@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<projectDescription>
+	<style>0</style>
+	<name>poseidonFB</name>
+	<targetName />
+	<comment />
+	<filter>*.d</filter>
+	<showemptyfolder>0</showemptyfolder>
+	<buildSpec>
+		<buildType>0</buildType>
+		<mainFile />
+		<Args />
+		<options>
+			<dmd> -inline -odobjs -release -L/SUBSYSTEM:windows:4 </dmd>
+			<tool />
+			<lib />
+			<implib />
+			<extra />
+			<toolextra />
+			<merge>0</merge>
+			<nonfiles>0</nonfiles>
+			<useimplib>0</useimplib>
+			<mapfile>0</mapfile>
+			<gcstub>0</gcstub>
+		</options>
+		<dmdpath>D:\CodingPark\DMD1076Tango</dmdpath>
+		<dmcpath>D:\CodingPark\DMD1076Tango</dmcpath>
+		<buildtoolexe />
+		<projectFiles>
+			<source>
+				<name>actionManager.d</name>
+				<name>dialogs\baseDlg.d</name>
+				<name>dialogs\fileDlg.d</name>
+				<name>dialogs\findFilesDlg.d</name>
+				<name>dialogs\helpDlg.d</name>
+				<name>dialogs\preferenceDlg.d</name>
+				<name>dialogs\prjPropertyDlg.d</name>
+				<name>dialogs\searchDlg.d</name>
+				<name>dialogs\singleTextDlg.d</name>
+				<name>executer.d</name>
+				<name>global.d</name>
+				<name>imageData.d</name>
+				<name>layout.d</name>
+				<name>layouts\messagePanel.d</name>
+				<name>layouts\statusBar.d</name>
+				<name>layouts\tabDocument.d</name>
+				<name>layouts\toolbar.d</name>
+				<name>layouts\tree.d</name>
+				<name>main.d</name>
+				<name>menu.d</name>
+				<name>project.d</name>
+				<name>scintilla.d</name>
+			</source>
+			<interface />
+			<resource>
+				<name>poseidonFB.res</name>
+			</resource>
+			<othersDMD />
+			<others />
+		</projectFiles>
+		<includePaths>
+			<name>D:\CodingPark\GameKyo\import</name>
+		</includePaths>
+		<linkLibrarys>
+			<name>D:\CodingPark\GameKyo\lib\iup\iup.lib</name>
+			<name>D:\CodingPark\GameKyo\lib\iup\iup_scintilla.lib</name>
+		</linkLibrarys>
+		<importExpressions />
+	</buildSpec>
+</projectDescription>

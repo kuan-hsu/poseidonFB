@@ -1,0 +1,301 @@
+﻿module dialogs.findFilesDlg;
+
+private import iup.iup, iup.iup_scintilla;
+
+private import global, project, scintilla, actionManager;
+private import dialogs.baseDlg;
+
+private import tango.stdc.stringz, Util = tango.text.Util;
+
+import Integer = tango.text.convert.Integer;
+
+
+class CFindInFilesDialog : CBaseDialog
+{
+	private:
+	Ihandle*	listFind, listReplace;
+	Ihandle*	labelStatus;
+
+	void createLayout()
+	{
+		Ihandle* bottom = createDlgButton();
+		IupSetAttribute( btnOK, "VISIBLE", "NO" );
+
+		listFind = IupList( null );
+		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
+		IupSetHandle( "CFindInFilesDialog_listFind", listFind );
+		Ihandle* hBox00 = IupHbox( IupLabel( "Find What:   " ), listFind, null );
+		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
+
+		listReplace = IupList( null );
+		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
+		IupSetHandle( "CFindInFilesDialog_listReplace", listReplace );
+		Ihandle* hBox01 = IupHbox( IupLabel( "Replace With:" ), listReplace, null );
+		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
+
+
+
+
+		// Options
+		Ihandle* toggleCaseSensitive = IupToggle( "Case Sensitive", null );
+		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES" );
+		IupSetHandle( "CFindInFilesDialog_toggleCaseSensitive", toggleCaseSensitive );
+		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleAction_cb );
+
+		Ihandle* toggleWholeWord = IupToggle( "Whole Word", null );
+		IupSetAttributes( toggleWholeWord, "VALUE=ON,EXPAND=YES" );
+		IupSetHandle( "CFindInFilesDialog_toggleWholeWord", toggleWholeWord );
+		IupSetCallback( toggleWholeWord, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleAction_cb );
+
+		Ihandle* hBoxOption = IupHbox( toggleCaseSensitive, toggleWholeWord, null );
+		IupSetAttributes( hBoxOption, "ALIGNMENT=ACENTER,EXPAND=YES,MARGIN=0x0,GAP=0" );
+		Ihandle* frameOption = IupFrame( hBoxOption );
+		IupSetAttributes( frameOption, "TITLE=Options,MARGIN=0x0,GAP=0,SIZE=0x20");
+
+
+
+
+
+		// Scope
+		Ihandle* toggleDocument = IupToggle( "Document", null );
+		IupSetAttributes( toggleDocument, "RADIO=YES");
+		IupSetHandle( "CFindInFilesDialog_toggleDocument", toggleDocument );
+		IupSetCallback( toggleDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+		
+		Ihandle* toggleAllDocument = IupToggle( "All Documents", null );
+		IupSetAttributes( toggleAllDocument, "RADIO=YES");
+		IupSetHandle( "CFindInFilesDialog_toggleAllDocument", toggleAllDocument );
+		IupSetCallback( toggleAllDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+		
+		Ihandle* togglePrj = IupToggle( "Project", null );
+		IupSetAttributes( togglePrj, "RADIO=YES");
+		IupSetHandle( "CFindInFilesDialog_togglePrj", togglePrj );
+		IupSetCallback( togglePrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+
+		Ihandle* toggleAllPrj = IupToggle( "All Projects", null );
+		IupSetAttributes( toggleAllPrj, "RADIO=YES");
+		IupSetHandle( "CFindInFilesDialog_toggletoggleAllPrj", toggleAllPrj );
+		IupSetCallback( toggleAllPrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+
+
+		Ihandle* vBoxScope = IupVbox( toggleDocument, toggleAllDocument, togglePrj, toggleAllPrj, null );
+		//IupSetAttributes( vBoxScope, "" );
+		Ihandle* radioScope = IupRadio( vBoxScope );
+		Ihandle* frameScope = IupFrame( radioScope );
+		IupSetAttributes( frameScope, "TITLE=Scope");		
+
+
+
+
+
+		Ihandle* btnFindAll = IupButton( "Find All", null );
+		IupSetHandle( "CFindInFilesDialog_btnFindAll", btnFindAll );
+		IupSetAttributes( btnFindAll, "EXPAND=YES" );
+		IupSetCallback( btnFindAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
+		
+		Ihandle* btnReplaceAll = IupButton( "Replace All", null );
+		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", btnReplaceAll );
+		IupSetAttributes( btnReplaceAll, "EXPAND=YES" );
+		//IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnReplaceAll_cb );
+		
+		Ihandle* btnCountAll = IupButton( "Count All", null );
+		IupSetHandle( "CFindInFilesDialog_btnCountAll", btnCountAll );
+		IupSetAttributes( btnCountAll, "EXPAND=YES" );
+		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
+		
+		Ihandle* btnMarkAll = IupButton( "Mark All", null );
+		IupSetHandle( "CFindInFilesDialog_btnMarkAll", btnMarkAll );
+		IupSetAttributes( btnMarkAll, "EXPAND=YES" );
+		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
+
+		Ihandle* vBoxButton = IupVbox( btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll, null );
+		IupSetAttributes( vBoxScope, "EXPANDCHILDREN=YES,GAP=2" );
+
+		Ihandle* hBoxButton = IupHbox( frameScope, vBoxButton, null );
+		IupSetAttributes( hBoxButton, "EXPAND=YES,HOMOGENEOUS=YES" );
+
+
+	
+		Ihandle* vBox = IupVbox( hBox00, hBox01, frameOption, hBoxButton, bottom, null );
+		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=0,EXPANDCHILDREN=YES" );
+
+		IupAppend( _dlg, vBox );
+	}	
+
+	public:
+
+	int			searchRule = 3;
+	
+	this( int w, int h, char[] title, char[] findWhat = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	{
+		super( w, h, title, bResize, parent );
+		IupSetAttribute( _dlg, "MINBOX", "NO" );
+
+		createLayout();
+
+		IupSetAttribute( listFind, "VALUE",toStringz( findWhat ) );
+
+		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
+	}
+
+	~this()
+	{
+		IupSetHandle( "CFindInFilesDialog_listFind", null );
+		IupSetHandle( "CFindInFilesDialog_listReplace", null );
+		IupSetHandle( "CFindInFilesDialog_toggleCaseSensitive", null );
+		IupSetHandle( "CFindInFilesDialog_toggleWholeWord", null );
+
+		IupSetHandle( "CFindInFilesDialog_toggleDocument", null );
+		IupSetHandle( "CFindInFilesDialog_toggleAllDocument", null );
+		IupSetHandle( "CFindInFilesDialog_togglePrj", null );
+		IupSetHandle( "CFindInFilesDialog_toggletoggleAllPrj", null );
+
+		IupSetHandle( "CFindInFilesDialog_btnFindAll", null );
+		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", null );
+		IupSetHandle( "CFindInFilesDialog_btnCountAll", null );
+		IupSetHandle( "CFindInFilesDialog_btnMarkAll", null );
+	}
+
+	char[] show( char[] selectedWord ) // Overload form CBaseDialog
+	{
+		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord ) );
+		IupShow( _dlg );
+		return null;
+	}	
+
+	char[] show( int x, int y ) // Overload form CBaseDialog
+	{
+		IupShowXY( _dlg, x, y );
+		return null;
+	}
+
+	void setStatusBar( char[] text )
+	{
+		IupSetAttribute( labelStatus, "TITLE", toStringz( text ) );
+	}
+}
+
+
+extern(C) // Callback for CFindInFilesDialog
+{
+	void CFindInFilesDialog_btnCancel_cb( Ihandle* ih )
+	{
+		if( GLOBAL.serachInFilesDlg !is null ) IupHide( GLOBAL.serachInFilesDlg._dlg );
+	}
+
+	int CFindInFilesDialog_toggleAction_cb( Ihandle* ih, int state )
+	{
+		if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
+		{
+			if( state == 1 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule | 1;
+			if( state == 0 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule & 2;
+		}
+		else //"Whole Word"
+		{
+			if( state == 1 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule | 2;
+			if( state == 0 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule & 1;
+		}
+
+		return IUP_DEFAULT;
+	}
+
+	int CFindInFilesDialog_toggleRadioAction_cb( Ihandle* ih, int state )
+	{
+		if( ih == IupGetHandle( "CFindInFilesDialog_togglePrj" ) || ih == IupGetHandle( "CFindInFilesDialog_toggletoggleAllPrj" ) )
+		{
+			IupSetAttribute( IupGetHandle( "CFindInFilesDialog_btnMarkAll" ), "ACTIVE", "NO" );
+		}
+		else
+		{
+			IupSetAttribute( IupGetHandle( "CFindInFilesDialog_btnMarkAll" ), "ACTIVE", "YES" );
+		}
+
+		return IUP_DEFAULT;
+	}
+
+
+	int CFindInFilesDialog_btnFindAll_cb( Ihandle* ih )
+	{
+		int		buttonIndex;
+		char[]	findText;
+
+		if( IupGetHandle( toStringz("CFindInFilesDialog_btnFindAll") ) == ih )
+			buttonIndex = 0;
+		else if( IupGetHandle( toStringz("CFindInFilesDialog_btnReplaceAll") ) == ih )
+			buttonIndex = 1;
+		else if( IupGetHandle( toStringz("CFindInFilesDialog_btnCountAll") ) == ih )
+			buttonIndex = 2;
+		else
+			buttonIndex = 3;
+			
+
+		Ihandle* listFind_ih = IupGetHandle( toStringz("CFindInFilesDialog_listFind") );
+		if( listFind_ih != null )
+		{
+			findText = Util.trim( fromStringz( IupGetAttribute( listFind_ih, "VALUE" )) );
+			if( findText.length )
+			{
+				switch( buttonIndex )
+				{
+					case 0:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Seraching......") ); break;
+					case 1:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Replace......") ); break;
+					case 2:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Counting......") ); break;
+					default:	IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Marking......") );
+				}
+
+				int _findCase, _findMethod, count;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleDocument" ), "VALUE" ) ) == "ON" ) _findCase = 1;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleAllDocument" ), "VALUE" ) ) == "ON" ) _findCase = 2;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_togglePrj" ), "VALUE" ) ) == "ON" ) _findCase = 3;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggletoggleAllPrj" ), "VALUE" ) ) == "ON" ) _findCase = 4;
+
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 1;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleWholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
+
+				switch( _findCase )
+				{
+					case 1:
+						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+						if( cSci !is null )
+						{
+							count = actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, _findMethod, buttonIndex );
+						}
+						break;
+						
+					case 2:
+						foreach( CScintilla cSci; GLOBAL.scintillaManager )
+						{
+							count = count + actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, _findMethod, buttonIndex );
+						}
+						break;
+						
+					case 3:
+						char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
+						if( activePrjName.length )
+						{
+							foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
+							{
+								count = count + actionManager.SearchAction.findInOneFile( s, findText, _findMethod, buttonIndex );
+							}
+						}
+						break;
+
+					default:
+						foreach( prj; GLOBAL.projectManager )
+						{
+							foreach( char[] s; prj.sources ~prj.includes )
+							{
+								count = count + actionManager.SearchAction.findInOneFile( s, findText, _findMethod, buttonIndex );
+							}
+						}
+				}
+
+				actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
+				IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results." ) );
+				IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}
+}
