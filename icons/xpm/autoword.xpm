@@ -1,0 +1,39 @@
+/* XPM */
+static char* autoword_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16       16            1",
+/* colors */
+"` c #5eaf7b",
+". c #e0e566",
+"# c #dae265",
+"a c #55a272",
+"b c #d0db63",
+"c c #509a6c",
+"d c #c5d660",
+"e c #468e64",
+"f c #adc75a",
+"g c #a0c058",
+"h c #438961",
+"i c #3c7e5a",
+"j c #96b956",
+"k c #8db454",
+"l c #367755",
+"m c None",
+/* pixels */
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mmmmmm````mmmmmm",
+"mmmmmm`..`mmmmmm",
+"mmmmmm`##`mmmmmm",
+"mmmmmma##ammmmmm",
+"mmaaaabbbbaaaamm",
+"mmcddddddddddcmm",
+"mmeffffffffffemm",
+"mmeeeeggggeheemm",
+"mmmmmmijjhmmmmmm",
+"mmmmmmikkimmmmmm",
+"mmmmmmlkklmmmmmm",
+"mmmmmmllllmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm"
+};

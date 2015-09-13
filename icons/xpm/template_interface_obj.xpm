@@ -1,0 +1,39 @@
+/* XPM */
+static const char *template_interface_obj_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16       16            1",
+/* colors */
+"` c #353535",
+". c #c7a560",
+"# c #a78c57",
+"a c #fad4af",
+"b c #f5ae67",
+"c c #635843",
+"d c #8a7bbf",
+"e c #f6c86f",
+"f c #afa5d3",
+"g c #ffffff",
+"h c #5b48a0",
+"i c #6250a5",
+"j c #a498ce",
+"k c #cac3e2",
+"l c #7362b1",
+"m c None",
+/* pixels */
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mmmmmabbbbbammmm",
+"mmmmbbbeeebbbmmm",
+"mmmbbeeeeeeebbmm",
+"mmabe.ccccc#ebam",
+"mmbbee..`#.bebbm",
+"mmbeeeee`.eeeebm",
+"mmbeeeee`.eeeebm",
+"mmbeeeee`.eeeebm",
+"mmbbeeee`.ekllkm",
+"mmabeeee`.jdffdj",
+"mmmbbeeeeeldgkdd",
+"mmmmbbbeeehhgfhh",
+"mmmmmabbbbiigfhi",
+"mmmmmmmmmmmlddlm"
+};

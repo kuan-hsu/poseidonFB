@@ -12,6 +12,10 @@ import tango.stdc.stringz;
 import Integer = tango.text.convert.Integer;
 import Util = tango.text.Util;
 
+import parser.scanner,  parser.token, parser.parser;
+
+
+
 void createMenu()
 {
 	// For Menu
@@ -19,7 +23,7 @@ void createMenu()
 	Ihandle* item_new, item_save, item_saveAll, item_open, item_exit, file_menu;
 	Ihandle* item_redo, item_undo, item_cut, item_copy, item_paste, item_selectAll, edit_menu;
 	Ihandle* item_findReplace, item_findNext, item_findPrevious, item_findReplaceInFiles, item_goto, search_menu;
-	Ihandle* item_outline, view_menu;
+	Ihandle* view_menu;
 	Ihandle* item_newProject, item_openProject, item_closeProject, item_saveProject, item_projectProperties, project_menu;
 	Ihandle* item_compile, item_run, item_build, item_buildAll, item_clean, item_quickRun, build_menu;
 	Ihandle* item_tool, item_preference, option_menu;
@@ -141,15 +145,16 @@ void createMenu()
 	IupSetCallback( item_goto, "ACTION", cast(Icallback) &item_goto_cb );
 
 	// View
-	item_outline= IupItem ("OutLine", null);
-	IupSetAttribute(item_outline, "KEY", "O");
-	IupSetAttribute(item_outline, "VALUE", "ON");
-	IupSetCallback(item_outline, "ACTION", cast(Icallback)&outline_cb);
+	GLOBAL.menuOutlineWindow = IupItem ("OutLine", null);
+	IupSetAttribute(GLOBAL.menuOutlineWindow, "KEY", "O");
+	IupSetAttribute(GLOBAL.menuOutlineWindow, "VALUE", "ON");
+	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
 
 	GLOBAL.menuMessageWindow = IupItem ("Message", null);
 	IupSetAttribute(GLOBAL.menuMessageWindow, "KEY", "M");
 	//IupSetAttribute(item_undo, "IMAGE", "IUP_EditUndo");
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
+	//IupSetHandle( "menuMessageWindow", GLOBAL.menuMessageWindow );
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 
 	// Project
@@ -222,7 +227,12 @@ void createMenu()
 	IupSetAttribute(item_preference, "KEY", "P");
 	IupSetCallback(item_preference, "ACTION", cast(Icallback)&preference_cb);
 
-	
+	Ihandle* item_about = IupItem ("About", null);
+	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.101\nBy Kuan Hsu (Taiwan)\n2015.09.13" );
+	});
+
 	file_menu = IupMenu( 	item_new, 
 							item_open, 
 							IupSeparator(),
@@ -256,7 +266,7 @@ void createMenu()
 							item_goto,
 							null );
 
-	view_menu = IupMenu( 	item_outline,
+	view_menu = IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
 							null );
 
@@ -284,6 +294,7 @@ void createMenu()
 
 	option_menu= IupMenu( 	item_tool,
 							item_preference,
+							item_about,
 							null );
 
 	mainMenu1_File = IupSubmenu( "File", file_menu );
@@ -329,8 +340,7 @@ extern(C)
 		scope fileSecectDlg = new CFileDlg( "Open File..." );
 		char[] fileName = fileSecectDlg.getFileName();
 
-		//Stdout( fileName ).newline;
-
+		//Util.substitute( fileName, "\\", "/" );
 		if( fileName.length )
 		{
 			//Stdout( fileName ).newline;
@@ -443,7 +453,8 @@ extern(C)
 				Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 				if( ih !is null ) targetText = fromStringz(IupGetAttribute( ih, toStringz("SELECTEDTEXT") ));
 
-				if( fromStringz(IupGetAttribute( GLOBAL.searchDlg.getIhandle, "VISIBLE" )) == "NO" ) GLOBAL.searchDlg.show( targetText );
+				//if( fromStringz(IupGetAttribute( GLOBAL.searchDlg.getIhandle, "VISIBLE" )) == "NO" ) GLOBAL.searchDlg.show( targetText );
+				GLOBAL.searchDlg.show( targetText );
 			}
 		}
 	}
@@ -456,7 +467,8 @@ extern(C)
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 			if( ih !is null ) targetText = fromStringz(IupGetAttribute( ih, toStringz("SELECTEDTEXT") ));
 
-			if( fromStringz(IupGetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE" )) == "NO" ) GLOBAL.serachInFilesDlg.show( targetText );
+			//if( fromStringz(IupGetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE" )) == "NO" ) GLOBAL.serachInFilesDlg.show( targetText );
+			GLOBAL.serachInFilesDlg.show( targetText );
 		}
 
 	}
@@ -557,6 +569,21 @@ extern(C)
 
 	int tool_cb()
 	{
+		scope scanner = new CScanner;
+
+		auto cSci = ScintillaAction.getActiveCScintilla();
+		
+		if( cSci !is null )
+		{
+			char[] document = cSci.getText();
+			TokenUnit[] tokens = scanner.scan( document );
+
+			scope _parser = new CParser( tokens );
+			_parser.parse( cSci.getFullPath );
+			
+ 		}		
+
+		
 		/+
 		auto doc = new Document!(char);
 
@@ -670,9 +697,11 @@ extern(C)
 				int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", i );
 				if( depth == 1 )
 				{
-					if( ( cast(CString) IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i )).text == activePrjName )
+					if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i )) == activePrjName )
 					{
 						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", i, "SELECTED" );
+						// Shadow
+						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
 						break;
 					}
 				}
@@ -731,35 +760,18 @@ extern(C)
 			for( int i = countChild - 1; i > 0; -- i )
 			{
 				int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", i );
-				//IupMessage( "USERDATA depth", toStringz(Integer.toString(i ) ~ " : " ~ Integer.toString(depth ))  );;
 				if( depth == 1 )
 				{
 					try
 					{
-						auto _cstring = cast(CString) IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i );
-						if( _cstring !is null )
+						char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i ) );
+						if( _cstring == p.dir )
 						{
-							//IupMessage( "USERDATA", toStringz( userData ) );
-							
-							if( _cstring.text == p.dir )
-							{
-								//IupMessage( "DEL USERDATA", toStringz( userData ) );
-								IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i, cast(char*) null );
+							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", i, "SELECTED" );
+							// Shadow
+							IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
 
-								/+
-								for( int j = 1; j <= IupGetIntId( GLOBAL.projectTree.getTreeHandle, "TOTALCHILDCOUNT", i ); ++ j )
-								{
-									CString __cstring = cast(CString) IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i + j );
-									IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i + j, cast(char*) null );
-									if( __cstring !is null ) delete __cstring;
-								}+/
-								//IupMessage( "DEL USERDATA", toStringz( _cstring.text ) );
-								IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", i, "SELECTED" );
-								//IupMessage( "DEL USERDATA", toStringz( _cstring.text ) );
-								//delete _cstring;
-								
-								break;
-							}
+							break;
 						}
 					}
 					catch( Exception e )

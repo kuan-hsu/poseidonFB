@@ -20,7 +20,10 @@ Ihandle* createStatusBar()
 		IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 	}
 
-	Ihandle* StatusBar = IupHbox( IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_FontType, null );
+	IupSetAttribute( GLOBAL.projectTree.getShadowTreeHandle, "VISIBLE", "NO" );	
+
+
+	Ihandle* StatusBar = IupHbox( IupFill(), GLOBAL.projectTree.getShadowTreeHandle, labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_FontType, null );
 	IupSetAttribute( StatusBar, "GAP", "5" );
 	IupSetAttribute( StatusBar, "MARGIN", "5" );
 

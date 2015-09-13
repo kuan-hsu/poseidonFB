@@ -1,0 +1,26 @@
+/* XPM */
+static char *breakpoint_unchecked_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        3            1",
+/* colors */
+"` c #3c66bc",
+"# c #2853a9",
+"a c None",
+/* pixels */
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaa````aaaaaa",
+"aaaaa`aaaa#aaaaa",
+"aaaa`aaaaaa#aaaa",
+"aaaa`aaaaaa#aaaa",
+"aaaa`aaaaaa#aaaa",
+"aaaa`aaaaaa#aaaa",
+"aaaaa#aaaa#aaaaa",
+"aaaaaa####aaaaaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa"
+};

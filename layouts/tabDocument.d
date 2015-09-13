@@ -31,6 +31,7 @@ extern(C)
 
 			// Marked the trees( FileList & ProjectTree )
 			actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() );
+			GLOBAL.outlineTree.changeTree( cSci.getFullPath() );
 		}
 
 		return IUP_DEFAULT;
@@ -64,7 +65,9 @@ extern(C)
 					IupSetAttributeId( GLOBAL.fileListTree, "DELNODE", id, "SELECTED" );
 					break;
 				}
-			}					
+			}
+
+			actionManager.OutlineAction.cleanTree( cSci.getFullPath );
 
 			// Remove from the scintillaManager
 			GLOBAL.scintillaManager.remove( cSci.getFullPath );
@@ -116,14 +119,23 @@ extern(C)
 			actionManager.ScintillaAction.closeAllDocument();
 		});
 
+		Ihandle* _refresh = IupItem( "Refresh Parser", null );
+		IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
+		IupSetCallback( _refresh, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		{
+			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			actionManager.OutlineAction.refresh( cSci.getFullPath() );
+		});
 		
 		
 		Ihandle* popupMenu = IupMenu( 
-										_save,
-										IupSeparator(),
 										_close,
 										_closeothers,
 										_closeall,
+										IupSeparator(),
+										_save,
+										IupSeparator(),
+										_refresh,
 										null
 									);
 

@@ -11,11 +11,8 @@ private
 	import Integer = tango.text.convert.Integer;
 	import tango.text.convert.Layout;
 	import tango.stdc.stringz;
-
-	//import tango.io.Stdout;
+	import tango.io.Stdout;
 }
-
-static bool bEnter;
 
 /*
 struct TextToFind 
@@ -36,27 +33,18 @@ struct TextToFind
 	}
 }
 */
+import		parser.autocompletion, tools;
 
 class CScintilla
 {
 	private:
+	import		global, images.xpm;
+	
 	import 		tango.io.FilePath;
-	import		tango.io.UnicodeFile, tango.text.Ascii;
-	import		global;
+	import		tango.io.UnicodeFile;
 
 	Ihandle*	sci;
 	char[]		fullPath, title;
-
-
-	void setAttribs()
-	{
-		if( sci == null ) return;
-		
-		IupSetAttribute(sci, "CLEARALL", "");
-
-
-		setGlobalSetting();
-	}
 
 	public:
 	int			encoding;
@@ -76,8 +64,9 @@ class CScintilla
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
 		IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
 		IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
+		IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
 		IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
-		
+		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
 		
 		init( _fullPath );
 	}	
@@ -91,22 +80,18 @@ class CScintilla
 	void init( char[] _fullPath )
 	{
 		fullPath = _fullPath;
-
 		scope mypath = new FilePath( fullPath );
 		title = mypath.file();
 		
 		if( GLOBAL.documentTabs != null )
 		{
-			//IupSetAttribute( sci, "PADDING", "10x0" );
-			//IupSetAttribute( sci, "VISIBLELINES", "0" );
-			//IupSetAttribute( sci, "VISIBLECOLUMNS", null );
-			
-			IupSetAttribute( sci, "TABTITLE", toStringz(title) );
-			if( toLower( mypath.ext )== "bas" )
+			int n = IupGetChildCount( GLOBAL.documentTabs );
+
+			if( lowerCase( mypath.ext )== "bas" )
 			{
 				IupSetAttribute( sci, "TABIMAGE", "icon_bas" );
 			}
-			else if( toLower( mypath.ext )== "bi" )
+			else if( lowerCase( mypath.ext )== "bi" )
 			{
 				IupSetAttribute( sci, "TABIMAGE", "icon_bi" );
 			}
@@ -119,8 +104,12 @@ class CScintilla
 			IupAppend( GLOBAL.documentTabs, sci );
 			IupMap( sci );
 			IupRefresh( GLOBAL.documentTabs );
+
+			IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", n, toStringz( title.dup ) );
 		}		
-		setAttribs();
+
+		IupSetAttribute( sci, "CLEARALL", "" );
+		setGlobalSetting();
 	}
 
 	void setText( char[] _text )
@@ -247,10 +236,6 @@ class CScintilla
 		// Set Keywords to Bold
 		IupSetAttribute(sci, "STYLEBOLD3", "YES");
 
-	
-		IupSetAttribute(sci, "STYLEHOTSPOT6", "YES");
-
-
 		IupSetAttribute( sci, "STYLEBOLD32", GLOBAL.editFont.bold == "ON" ? toStringz("YES") : toStringz("NO") );
 		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.editFont.italic == "ON" ? toStringz("YES") : toStringz("NO") );
 		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.editFont.underline == "ON" ? toStringz("YES") : toStringz("NO") );
@@ -324,12 +309,10 @@ class CScintilla
 		// Color
 		IupScintillaSendMessage( sci, 2098, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.caretLine ), 0 ); //SCI_SETCARETLINEBACK = 2098
 
-		// Error, always black......
-		/*
-		IupScintillaSendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-		IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+		SendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+		SendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 		//IupScintillaSendMessage( sci, 2478, 60, 0 );// SCI_SETSELALPHA   2478
-		*/
+		
 		IupSetAttribute( sci, "STYLEFGCOLOR33", toStringz(GLOBAL.editColor.linenumFore) );
 		IupSetAttribute( sci, "STYLEBGCOLOR33", toStringz(GLOBAL.editColor.linenumBack) );
 		// Error, Couldn't change......
@@ -339,10 +322,53 @@ class CScintilla
 		IupScintillaSendMessage( sci, 2069, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.cursor ), 0 ); // SCI_SETCARETFORE = 2069,
 
 		//IupSetAttribute( sci, "FOLDFLAGS", "LEVELNUMBERS" );  
+
+		IupScintillaSendMessage( sci, 2655, 1, 0 ); // SCI_SETCARETLINEVISIBLEALWAYS = 2655,
+		IupScintillaSendMessage( sci, 2115, 1, 0 ); // SCI_AUTOCSETIGNORECASE 2115
+		IupScintillaSendMessage( sci, 2118, 0, 0 ); // SCI_AUTOCSETAUTOHIDE 2118
+		IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+
+		IupSetInt( sci, "AUTOCMAXHEIGHT", 15 );
+
+
+		// Autocompletion XPM Image
+		SendMessage( sci, 2405, 0, cast(int) XPM.private_method_xpm.ptr );
+		SendMessage( sci, 2405, 1, cast(int) XPM.protected_method_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 2, cast(int) XPM.public_method_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+		SendMessage( sci, 2405, 3, cast(int) XPM.private_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 4, cast(int) XPM.protected_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 5, cast(int) XPM.public_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		
+		SendMessage( sci, 2405, 6, cast(int) XPM.class_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 7, cast(int) XPM.class_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 8, cast(int) XPM.class_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		
+		SendMessage( sci, 2405, 9, cast(int) XPM.struct_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 10, cast(int) XPM.struct_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 11, cast(int) XPM.struct_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		
+		SendMessage( sci, 2405, 12, cast(int) XPM.enum_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 13, cast(int) XPM.enum_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 14, cast(int) XPM.enum_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		
+		SendMessage( sci, 2405, 15, cast(int) XPM.union_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 16, cast(int) XPM.union_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 17, cast(int) XPM.union_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+		SendMessage( sci, 2405, 18, cast(int) XPM.parameter_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 19, cast(int) XPM.enum_member_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 20, cast(int) XPM.alias_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+		SendMessage( sci, 2405, 21, cast(int) XPM.normal_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 22, cast(int) XPM.import_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		SendMessage( sci, 2405, 23, cast(int) XPM.autoWord_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+		//SendMessage( sci, 2405, 29, cast(int) XPM.functionpointer_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 	}
-
-
 }
+
+
 
 
 extern(C)
@@ -420,6 +446,11 @@ extern(C)
 	{
 		if( pressed == 0 ) //release
 		{
+			if( status[1] == 'C' )
+			{
+				if( button == '1' ) AutoComplete.toDefintionAndType( true );
+			}
+			
 			actionManager.StatusBarAction.update();
 		}
 		
@@ -428,21 +459,134 @@ extern(C)
 
 	int CScintilla_keyany_cb( Ihandle *ih, int c ) 
 	{
-		if( c == 13 ) bEnter = true; else bEnter = false;
+		/*
+		Stdout( "Keycode: " );
+		Stdout( c ).newline;
+		*/
 
-		//Stdout( c ).newline;
+		AutoComplete.bAutocompletionPressEnter = false;
 		
+		if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
 
-		// CTRL+F 506870982
-		
-		//#define K_LCTRL    0xFFE3
-		if( c == 536870982 )
-			menu.findReplace_cb(); // From menu.d
-		else if( c == 0xFFC0 ) //#define K_F3       0xFFC0
+		if( c == 65307 ) // ESC
 		{
-			menu.findNext_cb(); // From menu.d
+			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 		}
+
+		foreach( ShortKey sk; GLOBAL.shortKeys )
+		{
+			switch( sk.name )
+			{
+				case "Find/Replace":				if( sk.keyValue == c ) menu.findReplace_cb();							break;
+				case "Find/Replace In Files":		if( sk.keyValue == c ) menu.findReplaceInFiles();						break;
+				case  "Find Next":					if( sk.keyValue == c ) menu.findNext_cb();								break;
+				case "Find Previous":				if( sk.keyValue == c ) menu.findPrev_cb();								break;
+				case "Goto Line":					if( sk.keyValue == c ) menu.item_goto_cb();								break;
+				case "Undo":						if( sk.keyValue == c ) menu.undo_cb();									break;
+				case "Redo":						if( sk.keyValue == c ) menu.redo_cb();									break;
+				case "Goto Defintion":				if( sk.keyValue == c ) AutoComplete.toDefintionAndType( true );			break;
+				case "Quick Run":					if( sk.keyValue == c ) menu.quickRun_cb( null );						break;
+				case "Run":							if( sk.keyValue == c ) menu.run_cb( null );								break;
+				case "Build":						if( sk.keyValue == c ) menu.buildAll_cb( null );						break;
+				case "On/Off Left-side Window":		if( sk.keyValue == c ) menu.outline_cb( GLOBAL.menuOutlineWindow );		break;
+				case "On/Off Bottom-side Window":	if( sk.keyValue == c ) menu.message_cb( GLOBAL.menuMessageWindow );		break;
+				case "Show Type":					if( sk.keyValue == c ) AutoComplete.toDefintionAndType( false );		break;
+				case "Reparse":
+					if( sk.keyValue == c )
+					{
+						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+						actionManager.OutlineAction.refresh( cSci.getFullPath() );
+					}
+					break;
+				default:
+			}
+		}
+
+		return IUP_DEFAULT;
+	}
+
+	int CScintilla_AUTOCSELECTION_cb( Ihandle *ih, int pos, char* text )
+	{
+		//Stdout( "CScintilla_AUTOCSELECTION_cb" ).newline;
 		
+		AutoComplete.bEnter = false;
+
+		AutoComplete.bAutocompletionPressEnter = true;
+
+		return IUP_DEFAULT;
+	}	
+
+	int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
+	{
+		//Stdout( "CScintilla_action_cb" ).newline;
+
+		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
+		
+		if( insert == 1 )
+		{
+			//Stdout( "text:" ~ fromStringz( _text ) ).newline;
+			
+			char[] text = fromStringz( _text );
+
+			if( text.length > 1 ) return IUP_DEFAULT;
+			
+			switch( text )
+			{
+				case " ", "\t", "\n", "\r":
+					break;
+
+				default:
+					//SendMessage( ih, 2003, pos, cast(int) toStringz("Mountain") ); //SCI_INSERTTEXT = 2003,
+
+					//IupSetAttributeId( ih, "INSERT", pos, _text );
+					IupScintillaSendMessage( ih, 2025, pos + text.length, 0 );// SCI_GOTOPOS = 2025,
+					
+					char[] list = AutoComplete.charAdd( ih, pos, text );
+					
+					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
+
+					char[][] splitWord = Util.split( alreadyInput, "." );
+					if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
+
+					alreadyInput = splitWord[length-1];
+					if( list.length )
+					{
+						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
+						{
+							IupSetAttribute( ih, "AUTOCSELECT", toStringz( alreadyInput ) );
+							if( IupGetInt( ih, "AUTOCSELECTEDINDEX" ) == -1 ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+						}
+						else
+						{
+							if( text == "(" )
+							{
+								if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+
+								IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
+								IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+								SendMessage( ih, 2200, pos, cast(int) toStringz(list) );// SCI_CALLTIPSHOW 2200
+							}
+							else
+							{
+								if( text == ">" )
+								{
+									if( pos > 0 )
+									{
+										if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
+										{
+											alreadyInput = alreadyInput[0..length-1];
+											SendMessage( ih, 2100, alreadyInput.length, cast(int) toStringz(list) );
+											break;
+										}
+									}
+								}
+								
+								SendMessage( ih, 2100, alreadyInput.length, cast(int) toStringz(list) );
+							}
+						}
+					}
+			}
+		}
 
 		return IUP_DEFAULT;
 	}
@@ -450,9 +594,9 @@ extern(C)
 	// Auto Ident
 	int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )
 	{
-		if( bEnter )
+		if( AutoComplete.bEnter )
 		{
-			bEnter = false;
+			AutoComplete.bEnter = false;
 			
 			//Now time to deal with auto indenting
 			int lineInd = 0;

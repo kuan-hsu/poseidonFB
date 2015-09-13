@@ -3,7 +3,7 @@
 import iup.iup;
 
 import global, scintilla, project, dialogs.preferenceDlg;
-import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, actionManager;
+import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, actionManager;
 
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg;
 
@@ -28,18 +28,19 @@ void createExplorerWindow()
 	+/
 	createFileListTree();
 	GLOBAL.projectTree = new CProjectTree; //createProjectManagerTree();
-	createOutlineTree();
+	GLOBAL.outlineTree = new COutline;
 
 	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TABTITLE", "Project" );
-	IupSetAttribute( GLOBAL.outlineTree, "TABTITLE", "Outline" );
 	IupSetAttribute( GLOBAL.fileListTree, "TABTITLE", "FileList" );
-
+	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "TABTITLE", "Outline" );
+	
 	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TABIMAGE", "icon_packageexplorer" );
-	IupSetAttribute( GLOBAL.outlineTree, "TABIMAGE", "icon_outline" );
 	IupSetAttribute( GLOBAL.fileListTree, "TABIMAGE", "icon_filelist" );
+	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "TABIMAGE", "icon_outline" );
+	
 
 	
-	GLOBAL.projectViewTabs = IupTabs( GLOBAL.fileListTree, GLOBAL.projectTree.getTreeHandle, GLOBAL.outlineTree, null );
+	GLOBAL.projectViewTabs = IupTabs( GLOBAL.fileListTree, GLOBAL.projectTree.getTreeHandle, GLOBAL.outlineTree.getZBoxHandle, null );
 	IupSetAttribute( GLOBAL.projectViewTabs, "TABTYPE", "BOTTOM" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 10" );
 

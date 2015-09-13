@@ -36,20 +36,29 @@
 				<name>dialogs\preferenceDlg.d</name>
 				<name>dialogs\prjPropertyDlg.d</name>
 				<name>dialogs\searchDlg.d</name>
+				<name>dialogs\shortcutDlg.d</name>
 				<name>dialogs\singleTextDlg.d</name>
 				<name>executer.d</name>
 				<name>global.d</name>
-				<name>imageData.d</name>
+				<name>images\imageData.d</name>
+				<name>images\xpm.d</name>
 				<name>layout.d</name>
 				<name>layouts\messagePanel.d</name>
+				<name>layouts\outline.d</name>
 				<name>layouts\statusBar.d</name>
 				<name>layouts\tabDocument.d</name>
 				<name>layouts\toolbar.d</name>
 				<name>layouts\tree.d</name>
 				<name>main.d</name>
 				<name>menu.d</name>
+				<name>parser\ast.d</name>
+				<name>parser\autocompletion.d</name>
+				<name>parser\parser.d</name>
+				<name>parser\scanner.d</name>
+				<name>parser\token.d</name>
 				<name>project.d</name>
 				<name>scintilla.d</name>
+				<name>tools.d</name>
 			</source>
 			<interface />
 			<resource>
@@ -62,8 +71,8 @@
 			<name>D:\CodingPark\GameKyo\import</name>
 		</includePaths>
 		<linkLibrarys>
-			<name>D:\CodingPark\GameKyo\lib\iup\iup.lib</name>
-			<name>D:\CodingPark\GameKyo\lib\iup\iup_scintilla.lib</name>
+			<name>D:\CodingPark\GameKYO\lib\iup\3_15_dll10\iup.lib</name>
+			<name>D:\CodingPark\GameKYO\lib\iup\3_15_dll10\iup_scintilla.lib</name>
 		</linkLibrarys>
 		<importExpressions />
 	</buildSpec>

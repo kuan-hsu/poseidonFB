@@ -1,0 +1,39 @@
+/* XPM */
+static const char *template_union_obj_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16       16            1",
+/* colors */
+"` c #353535",
+". c #9f9f5f",
+"# c #fad4af",
+"a c #d2ad64",
+"b c #eac06c",
+"c c #6a6a3b",
+"d c #f6ad67",
+"e c #bfbf5f",
+"f c #a08755",
+"g c #ffffff",
+"h c #635843",
+"i c #c6a460",
+"j c #ad9059",
+"k c #deb668",
+"l c #f6c86f",
+"m c None",
+/* pixels */
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mmmmm#ddddd#mmmm",
+"mmmmdddllldddmmm",
+"mmmddlllllllddmm",
+"mm#dlahhhhhjld#m",
+"mmdblbii`fiklddm",
+"mmdlllll`illlldm",
+"mmdlllll`illlldm",
+"mmdlllll`illlldm",
+"mmddllll`ilc..cm",
+"mm#dllll`icgeegc",
+"mmmddlllll.geeg.",
+"mmmmdldlll.geeg.",
+"mmmmm#ddddc.gg.c",
+"mmmmmmmmmmmc..cm"
+};

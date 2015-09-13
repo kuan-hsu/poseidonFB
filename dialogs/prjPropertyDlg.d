@@ -337,18 +337,18 @@ extern(C) // Callback for CProjectPropertiesDialog
 		if( dirHandle != null )
 		{
 
-			char[]	_prjDir				= Util.trim( fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ) );
+			char[]	_prjDir				= Util.trim( fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ) ).dup;
 
 			if( _prjDir.length )
 			{
-				char[]	_prjName			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textProjectName" ), "VALUE" ) ) );
-				char[]	_prjType			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "listType" ), "VALUE" ) ) );
-				char[]	_prjMainFile		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textMainFile" ), "VALUE" ) ) );
-				char[]	_prjTargetName		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textTargetName" ), "VALUE" ) ) );
-				char[]	_prjArgs			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textArgs" ), "VALUE" ) ) );
-				char[]	_prjCompilerOptions	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerOpts" ), "VALUE" ) ) );
-				char[]	_prjComment			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textComment" ), "VALUE" ) ) );
-				char[]	_prjCompilerPath	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerPath" ), "VALUE" ) ) );
+				char[]	_prjName			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textProjectName" ), "VALUE" ) ) ).dup;
+				char[]	_prjType			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "listType" ), "VALUE" ) ) ).dup;
+				char[]	_prjMainFile		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textMainFile" ), "VALUE" ) ) ).dup;
+				char[]	_prjTargetName		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textTargetName" ), "VALUE" ) ) ).dup;
+				char[]	_prjArgs			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textArgs" ), "VALUE" ) ) ).dup;
+				char[]	_prjCompilerOptions	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerOpts" ), "VALUE" ) ) ).dup;
+				char[]	_prjComment			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textComment" ), "VALUE" ) ) ).dup;
+				char[]	_prjCompilerPath	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerPath" ), "VALUE" ) ) ).dup;
 
 				PROJECT s;
 				s.name				= _prjName;

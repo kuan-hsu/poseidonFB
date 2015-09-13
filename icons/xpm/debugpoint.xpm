@@ -1,0 +1,31 @@
+/* XPM */
+static char *debugpoint_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c #3c66bc",
+". c #83acff",
+"# c #2853a9",
+"a c #6690e6",
+"b c None",
+"c c #000000",
+"d c #000000",
+"e c #000000",
+/* pixels */
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbb````bbbbbb",
+"bbbbb`....#bbbbb",
+"bbbb`.....a#bbbb",
+"bbbb`.....a#bbbb",
+"bbbb`.....a#bbbb",
+"bbbb`....aa#bbbb",
+"bbbbb#aaaa#bbbbb",
+"bbbbbb####bbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb"
+};

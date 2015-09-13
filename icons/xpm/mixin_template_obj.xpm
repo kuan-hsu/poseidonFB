@@ -1,0 +1,39 @@
+/* XPM */
+static const char *mixin_template_obj_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16       16            1",
+/* colors */
+"` c #f8c089",
+". c #f6b46c",
+"# c #f5bc6b",
+"a c #f8c99b",
+"b c #f4c36e",
+"c c #f6c86f",
+"d c #008800",
+"e c #d3ae65",
+"f c #7b6a4a",
+"g c #706247",
+"h c #caa762",
+"i c #86734d",
+"j c #978053",
+"k c #af925a",
+"l c #f9d4b0",
+"m c None",
+/* pixels */
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mm`.##.ammmmmmmm",
+"m.bbccb#`mmmdmmm",
+"`befggfh#ammddmm",
+".bbeiih#b.mmdddm",
+"#cbcjjbcc.mddddd",
+"#cccjjbcc.mddddd",
+".bccjjbcb.mmdddm",
+"a#cckkbc#lmmddmm",
+"m`#bccb#ammmdmmm",
+"mma....lmmmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm",
+"mmmmmmmmmmmmmmmm"
+};

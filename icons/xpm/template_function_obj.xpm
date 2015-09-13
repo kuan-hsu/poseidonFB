@@ -1,0 +1,31 @@
+/* XPM */
+static const char *template_function_obj_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c #f5ae64",
+". c #f6c86f",
+"# c #000000",
+"a c #957e52",
+"b c None",
+"c c #000000",
+"d c #000000",
+"e c #000000",
+/* pixels */
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bb`bbbbbbbbbb`bb",
+"b``bbbbbbbbbb``b",
+"b`bbbb````bbbb`b",
+"``bbb`....`bbb``",
+"``bb`.####.`bb``",
+"``bb`..#a..`bb``",
+"``bb`..#a..`bb``",
+"``bb`..#a..`bb``",
+"b`bbb`....`bbb`b",
+"b``bbb````bbb``b",
+"bb`bbbbbbbbbb`bb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb"
+};

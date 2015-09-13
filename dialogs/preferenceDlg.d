@@ -3,7 +3,7 @@
 private import iup.iup, iup.iup_scintilla;
 
 private import global, project, scintilla, actionManager;
-private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg;
+private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg, dialogs.shortcutDlg;
 
 private import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util;
 private import tango.text.xml.Document, tango.text.xml.DocPrinter, tango.io.UnicodeFile;
@@ -37,7 +37,7 @@ class CPreferenceDialog : CBaseDialog
 
 		
 
-		Ihandle* labelDebugger = IupLabel( "debugger Path:" );
+		Ihandle* labelDebugger = IupLabel( "Debugger Path:" );
 		IupSetAttributes( labelDebugger, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
 		textDebuggerPath = IupText( null );
@@ -52,9 +52,29 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
 
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, null );
+
+		// Parser Setting
+		Ihandle* labelTrigger = IupLabel( "Autocompletion Trigger:" );
+		IupSetAttributes( labelTrigger, "SIZE=100x12" );
+		
+		Ihandle* textTrigger = IupText( null );
+		IupSetAttribute( textTrigger, "SIZE", "30x12" );
+		IupSetAttribute( textTrigger, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
+		IupSetHandle( "textTrigger", textTrigger );
+		
+		
+		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
+
+		Ihandle* frameParser = IupFrame( hBox00 );
+		IupSetAttribute( frameParser, "TITLE", "Parser Setting");
+		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 
 
+		
+
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, frameParser, null );
+		IupSetAttribute( vBoxPage01, "ALIGNMENT", "ALEFT");
+		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
 /+
 
@@ -276,15 +296,41 @@ class CPreferenceDialog : CBaseDialog
 
 		IupSetAttribute( frameColor, "TITLE", "Color");
 
-
 		Ihandle* vBoxPage02 = IupVbox( gbox, hBox03, frameFont, frameColor, null );
 		IupSetAttribute( vBoxPage02, "EXPANDCHILDREN", "YES");
 
+
+		// Short Cut
+		Ihandle* shortCutList = IupList( null );
+		IupSetAttributes( shortCutList, "MULTIPLE=NO,SIZE=285x180,MARGIN=10x10,VISIBLELINES=YES" );
+		IupSetHandle( "shortCutList", shortCutList );
+		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
+
+
+		for( int i = 0; i < GLOBAL.shortKeys.length; ++ i )
+		{
+			char[] keyValue = convertShortKeyValue2String( GLOBAL.shortKeys[i].keyValue );
+			char[][] splitWord = Util.split( keyValue, "+" );
+
+			if(  splitWord.length == 4 ) 
+			{
+				if( splitWord[0] == "C" )  splitWord[0] = "Ctrl";
+				if( splitWord[1] == "S" )  splitWord[1] = "Shift";
+				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
+			}
+			
+			char[] string = Stdout.layout.convert( "{,-40} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[i].name, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
+
+			IupSetAttribute( shortCutList, toStringz( Integer.toString( i + 1 ) ), toStringz( string ) );
+		}
+
+
 		IupSetAttribute( vBoxPage01, "TABTITLE", "Compiler" );
-		IupSetAttribute( vBoxPage02, "TABTITLE", "Editor(1)" );
+		IupSetAttribute( vBoxPage02, "TABTITLE", "Editor" );
+		IupSetAttribute( shortCutList, "TABTITLE", "Short Cut" );
 		IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, null );
+		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, shortCutList, null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
 
@@ -310,6 +356,8 @@ class CPreferenceDialog : CBaseDialog
 	~this()
 	{
 		IupSetHandle( "compilerPath_Handle", null );
+		IupSetHandle( "debuggerPath_Handle", null );
+		IupSetHandle( "textTrigger", null );
 
 		IupSetHandle( "toggleLineMargin", null );
 		IupSetHandle( "toggleBookmarkMargin", null );
@@ -338,8 +386,66 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnLinenumFore", null );
 		IupSetHandle( "btnLinenumBack", null );
 		IupSetHandle( "btnFoldingColor", null );
-		IupSetHandle( "btnBookmarkColor", null );		
+		IupSetHandle( "btnBookmarkColor", null );
+
+		IupSetHandle( "shortCutList", null );
 	}
+
+	static char[] convertShortKeyValue2String( int keyValue )
+	{
+		char[] result;
+
+		if( keyValue & 0x20000000 ) result = "C+";else result = "+";
+		if( keyValue & 0x10000000 ) result ~= "S+";else result ~= "+";
+		if( keyValue & 0x40000000 ) result ~= "A+";else result ~= "+";
+
+		keyValue = keyValue & 0xFFFF;
+
+		if( keyValue >= 0x41 && keyValue <= 90 ) // 'A' ~ 'Z'
+		{
+			char c = keyValue;
+			result = result ~ c;
+		}
+		else if( keyValue >= 0xFFBE && keyValue <= 0xFFC9 ) // 'F1' ~ 'F12'
+		{
+			result = result ~ "F" ~ Integer.toString( keyValue - 0xFFBD );
+		}
+		
+		return result;
+	}	
+
+	static int convertShortKeyValue2Integer( char[] keyValue )
+	{
+		char[][] splitWord = Util.split( keyValue, "+" );
+		int result;
+
+		if( splitWord.length == 4 )
+		{
+			if( splitWord[0] == "C" ) result = result | 0x20000000; // Ctrl
+			if( splitWord[1] == "S" ) result = result | 0x10000000; // Shift
+			if( splitWord[2] == "A" ) result = result | 0x40000000; // Alt
+			if( splitWord[3].length )
+			{
+				switch( splitWord[3] )
+				{
+					case "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z":
+						result += cast(int) splitWord[3][0];
+						break;
+
+					default:
+						if( splitWord[3][0] == 'F' )
+						{
+							if( splitWord[3].length > 1 )
+							{
+								result = result + 0xFFBD + Integer.atoi( splitWord[3][1..length] );
+							}
+						}
+				}
+			}
+		}
+
+		return result;
+	}	
 
 	static void save()
 	{
@@ -391,6 +497,25 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack )
 		.attribute( null, "fold", GLOBAL.editColor.fold );
 
+		//<shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F12" messagewindow="+++F11"/>
+		editorNode.element( null, "shortkeys" )
+		.attribute( null, "find", convertShortKeyValue2String( GLOBAL.shortKeys[0].keyValue ) )
+		.attribute( null, "findinfile", convertShortKeyValue2String( GLOBAL.shortKeys[1].keyValue ) )
+		.attribute( null, "findnext", convertShortKeyValue2String( GLOBAL.shortKeys[2].keyValue ) )
+		.attribute( null, "findprev", convertShortKeyValue2String( GLOBAL.shortKeys[3].keyValue ) )
+		.attribute( null, "gotoline", convertShortKeyValue2String( GLOBAL.shortKeys[4].keyValue ) )
+		.attribute( null, "undo", convertShortKeyValue2String( GLOBAL.shortKeys[5].keyValue ) )
+		.attribute( null, "redo", convertShortKeyValue2String( GLOBAL.shortKeys[6].keyValue ) )
+		.attribute( null, "defintion", convertShortKeyValue2String( GLOBAL.shortKeys[7].keyValue ) )
+		.attribute( null, "quickrun", convertShortKeyValue2String( GLOBAL.shortKeys[8].keyValue ) )
+		.attribute( null, "run", convertShortKeyValue2String( GLOBAL.shortKeys[9].keyValue ) )
+		.attribute( null, "build", convertShortKeyValue2String( GLOBAL.shortKeys[10].keyValue ) )
+		.attribute( null, "outlinewindow", convertShortKeyValue2String( GLOBAL.shortKeys[11].keyValue ) )
+		.attribute( null, "messagewindow", convertShortKeyValue2String( GLOBAL.shortKeys[12].keyValue ) )
+		.attribute( null, "showtype", convertShortKeyValue2String( GLOBAL.shortKeys[13].keyValue ) )
+		.attribute( null, "reparse", convertShortKeyValue2String( GLOBAL.shortKeys[14].keyValue ) );
+		
+
 		/*
 		<buildtools>
 			<compilerpath>D:\CodingPark\FreeBASIC-1.02.1-win32\fbc.exe</compilerpath>
@@ -402,6 +527,14 @@ class CPreferenceDialog : CBaseDialog
 		buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath );
 		buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath );
 		buildtoolsNode.element( null, "maxerror", GLOBAL.maxError );
+
+		/*
+		<parser>
+			<parsertrigger>3</parsertrigger>
+		</parser>  
+		*/
+		auto parserNode = configNode.element( null, "parser" );
+		parserNode.element( null, "parsertrigger", Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) );
 
 		/*
 		<recentProjects>
@@ -422,121 +555,242 @@ class CPreferenceDialog : CBaseDialog
 
 	static void load()
 	{
-		// Loading Key Word...
-		scope file = new UnicodeFile!(char)( "settings\\editorSettings.xml", Encoding.Unknown );
-		//scope file  = cast(char[]) File.get( "settings\\editorSettings.xml" );
-
-		scope doc = new Document!( char );
-		doc.parse( file.read );
-
-		auto root = doc.elements;
-		auto result = root.query.descendant("keywords").attribute("value");
-
-		foreach( e; result )
+		try
 		{
-			GLOBAL.KEYWORDS~= e.value;
+			// Loading Key Word...
+			scope file = new UnicodeFile!(char)( "settings\\editorSettings.xml", Encoding.Unknown );
+			//scope file  = cast(char[]) File.get( "settings\\editorSettings.xml" );
+
+			scope doc = new Document!( char );
+			doc.parse( file.read );
+
+			auto root = doc.elements;
+			auto result = root.query.descendant("keywords").attribute("value");
+			GLOBAL.KEYWORDS.length = 0;
+			foreach( e; result )
+			{
+				GLOBAL.KEYWORDS~= e.value;
+			}
+
+			result = root.query.descendant("compilerpath");
+			foreach( e; result )
+			{
+				GLOBAL.compilerFullPath = e.value;
+			}	
+
+			result = root.query.descendant("debuggerpath");
+			foreach( e; result )
+			{
+				GLOBAL.debuggerFullPath = e.value;
+			}	
+
+			result = root.query.descendant("maxerror");
+			foreach( e; result )
+			{
+				GLOBAL.maxError = e.value;
+			}
+
+			// Parser
+			result = root.query.descendant("parsertrigger");
+			foreach( e; result )
+			{
+				GLOBAL.autoCompletionTriggerWordCount = Integer.atoi( e.value );
+			}
+
+			result = root.query.descendant("recentProjects").descendant("name");
+			foreach( e; result )
+			{
+				GLOBAL.recentProjects ~= e.value;
+			}	
+
+			result = root.query.descendant("toggle00").attribute("LineMargin");
+			foreach( e; result ) GLOBAL.editorSetting00.LineMargin = e.value;
+
+			result = root.query.descendant("toggle00").attribute("BookmarkMargin");
+			foreach( e; result ) GLOBAL.editorSetting00.BookmarkMargin = e.value;
+
+			result = root.query.descendant("toggle00").attribute("FoldMargin");
+			foreach( e; result ) GLOBAL.editorSetting00.FoldMargin = e.value;
+			
+			result = root.query.descendant("toggle00").attribute("IndentGuide");
+			foreach( e; result ) GLOBAL.editorSetting00.IndentGuide = e.value;
+			
+			result = root.query.descendant("toggle00").attribute("CaretLine");
+			foreach( e; result ) GLOBAL.editorSetting00.CaretLine = e.value;
+
+			result = root.query.descendant("toggle00").attribute("WordWrap");
+			foreach( e; result ) GLOBAL.editorSetting00.WordWrap = e.value;
+
+			result = root.query.descendant("toggle00").attribute("TabUseingSpace");
+			foreach( e; result ) GLOBAL.editorSetting00.TabUseingSpace = e.value;
+
+			result = root.query.descendant("toggle00").attribute("AutoIndent");
+			foreach( e; result ) GLOBAL.editorSetting00.AutoIndent = e.value;
+
+			result = root.query.descendant("toggle00").attribute("TabWidth");
+			foreach( e; result ) GLOBAL.editorSetting00.TabWidth = e.value;
+
+			// Font
+			result = root.query.descendant("font").attribute("name");
+			foreach( e; result ) GLOBAL.editFont.name = e.value;
+
+			result = root.query.descendant("font").attribute("size");
+			foreach( e; result ) GLOBAL.editFont.size = e.value;
+
+			result = root.query.descendant("font").attribute("bold");
+			foreach( e; result ) GLOBAL.editFont.bold = e.value;
+
+			result = root.query.descendant("font").attribute("italic");
+			foreach( e; result ) GLOBAL.editFont.italic = e.value;
+
+			result = root.query.descendant("font").attribute("underline");
+			foreach( e; result ) GLOBAL.editFont.underline = e.value;
+
+			result = root.query.descendant("font").attribute("forecolor");
+			foreach( e; result ) GLOBAL.editFont.foreColor = e.value;
+
+			result = root.query.descendant("font").attribute("backcolor");
+			foreach( e; result ) GLOBAL.editFont.backColor = e.value;
+
+
+			// Color (Editor)
+			result = root.query.descendant("color").attribute("caretLine");
+			foreach( e; result ) GLOBAL.editColor.caretLine = e.value;
+
+			result = root.query.descendant("color").attribute("cursor");
+			foreach( e; result ) GLOBAL.editColor.cursor = e.value;
+
+			result = root.query.descendant("color").attribute("selectionFore");
+			foreach( e; result ) GLOBAL.editColor.selectionFore = e.value;
+
+			result = root.query.descendant("color").attribute("selectionBack");
+			foreach( e; result ) GLOBAL.editColor.selectionBack = e.value;
+			
+			result = root.query.descendant("color").attribute("linenumFore");
+			foreach( e; result ) GLOBAL.editColor.linenumFore = e.value;
+
+			result = root.query.descendant("color").attribute("linenumBack");
+			foreach( e; result ) GLOBAL.editColor.linenumBack = e.value;
+
+			result = root.query.descendant("color").attribute("fold");
+			foreach( e; result ) GLOBAL.editColor.fold = e.value;
+
+
+			// short keys (Editor)
+			GLOBAL.shortKeys.length = 0;
+			result = root.query.descendant("shortkeys").attribute("find");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Find/Replace", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}
+
+			result = root.query.descendant("shortkeys").attribute("findinfile");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Find/Replace In Files", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}
+
+			result = root.query.descendant("shortkeys").attribute("findnext");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Find Next", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}
+
+			result = root.query.descendant("shortkeys").attribute("findprev");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Find Previous", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}		
+
+			result = root.query.descendant("shortkeys").attribute("gotoline");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Goto Line", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}
+
+			result = root.query.descendant("shortkeys").attribute("undo");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Undo", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}		
+
+			result = root.query.descendant("shortkeys").attribute("redo");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Redo", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}		
+
+			result = root.query.descendant("shortkeys").attribute("defintion");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Goto Defintion", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}	
+
+			result = root.query.descendant("shortkeys").attribute("quickrun");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Quick Run", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}	
+
+			result = root.query.descendant("shortkeys").attribute("run");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Run", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}	
+
+			result = root.query.descendant("shortkeys").attribute("build");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Build", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}	
+
+			result = root.query.descendant("shortkeys").attribute("outlinewindow");
+			foreach( e; result )
+			{
+				ShortKey sk = { "On/Off Left-side Window", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}	
+
+			result = root.query.descendant("shortkeys").attribute("messagewindow");
+			foreach( e; result )
+			{
+				ShortKey sk = { "On/Off Bottom-side Window", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}
+
+			result = root.query.descendant("shortkeys").attribute("showtype");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Show Type", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}
+
+			result = root.query.descendant("shortkeys").attribute("reparse");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Reparse", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}			
+
+			scope fileCompilerOptions = new UnicodeFile!(char)( "settings\\compilerOptions.txt", Encoding.Unknown );
+			GLOBAL.txtCompilerOptions = fileCompilerOptions.read;
 		}
-
-		result = root.query.descendant("compilerpath");
-		foreach( e; result )
+		catch
 		{
-			GLOBAL.compilerFullPath = e.value;
-		}	
 
-		result = root.query.descendant("debuggerpath");
-		foreach( e; result )
-		{
-			GLOBAL.debuggerFullPath = e.value;
-		}	
 
-		result = root.query.descendant("maxerror");
-		foreach( e; result )
-		{
-			GLOBAL.maxError = e.value;
 		}
-
-		result = root.query.descendant("recentProjects").descendant("name");
-		foreach( e; result )
-		{
-			GLOBAL.recentProjects ~= e.value;
-		}	
-
-		result = root.query.descendant("toggle00").attribute("LineMargin");
-		foreach( e; result ) GLOBAL.editorSetting00.LineMargin = e.value;
-
-		result = root.query.descendant("toggle00").attribute("BookmarkMargin");
-		foreach( e; result ) GLOBAL.editorSetting00.BookmarkMargin = e.value;
-
-		result = root.query.descendant("toggle00").attribute("FoldMargin");
-		foreach( e; result ) GLOBAL.editorSetting00.FoldMargin = e.value;
-		
-		result = root.query.descendant("toggle00").attribute("IndentGuide");
-		foreach( e; result ) GLOBAL.editorSetting00.IndentGuide = e.value;
-		
-		result = root.query.descendant("toggle00").attribute("CaretLine");
-		foreach( e; result ) GLOBAL.editorSetting00.CaretLine = e.value;
-
-		result = root.query.descendant("toggle00").attribute("WordWrap");
-		foreach( e; result ) GLOBAL.editorSetting00.WordWrap = e.value;
-
-		result = root.query.descendant("toggle00").attribute("TabUseingSpace");
-		foreach( e; result ) GLOBAL.editorSetting00.TabUseingSpace = e.value;
-
-		result = root.query.descendant("toggle00").attribute("AutoIndent");
-		foreach( e; result ) GLOBAL.editorSetting00.AutoIndent = e.value;
-
-		result = root.query.descendant("toggle00").attribute("TabWidth");
-		foreach( e; result ) GLOBAL.editorSetting00.TabWidth = e.value;
-
-		// Font
-		result = root.query.descendant("font").attribute("name");
-		foreach( e; result ) GLOBAL.editFont.name = e.value;
-
-		result = root.query.descendant("font").attribute("size");
-		foreach( e; result ) GLOBAL.editFont.size = e.value;
-
-		result = root.query.descendant("font").attribute("bold");
-		foreach( e; result ) GLOBAL.editFont.bold = e.value;
-
-		result = root.query.descendant("font").attribute("italic");
-		foreach( e; result ) GLOBAL.editFont.italic = e.value;
-
-		result = root.query.descendant("font").attribute("underline");
-		foreach( e; result ) GLOBAL.editFont.underline = e.value;
-
-		result = root.query.descendant("font").attribute("forecolor");
-		foreach( e; result ) GLOBAL.editFont.foreColor = e.value;
-
-		result = root.query.descendant("font").attribute("backcolor");
-		foreach( e; result ) GLOBAL.editFont.backColor = e.value;
-
-
-		// Color (Editor)
-		result = root.query.descendant("color").attribute("caretLine");
-		foreach( e; result ) GLOBAL.editColor.caretLine = e.value;
-
-		result = root.query.descendant("color").attribute("cursor");
-		foreach( e; result ) GLOBAL.editColor.cursor = e.value;
-
-		result = root.query.descendant("color").attribute("selectionFore");
-		foreach( e; result ) GLOBAL.editColor.selectionFore = e.value;
-
-		result = root.query.descendant("color").attribute("selectionBack");
-		foreach( e; result ) GLOBAL.editColor.selectionBack = e.value;
-		
-		result = root.query.descendant("color").attribute("linenumFore");
-		foreach( e; result ) GLOBAL.editColor.linenumFore = e.value;
-
-		result = root.query.descendant("color").attribute("linenumBack");
-		foreach( e; result ) GLOBAL.editColor.linenumBack = e.value;
-
-		result = root.query.descendant("color").attribute("fold");
-		foreach( e; result ) GLOBAL.editColor.fold = e.value;
-
-
-
-		scope fileCompilerOptions = new UnicodeFile!(char)( "settings\\compilerOptions.txt", Encoding.Unknown );
-		GLOBAL.txtCompilerOtions = fileCompilerOptions.read;
 	}
 }
 
@@ -551,7 +805,7 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			GLOBAL.compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "compilerPath_Handle" );
-			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", fileName.ptr );
+			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", toStringz( fileName ) );
 		}
 		else
 		{
@@ -561,35 +815,48 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_DEFAULT;
 	}
 
+	int CPreferenceDialog_shortCutList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
+	{
+		scope skDialog = new CShortCutDialog( 300, 140, item, fromStringz( text ).dup );
+		skDialog.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+
+		return IUP_DEFAULT;
+	}
+
 	int CPreferenceDialog_btnOK_cb( Ihandle* ih )
 	{
-		GLOBAL.editorSetting00.LineMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" ));
-		GLOBAL.editorSetting00.BookmarkMargin		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE" ));
-		GLOBAL.editorSetting00.FoldMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE" ));
-		GLOBAL.editorSetting00.IndentGuide			= fromStringz(IupGetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE" ));
-		GLOBAL.editorSetting00.CaretLine			= fromStringz(IupGetAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE" ));
-		GLOBAL.editorSetting00.WordWrap				= fromStringz(IupGetAttribute( IupGetHandle( "toggleWordWrap" ), "VALUE" ));
-		GLOBAL.editorSetting00.TabUseingSpace		= fromStringz(IupGetAttribute( IupGetHandle( "toggleTabUseingSpace" ), "VALUE" ));
-		GLOBAL.editorSetting00.AutoIndent			= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoIndent" ), "VALUE" ));
-		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" ));
+		GLOBAL.editorSetting00.LineMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.BookmarkMargin		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.FoldMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.IndentGuide			= fromStringz(IupGetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.CaretLine			= fromStringz(IupGetAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.WordWrap				= fromStringz(IupGetAttribute( IupGetHandle( "toggleWordWrap" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.TabUseingSpace		= fromStringz(IupGetAttribute( IupGetHandle( "toggleTabUseingSpace" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.AutoIndent			= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoIndent" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 
-		GLOBAL.editFont.name						= fromStringz(IupGetAttribute( IupGetHandle( "textFontName" ), "VALUE" ));
-		GLOBAL.editFont.size						= fromStringz(IupGetAttribute( IupGetHandle( "textFontSize" ), "VALUE" ));
-		GLOBAL.editFont.bold						= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontBold" ), "VALUE" ));
-		GLOBAL.editFont.italic						= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontItalic" ), "VALUE" ));
-		GLOBAL.editFont.underline					= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontUnderline" ), "VALUE" ));
-		GLOBAL.editFont.foreColor					= fromStringz(IupGetAttribute( IupGetHandle( "btnFontForeground" ), "BGCOLOR" ));
-		GLOBAL.editFont.backColor					= fromStringz(IupGetAttribute( IupGetHandle( "btnFontBackground" ), "BGCOLOR" ));
+		GLOBAL.editFont.name						= fromStringz(IupGetAttribute( IupGetHandle( "textFontName" ), "VALUE" )).dup;
+		GLOBAL.editFont.size						= fromStringz(IupGetAttribute( IupGetHandle( "textFontSize" ), "VALUE" )).dup;
+		GLOBAL.editFont.bold						= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontBold" ), "VALUE" )).dup;
+		GLOBAL.editFont.italic						= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontItalic" ), "VALUE" )).dup;
+		GLOBAL.editFont.underline					= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontUnderline" ), "VALUE" )).dup;
+		GLOBAL.editFont.foreColor					= fromStringz(IupGetAttribute( IupGetHandle( "btnFontForeground" ), "BGCOLOR" )).dup;
+		GLOBAL.editFont.backColor					= fromStringz(IupGetAttribute( IupGetHandle( "btnFontBackground" ), "BGCOLOR" )).dup;
 
 
-		GLOBAL.editColor.caretLine					= fromStringz(IupGetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR" ));
-		GLOBAL.editColor.cursor						= fromStringz(IupGetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR" ));
+		GLOBAL.editColor.caretLine					= fromStringz(IupGetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.cursor						= fromStringz(IupGetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR" )).dup;
 
-		GLOBAL.editColor.selectionFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR" ));
-		GLOBAL.editColor.selectionBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR" ));
-		GLOBAL.editColor.linenumFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR" ));
-		GLOBAL.editColor.linenumBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" ));
-		GLOBAL.editColor.fold						= fromStringz(IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" ));
+		GLOBAL.editColor.selectionFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.selectionBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.linenumFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.linenumBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.fold						= fromStringz(IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" )).dup;
+
+
+		GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( fromStringz(IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ).dup );
+
+		GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
 		
 
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
@@ -605,28 +872,33 @@ extern(C) // Callback for CPreferenceDialog
 
 	int CPreferenceDialog_btnFont_cb( Ihandle* ih )
 	{
+		char[] _fontName = fromStringz( IupGetAttribute( IupGetHandle( "textFontName" ), "VALUE" ) ).dup;
+		char[] _fontSize = fromStringz( IupGetAttribute( IupGetHandle( "textFontSize" ), "VALUE" ) ).dup;
+
 		Ihandle* dlg = IupFontDlg();
-		IupSetAttribute(dlg, "COLOR", "128 0 255");
-		IupSetAttribute(dlg, "VALUE", "Times New Roman, Bold 20");
+		IupSetAttribute(dlg, "COLOR", "0 0 0");
+		IupSetAttribute(dlg, "VALUE", toStringz( _fontName.dup ~ ", Regular " ~ _fontSize ) );
 		IupSetAttribute(dlg, "TITLE", "IupFontDlg Test");
 				
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 
 		if( IupGetInt( dlg, "STATUS" ) )
 		{
-			char[] fontInformation = fromStringz( IupGetAttribute( dlg, "VALUE" ) );
+			char[] fontInformation = fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup;
 			int commaPos = Util.index( fontInformation, "," );
 
 			if( commaPos <= fontInformation.length )
 			{
-				GLOBAL.editFont.name = fontInformation[0..commaPos];
+				GLOBAL.editFont.name = fontInformation[0..commaPos].dup;
+				if( !GLOBAL.editFont.name.length ) GLOBAL.editFont.name = "Consolas";
+				
 				Ihandle* _ih = IupGetHandle( "textFontName" );
 				if( _ih != null ) IupSetAttribute( _ih, "VALUE", toStringz(GLOBAL.editFont.name) );
 				
 				char[][] fontSizeInformation = Util.split( Util.trim( fontInformation[commaPos+1..length] ), " " );
 				if( fontSizeInformation.length )
 				{
-					GLOBAL.editFont.size = fontSizeInformation[length-1];
+					GLOBAL.editFont.size = fontSizeInformation[length-1].dup;
 					_ih = IupGetHandle( "textFontSize" );
 					if( _ih != null ) IupSetAttribute( _ih, "VALUE", toStringz(GLOBAL.editFont.size) );
 				}

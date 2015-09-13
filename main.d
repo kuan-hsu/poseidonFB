@@ -4,7 +4,7 @@ import iup.iup;
 import iup.iup_scintilla;
 import iup.iupcontrols;
 
-import global, layout, imageData;
+import global, layout, images.imageData;
 import menu, scintilla;
 
 import tango.io.Stdout;

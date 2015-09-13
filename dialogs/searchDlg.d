@@ -136,12 +136,15 @@ class CSearchDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 
 		createLayout();
 
 		IupSetAttribute( listFind, "VALUE",toStringz( findWhat ) );
 
+		IupSetHandle( "btnCANCEL_search", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSearchDialog_btnCancel_cb );
+		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_search" );
 	}
 
 	~this()
@@ -150,8 +153,9 @@ class CSearchDialog : CBaseDialog
 		IupSetHandle( "CSearchDialog_listReplace", null );
 
 		IupSetHandle( "CSearchDialog_toggleForward", null );
-		IupSetHandle( "CSearchDialog_toggleBackward", null );		
+		IupSetHandle( "CSearchDialog_toggleBackward", null );
 
+		IupSetHandle( "btnCANCEL_search", null );	
 	}
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog

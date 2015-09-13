@@ -72,7 +72,7 @@ class CBaseDialog
 
 extern(C) // Callback for CBaseDialog
 {
-	int CBaseDialog_btnCancel_cb( Ihandle* ih )
+	int CBaseDialog_btnCancel_cb()
 	{
 		return IUP_CLOSE;
 	}

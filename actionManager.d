@@ -7,9 +7,22 @@ private import iup.iup;
 
 private import Integer = tango.text.convert.Integer;
 private import Util = tango.text.Util;
-private import tango.stdc.stringz;
+private import tango.stdc.stringz, tango.io.Stdout;
+private version(Windows) import tango.sys.win32.UserGdi;
 
 private import global;
+
+long SendMessage( Ihandle* ih, uint msg, ulong wParam, long lParam )
+{
+	version(Windows)
+	{
+		return SendMessageA( ih.handle, msg, wParam, lParam );
+	}
+	else
+	{
+		return IupScintillaSendMessage( ih, msg, wParam, lParam );
+	}
+}
 
 
 // Action for FILE operate
@@ -58,9 +71,10 @@ struct FileAction
 struct ScintillaAction
 {
 	private:
-		import iup.iup_scintilla;
-		import tango.io.UnicodeFile;
-		import scintilla;
+	import iup.iup_scintilla;
+	import tango.io.UnicodeFile, tango.io.Stdout;
+	import scintilla;
+	import parser.scanner,  parser.token, parser.parser;
 		
 	public:
 	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8 )
@@ -89,6 +103,9 @@ struct ScintillaAction
 		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz(fullPath) );
 		IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
 
+		//Parser
+		OutlineAction.loadFile( fullPath );
+
 		return true;
 	}
 	
@@ -105,6 +122,7 @@ struct ScintillaAction
 			StatusBarAction.update();
 
 			toTreeMarked( fullPath );
+			GLOBAL.outlineTree.changeTree( fullPath );
 
 			return true;
 		}
@@ -128,6 +146,9 @@ struct ScintillaAction
 		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz(fullPath) );
 		IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
 		IupSetAttributeId( GLOBAL.fileListTree, "MARKED", 1, "YES" );
+		
+		// Parser
+		OutlineAction.loadFile( fullPath );
 
 		return true;
 	}
@@ -159,14 +180,11 @@ struct ScintillaAction
 					int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
 					for( int id = 1; id <= nodeCount; id++ )
 					{
-						auto _cstring = cast(CString) IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
-						if( _cstring !is null )
+						char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+						if( s == fullPath )
 						{
-							if( _cstring.text == fullPath )
-							{
-								IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
-								break;
-							}
+							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+							break;
 						}
 					}
 				}
@@ -276,6 +294,8 @@ struct ScintillaAction
 			GLOBAL.scintillaManager.remove( fullPath );
 			delete cSci;
 
+			actionManager.OutlineAction.cleanTree( fullPath );
+
 			if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
 		}
 
@@ -302,6 +322,8 @@ struct ScintillaAction
 				}
 
 				removeFileListNode( null, cSci );
+
+				actionManager.OutlineAction.cleanTree( cSci.getFullPath );
 
 				IupDestroy( iupSci );
 				delete cSci;
@@ -334,6 +356,8 @@ struct ScintillaAction
 
 			removeFileListNode( null, cSci );
 
+			actionManager.OutlineAction.cleanTree( cSci.getFullPath );
+
 			IupDestroy( iupSci );
 			delete cSci;
 		}
@@ -354,6 +378,9 @@ struct ScintillaAction
 		{
 			CScintilla cSci = getCScintilla( iupSci );
 			cSci.saveFile();
+
+			//Update Parser
+			OutlineAction.refresh( cSci.getFullPath() );
 		}
 		catch
 		{
@@ -377,6 +404,7 @@ struct ScintillaAction
 					if( _sci.getIupScintilla == _child )
 					{
 						_sci.saveFile();
+						OutlineAction.refresh( _sci.getFullPath() );
 						break;
 					}
 				}
@@ -433,13 +461,11 @@ struct ProjectAction
 
 	static char[] getActiveProjectName()
 	{
-		int id = getActiveProjectID;
+		int id = getActiveProjectID();
 
 		if( id < 1 ) return null;
 
-		auto _cstring = cast(CString) IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
-
-		return _cstring.text;
+		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
 	}
 
 	static int addTreeNode( char[] _prjDirName, char[] fullPath, int folderLocateId )
@@ -478,13 +504,47 @@ struct ProjectAction
 				if( !bFolerExist )
 				{
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz(splitText[counterSplitText]) );
-					if( pos != 0 ) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, cast(char*) new CString("FIXED") );
+					// Shadow
+					if( pos != 0 )
+						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( "FIXED" ) );
+					else
+						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
+
 					folderLocateId ++;
 				}
 			}
 		}
 		
 		return folderLocateId;
+	}
+
+	static char[] fileInProject( char[] fullPath, char[] projectName = null )
+	{
+		if( fullPath.length )
+		{
+			if( projectName.length )
+			{
+				if( projectName in GLOBAL.projectManager )
+				{
+					foreach( char[] prjFileFullPath; GLOBAL.projectManager[projectName].sources ~ GLOBAL.projectManager[projectName].includes )
+					{
+						if( fullPath == prjFileFullPath ) return projectName;
+					}
+				}
+			}
+			else
+			{
+				foreach( p; GLOBAL.projectManager )
+				{
+					foreach( char[] prjFileFullPath; p.sources ~ p.includes )
+					{
+						if( fullPath == prjFileFullPath ) return p.dir;
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 }
 
@@ -516,7 +576,7 @@ struct StatusBarAction
 			scope Layouter = new Layout!(char)();
 			char[] output = Layouter( "{,7}x{,5}", line, col );
 
-			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", output.ptr ); // Update line x col
+			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output )); // Update line x col
 
 			if( bOverType )
 			{
@@ -938,7 +998,7 @@ char[] pp="print";
 
 		if( searchRule & MATCHCASE ) targetText = toLower( targetText );
 		
-		scope f = new FilePath( fullPath );
+		scope f = new FilePath( Util.substitute( fullPath, "\\", "/" ) );
 		if( f.exists() )
 		{
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
@@ -1041,5 +1101,115 @@ char[] pp="print";
 			}
 		}
 	}
+}
+
+
+struct OutlineAction
+{
+	private:
+	import iup.iup_scintilla;
+
+	import scintilla;
+	import parser.scanner, parser.token, parser.parser;
+
+	import tango.io.FilePath, tango.text.Ascii;
+		
+
+
+	public:
+	static void loadFile( char[] fullPath )
+	{
+		refresh( fullPath );
+	}
 	
+	static void refresh( char[] fullPath )
+	{
+		scope f = new FilePath( fullPath );
+
+		char[] _ext = toLower( f.ext() );
+
+		if( _ext != "bas" && _ext != "bi" ) return;
+		
+		CScintilla actCSci;
+		
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+		{
+			if( fullPath == cSci.getFullPath() )
+			{
+				actCSci = cSci;
+				break;
+			}
+		}
+
+		if( actCSci !is null )
+		{
+			// Parser
+			scope scanner = new CScanner;
+
+			char[] document = actCSci.getText();
+			TokenUnit[] tokens = scanner.scan( document );
+			scope _parser = new CParser( tokens );
+			auto astHeadNode = _parser.parse( fullPath );
+
+			if( fullPath in GLOBAL.parserManager )
+			{
+				auto temp = GLOBAL.parserManager[fullPath] ;
+				delete temp;
+				GLOBAL.parserManager[fullPath] = astHeadNode;
+
+				GLOBAL.outlineTree.cleanTree( fullPath );
+			}
+			else
+			{
+				GLOBAL.parserManager[fullPath] = astHeadNode;
+			}
+
+			GLOBAL.outlineTree.createTree( astHeadNode );
+
+			GLOBAL.outlineTree.changeTree( fullPath );
+		}
+		else
+		{
+			// Don't Create Tree
+			// Parser
+			scope scanner = new CScanner;
+
+			TokenUnit[] tokens = scanner.scanFile( fullPath );
+			scope _parser = new CParser( tokens );
+			auto astHeadNode = _parser.parse( fullPath );
+
+			if( fullPath in GLOBAL.parserManager )
+			{
+				auto temp = GLOBAL.parserManager[fullPath] ;
+				delete temp;
+				GLOBAL.parserManager[fullPath] = astHeadNode;
+
+				GLOBAL.outlineTree.cleanTree( fullPath );
+			}
+			else
+			{
+				GLOBAL.parserManager[fullPath] = astHeadNode;
+			}			
+
+		}
+	}
+
+	static void cleanTree( char[] fullPath )
+	{
+		for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++i )
+		{
+			Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i );
+			if( ih != null )
+			{
+				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+
+				if( fullPath == _fullPath )
+				{
+					IupSetAttribute( ih, "DELNODE", "ALL" );
+					IupDestroy( ih );
+					break;
+				}
+			}
+		}
+	}	
 }

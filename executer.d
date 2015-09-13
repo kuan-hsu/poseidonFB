@@ -308,23 +308,20 @@ struct ExecuterAction
 			int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
 			for( int id = 1; id <= nodeCount; id++ )
 			{
-				auto _cstring = cast(CString) IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
-				if( _cstring !is null )
+				char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+				if( _cstring == activeCScintilla.getFullPath() )
 				{
-					if( _cstring.text == activeCScintilla.getFullPath() )
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+					bRunProject = true;
+					version(Windows)
 					{
-						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
-						bRunProject = true;
-						version(Windows)
-						{
-							command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
-						}
-						else
-						{
-							command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name;
-						}
-						break;
+						command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
 					}
+					else
+					{
+						command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name;
+					}
+					break;
 				}
 			}
 
@@ -358,7 +355,7 @@ struct ExecuterAction
 
 		IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
 		
-		scope f = new FilePath( command );
+		scope f = new FilePath( Util.substitute( command, "\\", "/" ) );
 		if( f.exists() )
 		{
 			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("Running " ~ command ~ "......") );

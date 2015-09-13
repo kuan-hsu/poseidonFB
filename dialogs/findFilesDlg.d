@@ -34,8 +34,6 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
 
 
-
-
 		// Options
 		Ihandle* toggleCaseSensitive = IupToggle( "Case Sensitive", null );
 		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES" );
@@ -51,9 +49,6 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetAttributes( hBoxOption, "ALIGNMENT=ACENTER,EXPAND=YES,MARGIN=0x0,GAP=0" );
 		Ihandle* frameOption = IupFrame( hBoxOption );
 		IupSetAttributes( frameOption, "TITLE=Options,MARGIN=0x0,GAP=0,SIZE=0x20");
-
-
-
 
 
 		// Scope
@@ -85,9 +80,7 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetAttributes( frameScope, "TITLE=Scope");		
 
 
-
-
-
+		// Buttons
 		Ihandle* btnFindAll = IupButton( "Find All", null );
 		IupSetHandle( "CFindInFilesDialog_btnFindAll", btnFindAll );
 		IupSetAttributes( btnFindAll, "EXPAND=YES" );
@@ -96,6 +89,7 @@ class CFindInFilesDialog : CBaseDialog
 		Ihandle* btnReplaceAll = IupButton( "Replace All", null );
 		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", btnReplaceAll );
 		IupSetAttributes( btnReplaceAll, "EXPAND=YES" );
+		IupSetAttribute( btnReplaceAll, "ACTIVE", "NO" );
 		//IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnReplaceAll_cb );
 		
 		Ihandle* btnCountAll = IupButton( "Count All", null );
@@ -130,12 +124,15 @@ class CFindInFilesDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 
 		createLayout();
 
 		IupSetAttribute( listFind, "VALUE",toStringz( findWhat ) );
 
+		IupSetHandle( "btnCANCEL_findinfiles", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
+		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_findinfiles" );
 	}
 
 	~this()
@@ -154,6 +151,8 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", null );
 		IupSetHandle( "CFindInFilesDialog_btnCountAll", null );
 		IupSetHandle( "CFindInFilesDialog_btnMarkAll", null );
+
+		IupSetHandle( "btnCANCEL_findinfiles", null );	
 	}
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog
@@ -178,9 +177,11 @@ class CFindInFilesDialog : CBaseDialog
 
 extern(C) // Callback for CFindInFilesDialog
 {
-	void CFindInFilesDialog_btnCancel_cb( Ihandle* ih )
+	int CFindInFilesDialog_btnCancel_cb( Ihandle* ih )
 	{
 		if( GLOBAL.serachInFilesDlg !is null ) IupHide( GLOBAL.serachInFilesDlg._dlg );
+
+		return IUP_DEFAULT;
 	}
 
 	int CFindInFilesDialog_toggleAction_cb( Ihandle* ih, int state )
@@ -212,7 +213,6 @@ extern(C) // Callback for CFindInFilesDialog
 
 		return IUP_DEFAULT;
 	}
-
 
 	int CFindInFilesDialog_btnFindAll_cb( Ihandle* ih )
 	{

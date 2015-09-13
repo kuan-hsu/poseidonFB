@@ -23,7 +23,8 @@ class CFileDlg
 
 		if( IupGetInt( dlg, "STATUS") != -1 )
 		{
-			fileName = trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
+			char[] _fileName = trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ) );
+			fileName = _fileName.dup;
 		}
 		else
 		{

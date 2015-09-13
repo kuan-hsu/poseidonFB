@@ -13,7 +13,7 @@ class CCompilerHelpDialog : CBaseDialog
 	{
 		Ihandle* text = IupText( null );
 		IupSetAttributes( text, "EXPAND=YES,MULTILINE=YES" );
-		IupSetAttribute( text, "VALUE", toStringz(GLOBAL.txtCompilerOtions) );
+		IupSetAttribute( text, "VALUE", toStringz(GLOBAL.txtCompilerOptions.dup) );
 
 		Ihandle* scrollBox = IupScrollBox( text );
 		
@@ -28,6 +28,7 @@ class CCompilerHelpDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 
 		createLayout();
 	}
