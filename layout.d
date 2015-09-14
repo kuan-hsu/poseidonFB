@@ -36,13 +36,14 @@ void createExplorerWindow()
 	
 	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TABIMAGE", "icon_packageexplorer" );
 	IupSetAttribute( GLOBAL.fileListTree, "TABIMAGE", "icon_filelist" );
+	//IupSetAttribute( GLOBAL.fileListTree, "FONT", "Consolas, 10" );
 	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "TABIMAGE", "icon_outline" );
 	
 
 	
 	GLOBAL.projectViewTabs = IupTabs( GLOBAL.fileListTree, GLOBAL.projectTree.getTreeHandle, GLOBAL.outlineTree.getZBoxHandle, null );
 	IupSetAttribute( GLOBAL.projectViewTabs, "TABTYPE", "BOTTOM" );
-	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 10" );
+	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
 
 	createTabs();
 

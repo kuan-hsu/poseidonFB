@@ -7,7 +7,7 @@ import iup.iupcontrols;
 import global, layout, images.imageData;
 import menu, scintilla;
 
-import tango.io.Stdout;
+import tango.io.Stdout, tango.stdc.stringz;
 
 
 version(Windows)
@@ -44,11 +44,12 @@ void main()
 
 	IupScintillaOpen();
 	IupSetGlobal("UTF8MODE", "YES");
-	IupSetGlobal( "DEFAULTFONT", "Consolas, 10" );
+	//IupSetGlobal( "DEFAULTFONT", "Consolas, 10" );
 
 	load_all_images_icons();
 
 	createEditorSetting();
+	IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
 
 	createMenu();
 	// Creates a dialog containing the control
@@ -72,6 +73,18 @@ void main()
 	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
 
 	createDialog();
+
+	if( GLOBAL.fonts.length == 9 )
+	{
+		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) ); // Leftside
+		IupSetAttribute( GLOBAL.fileListTree, "FONT", toStringz( GLOBAL.fonts[3].fontString ) ); // Filelist
+		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString ) ); // Project
+		IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) ); // Outline
+		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) ); // Bottom
+		IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
+		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
+	}	
+	
 	
 	
 	//ScintillaTest();

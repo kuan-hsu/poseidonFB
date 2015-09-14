@@ -36,7 +36,14 @@ class CSingleTextDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		IupSetAttribute( _dlg, "LOCKLOOP", "YES" );
+		version( Windows )
+		{
+			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+		}
 
 		labelName = _labelText ;
 		 

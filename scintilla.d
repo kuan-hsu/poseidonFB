@@ -213,8 +213,47 @@ class CScintilla
 		IupSetAttribute(sci, "KEYWORDS2", toStringz(GLOBAL.KEYWORDS[2]) );
 		IupSetAttribute(sci, "KEYWORDS3", toStringz(GLOBAL.KEYWORDS[3]) );
 
-		IupSetAttribute( sci, "STYLEFONT32", toStringz(GLOBAL.editFont.name) );
-		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz(GLOBAL.editFont.size) );
+
+		char[] font;
+		version( Windows )
+		{
+			font = "Courier New";
+		}
+		else
+		{
+			font = "Monospace";
+		}		
+		char[] size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
+
+		if( GLOBAL.fonts.length > 2 )
+		{
+			char[][] strings = Util.split( GLOBAL.fonts[1].fontString, "," );
+			if( strings.length == 2 )
+			{
+				if( strings[0].length )
+				{
+					font = Util.trim( strings[0] );
+				}
+
+				strings[1] = Util.trim( strings[1] );
+
+				foreach( char[] s; Util.split( strings[1], " " ) )
+				{
+					switch( s )
+					{
+						case "Bold":		Bold = "YES";		break;
+						case "Italic":		Italic = "YES";		break;
+						case "Underline":	Underline = "YES";	break;
+						case "Strikeout":	Strikeout = "YES";	break;
+						default:
+							size = s;
+					}
+				}
+			}
+		}
+
+		IupSetAttribute( sci, "STYLEFONT32", toStringz( font ) );
+		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size ) );
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		
 		IupSetAttribute(sci, "STYLEFGCOLOR1", "0 128 0");		// SCE_B_COMMENT 1
@@ -234,13 +273,13 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFGCOLOR19", "0 128 0");		// SCE_B_COMMENTBLOCK 19
 
 		// Set Keywords to Bold
-		IupSetAttribute(sci, "STYLEBOLD3", "YES");
+		//IupSetAttribute(sci, "STYLEBOLD3", "YES");
 
-		IupSetAttribute( sci, "STYLEBOLD32", GLOBAL.editFont.bold == "ON" ? toStringz("YES") : toStringz("NO") );
-		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.editFont.italic == "ON" ? toStringz("YES") : toStringz("NO") );
-		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.editFont.underline == "ON" ? toStringz("YES") : toStringz("NO") );
-		IupSetAttribute( sci, "FGCOLOR", toStringz(GLOBAL.editFont.foreColor) );
-		IupSetAttribute( sci, "BGCOLOR", toStringz(GLOBAL.editFont.backColor) );
+		IupSetAttribute( sci, "STYLEBOLD32", toStringz( Bold ) );
+		IupSetAttribute( sci, "STYLEITALIC32", toStringz( Italic ) );
+		IupSetAttribute( sci, "STYLEUNDERLINE32", toStringz( Underline ) );
+		IupSetAttribute( sci, "FGCOLOR", toStringz( "0 0 0" ) );
+		IupSetAttribute( sci, "BGCOLOR", toStringz( "255 255 255" ) );
 
 		int tabSize = Integer.atoi( GLOBAL.editorSetting00.TabWidth );
 		GLOBAL.editorSetting00.TabWidth = Integer.toString( tabSize );
@@ -249,8 +288,12 @@ class CScintilla
 		if( GLOBAL.editorSetting00.LineMargin == "ON" )
 		{
 			int lineCount = IupGetInt( sci, "LINECOUNT" );
+			char[] lc = Integer.toString( lineCount );
+			IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 2 ) * Integer.atoi( size ) );
+			/*
 			lineCount = ( lineCount / 10  + 1 ) * 12;
 			if( lineCount > 50 ) IupSetInt( sci, "MARGINWIDTH0", lineCount );else IupSetInt( sci, "MARGINWIDTH0", 50 );
+			*/
 		}
 		else
 		{

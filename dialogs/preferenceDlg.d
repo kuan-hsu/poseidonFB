@@ -152,6 +152,9 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
 
 
+
+
+		/+
 		Ihandle* labelFontName = IupLabel( "Font name:" );
 		Ihandle* textFontName = IupText( null );
 		IupSetAttribute( textFontName, "SIZE", "120x12" );
@@ -204,9 +207,51 @@ class CPreferenceDialog : CBaseDialog
 
 
 		Ihandle* vBoxFont00 = IupVbox( hBoxFont00, hBoxFont01, null );
-		
+		+/
+		// Short Cut
+		Ihandle* fontList = IupList( null );
+		IupSetAttributes( fontList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES" );
+		version( Windows )
+		{
+			IupSetAttribute( fontList, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( fontList, "FONT", "Monospace,9" );
+		}
 
-		Ihandle* frameFont = IupFrame( vBoxFont00 );
+		for( int i = 0; i < GLOBAL.fonts.length; ++ i )
+		{
+			char[][] strings = Util.split( GLOBAL.fonts[i].fontString, "," );
+			if( strings.length == 2 )
+			{
+				char[] Bold, Italic, Underline, Strikeout, size;
+				
+				strings[0] = Util.trim( strings[0] );
+				strings[1] = Util.trim( strings[1] );
+
+				foreach( char[] s; Util.split( strings[1], " " ) )
+				{
+					switch( s )
+					{
+						case "Bold":		Bold = s;		break;
+						case "Italic":		Italic = s;		break;
+						case "Underline":	Underline = s;	break;
+						case "Strikeout":	Strikeout = s;	break;
+						default:
+							size = s;
+					}
+				}
+
+				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[i].name, strings[0], Bold, Italic, Underline, Strikeout, size );
+				IupSetAttribute( fontList, toStringz( Integer.toString( i + 1 ) ), toStringz( _string ) );
+			}
+		}
+		IupSetHandle( "fontList", fontList );
+		IupSetCallback( fontList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_fontList_DBLCLICK_CB );
+
+
+		Ihandle* frameFont = IupFrame( fontList );
 		IupSetAttribute( frameFont, "TITLE", "Default_Font");
 		IupSetAttribute( frameFont, "EXPAND", "YES");
 
@@ -302,7 +347,15 @@ class CPreferenceDialog : CBaseDialog
 
 		// Short Cut
 		Ihandle* shortCutList = IupList( null );
-		IupSetAttributes( shortCutList, "MULTIPLE=NO,SIZE=285x180,MARGIN=10x10,VISIBLELINES=YES" );
+		IupSetAttributes( shortCutList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES" );
+		version( Windows )
+		{
+			IupSetAttribute( shortCutList, "FONT", "Courier New,10" );
+		}
+		else
+		{
+			IupSetAttribute( shortCutList, "FONT", "Monospace,10" );
+		}
 		IupSetHandle( "shortCutList", shortCutList );
 		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
 
@@ -319,7 +372,7 @@ class CPreferenceDialog : CBaseDialog
 				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
 			}
 			
-			char[] string = Stdout.layout.convert( "{,-40} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[i].name, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
+			char[] string = Stdout.layout.convert( "{,-30} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[i].name, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
 
 			IupSetAttribute( shortCutList, toStringz( Integer.toString( i + 1 ) ), toStringz( string ) );
 		}
@@ -349,6 +402,14 @@ class CPreferenceDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		version( Windows )
+		{
+			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+		}
 		 
 		createLayout();
 	}
@@ -389,6 +450,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnBookmarkColor", null );
 
 		IupSetHandle( "shortCutList", null );
+		IupSetHandle( "fontList", null );
 	}
 
 	static char[] convertShortKeyValue2String( int keyValue )
@@ -477,6 +539,7 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "AutoIndent", GLOBAL.editorSetting00.AutoIndent )	
 		.attribute( null, "TabWidth", GLOBAL.editorSetting00.TabWidth );
 
+		/+
 		//<font name="Consolas" size="11" bold="OFF" italic="OFF" underline="OFF" forecolor="0 0 0" backcolor="255 255 255"></font>
 		editorNode.element( null, "font" )
 		.attribute( null, "name", GLOBAL.editFont.name )
@@ -486,6 +549,17 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "underline", GLOBAL.editFont.underline )
 		.attribute( null, "forecolor", GLOBAL.editFont.foreColor )
 		.attribute( null, "backcolor", GLOBAL.editFont.backColor );
+		+/
+		editorNode.element( null, "font" )
+		.attribute( null, "Default", GLOBAL.fonts[0].fontString )
+		.attribute( null, "Document", GLOBAL.fonts[1].fontString )
+		.attribute( null, "Leftside", GLOBAL.fonts[2].fontString )
+		.attribute( null, "Filelist", GLOBAL.fonts[3].fontString )
+		.attribute( null, "Project", GLOBAL.fonts[4].fontString )
+		.attribute( null, "Outline", GLOBAL.fonts[5].fontString )
+		.attribute( null, "Bottom", GLOBAL.fonts[6].fontString )
+		.attribute( null, "Output", GLOBAL.fonts[7].fontString )
+		.attribute( null, "Search", GLOBAL.fonts[8].fontString );
 
 		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
 		editorNode.element( null, "color" )
@@ -630,6 +704,56 @@ class CPreferenceDialog : CBaseDialog
 			result = root.query.descendant("toggle00").attribute("TabWidth");
 			foreach( e; result ) GLOBAL.editorSetting00.TabWidth = e.value;
 
+
+			// Font
+			GLOBAL.fonts.length = 0;
+
+			fontUint fu = { "Default", "" };
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+
+			fu.name = "Document";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			
+			fu.name = "Leftside";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+
+			fu.name = "Filelist";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+
+			fu.name = "Project";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+
+			fu.name = "Outline";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			
+			fu.name = "Bottom";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+
+			fu.name = "Output";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+
+			fu.name = "Search";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			
+			/+
 			// Font
 			result = root.query.descendant("font").attribute("name");
 			foreach( e; result ) GLOBAL.editFont.name = e.value;
@@ -651,6 +775,7 @@ class CPreferenceDialog : CBaseDialog
 
 			result = root.query.descendant("font").attribute("backcolor");
 			foreach( e; result ) GLOBAL.editFont.backColor = e.value;
+			+/
 
 
 			// Color (Editor)
@@ -823,6 +948,68 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_DEFAULT;
 	}
 
+	int CPreferenceDialog_fontList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
+	{
+		char[] listString = fromStringz( text ).dup;
+		if( listString.length > 10 ) listString = listString[10..length]; else return IUP_DEFAULT;
+
+		// Set IupFontDlg
+		Ihandle* dlg = IupFontDlg();
+		IupSetAttribute(dlg, "VALUE", toStringz( listString ) );
+		IupSetAttribute(dlg, "TITLE", "Font");
+
+		// Open IupFontDlg
+		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
+
+		if( IupGetInt( dlg, "STATUS" ) )
+		{
+			char[] fontInformation = fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup;
+
+			char[][] strings = Util.split( fontInformation, "," );
+			if( strings.length == 2 )
+			{
+				char[] Bold, Italic, Underline, Strikeout, size;
+
+				if( !strings[0].length )
+				{
+					version( Windows )
+					{
+						strings[0] = "Courier New";
+					}
+					else
+					{
+						strings[0] = "Monospace";
+					}
+				}
+				else
+				{
+					strings[0] = Util.trim( strings[0] );
+				}
+				strings[1] = Util.trim( strings[1] );
+
+				foreach( char[] s; Util.split( strings[1], " " ) )
+				{
+					switch( s )
+					{
+						case "Bold":		Bold = s;		break;
+						case "Italic":		Italic = s;		break;
+						case "Underline":	Underline = s;	break;
+						case "Strikeout":	Strikeout = s;	break;
+						default:
+							size = s;
+					}
+				}
+
+				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[item-1].name, strings[0], Bold, Italic, Underline, Strikeout, size );
+				IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
+			}
+		}		
+
+		return IUP_DEFAULT;
+	}
+
+	
+
 	int CPreferenceDialog_btnOK_cb( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.LineMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
@@ -835,13 +1022,31 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editorSetting00.AutoIndent			= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoIndent" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 
-		GLOBAL.editFont.name						= fromStringz(IupGetAttribute( IupGetHandle( "textFontName" ), "VALUE" )).dup;
-		GLOBAL.editFont.size						= fromStringz(IupGetAttribute( IupGetHandle( "textFontSize" ), "VALUE" )).dup;
-		GLOBAL.editFont.bold						= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontBold" ), "VALUE" )).dup;
-		GLOBAL.editFont.italic						= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontItalic" ), "VALUE" )).dup;
-		GLOBAL.editFont.underline					= fromStringz(IupGetAttribute( IupGetHandle( "toggleFontUnderline" ), "VALUE" )).dup;
-		GLOBAL.editFont.foreColor					= fromStringz(IupGetAttribute( IupGetHandle( "btnFontForeground" ), "BGCOLOR" )).dup;
-		GLOBAL.editFont.backColor					= fromStringz(IupGetAttribute( IupGetHandle( "btnFontBackground" ), "BGCOLOR" )).dup;
+		Ihandle* _ft = IupGetHandle( "fontList" );
+		if( _ft != null )
+		{
+			for( int i = 0; i < GLOBAL.fonts.length; ++ i )
+			{
+				char[]	result;
+				
+				char[]	fontInformation = fromStringz( IupGetAttribute( _ft, toStringz( Integer.toString( i + 1 ) ) ) ).dup;
+				char[][] strings = Util.split( fontInformation[10..length] , "," );
+				
+				if( strings.length == 2 )
+				{
+					result ~= ( Util.trim( strings[0] ) ~ "," );
+
+					foreach( char[] s; Util.split( Util.trim( strings[1] ), " " ) )
+					{
+						s = Util.trim( s );
+						if( s.length )	result ~= ( " " ~ s );
+					}
+
+					GLOBAL.fonts[i].name = Util.trim( fontInformation[0..10] );
+					GLOBAL.fonts[i].fontString = result;
+				}			
+			}
+		}
 
 
 		GLOBAL.editColor.caretLine					= fromStringz(IupGetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR" )).dup;
@@ -857,55 +1062,26 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( fromStringz(IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ).dup );
 
 		GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
-		
 
-		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+		if( GLOBAL.fonts.length == 9 )
 		{
-			if( cSci !is null ) cSci.setGlobalSetting();
+			foreach( CScintilla cSci; GLOBAL.scintillaManager )
+			{
+				if( cSci !is null ) cSci.setGlobalSetting();
+			}			
+			IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) ); // Leftside
+			IupSetAttribute( GLOBAL.fileListTree, "FONT", toStringz( GLOBAL.fonts[3].fontString ) ); // Filelist
+			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString ) ); // Project
+			IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) ); // Outline
+			IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) ); // Bottom
+			IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
+			IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
 		}
 
 		// Save Setup to Xml
 		CPreferenceDialog.save();
 
 		return IUP_CLOSE;
-	}
-
-	int CPreferenceDialog_btnFont_cb( Ihandle* ih )
-	{
-		char[] _fontName = fromStringz( IupGetAttribute( IupGetHandle( "textFontName" ), "VALUE" ) ).dup;
-		char[] _fontSize = fromStringz( IupGetAttribute( IupGetHandle( "textFontSize" ), "VALUE" ) ).dup;
-
-		Ihandle* dlg = IupFontDlg();
-		IupSetAttribute(dlg, "COLOR", "0 0 0");
-		IupSetAttribute(dlg, "VALUE", toStringz( _fontName.dup ~ ", Regular " ~ _fontSize ) );
-		IupSetAttribute(dlg, "TITLE", "IupFontDlg Test");
-				
-		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
-
-		if( IupGetInt( dlg, "STATUS" ) )
-		{
-			char[] fontInformation = fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup;
-			int commaPos = Util.index( fontInformation, "," );
-
-			if( commaPos <= fontInformation.length )
-			{
-				GLOBAL.editFont.name = fontInformation[0..commaPos].dup;
-				if( !GLOBAL.editFont.name.length ) GLOBAL.editFont.name = "Consolas";
-				
-				Ihandle* _ih = IupGetHandle( "textFontName" );
-				if( _ih != null ) IupSetAttribute( _ih, "VALUE", toStringz(GLOBAL.editFont.name) );
-				
-				char[][] fontSizeInformation = Util.split( Util.trim( fontInformation[commaPos+1..length] ), " " );
-				if( fontSizeInformation.length )
-				{
-					GLOBAL.editFont.size = fontSizeInformation[length-1].dup;
-					_ih = IupGetHandle( "textFontSize" );
-					if( _ih != null ) IupSetAttribute( _ih, "VALUE", toStringz(GLOBAL.editFont.size) );
-				}
-			}
-		}
-
-		return IUP_DEFAULT;
 	}
 
 	int CPreferenceDialog_colorChoose_cb( Ihandle* ih )

@@ -657,7 +657,7 @@ extern(C)
 
 	int preference_cb( Ihandle *ih )
 	{
-		scope dlg = new CPreferenceDialog( 534, 470, "Preference", false );
+		scope dlg = new CPreferenceDialog( 534, 460, "Preference", false );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;

@@ -18,7 +18,7 @@ class CShortCutDialog : CBaseDialog
 		Ihandle* bottom = createDlgButton();
 		
 		char[]		shortKeyValue;
-		foreach( char[] s; Util.split( listText[40..length], "+" ) )
+		foreach( char[] s; Util.split( listText[30..length], "+" ) )
 		{
 			s = Util.trim( s );
 			if( s.length ) shortKeyValue ~= ( s ~ "+" );
@@ -77,6 +77,14 @@ class CShortCutDialog : CBaseDialog
 	{
 		super( w, h, "Config Short Key", bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		version( Windows )
+		{
+			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+		}		
 
 		createLayout( item, listText );
 

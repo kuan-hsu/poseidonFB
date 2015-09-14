@@ -137,6 +137,14 @@ class CSearchDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "TOPMOST", "YES" );
+		version( Windows )
+		{
+			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+		}		
 
 		createLayout();
 

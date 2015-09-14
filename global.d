@@ -10,11 +10,6 @@ struct EditorToggleUint
 	char[] TabWidth = "4";
 }
 
-struct EditorFontUint
-{
-	char[] name = "Consolas", size = "11", foreColor = "0 0 0", backColor = "255 255 255", bold = "OFF", italic = "OFF", underline = "OFF";
-}
-
 struct EditorColorUint
 {
 	char[] caretLine = "255 255 128", cursor = "0 0 0", selectionFore = "255 255 255", selectionBack = "0 0 255", linenumFore = "0 0 0", linenumBack = "200 200 200", fold = "200 208 208";
@@ -24,6 +19,12 @@ struct ShortKey
 {
 	char[] 	name;
 	int		keyValue;
+}
+
+struct fontUint
+{
+	char[] 	name;
+	char[]	fontString;
 }
 
 struct GLOBAL
@@ -79,7 +80,6 @@ struct GLOBAL
 	static char[]				maxError = "30";
 	static char[][]				recentProjects;
 	static EditorToggleUint		editorSetting00;
-	static EditorFontUint		editFont;
 	static EditorColorUint		editColor;
 	
 
@@ -96,6 +96,8 @@ struct GLOBAL
 	static char[]				txtCompilerOptions;
 
 	static ShortKey[]			shortKeys;
+
+	static fontUint[]			fonts;
 }
 
 static this()
@@ -135,4 +137,31 @@ static this()
 	GLOBAL.shortKeys ~= sk13;
 	ShortKey sk14 = { "Reparse", 65471 };
 	GLOBAL.shortKeys ~= sk14;
+
+	fontUint fu = { "Default", "Consolas,10" };
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Document";
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Leftside";
+	GLOBAL.fonts ~= fu;
+	
+	fu.name = "Filelist";
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Project";
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Outline";
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Bottom";
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Output";
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Search"; fu.fontString = "Courier New,Bold Italic Underline Strikeout 9";
+	GLOBAL.fonts ~= fu;	
 }

@@ -588,7 +588,7 @@ class CParser
 					case TOK.Tas:
 						parseToken( TOK.Tas );
 						_type = getVariableType();
-						
+
 						if( _type.length )
 						{
 							parseToken();
@@ -642,34 +642,6 @@ class CParser
 					case TOK.Tstatic:
 						parseToken( TOK.Tstatic );
 
-					case TOK.Tidentifier:
-
-						_name = token().identifier;
-						_lineNum = token().lineNumber;
-						parseToken( TOK.Tidentifier );
-
-						// Array
-						if( token().tok == TOK.Topenparen ) _name ~= parseArray();						
-					
-						if( token().tok == TOK.Tas )
-						{
-							parseToken( TOK.Tas );
-
-							_type = getVariableType();
-							if( _type.length )
-							{
-								parseToken();
-								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
-								{
-									_type ~= "*";
-									parseToken();
-								}								
-								activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
-							}
-						}
-						
-						break;
-
 					case TOK.Tdeclare:
 						parseToken( TOK.Tdeclare );
 
@@ -686,8 +658,45 @@ class CParser
 						
 						break;
 
+					case TOK.Teol, TOK.Tcolon:
+						tokenIndex ++;
+						break;
+						
+
+					//case TOK.Tidentifier:
+					default:
+
+						_name = token().identifier;
+						_lineNum = token().lineNumber;
+						parseToken( TOK.Tidentifier );
+
+						// Array
+						if( token().tok == TOK.Topenparen ) _name ~= parseArray();						
+					
+						if( token().tok == TOK.Tas )
+						{
+							parseToken( TOK.Tas );
+
+							if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+							_type = getVariableType();
+							if( _type.length )
+							{
+								parseToken();
+								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+								{
+									_type ~= "*";
+									parseToken();
+								}								
+								activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
+							}
+						}
+						
+						break;
+					/*
 					default:
 						tokenIndex ++;
+					*/
 				}
 			}
 
@@ -727,6 +736,60 @@ class CParser
 				if( token().tok == TOK.Tas )
 				{
 					parseToken( TOK.Tas );
+
+					// Function pointer
+					if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub )
+					{
+						if( token().tok == TOK.Tfunction ) _kind = B_FUNCTION; else _kind = B_SUB;
+						
+						parseToken();
+
+						char[]  _returnType;
+
+						if( token().tok == TOK.Topenparen )
+						{
+							if( next().tok != TOK.Tcloseparen )	_param = parseParam( false );else parseToken( TOK.Topenparen );
+
+							if( token().tok == TOK.Tcloseparen )
+							{
+								if( !_param.length ) _param = "()"; else _param ~= token().identifier;
+								parseToken( TOK.Tcloseparen );
+							}
+						}
+
+						if( token().tok == TOK.Tas )
+						{
+							parseToken( TOK.Tas );
+
+							if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+							_returnType = getVariableType();
+							if( _returnType.length )
+							{
+								parseToken();
+								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+								{
+									_returnType ~= "*";
+									parseToken();
+								}
+
+								_type = _returnType ~ _param;
+								activeASTnode.addChild( _name, _kind, null, _type, null, _lineNum );
+								
+								return true;
+							}
+						}
+
+						if( token().tok == TOK.Tstatic || token().tok == TOK.Texport  ) parseToken();
+						
+						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
+						{
+							activeASTnode.addChild( _name, _kind, null, _param, null, _lineNum );
+							return true;
+						}		
+					}
+
+					if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
 
 					_type = getVariableType();
 					if( _type.length )
@@ -979,9 +1042,6 @@ class CParser
 
 	void printAST( CASTnode _node )
 	{
-		//Stdout( _node.protection ~ " " ~ _node.kind ~" " ~ _node.type ~ " " ~ _node.name ~ " " );
-		Stdout( _node.lineNumber ).newline;
-
 		foreach( CASTnode t; _node.getChildren() )
 		{
 			printAST( t );
