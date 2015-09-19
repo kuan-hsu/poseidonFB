@@ -42,7 +42,7 @@ class CSingleTextDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
 		}
 
 		labelName = _labelText ;
@@ -62,6 +62,7 @@ class CSingleTextDialog : CBaseDialog
 	~this()
 	{
 		IupSetHandle( "textResult", null );
+		IupDestroy( _dlg );
 	}
 
 	char[] show( int x, int y ) // Overload form CBaseDialog
@@ -69,7 +70,7 @@ class CSingleTextDialog : CBaseDialog
 		IupPopup( _dlg, x, y );
 
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );
-		return fromStringz(IupGetAttribute( textHandle, "VALUE" ) );
+		return fromStringz(IupGetAttribute( textHandle, "VALUE" ) ).dup;
 	}	
 }
 

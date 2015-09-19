@@ -221,7 +221,8 @@ struct ExecuterAction
 			Process p = new Process( "\"" ~ GLOBAL.compilerFullPath ~ "\" \"" ~ fileName ~ "\"", null );
 			p.execute;
 
-			char[] outputResult;
+			bool	bError, bWarning;
+			char[]	outputResult;
 
 			// Compiler Command
 			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz(GLOBAL.compilerFullPath ~ " \"" ~ fileName ~ "\"") );
@@ -230,6 +231,16 @@ struct ExecuterAction
 			{
 				IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz(line) );
 				outputResult ~= line;
+
+				if( !bError )
+				{
+					if( Util.index( line, ") error " ) < line.length ) bError = true;
+				}
+
+				if( !bWarning )
+				{
+					if( Util.index( line, ") warning " ) < line.length ) bWarning = true;
+				}				
 			}
 
 			foreach (line; new Lines!(char)(p.stderr))  
@@ -245,9 +256,13 @@ struct ExecuterAction
 			// Back to top of outputPanel
 			IupSetAttribute( GLOBAL.outputPanel, "SCROLLTOPOS", "0" );
 
-			if( !outputResult.length )
+			if( !outputResult.length || !bError )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Success!") );
+				if( !bWarning )
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Success!") );
+				else
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Success! But got warning...") );
+				
 
 				char[] command;
 				int dotIndex = Util.rindex( fileName, "." );
@@ -330,11 +345,11 @@ struct ExecuterAction
 				scope _f = new FilePath( activeCScintilla.getFullPath() );
 				version(Windows)
 				{
-					command = _f.path ~ "\\" ~ _f.name ~ ".exe";
+					command = _f.path ~ _f.name ~ ".exe";
 				}
 				else
 				{
-					command = _f.path ~ "\\" ~ _f.name;
+					command = _f.path ~ _f.name;
 				}
 			}
 		}

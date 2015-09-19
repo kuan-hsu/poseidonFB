@@ -94,6 +94,7 @@ struct GLOBAL
 
 
 	static char[]				txtCompilerOptions;
+	static char[]				stringzTemp;
 
 	static ShortKey[]			shortKeys;
 
@@ -138,7 +139,18 @@ static this()
 	ShortKey sk14 = { "Reparse", 65471 };
 	GLOBAL.shortKeys ~= sk14;
 
-	fontUint fu = { "Default", "Consolas,10" };
+	fontUint fu;
+	version( Windows )
+	{
+		fu.name ="Default";
+		fu.fontString = "Consolas,10";
+	}
+	else
+	{
+		fu.name ="Default";
+		fu.fontString = "FreeMono,Bold 10";
+	}
+
 	GLOBAL.fonts ~= fu;
 
 	fu.name = "Document";

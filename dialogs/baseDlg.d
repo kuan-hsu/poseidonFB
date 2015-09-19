@@ -42,12 +42,16 @@ class CBaseDialog
 	
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
 	{
 		_dlg = IupDialog( null );
 		IupSetAttribute( _dlg, "TITLE", title.ptr );
 		IupSetAttribute( _dlg, "RASTERSIZE", (Integer.toString( w ) ~ "x" ~ Integer.toString( h )).ptr );
-		IupSetAttribute( _dlg, "PARENTDIALOG", toStringz(parent) );
+		if( parent.length)
+		{
+			IupSetAttribute( _dlg, "PARENTDIALOG", toStringz( parent, GLOBAL.stringzTemp ) );
+			delete GLOBAL.stringzTemp;
+		}
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
 	}
 

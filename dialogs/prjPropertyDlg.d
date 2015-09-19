@@ -159,12 +159,12 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetCallback( btnIncludePathAdd, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Add_cb );
 
 		Ihandle* btnIncludePathErase = IupButton( null, null );
-		IupSetAttributes( btnIncludePathErase, "IMAGE=icon_Write,FLAT=YES" );
+		IupSetAttributes( btnIncludePathErase, "IMAGE=icon_delete,FLAT=YES" );
 		IupSetHandle( "btnIncludePathErase_Handle", btnIncludePathErase );
 		IupSetCallback( btnIncludePathErase, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Erase_cb );
 		
 		Ihandle* btnIncludePathEdit = IupButton( null, null );
-		IupSetAttributes( btnIncludePathEdit, "IMAGE=icon_delete,FLAT=YES" );
+		IupSetAttributes( btnIncludePathEdit, "IMAGE=icon_Write,FLAT=YES" );
 		IupSetHandle( "btnIncludePathEdit_Handle", btnIncludePathEdit );
 		IupSetCallback( btnIncludePathEdit, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Edit_cb );
 
@@ -197,12 +197,12 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetCallback( btnLibPathAdd, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Add_cb );
 
 		Ihandle* btnLibPathErase = IupButton( null, null );
-		IupSetAttributes( btnLibPathErase, "IMAGE=icon_Write,FLAT=YES" );
+		IupSetAttributes( btnLibPathErase, "IMAGE=icon_delete,FLAT=YES" );
 		IupSetHandle( "btnLibPathErase_Handle", btnLibPathErase );
 		IupSetCallback( btnLibPathErase, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Erase_cb );
 		
 		Ihandle* btnLibPathEdit = IupButton( null, null );
-		IupSetAttributes( btnLibPathEdit, "IMAGE=icon_delete,FLAT=YES" );
+		IupSetAttributes( btnLibPathEdit, "IMAGE=icon_Write,FLAT=YES" );
 		IupSetHandle( "btnLibPathEdit_Handle", btnLibPathEdit );
 		IupSetCallback( btnLibPathEdit, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Edit_cb );
 
@@ -252,12 +252,19 @@ class CProjectPropertiesDialog : CBaseDialog
 	}
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, bool bNew = true, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, bool bResize = true, bool bNew = true, char[] parent = null )
 	{
 		super( w, h, title, bResize, parent );
 		bCreateNew = bNew;
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		//IupSetAttribute( _dlg, "LOCKLOOP", "YES" );
+		version( Windows )
+		{
+			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
+		}
 		 
 		createLayout();
 
@@ -337,7 +344,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		if( dirHandle != null )
 		{
 
-			char[]	_prjDir				= Util.trim( fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ) ).dup;
+			char[]	_prjDir				= Util.trim( fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup );
 
 			if( _prjDir.length )
 			{
@@ -363,11 +370,11 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 				int		includeCount = IupGetInt( IupGetHandle( "listIncludePath_Handle" ), "COUNT" );
 				for( int i = 1; i <= includeCount; i++ )
-					s.includeDirs ~= fromStringz( IupGetAttribute( IupGetHandle( "listIncludePath_Handle" ), toStringz( Integer.toString( i ) ) ) );
+					s.includeDirs ~= fromStringz( IupGetAttribute( IupGetHandle( "listIncludePath_Handle" ), toStringz( Integer.toString( i ) ) ) ).dup;
 				
 				int		libCount = IupGetInt( IupGetHandle( "listLibPath_Handle" ), "COUNT" );
 				for( int i = 1; i <= libCount; i++ )
-					s.libDirs ~= fromStringz( IupGetAttribute( IupGetHandle( "listLibPath_Handle" ), toStringz( Integer.toString( i ) ) ) );
+					s.libDirs ~= fromStringz( IupGetAttribute( IupGetHandle( "listLibPath_Handle" ), toStringz( Integer.toString( i ) ) ) ).dup;
 
 				GLOBAL.projectManager[_prjDir] = s;
 				GLOBAL.projectManager[_prjDir].saveFile();

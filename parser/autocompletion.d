@@ -29,15 +29,15 @@ struct AutoComplete
 		// SCI_GETLINEENDPOSITION = 2136,
 		// SCI_POSITIONFROMLINE = 2167,
 		
-		int posLineTail  = SendMessage( iupSci, 2136, line, 0 );
-		int posLineHead = SendMessage( iupSci, 2167, line, 0 );
+		int posLineTail = IupScintillaSendMessage( iupSci, 2136, line, 0 );
+		int posLineHead = IupScintillaSendMessage( iupSci, 2167, line, 0 );
 
 		if( posLineTail <= posLineHead ) return null;
 
 		char[]	text;
 		int		len = posLineTail - posLineHead;
 
-		int lineLength_CRLF =  SendMessage( iupSci, 2350, line, 0 ); // SCI_LINELENGTH = 2350, (include CR/LF)
+		int lineLength_CRLF =  IupScintillaSendMessage( iupSci, 2350, line, 0 ); // SCI_LINELENGTH = 2350, (include CR/LF)
 		text.length = lineLength_CRLF;
 
 		SendMessage( iupSci, 2153, line, cast(int) text.ptr ); // SCI_GETLINE = 2153, (include CR/LF)
@@ -65,12 +65,12 @@ struct AutoComplete
 		SCFIND_REGEXP = 0x00200000,
 		SCFIND_POSIX = 0x00400000,
 		*/
-		int documentLength = SendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
-		SendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
-		SendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-		SendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+		IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
 
-		int posHead = SendMessage( iupSci, 2197, targetText.length, cast(int) toStringz(targetText) );
+		int posHead = SendMessage( iupSci, 2197, targetText.length, cast(int) targetText.ptr );
 
 		if( posHead < 0 ) return null;
 
@@ -93,10 +93,10 @@ struct AutoComplete
 			}
 		}
 
-		SendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-		SendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
+		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+		IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
 
-		int posTail = SendMessage( iupSci, 2197, targetText.length, cast(int) toStringz(targetText) );
+		int posTail = SendMessage( iupSci, 2197, targetText.length, cast(int) targetText.ptr );
 
 		if( posTail < 0 ) return null;
 
@@ -1022,10 +1022,12 @@ struct AutoComplete
 									if( AST_Head is null ) return null;
 								}
 
-								foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
+								if( AST_Head.kind & ( B_TYPE | B_ENUM | B_UNION | B_CLASS ) )
 								{
-									listContainer ~= getListImage( _child );
-									//listContainer ~= _child;
+									foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
+									{
+										listContainer ~= getListImage( _child );
+									}
 								}
 							}
 

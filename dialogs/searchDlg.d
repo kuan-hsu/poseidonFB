@@ -143,7 +143,7 @@ class CSearchDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
 		}		
 
 		createLayout();

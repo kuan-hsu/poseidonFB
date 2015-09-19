@@ -44,10 +44,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( textDebuggerPath, "SIZE", "180x12" );
 		IupSetAttribute( textDebuggerPath, "VALUE", toStringz(GLOBAL.debuggerFullPath) );
 		IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
+		IupSetAttribute( textDebuggerPath, "ACTIVE", "NO" );
 		
 		Ihandle* btnOpenDebugger = IupButton( null, null );
 		IupSetAttribute( btnOpenDebugger, "IMAGE", "icon_openfile" );
 		IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCompileBinFile_cb );
+		IupSetAttribute( btnOpenDebugger, "ACTIVE", "NO" );
 
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
@@ -68,8 +70,6 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameParser = IupFrame( hBox00 );
 		IupSetAttribute( frameParser, "TITLE", "Parser Setting");
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
-
-
 		
 
 		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, frameParser, null );
@@ -151,63 +151,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( hBox03, "MARGIN", "0x0" );
 		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
 
-
-
-
-		/+
-		Ihandle* labelFontName = IupLabel( "Font name:" );
-		Ihandle* textFontName = IupText( null );
-		IupSetAttribute( textFontName, "SIZE", "120x12" );
-		IupSetAttribute( textFontName, "VALUE", toStringz(GLOBAL.editFont.name) );
-		IupSetHandle( "textFontName", textFontName );
-		
-		Ihandle* labelFontSize = IupLabel( "Font size:" );
-		Ihandle* textFontSize = IupText( null );
-		IupSetAttribute( textFontSize, "SIZE", "30x12" );
-		IupSetAttribute( textFontSize, "VALUE", toStringz(GLOBAL.editFont.size) );
-		IupSetHandle( "textFontSize", textFontSize );
-
-		Ihandle* btnFont = IupButton( "...", null );
-		//IupSetAttribute( btnFont, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnFont, "ACTION", cast(Icallback) &CPreferenceDialog_btnFont_cb );
-		
-		Ihandle* hBoxFont00 = IupHbox( labelFontName, textFontName, labelFontSize, textFontSize, btnFont, null );
-		IupSetAttributes( hBoxFont00, "EXPAND=YES,ALIGNMENT=ACENTER,MARGIN=0x0");
-
-
-		Ihandle* toggleFontBold = IupToggle( "Bold", null );
-		IupSetAttribute( toggleFontBold, "VALUE", toStringz(GLOBAL.editFont.bold) );
-		IupSetHandle( "toggleFontBold", toggleFontBold );
-		
-		Ihandle* toggleFontItalic = IupToggle( "Italic", null );
-		IupSetAttribute( toggleFontItalic, "VALUE", toStringz(GLOBAL.editFont.italic) );
-		IupSetHandle( "toggleFontItalic", toggleFontItalic );
-		
-		Ihandle* toggleFontUnderline = IupToggle( "Underline", null );
-		IupSetAttribute( toggleFontUnderline, "VALUE", toStringz(GLOBAL.editFont.underline) );
-		IupSetHandle( "toggleFontUnderline", toggleFontUnderline );
-
-		Ihandle* labelFontForeground = IupLabel( "Foreground:" );
-		Ihandle* btnFontForeground = IupButton( null, null );
-		IupSetAttribute( btnFontForeground, "BGCOLOR", toStringz(GLOBAL.editFont.foreColor) );
-		IupSetAttribute( btnFontForeground, "SIZE", "16x8" );
-		IupSetHandle( "btnFontForeground", btnFontForeground );
-		IupSetCallback( btnFontForeground, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		
-		Ihandle* labelFontBackground = IupLabel( "Background:" );
-		Ihandle* btnFontBackground = IupButton( null, null );
-		IupSetAttribute( btnFontBackground, "BGCOLOR", toStringz(GLOBAL.editFont.backColor) );
-		IupSetAttribute( btnFontBackground, "SIZE", "16x8" );
-		IupSetHandle( "btnFontBackground", btnFontBackground );
-		IupSetCallback( btnFontBackground, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		
-
-		Ihandle* hBoxFont01 = IupHbox( toggleFontBold, toggleFontItalic, toggleFontUnderline, labelFontForeground, btnFontForeground, labelFontBackground, btnFontBackground, null );
-		IupSetAttributes( hBoxFont01, "EXPAND=YES,ALIGNMENT=ACENTER,MARGIN=0x0");
-
-
-		Ihandle* vBoxFont00 = IupVbox( hBoxFont00, hBoxFont01, null );
-		+/
 		// Short Cut
 		Ihandle* fontList = IupList( null );
 		IupSetAttributes( fontList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES" );
@@ -217,7 +160,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( fontList, "FONT", "Monospace,9" );
+			IupSetAttribute( fontList, "FONT", "FreeMono,Bold 9" );
 		}
 
 		for( int i = 0; i < GLOBAL.fonts.length; ++ i )
@@ -354,7 +297,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( shortCutList, "FONT", "Monospace,10" );
+			IupSetAttribute( shortCutList, "FONT", "FreeMono,Bold 10" );
 		}
 		IupSetHandle( "shortCutList", shortCutList );
 		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
@@ -398,7 +341,7 @@ class CPreferenceDialog : CBaseDialog
 	}
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
@@ -408,7 +351,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
 		}
 		 
 		createLayout();
@@ -951,12 +894,14 @@ extern(C) // Callback for CPreferenceDialog
 	int CPreferenceDialog_fontList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
 		char[] listString = fromStringz( text ).dup;
-		if( listString.length > 10 ) listString = listString[10..length]; else return IUP_DEFAULT;
+		char[] _ls;
+		
+		if( listString.length > 10 ) _ls = listString[10..length].dup; else return IUP_DEFAULT;
 
 		// Set IupFontDlg
 		Ihandle* dlg = IupFontDlg();
-		IupSetAttribute(dlg, "VALUE", toStringz( listString ) );
-		IupSetAttribute(dlg, "TITLE", "Font");
+		IupSetAttribute( dlg, "VALUE", toStringz( _ls.dup, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+		IupSetAttribute( dlg, "TITLE", toStringz( "Font", GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 
 		// Open IupFontDlg
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
@@ -1003,7 +948,9 @@ extern(C) // Callback for CPreferenceDialog
 				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[item-1].name, strings[0], Bold, Italic, Underline, Strikeout, size );
 				IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
 			}
-		}		
+		}
+
+		IupDestroy( dlg ); 
 
 		return IUP_DEFAULT;
 	}

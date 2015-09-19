@@ -109,6 +109,31 @@ class CParser
 
 	char[] getVariableType()
 	{
+		if( token().tok == TOK.Tunsigned )
+		{
+			switch( next().tok )
+			{
+				case TOK.Tbyte:
+					parseToken();
+					return "ubyte";
+					
+				case TOK.Tshort:
+					parseToken();
+					return "ushort";
+				
+				case TOK.Tinteger:
+					parseToken();
+					return "uinteger";
+				
+				case TOK.Tlongint:
+					parseToken();
+					return "ulongint";
+
+				default:
+					parseToken();
+			}
+		}
+		
 		switch( token().tok )
 		{
 			case TOK.Tbyte, TOK.Tubyte:			
@@ -167,7 +192,7 @@ class CParser
 							_type = getVariableType();
 							if( _type.length )
 							{
-								_param ~= ( token().identifier ~ " " );
+								_param ~= ( _type ~ " " );
 								parseToken();
 
 								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )

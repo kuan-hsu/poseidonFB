@@ -3,7 +3,7 @@
 public import executer;
 
 
-private import iup.iup;
+private import iup.iup, iup.iup_scintilla;
 
 private import Integer = tango.text.convert.Integer;
 private import Util = tango.text.Util;
@@ -71,7 +71,6 @@ struct FileAction
 struct ScintillaAction
 {
 	private:
-	import iup.iup_scintilla;
 	import tango.io.UnicodeFile, tango.io.Stdout;
 	import scintilla;
 	import parser.scanner,  parser.token, parser.parser;
@@ -100,7 +99,7 @@ struct ScintillaAction
 
 		//StatusBarAction.update();
 
-		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz(fullPath) );
+		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz( fullPath, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 		IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
 
 		//Parser
@@ -143,7 +142,7 @@ struct ScintillaAction
 		if( lineNumber > -1 ) IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
 		//StatusBarAction.update();
 
-		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz(fullPath) );
+		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz( fullPath, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 		IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
 		IupSetAttributeId( GLOBAL.fileListTree, "MARKED", 1, "YES" );
 		
@@ -278,11 +277,10 @@ struct ScintillaAction
 		{
 			CScintilla	cSci		= GLOBAL.scintillaManager[fullPath];
 			Ihandle*	iupSci		= cSci.getIupScintilla;
-			char[]		savedStatus	= fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) );
 			
-			if( savedStatus == "YES" )
+			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
-				int button = IupAlarm( "Quest", toStringz("\"" ~ fullPath ~ "\"\nhas been changed, save it now?"), "Yes", "No", "Cancel" );
+				int button = IupAlarm( "Quest", toStringz( "\"" ~ fullPath ~ "\"\nhas been changed, save it now?", GLOBAL.stringzTemp ), "Yes", "No", "Cancel" ); delete GLOBAL.stringzTemp;
 				if( button == 3 ) return IUP_IGNORE;
 				if( button == 1 ) cSci.saveFile();
 			}
@@ -312,11 +310,10 @@ struct ScintillaAction
 			if( cSci.getFullPath != fullPath )
 			{
 				Ihandle*	iupSci		= cSci.getIupScintilla;
-				char[]		savedStatus	= fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) );
 				
-				if( savedStatus == "YES" )
+				if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 				{
-					int button = IupAlarm( "Quest", toStringz("\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?"), "Yes", "No", "Cancel" );
+					int button = IupAlarm( "Quest", toStringz( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?", GLOBAL.stringzTemp ), "Yes", "No", "Cancel" ); delete GLOBAL.stringzTemp;
 					if( button == 3 ) return IUP_IGNORE;
 					if( button == 1 ) cSci.saveFile();
 				}
@@ -345,11 +342,10 @@ struct ScintillaAction
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
 			Ihandle*	iupSci		= cSci.getIupScintilla;
-			char[]		savedStatus	= fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) );
 			
-			if( savedStatus == "YES" )
+			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
-				int button = IupAlarm( "Quest", toStringz("\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?"), "Yes", "No", "Cancel" );
+				int button = IupAlarm( "Quest", toStringz( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?", GLOBAL.stringzTemp ), "Yes", "No", "Cancel" ); delete GLOBAL.stringzTemp;
 				if( button == 3 ) return IUP_IGNORE;
 				if( button == 1 ) cSci.saveFile();
 			}
@@ -396,8 +392,7 @@ struct ScintillaAction
 		{
 			Ihandle* _child = IupGetChild( GLOBAL.documentTabs, i );
 
-			char[] savedStatus = fromStringz( IupGetAttribute( _child, "SAVEDSTATE" ) );
-			if( savedStatus == "YES" )
+			if( fromStringz( IupGetAttribute( _child, "SAVEDSTATE" ) ) == "YES" )
 			{
 				foreach( CScintilla _sci; GLOBAL.scintillaManager )
 				{
@@ -465,7 +460,7 @@ struct ProjectAction
 
 		if( id < 1 ) return null;
 
-		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 	}
 
 	static int addTreeNode( char[] _prjDirName, char[] fullPath, int folderLocateId )
@@ -503,12 +498,16 @@ struct ProjectAction
 				}
 				if( !bFolerExist )
 				{
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz(splitText[counterSplitText]) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText], GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 					// Shadow
 					if( pos != 0 )
-						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( "FIXED" ) );
+					{
+						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( "FIXED", GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+					}
 					else
-						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
+					{
+						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText], GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+					}
 
 					folderLocateId ++;
 				}
@@ -552,9 +551,7 @@ struct ProjectAction
 struct StatusBarAction
 {
 	private:
-		import iup.iup_scintilla;
-
-		import tango.text.convert.Layout;
+	import tango.text.convert.Layout;
 		
 	public:
 	static void update()
@@ -576,7 +573,7 @@ struct StatusBarAction
 			scope Layouter = new Layout!(char)();
 			char[] output = Layouter( "{,7}x{,5}", line, col );
 
-			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output )); // Update line x col
+			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output, GLOBAL.stringzTemp )); delete GLOBAL.stringzTemp;// Update line x col
 
 			if( bOverType )
 			{
@@ -632,7 +629,6 @@ struct ToolAction
 struct SearchAction
 {
 	private:
-	import iup.iup_scintilla;
 	import global, scintilla, project, menu;
 	import tango.io.FilePath, tango.text.Ascii, tango.stdc.stringz, Util = tango.text.Util;//, tango.io.UnicodeFile;
 	import tango.io.device.File;//, tango.io.stream.Lines;
@@ -798,7 +794,7 @@ char[] pp="print";
 				if( bJumpSelect )
 				{
 					char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-					IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
+					IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 				}
 				else
 				{
@@ -836,7 +832,7 @@ char[] pp="print";
 						if( bJumpSelect )
 						{
 							char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-							IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
+							IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 						}
 						else
 						{
@@ -894,7 +890,7 @@ char[] pp="print";
 			if( bJumpSelect )
 			{
 				char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-				IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
+				IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 			}
 			else
 			{
@@ -935,7 +931,7 @@ char[] pp="print";
 						if( bJumpSelect )
 						{
 							char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-							IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
+							IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 						}
 						else
 						{
@@ -1055,7 +1051,7 @@ char[] pp="print";
 						if( buttonIndex == 0 )
 						{
 							char[] outputWords = fullPath ~ "(" ~ Integer.toString( lineNum ) ~ "): " ~ line;
-							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz(outputWords) );
+							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( outputWords, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 						}
 						else if( buttonIndex == 3 )
 						{
@@ -1081,23 +1077,24 @@ char[] pp="print";
 			
 			for( int i = 1; i <= itemCount; ++ i )
 			{
-				if( fromStringz( IupGetAttribute( ih, toStringz(Integer.toString( i ) ) ) ) == text )
+				if( fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ), GLOBAL.stringzTemp ) ) ) == text )
 				{
 					IupSetInt( ih, "REMOVEITEM", i );
 					break;
 				}
+				delete GLOBAL.stringzTemp;
 			}
 
 			itemCount = IupGetInt( ih, "COUNT" );
 			if( itemCount == limit )
 			{
 				IupSetInt( ih, "REMOVEITEM", limit );
-				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz(text) );
+				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 			}
 			else
 			{
 				
-				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz(text) );
+				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 			}
 		}
 	}
@@ -1107,13 +1104,10 @@ char[] pp="print";
 struct OutlineAction
 {
 	private:
-	import iup.iup_scintilla;
-
 	import scintilla;
 	import parser.scanner, parser.token, parser.parser;
 
 	import tango.io.FilePath, tango.text.Ascii;
-		
 
 
 	public:

@@ -221,7 +221,7 @@ class CScintilla
 		}
 		else
 		{
-			font = "Monospace";
+			font = "FreeMono";
 		}		
 		char[] size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
 
@@ -290,10 +290,6 @@ class CScintilla
 			int lineCount = IupGetInt( sci, "LINECOUNT" );
 			char[] lc = Integer.toString( lineCount );
 			IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 2 ) * Integer.atoi( size ) );
-			/*
-			lineCount = ( lineCount / 10  + 1 ) * 12;
-			if( lineCount > 50 ) IupSetInt( sci, "MARGINWIDTH0", lineCount );else IupSetInt( sci, "MARGINWIDTH0", 50 );
-			*/
 		}
 		else
 		{
@@ -442,7 +438,7 @@ extern(C)
 
 	int savePoint_cb( Ihandle *ih, int status )
 	{
-		char[] _title = fromStringz( IupGetAttribute( ih, "TABTITLE" ) ); 
+		char[] _title = fromStringz( IupGetAttribute( ih, "TABTITLE" ) ).dup; 
 		if( status == 0 )
 		{
 			if( _title.length )
@@ -569,7 +565,7 @@ extern(C)
 		{
 			//Stdout( "text:" ~ fromStringz( _text ) ).newline;
 			
-			char[] text = fromStringz( _text );
+			char[] text = fromStringz( _text ).dup;
 
 			if( text.length > 1 ) return IUP_DEFAULT;
 			
@@ -671,7 +667,7 @@ extern(C)
 				}
 
 
-				IupSetAttributeId( ih, "INSERT", lineBeginPos, toStringz(prevIndentText) );
+				IupSetAttributeId( ih, "INSERT", lineBeginPos, toStringz( prevIndentText ,GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 				IupScintillaSendMessage( ih, 2025, lineBeginPos + prevIndentText.length , 0 );// SCI_GOTOPOS = 2025,
 			}
 		}

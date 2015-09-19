@@ -526,13 +526,13 @@ extern(C)
 			{
 				while( depth > 2 )
 				{
-					stepFolder ~= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) );
+					stepFolder ~= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup;
 					
 					id = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", id );
 					depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", id );
 				}
 
-				prjFilesFolderName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ); // = Sources or Includes or Others
+				prjFilesFolderName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup; // = Sources or Includes or Others
 			}
 
 			char[] activeProjectDirName = actionManager.ProjectAction.getActiveProjectName();
@@ -639,7 +639,7 @@ extern(C)
 		try
 		{
 			int		id					= actionManager.ProjectAction.getTargetDepthID( 2 );
-			char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ); // = Sources or Includes or Others
+			char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup; // = Sources or Includes or Others
 			char[]	prjDirName 			= actionManager.ProjectAction.getActiveProjectName();
 			char[]	filter;
 
@@ -751,9 +751,9 @@ extern(C)
 		// Get Focus Tree Node ID
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		// Shadow
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 		int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
-		char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ); // = Sources or Includes or Others
+		char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others
 
 		if( actionManager.ScintillaAction.closeDocument( fullPath ) == IUP_IGNORE ) return IUP_IGNORE;
 
@@ -793,7 +793,7 @@ extern(C)
 	{
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		// Shadow
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 
 		if( fullPath.length )
 		{
@@ -811,7 +811,7 @@ extern(C)
 		// 
 		int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		// Shadow
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 
 		scope fp = new FilePath( fullPath );
 

@@ -43,13 +43,20 @@ void main()
 	}
 
 	IupScintillaOpen();
-	IupSetGlobal("UTF8MODE", "YES");
-	//IupSetGlobal( "DEFAULTFONT", "Consolas, 10" );
+	version( Windows )
+	{
+		IupSetGlobal( "DEFAULTFONT", "Verdana, 10" );
+	}
+	else
+	{
+		IupSetGlobal( "DEFAULTFONT", "FreeMono,Bold 10" );
+	}
+	IupSetGlobal( "UTF8MODE", "YES" );
 
 	load_all_images_icons();
 
 	createEditorSetting();
-	IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
+	//version(Windows) IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
 
 	createMenu();
 	// Creates a dialog containing the control
@@ -76,13 +83,13 @@ void main()
 
 	if( GLOBAL.fonts.length == 9 )
 	{
-		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) ); // Leftside
-		IupSetAttribute( GLOBAL.fileListTree, "FONT", toStringz( GLOBAL.fonts[3].fontString ) ); // Filelist
-		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString ) ); // Project
-		IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) ); // Outline
-		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) ); // Bottom
-		IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
-		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
+		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Leftside
+		IupSetAttribute( GLOBAL.fileListTree, "FONT", toStringz( GLOBAL.fonts[3].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Filelist
+		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Project
+		IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Outline
+		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Bottom
+		IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Output
+		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Search
 	}	
 	
 	

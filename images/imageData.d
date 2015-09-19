@@ -2328,8 +2328,6 @@ void load_all_images_icons()
   IupSetHandle("IUP_enum", load_image_enum_obj());
   IupSetHandle("IUP_alias", load_image_alias_obj());
   IupSetHandle("IUP_union", load_image_union_obj());
-
-  
 }
 
 

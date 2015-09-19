@@ -73,7 +73,7 @@ class CShortCutDialog : CBaseDialog
 	}	
 
 	public:
-	this( int w, int h, int item, char[] listText, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, int item, char[] listText, bool bResize = false, char[] parent = null )
 	{
 		super( w, h, "Config Short Key", bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
@@ -83,7 +83,7 @@ class CShortCutDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
 		}		
 
 		createLayout( item, listText );
@@ -122,7 +122,7 @@ extern(C) // Callback for CSingleTextDialog
 		if( fromStringz( IupGetAttribute( _ctrl, "VALUE" ) ) == "ON" ) keyValue = "C+";else keyValue = "+";
 		if( fromStringz( IupGetAttribute( _shift, "VALUE" ) ) == "ON" ) keyValue ~= "S+";else keyValue ~= "+";
 		if( fromStringz( IupGetAttribute( _alt, "VALUE" ) ) == "ON" ) keyValue ~= "A+";else keyValue ~= "+";
-		keyValue ~= fromStringz( IupGetAttribute( _list, "VALUESTRING" ) );
+		keyValue ~= fromStringz( IupGetAttribute( _list, "VALUESTRING" ) ).dup;
 
 		int value = CPreferenceDialog.convertShortKeyValue2Integer( keyValue );
 		foreach( ShortKey sk; GLOBAL.shortKeys )
@@ -135,7 +135,7 @@ extern(C) // Callback for CSingleTextDialog
 		}
 		
 		Ihandle* label = IupGetHandle( "labelKeyName" );
-		char[] name = fromStringz( IupGetAttribute( label, "TITLE" ) );
+		char[] name = fromStringz( IupGetAttribute( label, "TITLE" ) ).dup;
 		int pos = Util.index( name, ":" );
 		if( pos < name.length )	name = Util.trim( name[pos+1..length] );else return IUP_CLOSE;
 

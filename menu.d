@@ -230,7 +230,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.101\nBy Kuan Hsu (Taiwan)\n2015.09.13" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.104\nBy Kuan Hsu (Taiwan)\n2015.09.19" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -372,7 +372,7 @@ extern(C)
 
 	int submenu_click_cb( Ihandle* ih )
 	{
-		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) );
+		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
 		int pos = Util.index( title, " : " );
 		if( pos < title.length )
 		{
@@ -487,7 +487,7 @@ extern(C)
 		if( ih != null )
 		{
 			char[] targetText = fromStringz(IupGetAttribute( ih, "SELECTEDTEXT" ));
-			 actionManager.SearchAction.findNext( ih, targetText, GLOBAL.searchDlg.searchRule );
+			actionManager.SearchAction.findNext( ih, targetText, GLOBAL.searchDlg.searchRule );
 		}
 	}
 
@@ -657,7 +657,8 @@ extern(C)
 
 	int preference_cb( Ihandle *ih )
 	{
-		scope dlg = new CPreferenceDialog( 534, 460, "Preference", false );
+		//scope dlg = new CPreferenceDialog( 534, 460, "Preference", false );
+		scope dlg = new CPreferenceDialog( 546, 460, "Preference", true );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;

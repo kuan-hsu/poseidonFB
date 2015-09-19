@@ -131,12 +131,12 @@ class CFindInFilesDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "Monospace,9" );
+			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
 		}
 		
 		createLayout();
 
-		IupSetAttribute( listFind, "VALUE",toStringz( findWhat ) );
+		IupSetAttribute( listFind, "VALUE",toStringz( findWhat, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 
 		IupSetHandle( "btnCANCEL_findinfiles", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
@@ -165,7 +165,7 @@ class CFindInFilesDialog : CBaseDialog
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog
 	{
-		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord ) );
+		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 		IupShow( _dlg );
 		return null;
 	}	
@@ -178,7 +178,7 @@ class CFindInFilesDialog : CBaseDialog
 
 	void setStatusBar( char[] text )
 	{
-		IupSetAttribute( labelStatus, "TITLE", toStringz( text ) );
+		IupSetAttribute( labelStatus, "TITLE", toStringz( text, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 	}
 }
 

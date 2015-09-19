@@ -11,7 +11,7 @@
 		<mainFile />
 		<Args />
 		<options>
-			<dmd> -inline -odobjs -release -L/SUBSYSTEM:windows:4 </dmd>
+			<dmd> -O -odobjs -release -L/SUBSYSTEM:windows:4 </dmd>
 			<tool />
 			<lib />
 			<implib />
