@@ -11,18 +11,16 @@
     <shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F11" messagewindow="+++F12" showtype="+++F1" reparse="+++F2"/>
   </editor>
   <buildtools>
-    <compilerpath>D:\CodingPark\FreeBASIC-1.02.1-win32\fbc.exe</compilerpath>
-    <debuggerpath>D:\CodingPark\FreeBASIC-1.02.1-win32\bin\win32\gdb.exe</debuggerpath>
+    <compilerpath>D:/CodingPark/FreeBASIC-1.03.0-win32/fbc.exe</compilerpath>
+    <debuggerpath>D:/CodingPark/FreeBASIC-1.02.1-win32/bin/win32/gdb.exe</debuggerpath>
     <maxerror>30</maxerror>
   </buildtools>
   <parser>
     <parsertrigger>2</parsertrigger>
   </parser>
   <recentProjects>
-    <name>D:\FB_Code\test02 : test02</name>
-    <name>D:\CodingPark\MyCode\FBcode\Shoot : shoot</name>
-    <name>D:\CodingPark\MyCode\FBcode\Shoot : test</name>
-    <name>D:\FB_Code\test03 : test03</name>
-    <name>D:\FB_Code\test01 : test01</name>
+    <name>D:/FB_Code/test01 : test01_test</name>
+    <name>D:/FB_Code/poseidonFB : poseidonFB</name>
+    <name>D:/FB_Code/test01 : test01</name>
   </recentProjects>
 </config>

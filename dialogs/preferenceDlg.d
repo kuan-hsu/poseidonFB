@@ -2,7 +2,7 @@
 
 private import iup.iup, iup.iup_scintilla;
 
-private import global, project, scintilla, actionManager;
+private import global, project, tools, scintilla, actionManager;
 private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg, dialogs.shortcutDlg;
 
 private import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util;
@@ -90,35 +90,35 @@ class CPreferenceDialog : CBaseDialog
 
 +/
 		Ihandle* toggleLineMargin = IupToggle( "Show line number margin", null );
-		IupSetAttribute( toggleLineMargin, "VALUE", toStringz(GLOBAL.editorSetting00.LineMargin) );
+		IupSetAttribute( toggleLineMargin, "VALUE", toStringz(GLOBAL.editorSetting00.LineMargin.dup) );
 		IupSetHandle( "toggleLineMargin", toggleLineMargin );
 		
 		Ihandle* toggleBookmarkMargin = IupToggle( "Show book mark margin", null );
-		IupSetAttribute( toggleBookmarkMargin, "VALUE", toStringz(GLOBAL.editorSetting00.BookmarkMargin) );
+		IupSetAttribute( toggleBookmarkMargin, "VALUE", toStringz(GLOBAL.editorSetting00.BookmarkMargin.dup) );
 		IupSetHandle( "toggleBookmarkMargin", toggleBookmarkMargin );
 		
 		Ihandle* toggleFoldMargin = IupToggle( "Show folding margin", null );
-		IupSetAttribute( toggleFoldMargin, "VALUE", toStringz(GLOBAL.editorSetting00.FoldMargin) );
+		IupSetAttribute( toggleFoldMargin, "VALUE", toStringz(GLOBAL.editorSetting00.FoldMargin.dup) );
 		IupSetHandle( "toggleFoldMargin", toggleFoldMargin );
 		
 		Ihandle* toggleIndentGuide = IupToggle( "Show indentation guide", null );
-		IupSetAttribute( toggleIndentGuide, "VALUE", toStringz(GLOBAL.editorSetting00.IndentGuide) );
+		IupSetAttribute( toggleIndentGuide, "VALUE", toStringz(GLOBAL.editorSetting00.IndentGuide.dup) );
 		IupSetHandle( "toggleIndentGuide", toggleIndentGuide );
 		
 		Ihandle* toggleCaretLine = IupToggle( "High light caret line", null );
-		IupSetAttribute( toggleCaretLine, "VALUE", toStringz(GLOBAL.editorSetting00.CaretLine) );
+		IupSetAttribute( toggleCaretLine, "VALUE", toStringz(GLOBAL.editorSetting00.CaretLine.dup) );
 		IupSetHandle( "toggleCaretLine", toggleCaretLine );
 		
 		Ihandle* toggleWordWrap = IupToggle( "Word warp", null );
-		IupSetAttribute( toggleWordWrap, "VALUE", toStringz(GLOBAL.editorSetting00.WordWrap) );
+		IupSetAttribute( toggleWordWrap, "VALUE", toStringz(GLOBAL.editorSetting00.WordWrap.dup) );
 		IupSetHandle( "toggleWordWrap", toggleWordWrap );
 		
 		Ihandle* toggleTabUseingSpace = IupToggle( "Replace tab by space", null );
-		IupSetAttribute( toggleTabUseingSpace, "VALUE", toStringz(GLOBAL.editorSetting00.TabUseingSpace) );
+		IupSetAttribute( toggleTabUseingSpace, "VALUE", toStringz(GLOBAL.editorSetting00.TabUseingSpace.dup) );
 		IupSetHandle( "toggleTabUseingSpace", toggleTabUseingSpace );
 		
 		Ihandle* toggleAutoIndent = IupToggle( "Auto indent", null );
-		IupSetAttribute( toggleAutoIndent, "VALUE", toStringz(GLOBAL.editorSetting00.AutoIndent) );
+		IupSetAttribute( toggleAutoIndent, "VALUE", toStringz(GLOBAL.editorSetting00.AutoIndent.dup) );
 		IupSetHandle( "toggleAutoIndent", toggleAutoIndent );
 		
 		Ihandle* gbox = IupGridBox
@@ -151,7 +151,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( hBox03, "MARGIN", "0x0" );
 		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
 
-		// Short Cut
+		// fontList
 		Ihandle* fontList = IupList( null );
 		IupSetAttributes( fontList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES" );
 		version( Windows )
@@ -347,11 +347,11 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
 		}
 		 
 		createLayout();
@@ -567,7 +567,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		auto print = new DocPrinter!(char);
-		actionManager.FileAction.saveFile( "settings\\editorSettings.xml", print.print( doc ) );
+		actionManager.FileAction.saveFile( "settings/editorSettings.xml", print.print( doc ) );
 	}
 
 	static void load()
@@ -575,7 +575,7 @@ class CPreferenceDialog : CBaseDialog
 		try
 		{
 			// Loading Key Word...
-			scope file = new UnicodeFile!(char)( "settings\\editorSettings.xml", Encoding.Unknown );
+			scope file = new UnicodeFile!(char)( "settings/editorSettings.xml", Encoding.Unknown );
 			//scope file  = cast(char[]) File.get( "settings\\editorSettings.xml" );
 
 			scope doc = new Document!( char );
@@ -851,7 +851,7 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.shortKeys ~= sk;
 			}			
 
-			scope fileCompilerOptions = new UnicodeFile!(char)( "settings\\compilerOptions.txt", Encoding.Unknown );
+			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
 			GLOBAL.txtCompilerOptions = fileCompilerOptions.read;
 		}
 		catch
@@ -898,59 +898,122 @@ extern(C) // Callback for CPreferenceDialog
 		
 		if( listString.length > 10 ) _ls = listString[10..length].dup; else return IUP_DEFAULT;
 
-		// Set IupFontDlg
-		Ihandle* dlg = IupFontDlg();
-		IupSetAttribute( dlg, "VALUE", toStringz( _ls.dup, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
-		IupSetAttribute( dlg, "TITLE", toStringz( "Font", GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
-
-		// Open IupFontDlg
-		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
-
-		if( IupGetInt( dlg, "STATUS" ) )
+		version(linux)
 		{
-			char[] fontInformation = fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup;
-
-			char[][] strings = Util.split( fontInformation, "," );
-			if( strings.length == 2 )
+			_ls = "";
+			foreach( char c; listString[10..length].dup )
 			{
-				char[] Bold, Italic, Underline, Strikeout, size;
-
-				if( !strings[0].length )
+				if( c != ' ' && c != ',' )
 				{
-					version( Windows )
+					_ls ~= c;
+				}
+				else if( c == ' ' )
+				{
+					if( _ls.length )
 					{
-						strings[0] = "Courier New";
+						if( _ls[length-1] != ' ' ) _ls ~= ' ' ;
+					}
+				}
+			}
+		}		
+
+		// Set IupFontDlg
+		try
+		{
+			Ihandle* dlg = IupFontDlg();
+
+			if( dlg == null )
+			{
+				IupMessage( "Error", toStringz( "IupFontDlg created fail!" ) );
+				return IUP_IGNORE;
+			}
+
+			
+			scope fontValue = new CstringConvert( _ls );
+			IupSetAttribute( dlg, "VALUE", fontValue.toStringz() );
+			
+			// Open IupFontDlg
+			IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
+
+			if( IupGetInt( dlg, "STATUS" ) )
+			{
+				char[] fontInformation = fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup;
+				char[] Bold, Italic, Underline, Strikeout, size, fontName;
+				char[][] strings = Util.split( fontInformation, "," );
+				if( strings.length == 2 )
+				{
+					if( !strings[0].length )
+					{
+						version( Windows )
+						{
+							strings[0] = "Courier New";
+						}
+						else
+						{
+							strings[0] = "Monospace";
+						}
 					}
 					else
 					{
-						strings[0] = "Monospace";
+						strings[0] = Util.trim( strings[0] );
 					}
+					strings[1] = Util.trim( strings[1] );
+
+					foreach( char[] s; Util.split( strings[1], " " ) )
+					{
+						switch( s )
+						{
+							case "Bold":		Bold = s;		break;
+							case "Italic":		Italic = s;		break;
+							case "Underline":	Underline = s;	break;
+							case "Strikeout":	Strikeout = s;	break;
+							default:
+								size = s;
+						}
+					}
+
+					char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[item-1].name, strings[0], Bold, Italic, Underline, Strikeout, size );
+					IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
 				}
 				else
 				{
-					strings[0] = Util.trim( strings[0] );
-				}
-				strings[1] = Util.trim( strings[1] );
-
-				foreach( char[] s; Util.split( strings[1], " " ) )
-				{
-					switch( s )
+					version(linux)
 					{
-						case "Bold":		Bold = s;		break;
-						case "Italic":		Italic = s;		break;
-						case "Underline":	Underline = s;	break;
-						case "Strikeout":	Strikeout = s;	break;
-						default:
-							size = s;
+						foreach( char[] s; Util.split( fontInformation, " " ) )
+						{
+							switch( s )
+							{
+								case "Bold":		Bold = s;		break;
+								case "Italic":		Italic = s;		break;
+								case "Underline":	Underline = s;	break;
+								case "Strikeout":	Strikeout = s;	break;
+								default:
+									if( s.length )
+									{
+										if( s[0] >= 48 && s[0] <= 57 )
+										{
+											size = s;
+											break;
+										}
+
+										fontName ~= ( s ~ " " );
+									}
+							}
+						}
+
+						fontName = Util.trim( fontName );
+						char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[item-1].name, fontName, Bold, Italic, Underline, Strikeout, size );
+						IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
 					}
-				}
-
-				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[item-1].name, strings[0], Bold, Italic, Underline, Strikeout, size );
-				IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
+				}			
 			}
-		}
 
-		IupDestroy( dlg ); 
+			IupDestroy( dlg ); 
+		}
+		catch( Exception e )
+		{
+			IupMessage( "Error", toStringz( e.toString ) );
+		}
 
 		return IUP_DEFAULT;
 	}

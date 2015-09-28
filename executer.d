@@ -33,7 +33,7 @@ struct ExecuterAction
 
 		void run()
 		{
-			system( toStringz( command ) );
+			system( GLOBAL.cString.convert( command ) );
 		}
 	}
 	
@@ -55,7 +55,7 @@ struct ExecuterAction
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("Without any source file has been selected......?\n\nCompile Error!") );
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nCompile Error!" ) );
 			return false;
 		}
 
@@ -67,17 +67,17 @@ struct ExecuterAction
 			char[] outputResult;
 
 			// Compiler Command
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz(command) );
-
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( command ) );
+			
 			foreach (line; new Lines!(char)(p.stdout))  
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz(line) );
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( line ) );
 				outputResult ~= line;
 			}
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz(line) );
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( line ) );
 				outputResult ~= line;
 			}			
 
@@ -85,7 +85,10 @@ struct ExecuterAction
 			
 			IupSetAttribute( GLOBAL.outputPanel, "SCROLLTOPOS", "0" ); // Back to top of outputPanel
 
-			if( !outputResult.length ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Compile Success!") );
+			if( !outputResult.length )
+			{
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
+			}
 
 			return true;
 		}
@@ -111,7 +114,7 @@ struct ExecuterAction
 
 			if( !activePrjName.length )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("No Project has been selected......?\n\nBuild Error!") );
+				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert("No Project has been selected......?\n\nBuild Error!") );
 				return false;
 			}
 			else
@@ -125,7 +128,7 @@ struct ExecuterAction
 
 				if( !txtSources.length )
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("Without source files......?\n\nBuild Error!") );
+					IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without source files......?\n\nBuild Error!" ) );
 					return false;
 				}
 
@@ -139,14 +142,36 @@ struct ExecuterAction
 					txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
 				}
 
-				char[] executeName;
+				char[] executeName, _targetName;
+
+				if( GLOBAL.projectManager[activePrjName].targetName.length ) _targetName = GLOBAL.projectManager[activePrjName].targetName; else _targetName = GLOBAL.projectManager[activePrjName].name;
 				version(Windows)
 				{
-					executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe\"";
+					switch( GLOBAL.projectManager[activePrjName].type )
+					{
+						case "2":
+							executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+							break;
+						case "3":
+							executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+							break;
+						default:
+							executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+					}
 				}
 				else
 				{
-					executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name ~ "\"";
+					switch( GLOBAL.projectManager[activePrjName].type )
+					{
+						case "2":
+							executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+							break;
+						case "3":
+							executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+							break;
+						default:
+							executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+					}
 				}
 
 				txtCommand = "\"" ~ GLOBAL.compilerFullPath ~ "\"" ~  executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption;
@@ -154,33 +179,48 @@ struct ExecuterAction
 				Process p = new Process( txtCommand, null );
 				p.execute;
 
-				char[] outputResult;
+				bool	bError, bWarning;
+				char[] 	outputResult;
 
 				// Compiler Command
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz(txtCommand) );
-
+				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( txtCommand ) );
+				
 				foreach (line; new Lines!(char)(p.stdout))  
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz(line) );
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( line ) );
 					outputResult ~= line;
+
+					if( !bError )
+					{
+						if( Util.index( line, ") error " ) < line.length ) bError = true;
+					}
+
+					if( !bWarning )
+					{
+						if( Util.index( line, ") warning " ) < line.length ) bWarning = true;
+					}					
 				}
 
 				foreach (line; new Lines!(char)(p.stderr))  
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz(line) );
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( line ) );
+					if( Util.trim( line ).length ) bError = true;
 					outputResult ~= line;
 				}				
 				auto result = p.wait;
 
 				IupSetAttribute( GLOBAL.outputPanel, "SCROLLTOPOS", "0" );
 
-				if( outputResult.length )
+				if( !outputResult.length || !bError )
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Error!") );
+					if( !bWarning )
+						IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
+					else
+						IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
 				}
 				else
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Success!") );
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
 				}
 			}
 
@@ -212,24 +252,37 @@ struct ExecuterAction
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("Without any source file has been selected......?\n\nBuild Error!") );
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nBuild Error!" ) );
 			return false;
 		}
 		
 		try
 		{
-			Process p = new Process( "\"" ~ GLOBAL.compilerFullPath ~ "\" \"" ~ fileName ~ "\"", null );
+			char[] commandString;
+			version( Windows )
+			{
+				commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"";
+			}
+			else
+			{
+				commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"";
+				//commandString = "/bin/sh -c " ~ GLOBAL.compilerFullPath ~ " \"" ~ fileName ~ "\"" ~ "\n";
+			}
+
+
+			//Process p = new Process( commandString, null );
+			Process p = new Process( commandString, null );
 			p.execute;
 
 			bool	bError, bWarning;
 			char[]	outputResult;
 
 			// Compiler Command
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz(GLOBAL.compilerFullPath ~ " \"" ~ fileName ~ "\"") );
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( commandString ) );
 
 			foreach (line; new Lines!(char)(p.stdout))  
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz(line) );
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND",  GLOBAL.cString.convert( line ) );
 				outputResult ~= line;
 
 				if( !bError )
@@ -245,7 +298,8 @@ struct ExecuterAction
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz(line) );
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( line ) );
+				if( Util.trim( line ).length ) bError = true;
 				outputResult ~= line;
 			}
 
@@ -259,10 +313,9 @@ struct ExecuterAction
 			if( !outputResult.length || !bError )
 			{
 				if( !bWarning )
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Success!") );
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success!" ) );
 				else
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Success! But got warning...") );
-				
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
 
 				char[] command;
 				int dotIndex = Util.rindex( fileName, "." );
@@ -289,7 +342,7 @@ struct ExecuterAction
 			}
 			else
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz("Build Error!") );
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
 			}
 			
 
@@ -328,13 +381,28 @@ struct ExecuterAction
 				{
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 					bRunProject = true;
+
+					if( GLOBAL.projectManager[activePrjName].type.length )
+					{
+						//IupMessage( "", toStringz(GLOBAL.projectManager[activePrjName].type ) );
+						if( GLOBAL.projectManager[activePrjName].type != "1" )
+						{
+							IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+							IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Run Static / Dynamic Library............Run Error!" ) );
+							return false;
+						}
+					}
+					
 					version(Windows)
 					{
-						command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
+						if( GLOBAL.projectManager[activePrjName].targetName.length )
+							command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName ~ ".exe";
+						else
+							command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
 					}
 					else
 					{
-						command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name;
+						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
 					}
 					break;
 				}
@@ -359,21 +427,21 @@ struct ExecuterAction
 			{
 				version(Windows)
 				{
-					command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
+					command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
 				}
 				else
 				{
-					command = GLOBAL.projectManager[activePrjName].dir ~ "\\" ~ GLOBAL.projectManager[activePrjName].name;
+					command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
 				}
 			}
 		}
 
 		IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
 		
-		scope f = new FilePath( Util.substitute( command, "\\", "/" ) );
+		scope f = new FilePath( command );
 		if( f.exists() )
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("Running " ~ command ~ "......") );
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
 
 			/+
 			Process exe = new Process(  "cmd.exe /k " ~ fullPath , null );
@@ -384,7 +452,7 @@ struct ExecuterAction
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!") );
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" ) );
 			return false;
 		}
 

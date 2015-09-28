@@ -11,7 +11,7 @@
 		<mainFile />
 		<Args />
 		<options>
-			<dmd> -O -odobjs -release -L/SUBSYSTEM:windows:4 </dmd>
+			<dmd> -odobjs -release -L/SUBSYSTEM:windows:4 </dmd>
 			<tool />
 			<lib />
 			<implib />
@@ -71,8 +71,8 @@
 			<name>D:\CodingPark\GameKyo\import</name>
 		</includePaths>
 		<linkLibrarys>
-			<name>D:\CodingPark\GameKYO\lib\iup\3_15_dll10\iup.lib</name>
-			<name>D:\CodingPark\GameKYO\lib\iup\3_15_dll10\iup_scintilla.lib</name>
+			<name>D:\CodingPark\GameKYO\lib\iup\iup315DLL9\iup.lib</name>
+			<name>D:\CodingPark\GameKYO\lib\iup\iup315DLL9\iup_scintilla.lib</name>
 		</linkLibrarys>
 		<importExpressions />
 	</buildSpec>

@@ -61,6 +61,59 @@ class CParser
 					}
 					break;
 
+				case TOK.Tdefine:
+					parseToken( TOK.Tdefine );
+
+					if( token().tok == TOK.Tidentifier )
+					{
+						char[] 	name = token().identifier;
+						int		lineNumber = token().lineNumber;
+						parseToken( TOK.Tidentifier );
+
+						if( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+						{
+							if( token().tok == TOK.Tnumbers  )
+							{
+								char[] type;
+								if( Util.index( token().identifier, "." ) < token().identifier.length )
+								{
+									type = "single";
+								}
+								else
+								{
+									type = "integer";
+
+								}
+								activeASTnode.addChild( name, B_VARIABLE, null, type, null, lineNumber );				
+							}
+							else if( token().tok == TOK.Tstrings  )
+							{
+								activeASTnode.addChild( name, B_VARIABLE, null, "string", null, lineNumber );	
+							}
+							else if( token().tok == TOK.Topenparen )
+							{
+								// #define GTK_VSCALE(obj) G_TYPE_CHECK_INSTANCE_CAST((obj), GTK_TYPE_VSCALE, GtkVScale)
+								char[] param;
+								while( token().tok != TOK.Teol )
+								{
+									param ~= token().identifier;
+									if(  token().tok == TOK.Tcloseparen )
+									{
+										parseToken();
+										break;
+									}
+									parseToken();
+								}
+								activeASTnode.addChild( name, B_FUNCTION, null, param, null, lineNumber );	
+							}
+							else if( token().tok == TOK.Tidentifier )
+							{
+								activeASTnode.addChild( name, B_VARIABLE, null, null, null, lineNumber );	
+							}
+						}
+					}
+					break;
+
 				case TOK.Tifdef:
 					parseToken( TOK.Tifdef );
 
@@ -503,6 +556,9 @@ class CParser
 
 					if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) parseToken();
 
+					// like " Declare Function app_oninit_cb WXCALL () As wxBool "
+					if( token().tok == TOK.Tidentifier ) parseToken( TOK.Tidentifier );	
+
 					// Overload
 					if( token().tok == TOK.Toverload ) parseToken( TOK.Toverload );
 
@@ -768,6 +824,21 @@ class CParser
 						if( token().tok == TOK.Tfunction ) _kind = B_FUNCTION; else _kind = B_SUB;
 						
 						parseToken();
+
+						if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) parseToken();
+
+						// like " Declare Function app_oninit_cb WXCALL () As wxBool "
+						if( token().tok == TOK.Tidentifier ) parseToken( TOK.Tidentifier );	
+
+						// Overload
+						if( token().tok == TOK.Toverload ) parseToken( TOK.Toverload );
+
+						// Alias "..."
+						if( token().tok == TOK.Talias )
+						{
+							parseToken( TOK.Talias );
+							if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return false;
+						}
 
 						char[]  _returnType;
 

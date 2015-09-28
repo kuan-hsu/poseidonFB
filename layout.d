@@ -60,8 +60,6 @@ void createExplorerWindow()
 
 	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, null );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
-	IupSetCallback( GLOBAL.messageWindowTabs, "BUTTON_CB", cast(Icallback) &messageClick_cb );
-	
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, GLOBAL.messageWindowTabs );
 	IupSetAttribute(GLOBAL.messageSplit, "ORIENTATION", "HORIZONTAL");
@@ -163,12 +161,3 @@ extern(C) int mainDialog_CLOSE_cb(Ihandle *ih)
 
 	return IUP_CLOSE;
 }
-
-
-extern(C) int messageClick_cb(Ihandle* ih, int button, int pressed, int x, int y, char* status )
-{
-	IupMessage("","click".ptr);
-
-	return IUP_DEFAULT;
-}
-

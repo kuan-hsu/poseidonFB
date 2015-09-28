@@ -72,7 +72,7 @@ struct PROJECT
 
 		// Save File
 		scope print = new DocPrinter!(char);
-		FileAction.saveFile( dir ~ "\\.poseidon", print.print( doc ) );
+		FileAction.saveFile( dir ~ "/.poseidon", print.print( doc ) );
 	}
 
 	PROJECT loadFile( char[] settingFileName )

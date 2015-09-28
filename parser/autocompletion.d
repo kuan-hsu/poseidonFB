@@ -40,7 +40,7 @@ struct AutoComplete
 		int lineLength_CRLF =  IupScintillaSendMessage( iupSci, 2350, line, 0 ); // SCI_LINELENGTH = 2350, (include CR/LF)
 		text.length = lineLength_CRLF;
 
-		SendMessage( iupSci, 2153, line, cast(int) text.ptr ); // SCI_GETLINE = 2153, (include CR/LF)
+		IupScintillaSendMessage( iupSci, 2153, line, cast(int) GLOBAL.cString.convert( text ) ); // SCI_GETLINE = 2153, (include CR/LF)
 
 		if( bCRLF ) return text;
 		
@@ -70,7 +70,7 @@ struct AutoComplete
 		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
 		IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
 
-		int posHead = SendMessage( iupSci, 2197, targetText.length, cast(int) targetText.ptr );
+		int posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 
 		if( posHead < 0 ) return null;
 
@@ -96,7 +96,7 @@ struct AutoComplete
 		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
 		IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
 
-		int posTail = SendMessage( iupSci, 2197, targetText.length, cast(int) targetText.ptr );
+		int posTail = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 
 		if( posTail < 0 ) return null;
 
@@ -427,20 +427,17 @@ struct AutoComplete
 		scope  _path = new FilePath( originalFullPath ); // Tail include /
 		char[] testPath = _path.path() ~ include;
 
-		testPath = Util.substitute( testPath, "\\", "/" );
-
 		_path.set( testPath ); // Reset
 
-		if( _path.exists() ) return Util.substitute( testPath, "/", "\\" );
+		if( _path.exists() ) return testPath;
 
 
 		// Step 2: Relative from the current working directory
 		testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
-		testPath = Util.substitute( testPath, "\\", "/" );
 
 		_path.set( testPath ); // Reset
 
-		if( _path.exists() ) return Util.substitute( testPath, "/", "\\" );
+		if( _path.exists() ) return testPath;
 
 
 		// Step 3: Relative from addition directories specified with the -i command line option
@@ -454,24 +451,22 @@ struct AutoComplete
 			foreach( char[] s; includeDirs )
 			{
 				testPath = s ~ "/" ~ include;
-				testPath = Util.substitute( testPath, "\\", "/" );
 				
 				_path.set( testPath ); // Reset
 
-				if( _path.exists() ) return Util.substitute( testPath, "/", "\\" );
+				if( _path.exists() ) return testPath;
 			}
 		}
 
 		// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-		_path.set( Util.substitute( GLOBAL.compilerFullPath, "\\", "/" ) );
+		_path.set( GLOBAL.compilerFullPath );
 		testPath = _path.path() ~ "inc/" ~ include;
-		testPath = Util.substitute( testPath, "\\", "/" );
 				
 		_path.set( testPath ); // Reset
 		if( _path.exists() )
 		{
 			//Stdout( "Bi fullpath :" ~ _path.toString ).newline; 
-			return Util.substitute( testPath, "/", "\\" );
+			return testPath;
 		}
 		
 		return null;
@@ -963,7 +958,7 @@ struct AutoComplete
 			{
 				// Clean listContainer
 				listContainer.length = 0;
-				IupSetAttribute( iupSci, "AUTOCCANCEL", toStringz( "YES" ) );
+				IupSetAttribute( iupSci, "AUTOCCANCEL", GLOBAL.cString.convert( "YES" ) );
 
 				// Divide word
 				char[][] splitWord = Util.split( word, "." );
@@ -1135,7 +1130,7 @@ struct AutoComplete
 			{
 				if( i == 0 )
 				{
-					AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+					AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
 					if( AST_Head is null ) return;
 
 					if( splitWord.length == 1 ) break;
@@ -1185,7 +1180,9 @@ struct AutoComplete
 
 				IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
 				IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-				SendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) toStringz( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ) );// SCI_CALLTIPSHOW 2200
+
+				char[] _list = ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ).dup;
+				IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) );
 			}
 			else
 			{
@@ -1197,7 +1194,14 @@ struct AutoComplete
 				}
 
 				char[] fullPath = AST_Head.name;
-				actionManager.ScintillaAction.openFile( fullPath, lineNum );
+
+				if( actionManager.ScintillaAction.openFile( fullPath, lineNum ) )
+				{
+					int _currentPos = ScintillaAction.getCurrentPos( GLOBAL.scintillaManager[fullPath].getIupScintilla );
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPath].getIupScintilla, 2025, _currentPos, 0 ); // SCI_GOTOPOS = 2025,
+				}
+				
+				
 				//SendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) toStringz( AST_Head.name ~ " : " ~ Integer.toString( AST_Head.lineNumber )  ) );// SCI_CALLTIPSHOW 2200
 			}
 		}

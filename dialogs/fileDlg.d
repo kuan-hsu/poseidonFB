@@ -3,30 +3,32 @@
 class CFileDlg
 {
 	private:
-	import global;
+	import global, tools;
 	
 	import iup.iup;
 
-	import tango.text.Util, tango.stdc.stringz;
+	import Util = tango.text.Util, tango.stdc.stringz;
 
-	char[]	fileName;
+	char[]	fileName, filterUsed;
 	
 	void callIupFileDlg( char[] title, char[] filter, char[] DIALOGTYPE = "OPEN" )
 	{
 		Ihandle *dlg = IupFileDlg(); 
 
-		IupSetAttribute( dlg, "DIALOGTYPE", toStringz( DIALOGTYPE, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
-		IupSetAttribute( dlg, "TITLE", toStringz( title, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+		scope _dialogType =  new CstringConvert( DIALOGTYPE );
+		IupSetAttribute( dlg, "DIALOGTYPE", _dialogType.toStringz );
+		IupSetAttribute( dlg, "TITLE", GLOBAL.cString.convert( title ) );
 
 		//char[] txtIupFilterAttribute = "FILTER = \"" ~ filter ~ "\", FILTERINFO = \"" ~  fileInfo ~ "\"";
 		//IupSetAttributes(dlg, txtIupFilterAttribute.ptr );
-		IupSetAttribute( dlg, "EXTFILTER", toStringz( filter, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+		IupSetAttribute( dlg, "EXTFILTER", GLOBAL.cString.convert( filter ) );
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT ); 
 
 		if( IupGetInt( dlg, "STATUS") != -1 )
 		{
-			char[] _fileName = trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
-			fileName = _fileName.dup;
+			fileName = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
+			filterUsed = Util.trim( fromStringz( IupGetAttribute( dlg, "FILTERUSED" ) ).dup );
+			fileName = Util.substitute( fileName, "\\", "/" );
 		}
 		else
 		{
@@ -50,4 +52,7 @@ class CFileDlg
 	}
 
 	char[] getFileName(){ return fileName; }
+
+	char[] getFilterUsed(){ return filterUsed; }
+	
 }

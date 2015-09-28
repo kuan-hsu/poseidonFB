@@ -145,6 +145,7 @@ enum TOK
 	Tendif,
 	Tifdef,
 	Tifndef,
+	Tdefine,
 	
 	//Tinclib,
 	
@@ -309,6 +310,7 @@ static this()
 	identToTOK["endif"]			= TOK.Tendif;
 	identToTOK["ifdef"]			= TOK.Tifdef;
 	identToTOK["ifndef"]		= TOK.Tifndef;
+	identToTOK["define"]		= TOK.Tdefine;	
 }
 
 

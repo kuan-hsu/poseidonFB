@@ -259,11 +259,11 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
 		}
 		 
 		createLayout();
@@ -367,6 +367,16 @@ extern(C) // Callback for CProjectPropertiesDialog
 				s.compilerOption	= _prjCompilerOptions;
 				s.comment			= _prjComment;
 				s.compilerPath		= _prjCompilerPath;
+
+				if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "NO" ) // Created project
+				{
+					if( _prjDir in GLOBAL.projectManager )
+					{
+						s.sources = GLOBAL.projectManager[_prjDir].sources.dup;
+						s.includes = GLOBAL.projectManager[_prjDir].includes.dup;
+						s.others = GLOBAL.projectManager[_prjDir].others.dup;
+					}
+				}
 
 				int		includeCount = IupGetInt( IupGetHandle( "listIncludePath_Handle" ), "COUNT" );
 				for( int i = 1; i <= includeCount; i++ )

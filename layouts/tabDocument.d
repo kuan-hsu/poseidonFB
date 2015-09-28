@@ -49,7 +49,7 @@ extern(C)
 		{
 			if( fromStringz( IupGetAttribute( _child, "SAVEDSTATE" ) ) == "YES" )
 			{
-				int button = IupAlarm( "Quest", toStringz("\"" ~ cSci.getFullPath ~ "\"\nhas been changed, save it now?"), "Yes", "No", "Cancel" );
+				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 				if( button == 3 ) return IUP_IGNORE;
 				if( button == 1 ) cSci.saveFile();
 			}

@@ -47,6 +47,13 @@ void createMenu()
 	IupSetAttribute( item_save, "IMAGE", "icon_save" );
 	IupSetCallback( item_save, "ACTION", cast(Icallback)&saveFile_cb );
 
+	
+	Ihandle* item_saveAs = IupItem( "Save As", null );
+	//IupSetAttribute( item_saveAll, "KEY", "A" );
+	IupSetAttribute( item_saveAs, "IMAGE", "icon_saveas" );
+	IupSetCallback( item_saveAs, "ACTION", cast(Icallback)&saveAsFile_cb );
+	
+
 	item_saveAll = IupItem( "SaveAll", null );
 	IupSetAttribute( item_saveAll, "KEY", "A" );
 	IupSetAttribute( item_saveAll, "IMAGE", "icon_saveall" );
@@ -220,6 +227,7 @@ void createMenu()
 	// Option
 	item_tool= IupItem ("Tools", null);
 	IupSetAttribute(item_tool, "KEY", "T");
+	IupSetAttribute(item_tool, "ACTIVE", "NO" );
 	IupSetCallback(item_tool, "ACTION", cast(Icallback)&tool_cb);
 	
 
@@ -230,13 +238,14 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.104\nBy Kuan Hsu (Taiwan)\n2015.09.19" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.108\nBy Kuan Hsu (Taiwan)\n2015.09.28" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
 							item_open, 
 							IupSeparator(),
 							item_save,
+							item_saveAs,
 							item_saveAll,
 							IupSeparator(),
 							item_close,
@@ -361,7 +370,29 @@ extern(C)
 		if( cSci !is null )	ScintillaAction.saveFile( cSci.getIupScintilla() );
 		
 		return IUP_DEFAULT;
-	}	
+	}
+	
+	int saveAsFile_cb( Ihandle* ih )
+	{
+		auto cSci = ScintillaAction.getActiveCScintilla();
+		if( cSci !is null )
+		{
+			scope dlg = new CFileDlg( "Save As...", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+
+			char[] fullPath = dlg.getFileName();
+
+			switch( dlg.getFilterUsed )
+			{
+				case "1": fullPath ~= ".bas";	break;
+				case "2": fullPath ~= ".bi";	break;
+				default:
+			}
+			
+			actionManager.ScintillaAction.saveAs( cSci.getIupScintilla(), fullPath );
+		}
+		
+		return IUP_DEFAULT;
+	}		
 
 	int saveAllFile_cb( Ihandle* ih )
 	{
@@ -666,7 +697,7 @@ extern(C)
 
 	int newProject_cb( Ihandle *ih )
 	{
-		scope dlg = new CProjectPropertiesDialog( 640, 414, "Project Properties", false, true );
+		scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, true );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
@@ -821,7 +852,7 @@ extern(C)
 		//if( !GLOBAL.activeProjectDirName.length ) return IUP_DEFAULT;
 		if( !actionManager.ProjectAction.getActiveProjectName.length ) return IUP_DEFAULT;
 		
-		scope dlg = new CProjectPropertiesDialog( 640, 414, "Project Properties", false, false );
+		scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, false );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;

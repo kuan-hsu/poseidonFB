@@ -19,11 +19,9 @@ class CScanner
 
 	TokenUnit[] scanFile( char[] fullPath )
 	{
-		scope f = new FilePath( Util.substitute( fullPath, "\\", "/" ) );
+		scope f = new FilePath( fullPath );
 		if( f.exists() )
 		{
-			Util.substitute( fullPath, "/", "\\" );
-			
 			char[] 	document;
 			//char[]	splitLineDocument;
 			if( fullPath in GLOBAL.scintillaManager )
@@ -108,31 +106,17 @@ class CScanner
 					}
 				}
 
-				if( bCommentFlag )
+				// Comment Line
+				if( !bStringFlag )
 				{
-					while( i < data.length )
+					if( data[i] == '\'' )
 					{
-						if( data[i] == '\n' )
+						while( ++i < data.length )
 						{
-							bCommentFlag = false;
-							lineNum ++;
-							break;
-						}
-
-						++i;
-					}
-
-					// Continue the main for-loop
-					continue;
-				}
-				else
-				{
-					if( !bStringFlag )
-					{
-						if( data[i] == '\'' )
-						{
-							bCommentFlag = true;
-							continue;
+							if( data[i] == '\n' )
+							{
+								break;
+							}
 						}
 					}
 				}
@@ -153,7 +137,7 @@ class CScanner
 				}
 				else
 				{
-					if( !bCommentFlag && !bCommentBlockFlag )
+					if( !bCommentBlockFlag )
 					{
 						if( data[i] == '"' )
 						{
@@ -312,7 +296,7 @@ class CScanner
 		}
 		catch( Exception e )
 		{
-			IupMessage( "Token Scanner", toStringz( e.toString ) );
+			// IupMessage( "Token Scanner", toStringz( e.toString ) );
 		}
 
 		//print( results );

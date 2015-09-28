@@ -1,7 +1,7 @@
 ﻿module dialogs.shortcutDlg;
 
 import iup.iup;
-import global, dialogs.baseDlg, dialogs.preferenceDlg;
+import global, tools, dialogs.baseDlg, dialogs.preferenceDlg;
 import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util, tango.io.Stdout;;
 
 class CShortCutDialog : CBaseDialog
@@ -79,11 +79,11 @@ class CShortCutDialog : CBaseDialog
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
 		}		
 
 		createLayout( item, listText );
@@ -178,7 +178,8 @@ extern(C) // Callback for CSingleTextDialog
 			
 			char[] string = Stdout.layout.convert( "{,-40} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[pos].name, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
 
-			IupSetAttribute( shortCutList, toStringz( Integer.toString( pos + 1 ) ), toStringz( string ) );
+			scope _cString = new CstringConvert ;
+			IupSetAttribute( shortCutList, _cString.convert( Integer.toString( pos + 1 ) ), GLOBAL.cString.convert( string ) );
 		}
 
 		return IUP_CLOSE;

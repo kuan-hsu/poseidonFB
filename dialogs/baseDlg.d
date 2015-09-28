@@ -49,8 +49,7 @@ class CBaseDialog
 		IupSetAttribute( _dlg, "RASTERSIZE", (Integer.toString( w ) ~ "x" ~ Integer.toString( h )).ptr );
 		if( parent.length)
 		{
-			IupSetAttribute( _dlg, "PARENTDIALOG", toStringz( parent, GLOBAL.stringzTemp ) );
-			delete GLOBAL.stringzTemp;
+			IupSetAttribute( _dlg, "PARENTDIALOG", GLOBAL.cString.convert( parent ) );
 		}
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
 	}

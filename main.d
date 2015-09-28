@@ -2,7 +2,6 @@
 
 import iup.iup;
 import iup.iup_scintilla;
-import iup.iupcontrols;
 
 import global, layout, images.imageData;
 import menu, scintilla;
@@ -83,13 +82,13 @@ void main()
 
 	if( GLOBAL.fonts.length == 9 )
 	{
-		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Leftside
-		IupSetAttribute( GLOBAL.fileListTree, "FONT", toStringz( GLOBAL.fonts[3].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Filelist
-		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Project
-		IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Outline
-		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Bottom
-		IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Output
-		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;// Search
+		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[2].fontString ) );// Leftside
+		IupSetAttribute( GLOBAL.fileListTree, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[3].fontString ) );// Filelist
+		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[4].fontString ) );// Project
+		IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[5].fontString ) );// Outline
+		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[6].fontString ) );// Bottom
+		IupSetAttribute( GLOBAL.outputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[7].fontString ) );// Output
+		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Search
 	}	
 	
 	

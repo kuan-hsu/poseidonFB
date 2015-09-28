@@ -139,11 +139,11 @@ class CSearchDialog : CBaseDialog
 		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );;
 		}		
 
 		createLayout();

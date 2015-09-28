@@ -4,11 +4,11 @@ import iup.iup;
 
 import dialogs.baseDlg;
 
-import tango.stdc.stringz;
-
 class CSingleTextDialog : CBaseDialog
 {
 	private:
+	import		global;
+	
 	Ihandle*	textResult;
 	char[]		labelName;
 
@@ -16,7 +16,7 @@ class CSingleTextDialog : CBaseDialog
 	{
 		Ihandle* bottom = createDlgButton();
 
-		Ihandle* label = IupLabel( toStringz(labelName) );
+		Ihandle* label = IupLabel( GLOBAL.cString.convert( labelName ) );
 		
 		textResult = IupText( null );
 		IupSetAttribute( textResult, "SIZE", "100x12" );
@@ -38,23 +38,18 @@ class CSingleTextDialog : CBaseDialog
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
 		}
 
 		labelName = _labelText ;
 		 
 		createLayout();
 
-		IupSetAttribute( textResult, "VALUE", toStringz(text) );
-		/+
-		IupSetAttribute( textResult, "CARET ", "1"  );
-		IupSetAttribute( textResult, "SELECTIONPOS ",  "0:2"  );
-		+/
-
+		IupSetAttribute( textResult, "VALUE", GLOBAL.cString.convert( text ) );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSingleTextDialog_btnCancel_cb );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CSingleTextDialog_btnOK_cb );
 	}

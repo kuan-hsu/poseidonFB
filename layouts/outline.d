@@ -30,61 +30,88 @@ class COutline
 		switch( _node.kind )
 		{
 			case B_VARIABLE:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_variable" ~ prot) );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ~ prot ) );
 				break;
 
 			case B_FUNCTION:
 			case B_SUB:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_function" ~ prot) );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_function" ~ prot) );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_function" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_function" ) );
+				}
 				break;
 
 			case B_PROPERTY:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_property") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_property") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+				}
 				break;
 
 			case B_CTOR:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_ctor") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_ctor") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+				}
 				break;
 
 			case B_DTOR:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_dtor") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_dtor") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+				}
 				break;
 
 			case B_TYPE:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_struct") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_struct") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+				}
 				break;
 
 			case B_CLASS:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_class") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_class") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+				}
 				break;
 
 			case B_ENUM:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_enum") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_enum") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+				}
 				break;				
 
 			case B_ENUMMEMBER:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_enummember") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_enummember") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+				}
 				break;
 
 			case B_UNION:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_union") );
-				if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, toStringz("IUP_union") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+				}
 				break;				
 
 			case B_ALIAS:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_alias") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_alias" ) );
 				break;				
 
 			default:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, toStringz("IUP_variable") );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
 		}
 	}
 	
@@ -110,18 +137,18 @@ class COutline
 					}
 
 					if( _type.length )
-						IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, toStringz( _node.name ~ _paramString ~ " : " ~ _type ) );
+						IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ " : " ~ _type ) );
 					else
-						IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, toStringz( _node.name ~ _paramString ) );
+						IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
 						
 					break;
 
 				case B_SUB, B_CTOR, B_DTOR:
-					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, toStringz( _node.name ~ _node.type ) );
+					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
 					break;
 
 				default:
-					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, toStringz( _node.name ) );
+					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, GLOBAL.cString.convert( _node.name ) );
 			}
 			lastAddNode = IupGetInt( activeTreeOutline, "LASTADDNODE" );
 			setImage( _node );
@@ -150,24 +177,24 @@ class COutline
 
 					if( _type.length )
 					{
-						IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, toStringz( _node.name ~ _paramString ~ " : " ~ _type ) );
+						IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ " : " ~ _type ) );
 					}
 					else
 					{
-						IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, toStringz( _node.name ~ _paramString ) );
+						IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
 					}
 					break;
 
 				case B_SUB, B_CTOR, B_DTOR:
-					IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, toStringz( _node.name ~ _node.type ) );
+					IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
 					break;
 
 				case B_VARIABLE, B_ALIAS:
-					IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+					IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
 					break;
 
 				case B_ENUMMEMBER:
-					IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, toStringz( _node.name ) );
+					IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ) );
 					break;
 
 				default:
@@ -206,7 +233,7 @@ class COutline
 
 				Ihandle* tree = IupTree();
 				activeTreeOutline = tree;
-				IupSetAttributes( activeTreeOutline, toStringz("ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x,TITLE=" ~ fullPath) );
+				IupSetAttributes( activeTreeOutline, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x,TITLE=" ~ fullPath ) );
 				IupSetCallback( activeTreeOutline, "SELECTION_CB", cast(Icallback) &COutline_selection );
 				IupSetCallback( activeTreeOutline, "RIGHTCLICK_CB", cast(Icallback) &COutline_RIGHTCLICK_CB );
 				/+

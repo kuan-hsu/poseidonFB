@@ -10,7 +10,7 @@ private import Util = tango.text.Util;
 private import tango.stdc.stringz, tango.io.Stdout;
 private version(Windows) import tango.sys.win32.UserGdi;
 
-private import global;
+private import global, tools;
 
 long SendMessage( Ihandle* ih, uint msg, ulong wParam, long lParam )
 {
@@ -71,12 +71,12 @@ struct FileAction
 struct ScintillaAction
 {
 	private:
-	import tango.io.UnicodeFile, tango.io.Stdout;
+	import tango.io.UnicodeFile, tango.io.FilePath;
 	import scintilla;
 	import parser.scanner,  parser.token, parser.parser;
 		
 	public:
-	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8 )
+	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8, char[] existData = null )
 	{
 		// FullPath had already opened
 		if( fullPath in GLOBAL.scintillaManager ) 
@@ -99,11 +99,18 @@ struct ScintillaAction
 
 		//StatusBarAction.update();
 
-		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz( fullPath, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", GLOBAL.cString.convert( fullPath ) );
 		IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
 
-		//Parser
-		OutlineAction.loadFile( fullPath );
+		if( existData.length) _sci.setText( existData );
+
+		scope f = new FilePath( fullPath );
+
+		if( lowerCase( f.ext() ) == "bas" || lowerCase( f.ext() ) == "bi" )
+		{
+			//Parser
+			OutlineAction.loadFile( fullPath );
+		}
 
 		return true;
 	}
@@ -126,30 +133,38 @@ struct ScintillaAction
 			return true;
 		}
 
-		int		_encoding;
-		auto 	_sci = new CScintilla( fullPath );
-		char[] 	_text = FileAction.loadFile( fullPath, cast(int)_encoding );
-		_sci.setEncoding( _encoding );
-		_sci.setText( _text );
-		GLOBAL.scintillaManager[fullPath] = _sci;
+		try
+		{
+			int		_encoding;
+			auto 	_sci = new CScintilla( fullPath );
+			char[] 	_text = FileAction.loadFile( fullPath, cast(int)_encoding );
+			_sci.setEncoding( _encoding );
+			_sci.setText( _text );
+			GLOBAL.scintillaManager[fullPath] = _sci;
 
-		// Set documentTabs to visible
-		if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
+			// Set documentTabs to visible
+			if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
 
-		// Set new tabitem to focus
-		IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci.getIupScintilla );
-		IupSetFocus( _sci.getIupScintilla );
-		if( lineNumber > -1 ) IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
-		//StatusBarAction.update();
+			// Set new tabitem to focus
+			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci.getIupScintilla );
+			IupSetFocus( _sci.getIupScintilla );
+			if( lineNumber > -1 ) IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
+			//StatusBarAction.update();
 
-		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", toStringz( fullPath, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
-		IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
-		IupSetAttributeId( GLOBAL.fileListTree, "MARKED", 1, "YES" );
-		
-		// Parser
-		OutlineAction.loadFile( fullPath );
+			IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", GLOBAL.cString.convert( fullPath ) );
+			IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
+			IupSetAttributeId( GLOBAL.fileListTree, "MARKED", 1, "YES" );
+			
+			// Parser
+			OutlineAction.loadFile( fullPath );
 
-		return true;
+			return true;
+		}
+		catch
+		{
+		}
+
+		return false;
 	}
 
 	static void toTreeMarked( char[] fullPath, int _switch = 3 )
@@ -280,7 +295,7 @@ struct ScintillaAction
 			
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
-				int button = IupAlarm( "Quest", toStringz( "\"" ~ fullPath ~ "\"\nhas been changed, save it now?", GLOBAL.stringzTemp ), "Yes", "No", "Cancel" ); delete GLOBAL.stringzTemp;
+				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 				if( button == 3 ) return IUP_IGNORE;
 				if( button == 1 ) cSci.saveFile();
 			}
@@ -313,7 +328,7 @@ struct ScintillaAction
 				
 				if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 				{
-					int button = IupAlarm( "Quest", toStringz( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?", GLOBAL.stringzTemp ), "Yes", "No", "Cancel" ); delete GLOBAL.stringzTemp;
+					int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 					if( button == 3 ) return IUP_IGNORE;
 					if( button == 1 ) cSci.saveFile();
 				}
@@ -345,7 +360,7 @@ struct ScintillaAction
 			
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
-				int button = IupAlarm( "Quest", toStringz( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?", GLOBAL.stringzTemp ), "Yes", "No", "Cancel" ); delete GLOBAL.stringzTemp;
+				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 				if( button == 3 ) return IUP_IGNORE;
 				if( button == 1 ) cSci.saveFile();
 			}
@@ -376,7 +391,7 @@ struct ScintillaAction
 			cSci.saveFile();
 
 			//Update Parser
-			OutlineAction.refresh( cSci.getFullPath() );
+			OutlineAction.refresh( cSci.getFullPath()  );
 		}
 		catch
 		{
@@ -385,6 +400,24 @@ struct ScintillaAction
 
 		return true;
 	}
+
+	static bool saveAs( Ihandle* iupSci, char[] fullPath )
+	{
+		if( iupSci == null ) return false;
+		
+		try
+		{
+			char[] _text = fromStringz( IupGetAttribute( iupSci, "VALUE" ) ).dup;
+
+			return ScintillaAction.newFile( fullPath, Encoding.UTF_8, _text );
+		}
+		catch
+		{
+			return false;
+		}
+
+		return true;
+	}	
 
 	static bool saveAllFile()
 	{
@@ -473,7 +506,7 @@ struct ProjectAction
 		if( _titleName.length )
 		{
 			// Check the child Folder
-			char[][]	splitText = Util.split( _titleName, "\\" );
+			char[][]	splitText = Util.split( _titleName, "/" );
 		
 			int counterSplitText;
 			for( counterSplitText = 0; counterSplitText < splitText.length - 1; ++counterSplitText )
@@ -498,15 +531,15 @@ struct ProjectAction
 				}
 				if( !bFolerExist )
 				{
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText], GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
 					// Shadow
 					if( pos != 0 )
 					{
-						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( "FIXED", GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( "FIXED" ) );
 					}
 					else
 					{
-						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText], GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
 					}
 
 					folderLocateId ++;
@@ -573,7 +606,7 @@ struct StatusBarAction
 			scope Layouter = new Layout!(char)();
 			char[] output = Layouter( "{,7}x{,5}", line, col );
 
-			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output, GLOBAL.stringzTemp )); delete GLOBAL.stringzTemp;// Update line x col
+			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output ) );// Update line x col
 
 			if( bOverType )
 			{
@@ -794,7 +827,7 @@ char[] pp="print";
 				if( bJumpSelect )
 				{
 					char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-					IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+					IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
 				}
 				else
 				{
@@ -832,7 +865,7 @@ char[] pp="print";
 						if( bJumpSelect )
 						{
 							char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-							IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+							IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
 						}
 						else
 						{
@@ -890,7 +923,7 @@ char[] pp="print";
 			if( bJumpSelect )
 			{
 				char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-				IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+				IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
 			}
 			else
 			{
@@ -931,7 +964,7 @@ char[] pp="print";
 						if( bJumpSelect )
 						{
 							char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-							IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+							IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
 						}
 						else
 						{
@@ -994,7 +1027,7 @@ char[] pp="print";
 
 		if( searchRule & MATCHCASE ) targetText = toLower( targetText );
 		
-		scope f = new FilePath( Util.substitute( fullPath, "\\", "/" ) );
+		scope f = new FilePath( fullPath );
 		if( f.exists() )
 		{
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
@@ -1051,7 +1084,7 @@ char[] pp="print";
 						if( buttonIndex == 0 )
 						{
 							char[] outputWords = fullPath ~ "(" ~ Integer.toString( lineNum ) ~ "): " ~ line;
-							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( outputWords, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", GLOBAL.cString.convert( outputWords ) );
 						}
 						else if( buttonIndex == 3 )
 						{
@@ -1077,24 +1110,23 @@ char[] pp="print";
 			
 			for( int i = 1; i <= itemCount; ++ i )
 			{
-				if( fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ), GLOBAL.stringzTemp ) ) ) == text )
+				if( fromStringz( IupGetAttribute( ih, GLOBAL.cString.convert( Integer.toString( i ) ) ) ) == text )
 				{
 					IupSetInt( ih, "REMOVEITEM", i );
 					break;
 				}
-				delete GLOBAL.stringzTemp;
 			}
 
 			itemCount = IupGetInt( ih, "COUNT" );
 			if( itemCount == limit )
 			{
 				IupSetInt( ih, "REMOVEITEM", limit );
-				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+				IupSetAttributeId( ih, "INSERTITEM", 1, GLOBAL.cString.convert( text ) );
 			}
 			else
 			{
 				
-				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+				IupSetAttributeId( ih, "INSERTITEM", 1, GLOBAL.cString.convert( text ) );
 			}
 		}
 	}

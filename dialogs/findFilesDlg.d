@@ -127,16 +127,16 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", "FreeMono,Bold 9" );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
 		}
 		
 		createLayout();
 
-		IupSetAttribute( listFind, "VALUE",toStringz( findWhat, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+		IupSetAttribute( listFind, "VALUE", GLOBAL.cString.convert( findWhat ) );
 
 		IupSetHandle( "btnCANCEL_findinfiles", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
@@ -165,7 +165,7 @@ class CFindInFilesDialog : CBaseDialog
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog
 	{
-		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE", GLOBAL.cString.convert( selectedWord ) );
 		IupShow( _dlg );
 		return null;
 	}	
@@ -178,7 +178,7 @@ class CFindInFilesDialog : CBaseDialog
 
 	void setStatusBar( char[] text )
 	{
-		IupSetAttribute( labelStatus, "TITLE", toStringz( text, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+		IupSetAttribute( labelStatus, "TITLE", GLOBAL.cString.convert( text ) );
 	}
 }
 
