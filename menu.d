@@ -238,7 +238,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.108\nBy Kuan Hsu (Taiwan)\n2015.09.28" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.110\nBy Kuan Hsu (Taiwan)\n2015.10.05" );
 	});
 
 	file_menu = IupMenu( 	item_new, 

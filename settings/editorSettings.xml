@@ -8,10 +8,10 @@
     <toggle00 LineMargin="ON" BookmarkMargin="ON" FoldMargin="ON" IndentGuide="ON" CaretLine="ON" WordWrap="OFF" TabUseingSpace="OFF" AutoIndent="ON" TabWidth="4"/>
     <font Default="Verdana, 10" Document="Inconsolata, 11" Leftside="Verdana, 10" Filelist="Calibri, 10" Project="Calibri, 9" Outline="Calibri, 9" Bottom="Verdana, 10" Output="Consolas, 8" Search="Consolas, 8"/>
     <color caretLine="255 255 128" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"/>
-    <shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F11" messagewindow="+++F12" showtype="+++F1" reparse="+++F2"/>
+    <shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F11" messagewindow="+++F12" showtype="+++F1" reparse="+++F2" save="C+++S" saveall="C+S++S" close="C+++W"/>
   </editor>
   <buildtools>
-    <compilerpath>D:/CodingPark/FreeBASIC-1.03.0-win32/fbc.exe</compilerpath>
+    <compilerpath>D:/CodingPark/FreeBASIC-1.04.0-win32/fbc.exe</compilerpath>
     <debuggerpath>D:/CodingPark/FreeBASIC-1.02.1-win32/bin/win32/gdb.exe</debuggerpath>
     <maxerror>30</maxerror>
   </buildtools>

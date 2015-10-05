@@ -156,6 +156,10 @@ extern(C) // Callback for CSingleTextDialog
 			case "On/Off Bottom-side Window":	pos = 12;	break;
 			case "Show Type":					pos = 13;	break;
 			case "Reparse":						pos = 14;	break;
+			case "Save File":					pos = 15;	break;
+			case "Save All":					pos = 16;	break;
+			case "Close File":					pos = 17;	break;
+
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;

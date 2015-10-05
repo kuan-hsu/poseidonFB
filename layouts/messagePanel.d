@@ -35,12 +35,26 @@ void createMessagePanel()
 	IupSetAttribute( GLOBAL.searchOutputPanel, "FONTSIZE", "8" );
 	IupSetCallback( GLOBAL.searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
 
+/*
+	GLOBAL.debugPanel = IupText( null );
+	IupSetAttribute( GLOBAL.debugPanel, "MULTILINE", "YES" );
+	IupSetAttribute( GLOBAL.debugPanel, "SCROLLBAR", "VERTICAL" );
+	IupSetAttribute( GLOBAL.debugPanel, "EXPAND", "YES" );
+	IupSetAttribute( GLOBAL.debugPanel, "VISIBLELINES", "0" );
+	IupSetAttribute( GLOBAL.debugPanel, "VISIBLECOLUMNS", null );
+	IupSetAttribute( GLOBAL.debugPanel, "FONTSIZE", "8" );
+	//IupSetCallback( debugPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
+*/
+
 
 	IupSetAttribute( GLOBAL.outputPanel, "TABTITLE", "Output" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "TABTITLE", "Search" );
+	IupSetAttribute( GLOBAL.debugPanel, "TABTITLE", "Debug" );
+	
 	
 	IupSetAttribute( GLOBAL.outputPanel, "TABIMAGE", "icon_message" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "TABIMAGE", "icon_find" );
+	IupSetAttribute( GLOBAL.debugPanel, "TABIMAGE", "icon_debug" );
 }
 
 

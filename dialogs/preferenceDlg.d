@@ -530,7 +530,10 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "outlinewindow", convertShortKeyValue2String( GLOBAL.shortKeys[11].keyValue ) )
 		.attribute( null, "messagewindow", convertShortKeyValue2String( GLOBAL.shortKeys[12].keyValue ) )
 		.attribute( null, "showtype", convertShortKeyValue2String( GLOBAL.shortKeys[13].keyValue ) )
-		.attribute( null, "reparse", convertShortKeyValue2String( GLOBAL.shortKeys[14].keyValue ) );
+		.attribute( null, "reparse", convertShortKeyValue2String( GLOBAL.shortKeys[14].keyValue ) )
+		.attribute( null, "save", convertShortKeyValue2String( GLOBAL.shortKeys[15].keyValue ) )
+		.attribute( null, "saveall", convertShortKeyValue2String( GLOBAL.shortKeys[16].keyValue ) )
+		.attribute( null, "close", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) );
 		
 
 		/*
@@ -850,6 +853,28 @@ class CPreferenceDialog : CBaseDialog
 				ShortKey sk = { "Reparse", convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys ~= sk;
 			}			
+
+			result = root.query.descendant("shortkeys").attribute("save");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Save File", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}			
+
+			result = root.query.descendant("shortkeys").attribute("saveall");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Save All", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}			
+
+			result = root.query.descendant("shortkeys").attribute("close");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Close File", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}			
+
 
 			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
 			GLOBAL.txtCompilerOptions = fileCompilerOptions.read;

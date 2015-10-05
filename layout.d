@@ -58,7 +58,7 @@ void createExplorerWindow()
 	
 	createMessagePanel();
 
-	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, null );
+	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, null );/*GLOBAL.debugPanel, null );*/
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, GLOBAL.messageWindowTabs );

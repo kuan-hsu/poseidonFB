@@ -1,6 +1,14 @@
 ﻿module images.imageData;
 
-private import iup.iup;
+import iup.iup;
+
+import tools;
+
+import tango.io.device.File;
+import tango.io.stream.Lines;
+import tango.stdc.stringz;
+import Util = tango.text.Util;
+import Integer = tango.text.convert.Integer;
 
 /+
 import tango.io.device.File;
@@ -108,7 +116,7 @@ void load_all_images_image()
 	Ihandle* undo = loadLed( "icons\\undo_edit.led" );
 	IupSetHandle( "icon_undo", undo );
 }
-
++/
 
 struct ColorIndexUint
 {
@@ -145,27 +153,20 @@ Ihandle* loadLed( char[] filePath )
 						// double quote
 						int firstDoubleQuote = Util.index( data[1], "\"" );
 						int lastDoubleQuote = Util.rindex( data[1], "\"" );
-						char[] _data1 = data[1][firstDoubleQuote+1..lastDoubleQuote];
 						
-						ColorIndexUint temp = [ Util.trim(data[0]), _data1 ];
+						char[] _data1 = data[1][firstDoubleQuote+1..lastDoubleQuote];
+						char[] _data0 = Util.trim(data[0]);
+						
+						ColorIndexUint temp;
+						temp.index = _data0;
+						temp.colorValue = _data1;
+
 						colorIndexes ~= temp;
 					}
 				}
 				else if( bReadData )
 				{
-					//if( filePath == "icons\\compile.led" ) IupMessage( " ", toStringz(line) );
 					_imgData ~= line;
-					/*				
-					foreach( char[] s; Util.split( line, "," ) )
-					{
-						char[] _s = Util.trim( s ).dup;
-						if( _s.length )
-						{
-							imgData ~= cast(ubyte) Integer.atoi( _s.dup );
-							//if( filePath == "icons\\compile.led" ) IupMessage( " ", toStringz(_s) );
-						}
-					}
-					*/
 				}
 
 				if( line == "[" )
@@ -187,32 +188,20 @@ Ihandle* loadLed( char[] filePath )
 
 		if( _imgData.length )
 		{
-			//if( filePath == "icons\\build.led" ) IupMessage("",toStringz( Integer.toString(imgData.length ) ));
-			//IupMessage(toStringz(filePath),toStringz(_imgData));
 			foreach( char[] s; Util.split( _imgData.dup, "," ) )
 			{
-				//IupMessage(toStringz(filePath),toStringz(">"~s~"<"));
-				//IupMessage(toStringz(filePath),toStringz(">"~Util.trim( s )~"<"));
-				
 				ubyte b = Integer.atoi(Util.trim( s ));
 				imgData ~= b;
-				/*
-				if( b >
-				if( _s.length )
-				{
-					imgData ~= cast(ubyte) Integer.atoi( _s.dup );
-					//if( filePath == "icons\\compile.led" ) IupMessage( " ", toStringz(_s) );
-				}
-				*/
 			}
 
 		
 			image = IupImage( width, height, imgData.ptr );
+			int colorIndex;
 			foreach( ColorIndexUint c; colorIndexes )
 			{
-				//IupMessage(toStringz(filePath), toStringz(c.index ~ ":" ~ c.colorValue) );
-
-				IupSetAttribute( image, toStringz(c.index), toStringz(c.colorValue) );
+				auto conv0 = new CstringConvert( c.index );
+				auto conv1 = new CstringConvert( c.colorValue );
+				IupSetAttribute( image, conv0.toStringz, conv1.toStringz );
 			}
 		}
 	}
@@ -223,7 +212,8 @@ Ihandle* loadLed( char[] filePath )
 	
 	return image;
 }
-+/
+
+
 Ihandle* load_image_mark_clear()
 {
   ubyte imgdata[] = [
@@ -2328,6 +2318,16 @@ void load_all_images_icons()
   IupSetHandle("IUP_enum", load_image_enum_obj());
   IupSetHandle("IUP_alias", load_image_alias_obj());
   IupSetHandle("IUP_union", load_image_union_obj());
+
+	IupSetHandle( "icon_debug", loadLed( "icons/GIF/debug/debug.led" ) );
+	IupSetHandle( "icon_debug_resume", loadLed( "icons/GIF/debug/resume.led" ) );
+	IupSetHandle( "icon_debug_stop", loadLed( "icons/GIF/debug/stop.led" ) );
+	IupSetHandle( "icon_debug_step", loadLed( "icons/GIF/debug/step.led" ) );
+	IupSetHandle( "icon_debug_next", loadLed( "icons/GIF/debug/next.led" ) );
+	IupSetHandle( "icon_debug_return", loadLed( "icons/GIF/debug/return.led" ) );
+
 }
+
+
 
 

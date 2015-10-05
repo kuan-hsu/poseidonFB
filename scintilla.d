@@ -596,6 +596,28 @@ extern(C)
 						actionManager.OutlineAction.refresh( cSci.getFullPath() );
 					}
 					break;
+				case "Save File":					
+					if( sk.keyValue == c )
+					{
+						menu.saveFile_cb( null );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Save All":
+					if( sk.keyValue == c )
+					{
+						menu.saveAllFile_cb( null );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Close File":
+					if( sk.keyValue == c )
+					{
+						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+						if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+					}
+					break;
+					
 				default:
 			}
 		}

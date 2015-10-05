@@ -63,6 +63,7 @@ struct GLOBAL
 	
 	static Ihandle* 			outputPanel;
 	static Ihandle* 			searchOutputPanel;
+	static Ihandle* 			debugPanel;
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
 	static char*				messageSplit_value = "800";
 
@@ -142,6 +143,13 @@ static this()
 	GLOBAL.shortKeys ~= sk13;
 	ShortKey sk14 = { "Reparse", 65471 };
 	GLOBAL.shortKeys ~= sk14;
+	ShortKey sk15 = { "Save File", 536870995 };
+	GLOBAL.shortKeys ~= sk15;
+	ShortKey sk16 = { "Save All", 805306451 };
+	GLOBAL.shortKeys ~= sk16;
+	ShortKey sk17 = { "Close File", 536870999 };
+	GLOBAL.shortKeys ~= sk17;
+	
 
 	fontUint fu;
 	version( Windows )

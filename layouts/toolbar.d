@@ -41,6 +41,12 @@ Ihandle* createToolBar()
 	btnBuildAll	= IupButton( null, "MarkNext" );
 	btnQuickRun = IupButton( null, "MarkClean" );
 
+	Ihandle* btnResume	= IupButton( null, "Resume" );
+	Ihandle* btnStop		= IupButton( null, "Stop" );
+	Ihandle* btnStep		= IupButton( null, "Step" );
+	Ihandle* btnNext		= IupButton( null, "Next" );
+	Ihandle* btnReturn	= IupButton( null, "Return" );
+
 
 	IupSetAttributes( btnNew, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_newfile,TIP=New_File" );
 	IupSetCallback( btnNew, "ACTION", cast(Icallback) &menu.newFile_cb ); // From menu.d
@@ -170,16 +176,24 @@ Ihandle* createToolBar()
 	IupSetCallback( btnQuickRun, "ACTION", cast(Icallback) &menu.quickRun_cb ); // From menu.d
 
 
-	Ihandle*[5] labelSEPARATOR;
-	for( int i = 0; i < 5; i++ )
+	Ihandle*[6] labelSEPARATOR;
+	for( int i = 0; i < 6; i++ )
 	{
 		labelSEPARATOR[i] = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 	}
+
+	IupSetAttributes( btnResume, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_resume,TIP=Run/Resume" );
+	//IupSetCallback( btnResume, "ACTION", cast(Icallback) &menu.quickRun_cb ); // From menu.d
+	IupSetAttributes( btnStop, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_stop,TIP=Stop" );
+	IupSetAttributes( btnStep, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_step,TIP=Step" );
+	IupSetAttributes( btnNext, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_next,TIP=Next" );
+	IupSetAttributes( btnReturn, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_return,TIP=Return" );	
 	
 	// IUP Container to put buttons on~
 	hBox = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
-					btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnRun, btnBuildAll, btnQuickRun, null );
+					btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnRun, btnBuildAll, btnQuickRun, null );/* labelSEPARATOR[5],
+					btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 	IupSetAttributes( hBox, "GAP=5" );
 
 	return hBox;

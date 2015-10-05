@@ -233,7 +233,8 @@ class COutline
 
 				Ihandle* tree = IupTree();
 				activeTreeOutline = tree;
-				IupSetAttributes( activeTreeOutline, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x,TITLE=" ~ fullPath ) );
+				IupSetAttributes( activeTreeOutline, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
+				IupSetAttribute( activeTreeOutline, "TITLE", toStringz( fullPath ) );
 				IupSetCallback( activeTreeOutline, "SELECTION_CB", cast(Icallback) &COutline_selection );
 				IupSetCallback( activeTreeOutline, "RIGHTCLICK_CB", cast(Icallback) &COutline_RIGHTCLICK_CB );
 				/+

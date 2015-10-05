@@ -8,34 +8,76 @@ struct ExecuterAction
 	import global, actionManager, menu;
 
 	import tango.sys.Process, tango.core.Exception, tango.io.stream.Lines, tango.io.stream.Iterator;
-	import tango.io.Stdout, tango.stdc.stringz, tango.stdc.stdlib, tango.io.FilePath, Util = tango.text.Util;
+	import tango.io.Stdout, tango.stdc.stringz, tango.stdc.stdlib, Util = tango.text.Util, Integer = tango.text.convert.Integer;
+	import tango.io.FilePath;
 
 	import tango.core.Thread;
+	import tango.time.Time;
+	import tango.time.Clock;
+
 	
 	// Inner Class
 	class ExecuterThread : Thread
 	{
 		private :
-		char[] command;
+		char[] command, cwd;
 
 		public:
-		this( char[] _command )
+		this( char[] _command, char[] _cwd = null )
 		{
 			command = _command;
+			cwd = _cwd;
 			super( &run );
-		}
-
-		~this()
-		{
-			//IupMessage("","BYE");
-			//Stdout("BYE BYE").newline;
 		}
 
 		void run()
 		{
-			system( GLOBAL.cString.convert( command ) );
+			Process p = new Process( command, null );
+			if( cwd.length ) p.workDir( cwd );
+			p.execute;
+
+			p.wait;
 		}
 	}
+
+	class QuickRunThread : Thread
+	{
+		private:
+		char[] command, cwd;
+
+		public:
+		this( char[] _command, char[] _cwd = null )
+		{
+			command = _command;
+			cwd = _cwd;
+			super( &run );
+		}
+
+		void run()
+		{
+			Process p = new Process( command, null );
+			if( cwd.length ) p.workDir( cwd );
+			p.execute;
+
+			auto result = p.wait;
+
+            switch( result.reason )
+            {
+                case Process.Result.Exit, Process.Result.Signal, Process.Result.Stop, Process.Result.Error:
+					if( command.length )
+					{
+						if( command[0] == '"' && command[length-1] == '"' )
+						{
+							scope _f = new FilePath( command[1..length-1] );
+							_f.remove();
+						}
+					}
+                    break;
+
+                default:
+            }
+		}
+	}	
 	
 	public:
 	static bool compile()
@@ -51,7 +93,16 @@ struct ExecuterAction
 		if( cSci !is null )
 		{
 			ScintillaAction.saveFile( cSci.getIupScintilla() );
-			command = "\"" ~ GLOBAL.compilerFullPath ~ "\" -c \"" ~ cSci.getFullPath() ~ "\"";
+			version( Windows )
+			{
+				//command = "\"" ~ GLOBAL.compilerFullPath ~ "\" -c \"" ~ cSci.getFullPath() ~ "\"";
+				command = "\"" ~ GLOBAL.compilerFullPath ~ "\" \"" ~ cSci.getFullPath() ~ "\"";
+			}
+			else
+			{
+				//command = "\"" ~ GLOBAL.compilerFullPath ~ "\" -c \"" ~ cSci.getFullPath() ~ "\"";
+				command = "\"" ~ GLOBAL.compilerFullPath ~ "\" \"" ~ cSci.getFullPath() ~ "\"";
+			}
 		}
 		else
 		{
@@ -62,6 +113,7 @@ struct ExecuterAction
 		try
 		{
 			Process p = new Process( command, null );
+			p.gui( true );
 			p.execute;
 
 			char[] outputResult;
@@ -177,6 +229,7 @@ struct ExecuterAction
 				txtCommand = "\"" ~ GLOBAL.compilerFullPath ~ "\"" ~  executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption;
 
 				Process p = new Process( txtCommand, null );
+				p.gui( true );
 				p.execute;
 
 				bool	bError, bWarning;
@@ -247,8 +300,15 @@ struct ExecuterAction
 		
 		if( cSci !is null )
 		{
+			/*
 			ScintillaAction.saveFile( cSci.getIupScintilla() );
 			fileName = cSci.getFullPath();
+			*/
+			scope _f = new FilePath( cSci.getFullPath() );
+			scope time = Clock.now.unix;
+			
+			fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
+			FileAction.saveFile( fileName, cSci.getText() );
 		}
 		else
 		{
@@ -259,19 +319,24 @@ struct ExecuterAction
 		try
 		{
 			char[] commandString;
+			Process p;
+
 			version( Windows )
 			{
 				commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"";
+				p = new Process( commandString, null );
 			}
 			else
 			{
-				commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"";
-				//commandString = "/bin/sh -c " ~ GLOBAL.compilerFullPath ~ " \"" ~ fileName ~ "\"" ~ "\n";
+				commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" -w 2 " ~ "\"" ~ fileName ~ "\"";
+				//commandString = "/bin/sh -c \"" ~ GLOBAL.compilerFullPath ~ " -b " ~ fileName ~ "\"";
+				char[][char[]] env;
+				
+				//env["PATH"] = "/user/bin/";
+				env["PATH"] = "/usr/local/FreeBASIC-1.03.0-linux-x86_64/bin";
+				p = new Process( commandString, env );
 			}
-
-
-			//Process p = new Process( commandString, null );
-			Process p = new Process( commandString, null );
+			p.gui( true );
 			p.execute;
 
 			bool	bError, bWarning;
@@ -318,6 +383,10 @@ struct ExecuterAction
 					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
 
 				char[] command;
+
+				scope _f = new FilePath( fileName );
+				_f.remove();
+				
 				int dotIndex = Util.rindex( fileName, "." );
 				if( dotIndex < fileName.length )
 				{
@@ -336,7 +405,7 @@ struct ExecuterAction
 				exe.execute;
 				+/
 				
-				auto derived = new ExecuterThread( command );
+				auto derived = new QuickRunThread( "\"" ~ command ~ "\"", _f.path );
 				derived.start();
 				
 			}
@@ -447,7 +516,7 @@ struct ExecuterAction
 			Process exe = new Process(  "cmd.exe /k " ~ fullPath , null );
 			exe.execute;
 			+/
-			auto derived = new ExecuterThread( command );
+			auto derived = new ExecuterThread( "\"" ~ command ~ "\"", f.path );
 			derived.start();
 		}
 		else
