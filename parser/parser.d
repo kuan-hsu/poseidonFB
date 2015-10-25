@@ -196,8 +196,21 @@ class CParser
 			case TOK.Tsingle, TOK.Tdouble:
 			case TOK.Tstring, TOK.Tzstring, TOK.Twstring:
 			case TOK.Tany:
-			case TOK.Tidentifier:
 				return token.identifier;
+			
+			case TOK.Tidentifier:
+				char[] _type;
+				while( next().tok == TOK.Tdot )
+				{
+					_type ~= token.identifier;
+					parseToken( TOK.Tidentifier );
+					_type ~= token.identifier;
+					parseToken( TOK.Tdot );
+				}
+
+				if( !_type.length ) _type = token.identifier;else _type ~= token.identifier;
+
+				return _type;
 
 			default:
 		}
@@ -205,6 +218,14 @@ class CParser
 	}
 
 	// Return (..............)
+	/*
+	parameter_list: parameter[, parameter[, ...]]
+	parameter: [ByRef|ByVal] identifier [As type] [= default_value]
+
+	identifier: the name of the variable referenced in the function. If the argument is an array then the identifier must be followed by an empty parenthesis. 
+	type: the type of variable
+	default_value: the value of the argument if none is specified in the call
+	*/	
 	char[] parseParam( bool bDeclare )
 	{
 		char[] _param = "(";
@@ -224,59 +245,77 @@ class CParser
 
 					//if( token().tok == TOK.Tidentifier )
 					//{
-						_name = token().identifier;
-						_lineNum = token().lineNumber;
+					_name = token().identifier;
+					_lineNum = token().lineNumber;
 
-						//parseToken( TOK.Tidentifier );
-						parseToken();
+					//parseToken( TOK.Tidentifier );
+					parseToken();
 
-						// Array
-						if( token().tok == TOK.Topenparen ) _name ~= parseArray();
+					// Array
+					if( token().tok == TOK.Topenparen ) _name ~= parseArray();
 
-						_param ~= ( _name ~ " " );
-						
-						if( token().tok == TOK.Tas )
+					_param ~= ( _name ~ " " );
+					
+					if( token().tok == TOK.Tas )
+					{
+						_param ~= ( token().identifier ~ " " );
+						parseToken( TOK.Tas );
+
+						if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+						_type = getVariableType();
+						if( _type.length )
 						{
-							_param ~= ( token().identifier ~ " " );
-							parseToken( TOK.Tas );
+							_param ~= ( _type ~ " " );
+							parseToken();
 
-							if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
-
-							_type = getVariableType();
-							if( _type.length )
+							while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
 							{
-								_param ~= ( _type ~ " " );
+								_type ~= "*";
 								parseToken();
-
-								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
-								{
-									_type ~= "*";
-									parseToken();
-								}
-								
-								if( token().tok == TOK.Tassign )
-								{
-									parseToken( TOK.Tassign );
-									if( token().tok != TOK.Tnumbers && token().tok != TOK.Tstrings && token().tok != TOK.Tidentifier ) return null;else parseToken();
-								}
+							}
 							
-								if( token().tok == TOK.Tcomma || token().tok == TOK.Tcloseparen )
+							if( token().tok == TOK.Tassign )
+							{
+								parseToken( TOK.Tassign );
+								if( token().tok != TOK.Tnumbers && token().tok != TOK.Tstrings && token().tok != TOK.Tidentifier )
 								{
-									_param = Util.trim( _param );
-									
-									if( !bDeclare ) activeASTnode.addChild( _name, B_PARAM, null, _type, null, _lineNum );
-									if( token().tok == TOK.Tcomma )
+									return null;
+								}
+								else
+								{
+									parseToken();
+									if( token().tok == TOK.Topenparen ) // The default_value call the define function
 									{
-										_param ~= ( token().identifier );
-										parseToken( TOK.Tcomma );
+										do
+										{
+											if( tokenIndex >= tokens.length ) break;
+											parseToken();
+										}
+										while( token().tok != TOK.Tcloseparen )
+
+										parseToken( TOK.Tcloseparen );
 									}
 								}
 							}
-							else
+						
+							if( token().tok == TOK.Tcomma || token().tok == TOK.Tcloseparen )
 							{
-								break;
+								_param = Util.trim( _param );
+								
+								if( !bDeclare ) activeASTnode.addChild( _name, B_PARAM, null, _type, null, _lineNum );
+								if( token().tok == TOK.Tcomma )
+								{
+									_param ~= ( token().identifier );
+									parseToken( TOK.Tcomma );
+								}
 							}
 						}
+						else
+						{
+							break;
+						}
+					}
 					//}
 					//else
 					//{
@@ -355,7 +394,27 @@ class CParser
 
 		return result;
 	}
+	
+	/*
+	Dim [Shared] name1 As DataType [, name2 As DataType, ...]
 
+	or
+
+	Dim [Shared] As DataType name1 [, name2, ...]
+
+	Arrays:
+
+	Dim name ( [lbound To] ubound [, ...] ) As DataType
+	Dim name ( Any [, Any...] ) As DataType
+	Dim name ( ) As DataType
+
+
+	Initializers:
+
+	Dim scalar_symbol As DataType = expression | Any
+	Dim array_symbol (arraybounds) As DataType = { expression [, ...] } | Any
+	Dim udt_symbol As DataType = ( expression [, ...] ) | Any
+	*/
 	bool parseVariable()
 	{
 		bool bConst;
@@ -497,7 +556,42 @@ class CParser
 		return false;
 	}
 
-	// Declare [Static] Sub procedure_name [Cdecl|Stdcall|Pascal] Overload [Alias "external_name"] [([parameter_list])] [Constructor [priority]] [Static] [Export]
+	bool parseNamespace()
+	{
+		try
+		{
+			parseToken( TOK.Tnamespace );
+			if( token().tok == TOK.Tidentifier )
+			{
+				activeASTnode = activeASTnode.addChild( token().identifier, B_NAMESPACE, null, null, null, token().lineNumber );
+				parseToken( TOK.Tidentifier );
+				return true;
+			}
+		}
+		catch( Exception e )
+		{
+
+		}
+
+		return false;
+	}
+	
+	/*
+	Declare [Static] Sub procedure_name [Cdecl|Stdcall|Pascal] Overload [Alias "external_name"] [([parameter_list])] [Constructor [priority]] [Static] [Export]
+	identifier: the name of the function
+	external_identifier: externally visible (to the linker) name enclosed in quotes
+	parameter_list: parameter[, parameter[, ...]]
+	parameter: [ByRef|ByVal] identifier [As type] [= default_value]
+
+	identifier: the name of the variable referenced in the function. If the argument is an array then the identifier must be followed by an empty parenthesis. 
+	type: the type of variable
+	default_value: the value of the argument if none is specified in the call
+
+	return_type: the type of variable returned by the function
+	statements: one or more statements that make up the function body
+	return_value: the value returned from the function
+	*/
+	
 	bool parseProcedure( bool bDeclare, char[] _protection )
 	{
 		int _kind;
@@ -626,13 +720,66 @@ class CParser
 		return false;
 	}
 
-	bool parseTypeBody()
+	/*
+	Type typename
+
+	fieldname1 As DataType
+	fieldname2 As DataType
+	As DataType fieldname3, fieldname4
+	...
+
+	End Type
+
+	Type typename [Extends base_typename] [Field = alignment]
+
+	[Private:|Public:|Protected:]
+
+	Declare Sub|Function|Constructor|Destructor|Property|Operator ...
+	Static variablename As DataType
+
+	fieldname As DataType [= initializer]
+	fieldname(array dimensions) As DataType [= initializer]
+	fieldname(Any [, Any...]) As DataType
+	fieldname : bits As DataType [= initializer]
+
+	As DataType fieldname [= initializer], ...
+	As DataType fieldname(array dimensions) [= initializer], ...
+	As DataType fieldname(Any [, Any...])
+	As DataType fieldname : bits [= initializer], ...
+
+	Union
+
+	fieldname As DataType
+	Type
+
+	fieldname As DataType
+	...
+
+	End Type
+	...
+
+	End Union
+
+	...
+
+	End Type
+	*/
+	bool parseTypeBody( int B_KIND )
 	{
 		try
 		{
 			char[] _protection;
+
+			switch( B_KIND )
+			{
+				case B_TYPE:	B_KIND = TOK.Ttype; break;
+				case B_UNION:	B_KIND = TOK.Tunion; break;
+				case B_ENUM:	B_KIND = TOK.Tenum; break;
+				default:
+					B_KIND = TOK.Ttype;
+			}
 			
-			while( token().tok != TOK.Tend && next().tok !=TOK.Ttype )
+			while( token().tok != TOK.Tend && next().tok != B_KIND )
 			{
 				char[]	_type, _name;
 				int		_lineNum;
@@ -690,12 +837,20 @@ class CParser
 								// Array
 								if( token().tok == TOK.Topenparen ) _name ~= parseArray();
 
+								// As DataType fieldname : bits [= initializer], ...
+								if( token().tok == TOK.Tcolon )
+								{
+									parseToken( TOK.Tcolon );
+									if( token().tok == TOK.Tnumbers ) parseToken( TOK.Tnumbers );else return false;
+								}
+
+								// [= initializer]
 								if( token().tok == TOK.Tassign )
 								{
 									parseToken( TOK.Tassign );
 									if( token().tok == TOK.Tstring || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
 								}
-										
+
 								if( token().tok == TOK.Tcomma )
 								{
 									activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
@@ -742,17 +897,39 @@ class CParser
 					case TOK.Teol, TOK.Tcolon:
 						tokenIndex ++;
 						break;
-						
+
+					case TOK.Tunion:
+						parseToken( TOK.Tunion );
+						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+						{
+							tokenIndex ++;
+							parseTypeBody( B_UNION );
+							if( token().tok == TOK.Tend )
+							{
+								if( next().tok == TOK.Tunion )
+								{
+									parseToken( TOK.Tend );
+									parseToken( TOK.Tunion );
+								}
+							}
+						}
+						break;
 
 					//case TOK.Tidentifier:
 					default:
-
 						_name = token().identifier;
 						_lineNum = token().lineNumber;
-						parseToken( TOK.Tidentifier );
+						parseToken(); 
 
 						// Array
-						if( token().tok == TOK.Topenparen ) _name ~= parseArray();						
+						if( token().tok == TOK.Topenparen ) _name ~= parseArray();
+
+						// fieldname : bits As DataType [= initializer]
+						if( token().tok == TOK.Tcolon )
+						{
+							parseToken( TOK.Tcolon );
+							if( token().tok == TOK.Tnumbers ) parseToken( TOK.Tnumbers );else return false;
+						}
 					
 						if( token().tok == TOK.Tas )
 						{
@@ -768,7 +945,15 @@ class CParser
 								{
 									_type ~= "*";
 									parseToken();
-								}								
+								}
+
+								// [= initializer]
+								if( token().tok == TOK.Tassign )
+								{
+									parseToken( TOK.Tassign );
+									if( token().tok == TOK.Tstring || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
+								}
+							
 								activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
 							}
 						}
@@ -916,11 +1101,12 @@ class CParser
 
 					if( token().tok == TOK.Tfield )
 					{
+						
 						if( next().tok == TOK.Tassign )
 						{
 							parseToken( TOK.Tfield );
 							parseToken( TOK.Tassign );
-							if( token().tok == TOK.Tnumbers ) parseToken( TOK.Tnumbers );else return false;
+							parseToken( TOK.Tnumbers );//else return false;
 						}
 						else
 						{
@@ -932,7 +1118,7 @@ class CParser
 					{
 						if( bClass ) activeASTnode = activeASTnode.addChild( _name, B_CLASS, null, null, _base, _lineNum ); else activeASTnode = activeASTnode.addChild( _name, _kind, null, null, _base, _lineNum );
 						parseToken( TOK.Teol );
-						parseTypeBody();
+						parseTypeBody( _kind );
 					}
 				}
 			}
@@ -1017,7 +1203,7 @@ class CParser
 
 			switch( token().tok )
 			{
-				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion:
+				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace:
 					parseToken();
 					if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather();
 
@@ -1112,6 +1298,10 @@ class CParser
 					
 				case TOK.Tenum:
 					parseEnum();
+					break;
+
+				case TOK.Tnamespace:
+					parseNamespace();
 					break;
 					
 				case TOK.Tdeclare:

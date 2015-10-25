@@ -19,7 +19,8 @@ class CSingleTextDialog : CBaseDialog
 		Ihandle* label = IupLabel( GLOBAL.cString.convert( labelName ) );
 		
 		textResult = IupText( null );
-		IupSetAttribute( textResult, "SIZE", "100x12" );
+		//IupSetAttribute( textResult, "SIZE", "100x12" );
+		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetHandle( "CSingleTextDialog_text", textResult );
 
 		Ihandle* hBox = IupHbox( label, textResult, null );
@@ -27,6 +28,9 @@ class CSingleTextDialog : CBaseDialog
 
 		Ihandle* vBox = IupVbox( hBox, bottom, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ALEFT,MARGIN=5x5,GAP=2,EXPAND=YES" );
+
+		IupSetAttribute( btnOK, "SIZE", "40x12" );
+		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );
 
 		IupAppend( _dlg, vBox );
 	}	

@@ -70,6 +70,9 @@ class CScintilla
 		IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
 		IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
 		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
+
+		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
+
 		
 		init( _fullPath );
 	}	
@@ -77,6 +80,24 @@ class CScintilla
 	~this()
 	{
 		IupSetHandle( GLOBAL.cString.convert( fullPath ), null );
+		if( !GLOBAL.debugPanel.isRunning && !GLOBAL.debugPanel.isExecuting )
+		{
+			int count = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" );
+			for( int i = count; i > 0; -- i )
+			{
+				char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
+				char[] id = Util.trim( listValue[0..6] );
+				char[] ln = Util.trim( listValue[6..12] );
+				char[] fn = Util.trim( listValue[12..length] );
+
+				if( id == "-1" )
+				{
+					if( fn == fullPath ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
+				}
+			}			
+		}
+
+		
 		if( title !is null ) delete title;
 		if( sci != null ) IupDestroy( sci );
 	}
@@ -147,6 +168,11 @@ class CScintilla
 		return fromStringz( title.toStringz ).dup;
 	}
 
+	CstringConvert getTitleHandle()
+	{
+		return title;
+	}
+
 	char[] getFullPath()
 	{
 		return fullPath;
@@ -156,7 +182,7 @@ class CScintilla
 	{
 		// Remove Old Handle
 		IupSetHandle( GLOBAL.cString.convert( fullPath ), null );
-		GLOBAL.scintillaManager.remove( fullPath );
+		GLOBAL.scintillaManager.remove( upperCase(fullPath) );
 
 		fullPath = newFullPath;
 		
@@ -170,7 +196,7 @@ class CScintilla
 		}		
 		IupSetHandle( fullPath.ptr, sci );
 
-		GLOBAL.scintillaManager[fullPath] = this;
+		GLOBAL.scintillaManager[upperCase(fullPath)] = this;
 
 		// Change the fileListTree's node
 		int nodeCount = IupGetInt( GLOBAL.fileListTree, "COUNT" );
@@ -281,6 +307,15 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFGCOLOR12", "16 108 232");	// SCE_B_KEYWORD4 12
 		IupSetAttribute(sci, "STYLEFGCOLOR19", "0 128 0");		// SCE_B_COMMENTBLOCK 19
 
+		// Brace Hightlight
+		IupSetAttribute(sci, "STYLEFGCOLOR34", "255 0 0");	
+		IupSetAttribute(sci, "STYLEBGCOLOR34", "0 255 0");
+		IupSetAttribute(sci, "STYLEFGCOLOR35", "255 255 0");
+		IupSetAttribute(sci, "STYLEBGCOLOR35", "255 0 255");
+		IupSetAttribute(sci, "STYLEBOLD34", "YES");
+		//IupScintillaSendMessage( sci, 2053, 34, 1 );
+
+
 		// Set Keywords to Bold
 		//IupSetAttribute(sci, "STYLEBOLD3", "YES");
 
@@ -312,10 +347,23 @@ class CScintilla
 			IupSetAttribute( sci, "MARGINSENSITIVE1", "YES" );
 			IupSetAttribute( sci, "MARKERDEFINE", "1=CIRCLE" );
 			IupSetAttribute( sci, "MARKERSYMBOL1", "CIRCLE" );
-
-			// Bookmark color
 			IupSetAttribute( sci, "MARKERFGCOLOR1", "255 128 0" );
 			IupSetAttribute( sci, "MARKERBGCOLOR1", "255 255 0" );
+
+			IupSetAttribute( sci, "MARKERDEFINE", "2=LEFTRECT" );
+			IupSetAttribute( sci, "MARKERSYMBOL2", "LEFTRECT" );
+			IupSetAttribute( sci, "MARKERFGCOLOR2", "0 0 255" );
+			IupSetAttribute( sci, "MARKERBGCOLOR2", "255 0 0" );
+
+			IupSetAttribute( sci, "MARKERDEFINE", "3=SHORTARROW" );
+			IupSetAttribute( sci, "MARKERSYMBOL3", "SHORTARROW" );
+			IupSetAttribute( sci, "MARKERFGCOLOR3", "0 0 0" );
+			IupSetAttribute( sci, "MARKERBGCOLOR3", "255 0 0" );
+
+			IupSetAttribute( sci, "MARKERDEFINE", "4=UNDERLINE" );
+			IupSetAttribute( sci, "MARKERSYMBOL4", "UNDERLINE" );
+			IupSetAttribute( sci, "MARKERFGCOLOR4", "255 0 0" );
+			IupSetAttribute( sci, "MARKERBGCOLOR4", "255 0 0" );
 		}
 		else 
 		{
@@ -350,8 +398,10 @@ class CScintilla
 		//IupScintillaSendMessage( sci, 2122, Integer.atoi(GLOBAL.editorSetting00.TabWidth), 0 ); // SCI_SETINDENT = 2122
 		if( GLOBAL.editorSetting00.IndentGuide == "ON" ) IupSetAttribute( sci, "INDENTATIONGUIDES", "REAL" ); else IupSetAttribute( sci, "INDENTATIONGUIDES", "NONE" );
 		if( GLOBAL.editorSetting00.CaretLine == "ON" ) IupScintillaSendMessage( sci, 2096, 1, 0 ); else IupScintillaSendMessage( sci, 2096, 0, 0 ); // SCI_SETCARETLINEVISIBLE = 2096
-		if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupSetAttribute( sci, "WORDWRAP", "YES" ); else IupSetAttribute( sci, "WORDWRAP", "NO" );
+		//if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupSetAttribute( sci, "WORDWRAP", "YES" ); else IupSetAttribute( sci, "WORDWRAP", "NO" );
+		if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupScintillaSendMessage( sci, 2268, 1, 0 ); else IupScintillaSendMessage( sci, 2268, 0, 0 ); //#define SCI_SETWRAPMODE 2268
 		if( GLOBAL.editorSetting00.TabUseingSpace == "ON" ) IupSetAttribute( sci, "USETABS", "NO" ); else IupSetAttribute( sci, "USETABS", "YES" );
+
 
 
 		// Color
@@ -414,7 +464,7 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2405, 22, cast(int) XPM.import_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 23, cast(int) XPM.autoWord_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 
-			//SendMessage( sci, 2405, 29, cast(int) XPM.functionpointer_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2405, 24, cast(int) XPM.namespace_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 		}
 		else
 		{
@@ -453,6 +503,8 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2627, 21, cast(int) XPM.normal_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 22, cast(int) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 23, cast(int) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+
+			IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_xpm.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 		}
 	}
 }
@@ -464,9 +516,29 @@ extern(C)
 {
 	int marginclick_cb( Ihandle* ih, int margin, int line, char* status )
 	{
+		char[] statusString = fromStringz( status ).dup;
+		
 		switch( margin )
 		{
 			case 1:
+				// With control
+				if( statusString[1] == 'C' ) 
+				{
+					uint state = IupGetIntId( ih, "MARKERGET", line );
+					if( state & ( 1 << 2 ) )
+					{
+						IupScintillaSendMessage( ih, 2044, line, cast(int) 2 ); // #define SCI_MARKERDELETE 2044
+						GLOBAL.debugPanel.removeBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+					}
+					else
+					{
+						IupScintillaSendMessage( ih, 2043, line, cast(int) 2 ); // #define SCI_MARKERADD 2043
+						GLOBAL.debugPanel.addBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+					}
+					break;
+				}
+			
+				
 				if( IupGetIntId( ih, "MARKERGET", line ) & 2 )
 				{
 					IupSetIntId( ih, "MARKERDELETE", line, 1 );
@@ -475,11 +547,12 @@ extern(C)
 				{
 					IupSetIntId( ih, "MARKERADD", line, 1 );
 				}
-				//IupMessage("MARK",IupGetAttributeId( ih, "MARKERGET", line ) );
 				break;
+				
 			case 2:
 				IupSetfAttribute( ih, "FOLDTOGGLE", "%d", line );
 				break;
+				
 			default:
 		}
 
@@ -499,7 +572,15 @@ extern(C)
 					if( pos > -1 )
 					{
 						_title = "*" ~ _title;
-						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+						auto cSci = ScintillaAction.getCScintilla( ih );
+						if( cSci !is null )
+						{
+							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, cSci.getTitleHandle().convert( _title ) );
+						}
+						else
+						{
+							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+						}
 					}
 				}
 			}
@@ -514,7 +595,15 @@ extern(C)
 					if( pos > -1 )
 					{
 						_title = _title[1..length];
-						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+						auto cSci = ScintillaAction.getCScintilla( ih );
+						if( cSci !is null )
+						{
+							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, cSci.getTitleHandle().convert( _title ) );
+						}
+						else
+						{
+							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+						}						
 					}
 				}
 			}
@@ -535,7 +624,13 @@ extern(C)
 	{
 		if( pressed == 0 ) //release
 		{
-			//if( button == '2' )	AutoComplete.toDefintionAndType( true );
+			char[] s = fromStringz( status );
+
+			// "Goto Defintion":
+			if( s[1] == 'C' )
+			{
+				if( button == '1' )	AutoComplete.toDefintionAndType( true );
+			}
 			
 			actionManager.StatusBarAction.update();
 		}
@@ -563,22 +658,89 @@ extern(C)
 		{
 			switch( sk.name )
 			{
-				case "Find/Replace":				if( sk.keyValue == c ) menu.findReplace_cb();							break;
-				case "Find/Replace In Files":		if( sk.keyValue == c ) menu.findReplaceInFiles();						break;
-				case "Find Next":					if( sk.keyValue == c ) menu.findNext_cb();								break;
-				case "Find Previous":				if( sk.keyValue == c ) menu.findPrev_cb();								break;
-				case "Goto Line":					if( sk.keyValue == c ) menu.item_goto_cb();								break;
-				case "Undo":						if( sk.keyValue == c ) menu.undo_cb();									break;
-				case "Redo":						if( sk.keyValue == c ) menu.redo_cb();									break;
-				case "Goto Defintion":				if( sk.keyValue == c ) AutoComplete.toDefintionAndType( true );			break;
-				case "Quick Run":					if( sk.keyValue == c ) menu.quickRun_cb( null );						break;
-				case "Run":							if( sk.keyValue == c ) menu.run_cb( null );								break;
-				case "Build":						if( sk.keyValue == c ) menu.buildAll_cb( null );						break;
+				case "Find/Replace":				
+					if( sk.keyValue == c )
+					{
+						menu.findReplace_cb();
+						return IUP_IGNORE;
+					}
+					break;
+				case "Find/Replace In Files":
+					if( sk.keyValue == c )
+					{ 
+						menu.findReplaceInFiles();
+						return IUP_IGNORE;
+					}
+					break;
+				case "Find Next":
+					if( sk.keyValue == c )
+					{
+						menu.findNext_cb();
+						return IUP_IGNORE;
+					}
+					break;
+				case "Find Previous":
+					if( sk.keyValue == c )
+					{
+						menu.findPrev_cb();
+						return IUP_IGNORE;
+					}
+					break;
+				case "Goto Line":
+					if( sk.keyValue == c )
+					{
+						menu.item_goto_cb();
+						return IUP_IGNORE;
+					}
+					break;
+				case "Undo":
+					if( sk.keyValue == c )
+					{
+						menu.undo_cb();
+						return IUP_IGNORE;
+					}
+					break;
+				case "Redo":						
+					if( sk.keyValue == c )
+					{
+						menu.redo_cb();
+						return IUP_IGNORE;
+					}
+					break;
+				case "Goto Defintion":
+					if( sk.keyValue == c )
+					{
+						AutoComplete.toDefintionAndType( true );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Quick Run":
+					if( sk.keyValue == c )
+					{
+						menu.quickRun_cb( null );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Run":
+					if( sk.keyValue == c )
+					{
+						menu.run_cb( null );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Build":
+					if( sk.keyValue == c )
+					{
+						menu.buildAll_cb( null );
+						return IUP_IGNORE;
+					}
+					break;
 				case "On/Off Left-side Window":
 					if( sk.keyValue == c ) 
 					{
 						menu.outline_cb( GLOBAL.menuOutlineWindow );
 						IupSetFocus( ih );
+						return IUP_IGNORE;
 					}
 					break;
 				case "On/Off Bottom-side Window":
@@ -586,9 +748,16 @@ extern(C)
 					{
 						menu.message_cb( GLOBAL.menuMessageWindow );
 						IupSetFocus( ih );
+						return IUP_IGNORE;
 					}
 					break;
-				case "Show Type":					if( sk.keyValue == c ) AutoComplete.toDefintionAndType( false );		break;
+				case "Show Type":
+					if( sk.keyValue == c )
+					{
+						AutoComplete.toDefintionAndType( false );
+						return IUP_IGNORE;
+					}
+					break;
 				case "Reparse":
 					if( sk.keyValue == c )
 					{
@@ -617,7 +786,37 @@ extern(C)
 						if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
 					}
 					break;
-					
+
+				case "Next Tab":
+					if( sk.keyValue == c )
+					{
+						int count = IupGetChildCount( GLOBAL.documentTabs );
+						if( count > 1 )
+						{
+							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+							if( id < count - 1 ) ++id; else id = 0;
+							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+						}
+						return IUP_IGNORE;
+					}
+					break;
+
+				case "Previous Tab":
+					if( sk.keyValue == c )
+					{
+						int count = IupGetChildCount( GLOBAL.documentTabs );
+						if( count > 1 )
+						{
+							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+							if( id > 0 ) --id; else id = --count;
+							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+						}
+						return IUP_IGNORE;
+					}
+					break;
+
 				default:
 			}
 		}
@@ -752,8 +951,28 @@ extern(C)
 			}
 		}
 
+		//char[] c = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
+		int close = IupScintillaSendMessage( ih, 2353, pos, 0 ); // SCI_BRACEMATCH = 2353,
+		if( close > -1 )
+		{
+			char[] highlightPos = Integer.toString( pos ) ~ ":" ~ Integer.toString( close );
+			IupSetAttribute( ih, "BRACEHIGHLIGHT", toStringz( highlightPos ) );
+		}
+		else
+		{
+			IupSetAttribute( ih, "BRACEBADLIGHT", toStringz( "-1" ) );
+		}
+		
+
 		actionManager.StatusBarAction.update();
 
+		return IUP_DEFAULT;
+	}
+
+	int CScintilla_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
+	{
+		actionManager.ScintillaAction.openFile( fromStringz( filename ).dup  );
+		if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 		return IUP_DEFAULT;
 	}	
 }

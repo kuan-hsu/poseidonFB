@@ -2,7 +2,7 @@
 
 private import iup.iup;
 
-private import global, scintilla, actionManager, menu;
+private import global, scintilla, actionManager, menu, tools;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 
 
@@ -101,7 +101,7 @@ class CProjectTree
 	private:
 		import		project;
 		
-		Ihandle*	tree, shadowTree;
+		Ihandle*	tree;//, shadowTree;
 
 	int _createTree( char[] _prjDirName, inout char[] _titleName )
 	{
@@ -138,7 +138,12 @@ class CProjectTree
 			if( !bFolerExist )
 			{
 				IupSetAttributeId( tree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
-
+				if( pos != 0 )
+					IupSetAttributeId( tree, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );
+				else
+					IupSetAttributeId( tree, "USERDATA", folderLocateId+1, tools.getCString( splitText[counterSplitText] ) );
+				
+				/*
 				// Shadow
 				if( pos != 0 )
 				{
@@ -148,6 +153,7 @@ class CProjectTree
 				{
 					IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
 				}
+				*/
 				
 				folderLocateId ++;
 			}
@@ -168,8 +174,10 @@ class CProjectTree
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
 		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_ExecuteLeaf_cb );
 
+		/*
 		shadowTree = IupTree();
 		IupSetAttributes( shadowTree, "ADDROOT=YES,EXPAND=NO,RASTERSIZE=0x,TITLE=Projects" );
+		*/
 	}
 
 	Ihandle* getTreeHandle()
@@ -177,10 +185,12 @@ class CProjectTree
 		return tree;
 	}
 
+	/*
 	Ihandle* getShadowTreeHandle()
 	{
 		return shadowTree;
-	}	
+	}
+	*/
 
 	void CreateNewProject( char[] prjName, char[] prjDir )
 	{
@@ -188,6 +198,7 @@ class CProjectTree
 
 		IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( prjName ) );
 		IupSetAttributeId( tree, "MARKED", 1, "YES" );
+		IupSetAttribute( tree, "USERDATA1", tools.getCString( prjDir ) );
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
@@ -195,13 +206,14 @@ class CProjectTree
 		// Set Focus to Project Tree
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
 
-
+		/*
 		// Shadow
 		IupSetAttribute( shadowTree, "ADDBRANCH0", GLOBAL.cString.convert( prjDir ) );
 		IupSetAttributeId( shadowTree, "MARKED", 1, "YES" );
 		IupSetAttribute( shadowTree, "ADDBRANCH1", "Others" );
 		IupSetAttribute( shadowTree, "ADDBRANCH1", "Includes" );
 		IupSetAttribute( shadowTree, "ADDBRANCH1", "Sources" );
+		*/
 
 		//Stdout( "tree count: " ~ fromStringz( IupGetAttribute( tree, "COUNT" ) ) ).newline;
 		//Stdout( "shadowtree count: " ~ fromStringz( IupGetAttribute( shadowTree, "COUNT" ) ) ).newline;
@@ -249,15 +261,15 @@ class CProjectTree
 			// Add Project's Name to Tree
 			IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( GLOBAL.projectManager[setupDir].name ) );
 			IupSetAttributeId( tree, "MARKED", 1, "YES" );
-
+			IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
 
 			// Shadow
-			IupSetAttribute( shadowTree, "ADDBRANCH0", GLOBAL.cString.convert( setupDir ) );
+			//IupSetAttribute( shadowTree, "ADDBRANCH0", GLOBAL.cString.convert( setupDir ) );
 
 			
 			IupSetAttribute( tree, "ADDBRANCH1", "Others" );
 			// Shadow
-			IupSetAttribute( shadowTree, "ADDBRANCH1", "Others" );
+			//IupSetAttribute( shadowTree, "ADDBRANCH1", "Others" );
 	
 			foreach( char[] s; GLOBAL.projectManager[setupDir].others )
 			{
@@ -266,14 +278,15 @@ class CProjectTree
 				
 				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 
 				// Shadow
-				IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
+				//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
 			}
 			
 			IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
 			// Shadow
-			IupSetAttribute( shadowTree, "ADDBRANCH1", "Includes" );
+			//IupSetAttribute( shadowTree, "ADDBRANCH1", "Includes" );
 			foreach( char[] s; GLOBAL.projectManager[setupDir].includes )
 			{
 				char[]		userData = s;
@@ -281,14 +294,15 @@ class CProjectTree
 				
 				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 
 				// Shadow
-				IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
+				//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
 			}
 
 			IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
 			// Shadow
-			IupSetAttribute( shadowTree, "ADDBRANCH1", "Sources" );			
+			//IupSetAttribute( shadowTree, "ADDBRANCH1", "Sources" );			
 			foreach( char[] s; GLOBAL.projectManager[setupDir].sources )
 			{
 				char[]		userData = s;
@@ -296,9 +310,10 @@ class CProjectTree
 				
 				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 
 				// Shadow
-				IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
+				//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
 			}
 
 			// Set Focus to Project Tree
@@ -376,11 +391,13 @@ extern(C)
 			// Swith the doument tabs by select Tree Node, if the doument isn't exist, do nothing
 			if( fromStringz( IupGetAttribute( ih, "KIND" ) ) == "LEAF" )
 			{
-				char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+				//char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ); // shadow
+				char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
+				//IupMessage("", IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 				
-				if( fullPath in GLOBAL.scintillaManager ) 
+				if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 				{
-					Ihandle* _sci = GLOBAL.scintillaManager[fullPath].getIupScintilla;
+					Ihandle* _sci = GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla;
 					
 					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci );
 					IupSetFocus( _sci );
@@ -395,7 +412,8 @@ extern(C)
 	// Leaf Node has been Double-Click
 	int CProjectTree_ExecuteLeaf_cb( Ihandle *ih, int id )
 	{
-		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+		//char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ); // Shadow
+		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 		actionManager.ScintillaAction.openFile( fullPath.dup );
 
 		return IUP_DEFAULT;
@@ -476,7 +494,8 @@ extern(C)
 
 			case 2:		// On Source or Include Node
 			default:
-				char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+				//char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+				char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 				if( s.length )
 				{
 					if( s == "FIXED" ) return IUP_DEFAULT;
@@ -520,7 +539,7 @@ extern(C)
 	int CProjectTree_NewFile_cb( Ihandle* ih )
 	{
 		// Open Dialog Window
-		scope test = new CSingleTextDialog( 275, 120, "Create New File", "File Name:", null, false );
+		scope test = new CSingleTextDialog( 275, 96, "Create New File", "File Name:", null, false );
 		char[] fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )
@@ -597,8 +616,9 @@ extern(C)
 
 			id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Re-Get Active Focus Node ID
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fileName ) );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id+1, tools.getCString( fullPath ) );
 			// shadow
-			IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
+			//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
 
 			switch( prjFilesFolderName )
 			{
@@ -622,7 +642,7 @@ extern(C)
 
 	int CProjectTree_NewFolder_cb( Ihandle* ih )
 	{
-		scope test = new CSingleTextDialog( 290, 120, "Create New Folder", "Folder Name:", null, false );
+		scope test = new CSingleTextDialog( 290, 96, "Create New Folder", "Folder Name:", null, false );
 		char[] folderName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( folderName.length )
@@ -637,7 +657,7 @@ extern(C)
 			{
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", id, GLOBAL.cString.convert( folderName ) );
 				// shadow
-				IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", id, GLOBAL.cString.convert( folderName ) );
+				//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", id, GLOBAL.cString.convert( folderName ) );
 			}
 		}
 		
@@ -723,8 +743,9 @@ extern(C)
 
 				int	folderLocateId = actionManager.ProjectAction.addTreeNode( prjDirName ~ "/", fullPath, id );
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( fn.file ) );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( fullPath ) );
 				// shadow
-				IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
+				//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
 
 				switch( prjFilesFolderName )
 				{
@@ -750,7 +771,8 @@ extern(C)
 		int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 
 		// Shadow
-		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+		//char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 		actionManager.ScintillaAction.openFile( fullPath.dup );
 
 		return IUP_DEFAULT;
@@ -761,7 +783,8 @@ extern(C)
 		// Get Focus Tree Node ID
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		// Shadow
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+		//char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
 		int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
 		char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others
 
@@ -791,10 +814,12 @@ extern(C)
 				break;
 		}		
 
+		char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
+		if( user != null ) delete user;
 		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", id, "SELECTED" );
 
 		// Shadow
-		IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", id, "SELECTED" );
+		//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", id, "SELECTED" );
 		
 		return IUP_DEFAULT;
 	}
@@ -802,8 +827,9 @@ extern(C)
 	int CProjectTree_delete_cb( Ihandle* ih )
 	{
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
 		// Shadow
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+		//char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 
 		if( fullPath.length )
 		{
@@ -818,16 +844,16 @@ extern(C)
 
 	int CProjectTree_rename_cb( Ihandle* ih )
 	{
-		// 
-		int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+		char[]	fullPath	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
 		// Shadow
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+		//char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 
 		scope fp = new FilePath( fullPath );
 
 		char[] oldExt = fp.ext();
 
-		scope test = new CSingleTextDialog( 275, 120, "File Rename", "File Name:", fp.name(), false );
+		scope test = new CSingleTextDialog( 275, 96, "File Rename", "File Name:", fp.name(), false );
 		char[] newFileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( newFileName.length )
@@ -835,9 +861,9 @@ extern(C)
 			// ReName On Disk & Change fn
 			fp.rename( fp.path ~ "/" ~ newFileName ~ fp.suffix );
 
-			if( fullPath in GLOBAL.scintillaManager ) 
+			if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 			{
-				GLOBAL.scintillaManager[fullPath].rename( fp.toString );
+				GLOBAL.scintillaManager[upperCase(fullPath)].rename( fp.toString );
 			}				
 
 			// Shadow

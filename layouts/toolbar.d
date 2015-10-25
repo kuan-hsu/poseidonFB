@@ -162,18 +162,18 @@ Ihandle* createToolBar()
 
 
 	IupSetAttributes( btnCompile, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_compile,TIP=Compile" );
-	IupSetCallback( btnCompile, "ACTION", cast(Icallback) &menu.compile_cb ); // From menu.d
+	IupSetCallback( btnCompile, "BUTTON_CB", cast(Icallback) &compile_button_cb );
 
 	IupSetAttributes( btnRun, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_run,TIP=Run" );
-	IupSetCallback( btnRun, "ACTION", cast(Icallback) &menu.run_cb ); // From menu.d
+	IupSetCallback( btnRun, "BUTTON_CB", cast(Icallback) &run_button_cb );
 
 	IupSetAttributes( btnBuildAll, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_rebuild,TIP=Rebuild_All" );
-	IupSetAttribute( btnBuildAll, "TIP", "Rebuild All" );
+	IupSetAttribute( btnBuildAll, "TIP", "Build Project" );
 	IupSetCallback( btnBuildAll, "ACTION", cast(Icallback) &menu.buildAll_cb ); // From menu.d
 
 	IupSetAttributes( btnQuickRun, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_quickrun,TIP=Quick Run" );
 	IupSetAttribute( btnQuickRun, "TIP", "Quick Run" );
-	IupSetCallback( btnQuickRun, "ACTION", cast(Icallback) &menu.quickRun_cb ); // From menu.d
+	IupSetCallback( btnQuickRun, "BUTTON_CB", cast(Icallback) &quickRun_button_cb );
 
 
 	Ihandle*[6] labelSEPARATOR;
@@ -198,6 +198,81 @@ Ihandle* createToolBar()
 
 	return hBox;
 }
+
+
+extern( C )
+{
+	int compile_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 )
+		{
+			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			{
+				ExecuterAction.compile();
+			}
+			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			{
+				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
+				{
+					if( GLOBAL.argsDlg !is null )
+					{
+						char[][] result = GLOBAL.argsDlg.show( 1 );
+						if( result.length == 1 ) ExecuterAction.compile( result[0] );
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
+	int run_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 )
+		{
+			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			{
+				ExecuterAction.run();
+			}
+			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			{
+				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
+				{
+					if( GLOBAL.argsDlg !is null )
+					{
+						char[][] result = GLOBAL.argsDlg.show( 2 );
+						if( result.length == 1 ) ExecuterAction.run( result[0] );
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+
+	
+	int quickRun_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 )
+		{
+			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			{
+				ExecuterAction.quickRun();
+			}
+			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			{
+				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
+				{
+					if( GLOBAL.argsDlg !is null )
+					{
+						char[][] result = GLOBAL.argsDlg.show( 3 );
+						if( result.length == 2 ) ExecuterAction.quickRun( result[0], result[1] );
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+}	
+
 
 /+
 extern(C)

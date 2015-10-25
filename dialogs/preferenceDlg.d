@@ -36,7 +36,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( hBox01, "ALIGNMENT", "ACENTER" );
 
 		
-
 		Ihandle* labelDebugger = IupLabel( "Debugger Path:" );
 		IupSetAttributes( labelDebugger, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
@@ -44,12 +43,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( textDebuggerPath, "SIZE", "180x12" );
 		IupSetAttribute( textDebuggerPath, "VALUE", toStringz(GLOBAL.debuggerFullPath) );
 		IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
-		IupSetAttribute( textDebuggerPath, "ACTIVE", "NO" );
 		
 		Ihandle* btnOpenDebugger = IupButton( null, null );
 		IupSetAttribute( btnOpenDebugger, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCompileBinFile_cb );
-		IupSetAttribute( btnOpenDebugger, "ACTIVE", "NO" );
+		IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenDebuggerBinFile_cb );
 
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
@@ -290,7 +287,7 @@ class CPreferenceDialog : CBaseDialog
 
 		// Short Cut
 		Ihandle* shortCutList = IupList( null );
-		IupSetAttributes( shortCutList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES" );
+		IupSetAttributes( shortCutList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES,AUTOHIDE=YES" );
 		version( Windows )
 		{
 			IupSetAttribute( shortCutList, "FONT", "Courier New,10" );
@@ -406,6 +403,10 @@ class CPreferenceDialog : CBaseDialog
 
 		keyValue = keyValue & 0xFFFF;
 
+		if( keyValue == 0x9 ) // TAB
+		{
+			result = result ~ "TAB";
+		}
 		if( keyValue >= 0x41 && keyValue <= 90 ) // 'A' ~ 'Z'
 		{
 			char c = keyValue;
@@ -435,6 +436,10 @@ class CPreferenceDialog : CBaseDialog
 				{
 					case "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z":
 						result += cast(int) splitWord[3][0];
+						break;
+
+					case "TAB":
+						result += 9;
 						break;
 
 					default:
@@ -502,7 +507,8 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "Outline", GLOBAL.fonts[5].fontString )
 		.attribute( null, "Bottom", GLOBAL.fonts[6].fontString )
 		.attribute( null, "Output", GLOBAL.fonts[7].fontString )
-		.attribute( null, "Search", GLOBAL.fonts[8].fontString );
+		.attribute( null, "Search", GLOBAL.fonts[8].fontString )
+		.attribute( null, "Debugger", GLOBAL.fonts[9].fontString );
 
 		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
 		editorNode.element( null, "color" )
@@ -533,8 +539,9 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "reparse", convertShortKeyValue2String( GLOBAL.shortKeys[14].keyValue ) )
 		.attribute( null, "save", convertShortKeyValue2String( GLOBAL.shortKeys[15].keyValue ) )
 		.attribute( null, "saveall", convertShortKeyValue2String( GLOBAL.shortKeys[16].keyValue ) )
-		.attribute( null, "close", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) );
-		
+		.attribute( null, "close", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) )
+		.attribute( null, "nexttab", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) )
+		.attribute( null, "prevtab", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) );
 
 		/*
 		<buildtools>
@@ -695,6 +702,11 @@ class CPreferenceDialog : CBaseDialog
 			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
 
 			fu.name = "Search";
+			GLOBAL.fonts ~= fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+
+			fu.name = "Debugger";
 			GLOBAL.fonts ~= fu;
 			result = root.query.descendant("font").attribute( fu.name );
 			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
@@ -875,6 +887,20 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.shortKeys ~= sk;
 			}			
 
+			result = root.query.descendant("shortkeys").attribute("nexttab");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Next Tab", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}			
+
+			result = root.query.descendant("shortkeys").attribute("prevtab");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Previous Tab", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}
+
 
 			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
 			GLOBAL.txtCompilerOptions = fileCompilerOptions.read;
@@ -889,7 +915,7 @@ class CPreferenceDialog : CBaseDialog
 
 extern(C) // Callback for CPreferenceDialog
 {
-	int CPreferenceDialog_OpenCompileBinFile_cb()
+	private int CPreferenceDialog_OpenCompileBinFile_cb( Ihandle* ih )
 	{
 		scope fileSecectDlg = new CFileDlg( "Open File..." );
 		char[] fileName = fileSecectDlg.getFileName();
@@ -908,7 +934,26 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_DEFAULT;
 	}
 
-	int CPreferenceDialog_shortCutList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
+	private int CPreferenceDialog_OpenDebuggerBinFile_cb( Ihandle* ih )
+	{
+		scope fileSecectDlg = new CFileDlg( "Open File..." );
+		char[] fileName = fileSecectDlg.getFileName();
+
+		if( fileName.length )
+		{
+			GLOBAL.debuggerFullPath = fileName;
+			Ihandle* _debuggerPath_Handle = IupGetHandle( "debuggerPath_Handle" );
+			if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", toStringz( fileName ) );
+		}
+		else
+		{
+			//Stdout( "NoThing!!!" ).newline;
+		}
+
+		return IUP_DEFAULT;
+	}
+
+	private int CPreferenceDialog_shortCutList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
 		scope skDialog = new CShortCutDialog( 300, 140, item, fromStringz( text ).dup );
 		skDialog.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
@@ -916,7 +961,7 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_DEFAULT;
 	}
 
-	int CPreferenceDialog_fontList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
+	private int CPreferenceDialog_fontList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
 		char[] listString = fromStringz( text ).dup;
 		char[] _ls;
@@ -1043,9 +1088,7 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_DEFAULT;
 	}
 
-	
-
-	int CPreferenceDialog_btnOK_cb( Ihandle* ih )
+	private int CPreferenceDialog_btnOK_cb( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.LineMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.BookmarkMargin		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE" )).dup;
@@ -1065,21 +1108,25 @@ extern(C) // Callback for CPreferenceDialog
 				char[]	result;
 				
 				char[]	fontInformation = fromStringz( IupGetAttribute( _ft, toStringz( Integer.toString( i + 1 ) ) ) ).dup;
-				char[][] strings = Util.split( fontInformation[10..length] , "," );
-				
-				if( strings.length == 2 )
+
+				if( fontInformation.length > 10 )
 				{
-					result ~= ( Util.trim( strings[0] ) ~ "," );
-
-					foreach( char[] s; Util.split( Util.trim( strings[1] ), " " ) )
+					char[][] strings = Util.split( fontInformation[10..length] , "," );
+					
+					if( strings.length == 2 )
 					{
-						s = Util.trim( s );
-						if( s.length )	result ~= ( " " ~ s );
-					}
+						result ~= ( Util.trim( strings[0] ) ~ "," );
 
-					GLOBAL.fonts[i].name = Util.trim( fontInformation[0..10] );
-					GLOBAL.fonts[i].fontString = result;
-				}			
+						foreach( char[] s; Util.split( Util.trim( strings[1] ), " " ) )
+						{
+							s = Util.trim( s );
+							if( s.length )	result ~= ( " " ~ s );
+						}
+
+						GLOBAL.fonts[i].name = Util.trim( fontInformation[0..10] );
+						GLOBAL.fonts[i].fontString = result;
+					}
+				}		
 			}
 		}
 
@@ -1098,7 +1145,7 @@ extern(C) // Callback for CPreferenceDialog
 
 		GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
 
-		if( GLOBAL.fonts.length == 9 )
+		if( GLOBAL.fonts.length == 10 )
 		{
 			foreach( CScintilla cSci; GLOBAL.scintillaManager )
 			{
@@ -1111,6 +1158,8 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) ); // Bottom
 			IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
 			IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
+			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Debugger
+			GLOBAL.debugPanel.setFont();
 		}
 
 		// Save Setup to Xml
@@ -1119,7 +1168,7 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_CLOSE;
 	}
 
-	int CPreferenceDialog_colorChoose_cb( Ihandle* ih )
+	private int CPreferenceDialog_colorChoose_cb( Ihandle* ih )
 	{
 		Ihandle* dlg = IupColorDlg();
 

@@ -1,19 +1,18 @@
 ﻿module layouts.tabDocument;
 
 private import iup.iup;
+import iup.iup_scintilla;
 private import global, actionManager, scintilla, menu;
 
 import tango.stdc.stringz;
 
 void createTabs()
 {
-	GLOBAL.documentTabs = IupTabs( null, null );
+	GLOBAL.documentTabs = IupTabs( null );
 	//IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
-
-	
 	//IupSetCallback( GLOBAL.documentTabs, "GETFOCUS_CB", cast(Icallback) &tabFocus_cb );
 }
 
@@ -21,25 +20,23 @@ extern(C)
 {
 	int tabchangePos_cb( Ihandle* ih, int new_pos, int old_pos )
 	{
-		Ihandle* _child = IupGetChild( ih, new_pos );
-		CScintilla cSci = actionManager.ScintillaAction.getCScintilla( _child );
-		
-		if( cSci !is null )
-		{
-			IupSetFocus( _child );
-			StatusBarAction.update();
-
-			// Marked the trees( FileList & ProjectTree )
-			actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() );
-			GLOBAL.outlineTree.changeTree( cSci.getFullPath() );
-		}
-
-		return IUP_DEFAULT;
+		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos, old_pos );
 	}
 	
 	// Close the document Iuptab......
 	int tabClose_cb( Ihandle* ih, int pos )
 	{
+		Ihandle* _child = IupGetChild( ih, pos );
+		CScintilla cSci = ScintillaAction.getCScintilla( _child );
+		
+		actionManager.ScintillaAction.closeDocument( cSci.getFullPath );
+		if( GLOBAL.scintillaManager.length == 0 )
+		{
+			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", "             " );
+			IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "   " );
+			IupSetAttribute( GLOBAL.statusBar_FontType, "TITLE", "        " );	
+		}		
+		/+
 		// ih = GLOBAL.documentTabs
 		// So we need get the child's Ihandle( Iupscintilla )
 		Ihandle* _child = IupGetChild( ih, pos );
@@ -79,6 +76,7 @@ extern(C)
 				IupSetAttribute( GLOBAL.statusBar_FontType, "TITLE", "        " );	
 			}
 		}
+		+/
 
 		return IUP_CONTINUE;
 	}

@@ -89,8 +89,8 @@ class CFindInFilesDialog : CBaseDialog
 		Ihandle* btnReplaceAll = IupButton( "Replace All", null );
 		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", btnReplaceAll );
 		IupSetAttributes( btnReplaceAll, "EXPAND=YES" );
-		IupSetAttribute( btnReplaceAll, "ACTIVE", "NO" );
-		//IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnReplaceAll_cb );
+		//IupSetAttribute( btnReplaceAll, "ACTIVE", "NO" );
+		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
 		
 		Ihandle* btnCountAll = IupButton( "Count All", null );
 		IupSetHandle( "CFindInFilesDialog_btnCountAll", btnCountAll );
@@ -141,6 +141,7 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetHandle( "btnCANCEL_findinfiles", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_findinfiles" );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
 	}
 
 	~this()
@@ -185,14 +186,14 @@ class CFindInFilesDialog : CBaseDialog
 
 extern(C) // Callback for CFindInFilesDialog
 {
-	int CFindInFilesDialog_btnCancel_cb( Ihandle* ih )
+	private int CFindInFilesDialog_btnCancel_cb( Ihandle* ih )
 	{
 		if( GLOBAL.serachInFilesDlg !is null ) IupHide( GLOBAL.serachInFilesDlg._dlg );
 
 		return IUP_DEFAULT;
 	}
 
-	int CFindInFilesDialog_toggleAction_cb( Ihandle* ih, int state )
+	private int CFindInFilesDialog_toggleAction_cb( Ihandle* ih, int state )
 	{
 		if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
 		{
@@ -208,7 +209,7 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 
-	int CFindInFilesDialog_toggleRadioAction_cb( Ihandle* ih, int state )
+	private int CFindInFilesDialog_toggleRadioAction_cb( Ihandle* ih, int state )
 	{
 		if( ih == IupGetHandle( "CFindInFilesDialog_togglePrj" ) || ih == IupGetHandle( "CFindInFilesDialog_toggletoggleAllPrj" ) )
 		{
@@ -222,10 +223,10 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 
-	int CFindInFilesDialog_btnFindAll_cb( Ihandle* ih )
+	private int CFindInFilesDialog_btnFindAll_cb( Ihandle* ih )
 	{
 		int		buttonIndex;
-		char[]	findText;
+		char[]	findText, replaceText;
 
 		if( IupGetHandle( toStringz("CFindInFilesDialog_btnFindAll") ) == ih )
 			buttonIndex = 0;
@@ -237,10 +238,14 @@ extern(C) // Callback for CFindInFilesDialog
 			buttonIndex = 3;
 			
 
-		Ihandle* listFind_ih = IupGetHandle( toStringz("CFindInFilesDialog_listFind") );
+		Ihandle* listFind_ih = IupGetHandle( toStringz( "CFindInFilesDialog_listFind" ) );
+		Ihandle* listReplace_ih = IupGetHandle( toStringz( "CFindInFilesDialog_listReplace" ) );
+		if( listReplace_ih != null ) replaceText = fromStringz( IupGetAttribute( listReplace_ih, "VALUE" )).dup;
+		
+		
 		if( listFind_ih != null )
 		{
-			findText = Util.trim( fromStringz( IupGetAttribute( listFind_ih, "VALUE" )) );
+			findText = fromStringz( IupGetAttribute( listFind_ih, "VALUE" ) ).dup;
 			if( findText.length )
 			{
 				switch( buttonIndex )
@@ -260,20 +265,38 @@ extern(C) // Callback for CFindInFilesDialog
 				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 1;
 				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleWholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
 
+
+				if( buttonIndex == 1 )
+				{
+					IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "NO" );
+					
+					Ihandle* messageDlg = IupMessageDlg();
+					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=Replace Text In Files,BUTTONS=OKCANCEL");
+					IupSetAttribute( messageDlg, "VALUE", toStringz( "This action can't be undo!\nContinue anyway?" ) );
+
+					IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
+					if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 2 )
+					{
+						IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "YES" );
+						return IUP_DEFAULT;
+					}
+					IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "YES" );
+				}
+
 				switch( _findCase )
 				{
 					case 1:
 						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 						if( cSci !is null )
 						{
-							count = actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, _findMethod, buttonIndex );
+							count = actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, replaceText, _findMethod, buttonIndex );
 						}
 						break;
 						
 					case 2:
 						foreach( CScintilla cSci; GLOBAL.scintillaManager )
 						{
-							count = count + actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, _findMethod, buttonIndex );
+							count = count + actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, replaceText, _findMethod, buttonIndex );
 						}
 						break;
 						
@@ -283,7 +306,7 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
 							{
-								count = count + actionManager.SearchAction.findInOneFile( s, findText, _findMethod, buttonIndex );
+								count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
 							}
 						}
 						break;
@@ -293,7 +316,7 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							foreach( char[] s; prj.sources ~prj.includes )
 							{
-								count = count + actionManager.SearchAction.findInOneFile( s, findText, _findMethod, buttonIndex );
+								count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
 							}
 						}
 				}

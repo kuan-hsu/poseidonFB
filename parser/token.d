@@ -148,6 +148,8 @@ enum TOK
 	Tdefine,
 	
 	//Tinclib,
+	Tnamespace,
+	
 	
 
 
@@ -230,6 +232,7 @@ static this()
 	identToTOK["enum"]		= TOK.Tenum;
 	identToTOK["type"]		= TOK.Ttype;
 	identToTOK["union"]		= TOK.Tunion;
+	identToTOK["field"]		= TOK.Tfield;
 	identToTOK["return"]	= TOK.Treturn;
 	identToTOK["with"]		= TOK.Twith;
 	identToTOK["select"]	= TOK.Tselect;
@@ -310,7 +313,9 @@ static this()
 	identToTOK["endif"]			= TOK.Tendif;
 	identToTOK["ifdef"]			= TOK.Tifdef;
 	identToTOK["ifndef"]		= TOK.Tifndef;
-	identToTOK["define"]		= TOK.Tdefine;	
+	identToTOK["define"]		= TOK.Tdefine;
+
+	identToTOK["namespace"]		= TOK.Tnamespace;
 }
 
 

@@ -8,7 +8,7 @@ struct PROJECT
 	import tango.text.xml.Document;
 	import tango.text.xml.DocPrinter;
 	import tango.io.UnicodeFile;
-	import tango.io.Stdout;
+	import tango.io.FilePath;//tango.io.Stdout;
 
 
 	public:
@@ -50,24 +50,39 @@ struct PROJECT
 		prjNode.element( null, "CompilerPath", compilerPath );
 
 		auto prjIncludeNode = prjNode.element( null, "IncludeDirs" );
-		foreach( char[] s; includeDirs ) 
+		foreach( char[] s; includeDirs )
+		{
+			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
 			prjIncludeNode.element( null, "Name", s );
+		}
 
 		auto prjLibNode = prjNode.element( null, "LibDirs" );
 		foreach( char[] s; libDirs ) 
+		{
+			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
 			prjLibNode.element( null, "Name", s );
+		}
 
 		auto prjSourceNode = prjNode.element( null, "Sources" );
-		foreach( char[] s; sources ) 
+		foreach( char[] s; sources )
+		{
+			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
 			prjSourceNode.element( null, "Name", s );
+		}
 
 		auto prjIncludeFileNode = prjNode.element( null, "Includes" );
 		foreach( char[] s; includes ) 
+		{
+			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
 			prjIncludeFileNode.element( null, "Name", s );
+		}
 
 		auto prjOthersNode = prjNode.element( null, "Others" );
 		foreach( char[] s; others ) 
+		{
+			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
 			prjOthersNode.element( null, "Name", s );
+		}
 
 
 		// Save File
@@ -117,19 +132,44 @@ struct PROJECT
 			foreach( e; result ){ s.compilerPath = e.value; }
 
 			result = root.query["IncludeDirs"]["Name"];
-			foreach( e; result ){ s.includeDirs ~= e.value; }
+			foreach( e; result )
+			{ 
+				s.includeDirs ~= e.value;
+				scope _fp = new FilePath( s.includeDirs[length-1]  );
+				if( !_fp.isAbsolute() ) s.includeDirs[length-1] = s.dir ~ "/" ~ s.includeDirs[length-1];
+			}
 			
 			result = root.query["LibDirs"]["Name"];
-			foreach( e; result ){ s.libDirs ~= e.value; }
+			foreach( e; result )
+			{
+				s.libDirs ~= e.value;
+				scope _fp = new FilePath( s.libDirs[length-1]  );
+				if( !_fp.isAbsolute() ) s.libDirs[length-1] = s.dir ~ "/" ~ s.libDirs[length-1];
+			}
 
 			result = root.query["Sources"]["Name"];
-			foreach( e; result ){ s.sources ~= e.value; }
+			foreach( e; result )
+			{
+				s.sources ~= e.value;
+				scope _fp = new FilePath( s.sources[length-1]  );
+				if( !_fp.isAbsolute() ) s.sources[length-1] = s.dir ~ "/" ~ s.sources[length-1];
+			}
 		
 			result = root.query["Includes"]["Name"];
-			foreach( e; result ){ s.includes ~= e.value; }
+			foreach( e; result )
+			{
+				s.includes ~= e.value;
+				scope _fp = new FilePath( s.includes[length-1]  );
+				if( !_fp.isAbsolute() ) s.includes[length-1] = s.dir ~ "/" ~ s.includes[length-1];
+			}
 
 			result = root.query["Others"]["Name"];
-			foreach( e; result ){ s.others ~= e.value; }
+			foreach( e; result )
+			{
+				s.others ~= e.value;
+				scope _fp = new FilePath( s.others[length-1]  );
+				if( !_fp.isAbsolute() ) s.others[length-1] = s.dir ~ "/" ~ s.others[length-1];
+			}
 
 			s.sources.sort;
 			s.includes.sort;

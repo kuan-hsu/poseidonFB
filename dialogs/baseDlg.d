@@ -35,6 +35,7 @@ class CBaseDialog
 
 		IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK" );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL" );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CBaseDialog_btnCancel_cb );
 
 
 		return hBox_DlgButton;
@@ -46,7 +47,10 @@ class CBaseDialog
 	{
 		_dlg = IupDialog( null );
 		IupSetAttribute( _dlg, "TITLE", title.ptr );
-		IupSetAttribute( _dlg, "RASTERSIZE", (Integer.toString( w ) ~ "x" ~ Integer.toString( h )).ptr );
+
+		char[] size = Integer.toString( w ) ~ "x" ~ Integer.toString( h );
+		IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );
+		
 		if( parent.length)
 		{
 			IupSetAttribute( _dlg, "PARENTDIALOG", GLOBAL.cString.convert( parent ) );

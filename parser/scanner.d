@@ -6,7 +6,7 @@ class CScanner
 	private:
 	import iup.iup;
 
-	import global;
+	import global, tools;
 	import parser.token;
 
 	import Integer = tango.text.convert.Integer;
@@ -24,9 +24,9 @@ class CScanner
 		{
 			char[] 	document;
 			//char[]	splitLineDocument;
-			if( fullPath in GLOBAL.scintillaManager )
+			if( upperCase(fullPath) in GLOBAL.scintillaManager )
 			{
-				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[fullPath].getIupScintilla, "VALUE" ) );
+				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
 			}
 			else
 			{
@@ -246,18 +246,17 @@ class CScanner
 							{
 								if( results[length-1].tok != TOK.Tunderline )
 								{
-									TokenUnit t = {TOK.Teol, "\n", lineNum};
-									results ~= t;
+									// Keep the TOK.Teol just only one
+									if( results[length-1].tok != TOK.Teol )
+									{
+										TokenUnit t = { TOK.Teol, "\n", lineNum };
+										results ~= t;
+									}
 								}
 								else
 								{
 									results.length = results.length - 1;
 								}
-							}
-							else
-							{
-								TokenUnit t = {TOK.Teol, "\n", lineNum};
-								results ~= t;
 							}
 				
 							lineNum ++;
@@ -313,6 +312,13 @@ class CScanner
 				Stdout( t.identifier );
 				Stdout( " #");
 				Stdout( t.lineNumber ).newline;
+			}
+			else
+			{
+				Stdout( "Teol");
+				Stdout( " #");
+				Stdout( t.lineNumber ).newline;
+
 			}
 		}
 	}

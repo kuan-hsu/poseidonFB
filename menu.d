@@ -10,7 +10,7 @@ import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dia
 import tango.io.Stdout;
 import tango.stdc.stringz;
 import Integer = tango.text.convert.Integer;
-import Util = tango.text.Util;
+import Util = tango.text.Util, tango.io.UnicodeFile;
 
 import parser.scanner,  parser.token, parser.parser;
 
@@ -26,10 +26,11 @@ void createMenu()
 	Ihandle* view_menu;
 	Ihandle* item_newProject, item_openProject, item_closeProject, item_saveProject, item_projectProperties, project_menu;
 	Ihandle* item_compile, item_run, item_build, item_buildAll, item_clean, item_quickRun, build_menu;
+	Ihandle* item_runDebug, item_withDebug, item_BuildwithDebug, debug_menu;
 	Ihandle* item_tool, item_preference, option_menu;
 	
 
-	Ihandle* mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Option;
+	Ihandle* mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu8_Option;
 
 	// File -> New
 	item_new = IupItem ("New", null);
@@ -159,9 +160,7 @@ void createMenu()
 
 	GLOBAL.menuMessageWindow = IupItem ("Message", null);
 	IupSetAttribute(GLOBAL.menuMessageWindow, "KEY", "M");
-	//IupSetAttribute(item_undo, "IMAGE", "IUP_EditUndo");
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
-	//IupSetHandle( "menuMessageWindow", GLOBAL.menuMessageWindow );
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 
 	// Project
@@ -206,12 +205,21 @@ void createMenu()
 	IupSetAttribute(item_run, "IMAGE", "icon_run");
 	IupSetCallback( item_run, "ACTION", cast(Icallback)&run_cb );
 
-	/*
-	item_build = IupItem ("Build", null);
-	IupSetAttribute(item_build, "KEY", "C");
-	*/
+	// Debug
+	item_runDebug = IupItem ("Run Debug", null);
+	IupSetAttribute(item_runDebug, "KEY", "R");
+	IupSetCallback( item_runDebug, "ACTION", cast(Icallback)&runDebug_cb );
 
-	item_buildAll = IupItem ("Build All", null);
+	item_withDebug = IupItem ("Compile With Debug", null);
+	IupSetAttribute(item_withDebug, "KEY", "C");
+	IupSetCallback( item_withDebug, "ACTION", cast(Icallback)&compileWithDebug_cb );
+	
+	item_BuildwithDebug = IupItem ("Build Project With Debug", null);
+	IupSetAttribute(item_BuildwithDebug, "KEY", "B");
+	IupSetCallback( item_BuildwithDebug, "ACTION", cast(Icallback)&buildAllWithDebug_cb );
+	
+
+	item_buildAll = IupItem ("Build Project", null);
 	IupSetAttribute(item_buildAll, "KEY", "M");
 	IupSetAttribute(item_buildAll, "IMAGE", "icon_rebuild");
 	IupSetCallback( item_buildAll, "ACTION", cast(Icallback)&buildAll_cb );
@@ -238,7 +246,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.110\nBy Kuan Hsu (Taiwan)\n2015.10.05" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.125\nBy Kuan Hsu (Taiwan)\n2015.10.25" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -293,13 +301,17 @@ void createMenu()
 
 	build_menu= IupMenu( 	item_compile,
 							item_run,
-							//item_build,
 							item_buildAll,
 							IupSeparator(),
 							//item_clean,
 							//IupSeparator(),
 							item_quickRun,
 							null );
+
+	debug_menu= IupMenu( 	item_runDebug,
+							item_withDebug,
+							item_BuildwithDebug,
+							null );							
 
 	option_menu= IupMenu( 	item_tool,
 							item_preference,
@@ -318,10 +330,12 @@ void createMenu()
 	IupSetAttribute( mainMenu5_Project, "KEY" ,"P" );	
 	mainMenu6_Build = IupSubmenu( "Build", build_menu );
 	IupSetAttribute( mainMenu6_Build, "KEY" ,"B" );	
-	mainMenu7_Option = IupSubmenu( "Option", option_menu );
-	IupSetAttribute( mainMenu7_Option, "KEY" ,"O" );	
+	mainMenu7_Debug = IupSubmenu( "Debug", debug_menu );
+	IupSetAttribute( mainMenu7_Debug, "KEY" ,"D" );	
+	mainMenu8_Option = IupSubmenu( "Option", option_menu );
+	IupSetAttribute( mainMenu8_Option, "KEY" ,"O" );	
 
-	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Option, null );
+	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu8_Option, null );
 	IupSetAttribute( menu, "GAP", "30" );
 	
 	IupSetHandle("mymenu", menu);
@@ -332,6 +346,42 @@ extern(C)
 {
 	int newFile_cb( Ihandle* ih )
 	{
+		int[] existedID;
+		
+		foreach( char[] s; GLOBAL.scintillaManager.keys )
+		{
+			// NONAME#....bas
+			if( s.length >= 7 )
+			{
+				if( s[0..7] == "NONAME#" ) existedID ~= Integer.atoi( s[7..length-4] );
+			}
+		}
+
+		existedID.sort;
+
+		char[] noname;
+		
+		if( !existedID.length )
+		{
+			noname = "NONAME#0.bas";
+		}
+		else
+		{
+			for( int i = 0; i < existedID.length; ++ i )
+			{
+				if( i < existedID[i] )
+				{
+					noname = "NONAME#" ~ Integer.toString( i ) ~ ".bas";
+					break;
+				}
+			}
+		}
+
+		if( !noname.length ) noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".bas";
+
+		actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false );
+
+		/+
 		scope dlg = new CFileDlg( "Create New File", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 		char[] fullPath = dlg.getFileName();
 
@@ -339,6 +389,7 @@ extern(C)
 		{
 			actionManager.ScintillaAction.newFile( fullPath );
 		}
+		+/
 
 		return IUP_DEFAULT;
 	}
@@ -366,38 +417,20 @@ extern(C)
 
 	int saveFile_cb( Ihandle* ih )
 	{
-		auto cSci = ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )	ScintillaAction.saveFile( cSci.getIupScintilla() );
-		
+		actionManager.ScintillaAction.saveFile( actionManager.ScintillaAction.getActiveCScintilla() );
 		return IUP_DEFAULT;
 	}
 	
+	
 	int saveAsFile_cb( Ihandle* ih )
 	{
-		auto cSci = ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )
-		{
-			scope dlg = new CFileDlg( "Save As...", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
-
-			char[] fullPath = dlg.getFileName();
-
-			switch( dlg.getFilterUsed )
-			{
-				case "1": fullPath ~= ".bas";	break;
-				case "2": fullPath ~= ".bi";	break;
-				default:
-			}
-			
-			actionManager.ScintillaAction.saveAs( cSci.getIupScintilla(), fullPath );
-		}
-		
+		actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), true );
 		return IUP_DEFAULT;
 	}		
 
 	int saveAllFile_cb( Ihandle* ih )
 	{
 		actionManager.ScintillaAction.saveAllFile();
-
 		return IUP_DEFAULT;
 	}
 
@@ -538,7 +571,7 @@ extern(C)
 		if( cSci !is null )
 		{
 			// Open Dialog Window
-			scope gotoLineDlg = new CSingleTextDialog( 240, 120, "Goto Line...", "Line:", null, false );
+			scope gotoLineDlg = new CSingleTextDialog( 240, 96, "Goto Line...", "Line:", null, false );
 			char[] lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
 			if( lineNum.length) actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum )  );
@@ -614,73 +647,6 @@ extern(C)
 			
  		}		
 
-		
-		/+
-		auto doc = new Document!(char);
-
-		// attach an xml header
-		doc.header;
-
-		auto configNode = doc.tree.element( null, "config" );
-
-
-		auto editorNode = configNode.element( null, "editor" );
-
-		for( int i = 0; i < GLOBAL.KEYWORDS.length; ++i )
-		{
-			editorNode.element( null, "keywords" )
-			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "value", GLOBAL.KEYWORDS[i] );
-		}
-		
-		editorNode.element( null, "toggle00" )
-		.attribute( null, "LineMargin", GLOBAL.editorSetting00.LineMargin )
-		.attribute( null, "BookmarkMargin", GLOBAL.editorSetting00.BookmarkMargin )
-		.attribute( null, "FoldMargin", GLOBAL.editorSetting00.FoldMargin )
-		.attribute( null, "IndentGuide", GLOBAL.editorSetting00.IndentGuide )
-		.attribute( null, "CaretLine", GLOBAL.editorSetting00.CaretLine )
-		.attribute( null, "WordWrap", GLOBAL.editorSetting00.WordWrap )
-		.attribute( null, "TabUseingSpace", GLOBAL.editorSetting00.TabUseingSpace )
-		.attribute( null, "AutoIndent", GLOBAL.editorSetting00.AutoIndent )	
-		.attribute( null, "TabWidth", GLOBAL.editorSetting00.TabWidth );
-
-		//<font name="Consolas" size="11" bold="OFF" italic="OFF" underline="OFF" forecolor="0 0 0" backcolor="255 255 255"></font>
-		editorNode.element( null, "font" )
-		.attribute( null, "name", GLOBAL.editFont.name )
-		.attribute( null, "size", GLOBAL.editFont.size )
-		.attribute( null, "bold", GLOBAL.editFont.bold )
-		.attribute( null, "italic", GLOBAL.editFont.italic )
-		.attribute( null, "underline", GLOBAL.editFont.underline )
-		.attribute( null, "forecolor", GLOBAL.editFont.foreColor )
-		.attribute( null, "backcolor", GLOBAL.editFont.backColor );
-
-		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
-		editorNode.element( null, "color" )
-		.attribute( null, "caretLine", GLOBAL.editColor.caretLine )
-		.attribute( null, "cursor", GLOBAL.editColor.cursor )
-		.attribute( null, "selectionFore", GLOBAL.editColor.selectionFore )
-		.attribute( null, "selectionBack", GLOBAL.editColor.selectionBack )
-		.attribute( null, "linenumFore", GLOBAL.editColor.linenumFore )
-		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack )
-		.attribute( null, "fold", GLOBAL.editColor.fold );
-
-		/*
-		<buildtools>
-			<compilerpath>D:\CodingPark\FreeBASIC-1.02.1-win32\fbc.exe</compilerpath>
-			<debuggerpath>D:\CodingPark\FreeBASIC-1.02.1-win32\bin\win32\gdb.exe</debuggerpath>
-			<maxerror>30</maxerror>
-		</buildtools>  
-		*/
-		auto buildtoolsNode = configNode.element( null, "buildtools" );
-		buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath );
-		buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath );
-		buildtoolsNode.element( null, "maxerror", GLOBAL.maxError );
-		
-		
-
-		auto print = new DocPrinter!(char);
-		Stdout(print.print( doc )).newline;
-		+/
-
 		return IUP_DEFAULT;
 	}
 
@@ -688,17 +654,32 @@ extern(C)
 
 	int preference_cb( Ihandle *ih )
 	{
-		//scope dlg = new CPreferenceDialog( 534, 460, "Preference", false );
-		scope dlg = new CPreferenceDialog( 546, 460, "Preference", true );
-		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		version( Windows ) 
+		{
+			scope dlg = new CPreferenceDialog( 546, 460, "Preference", true );
+			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		}
+		else
+		{
+			scope dlg = new CPreferenceDialog( 546, 490, "Preference", true );
+			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		}
 
 		return IUP_DEFAULT;
 	}
 
 	int newProject_cb( Ihandle *ih )
 	{
-		scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, true );
-		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		version( Windows )
+		{
+			scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, true );
+			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		}
+		else
+		{
+			scope dlg = new CProjectPropertiesDialog( 660, 470, "Project Properties", true, true );
+			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		}
 
 		return IUP_DEFAULT;
 	}
@@ -729,11 +710,14 @@ extern(C)
 				int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", i );
 				if( depth == 1 )
 				{
-					if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i )) == activePrjName )
+					//if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i )) == activePrjName )
+					if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i )) == activePrjName )
 					{
+						char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i );
+						if( user != null ) delete user;
 						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", i, "SELECTED" );
 						// Shadow
-						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
+						//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
 						break;
 					}
 				}
@@ -796,12 +780,15 @@ extern(C)
 				{
 					try
 					{
-						char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i ) );
+						//char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i ) );
+						char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i ) );
 						if( _cstring == p.dir )
 						{
+							char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i );
+							if( user != null ) delete user;
 							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", i, "SELECTED" );
 							// Shadow
-							IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
+							//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
 
 							break;
 						}
@@ -851,10 +838,17 @@ extern(C)
 	{
 		//if( !GLOBAL.activeProjectDirName.length ) return IUP_DEFAULT;
 		if( !actionManager.ProjectAction.getActiveProjectName.length ) return IUP_DEFAULT;
-		
-		scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, false );
-		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
+		version( Windows )
+		{
+			scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, false );
+			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		}
+		else
+		{
+			scope dlg = new CProjectPropertiesDialog( 656, 456, "Project Properties", true, false );
+			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		}
 		return IUP_DEFAULT;
 	}
 
@@ -866,7 +860,7 @@ extern(C)
 
 	int buildAll_cb( Ihandle *ih )
 	{
-		saveAllFile_cb( ih );
+		//saveAllFile_cb( ih );
 		ExecuterAction.buildAll();
 		return IUP_DEFAULT;
 	}
@@ -882,4 +876,23 @@ extern(C)
 		ExecuterAction.run();
 		return IUP_DEFAULT;
 	}
+
+	int runDebug_cb( Ihandle *ih )
+	{
+		if( !GLOBAL.debugPanel.isExecuting && !GLOBAL.debugPanel.isRunning ) GLOBAL.debugPanel.runDebug();
+		return IUP_DEFAULT;
+	}
+
+	int compileWithDebug_cb( Ihandle *ih )
+	{
+		GLOBAL.debugPanel.compileWithDebug();
+		return IUP_DEFAULT;
+	}
+
+	int buildAllWithDebug_cb( Ihandle *ih )
+	{
+		GLOBAL.debugPanel.buildAllWithDebug();
+		return IUP_DEFAULT;
+	}
+	
 }

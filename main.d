@@ -40,22 +40,47 @@ void main()
 		Stdout( "IUP open error!!!" ).newline;
 		return;
 	}
+	createEditorSetting();
 
 	IupScintillaOpen();
 	version( Windows )
 	{
-		IupSetGlobal( "DEFAULTFONT", "Verdana, 10" );
+		//IupSetGlobal( "DEFAULTFONT", toStringz( "Verdana, 10" ) );
+		IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
+
+		if( GLOBAL.fonts[0].fontString.length )
+		{
+			int comma = Util.index( GLOBAL.fonts[0].fontString, "," );
+			if( comma < GLOBAL.fonts[0].fontString.length )
+			{
+				IupSetGlobal( "DEFAULTFONTFACE", toStringz( ( GLOBAL.fonts[0].fontString[0..comma] ).dup ) );
+
+				for( int i = GLOBAL.fonts[0].fontString.length - 1; i > comma; -- i )
+				{
+					if( GLOBAL.fonts[0].fontString[i] < 48 || GLOBAL.fonts[0].fontString[i] > 57 )
+					{
+						IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..length] ).dup ) );
+
+						if( ++comma  < i ) IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
+						
+						break;
+					}
+				}
+				
+			}
+		}
+		//IupSetGlobal( "DEFAULTFONTSIZE", toStringz( "Consolas" ) );
+		//IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( "Consolas" ) );
 	}
 	else
 	{
 		IupSetGlobal( "DEFAULTFONT", "FreeMono,Bold 10" );
 	}
+
 	IupSetGlobal( "UTF8MODE", "YES" );
+	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
 
 	load_all_images_icons();
-
-	createEditorSetting();
-	//version(Windows) IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
 
 	createMenu();
 	// Creates a dialog containing the control
@@ -80,7 +105,7 @@ void main()
 
 	createDialog();
 
-	if( GLOBAL.fonts.length == 9 )
+	if( GLOBAL.fonts.length == 10 )
 	{
 		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[2].fontString ) );// Leftside
 		IupSetAttribute( GLOBAL.fileListTree, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[3].fontString ) );// Filelist
@@ -89,11 +114,8 @@ void main()
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[6].fontString ) );// Bottom
 		IupSetAttribute( GLOBAL.outputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[7].fontString ) );// Output
 		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Search
+		IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Debugger (shared Search)
 	}	
-	
-	
-	
-	//ScintillaTest();
 
 	//IUP main Loop
 	IupMainLoop();

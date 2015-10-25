@@ -61,6 +61,8 @@ class CShortCutDialog : CBaseDialog
 			listOptions ~= ( Integer.toString( i ) ~ "=\"F" ~ Integer.toString( i - 26 ) ~ "\"," );
 		}
 
+		listOptions ~= ( "39=\"TAB\"," );
+
 		listOptions ~=  "DROPDOWN=YES,VALUESTRING=" ~ Util.trim( listText[length-5..length] );
 		IupSetAttributes( keyList, toStringz( listOptions ) );
 
@@ -111,7 +113,7 @@ class CShortCutDialog : CBaseDialog
 
 extern(C) // Callback for CSingleTextDialog
 {
-	int CShortCutDialog_btnOK_cb( Ihandle* ih )
+	private int CShortCutDialog_btnOK_cb( Ihandle* ih )
 	{
 		char[] keyValue;
 		
@@ -159,7 +161,8 @@ extern(C) // Callback for CSingleTextDialog
 			case "Save File":					pos = 15;	break;
 			case "Save All":					pos = 16;	break;
 			case "Close File":					pos = 17;	break;
-
+			case "Next Tab":					pos = 18;	break;
+			case "Previous Tab":				pos = 19;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;
@@ -180,7 +183,7 @@ extern(C) // Callback for CSingleTextDialog
 				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
 			}
 			
-			char[] string = Stdout.layout.convert( "{,-40} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[pos].name, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
+			char[] string = Stdout.layout.convert( "{,-30} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[pos].name, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
 
 			scope _cString = new CstringConvert ;
 			IupSetAttribute( shortCutList, _cString.convert( Integer.toString( pos + 1 ) ), GLOBAL.cString.convert( string ) );

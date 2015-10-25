@@ -207,8 +207,7 @@ struct XPM
 					interface_private_obj_xpm, interface_protected_obj_xpm, interface_obj_xpm, union_private_obj_xpm,
 					union_protected_obj_xpm, union_obj_xpm, enum_private_obj_xpm, enum_protected_obj_xpm, enum_obj_xpm,
 					normal_xpm, import_xpm, autoWord_xpm, parameter_xpm, enum_member_obj_xpm, template_obj_xpm,
-					functionpointer_obj_xpm, template_function_obj_xpm, template_class_obj_xpm, template_struct_obj_xpm,
-					template_union_obj_xpm, template_interface_obj_xpm;
+					functionpointer_obj_xpm, namespace_obj_xpm;
 	/+
 	static ubyte[] private_method_rgba, protected_method_rgba, public_method_rgba, private_variable_rgba, alias_obj_rgba,
 					protected_variable_rgba, public_variable_rgba, class_private_obj_rgba, class_protected_obj_rgba,
@@ -227,7 +226,7 @@ struct XPM
 		union_protected_obj_rgba, union_obj_rgba, enum_private_obj_rgba, enum_protected_obj_rgba, enum_obj_rgba,
 		normal_rgba, import_rgba, autoWord_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
 		functionpointer_obj_rgba, template_function_obj_rgba, template_class_obj_rgba, template_struct_obj_rgba,
-		template_union_obj_rgba, template_interface_obj_rgba;
+		template_union_obj_rgba, namespace_obj_rgba;
 
 	static this()
 	{
@@ -266,6 +265,7 @@ struct XPM
 			alias_obj_xpm				= getXpm( "icons/xpm/alias_obj.xpm" );
 			//mixin_template_obj_xpm		= getXpm( "icons/xpm/mixin_template_obj.xpm" );
 			functionpointer_obj_xpm		= getXpm( "icons/xpm/functionpointer_obj.xpm" );
+			namespace_obj_xpm			= getXpm( "icons/xpm/namespace_obj.xpm" );
 		}
 		else
 		{
@@ -302,7 +302,7 @@ struct XPM
 			alias_obj_rgba				= getRGBA( "icons/xpm/alias_obj.xpm" );
 			//mixin_template_obj_rgba		= getRGBA( "icons/xpm/mixin_template_obj.xpm" );
 			functionpointer_obj_rgba	= getRGBA( "icons/xpm/functionpointer_obj.xpm" );
+			namespace_obj_xpm			= getRGBA( "icons/xpm/namespace_obj.xpm" );
 		}
-
 	}
 }

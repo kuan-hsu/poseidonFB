@@ -3,9 +3,10 @@
 import iup.iup;
 
 import global, scintilla, project, dialogs.preferenceDlg;
-import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, actionManager;
+import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, layouts.debugger, actionManager;
+import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 
-import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg;
+import tango.stdc.stringz;
 
 void createExplorerWindow()
 {
@@ -47,34 +48,37 @@ void createExplorerWindow()
 
 	createTabs();
 
-	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.documentTabs );
-	IupSetAttribute(GLOBAL.explorerSplit, "ORIENTATION", "VERTICAL");
-	IupSetAttribute(GLOBAL.explorerSplit, "COLOR", "127 127 255");
-	IupSetAttribute(GLOBAL.explorerSplit,"BARSIZE","5");
-	IupSetAttribute(GLOBAL.explorerSplit,"AUTOHIDE","YES");
-	IupSetAttribute(GLOBAL.explorerSplit,"VALUE","150");
-	//IupSetAttribute(GLOBAL.explorerSplit,"SHOWGRIP","NO");
+	Ihandle* dndEmptylabel = IupLabel( null );
+	IupSetAttribute( dndEmptylabel, "EXPAND", "YES" );
+	IupSetCallback( dndEmptylabel, "DROPFILES_CB",cast(Icallback) &label_dropfiles_cb );
+	GLOBAL.dndDocumentZBox = IupZbox( dndEmptylabel, GLOBAL.documentTabs, null  );
+
+
+	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.dndDocumentZBox );
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,VALUE=150");
+	//IupSetAttribute(GLOBAL.explorerSplit, "COLOR", "127 127 255");
 
 	
 	createMessagePanel();
 
-	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, null );/*GLOBAL.debugPanel, null );*/
-	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
+	GLOBAL.debugPanel = new CDebugger();
 
-	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, GLOBAL.messageWindowTabs );
-	IupSetAttribute(GLOBAL.messageSplit, "ORIENTATION", "HORIZONTAL");
-	IupSetAttribute(GLOBAL.messageSplit, "COLOR", "127 127 255");
-	IupSetAttribute(GLOBAL.messageSplit, "BARSIZE", "5");
-	IupSetAttribute(GLOBAL.messageSplit, "VALUE", "800");
-	//IupSetAttribute(GLOBAL.messageSplit,"SHOWGRIP","NO");
-	//IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback)&messageSplit_cb);
+	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, null );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
+	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+
+	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
+	 
+
+	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
+	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,VALUE=750");
+	//IupSetAttribute(GLOBAL.messageSplit, "COLOR", "127 127 255");
 
 	Ihandle* StatusBar = createStatusBar();
 
 	Ihandle* VBox = IupVbox( toolBar, GLOBAL.messageSplit, StatusBar, null );
 	IupAppend( GLOBAL.mainDlg, VBox );
-	IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
-	//IupSetAttribute( GLOBAL.documentTabs, "CHILDOFFSET", "50x20" );
+	//IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
 }
 
 void createEditorSetting()
@@ -92,6 +96,14 @@ void createDialog()
 	GLOBAL.searchDlg		= new CSearchDialog( 330, 400, "Search/Replace" );
 	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( 400, 310, "Search/Replace In Files" );
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, "Compiler Options" );
+	GLOBAL.argsDlg			= new CArgOptionDialog( 370, 146, "Compiler Options / EXE Arguments" );
+}
+
+extern(C) int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
+{
+	actionManager.ScintillaAction.openFile( fromStringz( filename ).dup  );
+	if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+	return IUP_DEFAULT;
 }
 
 extern(C) int mainDialog_CLOSE_cb(Ihandle *ih)

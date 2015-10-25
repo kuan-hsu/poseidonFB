@@ -27,6 +27,7 @@ class CSearchDialog : CBaseDialog
 		IupSetHandle( "CSearchDialog_listFind", listFind );
 		Ihandle* hBox00 = IupHbox( IupLabel( "Find What:   " ), listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
+		IupSetCallback( listFind, "K_ANY", cast(Icallback) &CSearchDialog_listFind_K_ANY_CB );
 
 
 		listReplace = IupList( null );
@@ -34,6 +35,7 @@ class CSearchDialog : CBaseDialog
 		IupSetHandle( "CSearchDialog_listReplace", listReplace );
 		Ihandle* hBox01 = IupHbox( IupLabel( "Replace With:" ), listReplace, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
+		IupSetCallback( listReplace, "K_ANY", cast(Icallback) &CSearchDialog_listReplace_K_ANY_CB );
 
 		Ihandle* toggleForward = IupToggle( "Forward", null );
 		IupSetAttributes( toggleForward, "RADIO=YES");
@@ -150,9 +152,11 @@ class CSearchDialog : CBaseDialog
 
 		IupSetAttribute( listFind, "VALUE",toStringz( findWhat ) );
 
+		//IupSetAttribute( _dlg, "DEFAULTENTER", "CSearchDialog_btnFind" );
 		IupSetHandle( "btnCANCEL_search", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSearchDialog_btnCancel_cb );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_search" );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CSearchDialog_btnCancel_cb );
 	}
 
 	~this()
@@ -187,14 +191,26 @@ class CSearchDialog : CBaseDialog
 
 extern(C) // Callback for CSingleTextDialog
 {
-	int CSearchDialog_btnCancel_cb( Ihandle* ih )
+	private int CSearchDialog_btnCancel_cb( Ihandle* ih )
 	{
 		if( GLOBAL.searchDlg !is null ) IupHide( GLOBAL.searchDlg._dlg );
 
 		return IUP_DEFAULT;
 	}
 
-	int CSearchDialog_toggleAction_cb( Ihandle* ih, int state )
+	private int CSearchDialog_listFind_K_ANY_CB( Ihandle *ih, int c ) 
+	{
+		if( c  == 13 ) CSearchDialog_search();
+		return IUP_DEFAULT;
+	}
+
+	private int CSearchDialog_listReplace_K_ANY_CB( Ihandle *ih, int c ) 
+	{
+		if( c  == 13 ) CSearchDialog_btnReplaceFind_cb();
+		return IUP_DEFAULT;
+	}
+
+	private int CSearchDialog_toggleAction_cb( Ihandle* ih, int state )
 	{
 		if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
 		{
@@ -210,7 +226,7 @@ extern(C) // Callback for CSingleTextDialog
 		return IUP_DEFAULT;
 	}
 
-	int CSearchDialog_search( bool bJumpSelect = true )
+	private int CSearchDialog_search( bool bJumpSelect = true )
 	{
 		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( iupSci != null )
@@ -239,7 +255,7 @@ extern(C) // Callback for CSingleTextDialog
 		return -1;
 	}
 
-	int CSearchDialog_btnFind_cb()
+	private int CSearchDialog_btnFind_cb()
 	{
 		GLOBAL.searchDlg.setStatusBar( "" );
 
@@ -283,7 +299,7 @@ extern(C) // Callback for CSingleTextDialog
 		return IUP_DEFAULT;;
 	}
 
-	int CSearchDialog_btnReplaceFind_cb()
+	private int CSearchDialog_btnReplaceFind_cb()
 	{
 		GLOBAL.searchDlg.setStatusBar( "" );
 		int pos = -1;
@@ -327,7 +343,7 @@ extern(C) // Callback for CSingleTextDialog
 		return pos;
 	}
 
-	int CSearchDialog_btnReplace_cb()
+	private int CSearchDialog_btnReplace_cb()
 	{
 		GLOBAL.searchDlg.setStatusBar( "" );
 		
@@ -359,7 +375,7 @@ extern(C) // Callback for CSingleTextDialog
 		return IUP_DEFAULT;
 	}
 
-	int CSearchDialog_btnReplaceAll_cb()
+	private int CSearchDialog_btnReplaceAll_cb()
 	{
 		int counts;
 		int pos;
@@ -407,7 +423,7 @@ extern(C) // Callback for CSingleTextDialog
 		return IUP_DEFAULT;
 	}
 
-	int CSearchDialog_btnCountAll_cb()
+	private int CSearchDialog_btnCountAll_cb()
 	{
 		int counts;
 		int pos;
@@ -461,7 +477,7 @@ extern(C) // Callback for CSingleTextDialog
 		return IUP_DEFAULT;
 	}
 
-	int CSearchDialog_btnMarkAll_cb()
+	private int CSearchDialog_btnMarkAll_cb()
 	{
 		int counts;
 		int pos;

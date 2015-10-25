@@ -1,9 +1,12 @@
 ﻿module tools;
 
+import tango.stdc.stdlib, tango.stdc.string;
+
+
 class CstringConvert
 {
 private:
-	import tango.stdc.stdlib, tango.stdc.string;
+	//import tango.stdc.stdlib, tango.stdc.string;
 
 	char* CstringPointer = null;
 
@@ -43,6 +46,14 @@ public:
 	{
 		return CstringPointer;
 	}
+}
+
+char* getCString( char[] Dstring )
+{
+	char* CstringPointer = cast(char*)calloc( 1, Dstring.length + 1 );
+	memcpy( CstringPointer, Dstring.ptr, Dstring.length );
+
+	return CstringPointer;
 }
 
 // To lowercase

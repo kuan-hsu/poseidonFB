@@ -35,7 +35,8 @@ void createMessagePanel()
 	IupSetAttribute( GLOBAL.searchOutputPanel, "FONTSIZE", "8" );
 	IupSetCallback( GLOBAL.searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
 
-/*
+
+	/*
 	GLOBAL.debugPanel = IupText( null );
 	IupSetAttribute( GLOBAL.debugPanel, "MULTILINE", "YES" );
 	IupSetAttribute( GLOBAL.debugPanel, "SCROLLBAR", "VERTICAL" );
@@ -44,17 +45,17 @@ void createMessagePanel()
 	IupSetAttribute( GLOBAL.debugPanel, "VISIBLECOLUMNS", null );
 	IupSetAttribute( GLOBAL.debugPanel, "FONTSIZE", "8" );
 	//IupSetCallback( debugPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
-*/
+	*/
 
 
 	IupSetAttribute( GLOBAL.outputPanel, "TABTITLE", "Output" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "TABTITLE", "Search" );
-	IupSetAttribute( GLOBAL.debugPanel, "TABTITLE", "Debug" );
+	//IupSetAttribute( GLOBAL.debugPanel, "TABTITLE", "Debug" );
 	
 	
 	IupSetAttribute( GLOBAL.outputPanel, "TABIMAGE", "icon_message" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "TABIMAGE", "icon_find" );
-	IupSetAttribute( GLOBAL.debugPanel, "TABIMAGE", "icon_debug" );
+	//IupSetAttribute( GLOBAL.debugPanel, "TABIMAGE", "icon_debug" );
 }
 
 
@@ -112,7 +113,7 @@ extern(C)
 										char[] lineNumber_char = lineText[openPos+1..closePos];
 										lineNumber = Integer.atoi( lineNumber_char );
 										fileName = lineText[0..openPos];
-										ScintillaAction.openFile( fileName.dup, lineNumber );
+										ScintillaAction.openFile( Util.replace( fileName, '\\', '/' ).dup, lineNumber );
 										
 										return IUP_DEFAULT;
 									}

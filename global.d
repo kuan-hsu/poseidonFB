@@ -29,6 +29,7 @@ struct fontUint
 	char[]	fontString;
 }
 
+
 struct GLOBAL
 {
 	private:
@@ -39,8 +40,8 @@ struct GLOBAL
 	//import Integer = tango.text.convert.Integer;
 	import tango.stdc.stringz;
 
-	import scintilla, project, layouts.tree, layouts.outline;
-	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg;
+	import scintilla, project, layouts.tree, layouts.outline, layouts.debugger;
+	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast;
 	
 
@@ -48,6 +49,7 @@ struct GLOBAL
 
 	static Ihandle*				mainDlg;
 	static Ihandle*				documentTabs, projectViewTabs, messageWindowTabs;
+	static Ihandle*				dndDocumentZBox;
 
 	// LAYOUT
 	static Ihandle* 			explorerWindow;
@@ -63,13 +65,14 @@ struct GLOBAL
 	
 	static Ihandle* 			outputPanel;
 	static Ihandle* 			searchOutputPanel;
-	static Ihandle* 			debugPanel;
+	static CDebugger 			debugPanel;
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
 	static char*				messageSplit_value = "800";
 
 	static CSearchDialog		searchDlg;
 	static CFindInFilesDialog	serachInFilesDlg;
 	static CCompilerHelpDialog	compilerHelpDlg;
+	static CArgOptionDialog		argsDlg;
 
 	static Ihandle*				statusBar_Line_Col, statusBar_Ins, statusBar_FontType;
 
@@ -149,6 +152,10 @@ static this()
 	GLOBAL.shortKeys ~= sk16;
 	ShortKey sk17 = { "Close File", 536870999 };
 	GLOBAL.shortKeys ~= sk17;
+	ShortKey sk18 = { "Next Tab", 536870921 };
+	GLOBAL.shortKeys ~= sk16;
+	ShortKey sk19 = { "Previous Tab", 805306377 };
+	GLOBAL.shortKeys ~= sk17;
 	
 
 	fontUint fu;
@@ -187,5 +194,8 @@ static this()
 	GLOBAL.fonts ~= fu;
 
 	fu.name = "Search"; fu.fontString = "Courier New,Bold Italic Underline Strikeout 9";
+	GLOBAL.fonts ~= fu;	
+
+	fu.name = "Debugger"; fu.fontString = "Courier New,9";
 	GLOBAL.fonts ~= fu;	
 }

@@ -8,6 +8,7 @@ private import iup.iup, iup.iup_scintilla;
 private import Integer = tango.text.convert.Integer;
 private import Util = tango.text.Util;
 private import tango.stdc.stringz, tango.io.Stdout;
+
 private version(Windows) import tango.sys.win32.UserGdi;
 
 private import global, tools;
@@ -68,27 +69,53 @@ struct FileAction
 }
 
 
+struct DocumentTabAction
+{
+	private:
+	import scintilla;
+	
+	public:
+	static int tabChangePOS( Ihandle* ih, int new_pos, int old_pos )
+	{
+		Ihandle* _child = IupGetChild( ih, new_pos );
+		CScintilla cSci = actionManager.ScintillaAction.getCScintilla( _child );
+		
+		if( cSci !is null )
+		{
+			IupSetFocus( _child );
+			StatusBarAction.update();
+
+			// Marked the trees( FileList & ProjectTree )
+			actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() );
+			GLOBAL.outlineTree.changeTree( cSci.getFullPath() );
+		}
+
+		return IUP_DEFAULT;
+	}
+}
+
+
 struct ScintillaAction
 {
 	private:
-	import tango.io.UnicodeFile, tango.io.FilePath;
+	import tango.io.UnicodeFile, tango.io.FilePath, dialogs.fileDlg;
 	import scintilla;
 	import parser.scanner,  parser.token, parser.parser;
-		
+
 	public:
-	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8, char[] existData = null )
+	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8, char[] existData = null, bool bCreateActualFile = true )
 	{
 		// FullPath had already opened
-		if( fullPath in GLOBAL.scintillaManager ) 
+		if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 		{
-			IupMessage( "Waring!!", "File has already exist!" );
+			IupMessage( "Waring!!", GLOBAL.cString.convert( fullPath ~ "\n has already exist!" ) );
 			return false;
 		}
 
 		auto 	_sci = new CScintilla( fullPath );
-		FileAction.newFile( fullPath );
+		if( bCreateActualFile ) FileAction.newFile( fullPath );
 		_sci.setEncoding( _encoding );
-		GLOBAL.scintillaManager[fullPath] = _sci;
+		GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
 
 		// Set documentTabs to visible
 		if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
@@ -112,19 +139,25 @@ struct ScintillaAction
 			OutlineAction.loadFile( fullPath );
 		}
 
+		if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+
 		return true;
 	}
 	
 	static bool openFile( char[] fullPath, int lineNumber = -1 )
 	{
 		// FullPath had already opened
-		if( fullPath in GLOBAL.scintillaManager ) 
+		if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 		{
-			Ihandle* ih = GLOBAL.scintillaManager[fullPath].getIupScintilla;
+			Ihandle* ih = GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla;
 			
 			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)ih );
 			IupSetFocus( ih );
-			if( lineNumber > -1 ) IupScintillaSendMessage( ih, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
+			if( lineNumber > -1 )
+			{
+				//IupScintillaSendMessage( ih, 2168, 0, 20 ); // SCI_LINESCROLL 2168
+				IupScintillaSendMessage( ih, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE 2024			
+			}
 			StatusBarAction.update();
 
 			toTreeMarked( fullPath );
@@ -140,7 +173,7 @@ struct ScintillaAction
 			char[] 	_text = FileAction.loadFile( fullPath, cast(int)_encoding );
 			_sci.setEncoding( _encoding );
 			_sci.setText( _text );
-			GLOBAL.scintillaManager[fullPath] = _sci;
+			GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
 
 			// Set documentTabs to visible
 			if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
@@ -148,7 +181,10 @@ struct ScintillaAction
 			// Set new tabitem to focus
 			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci.getIupScintilla );
 			IupSetFocus( _sci.getIupScintilla );
-			if( lineNumber > -1 ) IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
+			if( lineNumber > -1 )
+			{
+				IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
+			}
 			//StatusBarAction.update();
 
 			IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", GLOBAL.cString.convert( fullPath ) );
@@ -157,6 +193,8 @@ struct ScintillaAction
 			
 			// Parser
 			OutlineAction.loadFile( fullPath );
+
+			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
 			return true;
 		}
@@ -169,9 +207,9 @@ struct ScintillaAction
 
 	static void toTreeMarked( char[] fullPath, int _switch = 3 )
 	{
-		if( fullPath in GLOBAL.scintillaManager )
+		if( upperCase(fullPath) in GLOBAL.scintillaManager )
 		{
-			CScintilla cSci = GLOBAL.scintillaManager[fullPath];
+			CScintilla cSci = GLOBAL.scintillaManager[upperCase(fullPath)];
 			if( cSci !is null )
 			{
 				if( _switch & 1 ) // Mark the FileList
@@ -194,8 +232,8 @@ struct ScintillaAction
 					int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
 					for( int id = 1; id <= nodeCount; id++ )
 					{
-						char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
-						if( s == fullPath )
+						char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+						if( upperCase(s) == upperCase(fullPath) )
 						{
 							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 							break;
@@ -286,57 +324,90 @@ struct ScintillaAction
 
 	static int closeDocument( char[] fullPath )
 	{
-
-		//IupMessage( "BEFORE", toStringz(Integer.toString(IupGetChildCount( GLOBAL.documentTabs ))));
-		if( fullPath in GLOBAL.scintillaManager )
+		if( upperCase(fullPath) in GLOBAL.scintillaManager )
 		{
-			CScintilla	cSci		= GLOBAL.scintillaManager[fullPath];
+			CScintilla	cSci		= GLOBAL.scintillaManager[upperCase(fullPath)];
 			Ihandle*	iupSci		= cSci.getIupScintilla;
-			
+
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
 				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 				if( button == 3 ) return IUP_IGNORE;
-				if( button == 1 ) cSci.saveFile();
+				if( button == 1 )
+				{
+					if( fullPath.length >= 7 )
+					{
+						if( fullPath[0..7] == "NONAME#" )
+						{
+							saveAs( cSci );
+							return IUP_DEFAULT;
+						}
+					}
+
+					cSci.saveFile();
+				}
 			}
-
+	
 			IupDestroy( iupSci );
-
 			removeFileListNode( null, cSci );
-
-			GLOBAL.scintillaManager.remove( fullPath );
+			GLOBAL.scintillaManager.remove( upperCase(fullPath) );
 			delete cSci;
-
 			actionManager.OutlineAction.cleanTree( fullPath );
-
-			if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
+			if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 		}
 
-		//IupMessage( "AFTER", toStringz(Integer.toString(IupGetChildCount( GLOBAL.documentTabs ))));
 		return IUP_DEFAULT;
 	}
 
 	static int closeOthersDocument( char[] fullPath )
 	{
-		char[][] KEYS = GLOBAL.scintillaManager.keys;
+		char[][] KEYS;
 		
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
-			if( cSci.getFullPath != fullPath )
+			if( upperCase(cSci.getFullPath) != upperCase(fullPath) )
 			{
-				Ihandle*	iupSci		= cSci.getIupScintilla;
+				Ihandle* iupSci = cSci.getIupScintilla;
 				
 				if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 				{
+					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 					int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
-					if( button == 3 ) return IUP_IGNORE;
-					if( button == 1 ) cSci.saveFile();
+					if( button == 3 )
+					{
+						break;
+					}
+					else if( button == 2 )
+					{
+						KEYS ~= cSci.getFullPath;
+					}					
+					else if( button == 1 )
+					{
+						bool bNoNameFile;
+						if( fullPath.length >= 7 )
+						{
+							if( fullPath[0..7] == "NONAME#" )
+							{
+								if( !saveAs( cSci, false ) ) break;
+								KEYS ~= cSci.getFullPath;
+								bNoNameFile = true;
+							}
+						}
+
+						if( !bNoNameFile )
+						{
+							cSci.saveFile();
+							KEYS ~= cSci.getFullPath;
+						}
+					}
+				}
+				else
+				{
+					KEYS ~= cSci.getFullPath;
 				}
 
 				removeFileListNode( null, cSci );
-
 				actionManager.OutlineAction.cleanTree( cSci.getFullPath );
-
 				IupDestroy( iupSci );
 				delete cSci;
 			}
@@ -344,7 +415,7 @@ struct ScintillaAction
 
 		foreach( char[] s; KEYS )
 		{
-			if( s != fullPath )	GLOBAL.scintillaManager.remove( s );
+			if( upperCase(s) != upperCase(fullPath) )	GLOBAL.scintillaManager.remove( upperCase(s) );
 		}
 
 		return IUP_DEFAULT;
@@ -352,46 +423,89 @@ struct ScintillaAction
 
 	static int closeAllDocument()
 	{
-		char[][] KEYS = GLOBAL.scintillaManager.keys;
+		char[][] 	KEYS;
+		bool 		bCancel;
 		
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
-			Ihandle*	iupSci		= cSci.getIupScintilla;
+			Ihandle* iupSci = cSci.getIupScintilla;
 			
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
+				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
-				if( button == 3 ) return IUP_IGNORE;
-				if( button == 1 ) cSci.saveFile();
+				if( button == 3 )
+				{
+					bCancel = true;
+					break;
+				}
+				else if( button == 2 )
+				{
+					KEYS ~= cSci.getFullPath;
+				}
+				else if( button == 1 )
+				{
+					bool bNoNameFile;
+					if( cSci.getFullPath.length >= 7 )
+					{
+						if( cSci.getFullPath[0..7] == "NONAME#" )
+						{
+							if( !saveAs( cSci, false ) )
+							{
+								bCancel = true;
+								break;
+							}
+							KEYS ~= cSci.getFullPath;
+							bNoNameFile = true;
+						}
+					}
+
+					if( !bNoNameFile )
+					{
+						KEYS ~= cSci.getFullPath;
+						cSci.saveFile();
+					}
+				}
+			}
+			else
+			{
+				KEYS ~= cSci.getFullPath;
 			}
 
 			removeFileListNode( null, cSci );
-
 			actionManager.OutlineAction.cleanTree( cSci.getFullPath );
-
 			IupDestroy( iupSci );
 			delete cSci;
 		}
 
 		foreach( char[] s; KEYS )
-			GLOBAL.scintillaManager.remove( s );
+			GLOBAL.scintillaManager.remove( upperCase(s) );
 
-		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
+		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 
+		if( bCancel ) return IUP_IGNORE;
+		
 		return IUP_DEFAULT;
 	}
 
-	static bool saveFile( Ihandle* iupSci )
+	static bool saveFile( CScintilla cSci )
 	{
-		if( iupSci == null ) return false;
+		if( cSci is null ) return false;
 		
 		try
 		{
-			CScintilla cSci = getCScintilla( iupSci );
-			cSci.saveFile();
+			if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "SAVEDSTATE" ) ) == "YES" )
+			{
+				char[] fullPath = cSci.getFullPath();
 
-			//Update Parser
-			OutlineAction.refresh( cSci.getFullPath()  );
+				if( fullPath.length >= 7 )
+				{
+					if( fullPath[0..7] == "NONAME#" ) return saveAs( cSci, true );
+				}
+
+				cSci.saveFile();
+				OutlineAction.refresh( fullPath ); //Update Parser
+			}
 		}
 		catch
 		{
@@ -401,8 +515,57 @@ struct ScintillaAction
 		return true;
 	}
 
-	static bool saveAs( Ihandle* iupSci, char[] fullPath )
+	static bool saveAs( CScintilla cSci, bool bDel = false )
 	{
+		if( cSci is null ) return false;
+
+		try
+		{
+			scope dlg = new CFileDlg( "Save As...", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+
+			char[] fullPath = dlg.getFileName();
+
+			switch( dlg.getFilterUsed )
+			{
+				case "1": fullPath ~= ".bas";	break;
+				case "2": fullPath ~= ".bi";	break;
+				default:
+			}
+			
+			if( fullPath.length )
+			{
+				char[] newDocument = fromStringz( IupGetAttribute( cSci.getIupScintilla, "VALUE" ) ).dup;
+				ScintillaAction.newFile( fullPath, Encoding.UTF_8, newDocument );
+
+				char[] originalFullPath = cSci.getFullPath;
+
+				if( originalFullPath.length >= 7 )
+				{
+					if( originalFullPath[0..7] == "NONAME#" )
+					{
+						if( bDel )
+						{
+							IupDestroy( cSci.getIupScintilla );
+							removeFileListNode( null, cSci );
+							GLOBAL.scintillaManager.remove( upperCase(originalFullPath) );
+							delete cSci;
+							actionManager.OutlineAction.cleanTree( originalFullPath );
+						}
+					}
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		catch
+		{
+			return false;
+		}
+
+		
+		/+
 		if( iupSci == null ) return false;
 		
 		try
@@ -415,6 +578,7 @@ struct ScintillaAction
 		{
 			return false;
 		}
+		+/
 
 		return true;
 	}	
@@ -431,6 +595,16 @@ struct ScintillaAction
 				{
 					if( _sci.getIupScintilla == _child )
 					{
+						if( _sci.getFullPath.length >= 7 )
+						{
+							if( _sci.getFullPath[0..7] == "NONAME#" )
+							{
+								IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) _child );
+								actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), true );
+								break;
+							}
+						}
+						
 						_sci.saveFile();
 						OutlineAction.refresh( _sci.getFullPath() );
 						break;
@@ -493,7 +667,7 @@ struct ProjectAction
 
 		if( id < 1 ) return null;
 
-		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 	}
 
 	static int addTreeNode( char[] _prjDirName, char[] fullPath, int folderLocateId )
@@ -532,6 +706,15 @@ struct ProjectAction
 				if( !bFolerExist )
 				{
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
+					if( pos != 0 )
+					{
+						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId, tools.getCString( "FIXED" ) );
+					}
+					else
+					{
+						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, tools.getCString( splitText[counterSplitText] ) );
+					}
+					/*
 					// Shadow
 					if( pos != 0 )
 					{
@@ -541,6 +724,7 @@ struct ProjectAction
 					{
 						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
 					}
+					*/
 
 					folderLocateId ++;
 				}
@@ -1021,12 +1205,10 @@ char[] pp="print";
 	buttonIndex = 2 Count
 	buttonIndex = 3 Mark
 	*/
-	static int findInOneFile( char[] fullPath, char[] targetText, int searchRule = 3, int buttonIndex = 0 )
+	static int findInOneFile( char[] fullPath, char[] findText, char[] replaceText, int searchRule = 3, int buttonIndex = 0 )
 	{
 		int count;
 
-		if( searchRule & MATCHCASE ) targetText = toLower( targetText );
-		
 		scope f = new FilePath( fullPath );
 		if( f.exists() )
 		{
@@ -1035,9 +1217,9 @@ char[] pp="print";
 
 			char[] 	document;
 			//char[]	splitLineDocument;
-			if( fullPath in GLOBAL.scintillaManager )
+			if( upperCase(fullPath) in GLOBAL.scintillaManager )
 			{
-				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[fullPath].getIupScintilla, "VALUE" ) );
+				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
 			}
 			else
 			{
@@ -1046,17 +1228,71 @@ char[] pp="print";
 			}			
 			//scope file = new File( fullPath, File.ReadExisting );
 
+			if( buttonIndex == 1 )
+			{
+				int findIndex = 0;
+				while( findIndex < document.length )
+				{
+					if( searchRule & MATCHCASE )
+					{
+						findIndex = Util.index( document, findText, findIndex );
+					}
+					else
+					{
+						findIndex = Util.index( toLower( document ), toLower( findText ), findIndex );
+					}
+					
+					if( findIndex < document.length )
+					{
+						if( searchRule & WHOLEWORD )
+						{
+							if( IsWholeWord( document, findText, findIndex ) )
+							{
+								count ++;
+								document = document[0..findIndex] ~ replaceText ~ document[findIndex+findText.length..length];
+								findIndex += replaceText.length;
+							}
+							else
+							{
+								findIndex += findText.length;
+							}
+						}
+						else
+						{
+							count ++;
+							document = document[0..findIndex] ~ replaceText ~ document[findIndex+findText.length..length];
+							findIndex += replaceText.length;
+						}
+					}
+				}
+
+				File.set( fullPath, document );
+				if( toUpper( fullPath ) in GLOBAL.scintillaManager )
+				{
+					GLOBAL.scintillaManager[toUpper( fullPath )].setText( document );
+					OutlineAction.refresh( fullPath );
+					
+				}
+				return count;
+			}
+
 			int lineNum;
-			//foreach( line; new Lines!(char)(file) )
 			foreach( line; Util.splitLines( document ) )
 			{
 				lineNum++;
 
 				if( line.length )
 				{
-					if( searchRule & MATCHCASE ) line = toLower( line );
+					int pos;
+					if(!( searchRule & MATCHCASE ) )
+					{
+						pos = Util.index( toLower( line ) , toLower( findText ) );
+					}
+					else
+					{
+						pos = Util.index( line , findText );
+					}
 					
-					int pos = Util.index( line, targetText );
 					if( pos < line.length )
 					{
 						if( searchRule & WHOLEWORD )
@@ -1064,15 +1300,14 @@ char[] pp="print";
 							bool bGetWholeWord;
 							while( pos < line.length )
 							{
-								//IupMessage( toStringz( Integer.toString(lineNum) ), toStringz( Integer.toString( pos ) ) );
-								if( IsWholeWord( line, targetText, pos ) )
+								if( IsWholeWord( line, findText, pos ) )
 								{
 									bGetWholeWord = true;
 									break;
 								}
 								else
 								{
-									pos = Util.index( line, targetText, pos + targetText.length );
+									pos = Util.index( line, findText, pos + findText.length );
 								}
 							}
 							
@@ -1088,10 +1323,10 @@ char[] pp="print";
 						}
 						else if( buttonIndex == 3 )
 						{
-							if( fullPath in GLOBAL.scintillaManager )
+							if( upperCase(fullPath) in GLOBAL.scintillaManager )
 							{
 								//int linNum = IupScintillaSendMessage( GLOBAL.scintillaManager[fullPath].getIupScintilla, 2166, totalLength + pos, 0 );// SCI_LINEFROMPOSITION = 2166
-								if( !( IupGetIntId( GLOBAL.scintillaManager[fullPath].getIupScintilla, "MARKERGET", lineNum-1 ) & 2 ) ) IupSetIntId( GLOBAL.scintillaManager[fullPath].getIupScintilla, "MARKERADD", lineNum-1, 1 );
+								if( !( IupGetIntId( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "MARKERGET", lineNum-1 ) & 2 ) ) IupSetIntId( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "MARKERADD", lineNum-1, 1 );
 							}
 						}
 					}
@@ -1160,7 +1395,7 @@ struct OutlineAction
 		
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
-			if( fullPath == cSci.getFullPath() )
+			if( upperCase(fullPath) == upperCase(cSci.getFullPath()) )
 			{
 				actCSci = cSci;
 				break;
@@ -1177,17 +1412,17 @@ struct OutlineAction
 			scope _parser = new CParser( tokens );
 			auto astHeadNode = _parser.parse( fullPath );
 
-			if( fullPath in GLOBAL.parserManager )
+			if( upperCase(fullPath) in GLOBAL.parserManager )
 			{
-				auto temp = GLOBAL.parserManager[fullPath] ;
+				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
 				delete temp;
-				GLOBAL.parserManager[fullPath] = astHeadNode;
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
 
 				GLOBAL.outlineTree.cleanTree( fullPath );
 			}
 			else
 			{
-				GLOBAL.parserManager[fullPath] = astHeadNode;
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
 			}
 
 			GLOBAL.outlineTree.createTree( astHeadNode );
@@ -1204,17 +1439,17 @@ struct OutlineAction
 			scope _parser = new CParser( tokens );
 			auto astHeadNode = _parser.parse( fullPath );
 
-			if( fullPath in GLOBAL.parserManager )
+			if( upperCase(fullPath) in GLOBAL.parserManager )
 			{
-				auto temp = GLOBAL.parserManager[fullPath] ;
+				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
 				delete temp;
-				GLOBAL.parserManager[fullPath] = astHeadNode;
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
 
 				GLOBAL.outlineTree.cleanTree( fullPath );
 			}
 			else
 			{
-				GLOBAL.parserManager[fullPath] = astHeadNode;
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
 			}			
 
 		}

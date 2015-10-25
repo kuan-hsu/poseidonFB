@@ -29,6 +29,7 @@
 		<projectFiles>
 			<source>
 				<name>actionManager.d</name>
+				<name>dialogs\argOptionDlg.d</name>
 				<name>dialogs\baseDlg.d</name>
 				<name>dialogs\fileDlg.d</name>
 				<name>dialogs\findFilesDlg.d</name>
@@ -43,6 +44,7 @@
 				<name>images\imageData.d</name>
 				<name>images\xpm.d</name>
 				<name>layout.d</name>
+				<name>layouts\debugger.d</name>
 				<name>layouts\messagePanel.d</name>
 				<name>layouts\outline.d</name>
 				<name>layouts\statusBar.d</name>

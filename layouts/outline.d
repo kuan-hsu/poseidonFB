@@ -108,7 +108,15 @@ class COutline
 
 			case B_ALIAS:
 				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_alias" ) );
-				break;				
+				break;
+
+			case B_NAMESPACE:
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
+				}				
+				break;
 
 			default:
 				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
@@ -235,20 +243,7 @@ class COutline
 				activeTreeOutline = tree;
 				IupSetAttributes( activeTreeOutline, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
 				IupSetAttribute( activeTreeOutline, "TITLE", toStringz( fullPath ) );
-				IupSetCallback( activeTreeOutline, "SELECTION_CB", cast(Icallback) &COutline_selection );
-				IupSetCallback( activeTreeOutline, "RIGHTCLICK_CB", cast(Icallback) &COutline_RIGHTCLICK_CB );
-				/+
-				if( head.kind == "BAS" )
-				{
-					IupSetAttributeId( activeTreeOutline, "IMAGE", 0, toStringz("icon_bas") );
-					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", 0, toStringz("icon_bas") );
-				}
-				else
-				{
-					IupSetAttributeId( activeTreeOutline, "IMAGE", 0, toStringz("icon_bi") );
-					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", 0, toStringz("icon_bi") );
-				}
-				+/
+				IupSetCallback( activeTreeOutline, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
 
 				IupAppend( zBoxHandle, activeTreeOutline );
 				IupMap( activeTreeOutline );
@@ -291,51 +286,52 @@ class COutline
 
 extern(C) 
 {
-	private int COutline_selection( Ihandle *ih, int id, int status )
+	private int COutline_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		// SELECTION_CB will trigger 2 times, preSelect -> Select, we only catch second signal
-		if( status == 1 )
+		int id = IupConvertXYToPos( ih, x, y );
+		
+		if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 		{
-			CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
-			//Stdout( _node.lineNumber ).newline;
-
-			char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
+			char[] _s = fromStringz( status ).dup;
 			
-			ScintillaAction.openFile( _fullPath, _node.lineNumber );
+			if( _s.length > 5 )
+			{
+				if( _s[5] == 'D' ) // Double Click
+				{
+					if( id > 0 )
+					{
+						CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
+
+						char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
+						
+						ScintillaAction.openFile( _fullPath, _node.lineNumber );
+						IupSetAttributeId( ih, "MARKED", id, "YES" );
+
+						return IUP_IGNORE;
+					}
+				}
+			}
 		}
-
-		return IUP_DEFAULT;
-	}
-
-	private int COutline_RIGHTCLICK_CB( Ihandle *ih, int id )
-	{
-		if( id == 0 )
+		else if( button == 51 ) // IUP_BUTTON3 = '3' = 51
 		{
-			Ihandle* itemRefresh = IupItem( "Refresh", null );
-			IupSetCallback( itemRefresh, "ACTION", cast(Icallback) &COutline_refresh );
-			IupSetHandle( "outline_rightclick", ih );
+			if( id == 0 )
+			{
+				if( pressed == 0 )
+				{
+					IupSetAttributeId( ih, "MARKED", id, "YES" );
+					
+					Ihandle* itemRefresh = IupItem( "Refresh", null );
+					IupSetCallback( itemRefresh, "ACTION", cast(Icallback) &COutline_refresh );
+					IupSetHandle( "outline_rightclick", ih );
 
-			/*
-			Ihandle* itemShowParams= IupItem( "Show Params", null );
-			//IupSetAttribute(item_outline, "KEY", "O");
-			//IupSetAttribute( itemShowParams, "VALUE", "ON" );
-			IupSetCallback(itemShowParams, "ACTION", cast(Icallback)&COutline_showParams);
+					Ihandle* popupMenu = IupMenu( 	itemRefresh,
+													null
+												);
 
-			Ihandle* itemShowLineNum = IupItem( "Show LineNumber", null );
-			//IupSetAttribute(item_outline, "KEY", "O");
-			IupSetAttribute( itemShowLineNum, "VALUE", "ON" );
-			//IupSetCallback(itemShowParams, "ACTION", cast(Icallback)&outline_cb);
-			*/
-
-			Ihandle* popupMenu = IupMenu( 	itemRefresh,
-											//IupSeparator(),
-											//itemShowParams,
-											//itemShowLineNum,
-											null
-										);
-
-			IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
-			IupDestroy( popupMenu );
+					IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+					IupDestroy( popupMenu );
+				}
+			}
 		}
 
 		return IUP_DEFAULT;
