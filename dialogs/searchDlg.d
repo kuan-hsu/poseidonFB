@@ -200,7 +200,11 @@ extern(C) // Callback for CSingleTextDialog
 
 	private int CSearchDialog_listFind_K_ANY_CB( Ihandle *ih, int c ) 
 	{
-		if( c  == 13 ) CSearchDialog_search();
+		if( c == 13 )
+		{
+			int pos = CSearchDialog_search();
+			if( pos > -1 ) GLOBAL.searchDlg.setStatusBar( "Found Word." ); else GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
+		}
 		return IUP_DEFAULT;
 	}
 

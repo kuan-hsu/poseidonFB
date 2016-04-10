@@ -335,7 +335,7 @@ class CProjectPropertiesDialog : CBaseDialog
 	}
 }
 
-
+private:
 extern(C) // Callback for CProjectPropertiesDialog
 {
 	int CProjectPropertiesDialog_btnOK_cb( Ihandle* ih )
@@ -393,6 +393,8 @@ extern(C) // Callback for CProjectPropertiesDialog
 				GLOBAL.projectTree.updateRecentProjects( _prjDir, _prjName );
 
 				if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "YES" ) GLOBAL.projectTree.CreateNewProject( _prjName, _prjDir );
+
+				IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
 			}
 		}
 

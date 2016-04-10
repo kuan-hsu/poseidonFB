@@ -3,7 +3,7 @@
 private import iup.iup;
 private import iup.iup_scintilla;
 
-private import global, scintilla, actionManager;
+private import global, scintilla, actionManager, tools;
 
 private import Integer = tango.text.convert.Integer;
 private import tango.stdc.stringz;
@@ -15,13 +15,12 @@ import tango.io.Stdout;
 
 void createMessagePanel()
 {
-	GLOBAL.outputPanel = IupText(null);
+	GLOBAL.outputPanel = IupText( null );
 	IupSetAttribute( GLOBAL.outputPanel, "MULTILINE", "YES" );
 	IupSetAttribute( GLOBAL.outputPanel, "SCROLLBAR", "VERTICAL" );
 	IupSetAttribute( GLOBAL.outputPanel, "EXPAND", "YES" );
 	IupSetAttribute( GLOBAL.outputPanel, "VISIBLELINES", "0" );
 	IupSetAttribute( GLOBAL.outputPanel, "VISIBLECOLUMNS", null );
-	IupSetAttribute( GLOBAL.outputPanel, "FONTSIZE", "8" );
 	IupSetCallback( GLOBAL.outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
 	//IupSetAttribute( GLOBAL.outputPanel, "FORMATTING", "YES");
 	
@@ -32,36 +31,21 @@ void createMessagePanel()
 	IupSetAttribute( GLOBAL.searchOutputPanel, "EXPAND", "YES" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLELINES", "0" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLECOLUMNS", null );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "FONTSIZE", "8" );
 	IupSetCallback( GLOBAL.searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
-
-
-	/*
-	GLOBAL.debugPanel = IupText( null );
-	IupSetAttribute( GLOBAL.debugPanel, "MULTILINE", "YES" );
-	IupSetAttribute( GLOBAL.debugPanel, "SCROLLBAR", "VERTICAL" );
-	IupSetAttribute( GLOBAL.debugPanel, "EXPAND", "YES" );
-	IupSetAttribute( GLOBAL.debugPanel, "VISIBLELINES", "0" );
-	IupSetAttribute( GLOBAL.debugPanel, "VISIBLECOLUMNS", null );
-	IupSetAttribute( GLOBAL.debugPanel, "FONTSIZE", "8" );
-	//IupSetCallback( debugPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
-	*/
 
 
 	IupSetAttribute( GLOBAL.outputPanel, "TABTITLE", "Output" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "TABTITLE", "Search" );
-	//IupSetAttribute( GLOBAL.debugPanel, "TABTITLE", "Debug" );
 	
 	
 	IupSetAttribute( GLOBAL.outputPanel, "TABIMAGE", "icon_message" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "TABIMAGE", "icon_find" );
-	//IupSetAttribute( GLOBAL.debugPanel, "TABIMAGE", "icon_debug" );
 }
 
 
 extern(C)
 {
-	int outputPanelButton_cb(Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	private int outputPanelButton_cb(Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( button == IUP_BUTTON1 )
 		{
@@ -73,31 +57,8 @@ extern(C)
 					int		lineNumber;
 					bool	bGetFileName = true;
 					char[]	fileName;
-					char[]	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) );
+					char[]	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) ).dup;
 
-					/+
-					formattag = IupUser();
-
-					IupSetAttribute(GLOBAL.outputPanel, "REMOVEFORMATTING", "YES" );
-					
-					//IupSetAttribute( formattag, "CLEARATTRIBUTES", "" );
-					//IupDestroy( formattag );
-					
-					
-					IupSetAttribute(formattag, "BGCOLOR", "255 128 64");
-					IupSetAttribute(formattag, "WEIGHT", "BOLD");
-
-					int pos = IupConvertXYToPos( GLOBAL.outputPanel, x, y );
-					int line, col;
-					IupTextConvertPosToLinCol( GLOBAL.outputPanel, pos, &line, &col );
-					char[] lincol = Integer.toString(line) ~ ",1:" ~ Integer.toString(line) ~"," ~ Integer.toString(lineText.length);
-
-					
-					
-					IupSetAttribute(formattag, "SELECTION", toStringz( lincol ) );
-					IupSetAttribute(GLOBAL.outputPanel, "ADDFORMATTAG_HANDLE", cast(char*)formattag);
-					+/
-			
 					int openPos = Util.index( lineText, "(" );
 					if( openPos < lineText.length )
 					{
@@ -112,8 +73,57 @@ extern(C)
 									{
 										char[] lineNumber_char = lineText[openPos+1..closePos];
 										lineNumber = Integer.atoi( lineNumber_char );
-										fileName = lineText[0..openPos];
-										ScintillaAction.openFile( Util.replace( fileName, '\\', '/' ).dup, lineNumber );
+										fileName = Util.replace( lineText[0..openPos], '\\', '/' );
+
+										if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
+										{
+											if( GLOBAL.compilerAnootation == "ON" )
+											{
+												char[] allMessage = fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup;
+
+												foreach( char[] s; Util.splitLines( allMessage ) )
+												{
+													if( s.length )
+													{
+														bool bWarning;
+														int lineNumberTail = Util.index( s, ") error" );
+														if( lineNumberTail >= s.length )
+														{
+															lineNumberTail = Util.index( s, ") warning" );
+															bWarning = true;
+														}
+
+														if( lineNumberTail < s.length )
+														{
+															int lineNumberHead = Util.index( s, "(" );
+															if( lineNumberHead < lineNumberTail - 1 )
+															{
+																char[]	filePath = Util.replace( s[0..lineNumberHead++], '\\', '/' );
+																if( fileName == filePath )
+																{
+																	if( upperCase(filePath) in GLOBAL.scintillaManager )
+																	{
+																		CScintilla cSci = GLOBAL.scintillaManager[upperCase(filePath)];
+
+																		int		ln = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
+																		char[]	annotationText = s[lineNumberTail+2..length];
+																		char[]	getText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln ) ).dup;
+																		if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
+
+																		if( IupGetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln ) < 40 )
+																		{
+																			IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( s[lineNumberTail+2..length] ) );
+																			if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 40 );
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+												IupSetAttribute( GLOBAL.scintillaManager[upperCase(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+											}
+										}
 										
 										return IUP_DEFAULT;
 									}
@@ -136,7 +146,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int searchOutputButton_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	private int searchOutputButton_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( button == IUP_BUTTON1 )
 		{
@@ -187,15 +197,4 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}	
-
-	/*
-	int messageCaret_cb(Ihandle *ih, int lin, int col, int pos)
-	{
-		LINECOLPOS.line = lin;
-		LINECOLPOS.col = col;
-		LINECOLPOS.pos = pos;
-
-		return IUP_DEFAULT;
-	}	
-	*/
 }

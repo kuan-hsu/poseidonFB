@@ -9,79 +9,36 @@ import tango.stdc.stringz;
 void createTabs()
 {
 	GLOBAL.documentTabs = IupTabs( null );
-	//IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
+	version( linux )
+	{
+		IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
+		IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
+	}
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
-	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
 	//IupSetCallback( GLOBAL.documentTabs, "GETFOCUS_CB", cast(Icallback) &tabFocus_cb );
 }
 
 extern(C)
 {
-	int tabchangePos_cb( Ihandle* ih, int new_pos, int old_pos )
+	private int tabchangePos_cb( Ihandle* ih, int new_pos, int old_pos )
 	{
 		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos, old_pos );
 	}
 	
 	// Close the document Iuptab......
-	int tabClose_cb( Ihandle* ih, int pos )
+	private int tabClose_cb( Ihandle* ih, int pos )
 	{
+		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+		if( cSci !is null )	return actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+		/*
 		Ihandle* _child = IupGetChild( ih, pos );
 		CScintilla cSci = ScintillaAction.getCScintilla( _child );
-		
-		actionManager.ScintillaAction.closeDocument( cSci.getFullPath );
-		if( GLOBAL.scintillaManager.length == 0 )
-		{
-			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", "             " );
-			IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "   " );
-			IupSetAttribute( GLOBAL.statusBar_FontType, "TITLE", "        " );	
-		}		
-		/+
-		// ih = GLOBAL.documentTabs
-		// So we need get the child's Ihandle( Iupscintilla )
-		Ihandle* _child = IupGetChild( ih, pos );
-
-		CScintilla cSci = ScintillaAction.getCScintilla( _child );
-		if( cSci !is null )
-		{
-			if( fromStringz( IupGetAttribute( _child, "SAVEDSTATE" ) ) == "YES" )
-			{
-				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
-				if( button == 3 ) return IUP_IGNORE;
-				if( button == 1 ) cSci.saveFile();
-			}
-
-			// Remove the fileListTree's node
-			int nodeCount = IupGetInt( GLOBAL.fileListTree, "COUNT" );
-		
-			for( int id = 1; id <= nodeCount; id++ ) // include Parent "FileList" node
-			{
-				CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree, "USERDATA", id );
-				if( _sci_node == cSci )
-				{
-					IupSetAttributeId( GLOBAL.fileListTree, "DELNODE", id, "SELECTED" );
-					break;
-				}
-			}
-
-			actionManager.OutlineAction.cleanTree( cSci.getFullPath );
-
-			// Remove from the scintillaManager
-			GLOBAL.scintillaManager.remove( cSci.getFullPath );
-			delete cSci;
-			if( GLOBAL.scintillaManager.length == 0 )
-			{
-				IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", "             " );
-				IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "   " );
-				IupSetAttribute( GLOBAL.statusBar_FontType, "TITLE", "        " );	
-			}
-		}
-		+/
-
-		return IUP_CONTINUE;
+		*/
+		return IUP_DEFAULT;
 	}
 
-	int tabRightClick_cb( Ihandle* ih, int pos )
+	private int tabRightClick_cb( Ihandle* ih, int pos )
 	{
 		// ih = GLOBAL.documentTabs
 		// So we need get the child's Ihandle( Iupscintilla )
@@ -117,6 +74,32 @@ extern(C)
 			actionManager.ScintillaAction.closeAllDocument();
 		});
 
+		// Annotation
+		Ihandle* _showAnnotation = IupItem( "Show Annotation", null );
+		IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
+		IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		{
+			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+			//IupScintillaSendMessage( cSci.getIupScintilla, 2548, 3, 0 );
+		});
+		
+		Ihandle* _hideAnnotation = IupItem( "Hide Annotation", null );
+		IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
+		IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		{
+			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
+		});
+
+		Ihandle* _removeAllAnnotation = IupItem( "Remove All Annotation", null );
+		IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
+		IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		{
+			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
+		});
+
 		Ihandle* _refresh = IupItem( "Refresh Parser", null );
 		IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
 		IupSetCallback( _refresh, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
@@ -132,6 +115,10 @@ extern(C)
 										_closeall,
 										IupSeparator(),
 										_save,
+										IupSeparator(),
+										_showAnnotation,
+										_hideAnnotation,
+										_removeAllAnnotation,
 										IupSeparator(),
 										_refresh,
 										null

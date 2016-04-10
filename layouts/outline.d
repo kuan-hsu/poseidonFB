@@ -26,28 +26,58 @@ class COutline
 		{
 			if( _node.protection != "public" && _node.protection != "shared" ) prot = "_" ~ _node.protection;
 		}
-		
+
 		switch( _node.kind )
 		{
+			case B_DEFINE | B_VARIABLE:
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_var" ) );
+				break;
+
+			case B_DEFINE | B_FUNCTION:
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_fun" ) );
+				break;
+				
 			case B_VARIABLE:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ~ prot ) );
+				if( _node.name.length )
+				{
+					if( _node.name[length-1] == ')' )
+						IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable_array" ~ prot ) );
+					else
+						IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ~ prot ) );
+				}
 				break;
 
 			case B_FUNCTION:
-			case B_SUB:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_function" ) );
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
 				if( _node.getChildrenCount > 0 )
 				{
-					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_function" ) );
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
+				}
+				break;
+
+			case B_SUB:
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
 				}
 				break;
 
 			case B_PROPERTY:
-				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
-				if( _node.getChildrenCount > 0 )
+				if(_node.type.length )
 				{
-					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+					if( _node.type[0] == '(' )
+					{
+						IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+						if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+					}
+					else
+					{
+						IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
+						if( _node.getChildrenCount > 0 ) IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
+					}
 				}
+				
 				break;
 
 			case B_CTOR:
@@ -118,6 +148,15 @@ class COutline
 				}				
 				break;
 
+			case B_MACRO:
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
+				}				
+				break;
+				
+
 			default:
 				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
 		}
@@ -128,7 +167,9 @@ class COutline
 		int lastAddNode;
 
 		if( _node is null ) return;
-		
+
+		if( _node.kind & B_SCOPE ) return;
+
 		if( _node.getChildrenCount > 0 )
 		{
 			switch( _node.kind )
@@ -151,7 +192,7 @@ class COutline
 						
 					break;
 
-				case B_SUB, B_CTOR, B_DTOR:
+				case B_SUB, B_CTOR, B_DTOR, B_MACRO:
 					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
 					break;
 
@@ -170,7 +211,7 @@ class COutline
 		else
 		{
 			bool bNoImage;
-			switch( _node.kind )
+			switch( _node.kind & 524287 )
 			{
 				case B_FUNCTION, B_PROPERTY:
 					char[] _type = _node.type;
@@ -182,6 +223,12 @@ class COutline
 						_type = _node.type[0..pos];
 						_paramString = _node.type[pos..length];
 					}
+
+					if( _node.kind & B_DEFINE )
+					{
+						IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+						break;
+					}					
 
 					if( _type.length )
 					{
@@ -198,6 +245,12 @@ class COutline
 					break;
 
 				case B_VARIABLE, B_ALIAS:
+					if( _node.kind & B_DEFINE )
+					{
+						IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+						break;
+					}					
+				
 					IupSetAttributeId( activeTreeOutline, "ADDLEAF", bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
 					break;
 
@@ -324,7 +377,13 @@ extern(C)
 					IupSetCallback( itemRefresh, "ACTION", cast(Icallback) &COutline_refresh );
 					IupSetHandle( "outline_rightclick", ih );
 
+					Ihandle* itemExpand = IupItem( "Expand/Contract All", null );
+					IupSetCallback( itemExpand, "ACTION", cast(Icallback) &COutline_expand );
+					IupSetHandle( "outline_rightclickexpand", ih );
+					
+
 					Ihandle* popupMenu = IupMenu( 	itemRefresh,
+													itemExpand,
 													null
 												);
 
@@ -345,8 +404,28 @@ extern(C)
 			char[] fullPath = fromStringz( IupGetAttributeId( _iih, "TITLE", 0 ) );
 			actionManager.OutlineAction.refresh( fullPath );
 		}
+		IupSetHandle( "outline_rightclick", null );
 		return IUP_DEFAULT;
 	}
+
+	private int COutline_expand( Ihandle *ih )
+	{
+		
+		Ihandle* _iih = IupGetHandle( "outline_rightclickexpand" );
+		if( _iih != null )
+		{
+			
+			if( fromStringz( IupGetAttributeId( _iih, "STATE", 0 ) ) == "EXPANDED" )
+				IupSetAttribute( _iih, "EXPANDALL", "NO" );
+			else
+			{
+				IupSetAttribute( _iih, "EXPANDALL", "YES" );
+				IupSetAttribute( _iih, "TOPITEM", "YES" ); // Set position to top
+			}
+		}
+		IupSetHandle( "outline_rightclickexpand", null );
+		return IUP_DEFAULT;
+	}	
 
 	int COutline_showParams( Ihandle *ih )
 	{
@@ -361,5 +440,4 @@ extern(C)
 		
 		return IUP_DEFAULT;
 	}	
-	
 }

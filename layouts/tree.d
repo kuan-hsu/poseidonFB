@@ -6,11 +6,8 @@ private import global, scintilla, actionManager, menu, tools;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 
 
-private import tango.stdc.stringz;
-private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii, tango.io.Stdout;
-
-
-import Integer = tango.text.convert.Integer;
+private import tango.stdc.stringz, tango.sys.Process;
+private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii, Util = tango.text.Util, Integer = tango.text.convert.Integer;
 
 // FileLise Tree
 void createFileListTree()
@@ -321,6 +318,8 @@ class CProjectTree
 
 			// Recent Projects
 			GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
+
+			IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
 		}
 		else
 		{
@@ -378,7 +377,7 @@ class CProjectTree
 extern(C)
 {
 	// Node has been Selected, but Notice! Right-Click isn't Trigger!
-	int CProjectTree_Selection_cb( Ihandle *ih, int id, int status )
+	private int CProjectTree_Selection_cb( Ihandle *ih, int id, int status )
 	{
 		// SELECTION_CB will trigger 2 times, preSelect -> Select, we only catch second signal
 		if( status == 1 )
@@ -397,12 +396,27 @@ extern(C)
 				
 				if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 				{
+					//char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
+					actionManager.ScintillaAction.openFile( fullPath.dup );
+					/*
 					Ihandle* _sci = GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla;
 					
 					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci );
 					IupSetFocus( _sci );
 					StatusBarAction.update();
+					*/
 				}				
+			}
+
+			if( id > 0 )
+			{
+				int prjID = actionManager.ProjectAction.getActiveProjectID();
+				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
+				IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
+			}
+			else
+			{
+				IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 			}
 		}
 
@@ -410,7 +424,7 @@ extern(C)
 	}
 
 	// Leaf Node has been Double-Click
-	int CProjectTree_ExecuteLeaf_cb( Ihandle *ih, int id )
+	private int CProjectTree_ExecuteLeaf_cb( Ihandle *ih, int id )
 	{
 		//char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ); // Shadow
 		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
@@ -420,7 +434,7 @@ extern(C)
 	}
 
 	// Show Fullpath or Filename
-	int CProjectTree_RightClick_cb( Ihandle *ih, int id )
+	private int CProjectTree_RightClick_cb( Ihandle *ih, int id )
 	{
 		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 
@@ -483,7 +497,23 @@ extern(C)
 				Ihandle* itemClose = IupItem( "Close", null );
 				IupSetCallback( itemClose, "ACTION", cast(Icallback) &menu.closeProject_cb );  // From menu.d
 
-				Ihandle* popupMenu = IupMenu( 	itemProperty, 
+				Ihandle* itemExplorer = IupItem( "Open In Explorer", null );
+				IupSetCallback( itemExplorer, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					char[]	fullPath = actionManager.ProjectAction.getActiveProjectName();
+					version( Windows )
+					{
+						Util.replace( fullPath, '/', '\\' );
+						scope proc = new Process( true, "explorer " ~ "\"" ~ fullPath ~ "\"" );
+						proc.execute;
+						proc.wait;
+					}
+				});
+
+				Ihandle* popupMenu = IupMenu( 	itemProperty,
+												IupSeparator(),
+												itemExplorer,
+												IupSeparator(),
 												itemClose,
 												null
 											);
@@ -536,7 +566,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CProjectTree_NewFile_cb( Ihandle* ih )
+	private int CProjectTree_NewFile_cb( Ihandle* ih )
 	{
 		// Open Dialog Window
 		scope test = new CSingleTextDialog( 275, 96, "Create New File", "File Name:", null, false );
@@ -640,7 +670,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CProjectTree_NewFolder_cb( Ihandle* ih )
+	private int CProjectTree_NewFolder_cb( Ihandle* ih )
 	{
 		scope test = new CSingleTextDialog( 290, 96, "Create New Folder", "Folder Name:", null, false );
 		char[] folderName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
@@ -664,7 +694,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CProjectTree_AddFile_cb( Ihandle* ih )
+	private int CProjectTree_AddFile_cb( Ihandle* ih )
 	{
 		try
 		{
@@ -757,15 +787,15 @@ extern(C)
 				actionManager.ScintillaAction.openFile( fullPath.dup );
 			}
 		}
-		catch(Exception e )
+		catch( Exception e )
 		{
-			Stdout(e.toString).newline;
+			IupMessage( "Exception", toStringz( e.toString ) );
 		}
 		
 		return IUP_DEFAULT;
 	}
 
-	int CProjectTree_Open_cb( Ihandle *ih )
+	private int CProjectTree_Open_cb( Ihandle *ih )
 	{
 		// Get Focus Tree Node ID
 		int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
@@ -778,7 +808,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CProjectTree_remove_cb( Ihandle* ih )
+	private int CProjectTree_remove_cb( Ihandle* ih )
 	{
 		// Get Focus Tree Node ID
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
@@ -824,7 +854,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CProjectTree_delete_cb( Ihandle* ih )
+	private int CProjectTree_delete_cb( Ihandle* ih )
 	{
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
@@ -842,7 +872,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CProjectTree_rename_cb( Ihandle* ih )
+	private int CProjectTree_rename_cb( Ihandle* ih )
 	{
 		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		char[]	fullPath	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
@@ -859,16 +889,14 @@ extern(C)
 		if( newFileName.length )
 		{
 			// ReName On Disk & Change fn
-			fp.rename( fp.path ~ "/" ~ newFileName ~ fp.suffix );
+			fp.rename( fp.path ~ newFileName ~ fp.suffix );
 
 			if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 			{
 				GLOBAL.scintillaManager[upperCase(fullPath)].rename( fp.toString );
 			}				
 
-			// Shadow
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, GLOBAL.cString.convert( fp.toString ) );
-
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id, GLOBAL.cString.convert( fp.toString ) );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, GLOBAL.cString.convert( fp.file ) );
 
 			char[] activeProjectDirName = actionManager.ProjectAction.getActiveProjectName;

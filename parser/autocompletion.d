@@ -10,7 +10,7 @@ struct AutoComplete
 	import tools;
 	import parser.ast;
 
-	import Integer = tango.text.convert.Integer, Util = tango.text.Util;
+	import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf;
 	//import tango.text.convert.Layout;
 	import tango.stdc.stringz;
 	import tango.io.FilePath, tango.sys.Environment;
@@ -20,34 +20,7 @@ struct AutoComplete
 	static CASTnode[char[]]		includesMarkContainer;
 
 	
-
-	static char[] getLine( Ihandle* iupSci, int line, bool bCRLF = true )
-	{
-		// SCI_GETLINE = 2153, (include CR/LF)
-		// SCI_LINELENGTH = 2350, (include CR/LF)
-		// SCI_LINEFROMPOSITION = 2166,
-		// SCI_GETLINEENDPOSITION = 2136,
-		// SCI_POSITIONFROMLINE = 2167,
-		
-		int posLineTail = IupScintillaSendMessage( iupSci, 2136, line, 0 );
-		int posLineHead = IupScintillaSendMessage( iupSci, 2167, line, 0 );
-
-		if( posLineTail <= posLineHead ) return null;
-
-		char[]	text;
-		int		len = posLineTail - posLineHead;
-
-		int lineLength_CRLF =  IupScintillaSendMessage( iupSci, 2350, line, 0 ); // SCI_LINELENGTH = 2350, (include CR/LF)
-		text.length = lineLength_CRLF;
-
-		IupScintillaSendMessage( iupSci, 2153, line, cast(int) GLOBAL.cString.convert( text ) ); // SCI_GETLINE = 2153, (include CR/LF)
-
-		if( bCRLF ) return text;
-		
-		return text[0..len];
-	}
-	
-	static char[] searchHead( Ihandle* iupSci, int pos, char[] targetText )
+	static int getProcedurePos( Ihandle* iupSci, int pos, char[] targetText )
 	{
 		/*
 		SCI_SETTARGETSTART = 2190,
@@ -64,7 +37,7 @@ struct AutoComplete
 		SCFIND_WORDSTART = 0x00100000,
 		SCFIND_REGEXP = 0x00200000,
 		SCFIND_POSIX = 0x00400000,
-		*/
+		*/		
 		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
 		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
 		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
@@ -72,59 +45,195 @@ struct AutoComplete
 
 		int posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 
+		while( posHead >= 0 )
+		{
+			int style = IupScintillaSendMessage( iupSci, 2010, posHead, 0 ); // SCI_GETSTYLEAT 2010
+			if( style == 1 || style == 19 || style == 4 )
+			{
+				IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );
+				IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+				posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+			}
+			else
+			{
+				// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
+				bool bReSearch;
+				for( int i = posHead + targetText.length; i < documentLength; ++ i )
+				{
+					char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+
+					if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
+					{
+						bReSearch = true;
+						break;
+					}
+					else if( s != " " && s != "\t" )
+					{
+						// Check before targetText word.......
+						char[]	beforeWord;
+						for( int j = posHead - 1; j >= 0; --j )
+						{
+							char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+							
+							if( _s[0] == 13 || _s == ":" || _s == "\n" )
+							{
+								break;
+							}
+							else if( _s == " " || _s == "\t" )
+							{
+								if( beforeWord.length ) break;
+							}
+							else
+							{
+								beforeWord ~= _s;
+							}
+						}
+						
+						if( beforeWord == "eralced" || beforeWord == "dne" ) bReSearch = true; else bReSearch = false;
+						break;
+					}
+				}
+
+				if( bReSearch )
+				{
+					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
+					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		
+		return posHead;
+	}
+	
+	static char[] searchHead( Ihandle* iupSci, int pos, char[] targetText )
+	{
+		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+		
+		int posHead = getProcedurePos( iupSci, pos, targetText );
 		if( posHead < 0 ) return null;
 
-		// Check after "sub" have word, if "end sub", we got no word....
-		for( int i = posHead + targetText.length; i < documentLength; ++ i )
-		{
-			char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+		int posEnd = skipCommentAndString( iupSci, pos, "end " ~ targetText, 0 );
+		if( posEnd > posHead ) return null;
+		
 
-			
-			if( s[0] == 13 || s == ":" || s == "\n" )
+
+		/+
+		// Search from posHead
+		IupScintillaSendMessage( iupSci, 2190, posHead + targetText.length, 0 ); 	// SCI_SETTARGETSTART = 2190,
+		IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
+
+		// new
+		char[] endTargetText = "end " ~ targetText;
+		int posTail = IupScintillaSendMessage( iupSci, 2197, endTargetText.length, cast(int) GLOBAL.cString.convert( endTargetText ) );
+		
+		do
+		{
+			if( posTail < 0 )
 			{
 				return null;
 			}
-			else if( s == " " || s == "\t" )
-			{
-			}
 			else
 			{
-				break;
+				int style = IupScintillaSendMessage( iupSci, 2010, posTail, 0 ); // SCI_GETSTYLEAT 2010
+				if( style == 1 || style == 19 || style == 4 ) // Comment or String
+				{
+					// Research
+					IupScintillaSendMessage( iupSci, 2190, posTail + endTargetText.length, 0 );	// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
+					posTail = IupScintillaSendMessage( iupSci, 2197, endTargetText.length, cast(int) GLOBAL.cString.convert( endTargetText ) );
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
+		while( posTail >= 0 )
+		+/
 
-		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-		IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
-
+		
+		/+
 		int posTail = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-
 		if( posTail < 0 ) return null;
 
-		// Check after "sub" have word, if "end sub", we got no word....
-		for( int i = posTail+targetText.length; i < documentLength; ++ i )
+		while( posTail < documentLength - 1 && posTail >= 0  )
 		{
-			char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
-
-			if( s[0] == 13 || s == ":" || s == "\n" )
+			int style = IupScintillaSendMessage( iupSci, 2010, posTail, 0 ); // SCI_GETSTYLEAT 2010
+			if( style == 1 || style == 19 || style == 4 ) // Comment or String
 			{
-				break;
-			}
-			else if( s == " " || s == "\t" )
-			{
+				IupScintillaSendMessage( iupSci, 2190, posTail + targetText.length, 0 );	// SCI_SETTARGETSTART = 2190,
+				IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
+				posTail = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 			}
 			else
 			{
-				return null;
+				// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research
+				bool bReSearch;
+				for( int i = posTail + targetText.length; i < documentLength; ++ i )
+				{
+					char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+
+					if( s[0] == 13 || s == ":" || s == "\n" )
+					{
+						// Check before targetText word.......
+						char[]	beforeWord;
+						for( int j = posTail - 1; j >= posHead; --j )
+						{
+							char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+							
+							if( _s[0] == 13 || _s == ":" || _s == "\n" )
+							{
+								break;
+							}
+							else if( _s == " " || _s == "\t" )
+							{
+								if( beforeWord.length ) break;
+							}
+							else
+							{
+								beforeWord ~= _s;
+							}
+						}
+						
+						if( beforeWord == "dne" ) bReSearch = false; else bReSearch = true;
+						break;
+					}
+					else if( s != " " && s != "\t" )
+					{
+						bReSearch = true;
+						break;
+					}
+				}
+
+				if( bReSearch )
+				{
+					IupScintillaSendMessage( iupSci, 2190, posTail + targetText.length, 0 );	// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
+					posTail = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
+		+/
 
+		/+
+		if( posTail < 0 ) return null;
 		if( pos < posHead || pos > posTail ) return null;
+		+/
 
 		char[]	result;
 		bool	bSPACE, bReturnNextWord;
 		for( int i = posHead + targetText.length; i < documentLength; ++i )
 		{
-			char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+			char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) );
 
 			//stdout( s ).newline;
 			
@@ -145,6 +254,73 @@ struct AutoComplete
 		return Util.trim( result.dup );
 	}
 
+	// direct = 0 findprev, direct = 1 findnext
+	static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct )
+	{
+		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+
+		if( direct == 0 )
+		{
+			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
+			IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+		}
+		else
+		{
+			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
+			IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
+		}
+		pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+		
+		while( pos > -1 )
+		{
+			int style = IupScintillaSendMessage( iupSci, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
+			if( style == 1 || style == 19 || style == 4 )
+			{
+				if( direct == 0 )
+				{
+					IupScintillaSendMessage( iupSci, 2190, pos - 1, 0 );
+					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+				else
+				{
+					IupScintillaSendMessage( iupSci, 2190, pos + targetText.length, 0 );
+					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );							// SCI_SETTARGETEND = 2192,
+					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+			}
+			else
+			{
+				return pos;
+			}
+		}
+
+		return pos;
+	}
+
+	static bool checkWithBlock( Ihandle* iupSci, int pos )
+	{
+		int posWith		= skipCommentAndString( iupSci, pos, "with", 0 );
+		int posSub		= skipCommentAndString( iupSci, pos, "sub", 0 );
+		int posFunction	= skipCommentAndString( iupSci, pos, "function", 0 );
+		int posProperty	= skipCommentAndString( iupSci, pos, "property", 0 );
+		int posCtor		= skipCommentAndString( iupSci, pos, "constructor", 0 );
+		int posDtor		= skipCommentAndString( iupSci, pos, "destructor", 0 );
+
+		/*
+		IupMessage( "With", toStringz( Integer.toString( posWith ) ) );
+		IupMessage( "Sub", toStringz( Integer.toString( posSub ) ) );
+		IupMessage( "Function", toStringz( Integer.toString( posFunction ) ) );
+		*/
+
+		if( posWith < 0 ) return false;
+
+		if( posWith > posSub && posWith > posFunction && posWith > posProperty && posWith > posCtor && posWith > posDtor ) return true;
+
+		return false;
+	}
+
 	static char[] getListImage( CASTnode node )
 	{
 		int protAdd;
@@ -155,40 +331,50 @@ struct AutoComplete
 			case "protected":	protAdd = 1; break;
 			default:			protAdd = 2;
 		}
+
+		char[] name = node.name;
+		if( node.name.length )
+		{
+			if( node.name[length-1] == ')' )
+			{
+				int posOpenParen = Util.index( node.name, "(" );
+				if( posOpenParen < node.name.length ) name = node.name[0..posOpenParen];
+			}
+		}
 		
 		switch( node.kind )
 		{
-			case B_SUB, B_FUNCTION:			return node.name ~ "?" ~ Integer.toString( 0 + protAdd );
-			case B_VARIABLE:				return node.name ~ "?" ~ Integer.toString( 3 + protAdd );
-			/*
-				CASTnode _typeNode = getType( node );
-				if( _typeNode is null )
+			case B_DEFINE | B_VARIABLE:	return name ~ "?33";
+			case B_DEFINE | B_FUNCTION:	return name ~ "?34";
+			
+			case B_SUB:					return name ~ "?" ~ Integer.toString( 25 + protAdd );
+			case B_FUNCTION:			return name ~ "?" ~ Integer.toString( 28 + protAdd );
+			case B_VARIABLE:
+				if( node.name.length )
 				{
-					return node.name ~ "?" ~ Integer.toString( 3 + protAdd );
-				}
-				else
-				{	
-					char[] result = getListImage( _typeNode );
-					int questPos = Util.index( result, "?" );
-					if( questPos < result.length )
-					{
-						return node.name ~ result[questPos..length];
-					}
+					if( node.name[length-1] == ')' ) return name ~ "?" ~ Integer.toString( 0 + protAdd ); else return name ~ "?" ~ Integer.toString( 3 + protAdd );
 				}
 				break;
-			*/
-			case B_CLASS:					return node.name ~ "?" ~ Integer.toString( 6 + protAdd );
-			case B_TYPE: 					return node.name ~ "?" ~ Integer.toString( 9 + protAdd );
-			case B_ENUM: 					return node.name ~ "?" ~ Integer.toString( 12 + protAdd );
-			case B_PARAM:					return node.name ~ "?18";
-			case B_ENUMMEMBER:				return node.name ~ "?19";
-			case B_ALIAS:					return node.name ~ "?20";
-			case B_NAMESPACE:				return node.name ~ "?24";
+
+			case B_PROPERTY:
+				if( node.type.length )
+				{
+					if( node.type[0] == '(' ) return name ~ "?31"; else	return name ~ "?32";
+				}
+				break;
+				
+			case B_CLASS:					return name ~ "?" ~ Integer.toString( 6 + protAdd );
+			case B_TYPE: 					return name ~ "?" ~ Integer.toString( 9 + protAdd );
+			case B_ENUM: 					return name ~ "?" ~ Integer.toString( 12 + protAdd );
+			case B_PARAM:					return name ~ "?18";
+			case B_ENUMMEMBER:				return name ~ "?19";
+			case B_ALIAS:					return name ~ "?20";
+			case B_NAMESPACE:				return name ~ "?24";
 			case B_INCLUDE, B_CTOR, B_DTOR:	return null;
-			default:						return node.name ~ "?21";
+			default:						return name ~ "?21";
 		}
 
-		return node.name;
+		return name;
 	}
 
 	static CASTnode[] anonymousEnumMembers( CASTnode originalNode )
@@ -310,17 +496,6 @@ struct AutoComplete
 		}
 
 		return results;
-	}
-
-
-	static char[] getFunctionTitle( Ihandle* iupSci, int pos )
-	{
-		char[] result = searchHead( iupSci, pos, "sub" );
-
-		if( !result.length ) result = searchHead( iupSci, pos, "function" );
-		if( !result.length ) result = searchHead( iupSci, pos, "property" );
-
-		return result;
 	}
 
 	static CASTnode getFunctionAST( CASTnode head, char[] functionTitle, int line )
@@ -461,7 +636,23 @@ struct AutoComplete
 
 		// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
 		_path.set( GLOBAL.compilerFullPath );
-		testPath = _path.path() ~ "inc/" ~ include;
+		version( Windows )
+		{
+			testPath = _path.path() ~ "inc/" ~ include;
+		}
+		else
+		{
+			testPath = _path.path();
+			int pos = Util.rindex( testPath, "/bin/" );
+			if( pos > 0 && pos < testPath.length )
+			{
+				testPath = testPath[0..pos] ~ "/include/freebasic/" ~ include;
+			}
+			else
+			{
+				return null;
+			}
+		}
 				
 		_path.set( testPath ); // Reset
 		if( _path.exists() )
@@ -493,6 +684,7 @@ struct AutoComplete
 			}
 			else
 			{
+				//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
 				actionManager.OutlineAction.loadFile( includeFullPath );
 				results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
 				results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
@@ -504,10 +696,26 @@ struct AutoComplete
 		return results;
 	}
 
-	static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath )
+	static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false )
 	{
+		static int	level;
+		
 		CASTnode[] results;
 
+		if( !bRootCall )
+		{
+			level ++;
+			if( level >= GLOBAL.includeLevel )
+			{
+				level--;
+				return null;
+			}
+		}
+		else
+		{
+			level = 0;
+		}
+		
 		foreach( CASTnode _node; originalNode.getChildren )
 		{
 			if( _node.kind == B_INCLUDE )
@@ -520,6 +728,13 @@ struct AutoComplete
 						results ~= check( _node.name, originalFullPath );
 					}
 				}
+				else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
+				{
+					version(linux)
+					{
+						results ~= check( _node.name, originalFullPath );
+					}
+				}
 				else if( _node.type == "!__FB_WIN32__" )
 				{
 					version(Windows){}
@@ -529,6 +744,21 @@ struct AutoComplete
 						results ~= check( _node.name, originalFullPath );
 					}
 				}
+				else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
+				{
+					version(linux){}
+					else
+					{
+						results ~= check( _node.name, originalFullPath );
+					}
+				}
+				/*
+				else if( _node.type.length )
+				{
+
+			
+				}
+				*/
 				else
 				{
 					//Stdout( "Include(NORMAL): " ~ _node.name ).newline;
@@ -537,6 +767,7 @@ struct AutoComplete
 			}
 		}
 
+		level--;
 		return results;
 	}
 
@@ -549,12 +780,57 @@ struct AutoComplete
 		
 		// Parse Include
 		//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-		getIncludes( originalNode, originalFullPath );
+		getIncludes( originalNode, originalFullPath, true );
 
 		foreach( includeAST; includesMarkContainer )
 		{
 			foreach( child; includeAST.getChildren )
 			{
+				if( child.kind & B_NAMESPACE )
+				{
+					if( child.name.length )
+					{
+						if( lowerCase( child.name ) == lowerCase( word ) )
+						{
+							results ~= child;
+						}
+						else
+						{
+							foreach( _child; child.getChildren )
+							{
+								if( _child.name.length )
+								{
+									if( lowerCase( _child.name ) == lowerCase( word ) )
+									{
+										results ~= _child;
+									}
+								}
+								else
+								{
+									CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
+									if( enumResult.length ) results ~= enumResult;
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					if( child.name.length )
+					{
+						if( lowerCase( child.name ) == lowerCase( word ) )
+						{
+							results ~= child;
+						}
+					}
+					else
+					{
+						CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+						if( enumResult.length ) results ~= enumResult;
+					}
+				}
+
+				/+
 				if( child.kind & B_KIND )
 				{
 					if( lowerCase( child.name ) == lowerCase( word ) )
@@ -569,6 +845,7 @@ struct AutoComplete
 					}
 					*/
 				}
+				+/
 			}						
 		}
 
@@ -584,7 +861,7 @@ struct AutoComplete
 
 		// Parse Include
 		//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-		getIncludes( originalNode, originalFullPath );
+		getIncludes( originalNode, originalFullPath, true );
 
 		/*
 		foreach( CASTnode n; includesMarkContainer )
@@ -701,7 +978,8 @@ struct AutoComplete
 			{
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 
-				CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word );
+				//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word );
+				CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
 
 				if( resultIncludeNodes.length )	resultNode = resultIncludeNodes[0];
 			}
@@ -713,6 +991,36 @@ struct AutoComplete
 	static CASTnode getType( CASTnode originalNode )
 	{
 		CASTnode resultNode;
+
+		if( originalNode.type.length >= 4 )
+		{
+			if( originalNode.type[0..4] == "Var(" )
+			{
+				char[] varTypeName = removeArrayAndPointerWord( originalNode.type[4..length-1] );
+
+				CASTnode varNode = searchMatchNode( originalNode, varTypeName, B_FUNCTION | B_PROPERTY  );
+				if( varNode !is null )
+				{
+					varTypeName = removeArrayAndPointerWord( varNode.type );
+					return searchMatchNode( originalNode, varTypeName, B_TYPE | B_CLASS | B_ENUM | B_UNION );					
+				}
+				/+
+				CASTnode[] varNodes = AutoComplete.getMatchASTfromWholeWord( originalNode, varTypeName, originalNode.lineNumber, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
+				if( !varNodes.length )
+				{
+					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					if( cSci !is null )	varNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, varTypeName, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
+				}
+;
+				if( varNodes.length )
+				{
+					varTypeName = removeArrayAndPointerWord( varNodes[0].type );
+					resultNode = searchMatchNode( originalNode, varTypeName, B_TYPE | B_CLASS | B_ENUM | B_UNION );
+					return resultNode;
+				}
+				+/
+			}
+		}
 
 		switch( originalNode.kind )
 		{
@@ -818,6 +1126,23 @@ struct AutoComplete
 		return result;
 	}
 
+	static void keyWordlist( char[] word )
+	{
+		foreach( char[] _s; GLOBAL.KEYWORDS )
+		{
+			foreach( char[] s; Util.split( _s, " " ) )
+			{
+				if( s.length )
+				{
+					if( Util.index( lowerCase( s ), lowerCase( word ) ) == 0 )
+					{
+						listContainer ~= ( s ~ "?21" );
+					}
+				}
+			}
+		}
+	}
+
 
 	public:
 	static bool bEnter;
@@ -907,44 +1232,66 @@ struct AutoComplete
 	}	
 
 	
+
 	static char[] getWholeWordReverse( Ihandle* iupSci, int pos = -1 )
 	{
+		dchar[] word32;
 		char[]	word;
 		int		countParen;
-		
-		do
+
+		try
 		{
-			pos--;
-			char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-			switch( s )
+			while( pos > -1 )
 			{
-				case ")":
-					countParen++;
-					break;
+				--pos;
+				if( pos < 0 ) break;
+				
+				dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
+				//dchar[] s = UTF.toString32( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ) );
+				switch( s )
+				{
+					case ')':
+						countParen++;
+						break;
 
-				case "(":
-					countParen--;
-					if( countParen < 0 ) return word;
-					break;
-					
-				case ">":
-					if( pos > 0 && countParen == 0 )
-					{
-						if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+					case '(':
+						countParen--;
+						if( countParen < 0 ) return word;
+						break;
+						
+					case '>':
+						if( pos > 0 && countParen == 0 )
 						{
-							word ~= ">-";
-							pos--;
-							break;
+							if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+							{
+								word ~= ">-";
+								pos--;
+								break;
+							}
 						}
-					}
-				case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "<":
-					if( countParen == 0 ) return word;
+					case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '<':
+						if( countParen == 0 ) return word;
 
-				default: 
-					if( countParen == 0 ) word ~= s;
+					default: 
+						if( countParen == 0 )
+						{
+							if( UTF.isValid( s ) )
+							{
+								word32 = "";
+								word32 ~= s;
+								word ~= Util.trim( UTF.toString( word32 ) );
+								//word ~= s;
+							}
+						}
+				}
 			}
+			
 		}
-		while( pos > -1 )
+		catch( Exception e )
+		{
+			//IupMessage( "Error", toStringz( e.toString ) );
+			return null;
+		}
 
 		return word;
 	}
@@ -957,6 +1304,7 @@ struct AutoComplete
 		if( text == "(" )
 		{
 			bCallTip = true;
+			IupSetAttribute( iupSci, "AUTOCCANCEL", GLOBAL.cString.convert( "YES" ) ); // Prevent autocomplete -> calltip issue
 		}
 		else if( text == "." )
 		{
@@ -992,6 +1340,16 @@ struct AutoComplete
 		else
 		{
 			word = word ~ getWholeWordReverse( iupSci, pos );
+		}
+
+		// Check first dot '.' at With Block
+		if( !word.length && bDot )
+		{
+			if( checkWithBlock( iupSci, pos ) )
+			{
+				char[] withTitle = searchHead( iupSci, pos, "with" );
+				if( withTitle.length ) word = word ~ withTitle.reverse;
+			}
 		}
 
 		if( !bDot && !bCallTip )
@@ -1035,13 +1393,56 @@ struct AutoComplete
 				char[][] splitWord = Util.split( word, "." );
 				if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );
 
+				if( !splitWord[0].length )
+				{
+					if( checkWithBlock( iupSci, pos ) )
+					{
+						char[] withTitle = searchHead( iupSci, pos, "with" );
+						
+						if( withTitle.length )
+						{
+							char[][] splitWithTile = Util.split(withTitle, "." );
+							char[][] tempSplitWord = splitWord;
+							splitWord.length = 0;
+
+							foreach( char[] s; splitWithTile ~ tempSplitWord )
+							{
+								if( s != "" ) splitWord ~= s;
+							}
+						}
+					}
+				}
+
 				auto			AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
-				char[]			functionTitle = getFunctionTitle( iupSci, pos );
+				char[]			functionTitle = lowerCase( getFunctionTitle( iupSci, pos ) );
 				int				lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 
 				if( functionTitle.length ) AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
 
-				if( AST_Head is null ) return null;
+				if( AST_Head is null )
+				{
+					if( GLOBAL.enableKeywordComplete == "ON" )
+					{
+						keyWordlist( splitWord[0] );
+
+						if( listContainer.length )
+						{
+							listContainer.sort;
+							result ~= ( listContainer[0] ~ " " );
+							for( int i = 1; i < listContainer.length; ++ i )
+							{
+								if( listContainer[i].length )
+								{
+									if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ " " );
+								}
+							}
+
+							return result;
+						}
+					}
+
+					return null;
+				}
 
 				for( int i = 0; i < splitWord.length; i++ )
 				{
@@ -1050,7 +1451,7 @@ struct AutoComplete
 					if( i == 0 )
 					{
 						CASTnode firstMatchNode;
-						
+
 						if( splitWord.length == 1 )
 						{
 							if( !bDot )
@@ -1063,9 +1464,12 @@ struct AutoComplete
 									resultNodes			= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
 									resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
 
-									result = callTipList( resultNodes ~ resultIncludeNodes );
+									result = callTipList( resultNodes ~ resultIncludeNodes, splitWord[i] );
 									return Util.trim( result );
 								}
+
+
+								if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
 
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
 								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
@@ -1176,6 +1580,8 @@ struct AutoComplete
 
 	static void toDefintionAndType( bool bDefintion )
 	{
+		if( GLOBAL.enableParser != "ON" ) return;
+		
 		try
 		{
 			char[] word;
@@ -1208,7 +1614,7 @@ struct AutoComplete
 				}
 
 				
-				char[]			functionTitle = getFunctionTitle( cSci.getIupScintilla, currentPos );
+				char[]			functionTitle = lowerCase( getFunctionTitle( cSci.getIupScintilla, currentPos ) );
 				int				lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 
 				if( functionTitle.length ) AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
@@ -1262,9 +1668,14 @@ struct AutoComplete
 
 				if( !bDefintion )
 				{
-					char[] _type = AST_Head.type;
+					char[]	_param;
+					char[] 	_type = AST_Head.type;
 					int openParenPos = Util.index( AST_Head.type, "(" );
-					if( openParenPos < AST_Head.type.length ) _type = AST_Head.type[0..openParenPos];
+					if( openParenPos < AST_Head.type.length )
+					{
+						_type = AST_Head.type[0..openParenPos];
+						if( GLOBAL.showTypeWithParams == "ON" ) _param = AST_Head.type[openParenPos..length];
+					}
 
 					switch( AST_Head.kind )
 					{
@@ -1280,7 +1691,7 @@ struct AutoComplete
 					IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
 					IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
 
-					char[] _list = ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ).dup;
+					char[] _list = ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
 					IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
 				}
 				else
@@ -1298,7 +1709,86 @@ struct AutoComplete
 		}
 		catch( Exception e )
 		{
-			IupMessage( "Error", toStringz( e.toString ) );
+			//IupMessage( "Error", toStringz( e.toString ) );
 		}
+	}
+
+	static char[] getFunctionTitle( Ihandle* iupSci, int pos )
+	{
+		char[] result = searchHead( iupSci, pos, "sub" );
+
+		if( !result.length ) result = searchHead( iupSci, pos, "function" );
+		if( !result.length ) result = searchHead( iupSci, pos, "property" );
+		if( !result.length ) result = searchHead( iupSci, pos, "constructor" );
+		if( !result.length ) result = searchHead( iupSci, pos, "destructor" );
+
+		return result;
+	}
+
+	static char[] InsertEnd( Ihandle *iupSci, int lin, int pos )
+	{
+		// #define SCI_LINEFROMPOSITION 2166
+		lin--; // IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) begin from 0
+		
+		int POS		= getProcedurePos( iupSci, pos, "sub" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end sub";
+
+		POS		= getProcedurePos( iupSci, pos, "function" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end function";
+		
+		POS		= getProcedurePos( iupSci, pos, "property" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end property";
+		
+		POS		= getProcedurePos( iupSci, pos, "constructor" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end constructor";
+
+		POS		= getProcedurePos( iupSci, pos, "destructor" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end destructor";
+
+		POS		= getProcedurePos( iupSci, pos, "if" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end if";
+		
+		POS		= getProcedurePos( iupSci, pos, "with" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end with";
+
+		POS		= getProcedurePos( iupSci, pos, "select" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end select";
+
+		POS		= getProcedurePos( iupSci, pos, "namespace" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end namespace";
+
+		POS		= getProcedurePos( iupSci, pos, "type" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end type";
+
+		POS		= getProcedurePos( iupSci, pos, "union" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end union";
+		
+		POS		= getProcedurePos( iupSci, pos, "extern" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end extern";
+
+		POS		= getProcedurePos( iupSci, pos, "operator" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end operator";
+		 
+
+		POS		= skipCommentAndString( iupSci, pos, "enum", 0 );
+		int ENDPOS = skipCommentAndString( iupSci, pos, "end enum", 0 );
+		if( POS > -1 && POS != ENDPOS + 4)
+		{
+			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end enum";
+		}
+
+		POS		= skipCommentAndString( iupSci, pos, "scope", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "end scope", 0 );
+		if( POS > -1 && POS != ENDPOS + 4)
+		{
+			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end scope";
+		}
+
+		/*
+		POS		= skipCommentAndString( iupSci, pos, "for", 0 );
+		if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "next";
+		*/
+
+		return null;
 	}
 }

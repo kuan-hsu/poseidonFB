@@ -33,6 +33,9 @@ enum TOK
 	Tcloseparen,		// )
 	Topenbracket,		// [
 	Tclosebracket,		// ]
+	Topencurly,			// {
+	Tclosecurly,		// }
+
 
 	Tand,
 	Tor,
@@ -70,7 +73,7 @@ enum TOK
 	Twith,
 	Tselect,
 	Tcase,
-	
+	Tcast,	
 
 	Toption,
 	Texplicit,
@@ -146,6 +149,8 @@ enum TOK
 	Tifdef,
 	Tifndef,
 	Tdefine,
+	Tmacro,
+	Tendmacro,
 	
 	//Tinclib,
 	Tnamespace,
@@ -202,6 +207,8 @@ static this()
 	identToTOK[")"]			= TOK.Tcloseparen;
 	identToTOK["["]			= TOK.Topenbracket;
 	identToTOK["]"]			= TOK.Tclosebracket;
+	identToTOK["{"]			= TOK.Topencurly;
+	identToTOK["}"]			= TOK.Tclosecurly;
 
 	identToTOK["and"]		= TOK.Tand;
 	identToTOK["or"]		= TOK.Tor;
@@ -237,6 +244,7 @@ static this()
 	identToTOK["with"]		= TOK.Twith;
 	identToTOK["select"]	= TOK.Tselect;
 	identToTOK["case"]		= TOK.Tcase;
+	identToTOK["cast"]		= TOK.Tcast;
 	
 	identToTOK["option"]	= TOK.Toption;
 	identToTOK["explicit"]	= TOK.Texplicit;
@@ -314,6 +322,8 @@ static this()
 	identToTOK["ifdef"]			= TOK.Tifdef;
 	identToTOK["ifndef"]		= TOK.Tifndef;
 	identToTOK["define"]		= TOK.Tdefine;
+	identToTOK["macro"]			= TOK.Tmacro;
+	identToTOK["endmacro"]		= TOK.Tendmacro;
 
 	identToTOK["namespace"]		= TOK.Tnamespace;
 }

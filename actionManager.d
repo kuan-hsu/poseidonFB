@@ -2,35 +2,144 @@
 
 public import executer;
 
-
 private import iup.iup, iup.iup_scintilla;
-
-private import Integer = tango.text.convert.Integer;
-private import Util = tango.text.Util;
-private import tango.stdc.stringz, tango.io.Stdout;
-
-private version(Windows) import tango.sys.win32.UserGdi;
 
 private import global, tools;
 
-long SendMessage( Ihandle* ih, uint msg, ulong wParam, long lParam )
-{
-	version(Windows)
-	{
-		return SendMessageA( ih.handle, msg, wParam, lParam );
-	}
-	else
-	{
-		return IupScintillaSendMessage( ih, msg, wParam, lParam );
-	}
-}
+private import Integer = tango.text.convert.Integer;
+private import Util = tango.text.Util;
+private import tango.stdc.stringz;
 
 
 // Action for FILE operate
 struct FileAction
 {
 	private:
-	import tango.io.UnicodeFile, tango.io.device.File;
+	import tango.text.convert.Utf, tango.io.UnicodeFile, tango.io.device.File;
+	version( Windows ) import tango.sys.win32.CodePage;
+
+	static bool isUTF8WithouBOM( char[] data )
+	{
+		for( int i = 0; i < data.length; ++ i )
+		{
+			if( data[i] < 0x80 )
+			{
+				continue;
+			}
+			else
+			{
+				bool bChecked;
+				for( int k = 1; k < 6; ++ k )
+				{
+					if( ( data[i] >> k ) == ( (254 >> k) - 1 ) )
+					{
+						if( i <= data.length - ( 7 - k ) )
+						{
+							for( int j = 1; j < (7 - k); ++ j)
+							{
+								if( data[i+j] >> 6 != 2 ) return false;
+							}
+
+							bChecked = true;
+							i += ( 7 - k - 1 );
+							break;
+						}
+					}
+				}
+				if( !bChecked ) return false;
+			}
+		}
+
+		return true;
+	}
+
+	static int isUTF16WithouBOM( char[] data )
+	{
+		if( data.length % 2 != 0 ) return 0;
+		
+		// Check New line char
+		int countBE, countLE;
+		
+		for( int i = 0; i < data.length; i += 2 )
+		{
+			if( data[i] == 0 )
+			{
+				if( data[i+1] == 0x0a || data[i+1] == 0x0d ) countBE++;
+			}
+			else if( data[i+1] == 0 )
+			{
+				if( data[i] == 0x0a || data[i] == 0x0d ) countLE++;
+			}
+		}
+
+		if( countBE && countLE ) return 0;
+
+		if( countBE && !countLE ) return 1;
+
+		if( !countBE && countLE ) return 2;
+
+		// ASCII
+		countBE = countLE = 0;
+		for( int i = 0; i < data.length; i += 2 )
+		{
+			if( data[i] == 0 ) countBE++;
+		}
+
+		if( countBE > data.length / 3 ) return 1;
+
+		for( int i = 1; i < data.length; i += 2 )
+		{
+			if( data[i] == 0 ) countLE++;
+		}
+
+		if( countLE > data.length / 3 ) return 2;
+		
+		
+		return 0;
+	}
+
+	static int isUTF32WithouBOM( char[] data )
+	{
+		int BELE;
+		
+		if( data.length % 4 != 0 || data.length < 4 ) return 0;
+
+		for( int i = 0; i < data.length; i += 4 )
+		{
+			if( data[i] == 0 ) // BE
+			{
+				if( data[i+1] <= 0x10 )
+				{
+					if( BELE == 2 ) return 0;
+					BELE = 1;
+					continue;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else if( data[i+3] == 0 ) //LE
+			{
+				if( data[i+2] <= 0x10 )
+				{
+					if( BELE == 1 ) return 0;
+					BELE = 2;
+					continue;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		return BELE;
+	}		
 
 	public:
 	static void newFile( char[] fullPath )
@@ -43,19 +152,170 @@ struct FileAction
 
 	static char[] loadFile( char[] fullPath, inout int _encoding )
 	{
+		char[] result;
+		
 		scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 		char[] text = file.read;
-		_encoding = cast(int)file.encoding();
 
-		return text;
+		if( !file.bom.encoded )
+		{
+			//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
+			if( isUTF8WithouBOM( text ) )
+			{
+				result = text;
+				_encoding = Encoding.UTF_8N;
+			}
+			else
+			{	
+				int BELE = isUTF32WithouBOM( text );
+				if( BELE > 0 )
+				{
+					ubyte[]	bomData;
+					scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
+					
+					if( BELE == 1 )
+					{
+						bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
+						_encoding = 9;
+					}
+					else
+					{
+						bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
+						_encoding = 10;
+					}
+
+					for( int i = 3; i > -1; -- i )
+						text = cast(char)bomData[i] ~ text;
+
+					result = _bom.decode( text );
+				}
+				else
+				{
+					//IupMessage( "No Bom 16", toStringz( Integer.toString( BELE ) ) );
+					BELE = isUTF16WithouBOM( text );
+					if( BELE > 0 )
+					{
+						ubyte[]	bomData;
+						scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
+						
+						if( BELE == 1 )
+						{
+							bomData = [ 0xFE, 0xFF ];
+							_encoding = Encoding.UTF_16BE;
+						}
+						else
+						{
+							bomData = [ 0xFF, 0xFE ];
+							_encoding = Encoding.UTF_16LE;
+						}
+						
+
+						for( int i = 1; i >= 0; -- i )
+							text = cast(char)bomData[i] ~ text;
+
+						result = _bom.decode( text );
+					}
+					else
+					{
+						version( Windows )
+						{
+							if( !CodePage.isAscii( text ) ) // MBCS
+							{
+								char[] _text;
+								_text.length = 2 * text.length;
+								result = CodePage.from( text, _text );
+								_text.length = result.length;
+								_encoding = Encoding.Unknown;
+							}
+							else
+							{
+								result = text;
+							}
+						}
+						else
+						{
+							result = text;
+						}
+					}
+				}					
+			}
+		}
+		else
+		{
+			_encoding = file.encoding();
+			result = text;
+		}
+
+		return result;
 	}
 
-	static bool saveFile( char[] fullPath, char[] data, Encoding encoding = Encoding.UTF_8 )
+	static bool saveFile( char[] fullPath, char[] data, int encoding = Encoding.UTF_8 )
 	{
 		try
 		{
-			scope file = new UnicodeFile!(char)( fullPath, encoding );
-			file.write( data, true );
+			switch( encoding )
+			{
+				case Encoding.Unknown:
+					version( Windows )
+					{
+						char[] _text;
+						_text.length = 2 * data.length;
+						char[] result = CodePage.into( data, _text );
+						File.set( fullPath, result );
+					}
+					else
+					{
+						scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
+						file.write( data , false );
+					}
+					break;
+				
+				case Encoding.UTF_8N:
+					scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
+					file.write( data , false );
+					break;
+
+				case Encoding.UTF_8:
+					scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
+					file.write( data , true );
+					break;
+
+				case Encoding.UTF_16:
+				case Encoding.UTF_16BE:
+					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16BE );
+					file.write( toString16( data ), true );
+					break;
+
+				case Encoding.UTF_16LE:
+					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16LE );
+					file.write( toString16( data ) , true );
+					break;
+
+				
+				case Encoding.UTF_32BE:
+					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32BE );
+					file.write( toString32( data ) , true );
+					break;
+
+				case Encoding.UTF_32LE:
+					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32LE );
+					file.write( toString32( data ) , true );
+					break;
+
+				case 9:
+					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32BE );
+					file.write( toString32( data ) , false );
+					break;
+
+				case 10:
+					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32LE );
+					file.write( toString32( data ) , false );
+					break;
+
+				default:
+					scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
+					file.write( data, true );
+			}
 		}
 		catch
 		{
@@ -155,8 +415,8 @@ struct ScintillaAction
 			IupSetFocus( ih );
 			if( lineNumber > -1 )
 			{
-				//IupScintillaSendMessage( ih, 2168, 0, 20 ); // SCI_LINESCROLL 2168
-				IupScintillaSendMessage( ih, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE 2024			
+				IupScintillaSendMessage( ih, 2024, --lineNumber, 0 ); // SCI_GOTOLINE 2024
+				IupSetAttribute( ih, "FIRSTVISIBLELINE", toStringz( Integer.toString( lineNumber ) ) );
 			}
 			StatusBarAction.update();
 
@@ -168,9 +428,12 @@ struct ScintillaAction
 
 		try
 		{
-			int		_encoding;
+			scope filePath = new FilePath( fullPath );
+			if( !filePath.exists ) return false;
+			
+			Encoding		_encoding;
 			auto 	_sci = new CScintilla( fullPath );
-			char[] 	_text = FileAction.loadFile( fullPath, cast(int)_encoding );
+			char[] 	_text = FileAction.loadFile( fullPath, _encoding );
 			_sci.setEncoding( _encoding );
 			_sci.setText( _text );
 			GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
@@ -275,6 +538,10 @@ struct ScintillaAction
 
 	static Ihandle* getActiveIupScintilla()
 	{
+		int pos = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+		return IupGetChild( GLOBAL.documentTabs, pos );
+
+		/*
 		for( int i = 0; i < IupGetChildCount( GLOBAL.documentTabs ); i++ )
 		{
 			Ihandle* _child = IupGetChild( GLOBAL.documentTabs, i );
@@ -285,6 +552,7 @@ struct ScintillaAction
 		}
 
 		return null;
+		*/
 	}
 
 	static CScintilla getActiveCScintilla()
@@ -294,10 +562,7 @@ struct ScintillaAction
 		{
 			foreach( CScintilla _sci; GLOBAL.scintillaManager )
 			{
-				if( _sci.getIupScintilla == iupSci )
-				{
-					return _sci;
-				}
+				if( _sci.getIupScintilla == iupSci ) return _sci;
 			}
 		}
 
@@ -355,6 +620,8 @@ struct ScintillaAction
 			actionManager.OutlineAction.cleanTree( fullPath );
 			if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 		}
+
+		StatusBarAction.update();
 
 		return IUP_DEFAULT;
 	}
@@ -417,6 +684,8 @@ struct ScintillaAction
 		{
 			if( upperCase(s) != upperCase(fullPath) )	GLOBAL.scintillaManager.remove( upperCase(s) );
 		}
+
+		StatusBarAction.update();
 
 		return IUP_DEFAULT;
 	}	
@@ -484,6 +753,8 @@ struct ScintillaAction
 		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 
 		if( bCancel ) return IUP_IGNORE;
+
+		StatusBarAction.update();
 		
 		return IUP_DEFAULT;
 	}
@@ -536,6 +807,7 @@ struct ScintillaAction
 			{
 				char[] newDocument = fromStringz( IupGetAttribute( cSci.getIupScintilla, "VALUE" ) ).dup;
 				ScintillaAction.newFile( fullPath, Encoding.UTF_8, newDocument );
+				FileAction.saveFile( fullPath, newDocument );
 
 				char[] originalFullPath = cSci.getFullPath;
 
@@ -725,7 +997,6 @@ struct ProjectAction
 						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
 					}
 					*/
-
 					folderLocateId ++;
 				}
 			}
@@ -768,6 +1039,7 @@ struct ProjectAction
 struct StatusBarAction
 {
 	private:
+	import parser.autocompletion;
 	import tango.text.convert.Layout;
 		
 	public:
@@ -780,33 +1052,81 @@ struct StatusBarAction
 			// SCI_LINEFROMPOSITION = 2166
 			// SCI_GETCOLUMN = 2129
 			// SCI_GETOVERTYPE = 2187
-			Ihandle* _sci = ScintillaAction.getActiveIupScintilla();
+			// SCI_GETEOLMODE 2030
+			auto	cSci = ScintillaAction.getActiveCScintilla();
 
-			int pos = IupScintillaSendMessage( _sci, 2008, 0, 0 );
-			int line = IupScintillaSendMessage( _sci, 2166, pos, 0 ) + 1; // 0 based
-			int col = IupScintillaSendMessage( _sci, 2129, pos, 0 );
-			int bOverType = IupScintillaSendMessage( _sci, 2187, pos, 0 );
-
-			scope Layouter = new Layout!(char)();
-			char[] output = Layouter( "{,7}x{,5}", line, col );
-
-			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output ) );// Update line x col
-
-			if( bOverType )
+			if( cSci !is null )
 			{
-				IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "OVR" ); // Update line x col
-			}
-			else
-			{
-				IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "INS" ); // Update line x col
-			}
+				int pos = IupScintillaSendMessage( cSci.getIupScintilla, 2008, 0, 0 );
+				int line = IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; // 0 based
+				int col = IupScintillaSendMessage( cSci.getIupScintilla, 2129, pos, 0 );
+				int bOverType = IupScintillaSendMessage( cSci.getIupScintilla, 2187, pos, 0 );
+				int eolType = IupScintillaSendMessage( cSci.getIupScintilla, 2030, 0, 0 );
 
+				scope Layouter = new Layout!(char)();
+				char[] output = Layouter( "{,7}x{,5}", line, col );
+
+				IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output ) );// Update line x col
+
+				if( bOverType )
+				{
+					IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "OVR" ); // Update line x col
+				}
+				else
+				{
+					IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "INS" ); // Update line x col
+				}
+
+				switch( eolType )
+				{
+					case 0: //  SC_EOL_CRLF (0)
+						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "WINDOWS" ); break;
+					case 1: //    SC_EOL_CR (1)
+						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "    MAC" ); break;
+					case 2: //   SC_EOL_LF (2)
+						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "   UNIX" ); break;
+					default:
+						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", " UNKNOW" );
+				}
+
+				switch( cSci.encoding )
+				{
+					case 0: // Encoding.Unknown
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "DEFAULT    " ); break;
+					case 1: // Encoding.UTF_8N
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF8       " ); break;
+					case 2: // Encoding.UTF_8
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF8.BOM   " ); break;
+					case 3: // Encoding.UTF_16
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF16      " ); break;
+					case 4: // Encoding.UTF_16BE
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF16BE.BOM" ); break;
+					case 5: // Encoding.UTF_16LE
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF16LE.BOM" ); break;
+					case 6: // Encoding.UTF_32
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32      " ); break;
+					case 7: // Encoding.UTF_32BE
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32BE.BOM" ); break;
+					case 8: // Encoding.UTF_32LE
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32LE.BOM" ); break;
+					case 9: //
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32BE    " ); break;
+					case 10: //
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32LE    " ); break;
+					default:
+						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UNKNOWN?   " );
+						
+				}
+
+				if( GLOBAL.showFunctionTitle ) IupSetAttribute( GLOBAL.functionTitleHandle, "VALUE", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ) ) ) );
+			}
 		}
 		else
 		{
 			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", "             " );
 			IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "   " );
-			IupSetAttribute( GLOBAL.statusBar_FontType, "TITLE", "        " );	
+			IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "        " );	
+			IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "           " );
 		}
 	}
 }
@@ -1385,6 +1705,8 @@ struct OutlineAction
 	
 	static void refresh( char[] fullPath )
 	{
+		if( GLOBAL.enableParser != "ON" ) return;
+		
 		scope f = new FilePath( fullPath );
 
 		char[] _ext = toLower( f.ext() );
@@ -1404,6 +1726,7 @@ struct OutlineAction
 
 		if( actCSci !is null )
 		{
+			//IupSetAttribute( actCSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			// Parser
 			scope scanner = new CScanner;
 

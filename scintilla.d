@@ -11,6 +11,7 @@ private
 	import Integer = tango.text.convert.Integer;
 	import tango.text.convert.Layout;
 	import tango.stdc.stringz;
+	import tango.io.FilePath;
 	import tango.io.Stdout;
 	import tango.text.convert.Utf;
 }
@@ -197,6 +198,21 @@ class CScintilla
 		IupSetHandle( fullPath.ptr, sci );
 
 		GLOBAL.scintillaManager[upperCase(fullPath)] = this;
+		
+		if( upperCase(fullPath) in GLOBAL.parserManager )
+		{
+			auto temp = GLOBAL.parserManager[upperCase(fullPath)];
+			delete temp;
+			GLOBAL.parserManager.remove( upperCase(fullPath) );
+			GLOBAL.outlineTree.cleanTree( fullPath );
+
+			actionManager.OutlineAction.loadFile( newFullPath );
+		}
+		else
+		{
+			actionManager.OutlineAction.loadFile( newFullPath );
+		}
+
 
 		// Change the fileListTree's node
 		int nodeCount = IupGetInt( GLOBAL.fileListTree, "COUNT" );
@@ -216,7 +232,7 @@ class CScintilla
 	{
 		try
 		{
-			if( FileAction.saveFile( fullPath, getText(), Encoding.UTF_8 ) )
+			if( FileAction.saveFile( fullPath, getText(), cast(Encoding) encoding ) )
 			{
 				if( fromStringz( IupGetAttribute( sci, "SAVEDSTATE" ) ) == "YES" )
 				{
@@ -248,8 +264,7 @@ class CScintilla
 		IupSetAttribute(sci, "KEYWORDS2", GLOBAL.cString.convert( GLOBAL.KEYWORDS[2] ) );
 		IupSetAttribute(sci, "KEYWORDS3", GLOBAL.cString.convert( GLOBAL.KEYWORDS[3] ) );
 
-
-		char[] font;
+		char[] font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
 		version( Windows )
 		{
 			font = "Courier New";
@@ -258,42 +273,46 @@ class CScintilla
 		{
 			font = "FreeMono";
 		}		
-		char[] size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
 
-		if( GLOBAL.fonts.length > 2 )
+		void getFontAndSize( int index )
 		{
-			char[][] strings = Util.split( GLOBAL.fonts[1].fontString, "," );
-			if( strings.length == 2 )
+			if( GLOBAL.fonts.length > 2 )
 			{
-				if( strings[0].length )
+				char[][] strings = Util.split( GLOBAL.fonts[index].fontString, "," );
+				if( strings.length == 2 )
 				{
-					font = Util.trim( strings[0] );
-				}
-
-				strings[1] = Util.trim( strings[1] );
-
-				foreach( char[] s; Util.split( strings[1], " " ) )
-				{
-					switch( s )
+					if( strings[0].length )
 					{
-						case "Bold":		Bold = "YES";		break;
-						case "Italic":		Italic = "YES";		break;
-						case "Underline":	Underline = "YES";	break;
-						case "Strikeout":	Strikeout = "YES";	break;
-						default:
-							size = s;
+						font = Util.trim( strings[0] );
+					}
+
+					strings[1] = Util.trim( strings[1] );
+
+					foreach( char[] s; Util.split( strings[1], " " ) )
+					{
+						switch( s )
+						{
+							case "Bold":		Bold = "YES";		break;
+							case "Italic":		Italic = "YES";		break;
+							case "Underline":	Underline = "YES";	break;
+							case "Strikeout":	Strikeout = "YES";	break;
+							default:
+								size = s;
+						}
 					}
 				}
 			}
 		}
 
-		IupSetAttribute( sci, "STYLEFONT32", GLOBAL.cString.convert( font ) );
-		IupSetAttribute( sci, "STYLEFONTSIZE32", GLOBAL.cString.convert( size ) );
+		getFontAndSize( 1 );
+		IupSetAttribute( sci, "STYLEFONT32", toStringz( font.dup ) );
+		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		
 		IupSetAttribute(sci, "STYLEFGCOLOR1", "0 128 0");		// SCE_B_COMMENT 1
 		IupSetAttribute(sci, "STYLEFGCOLOR2", "0 128 0");		// SCE_B_NUMBER 2
-		IupSetAttribute(sci, "STYLEFGCOLOR3", "5 91 35");		// SCE_B_KEYWORD 3
+		//IupSetAttribute(sci, "STYLEFGCOLOR3", "5 91 35");		// SCE_B_KEYWORD 3
+		IupSetAttribute(sci, "STYLEFGCOLOR3", toStringz( GLOBAL.editColor.keyWord[0] ) );		// SCE_B_KEYWORD 3
 		IupSetAttribute(sci, "STYLEFGCOLOR4", "128 0 0");		// SCE_B_STRING 4
 		IupSetAttribute(sci, "STYLEFGCOLOR5", "0 0 255");		// SCE_B_PREPROCESSOR 5
 		IupSetAttribute(sci, "STYLEFGCOLOR6", "160 20 20");		// SCE_B_OPERATOR 6
@@ -302,9 +321,9 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFGCOLOR8", "128 0 0");		// SCE_B_DATE 8
 		IupSetAttribute(sci, "STYLEFGCOLOR9", "16 108 232");	// SCE_B_STRINGEOL 9
 		*/
-		IupSetAttribute(sci, "STYLEFGCOLOR10", "0 0 255");		// SCE_B_KEYWORD2 10
-		IupSetAttribute(sci, "STYLEFGCOLOR11", "231 144 20");	// SCE_B_KEYWORD3 11
-		IupSetAttribute(sci, "STYLEFGCOLOR12", "16 108 232");	// SCE_B_KEYWORD4 12
+		IupSetAttribute(sci, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.keyWord[1] ));		// SCE_B_KEYWORD2 10
+		IupSetAttribute(sci, "STYLEFGCOLOR11", toStringz( GLOBAL.editColor.keyWord[2] ));	// SCE_B_KEYWORD3 11
+		IupSetAttribute(sci, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.keyWord[3] ));	// SCE_B_KEYWORD4 12
 		IupSetAttribute(sci, "STYLEFGCOLOR19", "0 128 0");		// SCE_B_COMMENTBLOCK 19
 
 		// Brace Hightlight
@@ -315,7 +334,6 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEBOLD34", "YES");
 		//IupScintillaSendMessage( sci, 2053, 34, 1 );
 
-
 		// Set Keywords to Bold
 		//IupSetAttribute(sci, "STYLEBOLD3", "YES");
 
@@ -325,10 +343,21 @@ class CScintilla
 		IupSetAttribute( sci, "FGCOLOR", GLOBAL.cString.convert( "0 0 0" ) );
 		IupSetAttribute( sci, "BGCOLOR", GLOBAL.cString.convert( "255 255 255" ) );
 
+		getFontAndSize( 10 );
+		IupSetAttribute(sci, "STYLEFGCOLOR40", "102 69 3");	
+		IupSetAttribute(sci, "STYLEBGCOLOR40", "255 200 227");
+		IupSetAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
+		IupSetAttribute(sci, "STYLEFONTSIZE40",  toStringz( size.dup ) );
+		IupSetAttribute(sci, "STYLEFGCOLOR41", "0 0 255");	
+		IupSetAttribute(sci, "STYLEBGCOLOR41", "255 255 157");
+		IupSetAttribute(sci, "STYLEFONT41",  toStringz( font.dup ) );
+		IupSetAttribute(sci, "STYLEFONTSIZE41",  toStringz( size.dup ) );		
+
 		int tabSize = Integer.atoi( GLOBAL.editorSetting00.TabWidth );
 		GLOBAL.editorSetting00.TabWidth = Integer.toString( tabSize );
 		IupSetAttribute( sci, "TABSIZE", GLOBAL.cString.convert( GLOBAL.editorSetting00.TabWidth ) );
 
+		getFontAndSize( 1 );
 		if( GLOBAL.editorSetting00.LineMargin == "ON" )
 		{
 			int lineCount = IupGetInt( sci, "LINECOUNT" );
@@ -402,14 +431,43 @@ class CScintilla
 		if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupScintillaSendMessage( sci, 2268, 1, 0 ); else IupScintillaSendMessage( sci, 2268, 0, 0 ); //#define SCI_SETWRAPMODE 2268
 		if( GLOBAL.editorSetting00.TabUseingSpace == "ON" ) IupSetAttribute( sci, "USETABS", "NO" ); else IupSetAttribute( sci, "USETABS", "YES" );
 
+		/*
+		SCI_SETVIEWEOL 2356
+		SCI_SETVIEWWS 2021
+		SCI_SETWHITESPACEFORE 2084
+		SCI_SETWHITESPACEBACK 2085
+		SCI_SETWHITESPACESIZE 2086
+		*/
+		if( GLOBAL.editorSetting00.ShowEOL == "ON" ) IupScintillaSendMessage( sci, 2356, 1, 0 ); else IupScintillaSendMessage( sci, 2356, 0, 0 );
+		if( GLOBAL.editorSetting00.ShowSpace == "ON" )
+		{
+			IupScintillaSendMessage( sci, 2021, 1, 0 );
+			IupScintillaSendMessage( sci, 2086, 2, 0 );
+			IupScintillaSendMessage( sci, 2084, 1, actionManager.ToolAction.convertIupColor( "177 177 177" ) );
+		}
+		else
+		{
+			IupScintillaSendMessage( sci, 2021, 0, 0 );
+		}
 
 
 		// Color
 		IupScintillaSendMessage( sci, 2098, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.caretLine ), 0 ); //SCI_SETCARETLINEBACK = 2098
 
-		SendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-		SendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
-		//IupScintillaSendMessage( sci, 2478, 60, 0 );// SCI_SETSELALPHA   2478
+		uint alpha = Integer.atoi( GLOBAL.editColor.selAlpha );
+		if( alpha > 255 || alpha <= 0 ) alpha = 255;
+
+		if( alpha == 255 )
+		{
+			IupScintillaSendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+		}
+		else
+		{
+			IupScintillaSendMessage( sci, 2067, false, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
+		}
 		
 		IupSetAttribute( sci, "STYLEFGCOLOR33", GLOBAL.cString.convert( GLOBAL.editColor.linenumFore ) );
 		IupSetAttribute( sci, "STYLEBGCOLOR33", GLOBAL.cString.convert( GLOBAL.editColor.linenumBack ) );
@@ -432,9 +490,9 @@ class CScintilla
 		// Autocompletion XPM Image
 		version( Windows )
 		{
-			IupScintillaSendMessage( sci, 2405, 0, cast(int) XPM.private_method_xpm.ptr );
-			IupScintillaSendMessage( sci, 2405, 1, cast(int) XPM.protected_method_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 2, cast(int) XPM.public_method_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2405, 0, cast(int) XPM.private_variable_array_xpm.ptr );
+			IupScintillaSendMessage( sci, 2405, 1, cast(int) XPM.protected_variable_array_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2405, 2, cast(int) XPM.public_variable_array_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 
 			IupScintillaSendMessage( sci, 2405, 3, cast(int) XPM.private_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 4, cast(int) XPM.protected_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
@@ -465,6 +523,21 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2405, 23, cast(int) XPM.autoWord_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 
 			IupScintillaSendMessage( sci, 2405, 24, cast(int) XPM.namespace_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+			IupScintillaSendMessage( sci, 2405, 25, cast(int) XPM.private_sub_xpm.ptr );
+			IupScintillaSendMessage( sci, 2405, 26, cast(int) XPM.protected_sub_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2405, 27, cast(int) XPM.public_sub_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+			IupScintillaSendMessage( sci, 2405, 28, cast(int) XPM.private_fun_xpm.ptr );
+			IupScintillaSendMessage( sci, 2405, 29, cast(int) XPM.protected_fun_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2405, 30, cast(int) XPM.public_fun_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+			IupScintillaSendMessage( sci, 2405, 31, cast(int) XPM.property_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2405, 32, cast(int) XPM.property_var_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+
+			IupScintillaSendMessage( sci, 2405, 33, cast(int) XPM.define_var_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2405, 34, cast(int) XPM.define_fun_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			
 		}
 		else
 		{
@@ -472,9 +545,9 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2625, 16, 0 ); // SCI_RGBAIMAGESETHEIGHT 2625
 
 			// SCI_REGISTERRGBAIMAGE 2627
-			IupScintillaSendMessage( sci, 2627, 0, cast(int) XPM.private_method_rgba.toStringz );
-			IupScintillaSendMessage( sci, 2627, 1, cast(int) XPM.protected_method_rgba.toStringz ); 
-			IupScintillaSendMessage( sci, 2627, 2, cast(int) XPM.public_method_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 0, cast(int) XPM.private_variable_array_rgba.toStringz );
+			IupScintillaSendMessage( sci, 2627, 1, cast(int) XPM.protected_variable_array_rgba.toStringz ); 
+			IupScintillaSendMessage( sci, 2627, 2, cast(int) XPM.public_variable_array_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
 			IupScintillaSendMessage( sci, 2627, 3, cast(int) XPM.private_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
@@ -504,7 +577,23 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2627, 22, cast(int) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 23, cast(int) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
-			IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_xpm.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+
+			IupScintillaSendMessage( sci, 2627, 25, cast(int) XPM.private_sub_rgba.toStringz );
+			IupScintillaSendMessage( sci, 2627, 26, cast(int) XPM.protected_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 27, cast(int) XPM.public_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			
+			IupScintillaSendMessage( sci, 2627, 28, cast(int) XPM.private_fun_rgba.toStringz );
+			IupScintillaSendMessage( sci, 2627, 29, cast(int) XPM.protected_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 30, cast(int) XPM.public_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			
+			IupScintillaSendMessage( sci, 2627, 31, cast(int) XPM.property_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 32, cast(int) XPM.property_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			
+			IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+
+			
 		}
 	}
 }
@@ -514,7 +603,7 @@ class CScintilla
 
 extern(C)
 {
-	int marginclick_cb( Ihandle* ih, int margin, int line, char* status )
+	private int marginclick_cb( Ihandle* ih, int margin, int line, char* status )
 	{
 		char[] statusString = fromStringz( status ).dup;
 		
@@ -559,7 +648,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int savePoint_cb( Ihandle *ih, int status )
+	private int savePoint_cb( Ihandle *ih, int status )
 	{
 		char[] _title = fromStringz( IupGetAttribute( ih, "TABTITLE" ) ).dup; 
 		if( status == 0 )
@@ -612,7 +701,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CScintilla_valuechanged_cb( Ihandle* ih )
+	private int CScintilla_valuechanged_cb( Ihandle* ih )
 	{
 		actionManager.StatusBarAction.update();
 
@@ -620,7 +709,7 @@ extern(C)
 	}
 
 	// mouse button
-	int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( pressed == 0 ) //release
 		{
@@ -638,7 +727,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CScintilla_keyany_cb( Ihandle *ih, int c ) 
+	private int CScintilla_keyany_cb( Ihandle *ih, int c ) 
 	{
 		/*
 		Stdout( "Keycode: " );
@@ -824,28 +913,56 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CScintilla_AUTOCSELECTION_cb( Ihandle *ih, int pos, char* text )
+	private int CScintilla_AUTOCSELECTION_cb( Ihandle *ih, int pos, char* text )
 	{
 		//Stdout( "CScintilla_AUTOCSELECTION_cb" ).newline;
 		
 		AutoComplete.bEnter = false;
 
 		AutoComplete.bAutocompletionPressEnter = true;
+			
+		char[] _text = fromStringz( text ).dup;
+		if( _text.length )
+		{
+			if( _text[length-1] == ')' )
+			{
+				int _pos = Util.index( _text, "(" );
+				if( _pos < _text.length )
+				{
+					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+					IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
+					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text[0.._pos] ) );
+					//return IUP_IGNORE;
+				}
+			}
+		}
 
 		return IUP_DEFAULT;
 	}	
 
-	int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
+	private int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
-		//Stdout( "CScintilla_action_cb" ).newline;
+		if( GLOBAL.enableParser != "ON" ) return IUP_DEFAULT;
+		
+		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
+		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
-		
+
 		if( insert == 1 )
 		{
 			//Stdout( "text:" ~ fromStringz( _text ) ).newline;
-			
+
 			char[] text = fromStringz( _text ).dup;
+			/*
+			IupMessage( "LENGTH", toStringz( Integer.toString( length) ) );
+			
+			if( length > 0 )
+			{
+				char[] yyy = text[0..length].dup;
+				IupMessage( "", GLOBAL.cString.convert( yyy ) );
+			}
+			*/
 
 			if( text.length > 1 ) return IUP_DEFAULT;
 			
@@ -913,41 +1030,37 @@ extern(C)
 	}
 
 	// Auto Ident
-	int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )
+	private int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )
 	{
 		if( AutoComplete.bEnter )
 		{
 			AutoComplete.bEnter = false;
-			
-			//Now time to deal with auto indenting
-			int lineInd = 0;
-			int currentPos			= IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-			int currentLine  		= lin;//IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
 
-		   
-			if( currentLine > 0 )
-			{
-				lineInd = IupScintillaSendMessage( ih, 2127, currentLine - 1, 0 ); // SCI_GETLINEINDENTATION = 2127
+			bool bAutoInsert;
+			if( GLOBAL.editorSetting00.AutoEnd == "ON" )
+			{			
+				if( pos == IupScintillaSendMessage( ih, 2136, lin, 0 ) ) bAutoInsert = true;// #define SCI_GETLINEENDPOSITION 2136 )
 			}
-		   
-			if( lineInd != 0 )   // NOT in the beginning
+
+			if( GLOBAL.editorSetting00.AutoIndent == "ON" )
 			{
-				IupScintillaSendMessage( ih, 2126, currentLine, lineInd ); // SCI_SETLINEINDENTATION = 2126
-				int lineBeginPos		= IupScintillaSendMessage( ih, 2167, currentLine, 0 ); //  SCI_POSITIONFROMLINE = 2167
+				//Now time to deal with auto indenting
+				int lineInd = 0;
 
-				char[] prevIndentText;
-				char[] prevLineText		= fromStringz(IupGetAttributeId( ih, "LINE", currentLine - 1 ));
-				int prevIndentPos		= IupScintillaSendMessage( ih, 2128, currentLine - 1, 0 ); // SCI_GETLINEINDENTPOSITION = 2128
-				int prevLineBeginPos	= IupScintillaSendMessage( ih, 2167, currentLine - 1, 0 ); //  SCI_POSITIONFROMLINE = 2167
-				
-				if( prevIndentPos > prevLineBeginPos )
+				if( lin > 0 ) lineInd = IupScintillaSendMessage( ih, 2127, lin - 1, 0 ); // SCI_GETLINEINDENTATION = 2127
+			   
+				if( lineInd != 0 )   // NOT in the beginning
 				{
-					prevIndentText = prevLineText[0..prevIndentPos-prevLineBeginPos];
+					IupScintillaSendMessage( ih, 2126, lin, lineInd ); // SCI_SETLINEINDENTATION = 2126
+					int changeLinePos = IupScintillaSendMessage( ih, 2128, lin, 0 );
+					IupScintillaSendMessage( ih, 2025, changeLinePos , 0 );// SCI_GOTOPOS = 2025,
 				}
+			}
 
-
-				IupSetAttributeId( ih, "INSERT", lineBeginPos, GLOBAL.cString.convert( prevIndentText ) );
-				IupScintillaSendMessage( ih, 2025, lineBeginPos + prevIndentText.length , 0 );// SCI_GOTOPOS = 2025,
+			if( bAutoInsert )
+			{
+				char[] insertEndText = AutoComplete.InsertEnd( ih, lin, pos );
+				if( insertEndText.length ) IupSetAttributeId( ih, "INSERT", -1, GLOBAL.cString.convert( insertEndText ) );
 			}
 		}
 
@@ -969,10 +1082,21 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int CScintilla_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
+	private int CScintilla_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
 	{
-		actionManager.ScintillaAction.openFile( fromStringz( filename ).dup  );
-		if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+		scope f = new FilePath( fromStringz( filename ) );
+
+		if( f.name == ".poseidon" )
+		{
+			char[] dir = f.path;
+			if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'
+			GLOBAL.projectTree.openProject( dir );
+		}
+		else
+		{
+			actionManager.ScintillaAction.openFile( fromStringz( filename ).dup  );
+			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+		}
 		return IUP_DEFAULT;
 	}	
 }

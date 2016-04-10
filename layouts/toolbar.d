@@ -41,12 +41,6 @@ Ihandle* createToolBar()
 	btnBuildAll	= IupButton( null, "MarkNext" );
 	btnQuickRun = IupButton( null, "MarkClean" );
 
-	Ihandle* btnResume	= IupButton( null, "Resume" );
-	Ihandle* btnStop		= IupButton( null, "Stop" );
-	Ihandle* btnStep		= IupButton( null, "Step" );
-	Ihandle* btnNext		= IupButton( null, "Next" );
-	Ihandle* btnReturn	= IupButton( null, "Return" );
-
 
 	IupSetAttributes( btnNew, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_newfile,TIP=New_File" );
 	IupSetCallback( btnNew, "ACTION", cast(Icallback) &menu.newFile_cb ); // From menu.d
@@ -183,18 +177,34 @@ Ihandle* createToolBar()
 		IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 	}
 
-	IupSetAttributes( btnResume, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_resume,TIP=Run/Resume" );
-	//IupSetCallback( btnResume, "ACTION", cast(Icallback) &menu.quickRun_cb ); // From menu.d
-	IupSetAttributes( btnStop, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_stop,TIP=Stop" );
-	IupSetAttributes( btnStep, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_step,TIP=Step" );
-	IupSetAttributes( btnNext, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_next,TIP=Next" );
-	IupSetAttributes( btnReturn, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_return,TIP=Return" );	
+
+	GLOBAL.functionTitleHandle = IupText( null );
+	IupSetAttributes( GLOBAL.functionTitleHandle, "ACTIVE=NO,MULTILINE=NO,SCROLLBAR=NO,SIZE=180x12,READONLY=YES" );
+	IupSetAttribute( GLOBAL.functionTitleHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
+	/*
+	if( GLOBAL.fonts[0].fontString.length )
+	{
+		int pos = Util.rindex( GLOBAL.fonts[0].fontString, "," );
+		if( pos < GLOBAL.fonts[0].fontString.length )
+		{
+			pos++;
+			char[] fontStyle = GLOBAL.fonts[0].fontString[0..pos] ~ "Bold " ~ GLOBAL.fonts[0].fontString[pos..length];
+			IupSetAttribute( GLOBAL.functionTitleHandle, "FONT", toStringz( fontStyle.dup ) );
+		}
+		
+	}
+	*/
+	if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "NO" );
+	//IupSetCallback( GLOBAL.functionTitleHandle, "ACTION", cast(Icallback) &consoleInput_cb );
+
+	
+	
 	
 	// IUP Container to put buttons on~
 	hBox = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
-					btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnRun, btnBuildAll, btnQuickRun, null );/* labelSEPARATOR[5],
+					btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], GLOBAL.functionTitleHandle, null );/* labelSEPARATOR[5],
 					btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
-	IupSetAttributes( hBox, "GAP=5" );
+	IupSetAttributes( hBox, "GAP=5,ALIGNMENT=ACENTER" );
 
 	return hBox;
 }

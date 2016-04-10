@@ -6,7 +6,7 @@ import global, scintilla, project, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, layouts.debugger, actionManager;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 
-import tango.stdc.stringz;
+import tango.stdc.stringz, tango.io.FilePath;
 
 void createExplorerWindow()
 {
@@ -64,6 +64,8 @@ void createExplorerWindow()
 	GLOBAL.debugPanel = new CDebugger();
 
 	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, null );
+	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
+
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
 	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
 
@@ -93,83 +95,87 @@ void createLayout()
 
 void createDialog()
 {
-	GLOBAL.searchDlg		= new CSearchDialog( 330, 400, "Search/Replace" );
-	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( 400, 310, "Search/Replace In Files" );
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, "Compiler Options" );
-	GLOBAL.argsDlg			= new CArgOptionDialog( 370, 146, "Compiler Options / EXE Arguments" );
-}
-
-extern(C) int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
-{
-	actionManager.ScintillaAction.openFile( fromStringz( filename ).dup  );
-	if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
-	return IUP_DEFAULT;
-}
-
-extern(C) int mainDialog_CLOSE_cb(Ihandle *ih)
-{
-	int ret = ScintillaAction.closeAllDocument();
-	if( ret == IUP_IGNORE ) return IUP_IGNORE;
-	
-	// Save All Project	
-	foreach( PROJECT p; GLOBAL.projectManager )
+	version( Windows )
 	{
-		p.saveFile();
+		GLOBAL.argsDlg			= new CArgOptionDialog( 370, 146, "Compiler Options / EXE Arguments" );
+		GLOBAL.searchDlg		= new CSearchDialog( 330, 400, "Search/Replace" );
+		GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( 400, 310, "Search/Replace In Files" );
+	}
+	else
+	{
+		GLOBAL.argsDlg			= new CArgOptionDialog( 370, 164, "Compiler Options / EXE Arguments" );
+		GLOBAL.searchDlg		= new CSearchDialog( 330, 418, "Search/Replace" );
+		GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( 400, 332, "Search/Replace In Files" );
+	}
+}
+
+extern(C)
+{
+	int mainDialog_CLOSE_cb(Ihandle *ih)
+	{
+		int ret = ScintillaAction.closeAllDocument();
+		if( ret == IUP_IGNORE ) return IUP_IGNORE;
+		
+		// Save All Project	
+		foreach( PROJECT p; GLOBAL.projectManager )
+		{
+			p.saveFile();
+		}
+
+		CPreferenceDialog.save();
+
+		return IUP_CLOSE;
+	}
+	
+	private int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
+	{
+		scope f = new FilePath( fromStringz( filename ) );
+
+		if( f.name == ".poseidon" )
+		{
+			char[] dir = f.path;
+			if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'
+			GLOBAL.projectTree.openProject( dir );
+		}
+		else
+		{
+			actionManager.ScintillaAction.openFile( fromStringz( filename ).dup  );
+			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+		}
+		return IUP_DEFAULT;
 	}
 
-	CPreferenceDialog.save();
+	private int messageTabRightClick_cb( Ihandle* ih, int pos )
+	{
+		// ih = GLOBAL.messageWindowTabs
+		// So we need get the child's Ihandle
+		Ihandle* _child = IupGetChild( ih, pos );
+		// Get Focus
+		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUE_HANDLE", cast(char*)_child );
 
-	/+
-	// Save Preference
-	auto doc = new Document!(char);
-	
-	// attach an xml header
-	doc.header;
-
-	auto prjNode = doc.tree.element( null, "config" );
-
-	prjNode.element( null, "editor", name );
+		if( pos == 2 ) return IUP_DEFAULT;
 
 
-	
-	prjNode.element( null, "Type", type );
+		Ihandle* _clear = IupItem( "Clear Output", null );
+		IupSetAttribute( _clear, "IMAGE", "icon_debug_clear" );
+		IupSetCallback( _clear, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* _ih )
+		{
+			int valuePos = IupGetInt( GLOBAL.messageWindowTabs, "VALUEPOS" );
+			if( valuePos == 0 )
+			{
+				IupSetAttribute( GLOBAL.outputPanel, "VALUE", null );
+			}
+			else if( valuePos == 1 )
+			{
+				IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", null );
+			}
+		});
+		Ihandle* popupMenu = IupMenu( _clear, null );
 
+		IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+		IupDestroy( popupMenu );		
 
-
-	
-	prjNode.element( null, "Dir", dir );
-	prjNode.element( null, "MainFile", mainFile );
-	prjNode.element( null, "TargetName", targetName );
-	prjNode.element( null, "CompilerArgs", args );
-	prjNode.element( null, "CompilerOption", compilerOption );
-	prjNode.element( null, "Comment", comment );
-	prjNode.element( null, "CompilerPath", compilerPath );
-
-	auto prjIncludeNode = prjNode.element( null, "IncludeDirs" );
-	foreach( char[] s; includeDirs ) 
-		prjIncludeNode.element( null, "Name", s );
-
-	auto prjLibNode = prjNode.element( null, "LibDirs" );
-	foreach( char[] s; libDirs ) 
-		prjLibNode.element( null, "Name", s );
-
-	auto prjSourceNode = prjNode.element( null, "Sources" );
-	foreach( char[] s; sources ) 
-		prjSourceNode.element( null, "Name", s );
-
-	auto prjIncludeFileNode = prjNode.element( null, "Includes" );
-	foreach( char[] s; includes ) 
-		prjIncludeFileNode.element( null, "Name", s );
-
-	auto prjOthersNode = prjNode.element( null, "Others" );
-	foreach( char[] s; others ) 
-		prjOthersNode.element( null, "Name", s );
-
-
-	// Save File
-	scope print = new DocPrinter!(char);
-	FileAction.saveFile( dir ~ "\\.poseidon", print.print( doc ) );
-	+/
-
-	return IUP_CLOSE;
+		return IUP_DEFAULT;
+	}
 }

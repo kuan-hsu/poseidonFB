@@ -73,8 +73,8 @@
 			<name>D:\CodingPark\GameKyo\import</name>
 		</includePaths>
 		<linkLibrarys>
-			<name>D:\CodingPark\GameKYO\lib\iup\iup315DLL9\iup.lib</name>
-			<name>D:\CodingPark\GameKYO\lib\iup\iup315DLL9\iup_scintilla.lib</name>
+			<name>D:\CodingPark\GameKYO\lib\iup\iup318DLL11\iup.lib</name>
+			<name>D:\CodingPark\GameKYO\lib\iup\iup318DLL11\iup_scintilla.lib</name>
 		</linkLibrarys>
 		<importExpressions />
 	</buildSpec>

@@ -21,31 +21,88 @@ version(Windows)
 //-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
 version(Linux)
 {
-	pragma(lib, "gtk-x11-2.0");
-	pragma(lib, "gdk-x11-2.0");
-	pragma(lib, "pangox-1.0");
-	pragma(lib, "gdk_pixbuf-2.0");
+	//pragma(lib, "gtk-x11-2.0");
+	//pragma(lib, "gdk-x11-2.0");
+	//pragma(lib, "pangox-1.0");
+	//pragma(lib, "gdk_pixbuf-2.0");
 	pragma(lib, "pango-1.0");
 	pragma(lib, "gobject-2.0");
 	pragma(lib, "gmodule-2.0");
 	pragma(lib, "glib-2.0");
 }
 
+version(Windows)
+{
+	import tango.sys.win32.UserGdi;
+
+	bool bRunAgain;
+	
+	extern( Windows ) BOOL enumWindowsProc( HWND hWnd, LPARAM lParam )
+	{
+		int length = GetWindowTextLengthA( hWnd );
+
+		char[] title;
+		title.length = length + 1;
+		
+		GetWindowTextA( hWnd, title.ptr, length + 1 );
+
+		if( title.length > 13 )
+		{
+			// poseidonFB - FreeBasic IDE
+			if( title[length-14..length] == "FreeBasic IDE\0" )
+			{
+				if( IsIconic( hWnd ) )
+				{
+					ShowWindow( hWnd, SW_RESTORE);  
+				}
+				else
+				{
+					SetForegroundWindow( hWnd );
+				}
+				bRunAgain = true;
+				return false;
+			}
+		}
+
+		return TRUE;
+	}
+}
+
+
 
 
 void main()
 {
+	version(Windows)
+	{
+		EnumWindows( &enumWindowsProc, 0 );
+		if( bRunAgain ) return;
+
+		/*
+		HANDLE handle = CreateMutexA( NULL, FALSE, "poseidonFB.exe" );
+
+		if( GetLastError( ) == ERROR_ALREADY_EXISTS )
+		{
+			EnumWindows( &enumWindowsProc, 0 );
+			return;
+		}
+		*/
+	}
+
+
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
 		Stdout( "IUP open error!!!" ).newline;
 		return;
 	}
+	
 	createEditorSetting();
 
 	IupScintillaOpen();
-	version( Windows )
+
+	// Set Default Font
+	if(  GLOBAL.fonts[0].fontString.length )
 	{
-		//IupSetGlobal( "DEFAULTFONT", toStringz( "Verdana, 10" ) );
 		IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
 
 		if( GLOBAL.fonts[0].fontString.length )
@@ -69,12 +126,6 @@ void main()
 				
 			}
 		}
-		//IupSetGlobal( "DEFAULTFONTSIZE", toStringz( "Consolas" ) );
-		//IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( "Consolas" ) );
-	}
-	else
-	{
-		IupSetGlobal( "DEFAULTFONT", "FreeMono,Bold 10" );
 	}
 
 	IupSetGlobal( "UTF8MODE", "YES" );
@@ -88,8 +139,9 @@ void main()
 
 	createLayout();
 
-	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "Poseidon - FreeBasic IDE" );
+	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", "700x500" );
+	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	//IupSetAttribute( GLOBAL.mainDlg, "MARGIN", "10x10");
 
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
@@ -101,12 +153,13 @@ void main()
 	// Shows dialog
 	IupShow( GLOBAL.mainDlg );
 	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );
+	
 	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
 
 	createDialog();
 
-	if( GLOBAL.fonts.length == 10 )
-	{
+	//if( GLOBAL.fonts.length == 11 )
+	//{
 		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[2].fontString ) );// Leftside
 		IupSetAttribute( GLOBAL.fileListTree, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[3].fontString ) );// Filelist
 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[4].fontString ) );// Project
@@ -115,9 +168,20 @@ void main()
 		IupSetAttribute( GLOBAL.outputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[7].fontString ) );// Output
 		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Search
 		IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Debugger (shared Search)
-	}	
+	//}	
 
 	//IUP main Loop
 	IupMainLoop();
 	IupClose();
+
+	/*
+	version( Windows )
+	{
+		if( handle != null )
+		{
+			ReleaseMutex( handle );
+			CloseHandle( handle );
+		}
+	}
+	*/
 }

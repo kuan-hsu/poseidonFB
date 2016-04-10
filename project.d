@@ -41,7 +41,7 @@ struct PROJECT
 
 		prjNode.element( null, "ProjectName", name );
 		prjNode.element( null, "Type", type );
-		prjNode.element( null, "Dir", dir );
+		//prjNode.element( null, "Dir", dir );
 		prjNode.element( null, "MainFile", mainFile );
 		prjNode.element( null, "TargetName", targetName );
 		prjNode.element( null, "CompilerArgs", args );
@@ -110,9 +110,14 @@ struct PROJECT
 			result = root.query.descendant( "Type" );
 			foreach( e; result ){ s.type = e.value;	}
 
+			/*
 			result = root.query.descendant( "Dir" );
 			foreach( e; result ){ s.dir = e.value; }
-
+			*/
+			
+			scope _dir = new FilePath( settingFileName );
+			s.dir = _dir.path[0..length-1];
+			
 			result = root.query.descendant( "MainFile" );
 			foreach( e; result ){ s.mainFile = e.value;	}
 

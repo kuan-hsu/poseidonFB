@@ -152,6 +152,16 @@ class CScanner
 				switch( data[i]  )
 				{
 					case '#':
+						if( i < data.length - 1 )
+						{
+							if( data[i+1] == '#' )
+							{
+								identifier ~= "##";
+								i ++;
+								break;
+							}
+						}
+						
 						TokenUnit t = {TOK.Tpound, "#", lineNum};
 						results ~= t;
 						identifier = "";

@@ -12,6 +12,7 @@ private import tango.io.Stdout;
 class CPreferenceDialog : CBaseDialog
 {
 	private:
+	//import tango.io.device.File;
 	
 	Ihandle* textCompilerPath, textDebuggerPath;
 
@@ -24,7 +25,7 @@ class CPreferenceDialog : CBaseDialog
 		//IupSetAttribute( labelCompiler, "FONT", "Consolas, 10" );
 		
 		textCompilerPath = IupText( null );
-		IupSetAttribute( textCompilerPath, "SIZE", "180x12" );
+		IupSetAttribute( textCompilerPath, "SIZE", "185x12" );
 		IupSetAttribute( textCompilerPath, "VALUE", toStringz(GLOBAL.compilerFullPath) );
 		IupSetHandle( "compilerPath_Handle", textCompilerPath );
 		
@@ -40,7 +41,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( labelDebugger, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
 		textDebuggerPath = IupText( null );
-		IupSetAttribute( textDebuggerPath, "SIZE", "180x12" );
+		IupSetAttribute( textDebuggerPath, "SIZE", "185x12" );
 		IupSetAttribute( textDebuggerPath, "VALUE", toStringz(GLOBAL.debuggerFullPath) );
 		IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
 		
@@ -51,25 +52,65 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
 
+		// compiler Setting
+		Ihandle* toggleAnnotation = IupToggle( "Show compile error using annotation", null );
+		IupSetAttribute( toggleAnnotation, "VALUE", toStringz(GLOBAL.compilerAnootation.dup) );
+		IupSetHandle( "toggleAnnotation", toggleAnnotation );
+		
+		//Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
+
+		Ihandle* frameCompiler = IupFrame( toggleAnnotation );
+		IupSetAttribute( frameCompiler, "TITLE", "Compiler Setting");
+		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=275x");
 
 		// Parser Setting
+		Ihandle* toggleKeywordComplete = IupToggle( "Enable Keyword Autocomplete", null );
+		IupSetAttribute( toggleKeywordComplete, "VALUE", toStringz(GLOBAL.enableKeywordComplete.dup) );
+		IupSetHandle( "toggleKeywordComplete", toggleKeywordComplete );
+		
+		Ihandle* toggleUseParser = IupToggle( "Enable Parser", null );
+		IupSetAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.enableParser.dup) );
+		IupSetHandle( "toggleUseParser", toggleUseParser );
+		
 		Ihandle* labelTrigger = IupLabel( "Autocompletion Trigger:" );
 		IupSetAttributes( labelTrigger, "SIZE=100x12" );
 		
 		Ihandle* textTrigger = IupText( null );
 		IupSetAttribute( textTrigger, "SIZE", "30x12" );
+		IupSetAttribute( textTrigger, "TIP", "Set '0' to disable" );
 		IupSetAttribute( textTrigger, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
 		IupSetHandle( "textTrigger", textTrigger );
+
+		Ihandle* labelIncludeLevel = IupLabel( "Include Levels:" );
+		IupSetAttributes( labelIncludeLevel, "SIZE=100x12,GAP=0" );
 		
+		Ihandle* textIncludeLevel = IupText( null );
+		IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
+		IupSetAttribute( textIncludeLevel, "VALUE", toStringz( Integer.toString( GLOBAL.includeLevel ) ) );
+		IupSetHandle( "textIncludeLevel", textIncludeLevel );
+
+		
+
+		Ihandle* toggleFunctionTitle = IupToggle( "Show Function Title", null );
+		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
+		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
+
+		Ihandle* toggleWithParams = IupToggle( "Show Type With Function Parameters", null );
+		IupSetAttribute( toggleWithParams, "VALUE", toStringz(GLOBAL.showTypeWithParams.dup) );
+		IupSetHandle( "toggleWithParams", toggleWithParams );
+
 		
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
-
-		Ihandle* frameParser = IupFrame( hBox00 );
+		Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, hBox00, hBox00_1, null );
+		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1" );
+	
+		Ihandle* frameParser = IupFrame( vBox00 );
 		IupSetAttribute( frameParser, "TITLE", "Parser Setting");
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
+		IupSetAttribute( frameParser, "SIZE", "275x");
 		
-
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, frameParser, null );
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, frameCompiler, frameParser, null );
 		IupSetAttribute( vBoxPage01, "ALIGNMENT", "ALEFT");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
@@ -117,6 +158,20 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleAutoIndent = IupToggle( "Auto indent", null );
 		IupSetAttribute( toggleAutoIndent, "VALUE", toStringz(GLOBAL.editorSetting00.AutoIndent.dup) );
 		IupSetHandle( "toggleAutoIndent", toggleAutoIndent );
+
+		Ihandle* toggleShowEOL = IupToggle( "Show EOL", null );
+		IupSetAttribute( toggleShowEOL, "VALUE", toStringz(GLOBAL.editorSetting00.ShowEOL.dup) );
+		IupSetHandle( "toggleShowEOL", toggleShowEOL );
+
+		Ihandle* toggleShowSpace = IupToggle( "Show Space/Tab", null );
+		IupSetAttribute( toggleShowSpace, "VALUE", toStringz(GLOBAL.editorSetting00.ShowSpace.dup) );
+		IupSetHandle( "toggleShowSpace", toggleShowSpace );
+
+		Ihandle* toggleAutoEnd = IupToggle( "Auto Insert Block End", null );
+		IupSetAttribute( toggleAutoEnd, "VALUE", toStringz(GLOBAL.editorSetting00.AutoEnd.dup) );
+		IupSetHandle( "toggleAutoEnd", toggleAutoEnd );
+		
+		
 		
 		Ihandle* gbox = IupGridBox
 		(
@@ -131,6 +186,12 @@ class CPreferenceDialog : CBaseDialog
 
 			IupSetAttributes( toggleTabUseingSpace, "" ),
 			IupSetAttributes( toggleAutoIndent, "" ),
+
+			IupSetAttributes( toggleShowEOL, "" ),
+			IupSetAttributes( toggleShowSpace, "" ),
+
+			IupSetAttributes( toggleAutoEnd, "" ),
+			
 			null
 		);
 
@@ -184,6 +245,7 @@ class CPreferenceDialog : CBaseDialog
 				}
 
 				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[i].name, strings[0], Bold, Italic, Underline, Strikeout, size );
+				
 				IupSetAttribute( fontList, toStringz( Integer.toString( i + 1 ) ), toStringz( _string ) );
 			}
 		}
@@ -216,7 +278,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( btnSelectFore, "SIZE", "16x8" );
 		IupSetHandle( "btnSelectFore", btnSelectFore );
 		IupSetCallback( btnSelectFore, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		IupSetAttribute( btnSelectFore, "ACTIVE", "NO" );
 
 		Ihandle* labelSelectBack = IupLabel( "Selection background:" );
 		Ihandle* btnSelectBack = IupButton( null, null );
@@ -224,7 +285,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( btnSelectBack, "SIZE", "16x8" );
 		IupSetHandle( "btnSelectBack", btnSelectBack );
 		IupSetCallback( btnSelectBack, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		IupSetAttribute( btnSelectBack, "ACTIVE", "NO" );
 
 		Ihandle* labelLinenumFore = IupLabel( "Linenumber foreground:" );
 		Ihandle* btnLinenumFore = IupButton( null, null );
@@ -246,7 +306,14 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( btnFoldingColor, "SIZE", "16x8" );
 		IupSetHandle( "btnFoldingColor", btnFoldingColor );
 		IupSetCallback( btnFoldingColor, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		IupSetAttribute( btnFoldingColor, "ACTIVE", "NO" );
+
+		Ihandle* labelSelAlpha = IupLabel( "Selection Alpha:" );
+		Ihandle* textAlpha = IupText( null );
+		IupSetAttributes( textAlpha, "SIZE=20x10,MARGIN=0x0" );
+		IupSetAttribute( textAlpha, "VALUE", toStringz( GLOBAL.editColor.selAlpha ) );
+		IupSetAttribute( textAlpha, "TIP", toStringz( "'255' will disable the alpha" ) );
+		IupSetHandle( "textAlpha", textAlpha );
+
 
 
 		Ihandle* gboxColor = IupGridBox
@@ -268,8 +335,8 @@ class CPreferenceDialog : CBaseDialog
 
 			IupSetAttributes( labelFoldingColor, "" ),
 			IupSetAttributes( btnFoldingColor, "" ),
-			IupSetAttributes( null, "" ),
-			IupSetAttributes( null, "" ),
+			IupSetAttributes( labelSelAlpha, "" ),
+			IupSetAttributes( textAlpha, "" ),
 
 			null
 		);
@@ -318,12 +385,80 @@ class CPreferenceDialog : CBaseDialog
 		}
 
 
+		Ihandle* keyWordText0 = IupText( null );
+		IupSetAttributes( keyWordText0, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
+		IupSetAttribute( keyWordText0, "VALUE", toStringz( GLOBAL.KEYWORDS[0] ) );
+		IupSetHandle( "keyWordText0", keyWordText0 );
+		Ihandle* keyWordText1 = IupText( null );
+		IupSetAttributes( keyWordText1, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
+		IupSetAttribute( keyWordText1, "VALUE", toStringz( GLOBAL.KEYWORDS[1] ) );
+		IupSetHandle( "keyWordText1", keyWordText1 );
+		Ihandle* keyWordText2 = IupText( null );
+		IupSetAttributes( keyWordText2, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
+		IupSetAttribute( keyWordText2, "VALUE", toStringz( GLOBAL.KEYWORDS[2] ) );
+		IupSetHandle( "keyWordText2", keyWordText2 );
+		Ihandle* keyWordText3 = IupText( null );
+		IupSetAttributes( keyWordText3, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
+		IupSetAttribute( keyWordText3, "VALUE", toStringz( GLOBAL.KEYWORDS[3] ) );
+		IupSetHandle( "keyWordText3", keyWordText3 );
+
+
+		Ihandle* labelKeyWord0 = IupLabel( "KeyWord0" );
+		Ihandle* btnKeyWord0Color = IupButton( null, null );
+		IupSetAttribute( btnKeyWord0Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[0]) );
+		IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" );
+		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
+		IupSetCallback( btnKeyWord0Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelKeyWord1 = IupLabel( "KeyWord1" );
+		Ihandle* btnKeyWord1Color = IupButton( null, null );
+		IupSetAttribute( btnKeyWord1Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[1]) );
+		IupSetAttribute( btnKeyWord1Color, "SIZE", "24x8" );
+		IupSetHandle( "btnKeyWord1Color", btnKeyWord1Color );
+		IupSetCallback( btnKeyWord1Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelKeyWord2 = IupLabel( "KeyWord2" );
+		Ihandle* btnKeyWord2Color = IupButton( null, null );
+		IupSetAttribute( btnKeyWord2Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[2]) );
+		IupSetAttribute( btnKeyWord2Color, "SIZE", "24x8" );
+		IupSetHandle( "btnKeyWord2Color", btnKeyWord2Color );
+		IupSetCallback( btnKeyWord2Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelKeyWord3 = IupLabel( "KeyWord3" );
+		Ihandle* btnKeyWord3Color = IupButton( null, null );
+		IupSetAttribute( btnKeyWord3Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[3]) );
+		IupSetAttribute( btnKeyWord3Color, "SIZE", "24x8" );
+		IupSetHandle( "btnKeyWord3Color", btnKeyWord3Color );
+		IupSetCallback( btnKeyWord3Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* gboxKeyWordColor = IupGridBox
+		(
+			IupSetAttributes( labelKeyWord0, "" ),
+			IupSetAttributes( btnKeyWord0Color,"" ),
+			IupSetAttributes( labelKeyWord1, "" ),
+			IupSetAttributes( btnKeyWord1Color, "" ),
+
+			IupSetAttributes( labelKeyWord2, "" ),
+			IupSetAttributes( btnKeyWord2Color, "" ),
+			IupSetAttributes( labelKeyWord3, "" ),
+			IupSetAttributes( btnKeyWord3Color, "" ),
+
+			null
+		);
+		IupSetAttributes( gboxKeyWordColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=0,GAPCOL=0,MARGIN=0x0,SIZELIN=0,HOMOGENEOUSCOL=YES" );
+
+
+		Ihandle* keyWordVbox = IupVbox( keyWordText0, keyWordText1, keyWordText2, keyWordText3, gboxKeyWordColor, null );
+		IupSetAttribute( keyWordVbox, "ALIGNMENT", toStringz( "ACENTER" ) );
+
+
 		IupSetAttribute( vBoxPage01, "TABTITLE", "Compiler" );
 		IupSetAttribute( vBoxPage02, "TABTITLE", "Editor" );
 		IupSetAttribute( shortCutList, "TABTITLE", "Short Cut" );
+		IupSetAttribute( keyWordVbox, "TABTITLE", "KeyWords" );
 		IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, shortCutList, null );
+		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, shortCutList, keyWordVbox, null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
 
@@ -359,6 +494,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "compilerPath_Handle", null );
 		IupSetHandle( "debuggerPath_Handle", null );
 		IupSetHandle( "textTrigger", null );
+		IupSetHandle( "textIncludeLevel", null );
+		IupSetHandle( "toggleFunctionTitle", null );
+		IupSetHandle( "toggleKeywordComplete", null );
+		IupSetHandle( "toggleUseParser", null );
+		IupSetHandle( "toggleWithParams", null );
+		IupSetHandle( "toggleAnnotation", null );
 
 		IupSetHandle( "toggleLineMargin", null );
 		IupSetHandle( "toggleBookmarkMargin", null );
@@ -368,6 +509,9 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleWordWarp", null );
 		IupSetHandle( "toggleTabUseingSpace", null );
 		IupSetHandle( "toggleAutoIndent", null );
+		IupSetHandle( "toggleShowEOL", null );
+		IupSetHandle( "toggleShowSpace", null );
+		IupSetHandle( "toggleAutoEnd", null );
 		
 		IupSetHandle( "textTabWidth", null );
 
@@ -388,7 +532,18 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnLinenumBack", null );
 		IupSetHandle( "btnFoldingColor", null );
 		IupSetHandle( "btnBookmarkColor", null );
+		IupSetHandle( "textAlpha", null );
 
+		IupSetHandle( "btnKeyWord0Color", null );
+		IupSetHandle( "btnKeyWord1Color", null );
+		IupSetHandle( "btnKeyWord2Color", null );
+		IupSetHandle( "btnKeyWord3Color", null );
+
+		IupSetHandle( "keyWordText0", null );
+		IupSetHandle( "keyWordText1", null );
+		IupSetHandle( "keyWordText2", null );
+		IupSetHandle( "keyWordText3", null );
+		
 		IupSetHandle( "shortCutList", null );
 		IupSetHandle( "fontList", null );
 	}
@@ -473,7 +628,7 @@ class CPreferenceDialog : CBaseDialog
 		for( int i = 0; i < GLOBAL.KEYWORDS.length; ++i )
 		{
 			editorNode.element( null, "keywords" )
-			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "value", GLOBAL.KEYWORDS[i] );
+			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "value", Util.trim( GLOBAL.KEYWORDS[i] ) ).attribute( null, "color", GLOBAL.editColor.keyWord[i]);
 		}
 		
 		editorNode.element( null, "toggle00" )
@@ -484,7 +639,10 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "CaretLine", GLOBAL.editorSetting00.CaretLine )
 		.attribute( null, "WordWrap", GLOBAL.editorSetting00.WordWrap )
 		.attribute( null, "TabUseingSpace", GLOBAL.editorSetting00.TabUseingSpace )
-		.attribute( null, "AutoIndent", GLOBAL.editorSetting00.AutoIndent )	
+		.attribute( null, "AutoIndent", GLOBAL.editorSetting00.AutoIndent )
+		.attribute( null, "ShowEOL", GLOBAL.editorSetting00.ShowEOL )
+		.attribute( null, "ShowSpace", GLOBAL.editorSetting00.ShowSpace )	
+		.attribute( null, "AutoEnd", GLOBAL.editorSetting00.AutoEnd )	
 		.attribute( null, "TabWidth", GLOBAL.editorSetting00.TabWidth );
 
 		/+
@@ -508,7 +666,8 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "Bottom", GLOBAL.fonts[6].fontString )
 		.attribute( null, "Output", GLOBAL.fonts[7].fontString )
 		.attribute( null, "Search", GLOBAL.fonts[8].fontString )
-		.attribute( null, "Debugger", GLOBAL.fonts[9].fontString );
+		.attribute( null, "Debugger", GLOBAL.fonts[9].fontString )
+		.attribute( null, "Annotation", GLOBAL.fonts[10].fontString );
 
 		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
 		editorNode.element( null, "color" )
@@ -518,7 +677,8 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "selectionBack", GLOBAL.editColor.selectionBack )
 		.attribute( null, "linenumFore", GLOBAL.editColor.linenumFore )
 		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack )
-		.attribute( null, "fold", GLOBAL.editColor.fold );
+		.attribute( null, "fold", GLOBAL.editColor.fold )
+		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha );
 
 		//<shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F12" messagewindow="+++F11"/>
 		editorNode.element( null, "shortkeys" )
@@ -554,6 +714,7 @@ class CPreferenceDialog : CBaseDialog
 		buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath );
 		buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath );
 		buildtoolsNode.element( null, "maxerror", GLOBAL.maxError );
+		buildtoolsNode.element( null, "annotation", GLOBAL.compilerAnootation );
 
 		/*
 		<parser>
@@ -561,7 +722,14 @@ class CPreferenceDialog : CBaseDialog
 		</parser>  
 		*/
 		auto parserNode = configNode.element( null, "parser" );
+
+		parserNode.element( null, "enablekeywordcomplete", GLOBAL.enableKeywordComplete );
+		parserNode.element( null, "enableparser", GLOBAL.enableParser );
 		parserNode.element( null, "parsertrigger", Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) );
+		parserNode.element( null, "showfunctiontitle", GLOBAL.showFunctionTitle );
+		parserNode.element( null, "showtypewithparams", GLOBAL.showTypeWithParams );
+		parserNode.element( null, "includelevel", Integer.toString( GLOBAL.includeLevel ) );
+		
 
 		/*
 		<recentProjects>
@@ -599,6 +767,13 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.KEYWORDS~= e.value;
 			}
 
+			result = root.query.descendant("keywords").attribute("color");
+			int index;
+			foreach( e; result )
+			{
+				GLOBAL.editColor.keyWord[index++] = e.value;
+			}			
+
 			result = root.query.descendant("compilerpath");
 			foreach( e; result )
 			{
@@ -617,12 +792,45 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.maxError = e.value;
 			}
 
+			result = root.query.descendant("annotation");
+			foreach( e; result )
+			{
+				GLOBAL.compilerAnootation = e.value;
+			}
+
 			// Parser
+			result = root.query.descendant("enablekeywordcomplete");
+			foreach( e; result )
+			{
+				GLOBAL.enableKeywordComplete = e.value;
+			}
+			result = root.query.descendant("enableparser");
+			foreach( e; result )
+			{
+				GLOBAL.enableParser = e.value;
+			}
 			result = root.query.descendant("parsertrigger");
 			foreach( e; result )
 			{
 				GLOBAL.autoCompletionTriggerWordCount = Integer.atoi( e.value );
 			}
+			result = root.query.descendant("showfunctiontitle");
+			foreach( e; result )
+			{
+				GLOBAL.showFunctionTitle = e.value;
+			}
+			result = root.query.descendant("showtypewithparams");
+			foreach( e; result )
+			{
+				GLOBAL.showTypeWithParams = e.value;
+			}
+			result = root.query.descendant("includelevel");
+			foreach( e; result )
+			{
+				GLOBAL.includeLevel = Integer.atoi( e.value );
+			}
+			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
+			
 
 			result = root.query.descendant("recentProjects").descendant("name");
 			foreach( e; result )
@@ -654,63 +862,85 @@ class CPreferenceDialog : CBaseDialog
 			result = root.query.descendant("toggle00").attribute("AutoIndent");
 			foreach( e; result ) GLOBAL.editorSetting00.AutoIndent = e.value;
 
+			result = root.query.descendant("toggle00").attribute("ShowEOL");
+			foreach( e; result ) GLOBAL.editorSetting00.ShowEOL = e.value;
+
+			result = root.query.descendant("toggle00").attribute("ShowSpace");
+			foreach( e; result ) GLOBAL.editorSetting00.ShowSpace = e.value;
+
+			result = root.query.descendant("toggle00").attribute("AutoEnd");
+			foreach( e; result ) GLOBAL.editorSetting00.AutoEnd = e.value;
+
 			result = root.query.descendant("toggle00").attribute("TabWidth");
 			foreach( e; result ) GLOBAL.editorSetting00.TabWidth = e.value;
 
 
 			// Font
-			GLOBAL.fonts.length = 0;
+			//GLOBAL.fonts.length = 0;
+			fontUint fu;
+			version( Windows )
+			{
+				fu.fontString = "Courier New,9";
+			}
+			else
+			{
+				fu.fontString = "FreeMono,Bold 9";
+			}
 
-			fontUint fu = { "Default", "" };
-			GLOBAL.fonts ~= fu;
+			fu.name = "Default";
+			GLOBAL.fonts[0] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[0].fontString = e.value;
 
 			fu.name = "Document";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[1] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[1].fontString = e.value;
 			
 			fu.name = "Leftside";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[2] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[2].fontString = e.value;
 
 			fu.name = "Filelist";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[3] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[3].fontString = e.value;
 
 			fu.name = "Project";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[4] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[4].fontString = e.value;
 
 			fu.name = "Outline";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[5] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[5].fontString = e.value;
 			
 			fu.name = "Bottom";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[6] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[6].fontString = e.value;
 
 			fu.name = "Output";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[7] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[7].fontString = e.value;
 
 			fu.name = "Search";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[8] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[8].fontString = e.value;
 
 			fu.name = "Debugger";
-			GLOBAL.fonts ~= fu;
+			GLOBAL.fonts[9] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) GLOBAL.fonts[length-1].fontString = e.value;
-			
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[9].fontString = e.value;
+
+			fu.name = "Annotation";
+			GLOBAL.fonts[10] = fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[10].fontString = e.value;			
 			/+
 			// Font
 			result = root.query.descendant("font").attribute("name");
@@ -757,6 +987,9 @@ class CPreferenceDialog : CBaseDialog
 
 			result = root.query.descendant("color").attribute("fold");
 			foreach( e; result ) GLOBAL.editColor.fold = e.value;
+
+			result = root.query.descendant("color").attribute("selAlpha");
+			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
 
 
 			// short keys (Editor)
@@ -901,9 +1134,32 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.shortKeys ~= sk;
 			}
 
-
 			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
 			GLOBAL.txtCompilerOptions = fileCompilerOptions.read;
+
+			// Get linux terminal program name
+			version( linux )
+			{
+				//char[] termNameFile = cast(char[]) File.get( "/etc/alternatives/x-terminal-emulator" );
+				scope term = new UnicodeFile!(char)( "/etc/alternatives/x-terminal-emulator", Encoding.Unknown );
+				char[] termNameFile = term.read;
+				if( termNameFile.length )
+				{
+					int pos = Util.rindex( termNameFile, "exec('" ); 
+					if( pos < termNameFile.length )
+					{
+						for( int i = pos + 6; i < termNameFile.length; ++ i )
+						{
+							if( termNameFile[i] == '\'' ) break;
+							GLOBAL.linuxTermName ~= termNameFile[i];
+						}
+					}
+				}
+				else
+				{
+					//GLOBAL.linuxTermName = "gnome-terminal";
+				}
+			}
 		}
 		catch
 		{
@@ -1090,6 +1346,11 @@ extern(C) // Callback for CPreferenceDialog
 
 	private int CPreferenceDialog_btnOK_cb( Ihandle* ih )
 	{
+		GLOBAL.KEYWORDS[0] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText0" ), "VALUE" ))).dup;
+		GLOBAL.KEYWORDS[1] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText1" ), "VALUE" ))).dup;
+		GLOBAL.KEYWORDS[2] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText2" ), "VALUE" ))).dup;
+		GLOBAL.KEYWORDS[3] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText3" ), "VALUE" ))).dup;
+		
 		GLOBAL.editorSetting00.LineMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.BookmarkMargin		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.FoldMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE" )).dup;
@@ -1098,6 +1359,9 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editorSetting00.WordWrap				= fromStringz(IupGetAttribute( IupGetHandle( "toggleWordWrap" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.TabUseingSpace		= fromStringz(IupGetAttribute( IupGetHandle( "toggleTabUseingSpace" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.AutoIndent			= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoIndent" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.ShowEOL				= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.ShowSpace			= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.AutoEnd				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 
 		Ihandle* _ft = IupGetHandle( "fontList" );
@@ -1139,14 +1403,35 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editColor.linenumFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.linenumBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.fold						= fromStringz(IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.selAlpha					= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" )).dup;
+
+
+		GLOBAL.editColor.keyWord[0]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.keyWord[1]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.keyWord[2]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.keyWord[3]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR" )).dup;
 
 
 		GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( fromStringz(IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ).dup );
+		GLOBAL.includeLevel							= Integer.atoi( fromStringz(IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ).dup );
+
+		if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 
 		GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
+		GLOBAL.debuggerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
+		GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 
-		if( GLOBAL.fonts.length == 10 )
-		{
+		GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
+		GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
+		GLOBAL.showFunctionTitle					= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
+		GLOBAL.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
+
+		
+
+		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "NO" );
+
+		//if( GLOBAL.fonts.length == 11 )
+		//{
 			foreach( CScintilla cSci; GLOBAL.scintillaManager )
 			{
 				if( cSci !is null ) cSci.setGlobalSetting();
@@ -1160,7 +1445,7 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
 			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Debugger
 			GLOBAL.debugPanel.setFont();
-		}
+		//}
 
 		// Save Setup to Xml
 		CPreferenceDialog.save();

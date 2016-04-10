@@ -2,19 +2,16 @@
 
 import tools;
 
-import tango.text.xml.Document;
-import tango.io.UnicodeFile;
-
-
 struct EditorToggleUint
 {
-	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON";
+	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
 	char[] TabWidth = "4";
 }
 
 struct EditorColorUint
 {
-	char[] caretLine = "255 255 128", cursor = "0 0 0", selectionFore = "255 255 255", selectionBack = "0 0 255", linenumFore = "0 0 0", linenumBack = "200 200 200", fold = "200 208 208";
+	char[][4] keyWord = [ "5 91 35", "0 0 255", "231 144 20", "16 108 232" ];
+	char[] caretLine = "255 255 128", cursor = "0 0 0", selectionFore = "255 255 255", selectionBack = "0 0 255", linenumFore = "0 0 0", linenumBack = "200 200 200", fold = "200 208 208", selAlpha = "255";
 }
 
 struct ShortKey
@@ -74,27 +71,34 @@ struct GLOBAL
 	static CCompilerHelpDialog	compilerHelpDlg;
 	static CArgOptionDialog		argsDlg;
 
-	static Ihandle*				statusBar_Line_Col, statusBar_Ins, statusBar_FontType;
+	static Ihandle*				statusBar_Line_Col, statusBar_Ins, statusBar_EOLType, statusBar_encodingType;
 
 	static Ihandle*				menuOutlineWindow, menuMessageWindow;
-	
+
+	static char[]				linuxTermName;
 
 	// Setting
 	static char[][]				KEYWORDS;
 	static char[]				compilerFullPath;// = "D:\\CodingPark\\FreeBASIC-1.02.1-win32\\fbc.exe";
+	static char[]				compilerAnootation = "ON";
 	static char[]				debuggerFullPath;
 	static char[]				maxError = "30";
 	static char[][]				recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorColorUint		editColor;
-	
-
+	static Ihandle*				functionTitleHandle;
+	static char[]				enableKeywordComplete = "ON";
+	static char[]				enableParser = "ON";
+	static char[]				showFunctionTitle = "OFF";
+	static char[]				showTypeWithParams = "OFF";
 
 	static CScintilla[char[]]	scintillaManager;
 
 	static CASTnode[char[]]		parserManager;
 
 	static int					autoCompletionTriggerWordCount = 3;
+	static int					includeLevel = 3;
+
 
 	static PROJECT[char[]]		projectManager;
 
@@ -162,7 +166,7 @@ static this()
 	version( Windows )
 	{
 		fu.name ="Default";
-		fu.fontString = "Consolas,10";
+		fu.fontString = "Courier New,10";
 	}
 	else
 	{
@@ -193,9 +197,12 @@ static this()
 	fu.name = "Output";
 	GLOBAL.fonts ~= fu;
 
-	fu.name = "Search"; fu.fontString = "Courier New,Bold Italic Underline Strikeout 9";
+	fu.name = "Search";
 	GLOBAL.fonts ~= fu;	
 
-	fu.name = "Debugger"; fu.fontString = "Courier New,9";
+	fu.name = "Debugger";
+	GLOBAL.fonts ~= fu;
+
+	fu.name = "Annotation";
 	GLOBAL.fonts ~= fu;	
 }

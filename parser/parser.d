@@ -4,7 +4,7 @@ class CParser
 {
 	private:
 	import			parser.ast;
-	import			parser.token;
+	import			parser.token, parser.autocompletion;
 
 	import			tango.io.FilePath, tango.text.Ascii;
 	import			Util = tango.text.Util;
@@ -18,7 +18,10 @@ class CParser
 	
 
 
-	TokenUnit token(){ return tokens[tokenIndex]; }
+	TokenUnit token()
+	{
+		if( tokenIndex < tokens.length ) return tokens[tokenIndex]; else throw new Exception( "Method next(), out of range!" );
+	}
 
 	TokenUnit next()
 	{
@@ -57,7 +60,58 @@ class CParser
 						TokenUnit t = getToken();
 						parseToken( TOK.Tstring );
 
-						activeASTnode.addChild( t.identifier, B_INCLUDE, null, _type, null, t.lineNumber );
+						activeASTnode.addChild( Util.replace( t.identifier, '\\', '/' ) , B_INCLUDE, null, _type, null, t.lineNumber );
+					}
+					break;
+
+				/*
+				#macro identifier( [ parameters ] )
+					body
+				#endmacro
+
+				#macro identifier( [ parameters, ] Variadic_Parameter... )
+					body
+				#endmacro
+				*/
+				case TOK.Tmacro:
+					parseToken( TOK.Tmacro );
+					if( token().tok == TOK.Tidentifier )
+					{
+						char[] 	name = token().identifier;
+						int		lineNumber = token().lineNumber;
+						parseToken( TOK.Tidentifier );
+
+						char[] paramName, paramString;
+
+						activeASTnode = activeASTnode.addChild( name, B_MACRO, null, paramString, null, lineNumber );	
+						
+						while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+						{
+							paramString ~= token().identifier;
+							
+							if( token().tok == TOK.Topenparen )
+							{
+								parseToken( TOK.Topenparen );
+							}
+							else if( token().tok == TOK.Tcloseparen )
+							{
+								parseToken( TOK.Tcloseparen );
+								break;
+							}
+							else if( token().tok == TOK.Tcomma )
+							{
+								activeASTnode.addChild( paramName, B_PARAM, null, null, null, lineNumber );
+								paramName = "";
+								parseToken();
+							}
+							else
+							{
+								paramName ~= token().identifier;
+								parseToken();
+							}
+						}
+
+						activeASTnode.type = paramString;
 					}
 					break;
 
@@ -84,11 +138,11 @@ class CParser
 									type = "integer";
 
 								}
-								activeASTnode.addChild( name, B_VARIABLE, null, type, null, lineNumber );				
+								activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, type, null, lineNumber );				
 							}
 							else if( token().tok == TOK.Tstrings  )
 							{
-								activeASTnode.addChild( name, B_VARIABLE, null, "string", null, lineNumber );	
+								activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, "string", null, lineNumber );	
 							}
 							else if( token().tok == TOK.Topenparen )
 							{
@@ -104,11 +158,11 @@ class CParser
 									}
 									parseToken();
 								}
-								activeASTnode.addChild( name, B_FUNCTION, null, param, null, lineNumber );	
+								activeASTnode.addChild( name, B_FUNCTION | B_DEFINE, null, param, null, lineNumber );	
 							}
 							else if( token().tok == TOK.Tidentifier )
 							{
-								activeASTnode.addChild( name, B_VARIABLE, null, null, null, lineNumber );	
+								activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, null, null, lineNumber );	
 							}
 						}
 					}
@@ -117,22 +171,22 @@ class CParser
 				case TOK.Tifdef:
 					parseToken( TOK.Tifdef );
 
-					_type = token().identifier;
+					_type = toUpper( token().identifier );
 					parseToken();
 					break;
 
 				case TOK.Telseif, TOK.Telse:
-					parseToken( TOK.Tifndef );
+					parseToken();
 
 					if( _type.length )
 					{
 						if( _type[0] == '!' )
 						{
-							_type = _type[1..length];
+							_type = toUpper( _type[1..length] );
 						}
 						else
 						{
-							_type = "!" ~ _type;
+							_type = toUpper( "!" ~ _type );
 						}
 					}
 					break;
@@ -261,12 +315,117 @@ class CParser
 						_param ~= ( token().identifier ~ " " );
 						parseToken( TOK.Tas );
 
-						if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+						// Function pointer
+						if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub )
+						{
+							int _kind;
+							char[] __param;
+							
+							if( token().tok == TOK.Tfunction ) _kind = B_FUNCTION; else _kind = B_SUB;
+							
+							_param ~= token().identifier;
+							parseToken();
+
+							if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal )
+							{
+								//_param ~= token().identifier;
+								parseToken();
+							}
+
+							// like " Declare Function app_oninit_cb WXCALL () As wxBool "
+							if( token().tok == TOK.Tidentifier )
+							{
+								_param ~= ( " " ~ token().identifier );
+								parseToken( TOK.Tidentifier );
+							}
+
+							// Overload
+							if( token().tok == TOK.Toverload )
+							{
+								//_param ~= ( " " ~ token().identifier );
+								parseToken( TOK.Toverload );
+							}
+
+							// Alias "..."
+							if( token().tok == TOK.Talias )
+							{
+								//_param ~= ( " " ~ token().identifier );
+								parseToken( TOK.Talias );
+								if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return null;
+							}
+
+							char[]  _returnType;
+
+							if( token().tok == TOK.Topenparen )
+							{
+								if( next().tok != TOK.Tcloseparen )	__param = parseParam( false );else parseToken( TOK.Topenparen );
+
+								if( token().tok == TOK.Tcloseparen )
+								{
+									if( !__param.length )
+									{
+										__param = "()";
+									}
+									else
+									{
+										if( __param[length-1] == ' ' ) __param = __param[0..length-1];
+										__param ~= token().identifier;
+									}
+									parseToken( TOK.Tcloseparen );
+								}
+							}
+
+							_param ~= __param;
+
+							if( token().tok == TOK.Tas )
+							{
+								_param ~= ( " " ~ token().identifier );
+								parseToken( TOK.Tas );
+
+								if( token().tok == TOK.Tconst )
+								{
+									_param ~= ( " " ~ token().identifier );
+									parseToken( TOK.Tconst );
+								}
+
+								_returnType = getVariableType();
+								if( _returnType.length )
+								{
+									parseToken();
+									while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+									{
+										_returnType ~= "*";
+										parseToken();
+									}
+
+									// Mother param strings
+									_param ~= ( " " ~ _returnType );
+
+									_type = _returnType ~ __param;
+									activeASTnode.addChild( _name, _kind, null, _type, null, _lineNum );
+									
+									//return true;
+								}
+							}
+
+							if( token().tok == TOK.Tstatic || token().tok == TOK.Texport  ) parseToken();
+							
+							if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
+							{
+								activeASTnode.addChild( _name, _kind, null, __param, null, _lineNum );
+							}		
+						}
+
+						if( token().tok == TOK.Tconst )
+						{
+							_param ~= ( token().identifier ~ " " );
+							parseToken( TOK.Tconst );
+						}
 
 						_type = getVariableType();
 						if( _type.length )
 						{
-							_param ~= ( _type ~ " " );
 							parseToken();
 
 							while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
@@ -274,30 +433,36 @@ class CParser
 								_type ~= "*";
 								parseToken();
 							}
-							
+							_param ~= ( _type ~ " " );
+
+
 							if( token().tok == TOK.Tassign )
 							{
 								parseToken( TOK.Tassign );
-								if( token().tok != TOK.Tnumbers && token().tok != TOK.Tstrings && token().tok != TOK.Tidentifier )
-								{
-									return null;
-								}
-								else
-								{
-									parseToken();
-									if( token().tok == TOK.Topenparen ) // The default_value call the define function
-									{
-										do
-										{
-											if( tokenIndex >= tokens.length ) break;
-											parseToken();
-										}
-										while( token().tok != TOK.Tcloseparen )
 
-										parseToken( TOK.Tcloseparen );
+								int countParen;
+								do
+								{
+									if( token().tok == TOK.Topenparen )
+									{
+										countParen ++;
 									}
+									else if( token().tok == TOK.Tcloseparen )
+									{
+										countParen --;
+										if( countParen == -1 ) break; // Param Tail
+									}
+									else if( token().tok == TOK.Tcomma )
+									{
+										if( countParen == 0 ) break;
+									}
+									
+									if( tokenIndex >= tokens.length ) break;
+									parseToken();
 								}
-							}
+								while( token().tok != TOK.Teol )
+							}							
+
 						
 							if( token().tok == TOK.Tcomma || token().tok == TOK.Tcloseparen )
 							{
@@ -336,7 +501,58 @@ class CParser
 	char[] parseArray()
 	{
 		char[] result;
+
+		if( token().tok == TOK.Topenparen )
+		{
+			parseToken( TOK.Topenparen );
+			result = "(";
+
+			if( token().tok == TOK.Tcloseparen )
+			{
+				parseToken( TOK.Tcloseparen );
+				return "()";
+			}
+			
+			int countOpenParen = 1;
+			do
+			{
+				switch( token().tok )
+				{
+					case TOK.Tcloseparen:
+						countOpenParen --;
+						parseToken( TOK.Tcloseparen );
+						result ~= ")";
+						if( countOpenParen == 0 ) return result;
+						break;
+
+					case TOK.Topenparen:
+						countOpenParen ++;
+						parseToken( TOK.Topenparen );
+						result ~= "(";
+						break;
+
+					case TOK.Tto:
+						result ~= " to ";
+						parseToken();
+						break;
+
+					case TOK.Teol:
+					case TOK.Tcolon:
+						parseToken();
+						return null;
+
+					default:
+						result ~= token.identifier;
+						parseToken();
+				}
+			}
+			while( tokenIndex < tokens.length )
+		}
 		
+		return result;
+
+		
+		/+
 		if( token().tok == TOK.Topenparen )
 		{
 			parseToken( TOK.Topenparen );
@@ -393,6 +609,7 @@ class CParser
 		}
 
 		return result;
+		+/
 	}
 	
 	/*
@@ -464,13 +681,131 @@ class CParser
 							// Array
 							if( token().tok == TOK.Topenparen ) _name ~= parseArray();
 							
-
 							if( token().tok == TOK.Tassign )
 							{
 								parseToken( TOK.Tassign );
-								if( token().tok == TOK.Tstring || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
-							}
+
+								int countCurly, countParen;
+
+								switch( token().tok )
+								{
+									case TOK.Topencurly:
+										do
+										{
+											if( token().tok == TOK.Topencurly )
+											{
+												countCurly ++;
+											}
+											else if( token().tok == TOK.Tclosecurly )
+											{
+												if( --countCurly == 0 )
+												{
+													parseToken( TOK.Tclosecurly );
+													break;
+												}
+												
+											}
+											else if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+											{
+												break;
+											}
+
+											parseToken();
+										}
+										while( tokenIndex < tokens.length )
+										break;
+
+									case TOK.Topenparen:
+										do
+										{
+											if( token().tok == TOK.Topenparen )
+											{
+												countParen ++;
+											}
+											else if( token().tok == TOK.Tcloseparen )
+											{
+												if( --countParen == 0 )
+												{
+													parseToken( TOK.Tcloseparen );
+													break;
+												}
+												
+											}
+											else if( token().tok == TOK.Teol ||  token().tok == TOK.Tcolon  )
+											{
+												break;
+											}
+
+											parseToken();
+										}
+										while( tokenIndex < tokens.length )
+										break;
+
+									default:
+										while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
+										{
+											if( token().tok == TOK.Tcomma )
+											{
+												if( countParen == 0 && countCurly == 0 ) break;
+											}
+											parseToken();
+											if( tokenIndex >= tokens.length ) break;
+										}
+								}
+
+								/*
+								int countParen;
+								do
+								{
+									if( token().tok == TOK.Topenparen )
+									{
+										countParen ++;
+									}
+									else if( token().tok == TOK.Tcloseparen )
+									{
+										countParen --;
+									}
+									else if( token().tok == TOK.Tcomma )
+									{
+										if( countParen == 0 ) break;
+									}
+									else if( token().tok == TOK.Tcolon )
+									{
+										if( countParen == 0 )
+										{
+											parseToken();
+											break;
+										}
+									}
+									else if( token().tok == TOK.Topencurly )
+									{
+										int countCurly = 1;
+										parseToken( TOK.Topencurly );
+
+										while( countCurly != 0 )
+										{
+											if( tokenIndex >= tokens.length ) break;
+											
+											if( token().tok == TOK.Topencurly )
+											{
+												countCurly ++;
+											}
+											else if( token().tok == TOK.Tclosecurly )
+											{
+												countCurly --;
+											}
+
+											tokenIndex ++;
+										}
+									}
 									
+									if( tokenIndex >= tokens.length ) break;
+									parseToken();
+								}
+								while( token().tok != TOK.Teol )
+								*/
+							}
+
 							if( token().tok == TOK.Tcomma )
 							{
 								activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
@@ -491,57 +826,62 @@ class CParser
 				}
 				else if( token().tok == TOK.Tidentifier )
 				{
-					_name = token().identifier;
-					_lineNum = token().lineNumber;
-					parseToken( TOK.Tidentifier );
-
-					if( bConst )
+					while( token().tok == TOK.Tidentifier )
 					{
-						if( token().tok == TOK.Tassign )
+						_name = token().identifier;
+						_lineNum = token().lineNumber;
+						parseToken( TOK.Tidentifier );
+
+						if( bConst )
 						{
-							parseToken( TOK.Tassign );
-							if( token().tok == TOK.Tnumbers || token().tok == TOK.Tidentifier )
+							if( token().tok == TOK.Tassign )
 							{
-								parseToken( );
-								if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+								parseToken( TOK.Tassign );
+								if( token().tok == TOK.Tnumbers || token().tok == TOK.Tidentifier )
 								{
 									parseToken( );
-									activeASTnode.addChild( _name, B_VARIABLE, null, null, null, _lineNum );
-									return true;
+									if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+									{
+										parseToken( );
+										activeASTnode.addChild( _name, B_VARIABLE, null, null, null, _lineNum );
+										return true;
+									}
+									else
+									{
+										return false;
+									}
 								}
 								else
 								{
 									return false;
 								}
 							}
-							else
-							{
-								return false;
-							}
 						}
-					}
+						
+						// Array
+						if( token().tok == TOK.Topenparen ) _name ~= parseArray();
 					
-					// Array
-					if( token().tok == TOK.Topenparen ) _name ~= parseArray();
-				
-					if( token().tok == TOK.Tas )
-					{
-						parseToken( TOK.Tas );
-
-						if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
-
-						_type = getVariableType();
-						if( _type.length )
+						if( token().tok == TOK.Tas )
 						{
-							parseToken();
+							parseToken( TOK.Tas );
 
-							while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+							if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+							_type = getVariableType();
+							if( _type.length )
 							{
-								_type ~= "*";
 								parseToken();
+
+								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+								{
+									_type ~= "*";
+									parseToken();
+								}
+								
+								activeASTnode.addChild( _name, B_VARIABLE, null, _type, null, _lineNum );
+
+								if( token.tok != TOK.Tcomma ) break; else parseToken( TOK.Tcomma );
 							}
-							
-							activeASTnode.addChild( _name, B_VARIABLE, null, _type, null, _lineNum );
 						}
 					}
 				}
@@ -554,6 +894,58 @@ class CParser
 		}
 
 		return false;
+	}
+
+	// Var [Shared] symbolname = expression[, symbolname = expression]
+	bool parserVar()
+	{
+		char[] 	_name;
+		int 	_lineNum;
+		
+		parseToken( TOK.Tvar );
+
+		if( token().tok == TOK.Tshared ) parseToken( TOK.Tshared );
+
+		_name = token().identifier;
+		_lineNum = token().lineNumber;
+		parseToken();
+
+		if( token().tok == TOK.Tassign )
+		{
+			parseToken( TOK.Tassign );
+			if( token().tok == TOK.Tcast )
+			{
+				parseToken( TOK.Tcast );
+				
+				if( token().tok == TOK.Topenparen )
+				{
+					parseToken( TOK.Topenparen );
+
+					activeASTnode.addChild( _name, B_VARIABLE, null, toLower( token().identifier ), null, _lineNum );
+
+					while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+					{
+						if( tokenIndex < tokens.length ) parseToken(); else return false;
+						parseToken();
+					}
+					parseToken();
+				}
+			}
+			else
+			{
+				char[] _typeName = token().identifier;
+				parseToken();
+
+				activeASTnode.addChild( _name, B_VARIABLE, null, "Var(" ~ _typeName ~ ")", null, _lineNum );
+				while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+				{
+					if( tokenIndex < tokens.length ) parseToken(); else return false;
+				}
+				parseToken();				
+			}
+		}
+
+		return true;
 	}
 
 	bool parseNamespace()
@@ -848,7 +1240,74 @@ class CParser
 								if( token().tok == TOK.Tassign )
 								{
 									parseToken( TOK.Tassign );
-									if( token().tok == TOK.Tstring || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
+
+									switch( token().tok )
+									{
+										case TOK.Topencurly:
+											int countCurly;
+
+											do
+											{
+												if( token().tok == TOK.Topencurly )
+												{
+													countCurly ++;
+												}
+												else if( token().tok == TOK.Tclosecurly )
+												{
+													if( --countCurly == 0 )
+													{
+														parseToken( TOK.Tclosecurly );
+														break;
+													}
+													
+												}
+												else if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+												{
+													break;
+												}
+
+												parseToken();
+											}
+											while( tokenIndex < tokens.length )
+											break;
+
+										case TOK.Topenparen:
+											int countParen;
+
+											do
+											{
+												if( token().tok == TOK.Topenparen )
+												{
+													countParen ++;
+												}
+												else if( token().tok == TOK.Tcloseparen )
+												{
+													if( --countParen == 0 )
+													{
+														parseToken( TOK.Tcloseparen );
+														break;
+													}
+													
+												}
+												else if( token().tok == TOK.Teol ||  token().tok == TOK.Tcolon  )
+												{
+													break;
+												}
+
+												parseToken();
+											}
+											while( tokenIndex < tokens.length )
+											break;
+
+										default:
+											while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
+											{
+												parseToken();
+												if( tokenIndex >= tokens.length ) break;
+											}
+									}
+
+									//if( token().tok == TOK.Tstring || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
 								}
 
 								if( token().tok == TOK.Tcomma )
@@ -1029,7 +1488,7 @@ class CParser
 
 						if( token().tok == TOK.Topenparen )
 						{
-							if( next().tok != TOK.Tcloseparen )	_param = parseParam( false );else parseToken( TOK.Topenparen );
+							if( next().tok != TOK.Tcloseparen )	_param = parseParam( true );else parseToken( TOK.Topenparen );
 
 							if( token().tok == TOK.Tcloseparen )
 							{
@@ -1193,6 +1652,21 @@ class CParser
 		}
 
 		return false;
+	}
+
+	bool parseScope()
+	{
+		if( next().tok == TOK.Teol || next().tok == TOK.Tcolon )
+		{
+			activeASTnode = activeASTnode.addChild( null, B_SCOPE, null, null, null, token().lineNumber );
+			parseToken( TOK.Tscope );
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
 	}	
 	
 	bool parseEnd()
@@ -1203,7 +1677,7 @@ class CParser
 
 			switch( token().tok )
 			{
-				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace:
+				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope:
 					parseToken();
 					if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather();
 
@@ -1276,6 +1750,10 @@ class CParser
 					parseVariable();
 					break;
 
+				case TOK.Tvar:
+					parserVar();
+					break;
+
 				case TOK.Tfunction, TOK.Tsub, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor:
 					parseProcedure( false, null );
 					break;
@@ -1300,6 +1778,10 @@ class CParser
 					parseEnum();
 					break;
 
+				case TOK.Tscope:
+					parseScope();
+					break;
+
 				case TOK.Tnamespace:
 					parseNamespace();
 					break;
@@ -1313,6 +1795,9 @@ class CParser
 					}
 
 					break;
+
+				case TOK.Tendmacro:
+					activeASTnode = activeASTnode.getFather();					
 
 				default:
 					tokenIndex ++;
