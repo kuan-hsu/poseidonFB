@@ -100,66 +100,7 @@ class CProjectTree
 		
 		Ihandle*	tree;//, shadowTree;
 
-	int _createTree( char[] _prjDirName, inout char[] _titleName )
-	{
-		int		folderLocateId = 2;
-		char[]	fullPath = _titleName;
-		
-		int pos = Util.index( fullPath, _prjDirName );
-		if( pos == 0 ) 	_titleName = Util.substitute( fullPath, _prjDirName, "" );
 
-		// Check the child Folder
-		char[][]	splitText = Util.split( _titleName, "/" );
-	
-		int counterSplitText;
-		for( counterSplitText = 0; counterSplitText < splitText.length - 1; ++counterSplitText )
-		{
-			//int 	countChild = IupGetIntId( tree, "TOTALCHILDCOUNT", folderLocateId );
-			int 	countChild = IupGetIntId( tree, "COUNT", folderLocateId );
-
-			bool bFolerExist = false;
-			for( int i = 1; i <= countChild; ++ i )
-			{
-				char[]	kind = fromStringz( IupGetAttributeId( tree, "KIND", folderLocateId + i ) );
-				if( kind == "BRANCH" )
-				{
-					if( splitText[counterSplitText] == fromStringz( IupGetAttributeId( tree, "TITLE", folderLocateId + i ) ) )
-					{
-						// folder already exist
-						folderLocateId = folderLocateId+i;
-						bFolerExist = true;
-						break;
-					}
-				}
-			}
-			if( !bFolerExist )
-			{
-				IupSetAttributeId( tree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
-				if( pos != 0 )
-					IupSetAttributeId( tree, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );
-				else
-					IupSetAttributeId( tree, "USERDATA", folderLocateId+1, tools.getCString( splitText[counterSplitText] ) );
-				
-				/*
-				// Shadow
-				if( pos != 0 )
-				{
-					IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( "FIXED" ) );
-				}
-				else
-				{
-					IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
-				}
-				*/
-				
-				folderLocateId ++;
-			}
-		}
-
-		if( splitText.length > 1 ) _titleName = splitText[length-1];
-		
-		return folderLocateId;
-	}		
 
 
 	public:
@@ -216,7 +157,7 @@ class CProjectTree
 		//Stdout( "shadowtree count: " ~ fromStringz( IupGetAttribute( shadowTree, "COUNT" ) ) ).newline;
 	}
 
-	void openProject( char[] setupDir = null )
+	bool openProject( char[] setupDir = null )
 	{
 		if( !setupDir.length )
 		{
@@ -224,12 +165,12 @@ class CProjectTree
 			setupDir = fileSelectDlg.getFileName();
 		}
 
-		if( !setupDir.length ) return;
+		if( !setupDir.length ) return false;
 
 		if( setupDir in GLOBAL.projectManager )
 		{
 			IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas already opened!" ) );
-			return;
+			return false;
 		}
 		
 		char[] setupFileName = setupDir ~ "/.poseidon";
@@ -245,7 +186,7 @@ class CProjectTree
 			{
 				GLOBAL.projectManager.remove( setupDir );
 				IupMessage( "ERROR", GLOBAL.cString.convert( "Project setup file loading error!!\nXml format may be broken!!" ) );
-				return;
+				return false;
 			}
 
 			/*
@@ -324,8 +265,10 @@ class CProjectTree
 		else
 		{
 			IupMessage( "Error!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas lost setting xml file!" ) );
-			return;
+			return false;
 		}
+
+		return true;
 	}
 
 	void updateRecentProjects( char[] prjDir, char[] prjName )
@@ -710,81 +653,90 @@ extern(C)
 				default:			filter = "All Files|*.*"; break;
 			}
 
-			scope fileSecectDlg = new CFileDlg( "Add File...", filter );
-			char[] fullPath = fileSecectDlg.getFileName();
-
-			if( fullPath.length )
+			scope fileSecectDlg = new CFileDlg( "Add File...", filter, "OPEN", "YES" );
+			//char[] fullPath = fileSecectDlg.getFileName();
+			foreach( char[] fullPath; fileSecectDlg.getFilesName() )
 			{
-				scope fn = new FilePath( fullPath.dup );
-				if( !fn.exists() )
+				if( fullPath.length )
 				{
-					IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\nhas no exist!" ) );
-					return IUP_DEFAULT;
-				}
-				else
-				{
-					//Util.substitute( fullPath, "/", "\\" );
-					foreach( char[] s; GLOBAL.projectManager[prjDirName].sources ~ GLOBAL.projectManager[prjDirName].includes ~ GLOBAL.projectManager[prjDirName].others )
+					scope fn = new FilePath( fullPath.dup );
+					if( !fn.exists() )
 					{
-						if( s == fullPath )
+						IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\nhas no exist!" ) );
+						return IUP_DEFAULT;
+					}
+					else
+					{
+						//Util.substitute( fullPath, "/", "\\" );
+						foreach( char[] s; GLOBAL.projectManager[prjDirName].sources ~ GLOBAL.projectManager[prjDirName].includes ~ GLOBAL.projectManager[prjDirName].others )
 						{
-							actionManager.ScintillaAction.openFile( s.dup );
-							return IUP_DEFAULT;
+							if( s == fullPath )
+							{
+								actionManager.ScintillaAction.openFile( s.dup );
+								return IUP_DEFAULT;
+							}
 						}
 					}
+
+					// Wrong Ext, exit!
+					switch( toLower( fn.ext ) )
+					{
+						case "bas":
+							if( prjFilesFolderName != "Sources" )
+							{
+								IupMessage( "Wrong!", "Wrong Ext Name!!" );
+								return IUP_DEFAULT;
+							}
+							else
+							{
+								GLOBAL.projectManager[prjDirName].sources ~= fullPath;
+							}
+							break;
+						case "bi":
+							if( prjFilesFolderName != "Includes" )
+							{
+								IupMessage( "Wrong!", "Wrong Ext Name!!" );
+								return IUP_DEFAULT;
+							}
+							else
+							{
+								GLOBAL.projectManager[prjDirName].includes ~= fullPath;
+							}
+							break;
+						default:
+							if( prjFilesFolderName != "Others" )
+							{
+								IupMessage( "Wrong!", "Wrong Ext Name!!" );
+								return IUP_DEFAULT;
+							}
+							else
+							{
+								GLOBAL.projectManager[prjDirName].others ~= fullPath;
+							}
+					}
+
+					/*
+					int	folderLocateId = actionManager.ProjectAction.addTreeNode( prjDirName ~ "/", fullPath, id );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( fn.file ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( fullPath ) );
+					// shadow
+					//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
+					*/
+					char[]		titleName = Util.substitute( fullPath, "\\", "/" );
+					int			folderLocateId = _createTree( prjDirName ~ "/", titleName, id );
+					char[]		userData = fullPath;
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( titleName ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+
+					switch( prjFilesFolderName )
+					{
+						case "Sources":		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) ); break;
+						case "Includes":	IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) ); break;
+						default:			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) ); break;
+					}
+
+					actionManager.ScintillaAction.openFile( fullPath.dup );
 				}
-
-				// Wrong Ext, exit!
-				switch( toLower( fn.ext ) )
-				{
-					case "bas":
-						if( prjFilesFolderName != "Sources" )
-						{
-							IupMessage( "Wrong!", "Wrong Ext Name!!" );
-							return IUP_DEFAULT;
-						}
-						else
-						{
-							GLOBAL.projectManager[prjDirName].sources ~= fullPath;
-						}
-						break;
-					case "bi":
-						if( prjFilesFolderName != "Includes" )
-						{
-							IupMessage( "Wrong!", "Wrong Ext Name!!" );
-							return IUP_DEFAULT;
-						}
-						else
-						{
-							GLOBAL.projectManager[prjDirName].includes ~= fullPath;
-						}
-						break;
-					default:
-						if( prjFilesFolderName != "Others" )
-						{
-							IupMessage( "Wrong!", "Wrong Ext Name!!" );
-							return IUP_DEFAULT;
-						}
-						else
-						{
-							GLOBAL.projectManager[prjDirName].others ~= fullPath;
-						}
-				}
-
-				int	folderLocateId = actionManager.ProjectAction.addTreeNode( prjDirName ~ "/", fullPath, id );
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( fn.file ) );
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( fullPath ) );
-				// shadow
-				//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
-
-				switch( prjFilesFolderName )
-				{
-					case "Sources":		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) ); break;
-					case "Includes":	IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) ); break;
-					default:			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) ); break;
-				}
-
-				actionManager.ScintillaAction.openFile( fullPath.dup );
 			}
 		}
 		catch( Exception e )
@@ -846,10 +798,26 @@ extern(C)
 
 		char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
 		if( user != null ) delete user;
+		int parentID = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", id );
 		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", id, "SELECTED" );
 
 		// Shadow
 		//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", id, "SELECTED" );
+
+		// Del empty folder( branch )
+		while( IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", parentID ) > 2 )
+		{
+			if( IupGetIntId( GLOBAL.projectTree.getTreeHandle, "CHILDCOUNT", parentID ) < 1 )
+			{
+				int beDelParentID = parentID;
+				parentID = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", beDelParentID );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", beDelParentID, "SELECTED" );
+			}
+			else
+			{
+				break;
+			}
+		}
 		
 		return IUP_DEFAULT;
 	}
@@ -948,4 +916,64 @@ extern(C)
 		
 		return IUP_DEFAULT;
 	}
+
+	private int _createTree( char[] _prjDirName, inout char[] _titleName, int startID = 2 )
+	{
+		int		folderLocateId = startID;
+		char[]	fullPath = _titleName;
+		
+		int pos = Util.index( fullPath, _prjDirName );
+		if( pos == 0 ) 	_titleName = Util.substitute( fullPath, _prjDirName, "" );
+
+		// Check the child Folder
+		char[][]	splitText = Util.split( _titleName, "/" );
+	
+		int counterSplitText;
+		for( counterSplitText = 0; counterSplitText < splitText.length - 1; ++counterSplitText )
+		{
+			int 	countChild = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "TOTALCHILDCOUNT", folderLocateId );
+			//int 	countChild = IupGetIntId( tree, "COUNT", folderLocateId );
+			bool bFolerExist = false;
+			for( int i = 1; i <= countChild; ++ i )
+			{
+				char[]	kind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );
+				if( kind == "BRANCH" )
+				{
+					if( splitText[counterSplitText] == fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", folderLocateId + i ) ) )
+					{
+						// folder already exist
+						folderLocateId = folderLocateId+i;
+						bFolerExist = true;
+						break;
+					}
+				}
+			}
+			if( !bFolerExist )
+			{
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
+				if( pos != 0 )
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );
+				else
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( splitText[counterSplitText] ) );
+				
+				/*
+				// Shadow
+				if( pos != 0 )
+				{
+					IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( "FIXED" ) );
+				}
+				else
+				{
+					IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
+				}
+				*/
+				
+				folderLocateId ++;
+			}
+		}
+
+		if( splitText.length > 1 ) _titleName = splitText[length-1];
+		
+		return folderLocateId;
+	}		
 }

@@ -3,7 +3,7 @@
 import iup.iup;
 
 import global, scintilla, project, dialogs.preferenceDlg;
-import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, layouts.debugger, actionManager;
+import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, layouts.debugger, actionManager, menu;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 
 import tango.stdc.stringz, tango.io.FilePath;
@@ -127,6 +127,102 @@ extern(C)
 
 		return IUP_CLOSE;
 	}
+
+	/*
+	int GlobalKeyPress_CB( int c, int press )
+	{
+		if( press == 0 ) GLOBAL.bKeyUp = true;
+
+		return IUP_DEFAULT;
+	}
+	*/
+
+	int mainKany_cb( Ihandle* ih, int c )
+	{
+		foreach( ShortKey sk; GLOBAL.shortKeys )
+		{
+			switch( sk.name )
+			{
+				case "Quick Run":
+					if( sk.keyValue == c )
+					{
+						menu.quickRun_cb( null );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Run":
+					if( sk.keyValue == c )
+					{
+						menu.run_cb( null );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Build":
+					if( sk.keyValue == c )
+					{
+						menu.buildAll_cb( null );
+						return IUP_IGNORE;
+					}
+					break;				
+				case "On/Off Left-side Window":
+					if( sk.keyValue == c ) 
+					{
+						menu.outline_cb( GLOBAL.menuOutlineWindow );
+						IupSetFocus( ih );
+						return IUP_IGNORE;
+					}
+					break;
+				case "On/Off Bottom-side Window":
+					if( sk.keyValue == c )
+					{
+						menu.message_cb( GLOBAL.menuMessageWindow );
+						IupSetFocus( ih );
+						return IUP_IGNORE;
+					}
+					break;
+				case "Next Tab":
+					if( sk.keyValue == c )
+					{
+						int count = IupGetChildCount( GLOBAL.documentTabs );
+						if( count > 1 )
+						{
+							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+							if( id < count - 1 ) ++id; else id = 0;
+							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+						}
+						return IUP_IGNORE;
+					}
+					break;
+
+				case "Previous Tab":
+					if( sk.keyValue == c )
+					{
+						int count = IupGetChildCount( GLOBAL.documentTabs );
+						if( count > 1 )
+						{
+							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+							if( id > 0 ) --id; else id = --count;
+							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+						}
+						return IUP_IGNORE;
+					}
+					break;					
+				case "New Tab":
+					if( sk.keyValue == c )
+					{
+						menu.newFile_cb( ih );
+						return IUP_IGNORE;
+					}
+					break;
+
+				default:
+			}
+		}
+
+		return IUP_DEFAULT;
+	}	
 	
 	private int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
 	{

@@ -119,115 +119,7 @@ struct AutoComplete
 
 		int posEnd = skipCommentAndString( iupSci, pos, "end " ~ targetText, 0 );
 		if( posEnd > posHead ) return null;
-		
 
-
-		/+
-		// Search from posHead
-		IupScintillaSendMessage( iupSci, 2190, posHead + targetText.length, 0 ); 	// SCI_SETTARGETSTART = 2190,
-		IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
-
-		// new
-		char[] endTargetText = "end " ~ targetText;
-		int posTail = IupScintillaSendMessage( iupSci, 2197, endTargetText.length, cast(int) GLOBAL.cString.convert( endTargetText ) );
-		
-		do
-		{
-			if( posTail < 0 )
-			{
-				return null;
-			}
-			else
-			{
-				int style = IupScintillaSendMessage( iupSci, 2010, posTail, 0 ); // SCI_GETSTYLEAT 2010
-				if( style == 1 || style == 19 || style == 4 ) // Comment or String
-				{
-					// Research
-					IupScintillaSendMessage( iupSci, 2190, posTail + endTargetText.length, 0 );	// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
-					posTail = IupScintillaSendMessage( iupSci, 2197, endTargetText.length, cast(int) GLOBAL.cString.convert( endTargetText ) );
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-		while( posTail >= 0 )
-		+/
-
-		
-		/+
-		int posTail = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-		if( posTail < 0 ) return null;
-
-		while( posTail < documentLength - 1 && posTail >= 0  )
-		{
-			int style = IupScintillaSendMessage( iupSci, 2010, posTail, 0 ); // SCI_GETSTYLEAT 2010
-			if( style == 1 || style == 19 || style == 4 ) // Comment or String
-			{
-				IupScintillaSendMessage( iupSci, 2190, posTail + targetText.length, 0 );	// SCI_SETTARGETSTART = 2190,
-				IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
-				posTail = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-			}
-			else
-			{
-				// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research
-				bool bReSearch;
-				for( int i = posTail + targetText.length; i < documentLength; ++ i )
-				{
-					char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
-
-					if( s[0] == 13 || s == ":" || s == "\n" )
-					{
-						// Check before targetText word.......
-						char[]	beforeWord;
-						for( int j = posTail - 1; j >= posHead; --j )
-						{
-							char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
-							
-							if( _s[0] == 13 || _s == ":" || _s == "\n" )
-							{
-								break;
-							}
-							else if( _s == " " || _s == "\t" )
-							{
-								if( beforeWord.length ) break;
-							}
-							else
-							{
-								beforeWord ~= _s;
-							}
-						}
-						
-						if( beforeWord == "dne" ) bReSearch = false; else bReSearch = true;
-						break;
-					}
-					else if( s != " " && s != "\t" )
-					{
-						bReSearch = true;
-						break;
-					}
-				}
-
-				if( bReSearch )
-				{
-					IupScintillaSendMessage( iupSci, 2190, posTail + targetText.length, 0 );	// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );				// SCI_SETTARGETEND = 2192,
-					posTail = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-		+/
-
-		/+
-		if( posTail < 0 ) return null;
-		if( pos < posHead || pos > posTail ) return null;
-		+/
 
 		char[]	result;
 		bool	bSPACE, bReturnNextWord;
@@ -699,13 +591,13 @@ struct AutoComplete
 	static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false )
 	{
 		static int	level;
-		
+
 		CASTnode[] results;
 
 		if( !bRootCall )
 		{
 			level ++;
-			if( level >= GLOBAL.includeLevel )
+			if( level > GLOBAL.includeLevel )
 			{
 				level--;
 				return null;
@@ -715,7 +607,7 @@ struct AutoComplete
 		{
 			level = 0;
 		}
-		
+
 		foreach( CASTnode _node; originalNode.getChildren )
 		{
 			if( _node.kind == B_INCLUDE )
@@ -767,7 +659,8 @@ struct AutoComplete
 			}
 		}
 
-		level--;
+		if( level > 0 ) level--;
+
 		return results;
 	}
 
@@ -1154,7 +1047,7 @@ struct AutoComplete
 		int		countParen;
 		int		oriPos = pos;
 		bool	bForntEnd, bBackEnd;
-		int		documentLength = IupScintillaSendMessage( iupSci, 2183, 0, 0 ); //SCI_GETTEXTLENGTH = 2183
+		int		documentLength = IupGetInt( iupSci, "COUNT" );
 
 		do
 		{
@@ -1210,7 +1103,7 @@ struct AutoComplete
 	static char[] checkIsInclude( Ihandle* iupSci, int pos = -1 )
 	{
 		char[]	result;
-		int		documentLength = IupScintillaSendMessage( iupSci, 2183, 0, 0 ); //SCI_GETTEXTLENGTH = 2183
+		int		documentLength = IupGetInt( iupSci, "COUNT" );
 		
 		do
 		{
@@ -1231,8 +1124,6 @@ struct AutoComplete
 		return result.reverse;
 	}	
 
-	
-
 	static char[] getWholeWordReverse( Ihandle* iupSci, int pos = -1 )
 	{
 		dchar[] word32;
@@ -1246,8 +1137,10 @@ struct AutoComplete
 				--pos;
 				if( pos < 0 ) break;
 				
-				dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
-				//dchar[] s = UTF.toString32( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ) );
+				//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
+				char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+				dchar[] sd = UTF.toString32( _s );
+				dchar s = sd[0];
 				switch( s )
 				{
 					case ')':

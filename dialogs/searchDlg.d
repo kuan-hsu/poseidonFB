@@ -55,6 +55,7 @@ class CSearchDialog : CBaseDialog
 		IupSetAttributes( toggleAll, "RADIO=YES");		
 		Ihandle* toggleSelection = IupToggle( "Selection", null );
 		IupSetAttributes( toggleSelection, "RADIO=YES");
+		IupSetAttribute( toggleSelection, "ACTIVE", "NO" );
 		Ihandle* vBoxScope = IupVbox( toggleAll, toggleSelection, null );
 		IupSetAttributes( vBoxScope, "EXPAND=YES,EXPANDCHILDREN=YES" );
 		Ihandle* radioScope = IupRadio( vBoxScope );
@@ -132,7 +133,7 @@ class CSearchDialog : CBaseDialog
 
 	public:
 
-	int			searchRule = 3;
+	int			searchRule = 6;
 	
 	this( int w, int h, char[] title, char[] findWhat = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
 	{
@@ -218,13 +219,13 @@ extern(C) // Callback for CSingleTextDialog
 	{
 		if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
 		{
-			if( state == 1 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule | 1;
+			if( state == 1 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule | 4;
 			if( state == 0 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule & 2;
 		}
 		else //"Whole Word"
 		{
 			if( state == 1 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule | 2;
-			if( state == 0 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule & 1;
+			if( state == 0 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule & 4;
 		}
 
 		return IUP_DEFAULT;
@@ -250,7 +251,7 @@ extern(C) // Callback for CSingleTextDialog
 
 						actionManager.SearchAction.addListItem( listFind_handle, findText, 15 );
 						
-						return actionManager.SearchAction.search( iupSci, findText, GLOBAL.searchDlg.searchRule, bForward, bJumpSelect );
+						return actionManager.SearchAction.search( iupSci, findText, GLOBAL.searchDlg.searchRule, bForward );
 					}
 				}
 			}
@@ -263,43 +264,9 @@ extern(C) // Callback for CSingleTextDialog
 	{
 		GLOBAL.searchDlg.setStatusBar( "" );
 
-		//int pos = actionManager.SearchAction.search();
 		int pos = CSearchDialog_search();
-
 		if( pos > -1 ) GLOBAL.searchDlg.setStatusBar( "Found Word." ); else GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
-
-		/+
-		int pos = -1;
-		
-		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
-		if( iupSci != null )
-		{
-			Ihandle* listFind_handle = IupGetHandle( "CSearchDialog_listFind" );
-			if( listFind_handle != null )
-			{
-				char[] findText = fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) );
-
-				if( findText.length )
-				{
-					Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
-					if( direction_handle != null )
-					{
-						if( fromStringz(IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
-						{
-							pos = actionManager.SearchAction.findNext( iupSci, findText, GLOBAL.searchDlg.searchRule );
-						}
-						else
-						{
-							pos = actionManager.SearchAction.findPrev( iupSci, findText, GLOBAL.searchDlg.searchRule );
-						}
-					}		
-				}
-			}
-		}
-
-		if( pos > -1 ) GLOBAL.searchDlg.setStatusBar( "Found Word." ); else GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
-		+/
-		
+	
 		return IUP_DEFAULT;;
 	}
 
@@ -327,17 +294,16 @@ extern(C) // Callback for CSingleTextDialog
 						if( targetText == findText )
 						{
 							IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
-							//IupScintillaSendMessage( iupSci, 2170, 0, cast(long) toStringz(ReplaceText.dup) ); // SCI_REPLACESEL = 2170
 						}
 						
 						
 						if( fromStringz(IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
 						{
-							pos = actionManager.SearchAction.findNext( iupSci, findText, GLOBAL.searchDlg.searchRule );
+							pos = actionManager.SearchAction.search( iupSci, findText, GLOBAL.searchDlg.searchRule, true );
 						}
 						else
 						{
-							pos = actionManager.SearchAction.findPrev( iupSci, findText, GLOBAL.searchDlg.searchRule );
+							pos = actionManager.SearchAction.search( iupSci, findText, GLOBAL.searchDlg.searchRule, false );
 						}
 					}
 				}
@@ -381,160 +347,85 @@ extern(C) // Callback for CSingleTextDialog
 
 	private int CSearchDialog_btnReplaceAll_cb()
 	{
-		int counts;
-		int pos;
-
-		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
-		if( iupSci !is null )
-		{
-			int 	OriginPos;
-			bool	bU_trun;
-			char[]	OriginValue;
-
-			Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
-			if( direction_handle != null )
-			{
-				// Change direction_handle
-				OriginValue = fromStringz(IupGetAttribute( direction_handle, "VALUE" ));
-				IupSetAttribute( direction_handle, "VALUE", "ON" );
-			
-				while( pos > -1 )
-				{
-					pos = CSearchDialog_btnReplaceFind_cb();
-
-					if( !bU_trun )
-					{
-						if( pos < OriginPos ) bU_trun = true;
-						if( pos == OriginPos ) break;
-						
-					}
-					else
-					{
-						if( pos >= OriginPos ) break;
-					}
-
-					if( counts == 0 ) OriginPos = pos;
-					if( pos > -1 ) counts ++;
-				}
-
-				// Re-change direction_handle
-				IupSetAttribute( direction_handle, "VALUE", toStringz(OriginValue) );
-			}
-		}
-
-		if( counts == 0 ) GLOBAL.searchDlg.setStatusBar( "Find nothing!" ); else GLOBAL.searchDlg.setStatusBar( "Replace " ~ Integer.toString( counts ) ~ " words." );
-
-		return IUP_DEFAULT;
+		return CSearchDialogAction( 2 );
 	}
 
 	private int CSearchDialog_btnCountAll_cb()
 	{
-		int counts;
-		int pos;
-
-		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
-		if( iupSci !is null )
-		{
-			int 	OriginPos;
-			bool	bU_trun;
-			char[]	OriginValue, OriginSelectPos;
-
-			Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
-			if( direction_handle != null )
-			{
-				// Change direction_handle
-				OriginValue = fromStringz(IupGetAttribute( direction_handle, "VALUE" ));
-				IupSetAttribute( direction_handle, "VALUE", "ON" );
-
-				OriginSelectPos = fromStringz( IupGetAttribute( iupSci, "SELECTIONPOS" ) );
-				
-				while( pos > -1 )
-				{
-					//pos = actionManager.SearchAction.search( false );//CSearchDialog_btnFind_cb();
-					pos = CSearchDialog_search( false );
-
-					if( !bU_trun )
-					{
-						if( pos < OriginPos ) bU_trun = true;
-						if( pos == OriginPos ) break;
-						
-					}
-					else
-					{
-						if( pos >= OriginPos ) break;
-					}
-
-					if( counts == 0 ) OriginPos = pos;
-					if( pos > -1 ) counts ++;
-				}
-
-				// Re-change direction_handle
-				IupSetAttribute( direction_handle, "VALUE", toStringz(OriginValue) );
-			}
-
-			IupSetAttribute( iupSci, "SELECTIONPOS", toStringz( OriginSelectPos ) );
-			IupScintillaSendMessage( iupSci, 2163, 0, 0 ); // SCI_HIDESELECTION = 2163,
-		}
-
-		if( counts == 0 ) GLOBAL.searchDlg.setStatusBar( "Find nothing!" ); else GLOBAL.searchDlg.setStatusBar( "Count total = " ~ Integer.toString( counts ) ~ " words." );
-
-		return IUP_DEFAULT;
+		return CSearchDialogAction( 0 );
 	}
 
 	private int CSearchDialog_btnMarkAll_cb()
 	{
+		return CSearchDialogAction( 1 );
+	}
+
+	/*
+	flag = 0 CountALL
+	flag = 1 MarkALL
+	flag = 2 ReplaceALL
+	*/
+	private int CSearchDialogAction( int flag = 0 )
+	{
 		int counts;
-		int pos;
 
 		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
-		if( iupSci != null )
+		if( iupSci !is null )
 		{
-			int 	OriginPos;
-			bool	bU_trun;
-			char[]	OriginValue, OriginSelectPos;
-
-			Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
-			if( direction_handle != null )
-			{
-				// Change direction_handle
-				OriginValue = fromStringz(IupGetAttribute( direction_handle, "VALUE" ));
-				IupSetAttribute( direction_handle, "VALUE", "ON" );
-
-				OriginSelectPos = fromStringz( IupGetAttribute( iupSci, "SELECTIONPOS" ) );
+			Ihandle* listFind_handle	= IupGetHandle( "CSearchDialog_listFind" );
+			Ihandle* listReplace_handle	= IupGetHandle( "CSearchDialog_listReplace" );
 			
-				while( pos > -1 )
+			if( listFind_handle != null && listReplace_handle != null )
+			{
+				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) );
+				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) );
+				
+				if( findText.length )
 				{
-					//pos = actionManager.SearchAction.search( false );//CSearchDialog_btnFind_cb();
-					pos = CSearchDialog_search( false );
+					IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchDlg.searchRule, 0 ); // SCI_SETSEARCHFLAGS = 2198,
+					
+					IupSetInt( iupSci, "TARGETSTART", 0 );
+					IupSetInt( iupSci, "TARGETEND", 0 );
 
-					if( !bU_trun )
+					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
+					while( findPos > -1 )
 					{
-						if( pos < OriginPos ) bU_trun = true;
-						if( pos == OriginPos ) break;
+						switch( flag )
+						{
+							case 1:
+								int linNum = IupScintillaSendMessage( iupSci, 2166, findPos, 0 );// SCI_LINEFROMPOSITION = 2166
+								if( !( IupGetIntId( iupSci, "MARKERGET", linNum ) & 2 ) ) IupSetIntId( iupSci, "MARKERADD", linNum, 1 );
+								break;
+							case 2:
+								IupSetAttribute( iupSci, "REPLACETARGET", toStringz( ReplaceText ) );
+								break;
+							default:
+						}
 						
+						counts ++;
+						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos );
+						IupSetInt( iupSci, "TARGETEND", 0 );
+						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
 					}
-					else
-					{
-						if( pos >= OriginPos ) break;
-					}
-
-					if( counts == 0 ) OriginPos = pos;
-					if( pos > -1 ) counts ++;else break;
-
-					int linNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 );// SCI_LINEFROMPOSITION = 2166
-					if( !( IupGetIntId( iupSci, "MARKERGET", linNum ) & 2 ) ) IupSetIntId( iupSci, "MARKERADD", linNum, 1 );
 				}
-
-				// Re-change direction_handle
-				IupSetAttribute( direction_handle, "VALUE", toStringz(OriginValue) );
 			}
-
-			IupSetAttribute( iupSci, "SELECTIONPOS", toStringz( OriginSelectPos ) );
-			IupScintillaSendMessage( iupSci, 2163, 0, 0 ); // SCI_HIDESELECTION = 2163,
 		}
 
-		if( counts == 0 ) GLOBAL.searchDlg.setStatusBar( "Find nothing!" ); else GLOBAL.searchDlg.setStatusBar( "Mark total = " ~ Integer.toString( counts ) ~ " words." );
+		if( counts == 0 )
+		{
+			GLOBAL.searchDlg.setStatusBar( "Find nothing!" );
+		}
+		else
+		{
+			switch( flag )
+			{
+				case 0:	GLOBAL.searchDlg.setStatusBar( "Count total = " ~ Integer.toString( counts ) ~ " words." ); break;
+				case 1:	GLOBAL.searchDlg.setStatusBar( "Mark total = " ~ Integer.toString( counts ) ~ " words." ); break;
+				case 2: GLOBAL.searchDlg.setStatusBar( "Replace total = " ~ Integer.toString( counts ) ~ " words." ); break;
+				default:
+			}			
+		}
 
 		return IUP_DEFAULT;
-	}	
+	}
 }

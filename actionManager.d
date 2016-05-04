@@ -416,7 +416,9 @@ struct ScintillaAction
 			if( lineNumber > -1 )
 			{
 				IupScintillaSendMessage( ih, 2024, --lineNumber, 0 ); // SCI_GOTOLINE 2024
-				IupSetAttribute( ih, "FIRSTVISIBLELINE", toStringz( Integer.toString( lineNumber ) ) );
+
+				// If debug window is on, don't scroll to top
+				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )	IupSetAttribute( ih, "FIRSTVISIBLELINE", toStringz( Integer.toString( lineNumber ) ) );
 			}
 			StatusBarAction.update();
 
@@ -795,16 +797,28 @@ struct ScintillaAction
 			scope dlg = new CFileDlg( "Save As...", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
-
 			switch( dlg.getFilterUsed )
 			{
-				case "1": fullPath ~= ".bas";	break;
-				case "2": fullPath ~= ".bi";	break;
+				case "1":
+					if( fullPath.length > 4 )
+					{
+						if( fullPath[length-4..length] == ".bas" ) fullPath = fullPath[0..length-4];
+					}
+					fullPath ~= ".bas";	break;
+				case "2":
+					if( fullPath.length > 3 )
+					{
+						if( fullPath[length-3..length] == ".bi" ) fullPath = fullPath[0..length-3];
+					}
+					fullPath ~= ".bi";
+					break;
 				default:
 			}
 			
 			if( fullPath.length )
 			{
+				if( upperCase(fullPath) in GLOBAL.scintillaManager ) return saveFile( cSci );
+				
 				char[] newDocument = fromStringz( IupGetAttribute( cSci.getIupScintilla, "VALUE" ) ).dup;
 				ScintillaAction.newFile( fullPath, Encoding.UTF_8, newDocument );
 				FileAction.saveFile( fullPath, newDocument );
@@ -1170,125 +1184,7 @@ struct SearchAction
 	import tango.io.FilePath, tango.text.Ascii, tango.stdc.stringz, Util = tango.text.Util;//, tango.io.UnicodeFile;
 	import tango.io.device.File;//, tango.io.stream.Lines;
 
-	public:
-	const int MATCHCASE = 1;
-	const int WHOLEWORD = 2;
-	
-	static int search( Ihandle* iupSci, char[] findText, int searchRule, bool bForward = true, bool bJumpSelect = true )
-	{
-		int pos = -1;
-
-		if( iupSci != null && findText.length )
-		{
-			if( bForward )
-			{
-				pos = actionManager.SearchAction.findNext( iupSci, findText, searchRule, bJumpSelect );
-			}
-			else
-			{
-				pos = actionManager.SearchAction.findPrev( iupSci, findText, searchRule, bJumpSelect );
-			}
-		}
-
-		/*
-		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
-		if( iupSci != null )
-		{
-			Ihandle* listFind_handle = IupGetHandle( "CSearchDialog_listFind" );
-			if( listFind_handle != null )
-			{
-				char[] findText = fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) );
-
-				if( findText.length )
-				{
-					Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
-					if( direction_handle != null )
-					{
-						if( fromStringz(IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
-						{
-							pos = actionManager.SearchAction.findNext( iupSci, findText, GLOBAL.searchDlg.searchRule, bJumpSelect );
-						}
-						else
-						{
-							pos = actionManager.SearchAction.findPrev( iupSci, findText, GLOBAL.searchDlg.searchRule, bJumpSelect );
-						}
-
-						addListItem( listFind_handle, findText, 15 );
-					}
-				}
-			}
-		}
-		*/
-
-		return pos;
-	}	
-
-	/+
-	static int findNext( Ihandle* ih, char[] targetText, int type = 2, bool bJumpSelect = true )
-	{
-		int currentPos = IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-		int anchorPos =  IupScintillaSendMessage( ih, 2009, 0, 0 ); // SCI_GETANCHOR = 2009
-
-		IupSetInt( ih, "TARGETSTART", 0 );
-
-		IupMessage( "TARGETSTART", IupGetAttribute( ih, "TARGETSTART" ) );
-
-		int documentLength = IupScintillaSendMessage( ih, 2183, 0, 0 ); //SCI_GETTEXTLENGTH = 2183
-
-		
-		//IupSetInt( ih, "TARGETEND ",documentLength );
-		IupScintillaSendMessage( ih, 2192, documentLength, 0 ); // SCI_SETTARGETEND = 2192,
-
-		IupMessage( "TARGETEND", IupGetAttribute( ih, "TARGETEND" ) );
-
-		IupScintillaSendMessage( ih, 2198, 4, 0 ); //SCI_SETSEARCHFLAGS = 2198
-		
-		//IupSetAttribute( ih, "SEARCHFLAGS", "MATCHCASE" );
-char[] pp="print";
-
-		IupSetAttribute( ih, "SEARCHINTARGET", toStringz(pp.dup) );
-		
-		//anchorPos = IupScintillaSendMessage( ih, 2197, 5, cast(long) toStringz(pp.dup) ); //SCI_SEARCHINTARGET = 2197,
-
-		IupMessage( "next", toStringz( Integer.toString(anchorPos)));
-
-
-		//IupGetAttribute( ih, "TARGETSTART" ) );
-
-		
-		//IupSetAttribute( ih, "SEARCHINTARGET", toStringz( "print" ) );
-		/+
-
-		int startPos =  IupScintillaSendMessage( ih, 2190, 0, 0 ); // SCI_SETTARGETSTART = 2190,
-		int endPos =  IupScintillaSendMessage( ih, 2192, 0, 0 ); // SCI_SETTARGETEND = 2192,
-		
-
-		IupMessage( "currentPos", toStringz( Integer.toString( currentPos ) ) );
-		IupMessage( "anchorPos", toStringz( Integer.toString( anchorPos ) ) );
-
-		anchorPos =  IupScintillaSendMessage( ih, 2026, currentPos, 0 );    // SCI_SETANCHOR = 2026,
-
-		IupMessage( "anchorPos", toStringz( Integer.toString( anchorPos ) ) );
-
-
-		IupScintillaSendMessage( ih, 2366, 0, 0 ); //SCI_SEARCHANCHOR = 2366,
-		IupMessage( "anchorPos", toStringz( Integer.toString( anchorPos ) ) );
-
-		
-		
-		int nextPos = IupScintillaSendMessage( ih, 2367, 6, cast(long) toStringz( "print" ) ); // SCI_SEARCHNEXT = 2367
-		IupMessage( "nextPos", toStringz( Integer.toString( nextPos ) ) );
-
-		+/
-		
-		// SCI_SEARCHNEXT = 2367
-		return -1;
-
-	}
-
-	+/
-
-	static int findNext( Ihandle* ih, char[] targetText, int type = 2, bool bJumpSelect = true )
+	static int _find( Ihandle* ih, char[] targetText, int type = 2, bool bNext = true )
 	{
 		int			findPos = -1;
 
@@ -1296,194 +1192,89 @@ char[] pp="print";
 
 		//IupMessage( "Text:", toStringz(targetText) );
 		
-		int currentPos = IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-		int documentLength = IupScintillaSendMessage( ih, 2183, 0, 0 ); //SCI_GETTEXTLENGTH = 2183
+		int currentPos = cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+		int	documentLength = IupGetInt( ih, "COUNT" );
+		IupScintillaSendMessage( ih, 2198, type, 0 ); // SCI_SETSEARCHFLAGS = 2198,
 
-		char[] document = fromStringz( IupGetAttribute( ih, "VALUE" ) );
-		if( !( type & MATCHCASE ) ) document = toLower( document );
-
-		if( currentPos + targetText.length <= documentLength )
+		if( targetText.length )
 		{
-			if( document[currentPos..currentPos+targetText.length] == targetText ) currentPos += targetText.length;
-		}
+			IupSetInt( ih, "TARGETSTART", currentPos );
 
-		if( currentPos < document.length )
-		{
-			findPos = Util.index( document, targetText, currentPos );
+			if( bNext )	IupSetInt( ih, "TARGETEND", 0 ); else IupSetInt( ih, "TARGETEND", 1 );
 
-			if( type & WHOLEWORD )
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
+
+			// reSearch form file's head
+			if( findPos < 0 )
 			{
-				while( findPos < document.length )
+				if( bNext )
 				{
-					if( IsWholeWord( document, targetText, findPos ) )
-					{
-						break;
-					}
-					else
-					{
-						findPos = Util.index( document, targetText, findPos + targetText.length );
-					}
-				}
-			}
-
-			if( findPos < document.length )
-			{
-				if( bJumpSelect )
-				{
-					char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-					IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
+					IupSetInt( ih, "TARGETSTART", 0 );
+					IupSetInt( ih, "TARGETEND", currentPos );
 				}
 				else
 				{
-					IupScintillaSendMessage( ih, 2141, findPos+targetText.length, 0 ); // SCI_SETCURRENTPOS = 2141,
-					IupScintillaSendMessage( ih, 2163, 1, 0 ); // SCI_HIDESELECTION = 2163,
+					IupSetInt( ih, "TARGETSTART", documentLength );
+					IupSetInt( ih, "TARGETEND", currentPos );
 				}
-				return findPos;
+
+				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
+			}
+	
+			if( findPos < 0 )
+			{
+				return -1;
 			}
 			else
 			{
-				int startPos;
-
-				if( startPos <= currentPos )
+				char[] pos;
+				if( bNext )
 				{
-					document = document[0..currentPos];
-					findPos = Util.index( document, targetText, startPos );
-
-					if( type & WHOLEWORD )
-					{
-						while( findPos < document.length )
-						{
-							if( IsWholeWord( document, targetText, findPos ) )
-							{
-								break;
-							}
-							else
-							{
-								findPos = Util.index( document, targetText, findPos + targetText.length );
-							}
-						}
-					}
-					
-					if( findPos < currentPos )
-					{
-						if( bJumpSelect )
-						{
-							char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-							IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
-						}
-						else
-						{
-							IupScintillaSendMessage( ih, 2141, findPos+targetText.length, 0 ); // SCI_SETCURRENTPOS = 2141,
-							IupScintillaSendMessage( ih, 2163, 1, 0 ); // SCI_HIDESELECTION = 2163,
-						}
-						return findPos;
-					}
-				}
-			}
-		}
-
-		return -1;
-	}
-
-
-	static int findPrev( Ihandle* ih, char[] targetText, int type = 2, bool bJumpSelect = true )
-	{
-		int			findPos = -1;
-
-		if( !( type & MATCHCASE ) ) targetText = toLower( targetText );
-
-		int currentPos = IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-		int documentLength = IupScintillaSendMessage( ih, 2183, 0, 0 ); //SCI_GETTEXTLENGTH = 2183
-
-		char[] document = fromStringz( IupGetAttribute( ih, "VALUE" ) );
-		if( !( type & MATCHCASE ) ) document = toLower( document );
-
-		if( currentPos - targetText.length >= 0 )
-		{
-			if( document[currentPos-targetText.length..currentPos] == targetText ) currentPos -= targetText.length;
-		}
-
-		//if( ( type & WHOLEWORD ) ) currentPos = getWholeWordPos( document, targetText, currentPos, false );
-
-		findPos = Util.rindex( document, targetText, currentPos );
-
-		if( type & WHOLEWORD )
-		{
-			while( findPos < document.length )
-			{
-				if( IsWholeWord( document, targetText, findPos ) )
-				{
-					break;
+					pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
 				}
 				else
 				{
-					findPos = Util.rindex( document, targetText, findPos );
+					pos = Integer.toString( findPos+targetText.length ) ~ ":" ~ Integer.toString( findPos );
 				}
-			}
-		}
-		
-		if( findPos < document.length )
-		{
-			if( bJumpSelect )
-			{
-				char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
 				IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
+		
 			}
-			else
-			{
-				IupScintillaSendMessage( ih, 2141, findPos+targetText.length, 0 ); // SCI_SETCURRENTPOS = 2141,
-				IupScintillaSendMessage( ih, 2163, 1, 0 ); // SCI_HIDESELECTION = 2163,
-			}
-			
 			return findPos;
 		}
-		else
-		{
-			int startPos = document.length;
-			//if( ( type & WHOLEWORD ) ) startPos = getWholeWordPos( document, targetText, documentLength, false );
-			
-			if( currentPos < documentLength )
-			{
-				findPos = Util.rindex( document, targetText, startPos );
+	}
 
-				if( type & WHOLEWORD )
-				{
-					while( findPos < document.length )
-					{
-						if( IsWholeWord( document, targetText, findPos ) )
-						{
-							break;
-						}
-						else
-						{
-							findPos = Util.rindex( document, targetText, findPos );
-						}
-					}
-				}
-				
-				if( findPos < document.length )
-				{
-					if( findPos > currentPos )
-					{
-						if( bJumpSelect )
-						{
-							char[] pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
-							IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
-						}
-						else
-						{
-							IupScintillaSendMessage( ih, 2141, findPos+targetText.length, 0 ); // SCI_SETCURRENTPOS = 2141,
-							IupScintillaSendMessage( ih, 2163, 1, 0 ); // SCI_HIDESELECTION = 2163,
-						}
-						
-						return findPos;
-					}
-				}
+	/*
+    SCFIND_WHOLEWORD = 2,
+    SCFIND_MATCHCASE = 4,
+    SCFIND_WORDSTART = 0x00100000,
+    SCFIND_REGEXP = 0x00200000,
+    SCFIND_POSIX = 0x00400000,
+	*/	
+
+	public:
+	const int MATCHCASE = 2;
+	const int WHOLEWORD = 4;
+	
+	static int search( Ihandle* iupSci, char[] findText, int searchRule, bool bForward = true )
+	{
+		int pos = -1;
+
+		if( iupSci != null && findText.length )
+		{
+			if( bForward )
+			{
+				pos = _find( iupSci, findText, searchRule, true );
+			}
+			else
+			{
+				pos = _find( iupSci, findText, searchRule, false );
 			}
 		}
-		
-		return -1;
-	}
+
+		// IUP_IGNORE = -1, IUP_DEFAULT = -2, 
+		if( pos == -1 ) return -2;
+		return pos;
+	}	
 
 	static bool IsWholeWord( char[] lineData, char[] target, int pos )
 	{
@@ -1525,7 +1316,7 @@ char[] pp="print";
 	buttonIndex = 2 Count
 	buttonIndex = 3 Mark
 	*/
-	static int findInOneFile( char[] fullPath, char[] findText, char[] replaceText, int searchRule = 3, int buttonIndex = 0 )
+	static int findInOneFile( char[] fullPath, char[] findText, char[] replaceText, int searchRule = 6, int buttonIndex = 0 )
 	{
 		int count;
 

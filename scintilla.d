@@ -37,6 +37,7 @@ struct TextToFind
 */
 import		parser.autocompletion, tools;
 
+
 class CScintilla
 {
 	private:
@@ -63,6 +64,8 @@ class CScintilla
 	{
 		sci = IupScintilla();
 		IupSetAttribute( sci, "EXPAND", "YES" );
+		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
+
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
@@ -580,18 +583,18 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
 			IupScintillaSendMessage( sci, 2627, 25, cast(int) XPM.private_sub_rgba.toStringz );
-			IupScintillaSendMessage( sci, 2627, 26, cast(int) XPM.protected_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2627, 27, cast(int) XPM.public_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 26, cast(int) XPM.protected_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 27, cast(int) XPM.public_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
 			
 			IupScintillaSendMessage( sci, 2627, 28, cast(int) XPM.private_fun_rgba.toStringz );
-			IupScintillaSendMessage( sci, 2627, 29, cast(int) XPM.protected_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2627, 30, cast(int) XPM.public_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 29, cast(int) XPM.protected_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 30, cast(int) XPM.public_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
 			
-			IupScintillaSendMessage( sci, 2627, 31, cast(int) XPM.property_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2627, 32, cast(int) XPM.property_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 31, cast(int) XPM.property_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 32, cast(int) XPM.property_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
 			
-			IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2405
+			IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
 
 			
 		}
@@ -905,7 +908,13 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-
+				case "New Tab":
+					if( sk.keyValue == c )
+					{
+						menu.newFile_cb( ih );
+						return IUP_IGNORE;
+					}
+					break;
 				default:
 			}
 		}
@@ -938,10 +947,14 @@ extern(C)
 		}
 
 		return IUP_DEFAULT;
-	}	
+	}
 
 	private int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
+		static int staticPos;
+		static int bListFalse;
+
+		
 		if( GLOBAL.enableParser != "ON" ) return IUP_DEFAULT;
 		
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
@@ -951,42 +964,65 @@ extern(C)
 
 		if( insert == 1 )
 		{
-			//Stdout( "text:" ~ fromStringz( _text ) ).newline;
+			if( length > 1 ) return IUP_DEFAULT;
 
-			char[] text = fromStringz( _text ).dup;
-			/*
-			IupMessage( "LENGTH", toStringz( Integer.toString( length) ) );
-			
-			if( length > 0 )
-			{
-				char[] yyy = text[0..length].dup;
-				IupMessage( "", GLOBAL.cString.convert( yyy ) );
-			}
-			*/
-
-			if( text.length > 1 ) return IUP_DEFAULT;
+			// Below code are fixed because of IUP DLL10 and D 1.076
+			char[] text;
+			text ~= _text[0];
 			
 			switch( text )
 			{
 				case " ", "\t", "\n", "\r":
+					staticPos = -1;
+					return IUP_DEFAULT;
 					break;
 
 				default:
-					//SendMessage( ih, 2003, pos, cast(int) toStringz("Mountain") ); //SCI_INSERTTEXT = 2003,
+					if( staticPos == pos -1 )
+					{
+						if( text == ">" )
+						{
+							if( pos > 0 )
+							{
+								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
+								{
+									bListFalse = false;
+									staticPos = -1;
+								}
+							}
+						}
+						
+						if( bListFalse ) break;
+					}
+					else
+					{
+						bListFalse = false;
+						staticPos = -1;
+					}
 
-					//IupSetAttributeId( ih, "INSERT", pos, _text );
-					IupScintillaSendMessage( ih, 2025, pos + text.length, 0 );// SCI_GOTOPOS = 2025,
-					
 					char[] list = AutoComplete.charAdd( ih, pos, text );
-					
-					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
+
+					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse  ~ text;
+					if( text == ">" )
+					{
+						if( pos > 0 )
+						{
+							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
+							{
+								alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse;
+							}
+						}
+					}
 
 					char[][] splitWord = Util.split( alreadyInput, "." );
 					if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
 
 					alreadyInput = splitWord[length-1];
+
 					if( list.length )
 					{
+						bListFalse = false;
+						
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
 						{
 							IupSetAttribute( ih, "AUTOCSELECT", GLOBAL.cString.convert( alreadyInput ) );
@@ -1005,27 +1041,18 @@ extern(C)
 							}
 							else
 							{
-								if( text == ">" )
-								{
-									if( pos > 0 )
-									{
-										if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
-										{
-											alreadyInput = alreadyInput[0..length-1];
-
-											IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
-											break;
-										}
-									}
-								}
-
-								IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
+								IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) );
 							}
 						}
+					}
+					else
+					{
+						if( alreadyInput.length >= GLOBAL.autoCompletionTriggerWordCount ) bListFalse = true;else bListFalse = false;
 					}
 			}
 		}
 
+		staticPos = pos;
 		return IUP_DEFAULT;
 	}
 

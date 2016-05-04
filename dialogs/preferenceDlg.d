@@ -701,7 +701,8 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "saveall", convertShortKeyValue2String( GLOBAL.shortKeys[16].keyValue ) )
 		.attribute( null, "close", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) )
 		.attribute( null, "nexttab", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) )
-		.attribute( null, "prevtab", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) );
+		.attribute( null, "prevtab", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) )
+		.attribute( null, "newtab", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) );
 
 		/*
 		<buildtools>
@@ -1133,6 +1134,13 @@ class CPreferenceDialog : CBaseDialog
 				ShortKey sk = { "Previous Tab", convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys ~= sk;
 			}
+
+			result = root.query.descendant("shortkeys").attribute("newtab");
+			foreach( e; result )
+			{
+				ShortKey sk = { "New Tab", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys ~= sk;
+			}			
 
 			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
 			GLOBAL.txtCompilerOptions = fileCompilerOptions.read;

@@ -17,10 +17,9 @@ version(Windows)
 	pragma(lib, "comctl32.lib");
 	pragma(lib, "ole32.lib");
 }
-
-//-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
-version(Linux)
+else
 {
+	//-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
 	//pragma(lib, "gtk-x11-2.0");
 	//pragma(lib, "gdk-x11-2.0");
 	//pragma(lib, "pangox-1.0");
@@ -148,13 +147,17 @@ void main()
 	IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" );
 	//IupAppend( GLOBAL.mainDlg, GLOBAL.documentTabs );
 
-	
+	//IupSetGlobal("INPUTCALLBACKS", "YES");
+	//IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
+
 	
 	// Shows dialog
 	IupShow( GLOBAL.mainDlg );
 	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );
 	
 	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
+	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
+	
 
 	createDialog();
 

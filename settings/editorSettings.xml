@@ -8,7 +8,7 @@
     <toggle00 LineMargin="ON" BookmarkMargin="ON" FoldMargin="ON" IndentGuide="ON" CaretLine="ON" WordWrap="OFF" TabUseingSpace="OFF" AutoIndent="ON" ShowEOL="OFF" ShowSpace="OFF" AutoEnd="ON" TabWidth="4"/>
     <font Default="Inconsolata, 11" Document="Inconsolata, 11" Leftside="Verdana, 9" Filelist="Calibri, 10" Project="Calibri, 10" Outline="Verdana, 8" Bottom="Verdana, 10" Output="Ubuntu Mono, 9" Search="Ubuntu Mono, 9" Debugger="Ubuntu Mono, 10" Annotation="Anonymous Pro, 11"/>
     <color caretLine="255 255 128" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208" selAlpha="60"/>
-    <shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F11" messagewindow="+++F12" showtype="+++F1" reparse="+++F2" save="C+++S" saveall="C+S++S" close="C+++W" nexttab="C+++TAB" prevtab="C+S++TAB"/>
+    <shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F11" messagewindow="+++F12" showtype="+++F1" reparse="+++F2" save="C+++S" saveall="C+S++S" close="C+++W" nexttab="C+++TAB" prevtab="C+S++TAB" newtab="C+++N"/>
   </editor>
   <buildtools>
     <compilerpath>D:/CodingPark/FreeBASIC-1.05.0-win32/fbc.exe</compilerpath>
@@ -22,12 +22,13 @@
     <parsertrigger>2</parsertrigger>
     <showfunctiontitle>ON</showfunctiontitle>
     <showtypewithparams>ON</showtypewithparams>
-    <includelevel>4</includelevel>
+    <includelevel>2</includelevel>
   </parser>
   <recentProjects>
     <name>D:/CodingPark/MyCode/FBcode/Shoot : Shoot</name>
     <name>D:/FB_Code/poorpowerSDL2 : ppSDL2</name>
-    <name>D:/FB_Code/test02 : test02</name>
+    <name>D:/FB_Code/parserFB : parserFB</name>
     <name>D:/FB_Code/test01 : test01</name>
+    <name>D:/FB_Code/test02 : test02</name>
   </recentProjects>
 </config>

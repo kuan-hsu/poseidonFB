@@ -97,7 +97,7 @@ struct GLOBAL
 	static CASTnode[char[]]		parserManager;
 
 	static int					autoCompletionTriggerWordCount = 3;
-	static int					includeLevel = 3;
+	static int					includeLevel = 2;
 
 
 	static PROJECT[char[]]		projectManager;
@@ -109,6 +109,8 @@ struct GLOBAL
 	static ShortKey[]			shortKeys;
 
 	static fontUint[]			fonts;
+
+	//static bool					bKeyUp = true;
 }
 
 static this()
@@ -157,9 +159,11 @@ static this()
 	ShortKey sk17 = { "Close File", 536870999 };
 	GLOBAL.shortKeys ~= sk17;
 	ShortKey sk18 = { "Next Tab", 536870921 };
-	GLOBAL.shortKeys ~= sk16;
+	GLOBAL.shortKeys ~= sk18;
 	ShortKey sk19 = { "Previous Tab", 805306377 };
-	GLOBAL.shortKeys ~= sk17;
+	GLOBAL.shortKeys ~= sk19;
+	ShortKey sk20 = { "New Tab", 536870990 };
+	GLOBAL.shortKeys ~= sk20;
 	
 
 	fontUint fu;

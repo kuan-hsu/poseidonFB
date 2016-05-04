@@ -9,9 +9,10 @@ class CFileDlg
 
 	import Util = tango.text.Util, tango.stdc.stringz;
 
-	char[]	fileName, filterUsed;
+	char[][]	filesName;
+	char[]		filterUsed;
 	
-	void callIupFileDlg( char[] title, char[] filter, char[] DIALOGTYPE = "OPEN" )
+	void callIupFileDlg( char[] title, char[] filter, char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
 	{
 		Ihandle *dlg = IupFileDlg(); 
 
@@ -19,39 +20,86 @@ class CFileDlg
 		IupSetAttribute( dlg, "DIALOGTYPE", _dialogType.toStringz );
 		IupSetAttribute( dlg, "TITLE", GLOBAL.cString.convert( title ) );
 
+		bool bMultiFiles;
+		if( DIALOGTYPE == "OPEN" && MULTIPLEFILES == "YES" )
+		{
+			bMultiFiles = true;
+			IupSetAttribute( dlg, "MULTIPLEFILES", GLOBAL.cString.convert( MULTIPLEFILES ) );
+		}
+
 		//char[] txtIupFilterAttribute = "FILTER = \"" ~ filter ~ "\", FILTERINFO = \"" ~  fileInfo ~ "\"";
 		//IupSetAttributes(dlg, txtIupFilterAttribute.ptr );
 		IupSetAttribute( dlg, "EXTFILTER", GLOBAL.cString.convert( filter ) );
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT ); 
 
+		/*
+		"1": New file.
+		"0": Normal, existing file or directory.
+		"-1": Operation cancelled.
+		*/
 		if( IupGetInt( dlg, "STATUS") != -1 )
 		{
-			fileName = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
 			filterUsed = Util.trim( fromStringz( IupGetAttribute( dlg, "FILTERUSED" ) ).dup );
-			fileName = Util.substitute( fileName, "\\", "/" );
+			char[] fileString = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
+
+			if( fileString.length )
+			{
+				if( !bMultiFiles )
+				{
+					fileString = Util.substitute( fileString, "\\", "/" );
+					filesName ~= fileString;
+				}
+				else
+				{
+					if( fileString[length-1] == '|' ) // > 1 files
+					{
+						char[][] _files = Util.split( fileString, "|" );
+						if( _files.length )
+						{
+							char[] _path = Util.substitute( _files[0], "\\", "/" ) ~ "/";
+							for( int i = 1; i < _files.length; ++ i )
+							{
+								if( _files[i].length ) filesName ~= ( _path ~ _files[i] );
+							}
+						}
+					}
+					else
+					{
+						fileString = Util.substitute( fileString, "\\", "/" );
+						filesName ~= fileString;
+					}
+				}
+			}
 		}
 		else
 		{
-			fileName = "";
+			filesName.length = 0;
 		}
 
 		IupDestroy( dlg );
 	}
 
 	public:
-	this( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN" )
+	this( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
 	{
-		callIupFileDlg( title, filefilter, DIALOGTYPE );
+		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
 	}
 
-	char[] open( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN" )
+	char[][] open( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
 	{
-		callIupFileDlg( title, filefilter, DIALOGTYPE );
+		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
 
-		return fileName;
+		return filesName;
 	}
 
-	char[] getFileName(){ return fileName; }
+	char[][] getFilesName(){ return filesName; }
+
+	char[] getFileName()
+	{
+		if( filesName.length ) return filesName[0];
+
+		return null;
+	}
 
 	char[] getFilterUsed(){ return filterUsed; }
 	

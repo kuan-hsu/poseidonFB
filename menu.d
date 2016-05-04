@@ -360,7 +360,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.159\nBy Kuan Hsu (Taiwan)\n2016.04.10" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.167\nBy Kuan Hsu (Taiwan)\n2016.05.03" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -627,7 +627,17 @@ extern(C)
 		int pos = Util.index( title, " : " );
 		if( pos < title.length )
 		{
-			GLOBAL.projectTree.openProject( Util.trim( title[0..pos].dup ) );
+			if( !GLOBAL.projectTree.openProject( Util.trim( title[0..pos].dup ) ) )
+			{
+				IupDestroy( ih );
+				char[][] _recentProjects;
+				foreach( char[] s; GLOBAL.recentProjects )
+				{
+					if( s != title ) _recentProjects ~= s;
+				}
+				GLOBAL.recentProjects.length = 0;
+				GLOBAL.recentProjects = _recentProjects;
+			}
 		}
 
 		return IUP_DEFAULT;
@@ -738,7 +748,8 @@ extern(C)
 		if( ih != null )
 		{
 			char[] targetText = fromStringz(IupGetAttribute( ih, "SELECTEDTEXT" ));
-			actionManager.SearchAction.findNext( ih, targetText, GLOBAL.searchDlg.searchRule );
+			//actionManager.SearchAction.findNext( ih, targetText, GLOBAL.searchDlg.searchRule );
+			actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, true );
 		}
 	}
 
@@ -748,7 +759,8 @@ extern(C)
 		if( ih != null )
 		{
 			char[] targetText = fromStringz(IupGetAttribute( ih, "SELECTEDTEXT" ));
-			if( targetText.length ) actionManager.SearchAction.findPrev( ih, targetText, GLOBAL.searchDlg.searchRule );
+			//actionManager.SearchAction.findPrev( ih, targetText, GLOBAL.searchDlg.searchRule );
+			actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
 		}
 	}
 
