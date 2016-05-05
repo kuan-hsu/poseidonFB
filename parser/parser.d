@@ -638,10 +638,12 @@ class CParser
 		
 		try
 		{
-			if( token().tok == TOK.Tdim || token().tok == TOK.Tstatic || token().tok == TOK.Tcommon || token().tok == TOK.Tconst )
+			if( token().tok == TOK.Tdim || token().tok == TOK.Tstatic || token().tok == TOK.Tcommon || token().tok == TOK.Tconst || token().tok == TOK.Tredim )
 			{
 				if( token().tok == TOK.Tconst ) bConst = true;
-				
+
+				if( token().tok == TOK.Tredim &&  next().tok == TOK.Tpreserve ) parseToken( TOK.Tredim );
+
 				parseToken();
 
 				char[]	_type, _name, _protection;
@@ -1747,6 +1749,7 @@ class CParser
 				case TOK.Tcommon:
 				case TOK.Tstatic:
 				case TOK.Tdim:
+				case TOK.Tredim:
 					parseVariable();
 					break;
 
