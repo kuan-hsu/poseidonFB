@@ -233,42 +233,47 @@ void createMenu()
 
 	// Option
 	Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
-	IupSetAttribute(_windowsEOL, "IMAGE", "icon_windows");
+	//IupSetAttribute(_windowsEOL, "IMAGE", "icon_windows");
 	IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )
-		{
-			IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
-			StatusBarAction.update();
-		}
+		GLOBAL.editorSetting00.EolType = "0";
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
+
+		StatusBarAction.update();
 	});	
 	
 	Ihandle* _macEOL = IupItem( toStringz( "Mac" ), null );
-	IupSetAttribute(_macEOL, "IMAGE", "icon_mac");
+	//IupSetAttribute(_macEOL, "IMAGE", "icon_mac");
 	IupSetCallback( _macEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )
-		{
-			IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
-			StatusBarAction.update();
-		}
+		GLOBAL.editorSetting00.EolType = "1";
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
+		
+		StatusBarAction.update();
 	});	
 	
 	Ihandle* _unixEOL = IupItem( toStringz( "Unix" ), null );
-	IupSetAttribute(_unixEOL, "IMAGE", "icon_linux");
+	//IupSetAttribute(_unixEOL, "IMAGE", "icon_linux");
 	IupSetCallback( _unixEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )
-		{
-			IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
-			StatusBarAction.update();
-		}
+		GLOBAL.editorSetting00.EolType = "2";
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
+
+		StatusBarAction.update();
 	});
 
 	Ihandle* _eolSubMenu = IupMenu( _windowsEOL, _macEOL, _unixEOL, null  );
+	IupSetAttribute(_eolSubMenu, "RADIO", "YES");
+	switch( GLOBAL.editorSetting00.EolType )
+	{
+		case "0":	IupSetAttribute( _windowsEOL, "VALUE", "ON"); break;
+		case "1":	IupSetAttribute( _macEOL, "VALUE", "ON"); break;
+		case "2":	IupSetAttribute( _unixEOL, "VALUE", "ON"); break;
+		default:
+	}
 	Ihandle* setEOL = IupSubmenu( toStringz( "Set EOL Character" ), _eolSubMenu );
 
 	Ihandle* windowsEOL = IupItem( toStringz( "Windows" ), null );
@@ -276,7 +281,11 @@ void createMenu()
 	IupSetCallback( windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2029, 0, 0 ); // SCI_CONVERTEOLS 2029
+		if( cSci !is null )
+		{
+			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 0, 0 ); // SCI_CONVERTEOLS 2029
+			actionManager.StatusBarAction.update();
+		}
 	});	
 	
 	Ihandle* macEOL = IupItem( toStringz( "Mac" ), null );
@@ -284,7 +293,11 @@ void createMenu()
 	IupSetCallback( macEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2029, 1, 0 ); // SCI_CONVERTEOLS 2029
+		if( cSci !is null )
+		{
+			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 1, 0 ); // SCI_CONVERTEOLS 2029
+			actionManager.StatusBarAction.update();
+		}
 	});	
 	
 	Ihandle* unixEOL = IupItem( toStringz( "Unix" ), null );
@@ -292,7 +305,11 @@ void createMenu()
 	IupSetCallback( unixEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2029, 2, 0 ); // SCI_CONVERTEOLS 2029
+		if( cSci !is null )
+		{
+			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 2, 0 ); // SCI_CONVERTEOLS 2029
+			actionManager.StatusBarAction.update();
+		}
 	});	
 
 	Ihandle* eolSubMenu = IupMenu( windowsEOL, macEOL, unixEOL, null  );
@@ -360,7 +377,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.168\nBy Kuan Hsu (Taiwan)\n2016.05.05" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.169\nBy Kuan Hsu (Taiwan)\n2016.05.07" );
 	});
 
 	file_menu = IupMenu( 	item_new, 

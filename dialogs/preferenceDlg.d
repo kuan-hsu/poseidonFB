@@ -643,8 +643,8 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "ShowEOL", GLOBAL.editorSetting00.ShowEOL )
 		.attribute( null, "ShowSpace", GLOBAL.editorSetting00.ShowSpace )	
 		.attribute( null, "AutoEnd", GLOBAL.editorSetting00.AutoEnd )	
-		.attribute( null, "TabWidth", GLOBAL.editorSetting00.TabWidth );
-
+		.attribute( null, "TabWidth", GLOBAL.editorSetting00.TabWidth )
+		.attribute( null, "EolType", GLOBAL.editorSetting00.EolType );
 		/+
 		//<font name="Consolas" size="11" bold="OFF" italic="OFF" underline="OFF" forecolor="0 0 0" backcolor="255 255 255"></font>
 		editorNode.element( null, "font" )
@@ -875,6 +875,8 @@ class CPreferenceDialog : CBaseDialog
 			result = root.query.descendant("toggle00").attribute("TabWidth");
 			foreach( e; result ) GLOBAL.editorSetting00.TabWidth = e.value;
 
+			result = root.query.descendant("toggle00").attribute("EolType");
+			foreach( e; result ) GLOBAL.editorSetting00.EolType = e.value;
 
 			// Font
 			//GLOBAL.fonts.length = 0;

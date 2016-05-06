@@ -326,7 +326,8 @@ struct ExecuterAction
 					}
 				}
 
-				txtCommand = "\"" ~ GLOBAL.compilerFullPath ~ "\"" ~  executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : GLOBAL.compilerFullPath;
+				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 
 				Process p = new Process( true, txtCommand );
 				p.gui( true );

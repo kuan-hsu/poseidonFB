@@ -141,6 +141,15 @@ class CScintilla
 
 		IupSetAttribute( sci, "CLEARALL", "" );
 		setGlobalSetting();
+
+		switch( GLOBAL.editorSetting00.EolType )
+		{
+			case "0":	IupScintillaSendMessage( sci, 2031, 0, 0 ); break;
+			case "1":	IupScintillaSendMessage( sci, 2031, 1, 0 ); break;
+			case "2":	IupScintillaSendMessage( sci, 2031, 2, 0 ); break;
+			default:
+		}		
+		
 	}
 
 	void setText( char[] _text )
