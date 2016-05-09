@@ -51,7 +51,7 @@ struct GLOBAL
 	// LAYOUT
 	static Ihandle* 			explorerWindow;
 	static Ihandle* 			explorerSplit; // which split explorerWindow & editWindow
-	static char*				explorerSplit_value = "300";
+	static int					explorerSplit_value = 300;
 	//static Ihandle* 			projectManagerToolbar;
 	//static Ihandle* 			projectManagerTree;
 
@@ -64,7 +64,7 @@ struct GLOBAL
 	static Ihandle* 			searchOutputPanel;
 	static CDebugger 			debugPanel;
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
-	static char*				messageSplit_value = "800";
+	static int					messageSplit_value = 800;
 
 	static CSearchDialog		searchDlg;
 	static CFindInFilesDialog	serachInFilesDlg;
@@ -110,7 +110,7 @@ struct GLOBAL
 
 	static fontUint[]			fonts;
 
-	//static bool					bKeyUp = true;
+	static bool					bKeyUp = true;
 }
 
 static this()

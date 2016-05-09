@@ -147,8 +147,8 @@ void main()
 	IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" );
 	//IupAppend( GLOBAL.mainDlg, GLOBAL.documentTabs );
 
-	//IupSetGlobal("INPUTCALLBACKS", "YES");
-	//IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
+	IupSetGlobal( "INPUTCALLBACKS", "YES" );
+	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
 
 	
 	// Shows dialog

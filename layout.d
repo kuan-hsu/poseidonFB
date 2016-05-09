@@ -128,14 +128,12 @@ extern(C)
 		return IUP_CLOSE;
 	}
 
-	/*
 	int GlobalKeyPress_CB( int c, int press )
 	{
 		if( press == 0 ) GLOBAL.bKeyUp = true;
 
 		return IUP_DEFAULT;
 	}
-	*/
 
 	int mainKany_cb( Ihandle* ih, int c )
 	{

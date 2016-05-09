@@ -960,9 +960,8 @@ extern(C)
 
 	private int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
-		static int staticPos;
-		static int bListFalse;
-
+		// If un-release the key, cancel
+		if( GLOBAL.bKeyUp )	GLOBAL.bKeyUp = false; else	return IUP_DEFAULT;
 		
 		if( GLOBAL.enableParser != "ON" ) return IUP_DEFAULT;
 		
@@ -982,33 +981,10 @@ extern(C)
 			switch( text )
 			{
 				case " ", "\t", "\n", "\r":
-					staticPos = -1;
 					return IUP_DEFAULT;
 					break;
 
 				default:
-					if( staticPos == pos -1 )
-					{
-						if( text == ">" )
-						{
-							if( pos > 0 )
-							{
-								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
-								{
-									bListFalse = false;
-									staticPos = -1;
-								}
-							}
-						}
-						
-						if( bListFalse ) break;
-					}
-					else
-					{
-						bListFalse = false;
-						staticPos = -1;
-					}
-
 					char[] list = AutoComplete.charAdd( ih, pos, text );
 
 					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse  ~ text;
@@ -1030,8 +1006,6 @@ extern(C)
 
 					if( list.length )
 					{
-						bListFalse = false;
-						
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
 						{
 							IupSetAttribute( ih, "AUTOCSELECT", GLOBAL.cString.convert( alreadyInput ) );
@@ -1054,14 +1028,9 @@ extern(C)
 							}
 						}
 					}
-					else
-					{
-						if( alreadyInput.length >= GLOBAL.autoCompletionTriggerWordCount ) bListFalse = true;else bListFalse = false;
-					}
 			}
 		}
 
-		staticPos = pos;
 		return IUP_DEFAULT;
 	}
 

@@ -377,7 +377,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.169\nBy Kuan Hsu (Taiwan)\n2016.05.07" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.170\nBy Kuan Hsu (Taiwan)\n2016.05.09" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -800,7 +800,7 @@ extern(C)
 		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
-			GLOBAL.explorerSplit_value = IupGetAttribute( GLOBAL.explorerSplit, "VALUE" );
+			GLOBAL.explorerSplit_value = IupGetInt( GLOBAL.explorerSplit, "VALUE" );
 			IupSetAttribute( GLOBAL.explorerSplit, "VALUE", "0" );
 
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "NO" );
@@ -811,7 +811,7 @@ extern(C)
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
-			IupSetAttribute( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
+			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
 		}
 		
@@ -823,8 +823,8 @@ extern(C)
 		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
-			GLOBAL.messageSplit_value = IupGetAttribute( GLOBAL.messageSplit, "VALUE" );
-			IupSetAttribute( GLOBAL.messageSplit, "VALUE", "1000" );
+			GLOBAL.messageSplit_value = IupGetInt( GLOBAL.messageSplit, "VALUE" );
+			IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
 
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "NO" );
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
@@ -837,7 +837,7 @@ extern(C)
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
-			IupSetAttribute( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
+			IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "YES" );
 			IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
 			IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
