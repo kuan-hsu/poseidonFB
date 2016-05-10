@@ -12,8 +12,8 @@ class CCompilerHelpDialog : CBaseDialog
 	void createLayout()
 	{
 		Ihandle* text = IupText( null );
-		IupSetAttributes( text, "EXPAND=YES,MULTILINE=YES" );
-		IupSetAttribute( text, "VALUE", toStringz(GLOBAL.txtCompilerOptions.dup) );
+		IupSetAttributes( text, "EXPAND=YES,MULTILINE=YES,READONLY=YES" );
+		IupSetAttribute( text, "VALUE", toStringz(GLOBAL.txtCompilerOptions) );
 
 		Ihandle* scrollBox = IupScrollBox( text );
 		

@@ -2,6 +2,7 @@
 
 import tools;
 
+
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", EolType = "0";
@@ -36,7 +37,6 @@ struct GLOBAL
 
 	//import Integer = tango.text.convert.Integer;
 	import tango.stdc.stringz;
-
 	import scintilla, project, layouts.tree, layouts.outline, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast;
@@ -112,6 +112,8 @@ struct GLOBAL
 
 	static bool					bKeyUp = true;
 }
+
+import tango.io.UnicodeFile;
 
 static this()
 {
@@ -208,5 +210,8 @@ static this()
 	GLOBAL.fonts ~= fu;
 
 	fu.name = "Annotation";
-	GLOBAL.fonts ~= fu;	
+	GLOBAL.fonts ~= fu;
+
+	scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
+	GLOBAL.txtCompilerOptions = fileCompilerOptions.read.dup;
 }

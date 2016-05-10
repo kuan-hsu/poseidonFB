@@ -980,14 +980,13 @@ extern(C)
 			
 			switch( text )
 			{
-				case " ", "\t", "\n", "\r":
-					return IUP_DEFAULT;
+				case " ", "\t", "\n", "\r", ")":
+					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					break;
 
 				default:
-					char[] list = AutoComplete.charAdd( ih, pos, text );
+					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
 
-					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse  ~ text;
 					if( text == ">" )
 					{
 						if( pos > 0 )
@@ -999,13 +998,17 @@ extern(C)
 						}
 					}
 
-					char[][] splitWord = Util.split( alreadyInput, "." );
-					if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
+					if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
 
-					alreadyInput = splitWord[length-1];
+					char[] list = AutoComplete.charAdd( ih, pos, text );
 
 					if( list.length )
 					{
+						char[][] splitWord = Util.split( alreadyInput, "." );
+						if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
+
+						alreadyInput = splitWord[length-1];
+
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
 						{
 							IupSetAttribute( ih, "AUTOCSELECT", GLOBAL.cString.convert( alreadyInput ) );

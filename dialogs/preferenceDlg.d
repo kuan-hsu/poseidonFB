@@ -1144,9 +1144,6 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.shortKeys ~= sk;
 			}			
 
-			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
-			GLOBAL.txtCompilerOptions = fileCompilerOptions.read;
-
 			// Get linux terminal program name
 			version( linux )
 			{
