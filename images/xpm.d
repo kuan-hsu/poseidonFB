@@ -208,8 +208,8 @@ struct XPM
 	static char*[] private_fun_xpm, protected_fun_xpm, public_fun_xpm, private_sub_xpm, protected_sub_xpm, public_sub_xpm,
 					private_variable_array_xpm, protected_variable_array_xpm, public_variable_array_xpm, private_variable_xpm, alias_obj_xpm,
 					protected_variable_xpm, public_variable_xpm, class_private_obj_xpm, class_protected_obj_xpm,
-					class_obj_xpm, struct_private_obj_xpm, struct_protected_obj_xpm, struct_obj_xpm, mixin_template_obj_xpm, 
-					interface_private_obj_xpm, interface_protected_obj_xpm, interface_obj_xpm, union_private_obj_xpm,
+					class_obj_xpm, struct_private_obj_xpm, struct_protected_obj_xpm, struct_obj_xpm,  
+					union_private_obj_xpm,
 					union_protected_obj_xpm, union_obj_xpm, enum_private_obj_xpm, enum_protected_obj_xpm, enum_obj_xpm,
 					normal_xpm, import_xpm, autoWord_xpm, parameter_xpm, enum_member_obj_xpm, template_obj_xpm,
 					functionpointer_obj_xpm, namespace_obj_xpm, property_xpm, property_var_xpm, define_var_xpm, define_fun_xpm;
@@ -217,7 +217,7 @@ struct XPM
 	/+
 	static ubyte[] private_method_rgba, protected_method_rgba, public_method_rgba, private_variable_rgba, alias_obj_rgba,
 					protected_variable_rgba, public_variable_rgba, class_private_obj_rgba, class_protected_obj_rgba,
-					class_obj_rgba, struct_private_obj_rgba, struct_protected_obj_rgba, struct_obj_rgba, mixin_template_obj_rgba, 
+					class_obj_rgba, struct_private_obj_rgba, struct_protected_obj_rgba, struct_obj_rgba,  
 					interface_private_obj_rgba, interface_protected_obj_rgba, interface_obj_rgba, union_private_obj_rgba,
 					union_protected_obj_rgba, union_obj_rgba, enum_private_obj_rgba, enum_protected_obj_rgba, enum_obj_rgba,
 					normal_rgba, import_rgba, autoWord_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
@@ -228,8 +228,8 @@ struct XPM
 	static CstringConvert private_fun_rgba, protected_fun_rgba, public_fun_rgba, private_sub_rgba, protected_sub_rgba, public_sub_rgba,
 		private_variable_array_rgba, protected_variable_array_rgba, public_variable_array_rgba, private_variable_rgba, alias_obj_rgba,
 		protected_variable_rgba, public_variable_rgba, class_private_obj_rgba, class_protected_obj_rgba,
-		class_obj_rgba, struct_private_obj_rgba, struct_protected_obj_rgba, struct_obj_rgba, mixin_template_obj_rgba, 
-		interface_private_obj_rgba, interface_protected_obj_rgba, interface_obj_rgba, union_private_obj_rgba,
+		class_obj_rgba, struct_private_obj_rgba, struct_protected_obj_rgba, struct_obj_rgba,  
+		union_private_obj_rgba,
 		union_protected_obj_rgba, union_obj_rgba, enum_private_obj_rgba, enum_protected_obj_rgba, enum_obj_rgba,
 		normal_rgba, import_rgba, autoWord_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
 		functionpointer_obj_rgba, namespace_obj_rgba, property_rgba, property_var_rgba, define_var_rgba, define_fun_rgba;
@@ -258,9 +258,6 @@ struct XPM
 			struct_private_obj_xpm 		= getXpm( "icons/xpm/struct_private_obj.xpm" );
 			struct_protected_obj_xpm 	= getXpm( "icons/xpm/struct_protected_obj.xpm" );
 			struct_obj_xpm 				= getXpm( "icons/xpm/struct_obj.xpm" );
-			interface_private_obj_xpm 	= getXpm( "icons/xpm/interface_private_obj.xpm" );
-			interface_protected_obj_xpm = getXpm( "icons/xpm/interface_protected_obj.xpm" );
-			interface_obj_xpm 			= getXpm( "icons/xpm/interface_obj.xpm" );
 			union_private_obj_xpm 		= getXpm( "icons/xpm/union_private_obj.xpm" );
 			union_protected_obj_xpm 	= getXpm( "icons/xpm/union_protected_obj.xpm" );
 			union_obj_xpm 				= getXpm( "icons/xpm/union_obj.xpm" );
@@ -309,9 +306,6 @@ struct XPM
 			struct_private_obj_rgba 		= getRGBA( "icons/xpm/struct_private_obj.xpm" );
 			struct_protected_obj_rgba 	= getRGBA( "icons/xpm/struct_protected_obj.xpm" );
 			struct_obj_rgba 				= getRGBA( "icons/xpm/struct_obj.xpm" );
-			interface_private_obj_rgba 	= getRGBA( "icons/xpm/interface_private_obj.xpm" );
-			interface_protected_obj_rgba = getRGBA( "icons/xpm/interface_protected_obj.xpm" );
-			interface_obj_rgba 			= getRGBA( "icons/xpm/interface_obj.xpm" );
 			union_private_obj_rgba	= getRGBA( "icons/xpm/union_private_obj.xpm" );
 			union_protected_obj_rgba	= getRGBA( "icons/xpm/union_protected_obj.xpm" );
 			union_obj_rgba				= getRGBA( "icons/xpm/union_obj.xpm" );

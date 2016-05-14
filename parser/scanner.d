@@ -204,6 +204,12 @@ class CScanner
 								if( identifier.length > 1 )
 								{
 									if( identifier[0] == 45 && identifier[1] >=48 && identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
+
+									if( identifier.length > 2 )
+									{
+										if( toLower( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
+										if( toLower( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
+									}									
 								}
 
 								t.identifier = identifier;
@@ -241,6 +247,12 @@ class CScanner
 								if( identifier.length > 1 )
 								{
 									if( identifier[0] == 45 && identifier[1] >=48 && identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
+
+									if( identifier.length > 2 )
+									{
+										if( toLower( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
+										if( toLower( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
+									}
 								}
 
 								t.identifier = identifier;

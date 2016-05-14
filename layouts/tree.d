@@ -198,6 +198,8 @@ class CProjectTree
 
 			// Add Project's Name to Tree
 			IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( GLOBAL.projectManager[setupDir].name ) );
+			IupSetAttribute( tree, "IMAGE1", GLOBAL.cString.convert( "icon_prj" ) );
+			IupSetAttribute( tree, "IMAGEEXPANDED1", GLOBAL.cString.convert( "icon_prj_open" ) );
 			IupSetAttributeId( tree, "MARKED", 1, "YES" );
 			IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
 

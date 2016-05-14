@@ -309,8 +309,16 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* labelSelAlpha = IupLabel( "Selection Alpha:" );
 		Ihandle* textAlpha = IupText( null );
-		IupSetAttributes( textAlpha, "SIZE=20x10,MARGIN=0x0" );
-		IupSetAttribute( textAlpha, "VALUE", toStringz( GLOBAL.editColor.selAlpha ) );
+		version( Windows)
+		{
+			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0" );
+			IupSetAttribute( textAlpha, "SPINVALUE", toStringz( GLOBAL.editColor.selAlpha ) );
+		}
+		else
+		{
+			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0" );
+			IupSetAttribute( textAlpha, "VALUE", toStringz( GLOBAL.editColor.selAlpha ) );
+		}
 		IupSetAttribute( textAlpha, "TIP", toStringz( "'255' will disable the alpha" ) );
 		IupSetHandle( "textAlpha", textAlpha );
 
@@ -1410,8 +1418,10 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editColor.linenumFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.linenumBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.fold						= fromStringz(IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" )).dup;
-		GLOBAL.editColor.selAlpha					= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" )).dup;
-
+		version(Windows)
+			GLOBAL.editColor.selAlpha					= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" )).dup;
+		else
+			GLOBAL.editColor.selAlpha					= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" )).dup;
 
 		GLOBAL.editColor.keyWord[0]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.keyWord[1]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" )).dup;

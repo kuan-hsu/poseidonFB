@@ -377,7 +377,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.171\nBy Kuan Hsu (Taiwan)\n2016.05.10" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.172\nBy Kuan Hsu (Taiwan)\n2016.05.14" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -1047,7 +1047,7 @@ extern(C)
 		}
 		else
 		{
-			scope dlg = new CProjectPropertiesDialog( 656, 456, "Project Properties", true, false );
+			scope dlg = new CProjectPropertiesDialog( 656, 470, "Project Properties", true, false );
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 		return IUP_DEFAULT;

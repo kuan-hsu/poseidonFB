@@ -3038,6 +3038,74 @@ Ihandle* load_image_clear()
   return image;
 }
 
+Ihandle* load_image_prj_open()
+{
+  ubyte imgdata[] = [
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 5, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7,
+    3, 3, 3, 6, 6, 6, 5, 5, 5, 3, 3, 3, 3, 3, 3, 7,
+    3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 7,
+    7, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 7, 7,
+    7, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 7, 7,
+    7, 4, 6, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    7, 4, 6, 6, 6, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4,
+    7, 0, 6, 6, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 7,
+    7, 0, 5, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 7, 7,
+    7, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 7, 7, 7,
+    7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7];
+
+  Ihandle* image = IupImage(16, 16, imgdata.ptr);
+
+  IupSetAttribute(image, "0", "49 75 177");
+  IupSetAttribute(image, "1", "159 198 244");
+  IupSetAttribute(image, "2", "180 226 252");
+  IupSetAttribute(image, "3", "141 129 150");
+  IupSetAttribute(image, "4", "94 100 157");
+  IupSetAttribute(image, "5", "226 189 124");
+  IupSetAttribute(image, "6", "252 233 174");
+  IupSetAttribute(image, "7", "BGCOLOR");
+
+  return image;
+}
+
+Ihandle* load_image_prj()
+{
+  ubyte imgdata[] = [
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 6, 7, 7, 7, 2, 5, 7, 7, 7, 7, 7, 7,
+    7, 6, 6, 6, 1, 1, 3, 3, 3, 3, 6, 6, 6, 6, 6, 6,
+    7, 0, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 0,
+    7, 7, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 7,
+    7, 7, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 7,
+    7, 7, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 7,
+    7, 7, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 7,
+    7, 7, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 7,
+    7, 7, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 7,
+    7, 7, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 7,
+    7, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7];
+
+  Ihandle* image = IupImage(16, 16, imgdata.ptr);
+
+  IupSetAttribute(image, "0", "58 81 176");
+  IupSetAttribute(image, "1", "144 181 236");
+  IupSetAttribute(image, "2", "252 182 156");
+  IupSetAttribute(image, "3", "76 138 228");
+  IupSetAttribute(image, "4", "169 213 250");
+  IupSetAttribute(image, "5", "129 114 137");
+  IupSetAttribute(image, "6", "152 133 142");
+  IupSetAttribute(image, "7", "BGCOLOR");
+
+  return image;
+}
+
 
 Ihandle* load_image_poseidonFBico()
 {
@@ -3114,6 +3182,9 @@ void load_all_images_icons()
   IupSetHandle("icon_windows", load_image_windows());
   IupSetHandle("icon_mac", load_image_mac());
   IupSetHandle("icon_linux", load_image_linux());
+
+  IupSetHandle("icon_prj_open", load_image_prj_open());
+  IupSetHandle("icon_prj", load_image_prj());  
 
   
 

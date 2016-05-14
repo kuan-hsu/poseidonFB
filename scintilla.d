@@ -960,6 +960,10 @@ extern(C)
 
 	private int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
+		static bool bWithoutList;
+		static int	prevPos;
+
+		
 		// If un-release the key, cancel
 		if( GLOBAL.bKeyUp )	GLOBAL.bKeyUp = false; else	return IUP_DEFAULT;
 		
@@ -982,9 +986,28 @@ extern(C)
 			{
 				case " ", "\t", "\n", "\r", ")":
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+					bWithoutList = false;
 					break;
 
 				default:
+					if( bWithoutList )
+					{
+						if( pos > 0 )
+						{
+							if( prevPos == pos - 1 )
+							{
+								//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "bWithoutList=True " ) );
+								break;
+							}
+							else
+							{
+								bWithoutList = false;
+								//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "bWithoutList=False " ) );
+							}
+						}
+					}
+
+
 					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
 
 					if( text == ">" )
@@ -1004,6 +1027,8 @@ extern(C)
 
 					if( list.length )
 					{
+						bWithoutList = false;
+						
 						char[][] splitWord = Util.split( alreadyInput, "." );
 						if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
 
@@ -1031,9 +1056,14 @@ extern(C)
 							}
 						}
 					}
+					else
+					{
+						bWithoutList = true;
+					}
 			}
 		}
 
+		prevPos = pos;
 		return IUP_DEFAULT;
 	}
 

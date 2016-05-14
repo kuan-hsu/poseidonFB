@@ -22,8 +22,8 @@ else
 	//-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
 	//pragma(lib, "gtk-x11-2.0");
 	//pragma(lib, "gdk-x11-2.0");
-	//pragma(lib, "pangox-1.0");
-	//pragma(lib, "gdk_pixbuf-2.0");
+	pragma(lib, "pangox-1.0");
+	pragma(lib, "gdk_pixbuf-2.0");
 	pragma(lib, "pango-1.0");
 	pragma(lib, "gobject-2.0");
 	pragma(lib, "gmodule-2.0");

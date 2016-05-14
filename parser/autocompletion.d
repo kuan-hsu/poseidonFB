@@ -597,8 +597,9 @@ struct AutoComplete
 		if( !bRootCall )
 		{
 			level ++;
-			if( level > GLOBAL.includeLevel )
+			if( level >= GLOBAL.includeLevel )
 			{
+				//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
 				level--;
 				return null;
 			}
@@ -658,6 +659,8 @@ struct AutoComplete
 				}
 			}
 		}
+
+		//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
 
 		if( level > 0 ) level--;
 
