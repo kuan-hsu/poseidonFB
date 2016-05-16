@@ -1156,6 +1156,7 @@ class CPreferenceDialog : CBaseDialog
 			version( linux )
 			{
 				//char[] termNameFile = cast(char[]) File.get( "/etc/alternatives/x-terminal-emulator" );
+				GLOBAL.linuxTermName = "/etc/alternatives/x-terminal-emulator";
 				scope term = new UnicodeFile!(char)( "/etc/alternatives/x-terminal-emulator", Encoding.Unknown );
 				char[] termNameFile = term.read;
 				if( termNameFile.length )
@@ -1163,16 +1164,13 @@ class CPreferenceDialog : CBaseDialog
 					int pos = Util.rindex( termNameFile, "exec('" ); 
 					if( pos < termNameFile.length )
 					{
+						GLOBAL.linuxTermName = "";
 						for( int i = pos + 6; i < termNameFile.length; ++ i )
 						{
 							if( termNameFile[i] == '\'' ) break;
 							GLOBAL.linuxTermName ~= termNameFile[i];
 						}
 					}
-				}
-				else
-				{
-					//GLOBAL.linuxTermName = "gnome-terminal";
 				}
 			}
 		}

@@ -19,6 +19,7 @@ version(Windows)
 }
 else
 {
+	// libgtk2.0-dev
 	//-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
 	//pragma(lib, "gtk-x11-2.0");
 	//pragma(lib, "gdk-x11-2.0");
@@ -28,6 +29,8 @@ else
 	pragma(lib, "gobject-2.0");
 	pragma(lib, "gmodule-2.0");
 	pragma(lib, "glib-2.0");
+	pragma(lib, "iup");
+	pragma(lib, "iup_scintilla");
 }
 
 version(Windows)
