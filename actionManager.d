@@ -746,11 +746,15 @@ struct ScintillaAction
 			removeFileListNode( null, cSci );
 			actionManager.OutlineAction.cleanTree( cSci.getFullPath );
 			IupDestroy( iupSci );
-			delete cSci;
 		}
 
 		foreach( char[] s; KEYS )
+		{
+			CScintilla cSci = GLOBAL.scintillaManager[upperCase(s)];
+			delete cSci;
+
 			GLOBAL.scintillaManager.remove( upperCase(s) );
+		}
 
 		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 

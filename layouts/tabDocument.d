@@ -69,7 +69,7 @@ extern(C)
 
 		Ihandle* _closeall = IupItem( "Close All", null );
 		IupSetAttribute( _closeall, "IMAGE", "icon_deleteall" );
-		IupSetCallback( _closeall, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( _closeall, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			actionManager.ScintillaAction.closeAllDocument();
 		});
@@ -77,7 +77,7 @@ extern(C)
 		// Annotation
 		Ihandle* _showAnnotation = IupItem( "Show Annotation", null );
 		IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
-		IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
@@ -86,7 +86,7 @@ extern(C)
 		
 		Ihandle* _hideAnnotation = IupItem( "Hide Annotation", null );
 		IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
-		IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback)function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
@@ -94,7 +94,7 @@ extern(C)
 
 		Ihandle* _removeAllAnnotation = IupItem( "Remove All Annotation", null );
 		IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
-		IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
@@ -102,7 +102,7 @@ extern(C)
 
 		Ihandle* _refresh = IupItem( "Refresh Parser", null );
 		IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
-		IupSetCallback( _refresh, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			actionManager.OutlineAction.refresh( cSci.getFullPath() );

@@ -1309,7 +1309,7 @@ class DebugThread : Thread
 				try
 				{
 					char[1] c;
-					proc.stdout.get( c );
+					version(Windows) proc.stdout.get( c );else proc.stdout.read( c );
 					
 					result ~= c;
 

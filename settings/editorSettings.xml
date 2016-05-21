@@ -20,14 +20,14 @@
     <enablekeywordcomplete>ON</enablekeywordcomplete>
     <enableparser>ON</enableparser>
     <parsertrigger>2</parsertrigger>
-    <showfunctiontitle>OFF</showfunctiontitle>
+    <showfunctiontitle>ON</showfunctiontitle>
     <showtypewithparams>ON</showtypewithparams>
     <includelevel>3</includelevel>
   </parser>
   <recentProjects>
     <name>D:/CodingPark/MyCode/FBcode/Shoot : Shoot</name>
     <name>D:/FB_Code/parserFB : parserFB</name>
-    <name>D:/FB_Code/test02 : test02</name>
     <name>D:/FB_Code/test01 : test01</name>
+    <name>D:/FB_Code/test02 : test02</name>
   </recentProjects>
 </config>
