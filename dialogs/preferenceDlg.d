@@ -77,7 +77,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* textTrigger = IupText( null );
 		IupSetAttribute( textTrigger, "SIZE", "30x12" );
-		IupSetAttribute( textTrigger, "TIP", "Set '0' to disable" );
+		IupSetAttribute( textTrigger, "TIP", "Set '0' to disable autocomplete" );
 		IupSetAttribute( textTrigger, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
 		IupSetHandle( "textTrigger", textTrigger );
 
@@ -99,10 +99,17 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleWithParams, "VALUE", toStringz(GLOBAL.showTypeWithParams.dup) );
 		IupSetHandle( "toggleWithParams", toggleWithParams );
 
-		
+		Ihandle* toggleIGNORECASE = IupToggle( "Autocomplete List Sort Is Ignore Case", null );
+		IupSetAttribute( toggleIGNORECASE, "VALUE", toStringz(GLOBAL.toggleIgnoreCase.dup) );
+		IupSetHandle( "toggleIGNORECASE", toggleIGNORECASE );
+
+		Ihandle* toggleCASEINSENSITIVE = IupToggle( "Selection Of Autocomplete List Is Case Insensitive", null );
+		IupSetAttribute( toggleCASEINSENSITIVE, "VALUE", toStringz(GLOBAL.toggleCaseInsensitive.dup) );
+		IupSetHandle( "toggleCASEINSENSITIVE", toggleCASEINSENSITIVE );
+
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, hBox00, hBox00_1, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, hBox00, hBox00_1, null );
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
@@ -507,6 +514,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleKeywordComplete", null );
 		IupSetHandle( "toggleUseParser", null );
 		IupSetHandle( "toggleWithParams", null );
+		IupSetHandle( "toggleIGNORECASE", null );
+		IupSetHandle( "toggleCASEINSENSITIVE", null );
 		IupSetHandle( "toggleAnnotation", null );
 
 		IupSetHandle( "toggleLineMargin", null );
@@ -710,7 +719,8 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "close", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) )
 		.attribute( null, "nexttab", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) )
 		.attribute( null, "prevtab", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) )
-		.attribute( null, "newtab", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) );
+		.attribute( null, "newtab", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) )
+		.attribute( null, "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) );
 
 		/*
 		<buildtools>
@@ -738,6 +748,8 @@ class CPreferenceDialog : CBaseDialog
 		parserNode.element( null, "showfunctiontitle", GLOBAL.showFunctionTitle );
 		parserNode.element( null, "showtypewithparams", GLOBAL.showTypeWithParams );
 		parserNode.element( null, "includelevel", Integer.toString( GLOBAL.includeLevel ) );
+		parserNode.element( null, "ignorecase", GLOBAL.toggleIgnoreCase );
+		parserNode.element( null, "caseinsensitive", GLOBAL.toggleCaseInsensitive );
 		
 
 		/*
@@ -839,6 +851,18 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.includeLevel = Integer.atoi( e.value );
 			}
 			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
+			result = root.query.descendant("ignorecase");
+			foreach( e; result )
+			{
+				GLOBAL.toggleIgnoreCase = e.value;
+			}
+			result = root.query.descendant("caseinsensitive");
+			foreach( e; result )
+			{
+				GLOBAL.toggleCaseInsensitive = e.value;
+			}			
+
+
 			
 
 			result = root.query.descendant("recentProjects").descendant("name");
@@ -1004,153 +1028,162 @@ class CPreferenceDialog : CBaseDialog
 
 
 			// short keys (Editor)
-			GLOBAL.shortKeys.length = 0;
+			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 21;
 			result = root.query.descendant("shortkeys").attribute("find");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Find/Replace", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[0] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("findinfile");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Find/Replace In Files", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[1] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("findnext");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Find Next", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[2] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("findprev");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Find Previous", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[3] = sk;
 			}		
 
 			result = root.query.descendant("shortkeys").attribute("gotoline");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Goto Line", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[4] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("undo");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Undo", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[5] = sk;
 			}		
 
 			result = root.query.descendant("shortkeys").attribute("redo");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Redo", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[6] = sk;
 			}		
 
 			result = root.query.descendant("shortkeys").attribute("defintion");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Goto Defintion", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[7] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("quickrun");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Quick Run", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[8] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("run");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Run", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[9] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("build");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Build", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[10] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("outlinewindow");
 			foreach( e; result )
 			{
 				ShortKey sk = { "On/Off Left-side Window", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[11] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("messagewindow");
 			foreach( e; result )
 			{
 				ShortKey sk = { "On/Off Bottom-side Window", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[12] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("showtype");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Show Type", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[13] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("reparse");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Reparse", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[14] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("save");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Save File", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[15] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("saveall");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Save All", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[16] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("close");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Close File", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[17] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("nexttab");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Next Tab", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[18] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("prevtab");
 			foreach( e; result )
 			{
 				ShortKey sk = { "Previous Tab", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
+				GLOBAL.shortKeys[19] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("newtab");
 			foreach( e; result )
 			{
 				ShortKey sk = { "New Tab", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys ~= sk;
-			}			
+				GLOBAL.shortKeys[20] = sk;
+			}
+
+			result = root.query.descendant("shortkeys").attribute("autocomplete");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Autocomplete", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[21]= sk;
+			}
+
+			
 
 			// Get linux terminal program name
 			version( linux )
@@ -1417,9 +1450,9 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editColor.linenumBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.fold						= fromStringz(IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" )).dup;
 		version(Windows)
-			GLOBAL.editColor.selAlpha					= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" )).dup;
+			GLOBAL.editColor.selAlpha				= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" )).dup;
 		else
-			GLOBAL.editColor.selAlpha					= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" )).dup;
+			GLOBAL.editColor.selAlpha				= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" )).dup;
 
 		GLOBAL.editColor.keyWord[0]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.keyWord[1]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" )).dup;
@@ -1440,6 +1473,11 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
 		GLOBAL.showFunctionTitle					= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
 		GLOBAL.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
+		GLOBAL.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
+		GLOBAL.toggleCaseInsensitive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
+
+
+		
 
 		
 

@@ -185,11 +185,11 @@ class CScanner
 						*/
 
 					case ',', '+', '*', '/', ':', '(', ')', '[', ']', '>', '<', '=':
-						if( toLower( identifier.dup ) in identToTOK )
+						if( lowerCase( identifier.dup ) in identToTOK )
 						{
 							if( identifier.length )
 							{
-								TokenUnit t = {identToTOK[toLower( identifier.dup )], identifier, lineNum};
+								TokenUnit t = {identToTOK[lowerCase( identifier.dup )], identifier, lineNum};
 								results ~= t;
 							}
 						}
@@ -207,8 +207,8 @@ class CScanner
 
 									if( identifier.length > 2 )
 									{
-										if( toLower( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
-										if( toLower( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
+										if( lowerCase( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
+										if( lowerCase( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
 									}									
 								}
 
@@ -229,11 +229,11 @@ class CScanner
 						break;
 					
 					case '\t', ' ', '\n':
-						if( toLower( identifier.dup ) in identToTOK )
+						if( lowerCase( identifier.dup ) in identToTOK )
 						{
 							if( identifier.length )
 							{
-								TokenUnit t = {identToTOK[toLower( identifier.dup )], identifier, lineNum};
+								TokenUnit t = {identToTOK[lowerCase( identifier.dup )], identifier, lineNum};
 								results ~= t;
 							}
 						}
@@ -250,8 +250,8 @@ class CScanner
 
 									if( identifier.length > 2 )
 									{
-										if( toLower( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
-										if( toLower( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
+										if( lowerCase( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
+										if( lowerCase( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
 									}
 								}
 
@@ -292,9 +292,9 @@ class CScanner
 						{
 							if( identifier[0] < 48 || identifier[0] > 57 )
 							{
-								if( toLower( identifier.dup ) in identToTOK )
+								if( lowerCase( identifier.dup ) in identToTOK )
 								{
-									TokenUnit t = {identToTOK[toLower( identifier.dup )], identifier, lineNum};
+									TokenUnit t = {identToTOK[lowerCase( identifier.dup )], identifier, lineNum};
 									results ~= t;
 								}
 								else

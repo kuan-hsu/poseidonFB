@@ -91,6 +91,9 @@ struct GLOBAL
 	static char[]				enableParser = "ON";
 	static char[]				showFunctionTitle = "OFF";
 	static char[]				showTypeWithParams = "OFF";
+	static char[]				toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
+	static char[]				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
+	
 
 	static CScintilla[char[]]	scintillaManager;
 
@@ -166,6 +169,8 @@ static this()
 	GLOBAL.shortKeys ~= sk19;
 	ShortKey sk20 = { "New Tab", 536870990 };
 	GLOBAL.shortKeys ~= sk20;
+	ShortKey sk21 = { "Autocomplete", 536870993 };
+	GLOBAL.shortKeys ~= sk21;
 	
 
 	fontUint fu;

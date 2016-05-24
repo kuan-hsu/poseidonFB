@@ -446,10 +446,17 @@ extern(C)
 				IupSetCallback( itemExplorer, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					char[]	fullPath = actionManager.ProjectAction.getActiveProjectName();
+
 					version( Windows )
 					{
 						Util.replace( fullPath, '/', '\\' );
 						scope proc = new Process( true, "explorer " ~ "\"" ~ fullPath ~ "\"" );
+						proc.execute;
+						proc.wait;
+					}
+					else
+					{
+						scope proc = new Process( true, "xdg-open " ~ "\"" ~ fullPath ~ "\"" );
 						proc.execute;
 						proc.wait;
 					}

@@ -781,6 +781,7 @@ struct AutoComplete
 							{
 								if( _child.name.length )
 								{
+									// Bug
 									if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
 									{
 										results ~= _child;
@@ -926,10 +927,10 @@ struct AutoComplete
 				{
 					if( s.length )
 					{
+						char[] _type = removeArrayAndPointerWord( s );
+						
 						if( ++countLoop == 0 )
 						{
-							char[] _type = removeArrayAndPointerWord( s );
-
 							if( isDefaultType( _type ) ) return null;
 
 							resultNode = searchMatchNode( originalNode, _type, B_TYPE | B_CLASS | B_ENUM | B_UNION );
@@ -942,7 +943,7 @@ struct AutoComplete
 						}
 						else
 						{
-							if( !stepByStep( resultNode, s, B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_ALIAS ) ) return null;
+							if( !stepByStep( resultNode, _type, B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_ALIAS ) ) return null;
 						}
 					}
 				}
@@ -1224,6 +1225,7 @@ struct AutoComplete
 				word = text;
 			}
 		}
+		
 		else
 		{
 			word = text;
@@ -1248,10 +1250,12 @@ struct AutoComplete
 			}
 		}
 
+		/*
 		if( !bDot && !bCallTip )
 		{
 			if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return null;
 		}
+		*/
 
 		word = lowerCase( word.reverse );
 
@@ -1686,5 +1690,46 @@ struct AutoComplete
 		*/
 
 		return null;
+	}
+
+	static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput )
+	{
+		char[] list = charAdd( ih, pos, text );
+
+		if( list.length )
+		{
+			char[][] splitWord = Util.split( alreadyInput, "." );
+			if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
+
+			alreadyInput = splitWord[length-1];
+
+			//IupMessage("final",toStringz(alreadyInput));
+
+			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
+			{
+				IupSetAttribute( ih, "AUTOCSELECT", GLOBAL.cString.convert( alreadyInput ) );
+				if( IupGetInt( ih, "AUTOCSELECTEDINDEX" ) == -1 ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+			}
+			else
+			{
+				if( text == "(" )
+				{
+					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+
+					IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
+					IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+
+					IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+				}
+				else
+				{
+					IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) );
+				}
+			}
+
+			return false;
+		}
+
+		return true;
 	}
 }

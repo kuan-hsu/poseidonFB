@@ -16,6 +16,9 @@ class CShortCutDialog : CBaseDialog
 	void createLayout( int item, char[] listText )
 	{
 		Ihandle* bottom = createDlgButton();
+
+		IupSetAttribute( btnOK, "SIZE", "40x12" );
+		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );		
 		
 		char[]		shortKeyValue;
 		foreach( char[] s; Util.split( listText[30..length], "+" ) )
@@ -71,6 +74,7 @@ class CShortCutDialog : CBaseDialog
 
 
 		Ihandle* VBox0 = IupVbox( label0, label1, labelSEPARATOR, HBox0, IupFill(), bottom, null );
+		IupSetAttributes( VBox0, "MARGIN=5x5" );
 		IupAppend( _dlg, VBox0 );
 	}	
 
@@ -163,6 +167,8 @@ extern(C) // Callback for CSingleTextDialog
 			case "Close File":					pos = 17;	break;
 			case "Next Tab":					pos = 18;	break;
 			case "Previous Tab":				pos = 19;	break;
+			case "New Tab":						pos = 20;	break;
+			case "Autocomplete":				pos = 21;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;

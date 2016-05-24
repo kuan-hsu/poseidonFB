@@ -492,7 +492,13 @@ class CScintilla
 		//IupSetAttribute( sci, "FOLDFLAGS", "LEVELNUMBERS" );  
 
 		IupScintillaSendMessage( sci, 2655, 1, 0 ); // SCI_SETCARETLINEVISIBLEALWAYS = 2655,
-		IupScintillaSendMessage( sci, 2115, 1, 0 ); // SCI_AUTOCSETIGNORECASE 2115
+
+		// SCI_AUTOCSETIGNORECASE 2115
+		if( GLOBAL.toggleIgnoreCase == "ON" ) IupScintillaSendMessage( sci, 2115, 1, 0 ); else IupScintillaSendMessage( sci, 2115, 0, 0 );
+
+		// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR 2634
+		if(GLOBAL.toggleCaseInsensitive == "ON" ) IupScintillaSendMessage( sci, 2634, 1, 0 ); else IupScintillaSendMessage( sci, 2634, 0, 0 );
+		
 		IupScintillaSendMessage( sci, 2118, 0, 0 ); // SCI_AUTOCSETAUTOHIDE 2118
 		IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 
@@ -924,6 +930,39 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
+				case "Autocomplete":
+					if( sk.keyValue == c )
+					{
+						char[] 	alreadyInput;
+						char[]	lastChar;
+						int		pos = actionManager.ScintillaAction.getCurrentPos( ih );
+
+						if( pos > 0 ) lastChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ); else return IUP_IGNORE;
+
+						if( pos > 1 )
+						{
+							if( lastChar == ">" )
+							{
+								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 2 ).reverse ~ "->";
+							}
+						}
+						
+
+						if( lastChar == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1 ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse;
+					
+						try
+						{
+							if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar.dup, alreadyInput~" " );
+						}
+						catch( Exception e )
+						{
+							//IupMessage( "Error", toStringz( e.toString ) );
+						}
+
+						return IUP_IGNORE;
+					}
+					break;
+					
 				default:
 			}
 		}
@@ -990,25 +1029,8 @@ extern(C)
 					break;
 
 				default:
-					if( bWithoutList )
-					{
-						if( pos > 0 )
-						{
-							if( prevPos == pos - 1 )
-							{
-								//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "bWithoutList=True " ) );
-								break;
-							}
-							else
-							{
-								bWithoutList = false;
-								//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "bWithoutList=False " ) );
-							}
-						}
-					}
-
-
-					char[] alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
+					char[]	alreadyInput;
+					bool	bDot, bOpenParen;
 
 					if( text == ">" )
 					{
@@ -1016,13 +1038,55 @@ extern(C)
 						{
 							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
 							{
-								alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse;
+								//IupMessage("POINTER","");
+								alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1 ).reverse ~ "->";
+								bDot = true;
+								bWithoutList = false;
+							}
+						}
+					}
+					else if( text == "." )
+					{
+						bDot = true;
+					}
+					else if( text == "(" )
+					{
+						bOpenParen = true;
+					}
+					
+
+					if( bWithoutList )
+					{
+						if( pos > 0 )
+						{
+							if( prevPos == pos - 1 )
+							{
+								break;
+							}
+							else
+							{
+								bWithoutList = false;
 							}
 						}
 					}
 
-					if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
+					if( !alreadyInput.length ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
 
+					if( !bDot && !bOpenParen )
+					{
+						if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
+					}
+
+					try
+					{
+						bWithoutList = AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
+					}
+					catch( Exception e )
+					{
+
+					}
+					
+					/+
 					char[] list = AutoComplete.charAdd( ih, pos, text );
 
 					if( list.length )
@@ -1060,12 +1124,16 @@ extern(C)
 					{
 						bWithoutList = true;
 					}
+					+/
 			}
 		}
 
 		prevPos = pos;
 		return IUP_DEFAULT;
 	}
+
+
+
 
 	// Auto Ident
 	private int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )

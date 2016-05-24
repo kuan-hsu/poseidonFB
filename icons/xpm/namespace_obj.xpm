@@ -3,7 +3,7 @@ static char *namespace_obj_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    16    16       16            1",
 /* colors */
-"` c #fcfefc",
+"` c None",
 ". c #fcaa68",
 "# c #f6d66f",
 "a c #040204",
