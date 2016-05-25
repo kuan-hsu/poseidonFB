@@ -956,7 +956,7 @@ extern(C)
 						}
 						catch( Exception e )
 						{
-							//IupMessage( "Error", toStringz( e.toString ) );
+							debug IupMessage( "Error", toStringz( e.toString ) );
 						}
 
 						return IUP_IGNORE;
