@@ -841,6 +841,15 @@ struct AutoComplete
 
 	static CASTnode searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 	{
+		foreach( CASTnode _node; getMembers( originalNode ) )
+		{
+			if( _node.kind & B_KIND )
+			{
+				if( lowerCase( removeArrayAndPointerWord( _node.name ) ) == lowerCase( word ) ) return _node;
+			}
+		}
+		
+		/+
 		foreach( CASTnode _node; originalNode.getChildren() )
 		{
 			if( _node.kind & B_KIND )
@@ -857,6 +866,7 @@ struct AutoComplete
 				if( lowerCase( removeArrayAndPointerWord( _node.name ) ) == lowerCase( word ) ) return _node;
 			}
 		}
+		+/
 
 		return null;
 	}
@@ -883,6 +893,25 @@ struct AutoComplete
 		}
 
 		return resultNode;
+	}
+
+	static CASTnode[] getMembers( CASTnode AST_Head )
+	{
+		CASTnode[] result;
+
+		foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
+		{
+			if( _child.kind & ( B_UNION | B_TYPE ) )
+			{
+				if( !_child.name.length ) result ~= getMembers( _child );else result ~= _child;
+			}
+			else
+			{
+				result ~= _child;
+			}
+		}
+
+		return result;
 	}
 
 	static CASTnode getType( CASTnode originalNode )
@@ -1394,7 +1423,7 @@ struct AutoComplete
 
 								if( AST_Head.kind & ( B_TYPE | B_ENUM | B_UNION | B_CLASS | B_NAMESPACE ) )
 								{
-									foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
+									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 									{
 										listContainer ~= getListImage( _child );
 									}
@@ -1422,7 +1451,8 @@ struct AutoComplete
 								result = callTipList( AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ), splitWord[i] );
 								return Util.trim( result );
 							}
-							
+
+							/*
 							foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
 							{
 								if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 )
@@ -1431,15 +1461,26 @@ struct AutoComplete
 									//listContainer ~= _child;
 								}
 							}
+							*/
+							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+							{
+								if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 ) listContainer ~= getListImage( _child );
+							}							
 						}
 						else
 						{
 							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+							/*
 							foreach( CASTnode _child; AST_Head.getChildren() )
 							{
 								listContainer ~= getListImage( _child );
 								//listContainer ~= _child;
-							}							
+							}
+							*/
+							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+							{
+								listContainer ~= getListImage( _child );
+							}								
 						}
 						
 					}

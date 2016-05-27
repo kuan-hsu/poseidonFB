@@ -1142,16 +1142,12 @@ class CParser
 	As DataType fieldname : bits [= initializer], ...
 
 	Union
-
-	fieldname As DataType
-	Type
-
-	fieldname As DataType
-	...
-
-	End Type
-	...
-
+		fieldname As DataType
+		Type
+			fieldname As DataType
+			...
+		End Type
+		...
 	End Union
 
 	...
@@ -1359,22 +1355,17 @@ class CParser
 						tokenIndex ++;
 						break;
 
-					case TOK.Tunion:
-						parseToken( TOK.Tunion );
-						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+					case TOK.Tunion, TOK.Ttype:
+						TOK nestUnnameTOK = token().tok;
+						_lineNum = token().lineNumber;
+
+						if( next().tok == TOK.Teol || next().tok == TOK.Tcolon )
 						{
-							tokenIndex ++;
-							parseTypeBody( B_UNION );
-							if( token().tok == TOK.Tend )
-							{
-								if( next().tok == TOK.Tunion )
-								{
-									parseToken( TOK.Tend );
-									parseToken( TOK.Tunion );
-								}
-							}
+							tokenIndex += 2;
+							activeASTnode = activeASTnode.addChild( null, ( nestUnnameTOK == TOK.Tunion ? B_UNION : B_TYPE ), null, null, null, _lineNum );
+							parseTypeBody( activeASTnode.kind );
+							break;
 						}
-						break;
 
 					//case TOK.Tidentifier:
 					default:
@@ -1418,23 +1409,23 @@ class CParser
 								activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
 							}
 						}
-						
-						break;
-					/*
-					default:
-						tokenIndex ++;
-					*/
 				}
 			}
 
-			return true;
+			// After exit loop......
+			if( token().tok == TOK.Tend && next().tok == B_KIND )
+			{
+				tokenIndex += 2;
+				activeASTnode = activeASTnode.getFather;
+				return true;
+			}			
 		}
 		catch( Exception e )
 		{
 		}
 
 		return false;
-	}		
+	}
 
 	bool parseType( bool bClass = false )
 	{
