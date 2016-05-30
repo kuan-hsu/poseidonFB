@@ -614,6 +614,17 @@ struct ScintillaAction
 					cSci.saveFile();
 				}
 			}
+
+			// Change Tree Selection and move new tab pos to left 1
+			int oldPos = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+			int newPos = 0;
+			if( oldPos > 0 )
+			{
+				newPos = oldPos - 1;
+				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newPos );
+			}
+			actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, newPos, oldPos );
+			
 	
 			IupDestroy( iupSci );
 			removeFileListNode( null, cSci );
@@ -1136,7 +1147,11 @@ struct StatusBarAction
 						
 				}
 
-				if( GLOBAL.showFunctionTitle ) IupSetAttribute( GLOBAL.functionTitleHandle, "VALUE", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ) ) ) );
+				if( GLOBAL.showFunctionTitle )
+				{
+					int memberFunctionNum;
+					IupSetAttribute( GLOBAL.functionTitleHandle, "VALUE", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ), memberFunctionNum ) ) );
+				}
 			}
 		}
 		else
@@ -1545,7 +1560,8 @@ struct OutlineAction
 
 			GLOBAL.outlineTree.createTree( astHeadNode );
 
-			GLOBAL.outlineTree.changeTree( fullPath );
+			CScintilla nowCsci = ScintillaAction.getActiveCScintilla();
+			if( nowCsci == actCSci ) GLOBAL.outlineTree.changeTree( fullPath );
 		}
 		else
 		{

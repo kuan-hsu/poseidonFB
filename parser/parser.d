@@ -10,6 +10,8 @@ class CParser
 	import			Util = tango.text.Util;
 	import 			tango.io.Stdout;
 
+	import			tools;
+
 	bool			bEasyFlag = true;
 
 	TokenUnit[]		tokens;
@@ -250,7 +252,7 @@ class CParser
 			case TOK.Tsingle, TOK.Tdouble:
 			case TOK.Tstring, TOK.Tzstring, TOK.Twstring:
 			case TOK.Tany:
-				return token.identifier;
+				return lowerCase( token.identifier );
 			
 			case TOK.Tidentifier:
 				char[] _type;
@@ -667,6 +669,15 @@ class CParser
 					{
 						parseToken(); 
 
+						if( _type == "string" || _type == "zstring" || _type == "wstring" )
+						{
+							if( token().tok == TOK.Ttimes )
+							{
+								parseToken( TOK.Ttimes );
+								parseToken(); // TOK.Tnumber or	TOK.Tidentifier
+							}
+						}
+
 						while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
 						{
 							_type ~= "*";
@@ -873,6 +884,15 @@ class CParser
 							if( _type.length )
 							{
 								parseToken();
+
+								if( _type == "string" || _type == "zstring" || _type == "wstring" )
+								{
+									if( token().tok == TOK.Ttimes )
+									{
+										parseToken( TOK.Ttimes );
+										parseToken(); // TOK.Tnumber or	TOK.Tidentifier
+									}
+								}
 
 								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
 								{
@@ -1210,6 +1230,15 @@ class CParser
 						if( _type.length )
 						{
 							parseToken();
+
+							if( _type == "string" || _type == "zstring" || _type == "wstring" )
+							{
+								if( token().tok == TOK.Ttimes )
+								{
+									parseToken( TOK.Ttimes );
+									parseToken(); // TOK.Tnumber or	TOK.Tidentifier
+								}
+							}
 
 							while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
 							{

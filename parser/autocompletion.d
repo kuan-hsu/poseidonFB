@@ -419,7 +419,14 @@ struct AutoComplete
 			{
 				if( lowerCase( child.name ) == lowerCase( word ) )
 				{
-					if( line >= child.lineNumber ) results ~= child;
+					if( line < 0 )
+					{
+						results ~= child;
+					}
+					else
+					{
+						if( line >= child.lineNumber ) results ~= child;
+					}
 				}
 				/*
 				else
@@ -450,7 +457,7 @@ struct AutoComplete
 		{
 			if( child.name.length )
 			{
-				if( Util.index( lowerCase( child.name ), word ) == 0 )
+				if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
 				{
 					if( line >= child.lineNumber ) results ~= child;
 				}
@@ -848,28 +855,34 @@ struct AutoComplete
 				if( lowerCase( removeArrayAndPointerWord( _node.name ) ) == lowerCase( word ) ) return _node;
 			}
 		}
-		
-		/+
-		foreach( CASTnode _node; originalNode.getChildren() )
-		{
-			if( _node.kind & B_KIND )
-			{
-				if( lowerCase( removeArrayAndPointerWord( _node.name ) ) == lowerCase( word ) ) return _node;
-			}
-		}
-
-		// Extends
-		foreach( CASTnode _node; getBaseNodeMembers( originalNode ) )
-		{
-			if( _node.kind & B_KIND )
-			{
-				if( lowerCase( removeArrayAndPointerWord( _node.name ) ) == lowerCase( word ) ) return _node;
-			}
-		}
-		+/
 
 		return null;
 	}
+
+	static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bWholeWord = true )
+	{
+		CASTnode[] results;
+		
+		foreach( CASTnode _node; getMembers( originalNode ) )
+		{
+			if( _node.kind & B_KIND )
+			{
+				char[] name = lowerCase( removeArrayAndPointerWord( _node.name ) );
+
+				if( bWholeWord )
+				{
+					if( name == lowerCase( word ) ) results ~= _node;
+				}
+				else
+				{
+					if( Util.index( name, lowerCase( word ) ) == 0 ) results ~= _node;
+				}
+			}
+		}
+
+		return results;
+	}
+	
 
 	static CASTnode searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 	{
@@ -1005,7 +1018,7 @@ struct AutoComplete
 
 	static char[] callTipList( CASTnode[] groupAST, char[] word = null )
 	{
-		char[] result;
+		char[][] results;
 		
 		for( int i = 0; i < groupAST.length; ++ i )
 		{
@@ -1029,9 +1042,9 @@ struct AutoComplete
 					}
 
 					if( _type.length )
-						result ~= ( _type ~ " " ~ groupAST[i].name ~ _paramString ~ "\n" );
+						results ~= ( _type ~ " " ~ groupAST[i].name ~ _paramString ~ "\n" );
 					else
-						result ~= ( "void " ~ groupAST[i].name ~ _paramString ~ "\n" );
+						results ~= ( "void " ~ groupAST[i].name ~ _paramString ~ "\n" );
 				}
 			}
 			else if( groupAST[i].kind & ( B_TYPE | B_CLASS| B_UNION ) )
@@ -1042,11 +1055,25 @@ struct AutoComplete
 					{
 						if( _child.kind & B_CTOR )
 						{
-							result ~= ( "Constructor" ~ _child.type ~ "\n" );
+							results ~= ( "Constructor" ~ _child.type ~ "\n" );
 						}
 					}
 				}
 			}
+		}
+
+		results.sort;
+		
+		char[] result;
+		for( int i = 0; i < results.length; i ++ )
+		{
+			if( i > 0 )
+			{
+				if( results[i] != results[i-1] ) result ~= results[i];
+			}
+			else
+				result ~= results[i];
+
 		}
 
 		return result;
@@ -1343,10 +1370,28 @@ struct AutoComplete
 				}
 
 				auto			AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
-				char[]			functionTitle = lowerCase( getFunctionTitle( iupSci, pos ) );
+				int 			memberFunctionNum;
+				char[]			functionTitle = lowerCase( getFunctionTitle( iupSci, pos, memberFunctionNum ) );
 				int				lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				char[]			memberFunctionMotherName;
 
-				if( functionTitle.length ) AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
+				if( functionTitle.length )
+				{
+					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
+					CASTnode functionHeadNode = getFunctionAST( AST_Head, functionTitle, lineNum );
+					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
+					
+					int dotPos = Util.index( functionTitle, "." );
+					if( dotPos < functionTitle.length )
+					{
+						memberFunctionMotherName = functionTitle[0..dotPos];
+					}
+					else
+					{
+						// check Constructor or Destructor
+						if( memberFunctionNum == 1 ) memberFunctionMotherName = functionTitle;
+					}
+				}
 
 				if( AST_Head is null )
 				{
@@ -1366,7 +1411,9 @@ struct AutoComplete
 								}
 							}
 
-							return result;
+							//IupMessage( "", toStringz( "*" ~ result) );
+
+							return Util.trim( result );
 						}
 					}
 
@@ -1393,6 +1440,14 @@ struct AutoComplete
 									resultNodes			= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
 									resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
 
+									// For Type Objects
+									if( memberFunctionMotherName.length )
+									{
+										// "_searchMatchNode" also search includes
+										CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+										if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode, splitWord[i], B_ALL );
+									}
+
 									result = callTipList( resultNodes ~ resultIncludeNodes, splitWord[i] );
 									return Util.trim( result );
 								}
@@ -1402,6 +1457,13 @@ struct AutoComplete
 
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
 								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
+
+								// For Type Objects
+								if( memberFunctionMotherName.length )
+								{
+									CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode,  splitWord[i] , B_ALL, false );
+								}					
 
 								foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 								{
@@ -1413,6 +1475,17 @@ struct AutoComplete
 							{
 								// Get Members
 								AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+								if( AST_Head is null )
+								{
+									// For Type Objects
+									if( memberFunctionMotherName.length )
+									{
+										//AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
+										CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+										if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+									}					
+								}
+
 								if( AST_Head is null ) return null;
 
 								if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
@@ -1434,6 +1507,16 @@ struct AutoComplete
 						}
 
 						AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+						if( AST_Head is null )
+						{
+							// For Type Objects
+							if( memberFunctionMotherName.length )
+							{
+								CASTnode memberFunctionMotherNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+								if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND );
+							}					
+						}
+
 						if( AST_Head is null ) return null;
 
 						if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
@@ -1554,8 +1637,8 @@ struct AutoComplete
 					}			
 				}
 
-				
-				char[]			functionTitle = lowerCase( getFunctionTitle( cSci.getIupScintilla, currentPos ) );
+				int 			memberFunctionNum;
+				char[]			functionTitle = lowerCase( getFunctionTitle( cSci.getIupScintilla, currentPos, memberFunctionNum ) );
 				int				lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 
 				if( functionTitle.length ) AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
@@ -1654,14 +1737,31 @@ struct AutoComplete
 		}
 	}
 
-	static char[] getFunctionTitle( Ihandle* iupSci, int pos )
+	static char[] getFunctionTitle( Ihandle* iupSci, int pos, out int bMemberFunction )
 	{
+		bMemberFunction = -1;
+		
 		char[] result = searchHead( iupSci, pos, "sub" );
 
 		if( !result.length ) result = searchHead( iupSci, pos, "function" );
 		if( !result.length ) result = searchHead( iupSci, pos, "property" );
+		if( !result.length ) result = searchHead( iupSci, pos, "operator" );
 		if( !result.length ) result = searchHead( iupSci, pos, "constructor" );
-		if( !result.length ) result = searchHead( iupSci, pos, "destructor" );
+		if( !result.length )
+		{
+			result = searchHead( iupSci, pos, "destructor" );
+			if( result.length ) bMemberFunction = 1;
+		}
+		else
+		{
+			bMemberFunction = 1;
+		}
+
+		if( result.length )
+		{
+			if( Util.index( result, "." ) < result.length ) bMemberFunction = 1;
+		}
+		
 
 		return result;
 	}
