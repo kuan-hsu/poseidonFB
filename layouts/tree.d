@@ -838,12 +838,20 @@ extern(C)
 		// Shadow
 		//char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 
-		if( fullPath.length )
-		{
-			if( CProjectTree_remove_cb( ih ) == IUP_IGNORE ) return IUP_IGNORE;
+		Ihandle* messageDlg = IupMessageDlg();
+		IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=Warning!,BUTTONS=OKCANCEL" );
+		IupSetAttribute( messageDlg, "VALUE", toStringz( "Are you sure to delete file?" ) );
+		IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
 
-			scope f = new FilePath( fullPath );
-			f.remove();
+		if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 1 )
+		{
+			if( fullPath.length )
+			{
+				if( CProjectTree_remove_cb( ih ) == IUP_IGNORE ) return IUP_IGNORE;
+
+				scope f = new FilePath( fullPath );
+				f.remove();
+			}
 		}
 
 		return IUP_DEFAULT;

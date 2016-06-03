@@ -1639,18 +1639,48 @@ struct AutoComplete
 
 				int 			memberFunctionNum;
 				char[]			functionTitle = lowerCase( getFunctionTitle( cSci.getIupScintilla, currentPos, memberFunctionNum ) );
+				char[]			memberFunctionMotherName;
 				int				lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 
-				if( functionTitle.length ) AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
+				//if( functionTitle.length ) AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
+				if( functionTitle.length )
+				{
+					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
+					CASTnode functionHeadNode = getFunctionAST( AST_Head, functionTitle, lineNum );
+					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
+					
+					int dotPos = Util.index( functionTitle, "." );
+					if( dotPos < functionTitle.length )
+					{
+						memberFunctionMotherName = functionTitle[0..dotPos];
+
+					}
+					else
+					{
+						// check Constructor or Destructor
+						if( memberFunctionNum == 1 ) memberFunctionMotherName = functionTitle;
+					}
+				}				
 
 				if( AST_Head is null ) return;
-
 
 				for( int i = 0; i < splitWord.length; i++ )
 				{
 					if( i == 0 )
 					{
 						AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
+
+						if( AST_Head is null )
+						{
+							// For Type Objects
+							if( memberFunctionMotherName.length )
+							{
+								//AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
+								CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+								if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND | B_SUB );
+							}					
+						}
+
 						if( AST_Head is null ) return;
 
 						if( splitWord.length == 1 ) break;
@@ -1663,7 +1693,7 @@ struct AutoComplete
 						}
 						else
 						{
-							AST_Head = searchMatchMemberNode( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_NAMESPACE );
+							AST_Head = searchMatchMemberNode( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_NAMESPACE | B_SUB );
 						}
 						
 						if( AST_Head is null ) return;
@@ -1671,7 +1701,7 @@ struct AutoComplete
 
 					if( bDefintion )
 					{
-						if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+						if( AST_Head.kind & ( B_VARIABLE | B_PARAM ) )// | B_FUNCTION ) )
 						{
 							AST_Head = getType( AST_Head );
 							if( AST_Head is null ) return;
@@ -1679,7 +1709,7 @@ struct AutoComplete
 					}
 					else
 					{
-						if( i < splitWord.length )
+						if( i < splitWord.length - 1 )
 						{
 							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 							{
