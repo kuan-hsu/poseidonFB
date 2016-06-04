@@ -1104,7 +1104,7 @@ struct AutoComplete
 
 	static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 	{
-		int		countParen;
+		int		countParen, countBracket;
 		int		oriPos = pos;
 		bool	bForntEnd, bBackEnd;
 		int		documentLength = IupGetInt( iupSci, "COUNT" );
@@ -1116,16 +1116,25 @@ struct AutoComplete
 			switch( s )
 			{
 				case "(":
-					countParen ++;
+					if( countBracket == 0 ) countParen ++;
 					break;
 
 				case ")":
-					countParen --;
+					if( countBracket == 0 ) countParen --;
 					if( countParen < 0 ) bBackEnd = true;
 					break;
 
+				case "[":
+					if( countParen == 0 ) countBracket ++;
+					break;
+
+				case "]":
+					if( countParen == 0 ) countBracket --;
+					if( countBracket < 0 ) bBackEnd = true;
+					break;
+
 				case ".":
-					if( countParen == 0 ) bBackEnd = true;
+					if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
 					break;
 				
 				case "-":
@@ -1133,7 +1142,7 @@ struct AutoComplete
 					{
 						if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos + 1 ) ) == ">" )
 						{
-							if( countParen == 0 )
+							if( countParen == 0 && countBracket == 0 )
 							{
 								bBackEnd = true;
 							}
@@ -1144,8 +1153,8 @@ struct AutoComplete
 							break;
 						}
 					}
-				case " ", "\t", ":", "\n", "\r", "+", ">", "*", "/", "<":
-					if( countParen == 0 ) bBackEnd = true;
+				case " ", "\t", ":", "\n", "\r", "+", ">", "*", "/", "<", ",":
+					if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
 					break;
 
 				default:
@@ -1188,7 +1197,7 @@ struct AutoComplete
 	{
 		dchar[] word32;
 		char[]	word;
-		int		countParen;
+		int		countParen, countBracket;
 
 		try
 		{
@@ -1204,16 +1213,25 @@ struct AutoComplete
 				switch( s )
 				{
 					case ')':
-						countParen++;
+						if( countBracket == 0 ) countParen++;
 						break;
 
 					case '(':
-						countParen--;
+						if( countBracket == 0 ) countParen--;
 						if( countParen < 0 ) return word;
 						break;
 						
+					case ']':
+						if( countParen == 0 ) countBracket++;
+						break;
+
+					case '[':
+						if( countParen == 0 ) countBracket--;
+						if( countBracket < 0 ) return word;
+						break;
+						
 					case '>':
-						if( pos > 0 && countParen == 0 )
+						if( pos > 0 && countParen == 0 && countBracket == 0 )
 						{
 							if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
 							{
@@ -1223,10 +1241,10 @@ struct AutoComplete
 							}
 						}
 					case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '<':
-						if( countParen == 0 ) return word;
+						if( countParen == 0 && countBracket == 0 ) return word;
 
 					default: 
-						if( countParen == 0 )
+						if( countParen == 0 && countBracket == 0 )
 						{
 							if( UTF.isValid( s ) )
 							{
