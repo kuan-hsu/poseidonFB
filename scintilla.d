@@ -442,6 +442,8 @@ class CScintilla
 		//if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupSetAttribute( sci, "WORDWRAP", "YES" ); else IupSetAttribute( sci, "WORDWRAP", "NO" );
 		if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupScintillaSendMessage( sci, 2268, 1, 0 ); else IupScintillaSendMessage( sci, 2268, 0, 0 ); //#define SCI_SETWRAPMODE 2268
 		if( GLOBAL.editorSetting00.TabUseingSpace == "ON" ) IupSetAttribute( sci, "USETABS", "NO" ); else IupSetAttribute( sci, "USETABS", "YES" );
+		IupScintillaSendMessage( sci, 2106, cast(int) '^', 0 ); //#define SCI_AUTOCSETSEPARATOR 2106
+		IupSetAttribute( sci, "APPENDNEWLINE", "NO" );
 
 		/*
 		SCI_SETVIEWEOL 2356
@@ -979,6 +981,14 @@ extern(C)
 		AutoComplete.bAutocompletionPressEnter = true;
 			
 		char[] _text = fromStringz( text ).dup;
+
+		if( GLOBAL.toggleShowListType == "ON" )
+		{
+			int colonPos = Util.rindex( _text, "::" );
+			if( colonPos < _text.length ) _text = _text[0..colonPos];
+			_text = Util.trim( _text );
+		}
+		
 		if( _text.length )
 		{
 			if( _text[length-1] == ')' )
@@ -989,7 +999,22 @@ extern(C)
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
 					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text[0.._pos] ) );
-					//return IUP_IGNORE;
+					return IUP_DEFAULT;
+				}
+			}
+
+			if( GLOBAL.toggleShowListType == "ON" )
+			{
+				IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+				IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
+
+				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
+				{
+					IupSetAttribute( ih , "PREPEND", GLOBAL.cString.convert( _text ) );
+				}
+				else
+				{
+					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text ) );
 				}
 			}
 		}
@@ -999,8 +1024,8 @@ extern(C)
 
 	private int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
-		static bool bWithoutList;
-		static int	prevPos;
+		//static bool bWithoutList;
+		//static int	prevPos;
 
 		
 		// If un-release the key, cancel
@@ -1025,7 +1050,7 @@ extern(C)
 			{
 				case " ", "\t", "\n", "\r", ")":
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-					bWithoutList = false;
+					//bWithoutList = false;
 					break;
 
 				default:
@@ -1041,7 +1066,7 @@ extern(C)
 								//IupMessage("POINTER","");
 								alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1 ).reverse ~ "->";
 								bDot = true;
-								bWithoutList = false;
+								//bWithoutList = false;
 							}
 						}
 					}
@@ -1054,7 +1079,7 @@ extern(C)
 						bOpenParen = true;
 					}
 					
-
+					/*
 					if( bWithoutList )
 					{
 						if( pos > 0 )
@@ -1069,6 +1094,7 @@ extern(C)
 							}
 						}
 					}
+					*/
 
 					if( !alreadyInput.length ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
 
@@ -1079,7 +1105,7 @@ extern(C)
 
 					try
 					{
-						bWithoutList = AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
+						/*bWithoutList = */AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
 					}
 					catch( Exception e )
 					{
@@ -1128,7 +1154,7 @@ extern(C)
 			}
 		}
 
-		prevPos = pos;
+		//prevPos = pos;
 		return IUP_DEFAULT;
 	}
 

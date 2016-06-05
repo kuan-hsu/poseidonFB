@@ -153,13 +153,17 @@ struct FileAction
 	static char[] loadFile( char[] fullPath, inout int _encoding )
 	{
 		char[] result;
+
 		
 		scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 		char[] text = file.read;
-
+		/*
+		IupMessage( "", toStringz( Integer.toString( file.encoding() ) ) );
+		IupMessage( "", toStringz( text[0..4] ) );
+		*/
 		if( !file.bom.encoded )
 		{
-			//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
+			// IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
 			if( isUTF8WithouBOM( text ) )
 			{
 				result = text;
@@ -363,7 +367,7 @@ struct ScintillaAction
 	import parser.scanner,  parser.token, parser.parser;
 
 	public:
-	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8, char[] existData = null, bool bCreateActualFile = true )
+	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8N, char[] existData = null, bool bCreateActualFile = true )
 	{
 		// FullPath had already opened
 		if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
@@ -400,6 +404,8 @@ struct ScintillaAction
 		}
 
 		if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+
+		StatusBarAction.update();
 
 		return true;
 	}
@@ -460,6 +466,8 @@ struct ScintillaAction
 			OutlineAction.loadFile( fullPath );
 
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+
+			StatusBarAction.update();
 
 			return true;
 		}
@@ -623,6 +631,12 @@ struct ScintillaAction
 				newPos = oldPos - 1;
 				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newPos );
 			}
+			else
+			{
+				newPos = 1;
+				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newPos );
+			}
+			
 			actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, newPos, oldPos );
 			
 	
@@ -776,13 +790,13 @@ struct ScintillaAction
 		return IUP_DEFAULT;
 	}
 
-	static bool saveFile( CScintilla cSci )
+	static bool saveFile( CScintilla cSci, bool bForce = false )
 	{
 		if( cSci is null ) return false;
 		
 		try
 		{
-			if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "SAVEDSTATE" ) ) == "YES" )
+			if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "SAVEDSTATE" ) ) == "YES" || bForce )
 			{
 				char[] fullPath = cSci.getFullPath();
 
@@ -835,8 +849,8 @@ struct ScintillaAction
 				if( upperCase(fullPath) in GLOBAL.scintillaManager ) return saveFile( cSci );
 				
 				char[] newDocument = fromStringz( IupGetAttribute( cSci.getIupScintilla, "VALUE" ) ).dup;
-				ScintillaAction.newFile( fullPath, Encoding.UTF_8, newDocument );
-				FileAction.saveFile( fullPath, newDocument );
+				ScintillaAction.newFile( fullPath, cast(Encoding) cSci.encoding, newDocument );
+				FileAction.saveFile( fullPath, newDocument, cast(Encoding) cSci.encoding );
 
 				char[] originalFullPath = cSci.getFullPath;
 

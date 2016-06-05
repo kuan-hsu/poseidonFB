@@ -233,18 +233,30 @@ struct AutoComplete
 				if( posOpenParen < node.name.length ) name = node.name[0..posOpenParen];
 			}
 		}
+
+		bool bShowType = GLOBAL.toggleShowListType == "ON" ? true : false;
+		char[] type = node.type;
+
+		if( bShowType )
+		{
+			if( node.type.length )
+			{
+				int posOpenParen = Util.index( node.type, "(" );
+				if( posOpenParen < node.type.length ) type = node.type[0..posOpenParen]; else type = node.type;
+			}
+		}
 		
 		switch( node.kind )
 		{
 			case B_DEFINE | B_VARIABLE:	return name ~ "?33";
 			case B_DEFINE | B_FUNCTION:	return name ~ "?34";
 			
-			case B_SUB:					return name ~ "?" ~ Integer.toString( 25 + protAdd );
-			case B_FUNCTION:			return name ~ "?" ~ Integer.toString( 28 + protAdd );
+			case B_SUB:					return bShowType ? name ~ "~void" ~ "?" ~ Integer.toString( 25 + protAdd ) : name ~ "?" ~ Integer.toString( 25 + protAdd );
+			case B_FUNCTION:			return bShowType ? name  ~ "~" ~ type ~ "?" ~ Integer.toString( 28 + protAdd ) : name ~ "?" ~ Integer.toString( 28 + protAdd );
 			case B_VARIABLE:
 				if( node.name.length )
 				{
-					if( node.name[length-1] == ')' ) return name ~ "?" ~ Integer.toString( 0 + protAdd ); else return name ~ "?" ~ Integer.toString( 3 + protAdd );
+					if( node.name[length-1] == ')' ) return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 0 + protAdd ) : name ~ "?" ~ Integer.toString( 0 + protAdd ); else return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 3 + protAdd ) : name ~ "?" ~ Integer.toString( 3 + protAdd );
 				}
 				break;
 
@@ -258,7 +270,7 @@ struct AutoComplete
 			case B_CLASS:					return name ~ "?" ~ Integer.toString( 6 + protAdd );
 			case B_TYPE: 					return name ~ "?" ~ Integer.toString( 9 + protAdd );
 			case B_ENUM: 					return name ~ "?" ~ Integer.toString( 12 + protAdd );
-			case B_PARAM:					return name ~ "?18";
+			case B_PARAM:					return bShowType ? name ~ "~" ~ type ~ "?18" : name ~ "?18";
 			case B_ENUMMEMBER:				return name ~ "?19";
 			case B_ALIAS:					return name ~ "?20";
 			case B_NAMESPACE:				return name ~ "?24";
@@ -1338,6 +1350,7 @@ struct AutoComplete
 		{
 			if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) )
 			{
+				/+
 				/*
 				foreach( CASTnode node; listContainer )
 				{
@@ -1347,15 +1360,40 @@ struct AutoComplete
 				if( listContainer.length )
 				{
 					listContainer.sort;
-					result ~= ( listContainer[0] ~ " " );
+
+					char[]	_type;
+					int		maxLeft, maxRight;
+					
+					for( int i = 0; i < listContainer.length; ++ i )
+					{
+						if( listContainer[i].length )
+						{
+							int dollarPos = Util.rindex( listContainer[i], "~" );
+							if( dollarPos < listContainer[i].length )
+							{
+								_type = listContainer[i][dollarPos+1..length];
+								if( _type.length > maxRight ) maxRight = _type.length;
+								listContainer[i] = listContainer[i][0..dollarPos];
+								if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
+							}
+							else
+							{
+								if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
+							}
+						}
+					}
+
+					
+					result ~= ( listContainer[0] ~ "^" );
 					for( int i = 1; i < listContainer.length; ++ i )
 					{
 						if( listContainer[i].length )
 						{
-							if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ " " );
+							if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
 						}
 					}
 				}
+				+/
 			}
 			else
 			{
@@ -1420,16 +1458,25 @@ struct AutoComplete
 						if( listContainer.length )
 						{
 							listContainer.sort;
-							result ~= ( listContainer[0] ~ " " );
-							for( int i = 1; i < listContainer.length; ++ i )
+
+							for( int i = 0; i < listContainer.length; ++ i )
 							{
 								if( listContainer[i].length )
 								{
-									if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ " " );
+									if( i > 0 )
+									{
+										if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
+									}
+									else
+									{
+										result ~= ( listContainer[i] ~ "^" );
+									}
 								}
 							}
 
-							//IupMessage( "", toStringz( "*" ~ result) );
+
+							if( result.length )
+								if( result[length-1] == '^' ) result = result[0..length-1];
 
 							return Util.trim( result );
 						}
@@ -1530,8 +1577,8 @@ struct AutoComplete
 							// For Type Objects
 							if( memberFunctionMotherName.length )
 							{
-								CASTnode memberFunctionMotherNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
-								if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND );
+								CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+								if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
 							}					
 						}
 
@@ -1553,16 +1600,6 @@ struct AutoComplete
 								return Util.trim( result );
 							}
 
-							/*
-							foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
-							{
-								if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 )
-								{
-									listContainer ~= getListImage( _child );
-									//listContainer ~= _child;
-								}
-							}
-							*/
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
 								if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 ) listContainer ~= getListImage( _child );
@@ -1570,14 +1607,15 @@ struct AutoComplete
 						}
 						else
 						{
-							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
-							/*
-							foreach( CASTnode _child; AST_Head.getChildren() )
+							if( AST_Head.kind & B_NAMESPACE )
 							{
-								listContainer ~= getListImage( _child );
-								//listContainer ~= _child;
+								if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
 							}
-							*/
+							else
+							{
+								if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+							}
+
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
 								listContainer ~= getListImage( _child );
@@ -1587,7 +1625,14 @@ struct AutoComplete
 					}
 					else
 					{
-						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+						if( AST_Head.kind & B_NAMESPACE )
+						{
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
+						}
+						else
+						{
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+						}
 					}
 				}
 
@@ -1603,18 +1648,83 @@ struct AutoComplete
 				if( listContainer.length )
 				{
 					listContainer.sort;
-					result ~= ( listContainer[0] ~ " " );
-					for( int i = 1; i < listContainer.length; ++ i )
+
+					char[]	_type, _list;
+					int		maxLeft, maxRight;
+
+					if( GLOBAL.toggleShowListType == "ON" )
+					{
+						for( int i = 0; i < listContainer.length; ++ i )
+						{
+							if( listContainer[i].length )
+							{
+								int dollarPos = Util.rindex( listContainer[i], "~" );
+								if( dollarPos < listContainer[i].length )
+								{
+									_type = listContainer[i][dollarPos+1..length];
+									if( _type.length > maxRight ) maxRight = _type.length;
+									_list = listContainer[i][0..dollarPos];
+									if( _list.length > maxLeft ) maxLeft = _list.length;
+								}
+								else
+								{
+									if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
+								}
+							}
+						}
+					}
+
+					char[] formatString = "{,-" ~ Integer.toString( maxLeft ) ~ "} :: {,-" ~ Integer.toString( maxRight ) ~ "}";
+					
+					for( int i = 0; i < listContainer.length; ++ i )
 					{
 						if( listContainer[i].length )
 						{
-							if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ " " );
+							if( GLOBAL.toggleShowListType == "ON" )
+							{
+								char[] _string;
+								
+								int dollarPos = Util.rindex( listContainer[i], "~" );
+								if( dollarPos < listContainer[i].length )
+								{
+									_type = listContainer[i][dollarPos+1..length];
+									_list = listContainer[i][0..dollarPos];
+									_string = Util.trim( Stdout.layout.convert( formatString, _list, _type ) );
+								}
+								else
+								{
+									_string = listContainer[i];
+								}
+
+								if( i > 0 )
+								{
+									if( _string != listContainer[i-1] ) result ~= ( _string ~ "^" );
+								}
+								else
+								{
+									result ~= ( _string ~ "^" );
+								}
+							}
+							else
+							{
+								if( i > 0 )
+								{
+									if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
+								}
+								else
+								{
+									result ~= ( listContainer[i] ~ "^" );
+								}
+							}
 						}
 					}
 				}
 			}
-			
-			return Util.trim( result );
+
+			if( result.length )
+				if( result[length-1] == '^' ) result = result[0..length-1];
+
+			return result.dup;
 		}
 
 		return null;

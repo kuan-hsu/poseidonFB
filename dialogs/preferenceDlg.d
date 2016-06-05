@@ -107,9 +107,14 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleCASEINSENSITIVE, "VALUE", toStringz(GLOBAL.toggleCaseInsensitive.dup) );
 		IupSetHandle( "toggleCASEINSENSITIVE", toggleCASEINSENSITIVE );
 
+		Ihandle* toggleSHOWLISTTYPE = IupToggle( "Show Autocomplete List Type", null );
+		IupSetAttribute( toggleSHOWLISTTYPE, "VALUE", toStringz(GLOBAL.toggleShowListType.dup) );
+		IupSetHandle( "toggleSHOWLISTTYPE", toggleSHOWLISTTYPE );
+
+
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, hBox00, hBox00_1, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, hBox00, hBox00_1, null );
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
@@ -516,6 +521,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleWithParams", null );
 		IupSetHandle( "toggleIGNORECASE", null );
 		IupSetHandle( "toggleCASEINSENSITIVE", null );
+		IupSetHandle( "toggleSHOWLISTTYPE", null );
+	
 		IupSetHandle( "toggleAnnotation", null );
 
 		IupSetHandle( "toggleLineMargin", null );
@@ -750,6 +757,7 @@ class CPreferenceDialog : CBaseDialog
 		parserNode.element( null, "includelevel", Integer.toString( GLOBAL.includeLevel ) );
 		parserNode.element( null, "ignorecase", GLOBAL.toggleIgnoreCase );
 		parserNode.element( null, "caseinsensitive", GLOBAL.toggleCaseInsensitive );
+		parserNode.element( null, "showlisttype", GLOBAL.toggleShowListType );
 		
 
 		/*
@@ -861,7 +869,11 @@ class CPreferenceDialog : CBaseDialog
 			{
 				GLOBAL.toggleCaseInsensitive = e.value;
 			}			
-
+			result = root.query.descendant("showlisttype");
+			foreach( e; result )
+			{
+				GLOBAL.toggleShowListType = e.value;
+			}	
 
 			
 
@@ -1475,10 +1487,7 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
 		GLOBAL.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
 		GLOBAL.toggleCaseInsensitive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
-
-
-		
-
+		GLOBAL.toggleShowListType					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWLISTTYPE" ), "VALUE" ) ).dup;
 		
 
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "NO" );

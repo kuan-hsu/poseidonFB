@@ -93,6 +93,7 @@ struct GLOBAL
 	static char[]				showTypeWithParams = "OFF";
 	static char[]				toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
 	static char[]				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
+	static char[]				toggleShowListType = "OFF";
 	
 
 	static CScintilla[char[]]	scintillaManager;

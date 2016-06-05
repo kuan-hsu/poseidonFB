@@ -377,7 +377,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.182\nBy Kuan Hsu (Taiwan)\n2016.06.04" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.183\nBy Kuan Hsu (Taiwan)\n2016.06.05" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -583,7 +583,7 @@ extern(C)
 
 		if( !noname.length ) noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".bas";
 
-		actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false );
+		actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
 
 		/+
 		scope dlg = new CFileDlg( "Create New File", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
@@ -1117,7 +1117,7 @@ extern(C)
 				default: return IUP_DEFAULT;
 			}
 
-			ScintillaAction.saveFile( cSci );
+			ScintillaAction.saveFile( cSci, true );
 			actionManager.StatusBarAction.update();
 		}
 		return IUP_DEFAULT;
