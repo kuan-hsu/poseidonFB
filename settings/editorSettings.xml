@@ -25,7 +25,7 @@
     <includelevel>3</includelevel>
     <ignorecase>ON</ignorecase>
     <caseinsensitive>ON</caseinsensitive>
-    <showlisttype>OFF</showlisttype>
+    <showlisttype>ON</showlisttype>
   </parser>
   <recentProjects>
     <name>D:/CodingPark/MyCode/FBcode/Shoot : Shoot</name>

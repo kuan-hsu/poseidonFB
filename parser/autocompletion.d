@@ -1108,6 +1108,58 @@ struct AutoComplete
 		}
 	}
 
+	static char[][] getDivideWord( char[] word )
+	{
+		char[][]	splitWord;
+		char[]		tempWord;
+
+		//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( word ) );
+		for( int i = 0; i < word.length ; ++ i )
+		{
+			if( word[i] == '.' )
+			{
+				splitWord ~= tempWord;
+				tempWord = "";
+			}
+			else if( word[i] == '-' )
+			{
+				if( i < word.length - 1 )
+				{
+					if( word[i+1] == '>' )
+					{
+						splitWord ~= tempWord;
+						tempWord = "";
+						i ++;
+					}
+					else
+					{
+						tempWord ~= word[i];
+					}
+				}
+				else
+				{
+					tempWord ~= word[i];
+				}
+			}
+			else
+			{
+				tempWord ~= word[i];
+			}
+		}
+
+		splitWord ~= tempWord;
+
+		/*
+		foreach( char[] s; splitWord )
+		{
+			IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( s ) );
+		}
+		IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\n" ) );
+		*/
+
+		return splitWord;
+	}
+
 
 	public:
 	static bool bEnter;
@@ -1402,8 +1454,9 @@ struct AutoComplete
 				IupSetAttribute( iupSci, "AUTOCCANCEL", GLOBAL.cString.convert( "YES" ) );
 
 				// Divide word
-				char[][] splitWord = Util.split( word, "." );
-				if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );
+				/*char[][] splitWord = Util.split( word, "." );
+				if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );*/
+				char[][]	splitWord = getDivideWord( word );
 
 				if( !splitWord[0].length )
 				{
@@ -1747,8 +1800,7 @@ struct AutoComplete
 				word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
 				word = lowerCase( word.reverse );
 
-				char[][] splitWord = Util.split( word, "." );
-				if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );
+				char[][] splitWord = getDivideWord( word );
 
 				auto			AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 
@@ -1997,12 +2049,11 @@ struct AutoComplete
 
 		if( list.length )
 		{
-			char[][] splitWord = Util.split( alreadyInput, "." );
-			if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
+			/*char[][] splitWord = Util.split( alreadyInput, "." );
+			if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );*/
+			char[][] splitWord = getDivideWord( alreadyInput );
 
 			alreadyInput = splitWord[length-1];
-
-			//IupMessage("final",toStringz(alreadyInput));
 
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
 			{

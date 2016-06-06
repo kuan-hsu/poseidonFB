@@ -939,7 +939,7 @@ extern(C)
 						char[]	lastChar;
 						int		pos = actionManager.ScintillaAction.getCurrentPos( ih );
 
-						if( pos > 0 ) lastChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ); else return IUP_IGNORE;
+						if( pos > 0 ) lastChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ).dup; else return IUP_IGNORE;
 
 						if( pos > 1 )
 						{
@@ -949,12 +949,11 @@ extern(C)
 							}
 						}
 						
-
 						if( lastChar == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1 ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse;
 					
 						try
 						{
-							if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar.dup, alreadyInput~" " );
+							if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput );
 						}
 						catch( Exception e )
 						{
@@ -1205,7 +1204,16 @@ extern(C)
 		}
 		else
 		{
-			IupSetAttribute( ih, "BRACEBADLIGHT", toStringz( "-1" ) );
+			close = IupScintillaSendMessage( ih, 2353, pos - 1, 0 ); // SCI_BRACEMATCH = 2353,
+			if( close > -1 )
+			{
+				char[] highlightPos = Integer.toString( pos - 1 ) ~ ":" ~ Integer.toString( close );
+				IupSetAttribute( ih, "BRACEHIGHLIGHT", toStringz( highlightPos ) );
+			}
+			else
+			{
+				IupSetAttribute( ih, "BRACEBADLIGHT", toStringz( "-1" ) );
+			}
 		}
 		
 
