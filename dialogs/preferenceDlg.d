@@ -111,10 +111,15 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleSHOWLISTTYPE, "VALUE", toStringz(GLOBAL.toggleShowListType.dup) );
 		IupSetHandle( "toggleSHOWLISTTYPE", toggleSHOWLISTTYPE );
 
+		Ihandle* toggleSHOWALLMEMBER = IupToggle( "Show All Members", null );
+		IupSetAttribute( toggleSHOWALLMEMBER, "VALUE", toStringz(GLOBAL.toggleShowAllMember.dup) );
+		IupSetHandle( "toggleSHOWALLMEMBER", toggleSHOWALLMEMBER );
+		
+
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, hBox00, hBox00_1, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, /*toggleSHOWALLMEMBER,*/ hBox00, hBox00_1, null );
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
@@ -522,6 +527,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleIGNORECASE", null );
 		IupSetHandle( "toggleCASEINSENSITIVE", null );
 		IupSetHandle( "toggleSHOWLISTTYPE", null );
+		IupSetHandle( "toggleSHOWALLMEMBER", null );
+		
 	
 		IupSetHandle( "toggleAnnotation", null );
 
@@ -758,6 +765,7 @@ class CPreferenceDialog : CBaseDialog
 		parserNode.element( null, "ignorecase", GLOBAL.toggleIgnoreCase );
 		parserNode.element( null, "caseinsensitive", GLOBAL.toggleCaseInsensitive );
 		parserNode.element( null, "showlisttype", GLOBAL.toggleShowListType );
+		parserNode.element( null, "showallmember", GLOBAL.toggleShowAllMember );
 		
 
 		/*
@@ -874,7 +882,11 @@ class CPreferenceDialog : CBaseDialog
 			{
 				GLOBAL.toggleShowListType = e.value;
 			}	
-
+			result = root.query.descendant("showallmember");
+			foreach( e; result )
+			{
+				GLOBAL.toggleShowAllMember = e.value;
+			}
 			
 
 			result = root.query.descendant("recentProjects").descendant("name");
@@ -1488,6 +1500,7 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
 		GLOBAL.toggleCaseInsensitive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
 		GLOBAL.toggleShowListType					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWLISTTYPE" ), "VALUE" ) ).dup;
+		GLOBAL.toggleShowAllMember					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWALLMEMBER" ), "VALUE" ) ).dup;
 		
 
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "NO" );

@@ -53,22 +53,19 @@ class CFindInFilesDialog : CBaseDialog
 
 		// Scope
 		Ihandle* toggleDocument = IupToggle( "Document", null );
-		IupSetAttributes( toggleDocument, "RADIO=YES");
 		IupSetHandle( "CFindInFilesDialog_toggleDocument", toggleDocument );
 		IupSetCallback( toggleDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 		
 		Ihandle* toggleAllDocument = IupToggle( "All Documents", null );
-		IupSetAttributes( toggleAllDocument, "RADIO=YES");
 		IupSetHandle( "CFindInFilesDialog_toggleAllDocument", toggleAllDocument );
 		IupSetCallback( toggleAllDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 		
 		Ihandle* togglePrj = IupToggle( "Project", null );
-		IupSetAttributes( togglePrj, "RADIO=YES");
+		IupSetAttributes( togglePrj, "VALUE=ON");
 		IupSetHandle( "CFindInFilesDialog_togglePrj", togglePrj );
 		IupSetCallback( togglePrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 
 		Ihandle* toggleAllPrj = IupToggle( "All Projects", null );
-		IupSetAttributes( toggleAllPrj, "RADIO=YES");
 		IupSetHandle( "CFindInFilesDialog_toggletoggleAllPrj", toggleAllPrj );
 		IupSetCallback( toggleAllPrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 

@@ -16,20 +16,14 @@ import tango.io.Stdout;
 void createMessagePanel()
 {
 	GLOBAL.outputPanel = IupText( null );
-	IupSetAttribute( GLOBAL.outputPanel, "MULTILINE", "YES" );
-	IupSetAttribute( GLOBAL.outputPanel, "SCROLLBAR", "VERTICAL" );
-	IupSetAttribute( GLOBAL.outputPanel, "EXPAND", "YES" );
-	IupSetAttribute( GLOBAL.outputPanel, "VISIBLELINES", "0" );
+	IupSetAttributes( GLOBAL.outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
 	IupSetAttribute( GLOBAL.outputPanel, "VISIBLECOLUMNS", null );
 	IupSetCallback( GLOBAL.outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
 	//IupSetAttribute( GLOBAL.outputPanel, "FORMATTING", "YES");
 	
 
 	GLOBAL.searchOutputPanel = IupText( null );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "MULTILINE", "YES" );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "SCROLLBAR", "VERTICAL" );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "EXPAND", "YES" );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLELINES", "0" );
+	IupSetAttributes( GLOBAL.searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLECOLUMNS", null );
 	IupSetCallback( GLOBAL.searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
 
@@ -124,8 +118,13 @@ extern(C)
 												IupSetAttribute( GLOBAL.scintillaManager[upperCase(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 											}
 										}
+
+										// Make all line be selected
+										int _line, _col;
+										IupTextConvertPosToLinCol( ih, IupConvertXYToPos( ih, x, y ), &_line, &_col );
+										IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",1:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length + 1 ) ) );
 										
-										return IUP_DEFAULT;
+										return IUP_IGNORE;
 									}
 								}
 							}
@@ -177,7 +176,12 @@ extern(C)
 										fileName = lineText[0..openPos];
 										ScintillaAction.openFile( fileName.dup, lineNumber );
 
-										return IUP_DEFAULT;
+										// Make all line be selected
+										int _line, _col;
+										IupTextConvertPosToLinCol( ih, IupConvertXYToPos( ih, x, y ), &_line, &_col );
+										IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",1:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length + 1 ) ) );										
+
+										return IUP_IGNORE;
 									}
 								}
 							}

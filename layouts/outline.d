@@ -2,7 +2,7 @@
 
 private import iup.iup;
 
-private import global, scintilla, actionManager, menu;
+private import global, scintilla, actionManager, menu, tools;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 private import parser.ast;
 
@@ -277,6 +277,16 @@ class COutline
 		zBoxHandle = IupZbox( null );
 	}
 
+	void setActiveTree( Ihandle* ih )
+	{
+		activeTreeOutline = ih;
+	}
+
+	Ihandle* getActiveTree()
+	{
+		return activeTreeOutline;
+	}
+
 
 	void cleanTree( char[] fullPath )
 	{
@@ -372,6 +382,8 @@ extern(C)
 				if( pressed == 0 )
 				{
 					IupSetAttributeId( ih, "MARKED", id, "YES" );
+
+					GLOBAL.outlineTree.setActiveTree( ih );
 					
 					Ihandle* itemRefresh = IupItem( "Refresh", null );
 					IupSetCallback( itemRefresh, "ACTION", cast(Icallback) &COutline_refresh );
@@ -380,10 +392,16 @@ extern(C)
 					Ihandle* itemExpand = IupItem( "Expand/Contract All", null );
 					IupSetCallback( itemExpand, "ACTION", cast(Icallback) &COutline_expand );
 					IupSetHandle( "outline_rightclickexpand", ih );
+
+					Ihandle* itemSearch = IupItem( "Mark Search", null );
+					IupSetCallback( itemSearch, "ACTION", cast(Icallback) &COutline_search );
+					IupSetHandle( "outline_search", ih );
 					
 
 					Ihandle* popupMenu = IupMenu( 	itemRefresh,
 													itemExpand,
+													IupSeparator(),
+													itemSearch,
 													null
 												);
 
@@ -425,7 +443,42 @@ extern(C)
 		}
 		IupSetHandle( "outline_rightclickexpand", null );
 		return IUP_DEFAULT;
-	}	
+	}
+
+	private int COutline_search( Ihandle *ih )
+	{
+		Ihandle* _iih = IupGetHandle( "outline_search" );
+		if( _iih != null )
+		{
+			// Open Dialog Window
+			scope test = new CSingleTextDialog( 275, 96, "Mark Search Outline...", "Target:", null, false );
+			char[] target = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+			if( target.length )
+			{
+				Ihandle* treeHandle = GLOBAL.outlineTree.getActiveTree;
+				if( treeHandle != null )
+				{
+					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
+					{
+						IupSetAttributeId( treeHandle, "COLOR", i, "0 0 0" );
+					}
+					
+					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
+					{
+						//IupMessage( "", IupGetAttributeId( treeHandle, "TITLE", i ) );
+						char[] title = fromStringz( IupGetAttributeId( treeHandle, "TITLE", i ) );
+						int colonPos = Util.index( title, ":" );
+						if( colonPos < title.length ) title = title[0..colonPos].dup;
+
+						if( Util.index( lowerCase( title ), lowerCase( target ) ) < title.length ) IupSetAttributeId( treeHandle, "COLOR", i, "0 0 255" );
+					}
+				}
+			}
+		}
+		IupSetHandle( "outline_search", null );
+		return IUP_DEFAULT;
+	}
+	
 
 	int COutline_showParams( Ihandle *ih )
 	{

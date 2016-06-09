@@ -1852,6 +1852,15 @@ struct AutoComplete
 
 						if( AST_Head is null )
 						{
+							if( memberFunctionMotherName.length )
+							{
+								//IupMessage("",toStringz(memberFunctionMotherName ~ "." ~ word));
+								AST_Head = searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName ~ "." ~ word, B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
+							}
+						}
+
+						if( AST_Head is null )
+						{
 							// For Type Objects
 							if( memberFunctionMotherName.length )
 							{

@@ -16,25 +16,6 @@ private
 	import tango.text.convert.Utf;
 }
 
-/*
-struct TextToFind 
-{
-	int start;
-	int end; 
-	char* searchPattern;
-	int startFound; 
-	int endFound; 
-		
-	static TextToFind opCall(char[] searchPattern, int start, int end)
-	{
-		TextToFind tf;
-		tf.searchPattern = toStringz(searchPattern);
-		tf.start = start;
-		tf.end = end;
-		return tf;
-	}
-}
-*/
 import		parser.autocompletion, tools;
 
 
@@ -948,12 +929,12 @@ extern(C)
 								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 2 ).reverse ~ "->";
 							}
 						}
-						
+
 						if( lastChar == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1 ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse;
 					
 						try
 						{
-							if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput );
+							if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
 						}
 						catch( Exception e )
 						{
@@ -997,7 +978,7 @@ extern(C)
 				{
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
-					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text[0.._pos] ) );
+					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text[0.._pos].dup ) );
 					return IUP_DEFAULT;
 				}
 			}
@@ -1009,11 +990,11 @@ extern(C)
 
 				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
 				{
-					IupSetAttribute( ih , "PREPEND", GLOBAL.cString.convert( _text ) );
+					IupSetAttribute( ih , "PREPEND", GLOBAL.cString.convert( _text.dup ) );
 				}
 				else
 				{
-					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text ) );
+					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text.dup ) );
 				}
 			}
 		}
@@ -1110,46 +1091,6 @@ extern(C)
 					{
 
 					}
-					
-					/+
-					char[] list = AutoComplete.charAdd( ih, pos, text );
-
-					if( list.length )
-					{
-						bWithoutList = false;
-						
-						char[][] splitWord = Util.split( alreadyInput, "." );
-						if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );
-
-						alreadyInput = splitWord[length-1];
-
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
-						{
-							IupSetAttribute( ih, "AUTOCSELECT", GLOBAL.cString.convert( alreadyInput ) );
-							if( IupGetInt( ih, "AUTOCSELECTEDINDEX" ) == -1 ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-						}
-						else
-						{
-							if( text == "(" )
-							{
-								if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-
-								IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
-								IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-
-								IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
-							}
-							else
-							{
-								IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) );
-							}
-						}
-					}
-					else
-					{
-						bWithoutList = true;
-					}
-					+/
 			}
 		}
 

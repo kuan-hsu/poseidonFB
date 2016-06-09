@@ -1084,10 +1084,11 @@ class CDebugger
 		
 		if( DebugControl !is null ) delete DebugControl;
 		IupSetAttribute( consoleHandle, "VALUE", "" );
-		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
-
-		IupSetAttribute( localTreeHandle, "DELNODE", "ALL" ); 
+		IupSetAttribute( GLOBAL.debugPanel.getConsoleCommandInputHandle, "VALUE", "" ); // Clear Input Text
 		
+		IupSetAttribute( localTreeHandle, "DELNODE", "ALL" ); 
+		IupSetAttribute( argTreeHandle, "DELNODE", "ALL" ); 
+		IupSetAttribute( shareTreeHandle, "DELNODE", "ALL" );
 		IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
 		IupSetAttribute( regListHandle, "REMOVEITEM", "ALL" ); 
 		//IupSetAttribute( bpListHandle, "REMOVEITEM", "ALL" ); // Remove All LIst Items
@@ -1099,7 +1100,8 @@ class CDebugger
 			listValue[0..2] = "-1";
 			IupSetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ), toStringz( listValue.dup ) );
 		}
-		
+
+		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
 	}
 
 	bool runDebug()
@@ -1705,7 +1707,7 @@ extern( C )
 						GLOBAL.debugPanel.sendCommand( "set var " ~ varName ~ " = " ~  value ~ "\n", false );
 
 						int posCloseParen = Util.index( title, ") " );
-						if( posCloseParen < title.length ) IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..posCloseParen+3] ~ value ) );else IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..assignPos+3] ~ value ) );
+						if( posCloseParen < title.length ) IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..posCloseParen+2] ~ value ) );else IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..assignPos+3] ~ value ) );
 					}
 				}
 			}
