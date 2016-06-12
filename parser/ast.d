@@ -13,10 +13,11 @@ class CASTnode
 	char[]				type;
 	char[]				base;
 	int					lineNumber;
+	int					endLineNum;
 
 	this(){}
 
-	this( char[] _name, int _kind, char[] _protection, char[] _type, char[] _base, int _lineNumber )
+	this( char[] _name, int _kind, char[] _protection, char[] _type, char[] _base, int _lineNumber, int _endLineNum = -1 )
 	{
 		name = _name;
 		kind = _kind;
@@ -24,6 +25,7 @@ class CASTnode
 		type = _type;
 		base = _base;
 		lineNumber = _lineNumber;
+		endLineNum = _endLineNum = -1 ? _lineNumber : _endLineNum;
 	}
 
 	~this()
@@ -42,9 +44,9 @@ class CASTnode
 		return children.length - 1;
 	}
 
-	CASTnode addChild( char[] _name, int _kind, char[] _protection, char[] _type, char[] _base, int _lineNumber  )
+	CASTnode addChild( char[] _name, int _kind, char[] _protection, char[] _type, char[] _base, int _lineNumber, int _endLineNum = -1  )
 	{
-		CASTnode _child = new CASTnode( _name, _kind, _protection, _type, _base, _lineNumber );
+		CASTnode _child = new CASTnode( _name, _kind, _protection, _type, _base, _lineNumber, _endLineNum );
 		_child.father = this;
 		children ~= _child;
 		return _child;
@@ -57,11 +59,17 @@ class CASTnode
 		return null;
 	}
 
-	CASTnode getFather(){ return father; }
+	CASTnode getFather( int _endLineNum = -1 )
+	{
+		if( _endLineNum > 0 ) endLineNum = _endLineNum;
+		return father;
+	}
 	
 	CASTnode[] getChildren(){ return children; }
 
 	int getChildrenCount(){ return children.length; }
+
+	void zeroChildCount(){ children.length = 0; }// Warning, very dangerous! 
 }
 
 const int B_VARIABLE = 1;
@@ -84,6 +92,7 @@ const uint B_NAMESPACE = 65536;
 const uint B_MACRO = 131072;
 const uint B_SCOPE = 262144;
 const uint B_DEFINE = 524288;
+const uint B_OPERATOR  = 1048576;
 
 const int B_ALL = B_VARIABLE | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_PARAM | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_INCLUDE | B_ENUMMEMBER | B_ALIAS | B_NAMESPACE | B_MACRO;
 const int B_FIND = B_VARIABLE | B_FUNCTION | B_PROPERTY | B_PARAM | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_ALIAS | B_NAMESPACE | B_MACRO;// | B_SUB;

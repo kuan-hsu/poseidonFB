@@ -2,7 +2,7 @@
 
 private import iup.iup, iup.iup_scintilla;
 
-private import global, project, scintilla, actionManager;
+private import global, project, scintilla, actionManager, menu;
 private import dialogs.baseDlg;
 
 private import tango.stdc.stringz, Util = tango.text.Util;
@@ -306,15 +306,34 @@ extern(C) // Callback for CFindInFilesDialog
 								count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
 							}
 						}
+						else
+						{
+							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
+							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
+							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Active Project Be Selected.\n" ) );
+							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
+							return IUP_DEFAULT;
+						}
 						break;
 
 					default:
-						foreach( prj; GLOBAL.projectManager )
+						if( GLOBAL.projectManager.length )
 						{
-							foreach( char[] s; prj.sources ~prj.includes )
+							foreach( prj; GLOBAL.projectManager )
 							{
-								count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
+								foreach( char[] s; prj.sources ~ prj.includes )
+								{
+									count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
+								}
 							}
+						}
+						else
+						{
+							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
+							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
+							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Any Project Be Selected.\n" ) );
+							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
+							return IUP_DEFAULT;
 						}
 				}
 

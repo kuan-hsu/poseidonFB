@@ -63,6 +63,15 @@ class COutline
 				}
 				break;
 
+			case B_OPERATOR:
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_operator") );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_operator" ) );
+				}
+				
+				break;
+
 			case B_PROPERTY:
 				if(_node.type.length )
 				{
@@ -155,7 +164,14 @@ class COutline
 					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
 				}				
 				break;
-				
+
+			case B_SCOPE:
+				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( activeTreeOutline, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
+				}				
+				break;	
 
 			default:
 				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
@@ -168,13 +184,13 @@ class COutline
 
 		if( _node is null ) return;
 
-		if( _node.kind & B_SCOPE ) return;
+		//if( _node.kind & B_SCOPE ) return;
 
 		if( _node.getChildrenCount > 0 )
 		{
 			switch( _node.kind )
 			{
-				case B_FUNCTION, B_PROPERTY:
+				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
 					char[] _type = _node.type;
 					char[] _paramString;
 
@@ -196,6 +212,10 @@ class COutline
 					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
 					break;
 
+				case B_SCOPE:
+					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, null );
+					break;				
+
 				default:
 					IupSetAttributeId( activeTreeOutline, "ADDBRANCH", bracchID, GLOBAL.cString.convert( _node.name ) );
 			}
@@ -211,9 +231,9 @@ class COutline
 		else
 		{
 			bool bNoImage;
-			switch( _node.kind & 524287 )
+			switch( _node.kind & 2097151 )
 			{
-				case B_FUNCTION, B_PROPERTY:
+				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
 					char[] _type = _node.type;
 					char[] _paramString;
 					
@@ -352,7 +372,13 @@ extern(C)
 	private int COutline_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		int id = IupConvertXYToPos( ih, x, y );
-		
+
+		if( fromStringz( IupGetAttribute( ih, "MARKMODE" ) ) == "MULTIPLE" )
+		{
+			IupSetAttributes( ih, GLOBAL.cString.convert( "MARK=CLEARALL" ) );
+			IupSetAttributes( ih, GLOBAL.cString.convert( "MARKMODE=SINGLE" ) );
+		}
+
 		if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 		{
 			char[] _s = fromStringz( status ).dup;
@@ -458,10 +484,14 @@ extern(C)
 				Ihandle* treeHandle = GLOBAL.outlineTree.getActiveTree;
 				if( treeHandle != null )
 				{
+					IupSetAttributes( treeHandle, GLOBAL.cString.convert( "MARKMODE=MULTIPLE" ) );
+					/*
 					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
 					{
 						IupSetAttributeId( treeHandle, "COLOR", i, "0 0 0" );
 					}
+					*/
+					IupSetAttributeId( treeHandle, "MARKED", 0, "NO" );
 					
 					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
 					{
@@ -470,7 +500,7 @@ extern(C)
 						int colonPos = Util.index( title, ":" );
 						if( colonPos < title.length ) title = title[0..colonPos].dup;
 
-						if( Util.index( lowerCase( title ), lowerCase( target ) ) < title.length ) IupSetAttributeId( treeHandle, "COLOR", i, "0 0 255" );
+						if( Util.index( lowerCase( title ), lowerCase( target ) ) < title.length ) IupSetAttributeId( treeHandle, "MARKED", i, "YES" );//IupSetAttributeId( treeHandle, "COLOR", i, "0 0 255" );
 					}
 				}
 			}

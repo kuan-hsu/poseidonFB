@@ -1515,7 +1515,7 @@ struct SearchAction
 struct OutlineAction
 {
 	private:
-	import scintilla;
+	import scintilla, parser.ast;
 	import parser.scanner, parser.token, parser.parser;
 
 	import tango.io.FilePath, tango.text.Ascii;
@@ -1599,7 +1599,6 @@ struct OutlineAction
 			{
 				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
 			}			
-
 		}
 	}
 
@@ -1620,5 +1619,24 @@ struct OutlineAction
 				}
 			}
 		}
-	}	
+	}
+
+	static CASTnode parserText( char[] text )
+	{
+		// Don't Create Tree
+		// Parser
+		try
+		{
+			scope scanner = new CScanner;
+
+			TokenUnit[] tokens = scanner.scan( text );
+			scope _parser = new CParser( tokens );
+			return _parser.parse( "x.bas" );
+		}
+		catch( Exception e )
+		{
+		}
+
+		return null;
+	}
 }

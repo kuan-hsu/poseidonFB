@@ -10,7 +10,7 @@ enum TOK
 	Tmod,				// mod
 	Tintegerdiv,		// \
 	Tshl,				// shl
-	Tshr,				// dhr
+	Tshr,				// shr
 	Tcaret,				// ^
 
 	Tgreater,			// >
@@ -47,7 +47,7 @@ enum TOK
 	Tandalso,
 	Torelse,
 
-
+	Tlet,
 	Tfor,
 	Tto,
 	Tnext,
@@ -136,6 +136,7 @@ enum TOK
 	Tconstructor,
 	Tdestructor,
 	Tproperty,
+	Toperator,
 	Tthis,
 	Tbase,
 
@@ -219,6 +220,7 @@ static this()
 	identToTOK["andalso"]	= TOK.Tandalso;
 	identToTOK["orelse"]	= TOK.Torelse;
 
+	identToTOK["let"]		= TOK.Tlet;
 	identToTOK["for"]		= TOK.Tfor;
 	identToTOK["to"]		= TOK.Tto;
 	identToTOK["next"]		= TOK.Tnext;
@@ -311,6 +313,7 @@ static this()
 	identToTOK["constructor"]	= TOK.Tconstructor;
 	identToTOK["destructor"]	= TOK.Tdestructor;
 	identToTOK["property"]		= TOK.Tproperty;
+	identToTOK["operator"]		= TOK.Toperator;
 	identToTOK["this"]			= TOK.Tthis;
 	identToTOK["base"]			= TOK.Tbase;
 

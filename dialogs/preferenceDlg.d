@@ -114,13 +114,37 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleSHOWALLMEMBER = IupToggle( "Show All Members", null );
 		IupSetAttribute( toggleSHOWALLMEMBER, "VALUE", toStringz(GLOBAL.toggleShowAllMember.dup) );
 		IupSetHandle( "toggleSHOWALLMEMBER", toggleSHOWALLMEMBER );
+
+
+		Ihandle* toggleLiveNone = IupToggle( "None", null );
+		IupSetHandle( "toggleLiveNone", toggleLiveNone );
+
+		Ihandle* toggleLiveLight = IupToggle( "Light", null );
+		IupSetHandle( "toggleLiveLight", toggleLiveLight );
 		
+		Ihandle* toggleLiveFull = IupToggle( "Full", null );
+		IupSetHandle( "toggleLiveFull", toggleLiveFull );
+		IupSetAttribute( toggleLiveFull, "ACTIVE", "NO" );
+
+		switch( GLOBAL.liveLevel )
+		{
+			case 1:		IupSetAttribute( toggleLiveLight, "VALUE", "ON" ); break;
+			case 2:		IupSetAttribute( toggleLiveFull, "VALUE", "ON" ); break;
+			default:	IupSetAttribute( toggleLiveNone, "VALUE", "ON" ); break;
+		}
+
+		Ihandle* hBoxLive = IupHbox( toggleLiveNone, toggleLiveLight, toggleLiveFull, null );
+		IupSetAttributes( hBoxLive, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES,EXPANDCHILDREN=YES,SIZE=270" );
+		Ihandle* radioLive = IupRadio( hBoxLive );
+		Ihandle* frameLive = IupFrame( radioLive );
+		//IupSetAttribute( frameLive, "SIZE", "260x" );
+		IupSetAttribute( frameLive, "TITLE", "ParseLive! Level");
 
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, /*toggleSHOWALLMEMBER,*/ hBox00, hBox00_1, null );
-		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1" );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, /*toggleSHOWALLMEMBER,*/ frameLive, hBox00, hBox00_1, null );
+		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
 		IupSetAttribute( frameParser, "TITLE", "Parser Setting");
@@ -528,6 +552,9 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleCASEINSENSITIVE", null );
 		IupSetHandle( "toggleSHOWLISTTYPE", null );
 		IupSetHandle( "toggleSHOWALLMEMBER", null );
+		IupSetHandle( "toggleLiveNone", null );
+		IupSetHandle( "toggleLiveLight", null );
+		IupSetHandle( "toggleLiveFull", null );		
 		
 	
 		IupSetHandle( "toggleAnnotation", null );
@@ -766,6 +793,7 @@ class CPreferenceDialog : CBaseDialog
 		parserNode.element( null, "caseinsensitive", GLOBAL.toggleCaseInsensitive );
 		parserNode.element( null, "showlisttype", GLOBAL.toggleShowListType );
 		parserNode.element( null, "showallmember", GLOBAL.toggleShowAllMember );
+		parserNode.element( null, "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 		
 
 		/*
@@ -887,6 +915,12 @@ class CPreferenceDialog : CBaseDialog
 			{
 				GLOBAL.toggleShowAllMember = e.value;
 			}
+			result = root.query.descendant("livelevel");
+			foreach( e; result )
+			{
+				GLOBAL.liveLevel = Integer.atoi( e.value );
+			}
+			
 			
 
 			result = root.query.descendant("recentProjects").descendant("name");
@@ -1501,6 +1535,17 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.toggleCaseInsensitive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
 		GLOBAL.toggleShowListType					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWLISTTYPE" ), "VALUE" ) ).dup;
 		GLOBAL.toggleShowAllMember					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWALLMEMBER" ), "VALUE" ) ).dup;
+
+
+		if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveNone" ), "VALUE" ) ) == "ON" )
+			GLOBAL.liveLevel = 0;
+		else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveLight" ), "VALUE" ) ) == "ON" )
+			GLOBAL.liveLevel = 1;
+		else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveFull" ), "VALUE" ) ) == "ON" )
+			GLOBAL.liveLevel = 2;
+		else
+			GLOBAL.liveLevel = 0;
+			
 		
 
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "NO" );
@@ -1545,4 +1590,4 @@ extern(C) // Callback for CPreferenceDialog
 
 		return IUP_DEFAULT;
 	}
-}	
+}

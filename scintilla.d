@@ -16,7 +16,7 @@ private
 	import tango.text.convert.Utf;
 }
 
-import		parser.autocompletion, tools;
+import		parser.autocompletion, parser.live, tools;
 
 
 class CScintilla
@@ -48,7 +48,7 @@ class CScintilla
 		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
 
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
-		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
+		IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
 		IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
 		IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
@@ -704,7 +704,18 @@ extern(C)
 
 	private int CScintilla_valuechanged_cb( Ihandle* ih )
 	{
-		actionManager.StatusBarAction.update();
+		//actionManager.StatusBarAction.update();
+		if( GLOBAL.liveLevel > 0 )
+		{
+			try
+			{
+				LiveParser.parseCurrentLine();
+			}
+			catch( Exception e )
+			{
+
+			}
+		}
 
 		return IUP_DEFAULT;
 	}
@@ -1028,7 +1039,26 @@ extern(C)
 			
 			switch( text )
 			{
-				case " ", "\t", "\n", "\r", ")":
+				case "\n":
+					if( GLOBAL.liveLevel > 0 )
+					{
+						try
+						{
+							auto cSci = ScintillaAction.getActiveCScintilla();
+							int	currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+							
+							if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+							{
+								LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum );
+							}
+						}
+						catch( Exception e )
+						{
+
+						}
+					}
+					
+				case " ", "\t", "\r", ")":
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					//bWithoutList = false;
 					break;

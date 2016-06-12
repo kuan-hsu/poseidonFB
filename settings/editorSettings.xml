@@ -27,6 +27,7 @@
     <caseinsensitive>ON</caseinsensitive>
     <showlisttype>ON</showlisttype>
     <showallmember>ON</showallmember>
+    <livelevel>1</livelevel>
   </parser>
   <recentProjects>
     <name>D:/CodingPark/MyCode/FBcode/Shoot : Shoot</name>

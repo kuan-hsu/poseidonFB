@@ -9,6 +9,10 @@ import tango.stdc.stringz;
 void createTabs()
 {
 	GLOBAL.documentTabs = IupTabs( null );
+	version(Windows) IupSetAttribute( GLOBAL.documentTabs, "CHILDOFFSET", "0x4" );
+	//IupSetAttribute( GLOBAL.documentTabs, "PADDING", "10x10" );
+
+	 
 	version( linux )
 	{
 		IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );

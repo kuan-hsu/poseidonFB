@@ -275,6 +275,7 @@ struct AutoComplete
 			case B_ALIAS:					return name ~ "?20";
 			case B_NAMESPACE:				return name ~ "?24";
 			case B_INCLUDE, B_CTOR, B_DTOR:	return null;
+			case B_OPERATOR:				return null;
 			default:						return name ~ "?21";
 		}
 
@@ -401,6 +402,47 @@ struct AutoComplete
 
 		return results;
 	}
+
+	static CASTnode checkScopeNode( Ihandle* iupSci, CASTnode head, int line )
+	{
+		CASTnode nextNode;
+		
+		// Whole Word
+		IupScintillaSendMessage( iupSci, 2198, 2, 0 );	// SCI_SETSEARCHFLAGS = 2198,
+		
+		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+		int currentPos = ScintillaAction.getCurrentPos( iupSci );
+		
+		foreach_reverse( CASTnode child; head.getChildren() )
+		{
+			if( child.kind == B_SCOPE )
+			{
+				if( child.lineNumber < line )
+				{
+					int startPos;
+					if( nextNode is null ) startPos = documentLength - 1;else startPos = IupScintillaSendMessage( iupSci, 2167, nextNode.lineNumber, 0 ); // SCI_POSITIONFROMLINE = 2167,
+					
+					int endPos = IupScintillaSendMessage( iupSci, 2167, child.lineNumber, 0 ); // SCI_POSITIONFROMLINE = 2167,
+
+					IupScintillaSendMessage( iupSci, 2190, startPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( iupSci, 2192, endPos, 0 );							// SCI_SETTARGETEND = 2192,
+
+					int posEndScope = cast(int) IupScintillaSendMessage( iupSci, 2197, 9, cast(int) GLOBAL.cString.convert( "end scope" ) ); // SCI_SEARCHINTARGET = 2197,
+
+					if( posEndScope > endPos )
+					{
+						if( currentPos < posEndScope && currentPos > endPos )
+						{
+							if( child.getChildrenCount > 0 ) return checkScopeNode( iupSci, child, line ); else return child;
+						}
+					}
+				}
+			}
+
+			nextNode = child;
+		}
+		return head;
+	}		
 
 	static CASTnode getFunctionAST( CASTnode head, char[] functionTitle, int line )
 	{
@@ -1489,6 +1531,7 @@ struct AutoComplete
 					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
 					CASTnode functionHeadNode = getFunctionAST( AST_Head, functionTitle, lineNum );
 					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
+					AST_Head = checkScopeNode( iupSci, AST_Head, lineNum );
 					
 					int dotPos = Util.index( functionTitle, "." );
 					if( dotPos < functionTitle.length )
@@ -1501,6 +1544,10 @@ struct AutoComplete
 						if( memberFunctionNum == 1 ) memberFunctionMotherName = functionTitle;
 					}
 				}
+				else
+				{
+					AST_Head = checkScopeNode( iupSci, AST_Head, lineNum );
+				}				
 
 				if( AST_Head is null )
 				{
@@ -1731,6 +1778,9 @@ struct AutoComplete
 					
 					for( int i = 0; i < listContainer.length; ++ i )
 					{
+						if( i > 0 )
+							if( listContainer[i] == listContainer[i+1] ) continue;
+
 						if( listContainer[i].length )
 						{
 							if( GLOBAL.toggleShowListType == "ON" )
@@ -1749,6 +1799,8 @@ struct AutoComplete
 									_string = listContainer[i];
 								}
 
+								result ~= ( _string ~ "^" );
+								/*
 								if( i > 0 )
 								{
 									if( _string != listContainer[i-1] ) result ~= ( _string ~ "^" );
@@ -1757,9 +1809,12 @@ struct AutoComplete
 								{
 									result ~= ( _string ~ "^" );
 								}
+								*/
 							}
 							else
 							{
+								result ~= ( listContainer[i] ~ "^" );
+								/*
 								if( i > 0 )
 								{
 									if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
@@ -1768,6 +1823,7 @@ struct AutoComplete
 								{
 									result ~= ( listContainer[i] ~ "^" );
 								}
+								*/
 							}
 						}
 					}
@@ -1828,6 +1884,7 @@ struct AutoComplete
 					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
 					CASTnode functionHeadNode = getFunctionAST( AST_Head, functionTitle, lineNum );
 					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
+					AST_Head = checkScopeNode( cSci.getIupScintilla, AST_Head, lineNum );
 					
 					int dotPos = Util.index( functionTitle, "." );
 					if( dotPos < functionTitle.length )
@@ -1840,7 +1897,11 @@ struct AutoComplete
 						// check Constructor or Destructor
 						if( memberFunctionNum == 1 ) memberFunctionMotherName = functionTitle;
 					}
-				}				
+				}
+				else
+				{
+					AST_Head = checkScopeNode( cSci.getIupScintilla, AST_Head, lineNum );
+				}
 
 				if( AST_Head is null ) return;
 

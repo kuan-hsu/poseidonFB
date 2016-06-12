@@ -292,6 +292,12 @@ class CParser
 			{
 				parseToken( TOK.Topenparen );
 
+				if( token().tok == TOK.Tcloseparen )
+				{
+					parseToken( TOK.Tcloseparen );
+					return "()";
+				}
+
 				while( token().tok != TOK.Tcloseparen )
 				{
 					char[] 	_name, _type;
@@ -359,24 +365,7 @@ class CParser
 
 							char[]  _returnType;
 
-							if( token().tok == TOK.Topenparen )
-							{
-								if( next().tok != TOK.Tcloseparen )	__param = parseParam( false );else parseToken( TOK.Topenparen );
-
-								if( token().tok == TOK.Tcloseparen )
-								{
-									if( !__param.length )
-									{
-										__param = "()";
-									}
-									else
-									{
-										if( __param[length-1] == ' ' ) __param = __param[0..length-1];
-										__param ~= token().identifier;
-									}
-									parseToken( TOK.Tcloseparen );
-								}
-							}
+							if( token().tok == TOK.Topenparen ) __param = parseParam( false );
 
 							_param ~= __param;
 
@@ -471,6 +460,7 @@ class CParser
 								_param = Util.trim( _param );
 								
 								if( !bDeclare ) activeASTnode.addChild( _name, B_PARAM, null, _type, null, _lineNum );
+								
 								if( token().tok == TOK.Tcomma )
 								{
 									_param ~= ( token().identifier );
@@ -490,12 +480,18 @@ class CParser
 					//}
 				}
 			}
-
 		}
 		catch
 		{
 			return null;
 		}
+
+		if( token().tok == TOK.Tcloseparen )
+		{
+			parseToken( TOK.Tcloseparen );
+			if( _param[length-1] == ' ' ) _param = _param[0..length-1];
+			_param ~= ")";
+		}	
 
 		return _param;
 	}
@@ -989,6 +985,362 @@ class CParser
 
 		return false;
 	}
+
+	/*
+	Syntax
+
+	{ Type | Class | Union | Enum } typename
+
+	Declare Operator Cast () [ ByRef ] As datatype
+	Declare Operator @ () [ ByRef ] As datatype Ptr
+	Declare Operator assignment_op ( [ ByRef | ByVal ] rhs As datatype )
+	Declare Operator [] ( index As datatype ) [ ByRef ] As datatype
+	Declare Operator New ( size As UInteger ) As Any Ptr
+	Declare Operator New[] ( size As UInteger ) As Any Ptr
+	Declare Operator Delete ( buf As Any Ptr )
+	Declare Operator Delete[] ( buf As Any Ptr )
+
+	End { Type | Class | Union | Enum }
+
+	{ Type | Class | Union } typename
+
+	Declare Operator For ()
+	Declare Operator For ( [ ByRef | ByVal ] stp As typename )
+	Declare Operator Step ()
+	Declare Operator Step ( [ ByRef | ByVal ] stp As typename )
+	Declare Operator Next ( [ ByRef | ByVal ] cond As typename ) As Integer
+	Declare Operator Next ( [ ByRef | ByVal ] cond As typename, [ ByRef | ByVal ] stp As typename ) As Integer
+
+	End { Type | Class | Union }
+
+	Declare Operator unary_op ( [ ByRef | ByVal ] rhs As datatype ) As datatype
+	Declare Operator binary_op ( [ ByRef | ByVal ] lhs As datatype, [ ByRef | ByVal ] rhs As datatype ) As datatype
+
+	Operator typename.Cast () [ ByRef ] As datatype [ Export ]
+	Operator typename.@ () [ ByRef ] As datatype Ptr [ Export ]
+	Operator typename.assignment_op ( [ ByRef | ByVal ] rhs As datatype ) [ Export ]
+	Operator [] ( index As datatype ) [ ByRef ] As datatype [ Export ]
+	Operator unary_op ( [ ByRef | ByVal ] rhs As datatype ) As datatype [ Export ]
+	Operator binary_op ( [ ByRef | ByVal ] lhs As datatype, [ ByRef | ByVal ] rhs As datatype ) As datatype [ Export ]
+	Operator typename.New ( size as uinteger ) As Any Ptr [ Export ]
+	Operator typename.New[] ( size As UInteger ) As Any Ptr [ Export ]
+	Operator typename.Delete ( buf As Any Ptr ) [ Export ]
+	Operator typename.Delete[] ( buf As Any Ptr ) [ Export ]
+	*/
+	bool parseOperator( bool bDeclare, char[] _protection )
+	{
+		//if( bDeclare ) return true;
+		
+		try
+		{
+			char[]	_returnType, _name, _kind, _param;
+			int		_lineNum, opType;
+			
+			parseToken( TOK.Toperator );
+
+			// Function Name
+			// Function Name
+			if( !bDeclare )
+			{
+				if( token().tok == TOK.Tidentifier && next().tok == TOK.Tdot  )
+				{
+					_name = token().identifier;
+					parseToken();
+
+					_name ~= token().identifier;
+					parseToken( TOK.Tdot );
+				}
+			}
+
+			switch( token().tok )
+			{
+				case TOK.Tcast, TOK.Tat:
+				
+					_name ~= token().identifier;
+					_lineNum = token().lineNumber;
+					parseToken();
+					
+					if( token().tok == TOK.Topenparen && next().tok == TOK.Tcloseparen )
+					{
+						parseToken( TOK.Topenparen );
+						parseToken( TOK.Tcloseparen );
+
+						if( token().tok == TOK.Tbyref ) 
+							parseToken( TOK.Tbyref );
+						else if( token().tok == TOK.Tbyval ) 
+							parseToken( TOK.Tbyval );
+
+						if( token().tok == TOK.Tas )
+						{
+							parseToken( TOK.Tas );
+							_returnType = getVariableType();
+							if( _returnType.length )
+							{
+								parseToken();
+								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+								{
+									_returnType ~= "*";
+									parseToken();
+								}
+							}
+
+							activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, _returnType ~ "()", null, _lineNum );
+							if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+							break;
+						}
+					}
+					return false;
+
+				case TOK.Topenbracket:
+					if( next().tok == TOK.Tclosebracket )
+					{
+						_lineNum = token().lineNumber;
+						
+						parseToken( TOK.Topenbracket );
+						parseToken( TOK.Tclosebracket );
+						_name ~= "[]";
+						
+						if( token().tok == TOK.Topenparen )
+						{
+							activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, null, null, _lineNum );
+							_param = parseParam( bDeclare );
+
+							if( token().tok == TOK.Tbyref ) 
+								parseToken( TOK.Tbyref );
+							else if( token().tok == TOK.Tbyval ) 
+								parseToken( TOK.Tbyval );
+
+							if( token().tok == TOK.Tas )
+							{
+								parseToken( TOK.Tas );
+								_returnType = getVariableType();
+								if( _returnType.length )
+								{
+									parseToken();
+									while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+									{
+										_returnType ~= "*";
+										parseToken();
+									}
+								}
+
+								activeASTnode.type = _returnType ~ _param;
+							
+								if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								break;
+							}
+						}
+					}
+					return false;
+					
+				case TOK.Tnew, TOK.Tdelete: // "new" and "new[]" and "delete" and "delete[]"
+					_lineNum = token().lineNumber;
+					_name ~= token().identifier;
+					parseToken();
+
+					if( token().tok == TOK.Topenbracket && next().tok == TOK.Tclosebracket )
+					{
+						parseToken( TOK.Topenparen );
+						parseToken( TOK.Tcloseparen );	
+						_name ~= "[]";
+					}
+					
+					if( token().tok == TOK.Topenparen )
+					{
+						activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, null, null, _lineNum );
+						_param = parseParam( bDeclare );
+
+						if( Util.index( lowerCase( _name ), "new" ) < _name.length )
+						{
+							if( token().tok == TOK.Tas )
+							{
+								parseToken( TOK.Tas );
+								_returnType = getVariableType();
+								if( _returnType.length )
+								{
+									parseToken();
+									while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+									{
+										_returnType ~= "*";
+										parseToken();
+									}
+								}
+
+								activeASTnode.type = _returnType ~ _param;
+								if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+							}
+						}
+						else // delete
+						{
+							activeASTnode.type = _param;
+							if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+						}
+						break;
+					}
+					return false;
+
+				case TOK.Tlet:
+					if( next().tok == TOK.Topenparen ) opType = 1; else return false; // Check if assignment_op, p.s. opType = 1
+
+				case TOK.Tplus, TOK.Tminus, TOK.Ttimes, TOK.Tandsign, TOK.Tdiv, TOK.Tintegerdiv, TOK.Tmod, TOK.Tshl, TOK.Tshr, TOK.Tand, TOK.Tor, TOK.Txor, TOK.Timp, TOK.Teqv, TOK.Tcaret:
+					if( opType == 0 )
+					{
+						if( next().tok == TOK.Tassign )
+						{
+							opType = 1;
+						}
+						else if( next().tok == TOK.Topenparen )
+						{
+							opType = 3;
+						}
+						else if( token().tok == TOK.Tminus && next().tok == TOK.Tgreater )
+						{
+							_name ~= token().identifier;
+							parseToken();
+							opType = 2;							
+						}						
+					}
+					
+				case TOK.Tassign:
+					if( opType == 0 )
+						if( next().tok == TOK.Topenparen ) opType = 3; else return false;
+
+				case TOK.Tless:
+					if( opType == 0 )
+					{
+						if( next().tok == TOK.Tgreater || next().tok == TOK.Tassign )
+						{
+							_name ~= token().identifier;
+							parseToken();
+							opType = 3;
+						}
+						else if( next().tok == TOK.Topenparen )
+						{
+							opType = 3;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+				case TOK.Tgreater:
+					if( opType == 0 )
+					{
+						if( next().tok == TOK.Tassign )
+						{
+							_name ~= token().identifier;
+							parseToken();
+							opType = 3;
+						}
+						else if( next().tok == TOK.Topenparen )
+						{
+							opType = 3;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+				case TOK.Tnot:
+					if( opType == 0 )
+						if( next().tok == TOK.Topenparen ) opType = 2; else return false;
+			
+				case TOK.Tidentifier:
+					if( opType == 0 )
+					{
+						switch( lowerCase( token().identifier ) )
+						{
+							case "abs", "sgn", "fix", "frac", "int", "exp", "log", "sin", "asin", "cos", "acos", "tan", "atn", "len":
+								if( next().tok == TOK.Topenparen )
+								{
+									opType = 2;
+									break;
+								}
+
+							default:
+								return false;
+						}
+						
+					}
+
+					switch( opType )
+					{
+						case 1:
+							_name ~= token().identifier;
+							_lineNum = token().lineNumber;
+							parseToken();
+							if( token().tok == TOK.Tassign )
+							{
+								parseToken( TOK.Tassign );
+								_name ~= "=";
+							}
+
+							if( token().tok == TOK.Topenparen )
+							{
+								activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, null, null, _lineNum );
+								_param = parseParam( bDeclare );
+
+								activeASTnode.type = _param;
+								if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								if( token().tok == TOK.Texport ) parseToken( TOK.Texport );
+								break;
+							}
+							return false;
+
+						case 2, 3:
+							_name ~= token().identifier;
+							_lineNum = token().lineNumber;
+							parseToken();
+
+							if( token().tok == TOK.Topenparen )
+							{
+								activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, null, null, _lineNum );
+								_param = parseParam( bDeclare );
+
+								if( token().tok == TOK.Tbyref ) 
+									parseToken( TOK.Tbyref );
+								else if( token().tok == TOK.Tbyval ) 
+									parseToken( TOK.Tbyval );
+
+								if( token().tok == TOK.Tas )
+								{
+									parseToken( TOK.Tas );
+									_returnType = getVariableType();
+									if( _returnType.length )
+									{
+										parseToken();
+										while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+										{
+											_returnType ~= "*";
+											parseToken();
+										}
+									}
+			
+									activeASTnode.type = _returnType ~ _param;
+									if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+									if( token().tok == TOK.Texport ) parseToken( TOK.Texport );
+									break;
+								}
+							}
+
+						default:
+							return false;
+					}
+					break;
+
+				default:
+					return false;
+			}
+		}
+		catch
+		{
+			return false;
+		}
+
+		return true;
+	}
 	
 	/*
 	Declare [Static] Sub procedure_name [Cdecl|Stdcall|Pascal] Overload [Alias "external_name"] [([parameter_list])] [Constructor [priority]] [Static] [Export]
@@ -1079,16 +1431,13 @@ class CParser
 
 					activeASTnode = activeASTnode.addChild( _name, _kind, _protection, null, null, _lineNum );
 
-					if( token().tok == TOK.Topenparen )
-					{
-						if( next().tok != TOK.Tcloseparen )	_param = parseParam( bDeclare );else parseToken( TOK.Topenparen );
+					if( token().tok == TOK.Topenparen ) _param = parseParam( bDeclare );
 
-						if( token().tok == TOK.Tcloseparen )
-						{
-							if( !_param.length ) _param = "()"; else _param ~= token().identifier;
-							parseToken( TOK.Tcloseparen );
-						}
-					}
+					// New
+					if( token().tok == TOK.Tbyref ) 
+						parseToken( TOK.Tbyref );
+					else if( token().tok == TOK.Tbyval ) 
+						parseToken( TOK.Tbyval );					
 
 					if( token().tok == TOK.Tas )
 					{
@@ -1107,7 +1456,7 @@ class CParser
 							}
 						
 							activeASTnode.type = _returnType ~ _param;
-							if( bDeclare ) activeASTnode = activeASTnode.getFather();
+							if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 
 							if( token().tok == TOK.Tstatic ) parseToken(  TOK.Tstatic );
 							
@@ -1120,7 +1469,7 @@ class CParser
 					if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
 					{
 						activeASTnode.type = _param;
-						if( bDeclare ) activeASTnode = activeASTnode.getFather();
+						if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 						return true;
 					}						
 				}
@@ -1222,7 +1571,11 @@ class CParser
 							_protection = "protected";
 						}
 						break;
-					
+
+					case TOK.Tdim:
+						parseVariable();
+						break;
+						
 					case TOK.Tas:
 						parseToken( TOK.Tas );
 						_type = getVariableType();
@@ -1377,7 +1730,10 @@ class CParser
 						{
 							parseProcedure( true, _protection );
 						}
-						
+						else if( token().tok == TOK.Toperator )
+						{
+							parseOperator( true, _protection );
+						}	
 						break;
 
 					case TOK.Teol, TOK.Tcolon:
@@ -1445,7 +1801,7 @@ class CParser
 			if( token().tok == TOK.Tend && next().tok == B_KIND )
 			{
 				tokenIndex += 2;
-				activeASTnode = activeASTnode.getFather;
+				activeASTnode = activeASTnode.getFather( token().lineNumber );
 				return true;
 			}			
 		}
@@ -1508,16 +1864,7 @@ class CParser
 
 						char[]  _returnType;
 
-						if( token().tok == TOK.Topenparen )
-						{
-							if( next().tok != TOK.Tcloseparen )	_param = parseParam( true );else parseToken( TOK.Topenparen );
-
-							if( token().tok == TOK.Tcloseparen )
-							{
-								if( !_param.length ) _param = "()"; else _param ~= token().identifier;
-								parseToken( TOK.Tcloseparen );
-							}
-						}
+						if( token().tok == TOK.Topenparen ) _param = parseParam( true );
 
 						if( token().tok == TOK.Tas )
 						{
@@ -1699,9 +2046,9 @@ class CParser
 
 			switch( token().tok )
 			{
-				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope:
+				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope:
 					parseToken();
-					if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather();
+					if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 
 					break;
 				default:
@@ -1738,11 +2085,11 @@ class CParser
 		char[]		_ext;
 		if( toLower( f.ext() ) == "bas" ) 
 		{
-			head = new CASTnode( fullPath, B_BAS, null, null, null, 0 );
+			head = new CASTnode( fullPath, B_BAS, null, null, null, 0, 2147483647 );
 		}
 		else
 		{
-			head = new CASTnode( fullPath, B_BI, null, null, null, 0 );
+			head = new CASTnode( fullPath, B_BI, null, null, null, 0, 2147483647 );
 		}
 
 		activeASTnode = head;
@@ -1781,6 +2128,10 @@ class CParser
 					parseProcedure( false, null );
 					break;
 
+				case TOK.Toperator:
+					parseOperator( false, null );
+					break;
+
 				case TOK.Tend:
 					parseEnd();
 					break;
@@ -1812,15 +2163,18 @@ class CParser
 				case TOK.Tdeclare:
 					parseToken( TOK.Tdeclare );
 					
-					if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub )
+					if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub || token().tok == TOK.Tconstructor || token().tok == TOK.Tdestructor || token().tok == TOK.Tproperty )
 					{
 						parseProcedure( true, null );
 					}
-
+					else if( token().tok == TOK.Toperator )
+					{
+						parseOperator( true, null );
+					}
 					break;
 
 				case TOK.Tendmacro:
-					activeASTnode = activeASTnode.getFather();					
+					activeASTnode = activeASTnode.getFather( token().lineNumber );					
 
 				default:
 					tokenIndex ++;
@@ -1829,6 +2183,7 @@ class CParser
 			}
 		}
 
+		head.endLineNum = 2147483647;
 		//printAST( head );
 
 		return head;
@@ -1841,5 +2196,4 @@ class CParser
 			printAST( t );
 		}
 	}
-
 }

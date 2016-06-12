@@ -2186,6 +2186,40 @@ Ihandle* load_image_property_var()
   return image;
 }
 
+Ihandle* load_image_operator()
+{
+  ubyte imgdata[] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+    0, 0, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 1, 4, 4, 4, 1, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 4, 5, 1, 1, 4, 1, 6, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 4, 5, 1, 1, 4, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 4, 5, 1, 1, 4, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 4, 5, 1, 1, 4, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 4, 5, 1, 1, 4, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 1, 4, 4, 4, 1, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 0,
+    0, 0, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 0,
+    0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  Ihandle* image = IupImage(16, 16, imgdata.ptr);
+
+  IupSetAttribute(image, "0", "BGCOLOR");
+  IupSetAttribute(image, "1", "241 203 12");
+  IupSetAttribute(image, "2", "231 166 1");
+  IupSetAttribute(image, "3", "237 187 5");
+  IupSetAttribute(image, "4", "249 249 249");
+  IupSetAttribute(image, "5", "251 241 189");
+  IupSetAttribute(image, "6", "241 204 14");
+  IupSetAttribute(image, "7", "0 0 0");
+
+  return image;
+}
+
 Ihandle* load_image_variable_protected_obj()
 {
   ubyte imgdata[] = [
@@ -2558,6 +2592,40 @@ Ihandle* load_image_macro()
   IupSetAttribute(image, "6", "0 0 0");
   IupSetAttribute(image, "7", "0 0 0");
 
+
+  return image;
+}
+
+Ihandle* load_image_scope()
+{
+  ubyte imgdata[] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  Ihandle* image = IupImage(16, 16, imgdata.ptr);
+
+  IupSetAttribute(image, "0", "BGCOLOR");
+  IupSetAttribute(image, "1", "255 0 0");
+  IupSetAttribute(image, "2", "0 0 0");
+  IupSetAttribute(image, "3", "0 0 0");
+  IupSetAttribute(image, "4", "0 0 0");
+  IupSetAttribute(image, "5", "0 0 0");
+  IupSetAttribute(image, "6", "0 0 0");
+  IupSetAttribute(image, "7", "0 0 0");
 
   return image;
 }
@@ -3212,6 +3280,7 @@ void load_all_images_icons()
   IupSetHandle("IUP_struct", load_image_struct_obj());
   IupSetHandle("IUP_property", load_image_property_obj());
   IupSetHandle("IUP_property_var", load_image_property_var());
+  IupSetHandle("IUP_operator", load_image_operator());
   IupSetHandle("IUP_variable_protected", load_image_variable_protected_obj());
   IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
   IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
@@ -3222,6 +3291,7 @@ void load_all_images_icons()
   IupSetHandle("IUP_union", load_image_union_obj());
   IupSetHandle("IUP_namespace", load_image_namespace_obj());
   IupSetHandle("IUP_macro", load_image_macro());
+  IupSetHandle("IUP_scope", load_image_scope());
   IupSetHandle("IUP_define_fun", load_image_define_fun());
   IupSetHandle("IUP_define_var", load_image_define_var());
 

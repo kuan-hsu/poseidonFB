@@ -103,6 +103,7 @@ struct GLOBAL
 
 	static int					autoCompletionTriggerWordCount = 3;
 	static int					includeLevel = 2;
+	static int					liveLevel = 0;
 
 
 	static PROJECT[char[]]		projectManager;
