@@ -2102,6 +2102,11 @@ class CParser
 					parseToken( TOK.Tprivate );
 					if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "private" );
 					break;
+
+				case TOK.Tprotected:
+					parseToken( TOK.Tprotected );
+					if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "protected" );
+					break;
 					
 				case TOK.Tpublic:
 					parseToken( TOK.Tpublic );

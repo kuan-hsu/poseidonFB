@@ -1082,7 +1082,7 @@ struct ProjectAction
 struct StatusBarAction
 {
 	private:
-	import parser.autocompletion;
+	import parser.autocompletion, parser.ast;
 	import tango.text.convert.Layout;
 		
 	public:
@@ -1161,10 +1161,30 @@ struct StatusBarAction
 						
 				}
 
-				if( GLOBAL.showFunctionTitle )
+				if( GLOBAL.showFunctionTitle == "ON" )
 				{
-					int memberFunctionNum;
-					IupSetAttribute( GLOBAL.functionTitleHandle, "VALUE", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ), memberFunctionNum ) ) );
+					int _kind;
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "UPDATE STATUS: " ) );
+					IupSetAttribute( GLOBAL.functionTitleHandle, "1", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ), _kind ) ) );
+
+					if( _kind & B_FUNCTION )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_function" );
+					else if( _kind & B_SUB )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_sub" );
+					else if( _kind & B_TYPE )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_struct" );
+					else if( _kind & B_ENUM )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_enum" );
+					else if( _kind & B_UNION )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_union" );
+					else if( _kind & B_CTOR )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_ctor" );
+					else if( _kind & B_DTOR )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_dtor" );
+					else if( _kind & B_PROPERTY )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_property" );
+					else if( _kind & B_OPERATOR )
+						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_operator" );
 				}
 			}
 		}

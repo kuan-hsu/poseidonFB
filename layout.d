@@ -5,6 +5,7 @@ import iup.iup;
 import global, scintilla, project, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, layouts.debugger, actionManager, menu;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
+import parser.live;
 
 import tango.stdc.stringz, tango.io.FilePath;
 
@@ -130,7 +131,18 @@ extern(C)
 
 	int GlobalKeyPress_CB( int c, int press )
 	{
-		if( press == 0 ) GLOBAL.bKeyUp = true;
+		if( press == 0 ) 
+		{
+			try
+			{
+				if( GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp ) LiveParser.parseCurrentLine(); 
+			}
+			catch( Exception e ){}
+		
+			GLOBAL.bKeyUp = true; // Release
+		}
+			
+		//if( press == 0 ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "KeyUP\n" ) );else IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "KeyDOWN\n" ) );
 
 		return IUP_DEFAULT;
 	}

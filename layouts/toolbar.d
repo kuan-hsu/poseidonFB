@@ -178,26 +178,10 @@ Ihandle* createToolBar()
 	}
 
 
-	GLOBAL.functionTitleHandle = IupText( null );
-	IupSetAttributes( GLOBAL.functionTitleHandle, "ACTIVE=NO,MULTILINE=NO,SCROLLBAR=NO,SIZE=180x12,READONLY=YES" );
+	GLOBAL.functionTitleHandle = IupList( null );
+	IupSetAttributes( GLOBAL.functionTitleHandle, "ACTIVE=YES,SIZE=180x12,SHOWIMAGE=YES,SCROLLBAR=NO" );
 	IupSetAttribute( GLOBAL.functionTitleHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
-	/*
-	if( GLOBAL.fonts[0].fontString.length )
-	{
-		int pos = Util.rindex( GLOBAL.fonts[0].fontString, "," );
-		if( pos < GLOBAL.fonts[0].fontString.length )
-		{
-			pos++;
-			char[] fontStyle = GLOBAL.fonts[0].fontString[0..pos] ~ "Bold " ~ GLOBAL.fonts[0].fontString[pos..length];
-			IupSetAttribute( GLOBAL.functionTitleHandle, "FONT", toStringz( fontStyle.dup ) );
-		}
-		
-	}
-	*/
 	if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "NO" );
-	//IupSetCallback( GLOBAL.functionTitleHandle, "ACTION", cast(Icallback) &consoleInput_cb );
-
-	
 	
 	
 	// IUP Container to put buttons on~

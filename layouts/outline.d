@@ -176,6 +176,16 @@ class COutline
 			default:
 				IupSetAttributeId( activeTreeOutline, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
 		}
+
+		if( GLOBAL.editorSetting00.ColorOutline == "ON" )
+		{
+			switch( lowerCase( _node.protection ) )
+			{
+				case "private":		IupSetAttributeId( activeTreeOutline, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
+				case "protected":	IupSetAttributeId( activeTreeOutline, "COLOR", lastAddNode, GLOBAL.cString.convert( "236 95 0" ) ); break;
+				default:
+			}
+		}
 	}
 	
 	void append( CASTnode _node, int bracchID )
@@ -477,7 +487,7 @@ extern(C)
 		if( _iih != null )
 		{
 			// Open Dialog Window
-			scope test = new CSingleTextDialog( 275, 96, "Mark Search Outline...", "Target:", null, false );
+			scope test = new CSingleTextDialog( -1, -1, "Mark Search Outline...", "Target:", null, null, false );
 			char[] target = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 			if( target.length )
 			{

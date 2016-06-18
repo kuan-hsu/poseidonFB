@@ -521,7 +521,7 @@ extern(C)
 	private int CProjectTree_NewFile_cb( Ihandle* ih )
 	{
 		// Open Dialog Window
-		scope test = new CSingleTextDialog( 275, 96, "Create New File", "File Name:", null, false );
+		scope test = new CSingleTextDialog( -1, -1, "Create New File", "File Name:", "100x", null, false );
 		char[] fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )
@@ -624,7 +624,7 @@ extern(C)
 
 	private int CProjectTree_NewFolder_cb( Ihandle* ih )
 	{
-		scope test = new CSingleTextDialog( 290, 96, "Create New Folder", "Folder Name:", null, false );
+		scope test = new CSingleTextDialog( -1, -1, "Create New Folder", "Folder Name:", "100x", null, false );
 		char[] folderName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( folderName.length )
@@ -868,7 +868,7 @@ extern(C)
 
 		char[] oldExt = fp.ext();
 
-		scope test = new CSingleTextDialog( 275, 96, "File Rename", "File Name:", fp.name(), false );
+		scope test = new CSingleTextDialog( -1, -1, "File Rename", "File Name:", "100x", fp.name(), false );
 		char[] newFileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( newFileName.length )

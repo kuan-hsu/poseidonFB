@@ -12,13 +12,14 @@ class CSingleTextDialog : CBaseDialog
 	Ihandle*	textResult;
 	char[]		labelName;
 
-	void createLayout()
+	void createLayout( char[] textWH )
 	{
 		Ihandle* bottom = createDlgButton();
 
 		Ihandle* label = IupLabel( GLOBAL.cString.convert( labelName ) );
 		
 		textResult = IupText( null );
+		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
 		//IupSetAttribute( textResult, "SIZE", "100x12" );
 		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetHandle( "CSingleTextDialog_text", textResult );
@@ -36,7 +37,7 @@ class CSingleTextDialog : CBaseDialog
 	}	
 
 	public:
-	this( int w, int h, char[] title, char[] _labelText = null, char[] text = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, char[] _labelText = null, char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
@@ -51,9 +52,12 @@ class CSingleTextDialog : CBaseDialog
 
 		labelName = _labelText ;
 		 
-		createLayout();
+		createLayout( textWH );
 
+		//if( text.length) IupSetAttribute( textResult, "SELECTIONPOS", "ALL" );
 		IupSetAttribute( textResult, "VALUE", GLOBAL.cString.convert( text ) );
+
+		
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSingleTextDialog_btnCancel_cb );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CSingleTextDialog_btnOK_cb );
 	}

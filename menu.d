@@ -377,7 +377,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.189\nBy Kuan Hsu (Taiwan)\n2016.06.12" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.190\nBy Kuan Hsu (Taiwan)\n2016.06.18" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -787,7 +787,7 @@ extern(C)
 		if( cSci !is null )
 		{
 			// Open Dialog Window
-			scope gotoLineDlg = new CSingleTextDialog( 240, 96, "Goto Line...", "Line:", null, false );
+			scope gotoLineDlg = new CSingleTextDialog( -1, -1, "Goto Line...", "Line:", null, null, false );
 			char[] lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
 			if( lineNum.length) actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum )  );
@@ -870,6 +870,7 @@ extern(C)
 
 	int preference_cb( Ihandle *ih )
 	{
+		/*
 		version( Windows ) 
 		{
 			scope dlg = new CPreferenceDialog( 546, 560, "Preference", true );
@@ -880,12 +881,16 @@ extern(C)
 			scope dlg = new CPreferenceDialog( 546, 576, "Preference", true );
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
+		*/
+		scope dlg = new CPreferenceDialog( -1, -1, "Preference", true );
+		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
 	}
 
 	int newProject_cb( Ihandle *ih )
 	{
+		/*
 		version( Windows )
 		{
 			scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, true );
@@ -896,6 +901,9 @@ extern(C)
 			scope dlg = new CProjectPropertiesDialog( 660, 470, "Project Properties", true, true );
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
+		*/
+		scope dlg = new CProjectPropertiesDialog( -1, -1, "Project Properties", true, true );
+		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
 	}
@@ -1040,6 +1048,7 @@ extern(C)
 		//if( !GLOBAL.activeProjectDirName.length ) return IUP_DEFAULT;
 		if( !actionManager.ProjectAction.getActiveProjectName.length ) return IUP_DEFAULT;
 
+		/*
 		version( Windows )
 		{
 			scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, false );
@@ -1050,6 +1059,10 @@ extern(C)
 			scope dlg = new CProjectPropertiesDialog( 656, 470, "Project Properties", true, false );
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
+		*/
+		scope dlg = new CProjectPropertiesDialog( -1, -1, "Project Properties", true, false );
+		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+
 		return IUP_DEFAULT;
 	}
 

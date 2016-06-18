@@ -1272,9 +1272,9 @@ class CDebugger
 class CVarDlg : CSingleTextDialog
 {
 	public:
-	this( int w, int h, char[] title, char[] _labelText = null, char[] text = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, char[] _labelText = null, char[] text = null, char[] textWH = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
 	{
-		super( w, h, title, _labelText, text, bResize, parent );
+		super( w, h, title, _labelText, text, textWH, bResize, parent );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CConsoleDlg_btnCancel_cb );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CConsoleDlg_btnCancel_cb );
 	}
@@ -1569,7 +1569,7 @@ extern( C )
 				{
 					if( !GLOBAL.debugPanel.isRunning() )
 					{
-						scope argDialog = new CSingleTextDialog( 275, 96, "Args To Debugger Run", "Args:", null, false );
+						scope argDialog = new CSingleTextDialog( -1, -1, "Args To Debugger Run", "Args:", null, null, false );
 						char[] args = argDialog.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 						
 						if( args.length ) GLOBAL.debugPanel.sendCommand( "r " ~ args ~ "\n" );

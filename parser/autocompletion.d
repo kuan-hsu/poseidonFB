@@ -444,18 +444,21 @@ struct AutoComplete
 		return head;
 	}		
 
-	static CASTnode getFunctionAST( CASTnode head, char[] functionTitle, int line )
+	static CASTnode getFunctionAST( CASTnode head, int _kind, char[] functionTitle, int line )
 	{
 		foreach_reverse( CASTnode node; head.getChildren() )
 		{
-			if( lowerCase( node.name ) == functionTitle )
+			if( node.kind & _kind )
 			{
-				if( line >= node.lineNumber ) return node;
+				if( lowerCase( node.name ) == functionTitle )
+				{
+					if( line >= node.lineNumber ) return node;
+				}
 			}
 
 			if( node.getChildrenCount )
 			{
-				CASTnode _node = getFunctionAST( node, functionTitle, line );
+				CASTnode _node = getFunctionAST( node, _kind, functionTitle, line );
 				if( _node !is null ) return _node;
 			}
 		}
@@ -1208,6 +1211,21 @@ struct AutoComplete
 	static bool bAutocompletionPressEnter;
 
 
+	static CASTnode getTitleAST( Ihandle* iupSci, int pos, CASTnode head )
+	{
+		int _kind;
+		
+		char[] titleName = getFunctionTitle( iupSci, pos, _kind );
+		if( titleName.length )
+		{
+			int	lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			return getFunctionAST( head, _kind, lowerCase( titleName ), lineNum );
+		}
+
+		return null;
+	}
+
+
 	static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 	{
 		int		countParen, countBracket;
@@ -1521,15 +1539,15 @@ struct AutoComplete
 				}
 
 				auto			AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
-				int 			memberFunctionNum;
-				char[]			functionTitle = lowerCase( getFunctionTitle( iupSci, pos, memberFunctionNum ) );
+				int 			titleKind;
+				char[]			functionTitle = lowerCase( getFunctionTitle( iupSci, pos, titleKind ) );
 				int				lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 				char[]			memberFunctionMotherName;
 
 				if( functionTitle.length )
 				{
 					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
-					CASTnode functionHeadNode = getFunctionAST( AST_Head, functionTitle, lineNum );
+					CASTnode functionHeadNode = getFunctionAST( AST_Head, titleKind, functionTitle, lineNum );
 					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
 					AST_Head = checkScopeNode( iupSci, AST_Head, lineNum );
 					
@@ -1541,7 +1559,7 @@ struct AutoComplete
 					else
 					{
 						// check Constructor or Destructor
-						if( memberFunctionNum == 1 ) memberFunctionMotherName = functionTitle;
+						if( titleKind & ( B_CTOR | B_DTOR ) ) memberFunctionMotherName = functionTitle;
 					}
 				}
 				else
@@ -1557,7 +1575,7 @@ struct AutoComplete
 
 						if( listContainer.length )
 						{
-							listContainer.sort;
+							//listContainer.sort;
 
 							for( int i = 0; i < listContainer.length; ++ i )
 							{
@@ -1747,7 +1765,7 @@ struct AutoComplete
 
 				if( listContainer.length )
 				{
-					listContainer.sort;
+					//listContainer.sort;
 
 					char[]	_type, _list;
 					int		maxLeft, maxRight;
@@ -1873,8 +1891,8 @@ struct AutoComplete
 					}			
 				}
 
-				int 			memberFunctionNum;
-				char[]			functionTitle = lowerCase( getFunctionTitle( cSci.getIupScintilla, currentPos, memberFunctionNum ) );
+				int 			titleKind;
+				char[]			functionTitle = lowerCase( getFunctionTitle( cSci.getIupScintilla, currentPos, titleKind ) );
 				char[]			memberFunctionMotherName;
 				int				lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 
@@ -1882,7 +1900,7 @@ struct AutoComplete
 				if( functionTitle.length )
 				{
 					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
-					CASTnode functionHeadNode = getFunctionAST( AST_Head, functionTitle, lineNum );
+					CASTnode functionHeadNode = getFunctionAST( AST_Head, titleKind, functionTitle, lineNum );
 					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
 					AST_Head = checkScopeNode( cSci.getIupScintilla, AST_Head, lineNum );
 					
@@ -1895,7 +1913,7 @@ struct AutoComplete
 					else
 					{
 						// check Constructor or Destructor
-						if( memberFunctionNum == 1 ) memberFunctionMotherName = functionTitle;
+						if( titleKind & ( B_CTOR | B_DTOR ) ) memberFunctionMotherName = functionTitle;
 					}
 				}
 				else
@@ -2017,31 +2035,86 @@ struct AutoComplete
 		}
 	}
 
-	static char[] getFunctionTitle( Ihandle* iupSci, int pos, out int bMemberFunction )
-	{
-		bMemberFunction = -1;
-		
-		char[] result = searchHead( iupSci, pos, "sub" );
 
-		if( !result.length ) result = searchHead( iupSci, pos, "function" );
-		if( !result.length ) result = searchHead( iupSci, pos, "property" );
-		if( !result.length ) result = searchHead( iupSci, pos, "operator" );
-		if( !result.length ) result = searchHead( iupSci, pos, "constructor" );
-		if( !result.length )
-		{
-			result = searchHead( iupSci, pos, "destructor" );
-			if( result.length ) bMemberFunction = 1;
-		}
-		else
-		{
-			bMemberFunction = 1;
-		}
+	static char[] getFunctionTitle( Ihandle* iupSci, int pos, out int code )
+	{
+		char[] result = searchHead( iupSci, pos, "sub" );
 
 		if( result.length )
 		{
-			if( Util.index( result, "." ) < result.length ) bMemberFunction = 1;
+			code = B_SUB;
+		}
+		else
+		{
+			result = searchHead( iupSci, pos, "function" );
+			if( result.length )
+			{
+				code = B_FUNCTION;
+			}
+			else
+			{
+				result = searchHead( iupSci, pos, "property" );
+				if( result.length )
+				{
+					code = B_PROPERTY;
+				}
+				else
+				{
+					result = searchHead( iupSci, pos, "operator" );
+					if( result.length )
+					{
+						code = B_OPERATOR;
+					}
+					else
+					{
+						result = searchHead( iupSci, pos, "type" );
+						if( result.length )
+						{
+							code = B_TYPE;
+						}
+						else
+						{
+							result = searchHead( iupSci, pos, "union" );
+							if( result.length )
+							{
+								code = B_UNION;
+							}
+							else
+							{
+								result = searchHead( iupSci, pos, "enum" );
+								if( result.length )
+								{
+									code = B_ENUM;
+								}
+								else
+								{
+									result = searchHead( iupSci, pos, "constructor" );
+									if( result.length )
+									{
+										code = B_CTOR | 1;
+									}
+									else
+									{
+										result = searchHead( iupSci, pos, "destructor" );
+										if( result.length )
+										{
+											code = B_DTOR | 1;
+										}
+									}
+								}				
+							}				
+						}				
+					}				
+				}				
+			}
 		}
 		
+		if( result.length )
+		{
+			if( Util.index( result, "." ) < result.length ) code = code | 1;
+		}
+
+		//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Title: " ~ result ) );
 
 		return result;
 	}

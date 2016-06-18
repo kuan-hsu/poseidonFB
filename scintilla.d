@@ -48,7 +48,7 @@ class CScintilla
 		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
 
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
-		IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
+		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
 		IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
 		IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
@@ -705,17 +705,19 @@ extern(C)
 	private int CScintilla_valuechanged_cb( Ihandle* ih )
 	{
 		//actionManager.StatusBarAction.update();
+		/+
 		if( GLOBAL.liveLevel > 0 )
 		{
 			try
 			{
-				LiveParser.parseCurrentLine();
+				if( !GLOBAL.bKeyUp ) LiveParser.parseCurrentLine();
 			}
 			catch( Exception e )
 			{
 
 			}
 		}
+		+/
 
 		return IUP_DEFAULT;
 	}
@@ -732,8 +734,6 @@ extern(C)
 			{
 				if( button == '1' )	AutoComplete.toDefintionAndType( true );
 			}
-			
-			actionManager.StatusBarAction.update();
 		}
 		
 		return IUP_DEFAULT;
@@ -741,11 +741,7 @@ extern(C)
 
 	private int CScintilla_keyany_cb( Ihandle *ih, int c ) 
 	{
-		/*
-		Stdout( "Keycode: " );
-		Stdout( c ).newline;
-		*/
-
+		//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Keycode:" ~ Integer.toString( c ) ) );
 		AutoComplete.bAutocompletionPressEnter = false;
 		
 		if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
@@ -754,6 +750,81 @@ extern(C)
 		{
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 		}
+		else
+		{
+			if( GLOBAL.liveLevel > 0 )
+			{
+				try
+				{
+					int		pos = ScintillaAction.getCurrentPos( ih );
+					auto	cSci = ScintillaAction.getActiveCScintilla();
+					int		currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, ScintillaAction.getCurrentPos( ih ), 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+					
+					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+					{
+						switch( c )
+						{
+							case 13:
+								LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum );
+								break;
+
+							case 8: // BS
+								int		minusCount = -1;
+								char[] selectedLinCol = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
+								if( selectedLinCol.length )
+								{
+									int line1, line2, firstCommaPos = Util.index( selectedLinCol, "," ), secondCommaPos = Util.rindex( selectedLinCol, "," ), colonPos = Util.index( selectedLinCol, ":" );
+									if( firstCommaPos < secondCommaPos )
+									{
+										// Start from 0, so +1
+										line1 = Integer.atoi( selectedLinCol[0..firstCommaPos] ) + 1;
+										line2 = Integer.atoi( selectedLinCol[colonPos+1..secondCommaPos] ) + 1;
+										minusCount = line1 - line2;
+										if( minusCount < 0 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], line1, minusCount );
+										break;
+									}
+								}
+							
+								int	col = IupScintillaSendMessage( ih, 2129, pos, 0 ); // SCI_GETCOLUMN 2129.
+								if( col == 0 )
+								{
+									if( currentLineNum > 1 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum - 1, -1 );
+								}
+								break;
+
+							case 65535: // DEL
+								int		minusCount = -1;
+								char[] selectedLinCol = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
+								if( selectedLinCol.length )
+								{
+									int line1, line2, firstCommaPos = Util.index( selectedLinCol, "," ), secondCommaPos = Util.rindex( selectedLinCol, "," ), colonPos = Util.index( selectedLinCol, ":" );
+									if( firstCommaPos < secondCommaPos )
+									{
+										// Start from 0, so +1
+										line1 = Integer.atoi( selectedLinCol[0..firstCommaPos] ) + 1;
+										line2 = Integer.atoi( selectedLinCol[colonPos+1..secondCommaPos] ) + 1;
+										//IupMessage( "", toStringz( Integer.toString( line1 ) ~ " : " ~ Integer.toString( line2 ) ) );
+										minusCount = line1 - line2;
+										if( minusCount < 0 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], line1, minusCount );
+										break;
+									}
+								}
+							
+								char[] nextChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
+								if( nextChar == "\n" )
+								{
+									if( currentLineNum > 1 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum, -1 );
+								}
+								break;
+								
+							default:
+						}
+					}
+				}
+				catch( Exception e ){}
+			}
+		}
+		
 
 		foreach( ShortKey sk; GLOBAL.shortKeys )
 		{
@@ -982,6 +1053,8 @@ extern(C)
 		
 		if( _text.length )
 		{
+			scope textCovert = new CstringConvert;
+			
 			if( _text[length-1] == ')' )
 			{
 				int _pos = Util.index( _text, "(" );
@@ -989,7 +1062,7 @@ extern(C)
 				{
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
-					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text[0.._pos].dup ) );
+					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text[0.._pos].dup ) );
 					return IUP_DEFAULT;
 				}
 			}
@@ -1001,11 +1074,11 @@ extern(C)
 
 				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
 				{
-					IupSetAttribute( ih , "PREPEND", GLOBAL.cString.convert( _text.dup ) );
+					IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
 				}
 				else
 				{
-					IupSetAttribute( ih , "SELECTEDTEXT", GLOBAL.cString.convert( _text.dup ) );
+					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );
 				}
 			}
 		}
@@ -1013,14 +1086,14 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	private int CScintilla_action_cb(Ihandle *ih, int insert, int pos, int length, char* _text )
+	private int CScintilla_action_cb( Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
 		//static bool bWithoutList;
 		//static int	prevPos;
 
 		
 		// If un-release the key, cancel
-		if( GLOBAL.bKeyUp )	GLOBAL.bKeyUp = false; else	return IUP_DEFAULT;
+		if( !GLOBAL.bKeyUp ) return IUP_DEFAULT;else GLOBAL.bKeyUp = false;
 		
 		if( GLOBAL.enableParser != "ON" ) return IUP_DEFAULT;
 		
@@ -1039,26 +1112,7 @@ extern(C)
 			
 			switch( text )
 			{
-				case "\n":
-					if( GLOBAL.liveLevel > 0 )
-					{
-						try
-						{
-							auto cSci = ScintillaAction.getActiveCScintilla();
-							int	currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-							
-							if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
-							{
-								LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum );
-							}
-						}
-						catch( Exception e )
-						{
-
-						}
-					}
-					
-				case " ", "\t", "\r", ")":
+				case " ", "\n", "\t", "\r", ")":
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					//bWithoutList = false;
 					break;
@@ -1127,8 +1181,6 @@ extern(C)
 		//prevPos = pos;
 		return IUP_DEFAULT;
 	}
-
-
 
 
 	// Auto Ident
