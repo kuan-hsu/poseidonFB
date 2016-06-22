@@ -3,7 +3,7 @@
 import iup.iup;
 
 import global, scintilla, project, dialogs.preferenceDlg;
-import layouts.tabDocument, layouts.toolbar, layouts.tree, layouts.messagePanel, layouts.statusBar, layouts.outline, layouts.debugger, actionManager, menu;
+import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live;
 
@@ -28,23 +28,22 @@ void createExplorerWindow()
 	Ihandle* prjManager = createProjectManagerToolBar();
 	Ihandle* prjOutline = createOutlineToolBar();
 	+/
-	createFileListTree();
-	GLOBAL.projectTree = new CProjectTree; //createProjectManagerTree();
+	GLOBAL.fileListTree = new CFileList;
+	GLOBAL.projectTree = new CProjectTree;
 	GLOBAL.outlineTree = new COutline;
 
-	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TABTITLE", "Project" );
-	IupSetAttribute( GLOBAL.fileListTree, "TABTITLE", "FileList" );
-	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "TABTITLE", "Outline" );
-	
-	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TABIMAGE", "icon_packageexplorer" );
-	IupSetAttribute( GLOBAL.fileListTree, "TABIMAGE", "icon_filelist" );
-	//IupSetAttribute( GLOBAL.fileListTree, "FONT", "Consolas, 10" );
-	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "TABIMAGE", "icon_outline" );
-	
 
+	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", "Project" );
+	IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABTITLE", "FileList" );
+	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", "Outline" );
 	
-	GLOBAL.projectViewTabs = IupTabs( GLOBAL.fileListTree, GLOBAL.projectTree.getTreeHandle, GLOBAL.outlineTree.getZBoxHandle, null );
-	IupSetAttribute( GLOBAL.projectViewTabs, "TABTYPE", "BOTTOM" );
+	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer" );
+	IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABIMAGE", "icon_filelist" );
+	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
+
+
+	GLOBAL.projectViewTabs = IupTabs( GLOBAL.fileListTree.getLayoutHandle, GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
+	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
 
 	createTabs();
@@ -97,18 +96,9 @@ void createLayout()
 void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, "Compiler Options" );
-	version( Windows )
-	{
-		GLOBAL.argsDlg			= new CArgOptionDialog( 370, 146, "Compiler Options / EXE Arguments" );
-		GLOBAL.searchDlg		= new CSearchDialog( 330, 400, "Search/Replace" );
-		GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( 400, 310, "Search/Replace In Files" );
-	}
-	else
-	{
-		GLOBAL.argsDlg			= new CArgOptionDialog( 370, 164, "Compiler Options / EXE Arguments" );
-		GLOBAL.searchDlg		= new CSearchDialog( 330, 418, "Search/Replace" );
-		GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( 400, 332, "Search/Replace In Files" );
-	}
+	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, "Compiler Options / EXE Arguments" );
+	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, "Search/Replace" );
+	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, "Search/Replace In Files" );
 }
 
 extern(C)
@@ -135,7 +125,18 @@ extern(C)
 		{
 			try
 			{
-				if( GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp ) LiveParser.parseCurrentLine(); 
+				if( GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
+				{
+					switch( c )
+					{
+						case 8, 9, 10, 13, 65535:
+							LiveParser.parseCurrentLine();
+							break;
+							
+						default:
+							if( c > 31 && c < 127 ) LiveParser.parseCurrentLine();
+					}
+				}
 			}
 			catch( Exception e ){}
 		

@@ -376,9 +376,9 @@ struct ScintillaAction
 			return false;
 		}
 
-		auto 	_sci = new CScintilla( fullPath );
+		auto 	_sci = new CScintilla( fullPath, null, _encoding );
 		if( bCreateActualFile ) FileAction.newFile( fullPath );
-		_sci.setEncoding( _encoding );
+		//_sci.setEncoding( _encoding );
 		GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
 
 		// Set documentTabs to visible
@@ -390,8 +390,7 @@ struct ScintillaAction
 
 		//StatusBarAction.update();
 
-		IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", GLOBAL.cString.convert( fullPath ) );
-		IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
+		GLOBAL.fileListTree.addItem( _sci );
 
 		if( existData.length) _sci.setText( existData );
 
@@ -440,10 +439,10 @@ struct ScintillaAction
 			if( !filePath.exists ) return false;
 			
 			Encoding		_encoding;
-			auto 	_sci = new CScintilla( fullPath );
 			char[] 	_text = FileAction.loadFile( fullPath, _encoding );
-			_sci.setEncoding( _encoding );
-			_sci.setText( _text );
+			auto 	_sci = new CScintilla( fullPath, _text, _encoding );
+			//_sci.setEncoding( _encoding );
+			//_sci.setText( _text );
 			GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
 
 			// Set documentTabs to visible
@@ -458,9 +457,7 @@ struct ScintillaAction
 			}
 			//StatusBarAction.update();
 
-			IupSetAttribute( GLOBAL.fileListTree, "ADDLEAF0", GLOBAL.cString.convert( fullPath ) );
-			IupSetAttribute( GLOBAL.fileListTree, "USERDATA1", cast(char*) _sci  );
-			IupSetAttributeId( GLOBAL.fileListTree, "MARKED", 1, "YES" );
+			GLOBAL.fileListTree.addItem( _sci );
 			
 			// Parser
 			OutlineAction.loadFile( fullPath );
@@ -487,16 +484,7 @@ struct ScintillaAction
 			{
 				if( _switch & 1 ) // Mark the FileList
 				{
-					int nodeCount = IupGetInt( GLOBAL.fileListTree, "COUNT" );
-					for( int id = 1; id <= nodeCount; id++ ) // Not include Parent "FileList" node
-					{
-						CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree, "USERDATA", id );
-						if( _sci_node == cSci )
-						{
-							IupSetAttributeId( GLOBAL.fileListTree, "MARKED", id, "YES" );
-							break;
-						}
-					}
+					GLOBAL.fileListTree.markItem( cSci.getFullPath );
 				}
 
 				if( _switch & 2 ) // Mark the ProjectTree
@@ -515,35 +503,6 @@ struct ScintillaAction
 				}
 			}
 		}
-	}
-
-	static bool removeFileListNode( char[] fullPath, CScintilla cSci )
-	{
-		// Remove the fileListTree's node
-		int nodeCount = IupGetInt( GLOBAL.fileListTree, "COUNT" );
-		
-		for( int id = 1; id <= nodeCount; id++ ) // include Parent "FileList" node
-		{
-			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree, "USERDATA", id );
-			if( fullPath.length )
-			{
-				if( _sci_node.getFullPath == fullPath )
-				{
-					IupSetAttributeId( GLOBAL.fileListTree, "DELNODE", id, "SELECTED" );
-					return true;
-				}
-			}
-			else if( cSci !is null )
-			{
-				if( _sci_node == cSci )
-				{
-					IupSetAttributeId( GLOBAL.fileListTree, "DELNODE", id, "SELECTED" );
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	static Ihandle* getActiveIupScintilla()
@@ -641,7 +600,7 @@ struct ScintillaAction
 			
 	
 			IupDestroy( iupSci );
-			removeFileListNode( null, cSci );
+			GLOBAL.fileListTree.removeItem( cSci );
 			GLOBAL.scintillaManager.remove( upperCase(fullPath) );
 			delete cSci;
 			actionManager.OutlineAction.cleanTree( fullPath );
@@ -700,7 +659,7 @@ struct ScintillaAction
 					KEYS ~= cSci.getFullPath;
 				}
 
-				removeFileListNode( null, cSci );
+				GLOBAL.fileListTree.removeItem( cSci );
 				actionManager.OutlineAction.cleanTree( cSci.getFullPath );
 				IupDestroy( iupSci );
 				delete cSci;
@@ -768,7 +727,7 @@ struct ScintillaAction
 				KEYS ~= cSci.getFullPath;
 			}
 
-			removeFileListNode( null, cSci );
+			GLOBAL.fileListTree.removeItem( cSci );
 			actionManager.OutlineAction.cleanTree( cSci.getFullPath );
 			IupDestroy( iupSci );
 		}
@@ -861,7 +820,7 @@ struct ScintillaAction
 						if( bDel )
 						{
 							IupDestroy( cSci.getIupScintilla );
-							removeFileListNode( null, cSci );
+							GLOBAL.fileListTree.removeItem( cSci );
 							GLOBAL.scintillaManager.remove( upperCase(originalFullPath) );
 							delete cSci;
 							actionManager.OutlineAction.cleanTree( originalFullPath );
@@ -941,6 +900,25 @@ struct ScintillaAction
 	static int iup_XkeyCtrl( int _c ){ return _c | 0x20000000; }
 
 	static int iup_XkeyAlt( int _c ){ return _c | 0x40000000; }
+
+	static bool isComment( Ihandle* ih, int pos )
+	{
+		int style = IupScintillaSendMessage( ih, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
+		if( style == 1 || style == 19 || style == 4 )
+		{
+			return true;
+		}
+		else
+		{
+			int lineStartPos = IupScintillaSendMessage( ih, 2167, IupScintillaSendMessage( ih, 2166, pos, 0 ), 0 ); // SCI_LINEFROMPOSITION = 2166, SCI_POSITIONFROMLINE=2167
+			//IupMessage("", toStringz( Integer.toString(pos) ~ " / " ~ Integer.toString(lineStartPos) ) );
+			for( int i = pos - 1; i >= lineStartPos; --i )
+			{
+				if( IupScintillaSendMessage( ih, 2010, i, 0 ) == 1 ) return true;
+			}
+		}
+		return false;
+	}
 }
 
 

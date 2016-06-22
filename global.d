@@ -37,7 +37,7 @@ struct GLOBAL
 
 	//import Integer = tango.text.convert.Integer;
 	import tango.stdc.stringz;
-	import scintilla, project, layouts.tree, layouts.outline, layouts.debugger;
+	import scintilla, project, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast;
 	
@@ -57,7 +57,7 @@ struct GLOBAL
 
 	static CProjectTree			projectTree;
 	static COutline 			outlineTree;
-	static Ihandle* 			fileListTree;
+	static CFileList 			fileListTree;
 	
 	
 	static Ihandle* 			outputPanel;

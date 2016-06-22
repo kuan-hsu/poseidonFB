@@ -32,59 +32,34 @@ class CScintilla
 	char[]			fullPath;
 	CstringConvert	title;
 
-	public:
-	int				encoding;
-	
-	this()
+	void getFontAndSize( int index, out char[] font, out char[] Bold, out char[] Italic, out char[] Underline, out char[] Strikeout, out char[] size )
 	{
-		sci = IupScintilla();
-		IupSetAttribute( sci, "EXPAND", "YES" );
-	}
-
-	this( char[] _fullPath )
-	{
-		sci = IupScintilla();
-		IupSetAttribute( sci, "EXPAND", "YES" );
-		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
-
-		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
-		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
-		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
-		IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
-		IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
-		IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
-		IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
-		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
-
-		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
-
-		
-		init( _fullPath );
-	}	
-
-	~this()
-	{
-		IupSetHandle( GLOBAL.cString.convert( fullPath ), null );
-		if( !GLOBAL.debugPanel.isRunning && !GLOBAL.debugPanel.isExecuting )
+		if( GLOBAL.fonts.length > 2 )
 		{
-			int count = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" );
-			for( int i = count; i > 0; -- i )
+			char[][] strings = Util.split( GLOBAL.fonts[index].fontString, "," );
+			if( strings.length == 2 )
 			{
-				char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
-				char[] id = Util.trim( listValue[0..6] );
-				char[] ln = Util.trim( listValue[6..12] );
-				char[] fn = Util.trim( listValue[12..length] );
-
-				if( id == "-1" )
+				if( strings[0].length )
 				{
-					if( fn == fullPath ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
+					font = Util.trim( strings[0] );
 				}
-			}			
-		}
 
-		
-		if( title !is null ) delete title;
-		if( sci != null ) IupDestroy( sci );
+				strings[1] = Util.trim( strings[1] );
+
+				foreach( char[] s; Util.split( strings[1], " " ) )
+				{
+					switch( s )
+					{
+						case "Bold":		Bold = "YES";		break;
+						case "Italic":		Italic = "YES";		break;
+						case "Underline":	Underline = "YES";	break;
+						case "Strikeout":	Strikeout = "YES";	break;
+						default:
+							size = s;
+					}
+				}
+			}
+		}
 	}
 
 	void init( char[] _fullPath )
@@ -120,8 +95,8 @@ class CScintilla
 			// IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", n, toStringz( title.dup, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
 		}		
 
-		IupSetAttribute( sci, "CLEARALL", "" );
-		setGlobalSetting();
+		//IupSetAttribute( sci, "CLEARALL", "" );
+		setGlobalSetting( true );
 
 		switch( GLOBAL.editorSetting00.EolType )
 		{
@@ -131,12 +106,85 @@ class CScintilla
 			default:
 		}		
 		
+	}	
+
+	public:
+	int				encoding;
+	
+	this()
+	{
+		sci = IupScintilla();
+		IupSetAttribute( sci, "EXPAND", "YES" );
+	}
+
+	this( char[] _fullPath, char[] _text = null, int _encode = Encoding.UTF_8 )
+	{
+		sci = IupScintilla();
+		IupSetAttribute( sci, "EXPAND", "YES" );
+		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
+
+		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
+		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
+		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
+		IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
+		IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
+		IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
+		IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
+		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
+
+		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
+
+		init( _fullPath );
+
+		setText( _text );
+		setEncoding( _encode );
+
+		// Set margin size
+		char[] font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
+		version( Windows ) font = "Courier New"; else font = "FreeMono";
+
+		getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
+		if( GLOBAL.editorSetting00.LineMargin == "ON" )
+		{
+			int lineCount = IupGetInt( sci, "LINECOUNT" );
+			char[] lc = Integer.toString( lineCount );
+			if( _text.length ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * Integer.atoi( size ) ); else IupSetInt( sci, "MARGINWIDTH0", 3 * Integer.atoi( size ) );
+		}
+		else
+		{
+			IupSetAttribute( sci, "MARGINWIDTH0", "0" );
+		}		
+	}	
+
+	~this()
+	{
+		IupSetHandle( GLOBAL.cString.convert( fullPath ), null );
+		if( !GLOBAL.debugPanel.isRunning && !GLOBAL.debugPanel.isExecuting )
+		{
+			int count = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" );
+			for( int i = count; i > 0; -- i )
+			{
+				char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
+				char[] id = Util.trim( listValue[0..6] );
+				char[] ln = Util.trim( listValue[6..12] );
+				char[] fn = Util.trim( listValue[12..length] );
+
+				if( id == "-1" )
+				{
+					if( fn == fullPath ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
+				}
+			}			
+		}
+
+		
+		if( title !is null ) delete title;
+		if( sci != null ) IupDestroy( sci );
 	}
 
 	void setText( char[] _text )
 	{
 		IupSetAttribute( sci, "CLEARALL", "" );
-		IupSetAttribute( sci, "INSERT0", GLOBAL.cString.convert( _text ) );
+		IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text ) );
 		IupSetAttribute( sci, "SAVEDSTATE", "YES" );
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 	}
@@ -208,14 +256,14 @@ class CScintilla
 
 
 		// Change the fileListTree's node
-		int nodeCount = IupGetInt( GLOBAL.fileListTree, "COUNT" );
+		int nodeCount = IupGetInt( GLOBAL.fileListTree.getTreeHandle, toStringz( "COUNT" ) );
 	
 		for( int id = 1; id <= nodeCount; id++ ) // include Parent "FileList" node
 		{
-			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree, "USERDATA", id );
+			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", id );
 			if( _sci_node == this )
 			{
-				IupSetAttributeId( GLOBAL.fileListTree, "TITLE", id, fullPath.ptr );
+				IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id, fullPath.ptr );
 				break;
 			}
 		}					
@@ -248,7 +296,7 @@ class CScintilla
 		return true;
 	}
 
-	void setGlobalSetting()
+	void setGlobalSetting( bool bFirstTime = false )
 	{
 		IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic");
 
@@ -265,39 +313,9 @@ class CScintilla
 		else
 		{
 			font = "FreeMono";
-		}		
-
-		void getFontAndSize( int index )
-		{
-			if( GLOBAL.fonts.length > 2 )
-			{
-				char[][] strings = Util.split( GLOBAL.fonts[index].fontString, "," );
-				if( strings.length == 2 )
-				{
-					if( strings[0].length )
-					{
-						font = Util.trim( strings[0] );
-					}
-
-					strings[1] = Util.trim( strings[1] );
-
-					foreach( char[] s; Util.split( strings[1], " " ) )
-					{
-						switch( s )
-						{
-							case "Bold":		Bold = "YES";		break;
-							case "Italic":		Italic = "YES";		break;
-							case "Underline":	Underline = "YES";	break;
-							case "Strikeout":	Strikeout = "YES";	break;
-							default:
-								size = s;
-						}
-					}
-				}
-			}
 		}
 
-		getFontAndSize( 1 );
+		getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
 		IupSetAttribute( sci, "STYLEFONT32", toStringz( font.dup ) );
 		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
@@ -314,7 +332,7 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFGCOLOR8", "128 0 0");		// SCE_B_DATE 8
 		IupSetAttribute(sci, "STYLEFGCOLOR9", "16 108 232");	// SCE_B_STRINGEOL 9
 		*/
-		IupSetAttribute(sci, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.keyWord[1] ));		// SCE_B_KEYWORD2 10
+		IupSetAttribute(sci, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.keyWord[1] ));	// SCE_B_KEYWORD2 10
 		IupSetAttribute(sci, "STYLEFGCOLOR11", toStringz( GLOBAL.editColor.keyWord[2] ));	// SCE_B_KEYWORD3 11
 		IupSetAttribute(sci, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.keyWord[3] ));	// SCE_B_KEYWORD4 12
 		IupSetAttribute(sci, "STYLEFGCOLOR19", "0 128 0");		// SCE_B_COMMENTBLOCK 19
@@ -336,7 +354,7 @@ class CScintilla
 		IupSetAttribute( sci, "FGCOLOR", GLOBAL.cString.convert( "0 0 0" ) );
 		IupSetAttribute( sci, "BGCOLOR", GLOBAL.cString.convert( "255 255 255" ) );
 
-		getFontAndSize( 10 );
+		getFontAndSize( 10, font, Bold, Italic, Underline, Strikeout, size );
 		IupSetAttribute(sci, "STYLEFGCOLOR40", "102 69 3");	
 		IupSetAttribute(sci, "STYLEBGCOLOR40", "255 200 227");
 		IupSetAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
@@ -350,16 +368,19 @@ class CScintilla
 		GLOBAL.editorSetting00.TabWidth = Integer.toString( tabSize );
 		IupSetAttribute( sci, "TABSIZE", GLOBAL.cString.convert( GLOBAL.editorSetting00.TabWidth ) );
 
-		getFontAndSize( 1 );
-		if( GLOBAL.editorSetting00.LineMargin == "ON" )
+		if( !bFirstTime )
 		{
-			int lineCount = IupGetInt( sci, "LINECOUNT" );
-			char[] lc = Integer.toString( lineCount );
-			IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 2 ) * Integer.atoi( size ) );
-		}
-		else
-		{
-			IupSetAttribute(sci, "MARGINWIDTH0", "0" );
+			getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
+			if( GLOBAL.editorSetting00.LineMargin == "ON" )
+			{
+				int lineCount = IupGetInt( sci, "LINECOUNT" );
+				char[] lc = Integer.toString( lineCount );
+				IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * Integer.atoi( size.dup ) );
+			}
+			else
+			{
+				IupSetAttribute( sci, "MARGINWIDTH0", "0" );
+			}
 		}
 		
 		if( GLOBAL.editorSetting00.BookmarkMargin == "ON" )
@@ -418,7 +439,7 @@ class CScintilla
 		}
 
 		//IupScintillaSendMessage( sci, 2122, Integer.atoi(GLOBAL.editorSetting00.TabWidth), 0 ); // SCI_SETINDENT = 2122
-		if( GLOBAL.editorSetting00.IndentGuide == "ON" ) IupSetAttribute( sci, "INDENTATIONGUIDES", "REAL" ); else IupSetAttribute( sci, "INDENTATIONGUIDES", "NONE" );
+		if( GLOBAL.editorSetting00.IndentGuide == "ON" ) IupSetAttribute( sci, "INDENTATIONGUIDES", "LOOKBOTH" ); else IupSetAttribute( sci, "INDENTATIONGUIDES", "NONE" );
 		if( GLOBAL.editorSetting00.CaretLine == "ON" ) IupScintillaSendMessage( sci, 2096, 1, 0 ); else IupScintillaSendMessage( sci, 2096, 0, 0 ); // SCI_SETCARETLINEVISIBLE = 2096
 		//if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupSetAttribute( sci, "WORDWRAP", "YES" ); else IupSetAttribute( sci, "WORDWRAP", "NO" );
 		if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupScintillaSendMessage( sci, 2268, 1, 0 ); else IupScintillaSendMessage( sci, 2268, 0, 0 ); //#define SCI_SETWRAPMODE 2268
@@ -705,19 +726,6 @@ extern(C)
 	private int CScintilla_valuechanged_cb( Ihandle* ih )
 	{
 		//actionManager.StatusBarAction.update();
-		/+
-		if( GLOBAL.liveLevel > 0 )
-		{
-			try
-			{
-				if( !GLOBAL.bKeyUp ) LiveParser.parseCurrentLine();
-			}
-			catch( Exception e )
-			{
-
-			}
-		}
-		+/
 
 		return IUP_DEFAULT;
 	}
@@ -1101,6 +1109,8 @@ extern(C)
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
+
+		if( ScintillaAction.isComment( ih, pos ) ) return IUP_DEFAULT;
 
 		if( insert == 1 )
 		{

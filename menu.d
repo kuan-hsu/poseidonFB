@@ -377,7 +377,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.190\nBy Kuan Hsu (Taiwan)\n2016.06.18" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.192\nBy Kuan Hsu (Taiwan)\n2016.06.22" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -764,9 +764,12 @@ extern(C)
 		Ihandle* ih	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null )
 		{
-			char[] targetText = fromStringz(IupGetAttribute( ih, "SELECTEDTEXT" ));
-			//actionManager.SearchAction.findNext( ih, targetText, GLOBAL.searchDlg.searchRule );
-			actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, true );
+			char[] targetText = fromStringz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
+			if( targetText.length )
+			{
+				IupSetAttribute( ih, "SELECTIONPOS", IupGetAttribute( ih, "SELECTIONPOS" ) );
+				actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, true );
+			}
 		}
 	}
 
@@ -776,8 +779,24 @@ extern(C)
 		if( ih != null )
 		{
 			char[] targetText = fromStringz(IupGetAttribute( ih, "SELECTEDTEXT" ));
+			if( targetText.length )
+			{
+				char[] beginEndPos = fromStringz( IupGetAttribute( ih, "SELECTIONPOS" ) );
+				if( beginEndPos.length )
+				{
+					int colonPos = Util.index( beginEndPos, ":" );
+					if( colonPos < beginEndPos.length )
+					{
+						char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
+						IupSetAttribute( ih, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
+						actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
+					}
+				}
+				
+			}
+			
 			//actionManager.SearchAction.findPrev( ih, targetText, GLOBAL.searchDlg.searchRule );
-			actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
+			//actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
 		}
 	}
 

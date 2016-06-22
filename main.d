@@ -167,7 +167,7 @@ void main()
 	//if( GLOBAL.fonts.length == 11 )
 	//{
 		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[2].fontString ) );// Leftside
-		IupSetAttribute( GLOBAL.fileListTree, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[3].fontString ) );// Filelist
+		IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[3].fontString ) );// Filelist
 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[4].fontString ) );// Project
 		IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[5].fontString ) );// Outline
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[6].fontString ) );// Bottom
