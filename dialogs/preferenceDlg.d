@@ -77,7 +77,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* textTrigger = IupText( null );
 		IupSetAttribute( textTrigger, "SIZE", "30x12" );
-		IupSetAttribute( textTrigger, "TIP", "Set '0' to disable autocomplete" );
+		IupSetAttribute( textTrigger, "TIP", "Set 0 to disable auto complete" );
 		IupSetAttribute( textTrigger, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
 		IupSetHandle( "textTrigger", textTrigger );
 
@@ -215,8 +215,25 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleColorOutline = IupToggle( "Colorize Outline Item", null );
 		IupSetAttribute( toggleColorOutline, "VALUE", toStringz(GLOBAL.editorSetting00.ColorOutline.dup) );
 		IupSetHandle( "toggleColorOutline", toggleColorOutline );		
+
+
+
+		Ihandle* labelTabWidth = IupLabel( "Tab Width:" );
+		Ihandle* textTabWidth = IupText( null );
+		IupSetAttribute( textTabWidth, "VALUE", toStringz(GLOBAL.editorSetting00.TabWidth) );
+		IupSetHandle( "textTabWidth", textTabWidth );
+		Ihandle* hBoxTab = IupHbox( labelTabWidth, textTabWidth, null );
+		IupSetAttribute( hBoxTab, "ALIGNMENT", "ACENTER" );
 		
-		
+		Ihandle* labelColumnEdge = IupLabel( "Column Edge:" );
+		Ihandle* textColumnEdge = IupText( null );
+		IupSetAttribute( textColumnEdge, "VALUE", toStringz(GLOBAL.editorSetting00.ColumnEdge) );
+		IupSetAttribute( textColumnEdge, "TIP", toStringz( "Set 0 to disable" ) );
+		IupSetHandle( "textColumnEdge", textColumnEdge );
+		Ihandle* hBoxColumn = IupHbox( labelColumnEdge, textColumnEdge, null );
+		IupSetAttribute( hBoxColumn, "ALIGNMENT", "ACENTER" );
+
+			
 		Ihandle* gbox = IupGridBox
 		(
 			IupSetAttributes( toggleLineMargin, "" ),
@@ -236,6 +253,9 @@ class CPreferenceDialog : CBaseDialog
 
 			IupSetAttributes( toggleAutoEnd, "" ),
 			IupSetAttributes( toggleColorOutline, "" ),
+
+			IupSetAttributes( hBoxTab, "" ),
+			IupSetAttributes( hBoxColumn, "" ),
 			
 			null
 		);
@@ -243,16 +263,6 @@ class CPreferenceDialog : CBaseDialog
 		//IupSetAttribute(gbox, "SIZECOL", "1");
 		//IupSetAttribute(gbox, "SIZELIN", "4");
 		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=5,GAPCOL=20,MARGIN=0x0" );
-
-		Ihandle* labelTabWidth = IupLabel( "Tab Width:" );
-		Ihandle* textTabWidth = IupText( null );
-		IupSetAttributes( textTabWidth, "SIZE=30x12,MARGIN=0x0" );
-		IupSetAttribute( textTabWidth, "VALUE", toStringz(GLOBAL.editorSetting00.TabWidth) );
-		IupSetHandle( "textTabWidth", textTabWidth );
-
-		Ihandle* hBox03 = IupHbox( labelTabWidth, textTabWidth, null );
-		IupSetAttribute( hBox03, "MARGIN", "0x0" );
-		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
 
 		// fontList
 		Ihandle* fontList = IupList( null );
@@ -401,7 +411,7 @@ class CPreferenceDialog : CBaseDialog
 
 		IupSetAttribute( frameColor, "TITLE", "Color");
 
-		Ihandle* vBoxPage02 = IupVbox( gbox, hBox03, frameFont, frameColor, null );
+		Ihandle* vBoxPage02 = IupVbox( gbox, frameFont, frameColor, null );
 		IupSetAttribute( vBoxPage02, "EXPANDCHILDREN", "YES");
 
 
@@ -578,6 +588,7 @@ class CPreferenceDialog : CBaseDialog
 
 		
 		IupSetHandle( "textTabWidth", null );
+		IupSetHandle( "textColumnEdge", null );
 
 		IupSetHandle( "textFontName", null );
 		IupSetHandle( "textFontSize", null );
@@ -708,6 +719,7 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "ShowSpace", GLOBAL.editorSetting00.ShowSpace )	
 		.attribute( null, "AutoEnd", GLOBAL.editorSetting00.AutoEnd )	
 		.attribute( null, "TabWidth", GLOBAL.editorSetting00.TabWidth )
+		.attribute( null, "ColumnEdge", GLOBAL.editorSetting00.ColumnEdge )
 		.attribute( null, "EolType", GLOBAL.editorSetting00.EolType )
 		.attribute( null, "ColorOutline", GLOBAL.editorSetting00.ColorOutline );
 		/+
@@ -971,6 +983,9 @@ class CPreferenceDialog : CBaseDialog
 
 			result = root.query.descendant("toggle00").attribute("TabWidth");
 			foreach( e; result ) GLOBAL.editorSetting00.TabWidth = e.value;
+
+			result = root.query.descendant("toggle00").attribute("ColumnEdge");
+			foreach( e; result ) GLOBAL.editorSetting00.ColumnEdge = e.value;
 
 			result = root.query.descendant("toggle00").attribute("EolType");
 			foreach( e; result ) GLOBAL.editorSetting00.EolType = e.value;
@@ -1478,6 +1493,7 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editorSetting00.AutoEnd				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.ColorOutline			= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorOutline" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
 
 		Ihandle* _ft = IupGetHandle( "fontList" );
 		if( _ft != null )

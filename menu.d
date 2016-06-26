@@ -207,14 +207,17 @@ void createMenu()
 	// Debug
 	item_runDebug = IupItem ("Run Debug", null);
 	IupSetAttribute(item_runDebug, "KEY", "R");
+	IupSetAttribute(item_runDebug, "IMAGE", "icon_debugrun");
 	IupSetCallback( item_runDebug, "ACTION", cast(Icallback)&runDebug_cb );
 
 	item_withDebug = IupItem ("Compile With Debug", null);
 	IupSetAttribute(item_withDebug, "KEY", "C");
+	IupSetAttribute(item_withDebug, "IMAGE", "icon_debugbuild");
 	IupSetCallback( item_withDebug, "ACTION", cast(Icallback)&compileWithDebug_cb );
 	
 	item_BuildwithDebug = IupItem ("Build Project With Debug", null);
 	IupSetAttribute(item_BuildwithDebug, "KEY", "B");
+	IupSetAttribute(item_BuildwithDebug, "IMAGE", "icon_debugbuild");
 	IupSetCallback( item_BuildwithDebug, "ACTION", cast(Icallback)&buildAllWithDebug_cb );
 	
 
@@ -377,7 +380,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.192\nBy Kuan Hsu (Taiwan)\n2016.06.22" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.193\nBy Kuan Hsu (Taiwan)\n2016.06.26" );
 	});
 
 	file_menu = IupMenu( 	item_new, 

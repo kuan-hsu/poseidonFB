@@ -140,15 +140,12 @@ class CScintilla
 		setEncoding( _encode );
 
 		// Set margin size
-		char[] font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
-		version( Windows ) font = "Courier New"; else font = "FreeMono";
-
-		getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
+		int textWidth = IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 		if( GLOBAL.editorSetting00.LineMargin == "ON" )
 		{
 			int lineCount = IupGetInt( sci, "LINECOUNT" );
 			char[] lc = Integer.toString( lineCount );
-			if( _text.length ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * Integer.atoi( size ) ); else IupSetInt( sci, "MARGINWIDTH0", 3 * Integer.atoi( size ) );
+			if( lc.length > 6 ) IupSetInt( sci, "MARGINWIDTH0", lc.length * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
 		}
 		else
 		{
@@ -370,12 +367,12 @@ class CScintilla
 
 		if( !bFirstTime )
 		{
-			getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
+			int textWidth = IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
 				char[] lc = Integer.toString( lineCount );
-				IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * Integer.atoi( size.dup ) );
+				if( lc.length > 6 ) IupSetInt( sci, "MARGINWIDTH0", lc.length * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
 			}
 			else
 			{
@@ -507,7 +504,17 @@ class CScintilla
 		IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 
 		IupSetInt( sci, "AUTOCMAXHEIGHT", 15 );
-
+		int columnEdge = Integer.atoi( GLOBAL.editorSetting00.ColumnEdge );
+		if( columnEdge > 0 )
+		{
+			IupScintillaSendMessage( sci, 2363, 1, 0 );  // SCI_SETEDGEMODE 2363
+			IupScintillaSendMessage( sci, 2361, columnEdge, 0 ); // SCI_SETEDGECOLUMN 2361
+		}
+		else
+		{
+			IupScintillaSendMessage( sci, 2363, 0, 0 );  // SCI_SETEDGEMODE 2363
+		}
+		
 
 		// Autocompletion XPM Image
 		version( Windows )
@@ -520,15 +527,15 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2405, 4, cast(int) XPM.protected_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 5, cast(int) XPM.public_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			
-			IupScintillaSendMessage( sci, 2405, 6, cast(int) XPM.class_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 7, cast(int) XPM.class_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			//IupScintillaSendMessage( sci, 2405, 6, cast(int) XPM.class_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			//IupScintillaSendMessage( sci, 2405, 7, cast(int) XPM.class_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 8, cast(int) XPM.class_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			
 			IupScintillaSendMessage( sci, 2405, 9, cast(int) XPM.struct_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 10, cast(int) XPM.struct_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 11, cast(int) XPM.struct_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			
-			IupScintillaSendMessage( sci, 2405, 12, cast(int) XPM.enum_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			//IupScintillaSendMessage( sci, 2405, 12, cast(int) XPM.enum_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 13, cast(int) XPM.enum_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 14, cast(int) XPM.enum_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			
@@ -541,8 +548,8 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2405, 20, cast(int) XPM.alias_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 
 			IupScintillaSendMessage( sci, 2405, 21, cast(int) XPM.normal_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 22, cast(int) XPM.import_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 23, cast(int) XPM.autoWord_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			//IupScintillaSendMessage( sci, 2405, 22, cast(int) XPM.import_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+			//IupScintillaSendMessage( sci, 2405, 23, cast(int) XPM.autoWord_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 
 			IupScintillaSendMessage( sci, 2405, 24, cast(int) XPM.namespace_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 
@@ -575,15 +582,15 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 5, cast(int) XPM.public_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			
-			IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			//IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			//IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 8, cast(int) XPM.class_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			
 			IupScintillaSendMessage( sci, 2627, 9, cast(int) XPM.struct_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 10, cast(int) XPM.struct_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 11, cast(int) XPM.struct_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			
-			IupScintillaSendMessage( sci, 2627, 12, cast(int) XPM.enum_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			//IupScintillaSendMessage( sci, 2627, 12, cast(int) XPM.enum_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 13, cast(int) XPM.enum_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 14, cast(int) XPM.enum_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 			
@@ -596,8 +603,8 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2627, 20, cast(int) XPM.alias_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
 			IupScintillaSendMessage( sci, 2627, 21, cast(int) XPM.normal_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 22, cast(int) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 23, cast(int) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			//IupScintillaSendMessage( sci, 2627, 22, cast(int) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			//IupScintillaSendMessage( sci, 2627, 23, cast(int) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
 			IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
@@ -614,8 +621,6 @@ class CScintilla
 			
 			IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-
-			
 		}
 	}
 }
