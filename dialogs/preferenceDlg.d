@@ -126,6 +126,11 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleLiveFull", toggleLiveFull );
 		IupSetAttribute( toggleLiveFull, "ACTIVE", "NO" );
 
+		Ihandle* toggleUpdateOutline = IupToggle( "Update Outline", null );
+		IupSetAttribute( toggleUpdateOutline, "VALUE", toStringz(GLOBAL.toggleUpdateOutlineLive.dup) );
+		IupSetAttribute( toggleUpdateOutline, "ACTIVE", "NO" );
+		IupSetHandle( "toggleUpdateOutline", toggleUpdateOutline );
+
 		switch( GLOBAL.liveLevel )
 		{
 			case 1:		IupSetAttribute( toggleLiveLight, "VALUE", "ON" ); break;
@@ -134,11 +139,17 @@ class CPreferenceDialog : CBaseDialog
 		}
 
 		Ihandle* hBoxLive = IupHbox( toggleLiveNone, toggleLiveLight, toggleLiveFull, null );
-		IupSetAttributes( hBoxLive, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES,EXPANDCHILDREN=YES,SIZE=270" );
+		IupSetAttributes( hBoxLive, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
 		Ihandle* radioLive = IupRadio( hBoxLive );
-		Ihandle* frameLive = IupFrame( radioLive );
-		//IupSetAttribute( frameLive, "SIZE", "260x" );
+
+		Ihandle* hBoxLive2 = IupHbox( radioLive, toggleUpdateOutline, null );
+		IupSetAttributes( hBoxLive2, "GAP=30,MARGIN=10x,ALIGNMENT=ACENTER" );
+		//IupSetAttributes( hBoxLive2, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
+		
+		Ihandle* frameLive = IupFrame( hBoxLive2 );
+		IupSetAttributes( frameLive, "SIZE=270x" );
 		IupSetAttribute( frameLive, "TITLE", "ParseLive! Level");
+
 
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
@@ -276,6 +287,37 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttribute( fontList, "FONT", "FreeMono,Bold 9" );
 		}
 
+
+		Ihandle* radioKeywordCase0 = IupToggle( "None", null );
+		IupSetHandle( "radioKeywordCase0", radioKeywordCase0 );
+
+		Ihandle* radioKeywordCase1 = IupToggle( "lowercase", null );
+		IupSetHandle( "radioKeywordCase1", radioKeywordCase1 );
+		
+		Ihandle* radioKeywordCase2 = IupToggle( "UPPERCASE", null );
+		IupSetHandle( "radioKeywordCase2", radioKeywordCase2 );
+
+		Ihandle* radioKeywordCase3 = IupToggle( "Mixedcase", null );
+		IupSetHandle( "radioKeywordCase3", radioKeywordCase3 );
+
+		switch( GLOBAL.keywordCase )
+		{
+			case 0:		IupSetAttribute( radioKeywordCase0, "VALUE", "ON" ); break;
+			case 1:		IupSetAttribute( radioKeywordCase1, "VALUE", "ON" ); break;
+			case 2:		IupSetAttribute( radioKeywordCase2, "VALUE", "ON" ); break;
+			default:	IupSetAttribute( radioKeywordCase3, "VALUE", "ON" ); break;
+		}
+
+		Ihandle* hBoxKeywordCase = IupHbox( radioKeywordCase0, radioKeywordCase1, radioKeywordCase2, radioKeywordCase3, null );
+		IupSetAttributes( hBoxKeywordCase, "GAP=30,MARGIN=30x,ALIGNMENT=ACENTER" );
+		Ihandle* radioKeywordCase = IupRadio( hBoxKeywordCase );
+
+		Ihandle* frameKeywordCase = IupFrame( radioKeywordCase );
+		IupSetAttributes( frameKeywordCase, "SIZE=270,GAP=1" );
+		IupSetAttribute( frameKeywordCase, "TITLE", "Auto Convert Keyword Case");
+		
+		
+
 		for( int i = 0; i < GLOBAL.fonts.length; ++ i )
 		{
 			char[][] strings = Util.split( GLOBAL.fonts[i].fontString, "," );
@@ -316,55 +358,55 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* labelCaretLine = IupLabel( "Caret line:" );
 		Ihandle* btnCaretLine = IupButton( null, null );
 		IupSetAttribute( btnCaretLine, "BGCOLOR", toStringz(GLOBAL.editColor.caretLine) );
-		IupSetAttribute( btnCaretLine, "SIZE", "16x8" );
+		version(Windows) IupSetAttribute( btnCaretLine, "SIZE", "16x8" ); else IupSetAttribute( btnCaretLine, "SIZE", "16x12" );
 		IupSetHandle( "btnCaretLine", btnCaretLine );
 		IupSetCallback( btnCaretLine, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelCursor = IupLabel( "Cursor:" );
 		Ihandle* btnCursor = IupButton( null, null );
 		IupSetAttribute( btnCursor, "BGCOLOR", toStringz(GLOBAL.editColor.cursor) );
-		IupSetAttribute( btnCursor, "SIZE", "16x8" );
+		version(Windows) IupSetAttribute( btnCursor, "SIZE", "16x8" ); else IupSetAttribute( btnCursor, "SIZE", "16x12" );
 		IupSetHandle( "btnCursor", btnCursor );
 		IupSetCallback( btnCursor, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelSelectFore = IupLabel( "Selection foreground:" );
 		Ihandle* btnSelectFore = IupButton( null, null );
 		IupSetAttribute( btnSelectFore, "BGCOLOR", toStringz(GLOBAL.editColor.selectionFore) );
-		IupSetAttribute( btnSelectFore, "SIZE", "16x8" );
+		version(Windows) IupSetAttribute( btnSelectFore, "SIZE", "16x8" ); else IupSetAttribute( btnSelectFore, "SIZE", "16x12" );
 		IupSetHandle( "btnSelectFore", btnSelectFore );
 		IupSetCallback( btnSelectFore, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelSelectBack = IupLabel( "Selection background:" );
 		Ihandle* btnSelectBack = IupButton( null, null );
 		IupSetAttribute( btnSelectBack, "BGCOLOR", toStringz(GLOBAL.editColor.selectionBack) );
-		IupSetAttribute( btnSelectBack, "SIZE", "16x8" );
+		version(Windows) IupSetAttribute( btnSelectBack, "SIZE", "16x8" ); else IupSetAttribute( btnSelectBack, "SIZE", "16x12" );
 		IupSetHandle( "btnSelectBack", btnSelectBack );
 		IupSetCallback( btnSelectBack, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelLinenumFore = IupLabel( "Linenumber foreground:" );
 		Ihandle* btnLinenumFore = IupButton( null, null );
 		IupSetAttribute( btnLinenumFore, "BGCOLOR", toStringz(GLOBAL.editColor.linenumFore) );
-		IupSetAttribute( btnLinenumFore, "SIZE", "16x8" );
+		version(Windows) IupSetAttribute( btnLinenumFore, "SIZE", "16x8" ); else IupSetAttribute( btnLinenumFore, "SIZE", "16x12" );
 		IupSetHandle( "btnLinenumFore", btnLinenumFore );
 		IupSetCallback( btnLinenumFore, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelLinenumBack = IupLabel( "Linenumber background:" );
 		Ihandle* btnLinenumBack = IupButton( null, null );
 		IupSetAttribute( btnLinenumBack, "BGCOLOR", toStringz(GLOBAL.editColor.linenumBack) );
-		IupSetAttribute( btnLinenumBack, "SIZE", "16x8" );
+		version(Windows) IupSetAttribute( btnLinenumBack, "SIZE", "16x8" ); else IupSetAttribute( btnLinenumBack, "SIZE", "16x12" );
 		IupSetHandle( "btnLinenumBack", btnLinenumBack );
 		IupSetCallback( btnLinenumBack, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelFoldingColor = IupLabel( "FoldingMargin color:" );
 		Ihandle* btnFoldingColor = IupButton( null, null );
 		IupSetAttribute( btnFoldingColor, "BGCOLOR", toStringz(GLOBAL.editColor.fold) );
-		IupSetAttribute( btnFoldingColor, "SIZE", "16x8" );
+		version(Windows) IupSetAttribute( btnFoldingColor, "SIZE", "16x8" ); else IupSetAttribute( btnFoldingColor, "SIZE", "16x12" );
 		IupSetHandle( "btnFoldingColor", btnFoldingColor );
 		IupSetCallback( btnFoldingColor, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelSelAlpha = IupLabel( "Selection Alpha:" );
 		Ihandle* textAlpha = IupText( null );
-		version( Windows)
+		version(Windows)
 		{
 			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0" );
 			IupSetAttribute( textAlpha, "SPINVALUE", toStringz( GLOBAL.editColor.selAlpha ) );
@@ -403,7 +445,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ARIGHT,GAPLIN=5,GAPCOL=20,MARGIN=2x10,SIZELIN=2" );
+		IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=20,MARGIN=2x10,SIZELIN=2" );
 
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -411,8 +453,8 @@ class CPreferenceDialog : CBaseDialog
 
 		IupSetAttribute( frameColor, "TITLE", "Color");
 
-		Ihandle* vBoxPage02 = IupVbox( gbox, frameFont, frameColor, null );
-		IupSetAttribute( vBoxPage02, "EXPANDCHILDREN", "YES");
+		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, frameColor, null );
+		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 
 
 		// Short Cut
@@ -469,28 +511,28 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* labelKeyWord0 = IupLabel( "KeyWord0" );
 		Ihandle* btnKeyWord0Color = IupButton( null, null );
 		IupSetAttribute( btnKeyWord0Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[0]) );
-		IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" );
+		version(Windows) IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord0Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
 		IupSetCallback( btnKeyWord0Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelKeyWord1 = IupLabel( "KeyWord1" );
 		Ihandle* btnKeyWord1Color = IupButton( null, null );
 		IupSetAttribute( btnKeyWord1Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[1]) );
-		IupSetAttribute( btnKeyWord1Color, "SIZE", "24x8" );
+		version(Windows) IupSetAttribute( btnKeyWord1Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord1Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord1Color", btnKeyWord1Color );
 		IupSetCallback( btnKeyWord1Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelKeyWord2 = IupLabel( "KeyWord2" );
 		Ihandle* btnKeyWord2Color = IupButton( null, null );
 		IupSetAttribute( btnKeyWord2Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[2]) );
-		IupSetAttribute( btnKeyWord2Color, "SIZE", "24x8" );
+		version(Windows) IupSetAttribute( btnKeyWord2Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord2Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord2Color", btnKeyWord2Color );
 		IupSetCallback( btnKeyWord2Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelKeyWord3 = IupLabel( "KeyWord3" );
 		Ihandle* btnKeyWord3Color = IupButton( null, null );
 		IupSetAttribute( btnKeyWord3Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[3]) );
-		IupSetAttribute( btnKeyWord3Color, "SIZE", "24x8" );
+		version(Windows) IupSetAttribute( btnKeyWord3Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord3Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord3Color", btnKeyWord3Color );
 		IupSetCallback( btnKeyWord3Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
@@ -569,7 +611,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleLiveNone", null );
 		IupSetHandle( "toggleLiveLight", null );
 		IupSetHandle( "toggleLiveFull", null );		
-		
+		IupSetHandle( "toggleUpdateOutline", null );
 	
 		IupSetHandle( "toggleAnnotation", null );
 
@@ -589,6 +631,11 @@ class CPreferenceDialog : CBaseDialog
 		
 		IupSetHandle( "textTabWidth", null );
 		IupSetHandle( "textColumnEdge", null );
+
+		IupSetHandle( "radioKeywordCase0", null );
+		IupSetHandle( "radioKeywordCase1", null );
+		IupSetHandle( "radioKeywordCase2", null );
+		IupSetHandle( "radioKeywordCase3", null );
 
 		IupSetHandle( "textFontName", null );
 		IupSetHandle( "textFontSize", null );
@@ -813,7 +860,8 @@ class CPreferenceDialog : CBaseDialog
 		parserNode.element( null, "showlisttype", GLOBAL.toggleShowListType );
 		parserNode.element( null, "showallmember", GLOBAL.toggleShowAllMember );
 		parserNode.element( null, "livelevel", Integer.toString( GLOBAL.liveLevel ) );
-		
+		parserNode.element( null, "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
+		parserNode.element( null, "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
 
 		/*
 		<recentProjects>
@@ -939,8 +987,18 @@ class CPreferenceDialog : CBaseDialog
 			{
 				GLOBAL.liveLevel = Integer.atoi( e.value );
 			}
-			
-			
+			result = root.query.descendant("updateoutlinelive");
+			foreach( e; result )
+			{
+				GLOBAL.toggleUpdateOutlineLive = e.value;
+			}
+			result = root.query.descendant("keywordcase");
+			foreach( e; result )
+			{
+				GLOBAL.keywordCase = Integer.atoi( e.value );
+			}
+		
+
 
 			result = root.query.descendant("recentProjects").descendant("name");
 			foreach( e; result )
@@ -1572,10 +1630,20 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.liveLevel = 2;
 		else
 			GLOBAL.liveLevel = 0;
-			
-		
 
-		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.functionTitleHandle, "VISIBLE", "NO" );
+		GLOBAL.toggleUpdateOutlineLive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleUpdateOutline" ), "VALUE" ) ).dup;
+
+
+		if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase0" ), "VALUE" ) ) == "ON" )
+			GLOBAL.keywordCase = 0;
+		else if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase1" ), "VALUE" ) ) == "ON" )
+			GLOBAL.keywordCase = 1;
+		else if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase2" ), "VALUE" ) ) == "ON" )
+			GLOBAL.keywordCase = 2;
+		else
+			GLOBAL.keywordCase = 3;
+
+		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "NO" );
 
 		//if( GLOBAL.fonts.length == 11 )
 		//{

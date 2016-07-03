@@ -28,6 +28,8 @@
     <showlisttype>ON</showlisttype>
     <showallmember>ON</showallmember>
     <livelevel>1</livelevel>
+    <updateoutlinelive>OFF</updateoutlinelive>
+    <keywordcase>2</keywordcase>
   </parser>
   <recentProjects>
     <name>D:/CodingPark/MyCode/FBcode/Shoot : Shoot</name>

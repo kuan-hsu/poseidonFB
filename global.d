@@ -37,7 +37,7 @@ struct GLOBAL
 
 	//import Integer = tango.text.convert.Integer;
 	import tango.stdc.stringz;
-	import scintilla, project, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.debugger;
+	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast;
 	
@@ -52,8 +52,8 @@ struct GLOBAL
 	static Ihandle* 			explorerWindow;
 	static Ihandle* 			explorerSplit; // which split explorerWindow & editWindow
 	static int					explorerSplit_value = 300;
-	//static Ihandle* 			projectManagerToolbar;
-	//static Ihandle* 			projectManagerTree;
+
+	static CToolBar	 			toolbar;
 
 	static CProjectTree			projectTree;
 	static COutline 			outlineTree;
@@ -79,6 +79,7 @@ struct GLOBAL
 
 	// Setting
 	static char[][]				KEYWORDS;
+	static int					keywordCase = 0;	
 	static char[]				compilerFullPath;// = "D:\\CodingPark\\FreeBASIC-1.02.1-win32\\fbc.exe";
 	static char[]				compilerAnootation = "ON";
 	static char[]				debuggerFullPath;
@@ -86,7 +87,7 @@ struct GLOBAL
 	static char[][]				recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorColorUint		editColor;
-	static Ihandle*				functionTitleHandle;
+	//static Ihandle*			functionTitleHandle;
 	static char[]				enableKeywordComplete = "ON";
 	static char[]				enableParser = "ON";
 	static char[]				showFunctionTitle = "OFF";
@@ -104,6 +105,9 @@ struct GLOBAL
 	static int					autoCompletionTriggerWordCount = 3;
 	static int					includeLevel = 2;
 	static int					liveLevel = 0;
+	static char[]				toggleUpdateOutlineLive = "OFF";
+
+
 
 
 	static PROJECT[char[]]		projectManager;
@@ -117,6 +121,7 @@ struct GLOBAL
 	static fontUint[]			fonts;
 
 	static bool					bKeyUp = true;
+	static int					KeyNumber;
 }
 
 import tango.io.UnicodeFile;

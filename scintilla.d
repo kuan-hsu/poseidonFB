@@ -382,6 +382,7 @@ class CScintilla
 		
 		if( GLOBAL.editorSetting00.BookmarkMargin == "ON" )
 		{
+			/*
 			IupSetAttribute( sci, "MARGINWIDTH1", "16" );
 			IupSetAttribute( sci, "MARGINTYPE1",  "SYMBOL" );
 			IupSetAttribute( sci, "MARGINSENSITIVE1", "YES" );
@@ -389,6 +390,10 @@ class CScintilla
 			IupSetAttribute( sci, "MARKERSYMBOL1", "CIRCLE" );
 			IupSetAttribute( sci, "MARKERFGCOLOR1", "255 128 0" );
 			IupSetAttribute( sci, "MARKERBGCOLOR1", "255 255 0" );
+			*/
+			IupSetAttribute( sci, "MARGINWIDTH1", "16" );
+			IupSetAttribute( sci, "MARGINTYPE1",  "SYMBOL" );
+			IupSetAttribute( sci, "MARGINSENSITIVE1", "YES" );			
 
 			IupSetAttribute( sci, "MARKERDEFINE", "2=LEFTRECT" );
 			IupSetAttribute( sci, "MARKERSYMBOL2", "LEFTRECT" );
@@ -503,6 +508,9 @@ class CScintilla
 		IupScintillaSendMessage( sci, 2118, 0, 0 ); // SCI_AUTOCSETAUTOHIDE 2118
 		IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 
+		IupSetAttribute( sci, "SIZE", "NULL" );
+		//IupSetAttribute( sci, "VISIBLELINES", "60" );
+
 		IupSetInt( sci, "AUTOCMAXHEIGHT", 15 );
 		int columnEdge = Integer.atoi( GLOBAL.editorSetting00.ColumnEdge );
 		if( columnEdge > 0 )
@@ -566,7 +574,9 @@ class CScintilla
 
 			IupScintillaSendMessage( sci, 2405, 33, cast(int) XPM.define_var_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
 			IupScintillaSendMessage( sci, 2405, 34, cast(int) XPM.define_fun_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			
+
+			// BOOKMARK
+			IupScintillaSendMessage( sci, 2049, 1, cast(int) XPM.bookmark_xpm.ptr ); // SCI_MARKERDEFINEPIXMAP 2049
 		}
 		else
 		{
@@ -621,6 +631,9 @@ class CScintilla
 			
 			IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+
+			// BOOKMARK
+			IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toStringz ); // SCI_MARKERDEFINERGBAIMAGE 2626
 		}
 	}
 }
@@ -763,6 +776,7 @@ extern(C)
 		{
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 		}
+		/+
 		else
 		{
 			if( GLOBAL.liveLevel > 0 )
@@ -837,6 +851,7 @@ extern(C)
 				catch( Exception e ){}
 			}
 		}
+		+/
 		
 
 		foreach( ShortKey sk; GLOBAL.shortKeys )
@@ -1014,6 +1029,7 @@ extern(C)
 						char[] 	alreadyInput;
 						char[]	lastChar;
 						int		pos = actionManager.ScintillaAction.getCurrentPos( ih );
+						int		dummyHeadPos;
 
 						if( pos > 0 ) lastChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ).dup; else return IUP_IGNORE;
 
@@ -1021,11 +1037,11 @@ extern(C)
 						{
 							if( lastChar == ">" )
 							{
-								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 2 ).reverse ~ "->";
+								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 2, dummyHeadPos ).reverse ~ "->";
 							}
 						}
 
-						if( lastChar == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1 ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse;
+						if( lastChar == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1, dummyHeadPos ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos ).reverse;
 					
 						try
 						{
@@ -1104,6 +1120,67 @@ extern(C)
 		//static bool bWithoutList;
 		//static int	prevPos;
 
+
+		if( GLOBAL.liveLevel > 0 )
+		{
+			try
+			{
+				char[]	dText = fromStringz( _text );
+				auto	cSci = ScintillaAction.getActiveCScintilla();
+				int		currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,				
+
+				if( insert == 1 )
+				{
+					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+					{
+						int countNewLine = Util.count( dText, "\n" );
+						if( countNewLine > 0 )
+						{
+							int	col = IupScintillaSendMessage( ih, 2129, pos, 0 ); // SCI_GETCOLUMN 2129.
+							if( col == 0 )
+							{
+								//IupMessage( "currentLineNum", toStringz( Integer.toString( currentLineNum )  ) );
+								//IupMessage( "countNewLine", toStringz( Integer.toString( countNewLine )  ) );
+								LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum - 1, countNewLine );
+							}
+							else
+							{
+								LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum, countNewLine );
+							}
+						}
+					}
+				}
+				else
+				{
+					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+					{
+						int		minusCount = -1;
+						char[] selectedLinCol = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
+						if( selectedLinCol.length )
+						{
+							int line1, line2, firstCommaPos = Util.index( selectedLinCol, "," ), secondCommaPos = Util.rindex( selectedLinCol, "," ), colonPos = Util.index( selectedLinCol, ":" );
+							if( firstCommaPos < secondCommaPos )
+							{
+								// Start from 0, so +1
+								line1 = Integer.atoi( selectedLinCol[0..firstCommaPos] ) + 1;
+								line2 = Integer.atoi( selectedLinCol[colonPos+1..secondCommaPos] ) + 1;
+								minusCount = line1 - line2;
+								if( minusCount < 0 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], line1, minusCount );
+							}
+						}
+						else
+						{
+							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) == "\n" )
+							{
+								if( currentLineNum >= 0 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum, -1 );
+							}
+						}
+					}
+				}
+			}
+			catch( Exception e ){}
+		}
+
 		
 		// If un-release the key, cancel
 		if( !GLOBAL.bKeyUp ) return IUP_DEFAULT;else GLOBAL.bKeyUp = false;
@@ -1121,6 +1198,7 @@ extern(C)
 		{
 			if( length > 1 ) return IUP_DEFAULT;
 
+			int dummyHeadPos;
 			// Below code are fixed because of IUP DLL10 and D 1.076
 			char[] text;
 			text ~= _text[0];
@@ -1143,7 +1221,7 @@ extern(C)
 							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
 							{
 								//IupMessage("POINTER","");
-								alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1 ).reverse ~ "->";
+								alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1, dummyHeadPos ).reverse ~ "->";
 								bDot = true;
 								//bWithoutList = false;
 							}
@@ -1175,7 +1253,7 @@ extern(C)
 					}
 					*/
 
-					if( !alreadyInput.length ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos ).reverse ~ text;
+					if( !alreadyInput.length ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos ).reverse ~ text;
 
 					if( !bDot && !bOpenParen )
 					{

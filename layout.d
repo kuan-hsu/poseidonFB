@@ -2,36 +2,20 @@
 
 import iup.iup;
 
-import global, scintilla, project, dialogs.preferenceDlg;
+import global, scintilla, project, tools, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
-import parser.live;
+import parser.live, parser.autocompletion;
 
-import tango.stdc.stringz, tango.io.FilePath;
+import tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
 
 void createExplorerWindow()
 {
-	Ihandle* toolBar = createToolBar();	
-	//Ihandle* toolBar_VBox = IupVbox( toolBar, null );
-	//IupSetAttributes( toolBar_VBox, "ALIGNMENT=ALEFT,RASTERSIZE=x10" );	
-	
-	// Explorer Window
-	// To be continue...
-	/+
-	Ihandle* ml = IupMultiLine(null);
-	IupSetAttribute(ml, "EXPAND", "YES");
-	IupSetAttribute(ml, "VISIBLELINES", "5");
-	IupSetAttribute(ml, "VISIBLECOLUMNS", "10");
-	+/
+	GLOBAL.toolbar = new CToolBar();
 
-	/+
-	Ihandle* prjManager = createProjectManagerToolBar();
-	Ihandle* prjOutline = createOutlineToolBar();
-	+/
 	GLOBAL.fileListTree = new CFileList;
 	GLOBAL.projectTree = new CProjectTree;
 	GLOBAL.outlineTree = new COutline;
-
 
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", "Project" );
 	IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABTITLE", "FileList" );
@@ -55,7 +39,7 @@ void createExplorerWindow()
 
 
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.dndDocumentZBox );
-	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,VALUE=150");
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	//IupSetAttribute(GLOBAL.explorerSplit, "COLOR", "127 127 255");
 
 	
@@ -73,12 +57,12 @@ void createExplorerWindow()
 	 
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
-	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,VALUE=750");
+	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	//IupSetAttribute(GLOBAL.messageSplit, "COLOR", "127 127 255");
 
 	Ihandle* StatusBar = createStatusBar();
 
-	Ihandle* VBox = IupVbox( toolBar, GLOBAL.messageSplit, StatusBar, null );
+	Ihandle* VBox = IupVbox( GLOBAL.toolbar.getHandle, GLOBAL.messageSplit, StatusBar, null );
 	IupAppend( GLOBAL.mainDlg, VBox );
 	//IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
 }
@@ -125,22 +109,89 @@ extern(C)
 		{
 			try
 			{
+				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+
+				// Auto convert keyword case......
+				if( GLOBAL.keywordCase > 0 )
+				{
+					if( cSci !is null )
+					{
+						if( ( c > 31 && c < 127 ) || c == 9 || c == 32 )
+						{
+							int currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+							if( c == 9 || c == 32 ) currentPos--;
+							
+							char[]	nextChar = lowerCase( fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", currentPos ) ) );
+							bool	bContinue = true;
+							
+							
+							if( nextChar.length )
+							{
+								if( nextChar[0] >= 'a' && nextChar[0] <= 'z' ) bContinue = false;
+							}
+
+							if( bContinue )
+							{
+								int		headPos;
+								char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, currentPos, headPos );
+								word = lowerCase( word.reverse );
+
+								if( word.length )
+								{
+									bool bExitFlag;
+									foreach( char[] _keyword; GLOBAL.KEYWORDS )
+									{
+										foreach( char[] _k; Util.split( _keyword, " " ) )
+										{								
+											if( lowerCase( _k ) == word )
+											{
+												if( c == 9 || c == 32 )
+												{
+													currentPos++;
+													word ~= c;
+												}
+												//IupMessage("",toStringz( Integer.toString( ++headPos ) ~ ":" ~ Integer.toString( currentPos ) ) );
+												IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( ++headPos ) ~ ":" ~ Integer.toString( currentPos ) ) );
+												word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
+												IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
+												bExitFlag = true;
+												break;
+											}
+										}
+										if( bExitFlag ) break;
+									}
+								}
+							}
+						}
+					}
+				}
+
+				
 				if( GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 				{
-					switch( c )
+					if( cSci !is null )
 					{
-						case 8, 9, 10, 13, 65535:
-							LiveParser.parseCurrentLine();
-							break;
+						switch( c )
+						{
+							case 8, 9, 10, 13, 65535:
 							
-						default:
-							if( c > 31 && c < 127 ) LiveParser.parseCurrentLine();
+								LiveParser.parseCurrentLine();
+								break;
+								
+							default:
+								if( c > 31 && c < 127 ) LiveParser.parseCurrentLine();
+						}
 					}
 				}
 			}
 			catch( Exception e ){}
 		
 			GLOBAL.bKeyUp = true; // Release
+			GLOBAL.KeyNumber = -1;
+		}
+		else
+		{
+			GLOBAL.KeyNumber = c;
 		}
 			
 		//if( press == 0 ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "KeyUP\n" ) );else IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "KeyDOWN\n" ) );

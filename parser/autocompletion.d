@@ -1146,6 +1146,7 @@ struct AutoComplete
 				{
 					if( Util.index( lowerCase( s ), lowerCase( word ) ) == 0 )
 					{
+						s = tools.convertKeyWordCase( GLOBAL.keywordCase, s );
 						listContainer ~= ( s ~ "?21" );
 					}
 				}
@@ -1290,7 +1291,8 @@ struct AutoComplete
 
 		if( oriPos == pos ) return null;
 
-		return getWholeWordReverse( iupSci, pos );
+		int dummyHeadPos;
+		return getWholeWordReverse( iupSci, pos, dummyHeadPos );
 	}
 
 	static char[] checkIsInclude( Ihandle* iupSci, int pos = -1 )
@@ -1317,7 +1319,7 @@ struct AutoComplete
 		return result.reverse;
 	}	
 
-	static char[] getWholeWordReverse( Ihandle* iupSci, int pos = -1 )
+	static char[] getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
 	{
 		dchar[] word32;
 		char[]	word;
@@ -1328,6 +1330,7 @@ struct AutoComplete
 			while( pos > -1 )
 			{
 				--pos;
+				headPos = pos;
 				if( pos < 0 ) break;
 				
 				//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
@@ -1393,6 +1396,7 @@ struct AutoComplete
 	
 	static char[] charAdd( Ihandle* iupSci, int pos = -1, char[] text = "" )
 	{
+		int		dummyHeadPos;
 		char[] 	word, result;
 		bool	bDot, bCallTip;
 
@@ -1431,11 +1435,11 @@ struct AutoComplete
 
 		if( text == ">" && bDot )
 		{
-			word = word ~ getWholeWordReverse( iupSci, pos - 1 );
+			word = word ~ getWholeWordReverse( iupSci, pos - 1, dummyHeadPos );
 		}
 		else
 		{
-			word = word ~ getWholeWordReverse( iupSci, pos );
+			word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 		}
 
 		// Check first dot '.' at With Block

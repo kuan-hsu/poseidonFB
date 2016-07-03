@@ -142,7 +142,7 @@ void main()
 	createLayout();
 
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
-	IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", "700x500" );
+	//IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", "700x500" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	//IupSetAttribute( GLOBAL.mainDlg, "MARGIN", "10x10");
 
@@ -156,6 +156,12 @@ void main()
 	
 	// Shows dialog
 	IupShow( GLOBAL.mainDlg );
+
+	// Set Split %
+	IupSetInt( GLOBAL.explorerSplit, "VALUE", 150 );
+	IupSetInt( GLOBAL.messageSplit, "VALUE", 800 );
+
+
 	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );
 	
 	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );

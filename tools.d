@@ -138,3 +138,25 @@ int upperCase( int num )
 	return result;
 }
 
+char[] convertKeyWordCase( int type, char[] replaceText )
+{
+	switch( type )
+	{
+		case 1: replaceText = lowerCase( replaceText ); break; // lowercase
+		case 2: replaceText = upperCase( replaceText ); break; // UPPERCASE
+		case 3: // MixedCase
+			replaceText = lowerCase( replaceText );
+			for( int i = 0; i < replaceText.length; ++ i )
+			{
+				if( replaceText[i] >= 'a' && replaceText[i] <= 'z' )
+				{
+					replaceText[i] = replaceText[i] - 32;
+					break;
+				}
+			}
+			break;
+		default:
+	}
+
+	return replaceText;
+}

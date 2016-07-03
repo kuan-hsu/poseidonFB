@@ -214,7 +214,9 @@ struct XPM
 					union_private_obj_xpm,
 					union_protected_obj_xpm, union_obj_xpm, enum_private_obj_xpm, enum_protected_obj_xpm, enum_obj_xpm,
 					normal_xpm, parameter_xpm, enum_member_obj_xpm, template_obj_xpm,
-					functionpointer_obj_xpm, namespace_obj_xpm, property_xpm, property_var_xpm, define_var_xpm, define_fun_xpm;
+					functionpointer_obj_xpm, namespace_obj_xpm, property_xpm, property_var_xpm, define_var_xpm, define_fun_xpm,
+					bookmark_xpm;
+					
 
 	static CstringConvert private_fun_rgba, protected_fun_rgba, public_fun_rgba, private_sub_rgba, protected_sub_rgba, public_sub_rgba,
 			private_variable_array_rgba, protected_variable_array_rgba, public_variable_array_rgba, private_variable_rgba, alias_obj_rgba,
@@ -223,7 +225,8 @@ struct XPM
 			union_private_obj_rgba,
 			union_protected_obj_rgba, union_obj_rgba, enum_private_obj_rgba, enum_protected_obj_rgba, enum_obj_rgba,
 			normal_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
-			functionpointer_obj_rgba, namespace_obj_rgba, property_rgba, property_var_rgba, define_var_rgba, define_fun_rgba;
+			functionpointer_obj_rgba, namespace_obj_rgba, property_rgba, property_var_rgba, define_var_rgba, define_fun_rgba,
+			bookmark_rgba;
 
 
 	static Ihandle* getIUPimage( char[] filePath )
@@ -382,6 +385,8 @@ struct XPM
 
 			define_var_xpm					= getXpm( "icons/xpm/outline/define_var.xpm" );
 			define_fun_xpm					= getXpm( "icons/xpm/outline/define_fun.xpm" );
+
+			bookmark_xpm					= getXpm( "icons/xpm/bookmark.xpm" );
 		}
 		else
 		{
@@ -428,6 +433,8 @@ struct XPM
 			
 			define_var_rgba					= getRGBA( "icons/xpm/outline/define_var.xpm" );
 			define_fun_rgba					= getRGBA( "icons/xpm/outline/define_fun.xpm" );
+
+			bookmark_rgba					= getRGBA( "icons/xpm/bookmark.xpm" );
 		}
 	}	
 }

@@ -51,8 +51,64 @@ class CASTnode
 		children ~= _child;
 		return _child;
 	}
-	
 
+	int insertChildByLineNumber( CASTnode _child, int _ln )
+	{
+		int			mid;
+		int			low = 0; 
+		int			upper = children.length - 1;
+		CASTnode[]	tempChildren;
+
+		if( children.length )
+		{
+			if( children[0].lineNumber > _ln )
+			{
+				tempChildren = _child ~ children;
+				low = 0;
+			}
+			else if( children[length-1].lineNumber <= _ln )
+			{
+				return addChild( _child );
+			}
+			else
+			{
+				// Binary Search
+				while( low <= upper ) 
+				{ 
+					mid = ( low + upper ) / 2; 
+					if( children[mid].lineNumber < _ln ) 
+					{
+						low = mid + 1 ;
+					}
+					else if( children[mid].lineNumber > _ln )
+					{
+						upper = mid - 1;
+					}
+					else
+					{
+						for( int i = low + 1; i < children.length; ++ i )
+						{
+							if( children[i].lineNumber > _ln )
+							{
+								low = i;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			tempChildren = children[0..low] ~ _child ~ children[low..length];
+			this.children = tempChildren;
+		}
+		else
+		{
+			return addChild( _child );
+		}
+
+		return low;
+	}
+	
 	CASTnode getChild( int index )
 	{
 		if( index < children.length ) return children[index];

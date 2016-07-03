@@ -351,7 +351,6 @@ struct DocumentTabAction
 
 			// Marked the trees( FileList & ProjectTree )
 			actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() );
-			GLOBAL.outlineTree.changeTree( cSci.getFullPath() );
 		}
 
 		return IUP_DEFAULT;
@@ -428,7 +427,6 @@ struct ScintillaAction
 			StatusBarAction.update();
 
 			toTreeMarked( fullPath );
-			GLOBAL.outlineTree.changeTree( fullPath );
 
 			return true;
 		}
@@ -475,7 +473,7 @@ struct ScintillaAction
 		return false;
 	}
 
-	static void toTreeMarked( char[] fullPath, int _switch = 3 )
+	static void toTreeMarked( char[] fullPath, int _switch = 7 )
 	{
 		if( upperCase(fullPath) in GLOBAL.scintillaManager )
 		{
@@ -500,6 +498,11 @@ struct ScintillaAction
 							break;
 						}
 					}
+				}
+
+				if( _switch & 4 ) // Mark the OutlineTree
+				{
+					GLOBAL.outlineTree.changeTree( cSci.getFullPath );
 				}
 			}
 		}
@@ -782,7 +785,7 @@ struct ScintillaAction
 
 		try
 		{
-			scope dlg = new CFileDlg( "Save As...", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			scope dlg = new CFileDlg( "Save As...", "FreeBASIC Sources|*.bas|FreeBASIC Inculdes|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )
@@ -894,6 +897,19 @@ struct ScintillaAction
 	{
 		if( ih != null ) return IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
 	}
+
+	static char[] getCurrentChar( int bias, Ihandle* ih = null )
+	{
+		if( ih == null ) ih = getActiveIupScintilla();
+
+		if( ih != null )
+		{
+			int pos = getCurrentPos( ih );
+			return fromStringz( IupGetAttributeId( ih, "CHAR", pos + bias ) );
+		}
+
+		return null;
+	}	
 
 	static int iup_XkeyShift( int _c ){ return _c | 0x10000000; }
 
@@ -1143,26 +1159,26 @@ struct StatusBarAction
 				{
 					int _kind;
 					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "UPDATE STATUS: " ) );
-					IupSetAttribute( GLOBAL.functionTitleHandle, "1", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ), _kind ) ) );
+					IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ), _kind ) ) );
 
 					if( _kind & B_FUNCTION )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_function" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );
 					else if( _kind & B_SUB )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_sub" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );
 					else if( _kind & B_TYPE )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_struct" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );
 					else if( _kind & B_ENUM )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_enum" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );
 					else if( _kind & B_UNION )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_union" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );
 					else if( _kind & B_CTOR )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_ctor" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );
 					else if( _kind & B_DTOR )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_dtor" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );
 					else if( _kind & B_PROPERTY )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_property" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );
 					else if( _kind & B_OPERATOR )
-						IupSetAttribute( GLOBAL.functionTitleHandle, "IMAGE1","IUP_operator" );
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );
 				}
 			}
 		}

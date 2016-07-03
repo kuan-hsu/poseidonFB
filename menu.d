@@ -346,21 +346,21 @@ void createMenu()
 	//IupSetAttribute(upperCase, "IMAGE", "icon_windows");
 	IupSetCallback( upperCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		convertKeyWordCase( 0 );
+		_convertKeyWordCase( 2 );
 	});	
 	
 	Ihandle* lowerCase = IupItem( toStringz( "lowercase" ), null );
 	//IupSetAttribute(lowerCase, "IMAGE", "icon_mac");
 	IupSetCallback( lowerCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		convertKeyWordCase( 1 );
+		_convertKeyWordCase( 1 );
 	});	
 	
 	Ihandle* mixedCase = IupItem( toStringz( "Mixedcase" ), null );
 	//IupSetAttribute(mixedCase, "IMAGE", "icon_linux");
 	IupSetCallback( mixedCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		convertKeyWordCase( 2 );
+		_convertKeyWordCase( 3 );
 	});	
 
 	Ihandle* caseSubMenu = IupMenu( upperCase, lowerCase, mixedCase, null  );
@@ -380,7 +380,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.193\nBy Kuan Hsu (Taiwan)\n2016.06.26" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.194\nBy Kuan Hsu (Taiwan)\n2016.07.04" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -467,7 +467,7 @@ void createMenu()
 	mainMenu7_Debug = IupSubmenu( "Debug", debug_menu );
 	IupSetAttribute( mainMenu7_Debug, "KEY" ,"D" );
 	version( linux ) IupSetAttribute( mainMenu7_Debug, "ACTIVE" ,"NO" );
-	mainMenu8_Option = IupSubmenu( "Option", option_menu );
+	mainMenu8_Option = IupSubmenu( "Options", option_menu );
 	IupSetAttribute( mainMenu8_Option, "KEY" ,"O" );	
 
 	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu8_Option, null );
@@ -477,7 +477,7 @@ void createMenu()
 }
 
 
-private void convertKeyWordCase( int type )
+private void _convertKeyWordCase( int type )
 {
 	/*
 	SCI_SETTARGETSTART = 2190,
@@ -507,26 +507,8 @@ private void convertKeyWordCase( int type )
 			{
 				if( targetText.length )
 				{
-					char[]	replaceText;
 					int		replaceTextLength = targetText.length;
-					switch( type )
-					{
-						case 0: replaceText = upperCase( targetText ); break; // UPPERCASE
-						case 1: replaceText = lowerCase( targetText ); break; // lowercase
-						case 2: // MixedCase
-							replaceText = lowerCase( targetText );
-							for( int i = 0; i < replaceText.length; ++ i )
-							{
-								if( replaceText[i] >= 'a' && replaceText[i] <= 'z' )
-								{
-									replaceText[i] = replaceText[i] - 32;
-									break;
-								}
-							}
-							break;
-						default:
-							replaceText = targetText;
-					}
+					char[]	replaceText = tools.convertKeyWordCase( type, targetText );
 					
 					int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );	// SCI_GETLENGTH = 2006,
 					IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
@@ -604,7 +586,7 @@ extern(C)
 	
 	int openFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( "Open File..." );
+		scope fileSecectDlg = new CFileDlg( "Open File...", "All Files|*.*|FreeBASIC Sources|*.bas|FreeBASIC Includes|*.bi" );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		//Util.substitute( fileName, "\\", "/" );
