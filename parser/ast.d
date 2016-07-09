@@ -35,6 +35,12 @@ class CASTnode
 			delete _ast;
 		}
 	}
+
+	// Overload []
+	CASTnode opIndex( int i )
+	{ 
+		if( i < children.length ) return children[i]; else return null;
+	}	
 	
 	// Return index of children
 	int addChild( CASTnode _child )
@@ -98,6 +104,7 @@ class CASTnode
 				}
 			}
 
+			_child.father = this;
 			tempChildren = children[0..low] ~ _child ~ children[low..length];
 			this.children = tempChildren;
 		}

@@ -1579,7 +1579,7 @@ struct OutlineAction
 				delete temp;
 				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
 
-				GLOBAL.outlineTree.cleanTree( fullPath );
+				cleanTree( fullPath );
 			}
 			else
 			{
@@ -1607,7 +1607,7 @@ struct OutlineAction
 				delete temp;
 				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
 
-				GLOBAL.outlineTree.cleanTree( fullPath );
+				cleanTree( fullPath );
 			}
 			else
 			{

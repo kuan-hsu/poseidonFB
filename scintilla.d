@@ -242,7 +242,7 @@ class CScintilla
 			auto temp = GLOBAL.parserManager[upperCase(fullPath)];
 			delete temp;
 			GLOBAL.parserManager.remove( upperCase(fullPath) );
-			GLOBAL.outlineTree.cleanTree( fullPath );
+			actionManager.OutlineAction.cleanTree( fullPath );
 
 			actionManager.OutlineAction.loadFile( newFullPath );
 		}
@@ -962,7 +962,8 @@ extern(C)
 					if( sk.keyValue == c )
 					{
 						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-						actionManager.OutlineAction.refresh( cSci.getFullPath() );
+						GLOBAL.outlineTree.softRefresh( cSci );
+						//actionManager.OutlineAction.refresh( cSci.getFullPath() );
 					}
 					break;
 				case "Save File":					
@@ -1136,11 +1137,15 @@ extern(C)
 						int countNewLine = Util.count( dText, "\n" );
 						if( countNewLine > 0 )
 						{
-							int	col = IupScintillaSendMessage( ih, 2129, pos, 0 ); // SCI_GETCOLUMN 2129.
-							if( col == 0 )
+							int lineHeadPos = IupScintillaSendMessage( ih, 2167, currentLineNum - 1, 0 ); //SCI_POSITIONFROMLINE 2167
+
+							IupSetInt( ih, "TARGETSTART", lineHeadPos );
+							IupSetInt( ih, "TARGETEND", pos );
+							scope blockText = new char[pos-lineHeadPos];
+							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
+
+							if( !( Util.trim( blockText ).length ) )
 							{
-								//IupMessage( "currentLineNum", toStringz( Integer.toString( currentLineNum )  ) );
-								//IupMessage( "countNewLine", toStringz( Integer.toString( countNewLine )  ) );
 								LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum - 1, countNewLine );
 							}
 							else

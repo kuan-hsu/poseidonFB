@@ -19,97 +19,7 @@ struct AutoComplete
 	static char[][]				listContainer;
 	static CASTnode[char[]]		includesMarkContainer;
 
-	
-	static int getProcedurePos( Ihandle* iupSci, int pos, char[] targetText )
-	{
-		/*
-		SCI_SETTARGETSTART = 2190,
-		SCI_GETTARGETSTART = 2191,
-		SCI_SETTARGETEND = 2192,
-		SCI_GETTARGETEND = 2193,
-		SCI_SEARCHINTARGET = 2197,
-		SCI_SETSEARCHFLAGS = 2198,
-		SCFIND_WHOLEWORD = 2,
-		SCFIND_MATCHCASE = 4,
 
-		SCFIND_WHOLEWORD = 2,
-		SCFIND_MATCHCASE = 4,
-		SCFIND_WORDSTART = 0x00100000,
-		SCFIND_REGEXP = 0x00200000,
-		SCFIND_POSIX = 0x00400000,
-		*/		
-		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
-		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
-		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-		IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-
-		int posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-
-		while( posHead >= 0 )
-		{
-			int style = IupScintillaSendMessage( iupSci, 2010, posHead, 0 ); // SCI_GETSTYLEAT 2010
-			if( style == 1 || style == 19 || style == 4 )
-			{
-				IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );
-				IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-				posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-			}
-			else
-			{
-				// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
-				bool bReSearch;
-				for( int i = posHead + targetText.length; i < documentLength; ++ i )
-				{
-					char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
-
-					if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
-					{
-						bReSearch = true;
-						break;
-					}
-					else if( s != " " && s != "\t" )
-					{
-						// Check before targetText word.......
-						char[]	beforeWord;
-						for( int j = posHead - 1; j >= 0; --j )
-						{
-							char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
-							
-							if( _s[0] == 13 || _s == ":" || _s == "\n" )
-							{
-								break;
-							}
-							else if( _s == " " || _s == "\t" )
-							{
-								if( beforeWord.length ) break;
-							}
-							else
-							{
-								beforeWord ~= _s;
-							}
-						}
-						
-						if( beforeWord == "eralced" || beforeWord == "dne" ) bReSearch = true; else bReSearch = false;
-						break;
-					}
-				}
-
-				if( bReSearch )
-				{
-					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
-					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-		
-		return posHead;
-	}
-	
 	static char[] searchHead( Ihandle* iupSci, int pos, char[] targetText )
 	{
 		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
@@ -117,7 +27,7 @@ struct AutoComplete
 		int posHead = getProcedurePos( iupSci, pos, targetText );
 		if( posHead < 0 ) return null;
 
-		int posEnd = skipCommentAndString( iupSci, pos, "end " ~ targetText, 0 );
+		int posEnd = getProcedureTailPos( iupSci, pos, targetText, 0 );//skipCommentAndString( iupSci, pos, "end " ~ targetText, 0 );
 		if( posEnd > posHead ) return null;
 
 
@@ -144,51 +54,6 @@ struct AutoComplete
 		}
 
 		return Util.trim( result.dup );
-	}
-
-	// direct = 0 findprev, direct = 1 findnext
-	static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct )
-	{
-		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
-		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
-
-		if( direct == 0 )
-		{
-			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
-			IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-		}
-		else
-		{
-			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
-			IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
-		}
-		pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-		
-		while( pos > -1 )
-		{
-			int style = IupScintillaSendMessage( iupSci, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
-			if( style == 1 || style == 19 || style == 4 )
-			{
-				if( direct == 0 )
-				{
-					IupScintillaSendMessage( iupSci, 2190, pos - 1, 0 );
-					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-				}
-				else
-				{
-					IupScintillaSendMessage( iupSci, 2190, pos + targetText.length, 0 );
-					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );							// SCI_SETTARGETEND = 2192,
-					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-				}
-			}
-			else
-			{
-				return pos;
-			}
-		}
-
-		return pos;
 	}
 
 	static bool checkWithBlock( Ihandle* iupSci, int pos )
@@ -443,28 +308,6 @@ struct AutoComplete
 		}
 		return head;
 	}		
-
-	static CASTnode getFunctionAST( CASTnode head, int _kind, char[] functionTitle, int line )
-	{
-		foreach_reverse( CASTnode node; head.getChildren() )
-		{
-			if( node.kind & _kind )
-			{
-				if( lowerCase( node.name ) == functionTitle )
-				{
-					if( line >= node.lineNumber ) return node;
-				}
-			}
-
-			if( node.getChildrenCount )
-			{
-				CASTnode _node = getFunctionAST( node, _kind, functionTitle, line );
-				if( _node !is null ) return _node;
-			}
-		}
-
-		return null;
-	}
 
 	static CASTnode[] getMatchASTfromWholeWord( CASTnode node, char[] word, int line, int B_KIND )
 	{
@@ -1211,6 +1054,179 @@ struct AutoComplete
 	static bool bEnter;
 	static bool bAutocompletionPressEnter;
 
+
+	
+	static int getProcedurePos( Ihandle* iupSci, int pos, char[] targetText )
+	{
+		/*
+		SCI_SETTARGETSTART = 2190,
+		SCI_GETTARGETSTART = 2191,
+		SCI_SETTARGETEND = 2192,
+		SCI_GETTARGETEND = 2193,
+		SCI_SEARCHINTARGET = 2197,
+		SCI_SETSEARCHFLAGS = 2198,
+		SCFIND_WHOLEWORD = 2,
+		SCFIND_MATCHCASE = 4,
+
+		SCFIND_WHOLEWORD = 2,
+		SCFIND_MATCHCASE = 4,
+		SCFIND_WORDSTART = 0x00100000,
+		SCFIND_REGEXP = 0x00200000,
+		SCFIND_POSIX = 0x00400000,
+		*/		
+		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+		IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+
+		int posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+
+		while( posHead >= 0 )
+		{
+			int style = IupScintillaSendMessage( iupSci, 2010, posHead, 0 ); // SCI_GETSTYLEAT 2010
+			if( style == 1 || style == 19 || style == 4 )
+			{
+				IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
+				IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+				posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+			}
+			else
+			{
+				// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
+				bool bReSearch;
+				for( int i = posHead + targetText.length; i < documentLength; ++ i )
+				{
+					char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+
+					if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
+					{
+						bReSearch = true;
+						break;
+					}
+					else if( s != " " && s != "\t" )
+					{
+						// Check before targetText word.......
+						char[]	beforeWord;
+						for( int j = posHead - 1; j >= 0; --j )
+						{
+							char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+							
+							if( _s[0] == 13 || _s == ":" || _s == "\n" )
+							{
+								break;
+							}
+							else if( _s == " " || _s == "\t" )
+							{
+								if( beforeWord.length ) break;
+							}
+							else
+							{
+								beforeWord ~= _s;
+							}
+						}
+						
+						if( beforeWord == "eralced" || beforeWord == "dne" ) bReSearch = true; else bReSearch = false;
+						break;
+					}
+				}
+
+				if( bReSearch )
+				{
+					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
+					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		
+		return posHead;
+	}
+
+	// direct = 0 findprev, direct = 1 findnext
+	static int getProcedureTailPos( Ihandle* iupSci, int pos, char[] targetText, int direct )
+	{
+		int		documentLength = IupGetInt( iupSci, "COUNT" );
+		int		posEnd = skipCommentAndString( iupSci, pos, "end", direct );
+
+		while( posEnd > 0 )
+		{
+			pos = posEnd; // Put vrigin posEnd to pos
+			posEnd += 3;
+			
+			char[] 	_char = fromStringz( IupGetAttributeId( iupSci, "CHAR", posEnd ) );
+			char[]	endText;
+			while( _char != "\n" && _char != ":" )
+			{
+				endText ~= _char;
+				posEnd ++;
+				if( posEnd >= documentLength ) break; else _char = fromStringz( IupGetAttributeId( iupSci, "CHAR", posEnd ) );
+			}
+			endText = Util.trim( endText );
+
+			if( lowerCase( endText ) == lowerCase( targetText ) )
+			{
+				return posEnd;
+			}
+			else
+			{
+				if( direct == 0 )
+					posEnd = skipCommentAndString( iupSci, --pos, "end", 0 );
+				else 
+					posEnd = skipCommentAndString( iupSci, posEnd, "end", 1 );
+			}	
+		}
+
+		return -1;
+	}	
+
+	// direct = 0 findprev, direct = 1 findnext
+	static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct )
+	{
+		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+
+		if( direct == 0 )
+		{
+			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
+			IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+		}
+		else
+		{
+			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
+			IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
+		}
+		pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+		
+		while( pos > -1 )
+		{
+			int style = IupScintillaSendMessage( iupSci, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
+			if( style == 1 || style == 19 || style == 4 )
+			{
+				if( direct == 0 )
+				{
+					IupScintillaSendMessage( iupSci, 2190, pos - 1, 0 );
+					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+				else
+				{
+					IupScintillaSendMessage( iupSci, 2190, pos + targetText.length, 0 );
+					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );							// SCI_SETTARGETEND = 2192,
+					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+			}
+			else
+			{
+				return pos;
+			}
+		}
+
+		return pos;
+	}	
 
 	static CASTnode getTitleAST( Ihandle* iupSci, int pos, CASTnode head )
 	{
@@ -2039,6 +2055,27 @@ struct AutoComplete
 		}
 	}
 
+	static CASTnode getFunctionAST( CASTnode head, int _kind, char[] functionTitle, int line )
+	{
+		foreach_reverse( CASTnode node; head.getChildren() )
+		{
+			if( node.kind & _kind )
+			{
+				if( lowerCase( node.name ) == functionTitle )
+				{
+					if( line >= node.lineNumber ) return node;
+				}
+			}
+
+			if( node.getChildrenCount )
+			{
+				CASTnode _node = getFunctionAST( node, _kind, functionTitle, line );
+				if( _node !is null ) return _node;
+			}
+		}
+
+		return null;
+	}
 
 	static char[] getFunctionTitle( Ihandle* iupSci, int pos, out int code )
 	{

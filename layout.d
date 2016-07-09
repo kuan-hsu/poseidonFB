@@ -167,19 +167,31 @@ extern(C)
 				}
 
 				
-				if( GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
+				if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 				{
 					if( cSci !is null )
 					{
 						switch( c )
 						{
 							case 8, 9, 10, 13, 65535:
-							
-								LiveParser.parseCurrentLine();
+								switch( GLOBAL.liveLevel )
+								{
+									case 1: LiveParser.parseCurrentLine(); break;
+									case 2: LiveParser.parseCurrentBlock(); break;
+									default:
+								}
 								break;
 								
 							default:
-								if( c > 31 && c < 127 ) LiveParser.parseCurrentLine();
+								if( c > 31 && c < 127 )
+								{
+									switch( GLOBAL.liveLevel )
+									{
+										case 1: LiveParser.parseCurrentLine(); break;
+										case 2: LiveParser.parseCurrentBlock(); break;
+										default:
+									}
+								}
 						}
 					}
 				}

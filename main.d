@@ -158,7 +158,7 @@ void main()
 	IupShow( GLOBAL.mainDlg );
 
 	// Set Split %
-	IupSetInt( GLOBAL.explorerSplit, "VALUE", 150 );
+	IupSetInt( GLOBAL.explorerSplit, "VALUE", 170 );
 	IupSetInt( GLOBAL.messageSplit, "VALUE", 800 );
 
 

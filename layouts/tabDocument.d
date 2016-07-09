@@ -109,7 +109,8 @@ extern(C)
 		IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-			actionManager.OutlineAction.refresh( cSci.getFullPath() );
+			GLOBAL.outlineTree.softRefresh( cSci );
+			//actionManager.OutlineAction.refresh( cSci.getFullPath() );
 		});
 		
 		

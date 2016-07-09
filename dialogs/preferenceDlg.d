@@ -124,11 +124,11 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* toggleLiveFull = IupToggle( "Full", null );
 		IupSetHandle( "toggleLiveFull", toggleLiveFull );
-		IupSetAttribute( toggleLiveFull, "ACTIVE", "NO" );
+		//IupSetAttribute( toggleLiveFull, "ACTIVE", "NO" );
 
 		Ihandle* toggleUpdateOutline = IupToggle( "Update Outline", null );
 		IupSetAttribute( toggleUpdateOutline, "VALUE", toStringz(GLOBAL.toggleUpdateOutlineLive.dup) );
-		IupSetAttribute( toggleUpdateOutline, "ACTIVE", "NO" );
+		//IupSetAttribute( toggleUpdateOutline, "ACTIVE", "NO" );
 		IupSetHandle( "toggleUpdateOutline", toggleUpdateOutline );
 
 		switch( GLOBAL.liveLevel )
