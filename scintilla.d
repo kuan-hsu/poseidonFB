@@ -1139,10 +1139,17 @@ extern(C)
 						{
 							int lineHeadPos = IupScintillaSendMessage( ih, 2167, currentLineNum - 1, 0 ); //SCI_POSITIONFROMLINE 2167
 
+
+							char[] blockText;
+							for( int i = lineHeadPos; i < pos; ++ i )
+								blockText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", i ) );
+							
+							/*
 							IupSetInt( ih, "TARGETSTART", lineHeadPos );
-							IupSetInt( ih, "TARGETEND", pos );
+							IupSetInt( ih, "TARGETEND", pos );							
 							scope blockText = new char[pos-lineHeadPos];
 							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
+							*/
 
 							if( !( Util.trim( blockText ).length ) )
 							{

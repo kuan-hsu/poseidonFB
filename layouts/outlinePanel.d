@@ -1,0 +1,1142 @@
+﻿module layouts.outlinePanel;
+
+private import iup.iup;
+
+private import global, scintilla, actionManager, menu, tools;
+private import dialogs.singleTextDlg, dialogs.fileDlg;
+private import parser.ast;
+
+
+private import tango.stdc.stringz, Integer = tango.text.convert.Integer;
+private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii, tango.io.Stdout;
+
+class COutline
+{
+	private:
+	import parser.scanner, parser.token, parser.parser;
+
+
+	Ihandle*			layoutHandle, zBoxHandle;
+	CASTnode[]			listItemASTs;
+	int[]				listItemTreeID;
+	int					showIndex= 0;
+
+	void setImage( Ihandle* rootTree, CASTnode _node )
+	{
+		int lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
+
+		char[] prot;
+		if( _node.protection.length )
+		{
+			if( _node.protection != "public" && _node.protection != "shared" ) prot = "_" ~ _node.protection;
+		}
+
+		switch( _node.kind )
+		{
+			case B_DEFINE | B_VARIABLE:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_var" ) );
+				break;
+
+			case B_DEFINE | B_FUNCTION:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_fun" ) );
+				break;
+				
+			case B_VARIABLE:
+				if( _node.name.length )
+				{
+					if( _node.name[length-1] == ')' )
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable_array" ~ prot ) );
+					else
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ~ prot ) );
+				}
+				break;
+
+			case B_FUNCTION:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
+				}
+				break;
+
+			case B_SUB:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
+				}
+				break;
+
+			case B_OPERATOR:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_operator") );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_operator" ) );
+				}
+				
+				break;
+
+			case B_PROPERTY:
+				if(_node.type.length )
+				{
+					if( _node.type[0] == '(' )
+					{
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+						if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+					}
+					else
+					{
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
+						if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
+					}
+				}
+				
+				break;
+
+			case B_CTOR:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+				}
+				break;
+
+			case B_DTOR:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+				}
+				break;
+
+			case B_TYPE:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+				}
+				break;
+
+			case B_CLASS:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+				}
+				break;
+
+			case B_ENUM:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+				}
+				break;				
+
+			case B_ENUMMEMBER:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+				}
+				break;
+
+			case B_UNION:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+				}
+				break;				
+
+			case B_ALIAS:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_alias" ) );
+				break;
+
+			case B_NAMESPACE:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
+				}				
+				break;
+
+			case B_MACRO:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
+				}				
+				break;
+
+			case B_SCOPE:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
+				if( _node.getChildrenCount > 0 )
+				{
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
+				}				
+				break;	
+
+			default:
+				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
+		}
+
+		if( GLOBAL.editorSetting00.ColorOutline == "ON" )
+		{
+			switch( lowerCase( _node.protection ) )
+			{
+				case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
+				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "236 95 0" ) ); break;
+				default:
+			}
+		}
+	}
+
+	void changePR()
+	{
+		if( IupGetChildCount( zBoxHandle ) > 0 )
+		{
+			int pos = IupGetInt( zBoxHandle, "VALUEPOS" ); // Get active zbox pos
+			Ihandle* actTree = IupGetChild( zBoxHandle, pos );
+
+			for( int i = 1; i < IupGetInt( actTree, "COUNT" ); ++ i )
+			{
+				CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+
+				switch( _node.kind )
+				{
+					case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+						char[] _type = _node.type;
+						char[] _paramString;
+
+						int parenPos = Util.index( _node.type, "(" );
+						if( parenPos < _node.type.length )
+						{
+							_type = _node.type[0..parenPos];
+							_paramString = _node.type[parenPos..length];
+						}
+
+
+						if( _node.kind & B_DEFINE )
+						{
+							switch( showIndex )
+							{
+								case 0, 1:
+									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+									break;
+								default:
+									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+									break;
+							}
+							break;
+						}
+						
+						switch( showIndex )
+						{
+							case 0:
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								break;
+							case 1:
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+								break;
+							case 2:
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								break;
+							default:
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+								break;
+						}
+						break;
+
+					case B_SUB, B_CTOR, B_DTOR, B_MACRO:
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+								break;
+							default:
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+								break;
+						}
+						break;
+
+					case B_VARIABLE, B_ALIAS:
+						if( _node.kind & B_DEFINE )
+						{
+							if( showIndex == 0 || showIndex == 2 )
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+							else
+								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+							
+							break;
+						}					
+
+						if( showIndex == 0 || showIndex == 2 )
+							IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+						else
+							IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+						
+						break;						
+
+					default:
+				}
+			}
+		}		
+	}
+	
+	void append( Ihandle* rootTree, CASTnode _node, int bracchID, bool bInsertMode = false )
+	{
+		int lastAddNode;
+
+		if( _node is null ) return;
+
+		//if( _node.kind & B_SCOPE ) return;
+
+		char[]	BRANCH, LEAF;
+		if( bInsertMode )
+		{
+			BRANCH	= "INSERTBRANCH";
+			LEAF	= "INSERTLEAF";
+		}
+		else
+		{
+			BRANCH	= "ADDBRANCH";
+			LEAF	= "ADDLEAF";
+		}
+
+		if( _node.getChildrenCount > 0 )
+		{
+			switch( _node.kind )
+			{
+				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+					char[] _type = _node.type;
+					char[] _paramString;
+
+					int pos = Util.index( _node.type, "(" );
+					if( pos < _node.type.length )
+					{
+						_type = _node.type[0..pos];
+						_paramString = _node.type[pos..length];
+					}
+
+					switch( showIndex )
+					{
+						case 0:
+							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							break;
+						case 1:
+							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+							break;
+						case 2:
+							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							break;
+						default:
+							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							break;
+					}					
+					break;
+
+				case B_SUB, B_CTOR, B_DTOR, B_MACRO:
+					switch( showIndex )
+					{
+						case 0, 1:
+							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+							break;
+						default:
+							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							break;
+					}
+					break;
+
+				case B_SCOPE:
+					IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, null );
+					break;				
+
+				default:
+					IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+			}
+			lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
+			setImage( rootTree, _node );
+			IupSetAttributeId( rootTree, "USERDATA", lastAddNode, cast(char*) _node );
+
+			foreach_reverse( CASTnode t; _node.getChildren() )
+			{
+				append( rootTree, t, lastAddNode );
+			}
+		}
+		else
+		{
+			bool bNoImage;
+			switch( _node.kind & 2097151 )
+			{
+				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+					char[] _type = _node.type;
+					char[] _paramString;
+					
+					int pos = Util.index( _node.type, "(" );
+					if( pos < _node.type.length )
+					{
+						_type = _node.type[0..pos];
+						_paramString = _node.type[pos..length];
+					}
+
+					if( _node.kind & B_DEFINE )
+					{
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+								break;
+							default:
+								IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								break;
+						}
+						break;
+					}					
+
+					switch( showIndex )
+					{
+						case 0:
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							break;
+						case 1:
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+							break;
+						case 2:
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							break;
+						default:
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							break;
+					}
+					break;
+
+				case B_SUB, B_CTOR, B_DTOR:
+					switch( showIndex )
+					{
+						case 0, 1:
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+							break;
+						default:
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							break;
+					}				
+					break;
+
+				case B_VARIABLE, B_ALIAS:
+					if( _node.kind & B_DEFINE )
+					{
+						if( showIndex == 0 || showIndex == 2 )
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+						else
+							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+						
+						break;
+					}					
+
+					if( showIndex == 0 || showIndex == 2 )
+						IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+					else
+						IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+					
+					break;
+
+				case B_ENUMMEMBER:
+					IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+					break;
+
+				default:
+					bNoImage = true;
+			}
+
+			if( !bNoImage )
+			{
+				lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
+				setImage( rootTree, _node );
+				IupSetAttributeId( rootTree, "USERDATA", lastAddNode, cast(char*) _node );
+			}
+		}
+	}
+
+	int updateNodeByLineNumber( CASTnode[] newASTNodes, int _ln )
+	{
+		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return -1;
+
+		int insertID = -1;
+		if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+		{
+			int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
+			Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
+
+			if( actTree != null )
+			{
+				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+				{
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+					if( _node.lineNumber == _ln  )
+					{
+						insertID = i;
+						IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+					}
+				}
+
+				if( insertID == -1 )
+				{
+					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
+					{
+						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+
+						if( _node.lineNumber < _ln )
+						{
+							insertID = i + 1;
+							break;
+						}
+					}
+				}
+
+				if( insertID > 0 ) insertID --;
+			}
+		}
+		return insertID;
+	}
+
+	void createLayout()
+	{
+		// Outline Toolbar
+		Ihandle* outlineButtonCollapse = IupButton( null, "Collapse" );
+		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,TIP=Collapse" );
+		IupSetCallback( outlineButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
+			if( tree != null )
+				{
+					
+					if( fromStringz( IupGetAttributeId( tree, "STATE", 0 ) ) == "EXPANDED" )
+						IupSetAttribute( tree, "EXPANDALL", "NO" );
+					else
+					{
+						IupSetAttribute( tree, "EXPANDALL", "YES" );
+						IupSetAttribute( tree, "TOPITEM", "YES" ); // Set position to top
+					}
+				}
+			
+		});
+
+		Ihandle* outlineButtonPR = IupButton( null, "PR" );
+		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_pr" );
+		IupSetAttribute( outlineButtonPR, "TIP", "Change Outline Node Title" );
+		IupSetHandle( "outlineButtonPR", outlineButtonPR );
+		IupSetCallback( outlineButtonPR, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			if( GLOBAL.outlineTree.showIndex == 3 ) GLOBAL.outlineTree.showIndex = 0; else GLOBAL.outlineTree.showIndex ++;
+
+			Ihandle* _ih = IupGetHandle( "outlineButtonPR" );
+			if( _ih != null )
+			{
+				switch( GLOBAL.outlineTree.showIndex )
+				{
+					case 0:		IupSetAttribute( _ih, "IMAGE", "icon_show_pr" ); break;
+					case 1:		IupSetAttribute( _ih, "IMAGE", "icon_show_p" ); break;
+					case 2:		IupSetAttribute( _ih, "IMAGE", "icon_show_r" ); break;
+					default:	IupSetAttribute( _ih, "IMAGE", "icon_show_nopr" ); break;
+				}
+			}
+
+			GLOBAL.outlineTree.changePR();
+		});
+
+		Ihandle* outlineToggleAnyWord = IupToggle( null, null );
+		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_searchany,VALUE=TOGGLE" );
+		IupSetAttribute( outlineToggleAnyWord, "TIP", "Search Any Word" );
+		IupSetHandle( "outlineToggleAnyWord", outlineToggleAnyWord );
+
+
+		Ihandle* outlineButtonFresh = IupButton( null, "Refresh" );
+		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_refresh,TIP=Refresh" );
+		IupSetCallback( outlineButtonFresh, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			//if( cSci !is null ) actionManager.OutlineAction.refresh( cSci.getFullPath() );
+			GLOBAL.outlineTree.softRefresh( cSci );
+		});
+
+		Ihandle* outlineButtonHide = IupButton( null, "Hide" );
+		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_debug_left,TIP=Hide" );
+		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			menu.outline_cb( GLOBAL.menuOutlineWindow );
+		});
+
+
+		Ihandle* labelSEPARATOR01 = IupLabel( null ); 
+		IupSetAttribute( labelSEPARATOR01, "SEPARATOR", "VERTICAL");	
+		
+
+		Ihandle* outlineToolbarTitleImage = IupLabel( null );
+		IupSetAttributes( outlineToolbarTitleImage, "IMAGE=icon_outline,ALIGNMENT=ALEFT:ACENTER" );
+
+		/*Ihandle* outlineToolbarTitle = IupLabel( "Outline" );
+		IupSetAttribute( outlineToolbarTitle, "ALIGNMENT", "ALEFT" );*/
+
+		Ihandle* outlineToolbarH = IupHbox( outlineToolbarTitleImage, /*outlineToolbarTitle,*/ IupFill, outlineButtonCollapse, outlineButtonPR, outlineButtonFresh, outlineToggleAnyWord, labelSEPARATOR01, outlineButtonHide, null );
+		IupSetAttributes( outlineToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
+
+
+		Ihandle* outlineTreeNodeList = IupList( null );
+		IupSetAttributes( outlineTreeNodeList, "ACTIVE=YES,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8" );
+
+		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
+		IupSetCallback( outlineTreeNodeList, "ACTION",cast(Icallback) &COutline_List_ACTION );
+
+		version(linux)
+		{
+			IupSetCallback( outlineTreeNodeList, "EDIT_CB",cast(Icallback) &COutline_List_EDIT_CB );
+			IupSetCallback( outlineTreeNodeList, "K_ANY",cast(Icallback) &COutline_List_K_ANY );
+		}
+
+		layoutHandle = IupVbox( outlineToolbarH, outlineTreeNodeList, zBoxHandle, null );
+		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" ) );
+	}
+
+
+	public:
+	this()
+	{
+		zBoxHandle = IupZbox( null );
+		createLayout();
+	}
+
+	~this()
+	{
+		IupSetHandle( "outlineButtonPR", null );
+		IupSetHandle( "outlineToggleAnyWord", null );
+	}
+
+	Ihandle* getLayoutHandle()
+	{
+		return layoutHandle;
+	}
+
+	Ihandle* getActiveTree()
+	{
+		int pos = IupGetInt( zBoxHandle, "VALUEPOS" ); // Get active zbox pos
+		if( pos >= 0 ) return IupGetChild( zBoxHandle, pos );
+
+		return null;
+	}
+
+	void createTree( CASTnode head )
+	{
+		if( head !is null )
+		{
+			if( head.kind == B_BAS || head.kind == B_BI )
+			{
+				char[] fullPath = head.name;
+
+				Ihandle* tree = IupTree();
+				IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
+				IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
+				IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+
+				IupAppend( zBoxHandle, tree );
+				IupMap( tree );
+				IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
+				foreach_reverse( CASTnode t; head.getChildren() )
+				{
+					//Stdout( t.kind ~ " " ~ t.type ~ " " );
+					//Stdout( t.name ).newline;
+					append( tree, t, 0 );
+				}
+			}
+		}
+	}
+
+	void changeTree( char[] fullPath )
+	{
+		for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
+		{
+			Ihandle* ih = IupGetChild( zBoxHandle, i );
+			if( ih != null )
+			{
+				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+
+				if( fullPath == _fullPath )
+				{
+					IupSetInt( zBoxHandle, "VALUEPOS", i );
+					break;
+				}
+			}
+		}
+	}
+	
+	Ihandle* getZBoxHandle(){ return zBoxHandle; }
+
+	char[] getImageName( CASTnode _node )
+	{
+		char[] prot;
+		if( _node.protection.length )
+		{
+			if( _node.protection != "public" && _node.protection != "shared" ) prot = "_" ~ _node.protection;
+		}
+
+		switch( _node.kind )
+		{
+			case B_DEFINE | B_VARIABLE: return "IUP_define_var";
+			case B_DEFINE | B_FUNCTION: return "IUP_define_fun";
+			case B_VARIABLE:
+				if( _node.name.length )
+				{
+					if( _node.name[length-1] == ')' ) return ( "IUP_variable_array" ~ prot ); else return( "IUP_variable" ~ prot );
+				}
+				break;
+
+			case B_FUNCTION:			return ( "IUP_function" ~ prot );
+			case B_SUB:					return ( "IUP_sub" ~ prot );
+			case B_OPERATOR:			return "IUP_operator";
+			case B_PROPERTY:	
+				if(_node.type.length )
+				{
+					if( _node.type[0] == '(' ) return "IUP_property"; else return "IUP_property_var";
+				}
+				break;
+
+			case B_CTOR:				return "IUP_ctor";
+			case B_DTOR:				return "IUP_dtor";
+			case B_TYPE:				return "IUP_struct";
+			case B_CLASS:				return "IUP_class";
+			case B_ENUM:				return "IUP_enum";
+			case B_ENUMMEMBER:			return "IUP_enummember";
+			case B_UNION:				return "IUP_union";
+			case B_ALIAS:				return "IUP_alias";
+			case B_NAMESPACE:			return "IUP_namespace";
+			case B_MACRO:				return "IUP_macro";
+			case B_SCOPE:				return "IUP_scope";
+			default:					return "IUP_variable";
+		}
+
+		return "IUP_variable";
+	}
+
+	void addNodeByLineNumber( CASTnode[] newASTNodes, int _ln )
+	{
+		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return;
+
+		try
+		{
+			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+			{
+				int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
+				Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
+
+				int insertID;
+				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+				{
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+					if( _node.lineNumber == _ln  )
+					{
+						insertID = i;
+						IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+					}
+				}
+
+				if( !newASTNodes.length ) return;
+
+				if( insertID == 0 )
+				{
+					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
+					{
+						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+
+						if( _node.lineNumber < _ln )
+						{
+							insertID = i + 1;
+							break;
+						}
+					}
+				}
+
+				if( insertID > 0 ) insertID --;
+				
+				foreach_reverse( CASTnode _node; newASTNodes )
+				{
+					append( actTree, _node, insertID );
+				}
+				IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" );
+			}
+		}
+		catch( Exception e ){}
+	}
+
+	void insertBlockNodeByLineNumber( CASTnode newASTNode, int _ln )
+	{
+		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return;
+	
+		try
+		{
+			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+			{
+				int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
+				Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
+
+				if( actTree != null )
+				{
+					int insertID;
+					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+					{
+						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+						if( _node.lineNumber == _ln  )
+						{
+							insertID = i;
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+						}
+					}
+
+					if( insertID == 0 )
+					{
+						for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
+						{
+							CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+
+							if( _node.lineNumber < _ln )
+							{
+								insertID = i + 1;
+								break;
+							}
+						}
+					}
+
+					if( insertID > 0 ) insertID --;
+
+					if( insertID == 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
+					IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" );
+				}
+			}
+		}
+		catch( Exception e ){}
+	}	
+
+	void markTreeNode( int _ln = -1, char[] _name = "-NULL", int _kind = -1, char[] _type = "-NULL" )
+	{
+		if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+		{
+			int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
+			Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
+
+			for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+			{
+				CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+				bool bMatch;
+				if( _ln != -1 )
+				{
+					if( _node.lineNumber == _ln  )
+					{
+						bMatch = true; 
+					}
+					else if( _node.lineNumber < _ln  )
+					{
+						return;
+					}
+					else
+					{
+						continue;
+					}
+				}
+				if( _name != "-NULL" )
+				{
+					if( _node.name == _name  ) bMatch = true; else continue;
+				}
+				if( _kind != -1 )
+				{
+					if( _node.kind == _kind  ) bMatch = true; else continue;
+				}
+				if( _type != "-NULL" )
+				{
+					if( _node.type == _type  ) bMatch = true; else continue;
+				}
+
+				if( bMatch )
+				{
+					IupSetAttributeId( actTree, "MARKED", i, "YES" );
+					return;
+				}
+			}
+		}			
+	}
+
+	bool softRefresh( CScintilla cSci )
+	{
+		if( GLOBAL.enableParser != "ON" ) return false;
+		
+		if( cSci !is null )
+		{
+			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+			{
+				Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
+				if( actTree != null )
+				{
+					scope scanner = new CScanner;
+
+					char[] document = cSci.getText();
+					TokenUnit[] tokens = scanner.scan( document );
+					scope _parser = new CParser( tokens );
+					auto astHeadNode = _parser.parse( cSci.getFullPath );
+
+					auto temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)] ;
+					delete temp;
+					GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
+					
+					IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
+					foreach_reverse( CASTnode t; astHeadNode.getChildren() )
+					{
+						append( actTree, t, 0 );
+					}
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}	
+}
+
+extern(C) 
+{
+	private int COutline_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		int id = IupConvertXYToPos( ih, x, y );
+
+		/*
+		if( fromStringz( IupGetAttribute( ih, "MARKMODE" ) ) == "MULTIPLE" )
+		{
+			IupSetAttributes( ih, GLOBAL.cString.convert( "MARK=CLEARALL" ) );
+			IupSetAttributes( ih, GLOBAL.cString.convert( "MARKMODE=SINGLE" ) );
+		}
+		*/
+
+		if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+		{
+			char[] _s = fromStringz( status ).dup;
+			
+			if( _s.length > 5 )
+			{
+				if( _s[5] == 'D' ) // Double Click
+				{
+					if( id > 0 )
+					{
+						CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
+
+						char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
+						
+						ScintillaAction.openFile( _fullPath, _node.lineNumber );
+						IupSetAttributeId( ih, "MARKED", id, "YES" );
+
+						return IUP_IGNORE;
+					}
+				}
+			}
+		}
+		/+
+		else if( button == 51 ) // IUP_BUTTON3 = '3' = 51
+		{
+			if( id == 0 )
+			{
+				if( pressed == 0 )
+				{
+					IupSetAttributeId( ih, "MARKED", id, "YES" );
+
+					Ihandle* itemRefresh = IupItem( "Refresh", null );
+					IupSetCallback( itemRefresh, "ACTION", cast(Icallback) &COutline_refresh );
+					IupSetHandle( "outline_rightclick", ih );
+
+					Ihandle* itemExpand = IupItem( "Expand/Contract All", null );
+					IupSetCallback( itemExpand, "ACTION", cast(Icallback) &COutline_expand );
+					IupSetHandle( "outline_rightclickexpand", ih );
+					/*
+					Ihandle* itemSearch = IupItem( "Mark Search", null );
+					IupSetCallback( itemSearch, "ACTION", cast(Icallback) &COutline_search );
+					IupSetHandle( "outline_search", ih );
+					*/
+
+					Ihandle* popupMenu = IupMenu( 	itemRefresh,
+													itemExpand,
+													/*IupSeparator(),
+													itemSearch,*/
+													null
+												);
+
+					IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+					IupDestroy( popupMenu );
+				}
+			}
+		}
+		+/
+
+		return IUP_DEFAULT;
+	}
+
+	/*
+	private int COutline_refresh( Ihandle *ih )
+	{
+		Ihandle* _iih = IupGetHandle( "outline_rightclick" );
+		if( _iih != null )
+		{
+			char[] fullPath = fromStringz( IupGetAttributeId( _iih, "TITLE", 0 ) );
+			actionManager.OutlineAction.refresh( fullPath );
+		}
+		IupSetHandle( "outline_rightclick", null );
+		return IUP_DEFAULT;
+	}
+
+	private int COutline_expand( Ihandle *ih )
+	{
+		
+		Ihandle* _iih = IupGetHandle( "outline_rightclickexpand" );
+		if( _iih != null )
+		{
+			
+			if( fromStringz( IupGetAttributeId( _iih, "STATE", 0 ) ) == "EXPANDED" )
+				IupSetAttribute( _iih, "EXPANDALL", "NO" );
+			else
+			{
+				IupSetAttribute( _iih, "EXPANDALL", "YES" );
+				IupSetAttribute( _iih, "TOPITEM", "YES" ); // Set position to top
+			}
+		}
+		IupSetHandle( "outline_rightclickexpand", null );
+		return IUP_DEFAULT;
+	}
+	*/
+
+	/+
+	private int COutline_search( Ihandle *ih )
+	{
+		Ihandle* _iih = IupGetHandle( "outline_search" );
+		if( _iih != null )
+		{
+			// Open Dialog Window
+			scope test = new CSingleTextDialog( -1, -1, "Mark Search Outline...", "Target:", null, null, false );
+			char[] target = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+			if( target.length )
+			{
+				Ihandle* treeHandle = GLOBAL.outlineTree.getActiveTree;
+				if( treeHandle != null )
+				{
+					IupSetAttributes( treeHandle, GLOBAL.cString.convert( "MARKMODE=MULTIPLE" ) );
+					/*
+					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
+					{
+						IupSetAttributeId( treeHandle, "COLOR", i, "0 0 0" );
+					}
+					*/
+					IupSetAttributeId( treeHandle, "MARKED", 0, "NO" );
+					
+					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
+					{
+						//IupMessage( "", IupGetAttributeId( treeHandle, "TITLE", i ) );
+						char[] title = fromStringz( IupGetAttributeId( treeHandle, "TITLE", i ) );
+						int colonPos = Util.index( title, ":" );
+						if( colonPos < title.length ) title = title[0..colonPos].dup;
+
+						if( Util.index( lowerCase( title ), lowerCase( target ) ) < title.length ) IupSetAttributeId( treeHandle, "MARKED", i, "YES" );//IupSetAttributeId( treeHandle, "COLOR", i, "0 0 255" );
+					}
+				}
+			}
+		}
+		IupSetHandle( "outline_search", null );
+		return IUP_DEFAULT;
+	}
+	+/
+
+	private int COutline_List_DROPDOWN_CB( Ihandle *ih, int state )
+	{
+		if( state == 1 )
+		{
+			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+			{
+				int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
+				Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
+
+				char[] imageName, editText = Util.trim( fromStringz( IupGetAttribute( ih, "VALUE" ) ) );
+
+				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
+				GLOBAL.outlineTree.listItemASTs.length = 0;
+				GLOBAL.outlineTree.listItemTreeID.length = 0;
+
+				bool bAnyWord, bGo;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "outlineToggleAnyWord" ), "VALUE" ) ) == "ON" ) bAnyWord = true; else bAnyWord = false;
+				
+				for( int i = 1; i < IupGetInt( actTree, "COUNT" ); ++ i )
+				{
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+
+					if( bAnyWord )
+					{
+						if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) < _node.name.length ) bGo = true; else bGo = false;
+					}
+					else
+					{
+						if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) == 0 ) bGo = true; else bGo = false;
+					}
+					
+					if( bGo )
+					{
+						IupSetAttribute( ih, "APPENDITEM", toStringz( _node.name ) );
+						
+						GLOBAL.outlineTree.listItemASTs ~= _node;
+						GLOBAL.outlineTree.listItemTreeID ~= i;
+						
+						imageName = GLOBAL.outlineTree.getImageName( _node );
+						if( imageName.length ) IupSetAttributeId( ih, "IMAGE", IupGetInt( ih, "COUNT" ), toStringz( imageName ) );
+					}
+				}
+
+				if( IupGetInt( ih, "COUNT" ) > 0 ) IupSetAttribute( ih, "VALUE", IupGetAttribute( ih, "1" ) );
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}
+
+	private int COutline_List_ACTION( Ihandle *ih, char *text, int item, int state )
+	{
+		//IupMessage("BEFORE",toStringz(Integer.toString(item)));
+
+		if( state == 1 )
+		{
+			if( IupGetInt( ih, "COUNT" ) > 0 )
+			{
+				if( item <= GLOBAL.outlineTree.listItemASTs.length )
+				{
+					ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[--item].lineNumber );
+					Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
+					if( tree != null ) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" );
+					
+				}
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}	
+
+	version(linux)
+	{
+		private int COutline_List_EDIT_CB( Ihandle *ih, int c, char *new_value )
+		{
+			//IupMessage("new_value",new_value);
+			//IupMessage("c",toStringz(Integer.toString(c)));
+			IupSetAttribute( ih, "APPENDITEM", toStringz( "DUMMY" ) );
+
+			return IUP_DEFAULT;
+		}
+
+		private int COutline_List_K_ANY( Ihandle *ih, int c )
+		{
+			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+			{
+				if(  c == 13 ) IupSetAttribute( ih, "SHOWDROPDOWN", "YES" );
+			}
+			return IUP_DEFAULT;
+		}
+	}
+}
