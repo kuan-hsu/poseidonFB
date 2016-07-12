@@ -380,7 +380,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.196\nBy Kuan Hsu (Taiwan)\n2016.07.10" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.197\nBy Kuan Hsu (Taiwan)\n2016.07.13" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -850,27 +850,6 @@ extern(C)
 		
 		return IUP_DEFAULT;
 	}
-
-	int tool_cb()
-	{
-		scope scanner = new CScanner;
-
-		auto cSci = ScintillaAction.getActiveCScintilla();
-		
-		if( cSci !is null )
-		{
-			char[] document = cSci.getText();
-			TokenUnit[] tokens = scanner.scan( document );
-
-			scope _parser = new CParser( tokens );
-			_parser.parse( cSci.getFullPath );
-			
- 		}		
-
-		return IUP_DEFAULT;
-	}
-
-	
 
 	int preference_cb( Ihandle *ih )
 	{

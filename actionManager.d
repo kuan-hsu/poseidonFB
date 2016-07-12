@@ -1566,12 +1566,9 @@ struct OutlineAction
 		{
 			//IupSetAttribute( actCSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			// Parser
-			scope scanner = new CScanner;
-
 			char[] document = actCSci.getText();
-			TokenUnit[] tokens = scanner.scan( document );
-			scope _parser = new CParser( tokens );
-			auto astHeadNode = _parser.parse( fullPath );
+			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
+			auto astHeadNode = GLOBAL.parser.parse( fullPath );
 
 			if( upperCase(fullPath) in GLOBAL.parserManager )
 			{
@@ -1595,11 +1592,8 @@ struct OutlineAction
 		{
 			// Don't Create Tree
 			// Parser
-			scope scanner = new CScanner;
-
-			TokenUnit[] tokens = scanner.scanFile( fullPath );
-			scope _parser = new CParser( tokens );
-			auto astHeadNode = _parser.parse( fullPath );
+			GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
+			auto astHeadNode = GLOBAL.parser.parse( fullPath );
 
 			if( upperCase(fullPath) in GLOBAL.parserManager )
 			{
@@ -1638,14 +1632,11 @@ struct OutlineAction
 	static CASTnode parserText( char[] text )
 	{
 		// Don't Create Tree
-		// Parser
 		try
 		{
-			scope scanner = new CScanner;
-
-			TokenUnit[] tokens = scanner.scan( text );
-			scope _parser = new CParser( tokens );
-			return _parser.parse( "x.bas" );
+			// Parser
+			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( text ) );
+			return GLOBAL.parser.parse( "x.bas" );
 		}
 		catch( Exception e )
 		{

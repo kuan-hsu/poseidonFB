@@ -12,14 +12,10 @@ class CParser
 
 	import			tools;
 
-	bool			bEasyFlag = true;
-
 	TokenUnit[]		tokens;
 	int				tokenIndex;
 	CASTnode		activeASTnode;
 	
-
-
 	TokenUnit token()
 	{
 		if( tokenIndex < tokens.length ) return tokens[tokenIndex]; else throw new Exception( "Method next(), out of range!" );
@@ -2064,15 +2060,20 @@ class CParser
 
 
 	public:
+	this(){}
+	
 	this( TokenUnit[] _tokens )
 	{
-		tokens = _tokens;
+		updateTokens( _tokens );
 	}
 
 	void updateTokens( TokenUnit[] _tokens )
 	{
+		tokenIndex = 0;
+		delete tokens;
 		tokens.length = 0;
 		tokens = _tokens;
+		activeASTnode = null;
 	}
 	
 	CASTnode parse( char[] fullPath )

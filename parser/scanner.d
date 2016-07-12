@@ -16,6 +16,8 @@ class CScanner
 
 
 	public:
+	this(){}
+	~this(){}
 
 	TokenUnit[] scanFile( char[] fullPath )
 	{
@@ -184,7 +186,7 @@ class CScanner
 						}
 						*/
 
-					case ',', '+', '*', '/', ':', '(', ')', '[', ']', '>', '<', '=':
+					case ',', '+', '*', '/', ':', '(', ')', '[', ']', '>', '<', '=', '{', '}':
 						if( lowerCase( identifier.dup ) in identToTOK )
 						{
 							if( identifier.length )

@@ -181,7 +181,11 @@ struct LiveParser
 					}
 
 					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr
-					if( newHead.endLineNum < 2147483647 ) return;
+					if( newHead.endLineNum < 2147483647 )
+					{
+						delete newHead;
+						return;
+					}
 
 					CASTnode[] newChildren;
 					foreach( CASTnode node; newHead.getChildren() )
@@ -271,7 +275,7 @@ struct LiveParser
 						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
 						if( _node.lineNumber <= _ln  )
 						{
-							IupSetAttributeId( actTree, "MARKED", i, "YES" );
+							version(Windows) IupSetAttributeId( actTree, "MARKED", i, "YES" ); else IupSetInt( actTree, "VALUE", i );
 							break;
 						}
 					}			
@@ -344,7 +348,11 @@ struct LiveParser
 					}
 
 					// Parser not complete
-					if( newHead.endLineNum < 2147483647 ) return;
+					if( newHead.endLineNum < 2147483647 )
+					{
+						delete newHead;
+						return;
+					}
 
 					int headLine = IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					lineNumberAdd( newHead, newHead[0].lineNumber - 1, headLine - 1 );

@@ -8,7 +8,7 @@ private import parser.ast;
 
 
 private import tango.stdc.stringz, Integer = tango.text.convert.Integer;
-private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii, tango.io.Stdout;
+private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii;
 
 class COutline
 {
@@ -303,6 +303,8 @@ class COutline
 			BRANCH	= "ADDBRANCH";
 			LEAF	= "ADDLEAF";
 		}
+		
+		scope sCovert = new CstringConvert;
 
 		if( _node.getChildrenCount > 0 )
 		{
@@ -322,16 +324,16 @@ class COutline
 					switch( showIndex )
 					{
 						case 0:
-							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
 							break;
 						case 1:
-							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
 							break;
 						case 2:
-							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
 							break;
 						default:
-							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
 							break;
 					}					
 					break;
@@ -340,20 +342,20 @@ class COutline
 					switch( showIndex )
 					{
 						case 0, 1:
-							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
 							break;
 						default:
-							IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
 							break;
 					}
 					break;
 
 				case B_SCOPE:
-					IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, null );
+					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, null );
 					break;				
 
 				default:
-					IupSetAttributeId( rootTree, toStringz( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
 			}
 			lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
 			setImage( rootTree, _node );
@@ -385,10 +387,10 @@ class COutline
 						switch( showIndex )
 						{
 							case 0, 1:
-								IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
 								break;
 							default:
-								IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 								break;
 						}
 						break;
@@ -397,16 +399,16 @@ class COutline
 					switch( showIndex )
 					{
 						case 0:
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
 							break;
 						case 1:
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
 							break;
 						case 2:
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
 							break;
 						default:
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 							break;
 					}
 					break;
@@ -415,10 +417,10 @@ class COutline
 					switch( showIndex )
 					{
 						case 0, 1:
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
 							break;
 						default:
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 							break;
 					}				
 					break;
@@ -427,22 +429,22 @@ class COutline
 					if( _node.kind & B_DEFINE )
 					{
 						if( showIndex == 0 || showIndex == 2 )
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
 						else
-							IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 						
 						break;
 					}					
 
 					if( showIndex == 0 || showIndex == 2 )
-						IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
 					else
-						IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 					
 					break;
 
 				case B_ENUMMEMBER:
-					IupSetAttributeId( rootTree, toStringz( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+					IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 					break;
 
 				default:
@@ -643,8 +645,6 @@ class COutline
 				IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
 				foreach_reverse( CASTnode t; head.getChildren() )
 				{
-					//Stdout( t.kind ~ " " ~ t.type ~ " " );
-					//Stdout( t.name ).newline;
 					append( tree, t, 0 );
 				}
 			}
@@ -732,10 +732,13 @@ class COutline
 				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 				{
 					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					if( _node.lineNumber == _ln  )
+					if( _node !is null )
 					{
-						insertID = i;
-						IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+						if( _node.lineNumber == _ln  )
+						{
+							insertID = i;
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+						}
 					}
 				}
 
@@ -746,11 +749,13 @@ class COutline
 					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
 					{
 						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-
-						if( _node.lineNumber < _ln )
+						if( _node !is null )
 						{
-							insertID = i + 1;
-							break;
+							if( _node.lineNumber < _ln )
+							{
+								insertID = i + 1;
+								break;
+							}
 						}
 					}
 				}
@@ -761,7 +766,8 @@ class COutline
 				{
 					append( actTree, _node, insertID );
 				}
-				IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" );
+				//IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" );
+				version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
 			}
 		}
 		catch( Exception e ){}
@@ -784,20 +790,15 @@ class COutline
 					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 					{
 						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-						if( _node.lineNumber == _ln  )
+						if( _node !is null )
 						{
-							insertID = i;
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-						}
-					}
-
-					if( insertID == 0 )
-					{
-						for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
-						{
-							CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-
-							if( _node.lineNumber < _ln )
+							if( _node.lineNumber == _ln  )
+							{
+								insertID = i;
+								IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+								break;
+							}
+							else if( _node.lineNumber < _ln )
 							{
 								insertID = i + 1;
 								break;
@@ -808,7 +809,7 @@ class COutline
 					if( insertID > 0 ) insertID --;
 
 					if( insertID == 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
-					IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" );
+					version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
 				}
 			}
 		}
@@ -856,7 +857,8 @@ class COutline
 
 				if( bMatch )
 				{
-					IupSetAttributeId( actTree, "MARKED", i, "YES" );
+					//IupSetAttributeId( actTree, "MARKED", i, "YES" );
+					version(Windows) IupSetAttributeId( actTree, "MARKED", i, "YES" ); else IupSetInt( actTree, "VALUE", i );
 					return;
 				}
 			}
@@ -874,24 +876,26 @@ class COutline
 				Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
 				if( actTree != null )
 				{
-					scope scanner = new CScanner;
-
-					char[] document = cSci.getText();
-					TokenUnit[] tokens = scanner.scan( document );
-					scope _parser = new CParser( tokens );
-					auto astHeadNode = _parser.parse( cSci.getFullPath );
-
-					auto temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)] ;
-					delete temp;
-					GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
-					
-					IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
-					foreach_reverse( CASTnode t; astHeadNode.getChildren() )
+					try
 					{
-						append( actTree, t, 0 );
-					}
+						char[] document = cSci.getText();
+						GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
+						
+						CASTnode astHeadNode = GLOBAL.parser.parse( cSci.getFullPath );
+						CASTnode temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 
-					return true;
+						GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
+						delete temp;
+
+						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" ); 
+						foreach_reverse( CASTnode t; astHeadNode.getChildren() )
+						{
+							append( actTree, t, 0 );
+						}
+
+						return true;
+					}
+					catch( Exception e ){}
 				}
 			}
 		}

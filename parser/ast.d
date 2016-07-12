@@ -15,8 +15,6 @@ class CASTnode
 	int					lineNumber;
 	int					endLineNum;
 
-	this(){}
-
 	this( char[] _name, int _kind, char[] _protection, char[] _type, char[] _base, int _lineNumber, int _endLineNum = -1 )
 	{
 		name = _name;
@@ -69,8 +67,9 @@ class CASTnode
 		{
 			if( children[0].lineNumber > _ln )
 			{
-				tempChildren = _child ~ children;
-				low = 0;
+				_child.father = this;
+				children = _child ~ children;
+				return 0;
 			}
 			else if( children[length-1].lineNumber <= _ln )
 			{

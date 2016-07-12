@@ -27,7 +27,7 @@
     <caseinsensitive>ON</caseinsensitive>
     <showlisttype>ON</showlisttype>
     <showallmember>ON</showallmember>
-    <livelevel>1</livelevel>
+    <livelevel>2</livelevel>
     <updateoutlinelive>ON</updateoutlinelive>
     <keywordcase>0</keywordcase>
   </parser>
