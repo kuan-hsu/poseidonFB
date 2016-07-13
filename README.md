@@ -18,4 +18,27 @@ It supports:
 12. etc...
 
 Win7:
+
 ![poseidonFB_windows.png](https://bitbucket.org/repo/j5rjj4/images/218696064-poseidonFB_windows.png)
+
+## Install ##
+Go to **Downloads** https://bitbucket.org/KuanHsu/poseidonfb/downloads to select file to download.
+
+**Win:**
+
+Download poseidonFB.7z, extract to floder, then run the poseidonFB.exe
+
+**Linux:**
+
+At first install IUP framework(3.18), http://sourceforge.net/projects/iup/files/
+
+Open the terminal to install the *.so to system.
+
+```
+#!d
+
+sudo ./install
+
+```
+
+Then choose x64 or x86 verrsion to download, extract to floder, then run the poseidonFB
