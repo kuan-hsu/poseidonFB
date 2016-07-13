@@ -1,6 +1,7 @@
 Welcome to poseidonFB, the IDE is writtfln by D language + IUP framework for freeBASIC
 
 It supports:
+
 1. Syntax highlighting
 2. Project manager
 3. Autocompletion & Calltip
