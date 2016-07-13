@@ -30,7 +30,7 @@ Download poseidonFB.7z, extract to floder, then run the poseidonFB.exe
 
 **Linux:**
 
-At first install IUP framework(3.18), http://sourceforge.net/projects/iup/files/
+At first install IUP framework(3.18), https://sourceforge.net/projects/iup/files/3.18/Linux%20Libraries/
 
 Open the terminal to install the *.so to system.
 
