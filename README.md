@@ -1,4 +1,6 @@
-Welcome to poseidonFB, the IDE is writtfln by D language + IUP framework for freeBASIC
+### poseidonFB ###
+
+Welcome to poseidonFB, the IDE is writefln by D language + IUP framework for freeBASIC
 
 It supports:
 
