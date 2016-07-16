@@ -905,7 +905,7 @@ class COutline
 
 				if( actTree != null ) 
 				{
-					softRefresh( cSci );
+					softRefresh( cSci, actTree );
 				}
 				else
 				{
@@ -914,12 +914,6 @@ class COutline
 			}
 		}
 	}
-
-	void fresh( char[] fullPath )
-	{
-		hardRefresh( fullPath );
-	}
-	
 
 	bool softRefresh( CScintilla cSci, Ihandle* actTree = null )
 	{

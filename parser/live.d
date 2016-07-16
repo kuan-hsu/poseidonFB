@@ -304,7 +304,7 @@ struct LiveParser
 				{
 					char* blockText = cast(char*)calloc( 1, posTail-posHead );
 					IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
-					newHead = OutlineAction.parserText( fromStringz( blockText ) );
+					newHead = GLOBAL.outlineTree.parserText( fromStringz( blockText ) );
 					free( blockText );
 				}
 				//IupMessage( "", toStringz( blockText ) );

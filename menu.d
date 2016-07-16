@@ -380,7 +380,7 @@ void createMenu()
 	Ihandle* item_about = IupItem ("About", null);
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.198\nBy Kuan Hsu (Taiwan)\n2016.07.16" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.199\nBy Kuan Hsu (Taiwan)\n2016.07.17" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -811,12 +811,14 @@ extern(C)
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
 			Ihandle* thirdChild = IupGetChild( GLOBAL.explorerSplit, 2 );
 			IupSetAttribute( thirdChild, "ACTIVE", "YES" );
+			IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "VISIBLE", "NO" );
 		}
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
+			if( IupGetInt( GLOBAL.fileListSplit, "VALUE" ) < 965 ) IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "VISIBLE", "YES" );
 		}
 		
 		return IUP_DEFAULT;

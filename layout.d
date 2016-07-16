@@ -46,7 +46,7 @@ void createExplorerWindow()
 	//GLOBAL.explorerSplit = IupSplit( _split, GLOBAL.dndDocumentZBox );
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.fileListSplit, GLOBAL.dndDocumentZBox );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
-	//IupSetAttribute(GLOBAL.explorerSplit, "COLOR", "127 127 255");
+	IupSetCallback( GLOBAL.explorerSplit, "VALUECHANGED_CB", cast(Icallback) &explorerSplit_cb );
 
 	
 	createMessagePanel();
@@ -367,7 +367,22 @@ extern(C)
 			IupSetAttributes( GLOBAL.fileListTree.getTreeHandle, "VISIBLE=NO" );	
 		}
 		
-
 		return IUP_DEFAULT;
-	}	
+	}
+
+	private int explorerSplit_cb( Ihandle *ih )
+	{
+		int value = IupGetInt( ih, "VALUE" );
+		if( value <= 0 )
+		{
+			IupSetAttributes( GLOBAL.fileListTree.getTreeHandle, "VISIBLE=NO" );	
+		}
+		else
+		{
+			if( IupGetInt( GLOBAL.fileListSplit, "VALUE" ) < 965 ) IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "VISIBLE", "YES" );
+		}
+		
+		return IUP_DEFAULT;
+	}
+	
 }
