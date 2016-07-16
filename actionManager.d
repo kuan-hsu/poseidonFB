@@ -398,7 +398,7 @@ struct ScintillaAction
 		if( lowerCase( f.ext() ) == "bas" || lowerCase( f.ext() ) == "bi" )
 		{
 			//Parser
-			OutlineAction.loadFile( fullPath );
+			GLOBAL.outlineTree.loadFile( fullPath );
 		}
 
 		if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
@@ -458,7 +458,7 @@ struct ScintillaAction
 			GLOBAL.fileListTree.addItem( _sci );
 			
 			// Parser
-			OutlineAction.loadFile( fullPath );
+			GLOBAL.outlineTree.loadFile( fullPath );
 
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
@@ -606,7 +606,7 @@ struct ScintillaAction
 			GLOBAL.fileListTree.removeItem( cSci );
 			GLOBAL.scintillaManager.remove( upperCase(fullPath) );
 			delete cSci;
-			actionManager.OutlineAction.cleanTree( fullPath );
+			GLOBAL.outlineTree.cleanTree( fullPath );
 			if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 		}
 
@@ -663,7 +663,7 @@ struct ScintillaAction
 				}
 
 				GLOBAL.fileListTree.removeItem( cSci );
-				actionManager.OutlineAction.cleanTree( cSci.getFullPath );
+				GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
 				IupDestroy( iupSci );
 				delete cSci;
 			}
@@ -731,7 +731,7 @@ struct ScintillaAction
 			}
 
 			GLOBAL.fileListTree.removeItem( cSci );
-			actionManager.OutlineAction.cleanTree( cSci.getFullPath );
+			GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
 			IupDestroy( iupSci );
 		}
 
@@ -768,7 +768,7 @@ struct ScintillaAction
 				}
 
 				cSci.saveFile();
-				OutlineAction.refresh( fullPath ); //Update Parser
+				GLOBAL.outlineTree.hardRefresh( fullPath ); //Update Parser
 			}
 		}
 		catch
@@ -826,7 +826,7 @@ struct ScintillaAction
 							GLOBAL.fileListTree.removeItem( cSci );
 							GLOBAL.scintillaManager.remove( upperCase(originalFullPath) );
 							delete cSci;
-							actionManager.OutlineAction.cleanTree( originalFullPath );
+							GLOBAL.outlineTree.cleanTree( originalFullPath );
 						}
 					}
 				}
@@ -883,7 +883,7 @@ struct ScintillaAction
 						}
 						
 						_sci.saveFile();
-						OutlineAction.refresh( _sci.getFullPath() );
+						GLOBAL.outlineTree.hardRefresh( _sci.getFullPath() );
 						break;
 					}
 				}
@@ -1428,7 +1428,7 @@ struct SearchAction
 				if( toUpper( fullPath ) in GLOBAL.scintillaManager )
 				{
 					GLOBAL.scintillaManager[toUpper( fullPath )].setText( document );
-					OutlineAction.refresh( fullPath );
+					GLOBAL.outlineTree.hardRefresh( fullPath );
 					
 				}
 				return count;
@@ -1522,126 +1522,5 @@ struct SearchAction
 				IupSetAttributeId( ih, "INSERTITEM", 1, GLOBAL.cString.convert( text ) );
 			}
 		}
-	}
-}
-
-
-struct OutlineAction
-{
-	private:
-	import scintilla, parser.ast;
-	import parser.scanner, parser.token, parser.parser;
-
-	import tango.io.FilePath, tango.text.Ascii;
-
-
-	public:
-	static void loadFile( char[] fullPath )
-	{
-		refresh( fullPath );
-	}
-	
-	static void refresh( char[] fullPath )
-	{
-		if( GLOBAL.enableParser != "ON" ) return;
-		
-		scope f = new FilePath( fullPath );
-
-		char[] _ext = toLower( f.ext() );
-
-		if( _ext != "bas" && _ext != "bi" ) return;
-		
-		CScintilla actCSci;
-		
-		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-		{
-			if( upperCase(fullPath) == upperCase(cSci.getFullPath()) )
-			{
-				actCSci = cSci;
-				break;
-			}
-		}
-
-		if( actCSci !is null )
-		{
-			//IupSetAttribute( actCSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
-			// Parser
-			char[] document = actCSci.getText();
-			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
-			auto astHeadNode = GLOBAL.parser.parse( fullPath );
-
-			if( upperCase(fullPath) in GLOBAL.parserManager )
-			{
-				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
-				delete temp;
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-
-				cleanTree( fullPath );
-			}
-			else
-			{
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-			}
-
-			GLOBAL.outlineTree.createTree( astHeadNode );
-
-			CScintilla nowCsci = ScintillaAction.getActiveCScintilla();
-			if( nowCsci == actCSci ) GLOBAL.outlineTree.changeTree( fullPath );
-		}
-		else
-		{
-			// Don't Create Tree
-			// Parser
-			GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
-			auto astHeadNode = GLOBAL.parser.parse( fullPath );
-
-			if( upperCase(fullPath) in GLOBAL.parserManager )
-			{
-				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
-				delete temp;
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-
-				cleanTree( fullPath );
-			}
-			else
-			{
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-			}			
-		}
-	}
-
-	static void cleanTree( char[] fullPath )
-	{
-		for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++i )
-		{
-			Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i );
-			if( ih != null )
-			{
-				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
-
-				if( fullPath == _fullPath )
-				{
-					IupSetAttribute( ih, "DELNODE", "ALL" );
-					IupDestroy( ih );
-					break;
-				}
-			}
-		}
-	}
-
-	static CASTnode parserText( char[] text )
-	{
-		// Don't Create Tree
-		try
-		{
-			// Parser
-			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( text ) );
-			return GLOBAL.parser.parse( "x.bas" );
-		}
-		catch( Exception e )
-		{
-		}
-
-		return null;
 	}
 }

@@ -484,7 +484,7 @@ struct AutoComplete
 			else
 			{
 				//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
-				actionManager.OutlineAction.loadFile( includeFullPath );
+				GLOBAL.outlineTree.loadFile( includeFullPath );
 				results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
 				results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
 

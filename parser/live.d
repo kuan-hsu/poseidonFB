@@ -161,7 +161,7 @@ struct LiveParser
 					return;
 				}
 				
-				CASTnode newHead = OutlineAction.parserText( currentLineText );
+				CASTnode newHead = GLOBAL.outlineTree.parserText( currentLineText );
 				if( newHead !is null )
 				{
 					if( !newHead.getChildrenCount )
@@ -176,7 +176,7 @@ struct LiveParser
 					if( oldHead.getChildrenCount == 0 )
 					{
 						delete newHead;
-						if( !GLOBAL.outlineTree.softRefresh( cSci ) ) actionManager.OutlineAction.refresh( cSci.getFullPath() );
+						if( !GLOBAL.outlineTree.softRefresh( cSci ) ) GLOBAL.outlineTree.hardRefresh( cSci.getFullPath() );
 						return;
 					}
 
@@ -263,7 +263,7 @@ struct LiveParser
 
 				if( posHead == 0 )
 				{
-					if( !GLOBAL.outlineTree.softRefresh( cSci ) ) actionManager.OutlineAction.refresh( cSci.getFullPath() );
+					if( !GLOBAL.outlineTree.softRefresh( cSci ) ) GLOBAL.outlineTree.hardRefresh( cSci.getFullPath() );
 					
 					int _ln = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 				
@@ -298,7 +298,7 @@ struct LiveParser
 				{
 					scope blockText = new char[posTail-posHead];
 					IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
-					newHead = OutlineAction.parserText( blockText );
+					newHead = GLOBAL.outlineTree.parserText( blockText );
 				}
 				else
 				{

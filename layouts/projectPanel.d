@@ -227,7 +227,7 @@ class CProjectTree
 
 			IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
 
-			IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "1" );
+			IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
 		}
 		else
 		{
@@ -559,7 +559,7 @@ extern(C)
 			if( !fn.exists() ) fn.create(); // Create Folder On Disk
 
 			actionManager.ScintillaAction.newFile( fullPath );
-			actionManager.OutlineAction.loadFile( fullPath );
+			GLOBAL.outlineTree.loadFile( fullPath );
 
 			id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Re-Get Active Focus Node ID
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fileName ) );

@@ -160,6 +160,7 @@ void main()
 	// Set Split %
 	IupSetInt( GLOBAL.explorerSplit, "VALUE", 170 );
 	IupSetInt( GLOBAL.messageSplit, "VALUE", 800 );
+	IupSetInt( GLOBAL.fileListSplit, "VALUE", 986 );
 
 
 	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );

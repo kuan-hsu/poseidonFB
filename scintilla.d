@@ -242,13 +242,13 @@ class CScintilla
 			auto temp = GLOBAL.parserManager[upperCase(fullPath)];
 			delete temp;
 			GLOBAL.parserManager.remove( upperCase(fullPath) );
-			actionManager.OutlineAction.cleanTree( fullPath );
+			GLOBAL.outlineTree.cleanTree( fullPath );
 
-			actionManager.OutlineAction.loadFile( newFullPath );
+			GLOBAL.outlineTree.loadFile( newFullPath );
 		}
 		else
 		{
-			actionManager.OutlineAction.loadFile( newFullPath );
+			GLOBAL.outlineTree.loadFile( newFullPath );
 		}
 
 
@@ -525,7 +525,7 @@ class CScintilla
 		
 
 		// Autocompletion XPM Image
-		version( Windows )
+		version( none )
 		{
 			IupScintillaSendMessage( sci, 2405, 0, cast(int) XPM.private_variable_array_xpm.ptr );
 			IupScintillaSendMessage( sci, 2405, 1, cast(int) XPM.protected_variable_array_xpm.ptr ); // SCI_REGISTERIMAGE = 2405

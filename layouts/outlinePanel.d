@@ -621,6 +621,7 @@ class COutline
 
 	Ihandle* getActiveTree()
 	{
+		//if( IupGetChildCount( GzBoxHandle ) ) < 1 return null;
 		int pos = IupGetInt( zBoxHandle, "VALUEPOS" ); // Get active zbox pos
 		if( pos >= 0 ) return IupGetChild( zBoxHandle, pos );
 
@@ -668,8 +669,32 @@ class COutline
 			}
 		}
 	}
+
+	void cleanTree( char[] fullPath, bool bDestroy = true )
+	{
+		for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++i )
+		{
+			Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ); 
+			if( ih != null )
+			{
+				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+
+				if( fullPath == _fullPath )
+				{
+					IupSetAttribute( ih, "DELNODE", "ALL" );
+					if( bDestroy ) IupDestroy( ih );
+					break;
+				}
+			}
+		}
+	}	
 	
 	Ihandle* getZBoxHandle(){ return zBoxHandle; }
+
+	void loadFile( char[] fullPath )
+	{
+		hardRefresh( fullPath );
+	}	
 
 	char[] getImageName( CASTnode _node )
 	{
@@ -723,11 +748,9 @@ class COutline
 
 		try
 		{
-			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+			Ihandle* actTree = getActiveTree();
+			if( actTree != null )
 			{
-				int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
-				Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
-
 				int insertID;
 				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 				{
@@ -779,38 +802,33 @@ class COutline
 	
 		try
 		{
-			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+			Ihandle* actTree = getActiveTree();
+			if( actTree != null )
 			{
-				int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
-				Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
-
-				if( actTree != null )
+				int insertID;
+				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 				{
-					int insertID;
-					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+					if( _node !is null )
 					{
-						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-						if( _node !is null )
+						if( _node.lineNumber == _ln  )
 						{
-							if( _node.lineNumber == _ln  )
-							{
-								insertID = i;
-								IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-								break;
-							}
-							else if( _node.lineNumber < _ln )
-							{
-								insertID = i + 1;
-								break;
-							}
+							insertID = i;
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+							break;
+						}
+						else if( _node.lineNumber < _ln )
+						{
+							insertID = i + 1;
+							break;
 						}
 					}
-
-					if( insertID > 0 ) insertID --;
-
-					if( insertID == 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
-					version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
 				}
+
+				if( insertID > 0 ) insertID --;
+
+				if( insertID == 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
+				version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
 			}
 		}
 		catch( Exception e ){}
@@ -818,11 +836,9 @@ class COutline
 
 	void markTreeNode( int _ln = -1, char[] _name = "-NULL", int _kind = -1, char[] _type = "-NULL" )
 	{
-		if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
+		Ihandle* actTree = getActiveTree();
+		if( actTree != null )
 		{
-			int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
-			Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
-
 			for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 			{
 				CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
@@ -865,7 +881,47 @@ class COutline
 		}			
 	}
 
-	bool softRefresh( CScintilla cSci )
+	void refresh( CScintilla cSci )
+	{
+		if( cSci !is null )
+		{
+			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+			{
+				Ihandle* actTree;
+				
+				for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
+				{
+					Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
+					if( ih != null )
+					{
+						char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+						if( cSci.getFullPath == _fullPath )
+						{
+							actTree = ih;
+							break;
+						}
+					}
+				}
+
+				if( actTree != null ) 
+				{
+					softRefresh( cSci );
+				}
+				else
+				{
+					hardRefresh( cSci.getFullPath() );
+				}
+			}
+		}
+	}
+
+	void fresh( char[] fullPath )
+	{
+		hardRefresh( fullPath );
+	}
+	
+
+	bool softRefresh( CScintilla cSci, Ihandle* actTree = null )
 	{
 		if( GLOBAL.enableParser != "ON" ) return false;
 		
@@ -873,7 +929,7 @@ class COutline
 		{
 			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 			{
-				Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
+				if( actTree == null ) actTree = getActiveTree();
 				if( actTree != null )
 				{
 					try
@@ -901,6 +957,91 @@ class COutline
 		}
 
 		return false;
+	}
+
+	void hardRefresh( char[] fullPath )
+	{
+		if( GLOBAL.enableParser != "ON" ) return;
+		
+		scope f = new FilePath( fullPath );
+
+		char[] _ext = toLower( f.ext() );
+
+		if( _ext != "bas" && _ext != "bi" ) return;
+		
+		CScintilla actCSci;
+		
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+		{
+			if( upperCase(fullPath) == upperCase(cSci.getFullPath()) )
+			{
+				actCSci = cSci;
+				break;
+			}
+		}
+
+		if( actCSci !is null )
+		{
+			//IupSetAttribute( actCSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
+			// Parser
+			char[] document = actCSci.getText();
+			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
+			auto astHeadNode = GLOBAL.parser.parse( fullPath );
+
+			if( upperCase(fullPath) in GLOBAL.parserManager )
+			{
+				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
+				delete temp;
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
+
+				cleanTree( fullPath );
+			}
+			else
+			{
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
+			}
+
+			createTree( astHeadNode );
+
+			CScintilla nowCsci = ScintillaAction.getActiveCScintilla();
+			if( nowCsci == actCSci ) changeTree( fullPath );
+		}
+		else
+		{
+			// Don't Create Tree
+			// Parser
+			GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
+			auto astHeadNode = GLOBAL.parser.parse( fullPath );
+
+			if( upperCase(fullPath) in GLOBAL.parserManager )
+			{
+				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
+				delete temp;
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
+
+				cleanTree( fullPath );
+			}
+			else
+			{
+				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
+			}			
+		}
+	}
+
+	CASTnode parserText( char[] text )
+	{
+		// Don't Create Tree
+		try
+		{
+			// Parser
+			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( text ) );
+			return GLOBAL.parser.parse( "x.bas" );
+		}
+		catch( Exception e )
+		{
+		}
+
+		return null;
 	}	
 }
 

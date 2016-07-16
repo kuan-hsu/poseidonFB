@@ -12,29 +12,11 @@ class CFileList
 {
 	private:
 	Ihandle*		layoutHandle, tree;
+	int				fullPathState;
 
 	void createLayout()
 	{
 		// Outline Toolbar
-		Ihandle* filelistButtonCollapse = IupButton( null, "Collapse" );
-		IupSetAttributes( filelistButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,TIP=Collapse" );
-		IupSetCallback( filelistButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
-		{
-			Ihandle* _tree = GLOBAL.fileListTree.getTreeHandle();
-			if( _tree != null )
-				{
-					
-					if( fromStringz( IupGetAttributeId( _tree, "STATE", 0 ) ) == "EXPANDED" )
-						IupSetAttribute( _tree, "EXPANDALL", "NO" );
-					else
-					{
-						IupSetAttribute( _tree, "EXPANDALL", "YES" );
-						IupSetAttribute( _tree, "TOPITEM", "YES" ); // Set position to top
-					}
-				}
-			
-		});
-
 		scope string = new CstringConvert( "Show Fullpath" );
 
 		Ihandle* filelistButtonFilename = IupButton( null, "Fullpath" );
@@ -43,10 +25,10 @@ class CFileList
 
 
 		Ihandle* filelistButtonHide = IupButton( null, "Hide" );
-		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_debug_left,TIP=Hide" );
+		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_downarrow,TIP=Hide" );
 		IupSetCallback( filelistButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			menu.outline_cb( GLOBAL.menuOutlineWindow );
+			IupSetInt( GLOBAL.fileListSplit, "VALUE", 984 );
 		});
 
 
@@ -57,19 +39,20 @@ class CFileList
 		Ihandle* filelistToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( filelistToolbarTitleImage, "IMAGE=icon_filelist,ALIGNMENT=ALEFT:ACENTER" );
 
-		/*Ihandle* filelistToolbarTitle = IupLabel( " FileList" );
-		IupSetAttribute( filelistToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );*/
+		Ihandle* filelistToolbarTitle = IupLabel( " FileList" );
+		IupSetAttribute( filelistToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );
 
-		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, /*filelistToolbarTitle,*/ IupFill, filelistButtonCollapse, filelistButtonFilename, labelSEPARATOR01, filelistButtonHide, null );
+		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, filelistToolbarTitle, IupFill, filelistButtonFilename, labelSEPARATOR01, filelistButtonHide, null );
 		IupSetAttributes( filelistToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 		tree = IupTree();
-		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=FileList,SIZE=NULL" );
-		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &fileListNodeSelect_cb );
-		//IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &fileListNodeRightClick_cb );
+		IupSetAttributes( tree, "ADDROOT=NO,EXPAND=YES,SIZE=NULL,VISIBLE=NO" );
+		IupSetAttributes( tree, "SHOWDRAGDROP=YES" );
+		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &fileList_SELECTION_CB );
+		IupSetCallback( tree, "DRAGDROP_CB", cast(Icallback) &fileList_DRAGDROP_CB );
 
 		layoutHandle = IupVbox( filelistToolbarH, tree, null );
-		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,GAP=2" ) );
+		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT" ) );
 	}
 
 	public:
@@ -92,15 +75,22 @@ class CFileList
 	{
 		if( _sci !is null )
 		{
-			IupSetAttribute( tree, "ADDLEAF0", GLOBAL.cString.convert( _sci.getFullPath ) );
-			IupSetAttribute( tree, "USERDATA1", cast(char*) _sci  );
-			IupSetAttributeId( tree, "MARKED", 1, "YES" );
+			if( GLOBAL.fileListTree.fullPathState == 0 )
+				IupSetAttributeId( tree, "ADDLEAF", -1, GLOBAL.cString.convert( _sci.getFullPath ) );
+			else
+			{
+				scope _fullPath = new FilePath( _sci.getFullPath );
+				IupSetAttributeId( tree, "ADDLEAF", -1, GLOBAL.cString.convert( _fullPath.file() ) );
+			}
+			
+			IupSetAttributeId( tree, "USERDATA", 0, cast(char*) _sci  );
+			IupSetAttributeId( tree, "MARKED", 0, "YES" );
 		}
 	}
 
 	void markItem( char[] fullPath )
 	{
-		for( int id = 1; id <= IupGetInt( tree, "COUNT" ); id++ ) // Not include Parent "FileList" node
+		for( int id = 0; id < IupGetInt( tree, "COUNT" ); id++ ) // Not include Parent "FileList" node
 		{
 			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( tree, "USERDATA", id );
 			if( _sci_node.getFullPath == fullPath )
@@ -118,7 +108,7 @@ class CFileList
 
 	void removeItem( char[] fullPath )
 	{
-		for( int id = 1; id <= IupGetInt( tree, "COUNT" ); id++ ) // Not include Parent "FileList" node
+		for( int id = 0; id < IupGetInt( tree, "COUNT" ); id++ ) // Not include Parent "FileList" node
 		{
 			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( tree, "USERDATA", id );
 			if( _sci_node.getFullPath == fullPath )
@@ -139,9 +129,9 @@ class CFileList
 extern(C)
 {
 	// Open File...
-	private int fileListNodeSelect_cb( Ihandle *ih, int id, int status )
+	private int fileList_SELECTION_CB( Ihandle *ih, int id, int status )
 	{
-		if( id > 0 )
+		if( id >= 0 )
 		{
 			// SELECTION_CB will trigger 2 times, preSelect -> Select, we only catch second signal
 			if( status == 1 )
@@ -154,11 +144,42 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+
+	private int fileList_DRAGDROP_CB( Ihandle *ih, int drag_id, int drop_id, int isshift, int iscontrol )
+	{
+
+		CScintilla _sci = cast(CScintilla) IupGetAttributeId( ih, "USERDATA", drag_id );
+
+		if( _sci !is null )
+		{
+			char[]		_title = fromStringz( IupGetAttributeId( ih, "TITLE", drag_id ) );
+
+			GLOBAL.fileListTree.removeItem( _sci );
+
+			if( drop_id < drag_id )
+			{
+				IupSetAttributeId( ih, "INSERTLEAF", drop_id ++, GLOBAL.cString.convert( _title ) );
+			}
+			else if( drop_id > drag_id )
+			{
+				IupSetAttributeId( ih, "INSERTLEAF", drop_id - 1, GLOBAL.cString.convert( _title ) );
+			}
+			else
+			{
+				return IUP_DEFAULT;
+			}
+
+			IupSetAttributeId( ih, "USERDATA", drop_id, cast(char*) _sci  );
+			IupSetAttributeId( ih, "MARKED", drop_id, "YES" );
+		}
+
+		return IUP_DEFAULT;
+	}
+
 	private int fileList_Filename_ACTION( Ihandle *ih )
 	{
-		static state = 0;
-		if( state == 1 ) showFullpath(); else showFilename();
-		if( state == 1 ) state = 0; else state = 1;
+		if( GLOBAL.fileListTree.fullPathState == 1 ) showFullpath(); else showFilename();
+		if( GLOBAL.fileListTree.fullPathState == 1 ) GLOBAL.fileListTree.fullPathState = 0; else GLOBAL.fileListTree.fullPathState = 1;
 
 		return IUP_DEFAULT;
 	}
@@ -168,7 +189,7 @@ extern(C)
 	{
 		int nodeCount = IupGetInt( GLOBAL.fileListTree.getTreeHandle, "COUNT" );
 	
-		for( int id = 1; id <= nodeCount; id++ ) // include Parent "FileList" node
+		for( int id = 0; id < nodeCount; id++ ) // include Parent "FileList" node
 		{
 			CScintilla _sci = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", id );
 			if( _sci !is null)
@@ -182,7 +203,7 @@ extern(C)
 	{
 		int nodeCount = IupGetInt( GLOBAL.fileListTree.getTreeHandle, "COUNT" );
 	
-		for( int id = 1; id <= nodeCount; id++ ) // include Parent "FileList" node
+		for( int id = 0; id < nodeCount; id++ ) // include Parent "FileList" node
 		{
 			char* nodeTitle = IupGetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id );
 
@@ -192,29 +213,4 @@ extern(C)
 			IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id, GLOBAL.cString.convert( baseName ) );
 		}		
 	}
-
-	/+
-	// Show Fullpath or Filename
-	private int fileListNodeRightClick_cb( Ihandle *ih, int id )
-	{
-		if( id == 0 )
-		{
-			IupSetAttributeId( ih, "MARKED", 0, "YES" );
-
-			Ihandle* popupMenu = IupMenu( 
-											IupItem( "Show Fullpath", "showFullpath" ),
-											IupItem( "Show Filename", "showFilename" ),
-											null
-										);
-
-			IupSetFunction( "showFullpath", cast(Icallback) &showFullpath );
-			IupSetFunction( "showFilename", cast(Icallback) &showFilename );
-
-			IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
-			IupDestroy(popupMenu);
-		}
-
-		return IUP_DEFAULT;
-	}
-	+/
 }

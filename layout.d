@@ -18,17 +18,23 @@ void createExplorerWindow()
 	GLOBAL.outlineTree = new COutline;
 
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", "Project" );
-	IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABTITLE", "FileList" );
+	//IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABTITLE", "FileList" );
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", "Outline" );
 	
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer" );
-	IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABIMAGE", "icon_filelist" );
+	//IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABIMAGE", "icon_filelist" );
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
 
 
-	GLOBAL.projectViewTabs = IupTabs( GLOBAL.fileListTree.getLayoutHandle, GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
+	GLOBAL.projectViewTabs = IupTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
 	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
+
+	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
+	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=YES,SHOWGRIP=LINES");
+	IupSetCallback( GLOBAL.fileListSplit, "VALUECHANGED_CB", cast(Icallback) &fileList_cb );
+
+
 
 	createTabs();
 
@@ -37,8 +43,8 @@ void createExplorerWindow()
 	IupSetCallback( dndEmptylabel, "DROPFILES_CB",cast(Icallback) &label_dropfiles_cb );
 	GLOBAL.dndDocumentZBox = IupZbox( dndEmptylabel, GLOBAL.documentTabs, null  );
 
-
-	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.dndDocumentZBox );
+	//GLOBAL.explorerSplit = IupSplit( _split, GLOBAL.dndDocumentZBox );
+	GLOBAL.explorerSplit = IupSplit( GLOBAL.fileListSplit, GLOBAL.dndDocumentZBox );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	//IupSetAttribute(GLOBAL.explorerSplit, "COLOR", "127 127 255");
 
@@ -348,4 +354,20 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
+
+	private int fileList_cb( Ihandle *ih )
+	{
+		int value = IupGetInt( ih, "VALUE" );
+		if( value < 965 )
+		{
+			IupSetAttributes( GLOBAL.fileListTree.getTreeHandle, "VISIBLE=YES" );	
+		}
+		else
+		{
+			IupSetAttributes( GLOBAL.fileListTree.getTreeHandle, "VISIBLE=NO" );	
+		}
+		
+
+		return IUP_DEFAULT;
+	}	
 }

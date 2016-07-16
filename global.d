@@ -46,6 +46,8 @@ struct GLOBAL
 	static Ihandle*				dndDocumentZBox;
 
 	// LAYOUT
+	static Ihandle* 			fileListSplit;
+	
 	static Ihandle* 			explorerWindow;
 	static Ihandle* 			explorerSplit; // which split explorerWindow & editWindow
 	static int					explorerSplit_value = 300;

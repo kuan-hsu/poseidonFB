@@ -264,7 +264,7 @@ struct ExecuterAction
 					if( upperCase(s) in GLOBAL.scintillaManager )
 					{
 						GLOBAL.scintillaManager[upperCase(s)].saveFile();
-						OutlineAction.refresh( s ); //Update Parser
+						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
 					}
 				}
 
@@ -274,7 +274,7 @@ struct ExecuterAction
 					if( upperCase(s) in GLOBAL.scintillaManager )
 					{
 						GLOBAL.scintillaManager[upperCase(s)].saveFile();
-						OutlineAction.refresh( s ); //Update Parser
+						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
 					}
 				}
 
