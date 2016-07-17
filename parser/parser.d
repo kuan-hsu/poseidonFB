@@ -1595,9 +1595,9 @@ class CParser
 								parseToken();
 							}							
 
-							while( token().tok == TOK.Tidentifier )
+							while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 							{
-								_lineNum = token().lineNumber;
+								_lineNum	= token().lineNumber;
 								_name		= token().identifier;
 								
 								parseToken( TOK.Tidentifier );
@@ -1768,6 +1768,8 @@ class CParser
 						{
 							parseToken( TOK.Tas );
 
+							if(	parseFunctionPointer( _name, _lineNum ) ) break;
+
 							if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
 
 							_type = getVariableType();
@@ -1808,6 +1810,71 @@ class CParser
 		return false;
 	}
 
+	bool parseFunctionPointer( char[] _name, int _lineNumber )
+	{
+		char[] 	_param, _type;
+		int		_kind;
+		
+		// Function pointer
+		if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub )
+		{
+			if( token().tok == TOK.Tfunction ) _kind = B_FUNCTION; else _kind = B_SUB;
+			parseToken();
+
+			if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) parseToken();
+
+			// like " Declare Function app_oninit_cb WXCALL () As wxBool "
+			if( token().tok == TOK.Tidentifier ) parseToken( TOK.Tidentifier );	
+
+			// Overload
+			if( token().tok == TOK.Toverload ) parseToken( TOK.Toverload );
+
+			// Alias "..."
+			if( token().tok == TOK.Talias )
+			{
+				parseToken( TOK.Talias );
+				if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return false;
+			}
+
+			char[]  _returnType;
+
+			if( token().tok == TOK.Topenparen ) _param = parseParam( true );
+
+			if( token().tok == TOK.Tas )
+			{
+				parseToken( TOK.Tas );
+
+				if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+				_returnType = getVariableType();
+				if( _returnType.length )
+				{
+					parseToken();
+					while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+					{
+						_returnType ~= "*";
+						parseToken();
+					}
+
+					_type = _returnType ~ _param;
+					activeASTnode.addChild( _name, _kind, null, _type, null, _lineNumber );
+					
+					return true;
+				}
+			}
+
+			if( token().tok == TOK.Tstatic || token().tok == TOK.Texport  ) parseToken();
+			
+			if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
+			{
+				activeASTnode.addChild( _name, _kind, null, _param, null, _lineNumber );
+				return true;
+			}		
+		}
+
+		return false;
+	}
+
 	bool parseType( bool bClass = false )
 	{
 		try
@@ -1836,6 +1903,29 @@ class CParser
 				{
 					parseToken( TOK.Tas );
 
+					if( parseFunctionPointer( _name, _lineNum ) ) return true;
+
+					if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+					_type = getVariableType();
+					if( _type.length )
+					{
+						parseToken();
+
+						while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+						{
+							_type ~= "*";
+							parseToken();
+						}
+					}
+
+					if( token().tok == TOK.Tcolon || token().tok == TOK.Teol )
+					{
+						activeASTnode.addChild( _name, B_ALIAS, null, _type, null, _lineNum );
+						return true;
+					}
+
+					/+
 					// Function pointer
 					if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub )
 					{
@@ -1913,6 +2003,7 @@ class CParser
 						activeASTnode.addChild( _name, B_ALIAS, null, _type, null, _lineNum );
 						return true;
 					}
+					+/
 				}
 				else
 				{
