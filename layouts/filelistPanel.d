@@ -17,24 +17,17 @@ class CFileList
 	void createLayout()
 	{
 		// Outline Toolbar
-		scope string = new CstringConvert( "Show Fullpath" );
-
 		Ihandle* filelistButtonFilename = IupButton( null, "Fullpath" );
 		IupSetAttributes( filelistButtonFilename, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_p,TIP=FullPath" );
 		IupSetCallback( filelistButtonFilename, "ACTION", cast(Icallback) &fileList_Filename_ACTION );
 
 
 		Ihandle* filelistButtonHide = IupButton( null, "Hide" );
-		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_downarrow,TIP=Hide" );
+		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_b,TIP=Hide" );
 		IupSetCallback( filelistButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			IupSetInt( GLOBAL.fileListSplit, "VALUE", 984 );
+			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 		});
-
-
-		Ihandle* labelSEPARATOR01 = IupLabel( null ); 
-		IupSetAttribute( labelSEPARATOR01, "SEPARATOR", "VERTICAL");	
-		
 
 		Ihandle* filelistToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( filelistToolbarTitleImage, "IMAGE=icon_filelist,ALIGNMENT=ALEFT:ACENTER" );
@@ -42,17 +35,19 @@ class CFileList
 		Ihandle* filelistToolbarTitle = IupLabel( " FileList" );
 		IupSetAttribute( filelistToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );
 
-		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, filelistToolbarTitle, IupFill, filelistButtonFilename, labelSEPARATOR01, filelistButtonHide, null );
+		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, filelistToolbarTitle, IupFill, filelistButtonFilename, filelistButtonHide, null );
 		IupSetAttributes( filelistToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 		tree = IupTree();
-		IupSetAttributes( tree, "ADDROOT=NO,EXPAND=YES,SIZE=NULL,VISIBLE=NO" );
+		IupSetAttributes( tree, "ADDROOT=NO,EXPAND=YES,SIZE=NULL" );
 		IupSetAttributes( tree, "SHOWDRAGDROP=YES" );
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &fileList_SELECTION_CB );
 		IupSetCallback( tree, "DRAGDROP_CB", cast(Icallback) &fileList_DRAGDROP_CB );
 
-		layoutHandle = IupVbox( filelistToolbarH, tree, null );
-		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT" ) );
+		Ihandle* _v = IupVbox( filelistToolbarH, tree, null );
+		IupSetAttributes( _v, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT" ) );
+		
+		layoutHandle = IupBackgroundBox( _v );
 	}
 
 	public:
@@ -84,7 +79,7 @@ class CFileList
 			}
 			
 			IupSetAttributeId( tree, "USERDATA", 0, cast(char*) _sci  );
-			IupSetAttributeId( tree, "MARKED", 0, "YES" );
+			version(Windows) IupSetAttributeId( tree, "MARKED", 0, "YES" ); else IupSetInt( tree, "VALUE", 0 );
 		}
 	}
 
@@ -95,7 +90,7 @@ class CFileList
 			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( tree, "USERDATA", id );
 			if( _sci_node.getFullPath == fullPath )
 			{
-				IupSetAttributeId( tree, "MARKED", id, "YES" );
+				version(Windows) IupSetAttributeId( tree, "MARKED", id, "YES" ); else IupSetInt( tree, "VALUE", id );
 				break;
 			}
 		}
@@ -122,7 +117,7 @@ class CFileList
 	void removeItem( CScintilla _sci )
 	{
 		if( _sci !is null ) removeItem( _sci.getFullPath );
-	}	
+	}
 }
 
 
@@ -170,7 +165,7 @@ extern(C)
 			}
 
 			IupSetAttributeId( ih, "USERDATA", drop_id, cast(char*) _sci  );
-			IupSetAttributeId( ih, "MARKED", drop_id, "YES" );
+			version(Windows) IupSetAttributeId( ih, "MARKED", drop_id, "YES" ); else IupSetInt( ih, "VALUE", drop_id );
 		}
 
 		return IUP_DEFAULT;

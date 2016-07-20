@@ -30,7 +30,7 @@ Ihandle* load_image_poseidonFBico()
 
 void load_all_images_icons()
 {
-	IupSetHandle("icon_markclear", XPM.getIUPimage( "icons/xpm/mark_clear.xpm" ) ); // IupSetHandle("icon_markclear", load_image_mark_clear());
+	IupSetHandle( "icon_markclear", XPM.getIUPimage( "icons/xpm/mark_clear.xpm" ) ); // IupSetHandle("icon_markclear", load_image_mark_clear());
 	IupSetHandle( "icon_cut", XPM.getIUPimage( "icons/xpm/cut.xpm" ) ); // IupSetHandle("icon_cut", load_image_cut_edit());
 	IupSetHandle( "icon_quickrun", XPM.getIUPimage( "icons/xpm/quickrun.xpm" ) ); //IupSetHandle("icon_quickrun", load_image_quickrun());
 	IupSetHandle( "icon_packageexplorer", XPM.getIUPimage( "icons/xpm/prjexplorer.xpm" ) ); // IupSetHandle("icon_packageexplorer", load_image_package_explorer());
@@ -65,7 +65,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_redo", XPM.getIUPimage( "icons/xpm/redo.xpm" ) ); // IupSetHandle("icon_redo", load_image_redo_edit());
 	IupSetHandle( "icon_filelist", XPM.getIUPimage( "icons/xpm/filelist.xpm" ) ); // IupSetHandle("icon_filelist", load_image_th_single());
 	IupSetHandle( "icon_Write", XPM.getIUPimage( "icons/xpm/write.xpm" ) ); // IupSetHandle("icon_Write", load_image_write_obj());
-	IupSetHandle( "icon_find", XPM.getIUPimage( "icons/xpm/search.xpm" ) ); // IupSetHandle("icon_find", load_image_find_obj());
+	IupSetHandle( "icon_search", XPM.getIUPimage( "icons/xpm/search.xpm" ) ); // IupSetHandle("icon_find", load_image_find_obj());
 	IupSetHandle( "icon_message", XPM.getIUPimage( "icons/xpm/message.xpm" ) ); // IupSetHandle("icon_message", load_image_details_view());
 	IupSetHandle( "icon_help", XPM.getIUPimage( "icons/xpm/help.xpm" ) ); // IupSetHandle("icon_help", load_image_help());
 	IupSetHandle( "icon_deleteothers", XPM.getIUPimage( "icons/xpm/removeothers.xpm" ) ); // IupSetHandle("icon_deleteothers", load_image_delete_others());
@@ -77,6 +77,16 @@ void load_all_images_icons()
 	IupSetHandle( "icon_windows", XPM.getIUPimage( "icons/xpm/windows.xpm" ) ); // IupSetHandle("icon_windows", load_image_windows());
 	IupSetHandle( "icon_mac", XPM.getIUPimage( "icons/xpm/mac.xpm" ) ); // IupSetHandle("icon_mac", load_image_mac());
 	IupSetHandle( "icon_linux", XPM.getIUPimage( "icons/xpm/linux.xpm" ) ); // IupSetHandle("icon_linux", load_image_linux());
+	IupSetHandle( "icon_tools", XPM.getIUPimage( "icons/xpm/tools.xpm" ) );
+	IupSetHandle( "icon_properties", XPM.getIUPimage( "icons/xpm/properties.xpm" ) );
+	IupSetHandle( "icon_preference", XPM.getIUPimage( "icons/xpm/preference.xpm" ) );
+	IupSetHandle( "icon_shift_l", XPM.getIUPimage( "icons/xpm/shift_l_edit.xpm" ) );
+	IupSetHandle( "icon_shift_b", XPM.getIUPimage( "icons/xpm/shift_b_edit.xpm" ) );
+	IupSetHandle( "icon_information", XPM.getIUPimage( "icons/xpm/information.xpm" ) );
+	IupSetHandle( "icon_find", XPM.getIUPimage( "icons/xpm/find.xpm" ) );
+	IupSetHandle( "icon_findnext", XPM.getIUPimage( "icons/xpm/findnext.xpm" ) );
+	IupSetHandle( "icon_findprev", XPM.getIUPimage( "icons/xpm/findprev.xpm" ) );
+	IupSetHandle( "icon_findfiles", XPM.getIUPimage( "icons/xpm/findfiles.xpm" ) );
 
 	IupSetHandle( "icon_prj_open", XPM.getIUPimage( "icons/xpm/prjfolderopen.xpm" ) ); // IupSetHandle("icon_prj_open", load_image_prj_open());
 	IupSetHandle( "icon_prj", XPM.getIUPimage( "icons/xpm/prjfolder.xpm" ) ); // IupSetHandle("icon_prj", load_image_prj()); 

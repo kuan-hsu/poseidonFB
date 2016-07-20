@@ -18,11 +18,9 @@ void createExplorerWindow()
 	GLOBAL.outlineTree = new COutline;
 
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", "Project" );
-	//IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABTITLE", "FileList" );
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", "Outline" );
 	
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer" );
-	//IupSetAttribute( GLOBAL.fileListTree.getLayoutHandle, "TABIMAGE", "icon_filelist" );
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
 
 
@@ -31,9 +29,7 @@ void createExplorerWindow()
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
 
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
-	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=YES,SHOWGRIP=LINES");
-	IupSetCallback( GLOBAL.fileListSplit, "VALUECHANGED_CB", cast(Icallback) &fileList_cb );
-
+	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 
 
 	createTabs();
@@ -46,7 +42,6 @@ void createExplorerWindow()
 	//GLOBAL.explorerSplit = IupSplit( _split, GLOBAL.dndDocumentZBox );
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.fileListSplit, GLOBAL.dndDocumentZBox );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
-	IupSetCallback( GLOBAL.explorerSplit, "VALUECHANGED_CB", cast(Icallback) &explorerSplit_cb );
 
 	
 	createMessagePanel();
@@ -64,7 +59,6 @@ void createExplorerWindow()
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
-	//IupSetAttribute(GLOBAL.messageSplit, "COLOR", "127 127 255");
 
 	Ihandle* StatusBar = createStatusBar();
 
@@ -354,35 +348,4 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
-
-	private int fileList_cb( Ihandle *ih )
-	{
-		int value = IupGetInt( ih, "VALUE" );
-		if( value < 965 )
-		{
-			IupSetAttributes( GLOBAL.fileListTree.getTreeHandle, "VISIBLE=YES" );	
-		}
-		else
-		{
-			IupSetAttributes( GLOBAL.fileListTree.getTreeHandle, "VISIBLE=NO" );	
-		}
-		
-		return IUP_DEFAULT;
-	}
-
-	private int explorerSplit_cb( Ihandle *ih )
-	{
-		int value = IupGetInt( ih, "VALUE" );
-		if( value <= 0 )
-		{
-			IupSetAttributes( GLOBAL.fileListTree.getTreeHandle, "VISIBLE=NO" );	
-		}
-		else
-		{
-			if( IupGetInt( GLOBAL.fileListSplit, "VALUE" ) < 965 ) IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "VISIBLE", "YES" );
-		}
-		
-		return IUP_DEFAULT;
-	}
-	
 }

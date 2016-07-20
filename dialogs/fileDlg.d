@@ -16,9 +16,8 @@ class CFileDlg
 	{
 		Ihandle *dlg = IupFileDlg(); 
 
-		scope _dialogType =  new CstringConvert( DIALOGTYPE );
-		IupSetAttribute( dlg, "DIALOGTYPE", _dialogType.toStringz );
-		IupSetAttribute( dlg, "TITLE", GLOBAL.cString.convert( title ) );
+		IupSetAttribute( dlg, "DIALOGTYPE",  toStringz( DIALOGTYPE.dup ) );
+		IupSetAttribute( dlg, "TITLE", toStringz( title.dup ) );
 
 		bool bMultiFiles;
 		if( DIALOGTYPE == "OPEN" && MULTIPLEFILES == "YES" )

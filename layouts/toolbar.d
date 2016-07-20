@@ -2,6 +2,8 @@
 
 private import iup.iup;
 private import global, actionManager, menu, executer;
+private import Util = tango.text.Util;
+
 
 class CToolBar
 {
@@ -227,7 +229,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				ExecuterAction.compile();
+				ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) );
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{
@@ -273,7 +275,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				ExecuterAction.quickRun();
+				ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption ) );
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{

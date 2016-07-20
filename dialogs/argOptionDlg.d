@@ -18,7 +18,10 @@ class CArgOptionDialog : CBaseDialog
 
 		listOptions = IupList( null );
 		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
-		IupSetHandle( "CArgOprionDialog_listOptions", listOptions );
+		for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
+			if( GLOBAL.recentOptions[i].length ) IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), toStringz( GLOBAL.recentOptions[i] ) );
+			
+		IupSetHandle( "CArgOptionDialog_listOptions", listOptions );
 
 		labelOptions = IupLabel( "Compiler Options: " );
 		Ihandle* hBox00 = IupHbox( labelOptions, listOptions, null );
@@ -26,7 +29,11 @@ class CArgOptionDialog : CBaseDialog
 
 		listArgs = IupList( null );
 		IupSetAttributes( listArgs, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
-		IupSetHandle( "CArgOprionDialog_listArgs", listArgs );
+		for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
+			if( GLOBAL.recentArgs[i].length ) IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), toStringz( GLOBAL.recentArgs[i] ) );
+		
+		IupSetHandle( "CArgOptionDialog_listArgs", listArgs );
+
 		labelArgs = IupLabel( "Execute Arguments:" );
 		Ihandle* hBox01 = IupHbox( labelArgs, listArgs, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
@@ -57,19 +64,19 @@ class CArgOptionDialog : CBaseDialog
 		IupSetHandle( "btnCANCEL_argOption", btnCANCEL );
 		IupSetHandle( "btnOK_argOption", btnOK );
 
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CArgOprionDialog_btnCancel_cb );
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOprionDialog_btnOK_cb );
+		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
+		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
 
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_argOption" );
 		IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK_argOption" );
 
-		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CArgOprionDialog_CLOSE_cb );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CArgOptionDialog_CLOSE_cb );
 	}
 
 	~this()
 	{
-		IupSetHandle( "CArgOprionDialog_listOptions", null );
-		IupSetHandle( "CArgOprionDialog_listArgs", null );
+		//IupSetHandle( "CArgOptionDialog_listOptions", null );
+		IupSetHandle( "CArgOptionDialog_listArgs", null );
 		IupSetHandle( "btnCANCEL_argOption", null );	
 	}
 
@@ -98,17 +105,22 @@ class CArgOptionDialog : CBaseDialog
 			IupSetAttribute( labelArgs, "ACTIVE", "NO" );
 		}
 
+		if( fromStringz( IupGetAttribute( listOptions, "ACTIVE" ) ) == "YES" )
+			if( IupGetInt( listOptions, "COUNT" ) > 0 ) IupSetAttribute( listOptions, "VALUE", IupGetAttribute( listOptions, "1" ) );
+
+		if( fromStringz( IupGetAttribute( listArgs, "ACTIVE" ) ) == "YES" )
+			if( IupGetInt( listArgs, "COUNT" ) > 0 ) IupSetAttribute( listArgs, "VALUE", IupGetAttribute( listArgs, "1" ) );
+			
+
 		IupPopup( _dlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		char[][] results;
 
-		Ihandle* listOptions = IupGetHandle( "CArgOprionDialog_listOptions" );
 		if( listOptions != null )
 		{
 			if( fromStringz( IupGetAttribute( listOptions, "ACTIVE" ) ) == "YES" ) results ~= fromStringz( IupGetAttribute( listOptions, "VALUE" ) ).dup;
 		}
 
-		Ihandle* listArgs = IupGetHandle( "CArgOprionDialog_listArgs" );
 		if( listArgs != null )
 		{
 			if( fromStringz( IupGetAttribute( listArgs, "ACTIVE" ) ) == "YES" ) results ~= fromStringz( IupGetAttribute( listArgs, "VALUE" ) ).dup;
@@ -118,16 +130,16 @@ class CArgOptionDialog : CBaseDialog
 	}	
 }
 
-extern(C) // Callback for CArgOprionDialog
+extern(C) // Callback for CArgOptionDialog
 {
-	private int CArgOprionDialog_btnCancel_cb( Ihandle* ih )
+	private int CArgOptionDialog_btnCancel_cb( Ihandle* ih )
 	{
 		if( GLOBAL.argsDlg !is null )
 		{
-			Ihandle* listOptions = IupGetHandle( "CArgOprionDialog_listOptions" );
+			Ihandle* listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
 			if( listOptions != null ) IupSetAttribute( listOptions, "ACTIVE", "NO" );
 
-			Ihandle* listArgs = IupGetHandle( "CArgOprionDialog_listArgs" );
+			Ihandle* listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
 			if( listArgs != null ) IupSetAttribute( listArgs, "ACTIVE", "NO" );
 
 			IupHide( GLOBAL.argsDlg._dlg );
@@ -136,17 +148,17 @@ extern(C) // Callback for CArgOprionDialog
 		return IUP_DEFAULT;
 	}
 
-	private int CArgOprionDialog_btnOK_cb( Ihandle* ih )
+	private int CArgOptionDialog_btnOK_cb( Ihandle* ih )
 	{
 		if( GLOBAL.argsDlg !is null )
 		{
-			Ihandle* listOptions = IupGetHandle( "CArgOprionDialog_listOptions" );
+			Ihandle* listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
 			if( listOptions != null )
 			{
 				if( fromStringz( IupGetAttribute( listOptions, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( listOptions, fromStringz( IupGetAttribute( listOptions, "VALUE" ) ).dup , 10 );
 			}
 
-			Ihandle* listArgs = IupGetHandle( "CArgOprionDialog_listArgs" );
+			Ihandle* listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
 			if( listArgs != null )
 			{
 				if( fromStringz( IupGetAttribute( listArgs, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( listArgs, fromStringz( IupGetAttribute( listArgs, "VALUE" ) ).dup , 10 );
@@ -158,8 +170,8 @@ extern(C) // Callback for CArgOprionDialog
 		return IUP_DEFAULT;
 	}
 
-	private int CArgOprionDialog_CLOSE_cb( Ihandle *ih )
+	private int CArgOptionDialog_CLOSE_cb( Ihandle *ih )
 	{
-		return CArgOprionDialog_btnCancel_cb( ih );
+		return CArgOptionDialog_btnCancel_cb( ih );
 	}	
 }

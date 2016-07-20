@@ -849,7 +849,7 @@ class CDebugger
 										if( i == 0 )
 										{
 											IupSetAttributeId( backtraceHandle, "COLOR", lastID, GLOBAL.cString.convert( "0 0 255" ) );
-											IupSetAttributeId( backtraceHandle, "MARKED", lastID, toStringz( "YES" ) );
+											version(Windows) IupSetAttributeId( backtraceHandle, "MARKED", lastID, "YES" ); else IupSetInt( backtraceHandle, "VALUE", lastID );
 										}
 											
 										branchString = "";
@@ -1122,7 +1122,8 @@ class CDebugger
 				char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup; // Shadow
 				if( _cstring == activeCScintilla.getFullPath() )
 				{
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+					version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
+
 					bRunProject = true;
 
 					if( GLOBAL.projectManager[activePrjName].type.length )
@@ -1650,7 +1651,7 @@ extern( C )
 								if( selectedFrame.length )
 								{
 									GLOBAL.debugPanel.sendCommand( "select-frame " ~ selectedFrame ~ "\n", false );
-									IupSetAttributeId( GLOBAL.debugPanel.backtraceHandle, "MARKED", id, toStringz( "YES" ) );
+									version(Windows) IupSetAttributeId( GLOBAL.debugPanel.backtraceHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.debugPanel.backtraceHandle, "VALUE", id );
 
 									char[][]	frameFullPathandLineNumber = GLOBAL.debugPanel.getFrameFullPathandLineNumber();
 									if( frameFullPathandLineNumber.length == 2 )

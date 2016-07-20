@@ -39,16 +39,11 @@ class CProjectTree
 		});
 
 		Ihandle* projectButtonHide = IupButton( null, "Hide" );
-		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_debug_left,TIP=Hide" );
+		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l,TIP=Hide" );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outline_cb( GLOBAL.menuOutlineWindow );
 		});
-
-
-		Ihandle* labelSEPARATOR01 = IupLabel( null ); 
-		IupSetAttribute( labelSEPARATOR01, "SEPARATOR", "VERTICAL");	
-		
 
 		Ihandle* projectToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( projectToolbarTitleImage, "IMAGE=icon_packageexplorer,ALIGNMENT=ACENTER:ALEFT" );
@@ -56,7 +51,7 @@ class CProjectTree
 		/*Ihandle* projectToolbarTitle = IupLabel( " Project" );
 		IupSetAttribute( projectToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );*/
 
-		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, /*projectToolbarTitle,*/ IupFill, projectButtonCollapse, labelSEPARATOR01, projectButtonHide, null );
+		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, /*projectToolbarTitle,*/ IupFill, projectButtonCollapse, projectButtonHide, null );
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 		tree = IupTree();
@@ -98,7 +93,7 @@ class CProjectTree
 		//GLOBAL.activeProjectDirName = prjDir;
 
 		IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( prjName ) );
-		IupSetAttributeId( tree, "MARKED", 1, "YES" );
+		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttribute( tree, "USERDATA1", tools.getCString( prjDir ) );
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
@@ -163,7 +158,7 @@ class CProjectTree
 			IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( GLOBAL.projectManager[setupDir].name ) );
 			IupSetAttribute( tree, "IMAGE1", GLOBAL.cString.convert( "icon_prj" ) );
 			IupSetAttribute( tree, "IMAGEEXPANDED1", GLOBAL.cString.convert( "icon_prj_open" ) );
-			IupSetAttributeId( tree, "MARKED", 1, "YES" );
+			version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 			IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
 
 			// Shadow
@@ -219,15 +214,16 @@ class CProjectTree
 				//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
 			}
 
+			// Switch to project tree tab
+			IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
+			//IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
 			// Set Focus to Project Tree
-			IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
+			version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 
 			// Recent Projects
 			GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
 
 			IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
-
-			IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
 		}
 		else
 		{
@@ -346,7 +342,7 @@ extern(C)
 	// Show Fullpath or Filename
 	private int CProjectTree_RightClick_cb( Ihandle *ih, int id )
 	{
-		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+		version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
 
 		char[] nodeKind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) );
 
@@ -380,12 +376,15 @@ extern(C)
 		{
 			case 0:
 				Ihandle* itemNewProject = IupItem( "New Project", null );
+				IupSetAttribute(itemNewProject, "IMAGE", "icon_newprj");
 				IupSetCallback( itemNewProject, "ACTION", cast(Icallback) &menu.newProject_cb ); // From menu.d
 				
 				Ihandle* itemOpenProject = IupItem( "Open Project", null );
+				IupSetAttribute(itemOpenProject, "IMAGE", "icon_openprj");
 				IupSetCallback( itemOpenProject, "ACTION", cast(Icallback) &menu.openProject_cb ); // From menu.d
 
 				Ihandle* itemCloseAllProject = IupItem( "Close All Project", null );
+				IupSetAttribute(itemCloseAllProject, "IMAGE", "icon_deleteall");
 				IupSetCallback( itemCloseAllProject, "ACTION", cast(Icallback) &menu.closeAllProject_cb ); // From menu.d
 				
 
@@ -401,10 +400,12 @@ extern(C)
 				break;
 
 			case 1:		// On Project Name Node
-				Ihandle* itemProperty = IupItem( "Property", null );
+				Ihandle* itemProperty = IupItem( "Properties...", null );
+				IupSetAttribute(itemProperty, "IMAGE", "icon_properties");
 				IupSetCallback( itemProperty, "ACTION", cast(Icallback) &menu.projectProperties_cb ); // From menu.d
 				
 				Ihandle* itemClose = IupItem( "Close", null );
+				IupSetAttribute(itemClose, "IMAGE", "icon_delete");
 				IupSetCallback( itemClose, "ACTION", cast(Icallback) &menu.closeProject_cb );  // From menu.d
 
 				Ihandle* itemExplorer = IupItem( "Open In Explorer", null );
@@ -486,7 +487,7 @@ extern(C)
 	private int CProjectTree_NewFile_cb( Ihandle* ih )
 	{
 		// Open Dialog Window
-		scope test = new CSingleTextDialog( -1, -1, "Create New File", "File Name:", "100x", null, false );
+		scope test = new CSingleTextDialog( -1, -1, "Create New File", "File Name:", "100x", null, false, "MAIN_DIALOG", "icon_newfile" );
 		char[] fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )

@@ -13,6 +13,7 @@
   <buildtools>
     <compilerpath>D:/CodingPark/FreeBASIC-1.05.0-win32/fbc.exe</compilerpath>
     <debuggerpath>D:/CodingPark/FreeBASIC-1.05.0-win32/bin/win32/gdb.exe</debuggerpath>
+    <defaultoption/>
     <maxerror>30</maxerror>
     <annotation>ON</annotation>
   </buildtools>
@@ -36,4 +37,15 @@
     <name>D:/FB_Code/test01 : test01</name>
     <name>D:/FB_Code/parserFB : parserFB</name>
   </recentProjects>
+  <recentOptions>
+    <name>)Òæetoken</name>
+    <name>casee1ff</name>
+    <name>case</name>
+    <name>TOK83ff</name>
+  </recentOptions>
+  <recentArgs>
+    <name>Tscope</name>
+    <name>tscopetorx</name>
+    <name>tscratorx</name>
+  </recentArgs>
 </config>

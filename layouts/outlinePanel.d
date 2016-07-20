@@ -563,16 +563,11 @@ class COutline
 		});
 
 		Ihandle* outlineButtonHide = IupButton( null, "Hide" );
-		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_debug_left,TIP=Hide" );
+		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_l,TIP=Hide" );
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outline_cb( GLOBAL.menuOutlineWindow );
 		});
-
-
-		Ihandle* labelSEPARATOR01 = IupLabel( null ); 
-		IupSetAttribute( labelSEPARATOR01, "SEPARATOR", "VERTICAL");	
-		
 
 		Ihandle* outlineToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( outlineToolbarTitleImage, "IMAGE=icon_outline,ALIGNMENT=ALEFT:ACENTER" );
@@ -580,7 +575,7 @@ class COutline
 		/*Ihandle* outlineToolbarTitle = IupLabel( "Outline" );
 		IupSetAttribute( outlineToolbarTitle, "ALIGNMENT", "ALEFT" );*/
 
-		Ihandle* outlineToolbarH = IupHbox( outlineToolbarTitleImage, /*outlineToolbarTitle,*/ IupFill, outlineButtonCollapse, outlineButtonPR, outlineButtonFresh, outlineToggleAnyWord, labelSEPARATOR01, outlineButtonHide, null );
+		Ihandle* outlineToolbarH = IupHbox( outlineToolbarTitleImage, /*outlineToolbarTitle,*/ IupFill, outlineButtonCollapse, outlineButtonPR, outlineButtonFresh, outlineToggleAnyWord, outlineButtonHide, null );
 		IupSetAttributes( outlineToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 
@@ -1068,7 +1063,7 @@ extern(C)
 						char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
 						
 						ScintillaAction.openFile( _fullPath, _node.lineNumber );
-						IupSetAttributeId( ih, "MARKED", id, "YES" );
+						version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
 
 						return IUP_IGNORE;
 					}
@@ -1249,7 +1244,7 @@ extern(C)
 				{
 					ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[--item].lineNumber );
 					Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-					if( tree != null ) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" );
+					if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
 					
 				}
 			}

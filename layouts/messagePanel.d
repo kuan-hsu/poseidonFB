@@ -33,7 +33,7 @@ void createMessagePanel()
 	
 	
 	IupSetAttribute( GLOBAL.outputPanel, "TABIMAGE", "icon_message" );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "TABIMAGE", "icon_find" );
+	IupSetAttribute( GLOBAL.searchOutputPanel, "TABIMAGE", "icon_search" );
 }
 
 

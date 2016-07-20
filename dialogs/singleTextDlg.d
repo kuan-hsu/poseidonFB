@@ -37,10 +37,11 @@ class CSingleTextDialog : CBaseDialog
 	}	
 
 	public:
-	this( int w, int h, char[] title, char[] _labelText = null, char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, char[] _labelText = null, char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "MAIN_DIALOG", char[] iconName = null )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		IupSetAttribute( _dlg, "ICON", toStringz( iconName.dup ) );
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );

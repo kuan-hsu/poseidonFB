@@ -51,6 +51,28 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
+		
+
+		Ihandle* labelDefaultOption = IupLabel( "Compiler Opts:" );
+		IupSetAttributes( labelDefaultOption, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		
+		Ihandle* textDefaultOption = IupText( null );
+		IupSetAttribute( textDefaultOption, "SIZE", "185x12" );
+		IupSetAttribute( textDefaultOption, "VALUE", toStringz( GLOBAL.defaultOption.dup ) );
+		IupSetHandle( "defaultOption_Handle", textDefaultOption );
+
+		Ihandle* btnCompilerOpts = IupButton( null, null );
+		IupSetAttributes( btnCompilerOpts, "IMAGE=icon_help" );
+		IupSetCallback( btnCompilerOpts, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			GLOBAL.compilerHelpDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+		});	
+
+
+		Ihandle* hBox03 = IupHbox( labelDefaultOption, textDefaultOption, btnCompilerOpts, null );
+		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
+
+
 
 		// compiler Setting
 		Ihandle* toggleAnnotation = IupToggle( "Show compile error using annotation", null );
@@ -61,7 +83,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* frameCompiler = IupFrame( toggleAnnotation );
 		IupSetAttribute( frameCompiler, "TITLE", "Compiler Setting");
-		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=275x");
+		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=261x");
 
 		// Parser Setting
 		Ihandle* toggleKeywordComplete = IupToggle( "Enable Keyword Autocomplete", null );
@@ -147,7 +169,7 @@ class CPreferenceDialog : CBaseDialog
 		//IupSetAttributes( hBoxLive2, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
 		
 		Ihandle* frameLive = IupFrame( hBoxLive2 );
-		IupSetAttributes( frameLive, "SIZE=270x" );
+		IupSetAttributes( frameLive, "SIZE=261x" );
 		IupSetAttribute( frameLive, "TITLE", "ParseLive! Level");
 
 
@@ -162,8 +184,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 		IupSetAttribute( frameParser, "SIZE", "275x");
 		
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, frameCompiler, frameParser, null );
-		IupSetAttribute( vBoxPage01, "ALIGNMENT", "ALEFT");
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, hBox03, frameCompiler, frameParser, null );
+		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
 /+
@@ -582,6 +604,7 @@ class CPreferenceDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		IupSetAttribute( _dlg, "ICON", "icon_preference" );
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -598,6 +621,7 @@ class CPreferenceDialog : CBaseDialog
 	{
 		IupSetHandle( "compilerPath_Handle", null );
 		IupSetHandle( "debuggerPath_Handle", null );
+		IupSetHandle( "defaultOption_Handle", null );
 		IupSetHandle( "textTrigger", null );
 		IupSetHandle( "textIncludeLevel", null );
 		IupSetHandle( "toggleFunctionTitle", null );
@@ -839,6 +863,7 @@ class CPreferenceDialog : CBaseDialog
 		auto buildtoolsNode = configNode.element( null, "buildtools" );
 		buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath );
 		buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath );
+		buildtoolsNode.element( null, "defaultoption", GLOBAL.defaultOption );
 		buildtoolsNode.element( null, "maxerror", GLOBAL.maxError );
 		buildtoolsNode.element( null, "annotation", GLOBAL.compilerAnootation );
 
@@ -874,7 +899,33 @@ class CPreferenceDialog : CBaseDialog
 		{
 			recentNode.element( null, "name", GLOBAL.recentProjects[i] );
 		}
-		
+
+		/*
+		<compileOptionLists>
+			<name>-E</name>
+			<name>-C</name>
+			<name>-c</name>
+		</compileOptionLists>
+		*/
+		auto optionsNode = configNode.element( null, "recentOptions" );
+		Ihandle* listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
+		if( listOptions != null )
+		{
+			for( int i = 0; i < IupGetInt( listOptions, "COUNT" ); ++i )
+			{
+				optionsNode.element( null, "name", fromStringz( IupGetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ) ) ) );
+			}
+		}
+
+		auto argsNode = configNode.element( null, "recentArgs" );
+		Ihandle* listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
+		if( listArgs != null )
+		{
+			for( int i = 0; i < IupGetInt( listArgs, "COUNT" ); ++i )
+			{
+				argsNode.element( null, "name", fromStringz( IupGetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ) ) ) );
+			}
+		}		
 		
 		auto print = new DocPrinter!(char);
 		actionManager.FileAction.saveFile( "settings/editorSettings.xml", print.print( doc ) );
@@ -916,7 +967,13 @@ class CPreferenceDialog : CBaseDialog
 			foreach( e; result )
 			{
 				GLOBAL.debuggerFullPath = e.value;
-			}	
+			}
+
+			result = root.query.descendant("defaultoption");
+			foreach( e; result )
+			{
+				GLOBAL.defaultOption = e.value;
+			}
 
 			result = root.query.descendant("maxerror");
 			foreach( e; result )
@@ -999,12 +1056,24 @@ class CPreferenceDialog : CBaseDialog
 			}
 		
 
-
 			result = root.query.descendant("recentProjects").descendant("name");
 			foreach( e; result )
 			{
 				GLOBAL.recentProjects ~= e.value;
-			}	
+			}
+
+			result = root.query.descendant("recentOptions").descendant("name");
+			foreach( e; result )
+			{
+				GLOBAL.recentOptions ~= e.value;
+			}
+
+			result = root.query.descendant("recentArgs").descendant("name");
+			foreach( e; result )
+			{
+				GLOBAL.recentArgs ~= e.value;
+			}
+
 
 			result = root.query.descendant("toggle00").attribute("LineMargin");
 			foreach( e; result ) GLOBAL.editorSetting00.LineMargin = e.value;
@@ -1441,9 +1510,7 @@ extern(C) // Callback for CPreferenceDialog
 				return IUP_IGNORE;
 			}
 
-			
-			scope fontValue = new CstringConvert( _ls );
-			IupSetAttribute( dlg, "VALUE", fontValue.toStringz() );
+			IupSetAttribute( dlg, "VALUE", toStringz( _ls.dup ) );
 			
 			// Open IupFontDlg
 			IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
@@ -1610,6 +1677,7 @@ extern(C) // Callback for CPreferenceDialog
 
 		GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
 		GLOBAL.debuggerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
+		GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 		GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 
 		GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;

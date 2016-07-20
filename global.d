@@ -79,11 +79,12 @@ struct GLOBAL
 	// Setting
 	static char[][]				KEYWORDS;
 	static int					keywordCase = 0;	
-	static char[]				compilerFullPath;// = "D:\\CodingPark\\FreeBASIC-1.02.1-win32\\fbc.exe";
+	static char[]				compilerFullPath;
 	static char[]				compilerAnootation = "ON";
 	static char[]				debuggerFullPath;
 	static char[]				maxError = "30";
-	static char[][]				recentProjects;
+	static char[]				defaultOption;
+	static char[][]				recentProjects, recentOptions, recentArgs;
 	static EditorToggleUint		editorSetting00;
 	static EditorColorUint		editColor;
 	//static Ihandle*			functionTitleHandle;

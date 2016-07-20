@@ -46,7 +46,7 @@ class CBaseDialog
 	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
 	{
 		_dlg = IupDialog( null );
-		IupSetAttribute( _dlg, "TITLE", title.ptr );
+		IupSetAttribute( _dlg, "TITLE", toStringz( title.dup ) );
 
 		char[] size = Integer.toString( w ) ~ "x" ~ Integer.toString( h );
 		if( w < 0 || h < 0 ) IupSetAttribute( _dlg, "RASTERSIZE", "NULL" ); else IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );

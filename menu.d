@@ -131,18 +131,22 @@ void createMenu()
 
 	// Search
 	item_findReplace = IupItem( "Find / Replace", null );
+	IupSetAttribute(item_findReplace, "IMAGE", "icon_find");
 	IupSetAttribute( item_findReplace, "KEY", "F" );
 	IupSetCallback( item_findReplace, "ACTION", cast(Icallback) &findReplace_cb );
 
 	item_findNext = IupItem( "Find Next", null );
+	IupSetAttribute(item_findNext, "IMAGE", "icon_findnext");
 	IupSetAttribute( item_findNext, "KEY", "N" );
 	IupSetCallback( item_findNext, "ACTION", cast(Icallback) &findNext_cb );
 
 	item_findPrevious = IupItem( "Find Previous", null );
+	IupSetAttribute(item_findPrevious, "IMAGE", "icon_findprev");
 	IupSetAttribute( item_findPrevious, "KEY", "P" );
 	IupSetCallback( item_findPrevious, "ACTION", cast(Icallback) &findPrev_cb );
 	
 	item_findReplaceInFiles = IupItem ("Find / Replace In Files", null);
+	IupSetAttribute(item_findReplaceInFiles, "IMAGE", "icon_findfiles");
 	IupSetAttribute(item_findReplaceInFiles, "KEY", "R");
 	IupSetCallback( item_findReplaceInFiles, "ACTION", cast(Icallback) &findReplaceInFiles );
 
@@ -190,6 +194,7 @@ void createMenu()
 	IupSetCallback(item_saveAllProject, "ACTION", cast(Icallback)&saveAllProject_cb);
 
 	item_projectProperties = IupItem("Properties...", null);
+	IupSetAttribute(item_projectProperties, "IMAGE", "icon_properties");
 	IupSetAttribute(item_projectProperties, "KEY", "P");
 	IupSetCallback(item_projectProperties, "ACTION", cast(Icallback)&projectProperties_cb);
 
@@ -369,18 +374,21 @@ void createMenu()
 
 	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, null  );
 	item_tool = IupSubmenu( "Tools", toolsSubMenu );
+	IupSetAttribute(item_tool, "IMAGE", "icon_tools");
 	IupSetAttribute(item_tool, "KEY", "T");
 
 
 
 	item_preference = IupItem ("Preference", null);
+	IupSetAttribute(item_preference, "IMAGE", "icon_preference");
 	IupSetAttribute(item_preference, "KEY", "P");
 	IupSetCallback(item_preference, "ACTION", cast(Icallback)&preference_cb);
 
 	Ihandle* item_about = IupItem ("About", null);
+	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.200\nBy Kuan Hsu (Taiwan)\n2016.07.17" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.202\nBy Kuan Hsu (Taiwan)\n2016.07.20" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -811,14 +819,12 @@ extern(C)
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
 			Ihandle* thirdChild = IupGetChild( GLOBAL.explorerSplit, 2 );
 			IupSetAttribute( thirdChild, "ACTIVE", "YES" );
-			IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "VISIBLE", "NO" );
 		}
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
-			if( IupGetInt( GLOBAL.fileListSplit, "VALUE" ) < 965 ) IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "VISIBLE", "YES" );
 		}
 		
 		return IUP_DEFAULT;
@@ -828,6 +834,11 @@ extern(C)
 	{
 		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
 		{
+			int fileListTreeH = -1;
+			char[] size = fromStringz( IupGetAttribute( GLOBAL.fileListTree.getTreeHandle, "SIZE" ) );
+			int xPos = Util.index( size, "x" );
+			if( xPos < size.length ) fileListTreeH = Integer.atoi( size[++xPos..length] );
+
 			IupSetAttribute( ih, "VALUE", "OFF" );
 			GLOBAL.messageSplit_value = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
@@ -839,6 +850,8 @@ extern(C)
 
 			IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "NO" );
 			IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
+
+			if( fileListTreeH == 0 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 		}
 		else
 		{
@@ -847,7 +860,6 @@ extern(C)
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "YES" );
 			IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
 			IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
-			
 		}
 		
 		return IUP_DEFAULT;
@@ -1053,7 +1065,7 @@ extern(C)
 
 	int compile_cb( Ihandle *ih )
 	{
-		ExecuterAction.compile();
+		ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) );
 		return IUP_DEFAULT;
 	}
 
@@ -1066,7 +1078,7 @@ extern(C)
 
 	int quickRun_cb( Ihandle *ih )
 	{
-		ExecuterAction.quickRun();
+		ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption ) );
 		return IUP_DEFAULT;
 	}
 

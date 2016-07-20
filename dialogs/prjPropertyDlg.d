@@ -100,7 +100,10 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		Ihandle* btnCompilerOpts = IupButton( null, null );
 		IupSetAttributes( btnCompilerOpts, "IMAGE=icon_help,FLAT=YES" );
-		IupSetCallback( btnCompilerOpts, "ACTION", cast(Icallback) &CProjectPropertiesDialog_btnCompilerOpts_cb );
+		IupSetCallback( btnCompilerOpts, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			GLOBAL.compilerHelpDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+		});	
 		
 		Ihandle* hBox05 = IupHbox( labelCompilerOpts, textCompilerOpts, btnCompilerOpts, null );
 		IupSetAttribute( hBox05, "ALIGNMENT", "ACENTER" );
@@ -257,6 +260,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		bCreateNew = bNew;
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		IupSetAttribute( _dlg, "ICON", "icon_properties" );
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -435,13 +439,6 @@ extern(C) // Callback for CProjectPropertiesDialog
 			//Stdout( "NoThing!!!" ).newline;
 		}
 
-		return IUP_DEFAULT;
-	}
-
-	int CProjectPropertiesDialog_btnCompilerOpts_cb( Ihandle* ih ) 
-	{
-		GLOBAL.compilerHelpDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
-		
 		return IUP_DEFAULT;
 	}
 

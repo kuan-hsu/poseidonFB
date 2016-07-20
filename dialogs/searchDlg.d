@@ -138,6 +138,7 @@ class CSearchDialog : CBaseDialog
 	this( int w, int h, char[] title, char[] findWhat = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
+		IupSetAttribute( _dlg, "ICON", "icon_find" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 		version( Windows )
