@@ -24,7 +24,7 @@ Win7:
 
 Linux mint18 x64:
 
-![x64.png](https://bitbucket.org/repo/j5rjj4/images/2254196372-x64.png)
+![x64.png](https://bitbucket.org/repo/j5rjj4/images/1668889971-x64.png)
 
 ## Install ##
 Go to **Downloads** https://bitbucket.org/KuanHsu/poseidonfb/downloads to select file to download.
