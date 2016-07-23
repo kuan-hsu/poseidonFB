@@ -42,14 +42,15 @@ struct ExecuterAction
 	class QuickRunThread : Thread
 	{
 		private:
-		char[] command, args, cwd;
+		char[] command, args, cwd, options;
 
 		public:
-		this( char[] _command, char[] _args, char[] _cwd = null )
+		this( char[] _command, char[] _args, char[] _cwd = null, char[] _options = null )
 		{
 			command = _command;
 			args = _args;
 			cwd = _cwd;
+			options = _options;
 			super( &run );
 		}
 
@@ -62,7 +63,7 @@ struct ExecuterAction
 			}
 			else
 			{
-				p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ command ~ args );
+				if( Util.index( options, "-s gui" ) < options.length ) p = new Process( true, command ~ args ); else p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ command ~ args );
 			}
 
 			if( cwd.length ) p.workDir( cwd );
@@ -480,7 +481,7 @@ struct ExecuterAction
 				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ "./" ~ _f.name;
 				_f.remove();
 
-				QuickRunThread	derived = new QuickRunThread( "\"" ~ command ~ "\"", args, _f.path );
+				QuickRunThread	derived = new QuickRunThread( "\"" ~ command ~ "\"", args, _f.path, options );
 				derived.start();
 
 				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\nRunning " ~ command ~ args ~ "......" ) );

@@ -737,16 +737,71 @@ class COutline
 		return "IUP_variable";
 	}
 
-	void addNodeByLineNumber( CASTnode[] newASTNodes, int _ln )
+	int removeNodeByLineNumber( int _ln )
 	{
-		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return;
+		int insertID = -1;
+		
+		try
+		{
+			Ihandle* actTree = getActiveTree();
+			
+			if( actTree != null )
+			{
+				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+				{
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+					if( _node !is null )
+					{
+						if( _node.lineNumber == _ln  )
+						{
+							insertID = i;
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+						}
+						else if( _node.lineNumber < _ln )
+						{
+							if( insertID != -1 ) break;
+							insertID = i + 1;
+							break;
+						}						
+					}
+				}
+
+				if( insertID > 0 ) insertID --;
+			}
+		}
+		catch( Exception e ){}
+
+		return insertID;
+	}	
+
+	void insertNodeByLineNumber( CASTnode[] newASTNodes, int insertID )
+	{
+		if( insertID < 0 ) return;
 
 		try
 		{
 			Ihandle* actTree = getActiveTree();
 			if( actTree != null )
+			{			
+				foreach_reverse( CASTnode _node; newASTNodes )
+					append( actTree, _node, insertID );
+
+				version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
+			}
+		}
+		catch( Exception e ){}		
+		/+
+		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return;
+
+		try
+		{
+			Ihandle* actTree = getActiveTree();
+			
+			if( actTree != null )
 			{
+				
 				int insertID;
+				
 				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 				{
 					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
@@ -779,7 +834,7 @@ class COutline
 				}
 
 				if( insertID > 0 ) insertID --;
-				
+
 				foreach_reverse( CASTnode _node; newASTNodes )
 				{
 					append( actTree, _node, insertID );
@@ -789,17 +844,55 @@ class COutline
 			}
 		}
 		catch( Exception e ){}
+		+/
 	}
 
-	void insertBlockNodeByLineNumber( CASTnode newASTNode, int _ln )
+	int removeBlockNodeByLineNumber( int _ln )
 	{
-		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return;
-	
+		int insertID = -1;
+		
 		try
 		{
 			Ihandle* actTree = getActiveTree();
 			if( actTree != null )
 			{
+				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+				{
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+					if( _node !is null )
+					{
+						if( _node.lineNumber == _ln  )
+						{
+							insertID = i;
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+							break;
+						}
+					}
+					else if( _node.lineNumber < _ln )
+					{
+						insertID = i + 1;
+						break;
+					}					
+				}
+
+				if( insertID > 0 ) insertID --;
+			}
+		}
+		catch( Exception e ){}
+
+		return insertID;
+	}
+
+	void insertBlockNodeByLineNumber( CASTnode newASTNode, int insertID )
+	{
+		if( insertID < 0 ) return;
+		
+		try
+		{
+			Ihandle* actTree = getActiveTree();
+			if( actTree != null )
+			{
+				/+
 				int insertID;
 				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 				{
@@ -821,6 +914,7 @@ class COutline
 				}
 
 				if( insertID > 0 ) insertID --;
+				+/
 
 				if( insertID == 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
 				version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );

@@ -607,6 +607,7 @@ struct ScintillaAction
 			GLOBAL.scintillaManager.remove( upperCase(fullPath) );
 			delete cSci;
 			GLOBAL.outlineTree.cleanTree( fullPath );
+			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", null );
 			if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 		}
 

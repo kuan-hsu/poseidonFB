@@ -125,6 +125,10 @@ struct LiveParser
 				head.lineNumber += n;
 				head.endLineNum += n;
 			}
+			else if( head.endLineNum > fixeLn )
+			{
+				if( head.endLineNum + n <= 2147483647 ) head.endLineNum += n;
+			}
 		}
 	}
 
@@ -140,7 +144,7 @@ struct LiveParser
 				if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
 				
 				int	currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-				char[] currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) );
+				char[] currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
 				debug IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "CurrentLineText: " ~ currentLineText ~ "(" ~ Integer.toString(currentLineNum) ~ ")" ) );
 
 				CASTnode oldHead;
@@ -164,10 +168,18 @@ struct LiveParser
 				CASTnode newHead = GLOBAL.outlineTree.parserText( currentLineText );
 				if( newHead !is null )
 				{
+					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr
+					if( newHead.endLineNum < 2147483647 )
+					{
+						delete newHead;
+						return;
+					}
+
+					// Parse complete, but no any result
 					if( !newHead.getChildrenCount )
 					{
 						delete newHead;
-						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.addNodeByLineNumber( null, currentLineNum );
+						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.removeNodeByLineNumber( currentLineNum );
 						debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum ) ~ " " ~ "No child, Parse Error" ) );
 						return;
 					}
@@ -177,13 +189,6 @@ struct LiveParser
 					{
 						delete newHead;
 						if( !GLOBAL.outlineTree.softRefresh( cSci ) ) GLOBAL.outlineTree.hardRefresh( cSci.getFullPath() );
-						return;
-					}
-
-					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr
-					if( newHead.endLineNum < 2147483647 )
-					{
-						delete newHead;
 						return;
 					}
 
@@ -198,14 +203,17 @@ struct LiveParser
 
 					if( newChildren.length )
 					{
+						int insertID;
+						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeByLineNumber( currentLineNum );
+
 						oldHead = delChildrenByLineNum( oldHead, currentLineNum );
 
 						if( oldHead !is null )
 						{
-							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.addNodeByLineNumber( newChildren, currentLineNum );
-							
 							foreach( CASTnode node; newChildren )
 								oldHead.insertChildByLineNumber( node, node.lineNumber );
+
+							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertNodeByLineNumber( newChildren, insertID );
 
 							newHead.zeroChildCount();
 						}
@@ -312,7 +320,8 @@ struct LiveParser
 				if( newHead !is null )
 				{
 					CASTnode[]	beAliveNodes;
-					
+
+
 					if( !newHead.getChildrenCount )
 					{
 						delete newHead;
@@ -320,6 +329,13 @@ struct LiveParser
 					}
 					else
 					{
+						// Parser not complete
+						if( newHead.endLineNum < 2147483647 )
+						{
+							delete newHead;
+							return;
+						}
+						/+
 						// DelNode
 						if( !newHead[0].getChildrenCount )
 						{
@@ -345,13 +361,7 @@ struct LiveParser
 							delete newHead;
 							return;
 						}
-					}
-
-					// Parser not complete
-					if( newHead.endLineNum < 2147483647 )
-					{
-						delete newHead;
-						return;
+						+/
 					}
 
 					int headLine = IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
@@ -365,6 +375,9 @@ struct LiveParser
 						//if( oldHead !is null ) IupMessage( "oldHead", toStringz( oldHead.name ~ " " ~oldHead.type ~ " (" ~ Integer.toString( oldHead.lineNumber ) ~ ")" ) ); else IupMessage("","NULL");
 						if( oldHead !is null )
 						{
+							int insertID;
+							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeBlockNodeByLineNumber( headLine );
+
 							CASTnode	father = oldHead.getFather;
 
 							foreach_reverse( CASTnode child; father.getChildren() )
@@ -389,10 +402,7 @@ struct LiveParser
 							//if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.updateOneLineNodeByNumber( currentLineNum, newChildren );
 							father.insertChildByLineNumber( newHead[0], headLine );
 
-							if( GLOBAL.toggleUpdateOutlineLive == "ON" )
-							{
-								GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], headLine );
-							}
+							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], insertID );
 							
 							newHead.zeroChildCount();
 							delete newHead;
