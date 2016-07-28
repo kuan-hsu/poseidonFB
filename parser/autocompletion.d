@@ -1092,41 +1092,101 @@ struct AutoComplete
 			}
 			else
 			{
-				// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
 				bool bReSearch;
-				for( int i = posHead + targetText.length; i < documentLength; ++ i )
+				
+				// check if Type (Alias) or Temporary Types
+				if( lowerCase( targetText ) == "type" )
 				{
-					char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+					char[]	afterWord;
+					bool	bFirstChar = true;
+					int		count;
+					
+					for( int i = posHead + targetText.length; i < documentLength; ++ i )
+					{
+						char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
 
-					if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
-					{
-						bReSearch = true;
-						break;
-					}
-					else if( s != " " && s != "\t" )
-					{
-						// Check before targetText word.......
-						char[]	beforeWord;
-						for( int j = posHead - 1; j >= 0; --j )
+						if( _s[0] == 13 || _s == ":" || _s == "\n" )
 						{
-							char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
-							
-							if( _s[0] == 13 || _s == ":" || _s == "\n" )
+							break;
+						}
+						else if( _s == " " || _s == "\t" )
+						{
+							if( !bFirstChar )
 							{
-								break;
+								count ++;
+								
+								if( count == 2 && lowerCase( afterWord ) == "as" )
+								{
+									bReSearch = true;
+									break;	
+								}
+								else
+								{
+									afterWord = "";
+								}
 							}
-							else if( _s == " " || _s == "\t" )
+						}
+						else
+						{
+							if( bFirstChar )
 							{
-								if( beforeWord.length ) break;
+								if( _s == "(" || _s == "<" )
+								{
+									bReSearch = true;
+									break;
+								}
+								else
+								{
+									bFirstChar = false;
+									afterWord ~= _s;
+								}
 							}
 							else
 							{
-								beforeWord ~= _s;
+								afterWord ~= _s;
 							}
 						}
-						
-						if( beforeWord == "eralced" || beforeWord == "dne" ) bReSearch = true; else bReSearch = false;
-						break;
+					}
+				}
+
+
+				if( !bReSearch )
+				{
+					// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
+					for( int i = posHead + targetText.length; i < documentLength; ++ i )
+					{
+						char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+
+						if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
+						{
+							bReSearch = true;
+							break;
+						}
+						else if( s != " " && s != "\t" )
+						{
+							// Check before targetText word.......
+							char[]	beforeWord;
+							for( int j = posHead - 1; j >= 0; --j )
+							{
+								char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+								
+								if( _s[0] == 13 || _s == ":" || _s == "\n" )
+								{
+									break;
+								}
+								else if( _s == " " || _s == "\t" )
+								{
+									if( beforeWord.length ) break;
+								}
+								else
+								{
+									beforeWord ~= _s;
+								}
+							}
+							
+							if( beforeWord == "eralced" || beforeWord == "dne" || beforeWord == "=" ) bReSearch = true; else bReSearch = false;
+							break;
+						}
 					}
 				}
 

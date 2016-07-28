@@ -595,7 +595,6 @@ class COutline
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" ) );
 	}
 
-
 	public:
 	this()
 	{
@@ -737,9 +736,10 @@ class COutline
 		return "IUP_variable";
 	}
 
-	int removeNodeByLineNumber( int _ln )
+
+	int removeNodeAndGetInsertIndexByLineNumber( int _ln )
 	{
-		int insertID = -1;
+		int insertID = 0;
 		
 		try
 		{
@@ -747,6 +747,7 @@ class COutline
 			
 			if( actTree != null )
 			{
+				bool bEqual;
 				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 				{
 					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
@@ -754,29 +755,165 @@ class COutline
 					{
 						if( _node.lineNumber == _ln  )
 						{
-							insertID = i;
+							/+
+							insertID = i - 1;
+							// Check if the be deleted node is the first child node of branch or not
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", insertID ) ) == "BRANCH" ) insertID = -insertID;
+
 							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+							+/
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", i - 1 ) ) == "LEAF" )
+							{
+								int parentID = IupGetIntId( actTree, "PARENT", i - 1 );
+								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
+								if( parentID > 0 )
+								{
+									if( _parentNode.endLineNum < _ln ) 
+										insertID = parentID; // New node out BRANCH block
+									else
+										insertID = i - 1; // New node in BRANCH block
+								}
+								else
+								{
+									insertID = i - 1; // parentID = 0 = root node
+								}								
+							}
+							else
+							{
+								insertID = -( i - 1 );
+							}
+
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+							bEqual = true;
 						}
 						else if( _node.lineNumber < _ln )
 						{
-							if( insertID != -1 ) break;
-							insertID = i + 1;
+							if( bEqual ) break;
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "LEAF" )
+							{
+								int parentID = IupGetIntId( actTree, "PARENT", i );
+								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
+								if( parentID > 0 )
+								{
+									if( _parentNode.endLineNum < _ln ) 
+										insertID = parentID; // New node out BRANCH block
+									else
+										insertID = i; // New node in BRANCH block
+								}
+								else
+								{
+									insertID = i; // parentID = 0 = root node
+								}
+
+								//if( parentID == i - 1 ) insertID = -i; // If insertID <=0, using "ADDLEAF"; insertID > 0, using "INSERTLEAF"
+							}
+							else
+							{
+								insertID = -i;
+							}
+							
 							break;
 						}						
 					}
 				}
-
-				if( insertID > 0 ) insertID --;
 			}
 		}
 		catch( Exception e ){}
 
 		return insertID;
-	}	
+	}
+
+	/+
+	int removeNodeByLineNumber( int _ln )
+	{
+		int insertID = 0;
+		
+		try
+		{
+			Ihandle* actTree = getActiveTree();
+			
+			if( actTree != null )
+			{
+				bool bEqual;
+				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+				{
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+					if( _node !is null )
+					{
+						if( _node.lineNumber == _ln  )
+						{
+							/+
+							insertID = i - 1;
+							// Check if the be deleted node is the first child node of branch or not
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", insertID ) ) == "BRANCH" ) insertID = -insertID;
+
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+							+/
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", i - 1 ) ) == "LEAF" )
+							{
+								int parentID = IupGetIntId( actTree, "PARENT", i - 1 );
+								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
+								if( parentID > 0 )
+								{
+									if( _parentNode.endLineNum < _ln ) 
+										insertID = parentID; // New node out BRANCH block
+									else
+										insertID = i - 1; // New node in BRANCH block
+								}
+								else
+								{
+									insertID = i - 1; // parentID = 0 = root node
+								}								
+							}
+							else
+							{
+								insertID = -( i - 1 );
+							}
+
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+							bEqual = true;
+						}
+						else if( _node.lineNumber < _ln )
+						{
+							if( bEqual ) break;
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "LEAF" )
+							{
+								int parentID = IupGetIntId( actTree, "PARENT", i );
+								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
+								if( parentID > 0 )
+								{
+									if( _parentNode.endLineNum < _ln ) 
+										insertID = parentID; // New node out BRANCH block
+									else
+										insertID = i; // New node in BRANCH block
+								}
+								else
+								{
+									insertID = i; // parentID = 0 = root node
+								}
+
+								//if( parentID == i - 1 ) insertID = -i; // If insertID <=0, using "ADDLEAF"; insertID > 0, using "INSERTLEAF"
+							}
+							else
+							{
+								insertID = -i;
+							}
+							
+							break;
+						}						
+					}
+				}
+			}
+		}
+		catch( Exception e ){}
+
+		return insertID;
+	}
+	+/
 
 	void insertNodeByLineNumber( CASTnode[] newASTNodes, int insertID )
 	{
-		if( insertID < 0 ) return;
+		//if( insertID < 0 ) return;
 
 		try
 		{
@@ -784,71 +921,22 @@ class COutline
 			if( actTree != null )
 			{			
 				foreach_reverse( CASTnode _node; newASTNodes )
-					append( actTree, _node, insertID );
+				{
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( " InsertID= " ~ Integer.toString(insertID) ) );
+					if( insertID <= 0 ) append( actTree, _node, -insertID ); else append( actTree, _node, insertID, true );
+				}
 
-				version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
+				int markID = IupGetInt( actTree, "LASTADDNODE" ) + newASTNodes.length - 1;
+				version(Windows) IupSetAttributeId( actTree, "MARKED", markID, "YES" ); else IupSetInt( actTree, "VALUE", markID );
 			}
 		}
 		catch( Exception e ){}		
-		/+
-		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return;
-
-		try
-		{
-			Ihandle* actTree = getActiveTree();
-			
-			if( actTree != null )
-			{
-				
-				int insertID;
-				
-				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-				{
-					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					if( _node !is null )
-					{
-						if( _node.lineNumber == _ln  )
-						{
-							insertID = i;
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-						}
-					}
-				}
-
-				if( !newASTNodes.length ) return;
-
-				if( insertID == 0 )
-				{
-					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
-					{
-						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-						if( _node !is null )
-						{
-							if( _node.lineNumber < _ln )
-							{
-								insertID = i + 1;
-								break;
-							}
-						}
-					}
-				}
-
-				if( insertID > 0 ) insertID --;
-
-				foreach_reverse( CASTnode _node; newASTNodes )
-				{
-					append( actTree, _node, insertID );
-				}
-				//IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" );
-				version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
-			}
-		}
-		catch( Exception e ){}
-		+/
 	}
 
+	/+
 	int removeBlockNodeByLineNumber( int _ln )
 	{
+		/+
 		int insertID = -1;
 		
 		try
@@ -879,13 +967,96 @@ class COutline
 			}
 		}
 		catch( Exception e ){}
+		+/
+
+		int insertID = 0;
+
+		try
+		{
+			Ihandle* actTree = getActiveTree();
+			
+			if( actTree != null )
+			{
+				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+				{
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+					if( _node !is null )
+					{
+						if( _node.lineNumber == _ln  )
+						{
+							//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( " InsertID= " ~ Integer.toString(i) ) );
+
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", i - 1 ) ) == "LEAF" )
+							{
+								int parentID = IupGetIntId( actTree, "PARENT", i - 1 );
+								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
+								if( parentID > 0 )
+								{
+									if( _parentNode.endLineNum < _ln ) 
+										insertID = parentID; // New node out BRANCH block
+									else
+										insertID = i - 1; // New node in BRANCH block
+								}
+								else
+								{
+									insertID = i - 1; // parentID = 0 = root node
+								}								
+							}
+							else
+							{
+								insertID = -( i - 1 );
+							}
+
+							
+							/*
+							insertID = i - 1;
+							// Check if the be deleted node is the first child node of branch or not
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", insertID ) ) == "BRANCH" ) insertID = -insertID;
+							*/
+
+							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
+							break;
+						}
+						else if( _node.lineNumber < _ln )
+						{
+							if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "LEAF" )
+							{
+								int parentID = IupGetIntId( actTree, "PARENT", i );
+								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
+								if( parentID > 0 )
+								{
+									if( _parentNode.endLineNum < _ln ) 
+										insertID = parentID; // New node out BRANCH block
+									else
+										insertID = i; // New node in BRANCH block
+								}
+								else
+								{
+									insertID = i; // parentID = 0 = root node
+								}
+
+								//if( parentID == i - 1 ) insertID = -i; // If insertID <=0, using "ADDLEAF"; insertID > 0, using "INSERTLEAF"
+							}
+							else
+							{
+								insertID = -i;
+							}
+							
+							break;
+						}						
+					}
+				}
+			}
+		}
+		catch( Exception e ){}		
 
 		return insertID;
 	}
+	+/
 
 	void insertBlockNodeByLineNumber( CASTnode newASTNode, int insertID )
 	{
-		if( insertID < 0 ) return;
+		//if( insertID < 0 ) return;
 		
 		try
 		{
@@ -915,9 +1086,9 @@ class COutline
 
 				if( insertID > 0 ) insertID --;
 				+/
-
-				if( insertID == 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
-				version(Windows) IupSetAttributeId( actTree, "MARKED", insertID + 1, "YES" ); else IupSetInt( actTree, "VALUE", insertID + 1 );
+				if( insertID <= 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
+				int markID = IupGetInt( actTree, "LASTADDNODE" );
+				version(Windows) IupSetAttributeId( actTree, "MARKED", markID, "YES" ); else IupSetInt( actTree, "VALUE", markID );
 			}
 		}
 		catch( Exception e ){}
@@ -1111,14 +1282,14 @@ class COutline
 		}
 	}
 
-	CASTnode parserText( char[] text )
+	CASTnode parserText( char[] text, int B_KIND = 0 )
 	{
 		// Don't Create Tree
 		try
 		{
 			// Parser
 			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( text ) );
-			return GLOBAL.parser.parse( "x.bas" );
+			return GLOBAL.parser.parse( "x.bas", B_KIND );
 		}
 		catch( Exception e )
 		{

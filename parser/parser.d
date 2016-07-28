@@ -897,6 +897,10 @@ class CParser
 								if( token.tok != TOK.Tcomma ) break; else parseToken( TOK.Tcomma );
 							}
 						}
+						else
+						{
+							return false;
+						}
 					}
 				}
 			}
@@ -1736,6 +1740,19 @@ class CParser
 						tokenIndex ++;
 						break;
 
+					case TOK.Tenum:
+						parseEnum();
+						if( token().tok == TOK.Tend || next().tok == TOK.Tenum )
+						{
+							tokenIndex += 2;
+							activeASTnode = activeASTnode.getFather( token().lineNumber );
+						}
+						else
+						{
+							return false;
+						}						
+						break;
+
 					case TOK.Tunion, TOK.Ttype:
 						TOK nestUnnameTOK = token().tok;
 						_lineNum = token().lineNumber;
@@ -1791,6 +1808,10 @@ class CParser
 							
 								activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
 							}
+						}
+						else
+						{
+							return false;
 						}
 				}
 			}
@@ -2043,7 +2064,51 @@ class CParser
 		}
 
 		return false;
-	}	
+	}
+
+	bool parseEnumBody()
+	{
+		try
+		{
+			char[] 	_name, _param, _type, _base;
+			int		_lineNum;
+			
+			while( token().tok != TOK.Tend && next().tok !=TOK.Tenum )
+			{
+				if( token().tok == TOK.Tidentifier )
+				{
+					_name = token().identifier;
+					_lineNum = token().lineNumber;
+					parseToken( TOK.Tidentifier );
+
+					if( token().tok == TOK.Tassign )
+					{
+						parseToken( TOK.Tassign );
+						//if( token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken(); else break;
+					}
+
+					// Pass the maybe complicated express
+					while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+					{
+						parseToken();
+					}
+
+					if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+					{
+						activeASTnode.addChild( _name, B_ENUMMEMBER, null, null, null, _lineNum );
+						parseToken();
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		catch( Exception e ){}
+
+		return false;
+	}
 
 	bool parseEnum()
 	{
@@ -2069,6 +2134,9 @@ class CParser
 					activeASTnode = activeASTnode.addChild( _name, B_ENUM, null, null, _base, _lineNum );
 					parseToken( TOK.Teol );
 
+					parseEnumBody();
+
+					/+
 					while( token().tok != TOK.Tend && next().tok !=TOK.Tenum )
 					{
 						if( token().tok == TOK.Tidentifier )
@@ -2100,12 +2168,11 @@ class CParser
 							break;
 						}
 					}
+					+/
 				}
 			}
 		}
-		catch( Exception e )
-		{
-		}
+		catch( Exception e ){}
 
 		return false;
 	}
@@ -2167,7 +2234,7 @@ class CParser
 		activeASTnode = null;
 	}
 	
-	CASTnode parse( char[] fullPath )
+	CASTnode parse( char[] fullPath, int B_KIND = 0 )
 	{
 		scope f = new FilePath( fullPath );
 
@@ -2188,6 +2255,16 @@ class CParser
 
 		while( tokenIndex < tokens.length )
 		{
+			if( B_KIND > 0 )
+			{
+				if( B_KIND & ( B_TYPE | B_UNION ) )
+					parseTypeBody( B_TYPE );
+				else if( B_KIND & B_ENUM )
+					parseEnumBody();
+					
+				break;
+			}
+			
 			switch( tokens[tokenIndex].tok )
 			{
 				case TOK.Tprivate:

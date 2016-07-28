@@ -147,11 +147,20 @@ struct LiveParser
 				char[] currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
 				debug IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "CurrentLineText: " ~ currentLineText ~ "(" ~ Integer.toString(currentLineNum) ~ ")" ) );
 
-				CASTnode oldHead;
+				CASTnode 	oldHead;
+				int			B_KIND;
+
 
 				if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 				{
-					oldHead = AutoComplete.getTitleAST( cSci.getIupScintilla, currentPos, GLOBAL.parserManager[upperCase( cSci.getFullPath )] );
+					char[] titleName = AutoComplete.getFunctionTitle( cSci.getIupScintilla, currentPos, B_KIND );
+					if( titleName.length )
+					{
+						int	lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+						oldHead = AutoComplete.getFunctionAST( GLOBAL.parserManager[upperCase( cSci.getFullPath )], B_KIND, lowerCase( titleName ), lineNum );
+					}
+
+					//oldHead = AutoComplete.getTitleAST( cSci.getIupScintilla, currentPos, GLOBAL.parserManager[upperCase( cSci.getFullPath )] );
 					if( oldHead is null ) oldHead = GLOBAL.parserManager[upperCase( cSci.getFullPath )];// else IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ oldHead.name  ~ " : " ~ oldHead.type ) );
 				}
 				else
@@ -166,6 +175,9 @@ struct LiveParser
 				}
 				
 				CASTnode newHead = GLOBAL.outlineTree.parserText( currentLineText );
+
+				if( B_KIND & ( B_TYPE | B_UNION | B_ENUM ) ) newHead = GLOBAL.outlineTree.parserText( currentLineText, B_KIND );
+				
 				if( newHead !is null )
 				{
 					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr
@@ -179,7 +191,7 @@ struct LiveParser
 					if( !newHead.getChildrenCount )
 					{
 						delete newHead;
-						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.removeNodeByLineNumber( currentLineNum );
+						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
 						debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum ) ~ " " ~ "No child, Parse Error" ) );
 						return;
 					}
@@ -204,7 +216,7 @@ struct LiveParser
 					if( newChildren.length )
 					{
 						int insertID;
-						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeByLineNumber( currentLineNum );
+						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
 
 						oldHead = delChildrenByLineNum( oldHead, currentLineNum );
 
@@ -376,7 +388,7 @@ struct LiveParser
 						if( oldHead !is null )
 						{
 							int insertID;
-							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeBlockNodeByLineNumber( headLine );
+							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( headLine );
 
 							CASTnode	father = oldHead.getFather;
 
