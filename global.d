@@ -81,8 +81,9 @@ struct GLOBAL
 	static int					keywordCase = 0;	
 	static char[]				compilerFullPath;
 	static char[]				compilerAnootation = "ON";
+	static char[]				compilerWindow = "ON";
 	static char[]				debuggerFullPath;
-	static char[]				maxError = "30";
+	//static char[]				maxError = "30";
 	static char[]				defaultOption;
 	static char[][]				recentProjects, recentOptions, recentArgs;
 	static EditorToggleUint		editorSetting00;

@@ -75,13 +75,17 @@ class CPreferenceDialog : CBaseDialog
 
 
 		// compiler Setting
-		Ihandle* toggleAnnotation = IupToggle( "Show compile error using annotation", null );
+		Ihandle* toggleAnnotation = IupToggle( "Show Compile Error/Warning Using Annotation", null );
 		IupSetAttribute( toggleAnnotation, "VALUE", toStringz(GLOBAL.compilerAnootation.dup) );
 		IupSetHandle( "toggleAnnotation", toggleAnnotation );
 		
-		//Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
+		Ihandle* toggleShowResultWindow = IupToggle( "Show Result Window", null );
+		IupSetAttribute( toggleShowResultWindow, "VALUE", toStringz(GLOBAL.compilerWindow.dup) );
+		IupSetHandle( "toggleShowResultWindow", toggleShowResultWindow );
 
-		Ihandle* frameCompiler = IupFrame( toggleAnnotation );
+		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, null );
+
+		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", "Compiler Setting");
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=261x");
 
@@ -638,6 +642,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleUpdateOutline", null );
 	
 		IupSetHandle( "toggleAnnotation", null );
+		IupSetHandle( "toggleShowResultWindow", null );
 
 		IupSetHandle( "toggleLineMargin", null );
 		IupSetHandle( "toggleBookmarkMargin", null );
@@ -864,7 +869,7 @@ class CPreferenceDialog : CBaseDialog
 		buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath );
 		buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath );
 		buildtoolsNode.element( null, "defaultoption", GLOBAL.defaultOption );
-		buildtoolsNode.element( null, "maxerror", GLOBAL.maxError );
+		buildtoolsNode.element( null, "resultwindow", GLOBAL.compilerWindow );
 		buildtoolsNode.element( null, "annotation", GLOBAL.compilerAnootation );
 
 		/*
@@ -975,10 +980,10 @@ class CPreferenceDialog : CBaseDialog
 				GLOBAL.defaultOption = e.value;
 			}
 
-			result = root.query.descendant("maxerror");
+			result = root.query.descendant("resultwindow");
 			foreach( e; result )
 			{
-				GLOBAL.maxError = e.value;
+				GLOBAL.compilerWindow = e.value;
 			}
 
 			result = root.query.descendant("annotation");
@@ -1679,6 +1684,8 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.debuggerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
 		GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 		GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
+		GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
+
 
 		GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
 		GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;

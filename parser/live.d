@@ -173,10 +173,23 @@ struct LiveParser
 					debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ "No oldHead" ) );
 					return;
 				}
+				/*
+				else
+				{
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ oldHead.name  ~ " : " ~ oldHead.type ) );
+				}
+				*/
 				
-				CASTnode newHead = GLOBAL.outlineTree.parserText( currentLineText );
-
-				if( B_KIND & ( B_TYPE | B_UNION | B_ENUM ) ) newHead = GLOBAL.outlineTree.parserText( currentLineText, B_KIND );
+				CASTnode newHead;
+				if( B_KIND & ( B_TYPE | B_UNION | B_ENUM ) )
+				{
+					if( oldHead.lineNumber == oldHead.endLineNum ) return; // Not Complete Block
+					newHead = GLOBAL.outlineTree.parserText( currentLineText, B_KIND );
+				}
+				else
+				{
+					newHead = GLOBAL.outlineTree.parserText( currentLineText );
+				}
 				
 				if( newHead !is null )
 				{
@@ -210,7 +223,7 @@ struct LiveParser
 						node.lineNumber = currentLineNum;
 						node.endLineNum = node.lineNumber;
 						newChildren ~= node;
-						debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ node.name  ~ " : " ~ node.type ) );
+						debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "New Node :" ~ Integer.toString(currentLineNum) ~ " " ~ node.name  ~ " : " ~ node.type ) );
 					}
 
 					if( newChildren.length )

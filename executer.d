@@ -178,7 +178,7 @@ struct ExecuterAction
 			bool	bError, bWarning;
 			char[] stdoutMessage, stderrMessage;
 			// Compiler Command
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( command ~ "\n" ) );
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n" ) );
 
 			foreach( line; new Lines!(char)(p.stderr) )  
 			{
@@ -202,19 +202,48 @@ struct ExecuterAction
 
 			auto result = p.wait;
 
-			showAnnotation( stdoutMessage );
-			IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
 			
 			if( bError )
 			{
 				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
+
+				if( GLOBAL.compilerWindow == "ON" )
+				{
+					Ihandle* messageDlg = IupMessageDlg();
+					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR,TITLE=ERROR,BUTTONDEFAULT=1" );
+					IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Failure!" ) );
+					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				}
 			}
 			else
 			{
 				if( !bWarning )
+				{
 					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
+
+					if( GLOBAL.compilerWindow == "ON" )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Success!" ) );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
+					
+				}
 				else
+				{
 					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
+
+					if( GLOBAL.compilerWindow == "ON" )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=WARNING,BUTTONDEFAULT=1" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Done\nBut Got Warnings!" ) );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
+				}
 
 				return true;
 			}
@@ -337,7 +366,7 @@ struct ExecuterAction
 				bool	bError, bWarning;
 				char[] stdoutMessage, stderrMessage;
 				// Compiler Command
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( txtCommand ~ "\n" ) );
+				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
 
 				foreach (line; new Lines!(char)(p.stderr))  
 				{
@@ -361,19 +390,48 @@ struct ExecuterAction
 		
 				auto result = p.wait;
 
-				showAnnotation( stdoutMessage );
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+
 
 				if( bError )
 				{
 					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
+
+					if( GLOBAL.compilerWindow == "ON" )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR,TITLE=ERROR,BUTTONDEFAULT=1" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( "Build Failure!" ) );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
 				}
 				else
 				{
 					if( !bWarning )
+					{
 						IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
+
+						if( GLOBAL.compilerWindow == "ON" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
+							IupSetAttribute( messageDlg, "VALUE", toStringz( "Build Success!" ) );
+							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+						}
+					}
 					else
+					{
 						IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
+
+						if( GLOBAL.compilerWindow == "ON" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=WARNING,BUTTONDEFAULT=1" );
+							IupSetAttribute( messageDlg, "VALUE", toStringz( "Build Done\nBut Got Warnings!" ) );
+							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+						}
+					}
 				}
 
 				IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
@@ -435,7 +493,7 @@ struct ExecuterAction
 			char[]	stdoutMessage, stderrMessage;
 			bool	bError, bWarning;
 			// Compiler Command
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( commandString ~ "\n" ) );
+			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Quick Run......\n\n" ~ commandString ~ "\n" ) );
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
@@ -466,14 +524,15 @@ struct ExecuterAction
 
 			auto result = p.wait;
 
-			showAnnotation( stdoutMessage );
-			IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+
 			if( !bError )
 			{
 				if( !bWarning )
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success!" ) );
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
 				else
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
 
 				char[] command;
 
@@ -489,7 +548,16 @@ struct ExecuterAction
 			}
 			else
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
+
+				if( GLOBAL.compilerWindow == "ON" )
+				{
+					Ihandle* messageDlg = IupMessageDlg();
+					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR,TITLE=ERROR,BUTTONDEFAULT=1" );
+					IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Failure!" ) );
+					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				}
+				
 				scope _f = new FilePath( fileName );
 				_f.remove();				
 			}

@@ -98,6 +98,8 @@ struct AutoComplete
 				if( posOpenParen < node.name.length ) name = node.name[0..posOpenParen];
 			}
 		}
+		else
+			return null;
 
 		bool bShowType = GLOBAL.toggleShowListType == "ON" ? true : false;
 		char[] type = node.type;

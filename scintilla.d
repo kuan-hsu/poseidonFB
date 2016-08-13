@@ -756,9 +756,12 @@ extern(C)
 			char[] s = fromStringz( status );
 
 			// "Goto Defintion":
-			if( s[1] == 'C' )
+			if( s.length > 1 )
 			{
-				if( button == '1' )	AutoComplete.toDefintionAndType( true );
+				if( s[1] == 'C' )
+				{
+					if( button == '1' )	AutoComplete.toDefintionAndType( true );
+				}
 			}
 		}
 		

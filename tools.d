@@ -56,6 +56,11 @@ char* getCString( char[] Dstring )
 	return CstringPointer;
 }
 
+void freeCString( char* cString )
+{
+	if( cString != null ) free( cString );
+}
+
 
 class DstringConvert
 {
