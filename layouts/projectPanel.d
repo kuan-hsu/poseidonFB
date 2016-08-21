@@ -335,7 +335,33 @@ extern(C)
 	{
 		//char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ); // Shadow
 		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
-		actionManager.ScintillaAction.openFile( fullPath.dup );
+
+		scope fp = new FilePath( fullPath );
+		char[] ext = lowerCase( fp.ext );
+
+		if( ext == "bas" || ext == "bi" )
+		{
+			actionManager.ScintillaAction.openFile( fullPath.dup );
+		}
+		else
+		{
+			try
+			{
+				version(Windows)
+				{
+					Process p = new Process( true, "cmd", "/c", fullPath );
+					p.gui( true );
+					p.execute;
+				}
+				else
+				{
+					Process p = new Process( true, "xdg-open", fullPath );
+					p.gui( true );
+					p.execute;
+				}
+			}
+			catch{}
+		}
 
 		return IUP_DEFAULT;
 	}
@@ -348,7 +374,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	// Show Fullpath or Filename
+	// 
 	private int CProjectTree_RightClick_cb( Ihandle *ih, int id )
 	{
 		version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
@@ -656,7 +682,8 @@ extern(C)
 						{
 							if( s == fullPath )
 							{
-								actionManager.ScintillaAction.openFile( s.dup );
+								char[] ext = lowerCase( fn.ext() );
+								if( ext == "bi" || ext == "bas" ) actionManager.ScintillaAction.openFile( s.dup );
 								return IUP_DEFAULT;
 							}
 						}
@@ -719,7 +746,7 @@ extern(C)
 						default:			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) ); break;
 					}
 
-					actionManager.ScintillaAction.openFile( fullPath.dup );
+					//actionManager.ScintillaAction.openFile( fullPath.dup );
 				}
 			}
 		}
@@ -739,7 +766,33 @@ extern(C)
 		// Shadow
 		//char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
 		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
-		actionManager.ScintillaAction.openFile( fullPath.dup );
+
+		scope fp = new FilePath( fullPath );
+		char[] ext = lowerCase( fp.ext );
+
+		if( ext == "bi" || ext == "bas" )
+		{
+			actionManager.ScintillaAction.openFile( fullPath.dup );
+		}
+		else
+		{
+			try
+			{
+				version(Windows)
+				{
+					Process p = new Process( true, "cmd", "/c", fullPath );
+					p.gui( true );
+					p.execute;
+				}
+				else
+				{
+					Process p = new Process( true, "xdg-open", fullPath );
+					p.gui( true );
+					p.execute;
+				}
+			}
+			catch{}
+		}
 
 		return IUP_DEFAULT;
 	}
@@ -841,7 +894,7 @@ extern(C)
 
 		scope fp = new FilePath( fullPath );
 
-		char[] oldExt = fp.ext();
+		char[] oldExt = fp.ext().dup;
 
 		scope test = new CSingleTextDialog( -1, -1, "File Rename", "File Name:", "100x", fp.name(), false );
 		char[] newFileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
@@ -854,9 +907,13 @@ extern(C)
 			if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 			{
 				GLOBAL.scintillaManager[upperCase(fullPath)].rename( fp.toString );
-			}				
+			}
 
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id, GLOBAL.cString.convert( fp.toString ) );
+			
+			char* pointer = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
+			if( pointer != null ) freeCString( pointer );
+			
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id, tools.getCString( fp.toString ) );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, GLOBAL.cString.convert( fp.file ) );
 
 			char[] activeProjectDirName = actionManager.ProjectAction.getActiveProjectName;

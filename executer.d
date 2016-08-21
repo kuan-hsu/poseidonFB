@@ -314,6 +314,11 @@ struct ExecuterAction
 					return false;
 				}
 
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].others )
+				{
+					txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+				}				
+
 				foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
 				{
 					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
@@ -360,6 +365,7 @@ struct ExecuterAction
 				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 
 				Process p = new Process( true, txtCommand );
+				p.workDir( GLOBAL.projectManager[activePrjName].dir );
 				p.gui( true );
 				p.execute;
 
@@ -382,7 +388,10 @@ struct ExecuterAction
 					}
 					if( !bError )
 					{
-						if( Util.index( line, ") error " ) < line.length ) bError = true;
+						if( Util.index( line, ") error " ) < line.length )
+							bError = true;
+						else if( Util.index( line, "Error!" ) < line.length )
+							bError = true;
 					}				
 					
 					stdoutMessage ~= ( line ~ "\n" );

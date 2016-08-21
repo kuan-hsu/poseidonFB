@@ -339,7 +339,7 @@ struct DocumentTabAction
 	import scintilla;
 	
 	public:
-	static int tabChangePOS( Ihandle* ih, int new_pos, int old_pos )
+	static int tabChangePOS( Ihandle* ih, int new_pos )
 	{
 		Ihandle* _child = IupGetChild( ih, new_pos );
 		CScintilla cSci = actionManager.ScintillaAction.getCScintilla( _child );
@@ -599,7 +599,7 @@ struct ScintillaAction
 				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newPos );
 			}
 			
-			actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, newPos, oldPos );
+			actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, newPos );
 			
 	
 			IupDestroy( iupSci );

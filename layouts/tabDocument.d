@@ -27,7 +27,7 @@ extern(C)
 {
 	private int tabchangePos_cb( Ihandle* ih, int new_pos, int old_pos )
 	{
-		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos, old_pos );
+		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos );
 	}
 	
 	// Close the document Iuptab......
@@ -45,11 +45,10 @@ extern(C)
 	private int tabRightClick_cb( Ihandle* ih, int pos )
 	{
 		// ih = GLOBAL.documentTabs
-		// So we need get the child's Ihandle( Iupscintilla )
-		Ihandle* _child = IupGetChild( ih, pos );
-
 		// Get Focus
-		IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_child );
+		IupSetInt( ih, "VALUEPOS" , pos ); 
+		
+		actionManager.DocumentTabAction.tabChangePOS( ih, pos );
 
 		Ihandle* _save = IupItem( "Save", null );
 		IupSetAttribute( _save, "IMAGE", "icon_save" );
@@ -77,42 +76,6 @@ extern(C)
 		{
 			actionManager.ScintillaAction.closeAllDocument();
 		});
-
-		// Annotation
-		Ihandle* _showAnnotation = IupItem( "Show Annotation", null );
-		IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
-		IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
-		{
-			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
-			//IupScintillaSendMessage( cSci.getIupScintilla, 2548, 3, 0 );
-		});
-		
-		Ihandle* _hideAnnotation = IupItem( "Hide Annotation", null );
-		IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
-		IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback)function( Ihandle* ih )
-		{
-			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
-		});
-
-		Ihandle* _removeAllAnnotation = IupItem( "Remove All Annotation", null );
-		IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
-		IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
-		{
-			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
-		});
-
-		Ihandle* _refresh = IupItem( "Refresh Parser", null );
-		IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
-		IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
-		{
-			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-			GLOBAL.outlineTree.softRefresh( cSci );
-			//actionManager.OutlineAction.refresh( cSci.getFullPath() );
-		});
-		
 		
 		Ihandle* popupMenu = IupMenu( 
 										_close,
@@ -120,12 +83,6 @@ extern(C)
 										_closeall,
 										IupSeparator(),
 										_save,
-										IupSeparator(),
-										_showAnnotation,
-										_hideAnnotation,
-										_removeAllAnnotation,
-										IupSeparator(),
-										_refresh,
 										null
 									);
 

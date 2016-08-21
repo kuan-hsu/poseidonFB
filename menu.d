@@ -388,7 +388,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.206\nBy Kuan Hsu (Taiwan)\n2016.08.14" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.210\nBy Kuan Hsu (Taiwan)\n2016.08.21" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -813,7 +813,9 @@ extern(C)
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
 			GLOBAL.explorerSplit_value = IupGetInt( GLOBAL.explorerSplit, "VALUE" );
-			IupSetAttribute( GLOBAL.explorerSplit, "VALUE", "0" );
+			IupSetInt( GLOBAL.explorerSplit, "VALUE", 0 );
+			IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 0 );
+			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 0 );
 
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "NO" );
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
@@ -823,6 +825,16 @@ extern(C)
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
+			version(Windows)
+			{
+				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 );
+				IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 );
+			}
+			else
+			{
+				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 1 );
+				IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 1 );
+			}
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
 		}

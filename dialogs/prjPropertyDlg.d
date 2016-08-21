@@ -414,7 +414,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		if( fileName.length )
 		{
 			Ihandle* textPrjPath = IupGetHandle( "textProjectDir" );
-			if( textPrjPath != null ) IupSetAttribute( textPrjPath, "VALUE", fileName.ptr );
+			if( textPrjPath != null ) IupSetAttribute( textPrjPath, "VALUE", toStringz( fileName ) );
 		}
 		else
 		{
@@ -432,7 +432,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		if( fileName.length )
 		{
 			Ihandle* _compilerPath = IupGetHandle( "textCompilerPath" );
-			if( _compilerPath != null ) IupSetAttribute( _compilerPath, "VALUE", fileName.ptr );
+			if( _compilerPath != null ) IupSetAttribute( _compilerPath, "VALUE", toStringz( fileName ) );
 		}
 		else
 		{
@@ -491,7 +491,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 			if( fileName.length )
 			{
-				IupSetAttribute( list, itemNumber, fileName.ptr );
+				IupSetAttribute( list, itemNumber, toStringz( fileName ) );
 			}
 		}
 		
@@ -507,13 +507,13 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 		if( itemNumber > 1 )
 		{
-			char* prevItemText = IupGetAttribute( list, Integer.toString(itemNumber-1).ptr );
-			char* nowItemText = IupGetAttribute( list, Integer.toString(itemNumber).ptr );
+			char* prevItemText = IupGetAttribute( list, toStringz( Integer.toString(itemNumber-1) ) );
+			char* nowItemText = IupGetAttribute( list, toStringz( Integer.toString(itemNumber) ) );
 
-			IupSetAttribute( list, Integer.toString(itemNumber-1).ptr, nowItemText );
-			IupSetAttribute( list, Integer.toString(itemNumber).ptr, prevItemText );
+			IupSetAttribute( list, toStringz( Integer.toString(itemNumber-1) ), nowItemText );
+			IupSetAttribute( list, toStringz( Integer.toString(itemNumber) ), prevItemText );
 
-			IupSetAttribute( list, "VALUE", Integer.toString(itemNumber-1).ptr );
+			IupSetAttribute( list, "VALUE", toStringz( Integer.toString(itemNumber-1) ) );
 		}
 
 		return IUP_DEFAULT;
@@ -529,13 +529,13 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 		if( itemNumber < itemCount )
 		{
-			char* nextItemText = IupGetAttribute( list, Integer.toString(itemNumber+1).ptr );
-			char* nowItemText = IupGetAttribute( list, Integer.toString(itemNumber).ptr );
+			char* nextItemText = IupGetAttribute( list, toStringz( Integer.toString(itemNumber+1) ) );
+			char* nowItemText = IupGetAttribute( list, toStringz( Integer.toString(itemNumber) ) );
 
-			IupSetAttribute( list, Integer.toString(itemNumber+1).ptr, nowItemText );
-			IupSetAttribute( list, Integer.toString(itemNumber).ptr, nextItemText );
+			IupSetAttribute( list, toStringz( Integer.toString(itemNumber+1) ), nowItemText );
+			IupSetAttribute( list, toStringz( Integer.toString(itemNumber) ), nextItemText );
 
-			IupSetAttribute( list, "VALUE", Integer.toString(itemNumber+1).ptr );
+			IupSetAttribute( list, "VALUE", toStringz( Integer.toString(itemNumber+1) ) );
 		}
 
 		return IUP_DEFAULT;

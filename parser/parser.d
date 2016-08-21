@@ -1720,7 +1720,7 @@ class CParser
 					case TOK.Tdeclare:
 						parseToken( TOK.Tdeclare );
 
-						if( token().tok == TOK.Tstatic || token().tok == TOK.Tconst ) parseToken();
+						if( token().tok == TOK.Tstatic || token().tok == TOK.Tconst || token().tok == TOK.Tabstract || token().tok == TOK.Tvirtual ) parseToken();
 
 						if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub || token().tok == TOK.Tproperty )
 						{

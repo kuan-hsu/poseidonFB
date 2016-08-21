@@ -29,7 +29,8 @@ void createExplorerWindow()
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
 
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
-	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=NO,SHOWGRIP=LINES");
+	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=NO,SHOWGRIP=LINES" );
+	version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 1 );
 
 
 	createTabs();
@@ -42,6 +43,7 @@ void createExplorerWindow()
 	//GLOBAL.explorerSplit = IupSplit( _split, GLOBAL.dndDocumentZBox );
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.fileListSplit, GLOBAL.dndDocumentZBox );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
+	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 1 );
 
 	
 	createMessagePanel();
@@ -59,6 +61,7 @@ void createExplorerWindow()
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
+	version(Windows) IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 ); else IupSetInt( GLOBAL.messageSplit, "BARSIZE", 1 );
 
 	Ihandle* StatusBar = createStatusBar();
 
@@ -263,7 +266,7 @@ extern(C)
 							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
 							if( id < count - 1 ) ++id; else id = 0;
 							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
 						}
 						return IUP_IGNORE;
 					}
@@ -278,7 +281,7 @@ extern(C)
 							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
 							if( id > 0 ) --id; else id = --count;
 							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
 						}
 						return IUP_IGNORE;
 					}

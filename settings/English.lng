@@ -1,0 +1,179 @@
+file=File
+	new=New
+	open=Open
+	save=Save
+	saveas=Save All
+	saveall=Save All
+	close=Close File
+	closeall=Close All
+	recentprj=Recent Projects
+	exit=Exit
+	
+edit=Edit
+	redo=Redo
+	undo=Undo
+	cut=Cut
+	copy=Copy
+	paste=Paste
+	selectall=Select All
+	
+search=Search
+	findreplace=Find / Replace
+	finprev=Find Previous
+	findnextFind Next
+	findreplacefiles=Find / Replace In Files
+	goto=Goto Line
+
+view=View
+	outline=Outline
+	message=Message
+	
+Prj=Project
+	newprj=New Project
+	openpjr=Open Project
+	saveprj=Save Project
+	saveallprj=Save All Projects
+	closeprj=Close Project
+	closeallprj=Close All Projects
+	properties=Properties...
+	
+	openinexplorer=Open In Explorer
+	addinprj=Add File(s)
+	removeinprj=Remove From Project
+	delinprj=Delete File
+	reninprj=Rename File
+	
+build=Build
+	compile=Compile File
+	run=Run
+	buildprj=Build Project
+	quickrun=Quick Run
+	
+debug=Debug
+	rundebug=Run Debug
+	compiledebug=Compile With Debug
+	builddebug=Build Project With Debug
+	
+options=Options
+	tools=Tools
+		seteol=Set Eol Character
+		converteol=Convert Eol Character
+		convertencoding=Convert Encoding
+		convertcase=Convert Keyword Case
+			uppercase=UPPERCASE
+			lowercase=lowercase
+			mixercase=Mixedcase
+	preference=Preference
+		compiler=Compiler
+			compilerpath=Compiler Path
+			debugpath=Debugger Path
+			compileropts=Compiler Opts
+			compilersetting=Compiler Setting
+				errorannotation=Show Compiler Errors Using Annotation
+			parsersetting=Parser Setting
+				enablekeyword=Enable Keyword Complete
+				enableparser=Enable Parser
+				showtitle=Show Function Title
+				showtypeparam=Show Type With Function Parameters
+				sortignorecase=Autocomplete List Is Ignore Case
+				selcase=Selection Of Autocomplete List Is Case Insensitive
+				showlisttype=Show Autocomplete List Type
+				parserlive=ParseLiveLevel
+					none=None
+					light=Light
+					full=Full
+					update=Update Outline
+				trigger=Autocompletion Trigger
+				includelevel=Include Levels
+			editor=Editor
+				lnmargin=Show Linenumber Margin
+				bkmargin=Show Bookmark Margin
+				fdmargin=Show Folding Margin
+				indentguide=Show Indentation Guide
+				caretline=Hightlight Caret Line
+				wordwarp=Word Warp
+				tabtospace=Replace Tab With Space
+				autoindent=Automatic Indent
+				showeol=Show EOL Sign
+				showspacetab=Show Space/Tab
+				autoinsertend=Auto Insert Block End
+				coloroutline=Colorize Outline Item
+				tabwidth=Tab Width
+				columnedge=Colume Edge
+				autoconvertkeyword=Auto Convert Keyword Case
+				font=Font
+					default=Default
+					document=Document
+					leftside=Leftside
+					'fistlist=FileList
+					'project=Project
+					'outline=Outline
+					bottom=Bottom
+					'output=Output
+					'search=Search
+					'debug=Debug
+					annotation=Annotation
+				color=Color
+					caretLine=Caret Line
+					cursor=Cursor
+					selfor=Selection Foreground
+					selback=Selection Background
+					lnfor=Linenumber Foreground
+					lnback=Linenumber Background
+					foldcolor=FoldingMargin Color
+					selalpha=Selection Alpha
+			shortcut=Short Cut
+				gotodef=Goto Definition
+				leftwindow=On/Off Left Window
+				bottomwindow=On/Off Bottom Window
+				showtype=Show Type
+				reparse=Reparse
+				nexttab=Next Tab
+				prevtab=Previous Tab
+				newtab=New Tab
+				autocomplete=Auto Complete
+			keywords=Keywords
+				keyword0=Keyword0
+				keyword1=Keyword1
+				keyword2=Keyword2
+				keyword3=Keyword3
+	about=About
+
+outline=Outline
+	collapse=Collapse
+	showpr=Change Outline Node Title
+	refresh=Refresh Parser
+	searchanyword=Search Any Word
+	hide=Hide
+
+filelist=FileList
+	fullpath=FullPath
+
+output=Output
+	clear=Clear
+
+'tab
+closeothers=Close Others
+showannotation=Show Annotation
+hideannotation=Hide Annotation
+removeannotation=Remove All Annotation
+
+'properties
+general=General
+	prjname=Project Name
+	prjtype=Type
+		console=Console Application
+		static=Static Library
+		dynamic=Dynamic Link Library
+	prjdir=Project Dir
+	prjmainfile=Main file
+	prjtarget=Target Name
+	prjargs=Execute Args
+	prjopts=Compile Opt
+	prjcomment=Comment
+	prjcompile=FBC Path
+include=Include...
+	includepath=Include Paths
+	librarypath=Libeay Paths
+	
+'preference

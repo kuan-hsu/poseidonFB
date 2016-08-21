@@ -233,7 +233,7 @@ class CScintilla
 		{
 			IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toStringz );
 		}		
-		IupSetHandle( fullPath.ptr, sci );
+		IupSetHandle( toStringz( fullPath ), sci );
 
 		GLOBAL.scintillaManager[upperCase(fullPath)] = this;
 		
@@ -255,12 +255,12 @@ class CScintilla
 		// Change the fileListTree's node
 		int nodeCount = IupGetInt( GLOBAL.fileListTree.getTreeHandle, toStringz( "COUNT" ) );
 	
-		for( int id = 1; id <= nodeCount; id++ ) // include Parent "FileList" node
+		for( int id = 0; id < nodeCount; id++ ) // include Parent "FileList" node
 		{
 			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", id );
 			if( _sci_node == this )
 			{
-				IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id, fullPath.ptr );
+				IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id, toStringz( fullPath ) );
 				break;
 			}
 		}					
@@ -523,7 +523,7 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2363, 0, 0 );  // SCI_SETEDGEMODE 2363
 		}
 		
-
+		IupSetAttribute( sci, "USEPOPUP", "NO" );
 		// Autocompletion XPM Image
 		version( none )
 		{
@@ -749,18 +749,149 @@ extern(C)
 	}
 
 	// mouse button
+	/*
+	IUP_BUTTON1 = 1
+	IUP_BUTTON2 = 2
+	IUP_BUTTON3 = 3
+	IUP_BUTTON4 = 4
+	IUP_BUTTON5 = 5	
+	*/
 	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( pressed == 0 ) //release
 		{
-			char[] s = fromStringz( status );
-
-			// "Goto Defintion":
-			if( s.length > 1 )
+			if( button == '3' ) // Right Click
 			{
-				if( s[1] == 'C' )
+				Ihandle* _undo = IupItem( "Undo", null );
+				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
+				IupSetCallback( _undo, "ACTION", cast(Icallback) &menu.undo_cb ); // from menu.d
+
+				Ihandle* _redo = IupItem( "Redo", null );
+				IupSetAttribute( _redo, "IMAGE", "icon_redo" );
+				IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
+
+				Ihandle* _cut = IupItem( "Cut", null );
+				IupSetAttribute( _cut, "IMAGE", "icon_cut" );
+				IupSetCallback( _cut, "ACTION", cast(Icallback) &menu.cut_cb ); // from menu.d
+
+				Ihandle* _copy = IupItem( "Copy", null );
+				IupSetAttribute( _copy, "IMAGE", "icon_copy" );
+				IupSetCallback( _copy, "ACTION", cast(Icallback) &menu.copy_cb ); // from menu.d
+
+				Ihandle* _paste = IupItem( "Paste", null );
+				IupSetAttribute( _paste, "IMAGE", "icon_paste" );
+				IupSetCallback( _paste, "ACTION", cast(Icallback) &menu.paste_cb ); // from menu.d
+
+				Ihandle* _delete = IupItem( "Delete", null );
+				IupSetAttribute( _delete, "IMAGE", "icon_clear" );
+				IupSetCallback( _delete, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
-					if( button == '1' )	AutoComplete.toDefintionAndType( true );
+					Ihandle* _sci = actionManager.ScintillaAction.getActiveIupScintilla();
+					if( _sci != null )
+					{
+						char[] posText = fromStringz( IupGetAttribute( _sci, "SELECTIONPOS" ) );
+						if( posText.length )
+						{
+							int colonPos = Util.index( posText, ":" );
+							if( colonPos < posText.length )
+							{
+								int pos1 = Integer.atoi( posText[0..colonPos] );
+								int pos2 = Integer.atoi( posText[colonPos+1..length] );
+
+								char[] deleteRange = posText[0..colonPos] ~ "," ~ Integer.toString(pos2-pos1);
+								IupSetAttribute( _sci, "DELETERANGE", toStringz( deleteRange.dup ) );
+							}
+						}
+					}
+				});
+
+				Ihandle* _selectall = IupItem( "Select All", null );
+				IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
+				IupSetCallback( _selectall, "ACTION", cast(Icallback) &menu.selectall_cb ); // from menu.d
+
+
+
+				// Annotation
+				Ihandle* _showAnnotation = IupItem( "Show Annotation", null );
+				IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
+				IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+					//IupScintillaSendMessage( cSci.getIupScintilla, 2548, 3, 0 );
+				});
+				
+				Ihandle* _hideAnnotation = IupItem( "Hide Annotation", null );
+				IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
+				IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback)function( Ihandle* ih )
+				{
+					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
+				});
+
+				Ihandle* _removeAllAnnotation = IupItem( "Remove All Annotation", null );
+				IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
+				IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
+				});
+
+				Ihandle* _refresh = IupItem( "Refresh Parser", null );
+				IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
+				IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					GLOBAL.outlineTree.softRefresh( cSci );
+					//actionManager.OutlineAction.refresh( cSci.getFullPath() );
+				});
+
+				Ihandle* _goto = IupItem( "Goto Defintion", null );
+				IupSetAttribute( _goto, "IMAGE", "icon_goto" );
+				IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					AutoComplete.toDefintionAndType( true );
+				});
+				
+				
+				Ihandle* popupMenu = IupMenu(
+												_undo,
+												_redo,
+												IupSeparator(),
+
+												_cut,
+												_copy,
+												_paste,
+												_delete,
+												IupSeparator(),
+
+												_selectall,
+												IupSeparator(),
+												
+												_showAnnotation,
+												_hideAnnotation,
+												_removeAllAnnotation,
+												IupSeparator(),
+												_refresh,
+												_goto,
+												null
+											);
+
+
+				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+				IupDestroy( popupMenu );
+			}
+			else
+			{
+				char[] s = fromStringz( status );
+
+				// "Goto Defintion":
+				if( s.length > 1 )
+				{
+					if( s[1] == 'C' )
+					{
+						if( button == '1' )	AutoComplete.toDefintionAndType( true );
+					}
 				}
 			}
 		}
@@ -1000,7 +1131,7 @@ extern(C)
 							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
 							if( id < count - 1 ) ++id; else id = 0;
 							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
 						}
 						return IUP_IGNORE;
 					}
@@ -1015,7 +1146,7 @@ extern(C)
 							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
 							if( id > 0 ) --id; else id = --count;
 							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id, -1 );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
 						}
 						return IUP_IGNORE;
 					}
