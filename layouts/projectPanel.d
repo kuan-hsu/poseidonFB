@@ -12,8 +12,8 @@ private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.c
 class CProjectTree
 {
 	private:
-	import		project;
-		
+	import		project, tango.io.device.File, tango.io.stream.Lines;
+	
 	Ihandle*	layoutHandle, tree;//, shadowTree;
 
 	void createLayout()
@@ -89,6 +89,82 @@ class CProjectTree
 	}
 	*/
 
+	void createProjectTree( char[] setupDir )
+	{
+		char[] prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
+
+		// Add Project's Name to Tree
+		IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( GLOBAL.projectManager[setupDir].name ) );
+		IupSetAttribute( tree, "IMAGE1", GLOBAL.cString.convert( "icon_prj" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED1", GLOBAL.cString.convert( "icon_prj_open" ) );
+		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
+		IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
+
+		// Shadow
+		//IupSetAttribute( shadowTree, "ADDBRANCH0", GLOBAL.cString.convert( setupDir ) );
+
+		
+		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
+		// Shadow
+		//IupSetAttribute( shadowTree, "ADDBRANCH1", "Others" );
+
+		foreach( char[] s; GLOBAL.projectManager[setupDir].others )
+		{
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
+			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+
+			// Shadow
+			//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
+		}
+		
+		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
+		// Shadow
+		//IupSetAttribute( shadowTree, "ADDBRANCH1", "Includes" );
+		foreach( char[] s; GLOBAL.projectManager[setupDir].includes )
+		{
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
+			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+
+			// Shadow
+			//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
+		}
+
+		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
+		// Shadow
+		//IupSetAttribute( shadowTree, "ADDBRANCH1", "Sources" );			
+		foreach( char[] s; GLOBAL.projectManager[setupDir].sources )
+		{
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
+			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+
+			// Shadow
+			//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
+		}
+
+		// Switch to project tree tab
+		IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
+		//IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
+		// Set Focus to Project Tree
+		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
+
+		// Recent Projects
+		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
+
+		IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
+	}
+
 	void CreateNewProject( char[] prjName, char[] prjDir )
 	{
 		//GLOBAL.activeProjectDirName = prjDir;
@@ -126,6 +202,8 @@ class CProjectTree
 
 		if( !setupDir.length ) return false;
 
+		setupDir = Util.replace( setupDir, '\\', '/' );
+
 		if( setupDir in GLOBAL.projectManager )
 		{
 			IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas already opened!" ) );
@@ -148,83 +226,7 @@ class CProjectTree
 				return false;
 			}
 
-			/*
-			GLOBAL.activeProjectDirName = GLOBAL.projectManager[setupDir].dir;
-
-			char[] 		prjDirName = GLOBAL.activeProjectDirName ~ "\\";
-			*/
-			char[] prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
-
-			// Add Project's Name to Tree
-			IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( GLOBAL.projectManager[setupDir].name ) );
-			IupSetAttribute( tree, "IMAGE1", GLOBAL.cString.convert( "icon_prj" ) );
-			IupSetAttribute( tree, "IMAGEEXPANDED1", GLOBAL.cString.convert( "icon_prj_open" ) );
-			version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
-			IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
-
-			// Shadow
-			//IupSetAttribute( shadowTree, "ADDBRANCH0", GLOBAL.cString.convert( setupDir ) );
-
-			
-			IupSetAttribute( tree, "ADDBRANCH1", "Others" );
-			// Shadow
-			//IupSetAttribute( shadowTree, "ADDBRANCH1", "Others" );
-	
-			foreach( char[] s; GLOBAL.projectManager[setupDir].others )
-			{
-				char[]		userData = s;
-				int			folderLocateId = _createTree( prjDirName, s );
-				
-				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
-				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
-
-				// Shadow
-				//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
-			}
-			
-			IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
-			// Shadow
-			//IupSetAttribute( shadowTree, "ADDBRANCH1", "Includes" );
-			foreach( char[] s; GLOBAL.projectManager[setupDir].includes )
-			{
-				char[]		userData = s;
-				int			folderLocateId = _createTree( prjDirName, s );
-				
-				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
-				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
-
-				// Shadow
-				//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
-			}
-
-			IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
-			// Shadow
-			//IupSetAttribute( shadowTree, "ADDBRANCH1", "Sources" );			
-			foreach( char[] s; GLOBAL.projectManager[setupDir].sources )
-			{
-				char[]		userData = s;
-				int			folderLocateId = _createTree( prjDirName, s );
-				
-				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
-				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
-
-				// Shadow
-				//IupSetAttributeId( shadowTree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( userData ) );
-			}
-
-			// Switch to project tree tab
-			IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
-			//IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
-			// Set Focus to Project Tree
-			version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
-
-			// Recent Projects
-			GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
-
-			IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
+			createProjectTree( setupDir );
 		}
 		else
 		{
@@ -234,6 +236,169 @@ class CProjectTree
 
 		return true;
 	}
+
+	bool importFbEditProject()
+	{
+		scope fileSelectDlg = new CFileDlg( null,  "FbEdit Project|*.fbp", "OPEN" );
+		char[] fbpFullPath = fileSelectDlg.getFileName();
+
+		if( !fbpFullPath.length ) return false;
+
+		scope sFN = new FilePath( fbpFullPath );
+		char[] _dir = sFN.path(); // include tail /
+
+		if( _dir.length )
+			if( _dir[length-1] == '/' ) _dir = _dir[0..length-1].dup;
+
+		if( _dir in GLOBAL.projectManager )
+		{
+			IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ _dir ~ "\"\nhas already opened!" ) );
+			return false;
+		}
+
+		scope poseidonFN = new FilePath( sFN.path ~ ".poseidon" );
+
+		if( poseidonFN.exists() )
+		{
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=WARNING,BUTTONDEFAULT=2,BUTTONS=YESNO" );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( "The Dir has poseidonFB Project File,\nContinue Import Anyway?" ) );
+			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+
+			if( IupGetInt( messageDlg, "BUTTONRESPONSE") == 2 ) return false;
+		}
+
+		scope file = new File( fbpFullPath, File.ReadExisting );
+
+		PROJECT			prj;
+		int				blockType; // blockType = 1 [Project], 2 [Make], 3 [TabOrder], 4 [File], 5 [BreakPoint], 6 [FileInfo], 7 [NoDebug]
+		char[][char[]]	fileArrays, optionArrays;
+		char[]			currentOption;
+
+		prj.dir = _dir;
+		prj.name = sFN.name;
+
+		foreach( line; new Lines!(char)(file) )
+		{
+			if( line.length )
+			{
+				char[] _lineData = Util.trim( line );
+				bool bContinue;
+
+				switch( _lineData )
+				{
+					case "[Project]":		blockType = 1; bContinue = true; break;
+					case "[Make]":			blockType = 2; bContinue = true; break;
+					case "[TabOrder]":		blockType = 3; bContinue = true; break;
+					case "[File]":			blockType = 4; bContinue = true; break;
+					case "[BreakPoint]":	blockType = 5; bContinue = true; break;
+					case "[FileInfo]":		blockType = 6; bContinue = true; break;
+					case "[NoDebug]":		blockType = 7; bContinue = true; break;
+					default:
+				}
+
+				if( !bContinue )
+				{
+					switch( blockType )
+					{
+						case 1:
+							int assignPos = Util.index( _lineData, "=" );
+							if( assignPos < _lineData.length - 1 )
+							{
+								char[] 	_keyWord = _lineData[0..assignPos];
+								char[]	_value = _lineData[assignPos+1..length];
+								if( _keyWord == "Description" )
+								{
+									prj.comment = _value;
+								}
+							}
+
+						case 2:
+							int assignPos = Util.index( _lineData, "=" );
+							if( assignPos < _lineData.length - 1 )
+							{
+								char[] 	_keyWord = _lineData[0..assignPos];
+								char[]	_value = _lineData[assignPos+1..length];
+
+								if( _keyWord == "Output" )
+								{
+									scope _fp = new FilePath( _value );
+									prj.targetName = _fp.name;
+								}
+								else if( _keyWord == "Run" )
+								{
+									prj.args = _value;
+								}
+								else  if( _keyWord == "Current" )
+								{
+									currentOption = _value;
+								}
+								else
+								{
+									if( _keyWord[0] > 48 && _keyWord[0] < 58 )
+										if( Integer.atoi( _keyWord ) < 1000 ) optionArrays[_keyWord] = _value;
+								}
+							}
+							break;
+
+						case 4:
+							int assignPos = Util.index( _lineData, "=" );
+							if( assignPos < _lineData.length - 1 )
+							{
+								char[] 	_keyWord = _lineData[0..assignPos];
+								char[]	_value = _lineData[assignPos+1..length];
+
+								if( _keyWord == "Main" )
+								{
+									if( fileArrays.length )	prj.mainFile = fileArrays[_value];
+									break;
+								}
+				
+								fileArrays[_keyWord] = _value;
+
+								scope _fp = new FilePath( Util.replace( _value, '\\', '/' ) );
+								if( lowerCase( _fp.ext ) == "bas" )
+								{
+									if( !_fp.isAbsolute ) prj.sources ~= ( prj.dir ~ "/" ~ _value ); else prj.sources ~= _value;
+								}
+								else if( lowerCase( _fp.ext ) == "bi" )
+								{
+									if( !_fp.isAbsolute ) prj.includes ~= ( prj.dir ~ "/" ~ _value ); else prj.includes ~= _value;
+								}
+								else
+								{
+									if( !_fp.isAbsolute ) prj.others ~= ( prj.dir ~ "/" ~ _value ); else prj.others ~= _value;
+								}
+							}
+							break;
+
+						default:
+					}
+				}
+			}
+		}
+
+		if( currentOption.length )
+		{
+			if( currentOption in optionArrays )
+			{
+				char[] option = optionArrays[currentOption];
+				int posComma = Util.index( option, "," );
+				if( posComma < option.length )
+				{
+					option = option[posComma+1..length];
+					option = Util.substitute( option, "fbc ", "" );
+					prj.compilerOption = Util.trim( option );
+				}
+			}
+		}
+
+		prj.type = "1";
+
+		GLOBAL.projectManager[prj.dir] = prj;
+		createProjectTree( prj.dir );
+		return true;
+	}	
 
 	void updateRecentProjects( char[] prjDir, char[] prjName )
 	{
@@ -969,7 +1134,7 @@ extern(C)
 	private int _createTree( char[] _prjDirName, inout char[] _titleName, int startID = 2 )
 	{
 		int		folderLocateId = startID;
-		char[]	fullPath = _titleName;
+		char[]	fullPath =Util.replace( _titleName, '\\', '/' );
 		
 		int pos = Util.index( fullPath, _prjDirName );
 		if( pos == 0 ) 	_titleName = Util.substitute( fullPath, _prjDirName, "" );
@@ -980,44 +1145,47 @@ extern(C)
 		int counterSplitText;
 		for( counterSplitText = 0; counterSplitText < splitText.length - 1; ++counterSplitText )
 		{
-			int 	countChild = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "TOTALCHILDCOUNT", folderLocateId );
-			//int 	countChild = IupGetIntId( tree, "COUNT", folderLocateId );
-			bool bFolerExist = false;
-			for( int i = 1; i <= countChild; ++ i )
+			if( splitText[counterSplitText].length )
 			{
-				char[]	kind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );
-				if( kind == "BRANCH" )
+				int 	countChild = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "TOTALCHILDCOUNT", folderLocateId );
+				//int 	countChild = IupGetIntId( tree, "COUNT", folderLocateId );
+				bool bFolerExist = false;
+				for( int i = 1; i <= countChild; ++ i )
 				{
-					if( splitText[counterSplitText] == fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", folderLocateId + i ) ) )
+					char[]	kind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );
+					if( kind == "BRANCH" )
 					{
-						// folder already exist
-						folderLocateId = folderLocateId+i;
-						bFolerExist = true;
-						break;
+						if( splitText[counterSplitText] == fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", folderLocateId + i ) ) )
+						{
+							// folder already exist
+							folderLocateId = folderLocateId+i;
+							bFolerExist = true;
+							break;
+						}
 					}
 				}
-			}
-			if( !bFolerExist )
-			{
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
-				if( pos != 0 )
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );
-				else
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( splitText[counterSplitText] ) );
-				
-				/*
-				// Shadow
-				if( pos != 0 )
+				if( !bFolerExist )
 				{
-					IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( "FIXED" ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
+					if( pos != 0 )
+						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );
+					else
+						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( splitText[counterSplitText] ) );
+					
+					/*
+					// Shadow
+					if( pos != 0 )
+					{
+						IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( "FIXED" ) );
+					}
+					else
+					{
+						IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
+					}
+					*/
+					
+					folderLocateId ++;
 				}
-				else
-				{
-					IupSetAttributeId( shadowTree, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
-				}
-				*/
-				
-				folderLocateId ++;
 			}
 		}
 

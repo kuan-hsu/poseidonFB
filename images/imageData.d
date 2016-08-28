@@ -44,6 +44,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_newprj", XPM.getIUPimage( "icons/xpm/newprj.xpm" ) ); // IupSetHandle("icon_newprj", load_image_newprj_wiz());
 	IupSetHandle( "icon_compile", XPM.getIUPimage( "icons/xpm/compile.xpm" ) ); // IupSetHandle("icon_compile", load_image_compile());
 	IupSetHandle( "icon_openprj", XPM.getIUPimage( "icons/xpm/openprj.xpm" ) ); // IupSetHandle("icon_openprj", load_image_openprj());
+	IupSetHandle( "icon_importprj", XPM.getIUPimage( "icons/xpm/fbedit.xpm" ) ); // IupSetHandle("icon_openprj", load_image_openprj());
 	IupSetHandle( "icon_marknext", XPM.getIUPimage( "icons/xpm/mark_next.xpm" ) ); // IupSetHandle("icon_marknext", load_image_mark_next());
 	IupSetHandle( "icon_uparrow", XPM.getIUPimage( "icons/xpm/up.xpm" ) ); // IupSetHandle("icon_uparrow", load_image_prev_nav());
 	IupSetHandle( "icon_saveas", XPM.getIUPimage( "icons/xpm/saveas.xpm" ) ); // IupSetHandle("icon_saveas", load_image_saveas());

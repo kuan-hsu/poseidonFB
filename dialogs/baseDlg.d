@@ -5,12 +5,13 @@ import iup.iup;
 class CBaseDialog
 {
 	protected:
-	import global, project, scintilla, actionManager;
+	import global, project, scintilla, actionManager, tools;
 
 	import tango.stdc.stringz, Integer = tango.text.convert.Integer;
 	
 	Ihandle*	_dlg;
 	Ihandle*	btnOK, btnCANCEL;//, btnAPPLY;
+	char*		_TITLETEXT;
 
 
 	Ihandle* createDlgButton()
@@ -46,7 +47,9 @@ class CBaseDialog
 	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
 	{
 		_dlg = IupDialog( null );
-		IupSetAttribute( _dlg, "TITLE", toStringz( title.dup ) );
+		//IupSetAttribute( _dlg, "TITLE", toStringz( title.dup ) );
+		_TITLETEXT = tools.getCString( title.dup );
+		IupSetAttribute( _dlg, "TITLE", _TITLETEXT );
 
 		char[] size = Integer.toString( w ) ~ "x" ~ Integer.toString( h );
 		if( w < 0 || h < 0 ) IupSetAttribute( _dlg, "RASTERSIZE", "NULL" ); else IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );
@@ -63,6 +66,7 @@ class CBaseDialog
 		IupSetHandle( "btnCANCEL", null );
 		IupSetHandle( "btnOK", null );
 		IupDestroy( _dlg );
+		tools.freeCString( _TITLETEXT );
 	}
 
 	char[] show( int x, int y )

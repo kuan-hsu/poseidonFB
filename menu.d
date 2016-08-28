@@ -177,6 +177,12 @@ void createMenu()
 	IupSetAttribute(item_openProject, "IMAGE", "icon_openprj");
 	IupSetCallback(item_openProject, "ACTION", cast(Icallback)&openProject_cb);
 
+	Ihandle* item_import = IupItem ("Import FbEdit Project", null);
+	//IupSetAttribute(item_exit, "KEY", "x");
+	IupSetAttribute(item_import, "IMAGE", "icon_importprj");
+	IupSetCallback(item_import, "ACTION", cast(Icallback)&importProject_cb);
+	
+
 	item_closeProject = IupItem ("Close Project", null);
 	IupSetAttribute(item_closeProject, "KEY", "C");
 	IupSetCallback(item_closeProject, "ACTION", cast(Icallback)&closeProject_cb);
@@ -388,7 +394,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.210\nBy Kuan Hsu (Taiwan)\n2016.08.21" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.212\nBy Kuan Hsu (Taiwan)\n2016.08.27" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -431,6 +437,8 @@ void createMenu()
 
 	project_menu = IupMenu( item_newProject,
 							item_openProject,
+							IupSeparator(),
+							item_import,
 							IupSeparator(),
 							item_saveProject,
 							item_saveAllProject,
@@ -832,8 +840,8 @@ extern(C)
 			}
 			else
 			{
-				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 1 );
-				IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 1 );
+				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
+				IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
 			}
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
@@ -920,6 +928,12 @@ extern(C)
 	int openProject_cb( Ihandle *ih )
 	{
 		GLOBAL.projectTree.openProject();
+		return IUP_DEFAULT;
+	}
+
+	int importProject_cb( Ihandle *ih )
+	{
+		GLOBAL.projectTree.importFbEditProject();
 		return IUP_DEFAULT;
 	}
 

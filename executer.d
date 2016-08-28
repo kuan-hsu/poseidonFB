@@ -362,7 +362,7 @@ struct ExecuterAction
 				}
 
 				char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : GLOBAL.compilerFullPath;
-				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 
 				Process p = new Process( true, txtCommand );
 				p.workDir( GLOBAL.projectManager[activePrjName].dir );
@@ -391,6 +391,8 @@ struct ExecuterAction
 						if( Util.index( line, ") error " ) < line.length )
 							bError = true;
 						else if( Util.index( line, "Error!" ) < line.length )
+							bError = true;
+						else if( Util.index( line, "error " ) < line.length )
 							bError = true;
 					}				
 					

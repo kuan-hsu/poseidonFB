@@ -364,7 +364,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 				PROJECT s;
 				s.name				= _prjName;
 				s.type				= _prjType;
-				s.dir				= _prjDir;
+				s.dir				= Util.replace( _prjDir, '\\', '/' );
 				s.mainFile			= _prjMainFile;
 				s.targetName		= _prjTargetName;
 				s.args				= _prjArgs;

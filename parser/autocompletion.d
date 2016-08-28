@@ -2248,7 +2248,7 @@ struct AutoComplete
 		POS		= getProcedurePos( iupSci, pos, "with" );
 		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end with";
 
-		POS		= getProcedurePos( iupSci, pos, "select" );
+		POS		= getProcedurePos( iupSci, pos, "select case" );
 		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end select";
 
 		POS		= getProcedurePos( iupSci, pos, "namespace" );
@@ -2267,24 +2267,40 @@ struct AutoComplete
 		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end operator";
 		 
 
-		POS		= skipCommentAndString( iupSci, pos, "enum", 0 );
-		int ENDPOS = skipCommentAndString( iupSci, pos, "end enum", 0 );
+		POS			= skipCommentAndString( iupSci, pos, "enum", 0 );
+		int ENDPOS	= skipCommentAndString( iupSci, pos, "end enum", 0 );
 		if( POS > -1 && POS != ENDPOS + 4)
-		{
 			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end enum";
-		}
 
 		POS		= skipCommentAndString( iupSci, pos, "scope", 0 );
 		ENDPOS	= skipCommentAndString( iupSci, pos, "end scope", 0 );
 		if( POS > -1 && POS != ENDPOS + 4)
-		{
 			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end scope";
+
+		POS		= skipCommentAndString( iupSci, pos, "for", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "exit for", 0 );
+		if( POS > -1 && POS != ENDPOS + 5 )
+		{
+			POS		= getProcedurePos( iupSci, pos, "for" );
+			if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "next";
 		}
 
-		/*
-		POS		= skipCommentAndString( iupSci, pos, "for", 0 );
-		if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "next";
-		*/
+
+		POS		= skipCommentAndString( iupSci, pos, "while", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "do while", 0 );
+		if( POS > -1 && POS != ENDPOS + 3 )
+		{
+			POS		= getProcedurePos( iupSci, pos, "while" );
+			if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "wend";
+		}
+
+		POS		= skipCommentAndString( iupSci, pos, "do", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "exit do", 0 );
+		if( POS > -1 && POS != ENDPOS + 5 )
+		{
+			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "loop";
+		}
+		
 
 		return null;
 	}

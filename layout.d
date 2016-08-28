@@ -30,7 +30,7 @@ void createExplorerWindow()
 
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
 	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=NO,SHOWGRIP=LINES" );
-	version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 1 );
+	version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
 
 
 	createTabs();
@@ -43,7 +43,7 @@ void createExplorerWindow()
 	//GLOBAL.explorerSplit = IupSplit( _split, GLOBAL.dndDocumentZBox );
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.fileListSplit, GLOBAL.dndDocumentZBox );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
-	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 1 );
+	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 
 	
 	createMessagePanel();
@@ -61,7 +61,7 @@ void createExplorerWindow()
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
-	version(Windows) IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 ); else IupSetInt( GLOBAL.messageSplit, "BARSIZE", 1 );
+	version(Windows) IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 ); else IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
 
 	Ihandle* StatusBar = createStatusBar();
 
