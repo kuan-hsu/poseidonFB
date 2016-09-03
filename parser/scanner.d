@@ -185,8 +185,19 @@ class CScanner
 							}
 						}
 						*/
+					case '>':
+						if( identifier == "-" )
+						{
+							TokenUnit t;
+							t.tok = TOK.Tptraccess;
+							t.identifier = "->";
+							t.lineNumber = lineNum;
+							results ~= t;
+							identifier = "";
+							break;
+						}
 
-					case ',', '+', '*', '/', ':', '(', ')', '[', ']', '>', '<', '=', '{', '}':
+					case ',', '+', '*', '/', ':', '(', ')', '[', ']', '<', '=', '{', '}': // '>', 
 						if( lowerCase( identifier.dup ) in identToTOK )
 						{
 							if( identifier.length )

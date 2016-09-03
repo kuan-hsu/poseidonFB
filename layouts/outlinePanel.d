@@ -186,7 +186,7 @@ class COutline
 			switch( lowerCase( _node.protection ) )
 			{
 				case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
-				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "236 95 0" ) ); break;
+				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 168 81" ) ); break;
 				default:
 			}
 		}
@@ -595,6 +595,16 @@ class COutline
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" ) );
 	}
 
+	void toBoldTitle( Ihandle* _tree, int id )
+	{
+		int commaPos = Util.index( GLOBAL.fonts[4].fontString, "," );
+		if( commaPos < GLOBAL.fonts[4].fontString.length )
+		{
+			char[] fontString = Util.substitute( GLOBAL.fonts[5].fontString.dup, ",", ",Bold " );
+			IupSetAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
+		}
+	}	
+
 	public:
 	this()
 	{
@@ -633,6 +643,7 @@ class COutline
 				Ihandle* tree = IupTree();
 				IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
 				IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
+				toBoldTitle( tree, 0 );
 				IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
 
 				IupAppend( zBoxHandle, tree );

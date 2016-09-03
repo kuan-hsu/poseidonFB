@@ -80,6 +80,9 @@ struct AutoComplete
 
 	static char[] getListImage( CASTnode node )
 	{
+		if( GLOBAL.toggleShowAllMember == "OFF" )
+			if( node.protection == "private" ) return null;
+		
 		int protAdd;
 		switch( node.protection )
 		{
@@ -1747,7 +1750,10 @@ struct AutoComplete
 									{
 										//AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 										CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-										if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+										if( memberFunctionMotherNode !is null )
+										{
+											if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+										}
 									}					
 								}
 
@@ -1778,7 +1784,11 @@ struct AutoComplete
 							if( memberFunctionMotherName.length )
 							{
 								CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-								if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+								if( memberFunctionMotherNode !is null )
+								{
+									if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+									//AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+								}
 							}					
 						}
 

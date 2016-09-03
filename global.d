@@ -32,7 +32,6 @@ struct GLOBAL
 	import iup.iup_scintilla;
 
 	import tango.stdc.stringz;
-	import tango.io.UnicodeFile;
 
 	import tools;
 	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.debugger;
@@ -117,7 +116,6 @@ struct GLOBAL
 	static PROJECT[char[]]		projectManager;
 
 
-	static char[]				txtCompilerOptions;
 	static CstringConvert		cString;
 	
 	static ShortKey[]			shortKeys;
@@ -227,8 +225,5 @@ struct GLOBAL
 
 		fu.name = "Annotation";
 		GLOBAL.fonts ~= fu;
-
-		scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
-		GLOBAL.txtCompilerOptions = fileCompilerOptions.read.dup;
 	}	
 }

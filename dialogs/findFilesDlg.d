@@ -260,8 +260,8 @@ extern(C) // Callback for CFindInFilesDialog
 				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_togglePrj" ), "VALUE" ) ) == "ON" ) _findCase = 3;
 				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggletoggleAllPrj" ), "VALUE" ) ) == "ON" ) _findCase = 4;
 
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 1;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleWholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleWholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 4;
 
 
 				if( buttonIndex == 1 )

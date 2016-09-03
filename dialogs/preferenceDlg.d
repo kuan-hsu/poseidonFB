@@ -137,7 +137,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleSHOWLISTTYPE, "VALUE", toStringz(GLOBAL.toggleShowListType.dup) );
 		IupSetHandle( "toggleSHOWLISTTYPE", toggleSHOWLISTTYPE );
 
-		Ihandle* toggleSHOWALLMEMBER = IupToggle( "Show All Members", null );
+		Ihandle* toggleSHOWALLMEMBER = IupToggle( "Show All Members( public, protected, private )", null );
 		IupSetAttribute( toggleSHOWALLMEMBER, "VALUE", toStringz(GLOBAL.toggleShowAllMember.dup) );
 		IupSetHandle( "toggleSHOWALLMEMBER", toggleSHOWALLMEMBER );
 
@@ -180,7 +180,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, /*toggleSHOWALLMEMBER,*/ frameLive, hBox00, hBox00_1, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, frameLive, hBox00, hBox00_1, null );
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );

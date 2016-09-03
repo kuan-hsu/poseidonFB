@@ -56,6 +56,7 @@ class CProjectTree
 
 		tree = IupTree();
 		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL" );
+		toBoldTitle( tree, 0 );
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
 		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_ExecuteLeaf_cb );
@@ -63,6 +64,16 @@ class CProjectTree
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,GAP=2" ) );
+	}
+
+	void toBoldTitle( Ihandle* _tree, int id )
+	{
+		int commaPos = Util.index( GLOBAL.fonts[4].fontString, "," );
+		if( commaPos < GLOBAL.fonts[4].fontString.length )
+		{
+			char[] fontString = Util.substitute( GLOBAL.fonts[4].fontString.dup, ",", ",Bold " );
+			IupSetAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
+		}
 	}
 
 
@@ -99,12 +110,18 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED1", GLOBAL.cString.convert( "icon_prj_open" ) );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
+		IupSetAttributeId( tree, "COLOR", 1, toStringz( "128 0 0" ) );
+		toBoldTitle( tree, 1 );
 
 		// Shadow
 		//IupSetAttribute( shadowTree, "ADDBRANCH0", GLOBAL.cString.convert( setupDir ) );
 
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
+		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		toBoldTitle( tree, 2 );
 		// Shadow
 		//IupSetAttribute( shadowTree, "ADDBRANCH1", "Others" );
 
@@ -122,6 +139,11 @@ class CProjectTree
 		}
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
+		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		toBoldTitle( tree, 2 );
+		
 		// Shadow
 		//IupSetAttribute( shadowTree, "ADDBRANCH1", "Includes" );
 		foreach( char[] s; GLOBAL.projectManager[setupDir].includes )
@@ -138,6 +160,12 @@ class CProjectTree
 		}
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
+		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
+		toBoldTitle( tree, 2 );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		
+		
 		// Shadow
 		//IupSetAttribute( shadowTree, "ADDBRANCH1", "Sources" );			
 		foreach( char[] s; GLOBAL.projectManager[setupDir].sources )
@@ -172,10 +200,26 @@ class CProjectTree
 		IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( prjName ) );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttribute( tree, "USERDATA1", tools.getCString( prjDir ) );
+		IupSetAttributeId( tree, "COLOR", 1, toStringz( "128 0 0" ) );
+		toBoldTitle( tree, 1 );
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
+		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		toBoldTitle( tree, 2 );
+		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
+		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		toBoldTitle( tree, 2 );
+		
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
+		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		toBoldTitle( tree, 2 );
 		// Set Focus to Project Tree
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
 
@@ -584,7 +628,7 @@ extern(C)
 				IupSetCallback( itemOpenProject, "ACTION", cast(Icallback) &menu.openProject_cb ); // From menu.d
 
 				Ihandle* itemCloseAllProject = IupItem( "Close All Project", null );
-				IupSetAttribute(itemCloseAllProject, "IMAGE", "icon_deleteall");
+				IupSetAttribute(itemCloseAllProject, "IMAGE", "icon_clearall");
 				IupSetCallback( itemCloseAllProject, "ACTION", cast(Icallback) &menu.closeAllProject_cb ); // From menu.d
 				
 
@@ -605,7 +649,7 @@ extern(C)
 				IupSetCallback( itemProperty, "ACTION", cast(Icallback) &menu.projectProperties_cb ); // From menu.d
 				
 				Ihandle* itemClose = IupItem( "Close", null );
-				IupSetAttribute(itemClose, "IMAGE", "icon_delete");
+				IupSetAttribute(itemClose, "IMAGE", "icon_clear");
 				IupSetCallback( itemClose, "ACTION", cast(Icallback) &menu.closeProject_cb );  // From menu.d
 
 				Ihandle* itemExplorer = IupItem( "Open In Explorer", null );

@@ -21,6 +21,13 @@ class CParser
 		if( tokenIndex < tokens.length ) return tokens[tokenIndex]; else throw new Exception( "Method next(), out of range!" );
 	}
 
+	TokenUnit prev()
+	{
+		if( tokenIndex > 0 ) return tokens[tokenIndex-1];
+
+		throw new Exception( "Method prev(), out of range!" );
+	}
+	
 	TokenUnit next()
 	{
 		if( tokenIndex < tokens.length - 1 ) return tokens[tokenIndex+1];
@@ -1903,6 +1910,17 @@ class CParser
 			char[] 	_name, _param, _type, _base;
 			int		_lineNum, _kind;
 
+			/+
+			if( tokenIndex != 0 )
+			{
+				if( prev().tok != TOK.Tcolon && prev().tok != TOK.Teol )
+				{
+					parseToken();
+					return false;
+				}
+			}
+			+/
+
 			if( token().tok == TOK.Ttype || token().tok == TOK.Tunion || ( bClass & token().tok == TOK.Tclass ) )
 			{
 				switch( token().tok )
@@ -2263,6 +2281,16 @@ class CParser
 					parseEnumBody();
 					
 				break;
+			}
+
+			// Pass Member Acdess
+			if( tokenIndex > 0 )
+			{
+				if( prev().tok == TOK.Tdot || prev.tok == TOK.Tptraccess )
+				{
+					tokenIndex ++;
+					continue;
+				}
 			}
 			
 			switch( tokens[tokenIndex].tok )

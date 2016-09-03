@@ -422,7 +422,7 @@ struct ScintillaAction
 				IupScintillaSendMessage( ih, 2024, --lineNumber, 0 ); // SCI_GOTOLINE 2024
 
 				// If debug window is on, don't scroll to top
-				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )	IupSetAttribute( ih, "FIRSTVISIBLELINE", toStringz( Integer.toString( lineNumber ) ) );
+				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )	IupSetInt( ih, "FIRSTVISIBLELINE", lineNumber );
 			}
 			StatusBarAction.update();
 
@@ -435,7 +435,7 @@ struct ScintillaAction
 		{
 			scope filePath = new FilePath( fullPath );
 			if( !filePath.exists ) return false;
-			
+
 			Encoding		_encoding;
 			char[] 	_text = FileAction.loadFile( fullPath, _encoding );
 			auto 	_sci = new CScintilla( fullPath, _text, _encoding );
@@ -452,6 +452,7 @@ struct ScintillaAction
 			if( lineNumber > -1 )
 			{
 				IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
+				IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber - 1 );
 			}
 			//StatusBarAction.update();
 
@@ -1104,7 +1105,7 @@ struct StatusBarAction
 				scope Layouter = new Layout!(char)();
 				char[] output = Layouter( "{,7}x{,5}", line, col );
 
-				IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output ) );// Update line x col
+				IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output.dup ) );// Update line x col
 
 				if( bOverType )
 				{
@@ -1372,7 +1373,7 @@ struct SearchAction
 		if( f.exists() )
 		{
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
-			IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
+			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 1 );
 
 			char[] 	document;
 			//char[]	splitLineDocument;

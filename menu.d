@@ -185,10 +185,12 @@ void createMenu()
 
 	item_closeProject = IupItem ("Close Project", null);
 	IupSetAttribute(item_closeProject, "KEY", "C");
+	IupSetAttribute(item_closeProject, "IMAGE", "icon_clear");
 	IupSetCallback(item_closeProject, "ACTION", cast(Icallback)&closeProject_cb);
 
 	Ihandle* item_closeAllProject = IupItem ("Close All Project", null);
 	IupSetAttribute(item_closeAllProject, "KEY", "j");
+	IupSetAttribute(item_closeAllProject, "IMAGE", "icon_clearall");
 	IupSetCallback(item_closeAllProject, "ACTION", cast(Icallback)&closeAllProject_cb);
 	
 	item_saveProject = IupItem ("Save Project", null);
@@ -394,7 +396,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.212\nBy Kuan Hsu (Taiwan)\n2016.08.27" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.216\nBy Kuan Hsu (Taiwan)\n2016.09.3" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -846,6 +848,9 @@ extern(C)
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
 		}
+
+		Ihandle* _activeDocument = ScintillaAction.getActiveIupScintilla();
+		if( _activeDocument != null ) IupSetFocus( _activeDocument ); else IupSetFocus( GLOBAL.mainDlg );
 		
 		return IUP_DEFAULT;
 	}

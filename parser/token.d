@@ -111,6 +111,7 @@ enum TOK
 	
 	Tconst,
 	Tpointer, Tptr,
+	Tptraccess,
 	Tunsigned,
 	Textern,
 	Tcommon,
