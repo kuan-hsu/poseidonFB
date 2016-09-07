@@ -799,22 +799,8 @@ extern(C)
 				IupSetCallback( _delete, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					Ihandle* _sci = actionManager.ScintillaAction.getActiveIupScintilla();
-					if( _sci != null )
-					{
-						char[] posText = fromStringz( IupGetAttribute( _sci, "SELECTIONPOS" ) );
-						if( posText.length )
-						{
-							int colonPos = Util.index( posText, ":" );
-							if( colonPos < posText.length )
-							{
-								int pos1 = Integer.atoi( posText[0..colonPos] );
-								int pos2 = Integer.atoi( posText[colonPos+1..length] );
+					if( _sci != null ) IupSetAttribute( _sci, "SELECTEDTEXT", "" );
 
-								char[] deleteRange = posText[0..colonPos] ~ "," ~ Integer.toString(pos2-pos1);
-								IupSetAttribute( _sci, "DELETERANGE", toStringz( deleteRange.dup ) );
-							}
-						}
-					}
 				});
 
 				Ihandle* _selectall = IupItem( "Select All", null );
