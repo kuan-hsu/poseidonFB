@@ -1090,6 +1090,7 @@ class CDebugger
 		IupSetAttribute( argTreeHandle, "DELNODE", "ALL" ); 
 		IupSetAttribute( shareTreeHandle, "DELNODE", "ALL" );
 		IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
+		IupSetAttributeId( backtraceHandle, "DELNODE", 0, "CHILDREN" );
 		IupSetAttribute( regListHandle, "REMOVEITEM", "ALL" ); 
 		//IupSetAttribute( bpListHandle, "REMOVEITEM", "ALL" ); // Remove All LIst Items
 
@@ -1355,10 +1356,6 @@ class DebugThread : Thread
 		proc.kill();
 		delete proc;
 
-		//GLOBAL.messageSplit_value = 800;
-		//IupSetInt( GLOBAL.messageSplit, "VALUE", splitValue );
-		//menu.message_cb( GLOBAL.menuMessageWindow );
-
 		IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "OFF" );
 		GLOBAL.messageSplit_value = 800;
 		IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
@@ -1427,7 +1424,7 @@ class DebugThread : Thread
 			caretPos = IupGetInt( GLOBAL.debugPanel.getConsoleHandle, GLOBAL.cString.convert( "CARETPOS" ) );
 
 			bExecuted = true;
-			IupSetAttribute( GLOBAL.debugPanel.getBacktraceHandle(), "TITLE", GLOBAL.cString.convert( executeFullPath ) );
+			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "TITLE", 0, GLOBAL.cString.convert( executeFullPath ) );
 			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, GLOBAL.cString.convert( "icon_debug_bt0" ) );
 			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, GLOBAL.cString.convert( "icon_debug_bt0" ) );
 			splitValue = IupGetInt( GLOBAL.messageSplit, "VALUE" );
@@ -1480,6 +1477,8 @@ class DebugThread : Thread
 				sendCommand( "tty " ~ ttyResult ~ "\n", true );+/
 			}
 			sendCommand( "set print array-indexes on\n", false );
+			//sendCommand( "set breakpoint pending on\n", false );
+			
 			//sendCommand( "set print elements 1\n", false );
 		}
 		catch( Exception e )

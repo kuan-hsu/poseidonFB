@@ -62,7 +62,7 @@ class CScintilla
 		}
 	}
 
-	void init( char[] _fullPath )
+	void init( char[] _fullPath, int insertPos )
 	{
 		fullPath = _fullPath;
 		scope mypath = new FilePath( fullPath );
@@ -88,7 +88,19 @@ class CScintilla
 			IupSetAttribute( sci, "TABTITLE", title.toStringz() );
 			IupSetHandle( GLOBAL.cString.convert( _fullPath ), sci );
 
-			IupAppend( GLOBAL.documentTabs, sci );
+			if( insertPos == -1 )
+			{
+				IupAppend( GLOBAL.documentTabs, sci );
+			}
+			else
+			{
+				if( IupGetChildCount( GLOBAL.documentTabs ) > insertPos )
+				{
+					Ihandle* refChild = IupGetChild( GLOBAL.documentTabs, insertPos );
+					IupInsert( GLOBAL.documentTabs, refChild, sci );
+				}
+			}
+			
 			IupMap( sci );
 			IupRefresh( GLOBAL.documentTabs );
 
@@ -117,7 +129,7 @@ class CScintilla
 		IupSetAttribute( sci, "EXPAND", "YES" );
 	}
 
-	this( char[] _fullPath, char[] _text = null, int _encode = Encoding.UTF_8 )
+	this( char[] _fullPath, char[] _text = null, int _encode = Encoding.UTF_8, int insertPos = -1 )
 	{
 		sci = IupScintilla();
 		IupSetAttribute( sci, "EXPAND", "YES" );
@@ -134,7 +146,7 @@ class CScintilla
 
 		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
 
-		init( _fullPath );
+		init( _fullPath, insertPos );
 
 		setText( _text );
 		setEncoding( _encode );
@@ -881,6 +893,7 @@ extern(C)
 				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 				IupDestroy( popupMenu );
 			}
+			/+
 			else
 			{
 				char[] s = fromStringz( status );
@@ -894,6 +907,7 @@ extern(C)
 					}
 				}
 			}
+			+/
 		}
 		
 		return IUP_DEFAULT;

@@ -12,7 +12,6 @@ void createTabs()
 	version(Windows) IupSetAttribute( GLOBAL.documentTabs, "CHILDOFFSET", "0x3" );
 	//IupSetAttribute( GLOBAL.documentTabs, "PADDING", "10x10" );
 
-	 
 	version( linux )
 	{
 		IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
@@ -33,12 +32,14 @@ extern(C)
 	// Close the document Iuptab......
 	private int tabClose_cb( Ihandle* ih, int pos )
 	{
-		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )	return actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
-		/*
 		Ihandle* _child = IupGetChild( ih, pos );
 		CScintilla cSci = ScintillaAction.getCScintilla( _child );
-		*/
+		if( cSci !is null )
+		{
+			IupSetInt( GLOBAL.documentTabs, "VALUEPOS", pos );
+			return actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+		}
+
 		return IUP_DEFAULT;
 	}
 
@@ -93,4 +94,3 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 }
-

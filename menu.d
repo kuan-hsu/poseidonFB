@@ -396,7 +396,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.216\nBy Kuan Hsu (Taiwan)\n2016.09.3" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.217\nBy Kuan Hsu (Taiwan)\n2016.09.05" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -628,10 +628,9 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	
 	int saveAsFile_cb( Ihandle* ih )
 	{
-		actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), true );
+		actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), true, true, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
 		return IUP_DEFAULT;
 	}		
 

@@ -3,7 +3,7 @@
 struct PROJECT
 {
 	private:
-	import actionManager;
+	import actionManager, tools;
 	
 	import tango.text.xml.Document;
 	import tango.text.xml.DocPrinter;
@@ -32,6 +32,25 @@ struct PROJECT
 
 	void saveFile()
 	{
+		char[] _replaceDir( char[] _fullPath, char[] _dir )
+		{
+			int pos;
+			
+			version(Windows)
+			{
+				pos = Util.index( tools.lowerCase( _fullPath ), tools.lowerCase( _dir ) );
+				if( pos == 0 ) return _fullPath[_dir.length..length].dup;
+			}
+			else
+			{
+				pos = Util.index( _fullPath, _dir );
+				if( pos == 0 ) return _fullPath[_dir.length..length].dup;
+			}
+
+			return _fullPath;
+		}
+	
+		
 		auto doc = new Document!(char);
 		
 		// attach an xml header
@@ -49,39 +68,38 @@ struct PROJECT
 		prjNode.element( null, "Comment", comment );
 		prjNode.element( null, "CompilerPath", compilerPath );
 
+		int		pos;
+		char[]	PATH = dir ~ "/";
+
 		auto prjIncludeNode = prjNode.element( null, "IncludeDirs" );
 		foreach( char[] s; includeDirs )
 		{
-			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
-			prjIncludeNode.element( null, "Name", s );
+			prjIncludeNode.element( null, "Name", _replaceDir( s, PATH ) );
 		}
 
 		auto prjLibNode = prjNode.element( null, "LibDirs" );
 		foreach( char[] s; libDirs ) 
 		{
-			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
-			prjLibNode.element( null, "Name", s );
+			prjLibNode.element( null, "Name", _replaceDir( s, PATH ) );
 		}
+			
 
 		auto prjSourceNode = prjNode.element( null, "Sources" );
 		foreach( char[] s; sources )
 		{
-			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
-			prjSourceNode.element( null, "Name", s );
+			prjSourceNode.element( null, "Name", _replaceDir( s, PATH ) );
 		}
 
 		auto prjIncludeFileNode = prjNode.element( null, "Includes" );
 		foreach( char[] s; includes ) 
 		{
-			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
-			prjIncludeFileNode.element( null, "Name", s );
+			prjIncludeFileNode.element( null, "Name", _replaceDir( s, PATH ) );
 		}
 
 		auto prjOthersNode = prjNode.element( null, "Others" );
 		foreach( char[] s; others ) 
 		{
-			if( Util.index( s, dir ~ "/" ) < s.length ) s = Util.substitute( s, dir ~ "/", "" );
-			prjOthersNode.element( null, "Name", s );
+			prjOthersNode.element( null, "Name", _replaceDir( s, PATH ) );
 		}
 
 
