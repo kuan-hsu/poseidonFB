@@ -918,7 +918,7 @@ class CPreferenceDialog : CBaseDialog
 		{
 			for( int i = 0; i < IupGetInt( listOptions, "COUNT" ); ++i )
 			{
-				optionsNode.element( null, "name", fromStringz( IupGetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ) ) ) );
+				optionsNode.element( null, "name", fromStringz( IupGetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ) ) ).dup );
 			}
 		}
 
@@ -928,7 +928,7 @@ class CPreferenceDialog : CBaseDialog
 		{
 			for( int i = 0; i < IupGetInt( listArgs, "COUNT" ); ++i )
 			{
-				argsNode.element( null, "name", fromStringz( IupGetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ) ) ) );
+				argsNode.element( null, "name", fromStringz( IupGetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ) ) ).dup );
 			}
 		}		
 		

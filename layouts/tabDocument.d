@@ -28,19 +28,22 @@ extern(C)
 	{
 		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos );
 	}
-	
-	// Close the document Iuptab......
-	private int tabClose_cb( Ihandle* ih, int pos )
-	{
-		Ihandle* _child = IupGetChild( ih, pos );
-		CScintilla cSci = ScintillaAction.getCScintilla( _child );
-		if( cSci !is null )
-		{
-			IupSetInt( GLOBAL.documentTabs, "VALUEPOS", pos );
-			return actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
-		}
 
-		return IUP_DEFAULT;
+	version( linux )
+	{
+		// Close the document Iuptab......
+		private int tabClose_cb( Ihandle* ih, int pos )
+		{
+			Ihandle* _child = IupGetChild( ih, pos );
+			CScintilla cSci = ScintillaAction.getCScintilla( _child );
+			if( cSci !is null )
+			{
+				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", pos );
+				return actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+			}
+
+			return IUP_DEFAULT;
+		}
 	}
 
 	private int tabRightClick_cb( Ihandle* ih, int pos )

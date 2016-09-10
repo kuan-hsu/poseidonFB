@@ -850,6 +850,13 @@ extern(C)
 				{
 					AutoComplete.toDefintionAndType( true );
 				});
+
+				Ihandle* _showType = IupItem( "Show Type", null );
+				IupSetAttribute( _showType, "IMAGE", "icon_type" );
+				IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					AutoComplete.toDefintionAndType( false );
+				});				
 				
 				
 				Ihandle* popupMenu = IupMenu(
@@ -872,6 +879,7 @@ extern(C)
 												IupSeparator(),
 												_refresh,
 												_goto,
+												_showType,
 												null
 											);
 

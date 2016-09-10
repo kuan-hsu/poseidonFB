@@ -152,16 +152,16 @@ extern(C) // Callback for CArgOptionDialog
 	{
 		if( GLOBAL.argsDlg !is null )
 		{
-			Ihandle* listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
-			if( listOptions != null )
+			Ihandle* _listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
+			if( _listOptions != null )
 			{
-				if( fromStringz( IupGetAttribute( listOptions, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( listOptions, fromStringz( IupGetAttribute( listOptions, "VALUE" ) ).dup , 10 );
+				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listOptions, fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ), 10 );
 			}
 
-			Ihandle* listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
-			if( listArgs != null )
+			Ihandle* _listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
+			if( _listArgs != null )
 			{
-				if( fromStringz( IupGetAttribute( listArgs, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( listArgs, fromStringz( IupGetAttribute( listArgs, "VALUE" ) ).dup , 10 );
+				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listArgs, fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ) , 10 );
 			}			
 			
 			IupHide( GLOBAL.argsDlg._dlg );

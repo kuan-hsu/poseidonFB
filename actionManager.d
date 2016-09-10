@@ -1544,12 +1544,12 @@ struct SearchAction
 			if( itemCount == limit )
 			{
 				IupSetInt( ih, "REMOVEITEM", limit );
-				IupSetAttributeId( ih, "INSERTITEM", 1, GLOBAL.cString.convert( text ) );
+				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text.dup ) );
 			}
 			else
 			{
 				
-				IupSetAttributeId( ih, "INSERTITEM", 1, GLOBAL.cString.convert( text ) );
+				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text.dup ) );
 			}
 		}
 	}

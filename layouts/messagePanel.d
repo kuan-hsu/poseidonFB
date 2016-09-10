@@ -41,9 +41,12 @@ extern(C)
 {
 	private void right_click()
 	{
-		Ihandle* _undo = IupItem( "Undo", null );
-		IupSetAttribute( _undo, "IMAGE", "icon_undo" );
-		IupSetCallback( _undo, "ACTION", cast(Icallback) &undo_ACTION );
+		version(Windows)
+		{
+			Ihandle* _undo = IupItem( "Undo", null );
+			IupSetAttribute( _undo, "IMAGE", "icon_undo" );
+			IupSetCallback( _undo, "ACTION", cast(Icallback) &undo_ACTION );
+		}
 
 		Ihandle* _cut = IupItem( "Cut", null );
 		IupSetAttribute( _cut, "IMAGE", "icon_cut" );
@@ -67,23 +70,40 @@ extern(C)
 
 		Ihandle* _clear = IupItem( "Clear All", null );
 		IupSetAttribute( _clear, "IMAGE", "icon_debug_clear" );
-		IupSetCallback( _clear, "ACTION", cast(Icallback) &clearall_ACTION );			
+		IupSetCallback( _clear, "ACTION", cast(Icallback) &clearall_ACTION );
 		
-		Ihandle* popupMenu = IupMenu(
-										_undo,
-										IupSeparator(),
+		Ihandle* popupMenu;
+		version(Windows)
+		{
+			popupMenu = IupMenu(
+								_undo,
+								IupSeparator(),
 
-										_cut,
-										_copy,
-										_paste,
-										_delete,
-										IupSeparator(),
+								_cut,
+								_copy,
+								_paste,
+								_delete,
+								IupSeparator(),
 
-										_selectall,
-										_clear,
-										null
-									);
+								_selectall,
+								_clear,
+								null
+								);
+		}
+		else
+		{
+			popupMenu = IupMenu(
+								_cut,
+								_copy,
+								_paste,
+								_delete,
+								IupSeparator(),
 
+								_selectall,
+								_clear,
+								null
+								);
+		}
 
 		IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 		IupDestroy( popupMenu );
@@ -194,6 +214,7 @@ extern(C)
 		else if( button == IUP_BUTTON3 )
 		{
 			right_click();
+			return IUP_IGNORE;
 		}
 		
 		return IUP_DEFAULT;
