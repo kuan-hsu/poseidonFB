@@ -213,7 +213,7 @@ struct LiveParser
 					if( oldHead.getChildrenCount == 0 )
 					{
 						delete newHead;
-						if( !GLOBAL.outlineTree.softRefresh( cSci ) ) GLOBAL.outlineTree.hardRefresh( cSci.getFullPath() );
+						GLOBAL.outlineTree.refresh( cSci );
 						return;
 					}
 
@@ -296,7 +296,7 @@ struct LiveParser
 
 				if( posHead == 0 )
 				{
-					if( !GLOBAL.outlineTree.softRefresh( cSci ) ) GLOBAL.outlineTree.hardRefresh( cSci.getFullPath() );
+					GLOBAL.outlineTree.refresh( cSci );
 					
 					int _ln = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 				

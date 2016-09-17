@@ -500,85 +500,6 @@ struct AutoComplete
 		return results;
 	}
 
-	static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false )
-	{
-		static int	level;
-
-		CASTnode[] results;
-
-		if( !bRootCall )
-		{
-			level ++;
-			if( level >= GLOBAL.includeLevel )
-			{
-				//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
-				level--;
-				return null;
-			}
-		}
-		else
-		{
-			level = 0;
-		}
-
-		foreach( CASTnode _node; originalNode.getChildren )
-		{
-			if( _node.kind == B_INCLUDE )
-			{
-				if( _node.type == "__FB_WIN32__" )
-				{
-					version(Windows)
-					{
-						//Stdout( "Include(Win32): " ~ _node.name ).newline;
-						results ~= check( _node.name, originalFullPath );
-					}
-				}
-				else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
-				{
-					version(linux)
-					{
-						results ~= check( _node.name, originalFullPath );
-					}
-				}
-				else if( _node.type == "!__FB_WIN32__" )
-				{
-					version(Windows){}
-					else
-					{
-						//Stdout( "Include((Linux)): " ~ _node.name ).newline;
-						results ~= check( _node.name, originalFullPath );
-					}
-				}
-				else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
-				{
-					version(linux){}
-					else
-					{
-						results ~= check( _node.name, originalFullPath );
-					}
-				}
-				/*
-				else if( _node.type.length )
-				{
-
-			
-				}
-				*/
-				else
-				{
-					//Stdout( "Include(NORMAL): " ~ _node.name ).newline;
-					results ~= check( _node.name, originalFullPath );
-				}
-			}
-		}
-
-		//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
-
-		if( level > 0 ) level--;
-
-		return results;
-	}
-
 	static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int B_KIND )
 	{
 		CASTnode[] results;
@@ -1060,6 +981,84 @@ struct AutoComplete
 	static bool bAutocompletionPressEnter;
 
 
+	static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false )
+	{
+		static int	level;
+
+		CASTnode[] results;
+
+		if( !bRootCall )
+		{
+			level ++;
+			if( level >= GLOBAL.includeLevel )
+			{
+				//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
+				level--;
+				return null;
+			}
+		}
+		else
+		{
+			level = 0;
+		}
+
+		foreach( CASTnode _node; originalNode.getChildren )
+		{
+			if( _node.kind == B_INCLUDE )
+			{
+				if( _node.type == "__FB_WIN32__" )
+				{
+					version(Windows)
+					{
+						//Stdout( "Include(Win32): " ~ _node.name ).newline;
+						results ~= check( _node.name, originalFullPath );
+					}
+				}
+				else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
+				{
+					version(linux)
+					{
+						results ~= check( _node.name, originalFullPath );
+					}
+				}
+				else if( _node.type == "!__FB_WIN32__" )
+				{
+					version(Windows){}
+					else
+					{
+						//Stdout( "Include((Linux)): " ~ _node.name ).newline;
+						results ~= check( _node.name, originalFullPath );
+					}
+				}
+				else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
+				{
+					version(linux){}
+					else
+					{
+						results ~= check( _node.name, originalFullPath );
+					}
+				}
+				/*
+				else if( _node.type.length )
+				{
+
+			
+				}
+				*/
+				else
+				{
+					//Stdout( "Include(NORMAL): " ~ _node.name ).newline;
+					results ~= check( _node.name, originalFullPath );
+				}
+			}
+		}
+
+		//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
+
+		if( level > 0 ) level--;
+
+		return results;
+	}
 	
 	static int getProcedurePos( Ihandle* iupSci, int pos, char[] targetText )
 	{

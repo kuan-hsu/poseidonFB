@@ -32,7 +32,7 @@ struct ExecuterAction
 		{
 			Process p = new Process( true, command );
 			if( cwd.length ) p.workDir( cwd );
-			//p.redirect( Redirect.None );
+			p.redirect( Redirect.None );
 			p.execute;
 			
 			p.wait;
@@ -67,7 +67,7 @@ struct ExecuterAction
 			}
 
 			if( cwd.length ) p.workDir( cwd );
-			//p.redirect( Redirect.None );
+			p.redirect( Redirect.None );
 			p.execute;
 			
 			auto result = p.wait;

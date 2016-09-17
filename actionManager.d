@@ -365,6 +365,50 @@ struct ScintillaAction
 	import scintilla;
 	import parser.scanner,  parser.token, parser.parser;
 
+
+	import tango.core.Thread;
+	// Inner Class
+	class ParseThread : Thread
+	{
+		private:
+		import			parser.ast, parser.autocompletion;
+		
+		char[]			pFullPath;
+		CASTnode		pParseTree;
+
+		public:
+		this( char[] _pFullPath )
+		{
+			pFullPath = _pFullPath;
+			pParseTree = GLOBAL.outlineTree.loadFile( pFullPath );
+			super( &run );
+		}
+
+		void run()
+		{
+			if( pParseTree !is null )
+			{
+				auto _parsers = AutoComplete.getIncludes( pParseTree, pFullPath, true );
+				if( GLOBAL.editorSetting00.Message == "ON" )
+				{
+					version(Windows)
+					{
+						IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Parse File: [" ~ pFullPath ~ "]"  ) );
+
+						char[] Name;
+						foreach( _p; _parsers )
+							if( _p.name.length ) Name ~= ( "    Pre-Parse file: [" ~ _p.name ~ "]\n" );
+						
+						IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( Name ) );
+						//int pos = IupGetInt( GLOBAL.outputPanel, "COUNT" );
+						//IupSetInt( GLOBAL.outputPanel, "CARETPOS", pos );
+					}
+				}
+			}
+		}
+	}
+	
+
 	public:
 	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8N, char[] existData = null, bool bCreateActualFile = true, int insertPos = -1 )
 	{
@@ -459,7 +503,9 @@ struct ScintillaAction
 			GLOBAL.fileListTree.addItem( _sci );
 			
 			// Parser
-			GLOBAL.outlineTree.loadFile( fullPath );
+			//GLOBAL.outlineTree.loadFile( fullPath );
+			ParseThread subThread = new ParseThread( fullPath );
+			subThread.start();
 
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
@@ -780,7 +826,7 @@ struct ScintillaAction
 				}
 
 				cSci.saveFile();
-				GLOBAL.outlineTree.hardRefresh( fullPath ); //Update Parser
+				GLOBAL.outlineTree.refresh( cSci ); //Update Parser
 			}
 		}
 		catch
@@ -900,7 +946,7 @@ struct ScintillaAction
 						}
 						
 						_sci.saveFile();
-						GLOBAL.outlineTree.hardRefresh( _sci.getFullPath() );
+						GLOBAL.outlineTree.refresh( _sci );
 						break;
 					}
 				}
@@ -1455,10 +1501,10 @@ struct SearchAction
 				}
 
 				File.set( fullPath, document );
-				if( tools.lowerCase( fullPath ) in GLOBAL.scintillaManager )
+				if( lowerCase( fullPath ) in GLOBAL.scintillaManager )
 				{
-					GLOBAL.scintillaManager[tools.lowerCase( fullPath )].setText( document );
-					GLOBAL.outlineTree.hardRefresh( fullPath );
+					GLOBAL.scintillaManager[lowerCase( fullPath )].setText( document );
+					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[lowerCase( fullPath )] );
 					
 				}
 				return count;

@@ -34,7 +34,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnOpen, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCompileBinFile_cb );
 
 		Ihandle* hBox01 = IupHbox( labelCompiler, textCompilerPath, btnOpen, null );
-		IupSetAttribute( hBox01, "ALIGNMENT", "ACENTER" );
+		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 
 		
 		Ihandle* labelDebugger = IupLabel( "Debugger Path:" );
@@ -50,7 +50,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenDebuggerBinFile_cb );
 
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
-		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
+		IupSetAttributes( hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 		
 
 		Ihandle* labelDefaultOption = IupLabel( "Compiler Opts:" );
@@ -70,7 +70,7 @@ class CPreferenceDialog : CBaseDialog
 
 
 		Ihandle* hBox03 = IupHbox( labelDefaultOption, textDefaultOption, btnCompilerOpts, null );
-		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
+		IupSetAttributes( hBox03, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 
 
 
@@ -99,7 +99,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleUseParser", toggleUseParser );
 		
 		Ihandle* labelTrigger = IupLabel( "Autocompletion Trigger:" );
-		IupSetAttributes( labelTrigger, "SIZE=100x12" );
+		IupSetAttributes( labelTrigger, "SIZE=96x12" );
 		
 		Ihandle* textTrigger = IupText( null );
 		IupSetAttribute( textTrigger, "SIZE", "30x12" );
@@ -107,8 +107,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( textTrigger, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
 		IupSetHandle( "textTrigger", textTrigger );
 
-		Ihandle* labelIncludeLevel = IupLabel( "Include Levels:" );
-		IupSetAttributes( labelIncludeLevel, "SIZE=100x12,GAP=0" );
+		Ihandle* labelIncludeLevel = IupLabel( "    Include Levels:" );
+		IupSetAttributes( labelIncludeLevel, "SIZE=80x12,GAP=0" );
 		
 		Ihandle* textIncludeLevel = IupText( null );
 		IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
@@ -178,9 +178,9 @@ class CPreferenceDialog : CBaseDialog
 
 
 
-		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
-		Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, frameLive, hBox00, hBox00_1, null );
+		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
+		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, frameLive, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
@@ -253,6 +253,9 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleColorOutline, "VALUE", toStringz(GLOBAL.editorSetting00.ColorOutline.dup) );
 		IupSetHandle( "toggleColorOutline", toggleColorOutline );		
 
+		Ihandle* toggleMessage = IupToggle( "Show IDE Message", null );
+		IupSetAttribute( toggleMessage, "VALUE", toStringz(GLOBAL.editorSetting00.Message.dup) );
+		IupSetHandle( "toggleMessage", toggleMessage );		
 
 
 		Ihandle* labelTabWidth = IupLabel( "Tab Width:" );
@@ -290,6 +293,10 @@ class CPreferenceDialog : CBaseDialog
 
 			IupSetAttributes( toggleAutoEnd, "" ),
 			IupSetAttributes( toggleColorOutline, "" ),
+
+			IupSetAttributes( toggleMessage, "" ),
+			IupSetAttributes( IupFill, "" ),
+			
 
 			IupSetAttributes( hBoxTab, "" ),
 			IupSetAttributes( hBoxColumn, "" ),
@@ -656,6 +663,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleShowSpace", null );
 		IupSetHandle( "toggleAutoEnd", null );
 		IupSetHandle( "toggleColorOutline", null );
+		IupSetHandle( "toggleMessage", null );
 
 		
 		IupSetHandle( "textTabWidth", null );
@@ -797,7 +805,8 @@ class CPreferenceDialog : CBaseDialog
 		.attribute( null, "TabWidth", GLOBAL.editorSetting00.TabWidth )
 		.attribute( null, "ColumnEdge", GLOBAL.editorSetting00.ColumnEdge )
 		.attribute( null, "EolType", GLOBAL.editorSetting00.EolType )
-		.attribute( null, "ColorOutline", GLOBAL.editorSetting00.ColorOutline );
+		.attribute( null, "ColorOutline", GLOBAL.editorSetting00.ColorOutline )
+		.attribute( null, "Message", GLOBAL.editorSetting00.Message );
 		/+
 		//<font name="Consolas" size="11" bold="OFF" italic="OFF" underline="OFF" forecolor="0 0 0" backcolor="255 255 255"></font>
 		editorNode.element( null, "font" )
@@ -1124,6 +1133,9 @@ class CPreferenceDialog : CBaseDialog
 
 			result = root.query.descendant("toggle00").attribute("ColorOutline");
 			foreach( e; result ) GLOBAL.editorSetting00.ColorOutline = e.value;
+
+			result = root.query.descendant("toggle00").attribute("Message");
+			foreach( e; result ) GLOBAL.editorSetting00.Message = e.value;
 
 			// Font
 			//GLOBAL.fonts.length = 0;
@@ -1622,6 +1634,8 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editorSetting00.ShowSpace			= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.AutoEnd				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.ColorOutline			= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorOutline" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.Message				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMessage" ), "VALUE" )).dup;
+
 		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
 

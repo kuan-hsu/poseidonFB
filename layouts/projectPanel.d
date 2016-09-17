@@ -13,6 +13,38 @@ class CProjectTree
 {
 	private:
 	import		project, tango.io.device.File, tango.io.stream.Lines;
+	import		tango.core.Thread, parser.autocompletion;
+
+	/+
+	// Inner Class
+	class ParseThread : Thread
+	{
+		private:
+
+		PROJECT 	p;
+
+		public:
+		this( PROJECT _p )
+		{
+			p = _p;
+			super( &run );
+		}
+
+		void run()
+		{
+			foreach( char[] s; p.sources ~ p.includes )
+			{
+				auto _parserTree = GLOBAL.outlineTree.loadFile( s );
+				auto _parsers = AutoComplete.getIncludes( _parserTree, s, true );
+				/*
+				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( s ) );
+				foreach( _p; _parsers )
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\t" ~ _p.name ) );
+				*/
+			}
+		}
+	}
+	+/
 	
 	Ihandle*	layoutHandle, tree;
 
@@ -75,6 +107,7 @@ class CProjectTree
 			IupSetAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
 		}
 	}
+
 
 
 	public:
@@ -223,6 +256,8 @@ class CProjectTree
 			IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas already opened!" ) );
 			return false;
 		}
+
+		if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Load Project: [" ~ setupDir ~ "]" ) );
 		
 		char[] setupFileName = setupDir ~ "/.poseidon";
 
@@ -247,6 +282,14 @@ class CProjectTree
 			IupMessage( "Error!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas lost setting xml file!" ) );
 			return false;
 		}
+
+		/+
+		// Pre-Load Parser
+		ParseThread subThread = new ParseThread( GLOBAL.projectManager[setupDir] );
+		subThread.start();
+		+/
+
+		if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Done."  ) );
 
 		return true;
 	}

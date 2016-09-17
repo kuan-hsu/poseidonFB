@@ -851,11 +851,17 @@ class CParser
 								parseToken( TOK.Tassign );
 								if( token().tok == TOK.Tnumbers || token().tok == TOK.Tidentifier )
 								{
+									bool bSingle;
+									if( token().tok == TOK.Tnumbers )
+									{
+										if( Util.index( token().identifier, "." ) < token().identifier.length ) bSingle = true;
+									}
 									parseToken( );
+									
 									if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 									{
 										parseToken( );
-										activeASTnode.addChild( _name, B_VARIABLE, null, null, null, _lineNum );
+										if( bSingle ) activeASTnode.addChild( _name, B_VARIABLE, null, "single", null, _lineNum ); else activeASTnode.addChild( _name, B_VARIABLE, null, "integer", null, _lineNum );
 										return true;
 									}
 									else

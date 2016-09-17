@@ -15,6 +15,63 @@ class COutline
 	private:
 	import parser.scanner, parser.token, parser.parser;
 
+	/+
+	import tango.core.Thread;
+	// Inner Class
+	class ReparseThread : Thread
+	{
+		private:
+		import			parser.ast, parser.autocompletion;
+		
+		CScintilla 		cSci;
+
+		public:
+		this( CScintilla _cSci )
+		{
+			cSci = _cSci;
+			super( &run );
+		}
+
+		void run()
+		{
+			if( GLOBAL.enableParser != "ON" ) return;
+			
+			if( cSci !is null )
+			{
+				scope f = new FilePath( cSci.getFullPath );
+
+				char[] _ext = toLower( f.ext() );
+				if( _ext != "bas" && _ext != "bi" ) return;
+				
+				if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+				{
+					Ihandle* actTree = getTree( cSci.getFullPath );
+					if( actTree != null )
+					{
+						try
+						{
+							char[] document = cSci.getText();
+							GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
+							
+							CASTnode astHeadNode = GLOBAL.parser.parse( cSci.getFullPath );
+							CASTnode temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
+
+							GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
+							delete temp;
+
+							IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" ); 
+							foreach_reverse( CASTnode t; astHeadNode.getChildren() )
+							{
+								append( actTree, t, 0 );
+							}
+						}
+						catch( Exception e ){}
+					}
+				}
+			}
+		}
+	}
+	+/
 
 	Ihandle*			layoutHandle, zBoxHandle;
 	CASTnode[]			listItemASTs;
@@ -558,8 +615,7 @@ class COutline
 		IupSetCallback( outlineButtonFresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-			//if( cSci !is null ) actionManager.OutlineAction.refresh( cSci.getFullPath() );
-			GLOBAL.outlineTree.softRefresh( cSci );
+			GLOBAL.outlineTree.refresh( cSci );
 		});
 
 		Ihandle* outlineButtonHide = IupButton( null, "Hide" );
@@ -692,14 +748,88 @@ class COutline
 				}
 			}
 		}
-	}	
+	}
+
+	Ihandle* getTree( char[] fullPath )
+	{
+		for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++i )
+		{
+			Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ); 
+			if( ih != null )
+			{
+				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+
+				if( fullPath == _fullPath ) return ih;
+			}
+		}
+
+		return null;
+	}
 	
+
 	Ihandle* getZBoxHandle(){ return zBoxHandle; }
 
-	void loadFile( char[] fullPath )
+
+	CASTnode loadFile( char[] fullPath )
 	{
-		hardRefresh( fullPath );
-	}	
+		if( GLOBAL.enableParser != "ON" ) return null;
+		
+		scope f = new FilePath( fullPath );
+
+		char[] _ext = toLower( f.ext() );
+
+		if( _ext != "bas" && _ext != "bi" ) return null;
+
+		
+		CScintilla actCSci;
+		
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+		{
+			if( upperCase(fullPath) == upperCase(cSci.getFullPath()) )
+			{
+				actCSci = cSci;
+				break;
+			}
+		}
+
+
+		if( actCSci !is null )
+		{
+			if( upperCase(fullPath) in GLOBAL.parserManager )
+			{
+				cleanTree( fullPath );
+			}
+			else
+			{
+				char[] document = actCSci.getText();
+				GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.parser.parse( fullPath );
+				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\t"~fullPath ) );
+			}
+
+			createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+			CScintilla nowCsci = ScintillaAction.getActiveCScintilla();
+			if( nowCsci == actCSci ) changeTree( fullPath );
+		}
+		else
+		{
+			if( upperCase(fullPath) in GLOBAL.parserManager )
+			{
+			}
+			else
+			{
+				// Don't Create Tree
+				// Parser
+				GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.parser.parse( fullPath );
+				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( fullPath ) );
+			}
+		}
+
+		return GLOBAL.parserManager[upperCase(fullPath)];
+
+		//hardRefresh( fullPath );
+	}
 
 	char[] getImageName( CASTnode _node )
 	{
@@ -1152,49 +1282,20 @@ class COutline
 		}			
 	}
 
-	void refresh( CScintilla cSci )
-	{
-		if( cSci !is null )
-		{
-			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
-			{
-				Ihandle* actTree;
-				
-				for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
-				{
-					Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
-					if( ih != null )
-					{
-						char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
-						if( cSci.getFullPath == _fullPath )
-						{
-							actTree = ih;
-							break;
-						}
-					}
-				}
-
-				if( actTree != null ) 
-				{
-					softRefresh( cSci, actTree );
-				}
-				else
-				{
-					hardRefresh( cSci.getFullPath() );
-				}
-			}
-		}
-	}
-
-	bool softRefresh( CScintilla cSci, Ihandle* actTree = null )
+	bool refresh( CScintilla cSci )
 	{
 		if( GLOBAL.enableParser != "ON" ) return false;
+
+		scope f = new FilePath( cSci.getFullPath );
+
+		char[] _ext = toLower( f.ext() );
+		if( _ext != "bas" && _ext != "bi" ) return false;
 		
 		if( cSci !is null )
 		{
 			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 			{
-				if( actTree == null ) actTree = getActiveTree();
+				Ihandle* actTree = getTree( cSci.getFullPath );
 				if( actTree != null )
 				{
 					try
@@ -1220,77 +1321,19 @@ class COutline
 				}
 			}
 		}
-
-		return false;
-	}
-
-	void hardRefresh( char[] fullPath )
-	{
-		if( GLOBAL.enableParser != "ON" ) return;
-		
-		scope f = new FilePath( fullPath );
-
-		char[] _ext = toLower( f.ext() );
-
-		if( _ext != "bas" && _ext != "bi" ) return;
-		
-		CScintilla actCSci;
-		
-		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+		/+
+		try
 		{
-			if( upperCase(fullPath) == upperCase(cSci.getFullPath()) )
-			{
-				actCSci = cSci;
-				break;
-			}
+			ReparseThread p = new ReparseThread( cSci );
+			p.start();
 		}
-
-		if( actCSci !is null )
+		catch
 		{
-			//IupSetAttribute( actCSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
-			// Parser
-			char[] document = actCSci.getText();
-			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
-			auto astHeadNode = GLOBAL.parser.parse( fullPath );
-
-			if( upperCase(fullPath) in GLOBAL.parserManager )
-			{
-				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
-				delete temp;
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-
-				cleanTree( fullPath );
-			}
-			else
-			{
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-			}
-
-			createTree( astHeadNode );
-
-			CScintilla nowCsci = ScintillaAction.getActiveCScintilla();
-			if( nowCsci == actCSci ) changeTree( fullPath );
+			return false;
 		}
-		else
-		{
-			// Don't Create Tree
-			// Parser
-			GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
-			auto astHeadNode = GLOBAL.parser.parse( fullPath );
+		+/
 
-			if( upperCase(fullPath) in GLOBAL.parserManager )
-			{
-				auto temp = GLOBAL.parserManager[upperCase(fullPath)] ;
-				delete temp;
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-
-				cleanTree( fullPath );
-			}
-			else
-			{
-				GLOBAL.parserManager[upperCase(fullPath)] = astHeadNode;
-			}			
-		}
+		return true;
 	}
 
 	CASTnode parserText( char[] text, int B_KIND = 0 )
@@ -1384,79 +1427,6 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
-
-	/*
-	private int COutline_refresh( Ihandle *ih )
-	{
-		Ihandle* _iih = IupGetHandle( "outline_rightclick" );
-		if( _iih != null )
-		{
-			char[] fullPath = fromStringz( IupGetAttributeId( _iih, "TITLE", 0 ) );
-			actionManager.OutlineAction.refresh( fullPath );
-		}
-		IupSetHandle( "outline_rightclick", null );
-		return IUP_DEFAULT;
-	}
-
-	private int COutline_expand( Ihandle *ih )
-	{
-		
-		Ihandle* _iih = IupGetHandle( "outline_rightclickexpand" );
-		if( _iih != null )
-		{
-			
-			if( fromStringz( IupGetAttributeId( _iih, "STATE", 0 ) ) == "EXPANDED" )
-				IupSetAttribute( _iih, "EXPANDALL", "NO" );
-			else
-			{
-				IupSetAttribute( _iih, "EXPANDALL", "YES" );
-				IupSetAttribute( _iih, "TOPITEM", "YES" ); // Set position to top
-			}
-		}
-		IupSetHandle( "outline_rightclickexpand", null );
-		return IUP_DEFAULT;
-	}
-	*/
-
-	/+
-	private int COutline_search( Ihandle *ih )
-	{
-		Ihandle* _iih = IupGetHandle( "outline_search" );
-		if( _iih != null )
-		{
-			// Open Dialog Window
-			scope test = new CSingleTextDialog( -1, -1, "Mark Search Outline...", "Target:", null, null, false );
-			char[] target = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
-			if( target.length )
-			{
-				Ihandle* treeHandle = GLOBAL.outlineTree.getActiveTree;
-				if( treeHandle != null )
-				{
-					IupSetAttributes( treeHandle, GLOBAL.cString.convert( "MARKMODE=MULTIPLE" ) );
-					/*
-					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
-					{
-						IupSetAttributeId( treeHandle, "COLOR", i, "0 0 0" );
-					}
-					*/
-					IupSetAttributeId( treeHandle, "MARKED", 0, "NO" );
-					
-					for( int i = 1; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
-					{
-						//IupMessage( "", IupGetAttributeId( treeHandle, "TITLE", i ) );
-						char[] title = fromStringz( IupGetAttributeId( treeHandle, "TITLE", i ) );
-						int colonPos = Util.index( title, ":" );
-						if( colonPos < title.length ) title = title[0..colonPos].dup;
-
-						if( Util.index( lowerCase( title ), lowerCase( target ) ) < title.length ) IupSetAttributeId( treeHandle, "MARKED", i, "YES" );//IupSetAttributeId( treeHandle, "COLOR", i, "0 0 255" );
-					}
-				}
-			}
-		}
-		IupSetHandle( "outline_search", null );
-		return IUP_DEFAULT;
-	}
-	+/
 
 	private int COutline_List_DROPDOWN_CB( Ihandle *ih, int state )
 	{

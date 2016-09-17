@@ -840,8 +840,7 @@ extern(C)
 				IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					GLOBAL.outlineTree.softRefresh( cSci );
-					//actionManager.OutlineAction.refresh( cSci.getFullPath() );
+					GLOBAL.outlineTree.refresh( cSci );
 				});
 
 				Ihandle* _goto = IupItem( "Goto Defintion", null );
@@ -1104,8 +1103,7 @@ extern(C)
 					if( sk.keyValue == c )
 					{
 						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-						GLOBAL.outlineTree.softRefresh( cSci );
-						//actionManager.OutlineAction.refresh( cSci.getFullPath() );
+						GLOBAL.outlineTree.refresh( cSci );
 					}
 					break;
 				case "Save File":					
