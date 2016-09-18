@@ -19,8 +19,7 @@ It supports:
 
 Win7:
 
-![poseidonFB_windows.png](https://bitbucket.org/repo/j5rjj4/images/218696064-poseidonFB_windows.png)
-
+![poseidonFB_windows.png](https://bitbucket.org/repo/j5rjj4/images/501719893-poseidonFB_windows.png)
 
 Linux mint18 x64:
 
