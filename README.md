@@ -45,4 +45,4 @@ sudo ./install
 
 ```
 
-Then choose x64 or x86 verrsion to download, extract to floder, then run the poseidonFB
+Then choose x64 or x86 version to download, extract to floder, then run the poseidonFB
