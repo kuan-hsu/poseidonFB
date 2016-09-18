@@ -41,6 +41,7 @@
 				<name>dialogs\singleTextDlg.d</name>
 				<name>executer.d</name>
 				<name>global.d</name>
+				<name>IDE.d</name>
 				<name>images\imageData.d</name>
 				<name>images\xpm.d</name>
 				<name>layout.d</name>

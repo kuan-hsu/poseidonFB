@@ -1,15 +1,12 @@
 ﻿module dialogs.shortcutDlg;
 
 import iup.iup;
-import global, tools, dialogs.baseDlg, dialogs.preferenceDlg;
+import global, IDE, tools, dialogs.baseDlg;
 import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util, tango.io.Stdout;;
 
 class CShortCutDialog : CBaseDialog
 {
 	private:
-	
-
-	
 	Ihandle*	textResult;
 	char[]		labelName;
 
@@ -130,7 +127,7 @@ extern(C) // Callback for CSingleTextDialog
 		if( fromStringz( IupGetAttribute( _alt, "VALUE" ) ) == "ON" ) keyValue ~= "A+";else keyValue ~= "+";
 		keyValue ~= fromStringz( IupGetAttribute( _list, "VALUESTRING" ) ).dup;
 
-		int value = CPreferenceDialog.convertShortKeyValue2Integer( keyValue );
+		int value = IDECONFIG.convertShortKeyValue2Integer( keyValue );
 		foreach( ShortKey sk; GLOBAL.shortKeys )
 		{
 			if( sk.keyValue == value )
@@ -179,7 +176,7 @@ extern(C) // Callback for CSingleTextDialog
 		Ihandle* shortCutList = IupGetHandle( "shortCutList" );
 		if( shortCutList != null )
 		{
-			keyValue = CPreferenceDialog.convertShortKeyValue2String( GLOBAL.shortKeys[pos].keyValue );
+			keyValue = IDECONFIG.convertShortKeyValue2String( GLOBAL.shortKeys[pos].keyValue );
 			char[][] splitWord = Util.split( keyValue, "+" );
 
 			if(  splitWord.length == 4 ) 

@@ -97,7 +97,8 @@ void main()
 		Stdout( "IUP open error!!!" ).newline;
 		return;
 	}
-	
+
+	// Init IDE
 	createEditorSetting();
 
 	IupScintillaOpen();

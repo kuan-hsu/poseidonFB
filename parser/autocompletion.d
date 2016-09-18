@@ -490,6 +490,12 @@ struct AutoComplete
 			{
 				//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
 				GLOBAL.outlineTree.loadFile( includeFullPath );
+
+				if( GLOBAL.editorSetting00.Message == "ON" ) 
+				{
+					version(Windows) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+				}
+				
 				results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
 				results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
 

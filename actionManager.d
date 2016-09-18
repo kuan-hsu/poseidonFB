@@ -381,6 +381,20 @@ struct ScintillaAction
 		{
 			pFullPath = _pFullPath;
 			pParseTree = GLOBAL.outlineTree.loadFile( pFullPath );
+
+			if( pParseTree !is null )
+			{
+				if( GLOBAL.editorSetting00.Message == "ON" ) 
+				{
+					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Parse File: [" ~ pFullPath ~ "]"  ) );
+					version(linux)
+					{
+						int count = IupGetInt( GLOBAL.outputPanel, "COUNT" );
+						IupSetInt( GLOBAL.outputPanel, "CARETPOS", count );
+					}
+				}
+			}
+				
 			super( &run );
 		}
 
@@ -388,22 +402,7 @@ struct ScintillaAction
 		{
 			if( pParseTree !is null )
 			{
-				auto _parsers = AutoComplete.getIncludes( pParseTree, pFullPath, true );
-				if( GLOBAL.editorSetting00.Message == "ON" )
-				{
-					version(Windows)
-					{
-						IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Parse File: [" ~ pFullPath ~ "]"  ) );
-
-						char[] Name;
-						foreach( _p; _parsers )
-							if( _p.name.length ) Name ~= ( "    Pre-Parse file: [" ~ _p.name ~ "]\n" );
-						
-						IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( Name ) );
-						//int pos = IupGetInt( GLOBAL.outputPanel, "COUNT" );
-						//IupSetInt( GLOBAL.outputPanel, "CARETPOS", pos );
-					}
-				}
+				AutoComplete.getIncludes( pParseTree, pFullPath, true );
 			}
 		}
 	}

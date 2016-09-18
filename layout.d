@@ -2,7 +2,7 @@
 
 import iup.iup;
 
-import global, scintilla, project, tools, dialogs.preferenceDlg;
+import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
@@ -72,7 +72,7 @@ void createExplorerWindow()
 
 void createEditorSetting()
 {
-	CPreferenceDialog.load();
+	IDECONFIG.load();
 }
 
 void createLayout()
@@ -101,7 +101,7 @@ extern(C)
 			p.saveFile();
 		}
 
-		CPreferenceDialog.save();
+		IDECONFIG.save();
 
 		return IUP_CLOSE;
 	}

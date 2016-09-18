@@ -396,7 +396,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.221\nBy Kuan Hsu (Taiwan)\n2016.09.17" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.222\nBy Kuan Hsu (Taiwan)\n2016.09.18" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -953,7 +953,7 @@ extern(C)
 			}
 
 			GLOBAL.projectManager[activePrjName].saveFile();
-			if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
+			if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
 			GLOBAL.projectManager.remove( activePrjName );
 
 			int countChild = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
@@ -1037,7 +1037,7 @@ extern(C)
 				}
 			}
 
-			if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Close Project: [" ~ p.name ~ "]"  ) );
+			if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
 		}
 
 		foreach( char[] s; prjsDir )
