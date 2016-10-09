@@ -24,7 +24,7 @@ void createMenu()
 	Ihandle* item_findReplace, item_findNext, item_findPrevious, item_findReplaceInFiles, item_goto, search_menu;
 	Ihandle* view_menu;
 	Ihandle* item_newProject, item_openProject, item_closeProject, item_saveProject, item_projectProperties, project_menu;
-	Ihandle* item_compile, item_run, item_build, item_buildAll, item_clean, item_quickRun, build_menu;
+	Ihandle* item_compile, item_buildrun, item_run, item_build, item_buildAll, item_clean, item_quickRun, build_menu;
 	Ihandle* item_runDebug, item_withDebug, item_BuildwithDebug, debug_menu;
 	Ihandle* item_tool, item_preference, option_menu;
 	
@@ -207,11 +207,16 @@ void createMenu()
 	IupSetCallback(item_projectProperties, "ACTION", cast(Icallback)&projectProperties_cb);
 
 	// Build
-	item_compile= IupItem( "Compile File", null );
+	item_compile = IupItem( "Compile File", null );
 	IupSetAttribute( item_compile, "KEY", "N" );
 	IupSetAttribute(item_compile, "IMAGE", "icon_compile");
 	IupSetCallback( item_compile, "ACTION", cast(Icallback)&compile_cb );
 
+	item_buildrun = IupItem( "Compile Run", null );
+	IupSetAttribute( item_buildrun, "KEY", "Z" );
+	IupSetAttribute(item_buildrun, "IMAGE", "icon_buildrun");
+	IupSetCallback( item_buildrun, "ACTION", cast(Icallback)&buildrun_cb );
+	
 	item_run = IupItem ("Run", null);
 	IupSetAttribute(item_run, "KEY", "O");
 	IupSetAttribute(item_run, "IMAGE", "icon_run");
@@ -396,7 +401,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.222\nBy Kuan Hsu (Taiwan)\n2016.09.18" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.225\nBy Kuan Hsu (Taiwan)\n2016.10.09" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -452,6 +457,7 @@ void createMenu()
 							null );							
 
 	build_menu= IupMenu( 	item_compile,
+							item_buildrun,
 							item_run,
 							item_buildAll,
 							IupSeparator(),
@@ -1101,6 +1107,12 @@ extern(C)
 		ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) );
 		return IUP_DEFAULT;
 	}
+
+	int buildrun_cb( Ihandle *ih )
+	{
+		if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) ) ) ExecuterAction.run();
+		return IUP_DEFAULT;
+	}	
 
 	int buildAll_cb( Ihandle *ih )
 	{

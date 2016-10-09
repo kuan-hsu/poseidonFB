@@ -253,6 +253,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleMessage, "VALUE", toStringz(GLOBAL.editorSetting00.Message.dup) );
 		IupSetHandle( "toggleMessage", toggleMessage );		
 
+		Ihandle* toggleBoldKeyword = IupToggle( "Bold Keyword", null );
+		IupSetAttribute( toggleBoldKeyword, "VALUE", toStringz(GLOBAL.editorSetting00.BoldKeyword.dup) );
+		IupSetHandle( "toggleBoldKeyword", toggleBoldKeyword );		
+
 
 		Ihandle* labelTabWidth = IupLabel( "Tab Width:" );
 		Ihandle* textTabWidth = IupText( null );
@@ -291,7 +295,7 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( toggleColorOutline, "" ),
 
 			IupSetAttributes( toggleMessage, "" ),
-			IupSetAttributes( IupFill, "" ),
+			IupSetAttributes( toggleBoldKeyword, "" ),
 			
 
 			IupSetAttributes( hBoxTab, "" ),
@@ -660,6 +664,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleAutoEnd", null );
 		IupSetHandle( "toggleColorOutline", null );
 		IupSetHandle( "toggleMessage", null );
+		IupSetHandle( "toggleBoldKeyword", null );	
 
 		
 		IupSetHandle( "textTabWidth", null );
@@ -897,6 +902,8 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editorSetting00.AutoEnd				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.ColorOutline			= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorOutline" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.Message				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMessage" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.BoldKeyword			= fromStringz(IupGetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE" )).dup;
+
 
 		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;

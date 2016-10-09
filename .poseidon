@@ -23,7 +23,7 @@
 			<mapfile>0</mapfile>
 			<gcstub>0</gcstub>
 		</options>
-		<dmdpath>D:\CodingPark\DMD1076Tango</dmdpath>
+		<dmdpath>D:/CodingPark/DMD1076Tango</dmdpath>
 		<dmcpath />
 		<buildtoolexe />
 		<projectFiles>
@@ -74,8 +74,8 @@
 		</projectFiles>
 		<includePaths />
 		<linkLibrarys>
-			<name>D:\CodingPark\GameKYO\lib\iup\iup318DLL10\iup_scintilla.lib</name>
 			<name>D:\CodingPark\GameKYO\lib\iup\iup318DLL10\iup.lib</name>
+			<name>D:\CodingPark\GameKYO\lib\iup\iup318DLL10\iup_scintilla.lib</name>
 		</linkLibrarys>
 		<importExpressions />
 	</buildSpec>

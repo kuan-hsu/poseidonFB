@@ -355,7 +355,13 @@ class CScintilla
 		//IupScintillaSendMessage( sci, 2053, 34, 1 );
 
 		// Set Keywords to Bold
-		//IupSetAttribute(sci, "STYLEBOLD3", "YES");
+		if( GLOBAL.editorSetting00.BoldKeyword == "ON" )
+		{
+			IupSetAttribute(sci, "STYLEBOLD3", "YES");
+			IupSetAttribute(sci, "STYLEBOLD10", "YES");
+			IupSetAttribute(sci, "STYLEBOLD11", "YES");
+			IupSetAttribute(sci, "STYLEBOLD12", "YES");
+		}
 
 		IupSetAttribute( sci, "STYLEBOLD32", GLOBAL.cString.convert( Bold ) );
 		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Italic ) );
@@ -1438,13 +1444,14 @@ extern(C)
 			bool bAutoInsert;
 			if( GLOBAL.editorSetting00.AutoEnd == "ON" )
 			{			
-				if( pos == IupScintillaSendMessage( ih, 2136, lin, 0 ) ) bAutoInsert = true;// #define SCI_GETLINEENDPOSITION 2136 )
+				if( pos == cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ) ) bAutoInsert = true; // SCI_GETLINEENDPOSITION 2136
 			}
 
+			int lineInd = 0;
 			if( GLOBAL.editorSetting00.AutoIndent == "ON" )
 			{
 				//Now time to deal with auto indenting
-				int lineInd = 0;
+				//int lineInd = 0;
 
 				if( lin > 0 ) lineInd = IupScintillaSendMessage( ih, 2127, lin - 1, 0 ); // SCI_GETLINEINDENTATION = 2127
 			   
@@ -1459,7 +1466,14 @@ extern(C)
 			if( bAutoInsert )
 			{
 				char[] insertEndText = AutoComplete.InsertEnd( ih, lin, pos );
-				if( insertEndText.length ) IupSetAttributeId( ih, "INSERT", -1, GLOBAL.cString.convert( insertEndText ) );
+				if( insertEndText.length )
+				{
+					IupSetAttributeId( ih, "INSERT", -1, toStringz( insertEndText.dup ) );
+					IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
+					IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
+					IupScintillaSendMessage( ih, 2126, lin, lineInd + 4 ); // SCI_SETLINEINDENTATION = 2126
+					IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136
+				}
 			}
 		}
 

@@ -315,13 +315,18 @@ class CScanner
 									TokenUnit t = {TOK.Tidentifier, identifier, lineNum};
 									results ~= t;
 								}
-
-								identifier = "";
-								TokenUnit t = {identToTOK["."], ".", lineNum};
-								results ~= t;
-								continue;
+							}
+							else
+							{
+								identifier ~= data[i];
+								break;
 							}
 						}
+
+						identifier = "";
+						TokenUnit t = {TOK.Tdot, ".", lineNum};
+						results ~= t;
+						break;
 
 					default:
 						identifier ~= data[i];

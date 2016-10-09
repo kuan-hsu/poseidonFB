@@ -699,6 +699,34 @@ class CParser
 
 								int countCurly, countParen;
 
+								while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
+								{
+									if( token().tok == TOK.Topencurly )
+									{
+										countCurly ++;
+									}
+									else if( token().tok == TOK.Tclosecurly )
+									{
+										countCurly --;
+									}
+									else if( token().tok == TOK.Topenparen )
+									{
+										countParen ++;
+									}
+									else if( token().tok == TOK.Tcloseparen )
+									{
+										countParen --;
+									}
+
+									if( token().tok == TOK.Tcomma )
+									{
+										if( countParen == 0 && countCurly == 0 ) break;
+									}
+									parseToken();
+									if( tokenIndex >= tokens.length ) break;
+								}
+
+								/+
 								switch( token().tok )
 								{
 									case TOK.Topencurly:
@@ -764,6 +792,7 @@ class CParser
 											if( tokenIndex >= tokens.length ) break;
 										}
 								}
+								+/
 
 								/*
 								int countParen;
@@ -2381,8 +2410,13 @@ class CParser
 					}
 					break;
 
+				case TOK.Tassign:
+					parseToken( TOK.Tassign );
+
+					break;
+
 				case TOK.Tendmacro:
-					activeASTnode = activeASTnode.getFather( token().lineNumber );					
+					activeASTnode = activeASTnode.getFather( token().lineNumber );
 
 				default:
 					tokenIndex ++;

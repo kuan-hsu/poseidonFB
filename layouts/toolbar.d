@@ -21,7 +21,7 @@ class CToolBar
 		Ihandle* btnUndo, btnRedo;
 		Ihandle* btnCut, btnCopy, btnPaste;
 		Ihandle* btnMark, btnMarkPrev, btnMarkNext, btnMarkClean;
-		Ihandle* btnCompile, btnRun, btnBuildAll, btnQuickRun;
+		Ihandle* btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun;
 
 		btnNew		= IupButton( null, "New" );
 		btnOpen		= IupButton( null, "Open" );
@@ -41,10 +41,11 @@ class CToolBar
 		btnMarkNext	= IupButton( null, "MarkNext" );
 		btnMarkClean= IupButton( null, "MarkClean" );
 		
-		btnCompile	= IupButton( null, "Mark" );
-		btnRun		= IupButton( null, "MarkPrev" );
-		btnBuildAll	= IupButton( null, "MarkNext" );
-		btnQuickRun = IupButton( null, "MarkClean" );
+		btnCompile	= IupButton( null, "Compile" );
+		btnBuildRun = IupButton( null, "BuildRun" );
+		btnRun		= IupButton( null, "Run" );
+		btnBuildAll	= IupButton( null, "BuildAll" );
+		btnQuickRun = IupButton( null, "QuickRun" );
 
 
 		IupSetAttributes( btnNew, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_newfile,TIP=New_File" );
@@ -159,6 +160,9 @@ class CToolBar
 		IupSetAttributes( btnCompile, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_compile,TIP=Compile" );
 		IupSetCallback( btnCompile, "BUTTON_CB", cast(Icallback) &compile_button_cb );
 
+		IupSetAttributes( btnBuildRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_buildrun,TIP=CompileRun" );
+		IupSetCallback( btnBuildRun, "BUTTON_CB", cast(Icallback) &buildrun_button_cb );
+
 		IupSetAttributes( btnRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_run,TIP=Run" );
 		IupSetCallback( btnRun, "BUTTON_CB", cast(Icallback) &run_button_cb );
 
@@ -187,7 +191,7 @@ class CToolBar
 		
 		// IUP Container to put buttons on~
 		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
-						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], listHandle, null );/* labelSEPARATOR[5],
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 		IupSetAttributes( handle, "GAP=5,ALIGNMENT=ACENTER" );
 	}
@@ -245,6 +249,32 @@ extern( C )
 		}
 		return IUP_DEFAULT;
 	}
+
+	private int buildrun_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 )
+		{
+			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			{
+				if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) ) ) ExecuterAction.run();
+			}
+			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			{
+				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
+				{
+					if( GLOBAL.argsDlg !is null )
+					{
+						char[][] result = GLOBAL.argsDlg.show( 3 );
+						if( result.length == 2 )
+						{
+							if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1] );
+						}
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}	
 	
 	private int run_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{

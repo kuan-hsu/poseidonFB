@@ -111,7 +111,9 @@ struct IDECONFIG
 		.attribute( null, "ColumnEdge", GLOBAL.editorSetting00.ColumnEdge )
 		.attribute( null, "EolType", GLOBAL.editorSetting00.EolType )
 		.attribute( null, "ColorOutline", GLOBAL.editorSetting00.ColorOutline )
-		.attribute( null, "Message", GLOBAL.editorSetting00.Message );
+		.attribute( null, "Message", GLOBAL.editorSetting00.Message )
+		.attribute( null, "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword );
+
 		/+
 		//<font name="Consolas" size="11" bold="OFF" italic="OFF" underline="OFF" forecolor="0 0 0" backcolor="255 255 255"></font>
 		editorNode.element( null, "font" )
@@ -441,6 +443,10 @@ struct IDECONFIG
 
 			result = root.query.descendant("toggle00").attribute("Message");
 			foreach( e; result ) GLOBAL.editorSetting00.Message = e.value;
+
+			result = root.query.descendant("toggle00").attribute("BoldKeyword");
+			foreach( e; result ) GLOBAL.editorSetting00.BoldKeyword = e.value;
+
 
 			// Font
 			//GLOBAL.fonts.length = 0;
