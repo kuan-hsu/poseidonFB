@@ -1038,8 +1038,8 @@ extern(C) // Callback for CPreferenceDialog
 		//IupSetCallback(dlg, "HELP_CB", (Icallback)help_cb);
 
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
-		IupSetAttribute( ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
-	
+
+		if( IupGetInt( dlg, "STATUS" ) ) IupSetAttribute( ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
 
 		return IUP_DEFAULT;
 	}

@@ -84,7 +84,7 @@ struct GLOBAL
 	static char[]				debuggerFullPath;
 	//static char[]				maxError = "30";
 	static char[]				defaultOption;
-	static char[][]				recentProjects, recentOptions, recentArgs;
+	static char[][]				recentFiles, recentProjects, recentOptions, recentArgs;
 	static EditorToggleUint		editorSetting00;
 	static EditorColorUint		editColor;
 	//static Ihandle*			functionTitleHandle;
@@ -180,6 +180,8 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk20;
 		ShortKey sk21 = { "Autocomplete", 536870993 };
 		GLOBAL.shortKeys ~= sk21;
+		ShortKey sk22 = { "Compile & Run", 536936386 };
+		GLOBAL.shortKeys ~= sk22;
 		
 
 		fontUint fu;

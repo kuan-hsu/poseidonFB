@@ -79,19 +79,36 @@ void createMenu()
 
 	Ihandle* recentFilesSubMenu;
 	recentFilesSubMenu = IupMenu( null );
-	IupSetHandle( "recentFilesMenu", recentFilesSubMenu );
+	IupSetHandle( "recentFilesSubMenu", recentFilesSubMenu );
+
+	//Ihandle*[] submenuItem;
+	for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
+	{
+		Ihandle* _new = IupItem( toStringz(GLOBAL.recentFiles[i]), null );
+		IupSetCallback( _new, "ACTION", cast(Icallback)&submenuRecentFiles_click_cb );
+		IupInsert( recentFilesSubMenu, null, _new );
+		IupMap( _new );
+	}
+	IupRefresh( recentFilesSubMenu );
+	
+	Ihandle* item_recentFiles = IupSubmenu( "Recent Files", recentFilesSubMenu );
+	
+
+	Ihandle* recentPrjsSubMenu;
+	recentPrjsSubMenu = IupMenu( null );
+	IupSetHandle( "recentPrjsSubMenu", recentPrjsSubMenu );
 
 	//Ihandle*[] submenuItem;
 	for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
 	{
 		Ihandle* _new = IupItem( toStringz(GLOBAL.recentProjects[i]), null );
 		IupSetCallback( _new, "ACTION", cast(Icallback)&submenu_click_cb );
-		IupInsert( recentFilesSubMenu, null, _new );
+		IupInsert( recentPrjsSubMenu, null, _new );
 		IupMap( _new );
 	}
-	IupRefresh( recentFilesSubMenu );	
+	IupRefresh( recentPrjsSubMenu );	
 	
-	Ihandle* item_recent = IupSubmenu( "Recent Projects", recentFilesSubMenu );
+	Ihandle* item_recent = IupSubmenu( "Recent Projects", recentPrjsSubMenu );
 
 	item_exit = IupItem ("Exit", null);
 	IupSetAttribute(item_exit, "KEY", "x");
@@ -128,6 +145,11 @@ void createMenu()
 	IupSetAttribute(item_selectAll, "KEY", "A");
 	IupSetAttribute(item_selectAll, "IMAGE", "icon_selectall");
 	IupSetCallback( item_selectAll, "ACTION", cast(Icallback) &selectall_cb );
+
+	Ihandle* item_comment = IupItem ("(Un)Comment Line", null);
+	//IupSetAttribute(item_selectAll, "KEY", "c");
+	IupSetAttribute(item_comment, "IMAGE", "icon_comment");
+	IupSetCallback( item_comment, "ACTION", cast(Icallback) &comment_cb );
 
 	// Search
 	item_findReplace = IupItem( "Find / Replace", null );
@@ -401,7 +423,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.225\nBy Kuan Hsu (Taiwan)\n2016.10.09" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.226\nBy Kuan Hsu (Taiwan)\n2016.10.23" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -414,6 +436,7 @@ void createMenu()
 							item_close,
 							item_closeAll,
 							IupSeparator(),
+							item_recentFiles,
 							item_recent,
 							IupSeparator(),
 							item_exit,
@@ -425,6 +448,8 @@ void createMenu()
 							item_cut,
 							item_copy,
 							item_paste,
+							IupSeparator(),
+							item_comment,
 							IupSeparator(),
 							item_selectAll,
 							null );
@@ -618,6 +643,7 @@ extern(C)
 		{
 			//Stdout( fileName ).newline;
 			ScintillaAction.openFile( fileName );
+			actionManager.ScintillaAction.updateRecentFiles( fileName );
 		}
 		else
 		{
@@ -646,6 +672,27 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	int submenuRecentFiles_click_cb( Ihandle* ih )
+	{
+		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
+		if( title.length )
+		{
+			if( !ScintillaAction.openFile( title ) )
+			{
+				IupDestroy( ih );
+				char[][] _recentFiles;
+				foreach( char[] s; GLOBAL.recentFiles )
+				{
+					if( s != title ) _recentFiles ~= s;
+				}
+				GLOBAL.recentFiles.length = 0;
+				GLOBAL.recentFiles = _recentFiles;
+			}
+		}
+
+		return IUP_DEFAULT;
+	}
+	
 	int submenu_click_cb( Ihandle* ih )
 	{
 		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
@@ -727,6 +774,77 @@ extern(C)
 	{
 		Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null ) IupSetAttribute( ih, "SELECTION", "ALL" );
+	}
+	
+	void comment_cb()
+	{
+		Ihandle*	iupSci = actionManager.ScintillaAction.getActiveIupScintilla();
+		if( iupSci != null )
+		{
+			int			lineheadPos;
+			int			currentPos = actionManager.ScintillaAction.getCurrentPos( iupSci );
+			int			currentLine = IupScintillaSendMessage( iupSci, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			
+			char* _selectText = IupGetAttribute( iupSci, "SELECTION" );
+			if( _selectText == null ) // Non Selection
+			{
+				char[] currentLineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) ).dup;
+				if( currentLineText.length )
+				{
+					//SCI_POSITIONFROMLINE   2167
+					if( currentLineText[0] == '\'' )
+					{
+						lineheadPos = IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
+						IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
+					}
+					else
+					{
+						lineheadPos = IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
+						IupSetAttributeId( iupSci, "INSERT", lineheadPos, "'" );
+					
+					}
+				}
+			}
+			else
+			{
+				char[] selectText = fromStringz( _selectText );
+				int headCommaPos = Util.index( selectText, "," );
+				int headColonPos = Util.index( selectText, ":" );
+				int tailCommaPos = Util.rindex( selectText, "," );
+				if( tailCommaPos > headCommaPos )
+				{
+					int line1 = Integer.atoi( selectText[0..headCommaPos] );
+					int line2 = Integer.atoi( selectText[headColonPos+1..headCommaPos] );
+					
+					if( line1 > line2 )
+					{
+						int temp = line1;
+						line1 = line2;
+						line2 = temp;
+					}
+					
+					for( int i = line1; i <= line2; ++ i )
+					{
+						char[] currentLineText = fromStringz( IupGetAttributeId( iupSci, "LINE", i ) ).dup;
+						if( currentLineText.length )
+						{
+							//SCI_POSITIONFROMLINE   2167
+							if( currentLineText[0] == '\'' )
+							{
+								lineheadPos = IupScintillaSendMessage( iupSci, 2167, i, 0 );
+								IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
+							}
+							else
+							{
+								lineheadPos = IupScintillaSendMessage( iupSci, 2167, i, 0 );
+								IupSetAttributeId( iupSci, "INSERT", lineheadPos, "'" );
+							
+							}
+						}					
+					}
+				}
+			}
+		}
 	}
 
 	void findReplace_cb()
@@ -1177,5 +1295,4 @@ extern(C)
 		}
 		return IUP_DEFAULT;
 	}
-	
 }

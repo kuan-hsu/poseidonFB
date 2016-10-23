@@ -16,6 +16,8 @@ version(Windows)
 	pragma(lib, "comdlg32.lib");
 	pragma(lib, "comctl32.lib");
 	pragma(lib, "ole32.lib");
+	pragma(lib, "iup.lib");
+	pragma(lib, "iup_scintilla.lib");
 }
 else
 {

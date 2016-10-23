@@ -480,7 +480,7 @@ class CProjectTree
 			GLOBAL.recentProjects.length = 8;
 		}
 
-		Ihandle* recentPrj_ih = IupGetHandle( "recentFilesMenu" );
+		Ihandle* recentPrj_ih = IupGetHandle( "recentPrjsSubMenu" );
 		if( recentPrj_ih != null )
 		{
 			// Clear All iupItem......

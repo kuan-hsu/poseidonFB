@@ -166,6 +166,7 @@ extern(C) // Callback for CSingleTextDialog
 			case "Previous Tab":				pos = 19;	break;
 			case "New Tab":						pos = 20;	break;
 			case "Autocomplete":				pos = 21;	break;
+			case "Compile & Run":				pos = 22;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;

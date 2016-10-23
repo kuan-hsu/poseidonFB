@@ -172,7 +172,8 @@ struct IDECONFIG
 		.attribute( null, "nexttab", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) )
 		.attribute( null, "prevtab", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) )
 		.attribute( null, "newtab", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) )
-		.attribute( null, "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) );
+		.attribute( null, "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) )
+		.attribute( null, "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) );
 
 		/*
 		<buildtools>
@@ -208,6 +209,18 @@ struct IDECONFIG
 		parserNode.element( null, "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 		parserNode.element( null, "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 		parserNode.element( null, "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
+
+		/*
+		<recentFiles>
+			<name>~~~</name>
+			<name>~~~</name>
+		</recentFiles>  
+		*/
+		auto recentFilesNode = configNode.element( null, "recentFiles" );
+		for( int i = 0; i < GLOBAL.recentFiles.length; ++i )
+		{
+			recentFilesNode.element( null, "name", GLOBAL.recentFiles[i] );
+		}
 
 		/*
 		<recentProjects>
@@ -376,6 +389,11 @@ struct IDECONFIG
 				GLOBAL.keywordCase = Integer.atoi( e.value );
 			}
 		
+			result = root.query.descendant("recentFiles").descendant("name");
+			foreach( e; result )
+			{
+				GLOBAL.recentFiles ~= e.value;
+			}
 
 			result = root.query.descendant("recentProjects").descendant("name");
 			foreach( e; result )
@@ -566,7 +584,7 @@ struct IDECONFIG
 
 
 			// short keys (Editor)
-			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 21;
+			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 23;
 			result = root.query.descendant("shortkeys").attribute("find");
 			foreach( e; result )
 			{
@@ -721,6 +739,12 @@ struct IDECONFIG
 				GLOBAL.shortKeys[21]= sk;
 			}
 
+			result = root.query.descendant("shortkeys").attribute("compilerun");
+			foreach( e; result )
+			{
+				ShortKey sk = { "Compile & Run", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[22]= sk;
+			}
 
 			// Get linux terminal program name
 			version( linux )

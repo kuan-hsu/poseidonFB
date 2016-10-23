@@ -362,7 +362,7 @@ struct ScintillaAction
 {
 	private:
 	import tango.io.UnicodeFile, tango.io.FilePath, dialogs.fileDlg;
-	import scintilla;
+	import scintilla, menu;
 	import parser.scanner,  parser.token, parser.parser;
 
 
@@ -1010,6 +1010,48 @@ struct ScintillaAction
 		}
 		return false;
 	}
+	
+	static void updateRecentFiles( char[] fullPath )
+	{
+		char[][]	temps;
+		bool		bMove;
+
+		for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
+		{
+			if( GLOBAL.recentFiles[i] != fullPath )	temps ~= GLOBAL.recentFiles[i];
+		}
+
+		temps ~= fullPath;
+		GLOBAL.recentFiles.length = 0;
+		GLOBAL.recentFiles = temps;
+		
+		// Recent Files
+		if( GLOBAL.recentFiles.length > 8 )
+		{
+			GLOBAL.recentFiles[0..8] = GLOBAL.recentFiles[length-8..length].dup;
+			GLOBAL.recentFiles.length = 8;
+		}
+
+		Ihandle* recentFile_ih = IupGetHandle( "recentFilesSubMenu" );
+		if( recentFile_ih != null )
+		{
+			// Clear All iupItem......
+			for( int i = IupGetChildCount( recentFile_ih ) - 1; i >= 0; -- i )
+			{
+				IupDestroy( IupGetChild( recentFile_ih, i ) );
+			}
+
+			// Create New iupItem
+			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
+			{
+				Ihandle* _new = IupItem( GLOBAL.cString.convert( GLOBAL.recentFiles[i] ), null );
+				IupSetCallback( _new, "ACTION", cast(Icallback)&menu.submenuRecentFiles_click_cb );
+				IupInsert( recentFile_ih, null, _new );
+				IupMap( _new );
+			}
+			IupRefresh( recentFile_ih );
+		}		
+	}	
 }
 
 

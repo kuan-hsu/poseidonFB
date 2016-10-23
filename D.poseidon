@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+  <ProjectName>poseidonFB</ProjectName>
+  <Type>1</Type>
+  <MainFile/>
+  <TargetName/>
+  <CompilerArgs/>
+  <CompilerOption>-odobjs -release -L/SUBSYSTEM:windows:4</CompilerOption>
+  <Comment/>
+  <CompilerPath/>
+  <IncludeDirs/>
+  <LibDirs>
+    <Name>D:/CodingPark/GameKYO/lib/iup/iup318DLL10</Name>
+  </LibDirs>
+  <Sources>
+    <Name>IDE.d</Name>
+    <Name>actionManager.d</Name>
+    <Name>dialogs/argOptionDlg.d</Name>
+    <Name>dialogs/baseDlg.d</Name>
+    <Name>dialogs/fileDlg.d</Name>
+    <Name>dialogs/findFilesDlg.d</Name>
+    <Name>dialogs/helpDlg.d</Name>
+    <Name>dialogs/preferenceDlg.d</Name>
+    <Name>dialogs/prjPropertyDlg.d</Name>
+    <Name>dialogs/searchDlg.d</Name>
+    <Name>dialogs/shortcutDlg.d</Name>
+    <Name>dialogs/singleTextDlg.d</Name>
+    <Name>executer.d</Name>
+    <Name>global.d</Name>
+    <Name>images/imageData.d</Name>
+    <Name>images/xpm.d</Name>
+    <Name>layout.d</Name>
+    <Name>layouts/debugger.d</Name>
+    <Name>layouts/filelistPanel.d</Name>
+    <Name>layouts/messagePanel.d</Name>
+    <Name>layouts/outlinePanel.d</Name>
+    <Name>layouts/projectPanel.d</Name>
+    <Name>layouts/statusBar.d</Name>
+    <Name>layouts/tabDocument.d</Name>
+    <Name>layouts/toolbar.d</Name>
+    <Name>main.d</Name>
+    <Name>menu.d</Name>
+    <Name>parser/ast.d</Name>
+    <Name>parser/autocompletion.d</Name>
+    <Name>parser/live.d</Name>
+    <Name>parser/parser.d</Name>
+    <Name>parser/scanner.d</Name>
+    <Name>parser/token.d</Name>
+    <Name>project.d</Name>
+    <Name>scintilla.d</Name>
+    <Name>tools.d</Name>
+  </Sources>
+  <Includes/>
+  <Others>
+    <Name>poseidonFB.res</Name>
+  </Others>
+</Project>

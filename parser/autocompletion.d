@@ -1322,53 +1322,56 @@ struct AutoComplete
 
 		do
 		{
-			char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-
-			switch( s )
+			if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 			{
-				case "(":
-					if( countBracket == 0 ) countParen ++;
-					break;
+				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 
-				case ")":
-					if( countBracket == 0 ) countParen --;
-					if( countParen < 0 ) bBackEnd = true;
-					break;
+				switch( s )
+				{
+					case "(":
+						if( countBracket == 0 ) countParen ++;
+						break;
 
-				case "[":
-					if( countParen == 0 ) countBracket ++;
-					break;
+					case ")":
+						if( countBracket == 0 ) countParen --;
+						if( countParen < 0 ) bBackEnd = true;
+						break;
 
-				case "]":
-					if( countParen == 0 ) countBracket --;
-					if( countBracket < 0 ) bBackEnd = true;
-					break;
+					case "[":
+						if( countParen == 0 ) countBracket ++;
+						break;
 
-				case ".":
-					if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
-					break;
-				
-				case "-":
-					if( pos < documentLength )
-					{
-						if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos + 1 ) ) == ">" )
+					case "]":
+						if( countParen == 0 ) countBracket --;
+						if( countBracket < 0 ) bBackEnd = true;
+						break;
+
+					case ".":
+						if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
+						break;
+					
+					case "-":
+						if( pos < documentLength )
 						{
-							if( countParen == 0 && countBracket == 0 )
+							if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos + 1 ) ) == ">" )
 							{
-								bBackEnd = true;
+								if( countParen == 0 && countBracket == 0 )
+								{
+									bBackEnd = true;
+								}
+								else
+								{
+									pos++;
+								}
+								break;
 							}
-							else
-							{
-								pos++;
-							}
-							break;
 						}
-					}
-				case " ", "\t", ":", "\n", "\r", "+", ">", "*", "/", "<", ",":
-					if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
-					break;
+					case " ", "\t", ":", "\n", "\r", "+", ">", "*", "/", "<", ",":
+						if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
+						break;
 
-				default:
+					default:
+				}
 			}
 
 			if( bBackEnd ) break;
@@ -1419,54 +1422,57 @@ struct AutoComplete
 				headPos = pos;
 				if( pos < 0 ) break;
 				
-				//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
-				char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-				dchar[] sd = UTF.toString32( _s );
-				dchar s = sd[0];
-				switch( s )
+				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 				{
-					case ')':
-						if( countBracket == 0 ) countParen++;
-						break;
+					//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
+					char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					dchar[] sd = UTF.toString32( _s );
+					dchar s = sd[0];
+					switch( s )
+					{
+						case ')':
+							if( countBracket == 0 ) countParen++;
+							break;
 
-					case '(':
-						if( countBracket == 0 ) countParen--;
-						if( countParen < 0 ) return word;
-						break;
-						
-					case ']':
-						if( countParen == 0 ) countBracket++;
-						break;
+						case '(':
+							if( countBracket == 0 ) countParen--;
+							if( countParen < 0 ) return word;
+							break;
+							
+						case ']':
+							if( countParen == 0 ) countBracket++;
+							break;
 
-					case '[':
-						if( countParen == 0 ) countBracket--;
-						if( countBracket < 0 ) return word;
-						break;
-						
-					case '>':
-						if( pos > 0 && countParen == 0 && countBracket == 0 )
-						{
-							if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+						case '[':
+							if( countParen == 0 ) countBracket--;
+							if( countBracket < 0 ) return word;
+							break;
+							
+						case '>':
+							if( pos > 0 && countParen == 0 && countBracket == 0 )
 							{
-								word ~= ">-";
-								pos--;
-								break;
+								if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+								{
+									word ~= ">-";
+									pos--;
+									break;
+								}
 							}
-						}
-					case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '<':
-						if( countParen == 0 && countBracket == 0 ) return word;
+						case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '<':
+							if( countParen == 0 && countBracket == 0 ) return word;
 
-					default: 
-						if( countParen == 0 && countBracket == 0 )
-						{
-							if( UTF.isValid( s ) )
+						default: 
+							if( countParen == 0 && countBracket == 0 )
 							{
-								word32 = "";
-								word32 ~= s;
-								word ~= Util.trim( UTF.toString( word32 ) );
-								//word ~= s;
+								if( UTF.isValid( s ) )
+								{
+									word32 = "";
+									word32 ~= s;
+									word ~= Util.trim( UTF.toString( word32 ) );
+									//word ~= s;
+								}
 							}
-						}
+					}
 				}
 			}
 			
@@ -2236,6 +2242,155 @@ struct AutoComplete
 
 		return result;
 	}
+	/+
+	static char[] InsertEnd( Ihandle *iupSci, int lin, int pos )
+	{
+		// #define SCI_LINEFROMPOSITION 2166
+		lin--; // IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) begin from 0
+		
+		int POS		= getProcedurePos( iupSci, pos, "sub" ), rePOS;
+		int	ENDPOS;
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "sub", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 3, "sub" ); else return "end sub";
+			if( POS == rePOS ) return null; else return "end sub";
+		}
+
+		POS		= getProcedurePos( iupSci, pos, "function" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "function", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 8, "function" ); else return "end function";
+			if( POS == rePOS ) return null; else return "end function";
+		}
+		
+		POS		= getProcedurePos( iupSci, pos, "property" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "property", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 8, "property" ); else return "end property";
+			if( POS == rePOS ) return null; else return "end property";
+		}
+		
+		POS		= getProcedurePos( iupSci, pos, "constructor" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "constructor", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 11, "constructor" ); else return "end constructor";
+			if( POS == rePOS ) return null; else return "end constructor";
+		}
+
+		POS		= getProcedurePos( iupSci, pos, "destructor" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "destructor", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 10, "destructor" ); else return "end destructor";
+			if( POS == rePOS ) return null; else return "end destructor";
+		}
+
+		POS		= getProcedurePos( iupSci, pos, "if" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "if", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 2, "if" ); else return "end if";
+			if( POS == rePOS ) return null; else return "end if";
+		}
+		
+		POS		= getProcedurePos( iupSci, pos, "with" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "with", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 4, "with" ); else return "end with";
+			if( POS == rePOS ) return null; else return "end with";
+		}
+
+		POS		= getProcedurePos( iupSci, pos, "select case" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end select";
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "select", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 6, "select case" ); else return "end select";
+			if( POS == rePOS ) return null; else return "end select";
+		}
+		
+		POS		= getProcedurePos( iupSci, pos, "namespace" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "namespace", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 9, "namespace" ); else return "end namespace";
+			if( POS == rePOS ) return null; else return "end namespace";
+		}		
+
+		POS		= getProcedurePos( iupSci, pos, "type" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "type", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 4, "type" ); else return "end type";
+			if( POS == rePOS ) return null; else return "end type";
+		}		
+
+		POS		= getProcedurePos( iupSci, pos, "union" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "union", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 5, "union" ); else return "end union";
+			if( POS == rePOS ) return null; else return "end union";
+		}		
+		
+		POS		= getProcedurePos( iupSci, pos, "extern" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "extern", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 6, "extern" ); else return "end extern";
+			if( POS == rePOS ) return null; else return "end extern";
+		}		
+
+		POS		= getProcedurePos( iupSci, pos, "operator" );
+		if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) )
+		{
+			ENDPOS	= getProcedureTailPos( iupSci, pos, "operator", 1 );
+			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 8, "operator" ); else return "end operator";
+			if( POS == rePOS ) return null; else return "end operator";
+		}		
+
+		POS			= skipCommentAndString( iupSci, pos, "enum", 0 );
+		ENDPOS		= skipCommentAndString( iupSci, pos, "end enum", 0 );
+		if( POS > -1 && POS != ENDPOS + 4)
+			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end enum";
+
+		POS		= skipCommentAndString( iupSci, pos, "scope", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "end scope", 0 );
+		if( POS > -1 && POS != ENDPOS + 4)
+			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "end scope";
+
+		POS		= skipCommentAndString( iupSci, pos, "for", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "exit for", 0 );
+		if( POS > -1 && POS != ENDPOS + 5 )
+		{
+			POS		= getProcedurePos( iupSci, pos, "for" );
+			if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "next";
+		}
+
+
+		POS		= skipCommentAndString( iupSci, pos, "while", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "do while", 0 );
+		if( POS > -1 && POS != ENDPOS + 3 )
+		{
+			POS		= getProcedurePos( iupSci, pos, "while" );
+			if( POS > -1 && lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "wend";
+		}
+
+		POS		= skipCommentAndString( iupSci, pos, "do", 0 );
+		ENDPOS	= skipCommentAndString( iupSci, pos, "exit do", 0 );
+		if( POS > -1 && POS != ENDPOS + 5 )
+		{
+			if( lin == IupScintillaSendMessage( iupSci, 2166, POS, 0 ) ) return "loop";
+		}
+		
+
+		return null;
+	}
+	+/
 
 	static char[] InsertEnd( Ihandle *iupSci, int lin, int pos )
 	{

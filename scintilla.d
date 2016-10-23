@@ -543,116 +543,60 @@ class CScintilla
 		
 		IupSetAttribute( sci, "USEPOPUP", "NO" );
 		// Autocompletion XPM Image
-		version( none )
-		{
-			IupScintillaSendMessage( sci, 2405, 0, cast(int) XPM.private_variable_array_xpm.ptr );
-			IupScintillaSendMessage( sci, 2405, 1, cast(int) XPM.protected_variable_array_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 2, cast(int) XPM.public_variable_array_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		IupScintillaSendMessage( sci, 2624, 16, 0 ); // SCI_RGBAIMAGESETWIDTH 2624
+		IupScintillaSendMessage( sci, 2625, 16, 0 ); // SCI_RGBAIMAGESETHEIGHT 2625
 
-			IupScintillaSendMessage( sci, 2405, 3, cast(int) XPM.private_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 4, cast(int) XPM.protected_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 5, cast(int) XPM.public_variable_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			
-			//IupScintillaSendMessage( sci, 2405, 6, cast(int) XPM.class_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			//IupScintillaSendMessage( sci, 2405, 7, cast(int) XPM.class_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 8, cast(int) XPM.class_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			
-			IupScintillaSendMessage( sci, 2405, 9, cast(int) XPM.struct_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 10, cast(int) XPM.struct_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 11, cast(int) XPM.struct_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			
-			//IupScintillaSendMessage( sci, 2405, 12, cast(int) XPM.enum_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 13, cast(int) XPM.enum_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 14, cast(int) XPM.enum_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			
-			IupScintillaSendMessage( sci, 2405, 15, cast(int) XPM.union_private_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 16, cast(int) XPM.union_protected_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 17, cast(int) XPM.union_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		// SCI_REGISTERRGBAIMAGE 2627
+		IupScintillaSendMessage( sci, 2627, 0, cast(int) XPM.private_variable_array_rgba.toStringz );
+		IupScintillaSendMessage( sci, 2627, 1, cast(int) XPM.protected_variable_array_rgba.toStringz ); 
+		IupScintillaSendMessage( sci, 2627, 2, cast(int) XPM.public_variable_array_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
-			IupScintillaSendMessage( sci, 2405, 18, cast(int) XPM.parameter_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 19, cast(int) XPM.enum_member_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 20, cast(int) XPM.alias_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		IupScintillaSendMessage( sci, 2627, 3, cast(int) XPM.private_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 5, cast(int) XPM.public_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		
+		//IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		//IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 8, cast(int) XPM.class_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		
+		IupScintillaSendMessage( sci, 2627, 9, cast(int) XPM.struct_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 10, cast(int) XPM.struct_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 11, cast(int) XPM.struct_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		
+		//IupScintillaSendMessage( sci, 2627, 12, cast(int) XPM.enum_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 13, cast(int) XPM.enum_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 14, cast(int) XPM.enum_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		
+		IupScintillaSendMessage( sci, 2627, 15, cast(int) XPM.union_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 16, cast(int) XPM.union_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 17, cast(int) XPM.union_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
-			IupScintillaSendMessage( sci, 2405, 21, cast(int) XPM.normal_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			//IupScintillaSendMessage( sci, 2405, 22, cast(int) XPM.import_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			//IupScintillaSendMessage( sci, 2405, 23, cast(int) XPM.autoWord_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		IupScintillaSendMessage( sci, 2627, 18, cast(int) XPM.parameter_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 19, cast(int) XPM.enum_member_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 20, cast(int) XPM.alias_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
-			IupScintillaSendMessage( sci, 2405, 24, cast(int) XPM.namespace_obj_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		IupScintillaSendMessage( sci, 2627, 21, cast(int) XPM.normal_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		//IupScintillaSendMessage( sci, 2627, 22, cast(int) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		//IupScintillaSendMessage( sci, 2627, 23, cast(int) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
-			IupScintillaSendMessage( sci, 2405, 25, cast(int) XPM.private_sub_xpm.ptr );
-			IupScintillaSendMessage( sci, 2405, 26, cast(int) XPM.protected_sub_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 27, cast(int) XPM.public_sub_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
-			IupScintillaSendMessage( sci, 2405, 28, cast(int) XPM.private_fun_xpm.ptr );
-			IupScintillaSendMessage( sci, 2405, 29, cast(int) XPM.protected_fun_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 30, cast(int) XPM.public_fun_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
+		IupScintillaSendMessage( sci, 2627, 25, cast(int) XPM.private_sub_rgba.toStringz );
+		IupScintillaSendMessage( sci, 2627, 26, cast(int) XPM.protected_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 27, cast(int) XPM.public_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		
+		IupScintillaSendMessage( sci, 2627, 28, cast(int) XPM.private_fun_rgba.toStringz );
+		IupScintillaSendMessage( sci, 2627, 29, cast(int) XPM.protected_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 30, cast(int) XPM.public_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		
+		IupScintillaSendMessage( sci, 2627, 31, cast(int) XPM.property_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 32, cast(int) XPM.property_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		
+		IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
 
-			IupScintillaSendMessage( sci, 2405, 31, cast(int) XPM.property_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 32, cast(int) XPM.property_var_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-
-			IupScintillaSendMessage( sci, 2405, 33, cast(int) XPM.define_var_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-			IupScintillaSendMessage( sci, 2405, 34, cast(int) XPM.define_fun_xpm.ptr ); // SCI_REGISTERIMAGE = 2405
-
-			// BOOKMARK
-			IupScintillaSendMessage( sci, 2049, 1, cast(int) XPM.bookmark_xpm.ptr ); // SCI_MARKERDEFINEPIXMAP 2049
-		}
-		else
-		{
-			IupScintillaSendMessage( sci, 2624, 16, 0 ); // SCI_RGBAIMAGESETWIDTH 2624
-			IupScintillaSendMessage( sci, 2625, 16, 0 ); // SCI_RGBAIMAGESETHEIGHT 2625
-
-			// SCI_REGISTERRGBAIMAGE 2627
-			IupScintillaSendMessage( sci, 2627, 0, cast(int) XPM.private_variable_array_rgba.toStringz );
-			IupScintillaSendMessage( sci, 2627, 1, cast(int) XPM.protected_variable_array_rgba.toStringz ); 
-			IupScintillaSendMessage( sci, 2627, 2, cast(int) XPM.public_variable_array_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-
-			IupScintillaSendMessage( sci, 2627, 3, cast(int) XPM.private_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 5, cast(int) XPM.public_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			
-			//IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			//IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 8, cast(int) XPM.class_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			
-			IupScintillaSendMessage( sci, 2627, 9, cast(int) XPM.struct_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 10, cast(int) XPM.struct_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 11, cast(int) XPM.struct_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			
-			//IupScintillaSendMessage( sci, 2627, 12, cast(int) XPM.enum_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 13, cast(int) XPM.enum_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 14, cast(int) XPM.enum_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			
-			IupScintillaSendMessage( sci, 2627, 15, cast(int) XPM.union_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 16, cast(int) XPM.union_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 17, cast(int) XPM.union_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-
-			IupScintillaSendMessage( sci, 2627, 18, cast(int) XPM.parameter_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 19, cast(int) XPM.enum_member_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 20, cast(int) XPM.alias_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-
-			IupScintillaSendMessage( sci, 2627, 21, cast(int) XPM.normal_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			//IupScintillaSendMessage( sci, 2627, 22, cast(int) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			//IupScintillaSendMessage( sci, 2627, 23, cast(int) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-
-			IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-
-			IupScintillaSendMessage( sci, 2627, 25, cast(int) XPM.private_sub_rgba.toStringz );
-			IupScintillaSendMessage( sci, 2627, 26, cast(int) XPM.protected_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 27, cast(int) XPM.public_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-			
-			IupScintillaSendMessage( sci, 2627, 28, cast(int) XPM.private_fun_rgba.toStringz );
-			IupScintillaSendMessage( sci, 2627, 29, cast(int) XPM.protected_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 30, cast(int) XPM.public_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-			
-			IupScintillaSendMessage( sci, 2627, 31, cast(int) XPM.property_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 32, cast(int) XPM.property_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-			
-			IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-			IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-
-			// BOOKMARK
-			IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toStringz ); // SCI_MARKERDEFINERGBAIMAGE 2626
-		}
+		// BOOKMARK
+		IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toStringz ); // SCI_MARKERDEFINERGBAIMAGE 2626
 	}
 }
 
@@ -1199,6 +1143,14 @@ extern(C)
 							debug IupMessage( "Error", toStringz( e.toString ) );
 						}
 
+						return IUP_IGNORE;
+					}
+					break;
+				
+				case "Compile & Run":
+					if( sk.keyValue == c )
+					{
+						menu.buildrun_cb( null );
 						return IUP_IGNORE;
 					}
 					break;

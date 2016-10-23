@@ -207,22 +207,6 @@ struct XPM
 
 	public:
 	/* XPM */
-	version( none ) // Memory error while using xpm in Linux( I think because of D ), using rgba instead
-	{
-
-	static char*[] private_fun_xpm, protected_fun_xpm, public_fun_xpm, private_sub_xpm, protected_sub_xpm, public_sub_xpm,
-					private_variable_array_xpm, protected_variable_array_xpm, public_variable_array_xpm, private_variable_xpm, alias_obj_xpm,
-					protected_variable_xpm, public_variable_xpm, class_private_obj_xpm, class_protected_obj_xpm,
-					class_obj_xpm, struct_private_obj_xpm, struct_protected_obj_xpm, struct_obj_xpm,  
-					union_private_obj_xpm,
-					union_protected_obj_xpm, union_obj_xpm, enum_private_obj_xpm, enum_protected_obj_xpm, enum_obj_xpm,
-					normal_xpm, parameter_xpm, enum_member_obj_xpm, template_obj_xpm,
-					functionpointer_obj_xpm, namespace_obj_xpm, property_xpm, property_var_xpm, define_var_xpm, define_fun_xpm,
-					bookmark_xpm;
-	}
-	else
-	{
-
 	static CstringConvert private_fun_rgba, protected_fun_rgba, public_fun_rgba, private_sub_rgba, protected_sub_rgba, public_sub_rgba,
 			private_variable_array_rgba, protected_variable_array_rgba, public_variable_array_rgba, private_variable_rgba, alias_obj_rgba,
 			protected_variable_rgba, public_variable_rgba, class_private_obj_rgba, class_protected_obj_rgba,
@@ -232,9 +216,6 @@ struct XPM
 			normal_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
 			functionpointer_obj_rgba, namespace_obj_rgba, property_rgba, property_var_rgba, define_var_rgba, define_fun_rgba,
 			bookmark_rgba;
-
-	}
-
 
 	static Ihandle* getIUPimage( char[] filePath )
 	{
@@ -347,101 +328,50 @@ struct XPM
 
 	static this()
 	{
-		version( none )
-		{
-			private_fun_xpm 				= getXpm( "icons/xpm/outline/fun_private.xpm");
-			protected_fun_xpm 				= getXpm( "icons/xpm/outline/fun_protected.xpm" );
-			public_fun_xpm 					= getXpm( "icons/xpm/outline/fun_public.xpm" );
-			private_sub_xpm 				= getXpm( "icons/xpm/outline/sub_private.xpm");
-			protected_sub_xpm 				= getXpm( "icons/xpm/outline/sub_protected.xpm" );
-			public_sub_xpm 					= getXpm( "icons/xpm/outline/sub_public.xpm" );
+		private_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_private.xpm");
+		protected_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_protected.xpm" );
+		public_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_public.xpm" );
+		private_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_private.xpm");
+		protected_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_protected.xpm" );
+		public_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_public.xpm" );
+		
+		private_variable_array_rgba		= getRGBA( "icons/xpm/outline/variable_array_private_obj.xpm" );
+		protected_variable_array_rgba 	= getRGBA( "icons/xpm/outline/variable_array_protected_obj.xpm" );
+		public_variable_array_rgba		= getRGBA( "icons/xpm/outline/variable_array_obj.xpm" );
+		private_variable_rgba 			= getRGBA( "icons/xpm/outline/variable_private_obj.xpm" );
+		protected_variable_rgba 		= getRGBA( "icons/xpm/outline/variable_protected_obj.xpm" );
+		public_variable_rgba 			= getRGBA( "icons/xpm/outline/variable_obj.xpm" );
+		
+		//class_private_obj_rgba 		= getRGBA( "icons/xpm/outline/class_private_obj.xpm" );
+		//class_protected_obj_rgba		= getRGBA( "icons/xpm/outline/class_protected_obj.xpm" );
+		class_obj_rgba 					= getRGBA( "icons/xpm/outline/class_obj.xpm" );
+		struct_private_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_private_obj.xpm" );
+		struct_protected_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_protected_obj.xpm" );
+		struct_obj_rgba 				= getRGBA( "icons/xpm/outline/struct_obj.xpm" );
+		union_private_obj_rgba			= getRGBA( "icons/xpm/outline/union_private_obj.xpm" );
+		union_protected_obj_rgba		= getRGBA( "icons/xpm/outline/union_protected_obj.xpm" );
+		union_obj_rgba					= getRGBA( "icons/xpm/outline/union_obj.xpm" );
+		//enum_private_obj_rgba 		= getRGBA( "icons/xpmoutline//enum_private_obj.xpm" );
+		enum_protected_obj_rgba			= getRGBA( "icons/xpm/outline/enum_protected_obj.xpm" );
+		enum_obj_rgba					= getRGBA( "icons/xpm/outline/enum_obj.xpm" );
+		
+		normal_rgba						= getRGBA( "icons/xpm/outline/normal.xpm" );
+		//import_rgba					= getRGBA( "icons/xpm/import.xpm" );
+		//autoWord_rgba					= getRGBA( "icons/xpm/autoword.xpm" );
+		
+		parameter_rgba					= getRGBA( "icons/xpm/outline/parameter_obj.xpm" );
+		enum_member_obj_rgba			= getRGBA( "icons/xpm/outline/enum_member_obj.xpm" );
+		
+		alias_obj_rgba					= getRGBA( "icons/xpm/outline/alias_obj.xpm" );
+		//functionpointer_obj_rgba		= getRGBA( "icons/xpm/functionpointer_obj.xpm" );
+		namespace_obj_rgba				= getRGBA( "icons/xpm/outline/namespace_obj.xpm" );
+		
+		property_rgba					= getRGBA( "icons/xpm/outline/property_obj.xpm" );
+		property_var_rgba				= getRGBA( "icons/xpm/outline/property_var.xpm" );
+		
+		define_var_rgba					= getRGBA( "icons/xpm/outline/define_var.xpm" );
+		define_fun_rgba					= getRGBA( "icons/xpm/outline/define_fun.xpm" );
 
-			private_variable_array_xpm		= getXpm( "icons/xpm/outline/variable_array_private_obj.xpm" );
-			protected_variable_array_xpm 	= getXpm( "icons/xpm/outline/variable_array_protected_obj.xpm" );
-			public_variable_array_xpm		= getXpm( "icons/xpm/outline/variable_array_obj.xpm" );
-			private_variable_xpm 			= getXpm( "icons/xpm/outline/variable_private_obj.xpm" );
-			protected_variable_xpm 			= getXpm( "icons/xpm/outline/variable_protected_obj.xpm" );
-			public_variable_xpm 			= getXpm( "icons/xpm/outline/variable_obj.xpm" );
-
-			//class_private_obj_xpm 		= getXpm( "icons/xpm/outline/class_private_obj.xpm" );
-			//class_protected_obj_xpm		= getXpm( "icons/xpm/outline/class_protected_obj.xpm" );
-			class_obj_xpm 					= getXpm( "icons/xpm/outline/class_obj.xpm" );
-			struct_private_obj_xpm 			= getXpm( "icons/xpm/outline/struct_private_obj.xpm" );
-			struct_protected_obj_xpm 		= getXpm( "icons/xpm/outline/struct_protected_obj.xpm" );
-			struct_obj_xpm 					= getXpm( "icons/xpm/outline/struct_obj.xpm" );
-			union_private_obj_xpm 			= getXpm( "icons/xpm/outline/union_private_obj.xpm" );
-			union_protected_obj_xpm 		= getXpm( "icons/xpm/outline/union_protected_obj.xpm" );
-			union_obj_xpm 					= getXpm( "icons/xpm/outline/union_obj.xpm" );
-			//enum_private_obj_xpm 			= getXpm( "icons/xpm/outline/enum_private_obj.xpm" );
-			enum_protected_obj_xpm 			= getXpm( "icons/xpm/outline/enum_protected_obj.xpm" );
-			enum_obj_xpm 					= getXpm( "icons/xpm/outline/enum_obj.xpm" );
-			
-			normal_xpm 						= getXpm( "icons/xpm/outline/normal.xpm" );
-			//import_xpm 					= getXpm( "icons/xpm/import.xpm" );
-			//autoWord_xpm 					= getXpm( "icons/xpm/autoword.xpm" );
-
-			parameter_xpm					= getXpm( "icons/xpm/outline/parameter_obj.xpm" );
-			enum_member_obj_xpm				= getXpm( "icons/xpm/outline/enum_member_obj.xpm" );
-
-			alias_obj_xpm					= getXpm( "icons/xpm/outline/alias_obj.xpm" );
-			//functionpointer_obj_xpm		= getXpm( "icons/xpm/functionpointer_obj.xpm" );
-			namespace_obj_xpm				= getXpm( "icons/xpm/outline/namespace_obj.xpm" );
-
-			property_xpm					= getXpm( "icons/xpm/outline/property_obj.xpm" );
-			property_var_xpm				= getXpm( "icons/xpm/outline/property_var.xpm" );
-
-			define_var_xpm					= getXpm( "icons/xpm/outline/define_var.xpm" );
-			define_fun_xpm					= getXpm( "icons/xpm/outline/define_fun.xpm" );
-
-			bookmark_xpm					= getXpm( "icons/xpm/bookmark.xpm" );
-		}
-		else
-		{
-			private_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_private.xpm");
-			protected_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_protected.xpm" );
-			public_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_public.xpm" );
-			private_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_private.xpm");
-			protected_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_protected.xpm" );
-			public_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_public.xpm" );
-			
-			private_variable_array_rgba		= getRGBA( "icons/xpm/outline/variable_array_private_obj.xpm" );
-			protected_variable_array_rgba 	= getRGBA( "icons/xpm/outline/variable_array_protected_obj.xpm" );
-			public_variable_array_rgba		= getRGBA( "icons/xpm/outline/variable_array_obj.xpm" );
-			private_variable_rgba 			= getRGBA( "icons/xpm/outline/variable_private_obj.xpm" );
-			protected_variable_rgba 		= getRGBA( "icons/xpm/outline/variable_protected_obj.xpm" );
-			public_variable_rgba 			= getRGBA( "icons/xpm/outline/variable_obj.xpm" );
-			
-			//class_private_obj_rgba 		= getRGBA( "icons/xpm/outline/class_private_obj.xpm" );
-			//class_protected_obj_rgba		= getRGBA( "icons/xpm/outline/class_protected_obj.xpm" );
-			class_obj_rgba 					= getRGBA( "icons/xpm/outline/class_obj.xpm" );
-			struct_private_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_private_obj.xpm" );
-			struct_protected_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_protected_obj.xpm" );
-			struct_obj_rgba 				= getRGBA( "icons/xpm/outline/struct_obj.xpm" );
-			union_private_obj_rgba			= getRGBA( "icons/xpm/outline/union_private_obj.xpm" );
-			union_protected_obj_rgba		= getRGBA( "icons/xpm/outline/union_protected_obj.xpm" );
-			union_obj_rgba					= getRGBA( "icons/xpm/outline/union_obj.xpm" );
-			//enum_private_obj_rgba 		= getRGBA( "icons/xpmoutline//enum_private_obj.xpm" );
-			enum_protected_obj_rgba			= getRGBA( "icons/xpm/outline/enum_protected_obj.xpm" );
-			enum_obj_rgba					= getRGBA( "icons/xpm/outline/enum_obj.xpm" );
-			
-			normal_rgba						= getRGBA( "icons/xpm/outline/normal.xpm" );
-			//import_rgba					= getRGBA( "icons/xpm/import.xpm" );
-			//autoWord_rgba					= getRGBA( "icons/xpm/autoword.xpm" );
-			
-			parameter_rgba					= getRGBA( "icons/xpm/outline/parameter_obj.xpm" );
-			enum_member_obj_rgba			= getRGBA( "icons/xpm/outline/enum_member_obj.xpm" );
-			
-			alias_obj_rgba					= getRGBA( "icons/xpm/outline/alias_obj.xpm" );
-			//functionpointer_obj_rgba		= getRGBA( "icons/xpm/functionpointer_obj.xpm" );
-			namespace_obj_rgba				= getRGBA( "icons/xpm/outline/namespace_obj.xpm" );
-			
-			property_rgba					= getRGBA( "icons/xpm/outline/property_obj.xpm" );
-			property_var_rgba				= getRGBA( "icons/xpm/outline/property_var.xpm" );
-			
-			define_var_rgba					= getRGBA( "icons/xpm/outline/define_var.xpm" );
-			define_fun_rgba					= getRGBA( "icons/xpm/outline/define_fun.xpm" );
-
-			bookmark_rgba					= getRGBA( "icons/xpm/bookmark.xpm" );
-		}
+		bookmark_rgba					= getRGBA( "icons/xpm/bookmark.xpm" );
 	}	
 }
