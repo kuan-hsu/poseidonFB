@@ -1468,7 +1468,9 @@ extern(C)
 		}
 		else
 		{
-			actionManager.ScintillaAction.openFile( fromStringz( filename ).dup  );
+			actionManager.ScintillaAction.openFile( f.toString  );
+			actionManager.ScintillaAction.updateRecentFiles( f.toString );
+			
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 		}
 		return IUP_DEFAULT;
