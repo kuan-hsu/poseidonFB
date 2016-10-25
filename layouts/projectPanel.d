@@ -459,19 +459,22 @@ class CProjectTree
 
 	void updateRecentProjects( char[] prjDir, char[] prjName )
 	{
-		char[] title = prjDir ~ " : " ~ prjName;
-
-		char[][]	temps;
-		bool		bMove;
-
-		for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
+		char[] title;
+		
+		if( prjDir.length )
 		{
-			if( GLOBAL.recentProjects[i] != title )	temps ~= GLOBAL.recentProjects[i];
-		}
+			char[][]	temps;
+			title = prjDir ~ " : " ~ prjName;
+			
+			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
+			{
+				if( GLOBAL.recentProjects[i] != title )	temps ~= GLOBAL.recentProjects[i];
+			}
 
-		temps ~= title;
-		GLOBAL.recentProjects.length = 0;
-		GLOBAL.recentProjects = temps;
+			temps ~= title;
+			GLOBAL.recentProjects.length = 0;
+			GLOBAL.recentProjects = temps;
+		}
 		
 		// Recent Projects
 		if( GLOBAL.recentProjects.length > 8 )
@@ -489,11 +492,19 @@ class CProjectTree
 				IupDestroy( IupGetChild( recentPrj_ih, i ) );
 			}
 
+			Ihandle* _clearRecentPrjs = IupItem( toStringz( "Clear All" ), null );
+			IupSetAttribute(_clearRecentPrjs, "IMAGE", "icon_clearall");
+			IupSetCallback( _clearRecentPrjs, "ACTION", cast(Icallback) &menu.submenuRecentPrjsClear_click_cb );
+			IupInsert( recentPrj_ih, null, _clearRecentPrjs );
+			IupMap( IupGetChild( recentPrj_ih, 0 ) );
+			IupInsert( recentPrj_ih, null, IupSeparator() );
+			IupMap( IupGetChild( recentPrj_ih, 0 ) );
+	
 			// Create New iupItem
 			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
 			{
 				Ihandle* _new = IupItem( GLOBAL.cString.convert( GLOBAL.recentProjects[i] ), null );
-				IupSetCallback( _new, "ACTION", cast(Icallback)&menu.submenu_click_cb );
+				IupSetCallback( _new, "ACTION", cast(Icallback) &menu.submenuRecentProject_click_cb );
 				IupInsert( recentPrj_ih, null, _new );
 				IupMap( _new );
 			}

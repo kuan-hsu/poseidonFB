@@ -6,6 +6,11 @@ struct EditorToggleUint
 	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF";
 }
 
+struct EditorLayoutSize
+{
+	char[] PLACEMENT = "MAXIMIZED", MAXIMIZED = "NO", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON";
+}
+
 struct EditorColorUint
 {
 	char[][4] keyWord = [ "5 91 35", "0 0 255", "231 144 20", "16 108 232" ];
@@ -86,6 +91,7 @@ struct GLOBAL
 	static char[]				defaultOption;
 	static char[][]				recentFiles, recentProjects, recentOptions, recentArgs;
 	static EditorToggleUint		editorSetting00;
+	static EditorLayoutSize		editorSetting01;
 	static EditorColorUint		editColor;
 	//static Ihandle*			functionTitleHandle;
 	static char[]				enableKeywordComplete = "ON";

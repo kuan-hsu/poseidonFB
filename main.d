@@ -6,7 +6,7 @@ import iup.iup_scintilla;
 import global, layout, images.imageData;
 import menu, scintilla;
 
-import tango.io.Stdout, tango.stdc.stringz;
+import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
 
 
 version(Windows)
@@ -145,26 +145,48 @@ void main()
 	createLayout();
 
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
-	//IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", "700x500" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	//IupSetAttribute( GLOBAL.mainDlg, "MARGIN", "10x10");
 
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
-	IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" );
 	//IupAppend( GLOBAL.mainDlg, GLOBAL.documentTabs );
 
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
-
+	
+	version(Windows)
+	{
+		if( GLOBAL.editorSetting01.MAXIMIZED == "YES" )
+		{
+			IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" );
+			//IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( "700x500" ) );
+		}
+		else
+		{
+			IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
+		}
+	}
+	else
+	{
+		IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
+	}
 	
 	// Shows dialog
 	IupShow( GLOBAL.mainDlg );
 
 	// Set Split %
+	IupSetAttribute( GLOBAL.explorerSplit, "VALUE", toStringz( GLOBAL.editorSetting01.ExplorerSplit ) );
+	IupSetAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );
+	IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
+	
+	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outline_cb( GLOBAL.menuOutlineWindow );
+	if( GLOBAL.editorSetting01.MessageWindow == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
+
+	/*
 	IupSetInt( GLOBAL.explorerSplit, "VALUE", 170 );
 	IupSetInt( GLOBAL.messageSplit, "VALUE", 800 );
 	IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
-
+	*/
 
 	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );
 	

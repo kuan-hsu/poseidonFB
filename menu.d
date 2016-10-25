@@ -81,11 +81,18 @@ void createMenu()
 	recentFilesSubMenu = IupMenu( null );
 	IupSetHandle( "recentFilesSubMenu", recentFilesSubMenu );
 
+	Ihandle* _clearRecentFiles = IupItem( toStringz( "Clear All" ), null );
+	IupSetAttribute( _clearRecentFiles, "IMAGE", "icon_deleteall" );
+	IupSetCallback( _clearRecentFiles, "ACTION", cast(Icallback) &submenuRecentFilesClear_click_cb );
+	IupInsert( recentFilesSubMenu, null, _clearRecentFiles );
+	IupInsert( recentFilesSubMenu, null, IupSeparator() );
+	IupMap( _clearRecentFiles );
+
 	//Ihandle*[] submenuItem;
 	for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
 	{
 		Ihandle* _new = IupItem( toStringz(GLOBAL.recentFiles[i]), null );
-		IupSetCallback( _new, "ACTION", cast(Icallback)&submenuRecentFiles_click_cb );
+		IupSetCallback( _new, "ACTION", cast(Icallback) &submenuRecentFiles_click_cb );
 		IupInsert( recentFilesSubMenu, null, _new );
 		IupMap( _new );
 	}
@@ -94,15 +101,24 @@ void createMenu()
 	Ihandle* item_recentFiles = IupSubmenu( "Recent Files", recentFilesSubMenu );
 	
 
+
+
 	Ihandle* recentPrjsSubMenu;
 	recentPrjsSubMenu = IupMenu( null );
 	IupSetHandle( "recentPrjsSubMenu", recentPrjsSubMenu );
+
+	Ihandle* _clearRecentPrjs = IupItem( toStringz( "Clear All" ), null );
+	IupSetAttribute(_clearRecentPrjs, "IMAGE", "icon_clearall");
+	IupSetCallback( _clearRecentPrjs, "ACTION", cast(Icallback) &submenuRecentPrjsClear_click_cb );
+	IupInsert( recentPrjsSubMenu, null, _clearRecentPrjs );
+	IupInsert( recentPrjsSubMenu, null, IupSeparator() );
+	IupMap( _clearRecentPrjs );
 
 	//Ihandle*[] submenuItem;
 	for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
 	{
 		Ihandle* _new = IupItem( toStringz(GLOBAL.recentProjects[i]), null );
-		IupSetCallback( _new, "ACTION", cast(Icallback)&submenu_click_cb );
+		IupSetCallback( _new, "ACTION", cast(Icallback) &submenuRecentProject_click_cb );
 		IupInsert( recentPrjsSubMenu, null, _new );
 		IupMap( _new );
 	}
@@ -423,7 +439,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.226\nBy Kuan Hsu (Taiwan)\n2016.10.23" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.227\nBy Kuan Hsu (Taiwan)\n2016.10.25" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -671,6 +687,14 @@ extern(C)
 		actionManager.ScintillaAction.saveAllFile();
 		return IUP_DEFAULT;
 	}
+	
+	int submenuRecentFilesClear_click_cb( Ihandle* ih )
+	{
+		GLOBAL.recentFiles.length = 0;
+		actionManager.ScintillaAction.updateRecentFiles( null );
+		
+		return IUP_DEFAULT;
+	}
 
 	int submenuRecentFiles_click_cb( Ihandle* ih )
 	{
@@ -693,7 +717,15 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	int submenu_click_cb( Ihandle* ih )
+	int submenuRecentPrjsClear_click_cb( Ihandle* ih )
+	{
+		GLOBAL.recentProjects.length = 0;
+		GLOBAL.projectTree.updateRecentProjects( null, null );
+		
+		return IUP_DEFAULT;
+	}
+	
+	int submenuRecentProject_click_cb( Ihandle* ih )
 	{
 		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
 		int pos = Util.index( title, " : " );
@@ -982,12 +1014,13 @@ extern(C)
 	{
 		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
 		{
+			IupSetAttribute( ih, "VALUE", "OFF" );
+			
 			int fileListTreeH = -1;
 			char[] size = fromStringz( IupGetAttribute( GLOBAL.fileListTree.getTreeHandle, "SIZE" ) );
 			int xPos = Util.index( size, "x" );
 			if( xPos < size.length ) fileListTreeH = Integer.atoi( size[++xPos..length] );
-
-			IupSetAttribute( ih, "VALUE", "OFF" );
+			
 			GLOBAL.messageSplit_value = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
 

@@ -1013,17 +1013,19 @@ struct ScintillaAction
 	
 	static void updateRecentFiles( char[] fullPath )
 	{
-		char[][]	temps;
-		bool		bMove;
-
-		for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
+		if( fullPath.length )
 		{
-			if( GLOBAL.recentFiles[i] != fullPath )	temps ~= GLOBAL.recentFiles[i];
-		}
+			char[][]	temps;
 
-		temps ~= fullPath;
-		GLOBAL.recentFiles.length = 0;
-		GLOBAL.recentFiles = temps;
+			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
+			{
+				if( GLOBAL.recentFiles[i] != fullPath )	temps ~= GLOBAL.recentFiles[i];
+			}
+
+			GLOBAL.recentFiles.length = 0;
+			temps ~= fullPath;
+			GLOBAL.recentFiles = temps;
+		}
 		
 		// Recent Files
 		if( GLOBAL.recentFiles.length > 8 )
@@ -1041,6 +1043,14 @@ struct ScintillaAction
 				IupDestroy( IupGetChild( recentFile_ih, i ) );
 			}
 
+			Ihandle* _clearRecentFiles = IupItem( toStringz( "Clear All" ), null );
+			IupSetAttribute( _clearRecentFiles, "IMAGE", "icon_deleteall" );
+			IupSetCallback( _clearRecentFiles, "ACTION", cast(Icallback) &menu.submenuRecentFilesClear_click_cb );
+			IupInsert( recentFile_ih, null, _clearRecentFiles );
+			IupMap( IupGetChild( recentFile_ih, 0 ) );
+			IupInsert( recentFile_ih, null, IupSeparator() );
+			IupMap( IupGetChild( recentFile_ih, 0 ) );
+			
 			// Create New iupItem
 			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
 			{
@@ -1049,6 +1059,7 @@ struct ScintillaAction
 				IupInsert( recentFile_ih, null, _new );
 				IupMap( _new );
 			}
+	
 			IupRefresh( recentFile_ih );
 		}		
 	}	

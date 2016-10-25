@@ -114,6 +114,40 @@ struct IDECONFIG
 		.attribute( null, "Message", GLOBAL.editorSetting00.Message )
 		.attribute( null, "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword );
 
+		GLOBAL.editorSetting01.PLACEMENT = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "PLACEMENT" ) );
+		
+		version(Windows) 
+			GLOBAL.editorSetting01.MAXIMIZED = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "MAXIMIZED" ) );
+		else
+			GLOBAL.editorSetting01.MAXIMIZED = "NO";
+		
+		GLOBAL.editorSetting01.RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE" ) );
+		
+		if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
+			GLOBAL.editorSetting01.ExplorerSplit = Integer.toString( GLOBAL.explorerSplit_value );
+		else
+			GLOBAL.editorSetting01.ExplorerSplit = fromStringz( IupGetAttribute( GLOBAL.explorerSplit, "VALUE" ) );
+		
+		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
+			GLOBAL.editorSetting01.MessageSplit = Integer.toString( GLOBAL.messageSplit_value );
+		else
+			GLOBAL.editorSetting01.MessageSplit = fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) );
+		
+		
+		GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) );
+		GLOBAL.editorSetting01.OutlineWindow = fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) );
+		GLOBAL.editorSetting01.MessageWindow = fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) );
+
+		editorNode.element( null, "size01" )
+		.attribute( null, "PLACEMENT", GLOBAL.editorSetting01.PLACEMENT )
+		.attribute( null, "MAXIMIZED", GLOBAL.editorSetting01.MAXIMIZED )
+		.attribute( null, "RASTERSIZE", GLOBAL.editorSetting01.RASTERSIZE )
+		.attribute( null, "ExplorerSplit", GLOBAL.editorSetting01.ExplorerSplit )
+		.attribute( null, "MessageSplit", GLOBAL.editorSetting01.MessageSplit )
+		.attribute( null, "FileListSplit", GLOBAL.editorSetting01.FileListSplit )
+		.attribute( null, "OutlineWindow", GLOBAL.editorSetting01.OutlineWindow )
+		.attribute( null, "MessageWindow", GLOBAL.editorSetting01.MessageWindow );
+		
 		/+
 		//<font name="Consolas" size="11" bold="OFF" italic="OFF" underline="OFF" forecolor="0 0 0" backcolor="255 255 255"></font>
 		editorNode.element( null, "font" )
@@ -465,6 +499,31 @@ struct IDECONFIG
 			result = root.query.descendant("toggle00").attribute("BoldKeyword");
 			foreach( e; result ) GLOBAL.editorSetting00.BoldKeyword = e.value;
 
+
+			result = root.query.descendant("size01").attribute("PLACEMENT");
+			foreach( e; result ) GLOBAL.editorSetting01.PLACEMENT = e.value;
+
+			result = root.query.descendant("size01").attribute("MAXIMIZED");
+			foreach( e; result ) GLOBAL.editorSetting01.MAXIMIZED = e.value;
+
+			result = root.query.descendant("size01").attribute("RASTERSIZE");
+			foreach( e; result ) GLOBAL.editorSetting01.RASTERSIZE = e.value;
+
+			result = root.query.descendant("size01").attribute("ExplorerSplit");
+			foreach( e; result ) GLOBAL.editorSetting01.ExplorerSplit = e.value;
+
+			result = root.query.descendant("size01").attribute("MessageSplit");
+			foreach( e; result ) GLOBAL.editorSetting01.MessageSplit = e.value;
+
+			result = root.query.descendant("size01").attribute("FileListSplit");
+			foreach( e; result ) GLOBAL.editorSetting01.FileListSplit = e.value;
+			
+			result = root.query.descendant("size01").attribute("OutlineWindow");
+			foreach( e; result ) GLOBAL.editorSetting01.OutlineWindow = e.value;
+
+			result = root.query.descendant("size01").attribute("MessageWindow");
+			foreach( e; result ) GLOBAL.editorSetting01.MessageWindow = e.value;
+			
 
 			// Font
 			//GLOBAL.fonts.length = 0;
