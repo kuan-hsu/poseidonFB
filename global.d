@@ -8,7 +8,7 @@ struct EditorToggleUint
 
 struct EditorLayoutSize
 {
-	char[] PLACEMENT = "MAXIMIZED", MAXIMIZED = "NO", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON";
+	char[] PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON";
 }
 
 struct EditorColorUint

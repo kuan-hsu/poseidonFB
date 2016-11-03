@@ -7,27 +7,20 @@ private
 	import iup.iup_scintilla;
 
 	import global, actionManager, menu, tools;
+	import parser.autocompletion, parser.live;
 
 	import Integer = tango.text.convert.Integer;
-	import tango.text.convert.Layout;
 	import tango.stdc.stringz;
 	import tango.io.FilePath;
-	import tango.io.Stdout;
 	import tango.text.convert.Utf;
 }
-
-import		parser.autocompletion, parser.live, tools;
-
 
 class CScintilla
 {
 	private:
-	import			global, images.xpm;
-	
-	import 			tango.io.FilePath;
+	import			images.xpm;
 	import			tango.io.UnicodeFile;
 	
-
 	Ihandle*		sci;
 	char[]			fullPath;
 	CstringConvert	title;
@@ -703,12 +696,14 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	/*
 	private int CScintilla_valuechanged_cb( Ihandle* ih )
 	{
 		//actionManager.StatusBarAction.update();
 
 		return IUP_DEFAULT;
 	}
+	*/
 
 	// mouse button
 	/*
@@ -720,6 +715,8 @@ extern(C)
 	*/
 	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
+		AutoComplete.bInsertBrace = false;
+		
 		if( pressed == 0 ) //release
 		{
 			if( button == '3' ) // Right Click
@@ -1158,6 +1155,8 @@ extern(C)
 				default:
 			}
 		}
+		
+		if( c == '}' || c == ']' || c == ')' ) AutoComplete.bInsertBrace = true; else AutoComplete.bInsertBrace = false;
 
 		return IUP_DEFAULT;
 	}
@@ -1429,30 +1428,63 @@ extern(C)
 			}
 		}
 
-		//char[] c = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
-		int close = IupScintillaSendMessage( ih, 2353, pos, 0 ); // SCI_BRACEMATCH = 2353,
+		// BRACEMATCH
+		int close = IupGetIntId( ih, "BRACEMATCH", pos );
 		if( close > -1 )
 		{
-			char[] highlightPos = Integer.toString( pos ) ~ ":" ~ Integer.toString( close );
-			IupSetAttribute( ih, "BRACEHIGHLIGHT", toStringz( highlightPos ) );
+			IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
 		}
 		else
 		{
-			close = IupScintillaSendMessage( ih, 2353, pos - 1, 0 ); // SCI_BRACEMATCH = 2353,
+			close = IupGetIntId( ih, "BRACEMATCH", pos - 1 );
 			if( close > -1 )
 			{
-				char[] highlightPos = Integer.toString( pos - 1 ) ~ ":" ~ Integer.toString( close );
-				IupSetAttribute( ih, "BRACEHIGHLIGHT", toStringz( highlightPos ) );
+				IupScintillaSendMessage( ih, 2351, pos - 1, close ); // SCI_BRACEHIGHLIGHT 2351
 			}
 			else
 			{
-				IupSetAttribute( ih, "BRACEBADLIGHT", toStringz( "-1" ) );
+				IupSetInt( ih, "BRACEBADLIGHT", -1 );
+				
+				if( AutoComplete.bInsertBrace )
+				{
+					int		_countDelimit, _pos = --pos;
+					char[]	closeDelimit = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ).dup, openDelimit;
+					
+					switch( closeDelimit )
+					{
+						case ")":	openDelimit = "("; break;
+						case "}":	openDelimit = "{"; break;
+						case "]":	openDelimit = "["; break;
+						default:	return IUP_DEFAULT;
+					}
+					
+					_countDelimit++;
+					
+					do
+					{
+						if( !ScintillaAction.isComment( ih, --_pos ) )
+						{
+							char[]	_char = fromStringz( IupGetAttributeId( ih, "CHAR", _pos ) ).dup;
+							
+							if( _char == openDelimit )
+								_countDelimit--;
+							if( _char == closeDelimit )
+								_countDelimit++;
+							
+							if( _countDelimit == 0 )
+							{
+								IupScintillaSendMessage( ih, 2351, _pos, pos ); // SCI_BRACEHIGHLIGHT 2351
+								actionManager.StatusBarAction.update();
+								return IUP_DEFAULT;
+							}
+						}
+					}
+					while( _pos > -1 )
+				}				
 			}
 		}
-		
 
 		actionManager.StatusBarAction.update();
-
 		return IUP_DEFAULT;
 	}
 

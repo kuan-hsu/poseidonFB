@@ -106,6 +106,25 @@ extern(C)
 		return IUP_CLOSE;
 	}
 
+	int mainDialog_SHOW_cb( Ihandle *ih,int state )
+	{
+		switch( state )
+		{
+			case IUP_MAXIMIZE:	GLOBAL.editorSetting01.PLACEMENT = "MAXIMIZED";		break;
+			case IUP_RESTORE:	GLOBAL.editorSetting01.PLACEMENT = "NORMAL";		break;
+			case IUP_MINIMIZE:	GLOBAL.editorSetting01.PLACEMENT = "MINIMIZED";		break;
+			default:
+		}
+
+		return IUP_DEFAULT;
+	}
+	
+	int mainDialog_RESIZE_cb( Ihandle *ih, int width, int height )
+	{
+		if( GLOBAL.editorSetting01.PLACEMENT != "MAXIMIZED" ) GLOBAL.editorSetting01.RASTERSIZE = Integer.toString( width ) ~ "x" ~ Integer.toString( height );
+		return IUP_DEFAULT;
+	}
+	
 	int GlobalKeyPress_CB( int c, int press )
 	{
 		if( press == 0 ) 

@@ -983,7 +983,7 @@ struct AutoComplete
 
 
 	public:
-	static bool bEnter;
+	static bool bEnter, bInsertBrace;
 	static bool bAutocompletionPressEnter;
 
 

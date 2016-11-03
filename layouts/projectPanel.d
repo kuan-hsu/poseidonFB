@@ -135,6 +135,7 @@ class CProjectTree
 
 	void createProjectTree( char[] setupDir )
 	{
+		
 		char[] prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
 
 		// Add Project's Name to Tree
@@ -206,6 +207,8 @@ class CProjectTree
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
 
 		IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
+		
+		IupSetInt( GLOBAL.fileListSplit, "VALUE", Integer.atoi( GLOBAL.editorSetting01.FileListSplit ) + 12 );
 	}
 
 	void CreateNewProject( char[] prjName, char[] prjDir )

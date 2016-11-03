@@ -114,15 +114,7 @@ struct IDECONFIG
 		.attribute( null, "Message", GLOBAL.editorSetting00.Message )
 		.attribute( null, "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword );
 
-		GLOBAL.editorSetting01.PLACEMENT = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "PLACEMENT" ) );
-		
-		version(Windows) 
-			GLOBAL.editorSetting01.MAXIMIZED = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "MAXIMIZED" ) );
-		else
-			GLOBAL.editorSetting01.MAXIMIZED = "NO";
-		
-		GLOBAL.editorSetting01.RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE" ) );
-		
+
 		if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
 			GLOBAL.editorSetting01.ExplorerSplit = Integer.toString( GLOBAL.explorerSplit_value );
 		else
@@ -140,7 +132,6 @@ struct IDECONFIG
 
 		editorNode.element( null, "size01" )
 		.attribute( null, "PLACEMENT", GLOBAL.editorSetting01.PLACEMENT )
-		.attribute( null, "MAXIMIZED", GLOBAL.editorSetting01.MAXIMIZED )
 		.attribute( null, "RASTERSIZE", GLOBAL.editorSetting01.RASTERSIZE )
 		.attribute( null, "ExplorerSplit", GLOBAL.editorSetting01.ExplorerSplit )
 		.attribute( null, "MessageSplit", GLOBAL.editorSetting01.MessageSplit )
@@ -502,9 +493,6 @@ struct IDECONFIG
 
 			result = root.query.descendant("size01").attribute("PLACEMENT");
 			foreach( e; result ) GLOBAL.editorSetting01.PLACEMENT = e.value;
-
-			result = root.query.descendant("size01").attribute("MAXIMIZED");
-			foreach( e; result ) GLOBAL.editorSetting01.MAXIMIZED = e.value;
 
 			result = root.query.descendant("size01").attribute("RASTERSIZE");
 			foreach( e; result ) GLOBAL.editorSetting01.RASTERSIZE = e.value;

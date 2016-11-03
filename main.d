@@ -141,57 +141,36 @@ void main()
 	createMenu();
 	// Creates a dialog containing the control
 	GLOBAL.mainDlg = IupDialog( null );
+	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );
+	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
+	IupSetCallback( GLOBAL.mainDlg, "SHOW_CB", cast(Icallback) &mainDialog_SHOW_cb );
+	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
+	IupSetCallback( GLOBAL.mainDlg, "RESIZE_CB", cast(Icallback) &mainDialog_RESIZE_cb );
+	
+	
 
 	createLayout();
 
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
-	//IupSetAttribute( GLOBAL.mainDlg, "MARGIN", "10x10");
-
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
-	//IupAppend( GLOBAL.mainDlg, GLOBAL.documentTabs );
 
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
 	
-	version(Windows)
-	{
-		if( GLOBAL.editorSetting01.MAXIMIZED == "YES" )
-		{
-			IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" );
-			//IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( "700x500" ) );
-		}
-		else
-		{
-			IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
-		}
-	}
-	else
-	{
-		IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
-	}
-	
-	// Shows dialog
-	IupShow( GLOBAL.mainDlg );
+	if( GLOBAL.editorSetting01.PLACEMENT == "MAXIMIZED" ) IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" );
+	IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
 
 	// Set Split %
 	IupSetAttribute( GLOBAL.explorerSplit, "VALUE", toStringz( GLOBAL.editorSetting01.ExplorerSplit ) );
-	IupSetAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );
-	IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
+
+	// Shows dialog
+	IupShow( GLOBAL.mainDlg );
 	
+	IupSetAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );	
+	IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
 	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outline_cb( GLOBAL.menuOutlineWindow );
 	if( GLOBAL.editorSetting01.MessageWindow == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
-
-	/*
-	IupSetInt( GLOBAL.explorerSplit, "VALUE", 170 );
-	IupSetInt( GLOBAL.messageSplit, "VALUE", 800 );
-	IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
-	*/
-
-	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );
-	
-	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
-	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
 	
 
 	createDialog();

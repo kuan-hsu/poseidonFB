@@ -1068,9 +1068,6 @@ struct ScintillaAction
 
 struct ProjectAction
 {
-	private:
-	import Util = tango.text.Util;
-	
 	public:
 	static int getTargetDepthID( int targetDepth )
 	{
@@ -1322,9 +1319,6 @@ struct StatusBarAction
 
 struct ToolAction
 {
-	private:
-	import Util = tango.text.Util;
-
 	public:
 	static int convertIupColor( char[] color )
 	{
@@ -1355,8 +1349,8 @@ struct ToolAction
 struct SearchAction
 {
 	private:
-	import global, scintilla, project, menu;
-	import tango.io.FilePath, tango.text.Ascii, tango.stdc.stringz, Util = tango.text.Util;//, tango.io.UnicodeFile;
+	import scintilla, project, menu;
+	import tango.io.FilePath, tango.text.Ascii;
 	import tango.io.device.File;//, tango.io.stream.Lines;
 
 	static int _find( Ihandle* ih, char[] targetText, int type = 2, bool bNext = true )
