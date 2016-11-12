@@ -1625,7 +1625,7 @@ struct SearchAction
 			
 			for( int i = 1; i <= itemCount; ++ i )
 			{
-				if( fromStringz( IupGetAttribute( ih, GLOBAL.cString.convert( Integer.toString( i ) ) ) ) == text )
+				if( fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ) ) ) ).dup == text )
 				{
 					IupSetInt( ih, "REMOVEITEM", i );
 					break;

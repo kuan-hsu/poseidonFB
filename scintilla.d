@@ -300,7 +300,7 @@ class CScintilla
 
 	void setGlobalSetting( bool bFirstTime = false )
 	{
-		IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic");
+		IupSetAttribute(sci, "LEXERLANGUAGE", toStringz( GLOBAL.lexer ) );
 
 		IupSetAttribute(sci, "KEYWORDS0", GLOBAL.cString.convert( GLOBAL.KEYWORDS[0] ) );
 		IupSetAttribute(sci, "KEYWORDS1", GLOBAL.cString.convert( GLOBAL.KEYWORDS[1] ) );

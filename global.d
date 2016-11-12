@@ -81,6 +81,7 @@ struct GLOBAL
 	static char[]				linuxTermName;
 
 	// Setting
+	static char[]				lexer = "freebasic";
 	static char[][]				KEYWORDS;
 	static int					keywordCase = 0;	
 	static char[]				compilerFullPath;

@@ -1209,7 +1209,7 @@ class CDebugger
 
 	bool buildAllWithDebug()
 	{
-		return ExecuterAction.buildAll( "-g" );
+		return ExecuterAction.buildAll( null, "-g" );
 	}	
 
 	void updateBackTrace()

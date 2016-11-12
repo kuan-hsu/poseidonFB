@@ -168,7 +168,7 @@ class CToolBar
 
 		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild,TIP=Rebuild_All" );
 		IupSetAttribute( btnBuildAll, "TIP", "Build Project" );
-		IupSetCallback( btnBuildAll, "ACTION", cast(Icallback) &menu.buildAll_cb ); // From menu.d
+		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
 
 		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun,TIP=Quick Run" );
 		IupSetAttribute( btnQuickRun, "TIP", "Quick Run" );
@@ -250,6 +250,29 @@ extern( C )
 		return IUP_DEFAULT;
 	}
 
+	private int buildall_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 )
+		{
+			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			{
+				ExecuterAction.buildAll();
+			}
+			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			{
+				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
+				{
+					if( GLOBAL.argsDlg !is null )
+					{
+						char[][] result = GLOBAL.argsDlg.show( 1 );
+						if( result.length == 1 ) ExecuterAction.buildAll( result[0] );
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
 	private int buildrun_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( pressed == 0 )

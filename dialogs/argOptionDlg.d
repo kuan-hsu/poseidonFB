@@ -155,13 +155,13 @@ extern(C) // Callback for CArgOptionDialog
 			Ihandle* _listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
 			if( _listOptions != null )
 			{
-				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listOptions, fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ), 10 );
+				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listOptions, fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup, 10 );
 			}
 
 			Ihandle* _listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
 			if( _listArgs != null )
 			{
-				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listArgs, fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ) , 10 );
+				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listArgs, fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup , 10 );
 			}			
 			
 			IupHide( GLOBAL.argsDlg._dlg );

@@ -190,11 +190,11 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					if( Util.index( line, ") warning " ) < line.length ) bWarning = true;
+					if( Util.index( line, "warning " ) < line.length ) bWarning = true;
 				}
 				if( !bError )
 				{
-					if( Util.index( line, ") error " ) < line.length ) bError = true;
+					if( Util.index( line, "error " ) < line.length ) bError = true;
 				}				
 				
 				stdoutMessage ~= ( line ~ "\n" );
@@ -261,7 +261,7 @@ struct ExecuterAction
 		return false;
 	}
 	
-	static bool buildAll( char[] optionDebug = null )
+	static bool buildAll( char[] options = null, char[] optionDebug = null )
 	{
 		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
 
@@ -362,7 +362,13 @@ struct ExecuterAction
 				}
 
 				char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : GLOBAL.compilerFullPath;
-				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				
+				if( options.length )
+					txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
+								txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ options ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				else
+					txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
+								txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 
 				Process p = new Process( true, txtCommand );
 				p.workDir( GLOBAL.projectManager[activePrjName].dir );
@@ -384,15 +390,13 @@ struct ExecuterAction
 				{
 					if( !bWarning )
 					{
-						if( Util.index( line, ") warning " ) < line.length ) bWarning = true;
+						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
 					}
 					if( !bError )
 					{
-						if( Util.index( line, ") error " ) < line.length )
+						if( Util.index( line, "error " ) < line.length )
 							bError = true;
 						else if( Util.index( line, "Error!" ) < line.length )
-							bError = true;
-						else if( Util.index( line, "error " ) < line.length )
 							bError = true;
 					}				
 					

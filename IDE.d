@@ -86,9 +86,8 @@ struct IDECONFIG
 
 		auto configNode = doc.tree.element( null, "config" );
 
-
 		auto editorNode = configNode.element( null, "editor" );
-
+		editorNode.element( null, "lexer", GLOBAL.lexer );
 		for( int i = 0; i < GLOBAL.KEYWORDS.length; ++i )
 		{
 			editorNode.element( null, "keywords" )
@@ -302,11 +301,18 @@ struct IDECONFIG
 			doc.parse( file.read );
 
 			auto root = doc.elements;
-			auto result = root.query.descendant("keywords").attribute("value");
+			
+			auto result = root.query.descendant("lexer");
+			foreach( e; result )
+			{
+				GLOBAL.lexer = e.value;
+			}			
+			
+			result = root.query.descendant("keywords").attribute("value");
 			GLOBAL.KEYWORDS.length = 0;
 			foreach( e; result )
 			{
-				GLOBAL.KEYWORDS~= e.value;
+				GLOBAL.KEYWORDS ~= e.value;
 			}
 
 			result = root.query.descendant("keywords").attribute("color");
