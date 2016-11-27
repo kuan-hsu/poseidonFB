@@ -306,7 +306,8 @@ struct IDECONFIG
 			foreach( e; result )
 			{
 				GLOBAL.lexer = e.value;
-			}			
+			}
+			if( !GLOBAL.lexer.length ) GLOBAL.lexer = "freebasic";
 			
 			result = root.query.descendant("keywords").attribute("value");
 			GLOBAL.KEYWORDS.length = 0;

@@ -8,7 +8,9 @@
   <CompilerOption>-odobjs -release -L/SUBSYSTEM:windows:4</CompilerOption>
   <Comment/>
   <CompilerPath/>
-  <IncludeDirs/>
+  <IncludeDirs>
+    <Name>C:/Users/NagahiroKyo/Desktop/kelly/里居遊</Name>
+  </IncludeDirs>
   <LibDirs>
     <Name>D:/CodingPark/GameKYO/lib/iup/iup318DLL10</Name>
   </LibDirs>

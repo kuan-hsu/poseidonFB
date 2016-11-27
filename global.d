@@ -90,6 +90,7 @@ struct GLOBAL
 	static char[]				debuggerFullPath;
 	//static char[]				maxError = "30";
 	static char[]				defaultOption;
+	static char[]				recentOpenDir;
 	static char[][]				recentFiles, recentProjects, recentOptions, recentArgs;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;

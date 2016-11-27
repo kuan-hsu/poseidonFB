@@ -7,6 +7,7 @@ class CFileDlg
 	
 	import iup.iup;
 
+	import tango.io.FilePath;
 	import Util = tango.text.Util, tango.stdc.stringz;
 
 	char[][]	filesName;
@@ -18,6 +19,7 @@ class CFileDlg
 
 		IupSetAttribute( dlg, "DIALOGTYPE",  toStringz( DIALOGTYPE.dup ) );
 		IupSetAttribute( dlg, "TITLE", toStringz( title.dup ) );
+		if( GLOBAL.recentOpenDir.length ) IupSetAttribute( dlg, "DIRECTORY", toStringz( GLOBAL.recentOpenDir ) );
 
 		bool bMultiFiles;
 		if( DIALOGTYPE == "OPEN" && MULTIPLEFILES == "YES" )
@@ -68,6 +70,9 @@ class CFileDlg
 						filesName ~= fileString;
 					}
 				}
+				
+				scope _fp = new FilePath( fileString );
+				if( _fp.isFolder() ) GLOBAL.recentOpenDir = _fp.toString; else GLOBAL.recentOpenDir = _fp.path;
 			}
 		}
 		else
@@ -101,5 +106,4 @@ class CFileDlg
 	}
 
 	char[] getFilterUsed(){ return filterUsed; }
-	
 }

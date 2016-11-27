@@ -171,6 +171,8 @@ struct ExecuterAction
 		{
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
+			if( IupGetInt( GLOBAL.toolbar.getListGUIHandle, "VALUE" ) == 2 ) command ~= " -s gui";
+			
 			Process p = new Process( true, command );
 			p.gui( true );
 			p.execute;
@@ -370,6 +372,9 @@ struct ExecuterAction
 					txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
 								txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 
+				
+				if( IupGetInt( GLOBAL.toolbar.getListGUIHandle, "VALUE" ) == 2 ) txtCommand ~= " -s gui";
+
 				Process p = new Process( true, txtCommand );
 				p.workDir( GLOBAL.projectManager[activePrjName].dir );
 				p.gui( true );
@@ -501,6 +506,9 @@ struct ExecuterAction
 		try
 		{
 			char[] commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
+			
+			if( IupGetInt( GLOBAL.toolbar.getListGUIHandle, "VALUE" ) == 2 ) commandString ~= " -s gui";
+			
 			Process p = new Process( true, commandString );
 			p.gui( true );
 			p.execute;

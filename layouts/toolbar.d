@@ -12,7 +12,7 @@ class CToolBar
 	import menu, parser.ast;
 	import tango.stdc.stringz;
 
-	Ihandle*	handle, listHandle;
+	Ihandle*	handle, listHandle, listGUIHandle;
 
 	void createToolBar()
 	{
@@ -182,7 +182,11 @@ class CToolBar
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 		}
 
-
+		listGUIHandle = IupList( null );
+		IupSetAttributes( listGUIHandle, "ACTIVE=YES,SIZE=60x12,SCROLLBAR=NO" );
+		IupSetAttribute( listGUIHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
+		IupSetAttributes( listGUIHandle, "1=\"Console\",2=\"GUI\",SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=2");		
+		
 		listHandle = IupList( null );
 		IupSetAttributes( listHandle, "ACTIVE=YES,SIZE=180x12,SHOWIMAGE=YES,SCROLLBAR=NO" );
 		IupSetAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
@@ -191,7 +195,7 @@ class CToolBar
 		
 		// IUP Container to put buttons on~
 		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
-						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], listHandle, null );/* labelSEPARATOR[5],
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], listGUIHandle, listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 		IupSetAttributes( handle, "GAP=5,ALIGNMENT=ACENTER" );
 	}
@@ -211,6 +215,11 @@ class CToolBar
 	Ihandle* getListHandle()
 	{
 		return listHandle;
+	}
+	
+	Ihandle* getListGUIHandle()
+	{
+		return listGUIHandle;
 	}
 
 	void showList( bool status )
