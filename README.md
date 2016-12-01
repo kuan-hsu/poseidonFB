@@ -1,10 +1,10 @@
 ### poseidonFB ###
 
-Welcome to poseidonFB, the IDE is writefln by D language + IUP framework for freeBASIC
+Welcome to poseidonFB, is a freeBASIC IDE written in the D language utilizing IUP framework.
 
 It supports:
 
-1. Multiple platforms(Windows, Linux)
+1. Multiple platforms (Windows, Linux)
 2. Syntax highlighting
 3. Project manager
 4. Autocompletion & Calltip
@@ -12,7 +12,7 @@ It supports:
 5. Function / Type / Variable... treeview
 7. Find / Replace in document or project
 8. Utf-8/16/32 decode & encode
-9. Debug(only Windows)
+9. Debug (only Windows)
 10. Compile / Quick run / Build project
 11. Self-define short cuts
 12. etc...
@@ -30,11 +30,11 @@ Go to **Downloads** https://bitbucket.org/KuanHsu/poseidonfb/downloads to select
 
 **Win:**
 
-Download poseidonFB.7z, extract to floder, then run the poseidonFB.exe
+Download poseidonFB.7z, extract to folder, then run the poseidonFB.exe
 
 **Linux:**
 
-At first install IUP framework(3.18), https://sourceforge.net/projects/iup/files/3.18/Linux%20Libraries/
+First install IUP framework(3.18), https://sourceforge.net/projects/iup/files/3.18/Linux%20Libraries/
 
 Open the terminal to install the *.so to system.
 
@@ -45,4 +45,4 @@ sudo ./install
 
 ```
 
-Then choose x64 or x86 version to download, extract to floder, then run the poseidonFB
+Then choose x64 or x86 version to download, extract to folder, then run the poseidonFB
