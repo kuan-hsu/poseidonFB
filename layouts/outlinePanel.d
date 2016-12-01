@@ -622,7 +622,7 @@ class COutline
 		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_l,TIP=Hide" );
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			menu.outline_cb( GLOBAL.menuOutlineWindow );
+			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 		});
 
 		Ihandle* outlineToolbarTitleImage = IupLabel( null );

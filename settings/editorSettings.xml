@@ -7,7 +7,7 @@
     <keywords id="2" value="hour if iif imageconvertrow imagecreate imagedestroy imageinfo imp implements import inkey inp input instr instrrev int integer is isdate isredirected kill lbound lcase left len let lib line lobyte loc local locate lock lof log long longint loop loword lpos lprint lset ltrim mid minute mkd mkdir mki mkl mklongint mks mkshort mod month monthname multikey mutexcreate mutexdestroy mutexlock mutexunlock naked name namespace next new not now object oct offsetof on once open operator option or orelse out output overload override paint palette pascal pcopy peek pmap point pointcoord pointer poke pos preserve preset print private procptr property protected pset ptr public put random randomize read reallocate redim rem reset restore resume return rgb rgba right rmdir boolean" color="231 144 20"/>
     <keywords id="3" value="rnd rset rtrim run sadd scope screen screencopy screencontrol screenevent screeninfo screenglproc screenlist screenlock screenptr screenres screenset screensync screenunlock second seek select setdate setenviron setmouse settime sgn shared shell shl shr short sin single sizeof sleep space spc sqr static stdcall step stick stop str strig string strptr sub swap system tab tan then this threadcall threadcreate threaddetach threadwait time timeserial timevalue timer to trans trim type typeof ubound ubyte ucase uinteger ulong ulongint union unlock unsigned until ushort using va_arg va_first va_next val vallng valint valuint valulng var varptr view virtual wait wbin wchr weekday weekdayname wend while whex width window windowtitle winput with woct write wspace wstr wstring xor year zstring false" color="0 128 255"/>
     <toggle00 LineMargin="ON" BookmarkMargin="ON" FoldMargin="ON" IndentGuide="ON" CaretLine="ON" WordWrap="OFF" TabUseingSpace="OFF" AutoIndent="ON" ShowEOL="OFF" ShowSpace="OFF" AutoEnd="OFF" TabWidth="4" ColumnEdge="0" EolType="0" ColorOutline="ON" Message="OFF" BoldKeyword="OFF"/>
-    <size01 PLACEMENT="MAXIMIZED" RASTERSIZE="1246x375" ExplorerSplit="193" MessageSplit="705" FileListSplit="974" OutlineWindow="ON" MessageWindow="OFF"/>
+    <size01 PLACEMENT="MAXIMIZED" RASTERSIZE="1074x684" ExplorerSplit="212" MessageSplit="757" FileListSplit="966" OutlineWindow="ON" MessageWindow="ON"/>
     <font Default="Inconsolata, 11" Document="Inconsolata, 11" Leftside="Verdana, 9" Filelist="Calibri, 10" Project="Calibri, 10" Outline="Verdana, 8" Bottom="Verdana, 10" Output="Ubuntu Mono, 9" Search="Ubuntu Mono, 9" Debugger="Ubuntu Mono, 10" Annotation="Anonymous Pro, 11"/>
     <color caretLine="255 255 128" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208" selAlpha="80"/>
     <shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+S++Z" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F11" messagewindow="+++F12" showtype="+++F1" reparse="+++F2" save="C+++S" saveall="C+S++S" close="C+++W" nexttab="C+++TAB" prevtab="C+S++TAB" newtab="C+++N" autocomplete="C+++Q" compilerun="C+++F5"/>
@@ -37,12 +37,18 @@
   <recentFiles>
     <name>D:/CodingPark/FreeBASIC-1.02.1-win32/examples/pointers.bas</name>
     <name>D:/CodingPark/FreeBASIC-1.02.1-win32/examples/preprocessor.bas</name>
-    <name>C:/Users/NagahiroKyo/Desktop/Version-1.1/OGL.bi</name>
+    <name>D:/CodingPark/FreeBASIC-1.05.0-win32/examples/regex/PCRE/pcredemo.bas</name>
+    <name>D:/CodingPark/FreeBASIC-1.05.0-win32/examples/console/color.bas</name>
   </recentFiles>
   <recentProjects>
     <name>D:/FB_Code/parserFB : parserFB</name>
     <name>D:/FB_Code/poorpowerSDL2 : ppSDL2</name>
+    <name>D:/FB_Code/freetype : freetypeDemo</name>
   </recentProjects>
-  <recentOptions/>
-  <recentArgs/>
+  <recentOptions>
+    <name>-g</name>
+  </recentOptions>
+  <recentArgs>
+    <name>100</name>
+  </recentArgs>
 </config>

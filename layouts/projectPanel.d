@@ -74,7 +74,7 @@ class CProjectTree
 		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l,TIP=Hide" );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			menu.outline_cb( GLOBAL.menuOutlineWindow );
+			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 		});
 
 		Ihandle* projectToolbarTitleImage = IupLabel( null );
@@ -208,7 +208,7 @@ class CProjectTree
 
 		IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
 		
-		IupSetInt( GLOBAL.fileListSplit, "VALUE", Integer.atoi( GLOBAL.editorSetting01.FileListSplit ) + 12 );
+		//IupSetInt( GLOBAL.fileListSplit, "VALUE", IupGetInt( GLOBAL.fileListSplit, "VALUE" ) + 12 );
 	}
 
 	void CreateNewProject( char[] prjName, char[] prjDir )
@@ -257,7 +257,7 @@ class CProjectTree
 		if( setupDir in GLOBAL.projectManager )
 		{
 			IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas already opened!" ) );
-			return false;
+			return true;
 		}
 
 		if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );

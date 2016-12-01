@@ -52,6 +52,8 @@ void load_all_images_icons()
 	IupSetHandle( "icon_txt", XPM.getIUPimage( "icons/xpm/txt.xpm" ) ); // IupSetHandle("icon_txt", load_image_new_untitled_text_file());
 	IupSetHandle( "icon_rebuild", XPM.getIUPimage( "icons/xpm/build.xpm" ) ); // IupSetHandle( "icon_rebuild", load_image_rebuild());
 	IupSetHandle( "icon_buildrun", XPM.getIUPimage( "icons/xpm/buildrun.xpm" ) );
+	IupSetHandle( "icon_console", XPM.getIUPimage( "icons/xpm/console.xpm" ) );
+	IupSetHandle( "icon_gui", XPM.getIUPimage( "icons/xpm/gui.xpm" ) );
 
 	IupSetHandle( "icon_copy", XPM.getIUPimage( "icons/xpm/copy.xpm" ) ); // IupSetHandle("icon_copy", load_image_copy_edit());
 	IupSetHandle( "icon_save", XPM.getIUPimage( "icons/xpm/save.xpm" ) ); // IupSetHandle("icon_save", load_image_save_edit());
@@ -82,6 +84,8 @@ void load_all_images_icons()
 	IupSetHandle( "icon_tools", XPM.getIUPimage( "icons/xpm/tools.xpm" ) );
 	IupSetHandle( "icon_properties", XPM.getIUPimage( "icons/xpm/properties.xpm" ) );
 	IupSetHandle( "icon_preference", XPM.getIUPimage( "icons/xpm/preference.xpm" ) );
+	IupSetHandle( "icon_shift_r", XPM.getIUPimage( "icons/xpm/shift_r_edit.xpm" ) );
+	IupSetHandle( "icon_shift_t", XPM.getIUPimage( "icons/xpm/shift_t_edit.xpm" ) );
 	IupSetHandle( "icon_shift_l", XPM.getIUPimage( "icons/xpm/shift_l_edit.xpm" ) );
 	IupSetHandle( "icon_shift_b", XPM.getIUPimage( "icons/xpm/shift_b_edit.xpm" ) );
 	IupSetHandle( "icon_information", XPM.getIUPimage( "icons/xpm/information.xpm" ) );

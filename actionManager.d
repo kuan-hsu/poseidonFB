@@ -1631,7 +1631,7 @@ struct SearchAction
 					break;
 				}
 			}
-
+			
 			itemCount = IupGetInt( ih, "COUNT" );
 			if( itemCount == limit )
 			{
@@ -1640,7 +1640,6 @@ struct SearchAction
 			}
 			else
 			{
-				
 				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text.dup ) );
 			}
 		}

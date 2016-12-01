@@ -266,6 +266,9 @@ struct IDECONFIG
 		</compileOptionLists>
 		*/
 		auto optionsNode = configNode.element( null, "recentOptions" );
+		foreach( char[] s; GLOBAL.recentOptions )
+			optionsNode.element( null, "name", s );
+		/*
 		Ihandle* listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
 		if( listOptions != null )
 		{
@@ -274,8 +277,12 @@ struct IDECONFIG
 				optionsNode.element( null, "name", fromStringz( IupGetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ) ) ).dup );
 			}
 		}
+		*/
 
 		auto argsNode = configNode.element( null, "recentArgs" );
+		foreach( char[] s; GLOBAL.recentArgs )
+			argsNode.element( null, "name", s );		
+		/*
 		Ihandle* listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
 		if( listArgs != null )
 		{
@@ -283,7 +290,8 @@ struct IDECONFIG
 			{
 				argsNode.element( null, "name", fromStringz( IupGetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ) ) ).dup );
 			}
-		}		
+		}
+		*/
 		
 		auto print = new DocPrinter!(char);
 		actionManager.FileAction.saveFile( "settings/editorSettings.xml", print.print( doc ) );

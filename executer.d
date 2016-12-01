@@ -171,7 +171,7 @@ struct ExecuterAction
 		{
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
-			if( IupGetInt( GLOBAL.toolbar.getListGUIHandle, "VALUE" ) == 2 ) command ~= " -s gui";
+			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) command ~= " -s gui";
 			
 			Process p = new Process( true, command );
 			p.gui( true );
@@ -373,7 +373,7 @@ struct ExecuterAction
 								txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 
 				
-				if( IupGetInt( GLOBAL.toolbar.getListGUIHandle, "VALUE" ) == 2 ) txtCommand ~= " -s gui";
+				if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) txtCommand ~= " -s gui";
 
 				Process p = new Process( true, txtCommand );
 				p.workDir( GLOBAL.projectManager[activePrjName].dir );
@@ -507,7 +507,7 @@ struct ExecuterAction
 		{
 			char[] commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
 			
-			if( IupGetInt( GLOBAL.toolbar.getListGUIHandle, "VALUE" ) == 2 ) commandString ~= " -s gui";
+			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) commandString ~= " -s gui";
 			
 			Process p = new Process( true, commandString );
 			p.gui( true );
@@ -562,7 +562,8 @@ struct ExecuterAction
 				scope _f = new FilePath( fileName );
 				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ "./" ~ _f.name;
 				_f.remove();
-
+				
+				if( args.length ) args = " " ~ args; else args = "";
 				QuickRunThread	derived = new QuickRunThread( "\"" ~ command ~ "\"", args, _f.path, options );
 				derived.start();
 

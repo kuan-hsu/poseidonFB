@@ -2,7 +2,7 @@
 
 private import iup.iup;
 private import global, actionManager, menu, executer;
-private import Util = tango.text.Util;
+private import Util = tango.text.Util, tango.stdc.stringz;;
 
 
 class CToolBar
@@ -10,9 +10,8 @@ class CToolBar
 	private:
 	import iup.iup_scintilla;
 	import menu, parser.ast;
-	import tango.stdc.stringz;
-
-	Ihandle*	handle, listHandle, listGUIHandle;
+	
+	Ihandle*	handle, listHandle, guiButton;
 
 	void createToolBar()
 	{
@@ -175,18 +174,43 @@ class CToolBar
 		IupSetCallback( btnQuickRun, "BUTTON_CB", cast(Icallback) &quickRun_button_cb );
 
 
-		Ihandle*[6] labelSEPARATOR;
-		for( int i = 0; i < 6; i++ )
+		Ihandle*[7] labelSEPARATOR;
+		for( int i = 0; i < 8; i++ )
 		{
 			labelSEPARATOR[i] = IupLabel( null ); 
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 		}
 
+		/+
 		listGUIHandle = IupList( null );
-		IupSetAttributes( listGUIHandle, "ACTIVE=YES,SIZE=60x12,SCROLLBAR=NO" );
+		IupSetAttributes( listGUIHandle, "ACTIVE=YES,SIZE=50x12,SCROLLBAR=NO" );
 		IupSetAttribute( listGUIHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
-		IupSetAttributes( listGUIHandle, "1=\"Console\",2=\"GUI\",SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=2");		
+		IupSetAttributes( listGUIHandle, "1=\"Console\",2=\"GUI\",SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=2");
+		+/
 		
+		Ihandle* outlineButtonHide = IupToggle( null, "Hide" );
+		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_r,IMPRESS=icon_shift_l" );
+		IupSetAttribute( outlineButtonHide, "TIP", "Show / Hide Left-Window" );
+		IupSetHandle( "outlineButtonHide", outlineButtonHide );
+		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			menu.outline_cb( GLOBAL.menuOutlineWindow );
+		});		
+
+		Ihandle* messageButtonHide = IupToggle( null, "HideMessage" );
+		IupSetAttributes( messageButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_t,IMPRESS=icon_shift_b" );
+		IupSetAttribute( messageButtonHide, "TIP", "Show / Hide Bottom-Window" );
+		IupSetHandle( "messageButtonHide", messageButtonHide );
+		IupSetCallback( messageButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			menu.message_cb( GLOBAL.menuMessageWindow );
+		});		
+		
+		
+		guiButton = IupToggle( null, "GUI" );
+		IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,VALUE=OFF" );
+		IupSetAttribute( guiButton, "TIP", "Console / GUI" );
+
 		listHandle = IupList( null );
 		IupSetAttributes( listHandle, "ACTIVE=YES,SIZE=180x12,SHOWIMAGE=YES,SCROLLBAR=NO" );
 		IupSetAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
@@ -195,7 +219,7 @@ class CToolBar
 		
 		// IUP Container to put buttons on~
 		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
-						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], listGUIHandle, listHandle, null );/* labelSEPARATOR[5],
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], outlineButtonHide, messageButtonHide, labelSEPARATOR[6], guiButton, listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 		IupSetAttributes( handle, "GAP=5,ALIGNMENT=ACENTER" );
 	}
@@ -217,9 +241,9 @@ class CToolBar
 		return listHandle;
 	}
 	
-	Ihandle* getListGUIHandle()
+	Ihandle* getGuiButtonHandle()
 	{
-		return listGUIHandle;
+		return guiButton;
 	}
 
 	void showList( bool status )

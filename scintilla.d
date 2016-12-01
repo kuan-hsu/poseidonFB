@@ -1026,7 +1026,7 @@ extern(C)
 				case "On/Off Left-side Window":
 					if( sk.keyValue == c ) 
 					{
-						menu.outline_cb( GLOBAL.menuOutlineWindow );
+						menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 						IupSetFocus( ih );
 						return IUP_IGNORE;
 					}
@@ -1034,7 +1034,7 @@ extern(C)
 				case "On/Off Bottom-side Window":
 					if( sk.keyValue == c )
 					{
-						menu.message_cb( GLOBAL.menuMessageWindow );
+						menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 						IupSetFocus( ih );
 						return IUP_IGNORE;
 					}

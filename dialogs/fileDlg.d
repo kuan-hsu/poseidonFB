@@ -7,7 +7,7 @@ class CFileDlg
 	
 	import iup.iup;
 
-	import tango.io.FilePath;
+	import tango.io.FilePath, Path = tango.io.Path;
 	import Util = tango.text.Util, tango.stdc.stringz;
 
 	char[][]	filesName;
@@ -47,7 +47,8 @@ class CFileDlg
 			{
 				if( !bMultiFiles )
 				{
-					fileString = Util.substitute( fileString, "\\", "/" );
+					fileString = Path.normalize( fileString );
+					//fileString = Util.substitute( fileString, "\\", "/" );
 					filesName ~= fileString;
 				}
 				else

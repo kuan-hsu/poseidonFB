@@ -169,8 +169,8 @@ void main()
 	
 	IupSetAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );	
 	IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
-	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outline_cb( GLOBAL.menuOutlineWindow );
-	if( GLOBAL.editorSetting01.MessageWindow == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
+	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+	if( GLOBAL.editorSetting01.MessageWindow == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 	
 
 	createDialog();

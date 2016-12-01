@@ -155,13 +155,29 @@ extern(C) // Callback for CArgOptionDialog
 			Ihandle* _listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
 			if( _listOptions != null )
 			{
-				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listOptions, fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup, 10 );
+				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" )
+				{
+					actionManager.SearchAction.addListItem( _listOptions, fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup, 10 );
+					GLOBAL.recentOptions.length = 0;
+					for( int i = 1; i <= IupGetInt( _listOptions, "COUNT" ); ++ i )
+					{
+						GLOBAL.recentOptions ~= fromStringz( IupGetAttribute( _listOptions, toStringz( Integer.toString( i ) ) ) ).dup;
+					}
+				}
 			}
 
 			Ihandle* _listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
 			if( _listArgs != null )
 			{
-				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" ) actionManager.SearchAction.addListItem( _listArgs, fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup , 10 );
+				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" )
+				{
+					actionManager.SearchAction.addListItem( _listArgs, fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup , 10 );
+					GLOBAL.recentArgs.length = 0;
+					for( int i = 1; i <= IupGetInt( _listArgs, "COUNT" ); ++ i )
+					{
+						GLOBAL.recentArgs ~= fromStringz( IupGetAttribute( _listArgs, toStringz( Integer.toString( i ) ) ) ).dup;
+					}
+				}
 			}			
 			
 			IupHide( GLOBAL.argsDlg._dlg );

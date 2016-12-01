@@ -197,12 +197,15 @@ void createMenu()
 	GLOBAL.menuOutlineWindow = IupItem ("OutLine", null);
 	IupSetAttribute(GLOBAL.menuOutlineWindow, "KEY", "O");
 	IupSetAttribute(GLOBAL.menuOutlineWindow, "VALUE", "ON");
-	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
+	//IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
+	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outlineMenuItem_cb);
+	
 
 	GLOBAL.menuMessageWindow = IupItem ("Message", null);
 	IupSetAttribute(GLOBAL.menuMessageWindow, "KEY", "M");
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
-	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
+	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
+	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
 
 	// Project
 	item_newProject= IupItem ("New Project", null);
@@ -439,7 +442,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.231\nBy Kuan Hsu (Taiwan)\n2016.11.27" );
+		IupMessage( "About", "FreeBasic IDE\nPoseidonFB V0.232\nBy Kuan Hsu (Taiwan)\n2016.12.2" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -971,6 +974,16 @@ extern(C)
 		}
 	}
 	
+	int outlineMenuItem_cb( Ihandle *ih )
+	{
+		Ihandle* buttonHandle = IupGetHandle( "outlineButtonHide" );
+		if( buttonHandle != null )
+		{
+			if( fromStringz( IupGetAttribute( buttonHandle, "VALUE" ) ) == "ON" ) IupSetAttribute( buttonHandle, "VALUE", "OFF" ); else IupSetAttribute( buttonHandle, "VALUE", "ON" );
+		}
+		
+		return outline_cb( ih );
+	}
 
 	int outline_cb( Ihandle *ih )
 	{
@@ -1010,6 +1023,17 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	int messageMenuItem_cb( Ihandle *ih )
+	{
+		Ihandle* buttonHandle = IupGetHandle( "messageButtonHide" );
+		if( buttonHandle != null )
+		{
+			if( fromStringz( IupGetAttribute( buttonHandle, "VALUE" ) ) == "ON" ) IupSetAttribute( buttonHandle, "VALUE", "OFF" ); else IupSetAttribute( buttonHandle, "VALUE", "ON" );
+		}
+		
+		return message_cb( ih );
+	}
+	
 	int message_cb( Ihandle *ih )
 	{
 		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
