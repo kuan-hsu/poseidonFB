@@ -10,8 +10,11 @@ private import tango.stdc.stringz;
 class CSearchDialog : CBaseDialog
 {
 	private:
-	Ihandle*	listFind, listReplace;
-	Ihandle*	labelStatus;
+	import				tools;
+	
+	Ihandle*			listFind, listReplace;
+	Ihandle*			labelStatus;
+	CstringConvert[17]	cStrings;
 
 	void createLayout()
 	{
@@ -25,7 +28,10 @@ class CSearchDialog : CBaseDialog
 		*/
 		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3");
 		IupSetHandle( "CSearchDialog_listFind", listFind );
-		Ihandle* hBox00 = IupHbox( IupLabel( "Find What:   " ), listFind, null );
+		
+		cStrings[0] = new CstringConvert( GLOBAL.languageItems["findwhat"] ~ ":" );
+		Ihandle* hBox00 = IupHbox( IupLabel( cStrings[0].toStringz ), listFind, null );
+		
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 		IupSetCallback( listFind, "K_ANY", cast(Icallback) &CSearchDialog_listFind_K_ANY_CB );
 
@@ -33,15 +39,19 @@ class CSearchDialog : CBaseDialog
 		listReplace = IupList( null );
 		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3");
 		IupSetHandle( "CSearchDialog_listReplace", listReplace );
-		Ihandle* hBox01 = IupHbox( IupLabel( "Replace With:" ), listReplace, null );
+		
+		cStrings[1] = new CstringConvert( GLOBAL.languageItems["replacewith"] ~ ":" );
+		Ihandle* hBox01 = IupHbox( IupLabel( cStrings[1].toStringz ), listReplace, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
 		IupSetCallback( listReplace, "K_ANY", cast(Icallback) &CSearchDialog_listReplace_K_ANY_CB );
 
-		Ihandle* toggleForward = IupToggle( "Forward", null );
+		cStrings[2] = new CstringConvert( GLOBAL.languageItems["forward"] );
+		Ihandle* toggleForward = IupToggle( cStrings[2].toStringz, null );
 		IupSetAttributes( toggleForward, "RADIO=YES");
 		IupSetHandle( "CSearchDialog_toggleForward", toggleForward );
 		
-		Ihandle* toggleBackward = IupToggle( "Backward", null );
+		cStrings[3] = new CstringConvert( GLOBAL.languageItems["backward"] );
+		Ihandle* toggleBackward = IupToggle( cStrings[3].toStringz, null );
 		IupSetAttributes( toggleBackward, "RADIO=YES");
 		IupSetHandle( "CSearchDialog_toggleBackward", toggleBackward );
 		
@@ -49,58 +59,79 @@ class CSearchDialog : CBaseDialog
 		IupSetAttributes( vBoxDirection, "EXPAND=YES,EXPANDCHILDREN=YES" );
 		Ihandle* radioDirection = IupRadio( vBoxDirection );
 		Ihandle* frameDirection = IupFrame( radioDirection );
-		IupSetAttributes( frameDirection, "TITLE=Direction,EXPAND=YES");		
+		IupSetAttributes( frameDirection, "EXPAND=YES");
+		
+		cStrings[4] = new CstringConvert( GLOBAL.languageItems["direction"] );
+		IupSetAttribute( frameDirection, "TITLE", cStrings[4].toStringz );
 
-		Ihandle* toggleAll = IupToggle( "All", null );
+		cStrings[5] = new CstringConvert( GLOBAL.languageItems["all"] );
+		cStrings[6] = new CstringConvert( GLOBAL.languageItems["selection"] );
+		cStrings[7] = new CstringConvert( GLOBAL.languageItems["scope"] );
+		
+		Ihandle* toggleAll = IupToggle( cStrings[5].toStringz, null );
 		IupSetAttributes( toggleAll, "RADIO=YES");		
-		Ihandle* toggleSelection = IupToggle( "Selection", null );
+		Ihandle* toggleSelection = IupToggle( cStrings[6].toStringz, null );
 		IupSetAttributes( toggleSelection, "RADIO=YES");
 		IupSetAttribute( toggleSelection, "ACTIVE", "NO" );
 		Ihandle* vBoxScope = IupVbox( toggleAll, toggleSelection, null );
 		IupSetAttributes( vBoxScope, "EXPAND=YES,EXPANDCHILDREN=YES" );
 		Ihandle* radioScope = IupRadio( vBoxScope );
 		Ihandle* frameScope = IupFrame( radioScope );
-		IupSetAttributes( frameScope, "TITLE=Scope,EXPAND=YES");
+		IupSetAttribute( frameScope, "EXPAND", "YES");
+		IupSetAttribute( frameScope, "TITLE", cStrings[7].toStringz );
 
 		Ihandle* hBox02 = IupHbox( frameDirection, frameScope, null );
 		IupSetAttributes( hBox02, "EXPAND=YES,EXPANDCHILDREN=YES" );
 
 		// Options
-		Ihandle* toggleCaseSensitive = IupToggle( "Case Sensitive", null );
+		cStrings[8] = new CstringConvert( GLOBAL.languageItems["casesensitive"] );
+		cStrings[9] = new CstringConvert( GLOBAL.languageItems["wholeword"] );
+		cStrings[10] = new CstringConvert( GLOBAL.languageItems["options"] );
+		
+		Ihandle* toggleCaseSensitive = IupToggle( cStrings[8].toStringz, null );
 		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES" );
 		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &CSearchDialog_toggleAction_cb );
 
-		Ihandle* toggleWholeWord = IupToggle( "Whole Word", null );
+		Ihandle* toggleWholeWord = IupToggle( cStrings[9].toStringz, null );
 		IupSetAttributes( toggleWholeWord, "VALUE=ON,EXPAND=YES" );
 		IupSetCallback( toggleWholeWord, "ACTION", cast(Icallback) &CSearchDialog_toggleAction_cb );
 
 		Ihandle* hBoxOption = IupHbox( toggleCaseSensitive, toggleWholeWord, null );
 		IupSetAttributes( hBoxOption, "EXPAND=YES" );
 		Ihandle* frameOption = IupFrame( hBoxOption );
-		IupSetAttributes( frameOption, "TITLE=Options,EXPAND=YES,MARGIN=0x0");
+		IupSetAttributes( frameOption, "EXPAND=YES,MARGIN=0x0");
+		IupSetAttribute( frameOption, "TITLE", cStrings[10].toStringz );
 
 
-		Ihandle* btnFind = IupButton( "Find", null );
+		cStrings[11] = new CstringConvert( GLOBAL.languageItems["find"] );
+		cStrings[12] = new CstringConvert( GLOBAL.languageItems["replacefind"] );
+		cStrings[13] = new CstringConvert( GLOBAL.languageItems["replace"] );
+		cStrings[14] = new CstringConvert( GLOBAL.languageItems["replaceall"] );
+		cStrings[15] = new CstringConvert( GLOBAL.languageItems["countall"] );
+		cStrings[16] = new CstringConvert( GLOBAL.languageItems["bookmarkall"] );
+
+
+		Ihandle* btnFind = IupButton( cStrings[11].toStringz, null );
 		IupSetHandle( "CSearchDialog_btnFind", btnFind );
 		IupSetCallback( btnFind, "ACTION", cast(Icallback) &CSearchDialog_btnFind_cb );
 		
-		Ihandle* btnReplaceFind = IupButton( "Replace/Find", null );
+		Ihandle* btnReplaceFind = IupButton( cStrings[12].toStringz, null );
 		IupSetHandle( "btnReplaceFind", btnReplaceFind );
 		IupSetCallback( btnReplaceFind, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceFind_cb );
 		
-		Ihandle* btnReplace = IupButton( "Replace", null );
+		Ihandle* btnReplace = IupButton( cStrings[13].toStringz, null );
 		IupSetHandle( "btnReplace", btnReplace );
 		IupSetCallback( btnReplace, "ACTION", cast(Icallback) &CSearchDialog_btnReplace_cb );
 		
-		Ihandle* btnReplaceAll = IupButton( "Replace All", null );
+		Ihandle* btnReplaceAll = IupButton( cStrings[14].toStringz, null );
 		IupSetHandle( "btnReplaceAll", btnReplaceAll );
 		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceAll_cb );
 		
-		Ihandle* btnCountAll = IupButton( "Count All", null );
+		Ihandle* btnCountAll = IupButton( cStrings[15].toStringz, null );
 		IupSetHandle( "btnCountAll", btnCountAll );
 		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &CSearchDialog_btnCountAll_cb );
 		
-		Ihandle* btnMarkAll = IupButton( "Mark All", null );
+		Ihandle* btnMarkAll = IupButton( cStrings[16].toStringz, null );
 		IupSetHandle( "btnMarkAll", btnMarkAll );
 		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &CSearchDialog_btnMarkAll_cb );
 
@@ -169,7 +200,7 @@ class CSearchDialog : CBaseDialog
 		IupSetHandle( "CSearchDialog_toggleForward", null );
 		IupSetHandle( "CSearchDialog_toggleBackward", null );
 
-		IupSetHandle( "btnCANCEL_search", null );	
+		IupSetHandle( "btnCANCEL_search", null );
 	}
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog

@@ -17,8 +17,8 @@ void createExplorerWindow()
 	GLOBAL.projectTree = new CProjectTree;
 	GLOBAL.outlineTree = new COutline;
 
-	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", "Project" );
-	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", "Outline" );
+	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", toStringz( GLOBAL.languageItems["prj"] ) );
+	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", toStringz( GLOBAL.languageItems["outline"] ) );
 	
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer" );
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
@@ -83,15 +83,17 @@ void createLayout()
 void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, "Compiler Options" );
-	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, "Compiler Options / EXE Arguments" );
-	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, "Search/Replace" );
-	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, "Search/Replace In Files" );
+	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["argtitle"] );
+	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["findreplace"] );
+	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["findreplacefiles"] );
 }
 
 extern(C)
 {
 	int mainDialog_CLOSE_cb(Ihandle *ih)
 	{
+		try
+		{
 		int ret = ScintillaAction.closeAllDocument();
 		if( ret == IUP_IGNORE ) return IUP_IGNORE;
 		
@@ -102,6 +104,18 @@ extern(C)
 		}
 
 		IDECONFIG.save();
+
+		foreach( parser; GLOBAL.parserManager )
+		{
+			delete parser;
+		}
+		}
+		catch(Exception e )
+		{
+			IupMessage("",toStringz(e.toString()));
+			
+		}
+
 
 		return IUP_CLOSE;
 	}

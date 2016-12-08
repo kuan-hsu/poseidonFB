@@ -8,7 +8,8 @@ struct IDECONFIG
 	import global, actionManager;
 
 	import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util;
-	import tango.text.xml.Document, tango.text.xml.DocPrinter, tango.io.UnicodeFile;
+	import tango.text.xml.Document, tango.text.xml.DocPrinter, tango.io.UnicodeFile, tango.io.stream.Lines;
+	import tango.io.FilePath;
 	
 	public:
 
@@ -88,6 +89,9 @@ struct IDECONFIG
 
 		auto editorNode = configNode.element( null, "editor" );
 		editorNode.element( null, "lexer", GLOBAL.lexer );
+		
+		editorNode.element( null, "language", GLOBAL.language );
+		
 		for( int i = 0; i < GLOBAL.KEYWORDS.length; ++i )
 		{
 			editorNode.element( null, "keywords" )
@@ -316,6 +320,12 @@ struct IDECONFIG
 				GLOBAL.lexer = e.value;
 			}
 			if( !GLOBAL.lexer.length ) GLOBAL.lexer = "freebasic";
+			
+			result = root.query.descendant("language");
+			foreach( e; result )
+			{
+				GLOBAL.language = e.value;
+			}
 			
 			result = root.query.descendant("keywords").attribute("value");
 			GLOBAL.KEYWORDS.length = 0;
@@ -645,166 +655,192 @@ struct IDECONFIG
 			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
 
 
+			
+			// Load Language lng
+			scope lngFilePath = new FilePath( "settings/" ~ GLOBAL.language ~ ".lng" );
+			if( lngFilePath.exists() )
+			{
+				scope lngFile = new UnicodeFile!(char)( lngFilePath.toString, Encoding.Unknown );
+				char[] lngDocument = lngFile.read();
+				
+				foreach( char[] s; Util.splitLines( lngDocument ) )
+				{
+					s = Util.trim( s );
+					if( s.length )
+					{
+						if( s[0] != '\'' )
+						{
+							int assignIndex = Util.index( s, "=" );
+							if( assignIndex < s.length )
+							{
+								GLOBAL.languageItems[Util.trim( s[0..assignIndex] )] = Util.trim( s[assignIndex+1..$] );
+							}
+						}
+					}
+				}
+			}
+			
+
 			// short keys (Editor)
 			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 23;
 			result = root.query.descendant("shortkeys").attribute("find");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Find/Replace", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "find", GLOBAL.languageItems["findreplace"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[0] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("findinfile");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Find/Replace In Files", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "findinfile", GLOBAL.languageItems["findreplacefiles"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[1] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("findnext");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Find Next", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "findnext", GLOBAL.languageItems["findnext"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[2] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("findprev");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Find Previous", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "findprev", GLOBAL.languageItems["findprev"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[3] = sk;
 			}		
 
 			result = root.query.descendant("shortkeys").attribute("gotoline");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Goto Line", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "gotoline", GLOBAL.languageItems["goto"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[4] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("undo");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Undo", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "undo", GLOBAL.languageItems["undo"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[5] = sk;
 			}		
 
 			result = root.query.descendant("shortkeys").attribute("redo");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Redo", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "redo", GLOBAL.languageItems["redo"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[6] = sk;
 			}		
 
 			result = root.query.descendant("shortkeys").attribute("defintion");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Goto Defintion", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "defintion", GLOBAL.languageItems["gotodef"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[7] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("quickrun");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Quick Run", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "quickrun", GLOBAL.languageItems["quickrun"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[8] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("run");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Run", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "run", GLOBAL.languageItems["run"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[9] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("build");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Build", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "build", GLOBAL.languageItems["build"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[10] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("outlinewindow");
 			foreach( e; result )
 			{
-				ShortKey sk = { "On/Off Left-side Window", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "outlinewindow", GLOBAL.languageItems["leftwindow"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[11] = sk;
 			}	
 
 			result = root.query.descendant("shortkeys").attribute("messagewindow");
 			foreach( e; result )
 			{
-				ShortKey sk = { "On/Off Bottom-side Window", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "messagewindow", GLOBAL.languageItems["bottomwindow"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[12] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("showtype");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Show Type", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "showtype", GLOBAL.languageItems["showtype"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[13] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("reparse");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Reparse", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "reparse", GLOBAL.languageItems["reparse"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[14] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("save");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Save File", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "save", GLOBAL.languageItems["save"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[15] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("saveall");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Save All", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "saveall", GLOBAL.languageItems["saveall"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[16] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("close");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Close File", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "close", GLOBAL.languageItems["close"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[17] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("nexttab");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Next Tab", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "nexttab", GLOBAL.languageItems["nexttab"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[18] = sk;
 			}			
 
 			result = root.query.descendant("shortkeys").attribute("prevtab");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Previous Tab", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "prevtab", GLOBAL.languageItems["prevtab"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[19] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("newtab");
 			foreach( e; result )
 			{
-				ShortKey sk = { "New Tab", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "newtab", GLOBAL.languageItems["newtab"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[20] = sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("autocomplete");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Autocomplete", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "autocomplete", GLOBAL.languageItems["autocomplete"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[21]= sk;
 			}
 
 			result = root.query.descendant("shortkeys").attribute("compilerun");
 			foreach( e; result )
 			{
-				ShortKey sk = { "Compile & Run", convertShortKeyValue2Integer( e.value ) };
+				ShortKey sk = { "compilerun", GLOBAL.languageItems["compilerun"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[22]= sk;
 			}
 

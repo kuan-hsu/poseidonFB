@@ -12,9 +12,10 @@ private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.c
 class CProjectTree
 {
 	private:
-	import		project, tango.io.device.File, tango.io.stream.Lines;
-	import		tango.core.Thread, parser.autocompletion;
-
+	import				project, tango.io.device.File, tango.io.stream.Lines;
+	import				tango.core.Thread, parser.autocompletion;
+	
+	CstringConvert[2]	cStrings;
 	/+
 	// Inner Class
 	class ParseThread : Thread
@@ -50,9 +51,13 @@ class CProjectTree
 
 	void createLayout()
 	{
+		cStrings[0] = new CstringConvert( GLOBAL.languageItems["collapse"] );
+		cStrings[1] = new CstringConvert( GLOBAL.languageItems["hide"] );
+		
 		// Outline Toolbar
-		Ihandle* projectButtonCollapse = IupButton( null, "Collapse" );
-		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,TIP=Collapse" );
+		Ihandle* projectButtonCollapse = IupButton( null, null );
+		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse" );
+		IupSetAttribute( projectButtonCollapse, "TIP", cStrings[0].toStringz );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* tree = GLOBAL.projectTree.getTreeHandle();
@@ -70,8 +75,9 @@ class CProjectTree
 			
 		});
 
-		Ihandle* projectButtonHide = IupButton( null, "Hide" );
-		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l,TIP=Hide" );
+		Ihandle* projectButtonHide = IupButton( null, null );
+		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l" );
+		IupSetAttribute( projectButtonHide, "TIP", cStrings[1].toStringz );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
@@ -116,6 +122,10 @@ class CProjectTree
 		createLayout();
 	}
 
+	~this()
+	{
+	}
+	
 	Ihandle* getLayoutHandle()
 	{
 		return layoutHandle;
@@ -604,11 +614,11 @@ extern(C)
 		if( nodeKind == "LEAF" ) // On File(*.bas, *.bi) Node
 		{
 			Ihandle* popupMenu = IupMenu( 
-										IupItem( "Open", "CProjectTree_open" ),
-										IupItem( "Remove from Project", "CProjectTree_remove" ),
+										IupItem( toStringz( GLOBAL.languageItems["open"] ), "CProjectTree_open" ),
+										IupItem( toStringz( GLOBAL.languageItems["removefromprj"] ), "CProjectTree_remove" ),
 										IupSeparator(),
-										IupItem( "Delete", "CProjectTree_delete" ),
-										IupItem( "Rename", "CProjectTree_rename" ),
+										IupItem( toStringz( GLOBAL.languageItems["delete"] ), "CProjectTree_delete" ),
+										IupItem( toStringz( GLOBAL.languageItems["rename"] ), "CProjectTree_rename" ),
 										null
 									);
 
@@ -630,15 +640,15 @@ extern(C)
 		switch( depth )
 		{
 			case 0:
-				Ihandle* itemNewProject = IupItem( "New Project", null );
+				Ihandle* itemNewProject = IupItem( toStringz( GLOBAL.languageItems["newprj"] ), null );
 				IupSetAttribute(itemNewProject, "IMAGE", "icon_newprj");
 				IupSetCallback( itemNewProject, "ACTION", cast(Icallback) &menu.newProject_cb ); // From menu.d
 				
-				Ihandle* itemOpenProject = IupItem( "Open Project", null );
+				Ihandle* itemOpenProject = IupItem( toStringz( GLOBAL.languageItems["openprj"] ), null );
 				IupSetAttribute(itemOpenProject, "IMAGE", "icon_openprj");
 				IupSetCallback( itemOpenProject, "ACTION", cast(Icallback) &menu.openProject_cb ); // From menu.d
 
-				Ihandle* itemCloseAllProject = IupItem( "Close All Project", null );
+				Ihandle* itemCloseAllProject = IupItem( toStringz( GLOBAL.languageItems["closeallprj"] ), null );
 				IupSetAttribute(itemCloseAllProject, "IMAGE", "icon_clearall");
 				IupSetCallback( itemCloseAllProject, "ACTION", cast(Icallback) &menu.closeAllProject_cb ); // From menu.d
 				
@@ -655,15 +665,15 @@ extern(C)
 				break;
 
 			case 1:		// On Project Name Node
-				Ihandle* itemProperty = IupItem( "Properties...", null );
+				Ihandle* itemProperty = IupItem( toStringz( GLOBAL.languageItems["properties"] ), null );
 				IupSetAttribute(itemProperty, "IMAGE", "icon_properties");
 				IupSetCallback( itemProperty, "ACTION", cast(Icallback) &menu.projectProperties_cb ); // From menu.d
 				
-				Ihandle* itemClose = IupItem( "Close", null );
+				Ihandle* itemClose = IupItem( toStringz( GLOBAL.languageItems["closeprj"] ), null );
 				IupSetAttribute(itemClose, "IMAGE", "icon_clear");
 				IupSetCallback( itemClose, "ACTION", cast(Icallback) &menu.closeProject_cb );  // From menu.d
 
-				Ihandle* itemExplorer = IupItem( "Open In Explorer", null );
+				Ihandle* itemExplorer = IupItem( toStringz( GLOBAL.languageItems["openinexplorer"] ), null );
 				IupSetCallback( itemExplorer, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					char[]	fullPath = actionManager.ProjectAction.getActiveProjectName();
@@ -704,16 +714,16 @@ extern(C)
 					if( s == "FIXED" ) return IUP_DEFAULT;
 				}
 				
-				Ihandle* itemNewFile = IupItem( "New File", null );
+				Ihandle* itemNewFile = IupItem( toStringz( GLOBAL.languageItems["newfile"] ), null );
 				IupSetCallback( itemNewFile, "ACTION", cast(Icallback) &CProjectTree_NewFile_cb );
-				Ihandle* itemNewFolder = IupItem( "New Folder", null );
+				Ihandle* itemNewFolder = IupItem( toStringz( GLOBAL.languageItems["newfolder"] ), null );
 				IupSetCallback( itemNewFolder, "ACTION", cast(Icallback) &CProjectTree_NewFolder_cb );
 				
 				Ihandle* itemCreateNew = IupMenu( itemNewFile, itemNewFolder, null );
 		
-				Ihandle* itemNew = IupSubmenu( "New", itemCreateNew );
+				Ihandle* itemNew = IupSubmenu( toStringz( GLOBAL.languageItems["new"] ), itemCreateNew );
 				
-				Ihandle* itemAdd = IupItem( "Add File", null );
+				Ihandle* itemAdd = IupItem( toStringz( GLOBAL.languageItems["addfile"] ), null );
 				IupSetCallback( itemAdd, "ACTION", &CProjectTree_AddFile_cb );
 
 				Ihandle* popupMenu;

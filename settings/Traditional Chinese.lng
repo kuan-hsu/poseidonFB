@@ -1,0 +1,235 @@
+﻿file=檔案
+	new=新建
+	open=開啟
+	save=儲存
+	saveas=另存新檔
+	saveall=儲存全部
+	close=關閉
+	closeall=關閉全部
+	recentfiles=最近開啟檔案
+	recentprjs=最近開啟專案
+	clearall=清除所有記錄
+	exit=離開主程式
+	
+edit=編輯
+	redo=重作
+	undo=還原
+	cut=剪下
+	copy=複製
+	paste=貼上
+	commentline=列為註解行
+	selectall=選擇全部
+	
+search=尋找
+	findreplace=尋找 / 取代
+	findnext=尋找下一個
+	findprev=尋找上一個
+	findreplacefiles=在檔案中尋找 / 取代
+	goto=跳到指定行
+
+view=檢視
+	'outline=大綱
+	message=訊息
+	
+prj=專案
+	newprj=新建專案
+	openprj=開啟專案
+	importprj=讀入Fbedit專案
+	saveprj=儲存專案
+	saveallprj=儲存所有專案
+	closeprj=關閉專案
+	closeallprj=關閉所有專案
+	properties=專案性質...
+	
+	openinexplorer=在檔案總管開啟
+	addinprj=增加檔案
+	removefromprj=從專案移除
+	rename=重新命名
+	newfile=新建檔案
+	newfolder=新建資料匣
+	addfile=增加檔案
+	
+build=建立
+	compile=編譯檔案
+	compilerun=編譯檔案及執行
+	run=執行
+	buildprj=建立專案
+	quickrun=快速執行
+	
+debug=除錯
+	rundebug=執行除錯
+	compiledebug=編譯可除錯檔
+	builddebug=建立可除錯專案
+	
+options=選項
+	tools=工具
+		seteol=設定換行字元
+		converteol=轉換換行字元
+		convertencoding=轉換編碼
+		convertcase=轉換關鍵字
+			uppercase=全大寫
+			lowercase=全小寫
+			mixercase=混合
+	preference=偏好
+		compiler=編譯器
+			compilerpath=編譯器位置
+			debugpath=除錯器位置
+			compileropts=編譯器選項
+			compilersetting=編譯器設定
+				errorannotation=在註解中顯示編譯器提示
+				showresultwindow=編譯完成,顯示結果視窗
+			parsersetting=分析器設定
+				enablekeyword=啟用關鍵字自動完成
+				enableparser=啟動分析器
+				showtitle=顯示函式名稱
+				showtypeparam=顯示種類若為函式顯示其參數
+				sortignorecase=自動完成列表不分大小寫
+				selectcase=選擇自動完成項目不分大小寫
+				showlisttype=自動完成項目顯示種類
+				showallmembers=顯示所有成員
+				parserlive=自動更新等級
+					none=無
+					light=輕量
+					full=全開啟
+					update=立即更新大綱
+				trigger=自動完成啟動字數
+					triggertip=設定0關閉此功能
+				includelevel=引含檔案的層數
+			editor=編輯器
+				lnmargin=顯示行號欄位
+				bkmargin=顯示書籤欄位
+				fdmargin=顯示代碼摺疊欄位
+				indentguide=顯示定位點
+				showcaretline=顯示所在行
+				wordwarp=代碼自動換行
+				tabtospace=空白取代跳位符號
+				autoindent=自動換行定位
+				showeol=顯示行末符號
+				showspacetab=顯示空白及跳位符號
+				autoinsertend=自動插入函式結尾
+				coloroutline=大綱項目依內定著色
+				showidemessage=顯示編輯器訊息
+				boldkeyword=關鍵字粗黑化
+				tabwidth=跳位字元寬度
+				columnedge=顯示列末線
+				autoconvertkeyword=自動轉換關鍵字大小寫
+				font=字型
+					default=內定
+					document=文件
+					leftside=左方視窗
+					'fistlist=FileList
+					'project=Project
+					'outline=Outline
+					bottom=下方視窗
+					'output=Output
+					'search=Search
+					'debug=Debug
+					annotation=註解
+				color=色彩
+					caretline=當前行
+					cursor=游標
+					selfor=選擇的前景色
+					selback=選擇的背景色
+					lnfor=行號欄的前景色
+					lnback=行號欄的背景色
+					foldcolor=摺疊欄位的前景色
+					selalpha=選取的半透明值
+						alphatip=設定0關閉此功能
+			shortcut=快捷鍵
+				'findreplace=Find / Replace
+				'findreplacefiles=Find / Replace In Files
+				'findnext=Find Next
+				'finprev=Find Previous
+				'goto=Goto Line
+				gotodef=跳到宣告處
+				leftwindow=開啟/關閉左方視窗
+				bottomwindow=開啟/關閉下方訊息視窗
+				showtype=顯示種類
+				reparse=重新分析
+				nexttab=下一分頁
+				prevtab=上一分頁
+				newtab=新分頁
+				autocomplete=自動完成
+			keywords=關鍵字
+				keyword0=關鍵字0
+				keyword1=關鍵字1
+				keyword2=關鍵字2
+				keyword3=關鍵字3
+	language=語言
+		openlanguage=選定語言...
+	about=關於
+	
+bookmark=標記書籤
+bookmarkprev=前一書籤
+bookmarknext=後一書籤
+bookmarkclear=清除所有書籤
+
+outline=大綱
+	collapse=展開/關閉
+	showpr=更改大綱項目內容
+	refresh=重新分析
+	searchanyword=尋找所有字元
+	hide=隱藏
+
+filelist=檔案列表
+	fullpath=全路徑
+
+output=輸出
+	clear=清除
+
+'tab
+closeothers=關閉其它
+
+'popup window
+delete=刪除
+showannotation=顯示註解
+hideannotation=隱藏註解
+removeannotation=移除所有註解
+
+'properties
+prjproperties=專案性質
+general=一般
+	prjname=專案名稱
+	prjtype=種類
+		console=執行檔
+		static=靜態連結庫
+		dynamic=動態連結庫
+	prjdir=專案目錄
+	prjmainfile=主檔名稱
+	prjtarget=目標名稱
+	prjargs=執行參數
+	prjopts=編譯選項
+	prjcomment=註釋
+	prjcompiler=編譯器
+include=路徑...
+	includepath=引含檔路徑
+	librarypath=函式庫路徑
+	
+'search window
+findwhat=尋找字串
+replacewith=取代字串
+direction=方向
+	forward=向前
+	backward=向後
+scope=範圍
+	all=全文
+	selection=選擇
+casesensitive=區分大小寫
+wholeword=字串符合
+find=尋找
+findall=尋找全部
+replacefind=取代後尋找
+replace=取代
+replaceall=取代所有
+countall=計數所有
+bookmarkall=標記所有
+document=文件
+alldocument=所有文件
+allproject=所有專案
+
+'args window
+argtitle=編譯器選項/執行參數
+
+yes=是
+no=否
+cancel=取消

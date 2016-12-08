@@ -23,19 +23,21 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// PAGE 1 General
 		// Line 1
-		Ihandle* labelProjectName = IupLabel( "Project Name:" );
+		Ihandle* labelProjectName = IupLabel( toStringz( GLOBAL.languageItems["prjname"] ~ ":" ) );
 		IupSetAttributes( labelProjectName, "SIZE=54x20" );
 		
 		textProjectName = IupText( null );
 		IupSetAttribute( textProjectName, "SIZE", "140x12" );
 		IupSetHandle( "textProjectName", textProjectName );
 		
-		Ihandle* labelType = IupLabel( "    Type:" );
+		Ihandle* labelType = IupLabel( toStringz( GLOBAL.languageItems["prjtype"] ~ ":" ) );
 		IupSetAttributes( labelType, "SIZE=40x20" );
 		
 		listType = IupList( null );
-		IupSetAttributes( listType, "1=\"Console Application\",2=\"Static Library\",3=\"Dynamic Link Library\","
-                                   "SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=3");
+		IupSetAttributes( listType, "SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=3" );
+		IupSetAttribute( listType, "1", toStringz(  GLOBAL.languageItems["console"] ) );
+		IupSetAttribute( listType, "2", toStringz(  GLOBAL.languageItems["static"] ) );
+		IupSetAttribute( listType, "3", toStringz(  GLOBAL.languageItems["dynamic"] ) );
 		IupSetHandle( "listType", listType );
 
 		Ihandle* hBox00 = IupHbox( labelProjectName, textProjectName, labelType, listType, null );
@@ -43,7 +45,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 
 		// Line 2
-		Ihandle* labelProjectDir = IupLabel( "Project Dir:" );
+		Ihandle* labelProjectDir = IupLabel( toStringz( GLOBAL.languageItems["prjdir"] ~ ":" ) );
 		IupSetAttributes( labelProjectDir, "SIZE=54x20" );
 		
 		textProjectDir = IupText( null );
@@ -58,7 +60,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox01, "ALIGNMENT", "ACENTER" );	
 
 		// Line 3
-		Ihandle* labelMainFile = IupLabel( "Main File:" );
+		Ihandle* labelMainFile = IupLabel( toStringz( GLOBAL.languageItems["prjmainfile"] ~ ":" ) );
 		IupSetAttributes( labelMainFile, "SIZE=54x20" );
 		
 		textMainFile = IupText( null );
@@ -69,7 +71,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
 
 		// Line 4
-		Ihandle* labelTargetName = IupLabel( "Target Name:" );
+		Ihandle* labelTargetName = IupLabel( toStringz( GLOBAL.languageItems["prjtarget"] ~ ":" ) );
 		IupSetAttributes( labelTargetName, "SIZE=54x20" );
 		
 		textTargetName = IupText( null );
@@ -80,7 +82,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
 
 		// Line 5
-		Ihandle* labelArgs = IupLabel( "Execute Args:" );
+		Ihandle* labelArgs = IupLabel( toStringz( GLOBAL.languageItems["prjargs"] ~ ":" ) );
 		IupSetAttributes( labelArgs, "SIZE=54x20" );
 		
 		textArgs = IupText( null );
@@ -91,7 +93,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox04, "ALIGNMENT", "ACENTER" );
 
 		// Line 6
-		Ihandle* labelCompilerOpts = IupLabel( "Compiler Opt:" );
+		Ihandle* labelCompilerOpts = IupLabel( toStringz( GLOBAL.languageItems["prjopts"] ~ ":" ) );
 		IupSetAttributes( labelCompilerOpts, "SIZE=54x20" );
 		
 		textCompilerOpts = IupText( null );
@@ -109,7 +111,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox05, "ALIGNMENT", "ACENTER" );
 
 		// Line 7
-		Ihandle* labelComment = IupLabel( "Comment:" );
+		Ihandle* labelComment = IupLabel( toStringz( GLOBAL.languageItems["prjcomment"] ~ ":" ) );
 		IupSetAttributes( labelComment, "SIZE=54x20" );
 		
 		textComment = IupText( null );
@@ -120,7 +122,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox06, "ALIGNMENT", "ACENTER" );
 
 		// Line 8
-		Ihandle* labelCompilerPath = IupLabel( "FBC Path:" );
+		Ihandle* labelCompilerPath = IupLabel( toStringz( GLOBAL.languageItems["prjcompiler"] ~ ":" ) );
 		IupSetAttributes( labelCompilerPath, "SIZE=54x20" );
 		
 		textCompilerPath = IupText( null );
@@ -185,7 +187,8 @@ class CProjectPropertiesDialog : CBaseDialog
 		Ihandle* hBoxIncludePath = IupHbox( listIncludePath, vBoxButtonIncludePath, null );
 		
 		Ihandle* frameIncludePath = IupFrame( hBoxIncludePath );
-		IupSetAttributes( frameIncludePath, "ALIGNMENT=ACENTER,MARGIN=2x2,TITLE=Include_Paths" );
+		IupSetAttributes( frameIncludePath, "ALIGNMENT=ACENTER,MARGIN=2x2" );
+		IupSetAttribute( frameIncludePath, "TITLE", toStringz( GLOBAL.languageItems["includepath"] ) );
 
 
 
@@ -223,15 +226,16 @@ class CProjectPropertiesDialog : CBaseDialog
 		Ihandle* hBoxLibPath = IupHbox( listLibPath, vBoxButtonLibPath, null );
 				
 		Ihandle* frameLibPath = IupFrame( hBoxLibPath );
-		IupSetAttributes( frameLibPath, "ALIGNMENT=ACENTER,MARGIN=2x2,TITLE=Library_Paths" );
+		IupSetAttributes( frameLibPath, "ALIGNMENT=ACENTER,MARGIN=2x2" );
+		IupSetAttribute( frameLibPath, "TITLE", toStringz( GLOBAL.languageItems["librarypath"] ) );
 
 		Ihandle* vBoxPage02 = IupVbox( frameIncludePath, frameLibPath, null );
 		IupSetAttributes( vBoxPage02, "ALIGNMENT=ALEFT,MARGIN=2x0,GAP=0" );
 
 
 
-		IupSetAttribute( vBoxPage01, "TABTITLE", "General" );
-		IupSetAttribute( vBoxPage02, "TABTITLE", "Include..." );
+		IupSetAttribute( vBoxPage01, "TABTITLE", toStringz( GLOBAL.languageItems["general"] ) );
+		IupSetAttribute( vBoxPage02, "TABTITLE", toStringz( GLOBAL.languageItems["include"] ) );
 
 		
 		//IupSetAttribute( hBox, "EXPAND", "YES" );

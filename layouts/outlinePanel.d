@@ -13,7 +13,9 @@ private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii;
 class COutline
 {
 	private:
-	import parser.scanner, parser.token, parser.parser;
+	import				parser.scanner, parser.token, parser.parser;
+	
+	CstringConvert[5]	cStrings;
 
 	/+
 	import tango.core.Thread;
@@ -561,9 +563,16 @@ class COutline
 
 	void createLayout()
 	{
+		cStrings[0] = new CstringConvert( GLOBAL.languageItems["collapse"] );
+		cStrings[1] = new CstringConvert( GLOBAL.languageItems["showpr"] );
+		cStrings[2] = new CstringConvert( GLOBAL.languageItems["searchanyword"] );
+		cStrings[3] = new CstringConvert( GLOBAL.languageItems["reparse"] );
+		cStrings[4] = new CstringConvert( GLOBAL.languageItems["hide"] );
+		
 		// Outline Toolbar
-		Ihandle* outlineButtonCollapse = IupButton( null, "Collapse" );
-		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,TIP=Collapse" );
+		Ihandle* outlineButtonCollapse = IupButton( null, null );
+		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse" );
+		IupSetAttribute( outlineButtonCollapse, "TIP", cStrings[0].toStringz );
 		IupSetCallback( outlineButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
@@ -583,7 +592,7 @@ class COutline
 
 		Ihandle* outlineButtonPR = IupButton( null, "PR" );
 		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_pr" );
-		IupSetAttribute( outlineButtonPR, "TIP", "Change Outline Node Title" );
+		IupSetAttribute( outlineButtonPR, "TIP", cStrings[1].toStringz );
 		IupSetHandle( "outlineButtonPR", outlineButtonPR );
 		IupSetCallback( outlineButtonPR, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -606,20 +615,22 @@ class COutline
 
 		Ihandle* outlineToggleAnyWord = IupToggle( null, null );
 		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_searchany,VALUE=TOGGLE" );
-		IupSetAttribute( outlineToggleAnyWord, "TIP", "Search Any Word" );
+		IupSetAttribute( outlineToggleAnyWord, "TIP", cStrings[2].toStringz );
 		IupSetHandle( "outlineToggleAnyWord", outlineToggleAnyWord );
 
 
-		Ihandle* outlineButtonFresh = IupButton( null, "Refresh" );
-		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_refresh,TIP=Refresh" );
+		Ihandle* outlineButtonFresh = IupButton( null, null );
+		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_refresh" );
+		IupSetAttribute( outlineButtonFresh, "TIP", cStrings[3].toStringz );
 		IupSetCallback( outlineButtonFresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			GLOBAL.outlineTree.refresh( cSci );
 		});
 
-		Ihandle* outlineButtonHide = IupButton( null, "Hide" );
-		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_l,TIP=Hide" );
+		Ihandle* outlineButtonHide = IupButton( null, null );
+		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_l" );
+		IupSetAttribute( outlineButtonHide, "TIP", cStrings[4].toStringz );
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );

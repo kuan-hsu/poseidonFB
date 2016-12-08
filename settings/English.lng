@@ -1,12 +1,14 @@
-file=File
+﻿file=File
 	new=New
 	open=Open
 	save=Save
-	saveas=Save All
+	saveas=Save As
 	saveall=Save All
-	close=Close File
+	close=Close
 	closeall=Close All
-	recentprj=Recent Projects
+	recentfiles=Recent Files
+	recentprjs=Recent Projects
+	clearall=Clear All
 	exit=Exit
 	
 edit=Edit
@@ -15,12 +17,13 @@ edit=Edit
 	cut=Cut
 	copy=Copy
 	paste=Paste
+	commentline=(Un)Comment Line
 	selectall=Select All
 	
 search=Search
 	findreplace=Find / Replace
-	finprev=Find Previous
-	findnextFind Next
+	findnext=Find Next
+	findprev=Find Previous
 	findreplacefiles=Find / Replace In Files
 	goto=Goto Line
 
@@ -28,9 +31,10 @@ view=View
 	outline=Outline
 	message=Message
 	
-Prj=Project
+prj=Project
 	newprj=New Project
-	openpjr=Open Project
+	openprj=Open Project
+	importprj=Import Fbedit Project
 	saveprj=Save Project
 	saveallprj=Save All Projects
 	closeprj=Close Project
@@ -39,12 +43,15 @@ Prj=Project
 	
 	openinexplorer=Open In Explorer
 	addinprj=Add File(s)
-	removeinprj=Remove From Project
-	delinprj=Delete File
-	reninprj=Rename File
+	removefromprj=Remove From Project
+	rename=Rename File
+	newfile=New File
+	newfolder=New Folder
+	addfile=Add file(s)
 	
 build=Build
 	compile=Compile File
+	compilerun=Compile File And Run
 	run=Run
 	buildprj=Build Project
 	quickrun=Quick Run
@@ -69,28 +76,31 @@ options=Options
 			debugpath=Debugger Path
 			compileropts=Compiler Opts
 			compilersetting=Compiler Setting
-				errorannotation=Show Compiler Errors Using Annotation
-			parsersetting=Parser Setting
-				enablekeyword=Enable Keyword Complete
+				errorannotation=Show Compiler Errors/Warnings Using Annotation
+				showresultwindow=Show Compiled Result Window
+			parsersetting=Parser Settings
+				enablekeyword=Enable Keyword Autocomplete
 				enableparser=Enable Parser
 				showtitle=Show Function Title
 				showtypeparam=Show Type With Function Parameters
 				sortignorecase=Autocomplete List Is Ignore Case
-				selcase=Selection Of Autocomplete List Is Case Insensitive
+				selectcase=Selection Of Autocomplete List Is Case Insensitive
 				showlisttype=Show Autocomplete List Type
-				parserlive=ParseLiveLevel
+				showallmembers=Show All Members( public, protected, private )
+				parserlive=ParseLive! Level
 					none=None
 					light=Light
 					full=Full
 					update=Update Outline
 				trigger=Autocompletion Trigger
+					triggertip=Set 0 To Disable
 				includelevel=Include Levels
 			editor=Editor
 				lnmargin=Show Linenumber Margin
 				bkmargin=Show Bookmark Margin
 				fdmargin=Show Folding Margin
 				indentguide=Show Indentation Guide
-				caretline=Hightlight Caret Line
+				showcaretline=Hightlight Caret Line
 				wordwarp=Word Warp
 				tabtospace=Replace Tab With Space
 				autoindent=Automatic Indent
@@ -98,6 +108,8 @@ options=Options
 				showspacetab=Show Space/Tab
 				autoinsertend=Auto Insert Block End
 				coloroutline=Colorize Outline Item
+				showidemessage=Show IDE Message
+				boldkeyword=Bold Keywords
 				tabwidth=Tab Width
 				columnedge=Colume Edge
 				autoconvertkeyword=Auto Convert Keyword Case
@@ -114,7 +126,7 @@ options=Options
 					'debug=Debug
 					annotation=Annotation
 				color=Color
-					caretLine=Caret Line
+					caretline=Caret Line
 					cursor=Cursor
 					selfor=Selection Foreground
 					selback=Selection Background
@@ -122,7 +134,13 @@ options=Options
 					lnback=Linenumber Background
 					foldcolor=FoldingMargin Color
 					selalpha=Selection Alpha
+						alphatip=Set 255 To Disable Alpha
 			shortcut=Short Cut
+				'findreplace=Find / Replace
+				'findreplacefiles=Find / Replace In Files
+				'findnext=Find Next
+				'finprev=Find Previous
+				'goto=Goto Line
 				gotodef=Goto Definition
 				leftwindow=On/Off Left Window
 				bottomwindow=On/Off Bottom Window
@@ -137,7 +155,14 @@ options=Options
 				keyword1=Keyword1
 				keyword2=Keyword2
 				keyword3=Keyword3
+	language=language
+		openlanguage=Choose Language...
 	about=About
+
+bookmark=Mark Bookmark
+bookmarkprev=Previous Bookmark
+bookmarknext=Next Bookmark
+bookmarkclear=Clear Bookmark
 
 outline=Outline
 	collapse=Collapse
@@ -154,11 +179,15 @@ output=Output
 
 'tab
 closeothers=Close Others
+
+'popup window
+delete=Delete
 showannotation=Show Annotation
 hideannotation=Hide Annotation
 removeannotation=Remove All Annotation
 
 'properties
+prjproperties=Project Properties
 general=General
 	prjname=Project Name
 	prjtype=Type
@@ -171,9 +200,36 @@ general=General
 	prjargs=Execute Args
 	prjopts=Compile Opt
 	prjcomment=Comment
-	prjcompile=FBC Path
+	prjcompiler=FBC Path
 include=Include...
 	includepath=Include Paths
-	librarypath=Libeay Paths
+	librarypath=Libraries Paths
 	
-'preference
+'search window
+findwhat=Find What
+replacewith=Replace With
+direction=Direction
+	forward=Forward
+	backward=Backward
+scope=Scope
+	all=All
+	selection=Selection
+casesensitive=Case Sensitive
+wholeword=Whole Word
+find=Find
+findall=Find All
+replacefind=Find/Replace
+replace=Replace
+replaceall=Replace All
+countall=Count All
+bookmarkall=Mark All
+document=Document
+alldocument=All Document
+allproject=All Project
+
+'args window
+argtitle=Compiler Options / EXE Arguments
+
+yes=Yes
+no=No
+cancel=Cancel

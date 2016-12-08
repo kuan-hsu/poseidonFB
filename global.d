@@ -19,7 +19,7 @@ struct EditorColorUint
 
 struct ShortKey
 {
-	char[] 	name;
+	char[] 	name, title;
 	int		keyValue;
 }
 
@@ -122,6 +122,9 @@ struct GLOBAL
 
 
 	static PROJECT[char[]]		projectManager;
+	
+	static char[]				language;
+	static char[][char[]]		languageItems;
 
 
 	static CstringConvert		cString;
@@ -144,51 +147,51 @@ struct GLOBAL
 		GLOBAL.KEYWORDS ~= "hour if iif imageconvertrow imagecreate imagedestroy imageinfo imp implements import inkey inp input instr instrrev int integer is isdate isredirected kill lbound lcase left len let lib line lobyte loc local locate lock lof log long longint loop loword lpos lprint lset ltrim mid minute mkd mkdir mki mkl mklongint mks mkshort mod month monthname multikey mutexcreate mutexdestroy mutexlock mutexunlock naked name namespace next new not now object oct offsetof on once open operator option or orelse out output overload override paint palette pascal pcopy peek pmap point pointcoord pointer poke pos preserve preset print private procptr property protected pset ptr public put random randomize read reallocate redim rem reset restore resume return rgb rgba right rmdir";
 		GLOBAL.KEYWORDS ~= "rnd rset rtrim run sadd scope screen screencopy screencontrol screenevent screeninfo screenglproc screenlist screenlock screenptr screenres screenset screensync screenunlock second seek select setdate setenviron setmouse settime sgn shared shell shl shr short sin single sizeof sleep space spc sqr static stdcall step stick stop str strig string strptr sub swap system tab tan then this threadcall threadcreate threaddetach threadwait time timeserial timevalue timer to trans trim type typeof ubound ubyte ucase uinteger ulong ulongint union unlock unsigned until ushort using va_arg va_first va_next val vallng valint valuint valulng var varptr view virtual wait wbin wchr weekday weekdayname wend while whex width window windowtitle winput with woct write wspace wstr wstring xor year zstring";
 
-		ShortKey sk0 = { "Find/Replace", 536870982 };
+		ShortKey sk0 = { "find", "Find/Replace", 536870982 };
 		GLOBAL.shortKeys ~= sk0;
-		ShortKey sk1 = { "Find/Replace In Files", 805306438 };
+		ShortKey sk1 = { "findinfile", "Find/Replace In Files", 805306438 };
 		GLOBAL.shortKeys ~= sk1;
-		ShortKey sk2 = { "Find Next", 65472 };
+		ShortKey sk2 = { "findnext", "Find Next", 65472 };
 		GLOBAL.shortKeys ~= sk1;
-		ShortKey sk3 = { "Find Previous", 536936384 };
+		ShortKey sk3 = { "findprev", "Find Previous", 536936384 };
 		GLOBAL.shortKeys ~= sk3;
-		ShortKey sk4 = { "Goto Line", 536870983 };
+		ShortKey sk4 = { "gotoline", "Goto Line", 536870983 };
 		GLOBAL.shortKeys ~= sk4;
-		ShortKey sk5 = { "Undo", 536871002 };
+		ShortKey sk5 = { "undo", "Undo", 536871002 };
 		GLOBAL.shortKeys ~= sk5;
-		ShortKey sk6 = { "Redo", 536871000 };
+		ShortKey sk6 = { "redo", "Redo", 536871000 };
 		GLOBAL.shortKeys ~= sk6;
-		ShortKey sk7 = { "Goto Defintion", 1073741895 };
+		ShortKey sk7 = { "defintion", "Goto Defintion", 1073741895 };
 		GLOBAL.shortKeys ~= sk7;
-		ShortKey sk8 = { "Quick Run", 268500930 };
+		ShortKey sk8 = { "quickrun", "Quick Run", 268500930 };
 		GLOBAL.shortKeys ~= sk8;
-		ShortKey sk9 = { "Run", 65474 };
+		ShortKey sk9 = { "run", "Run", 65474 };
 		GLOBAL.shortKeys ~= sk9;
-		ShortKey sk10 = { "Build", 65475 };
+		ShortKey sk10 = { "build", "Build", 65475 };
 		GLOBAL.shortKeys ~= sk10;
-		ShortKey sk11 = { "On/Off Left-side Window", 65480 };
+		ShortKey sk11 = { "outlinewindow", "On/Off Left-side Window", 65480 };
 		GLOBAL.shortKeys ~= sk11;
-		ShortKey sk12 = { "On/Off Bottom-side Window", 65481 };
+		ShortKey sk12 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
 		GLOBAL.shortKeys ~= sk12;
-		ShortKey sk13 = { "Show Type", 65470 };
+		ShortKey sk13 = { "showtype", "Show Type", 65470 };
 		GLOBAL.shortKeys ~= sk13;
-		ShortKey sk14 = { "Reparse", 65471 };
+		ShortKey sk14 = { "reparse", "Reparse", 65471 };
 		GLOBAL.shortKeys ~= sk14;
-		ShortKey sk15 = { "Save File", 536870995 };
+		ShortKey sk15 = { "save", "Save File", 536870995 };
 		GLOBAL.shortKeys ~= sk15;
-		ShortKey sk16 = { "Save All", 805306451 };
+		ShortKey sk16 = { "saveall", "Save All", 805306451 };
 		GLOBAL.shortKeys ~= sk16;
-		ShortKey sk17 = { "Close File", 536870999 };
+		ShortKey sk17 = { "close", "Close File", 536870999 };
 		GLOBAL.shortKeys ~= sk17;
-		ShortKey sk18 = { "Next Tab", 536870921 };
+		ShortKey sk18 = { "nexttab", "Next Tab", 536870921 };
 		GLOBAL.shortKeys ~= sk18;
-		ShortKey sk19 = { "Previous Tab", 805306377 };
+		ShortKey sk19 = { "prevtab","Previous Tab", 805306377 };
 		GLOBAL.shortKeys ~= sk19;
-		ShortKey sk20 = { "New Tab", 536870990 };
+		ShortKey sk20 = { "newtab", "New Tab", 536870990 };
 		GLOBAL.shortKeys ~= sk20;
-		ShortKey sk21 = { "Autocomplete", 536870993 };
+		ShortKey sk21 = { "autocomplete", "Autocomplete", 536870993 };
 		GLOBAL.shortKeys ~= sk21;
-		ShortKey sk22 = { "Compile & Run", 536936386 };
+		ShortKey sk22 = { "compilerun", "Compile & Run", 536936386 };
 		GLOBAL.shortKeys ~= sk22;
 		
 
@@ -235,5 +238,243 @@ struct GLOBAL
 
 		fu.name = "Annotation";
 		GLOBAL.fonts ~= fu;
+		
+		
+		
+		GLOBAL.languageItems["file"] = "File";
+		GLOBAL.languageItems["new"] = "New";
+		GLOBAL.languageItems["open"] = "Open";
+		GLOBAL.languageItems["save"] = "Save";
+		GLOBAL.languageItems["saveas"] = "Save As";
+		GLOBAL.languageItems["saveall"] = "Save All";
+		GLOBAL.languageItems["close"] = "Close";
+		GLOBAL.languageItems["closeall"] = "Close All";
+		GLOBAL.languageItems["recentfiles"] = "Recent Files";
+		GLOBAL.languageItems["recentprjs"] = "Recent Projects";
+		GLOBAL.languageItems["clearall"] = "Claer All";
+		GLOBAL.languageItems["exit"] = "Exit";
+			
+		GLOBAL.languageItems["edit"] = "Edit";
+		GLOBAL.languageItems["redo"] = "Redo";
+		GLOBAL.languageItems["undo"] = "Undo";
+		GLOBAL.languageItems["cut"] = "Cut";
+		GLOBAL.languageItems["copy"] = "Copy";
+		GLOBAL.languageItems["paste"] = "Paste";
+		GLOBAL.languageItems["commentline"] = "(Un)Comment Line";
+		GLOBAL.languageItems["selectall"] = "Select All";
+			
+		GLOBAL.languageItems["search"] = "Search";
+		GLOBAL.languageItems["findreplace"] = "Find / Replace";
+		GLOBAL.languageItems["findnext"] = "Find Next";
+		GLOBAL.languageItems["findprev"] = "Find Previous";
+		GLOBAL.languageItems["findreplacefiles"] = "Find / Replace In Files";
+		GLOBAL.languageItems["goto"] = "Goto Line";
+
+		GLOBAL.languageItems["view"] = "View";
+		GLOBAL.languageItems["outline"] = "Outline";
+		GLOBAL.languageItems["message"]= "Message";
+			
+		GLOBAL.languageItems["prj"] = "Project";
+			GLOBAL.languageItems["newprj"] = "New Project";
+			GLOBAL.languageItems["openprj"] = "Open Project";
+			GLOBAL.languageItems["importprj"] = "Import Fbedit Project";
+			GLOBAL.languageItems["saveprj"] = "Save Project";
+			GLOBAL.languageItems["saveallprj"] = "Save All Projects";
+			GLOBAL.languageItems["closeprj"] = "Close Project";
+			GLOBAL.languageItems["closeallprj"] = "Close All Projects";
+			GLOBAL.languageItems["properties"] = "Properties...";
+			
+			GLOBAL.languageItems["openinexplorer"] = "Open In Explorer";
+			GLOBAL.languageItems["addinprj"]= "Add File(s)";
+			GLOBAL.languageItems["removefromprj"] = "Remove From Project";
+			GLOBAL.languageItems["rename=Rename"] = "File";
+			GLOBAL.languageItems["newfile"] = "New File";
+			GLOBAL.languageItems["newfolder"] = "New Folder";
+			GLOBAL.languageItems["addfile"] = "Add file(s)";
+		
+		GLOBAL.languageItems["build"] = "Build";
+			GLOBAL.languageItems["compile"] = "Compile File";
+			GLOBAL.languageItems["compilerun"]= "Compile File And Run";
+			GLOBAL.languageItems["run"] = "Run";
+			GLOBAL.languageItems["buildprj"] = "Build Project";
+			GLOBAL.languageItems["quickrun"] = "Quick Run";
+			
+		GLOBAL.languageItems["debug"] = "Debug";
+			GLOBAL.languageItems["rundebug"] = "Run Debug";
+			GLOBAL.languageItems["compiledebug"] = "Compile With Debug";
+			GLOBAL.languageItems["builddebug"] = "Build Project With Debug";
+			
+		GLOBAL.languageItems["options"] = "Options";
+			GLOBAL.languageItems["tools"] = "Tools";
+				GLOBAL.languageItems["seteol"] = "Set Eol Character";
+				GLOBAL.languageItems["converteol"] = "Convert Eol Character";
+				GLOBAL.languageItems["convertencoding"] = "Convert Encoding";
+				GLOBAL.languageItems["convertcase"] = "Convert Keyword Case";
+					GLOBAL.languageItems["uppercase"] = "UPPERCASE";
+					GLOBAL.languageItems["lowercase"] = "lowercase";
+					GLOBAL.languageItems["mixercase"] = "Mixedcase";
+			GLOBAL.languageItems["preference"] = "Preference";
+				GLOBAL.languageItems["compiler"] = "Compiler";
+					GLOBAL.languageItems["compilerpath"] = "Compiler Path";
+					GLOBAL.languageItems["debugpath"] = "Debugger Path";
+					GLOBAL.languageItems["compileropts"] = "Compiler Opts";
+					GLOBAL.languageItems["compilersetting"] = "Compiler Setting";
+						GLOBAL.languageItems["errorannotation"] = "Show Compiler Errors/Warnings Using Annotation";
+						GLOBAL.languageItems["showresultwindow"] = "Show Compiled Result Window";
+					GLOBAL.languageItems["parsersetting"] = "Parser Settings";
+						GLOBAL.languageItems["enablekeyword"] = "Enable Keyword Autocomplete";
+						GLOBAL.languageItems["enableparser"] = "Enable Parser";
+						GLOBAL.languageItems["showtitle"] = "Show Function Title";
+						GLOBAL.languageItems["showtypeparam"] = "Show Type With Function Parameters";
+						GLOBAL.languageItems["sortignorecase"] = "Autocomplete List Is Ignore Case";
+						GLOBAL.languageItems["selectcase"] = "Selection Of Autocomplete List Is Case Insensitive";
+						GLOBAL.languageItems["showlisttype"] = "Show Autocomplete List Type";
+						GLOBAL.languageItems["showallmembers"] = "Show All Members( public, protected, private )";
+						GLOBAL.languageItems["parserlive"] = "ParseLive! Level";
+							GLOBAL.languageItems["none"] = "None";
+							GLOBAL.languageItems["light"] = "Light";
+							GLOBAL.languageItems["full"] = "Full";
+							GLOBAL.languageItems["update"] = "Update Outline";
+						GLOBAL.languageItems["trigger"] = "Autocompletion Trigger";
+							GLOBAL.languageItems["triggertip"] = "Set 0 To Disable";
+						GLOBAL.languageItems["includelevel"] = "Include Levels";
+					GLOBAL.languageItems["editor"] = "Editor";
+						GLOBAL.languageItems["lnmargin"] = "Show Linenumber Margin";
+						GLOBAL.languageItems["bkmargin"] = "Show Bookmark Margin";
+						GLOBAL.languageItems["fdmargin"] = "Show Folding Margin";
+						GLOBAL.languageItems["indentguide"] = "Show Indentation Guide";
+						GLOBAL.languageItems["showcaretline"] = "Hightlight Caret Line";
+						GLOBAL.languageItems["wordwarp"] = "Word Warp";
+						GLOBAL.languageItems["tabtospace"] = "Replace Tab With Space";
+						GLOBAL.languageItems["autoindent"] = "Automatic Indent";
+						GLOBAL.languageItems["showeol"] = "Show EOL Sign";
+						GLOBAL.languageItems["showspacetab"] = "Show Space/Tab";
+						GLOBAL.languageItems["autoinsertend"] = "Auto Insert Block End";
+						GLOBAL.languageItems["coloroutline"] = "Colorize Outline Item";
+						GLOBAL.languageItems["showidemessage"] = "Show IDE Message";
+						GLOBAL.languageItems["boldkeyword"] = "Bold Keywords";
+						GLOBAL.languageItems["tabwidth"] = "Tab Width";
+						GLOBAL.languageItems["columnedge"] = "Colume Edge";
+						GLOBAL.languageItems["autoconvertkeyword"] = "Auto Convert Keyword Case";
+						GLOBAL.languageItems["font"] = "Font";
+							GLOBAL.languageItems["default"] = "Default";
+							GLOBAL.languageItems["document"] = "Document";
+							GLOBAL.languageItems["leftside"] = "Leftside";
+							//'fistlist=FileList
+							//'project=Project
+							//'outline=Outline
+							GLOBAL.languageItems["bottom"] = "Bottom";
+							//'output=Output
+							//'search=Search
+							//'debug=Debug
+							GLOBAL.languageItems["annotation"] = "Annotation";
+						GLOBAL.languageItems["color"] = "Color";
+							GLOBAL.languageItems["caretline"] = "Caret Line";
+							GLOBAL.languageItems["cursor"] = "Cursor";
+							GLOBAL.languageItems["selfor"] = "Selection Foreground";
+							GLOBAL.languageItems["selback"] = "Selection Background";
+							GLOBAL.languageItems["lnfor"] = "Linenumber Foreground";
+							GLOBAL.languageItems["lnback"] = "Linenumber Background";
+							GLOBAL.languageItems["foldcolor"] = "FoldingMargin Color";
+							GLOBAL.languageItems["selalpha"] = "Selection Alpha";
+								GLOBAL.languageItems["alphatip"] = "Set 255 To Disable Alpha";
+					GLOBAL.languageItems["shortcut"] = "Short Cut";
+						//'findreplace=Find / Replace
+						//'findreplacefiles=Find / Replace In Files
+						//'findnext=Find Next
+						//'finprev=Find Previous
+						//'goto=Goto Line
+						GLOBAL.languageItems["gotodef"] = "Goto Definition";
+						GLOBAL.languageItems["leftwindow"] = "On/Off Left Window";
+						GLOBAL.languageItems["bottomwindow"] = "On/Off Bottom Window";
+						GLOBAL.languageItems["showtype"] = "Show Type";
+						GLOBAL.languageItems["reparse"] = "Reparse";
+						GLOBAL.languageItems["nexttab"] = "Next Tab";
+						GLOBAL.languageItems["prevtab"] = "Previous Tab";
+						GLOBAL.languageItems["newtab"] = "New Tab";
+						GLOBAL.languageItems["autocomplete"] = "Auto Complete";
+					GLOBAL.languageItems["keywords"] = "Keywords";
+						GLOBAL.languageItems["keyword0"] = "Keyword0";
+						GLOBAL.languageItems["keyword1"] = "Keyword1";
+						GLOBAL.languageItems["keyword2"] = "Keyword2";
+						GLOBAL.languageItems["keyword3"] = "Keyword3";
+			GLOBAL.languageItems["language"] = "Language";
+				GLOBAL.languageItems["openlanguage"] = "Choose Language...";
+			GLOBAL.languageItems["about"] = "About";
+		
+		GLOBAL.languageItems["bookmark"] = "Mark Bookmark";
+		GLOBAL.languageItems["bookmarkprev"] = "Previous Bookmark";
+		GLOBAL.languageItems["bookmarknext"] = "Next Bookmark";
+		GLOBAL.languageItems["bookmarkclear"] = "Clear Bookmark";
+
+		GLOBAL.languageItems["outline"] = "Outline";
+			GLOBAL.languageItems["collapse"] = "Collapse";
+			GLOBAL.languageItems["showpr"] = "Change Outline Node Title";
+			GLOBAL.languageItems["refresh"] = "Refresh Parser";
+			GLOBAL.languageItems["searchanyword"] = "Search Any Word";
+			GLOBAL.languageItems["hide"] = "Hide";
+
+		GLOBAL.languageItems["filelist"] = "FileList";
+			GLOBAL.languageItems["fullpath"] = "FullPath";
+
+		GLOBAL.languageItems["output"] = "Output";
+			GLOBAL.languageItems["clear"] = "Clear";
+
+		//'tab
+		GLOBAL.languageItems["closeothers"] = "Close Others";
+
+		//'popup window
+		GLOBAL.languageItems["delete"] = "Delete";
+		GLOBAL.languageItems["showannotation"] = "Show Annotation";
+		GLOBAL.languageItems["hideannotation"] = "Hide Annotation";
+		GLOBAL.languageItems["removeannotation"] = "Remove All Annotation";
+
+		//'properties
+		GLOBAL.languageItems["prjproperties"] = "Project Properties";
+		GLOBAL.languageItems["general"] = "General";
+			GLOBAL.languageItems["prjname"] = "Project Name";
+			GLOBAL.languageItems["prjtype"] = "Type";
+				GLOBAL.languageItems["console"] = "Console Application";
+				GLOBAL.languageItems["static"] = "Static Library";
+				GLOBAL.languageItems["dynamic"] = "Dynamic Link Library";
+			GLOBAL.languageItems["prjdir"] = "Project Dir";
+			GLOBAL.languageItems["prjmainfile"] = "Main file";
+			GLOBAL.languageItems["prjtarget"] = "Target Name";
+			GLOBAL.languageItems["prjargs"] = "Execute Args";
+			GLOBAL.languageItems["prjopts"] = "Compile Opt";
+			GLOBAL.languageItems["prjcomment"] = "Comment";
+			GLOBAL.languageItems["prjcompiler"] = "FBC Path";
+		GLOBAL.languageItems["include"] = "Include...";
+			GLOBAL.languageItems["includepath"] = "Include Paths";
+			GLOBAL.languageItems["librarypath"] = "Libraries Paths";
+		
+		// Search Window
+		GLOBAL.languageItems["findwhat"] = "Find What";
+		GLOBAL.languageItems["replacewith"] = "Replace With";
+		GLOBAL.languageItems["direction"] = "Direction";
+			GLOBAL.languageItems["forward"] = "Forward";
+			GLOBAL.languageItems["backward"] = "Backward";
+		GLOBAL.languageItems["scope"] = "Scope";
+			GLOBAL.languageItems["all"] = "All";
+			GLOBAL.languageItems["selection"] = "Selection";
+		GLOBAL.languageItems["casesensitive"] = "Case Sensitive";
+		GLOBAL.languageItems["wholeword"] = "Whole Word";
+		GLOBAL.languageItems["find"] = "Find";
+		GLOBAL.languageItems["findall"] = "Find All";
+		GLOBAL.languageItems["replacefind"] = "Find/Replace";
+		GLOBAL.languageItems["replace"] = "Replace";
+		GLOBAL.languageItems["replaceall"] = "Replace All";
+		GLOBAL.languageItems["countall"] = "Count All";
+		GLOBAL.languageItems["bookmarkall"] = "Mark All";
+		GLOBAL.languageItems["document"] = "Document";
+		GLOBAL.languageItems["alldocument"] = "All Document";
+		GLOBAL.languageItems["allproject"] = "All Project";
+		
+		// args window
+		GLOBAL.languageItems["argtitle"] = "Compiler Options / EXE Arguments";
+		
+		GLOBAL.languageItems["yes"] = "Yes";
+		GLOBAL.languageItems["no"] = "No";
+		GLOBAL.languageItems["cancel"] = "Cancel";
 	}	
 }

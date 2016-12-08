@@ -11,19 +11,24 @@ private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.c
 class CFileList
 {
 	private:
-	Ihandle*		layoutHandle, tree;
-	int				fullPathState;
+	Ihandle*			layoutHandle, tree;
+	int					fullPathState;
+	CstringConvert[2]	cStrings;
 
 	void createLayout()
 	{
+		cStrings[0] = new CstringConvert( GLOBAL.languageItems["fullpath"] );
+		cStrings[1] = new CstringConvert( GLOBAL.languageItems["hide"] );
+		
 		// Outline Toolbar
-		Ihandle* filelistButtonFilename = IupButton( null, "Fullpath" );
-		IupSetAttributes( filelistButtonFilename, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_p,TIP=FullPath" );
+		Ihandle* filelistButtonFilename = IupButton( null, null );
+		IupSetAttributes( filelistButtonFilename, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_p" );
+		IupSetAttribute( filelistButtonFilename, "TIP", cStrings[0].toStringz );
 		IupSetCallback( filelistButtonFilename, "ACTION", cast(Icallback) &fileList_Filename_ACTION );
 
-
-		Ihandle* filelistButtonHide = IupButton( null, "Hide" );
-		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_b,TIP=Hide" );
+		Ihandle* filelistButtonHide = IupButton( null, null );
+		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_b" );
+		IupSetAttribute( filelistButtonHide, "TIP", cStrings[1].toStringz );
 		IupSetCallback( filelistButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
@@ -32,7 +37,7 @@ class CFileList
 		Ihandle* filelistToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( filelistToolbarTitleImage, "IMAGE=icon_filelist,ALIGNMENT=ALEFT:ACENTER" );
 
-		Ihandle* filelistToolbarTitle = IupLabel( " FileList" );
+		Ihandle* filelistToolbarTitle = IupLabel( toStringz( GLOBAL.languageItems["filelist"] ) );
 		IupSetAttribute( filelistToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );
 
 		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, filelistToolbarTitle, IupFill, filelistButtonFilename, filelistButtonHide, null );
@@ -55,6 +60,10 @@ class CFileList
 	{
 		createLayout();
 	}
+	
+	~this()
+	{
+	}	
 	
 	Ihandle* getLayoutHandle()
 	{

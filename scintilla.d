@@ -721,27 +721,27 @@ extern(C)
 		{
 			if( button == '3' ) // Right Click
 			{
-				Ihandle* _undo = IupItem( "Undo", null );
+				Ihandle* _undo = IupItem( toStringz( GLOBAL.languageItems["undo"] ), null );
 				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
 				IupSetCallback( _undo, "ACTION", cast(Icallback) &menu.undo_cb ); // from menu.d
 
-				Ihandle* _redo = IupItem( "Redo", null );
+				Ihandle* _redo = IupItem( toStringz( GLOBAL.languageItems["redo"] ), null );
 				IupSetAttribute( _redo, "IMAGE", "icon_redo" );
 				IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
 
-				Ihandle* _cut = IupItem( "Cut", null );
+				Ihandle* _cut = IupItem( toStringz( GLOBAL.languageItems["cut"] ), null );
 				IupSetAttribute( _cut, "IMAGE", "icon_cut" );
 				IupSetCallback( _cut, "ACTION", cast(Icallback) &menu.cut_cb ); // from menu.d
 
-				Ihandle* _copy = IupItem( "Copy", null );
+				Ihandle* _copy = IupItem( toStringz( GLOBAL.languageItems["copy"] ), null );
 				IupSetAttribute( _copy, "IMAGE", "icon_copy" );
 				IupSetCallback( _copy, "ACTION", cast(Icallback) &menu.copy_cb ); // from menu.d
 
-				Ihandle* _paste = IupItem( "Paste", null );
+				Ihandle* _paste = IupItem( toStringz( GLOBAL.languageItems["paste"] ), null );
 				IupSetAttribute( _paste, "IMAGE", "icon_paste" );
 				IupSetCallback( _paste, "ACTION", cast(Icallback) &menu.paste_cb ); // from menu.d
 
-				Ihandle* _delete = IupItem( "Delete", null );
+				Ihandle* _delete = IupItem( toStringz( GLOBAL.languageItems["delete"] ), null );
 				IupSetAttribute( _delete, "IMAGE", "icon_clear" );
 				IupSetCallback( _delete, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -750,14 +750,14 @@ extern(C)
 
 				});
 
-				Ihandle* _selectall = IupItem( "Select All", null );
+				Ihandle* _selectall = IupItem( toStringz( GLOBAL.languageItems["selectall"] ), null );
 				IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
 				IupSetCallback( _selectall, "ACTION", cast(Icallback) &menu.selectall_cb ); // from menu.d
 
 
 
 				// Annotation
-				Ihandle* _showAnnotation = IupItem( "Show Annotation", null );
+				Ihandle* _showAnnotation = IupItem( toStringz( GLOBAL.languageItems["showannotation"] ), null );
 				IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
 				IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -766,7 +766,7 @@ extern(C)
 					//IupScintillaSendMessage( cSci.getIupScintilla, 2548, 3, 0 );
 				});
 				
-				Ihandle* _hideAnnotation = IupItem( "Hide Annotation", null );
+				Ihandle* _hideAnnotation = IupItem( toStringz( GLOBAL.languageItems["hideannotation"] ), null );
 				IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
 				IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback)function( Ihandle* ih )
 				{
@@ -774,7 +774,7 @@ extern(C)
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
 				});
 
-				Ihandle* _removeAllAnnotation = IupItem( "Remove All Annotation", null );
+				Ihandle* _removeAllAnnotation = IupItem( toStringz( GLOBAL.languageItems["removeannotation"] ), null );
 				IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
 				IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -782,7 +782,7 @@ extern(C)
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 				});
 
-				Ihandle* _refresh = IupItem( "Refresh Parser", null );
+				Ihandle* _refresh = IupItem( toStringz( GLOBAL.languageItems["refresh"] ), null );
 				IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
 				IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -790,14 +790,14 @@ extern(C)
 					GLOBAL.outlineTree.refresh( cSci );
 				});
 
-				Ihandle* _goto = IupItem( "Goto Defintion", null );
+				Ihandle* _goto = IupItem( toStringz( GLOBAL.languageItems["gotodef"] ), null );
 				IupSetAttribute( _goto, "IMAGE", "icon_goto" );
 				IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.toDefintionAndType( true );
 				});
 
-				Ihandle* _showType = IupItem( "Show Type", null );
+				Ihandle* _showType = IupItem( toStringz( GLOBAL.languageItems["showtype"] ), null );
 				IupSetAttribute( _showType, "IMAGE", "icon_type" );
 				IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -946,84 +946,84 @@ extern(C)
 		{
 			switch( sk.name )
 			{
-				case "Find/Replace":				
+				case "find":				
 					if( sk.keyValue == c )
 					{
 						menu.findReplace_cb();
 						return IUP_IGNORE;
 					}
 					break;
-				case "Find/Replace In Files":
+				case "findinfile":
 					if( sk.keyValue == c )
 					{ 
 						menu.findReplaceInFiles();
 						return IUP_IGNORE;
 					}
 					break;
-				case "Find Next":
+				case "findnext":
 					if( sk.keyValue == c )
 					{
 						menu.findNext_cb();
 						return IUP_IGNORE;
 					}
 					break;
-				case "Find Previous":
+				case "findprev":
 					if( sk.keyValue == c )
 					{
 						menu.findPrev_cb();
 						return IUP_IGNORE;
 					}
 					break;
-				case "Goto Line":
+				case "gotoline":
 					if( sk.keyValue == c )
 					{
 						menu.item_goto_cb();
 						return IUP_IGNORE;
 					}
 					break;
-				case "Undo":
+				case "undo":
 					if( sk.keyValue == c )
 					{
 						menu.undo_cb();
 						return IUP_IGNORE;
 					}
 					break;
-				case "Redo":						
+				case "redo":						
 					if( sk.keyValue == c )
 					{
 						menu.redo_cb();
 						return IUP_IGNORE;
 					}
 					break;
-				case "Goto Defintion":
+				case "defintion":
 					if( sk.keyValue == c )
 					{
 						AutoComplete.toDefintionAndType( true );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Quick Run":
+				case "quickrun":
 					if( sk.keyValue == c )
 					{
 						menu.quickRun_cb( null );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Run":
+				case "run":
 					if( sk.keyValue == c )
 					{
 						menu.run_cb( null );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Build":
+				case "build":
 					if( sk.keyValue == c )
 					{
 						menu.buildAll_cb( null );
 						return IUP_IGNORE;
 					}
 					break;
-				case "On/Off Left-side Window":
+				case "outlinewindow":
 					if( sk.keyValue == c ) 
 					{
 						menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
@@ -1031,7 +1031,7 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				case "On/Off Bottom-side Window":
+				case "messagewindow":
 					if( sk.keyValue == c )
 					{
 						menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
@@ -1039,35 +1039,35 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				case "Show Type":
+				case "showtype":
 					if( sk.keyValue == c )
 					{
 						AutoComplete.toDefintionAndType( false );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Reparse":
+				case "reparse":
 					if( sk.keyValue == c )
 					{
 						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 						GLOBAL.outlineTree.refresh( cSci );
 					}
 					break;
-				case "Save File":					
+				case "save":					
 					if( sk.keyValue == c )
 					{
 						menu.saveFile_cb( null );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Save All":
+				case "saveall":
 					if( sk.keyValue == c )
 					{
 						menu.saveAllFile_cb( null );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Close File":
+				case "close":
 					if( sk.keyValue == c )
 					{
 						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
@@ -1075,7 +1075,7 @@ extern(C)
 					}
 					break;
 
-				case "Next Tab":
+				case "nexttab":
 					if( sk.keyValue == c )
 					{
 						int count = IupGetChildCount( GLOBAL.documentTabs );
@@ -1090,7 +1090,7 @@ extern(C)
 					}
 					break;
 
-				case "Previous Tab":
+				case "prevtab":
 					if( sk.keyValue == c )
 					{
 						int count = IupGetChildCount( GLOBAL.documentTabs );
@@ -1104,14 +1104,14 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				case "New Tab":
+				case "newtab":
 					if( sk.keyValue == c )
 					{
 						menu.newFile_cb( ih );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Autocomplete":
+				case "autocomplete":
 					if( sk.keyValue == c )
 					{
 						char[] 	alreadyInput;
@@ -1144,7 +1144,7 @@ extern(C)
 					}
 					break;
 				
-				case "Compile & Run":
+				case "compilerun":
 					if( sk.keyValue == c )
 					{
 						menu.buildrun_cb( null );

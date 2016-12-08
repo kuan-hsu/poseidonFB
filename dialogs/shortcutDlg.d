@@ -144,29 +144,29 @@ extern(C) // Callback for CSingleTextDialog
 
 		switch( name )
 		{
-			case "Find/Replace":				pos = 0;	break;
-			case "Find/Replace In Files":		pos = 1;	break;
-			case "Find Next":					pos = 2;	break;
-			case "Find Previous":				pos = 3;	break;
-			case "Goto Line":					pos = 4;	break;
-			case "Undo":						pos = 5;	break;
-			case "Redo":						pos = 6;	break;
-			case "Goto Defintion":				pos = 7;	break;
-			case "Quick Run":					pos = 8;	break;
-			case "Run":							pos = 9;	break;
-			case "Build":						pos = 10;	break;
-			case "On/Off Left-side Window":		pos = 11;	break;
-			case "On/Off Bottom-side Window":	pos = 12;	break;
-			case "Show Type":					pos = 13;	break;
-			case "Reparse":						pos = 14;	break;
-			case "Save File":					pos = 15;	break;
-			case "Save All":					pos = 16;	break;
-			case "Close File":					pos = 17;	break;
-			case "Next Tab":					pos = 18;	break;
-			case "Previous Tab":				pos = 19;	break;
-			case "New Tab":						pos = 20;	break;
-			case "Autocomplete":				pos = 21;	break;
-			case "Compile & Run":				pos = 22;	break;
+			case "find":						pos = 0;	break;
+			case "findinfile":					pos = 1;	break;
+			case "findnext":					pos = 2;	break;
+			case "findprev":					pos = 3;	break;
+			case "gotoline":					pos = 4;	break;
+			case "undo":						pos = 5;	break;
+			case "redo":						pos = 6;	break;
+			case "defintion":					pos = 7;	break;
+			case "quickrun":					pos = 8;	break;
+			case "run":							pos = 9;	break;
+			case "build":						pos = 10;	break;
+			case "outlinewindow":				pos = 11;	break;
+			case "messagewindow":				pos = 12;	break;
+			case "showtype":					pos = 13;	break;
+			case "reparse":						pos = 14;	break;
+			case "save":						pos = 15;	break;
+			case "saveall":						pos = 16;	break;
+			case "close":						pos = 17;	break;
+			case "nexttab":						pos = 18;	break;
+			case "prevtab":						pos = 19;	break;
+			case "newtab":						pos = 20;	break;
+			case "autocomplete":				pos = 21;	break;
+			case "compilerun":					pos = 22;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;
@@ -187,7 +187,7 @@ extern(C) // Callback for CSingleTextDialog
 				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
 			}
 			
-			char[] string = Stdout.layout.convert( "{,-30} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[pos].name, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
+			char[] string = Stdout.layout.convert( "{,-30} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[pos].title, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
 
 			scope _cString = new CstringConvert ;
 			IupSetAttribute( shortCutList, _cString.convert( Integer.toString( pos + 1 ) ), GLOBAL.cString.convert( string ) );
