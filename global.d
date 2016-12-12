@@ -251,7 +251,7 @@ struct GLOBAL
 		GLOBAL.languageItems["closeall"] = "Close All";
 		GLOBAL.languageItems["recentfiles"] = "Recent Files";
 		GLOBAL.languageItems["recentprjs"] = "Recent Projects";
-		GLOBAL.languageItems["clearall"] = "Claer All";
+		GLOBAL.languageItems["clearall"] = "Clear All";
 		GLOBAL.languageItems["exit"] = "Exit";
 			
 		GLOBAL.languageItems["edit"] = "Edit";

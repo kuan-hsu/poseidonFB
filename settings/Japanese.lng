@@ -1,0 +1,235 @@
+﻿file=ファイル
+	new=新規
+	open=開く
+	save=保存
+	saveas=名前を付けて保存
+	saveall=全て保存
+	close=閉じる
+	closeall=全て閉じる
+	recentfiles=最近のファイル
+	recentprjs=最近のプロジェクト
+	clearall=全て消去
+	exit=終了
+	
+edit=編集
+	redo=やり直し
+	undo=元に戻す
+	cut=カット
+	copy=コピー
+	paste=貼付け
+	commentline=(Un)コメント行
+	selectall=全て選択
+	
+search=検索
+	findreplace=検索 / 置換
+	findnext=次を検索
+	findprev=前を検索
+	findreplacefiles=検索 / ファイル内を置換
+	goto=行に飛ぶ
+
+view=表示
+	outline=概略
+	message=メッセージ
+	
+prj=プロジェクト
+	newprj=新しいプロジェクト
+	openprj=プロジェクトを開く
+	importprj=Fbedit プロジェクトを取り込む
+	saveprj=プロジェクトを保存
+	saveallprj=全てのプロジェクトを保存
+	closeprj=プロジェクトを閉じる
+	closeallprj=全てのプロジェクトを閉じる
+	properties=プロパティ...
+	
+	openinexplorer=エクスプローラで開く
+	addinprj=ファイルを追加
+	removefromprj=プロジェクトから除く
+	rename=ファイルの名前を変える
+	newfile=新しいファイル
+	newfolder=新しいフォルダ
+	addfile=ファイルを追加
+	
+build=構築
+	compile=ファイルをコンパイル
+	compilerun=コンパイルして実行
+	run=実行
+	buildprj=プロジェクトを構築
+	quickrun=即実行
+	
+debug=デバッグ
+	rundebug=デバッグ実行
+	compiledebug=デバッグ＋コンパイル
+	builddebug=デバッグ＋プロジェクト構築
+	
+options=オプション
+	tools=ツール
+		seteol=改行コードを設定
+		converteol=改行コードを変換
+		convertencoding=エンコードを変換
+		convertcase=キーワードの大文字小文字変換
+			uppercase=大文字
+			lowercase=小文字
+			mixercase=混合
+	preference=環境設定
+		compiler=コンパイラ
+			compilerpath=コンパイラ・パス
+			debugpath=デバッガ・パス
+			compileropts=コンパイラ・オプション
+			compilersetting=コンパイラ設定
+				errorannotation=コンパイル・エラーを表示/注釈を使って警告
+				showresultwindow=コンパイル結果画面を表示
+			parsersetting=パーサー設定
+				enablekeyword=キーワード自動補完を有効に
+				enableparser=パーサーを有効に
+				showtitle=関数のタイトルを表示
+				showtypeparam=関数のパラメータと種類を表示
+				sortignorecase=自動補完リストは大文字小文字を無視
+				selectcase=自動補完リストの選択で大文字小文字を区別しない
+				showlisttype=自動補完リスト種類を表示
+				showallmembers=全てのメンバーを表示(公開, 保護, 非公開)
+				parserlive=ParseLive! レベル
+					none=無し
+					light=軽く
+					full=全て
+					update=概要を更新
+				trigger=自動補完きっかけ
+					triggertip=0 を無効にする
+				includelevel=含めるレベル
+			editor=エディタ
+				lnmargin=行番号を表示
+				bkmargin=しおりを表示
+				fdmargin=折りたたみを表示
+				indentguide=インデント・ガイドを表示
+				showcaretline=キャレット線を強調
+				wordwarp=ワードラップ
+				tabtospace=タブを空白に置換
+				autoindent=自動字下げ
+				showeol=EOL を表示
+				showspacetab=空白/Tab を表示
+				autoinsertend=ブロック End を自動挿入
+				coloroutline=概要項目を色分け
+				showidemessage=IDE メッセージを表示
+				boldkeyword=キーワードを太字に
+				tabwidth=タブ幅
+				columnedge=柱軸の端
+				autoconvertkeyword=キーワードの大文字小文字を自動変換
+				font=フォント
+					default=既定
+					document=文書
+					leftside=左端
+					'fistlist=FileList
+					'project=Project
+					'outline=Outline
+					bottom=最後
+					'output=Output
+					'search=Search
+					'debug=Debug
+					annotation=注釈
+				color=色
+					caretline=キャレット線
+					cursor=カーソル
+					selfor=前景を選択
+					selback=背景を選択
+					lnfor=行番号前景
+					lnback=行番号背景
+					foldcolor=折りたたみの色
+					selalpha=透過を選択
+						alphatip=255 で透過無し
+			shortcut=ショート・カット
+				'findreplace=Find / Replace
+				'findreplacefiles=Find / Replace In Files
+				'findnext=Find Next
+				'finprev=Find Previous
+				'goto=Goto Line
+				gotodef=Goto 定義
+				leftwindow=左画面 On/Off
+				bottomwindow=下画面 On/Off
+				showtype=種類を表示
+				reparse=再パース
+				nexttab=前の Tab
+				prevtab=後の Tab
+				newtab=新しい Tab
+				autocomplete=自動補完
+			keywords=キーワード
+				keyword0=Keyword0
+				keyword1=Keyword1
+				keyword2=Keyword2
+				keyword3=Keyword3
+	language=言語
+		openlanguage=言語を選択...
+	about=バージョン情報
+
+bookmark=しおりを付ける
+bookmarkprev=前のしおり
+bookmarknext=次のしおり
+bookmarkclear=しおりを消去
+
+outline=概略
+	collapse=閉じる
+	showpr=概略ノードの表示を変更
+	refresh=パーサーを再読込み
+	searchanyword=任意の語を検索
+	hide=隠す
+
+filelist=ファイル・リスト
+	fullpath=フルパス
+
+output=出力
+	clear=消去
+
+'tab
+closeothers=他を閉じる
+
+'popup window
+delete=削除
+showannotation=注釈を表示
+hideannotation=注釈を隠す
+removeannotation=全ての注釈を消去
+
+'properties
+prjproperties=プロジェクト・プロパティ
+general=一般
+	prjname=プロジェクト名
+	prjtype=種類
+		console=コンソール・アプリ
+		static=静的ライブラリ
+		dynamic=動的リンクライブラリ(DLL)
+	prjdir=プロジェクト・ディレクトリ
+	prjmainfile=主ファイル
+	prjtarget=目標名
+	prjargs=実行引数
+	prjopts=コンパイル・オプション
+	prjcomment=コメント
+	prjcompiler=FBC パス
+include=インクルード...
+	includepath=インクルード・パス
+	librarypath=ライブラリ・パス
+	
+'search window
+findwhat=対象
+replacewith=置換後
+direction=方向
+	forward=前に
+	backward=後に
+scope=範囲
+	all=全て
+	selection=選択
+casesensitive=大文字小文字を区分
+wholeword=言葉全体
+find=検索
+findall=全てを検索
+replacefind=検索/置換
+replace=置換
+replaceall=全てを置換
+countall=全てを数える
+bookmarkall=全てを区分
+document=文書
+alldocument=全ての文書
+allproject=全てのプロジェクト
+
+'args window
+argtitle=コンパイラ・オプション / EXE 引数
+
+yes=Yes
+no=No
+cancel=中断
