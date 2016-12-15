@@ -343,8 +343,8 @@ struct GLOBAL
 						GLOBAL.languageItems["bkmargin"] = "Show Bookmark Margin";
 						GLOBAL.languageItems["fdmargin"] = "Show Folding Margin";
 						GLOBAL.languageItems["indentguide"] = "Show Indentation Guide";
-						GLOBAL.languageItems["showcaretline"] = "Hightlight Caret Line";
-						GLOBAL.languageItems["wordwarp"] = "Word Warp";
+						GLOBAL.languageItems["showcaretline"] = "Highlight Caret Line";
+						GLOBAL.languageItems["wordwarp"] = "Word Wrap";
 						GLOBAL.languageItems["tabtospace"] = "Replace Tab With Space";
 						GLOBAL.languageItems["autoindent"] = "Automatic Indent";
 						GLOBAL.languageItems["showeol"] = "Show EOL Sign";
@@ -354,7 +354,7 @@ struct GLOBAL
 						GLOBAL.languageItems["showidemessage"] = "Show IDE Message";
 						GLOBAL.languageItems["boldkeyword"] = "Bold Keywords";
 						GLOBAL.languageItems["tabwidth"] = "Tab Width";
-						GLOBAL.languageItems["columnedge"] = "Colume Edge";
+						GLOBAL.languageItems["columnedge"] = "Column Edge";
 						GLOBAL.languageItems["autoconvertkeyword"] = "Auto Convert Keyword Case";
 						GLOBAL.languageItems["font"] = "Font";
 							GLOBAL.languageItems["default"] = "Default";

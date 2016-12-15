@@ -14,7 +14,7 @@ class CSearchDialog : CBaseDialog
 	
 	Ihandle*			listFind, listReplace;
 	Ihandle*			labelStatus;
-	CstringConvert[17]	cStrings;
+	CstringConvert[18]	cStrings;
 
 	void createLayout()
 	{
@@ -154,7 +154,8 @@ class CSearchDialog : CBaseDialog
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL" );
 
-		labelStatus = IupLabel( "Status Bar" );
+		cStrings[17] = new CstringConvert( "Status Bar" );
+		labelStatus = IupLabel( cStrings[17].toStringz );
 		
 		Ihandle* vBox = IupVbox( hBox00, hBox01, hBox02, frameOption, gbox, bottom, labelSEPARATOR, labelStatus, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=2,EXPAND=YES,EXPANDCHILDREN=YES" );

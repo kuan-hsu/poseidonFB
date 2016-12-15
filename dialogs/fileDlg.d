@@ -73,7 +73,10 @@ class CFileDlg
 				}
 				
 				scope _fp = new FilePath( fileString );
-				if( _fp.isFolder() ) GLOBAL.recentOpenDir = _fp.toString; else GLOBAL.recentOpenDir = _fp.path;
+				if( _fp.exists() )
+				{
+					if( _fp.isFolder() ) GLOBAL.recentOpenDir = _fp.toString; else GLOBAL.recentOpenDir = _fp.path;
+				}
 			}
 		}
 		else

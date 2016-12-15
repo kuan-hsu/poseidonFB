@@ -365,7 +365,7 @@ extern(C)
 		if( pos == 2 ) return IUP_DEFAULT;
 
 
-		Ihandle* _clear = IupItem( "Clear Output", null );
+		Ihandle* _clear = IupItem( toStringz( GLOBAL.languageItems["clear"] ), null );
 		IupSetAttribute( _clear, "IMAGE", "icon_debug_clear" );
 		IupSetCallback( _clear, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* _ih )
 		{

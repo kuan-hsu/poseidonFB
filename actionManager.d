@@ -842,7 +842,7 @@ struct ScintillaAction
 
 		try
 		{
-			scope dlg = new CFileDlg( "Save As...", "FreeBASIC Sources|*.bas|FreeBASIC Inculdes|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"] ~ "...", "FreeBASIC Sources|*.bas|FreeBASIC Inculdes|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )
@@ -1043,7 +1043,7 @@ struct ScintillaAction
 				IupDestroy( IupGetChild( recentFile_ih, i ) );
 			}
 
-			Ihandle* _clearRecentFiles = IupItem( toStringz( "Clear All" ), null );
+			Ihandle* _clearRecentFiles = IupItem( toStringz( GLOBAL.languageItems["clearall"] ), null );
 			IupSetAttribute( _clearRecentFiles, "IMAGE", "icon_deleteall" );
 			IupSetCallback( _clearRecentFiles, "ACTION", cast(Icallback) &menu.submenuRecentFilesClear_click_cb );
 			IupInsert( recentFile_ih, null, _clearRecentFiles );

@@ -1,0 +1,235 @@
+﻿file=Archivo
+	new=Nuevo
+	open=Abrir
+	save=Guardar
+	saveas=Guardar como
+	saveall=Guardar todo
+	close=Cerrar
+	closeall=Cerrar todo
+	recentfiles=Archivos recientes
+	recentprjs=Proyectos recientes
+	clearall=Limpiar todo
+	exit=Salir
+	
+edit=Editar
+	redo=Rehacer
+	undo=Deshacer
+	cut=Cortar
+	copy=Copiar
+	paste=Pegar
+	commentline=(Des)Comentar línea
+	selectall=Seleccionar todo
+	
+search=Buscar
+	findreplace=Buscar/Reemplazar
+	findnext=Buscar siguiente
+	findprev=Buscar anterior
+	findreplacefiles=Buscar/Reemplazar en archivos
+	goto=Ir a la línea
+
+view=Ver
+	outline=Esquema
+	message=Mensaje
+	
+prj=Proyecto
+	newprj=Nuevo proyecto
+	openprj=Abrir proyecto
+	importprj=Importar proyecto Fbedit
+	saveprj=Guardar proyecto
+	saveallprj=Guardar todos los proyectos
+	closeprj=Cerrar proyecto
+	closeallprj=Cerrar todos los proyecto
+	properties=Propiedades...
+	
+	openinexplorer=Abrir en el Explorador
+	addinprj=Agregar archivo(s)
+	removefromprj=Quitar del proyecto
+	rename=Renombrar archivo
+	newfile=Nuevo archivo
+	newfolder=Nueva carpeta
+	addfile=Agregar archivo(s)
+	
+build=Construir
+	compile=Compilar archivo
+	compilerun=Compilar archivo y ejecutar
+	run=Ejecutar
+	buildprj=Construir proyecto
+	quickrun=Ejecución rápida
+	
+debug=Depurar
+	rundebug=Ejecutar depuración
+	compiledebug=Compilar con depuración
+	builddebug=Construir proyecto con depuración
+	
+options=Opciones
+	tools=Herramientas
+		seteol=Definir carácter de fin de línea
+		converteol=Convertir carácter de fin de línea
+		convertencoding=Codificación de conversión
+		convertcase=Convertir caso de palabra clave
+			uppercase=MAYÚSCULAS
+			lowercase=minúsculas
+			mixercase=Caso Mixto
+	preference=Preferencias
+		compiler=Compilador
+			compilerpath=Ruta de compilador
+			debugpath=Ruta de depurador
+			compileropts=Opciones de compilador
+			compilersetting=Ajustes del compilador
+				errorannotation=Mostrar errores/advertencias del compilador usando anotación
+				showresultwindow=Mostrar ventana de resultados compilados
+			parsersetting=Ajustes del analizador
+				enablekeyword=Activar autocompletar palabras clave
+				enableparser=Activar analizador
+				showtitle=Mostrar título de función
+				showtypeparam=Mostrar tipo con parámetros de función
+				sortignorecase=Lista de autocompletar es ignorar el caso
+				selectcase=Ignorar caso en lista de seleccion de autocompletado
+				showlisttype=Mostrar tipo de lista de autocompletar
+				showallmembers=Mostrar todos los miembros( public, protected, private )
+				parserlive=Nivel de ParseLive!
+					none=Ninguno
+					light=Ligero
+					full=Completo
+					update=Actualizar esquema
+				trigger=Disparador de autocompletado
+					triggertip=Establecer 0 para deshabilitar
+				includelevel=Incluir niveles
+			editor=Editor
+				lnmargin=Mostrar margen de número de línea
+				bkmargin=Mostrar margen de marcador
+				fdmargin=Mostrar margen de plegado
+				indentguide=Mostrar guía de identado
+				showcaretline=Resaltar línea actual
+				wordwarp=Ajuste de línea
+				tabtospace=Reemplazar tabulación con espacio
+				autoindent=Indentado automático
+				showeol=Mostrar signo de fin de línea
+				showspacetab=Mostrar espacio/tabulación
+				autoinsertend=Auto insertar fin de bloquen
+				coloroutline=Colorear contorno de elemento
+				showidemessage=Mostrar mensaje de IDE
+				boldkeyword=Palabras clave en negrita
+				tabwidth=Ancho de tabulacón
+				columnedge=Borde de columna
+				autoconvertkeyword=Convertir palabras claves
+				font=Fuente
+					default=Por defecto
+					document=Documento
+					leftside=Lado izquierdo
+					'fistlist=Lista de archivos
+					'project=Proyecto
+					'outline=Contorno
+					bottom=Parte inferior
+					'output=Salida
+					'search=Búsqueda
+					'debug=Depuración
+					annotation=Anotación
+				color=Color
+					caretline=Línea actual
+					cursor=Cursor
+					selfor=Texto de selección
+					selback=Fondo de selección
+					lnfor=Texto de número de línea
+					lnback=Fondo de número de línea
+					foldcolor=Margen plegable
+					selalpha=Alfa de selección
+						alphatip=Asignar 255 para deshabilitar alfa
+			shortcut=Atajo
+				'findreplace=Buscar/Reemplazar
+				'findreplacefiles=Buscar/Reemplazar en archivos
+				'findnext=Buscar siguiente
+				'finprev=Buscar anterior
+				'goto=Ir a la línea
+				gotodef=Ir a la definición
+				leftwindow=Ver/Ocultar ventana izquierda
+				bottomwindow=Ver/Ocultar ventana inferior
+				showtype=Mostrar tipo
+				reparse=Volver a analizar
+				nexttab=Pestaña siguiente
+				prevtab=Pestaña anterior
+				newtab=Nueva pestaña
+				autocomplete=Auto completar
+			keywords=Palabras claves
+				keyword0=Grupo 0
+				keyword1=Grupo 1
+				keyword2=Grupo 2
+				keyword3=Grupo 3
+	language=Idioma
+		openlanguage=Elegir idioma...
+	about=Acerca de...
+
+bookmark=Marcar marcador
+bookmarkprev=Marcador anterior
+bookmarknext=Marcador siguiente
+bookmarkclear=Limpiar marcador
+
+outline=Esquema
+	collapse=Colapsar
+	showpr=Cambiar título del nodo del esquema
+	refresh=Refrescar analizador
+	searchanyword=Buscar cualquier palabra
+	hide=Ocultar
+
+filelist=Lista de archivos
+	fullpath=Ruta completa
+
+output=Salida
+	clear=Limpiar
+
+'tab
+closeothers=Close Others
+
+'popup window
+delete=Eliminar
+showannotation=Mostrar anotación
+hideannotation=Ocultar anotación
+removeannotation=Quitar toda la anotación
+
+'properties
+prjproperties=Propiedades del proyecto
+general=General
+	prjname=Nombre del proyecto
+	prjtype=Tipo
+		console=Aplicación de consola
+		static=Biblioteca estática
+		dynamic=Biblioteca de vínculos dinámicos
+	prjdir=Directorio del proyecto
+	prjmainfile=Archivo principal
+	prjtarget=Nombre de destino
+	prjargs=Execute Args
+	prjopts=Opciones de compilación
+	prjcomment=Comentario
+	prjcompiler=Ruta de FBC
+include=Include...
+	includepath=Ruta de Include
+	librarypath=Rutas de bibliotecas
+	
+'search window
+findwhat=Buscar
+replacewith=Remplazar con
+direction=Dirección
+	forward=Hacia adelante
+	backward=Hacia atrás
+scope=Alcance
+	all=Todo
+	selection=Selección
+casesensitive=Sensible al caso
+wholeword=Palabra completa
+find=Buscar
+findall=Buscar todo
+replacefind=Buscar/Reemplazar
+replace=Reemplazar
+replaceall=Reemplazar todo
+countall=Contar todo
+bookmarkall=Marcar todo
+document=Documento
+alldocument=Todo el documento
+allproject=Todo el proyecto
+
+'args window
+argtitle=Opciones del compilador / Argumentos EXE
+
+yes=Sí
+no=No
+cancel=Cancelar
