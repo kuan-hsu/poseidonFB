@@ -26,6 +26,7 @@ search=Search
 	findprev=Find Previous
 	findreplacefiles=Find / Replace In Files
 	goto=Goto Line
+		line=Line
 
 view=View
 	outline=Outline
@@ -100,8 +101,8 @@ options=Options
 				bkmargin=Show Bookmark Margin
 				fdmargin=Show Folding Margin
 				indentguide=Show Indentation Guide
-				showcaretline=Highlight Caret Line
-				wordwarp=Word Wrap
+				showcaretline=Hightlight Caret Line
+				wordwarp=Word Warp
 				tabtospace=Replace Tab With Space
 				autoindent=Automatic Indent
 				showeol=Show EOL Sign
@@ -111,7 +112,7 @@ options=Options
 				showidemessage=Show IDE Message
 				boldkeyword=Bold Keywords
 				tabwidth=Tab Width
-				columnedge=Column Edge
+				columnedge=Colume Edge
 				autoconvertkeyword=Auto Convert Keyword Case
 				font=Font
 					default=Default
@@ -227,9 +228,27 @@ document=Document
 alldocument=All Document
 allproject=All Project
 
+'short cut
+shortcutname=ShortCut Name
+shortcutkey=Current ShortCut Keys
+
 'args window
 argtitle=Compiler Options / EXE Arguments
 
+'message
 yes=Yes
 no=No
 cancel=Cancel
+bechange=has been changed, save it now?
+samekey=The same key value with
+needrestart=Need Restart To Change Language
+quest=Quest
+alarm=Alarm
+error=Error
+
+exefile=Execute Files
+basfile=freeBASIC Sources
+bifile=freeBASIC Includes
+lngfile=Language Files
+allfile=All Files
+fbeditfile=FbEdit Projects

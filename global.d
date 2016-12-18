@@ -269,6 +269,7 @@ struct GLOBAL
 		GLOBAL.languageItems["findprev"] = "Find Previous";
 		GLOBAL.languageItems["findreplacefiles"] = "Find / Replace In Files";
 		GLOBAL.languageItems["goto"] = "Goto Line";
+			GLOBAL.languageItems["line"] = "Line";
 
 		GLOBAL.languageItems["view"] = "View";
 		GLOBAL.languageItems["outline"] = "Outline";
@@ -470,11 +471,29 @@ struct GLOBAL
 		GLOBAL.languageItems["alldocument"] = "All Document";
 		GLOBAL.languageItems["allproject"] = "All Project";
 		
+		// shortcut
+		GLOBAL.languageItems["shortcutname"] = "ShortCut Name";
+		GLOBAL.languageItems["shortcutkey"] = "Current ShortCut Keys";
+		
 		// args window
 		GLOBAL.languageItems["argtitle"] = "Compiler Options / EXE Arguments";
 		
+		// message
 		GLOBAL.languageItems["yes"] = "Yes";
 		GLOBAL.languageItems["no"] = "No";
 		GLOBAL.languageItems["cancel"] = "Cancel";
+		GLOBAL.languageItems["bechange"] = "has been changed, save it now?";
+		GLOBAL.languageItems["samekey"] = "The same key value with";
+		GLOBAL.languageItems["needrestart"] = "Need Restart To Change Language";
+		GLOBAL.languageItems["quest"] = "Quest";
+		GLOBAL.languageItems["alarm"] = "Alarm";
+		GLOBAL.languageItems["error"] = "Error";
+
+		GLOBAL.languageItems["exefile"] = "Execute Files";
+		GLOBAL.languageItems["basfile"] = "freeBASIC Sources";
+		GLOBAL.languageItems["bifile"] = "freeBASIC Includes";
+		GLOBAL.languageItems["lngfile"] = "Language Files";
+		GLOBAL.languageItems["allfile"] = "All Files";
+		GLOBAL.languageItems["fbeditfile"] = "FbEdit Projects";
 	}	
 }

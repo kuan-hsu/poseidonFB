@@ -256,7 +256,7 @@ class CProjectTree
 	{
 		if( !setupDir.length )
 		{
-			scope fileSelectDlg = new CFileDlg( null, null, "DIR" );
+			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["openprj"], null, "DIR" );
 			setupDir = fileSelectDlg.getFileName();
 		}
 
@@ -309,7 +309,7 @@ class CProjectTree
 
 	bool importFbEditProject()
 	{
-		scope fileSelectDlg = new CFileDlg( null,  "FbEdit Project|*.fbp", "OPEN" );
+		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["importprj"],  GLOBAL.languageItems["fbeditfile"] ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"] ~ "|All Files|*.*" );
 		char[] fbpFullPath = fileSelectDlg.getFileName();
 
 		if( !fbpFullPath.length ) return false;
@@ -505,7 +505,7 @@ class CProjectTree
 				IupDestroy( IupGetChild( recentPrj_ih, i ) );
 			}
 
-			Ihandle* _clearRecentPrjs = IupItem( toStringz( "Clear All" ), null );
+			Ihandle* _clearRecentPrjs = IupItem( toStringz( GLOBAL.languageItems["clearall"] ), null );
 			IupSetAttribute(_clearRecentPrjs, "IMAGE", "icon_clearall");
 			IupSetCallback( _clearRecentPrjs, "ACTION", cast(Icallback) &menu.submenuRecentPrjsClear_click_cb );
 			IupInsert( recentPrj_ih, null, _clearRecentPrjs );

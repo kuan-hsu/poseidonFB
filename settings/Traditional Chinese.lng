@@ -26,6 +26,7 @@ search=尋找
 	findprev=尋找上一個
 	findreplacefiles=在檔案中尋找 / 取代
 	goto=跳到指定行
+		line=行
 
 view=檢視
 	'outline=大綱
@@ -227,9 +228,27 @@ document=文件
 alldocument=所有文件
 allproject=所有專案
 
+'short cut
+shortcutname=快捷鍵名稱
+shortcutkey=現行組合鍵
+
 'args window
 argtitle=編譯器選項/執行參數
 
+'message
 yes=是
 no=否
 cancel=取消
+bechange=內容已更改, 進行儲存?
+samekey=相同組合鍵
+needrestart=需要重新啟動更新介面語言
+quest=問題
+alarm=警告
+error=錯誤
+
+exefile=執行檔
+basfile=程式源碼
+bifile=引含檔
+lngfile=語言檔
+allfile=所有檔案
+fbeditfile=FbEdit專案

@@ -33,34 +33,28 @@ void createMenu()
 
 	// File -> New
 	item_new = IupItem (toStringz( GLOBAL.languageItems["new"] ), null);
-	IupSetAttribute(item_new, "KEY", "N");
 	IupSetAttribute(item_new, "IMAGE", "icon_newfile");
 	IupSetCallback(item_new, "ACTION", cast(Icallback)&newFile_cb);
 
 	item_open = IupItem (toStringz( GLOBAL.languageItems["open"] ), null);
-	IupSetAttribute(item_open, "KEY", "O");
 	IupSetAttribute(item_open, "IMAGE", "icon_openfile");
 	IupSetCallback(item_open, "ACTION", cast(Icallback)&openFile_cb);
 	
 	item_save = IupItem( toStringz( GLOBAL.languageItems["save"] ), null );
-	IupSetAttribute( item_save, "KEY", "S" );
 	IupSetAttribute( item_save, "IMAGE", "icon_save" );
 	IupSetCallback( item_save, "ACTION", cast(Icallback)&saveFile_cb );
 
 	
 	Ihandle* item_saveAs = IupItem( toStringz( GLOBAL.languageItems["saveas"] ), null );
-	//IupSetAttribute( item_saveAll, "KEY", "A" );
 	IupSetAttribute( item_saveAs, "IMAGE", "icon_saveas" );
 	IupSetCallback( item_saveAs, "ACTION", cast(Icallback)&saveAsFile_cb );
 	
 
 	item_saveAll = IupItem( toStringz( GLOBAL.languageItems["saveall"] ), null );
-	IupSetAttribute( item_saveAll, "KEY", "A" );
 	IupSetAttribute( item_saveAll, "IMAGE", "icon_saveall" );
 	IupSetCallback( item_saveAll, "ACTION", cast(Icallback)&saveAllFile_cb );
  
 	Ihandle* item_close = IupItem( toStringz( GLOBAL.languageItems["close"] ), null );
-	IupSetAttribute( item_close, "KEY", "C" );
 	IupSetAttribute( item_close, "IMAGE", "icon_delete" );
 	IupSetCallback( item_close, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
@@ -69,7 +63,6 @@ void createMenu()
 	});
 
 	Ihandle* item_closeAll = IupItem( toStringz( GLOBAL.languageItems["closeall"] ), null );
-	IupSetAttribute( item_closeAll, "KEY", "l" );
 	IupSetAttribute( item_closeAll, "IMAGE", "icon_deleteall" );
 	IupSetCallback( item_closeAll, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
@@ -127,167 +120,136 @@ void createMenu()
 	Ihandle* item_recent = IupSubmenu( toStringz( GLOBAL.languageItems["recentprjs"] ), recentPrjsSubMenu );
 
 	item_exit = IupItem (toStringz( GLOBAL.languageItems["exit"] ), null);
-	IupSetAttribute(item_exit, "KEY", "x");
 	IupSetCallback(item_exit, "ACTION", cast(Icallback)&exit_cb);
 
 	// Edit
 	item_undo = IupItem (toStringz( GLOBAL.languageItems["undo"] ), null);
-	IupSetAttribute(item_undo, "KEY", "U");
 	IupSetAttribute(item_undo, "IMAGE", "icon_undo");
 	IupSetCallback( item_undo, "ACTION", cast(Icallback) &undo_cb );
 
 	item_redo = IupItem (toStringz( GLOBAL.languageItems["redo"] ), null);
-	IupSetAttribute(item_redo, "KEY", "R");
 	IupSetAttribute(item_redo, "IMAGE", "icon_redo");
 	IupSetCallback( item_redo, "ACTION", cast(Icallback) &redo_cb );
 
 	item_cut = IupItem (toStringz( GLOBAL.languageItems["cut"] ), null);
-	IupSetAttribute(item_cut, "KEY", "C");
 	IupSetAttribute(item_cut, "IMAGE", "icon_cut");
 	IupSetCallback( item_cut, "ACTION", cast(Icallback) &cut_cb );
 
 
 	item_copy = IupItem (toStringz( GLOBAL.languageItems["copy"] ), null);
-	IupSetAttribute(item_copy, "KEY", "o");
 	IupSetAttribute(item_copy, "IMAGE", "icon_copy");
 	IupSetCallback( item_copy, "ACTION", cast(Icallback) &copy_cb );
 
 	item_paste = IupItem (toStringz( GLOBAL.languageItems["paste"] ), null);
-	IupSetAttribute(item_paste, "KEY", "P");
 	IupSetAttribute(item_paste, "IMAGE", "icon_paste");
 	IupSetCallback( item_paste, "ACTION", cast(Icallback) &paste_cb );
 
 	item_selectAll = IupItem (toStringz( GLOBAL.languageItems["selectall"] ), null);
-	IupSetAttribute(item_selectAll, "KEY", "A");
 	IupSetAttribute(item_selectAll, "IMAGE", "icon_selectall");
 	IupSetCallback( item_selectAll, "ACTION", cast(Icallback) &selectall_cb );
 
 	Ihandle* item_comment = IupItem (toStringz( GLOBAL.languageItems["commentline"] ), null);
-	//IupSetAttribute(item_selectAll, "KEY", "c");
 	IupSetAttribute(item_comment, "IMAGE", "icon_comment");
 	IupSetCallback( item_comment, "ACTION", cast(Icallback) &comment_cb );
 
 	// Search
 	item_findReplace = IupItem( toStringz( GLOBAL.languageItems["findreplace"] ), null );
 	IupSetAttribute(item_findReplace, "IMAGE", "icon_find");
-	IupSetAttribute( item_findReplace, "KEY", "F" );
 	IupSetCallback( item_findReplace, "ACTION", cast(Icallback) &findReplace_cb );
 
 	item_findNext = IupItem( toStringz( GLOBAL.languageItems["findnext"] ), null );
 	IupSetAttribute(item_findNext, "IMAGE", "icon_findnext");
-	IupSetAttribute( item_findNext, "KEY", "N" );
 	IupSetCallback( item_findNext, "ACTION", cast(Icallback) &findNext_cb );
 
 	item_findPrevious = IupItem( toStringz( GLOBAL.languageItems["findprev"] ), null );
 	IupSetAttribute(item_findPrevious, "IMAGE", "icon_findprev");
-	IupSetAttribute( item_findPrevious, "KEY", "P" );
 	IupSetCallback( item_findPrevious, "ACTION", cast(Icallback) &findPrev_cb );
 	
 	item_findReplaceInFiles = IupItem (toStringz( GLOBAL.languageItems["findreplacefiles"] ), null);
 	IupSetAttribute(item_findReplaceInFiles, "IMAGE", "icon_findfiles");
-	IupSetAttribute(item_findReplaceInFiles, "KEY", "R");
 	IupSetCallback( item_findReplaceInFiles, "ACTION", cast(Icallback) &findReplaceInFiles );
 
 	item_goto = IupItem( toStringz( GLOBAL.languageItems["goto"] ), null );
-	IupSetAttribute( item_goto, "KEY", "G" );
 	IupSetAttribute(item_goto, "IMAGE", "icon_goto");
 	IupSetCallback( item_goto, "ACTION", cast(Icallback) &item_goto_cb );
 
 	// View
 	GLOBAL.menuOutlineWindow = IupItem (toStringz( GLOBAL.languageItems["outline"] ), null);
-	IupSetAttribute(GLOBAL.menuOutlineWindow, "KEY", "O");
 	IupSetAttribute(GLOBAL.menuOutlineWindow, "VALUE", "ON");
 	//IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
 	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outlineMenuItem_cb);
 	
 
 	GLOBAL.menuMessageWindow = IupItem (toStringz( GLOBAL.languageItems["message"] ), null);
-	IupSetAttribute(GLOBAL.menuMessageWindow, "KEY", "M");
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
 	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
 
 	// Project
 	item_newProject= IupItem (toStringz( GLOBAL.languageItems["newprj"] ), null);
-	IupSetAttribute(item_newProject, "KEY", "N");
 	IupSetAttribute(item_newProject, "IMAGE", "icon_newprj");
 	IupSetCallback(item_newProject, "ACTION", cast(Icallback)&newProject_cb);
 
 	item_openProject = IupItem (toStringz( GLOBAL.languageItems["openprj"] ), null);
-	IupSetAttribute(item_openProject, "KEY", "O");
 	IupSetAttribute(item_openProject, "IMAGE", "icon_openprj");
 	IupSetCallback(item_openProject, "ACTION", cast(Icallback)&openProject_cb);
 
 	Ihandle* item_import = IupItem (toStringz( GLOBAL.languageItems["importprj"] ), null);
-	//IupSetAttribute(item_exit, "KEY", "x");
 	IupSetAttribute(item_import, "IMAGE", "icon_importprj");
 	IupSetCallback(item_import, "ACTION", cast(Icallback)&importProject_cb);
 	
 
 	item_closeProject = IupItem (toStringz( GLOBAL.languageItems["closeprj"] ), null);
-	IupSetAttribute(item_closeProject, "KEY", "C");
 	IupSetAttribute(item_closeProject, "IMAGE", "icon_clear");
 	IupSetCallback(item_closeProject, "ACTION", cast(Icallback)&closeProject_cb);
 
 	Ihandle* item_closeAllProject = IupItem (toStringz( GLOBAL.languageItems["closeallprj"] ), null);
-	IupSetAttribute(item_closeAllProject, "KEY", "j");
 	IupSetAttribute(item_closeAllProject, "IMAGE", "icon_clearall");
 	IupSetCallback(item_closeAllProject, "ACTION", cast(Icallback)&closeAllProject_cb);
 	
 	item_saveProject = IupItem (toStringz( GLOBAL.languageItems["saveprj"] ), null);
-	IupSetAttribute(item_saveProject, "KEY", "M");
 	IupSetCallback(item_saveProject, "ACTION", cast(Icallback)&saveProject_cb);
 
 	Ihandle* item_saveAllProject = IupItem (toStringz( GLOBAL.languageItems["saveallprj"] ), null);
-	IupSetAttribute(item_saveAllProject, "KEY", "M");
 	IupSetCallback(item_saveAllProject, "ACTION", cast(Icallback)&saveAllProject_cb);
 
 	item_projectProperties = IupItem(toStringz( GLOBAL.languageItems["properties"] ), null);
 	IupSetAttribute(item_projectProperties, "IMAGE", "icon_properties");
-	IupSetAttribute(item_projectProperties, "KEY", "P");
 	IupSetCallback(item_projectProperties, "ACTION", cast(Icallback)&projectProperties_cb);
 
 	// Build
 	item_compile = IupItem( toStringz( GLOBAL.languageItems["compile"] ), null );
-	IupSetAttribute( item_compile, "KEY", "N" );
 	IupSetAttribute(item_compile, "IMAGE", "icon_compile");
 	IupSetCallback( item_compile, "ACTION", cast(Icallback)&compile_cb );
 
 	item_buildrun = IupItem( toStringz( GLOBAL.languageItems["compilerun"] ), null );
-	IupSetAttribute( item_buildrun, "KEY", "Z" );
 	IupSetAttribute(item_buildrun, "IMAGE", "icon_buildrun");
 	IupSetCallback( item_buildrun, "ACTION", cast(Icallback)&buildrun_cb );
 	
 	item_run = IupItem (toStringz( GLOBAL.languageItems["run"] ), null);
-	IupSetAttribute(item_run, "KEY", "O");
 	IupSetAttribute(item_run, "IMAGE", "icon_run");
 	IupSetCallback( item_run, "ACTION", cast(Icallback)&run_cb );
 
 	// Debug
 	item_runDebug = IupItem (toStringz( GLOBAL.languageItems["rundebug"] ), null);
-	IupSetAttribute(item_runDebug, "KEY", "R");
 	IupSetAttribute(item_runDebug, "IMAGE", "icon_debugrun");
 	IupSetCallback( item_runDebug, "ACTION", cast(Icallback)&runDebug_cb );
 
 	item_withDebug = IupItem (toStringz( GLOBAL.languageItems["compiledebug"] ), null);
-	IupSetAttribute(item_withDebug, "KEY", "C");
 	IupSetAttribute(item_withDebug, "IMAGE", "icon_debugbuild");
 	IupSetCallback( item_withDebug, "ACTION", cast(Icallback)&compileWithDebug_cb );
 	
 	item_BuildwithDebug = IupItem (toStringz( GLOBAL.languageItems["builddebug"] ), null);
-	IupSetAttribute(item_BuildwithDebug, "KEY", "B");
 	IupSetAttribute(item_BuildwithDebug, "IMAGE", "icon_debugbuild");
 	IupSetCallback( item_BuildwithDebug, "ACTION", cast(Icallback)&buildAllWithDebug_cb );
 	
 
 	item_buildAll = IupItem (toStringz( GLOBAL.languageItems["buildprj"] ), null);
-	IupSetAttribute(item_buildAll, "KEY", "M");
 	IupSetAttribute(item_buildAll, "IMAGE", "icon_rebuild");
 	IupSetCallback( item_buildAll, "ACTION", cast(Icallback)&buildAll_cb );
 
 	item_quickRun = IupItem(toStringz( GLOBAL.languageItems["quickrun"] ), null);
 	IupSetAttribute( item_quickRun, "IMAGE", "icon_quickrun" );
-	IupSetAttribute( item_quickRun, "KEY", "P" );
 	IupSetCallback( item_quickRun, "ACTION", cast(Icallback)&quickRun_cb );
 
 	// Option
@@ -426,13 +388,11 @@ void createMenu()
 	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, null  );
 	item_tool = IupSubmenu( toStringz( GLOBAL.languageItems["tools"] ), toolsSubMenu );
 	IupSetAttribute(item_tool, "IMAGE", "icon_tools");
-	IupSetAttribute(item_tool, "KEY", "T");
 
 
 
 	item_preference = IupItem (toStringz( GLOBAL.languageItems["preference"] ), null);
 	IupSetAttribute(item_preference, "IMAGE", "icon_preference");
-	IupSetAttribute(item_preference, "KEY", "P");
 	IupSetCallback(item_preference, "ACTION", cast(Icallback)&preference_cb);
 	
 	
@@ -465,7 +425,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.235\nBy Kuan Hsu (Taiwan)\n2016.12.15" );
+		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.236\nBy Kuan Hsu (Taiwan)\n2016.12.18" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -545,22 +505,14 @@ void createMenu()
 							null );
 
 	mainMenu1_File = IupSubmenu( toStringz( GLOBAL.languageItems["file"] ), file_menu );
-	IupSetAttribute( mainMenu1_File, "KEY" ,"F" );
 	mainMenu2_Edit = IupSubmenu( toStringz( GLOBAL.languageItems["edit"] ), edit_menu );
-	IupSetAttribute( mainMenu2_Edit, "KEY" ,"E" );
 	mainMenu3_Search = IupSubmenu( toStringz( GLOBAL.languageItems["search"] ), search_menu );
-	IupSetAttribute( mainMenu3_Search, "KEY" ,"S" );
 	mainMenu4_View = IupSubmenu( toStringz( GLOBAL.languageItems["view"] ), view_menu );
-	IupSetAttribute( mainMenu4_View, "KEY" ,"V" );
 	mainMenu5_Project = IupSubmenu( toStringz( GLOBAL.languageItems["prj"] ), project_menu );
-	IupSetAttribute( mainMenu5_Project, "KEY" ,"P" );	
 	mainMenu6_Build = IupSubmenu( toStringz( GLOBAL.languageItems["build"] ), build_menu );
-	IupSetAttribute( mainMenu6_Build, "KEY" ,"B" );	
 	mainMenu7_Debug = IupSubmenu( toStringz( GLOBAL.languageItems["debug"] ), debug_menu );
-	IupSetAttribute( mainMenu7_Debug, "KEY" ,"D" );
 	version( linux ) IupSetAttribute( mainMenu7_Debug, "ACTIVE" ,"NO" );
 	mainMenu8_Option = IupSubmenu( toStringz( GLOBAL.languageItems["options"] ), option_menu );
-	IupSetAttribute( mainMenu8_Option, "KEY" ,"O" );	
 
 	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu8_Option, null );
 	IupSetAttribute( menu, "GAP", "30" );
@@ -678,7 +630,7 @@ extern(C)
 	
 	int openFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( "Open File...", "All Files|*.*|FreeBASIC Sources|*.bas|FreeBASIC Includes|*.bi" );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["open"] ~ "...", GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|All Files|*.*" );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		//Util.substitute( fileName, "\\", "/" );
@@ -730,7 +682,7 @@ extern(C)
 		IupSetAttribute( dlg, "DIALOGTYPE", "OPEN" );
 		IupSetAttribute( dlg, "TITLE", toStringz( GLOBAL.languageItems["openlanguage"] ) );
 		IupSetAttribute( dlg, "DIRECTORY", "settings/" );
-		IupSetAttribute( dlg, "EXTFILTER", "Language File|*.lng" );
+		IupSetAttribute( dlg, "EXTFILTER", toStringz( GLOBAL.languageItems["lngfile"] ~ "|*.lng|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|" ) );
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 		
 		if( IupGetInt( dlg, "STATUS") == 0 )
@@ -746,9 +698,9 @@ extern(C)
 					GLOBAL.language = _fp.name;
 					
 					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
-					IupSetAttribute( messageDlg, "VALUE", toStringz( "Need Restart To Change Language." ) );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );					
+					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,BUTTONDEFAULT=1" );
+					IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["needrestart"] ) );
+					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 				}
 			}
 		}
@@ -1024,10 +976,10 @@ extern(C)
 		if( cSci !is null )
 		{
 			// Open Dialog Window
-			scope gotoLineDlg = new CSingleTextDialog( -1, -1, "Goto Line...", "Line:", null, null, false );
+			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["goto"] ~ "...", GLOBAL.languageItems["line"] ~ ":", null, null, false );
 			char[] lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
-			if( lineNum.length) actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum )  );
+			if( lineNum.length) actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
 		}
 	}
 	

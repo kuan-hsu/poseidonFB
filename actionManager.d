@@ -646,7 +646,16 @@ struct ScintillaAction
 
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
-				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
+				scope cStringDocument = new CstringConvert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+				scope cStringTitle = new CstringConvert( GLOBAL.languageItems["quest"]  );
+				
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
+				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+				IupSetAttribute( messageDlg, "TITLE", cStringTitle.toStringz );
+				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				//int button = IupAlarm( toStringz( GLOBAL.languageItems["alarm"] ), GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] ), toStringz( GLOBAL.languageItems["yes"] ), toStringz( GLOBAL.languageItems["no"] ), toStringz( GLOBAL.languageItems["cancel"] ) );
+				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
 				if( button == 3 ) return IUP_IGNORE;
 				if( button == 1 )
 				{
@@ -684,7 +693,17 @@ struct ScintillaAction
 				if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 				{
 					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
-					int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
+					
+					scope cStringDocument = new CstringConvert( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+					scope cStringTitle = new CstringConvert( GLOBAL.languageItems["quest"]  );
+					
+					Ihandle* messageDlg = IupMessageDlg();
+					IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
+					IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+					IupSetAttribute( messageDlg, "TITLE", cStringTitle.toStringz );					
+					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
+					int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
+					//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 					if( button == 3 )
 					{
 						break;
@@ -747,7 +766,17 @@ struct ScintillaAction
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
 				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
-				int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
+				
+				scope cStringDocument = new CstringConvert( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+				scope cStringTitle = new CstringConvert( GLOBAL.languageItems["quest"]  );
+				
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
+				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+				IupSetAttribute( messageDlg, "TITLE", cStringTitle.toStringz );						
+				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
+				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
+				//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 				if( button == 3 )
 				{
 					bCancel = true;
@@ -842,7 +871,7 @@ struct ScintillaAction
 
 		try
 		{
-			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"] ~ "...", "FreeBASIC Sources|*.bas|FreeBASIC Inculdes|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"] ~ "...",  GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )

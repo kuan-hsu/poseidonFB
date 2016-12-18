@@ -21,15 +21,17 @@ class CShortCutDialog : CBaseDialog
 		foreach( char[] s; Util.split( listText[30..length], "+" ) )
 		{
 			s = Util.trim( s );
-			if( s.length ) shortKeyValue ~= ( s ~ "+" );
+			if( s.length )
+			{
+				if( shortKeyValue.length ) shortKeyValue ~= ( " + " ~ s ); else shortKeyValue ~= s;
+			}
 		}
-		if( shortKeyValue.length > 1 ) shortKeyValue = shortKeyValue[0..length-1];
 
-		Ihandle* label0 = IupLabel( toStringz( "Short Key Name: " ~ GLOBAL.shortKeys[item-1].name ) );
+		Ihandle* label0 = IupLabel( toStringz( GLOBAL.languageItems["shortcutname"] ~ ": " ~ GLOBAL.shortKeys[item-1].name ) );
 		IupSetHandle( "labelKeyName", label0 );
 
 		
-		Ihandle* label1 = IupLabel( toStringz( "Current Key: " ~ shortKeyValue ) );
+		Ihandle* label1 = IupLabel( toStringz( GLOBAL.languageItems["shortcutkey"] ~ ": " ~ shortKeyValue ) );
 
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
@@ -78,7 +80,7 @@ class CShortCutDialog : CBaseDialog
 	public:
 	this( int w, int h, int item, char[] listText, bool bResize = false, char[] parent = null )
 	{
-		super( w, h, "Config Short Key", bResize, parent );
+		super( w, h, GLOBAL.languageItems["shortcut"], bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
@@ -132,7 +134,7 @@ extern(C) // Callback for CSingleTextDialog
 		{
 			if( sk.keyValue == value )
 			{
-				IupMessage( "Alarm", toStringz( "The same key value with \"" ~ sk.name ~ "\"" ) );
+				IupMessage( "Alarm", toStringz( GLOBAL.languageItems["samekey"] ~ " \"" ~ sk.name ~ "\"" ) );
 				return IUP_CONTINUE;
 			}
 		}

@@ -430,7 +430,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 	int CProjectPropertiesDialog_btnCompilerPath_cb( Ihandle* ih ) 
 	{
-		scope fileSecectDlg = new CFileDlg( "FreeBasic Path", "Execute File|*.exe" );
+		scope fileSecectDlg = new CFileDlg( "FreeBasic Path", GLOBAL.languageItems["exefile"] ~ "|*.exe" );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )

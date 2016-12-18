@@ -60,23 +60,29 @@ class CScanner
 					{
 						if( data[i] == '/' )
 						{
-							if( data[i+1] == '\'' ) // Check if /'
+							if( i < data.length - 1 )
 							{
-								commentCount ++;
-								continue;
+								if( data[i+1] == '\'' ) // Check if /'
+								{
+									commentCount ++;
+									continue;
+								}
 							}
 						}
 						else if( data[i] == '\'' ) // '
 						{
-							if( data[i+1] == '/' ) // /
+							if( i < data.length - 1 )
 							{
-								commentCount --;
-
-								if( commentCount == 0 )
+								if( data[i+1] == '/' ) // /
 								{
-									bCommentBlockFlag = false;
-									i++;
-									break;
+									commentCount --;
+
+									if( commentCount == 0 )
+									{
+										bCommentBlockFlag = false;
+										i++;
+										break;
+									}
 								}
 							}
 						}
@@ -98,11 +104,14 @@ class CScanner
 					{
 						if( data[i] == '/' )
 						{
-							if( data[i+1] == '\'' ) // Check if /'
+							if( i < data.length - 1 )
 							{
-								bCommentBlockFlag = true;
-								commentCount = 1;
-								continue;
+								if( data[i+1] == '\'' ) // Check if /'
+								{
+									bCommentBlockFlag = true;
+									commentCount = 1;
+									continue;
+								}
 							}
 						}
 					}
@@ -115,10 +124,7 @@ class CScanner
 					{
 						while( ++i < data.length )
 						{
-							if( data[i] == '\n' )
-							{
-								break;
-							}
+							if( data[i] == '\n' ) break;
 						}
 					}
 				}
@@ -170,10 +176,13 @@ class CScanner
 						break;
 
 					case '-':
-						if( results[length-1].tok == TOK.Tassign )
+						if( results.length > 0 )
 						{
-							identifier ~= data[i];
-							break;
+							if( results[$-1].tok == TOK.Tassign )
+							{
+								identifier ~= data[i];
+								break;
+							}
 						}
 						/*
 						if( i < data.length - 1 )
@@ -277,9 +286,9 @@ class CScanner
 						//
 						if( data[i] == '\n' )
 						{
-							if( results.length > 0 )
+							if( results.length )
 							{
-								if( results[length-1].tok != TOK.Tunderline )
+								if( results[$-1].tok != TOK.Tunderline )
 								{
 									// Keep the TOK.Teol just only one
 									if( results[length-1].tok != TOK.Teol )
@@ -358,7 +367,6 @@ class CScanner
 				Stdout( "Teol");
 				Stdout( " #");
 				Stdout( t.lineNumber ).newline;
-
 			}
 		}
 	}

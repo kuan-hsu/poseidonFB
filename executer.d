@@ -641,7 +641,10 @@ struct ExecuterAction
 					}
 					else
 					{
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].name;
+						if( GLOBAL.projectManager[activePrjName].targetName.length )
+							command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].targetName;
+						else
+							command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].name;
 					}
 					break;
 				}
@@ -666,11 +669,17 @@ struct ExecuterAction
 			{
 				version( Windows )
 				{
-					command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
+					if( GLOBAL.projectManager[activePrjName].targetName.length )
+						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName ~ ".exe";
+					else
+						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
 				}
 				else
 				{
-					command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
+					if( GLOBAL.projectManager[activePrjName].targetName.length )
+						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName;
+					else
+						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
 				}
 			}
 		}
