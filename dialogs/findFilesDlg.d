@@ -137,7 +137,7 @@ class CFindInFilesDialog : CBaseDialog
 
 	public:
 
-	int			searchRule = 3;
+	int			searchRule = 6;
 	
 	this( int w, int h, char[] title, char[] findWhat = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
 	{
@@ -215,15 +215,15 @@ extern(C) // Callback for CFindInFilesDialog
 
 	private int CFindInFilesDialog_toggleAction_cb( Ihandle* ih, int state )
 	{
-		if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
+		if( ih == IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ) )
 		{
-			if( state == 1 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule | 1;
+			if( state == 1 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule | 4;
 			if( state == 0 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule & 2;
 		}
 		else //"Whole Word"
 		{
 			if( state == 1 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule | 2;
-			if( state == 0 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule & 1;
+			if( state == 0 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule & 4;
 		}
 
 		return IUP_DEFAULT;
@@ -282,8 +282,8 @@ extern(C) // Callback for CFindInFilesDialog
 				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_togglePrj" ), "VALUE" ) ) == "ON" ) _findCase = 3;
 				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggletoggleAllPrj" ), "VALUE" ) ) == "ON" ) _findCase = 4;
 
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleWholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 4;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleWholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
+				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 4;
 
 
 				if( buttonIndex == 1 )

@@ -90,6 +90,7 @@ class CSearchDialog : CBaseDialog
 		
 		Ihandle* toggleCaseSensitive = IupToggle( cStrings[8].toStringz, null );
 		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES" );
+		IupSetHandle( "toggleCaseSensitive", toggleCaseSensitive );
 		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &CSearchDialog_toggleAction_cb );
 
 		Ihandle* toggleWholeWord = IupToggle( cStrings[9].toStringz, null );
@@ -206,7 +207,7 @@ class CSearchDialog : CBaseDialog
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog
 	{
-		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord ) );
+		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord.dup ) );
 		IupShow( _dlg );
 		return null;
 	}	
@@ -219,7 +220,7 @@ class CSearchDialog : CBaseDialog
 
 	void setStatusBar( char[] text )
 	{
-		IupSetAttribute( labelStatus, "TITLE", toStringz( text ) );
+		IupSetAttribute( labelStatus, "TITLE", toStringz( text.dup ) );
 	}
 }
 
@@ -250,7 +251,8 @@ extern(C) // Callback for CSingleTextDialog
 
 	private int CSearchDialog_toggleAction_cb( Ihandle* ih, int state )
 	{
-		if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
+		if( IupGetHandle( "toggleCaseSensitive" ) == ih )
+		//if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
 		{
 			if( state == 1 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule | 4;
 			if( state == 0 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule & 2;

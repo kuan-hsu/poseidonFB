@@ -1450,8 +1450,8 @@ struct SearchAction
 	*/	
 
 	public:
-	const int MATCHCASE = 2;
-	const int WHOLEWORD = 4;
+	const int WHOLEWORD = 2;
+	const int MATCHCASE = 4;
 	
 	static int search( Ihandle* iupSci, char[] findText, int searchRule, bool bForward = true )
 	{
