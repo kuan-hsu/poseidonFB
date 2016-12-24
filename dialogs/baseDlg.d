@@ -9,18 +9,20 @@ class CBaseDialog
 
 	import tango.stdc.stringz, Integer = tango.text.convert.Integer;
 	
-	Ihandle*	_dlg;
-	Ihandle*	btnOK, btnCANCEL;//, btnAPPLY;
-	char*		_TITLETEXT;
-
-
+	Ihandle*			_dlg;
+	Ihandle*			btnOK, btnCANCEL;//, btnAPPLY;
+	CstringConvert[3]	cStrings;
+	
 	Ihandle* createDlgButton()
 	{
-		btnOK = IupButton( "OK", null );
+		cStrings[1] = new CstringConvert( GLOBAL.languageItems["ok"] );
+		cStrings[2] = new CstringConvert( GLOBAL.languageItems["cancel"] );
+		
+		btnOK = IupButton( cStrings[1].toStringz, null );
 		IupSetHandle( "btnOK", btnOK );
 		IupSetAttributes( btnOK, "SIZE=40x20");//,IMAGE=IUP_ActionOk" );
 		
-		btnCANCEL = IupButton( "Cancel", null );
+		btnCANCEL = IupButton( cStrings[2].toStringz, null );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
 		IupSetAttributes( btnCANCEL, "SIZE=40x20" );// ,IMAGE=IUP_ActionCancel
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
@@ -47,9 +49,8 @@ class CBaseDialog
 	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
 	{
 		_dlg = IupDialog( null );
-		//IupSetAttribute( _dlg, "TITLE", toStringz( title.dup ) );
-		_TITLETEXT = tools.getCString( title.dup );
-		IupSetAttribute( _dlg, "TITLE", _TITLETEXT );
+		cStrings[0] = new CstringConvert( title );
+		IupSetAttribute( _dlg, "TITLE", cStrings[0].toStringz );
 
 		char[] size = Integer.toString( w ) ~ "x" ~ Integer.toString( h );
 		if( w < 0 || h < 0 ) IupSetAttribute( _dlg, "RASTERSIZE", "NULL" ); else IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );
@@ -66,7 +67,6 @@ class CBaseDialog
 		IupSetHandle( "btnCANCEL", null );
 		IupSetHandle( "btnOK", null );
 		IupDestroy( _dlg );
-		tools.freeCString( _TITLETEXT );
 	}
 
 	char[] show( int x, int y )

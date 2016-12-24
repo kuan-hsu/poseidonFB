@@ -425,7 +425,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.237\nBy Kuan Hsu (Taiwan)\n2016.12.19" );
+		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.238\nBy Kuan Hsu (Taiwan)\n2016.12.24" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -630,7 +630,7 @@ extern(C)
 	
 	int openFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["open"] ~ "...", GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|All Files|*.*" );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"] ~ "...", GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|" );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		//Util.substitute( fileName, "\\", "/" );
@@ -698,8 +698,9 @@ extern(C)
 					GLOBAL.language = _fp.name;
 					
 					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,BUTTONDEFAULT=1" );
+					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
 					IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["needrestart"] ) );
+					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["message"] ) );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 				}
 			}
@@ -976,7 +977,7 @@ extern(C)
 		if( cSci !is null )
 		{
 			// Open Dialog Window
-			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["goto"] ~ "...", GLOBAL.languageItems["line"] ~ ":", null, null, false );
+			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"] ~ "...", GLOBAL.languageItems["line"] ~ ":", null, null, false );
 			char[] lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
 			if( lineNum.length) actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
@@ -1093,7 +1094,7 @@ extern(C)
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 		*/
-		scope dlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["preference"], true );
+		scope dlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"], true );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
@@ -1113,7 +1114,7 @@ extern(C)
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 		*/
-		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["prjproperties"], true, true );
+		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"], true, true );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
@@ -1280,7 +1281,7 @@ extern(C)
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 		*/
-		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["prjproperties"], true, false );
+		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"], true, false );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;

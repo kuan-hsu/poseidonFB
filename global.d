@@ -242,38 +242,38 @@ struct GLOBAL
 		
 		
 		GLOBAL.languageItems["file"] = "File";
-		GLOBAL.languageItems["new"] = "New";
-		GLOBAL.languageItems["open"] = "Open";
-		GLOBAL.languageItems["save"] = "Save";
-		GLOBAL.languageItems["saveas"] = "Save As";
-		GLOBAL.languageItems["saveall"] = "Save All";
-		GLOBAL.languageItems["close"] = "Close";
-		GLOBAL.languageItems["closeall"] = "Close All";
-		GLOBAL.languageItems["recentfiles"] = "Recent Files";
-		GLOBAL.languageItems["recentprjs"] = "Recent Projects";
-		GLOBAL.languageItems["clearall"] = "Clear All";
-		GLOBAL.languageItems["exit"] = "Exit";
+			GLOBAL.languageItems["new"] = "New";
+			GLOBAL.languageItems["open"] = "Open";
+			GLOBAL.languageItems["save"] = "Save";
+			GLOBAL.languageItems["saveas"] = "Save As";
+			GLOBAL.languageItems["saveall"] = "Save All";
+			GLOBAL.languageItems["close"] = "Close";
+			GLOBAL.languageItems["closeall"] = "Close All";
+			GLOBAL.languageItems["recentfiles"] = "Recent Files";
+			GLOBAL.languageItems["recentprjs"] = "Recent Projects";
+			GLOBAL.languageItems["clearall"] = "Clear All";
+			GLOBAL.languageItems["exit"] = "Exit";
 			
 		GLOBAL.languageItems["edit"] = "Edit";
-		GLOBAL.languageItems["redo"] = "Redo";
-		GLOBAL.languageItems["undo"] = "Undo";
-		GLOBAL.languageItems["cut"] = "Cut";
-		GLOBAL.languageItems["copy"] = "Copy";
-		GLOBAL.languageItems["paste"] = "Paste";
-		GLOBAL.languageItems["commentline"] = "(Un)Comment Line";
-		GLOBAL.languageItems["selectall"] = "Select All";
+			GLOBAL.languageItems["redo"] = "Redo";
+			GLOBAL.languageItems["undo"] = "Undo";
+			GLOBAL.languageItems["cut"] = "Cut";
+			GLOBAL.languageItems["copy"] = "Copy";
+			GLOBAL.languageItems["paste"] = "Paste";
+			GLOBAL.languageItems["commentline"] = "(Un)Comment Line";
+			GLOBAL.languageItems["selectall"] = "Select All";
 			
 		GLOBAL.languageItems["search"] = "Search";
-		GLOBAL.languageItems["findreplace"] = "Find / Replace";
-		GLOBAL.languageItems["findnext"] = "Find Next";
-		GLOBAL.languageItems["findprev"] = "Find Previous";
-		GLOBAL.languageItems["findreplacefiles"] = "Find / Replace In Files";
-		GLOBAL.languageItems["goto"] = "Goto Line";
-			GLOBAL.languageItems["line"] = "Line";
+			GLOBAL.languageItems["findreplace"] = "Find/Replace";
+			GLOBAL.languageItems["findnext"] = "Find Next";
+			GLOBAL.languageItems["findprev"] = "Find Previous";
+			GLOBAL.languageItems["findreplacefiles"] = "Find/Replace In Files";
+			GLOBAL.languageItems["goto"] = "Goto Line";
+				GLOBAL.languageItems["line"] = "Line";
 
 		GLOBAL.languageItems["view"] = "View";
-		GLOBAL.languageItems["outline"] = "Outline";
-		GLOBAL.languageItems["message"]= "Message";
+			GLOBAL.languageItems["outline"] = "Outline";
+			GLOBAL.languageItems["message"]= "Message";
 			
 		GLOBAL.languageItems["prj"] = "Project";
 			GLOBAL.languageItems["newprj"] = "New Project";
@@ -288,9 +288,11 @@ struct GLOBAL
 			GLOBAL.languageItems["openinexplorer"] = "Open In Explorer";
 			GLOBAL.languageItems["addinprj"]= "Add File(s)";
 			GLOBAL.languageItems["removefromprj"] = "Remove From Project";
-			GLOBAL.languageItems["rename=Rename"] = "File";
+			GLOBAL.languageItems["rename"] = "Rename File";
 			GLOBAL.languageItems["newfile"] = "New File";
+				GLOBAL.languageItems["filename"] = "File Name";
 			GLOBAL.languageItems["newfolder"] = "New Folder";
+				GLOBAL.languageItems["foldername"] = "Folder Name";
 			GLOBAL.languageItems["addfile"] = "Add file(s)";
 		
 		GLOBAL.languageItems["build"] = "Build";
@@ -380,20 +382,30 @@ struct GLOBAL
 							GLOBAL.languageItems["selalpha"] = "Selection Alpha";
 								GLOBAL.languageItems["alphatip"] = "Set 255 To Disable Alpha";
 					GLOBAL.languageItems["shortcut"] = "Short Cut";
-						//'findreplace=Find / Replace
-						//'findreplacefiles=Find / Replace In Files
-						//'findnext=Find Next
-						//'finprev=Find Previous
-						//'goto=Goto Line
-						GLOBAL.languageItems["gotodef"] = "Goto Definition";
-						GLOBAL.languageItems["leftwindow"] = "On/Off Left Window";
-						GLOBAL.languageItems["bottomwindow"] = "On/Off Bottom Window";
-						GLOBAL.languageItems["showtype"] = "Show Type";
-						GLOBAL.languageItems["reparse"] = "Reparse";
-						GLOBAL.languageItems["nexttab"] = "Next Tab";
-						GLOBAL.languageItems["prevtab"] = "Previous Tab";
-						GLOBAL.languageItems["newtab"] = "New Tab";
-						GLOBAL.languageItems["autocomplete"] = "Auto Complete";
+						GLOBAL.languageItems["sc_findreplace"] = "Find/Replace";
+						GLOBAL.languageItems["sc_findreplacefiles"] = "Find/Replace In Files";
+						GLOBAL.languageItems["sc_findnext"] = "Find Next";
+						GLOBAL.languageItems["sc_finprev"] = "Find Previous";
+						GLOBAL.languageItems["sc_goto"] = "Goto Line";
+						GLOBAL.languageItems["sc_undo"] = "Undo";
+						GLOBAL.languageItems["sc_redo"] = "Redo";
+						GLOBAL.languageItems["sc_gotodef"] = "Goto Definition";
+						GLOBAL.languageItems["sc_quickrun"] = "Quick Run";
+						GLOBAL.languageItems["sc_run"] = "Run";
+						GLOBAL.languageItems["sc_compile"] = "Compile";
+						GLOBAL.languageItems["sc_build"] = "Build Project";
+						GLOBAL.languageItems["sc_leftwindow"] = "On/Off Left Window";
+						GLOBAL.languageItems["sc_bottomwindow"] = "On/Off Bottom Window";
+						GLOBAL.languageItems["sc_showtype"] = "Show Type";
+						GLOBAL.languageItems["sc_reparse"] = "Reparse";
+						GLOBAL.languageItems["sc_save"] = "Save File";
+						GLOBAL.languageItems["sc_saveall"] = "Save All";
+						GLOBAL.languageItems["sc_close"] = "Close File";
+						GLOBAL.languageItems["sc_nexttab"] = "Next Tab";
+						GLOBAL.languageItems["sc_prevtab"] = "Previous Tab";
+						GLOBAL.languageItems["sc_newtab"] ="New Tab";
+						GLOBAL.languageItems["sc_autocomplete"] = "Auto Complete";
+						GLOBAL.languageItems["sc_compilerun"] = "Compile File And Run";
 					GLOBAL.languageItems["keywords"] = "Keywords";
 						GLOBAL.languageItems["keyword0"] = "Keyword0";
 						GLOBAL.languageItems["keyword1"] = "Keyword1";
@@ -411,7 +423,7 @@ struct GLOBAL
 		GLOBAL.languageItems["outline"] = "Outline";
 			GLOBAL.languageItems["collapse"] = "Collapse";
 			GLOBAL.languageItems["showpr"] = "Change Outline Node Title";
-			GLOBAL.languageItems["refresh"] = "Refresh Parser";
+			GLOBAL.languageItems["refresh"] = "Refresh";
 			GLOBAL.languageItems["searchanyword"] = "Search Any Word";
 			GLOBAL.languageItems["hide"] = "Hide";
 
@@ -470,21 +482,73 @@ struct GLOBAL
 		GLOBAL.languageItems["document"] = "Document";
 		GLOBAL.languageItems["alldocument"] = "All Document";
 		GLOBAL.languageItems["allproject"] = "All Project";
+		GLOBAL.languageItems["status"] = "Status Bar";
 		
 		// shortcut
 		GLOBAL.languageItems["shortcutname"] = "ShortCut Name";
 		GLOBAL.languageItems["shortcutkey"] = "Current ShortCut Keys";
 		
-		// args window
-		GLOBAL.languageItems["argtitle"] = "Compiler Options / EXE Arguments";
+		// debug
+		GLOBAL.languageItems["runcontinue"] = "Run/Continue";
+		GLOBAL.languageItems["stop"] = "Stop";
+		GLOBAL.languageItems["step"] = "Step";
+		GLOBAL.languageItems["next"] = "Next";
+		GLOBAL.languageItems["return"] = "Return";
+		GLOBAL.languageItems["until"] = "Until";
+		GLOBAL.languageItems["terminate"] = "Terminate";
+		GLOBAL.languageItems["bp"] = "Breakpoints";
+		GLOBAL.languageItems["variable"] = "Variables";
+			GLOBAL.languageItems["watchlist"] = "Watch List";
+				GLOBAL.languageItems["add"] = "Add";
+				GLOBAL.languageItems["remove"] = "Remove";
+				GLOBAL.languageItems["removeall"] = "Remove All";
+			GLOBAL.languageItems["addtowatch"] = "Add To Watchlist";
+			GLOBAL.languageItems["locals"] = "Locals";
+			GLOBAL.languageItems["args"] = "Arguments";
+			GLOBAL.languageItems["shared"] = "Shared";
+		GLOBAL.languageItems["register"] = "Registers";
+
+		// caption
+		GLOBAL.languageItems["caption_new"] = "New";
+		GLOBAL.languageItems["caption_open"] = "Open";
+		GLOBAL.languageItems["caption_saveas"] = "Save As";
+		GLOBAL.languageItems["caption_cut"] = "Cut";
+		GLOBAL.languageItems["caption_copy"] = "Copy";
+		GLOBAL.languageItems["caption_paste"] = "Paste";
+		GLOBAL.languageItems["caption_selectall"] = "Select All";
+		GLOBAL.languageItems["caption_about"] = "About";
+		//GLOBAL.languageItems["caption_findreplace"] = "Find / Replace";
+		//GLOBAL.languageItems["caption_findreplacefiles"] = "Find / Replace In Files";
+		//GLOBAL.languageItems["caption_goto"] = "Goto Line";
+		GLOBAL.languageItems["caption_openprj"] = "Open Project";
+		GLOBAL.languageItems["caption_importprj"] = "Import Fbedit Project";
+		GLOBAL.languageItems["caption_prjproperties"] = "Project Properties";
+		GLOBAL.languageItems["caption_preference"] = "Preference";
+		GLOBAL.languageItems["caption_argtitle"] = "Compiler Options / EXE Arguments";
+		GLOBAL.languageItems["caption_debug"] = "Debug";
+		GLOBAL.languageItems["caption_optionhelp"] = "Compiler Options";
 		
 		// message
+		GLOBAL.languageItems["ok"] = "OK";
 		GLOBAL.languageItems["yes"] = "Yes";
 		GLOBAL.languageItems["no"] = "No";
 		GLOBAL.languageItems["cancel"] = "Cancel";
 		GLOBAL.languageItems["bechange"] = "has been changed, save it now?";
 		GLOBAL.languageItems["samekey"] = "The same key value with";
 		GLOBAL.languageItems["needrestart"] = "Need Restart To Change Language";
+		GLOBAL.languageItems["suredelete"] = "Are you sure to delete file?";
+		GLOBAL.languageItems["opened"] = "had already opened!";
+		GLOBAL.languageItems["existed"] = "had already existed!";
+		GLOBAL.languageItems["wrongext"] = "Wrong Ext Name!";
+		GLOBAL.languageItems[".poseidonbroken"] = "Project setup file loading error! Xml format may be broken!";
+		GLOBAL.languageItems[".poseidonlost"] = "had lost setting xml file!";
+		GLOBAL.languageItems["continueimport"] = "The Dir has poseidonFB Project File, Continue Import Anyway?";
+		GLOBAL.languageItems["compilefailure"] = "Compile Failure!";
+		GLOBAL.languageItems["compilewarning"] = "Compile Done, But Got Warnings!";
+		GLOBAL.languageItems["compileok"] = "Compile Success!";
+		GLOBAL.languageItems["cantundo"] = "This action can't be undo! Continue anyway?";
+		GLOBAL.languageItems["exitdebug1"] = "Exit debug right now?";
+		GLOBAL.languageItems["exitdebug2"] = "No debugging symbols found!! Exit debug!";
 		GLOBAL.languageItems["quest"] = "Quest";
 		GLOBAL.languageItems["alarm"] = "Alarm";
 		GLOBAL.languageItems["error"] = "Error";

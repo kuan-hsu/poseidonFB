@@ -714,7 +714,7 @@ extern(C) // Callback for CPreferenceDialog
 {
 	private int CPreferenceDialog_OpenCompileBinFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( "Open File..." );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"] ~ "..." );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )
@@ -733,7 +733,7 @@ extern(C) // Callback for CPreferenceDialog
 
 	private int CPreferenceDialog_OpenDebuggerBinFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( "Open File..." );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"] ~ "..." );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )

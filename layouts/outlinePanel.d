@@ -566,7 +566,7 @@ class COutline
 		cStrings[0] = new CstringConvert( GLOBAL.languageItems["collapse"] );
 		cStrings[1] = new CstringConvert( GLOBAL.languageItems["showpr"] );
 		cStrings[2] = new CstringConvert( GLOBAL.languageItems["searchanyword"] );
-		cStrings[3] = new CstringConvert( GLOBAL.languageItems["reparse"] );
+		cStrings[3] = new CstringConvert( GLOBAL.languageItems["sc_reparse"] );
 		cStrings[4] = new CstringConvert( GLOBAL.languageItems["hide"] );
 		
 		// Outline Toolbar

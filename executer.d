@@ -214,8 +214,9 @@ struct ExecuterAction
 				if( GLOBAL.compilerWindow == "ON" )
 				{
 					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR,TITLE=ERROR,BUTTONDEFAULT=1" );
-					IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Failure!" ) );
+					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+					IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilefailure"] ) );
+					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
 			}
@@ -228,8 +229,9 @@ struct ExecuterAction
 					if( GLOBAL.compilerWindow == "ON" )
 					{
 						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Success!" ) );
+						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compileok"] ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["message"] ) );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
 					
@@ -241,8 +243,9 @@ struct ExecuterAction
 					if( GLOBAL.compilerWindow == "ON" )
 					{
 						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=WARNING,BUTTONDEFAULT=1" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Done\nBut Got Warnings!" ) );
+						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilewarning"] ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
 				}
@@ -421,8 +424,9 @@ struct ExecuterAction
 					if( GLOBAL.compilerWindow == "ON" )
 					{
 						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR,TITLE=ERROR,BUTTONDEFAULT=1" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( "Build Failure!" ) );
+						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilefailure"] ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
 				}
@@ -435,8 +439,9 @@ struct ExecuterAction
 						if( GLOBAL.compilerWindow == "ON" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
-							IupSetAttribute( messageDlg, "VALUE", toStringz( "Build Success!" ) );
+							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+							IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compileok"] ) );
+							IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["message"] ) );
 							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 						}
 					}
@@ -447,8 +452,9 @@ struct ExecuterAction
 						if( GLOBAL.compilerWindow == "ON" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=WARNING,BUTTONDEFAULT=1" );
-							IupSetAttribute( messageDlg, "VALUE", toStringz( "Build Done\nBut Got Warnings!" ) );
+							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+							IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilewarning"] ) );
+							IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
 							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 						}
 					}
@@ -577,8 +583,9 @@ struct ExecuterAction
 				if( GLOBAL.compilerWindow == "ON" )
 				{
 					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR,TITLE=ERROR,BUTTONDEFAULT=1" );
-					IupSetAttribute( messageDlg, "VALUE", toStringz( "Compile Failure!" ) );
+					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+					IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilefailure"] ) );
+					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
 				

@@ -82,10 +82,10 @@ void createLayout()
 
 void createDialog()
 {
-	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, "Compiler Options" );
-	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["argtitle"] );
-	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["findreplace"] );
-	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["findreplacefiles"] );
+	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"]);
+	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"] );
+	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"] );
+	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"] );
 }
 
 extern(C)
@@ -253,28 +253,28 @@ extern(C)
 		{
 			switch( sk.name )
 			{
-				case "Quick Run":
+				case "quickrun":
 					if( sk.keyValue == c )
 					{
 						menu.quickRun_cb( null );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Run":
+				case "run":
 					if( sk.keyValue == c )
 					{
 						menu.run_cb( null );
 						return IUP_IGNORE;
 					}
 					break;
-				case "Build":
+				case "build":
 					if( sk.keyValue == c )
 					{
 						menu.buildAll_cb( null );
 						return IUP_IGNORE;
 					}
 					break;				
-				case "On/Off Left-side Window":
+				case "outlinewindow":
 					if( sk.keyValue == c ) 
 					{
 						menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
@@ -282,7 +282,7 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				case "On/Off Bottom-side Window":
+				case "messagewindow":
 					if( sk.keyValue == c )
 					{
 						menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
@@ -290,7 +290,7 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				case "Next Tab":
+				case "nexttab":
 					if( sk.keyValue == c )
 					{
 						int count = IupGetChildCount( GLOBAL.documentTabs );
@@ -305,7 +305,7 @@ extern(C)
 					}
 					break;
 
-				case "Previous Tab":
+				case "prevtab":
 					if( sk.keyValue == c )
 					{
 						int count = IupGetChildCount( GLOBAL.documentTabs );
@@ -319,7 +319,8 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;					
-				case "New Tab":
+
+				case "newtab":
 					if( sk.keyValue == c )
 					{
 						menu.newFile_cb( ih );

@@ -155,7 +155,7 @@ class CSearchDialog : CBaseDialog
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL" );
 
-		cStrings[17] = new CstringConvert( "Status Bar" );
+		cStrings[17] = new CstringConvert( GLOBAL.languageItems["status"] );
 		labelStatus = IupLabel( cStrings[17].toStringz );
 		
 		Ihandle* vBox = IupVbox( hBox00, hBox01, hBox02, frameOption, gbox, bottom, labelSEPARATOR, labelStatus, null );

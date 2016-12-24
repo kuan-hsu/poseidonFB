@@ -256,17 +256,21 @@ class CProjectTree
 	{
 		if( !setupDir.length )
 		{
-			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["openprj"], null, "DIR" );
+			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_openprj"] ~ "...", null, "DIR" );
 			setupDir = fileSelectDlg.getFileName();
 		}
 
 		if( !setupDir.length ) return false;
 
 		setupDir = Util.replace( setupDir, '\\', '/' );
-
+		
 		if( setupDir in GLOBAL.projectManager )
 		{
-			IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas already opened!" ) );
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems["opened"] ) );
+			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
 			return true;
 		}
 
@@ -284,7 +288,11 @@ class CProjectTree
 			if( !GLOBAL.projectManager[setupDir].dir.length )
 			{
 				GLOBAL.projectManager.remove( setupDir );
-				IupMessage( "ERROR", GLOBAL.cString.convert( "Project setup file loading error!!\nXml format may be broken!!" ) );
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+				IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems[".poseidonbroken"] ) );
+				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
 				return false;
 			}
 
@@ -292,7 +300,11 @@ class CProjectTree
 		}
 		else
 		{
-			IupMessage( "Error!", GLOBAL.cString.convert( "\"" ~ setupDir ~ "\"\nhas lost setting xml file!" ) );
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"] ) );
+			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
 			return false;
 		}
 
@@ -309,7 +321,7 @@ class CProjectTree
 
 	bool importFbEditProject()
 	{
-		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["importprj"],  GLOBAL.languageItems["fbeditfile"] ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"] ~ "|All Files|*.*" );
+		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"] ~ "...",  GLOBAL.languageItems["fbeditfile"] ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|" );
 		char[] fbpFullPath = fileSelectDlg.getFileName();
 
 		if( !fbpFullPath.length ) return false;
@@ -322,7 +334,11 @@ class CProjectTree
 
 		if( _dir in GLOBAL.projectManager )
 		{
-			IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ _dir ~ "\"\nhas already opened!" ) );
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ _dir ~ "\"\n" ~ GLOBAL.languageItems["opened"] ) );
+			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );				
 			return false;
 		}
 
@@ -331,8 +347,9 @@ class CProjectTree
 		if( poseidonFN.exists() )
 		{
 			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=WARNING,BUTTONDEFAULT=2,BUTTONS=YESNO" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( "The Dir has poseidonFB Project File,\nContinue Import Anyway?" ) );
+			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONDEFAULT=2,BUTTONS=YESNO" );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["continueimport"] ) );
+			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
 			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 
 			if( IupGetInt( messageDlg, "BUTTONRESPONSE") == 2 ) return false;
@@ -752,7 +769,7 @@ extern(C)
 	private int CProjectTree_NewFile_cb( Ihandle* ih )
 	{
 		// Open Dialog Window
-		scope test = new CSingleTextDialog( -1, -1, "Create New File", "File Name:", "100x", null, false, "MAIN_DIALOG", "icon_newfile" );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfile"], GLOBAL.languageItems["filename"] ~ ":", "120x", null, false, "MAIN_DIALOG", "icon_newfile" );
 		char[] fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )
@@ -791,7 +808,11 @@ extern(C)
 
 			if( fn.exists() )
 			{
-				IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ fileName ~ "\"\nhas already exist!" ) );
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fileName ~ "\"\n" ~ GLOBAL.languageItems["existed"] ) );
+				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
 				return IUP_DEFAULT;
 			}
 			
@@ -801,21 +822,33 @@ extern(C)
 				case "bas":
 					if( prjFilesFolderName != "Sources" )
 					{
-						IupMessage( "Wrong!", "Wrong Ext Name!!" );
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
 					break;
 				case "bi":
 					if( prjFilesFolderName != "Includes" )
 					{
-						IupMessage( "Wrong!", "Wrong Ext Name!!" );
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
 					break;
 				default:
 					if( prjFilesFolderName != "Others" )
 					{
-						IupMessage( "Wrong!", "Wrong Ext Name!!" );
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
 			}
@@ -855,7 +888,7 @@ extern(C)
 
 	private int CProjectTree_NewFolder_cb( Ihandle* ih )
 	{
-		scope test = new CSingleTextDialog( -1, -1, "Create New Folder", "Folder Name:", "100x", null, false );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfolder"], GLOBAL.languageItems["foldername"] ~ ":", "120x", null, false );
 		char[] folderName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( folderName.length )
@@ -888,13 +921,14 @@ extern(C)
 
 			switch( prjFilesFolderName )
 			{
-				case "Sources":		filter = "Source File|*.bas|All Files|*.*"; break;
-				case "Includes":	filter = "Include File|*.bi|All Files|*.*"; break;
-				default:			filter = "All Files|*.*"; break;
+				case "Sources":		filter = GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|"; break;
+				case "Includes":	filter = GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|"; break;
+				default:			filter = GLOBAL.languageItems["allfile"] ~ "|*.*|"; break;
 			}
-
-			scope fileSecectDlg = new CFileDlg( "Add File...", filter, "OPEN", "YES" );
+			
+			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["addfile"] ~ "...", filter, "OPEN", "YES" );
 			//char[] fullPath = fileSecectDlg.getFileName();
+			
 			foreach( char[] fullPath; fileSecectDlg.getFilesName() )
 			{
 				if( fullPath.length )
@@ -902,7 +936,11 @@ extern(C)
 					scope fn = new FilePath( fullPath.dup );
 					if( !fn.exists() )
 					{
-						IupMessage( "Alarm!", GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\nhas no exist!" ) );
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["existed"] ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
 					else
@@ -925,7 +963,11 @@ extern(C)
 						case "bas":
 							if( prjFilesFolderName != "Sources" )
 							{
-								IupMessage( "Wrong!", "Wrong Ext Name!!" );
+								Ihandle* messageDlg = IupMessageDlg();
+								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+								IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
+								IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 								return IUP_DEFAULT;
 							}
 							else
@@ -936,7 +978,11 @@ extern(C)
 						case "bi":
 							if( prjFilesFolderName != "Includes" )
 							{
-								IupMessage( "Wrong!", "Wrong Ext Name!!" );
+								Ihandle* messageDlg = IupMessageDlg();
+								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+								IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
+								IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 								return IUP_DEFAULT;
 							}
 							else
@@ -947,7 +993,11 @@ extern(C)
 						default:
 							if( prjFilesFolderName != "Others" )
 							{
-								IupMessage( "Wrong!", "Wrong Ext Name!!" );
+								Ihandle* messageDlg = IupMessageDlg();
+								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+								IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
+								IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 								return IUP_DEFAULT;
 							}
 							else
@@ -1087,8 +1137,9 @@ extern(C)
 		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
 
 		Ihandle* messageDlg = IupMessageDlg();
-		IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=Warning!,BUTTONS=OKCANCEL" );
-		IupSetAttribute( messageDlg, "VALUE", toStringz( "Are you sure to delete file?" ) );
+		IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONS=OKCANCEL" );
+		IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["suredelete"] ) );
+		IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
 		IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 1 )
@@ -1114,7 +1165,7 @@ extern(C)
 
 		char[] oldExt = fp.ext().dup;
 
-		scope test = new CSingleTextDialog( -1, -1, "File Rename", "File Name:", "100x", fp.name(), false );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["rename"], GLOBAL.languageItems["filename"] ~":", "120x", fp.name(), false );
 		char[] newFileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( newFileName.length )

@@ -213,12 +213,12 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetCallback( btnLibPathEdit, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Edit_cb );
 
 		Ihandle* btnLibPathUp = IupButton( null, null );
-		IupSetAttributes( btnLibPathUp, "IMAGE=IUP_ArrowUp,FLAT=YES" );
+		IupSetAttributes( btnLibPathUp, "IMAGE=icon_uparrow,FLAT=YES" );
 		IupSetHandle( "btnLibPathUp_Handle", btnLibPathUp );
 		IupSetCallback( btnLibPathUp, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Up_cb );
 		
 		Ihandle* btnLibPathDown = IupButton( null, null );
-		IupSetAttributes( btnLibPathDown, "IMAGE=IUP_ArrowDown,FLAT=YES" );
+		IupSetAttributes( btnLibPathDown, "IMAGE=icon_downarrow,FLAT=YES" );
 		IupSetHandle( "btnLibPathDown_Handle", btnLibPathDown );
 		IupSetCallback( btnLibPathDown, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Down_cb );
 
@@ -430,7 +430,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 	int CProjectPropertiesDialog_btnCompilerPath_cb( Ihandle* ih ) 
 	{
-		scope fileSecectDlg = new CFileDlg( "FreeBasic Path", GLOBAL.languageItems["exefile"] ~ "|*.exe" );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"] ~ "...", GLOBAL.languageItems["exefile"] ~ "|*.exe|" );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )

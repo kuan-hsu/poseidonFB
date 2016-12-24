@@ -647,12 +647,11 @@ struct ScintillaAction
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
 				scope cStringDocument = new CstringConvert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
-				scope cStringTitle = new CstringConvert( GLOBAL.languageItems["quest"]  );
 				
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
 				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
-				IupSetAttribute( messageDlg, "TITLE", cStringTitle.toStringz );
+				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["guest"] ) );
 				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				//int button = IupAlarm( toStringz( GLOBAL.languageItems["alarm"] ), GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] ), toStringz( GLOBAL.languageItems["yes"] ), toStringz( GLOBAL.languageItems["no"] ), toStringz( GLOBAL.languageItems["cancel"] ) );
 				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
@@ -695,12 +694,11 @@ struct ScintillaAction
 					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 					
 					scope cStringDocument = new CstringConvert( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
-					scope cStringTitle = new CstringConvert( GLOBAL.languageItems["quest"]  );
 					
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
 					IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
-					IupSetAttribute( messageDlg, "TITLE", cStringTitle.toStringz );					
+					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 					int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
 					//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
@@ -768,12 +766,11 @@ struct ScintillaAction
 				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				
 				scope cStringDocument = new CstringConvert( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
-				scope cStringTitle = new CstringConvert( GLOBAL.languageItems["quest"]  );
 				
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
 				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
-				IupSetAttribute( messageDlg, "TITLE", cStringTitle.toStringz );						
+				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
 				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
 				//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
@@ -871,7 +868,7 @@ struct ScintillaAction
 
 		try
 		{
-			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"] ~ "...",  GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"] ~ "...",  GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )

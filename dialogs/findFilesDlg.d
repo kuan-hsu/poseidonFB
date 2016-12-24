@@ -291,8 +291,9 @@ extern(C) // Callback for CFindInFilesDialog
 					IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "NO" );
 					
 					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=Replace Text In Files,BUTTONS=OKCANCEL");
-					IupSetAttribute( messageDlg, "VALUE", toStringz( "This action can't be undo!\nContinue anyway?" ) );
+					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONS=OKCANCEL");
+					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["findreplacefiles"] ) );
+					IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["cantundo"] ) );
 
 					IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
 					if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 2 )

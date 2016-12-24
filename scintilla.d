@@ -721,23 +721,23 @@ extern(C)
 		{
 			if( button == '3' ) // Right Click
 			{
-				Ihandle* _undo = IupItem( toStringz( GLOBAL.languageItems["undo"] ), null );
+				Ihandle* _undo = IupItem( toStringz( GLOBAL.languageItems["sc_undo"] ), null );
 				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
 				IupSetCallback( _undo, "ACTION", cast(Icallback) &menu.undo_cb ); // from menu.d
 
-				Ihandle* _redo = IupItem( toStringz( GLOBAL.languageItems["redo"] ), null );
+				Ihandle* _redo = IupItem( toStringz( GLOBAL.languageItems["sc_redo"] ), null );
 				IupSetAttribute( _redo, "IMAGE", "icon_redo" );
 				IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
 
-				Ihandle* _cut = IupItem( toStringz( GLOBAL.languageItems["cut"] ), null );
+				Ihandle* _cut = IupItem( toStringz( GLOBAL.languageItems["caption_cut"] ), null );
 				IupSetAttribute( _cut, "IMAGE", "icon_cut" );
 				IupSetCallback( _cut, "ACTION", cast(Icallback) &menu.cut_cb ); // from menu.d
 
-				Ihandle* _copy = IupItem( toStringz( GLOBAL.languageItems["copy"] ), null );
+				Ihandle* _copy = IupItem( toStringz( GLOBAL.languageItems["caption_copy"] ), null );
 				IupSetAttribute( _copy, "IMAGE", "icon_copy" );
 				IupSetCallback( _copy, "ACTION", cast(Icallback) &menu.copy_cb ); // from menu.d
 
-				Ihandle* _paste = IupItem( toStringz( GLOBAL.languageItems["paste"] ), null );
+				Ihandle* _paste = IupItem( toStringz( GLOBAL.languageItems["caption_paste"] ), null );
 				IupSetAttribute( _paste, "IMAGE", "icon_paste" );
 				IupSetCallback( _paste, "ACTION", cast(Icallback) &menu.paste_cb ); // from menu.d
 
@@ -782,7 +782,7 @@ extern(C)
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 				});
 
-				Ihandle* _refresh = IupItem( toStringz( GLOBAL.languageItems["refresh"] ), null );
+				Ihandle* _refresh = IupItem( toStringz( GLOBAL.languageItems["sc_reparse"] ), null );
 				IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
 				IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -790,14 +790,14 @@ extern(C)
 					GLOBAL.outlineTree.refresh( cSci );
 				});
 
-				Ihandle* _goto = IupItem( toStringz( GLOBAL.languageItems["gotodef"] ), null );
+				Ihandle* _goto = IupItem( toStringz( GLOBAL.languageItems["sc_gotodef"] ), null );
 				IupSetAttribute( _goto, "IMAGE", "icon_goto" );
 				IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.toDefintionAndType( true );
 				});
 
-				Ihandle* _showType = IupItem( toStringz( GLOBAL.languageItems["showtype"] ), null );
+				Ihandle* _showType = IupItem( toStringz( GLOBAL.languageItems["sc_showtype"] ), null );
 				IupSetAttribute( _showType, "IMAGE", "icon_type" );
 				IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{

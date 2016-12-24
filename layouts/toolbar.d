@@ -48,12 +48,12 @@ class CToolBar
 		btnQuickRun = IupButton( null, "QuickRun" );
 
 
-		cStrings[0] = new CstringConvert( GLOBAL.languageItems["new"] );
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["open"] );
-		cStrings[2] = new CstringConvert( GLOBAL.languageItems["save"] );
-		cStrings[3] = new CstringConvert( GLOBAL.languageItems["saveall"] );
-		cStrings[4] = new CstringConvert( GLOBAL.languageItems["undo"] );
-		cStrings[5] = new CstringConvert( GLOBAL.languageItems["redo"] );
+		cStrings[0] = new CstringConvert( GLOBAL.languageItems["caption_new"] );
+		cStrings[1] = new CstringConvert( GLOBAL.languageItems["caption_open"] );
+		cStrings[2] = new CstringConvert( GLOBAL.languageItems["sc_save"] );
+		cStrings[3] = new CstringConvert( GLOBAL.languageItems["sc_saveall"] );
+		cStrings[4] = new CstringConvert( GLOBAL.languageItems["sc_undo"] );
+		cStrings[5] = new CstringConvert( GLOBAL.languageItems["sc_redo"] );
 
 		IupSetAttributes( btnNew, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_newfile" );
 		
@@ -81,9 +81,9 @@ class CToolBar
 		IupSetCallback( btnRedo, "ACTION", cast(Icallback) &menu.redo_cb ); // From menu.d
 		
 
-		cStrings[6] = new CstringConvert( GLOBAL.languageItems["cut"] );
-		cStrings[7] = new CstringConvert( GLOBAL.languageItems["copy"] );
-		cStrings[8] = new CstringConvert( GLOBAL.languageItems["paste"] );
+		cStrings[6] = new CstringConvert( GLOBAL.languageItems["caption_cut"] );
+		cStrings[7] = new CstringConvert( GLOBAL.languageItems["caption_copy"] );
+		cStrings[8] = new CstringConvert( GLOBAL.languageItems["caption_paste"] );
 		cStrings[9] = new CstringConvert( GLOBAL.languageItems["bookmark"] );
 		cStrings[10] = new CstringConvert( GLOBAL.languageItems["bookmarkprev"] );
 		cStrings[11] = new CstringConvert( GLOBAL.languageItems["bookmarknext"] );
@@ -187,13 +187,13 @@ class CToolBar
 		});
 
 
-		cStrings[13] = new CstringConvert( GLOBAL.languageItems["compile"] );
-		cStrings[14] = new CstringConvert( GLOBAL.languageItems["compilerun"] );
-		cStrings[15] = new CstringConvert( GLOBAL.languageItems["run"] );
-		cStrings[16] = new CstringConvert( GLOBAL.languageItems["build"] );
-		cStrings[17] = new CstringConvert( GLOBAL.languageItems["quickrun"] );
-		cStrings[18] = new CstringConvert( GLOBAL.languageItems["leftwindow"] );
-		cStrings[19] = new CstringConvert( GLOBAL.languageItems["bottomwindow"] );	
+		cStrings[13] = new CstringConvert( GLOBAL.languageItems["sc_compile"] );
+		cStrings[14] = new CstringConvert( GLOBAL.languageItems["sc_compilerun"] );
+		cStrings[15] = new CstringConvert( GLOBAL.languageItems["sc_run"] );
+		cStrings[16] = new CstringConvert( GLOBAL.languageItems["sc_build"] );
+		cStrings[17] = new CstringConvert( GLOBAL.languageItems["sc_quickrun"] );
+		cStrings[18] = new CstringConvert( GLOBAL.languageItems["sc_leftwindow"] );
+		cStrings[19] = new CstringConvert( GLOBAL.languageItems["sc_bottomwindow"] );	
 
 
 

@@ -43,20 +43,20 @@ extern(C)
 	{
 		version(Windows)
 		{
-			Ihandle* _undo = IupItem( toStringz( GLOBAL.languageItems["undo"] ), null );
+			Ihandle* _undo = IupItem( toStringz( GLOBAL.languageItems["sc_undo"] ), null );
 			IupSetAttribute( _undo, "IMAGE", "icon_undo" );
 			IupSetCallback( _undo, "ACTION", cast(Icallback) &undo_ACTION );
 		}
 
-		Ihandle* _cut = IupItem( toStringz( GLOBAL.languageItems["cut"] ), null );
+		Ihandle* _cut = IupItem( toStringz( GLOBAL.languageItems["caption_cut"] ), null );
 		IupSetAttribute( _cut, "IMAGE", "icon_cut" );
 		IupSetCallback( _cut, "ACTION",  cast(Icallback) &cut_ACTION );
 		
-		Ihandle* _copy = IupItem( toStringz( GLOBAL.languageItems["copy"] ), null );
+		Ihandle* _copy = IupItem( toStringz( GLOBAL.languageItems["caption_copy"] ), null );
 		IupSetAttribute( _copy, "IMAGE", "icon_copy" );
 		IupSetCallback( _copy, "ACTION", cast(Icallback) &copy_ACTION );
 
-		Ihandle* _paste = IupItem( toStringz( GLOBAL.languageItems["paste"] ), null );
+		Ihandle* _paste = IupItem( toStringz( GLOBAL.languageItems["caption_paste"] ), null );
 		IupSetAttribute( _paste, "IMAGE", "icon_paste" );
 		IupSetCallback( _paste, "ACTION", cast(Icallback) &paste_ACTION );
 
@@ -64,7 +64,7 @@ extern(C)
 		IupSetAttribute( _delete, "IMAGE", "icon_clear" );
 		IupSetCallback( _delete, "ACTION", cast(Icallback) &delete_ACTION );
 		
-		Ihandle* _selectall = IupItem( toStringz( GLOBAL.languageItems["selectall"] ), null );
+		Ihandle* _selectall = IupItem( toStringz( GLOBAL.languageItems["caption_selectall"] ), null );
 		IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
 		IupSetCallback( _selectall, "ACTION", cast(Icallback) &selectall_ACTION );
 
