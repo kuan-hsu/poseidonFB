@@ -9,7 +9,7 @@ struct ExecuterAction
 
 	import tango.sys.Process, tango.core.Exception, tango.io.stream.Lines, tango.io.stream.Iterator;
 	import tango.io.Stdout, tango.stdc.stringz, Util = tango.text.Util, Integer = tango.text.convert.Integer;
-	import tango.io.FilePath;
+	import tango.io.FilePath, Path = tango.io.Path;
 
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;
@@ -113,7 +113,7 @@ struct ExecuterAction
 					int lineNumberHead = Util.index( s, "(" );
 					if( lineNumberHead < lineNumberTail - 1 )
 					{
-						char[]	filePath = Util.replace( s[0..lineNumberHead++], '\\', '/' );
+						char[]	filePath = Path.normalize( s[0..lineNumberHead++] );
 						if( filePath == cSci.getFullPath )
 						{
 							int		lineNumber = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
@@ -140,7 +140,7 @@ struct ExecuterAction
 		char[] command;
 		auto cSci = ScintillaAction.getActiveCScintilla();
 
-		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
+		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 		
 		if( cSci !is null )
@@ -270,7 +270,7 @@ struct ExecuterAction
 	{
 		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
 
-		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
+		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
 
 		try
@@ -478,7 +478,7 @@ struct ExecuterAction
 	{
 		IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
 
-		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
+		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 
 		scope compilePath = new FilePath( GLOBAL.compilerFullPath );
@@ -616,7 +616,7 @@ struct ExecuterAction
 		auto activeCScintilla = actionManager.ScintillaAction.getActiveCScintilla();
 		if( activeCScintilla !is null )
 		{
-			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
+			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 			IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 			
 			int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );

@@ -7,10 +7,7 @@ private import global, scintilla, actionManager, menu;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 private import parser.ast, tools;
 
-
-private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.core.Thread, tango.io.Stdout;
-//private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii, tango.io.Stdout;
-
+private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.core.Thread, tango.io.Stdout, Path = tango.io.Path;
 
 class CDebugger
 {
@@ -438,7 +435,7 @@ class CDebugger
 		if( results.length ==  2 )
 		{
 			int			lineNumber = Integer.atoi( results[1] );
-			char[]		fullPath = Util.replace( results[0], '\\', '/' );
+			char[]		fullPath = Path.normalize( results[0] );
 
 			if( ScintillaAction.openFile( fullPath, lineNumber ) )
 			{	
@@ -706,7 +703,7 @@ class CDebugger
 
 							head = Util.rindex( result, ": file " );
 							tail = Util.rindex( result, ", line " );
-							if( tail > head + 7 ) _fullPath = Util.replace( result[head+7..tail], '\\', '/' );
+							if( tail > head + 7 ) _fullPath = Path.normalize( result[head+7..tail] );
 							
 							head = Util.rindex( result, ", line " );
 							tail = Util.rindex( result, "." );
@@ -1134,7 +1131,7 @@ class CDebugger
 		auto activeCScintilla = actionManager.ScintillaAction.getActiveCScintilla();
 		if( activeCScintilla !is null )
 		{
-			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ).dup == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
+			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ).dup == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 			IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 			
 			int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
@@ -1675,7 +1672,7 @@ extern( C )
 									char[][]	frameFullPathandLineNumber = GLOBAL.debugPanel.getFrameFullPathandLineNumber();
 									if( frameFullPathandLineNumber.length == 2 )
 									{
-										char[]		fullPath = Util.replace( frameFullPathandLineNumber[0], '\\', '/' );
+										char[]		fullPath = Path.normalize( frameFullPathandLineNumber[0] );
 										actionManager.ScintillaAction.openFile( fullPath );
 									}
 

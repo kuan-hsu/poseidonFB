@@ -332,7 +332,7 @@ extern(C) // Callback for CFindInFilesDialog
 						}
 						else
 						{
-							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
+							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
 							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Active Project Be Selected.\n" ) );
 							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
@@ -353,7 +353,7 @@ extern(C) // Callback for CFindInFilesDialog
 						}
 						else
 						{
-							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.message_cb( GLOBAL.menuMessageWindow );
+							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
 							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Any Project Be Selected.\n" ) );
 							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );

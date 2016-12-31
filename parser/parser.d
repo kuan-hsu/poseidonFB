@@ -6,7 +6,7 @@ class CParser
 	import			parser.ast;
 	import			parser.token, parser.autocompletion;
 
-	import			tango.io.FilePath, tango.text.Ascii;
+	import			tango.io.FilePath, tango.text.Ascii, Path = tango.io.Path;
 	import			Util = tango.text.Util;
 	import 			tango.io.Stdout;
 
@@ -65,7 +65,7 @@ class CParser
 						TokenUnit t = getToken();
 						parseToken( TOK.Tstring );
 
-						activeASTnode.addChild( Util.replace( t.identifier, '\\', '/' ) , B_INCLUDE, null, _type, null, t.lineNumber );
+						activeASTnode.addChild( Path.normalize( t.identifier ) , B_INCLUDE, null, _type, null, t.lineNumber );
 					}
 					break;
 

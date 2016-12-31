@@ -385,7 +385,7 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_findreplace"] = "Find/Replace";
 						GLOBAL.languageItems["sc_findreplacefiles"] = "Find/Replace In Files";
 						GLOBAL.languageItems["sc_findnext"] = "Find Next";
-						GLOBAL.languageItems["sc_finprev"] = "Find Previous";
+						GLOBAL.languageItems["sc_findprev"] = "Find Previous";
 						GLOBAL.languageItems["sc_goto"] = "Goto Line";
 						GLOBAL.languageItems["sc_undo"] = "Undo";
 						GLOBAL.languageItems["sc_redo"] = "Redo";
@@ -520,6 +520,7 @@ struct GLOBAL
 		//GLOBAL.languageItems["caption_findreplace"] = "Find / Replace";
 		//GLOBAL.languageItems["caption_findreplacefiles"] = "Find / Replace In Files";
 		//GLOBAL.languageItems["caption_goto"] = "Goto Line";
+		GLOBAL.languageItems["caption_prj"] = "Project";
 		GLOBAL.languageItems["caption_openprj"] = "Open Project";
 		GLOBAL.languageItems["caption_importprj"] = "Import Fbedit Project";
 		GLOBAL.languageItems["caption_prjproperties"] = "Project Properties";

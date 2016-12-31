@@ -1518,7 +1518,7 @@ struct SearchAction
 		scope f = new FilePath( fullPath );
 		if( f.exists() )
 		{
-			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) message_cb( GLOBAL.menuMessageWindow );
+			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 1 );
 
 			char[] 	document;

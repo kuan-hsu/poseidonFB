@@ -7,7 +7,7 @@ private import global, scintilla, actionManager, menu, tools;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 
 private import tango.stdc.stringz, tango.sys.Process;
-private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.convert.Integer;
+private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.convert.Integer, Path = tango.io.Path;
 
 class CProjectTree
 {
@@ -262,7 +262,7 @@ class CProjectTree
 
 		if( !setupDir.length ) return false;
 
-		setupDir = Util.replace( setupDir, '\\', '/' );
+		setupDir = Path.normalize( setupDir );
 		
 		if( setupDir in GLOBAL.projectManager )
 		{
@@ -443,7 +443,7 @@ class CProjectTree
 				
 								fileArrays[_keyWord] = _value;
 
-								scope _fp = new FilePath( Util.replace( _value, '\\', '/' ) );
+								scope _fp = new FilePath( Path.normalize( _value ) );
 								if( lowerCase( _fp.ext ) == "bas" )
 								{
 									if( !_fp.isAbsolute ) prj.sources ~= ( prj.dir ~ "/" ~ _value ); else prj.sources ~= _value;
@@ -697,7 +697,7 @@ extern(C)
 
 					version( Windows )
 					{
-						Util.replace( fullPath, '/', '\\' );
+						fullPath = Path.normalize( fullPath );
 						scope proc = new Process( true, "explorer " ~ "\"" ~ fullPath ~ "\"" );
 						proc.execute;
 						proc.wait;
@@ -1013,7 +1013,7 @@ extern(C)
 					// shadow
 					//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
 					*/
-					char[]		titleName = Util.substitute( fullPath, "\\", "/" );
+					char[]		titleName = Path.normalize( fullPath );
 					int			folderLocateId = _createTree( prjDirName ~ "/", titleName, id );
 					char[]		userData = fullPath;
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( titleName ) );
@@ -1239,7 +1239,7 @@ extern(C)
 	{
 		int		pos;
 		int		folderLocateId = startID;
-		char[]	fullPath = Util.replace( _titleName, '\\', '/' );
+		char[]	fullPath = Path.normalize( _titleName );
 
 		version(Windows)
 		{

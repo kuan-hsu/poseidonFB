@@ -5,7 +5,7 @@ private import iup.iup, iup.iup_scintilla;
 private import global, project, scintilla, actionManager;
 private import dialogs.baseDlg, dialogs.fileDlg;
 
-private import tango.stdc.stringz, Util = tango.text.Util;
+private import tango.stdc.stringz, Util = tango.text.Util, Path = tango.io.Path;
 
 class CProjectPropertiesDialog : CBaseDialog
 {
@@ -368,7 +368,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 				PROJECT s;
 				s.name				= _prjName;
 				s.type				= _prjType;
-				s.dir				= Util.replace( _prjDir, '\\', '/' );
+				s.dir				= Path.normalize( _prjDir );
 				s.mainFile			= _prjMainFile;
 				s.targetName		= _prjTargetName;
 				s.args				= _prjArgs;

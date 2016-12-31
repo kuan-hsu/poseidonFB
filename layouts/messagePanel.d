@@ -7,7 +7,7 @@ private import global, scintilla, actionManager, tools;
 
 private import Integer = tango.text.convert.Integer;
 private import tango.stdc.stringz;
-private import tango.io.FilePath;
+private import tango.io.FilePath, Path = tango.io.Path;
 private import Util = tango.text.Util;
 
 
@@ -137,7 +137,7 @@ extern(C)
 									{
 										char[] lineNumber_char = lineText[openPos+1..closePos];
 										lineNumber = Integer.atoi( lineNumber_char );
-										fileName = Util.replace( lineText[0..openPos], '\\', '/' );
+										fileName = Path.normalize( lineText[0..openPos] );
 
 										if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
 										{
@@ -162,7 +162,7 @@ extern(C)
 															int lineNumberHead = Util.index( s, "(" );
 															if( lineNumberHead < lineNumberTail - 1 )
 															{
-																char[]	filePath = Util.replace( s[0..lineNumberHead++], '\\', '/' );
+																char[]	filePath = Path.normalize( s[0..lineNumberHead++] );
 																if( fileName == filePath )
 																{
 																	if( upperCase(filePath) in GLOBAL.scintillaManager )

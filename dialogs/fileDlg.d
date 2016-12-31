@@ -48,7 +48,6 @@ class CFileDlg
 				if( !bMultiFiles )
 				{
 					fileString = Path.normalize( fileString );
-					//fileString = Util.substitute( fileString, "\\", "/" );
 					filesName ~= fileString;
 				}
 				else
@@ -58,7 +57,7 @@ class CFileDlg
 						char[][] _files = Util.split( fileString, "|" );
 						if( _files.length )
 						{
-							char[] _path = Util.substitute( _files[0], "\\", "/" ) ~ "/";
+							char[] _path = Path.normalize( _files[0] ) ~ "/";
 							for( int i = 1; i < _files.length; ++ i )
 							{
 								if( _files[i].length ) filesName ~= ( _path ~ _files[i] );
@@ -67,7 +66,7 @@ class CFileDlg
 					}
 					else
 					{
-						fileString = Util.substitute( fileString, "\\", "/" );
+						fileString = Path.normalize( fileString );
 						filesName ~= fileString;
 					}
 				}
@@ -88,12 +87,12 @@ class CFileDlg
 	}
 
 	public:
-	this( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
+	this( char[] title, char[] filefilter = "All Files|*.*|", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
 	{
 		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
 	}
 
-	char[][] open( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
+	char[][] open( char[] title, char[] filefilter = "All Files|*.*|", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
 	{
 		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
 
