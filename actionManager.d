@@ -366,7 +366,7 @@ struct ScintillaAction
 	import parser.scanner,  parser.token, parser.parser;
 
 
-	import tango.core.Thread;
+	import tango.core.Thread, Path = tango.io.Path;
 	// Inner Class
 	class ParseThread : Thread
 	{
@@ -453,6 +453,8 @@ struct ScintillaAction
 	
 	static bool openFile( char[] fullPath, int lineNumber = -1 )
 	{
+		fullPath =  Path.normalize( fullPath );
+		
 		// FullPath had already opened
 		if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 		{

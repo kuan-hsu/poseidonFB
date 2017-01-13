@@ -326,7 +326,7 @@ struct XPM
 		return null;
 	}
 
-	static this()
+	static void init()
 	{
 		private_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_private.xpm");
 		protected_fun_rgba 				= getRGBA( "icons/xpm/outline/fun_protected.xpm" );

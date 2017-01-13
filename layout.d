@@ -7,7 +7,8 @@ import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.proj
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
 
-import tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
+import tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util, tango.io.Stdout;
+import tango.sys.win32.UserGdi;
 
 void createExplorerWindow()
 {
@@ -88,8 +89,55 @@ void createDialog()
 	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"] );
 }
 
+
 extern(C)
 {
+	version(Windows)
+	{
+		int mainDialog_COPYDATA_CB(Ihandle *ih, char* cmdLine, int size)
+		{
+			char[][]	args;
+			char[][]	_args = Util.split( fromStringz( cmdLine ), "\"" );
+			
+			foreach( char[] s; _args )
+			{
+				s = Util.trim( s );
+				if( s.length ) args ~= s;
+			}
+			
+			if( args.length > 1 )
+			{
+				scope argPath = new FilePath( args[1] );
+				if( argPath.exists() )
+				{
+					if( argPath.file == ".poseidon" )
+					{
+						char[] dir = argPath.path;
+						if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
+						GLOBAL.projectTree.openProject( dir );				
+					}
+					else
+					{
+						ScintillaAction.openFile( args[1] );
+					}
+				}				
+				
+			}
+
+			//IupShow( ih );
+			if( IsIconic( IupGetAttribute( GLOBAL.mainDlg, "HWND" ) ) )
+			{
+				ShowWindow( IupGetAttribute( GLOBAL.mainDlg, "HWND" ), SW_RESTORE);  
+			}
+			else
+			{
+				SetForegroundWindow( IupGetAttribute( GLOBAL.mainDlg, "HWND" ) );
+			}			
+			
+			return IUP_DEFAULT;
+		}
+	}
+
 	int mainDialog_CLOSE_cb(Ihandle *ih)
 	{
 		try

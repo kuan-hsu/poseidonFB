@@ -216,7 +216,7 @@ class CProjectTree
 		// Recent Projects
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
 
-		IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
+		//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
 		
 		//IupSetInt( GLOBAL.fileListSplit, "VALUE", IupGetInt( GLOBAL.fileListSplit, "VALUE" ) + 12 );
 	}
@@ -567,7 +567,7 @@ extern(C)
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
 				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
-				IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
+				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
 			}
 			else
 			{

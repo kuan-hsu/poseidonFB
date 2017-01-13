@@ -3,11 +3,13 @@
 import iup.iup;
 import iup.iup_scintilla;
 
-import global, layout, images.imageData;
-import menu, scintilla;
+import global, layout, images.imageData, tools;
+import menu, scintilla, actionManager;
 
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
+import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
 
+private char[][] _args;
 
 version(Windows)
 {
@@ -35,6 +37,7 @@ else
 	pragma(lib, "iup_scintilla");
 }
 
+/+
 version(Windows)
 {
 	import tango.sys.win32.UserGdi;
@@ -64,6 +67,19 @@ version(Windows)
 					SetForegroundWindow( hWnd );
 				}
 				bRunAgain = true;
+				
+				//if( _args.length > 1 )
+				//{
+					COPYDATASTRUCT copy;
+					copy.cbData = _args[0].length;
+					copy.lpData = cast(int*) _args[0].ptr;
+					
+					Stdout( _args[0] ).newline;
+
+					//int WM_COPYDATA = 0x004A;
+					SendMessageA( hWnd, 74, null, &copy );
+				//}
+				
 				return false;
 			}
 		}
@@ -71,14 +87,17 @@ version(Windows)
 		return TRUE;
 	}
 }
++/
 
 
 
-
-void main()
+void main( char[][] args )
 {
+	/+
 	version(Windows)
 	{
+		_args = args;
+		
 		EnumWindows( &enumWindowsProc, 0 );
 		if( bRunAgain ) return;
 
@@ -92,13 +111,28 @@ void main()
 		}
 		*/
 	}
-
-
+	+/
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
 		Stdout( "IUP open error!!!" ).newline;
 		return;
 	}
+	
+	version(Windows)
+	{
+		_args = args;
+		
+		IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
+		if( IupGetGlobal( toStringz( "SINGLEINSTANCE" ) ) == null  )
+		{
+			IupClose();
+			return;
+		}
+	}
+	
+	//  Get poseidonFB exePath & set the new cwd
+	scope _poseidonPath = new FilePath( args[0] );
+	if( _poseidonPath.exists() ) Environment.cwd( _poseidonPath.path );
 
 	// Init IDE
 	createEditorSetting();
@@ -146,9 +180,9 @@ void main()
 	IupSetCallback( GLOBAL.mainDlg, "SHOW_CB", cast(Icallback) &mainDialog_SHOW_cb );
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
 	IupSetCallback( GLOBAL.mainDlg, "RESIZE_CB", cast(Icallback) &mainDialog_RESIZE_cb );
+	IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB );
 	
 	
-
 	createLayout();
 
 
@@ -186,7 +220,25 @@ void main()
 		IupSetAttribute( GLOBAL.outputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[7].fontString ) );// Output
 		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Search
 		IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Debugger (shared Search)
-	//}	
+	//}
+	
+	if( args.length > 1 )
+	{
+		scope argPath = new FilePath( args[1] );
+		if( argPath.exists() )
+		{
+			if( argPath.file == ".poseidon" )
+			{
+				char[] dir = argPath.path;
+				if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
+				GLOBAL.projectTree.openProject( dir );				
+			}
+			else
+			{
+				ScintillaAction.openFile( args[1] );
+			}
+		}
+	}
 
 	//IUP main Loop
 	IupMainLoop();

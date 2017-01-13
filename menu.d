@@ -419,13 +419,11 @@ void createMenu()
 	item_language = IupSubmenu( toStringz( GLOBAL.languageItems["language"] ), languageSubMenu );
 	
 	
-	
-
 	Ihandle* item_about = IupItem( toStringz( GLOBAL.languageItems["about"] ), null );
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.240\nBy Kuan Hsu (Taiwan)\n2017.01.02" );
+		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.241\nBy Kuan Hsu (Taiwan)\n2017.01.13" );
 	});
 
 	file_menu = IupMenu( 	item_new, 

@@ -402,7 +402,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 				if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "YES" ) GLOBAL.projectTree.CreateNewProject( _prjName, _prjDir );
 
-				IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
+				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
 			}
 		}
 

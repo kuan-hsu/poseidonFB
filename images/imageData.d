@@ -30,6 +30,8 @@ Ihandle* load_image_poseidonFBico()
 
 void load_all_images_icons()
 {
+	XPM.init();
+	
 	IupSetHandle( "icon_markclear", XPM.getIUPimage( "icons/xpm/mark_clear.xpm" ) ); // IupSetHandle("icon_markclear", load_image_mark_clear());
 	IupSetHandle( "icon_cut", XPM.getIUPimage( "icons/xpm/cut.xpm" ) ); // IupSetHandle("icon_cut", load_image_cut_edit());
 	IupSetHandle( "icon_quickrun", XPM.getIUPimage( "icons/xpm/quickrun.xpm" ) ); //IupSetHandle("icon_quickrun", load_image_quickrun());
