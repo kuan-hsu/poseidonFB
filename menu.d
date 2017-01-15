@@ -423,7 +423,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.241\nBy Kuan Hsu (Taiwan)\n2017.01.13" );
+		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.242\nBy Kuan Hsu (Taiwan)\n2017.01.16" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -1164,7 +1164,7 @@ extern(C)
 				}
 			}
 
-			if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+			if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 )	IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 			/*
 			int 	id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Get Focus TreeNode
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", id, "SELECTED" );
@@ -1190,7 +1190,8 @@ extern(C)
 						GLOBAL.projectManager.remove( _s );
 					}
 
-					IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+					//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+					IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
 					return IUP_DEFAULT; 
 				}
 			}
@@ -1235,7 +1236,7 @@ extern(C)
 			//IupMessage("Remove",toStringz(s) );
 		}
 
-		if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+		if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 
 		return IUP_DEFAULT;
 	}	

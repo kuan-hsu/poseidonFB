@@ -175,7 +175,37 @@ struct IDECONFIG
 		.attribute( null, "linenumFore", GLOBAL.editColor.linenumFore )
 		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack )
 		.attribute( null, "fold", GLOBAL.editColor.fold )
-		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha );
+		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha )
+		.attribute( null, "scintillaFore", GLOBAL.editColor.scintillaFore )
+		.attribute( null, "scintillaBack", GLOBAL.editColor.scintillaBack )
+		.attribute( null, "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore )
+		.attribute( null, "SCE_B_COMMENT_Back", GLOBAL.editColor.SCE_B_COMMENT_Back )
+		.attribute( null, "SCE_B_NUMBER_Fore", GLOBAL.editColor.SCE_B_NUMBER_Fore )
+		.attribute( null, "SCE_B_NUMBER_Back", GLOBAL.editColor.SCE_B_NUMBER_Back )
+		.attribute( null, "SCE_B_STRING_Fore", GLOBAL.editColor.SCE_B_STRING_Fore )
+		.attribute( null, "SCE_B_STRING_Back", GLOBAL.editColor.SCE_B_STRING_Back )
+		.attribute( null, "SCE_B_PREPROCESSOR_Fore", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore )
+		.attribute( null, "SCE_B_PREPROCESSOR_Back", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back )
+		.attribute( null, "SCE_B_OPERATOR_Fore", GLOBAL.editColor.SCE_B_OPERATOR_Fore )
+		.attribute( null, "SCE_B_OPERATOR_Back", GLOBAL.editColor.SCE_B_OPERATOR_Back )
+		.attribute( null, "SCE_B_IDENTIFIER_Fore", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore )
+		.attribute( null, "SCE_B_IDENTIFIER_Back", GLOBAL.editColor.SCE_B_IDENTIFIER_Back )
+		.attribute( null, "SCE_B_COMMENTBLOCK_Fore", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore )
+		.attribute( null, "SCE_B_COMMENTBLOCK_Back", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back )
+		.attribute( null, "projectFore", GLOBAL.editColor.projectFore )
+		.attribute( null, "projectBack", GLOBAL.editColor.projectBack )
+		.attribute( null, "outlineFore", GLOBAL.editColor.outlineFore )
+		.attribute( null, "outlineBack", GLOBAL.editColor.outlineBack )		
+		.attribute( null, "filelistFore", GLOBAL.editColor.filelistFore )
+		.attribute( null, "filelistBack", GLOBAL.editColor.filelistBack )
+		.attribute( null, "outputFore", GLOBAL.editColor.outputFore )
+		.attribute( null, "outputBack", GLOBAL.editColor.outputBack )
+		.attribute( null, "searchFore", GLOBAL.editColor.searchFore )
+		.attribute( null, "searchBack", GLOBAL.editColor.searchBack )
+		.attribute( null, "prjTitle", GLOBAL.editColor.prjTitle )
+		.attribute( null, "prjSourceType", GLOBAL.editColor.prjSourceType );		
+		
+		
 
 		//<shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+++X" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F12" messagewindow="+++F11"/>
 		editorNode.element( null, "shortkeys" )
@@ -201,7 +231,8 @@ struct IDECONFIG
 		.attribute( null, "prevtab", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) )
 		.attribute( null, "newtab", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) )
 		.attribute( null, "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) )
-		.attribute( null, "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) );
+		.attribute( null, "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) )
+		.attribute( null, "comment", convertShortKeyValue2String( GLOBAL.shortKeys[23].keyValue ) );
 
 		/*
 		<buildtools>
@@ -655,7 +686,88 @@ struct IDECONFIG
 			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
 
 
+
+			result = root.query.descendant("color").attribute("scintillaFore");
+			foreach( e; result ) GLOBAL.editColor.scintillaFore = e.value;
+			result = root.query.descendant("color").attribute("scintillaBack");
+			foreach( e; result ) GLOBAL.editColor.scintillaBack = e.value;
 			
+			result = root.query.descendant("color").attribute("SCE_B_COMMENT_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_COMMENT_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_COMMENT_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_COMMENT_Back = e.value;
+			
+			result = root.query.descendant("color").attribute("SCE_B_NUMBER_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_NUMBER_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_NUMBER_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_NUMBER_Back = e.value;
+			
+			result = root.query.descendant("color").attribute("SCE_B_STRING_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_STRING_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_STRING_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_STRING_Back = e.value;
+			
+			result = root.query.descendant("color").attribute("selAlpha");
+			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
+			result = root.query.descendant("color").attribute("selAlpha");
+			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
+			
+			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_OPERATOR_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_OPERATOR_Back = e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_IDENTIFIER_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_IDENTIFIER_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_IDENTIFIER_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_IDENTIFIER_Back = e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_COMMENTBLOCK_Fore");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore = e.value;
+			result = root.query.descendant("color").attribute("SCE_B_COMMENTBLOCK_Back");
+			foreach( e; result ) GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back = e.value;
+
+			result = root.query.descendant("color").attribute("projectFore");
+			foreach( e; result ) GLOBAL.editColor.projectFore = e.value;
+			result = root.query.descendant("color").attribute("projectBack");
+			foreach( e; result ) GLOBAL.editColor.projectBack = e.value;
+
+			result = root.query.descendant("color").attribute("outlineFore");
+			foreach( e; result ) GLOBAL.editColor.outlineFore = e.value;
+			result = root.query.descendant("color").attribute("outlineBack");
+			foreach( e; result ) GLOBAL.editColor.outlineBack = e.value;
+
+			result = root.query.descendant("color").attribute("filelistFore");
+			foreach( e; result ) GLOBAL.editColor.filelistFore = e.value;
+			result = root.query.descendant("color").attribute("filelistBack");
+			foreach( e; result ) GLOBAL.editColor.filelistBack = e.value;
+
+			result = root.query.descendant("color").attribute("outputFore");
+			foreach( e; result ) GLOBAL.editColor.outputFore = e.value;
+			result = root.query.descendant("color").attribute("outputBack");
+			foreach( e; result ) GLOBAL.editColor.outputBack = e.value;
+
+			result = root.query.descendant("color").attribute("searchFore");
+			foreach( e; result ) GLOBAL.editColor.searchFore = e.value;
+			result = root.query.descendant("color").attribute("searchBack");
+			foreach( e; result ) GLOBAL.editColor.searchBack = e.value;
+
+			result = root.query.descendant("color").attribute("prjTitle");
+			foreach( e; result ) GLOBAL.editColor.prjTitle = e.value;
+			result = root.query.descendant("color").attribute("prjSourceType");
+			foreach( e; result ) GLOBAL.editColor.prjSourceType = e.value;
+
+		
 			// Load Language lng
 			scope lngFilePath = new FilePath( "settings/" ~ GLOBAL.language ~ ".lng" );
 			if( lngFilePath.exists() )
@@ -844,6 +956,12 @@ struct IDECONFIG
 				GLOBAL.shortKeys[22]= sk;
 			}
 
+			result = root.query.descendant("shortkeys").attribute("comment");
+			foreach( e; result )
+			{
+				ShortKey sk = { "comment", GLOBAL.languageItems["sc_comment"], convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[23]= sk;
+			}
 			// Get linux terminal program name
 			version( linux )
 			{

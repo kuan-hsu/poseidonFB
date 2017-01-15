@@ -385,6 +385,9 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameFont = IupFrame( fontList );
 		IupSetAttribute( frameFont, "TITLE", toStringz( GLOBAL.languageItems["font"] ));
 		IupSetAttribute( frameFont, "EXPAND", "YES");
+		
+		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, null );
+		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );		
 
 		// Color
 		Ihandle* labelCaretLine = IupLabel( toStringz( GLOBAL.languageItems["caretline"] ~ ":" ) );
@@ -401,31 +404,29 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnCursor", btnCursor );
 		IupSetCallback( btnCursor, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelSelectFore = IupLabel( toStringz( GLOBAL.languageItems["selfor"] ~ ":" ) );
+		Ihandle* labelSelectFore = IupLabel( toStringz( GLOBAL.languageItems["sel"] ~ ":" ) );
 		Ihandle* btnSelectFore = IupButton( null, null );
 		IupSetAttribute( btnSelectFore, "BGCOLOR", toStringz(GLOBAL.editColor.selectionFore) );
-		version(Windows) IupSetAttribute( btnSelectFore, "SIZE", "16x8" ); else IupSetAttribute( btnSelectFore, "SIZE", "16x12" );
+		version(Windows) IupSetAttribute( btnSelectFore, "SIZE", "64x8" ); else IupSetAttribute( btnSelectFore, "SIZE", "64x12" );
 		IupSetHandle( "btnSelectFore", btnSelectFore );
 		IupSetCallback( btnSelectFore, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelSelectBack = IupLabel( toStringz( GLOBAL.languageItems["selback"] ~ ":" ) );
 		Ihandle* btnSelectBack = IupButton( null, null );
 		IupSetAttribute( btnSelectBack, "BGCOLOR", toStringz(GLOBAL.editColor.selectionBack) );
-		version(Windows) IupSetAttribute( btnSelectBack, "SIZE", "16x8" ); else IupSetAttribute( btnSelectBack, "SIZE", "16x12" );
+		version(Windows) IupSetAttribute( btnSelectBack, "SIZE", "64x8" ); else IupSetAttribute( btnSelectBack, "SIZE", "64x12" );
 		IupSetHandle( "btnSelectBack", btnSelectBack );
 		IupSetCallback( btnSelectBack, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelLinenumFore = IupLabel( toStringz( GLOBAL.languageItems["lnfor"] ~ ":" ) );
+		Ihandle* labelLinenumFore = IupLabel( toStringz( GLOBAL.languageItems["ln"] ~ ":" ) );
 		Ihandle* btnLinenumFore = IupButton( null, null );
 		IupSetAttribute( btnLinenumFore, "BGCOLOR", toStringz(GLOBAL.editColor.linenumFore) );
-		version(Windows) IupSetAttribute( btnLinenumFore, "SIZE", "16x8" ); else IupSetAttribute( btnLinenumFore, "SIZE", "16x12" );
+		version(Windows) IupSetAttribute( btnLinenumFore, "SIZE", "64x8" ); else IupSetAttribute( btnLinenumFore, "SIZE", "64x12" );
 		IupSetHandle( "btnLinenumFore", btnLinenumFore );
 		IupSetCallback( btnLinenumFore, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelLinenumBack = IupLabel( toStringz( GLOBAL.languageItems["lnback"] ~ ":" ) );
 		Ihandle* btnLinenumBack = IupButton( null, null );
 		IupSetAttribute( btnLinenumBack, "BGCOLOR", toStringz(GLOBAL.editColor.linenumBack) );
-		version(Windows) IupSetAttribute( btnLinenumBack, "SIZE", "16x8" ); else IupSetAttribute( btnLinenumBack, "SIZE", "16x12" );
+		version(Windows) IupSetAttribute( btnLinenumBack, "SIZE", "64x8" ); else IupSetAttribute( btnLinenumBack, "SIZE", "64x12" );
 		IupSetHandle( "btnLinenumBack", btnLinenumBack );
 		IupSetCallback( btnLinenumBack, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
@@ -450,6 +451,22 @@ class CPreferenceDialog : CBaseDialog
 		}
 		IupSetAttribute( textAlpha, "TIP", toStringz( GLOBAL.languageItems["alphatip"] ) );
 		IupSetHandle( "textAlpha", textAlpha );
+		
+		
+		// 2017.1.14
+		Ihandle* labelPrjTitle = IupLabel( toStringz( GLOBAL.languageItems["prjtitle"] ~ ":" ) );
+		Ihandle* btnPrjTitle = IupButton( null, null );
+		IupSetAttribute( btnPrjTitle, "BGCOLOR", toStringz(GLOBAL.editColor.prjTitle) );
+		version(Windows) IupSetAttribute( btnPrjTitle, "SIZE", "16x8" ); else IupSetAttribute( btnPrjTitle, "SIZE", "16x12" );
+		IupSetHandle( "btnPrjTitle", btnPrjTitle );
+		IupSetCallback( btnPrjTitle, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );		
+
+		Ihandle* labelSourceTypeFolder = IupLabel( toStringz( GLOBAL.languageItems["sourcefolder"] ~ ":" ) );
+		Ihandle* btnSourceTypeFolder = IupButton( null, null );
+		IupSetAttribute( btnSourceTypeFolder, "BGCOLOR", toStringz(GLOBAL.editColor.prjSourceType) );
+		version(Windows) IupSetAttribute( btnSourceTypeFolder, "SIZE", "16x8" ); else IupSetAttribute( btnSourceTypeFolder, "SIZE", "16x12" );
+		IupSetHandle( "btnSourceTypeFolder", btnSourceTypeFolder );
+		IupSetCallback( btnSourceTypeFolder, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );		
 
 
 
@@ -460,24 +477,27 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( labelCursor, "" ),
 			IupSetAttributes( btnCursor, "" ),
 
-			IupSetAttributes( labelSelectFore, "" ),
-			IupSetAttributes( btnSelectFore, "" ),
-			IupSetAttributes( labelSelectBack, "" ),
-			IupSetAttributes( btnSelectBack, "" ),
-
-			IupSetAttributes( labelLinenumFore, "" ),
-			IupSetAttributes( btnLinenumFore, "" ),
-			IupSetAttributes( labelLinenumBack, "" ),
-			IupSetAttributes( btnLinenumBack, "" ),
-
 			IupSetAttributes( labelFoldingColor, "" ),
 			IupSetAttributes( btnFoldingColor, "" ),
 			IupSetAttributes( labelSelAlpha, "" ),
 			IupSetAttributes( textAlpha, "" ),
+			
+			IupSetAttributes( labelPrjTitle, "" ),
+			IupSetAttributes( btnPrjTitle, "" ),
+			IupSetAttributes( labelSourceTypeFolder, "" ),
+			IupSetAttributes( btnSourceTypeFolder, "" ),
+			/*
+			IupSetAttributes( labelLinenumFore, "" ),
+			IupSetAttributes( btnLinenumFore, "" ),
+			IupSetAttributes( labelLinenumBack, "" ),
+			IupSetAttributes( btnLinenumBack, "" ),
+			*/
+
+
 
 			null
 		);
-		IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=30,MARGIN=2x10,SIZELIN=2" );
+		IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
 
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -485,8 +505,368 @@ class CPreferenceDialog : CBaseDialog
 
 		IupSetAttribute( frameColor, "TITLE", toStringz( GLOBAL.languageItems["color"] ));
 
+		
+		// Color -1
+		Ihandle* label_Scintilla = IupLabel( toStringz( GLOBAL.languageItems["scintilla"] ~ ":" ) );
+		Ihandle* btn_Scintilla_FG = IupButton( null, null );
+		Ihandle* btn_Scintilla_BG = IupButton( null, null );
+		IupSetAttribute( btn_Scintilla_FG, "BGCOLOR", toStringz(GLOBAL.editColor.scintillaFore.dup) );
+		IupSetAttribute( btn_Scintilla_BG, "BGCOLOR", toStringz(GLOBAL.editColor.scintillaBack.dup) );
+		IupSetHandle( "btn_Scintilla_FG", btn_Scintilla_FG );
+		IupSetHandle( "btn_Scintilla_BG", btn_Scintilla_BG );
+		IupSetCallback( btn_Scintilla_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btn_Scintilla_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChooseScintilla_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btn_Scintilla_FG, "SIZE", "64x8" );
+			IupSetAttribute( btn_Scintilla_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btn_Scintilla_FG, "SIZE", "64x12" );
+			IupSetAttribute( btn_Scintilla_BG, "SIZE", "64x12" );
+		}
+
+		Ihandle* labelSCE_B_COMMENT = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_COMMENT"] ~ ":" ) );
+		Ihandle* btnSCE_B_COMMENT_FG = IupButton( null, null );
+		Ihandle* btnSCE_B_COMMENT_BG = IupButton( null, null );
+		IupSetAttribute( btnSCE_B_COMMENT_FG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_COMMENT_Fore.dup) );
+		IupSetAttribute( btnSCE_B_COMMENT_BG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_COMMENT_Back.dup) );
+		IupSetHandle( "btnSCE_B_COMMENT_FG", btnSCE_B_COMMENT_FG );
+		IupSetHandle( "btnSCE_B_COMMENT_BG", btnSCE_B_COMMENT_BG );
+		IupSetCallback( btnSCE_B_COMMENT_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSCE_B_COMMENT_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSCE_B_COMMENT_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_COMMENT_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSCE_B_COMMENT_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSCE_B_COMMENT_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelSCE_B_NUMBER = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_NUMBER"] ~ ":" ) );
+		Ihandle* btnSCE_B_NUMBER_FG = IupButton( null, null );
+		Ihandle* btnSCE_B_NUMBER_BG = IupButton( null, null );
+		IupSetAttribute( btnSCE_B_NUMBER_FG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_NUMBER_Fore.dup) );
+		IupSetAttribute( btnSCE_B_NUMBER_BG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_NUMBER_Back.dup) );
+		IupSetHandle( "btnSCE_B_NUMBER_FG", btnSCE_B_NUMBER_FG );
+		IupSetHandle( "btnSCE_B_NUMBER_BG", btnSCE_B_NUMBER_BG );
+		IupSetCallback( btnSCE_B_NUMBER_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSCE_B_NUMBER_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSCE_B_NUMBER_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_NUMBER_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSCE_B_NUMBER_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSCE_B_NUMBER_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelSCE_B_STRING = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_STRING"] ~ ":" ) );
+		Ihandle* btnSCE_B_STRING_FG = IupButton( null, null );
+		Ihandle* btnSCE_B_STRING_BG = IupButton( null, null );
+		IupSetAttribute( btnSCE_B_STRING_FG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_STRING_Fore.dup) );
+		IupSetAttribute( btnSCE_B_STRING_BG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_STRING_Back.dup) );
+		IupSetHandle( "btnSCE_B_STRING_FG", btnSCE_B_STRING_FG );
+		IupSetHandle( "btnSCE_B_STRING_BG", btnSCE_B_STRING_BG );
+		IupSetCallback( btnSCE_B_STRING_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSCE_B_STRING_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSCE_B_STRING_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_STRING_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSCE_B_STRING_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSCE_B_STRING_BG, "SIZE", "64x12" );
+		}		
+		
+		Ihandle* labelSCE_B_PREPROCESSOR = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_PREPROCESSOR"] ~ ":" ) );
+		Ihandle* btnSCE_B_PREPROCESSOR_FG = IupButton( null, null );
+		Ihandle* btnSCE_B_PREPROCESSOR_BG = IupButton( null, null );
+		IupSetAttribute( btnSCE_B_PREPROCESSOR_FG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.dup) );
+		IupSetAttribute( btnSCE_B_PREPROCESSOR_BG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.dup) );
+		IupSetHandle( "btnSCE_B_PREPROCESSOR_FG", btnSCE_B_PREPROCESSOR_FG );
+		IupSetHandle( "btnSCE_B_PREPROCESSOR_BG", btnSCE_B_PREPROCESSOR_BG );
+		IupSetCallback( btnSCE_B_PREPROCESSOR_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSCE_B_PREPROCESSOR_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelSCE_B_OPERATOR = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_OPERATOR"] ~ ":" ) );
+		Ihandle* btnSCE_B_OPERATOR_FG = IupButton( null, null );
+		Ihandle* btnSCE_B_OPERATOR_BG = IupButton( null, null );
+		IupSetAttribute( btnSCE_B_OPERATOR_FG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_OPERATOR_Fore.dup) );
+		IupSetAttribute( btnSCE_B_OPERATOR_BG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_OPERATOR_Back.dup) );
+		IupSetHandle( "btnSCE_B_OPERATOR_FG", btnSCE_B_OPERATOR_FG );
+		IupSetHandle( "btnSCE_B_OPERATOR_BG", btnSCE_B_OPERATOR_BG );
+		IupSetCallback( btnSCE_B_OPERATOR_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSCE_B_OPERATOR_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSCE_B_OPERATOR_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_OPERATOR_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSCE_B_OPERATOR_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSCE_B_OPERATOR_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelSCE_B_IDENTIFIER = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_IDENTIFIER"] ~ ":" ) );
+		Ihandle* btnSCE_B_IDENTIFIER_FG = IupButton( null, null );
+		Ihandle* btnSCE_B_IDENTIFIER_BG = IupButton( null, null );
+		IupSetAttribute( btnSCE_B_IDENTIFIER_FG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.dup) );
+		IupSetAttribute( btnSCE_B_IDENTIFIER_BG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_IDENTIFIER_Back.dup) );
+		IupSetHandle( "btnSCE_B_IDENTIFIER_FG", btnSCE_B_IDENTIFIER_FG );
+		IupSetHandle( "btnSCE_B_IDENTIFIER_BG", btnSCE_B_IDENTIFIER_BG );
+		IupSetCallback( btnSCE_B_IDENTIFIER_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSCE_B_IDENTIFIER_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSCE_B_IDENTIFIER_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_IDENTIFIER_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSCE_B_IDENTIFIER_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSCE_B_IDENTIFIER_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelSCE_B_COMMENTBLOCK = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_COMMENTBLOCK"] ~ ":" ) );
+		Ihandle* btnSCE_B_COMMENTBLOCK_FG = IupButton( null, null );
+		Ihandle* btnSCE_B_COMMENTBLOCK_BG = IupButton( null, null );
+		IupSetAttribute( btnSCE_B_COMMENTBLOCK_FG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.dup) );
+		IupSetAttribute( btnSCE_B_COMMENTBLOCK_BG, "BGCOLOR", toStringz(GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.dup) );	
+		IupSetHandle( "btnSCE_B_COMMENTBLOCK_FG", btnSCE_B_COMMENTBLOCK_FG );
+		IupSetHandle( "btnSCE_B_COMMENTBLOCK_BG", btnSCE_B_COMMENTBLOCK_BG );
+		IupSetCallback( btnSCE_B_COMMENTBLOCK_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSCE_B_COMMENTBLOCK_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_BG, "SIZE", "64x12" );
+		}
+		
+		
+		Ihandle* labelPrj = IupLabel( toStringz( GLOBAL.languageItems["caption_prj"] ~ ":" ) );
+		IupSetAttribute( labelPrj, "SIZE", toStringz("100x") );
+		Ihandle* btnPrj_FG = IupButton( null, null );
+		Ihandle* btnPrj_BG = IupButton( null, null );
+		IupSetAttribute( btnPrj_FG, "BGCOLOR", toStringz(GLOBAL.editColor.projectFore.dup) );
+		IupSetAttribute( btnPrj_BG, "BGCOLOR", toStringz(GLOBAL.editColor.projectBack.dup) );	
+		IupSetHandle( "btnPrj_FG", btnPrj_FG );
+		IupSetHandle( "btnPrj_BG", btnPrj_BG );
+		IupSetCallback( btnPrj_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnPrj_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnPrj_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnPrj_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnPrj_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnPrj_BG, "SIZE", "64x12" );
+		}		
+		
+		Ihandle* labelOutline = IupLabel( toStringz( GLOBAL.languageItems["outline"] ~ ":" ) );
+		Ihandle* btnOutline_FG = IupButton( null, null );
+		Ihandle* btnOutline_BG = IupButton( null, null );
+		IupSetAttribute( btnOutline_FG, "BGCOLOR", toStringz(GLOBAL.editColor.outlineFore.dup) );
+		IupSetAttribute( btnOutline_BG, "BGCOLOR", toStringz(GLOBAL.editColor.outlineBack.dup) );	
+		IupSetHandle( "btnOutline_FG", btnOutline_FG );
+		IupSetHandle( "btnOutline_BG", btnOutline_BG );
+		IupSetCallback( btnOutline_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnOutline_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnOutline_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnOutline_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnOutline_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnOutline_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelFilelist= IupLabel( toStringz( GLOBAL.languageItems["filelist"] ~ ":" ) );
+		Ihandle* btnFilelist_FG = IupButton( null, null );
+		Ihandle* btnFilelist_BG = IupButton( null, null );
+		IupSetAttribute( btnFilelist_FG, "BGCOLOR", toStringz(GLOBAL.editColor.filelistFore.dup) );
+		IupSetAttribute( btnFilelist_BG, "BGCOLOR", toStringz(GLOBAL.editColor.filelistBack.dup) );	
+		IupSetHandle( "btnFilelist_FG", btnFilelist_FG );
+		IupSetHandle( "btnFilelist_BG", btnFilelist_BG );
+		IupSetCallback( btnFilelist_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnFilelist_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnFilelist_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnFilelist_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnFilelist_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnFilelist_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelOutput= IupLabel( toStringz( GLOBAL.languageItems["output"] ~ ":" ) );
+		Ihandle* btnOutput_FG = IupButton( null, null );
+		Ihandle* btnOutput_BG = IupButton( null, null );
+		IupSetAttribute( btnOutput_FG, "BGCOLOR", toStringz(GLOBAL.editColor.outputFore.dup) );
+		IupSetAttribute( btnOutput_BG, "BGCOLOR", toStringz(GLOBAL.editColor.outputBack.dup) );	
+		IupSetHandle( "btnOutput_FG", btnOutput_FG );
+		IupSetHandle( "btnOutput_BG", btnOutput_BG );
+		IupSetCallback( btnOutput_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnOutput_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnOutput_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnOutput_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnOutput_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnOutput_BG, "SIZE", "64x12" );
+		}
+		
+		Ihandle* labelSearch= IupLabel( toStringz( GLOBAL.languageItems["caption_search"] ~ ":" ) );
+		Ihandle* btnSearch_FG = IupButton( null, null );
+		Ihandle* btnSearch_BG = IupButton( null, null );
+		IupSetAttribute( btnSearch_FG, "BGCOLOR", toStringz(GLOBAL.editColor.searchFore.dup) );
+		IupSetAttribute( btnSearch_BG, "BGCOLOR", toStringz(GLOBAL.editColor.searchBack.dup) );	
+		IupSetHandle( "btnSearch_FG", btnSearch_FG );
+		IupSetHandle( "btnSearch_BG", btnSearch_BG );
+		IupSetCallback( btnSearch_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnSearch_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnSearch_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnSearch_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnSearch_FG, "SIZE", "64x12" );
+			IupSetAttribute( btnSearch_BG, "SIZE", "64x12" );
+		}		
+		
+		Ihandle* gboxColor_1 = IupGridBox
+		(
+			IupSetAttributes( labelPrj, "" ),
+			//IupFill(),
+			IupSetAttributes( btnPrj_FG, "" ),
+			IupSetAttributes( btnPrj_BG, "" ),
+
+			IupSetAttributes( labelOutline, "" ),
+			//IupFill(),
+			IupSetAttributes( btnOutline_FG, "" ),
+			IupSetAttributes( btnOutline_BG, "" ),
+
+			IupSetAttributes( labelFilelist, "" ),
+			//IupFill(),
+			IupSetAttributes( btnFilelist_FG, "" ),
+			IupSetAttributes( btnFilelist_BG, "" ),
+
+			IupSetAttributes( labelOutput, "" ),
+			//IupFill(),
+			IupSetAttributes( btnOutput_FG, "" ),
+			IupSetAttributes( btnOutput_BG, "" ),
+
+			IupSetAttributes( labelSearch, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSearch_FG, "" ),
+			IupSetAttributes( btnSearch_BG, "" ),
+			
+			
+			IupSetAttributes( labelSelectFore, "" ),
+			IupSetAttributes( btnSelectFore, "" ),
+			//IupSetAttributes( labelSelectBack, "" ),
+			IupSetAttributes( btnSelectBack, "" ),
+
+			IupSetAttributes( labelLinenumFore, "" ),
+			IupSetAttributes( btnLinenumFore, "" ),
+			//IupSetAttributes( labelLinenumBack, "" ),
+			IupSetAttributes( btnLinenumBack, "" ),			
+			
+			
+			
+			IupSetAttributes( label_Scintilla, "" ),
+			//IupFill(),
+			IupSetAttributes( btn_Scintilla_FG,"" ),
+			IupSetAttributes( btn_Scintilla_BG, "" ),
+
+			IupSetAttributes( labelSCE_B_COMMENT, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSCE_B_COMMENT_FG,"" ),
+			IupSetAttributes( btnSCE_B_COMMENT_BG, "" ),
+
+			IupSetAttributes( labelSCE_B_NUMBER, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSCE_B_NUMBER_FG, "" ),
+			IupSetAttributes( btnSCE_B_NUMBER_BG, "" ),
+
+			IupSetAttributes( labelSCE_B_STRING, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSCE_B_STRING_FG, "" ),
+			IupSetAttributes( btnSCE_B_STRING_BG, "" ),
+
+			IupSetAttributes( labelSCE_B_PREPROCESSOR, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSCE_B_PREPROCESSOR_FG, "" ),
+			IupSetAttributes( btnSCE_B_PREPROCESSOR_BG, "" ),
+
+			IupSetAttributes( labelSCE_B_OPERATOR, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSCE_B_OPERATOR_FG, "" ),
+			IupSetAttributes( btnSCE_B_OPERATOR_BG, "" ),
+
+			IupSetAttributes( labelSCE_B_IDENTIFIER, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSCE_B_IDENTIFIER_FG, "" ),
+			IupSetAttributes( btnSCE_B_IDENTIFIER_BG, "" ),
+
+			IupSetAttributes( labelSCE_B_COMMENTBLOCK, "" ),
+			//IupFill(),
+			IupSetAttributes( btnSCE_B_COMMENTBLOCK_FG, "" ),
+			IupSetAttributes( btnSCE_B_COMMENTBLOCK_BG, "" ),
+
+			null
+		);
+		IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=4,GAPCOL=20,MARGIN=2x10" );
+
+		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
+		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
+		IupSetAttribute( frameColor_1, "SIZE", "275x" );//IupGetAttribute( frameFont, "SIZE" ) );
+
+		IupSetAttribute( frameColor_1, "TITLE", toStringz( GLOBAL.languageItems["colorfgbg"] ));
+		
+		
+		
+		/*
 		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, frameColor, null );
 		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
+		*/
+		Ihandle* vColor = IupVbox( frameColor, frameColor_1, null );
+		IupSetAttributes( vColor, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );		
 
 
 		// Short Cut
@@ -524,46 +904,46 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* keyWordText0 = IupText( null );
 		IupSetAttributes( keyWordText0, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText0, "VALUE", toStringz( GLOBAL.KEYWORDS[0] ) );
+		IupSetAttribute( keyWordText0, "VALUE", toStringz( GLOBAL.KEYWORDS[0].dup ) );
 		IupSetHandle( "keyWordText0", keyWordText0 );
 		Ihandle* keyWordText1 = IupText( null );
 		IupSetAttributes( keyWordText1, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText1, "VALUE", toStringz( GLOBAL.KEYWORDS[1] ) );
+		IupSetAttribute( keyWordText1, "VALUE", toStringz( GLOBAL.KEYWORDS[1].dup ) );
 		IupSetHandle( "keyWordText1", keyWordText1 );
 		Ihandle* keyWordText2 = IupText( null );
 		IupSetAttributes( keyWordText2, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText2, "VALUE", toStringz( GLOBAL.KEYWORDS[2] ) );
+		IupSetAttribute( keyWordText2, "VALUE", toStringz( GLOBAL.KEYWORDS[2].dup ) );
 		IupSetHandle( "keyWordText2", keyWordText2 );
 		Ihandle* keyWordText3 = IupText( null );
 		IupSetAttributes( keyWordText3, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText3, "VALUE", toStringz( GLOBAL.KEYWORDS[3] ) );
+		IupSetAttribute( keyWordText3, "VALUE", toStringz( GLOBAL.KEYWORDS[3].dup ) );
 		IupSetHandle( "keyWordText3", keyWordText3 );
 
 
 		Ihandle* labelKeyWord0 = IupLabel( toStringz( GLOBAL.languageItems["keyword0"] ) );
 		Ihandle* btnKeyWord0Color = IupButton( null, null );
-		IupSetAttribute( btnKeyWord0Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[0]) );
+		IupSetAttribute( btnKeyWord0Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[0].dup) );
 		version(Windows) IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord0Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
 		IupSetCallback( btnKeyWord0Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelKeyWord1 = IupLabel( toStringz( GLOBAL.languageItems["keyword1"] ) );
 		Ihandle* btnKeyWord1Color = IupButton( null, null );
-		IupSetAttribute( btnKeyWord1Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[1]) );
+		IupSetAttribute( btnKeyWord1Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[1].dup) );
 		version(Windows) IupSetAttribute( btnKeyWord1Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord1Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord1Color", btnKeyWord1Color );
 		IupSetCallback( btnKeyWord1Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelKeyWord2 = IupLabel( toStringz( GLOBAL.languageItems["keyword2"] ) );
 		Ihandle* btnKeyWord2Color = IupButton( null, null );
-		IupSetAttribute( btnKeyWord2Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[2]) );
+		IupSetAttribute( btnKeyWord2Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[2].dup) );
 		version(Windows) IupSetAttribute( btnKeyWord2Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord2Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord2Color", btnKeyWord2Color );
 		IupSetCallback( btnKeyWord2Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelKeyWord3 = IupLabel( toStringz( GLOBAL.languageItems["keyword3"] ) );
 		Ihandle* btnKeyWord3Color = IupButton( null, null );
-		IupSetAttribute( btnKeyWord3Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[3]) );
+		IupSetAttribute( btnKeyWord3Color, "BGCOLOR", toStringz(GLOBAL.editColor.keyWord[3].dup) );
 		version(Windows) IupSetAttribute( btnKeyWord3Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord3Color, "SIZE", "24x12" );
 		IupSetHandle( "btnKeyWord3Color", btnKeyWord3Color );
 		IupSetCallback( btnKeyWord3Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
@@ -591,13 +971,14 @@ class CPreferenceDialog : CBaseDialog
 
 		IupSetAttribute( vBoxPage01, "TABTITLE", toStringz( GLOBAL.languageItems["compiler"] ) );
 		IupSetAttribute( vBoxPage02, "TABTITLE", toStringz( GLOBAL.languageItems["editor"] ) );
+		IupSetAttribute( vColor, "TABTITLE", toStringz( GLOBAL.languageItems["color"] ) );
 		IupSetAttribute( shortCutList, "TABTITLE", toStringz( GLOBAL.languageItems["shortcut"] ) );
 		IupSetAttribute( keyWordVbox, "TABTITLE", toStringz( GLOBAL.languageItems["keywords"] ) );
 		IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
 	
 		
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, shortCutList, keyWordVbox, null );
+		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
 
@@ -694,6 +1075,23 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnFoldingColor", null );
 		IupSetHandle( "btnBookmarkColor", null );
 		IupSetHandle( "textAlpha", null );
+		
+		IupSetHandle( "btn_Scintilla_FG", null );
+		IupSetHandle( "btn_Scintilla_BG", null );
+		IupSetHandle( "btnSCE_B_COMMENT_FG", null );
+		IupSetHandle( "btnSCE_B_COMMENT_BG", null );
+		IupSetHandle( "btnSCE_B_NUMBER_FG", null );
+		IupSetHandle( "btnSCE_B_NUMBER_BG", null );
+		IupSetHandle( "btnSCE_B_STRING_FG", null );
+		IupSetHandle( "btnSCE_B_STRING_BG", null );
+		IupSetHandle( "btnSCE_B_PREPROCESSOR_FG", null );
+		IupSetHandle( "btnSCE_B_PREPROCESSOR_BG", null );
+		IupSetHandle( "btnSCE_B_OPERATOR_FG", null );
+		IupSetHandle( "btnSCE_B_OPERATOR_BG", null );
+		IupSetHandle( "btnSCE_B_IDENTIFIER_FG", null );
+		IupSetHandle( "btnSCE_B_IDENTIFIER_BG", null );
+		IupSetHandle( "btnSCE_B_COMMENTBLOCK_FG", null );
+		IupSetHandle( "btnSCE_B_COMMENTBLOCK_BG", null );		
 
 		IupSetHandle( "btnKeyWord0Color", null );
 		IupSetHandle( "btnKeyWord1Color", null );
@@ -952,6 +1350,55 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.selAlpha				= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" )).dup;
 		else
 			GLOBAL.editColor.selAlpha				= fromStringz(IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" )).dup;
+			
+		GLOBAL.editColor.scintillaFore				= fromStringz(IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.scintillaBack				= fromStringz(IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_COMMENT_Fore			= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_COMMENT_Back			= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_NUMBER_Fore			= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_NUMBER_Back			= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_STRING_Fore			= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_STRING_Back			= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore	= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Back	= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_OPERATOR_Fore		= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_OPERATOR_Back		= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Fore		= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Back		= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore	= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back	= fromStringz(IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.prjTitle					= fromStringz(IupGetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.prjSourceType				= fromStringz(IupGetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR" )).dup;
+		
+		
+		GLOBAL.editColor.projectFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.projectBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.outlineFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.outlineBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.filelistFore				= fromStringz(IupGetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.filelistBack				= fromStringz(IupGetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.outputFore					= fromStringz(IupGetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.outputBack					= fromStringz(IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.searchFore					= fromStringz(IupGetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR" )).dup;
+		GLOBAL.editColor.searchBack					= fromStringz(IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR" )).dup;
+		
+		GLOBAL.projectTree.changeColor();
+		GLOBAL.outlineTree.changeColor();
+		GLOBAL.fileListTree.changeColor();
+		
+		IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR" ) );
+		Ihandle* formattagOutput = IupUser();
+		IupSetAttribute(formattagOutput, "SELECTIONPOS", toStringz( "ALL" ));
+		IupSetAttribute(formattagOutput, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore.dup ) );
+		IupSetAttribute( GLOBAL.outputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattagOutput);
+		
+		IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR" ) );
+		Ihandle* formattagSearch = IupUser();
+		IupSetAttribute(formattagSearch, "SELECTIONPOS", toStringz( "ALL" ));
+		IupSetAttribute(formattagSearch, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore.dup ) );
+		IupSetAttribute( GLOBAL.searchOutputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattagSearch);
+		
+		
 
 		GLOBAL.editColor.keyWord[0]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" )).dup;
 		GLOBAL.editColor.keyWord[1]					= fromStringz(IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" )).dup;
@@ -1035,8 +1482,7 @@ extern(C) // Callback for CPreferenceDialog
 		//IupSetAttribute(dlg, "ALPHA", "142");
 		IupSetAttribute(dlg, "SHOWHEX", "YES");
 		IupSetAttribute(dlg, "SHOWCOLORTABLE", "YES");
-		IupSetAttribute(dlg, "TITLE", "IupColorDlg");
-		//IupSetCallback(dlg, "HELP_CB", (Icallback)help_cb);
+		IupSetAttribute(dlg, "TITLE", toStringz( GLOBAL.languageItems["color"] ) );
 
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 
@@ -1044,4 +1490,57 @@ extern(C) // Callback for CPreferenceDialog
 
 		return IUP_DEFAULT;
 	}
+	
+	private int CPreferenceDialog_colorChooseScintilla_cb( Ihandle* ih )
+	{
+		Ihandle* dlg = IupColorDlg();
+
+		IupSetAttribute( dlg, "VALUE", IupGetAttribute( ih, "BGCOLOR" ) );
+		IupSetAttribute(dlg, "SHOWHEX", "YES");
+		IupSetAttribute(dlg, "SHOWCOLORTABLE", "YES");
+		IupSetAttribute(dlg, "TITLE", toStringz( GLOBAL.languageItems["color"] ) );
+
+		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
+
+		if( IupGetInt( dlg, "STATUS" ) )
+		{
+			IupSetAttribute( ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+			
+			scope cStringDocument = new CstringConvert( GLOBAL.languageItems["applycolor"] );
+			
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=2,BUTTONS=YESNO" );
+			IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
+			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
+			int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
+			
+			if( button == 1 )
+			{
+				Ihandle* _ih = IupGetHandle( "btnSCE_B_COMMENT_BG" );
+				if( ih != null ) IupSetAttribute( _ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				
+				_ih = IupGetHandle( "btnSCE_B_NUMBER_BG" );
+				if( ih != null ) IupSetAttribute( _ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				
+				_ih = IupGetHandle( "btnSCE_B_STRING_BG" );
+				if( ih != null ) IupSetAttribute( _ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				
+				_ih = IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" );
+				if( ih != null ) IupSetAttribute( _ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				
+				_ih = IupGetHandle( "btnSCE_B_OPERATOR_BG" );
+				if( ih != null ) IupSetAttribute( _ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				
+				_ih = IupGetHandle( "btnSCE_B_IDENTIFIER_BG" );
+				if( ih != null ) IupSetAttribute( _ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				
+				_ih = IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" );
+				if( ih != null ) IupSetAttribute( _ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+			}			
+			
+		}
+
+		return IUP_DEFAULT;
+	}	
 }

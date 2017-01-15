@@ -318,10 +318,46 @@ class CScintilla
 		}
 
 		getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
+
 		IupSetAttribute( sci, "STYLEFONT32", toStringz( font.dup ) );
 		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
+		IupSetAttribute( sci, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.scintillaFore.dup ) );		// 32
+		IupSetAttribute( sci, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.scintillaBack.dup ) );		// 32
+		
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		
+		/*
+		IupSetAttribute( sci, "FGCOLOR", toStringz( GLOBAL.editColor.scintillaFore.dup ) );
+		IupSetAttribute( sci, "BGCOLOR", toStringz( GLOBAL.editColor.scintillaBack.dup ) );
+		*/
+		IupSetAttribute( sci, "STYLEFGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore.dup ) );		// SCE_B_COMMENT 1
+		IupSetAttribute( sci, "STYLEBGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back.dup ) );		// SCE_B_COMMENT 1
+		IupSetAttribute( sci, "STYLEFGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore.dup ) );		// SCE_B_NUMBER 2
+		IupSetAttribute( sci, "STYLEBGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back.dup ) );		// SCE_B_NUMBER 2
+		IupSetAttribute( sci, "STYLEFGCOLOR4", toStringz( GLOBAL.editColor.SCE_B_STRING_Fore.dup ) );		// SCE_B_STRING 4
+		IupSetAttribute( sci, "STYLEBGCOLOR4", toStringz( GLOBAL.editColor.SCE_B_STRING_Back.dup ) );		// SCE_B_STRING 4
+		IupSetAttribute( sci, "STYLEFGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.dup ) );	// SCE_B_PREPROCESSOR 5
+		IupSetAttribute( sci, "STYLEBGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.dup ) );	// SCE_B_PREPROCESSOR 5
+		IupSetAttribute( sci, "STYLEFGCOLOR6", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Fore.dup ) );		// SCE_B_OPERATOR 6
+		IupSetAttribute( sci, "STYLEBGCOLOR6", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back.dup ) );		// SCE_B_OPERATOR 6
+		IupSetAttribute( sci, "STYLEFGCOLOR7", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.dup ) );	// SCE_B_IDENTIFIER 7
+		IupSetAttribute( sci, "STYLEBGCOLOR7", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Back.dup ) );	// SCE_B_IDENTIFIER 7
+		IupSetAttribute( sci, "STYLEFGCOLOR19", toStringz( GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.dup ) );// SCE_B_COMMENTBLOCK 19
+		IupSetAttribute( sci, "STYLEBGCOLOR19", toStringz( GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.dup ) );// SCE_B_COMMENTBLOCK 19
+		
+		IupSetAttribute(sci, "STYLEFGCOLOR3", toStringz( GLOBAL.editColor.keyWord[0].dup ) );	// SCE_B_KEYWORD 3
+		IupSetAttribute(sci, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.keyWord[1].dup ));	// SCE_B_KEYWORD2 10
+		IupSetAttribute(sci, "STYLEFGCOLOR11", toStringz( GLOBAL.editColor.keyWord[2].dup ));	// SCE_B_KEYWORD3 11
+		IupSetAttribute(sci, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.keyWord[3].dup ));	// SCE_B_KEYWORD4 12
+		
+		/*
+		IupSetAttribute(sci, "STYLEBGCOLOR3", toStringz( GLOBAL.editColor.scintillaBack.dup ) );	// SCE_B_KEYWORD 3
+		IupSetAttribute(sci, "STYLEBGCOLOR10", toStringz( GLOBAL.editColor.scintillaBack.dup ));	// SCE_B_KEYWORD2 10
+		IupSetAttribute(sci, "STYLEBGCOLOR11", toStringz( GLOBAL.editColor.scintillaBack.dup ));	// SCE_B_KEYWORD3 11
+		IupSetAttribute(sci, "STYLEBGCOLOR12", toStringz( GLOBAL.editColor.scintillaBack.dup ));	// SCE_B_KEYWORD4 12
+		*/
+		
+		/+
 		IupSetAttribute(sci, "STYLEFGCOLOR1", "0 128 0");		// SCE_B_COMMENT 1
 		IupSetAttribute(sci, "STYLEFGCOLOR2", "0 128 0");		// SCE_B_NUMBER 2
 		//IupSetAttribute(sci, "STYLEFGCOLOR3", "5 91 35");		// SCE_B_KEYWORD 3
@@ -338,7 +374,8 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFGCOLOR11", toStringz( GLOBAL.editColor.keyWord[2] ));	// SCE_B_KEYWORD3 11
 		IupSetAttribute(sci, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.keyWord[3] ));	// SCE_B_KEYWORD4 12
 		IupSetAttribute(sci, "STYLEFGCOLOR19", "0 128 0");		// SCE_B_COMMENTBLOCK 19
-
+		+/
+		
 		// Brace Hightlight
 		IupSetAttribute(sci, "STYLEFGCOLOR34", "255 0 0");	
 		IupSetAttribute(sci, "STYLEBGCOLOR34", "0 255 0");
@@ -359,8 +396,6 @@ class CScintilla
 		IupSetAttribute( sci, "STYLEBOLD32", GLOBAL.cString.convert( Bold ) );
 		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Italic ) );
 		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.cString.convert( Underline ) );
-		IupSetAttribute( sci, "FGCOLOR", GLOBAL.cString.convert( "0 0 0" ) );
-		IupSetAttribute( sci, "BGCOLOR", GLOBAL.cString.convert( "255 255 255" ) );
 
 		getFontAndSize( 10, font, Bold, Italic, Underline, Strikeout, size );
 		IupSetAttribute(sci, "STYLEFGCOLOR40", "102 69 3");	
@@ -444,6 +479,10 @@ class CScintilla
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDERTAIL=EMPTY" );
 			IupSetAttribute( sci, "FOLDFLAGS", "LINEAFTER_CONTRACTED" );
 			IupSetAttribute( sci, "MARGINSENSITIVE2", "YES" );
+			
+			// define SCI_SETFOLDMARGINCOLOUR 2290  SCI_SETMARGINBACKN 2250
+			// IupScintillaSendMessage( sci, 2291, 6, toStringz( GLOBAL.editColor.fold.dup ) );
+			//IupSetAttribute( sci, "STYLEBGCOLOR39", toStringz( GLOBAL.editColor.fold.dup ) );
 		}
 		else
 		{
@@ -1151,6 +1190,14 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
+					
+				case "comment":
+					if( sk.keyValue == c )
+					{
+						menu.comment_cb();
+						return IUP_IGNORE;
+					}
+					break;					
 					
 				default:
 			}

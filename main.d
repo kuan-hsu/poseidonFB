@@ -9,7 +9,6 @@ import menu, scintilla, actionManager;
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
 
-private char[][] _args;
 
 version(Windows)
 {
@@ -120,8 +119,6 @@ void main( char[][] args )
 	
 	version(Windows)
 	{
-		_args = args;
-		
 		IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
 		if( IupGetGlobal( toStringz( "SINGLEINSTANCE" ) ) == null  )
 		{
@@ -180,7 +177,7 @@ void main( char[][] args )
 	IupSetCallback( GLOBAL.mainDlg, "SHOW_CB", cast(Icallback) &mainDialog_SHOW_cb );
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
 	IupSetCallback( GLOBAL.mainDlg, "RESIZE_CB", cast(Icallback) &mainDialog_RESIZE_cb );
-	IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB );
+	version(Windows) IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB );
 	
 	
 	createLayout();
@@ -189,6 +186,7 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
+	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );

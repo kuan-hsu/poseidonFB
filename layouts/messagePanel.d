@@ -16,16 +16,22 @@ import tango.io.Stdout;
 void createMessagePanel()
 {
 	GLOBAL.outputPanel = IupText( null );
-	IupSetAttributes( GLOBAL.outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
+	IupSetAttributes( GLOBAL.outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.outputPanel, "VISIBLECOLUMNS", null );
+	IupSetAttribute( GLOBAL.outputPanel, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore.dup ) );
+	IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", toStringz( GLOBAL.editColor.outputBack.dup ) );
 	IupSetCallback( GLOBAL.outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
-	//IupSetAttribute( GLOBAL.outputPanel, "FORMATTING", "YES");
+	IupSetCallback( GLOBAL.outputPanel, "VALUECHANGED_CB", cast(Icallback) &outputPanel_VALUECHANGED_CB );
 	
 
 	GLOBAL.searchOutputPanel = IupText( null );
-	IupSetAttributes( GLOBAL.searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
+	IupSetAttributes( GLOBAL.searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLECOLUMNS", null );
+	IupSetAttribute( GLOBAL.searchOutputPanel, "FGCOLOR", toStringz( GLOBAL.editColor.searchFore.dup ) );
+	IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", toStringz( GLOBAL.editColor.searchBack.dup ) );
+	
 	IupSetCallback( GLOBAL.searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
+	IupSetCallback( GLOBAL.searchOutputPanel, "VALUECHANGED_CB", cast(Icallback) &searchOutput_VALUECHANGED_CB );
 
 
 	IupSetAttribute( GLOBAL.outputPanel, "TABTITLE", toStringz( GLOBAL.languageItems["output"] ) );
@@ -108,6 +114,30 @@ extern(C)
 		IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 		IupDestroy( popupMenu );
 	}
+	
+	private int outputPanel_VALUECHANGED_CB( Ihandle *ih )
+	{
+		Ihandle* formattag = IupUser();
+		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
+		IupSetAttribute(formattag, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore.dup ) );
+		
+		IupSetAttribute( ih, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
+		
+		return IUP_DEFAULT;
+	}
+	
+	private int searchOutput_VALUECHANGED_CB( Ihandle *ih )
+	{
+		Ihandle* formattag = IupUser();
+		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
+		IupSetAttribute(formattag, "FGCOLOR", toStringz( GLOBAL.editColor.searchFore ) );
+		
+		IupSetAttribute( ih, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
+		
+		return IUP_DEFAULT;
+	}
+	
+	
 	
 	private int outputPanelButton_cb(Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{

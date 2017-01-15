@@ -1,0 +1,235 @@
+﻿file=Файл
+   new=Новий
+   open=Відкрити
+   save=Зберегти
+   saveas=Зберегти Як...
+   saveall=Зберегти Усе
+   close=Закрити
+   closeall=Закрити Усе
+   recentfiles=Недавні файли
+   recentprjs=Недавні проекти
+   clearall=Прибрати Усе
+   exit=Вийти
+   
+edit=Редагувати
+   redo=Повернути
+   undo=Скасувати
+   cut=Вирізати
+   copy=Копіювати
+   paste=Вставити
+   commentline=(Роз)Закоментувати строку
+   selectall=Вибрати Усе
+   
+search=Пошук
+   findreplace=Знайти / Замінити
+   findnext=Знайти наступне
+   findprev=Знайти попереднє
+   findreplacefiles=Знайти / Замінити в файлах
+   goto=Перейти до строки
+
+view=Вид
+   outline=Обрис
+   message=Повідомлення
+   
+prj=Проект
+   newprj=Новий проект
+   openprj=Відкрити проект
+   importprj=Імпорт проекту Fbedit
+   saveprj=Зберегти проект
+   saveallprj=Зберегти усі проекти
+   closeprj=Закрити проект
+   closeallprj=Закрити усі проекти
+   properties=Властивості...
+   
+   openinexplorer=Відкрити в провіднику
+   addinprj=Додати файл(и) в проект
+   removefromprj=Прибрати з проекту
+   rename=Перейменувати файли
+   newfile=Новий файл
+   newfolder=Нова папка
+   addfile=Додати файл(и)
+   
+build=Побудувати
+   compile=Компілювати
+   compilerun=Компілювати и виконати
+   run=Виконати
+   buildprj=Зібрати проект
+   quickrun=Швидкий запуск
+   
+debug=Зневадження
+   rundebug=Почати зневадження
+   compiledebug=Компілювати зі зневадженням
+   builddebug=Зібрати проект зі зневадженням
+   
+options=Налаштування
+   tools=Tools
+      seteol=Встановити символ завершення строки
+      converteol=Перетворити символ завершення строки
+      convertencoding=Перетворити кодування
+      convertcase=Змінити регістр
+         uppercase=ВЕРХНІЙ
+         lowercase=нижній
+         mixercase=Змішаний
+   preference=Preference
+      compiler=Компілятор
+         compilerpath=Шлях до компілятора
+         debugpath=Шлях до зневаджувача
+         compileropts=Опції компілятора
+         compilersetting=Налаштування компілятора
+            errorannotation=Показувати помилки/попередження компілятора
+            showresultwindow=Показати вікно результату компіляції
+         parsersetting=Налаштування парсеру
+            enablekeyword=Увімкнути автозавершення ключових слів
+            enableparser=Увімкнути парсер
+            showtitle=Показувати назви функцій
+            showtypeparam=Показувати Тип з функціональними параметрами
+            sortignorecase=Список автозавершення ігнорує регістр
+            selectcase=Підбір в списку автозаповнення не чутливий до регістру
+            showlisttype=Показувати тип списку автозавершення
+            showallmembers=Показувати усі члени ( public, protected, private )
+            parserlive=Рівень ParseLive!
+               none=Відсутний
+               light=Легкий
+               full=Повний
+               update=Оновлювати Outline
+            trigger=Гачок автозавершення
+               triggertip=Встановити 0, щоб вимкнути
+            includelevel=Включити рівні
+         editor=Редактор
+            lnmargin=Показувати відступ з номерами рядків
+            bkmargin=Показувати відступ з закладками
+            fdmargin=Показувати відступ розкладання
+            indentguide=Показувати направляючу відступу
+            showcaretline=Підсвітити поточний рядок
+            wordwarp=Деформація слів
+            tabtospace=Замінити табуляцію з пробілами
+            autoindent=Автоматичний відступ
+            showeol=Показувати символ завершення рядку
+            showspacetab=Показувати пробіли та табуляції
+            autoinsertend=Автоматична вставка завершення блоку
+            coloroutline=Розфарбувати пункти ескізу
+            showidemessage=Показати повідомлення IDE
+            boldkeyword=Bold Keywords
+            tabwidth=Довжина табуляції
+            columnedge=Відступ направляючої
+            autoconvertkeyword=Автоматичне перетворення регістру ключових слів
+            font=Шрифт
+               default=ПоЗамовчуванню
+               document=Документ
+               leftside=Ліва сторона
+               'fistlist=FileList
+               'project=Project
+               'outline=Outline
+               bottom=Bottom
+               'output=Output
+               'search=Пошук
+               'debug=Зневадження
+               annotation=Примітка
+            color=Колір
+               caretline=Лінія каретки
+               cursor=Курсор
+               selfor=Передній план вибраного
+               selback=Задній план вибраного
+               lnfor=Передній план нумерації
+               lnback=Задній план нумерації
+               foldcolor=Колір складання
+               selalpha=Альфа вибраного
+               alphatip=Встановити 255, щоб вимкнути альфу
+         shortcut=Поєднання клавіш
+            'findreplace=Find / Replace
+            'findreplacefiles=Find / Replace In Files
+            'findnext=Find Next
+            'finprev=Find Previous
+            'goto=Goto Line
+            gotodef=Перейти до визначення
+            leftwindow=Вмк/Вимк вікно зліва
+            bottomwindow=Вмк/Вимк вікно знизу
+            showtype=Показати тип
+            reparse=Розібрати ще
+            nexttab=Наступна вкладка
+            prevtab=Попередня вкладка
+            newtab=Нова вкладка
+            autocomplete=Автозавершення
+         keywords=Ключові слова
+            keyword0=КлючовеСлово0
+            keyword1=КлючовеСлово1
+            keyword2=КлючовеСлово2
+            keyword3=КлючовеСлово3
+   language=Мова
+      openlanguage=Вибрати мову...
+   about=Про програму...
+
+bookmark=Встановити закладку
+bookmarkprev=Попередня закладка
+bookmarknext=Наступна закладка
+bookmarkclear=Прибрати усі закладки
+
+outline=Outline
+   collapse=Згорнути
+   showpr=Змінити вигляд
+   refresh=Оновити парсер
+   searchanyword=Шукати будь яке слово
+   hide=Приховати
+
+filelist=FileList
+   fullpath=Повний шлях
+
+output=Output
+   clear=Очистити
+
+'tab
+closeothers=Закрити інші
+
+'popup window
+delete=Delete
+showannotation=Показати анотації
+hideannotation=Приховати анотації
+removeannotation=Видалити усі анотації
+
+'properties
+prjproperties=Властивості проекту
+general=Загальні
+   prjname=Назва проекту
+   prjtype=Тип
+      console=Console Application
+      static=Static Library
+      dynamic=Dynamic Link Library
+   prjdir=Каталог проекту
+   prjmainfile=Головний файл
+   prjtarget=І'мя цілі
+   prjargs=Аргументи виконання
+   prjopts=Параметри компіляції
+   prjcomment=Примітка
+   prjcompiler=Шлях до FBC
+include=Включити...
+   includepath=Шляхи до модулів
+   librarypath=Шляхи до бібліотек
+   
+'search window
+findwhat=Шукати
+replacewith=Замінити
+direction=Напрямок
+   forward=Вперед
+   backward=Назад
+scope=Межі
+   all=Усе
+   selection=Вибране
+casesensitive=Враховувати регістр
+wholeword=Лише цілі слова
+find=Знайти
+findall=Знайти усе
+replacefind=Знайти/Замінити
+replace=Замінити
+replaceall=Замінити Усе
+countall=Підрахувати усе
+bookmarkall=Позначити усе
+document=Документ
+alldocument=Усі документи
+allproject=Усі проекти
+
+'args window
+argtitle=Налаштування компілятора / Аргументи EXE
+
+yes=Так
+no=Ні
+cancel=Відмінити

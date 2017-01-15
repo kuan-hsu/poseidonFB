@@ -163,6 +163,7 @@ options=&Opciones
 				sc_newtab=Nueva pestaña
 				sc_autocomplete=Auto completar
 				sc_compilerun=Compilar archivo y ejecutar
+				sc_comment=Des/Comentar línea
 			keywords=Palabras claves
 				keyword0=Grupo 0
 				keyword1=Grupo 1

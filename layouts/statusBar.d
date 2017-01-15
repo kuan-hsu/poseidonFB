@@ -6,6 +6,7 @@ private import global, scintilla;
 
 Ihandle* createStatusBar()
 {
+	GLOBAL.statusBar_PrjName = IupLabel( "                                            " ); // GLOBAL.languageItems["caption_prj"]
 	GLOBAL.statusBar_Line_Col = IupLabel( "             " );
 	//IupSetAttributes( labelFont, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
 
@@ -22,9 +23,8 @@ Ihandle* createStatusBar()
 	}
 
 
-	Ihandle* StatusBar = IupHbox( IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
-	IupSetAttribute( StatusBar, "GAP", "5" );
-	IupSetAttribute( StatusBar, "MARGIN", "5" );
+	Ihandle* StatusBar = IupHbox( GLOBAL.statusBar_PrjName, IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
+	IupSetAttributes( StatusBar, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
 	version( Windows )
 	{
 		IupSetAttribute( StatusBar, "FONT", "Courier New,9" );

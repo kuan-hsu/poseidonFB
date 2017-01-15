@@ -350,7 +350,17 @@ struct DocumentTabAction
 			StatusBarAction.update();
 
 			// Marked the trees( FileList & ProjectTree )
-			actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() );
+			if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
+			{
+				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
+			}
+			else
+			{
+				int prjID = actionManager.ProjectAction.getActiveProjectID();
+				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
+				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
+				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.dup ) );
+			}
 		}
 
 		return IUP_DEFAULT;
@@ -471,7 +481,17 @@ struct ScintillaAction
 			}
 			StatusBarAction.update();
 
-			toTreeMarked( fullPath );
+			if( !( toTreeMarked( fullPath ) & 2 ))
+			{
+				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
+			}
+			else
+			{
+				int prjID = actionManager.ProjectAction.getActiveProjectID();
+				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
+				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
+				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.dup ) );
+			}			
 
 			return true;
 		}
@@ -502,6 +522,17 @@ struct ScintillaAction
 			//StatusBarAction.update();
 
 			GLOBAL.fileListTree.addItem( _sci );
+			if( !( toTreeMarked( fullPath ) & 2 ))
+			{
+				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
+			}
+			else
+			{
+				int prjID = actionManager.ProjectAction.getActiveProjectID();
+				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
+				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
+				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.dup ) );
+			}			
 			
 			// Parser
 			//GLOBAL.outlineTree.loadFile( fullPath );
@@ -521,8 +552,10 @@ struct ScintillaAction
 		return false;
 	}
 
-	static void toTreeMarked( char[] fullPath, int _switch = 7 )
+	static int toTreeMarked( char[] fullPath, int _switch = 7 )
 	{
+		int result;
+		
 		if( upperCase(fullPath) in GLOBAL.scintillaManager )
 		{
 			CScintilla cSci = GLOBAL.scintillaManager[upperCase(fullPath)];
@@ -531,7 +564,14 @@ struct ScintillaAction
 				if( _switch & 1 ) // Mark the FileList
 				{
 					GLOBAL.fileListTree.markItem( cSci.getFullPath );
+					result = result | 1;
 				}
+				
+				if( _switch & 4 ) // Mark the OutlineTree
+				{
+					GLOBAL.outlineTree.changeTree( cSci.getFullPath );
+					result = result | 4;
+				}				
 
 				if( _switch & 2 ) // Mark the ProjectTree
 				{
@@ -543,17 +583,15 @@ struct ScintillaAction
 						if( upperCase(s) == upperCase(fullPath) )
 						{
 							version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
+							result = result | 2;
 							break;
 						}
 					}
 				}
-
-				if( _switch & 4 ) // Mark the OutlineTree
-				{
-					GLOBAL.outlineTree.changeTree( cSci.getFullPath );
-				}
 			}
 		}
+		
+		return result;
 	}
 
 	static Ihandle* getActiveIupScintilla()

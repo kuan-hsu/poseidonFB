@@ -15,6 +15,15 @@ struct EditorColorUint
 {
 	char[][4] keyWord = [ "5 91 35", "0 0 255", "231 144 20", "16 108 232" ];
 	char[] caretLine = "255 255 128", cursor = "0 0 0", selectionFore = "255 255 255", selectionBack = "0 0 255", linenumFore = "0 0 0", linenumBack = "200 200 200", fold = "200 208 208", selAlpha = "255";
+	char[] scintillaFore = "0 0 0", scintillaBack = "255 255 255", SCE_B_COMMENT_Fore = "0 128 0", SCE_B_COMMENT_Back = "255 255 255";
+	char[] SCE_B_NUMBER_Fore = "0 128 0", SCE_B_NUMBER_Back = "255 255 255", SCE_B_STRING_Fore = "128 0 0", SCE_B_STRING_Back = "255 255 255";
+	char[] SCE_B_PREPROCESSOR_Fore = "0 0 255", SCE_B_PREPROCESSOR_Back = "255 255 255", SCE_B_OPERATOR_Fore = "160 20 20", SCE_B_OPERATOR_Back = "255 255 255";
+	char[] SCE_B_IDENTIFIER_Fore = "0 0 0", SCE_B_IDENTIFIER_Back = "255 255 255", SCE_B_COMMENTBLOCK_Fore = "0 128 0", SCE_B_COMMENTBLOCK_Back = "255 255 255";
+	
+	char[] projectFore = "0 0 0", projectBack = "255 255 255", outlineFore = "0 0 0", outlineBack = "255 255 255";
+	char[] filelistFore = "0 0 0", filelistBack = "255 255 255", outputFore = "0 0 0", outputBack = "255 255 255", searchFore = "0 0 0", searchBack = "255 255 255";
+	
+	char[] prjTitle = "128 0 0", prjSourceType = "0 0 255";
 }
 
 struct ShortKey
@@ -74,7 +83,7 @@ struct GLOBAL
 	static CCompilerHelpDialog	compilerHelpDlg;
 	static CArgOptionDialog		argsDlg;
 
-	static Ihandle*				statusBar_Line_Col, statusBar_Ins, statusBar_EOLType, statusBar_encodingType;
+	static Ihandle*				statusBar, statusBar_PrjName, statusBar_Line_Col, statusBar_Ins, statusBar_EOLType, statusBar_encodingType;
 
 	static Ihandle*				menuOutlineWindow, menuMessageWindow;
 
@@ -193,6 +202,8 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk21;
 		ShortKey sk22 = { "compilerun", "Compile & Run", 536936386 };
 		GLOBAL.shortKeys ~= sk22;
+		ShortKey sk23 = { "comment", "(Un)comment", 536870994 };
+		GLOBAL.shortKeys ~= sk23;
 		
 
 		fontUint fu;
@@ -374,13 +385,23 @@ struct GLOBAL
 						GLOBAL.languageItems["color"] = "Color";
 							GLOBAL.languageItems["caretline"] = "Caret Line";
 							GLOBAL.languageItems["cursor"] = "Cursor";
-							GLOBAL.languageItems["selfor"] = "Selection Foreground";
-							GLOBAL.languageItems["selback"] = "Selection Background";
-							GLOBAL.languageItems["lnfor"] = "Linenumber Foreground";
-							GLOBAL.languageItems["lnback"] = "Linenumber Background";
+							GLOBAL.languageItems["prjtitle"] = "Project Title";
+							GLOBAL.languageItems["sourcefolder"] = "Source Folder";
+							GLOBAL.languageItems["sel"] = "Selection";
+							GLOBAL.languageItems["ln"] = "Linenumber";
 							GLOBAL.languageItems["foldcolor"] = "FoldingMargin Color";
 							GLOBAL.languageItems["selalpha"] = "Selection Alpha";
 								GLOBAL.languageItems["alphatip"] = "Set 255 To Disable Alpha";
+						GLOBAL.languageItems["colorfgbg"] = "Color/Foreground/Background";
+							GLOBAL.languageItems["scintilla"] = "Scintilla";
+							GLOBAL.languageItems["SCE_B_COMMENT"] = "SCE_B_COMMENT";
+							GLOBAL.languageItems["SCE_B_NUMBER"] = "SCE_B_NUMBER";
+							GLOBAL.languageItems["SCE_B_STRING"] = "SCE_B_STRING";
+							GLOBAL.languageItems["SCE_B_PREPROCESSOR"] = "SCE_B_PREPROCESSOR";
+							GLOBAL.languageItems["SCE_B_OPERATOR"] = "SCE_B_OPERATOR";
+							GLOBAL.languageItems["SCE_B_IDENTIFIER"] = "SCE_B_IDENTIFIER";
+							GLOBAL.languageItems["SCE_B_COMMENTBLOCK"] = "SCE_B_COMMENTBLOCK";
+								
 					GLOBAL.languageItems["shortcut"] = "Short Cut";
 						GLOBAL.languageItems["sc_findreplace"] = "Find/Replace";
 						GLOBAL.languageItems["sc_findreplacefiles"] = "Find/Replace In Files";
@@ -406,6 +427,7 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_newtab"] ="New Tab";
 						GLOBAL.languageItems["sc_autocomplete"] = "Auto Complete";
 						GLOBAL.languageItems["sc_compilerun"] = "Compile File And Run";
+						GLOBAL.languageItems["sc_comment"] = "(Un)comment";
 					GLOBAL.languageItems["keywords"] = "Keywords";
 						GLOBAL.languageItems["keyword0"] = "Keyword0";
 						GLOBAL.languageItems["keyword1"] = "Keyword1";
@@ -520,6 +542,7 @@ struct GLOBAL
 		//GLOBAL.languageItems["caption_findreplace"] = "Find / Replace";
 		//GLOBAL.languageItems["caption_findreplacefiles"] = "Find / Replace In Files";
 		//GLOBAL.languageItems["caption_goto"] = "Goto Line";
+		GLOBAL.languageItems["caption_search"] = "Search";
 		GLOBAL.languageItems["caption_prj"] = "Project";
 		GLOBAL.languageItems["caption_openprj"] = "Open Project";
 		GLOBAL.languageItems["caption_importprj"] = "Import Fbedit Project";
@@ -550,6 +573,7 @@ struct GLOBAL
 		GLOBAL.languageItems["cantundo"] = "This action can't be undo! Continue anyway?";
 		GLOBAL.languageItems["exitdebug1"] = "Exit debug right now?";
 		GLOBAL.languageItems["exitdebug2"] = "No debugging symbols found!! Exit debug!";
+		GLOBAL.languageItems["applycolor"] = "Apply to other scintilla background color settings?";
 		GLOBAL.languageItems["quest"] = "Quest";
 		GLOBAL.languageItems["alarm"] = "Alarm";
 		GLOBAL.languageItems["error"] = "Error";

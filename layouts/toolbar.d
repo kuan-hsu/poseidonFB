@@ -12,17 +12,19 @@ class CToolBar
 	import 				menu, parser.ast, tools;
 	
 	Ihandle*			handle, listHandle, guiButton;
+	Ihandle* 			btnNew, btnOpen;
+	Ihandle* 			btnSave, btnSaveAll;
+	Ihandle* 			btnUndo, btnRedo;
+	Ihandle* 			btnCut, btnCopy, btnPaste;
+	Ihandle* 			btnMark, btnMarkPrev, btnMarkNext, btnMarkClean;
+	Ihandle* 			btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun;
+	Ihandle*			outlineButtonHide, messageButtonHide;
+	Ihandle*[7]			labelSEPARATOR;
+	
 	CstringConvert[20]	cStrings;
 
 	void createToolBar()
 	{
-		Ihandle* btnNew, btnOpen;
-		Ihandle* btnSave, btnSaveAll;
-		Ihandle* btnUndo, btnRedo;
-		Ihandle* btnCut, btnCopy, btnPaste;
-		Ihandle* btnMark, btnMarkPrev, btnMarkNext, btnMarkClean;
-		Ihandle* btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun;
-
 		btnNew		= IupButton( null, null );
 		btnOpen		= IupButton( null, "Open" );
 
@@ -218,7 +220,7 @@ class CToolBar
 		IupSetCallback( btnQuickRun, "BUTTON_CB", cast(Icallback) &quickRun_button_cb );
 
 
-		Ihandle*[7] labelSEPARATOR;
+		
 		for( int i = 0; i < 8; i++ )
 		{
 			labelSEPARATOR[i] = IupLabel( null ); 
@@ -232,7 +234,7 @@ class CToolBar
 		IupSetAttributes( listGUIHandle, "1=\"Console\",2=\"GUI\",SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=2");
 		+/
 		
-		Ihandle* outlineButtonHide = IupToggle( null, "Hide" );
+		outlineButtonHide = IupToggle( null, "Hide" );
 		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_r,IMPRESS=icon_shift_l" );
 		IupSetAttribute( outlineButtonHide, "TIP", cStrings[18].toStringz );
 		IupSetHandle( "outlineButtonHide", outlineButtonHide );
@@ -241,7 +243,7 @@ class CToolBar
 			menu.outline_cb( GLOBAL.menuOutlineWindow );
 		});		
 
-		Ihandle* messageButtonHide = IupToggle( null, "HideMessage" );
+		messageButtonHide = IupToggle( null, "HideMessage" );
 		IupSetAttributes( messageButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_t,IMPRESS=icon_shift_b" );
 		IupSetAttribute( messageButtonHide, "TIP", cStrings[19].toStringz );
 		IupSetHandle( "messageButtonHide", messageButtonHide );
@@ -293,7 +295,7 @@ class CToolBar
 	{
 		return guiButton;
 	}
-
+	
 	void showList( bool status )
 	{
 		if( status ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
