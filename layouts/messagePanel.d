@@ -18,8 +18,8 @@ void createMessagePanel()
 	GLOBAL.outputPanel = IupText( null );
 	IupSetAttributes( GLOBAL.outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.outputPanel, "VISIBLECOLUMNS", null );
-	IupSetAttribute( GLOBAL.outputPanel, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore.dup ) );
-	IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", toStringz( GLOBAL.editColor.outputBack.dup ) );
+	IupSetAttribute( GLOBAL.outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
+	IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
 	IupSetCallback( GLOBAL.outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
 	IupSetCallback( GLOBAL.outputPanel, "VALUECHANGED_CB", cast(Icallback) &outputPanel_VALUECHANGED_CB );
 	
@@ -27,8 +27,8 @@ void createMessagePanel()
 	GLOBAL.searchOutputPanel = IupText( null );
 	IupSetAttributes( GLOBAL.searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLECOLUMNS", null );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "FGCOLOR", toStringz( GLOBAL.editColor.searchFore.dup ) );
-	IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", toStringz( GLOBAL.editColor.searchBack.dup ) );
+	IupSetAttribute( GLOBAL.searchOutputPanel, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
+	IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", GLOBAL.editColor.searchBack.toCString );
 	
 	IupSetCallback( GLOBAL.searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
 	IupSetCallback( GLOBAL.searchOutputPanel, "VALUECHANGED_CB", cast(Icallback) &searchOutput_VALUECHANGED_CB );
@@ -119,7 +119,7 @@ extern(C)
 	{
 		Ihandle* formattag = IupUser();
 		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
-		IupSetAttribute(formattag, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore.dup ) );
+		IupSetAttribute(formattag, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
 		
 		IupSetAttribute( ih, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
 		
@@ -130,7 +130,7 @@ extern(C)
 	{
 		Ihandle* formattag = IupUser();
 		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
-		IupSetAttribute(formattag, "FGCOLOR", toStringz( GLOBAL.editColor.searchFore ) );
+		IupSetAttribute(formattag, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
 		
 		IupSetAttribute( ih, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
 		

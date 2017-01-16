@@ -48,6 +48,64 @@ public:
 	}
 }
 
+
+class IupString
+{
+private:
+	import	tango.stdc.stringz;
+	
+	char*	_CstringPointer = null;
+	char[]	_DString;
+
+	void copy( char[] Dstring )
+	{
+		_DString = Dstring;
+		_CstringPointer = cast(char*)calloc( 1, Dstring.length + 1 );
+		memcpy( _CstringPointer, Dstring.ptr, Dstring.length );
+	}
+
+public:
+	this(){}
+	
+	this( char[] Dstring )
+	{
+		copy( Dstring );
+	}
+
+	~this()
+	{
+		if( _CstringPointer != null ) free( _CstringPointer );
+	}
+	
+	void opAssign( char[] rhs )
+	{
+		convert( rhs );
+	}
+	
+	void opAssign( char* rhs )
+	{
+		convert( fromStringz( rhs ).dup );
+	}	
+
+	char* convert( char[] Dstring )
+	{
+		if( _CstringPointer != null ) free( _CstringPointer );
+		copy( Dstring );
+
+		return _CstringPointer;
+	}
+
+	char* toCString()
+	{
+		return _CstringPointer;
+	}
+
+	char[] toDString()
+	{
+		return _DString;
+	}
+}
+
 char* getCString( char[] Dstring )
 {
 	char* CstringPointer = cast(char*)calloc( 1, Dstring.length + 1 );

@@ -1,5 +1,7 @@
 ﻿module global;
 
+import tools;
+
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
@@ -13,6 +15,14 @@ struct EditorLayoutSize
 
 struct EditorColorUint
 {
+	IupString[4]	keyWord;
+	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha;
+	IupString		scintillaFore, scintillaBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
+	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
+	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
+	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
+	
+	/*
 	char[][4] keyWord = [ "5 91 35", "0 0 255", "231 144 20", "16 108 232" ];
 	char[] caretLine = "255 255 128", cursor = "0 0 0", selectionFore = "255 255 255", selectionBack = "0 0 255", linenumFore = "0 0 0", linenumBack = "200 200 200", fold = "200 208 208", selAlpha = "255";
 	char[] scintillaFore = "0 0 0", scintillaBack = "255 255 255", SCE_B_COMMENT_Fore = "0 128 0", SCE_B_COMMENT_Back = "255 255 255";
@@ -24,6 +34,7 @@ struct EditorColorUint
 	char[] filelistFore = "0 0 0", filelistBack = "255 255 255", outputFore = "0 0 0", outputBack = "255 255 255", searchFore = "0 0 0", searchBack = "255 255 255";
 	
 	char[] prjTitle = "128 0 0", prjSourceType = "0 0 255";
+	*/
 }
 
 struct ShortKey
@@ -47,7 +58,7 @@ struct GLOBAL
 
 	import tango.stdc.stringz;
 
-	import tools;
+	
 	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast, parser.scanner, parser.parser;
@@ -147,6 +158,56 @@ struct GLOBAL
 
 	static this()
 	{
+		// Init EditorColorUint
+		GLOBAL.editColor.keyWord[0] = new IupString( "5 91 35" );
+		GLOBAL.editColor.keyWord[1] = new IupString( "0 0 255" );
+		GLOBAL.editColor.keyWord[2] = new IupString( "231 144 0" );
+		GLOBAL.editColor.keyWord[3] = new IupString( "16 108 232" );
+		
+		GLOBAL.editColor.caretLine = new IupString( "255 255 128" );
+		GLOBAL.editColor.cursor = new IupString( "0 0 0" );
+		GLOBAL.editColor.selectionFore = new IupString( "255 255 255" );
+		GLOBAL.editColor.selectionBack = new IupString( "0 0 255" );
+		GLOBAL.editColor.linenumFore = new IupString( "0 0 0" );
+		GLOBAL.editColor.linenumBack = new IupString( "200 200 200" );
+		GLOBAL.editColor.fold = new IupString( "200 208 208" );
+		GLOBAL.editColor.selAlpha = new IupString( "255" );
+		
+		GLOBAL.editColor.scintillaFore = new IupString( "0 0 0" );
+		GLOBAL.editColor.scintillaBack = new IupString( "255 255 255" );
+		GLOBAL.editColor.SCE_B_COMMENT_Fore = new IupString( "0 128 0" );
+		GLOBAL.editColor.SCE_B_COMMENT_Back = new IupString( "255 255 255" );
+
+		GLOBAL.editColor.SCE_B_NUMBER_Fore = new IupString( "0 128 0" );
+		GLOBAL.editColor.SCE_B_NUMBER_Back = new IupString( "255 255 255" );
+		GLOBAL.editColor.SCE_B_STRING_Fore = new IupString( "128 0 0" );
+		GLOBAL.editColor.SCE_B_STRING_Back = new IupString( "255 255 255" );
+
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = new IupString( "0 0 255" );
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = new IupString( "255 255 255" );
+		GLOBAL.editColor.SCE_B_OPERATOR_Fore = new IupString( "160 20 20" );
+		GLOBAL.editColor.SCE_B_OPERATOR_Back = new IupString( "255 255 255" );
+
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Fore = new IupString( "0 0 0" );
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Back = new IupString( "255 255 255" );
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore = new IupString( "0 128 0" );
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back = new IupString( "255 255 255" );
+
+		GLOBAL.editColor.projectFore = new IupString( "0 0 0" );
+		GLOBAL.editColor.projectBack = new IupString( "255 255 255" );
+		GLOBAL.editColor.outlineFore = new IupString( "0 0 0" );
+		GLOBAL.editColor.outlineBack = new IupString( "255 255 255" );
+		GLOBAL.editColor.filelistFore = new IupString( "0 0 0" );
+		GLOBAL.editColor.filelistBack = new IupString( "255 255 255" );
+		GLOBAL.editColor.outputFore = new IupString( "0 0 0" );
+		GLOBAL.editColor.outputBack = new IupString( "255 255 255" );
+		GLOBAL.editColor.searchFore = new IupString( "0 0 0" );
+		GLOBAL.editColor.searchBack = new IupString( "255 255 255" );
+
+		GLOBAL.editColor.prjTitle = new IupString( "128 0 0" );
+		GLOBAL.editColor.prjSourceType = new IupString( "0 0 255" );
+		
+		
 		GLOBAL.cString = new CstringConvert;
 		GLOBAL.scanner = new CScanner;
 		GLOBAL.parser = new CParser;

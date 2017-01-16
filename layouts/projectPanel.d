@@ -94,8 +94,8 @@ class CProjectTree
 
 		tree = IupTree();
 		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL" );
-		IupSetAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore.dup ) );
-		IupSetAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack.dup ) );		
+		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
+		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );		
 		
 		toBoldTitle( tree, 0 );
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
@@ -141,9 +141,9 @@ class CProjectTree
 	
 	void changeColor()
 	{
-		IupSetAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.projectFore.dup ) );
-		IupSetAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore.dup ) );
-		IupSetAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack.dup ) );
+		IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.projectFore.toCString );
+		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
+		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
 		
 		/*
 		scope icon_prj = CstringConvert( "icon_prj" );
@@ -155,19 +155,19 @@ class CProjectTree
 		{
 			if( IupGetIntId( tree, "DEPTH", i ) == 1 )
 			{
-				IupSetAttributeId( tree, "COLOR", i, toStringz( GLOBAL.editColor.prjTitle.dup ) );
+				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.prjTitle.toCString );
 				IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_prj" ) );
 				IupSetAttributeId( tree, "IMAGEEXPANDED", i, GLOBAL.cString.convert( "icon_prj_open" ) );				
 			}
 			else if( IupGetIntId( tree, "DEPTH", i ) == 2 )
 			{
-				IupSetAttributeId( tree, "COLOR", i, toStringz( GLOBAL.editColor.prjSourceType.dup ) );
+				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.prjSourceType.toCString );
 				IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_door" ) );
 				IupSetAttributeId( tree, "IMAGEEXPANDED", i, GLOBAL.cString.convert( "icon_dooropen" ) );					
 			}
 			else
 			{
-				IupSetAttributeId( tree, "COLOR", i, toStringz( GLOBAL.editColor.projectFore.dup ) );
+				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.projectFore.toCString );
 				scope _fp = new FilePath( fromStringz( IupGetAttributeId( tree, "TITLE", i ) ) );
 
 				switch( tools.lowerCase( _fp.ext() ) )
@@ -201,12 +201,12 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED1", GLOBAL.cString.convert( "icon_prj_open" ) );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
-		IupSetAttributeId( tree, "COLOR", 1, toStringz( GLOBAL.editColor.prjTitle.dup ) );
+		IupSetAttributeId( tree, "COLOR", 1, GLOBAL.editColor.prjTitle.toCString );
 		toBoldTitle( tree, 1 );
 
 	
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
-		IupSetAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType.dup ) );
+		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
 		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
@@ -217,13 +217,13 @@ class CProjectTree
 			int			folderLocateId = _createTree( prjDirName, s );
 			
 			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore.dup ) );
+			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
 			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 		}
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
-		IupSetAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType.dup ) );
+		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
 		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
@@ -234,13 +234,13 @@ class CProjectTree
 			int			folderLocateId = _createTree( prjDirName, s );
 			
 			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore.dup ) );
+			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
 			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 		}
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
-		IupSetAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType.dup ) );
+		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
 		toBoldTitle( tree, 2 );
 		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
@@ -252,7 +252,7 @@ class CProjectTree
 			int			folderLocateId = _createTree( prjDirName, s );
 			
 			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore.dup ) );
+			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
 			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 		}
@@ -915,7 +915,7 @@ extern(C)
 
 			id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Re-Get Active Focus Node ID
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fileName ) );
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, toStringz( GLOBAL.editColor.projectFore.dup ) );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, GLOBAL.editColor.projectFore.toCString );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id+1, tools.getCString( fullPath ) );
 			// shadow
 			//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
@@ -956,7 +956,7 @@ extern(C)
 			if( kind == "BRANCH" )
 			{
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", id, GLOBAL.cString.convert( folderName ) );
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, toStringz( GLOBAL.editColor.projectFore.dup ) );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, GLOBAL.editColor.projectFore.toCString );
 				// shadow
 				//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", id, GLOBAL.cString.convert( folderName ) );
 			}
@@ -1072,7 +1072,7 @@ extern(C)
 					int			folderLocateId = _createTree( prjDirName ~ "/", titleName, id );
 					char[]		userData = fullPath;
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( titleName ) );
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore.dup ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 
 					switch( prjFilesFolderName )
@@ -1336,7 +1336,7 @@ extern(C)
 				if( !bFolerExist )
 				{
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore.dup ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 					if( pos != 0 )
 						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );
 					else

@@ -46,8 +46,8 @@ class CFileList
 		tree = IupTree();
 		IupSetAttributes( tree, "ADDROOT=NO,EXPAND=YES,SIZE=NULL" );
 		IupSetAttributes( tree, "SHOWDRAGDROP=YES" );
-		IupSetAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.filelistFore.dup ) );
-		IupSetAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.filelistBack.dup ) );		
+		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.filelistFore.toCString );
+		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.filelistBack.toCString );		
 		
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &fileList_SELECTION_CB );
 		IupSetCallback( tree, "DRAGDROP_CB", cast(Icallback) &fileList_DRAGDROP_CB );
@@ -80,10 +80,10 @@ class CFileList
 	
 	void changeColor()
 	{
-		IupSetAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.filelistBack.dup ) );
+		IupSetAttribute( tree, "BGCOLOR",  GLOBAL.editColor.filelistBack.toCString );
 		for( int i = 0; i < IupGetInt( tree, "COUNT" ); ++ i )
 		{
-			IupSetAttributeId( tree, "COLOR", i, toStringz( GLOBAL.editColor.filelistFore.dup ) );
+			IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.filelistFore.toCString );
 		}		
 	}
 
@@ -94,13 +94,13 @@ class CFileList
 			if( GLOBAL.fileListTree.fullPathState == 0 )
 			{
 				IupSetAttributeId( tree, "ADDLEAF", -1, GLOBAL.cString.convert( _sci.getFullPath ) );
-				IupSetAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.filelistFore.dup ) );
+				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.filelistFore.toCString );
 			}
 			else
 			{
 				scope _fullPath = new FilePath( _sci.getFullPath );
 				IupSetAttributeId( tree, "ADDLEAF", -1, GLOBAL.cString.convert( _fullPath.file() ) );
-				IupSetAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.filelistFore.dup ) );
+				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.filelistFore.toCString );
 			}
 			
 			IupSetAttributeId( tree, "USERDATA", 0, cast(char*) _sci  );

@@ -321,8 +321,8 @@ class CScintilla
 
 		IupSetAttribute( sci, "STYLEFONT32", toStringz( font.dup ) );
 		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
-		IupSetAttribute( sci, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.scintillaFore.dup ) );		// 32
-		IupSetAttribute( sci, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.scintillaBack.dup ) );		// 32
+		IupSetAttribute( sci, "STYLEFGCOLOR32", GLOBAL.editColor.scintillaFore.toCString );		// 32
+		IupSetAttribute( sci, "STYLEBGCOLOR32", GLOBAL.editColor.scintillaBack.toCString );		// 32
 		
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		
@@ -330,25 +330,25 @@ class CScintilla
 		IupSetAttribute( sci, "FGCOLOR", toStringz( GLOBAL.editColor.scintillaFore.dup ) );
 		IupSetAttribute( sci, "BGCOLOR", toStringz( GLOBAL.editColor.scintillaBack.dup ) );
 		*/
-		IupSetAttribute( sci, "STYLEFGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore.dup ) );		// SCE_B_COMMENT 1
-		IupSetAttribute( sci, "STYLEBGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back.dup ) );		// SCE_B_COMMENT 1
-		IupSetAttribute( sci, "STYLEFGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore.dup ) );		// SCE_B_NUMBER 2
-		IupSetAttribute( sci, "STYLEBGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back.dup ) );		// SCE_B_NUMBER 2
-		IupSetAttribute( sci, "STYLEFGCOLOR4", toStringz( GLOBAL.editColor.SCE_B_STRING_Fore.dup ) );		// SCE_B_STRING 4
-		IupSetAttribute( sci, "STYLEBGCOLOR4", toStringz( GLOBAL.editColor.SCE_B_STRING_Back.dup ) );		// SCE_B_STRING 4
-		IupSetAttribute( sci, "STYLEFGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.dup ) );	// SCE_B_PREPROCESSOR 5
-		IupSetAttribute( sci, "STYLEBGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.dup ) );	// SCE_B_PREPROCESSOR 5
-		IupSetAttribute( sci, "STYLEFGCOLOR6", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Fore.dup ) );		// SCE_B_OPERATOR 6
-		IupSetAttribute( sci, "STYLEBGCOLOR6", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back.dup ) );		// SCE_B_OPERATOR 6
-		IupSetAttribute( sci, "STYLEFGCOLOR7", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.dup ) );	// SCE_B_IDENTIFIER 7
-		IupSetAttribute( sci, "STYLEBGCOLOR7", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Back.dup ) );	// SCE_B_IDENTIFIER 7
-		IupSetAttribute( sci, "STYLEFGCOLOR19", toStringz( GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.dup ) );// SCE_B_COMMENTBLOCK 19
-		IupSetAttribute( sci, "STYLEBGCOLOR19", toStringz( GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.dup ) );// SCE_B_COMMENTBLOCK 19
+		IupSetAttribute( sci, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
+		IupSetAttribute( sci, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
+		IupSetAttribute( sci, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_B_NUMBER 2
+		IupSetAttribute( sci, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_B_NUMBER 2
+		IupSetAttribute( sci, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_B_STRING 4
+		IupSetAttribute( sci, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_B_STRING 4
+		IupSetAttribute( sci, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_B_PREPROCESSOR 5
+		IupSetAttribute( sci, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_B_PREPROCESSOR 5
+		IupSetAttribute( sci, "STYLEFGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_B_OPERATOR 6
+		IupSetAttribute( sci, "STYLEBGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_B_OPERATOR 6
+		IupSetAttribute( sci, "STYLEFGCOLOR7", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );	// SCE_B_IDENTIFIER 7
+		IupSetAttribute( sci, "STYLEBGCOLOR7", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );	// SCE_B_IDENTIFIER 7
+		IupSetAttribute( sci, "STYLEFGCOLOR19", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toCString );// SCE_B_COMMENTBLOCK 19
+		IupSetAttribute( sci, "STYLEBGCOLOR19", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toCString );// SCE_B_COMMENTBLOCK 19
 		
-		IupSetAttribute(sci, "STYLEFGCOLOR3", toStringz( GLOBAL.editColor.keyWord[0].dup ) );	// SCE_B_KEYWORD 3
-		IupSetAttribute(sci, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.keyWord[1].dup ));	// SCE_B_KEYWORD2 10
-		IupSetAttribute(sci, "STYLEFGCOLOR11", toStringz( GLOBAL.editColor.keyWord[2].dup ));	// SCE_B_KEYWORD3 11
-		IupSetAttribute(sci, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.keyWord[3].dup ));	// SCE_B_KEYWORD4 12
+		IupSetAttribute(sci, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
+		IupSetAttribute(sci, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
+		IupSetAttribute(sci, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
+		IupSetAttribute(sci, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
 		
 		/*
 		IupSetAttribute(sci, "STYLEBGCOLOR3", toStringz( GLOBAL.editColor.scintillaBack.dup ) );	// SCE_B_KEYWORD 3
@@ -520,30 +520,30 @@ class CScintilla
 
 
 		// Color
-		IupScintillaSendMessage( sci, 2098, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.caretLine ), 0 ); //SCI_SETCARETLINEBACK = 2098
+		IupScintillaSendMessage( sci, 2098, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.caretLine.toDString ), 0 ); //SCI_SETCARETLINEBACK = 2098
 
-		uint alpha = Integer.atoi( GLOBAL.editColor.selAlpha );
+		uint alpha = Integer.atoi( GLOBAL.editColor.selAlpha.toDString );
 		if( alpha > 255 || alpha <= 0 ) alpha = 255;
 
 		if( alpha == 255 )
 		{
-			IupScintillaSendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 		}
 		else
 		{
-			IupScintillaSendMessage( sci, 2067, false, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, false, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 		
-		IupSetAttribute( sci, "STYLEFGCOLOR33", GLOBAL.cString.convert( GLOBAL.editColor.linenumFore ) );
-		IupSetAttribute( sci, "STYLEBGCOLOR33", GLOBAL.cString.convert( GLOBAL.editColor.linenumBack ) );
+		IupSetAttribute( sci, "STYLEFGCOLOR33", GLOBAL.editColor.linenumFore.toCString );
+		IupSetAttribute( sci, "STYLEBGCOLOR33", GLOBAL.editColor.linenumBack.toCString );
 		// Error, Couldn't change......
 		/*
 		IupScintillaSendMessage( sci, 2290, 0, 0xffffff ); // SCI_SETFOLDMARGINCOLOUR = 2290,
 		*/
-		IupScintillaSendMessage( sci, 2069, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.cursor ), 0 ); // SCI_SETCARETFORE = 2069,
+		IupScintillaSendMessage( sci, 2069, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.cursor.toDString ), 0 ); // SCI_SETCARETFORE = 2069,
 
 		//IupSetAttribute( sci, "FOLDFLAGS", "LEVELNUMBERS" );  
 

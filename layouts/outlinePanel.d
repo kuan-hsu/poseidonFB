@@ -384,19 +384,19 @@ class COutline
 					{
 						case 0:
 							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 1:
 							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 2:
 							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 					}					
 					break;
@@ -406,23 +406,23 @@ class COutline
 					{
 						case 0, 1:
 							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 					}
 					break;
 
 				case B_SCOPE:
 					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, null );
-					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;				
 
 				default:
 					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
-					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 			}
 			lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
 			setImage( rootTree, _node );
@@ -455,11 +455,11 @@ class COutline
 						{
 							case 0, 1:
 								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
-								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 								break;
 							default:
 								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 								break;
 						}
 						break;
@@ -469,19 +469,19 @@ class COutline
 					{
 						case 0:
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 1:
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 2:
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 					}
 					break;
@@ -491,11 +491,11 @@ class COutline
 					{
 						case 0, 1:
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 					}				
 					break;
@@ -506,12 +506,12 @@ class COutline
 						if( showIndex == 0 || showIndex == 2 )
 						{
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 						}
 						else
 						{
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 						}
 						
 						break;
@@ -520,19 +520,19 @@ class COutline
 					if( showIndex == 0 || showIndex == 2 )
 					{
 						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
-						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					else
 					{
 						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					
 					break;
 
 				case B_ENUMMEMBER:
 					IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
 
 				default:
@@ -721,7 +721,7 @@ class COutline
 			Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
 			if( ih != null )
 			{
-				IupSetAttribute( ih, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack.dup ) );
+				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 			}
 		}
 		
@@ -754,10 +754,10 @@ class COutline
 
 				Ihandle* tree = IupTree();
 				IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
-				IupSetAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack.dup ) );
+				IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 				
 				IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
-				IupSetAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.outlineFore.dup ) );
+				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
 				
 				toBoldTitle( tree, 0 );
 				IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
