@@ -398,14 +398,22 @@ class CScintilla
 		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.cString.convert( Underline ) );
 
 		getFontAndSize( 10, font, Bold, Italic, Underline, Strikeout, size );
-		IupSetAttribute(sci, "STYLEFGCOLOR40", "102 69 3");	
-		IupSetAttribute(sci, "STYLEBGCOLOR40", "255 200 227");
+		IupSetAttribute(sci, "STYLEFGCOLOR40", GLOBAL.editColor.errorFore.toCString);	
+		IupSetAttribute(sci, "STYLEBGCOLOR40", GLOBAL.editColor.errorBack.toCString);
 		IupSetAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
 		IupSetAttribute(sci, "STYLEFONTSIZE40",  toStringz( size.dup ) );
-		IupSetAttribute(sci, "STYLEFGCOLOR41", "0 0 255");	
-		IupSetAttribute(sci, "STYLEBGCOLOR41", "255 255 157");
+		
+		IupSetAttribute(sci, "STYLEFGCOLOR41", GLOBAL.editColor.warningFore.toCString);
+		IupSetAttribute(sci, "STYLEBGCOLOR41", GLOBAL.editColor.warringBack.toCString);
 		IupSetAttribute(sci, "STYLEFONT41",  toStringz( font.dup ) );
-		IupSetAttribute(sci, "STYLEFONTSIZE41",  toStringz( size.dup ) );		
+		IupSetAttribute(sci, "STYLEFONTSIZE41",  toStringz( size.dup ) );
+
+		getFontAndSize( 11, font, Bold, Italic, Underline, Strikeout, size );
+		IupSetAttribute(sci, "STYLEFGCOLOR42", GLOBAL.editColor.manualFore.toCString);	
+		IupSetAttribute(sci, "STYLEBGCOLOR42", GLOBAL.editColor.manualBack.toCString);
+		IupSetAttribute(sci, "STYLEFONT42",  toStringz( font.dup ) );
+		IupSetAttribute(sci, "STYLEFONTSIZE42",  toStringz( "8" ) );		
+		
 
 		int tabSize = Integer.atoi( GLOBAL.editorSetting00.TabWidth );
 		GLOBAL.editorSetting00.TabWidth = Integer.toString( tabSize );

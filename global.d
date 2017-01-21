@@ -16,8 +16,8 @@ struct EditorLayoutSize
 struct EditorColorUint
 {
 	IupString[4]	keyWord;
-	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha;
-	IupString		scintillaFore, scintillaBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
+	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha, errorFore, errorBack, warningFore, warringBack;
+	IupString		scintillaFore, scintillaBack, manualFore, manualBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
 	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
@@ -59,7 +59,7 @@ struct GLOBAL
 	import tango.stdc.stringz;
 
 	
-	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.debugger;
+	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.manualPanel, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
@@ -97,17 +97,22 @@ struct GLOBAL
 	static Ihandle*				statusBar, statusBar_PrjName, statusBar_Line_Col, statusBar_Ins, statusBar_EOLType, statusBar_encodingType;
 
 	static Ihandle*				menuOutlineWindow, menuMessageWindow;
+	
+	static CManual				manualPanel;
 
 	static char[]				linuxTermName;
 
 	// Setting
+	static char[]				poseidonPath;
 	static char[]				lexer = "freebasic";
 	static char[][]				KEYWORDS;
 	static int					keywordCase = 0;	
-	static char[]				compilerFullPath;
+	static IupString			compilerFullPath;
 	static char[]				compilerAnootation = "ON";
 	static char[]				compilerWindow = "ON";
-	static char[]				debuggerFullPath;
+	static IupString			debuggerFullPath;
+	static IupString			manualPath;
+	static IupString			colorTemplate;
 	//static char[]				maxError = "30";
 	static char[]				defaultOption;
 	static char[]				recentOpenDir;
@@ -124,6 +129,9 @@ struct GLOBAL
 	static char[]				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
 	static char[]				toggleShowListType = "OFF";
 	static char[]				toggleShowAllMember = "ON";
+	
+	static char[]				toggleManualDefinition = "OFF";
+	static char[]				toggleManualShowType = "OFF";
 	
 
 	static CScintilla[char[]]	scintillaManager;
@@ -172,13 +180,19 @@ struct GLOBAL
 		GLOBAL.editColor.linenumBack = new IupString( "200 200 200" );
 		GLOBAL.editColor.fold = new IupString( "200 208 208" );
 		GLOBAL.editColor.selAlpha = new IupString( "255" );
+		GLOBAL.editColor.errorFore = new IupString( "102 69 3" );
+		GLOBAL.editColor.errorBack = new IupString( "255 200 227" );
+		GLOBAL.editColor.warningFore = new IupString( "0 0 255" );
+		GLOBAL.editColor.warringBack = new IupString( "255 255 157" );
+		GLOBAL.editColor.manualFore = new IupString( "255 255 255" );
+		GLOBAL.editColor.manualBack = new IupString( "80 80 80" );
 		
 		GLOBAL.editColor.scintillaFore = new IupString( "0 0 0" );
 		GLOBAL.editColor.scintillaBack = new IupString( "255 255 255" );
 		GLOBAL.editColor.SCE_B_COMMENT_Fore = new IupString( "0 128 0" );
 		GLOBAL.editColor.SCE_B_COMMENT_Back = new IupString( "255 255 255" );
 
-		GLOBAL.editColor.SCE_B_NUMBER_Fore = new IupString( "0 128 0" );
+		GLOBAL.editColor.SCE_B_NUMBER_Fore = new IupString( "128 128 64" );
 		GLOBAL.editColor.SCE_B_NUMBER_Back = new IupString( "255 255 255" );
 		GLOBAL.editColor.SCE_B_STRING_Fore = new IupString( "128 0 0" );
 		GLOBAL.editColor.SCE_B_STRING_Back = new IupString( "255 255 255" );
@@ -206,6 +220,11 @@ struct GLOBAL
 
 		GLOBAL.editColor.prjTitle = new IupString( "128 0 0" );
 		GLOBAL.editColor.prjSourceType = new IupString( "0 0 255" );
+		
+		GLOBAL.compilerFullPath = new IupString();
+		GLOBAL.debuggerFullPath = new IupString();
+		GLOBAL.manualPath = new IupString();
+		GLOBAL.colorTemplate = new IupString();
 		
 		
 		GLOBAL.cString = new CstringConvert;
@@ -311,6 +330,8 @@ struct GLOBAL
 		fu.name = "Annotation";
 		GLOBAL.fonts ~= fu;
 		
+		fu.name = "Manual";
+		GLOBAL.fonts ~= fu;
 		
 		
 		GLOBAL.languageItems["file"] = "File";
@@ -346,6 +367,7 @@ struct GLOBAL
 		GLOBAL.languageItems["view"] = "View";
 			GLOBAL.languageItems["outline"] = "Outline";
 			GLOBAL.languageItems["message"]= "Message";
+			GLOBAL.languageItems["manual"]= "Manual";
 			
 		GLOBAL.languageItems["prj"] = "Project";
 			GLOBAL.languageItems["newprj"] = "New Project";
@@ -444,6 +466,7 @@ struct GLOBAL
 							//'debug=Debug
 							GLOBAL.languageItems["annotation"] = "Annotation";
 						GLOBAL.languageItems["color"] = "Color";
+							GLOBAL.languageItems["colorfile"] = "Color Template";
 							GLOBAL.languageItems["caretline"] = "Caret Line";
 							GLOBAL.languageItems["cursor"] = "Cursor";
 							GLOBAL.languageItems["prjtitle"] = "Project Title";
@@ -454,6 +477,9 @@ struct GLOBAL
 							GLOBAL.languageItems["selalpha"] = "Selection Alpha";
 								GLOBAL.languageItems["alphatip"] = "Set 255 To Disable Alpha";
 						GLOBAL.languageItems["colorfgbg"] = "Color/Foreground/Background";
+							GLOBAL.languageItems["errorannotation"] = "Error Annotation";
+							GLOBAL.languageItems["warningannotation"] = "Warning Annotation";
+							GLOBAL.languageItems["manualannotation"] = "Manual Annotation";
 							GLOBAL.languageItems["scintilla"] = "Scintilla";
 							GLOBAL.languageItems["SCE_B_COMMENT"] = "SCE_B_COMMENT";
 							GLOBAL.languageItems["SCE_B_NUMBER"] = "SCE_B_NUMBER";
@@ -494,6 +520,12 @@ struct GLOBAL
 						GLOBAL.languageItems["keyword1"] = "Keyword1";
 						GLOBAL.languageItems["keyword2"] = "Keyword2";
 						GLOBAL.languageItems["keyword3"] = "Keyword3";
+					// GLOBAL.languageItems["manual"] = "Manual";
+						GLOBAL.languageItems["manualpath"] = "Manual Path";
+						GLOBAL.languageItems["manualdefinition"] = "Use \"Goto Definition\" To Show The Relative Manual Page";
+						GLOBAL.languageItems["manualshowtype"] = "Use \"Show Type\" To Show The Description At Annotation";
+						GLOBAL.languageItems["manualhome"] = "Home";
+					
 			GLOBAL.languageItems["language"] = "Language";
 				GLOBAL.languageItems["openlanguage"] = "Choose Language...";
 			GLOBAL.languageItems["about"] = "About";

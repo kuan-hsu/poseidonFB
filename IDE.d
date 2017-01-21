@@ -164,10 +164,12 @@ struct IDECONFIG
 		.attribute( null, "Output", GLOBAL.fonts[7].fontString )
 		.attribute( null, "Search", GLOBAL.fonts[8].fontString )
 		.attribute( null, "Debugger", GLOBAL.fonts[9].fontString )
-		.attribute( null, "Annotation", GLOBAL.fonts[10].fontString );
+		.attribute( null, "Annotation", GLOBAL.fonts[10].fontString )
+		.attribute( null, "Manual", GLOBAL.fonts[11].fontString );
 
 		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
 		editorNode.element( null, "color" )
+		.attribute( null, "template", GLOBAL.colorTemplate.toDString )
 		.attribute( null, "caretLine", GLOBAL.editColor.caretLine.toDString )
 		.attribute( null, "cursor", GLOBAL.editColor.cursor.toDString )
 		.attribute( null, "selectionFore", GLOBAL.editColor.selectionFore.toDString )
@@ -176,6 +178,12 @@ struct IDECONFIG
 		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack.toDString )
 		.attribute( null, "fold", GLOBAL.editColor.fold.toDString )
 		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha.toDString )
+		.attribute( null, "errorFore", GLOBAL.editColor.errorFore.toDString )
+		.attribute( null, "errorBack", GLOBAL.editColor.errorBack.toDString )
+		.attribute( null, "warningFore", GLOBAL.editColor.warningFore.toDString )
+		.attribute( null, "warningBack", GLOBAL.editColor.warringBack.toDString )
+		.attribute( null, "manualFore", GLOBAL.editColor.manualFore.toDString )
+		.attribute( null, "manualBack", GLOBAL.editColor.manualBack.toDString )
 		.attribute( null, "scintillaFore", GLOBAL.editColor.scintillaFore.toDString )
 		.attribute( null, "scintillaBack", GLOBAL.editColor.scintillaBack.toDString )
 		.attribute( null, "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore.toDString )
@@ -242,8 +250,8 @@ struct IDECONFIG
 		</buildtools>  
 		*/
 		auto buildtoolsNode = configNode.element( null, "buildtools" );
-		buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath );
-		buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath );
+		buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath.toDString );
+		buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath.toDString );
 		buildtoolsNode.element( null, "defaultoption", GLOBAL.defaultOption );
 		buildtoolsNode.element( null, "resultwindow", GLOBAL.compilerWindow );
 		buildtoolsNode.element( null, "annotation", GLOBAL.compilerAnootation );
@@ -268,6 +276,16 @@ struct IDECONFIG
 		parserNode.element( null, "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 		parserNode.element( null, "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 		parserNode.element( null, "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
+
+		/*
+		<manual>
+			<manualpath>manual/index00.html</manualpath>
+		</manual>  
+		*/
+		auto manualNode = configNode.element( null, "manual" );
+		manualNode.element( null, "manualpath", GLOBAL.manualPath.toDString );
+		manualNode.element( null, "manualdefinition", GLOBAL.toggleManualDefinition );
+		manualNode.element( null, "manualshowtype", GLOBAL.toggleManualShowType );
 
 		/*
 		<recentFiles>
@@ -469,6 +487,25 @@ struct IDECONFIG
 			{
 				GLOBAL.keywordCase = Integer.atoi( e.value );
 			}
+			
+			// Manual
+			result = root.query.descendant("manualpath");
+			foreach( e; result )
+			{
+				GLOBAL.manualPath = e.value;
+			}			
+			result = root.query.descendant("manualdefinition");
+			foreach( e; result )
+			{
+				GLOBAL.toggleManualDefinition = e.value;
+			}			
+			result = root.query.descendant("manualshowtype");
+			foreach( e; result )
+			{
+				GLOBAL.toggleManualShowType = e.value;
+			}			
+			
+			
 		
 			result = root.query.descendant("recentFiles").descendant("name");
 			foreach( e; result )
@@ -634,7 +671,13 @@ struct IDECONFIG
 			fu.name = "Annotation";
 			GLOBAL.fonts[10] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
-			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[10].fontString = e.value;			
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[10].fontString = e.value;
+			
+			fu.name = "Manual";
+			GLOBAL.fonts[11] = fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[11].fontString = e.value;
+			
 			/+
 			// Font
 			result = root.query.descendant("font").attribute("name");
@@ -661,6 +704,9 @@ struct IDECONFIG
 
 
 			// Color (Editor)
+			result = root.query.descendant("color").attribute("template");
+			foreach( e; result ) GLOBAL.colorTemplate = e.value;
+			
 			result = root.query.descendant("color").attribute("caretLine");
 			foreach( e; result ) GLOBAL.editColor.caretLine = e.value;
 
@@ -685,7 +731,20 @@ struct IDECONFIG
 			result = root.query.descendant("color").attribute("selAlpha");
 			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
 
+			result = root.query.descendant("color").attribute("errorFore");
+			foreach( e; result ) GLOBAL.editColor.errorFore = e.value;
+			result = root.query.descendant("color").attribute("errorBack");
+			foreach( e; result ) GLOBAL.editColor.errorBack = e.value;
 
+			result = root.query.descendant("color").attribute("warningFore");
+			foreach( e; result ) GLOBAL.editColor.warningFore = e.value;
+			result = root.query.descendant("color").attribute("warningBack");
+			foreach( e; result ) GLOBAL.editColor.warringBack = e.value;
+
+			result = root.query.descendant("color").attribute("manualFore");
+			foreach( e; result ) GLOBAL.editColor.manualFore = e.value;
+			result = root.query.descendant("color").attribute("manualBack");
+			foreach( e; result ) GLOBAL.editColor.manualBack = e.value;
 
 			result = root.query.descendant("color").attribute("scintillaFore");
 			foreach( e; result ) GLOBAL.editColor.scintillaFore = e.value;
@@ -769,7 +828,7 @@ struct IDECONFIG
 
 		
 			// Load Language lng
-			scope lngFilePath = new FilePath( "settings/" ~ GLOBAL.language ~ ".lng" );
+			scope lngFilePath = new FilePath( "settings/language/" ~ GLOBAL.language ~ ".lng" );
 			if( lngFilePath.exists() )
 			{
 				scope lngFile = new UnicodeFile!(char)( lngFilePath.toString, Encoding.Unknown );
@@ -985,5 +1044,202 @@ struct IDECONFIG
 			}
 		}
 		catch( Exception e ){}
+	}
+	
+	static void saveColorTemplate( char[] templateName )
+	{
+		// Write Setting File...
+		auto doc = new Document!(char);
+
+		// attach an xml header
+		doc.header;
+
+		auto configNode = doc.tree.element( null, "config" );
+
+		configNode.element( null, "color" )
+		.attribute( null, "caretLine", GLOBAL.editColor.caretLine.toDString )
+		.attribute( null, "cursor", GLOBAL.editColor.cursor.toDString )
+		.attribute( null, "selectionFore", GLOBAL.editColor.selectionFore.toDString )
+		.attribute( null, "selectionBack", GLOBAL.editColor.selectionBack.toDString )
+		.attribute( null, "linenumFore", GLOBAL.editColor.linenumFore.toDString )
+		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack.toDString )
+		.attribute( null, "fold", GLOBAL.editColor.fold.toDString )
+		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha.toDString )
+		.attribute( null, "errorFore", GLOBAL.editColor.errorFore.toDString )
+		.attribute( null, "errorBack", GLOBAL.editColor.errorBack.toDString )
+		.attribute( null, "warningFore", GLOBAL.editColor.warningFore.toDString )
+		.attribute( null, "warningBack", GLOBAL.editColor.warringBack.toDString )
+		.attribute( null, "manualFore", GLOBAL.editColor.manualFore.toDString )
+		.attribute( null, "manualBack", GLOBAL.editColor.manualBack.toDString )
+		.attribute( null, "scintillaFore", GLOBAL.editColor.scintillaFore.toDString )
+		.attribute( null, "scintillaBack", GLOBAL.editColor.scintillaBack.toDString )
+		.attribute( null, "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore.toDString )
+		.attribute( null, "SCE_B_COMMENT_Back", GLOBAL.editColor.SCE_B_COMMENT_Back.toDString )
+		.attribute( null, "SCE_B_NUMBER_Fore", GLOBAL.editColor.SCE_B_NUMBER_Fore.toDString )
+		.attribute( null, "SCE_B_NUMBER_Back", GLOBAL.editColor.SCE_B_NUMBER_Back.toDString )
+		.attribute( null, "SCE_B_STRING_Fore", GLOBAL.editColor.SCE_B_STRING_Fore.toDString )
+		.attribute( null, "SCE_B_STRING_Back", GLOBAL.editColor.SCE_B_STRING_Back.toDString )
+		.attribute( null, "SCE_B_PREPROCESSOR_Fore", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toDString )
+		.attribute( null, "SCE_B_PREPROCESSOR_Back", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toDString )
+		.attribute( null, "SCE_B_OPERATOR_Fore", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toDString )
+		.attribute( null, "SCE_B_OPERATOR_Back", GLOBAL.editColor.SCE_B_OPERATOR_Back.toDString )
+		.attribute( null, "SCE_B_IDENTIFIER_Fore", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toDString )
+		.attribute( null, "SCE_B_IDENTIFIER_Back", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toDString )
+		.attribute( null, "SCE_B_COMMENTBLOCK_Fore", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toDString )
+		.attribute( null, "SCE_B_COMMENTBLOCK_Back", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toDString )
+		.attribute( null, "projectFore", GLOBAL.editColor.projectFore.toDString )
+		.attribute( null, "projectBack", GLOBAL.editColor.projectBack.toDString )
+		.attribute( null, "outlineFore", GLOBAL.editColor.outlineFore.toDString )
+		.attribute( null, "outlineBack", GLOBAL.editColor.outlineBack.toDString )		
+		.attribute( null, "filelistFore", GLOBAL.editColor.filelistFore.toDString )
+		.attribute( null, "filelistBack", GLOBAL.editColor.filelistBack.toDString )
+		.attribute( null, "outputFore", GLOBAL.editColor.outputFore.toDString )
+		.attribute( null, "outputBack", GLOBAL.editColor.outputBack.toDString )
+		.attribute( null, "searchFore", GLOBAL.editColor.searchFore.toDString )
+		.attribute( null, "searchBack", GLOBAL.editColor.searchBack.toDString )
+		.attribute( null, "prjTitle", GLOBAL.editColor.prjTitle.toDString )
+		.attribute( null, "prjSourceType", GLOBAL.editColor.prjSourceType.toDString );		
+		
+		auto print = new DocPrinter!(char);
+		scope _fp = new FilePath( "settings/colorTemplates" );
+		if( !_fp.exists() )	_fp.createFolder();
+		
+		actionManager.FileAction.saveFile( "settings/colorTemplates/" ~ templateName ~ ".xml", print.print( doc ) );
+	}
+	
+	static char[][] loadColorTemplate( char[] templateName )
+	{
+		char[][] results;
+		
+		try
+		{
+			// Loading Key Word...
+			scope _fp = new FilePath( "settings/colorTemplates/" ~ templateName ~ ".xml" );
+			if( !_fp.exists() ) return null;
+			
+			scope file = new UnicodeFile!(char)( _fp.toString, Encoding.Unknown );
+
+			scope doc = new Document!( char );
+			doc.parse( file.read );
+
+			auto root = doc.elements;
+			
+			/*
+			auto result = root.query.descendant("color").attribute("template");
+			foreach( e; result ) results ~= e.value;
+			*/
+			
+			auto result = root.query.descendant("color").attribute("caretLine");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("cursor");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("selectionFore");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("selectionBack");
+			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("linenumFore");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("linenumBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("fold");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("selAlpha");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("errorFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("errorBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("warningFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("warningBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("manualFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("manualBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("scintillaFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("scintillaBack");
+			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("SCE_B_COMMENT_Fore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("SCE_B_COMMENT_Back");
+			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("SCE_B_NUMBER_Fore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("SCE_B_NUMBER_Back");
+			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("SCE_B_STRING_Fore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("SCE_B_STRING_Back");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Fore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Back");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Fore");
+			foreach( e; result )results ~= e.value;
+			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Back");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_IDENTIFIER_Fore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("SCE_B_IDENTIFIER_Back");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("SCE_B_COMMENTBLOCK_Fore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("SCE_B_COMMENTBLOCK_Back");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("projectFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("projectBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("outlineFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("outlineBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("filelistFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("filelistBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("outputFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("outputBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("searchFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("searchBack");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("prjTitle");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("prjSourceType");
+			foreach( e; result ) results ~= e.value;
+		}
+		catch( Exception e ){}
+		
+		return results;
 	}
 }

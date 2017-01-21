@@ -184,6 +184,11 @@ void createMenu()
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
 	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
+	
+	Ihandle* manualWindow = IupItem (toStringz( GLOBAL.languageItems["manual"] ), null);
+	IupSetAttribute( manualWindow, "VALUE", "OFF");
+	IupSetHandle( "menuManualWindow", manualWindow );
+	IupSetCallback( manualWindow, "ACTION", cast(Icallback)&manualMenuItem_cb);	
 
 	// Project
 	item_newProject= IupItem (toStringz( GLOBAL.languageItems["newprj"] ), null);
@@ -423,7 +428,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.243\nBy Kuan Hsu (Taiwan)\n2017.01.17" );
+		IupMessage( toStringz( GLOBAL.languageItems["about"] ), "FreeBasic IDE\nPoseidonFB V0.245\nBy Kuan Hsu (Taiwan)\n2017.01.21" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -465,6 +470,7 @@ void createMenu()
 
 	view_menu = IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
+							manualWindow,
 							null );
 
 	project_menu = IupMenu( item_newProject,
@@ -679,7 +685,7 @@ extern(C)
 
 		IupSetAttribute( dlg, "DIALOGTYPE", "OPEN" );
 		IupSetAttribute( dlg, "TITLE", toStringz( GLOBAL.languageItems["openlanguage"] ) );
-		IupSetAttribute( dlg, "DIRECTORY", "settings/" );
+		IupSetAttribute( dlg, "DIRECTORY", "settings/language" );
 		IupSetAttribute( dlg, "EXTFILTER", toStringz( GLOBAL.languageItems["lngfile"] ~ "|*.lng|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|" ) );
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 		
@@ -1027,6 +1033,24 @@ extern(C)
 
 		Ihandle* _activeDocument = ScintillaAction.getActiveIupScintilla();
 		if( _activeDocument != null ) IupSetFocus( _activeDocument ); else IupSetFocus( GLOBAL.mainDlg );
+		
+		return IUP_DEFAULT;
+	}
+	
+	int manualMenuItem_cb( Ihandle *ih )
+	{
+		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
+		{
+			IupSetAttribute( ih, "VALUE", "OFF" );
+			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 3, "NO" ); // Hide
+		}
+		else
+		{
+			IupSetAttribute( ih, "VALUE", "ON" );
+			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 3, "YES" ); // Show
+			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 3 );
+		}
+		
 		
 		return IUP_DEFAULT;
 	}

@@ -145,7 +145,7 @@ struct ExecuterAction
 		
 		if( cSci !is null )
 		{
-			scope compilePath = new FilePath( GLOBAL.compilerFullPath );
+			scope compilePath = new FilePath( GLOBAL.compilerFullPath.toDString );
 			if( !compilePath.exists() )
 			{
 				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
@@ -159,7 +159,7 @@ struct ExecuterAction
 			}
 
 			cSci = ScintillaAction.getActiveCScintilla();
-			command = "\"" ~ GLOBAL.compilerFullPath ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+			command = "\"" ~ GLOBAL.compilerFullPath.toDString ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 		}
 		else
 		{
@@ -278,7 +278,7 @@ struct ExecuterAction
 			// Clean outputPanel
 			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") );
 
-			scope compilePath = new FilePath( GLOBAL.compilerFullPath );
+			scope compilePath = new FilePath( GLOBAL.compilerFullPath.toDString );
 			if( !compilePath.exists() )
 			{
 				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
@@ -366,7 +366,7 @@ struct ExecuterAction
 					}
 				}
 
-				char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : GLOBAL.compilerFullPath;
+				char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : GLOBAL.compilerFullPath.toDString;
 				
 				if( options.length )
 					txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
@@ -481,7 +481,7 @@ struct ExecuterAction
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 
-		scope compilePath = new FilePath( GLOBAL.compilerFullPath );
+		scope compilePath = new FilePath( GLOBAL.compilerFullPath.toDString );
 		if( !compilePath.exists() )
 		{
 			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
@@ -511,7 +511,7 @@ struct ExecuterAction
 		
 		try
 		{
-			char[] commandString = "\"" ~ GLOBAL.compilerFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
+			char[] commandString = "\"" ~ GLOBAL.compilerFullPath.toDString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
 			
 			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) commandString ~= " -s gui";
 			

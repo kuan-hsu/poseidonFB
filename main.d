@@ -19,6 +19,7 @@ version(Windows)
 	pragma(lib, "ole32.lib");
 	pragma(lib, "iup.lib");
 	pragma(lib, "iup_scintilla.lib");
+	pragma(lib, "iupweb.lib");
 }
 else
 {
@@ -34,6 +35,7 @@ else
 	pragma(lib, "glib-2.0");
 	pragma(lib, "iup");
 	pragma(lib, "iup_scintilla");
+	pragma(lib, "iupweb");
 }
 
 /+
@@ -129,7 +131,11 @@ void main( char[][] args )
 	
 	//  Get poseidonFB exePath & set the new cwd
 	scope _poseidonPath = new FilePath( args[0] );
-	if( _poseidonPath.exists() ) Environment.cwd( _poseidonPath.path );
+	if( _poseidonPath.exists() )
+	{
+		GLOBAL.poseidonPath = _poseidonPath.path;
+		Environment.cwd( GLOBAL.poseidonPath );
+	}
 
 	// Init IDE
 	createEditorSetting();

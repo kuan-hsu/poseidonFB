@@ -32,6 +32,7 @@
     <Name>layout.d</Name>
     <Name>layouts/debugger.d</Name>
     <Name>layouts/filelistPanel.d</Name>
+    <Name>layouts/manualPanel.d</Name>
     <Name>layouts/messagePanel.d</Name>
     <Name>layouts/outlinePanel.d</Name>
     <Name>layouts/projectPanel.d</Name>

@@ -1413,7 +1413,7 @@ class DebugThread : Thread
 			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "YES" );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 2 );
 
-			proc = new Process( true, "\"" ~ GLOBAL.debuggerFullPath ~ "\" " ~ executeFullPath );
+			proc = new Process( true, "\"" ~ GLOBAL.debuggerFullPath.toDString ~ "\" " ~ executeFullPath );
 			proc.gui( true );
 			if( cwd.length ) proc.workDir( cwd );
 			//proc.redirect( Redirect.None );

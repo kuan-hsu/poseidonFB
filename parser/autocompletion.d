@@ -439,7 +439,7 @@ struct AutoComplete
 		}
 
 		// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-		_path.set( GLOBAL.compilerFullPath );
+		_path.set( GLOBAL.compilerFullPath.toDString );
 		version( Windows )
 		{
 			testPath = _path.path() ~ "inc/" ~ include;
@@ -1978,6 +1978,22 @@ struct AutoComplete
 				word = lowerCase( word.reverse );
 
 				char[][] splitWord = getDivideWord( word );
+				
+				// Manual
+				if( splitWord.length == 1 )
+				{
+					if( bDefintion )
+					{
+						if( GLOBAL.toggleManualDefinition == "ON" )
+						{
+							if( GLOBAL.manualPanel.jumpDefinition( splitWord[0] ) ) GLOBAL.manualPanel.showTab( true );
+						}
+					}
+					else
+					{
+						if( GLOBAL.toggleManualShowType == "ON" ) GLOBAL.manualPanel.showType( splitWord[0] );
+					}
+				}
 
 				auto			AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 

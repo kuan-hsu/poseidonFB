@@ -111,7 +111,9 @@ void load_all_images_icons()
 	IupSetHandle( "icon_show_nopr", XPM.getIUPimage( "icons/xpm/show_nopr.xpm" ) ); // IupSetHandle("icon_show_nopr", load_image_show_nopr());
 	IupSetHandle( "icon_searchany", XPM.getIUPimage( "icons/xpm/searchany.xpm" ) ); // IupSetHandle("icon_searchany", load_image_searchany());
 
-
+	IupSetHandle( "icon_manual", XPM.getIUPimage( "icons/xpm/manual.xpm" ) );
+	IupSetHandle( "icon_manual_home", XPM.getIUPimage( "icons/xpm/home.xpm" ) );
+	
 
 	IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) ); //IupSetHandle("IUP_function", load_image_function_public_obj());
 	IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) ); //IupSetHandle("IUP_sub", load_image_sub_public_obj());

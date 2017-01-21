@@ -1,9 +1,9 @@
 ﻿module layout;
 
-import iup.iup;
+import iup.iup, iup.iupweb;
 
 import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
-import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
+import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.manualPanel, layouts.debugger, actionManager, menu;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
 
@@ -46,17 +46,20 @@ void createExplorerWindow()
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 
-	
+	GLOBAL.manualPanel = new CManual();
+
 	createMessagePanel();
 
 	GLOBAL.debugPanel = new CDebugger();
-
-	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, null );
+	
+	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
 
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
 	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 3, "NO" ); // Hide the Manual window
 
+	
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
 	 
 
@@ -410,28 +413,44 @@ extern(C)
 		Ihandle* _child = IupGetChild( ih, pos );
 		// Get Focus
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUE_HANDLE", cast(char*)_child );
+		
+		Ihandle* popupMenu;
 
-		if( pos == 2 ) return IUP_DEFAULT;
-
-
-		Ihandle* _clear = IupItem( toStringz( GLOBAL.languageItems["clear"] ), null );
-		IupSetAttribute( _clear, "IMAGE", "icon_debug_clear" );
-		IupSetCallback( _clear, "ACTION", cast(Icallback) cast(Icallback) function( Ihandle* _ih )
+		if( pos == 2 )
 		{
-			int valuePos = IupGetInt( GLOBAL.messageWindowTabs, "VALUEPOS" );
-			if( valuePos == 0 )
+			return IUP_DEFAULT;
+		}
+		else if( pos == 3 )
+		{
+			Ihandle* _home = IupItem( toStringz( "Home" ), null );//IupItem( toStringz( GLOBAL.languageItems["clear"] ), null );
+			IupSetAttribute( _home, "IMAGE", "icon_manual_home" );
+			IupSetCallback( _home, "ACTION", cast(Icallback) function( Ihandle* _ih )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", null );
-			}
-			else if( valuePos == 1 )
+				GLOBAL.manualPanel.setValue( GLOBAL.manualPath.toCString );
+			});			
+			popupMenu = IupMenu( _home, null );
+		}
+		else
+		{
+			Ihandle* _clear = IupItem( toStringz( GLOBAL.languageItems["clear"] ), null );
+			IupSetAttribute( _clear, "IMAGE", "icon_debug_clear" );
+			IupSetCallback( _clear, "ACTION", cast(Icallback) function( Ihandle* _ih )
 			{
-				IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", null );
-			}
-		});
-		Ihandle* popupMenu = IupMenu( _clear, null );
+				int valuePos = IupGetInt( GLOBAL.messageWindowTabs, "VALUEPOS" );
+				if( valuePos == 0 )
+				{
+					IupSetAttribute( GLOBAL.outputPanel, "VALUE", null );
+				}
+				else if( valuePos == 1 )
+				{
+					IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", null );
+				}
+			});
+			popupMenu = IupMenu( _clear, null );
+		}
 
 		IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
-		IupDestroy( popupMenu );		
+		IupDestroy( popupMenu );
 
 		return IUP_DEFAULT;
 	}
