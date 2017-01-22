@@ -1982,16 +1982,19 @@ struct AutoComplete
 				// Manual
 				if( splitWord.length == 1 )
 				{
-					if( bDefintion )
+					if( GLOBAL.toggleUseManual == "ON" )
 					{
-						if( GLOBAL.toggleManualDefinition == "ON" )
+						if( bDefintion )
 						{
-							if( GLOBAL.manualPanel.jumpDefinition( splitWord[0] ) ) GLOBAL.manualPanel.showTab( true );
+							if( GLOBAL.toggleManualDefinition == "ON" )
+							{
+								if( GLOBAL.manualPanel.jumpDefinition( splitWord[0] ) ) GLOBAL.manualPanel.showTab( true );
+							}
 						}
-					}
-					else
-					{
-						if( GLOBAL.toggleManualShowType == "ON" ) GLOBAL.manualPanel.showType( splitWord[0] );
+						else
+						{
+							if( GLOBAL.toggleManualShowType == "ON" ) GLOBAL.manualPanel.showType( splitWord[0] );
+						}
 					}
 				}
 

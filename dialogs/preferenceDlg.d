@@ -797,7 +797,7 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttribute( btnSearch_BG, "SIZE", "64x10" );
 		}
 		
-		Ihandle* labelError= IupLabel( toStringz( GLOBAL.languageItems["errorannotation"] ~ ":" ) );
+		Ihandle* labelError= IupLabel( toStringz( GLOBAL.languageItems["manualerrorannotation"] ~ ":" ) );
 		Ihandle* btnError_FG = IupButton( null, null );
 		Ihandle* btnError_BG = IupButton( null, null );
 		IupSetAttribute( btnError_FG, "BGCOLOR", GLOBAL.editColor.errorFore.toCString );
@@ -817,7 +817,7 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttribute( btnError_BG, "SIZE", "64x10" );
 		}
 		
-		Ihandle* labelWarning= IupLabel( toStringz( GLOBAL.languageItems["warningannotation"] ~ ":" ) );
+		Ihandle* labelWarning= IupLabel( toStringz( GLOBAL.languageItems["manualwarningannotation"] ~ ":" ) );
 		Ihandle* btnWarning_FG = IupButton( null, null );
 		Ihandle* btnWarning_BG = IupButton( null, null );
 		IupSetAttribute( btnWarning_FG, "BGCOLOR", GLOBAL.editColor.warningFore.toCString );
@@ -1081,7 +1081,10 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* hboxManualPath = IupHbox( labelManualPath, textManualPath, btnManualOpen, null );
 		IupSetAttributes( hboxManualPath, "ALIGNMENT=ACENTER,MARGIN=5x0" );
-		
+
+		Ihandle* toggleUseManual = IupToggle( toStringz( GLOBAL.languageItems["manualusing"] ), null );
+		IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
+		IupSetHandle( "toggleUseManual", toggleUseManual );
 		
 		Ihandle* toggleManualLinkDefinition = IupToggle( toStringz( GLOBAL.languageItems["manualdefinition"] ), null );
 		IupSetAttribute( toggleManualLinkDefinition, "VALUE", toStringz(GLOBAL.toggleManualDefinition.dup) );
@@ -1099,7 +1102,7 @@ class CPreferenceDialog : CBaseDialog
 		//IupSetAttribute( hBoxTab, "ALIGNMENT", "ACENTER" );		
 		
 		
-		Ihandle* vboxManualPath = IupVbox( hboxManualPath, toggleManualLinkDefinition, toggleManualLinkShowType, null );
+		Ihandle* vboxManualPath = IupVbox( hboxManualPath, toggleUseManual, toggleManualLinkDefinition, toggleManualLinkShowType, null );
 
 
 		IupSetAttribute( vBoxPage01, "TABTITLE", toStringz( GLOBAL.languageItems["compiler"] ) );
@@ -1632,12 +1635,14 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
 			IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
 			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Debugger
+			IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[12].fontString ) );// StatusBar
 			GLOBAL.debugPanel.setFont();
 		//}
 		
 		GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textManualPath" ), "VALUE" );
 		if( GLOBAL.manualPath.toDString.length ) GLOBAL.manualPanel.setValue( GLOBAL.manualPath.toCString );
 		
+		GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;
 		GLOBAL.toggleManualDefinition				= fromStringz(IupGetAttribute( IupGetHandle( "toggleManualLinkDefinition" ), "VALUE" )).dup;
 		GLOBAL.toggleManualShowType					= fromStringz(IupGetAttribute( IupGetHandle( "toggleManualLinkShowType" ), "VALUE" )).dup;
 		

@@ -1,39 +1,95 @@
 ﻿module layouts.statusBar;
 
-
-private import iup.iup;
-private import global, scintilla;
-
-Ihandle* createStatusBar()
+class CStatusBar
 {
-	GLOBAL.statusBar_PrjName = IupLabel( "                                            " ); // GLOBAL.languageItems["caption_prj"]
-	GLOBAL.statusBar_Line_Col = IupLabel( "             " );
-	//IupSetAttributes( labelFont, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
-
-	GLOBAL.statusBar_Ins = IupLabel( "   " );
-	GLOBAL.statusBar_EOLType = IupLabel( "        " );
-	GLOBAL.statusBar_encodingType = IupLabel( "           " );
-
-
-	Ihandle*[4] labelSEPARATOR;
-	for( int i = 0; i < 4; i++ )
+	private:
+	import		iup.iup;
+	import		tools;
+	
+	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType;
+	IupString	_name, _lc, _ins, _eol, _en;
+	
+	
+	void createLayout()
 	{
-		labelSEPARATOR[i] = IupLabel( null ); 
-		IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
+		prjName = IupLabel( "                                            " );
+		IupSetAttribute( prjName, "SIZE", "500x" );
+		LINExCOL = IupLabel( "             " );
+		Ins = IupLabel( "   " );
+		EOLType = IupLabel( "        " );
+		EncodingType = IupLabel( "           " );
+		
+		Ihandle*[4] labelSEPARATOR;
+		for( int i = 0; i < 4; i++ )
+		{
+			labelSEPARATOR[i] = IupLabel( null ); 
+			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
+		}		
+
+		// Ihandle* StatusBar = IupHbox( GLOBAL.statusBar_PrjName, IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
+		layoutHandle = IupHbox( prjName, IupFill(), labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
+		IupSetAttributes( layoutHandle, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
+		
+		version(Windows)
+		{
+			IupSetAttribute( layoutHandle, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( layoutHandle, "FONT", "FreeMono,Bold 9" );
+		}			
+	}
+	
+	
+	public:
+	this()
+	{
+		_name = new IupString();
+		_lc = new IupString();
+		_ins = new IupString();
+		_eol = new IupString();
+		_en = new IupString();
+		
+		createLayout();
+	}
+	
+	~this()
+	{
+		//delete _name, _lc, _ins, _eol, _en;
+	}
+	
+	Ihandle* getLayoutHandle()
+	{
+		return layoutHandle;
+	}
+	
+	void setPrjName( char[] name )
+	{
+		_name = name;
+		IupSetAttribute( prjName, "TITLE", _name.toCString );
+	}
+	
+	void setLINExCOL( char[] lc )
+	{
+		_lc = lc;
+		IupSetAttribute( LINExCOL, "TITLE", _lc.toCString );
 	}
 
-
-	Ihandle* StatusBar = IupHbox( GLOBAL.statusBar_PrjName, IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
-	IupSetAttributes( StatusBar, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
-	version( Windows )
+	void setIns( char[] ins )
 	{
-		IupSetAttribute( StatusBar, "FONT", "Courier New,9" );
+		_ins = ins;
+		IupSetAttribute( Ins, "TITLE", _ins.toCString );
 	}
-	else
+
+	void setEOLType( char[] eol )
 	{
-		IupSetAttribute( StatusBar, "FONT", "FreeMono,Bold 9" );
-	}	
+		_eol = eol;
+		IupSetAttribute( EOLType, "TITLE", _eol.toCString );
+	}
 
-	return StatusBar;
-
+	void setEncodingType( char[] en )
+	{
+		_en = en;
+		IupSetAttribute( EncodingType, "TITLE", _en.toCString );
+	}
 }

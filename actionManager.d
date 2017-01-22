@@ -352,14 +352,13 @@ struct DocumentTabAction
 			// Marked the trees( FileList & ProjectTree )
 			if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
 			{
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
+				GLOBAL.statusBar.setPrjName( "                                            " );
 			}
 			else
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
-				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.dup ) );
+				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
 			}
 		}
 
@@ -481,16 +480,15 @@ struct ScintillaAction
 			}
 			StatusBarAction.update();
 
-			if( !( toTreeMarked( fullPath ) & 2 ))
+			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
+				GLOBAL.statusBar.setPrjName( "                                            " );
 			}
 			else
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
-				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.dup ) );
+				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
 			}			
 
 			return true;
@@ -522,16 +520,15 @@ struct ScintillaAction
 			//StatusBarAction.update();
 
 			GLOBAL.fileListTree.addItem( _sci );
-			if( !( toTreeMarked( fullPath ) & 2 ))
+			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
+				GLOBAL.statusBar.setPrjName( "                                            " );
 			}
 			else
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
-				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.dup ) );
+				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
 			}			
 			
 			// Parser
@@ -1293,57 +1290,55 @@ struct StatusBarAction
 
 				scope Layouter = new Layout!(char)();
 				char[] output = Layouter( "{,7}x{,5}", line, col );
-
-				IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", toStringz( output.dup ) );// Update line x col
+				GLOBAL.statusBar.setLINExCOL( output );
 
 				if( bOverType )
 				{
-					IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "OVR" ); // Update line x col
+					GLOBAL.statusBar.setIns( "OVR" ); // Update line x col
 				}
 				else
 				{
-					IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "INS" ); // Update line x col
+					GLOBAL.statusBar.setIns( "INS" ); // Update line x col
 				}
 
 				switch( eolType )
 				{
 					case 0: //  SC_EOL_CRLF (0)
-						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "WINDOWS" ); break;
+						GLOBAL.statusBar.setEOLType( "WINDOWS" ); break;
 					case 1: //    SC_EOL_CR (1)
-						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "    MAC" ); break;
+						GLOBAL.statusBar.setEOLType( "    MAC" ); break;
 					case 2: //   SC_EOL_LF (2)
-						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "   UNIX" ); break;
+						GLOBAL.statusBar.setEOLType( "   UNIX" ); break;
 					default:
-						IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", " UNKNOW" );
+						GLOBAL.statusBar.setEOLType( " UNKNOW" );
 				}
 
 				switch( cSci.encoding )
 				{
 					case 0: // Encoding.Unknown
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "DEFAULT    " ); break;
+						GLOBAL.statusBar.setEncodingType( "DEFAULT    " ); break;
 					case 1: // Encoding.UTF_8N
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF8       " ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF8       " ); break;
 					case 2: // Encoding.UTF_8
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF8.BOM   " ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF8.BOM   " ); break;
 					case 3: // Encoding.UTF_16
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF16      " ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF16      " ); break;
 					case 4: // Encoding.UTF_16BE
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF16BE.BOM" ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF16BE.BOM" ); break;
 					case 5: // Encoding.UTF_16LE
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF16LE.BOM" ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF16LE.BOM" ); break;
 					case 6: // Encoding.UTF_32
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32      " ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF32      " ); break;
 					case 7: // Encoding.UTF_32BE
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32BE.BOM" ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF32BE.BOM" ); break;
 					case 8: // Encoding.UTF_32LE
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32LE.BOM" ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF32LE.BOM" ); break;
 					case 9: //
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32BE    " ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF32BE    " ); break;
 					case 10: //
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UTF32LE    " ); break;
+						GLOBAL.statusBar.setEncodingType( "UTF32LE    " ); break;
 					default:
-						IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "UNKNOWN?   " );
-						
+						GLOBAL.statusBar.setEncodingType( "UNKNOWN?   " );
 				}
 
 				if( GLOBAL.showFunctionTitle == "ON" )
@@ -1375,10 +1370,11 @@ struct StatusBarAction
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.statusBar_Line_Col, "TITLE", "             " );
-			IupSetAttribute( GLOBAL.statusBar_Ins, "TITLE", "   " );
-			IupSetAttribute( GLOBAL.statusBar_EOLType, "TITLE", "        " );	
-			IupSetAttribute( GLOBAL.statusBar_encodingType, "TITLE", "           " );
+			GLOBAL.statusBar.setPrjName( "                                            " );
+			GLOBAL.statusBar.setLINExCOL( "             " );
+			GLOBAL.statusBar.setIns( "   " );
+			GLOBAL.statusBar.setEOLType( "        " );	
+			GLOBAL.statusBar.setEncodingType( "           " );
 		}
 	}
 }

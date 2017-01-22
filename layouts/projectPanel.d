@@ -265,10 +265,7 @@ class CProjectTree
 
 		// Recent Projects
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
-
-		//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( GLOBAL.projectManager[setupDir].name ~ " - poseidonFB - FreeBasic IDE" ) );
-		IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ GLOBAL.projectManager[setupDir].name.dup ) );
-		
+		GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ GLOBAL.projectManager[setupDir].name );
 		//IupSetInt( GLOBAL.fileListSplit, "VALUE", IupGetInt( GLOBAL.fileListSplit, "VALUE" ) + 12 );
 	}
 
@@ -617,13 +614,12 @@ extern(C)
 			if( id > 0 )
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				char[] _prjName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) ).dup;
-				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", toStringz( _prjName ~ " - poseidonFB - FreeBasic IDE" ) );
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", toStringz( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.dup ) );
+				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
 			}
 			else
 			{
-				IupSetAttribute( GLOBAL.statusBar_PrjName, "TITLE", null );
+				GLOBAL.statusBar.setPrjName( "                                            " );
 				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 			}
 		}

@@ -4,6 +4,7 @@ import iup.iup, iup.iupweb;
 
 import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.manualPanel, layouts.debugger, actionManager, menu;
+import layouts.statusBar;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
 
@@ -67,9 +68,9 @@ void createExplorerWindow()
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 ); else IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
 
-	Ihandle* StatusBar = createStatusBar();
+	GLOBAL.statusBar = new CStatusBar();
 
-	Ihandle* VBox = IupVbox( GLOBAL.toolbar.getHandle, GLOBAL.messageSplit, StatusBar, null );
+	Ihandle* VBox = IupVbox( GLOBAL.toolbar.getHandle, GLOBAL.messageSplit, GLOBAL.statusBar.getLayoutHandle, null );
 	IupAppend( GLOBAL.mainDlg, VBox );
 	//IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
 }

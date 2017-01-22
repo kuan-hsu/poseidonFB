@@ -30,8 +30,12 @@ class CManual
 		webHandle = IupWebBrowser();
 		IupSetCallback( webHandle, "COMPLETED_CB",cast(Icallback) &COMPLETED_CB );
 		IupSetCallback( webHandle, "ERROR_CB",cast(Icallback) &ERROR_CB );
-		
-		if( GLOBAL.manualPath.toDString.length ) IupSetAttribute( webHandle, "VALUE", GLOBAL.manualPath.toCString );
+		/*
+		if( GLOBAL.manualPath.toDString.length )
+		{
+			if( GLOBAL.toggleUseManual == "ON" ) IupSetAttribute( webHandle, "VALUE", GLOBAL.manualPath.toCString );
+		}
+		*/
 		
 		tempTextHandle= IupText( null );
 		IupSetAttributes( tempTextHandle, "MULTILINE=YES,VISIBLE=NO,VISIBLELINES=0,VISIBLECOLUMNS=0" );

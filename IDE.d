@@ -165,7 +165,9 @@ struct IDECONFIG
 		.attribute( null, "Search", GLOBAL.fonts[8].fontString )
 		.attribute( null, "Debugger", GLOBAL.fonts[9].fontString )
 		.attribute( null, "Annotation", GLOBAL.fonts[10].fontString )
-		.attribute( null, "Manual", GLOBAL.fonts[11].fontString );
+		.attribute( null, "Manual", GLOBAL.fonts[11].fontString )
+		.attribute( null, "StatusBar", GLOBAL.fonts[12].fontString );
+
 
 		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
 		editorNode.element( null, "color" )
@@ -284,6 +286,7 @@ struct IDECONFIG
 		*/
 		auto manualNode = configNode.element( null, "manual" );
 		manualNode.element( null, "manualpath", GLOBAL.manualPath.toDString );
+		manualNode.element( null, "manualusing", GLOBAL.toggleUseManual );
 		manualNode.element( null, "manualdefinition", GLOBAL.toggleManualDefinition );
 		manualNode.element( null, "manualshowtype", GLOBAL.toggleManualShowType );
 
@@ -493,6 +496,11 @@ struct IDECONFIG
 			foreach( e; result )
 			{
 				GLOBAL.manualPath = e.value;
+			}
+			result = root.query.descendant("manualusing");
+			foreach( e; result )
+			{
+				GLOBAL.toggleUseManual = e.value;
 			}			
 			result = root.query.descendant("manualdefinition");
 			foreach( e; result )
@@ -677,6 +685,13 @@ struct IDECONFIG
 			GLOBAL.fonts[11] = fu;
 			result = root.query.descendant("font").attribute( fu.name );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[11].fontString = e.value;
+
+			fu.name = "StatusBar";
+			GLOBAL.fonts[12] = fu;
+			result = root.query.descendant("font").attribute( fu.name );
+			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[12].fontString = e.value;
+			
+			
 			
 			/+
 			// Font

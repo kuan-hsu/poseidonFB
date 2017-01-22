@@ -59,7 +59,7 @@ struct GLOBAL
 	import tango.stdc.stringz;
 
 	
-	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.manualPanel, layouts.debugger;
+	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.manualPanel, layouts.statusBar, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
@@ -94,7 +94,7 @@ struct GLOBAL
 	static CCompilerHelpDialog	compilerHelpDlg;
 	static CArgOptionDialog		argsDlg;
 
-	static Ihandle*				statusBar, statusBar_PrjName, statusBar_Line_Col, statusBar_Ins, statusBar_EOLType, statusBar_encodingType;
+	static CStatusBar			statusBar;
 
 	static Ihandle*				menuOutlineWindow, menuMessageWindow;
 	
@@ -130,6 +130,7 @@ struct GLOBAL
 	static char[]				toggleShowListType = "OFF";
 	static char[]				toggleShowAllMember = "ON";
 	
+	static char[]				toggleUseManual = "OFF";
 	static char[]				toggleManualDefinition = "OFF";
 	static char[]				toggleManualShowType = "OFF";
 	
@@ -167,59 +168,59 @@ struct GLOBAL
 	static this()
 	{
 		// Init EditorColorUint
-		GLOBAL.editColor.keyWord[0] = new IupString( "5 91 35" );
-		GLOBAL.editColor.keyWord[1] = new IupString( "0 0 255" );
-		GLOBAL.editColor.keyWord[2] = new IupString( "231 144 0" );
-		GLOBAL.editColor.keyWord[3] = new IupString( "16 108 232" );
+		GLOBAL.editColor.keyWord[0] = new IupString( cast(char[]) "5 91 35" );
+		GLOBAL.editColor.keyWord[1] = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.keyWord[2] = new IupString( cast(char[]) "231 144 0" );
+		GLOBAL.editColor.keyWord[3] = new IupString( cast(char[]) "16 108 232" );
 		
-		GLOBAL.editColor.caretLine = new IupString( "255 255 128" );
-		GLOBAL.editColor.cursor = new IupString( "0 0 0" );
-		GLOBAL.editColor.selectionFore = new IupString( "255 255 255" );
-		GLOBAL.editColor.selectionBack = new IupString( "0 0 255" );
-		GLOBAL.editColor.linenumFore = new IupString( "0 0 0" );
-		GLOBAL.editColor.linenumBack = new IupString( "200 200 200" );
-		GLOBAL.editColor.fold = new IupString( "200 208 208" );
-		GLOBAL.editColor.selAlpha = new IupString( "255" );
-		GLOBAL.editColor.errorFore = new IupString( "102 69 3" );
-		GLOBAL.editColor.errorBack = new IupString( "255 200 227" );
-		GLOBAL.editColor.warningFore = new IupString( "0 0 255" );
-		GLOBAL.editColor.warringBack = new IupString( "255 255 157" );
-		GLOBAL.editColor.manualFore = new IupString( "255 255 255" );
-		GLOBAL.editColor.manualBack = new IupString( "80 80 80" );
+		GLOBAL.editColor.caretLine = new IupString( cast(char[]) "255 255 128" );
+		GLOBAL.editColor.cursor = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.selectionFore = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.selectionBack = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.linenumFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.linenumBack = new IupString( cast(char[]) "200 200 200" );
+		GLOBAL.editColor.fold = new IupString( cast(char[]) "200 208 208" );
+		GLOBAL.editColor.selAlpha = new IupString( cast(char[]) "255" );
+		GLOBAL.editColor.errorFore = new IupString( cast(char[]) "102 69 3" );
+		GLOBAL.editColor.errorBack = new IupString( cast(char[]) "255 200 227" );
+		GLOBAL.editColor.warningFore = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.warringBack = new IupString( cast(char[]) "255 255 157" );
+		GLOBAL.editColor.manualFore = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.manualBack = new IupString( cast(char[]) "80 80 80" );
 		
-		GLOBAL.editColor.scintillaFore = new IupString( "0 0 0" );
-		GLOBAL.editColor.scintillaBack = new IupString( "255 255 255" );
-		GLOBAL.editColor.SCE_B_COMMENT_Fore = new IupString( "0 128 0" );
-		GLOBAL.editColor.SCE_B_COMMENT_Back = new IupString( "255 255 255" );
+		GLOBAL.editColor.scintillaFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.scintillaBack = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.SCE_B_COMMENT_Fore = new IupString( cast(char[]) "0 128 0" );
+		GLOBAL.editColor.SCE_B_COMMENT_Back = new IupString( cast(char[]) "255 255 255" );
 
-		GLOBAL.editColor.SCE_B_NUMBER_Fore = new IupString( "128 128 64" );
-		GLOBAL.editColor.SCE_B_NUMBER_Back = new IupString( "255 255 255" );
-		GLOBAL.editColor.SCE_B_STRING_Fore = new IupString( "128 0 0" );
-		GLOBAL.editColor.SCE_B_STRING_Back = new IupString( "255 255 255" );
+		GLOBAL.editColor.SCE_B_NUMBER_Fore = new IupString( cast(char[]) "128 128 64" );
+		GLOBAL.editColor.SCE_B_NUMBER_Back = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.SCE_B_STRING_Fore = new IupString( cast(char[]) "128 0 0" );
+		GLOBAL.editColor.SCE_B_STRING_Back = new IupString( cast(char[]) "255 255 255" );
 
-		GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = new IupString( "0 0 255" );
-		GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = new IupString( "255 255 255" );
-		GLOBAL.editColor.SCE_B_OPERATOR_Fore = new IupString( "160 20 20" );
-		GLOBAL.editColor.SCE_B_OPERATOR_Back = new IupString( "255 255 255" );
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.SCE_B_OPERATOR_Fore = new IupString( cast(char[]) "160 20 20" );
+		GLOBAL.editColor.SCE_B_OPERATOR_Back = new IupString( cast(char[]) "255 255 255" );
 
-		GLOBAL.editColor.SCE_B_IDENTIFIER_Fore = new IupString( "0 0 0" );
-		GLOBAL.editColor.SCE_B_IDENTIFIER_Back = new IupString( "255 255 255" );
-		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore = new IupString( "0 128 0" );
-		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back = new IupString( "255 255 255" );
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Fore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Back = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore = new IupString( cast(char[]) "0 128 0" );
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back = new IupString( cast(char[]) "255 255 255" );
 
-		GLOBAL.editColor.projectFore = new IupString( "0 0 0" );
-		GLOBAL.editColor.projectBack = new IupString( "255 255 255" );
-		GLOBAL.editColor.outlineFore = new IupString( "0 0 0" );
-		GLOBAL.editColor.outlineBack = new IupString( "255 255 255" );
-		GLOBAL.editColor.filelistFore = new IupString( "0 0 0" );
-		GLOBAL.editColor.filelistBack = new IupString( "255 255 255" );
-		GLOBAL.editColor.outputFore = new IupString( "0 0 0" );
-		GLOBAL.editColor.outputBack = new IupString( "255 255 255" );
-		GLOBAL.editColor.searchFore = new IupString( "0 0 0" );
-		GLOBAL.editColor.searchBack = new IupString( "255 255 255" );
+		GLOBAL.editColor.projectFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.projectBack = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.outlineFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.outlineBack = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.filelistFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.filelistBack = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.outputFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.outputBack = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.searchFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.searchBack = new IupString( cast(char[]) "255 255 255" );
 
-		GLOBAL.editColor.prjTitle = new IupString( "128 0 0" );
-		GLOBAL.editColor.prjSourceType = new IupString( "0 0 255" );
+		GLOBAL.editColor.prjTitle = new IupString( cast(char[]) "128 0 0" );
+		GLOBAL.editColor.prjSourceType = new IupString( cast(char[]) "0 0 255" );
 		
 		GLOBAL.compilerFullPath = new IupString();
 		GLOBAL.debuggerFullPath = new IupString();
@@ -332,6 +333,10 @@ struct GLOBAL
 		
 		fu.name = "Manual";
 		GLOBAL.fonts ~= fu;
+		
+		fu.name = "StatusBar";
+		GLOBAL.fonts ~= fu;
+		
 		
 		
 		GLOBAL.languageItems["file"] = "File";
@@ -477,8 +482,8 @@ struct GLOBAL
 							GLOBAL.languageItems["selalpha"] = "Selection Alpha";
 								GLOBAL.languageItems["alphatip"] = "Set 255 To Disable Alpha";
 						GLOBAL.languageItems["colorfgbg"] = "Color/Foreground/Background";
-							GLOBAL.languageItems["errorannotation"] = "Error Annotation";
-							GLOBAL.languageItems["warningannotation"] = "Warning Annotation";
+							GLOBAL.languageItems["manualerrorannotation"] = "Error Annotation";
+							GLOBAL.languageItems["manualwarningannotation"] = "Warning Annotation";
 							GLOBAL.languageItems["manualannotation"] = "Manual Annotation";
 							GLOBAL.languageItems["scintilla"] = "Scintilla";
 							GLOBAL.languageItems["SCE_B_COMMENT"] = "SCE_B_COMMENT";
@@ -522,6 +527,7 @@ struct GLOBAL
 						GLOBAL.languageItems["keyword3"] = "Keyword3";
 					// GLOBAL.languageItems["manual"] = "Manual";
 						GLOBAL.languageItems["manualpath"] = "Manual Path";
+						GLOBAL.languageItems["manualusing"] = "Use Help Manual";
 						GLOBAL.languageItems["manualdefinition"] = "Use \"Goto Definition\" To Show The Relative Manual Page";
 						GLOBAL.languageItems["manualshowtype"] = "Use \"Show Type\" To Show The Description At Annotation";
 						GLOBAL.languageItems["manualhome"] = "Home";

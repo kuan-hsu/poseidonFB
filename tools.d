@@ -72,6 +72,18 @@ public:
 		copy( Dstring );
 	}
 
+	this( char* Cstring )
+	{
+		if( Cstring != null )
+		{
+			_DString = fromStringz( Cstring );
+			
+			int _len = strlen( Cstring );
+			_CstringPointer = cast(char*)calloc( 1, _len + 1 );
+			memcpy( _CstringPointer, Cstring, _len );
+		}
+	}	
+
 	~this()
 	{
 		if( _CstringPointer != null ) free( _CstringPointer );
