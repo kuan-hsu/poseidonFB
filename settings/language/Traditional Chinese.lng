@@ -44,7 +44,6 @@ prj=專案
 	properties=專案性質...
 	
 	openinexplorer=在檔案總管開啟
-	addinprj=增加檔案
 	removefromprj=從專案移除
 	rename=重新命名
 	newfile=新建檔案

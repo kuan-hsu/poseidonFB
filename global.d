@@ -385,7 +385,6 @@ struct GLOBAL
 			GLOBAL.languageItems["properties"] = "Properties...";
 			
 			GLOBAL.languageItems["openinexplorer"] = "Open In Explorer";
-			GLOBAL.languageItems["addinprj"]= "Add File(s)";
 			GLOBAL.languageItems["removefromprj"] = "Remove From Project";
 			GLOBAL.languageItems["rename"] = "Rename File";
 			GLOBAL.languageItems["newfile"] = "New File";

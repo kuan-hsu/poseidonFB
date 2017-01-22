@@ -414,7 +414,7 @@ void createMenu()
 	IupMap( _loadLngFiles );
 	
 	Ihandle* _lng;
-	if( GLOBAL.language.length ) _lng = IupItem( toStringz( GLOBAL.language ), null ); else  _lng = IupItem( toStringz( "Default" ), null );
+	if( GLOBAL.language.length ) _lng = IupItem( toStringz( GLOBAL.language ), null ); else  _lng = IupItem( toStringz( GLOBAL.languageItems["default"] ), null );
 	IupInsert( languageSubMenu, null, _lng );
 	IupMap( _lng );
 	IupSetHandle( "_lng", _lng );

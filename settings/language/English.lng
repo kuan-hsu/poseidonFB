@@ -44,14 +44,13 @@ prj=Project
 	properties=Properties...
 	
 	openinexplorer=Open In Explorer
-	addinprj=Add File(s)
 	removefromprj=Remove From Project
 	rename=Rename File
 	newfile=New File
 		filename=File Name
 	newfolder=New Folder
 		foldername=Folder Name
-	addfile=Add file(s)
+	addfile=Add File(s)
 	
 build=Build
 	compile=Compile File
