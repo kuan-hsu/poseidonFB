@@ -1640,14 +1640,15 @@ extern(C) // Callback for CPreferenceDialog
 		//}
 		
 		GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textManualPath" ), "VALUE" );
-		if( GLOBAL.manualPath.toDString.length ) GLOBAL.manualPanel.setValue( GLOBAL.manualPath.toCString );
-		
 		GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;
 		GLOBAL.toggleManualDefinition				= fromStringz(IupGetAttribute( IupGetHandle( "toggleManualLinkDefinition" ), "VALUE" )).dup;
 		GLOBAL.toggleManualShowType					= fromStringz(IupGetAttribute( IupGetHandle( "toggleManualLinkShowType" ), "VALUE" )).dup;
-		
-		
-		
+		/*
+		if( GLOBAL.manualPath.toDString.length )
+		{
+			if( GLOBAL.toggleUseManual == "ON" ) GLOBAL.manualPanel.setValue( GLOBAL.manualPath.toCString );
+		}
+		*/
 		
 
 		// Save Setup to Xml

@@ -22,8 +22,7 @@ class CScintilla
 	import			tango.io.UnicodeFile;
 	
 	Ihandle*		sci;
-	char[]			fullPath;
-	CstringConvert	title;
+	IupString		fullPath, title;
 
 	void getFontAndSize( int index, out char[] font, out char[] Bold, out char[] Italic, out char[] Underline, out char[] Strikeout, out char[] size )
 	{
@@ -57,10 +56,9 @@ class CScintilla
 
 	void init( char[] _fullPath, int insertPos )
 	{
+		scope mypath = new FilePath( _fullPath );
 		fullPath = _fullPath;
-		scope mypath = new FilePath( fullPath );
-
-		title = new CstringConvert( mypath.file() );
+		title = mypath.file();
 		
 		if( GLOBAL.documentTabs != null )
 		{
@@ -78,7 +76,7 @@ class CScintilla
 			{
 				IupSetAttribute( sci, "TABIMAGE", "icon_document" );
 			}
-			IupSetAttribute( sci, "TABTITLE", title.toStringz() );
+			IupSetAttribute( sci, "TABTITLE", title.toCString );
 			IupSetHandle( GLOBAL.cString.convert( _fullPath ), sci );
 
 			if( insertPos == -1 )
@@ -120,6 +118,9 @@ class CScintilla
 	{
 		sci = IupScintilla();
 		IupSetAttribute( sci, "EXPAND", "YES" );
+		
+		fullPath = new IupString();
+		title = new IupString();
 	}
 
 	this( char[] _fullPath, char[] _text = null, int _encode = Encoding.UTF_8, int insertPos = -1 )
@@ -127,6 +128,9 @@ class CScintilla
 		sci = IupScintilla();
 		IupSetAttribute( sci, "EXPAND", "YES" );
 		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
+		
+		fullPath = new IupString();
+		title = new IupString();
 
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
@@ -160,7 +164,7 @@ class CScintilla
 
 	~this()
 	{
-		IupSetHandle( GLOBAL.cString.convert( fullPath ), null );
+		IupSetHandle( fullPath.toCString, null );
 		if( !GLOBAL.debugPanel.isRunning && !GLOBAL.debugPanel.isExecuting )
 		{
 			int count = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" );
@@ -173,7 +177,7 @@ class CScintilla
 
 				if( id == "-1" )
 				{
-					if( fn == fullPath ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
+					if( fn == fullPath.toDString ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
 				}
 			}			
 		}
@@ -209,45 +213,45 @@ class CScintilla
 
 	char[] getTitle()
 	{
-		return fromStringz( title.toStringz ).dup;
+		return title.toDString;
 	}
 
-	CstringConvert getTitleHandle()
+	IupString getTitleHandle()
 	{
 		return title;
 	}
 
 	char[] getFullPath()
 	{
-		return fullPath;
+		return fullPath.toDString;
 	}
 
 	void rename( char[] newFullPath )
 	{
 		// Remove Old Handle
-		IupSetHandle( GLOBAL.cString.convert( fullPath ), null );
-		GLOBAL.scintillaManager.remove( upperCase(fullPath) );
+		IupSetHandle( fullPath.toCString, null );
+		GLOBAL.scintillaManager.remove( upperCase(fullPath.toDString) );
 
 		fullPath = newFullPath;
 		
-		scope mypath = new FilePath( fullPath );
-		title.convert( mypath.file() );
+		scope mypath = new FilePath( fullPath.toDString );
+		title = mypath.file();
 
 		int pos = IupGetChildPos( GLOBAL.documentTabs, sci );
 		if( pos > -1 )
 		{
-			IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toStringz );
+			IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toCString );
 		}		
-		IupSetHandle( toStringz( fullPath ), sci );
+		IupSetHandle( fullPath.toCString, sci );
 
-		GLOBAL.scintillaManager[upperCase(fullPath)] = this;
+		GLOBAL.scintillaManager[upperCase(fullPath.toDString)] = this;
 		
-		if( upperCase(fullPath) in GLOBAL.parserManager )
+		if( upperCase(fullPath.toDString) in GLOBAL.parserManager )
 		{
-			auto temp = GLOBAL.parserManager[upperCase(fullPath)];
+			auto temp = GLOBAL.parserManager[upperCase(fullPath.toDString)];
 			delete temp;
-			GLOBAL.parserManager.remove( upperCase(fullPath) );
-			GLOBAL.outlineTree.cleanTree( fullPath );
+			GLOBAL.parserManager.remove( upperCase(fullPath.toDString) );
+			GLOBAL.outlineTree.cleanTree( fullPath.toDString );
 
 			GLOBAL.outlineTree.loadFile( newFullPath );
 		}
@@ -265,7 +269,7 @@ class CScintilla
 			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", id );
 			if( _sci_node == this )
 			{
-				IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id, toStringz( fullPath ) );
+				IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id, fullPath.toCString );
 				break;
 			}
 		}					
@@ -275,7 +279,7 @@ class CScintilla
 	{
 		try
 		{
-			if( FileAction.saveFile( fullPath, getText(), cast(Encoding) encoding ) )
+			if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
 			{
 				if( fromStringz( IupGetAttribute( sci, "SAVEDSTATE" ) ) == "YES" )
 				{
@@ -284,7 +288,7 @@ class CScintilla
 					int pos = IupGetChildPos( GLOBAL.documentTabs, sci );
 					if( pos > -1 )
 					{
-						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toStringz );
+						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toCString );
 					}
 				}
 			}
@@ -706,11 +710,14 @@ extern(C)
 						auto cSci = ScintillaAction.getCScintilla( ih );
 						if( cSci !is null )
 						{
-							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, cSci.getTitleHandle().convert( _title ) );
+							auto titleHandle = cSci.getTitleHandle();
+							titleHandle = _title;
+							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
 						}
 						else
 						{
-							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+							// First time trigger, don't change title
+							//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
 						}
 					}
 				}
@@ -729,11 +736,13 @@ extern(C)
 						auto cSci = ScintillaAction.getCScintilla( ih );
 						if( cSci !is null )
 						{
-							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, cSci.getTitleHandle().convert( _title ) );
+							auto titleHandle = cSci.getTitleHandle();
+							titleHandle = _title;							
+							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
 						}
 						else
 						{
-							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+							//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
 						}						
 					}
 				}

@@ -17,16 +17,15 @@ class CManual
 	
 	import				tango.core.Thread;
 	
-	Ihandle*			layoutHandle, webHandle, tempTextHandle;
+	Ihandle*			layoutHandle, webHandle, tempTextHandle, clipboard;
 	IupString			title;
+	static IupString	prevClipboard;
 	int					fullPathState;
 	
 	static	bool		bShowType;
 
 	void createLayout()
 	{
-		//test
-		IupWebBrowserOpen();          
 		webHandle = IupWebBrowser();
 		IupSetCallback( webHandle, "COMPLETED_CB",cast(Icallback) &COMPLETED_CB );
 		IupSetCallback( webHandle, "ERROR_CB",cast(Icallback) &ERROR_CB );
@@ -47,12 +46,16 @@ class CManual
 		title = new IupString( GLOBAL.languageItems["manual"] );
 		IupSetAttribute( layoutHandle, "TABTITLE", title.toCString );
 		IupSetAttribute( layoutHandle, "TABIMAGE", "icon_manual" );
-	
+		
+		clipboard = IupClipboard();
+		IupSetHandle( "clipboard", clipboard );
 	}
 
 	public:
 	this()
 	{
+		CManual.prevClipboard = new IupString();
+		IupWebBrowserOpen();
 		createLayout();
 	}
 	
@@ -200,13 +203,18 @@ extern(C)
 		
 		if( manualTextHandle != null )
 		{
+			// Save previous clipboard text
+			CManual.prevClipboard = IupGetAttribute( IupGetHandle( "clipboard" ), "TEXT" );
+			
 			IupSetAttribute( ih, "SELECTALL", "YES" );
 			IupSetAttribute( ih, "COPY", null );
 			IupSetAttribute( ih, "RELOAD", "1" );
 			IupSetAttribute( ih, "STOP", "1" );
-			
 			IupSetAttribute( manualTextHandle, "VALUE", null );
 			IupSetAttribute( manualTextHandle, "CLIPBOARD", "PASTE" );
+			
+			// Restore previous clipboard text
+			IupSetAttribute( IupGetHandle( "clipboard" ), "TEXT", CManual.prevClipboard.toCString );
 			
 			if( CManual.bShowType )
 			{

@@ -8,8 +8,23 @@ import tango.stdc.stringz;
 
 void createTabs()
 {
+	//GLOBAL.documentTabs = IupTabs( null );
 	GLOBAL.documentTabs = IupTabs( null );
-	version(Windows) IupSetAttribute( GLOBAL.documentTabs, "CHILDOFFSET", "0x3" );
+	version(Windows)
+	{
+		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x3" );
+		
+		/+
+		//IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
+		//IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "0" );
+		IupSetAttribute( GLOBAL.documentTabs, "TABSFONT",GLOBAL.cString.convert( GLOBAL.fonts[0].fontString ) );
+		IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 0" );
+		IupSetAttribute( GLOBAL.documentTabs, "TABSFORECOLOR", "100 100 100" );
+		
+		IupSetInt( GLOBAL.documentTabs, "TABSFONTSIZE", 9 );
+		+/
+	}
+	
 	//IupSetAttribute( GLOBAL.documentTabs, "PADDING", "10x10" );
 
 	version( linux )
@@ -19,7 +34,7 @@ void createTabs()
 	}
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
-	//IupSetCallback( GLOBAL.documentTabs, "GETFOCUS_CB", cast(Icallback) &tabFocus_cb );
+	//IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabFocus_cb );
 }
 
 extern(C)
@@ -96,4 +111,18 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
+	
+	/*
+	private int tabFocus_cb(Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( button == IUP_BUTTON2 )
+		{
+			IupMessage("MID","");
+			for( int i = 0; i < IupGetInt( ih, "COUNT" ); i ++ )
+				IupMessage( "", IupGetAttribute( IupGetChild( ih, i ), "SCREENPOSITION" ) );
+			
+		}
+		return IUP_DEFAULT;
+	}
+	*/
 }

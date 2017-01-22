@@ -1033,7 +1033,16 @@ struct ScintillaAction
 
 	static int getCurrentPos( Ihandle* ih )
 	{
-		if( ih != null ) return IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+		if( ih != null ) return cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+		
+		return -1;
+	}
+	
+	static int getLinefromPos( Ihandle* ih, int pos )
+	{
+		if( ih != null ) return cast(int) IupScintillaSendMessage( ih, 2166, pos, 0 );
+		
+		return -1;
 	}
 
 	static char[] getCurrentChar( int bias, Ihandle* ih = null )
