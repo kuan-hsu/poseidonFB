@@ -117,8 +117,12 @@ class CManual
 				if( _keyWord == targetText )
 				{
 					scope _fp = new FilePath( GLOBAL.manualPath.toDString );
-					//char[] targetFile = _fp.path() ~ "keypg" ~ targetText ~ ".html";
-					_fp.set( _fp.path() ~ "keypg" ~ targetText ~ ".html" );
+					version(linux)
+					{
+						targetText = lowerCase( targetText );
+						if ( targetText[0] >= 'a' && targetText[0] <= 'z' ) targetText[0] = targetText[0] - 32;
+					}
+					_fp.set( _fp.path() ~ "KeyPg" ~ targetText ~ ".html" );
 					if( _fp.exists() )
 					{
 						setValue( _fp.toString );
@@ -250,7 +254,7 @@ extern(C)
 		
 		CManual.bShowType = false;
 		
-		return IUP_DEFAULT;
+		return IUP_IGNORE;
 	}
 	
 	private int ERROR_CB( Ihandle* ih, char* url )

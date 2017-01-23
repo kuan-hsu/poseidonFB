@@ -180,6 +180,8 @@ struct IDECONFIG
 		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack.toDString )
 		.attribute( null, "fold", GLOBAL.editColor.fold.toDString )
 		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha.toDString )
+		.attribute( null, "braceFore", GLOBAL.editColor.braceFore.toDString )
+		.attribute( null, "braceBack", GLOBAL.editColor.braceBack.toDString )		
 		.attribute( null, "errorFore", GLOBAL.editColor.errorFore.toDString )
 		.attribute( null, "errorBack", GLOBAL.editColor.errorBack.toDString )
 		.attribute( null, "warningFore", GLOBAL.editColor.warningFore.toDString )
@@ -745,6 +747,12 @@ struct IDECONFIG
 
 			result = root.query.descendant("color").attribute("selAlpha");
 			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
+			
+			
+			result = root.query.descendant("color").attribute("braceFore");
+			foreach( e; result ) GLOBAL.editColor.braceFore = e.value;
+			result = root.query.descendant("color").attribute("braceBack");
+			foreach( e; result ) GLOBAL.editColor.braceBack = e.value;			
 
 			result = root.query.descendant("color").attribute("errorFore");
 			foreach( e; result ) GLOBAL.editColor.errorFore = e.value;
@@ -1080,6 +1088,8 @@ struct IDECONFIG
 		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack.toDString )
 		.attribute( null, "fold", GLOBAL.editColor.fold.toDString )
 		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha.toDString )
+		.attribute( null, "braceFore", GLOBAL.editColor.braceFore.toDString )
+		.attribute( null, "braceBack", GLOBAL.editColor.braceBack.toDString )
 		.attribute( null, "errorFore", GLOBAL.editColor.errorFore.toDString )
 		.attribute( null, "errorBack", GLOBAL.editColor.errorBack.toDString )
 		.attribute( null, "warningFore", GLOBAL.editColor.warningFore.toDString )
@@ -1166,6 +1176,11 @@ struct IDECONFIG
 			foreach( e; result ) results ~= e.value;
 
 			result = root.query.descendant("color").attribute("selAlpha");
+			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("braceFore");
+			foreach( e; result ) results ~= e.value;
+			result = root.query.descendant("color").attribute("braceBack");
 			foreach( e; result ) results ~= e.value;
 
 			result = root.query.descendant("color").attribute("errorFore");

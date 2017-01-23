@@ -17,7 +17,7 @@ struct EditorColorUint
 {
 	IupString[4]	keyWord;
 	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha, errorFore, errorBack, warningFore, warringBack;
-	IupString		scintillaFore, scintillaBack, manualFore, manualBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
+	IupString		scintillaFore, scintillaBack, manualFore, manualBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
 	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
@@ -187,6 +187,8 @@ struct GLOBAL
 		GLOBAL.editColor.warringBack = new IupString( cast(char[]) "255 255 157" );
 		GLOBAL.editColor.manualFore = new IupString( cast(char[]) "255 255 255" );
 		GLOBAL.editColor.manualBack = new IupString( cast(char[]) "80 80 80" );
+		GLOBAL.editColor.braceFore = new IupString( cast(char[]) "255 0 0" );
+		GLOBAL.editColor.braceBack = new IupString( cast(char[]) "0 255 0" );
 		
 		GLOBAL.editColor.scintillaFore = new IupString( cast(char[]) "0 0 0" );
 		GLOBAL.editColor.scintillaBack = new IupString( cast(char[]) "255 255 255" );
@@ -481,6 +483,7 @@ struct GLOBAL
 							GLOBAL.languageItems["selalpha"] = "Selection Alpha";
 								GLOBAL.languageItems["alphatip"] = "Set 255 To Disable Alpha";
 						GLOBAL.languageItems["colorfgbg"] = "Color/Foreground/Background";
+							GLOBAL.languageItems["bracehighlight"] = "Brace Highlight";
 							GLOBAL.languageItems["manualerrorannotation"] = "Error Annotation";
 							GLOBAL.languageItems["manualwarningannotation"] = "Warning Annotation";
 							GLOBAL.languageItems["manualannotation"] = "Manual Annotation";

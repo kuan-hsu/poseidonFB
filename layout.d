@@ -1,6 +1,6 @@
 ﻿module layout;
 
-import iup.iup, iup.iupweb;
+import iup.iup, iup.iup_scintilla, iup.iupweb;
 
 import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.manualPanel, layouts.debugger, actionManager, menu;
@@ -223,7 +223,6 @@ extern(C)
 								int		headPos;
 								char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, currentPos, headPos );
 								word = lowerCase( word.reverse );
-
 								if( word.length )
 								{
 									bool bExitFlag;
@@ -236,12 +235,18 @@ extern(C)
 												if( c == 9 || c == 32 )
 												{
 													currentPos++;
-													word ~= c;
+													//word ~= c;
 												}
 												//IupMessage("",toStringz( Integer.toString( ++headPos ) ~ ":" ~ Integer.toString( currentPos ) ) );
-												IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( ++headPos ) ~ ":" ~ Integer.toString( currentPos ) ) );
+												++headPos;
+												IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
 												word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
 												IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
+
+												IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos , 0 );// sci_gotopos = 2025,
+												int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", currentPos - 1 );
+												if( close > -1 ) IupScintillaSendMessage( cSci.getIupScintilla, 2351, currentPos - 1, close ); // SCI_BRACEHIGHLIGHT 2351
+
 												bExitFlag = true;
 												break;
 											}

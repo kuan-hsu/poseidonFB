@@ -2431,6 +2431,18 @@ struct AutoComplete
 		POS		= getProcedurePos( iupSci, pos, "destructor" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end destructor";
 
+		POS		= getProcedurePos( iupSci, pos, "#if" );
+		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "#endif";
+
+		POS		= getProcedurePos( iupSci, pos, "#ifdef" );
+		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "#endif";
+
+		POS		= getProcedurePos( iupSci, pos, "#ifndef" );
+		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "#endif";
+
+		POS		= getProcedurePos( iupSci, pos, "#macro" );
+		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "#endmacro";
+
 		POS		= getProcedurePos( iupSci, pos, "if" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end if";
 		

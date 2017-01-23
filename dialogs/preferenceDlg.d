@@ -855,7 +855,27 @@ class CPreferenceDialog : CBaseDialog
 		{
 			IupSetAttribute( btnManual_FG, "SIZE", "64x10" );
 			IupSetAttribute( btnManual_BG, "SIZE", "64x10" );
-		}		
+		}
+		
+		Ihandle* labelBrace= IupLabel( toStringz( GLOBAL.languageItems["bracehighlight"] ~ ":" ) );
+		Ihandle* btnBrace_FG = IupButton( null, null );
+		Ihandle* btnBrace_BG = IupButton( null, null );
+		IupSetAttribute( btnBrace_FG, "BGCOLOR", GLOBAL.editColor.braceFore.toCString );
+		IupSetAttribute( btnBrace_BG, "BGCOLOR", GLOBAL.editColor.braceBack.toCString );	
+		IupSetHandle( "btnBrace_FG", btnBrace_FG );
+		IupSetHandle( "btnBrace_BG", btnBrace_BG );
+		IupSetCallback( btnBrace_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btnBrace_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		version(Windows)
+		{
+			IupSetAttribute( btnBrace_FG, "SIZE", "64x8" );
+			IupSetAttribute( btnBrace_BG, "SIZE", "64x8" );
+		}
+		else
+		{
+			IupSetAttribute( btnBrace_FG, "SIZE", "64x10" );
+			IupSetAttribute( btnBrace_BG, "SIZE", "64x10" );
+		}			
 		
 		Ihandle* gboxColor_1 = IupGridBox
 		(
@@ -891,7 +911,12 @@ class CPreferenceDialog : CBaseDialog
 
 			IupSetAttributes( labelLinenumFore, "" ),
 			IupSetAttributes( btnLinenumFore, "" ),
-			IupSetAttributes( btnLinenumBack, "" ),			
+			IupSetAttributes( btnLinenumBack, "" ),
+
+
+			IupSetAttributes( labelBrace, "" ),
+			IupSetAttributes( btnBrace_FG, "" ),
+			IupSetAttributes( btnBrace_BG, "" ),
 
 			IupSetAttributes( labelError, "" ),
 			IupSetAttributes( btnError_FG, "" ),
@@ -948,7 +973,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=1,GAPCOL=20,MARGIN=2x10" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=20,MARGIN=2x10" );
+		version(Windows) IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=0,GAPCOL=20,MARGIN=2x10" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=20,MARGIN=2x10" );
 
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -963,7 +988,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 		*/
 		Ihandle* vColor = IupVbox( hboxColorPath, frameColor, frameColor_1, null );
-		IupSetAttributes( vColor, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );		
+		IupSetAttributes( vColor, "EXPANDCHILDREN=YES" );		
 
 
 		// Short Cut
@@ -1543,6 +1568,8 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editColor.warringBack				= IupGetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR" );
 		GLOBAL.editColor.manualFore					= IupGetAttribute( IupGetHandle( "btnManual_FG" ), "BGCOLOR" );
 		GLOBAL.editColor.manualBack					= IupGetAttribute( IupGetHandle( "btnManual_BG" ), "BGCOLOR" );
+		GLOBAL.editColor.braceFore					= IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR" );
+		GLOBAL.editColor.braceBack					= IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR" );
 		
 		
 		GLOBAL.projectTree.changeColor();
@@ -1732,7 +1759,7 @@ extern(C) // Callback for CPreferenceDialog
 		char[]		templateName = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 		char[][]	colors = IDECONFIG.loadColorTemplate( templateName );
 		
-		if( colors.length == 42 )
+		if( colors.length == 44 )
 		{
 			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR", toStringz( colors[0] ) );
 			IupSetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR", toStringz( colors[1] ) );
@@ -1747,45 +1774,47 @@ extern(C) // Callback for CPreferenceDialog
 			else
 				IupSetAttribute( IupGetHandle( "textAlpha" ), "VALUE", toStringz( colors[7] ) );
 
-			IupSetAttribute( IupGetHandle( "btnError_FG" ), "BGCOLOR", toStringz( colors[8] ) );
-			IupSetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR", toStringz( colors[9] ) );
-			IupSetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR", toStringz( colors[10] ) );
-			IupSetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR", toStringz( colors[11] ) );
-			IupSetAttribute( IupGetHandle( "btnManual_FG" ), "BGCOLOR", toStringz( colors[12] ) );
-			IupSetAttribute( IupGetHandle( "btnManual_BG" ), "BGCOLOR", toStringz( colors[13] ) );
+			IupSetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR", toStringz( colors[8] ) );
+			IupSetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR", toStringz( colors[9] ) );
+			IupSetAttribute( IupGetHandle( "btnError_FG" ), "BGCOLOR", toStringz( colors[10] ) );
+			IupSetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR", toStringz( colors[11] ) );
+			IupSetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR", toStringz( colors[12] ) );
+			IupSetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR", toStringz( colors[13] ) );
+			IupSetAttribute( IupGetHandle( "btnManual_FG" ), "BGCOLOR", toStringz( colors[14] ) );
+			IupSetAttribute( IupGetHandle( "btnManual_BG" ), "BGCOLOR", toStringz( colors[15] ) );
 
 
-			IupSetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR", toStringz( colors[14] ) );
-			IupSetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR", toStringz( colors[15] ) );
+			IupSetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR", toStringz( colors[16] ) );
+			IupSetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR", toStringz( colors[17] ) );
 
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR", toStringz( colors[16] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR", toStringz( colors[17] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR", toStringz( colors[18] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR", toStringz( colors[19] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR", toStringz( colors[20] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR", toStringz( colors[21] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR", toStringz( colors[22] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR", toStringz( colors[23] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR", toStringz( colors[24] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR", toStringz( colors[25] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR", toStringz( colors[26] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR", toStringz( colors[27] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR", toStringz( colors[28] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR", toStringz( colors[29] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR", toStringz( colors[18] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR", toStringz( colors[19] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR", toStringz( colors[20] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR", toStringz( colors[21] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR", toStringz( colors[22] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR", toStringz( colors[23] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR", toStringz( colors[24] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR", toStringz( colors[25] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR", toStringz( colors[26] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR", toStringz( colors[27] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR", toStringz( colors[28] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR", toStringz( colors[29] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR", toStringz( colors[30] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR", toStringz( colors[31] ) );
 			
-			IupSetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR", toStringz( colors[30] ) );
-			IupSetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR", toStringz( colors[31] ) );
-			IupSetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR", toStringz( colors[32] ) );
-			IupSetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR", toStringz( colors[33] ) );
-			IupSetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR", toStringz( colors[34] ) );
-			IupSetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR", toStringz( colors[35] ) );
-			IupSetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR", toStringz( colors[36] ) );
-			IupSetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR", toStringz( colors[37] ) );
-			IupSetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR", toStringz( colors[38] ) );
-			IupSetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR", toStringz( colors[39] ) );
+			IupSetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR", toStringz( colors[32] ) );
+			IupSetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR", toStringz( colors[33] ) );
+			IupSetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR", toStringz( colors[34] ) );
+			IupSetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR", toStringz( colors[35] ) );
+			IupSetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR", toStringz( colors[36] ) );
+			IupSetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR", toStringz( colors[37] ) );
+			IupSetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR", toStringz( colors[38] ) );
+			IupSetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR", toStringz( colors[39] ) );
+			IupSetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR", toStringz( colors[40] ) );
+			IupSetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR", toStringz( colors[41] ) );
 			
-			IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", toStringz( colors[40] ) );
-			IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( colors[41] ) );
+			IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", toStringz( colors[42] ) );
+			IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( colors[43] ) );
 		}
 		
 		return IUP_DEFAULT;
@@ -1806,6 +1835,8 @@ extern(C) // Callback for CPreferenceDialog
 		else
 			IupSetAttribute( IupGetHandle( "textAlpha" ), "VALUE", toStringz( "255" ) );
 
+		IupSetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR", toStringz( "255 0 0" ) );
+		IupSetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR", toStringz( "0 255 0" ) );
 		IupSetAttribute( IupGetHandle( "btnError_FG" ), "BGCOLOR", toStringz( "102 69 3" ) );
 		IupSetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR", toStringz( "255 200 227" ) );
 		IupSetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR", toStringz( "0 0 255" ) );
@@ -1847,7 +1878,7 @@ extern(C) // Callback for CPreferenceDialog
 		IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( "0 0 255" ) );
 		
 		IupSetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE", null );
-		GLOBAL.colorTemplate = cast(char[]) null;
+		GLOBAL.colorTemplate = cast(char[]) " ";
 	
 		return IUP_DEFAULT;
 	}

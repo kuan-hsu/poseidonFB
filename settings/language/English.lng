@@ -140,6 +140,7 @@ options=Options
 					selalpha=Selection Alpha
 						alphatip=Set 255 To Disable Alpha
 				colorfgbg=Color/Foreground/Background
+					bracehighlight=Brace Highlight
 					errorannotation=Error Annotation
 					warningannotation=Warning Annotation
 					manualannotation=Manual Annotation

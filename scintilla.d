@@ -381,8 +381,8 @@ class CScintilla
 		+/
 		
 		// Brace Hightlight
-		IupSetAttribute(sci, "STYLEFGCOLOR34", "255 0 0");	
-		IupSetAttribute(sci, "STYLEBGCOLOR34", "0 255 0");
+		IupSetAttribute(sci, "STYLEFGCOLOR34", GLOBAL.editColor.braceFore.toCString);	
+		IupSetAttribute(sci, "STYLEBGCOLOR34", GLOBAL.editColor.braceBack.toCString);
 		IupSetAttribute(sci, "STYLEFGCOLOR35", "255 255 0");
 		IupSetAttribute(sci, "STYLEBGCOLOR35", "255 0 255");
 		IupSetAttribute(sci, "STYLEBOLD34", "YES");
