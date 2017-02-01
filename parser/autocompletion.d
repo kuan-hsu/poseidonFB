@@ -983,7 +983,7 @@ struct AutoComplete
 
 
 	public:
-	static bool bEnter, bInsertBrace;
+	static bool bEnter;
 	static bool bAutocompletionPressEnter;
 
 
@@ -2147,13 +2147,31 @@ struct AutoComplete
 						AST_Head = AST_Head.getFather();
 					}
 
-					actionManager.ScintillaAction.openFile( AST_Head.name, lineNum );
+					if( actionManager.ScintillaAction.openFile( AST_Head.name, lineNum ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 				}
 			}
 		}
 		catch( Exception e )
 		{
 			//IupMessage( "Error", toStringz( e.toString ) );
+		}
+	}
+	
+	static void backDefinition()
+	{
+		if( GLOBAL.stackGotoDefinition.length > 0 )
+		{
+			int starPos = Util.index( GLOBAL.stackGotoDefinition[$-1], "*" );
+			if( starPos < GLOBAL.stackGotoDefinition[$-1].length )
+			{
+				char[]	fileName = GLOBAL.stackGotoDefinition[$-1][0..starPos];
+				int		lineNumber = Integer.atoi( GLOBAL.stackGotoDefinition[$-1][starPos+1..$] );
+				
+				if( actionManager.ScintillaAction.openFile( fileName, lineNumber ) )
+				{
+					GLOBAL.stackGotoDefinition.length = GLOBAL.stackGotoDefinition.length - 1;
+				}
+			}
 		}
 	}
 

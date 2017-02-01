@@ -254,9 +254,16 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* toggleBoldKeyword = IupToggle( toStringz( GLOBAL.languageItems["boldkeyword"] ), null );
 		IupSetAttribute( toggleBoldKeyword, "VALUE", toStringz(GLOBAL.editorSetting00.BoldKeyword.dup) );
-		IupSetHandle( "toggleBoldKeyword", toggleBoldKeyword );		
+		IupSetHandle( "toggleBoldKeyword", toggleBoldKeyword );
+		
+		Ihandle* toggleBraceMatch = IupToggle( toStringz( GLOBAL.languageItems["bracematchhighlight"] ), null );
+		IupSetAttribute( toggleBraceMatch, "VALUE", toStringz(GLOBAL.editorSetting00.BraceMatchHighlight.dup) );
+		IupSetHandle( "toggleBraceMatch", toggleBraceMatch );		
 
-
+		Ihandle* toggleBraceMatchDB = IupToggle( toStringz( GLOBAL.languageItems["bracematchdoubleside"] ), null );
+		IupSetAttribute( toggleBraceMatchDB, "VALUE", toStringz(GLOBAL.editorSetting00.BraceMatchDoubleSidePos.dup) );
+		IupSetHandle( "toggleBraceMatchDB", toggleBraceMatchDB );			
+		
 		Ihandle* labelTabWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"] ~ ":" ) );
 		Ihandle* textTabWidth = IupText( null );
 		IupSetAttribute( textTabWidth, "VALUE", toStringz(GLOBAL.editorSetting00.TabWidth) );
@@ -296,7 +303,9 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( toggleMessage, "" ),
 			IupSetAttributes( toggleBoldKeyword, "" ),
 			
-
+			IupSetAttributes( toggleBraceMatch, "" ),
+			IupSetAttributes( toggleBraceMatchDB, "" ),
+			
 			IupSetAttributes( hBoxTab, "" ),
 			IupSetAttributes( hBoxColumn, "" ),
 			
@@ -1208,8 +1217,9 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleAutoEnd", null );
 		IupSetHandle( "toggleColorOutline", null );
 		IupSetHandle( "toggleMessage", null );
-		IupSetHandle( "toggleBoldKeyword", null );	
-
+		IupSetHandle( "toggleBoldKeyword", null );
+		IupSetHandle( "toggleBraceMatch", null );
+		IupSetHandle( "toggleBraceMatchDB", null );
 		
 		IupSetHandle( "textTabWidth", null );
 		IupSetHandle( "textColumnEdge", null );
@@ -1468,22 +1478,23 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.KEYWORDS[2] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText2" ), "VALUE" ))).dup;
 		GLOBAL.KEYWORDS[3] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText3" ), "VALUE" ))).dup;
 		
-		GLOBAL.editorSetting00.LineMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.BookmarkMargin		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.FoldMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.IndentGuide			= fromStringz(IupGetAttribute( IupGetHandle( "toggleIndentGuide" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.CaretLine			= fromStringz(IupGetAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.WordWrap				= fromStringz(IupGetAttribute( IupGetHandle( "toggleWordWrap" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.TabUseingSpace		= fromStringz(IupGetAttribute( IupGetHandle( "toggleTabUseingSpace" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.AutoIndent			= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoIndent" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.ShowEOL				= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.ShowSpace			= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.AutoEnd				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.ColorOutline			= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorOutline" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.Message				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMessage" ), "VALUE" )).dup;
-		GLOBAL.editorSetting00.BoldKeyword			= fromStringz(IupGetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE" )).dup;
-
-
+		GLOBAL.editorSetting00.LineMargin				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.BookmarkMargin			= fromStringz(IupGetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.FoldMargin				= fromStringz(IupGetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.IndentGuide				= fromStringz(IupGetAttribute( IupGetHandle( "toggleIndentGuide" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.CaretLine				= fromStringz(IupGetAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.WordWrap					= fromStringz(IupGetAttribute( IupGetHandle( "toggleWordWrap" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.TabUseingSpace			= fromStringz(IupGetAttribute( IupGetHandle( "toggleTabUseingSpace" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.AutoIndent				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoIndent" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.ShowEOL					= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.ShowSpace				= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.AutoEnd					= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.ColorOutline				= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorOutline" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.Message					= fromStringz(IupGetAttribute( IupGetHandle( "toggleMessage" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.BoldKeyword				= fromStringz(IupGetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.BraceMatchHighlight		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.BraceMatchDoubleSidePos	= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatchDB" ), "VALUE" )).dup;
+		
 		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
 

@@ -170,6 +170,7 @@ extern(C) // Callback for CSingleTextDialog
 			case "autocomplete":				pos = 21;	break;
 			case "compilerun":					pos = 22;	break;
 			case "comment":						pos = 23;	break;
+			case "backdefinition":				pos = 24;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;

@@ -115,7 +115,9 @@ struct IDECONFIG
 		.attribute( null, "EolType", GLOBAL.editorSetting00.EolType )
 		.attribute( null, "ColorOutline", GLOBAL.editorSetting00.ColorOutline )
 		.attribute( null, "Message", GLOBAL.editorSetting00.Message )
-		.attribute( null, "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword );
+		.attribute( null, "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword )
+		.attribute( null, "BraceMatchHighlight", GLOBAL.editorSetting00.BraceMatchHighlight )
+		.attribute( null, "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos );
 
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
@@ -244,7 +246,8 @@ struct IDECONFIG
 		.attribute( null, "newtab", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) )
 		.attribute( null, "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) )
 		.attribute( null, "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) )
-		.attribute( null, "comment", convertShortKeyValue2String( GLOBAL.shortKeys[23].keyValue ) );
+		.attribute( null, "comment", convertShortKeyValue2String( GLOBAL.shortKeys[23].keyValue ) )
+		.attribute( null, "backdefinition", convertShortKeyValue2String( GLOBAL.shortKeys[24].keyValue ) );
 
 		/*
 		<buildtools>
@@ -592,6 +595,12 @@ struct IDECONFIG
 
 			result = root.query.descendant("toggle00").attribute("BoldKeyword");
 			foreach( e; result ) GLOBAL.editorSetting00.BoldKeyword = e.value;
+
+			result = root.query.descendant("toggle00").attribute("BraceMatchHighlight");
+			foreach( e; result ) GLOBAL.editorSetting00.BraceMatchHighlight = e.value;
+
+			result = root.query.descendant("toggle00").attribute("BraceMatchDoubleSidePos");
+			foreach( e; result ) GLOBAL.editorSetting00.BraceMatchDoubleSidePos = e.value;
 
 
 			result = root.query.descendant("size01").attribute("PLACEMENT");
@@ -1044,6 +1053,13 @@ struct IDECONFIG
 				ShortKey sk = { "comment", GLOBAL.languageItems["sc_comment"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[23]= sk;
 			}
+			
+			result = root.query.descendant("shortkeys").attribute("backdefinition");
+			foreach( e; result )
+			{
+				ShortKey sk = { "backdefinition", GLOBAL.languageItems["sc_backdefinition"], convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[24]= sk;
+			}			
 			// Get linux terminal program name
 			version( linux )
 			{

@@ -771,8 +771,6 @@ extern(C)
 	*/
 	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		AutoComplete.bInsertBrace = false;
-		
 		if( pressed == 0 ) //release
 		{
 			if( button == '3' ) // Right Click
@@ -852,6 +850,13 @@ extern(C)
 				{
 					AutoComplete.toDefintionAndType( true );
 				});
+				
+				Ihandle* _back = IupItem( toStringz( GLOBAL.languageItems["sc_backdefinition"] ), null );
+				IupSetAttribute( _back, "IMAGE", "icon_back" );
+				IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					AutoComplete.backDefinition();
+				});				
 
 				Ihandle* _showType = IupItem( toStringz( GLOBAL.languageItems["sc_showtype"] ), null );
 				IupSetAttribute( _showType, "IMAGE", "icon_type" );
@@ -881,6 +886,7 @@ extern(C)
 												IupSeparator(),
 												_refresh,
 												_goto,
+												_back,
 												_showType,
 												null
 											);
@@ -889,21 +895,32 @@ extern(C)
 				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 				IupDestroy( popupMenu );
 			}
-			/+
-			else
+			else if( button == '1' )
 			{
-				char[] s = fromStringz( status );
-
-				// "Goto Defintion":
-				if( s.length > 1 )
+				// BRACEMATCH
+				if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
 				{
-					if( s[1] == 'C' )
+					int pos = actionManager.ScintillaAction.getCurrentPos( ih );
+					int close = IupGetIntId( ih, "BRACEMATCH", pos );
+					if( close > -1 )
 					{
-						if( button == '1' )	AutoComplete.toDefintionAndType( true );
+						IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+					}
+					else
+					{
+						if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
+						{
+							--pos;
+							close = IupGetIntId( ih, "BRACEMATCH", pos );
+							if( close > -1 )
+							{
+								IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+							}
+						}
 					}
 				}
+				
 			}
-			+/
 		}
 		
 		return IUP_DEFAULT;
@@ -1214,14 +1231,20 @@ extern(C)
 						menu.comment_cb();
 						return IUP_IGNORE;
 					}
-					break;					
+					break;
+					
+				case "backdefinition":
+					if( sk.keyValue == c )
+					{
+						AutoComplete.backDefinition();
+						return IUP_IGNORE;
+					}
+					break;						
 					
 				default:
 			}
 		}
 		
-		if( c == '}' || c == ']' || c == ')' ) AutoComplete.bInsertBrace = true; else AutoComplete.bInsertBrace = false;
-
 		return IUP_DEFAULT;
 	}
 
@@ -1281,8 +1304,7 @@ extern(C)
 	{
 		//static bool bWithoutList;
 		//static int	prevPos;
-
-
+		//if( insert == 0 )IupSetInt( ih, "BRACEBADLIGHT", -1 );
 		if( GLOBAL.liveLevel > 0 )
 		{
 			try
@@ -1452,6 +1474,8 @@ extern(C)
 	// Auto Ident
 	private int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )
 	{
+		if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" ) IupSetInt( ih, "BRACEBADLIGHT", -1 );
+		
 		if( AutoComplete.bEnter )
 		{
 			AutoComplete.bEnter = false;
@@ -1489,62 +1513,6 @@ extern(C)
 					IupScintillaSendMessage( ih, 2126, lin, lineInd + 4 ); // SCI_SETLINEINDENTATION = 2126
 					IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136
 				}
-			}
-		}
-
-		// BRACEMATCH
-		int close = IupGetIntId( ih, "BRACEMATCH", pos );
-		if( close > -1 )
-		{
-			IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
-		}
-		else
-		{
-			close = IupGetIntId( ih, "BRACEMATCH", pos - 1 );
-			if( close > -1 )
-			{
-				IupScintillaSendMessage( ih, 2351, pos - 1, close ); // SCI_BRACEHIGHLIGHT 2351
-			}
-			else
-			{
-				IupSetInt( ih, "BRACEBADLIGHT", -1 );
-				
-				if( AutoComplete.bInsertBrace )
-				{
-					int		_countDelimit, _pos = --pos;
-					char[]	closeDelimit = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ).dup, openDelimit;
-					
-					switch( closeDelimit )
-					{
-						case ")":	openDelimit = "("; break;
-						case "}":	openDelimit = "{"; break;
-						case "]":	openDelimit = "["; break;
-						default:	return IUP_DEFAULT;
-					}
-					
-					_countDelimit++;
-					
-					do
-					{
-						if( !ScintillaAction.isComment( ih, --_pos ) )
-						{
-							char[]	_char = fromStringz( IupGetAttributeId( ih, "CHAR", _pos ) ).dup;
-							
-							if( _char == openDelimit )
-								_countDelimit--;
-							if( _char == closeDelimit )
-								_countDelimit++;
-							
-							if( _countDelimit == 0 )
-							{
-								IupScintillaSendMessage( ih, 2351, _pos, pos ); // SCI_BRACEHIGHLIGHT 2351
-								actionManager.StatusBarAction.update();
-								return IUP_DEFAULT;
-							}
-						}
-					}
-					while( _pos > -1 )
-				}				
 			}
 		}
 

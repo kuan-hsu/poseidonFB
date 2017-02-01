@@ -132,44 +132,6 @@ void freeCString( char* cString )
 }
 
 
-class DstringConvert
-{
-private:
-	char[] Dstring;
-
-public:
-	this(){}
-	
-	this( char* Cstring, int length = -1 )
-	{
-		int len;
-
-		if( length == -1 ) len = strlen( Cstring );
-		Dstring ~= Cstring[0..len];
-	}
-
-	~this()
-	{
-	}
-
-	char[] convert( char* Cstring, int length = -1 )
-	{
-		if( Dstring.length ) Dstring.length = 0;
-
-		int len;
-		if( length == -1 ) len = strlen( Cstring );
-		Dstring ~= Cstring[0..len];
-
-		return Dstring;
-	}
-
-	char[] toDString()
-	{
-		return Dstring;
-	}
-}
-
-
 // To lowercase
 char[] lowerCase( char[] text )
 {

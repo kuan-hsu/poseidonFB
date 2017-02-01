@@ -5,7 +5,7 @@ import tools;
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON";
 }
 
 struct EditorLayoutSize
@@ -161,6 +161,8 @@ struct GLOBAL
 	static ShortKey[]			shortKeys;
 
 	static fontUint[]			fonts;
+	
+	static char[][]				stackGotoDefinition;
 
 	static bool					bKeyUp = true;
 	static int					KeyNumber;
@@ -287,6 +289,8 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk22;
 		ShortKey sk23 = { "comment", "(Un)comment", 536870994 };
 		GLOBAL.shortKeys ~= sk23;
+		ShortKey sk24 = { "backdefinition", "Back Definition", 1342177351 };
+		GLOBAL.shortKeys ~= sk24;
 		
 
 		fontUint fu;
@@ -456,6 +460,8 @@ struct GLOBAL
 						GLOBAL.languageItems["coloroutline"] = "Colorize Outline Item";
 						GLOBAL.languageItems["showidemessage"] = "Show IDE Message";
 						GLOBAL.languageItems["boldkeyword"] = "Bold Keywords";
+						GLOBAL.languageItems["bracematchhighlight"] = "Show Brace Match Highlight";
+						GLOBAL.languageItems["bracematchdoubleside"] = "Use Double-Side Brace Match";
 						GLOBAL.languageItems["tabwidth"] = "Tab Width";
 						GLOBAL.languageItems["columnedge"] = "Column Edge";
 						GLOBAL.languageItems["autoconvertkeyword"] = "Auto Convert Keyword Case";
@@ -522,6 +528,8 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_autocomplete"] = "Auto Complete";
 						GLOBAL.languageItems["sc_compilerun"] = "Compile File And Run";
 						GLOBAL.languageItems["sc_comment"] = "(Un)comment";
+						GLOBAL.languageItems["sc_backdefinition"] = "Back Definition";
+						
 					GLOBAL.languageItems["keywords"] = "Keywords";
 						GLOBAL.languageItems["keyword0"] = "Keyword0";
 						GLOBAL.languageItems["keyword1"] = "Keyword1";

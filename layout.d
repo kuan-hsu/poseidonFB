@@ -242,10 +242,7 @@ extern(C)
 												IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
 												word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
 												IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
-
-												IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos , 0 );// sci_gotopos = 2025,
-												int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", currentPos - 1 );
-												if( close > -1 ) IupScintillaSendMessage( cSci.getIupScintilla, 2351, currentPos - 1, close ); // SCI_BRACEHIGHLIGHT 2351
+												IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos , 0 ); // sci_gotopos = 2025,
 
 												bExitFlag = true;
 												break;
@@ -258,7 +255,31 @@ extern(C)
 						}
 					}
 				}
-
+				
+				// BRACEMATCH
+				if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
+				{
+					IupSetInt( cSci.getIupScintilla, "BRACEBADLIGHT", -1 );
+					
+					int pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+					int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
+					if( close > -1 )
+					{
+						IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+					}
+					else
+					{
+						if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
+						{
+							--pos;
+							close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
+							if( close > -1 )
+							{
+								IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+							}
+						}
+					}
+				}		
 				
 				if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 				{
