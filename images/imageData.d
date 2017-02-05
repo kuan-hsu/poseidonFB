@@ -81,6 +81,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_annotation", XPM.getIUPimage( "icons/xpm/annotate.xpm" ) ); // IupSetHandle("icon_annotation", load_image_annotation());
 	IupSetHandle( "icon_annotation_hide", XPM.getIUPimage( "icons/xpm/annotatehide.xpm" ) ); // IupSetHandle("icon_annotation_hide", load_image_annotation_hide());
 	IupSetHandle( "icon_annotation_remove", XPM.getIUPimage( "icons/xpm/annotate_removeall.xpm" ) ); //IupSetHandle("icon_annotation_remove", load_image_annotation_remove());
+	IupSetHandle( "icon_colormark", XPM.getIUPimage( "icons/xpm/colormark.xpm" ) );
 	IupSetHandle( "icon_windows", XPM.getIUPimage( "icons/xpm/windows.xpm" ) ); // IupSetHandle("icon_windows", load_image_windows());
 	IupSetHandle( "icon_mac", XPM.getIUPimage( "icons/xpm/mac.xpm" ) ); // IupSetHandle("icon_mac", load_image_mac());
 	IupSetHandle( "icon_linux", XPM.getIUPimage( "icons/xpm/linux.xpm" ) ); // IupSetHandle("icon_linux", load_image_linux());

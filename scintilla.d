@@ -23,6 +23,7 @@ class CScintilla
 	
 	Ihandle*		sci;
 	IupString		fullPath, title;
+	int				selectedMarkerIndex;
 
 	void getFontAndSize( int index, out char[] font, out char[] Bold, out char[] Italic, out char[] Underline, out char[] Strikeout, out char[] size )
 	{
@@ -125,12 +126,15 @@ class CScintilla
 
 	this( char[] _fullPath, char[] _text = null, int _encode = Encoding.UTF_8, int insertPos = -1 )
 	{
+		this();
+		/*
 		sci = IupScintilla();
 		IupSetAttribute( sci, "EXPAND", "YES" );
 		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
 		
 		fullPath = new IupString();
 		title = new IupString();
+		*/
 
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
@@ -354,32 +358,7 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
 		IupSetAttribute(sci, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
 		
-		/*
-		IupSetAttribute(sci, "STYLEBGCOLOR3", toStringz( GLOBAL.editColor.scintillaBack.dup ) );	// SCE_B_KEYWORD 3
-		IupSetAttribute(sci, "STYLEBGCOLOR10", toStringz( GLOBAL.editColor.scintillaBack.dup ));	// SCE_B_KEYWORD2 10
-		IupSetAttribute(sci, "STYLEBGCOLOR11", toStringz( GLOBAL.editColor.scintillaBack.dup ));	// SCE_B_KEYWORD3 11
-		IupSetAttribute(sci, "STYLEBGCOLOR12", toStringz( GLOBAL.editColor.scintillaBack.dup ));	// SCE_B_KEYWORD4 12
-		*/
-		
-		/+
-		IupSetAttribute(sci, "STYLEFGCOLOR1", "0 128 0");		// SCE_B_COMMENT 1
-		IupSetAttribute(sci, "STYLEFGCOLOR2", "0 128 0");		// SCE_B_NUMBER 2
-		//IupSetAttribute(sci, "STYLEFGCOLOR3", "5 91 35");		// SCE_B_KEYWORD 3
-		IupSetAttribute(sci, "STYLEFGCOLOR3", toStringz( GLOBAL.editColor.keyWord[0] ) );		// SCE_B_KEYWORD 3
-		IupSetAttribute(sci, "STYLEFGCOLOR4", "128 0 0");		// SCE_B_STRING 4
-		IupSetAttribute(sci, "STYLEFGCOLOR5", "0 0 255");		// SCE_B_PREPROCESSOR 5
-		IupSetAttribute(sci, "STYLEFGCOLOR6", "160 20 20");		// SCE_B_OPERATOR 6
-		/*
-		IupSetAttribute(sci, "STYLEFGCOLOR7", "0 0 0");			// SCE_B_IDENTIFIER 7 usually normal color
-		IupSetAttribute(sci, "STYLEFGCOLOR8", "128 0 0");		// SCE_B_DATE 8
-		IupSetAttribute(sci, "STYLEFGCOLOR9", "16 108 232");	// SCE_B_STRINGEOL 9
-		*/
-		IupSetAttribute(sci, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.keyWord[1] ));	// SCE_B_KEYWORD2 10
-		IupSetAttribute(sci, "STYLEFGCOLOR11", toStringz( GLOBAL.editColor.keyWord[2] ));	// SCE_B_KEYWORD3 11
-		IupSetAttribute(sci, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.keyWord[3] ));	// SCE_B_KEYWORD4 12
-		IupSetAttribute(sci, "STYLEFGCOLOR19", "0 128 0");		// SCE_B_COMMENTBLOCK 19
-		+/
-		
+	
 		// Brace Hightlight
 		IupSetAttribute(sci, "STYLEFGCOLOR34", GLOBAL.editColor.braceFore.toCString);	
 		IupSetAttribute(sci, "STYLEBGCOLOR34", GLOBAL.editColor.braceBack.toCString);
@@ -467,6 +446,12 @@ class CScintilla
 			IupSetAttribute( sci, "MARKERSYMBOL4", "UNDERLINE" );
 			IupSetAttribute( sci, "MARKERFGCOLOR4", "255 0 0" );
 			IupSetAttribute( sci, "MARKERBGCOLOR4", "255 0 0" );
+			
+			IupSetAttribute( sci, "MARKERDEFINE", "5=BACKGROUND" );
+			IupSetAttribute( sci, "MARKERSYMBOL5", "BACKGROUND" );
+			IupSetAttribute( sci, "MARKERSYMBOL6", "BACKGROUND" );
+			IupSetAttribute( sci, "MARKERSYMBOL7", "BACKGROUND" );
+			IupSetAttribute( sci, "MARKERSYMBOL8", "BACKGROUND" );			
 		}
 		else 
 		{
@@ -586,6 +571,10 @@ class CScintilla
 		}
 		
 		IupSetAttribute( sci, "USEPOPUP", "NO" );
+		
+		// SCI_SETMULTIPLESELECTION 2563
+		if( GLOBAL.editorSetting00.MultiSelection == "ON" ) IupScintillaSendMessage( sci, 2563, 1, 0 ); else IupScintillaSendMessage( sci, 2563, 0, 0 ); 
+		
 		// Autocompletion XPM Image
 		IupScintillaSendMessage( sci, 2624, 16, 0 ); // SCI_RGBAIMAGESETWIDTH 2624
 		IupScintillaSendMessage( sci, 2625, 16, 0 ); // SCI_RGBAIMAGESETHEIGHT 2625
@@ -835,6 +824,11 @@ extern(C)
 					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 				});
+				
+				Ihandle* _tempAnnotationMenu = IupMenu( _showAnnotation, _hideAnnotation, _removeAllAnnotation, null  );
+				Ihandle* _AnnotationSubMenu = IupSubmenu( toStringz( GLOBAL.languageItems["annotation"] ) ,_tempAnnotationMenu  );
+				IupSetAttribute( _AnnotationSubMenu, "IMAGE", "icon_annotation" );
+			
 
 				Ihandle* _refresh = IupItem( toStringz( GLOBAL.languageItems["sc_reparse"] ), null );
 				IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
@@ -866,6 +860,177 @@ extern(C)
 				});				
 				
 				
+				// High Light......
+				CScintilla	cSci = actionManager.ScintillaAction.getActiveCScintilla();
+				ubyte[256]	pixel;
+				
+				pixel[] = 0;
+				Ihandle* pixelImage = IupImage( 16, 16, pixel.ptr );
+
+				//selectedMarkerIndex
+				Ihandle* _maker0 = IupItem( toStringz( GLOBAL.languageItems["maker0"] ), null );
+				IupSetCallback( _maker0, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 0; });
+				
+				Ihandle* _maker1 = IupItem( toStringz( GLOBAL.languageItems["maker1"] ), null );
+				IupSetCallback( _maker1, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 1; });
+				
+				Ihandle* _maker2 = IupItem( toStringz( GLOBAL.languageItems["maker2"] ), null );
+				IupSetCallback( _maker2, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 2; });
+				
+				Ihandle* _maker3 = IupItem( toStringz( GLOBAL.languageItems["maker3"] ), null );
+				IupSetCallback( _maker3, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 3; });
+				
+				switch( cSci.selectedMarkerIndex )
+				{
+					case 0:
+						IupSetAttribute( _maker0, "VALUE", "ON");
+						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[0].toCString );
+						break;
+					case 1:
+						IupSetAttribute( _maker1, "VALUE", "ON");
+						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[1].toCString );
+						break;
+					case 2:
+						IupSetAttribute( _maker2, "VALUE", "ON");
+						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[2].toCString );
+						break;
+					case 3:
+						IupSetAttribute( _maker3, "VALUE", "ON");
+						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[3].toCString );
+						break;
+					default: 
+				}				
+				
+				Ihandle* _makerSubMenu = IupMenu( _maker0, _maker1, _maker2, _maker3, null  );
+				IupSetAttribute( _makerSubMenu, "RADIO", "YES");
+				IupSetHandle( "icon_color", pixelImage );
+				
+				
+				ubyte[4][256]	pixels;
+				
+				pixel[0] = pixel[1] = pixel[2] = pixel[3] = 0;
+				Ihandle*[4] pixelsImage;
+				for( int i = 0; i < 4; ++ i )
+				{
+					pixelsImage[i]	= IupImage( 16, 16, pixels[i].ptr );
+					IupSetAttribute( pixelsImage[i], "0", GLOBAL.editColor.maker[i].toCString );
+				}
+				IupSetHandle( "icon_color0", pixelsImage[0] );
+				IupSetHandle( "icon_color1", pixelsImage[1] );
+				IupSetHandle( "icon_color2", pixelsImage[2] );
+				IupSetHandle( "icon_color3", pixelsImage[3] );
+				
+				IupSetAttribute( _maker0, "TITLEIMAGE", "icon_color0" );
+				IupSetAttribute( _maker1, "TITLEIMAGE", "icon_color1" );
+				IupSetAttribute( _maker2, "TITLEIMAGE", "icon_color2" );
+				IupSetAttribute( _maker3, "TITLEIMAGE", "icon_color3" );
+
+				Ihandle* _highlightLine = IupItem( toStringz( GLOBAL.languageItems["highlghtlines"] ), null );
+				IupSetAttribute( _highlightLine, "IMAGE", "icon_color" );
+				IupSetCallback( _highlightLine, "ACTION", cast(Icallback) function( )
+				{
+					CScintilla actSci = ScintillaAction.getActiveCScintilla;
+					if( actSci !is null )
+					{
+						int currentPos			= IupScintillaSendMessage( actSci.getIupScintilla, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+						int currentLine  		= IupScintillaSendMessage( actSci.getIupScintilla, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+						
+						switch( actSci.selectedMarkerIndex )
+						{
+							case 0:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR5",  GLOBAL.editColor.maker[0].toCString ); break;
+							case 1:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR6",  GLOBAL.editColor.maker[1].toCString ); break;
+							case 2:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR7",  GLOBAL.editColor.maker[2].toCString ); break;
+							case 3:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR8",  GLOBAL.editColor.maker[3].toCString ); break;
+							default: 
+						}							
+						
+						char[] lines = fromStringz( IupGetAttribute( actSci.getIupScintilla, "SELECTION" ) );
+						if( lines.length )
+						{
+							char[][] splitText = Util.split( lines, "," );
+							if( splitText.length > 2 )
+							{
+								char[][] splitText2 = Util.split( splitText[1], ":" );
+								if( splitText2.length > 1 )
+								{
+									int startLine = Integer.atoi( splitText[0] );
+									int tailLine = Integer.atoi( splitText2[1] );
+									if( tailLine >= startLine )
+									{
+										for( int i = startLine; i <= tailLine; ++i )
+										{
+											for( int j = 5; j < 9; ++ j )
+											{
+												IupSetIntId( actSci.getIupScintilla, "MARKERDELETE", i, j );
+											}
+											IupSetIntId( actSci.getIupScintilla, "MARKERADD", i, actSci.selectedMarkerIndex + 5 );
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							for( int j = 5; j < 9; ++ j )
+							{
+								IupSetIntId( actSci.getIupScintilla, "MARKERDELETE", currentLine, j );
+							}							
+							IupSetIntId( actSci.getIupScintilla, "MARKERADD", currentLine, actSci.selectedMarkerIndex + 5 );
+						}
+					}
+				});
+				
+				Ihandle* _delHighlightLine = IupItem( toStringz( GLOBAL.languageItems["delhighlghtlines"] ), null );
+				IupSetAttribute( _delHighlightLine, "IMAGE", "icon_clear" );
+				IupSetCallback( _delHighlightLine, "ACTION", cast(Icallback) function( )
+				{
+					Ihandle* ih = ScintillaAction.getActiveIupScintilla;
+					if( ih != null )
+					{
+						int currentPos			= IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+						int currentLine  		= IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+						
+						char[] lines = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
+						if( lines.length )
+						{
+							char[][] splitText = Util.split( lines, "," );
+							if( splitText.length > 2 )
+							{
+								char[][] splitText2 = Util.split( splitText[1], ":" );
+								if( splitText2.length > 1 )
+								{
+									int startLine = Integer.atoi( splitText[0] );
+									int tailLine = Integer.atoi( splitText2[1] );
+									if( tailLine >= startLine )
+									{
+										
+										for( int i = startLine; i <= tailLine; ++i )
+										{
+											for( int j = 5; j < 9; ++ j )
+											{
+												IupSetIntId( ih, "MARKERDELETE", i, j );
+											}											
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							for( int j = 5; j < 9; ++ j )
+							{
+								IupSetIntId( ih, "MARKERDELETE", currentLine, j );
+							}
+						}
+					}
+				});					
+
+				Ihandle* itemHighlight = IupSubmenu( toStringz( GLOBAL.languageItems["colorhighlght"] ), _makerSubMenu );
+				IupSetAttribute( itemHighlight, "IMAGE", "icon_colormark" );
+				Ihandle* temp = IupMenu( _highlightLine, _delHighlightLine, itemHighlight, null );
+				Ihandle* itemMainHighlight = IupSubmenu( toStringz( GLOBAL.languageItems["highlightmaker"] ), temp );
+				IupSetAttribute( itemMainHighlight, "IMAGE", "icon_colormark" );
+				
 				Ihandle* popupMenu = IupMenu(
 												_undo,
 												_redo,
@@ -880,9 +1045,15 @@ extern(C)
 												_selectall,
 												IupSeparator(),
 												
+												itemMainHighlight,
+												IupSeparator(),
+												
+												_AnnotationSubMenu,
+												/*
 												_showAnnotation,
 												_hideAnnotation,
 												_removeAllAnnotation,
+												*/
 												IupSeparator(),
 												_refresh,
 												_goto,
@@ -894,6 +1065,11 @@ extern(C)
 
 				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 				IupDestroy( popupMenu );
+				IupDestroy( pixelImage );
+				for( int i = 0; i < 4; ++ i )
+				{
+					IupDestroy( pixelsImage[i] );
+				}				
 			}
 			else if( button == '1' )
 			{
@@ -919,7 +1095,61 @@ extern(C)
 						}
 					}
 				}
-				
+			}
+			else if( button == '2' )
+			{
+				if( GLOBAL.editorSetting00.MultiSelection == "ON" )
+				{
+					int pos = IupConvertXYToPos( ih, x, y );
+					IupScintillaSendMessage( ih, 2025, pos , 0 );// SCI_GOTOPOS = 2025,
+					IupSetFocus( ih );
+					char[] _char = Util.trim( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) );
+					
+					if( _char.length )
+					{
+						IupSetAttribute( ih, "SELECTIONPOS", "NONE" );
+						
+						char[] word = AutoComplete.getWholeWordDoubleSide( ih, pos );
+						word = word.reverse;
+						
+						char[][] splitWord = Util.split( word, "." );
+						if( splitWord.length > 1 ) word = splitWord[$-1];
+						
+						splitWord = Util.split( word, "->" );
+						if( splitWord.length > 1 ) word = splitWord[$-1];
+						
+						//IupMessage( "", toStringz( word ) );
+						if( word.length )
+						{
+							/*
+							SCFIND_WHOLEWORD = 2,
+							SCFIND_MATCHCASE = 4,
+							SCFIND_WORDSTART = 0x00100000,
+							SCFIND_REGEXP = 0x00200000,
+							SCFIND_POSIX = 0x00400000,
+							*/								
+							IupScintillaSendMessage( ih, 2198, 2, 0 ); // SCI_SETSEARCHFLAGS = 2198,
+							IupSetInt( ih, "TARGETSTART", 0 );
+							IupSetInt( ih, "TARGETEND", 0 );
+							
+							int count;
+							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
+							
+							while( findPos > -1 )
+							{
+								if( count++ == 0 ) 
+									IupScintillaSendMessage( ih, 2572, cast(int) findPos, cast(int) ( findPos + word.length ) ); // SCI_SETSELECTION 2572
+								else
+									IupScintillaSendMessage( ih, 2573, cast(int) findPos, cast(int) ( findPos + word.length ) ); // SCI_ADDSELECTION 2573
+
+								IupSetInt( ih, "TARGETSTART", findPos + word.length );
+								IupSetInt( ih, "TARGETEND", 0 );
+								
+								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
+							}
+						}
+					}
+				}
 			}
 		}
 		
@@ -1474,7 +1704,7 @@ extern(C)
 	// Auto Ident
 	private int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )
 	{
-		if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" ) IupSetInt( ih, "BRACEBADLIGHT", -1 );
+		IupSetInt( ih, "BRACEBADLIGHT", -1 );
 		
 		if( AutoComplete.bEnter )
 		{

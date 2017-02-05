@@ -5,7 +5,7 @@ import tools;
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF";
 }
 
 struct EditorLayoutSize
@@ -21,20 +21,7 @@ struct EditorColorUint
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
 	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
-	
-	/*
-	char[][4] keyWord = [ "5 91 35", "0 0 255", "231 144 20", "16 108 232" ];
-	char[] caretLine = "255 255 128", cursor = "0 0 0", selectionFore = "255 255 255", selectionBack = "0 0 255", linenumFore = "0 0 0", linenumBack = "200 200 200", fold = "200 208 208", selAlpha = "255";
-	char[] scintillaFore = "0 0 0", scintillaBack = "255 255 255", SCE_B_COMMENT_Fore = "0 128 0", SCE_B_COMMENT_Back = "255 255 255";
-	char[] SCE_B_NUMBER_Fore = "0 128 0", SCE_B_NUMBER_Back = "255 255 255", SCE_B_STRING_Fore = "128 0 0", SCE_B_STRING_Back = "255 255 255";
-	char[] SCE_B_PREPROCESSOR_Fore = "0 0 255", SCE_B_PREPROCESSOR_Back = "255 255 255", SCE_B_OPERATOR_Fore = "160 20 20", SCE_B_OPERATOR_Back = "255 255 255";
-	char[] SCE_B_IDENTIFIER_Fore = "0 0 0", SCE_B_IDENTIFIER_Back = "255 255 255", SCE_B_COMMENTBLOCK_Fore = "0 128 0", SCE_B_COMMENTBLOCK_Back = "255 255 255";
-	
-	char[] projectFore = "0 0 0", projectBack = "255 255 255", outlineFore = "0 0 0", outlineBack = "255 255 255";
-	char[] filelistFore = "0 0 0", filelistBack = "255 255 255", outputFore = "0 0 0", outputBack = "255 255 255", searchFore = "0 0 0", searchBack = "255 255 255";
-	
-	char[] prjTitle = "128 0 0", prjSourceType = "0 0 255";
-	*/
+	IupString[4]	maker;
 }
 
 struct ShortKey
@@ -174,6 +161,11 @@ struct GLOBAL
 		GLOBAL.editColor.keyWord[1] = new IupString( cast(char[]) "0 0 255" );
 		GLOBAL.editColor.keyWord[2] = new IupString( cast(char[]) "231 144 0" );
 		GLOBAL.editColor.keyWord[3] = new IupString( cast(char[]) "16 108 232" );
+		
+		GLOBAL.editColor.maker[0] = new IupString( cast(char[]) "200 255 200" );
+		GLOBAL.editColor.maker[1] = new IupString( cast(char[]) "255 200 255" );
+		GLOBAL.editColor.maker[2] = new IupString( cast(char[]) "200 255 255" );
+		GLOBAL.editColor.maker[3] = new IupString( cast(char[]) "255 200 200" );		
 		
 		GLOBAL.editColor.caretLine = new IupString( cast(char[]) "255 255 128" );
 		GLOBAL.editColor.cursor = new IupString( cast(char[]) "0 0 0" );
@@ -462,8 +454,13 @@ struct GLOBAL
 						GLOBAL.languageItems["boldkeyword"] = "Bold Keywords";
 						GLOBAL.languageItems["bracematchhighlight"] = "Show Brace Match Highlight";
 						GLOBAL.languageItems["bracematchdoubleside"] = "Use Double-Side Brace Match";
+						GLOBAL.languageItems["multiselection"] = "Enable Document Multi Selection";
 						GLOBAL.languageItems["tabwidth"] = "Tab Width";
 						GLOBAL.languageItems["columnedge"] = "Column Edge";
+						GLOBAL.languageItems["maker0"] = "Maker0";
+						GLOBAL.languageItems["maker1"] = "Maker1";
+						GLOBAL.languageItems["maker2"] = "Maker2";
+						GLOBAL.languageItems["maker3"] = "Maker3";
 						GLOBAL.languageItems["autoconvertkeyword"] = "Auto Convert Keyword Case";
 						GLOBAL.languageItems["font"] = "Font";
 							GLOBAL.languageItems["default"] = "Default";
@@ -568,6 +565,10 @@ struct GLOBAL
 		GLOBAL.languageItems["closeothers"] = "Close Others";
 
 		//'popup window
+		GLOBAL.languageItems["highlightmaker"] = "Highlight Maker...";
+		GLOBAL.languageItems["highlghtlines"] = "Highlight Line(s)";
+		GLOBAL.languageItems["delhighlghtlines"] = "Delete Highlight Line(s)";
+		GLOBAL.languageItems["colorhighlght"] = "Select Color...";
 		GLOBAL.languageItems["delete"] = "Delete";
 		GLOBAL.languageItems["showannotation"] = "Show Annotation";
 		GLOBAL.languageItems["hideannotation"] = "Hide Annotation";

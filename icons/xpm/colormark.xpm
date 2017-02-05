@@ -1,0 +1,31 @@
+/* XPM */
+static char *colormark_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c None",
+". c #ff8040",
+"# c #ffaec9",
+"a c #99d9ea",
+"b c #b5e61d",
+"c c #000000",
+"d c #000000",
+"e c #000000",
+/* pixels */
+"````````````````",
+"`.......#######`",
+"`.......#######`",
+"`.......#######`",
+"`.......#######`",
+"`.......#######`",
+"`.......#######`",
+"`.......#######`",
+"`aaaaaaabbbbbbb`",
+"`aaaaaaabbbbbbb`",
+"`aaaaaaabbbbbbb`",
+"`aaaaaaabbbbbbb`",
+"`aaaaaaabbbbbbb`",
+"`aaaaaaabbbbbbb`",
+"`aaaaaaabbbbbbb`",
+"````````````````"
+};

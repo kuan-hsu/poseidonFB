@@ -95,7 +95,7 @@ struct IDECONFIG
 		for( int i = 0; i < GLOBAL.KEYWORDS.length; ++i )
 		{
 			editorNode.element( null, "keywords" )
-			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "value", Util.trim( GLOBAL.KEYWORDS[i] ) ).attribute( null, "color", GLOBAL.editColor.keyWord[i].toDString );
+			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "value", Util.trim( GLOBAL.KEYWORDS[i] ) );
 		}
 		
 		editorNode.element( null, "toggle00" )
@@ -117,7 +117,8 @@ struct IDECONFIG
 		.attribute( null, "Message", GLOBAL.editorSetting00.Message )
 		.attribute( null, "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword )
 		.attribute( null, "BraceMatchHighlight", GLOBAL.editorSetting00.BraceMatchHighlight )
-		.attribute( null, "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos );
+		.attribute( null, "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos )
+		.attribute( null, "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
 
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
@@ -173,6 +174,10 @@ struct IDECONFIG
 
 		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
 		editorNode.element( null, "color" )
+		.attribute( null, "keyword0", GLOBAL.editColor.keyWord[0].toDString )
+		.attribute( null, "keyword1", GLOBAL.editColor.keyWord[1].toDString )
+		.attribute( null, "keyword2", GLOBAL.editColor.keyWord[2].toDString )
+		.attribute( null, "keyword3", GLOBAL.editColor.keyWord[3].toDString )		
 		.attribute( null, "template", GLOBAL.colorTemplate.toDString )
 		.attribute( null, "caretLine", GLOBAL.editColor.caretLine.toDString )
 		.attribute( null, "cursor", GLOBAL.editColor.cursor.toDString )
@@ -217,7 +222,11 @@ struct IDECONFIG
 		.attribute( null, "searchFore", GLOBAL.editColor.searchFore.toDString )
 		.attribute( null, "searchBack", GLOBAL.editColor.searchBack.toDString )
 		.attribute( null, "prjTitle", GLOBAL.editColor.prjTitle.toDString )
-		.attribute( null, "prjSourceType", GLOBAL.editColor.prjSourceType.toDString );		
+		.attribute( null, "prjSourceType", GLOBAL.editColor.prjSourceType.toDString )
+		.attribute( null, "maker0", GLOBAL.editColor.maker[0].toDString )
+		.attribute( null, "maker1", GLOBAL.editColor.maker[1].toDString )
+		.attribute( null, "maker2", GLOBAL.editColor.maker[2].toDString )
+		.attribute( null, "maker3", GLOBAL.editColor.maker[3].toDString );
 		
 		
 
@@ -390,13 +399,6 @@ struct IDECONFIG
 			{
 				GLOBAL.KEYWORDS ~= e.value;
 			}
-
-			result = root.query.descendant("keywords").attribute("color");
-			int index;
-			foreach( e; result )
-			{
-				GLOBAL.editColor.keyWord[index++] = e.value;
-			}			
 
 			result = root.query.descendant("compilerpath");
 			foreach( e; result )
@@ -602,6 +604,9 @@ struct IDECONFIG
 			result = root.query.descendant("toggle00").attribute("BraceMatchDoubleSidePos");
 			foreach( e; result ) GLOBAL.editorSetting00.BraceMatchDoubleSidePos = e.value;
 
+			result = root.query.descendant("toggle00").attribute("MultiSelection");
+			foreach( e; result ) GLOBAL.editorSetting00.MultiSelection = e.value;
+
 
 			result = root.query.descendant("size01").attribute("PLACEMENT");
 			foreach( e; result ) GLOBAL.editorSetting01.PLACEMENT = e.value;
@@ -730,6 +735,18 @@ struct IDECONFIG
 
 
 			// Color (Editor)
+			result = root.query.descendant("color").attribute("keyword0");
+			foreach( e; result ) GLOBAL.editColor.keyWord[0] = e.value;
+
+			result = root.query.descendant("color").attribute("keyword1");
+			foreach( e; result ) GLOBAL.editColor.keyWord[1] = e.value;
+
+			result = root.query.descendant("color").attribute("keyword2");
+			foreach( e; result ) GLOBAL.editColor.keyWord[2] = e.value;
+
+			result = root.query.descendant("color").attribute("keyword3");
+			foreach( e; result ) GLOBAL.editColor.keyWord[3] = e.value;
+			
 			result = root.query.descendant("color").attribute("template");
 			foreach( e; result ) GLOBAL.colorTemplate = e.value;
 			
@@ -857,7 +874,15 @@ struct IDECONFIG
 			foreach( e; result ) GLOBAL.editColor.prjTitle = e.value;
 			result = root.query.descendant("color").attribute("prjSourceType");
 			foreach( e; result ) GLOBAL.editColor.prjSourceType = e.value;
-
+			
+			result = root.query.descendant("color").attribute("maker0");
+			foreach( e; result ) GLOBAL.editColor.maker[0] = e.value;
+			result = root.query.descendant("color").attribute("maker1");
+			foreach( e; result ) GLOBAL.editColor.maker[1] = e.value;
+			result = root.query.descendant("color").attribute("maker2");
+			foreach( e; result ) GLOBAL.editColor.maker[2] = e.value;
+			result = root.query.descendant("color").attribute("maker3");
+			foreach( e; result ) GLOBAL.editColor.maker[3] = e.value;
 		
 			// Load Language lng
 			scope lngFilePath = new FilePath( "settings/language/" ~ GLOBAL.language ~ ".lng" );
@@ -1096,6 +1121,10 @@ struct IDECONFIG
 		auto configNode = doc.tree.element( null, "config" );
 
 		configNode.element( null, "color" )
+		.attribute( null, "keyword0", GLOBAL.editColor.keyWord[0].toDString )
+		.attribute( null, "keyword1", GLOBAL.editColor.keyWord[1].toDString )
+		.attribute( null, "keyword2", GLOBAL.editColor.keyWord[2].toDString )
+		.attribute( null, "keyword3", GLOBAL.editColor.keyWord[3].toDString )
 		.attribute( null, "caretLine", GLOBAL.editColor.caretLine.toDString )
 		.attribute( null, "cursor", GLOBAL.editColor.cursor.toDString )
 		.attribute( null, "selectionFore", GLOBAL.editColor.selectionFore.toDString )
@@ -1164,11 +1193,6 @@ struct IDECONFIG
 			doc.parse( file.read );
 
 			auto root = doc.elements;
-			
-			/*
-			auto result = root.query.descendant("color").attribute("template");
-			foreach( e; result ) results ~= e.value;
-			*/
 			
 			auto result = root.query.descendant("color").attribute("caretLine");
 			foreach( e; result ) results ~= e.value;
@@ -1283,6 +1307,18 @@ struct IDECONFIG
 			foreach( e; result ) results ~= e.value;
 			result = root.query.descendant("color").attribute("prjSourceType");
 			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("keyword0");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("keyword1");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("keyword2");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("keyword3");
+			foreach( e; result ) results ~= e.value;			
 		}
 		catch( Exception e ){}
 		

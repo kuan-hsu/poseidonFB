@@ -262,7 +262,12 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* toggleBraceMatchDB = IupToggle( toStringz( GLOBAL.languageItems["bracematchdoubleside"] ), null );
 		IupSetAttribute( toggleBraceMatchDB, "VALUE", toStringz(GLOBAL.editorSetting00.BraceMatchDoubleSidePos.dup) );
-		IupSetHandle( "toggleBraceMatchDB", toggleBraceMatchDB );			
+		IupSetHandle( "toggleBraceMatchDB", toggleBraceMatchDB );
+		
+		Ihandle* toggleMultiSelection = IupToggle( toStringz( GLOBAL.languageItems["multiselection"] ), null );
+		IupSetAttribute( toggleMultiSelection, "VALUE", toStringz(GLOBAL.editorSetting00.MultiSelection.dup) );
+		IupSetHandle( "toggleMultiSelection", toggleMultiSelection );			
+		
 		
 		Ihandle* labelTabWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"] ~ ":" ) );
 		Ihandle* textTabWidth = IupText( null );
@@ -306,6 +311,9 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( toggleBraceMatch, "" ),
 			IupSetAttributes( toggleBraceMatchDB, "" ),
 			
+			IupSetAttributes( toggleMultiSelection, "" ),
+			IupFill(),
+			
 			IupSetAttributes( hBoxTab, "" ),
 			IupSetAttributes( hBoxColumn, "" ),
 			
@@ -314,7 +322,56 @@ class CPreferenceDialog : CBaseDialog
 
 		//IupSetAttribute(gbox, "SIZECOL", "1");
 		//IupSetAttribute(gbox, "SIZELIN", "4");
-		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=5,GAPCOL=100,MARGIN=0x0" );
+		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=1,GAPCOL=100,MARGIN=0x0" );
+		
+		
+		// Mark High Light Line
+		Ihandle* labelMarker0 = IupLabel( toStringz( GLOBAL.languageItems["maker0"] ~ ": " ) );
+		Ihandle* btnMarker0Color = IupButton( null, null );
+		IupSetAttribute( btnMarker0Color, "BGCOLOR",GLOBAL.editColor.maker[0].toCString );
+		version(Windows) IupSetAttribute( btnMarker0Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker0Color, "SIZE", "24x12" );
+		IupSetHandle( "btnMarker0Color", btnMarker0Color );
+		IupSetCallback( btnMarker0Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		
+		Ihandle* labelMarker1 = IupLabel( toStringz( GLOBAL.languageItems["maker1"] ~ ": " ) );
+		Ihandle* btnMarker1Color = IupButton( null, null );
+		IupSetAttribute( btnMarker1Color, "BGCOLOR",GLOBAL.editColor.maker[1].toCString );
+		version(Windows) IupSetAttribute( btnMarker1Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker1Color, "SIZE", "24x12" );
+		IupSetHandle( "btnMarker1Color", btnMarker1Color );
+		IupSetCallback( btnMarker1Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelMarker2 = IupLabel( toStringz( GLOBAL.languageItems["maker2"] ~ ": " ) );
+		Ihandle* btnMarker2Color = IupButton( null, null );
+		IupSetAttribute( btnMarker2Color, "BGCOLOR",GLOBAL.editColor.maker[2].toCString );
+		version(Windows) IupSetAttribute( btnMarker2Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker2Color, "SIZE", "24x12" );
+		IupSetHandle( "btnMarker2Color", btnMarker2Color );
+		IupSetCallback( btnMarker2Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelMarker3 = IupLabel( toStringz( GLOBAL.languageItems["maker3"] ~ ": " ) );
+		Ihandle* btnMarker3Color = IupButton( null, null );
+		IupSetAttribute( btnMarker3Color, "BGCOLOR",GLOBAL.editColor.maker[3].toCString );
+		version(Windows) IupSetAttribute( btnMarker3Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker3Color, "SIZE", "24x12" );
+		IupSetHandle( "btnMarker3Color", btnMarker3Color );
+		IupSetCallback( btnMarker3Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		
+		Ihandle* gboxMarkerColor = IupGridBox
+		(
+			labelMarker0,
+			btnMarker0Color,
+			labelMarker1,
+			btnMarker1Color,
+
+			labelMarker2,
+			btnMarker2Color,
+			labelMarker3,
+			btnMarker3Color,
+
+			null
+		);
+		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=2,GAPCOL=0,MARGIN=0x0,SIZELIN=0,HOMOGENEOUSCOL=YES" );		
+		
+		
+		
 
 		// fontList
 		Ihandle* fontList = IupList( null );
@@ -395,7 +452,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( frameFont, "TITLE", toStringz( GLOBAL.languageItems["font"] ));
 		IupSetAttribute( frameFont, "EXPAND", "YES");
 		
-		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, null );
+		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, frameFont, null );
 		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );		
 
 		// Color
@@ -1220,6 +1277,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleBoldKeyword", null );
 		IupSetHandle( "toggleBraceMatch", null );
 		IupSetHandle( "toggleBraceMatchDB", null );
+		IupSetHandle( "toggleMultiSelection", null );
 		
 		IupSetHandle( "textTabWidth", null );
 		IupSetHandle( "textColumnEdge", null );
@@ -1494,6 +1552,8 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editorSetting00.BoldKeyword				= fromStringz(IupGetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.BraceMatchHighlight		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.BraceMatchDoubleSidePos	= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatchDB" ), "VALUE" )).dup;
+		GLOBAL.editorSetting00.MultiSelection			= fromStringz(IupGetAttribute( IupGetHandle( "toggleMultiSelection" ), "VALUE" )).dup;
+		
 		
 		GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 		GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
@@ -1582,6 +1642,10 @@ extern(C) // Callback for CPreferenceDialog
 		GLOBAL.editColor.braceFore					= IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR" );
 		GLOBAL.editColor.braceBack					= IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR" );
 		
+		GLOBAL.editColor.maker[0]					= IupGetAttribute( IupGetHandle( "btnMarker0Color" ), "BGCOLOR" );
+		GLOBAL.editColor.maker[1]					= IupGetAttribute( IupGetHandle( "btnMarker1Color" ), "BGCOLOR" );
+		GLOBAL.editColor.maker[2]					= IupGetAttribute( IupGetHandle( "btnMarker2Color" ), "BGCOLOR" );
+		GLOBAL.editColor.maker[3]					= IupGetAttribute( IupGetHandle( "btnMarker3Color" ), "BGCOLOR" );
 		
 		GLOBAL.projectTree.changeColor();
 		GLOBAL.outlineTree.changeColor();
@@ -1770,7 +1834,7 @@ extern(C) // Callback for CPreferenceDialog
 		char[]		templateName = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 		char[][]	colors = IDECONFIG.loadColorTemplate( templateName );
 		
-		if( colors.length == 44 )
+		if( colors.length == 48 )
 		{
 			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR", toStringz( colors[0] ) );
 			IupSetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR", toStringz( colors[1] ) );
@@ -1826,6 +1890,11 @@ extern(C) // Callback for CPreferenceDialog
 			
 			IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", toStringz( colors[42] ) );
 			IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( colors[43] ) );
+			
+			IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR", toStringz( colors[44] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", toStringz( colors[45] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", toStringz( colors[46] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", toStringz( colors[47] ) );
 		}
 		
 		return IUP_DEFAULT;
@@ -1887,6 +1956,12 @@ extern(C) // Callback for CPreferenceDialog
 		
 		IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", toStringz( "128 0 0" ) );
 		IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( "0 0 255" ) );
+		
+		IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR", toStringz( "5 91 35" ) );
+		IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", toStringz( "0 0 255" ) );
+		IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", toStringz( "231 144 0" ) );
+		IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", toStringz( "16 108 232" ) );		
+		
 		
 		IupSetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE", null );
 		GLOBAL.colorTemplate = cast(char[]) " ";

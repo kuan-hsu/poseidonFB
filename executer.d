@@ -234,7 +234,6 @@ struct ExecuterAction
 						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["message"] ) );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
-					
 				}
 				else
 				{
@@ -249,12 +248,15 @@ struct ExecuterAction
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
 				}
-
+				
+				IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
+				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+				
 				return true;
 			}
 
 			IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
-
+			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		catch( ProcessException e )
 		{
@@ -463,6 +465,8 @@ struct ExecuterAction
 				IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
 			}
 
+			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+			
 			return true;
 		}
 		catch( Exception e )
@@ -574,7 +578,6 @@ struct ExecuterAction
 				derived.start();
 
 				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\nRunning " ~ command ~ args ~ "......" ) );
-				
 			}
 			else
 			{
@@ -595,7 +598,7 @@ struct ExecuterAction
 
 			// Back to top of outputPanel
 			IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
-		
+			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 
 			return true;
 		}
