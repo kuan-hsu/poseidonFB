@@ -198,11 +198,10 @@ extern(C)
 			try
 			{
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-
-				// Auto convert keyword case......
-				if( GLOBAL.keywordCase > 0 )
+				if( cSci !is null )
 				{
-					if( cSci !is null )
+					// Auto convert keyword case......
+					if( GLOBAL.keywordCase > 0 )
 					{
 						if( ( c > 31 && c < 127 ) || c == 9 || c == 32 )
 						{
@@ -254,36 +253,33 @@ extern(C)
 							}
 						}
 					}
-				}
-				
-				// BRACEMATCH
-				if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
-				{
-					IupSetInt( cSci.getIupScintilla, "BRACEBADLIGHT", -1 );
 					
-					int pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-					int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
-					if( close > -1 )
+					// BRACEMATCH
+					if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
 					{
-						IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
-					}
-					else
-					{
-						if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
+						IupSetInt( cSci.getIupScintilla, "BRACEBADLIGHT", -1 );
+						
+						int pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+						int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
+						if( close > -1 )
 						{
-							--pos;
-							close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
-							if( close > -1 )
+							IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+						}
+						else
+						{
+							if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
 							{
-								IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+								--pos;
+								close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
+								if( close > -1 )
+								{
+									IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+								}
 							}
 						}
-					}
-				}		
-				
-				if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
-				{
-					if( cSci !is null )
+					}		
+					
+					if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
 						switch( c )
 						{

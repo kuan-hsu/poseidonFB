@@ -94,8 +94,8 @@ class CProjectTree
 
 		tree = IupTree();
 		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL" );
-		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
-		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );		
+		version(Windows) IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
+		version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );		
 		
 		toBoldTitle( tree, 0 );
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
@@ -143,7 +143,7 @@ class CProjectTree
 	{
 		IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
-		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
+		version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
 		
 		/*
 		scope icon_prj = CstringConvert( "icon_prj" );

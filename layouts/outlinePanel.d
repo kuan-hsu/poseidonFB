@@ -721,7 +721,7 @@ class COutline
 			Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
 			if( ih != null )
 			{
-				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+				version(Windows) IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 			}
 		}
 		
@@ -754,7 +754,7 @@ class COutline
 
 				Ihandle* tree = IupTree();
 				IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
-				IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+				version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 				
 				IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
 				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
