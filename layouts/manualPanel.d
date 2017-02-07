@@ -50,6 +50,29 @@ class CManual
 		clipboard = IupClipboard();
 		IupSetHandle( "clipboard", clipboard );
 	}
+	
+	bool searchPage( char[] keyWord )
+	{
+		scope _fp = new FilePath( GLOBAL.manualPath.toDString );
+		keyWord = lowerCase( keyWord );
+		if ( keyWord[0] >= 'a' && keyWord[0] <= 'z' ) keyWord[0] = keyWord[0] - 32;
+
+		
+		switch( lowerCase( keyWord ) )
+		{
+			case "select":	_fp.set( _fp.path() ~ "KeyPgSelectcase.html" );	break;
+			case "if", "then":	_fp.set( _fp.path() ~ "KeyPgIfthen.html" );	break;
+			default:	_fp.set( _fp.path() ~ "KeyPg" ~ keyWord ~ ".html" );
+		}
+		
+		if( _fp.exists() )
+		{
+			setValue( _fp.toString );
+			return true;
+		}
+		
+		return false;
+	}
 
 	public:
 	this()
@@ -116,18 +139,7 @@ class CManual
 			{
 				if( _keyWord == targetText )
 				{
-					scope _fp = new FilePath( GLOBAL.manualPath.toDString );
-					version(linux)
-					{
-						targetText = lowerCase( targetText );
-						if ( targetText[0] >= 'a' && targetText[0] <= 'z' ) targetText[0] = targetText[0] - 32;
-					}
-					_fp.set( _fp.path() ~ "KeyPg" ~ targetText ~ ".html" );
-					if( _fp.exists() )
-					{
-						setValue( _fp.toString );
-						return true;
-					}
+					return searchPage( _keyWord );
 				}
 			}
 		}

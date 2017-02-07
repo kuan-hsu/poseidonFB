@@ -94,7 +94,7 @@ class CProjectTree
 
 		tree = IupTree();
 		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL" );
-		version(Windows) IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
+		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );		
 		
 		toBoldTitle( tree, 0 );

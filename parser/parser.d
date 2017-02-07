@@ -246,6 +246,8 @@ class CParser
 			}
 		}
 		
+		if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+		
 		switch( token().tok )
 		{
 			case TOK.Tbyte, TOK.Tubyte:			

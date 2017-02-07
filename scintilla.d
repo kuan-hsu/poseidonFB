@@ -573,7 +573,17 @@ class CScintilla
 		IupSetAttribute( sci, "USEPOPUP", "NO" );
 		
 		// SCI_SETMULTIPLESELECTION 2563
-		if( GLOBAL.editorSetting00.MultiSelection == "ON" ) IupScintillaSendMessage( sci, 2563, 1, 0 ); else IupScintillaSendMessage( sci, 2563, 0, 0 ); 
+		// SCI_SETADDITIONALSELECTIONTYPING 2565
+		if( GLOBAL.editorSetting00.MultiSelection == "ON" )
+		{
+			IupScintillaSendMessage( sci, 2563, 1, 0 ); 
+			IupScintillaSendMessage( sci, 2565, 1, 0 ); 
+		}
+		else
+		{
+			IupScintillaSendMessage( sci, 2563, 0, 0 );
+			IupScintillaSendMessage( sci, 2565, 0, 0 ); 
+		}
 		
 		// Autocompletion XPM Image
 		IupScintillaSendMessage( sci, 2624, 16, 0 ); // SCI_RGBAIMAGESETWIDTH 2624
