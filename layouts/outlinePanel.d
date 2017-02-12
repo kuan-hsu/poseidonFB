@@ -1438,13 +1438,16 @@ extern(C)
 					if( id > 0 )
 					{
 						CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
-
-						char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
 						
-						ScintillaAction.openFile( _fullPath, _node.lineNumber );
-						version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
+						if( _node !is null )
+						{
+							char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
+						
+							ScintillaAction.openFile( _fullPath, _node.lineNumber );
+							version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
 
-						return IUP_IGNORE;
+							return IUP_IGNORE;
+						}
 					}
 				}
 			}
@@ -1551,7 +1554,6 @@ extern(C)
 					ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[--item].lineNumber );
 					Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
 					if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
-					
 				}
 			}
 		}

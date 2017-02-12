@@ -141,7 +141,6 @@ class CParser
 								else
 								{
 									type = "integer";
-
 								}
 								activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, type, null, lineNumber );				
 							}

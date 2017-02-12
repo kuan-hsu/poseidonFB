@@ -81,8 +81,9 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, null );
 
+		scope _compilersetting = new IupString( GLOBAL.languageItems["compilersetting"] );
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
-		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].ptr );
+		IupSetAttribute( frameCompiler, "TITLE", _compilersetting.toCString );
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=261x");
 
 		// Parser Setting
@@ -170,7 +171,8 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* frameLive = IupFrame( hBoxLive2 );
 		IupSetAttributes( frameLive, "SIZE=261x" );
-		IupSetAttribute( frameLive, "TITLE", GLOBAL.languageItems["parserlive"].ptr );
+		scope _parserlive = new IupString( GLOBAL.languageItems["parserlive"] );
+		IupSetAttribute( frameLive, "TITLE", _parserlive.toCString );
 
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
@@ -179,7 +181,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
-		IupSetAttribute( frameParser, "TITLE", GLOBAL.languageItems["parsersetting"].ptr );
+		scope _parsersetting = new IupString( GLOBAL.languageItems["parsersetting"] );
+		IupSetAttribute( frameParser, "TITLE", _parsersetting.toCString );
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 		IupSetAttribute( frameParser, "SIZE", "275x");
 		
@@ -412,7 +415,8 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* frameKeywordCase = IupFrame( radioKeywordCase );
 		IupSetAttributes( frameKeywordCase, "SIZE=270,GAP=1" );
-		IupSetAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].ptr );
+		scope _autoconvertkeyword = new IupString( GLOBAL.languageItems["autoconvertkeyword"] );
+		IupSetAttribute( frameKeywordCase, "TITLE", _autoconvertkeyword.toCString );
 		
 		
 
@@ -449,7 +453,8 @@ class CPreferenceDialog : CBaseDialog
 
 
 		Ihandle* frameFont = IupFrame( fontList );
-		IupSetAttribute( frameFont, "TITLE", GLOBAL.languageItems["font"].ptr );
+		scope _font = new IupString( GLOBAL.languageItems["font"] );
+		IupSetAttribute( frameFont, "TITLE", _font.toCString );
 		IupSetAttribute( frameFont, "EXPAND", "YES");
 		
 		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, frameFont, null );
@@ -596,7 +601,8 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetAttribute( frameColor, "SIZE", "275x" );//IupGetAttribute( frameFont, "SIZE" ) );
-		IupSetAttribute( frameColor, "TITLE", GLOBAL.languageItems["color"].ptr );
+		scope _color = new IupString( GLOBAL.languageItems["color"] );
+		IupSetAttribute( frameColor, "TITLE", _color.toCString );
 
 		
 		// Color -1
@@ -1043,7 +1049,8 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetAttribute( frameColor_1, "SIZE", "275x" );//IupGetAttribute( frameFont, "SIZE" ) );
-		IupSetAttribute( frameColor_1, "TITLE", GLOBAL.languageItems["colorfgbg"].ptr );
+		scope _colorfgbg = new IupString( GLOBAL.languageItems["colorfgbg"] );
+		IupSetAttribute( frameColor_1, "TITLE", _colorfgbg.toCString );
 		
 		
 		

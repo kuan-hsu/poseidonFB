@@ -746,7 +746,7 @@ extern(C)
 
 					version( Windows )
 					{
-						fullPath = Path.normalize( fullPath );
+						fullPath = Util.substitute( fullPath, "/", "\\" );
 						scope proc = new Process( true, "explorer " ~ "\"" ~ fullPath ~ "\"" );
 						proc.execute;
 						proc.wait;

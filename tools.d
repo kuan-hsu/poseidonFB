@@ -97,7 +97,7 @@ public:
 	void opAssign( char* rhs )
 	{
 		convert( fromStringz( rhs ).dup );
-	}	
+	}
 
 	char* convert( char[] Dstring )
 	{
