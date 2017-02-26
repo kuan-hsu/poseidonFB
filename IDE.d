@@ -257,6 +257,7 @@ struct IDECONFIG
 		.attribute( null, "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) )
 		.attribute( null, "comment", convertShortKeyValue2String( GLOBAL.shortKeys[23].keyValue ) )
 		.attribute( null, "backdefinition", convertShortKeyValue2String( GLOBAL.shortKeys[24].keyValue ) );
+		//.attribute( null, "testplugin", convertShortKeyValue2String( GLOBAL.shortKeys[25].keyValue ) );
 
 		/*
 		<buildtools>
@@ -910,7 +911,7 @@ struct IDECONFIG
 			
 
 			// short keys (Editor)
-			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 23;
+			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 25;
 			result = root.query.descendant("shortkeys").attribute("find");
 			foreach( e; result )
 			{
@@ -1084,7 +1085,17 @@ struct IDECONFIG
 			{
 				ShortKey sk = { "backdefinition", GLOBAL.languageItems["sc_backdefinition"], convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[24]= sk;
+			}
+			
+			/+
+			result = root.query.descendant("shortkeys").attribute("testplugin");
+			foreach( e; result )
+			{
+				ShortKey sk = { "testplugin", "Test  Plugin", convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[25]= sk;
 			}			
+			+/
+			
 			// Get linux terminal program name
 			version( linux )
 			{

@@ -13,16 +13,16 @@ class CArgOptionDialog : CBaseDialog
 	import				tools;
 
 	Ihandle*			labelOptions, labelArgs, listOptions, listArgs;
-	CstringConvert[2]	cStrings;
-	CstringConvert[]	recentOptions, recentArgs;
+	IupString[2]	cStrings;
+	IupString[]	recentOptions, recentArgs;
 	
 
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton();
 		
-		cStrings[0] = new CstringConvert( GLOBAL.languageItems["prjopts"] ~ ":" );
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["prjargs"] ~ ":" );		
+		cStrings[0] = new IupString( GLOBAL.languageItems["prjopts"] ~ ":" );
+		cStrings[1] = new IupString( GLOBAL.languageItems["prjargs"] ~ ":" );		
 
 		listOptions = IupList( null );
 		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
@@ -30,13 +30,13 @@ class CArgOptionDialog : CBaseDialog
 			if( GLOBAL.recentOptions[i].length )
 			{
 				recentOptions.length = recentOptions.length + 1;
-				recentOptions[$-1] = new CstringConvert( GLOBAL.recentOptions[i] );
-				IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), recentOptions[$-1].toStringz );
+				recentOptions[$-1] = new IupString( GLOBAL.recentOptions[i] );
+				IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), recentOptions[$-1].toCString );
 			}
 			
 		IupSetHandle( "CArgOptionDialog_listOptions", listOptions );
 
-		labelOptions = IupLabel( cStrings[0].toStringz );
+		labelOptions = IupLabel( cStrings[0].toCString );
 		Ihandle* hBox00 = IupHbox( labelOptions, listOptions, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 
@@ -46,13 +46,13 @@ class CArgOptionDialog : CBaseDialog
 			if( GLOBAL.recentArgs[i].length )
 			{
 				recentArgs.length = recentArgs.length + 1;
-				recentArgs[$-1] = new CstringConvert( GLOBAL.recentArgs[i] );
-				IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), recentArgs[$-1].toStringz );
+				recentArgs[$-1] = new IupString( GLOBAL.recentArgs[i] );
+				IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), recentArgs[$-1].toCString );
 			}
 		
 		IupSetHandle( "CArgOptionDialog_listArgs", listArgs );
 
-		labelArgs = IupLabel( cStrings[1].toStringz );
+		labelArgs = IupLabel( cStrings[1].toCString );
 		Ihandle* hBox01 = IupHbox( labelArgs, listArgs, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
 

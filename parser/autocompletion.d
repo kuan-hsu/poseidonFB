@@ -1519,7 +1519,6 @@ struct AutoComplete
 				word = text;
 			}
 		}
-		
 		else
 		{
 			word = text;

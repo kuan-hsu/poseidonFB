@@ -13,22 +13,22 @@ class CFileList
 	private:
 	Ihandle*			layoutHandle, tree;
 	int					fullPathState;
-	CstringConvert[2]	cStrings;
+	IupString[2]	cStrings;
 
 	void createLayout()
 	{
-		cStrings[0] = new CstringConvert( GLOBAL.languageItems["fullpath"] );
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["hide"] );
+		cStrings[0] = new IupString( GLOBAL.languageItems["fullpath"] );
+		cStrings[1] = new IupString( GLOBAL.languageItems["hide"] );
 		
 		// Outline Toolbar
 		Ihandle* filelistButtonFilename = IupButton( null, null );
 		IupSetAttributes( filelistButtonFilename, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_p" );
-		IupSetAttribute( filelistButtonFilename, "TIP", cStrings[0].toStringz );
+		IupSetAttribute( filelistButtonFilename, "TIP", cStrings[0].toCString );
 		IupSetCallback( filelistButtonFilename, "ACTION", cast(Icallback) &fileList_Filename_ACTION );
 
 		Ihandle* filelistButtonHide = IupButton( null, null );
 		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_b" );
-		IupSetAttribute( filelistButtonHide, "TIP", cStrings[1].toStringz );
+		IupSetAttribute( filelistButtonHide, "TIP", cStrings[1].toCString );
 		IupSetCallback( filelistButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );

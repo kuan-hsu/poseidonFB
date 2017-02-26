@@ -21,7 +21,7 @@ class CDebugger
 	bool					bRunning;
 	//int[char[]][char[]]		bpManager;
 	
-	CstringConvert[20]		cStrings;
+	IupString[20]		cStrings;
 
 	void createLayout()
 	{
@@ -50,24 +50,24 @@ class CDebugger
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 		}
 		
-		cStrings[0] = new CstringConvert( GLOBAL.languageItems["clear"] );
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["runcontinue"] );
-		cStrings[2] = new CstringConvert( GLOBAL.languageItems["stop"] );
-		cStrings[3] = new CstringConvert( GLOBAL.languageItems["step"] );
-		cStrings[4] = new CstringConvert( GLOBAL.languageItems["next"] );
-		cStrings[5] = new CstringConvert( GLOBAL.languageItems["return"] );
-		cStrings[6] = new CstringConvert( GLOBAL.languageItems["until"] );
-		cStrings[7] = new CstringConvert( GLOBAL.languageItems["terminate"] );
+		cStrings[0] = new IupString( GLOBAL.languageItems["clear"] );
+		cStrings[1] = new IupString( GLOBAL.languageItems["runcontinue"] );
+		cStrings[2] = new IupString( GLOBAL.languageItems["stop"] );
+		cStrings[3] = new IupString( GLOBAL.languageItems["step"] );
+		cStrings[4] = new IupString( GLOBAL.languageItems["next"] );
+		cStrings[5] = new IupString( GLOBAL.languageItems["return"] );
+		cStrings[6] = new IupString( GLOBAL.languageItems["until"] );
+		cStrings[7] = new IupString( GLOBAL.languageItems["terminate"] );
 		
 		
-		IupSetAttributes( btnClear, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_clear" );				IupSetAttribute( btnClear, "TIP", cStrings[0].toStringz );
-		IupSetAttributes( btnResume, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_resume" );				IupSetAttribute( btnResume, "TIP", cStrings[1].toStringz );
-		IupSetAttributes( btnStop, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_stop" );					IupSetAttribute( btnStop, "TIP", cStrings[2].toStringz );
-		IupSetAttributes( btnStep, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_step" );					IupSetAttribute( btnStep, "TIP", cStrings[3].toStringz );
-		IupSetAttributes( btnNext, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_next" );					IupSetAttribute( btnNext, "TIP", cStrings[4].toStringz );
-		IupSetAttributes( btnReturn, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_return" );				IupSetAttribute( btnReturn, "TIP", cStrings[5].toStringz );
-		IupSetAttributes( btnUntil, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_until" );				IupSetAttribute( btnUntil, "TIP", cStrings[6].toStringz );
-		IupSetAttributes( btnTerminate, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnTerminate, "TIP", cStrings[7].toStringz );
+		IupSetAttributes( btnClear, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_clear" );				IupSetAttribute( btnClear, "TIP", cStrings[0].toCString );
+		IupSetAttributes( btnResume, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_resume" );				IupSetAttribute( btnResume, "TIP", cStrings[1].toCString );
+		IupSetAttributes( btnStop, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_stop" );					IupSetAttribute( btnStop, "TIP", cStrings[2].toCString );
+		IupSetAttributes( btnStep, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_step" );					IupSetAttribute( btnStep, "TIP", cStrings[3].toCString );
+		IupSetAttributes( btnNext, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_next" );					IupSetAttribute( btnNext, "TIP", cStrings[4].toCString );
+		IupSetAttributes( btnReturn, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_return" );				IupSetAttribute( btnReturn, "TIP", cStrings[5].toCString );
+		IupSetAttributes( btnUntil, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_until" );				IupSetAttribute( btnUntil, "TIP", cStrings[6].toCString );
+		IupSetAttributes( btnTerminate, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnTerminate, "TIP", cStrings[7].toCString );
 		
 
 		IupSetCallback( btnClear, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -109,11 +109,11 @@ class CDebugger
 		Ihandle* btnLeft		= IupButton( null, "Left" );
 		Ihandle* btnRefresh		= IupButton( null, "Refresh" );
 		
-		cStrings[8] = new CstringConvert( GLOBAL.languageItems["addtowatch"] );		
-		cStrings[9] = new CstringConvert( GLOBAL.languageItems["refresh"] );
+		cStrings[8] = new IupString( GLOBAL.languageItems["addtowatch"] );		
+		cStrings[9] = new IupString( GLOBAL.languageItems["refresh"] );
 		
-		IupSetAttributes( btnLeft, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_left" );	IupSetAttribute( btnLeft, "TIP", cStrings[8].toStringz );
-		IupSetAttributes( btnRefresh, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnRefresh, "TIP", cStrings[9].toStringz );
+		IupSetAttributes( btnLeft, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_left" );	IupSetAttribute( btnLeft, "TIP", cStrings[8].toCString );
+		IupSetAttributes( btnRefresh, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnRefresh, "TIP", cStrings[9].toCString );
 
 
 		IupSetCallback( btnLeft, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -217,11 +217,11 @@ class CDebugger
 		IupSetAttribute( shareTreeHandle, "TABTITLE", toStringz( GLOBAL.languageItems["shared"] ) );
 
 
-		cStrings[10] = new CstringConvert( GLOBAL.languageItems["variable"] );
+		cStrings[10] = new IupString( GLOBAL.languageItems["variable"] );
 
 		Ihandle* vbox_var0 = IupVbox( hBoxVar0_toolbar, varTabHandle, null );
 		Ihandle* var0Frame = IupFrame( vbox_var0 );
-		IupSetAttribute( var0Frame, "TITLE", cStrings[10].toStringz );
+		IupSetAttribute( var0Frame, "TITLE", cStrings[10].toCString );
 		IupSetAttribute( var0Frame, "EXPANDCHILDREN", "YES");
 		Ihandle* var0ScrollBox = IupScrollBox( var0Frame );
 
@@ -231,13 +231,13 @@ class CDebugger
 		Ihandle* btnDel		= IupButton( null, "Del" );
 		Ihandle* btnDelAll	= IupButton( null, "RemoveAll" );
 		
-		cStrings[11] = new CstringConvert( GLOBAL.languageItems["add"] );		
-		cStrings[12] = new CstringConvert( GLOBAL.languageItems["remove"] );
-		cStrings[13] = new CstringConvert( GLOBAL.languageItems["removeall"] );
+		cStrings[11] = new IupString( GLOBAL.languageItems["add"] );		
+		cStrings[12] = new IupString( GLOBAL.languageItems["remove"] );
+		cStrings[13] = new IupString( GLOBAL.languageItems["removeall"] );
 
-		IupSetAttributes( btnAdd, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_add" );		IupSetAttribute( btnAdd, "TIP", cStrings[11].toStringz );
-		IupSetAttributes( btnDel, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_delete" );			IupSetAttribute( btnDel, "TIP", cStrings[12].toStringz );
-		IupSetAttributes( btnDelAll, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_deleteall" );	IupSetAttribute( btnDelAll, "TIP", cStrings[13].toStringz );
+		IupSetAttributes( btnAdd, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_add" );		IupSetAttribute( btnAdd, "TIP", cStrings[11].toCString );
+		IupSetAttributes( btnDel, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_delete" );			IupSetAttribute( btnDel, "TIP", cStrings[12].toCString );
+		IupSetAttributes( btnDelAll, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_deleteall" );	IupSetAttribute( btnDelAll, "TIP", cStrings[13].toCString );
 
 		Ihandle* hBoxVar1_toolbar = IupHbox( IupFill(), btnAdd, btnDel, /*btnUp, btnDown, */btnDelAll, null );
 		IupSetAttributes( hBoxVar1_toolbar, "ALIGNMENT=ACENTER,GAP=5" );
@@ -278,11 +278,11 @@ class CDebugger
 			return IUP_DEFAULT;
 		});
 
-		cStrings[14] = new CstringConvert( GLOBAL.languageItems["watchlist"] );
+		cStrings[14] = new IupString( GLOBAL.languageItems["watchlist"] );
 		
 		Ihandle* vbox_var1 = IupVbox( hBoxVar1_toolbar, watchTreeHandle, null );
 		Ihandle* var1Frame = IupFrame( vbox_var1 );
-		IupSetAttribute( var1Frame, "TITLE", cStrings[14].toStringz );
+		IupSetAttribute( var1Frame, "TITLE", cStrings[14].toCString );
 		IupSetAttribute( var1Frame, "EXPANDCHILDREN", "YES");
 		Ihandle* var1ScrollBox = IupScrollBox( var1Frame );
 	

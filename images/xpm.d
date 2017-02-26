@@ -9,7 +9,7 @@ struct XPM
 	import tango.stdc.stringz;
 	import tango.io.Stdout;
 
-	static CstringConvert[] colorStrings;
+	static IupString[] colorStrings;
 
 	struct ColorUnit
 	{
@@ -57,7 +57,7 @@ struct XPM
 		return 0;
 	}
 
-	static CstringConvert convert( char[] filePath )
+	static IupString convert( char[] filePath )
 	{
 		try
 		{
@@ -147,7 +147,7 @@ struct XPM
 				}
 			}
 
-			return new CstringConvert( cast(char[]) result.dup );
+			return new IupString( cast(char[]) result.dup );
 		}
 		catch( Exception e )
 		{
@@ -192,7 +192,7 @@ struct XPM
 		}
 	}
 
-	static CstringConvert getRGBA( char[] filePath )
+	static IupString getRGBA( char[] filePath )
 	{
 		try
 		{
@@ -207,7 +207,7 @@ struct XPM
 
 	public:
 	/* XPM */
-	static CstringConvert private_fun_rgba, protected_fun_rgba, public_fun_rgba, private_sub_rgba, protected_sub_rgba, public_sub_rgba,
+	static IupString private_fun_rgba, protected_fun_rgba, public_fun_rgba, private_sub_rgba, protected_sub_rgba, public_sub_rgba,
 			private_variable_array_rgba, protected_variable_array_rgba, public_variable_array_rgba, private_variable_rgba, alias_obj_rgba,
 			protected_variable_rgba, public_variable_rgba, class_private_obj_rgba, class_protected_obj_rgba,
 			class_obj_rgba, struct_private_obj_rgba, struct_protected_obj_rgba, struct_obj_rgba,  
@@ -311,9 +311,9 @@ struct XPM
 
 			foreach( ColorUnit __color; color )
 			{
-				auto VALUE = new CstringConvert( __color.value );
+				auto VALUE = new IupString( __color.value );
 				colorStrings ~= VALUE;
-				IupSetAttribute( image, toStringz( Integer.toString( __color.sn ) ) , VALUE.toZ );
+				IupSetAttribute( image, toStringz( Integer.toString( __color.sn ) ) , VALUE.toCString );
 			}
 
 			return image;

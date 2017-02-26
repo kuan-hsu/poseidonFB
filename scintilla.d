@@ -590,56 +590,56 @@ class CScintilla
 		IupScintillaSendMessage( sci, 2625, 16, 0 ); // SCI_RGBAIMAGESETHEIGHT 2625
 
 		// SCI_REGISTERRGBAIMAGE 2627
-		IupScintillaSendMessage( sci, 2627, 0, cast(int) XPM.private_variable_array_rgba.toStringz );
-		IupScintillaSendMessage( sci, 2627, 1, cast(int) XPM.protected_variable_array_rgba.toStringz ); 
-		IupScintillaSendMessage( sci, 2627, 2, cast(int) XPM.public_variable_array_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 0, cast(int) XPM.private_variable_array_rgba.toCString );
+		IupScintillaSendMessage( sci, 2627, 1, cast(int) XPM.protected_variable_array_rgba.toCString ); 
+		IupScintillaSendMessage( sci, 2627, 2, cast(int) XPM.public_variable_array_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 
-		IupScintillaSendMessage( sci, 2627, 3, cast(int) XPM.private_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 5, cast(int) XPM.public_variable_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 3, cast(int) XPM.private_variable_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 5, cast(int) XPM.public_variable_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 		
 		//IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 		//IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 8, cast(int) XPM.class_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 8, cast(int) XPM.class_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 		
-		IupScintillaSendMessage( sci, 2627, 9, cast(int) XPM.struct_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 10, cast(int) XPM.struct_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 11, cast(int) XPM.struct_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 9, cast(int) XPM.struct_private_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 10, cast(int) XPM.struct_protected_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 11, cast(int) XPM.struct_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 		
 		//IupScintillaSendMessage( sci, 2627, 12, cast(int) XPM.enum_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 13, cast(int) XPM.enum_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 14, cast(int) XPM.enum_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 13, cast(int) XPM.enum_protected_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 14, cast(int) XPM.enum_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 		
-		IupScintillaSendMessage( sci, 2627, 15, cast(int) XPM.union_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 16, cast(int) XPM.union_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 17, cast(int) XPM.union_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 15, cast(int) XPM.union_private_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 16, cast(int) XPM.union_protected_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 17, cast(int) XPM.union_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 
-		IupScintillaSendMessage( sci, 2627, 18, cast(int) XPM.parameter_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 19, cast(int) XPM.enum_member_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 20, cast(int) XPM.alias_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 18, cast(int) XPM.parameter_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 19, cast(int) XPM.enum_member_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 20, cast(int) XPM.alias_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 
-		IupScintillaSendMessage( sci, 2627, 21, cast(int) XPM.normal_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 21, cast(int) XPM.normal_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 		//IupScintillaSendMessage( sci, 2627, 22, cast(int) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 		//IupScintillaSendMessage( sci, 2627, 23, cast(int) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
-		IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 24, cast(int) XPM.namespace_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 
-		IupScintillaSendMessage( sci, 2627, 25, cast(int) XPM.private_sub_rgba.toStringz );
-		IupScintillaSendMessage( sci, 2627, 26, cast(int) XPM.protected_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 27, cast(int) XPM.public_sub_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 25, cast(int) XPM.private_sub_rgba.toCString );
+		IupScintillaSendMessage( sci, 2627, 26, cast(int) XPM.protected_sub_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 27, cast(int) XPM.public_sub_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 		
-		IupScintillaSendMessage( sci, 2627, 28, cast(int) XPM.private_fun_rgba.toStringz );
-		IupScintillaSendMessage( sci, 2627, 29, cast(int) XPM.protected_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 30, cast(int) XPM.public_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 28, cast(int) XPM.private_fun_rgba.toCString );
+		IupScintillaSendMessage( sci, 2627, 29, cast(int) XPM.protected_fun_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 30, cast(int) XPM.public_fun_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 		
-		IupScintillaSendMessage( sci, 2627, 31, cast(int) XPM.property_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 32, cast(int) XPM.property_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 31, cast(int) XPM.property_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 32, cast(int) XPM.property_var_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 		
-		IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
-		IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toStringz ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 
 		// BOOKMARK
-		IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toStringz ); // SCI_MARKERDEFINERGBAIMAGE 2626
+		IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toCString ); // SCI_MARKERDEFINERGBAIMAGE 2626
 	}
 }
 
@@ -1479,7 +1479,16 @@ extern(C)
 						AutoComplete.backDefinition();
 						return IUP_IGNORE;
 					}
-					break;						
+					break;
+				/+
+				case "testplugin":
+					if( sk.keyValue == c )
+					{
+						dllHandleClipboardText();
+						return IUP_IGNORE;
+					}
+					break;
+				+/
 					
 				default:
 			}
@@ -1507,7 +1516,7 @@ extern(C)
 		
 		if( _text.length )
 		{
-			scope textCovert = new CstringConvert;
+			scope textCovert = new IupString;
 			
 			if( _text[length-1] == ')' )
 			{

@@ -15,7 +15,7 @@ class CProjectTree
 	import				project, tango.io.device.File, tango.io.stream.Lines;
 	import				tango.core.Thread, parser.autocompletion;
 	
-	CstringConvert[2]	cStrings;
+	IupString[2]	cStrings;
 	/+
 	// Inner Class
 	class ParseThread : Thread
@@ -51,13 +51,13 @@ class CProjectTree
 
 	void createLayout()
 	{
-		cStrings[0] = new CstringConvert( GLOBAL.languageItems["collapse"] );
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["hide"] );
+		cStrings[0] = new IupString( GLOBAL.languageItems["collapse"] );
+		cStrings[1] = new IupString( GLOBAL.languageItems["hide"] );
 		
 		// Outline Toolbar
 		Ihandle* projectButtonCollapse = IupButton( null, null );
 		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse" );
-		IupSetAttribute( projectButtonCollapse, "TIP", cStrings[0].toStringz );
+		IupSetAttribute( projectButtonCollapse, "TIP", cStrings[0].toCString );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* tree = GLOBAL.projectTree.getTreeHandle();
@@ -77,7 +77,7 @@ class CProjectTree
 
 		Ihandle* projectButtonHide = IupButton( null, null );
 		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l" );
-		IupSetAttribute( projectButtonHide, "TIP", cStrings[1].toStringz );
+		IupSetAttribute( projectButtonHide, "TIP", cStrings[1].toCString );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );

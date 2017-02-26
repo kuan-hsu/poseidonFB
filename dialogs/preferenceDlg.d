@@ -10,7 +10,8 @@ private import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath;
 class CPreferenceDialog : CBaseDialog
 {
 	private:
-	Ihandle* textCompilerPath, textDebuggerPath;
+	Ihandle*	textCompilerPath, textDebuggerPath;
+	IupString	_compilersetting, _parserlive, _parsersetting, _autoconvertkeyword, _font, _color, _colorfgbg;
 
 	void createLayout()
 	{
@@ -81,7 +82,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, null );
 
-		scope _compilersetting = new IupString( GLOBAL.languageItems["compilersetting"] );
+		_compilersetting = new IupString( GLOBAL.languageItems["compilersetting"] );
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", _compilersetting.toCString );
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=261x");
@@ -171,7 +172,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* frameLive = IupFrame( hBoxLive2 );
 		IupSetAttributes( frameLive, "SIZE=261x" );
-		scope _parserlive = new IupString( GLOBAL.languageItems["parserlive"] );
+		_parserlive = new IupString( GLOBAL.languageItems["parserlive"] );
 		IupSetAttribute( frameLive, "TITLE", _parserlive.toCString );
 
 
@@ -181,7 +182,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
-		scope _parsersetting = new IupString( GLOBAL.languageItems["parsersetting"] );
+		_parsersetting = new IupString( GLOBAL.languageItems["parsersetting"] );
 		IupSetAttribute( frameParser, "TITLE", _parsersetting.toCString );
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 		IupSetAttribute( frameParser, "SIZE", "275x");
@@ -415,7 +416,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* frameKeywordCase = IupFrame( radioKeywordCase );
 		IupSetAttributes( frameKeywordCase, "SIZE=270,GAP=1" );
-		scope _autoconvertkeyword = new IupString( GLOBAL.languageItems["autoconvertkeyword"] );
+		_autoconvertkeyword = new IupString( GLOBAL.languageItems["autoconvertkeyword"] );
 		IupSetAttribute( frameKeywordCase, "TITLE", _autoconvertkeyword.toCString );
 		
 		
@@ -453,7 +454,7 @@ class CPreferenceDialog : CBaseDialog
 
 
 		Ihandle* frameFont = IupFrame( fontList );
-		scope _font = new IupString( GLOBAL.languageItems["font"] );
+		_font = new IupString( GLOBAL.languageItems["font"] );
 		IupSetAttribute( frameFont, "TITLE", _font.toCString );
 		IupSetAttribute( frameFont, "EXPAND", "YES");
 		
@@ -601,7 +602,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetAttribute( frameColor, "SIZE", "275x" );//IupGetAttribute( frameFont, "SIZE" ) );
-		scope _color = new IupString( GLOBAL.languageItems["color"] );
+		_color = new IupString( GLOBAL.languageItems["color"] );
 		IupSetAttribute( frameColor, "TITLE", _color.toCString );
 
 		
@@ -1049,7 +1050,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetAttribute( frameColor_1, "SIZE", "275x" );//IupGetAttribute( frameFont, "SIZE" ) );
-		scope _colorfgbg = new IupString( GLOBAL.languageItems["colorfgbg"] );
+		_colorfgbg = new IupString( GLOBAL.languageItems["colorfgbg"] );
 		IupSetAttribute( frameColor_1, "TITLE", _colorfgbg.toCString );
 		
 		
@@ -1796,11 +1797,11 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			IupSetAttribute( ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
 			
-			scope cStringDocument = new CstringConvert( GLOBAL.languageItems["applycolor"] );
+			scope cStringDocument = new IupString( GLOBAL.languageItems["applycolor"] );
 			
 			Ihandle* messageDlg = IupMessageDlg();
 			IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=2,BUTTONS=YESNO" );
-			IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+			IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
 			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
 			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 			int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );

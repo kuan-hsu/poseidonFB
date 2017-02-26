@@ -2,53 +2,6 @@
 
 import tango.stdc.stdlib, tango.stdc.string;
 
-
-class CstringConvert
-{
-private:
-	//import tango.stdc.stdlib, tango.stdc.string;
-
-	char* CstringPointer = null;
-
-	void copy( char[] Dstring )
-	{
-		CstringPointer = cast(char*)calloc( 1, Dstring.length + 1 );
-		memcpy( CstringPointer, Dstring.ptr, Dstring.length );
-	}
-
-public:
-	this(){}
-	
-	this( char[] Dstring )
-	{
-		copy( Dstring );
-	}
-
-	~this()
-	{
-		if( CstringPointer != null ) free( CstringPointer );
-	}
-
-	char* convert( char[] Dstring )
-	{
-		if( CstringPointer != null ) free( CstringPointer );
-		copy( Dstring );
-
-		return CstringPointer;
-	}
-
-	char* toStringz()
-	{
-		return toZ;
-	}
-
-	char* toZ()
-	{
-		return CstringPointer;
-	}
-}
-
-
 class IupString
 {
 private:

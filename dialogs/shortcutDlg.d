@@ -193,7 +193,7 @@ extern(C) // Callback for CSingleTextDialog
 			
 			char[] string = Stdout.layout.convert( "{,-30} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[pos].title, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
 
-			scope _cString = new CstringConvert ;
+			scope _cString = new IupString ;
 			IupSetAttribute( shortCutList, _cString.convert( Integer.toString( pos + 1 ) ), GLOBAL.cString.convert( string ) );
 		}
 

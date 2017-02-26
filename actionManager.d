@@ -683,11 +683,11 @@ struct ScintillaAction
 
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
-				scope cStringDocument = new CstringConvert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+				scope cStringDocument = new IupString( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
 				
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
 				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
 				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				//int button = IupAlarm( toStringz( GLOBAL.languageItems["alarm"] ), GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] ), toStringz( GLOBAL.languageItems["yes"] ), toStringz( GLOBAL.languageItems["no"] ), toStringz( GLOBAL.languageItems["cancel"] ) );
@@ -730,11 +730,11 @@ struct ScintillaAction
 				{
 					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 					
-					scope cStringDocument = new CstringConvert( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+					scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
 					
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-					IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+					IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
 					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 					int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
@@ -802,11 +802,11 @@ struct ScintillaAction
 			{
 				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				
-				scope cStringDocument = new CstringConvert( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+				scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
 				
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toStringz );
+				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
 				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
 				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				

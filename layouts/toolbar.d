@@ -21,7 +21,7 @@ class CToolBar
 	Ihandle*			outlineButtonHide, messageButtonHide;
 	Ihandle*[7]			labelSEPARATOR;
 	
-	CstringConvert[20]	cStrings;
+	IupString[20]	cStrings;
 
 	void createToolBar()
 	{
@@ -50,62 +50,62 @@ class CToolBar
 		btnQuickRun = IupButton( null, "QuickRun" );
 
 
-		cStrings[0] = new CstringConvert( GLOBAL.languageItems["caption_new"] );
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["caption_open"] );
-		cStrings[2] = new CstringConvert( GLOBAL.languageItems["sc_save"] );
-		cStrings[3] = new CstringConvert( GLOBAL.languageItems["sc_saveall"] );
-		cStrings[4] = new CstringConvert( GLOBAL.languageItems["sc_undo"] );
-		cStrings[5] = new CstringConvert( GLOBAL.languageItems["sc_redo"] );
+		cStrings[0] = new IupString( GLOBAL.languageItems["caption_new"] );
+		cStrings[1] = new IupString( GLOBAL.languageItems["caption_open"] );
+		cStrings[2] = new IupString( GLOBAL.languageItems["sc_save"] );
+		cStrings[3] = new IupString( GLOBAL.languageItems["sc_saveall"] );
+		cStrings[4] = new IupString( GLOBAL.languageItems["sc_undo"] );
+		cStrings[5] = new IupString( GLOBAL.languageItems["sc_redo"] );
 
 		IupSetAttributes( btnNew, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_newfile" );
 		
-		IupSetAttribute( btnNew, "TIP", cStrings[0].toStringz );
+		IupSetAttribute( btnNew, "TIP", cStrings[0].toCString );
 		IupSetCallback( btnNew, "ACTION", cast(Icallback) &menu.newFile_cb ); // From menu.d
 
 		IupSetAttributes( btnOpen, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_openfile" );
-		IupSetAttribute( btnOpen, "TIP", cStrings[1].toStringz );
+		IupSetAttribute( btnOpen, "TIP", cStrings[1].toCString );
 		IupSetCallback( btnOpen, "ACTION", cast(Icallback) &menu.openFile_cb ); // From menu.d
 
 		IupSetAttributes( btnSave, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_save" );
-		IupSetAttribute( btnSave, "TIP", cStrings[2].toStringz );
+		IupSetAttribute( btnSave, "TIP", cStrings[2].toCString );
 		IupSetCallback( btnSave, "ACTION", cast(Icallback) &menu.saveFile_cb ); // From menu.d
 
 		IupSetAttributes( btnSaveAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_saveall" );
-		IupSetAttribute( btnSaveAll, "TIP", cStrings[3].toStringz );
+		IupSetAttribute( btnSaveAll, "TIP", cStrings[3].toCString );
 		IupSetCallback( btnSaveAll, "ACTION", cast(Icallback) &menu.saveAllFile_cb ); // From menu.d
 
 		IupSetAttributes( btnUndo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_undo" );
-		IupSetAttribute( btnUndo, "TIP", cStrings[4].toStringz );
+		IupSetAttribute( btnUndo, "TIP", cStrings[4].toCString );
 		IupSetCallback( btnUndo, "ACTION", cast(Icallback) &menu.undo_cb ); // From menu.d
 		
 		IupSetAttributes( btnRedo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_redo" );
-		IupSetAttribute( btnRedo, "TIP", cStrings[5].toStringz );
+		IupSetAttribute( btnRedo, "TIP", cStrings[5].toCString );
 		IupSetCallback( btnRedo, "ACTION", cast(Icallback) &menu.redo_cb ); // From menu.d
 		
 
-		cStrings[6] = new CstringConvert( GLOBAL.languageItems["caption_cut"] );
-		cStrings[7] = new CstringConvert( GLOBAL.languageItems["caption_copy"] );
-		cStrings[8] = new CstringConvert( GLOBAL.languageItems["caption_paste"] );
-		cStrings[9] = new CstringConvert( GLOBAL.languageItems["bookmark"] );
-		cStrings[10] = new CstringConvert( GLOBAL.languageItems["bookmarkprev"] );
-		cStrings[11] = new CstringConvert( GLOBAL.languageItems["bookmarknext"] );
-		cStrings[12] = new CstringConvert( GLOBAL.languageItems["bookmarkclear"] );		
+		cStrings[6] = new IupString( GLOBAL.languageItems["caption_cut"] );
+		cStrings[7] = new IupString( GLOBAL.languageItems["caption_copy"] );
+		cStrings[8] = new IupString( GLOBAL.languageItems["caption_paste"] );
+		cStrings[9] = new IupString( GLOBAL.languageItems["bookmark"] );
+		cStrings[10] = new IupString( GLOBAL.languageItems["bookmarkprev"] );
+		cStrings[11] = new IupString( GLOBAL.languageItems["bookmarknext"] );
+		cStrings[12] = new IupString( GLOBAL.languageItems["bookmarkclear"] );		
 		
 		
 		IupSetAttributes( btnCut, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_cut" );
-		IupSetAttribute( btnCut, "TIP", cStrings[6].toStringz );
+		IupSetAttribute( btnCut, "TIP", cStrings[6].toCString );
 		IupSetCallback( btnCut, "ACTION", cast(Icallback) &menu.cut_cb ); // From menu.d
 		
 		IupSetAttributes( btnCopy, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_copy" );
-		IupSetAttribute( btnCopy, "TIP", cStrings[7].toStringz );
+		IupSetAttribute( btnCopy, "TIP", cStrings[7].toCString );
 		IupSetCallback( btnCopy, "ACTION", cast(Icallback) &menu.copy_cb ); // From menu.d
 		
 		IupSetAttributes( btnPaste, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_paste" );
-		IupSetAttribute( btnPaste, "TIP", cStrings[8].toStringz );
+		IupSetAttribute( btnPaste, "TIP", cStrings[8].toCString );
 		IupSetCallback( btnPaste, "ACTION", cast(Icallback) &menu.paste_cb ); // From menu.d
 
 		IupSetAttributes( btnMark, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_mark" );
-		IupSetAttribute( btnMark, "TIP", cStrings[9].toStringz );
+		IupSetAttribute( btnMark, "TIP", cStrings[9].toCString );
 		IupSetCallback( btnMark, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -126,7 +126,7 @@ class CToolBar
 		});
 		
 		IupSetAttributes( btnMarkPrev, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markprev" );
-		IupSetAttribute( btnMarkPrev, "TIP", cStrings[10].toStringz );
+		IupSetAttribute( btnMarkPrev, "TIP", cStrings[10].toCString );
 		IupSetCallback( btnMarkPrev, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -154,7 +154,7 @@ class CToolBar
 		});
 		
 		IupSetAttributes( btnMarkNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_marknext" );
-		IupSetAttribute( btnMarkNext, "TIP", cStrings[11].toStringz );
+		IupSetAttribute( btnMarkNext, "TIP", cStrings[11].toCString );
 		IupSetCallback( btnMarkNext, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -181,7 +181,7 @@ class CToolBar
 		});
 		
 		IupSetAttributes( btnMarkClean, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markclear" );
-		IupSetAttribute( btnMarkClean, "TIP", cStrings[12].toStringz );
+		IupSetAttribute( btnMarkClean, "TIP", cStrings[12].toCString );
 		IupSetCallback( btnMarkClean, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -189,34 +189,34 @@ class CToolBar
 		});
 
 
-		cStrings[13] = new CstringConvert( GLOBAL.languageItems["sc_compile"] );
-		cStrings[14] = new CstringConvert( GLOBAL.languageItems["sc_compilerun"] );
-		cStrings[15] = new CstringConvert( GLOBAL.languageItems["sc_run"] );
-		cStrings[16] = new CstringConvert( GLOBAL.languageItems["sc_build"] );
-		cStrings[17] = new CstringConvert( GLOBAL.languageItems["sc_quickrun"] );
-		cStrings[18] = new CstringConvert( GLOBAL.languageItems["sc_leftwindow"] );
-		cStrings[19] = new CstringConvert( GLOBAL.languageItems["sc_bottomwindow"] );	
+		cStrings[13] = new IupString( GLOBAL.languageItems["sc_compile"] );
+		cStrings[14] = new IupString( GLOBAL.languageItems["sc_compilerun"] );
+		cStrings[15] = new IupString( GLOBAL.languageItems["sc_run"] );
+		cStrings[16] = new IupString( GLOBAL.languageItems["sc_build"] );
+		cStrings[17] = new IupString( GLOBAL.languageItems["sc_quickrun"] );
+		cStrings[18] = new IupString( GLOBAL.languageItems["sc_leftwindow"] );
+		cStrings[19] = new IupString( GLOBAL.languageItems["sc_bottomwindow"] );	
 
 
 
 		IupSetAttributes( btnCompile, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_compile" );
-		IupSetAttribute( btnCompile, "TIP", cStrings[13].toStringz );
+		IupSetAttribute( btnCompile, "TIP", cStrings[13].toCString );
 		IupSetCallback( btnCompile, "BUTTON_CB", cast(Icallback) &compile_button_cb );
 
 		IupSetAttributes( btnBuildRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_buildrun" );
-		IupSetAttribute( btnBuildRun, "TIP", cStrings[14].toStringz );
+		IupSetAttribute( btnBuildRun, "TIP", cStrings[14].toCString );
 		IupSetCallback( btnBuildRun, "BUTTON_CB", cast(Icallback) &buildrun_button_cb );
 
 		IupSetAttributes( btnRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_run" );
-		IupSetAttribute( btnRun, "TIP", cStrings[15].toStringz );
+		IupSetAttribute( btnRun, "TIP", cStrings[15].toCString );
 		IupSetCallback( btnRun, "BUTTON_CB", cast(Icallback) &run_button_cb );
 
 		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild" );
-		IupSetAttribute( btnBuildAll, "TIP", cStrings[16].toStringz );
+		IupSetAttribute( btnBuildAll, "TIP", cStrings[16].toCString );
 		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
 
 		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun" );
-		IupSetAttribute( btnQuickRun, "TIP", cStrings[17].toStringz );
+		IupSetAttribute( btnQuickRun, "TIP", cStrings[17].toCString );
 		IupSetCallback( btnQuickRun, "BUTTON_CB", cast(Icallback) &quickRun_button_cb );
 
 
@@ -236,7 +236,7 @@ class CToolBar
 		
 		outlineButtonHide = IupToggle( null, "Hide" );
 		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_r,IMPRESS=icon_shift_l" );
-		IupSetAttribute( outlineButtonHide, "TIP", cStrings[18].toStringz );
+		IupSetAttribute( outlineButtonHide, "TIP", cStrings[18].toCString );
 		IupSetHandle( "outlineButtonHide", outlineButtonHide );
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -245,7 +245,7 @@ class CToolBar
 
 		messageButtonHide = IupToggle( null, "HideMessage" );
 		IupSetAttributes( messageButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_t,IMPRESS=icon_shift_b" );
-		IupSetAttribute( messageButtonHide, "TIP", cStrings[19].toStringz );
+		IupSetAttribute( messageButtonHide, "TIP", cStrings[19].toCString );
 		IupSetHandle( "messageButtonHide", messageButtonHide );
 		IupSetCallback( messageButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{

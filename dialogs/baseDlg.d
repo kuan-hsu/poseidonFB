@@ -11,18 +11,18 @@ class CBaseDialog
 	
 	Ihandle*			_dlg;
 	Ihandle*			btnOK, btnCANCEL;//, btnAPPLY;
-	CstringConvert[3]	cStrings;
+	IupString[3]		cStrings;
 	
 	Ihandle* createDlgButton()
 	{
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["ok"] );
-		cStrings[2] = new CstringConvert( GLOBAL.languageItems["cancel"] );
+		cStrings[1] = new IupString( GLOBAL.languageItems["ok"] );
+		cStrings[2] = new IupString( GLOBAL.languageItems["cancel"] );
 		
-		btnOK = IupButton( cStrings[1].toStringz, null );
+		btnOK = IupButton( cStrings[1].toCString, null );
 		IupSetHandle( "btnOK", btnOK );
 		IupSetAttributes( btnOK, "SIZE=40x20");//,IMAGE=IUP_ActionOk" );
 		
-		btnCANCEL = IupButton( cStrings[2].toStringz, null );
+		btnCANCEL = IupButton( cStrings[2].toCString, null );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
 		IupSetAttributes( btnCANCEL, "SIZE=40x20" );// ,IMAGE=IUP_ActionCancel
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
@@ -49,8 +49,8 @@ class CBaseDialog
 	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
 	{
 		_dlg = IupDialog( null );
-		cStrings[0] = new CstringConvert( title );
-		IupSetAttribute( _dlg, "TITLE", cStrings[0].toStringz );
+		cStrings[0] = new IupString( title );
+		IupSetAttribute( _dlg, "TITLE", cStrings[0].toCString );
 
 		char[] size = Integer.toString( w ) ~ "x" ~ Integer.toString( h );
 		if( w < 0 || h < 0 ) IupSetAttribute( _dlg, "RASTERSIZE", "NULL" ); else IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );

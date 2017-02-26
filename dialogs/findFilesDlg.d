@@ -17,40 +17,40 @@ class CFindInFilesDialog : CBaseDialog
 	Ihandle*			listFind, listReplace;
 	Ihandle*			labelStatus;
 	
-	CstringConvert[14]	cStrings;
+	IupString[14]	cStrings;
 
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton();
 		IupSetAttribute( btnOK, "VISIBLE", "NO" );
 
-		cStrings[0] = new CstringConvert( GLOBAL.languageItems["findwhat"] ~ ":" );
-		cStrings[1] = new CstringConvert( GLOBAL.languageItems["replacewith"] ~ ":" );
+		cStrings[0] = new IupString( GLOBAL.languageItems["findwhat"] ~ ":" );
+		cStrings[1] = new IupString( GLOBAL.languageItems["replacewith"] ~ ":" );
 
 		listFind = IupList( null );
 		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
 		IupSetHandle( "CFindInFilesDialog_listFind", listFind );
-		Ihandle* hBox00 = IupHbox( IupLabel( cStrings[0].toStringz ), listFind, null );
+		Ihandle* hBox00 = IupHbox( IupLabel( cStrings[0].toCString ), listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 
 		listReplace = IupList( null );
 		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
 		IupSetHandle( "CFindInFilesDialog_listReplace", listReplace );
-		Ihandle* hBox01 = IupHbox( IupLabel( cStrings[1].toStringz ), listReplace, null );
+		Ihandle* hBox01 = IupHbox( IupLabel( cStrings[1].toCString ), listReplace, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
 
 
 		// Options
-		cStrings[2] = new CstringConvert( GLOBAL.languageItems["casesensitive"] );
-		cStrings[3] = new CstringConvert( GLOBAL.languageItems["wholeword"] );
-		cStrings[13] = new CstringConvert( GLOBAL.languageItems["options"] );
+		cStrings[2] = new IupString( GLOBAL.languageItems["casesensitive"] );
+		cStrings[3] = new IupString( GLOBAL.languageItems["wholeword"] );
+		cStrings[13] = new IupString( GLOBAL.languageItems["options"] );
 		
-		Ihandle* toggleCaseSensitive = IupToggle( cStrings[2].toStringz, null );
+		Ihandle* toggleCaseSensitive = IupToggle( cStrings[2].toCString, null );
 		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES" );
 		IupSetHandle( "CFindInFilesDialog_toggleCaseSensitive", toggleCaseSensitive );
 		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleAction_cb );
 
-		Ihandle* toggleWholeWord = IupToggle( cStrings[3].toStringz, null );
+		Ihandle* toggleWholeWord = IupToggle( cStrings[3].toCString, null );
 		IupSetAttributes( toggleWholeWord, "VALUE=ON,EXPAND=YES" );
 		IupSetHandle( "CFindInFilesDialog_toggleWholeWord", toggleWholeWord );
 		IupSetCallback( toggleWholeWord, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleAction_cb );
@@ -59,30 +59,30 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetAttributes( hBoxOption, "ALIGNMENT=ACENTER,EXPAND=YES,MARGIN=0x0,GAP=0" );
 		Ihandle* frameOption = IupFrame( hBoxOption );
 		IupSetAttributes( frameOption, "MARGIN=0x0,GAP=0,SIZE=0x20");
-		IupSetAttribute( frameOption, "TITLE", cStrings[13].toStringz );
+		IupSetAttribute( frameOption, "TITLE", cStrings[13].toCString );
 
 
 		// Scope
-		cStrings[4] = new CstringConvert( GLOBAL.languageItems["document"] );
-		cStrings[5] = new CstringConvert( GLOBAL.languageItems["alldocument"] );		
-		cStrings[6] = new CstringConvert( GLOBAL.languageItems["prj"] );
-		cStrings[7] = new CstringConvert( GLOBAL.languageItems["allproject"] );		
-		cStrings[8] = new CstringConvert( GLOBAL.languageItems["scope"] );		
+		cStrings[4] = new IupString( GLOBAL.languageItems["document"] );
+		cStrings[5] = new IupString( GLOBAL.languageItems["alldocument"] );		
+		cStrings[6] = new IupString( GLOBAL.languageItems["prj"] );
+		cStrings[7] = new IupString( GLOBAL.languageItems["allproject"] );		
+		cStrings[8] = new IupString( GLOBAL.languageItems["scope"] );		
 		
-		Ihandle* toggleDocument = IupToggle( cStrings[4].toStringz, null );
+		Ihandle* toggleDocument = IupToggle( cStrings[4].toCString, null );
 		IupSetHandle( "CFindInFilesDialog_toggleDocument", toggleDocument );
 		IupSetCallback( toggleDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 		
-		Ihandle* toggleAllDocument = IupToggle( cStrings[5].toStringz, null );
+		Ihandle* toggleAllDocument = IupToggle( cStrings[5].toCString, null );
 		IupSetHandle( "CFindInFilesDialog_toggleAllDocument", toggleAllDocument );
 		IupSetCallback( toggleAllDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 		
-		Ihandle* togglePrj = IupToggle( cStrings[6].toStringz, null );
+		Ihandle* togglePrj = IupToggle( cStrings[6].toCString, null );
 		IupSetAttributes( togglePrj, "VALUE=ON");
 		IupSetHandle( "CFindInFilesDialog_togglePrj", togglePrj );
 		IupSetCallback( togglePrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 
-		Ihandle* toggleAllPrj = IupToggle( cStrings[7].toStringz, null );
+		Ihandle* toggleAllPrj = IupToggle( cStrings[7].toCString, null );
 		IupSetHandle( "CFindInFilesDialog_toggletoggleAllPrj", toggleAllPrj );
 		IupSetCallback( toggleAllPrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
 
@@ -91,32 +91,32 @@ class CFindInFilesDialog : CBaseDialog
 		//IupSetAttributes( vBoxScope, "" );
 		Ihandle* radioScope = IupRadio( vBoxScope );
 		Ihandle* frameScope = IupFrame( radioScope );
-		IupSetAttribute( frameScope, "TITLE", cStrings[8].toStringz );		
+		IupSetAttribute( frameScope, "TITLE", cStrings[8].toCString );		
 
 
 		// Buttons
-		cStrings[9] = new CstringConvert( GLOBAL.languageItems["findall"] );
-		cStrings[10] = new CstringConvert( GLOBAL.languageItems["replaceall"] );		
-		cStrings[11] = new CstringConvert( GLOBAL.languageItems["countall"] );
-		cStrings[12] = new CstringConvert( GLOBAL.languageItems["bookmarkall"] );		
+		cStrings[9] = new IupString( GLOBAL.languageItems["findall"] );
+		cStrings[10] = new IupString( GLOBAL.languageItems["replaceall"] );		
+		cStrings[11] = new IupString( GLOBAL.languageItems["countall"] );
+		cStrings[12] = new IupString( GLOBAL.languageItems["bookmarkall"] );		
 		
-		Ihandle* btnFindAll = IupButton( cStrings[9].toStringz, null );
+		Ihandle* btnFindAll = IupButton( cStrings[9].toCString, null );
 		IupSetHandle( "CFindInFilesDialog_btnFindAll", btnFindAll );
 		IupSetAttributes( btnFindAll, "EXPAND=YES" );
 		IupSetCallback( btnFindAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
 		
-		Ihandle* btnReplaceAll = IupButton( cStrings[10].toStringz, null );
+		Ihandle* btnReplaceAll = IupButton( cStrings[10].toCString, null );
 		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", btnReplaceAll );
 		IupSetAttributes( btnReplaceAll, "EXPAND=YES" );
 		//IupSetAttribute( btnReplaceAll, "ACTIVE", "NO" );
 		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
 		
-		Ihandle* btnCountAll = IupButton( cStrings[11].toStringz, null );
+		Ihandle* btnCountAll = IupButton( cStrings[11].toCString, null );
 		IupSetHandle( "CFindInFilesDialog_btnCountAll", btnCountAll );
 		IupSetAttributes( btnCountAll, "EXPAND=YES" );
 		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
 		
-		Ihandle* btnMarkAll = IupButton( cStrings[12].toStringz, null );
+		Ihandle* btnMarkAll = IupButton( cStrings[12].toCString, null );
 		IupSetHandle( "CFindInFilesDialog_btnMarkAll", btnMarkAll );
 		IupSetAttributes( btnMarkAll, "EXPAND=YES" );
 		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );

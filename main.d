@@ -9,6 +9,7 @@ import menu, scintilla, actionManager;
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
 
+//import tango.sys.SharedLib;
 
 version(Windows)
 {
@@ -90,8 +91,6 @@ version(Windows)
 }
 +/
 
-
-
 void main( char[][] args )
 {
 	/+
@@ -113,6 +112,37 @@ void main( char[][] args )
 		*/
 	}
 	+/
+	/+
+	SharedLib lib = SharedLib.load(`sancho2.dll` );
+	try
+	{
+        //Stdout("Library successfully loaded").newline;
+        void* ptr = lib.getSymbol("HandleClipboardText");
+        if( ptr )
+		{
+            //Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
+            
+            // binding function address from DLL to our function pointer
+            void **point = cast(void **)&dllHandleClipboardText;
+            *point = ptr;
+            
+            // using our function
+            //dllprint();
+			Stdout("DONE").newline;
+        }
+		else
+		{
+			Stdout("Symbol not found").newline;
+            //Trace.formatln("Symbol dllprint not found");
+        }
+    }
+	catch( Exception e )
+	{
+		Stdout(e.toString).newline;
+        //Trace.formatln("Could not load the library");
+    }	
+	+/
+	
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
 		Stdout( "IUP open error!!!" ).newline;
@@ -248,7 +278,8 @@ void main( char[][] args )
 	//IUP main Loop
 	IupMainLoop();
 	IupClose();
-
+	
+	//lib.unload();
 	/*
 	version( Windows )
 	{
