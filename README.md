@@ -26,7 +26,7 @@ Linux mint18 x64:
 ![linux64.png](https://bitbucket.org/repo/j5rjj4/images/559348986-linux64.png)
 
 ## Install ##
-Go to **Downloads** https://bitbucket.org/KuanHsu/poseidonfb/downloads to select file to download.
+Go to **Downloads** https://bitbucket.org/KuanHsu/poseidonfb/downloads/ to select file to download.
 
 **Win:**
 
