@@ -13,22 +13,18 @@ class CFileList
 	private:
 	Ihandle*			layoutHandle, tree;
 	int					fullPathState;
-	IupString[2]	cStrings;
 
 	void createLayout()
 	{
-		cStrings[0] = new IupString( GLOBAL.languageItems["fullpath"] );
-		cStrings[1] = new IupString( GLOBAL.languageItems["hide"] );
-		
 		// Outline Toolbar
 		Ihandle* filelistButtonFilename = IupButton( null, null );
 		IupSetAttributes( filelistButtonFilename, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_p" );
-		IupSetAttribute( filelistButtonFilename, "TIP", cStrings[0].toCString );
+		IupSetAttribute( filelistButtonFilename, "TIP", GLOBAL.languageItems["fullpath"].toCString );
 		IupSetCallback( filelistButtonFilename, "ACTION", cast(Icallback) &fileList_Filename_ACTION );
 
 		Ihandle* filelistButtonHide = IupButton( null, null );
 		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_b" );
-		IupSetAttribute( filelistButtonHide, "TIP", cStrings[1].toCString );
+		IupSetAttribute( filelistButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( filelistButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
@@ -37,7 +33,7 @@ class CFileList
 		Ihandle* filelistToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( filelistToolbarTitleImage, "IMAGE=icon_filelist,ALIGNMENT=ALEFT:ACENTER" );
 
-		Ihandle* filelistToolbarTitle = IupLabel( toStringz( GLOBAL.languageItems["filelist"] ) );
+		Ihandle* filelistToolbarTitle = IupLabel( GLOBAL.languageItems["filelist"].toCString() );
 		IupSetAttribute( filelistToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );
 
 		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, filelistToolbarTitle, IupFill, filelistButtonFilename, filelistButtonHide, null );

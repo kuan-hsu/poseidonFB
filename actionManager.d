@@ -358,7 +358,7 @@ struct DocumentTabAction
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
 				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
 			}
 		}
 
@@ -488,7 +488,7 @@ struct ScintillaAction
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
 				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
 			}			
 
 			return true;
@@ -528,7 +528,7 @@ struct ScintillaAction
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
 				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
 			}			
 			
 			// Parser
@@ -683,12 +683,12 @@ struct ScintillaAction
 
 			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
 			{
-				scope cStringDocument = new IupString( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+				scope cStringDocument = new IupString( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 				
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
 				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
 				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				//int button = IupAlarm( toStringz( GLOBAL.languageItems["alarm"] ), GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] ), toStringz( GLOBAL.languageItems["yes"] ), toStringz( GLOBAL.languageItems["no"] ), toStringz( GLOBAL.languageItems["cancel"] ) );
 				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
@@ -730,12 +730,12 @@ struct ScintillaAction
 				{
 					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 					
-					scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+					scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 					
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
 					IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
+					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 					int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
 					//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
@@ -802,12 +802,12 @@ struct ScintillaAction
 			{
 				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				
-				scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"] );
+				scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 				
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
 				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["quest"] ) );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
 				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
 				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
 				//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
@@ -905,7 +905,7 @@ struct ScintillaAction
 
 		try
 		{
-			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"] ~ "...",  GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...",  GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )
@@ -1115,7 +1115,7 @@ struct ScintillaAction
 				IupDestroy( IupGetChild( recentFile_ih, i ) );
 			}
 
-			Ihandle* _clearRecentFiles = IupItem( toStringz( GLOBAL.languageItems["clearall"] ), null );
+			Ihandle* _clearRecentFiles = IupItem( GLOBAL.languageItems["clearall"].toCString, null );
 			IupSetAttribute( _clearRecentFiles, "IMAGE", "icon_deleteall" );
 			IupSetCallback( _clearRecentFiles, "ACTION", cast(Icallback) &menu.submenuRecentFilesClear_click_cb );
 			IupInsert( recentFile_ih, null, _clearRecentFiles );

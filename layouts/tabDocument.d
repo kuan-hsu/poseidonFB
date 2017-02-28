@@ -69,11 +69,11 @@ extern(C)
 		
 		actionManager.DocumentTabAction.tabChangePOS( ih, pos );
 
-		Ihandle* _save = IupItem( toStringz( GLOBAL.languageItems["save"] ), null );
+		Ihandle* _save = IupItem( GLOBAL.languageItems["save"].toCString, null );
 		IupSetAttribute( _save, "IMAGE", "icon_save" );
 		IupSetCallback( _save, "ACTION", cast(Icallback) &menu.saveFile_cb ); // from menu.d
 
-		Ihandle* _close = IupItem( toStringz( GLOBAL.languageItems["close"] ), null );
+		Ihandle* _close = IupItem( GLOBAL.languageItems["close"].toCString, null );
 		IupSetAttribute( _close, "IMAGE", "icon_delete" );
 		IupSetCallback( _close, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -81,7 +81,7 @@ extern(C)
 			if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
 		});
 
-		Ihandle* _closeothers = IupItem( toStringz( GLOBAL.languageItems["closeothers"] ), null );
+		Ihandle* _closeothers = IupItem( GLOBAL.languageItems["closeothers"].toCString, null );
 		IupSetAttribute( _closeothers, "IMAGE", "icon_deleteothers" );
 		IupSetCallback( _closeothers, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -89,7 +89,7 @@ extern(C)
 			if( cSci !is null )	actionManager.ScintillaAction.closeOthersDocument( cSci.getFullPath() );
 		});
 
-		Ihandle* _closeall = IupItem( toStringz( GLOBAL.languageItems["closeall"] ), null );
+		Ihandle* _closeall = IupItem( GLOBAL.languageItems["closeall"].toCString, null );
 		IupSetAttribute( _closeall, "IMAGE", "icon_deleteall" );
 		IupSetCallback( _closeall, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{

@@ -27,11 +27,11 @@ class CShortCutDialog : CBaseDialog
 			}
 		}
 
-		Ihandle* label0 = IupLabel( toStringz( GLOBAL.languageItems["shortcutname"] ~ ": " ~ GLOBAL.shortKeys[item-1].name ) );
+		Ihandle* label0 = IupLabel( toStringz( GLOBAL.languageItems["shortcutname"].toDString() ~ ": " ~ GLOBAL.shortKeys[item-1].name ) );
 		IupSetHandle( "labelKeyName", label0 );
 
 		
-		Ihandle* label1 = IupLabel( toStringz( GLOBAL.languageItems["shortcutkey"] ~ ": " ~ shortKeyValue ) );
+		Ihandle* label1 = IupLabel( toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ": " ~ shortKeyValue ) );
 
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
@@ -80,7 +80,7 @@ class CShortCutDialog : CBaseDialog
 	public:
 	this( int w, int h, int item, char[] listText, bool bResize = false, char[] parent = null )
 	{
-		super( w, h, GLOBAL.languageItems["shortcut"], bResize, parent );
+		super( w, h, GLOBAL.languageItems["shortcut"].toDString(), bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
@@ -134,7 +134,7 @@ extern(C) // Callback for CSingleTextDialog
 		{
 			if( sk.keyValue == value )
 			{
-				IupMessage( "Alarm", toStringz( GLOBAL.languageItems["samekey"] ~ " \"" ~ sk.name ~ "\"" ) );
+				IupMessage( "Alarm", toStringz( GLOBAL.languageItems["samekey"].toDString() ~ " \"" ~ sk.name ~ "\"" ) );
 				return IUP_CONTINUE;
 			}
 		}

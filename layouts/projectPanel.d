@@ -15,7 +15,6 @@ class CProjectTree
 	import				project, tango.io.device.File, tango.io.stream.Lines;
 	import				tango.core.Thread, parser.autocompletion;
 	
-	IupString[2]	cStrings;
 	/+
 	// Inner Class
 	class ParseThread : Thread
@@ -51,13 +50,10 @@ class CProjectTree
 
 	void createLayout()
 	{
-		cStrings[0] = new IupString( GLOBAL.languageItems["collapse"] );
-		cStrings[1] = new IupString( GLOBAL.languageItems["hide"] );
-		
 		// Outline Toolbar
 		Ihandle* projectButtonCollapse = IupButton( null, null );
 		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse" );
-		IupSetAttribute( projectButtonCollapse, "TIP", cStrings[0].toCString );
+		IupSetAttribute( projectButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* tree = GLOBAL.projectTree.getTreeHandle();
@@ -77,7 +73,7 @@ class CProjectTree
 
 		Ihandle* projectButtonHide = IupButton( null, null );
 		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l" );
-		IupSetAttribute( projectButtonHide, "TIP", cStrings[1].toCString );
+		IupSetAttribute( projectButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
@@ -265,7 +261,7 @@ class CProjectTree
 
 		// Recent Projects
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
-		GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ GLOBAL.projectManager[setupDir].name );
+		GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[setupDir].name );
 		//IupSetInt( GLOBAL.fileListSplit, "VALUE", IupGetInt( GLOBAL.fileListSplit, "VALUE" ) + 12 );
 	}
 
@@ -304,7 +300,7 @@ class CProjectTree
 	{
 		if( !setupDir.length )
 		{
-			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_openprj"] ~ "...", null, "DIR" );
+			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_openprj"].toDString ~ "...", null, "DIR" );
 			setupDir = fileSelectDlg.getFileName();
 		}
 
@@ -316,8 +312,8 @@ class CProjectTree
 		{
 			Ihandle* messageDlg = IupMessageDlg();
 			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems["opened"] ) );
-			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString ) );
+			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
 			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
 			return true;
 		}
@@ -338,8 +334,8 @@ class CProjectTree
 				GLOBAL.projectManager.remove( setupDir );
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-				IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems[".poseidonbroken"] ) );
-				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems[".poseidonbroken"].toCString );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
 				return false;
 			}
@@ -350,8 +346,8 @@ class CProjectTree
 		{
 			Ihandle* messageDlg = IupMessageDlg();
 			IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"] ) );
-			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString ) );
+			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
 			return false;
 		}
@@ -369,7 +365,7 @@ class CProjectTree
 
 	bool importFbEditProject()
 	{
-		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"] ~ "...",  GLOBAL.languageItems["fbeditfile"] ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|" );
+		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"].toDString() ~ "...",  GLOBAL.languageItems["fbeditfile"].toDString() ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|" );
 		char[] fbpFullPath = fileSelectDlg.getFileName();
 
 		if( !fbpFullPath.length ) return false;
@@ -384,8 +380,8 @@ class CProjectTree
 		{
 			Ihandle* messageDlg = IupMessageDlg();
 			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ _dir ~ "\"\n" ~ GLOBAL.languageItems["opened"] ) );
-			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ _dir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString() ) );
+			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
 			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );				
 			return false;
 		}
@@ -396,8 +392,8 @@ class CProjectTree
 		{
 			Ihandle* messageDlg = IupMessageDlg();
 			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONDEFAULT=2,BUTTONS=YESNO" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["continueimport"] ) );
-			IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["continueimport"].toCString );
+			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
 			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 
 			if( IupGetInt( messageDlg, "BUTTONRESPONSE") == 2 ) return false;
@@ -570,7 +566,7 @@ class CProjectTree
 				IupDestroy( IupGetChild( recentPrj_ih, i ) );
 			}
 
-			Ihandle* _clearRecentPrjs = IupItem( toStringz( GLOBAL.languageItems["clearall"] ), null );
+			Ihandle* _clearRecentPrjs = IupItem( GLOBAL.languageItems["clearall"].toCString, null );
 			IupSetAttribute(_clearRecentPrjs, "IMAGE", "icon_clearall");
 			IupSetCallback( _clearRecentPrjs, "ACTION", cast(Icallback) &menu.submenuRecentPrjsClear_click_cb );
 			IupInsert( recentPrj_ih, null, _clearRecentPrjs );
@@ -615,7 +611,7 @@ extern(C)
 			{
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
 				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"] ~ ": " ~ _prjName.toDString );
+				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
 			}
 			else
 			{
@@ -680,11 +676,11 @@ extern(C)
 		if( nodeKind == "LEAF" ) // On File(*.bas, *.bi) Node
 		{
 			Ihandle* popupMenu = IupMenu( 
-										IupItem( toStringz( GLOBAL.languageItems["open"] ), "CProjectTree_open" ),
-										IupItem( toStringz( GLOBAL.languageItems["removefromprj"] ), "CProjectTree_remove" ),
+										IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
+										IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
 										IupSeparator(),
-										IupItem( toStringz( GLOBAL.languageItems["delete"] ), "CProjectTree_delete" ),
-										IupItem( toStringz( GLOBAL.languageItems["rename"] ), "CProjectTree_rename" ),
+										IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
+										IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
 										null
 									);
 
@@ -706,15 +702,15 @@ extern(C)
 		switch( depth )
 		{
 			case 0:
-				Ihandle* itemNewProject = IupItem( toStringz( GLOBAL.languageItems["newprj"] ), null );
+				Ihandle* itemNewProject = IupItem( GLOBAL.languageItems["newprj"].toCString, null );
 				IupSetAttribute(itemNewProject, "IMAGE", "icon_newprj");
 				IupSetCallback( itemNewProject, "ACTION", cast(Icallback) &menu.newProject_cb ); // From menu.d
 				
-				Ihandle* itemOpenProject = IupItem( toStringz( GLOBAL.languageItems["openprj"] ), null );
+				Ihandle* itemOpenProject = IupItem( GLOBAL.languageItems["openprj"].toCString, null );
 				IupSetAttribute(itemOpenProject, "IMAGE", "icon_openprj");
 				IupSetCallback( itemOpenProject, "ACTION", cast(Icallback) &menu.openProject_cb ); // From menu.d
 
-				Ihandle* itemCloseAllProject = IupItem( toStringz( GLOBAL.languageItems["closeallprj"] ), null );
+				Ihandle* itemCloseAllProject = IupItem( GLOBAL.languageItems["closeallprj"].toCString, null );
 				IupSetAttribute(itemCloseAllProject, "IMAGE", "icon_clearall");
 				IupSetCallback( itemCloseAllProject, "ACTION", cast(Icallback) &menu.closeAllProject_cb ); // From menu.d
 				
@@ -731,15 +727,15 @@ extern(C)
 				break;
 
 			case 1:		// On Project Name Node
-				Ihandle* itemProperty = IupItem( toStringz( GLOBAL.languageItems["properties"] ), null );
+				Ihandle* itemProperty = IupItem( GLOBAL.languageItems["properties"].toCString, null );
 				IupSetAttribute(itemProperty, "IMAGE", "icon_properties");
 				IupSetCallback( itemProperty, "ACTION", cast(Icallback) &menu.projectProperties_cb ); // From menu.d
 				
-				Ihandle* itemClose = IupItem( toStringz( GLOBAL.languageItems["closeprj"] ), null );
+				Ihandle* itemClose = IupItem( GLOBAL.languageItems["closeprj"].toCString, null );
 				IupSetAttribute(itemClose, "IMAGE", "icon_clear");
 				IupSetCallback( itemClose, "ACTION", cast(Icallback) &menu.closeProject_cb );  // From menu.d
 
-				Ihandle* itemExplorer = IupItem( toStringz( GLOBAL.languageItems["openinexplorer"] ), null );
+				Ihandle* itemExplorer = IupItem( GLOBAL.languageItems["openinexplorer"].toCString, null );
 				IupSetCallback( itemExplorer, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					char[]	fullPath = actionManager.ProjectAction.getActiveProjectName();
@@ -780,16 +776,16 @@ extern(C)
 					if( s == "FIXED" ) return IUP_DEFAULT;
 				}
 				
-				Ihandle* itemNewFile = IupItem( toStringz( GLOBAL.languageItems["newfile"] ), null );
+				Ihandle* itemNewFile = IupItem( GLOBAL.languageItems["newfile"].toCString, null );
 				IupSetCallback( itemNewFile, "ACTION", cast(Icallback) &CProjectTree_NewFile_cb );
-				Ihandle* itemNewFolder = IupItem( toStringz( GLOBAL.languageItems["newfolder"] ), null );
+				Ihandle* itemNewFolder = IupItem( GLOBAL.languageItems["newfolder"].toCString, null );
 				IupSetCallback( itemNewFolder, "ACTION", cast(Icallback) &CProjectTree_NewFolder_cb );
 				
 				Ihandle* itemCreateNew = IupMenu( itemNewFile, itemNewFolder, null );
 		
-				Ihandle* itemNew = IupSubmenu( toStringz( GLOBAL.languageItems["new"] ), itemCreateNew );
+				Ihandle* itemNew = IupSubmenu( GLOBAL.languageItems["new"].toCString, itemCreateNew );
 				
-				Ihandle* itemAdd = IupItem( toStringz( GLOBAL.languageItems["addfile"] ), null );
+				Ihandle* itemAdd = IupItem( GLOBAL.languageItems["addfile"].toCString, null );
 				IupSetCallback( itemAdd, "ACTION", &CProjectTree_AddFile_cb );
 
 				Ihandle* popupMenu;
@@ -818,7 +814,7 @@ extern(C)
 	private int CProjectTree_NewFile_cb( Ihandle* ih )
 	{
 		// Open Dialog Window
-		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfile"], GLOBAL.languageItems["filename"] ~ ":", "120x", null, false, "MAIN_DIALOG", "icon_newfile" );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfile"].toDString(), GLOBAL.languageItems["filename"].toDString() ~ ":", "120x", null, false, "MAIN_DIALOG", "icon_newfile" );
 		char[] fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )
@@ -859,8 +855,8 @@ extern(C)
 			{
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fileName ~ "\"\n" ~ GLOBAL.languageItems["existed"] ) );
-				IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fileName ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString() ) );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
 				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
 				return IUP_DEFAULT;
 			}
@@ -873,8 +869,8 @@ extern(C)
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
@@ -884,8 +880,8 @@ extern(C)
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
@@ -895,8 +891,8 @@ extern(C)
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
@@ -938,7 +934,7 @@ extern(C)
 
 	private int CProjectTree_NewFolder_cb( Ihandle* ih )
 	{
-		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfolder"], GLOBAL.languageItems["foldername"] ~ ":", "120x", null, false );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfolder"].toDString(), GLOBAL.languageItems["foldername"].toDString() ~ ":", "120x", null, false );
 		char[] folderName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( folderName.length )
@@ -972,12 +968,12 @@ extern(C)
 
 			switch( prjFilesFolderName )
 			{
-				case "Sources":		filter = GLOBAL.languageItems["basfile"] ~ "|*.bas|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|"; break;
-				case "Includes":	filter = GLOBAL.languageItems["bifile"] ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"] ~ "|*.*|"; break;
-				default:			filter = GLOBAL.languageItems["allfile"] ~ "|*.*|"; break;
+				case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+				case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+				default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
 			}
 			
-			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["addfile"] ~ "...", filter, "OPEN", "YES" );
+			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["addfile"].toDString() ~ "...", filter, "OPEN", "YES" );
 			//char[] fullPath = fileSecectDlg.getFileName();
 			
 			foreach( char[] fullPath; fileSecectDlg.getFilesName() )
@@ -989,8 +985,8 @@ extern(C)
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["existed"] ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+						IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString() ) );
+						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"].toDString() ) );
 						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
 						return IUP_DEFAULT;
 					}
@@ -1016,8 +1012,8 @@ extern(C)
 							{
 								Ihandle* messageDlg = IupMessageDlg();
 								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-								IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
-								IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 								return IUP_DEFAULT;
 							}
@@ -1031,8 +1027,8 @@ extern(C)
 							{
 								Ihandle* messageDlg = IupMessageDlg();
 								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-								IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
-								IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 								return IUP_DEFAULT;
 							}
@@ -1046,8 +1042,8 @@ extern(C)
 							{
 								Ihandle* messageDlg = IupMessageDlg();
 								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-								IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["wrongext"] ) );
-								IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 								return IUP_DEFAULT;
 							}
@@ -1190,8 +1186,8 @@ extern(C)
 
 		Ihandle* messageDlg = IupMessageDlg();
 		IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONS=OKCANCEL" );
-		IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["suredelete"] ) );
-		IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+		IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["suredelete"].toCString );
+		IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
 		IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 1 )
@@ -1217,7 +1213,7 @@ extern(C)
 
 		char[] oldExt = fp.ext().dup;
 
-		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["rename"], GLOBAL.languageItems["filename"] ~":", "120x", fp.name(), false );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["rename"].toDString(), GLOBAL.languageItems["filename"].toDString() ~":", "120x", fp.name(), false );
 		char[] newFileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( newFileName.length )

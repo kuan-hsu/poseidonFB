@@ -776,27 +776,27 @@ extern(C)
 		{
 			if( button == '3' ) // Right Click
 			{
-				Ihandle* _undo = IupItem( toStringz( GLOBAL.languageItems["sc_undo"] ), null );
+				Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
 				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
 				IupSetCallback( _undo, "ACTION", cast(Icallback) &menu.undo_cb ); // from menu.d
 
-				Ihandle* _redo = IupItem( toStringz( GLOBAL.languageItems["sc_redo"] ), null );
+				Ihandle* _redo = IupItem( GLOBAL.languageItems["sc_redo"].toCString, null );
 				IupSetAttribute( _redo, "IMAGE", "icon_redo" );
 				IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
 
-				Ihandle* _cut = IupItem( toStringz( GLOBAL.languageItems["caption_cut"] ), null );
+				Ihandle* _cut = IupItem( GLOBAL.languageItems["caption_cut"].toCString, null );
 				IupSetAttribute( _cut, "IMAGE", "icon_cut" );
 				IupSetCallback( _cut, "ACTION", cast(Icallback) &menu.cut_cb ); // from menu.d
 
-				Ihandle* _copy = IupItem( toStringz( GLOBAL.languageItems["caption_copy"] ), null );
+				Ihandle* _copy = IupItem( GLOBAL.languageItems["caption_copy"].toCString, null );
 				IupSetAttribute( _copy, "IMAGE", "icon_copy" );
 				IupSetCallback( _copy, "ACTION", cast(Icallback) &menu.copy_cb ); // from menu.d
 
-				Ihandle* _paste = IupItem( toStringz( GLOBAL.languageItems["caption_paste"] ), null );
+				Ihandle* _paste = IupItem( GLOBAL.languageItems["caption_paste"].toCString, null );
 				IupSetAttribute( _paste, "IMAGE", "icon_paste" );
 				IupSetCallback( _paste, "ACTION", cast(Icallback) &menu.paste_cb ); // from menu.d
 
-				Ihandle* _delete = IupItem( toStringz( GLOBAL.languageItems["delete"] ), null );
+				Ihandle* _delete = IupItem( GLOBAL.languageItems["delete"].toCString, null );
 				IupSetAttribute( _delete, "IMAGE", "icon_clear" );
 				IupSetCallback( _delete, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -805,14 +805,14 @@ extern(C)
 
 				});
 
-				Ihandle* _selectall = IupItem( toStringz( GLOBAL.languageItems["selectall"] ), null );
+				Ihandle* _selectall = IupItem( GLOBAL.languageItems["selectall"].toCString, null );
 				IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
 				IupSetCallback( _selectall, "ACTION", cast(Icallback) &menu.selectall_cb ); // from menu.d
 
 
 
 				// Annotation
-				Ihandle* _showAnnotation = IupItem( toStringz( GLOBAL.languageItems["showannotation"] ), null );
+				Ihandle* _showAnnotation = IupItem( GLOBAL.languageItems["showannotation"].toCString, null );
 				IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
 				IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -821,7 +821,7 @@ extern(C)
 					//IupScintillaSendMessage( cSci.getIupScintilla, 2548, 3, 0 );
 				});
 				
-				Ihandle* _hideAnnotation = IupItem( toStringz( GLOBAL.languageItems["hideannotation"] ), null );
+				Ihandle* _hideAnnotation = IupItem( GLOBAL.languageItems["hideannotation"].toCString, null );
 				IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
 				IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback)function( Ihandle* ih )
 				{
@@ -829,7 +829,7 @@ extern(C)
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
 				});
 
-				Ihandle* _removeAllAnnotation = IupItem( toStringz( GLOBAL.languageItems["removeannotation"] ), null );
+				Ihandle* _removeAllAnnotation = IupItem( GLOBAL.languageItems["removeannotation"].toCString, null );
 				IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
 				IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -838,11 +838,11 @@ extern(C)
 				});
 				
 				Ihandle* _tempAnnotationMenu = IupMenu( _showAnnotation, _hideAnnotation, _removeAllAnnotation, null  );
-				Ihandle* _AnnotationSubMenu = IupSubmenu( toStringz( GLOBAL.languageItems["annotation"] ) ,_tempAnnotationMenu  );
+				Ihandle* _AnnotationSubMenu = IupSubmenu( GLOBAL.languageItems["annotation"].toCString ,_tempAnnotationMenu  );
 				IupSetAttribute( _AnnotationSubMenu, "IMAGE", "icon_annotation" );
 			
 
-				Ihandle* _refresh = IupItem( toStringz( GLOBAL.languageItems["sc_reparse"] ), null );
+				Ihandle* _refresh = IupItem( GLOBAL.languageItems["sc_reparse"].toCString, null );
 				IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
 				IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -850,21 +850,21 @@ extern(C)
 					GLOBAL.outlineTree.refresh( cSci );
 				});
 
-				Ihandle* _goto = IupItem( toStringz( GLOBAL.languageItems["sc_gotodef"] ), null );
+				Ihandle* _goto = IupItem( GLOBAL.languageItems["sc_gotodef"].toCString, null );
 				IupSetAttribute( _goto, "IMAGE", "icon_goto" );
 				IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.toDefintionAndType( true );
 				});
 				
-				Ihandle* _back = IupItem( toStringz( GLOBAL.languageItems["sc_backdefinition"] ), null );
+				Ihandle* _back = IupItem( GLOBAL.languageItems["sc_backdefinition"].toCString, null );
 				IupSetAttribute( _back, "IMAGE", "icon_back" );
 				IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.backDefinition();
 				});				
 
-				Ihandle* _showType = IupItem( toStringz( GLOBAL.languageItems["sc_showtype"] ), null );
+				Ihandle* _showType = IupItem( GLOBAL.languageItems["sc_showtype"].toCString, null );
 				IupSetAttribute( _showType, "IMAGE", "icon_type" );
 				IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
@@ -880,16 +880,16 @@ extern(C)
 				Ihandle* pixelImage = IupImage( 16, 16, pixel.ptr );
 
 				//selectedMarkerIndex
-				Ihandle* _maker0 = IupItem( toStringz( GLOBAL.languageItems["maker0"] ), null );
+				Ihandle* _maker0 = IupItem( GLOBAL.languageItems["maker0"].toCString, null );
 				IupSetCallback( _maker0, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 0; });
 				
-				Ihandle* _maker1 = IupItem( toStringz( GLOBAL.languageItems["maker1"] ), null );
+				Ihandle* _maker1 = IupItem( GLOBAL.languageItems["maker1"].toCString, null );
 				IupSetCallback( _maker1, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 1; });
 				
-				Ihandle* _maker2 = IupItem( toStringz( GLOBAL.languageItems["maker2"] ), null );
+				Ihandle* _maker2 = IupItem( GLOBAL.languageItems["maker2"].toCString, null );
 				IupSetCallback( _maker2, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 2; });
 				
-				Ihandle* _maker3 = IupItem( toStringz( GLOBAL.languageItems["maker3"] ), null );
+				Ihandle* _maker3 = IupItem( GLOBAL.languageItems["maker3"].toCString, null );
 				IupSetCallback( _maker3, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 3; });
 				
 				switch( cSci.selectedMarkerIndex )
@@ -937,7 +937,7 @@ extern(C)
 				IupSetAttribute( _maker2, "TITLEIMAGE", "icon_color2" );
 				IupSetAttribute( _maker3, "TITLEIMAGE", "icon_color3" );
 
-				Ihandle* _highlightLine = IupItem( toStringz( GLOBAL.languageItems["highlghtlines"] ), null );
+				Ihandle* _highlightLine = IupItem( GLOBAL.languageItems["highlghtlines"].toCString, null );
 				IupSetAttribute( _highlightLine, "IMAGE", "icon_color" );
 				IupSetCallback( _highlightLine, "ACTION", cast(Icallback) function( )
 				{
@@ -992,7 +992,7 @@ extern(C)
 					}
 				});
 				
-				Ihandle* _delHighlightLine = IupItem( toStringz( GLOBAL.languageItems["delhighlghtlines"] ), null );
+				Ihandle* _delHighlightLine = IupItem( GLOBAL.languageItems["delhighlghtlines"].toCString, null );
 				IupSetAttribute( _delHighlightLine, "IMAGE", "icon_clear" );
 				IupSetCallback( _delHighlightLine, "ACTION", cast(Icallback) function( )
 				{
@@ -1037,10 +1037,10 @@ extern(C)
 					}
 				});					
 
-				Ihandle* itemHighlight = IupSubmenu( toStringz( GLOBAL.languageItems["colorhighlght"] ), _makerSubMenu );
+				Ihandle* itemHighlight = IupSubmenu( GLOBAL.languageItems["colorhighlght"].toCString, _makerSubMenu );
 				IupSetAttribute( itemHighlight, "IMAGE", "icon_colormark" );
 				Ihandle* temp = IupMenu( _highlightLine, _delHighlightLine, itemHighlight, null );
-				Ihandle* itemMainHighlight = IupSubmenu( toStringz( GLOBAL.languageItems["highlightmaker"] ), temp );
+				Ihandle* itemMainHighlight = IupSubmenu( GLOBAL.languageItems["highlightmaker"].toCString, temp );
 				IupSetAttribute( itemMainHighlight, "IMAGE", "icon_colormark" );
 				
 				Ihandle* popupMenu = IupMenu(

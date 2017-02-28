@@ -19,8 +19,8 @@ void createExplorerWindow()
 	GLOBAL.projectTree = new CProjectTree;
 	GLOBAL.outlineTree = new COutline;
 
-	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", toStringz( GLOBAL.languageItems["prj"] ) );
-	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", toStringz( GLOBAL.languageItems["outline"] ) );
+	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", GLOBAL.languageItems["prj"].toCString );
+	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", GLOBAL.languageItems["outline"].toCString );
 	
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer" );
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
@@ -87,10 +87,10 @@ void createLayout()
 
 void createDialog()
 {
-	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"]);
-	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"] );
-	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"] );
-	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"] );
+	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"].toDString );
+	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
+	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString );
+	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString );
 }
 
 
@@ -455,7 +455,7 @@ extern(C)
 		}
 		else
 		{
-			Ihandle* _clear = IupItem( toStringz( GLOBAL.languageItems["clear"] ), null );
+			Ihandle* _clear = IupItem( GLOBAL.languageItems["clear"].toCString, null );
 			IupSetAttribute( _clear, "IMAGE", "icon_debug_clear" );
 			IupSetCallback( _clear, "ACTION", cast(Icallback) function( Ihandle* _ih )
 			{

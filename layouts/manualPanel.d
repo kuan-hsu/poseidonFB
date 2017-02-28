@@ -43,8 +43,7 @@ class CManual
 		layoutHandle = IupZbox( webHandle, tempTextHandle, null );
 		
 		
-		title = new IupString( GLOBAL.languageItems["manual"] );
-		IupSetAttribute( layoutHandle, "TABTITLE", title.toCString );
+		IupSetAttribute( layoutHandle, "TABTITLE", GLOBAL.languageItems["manual"].toCString );
 		IupSetAttribute( layoutHandle, "TABIMAGE", "icon_manual" );
 		
 		clipboard = IupClipboard();

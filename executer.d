@@ -215,8 +215,8 @@ struct ExecuterAction
 				{
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-					IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilefailure"] ) );
-					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
+					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
 			}
@@ -230,8 +230,8 @@ struct ExecuterAction
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compileok"] ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["message"] ) );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
 				}
@@ -243,8 +243,8 @@ struct ExecuterAction
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilewarning"] ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
 				}
@@ -427,8 +427,8 @@ struct ExecuterAction
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilefailure"] ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
 				}
@@ -442,8 +442,8 @@ struct ExecuterAction
 						{
 							Ihandle* messageDlg = IupMessageDlg();
 							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-							IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compileok"] ) );
-							IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["message"] ) );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
 							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 						}
 					}
@@ -455,8 +455,8 @@ struct ExecuterAction
 						{
 							Ihandle* messageDlg = IupMessageDlg();
 							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-							IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilewarning"] ) );
-							IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"] ) );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
 							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 						}
 					}
@@ -587,8 +587,8 @@ struct ExecuterAction
 				{
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-					IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["compilefailure"] ) );
-					IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["error"] ) );
+					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
+					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
 				

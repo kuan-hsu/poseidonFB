@@ -13,16 +13,16 @@ class CArgOptionDialog : CBaseDialog
 	import				tools;
 
 	Ihandle*			labelOptions, labelArgs, listOptions, listArgs;
-	IupString[2]	cStrings;
-	IupString[]	recentOptions, recentArgs;
+	IupString[2]		cStrings;
+	IupString[]			recentOptions, recentArgs;
 	
 
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton();
 		
-		cStrings[0] = new IupString( GLOBAL.languageItems["prjopts"] ~ ":" );
-		cStrings[1] = new IupString( GLOBAL.languageItems["prjargs"] ~ ":" );		
+		cStrings[0] = new IupString( GLOBAL.languageItems["prjopts"].toDString() ~ ":" );
+		cStrings[1] = new IupString( GLOBAL.languageItems["prjargs"].toDString() ~ ":" );		
 
 		listOptions = IupList( null );
 		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
