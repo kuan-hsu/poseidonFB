@@ -113,11 +113,11 @@ void main( char[][] args )
 	}
 	+/
 	/+
-	SharedLib lib = SharedLib.load(`sancho2.dll` );
+	SharedLib lib = SharedLib.load(`sci.dll` );
 	try
 	{
         //Stdout("Library successfully loaded").newline;
-        void* ptr = lib.getSymbol("HandleClipboardText");
+        void* ptr = lib.getSymbol("openDialog");
         if( ptr )
 		{
             //Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);

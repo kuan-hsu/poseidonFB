@@ -658,20 +658,22 @@ extern(C)
 				// With control
 				if( statusString[1] == 'C' ) 
 				{
-					uint state = IupGetIntId( ih, "MARKERGET", line );
-					if( state & ( 1 << 2 ) )
+					if( GLOBAL.debugPanel.isExecuting() )
 					{
-						IupScintillaSendMessage( ih, 2044, line, cast(int) 2 ); // #define SCI_MARKERDELETE 2044
-						GLOBAL.debugPanel.removeBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
-					}
-					else
-					{
-						IupScintillaSendMessage( ih, 2043, line, cast(int) 2 ); // #define SCI_MARKERADD 2043
-						GLOBAL.debugPanel.addBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+						uint state = IupGetIntId( ih, "MARKERGET", line );
+						if( state & ( 1 << 2 ) )
+						{
+							IupScintillaSendMessage( ih, 2044, line, cast(int) 2 ); // #define SCI_MARKERDELETE 2044
+							GLOBAL.debugPanel.removeBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+						}
+						else
+						{
+							IupScintillaSendMessage( ih, 2043, line, cast(int) 2 ); // #define SCI_MARKERADD 2043
+							GLOBAL.debugPanel.addBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+						}
 					}
 					break;
 				}
-			
 				
 				if( IupGetIntId( ih, "MARKERGET", line ) & 2 )
 				{
@@ -1480,15 +1482,15 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				/+
+				
 				case "testplugin":
 					if( sk.keyValue == c )
 					{
-						dllHandleClipboardText();
+						dllHandleClipboardText( ih );
 						return IUP_IGNORE;
 					}
 					break;
-				+/
+				
 					
 				default:
 			}

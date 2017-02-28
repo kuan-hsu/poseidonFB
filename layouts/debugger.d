@@ -7,7 +7,7 @@ private import global, scintilla, actionManager, menu;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 private import parser.ast, tools;
 
-private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.core.Thread, tango.io.Stdout, Path = tango.io.Path;
+private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.io.Stdout, Path = tango.io.Path; //, tango.core.Thread;
 
 class CDebugger
 {
@@ -104,6 +104,7 @@ class CDebugger
 		backtraceHandle = IupTree();
 		IupSetAttributes( backtraceHandle, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=YES" ) );
 		IupSetCallback( backtraceHandle, "BUTTON_CB", cast(Icallback) &backtraceBUTTON_CB );
+		IupSetCallback( backtraceHandle, "NODEREMOVED_CB", cast(Icallback) &backtraceNODEREMOVED_CB );
 
 
 		Ihandle* btnLeft		= IupButton( null, "Left" );
@@ -333,11 +334,17 @@ class CDebugger
 			IupSetAttribute( regListHandle, "FONT", "FreeMono,Bold 10" );
 		}
 		
+		
+		cStrings[15] = new IupString( GLOBAL.languageItems["variable"] );
+		cStrings[16] = new IupString( GLOBAL.languageItems["bp"] );
+		cStrings[17] = new IupString( GLOBAL.languageItems["register"] );
+		cStrings[18] = new IupString( GLOBAL.languageItems["caption_debug"] );
+		
 
 
-		IupSetAttribute( varSplit, "TABTITLE", toStringz( GLOBAL.languageItems["variable"] ) );
-		IupSetAttribute( bpFrame, "TABTITLE", toStringz( GLOBAL.languageItems["bp"] ) );
-		IupSetAttribute( regListHandle, "TABTITLE", toStringz( GLOBAL.languageItems["register"] ) );
+		IupSetAttribute( varSplit, "TABTITLE", cStrings[15].toCString );
+		IupSetAttribute( bpFrame, "TABTITLE", cStrings[16].toCString );
+		IupSetAttribute( regListHandle, "TABTITLE", cStrings[17].toCString );
 
 		tabResultsHandle = IupTabs( bpFrame, varSplit, regListHandle, null );
 		IupSetAttribute( tabResultsHandle, "TABTYPE", "TOP" );
@@ -353,7 +360,7 @@ class CDebugger
 		IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=260,LAYOUTDRAG=NO" );
 
 		mainHandle = IupScrollBox( mainSplit );
-		IupSetAttribute( mainHandle, "TABTITLE", toStringz( GLOBAL.languageItems["caption_debug"] ) );
+		IupSetAttribute( mainHandle, "TABTITLE", cStrings[18].toCString );
 		IupSetAttribute( mainHandle, "TABIMAGE", "icon_debug" );
 	}
 
@@ -402,6 +409,22 @@ class CDebugger
 				}
 			}
 			
+			char* fnln = cast(char*) IupGetAttributeId( backtraceHandle, "USERDATA", id );
+			
+			if( fnln != null )
+			{
+				char[] valueString = fromStringz( fnln );
+				int colonPos = Util.rindex( valueString, ":" );
+				if( colonPos < valueString.length )
+				{
+					results ~= valueString[0..colonPos];
+					results ~= valueString[colonPos+1..$];
+					
+					return results;
+				}
+			}
+			
+			/+
 			char[] valueString = fromStringz( IupGetAttributeId( backtraceHandle, "TITLE", id ) ).dup;
 
 			if( valueString.length )
@@ -423,6 +446,7 @@ class CDebugger
 					}
 				}
 			}
+			+/
 		}
 
 		return null;
@@ -861,6 +885,28 @@ class CDebugger
 
 										IupSetAttributeId( backtraceHandle, "ADDBRANCH", lastID, GLOBAL.cString.convert( branchString.dup ) );
 										lastID = IupGetInt( backtraceHandle, "LASTADDNODE" );
+										
+										// Save FileName & LineNumber
+										if( branchString.length )
+										{
+											int fnHead = Util.rindex( branchString, " at " );
+											int lnHead = Util.rindex( branchString, ":" );
+
+											if( fnHead < branchString.length )
+											{
+												if( lnHead < branchString.length )
+												{
+													if( fnHead < lnHead )
+													{
+														char[] _fn = branchString[fnHead+4..lnHead];
+														char[] _ln = branchString[lnHead+1..length];
+														
+														IupSetAttributeId( backtraceHandle, "USERDATA", lastID, tools.getCString( _fn ~ ":" ~ _ln ) );
+													}
+												}
+											}
+										}										
+										
 										IupSetAttributeId( backtraceHandle, "IMAGE", lastID, GLOBAL.cString.convert( "icon_debug_bt1" ) );
 										IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, GLOBAL.cString.convert( "icon_debug_bt1" ) );
 										if( i == 0 )
@@ -1034,8 +1080,6 @@ class CDebugger
 									}
 								}
 								break;
-									
-								
 
 							case "reg":
 								if( bRunning )
@@ -1208,7 +1252,7 @@ class CDebugger
 		{
 			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
 			DebugControl = new DebugThread( "\"" ~ command ~ "\"", f.path );
-			DebugControl.start();
+			//version(Windows) DebugControl.start();
 		}
 		else
 		{
@@ -1303,11 +1347,10 @@ class CVarDlg : CSingleTextDialog
 		IupSetHandle( "textResult", null );
 		IupDestroy( _dlg );
 	}		
-
 }
 
 
-class DebugThread : Thread
+class DebugThread //: Thread
 {
 	private :
 	import		tango.io.stream.Data, tango.sys.Process;
@@ -1330,7 +1373,7 @@ class DebugThread : Thread
 				try
 				{
 					char[1] c;
-					version(Windows) proc.stdout.get( c );else proc.stdout.read( c );
+					proc.stdout.read( c );
 					
 					result ~= c;
 
@@ -1365,7 +1408,7 @@ class DebugThread : Thread
 	{
 		executeFullPath = _executeFullPath;
 		cwd = _cwd;
-		super( &run );
+		run();
 	}
 
 	~this()
@@ -1398,8 +1441,6 @@ class DebugThread : Thread
 	{
 		try
 		{
-			auto thisThread = DebugThread.getThis;
-
 			if( bExecuted ) return;
 
 			// Show bottom panel
@@ -1446,6 +1487,7 @@ class DebugThread : Thread
 			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, GLOBAL.cString.convert( "icon_debug_bt0" ) );
 			splitValue = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 400 );
+			/+
 			int count = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" );
 			for( int i = count; i > 0; -- i )
 			{
@@ -1463,39 +1505,37 @@ class DebugThread : Thread
 					}
 				}
 			}
-
+			+/
 			version( Windows )
 			{
 				sendCommand( "set new-console on\n", false );
 			}
 			else
-			{/+
-				auto termProc = new Process( GLOBAL.linuxTermName,null );
+			{
+				/+
+				//auto termProc = new Process( true, GLOBAL.linuxTermName);
+				auto termProc = new Process( true, GLOBAL.linuxTermName ~ " -e \"bash -c 'tty;$SHELL'\"" );
+				
+				//auto termProc = new Process( true, GLOBAL.linuxTermName ~ " -x sh -c \"ls\"" );
+				
+				
 				//termProc.redirect( Redirect.All );
+				//termProc.gui( true );
 				termProc.execute;
-				termProc.stdin.write( "tty\n" );
-				char[] ttyResult;
-				while( 1 )
-				{
-					try
-					{
-						char[1] c;
-						termProc.stdout.get( c );
-						if( c == "\n" ) break;
-
-						ttyResult ~= c;
-					}
-					catch( Exception e )
-					{
-						throw( e );
-					}
-				}
-
-				sendCommand( "tty " ~ ttyResult ~ "\n", true );+/
+				
+				termProc.stdin.write( "ls" );
+				
+				char[1024] ttyResult;
+				int size = termProc.stdout.read( ttyResult );
+				
+				
+				size = termProc.stdout.read( ttyResult );
+				
+				termProc.wait;
+				+/
 			}
 			sendCommand( "set print array-indexes on\n", false );
 			//sendCommand( "set breakpoint pending on\n", false );
-			
 			//sendCommand( "set print elements 1\n", false );
 		}
 		catch( Exception e )
@@ -1630,6 +1670,14 @@ extern( C )
 	private int CDebugger_terminate( Ihandle* ih )
 	{
 		GLOBAL.debugPanel.terminal();
+		return IUP_DEFAULT;
+	}
+	
+	private int backtraceNODEREMOVED_CB( Ihandle* ih, void* userdata )
+	{
+		char* userDataPTR = cast(char*) userdata;
+		if( userDataPTR != null ) tools.freeCString( userDataPTR );
+		
 		return IUP_DEFAULT;
 	}
 

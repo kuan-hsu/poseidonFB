@@ -2,10 +2,11 @@
 
 import tools;
 
-/+
-typedef extern (C) void function() _HandleClipboardText;
+import iup.iup;
+
+typedef extern (C) void function( Ihandle* iih ) _HandleClipboardText;
 _HandleClipboardText dllHandleClipboardText;
-+/
+
 
 struct EditorToggleUint
 {
@@ -288,11 +289,10 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk23;
 		ShortKey sk24 = { "backdefinition", "Back Definition", 1342177351 };
 		GLOBAL.shortKeys ~= sk24;
-		/+
+		/*
 		ShortKey sk25 = { "testplugin", "Test Plugin", 1073741909 };
 		GLOBAL.shortKeys ~= sk25;
-		+/
-		
+		*/
 
 		fontUint fu;
 		version( Windows )
