@@ -1482,7 +1482,7 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				
+				/*
 				case "testplugin":
 					if( sk.keyValue == c )
 					{
@@ -1490,7 +1490,7 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
-				
+				*/
 					
 				default:
 			}

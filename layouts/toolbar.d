@@ -20,8 +20,6 @@ class CToolBar
 	Ihandle* 			btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun;
 	Ihandle*			outlineButtonHide, messageButtonHide;
 	Ihandle*[7]			labelSEPARATOR;
-	
-	IupString[20]	cStrings;
 
 	void createToolBar()
 	{

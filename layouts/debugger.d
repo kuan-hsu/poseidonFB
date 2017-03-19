@@ -1479,12 +1479,22 @@ class DebugThread //: Thread
 				}
 			}
 			+/
+
+			sendCommand( "set print array-indexes on\n", false );
+			//sendCommand( "set breakpoint pending on\n", false );
+			//sendCommand( "set print elements 1\n", false );
+			
 			version( Windows )
 			{
 				sendCommand( "set new-console on\n", false );
 			}
 			else
 			{
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,BUTTONS=OK");
+				IupSetAttribute( messageDlg, "TITLE", "GDB" );
+				IupSetAttribute( messageDlg, "VALUE", "Use \"tty\" Command To Specifies The Terminal Device." );
+				IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
 				/+
 				//auto termProc = new Process( true, GLOBAL.linuxTermName);
 				auto termProc = new Process( true, GLOBAL.linuxTermName ~ " -e \"bash -c 'tty;$SHELL'\"" );
@@ -1506,10 +1516,7 @@ class DebugThread //: Thread
 				
 				termProc.wait;
 				+/
-			}
-			sendCommand( "set print array-indexes on\n", false );
-			//sendCommand( "set breakpoint pending on\n", false );
-			//sendCommand( "set print elements 1\n", false );
+			}			
 		}
 		catch( Exception e )
 		{

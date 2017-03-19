@@ -4,9 +4,10 @@ import tools;
 
 import iup.iup;
 
+/*
 typedef extern (C) void function( Ihandle* iih ) _HandleClipboardText;
 _HandleClipboardText dllHandleClipboardText;
-
+*/
 
 struct EditorToggleUint
 {
@@ -421,6 +422,7 @@ struct GLOBAL
 					GLOBAL.languageItems["uppercase"] = new IupString( cast(char[]) "UPPERCASE" );
 					GLOBAL.languageItems["lowercase"] = new IupString( cast(char[]) "lowercase" );
 					GLOBAL.languageItems["mixercase"] = new IupString( cast(char[]) "Mixedcase" );
+				GLOBAL.languageItems["setcustomtool"] = new IupString( cast(char[]) "Set Custom Tools..." );
 			GLOBAL.languageItems["preference"] = new IupString( cast(char[]) "Preference" );
 				GLOBAL.languageItems["compiler"] = new IupString( cast(char[]) "Compiler" );
 					GLOBAL.languageItems["compilerpath"] = new IupString( cast(char[]) "Compiler Path" );

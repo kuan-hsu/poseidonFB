@@ -388,9 +388,12 @@ void createMenu()
 
 	Ihandle* caseSubMenu = IupMenu( upperCase, lowerCase, mixedCase, null  );
 	Ihandle* convertCase = IupSubmenu( GLOBAL.languageItems["convertcase"].toCString, caseSubMenu );
+	
+	Ihandle* coustomTooledit = IupItem( GLOBAL.languageItems["setcustomtool"].toCString, null );
+	IupSetAttribute( coustomTooledit, "ACTIVE", "NO" );
 
 
-	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, null  );
+	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), coustomTooledit, null  );
 	item_tool = IupSubmenu( GLOBAL.languageItems["tools"].toCString, toolsSubMenu );
 	IupSetAttribute(item_tool, "IMAGE", "icon_tools");
 
@@ -428,7 +431,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.255\nBy Kuan Hsu (Taiwan)\n2017.02.28" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.256\nBy Kuan Hsu (Taiwan)\n2017.03.19" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -515,7 +518,6 @@ void createMenu()
 	mainMenu5_Project = IupSubmenu( GLOBAL.languageItems["prj"].toCString, project_menu );
 	mainMenu6_Build = IupSubmenu( GLOBAL.languageItems["build"].toCString, build_menu );
 	mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
-	version( linux ) IupSetAttribute( mainMenu7_Debug, "ACTIVE" ,"NO" );
 	mainMenu8_Option = IupSubmenu( GLOBAL.languageItems["options"].toCString, option_menu );
 
 	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu8_Option, null );

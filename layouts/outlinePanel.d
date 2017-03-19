@@ -14,8 +14,6 @@ class COutline
 {
 	private:
 	import				parser.scanner, parser.token, parser.parser;
-	
-	IupString[5]	cStrings;
 
 	/+
 	import tango.core.Thread;

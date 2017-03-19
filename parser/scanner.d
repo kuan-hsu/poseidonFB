@@ -65,7 +65,7 @@ class CScanner
 								if( data[i+1] == '\'' ) // Check if /'
 								{
 									commentCount ++;
-									continue;
+									break;
 								}
 							}
 						}
