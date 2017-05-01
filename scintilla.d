@@ -1482,6 +1482,29 @@ extern(C)
 						return IUP_IGNORE;
 					}
 					break;
+				
+				// Custom Tools
+				case "customtool1":
+				case "customtool2":
+				case "customtool3":
+				case "customtool4":
+				case "customtool5":
+					if( sk.keyValue == c )
+					{
+						char[]	tailChar = sk.name[$-1..$];
+						int		tailNum = Integer.atoi( tailChar );
+						if( tailNum > 0 && tailNum < 6 )
+						{
+							if( GLOBAL.customTools[tailNum].name.toDString.length )
+							{
+								if( GLOBAL.customTools[tailNum].dir.toDString.length ) IupExecute( GLOBAL.customTools[tailNum].dir.toCString, GLOBAL.customTools[tailNum].args.toCString );
+							}
+						}
+
+						return IUP_IGNORE;
+					}
+					break;					
+					
 				/*
 				case "testplugin":
 					if( sk.keyValue == c )

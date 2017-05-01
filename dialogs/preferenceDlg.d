@@ -440,7 +440,7 @@ class CPreferenceDialog : CBaseDialog
 					}
 				}
 
-				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[i].name, strings[0], Bold, Italic, Underline, Strikeout, size );
+				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.languageItems[GLOBAL.fonts[i].name].toDString, strings[0], Bold, Italic, Underline, Strikeout, size );
 				
 				IupSetAttribute( fontList, toStringz( Integer.toString( i + 1 ) ), toStringz( _string ) );
 			}

@@ -4,7 +4,7 @@ import iup.iup;
 import iup.iup_scintilla;
 
 import global, actionManager, scintilla, project, tools;
-import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg;
+import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg;
 
 import tango.io.Stdout;
 import tango.stdc.stringz;
@@ -390,7 +390,8 @@ void createMenu()
 	Ihandle* convertCase = IupSubmenu( GLOBAL.languageItems["convertcase"].toCString, caseSubMenu );
 	
 	Ihandle* coustomTooledit = IupItem( GLOBAL.languageItems["setcustomtool"].toCString, null );
-	IupSetAttribute( coustomTooledit, "ACTIVE", "NO" );
+	//IupSetAttribute( coustomTooledit, "ACTIVE", "NO" );
+	IupSetCallback( coustomTooledit, "ACTION", cast(Icallback)&coustomTooledit_cb );
 
 
 	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), coustomTooledit, null  );
@@ -431,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.256\nBy Kuan Hsu (Taiwan)\n2017.03.19" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.257\nBy Kuan Hsu (Taiwan)\n2017.05.01" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -1101,6 +1102,14 @@ extern(C)
 			IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
 		}
 		
+		return IUP_DEFAULT;
+	}
+	
+	int coustomTooledit_cb( Ihandle *ih )
+	{
+		scope dlg = new CCustomDialog( 480, 240, GLOBAL.languageItems["setcustomtool"].toDString(), false );
+		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+
 		return IUP_DEFAULT;
 	}
 

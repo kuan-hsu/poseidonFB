@@ -98,6 +98,12 @@ struct IDECONFIG
 			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "value", Util.trim( GLOBAL.KEYWORDS[i] ) );
 		}
 		
+		for( int i = 1; i < 6; ++i )
+		{
+			editorNode.element( null, "customtools" )
+			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "name", Util.trim( GLOBAL.customTools[i].name.toDString ) ).attribute( null, "dir", Util.trim( GLOBAL.customTools[i].dir.toDString ) ).attribute( null, "args", Util.trim( GLOBAL.customTools[i].args.toDString ) );
+		}
+
 		editorNode.element( null, "toggle00" )
 		.attribute( null, "LineMargin", GLOBAL.editorSetting00.LineMargin )
 		.attribute( null, "BookmarkMargin", GLOBAL.editorSetting00.BookmarkMargin )
@@ -256,7 +262,13 @@ struct IDECONFIG
 		.attribute( null, "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) )
 		.attribute( null, "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) )
 		.attribute( null, "comment", convertShortKeyValue2String( GLOBAL.shortKeys[23].keyValue ) )
-		.attribute( null, "backdefinition", convertShortKeyValue2String( GLOBAL.shortKeys[24].keyValue ) );
+		.attribute( null, "backdefinition", convertShortKeyValue2String( GLOBAL.shortKeys[24].keyValue ) )
+		
+		.attribute( null, "customtool1", convertShortKeyValue2String( GLOBAL.shortKeys[25].keyValue ) )
+		.attribute( null, "customtool2", convertShortKeyValue2String( GLOBAL.shortKeys[26].keyValue ) )
+		.attribute( null, "customtool3", convertShortKeyValue2String( GLOBAL.shortKeys[27].keyValue ) )
+		.attribute( null, "customtool4", convertShortKeyValue2String( GLOBAL.shortKeys[28].keyValue ) )
+		.attribute( null, "customtool5", convertShortKeyValue2String( GLOBAL.shortKeys[29].keyValue ) );
 		//.attribute( null, "testplugin", convertShortKeyValue2String( GLOBAL.shortKeys[25].keyValue ) );
 
 		/*
@@ -401,6 +413,25 @@ struct IDECONFIG
 				GLOBAL.KEYWORDS ~= e.value;
 			}
 
+			result = root.query.descendant("customtools").attribute("name");
+			int id = 1;
+			foreach( e; result )
+			{
+				GLOBAL.customTools[id++].name = e.value;
+			}
+			result = root.query.descendant("customtools").attribute("dir");
+			id = 1;
+			foreach( e; result )
+			{
+				GLOBAL.customTools[id++].dir = e.value;
+			}
+			result = root.query.descendant("customtools").attribute("args");
+			id = 1;
+			foreach( e; result )
+			{
+				GLOBAL.customTools[id++].args = e.value;
+			}
+			
 			result = root.query.descendant("compilerpath");
 			foreach( e; result )
 			{
@@ -643,69 +674,69 @@ struct IDECONFIG
 				fu.fontString = "FreeMono,Bold 9";
 			}
 
-			fu.name = "Default";
+			fu.name = "default";
 			GLOBAL.fonts[0] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Default" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[0].fontString = e.value;
 
-			fu.name = "Document";
+			fu.name = "document";
 			GLOBAL.fonts[1] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Document" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[1].fontString = e.value;
 			
-			fu.name = "Leftside";
+			fu.name = "leftside";
 			GLOBAL.fonts[2] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Leftside" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[2].fontString = e.value;
 
-			fu.name = "Filelist";
+			fu.name = "filelist";
 			GLOBAL.fonts[3] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Filelist" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[3].fontString = e.value;
 
-			fu.name = "Project";
+			fu.name = "caption_prj";
 			GLOBAL.fonts[4] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Project" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[4].fontString = e.value;
 
-			fu.name = "Outline";
+			fu.name = "outline";
 			GLOBAL.fonts[5] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Outline" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[5].fontString = e.value;
 			
-			fu.name = "Bottom";
+			fu.name = "bottom";
 			GLOBAL.fonts[6] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Bottom" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[6].fontString = e.value;
 
-			fu.name = "Output";
+			fu.name = "output";
 			GLOBAL.fonts[7] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Output" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[7].fontString = e.value;
 
-			fu.name = "Search";
+			fu.name = "search";
 			GLOBAL.fonts[8] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Search" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[8].fontString = e.value;
 
-			fu.name = "Debugger";
+			fu.name = "debug";
 			GLOBAL.fonts[9] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Debugger" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[9].fontString = e.value;
 
-			fu.name = "Annotation";
+			fu.name = "annotation";
 			GLOBAL.fonts[10] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Annotation" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[10].fontString = e.value;
 			
-			fu.name = "Manual";
+			fu.name = "manual";
 			GLOBAL.fonts[11] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "Manual" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[11].fontString = e.value;
 
-			fu.name = "StatusBar";
+			fu.name = "statusbar";
 			GLOBAL.fonts[12] = fu;
-			result = root.query.descendant("font").attribute( fu.name );
+			result = root.query.descendant("font").attribute( "StatusBar" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[12].fontString = e.value;
 			
 			
@@ -911,7 +942,7 @@ struct IDECONFIG
 			
 
 			// short keys (Editor)
-			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 25;
+			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 30;
 			result = root.query.descendant("shortkeys").attribute("find");
 			foreach( e; result )
 			{
@@ -1085,6 +1116,42 @@ struct IDECONFIG
 			{
 				ShortKey sk = { "backdefinition", GLOBAL.languageItems["sc_backdefinition"].toDString(), convertShortKeyValue2Integer( e.value ) };
 				GLOBAL.shortKeys[24]= sk;
+			}
+
+
+			result = root.query.descendant("shortkeys").attribute("customtool1");
+			foreach( e; result )
+			{
+				ShortKey sk = { "customtool1", GLOBAL.languageItems["customtool1"].toDString(), convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[25]= sk;
+			}
+			
+			result = root.query.descendant("shortkeys").attribute("customtool2");
+			foreach( e; result )
+			{
+				ShortKey sk = { "customtool2", GLOBAL.languageItems["customtool2"].toDString(), convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[26]= sk;
+			}
+			
+			result = root.query.descendant("shortkeys").attribute("customtool3");
+			foreach( e; result )
+			{
+				ShortKey sk = { "customtool3", GLOBAL.languageItems["customtool3"].toDString(), convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[27]= sk;
+			}
+			
+			result = root.query.descendant("shortkeys").attribute("customtool4");
+			foreach( e; result )
+			{
+				ShortKey sk = { "customtool4", GLOBAL.languageItems["customtool4"].toDString(), convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[28]= sk;
+			}
+			
+			result = root.query.descendant("shortkeys").attribute("customtool5");
+			foreach( e; result )
+			{
+				ShortKey sk = { "customtool5", GLOBAL.languageItems["customtool5"].toDString(), convertShortKeyValue2Integer( e.value ) };
+				GLOBAL.shortKeys[29]= sk;
 			}
 			
 			/+

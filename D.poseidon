@@ -17,6 +17,7 @@
     <Name>actionManager.d</Name>
     <Name>dialogs/argOptionDlg.d</Name>
     <Name>dialogs/baseDlg.d</Name>
+    <Name>dialogs/customDlg.d</Name>
     <Name>dialogs/fileDlg.d</Name>
     <Name>dialogs/findFilesDlg.d</Name>
     <Name>dialogs/helpDlg.d</Name>

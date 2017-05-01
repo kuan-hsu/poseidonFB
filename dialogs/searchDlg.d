@@ -30,8 +30,9 @@ class CSearchDialog : CBaseDialog
 		IupSetHandle( "CSearchDialog_listFind", listFind );
 		
 		cStrings[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
-		Ihandle* hBox00 = IupHbox( IupLabel( cStrings[0].toCString ), listFind, null );
-		
+		Ihandle* label0 = IupLabel( cStrings[0].toCString );
+		IupSetAttribute( label0, "SIZE", "60x16" );
+		Ihandle* hBox00 = IupHbox( label0, listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 		IupSetCallback( listFind, "K_ANY", cast(Icallback) &CSearchDialog_listFind_K_ANY_CB );
 
@@ -41,7 +42,9 @@ class CSearchDialog : CBaseDialog
 		IupSetHandle( "CSearchDialog_listReplace", listReplace );
 		
 		cStrings[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
-		Ihandle* hBox01 = IupHbox( IupLabel( cStrings[1].toCString ), listReplace, null );
+		Ihandle* label1 = IupLabel( cStrings[1].toCString );
+		IupSetAttribute( label1, "SIZE", "60x16" );
+		Ihandle* hBox01 = IupHbox( label1, listReplace, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
 		IupSetCallback( listReplace, "K_ANY", cast(Icallback) &CSearchDialog_listReplace_K_ANY_CB );
 
