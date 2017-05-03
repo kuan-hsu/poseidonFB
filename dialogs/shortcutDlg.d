@@ -171,6 +171,15 @@ extern(C) // Callback for CSingleTextDialog
 			case "compilerun":					pos = 22;	break;
 			case "comment":						pos = 23;	break;
 			case "backdefinition":				pos = 24;	break;
+			case "customtool1":					pos = 25;	break;
+			case "customtool2":					pos = 26;	break;
+			case "customtool3":					pos = 27;	break;
+			case "customtool4":					pos = 28;	break;
+			case "customtool5":					pos = 29;	break;
+			case "customtool6":					pos = 30;	break;
+			case "customtool7":					pos = 31;	break;
+			case "customtool8":					pos = 32;	break;
+			case "customtool9":					pos = 33;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;

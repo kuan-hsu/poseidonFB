@@ -166,7 +166,7 @@ struct GLOBAL
 	static bool					bKeyUp = true;
 	static int					KeyNumber;
 	
-	static CustomTool[6]		customTools;
+	static CustomTool[10]		customTools;
 
 	static this()
 	{
@@ -247,7 +247,7 @@ struct GLOBAL
 		GLOBAL.KEYWORDS ~= "hour if iif imageconvertrow imagecreate imagedestroy imageinfo imp implements import inkey inp input instr instrrev int integer is isdate isredirected kill lbound lcase left len let lib line lobyte loc local locate lock lof log long longint loop loword lpos lprint lset ltrim mid minute mkd mkdir mki mkl mklongint mks mkshort mod month monthname multikey mutexcreate mutexdestroy mutexlock mutexunlock naked name namespace next new not now object oct offsetof on once open operator option or orelse out output overload override paint palette pascal pcopy peek pmap point pointcoord pointer poke pos preserve preset print private procptr property protected pset ptr public put random randomize read reallocate redim rem reset restore resume return rgb rgba right rmdir";
 		GLOBAL.KEYWORDS ~= "rnd rset rtrim run sadd scope screen screencopy screencontrol screenevent screeninfo screenglproc screenlist screenlock screenptr screenres screenset screensync screenunlock second seek select setdate setenviron setmouse settime sgn shared shell shl shr short sin single sizeof sleep space spc sqr static stdcall step stick stop str strig string strptr sub swap system tab tan then this threadcall threadcreate threaddetach threadwait time timeserial timevalue timer to trans trim type typeof ubound ubyte ucase uinteger ulong ulongint union unlock unsigned until ushort using va_arg va_first va_next val vallng valint valuint valulng var varptr view virtual wait wbin wchr weekday weekdayname wend while whex width window windowtitle winput with woct write wspace wstr wstring xor year zstring";
 
-		for( int i = 0; i < 6; ++i )
+		for( int i = 0; i < 10; ++i )
 		{
 			GLOBAL.customTools[i].name = new IupString();
 			GLOBAL.customTools[i].dir = new IupString();
@@ -316,12 +316,14 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk28;
 		ShortKey sk29 = { "customtool5", "Custom Tool(5)", 805371842 };
 		GLOBAL.shortKeys ~= sk29;
-		
-		
-		/*
-		ShortKey sk25 = { "testplugin", "Test Plugin", 1073741909 };
-		GLOBAL.shortKeys ~= sk25;
-		*/
+		ShortKey sk30 = { "customtool6", "Custom Tool(6)", 805371843 };
+		GLOBAL.shortKeys ~= sk30;
+		ShortKey sk31 = { "customtool7", "Custom Tool(7)", 805371844 };
+		GLOBAL.shortKeys ~= sk31;
+		ShortKey sk32 = { "customtool8", "Custom Tool(8)", 805371845 };
+		GLOBAL.shortKeys ~= sk32;
+		ShortKey sk33 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		GLOBAL.shortKeys ~= sk33;
 
 		fontUint fu;
 		version( Windows )
@@ -456,6 +458,10 @@ struct GLOBAL
 					GLOBAL.languageItems["customtool3"] = new IupString( cast(char[]) "Custom Tool(3)" );
 					GLOBAL.languageItems["customtool4"] = new IupString( cast(char[]) "Custom Tool(4)" );
 					GLOBAL.languageItems["customtool5"] = new IupString( cast(char[]) "Custom Tool(5)" );
+					GLOBAL.languageItems["customtool6"] = new IupString( cast(char[]) "Custom Tool(6)" );
+					GLOBAL.languageItems["customtool7"] = new IupString( cast(char[]) "Custom Tool(7)" );
+					GLOBAL.languageItems["customtool8"] = new IupString( cast(char[]) "Custom Tool(8)" );
+					GLOBAL.languageItems["customtool9"] = new IupString( cast(char[]) "Custom Tool(9)" );
 				
 			GLOBAL.languageItems["preference"] = new IupString( cast(char[]) "Preference" );
 				GLOBAL.languageItems["compiler"] = new IupString( cast(char[]) "Compiler" );

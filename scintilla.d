@@ -10,7 +10,7 @@ private
 	import parser.autocompletion, parser.live;
 
 	import Integer = tango.text.convert.Integer;
-	import tango.stdc.stringz;
+	import tango.stdc.stringz, tango.sys.Process;
 	import tango.io.FilePath;
 	import tango.text.convert.Utf;
 }
@@ -1484,11 +1484,7 @@ extern(C)
 					break;
 				
 				// Custom Tools
-				case "customtool1":
-				case "customtool2":
-				case "customtool3":
-				case "customtool4":
-				case "customtool5":
+				case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":
 					if( sk.keyValue == c )
 					{
 						char[]	tailChar = sk.name[$-1..$];
@@ -1497,7 +1493,33 @@ extern(C)
 						{
 							if( GLOBAL.customTools[tailNum].name.toDString.length )
 							{
-								if( GLOBAL.customTools[tailNum].dir.toDString.length ) IupExecute( GLOBAL.customTools[tailNum].dir.toCString, GLOBAL.customTools[tailNum].args.toCString );
+								if( GLOBAL.customTools[tailNum].dir.toDString.length )
+								{
+									// %s Selected Text
+									char[] s = fromStringz( IupGetAttribute( ih, toStringz("SELECTEDTEXT") ) );
+									char[] args = Util.substitute( GLOBAL.customTools[tailNum].args.toDString, "%s ", s ~ " " );
+									
+									args = Util.substitute( args, "%\"s\" ", "\"" ~ s ~ "\"" ~ " " );
+									// %f Active File
+									CScintilla cSci = actionManager.ScintillaAction.getCScintilla( ih );
+									if( cSci !is null )
+									{
+										s = cSci.getFullPath();
+										args = Util.substitute( args, "%f ", s ~ " " );
+										args = Util.substitute( args, "%\"f\" ", "\"" ~ s ~ "\"" ~ " " );
+									}
+									
+									version(Windows)
+									{
+										IupExecute( GLOBAL.customTools[tailNum].dir.toCString, toStringz( args ) );
+									}
+									else
+									{
+										Process p = new Process( true, GLOBAL.customTools[tailNum].dir.toDString ~ " " ~ args );
+										//p.gui( true );
+										p.execute;
+									}
+								}
 							}
 						}
 

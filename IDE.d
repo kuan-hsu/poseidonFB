@@ -98,7 +98,7 @@ struct IDECONFIG
 			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "value", Util.trim( GLOBAL.KEYWORDS[i] ) );
 		}
 		
-		for( int i = 1; i < 6; ++i )
+		for( int i = 1; i < 10; ++i )
 		{
 			editorNode.element( null, "customtools" )
 			.attribute( null, "id", Integer.toString( i ) ).attribute( null, "name", Util.trim( GLOBAL.customTools[i].name.toDString ) ).attribute( null, "dir", Util.trim( GLOBAL.customTools[i].dir.toDString ) ).attribute( null, "args", Util.trim( GLOBAL.customTools[i].args.toDString ) );
@@ -268,8 +268,11 @@ struct IDECONFIG
 		.attribute( null, "customtool2", convertShortKeyValue2String( GLOBAL.shortKeys[26].keyValue ) )
 		.attribute( null, "customtool3", convertShortKeyValue2String( GLOBAL.shortKeys[27].keyValue ) )
 		.attribute( null, "customtool4", convertShortKeyValue2String( GLOBAL.shortKeys[28].keyValue ) )
-		.attribute( null, "customtool5", convertShortKeyValue2String( GLOBAL.shortKeys[29].keyValue ) );
-		//.attribute( null, "testplugin", convertShortKeyValue2String( GLOBAL.shortKeys[25].keyValue ) );
+		.attribute( null, "customtool5", convertShortKeyValue2String( GLOBAL.shortKeys[29].keyValue ) )
+		.attribute( null, "customtool6", convertShortKeyValue2String( GLOBAL.shortKeys[30].keyValue ) )
+		.attribute( null, "customtool7", convertShortKeyValue2String( GLOBAL.shortKeys[31].keyValue ) )
+		.attribute( null, "customtool8", convertShortKeyValue2String( GLOBAL.shortKeys[32].keyValue ) )
+		.attribute( null, "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[33].keyValue ) );
 
 		/*
 		<buildtools>
@@ -942,7 +945,7 @@ struct IDECONFIG
 			
 
 			// short keys (Editor)
-			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 30;
+			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 34;
 			result = root.query.descendant("shortkeys").attribute("find");
 			foreach( e; result )
 			{
@@ -1118,50 +1121,16 @@ struct IDECONFIG
 				GLOBAL.shortKeys[24]= sk;
 			}
 
-
-			result = root.query.descendant("shortkeys").attribute("customtool1");
-			foreach( e; result )
+			for( int i = 1; i < 10; ++ i )
 			{
-				ShortKey sk = { "customtool1", GLOBAL.languageItems["customtool1"].toDString(), convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys[25]= sk;
+				char[] targetString = "customtool" ~ Integer.toString(i);
+				result = root.query.descendant("shortkeys").attribute( targetString );
+				foreach( e; result )
+				{
+					ShortKey sk = { targetString, GLOBAL.languageItems[targetString].toDString(), convertShortKeyValue2Integer( e.value ) };
+					GLOBAL.shortKeys[24+i]= sk;
+				}
 			}
-			
-			result = root.query.descendant("shortkeys").attribute("customtool2");
-			foreach( e; result )
-			{
-				ShortKey sk = { "customtool2", GLOBAL.languageItems["customtool2"].toDString(), convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys[26]= sk;
-			}
-			
-			result = root.query.descendant("shortkeys").attribute("customtool3");
-			foreach( e; result )
-			{
-				ShortKey sk = { "customtool3", GLOBAL.languageItems["customtool3"].toDString(), convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys[27]= sk;
-			}
-			
-			result = root.query.descendant("shortkeys").attribute("customtool4");
-			foreach( e; result )
-			{
-				ShortKey sk = { "customtool4", GLOBAL.languageItems["customtool4"].toDString(), convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys[28]= sk;
-			}
-			
-			result = root.query.descendant("shortkeys").attribute("customtool5");
-			foreach( e; result )
-			{
-				ShortKey sk = { "customtool5", GLOBAL.languageItems["customtool5"].toDString(), convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys[29]= sk;
-			}
-			
-			/+
-			result = root.query.descendant("shortkeys").attribute("testplugin");
-			foreach( e; result )
-			{
-				ShortKey sk = { "testplugin", "Test  Plugin", convertShortKeyValue2Integer( e.value ) };
-				GLOBAL.shortKeys[25]= sk;
-			}			
-			+/
 			
 			// Get linux terminal program name
 			version( linux )
