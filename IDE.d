@@ -918,7 +918,7 @@ struct IDECONFIG
 			foreach( e; result ) GLOBAL.editColor.maker[2] = e.value;
 			result = root.query.descendant("color").attribute("maker3");
 			foreach( e; result ) GLOBAL.editColor.maker[3] = e.value;
-		
+
 			// Load Language lng
 			scope lngFilePath = new FilePath( "settings/language/" ~ GLOBAL.language ~ ".lng" );
 			if( lngFilePath.exists() )
@@ -936,7 +936,14 @@ struct IDECONFIG
 							int assignIndex = Util.index( s, "=" );
 							if( assignIndex < s.length )
 							{
-								GLOBAL.languageItems[Util.trim( s[0..assignIndex] )] = Util.trim( s[assignIndex+1..$] );
+								try
+								{
+									GLOBAL.languageItems[Util.trim( s[0..assignIndex] )] = Util.trim( s[assignIndex+1..$] );
+								}
+								catch( Exception e )
+								{
+									IupMessage( toStringz( "Language Error!" ), toStringz( Util.trim( s[0..assignIndex] ) ~ "=Error" ) );
+								}
 							}
 						}
 					}

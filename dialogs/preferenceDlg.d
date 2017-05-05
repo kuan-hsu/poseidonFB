@@ -1482,7 +1482,7 @@ extern(C) // Callback for CPreferenceDialog
 						}
 					}
 
-					char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[item-1].name, strings[0], Bold, Italic, Underline, Strikeout, size );
+					char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.languageItems[GLOBAL.fonts[item-1].name].toDString, strings[0], Bold, Italic, Underline, Strikeout, size );
 					IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
 				}
 				else
@@ -1512,7 +1512,7 @@ extern(C) // Callback for CPreferenceDialog
 						}
 
 						fontName = Util.trim( fontName );
-						char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.fonts[item-1].name, fontName, Bold, Italic, Underline, Strikeout, size );
+						char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.languageItems[GLOBAL.fonts[item-1].name].toDString, fontName, Bold, Italic, Underline, Strikeout, size );
 						IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
 					}
 				}			
@@ -1580,7 +1580,7 @@ extern(C) // Callback for CPreferenceDialog
 							if( s.length )	result ~= ( " " ~ s );
 						}
 
-						GLOBAL.fonts[i].name = Util.trim( fontInformation[0..10] );
+						//GLOBAL.fonts[i].name = Util.trim( fontInformation[0..10] );
 						GLOBAL.fonts[i].fontString = result;
 					}
 				}		
