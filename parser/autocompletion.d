@@ -273,46 +273,6 @@ struct AutoComplete
 		return results;
 	}
 
-	static CASTnode checkScopeNode( Ihandle* iupSci, CASTnode head, int line )
-	{
-		CASTnode nextNode;
-		
-		// Whole Word
-		IupScintillaSendMessage( iupSci, 2198, 2, 0 );	// SCI_SETSEARCHFLAGS = 2198,
-		
-		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
-		int currentPos = ScintillaAction.getCurrentPos( iupSci );
-		
-		foreach_reverse( CASTnode child; head.getChildren() )
-		{
-			if( child.kind == B_SCOPE )
-			{
-				if( child.lineNumber < line )
-				{
-					int startPos;
-					if( nextNode is null ) startPos = documentLength - 1;else startPos = IupScintillaSendMessage( iupSci, 2167, nextNode.lineNumber, 0 ); // SCI_POSITIONFROMLINE = 2167,
-					
-					int endPos = IupScintillaSendMessage( iupSci, 2167, child.lineNumber, 0 ); // SCI_POSITIONFROMLINE = 2167,
-
-					IupScintillaSendMessage( iupSci, 2190, startPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( iupSci, 2192, endPos, 0 );							// SCI_SETTARGETEND = 2192,
-
-					int posEndScope = cast(int) IupScintillaSendMessage( iupSci, 2197, 9, cast(int) GLOBAL.cString.convert( "end scope" ) ); // SCI_SEARCHINTARGET = 2197,
-
-					if( posEndScope > endPos )
-					{
-						if( currentPos < posEndScope && currentPos > endPos )
-						{
-							if( child.getChildrenCount > 0 ) return checkScopeNode( iupSci, child, line ); else return child;
-						}
-					}
-				}
-			}
-
-			nextNode = child;
-		}
-		return head;
-	}		
 
 	static CASTnode[] getMatchASTfromWholeWord( CASTnode node, char[] word, int line, int B_KIND )
 	{
@@ -1298,21 +1258,6 @@ struct AutoComplete
 		return pos;
 	}	
 
-	static CASTnode getTitleAST( Ihandle* iupSci, int pos, CASTnode head )
-	{
-		int _kind;
-		
-		char[] titleName = getFunctionTitle( iupSci, pos, _kind );
-		if( titleName.length )
-		{
-			int	lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-			return getFunctionAST( head, _kind, lowerCase( titleName ), lineNum );
-		}
-
-		return null;
-	}
-
-
 	static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 	{
 		int		countParen, countBracket;
@@ -1612,7 +1557,53 @@ struct AutoComplete
 				/*char[][] splitWord = Util.split( word, "." );
 				if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );*/
 				char[][]	splitWord = getDivideWord( word );
+				int			lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], lineNum );
+				char[]		memberFunctionMotherName;
 
+				if( !splitWord[0].length )
+				{
+					if( AST_Head.kind & B_WITH )
+					{
+						char[][] splitWithTile = getDivideWord( AST_Head.name );
+						char[][] tempSplitWord = splitWord;
+						splitWord.length = 0;						
+						foreach( char[] s; splitWithTile ~ tempSplitWord )
+						{
+							if( s != "" ) splitWord ~= s;
+						}						
+					}
+				}
+				
+				// Get memberFunctionMotherName
+				auto _fatherNode = AST_Head;
+				if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+				{
+					do
+					{
+						if( _fatherNode.getFather !is null ) _fatherNode = _fatherNode.getFather; else break;
+					}
+					while( _fatherNode.kind & ( B_WITH | B_SCOPE ) )
+				}
+				
+				if( !_fatherNode.name.length )
+				{
+					if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
+					{
+						memberFunctionMotherName = _fatherNode.name;
+					}					
+				}
+				else
+				{
+					int dotPos = Util.index( _fatherNode.name, "." );
+					if( dotPos < _fatherNode.name.length )
+					{
+						memberFunctionMotherName = _fatherNode.name[0..dotPos];
+					}
+				}
+
+				
+				/+
 				if( !splitWord[0].length )
 				{
 					if( checkWithBlock( iupSci, pos ) )
@@ -1638,6 +1629,9 @@ struct AutoComplete
 				char[]			functionTitle = lowerCase( getFunctionTitle( iupSci, pos, titleKind ) );
 				int				lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 				char[]			memberFunctionMotherName;
+				+/
+				
+				/+
 
 				if( functionTitle.length )
 				{
@@ -1660,7 +1654,8 @@ struct AutoComplete
 				else
 				{
 					AST_Head = checkScopeNode( iupSci, AST_Head, lineNum );
-				}				
+				}
+				+/
 
 				if( AST_Head is null )
 				{
@@ -1732,7 +1727,7 @@ struct AutoComplete
 
 
 								if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
-
+//IupMessage("",toStringz(AST_Head.name));
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
 								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
 
@@ -1997,7 +1992,67 @@ struct AutoComplete
 					}
 				}
 
-				auto			AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
+				// Divide word
+				int			lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], lineNum );
+				char[]		memberFunctionMotherName;
+
+				if( !splitWord[0].length )
+				{
+					if( AST_Head.kind & B_WITH )
+					{
+						char[][] splitWithTile = getDivideWord( AST_Head.name );
+						char[][] tempSplitWord = splitWord;
+						splitWord.length = 0;						
+						foreach( char[] s; splitWithTile ~ tempSplitWord )
+						{
+							if( s != "" ) splitWord ~= s;
+						}						
+					}
+				}
+				
+				// Get memberFunctionMotherName
+				auto _fatherNode = AST_Head;
+				if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+				{
+					do
+					{
+						if( _fatherNode.getFather !is null ) _fatherNode = _fatherNode.getFather; else break;
+					}
+					while( _fatherNode.kind & ( B_WITH | B_SCOPE ) )
+				}
+				
+				if( !_fatherNode.name.length )
+				{
+					if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
+					{
+						memberFunctionMotherName = _fatherNode.name;
+					}					
+				}
+				else
+				{
+					int dotPos = Util.index( _fatherNode.name, "." );
+					if( dotPos < _fatherNode.name.length )
+					{
+						memberFunctionMotherName = _fatherNode.name[0..dotPos];
+					}
+				}
+				/*
+				if( AST_Head.name.length )
+				{
+					int dotPos = Util.index( AST_Head.name, "." );
+					if( dotPos < AST_Head.name.length )
+					{
+						memberFunctionMotherName = AST_Head.name[0..dotPos];
+					}
+					else
+					{
+						// check Constructor or Destructor
+						if( AST_Head.kind & ( B_CTOR | B_DTOR ) ) memberFunctionMotherName = AST_Head.name;
+					}
+				}
+				*/
+				
 
 				// Goto Includes
 				if( bDefintion )
@@ -2010,36 +2065,6 @@ struct AutoComplete
 						actionManager.ScintillaAction.openFile( fullPath );
 						return;
 					}			
-				}
-
-				int 			titleKind;
-				char[]			functionTitle = lowerCase( getFunctionTitle( cSci.getIupScintilla, currentPos, titleKind ) );
-				char[]			memberFunctionMotherName;
-				int				lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-
-				//if( functionTitle.length ) AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
-				if( functionTitle.length )
-				{
-					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
-					CASTnode functionHeadNode = getFunctionAST( AST_Head, titleKind, functionTitle, lineNum );
-					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
-					AST_Head = checkScopeNode( cSci.getIupScintilla, AST_Head, lineNum );
-					
-					int dotPos = Util.index( functionTitle, "." );
-					if( dotPos < functionTitle.length )
-					{
-						memberFunctionMotherName = functionTitle[0..dotPos];
-
-					}
-					else
-					{
-						// check Constructor or Destructor
-						if( titleKind & ( B_CTOR | B_DTOR ) ) memberFunctionMotherName = functionTitle;
-					}
-				}
-				else
-				{
-					AST_Head = checkScopeNode( cSci.getIupScintilla, AST_Head, lineNum );
 				}
 
 				if( AST_Head is null ) return;

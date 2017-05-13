@@ -15,6 +15,7 @@ class CSearchDialog : CBaseDialog
 	Ihandle*			listFind, listReplace;
 	Ihandle*			labelStatus;
 	IupString[2]		cStrings;
+	IupString			statusString;
 
 	void createLayout()
 	{
@@ -159,6 +160,9 @@ class CSearchDialog : CBaseDialog
 		IupSetAttribute( _dlg, "ICON", "icon_find" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "TOPMOST", "YES" );
+		
+		statusString = new IupString;
+		
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -205,7 +209,8 @@ class CSearchDialog : CBaseDialog
 
 	void setStatusBar( char[] text )
 	{
-		IupSetAttribute( labelStatus, "TITLE", toStringz( text.dup ) );
+		statusString = text;
+		IupSetAttribute( labelStatus, "TITLE", statusString.toCString );
 	}
 }
 

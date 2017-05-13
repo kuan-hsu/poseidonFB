@@ -1416,6 +1416,62 @@ struct ToolAction
 	}	
 }
 
+
+struct ParserAction
+{
+	private:
+	import scintilla;
+	import parser.ast;
+
+	public:
+	static CASTnode getActiveParseAST()
+	{
+		CScintilla cSci = ScintillaAction.getActiveCScintilla();
+		
+		if( cSci !is null )
+		{
+			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager ) return GLOBAL.parserManager[upperCase( cSci.getFullPath )];
+		}
+
+		return null;
+	}
+	
+	static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line )
+	{
+		if( _fatherNode !is null )
+		{
+			//if( _fatherNode.kind & (D_CTOR | D_DTOR ) )
+			//	IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
+
+			
+			if( _fatherNode.kind & ( B_BAS | B_BI | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE ) )
+			{
+				if( line > _fatherNode.lineNumber && line < _fatherNode.endLineNum )
+				{
+					//IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
+					
+					foreach_reverse( CASTnode _node; _fatherNode.getChildren() )
+					{
+						//IupMessage("_node",toStringz( _node.name ~ " " ~ Integer.toString( _node.lineNumber ) ~ "~" ~ Integer.toString( _node.endLineNum )  ) );
+						
+						auto _result = getActiveASTFromLine( _node, line );
+						if( _result !is null ) 
+						{
+							//IupMessage("",toStringz( Integer.toString( _result.lineNumber ) ~ "~" ~ Integer.toString( _result.endLineNum )  ) );
+							return _result;
+						}
+					}
+
+					return _fatherNode;
+				}
+			}
+		}
+
+		return null;
+	}	
+}
+
+
 // Action for FILE operate
 struct SearchAction
 {

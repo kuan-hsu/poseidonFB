@@ -2244,7 +2244,28 @@ class CParser
 		}
 
 		return true;
-	}	
+	}
+	
+	bool parseWith()
+	{
+		parseToken( TOK.Twith );
+		
+		if( token().tok == TOK.Tidentifier )
+		{
+			char[] user_defined_var;
+			do
+			{
+				user_defined_var ~= token().identifier;
+				parseToken();
+			}
+			while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+				
+			activeASTnode = activeASTnode.addChild( user_defined_var, B_WITH, null, null, null, token().lineNumber );
+			parseToken( TOK.Tidentifier );
+			return true;
+		}
+		return false;
+	}
 	
 	bool parseEnd()
 	{
@@ -2254,7 +2275,7 @@ class CParser
 
 			switch( token().tok )
 			{
-				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope:
+				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope, TOK.Twith:
 					parseToken();
 					if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 
@@ -2392,6 +2413,10 @@ class CParser
 
 				case TOK.Tscope:
 					parseScope();
+					break;
+					
+				case TOK.Twith:
+					parseWith();
 					break;
 
 				case TOK.Tnamespace:

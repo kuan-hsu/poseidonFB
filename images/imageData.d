@@ -148,6 +148,7 @@ void load_all_images_icons()
 	IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
 	IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );// IupSetHandle("IUP_define_fun", load_image_define_fun());
 	IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
+	IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
 
 
 	IupSetHandle( "icon_debug_until", XPM.getIUPimage( "icons/xpm/debug/until.xpm" ) );//IupSetHandle("icon_debug_until", load_image_until());

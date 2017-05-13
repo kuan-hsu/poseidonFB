@@ -146,51 +146,18 @@ struct LiveParser
 				int	currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 				char[] currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
 				debug IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "CurrentLineText: " ~ currentLineText ~ "(" ~ Integer.toString(currentLineNum) ~ ")" ) );
-
+				
+				/*
 				CASTnode 	oldHead;
 				int			B_KIND;
-
-
-				if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
-				{
-					char[] titleName = AutoComplete.getFunctionTitle( cSci.getIupScintilla, currentPos, B_KIND );
-					if( titleName.length )
-					{
-						int	lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-						oldHead = AutoComplete.getFunctionAST( GLOBAL.parserManager[upperCase( cSci.getFullPath )], B_KIND, lowerCase( titleName ), lineNum );
-					}
-
-					//oldHead = AutoComplete.getTitleAST( cSci.getIupScintilla, currentPos, GLOBAL.parserManager[upperCase( cSci.getFullPath )] );
-					if( oldHead is null ) oldHead = GLOBAL.parserManager[upperCase( cSci.getFullPath )];// else IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ oldHead.name  ~ " : " ~ oldHead.type ) );
-				}
-				else
-				{
-					return;
-				}
-
-				if( oldHead is null )
-				{
-					debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ "No oldHead" ) );
-					return;
-				}
-				/*
-				else
-				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ oldHead.name  ~ " : " ~ oldHead.type ) );
-				}
-				*/
+				*/				
 				
-				CASTnode newHead;
-				if( B_KIND & ( B_TYPE | B_UNION | B_ENUM ) )
-				{
-					if( oldHead.lineNumber == oldHead.endLineNum ) return; // Not Complete Block
-					newHead = GLOBAL.outlineTree.parserText( currentLineText, B_KIND );
-				}
-				else
-				{
-					newHead = GLOBAL.outlineTree.parserText( currentLineText );
-				}
+				CASTnode 	oldHead = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), currentLineNum );
+
+				if( oldHead is null ) return;
 				
+				CASTnode	newHead = GLOBAL.outlineTree.parserText( currentLineText );
+
 				if( newHead !is null )
 				{
 					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr

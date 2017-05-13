@@ -213,7 +213,7 @@ struct XPM
 			class_obj_rgba, struct_private_obj_rgba, struct_protected_obj_rgba, struct_obj_rgba,  
 			union_private_obj_rgba,
 			union_protected_obj_rgba, union_obj_rgba, enum_private_obj_rgba, enum_protected_obj_rgba, enum_obj_rgba,
-			normal_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
+			normal_rgba, with_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
 			functionpointer_obj_rgba, namespace_obj_rgba, property_rgba, property_var_rgba, define_var_rgba, define_fun_rgba,
 			bookmark_rgba;
 
@@ -358,6 +358,7 @@ struct XPM
 		normal_rgba						= getRGBA( "icons/xpm/outline/normal.xpm" );
 		//import_rgba					= getRGBA( "icons/xpm/import.xpm" );
 		//autoWord_rgba					= getRGBA( "icons/xpm/autoword.xpm" );
+		with_rgba						= getRGBA( "icons/xpm/outline/with.xpm" );
 		
 		parameter_rgba					= getRGBA( "icons/xpm/outline/parameter_obj.xpm" );
 		enum_member_obj_rgba			= getRGBA( "icons/xpm/outline/enum_member_obj.xpm" );
