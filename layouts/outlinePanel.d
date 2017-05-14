@@ -614,8 +614,11 @@ class COutline
 		{
 			Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
 			if( tree != null )
+			{
+				int id = IupGetInt( tree, "VALUE" );
+				
+				if( id <= 0 )
 				{
-					
 					if( fromStringz( IupGetAttributeId( tree, "STATE", 0 ) ) == "EXPANDED" )
 						IupSetAttribute( tree, "EXPANDALL", "NO" );
 					else
@@ -624,9 +627,34 @@ class COutline
 						IupSetAttribute( tree, "TOPITEM", "YES" ); // Set position to top
 					}
 				}
-			
+				else
+				{
+					int 	nowDepth = IupGetIntId( tree, "DEPTH", id );
+					char*	nowState = IupGetAttributeId( tree, "STATE", id );
+					
+					if( nowState != null )
+					{
+						for( int i = IupGetInt( tree, "COUNT" ) - 1; i > 0; --i )
+						{
+							if( IupGetIntId( tree, "DEPTH", i ) == nowDepth )
+							{
+								if( IupGetIntId( tree, "CHILDCOUNT", i ) > 0 )
+								{
+									if( fromStringz( IupGetAttributeId( tree, "KIND", i ) ) == "BRANCH" )
+									{
+										if( fromStringz( nowState ) == "EXPANDED" )
+											IupSetAttributeId( tree, "STATE", i, "COLLAPSED" );
+										else
+											IupSetAttributeId( tree, "STATE", i, "EXPANDED" );
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		});
-
+		
 		Ihandle* outlineButtonPR = IupButton( null, "PR" );
 		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_pr" );
 		IupSetAttribute( outlineButtonPR, "TIP", GLOBAL.languageItems["showpr"].toCString );
@@ -688,6 +716,7 @@ class COutline
 
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
 		IupSetCallback( outlineTreeNodeList, "ACTION",cast(Icallback) &COutline_List_ACTION );
+		
 
 		version(linux)
 		{
@@ -1519,27 +1548,48 @@ extern(C)
 		/+
 		else if( button == 51 ) // IUP_BUTTON3 = '3' = 51
 		{
-			if( id == 0 )
+			if( id > 0 )
 			{
 				if( pressed == 0 )
 				{
-					IupSetAttributeId( ih, "MARKED", id, "YES" );
-
-					Ihandle* itemRefresh = IupItem( "Refresh", null );
-					IupSetCallback( itemRefresh, "ACTION", cast(Icallback) &COutline_refresh );
-					IupSetHandle( "outline_rightclick", ih );
-
-					Ihandle* itemExpand = IupItem( "Expand/Contract All", null );
-					IupSetCallback( itemExpand, "ACTION", cast(Icallback) &COutline_expand );
-					IupSetHandle( "outline_rightclickexpand", ih );
-					/*
-					Ihandle* itemSearch = IupItem( "Mark Search", null );
-					IupSetCallback( itemSearch, "ACTION", cast(Icallback) &COutline_search );
-					IupSetHandle( "outline_search", ih );
-					*/
-
-					Ihandle* popupMenu = IupMenu( 	itemRefresh,
-													itemExpand,
+					version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
+					
+					
+					if( IupGetIntId( ih, "CHILDCOUNT", id ) == 0 ) return IUP_DEFAULT;
+					
+					GLOBAL.outlineTree.nowDepth = IupGetIntId( ih, "DEPTH", id );
+					GLOBAL.outlineTree.nowState = IupGetAttributeId( ih, "STATE", id );
+					
+					if( GLOBAL.outlineTree.nowState == null ) return IUP_DEFAULT;
+					
+					Ihandle* itemExpand = IupItem( "Expand/Contract This Depth", null );
+					IupSetCallback( itemExpand, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
+						
+						if( actTree != null )
+						{
+							//bool bEqual;
+							for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+							{
+								if( IupGetIntId( actTree, "DEPTH", i ) == GLOBAL.outlineTree.nowDepth )
+								{
+									if( IupGetIntId( actTree, "CHILDCOUNT", i ) > 0 )
+									{
+										if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "BRANCH" )
+										{
+											if( fromStringz( GLOBAL.outlineTree.nowState ) == "EXPANDED" )
+												IupSetAttributeId( actTree, "STATE", i, "COLLAPSED" );
+											else
+												IupSetAttributeId( actTree, "STATE", i, "EXPANDED" );
+										}
+									}
+								}
+							}
+						}
+					});					
+					
+					Ihandle* popupMenu = IupMenu( 	itemExpand,
 													/*IupSeparator(),
 													itemSearch,*/
 													null

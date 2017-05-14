@@ -58,8 +58,11 @@ class CProjectTree
 		{
 			Ihandle* tree = GLOBAL.projectTree.getTreeHandle();
 			if( tree != null )
+			{
+				int id = IupGetInt( tree, "VALUE" );
+				
+				if( id <= 0 )
 				{
-					
 					if( fromStringz( IupGetAttributeId( tree, "STATE", 0 ) ) == "EXPANDED" )
 						IupSetAttribute( tree, "EXPANDALL", "NO" );
 					else
@@ -68,7 +71,32 @@ class CProjectTree
 						IupSetAttribute( tree, "TOPITEM", "YES" ); // Set position to top
 					}
 				}
-			
+				else
+				{
+					int 	nowDepth = IupGetIntId( tree, "DEPTH", id );
+					char*	nowState = IupGetAttributeId( tree, "STATE", id );
+					
+					if( nowState != null )
+					{
+						for( int i = IupGetInt( tree, "COUNT" ) - 1; i > 0; --i )
+						{
+							if( IupGetIntId( tree, "DEPTH", i ) == nowDepth )
+							{
+								if( IupGetIntId( tree, "CHILDCOUNT", i ) > 0 )
+								{
+									if( fromStringz( IupGetAttributeId( tree, "KIND", i ) ) == "BRANCH" )
+									{
+										if( fromStringz( nowState ) == "EXPANDED" )
+											IupSetAttributeId( tree, "STATE", i, "COLLAPSED" );
+										else
+											IupSetAttributeId( tree, "STATE", i, "EXPANDED" );
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		});
 
 		Ihandle* projectButtonHide = IupButton( null, null );
