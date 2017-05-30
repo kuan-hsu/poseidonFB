@@ -254,6 +254,7 @@ extern(C)
 						}
 					}
 					
+					/+
 					// BRACEMATCH
 					if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
 					{
@@ -277,7 +278,8 @@ extern(C)
 								}
 							}
 						}
-					}		
+					}
+					+/
 					
 					if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{

@@ -489,7 +489,7 @@ struct ScintillaAction
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
 				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
 				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
-			}			
+			}		
 
 			return true;
 		}
@@ -1674,10 +1674,10 @@ struct SearchAction
 				}
 
 				File.set( fullPath, document );
-				if( lowerCase( fullPath ) in GLOBAL.scintillaManager )
+				if( upperCase( fullPath ) in GLOBAL.scintillaManager )
 				{
-					GLOBAL.scintillaManager[lowerCase( fullPath )].setText( document );
-					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[lowerCase( fullPath )] );
+					GLOBAL.scintillaManager[upperCase( fullPath )].setText( document );
+					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase( fullPath )] );
 					
 				}
 				return count;

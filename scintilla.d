@@ -1083,6 +1083,7 @@ extern(C)
 					IupDestroy( pixelsImage[i] );
 				}				
 			}
+			/+
 			else if( button == '1' )
 			{
 				// BRACEMATCH
@@ -1108,6 +1109,7 @@ extern(C)
 					}
 				}
 			}
+			+/
 			else if( button == '2' )
 			{
 				if( GLOBAL.editorSetting00.MultiSelection == "ON" )
@@ -1770,7 +1772,33 @@ extern(C)
 	// Auto Ident
 	private int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )
 	{
-		IupSetInt( ih, "BRACEBADLIGHT", -1 );
+		//IupSetInt( ih, "BRACEBADLIGHT", -1 );
+		// BRACEMATCH
+		if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
+		{
+			IupSetInt( ih, "BRACEBADLIGHT", -1 );
+			if( !actionManager.ScintillaAction.isComment( ih, pos ) )
+			{
+				//int pos = actionManager.ScintillaAction.getCurrentPos( ih );
+				int close = IupGetIntId( ih, "BRACEMATCH", pos );
+				if( close > -1 )
+				{
+					IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+				}
+				else
+				{
+					if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
+					{
+						--pos;
+						close = IupGetIntId( ih, "BRACEMATCH", pos );
+						if( close > -1 )
+						{
+							IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+						}
+					}
+				}
+			}
+		}			
 		
 		if( AutoComplete.bEnter )
 		{

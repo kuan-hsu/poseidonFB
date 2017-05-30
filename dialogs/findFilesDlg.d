@@ -30,13 +30,17 @@ class CFindInFilesDialog : CBaseDialog
 		listFind = IupList( null );
 		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
 		IupSetHandle( "CFindInFilesDialog_listFind", listFind );
-		Ihandle* hBox00 = IupHbox( IupLabel( cStrings[0].toCString ), listFind, null );
+		Ihandle* label00 = IupLabel( cStrings[0].toCString );
+		IupSetAttribute( label00, "SIZE", "60x12" );
+		Ihandle* hBox00 = IupHbox( label00, listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 
 		listReplace = IupList( null );
 		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
 		IupSetHandle( "CFindInFilesDialog_listReplace", listReplace );
-		Ihandle* hBox01 = IupHbox( IupLabel( cStrings[1].toCString ), listReplace, null );
+		Ihandle* label01 = IupLabel( cStrings[1].toCString );
+		IupSetAttribute( label01, "SIZE", "60x12" );
+		Ihandle* hBox01 = IupHbox( label01, listReplace, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
 
 

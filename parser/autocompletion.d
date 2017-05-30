@@ -1586,19 +1586,19 @@ struct AutoComplete
 					while( _fatherNode.kind & ( B_WITH | B_SCOPE ) )
 				}
 				
-				if( !_fatherNode.name.length )
+				if( _fatherNode.name.length )
 				{
 					if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
 					{
 						memberFunctionMotherName = _fatherNode.name;
-					}					
-				}
-				else
-				{
-					int dotPos = Util.index( _fatherNode.name, "." );
-					if( dotPos < _fatherNode.name.length )
+					}
+					else
 					{
-						memberFunctionMotherName = _fatherNode.name[0..dotPos];
+						int dotPos = Util.index( _fatherNode.name, "." );
+						if( dotPos < _fatherNode.name.length )
+						{
+							memberFunctionMotherName = _fatherNode.name[0..dotPos];
+						}
 					}
 				}
 
@@ -1727,7 +1727,7 @@ struct AutoComplete
 
 
 								if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
-//IupMessage("",toStringz(AST_Head.name));
+								//IupMessage("",toStringz(AST_Head.name));
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
 								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
 
@@ -2022,21 +2022,22 @@ struct AutoComplete
 					while( _fatherNode.kind & ( B_WITH | B_SCOPE ) )
 				}
 				
-				if( !_fatherNode.name.length )
+				
+				if( _fatherNode.name.length )
 				{
 					if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
 					{
 						memberFunctionMotherName = _fatherNode.name;
-					}					
-				}
-				else
-				{
-					int dotPos = Util.index( _fatherNode.name, "." );
-					if( dotPos < _fatherNode.name.length )
-					{
-						memberFunctionMotherName = _fatherNode.name[0..dotPos];
 					}
-				}
+					else
+					{
+						int dotPos = Util.index( _fatherNode.name, "." );
+						if( dotPos < _fatherNode.name.length )
+						{
+							memberFunctionMotherName = _fatherNode.name[0..dotPos];
+						}
+					}
+				}				
 				/*
 				if( AST_Head.name.length )
 				{
