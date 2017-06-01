@@ -427,7 +427,15 @@ class COutline
 				case B_SCOPE:
 					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, null );
 					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-					break;		
+					break;
+					
+				case B_TYPE, B_CLASS:
+					if( _node.base.length )
+					{
+						IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ " : " ~ _node.base ) );
+						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+						break;
+					}
 
 				default:
 					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
@@ -543,6 +551,14 @@ class COutline
 					IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
+					
+				case B_TYPE, B_CLASS:
+					if( _node.base.length )
+					{
+						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ " : " ~ _node.base ) );
+						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+						break;
+					}
 
 				default:
 					bNoImage = true;

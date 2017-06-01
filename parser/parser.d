@@ -1759,6 +1759,7 @@ class CParser
 
 					case TOK.Tstatic:
 						parseToken( TOK.Tstatic );
+						break;
 
 					case TOK.Tdeclare:
 						parseToken( TOK.Tdeclare );
@@ -1836,6 +1837,16 @@ class CParser
 							if( _type.length )
 							{
 								parseToken();
+								
+								if( _type == "string" || _type == "zstring" || _type == "wstring" )
+								{
+									if( token().tok == TOK.Ttimes )
+									{
+										parseToken( TOK.Ttimes );
+										parseToken(); // TOK.Tnumber or	TOK.Tidentifier
+									}
+								}
+								
 								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
 								{
 									_type ~= "*";

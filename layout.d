@@ -187,7 +187,7 @@ extern(C)
 	
 	int mainDialog_RESIZE_cb( Ihandle *ih, int width, int height )
 	{
-		if( GLOBAL.editorSetting01.PLACEMENT != "MAXIMIZED" ) GLOBAL.editorSetting01.RASTERSIZE = Integer.toString( width ) ~ "x" ~ Integer.toString( height );
+		if( GLOBAL.editorSetting01.PLACEMENT != "MAXIMIZED" ) GLOBAL.editorSetting01.RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE") ); //Integer.toString( width ) ~ "x" ~ Integer.toString( height );
 		return IUP_DEFAULT;
 	}
 	
