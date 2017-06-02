@@ -338,19 +338,12 @@ class CParser
 							
 							_param ~= token().identifier;
 							parseToken();
-
-							if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal )
-							{
-								//_param ~= token().identifier;
+							
+							
+							if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) 
 								parseToken();
-							}
-
-							// like " Declare Function app_oninit_cb WXCALL () As wxBool "
-							if( token().tok == TOK.Tidentifier )
-							{
-								_param ~= ( " " ~ token().identifier );
+							else if( token().tok == TOK.Tidentifier ) // like " Declare Function app_oninit_cb WXCALL () As wxBool "
 								parseToken( TOK.Tidentifier );
-							}
 
 							// Overload
 							if( token().tok == TOK.Toverload )
@@ -1456,21 +1449,40 @@ class CParser
 						_name ~= token().identifier;
 						parseToken( TOK.Tidentifier );
 					}
-
-					if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) parseToken();
-
-					// like " Declare Function app_oninit_cb WXCALL () As wxBool "
-					if( token().tok == TOK.Tidentifier ) parseToken( TOK.Tidentifier );	
+					
+					/+
+					// Lazy GO!!!^^
+					while( token().tok != TOK.Teol && token().tok != TOK.Topenparen && token().tok != TOK.Tcolon )
+					{
+						parseToken();
+					}
+					+/
+					
+					if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) 
+						parseToken();
+					else if( token().tok == TOK.Tidentifier ) // like " Declare Function app_oninit_cb WXCALL () As wxBool "
+						parseToken( TOK.Tidentifier );
 
 					// Overload
 					if( token().tok == TOK.Toverload ) parseToken( TOK.Toverload );
-
+					
+					// Lib "..."
+					if( bDeclare )
+					{
+						if( token().tok == TOK.Tlib )
+						{
+							parseToken( TOK.Tlib );
+							if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return false;
+						}
+					}
+					
 					// Alias "..."
 					if( token().tok == TOK.Talias )
 					{
 						parseToken( TOK.Talias );
 						if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return false;
 					}
+					
 
 					activeASTnode = activeASTnode.addChild( _name, _kind, _protection, null, null, _lineNum );
 
@@ -1895,11 +1907,11 @@ class CParser
 		{
 			if( token().tok == TOK.Tfunction ) _kind = B_FUNCTION; else _kind = B_SUB;
 			parseToken();
-
-			if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) parseToken();
-
-			// like " Declare Function app_oninit_cb WXCALL () As wxBool "
-			if( token().tok == TOK.Tidentifier ) parseToken( TOK.Tidentifier );	
+			
+			if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) 
+				parseToken();
+			else if( token().tok == TOK.Tidentifier ) // like " Declare Function app_oninit_cb WXCALL () As wxBool "
+				parseToken( TOK.Tidentifier );			
 
 			// Overload
 			if( token().tok == TOK.Toverload ) parseToken( TOK.Toverload );

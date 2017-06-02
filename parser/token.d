@@ -153,6 +153,7 @@ enum TOK
 	Tdefine,
 	Tmacro,
 	Tendmacro,
+	Tlib,
 	
 	//Tinclib,
 	Tnamespace,
@@ -328,6 +329,7 @@ static this()
 	identToTOK["define"]		= TOK.Tdefine;
 	identToTOK["macro"]			= TOK.Tmacro;
 	identToTOK["endmacro"]		= TOK.Tendmacro;
+	identToTOK["lib"]			= TOK.Tlib;
 
 	identToTOK["namespace"]		= TOK.Tnamespace;
 }
