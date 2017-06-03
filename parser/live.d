@@ -145,7 +145,6 @@ struct LiveParser
 				
 				int	currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 				char[] currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
-				debug IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "CurrentLineText: " ~ currentLineText ~ "(" ~ Integer.toString(currentLineNum) ~ ")" ) );
 				
 				/*
 				CASTnode 	oldHead;
@@ -172,7 +171,6 @@ struct LiveParser
 					{
 						delete newHead;
 						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
-						debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum ) ~ " " ~ "No child, Parse Error" ) );
 						return;
 					}
 
@@ -190,7 +188,6 @@ struct LiveParser
 						node.lineNumber = currentLineNum;
 						node.endLineNum = node.lineNumber;
 						newChildren ~= node;
-						debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "New Node :" ~ Integer.toString(currentLineNum) ~ " " ~ node.name  ~ " : " ~ node.type ) );
 					}
 
 					if( newChildren.length )
@@ -212,13 +209,9 @@ struct LiveParser
 					}
 					
 					delete newHead;
-					
-
-					debug IupMessage( "", toStringz( oldHead.name ~ " " ~ Integer.toString( oldHead.getChildrenCount ) ) );
 				}
 				else
 				{
-					debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ "Parse NUll" ) );
 				}
 			}
 		}
