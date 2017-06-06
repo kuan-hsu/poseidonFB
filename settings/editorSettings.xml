@@ -17,7 +17,7 @@
     <customtools id="8" name="" dir="" args=""/>
     <customtools id="9" name="" dir="" args=""/>
     <toggle00 LineMargin="ON" BookmarkMargin="ON" FoldMargin="ON" IndentGuide="ON" CaretLine="ON" WordWrap="OFF" TabUseingSpace="OFF" AutoIndent="ON" ShowEOL="OFF" ShowSpace="OFF" AutoEnd="OFF" TabWidth="4" ColumnEdge="0" EolType="0" ColorOutline="ON" Message="OFF" BoldKeyword="OFF" BraceMatchHighlight="ON" BraceMatchDoubleSidePos="ON" MultiSelection="OFF"/>
-    <size01 PLACEMENT="MAXIMIZED" RASTERSIZE="1237x740" ExplorerSplit="212" MessageSplit="880" FileListSplit="971" OutlineWindow="ON" MessageWindow="ON"/>
+    <size01 PLACEMENT="MAXIMIZED" RASTERSIZE="1646x972" ExplorerSplit="212" MessageSplit="880" FileListSplit="971" OutlineWindow="ON" MessageWindow="ON"/>
     <font Default="Monaco, 9" Document="Fira Code, 9" Leftside="Monaco, 9" Filelist="Calibri, 9" Project="Calibri, 9" Outline="Calibri, 9" Bottom="Monaco, 9" Output="Inconsolata, 9" Search="Inconsolata, 9" Debugger="Inconsolata, 9" Annotation="Fira Code, 10" Manual="Consolas, 9" StatusBar="Monaco, 8"/>
     <color keyword0="5 91 35" keyword1="0 0 255" keyword2="231 144 0" keyword3="16 108 232" template=" " caretLine="255 255 128" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208" selAlpha="64" braceFore="255 0 0" braceBack="187 255 187" errorFore="102 69 3" errorBack="255 200 227" warningFore="0 0 255" warningBack="255 255 157" manualFore="255 255 255" manualBack="80 80 80" scintillaFore="0 0 0" scintillaBack="255 255 255" SCE_B_COMMENT_Fore="0 128 0" SCE_B_COMMENT_Back="255 255 255" SCE_B_NUMBER_Fore="128 128 64" SCE_B_NUMBER_Back="255 255 255" SCE_B_STRING_Fore="128 0 0" SCE_B_STRING_Back="255 255 255" SCE_B_PREPROCESSOR_Fore="0 0 255" SCE_B_PREPROCESSOR_Back="255 255 255" SCE_B_OPERATOR_Fore="160 20 20" SCE_B_OPERATOR_Back="255 255 255" SCE_B_IDENTIFIER_Fore="0 0 0" SCE_B_IDENTIFIER_Back="255 255 255" SCE_B_COMMENTBLOCK_Fore="0 128 0" SCE_B_COMMENTBLOCK_Back="255 255 255" projectFore="0 0 0" projectBack="255 255 255" outlineFore="0 0 0" outlineBack="255 255 255" filelistFore="0 0 0" filelistBack="255 255 255" outputFore="0 0 0" outputBack="255 255 255" searchFore="0 0 0" searchBack="255 255 255" prjTitle="128 0 0" prjSourceType="0 0 255" maker0="200 255 200" maker1="255 200 255" maker2="200 255 255" maker3="255 200 200"/>
     <shortkeys find="C+++F" findinfile="C+S++F" findnext="+++F3" findprev="C+++F3" gotoline="C+++G" undo="C+++Z" redo="C+S++Z" defintion="++A+G" quickrun="+S++F5" run="+++F5" build="+++F6" outlinewindow="+++F11" messagewindow="+++F12" showtype="+++F1" reparse="+++F2" save="C+++S" saveall="C+S++S" close="C+++W" nexttab="C+++TAB" prevtab="C+S++TAB" newtab="C+++N" autocomplete="C+++Q" compilerun="C+++F5" comment="C+++R" backdefinition="+S+A+G" customtool1="C+S++F1" customtool2="C+S++F2" customtool3="C+S++F3" customtool4="C+S++F4" customtool5="C+S++F5" customtool6="C+S++F6" customtool7="C+S++F7" customtool8="C+S++F8" customtool9="C+S++F9"/>
@@ -51,7 +51,6 @@
     <manualshowtype>ON</manualshowtype>
   </manual>
   <recentFiles>
-    <name>E:/CodingPark/MyCode/FB/syderal/source/syderal.bas</name>
     <name>E:/CodingPark/FreeBASIC-1.05.0-win64/inc/freetype2/freetype.bi</name>
     <name>E:/CodingPark/FreeBASIC-1.05.0-win64/inc/GLFW/glfw3.bi</name>
     <name>E:/CodingPark/FreeBASIC-1.05.0-win64/inc/json-c/debug.bi</name>
@@ -59,15 +58,21 @@
     <name>E:/CodingPark/FreeBASIC-1.05.0-win64/inc/json-c/json_util.bi</name>
     <name>E:/CodingPark/FreeBASIC-1.05.0-win64/inc/json-c/linkhash.bi</name>
     <name>E:/CodingPark/FreeBASIC-1.05.0-win64/inc/json-c/json_object.bi</name>
+    <name>E:/CodingPark/FreeBASIC-1.05.0-win64/examples/GUI/IUP/buttons.bas</name>
   </recentFiles>
   <recentProjects>
-    <name>E:/CodingPark/MyCode/FB/iupTest : iupTest</name>
     <name>E:/CodingPark/MyCode/FB/testGFX : testGFX</name>
     <name>E:/CodingPark/MyCode/FB/bullet : bullet</name>
+    <name>E:/CodingPark/MyCode/FB/iupTest : iupTest</name>
+    <name>E:/CodingPark/MyCode/FB/parserFB : parserFB</name>
   </recentProjects>
   <recentOptions>
     <name>-dll</name>
     <name>-p d:\</name>
   </recentOptions>
-  <recentArgs/>
+  <recentArgs>
+    <name>main.bas</name>
+    <name>ast.bi</name>
+    <name>ast.bas</name>
+  </recentArgs>
 </config>

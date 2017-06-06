@@ -19,65 +19,6 @@ struct AutoComplete
 	static char[][]				listContainer;
 	static CASTnode[char[]]		includesMarkContainer;
 
-
-	static char[] searchHead( Ihandle* iupSci, int pos, char[] targetText )
-	{
-		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
-		
-		int posHead = getProcedurePos( iupSci, pos, targetText );
-		if( posHead < 0 ) return null;
-
-		int posEnd = getProcedureTailPos( iupSci, pos, targetText, 0 );//skipCommentAndString( iupSci, pos, "end " ~ targetText, 0 );
-		if( posEnd > posHead ) return null;
-
-
-		char[]	result;
-		bool	bSPACE, bReturnNextWord;
-		for( int i = posHead + targetText.length; i < documentLength; ++i )
-		{
-			char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) );
-
-			//stdout( s ).newline;
-			
-			if( s == " " || s == "\t" )
-			{
-				if( result.length ) break;
-			}
-			else if( s == "(" || s[0] == 13 || s == "\n" )
-			{
-				break;
-			}
-			else
-			{
-				result ~= s;
-			}
-		}
-
-		return Util.trim( result.dup );
-	}
-
-	static bool checkWithBlock( Ihandle* iupSci, int pos )
-	{
-		int posWith		= skipCommentAndString( iupSci, pos, "with", 0 );
-		int posSub		= skipCommentAndString( iupSci, pos, "sub", 0 );
-		int posFunction	= skipCommentAndString( iupSci, pos, "function", 0 );
-		int posProperty	= skipCommentAndString( iupSci, pos, "property", 0 );
-		int posCtor		= skipCommentAndString( iupSci, pos, "constructor", 0 );
-		int posDtor		= skipCommentAndString( iupSci, pos, "destructor", 0 );
-
-		/*
-		IupMessage( "With", toStringz( Integer.toString( posWith ) ) );
-		IupMessage( "Sub", toStringz( Integer.toString( posSub ) ) );
-		IupMessage( "Function", toStringz( Integer.toString( posFunction ) ) );
-		*/
-
-		if( posWith < 0 ) return false;
-
-		if( posWith > posSub && posWith > posFunction && posWith > posProperty && posWith > posCtor && posWith > posDtor ) return true;
-
-		return false;
-	}
-
 	static char[] getListImage( CASTnode node )
 	{
 		if( GLOBAL.toggleShowAllMember == "OFF" )
@@ -1478,6 +1419,7 @@ struct AutoComplete
 			word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 		}
 
+		/+
 		// Check first dot '.' at With Block
 		if( !word.length && bDot )
 		{
@@ -1487,13 +1429,11 @@ struct AutoComplete
 				if( withTitle.length ) word = word ~ withTitle.reverse;
 			}
 		}
-
-		/*
 		if( !bDot && !bCallTip )
 		{
 			if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return null;
 		}
-		*/
+		+/
 
 		word = lowerCase( word.reverse );
 
@@ -2222,239 +2162,7 @@ struct AutoComplete
 		return null;
 	}
 
-	static char[] getFunctionTitle( Ihandle* iupSci, int pos, out int code )
-	{
-		char[] result = searchHead( iupSci, pos, "sub" );
-
-		if( result.length )
-		{
-			code = B_SUB;
-		}
-		else
-		{
-			result = searchHead( iupSci, pos, "function" );
-			if( result.length )
-			{
-				code = B_FUNCTION;
-			}
-			else
-			{
-				result = searchHead( iupSci, pos, "property" );
-				if( result.length )
-				{
-					code = B_PROPERTY;
-				}
-				else
-				{
-					result = searchHead( iupSci, pos, "operator" );
-					if( result.length )
-					{
-						code = B_OPERATOR;
-					}
-					else
-					{
-						result = searchHead( iupSci, pos, "type" );
-						if( result.length )
-						{
-							code = B_TYPE;
-						}
-						else
-						{
-							result = searchHead( iupSci, pos, "union" );
-							if( result.length )
-							{
-								code = B_UNION;
-							}
-							else
-							{
-								result = searchHead( iupSci, pos, "enum" );
-								if( result.length )
-								{
-									code = B_ENUM;
-								}
-								else
-								{
-									result = searchHead( iupSci, pos, "constructor" );
-									if( result.length )
-									{
-										code = B_CTOR | 1;
-									}
-									else
-									{
-										result = searchHead( iupSci, pos, "destructor" );
-										if( result.length )
-										{
-											code = B_DTOR | 1;
-										}
-									}
-								}				
-							}				
-						}				
-					}				
-				}				
-			}
-		}
-		
-		if( result.length )
-		{
-			if( Util.index( result, "." ) < result.length ) code = code | 1;
-		}
-
-		//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Title: " ~ result ) );
-
-		return result;
-	}
-	/+
-	static char[] InsertEnd( Ihandle *iupSci, int lin, int pos )
-	{
-		// #define SCI_LINEFROMPOSITION 2166
-		lin--; // ScintillaAction.getLinefromPos( iupSci, POS ) ) begin from 0
-		
-		int POS		= getProcedurePos( iupSci, pos, "sub" ), rePOS;
-		int	ENDPOS;
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "sub", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 3, "sub" ); else return "end sub";
-			if( POS == rePOS ) return null; else return "end sub";
-		}
-
-		POS		= getProcedurePos( iupSci, pos, "function" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "function", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 8, "function" ); else return "end function";
-			if( POS == rePOS ) return null; else return "end function";
-		}
-		
-		POS		= getProcedurePos( iupSci, pos, "property" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "property", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 8, "property" ); else return "end property";
-			if( POS == rePOS ) return null; else return "end property";
-		}
-		
-		POS		= getProcedurePos( iupSci, pos, "constructor" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "constructor", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 11, "constructor" ); else return "end constructor";
-			if( POS == rePOS ) return null; else return "end constructor";
-		}
-
-		POS		= getProcedurePos( iupSci, pos, "destructor" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "destructor", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 10, "destructor" ); else return "end destructor";
-			if( POS == rePOS ) return null; else return "end destructor";
-		}
-
-		POS		= getProcedurePos( iupSci, pos, "if" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "if", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 2, "if" ); else return "end if";
-			if( POS == rePOS ) return null; else return "end if";
-		}
-		
-		POS		= getProcedurePos( iupSci, pos, "with" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "with", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 4, "with" ); else return "end with";
-			if( POS == rePOS ) return null; else return "end with";
-		}
-
-		POS		= getProcedurePos( iupSci, pos, "select case" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end select";
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "select", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 6, "select case" ); else return "end select";
-			if( POS == rePOS ) return null; else return "end select";
-		}
-		
-		POS		= getProcedurePos( iupSci, pos, "namespace" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "namespace", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 9, "namespace" ); else return "end namespace";
-			if( POS == rePOS ) return null; else return "end namespace";
-		}		
-
-		POS		= getProcedurePos( iupSci, pos, "type" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "type", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 4, "type" ); else return "end type";
-			if( POS == rePOS ) return null; else return "end type";
-		}		
-
-		POS		= getProcedurePos( iupSci, pos, "union" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "union", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 5, "union" ); else return "end union";
-			if( POS == rePOS ) return null; else return "end union";
-		}		
-		
-		POS		= getProcedurePos( iupSci, pos, "extern" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "extern", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 6, "extern" ); else return "end extern";
-			if( POS == rePOS ) return null; else return "end extern";
-		}		
-
-		POS		= getProcedurePos( iupSci, pos, "operator" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-		{
-			ENDPOS	= getProcedureTailPos( iupSci, pos, "operator", 1 );
-			if( ENDPOS > -1 ) rePOS = getProcedurePos( iupSci, ENDPOS - 8, "operator" ); else return "end operator";
-			if( POS == rePOS ) return null; else return "end operator";
-		}		
-
-		POS			= skipCommentAndString( iupSci, pos, "enum", 0 );
-		ENDPOS		= skipCommentAndString( iupSci, pos, "end enum", 0 );
-		if( POS > -1 && POS != ENDPOS + 4)
-			if( lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end enum";
-
-		POS		= skipCommentAndString( iupSci, pos, "scope", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "end scope", 0 );
-		if( POS > -1 && POS != ENDPOS + 4)
-			if( lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end scope";
-
-		POS		= skipCommentAndString( iupSci, pos, "for", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "exit for", 0 );
-		if( POS > -1 && POS != ENDPOS + 5 )
-		{
-			POS		= getProcedurePos( iupSci, pos, "for" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "next";
-		}
-
-
-		POS		= skipCommentAndString( iupSci, pos, "while", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "do while", 0 );
-		if( POS > -1 && POS != ENDPOS + 3 )
-		{
-			POS		= getProcedurePos( iupSci, pos, "while" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "wend";
-		}
-
-		POS		= skipCommentAndString( iupSci, pos, "do", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "exit do", 0 );
-		if( POS > -1 && POS != ENDPOS + 5 )
-		{
-			if( lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "loop";
-		}
-		
-
-		return null;
-	}
-	+/
-
-	static char[] InsertEnd( Ihandle *iupSci, int lin, int pos )
+	static char[] InsertEnd( Ihandle* iupSci, int lin, int pos )
 	{
 		// #define SCI_LINEFROMPOSITION 2166
 		lin--; // ScintillaAction.getLinefromPos( iupSci, POS ) ) begin from 0

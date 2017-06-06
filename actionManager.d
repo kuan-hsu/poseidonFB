@@ -1352,28 +1352,39 @@ struct StatusBarAction
 
 				if( GLOBAL.showFunctionTitle == "ON" )
 				{
-					int _kind;
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "UPDATE STATUS: " ) );
-					IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AutoComplete.getFunctionTitle( cSci.getIupScintilla, ScintillaAction.getCurrentPos( cSci.getIupScintilla ), _kind ) ) );
-
-					if( _kind & B_FUNCTION )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );
-					else if( _kind & B_SUB )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );
-					else if( _kind & B_TYPE )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );
-					else if( _kind & B_ENUM )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );
-					else if( _kind & B_UNION )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );
-					else if( _kind & B_CTOR )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );
-					else if( _kind & B_DTOR )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );
-					else if( _kind & B_PROPERTY )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );
-					else if( _kind & B_OPERATOR )
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );
+					CASTnode 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], line );
+					
+					if( AST_Head !is null )
+					{
+						if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+						{
+							do
+							{
+								if( AST_Head.getFather !is null ) AST_Head = AST_Head.getFather; else break;
+							}
+							while( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+						}
+						
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+						switch( AST_Head.kind )
+						{
+							case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
+							case B_SUB:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );			break;
+							case B_TYPE:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );		break;
+							case B_ENUM:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );			break;
+							case B_UNION:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );		break;
+							case B_CTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );			break;
+							case B_DTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );			break;
+							case B_PROPERTY:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );		break;
+							case B_OPERATOR:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );		break;
+							default:
+								IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
+						}
+					}
+					else
+					{
+						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
+					}
 				}
 			}
 		}
@@ -1436,7 +1447,7 @@ struct ParserAction
 		return null;
 	}
 	
-	static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line )
+	static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line, uint _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE )
 	{
 		if( _fatherNode !is null )
 		{
@@ -1444,7 +1455,7 @@ struct ParserAction
 			//	IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
 
 			
-			if( _fatherNode.kind & ( B_BAS | B_BI | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE ) )
+			if( _fatherNode.kind & _kind )
 			{
 				if( line > _fatherNode.lineNumber && line < _fatherNode.endLineNum )
 				{
@@ -1454,7 +1465,7 @@ struct ParserAction
 					{
 						//IupMessage("_node",toStringz( _node.name ~ " " ~ Integer.toString( _node.lineNumber ) ~ "~" ~ Integer.toString( _node.endLineNum )  ) );
 						
-						auto _result = getActiveASTFromLine( _node, line );
+						auto _result = getActiveASTFromLine( _node, line, _kind );
 						if( _result !is null ) 
 						{
 							//IupMessage("",toStringz( Integer.toString( _result.lineNumber ) ~ "~" ~ Integer.toString( _result.endLineNum )  ) );

@@ -12,7 +12,7 @@ It supports:
 5. Function / Type / Variable... treeview
 7. Find / Replace in document or project
 8. Utf-8/16/32 decode & encode
-9. Debug (only Windows)
+9. Debug
 10. Compile / Quick run / Build project
 11. Self-define short cuts
 12. etc...

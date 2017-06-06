@@ -187,7 +187,12 @@ extern(C)
 	
 	int mainDialog_RESIZE_cb( Ihandle *ih, int width, int height )
 	{
-		if( GLOBAL.editorSetting01.PLACEMENT != "MAXIMIZED" ) GLOBAL.editorSetting01.RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE") ); //Integer.toString( width ) ~ "x" ~ Integer.toString( height );
+		if( GLOBAL.editorSetting01.PLACEMENT != "MAXIMIZED" )
+		{
+			scope rasterSize = new IupString;
+			rasterSize = IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE");
+			GLOBAL.editorSetting01.RASTERSIZE = rasterSize.toDString.dup;
+		}
 		return IUP_DEFAULT;
 	}
 	

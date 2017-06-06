@@ -18,7 +18,7 @@ class CParser
 	
 	TokenUnit token()
 	{
-		if( tokenIndex < tokens.length ) return tokens[tokenIndex]; else throw new Exception( "Method next(), out of range!" );
+		if( tokenIndex < tokens.length ) return tokens[tokenIndex]; else throw new Exception( "Method token(), out of range!" );
 	}
 
 	TokenUnit prev()
@@ -2008,86 +2008,6 @@ class CParser
 						activeASTnode.addChild( _name, B_ALIAS, null, _type, null, _lineNum );
 						return true;
 					}
-
-					/+
-					// Function pointer
-					if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub )
-					{
-						if( token().tok == TOK.Tfunction ) _kind = B_FUNCTION; else _kind = B_SUB;
-						
-						parseToken();
-
-						if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) parseToken();
-
-						// like " Declare Function app_oninit_cb WXCALL () As wxBool "
-						if( token().tok == TOK.Tidentifier ) parseToken( TOK.Tidentifier );	
-
-						// Overload
-						if( token().tok == TOK.Toverload ) parseToken( TOK.Toverload );
-
-						// Alias "..."
-						if( token().tok == TOK.Talias )
-						{
-							parseToken( TOK.Talias );
-							if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return false;
-						}
-
-						char[]  _returnType;
-
-						if( token().tok == TOK.Topenparen ) _param = parseParam( true );
-
-						if( token().tok == TOK.Tas )
-						{
-							parseToken( TOK.Tas );
-
-							if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
-
-							_returnType = getVariableType();
-							if( _returnType.length )
-							{
-								parseToken();
-								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
-								{
-									_returnType ~= "*";
-									parseToken();
-								}
-
-								_type = _returnType ~ _param;
-								activeASTnode.addChild( _name, _kind, null, _type, null, _lineNum );
-								
-								return true;
-							}
-						}
-
-						if( token().tok == TOK.Tstatic || token().tok == TOK.Texport  ) parseToken();
-						
-						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
-						{
-							activeASTnode.addChild( _name, _kind, null, _param, null, _lineNum );
-							return true;
-						}		
-					}
-
-					if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
-
-					_type = getVariableType();
-					if( _type.length )
-					{
-						parseToken();
-
-						while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
-						{
-							_type ~= "*";
-							parseToken();
-						}
-					}
-
-					if( token().tok == TOK.Tcolon || token().tok == TOK.Teol )
-					{
-						activeASTnode.addChild( _name, B_ALIAS, null, _type, null, _lineNum );
-						return true;
-					}
-					+/
 				}
 				else
 				{
@@ -2251,10 +2171,10 @@ class CParser
 	{
 		try
 		{
+			parseToken( TOK.Tscope );
 			if( next().tok == TOK.Teol || next().tok == TOK.Tcolon )
 			{
 				activeASTnode = activeASTnode.addChild( null, B_SCOPE, null, null, null, token().lineNumber );
-				parseToken( TOK.Tscope );
 			}
 			else
 			{
