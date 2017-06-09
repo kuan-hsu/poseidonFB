@@ -341,26 +341,36 @@ struct DocumentTabAction
 	public:
 	static int tabChangePOS( Ihandle* ih, int new_pos )
 	{
-		Ihandle* _child = IupGetChild( ih, new_pos );
-		CScintilla cSci = actionManager.ScintillaAction.getCScintilla( _child );
-		
-		if( cSci !is null )
+		try
 		{
-			IupSetFocus( _child );
-			StatusBarAction.update();
+			Ihandle* _child = IupGetChild( ih, new_pos );
+			if( _child != null )
+			{
+				CScintilla cSci = actionManager.ScintillaAction.getCScintilla( _child );
+				
+				if( cSci !is null )
+				{
+					IupSetFocus( _child );
+					StatusBarAction.update();
 
-			// Marked the trees( FileList & ProjectTree )
-			if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
-			{
-				GLOBAL.statusBar.setPrjName( "                                            " );
-			}
-			else
-			{
-				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+					// Marked the trees( FileList & ProjectTree )
+					if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
+					{
+						GLOBAL.statusBar.setPrjName( "                                            " );
+					}
+					else
+					{
+						int prjID = actionManager.ProjectAction.getActiveProjectID();
+						scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+						GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+					}
+				}
 			}
 		}
+		catch( Exception e )
+		{
+			debug IupMessage( "tabChangePOS", toStringz( e.toString() ) );
+		}		
 
 		return IUP_DEFAULT;
 	}

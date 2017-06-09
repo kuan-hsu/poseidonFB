@@ -147,14 +147,21 @@ extern(C)
 	// Open File...
 	private int fileList_SELECTION_CB( Ihandle *ih, int id, int status )
 	{
-		if( id >= 0 )
+		try
 		{
-			// SELECTION_CB will trigger 2 times, preSelect -> Select, we only catch second signal
-			if( status == 1 )
+			if( id >= 0 )
 			{
-				CScintilla _sci = cast(CScintilla) IupGetAttributeId( ih, "USERDATA", id );
-				ScintillaAction.openFile( _sci.getFullPath.dup );
+				// SELECTION_CB will trigger 2 times, preSelect -> Select, we only catch second signal
+				if( status == 1 )
+				{
+					CScintilla _sci = cast(CScintilla) IupGetAttributeId( ih, "USERDATA", id );
+					if( _sci !is null ) ScintillaAction.openFile( _sci.getFullPath.dup );
+				}
 			}
+		}
+		catch( Exception e )
+		{
+			debug IupMessage( "fileList_SELECTION_CB", toStringz( e.toString() ) );
 		}
 
 		return IUP_DEFAULT;

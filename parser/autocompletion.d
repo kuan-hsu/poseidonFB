@@ -307,17 +307,23 @@ struct AutoComplete
 		// Step 1: Relative from the directory of the source file
 		scope  _path = new FilePath( originalFullPath ); // Tail include /
 		char[] testPath = _path.path() ~ include;
-
 		_path.set( testPath ); // Reset
-
 		if( _path.exists() ) return testPath;
 
 
 		// Step 2: Relative from the current working directory
+		char[] dir = actionManager.ProjectAction.fileInProject( originalFullPath );
+		if( dir.length )
+		{
+			if( dir[$-1] != '/' ) dir ~= "/";
+			testPath = dir ~ include;
+
+			_path.set( testPath ); // Reset
+			if( _path.exists() ) return testPath;
+		}
+
 		testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
-
 		_path.set( testPath ); // Reset
-
 		if( _path.exists() ) return testPath;
 
 

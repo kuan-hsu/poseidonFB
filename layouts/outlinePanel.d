@@ -1528,95 +1528,38 @@ extern(C)
 	{
 		int id = IupConvertXYToPos( ih, x, y );
 
-		/*
-		if( fromStringz( IupGetAttribute( ih, "MARKMODE" ) ) == "MULTIPLE" )
+		try
 		{
-			IupSetAttributes( ih, GLOBAL.cString.convert( "MARK=CLEARALL" ) );
-			IupSetAttributes( ih, GLOBAL.cString.convert( "MARKMODE=SINGLE" ) );
-		}
-		*/
-
-		if( button == 49 ) // IUP_BUTTON1 = '1' = 49
-		{
-			char[] _s = fromStringz( status ).dup;
-			
-			if( _s.length > 5 )
+			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				if( _s[5] == 'D' ) // Double Click
+				char[] _s = fromStringz( status ).dup;
+				
+				if( _s.length > 5 )
 				{
-					if( id > 0 )
+					if( _s[5] == 'D' ) // Double Click
 					{
-						CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
-						
-						if( _node !is null )
+						if( id > 0 )
 						{
-							char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
-						
-							ScintillaAction.openFile( _fullPath, _node.lineNumber );
-							version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
+							CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
+							
+							if( _node !is null )
+							{
+								char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
+							
+								ScintillaAction.openFile( _fullPath, _node.lineNumber );
+								version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
 
-							return IUP_IGNORE;
+								return IUP_IGNORE;
+							}
 						}
 					}
 				}
 			}
 		}
-		/+
-		else if( button == 51 ) // IUP_BUTTON3 = '3' = 51
+		catch( Exception e )
 		{
-			if( id > 0 )
-			{
-				if( pressed == 0 )
-				{
-					version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
-					
-					
-					if( IupGetIntId( ih, "CHILDCOUNT", id ) == 0 ) return IUP_DEFAULT;
-					
-					GLOBAL.outlineTree.nowDepth = IupGetIntId( ih, "DEPTH", id );
-					GLOBAL.outlineTree.nowState = IupGetAttributeId( ih, "STATE", id );
-					
-					if( GLOBAL.outlineTree.nowState == null ) return IUP_DEFAULT;
-					
-					Ihandle* itemExpand = IupItem( "Expand/Contract This Depth", null );
-					IupSetCallback( itemExpand, "ACTION", cast(Icallback) function( Ihandle* ih )
-					{
-						Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
-						
-						if( actTree != null )
-						{
-							//bool bEqual;
-							for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-							{
-								if( IupGetIntId( actTree, "DEPTH", i ) == GLOBAL.outlineTree.nowDepth )
-								{
-									if( IupGetIntId( actTree, "CHILDCOUNT", i ) > 0 )
-									{
-										if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "BRANCH" )
-										{
-											if( fromStringz( GLOBAL.outlineTree.nowState ) == "EXPANDED" )
-												IupSetAttributeId( actTree, "STATE", i, "COLLAPSED" );
-											else
-												IupSetAttributeId( actTree, "STATE", i, "EXPANDED" );
-										}
-									}
-								}
-							}
-						}
-					});					
-					
-					Ihandle* popupMenu = IupMenu( 	itemExpand,
-													/*IupSeparator(),
-													itemSearch,*/
-													null
-												);
-
-					IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
-					IupDestroy( popupMenu );
-				}
-			}
+			debug IupMessage( "COutline_BUTTON_CB", toStringz( e.toString() ) );
 		}
-		+/
 
 		return IUP_DEFAULT;
 	}

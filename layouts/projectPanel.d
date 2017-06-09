@@ -624,27 +624,39 @@ extern(C)
 		// SELECTION_CB will trigger 2 times, preSelect -> Select, we only catch second signal
 		if( status == 1 )
 		{
-			// Swith the doument tabs by select Tree Node, if the doument isn't exist, do nothing
-			if( fromStringz( IupGetAttribute( ih, "KIND" ) ) == "LEAF" )
+			try
 			{
-				char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
-				
-				if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
+				// Swith the doument tabs by select Tree Node, if the doument isn't exist, do nothing
+				if( fromStringz( IupGetAttribute( ih, "KIND" ) ) == "LEAF" )
 				{
-					actionManager.ScintillaAction.openFile( fullPath.dup );
-				}				
-			}
+					char*	_fullpath = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
+					
+					if( _fullpath != null )
+					{
+						char[] fullPath = fromStringz( _fullpath );
 
-			if( id > 0 )
-			{
-				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+						if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
+						{
+							actionManager.ScintillaAction.openFile( fullPath.dup );
+						}
+					}
+				}
+
+				if( id > 0 )
+				{
+					int prjID = actionManager.ProjectAction.getActiveProjectID();
+					scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+					GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+				}
+				else
+				{
+					GLOBAL.statusBar.setPrjName( "                                            " );
+					//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+				}
 			}
-			else
+			catch( Exception e )
 			{
-				GLOBAL.statusBar.setPrjName( "                                            " );
-				//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+				debug IupMessage( "CProjectTree_Selection_cb", toStringz( e.toString() ) );
 			}
 		}
 
@@ -654,33 +666,45 @@ extern(C)
 	// Leaf Node has been Double-Click
 	private int CProjectTree_ExecuteLeaf_cb( Ihandle *ih, int id )
 	{
-		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
-
-		scope fp = new FilePath( fullPath );
-		char[] ext = lowerCase( fp.ext );
-
-		if( ext == "bas" || ext == "bi" )
+		char*	_fullpath = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
+		
+		if( _fullpath != null )
 		{
-			actionManager.ScintillaAction.openFile( fullPath.dup );
-		}
-		else
-		{
-			try
+			char[] fullPath = fromStringz( _fullpath );
+			
+			scope fp = new FilePath( fullPath );
+			
+			if( fp.exists() )
 			{
-				version(Windows)
+				char[] ext = lowerCase( fp.ext );
+
+				try
 				{
-					Process p = new Process( true, "cmd", "/c", fullPath );
-					p.gui( true );
-					p.execute;
+					if( ext == "bas" || ext == "bi" )
+					{
+						actionManager.ScintillaAction.openFile( fp.toString );
+					}
+					else
+					{
+						version(Windows)
+						{
+							Process p = new Process( true, "cmd", "/c", fullPath );
+							p.gui( true );
+							p.execute;
+						}
+						else
+						{
+							Process p = new Process( true, "xdg-open", fullPath );
+							p.gui( true );
+							p.execute;
+						}
+					}
 				}
-				else
+				catch( Exception e )
 				{
-					Process p = new Process( true, "xdg-open", fullPath );
-					p.gui( true );
-					p.execute;
+					debug IupMessage( "CProjectTree_ExecuteLeaf_cb", toStringz( e.toString() ) );
 				}
 			}
-			catch{}
 		}
 
 		return IUP_DEFAULT;
