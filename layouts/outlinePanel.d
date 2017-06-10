@@ -943,6 +943,35 @@ class COutline
 
 		//hardRefresh( fullPath );
 	}
+	
+	CASTnode loadParser( char[] fullPath )
+	{
+		if( GLOBAL.enableParser != "ON" ) return null;
+		
+		scope f = new FilePath( fullPath );
+
+		char[] _ext = toLower( f.ext() );
+
+		if( _ext != "bas" && _ext != "bi" ) return null;
+
+		if( upperCase(fullPath) in GLOBAL.parserManager )
+		{
+			return GLOBAL.parserManager[upperCase(fullPath)];
+		}
+		else
+		{
+			// Don't Create Tree
+			// Parser
+			if( f.ext() )
+			{
+				GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.parser.parse( fullPath );
+				return GLOBAL.parserManager[upperCase(fullPath)];
+			}
+		}
+
+		return null;
+	}
 
 	char[] getImageName( CASTnode _node )
 	{

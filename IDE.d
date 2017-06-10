@@ -5,7 +5,7 @@ struct IDECONFIG
 	private:
 	import iup.iup;
 	
-	import global, actionManager;
+	import global, actionManager, tools;
 
 	import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util;
 	import tango.text.xml.Document, tango.text.xml.DocPrinter, tango.io.UnicodeFile, tango.io.stream.Lines;
@@ -80,7 +80,7 @@ struct IDECONFIG
 	static void save()
 	{
 		// Write Setting File...
-		auto doc = new Document!(char);
+		scope doc = new Document!(char);
 
 		// attach an xml header
 		doc.header;
@@ -177,7 +177,6 @@ struct IDECONFIG
 		.attribute( null, "Manual", GLOBAL.fonts[11].fontString )
 		.attribute( null, "StatusBar", GLOBAL.fonts[12].fontString );
 
-
 		//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
 		editorNode.element( null, "color" )
 		.attribute( null, "keyword0", GLOBAL.editColor.keyWord[0].toDString )
@@ -272,8 +271,9 @@ struct IDECONFIG
 		.attribute( null, "customtool6", convertShortKeyValue2String( GLOBAL.shortKeys[30].keyValue ) )
 		.attribute( null, "customtool7", convertShortKeyValue2String( GLOBAL.shortKeys[31].keyValue ) )
 		.attribute( null, "customtool8", convertShortKeyValue2String( GLOBAL.shortKeys[32].keyValue ) )
-		.attribute( null, "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[33].keyValue ) );
-
+		.attribute( null, "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[33].keyValue ) )
+		.attribute( null, "procedure", convertShortKeyValue2String( GLOBAL.shortKeys[34].keyValue ) );
+		
 		/*
 		<buildtools>
 			<compilerpath>D:\CodingPark\FreeBASIC-1.02.1-win32\fbc.exe</compilerpath>
@@ -308,7 +308,7 @@ struct IDECONFIG
 		parserNode.element( null, "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 		parserNode.element( null, "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 		parserNode.element( null, "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
-
+		
 		/*
 		<manual>
 			<manualpath>manual/index00.html</manualpath>
@@ -329,7 +329,7 @@ struct IDECONFIG
 		auto recentFilesNode = configNode.element( null, "recentFiles" );
 		for( int i = 0; i < GLOBAL.recentFiles.length; ++i )
 		{
-			recentFilesNode.element( null, "name", GLOBAL.recentFiles[i] );
+			recentFilesNode.element( null, "name", GLOBAL.recentFiles[i].toDString );
 		}
 
 		/*
@@ -341,7 +341,7 @@ struct IDECONFIG
 		auto recentNode = configNode.element( null, "recentProjects" );
 		for( int i = 0; i < GLOBAL.recentProjects.length; ++i )
 		{
-			recentNode.element( null, "name", GLOBAL.recentProjects[i] );
+			recentNode.element( null, "name", GLOBAL.recentProjects[i].toDString );
 		}
 
 		/*
@@ -352,32 +352,12 @@ struct IDECONFIG
 		</compileOptionLists>
 		*/
 		auto optionsNode = configNode.element( null, "recentOptions" );
-		foreach( char[] s; GLOBAL.recentOptions )
-			optionsNode.element( null, "name", s );
-		/*
-		Ihandle* listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
-		if( listOptions != null )
-		{
-			for( int i = 0; i < IupGetInt( listOptions, "COUNT" ); ++i )
-			{
-				optionsNode.element( null, "name", fromStringz( IupGetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ) ) ).dup );
-			}
-		}
-		*/
+		foreach( IupString s; GLOBAL.recentOptions )
+			optionsNode.element( null, "name", s.toDString );
 
 		auto argsNode = configNode.element( null, "recentArgs" );
-		foreach( char[] s; GLOBAL.recentArgs )
-			argsNode.element( null, "name", s );		
-		/*
-		Ihandle* listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
-		if( listArgs != null )
-		{
-			for( int i = 0; i < IupGetInt( listArgs, "COUNT" ); ++i )
-			{
-				argsNode.element( null, "name", fromStringz( IupGetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ) ) ).dup );
-			}
-		}
-		*/
+		foreach( IupString s; GLOBAL.recentArgs )
+			argsNode.element( null, "name", s.toDString );		
 		
 		auto print = new DocPrinter!(char);
 		actionManager.FileAction.saveFile( "settings/editorSettings.xml", print.print( doc ) );
@@ -560,25 +540,29 @@ struct IDECONFIG
 			result = root.query.descendant("recentFiles").descendant("name");
 			foreach( e; result )
 			{
-				GLOBAL.recentFiles ~= e.value;
+				auto rf = new IupString( cast(char[]) e.value );
+				GLOBAL.recentFiles ~= rf;
 			}
 
 			result = root.query.descendant("recentProjects").descendant("name");
 			foreach( e; result )
 			{
-				GLOBAL.recentProjects ~= e.value;
+				auto rp = new IupString( cast(char[]) e.value );
+				GLOBAL.recentProjects ~= rp;
 			}
 
 			result = root.query.descendant("recentOptions").descendant("name");
 			foreach( e; result )
 			{
-				GLOBAL.recentOptions ~= e.value;
+				auto ro = new IupString( cast(char[]) e.value );
+				GLOBAL.recentOptions ~= ro;
 			}
 
 			result = root.query.descendant("recentArgs").descendant("name");
 			foreach( e; result )
 			{
-				GLOBAL.recentArgs ~= e.value;
+				auto ra = new IupString( cast(char[]) e.value );
+				GLOBAL.recentArgs ~= ra;
 			}
 
 
@@ -952,7 +936,7 @@ struct IDECONFIG
 			
 
 			// short keys (Editor)
-			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 34;
+			if( !GLOBAL.shortKeys.length ) GLOBAL.shortKeys.length = 35;
 			result = root.query.descendant("shortkeys").attribute("find");
 			foreach( e; result )
 			{
@@ -1137,6 +1121,18 @@ struct IDECONFIG
 					ShortKey sk = { targetString, GLOBAL.languageItems[targetString].toDString(), convertShortKeyValue2Integer( e.value ) };
 					GLOBAL.shortKeys[24+i]= sk;
 				}
+			}
+			
+			auto result34 = root.query.descendant("shortkeys").attribute("procedure");
+			foreach( e; result34 )
+			{
+				//ShortKey sk = { "procedure", GLOBAL.languageItems["sc_procedure"].toDString(), convertShortKeyValue2Integer( e.value ) };
+				//IupMessage( "",toStringz( e.value ) );
+				//int _value = cast(int) convertShortKeyValue2Integer( e.value );
+				GLOBAL.shortKeys[34].name = "procedure";
+				GLOBAL.shortKeys[34].title = GLOBAL.languageItems["sc_procedure"].toDString();
+				GLOBAL.shortKeys[34].keyValue = cast(int) convertShortKeyValue2Integer( e.value );
+				break;
 			}
 			
 			// Get linux terminal program name

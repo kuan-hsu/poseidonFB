@@ -1900,7 +1900,8 @@ struct AutoComplete
 		return null;
 	}
 
-	static void toDefintionAndType( bool bDefintion )
+	//static void toDefintionAndType( bool bDefintion )
+	static void toDefintionAndType( int TYPE )
 	{
 		if( GLOBAL.enableParser != "ON" ) return;
 		
@@ -1924,7 +1925,7 @@ struct AutoComplete
 				{
 					if( GLOBAL.toggleUseManual == "ON" )
 					{
-						if( bDefintion )
+						if( TYPE & 1 )
 						{
 							if( GLOBAL.toggleManualDefinition == "ON" )
 							{
@@ -1984,25 +1985,11 @@ struct AutoComplete
 						}
 					}
 				}				
-				/*
-				if( AST_Head.name.length )
-				{
-					int dotPos = Util.index( AST_Head.name, "." );
-					if( dotPos < AST_Head.name.length )
-					{
-						memberFunctionMotherName = AST_Head.name[0..dotPos];
-					}
-					else
-					{
-						// check Constructor or Destructor
-						if( AST_Head.kind & ( B_CTOR | B_DTOR ) ) memberFunctionMotherName = AST_Head.name;
-					}
-				}
-				*/
+
 				
 
 				// Goto Includes
-				if( bDefintion )
+				if( TYPE & 1 )
 				{
 					char[] string = checkIsInclude( cSci.getIupScintilla, currentPos );
 					char[] fullPath = checkIncludeExist( string, cSci.getFullPath );
@@ -2015,13 +2002,51 @@ struct AutoComplete
 				}
 
 				if( AST_Head is null ) return;
+				
+				
+				
+				uint keyword_Btype;
+				switch( lowerCase( word ) )
+				{
+					case "constructor":
+						keyword_Btype = B_CTOR;
+					case "destructor":
+						if( keyword_Btype == 0 ) keyword_Btype = B_DTOR;
+					case "operator":
+						if( keyword_Btype == 0 ) keyword_Btype = B_OPERATOR;
+					case "property":
+						if( keyword_Btype == 0 ) keyword_Btype = B_PROPERTY;
+					
+					default:
+						if( keyword_Btype > 0 )
+						{
+							CASTnode _motherNode = AST_Head;
 
+							foreach( CASTnode _node; getMembers( AST_Head ) )
+							{
+								if( _node.kind & keyword_Btype )
+								{
+									if( _node.lineNumber == lineNum )
+									{
+										AST_Head = _node;
+										break;
+									}
+								}
+							}
+
+							if( AST_Head is null ) return;
+						}
+				}
+				
+				
 				for( int i = 0; i < splitWord.length; i++ )
 				{
+					if( keyword_Btype > 0 ) break;
+					
 					if( i == 0 )
 					{
 						AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
-
+						/+
 						if( AST_Head is null )
 						{
 							if( memberFunctionMotherName.length )
@@ -2030,7 +2055,7 @@ struct AutoComplete
 								AST_Head = searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName ~ "." ~ word, B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
 							}
 						}
-
+						+/
 						if( AST_Head is null )
 						{
 							// For Type Objects
@@ -2038,7 +2063,7 @@ struct AutoComplete
 							{
 								//AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 								CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-								if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND | B_SUB );
+								if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND | B_CTOR | B_SUB );
 							}					
 						}
 
@@ -2060,7 +2085,7 @@ struct AutoComplete
 						if( AST_Head is null ) return;
 					}
 
-					if( bDefintion )
+					if( TYPE & 3 )
 					{
 						if( AST_Head.kind & ( B_VARIABLE | B_PARAM ) )// | B_FUNCTION ) )
 						{
@@ -2081,7 +2106,7 @@ struct AutoComplete
 					}
 				}
 
-				if( !bDefintion )
+				if( TYPE == 0 )
 				{
 					char[]	_param;
 					char[] 	_type = AST_Head.type;
@@ -2111,14 +2136,99 @@ struct AutoComplete
 				}
 				else
 				{
-					lineNum = AST_Head.lineNumber;
+					bool		bGotoMemberProcedure;
+					char[]		className, procedureName, fullPath;
+					CASTnode	sonProcedureNode, oriNode = AST_Head;
 					
+					if( TYPE & 2 )
+					{
+						if( AST_Head.kind & ( B_SUB | B_FUNCTION | B_DTOR | B_CTOR | B_OPERATOR | B_PROPERTY ) )
+						{
+							if( AST_Head.getFather !is null )
+							{
+								// Declare
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS | B_UNION ) )
+								{
+									bGotoMemberProcedure = true;
+									className = AST_Head.getFather.name;
+									procedureName = AST_Head.name;
+								}
+							}
+						}
+					}
+					else if( TYPE & 1 )
+					{
+						if( keyword_Btype > 0 )
+						{
+							// Declare
+							if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS | B_UNION ) )
+							{}
+							else
+							{
+								char[]	typeString = AST_Head.type;
+								CASTnode memberFunctionMotherNode = searchMatchNode( AST_Head.getFather, AST_Head.name, B_TYPE | B_CLASS | B_UNION );
+								if( memberFunctionMotherNode !is null )
+								{
+									foreach_reverse( CASTnode _node; getMembers( memberFunctionMotherNode ) )
+									{
+										if( _node.kind & keyword_Btype )
+										{
+											if( _node.type == typeString )
+											{
+												AST_Head = _node;
+												break;
+											}
+											AST_Head = _node;
+										}
+									}
+								}
+							}
+						}
+					}
+
+					// Get lineNum
+					lineNum = AST_Head.lineNumber;
 					while( AST_Head.getFather() !is null )
 					{
 						AST_Head = AST_Head.getFather();
 					}
+					fullPath = AST_Head.name;
+					
+					if( bGotoMemberProcedure )
+					{
+						scope _fp = new FilePath( fullPath );
+						if( lowerCase( _fp.ext ) == "bi" )
+						{
+							fullPath = _fp.path() ~ _fp.name ~ ".bas";
+							AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
+							
+							if( AST_Head !is null )
+							{
+								switch( oriNode.kind )
+								{
+									case B_SUB, B_FUNCTION, B_OPERATOR, B_PROPERTY:
+										sonProcedureNode = searchMatchMemberNode( AST_Head, className ~ "." ~ procedureName, oriNode.kind );
+										break;
 
-					if( actionManager.ScintillaAction.openFile( AST_Head.name, lineNum ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+									case B_CTOR, B_DTOR:
+										sonProcedureNode = searchMatchMemberNode( AST_Head, className, oriNode.kind );
+										break;
+									
+									default:
+										return;
+								}
+								
+								if( sonProcedureNode !is null )
+								{
+									if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+									return;
+								}
+							}
+						}
+						return;
+					}
+					
+					if( actionManager.ScintillaAction.openFile( fullPath, lineNum ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 				}
 			}
 		}

@@ -180,6 +180,7 @@ extern(C) // Callback for CSingleTextDialog
 			case "customtool7":					pos = 31;	break;
 			case "customtool8":					pos = 32;	break;
 			case "customtool9":					pos = 33;	break;
+			case "procedure":					pos = 34;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;

@@ -146,26 +146,25 @@ extern(C)
 	{
 		try
 		{
-		int ret = ScintillaAction.closeAllDocument();
-		if( ret == IUP_IGNORE ) return IUP_IGNORE;
-		
-		// Save All Project	
-		foreach( PROJECT p; GLOBAL.projectManager )
-		{
-			p.saveFile();
-		}
+			int ret = ScintillaAction.closeAllDocument();
+			if( ret == IUP_IGNORE ) return IUP_IGNORE;
+			
+			// Save All Project	
+			foreach( PROJECT p; GLOBAL.projectManager )
+			{
+				p.saveFile();
+			}
 
-		IDECONFIG.save();
+			IDECONFIG.save();
 
-		foreach( parser; GLOBAL.parserManager )
-		{
-			delete parser;
-		}
+			foreach( parser; GLOBAL.parserManager )
+			{
+				delete parser;
+			}
 		}
 		catch(Exception e )
 		{
-			IupMessage("",toStringz(e.toString()));
-			
+			debug IupMessage("",toStringz(e.toString()));
 		}
 
 

@@ -60,6 +60,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_copy", XPM.getIUPimage( "icons/xpm/copy.xpm" ) ); // IupSetHandle("icon_copy", load_image_copy_edit());
 	IupSetHandle( "icon_save", XPM.getIUPimage( "icons/xpm/save.xpm" ) ); // IupSetHandle("icon_save", load_image_save_edit());
 	IupSetHandle( "icon_goto", XPM.getIUPimage( "icons/xpm/goto.xpm" ) ); // IupSetHandle("icon_goto", load_image_goto_obj());
+	IupSetHandle( "icon_gotomember", XPM.getIUPimage( "icons/xpm/goto_member.xpm" ) ); // IupSetHandle("icon_goto", load_image_goto_obj());
 	IupSetHandle( "icon_back", XPM.getIUPimage( "icons/xpm/back.xpm" ) ); // IupSetHandle("icon_goto", load_image_goto_obj());
 	IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/bi.xpm" ) ); // IupSetHandle( "icon_bi", load_image_bi());
 	IupSetHandle( "icon_markprev", XPM.getIUPimage( "icons/xpm/mark_prev.xpm" ) ); // IupSetHandle("icon_markprev", load_image_mark_prev());

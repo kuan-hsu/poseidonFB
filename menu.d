@@ -84,7 +84,7 @@ void createMenu()
 	//Ihandle*[] submenuItem;
 	for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
 	{
-		Ihandle* _new = IupItem( toStringz(GLOBAL.recentFiles[i]), null );
+		Ihandle* _new = IupItem( GLOBAL.recentFiles[i].toCString, null );
 		IupSetCallback( _new, "ACTION", cast(Icallback) &submenuRecentFiles_click_cb );
 		IupInsert( recentFilesSubMenu, null, _new );
 		IupMap( _new );
@@ -110,7 +110,7 @@ void createMenu()
 	//Ihandle*[] submenuItem;
 	for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
 	{
-		Ihandle* _new = IupItem( toStringz(GLOBAL.recentProjects[i]), null );
+		Ihandle* _new = IupItem( GLOBAL.recentProjects[i].toCString, null );
 		IupSetCallback( _new, "ACTION", cast(Icallback) &submenuRecentProject_click_cb );
 		IupInsert( recentPrjsSubMenu, null, _new );
 		IupMap( _new );
@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.267\nBy Kuan Hsu (Taiwan)\n2017.06.09" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.268\nBy Kuan Hsu (Taiwan)\n2017.06.10" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -724,12 +724,17 @@ extern(C)
 			if( !ScintillaAction.openFile( title ) )
 			{
 				IupDestroy( ih );
-				char[][] _recentFiles;
-				foreach( char[] s; GLOBAL.recentFiles )
+				
+				IupString[] _recentFiles;
+				foreach( IupString s; GLOBAL.recentFiles )
 				{
-					if( s != title ) _recentFiles ~= s;
+					if( s.toDString != title ) _recentFiles ~= new IupString( s.toDString );
 				}
+				
+				foreach( s; GLOBAL.recentFiles )
+					delete s;
 				GLOBAL.recentFiles.length = 0;
+				
 				GLOBAL.recentFiles = _recentFiles;
 			}
 		}
@@ -754,12 +759,17 @@ extern(C)
 			if( !GLOBAL.projectTree.openProject( Util.trim( title[0..pos].dup ) ) )
 			{
 				IupDestroy( ih );
-				char[][] _recentProjects;
-				foreach( char[] s; GLOBAL.recentProjects )
+				IupString[] _recentProjects;
+				
+				foreach( IupString s; GLOBAL.recentProjects )
 				{
-					if( s != title ) _recentProjects ~= s;
+					if( s.toDString != title ) _recentProjects ~= new IupString( s.toDString );
 				}
+				
+				foreach( s; GLOBAL.recentProjects )
+					delete s;
 				GLOBAL.recentProjects.length = 0;
+				
 				GLOBAL.recentProjects = _recentProjects;
 			}
 		}

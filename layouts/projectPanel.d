@@ -565,15 +565,16 @@ class CProjectTree
 		
 		if( prjDir.length )
 		{
-			char[][]	temps;
+			IupString[]	temps;
+			
 			title = prjDir ~ " : " ~ prjName;
 			
 			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
 			{
-				if( GLOBAL.recentProjects[i] != title )	temps ~= GLOBAL.recentProjects[i];
+				if( GLOBAL.recentProjects[i].toDString != title ) temps ~= GLOBAL.recentProjects[i];
 			}
 
-			temps ~= title;
+			temps ~= new IupString( title );
 			GLOBAL.recentProjects.length = 0;
 			GLOBAL.recentProjects = temps;
 		}
@@ -581,7 +582,10 @@ class CProjectTree
 		// Recent Projects
 		if( GLOBAL.recentProjects.length > 8 )
 		{
-			GLOBAL.recentProjects[0..8] = GLOBAL.recentProjects[length-8..length].dup;
+			for( int i = 0; i < GLOBAL.recentProjects.length - 8; ++ i ) 
+				delete GLOBAL.recentProjects[i];			
+			
+			GLOBAL.recentProjects[0..8] = GLOBAL.recentProjects[$-8..$];
 			GLOBAL.recentProjects.length = 8;
 		}
 
@@ -605,7 +609,7 @@ class CProjectTree
 			// Create New iupItem
 			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
 			{
-				Ihandle* _new = IupItem( GLOBAL.cString.convert( GLOBAL.recentProjects[i] ), null );
+				Ihandle* _new = IupItem( GLOBAL.recentProjects[i].toCString, null );
 				IupSetCallback( _new, "ACTION", cast(Icallback) &menu.submenuRecentProject_click_cb );
 				IupInsert( recentPrj_ih, null, _new );
 				IupMap( _new );

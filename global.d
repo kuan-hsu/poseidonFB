@@ -115,7 +115,7 @@ struct GLOBAL
 	//static char[]				maxError = "30";
 	static char[]				defaultOption;
 	static char[]				recentOpenDir;
-	static char[][]				recentFiles, recentProjects, recentOptions, recentArgs;
+	static IupString[]			recentFiles, recentProjects, recentOptions, recentArgs;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;
 	static EditorColorUint		editColor;
@@ -324,6 +324,10 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk32;
 		ShortKey sk33 = { "customtool9", "Custom Tool(9)", 805371846 };		
 		GLOBAL.shortKeys ~= sk33;
+
+		ShortKey sk34 = { "procedure", "Goto Member Procedure", 536870992 };		
+		GLOBAL.shortKeys ~= sk34;
+
 
 		fontUint fu;
 		version( Windows )
@@ -560,6 +564,7 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_undo"] = new IupString( cast(char[]) "Undo" );
 						GLOBAL.languageItems["sc_redo"] = new IupString( cast(char[]) "Redo" );
 						GLOBAL.languageItems["sc_gotodef"] = new IupString( cast(char[]) "Goto Definition" );
+						GLOBAL.languageItems["sc_procedure"] = new IupString( cast(char[]) "Goto Member Procedure" );
 						GLOBAL.languageItems["sc_quickrun"] = new IupString( cast(char[]) "Quick Run" );
 						GLOBAL.languageItems["sc_run"] = new IupString( cast(char[]) "Run" );
 						GLOBAL.languageItems["sc_compile"] = new IupString( cast(char[]) "Compile" );

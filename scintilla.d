@@ -854,7 +854,7 @@ extern(C)
 				IupSetAttribute( _goto, "IMAGE", "icon_goto" );
 				IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
-					AutoComplete.toDefintionAndType( true );
+					AutoComplete.toDefintionAndType( 1 );
 				});
 				
 				Ihandle* _back = IupItem( GLOBAL.languageItems["sc_backdefinition"].toCString, null );
@@ -862,13 +862,22 @@ extern(C)
 				IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.backDefinition();
-				});				
+				});
+				
+				Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
+				IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" );
+				IupSetCallback( _gotoProcedure, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					AutoComplete.toDefintionAndType( 2 );
+				});
+				
+				
 
 				Ihandle* _showType = IupItem( GLOBAL.languageItems["sc_showtype"].toCString, null );
 				IupSetAttribute( _showType, "IMAGE", "icon_type" );
 				IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
-					AutoComplete.toDefintionAndType( false );
+					AutoComplete.toDefintionAndType( 0 );
 				});				
 				
 				
@@ -1069,6 +1078,7 @@ extern(C)
 												IupSeparator(),
 												_refresh,
 												_goto,
+												_gotoProcedure,
 												_back,
 												_showType,
 												null
@@ -1315,10 +1325,17 @@ extern(C)
 				case "defintion":
 					if( sk.keyValue == c )
 					{
-						AutoComplete.toDefintionAndType( true );
+						AutoComplete.toDefintionAndType( 1 );
 						return IUP_IGNORE;
 					}
 					break;
+				case "procedure":
+					if( sk.keyValue == c )
+					{
+						AutoComplete.toDefintionAndType( 2 );
+						return IUP_IGNORE;
+					}
+					break;					
 				case "quickrun":
 					if( sk.keyValue == c )
 					{
@@ -1359,7 +1376,7 @@ extern(C)
 				case "showtype":
 					if( sk.keyValue == c )
 					{
-						AutoComplete.toDefintionAndType( false );
+						AutoComplete.toDefintionAndType( 0 );
 						return IUP_IGNORE;
 					}
 					break;

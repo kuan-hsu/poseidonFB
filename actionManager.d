@@ -1097,22 +1097,25 @@ struct ScintillaAction
 	{
 		if( fullPath.length )
 		{
-			char[][]	temps;
+			IupString[]	temps;
 
 			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
 			{
-				if( GLOBAL.recentFiles[i] != fullPath )	temps ~= GLOBAL.recentFiles[i];
+				if( GLOBAL.recentFiles[i].toDString != fullPath ) temps ~= GLOBAL.recentFiles[i];
 			}
 
+			temps ~= new IupString( fullPath );
 			GLOBAL.recentFiles.length = 0;
-			temps ~= fullPath;
 			GLOBAL.recentFiles = temps;
 		}
 		
 		// Recent Files
 		if( GLOBAL.recentFiles.length > 8 )
 		{
-			GLOBAL.recentFiles[0..8] = GLOBAL.recentFiles[length-8..length].dup;
+			for( int i = 0; i < GLOBAL.recentFiles.length - 8; ++ i ) 
+				delete GLOBAL.recentFiles[i];
+			
+			GLOBAL.recentFiles[0..8] = GLOBAL.recentFiles[$-8..$];
 			GLOBAL.recentFiles.length = 8;
 		}
 
@@ -1136,7 +1139,7 @@ struct ScintillaAction
 			// Create New iupItem
 			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
 			{
-				Ihandle* _new = IupItem( GLOBAL.cString.convert( GLOBAL.recentFiles[i] ), null );
+				Ihandle* _new = IupItem( GLOBAL.recentFiles[i].toCString, null );
 				IupSetCallback( _new, "ACTION", cast(Icallback)&menu.submenuRecentFiles_click_cb );
 				IupInsert( recentFile_ih, null, _new );
 				IupMap( _new );
