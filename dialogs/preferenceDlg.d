@@ -162,7 +162,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 
 		Ihandle* hBoxLive = IupHbox( toggleLiveNone, toggleLiveLight, toggleLiveFull, null );
-		IupSetAttributes( hBoxLive, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
+		IupSetAttributes( hBoxLive, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES" );
 		Ihandle* radioLive = IupRadio( hBoxLive );
 
 		Ihandle* hBoxLive2 = IupHbox( radioLive, toggleUpdateOutline, null );
@@ -184,7 +184,49 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 		IupSetAttribute( frameParser, "SIZE", "275x");
 		
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, hBox03, frameCompiler, frameParser, null );
+		
+		// Manual
+		Ihandle* labelManualPath = IupLabel( toStringz( GLOBAL.languageItems["manualpath"].toDString ~ ":" ) );
+		IupSetAttributes( labelManualPath, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		
+		Ihandle* textManualPath = IupText( null );
+		IupSetAttribute( textManualPath, "SIZE", "185x12" );
+		IupSetAttribute( textManualPath, "VALUE", GLOBAL.manualPath.toCString );
+		IupSetHandle( "textManualPath", textManualPath );
+		
+		Ihandle* btnManualOpen = IupButton( null, null );
+		IupSetAttribute( btnManualOpen, "IMAGE", "icon_openfile" );
+		IupSetCallback( btnManualOpen, "ACTION", cast(Icallback) &CPreferenceDialog_ManualOpen_cb );
+		
+		Ihandle* hboxManualPath = IupHbox( labelManualPath, textManualPath, btnManualOpen, null );
+		IupSetAttributes( hboxManualPath, "ALIGNMENT=ACENTER,MARGIN=5x5" );
+
+		Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
+		IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
+		IupSetHandle( "toggleUseManual", toggleUseManual );
+		
+		Ihandle* toggleManualLinkDefinition = IupToggle( GLOBAL.languageItems["manualdefinition"].toCString(), null );
+		IupSetAttribute( toggleManualLinkDefinition, "VALUE", toStringz(GLOBAL.toggleManualDefinition.dup) );
+		IupSetHandle( "toggleManualLinkDefinition", toggleManualLinkDefinition );
+		
+		Ihandle* toggleManualLinkShowType = IupToggle( GLOBAL.languageItems["manualshowtype"].toCString(), null );
+		IupSetAttribute( toggleManualLinkShowType, "VALUE", toStringz(GLOBAL.toggleManualShowType.dup) );
+		IupSetHandle( "toggleManualLinkShowType", toggleManualLinkShowType );
+		
+		Ihandle* labelManualWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"].toDString ~ ":" ) );
+		Ihandle* textManualWidth = IupText( null );
+		IupSetAttribute( textManualWidth, "VALUE", toStringz(GLOBAL.editorSetting00.TabWidth) );
+		IupSetHandle( "textManualWidth", textManualWidth );
+		//Ihandle* hBoxTab = IupHbox( labelManualWidth, textManualWidth, null );
+		//IupSetAttribute( hBoxTab, "ALIGNMENT", "ACENTER" );
+		
+		Ihandle* vboxManualPath = IupVbox( hboxManualPath, toggleUseManual, toggleManualLinkDefinition, toggleManualLinkShowType, null );
+		Ihandle* manuFrame = IupFrame( vboxManualPath );
+		IupSetAttribute( manuFrame, "TITLE", GLOBAL.languageItems["manual"].toCString() );
+		
+		
+		
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, hBox03, frameCompiler, frameParser, manuFrame, null );
 		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
@@ -323,7 +365,7 @@ class CPreferenceDialog : CBaseDialog
 
 		//IupSetAttribute(gbox, "SIZECOL", "1");
 		//IupSetAttribute(gbox, "SIZELIN", "4");
-		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=1,GAPCOL=100,MARGIN=0x0" );
+		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=2,GAPCOL=100,MARGIN=0x0" );
 		
 		
 		// Mark High Light Line
@@ -372,21 +414,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=2,GAPCOL=0,MARGIN=0x0,SIZELIN=0,HOMOGENEOUSCOL=YES" );		
 		
 		
-		
-
-		// fontList
-		Ihandle* fontList = IupList( null );
-		IupSetAttributes( fontList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES" );
-		version( Windows )
-		{
-			IupSetAttribute( fontList, "FONT", "Courier New,9" );
-		}
-		else
-		{
-			IupSetAttribute( fontList, "FONT", "FreeMono,Bold 9" );
-		}
-
-
 		Ihandle* radioKeywordCase0 = IupToggle( GLOBAL.languageItems["none"].toCString, null );
 		IupSetHandle( "radioKeywordCase0", radioKeywordCase0 );
 
@@ -415,8 +442,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( frameKeywordCase, "SIZE=270,GAP=1" );
 		IupSetAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].toCString );
 		
+		Ihandle*[15]	lableString, flatFrame;
 		
-
 		for( int i = 0; i < GLOBAL.fonts.length; ++ i )
 		{
 			char[][] strings = Util.split( GLOBAL.fonts[i].fontString, "," );
@@ -439,30 +466,47 @@ class CPreferenceDialog : CBaseDialog
 							size = s;
 					}
 				}
-
-				char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.languageItems[GLOBAL.fonts[i].name].toDString, strings[0], Bold, Italic, Underline, Strikeout, size );
 				
-				IupSetAttribute( fontList, toStringz( Integer.toString( i + 1 ) ), toStringz( _string ) );
+				char[] _string = Stdout.layout.convert( "{,-32},{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+				
+				lableString[i]	= IupLabel( toStringz( _string ) );
+				IupSetAttributes( lableString[i], "SIZE=275x,EXPAND=YES");
+				
+				scope IupFlatFrameString = new IupString( "customFont_" ~ Integer.toString( i ) );
+				IupSetHandle( IupFlatFrameString.toCString, lableString[i] );
+				IupSetCallback( lableString[i], "BUTTON_CB", cast(Icallback) &CPreferenceDialog_font_BUTTON_CB );
+				
+				flatFrame[i] = IupFlatFrame( lableString[i] );
+				IupSetAttribute( flatFrame[i], "TITLE", GLOBAL.languageItems[GLOBAL.fonts[i].name].toCString );
+				
+				scope _fontSyle = new IupString( strings[0] );
+				IupSetAttribute( flatFrame[i], "FONTFACE", _fontSyle.toCString );
+				IupSetAttributes( flatFrame[i], "SIZE=286x,EXPAND=YES,FONTSIZE=9" );
+				IupSetAttribute( flatFrame[i], "TITLEBGCOLOR", "64 128 255");
+				IupSetAttribute( flatFrame[i], "TITLECOLOR", "255 255 255");
+				
+				scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( i ) );
+				IupSetHandle( _IupFlatFrameString.toCString, flatFrame[i] );
 			}
 		}
-		IupSetHandle( "fontList", fontList );
-		IupSetCallback( fontList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_fontList_DBLCLICK_CB );
-
-
-		Ihandle* frameFont = IupFrame( fontList );
-		IupSetAttribute( frameFont, "TITLE", GLOBAL.languageItems["font"].toCString() );
-		IupSetAttribute( frameFont, "EXPAND", "YES");
 		
-		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, frameFont, null );
-		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );		
+		Ihandle* visibleBox = IupVbox( flatFrame[0], flatFrame[1], flatFrame[2], flatFrame[3], flatFrame[4], flatFrame[5], flatFrame[6], flatFrame[7], flatFrame[8], flatFrame[9], flatFrame[10], flatFrame[11], flatFrame[12], null );
+		IupSetAttributes( visibleBox, "GAP=0,MARGIN=5x1,EXPANDCHILDREN=YES");
+		Ihandle* sb = IupFlatScrollBox ( visibleBox );
+		IupSetAttributes( sb, "EXPAND=NO,SIZE=300x180,ALIGNMENT=ACENTER" );
+		
+		
+		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, sb, null );
+		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 
 		// Color
 		Ihandle* labelColorPath = IupLabel( toStringz( GLOBAL.languageItems["colorfile"].toDString() ~ ":" ) );
-		IupSetAttributes( labelColorPath, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
 		Ihandle* colorTemplateList = IupList( null );
 		IupSetHandle( "colorTemplateList", colorTemplateList );
 		version(Windows) IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,EXPAND=YES,DROPDOWN=YES,VISIBLEITEMS=5" ); else IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,SIZE=120x12,DROPDOWN=YES,VISIBLEITEMS=5" );;
+		IupSetAttribute( colorTemplateList, "SIZE", "194x12" );
+		
 		scope templateFP = new FilePath( "settings/colorTemplates" );
 		if( templateFP.exists() )
 		{
@@ -482,7 +526,7 @@ class CPreferenceDialog : CBaseDialog
 
 		
 		Ihandle* hboxColorPath = IupHbox( labelColorPath, colorTemplateList, colorDefaultRefresh, null );
-		IupSetAttributes( hboxColorPath, "ALIGNMENT=ACENTER,MARGIN=0x0" );
+		IupSetAttributes( hboxColorPath, "ALIGNMENT=ACENTER,MARGIN=0x0,EXPAND=NO,SIZE=200x12" );
 		
 		
 		Ihandle* labelCaretLine = IupLabel( toStringz( GLOBAL.languageItems["caretline"].toDString ~ ":" ) );
@@ -1039,7 +1083,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=0,GAPCOL=20,MARGIN=2x10" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=20,MARGIN=2x10" );
+		version(Windows) IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=20,MARGIN=2x10" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=20,MARGIN=2x10" );
 
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -1053,7 +1097,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 		*/
 		Ihandle* vColor = IupVbox( hboxColorPath, frameColor, frameColor_1, null );
-		IupSetAttributes( vColor, "EXPANDCHILDREN=YES" );		
+		IupSetAttributes( vColor, "EXPANDCHILDREN=NO,SIZE=261x0,HOMOGENEOUS=NO" );		
 
 
 		// Short Cut
@@ -1156,43 +1200,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( keyWordVbox, "ALIGNMENT", toStringz( "ACENTER" ) );
 		
 		
-		// Manual
-		Ihandle* labelManualPath = IupLabel( toStringz( GLOBAL.languageItems["manualpath"].toDString ~ ":" ) );
-		IupSetAttributes( labelManualPath, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
-		
-		Ihandle* textManualPath = IupText( null );
-		IupSetAttribute( textManualPath, "SIZE", "185x12" );
-		IupSetAttribute( textManualPath, "VALUE", GLOBAL.manualPath.toCString );
-		IupSetHandle( "textManualPath", textManualPath );
-		
-		Ihandle* btnManualOpen = IupButton( null, null );
-		IupSetAttribute( btnManualOpen, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnManualOpen, "ACTION", cast(Icallback) &CPreferenceDialog_ManualOpen_cb );
-		
-		Ihandle* hboxManualPath = IupHbox( labelManualPath, textManualPath, btnManualOpen, null );
-		IupSetAttributes( hboxManualPath, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 
-		Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
-		IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
-		IupSetHandle( "toggleUseManual", toggleUseManual );
-		
-		Ihandle* toggleManualLinkDefinition = IupToggle( GLOBAL.languageItems["manualdefinition"].toCString(), null );
-		IupSetAttribute( toggleManualLinkDefinition, "VALUE", toStringz(GLOBAL.toggleManualDefinition.dup) );
-		IupSetHandle( "toggleManualLinkDefinition", toggleManualLinkDefinition );
-		
-		Ihandle* toggleManualLinkShowType = IupToggle( GLOBAL.languageItems["manualshowtype"].toCString(), null );
-		IupSetAttribute( toggleManualLinkShowType, "VALUE", toStringz(GLOBAL.toggleManualShowType.dup) );
-		IupSetHandle( "toggleManualLinkShowType", toggleManualLinkShowType );
-		
-		Ihandle* labelManualWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"].toDString ~ ":" ) );
-		Ihandle* textManualWidth = IupText( null );
-		IupSetAttribute( textManualWidth, "VALUE", toStringz(GLOBAL.editorSetting00.TabWidth) );
-		IupSetHandle( "textManualWidth", textManualWidth );
-		//Ihandle* hBoxTab = IupHbox( labelManualWidth, textManualWidth, null );
-		//IupSetAttribute( hBoxTab, "ALIGNMENT", "ACENTER" );		
-		
-		
-		Ihandle* vboxManualPath = IupVbox( hboxManualPath, toggleUseManual, toggleManualLinkDefinition, toggleManualLinkShowType, null );
+
+
+
 
 
 		IupSetAttribute( vBoxPage01, "TABTITLE", GLOBAL.languageItems["compiler"].toCString() );
@@ -1200,12 +1211,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( vColor, "TABTITLE", GLOBAL.languageItems["color"].toCString() );
 		IupSetAttribute( shortCutList, "TABTITLE", GLOBAL.languageItems["shortcut"].toCString() );
 		IupSetAttribute( keyWordVbox, "TABTITLE", GLOBAL.languageItems["keywords"].toCString() );
-		IupSetAttribute( vboxManualPath, "TABTITLE", GLOBAL.languageItems["manual"].toCString() );
+		//IupSetAttribute( manuFrame, "TABTITLE", GLOBAL.languageItems["manual"].toCString() );
 		IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
 	
 		
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, vboxManualPath, null );
+		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
 
@@ -1235,6 +1246,9 @@ class CPreferenceDialog : CBaseDialog
 		}
 		
 		createLayout();
+		
+		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
+		IupSetAttribute( _dlg, "SIZE", "322x380" );		
 	}
 
 	~this()
@@ -1286,14 +1300,19 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "radioKeywordCase2", null );
 		IupSetHandle( "radioKeywordCase3", null );
 
-		IupSetHandle( "textFontName", null );
-		IupSetHandle( "textFontSize", null );
-		IupSetHandle( "toggleFontBold", null );
-		IupSetHandle( "toggleFontItalic", null );
-		IupSetHandle( "toggleFontUnderline", null );
-		IupSetHandle( "btnFontForeground", null );
-		IupSetHandle( "btnFontBackground", null );
-
+		IupSetHandle( "customFont_0", null );
+		IupSetHandle( "customFont_1", null );
+		IupSetHandle( "customFont_2", null );
+		IupSetHandle( "customFont_3", null );
+		IupSetHandle( "customFont_4", null );
+		IupSetHandle( "customFont_5", null );
+		IupSetHandle( "customFont_6", null );
+		IupSetHandle( "customFont_7", null );
+		IupSetHandle( "customFont_8", null );
+		IupSetHandle( "customFont_9", null );
+		IupSetHandle( "customFont_10", null );
+		IupSetHandle( "customFont_11", null );
+		IupSetHandle( "customFont_12", null );
 
 		IupSetHandle( "btnCaretLine", null );
 		IupSetHandle( "btnCursor", null );
@@ -1333,7 +1352,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "keyWordText3", null );
 		
 		IupSetHandle( "shortCutList", null );
-		IupSetHandle( "fontList", null );
 	}
 }
 
@@ -1402,7 +1420,192 @@ extern(C) // Callback for CPreferenceDialog
 
 		return IUP_DEFAULT;
 	}
+	
+	
+	private int CPreferenceDialog_font_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		try
+		{
+			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			{
+				char[] _s = fromStringz( status ).dup;
+				
+				if( _s.length > 5 )
+				{
+					if( _s[5] == 'D' ) // Double Click
+					{
+						char[] listString = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
+						char[] _ls;
+						
+						if( listString.length > 32 ) _ls = listString[32..length].dup; else return IUP_DEFAULT;
+						
+						version(linux)
+						{
+							_ls = "";
+							foreach( char c; listString[10..length].dup )
+							{
+								if( c != ' ' && c != ',' )
+								{
+									_ls ~= c;
+								}
+								else if( c == ' ' )
+								{
+									if( _ls.length )
+									{
+										if( _ls[length-1] != ' ' ) _ls ~= ' ' ;
+									}
+								}
+							}
+						}
+						
+						Ihandle* dlg = IupFontDlg();
 
+						if( dlg == null )
+						{
+							IupMessage( "Error", toStringz( "IupFontDlg created fail!" ) );
+							return IUP_IGNORE;
+						}
+
+						IupSetAttribute( dlg, "VALUE", toStringz( _ls.dup ) );
+						
+						// Open IupFontDlg
+						IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );						
+						
+						if( IupGetInt( dlg, "STATUS" ) )
+						{
+							int id;
+							if( ih == IupGetHandle( "customFont_0" ) )
+								id = 0;
+							else if( ih == IupGetHandle( "customFont_1" ) )
+								id = 1;
+							else if( ih == IupGetHandle( "customFont_2" ) )
+								id = 2;
+							else if( ih == IupGetHandle( "customFont_3" ) )
+								id = 3;
+							else if( ih == IupGetHandle( "customFont_4" ) )
+								id = 4;
+							else if( ih == IupGetHandle( "customFont_5" ) )
+								id = 5;
+							else if( ih == IupGetHandle( "customFont_6" ) )
+								id = 6;
+							else if( ih == IupGetHandle( "customFont_7" ) )
+								id = 7;
+							else if( ih == IupGetHandle( "customFont_8" ) )
+								id = 8;
+							else if( ih == IupGetHandle( "customFont_9" ) )
+								id = 9;
+							else if( ih == IupGetHandle( "customFont_10" ) )
+								id = 10;
+							else if( ih == IupGetHandle( "customFont_11" ) )
+								id = 11;
+							else if( ih == IupGetHandle( "customFont_12" ) )
+								id = 12;
+							else
+								return IUP_DEFAULT;
+								
+							auto fontInformation = new IupString( IupGetAttribute( dlg, "VALUE" ) );
+							char[] Bold, Italic, Underline, Strikeout, size, fontName;
+							char[][] strings = Util.split( fontInformation.toDString, "," );
+							
+							if( strings.length == 2 )
+							{
+								if( !strings[0].length )
+								{
+									version( Windows )
+									{
+										strings[0] = "Courier New";
+									}
+									else
+									{
+										strings[0] = "Monospace";
+									}
+								}
+								else
+								{
+									strings[0] = Util.trim( strings[0] );
+								}
+								strings[1] = Util.trim( strings[1] );
+
+								foreach( char[] s; Util.split( strings[1], " " ) )
+								{
+									switch( s )
+									{
+										case "Bold":		Bold = s;		break;
+										case "Italic":		Italic = s;		break;
+										case "Underline":	Underline = s;	break;
+										case "Strikeout":	Strikeout = s;	break;
+										default:
+											size = s;
+									}
+								}
+								fontInformation = Stdout.layout.convert( "{,-32},{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+								IupSetAttribute( ih, "TITLE", fontInformation.toCString );
+
+								scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
+								Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );
+								if( _flatFrameHandle != null )
+								{
+									scope _fontSyle = new IupString( strings[0] );
+									IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
+									IupRefresh( _flatFrameHandle );
+								}
+							}
+							else
+							{
+								version(linux)
+								{
+									foreach( char[] s; Util.split( fontInformation, " " ) )
+									{
+										switch( s )
+										{
+											case "Bold":		Bold = s;		break;
+											case "Italic":		Italic = s;		break;
+											case "Underline":	Underline = s;	break;
+											case "Strikeout":	Strikeout = s;	break;
+											default:
+												if( s.length )
+												{
+													if( s[0] >= 48 && s[0] <= 57 )
+													{
+														size = s;
+														break;
+													}
+
+													fontName ~= ( s ~ " " );
+												}
+										}
+									}
+
+									fontName = Util.trim( fontName );
+									fontInformation = Stdout.layout.convert( "{,-32},{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
+									IupSetAttribute( ih, "TITLE", _string.toCString );
+									
+									scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
+									Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );
+									if( _flatFrameHandle != null )
+									{
+										scope _fontSyle = new IupString( fontName );
+										IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
+										IupRefresh( _flatFrameHandle );
+									}									
+								}
+							}			
+						}
+						
+						IupDestroy( dlg );
+					}
+				}
+			}
+		}
+		catch( Exception e )
+		{
+			debug IupMessage( "CPreferenceDialog_font_BUTTON_CB", toStringz( e.toString() ) );
+		}
+		
+		return IUP_DEFAULT;
+	}
+
+	/+
 	private int CPreferenceDialog_fontList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
 		char[] listString = fromStringz( text ).dup;
@@ -1527,6 +1730,7 @@ extern(C) // Callback for CPreferenceDialog
 
 		return IUP_DEFAULT;
 	}
+	+/
 
 	private int CPreferenceDialog_btnOK_cb( Ihandle* ih )
 	{
@@ -1558,19 +1762,20 @@ extern(C) // Callback for CPreferenceDialog
 			
 			GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
-
-			Ihandle* _ft = IupGetHandle( "fontList" );
-			if( _ft != null )
+			
+			// Save Font Style
+			for( int i = 0; i < GLOBAL.fonts.length; ++ i )
 			{
-				for( int i = 0; i < GLOBAL.fonts.length; ++ i )
+				scope _tempString = new IupString(  "customFont_" ~ Integer.toString( i ) );
+				Ihandle* _ih = IupGetHandle( _tempString.toCString );
+				if( ih != null )
 				{
+					char[] fontInformation = fromStringz( IupGetAttribute( _ih, "TITLE" ) );
 					char[]	result;
 					
-					char[]	fontInformation = fromStringz( IupGetAttribute( _ft, toStringz( Integer.toString( i + 1 ) ) ) ).dup;
-
-					if( fontInformation.length > 10 )
+					if( fontInformation.length > 32 )
 					{
-						char[][] strings = Util.split( fontInformation[10..length] , "," );
+						char[][] strings = Util.split( fontInformation, "," );
 						
 						if( strings.length == 2 )
 						{
@@ -1581,14 +1786,12 @@ extern(C) // Callback for CPreferenceDialog
 								s = Util.trim( s );
 								if( s.length )	result ~= ( " " ~ s );
 							}
-
-							//GLOBAL.fonts[i].name = Util.trim( fontInformation[0..10] );
 							GLOBAL.fonts[i].fontString = result;
 						}
-					}		
+					}					
 				}
 			}
-
+			
 
 			GLOBAL.editColor.caretLine					= IupGetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR" );
 			GLOBAL.editColor.cursor						= IupGetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR" );
@@ -1724,23 +1927,20 @@ extern(C) // Callback for CPreferenceDialog
 
 			if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "NO" );
 
-			//if( GLOBAL.fonts.length == 11 )
-			//{
-				foreach( CScintilla cSci; GLOBAL.scintillaManager )
-				{
-					if( cSci !is null ) cSci.setGlobalSetting();
-				}			
-				IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) ); // Leftside
-				IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[3].fontString ) ); // Filelist
-				IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString ) ); // Project
-				IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) ); // Outline
-				IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) ); // Bottom
-				IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
-				IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
-				IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Debugger
-				IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[12].fontString ) );// StatusBar
-				GLOBAL.debugPanel.setFont();
-			//}
+			foreach( CScintilla cSci; GLOBAL.scintillaManager )
+			{
+				if( cSci !is null ) cSci.setGlobalSetting();
+			}			
+			IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) ); // Leftside
+			IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[3].fontString ) ); // Filelist
+			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString ) ); // Project
+			IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) ); // Outline
+			IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) ); // Bottom
+			IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
+			IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
+			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Debugger
+			IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[12].fontString ) );// StatusBar
+			GLOBAL.debugPanel.setFont();
 			
 			GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textManualPath" ), "VALUE" );
 			GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;

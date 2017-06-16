@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.268\nBy Kuan Hsu (Taiwan)\n2017.06.10" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.269\nBy Kuan Hsu (Taiwan)\n2017.06.16" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -1146,7 +1146,7 @@ extern(C)
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 		*/
-		scope dlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), true );
+		scope dlg = new CPreferenceDialog( -1, 380, GLOBAL.languageItems["caption_preference"].toDString(), true );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
