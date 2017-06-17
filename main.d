@@ -165,6 +165,7 @@ void main( char[][] args )
 	{
 		GLOBAL.poseidonPath = _poseidonPath.path;
 		Environment.cwd( GLOBAL.poseidonPath );
+		version(Windows) GLOBAL.EnvironmentVars = Environment.get();
 	}
 
 	// Init IDE
@@ -244,18 +245,16 @@ void main( char[][] args )
 
 	createDialog();
 
-	//if( GLOBAL.fonts.length == 11 )
-	//{
-		IupSetAttribute( GLOBAL.projectViewTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[2].fontString ) );// Leftside
-		IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[3].fontString ) );// Filelist
-		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[4].fontString ) );// Project
-		IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[5].fontString ) );// Outline
-		IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[6].fontString ) );// Bottom
-		IupSetAttribute( GLOBAL.outputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[7].fontString ) );// Output
-		IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Search
-		IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );// Debugger (shared Search)
-		IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[12].fontString ) );// StatusBar
-	//}
+	scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
+	scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
+	scope prjString = new IupString( GLOBAL.fonts[4].fontString ); 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
+	scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", messageString.toCString );// Bottom
+	scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
+	scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
+	scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
+	scope statusString = new IupString( GLOBAL.fonts[12].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
+	scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline	
+	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "FONT", outlineString.toCString );// Outline
 	
 	if( args.length > 1 )
 	{

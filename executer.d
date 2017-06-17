@@ -171,6 +171,14 @@ struct ExecuterAction
 		{
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
+			version(Windows)
+			{
+				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
+				{
+					command = Util.substitute( command, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
+				}
+			}
+			
 			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) command ~= " -s gui";
 			
 			Process p = new Process( true, command );
@@ -370,6 +378,14 @@ struct ExecuterAction
 
 				char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : GLOBAL.compilerFullPath.toDString;
 				
+				version(Windows)
+				{
+					foreach( char[] s; GLOBAL.EnvironmentVars.keys )
+					{
+						fbcFullPath = Util.substitute( fbcFullPath, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
+					}
+				}				
+				
 				if( options.length )
 					txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
 								txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ options ~ ( optionDebug.length ? " " ~ optionDebug : "" );
@@ -516,6 +532,14 @@ struct ExecuterAction
 		try
 		{
 			char[] commandString = "\"" ~ GLOBAL.compilerFullPath.toDString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
+			
+			version(Windows)
+			{
+				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
+				{
+					commandString = Util.substitute( commandString, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
+				}
+			}			
 			
 			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) commandString ~= " -s gui";
 			

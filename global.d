@@ -102,7 +102,9 @@ struct GLOBAL
 	static char[]				linuxTermName;
 
 	// Setting
-	static char[]				poseidonPath;
+	version(Windows)	static char[][char[]]	EnvironmentVars;
+	
+	static char[]				poseidonPath;			// Include Tail /
 	static char[]				lexer = "freebasic";
 	static char[][]				KEYWORDS;
 	static int					keywordCase = 0;	

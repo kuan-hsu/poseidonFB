@@ -53,9 +53,10 @@ class CManual
 	bool searchPage( char[] keyWord )
 	{
 		scope _fp = new FilePath( GLOBAL.manualPath.toDString );
+		if( !_fp.isAbsolute() )	_fp.set( GLOBAL.poseidonPath ~ GLOBAL.manualPath.toDString );
+		
 		keyWord = lowerCase( keyWord );
 		if ( keyWord[0] >= 'a' && keyWord[0] <= 'z' ) keyWord[0] = keyWord[0] - 32;
-
 		
 		switch( lowerCase( keyWord ) )
 		{

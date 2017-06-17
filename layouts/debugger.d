@@ -1426,8 +1426,18 @@ class DebugThread //: Thread
 			// Show the Debug window
 			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "YES" );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 2 );
+			
+			char[] debuggerExe = GLOBAL.debuggerFullPath.toDString;
+			
+			version(Windows)
+			{
+				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
+				{
+					debuggerExe = Util.substitute( debuggerExe, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
+				}
+			}
 
-			proc = new Process( true, "\"" ~ GLOBAL.debuggerFullPath.toDString ~ "\" " ~ executeFullPath );
+			proc = new Process( true, "\"" ~ debuggerExe ~ "\" " ~ executeFullPath );
 			proc.gui( true );
 			if( cwd.length ) proc.workDir( cwd );
 			//proc.redirect( Redirect.None );

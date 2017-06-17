@@ -822,6 +822,8 @@ class COutline
 				{
 					append( tree, t, 0 );
 				}
+				
+				//IupSetAttribute( tree, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 			}
 		}
 	}

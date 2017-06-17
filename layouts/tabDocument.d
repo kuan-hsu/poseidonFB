@@ -13,15 +13,16 @@ void createTabs()
 	version(Windows)
 	{
 		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x3" );
-		
 		/+
-		//IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
-		//IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "0" );
+		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x0,TABSFONTSIZE=9" );
+		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
+		IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "0" );
 		IupSetAttribute( GLOBAL.documentTabs, "TABSFONT",GLOBAL.cString.convert( GLOBAL.fonts[0].fontString ) );
 		IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 0" );
 		IupSetAttribute( GLOBAL.documentTabs, "TABSFORECOLOR", "100 100 100" );
-		
+		IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 		IupSetInt( GLOBAL.documentTabs, "TABSFONTSIZE", 9 );
+		IupSetCallback( GLOBAL.documentTabs, "EXTRABUTTON_CB", cast(Icallback) &tabFocus_cb );
 		+/
 	}
 	
@@ -34,7 +35,6 @@ void createTabs()
 	}
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
-	//IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabFocus_cb );
 }
 
 extern(C)
@@ -112,17 +112,18 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	/*
-	private int tabFocus_cb(Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	/+
+	private int tabFocus_cb(Ihandle* ih, int button, int pressed)
 	{
-		if( button == IUP_BUTTON2 )
+		IupMessage("",toStringz(Integer.toString(button)));
+		
+		
+		if( button == 2 )
 		{
 			IupMessage("MID","");
-			for( int i = 0; i < IupGetInt( ih, "COUNT" ); i ++ )
-				IupMessage( "", IupGetAttribute( IupGetChild( ih, i ), "SCREENPOSITION" ) );
 			
 		}
 		return IUP_DEFAULT;
 	}
-	*/
+	+/
 }
