@@ -251,7 +251,7 @@ class COutline
 			switch( lowerCase( _node.protection ) )
 			{
 				case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
-				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 168 81" ) ); break;
+				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "232 116 0" ) ); break;
 				default:
 			}
 		}
@@ -823,7 +823,7 @@ class COutline
 					append( tree, t, 0 );
 				}
 				
-				//IupSetAttribute( tree, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+				IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 			}
 		}
 	}

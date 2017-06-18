@@ -1262,7 +1262,7 @@ class CPreferenceDialog : CBaseDialog
 		createLayout();
 		
 		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
-		IupSetAttribute( _dlg, "SIZE", "322x380" );		
+		version(Windows) IupSetAttribute( _dlg, "SIZE", "322x380" ); else IupSetAttribute( _dlg, "SIZE", "322x440" );
 	}
 
 	~this()
@@ -1563,7 +1563,7 @@ extern(C) // Callback for CPreferenceDialog
 							{
 								version(linux)
 								{
-									foreach( char[] s; Util.split( fontInformation, " " ) )
+									foreach( char[] s; Util.split( fontInformation.toDString, " " ) )
 									{
 										switch( s )
 										{
@@ -1587,7 +1587,7 @@ extern(C) // Callback for CPreferenceDialog
 
 									fontName = Util.trim( fontName );
 									fontInformation = Stdout.layout.convert( "{,-32}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
-									IupSetAttribute( ih, "TITLE", _string.toCString );
+									IupSetAttribute( ih, "TITLE", fontInformation.toCString );
 									
 									scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
 									Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );
@@ -1951,19 +1951,6 @@ extern(C) // Callback for CPreferenceDialog
 			scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
 			scope statusString = new IupString( GLOBAL.fonts[12].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
 			scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline	
-			IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "FONT", outlineString.toCString );// Outline			
-			/*
-			IupSetAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) ); // Leftside
-			IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[3].fontString ) ); // Filelist
-			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString ) ); // Project
-			IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) ); // Outline
-			IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
-			IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) ); // Bottom
-			IupSetAttribute( GLOBAL.outputPanel, "FONT", toStringz( GLOBAL.fonts[7].fontString ) ); // Output
-			IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", toStringz( GLOBAL.fonts[8].fontString ) ); // Search
-			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Debugger
-			IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[12].fontString ) );// StatusBar
-			*/
 			GLOBAL.debugPanel.setFont();
 			
 			GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textManualPath" ), "VALUE" );

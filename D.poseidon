@@ -10,7 +10,7 @@
   <CompilerPath/>
   <IncludeDirs/>
   <LibDirs>
-    <Name>E:/CodingPark/GameKYO/lib/iup/iup322DLL10</Name>
+    <Name>K:/CodingPark/GameKYO/lib/iup/iup322DLL10</Name>
   </LibDirs>
   <Sources>
     <Name>IDE.d</Name>

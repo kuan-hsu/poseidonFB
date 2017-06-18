@@ -11,7 +11,6 @@ struct AutoComplete
 	import parser.ast;
 
 	import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf;
-	//import tango.text.convert.Layout;
 	import tango.stdc.stringz;
 	import tango.io.FilePath, tango.sys.Environment;
 	import tango.io.Stdout;
@@ -19,6 +18,21 @@ struct AutoComplete
 	static char[][]				listContainer;
 	static CASTnode[char[]]		includesMarkContainer;
 
+
+	static void getTypeAndParameter( CASTnode node, inout char[] _type, inout char[] _param )
+	{
+		int openParenPos = Util.index( node.type, "(" );
+		if( openParenPos < node.type.length )
+		{
+			_type = node.type[0..openParenPos];
+			_param = node.type[openParenPos..$];
+		}
+		else
+		{
+			_type = node.type;
+		}
+	}
+	
 	static char[] getListImage( CASTnode node )
 	{
 		if( GLOBAL.toggleShowAllMember == "OFF" )
@@ -653,7 +667,7 @@ struct AutoComplete
 
 		foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
 		{
-			if( _child.kind & ( B_UNION | B_TYPE ) )
+			if( _child.kind & ( B_UNION | B_TYPE | B_CLASS ) )
 			{
 				if( !_child.name.length ) result ~= getMembers( _child );else result ~= _child;
 			}
@@ -770,15 +784,8 @@ struct AutoComplete
 			{
 				if( ( !word.length ) || lowerCase( groupAST[i].name ) == lowerCase( word ) )
 				{
-					char[] _type = groupAST[i].type;
-					char[] _paramString = "()";
-					
-					int openParenPos = Util.index( groupAST[i].type, "(" );
-					if( openParenPos < groupAST[i].type.length )
-					{
-						_type = groupAST[i].type[0..openParenPos];
-						_paramString = groupAST[i].type[openParenPos..length];
-					}
+					char[] _type, _paramString	= "()";
+					getTypeAndParameter( groupAST[i], _type, _paramString );
 
 					if( _type.length )
 						results ~= ( _type ~ " " ~ groupAST[i].name ~ _paramString ~ "\n" );
@@ -1350,7 +1357,7 @@ struct AutoComplete
 									break;
 								}
 							}
-						case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '<':
+						case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '<', '@':
 							if( countParen == 0 && countBracket == 0 ) return word;
 
 						default: 
@@ -1447,52 +1454,7 @@ struct AutoComplete
 		if( cSci !is null )
 		{
 			if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) )
-			{
-				/+
-				/*
-				foreach( CASTnode node; listContainer )
-				{
-					//result ~= ( getListImage( node ) ~ " " );
-				}
-				*/
-				if( listContainer.length )
-				{
-					listContainer.sort;
-
-					char[]	_type;
-					int		maxLeft, maxRight;
-					
-					for( int i = 0; i < listContainer.length; ++ i )
-					{
-						if( listContainer[i].length )
-						{
-							int dollarPos = Util.rindex( listContainer[i], "~" );
-							if( dollarPos < listContainer[i].length )
-							{
-								_type = listContainer[i][dollarPos+1..length];
-								if( _type.length > maxRight ) maxRight = _type.length;
-								listContainer[i] = listContainer[i][0..dollarPos];
-								if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
-							}
-							else
-							{
-								if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
-							}
-						}
-					}
-
-					
-					result ~= ( listContainer[0] ~ "^" );
-					for( int i = 1; i < listContainer.length; ++ i )
-					{
-						if( listContainer[i].length )
-						{
-							if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
-						}
-					}
-				}
-				+/
-			}
+			{}
 			else
 			{
 				// Clean listContainer
@@ -1547,61 +1509,6 @@ struct AutoComplete
 						}
 					}
 				}
-
-				
-				/+
-				if( !splitWord[0].length )
-				{
-					if( checkWithBlock( iupSci, pos ) )
-					{
-						char[] withTitle = searchHead( iupSci, pos, "with" );
-						
-						if( withTitle.length )
-						{
-							char[][] splitWithTile = Util.split(withTitle, "." );
-							char[][] tempSplitWord = splitWord;
-							splitWord.length = 0;
-
-							foreach( char[] s; splitWithTile ~ tempSplitWord )
-							{
-								if( s != "" ) splitWord ~= s;
-							}
-						}
-					}
-				}
-
-				auto			AST_Head = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
-				int 			titleKind;
-				char[]			functionTitle = lowerCase( getFunctionTitle( iupSci, pos, titleKind ) );
-				int				lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-				char[]			memberFunctionMotherName;
-				+/
-				
-				/+
-
-				if( functionTitle.length )
-				{
-					//AST_Head = getFunctionAST( AST_Head, functionTitle, lineNum );
-					CASTnode functionHeadNode = getFunctionAST( AST_Head, titleKind, functionTitle, lineNum );
-					if( functionHeadNode !is null ) AST_Head = functionHeadNode;
-					AST_Head = checkScopeNode( iupSci, AST_Head, lineNum );
-					
-					int dotPos = Util.index( functionTitle, "." );
-					if( dotPos < functionTitle.length )
-					{
-						memberFunctionMotherName = functionTitle[0..dotPos];
-					}
-					else
-					{
-						// check Constructor or Destructor
-						if( titleKind & ( B_CTOR | B_DTOR ) ) memberFunctionMotherName = functionTitle;
-					}
-				}
-				else
-				{
-					AST_Head = checkScopeNode( iupSci, AST_Head, lineNum );
-				}
-				+/
 
 				if( AST_Head is null )
 				{
@@ -1900,7 +1807,11 @@ struct AutoComplete
 		return null;
 	}
 
-	//static void toDefintionAndType( bool bDefintion )
+	/*
+		TYPE = 0		show type
+		TYPE = 1		goto definition
+		TYPE = 2		goto member procedure
+	*/
 	static void toDefintionAndType( int TYPE )
 	{
 		if( GLOBAL.enableParser != "ON" ) return;
@@ -1986,24 +1897,28 @@ struct AutoComplete
 					}
 				}				
 
-				
-
 				// Goto Includes
-				if( TYPE & 1 )
-				{
-					char[] string = checkIsInclude( cSci.getIupScintilla, currentPos );
-					char[] fullPath = checkIncludeExist( string, cSci.getFullPath );
+				char[] includeString = checkIsInclude( cSci.getIupScintilla, currentPos );
+				char[] includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
 
-					if( fullPath.length )
+				if( includeFullPath.length )
+				{
+					if( TYPE & 1 )
 					{
-						actionManager.ScintillaAction.openFile( fullPath );
-						return;
-					}			
+						actionManager.ScintillaAction.openFile( includeFullPath );
+					}
+					else
+					{
+						IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( includeFullPath.dup ) ); // SCI_CALLTIPSHOW 2200
+					}
+					return;
 				}
+				
+				
 
 				if( AST_Head is null ) return;
-				
-				
 				
 				uint keyword_Btype;
 				switch( lowerCase( word ) )
@@ -2038,7 +1953,6 @@ struct AutoComplete
 						}
 				}
 				
-				
 				for( int i = 0; i < splitWord.length; i++ )
 				{
 					if( keyword_Btype > 0 ) break;
@@ -2046,16 +1960,6 @@ struct AutoComplete
 					if( i == 0 )
 					{
 						AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
-						/+
-						if( AST_Head is null )
-						{
-							if( memberFunctionMotherName.length )
-							{
-								//IupMessage("",toStringz(memberFunctionMotherName ~ "." ~ word));
-								AST_Head = searchMatchNode( GLOBAL.parserManager[upperCase(cSci.getFullPath)], memberFunctionMotherName ~ "." ~ word, B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
-							}
-						}
-						+/
 						if( AST_Head is null )
 						{
 							// For Type Objects
@@ -2108,15 +2012,10 @@ struct AutoComplete
 
 				if( TYPE == 0 )
 				{
-					char[]	_param;
-					char[] 	_type = AST_Head.type;
-					int openParenPos = Util.index( AST_Head.type, "(" );
-					if( openParenPos < AST_Head.type.length )
-					{
-						_type = AST_Head.type[0..openParenPos];
-						if( GLOBAL.showTypeWithParams == "ON" ) _param = AST_Head.type[openParenPos..length];
-					}
-
+					char[]	_param, _type;
+					getTypeAndParameter( AST_Head, _type, _param );
+					if( GLOBAL.showTypeWithParams != "ON" ) _param = "";
+					
 					switch( AST_Head.kind )
 					{
 						case B_FUNCTION, B_SUB: if( !_type.length ) _type = "void"; break;
@@ -2125,13 +2024,22 @@ struct AutoComplete
 						case B_UNION: _type = "UNION"; break;
 						case B_ENUM: _type = "ENUM"; break;
 						case B_NAMESPACE: _type = "NAMESPACE"; break;
+						case B_BI, B_BAS:
+							return;
 						default:
 					}
-
+					
 					IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
 					IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
 
 					char[] _list = ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
+					
+					if( AST_Head.kind & ( B_TYPE | B_CLASS | B_UNION ) )
+					{
+						foreach( CASTnode _child; AST_Head.getChildren() )
+							if( _child.kind & B_CTOR ) _list ~= ( "\n" ~ _child.name ~ _child.type );
+					}
+					
 					IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
 				}
 				else
