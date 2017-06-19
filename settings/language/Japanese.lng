@@ -95,6 +95,7 @@ options=オプション
 				enablekeyword=キーワード自動補完を有効に
 				enableparser=構文解析を有効に
 				showtitle=関数のタイトルを表示
+				width=幅
 				showtypeparam=関数のパラメータと種類を表示
 				sortignorecase=自動補完リストは大文字小文字を無視
 				selectcase=自動補完リストの選択で大文字小文字を区別しない

@@ -117,6 +117,17 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
 		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
+		
+		Ihandle* labelFunctionTitle = IupLabel( GLOBAL.languageItems["width"].toCString );
+		IupSetAttributes( labelFunctionTitle, "SIZE=80x12,ALIGNMENT=ARIGHT:ACENTER" ); 
+		Ihandle* textFunctionTitle = IupText( null );
+		IupSetAttribute( textFunctionTitle, "SIZE", "30x12" );
+		IupSetAttribute( textFunctionTitle, "VALUE", GLOBAL.widthFunctionTitle.toCString );
+		IupSetHandle( "textFunctionTitle", textFunctionTitle );
+		
+		Ihandle* hBoxFunctionTitle = IupHbox( toggleFunctionTitle, labelFunctionTitle, textFunctionTitle, null );
+		IupSetAttribute( hBoxFunctionTitle, "ALIGNMENT", "ACENTER" ); 
+		
 
 		Ihandle* toggleWithParams = IupToggle( GLOBAL.languageItems["showtypeparam"].toCString, null );
 		IupSetAttribute( toggleWithParams, "VALUE", toStringz(GLOBAL.showTypeWithParams.dup) );
@@ -176,7 +187,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, toggleFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBox00, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, hBoxFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=NO" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
@@ -1907,6 +1918,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
 			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
 			GLOBAL.showFunctionTitle					= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
+			GLOBAL.widthFunctionTitle					= IupGetAttribute( IupGetHandle( "textFunctionTitle" ), "VALUE" );
 			GLOBAL.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
 			GLOBAL.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
 			GLOBAL.toggleCaseInsensitive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
@@ -1935,7 +1947,14 @@ extern(C) // Callback for CPreferenceDialog
 			else
 				GLOBAL.keywordCase = 3;
 
-			if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" ); else IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "NO" );
+			if( GLOBAL.showFunctionTitle == "ON" )
+			{
+				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" );
+				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", GLOBAL.widthFunctionTitle.toCString );
+				IupRefresh( GLOBAL.toolbar.getListHandle() );
+			}
+			else
+				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "NO" );
 
 			foreach( CScintilla cSci; GLOBAL.scintillaManager )
 			{

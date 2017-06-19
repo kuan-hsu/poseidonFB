@@ -95,6 +95,7 @@ options=Options
 				enablekeyword=Enable Keyword Autocomplete
 				enableparser=Enable Parser
 				showtitle=Show Function Title
+				width=Width
 				showtypeparam=Show Type With Function Parameters
 				sortignorecase=Autocomplete List Is Ignore Case
 				selectcase=Selection Of Autocomplete List Is Case Insensitive

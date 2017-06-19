@@ -299,6 +299,7 @@ struct IDECONFIG
 		parserNode.element( null, "enableparser", GLOBAL.enableParser );
 		parserNode.element( null, "parsertrigger", Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) );
 		parserNode.element( null, "showfunctiontitle", GLOBAL.showFunctionTitle );
+		parserNode.element( null, "widthfunctiontitle", GLOBAL.widthFunctionTitle.toDString );
 		parserNode.element( null, "showtypewithparams", GLOBAL.showTypeWithParams );
 		parserNode.element( null, "includelevel", Integer.toString( GLOBAL.includeLevel ) );
 		parserNode.element( null, "ignorecase", GLOBAL.toggleIgnoreCase );
@@ -466,6 +467,11 @@ struct IDECONFIG
 			{
 				GLOBAL.showFunctionTitle = e.value;
 			}
+			result = root.query.descendant("widthfunctiontitle");
+			foreach( e; result )
+			{
+				GLOBAL.widthFunctionTitle = e.value;
+			}			
 			result = root.query.descendant("showtypewithparams");
 			foreach( e; result )
 			{

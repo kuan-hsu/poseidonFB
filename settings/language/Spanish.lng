@@ -95,6 +95,7 @@ options=Opciones
 				enablekeyword=Activar autocompletar palabras clave
 				enableparser=Activar analizador
 				showtitle=Mostrar título de función
+				width=anchura
 				showtypeparam=Mostrar tipo con parámetros de función
 				sortignorecase=Lista de autocompletar ignora el caso
 				selectcase=Selección de autocompletar no es sensible al caso

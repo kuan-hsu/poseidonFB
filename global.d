@@ -125,6 +125,7 @@ struct GLOBAL
 	static char[]				enableKeywordComplete = "ON";
 	static char[]				enableParser = "ON";
 	static char[]				showFunctionTitle = "OFF";
+	static IupString			widthFunctionTitle;
 	static char[]				showTypeWithParams = "OFF";
 	static char[]				toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
 	static char[]				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
@@ -189,7 +190,7 @@ struct GLOBAL
 		GLOBAL.editColor.selectionBack = new IupString( cast(char[]) "0 0 255" );
 		GLOBAL.editColor.linenumFore = new IupString( cast(char[]) "0 0 0" );
 		GLOBAL.editColor.linenumBack = new IupString( cast(char[]) "200 200 200" );
-		GLOBAL.editColor.fold = new IupString( cast(char[]) "200 208 208" );
+		GLOBAL.editColor.fold = new IupString( cast(char[]) "238 238 238" );
 		GLOBAL.editColor.selAlpha = new IupString( cast(char[]) "255" );
 		GLOBAL.editColor.errorFore = new IupString( cast(char[]) "102 69 3" );
 		GLOBAL.editColor.errorBack = new IupString( cast(char[]) "255 200 227" );
@@ -238,6 +239,8 @@ struct GLOBAL
 		GLOBAL.debuggerFullPath = new IupString();
 		GLOBAL.manualPath = new IupString();
 		GLOBAL.colorTemplate = new IupString();
+		
+		GLOBAL.widthFunctionTitle = new IupString( cast(char[]) "200" );
 		
 		
 		GLOBAL.cString = new IupString;
@@ -481,6 +484,7 @@ struct GLOBAL
 						GLOBAL.languageItems["enablekeyword"] = new IupString( cast(char[]) "Enable Keyword Autocomplete" );
 						GLOBAL.languageItems["enableparser"] = new IupString( cast(char[]) "Enable Parser" );
 						GLOBAL.languageItems["showtitle"] = new IupString( cast(char[]) "Show Function Title" );
+						GLOBAL.languageItems["width"] = new IupString( cast(char[]) "Width" );
 						GLOBAL.languageItems["showtypeparam"] = new IupString( cast(char[]) "Show Type With Function Parameters" );
 						GLOBAL.languageItems["sortignorecase"] = new IupString( cast(char[]) "Autocomplete List Is Ignore Case" );
 						GLOBAL.languageItems["selectcase"] = new IupString( cast(char[]) "Selection Of Autocomplete List Is Case Insensitive" );

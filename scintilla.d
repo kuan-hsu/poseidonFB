@@ -476,10 +476,8 @@ class CScintilla
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDERTAIL=EMPTY" );
 			IupSetAttribute( sci, "FOLDFLAGS", "LINEAFTER_CONTRACTED" );
 			IupSetAttribute( sci, "MARGINSENSITIVE2", "YES" );
-			
-			// define SCI_SETFOLDMARGINCOLOUR 2290  SCI_SETMARGINBACKN 2250
-			// IupScintillaSendMessage( sci, 2291, 6, toStringz( GLOBAL.editColor.fold.dup ) );
-			//IupSetAttribute( sci, "STYLEBGCOLOR39", toStringz( GLOBAL.editColor.fold.dup ) );
+			IupSetAttribute( sci, "FOLDMARGINCOLOR", GLOBAL.editColor.fold.toCString );
+			IupSetAttribute( sci, "FOLDMARGINHICOLOR", GLOBAL.editColor.fold.toCString );
 		}
 		else
 		{

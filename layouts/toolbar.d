@@ -230,7 +230,8 @@ class CToolBar
 		IupSetAttribute( guiButton, "TIP", "Console / GUI" );
 
 		listHandle = IupList( null );
-		IupSetAttributes( listHandle, "ACTIVE=YES,SIZE=200x12,SHOWIMAGE=YES,SCROLLBAR=NO" );
+		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO" );
+		IupSetAttribute( listHandle, "SIZE", GLOBAL.widthFunctionTitle.toCString );
 		IupSetAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		

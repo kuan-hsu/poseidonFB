@@ -95,6 +95,7 @@ options=選項
 				enablekeyword=啟用關鍵字自動完成
 				enableparser=啟動分析器
 				showtitle=顯示函式名稱
+				width=寬度
 				showtypeparam=顯示種類若為函式顯示其參數
 				sortignorecase=自動完成列表不分大小寫
 				selectcase=選擇自動完成項目不分大小寫
