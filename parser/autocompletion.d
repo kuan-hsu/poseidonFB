@@ -2061,6 +2061,15 @@ struct AutoComplete
 									className = AST_Head.getFather.name;
 									procedureName = AST_Head.name;
 								}
+								else if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
+								{
+									if( AST_Head.lineNumber == AST_Head.endLineNum ) // Declare
+									{
+										bGotoMemberProcedure = true;
+										procedureName = AST_Head.name;
+										className = "";
+									}
+								}								
 							}
 						}
 					}
@@ -2102,38 +2111,106 @@ struct AutoComplete
 					}
 					fullPath = AST_Head.name;
 					
+					scope _fp = new FilePath( fullPath );
+					
 					if( bGotoMemberProcedure )
 					{
-						scope _fp = new FilePath( fullPath );
-						if( lowerCase( _fp.ext ) == "bi" )
+						if( className.length )
 						{
-							fullPath = _fp.path() ~ _fp.name ~ ".bas";
-							AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
-							
-							if( AST_Head !is null )
+							if( lowerCase( _fp.ext ) == "bi" )
 							{
-								switch( oriNode.kind )
-								{
-									case B_SUB, B_FUNCTION, B_OPERATOR, B_PROPERTY:
-										sonProcedureNode = searchMatchMemberNode( AST_Head, className ~ "." ~ procedureName, oriNode.kind );
-										break;
-
-									case B_CTOR, B_DTOR:
-										sonProcedureNode = searchMatchMemberNode( AST_Head, className, oriNode.kind );
-										break;
-									
-									default:
-										return;
-								}
+								fullPath = _fp.path() ~ _fp.name ~ ".bas";
+								AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
 								
-								if( sonProcedureNode !is null )
+								if( AST_Head !is null )
 								{
-									if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
-									return;
+									switch( oriNode.kind )
+									{
+										case B_SUB, B_FUNCTION, B_OPERATOR, B_PROPERTY:
+											sonProcedureNode = searchMatchMemberNode( AST_Head, className ~ "." ~ procedureName, oriNode.kind );
+											break;
+
+										case B_CTOR, B_DTOR:
+											sonProcedureNode = searchMatchMemberNode( AST_Head, className, oriNode.kind );
+											break;
+										
+										default:
+											return;
+									}
+									
+									if( sonProcedureNode !is null )
+									{
+										if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+										return;
+									}
+								}
+							}
+							return;
+						}
+						else
+						{
+							// Declare & procedure body at same file
+							foreach_reverse( CASTnode son; getMembers( AST_Head ) )
+							{
+								if( son.kind & oriNode.kind )
+									if( son.name == procedureName )
+										if( son.lineNumber < son.endLineNum )
+										{
+											if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+											return;
+										}
+							}
+							
+							// Check BAS file
+							if( lowerCase( _fp.ext ) == "bi" )
+							{
+								fullPath = _fp.path() ~ _fp.name ~ ".bas";
+								AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
+								
+								if( AST_Head !is null )
+								{
+									foreach_reverse( CASTnode son; getMembers( AST_Head ) )
+									{
+										if( son.kind & oriNode.kind )
+											if( son.name == procedureName )
+												if( son.lineNumber < son.endLineNum )
+												{
+													if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+													return;
+												}
+									}
+								}
+							}							
+							
+						}
+					}
+					else
+					{
+						if( oriNode.kind & ( B_SUB | B_FUNCTION ) )
+						{
+							if( oriNode.lineNumber < oriNode.endLineNum ) // Not Declare
+							{
+								if( lowerCase( _fp.ext ) == "bas" )
+								{
+									fullPath = _fp.path() ~ _fp.name ~ ".bi";
+									AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
+									
+									if( AST_Head !is null )
+									{
+										foreach( CASTnode son; getMembers( AST_Head ) )
+										{
+											if( son.kind & oriNode.kind )
+												if( son.name == oriNode.name )
+													if( son.lineNumber == son.endLineNum ) // Declare
+													{
+														if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+														return;
+													}
+										}
+									}										
 								}
 							}
 						}
-						return;
 					}
 					
 					if( actionManager.ScintillaAction.openFile( fullPath, lineNum ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );

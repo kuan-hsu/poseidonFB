@@ -1098,7 +1098,7 @@ class CParser
 							}
 
 							activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, _returnType ~ "()", null, _lineNum );
-							if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+							if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 							break;
 						}
 					}
@@ -1139,7 +1139,7 @@ class CParser
 
 								activeASTnode.type = _returnType ~ _param;
 							
-								if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 								break;
 							}
 						}
@@ -1180,13 +1180,13 @@ class CParser
 								}
 
 								activeASTnode.type = _returnType ~ _param;
-								if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 							}
 						}
 						else // delete
 						{
 							activeASTnode.type = _param;
-							if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+							if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 						}
 						break;
 					}
@@ -1296,7 +1296,7 @@ class CParser
 								_param = parseParam( bDeclare );
 
 								activeASTnode.type = _param;
-								if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 								if( token().tok == TOK.Texport ) parseToken( TOK.Texport );
 								break;
 							}
@@ -1332,7 +1332,7 @@ class CParser
 									}
 			
 									activeASTnode.type = _returnType ~ _param;
-									if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+									if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 									if( token().tok == TOK.Texport ) parseToken( TOK.Texport );
 									break;
 								}
@@ -1489,9 +1489,9 @@ class CParser
 							}
 						
 							activeASTnode.type = _returnType ~ _param;
-							if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+							if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 
-							if( token().tok == TOK.Tstatic ) parseToken(  TOK.Tstatic );
+							if( token().tok == TOK.Tstatic ) parseToken( TOK.Tstatic );
 							
 							return true;
 						}
@@ -1502,7 +1502,7 @@ class CParser
 					if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
 					{
 						activeASTnode.type = _param;
-						if( bDeclare ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+						if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 						return true;
 					}						
 				}

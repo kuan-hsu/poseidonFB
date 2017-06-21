@@ -41,7 +41,7 @@ class CScanner
 	
 	TokenUnit[]	scan( char[] data )
 	{
-		bool			bStringFlag, bCommentFlag, bCommentBlockFlag;
+		bool			bStringFlag, bEscapeSequences, bCommentFlag, bCommentBlockFlag;
 		char[]			identifier;
 		int				lineNum = 1;
 		int				commentCount;
@@ -133,7 +133,20 @@ class CScanner
 				{
 					if( data[i] == '"' )
 					{
+						if( bEscapeSequences )
+						{
+							if( i > 0 )
+							{
+								if( data[i-1] == '\\' )
+								{
+									identifier ~= data[i];
+									continue;
+								}
+							}
+						}
+							
 						bStringFlag = false;
+						bEscapeSequences = false;
 						identifier ~= data[i];
 						TokenUnit t = {TOK.Tstrings, identifier, lineNum};
 						results ~= t;
@@ -149,6 +162,11 @@ class CScanner
 					{
 						if( data[i] == '"' )
 						{
+							if( i > 0 )
+							{
+								if( data[i-1] == '!' ) bEscapeSequences = true;
+							}
+							
 							bStringFlag = true;
 							identifier ~= data[i];
 							continue;

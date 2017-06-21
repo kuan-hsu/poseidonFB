@@ -8,6 +8,7 @@ import menu, scintilla, actionManager;
 
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
+import tango.sys.Process, tango.io.stream.Lines;
 
 //import tango.sys.SharedLib;
 
@@ -165,7 +166,27 @@ void main( char[][] args )
 	{
 		GLOBAL.poseidonPath = _poseidonPath.path;
 		Environment.cwd( GLOBAL.poseidonPath );
-		version(Windows) GLOBAL.EnvironmentVars = Environment.get();
+		version(Windows)
+		{
+			GLOBAL.EnvironmentVars = Environment.get();
+/+
+			Process p = new Process( true, "cmd /C set" );
+			p.gui( true );
+			p.execute;
+
+			foreach( line; new Lines!(char)(p.stdout) )
+			{
+				line = Util.trim(line);
+				if( !line.length ) break;
+				int posAssign = Util.index( line, "=" );
+				if( posAssign < line.length )
+				{
+					char[] key = Util.trim( line[0..posAssign] ).dup;
+					char[] value = Util.trim( line[posAssign+1..$] ).dup;
+					if( key.length ) GLOBAL.EnvironmentVars[key] = value;
+				}
+			}+/
+		}
 	}
 
 	// Init IDE

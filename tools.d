@@ -1,6 +1,6 @@
 ﻿module tools;
 
-import tango.stdc.stdlib, tango.stdc.string;
+import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz;
 
 class IupString
 {
@@ -150,3 +150,57 @@ char[] convertKeyWordCase( int type, char[] replaceText )
 
 	return replaceText;
 }
+
+private import  tango.sys.Common;
+
+/+
+// The code is made by Christopher E. Miller 
+char[] getEnvironmentVariable(char[] name)
+{
+	/+
+	if(useUnicode)
+	{
+		version(STATIC_UNICODE)
+		{
+			alias GetEnvironmentVariableW proc;
+		}
+		else
+		{
+			const char[] NAME = "GetEnvironmentVariableW";
+			static GetEnvironmentVariableWProc proc = null;
+			
+			if(!proc)
+			{
+				proc = cast(GetEnvironmentVariableWProc)GetProcAddress(kernel32, NAME.ptr);
+				if(!proc)
+					getProcErr(NAME);
+			}
+		}
+		
+		wchar* strz, buf;
+		DWORD len;
+		strz = toUnicodez(name);
+		len = proc(strz, null, 0);
+		if(!len)
+			return null;
+		buf = (new wchar[len]).ptr;
+		len = proc(strz, buf, len);
+		return fromUnicode(buf, len);
+	}
+	else
+	{
+	+/
+		char* strz, buf;
+		ulong len;
+		strz = toStringz(name);
+		len = GetEnvironmentVariableA(strz, null, 0);
+		if(!len)
+			return null;
+		buf = (new char[len]).ptr;
+		len = GetEnvironmentVariableA(strz, buf, len);
+		//return fromAnsi(buf, len);
+		
+		return fromStringz(buf);
+	//}
+}
++/
