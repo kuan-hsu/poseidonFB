@@ -77,7 +77,8 @@ void createExplorerWindow()
 
 void createEditorSetting()
 {
-	IDECONFIG.load();
+	//IDECONFIG.load();
+	IDECONFIG.loadINI();
 }
 
 void createLayout()
@@ -155,7 +156,8 @@ extern(C)
 				p.saveFile();
 			}
 
-			IDECONFIG.save();
+			//IDECONFIG.save();
+			IDECONFIG.saveINI();
 
 			foreach( parser; GLOBAL.parserManager )
 			{
@@ -229,9 +231,9 @@ extern(C)
 								if( word.length )
 								{
 									bool bExitFlag;
-									foreach( char[] _keyword; GLOBAL.KEYWORDS )
+									foreach( IupString _keyword; GLOBAL.KEYWORDS )
 									{
-										foreach( char[] _k; Util.split( _keyword, " " ) )
+										foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
 										{								
 											if( lowerCase( _k ) == word )
 											{

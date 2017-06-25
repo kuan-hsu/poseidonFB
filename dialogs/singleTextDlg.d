@@ -22,6 +22,7 @@ class CSingleTextDialog : CBaseDialog
 		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
 		//IupSetAttribute( textResult, "SIZE", "100x12" );
 		IupSetAttribute( textResult, "EXPAND", "YES" );
+		IupSetAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
 		IupSetHandle( "CSingleTextDialog_text", textResult );
 
 		Ihandle* hBox = IupHbox( label, textResult, null );

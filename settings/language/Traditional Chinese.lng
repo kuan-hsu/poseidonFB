@@ -91,6 +91,7 @@ options=選項
 			compilersetting=編譯器設定
 				errorannotation=在註解中顯示編譯器提示
 				showresultwindow=編譯完成,顯示結果視窗
+				delexistexe=編譯前清除既有執行檔
 			parsersetting=分析器設定
 				enablekeyword=啟用關鍵字自動完成
 				enableparser=啟動分析器

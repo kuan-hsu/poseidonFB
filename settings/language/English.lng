@@ -91,6 +91,7 @@ options=Options
 			compilersetting=Compiler Setting
 				errorannotation=Show Compiler Errors/Warnings Using Annotation
 				showresultwindow=Show Compiled Result Window
+				delexistexe=Before Compile, Delete Existed Execute File
 			parsersetting=Parser Settings
 				enablekeyword=Enable Keyword Autocomplete
 				enableparser=Enable Parser

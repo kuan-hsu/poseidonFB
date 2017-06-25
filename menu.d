@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.273\nBy Kuan Hsu (Taiwan)\n2017.06.21" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.274\nBy Kuan Hsu (Taiwan)\n2017.06.25" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -552,9 +552,9 @@ private void _convertKeyWordCase( int type )
 	{
 		Ihandle* iupSci = cSci.getIupScintilla;
 
-		foreach( char[] _s; GLOBAL.KEYWORDS )
+		foreach( IupString _s; GLOBAL.KEYWORDS )
 		{
-			foreach( char[] targetText; Util.split( _s, " " ) )
+			foreach( char[] targetText; Util.split( _s.toDString, " " ) )
 			{
 				if( targetText.length )
 				{

@@ -235,7 +235,7 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
 
-		foreach( char[] s; GLOBAL.projectManager[setupDir].others )
+		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].others )
 		{
 			char[]		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
@@ -252,7 +252,7 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
 		
-		foreach( char[] s; GLOBAL.projectManager[setupDir].includes )
+		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].includes )
 		{
 			char[]		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
@@ -270,7 +270,7 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		
 		
-		foreach( char[] s; GLOBAL.projectManager[setupDir].sources )
+		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].sources )
 		{
 			char[]		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );

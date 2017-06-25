@@ -228,6 +228,14 @@ struct ExecuterAction
 					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
+				
+				if( GLOBAL.delExistExe == "ON" )
+				{
+					// Remove the execute file
+					scope targetFilePath = new FilePath( cSci.getFullPath() );
+					version(Windows) targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() ~ ".exe" ); else targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() );
+					if( targetFilePath.exists() ) targetFilePath.remove();
+				}
 			}
 			else
 			{
@@ -447,6 +455,14 @@ struct ExecuterAction
 					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
 					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				}
+				
+				if( GLOBAL.delExistExe == "ON" )
+				{
+					// Remove the execute file
+					version(Windows) _targetName ~= ".exe";
+					scope targetFilePath = new FilePath( _targetName );
+					if( targetFilePath.exists() ) targetFilePath.remove();
 				}
 			}
 			else

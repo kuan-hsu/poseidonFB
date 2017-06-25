@@ -1292,7 +1292,7 @@ struct StatusBarAction
 	public:
 	static void update()
 	{
-		int childCount = Integer.atoi( fromStringz( IupGetAttribute( GLOBAL.documentTabs, "COUNT" ) ) );
+		int childCount = IupGetInt( GLOBAL.documentTabs, "COUNT" );
 		if( childCount > 0 )
 		{
 			// SCI_GETCURRENTPOS = 2008
@@ -1365,38 +1365,44 @@ struct StatusBarAction
 
 				if( GLOBAL.showFunctionTitle == "ON" )
 				{
-					CASTnode 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], line );
-					
-					if( AST_Head !is null )
+					if( GLOBAL.enableParser == "ON" )
 					{
-						if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+						if( upperCase(cSci.getFullPath) in GLOBAL.parserManager )
 						{
-							do
+							CASTnode 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], line );
+							
+							if( AST_Head !is null )
 							{
-								if( AST_Head.getFather !is null ) AST_Head = AST_Head.getFather; else break;
+								if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+								{
+									do
+									{
+										if( AST_Head.getFather !is null ) AST_Head = AST_Head.getFather; else break;
+									}
+									while( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+								}
+								
+								IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+								switch( AST_Head.kind )
+								{
+									case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
+									case B_SUB:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );			break;
+									case B_TYPE:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );		break;
+									case B_ENUM:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );			break;
+									case B_UNION:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );		break;
+									case B_CTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );			break;
+									case B_DTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );			break;
+									case B_PROPERTY:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );		break;
+									case B_OPERATOR:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );		break;
+									default:
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
+								}
 							}
-							while( AST_Head.kind & ( B_WITH | B_SCOPE ) )
-						}
-						
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
-						switch( AST_Head.kind )
-						{
-							case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
-							case B_SUB:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );			break;
-							case B_TYPE:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );		break;
-							case B_ENUM:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );			break;
-							case B_UNION:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );		break;
-							case B_CTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );			break;
-							case B_DTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );			break;
-							case B_PROPERTY:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );		break;
-							case B_OPERATOR:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );		break;
-							default:
+							else
+							{
 								IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
+							}
 						}
-					}
-					else
-					{
-						IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
 					}
 				}
 			}

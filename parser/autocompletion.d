@@ -652,9 +652,11 @@ struct AutoComplete
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 
 				//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word );
-				CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
-
-				if( resultIncludeNodes.length )	resultNode = resultIncludeNodes[0];
+				if( upperCase(cSci.getFullPath) in GLOBAL.parserManager ) 
+				{
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
+					if( resultIncludeNodes.length )	resultNode = resultIncludeNodes[0];
+				}
 			}
 		}
 
@@ -827,9 +829,9 @@ struct AutoComplete
 
 	static void keyWordlist( char[] word )
 	{
-		foreach( char[] _s; GLOBAL.KEYWORDS )
+		foreach( IupString _s; GLOBAL.KEYWORDS )
 		{
-			foreach( char[] s; Util.split( _s, " " ) )
+			foreach( char[] s; Util.split( _s.toDString, " " ) )
 			{
 				if( s.length )
 				{
@@ -1453,6 +1455,8 @@ struct AutoComplete
 		auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )
 		{
+			if( upperCase(cSci.getFullPath) in GLOBAL.parserManager ){} else{ return null; }
+			
 			if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) )
 			{}
 			else
@@ -1823,6 +1827,8 @@ struct AutoComplete
 			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
 			{
+				if( upperCase(cSci.getFullPath) in GLOBAL.parserManager ){} else{ return; }
+				
 				int currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
 				if( currentPos < 1 ) return;
 				

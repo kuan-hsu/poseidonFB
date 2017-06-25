@@ -80,7 +80,11 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleShowResultWindow, "VALUE", toStringz(GLOBAL.compilerWindow.dup) );
 		IupSetHandle( "toggleShowResultWindow", toggleShowResultWindow );
 
-		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, null );
+		Ihandle* toggleDelPrevEXE = IupToggle( GLOBAL.languageItems["delexistexe"].toCString, null );
+		IupSetAttribute( toggleDelPrevEXE, "VALUE", toStringz(GLOBAL.delExistExe.dup) );
+		IupSetHandle( "toggleDelPrevEXE", toggleDelPrevEXE );
+
+		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleDelPrevEXE, null );
 
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
@@ -1160,19 +1164,19 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* keyWordText0 = IupText( null );
 		IupSetAttributes( keyWordText0, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText0, "VALUE", toStringz( GLOBAL.KEYWORDS[0].dup ) );
+		IupSetAttribute( keyWordText0, "VALUE", GLOBAL.KEYWORDS[0].toCString );
 		IupSetHandle( "keyWordText0", keyWordText0 );
 		Ihandle* keyWordText1 = IupText( null );
 		IupSetAttributes( keyWordText1, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText1, "VALUE", toStringz( GLOBAL.KEYWORDS[1].dup ) );
+		IupSetAttribute( keyWordText1, "VALUE", GLOBAL.KEYWORDS[1].toCString );
 		IupSetHandle( "keyWordText1", keyWordText1 );
 		Ihandle* keyWordText2 = IupText( null );
 		IupSetAttributes( keyWordText2, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText2, "VALUE", toStringz( GLOBAL.KEYWORDS[2].dup ) );
+		IupSetAttribute( keyWordText2, "VALUE", GLOBAL.KEYWORDS[2].toCString );
 		IupSetHandle( "keyWordText2", keyWordText2 );
 		Ihandle* keyWordText3 = IupText( null );
 		IupSetAttributes( keyWordText3, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText3, "VALUE", toStringz( GLOBAL.KEYWORDS[3].dup ) );
+		IupSetAttribute( keyWordText3, "VALUE", GLOBAL.KEYWORDS[3].toCString );
 		IupSetHandle( "keyWordText3", keyWordText3 );
 
 
@@ -1225,12 +1229,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( keyWordVbox, "ALIGNMENT", toStringz( "ACENTER" ) );
 		
 		
-
-
-
-
-
-
 		IupSetAttribute( vBoxPage01, "TABTITLE", GLOBAL.languageItems["compiler"].toCString() );
 		IupSetAttribute( vBoxPage02, "TABTITLE", GLOBAL.languageItems["editor"].toCString() );
 		IupSetAttribute( vColor, "TABTITLE", GLOBAL.languageItems["color"].toCString() );
@@ -1298,6 +1296,7 @@ class CPreferenceDialog : CBaseDialog
 	
 		IupSetHandle( "toggleAnnotation", null );
 		IupSetHandle( "toggleShowResultWindow", null );
+		IupSetHandle( "toggleDelPrevEXE", null );
 
 		IupSetHandle( "toggleLineMargin", null );
 		IupSetHandle( "toggleBookmarkMargin", null );
@@ -1913,7 +1912,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
-
+			GLOBAL.delExistExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleDelPrevEXE" ), "VALUE" ) ).dup;
 
 			GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
 			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
@@ -1983,9 +1982,11 @@ extern(C) // Callback for CPreferenceDialog
 			}
 			*/
 			
-
+			/*
 			// Save Setup to Xml
 			IDECONFIG.save();
+			*/
+			IDECONFIG.saveINI();
 		}
 		catch( Exception e )
 		{

@@ -133,9 +133,9 @@ class CManual
 
 	bool jumpDefinition( char[] _keyWord )
 	{
-		foreach( char[] _s; GLOBAL.KEYWORDS )
+		foreach( IupString _s; GLOBAL.KEYWORDS )
 		{
-			foreach( char[] targetText; Util.split( _s, " " ) )
+			foreach( char[] targetText; Util.split( _s.toDString, " " ) )
 			{
 				if( _keyWord == targetText )
 				{

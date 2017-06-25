@@ -310,10 +310,10 @@ class CScintilla
 	{
 		IupSetAttribute(sci, "LEXERLANGUAGE", toStringz( GLOBAL.lexer ) );
 
-		IupSetAttribute(sci, "KEYWORDS0", GLOBAL.cString.convert( GLOBAL.KEYWORDS[0] ) );
-		IupSetAttribute(sci, "KEYWORDS1", GLOBAL.cString.convert( GLOBAL.KEYWORDS[1] ) );
-		IupSetAttribute(sci, "KEYWORDS2", GLOBAL.cString.convert( GLOBAL.KEYWORDS[2] ) );
-		IupSetAttribute(sci, "KEYWORDS3", GLOBAL.cString.convert( GLOBAL.KEYWORDS[3] ) );
+		IupSetAttribute(sci, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
+		IupSetAttribute(sci, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
+		IupSetAttribute(sci, "KEYWORDS2", GLOBAL.KEYWORDS[2].toCString );
+		IupSetAttribute(sci, "KEYWORDS3", GLOBAL.KEYWORDS[3].toCString );
 
 		char[] font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
 		version( Windows )
@@ -1787,75 +1787,82 @@ extern(C)
 	// Auto Ident
 	private int CScintilla_caret_cb( Ihandle *ih, int lin, int col, int pos )
 	{
-		//IupSetInt( ih, "BRACEBADLIGHT", -1 );
-		// BRACEMATCH
-		if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
+		try
 		{
-			IupSetInt( ih, "BRACEBADLIGHT", -1 );
-			if( !actionManager.ScintillaAction.isComment( ih, pos ) )
+			//IupSetInt( ih, "BRACEBADLIGHT", -1 );
+			// BRACEMATCH
+			if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
 			{
-				//int pos = actionManager.ScintillaAction.getCurrentPos( ih );
-				int close = IupGetIntId( ih, "BRACEMATCH", pos );
-				if( close > -1 )
+				IupSetInt( ih, "BRACEBADLIGHT", -1 );
+				if( !actionManager.ScintillaAction.isComment( ih, pos ) )
 				{
-					IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
-				}
-				else
-				{
-					if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
+					//int pos = actionManager.ScintillaAction.getCurrentPos( ih );
+					int close = IupGetIntId( ih, "BRACEMATCH", pos );
+					if( close > -1 )
 					{
-						--pos;
-						close = IupGetIntId( ih, "BRACEMATCH", pos );
-						if( close > -1 )
+						IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+					}
+					else
+					{
+						if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
 						{
-							IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+							--pos;
+							close = IupGetIntId( ih, "BRACEMATCH", pos );
+							if( close > -1 )
+							{
+								IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+							}
 						}
 					}
 				}
-			}
-		}			
-		
-		if( AutoComplete.bEnter )
-		{
-			AutoComplete.bEnter = false;
-
-			bool bAutoInsert;
-			if( GLOBAL.editorSetting00.AutoEnd == "ON" )
-			{			
-				if( pos == cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ) ) bAutoInsert = true; // SCI_GETLINEENDPOSITION 2136
-			}
-
-			int lineInd = 0;
-			if( GLOBAL.editorSetting00.AutoIndent == "ON" )
+			}			
+			
+			if( AutoComplete.bEnter )
 			{
-				//Now time to deal with auto indenting
-				//int lineInd = 0;
+				AutoComplete.bEnter = false;
 
-				if( lin > 0 ) lineInd = IupScintillaSendMessage( ih, 2127, lin - 1, 0 ); // SCI_GETLINEINDENTATION = 2127
-			   
-				if( lineInd != 0 )   // NOT in the beginning
+				bool bAutoInsert;
+				if( GLOBAL.editorSetting00.AutoEnd == "ON" )
+				{			
+					if( pos == cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ) ) bAutoInsert = true; // SCI_GETLINEENDPOSITION 2136
+				}
+
+				int lineInd = 0;
+				if( GLOBAL.editorSetting00.AutoIndent == "ON" )
 				{
-					IupScintillaSendMessage( ih, 2126, lin, lineInd ); // SCI_SETLINEINDENTATION = 2126
-					int changeLinePos = IupScintillaSendMessage( ih, 2128, lin, 0 );
-					IupScintillaSendMessage( ih, 2025, changeLinePos , 0 );// SCI_GOTOPOS = 2025,
+					//Now time to deal with auto indenting
+					//int lineInd = 0;
+
+					if( lin > 0 ) lineInd = IupScintillaSendMessage( ih, 2127, lin - 1, 0 ); // SCI_GETLINEINDENTATION = 2127
+				   
+					if( lineInd != 0 )   // NOT in the beginning
+					{
+						IupScintillaSendMessage( ih, 2126, lin, lineInd ); // SCI_SETLINEINDENTATION = 2126
+						int changeLinePos = IupScintillaSendMessage( ih, 2128, lin, 0 );
+						IupScintillaSendMessage( ih, 2025, changeLinePos , 0 );// SCI_GOTOPOS = 2025,
+					}
+				}
+
+				if( bAutoInsert )
+				{
+					char[] insertEndText = AutoComplete.InsertEnd( ih, lin, pos );
+					if( insertEndText.length )
+					{
+						IupSetAttributeId( ih, "INSERT", -1, toStringz( insertEndText.dup ) );
+						IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
+						IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
+						IupScintillaSendMessage( ih, 2126, lin, lineInd + 4 ); // SCI_SETLINEINDENTATION = 2126
+						IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136
+					}
 				}
 			}
 
-			if( bAutoInsert )
-			{
-				char[] insertEndText = AutoComplete.InsertEnd( ih, lin, pos );
-				if( insertEndText.length )
-				{
-					IupSetAttributeId( ih, "INSERT", -1, toStringz( insertEndText.dup ) );
-					IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
-					IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
-					IupScintillaSendMessage( ih, 2126, lin, lineInd + 4 ); // SCI_SETLINEINDENTATION = 2126
-					IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136
-				}
-			}
+			actionManager.StatusBarAction.update();
 		}
-
-		actionManager.StatusBarAction.update();
+		catch( Exception e )
+		{
+			debug IupMessage( "", toStringz( e.toString ) );
+		}
 		return IUP_DEFAULT;
 	}
 
