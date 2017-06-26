@@ -116,9 +116,10 @@ struct GLOBAL
 	static IupString			manualPath;
 	static IupString			colorTemplate;
 	//static char[]				maxError = "30";
-	static char[]				defaultOption;
+	static IupString			defaultOption;
 	static char[]				recentOpenDir;
-	static IupString[]			recentFiles, recentProjects, recentOptions, recentArgs;
+	static char[][]				recentOptions, recentArgs;
+	static IupString[]			recentFiles, recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;
 	static EditorColorUint		editColor;
@@ -240,6 +241,7 @@ struct GLOBAL
 		GLOBAL.debuggerFullPath = new IupString();
 		GLOBAL.manualPath = new IupString();
 		GLOBAL.colorTemplate = new IupString();
+		GLOBAL.defaultOption = new IupString();
 		
 		GLOBAL.widthFunctionTitle = new IupString( cast(char[]) "200" );
 		

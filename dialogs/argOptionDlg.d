@@ -25,7 +25,8 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
 		{
-			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), GLOBAL.recentOptions[i].toCString );
+			char* _str = toStringz( GLOBAL.recentOptions[i] );
+			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), _str );
 		}
 			
 		IupSetHandle( "CArgOptionDialog_listOptions", listOptions );
@@ -38,7 +39,8 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttributes( listArgs, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 		{
-			IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), GLOBAL.recentArgs[i].toCString );
+			char* _str = toStringz( GLOBAL.recentArgs[i] );
+			IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), _str );
 		}
 		
 		IupSetHandle( "CArgOptionDialog_listArgs", listArgs );
@@ -134,7 +136,7 @@ class CArgOptionDialog : CBaseDialog
 		{
 			if( fromStringz( IupGetAttribute( listArgs, "ACTIVE" ) ) == "YES" ) results ~= fromStringz( IupGetAttribute( listArgs, "VALUE" ) ).dup;
 		}
-	
+		
 		return results;
 	}	
 }
@@ -167,17 +169,13 @@ extern(C) // Callback for CArgOptionDialog
 				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" )
 				{
 					actionManager.SearchAction.addListItem( _listOptions, fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup, 10 );
-
-					foreach( str; GLOBAL.recentOptions )
-					{
-						delete str;
-					}
-					GLOBAL.recentOptions.length = 0;
 					
+					GLOBAL.recentOptions.length = 0;
 					for( int i = 1; i <= IupGetInt( _listOptions, "COUNT" ); ++ i )
 					{
-						GLOBAL.recentOptions ~= new IupString( IupGetAttribute( _listOptions, toStringz( Integer.toString( i ) ) ) );
+						GLOBAL.recentOptions ~= fromStringz( IupGetAttribute( _listOptions, toStringz( Integer.toString( i ) ) ) ).dup;
 					}
+					if( GLOBAL.recentOptions.length ) IupSetAttribute( _listOptions, "VALUE", toStringz( GLOBAL.recentOptions[0] ) );
 				}
 			}
 
@@ -187,17 +185,13 @@ extern(C) // Callback for CArgOptionDialog
 				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" )
 				{
 					actionManager.SearchAction.addListItem( _listArgs, fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup , 10 );
-					
-					foreach( str; GLOBAL.recentArgs )
-					{
-						delete str;
-					}
+
 					GLOBAL.recentArgs.length = 0;
-					
 					for( int i = 1; i <= IupGetInt( _listArgs, "COUNT" ); ++ i )
 					{
-						GLOBAL.recentArgs ~= new IupString( IupGetAttribute( _listArgs, toStringz( Integer.toString( i ) ) ) );
+						GLOBAL.recentArgs ~= fromStringz( IupGetAttribute( _listArgs, toStringz( Integer.toString( i ) ) ) ).dup;
 					}
+					if( GLOBAL.recentArgs.length ) IupSetAttribute( _listArgs, "VALUE", toStringz( GLOBAL.recentArgs[0] ) );					
 				}
 			}			
 			

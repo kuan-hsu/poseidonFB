@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.274\nBy Kuan Hsu (Taiwan)\n2017.06.25" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.275\nBy Kuan Hsu (Taiwan)\n2017.06.26" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -1342,13 +1342,13 @@ extern(C)
 
 	int compile_cb( Ihandle *ih )
 	{
-		ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) );
+		ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) );
 		return IUP_DEFAULT;
 	}
 
 	int buildrun_cb( Ihandle *ih )
 	{
-		if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) ) ) ExecuterAction.run();
+		if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) ) ) ExecuterAction.run();
 		return IUP_DEFAULT;
 	}	
 
@@ -1361,7 +1361,7 @@ extern(C)
 
 	int quickRun_cb( Ihandle *ih )
 	{
-		ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption ) );
+		ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption.toDString ) );
 		return IUP_DEFAULT;
 	}
 

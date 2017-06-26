@@ -55,7 +55,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* textDefaultOption = IupText( null );
 		IupSetAttribute( textDefaultOption, "SIZE", "210x12" );
-		IupSetAttribute( textDefaultOption, "VALUE", toStringz( GLOBAL.defaultOption.dup ) );
+		IupSetAttribute( textDefaultOption, "VALUE", GLOBAL.defaultOption.toCString );
 		IupSetHandle( "defaultOption_Handle", textDefaultOption );
 
 		Ihandle* btnCompilerOpts = IupButton( null, null );

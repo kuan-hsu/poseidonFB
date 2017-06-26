@@ -289,7 +289,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) );
+				ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) );
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{
@@ -335,7 +335,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption ) ) ) ExecuterAction.run();
+				if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) ) ) ExecuterAction.run();
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{
@@ -384,7 +384,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption ) );
+				ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption.toDString ) );
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{

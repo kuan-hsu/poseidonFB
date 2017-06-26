@@ -360,7 +360,7 @@ struct IDECONFIG
 			auto buildtoolsNode = configNode.element( null, "buildtools" );
 			buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath.toDString );
 			buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath.toDString );
-			buildtoolsNode.element( null, "defaultoption", GLOBAL.defaultOption );
+			buildtoolsNode.element( null, "defaultoption", GLOBAL.defaultOption.toDString );
 			buildtoolsNode.element( null, "resultwindow", GLOBAL.compilerWindow );
 			buildtoolsNode.element( null, "annotation", GLOBAL.compilerAnootation );
 			buildtoolsNode.element( null, "delexistexe", GLOBAL.delExistExe );
@@ -430,8 +430,8 @@ struct IDECONFIG
 			</compileOptionLists>
 			*/
 			auto optionsNode = configNode.element( null, "recentOptions" );
-			foreach( IupString s; GLOBAL.recentOptions )
-				optionsNode.element( null, "name", s.toDString );
+			foreach( char[] s; GLOBAL.recentOptions )
+				optionsNode.element( null, "name", s );
 
 			auto argsNode = configNode.element( null, "recentArgs" );
 			foreach( IupString s; GLOBAL.recentArgs )
@@ -629,7 +629,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "[buildtools]");
 			doc ~= setINILineData( "compilerpath", GLOBAL.compilerFullPath.toDString );
 			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath.toDString );
-			doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption );
+			doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
 			doc ~= setINILineData( "delexistexe", GLOBAL.delExistExe );
@@ -671,12 +671,12 @@ struct IDECONFIG
 			// recentProjects
 			doc ~= setINILineData( "[recentOptions]" );
 			for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
-				doc ~= setINILineData( "name", GLOBAL.recentOptions[i].toDString );
+				doc ~= setINILineData( "name", GLOBAL.recentOptions[i] );
 
 			// recentProjects
 			doc ~= setINILineData( "[recentArgs]" );
 			for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
-				doc ~= setINILineData( "name", GLOBAL.recentArgs[i].toDString );
+				doc ~= setINILineData( "name", GLOBAL.recentArgs[i] );
 			
 			actionManager.FileAction.saveFile( fullpath, doc );
 		}
@@ -990,11 +990,11 @@ struct IDECONFIG
 						break;
 
 					case "[recentOptions]":
-						if( left == "name" ) GLOBAL.recentOptions ~= new IupString( right );
+						if( left == "name" ) GLOBAL.recentOptions ~= right;
 						break;
 
 					case "[recentArgs]":
-						if( left == "name" ) GLOBAL.recentArgs ~= new IupString( right );
+						if( left == "name" ) GLOBAL.recentArgs ~= right;
 						break;
 			
 					default:
@@ -1210,15 +1210,15 @@ struct IDECONFIG
 			result = root.query.descendant("recentOptions").descendant("name");
 			foreach( e; result )
 			{
-				auto ro = new IupString( cast(char[]) e.value );
-				GLOBAL.recentOptions ~= ro;
+				//auto ro = new IupString( cast(char[]) e.value );
+				GLOBAL.recentOptions ~= e.value;
 			}
 
 			result = root.query.descendant("recentArgs").descendant("name");
 			foreach( e; result )
 			{
-				auto ra = new IupString( cast(char[]) e.value );
-				GLOBAL.recentArgs ~= ra;
+				//auto ra = new IupString( cast(char[]) e.value );
+				GLOBAL.recentArgs ~= e.value;
 			}
 
 
