@@ -18,7 +18,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* bottom = createDlgButton();
 
 		Ihandle* labelCompiler = IupLabel( toStringz( GLOBAL.languageItems["compilerpath"].toDString ~ ":" ) );
-		IupSetAttributes( labelCompiler, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		IupSetAttributes( labelCompiler, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		//IupSetAttribute( labelCompiler, "FONT", "Consolas, 10" );
 		
 		textCompilerPath = IupText( null );
@@ -32,10 +32,25 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox01 = IupHbox( labelCompiler, textCompilerPath, btnOpen, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+		
+		Ihandle* labelx64Compiler = IupLabel( toStringz( GLOBAL.languageItems["x64path"].toDString ~ ":" ) );
+		IupSetAttributes( labelx64Compiler, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		
+		Ihandle* textx64CompilerPath = IupText( null );
+		IupSetAttribute( textx64CompilerPath, "SIZE", "210x12" );
+		IupSetAttribute( textx64CompilerPath, "VALUE", GLOBAL.x64compilerFullPath.toCString );
+		IupSetHandle( "x64compilerPath_Handle", textx64CompilerPath );
+		
+		Ihandle* btnx64Open = IupButton( null, null );
+		IupSetAttribute( btnx64Open, "IMAGE", "icon_openfile" );
+		IupSetCallback( btnx64Open, "ACTION", cast(Icallback) &CPreferenceDialog_Openx64CompileBinFile_cb );		
+
+		Ihandle* hBox01x64 = IupHbox( labelx64Compiler, textx64CompilerPath, btnx64Open, null );
+		IupSetAttributes( hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 
 		
 		Ihandle* labelDebugger = IupLabel( toStringz( GLOBAL.languageItems["debugpath"].toDString ~ ":" ) );
-		IupSetAttributes( labelDebugger, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		IupSetAttributes( labelDebugger, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
 		textDebuggerPath = IupText( null );
 		IupSetAttribute( textDebuggerPath, "SIZE", "210x12" );
@@ -49,9 +64,26 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
 		IupSetAttributes( hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 		
+		
+		Ihandle* labelx64Debugger = IupLabel( toStringz( GLOBAL.languageItems["x64path"].toDString ~ ":" ) );
+		IupSetAttributes( labelx64Debugger, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		
+		Ihandle* textx64DebuggerPath = IupText( null );
+		IupSetAttribute( textx64DebuggerPath, "SIZE", "210x12" );
+		IupSetAttribute( textx64DebuggerPath, "VALUE", GLOBAL.x64debuggerFullPath.toCString );
+		IupSetHandle( "x64debuggerPath_Handle", textx64DebuggerPath );
+		
+		Ihandle* btnx64OpenDebugger = IupButton( null, null );
+		IupSetAttribute( btnx64OpenDebugger, "IMAGE", "icon_openfile" );
+		IupSetCallback( btnx64OpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_Openx64DebuggerBinFile_cb );
+
+		Ihandle* hBox02x64 = IupHbox( labelx64Debugger, textx64DebuggerPath, btnx64OpenDebugger, null );
+		IupSetAttributes( hBox02x64, "ALIGNMENT=ACENTER,MARGIN=5x0,ACTIVE=NO" );
+		
+		
 
 		Ihandle* labelDefaultOption = IupLabel( toStringz( GLOBAL.languageItems["compileropts"].toDString ~ ":" ) );
-		IupSetAttributes( labelDefaultOption, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		IupSetAttributes( labelDefaultOption, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
 		Ihandle* textDefaultOption = IupText( null );
 		IupSetAttribute( textDefaultOption, "SIZE", "210x12" );
@@ -242,7 +274,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox02, hBox03, frameCompiler, frameParser, frameLive, manuFrame, null );
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, hBox03, frameCompiler, frameParser, frameLive, null );
 		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
@@ -1234,12 +1266,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( vColor, "TABTITLE", GLOBAL.languageItems["color"].toCString() );
 		IupSetAttribute( shortCutList, "TABTITLE", GLOBAL.languageItems["shortcut"].toCString() );
 		IupSetAttribute( keyWordVbox, "TABTITLE", GLOBAL.languageItems["keywords"].toCString() );
-		//IupSetAttribute( manuFrame, "TABTITLE", GLOBAL.languageItems["manual"].toCString() );
+		IupSetAttribute( manuFrame, "TABTITLE", GLOBAL.languageItems["manual"].toCString() );
 		IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
 	
 		
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, null );
+		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, manuFrame, null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
 
@@ -1399,6 +1431,25 @@ extern(C) // Callback for CPreferenceDialog
 
 		return IUP_DEFAULT;
 	}
+	
+	private int CPreferenceDialog_Openx64CompileBinFile_cb( Ihandle* ih )
+	{
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
+		char[] fileName = fileSecectDlg.getFileName();
+
+		if( fileName.length )
+		{
+			GLOBAL.x64compilerFullPath = fileName;
+			Ihandle* _compilePath_Handle = IupGetHandle( "x64compilerPath_Handle" );
+			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", toStringz( fileName ) );
+		}
+		else
+		{
+			//Stdout( "NoThing!!!" ).newline;
+		}
+
+		return IUP_DEFAULT;
+	}	
 
 	private int CPreferenceDialog_OpenDebuggerBinFile_cb( Ihandle* ih )
 	{
@@ -1418,6 +1469,25 @@ extern(C) // Callback for CPreferenceDialog
 
 		return IUP_DEFAULT;
 	}
+	
+	private int CPreferenceDialog_Openx64DebuggerBinFile_cb( Ihandle* ih )
+	{
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
+		char[] fileName = fileSecectDlg.getFileName();
+
+		if( fileName.length )
+		{
+			GLOBAL.x64debuggerFullPath = fileName;
+			Ihandle* _debuggerPath_Handle = IupGetHandle( "x64debuggerPath_Handle" );
+			if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", toStringz( fileName ) );
+		}
+		else
+		{
+			//Stdout( "NoThing!!!" ).newline;
+		}
+
+		return IUP_DEFAULT;
+	}	
 	
 	private int CPreferenceDialog_ManualOpen_cb( Ihandle* ih )
 	{

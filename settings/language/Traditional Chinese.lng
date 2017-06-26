@@ -87,6 +87,7 @@ options=選項
 		compiler=編譯器
 			compilerpath=編譯器位置
 			debugpath=除錯器位置
+			x64path=x64位置
 			compileropts=編譯器選項
 			compilersetting=編譯器設定
 				errorannotation=在註解中顯示編譯器提示

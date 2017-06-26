@@ -11,7 +11,7 @@ class CToolBar
 	import 				iup.iup_scintilla;
 	import 				menu, parser.ast, tools;
 	
-	Ihandle*			handle, listHandle, guiButton;
+	Ihandle*			handle, listHandle, guiButton, bitButton;
 	Ihandle* 			btnNew, btnOpen;
 	Ihandle* 			btnSave, btnSaveAll;
 	Ihandle* 			btnUndo, btnRedo;
@@ -228,6 +228,11 @@ class CToolBar
 		guiButton = IupToggle( null, "GUI" );
 		IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,VALUE=OFF" );
 		IupSetAttribute( guiButton, "TIP", "Console / GUI" );
+		
+		bitButton = IupToggle( null, "bit" );
+		IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=OFF" );
+		IupSetAttribute( bitButton, "TIP", "32 / 64 bit" );
+		
 
 		listHandle = IupList( null );
 		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO" );
@@ -238,7 +243,7 @@ class CToolBar
 		
 		// IUP Container to put buttons on~
 		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
-						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], outlineButtonHide, messageButtonHide, labelSEPARATOR[6], guiButton, listHandle, null );/* labelSEPARATOR[5],
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], outlineButtonHide, messageButtonHide, labelSEPARATOR[6], guiButton, bitButton, listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 		IupSetAttributes( handle, "GAP=5,ALIGNMENT=ACENTER" );
 	}
@@ -267,6 +272,23 @@ class CToolBar
 	Ihandle* getGuiButtonHandle()
 	{
 		return guiButton;
+	}
+
+	Ihandle* getBitButtonHandle()
+	{
+		return bitButton;
+	}
+
+	bool checkGuiButtonStatus()
+	{
+		if( fromStringz( IupGetAttribute( guiButton, "VALUE" ) ) == "ON" ) return true;
+		return false;
+	}
+	
+	int checkBitButtonStatus()
+	{
+		if( fromStringz( IupGetAttribute( bitButton, "VALUE" ) ) == "ON" ) return 64;
+		return 32;
 	}
 	
 	void showList( bool status )

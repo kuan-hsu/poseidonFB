@@ -87,6 +87,7 @@ options=Options
 		compiler=Compiler
 			compilerpath=Compiler Path
 			debugpath=Debugger Path
+			x64path=x64 Path
 			compileropts=Compiler Opts
 			compilersetting=Compiler Setting
 				errorannotation=Show Compiler Errors/Warnings Using Annotation

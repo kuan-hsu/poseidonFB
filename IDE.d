@@ -359,7 +359,9 @@ struct IDECONFIG
 			*/
 			auto buildtoolsNode = configNode.element( null, "buildtools" );
 			buildtoolsNode.element( null, "compilerpath", GLOBAL.compilerFullPath.toDString );
+			buildtoolsNode.element( null, "x64compilerpath", GLOBAL.x64compilerFullPath.toDString );
 			buildtoolsNode.element( null, "debuggerpath", GLOBAL.debuggerFullPath.toDString );
+			buildtoolsNode.element( null, "x64debuggerpath", GLOBAL.x64debuggerFullPath.toDString );
 			buildtoolsNode.element( null, "defaultoption", GLOBAL.defaultOption.toDString );
 			buildtoolsNode.element( null, "resultwindow", GLOBAL.compilerWindow );
 			buildtoolsNode.element( null, "annotation", GLOBAL.compilerAnootation );
@@ -628,7 +630,9 @@ struct IDECONFIG
 			// buildtools
 			doc ~= setINILineData( "[buildtools]");
 			doc ~= setINILineData( "compilerpath", GLOBAL.compilerFullPath.toDString );
+			doc ~= setINILineData( "x64compilerpath", GLOBAL.x64compilerFullPath.toDString );
 			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath.toDString );
+			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath.toDString );
 			doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
@@ -940,7 +944,9 @@ struct IDECONFIG
 						switch( left )
 						{
 							case "compilerpath":			GLOBAL.compilerFullPath = right;						break;
+							case "x64compilerpath":			GLOBAL.x64compilerFullPath = right;						break;
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
+							case "x64debuggerpath":			GLOBAL.x64debuggerFullPath = right;						break;
 							case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
 							case "annotation":				GLOBAL.compilerAnootation = right;						break;
@@ -1064,13 +1070,25 @@ struct IDECONFIG
 			foreach( e; result )
 			{
 				GLOBAL.compilerFullPath = e.value;
-			}	
+			}
+			
+			result = root.query.descendant("x64compilerpath");
+			foreach( e; result )
+			{
+				GLOBAL.x64compilerFullPath = e.value;
+			}				
 
 			result = root.query.descendant("debuggerpath");
 			foreach( e; result )
 			{
 				GLOBAL.debuggerFullPath = e.value;
 			}
+			
+			result = root.query.descendant("x64debuggerpath");
+			foreach( e; result )
+			{
+				GLOBAL.x64debuggerFullPath = e.value;
+			}			
 
 			result = root.query.descendant("defaultoption");
 			foreach( e; result )

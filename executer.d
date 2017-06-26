@@ -145,7 +145,7 @@ struct ExecuterAction
 		
 		if( cSci !is null )
 		{
-			char[] fbcFullPath = GLOBAL.compilerFullPath.toDString;
+			char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -180,7 +180,7 @@ struct ExecuterAction
 		{
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
-			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) command ~= " -s gui";
+			if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";
 			
 			Process p = new Process( true, command );
 			p.gui( true );
@@ -303,7 +303,7 @@ struct ExecuterAction
 				return false;
 			}			
 			
-			char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : GLOBAL.compilerFullPath.toDString;
+			char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -403,7 +403,7 @@ struct ExecuterAction
 							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 
 			
-			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) txtCommand ~= " -s gui";
+			if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
 
 			Process p = new Process( true, txtCommand );
 			p.workDir( GLOBAL.projectManager[activePrjName].dir );
@@ -516,7 +516,7 @@ struct ExecuterAction
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 		
-		char[] fbcFullPath = GLOBAL.compilerFullPath.toDString;
+		char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
 		version(Windows)
 		{
 			foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -557,7 +557,7 @@ struct ExecuterAction
 		{
 			char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
 			
-			if( fromStringz( IupGetAttribute( GLOBAL.toolbar.getGuiButtonHandle, "VALUE" ) ) == "ON" ) commandString ~= " -s gui";
+			if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -s gui";
 			
 			Process p = new Process( true, commandString );
 			p.gui( true );

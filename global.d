@@ -108,11 +108,11 @@ struct GLOBAL
 	static char[]				lexer = "freebasic";
 	static IupString[4]			KEYWORDS;
 	static int					keywordCase = 0;	
-	static IupString			compilerFullPath;
+	static IupString			compilerFullPath, x64compilerFullPath;
 	static char[]				compilerAnootation = "ON";
 	static char[]				compilerWindow = "ON";
 	static char[]				delExistExe = "ON";
-	static IupString			debuggerFullPath;
+	static IupString			debuggerFullPath, x64debuggerFullPath;
 	static IupString			manualPath;
 	static IupString			colorTemplate;
 	//static char[]				maxError = "30";
@@ -238,7 +238,9 @@ struct GLOBAL
 		GLOBAL.editColor.prjSourceType = new IupString( cast(char[]) "0 0 255" );
 		
 		GLOBAL.compilerFullPath = new IupString();
+		GLOBAL.x64compilerFullPath = new IupString();
 		GLOBAL.debuggerFullPath = new IupString();
+		GLOBAL.x64debuggerFullPath = new IupString();
 		GLOBAL.manualPath = new IupString();
 		GLOBAL.colorTemplate = new IupString();
 		GLOBAL.defaultOption = new IupString();
@@ -479,6 +481,7 @@ struct GLOBAL
 				GLOBAL.languageItems["compiler"] = new IupString( cast(char[]) "Compiler" );
 					GLOBAL.languageItems["compilerpath"] = new IupString( cast(char[]) "Compiler Path" );
 					GLOBAL.languageItems["debugpath"] = new IupString( cast(char[]) "Debugger Path" );
+					GLOBAL.languageItems["x64path"] = new IupString( cast(char[]) "x64 Path" );
 					GLOBAL.languageItems["compileropts"] = new IupString( cast(char[]) "Compiler Opts" );
 					GLOBAL.languageItems["compilersetting"] = new IupString( cast(char[]) "Compiler Setting" );
 						GLOBAL.languageItems["errorannotation"] = new IupString( cast(char[]) "Show Compiler Errors/Warnings Using Annotation" );
