@@ -1978,7 +1978,9 @@ extern(C) // Callback for CPreferenceDialog
 			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 
 			GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
+			GLOBAL.x64compilerFullPath					= fromStringz( IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.debuggerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
+			GLOBAL.x64debuggerFullPath					= fromStringz( IupGetAttribute( IupGetHandle( "x64debuggerPath_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;

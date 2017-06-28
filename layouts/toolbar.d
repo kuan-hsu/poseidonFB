@@ -193,7 +193,7 @@ class CToolBar
 
 
 		
-		for( int i = 0; i < 8; i++ )
+		for( int i = 0; i < 7; i++ )
 		{
 			labelSEPARATOR[i] = IupLabel( null ); 
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
@@ -230,7 +230,7 @@ class CToolBar
 		IupSetAttribute( guiButton, "TIP", "Console / GUI" );
 		
 		bitButton = IupToggle( null, "bit" );
-		IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=OFF" );
+		version(Windows) IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=OFF" ); else IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=ON" );
 		IupSetAttribute( bitButton, "TIP", "32 / 64 bit" );
 		
 

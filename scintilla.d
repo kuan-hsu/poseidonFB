@@ -1180,382 +1180,312 @@ extern(C)
 
 	private int CScintilla_keyany_cb( Ihandle *ih, int c ) 
 	{
-		//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Keycode:" ~ Integer.toString( c ) ) );
-		AutoComplete.bAutocompletionPressEnter = false;
-		
-		if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
+		try
+		{
+			//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Keycode:" ~ Integer.toString( c ) ) );
+			AutoComplete.bAutocompletionPressEnter = false;
+			
+			if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
 
-		if( c == 65307 ) // ESC
-		{
-			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-		}
-		/+
-		else
-		{
-			if( GLOBAL.liveLevel > 0 )
+			if( c == 65307 ) // ESC
 			{
-				try
+				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+			}
+
+			foreach( ShortKey sk; GLOBAL.shortKeys )
+			{
+				switch( sk.name )
 				{
-					int		pos = ScintillaAction.getCurrentPos( ih );
-					auto	cSci = ScintillaAction.getActiveCScintilla();
-					int		currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, ScintillaAction.getCurrentPos( ih ), 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-					
-					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
-					{
-						switch( c )
+					case "find":				
+						if( sk.keyValue == c )
 						{
-							case 13:
-								LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum );
-								break;
-
-							case 8: // BS
-								int		minusCount = -1;
-								char[] selectedLinCol = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
-								if( selectedLinCol.length )
-								{
-									int line1, line2, firstCommaPos = Util.index( selectedLinCol, "," ), secondCommaPos = Util.rindex( selectedLinCol, "," ), colonPos = Util.index( selectedLinCol, ":" );
-									if( firstCommaPos < secondCommaPos )
-									{
-										// Start from 0, so +1
-										line1 = Integer.atoi( selectedLinCol[0..firstCommaPos] ) + 1;
-										line2 = Integer.atoi( selectedLinCol[colonPos+1..secondCommaPos] ) + 1;
-										minusCount = line1 - line2;
-										if( minusCount < 0 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], line1, minusCount );
-										break;
-									}
-								}
-							
-								int	col = IupScintillaSendMessage( ih, 2129, pos, 0 ); // SCI_GETCOLUMN 2129.
-								if( col == 0 )
-								{
-									if( currentLineNum > 1 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum - 1, -1 );
-								}
-								break;
-
-							case 65535: // DEL
-								int		minusCount = -1;
-								char[] selectedLinCol = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
-								if( selectedLinCol.length )
-								{
-									int line1, line2, firstCommaPos = Util.index( selectedLinCol, "," ), secondCommaPos = Util.rindex( selectedLinCol, "," ), colonPos = Util.index( selectedLinCol, ":" );
-									if( firstCommaPos < secondCommaPos )
-									{
-										// Start from 0, so +1
-										line1 = Integer.atoi( selectedLinCol[0..firstCommaPos] ) + 1;
-										line2 = Integer.atoi( selectedLinCol[colonPos+1..secondCommaPos] ) + 1;
-										//IupMessage( "", toStringz( Integer.toString( line1 ) ~ " : " ~ Integer.toString( line2 ) ) );
-										minusCount = line1 - line2;
-										if( minusCount < 0 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], line1, minusCount );
-										break;
-									}
-								}
-							
-								char[] nextChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
-								if( nextChar == "\n" )
-								{
-									if( currentLineNum > 1 ) LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], currentLineNum, -1 );
-								}
-								break;
-								
-							default:
+							menu.findReplace_cb();
+							return IUP_IGNORE;
 						}
-					}
+						break;
+					case "findinfile":
+						if( sk.keyValue == c )
+						{ 
+							menu.findReplaceInFiles();
+							return IUP_IGNORE;
+						}
+						break;
+					case "findnext":
+						if( sk.keyValue == c )
+						{
+							menu.findNext_cb();
+							return IUP_IGNORE;
+						}
+						break;
+					case "findprev":
+						if( sk.keyValue == c )
+						{
+							menu.findPrev_cb();
+							return IUP_IGNORE;
+						}
+						break;
+					case "gotoline":
+						if( sk.keyValue == c )
+						{
+							menu.item_goto_cb();
+							return IUP_IGNORE;
+						}
+						break;
+					case "undo":
+						if( sk.keyValue == c )
+						{
+							menu.undo_cb();
+							return IUP_IGNORE;
+						}
+						break;
+					case "redo":						
+						if( sk.keyValue == c )
+						{
+							menu.redo_cb();
+							return IUP_IGNORE;
+						}
+						break;
+					case "defintion":
+						if( sk.keyValue == c )
+						{
+							AutoComplete.toDefintionAndType( 1 );
+							return IUP_IGNORE;
+						}
+						break;
+					case "procedure":
+						if( sk.keyValue == c )
+						{
+							AutoComplete.toDefintionAndType( 2 );
+							return IUP_IGNORE;
+						}
+						break;					
+					case "quickrun":
+						if( sk.keyValue == c )
+						{
+							menu.quickRun_cb( null );
+							return IUP_IGNORE;
+						}
+						break;
+					case "run":
+						if( sk.keyValue == c )
+						{
+							menu.run_cb( null );
+							return IUP_IGNORE;
+						}
+						break;
+					case "build":
+						if( sk.keyValue == c )
+						{
+							menu.buildAll_cb( null );
+							return IUP_IGNORE;
+						}
+						break;
+					case "outlinewindow":
+						if( sk.keyValue == c ) 
+						{
+							menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+							IupSetFocus( ih );
+							return IUP_IGNORE;
+						}
+						break;
+					case "messagewindow":
+						if( sk.keyValue == c )
+						{
+							menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+							IupSetFocus( ih );
+							return IUP_IGNORE;
+						}
+						break;
+					case "showtype":
+						if( sk.keyValue == c )
+						{
+							AutoComplete.toDefintionAndType( 0 );
+							return IUP_IGNORE;
+						}
+						break;
+					case "reparse":
+						if( sk.keyValue == c )
+						{
+							CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+							GLOBAL.outlineTree.refresh( cSci );
+						}
+						break;
+					case "save":					
+						if( sk.keyValue == c )
+						{
+							menu.saveFile_cb( null );
+							return IUP_IGNORE;
+						}
+						break;
+					case "saveall":
+						if( sk.keyValue == c )
+						{
+							menu.saveAllFile_cb( null );
+							return IUP_IGNORE;
+						}
+						break;
+					case "close":
+						if( sk.keyValue == c )
+						{
+							CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+							if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+						}
+						break;
+
+					case "nexttab":
+						if( sk.keyValue == c )
+						{
+							int count = IupGetChildCount( GLOBAL.documentTabs );
+							if( count > 1 )
+							{
+								int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+								if( id < count - 1 ) ++id; else id = 0;
+								IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
+								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
+							}
+							return IUP_IGNORE;
+						}
+						break;
+
+					case "prevtab":
+						if( sk.keyValue == c )
+						{
+							int count = IupGetChildCount( GLOBAL.documentTabs );
+							if( count > 1 )
+							{
+								int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+								if( id > 0 ) --id; else id = --count;
+								IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
+								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
+							}
+							return IUP_IGNORE;
+						}
+						break;
+					case "newtab":
+						if( sk.keyValue == c )
+						{
+							menu.newFile_cb( ih );
+							return IUP_IGNORE;
+						}
+						break;
+					case "autocomplete":
+						if( sk.keyValue == c )
+						{
+							char[] 	alreadyInput;
+							char[]	lastChar;
+							int		pos = actionManager.ScintillaAction.getCurrentPos( ih );
+							int		dummyHeadPos;
+
+							if( pos > 0 ) lastChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ).dup; else return IUP_IGNORE;
+
+							if( pos > 1 )
+							{
+								if( lastChar == ">" )
+								{
+									if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 2, dummyHeadPos ).reverse ~ "->";
+								}
+							}
+
+							if( lastChar == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1, dummyHeadPos ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos ).reverse;
+						
+							try
+							{
+								if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
+							}
+							catch( Exception e )
+							{
+								debug IupMessage( "Error", toStringz( e.toString ) );
+							}
+
+							return IUP_IGNORE;
+						}
+						break;
+					
+					case "compilerun":
+						if( sk.keyValue == c )
+						{
+							menu.buildrun_cb( null );
+							return IUP_IGNORE;
+						}
+						break;
+						
+					case "comment":
+						if( sk.keyValue == c )
+						{
+							menu.comment_cb();
+							return IUP_IGNORE;
+						}
+						break;
+						
+					case "backdefinition":
+						if( sk.keyValue == c )
+						{
+							AutoComplete.backDefinition();
+							return IUP_IGNORE;
+						}
+						break;
+					
+					// Custom Tools
+					case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":
+						if( sk.keyValue == c )
+						{
+							char[]	tailChar = sk.name[$-1..$];
+							int		tailNum = Integer.atoi( tailChar );
+							if( tailNum > 0 && tailNum < 6 )
+							{
+								if( GLOBAL.customTools[tailNum].name.toDString.length )
+								{
+									if( GLOBAL.customTools[tailNum].dir.toDString.length )
+									{
+										// %s Selected Text
+										char[] s = fromStringz( IupGetAttribute( ih, toStringz("SELECTEDTEXT") ) );
+										char[] args = Util.substitute( GLOBAL.customTools[tailNum].args.toDString, "%s ", s ~ " " );
+										
+										args = Util.substitute( args, "%\"s\" ", "\"" ~ s ~ "\"" ~ " " );
+										// %f Active File
+										CScintilla cSci = actionManager.ScintillaAction.getCScintilla( ih );
+										if( cSci !is null )
+										{
+											s = cSci.getFullPath();
+											args = Util.substitute( args, "%f ", s ~ " " );
+											args = Util.substitute( args, "%\"f\" ", "\"" ~ s ~ "\"" ~ " " );
+										}
+										
+										version(Windows)
+										{
+											IupExecute( GLOBAL.customTools[tailNum].dir.toCString, toStringz( args ) );
+										}
+										else
+										{
+											Process p = new Process( true, GLOBAL.customTools[tailNum].dir.toDString ~ " " ~ args );
+											//p.gui( true );
+											p.execute;
+										}
+									}
+								}
+							}
+
+							return IUP_IGNORE;
+						}
+						break;					
+						
+					/*
+					case "testplugin":
+						if( sk.keyValue == c )
+						{
+							dllHandleClipboardText( ih );
+							return IUP_IGNORE;
+						}
+						break;
+					*/
+						
+					default:
 				}
-				catch( Exception e ){}
 			}
 		}
-		+/
-		
-
-		foreach( ShortKey sk; GLOBAL.shortKeys )
+		catch( Exception e )
 		{
-			switch( sk.name )
-			{
-				case "find":				
-					if( sk.keyValue == c )
-					{
-						menu.findReplace_cb();
-						return IUP_IGNORE;
-					}
-					break;
-				case "findinfile":
-					if( sk.keyValue == c )
-					{ 
-						menu.findReplaceInFiles();
-						return IUP_IGNORE;
-					}
-					break;
-				case "findnext":
-					if( sk.keyValue == c )
-					{
-						menu.findNext_cb();
-						return IUP_IGNORE;
-					}
-					break;
-				case "findprev":
-					if( sk.keyValue == c )
-					{
-						menu.findPrev_cb();
-						return IUP_IGNORE;
-					}
-					break;
-				case "gotoline":
-					if( sk.keyValue == c )
-					{
-						menu.item_goto_cb();
-						return IUP_IGNORE;
-					}
-					break;
-				case "undo":
-					if( sk.keyValue == c )
-					{
-						menu.undo_cb();
-						return IUP_IGNORE;
-					}
-					break;
-				case "redo":						
-					if( sk.keyValue == c )
-					{
-						menu.redo_cb();
-						return IUP_IGNORE;
-					}
-					break;
-				case "defintion":
-					if( sk.keyValue == c )
-					{
-						AutoComplete.toDefintionAndType( 1 );
-						return IUP_IGNORE;
-					}
-					break;
-				case "procedure":
-					if( sk.keyValue == c )
-					{
-						AutoComplete.toDefintionAndType( 2 );
-						return IUP_IGNORE;
-					}
-					break;					
-				case "quickrun":
-					if( sk.keyValue == c )
-					{
-						menu.quickRun_cb( null );
-						return IUP_IGNORE;
-					}
-					break;
-				case "run":
-					if( sk.keyValue == c )
-					{
-						menu.run_cb( null );
-						return IUP_IGNORE;
-					}
-					break;
-				case "build":
-					if( sk.keyValue == c )
-					{
-						menu.buildAll_cb( null );
-						return IUP_IGNORE;
-					}
-					break;
-				case "outlinewindow":
-					if( sk.keyValue == c ) 
-					{
-						menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
-						IupSetFocus( ih );
-						return IUP_IGNORE;
-					}
-					break;
-				case "messagewindow":
-					if( sk.keyValue == c )
-					{
-						menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-						IupSetFocus( ih );
-						return IUP_IGNORE;
-					}
-					break;
-				case "showtype":
-					if( sk.keyValue == c )
-					{
-						AutoComplete.toDefintionAndType( 0 );
-						return IUP_IGNORE;
-					}
-					break;
-				case "reparse":
-					if( sk.keyValue == c )
-					{
-						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-						GLOBAL.outlineTree.refresh( cSci );
-					}
-					break;
-				case "save":					
-					if( sk.keyValue == c )
-					{
-						menu.saveFile_cb( null );
-						return IUP_IGNORE;
-					}
-					break;
-				case "saveall":
-					if( sk.keyValue == c )
-					{
-						menu.saveAllFile_cb( null );
-						return IUP_IGNORE;
-					}
-					break;
-				case "close":
-					if( sk.keyValue == c )
-					{
-						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-						if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
-					}
-					break;
-
-				case "nexttab":
-					if( sk.keyValue == c )
-					{
-						int count = IupGetChildCount( GLOBAL.documentTabs );
-						if( count > 1 )
-						{
-							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
-							if( id < count - 1 ) ++id; else id = 0;
-							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
-						}
-						return IUP_IGNORE;
-					}
-					break;
-
-				case "prevtab":
-					if( sk.keyValue == c )
-					{
-						int count = IupGetChildCount( GLOBAL.documentTabs );
-						if( count > 1 )
-						{
-							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
-							if( id > 0 ) --id; else id = --count;
-							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
-						}
-						return IUP_IGNORE;
-					}
-					break;
-				case "newtab":
-					if( sk.keyValue == c )
-					{
-						menu.newFile_cb( ih );
-						return IUP_IGNORE;
-					}
-					break;
-				case "autocomplete":
-					if( sk.keyValue == c )
-					{
-						char[] 	alreadyInput;
-						char[]	lastChar;
-						int		pos = actionManager.ScintillaAction.getCurrentPos( ih );
-						int		dummyHeadPos;
-
-						if( pos > 0 ) lastChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ).dup; else return IUP_IGNORE;
-
-						if( pos > 1 )
-						{
-							if( lastChar == ">" )
-							{
-								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 2, dummyHeadPos ).reverse ~ "->";
-							}
-						}
-
-						if( lastChar == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos - 1, dummyHeadPos ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos ).reverse;
-					
-						try
-						{
-							if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
-						}
-						catch( Exception e )
-						{
-							debug IupMessage( "Error", toStringz( e.toString ) );
-						}
-
-						return IUP_IGNORE;
-					}
-					break;
-				
-				case "compilerun":
-					if( sk.keyValue == c )
-					{
-						menu.buildrun_cb( null );
-						return IUP_IGNORE;
-					}
-					break;
-					
-				case "comment":
-					if( sk.keyValue == c )
-					{
-						menu.comment_cb();
-						return IUP_IGNORE;
-					}
-					break;
-					
-				case "backdefinition":
-					if( sk.keyValue == c )
-					{
-						AutoComplete.backDefinition();
-						return IUP_IGNORE;
-					}
-					break;
-				
-				// Custom Tools
-				case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":
-					if( sk.keyValue == c )
-					{
-						char[]	tailChar = sk.name[$-1..$];
-						int		tailNum = Integer.atoi( tailChar );
-						if( tailNum > 0 && tailNum < 6 )
-						{
-							if( GLOBAL.customTools[tailNum].name.toDString.length )
-							{
-								if( GLOBAL.customTools[tailNum].dir.toDString.length )
-								{
-									// %s Selected Text
-									char[] s = fromStringz( IupGetAttribute( ih, toStringz("SELECTEDTEXT") ) );
-									char[] args = Util.substitute( GLOBAL.customTools[tailNum].args.toDString, "%s ", s ~ " " );
-									
-									args = Util.substitute( args, "%\"s\" ", "\"" ~ s ~ "\"" ~ " " );
-									// %f Active File
-									CScintilla cSci = actionManager.ScintillaAction.getCScintilla( ih );
-									if( cSci !is null )
-									{
-										s = cSci.getFullPath();
-										args = Util.substitute( args, "%f ", s ~ " " );
-										args = Util.substitute( args, "%\"f\" ", "\"" ~ s ~ "\"" ~ " " );
-									}
-									
-									version(Windows)
-									{
-										IupExecute( GLOBAL.customTools[tailNum].dir.toCString, toStringz( args ) );
-									}
-									else
-									{
-										Process p = new Process( true, GLOBAL.customTools[tailNum].dir.toDString ~ " " ~ args );
-										//p.gui( true );
-										p.execute;
-									}
-								}
-							}
-						}
-
-						return IUP_IGNORE;
-					}
-					break;					
-					
-				/*
-				case "testplugin":
-					if( sk.keyValue == c )
-					{
-						dllHandleClipboardText( ih );
-						return IUP_IGNORE;
-					}
-					break;
-				*/
-					
-				default:
-			}
+			debug IupMessage( "CScintilla_keyany_cb", toStringz( e.toString ) );
 		}
 		
 		return IUP_DEFAULT;
@@ -1686,7 +1616,10 @@ extern(C)
 					}
 				}
 			}
-			catch( Exception e ){}
+			catch( Exception e )
+			{
+				debug IupMessage( "CScintilla_action_cb", toStringz( "LiveParser Error" ) );
+			}
 		}
 
 		
@@ -1774,7 +1707,7 @@ extern(C)
 					}
 					catch( Exception e )
 					{
-
+						debug IupMessage( "CScintilla_action_cb", toStringz( "callAutocomplete Error" ) );
 					}
 			}
 		}
@@ -1861,7 +1794,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "", toStringz( e.toString ) );
+			debug IupMessage( "CScintilla_caret_cb", toStringz( e.toString ) );
 		}
 		return IUP_DEFAULT;
 	}

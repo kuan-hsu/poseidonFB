@@ -212,7 +212,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parsePreprocessor" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parsePreprocessor" ).newline;
 			return false;
 		}
 
@@ -280,7 +280,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  getVariableType" ).newline;
+			//debug Stdout( e.toString ~ "  ::  getVariableType" ).newline;
 		}
 		
 		return null;
@@ -507,7 +507,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseParam" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseParam" ).newline;
 			return null;
 		}
 
@@ -569,7 +569,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseArray" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseArray" ).newline;
 		}
 		
 		return result;
@@ -913,7 +913,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseVariable" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseVariable" ).newline;
 		}
 
 		return false;
@@ -972,7 +972,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parserVar" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parserVar" ).newline;
 			return false;
 		}
 
@@ -993,7 +993,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseNamespace" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseNamespace" ).newline;
 		}
 
 		return false;
@@ -1349,7 +1349,7 @@ class CParser
 		}
 		catch
 		{
-			debug Stdout( e.toString ~ "  ::  parseOperator" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseOperator" ).newline;
 			return false;
 		}
 
@@ -1510,7 +1510,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseProcedure" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseProcedure" ).newline;
 		}
 
 		return false;
@@ -1870,7 +1870,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
 		}
 
 		return false;
@@ -1942,7 +1942,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseFunctionPointer" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseFunctionPointer" ).newline;
 		}
 
 		return false;
@@ -2090,7 +2090,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
 		}
 		
 
@@ -2161,7 +2161,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseEnum" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseEnum" ).newline;
 		}
 
 		return false;
@@ -2183,7 +2183,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseScope" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseScope" ).newline;
 			return false;
 		}
 
@@ -2213,7 +2213,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseWith" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseWith" ).newline;
 		}
 		
 		return false;
@@ -2238,7 +2238,7 @@ class CParser
 		}
 		catch( Exception e )
 		{
-			debug Stdout( e.toString ~ "  ::  parseEnd" ).newline;
+			//debug Stdout( e.toString ~ "  ::  parseEnd" ).newline;
 		}
 
 		return true;

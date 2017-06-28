@@ -84,6 +84,15 @@ void freeCString( char* cString )
 	if( cString != null ) free( cString );
 }
 
+char* toStringPtr( char[] DString )
+{
+	int len = DString.length;
+	char[] _str = new char[len+1];
+	_str[0..len] = DString;
+	_str[len] = '\0';
+	return _str.ptr;
+}
+
 
 // To lowercase
 char[] lowerCase( char[] text )

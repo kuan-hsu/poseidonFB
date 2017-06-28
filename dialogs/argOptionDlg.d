@@ -25,8 +25,7 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
 		{
-			char* _str = toStringz( GLOBAL.recentOptions[i] );
-			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), _str );
+			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), tools.toStringPtr( GLOBAL.recentOptions[i] ) );
 		}
 			
 		IupSetHandle( "CArgOptionDialog_listOptions", listOptions );
@@ -39,8 +38,7 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttributes( listArgs, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 		{
-			char* _str = toStringz( GLOBAL.recentArgs[i] );
-			IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), _str );
+			IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), tools.toStringPtr( GLOBAL.recentArgs[i] ) );
 		}
 		
 		IupSetHandle( "CArgOptionDialog_listArgs", listArgs );

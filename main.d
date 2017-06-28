@@ -188,7 +188,7 @@ void main( char[][] args )
 			}+/
 		}
 	}
-
+	
 	// Init IDE
 	createEditorSetting();
 

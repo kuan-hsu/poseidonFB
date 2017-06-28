@@ -404,7 +404,7 @@ struct LiveParser
 				}
 				else
 				{
-					debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ "Parse NUll" ) );
+					//debug IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( Integer.toString(currentLineNum) ~ " " ~ "Parse NUll" ) );
 				}
 			}
 		}

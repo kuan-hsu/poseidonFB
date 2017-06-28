@@ -62,7 +62,7 @@ struct IDECONFIG
 		return false;
 	}
 	
-	version(linux) void setLinuxTerminal()
+	version(linux) static void setLinuxTerminal()
 	{
 		// Get linux terminal program name
 		

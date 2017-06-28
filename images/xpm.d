@@ -151,7 +151,7 @@ struct XPM
 		}
 		catch( Exception e )
 		{
-			Stdout( e.toString ).newline;
+			debug IupMessage( "XPM:convert", toStringz( e.toString ) );
 		}
 
 		return null;
