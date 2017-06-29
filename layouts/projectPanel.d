@@ -660,7 +660,7 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				debug IupMessage( "CProjectTree_Selection_cb", toStringz( e.toString() ) );
+				debug IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 
@@ -706,7 +706,7 @@ extern(C)
 				}
 				catch( Exception e )
 				{
-					debug IupMessage( "CProjectTree_ExecuteLeaf_cb", toStringz( e.toString() ) );
+					debug IupMessage( "CProjectTree_ExecuteLeaf_cb", toStringz( "CProjectTree_ExecuteLeaf_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 				}
 			}
 		}

@@ -1394,7 +1394,7 @@ extern(C)
 							}
 							catch( Exception e )
 							{
-								debug IupMessage( "Error", toStringz( e.toString ) );
+								debug IupMessage( "ShortCut Error", toStringz( "autocompleten" ~ e.toString ) );
 							}
 
 							return IUP_IGNORE;
@@ -1485,7 +1485,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "CScintilla_keyany_cb", toStringz( e.toString ) );
+			debug IupMessage( "CScintilla_keyany_cb", toStringz( "CScintilla_keyany_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 		
 		return IUP_DEFAULT;
@@ -1618,7 +1618,7 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				debug IupMessage( "CScintilla_action_cb", toStringz( "LiveParser Error" ) );
+				debug IupMessage( "CScintilla_action_cb", toStringz( "LiveParser Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 
@@ -1707,7 +1707,7 @@ extern(C)
 					}
 					catch( Exception e )
 					{
-						debug IupMessage( "CScintilla_action_cb", toStringz( "callAutocomplete Error" ) );
+						debug IupMessage( "CScintilla_action_cb", toStringz( "callAutocomplete Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 					}
 			}
 		}
@@ -1794,7 +1794,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "CScintilla_caret_cb", toStringz( e.toString ) );
+			debug IupMessage( "CScintilla_caret_cb", toStringz( "CScintilla_caret_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 		return IUP_DEFAULT;
 	}

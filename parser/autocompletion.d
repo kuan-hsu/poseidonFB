@@ -1549,7 +1549,7 @@ struct AutoComplete
 
 					return null;
 				}
-
+				
 				for( int i = 0; i < splitWord.length; i++ )
 				{
 					listContainer.length = 0;
@@ -1585,20 +1585,21 @@ struct AutoComplete
 
 								if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
 								//IupMessage("",toStringz(AST_Head.name));
-								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
-								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
-
-								// For Type Objects
-								if( memberFunctionMotherName.length )
+								if( AST_Head !is null )
 								{
-									CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
-									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode,  splitWord[i] , B_ALL, false );
-								}					
-
-								foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
-								{
-									listContainer ~= getListImage( _node );
-									//listContainer ~= _node;
+									resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
+									resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
+									// For Type Objects
+									if( memberFunctionMotherName.length )
+									{
+										CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+										if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode,  splitWord[i] , B_ALL, false );
+									}
+									foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
+									{
+										listContainer ~= getListImage( _node );
+										//listContainer ~= _node;
+									}
 								}
 							}
 							else
@@ -1751,7 +1752,7 @@ struct AutoComplete
 					for( int i = 0; i < listContainer.length; ++ i )
 					{
 						if( i > 0 )
-							if( listContainer[i] == listContainer[i+1] ) continue;
+							if( listContainer[i] == listContainer[i-1] ) continue;
 
 						if( listContainer[i].length )
 						{

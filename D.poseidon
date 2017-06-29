@@ -5,7 +5,7 @@
   <MainFile/>
   <TargetName/>
   <CompilerArgs/>
-  <CompilerOption>-odobjs -L/SUBSYSTEM:windows:4 -debug</CompilerOption>
+  <CompilerOption>-odobjs -debug -L/SUBSYSTEM:windows:4</CompilerOption>
   <Comment/>
   <CompilerPath/>
   <IncludeDirs/>

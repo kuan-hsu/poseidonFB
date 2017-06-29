@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.277\nBy Kuan Hsu (Taiwan)\n2017.06.29" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.278\nBy Kuan Hsu (Taiwan)\n2017.06.29" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -876,7 +876,7 @@ extern(C)
 				if( tailCommaPos > headCommaPos )
 				{
 					int line1 = Integer.atoi( selectText[0..headCommaPos] );
-					int line2 = Integer.atoi( selectText[headColonPos+1..headCommaPos] );
+					int line2 = Integer.atoi( selectText[headColonPos+1..tailCommaPos] );
 					
 					if( line1 > line2 )
 					{

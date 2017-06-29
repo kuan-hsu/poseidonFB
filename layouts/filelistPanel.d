@@ -161,7 +161,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "fileList_SELECTION_CB", toStringz( e.toString() ) );
+			debug IupMessage( "fileList_SELECTION_CB", toStringz( "fileList_SELECTION_CB Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return IUP_DEFAULT;
