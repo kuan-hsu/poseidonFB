@@ -1524,24 +1524,24 @@ struct SearchAction
 
 		if( targetText.length )
 		{
-			IupSetInt( ih, "TARGETSTART", currentPos );
-
-			if( bNext )	IupSetInt( ih, "TARGETEND", 0 ); else IupSetInt( ih, "TARGETEND", 1 );
+			IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+			
+			if( bNext )	IupSetInt( ih, "TARGETEND", 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
 
 			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
-
+			
 			// reSearch form file's head
 			if( findPos < 0 )
 			{
 				if( bNext )
 				{
-					IupSetInt( ih, "TARGETSTART", 0 );
-					IupSetInt( ih, "TARGETEND", currentPos );
+					IupScintillaSendMessage( ih, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 				else
 				{
-					IupSetInt( ih, "TARGETSTART", documentLength );
-					IupSetInt( ih, "TARGETEND", currentPos );
+					IupScintillaSendMessage( ih, 2190, documentLength, 0 ); 		// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 
 				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,

@@ -408,9 +408,10 @@ extern(C) // Callback for CSingleTextDialog
 				
 				if( findText.length )
 				{
-					IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchDlg.searchRule, 0 ); // SCI_SETSEARCHFLAGS = 2198,
+					IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchDlg.searchRule, 0 );	// SCI_SETSEARCHFLAGS = 2198,
 					
-					IupSetInt( iupSci, "TARGETSTART", 0 );
+					//IupSetInt( iupSci, "TARGETSTART", 0 );
+					IupScintillaSendMessage( iupSci, 2190, 0, 0 ); 								// SCI_SETTARGETSTART = 2190,
 					IupSetInt( iupSci, "TARGETEND", 0 );
 
 					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
@@ -429,7 +430,8 @@ extern(C) // Callback for CSingleTextDialog
 						}
 						
 						counts ++;
-						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos );
+						//if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos );
+						if( flag < 2 ) IupScintillaSendMessage( iupSci, 2190, findPos + findText.length, 0 ); else IupScintillaSendMessage( iupSci, 2190, findPos, 0 ); // SCI_SETTARGETSTART = 2190,
 						IupSetInt( iupSci, "TARGETEND", 0 );
 						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
 					}

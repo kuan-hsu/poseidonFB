@@ -283,7 +283,8 @@ struct LiveParser
 					return;
 				}
 
-				IupSetInt( cSci.getIupScintilla, "TARGETSTART", posHead );
+				//IupSetInt( cSci.getIupScintilla, "TARGETSTART", posHead );
+				IupScintillaSendMessage( cSci.getIupScintilla, 2190, posHead, 0 ); 	// SCI_SETTARGETSTART = 2190,
 				IupSetInt( cSci.getIupScintilla, "TARGETEND", posTail );
 				
 				CASTnode newHead;

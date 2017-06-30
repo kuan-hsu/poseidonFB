@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.278\nBy Kuan Hsu (Taiwan)\n2017.06.29" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.279\nBy Kuan Hsu (Taiwan)\n2017.07.01" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -552,6 +552,8 @@ private void _convertKeyWordCase( int type )
 	{
 		Ihandle* iupSci = cSci.getIupScintilla;
 
+		IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
+
 		foreach( IupString _s; GLOBAL.KEYWORDS )
 		{
 			foreach( char[] targetText; Util.split( _s.toDString, " " ) )
@@ -560,19 +562,16 @@ private void _convertKeyWordCase( int type )
 				{
 					int		replaceTextLength = targetText.length;
 					char[]	replaceText = tools.convertKeyWordCase( type, targetText );
-					
-					int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );	// SCI_GETLENGTH = 2006,
-					IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
+
 					IupScintillaSendMessage( iupSci, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );		// SCI_SETTARGETEND = 2192,	
+					IupSetInt( iupSci, "TARGETEND", 0 );
 
 					int posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-					while( posHead > 0 )
+					while( posHead >= 0 )
 					{
-						IupScintillaSendMessage( iupSci, 2194, replaceText.length, cast(int) GLOBAL.cString.convert( replaceText ) );				// SCI_REPLACETARGET 2194
+						IupSetAttribute( iupSci, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
 						IupScintillaSendMessage( iupSci, 2190, posHead + replaceTextLength, 0 );													// SCI_SETTARGETSTART = 2190,
-						documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );																// SCI_GETLENGTH = 2006,
-						IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );																// SCI_SETTARGETEND = 2192,	
+						IupSetInt( iupSci, "TARGETEND", 0 );
 						posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 					}					
 				}

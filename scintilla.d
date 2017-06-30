@@ -1151,7 +1151,8 @@ extern(C)
 							SCFIND_POSIX = 0x00400000,
 							*/								
 							IupScintillaSendMessage( ih, 2198, 2, 0 ); // SCI_SETSEARCHFLAGS = 2198,
-							IupSetInt( ih, "TARGETSTART", 0 );
+							//IupSetInt( ih, "TARGETSTART", 0 );
+							IupScintillaSendMessage( ih, 2190, 0, 0 ); 								// SCI_SETTARGETSTART = 2190,
 							IupSetInt( ih, "TARGETEND", 0 );
 							
 							int count;
@@ -1164,7 +1165,8 @@ extern(C)
 								else
 									IupScintillaSendMessage( ih, 2573, cast(int) findPos, cast(int) ( findPos + word.length ) ); // SCI_ADDSELECTION 2573
 
-								IupSetInt( ih, "TARGETSTART", findPos + word.length );
+								//IupSetInt( ih, "TARGETSTART", findPos + word.length );
+								IupScintillaSendMessage( ih, 2190, findPos + word.length, 0 ); 	// SCI_SETTARGETSTART = 2190,
 								IupSetInt( ih, "TARGETEND", 0 );
 								
 								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
