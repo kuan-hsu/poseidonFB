@@ -7,7 +7,7 @@ struct AutoComplete
 	import iup.iup_scintilla;
 
 	import global, actionManager, menu;
-	import tools;
+	import tools, layouts.manualPanel;
 	import parser.ast;
 
 	import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf;
@@ -410,17 +410,20 @@ struct AutoComplete
 			else
 			{
 				//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
-				GLOBAL.outlineTree.loadFile( includeFullPath );
-
-				if( GLOBAL.editorSetting00.Message == "ON" ) 
-				{
-					version(Windows) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
-				}
+				CASTnode _createFileNode = GLOBAL.outlineTree.loadFile( includeFullPath );
 				
-				results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
-				results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
-
-				includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
+				if( _createFileNode !is null )
+				{
+					if( GLOBAL.editorSetting00.Message == "ON" ) 
+					{
+						version(Windows) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+					}
+					
+					includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
+					
+					results ~= _createFileNode;
+					results ~= getIncludes( _createFileNode, includeFullPath );
+				}
 			}
 		}
 
@@ -440,69 +443,72 @@ struct AutoComplete
 
 		foreach( includeAST; includesMarkContainer )
 		{
-			foreach( child; includeAST.getChildren )
+			if( includeAST !is null )
 			{
-				if( child.kind & B_NAMESPACE )
+				foreach( child; includeAST.getChildren )
 				{
-					if( child.name.length )
+					if( child.kind & B_NAMESPACE )
 					{
-						if( lowerCase( child.name ) == lowerCase( word ) )
+						if( child.name.length )
 						{
-							results ~= child;
-						}
-						else
-						{
-							foreach( _child; child.getChildren )
+							if( lowerCase( child.name ) == lowerCase( word ) )
 							{
-								if( _child.name.length )
+								results ~= child;
+							}
+							else
+							{
+								foreach( _child; child.getChildren )
 								{
-									if( lowerCase( _child.name ) == lowerCase( word ) )
+									if( _child.name.length )
 									{
-										results ~= _child;
+										if( lowerCase( _child.name ) == lowerCase( word ) )
+										{
+											results ~= _child;
+										}
 									}
-								}
-								else
-								{
-									CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
-									if( enumResult.length ) results ~= enumResult;
+									else
+									{
+										CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
+										if( enumResult.length ) results ~= enumResult;
+									}
 								}
 							}
 						}
 					}
-				}
-				else
-				{
-					if( child.name.length )
+					else
+					{
+						if( child.name.length )
+						{
+							if( lowerCase( child.name ) == lowerCase( word ) )
+							{
+								results ~= child;
+							}
+						}
+						else
+						{
+							CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+							if( enumResult.length ) results ~= enumResult;
+						}
+					}
+
+					/+
+					if( child.kind & B_KIND )
 					{
 						if( lowerCase( child.name ) == lowerCase( word ) )
 						{
 							results ~= child;
 						}
+						/*
+						else
+						{
+							CASTnode enumResult = getAnonymousEnumMemberFromWholeWord( child, word );
+							if( enumResult !is null ) results ~= enumResult;
+						}
+						*/
 					}
-					else
-					{
-						CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
-						if( enumResult.length ) results ~= enumResult;
-					}
+					+/
 				}
-
-				/+
-				if( child.kind & B_KIND )
-				{
-					if( lowerCase( child.name ) == lowerCase( word ) )
-					{
-						results ~= child;
-					}
-					/*
-					else
-					{
-						CASTnode enumResult = getAnonymousEnumMemberFromWholeWord( child, word );
-						if( enumResult !is null ) results ~= enumResult;
-					}
-					*/
-				}
-				+/
-			}						
+			}
 		}
 
 		return results;
@@ -905,6 +911,8 @@ struct AutoComplete
 
 	static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false )
 	{
+		if( originalNode is null ) return null;
+		
 		static int	level;
 
 		CASTnode[] results;
@@ -926,21 +934,23 @@ struct AutoComplete
 
 		foreach( CASTnode _node; originalNode.getChildren )
 		{
-			if( _node.kind == B_INCLUDE )
+			if( _node.kind & B_INCLUDE )
 			{
 				if( _node.type == "__FB_WIN32__" )
 				{
 					version(Windows)
 					{
 						//Stdout( "Include(Win32): " ~ _node.name ).newline;
-						results ~= check( _node.name, originalFullPath );
+						CASTnode[] _results = check( _node.name, originalFullPath );
+						if( _results.length ) results ~= _results;
 					}
 				}
 				else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
 				{
 					version(linux)
 					{
-						results ~= check( _node.name, originalFullPath );
+						CASTnode[] _results = check( _node.name, originalFullPath );
+						if( _results.length ) results ~= _results;
 					}
 				}
 				else if( _node.type == "!__FB_WIN32__" )
@@ -948,8 +958,8 @@ struct AutoComplete
 					version(Windows){}
 					else
 					{
-						//Stdout( "Include((Linux)): " ~ _node.name ).newline;
-						results ~= check( _node.name, originalFullPath );
+						CASTnode[] _results = check( _node.name, originalFullPath );
+						if( _resulst.length ) results ~= _results;
 					}
 				}
 				else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
@@ -957,20 +967,14 @@ struct AutoComplete
 					version(linux){}
 					else
 					{
-						results ~= check( _node.name, originalFullPath );
+						CASTnode[] _results = check( _node.name, originalFullPath );
+						if( _results.length ) results ~= _results;
 					}
 				}
-				/*
-				else if( _node.type.length )
-				{
-
-			
-				}
-				*/
 				else
 				{
-					//Stdout( "Include(NORMAL): " ~ _node.name ).newline;
-					results ~= check( _node.name, originalFullPath );
+					CASTnode[] _result = check( _node.name, originalFullPath );
+					if( _result.length ) results ~= _result;
 				}
 			}
 		}
@@ -1847,6 +1851,7 @@ struct AutoComplete
 						{
 							if( GLOBAL.toggleManualDefinition == "ON" )
 							{
+								CManual.bShowType = false;
 								if( GLOBAL.manualPanel.jumpDefinition( splitWord[0] ) ) GLOBAL.manualPanel.showTab( true );
 							}
 						}
@@ -1854,6 +1859,8 @@ struct AutoComplete
 						{
 							if( GLOBAL.toggleManualShowType == "ON" ) GLOBAL.manualPanel.showType( splitWord[0] );
 						}
+						
+						if( splitWord[0] == "constructor" || splitWord[0] == "destructor" ) return;
 					}
 				}
 

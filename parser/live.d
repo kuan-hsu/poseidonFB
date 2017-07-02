@@ -72,7 +72,10 @@ struct LiveParser
 				}
 			}
 		}
-		catch( Exception e ){}
+		catch( Exception e )
+		{
+			debug IupMessage( "LiveParser Error", toStringz( "delChildrenByLineNum()\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+		}
 
 		return null;
 	}
@@ -215,7 +218,10 @@ struct LiveParser
 				}
 			}
 		}
-		catch( Exception e ){}
+		catch( Exception e )
+		{
+			debug IupMessage( "LiveParser Error", toStringz( "parseCurrentLine()\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+		}
 	}
 
 	static void parseCurrentBlock()
@@ -409,6 +415,9 @@ struct LiveParser
 				}
 			}
 		}
-		catch( Exception e ){}
+		catch( Exception e )
+		{
+			debug IupMessage( "LiveParser Error", toStringz( "parseCurrentBlock()\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+		}
 	}	
 }

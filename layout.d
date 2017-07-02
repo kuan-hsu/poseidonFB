@@ -314,7 +314,10 @@ extern(C)
 					}
 				}
 			}
-			catch( Exception e ){}
+			catch( Exception e )
+			{
+				debug IupMessage( "GlobalKeyPress_CB Error", toStringz( "GlobalKeyPress_CB()\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			}
 		
 			GLOBAL.bKeyUp = true; // Release
 			GLOBAL.KeyNumber = -1;
@@ -457,7 +460,9 @@ extern(C)
 			IupSetAttribute( _home, "IMAGE", "icon_manual_home" );
 			IupSetCallback( _home, "ACTION", cast(Icallback) function( Ihandle* _ih )
 			{
-				GLOBAL.manualPanel.setValue( GLOBAL.manualPath.toCString );
+				scope _fp = new FilePath( GLOBAL.manualPath.toDString );
+				if( !_fp.isAbsolute() )	_fp.set( GLOBAL.poseidonPath ~ GLOBAL.manualPath.toDString );				
+				GLOBAL.manualPanel.setValue( _fp.toString );
 			});			
 			popupMenu = IupMenu( _home, null );
 		}

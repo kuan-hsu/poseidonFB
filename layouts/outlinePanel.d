@@ -1543,7 +1543,7 @@ class COutline
 		{
 			// Parser
 			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( text ) );
-			return GLOBAL.parser.parse( "x.bas", B_KIND );
+			return GLOBAL.parser.parse( "_.bas", B_KIND );
 		}
 		catch( Exception e )
 		{

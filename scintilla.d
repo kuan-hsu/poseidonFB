@@ -1643,8 +1643,8 @@ extern(C)
 
 			int dummyHeadPos;
 			// Below code are fixed because of IUP DLL10 and D 1.076
-			char[] text;
-			text ~= _text[0];
+			char[] text = fromStringz( _text );
+			//text ~= _text[0];
 			
 			switch( text )
 			{

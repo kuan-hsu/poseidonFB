@@ -7,7 +7,6 @@ private import global, scintilla, actionManager, tools;
 
 private import tango.stdc.stringz, tango.io.FilePath, Util = tango.text.Util;
 
-
 class CManual
 {
 	private:
@@ -150,10 +149,7 @@ class CManual
 	void showType( char[] _keyWord )
 	{
 		CManual.bShowType = true;
-		if( !jumpDefinition( _keyWord ) )
-		{
-			CManual.bShowType = false;
-		}
+		jumpDefinition( _keyWord );
 	}
 	
 	void showTab( bool bShow )
@@ -215,28 +211,28 @@ extern(C)
 	
 	private int COMPLETED_CB( Ihandle* ih, char* url )
 	{
+		if( !CManual.bShowType ) return IUP_DEFAULT;
+		
 		Ihandle* manualTextHandle = IupGetHandle( "manualTextHandle" );
 		
 		if( manualTextHandle != null )
 		{
-			// Save previous clipboard text
-			CManual.prevClipboard = IupGetAttribute( IupGetHandle( "clipboard" ), "TEXT" );
-			
-			IupSetAttribute( ih, "SELECTALL", "YES" );
-			IupSetAttribute( ih, "COPY", null );
-			IupSetAttribute( ih, "RELOAD", "1" );
-			IupSetAttribute( ih, "STOP", "1" );
-			IupSetAttribute( manualTextHandle, "VALUE", null );
-			IupSetAttribute( manualTextHandle, "CLIPBOARD", "PASTE" );
-			
-			// Restore previous clipboard text
-			IupSetAttribute( IupGetHandle( "clipboard" ), "TEXT", CManual.prevClipboard.toCString );
-			
 			if( CManual.bShowType )
 			{
 				Ihandle* iupSci = ScintillaAction.getActiveIupScintilla();
 				if( iupSci != null )
 				{
+					// Save previous clipboard text
+					CManual.prevClipboard = IupGetAttribute( IupGetHandle( "clipboard" ), "TEXT" );
+					
+					IupSetAttribute( ih, "SELECTALL", "YES" );
+					IupSetAttribute( ih, "COPY", null );
+					IupSetAttribute( manualTextHandle, "VALUE", "" );
+					IupSetAttribute( manualTextHandle, "CLIPBOARD", "PASTE" );
+					
+					// Restore previous clipboard text
+					IupSetAttribute( IupGetHandle( "clipboard" ), "TEXT", CManual.prevClipboard.toCString );
+			
 					int	lineNumber = IupScintillaSendMessage( iupSci, 2166, ScintillaAction.getCurrentPos( iupSci ), 0 ); //SCI_LINEFROMPOSITION = 2166,
 					
 					char[]	annotationText;
@@ -264,9 +260,13 @@ extern(C)
 			}
 		}
 		
-		CManual.bShowType = false;
+		if( CManual.bShowType )
+		{
+			CManual.bShowType = false;
+			IupSetAttribute( ih, "RELOAD", "1" );
+		}
 		
-		return IUP_IGNORE;
+		return IUP_DEFAULT;
 	}
 	
 	private int ERROR_CB( Ihandle* ih, char* url )
