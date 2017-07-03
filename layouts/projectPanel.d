@@ -563,6 +563,7 @@ class CProjectTree
 	{
 		char[] title;
 		
+		/+
 		if( prjDir.length )
 		{
 			IupString[]	temps;
@@ -588,6 +589,45 @@ class CProjectTree
 			GLOBAL.recentProjects[0..8] = GLOBAL.recentProjects[$-8..$];
 			GLOBAL.recentProjects.length = 8;
 		}
+		+/
+		if( prjDir.length )
+		{
+			IupString[]	temps;
+			
+			title = prjDir ~ " : " ~ prjName;
+			
+			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
+			{
+				if( GLOBAL.recentProjects[i].toDString != title ) temps ~= new IupString( GLOBAL.recentProjects[i].toDString );
+			}
+
+			temps ~= new IupString( title );
+			
+			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
+				delete GLOBAL.recentProjects[i];
+				
+			int count, index;
+			if( temps.length > 8 )
+			{
+				GLOBAL.recentProjects.length = 8;
+				for( count = temps.length - 8; count < temps.length; ++count )
+					GLOBAL.recentProjects[index++] = temps[count];
+			}
+			else
+			{
+				GLOBAL.recentProjects.length = temps.length;
+				for( count = 0; count < temps.length; ++count )
+					GLOBAL.recentProjects[index++] = temps[count];
+			}				
+		}
+		else
+		{
+			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
+				delete GLOBAL.recentProjects[i];
+				
+			GLOBAL.recentProjects.length = 0;
+		}
+		
 
 		Ihandle* recentPrj_ih = IupGetHandle( "recentPrjsSubMenu" );
 		if( recentPrj_ih != null )

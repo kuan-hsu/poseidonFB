@@ -1098,26 +1098,39 @@ struct ScintillaAction
 		if( fullPath.length )
 		{
 			IupString[]	temps;
-
+			
 			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
 			{
-				if( GLOBAL.recentFiles[i].toDString != fullPath ) temps ~= GLOBAL.recentFiles[i];
+				if( GLOBAL.recentFiles[i].toDString != fullPath ) temps ~= new IupString( GLOBAL.recentFiles[i].toDString );
 			}
 
 			temps ~= new IupString( fullPath );
-			GLOBAL.recentFiles.length = 0;
-			GLOBAL.recentFiles = temps;
-		}
-		
-		// Recent Files
-		if( GLOBAL.recentFiles.length > 8 )
-		{
-			for( int i = 0; i < GLOBAL.recentFiles.length - 8; ++ i ) 
+			
+			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
 				delete GLOBAL.recentFiles[i];
 			
-			GLOBAL.recentFiles[0..8] = GLOBAL.recentFiles[$-8..$];
-			GLOBAL.recentFiles.length = 8;
+			int count, index;
+			if( temps.length > 8 )
+			{
+				GLOBAL.recentFiles.length = 8;
+				for( count = temps.length - 8; count < temps.length; ++count )
+					GLOBAL.recentFiles[index++] = temps[count];
+			}
+			else
+			{
+				GLOBAL.recentFiles.length = temps.length;
+				for( count = 0; count < temps.length; ++count )
+					GLOBAL.recentFiles[index++] = temps[count];
+			}
 		}
+		else
+		{
+			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
+				delete GLOBAL.recentFiles[i];
+				
+			GLOBAL.recentFiles.length = 0;
+		}
+
 
 		Ihandle* recentFile_ih = IupGetHandle( "recentFilesSubMenu" );
 		if( recentFile_ih != null )
@@ -1146,7 +1159,7 @@ struct ScintillaAction
 			}
 	
 			IupRefresh( recentFile_ih );
-		}		
+		}
 	}	
 }
 
