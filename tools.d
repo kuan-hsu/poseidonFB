@@ -101,7 +101,7 @@ char[] lowerCase( char[] text )
 
 	foreach( char c; text )
 	{
-		if ( c >= 'A' && c <= 'Z' ) result ~= ( c + 32 );else result ~= c;
+		if ( c >= 'A' && c <= 'Z' ) result ~= cast(char)( c + 32 );else result ~= c;
 	}
 
 	return result.dup;
@@ -113,7 +113,7 @@ char[] upperCase( char[] text )
 
 	foreach( char c; text )
 	{
-		if ( c >= 'a' && c <= 'z' ) result ~= ( c - 32 );else result ~= c;
+		if ( c >= 'a' && c <= 'z' ) result ~= cast(char)( c - 32 );else result ~= c;
 	}
 
 	return result.dup;
@@ -123,7 +123,7 @@ int lowerCase( int num )
 {
 	int result = num;
 
-	if ( num >= 'A' && num <= 'Z' ) result = ( num + 32 );
+	if ( num >= 'A' && num <= 'Z' ) result = cast(char)( num + 32 );
 
 	return result;
 }
@@ -132,7 +132,7 @@ int upperCase( int num )
 {
 	int result = num;
 
-	if ( num >= 'a' && num <= 'z' ) result = ( num - 32 );
+	if ( num >= 'a' && num <= 'z' ) result = cast(char)( num - 32 );
 
 	return result;
 }

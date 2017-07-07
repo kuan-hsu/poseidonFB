@@ -11,7 +11,7 @@
 		<mainFile />
 		<Args />
 		<options>
-			<dmd> -odobjs -release -L/SUBSYSTEM:windows:4 </dmd>
+			<dmd> -debug -g -L/SUBSYSTEM:windows:4 </dmd>
 			<tool />
 			<lib />
 			<implib />
@@ -23,7 +23,7 @@
 			<mapfile>0</mapfile>
 			<gcstub>0</gcstub>
 		</options>
-		<dmdpath>D:/CodingPark/DMD1076Tango</dmdpath>
+		<dmdpath>K:\CodingPark\DMD1076Tango</dmdpath>
 		<dmcpath />
 		<buildtoolexe />
 		<projectFiles>
@@ -31,6 +31,7 @@
 				<name>actionManager.d</name>
 				<name>dialogs\argOptionDlg.d</name>
 				<name>dialogs\baseDlg.d</name>
+				<name>dialogs\customDlg.d</name>
 				<name>dialogs\fileDlg.d</name>
 				<name>dialogs\findFilesDlg.d</name>
 				<name>dialogs\helpDlg.d</name>
@@ -47,6 +48,7 @@
 				<name>layout.d</name>
 				<name>layouts\debugger.d</name>
 				<name>layouts\filelistPanel.d</name>
+				<name>layouts\manualPanel.d</name>
 				<name>layouts\messagePanel.d</name>
 				<name>layouts\outlinePanel.d</name>
 				<name>layouts\projectPanel.d</name>
@@ -66,16 +68,16 @@
 				<name>tools.d</name>
 			</source>
 			<interface />
-			<resource>
-				<name>poseidonFB.res</name>
-			</resource>
+			<resource />
 			<othersDMD />
 			<others />
 		</projectFiles>
 		<includePaths />
 		<linkLibrarys>
-			<name>D:\CodingPark\GameKYO\lib\iup\iup318DLL10\iup.lib</name>
-			<name>D:\CodingPark\GameKYO\lib\iup\iup318DLL10\iup_scintilla.lib</name>
+			<name>K:\CodingPark\GameKYO\lib\iup\iup322DLL10\iup.lib</name>
+			<name>K:\CodingPark\GameKYO\lib\iup\iup322DLL10\iup_scintilla.lib</name>
+			<name>K:\CodingPark\GameKYO\lib\iup\iup322DLL10\iupole.lib</name>
+			<name>K:\CodingPark\GameKYO\lib\iup\iup322DLL10\iupweb.lib</name>
 		</linkLibrarys>
 		<importExpressions />
 	</buildSpec>

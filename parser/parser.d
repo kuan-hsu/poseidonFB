@@ -1966,7 +1966,7 @@ class CParser
 			}
 			+/
 
-			if( token().tok == TOK.Ttype || token().tok == TOK.Tunion || ( bClass & token().tok == TOK.Tclass ) )
+			if( token().tok == TOK.Ttype || token().tok == TOK.Tunion || ( bClass && token().tok == TOK.Tclass ) )
 			{
 				switch( token().tok )
 				{

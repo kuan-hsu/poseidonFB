@@ -1085,6 +1085,9 @@ struct ScintillaAction
 		{
 			int lineStartPos = IupScintillaSendMessage( ih, 2167, IupScintillaSendMessage( ih, 2166, pos, 0 ), 0 ); // SCI_LINEFROMPOSITION = 2166, SCI_POSITIONFROMLINE=2167
 			//IupMessage("", toStringz( Integer.toString(pos) ~ " / " ~ Integer.toString(lineStartPos) ) );
+
+			if( pos == 0 ) return false;
+			
 			for( int i = pos - 1; i >= lineStartPos; --i )
 			{
 				if( IupScintillaSendMessage( ih, 2010, i, 0 ) == 1 ) return true;

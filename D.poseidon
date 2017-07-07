@@ -5,12 +5,12 @@
   <MainFile/>
   <TargetName/>
   <CompilerArgs/>
-  <CompilerOption>-odobjs -debug -L/SUBSYSTEM:windows:4</CompilerOption>
+  <CompilerOption>-odobjs -L/SUBSYSTEM:windows:4 -debug</CompilerOption>
   <Comment/>
   <CompilerPath/>
   <IncludeDirs/>
   <LibDirs>
-    <Name>K:/CodingPark/GameKYO/lib/iup/iup322DLL10</Name>
+    <Name>K:/IUP322</Name>
   </LibDirs>
   <Sources>
     <Name>IDE.d</Name>

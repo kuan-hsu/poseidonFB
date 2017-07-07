@@ -51,9 +51,9 @@ class COutline
 						try
 						{
 							char[] document = cSci.getText();
-							GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
+							GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
 							
-							CASTnode astHeadNode = GLOBAL.parser.parse( cSci.getFullPath );
+							CASTnode astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
 							CASTnode temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 
 							GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
@@ -917,8 +917,8 @@ class COutline
 			else
 			{
 				char[] document = actCSci.getText();
-				GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
-				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.parser.parse( fullPath );
+				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
 				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\t"~fullPath ) );
 			}
 
@@ -935,8 +935,8 @@ class COutline
 			{
 				// Don't Create Tree
 				// Parser
-				GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
-				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.parser.parse( fullPath );
+				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
 				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( fullPath ) );
 			}
 		}
@@ -966,8 +966,8 @@ class COutline
 			// Parser
 			if( f.ext() )
 			{
-				GLOBAL.parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
-				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.parser.parse( fullPath );
+				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
 				return GLOBAL.parserManager[upperCase(fullPath)];
 			}
 		}
@@ -1501,9 +1501,9 @@ class COutline
 					try
 					{
 						char[] document = cSci.getText();
-						GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( document ) );
+						GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
 						
-						CASTnode astHeadNode = GLOBAL.parser.parse( cSci.getFullPath );
+						CASTnode astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
 						CASTnode temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 
 						GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
@@ -1542,8 +1542,8 @@ class COutline
 		try
 		{
 			// Parser
-			GLOBAL.parser.updateTokens( GLOBAL.scanner.scan( text ) );
-			return GLOBAL.parser.parse( "_.bas", B_KIND );
+			GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) );
+			return GLOBAL.Parser.parse( "_.bas", B_KIND );
 		}
 		catch( Exception e )
 		{

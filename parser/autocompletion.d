@@ -17,8 +17,15 @@ struct AutoComplete
 
 	static char[][]				listContainer;
 	static CASTnode[char[]]		includesMarkContainer;
-
-
+	
+	
+	static void cleanIncludesMarkContainer()
+	{
+		foreach( char[] key; includesMarkContainer.keys )
+			includesMarkContainer.remove( key );
+		//IupMessage("",toStringz(Integer.toString(includesMarkContainer.length)));
+	}
+	
 	static void getTypeAndParameter( CASTnode node, inout char[] _type, inout char[] _param )
 	{
 		int openParenPos = Util.index( node.type, "(" );
@@ -416,7 +423,7 @@ struct AutoComplete
 				{
 					if( GLOBAL.editorSetting00.Message == "ON" ) 
 					{
-						version(Windows) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+						version(Windows) IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
 					}
 					
 					includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
@@ -434,8 +441,10 @@ struct AutoComplete
 	{
 		CASTnode[] results;
 
+		/+
 		foreach( char[] key; includesMarkContainer.keys )
 			includesMarkContainer.remove( key );		
+		+/
 		
 		// Parse Include
 		//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
@@ -518,8 +527,10 @@ struct AutoComplete
 	{
 		CASTnode[] results;
 
+		/+
 		foreach( char[] key; includesMarkContainer.keys )
 			includesMarkContainer.remove( key );
+		+/
 
 		// Parse Include
 		//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
@@ -531,53 +542,56 @@ struct AutoComplete
 		*/
 		foreach( includeAST; includesMarkContainer )
 		{
-			foreach( child; includeAST.getChildren )
+			if( includeAST !is null )
 			{
-				if( child.kind & B_NAMESPACE )
+				foreach( child; includeAST.getChildren )
 				{
-					if( child.name.length )
+					if( child.kind & B_NAMESPACE )
 					{
-						if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+						if( child.name.length )
 						{
-							results ~= child;
-						}
-						else
-						{
-							foreach( _child; child.getChildren )
+							if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
 							{
-								if( _child.name.length )
+								results ~= child;
+							}
+							else
+							{
+								foreach( _child; child.getChildren )
 								{
-									// Bug
-									if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
+									if( _child.name.length )
 									{
-										results ~= _child;
+										// Bug
+										if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
+										{
+											results ~= _child;
+										}
 									}
-								}
-								else
-								{
-									CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
-									if( enumResult.length ) results ~= enumResult;
+									else
+									{
+										CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
+										if( enumResult.length ) results ~= enumResult;
+									}
 								}
 							}
 						}
 					}
-				}
-				else
-				{
-					if( child.name.length )
-					{
-						if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
-						{
-							results ~= child;
-						}
-					}
 					else
 					{
-						CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
-						if( enumResult.length ) results ~= enumResult;
+						if( child.name.length )
+						{
+							if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+							{
+								results ~= child;
+							}
+						}
+						else
+						{
+							CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+							if( enumResult.length ) results ~= enumResult;
+						}
 					}
 				}
-			}						
+			}
 		}
 
 		return results;
@@ -1310,7 +1324,7 @@ struct AutoComplete
 		}
 		while( --pos >= 0 )
 		 
-		return result.reverse;
+		return result.dup.reverse;
 	}	
 
 	static char[] getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
@@ -1384,14 +1398,14 @@ struct AutoComplete
 		}
 		catch( Exception e )
 		{
-			//IupMessage( "Error", toStringz( e.toString ) );
+			IupMessage( "Error", toStringz( e.toString ) );
 			return null;
 		}
 
 		return word;
 	}
 	
-	static char[] charAdd( Ihandle* iupSci, int pos = -1, char[] text = "" )
+	static char[] charAdd( Ihandle* iupSci, int pos, char[] text )
 	{
 		int		dummyHeadPos;
 		char[] 	word, result;
@@ -1400,7 +1414,7 @@ struct AutoComplete
 		if( text == "(" )
 		{
 			bCallTip = true;
-			IupSetAttribute( iupSci, "AUTOCCANCEL", GLOBAL.cString.convert( "YES" ) ); // Prevent autocomplete -> calltip issue
+			IupSetAttribute( iupSci, "AUTOCCANCEL\0", "YES\0" ); // Prevent autocomplete -> calltip issue
 		}
 		else if( text == "." )
 		{
@@ -1454,28 +1468,74 @@ struct AutoComplete
 		}
 		+/
 
-		word = lowerCase( word.reverse );
+		word = lowerCase( word.dup.reverse );
 
 		auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )
 		{
-			if( upperCase(cSci.getFullPath) in GLOBAL.parserManager ){} else{ return null; }
+			if( upperCase(cSci.getFullPath) in GLOBAL.parserManager )
+			{
+				if( GLOBAL.parserManager[upperCase(cSci.getFullPath)] is null ) return null;
+			}
+			else
+			{
+				return null;
+			}
 			
-			if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) )
+			if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) )
 			{}
 			else
 			{
 				// Clean listContainer
 				listContainer.length = 0;
-				IupSetAttribute( iupSci, "AUTOCCANCEL", GLOBAL.cString.convert( "YES" ) );
+				
+				if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL\0", "YES\0" );
 
 				// Divide word
 				/*char[][] splitWord = Util.split( word, "." );
 				if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );*/
 				char[][]	splitWord = getDivideWord( word );
 				int			lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-				auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], lineNum );
+				CASTnode	AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], lineNum );
 				char[]		memberFunctionMotherName;
+
+
+				if( AST_Head is null )
+				{
+					if( GLOBAL.enableKeywordComplete == "ON" )
+					{
+						keyWordlist( splitWord[0] );
+
+						if( listContainer.length )
+						{
+							//listContainer.sort;
+
+							for( int i = 0; i < listContainer.length; ++ i )
+							{
+								if( listContainer[i].length )
+								{
+									if( i > 0 )
+									{
+										if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
+									}
+									else
+									{
+										result ~= ( listContainer[i] ~ "^" );
+									}
+								}
+							}
+
+
+							if( result.length )
+								if( result[length-1] == '^' ) result = result[0..length-1];
+
+							return Util.trim( result );
+						}
+					}
+
+					return null;
+				}
+
 
 				if( !splitWord[0].length )
 				{
@@ -1517,42 +1577,8 @@ struct AutoComplete
 						}
 					}
 				}
-
-				if( AST_Head is null )
-				{
-					if( GLOBAL.enableKeywordComplete == "ON" )
-					{
-						keyWordlist( splitWord[0] );
-
-						if( listContainer.length )
-						{
-							//listContainer.sort;
-
-							for( int i = 0; i < listContainer.length; ++ i )
-							{
-								if( listContainer[i].length )
-								{
-									if( i > 0 )
-									{
-										if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
-									}
-									else
-									{
-										result ~= ( listContainer[i] ~ "^" );
-									}
-								}
-							}
-
-
-							if( result.length )
-								if( result[length-1] == '^' ) result = result[0..length-1];
-
-							return Util.trim( result );
-						}
-					}
-
-					return null;
-				}
+				
+				cleanIncludesMarkContainer();
 				
 				for( int i = 0; i < splitWord.length; i++ )
 				{
@@ -1560,8 +1586,6 @@ struct AutoComplete
 					
 					if( i == 0 )
 					{
-						CASTnode firstMatchNode;
-
 						if( splitWord.length == 1 )
 						{
 							if( !bDot )
@@ -1593,6 +1617,8 @@ struct AutoComplete
 								{
 									resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
 									resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
+									
+									//cleanIncludesMarkContainer();
 									// For Type Objects
 									if( memberFunctionMotherName.length )
 									{
@@ -1838,7 +1864,7 @@ struct AutoComplete
 				if( currentPos < 1 ) return;
 				
 				word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
-				word = lowerCase( word.reverse );
+				word = lowerCase( word.dup.reverse );
 
 				char[][] splitWord = getDivideWord( word );
 				
@@ -2384,16 +2410,16 @@ struct AutoComplete
 
 			alreadyInput = splitWord[length-1];
 
-			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
+			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" )
 			{
-				IupSetAttribute( ih, "AUTOCSELECT", GLOBAL.cString.convert( alreadyInput ) );
-				if( IupGetInt( ih, "AUTOCSELECTEDINDEX" ) == -1 ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+				IupSetAttribute( ih, "AUTOCSELECT\0", GLOBAL.cString.convert( alreadyInput ) );
+				if( IupGetInt( ih, "AUTOCSELECTEDINDEX\0" ) == -1 ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
 			}
 			else
 			{
 				if( text == "(" )
 				{
-					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
 
 					IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
 					IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205

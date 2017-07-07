@@ -8,7 +8,7 @@ import layouts.statusBar;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
 
-import tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util, tango.io.Stdout;
+import tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
 import tango.sys.win32.UserGdi;
 
 void createExplorerWindow()
@@ -422,21 +422,83 @@ extern(C)
 	
 	private int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
 	{
-		scope f = new FilePath( fromStringz( filename ) );
-
-		if( f.name == ".poseidon" )
+		char[] _fn = fromStringz( filename );
+		
+		version(linux)
 		{
-			char[] dir = f.path;
-			if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'
-			GLOBAL.projectTree.openProject( dir );
-		}
-		else
-		{
-			actionManager.ScintillaAction.openFile( f.toString  );
-			actionManager.ScintillaAction.updateRecentFiles( f.toString );
+			char[] result;
 			
-			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+			for( int i = 0; i < _fn.length; ++ i )
+			{
+				if( _fn[i] != '%' )
+				{
+					result ~= _fn[i];
+				}
+				else
+				{
+					if( i + 2 < _fn.length )
+					{
+						char _a = _fn[i+1];
+						char _b = _fn[i+2];
+						
+						char computeValue;
+						
+						
+						if( _a >= '0' && _a <= '9' )
+						{
+							computeValue = ( _a - 48 ) * 16;
+						}
+						else if( _a >= 'A' && _a <= 'F' )
+						{
+							computeValue = ( _a - 55 ) * 16;
+						}
+						else
+						{
+							break;
+						}
+						
+						if( _b >= '0' && _b <= '9' )
+						{
+							computeValue += ( _b - 48 );
+						}
+						else if( _b >= 'A' && _b <= 'F' )
+						{
+							computeValue += ( _b - 55 );
+						}
+						else
+						{
+							break;
+						}
+				
+						result ~= cast(char)computeValue;
+						
+						i += 2;
+					}
+				}
+			}
+			
+			_fn = result;
 		}
+		
+		scope f = new FilePath( _fn );
+		
+		if( f.exists() )
+		{
+			if( f.name == ".poseidon" )
+			{
+				char[] dir = f.path;
+				if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'
+				GLOBAL.projectTree.openProject( dir );
+			}
+			else
+			{
+				actionManager.ScintillaAction.openFile( f.toString  );
+				actionManager.ScintillaAction.updateRecentFiles( f.toString );
+				
+				if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+			}
+		}
+		
 		return IUP_DEFAULT;
 	}
 

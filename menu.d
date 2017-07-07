@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.281\nBy Kuan Hsu (Taiwan)\n2017.07.03" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.283\nBy Kuan Hsu (Taiwan)\n2017.07.07" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
