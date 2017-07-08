@@ -294,6 +294,15 @@ void main( char[][] args )
 		}
 	}
 
+	if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
+	{
+		foreach( char[] s; GLOBAL.prevDoc )
+		{
+			ScintillaAction.openFile( s );
+		}
+	}
+
+
 	//IUP main Loop
 	IupMainLoop();
 	IupClose();

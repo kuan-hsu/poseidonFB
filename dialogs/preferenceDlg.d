@@ -358,6 +358,10 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleMultiSelection = IupToggle( GLOBAL.languageItems["multiselection"].toCString, null );
 		IupSetAttribute( toggleMultiSelection, "VALUE", toStringz(GLOBAL.editorSetting00.MultiSelection.dup) );
 		IupSetHandle( "toggleMultiSelection", toggleMultiSelection );			
+
+		Ihandle* toggleLoadprev = IupToggle( GLOBAL.languageItems["loadprevdoc"].toCString, null );
+		IupSetAttribute( toggleLoadprev, "VALUE", toStringz(GLOBAL.editorSetting00.LoadPrevDoc.dup) );
+		IupSetHandle( "toggleLoadprev", toggleLoadprev );			
 		
 		
 		Ihandle* labelTabWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"].toDString ~ ":" ) );
@@ -403,6 +407,8 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( toggleBraceMatchDB, "" ),
 			
 			IupSetAttributes( toggleMultiSelection, "" ),
+			IupSetAttributes( toggleLoadprev, "" ),
+			
 			IupFill(),
 			
 			IupSetAttributes( hBoxTab, "" ),
@@ -1347,6 +1353,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleBraceMatch", null );
 		IupSetHandle( "toggleBraceMatchDB", null );
 		IupSetHandle( "toggleMultiSelection", null );
+		IupSetHandle( "toggleLoadprev", null );
+		
 		
 		IupSetHandle( "textTabWidth", null );
 		IupSetHandle( "textColumnEdge", null );
@@ -1848,7 +1856,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.BraceMatchHighlight		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.BraceMatchDoubleSidePos	= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatchDB" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.MultiSelection			= fromStringz(IupGetAttribute( IupGetHandle( "toggleMultiSelection" ), "VALUE" )).dup;
-			
+			GLOBAL.editorSetting00.LoadPrevDoc				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadprev" ), "VALUE" )).dup;
 			
 			GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;

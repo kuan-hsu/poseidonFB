@@ -129,6 +129,7 @@ options=選項
 				bracematchhighlight=顯示匹配括號
 				bracematchdoubleside=使用游標雙邊匹配括號
 				multiselection=開啟文件多重選擇
+				loadprevdoc=載入先前編輯的檔案
 				tabwidth=跳位字元寬度
 				columnedge=顯示列末線
 				maker0=標記0

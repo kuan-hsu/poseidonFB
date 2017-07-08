@@ -147,6 +147,15 @@ extern(C)
 	{
 		try
 		{
+			GLOBAL.prevDoc.length = 0;
+			if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
+			{
+				foreach( CScintilla sci; GLOBAL.scintillaManager )
+				{
+					if( sci !is null ) GLOBAL.prevDoc ~= sci.getFullPath;
+				}
+			}
+			
 			int ret = ScintillaAction.closeAllDocument();
 			if( ret == IUP_IGNORE ) return IUP_IGNORE;
 			

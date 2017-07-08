@@ -12,7 +12,7 @@ _HandleClipboardText dllHandleClipboardText;
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF";
 }
 
 struct EditorLayoutSize
@@ -118,7 +118,7 @@ struct GLOBAL
 	//static char[]				maxError = "30";
 	static IupString			defaultOption;
 	static char[]				recentOpenDir;
-	static char[][]				recentOptions, recentArgs;
+	static char[][]				recentOptions, recentArgs, prevDoc;
 	static IupString[]			recentFiles, recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;
@@ -137,6 +137,7 @@ struct GLOBAL
 	static char[]				toggleUseManual = "OFF";
 	static char[]				toggleManualDefinition = "OFF";
 	static char[]				toggleManualShowType = "OFF";
+	
 	
 
 	static CScintilla[char[]]	scintillaManager;
@@ -523,6 +524,7 @@ struct GLOBAL
 						GLOBAL.languageItems["bracematchhighlight"] = new IupString( cast(char[]) "Show Brace Match Highlight" );
 						GLOBAL.languageItems["bracematchdoubleside"] = new IupString( cast(char[]) "Use Double-Side Brace Match" );
 						GLOBAL.languageItems["multiselection"] = new IupString( cast(char[]) "Enable Document Multi Selection" );
+						GLOBAL.languageItems["loadprevdoc"] = new IupString( cast(char[]) "Load Previous Documents" );
 						GLOBAL.languageItems["tabwidth"] = new IupString( cast(char[]) "Tab Width" );
 						GLOBAL.languageItems["columnedge"] = new IupString( cast(char[]) "Column Edge" );
 						GLOBAL.languageItems["maker0"] = new IupString( cast(char[]) "Maker0" );

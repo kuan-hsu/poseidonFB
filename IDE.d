@@ -201,7 +201,8 @@ struct IDECONFIG
 			.attribute( null, "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword )
 			.attribute( null, "BraceMatchHighlight", GLOBAL.editorSetting00.BraceMatchHighlight )
 			.attribute( null, "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos )
-			.attribute( null, "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
+			.attribute( null, "MultiSelection", GLOBAL.editorSetting00.MultiSelection )
+			.attribute( null, "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
 
 
 			if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
@@ -489,6 +490,8 @@ struct IDECONFIG
 			doc ~= setINILineData( "BraceMatchHighlight", GLOBAL.editorSetting00.BraceMatchHighlight );
 			doc ~= setINILineData( "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos );
 			doc ~= setINILineData( "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
+			doc ~= setINILineData( "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
+			
 			
 			
 			if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
@@ -681,6 +684,11 @@ struct IDECONFIG
 			doc ~= setINILineData( "[recentArgs]" );
 			for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.recentArgs[i] );
+				
+			// prevLoadDoc
+			doc ~= setINILineData( "[prevDocs]" );
+			for( int i = 0; i < GLOBAL.prevDoc.length; ++i )
+				doc ~= setINILineData( "name", GLOBAL.prevDoc[i] );
 			
 			actionManager.FileAction.saveFile( fullpath, doc );
 		}
@@ -794,7 +802,8 @@ struct IDECONFIG
 							case "BoldKeyword":				GLOBAL.editorSetting00.BoldKeyword = right;				break;
 							case "BraceMatchHighlight":		GLOBAL.editorSetting00.BraceMatchHighlight = right;		break;
 							case "BraceMatchDoubleSidePos":	GLOBAL.editorSetting00.BraceMatchDoubleSidePos = right;	break;
-							case "MultiSelection":			GLOBAL.editorSetting00.MultiSelection = right;			break;					
+							case "MultiSelection":			GLOBAL.editorSetting00.MultiSelection = right;			break;
+							case "LoadPrevDoc":				GLOBAL.editorSetting00.LoadPrevDoc = right;				break;
 							default:
 						}
 						break;
@@ -1001,6 +1010,10 @@ struct IDECONFIG
 
 					case "[recentArgs]":
 						if( left == "name" ) GLOBAL.recentArgs ~= right;
+						break;
+
+					case "[prevDocs]":
+						if( left == "name" ) GLOBAL.prevDoc ~= right;
 						break;
 			
 					default:
@@ -1299,6 +1312,9 @@ struct IDECONFIG
 
 			result = root.query.descendant("toggle00").attribute("MultiSelection");
 			foreach( e; result ) GLOBAL.editorSetting00.MultiSelection = e.value;
+
+			result = root.query.descendant("toggle00").attribute("LoadPrevDoc");
+			foreach( e; result ) GLOBAL.editorSetting00.LoadPrevDoc = e.value;
 
 
 			result = root.query.descendant("size01").attribute("PLACEMENT");

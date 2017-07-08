@@ -129,6 +129,7 @@ options=Options
 				bracematchhighlight=Show Brace Match Highlight
 				bracematchdoubleside=Use Double-Side Brace Match
 				multiselection=Enable Document Multi Selection
+				loadprevdoc=Load Previous Documents
 				tabwidth=Tab Width
 				columnedge=Colume Edge
 				maker0=Maker0
