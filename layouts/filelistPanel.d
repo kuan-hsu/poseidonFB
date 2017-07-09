@@ -12,6 +12,7 @@ class CFileList
 {
 	private:
 	Ihandle*			layoutHandle, tree;
+	Ihandle*			filelistToolbarTitle;
 	int					fullPathState;
 
 	void createLayout()
@@ -33,7 +34,8 @@ class CFileList
 		Ihandle* filelistToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( filelistToolbarTitleImage, "IMAGE=icon_filelist,ALIGNMENT=ALEFT:ACENTER" );
 
-		Ihandle* filelistToolbarTitle = IupLabel( GLOBAL.languageItems["filelist"].toCString() );
+		filelistToolbarTitle = IupLabel( GLOBAL.languageItems["filelist"].toCString() );
+		setTitleFont();
 		IupSetAttribute( filelistToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );
 
 		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, filelistToolbarTitle, IupFill, filelistButtonFilename, filelistButtonHide, null );
@@ -72,6 +74,12 @@ class CFileList
 	Ihandle* getTreeHandle()
 	{
 		return tree;
+	}
+	
+	void setTitleFont()
+	{
+		scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );
+		IupSetAttribute( filelistToolbarTitle, "FONT", leftsideString.toCString );// Leftside                	                                9  
 	}
 	
 	void changeColor()

@@ -49,6 +49,7 @@ class CArgOptionDialog : CBaseDialog
 
 		Ihandle* vBox = IupVbox( hBox00, hBox01, bottom, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=2,EXPAND=YES,EXPANDCHILDREN=YES" );
+		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "FreeMono,Bold 9" );
 
 		IupAppend( _dlg, vBox );
 	}	

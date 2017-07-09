@@ -12,7 +12,7 @@ _HandleClipboardText dllHandleClipboardText;
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF";
 }
 
 struct EditorLayoutSize
@@ -23,7 +23,7 @@ struct EditorLayoutSize
 struct EditorColorUint
 {
 	IupString[4]	keyWord;
-	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha, errorFore, errorBack, warningFore, warringBack;
+	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha, errorFore, errorBack, warningFore, warringBack, currentWord, currentWordAlpha;
 	IupString		scintillaFore, scintillaBack, manualFore, manualBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
@@ -199,6 +199,9 @@ struct GLOBAL
 		GLOBAL.editColor.errorBack = new IupString( cast(char[]) "255 200 227" );
 		GLOBAL.editColor.warningFore = new IupString( cast(char[]) "0 0 255" );
 		GLOBAL.editColor.warringBack = new IupString( cast(char[]) "255 255 157" );
+		GLOBAL.editColor.currentWord = new IupString( cast(char[]) "0 128 0" );
+		GLOBAL.editColor.currentWordAlpha = new IupString( cast(char[]) "80" );
+		
 		GLOBAL.editColor.manualFore = new IupString( cast(char[]) "255 255 255" );
 		GLOBAL.editColor.manualBack = new IupString( cast(char[]) "80 80 80" );
 		GLOBAL.editColor.braceFore = new IupString( cast(char[]) "255 0 0" );
@@ -413,6 +416,7 @@ struct GLOBAL
 			GLOBAL.languageItems["paste"] = new IupString( cast(char[]) "Paste" );
 			GLOBAL.languageItems["commentline"] = new IupString( cast(char[]) "(Un)Comment Line" );
 			GLOBAL.languageItems["selectall"] = new IupString( cast(char[]) "Select All" );
+			GLOBAL.languageItems["selectmulti"] = new IupString( cast(char[]) "Multi-Select By Word" );
 			
 		GLOBAL.languageItems["search"] = new IupString( cast(char[]) "Search" );
 			GLOBAL.languageItems["findreplace"] = new IupString( cast(char[]) "Find/Replace" );
@@ -556,6 +560,9 @@ struct GLOBAL
 							GLOBAL.languageItems["foldcolor"] = new IupString( cast(char[]) "FoldingMargin Color" );
 							GLOBAL.languageItems["selalpha"] = new IupString( cast(char[]) "Selection Alpha" );
 								GLOBAL.languageItems["alphatip"] = new IupString( cast(char[]) "Set 255 To Disable Alpha" );
+							GLOBAL.languageItems["hlcurrentword"] = new IupString( cast(char[]) "Highlight Current Word" );								
+							GLOBAL.languageItems["hlcurrentwordalpha"] = new IupString( cast(char[]) "Indicator Alpha" );
+							
 						GLOBAL.languageItems["colorfgbg"] = new IupString( cast(char[]) "Color/Foreground/Background" );
 							GLOBAL.languageItems["bracehighlight"] = new IupString( cast(char[]) "Brace Highlight" );
 							GLOBAL.languageItems["manualerrorannotation"] = new IupString( cast(char[]) "Error Annotation" );

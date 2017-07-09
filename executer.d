@@ -193,7 +193,15 @@ struct ExecuterAction
 
 			foreach( line; new Lines!(char)(p.stderr) )  
 			{
-				if( Util.trim( line ).length ) bError = true;
+				if( !bWarning )
+				{
+					if( Util.index( line, "warning:" ) < line.length ) bWarning = true;
+				}
+				if( !bError )
+				{
+					if( Util.index( line, "Error:" ) < line.length ) bError = true;
+				}				
+
 				stderrMessage ~= ( line ~ "\n" );
 			}
 
@@ -417,7 +425,15 @@ struct ExecuterAction
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
-				if( Util.trim( line ).length ) bError = true;
+				if( !bWarning )
+				{
+					if( Util.index( line, "warning:" ) < line.length ) bWarning = true;
+				}
+				if( !bError )
+				{
+					if( Util.index( line, "Error:" ) < line.length ) bError = true;
+				}				
+
 				stderrMessage ~= ( line ~ "\n" );
 			}
 
@@ -570,7 +586,15 @@ struct ExecuterAction
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
-				if( Util.trim( line ).length ) bError = true;
+				if( !bWarning )
+				{
+					if( Util.index( line, "warning:" ) < line.length ) bWarning = true;
+				}
+				if( !bError )
+				{
+					if( Util.index( line, "Error:" ) < line.length ) bError = true;
+				}				
+
 				stderrMessage ~= ( line ~ "\n" );
 			}
 			
@@ -603,9 +627,29 @@ struct ExecuterAction
 			if( !bError )
 			{
 				if( !bWarning )
+				{
 					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
+					if( GLOBAL.compilerWindow == "ON" )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
+				}
 				else
+				{
 					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
+					if( GLOBAL.compilerWindow == "ON" )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}					
+				}
 
 				char[] command;
 

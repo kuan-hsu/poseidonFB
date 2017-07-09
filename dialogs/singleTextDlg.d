@@ -33,6 +33,7 @@ class CSingleTextDialog : CBaseDialog
 
 		IupSetAttribute( btnOK, "SIZE", "40x12" );
 		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );
+		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "FreeMono,Bold 9" );
 
 		IupAppend( _dlg, vBox );
 	}	

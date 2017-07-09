@@ -362,6 +362,10 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleLoadprev = IupToggle( GLOBAL.languageItems["loadprevdoc"].toCString, null );
 		IupSetAttribute( toggleLoadprev, "VALUE", toStringz(GLOBAL.editorSetting00.LoadPrevDoc.dup) );
 		IupSetHandle( "toggleLoadprev", toggleLoadprev );			
+
+		Ihandle* toggleCurrentWord = IupToggle( GLOBAL.languageItems["hlcurrentword"].toCString, null );
+		IupSetAttribute( toggleCurrentWord, "VALUE", toStringz(GLOBAL.editorSetting00.HighlightCurrentWord.dup) );
+		IupSetHandle( "toggleCurrentWord", toggleCurrentWord );			
 		
 		
 		Ihandle* labelTabWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"].toDString ~ ":" ) );
@@ -409,6 +413,7 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( toggleMultiSelection, "" ),
 			IupSetAttributes( toggleLoadprev, "" ),
 			
+			IupSetAttributes( toggleCurrentWord, "" ),
 			IupFill(),
 			
 			IupSetAttributes( hBoxTab, "" ),
@@ -560,7 +565,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* visibleBox = IupVbox( flatFrame[0], flatFrame[1], flatFrame[2], flatFrame[3], flatFrame[4], flatFrame[5], flatFrame[6], flatFrame[7], flatFrame[8], flatFrame[9], flatFrame[10], flatFrame[11], flatFrame[12], null );
 		IupSetAttributes( visibleBox, "GAP=0,MARGIN=5x1,EXPANDCHILDREN=YES");
 		Ihandle* sb = IupFlatScrollBox ( visibleBox );
-		IupSetAttributes( sb, "EXPAND=NO,SIZE=300x180,ALIGNMENT=ACENTER" );
+		IupSetAttributes( sb, "EXPAND=NO,SIZE=300x170,ALIGNMENT=ACENTER" );
 		
 		
 		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, sb, null );
@@ -675,6 +680,31 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSourceTypeFolder, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );		
 
 
+		// 2017.7.9
+		Ihandle* labelIndicator = IupLabel( toStringz( GLOBAL.languageItems["hlcurrentword"].toDString ~ ":" ) );
+		Ihandle* btnIndicator = IupButton( null, null );
+		IupSetAttribute( btnIndicator, "BGCOLOR", GLOBAL.editColor.currentWord.toCString );
+		version(Windows) IupSetAttribute( btnIndicator, "SIZE", "16x8" ); else IupSetAttribute( btnIndicator, "SIZE", "16x10" );
+		IupSetHandle( "btnIndicator", btnIndicator );
+		IupSetCallback( btnIndicator, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelIndicatorAlpha = IupLabel( toStringz( GLOBAL.languageItems["hlcurrentwordalpha"].toDString ~ ":" ) );
+		Ihandle* textIndicatorAlpha = IupText( null );
+		version(Windows)
+		{
+			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0" );
+			IupSetAttribute( textIndicatorAlpha, "SPINVALUE", GLOBAL.editColor.currentWordAlpha.toCString );
+		}
+		else
+		{
+			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0" );
+			IupSetAttribute( textIndicatorAlpha, "VALUE", GLOBAL.editColor.currentWordAlpha.toCString );
+		}
+		IupSetAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
+		IupSetHandle( "textIndicatorAlpha", textIndicatorAlpha );
+
+
+
 
 		Ihandle* gboxColor = IupGridBox
 		(
@@ -692,14 +722,11 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( btnPrjTitle, "" ),
 			IupSetAttributes( labelSourceTypeFolder, "" ),
 			IupSetAttributes( btnSourceTypeFolder, "" ),
-			/*
-			IupSetAttributes( labelLinenumFore, "" ),
-			IupSetAttributes( btnLinenumFore, "" ),
-			IupSetAttributes( labelLinenumBack, "" ),
-			IupSetAttributes( btnLinenumBack, "" ),
-			*/
-
-
+			
+			IupSetAttributes( labelIndicator, "" ),
+			IupSetAttributes( btnIndicator, "" ),
+			IupSetAttributes( labelIndicatorAlpha, "" ),
+			IupSetAttributes( textIndicatorAlpha, "" ),
 
 			null
 		);
@@ -1354,6 +1381,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleBraceMatchDB", null );
 		IupSetHandle( "toggleMultiSelection", null );
 		IupSetHandle( "toggleLoadprev", null );
+		IupSetHandle( "toggleCurrentWord", null );
 		
 		
 		IupSetHandle( "textTabWidth", null );
@@ -1387,6 +1415,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnFoldingColor", null );
 		IupSetHandle( "btnBookmarkColor", null );
 		IupSetHandle( "textAlpha", null );
+		IupSetHandle( "btnIndicator", null );
+		IupSetHandle( "textIndicatorAlpha", null );		
 		
 		IupSetHandle( "btn_Scintilla_FG", null );
 		IupSetHandle( "btn_Scintilla_BG", null );
@@ -1857,6 +1887,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.BraceMatchDoubleSidePos	= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatchDB" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.MultiSelection			= fromStringz(IupGetAttribute( IupGetHandle( "toggleMultiSelection" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.LoadPrevDoc				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadprev" ), "VALUE" )).dup;
+			GLOBAL.editorSetting00.HighlightCurrentWord		= fromStringz(IupGetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE" )).dup;
 			
 			GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
@@ -1903,6 +1934,13 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" );
 			else
 				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" );
+			
+			GLOBAL.editColor.currentWord				= IupGetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR" );
+			version(Windows)
+				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE" );
+			else
+				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE" );
+				
 				
 			GLOBAL.editColor.scintillaFore				= IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR" );
 			GLOBAL.editColor.scintillaBack				= IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR" );
@@ -2040,6 +2078,38 @@ extern(C) // Callback for CPreferenceDialog
 				if( cSci !is null ) cSci.setGlobalSetting();
 			}
 			
+			
+			//=====================FONT=====================
+			// Set Default Font
+			if(  GLOBAL.fonts[0].fontString.length )
+			{
+				IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
+
+				if( GLOBAL.fonts[0].fontString.length )
+				{
+					int comma = Util.index( GLOBAL.fonts[0].fontString, "," );
+					if( comma < GLOBAL.fonts[0].fontString.length )
+					{
+						IupSetGlobal( "DEFAULTFONTFACE", toStringz( ( GLOBAL.fonts[0].fontString[0..comma] ).dup ) );
+
+						for( int i = GLOBAL.fonts[0].fontString.length - 1; i > comma; -- i )
+						{
+							if( GLOBAL.fonts[0].fontString[i] < 48 || GLOBAL.fonts[0].fontString[i] > 57 )
+							{
+								IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..length] ).dup ) );
+
+								if( ++comma  < i ) IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
+								
+								break;
+							}
+						}
+						
+					}
+				}
+			}			
+			scope docTabString = new IupString( GLOBAL.fonts[0].fontString );	IupSetAttribute( GLOBAL.documentTabs, "FONT", docTabString.toCString );// Leftside
+			
+			GLOBAL.fileListTree.setTitleFont(); // Change Filelist Title Font
 			scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
 			scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 			scope prjString = new IupString( GLOBAL.fonts[4].fontString ); 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
@@ -2149,7 +2219,7 @@ extern(C) // Callback for CPreferenceDialog
 		char[]		templateName = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 		char[][]	colors = IDECONFIG.loadColorTemplate( templateName );
 		
-		if( colors.length == 48 )
+		if( colors.length == 50 )
 		{
 			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR", toStringz( colors[0] ) );
 			IupSetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR", toStringz( colors[1] ) );
@@ -2210,6 +2280,12 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", toStringz( colors[45] ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", toStringz( colors[46] ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", toStringz( colors[47] ) );
+			
+			IupSetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR", toStringz( colors[48] ) );
+			version(Windows)
+				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", toStringz( colors[49] ) );
+			else
+				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", toStringz( colors[49] ) );			
 		}
 		
 		return IUP_DEFAULT;
@@ -2276,6 +2352,12 @@ extern(C) // Callback for CPreferenceDialog
 		IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", toStringz( "0 0 255" ) );
 		IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", toStringz( "231 144 0" ) );
 		IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", toStringz( "16 108 232" ) );		
+		
+		IupSetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR", toStringz( "0 128 0" ) );
+		version(Windows)
+			IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", toStringz( "80" ) );
+		else
+			IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", toStringz( "80" ) );			
 		
 		
 		IupSetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE", null );

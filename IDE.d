@@ -202,7 +202,8 @@ struct IDECONFIG
 			.attribute( null, "BraceMatchHighlight", GLOBAL.editorSetting00.BraceMatchHighlight )
 			.attribute( null, "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos )
 			.attribute( null, "MultiSelection", GLOBAL.editorSetting00.MultiSelection )
-			.attribute( null, "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
+			.attribute( null, "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc )
+			.attribute( null, "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
 
 
 			if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
@@ -270,6 +271,8 @@ struct IDECONFIG
 			.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack.toDString )
 			.attribute( null, "fold", GLOBAL.editColor.fold.toDString )
 			.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha.toDString )
+			.attribute( null, "currentword", GLOBAL.editColor.currentWord.toDString )
+			.attribute( null, "currentwordAlpha", GLOBAL.editColor.currentWordAlpha.toDString )
 			.attribute( null, "braceFore", GLOBAL.editColor.braceFore.toDString )
 			.attribute( null, "braceBack", GLOBAL.editColor.braceBack.toDString )		
 			.attribute( null, "errorFore", GLOBAL.editColor.errorFore.toDString )
@@ -491,6 +494,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos );
 			doc ~= setINILineData( "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
 			doc ~= setINILineData( "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
+			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
 			
 			
 			
@@ -550,6 +554,8 @@ struct IDECONFIG
 			doc ~= setINILineData( "linenumBack", GLOBAL.editColor.linenumBack.toDString );
 			doc ~= setINILineData( "fold", GLOBAL.editColor.fold.toDString );
 			doc ~= setINILineData( "selAlpha", GLOBAL.editColor.selAlpha.toDString );
+			doc ~= setINILineData( "currentword", GLOBAL.editColor.currentWord.toDString );
+			doc ~= setINILineData( "currentwordAlpha", GLOBAL.editColor.currentWordAlpha.toDString );
 			doc ~= setINILineData( "braceFore", GLOBAL.editColor.braceFore.toDString );
 			doc ~= setINILineData( "braceBack", GLOBAL.editColor.braceBack.toDString );		
 			doc ~= setINILineData( "errorFore", GLOBAL.editColor.errorFore.toDString );
@@ -804,6 +810,7 @@ struct IDECONFIG
 							case "BraceMatchDoubleSidePos":	GLOBAL.editorSetting00.BraceMatchDoubleSidePos = right;	break;
 							case "MultiSelection":			GLOBAL.editorSetting00.MultiSelection = right;			break;
 							case "LoadPrevDoc":				GLOBAL.editorSetting00.LoadPrevDoc = right;				break;
+							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
 							default:
 						}
 						break;
@@ -858,6 +865,8 @@ struct IDECONFIG
 							case "linenumBack":				GLOBAL.editColor.linenumBack = right;					break;
 							case "fold":					GLOBAL.editColor.fold = right;							break;
 							case "selAlpha":				GLOBAL.editColor.selAlpha = right;						break;
+							case "currentword":				GLOBAL.editColor.currentWord = right;					break;
+							case "currentwordAlpha":		GLOBAL.editColor.currentWordAlpha = right;				break;
 							case "braceFore":				GLOBAL.editColor.braceFore = right;						break;
 							case "braceBack":				GLOBAL.editColor.braceBack = right;						break;
 							case "errorFore":				GLOBAL.editColor.errorFore = right;						break;
@@ -1315,6 +1324,9 @@ struct IDECONFIG
 
 			result = root.query.descendant("toggle00").attribute("LoadPrevDoc");
 			foreach( e; result ) GLOBAL.editorSetting00.LoadPrevDoc = e.value;
+			
+			result = root.query.descendant("toggle00").attribute("HighlightCurrentWord");
+			foreach( e; result ) GLOBAL.editorSetting00.HighlightCurrentWord = e.value;
 
 
 			result = root.query.descendant("size01").attribute("PLACEMENT");
@@ -1483,6 +1495,12 @@ struct IDECONFIG
 			result = root.query.descendant("color").attribute("selAlpha");
 			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
 			
+			result = root.query.descendant("color").attribute("currentword");
+			foreach( e; result ) GLOBAL.editColor.currentWord = e.value;
+
+			result = root.query.descendant("color").attribute("currentwordAlpha");
+			foreach( e; result ) GLOBAL.editColor.currentWordAlpha = e.value;
+
 			
 			result = root.query.descendant("color").attribute("braceFore");
 			foreach( e; result ) GLOBAL.editColor.braceFore = e.value;
@@ -1523,11 +1541,6 @@ struct IDECONFIG
 			foreach( e; result ) GLOBAL.editColor.SCE_B_STRING_Fore = e.value;
 			result = root.query.descendant("color").attribute("SCE_B_STRING_Back");
 			foreach( e; result ) GLOBAL.editColor.SCE_B_STRING_Back = e.value;
-			
-			result = root.query.descendant("color").attribute("selAlpha");
-			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
-			result = root.query.descendant("color").attribute("selAlpha");
-			foreach( e; result ) GLOBAL.editColor.selAlpha = e.value;
 			
 			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Fore");
 			foreach( e; result ) GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = e.value;
@@ -1893,7 +1906,9 @@ struct IDECONFIG
 		.attribute( null, "searchFore", GLOBAL.editColor.searchFore.toDString )
 		.attribute( null, "searchBack", GLOBAL.editColor.searchBack.toDString )
 		.attribute( null, "prjTitle", GLOBAL.editColor.prjTitle.toDString )
-		.attribute( null, "prjSourceType", GLOBAL.editColor.prjSourceType.toDString );		
+		.attribute( null, "prjSourceType", GLOBAL.editColor.prjSourceType.toDString )
+		.attribute( null, "currentword", GLOBAL.editColor.currentWord.toDString )
+		.attribute( null, "currentwordAlpha", GLOBAL.editColor.currentWordAlpha.toDString );		
 		
 		auto print = new DocPrinter!(char);
 		scope _fp = new FilePath( "settings/colorTemplates" );
@@ -2043,7 +2058,14 @@ struct IDECONFIG
 			foreach( e; result ) results ~= e.value;
 
 			result = root.query.descendant("color").attribute("keyword3");
+			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("currentword");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("currentwordAlpha");
 			foreach( e; result ) results ~= e.value;			
+			
 		}
 		catch( Exception e ){}
 		

@@ -583,6 +583,15 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2565, 0, 0 ); 
 		}
 		
+		IupScintillaSendMessage( sci, 2080, 8, 7 ); //SCI_INDICSETSTYLE = 2080
+		//IupScintillaSendMessage( sci, 2284, 1, 0 ); //SCI_SETTWOPHASEDRAW = 2284		
+		//IupScintillaSendMessage( sci, 2510, 8, 1 ); //SCI_INDICSETUNDER = 2510
+		IupScintillaSendMessage( sci, 2082, 8, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.currentWord.toDString ) ); // SCI_INDICSETFORE = 2082
+		alpha = Integer.atoi( GLOBAL.editColor.currentWordAlpha.toDString );
+		if( alpha > 255 || alpha <= 0 ) alpha = 255;		
+		IupScintillaSendMessage( sci, 2523, 8, alpha ); // SCI_INDICSETALPHA = 2523
+		
+		
 		// Autocompletion XPM Image
 		IupScintillaSendMessage( sci, 2624, 16, 0 ); // SCI_RGBAIMAGESETWIDTH 2624
 		IupScintillaSendMessage( sci, 2625, 16, 0 ); // SCI_RGBAIMAGESETHEIGHT 2625
@@ -806,8 +815,6 @@ extern(C)
 				Ihandle* _selectall = IupItem( GLOBAL.languageItems["selectall"].toCString, null );
 				IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
 				IupSetCallback( _selectall, "ACTION", cast(Icallback) &menu.selectall_cb ); // from menu.d
-
-
 
 				// Annotation
 				Ihandle* _showAnnotation = IupItem( GLOBAL.languageItems["showannotation"].toCString, null );
@@ -1074,6 +1081,7 @@ extern(C)
 												_removeAllAnnotation,
 												*/
 												IupSeparator(),
+												
 												_refresh,
 												_goto,
 												_gotoProcedure,
@@ -1124,6 +1132,7 @@ extern(C)
 				{
 					int pos = IupConvertXYToPos( ih, x, y );
 					IupScintillaSendMessage( ih, 2025, pos , 0 );// SCI_GOTOPOS = 2025,
+					
 					IupSetFocus( ih );
 					char[] _char = Util.trim( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) );
 					
@@ -1173,6 +1182,14 @@ extern(C)
 							}
 						}
 					}
+				}
+			}
+			else if( button == '1' )
+			{
+				if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" )
+				{
+					IupScintillaSendMessage( ih, 2505, 0, IupGetInt( ih, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+					HighlightWord( ih, IupConvertXYToPos( ih, x, y ) );
 				}
 			}
 		}
@@ -1881,5 +1898,50 @@ extern(C)
 		}
 		
 		return IUP_DEFAULT;
+	}
+	
+	private void HighlightWord( Ihandle* ih, int pos )
+	{
+		IupSetFocus( ih );
+		char[] _char = Util.trim( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) );
+		
+		if( _char.length )
+		{
+			char[] word = AutoComplete.getWholeWordDoubleSide( ih, pos );
+			word = word.reverse;
+			
+			char[][] splitWord = Util.split( word, "." );
+			if( splitWord.length > 1 ) word = splitWord[$-1];
+			
+			splitWord = Util.split( word, "->" );
+			if( splitWord.length > 1 ) word = splitWord[$-1];
+			
+			if( word.length ) _HighlightWord( ih, word );
+		}
+	}
+	
+	private void _HighlightWord( Ihandle* ih, char[] targetText )
+	{
+		int targetStart, TargetEnd, documentLength = IupGetInt( ih, "COUNT" );
+
+		IupScintillaSendMessage( ih, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		
+		// Search Document
+		IupSetAttribute( ih, "SEARCHFLAGS", null );
+		IupScintillaSendMessage( ih, 2190, 0, 0 );					// SCI_SETTARGETSTART = 2190
+		IupScintillaSendMessage( ih, 2192, documentLength, 0 );		// SCI_SETTARGETEND = 2192
+		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+		
+		while( findPos != -1 )
+		{
+			targetStart = IupGetInt( ih, "TARGETSTART" );
+			TargetEnd = IupGetInt( ih, "TARGETEND" );
+			IupScintillaSendMessage( ih, 2504, targetStart, TargetEnd - targetStart ); // SCI_INDICATORFILLRANGE =  2504
+			
+			IupScintillaSendMessage( ih, 2190, TargetEnd, 0 ); 		// SCI_SETTARGETSTART = 2190
+			IupScintillaSendMessage( ih, 2192, documentLength, 0 );	// SCI_SETTARGETEND = 2192
+			
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+		}
 	}	
 }

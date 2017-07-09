@@ -160,9 +160,9 @@ char[] convertKeyWordCase( int type, char[] replaceText )
 	return replaceText;
 }
 
+/+
 private import  tango.sys.Common;
 
-/+
 // The code is made by Christopher E. Miller 
 char[] getEnvironmentVariable(char[] name)
 {
