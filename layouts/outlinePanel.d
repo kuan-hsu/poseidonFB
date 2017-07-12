@@ -922,7 +922,7 @@ class COutline
 				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\t"~fullPath ) );
 			}
 
-			createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+			if( GLOBAL.parserManager[upperCase(fullPath)] !is null ) createTree( GLOBAL.parserManager[upperCase(fullPath)] );
 			CScintilla nowCsci = ScintillaAction.getActiveCScintilla();
 			if( nowCsci == actCSci ) changeTree( fullPath );
 		}

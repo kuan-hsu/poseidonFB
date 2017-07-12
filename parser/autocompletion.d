@@ -167,6 +167,8 @@ struct AutoComplete
 
 	static CASTnode _searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 	{
+		if( originalNode is null ) return null;
+		
 		CASTnode resultNode;
 		
 		foreach( CASTnode _node; originalNode.getChildren() )
@@ -439,6 +441,8 @@ struct AutoComplete
 
 	static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int B_KIND )
 	{
+		if( originalNode is null ) return null;
+		
 		CASTnode[] results;
 
 		/+
@@ -525,6 +529,8 @@ struct AutoComplete
 
 	static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, char[] originalFullPath, char[] word )
 	{
+		if( originalNode is null ) return null;
+		
 		CASTnode[] results;
 
 		/+
@@ -973,7 +979,7 @@ struct AutoComplete
 					else
 					{
 						CASTnode[] _results = check( _node.name, originalFullPath );
-						if( _resulst.length ) results ~= _results;
+						if( _results.length ) results ~= _results;
 					}
 				}
 				else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
@@ -1285,7 +1291,8 @@ struct AutoComplete
 								break;
 							}
 						}
-					case " ", "\t", ":", "\n", "\r", "+", ">", "*", "/", "<", ",":
+						
+					case " ", "\t", ":", "\n", "\r", "+", "*", "/", "\\", ">", "<", "=", ",", "@":
 						if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
 						break;
 
@@ -1377,9 +1384,9 @@ struct AutoComplete
 									break;
 								}
 							}
-						case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '<', '@':
+						case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '\\', '<', '=', ',', '@':
 							if( countParen == 0 && countBracket == 0 ) return word;
-
+							
 						default: 
 							if( countParen == 0 && countBracket == 0 )
 							{

@@ -12,7 +12,7 @@ class CArgOptionDialog : CBaseDialog
 	private:
 	Ihandle*			labelOptions, labelArgs, listOptions, listArgs;
 	IupString[2]		cStrings;
-	
+	IupString[20]		_recentOptions, _recentArgs;
 
 	void createLayout()
 	{
@@ -25,7 +25,8 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
 		{
-			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), tools.toStringPtr( GLOBAL.recentOptions[i] ) );
+			_recentOptions[i] = new IupString( GLOBAL.recentOptions[i] );
+			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), _recentOptions[i].toCString );
 		}
 			
 		IupSetHandle( "CArgOptionDialog_listOptions", listOptions );
@@ -38,7 +39,8 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttributes( listArgs, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 		{
-			IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), tools.toStringPtr( GLOBAL.recentArgs[i] ) );
+			_recentArgs[i] = new IupString( GLOBAL.recentArgs[i] );
+			IupSetAttribute( listArgs, toStringz( Integer.toString( i + 1 ) ), _recentArgs[i].toCString );
 		}
 		
 		IupSetHandle( "CArgOptionDialog_listArgs", listArgs );
@@ -87,7 +89,15 @@ class CArgOptionDialog : CBaseDialog
 	{
 		//IupSetHandle( "CArgOptionDialog_listOptions", null );
 		IupSetHandle( "CArgOptionDialog_listArgs", null );
-		IupSetHandle( "btnCANCEL_argOption", null );	
+		IupSetHandle( "btnCANCEL_argOption", null );
+		for( int i =0; i < 20; ++ i )
+		{
+			if( _recentArgs[i] !is null ) delete _recentArgs[i];
+			if( _recentOptions[i] !is null ) delete _recentOptions[i];
+		}
+		
+		if( cStrings[0] !is null ) delete cStrings[0];
+		if( cStrings[1] !is null ) delete cStrings[1];
 	}
 
 	char[][] show( int showWhat ) // Overload form CBaseDialog

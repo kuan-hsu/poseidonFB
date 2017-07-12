@@ -111,26 +111,29 @@ struct LiveParser
 	
 	static void lineNumberAdd( CASTnode head, int fixeLn, int n = 1 )
 	{
-		if( head.getChildrenCount )
+		if( head !is null )
 		{
-			foreach( CASTnode node; head.getChildren )
+			if( head.getChildrenCount )
 			{
-				lineNumberAdd( node, fixeLn, n );
+				foreach( CASTnode node; head.getChildren )
+				{
+					lineNumberAdd( node, fixeLn, n );
+				}
 			}
-		}
 
-		if( head.getFather !is null )
-		{
-			// Stdout( head.name ~ " " );
-			// Stdout( head.lineNumber ).newline;
-			if( head.lineNumber > fixeLn )
+			if( head.getFather !is null )
 			{
-				head.lineNumber += n;
-				head.endLineNum += n;
-			}
-			else if( head.endLineNum > fixeLn )
-			{
-				if( head.endLineNum + n <= 2147483647 ) head.endLineNum += n;
+				// Stdout( head.name ~ " " );
+				// Stdout( head.lineNumber ).newline;
+				if( head.lineNumber > fixeLn )
+				{
+					head.lineNumber += n;
+					head.endLineNum += n;
+				}
+				else if( head.endLineNum > fixeLn )
+				{
+					if( head.endLineNum + n <= 2147483647 ) head.endLineNum += n;
+				}
 			}
 		}
 	}

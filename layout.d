@@ -170,7 +170,7 @@ extern(C)
 
 			foreach( parser; GLOBAL.parserManager )
 			{
-				delete parser;
+				if( parser !is null ) delete parser;
 			}
 		}
 		catch(Exception e )

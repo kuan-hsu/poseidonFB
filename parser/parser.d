@@ -1790,13 +1790,34 @@ class CParser
 					case TOK.Tunion, TOK.Ttype:
 						TOK nestUnnameTOK = token().tok;
 						_lineNum = token().lineNumber;
-
-						if( next().tok == TOK.Teol || next().tok == TOK.Tcolon )
+						
+						parseToken();
+						
+						if( token().tok == TOK.Tfield )
 						{
-							tokenIndex += 2;
+							
+							if( next().tok == TOK.Tassign )
+							{
+								parseToken( TOK.Tfield );
+								parseToken( TOK.Tassign );
+								parseToken( TOK.Tnumbers );//else return false;
+							}
+							else
+							{
+								return false;
+							}
+						}						
+
+						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+						{
+							tokenIndex += 1;
 							activeASTnode = activeASTnode.addChild( null, ( nestUnnameTOK == TOK.Tunion ? B_UNION : B_TYPE ), null, null, null, _lineNum );
 							parseTypeBody( activeASTnode.kind );
 							break;
+						}
+						else
+						{
+							return false;
 						}
 
 					//case TOK.Tidentifier:
@@ -2172,7 +2193,7 @@ class CParser
 		try
 		{
 			parseToken( TOK.Tscope );
-			if( next().tok == TOK.Teol || next().tok == TOK.Tcolon )
+			if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 			{
 				activeASTnode = activeASTnode.addChild( null, B_SCOPE, null, null, null, token().lineNumber );
 			}
