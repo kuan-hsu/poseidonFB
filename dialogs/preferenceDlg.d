@@ -377,7 +377,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* labelColumnEdge = IupLabel( toStringz( GLOBAL.languageItems["columnedge"].toDString ~ ":" ) );
 		Ihandle* textColumnEdge = IupText( null );
-		IupSetAttribute( textColumnEdge, "VALUE", toStringz(GLOBAL.editorSetting00.ColumnEdge) );
+		IupSetAttribute( textColumnEdge, "VALUE", toStringz(GLOBAL.editorSetting00.ColumnEdge.dup) );
 		IupSetAttribute( textColumnEdge, "TIP", GLOBAL.languageItems["triggertip"].toCString );
 		IupSetHandle( "textColumnEdge", textColumnEdge );
 		Ihandle* hBoxColumn = IupHbox( labelColumnEdge, textColumnEdge, null );
@@ -1899,7 +1899,7 @@ extern(C) // Callback for CPreferenceDialog
 				Ihandle* _ih = IupGetHandle( _tempString.toCString );
 				if( ih != null )
 				{
-					char[]	fontInformation = fromStringz( IupGetAttribute( _ih, "TITLE" ) );
+					char[]	fontInformation = fromStringz( IupGetAttribute( _ih, "TITLE" ) ).dup;
 					char[]	result;
 					
 					if( fontInformation.length > 32 )

@@ -1758,11 +1758,10 @@ extern(C)
 					{
 						if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
 						{
-							--pos;
-							close = IupGetIntId( ih, "BRACEMATCH", pos );
+							close = IupGetIntId( ih, "BRACEMATCH", pos - 1 );
 							if( close > -1 )
 							{
-								IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+								IupScintillaSendMessage( ih, 2351, pos - 1, close ); // SCI_BRACEHIGHLIGHT 2351
 							}
 						}
 					}
@@ -1800,7 +1799,13 @@ extern(C)
 					char[] insertEndText = AutoComplete.InsertEnd( ih, lin, pos );
 					if( insertEndText.length )
 					{
-						IupSetAttributeId( ih, "INSERT", -1, toStringz( insertEndText.dup ) );
+						char[] word;
+						foreach( char[] s; Util.split( insertEndText, " " ) )
+						{
+							if( s.length ) word ~= ( tools.convertKeyWordCase( GLOBAL.keywordCase, s ) ~ " " );
+						}
+						
+						IupSetAttributeId( ih, "INSERT", -1, toStringz( Util.trim( word ).dup ) );
 						IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
 						IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
 						IupScintillaSendMessage( ih, 2126, lin, lineInd + 4 ); // SCI_SETLINEINDENTATION = 2126
