@@ -1024,21 +1024,21 @@ struct AutoComplete
 		SCFIND_REGEXP = 0x00200000,
 		SCFIND_POSIX = 0x00400000,
 		*/		
-		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+		int documentLength = cast(int) IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
 		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
 		IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
 		IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
 
-		int posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+		int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 
 		while( posHead >= 0 )
 		{
-			int style = IupScintillaSendMessage( iupSci, 2010, posHead, 0 ); // SCI_GETSTYLEAT 2010
+			int style = cast(int) IupScintillaSendMessage( iupSci, 2010, posHead, 0 ); // SCI_GETSTYLEAT 2010
 			if( style == 1 || style == 19 || style == 4 )
 			{
 				IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
 				IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-				posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 			}
 			else
 			{
@@ -1144,7 +1144,7 @@ struct AutoComplete
 				{
 					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
 					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 				}
 				else
 				{
@@ -1197,7 +1197,7 @@ struct AutoComplete
 	static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct )
 	{
 		IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
-		int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
+		int documentLength = cast(int) IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
 
 		if( direct == 0 )
 		{
@@ -1209,24 +1209,24 @@ struct AutoComplete
 			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
 			IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
 		}
-		pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+		pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 		
 		while( pos > -1 )
 		{
-			int style = IupScintillaSendMessage( iupSci, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
+			int style = cast(int) IupScintillaSendMessage( iupSci, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
 			if( style == 1 || style == 19 || style == 4 )
 			{
 				if( direct == 0 )
 				{
 					IupScintillaSendMessage( iupSci, 2190, pos - 1, 0 );
 					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+					pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 				}
 				else
 				{
 					IupScintillaSendMessage( iupSci, 2190, pos + targetText.length, 0 );
 					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );							// SCI_SETTARGETEND = 2192,
-					pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+					pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 				}
 			}
 			else
@@ -1502,7 +1502,7 @@ struct AutoComplete
 				/*char[][] splitWord = Util.split( word, "." );
 				if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );*/
 				char[][]	splitWord = getDivideWord( word );
-				int			lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				int			lineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 				CASTnode	AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], lineNum );
 				char[]		memberFunctionMotherName;
 
@@ -1553,7 +1553,7 @@ struct AutoComplete
 						splitWord.length = 0;						
 						foreach( char[] s; splitWithTile ~ tempSplitWord )
 						{
-							if( s != "" ) splitWord ~= s;
+							if( s != "" ) splitWord ~= removeArrayAndPointerWord( s );
 						}						
 					}
 				}
@@ -1898,7 +1898,7 @@ struct AutoComplete
 				}
 
 				// Divide word
-				int			lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				int			lineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 				auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[upperCase(cSci.getFullPath)], lineNum );
 				char[]		memberFunctionMotherName;
 
@@ -1911,7 +1911,7 @@ struct AutoComplete
 						splitWord.length = 0;						
 						foreach( char[] s; splitWithTile ~ tempSplitWord )
 						{
-							if( s != "" ) splitWord ~= s;
+							if( s != "" ) splitWord ~= removeArrayAndPointerWord( s );
 						}						
 					}
 				}

@@ -87,18 +87,18 @@ struct LiveParser
 		if( posHead >= 0 )
 		{
 			//IupMessage( "targetText",toStringz( targetText ));
-			int	LineNum = IupScintillaSendMessage( iupSci, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			int	LineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 			//IupMessage( "targetText LineNum",toStringz( Integer.toString( LineNum ) ));
 			
 			posEnd = AutoComplete.getProcedureTailPos( iupSci, pos, targetText, 0 );
 
-			LineNum = IupScintillaSendMessage( iupSci, 2166, posEnd, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			LineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, posEnd, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 			//IupMessage( "targetText Tail LineNum",toStringz( Integer.toString( LineNum ) ));
 			
 			if( posEnd > posHead ) return false;
 
 			posEnd = AutoComplete.getProcedureTailPos( iupSci, pos, targetText, 1 );
-			LineNum = IupScintillaSendMessage( iupSci, 2166, posEnd, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			LineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, posEnd, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 			//IupMessage( "Re targetText Tail LineNum",toStringz( Integer.toString( LineNum ) ));
 		
 			if( posEnd > posHead ) return true;
@@ -149,7 +149,7 @@ struct LiveParser
 
 				if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
 				
-				int	currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				int	currentLineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 				char[] currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
 				
 				/*
@@ -267,7 +267,7 @@ struct LiveParser
 				{
 					GLOBAL.outlineTree.refresh( cSci );
 					
-					int _ln = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
+					int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 				
 					int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
 					Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
@@ -340,7 +340,7 @@ struct LiveParser
 								{
 									int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
 									Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
-									int _ln = IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1;
+									int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1;
 
 									for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 									{
@@ -359,7 +359,7 @@ struct LiveParser
 						+/
 					}
 
-					int headLine = IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+					int headLine = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					lineNumberAdd( newHead, newHead[0].lineNumber - 1, headLine - 1 );
 					//IupMessage( "newHead", toStringz( newHead[0].name ~ " " ~ newHead[0].type ~ " (" ~ Integer.toString( newHead[0].lineNumber ) ~ ")" ) );
 

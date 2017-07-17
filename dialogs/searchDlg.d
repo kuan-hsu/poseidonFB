@@ -420,7 +420,7 @@ extern(C) // Callback for CSingleTextDialog
 						switch( flag )
 						{
 							case 1:
-								int linNum = IupScintillaSendMessage( iupSci, 2166, findPos, 0 );// SCI_LINEFROMPOSITION = 2166
+								int linNum = cast(int) IupScintillaSendMessage( iupSci, 2166, findPos, 0 );// SCI_LINEFROMPOSITION = 2166
 								if( !( IupGetIntId( iupSci, "MARKERGET", linNum ) & 2 ) ) IupSetIntId( iupSci, "MARKERADD", linNum, 1 );
 								break;
 							case 2:

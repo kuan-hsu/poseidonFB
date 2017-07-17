@@ -93,8 +93,8 @@ class CToolBar
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 			if( ih != null )
 			{
-				int currentPos			= IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-				int currentLine  		= IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+				int currentPos			= cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+				int currentLine  		= cast(int) IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
 				
 				if( IupGetIntId( ih, "MARKERGET", currentLine ) & 2 )
 				{
@@ -114,8 +114,8 @@ class CToolBar
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 			if( ih != null )
 			{
-				int currentPos			= IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-				int currentLine  		= IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+				int currentPos			= cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+				int currentLine  		= cast(int) IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
 
 				IupSetIntId( ih, "MARKERPREVIOUS", --currentLine, 2 );
 				
@@ -142,8 +142,8 @@ class CToolBar
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 			if( ih != null )
 			{
-				int currentPos			= IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-				int currentLine  		= IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+				int currentPos			= cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+				int currentLine  		= cast(int) IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
 
 				IupSetIntId( ih, "MARKERNEXT", ++currentLine, 2 );
 				

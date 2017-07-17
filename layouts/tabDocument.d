@@ -1,40 +1,36 @@
 ﻿module layouts.tabDocument;
 
 private import iup.iup;
-import iup.iup_scintilla;
-private import global, actionManager, scintilla, menu;
+private import iup.iup_scintilla;
+private import global, actionManager, scintilla, menu, tools;
 
 import tango.stdc.stringz;
 
 void createTabs()
 {
-	//GLOBAL.documentTabs = IupTabs( null );
-	GLOBAL.documentTabs = IupTabs( null );
-	version(Windows)
+	version( FLATTAB )
 	{
-		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x3" );
-		/+
-		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x0,TABSFONTSIZE=9" );
-		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
-		IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "0" );
-		IupSetAttribute( GLOBAL.documentTabs, "TABSFONT",GLOBAL.cString.convert( GLOBAL.fonts[0].fontString ) );
-		IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 0" );
-		IupSetAttribute( GLOBAL.documentTabs, "TABSFORECOLOR", "100 100 100" );
-		IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
-		IupSetInt( GLOBAL.documentTabs, "TABSFONTSIZE", 9 );
-		IupSetCallback( GLOBAL.documentTabs, "EXTRABUTTON_CB", cast(Icallback) &tabFocus_cb );
-		+/
-	}
-	
-	//IupSetAttribute( GLOBAL.documentTabs, "PADDING", "10x10" );
-
-	version( linux )
-	{
+		GLOBAL.documentTabs = IupFlatTabs( null );
+		
 		IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
-		IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
+		IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "1" );
+		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
+		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
+		IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
+		//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
 	}
+	else
+	{
+		GLOBAL.documentTabs = IupTabs( null );
+		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x3" );
+		version( linux ) IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
+	}
+
+	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
+	//IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 }
 
 extern(C)
@@ -44,21 +40,38 @@ extern(C)
 		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos );
 	}
 
-	version( linux )
+	// Close the document Iuptab......
+	private int tabClose_cb( Ihandle* ih, int pos )
 	{
-		// Close the document Iuptab......
-		private int tabClose_cb( Ihandle* ih, int pos )
+		Ihandle* _child = IupGetChild( ih, pos );
+		CScintilla cSci = ScintillaAction.getCScintilla( _child );
+		if( cSci !is null )
 		{
-			Ihandle* _child = IupGetChild( ih, pos );
-			CScintilla cSci = ScintillaAction.getCScintilla( _child );
-			if( cSci !is null )
+			int result;
+			
+			Ihandle* oldHandle = cast(Ihandle*) IupGetAttribute( ih, "VALUE_HANDLE" );
+			
+			if( oldHandle != cSci.getIupScintilla )
 			{
-				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", pos );
-				return actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+				result = actionManager.ScintillaAction.closeDocument( cSci.getFullPath(), pos );
+				if( IupGetInt( ih, "COUNT" ) > 0 && oldHandle != null )
+				{
+					int oldPos = IupGetChildPos( ih, oldHandle );
+					DocumentTabAction.tabChangePOS( ih, oldPos );
+					IupRefresh( GLOBAL.documentTabs );
+				}
 			}
-
-			return IUP_DEFAULT;
+			else
+			{
+				result = actionManager.ScintillaAction.closeDocument( cSci.getFullPath(), pos );
+			}
+			
+			if( result == IUP_IGNORE ) return IUP_IGNORE;
 		}
+
+		version( FLATTAB ) return IUP_CONTINUE;
+		
+		return IUP_DEFAULT;
 	}
 
 	private int tabRightClick_cb( Ihandle* ih, int pos )
@@ -113,15 +126,29 @@ extern(C)
 	}
 	
 	/+
-	private int tabFocus_cb(Ihandle* ih, int button, int pressed)
+	private int tabbutton_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		IupMessage("",toStringz(Integer.toString(button)));
-		
-		
-		if( button == 2 )
+		if( pressed == 0 )
 		{
-			IupMessage("MID","");
-			
+			if( button == '2' ) // IUP_BUTTON1 = '2' = 50
+			{
+				char* ScreenPos = IupGetGlobal( "CURSORPOS" );
+				
+				scope mouse = new IupString( Integer.toString(x) ~ "x" ~ Integer.toString(y) ~ " 1 1" );
+				IupSetGlobal( "MOUSEBUTTON", mouse.toCString );
+				mouse = Integer.toString(x) ~ "x" ~ Integer.toString(y) ~ " 1 0";
+				IupSetGlobal( "MOUSEBUTTON", mouse.toCString );
+				
+				IupSetGlobal( "CURSORPOS", ScreenPos );
+				
+				
+				int pos = IupGetInt( ih, "VALUEPOS" );
+				
+				
+				IupMessage( "", toStringz(Integer.toString(pos) ) );
+				
+
+			}
 		}
 		return IUP_DEFAULT;
 	}

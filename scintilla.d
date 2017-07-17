@@ -63,8 +63,6 @@ class CScintilla
 		
 		if( GLOBAL.documentTabs != null )
 		{
-			int n = IupGetChildCount( GLOBAL.documentTabs );
-
 			if( lowerCase( mypath.ext )== "bas" )
 			{
 				IupSetAttribute( sci, "TABIMAGE", "icon_bas" );
@@ -77,8 +75,7 @@ class CScintilla
 			{
 				IupSetAttribute( sci, "TABIMAGE", "icon_document" );
 			}
-			IupSetAttribute( sci, "TABTITLE", title.toCString );
-			IupSetHandle( GLOBAL.cString.convert( _fullPath ), sci );
+			IupSetHandle( fullPath.toCString, sci );
 
 			if( insertPos == -1 )
 			{
@@ -95,8 +92,11 @@ class CScintilla
 			
 			IupMap( sci );
 			IupRefresh( GLOBAL.documentTabs );
-
-			// IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", n, toStringz( title.dup, GLOBAL.stringzTemp ) ); delete GLOBAL.stringzTemp;
+			
+			int newDocumentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
+			IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, title.toCString );
+			// For IupFlatTabs
+			version( FLATTAB ) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
 		}		
 
 		//IupSetAttribute( sci, "CLEARALL", "" );
@@ -144,7 +144,6 @@ class CScintilla
 		IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
 		IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
 		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
-
 		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
 
 		init( _fullPath, insertPos );
@@ -153,7 +152,7 @@ class CScintilla
 		setEncoding( _encode );
 
 		// Set margin size
-		int textWidth = IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+		int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 		if( GLOBAL.editorSetting00.LineMargin == "ON" )
 		{
 			int lineCount = IupGetInt( sci, "LINECOUNT" );
@@ -189,6 +188,9 @@ class CScintilla
 		
 		if( title !is null ) delete title;
 		if( sci != null ) IupDestroy( sci );
+		
+		delete fullPath;
+		delete title;
 	}
 
 	void setText( char[] _text )
@@ -230,6 +232,11 @@ class CScintilla
 		return fullPath.toDString;
 	}
 
+	IupString getFullPath_IupString()
+	{
+		return fullPath;
+	}
+	
 	void rename( char[] newFullPath )
 	{
 		// Remove Old Handle
@@ -404,7 +411,7 @@ class CScintilla
 
 		if( !bFirstTime )
 		{
-			int textWidth = IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
@@ -704,29 +711,30 @@ extern(C)
 
 	private int savePoint_cb( Ihandle *ih, int status )
 	{
-		char[] _title = fromStringz( IupGetAttribute( ih, "TABTITLE" ) ).dup; 
+		char[]	_title;
+		int 	pos = IupGetChildPos( GLOBAL.documentTabs, ih );
+		
+		pos = IupGetChildPos( GLOBAL.documentTabs, ih );
+		if( pos > -1 ) _title = fromStringz( IupGetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos ) ).dup; else return IUP_CONTINUE;
+		
 		if( status == 0 )
 		{
 			if( _title.length )
 			{
 				if( _title[0] != '*' )
 				{
-					int pos = IupGetChildPos( GLOBAL.documentTabs, ih );
-					if( pos > -1 )
+					_title = "*" ~ _title;
+					auto cSci = ScintillaAction.getCScintilla( ih );
+					if( cSci !is null )
 					{
-						_title = "*" ~ _title;
-						auto cSci = ScintillaAction.getCScintilla( ih );
-						if( cSci !is null )
-						{
-							auto titleHandle = cSci.getTitleHandle();
-							titleHandle = _title;
-							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
-						}
-						else
-						{
-							// First time trigger, don't change title
-							//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
-						}
+						auto titleHandle = cSci.getTitleHandle();
+						titleHandle = _title;
+						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
+					}
+					else
+					{
+						// First time trigger, don't change title
+						//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
 					}
 				}
 			}
@@ -737,22 +745,18 @@ extern(C)
 			{
 				if( _title[0] == '*' )
 				{
-					int pos = IupGetChildPos( GLOBAL.documentTabs, ih );
-					if( pos > -1 )
+					_title = _title[1..length];
+					auto cSci = ScintillaAction.getCScintilla( ih );
+					if( cSci !is null )
 					{
-						_title = _title[1..length];
-						auto cSci = ScintillaAction.getCScintilla( ih );
-						if( cSci !is null )
-						{
-							auto titleHandle = cSci.getTitleHandle();
-							titleHandle = _title;							
-							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
-						}
-						else
-						{
-							//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
-						}						
+						auto titleHandle = cSci.getTitleHandle();
+						titleHandle = _title;							
+						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
 					}
+					else
+					{
+						//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+					}						
 				}
 			}
 		}
@@ -958,8 +962,8 @@ extern(C)
 					CScintilla actSci = ScintillaAction.getActiveCScintilla;
 					if( actSci !is null )
 					{
-						int currentPos			= IupScintillaSendMessage( actSci.getIupScintilla, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-						int currentLine  		= IupScintillaSendMessage( actSci.getIupScintilla, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+						int currentPos			= cast(int) IupScintillaSendMessage( actSci.getIupScintilla, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+						int currentLine  		= cast(int) IupScintillaSendMessage( actSci.getIupScintilla, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
 						
 						switch( actSci.selectedMarkerIndex )
 						{
@@ -1013,8 +1017,8 @@ extern(C)
 					Ihandle* ih = ScintillaAction.getActiveIupScintilla;
 					if( ih != null )
 					{
-						int currentPos			= IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-						int currentLine  		= IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+						int currentPos			= cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+						int currentLine  		= cast(int) IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
 						
 						char[] lines = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
 						if( lines.length )
@@ -1573,7 +1577,7 @@ extern(C)
 			{
 				char[]	dText = fromStringz( _text );
 				auto	cSci = ScintillaAction.getActiveCScintilla();
-				int		currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,				
+				int		currentLineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,				
 
 				if( insert == 1 )
 				{
@@ -1582,7 +1586,7 @@ extern(C)
 						int countNewLine = Util.count( dText, "\n" );
 						if( countNewLine > 0 )
 						{
-							int lineHeadPos = IupScintillaSendMessage( ih, 2167, currentLineNum - 1, 0 ); //SCI_POSITIONFROMLINE 2167
+							int lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, currentLineNum - 1, 0 ); //SCI_POSITIONFROMLINE 2167
 
 
 							char[] blockText;
@@ -1784,12 +1788,12 @@ extern(C)
 					//Now time to deal with auto indenting
 					//int lineInd = 0;
 
-					if( lin > 0 ) lineInd = IupScintillaSendMessage( ih, 2127, lin - 1, 0 ); // SCI_GETLINEINDENTATION = 2127
+					if( lin > 0 ) lineInd = cast(int) IupScintillaSendMessage( ih, 2127, lin - 1, 0 ); // SCI_GETLINEINDENTATION = 2127
 				   
 					if( lineInd != 0 )   // NOT in the beginning
 					{
 						IupScintillaSendMessage( ih, 2126, lin, lineInd ); // SCI_SETLINEINDENTATION = 2126
-						int changeLinePos = IupScintillaSendMessage( ih, 2128, lin, 0 );
+						int changeLinePos = cast(int) IupScintillaSendMessage( ih, 2128, lin, 0 );
 						IupScintillaSendMessage( ih, 2025, changeLinePos , 0 );// SCI_GOTOPOS = 2025,
 					}
 				}
@@ -1948,5 +1952,5 @@ extern(C)
 			
 			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 		}
-	}	
+	}
 }

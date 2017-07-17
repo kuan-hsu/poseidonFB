@@ -432,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.287\nBy Kuan Hsu (Taiwan)\n2017.07.13" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.288\nBy Kuan Hsu (Taiwan)\n2017.07.17" );
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -566,13 +566,13 @@ private void _convertKeyWordCase( int type )
 					IupScintillaSendMessage( iupSci, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
 					IupSetInt( iupSci, "TARGETEND", 0 );
 
-					int posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+					int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 					while( posHead >= 0 )
 					{
 						IupSetAttribute( iupSci, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
 						IupScintillaSendMessage( iupSci, 2190, posHead + replaceTextLength, 0 );													// SCI_SETTARGETSTART = 2190,
 						IupSetInt( iupSci, "TARGETEND", 0 );
-						posHead = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+						posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 					}					
 				}
 			}
@@ -842,7 +842,7 @@ extern(C)
 		{
 			int			lineheadPos;
 			int			currentPos = actionManager.ScintillaAction.getCurrentPos( iupSci );
-			int			currentLine = IupScintillaSendMessage( iupSci, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			int			currentLine = cast(int) IupScintillaSendMessage( iupSci, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 			
 			char* _selectText = IupGetAttribute( iupSci, "SELECTION" );
 			if( _selectText == null ) // Non Selection
@@ -853,12 +853,12 @@ extern(C)
 					//SCI_POSITIONFROMLINE   2167
 					if( currentLineText[0] == '\'' )
 					{
-						lineheadPos = IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
+						lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
 						IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
 					}
 					else
 					{
-						lineheadPos = IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
+						lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
 						IupSetAttributeId( iupSci, "INSERT", lineheadPos, "'" );
 					
 					}
@@ -890,12 +890,12 @@ extern(C)
 							//SCI_POSITIONFROMLINE   2167
 							if( currentLineText[0] == '\'' )
 							{
-								lineheadPos = IupScintillaSendMessage( iupSci, 2167, i, 0 );
+								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
 								IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
 							}
 							else
 							{
-								lineheadPos = IupScintillaSendMessage( iupSci, 2167, i, 0 );
+								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
 								IupSetAttributeId( iupSci, "INSERT", lineheadPos, "'" );
 							
 							}

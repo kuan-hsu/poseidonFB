@@ -144,7 +144,7 @@ void load_all_images_icons()
 	IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private_obj.xpm" ) );  //IupSetHandle("IUP_variable_private", load_image_variable_private_obj());  
 	IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member_obj.xpm" ) );//IupSetHandle("IUP_enummember", load_image_enum_member_obj());
 	IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum_obj.xpm" ) );//IupSetHandle("IUP_enum", load_image_enum_obj());
-	IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
+	IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias_obj.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
 	IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union_obj.xpm" ) );//IupSetHandle("IUP_union", load_image_union_obj());
 	IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace_obj.xpm" ) );//IupSetHandle("IUP_namespace", load_image_namespace_obj());
 	IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );//IupSetHandle("IUP_macro", load_image_macro());

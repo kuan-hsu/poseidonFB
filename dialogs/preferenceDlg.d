@@ -2017,9 +2017,11 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.keyWord[2]					= IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR" );
 			GLOBAL.editColor.keyWord[3]					= IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR" );
 
-
-			GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( fromStringz(IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ).dup );
-			GLOBAL.includeLevel							= Integer.atoi( fromStringz(IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ).dup );
+			scope numberString_0 = new IupString( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) );
+			scope numberString_1 = new IupString( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) );
+			
+			GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( numberString_0.toDString );
+			GLOBAL.includeLevel							= Integer.atoi( numberString_1.toDString );
 
 			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 

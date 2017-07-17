@@ -233,7 +233,7 @@ extern(C)
 					// Restore previous clipboard text
 					IupSetAttribute( IupGetHandle( "clipboard" ), "TEXT", CManual.prevClipboard.toCString );
 			
-					int	lineNumber = IupScintillaSendMessage( iupSci, 2166, ScintillaAction.getCurrentPos( iupSci ), 0 ); //SCI_LINEFROMPOSITION = 2166,
+					int	lineNumber = cast(int) IupScintillaSendMessage( iupSci, 2166, ScintillaAction.getCurrentPos( iupSci ), 0 ); //SCI_LINEFROMPOSITION = 2166,
 					
 					char[]	annotationText;
 					bool	bFirstLine = true;
