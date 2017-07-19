@@ -694,7 +694,7 @@ extern(C)
 				}
 				else
 				{
-					GLOBAL.statusBar.setPrjName( "                                            " );
+					GLOBAL.statusBar.setPrjName( "" );
 					//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 				}
 			}

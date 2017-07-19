@@ -17,6 +17,7 @@ void createTabs()
 		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
 		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
 		IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
+		IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
 		//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
 	}
@@ -128,6 +129,11 @@ extern(C)
 	/+
 	private int tabbutton_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
+		IupMessage( "CLIENTSIZE", IupGetAttribute( ih, "CLIENTSIZE" ) );
+		IupMessage( "POSITION", IupGetAttribute( ih, "POSITION" ) );
+		IupMessage( "MINSIZE", IupGetAttribute( ih, "MINSIZE" ) );
+		
+		/+
 		if( pressed == 0 )
 		{
 			if( button == '2' ) // IUP_BUTTON1 = '2' = 50
@@ -149,7 +155,7 @@ extern(C)
 				
 
 			}
-		}
+		}+/
 		return IUP_DEFAULT;
 	}
 	+/

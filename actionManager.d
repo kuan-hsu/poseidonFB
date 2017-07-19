@@ -389,9 +389,8 @@ struct DocumentTabAction
 				if( _ih != null )
 				{
 					auto _cSci = ScintillaAction.getCScintilla( _ih );
-					IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", i, _cSci.getFullPath_IupString.toCString );
+					if( _cSci !is null ) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", i, _cSci.getFullPath_IupString.toCString );
 				}
-				
 			}
 		}
 	}

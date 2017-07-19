@@ -515,7 +515,7 @@ struct IDECONFIG
 
 			// size
 			doc ~= setINILineData( "[size]");
-			doc ~= setINILineData( "PLACEMENT", GLOBAL.editorSetting01.PLACEMENT );
+			if( GLOBAL.editorSetting01.PLACEMENT == "MINIMIZED" ) doc ~= setINILineData( "PLACEMENT", "NORMAL" ); else doc ~= setINILineData( "PLACEMENT", GLOBAL.editorSetting01.PLACEMENT );
 			doc ~= setINILineData( "RASTERSIZE", GLOBAL.editorSetting01.RASTERSIZE );
 			doc ~= setINILineData( "ExplorerSplit", GLOBAL.editorSetting01.ExplorerSplit );
 			doc ~= setINILineData( "MessageSplit", GLOBAL.editorSetting01.MessageSplit );
@@ -943,7 +943,7 @@ struct IDECONFIG
 							case "comment":					index =23; title = GLOBAL.languageItems["sc_comment"].toDString();					break;
 							case "backdefinition":			index =24; title = GLOBAL.languageItems["sc_backdefinition"].toDString();			break;
 							case "procedure":				index =34; title = GLOBAL.languageItems["sc_procedure"].toDString();				break;
-							case "customtools1", "customtools2", "customtools3", "customtools4", "customtools5", "customtools6", "customtools7", "customtools8", "customtools9":
+							case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":
 								index = Integer.atoi( left[$-1..$] ) + 24;
 								title = GLOBAL.languageItems[left].toDString();
 								break;

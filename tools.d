@@ -149,7 +149,7 @@ char[] convertKeyWordCase( int type, char[] replaceText )
 			{
 				if( replaceText[i] >= 'a' && replaceText[i] <= 'z' )
 				{
-					replaceText[i] = replaceText[i] - 32;
+					replaceText[i] = cast(char) ( replaceText[i] - 32 );
 					break;
 				}
 			}

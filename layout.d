@@ -203,6 +203,9 @@ extern(C)
 			rasterSize = IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE");
 			GLOBAL.editorSetting01.RASTERSIZE = rasterSize.toDString.dup;
 		}
+		//IupMessage("",toStringz(GLOBAL.editorSetting01.PLACEMENT));
+		if( GLOBAL.editorSetting01.PLACEMENT != "MINIMIZED" ) GLOBAL.statusBar.setPrjNameSize( width );
+		
 		return IUP_DEFAULT;
 	}
 	

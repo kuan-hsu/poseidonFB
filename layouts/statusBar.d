@@ -5,6 +5,7 @@ class CStatusBar
 	private:
 	import		iup.iup;
 	import		tools;
+	import		tango.stdc.stringz, Integer = tango.text.convert.Integer;
 	
 	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType;
 	IupString	_name, _lc, _ins, _eol, _en;
@@ -12,8 +13,8 @@ class CStatusBar
 	
 	void createLayout()
 	{
-		prjName = IupLabel( "                                            " );
-		IupSetAttribute( prjName, "SIZE", "500x" );
+		prjName = IupLabel( null );
+		IupSetAttribute( prjName, "SIZE", "350x" );
 		LINExCOL = IupLabel( "             " );
 		Ins = IupLabel( "   " );
 		EOLType = IupLabel( "        " );
@@ -61,6 +62,11 @@ class CStatusBar
 	Ihandle* getLayoutHandle()
 	{
 		return layoutHandle;
+	}
+	
+	void setPrjNameSize( int width )
+	{
+		IupSetAttribute( prjName, "SIZE", toStringz( Integer.toString( width / 3 ) ~ "x" ) );
 	}
 	
 	void setPrjName( char[] name )
