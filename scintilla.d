@@ -97,7 +97,7 @@ class CScintilla
 			int newDocumentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
 			//IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, title.toCString );
 			// For IupFlatTabs
-			version( FLATTAB ) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
+			version(FLATTAB) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
 		}		
 
 		//IupSetAttribute( sci, "CLEARALL", "" );

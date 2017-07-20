@@ -352,7 +352,7 @@ struct DocumentTabAction
 				if( cSci !is null )
 				{
 					StatusBarAction.update( _child );
-					version( FLATTAB ) IupSetInt( ih, "VALUEPOS" , new_pos );
+					version(FLATTAB) IupSetInt( ih, "VALUEPOS" , new_pos );
 					IupSetFocus( _child );
 
 					// Marked the trees( FileList & ProjectTree )
@@ -367,7 +367,7 @@ struct DocumentTabAction
 						GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
 					}
 					
-					version( FLATTAB ) return IUP_CONTINUE;
+					version(FLATTAB) return IUP_CONTINUE;
 				}
 			}
 		}
@@ -379,7 +379,7 @@ struct DocumentTabAction
 		return IUP_DEFAULT;
 	}
 	
-	version( FLATTAB )
+	version(FLATTAB)
 	{
 		static void resetTip()
 		{
@@ -401,7 +401,7 @@ struct DocumentTabAction
 		{
 			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE" , cast(char*) ih );
 			IupSetFocus( ih );
-			version( FLATTAB ) return IUP_CONTINUE;
+			version(FLATTAB) return IUP_CONTINUE;
 		}
 		
 		return IUP_DEFAULT;
@@ -413,7 +413,7 @@ struct DocumentTabAction
 		{
 			IupSetInt( GLOBAL.documentTabs, "VALUEPOS" , pos );
 			IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.documentTabs, pos ) );
-			version( FLATTAB ) return IUP_CONTINUE;
+			version(FLATTAB) return IUP_CONTINUE;
 		}
 		
 		return IUP_DEFAULT;

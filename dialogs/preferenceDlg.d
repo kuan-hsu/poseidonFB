@@ -2109,7 +2109,9 @@ extern(C) // Callback for CPreferenceDialog
 					}
 				}
 			}			
-			scope docTabString = new IupString( GLOBAL.fonts[0].fontString );	IupSetAttribute( GLOBAL.documentTabs, "FONT", docTabString.toCString );// Leftside
+			scope docTabString = new IupString( GLOBAL.fonts[0].fontString );
+			version(FLATTAB) IupSetAttribute( GLOBAL.documentTabs, "TABFONT", docTabString.toCString ); else IupSetAttribute( GLOBAL.documentTabs, "FONT", docTabString.toCString );
+			IupRefresh( GLOBAL.documentTabs );
 			
 			GLOBAL.fileListTree.setTitleFont(); // Change Filelist Title Font
 			scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside

@@ -265,7 +265,9 @@ void main( char[][] args )
 
 	createDialog();
 
-	scope docTabString = new IupString( GLOBAL.fonts[0].fontString );	IupSetAttribute( GLOBAL.documentTabs, "FONT", docTabString.toCString );// Leftside
+	scope docTabString = new IupString( GLOBAL.fonts[0].fontString );
+	version(FLATTAB) IupSetAttribute( GLOBAL.documentTabs, "TABFONT", docTabString.toCString ); else IupSetAttribute( GLOBAL.documentTabs, "FONT", docTabString.toCString );
+	
 	scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
 	scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 	scope prjString = new IupString( GLOBAL.fonts[4].fontString ); 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project

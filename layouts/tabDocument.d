@@ -8,7 +8,7 @@ import tango.stdc.stringz;
 
 void createTabs()
 {
-	version( FLATTAB )
+	version(FLATTAB)
 	{
 		GLOBAL.documentTabs = IupFlatTabs( null );
 		
@@ -70,7 +70,7 @@ extern(C)
 			if( result == IUP_IGNORE ) return IUP_IGNORE;
 		}
 
-		version( FLATTAB ) return IUP_CONTINUE;
+		version(FLATTAB) return IUP_CONTINUE;
 		
 		return IUP_DEFAULT;
 	}
