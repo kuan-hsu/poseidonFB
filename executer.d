@@ -30,7 +30,10 @@ struct ExecuterAction
 
 		void run()
 		{
-			Process p = new Process( true, command );
+			char[] scommand;
+			if( GLOBAL.consoleExe == "ON" ) scommand = "consoleLanucher " ~ command; else scommand = command;
+			
+			Process p = new Process( true, scommand );
 			if( cwd.length ) p.workDir( cwd );
 			p.redirect( Redirect.None );
 			p.execute;
@@ -56,25 +59,73 @@ struct ExecuterAction
 
 		void run()
 		{
-			Process p;
+			Process		p;
+			char[]		scommand;
+			
+			if( GLOBAL.consoleExe == "ON" ) scommand = "consoleLanucher " ~ command; else scommand = command;
+			
 			version( Windows )
 			{
-				p = new Process( true, command ~ args );
+				p = new Process( true, scommand ~ args );
 			}
 			else
 			{
-				if( Util.index( options, "-s gui" ) < options.length ) p = new Process( true, command ~ args ); else p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ command ~ args );
+				if( Util.index( options, "-s gui" ) < options.length ) p = new Process( true, scommand ~ args ); else p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand ~ args );
 			}
 
 			if( cwd.length ) p.workDir( cwd );
-			p.redirect( Redirect.None );
+			p.setRedirect( Redirect.None );
 			p.execute;
 			
 			auto result = p.wait;
 			
 			switch( result.reason )
 			{
-				case Process.Result.Exit, Process.Result.Signal, Process.Result.Stop, Process.Result.Error:
+				/+
+				case Process.Result.Error:
+					IupMessage("","ERROR");
+					
+				case  Process.Result.Signal:
+					IupMessage("","Signal");
+					
+				case  Process.Result.Exit:
+					IupMessage("","Exit");
+				
+				case Process.Result.Stop:
+					IupMessage("","Stop");
+					
+					bool	bError, bWarning;
+					char[]	stdoutMessage, stderrMessage;
+					
+					if( p.stderr is null ) IupMessage("stderr", "NULL");
+					if( p.stdout is null ) IupMessage("stdout", "NULL");
+					try
+					{
+						if( p.stderr !is null )
+						{
+							foreach( line; new Lines!(char)(p.stderr) )  
+							{
+								stderrMessage ~= ( line ~ "\n" );
+							}
+						}
+						
+						if( p.stdout !is null )
+						{
+							foreach( line; new Lines!(char)(p.stdout) )
+							{
+								stdoutMessage ~= ( line ~ "\n" );
+							}
+						}
+						
+						if( stderrMessage.length ) IupMessage( "stderrMessage", toStringz( stderrMessage ) ); else IupMessage( "stderrMessage", toStringz("NULL" ) );
+						if( stdoutMessage.length ) IupMessage( "stdoutMessage", toStringz( stdoutMessage ) ); else IupMessage( "stdoutMessage", toStringz("NULL" ) );
+					}
+					catch( Exception e )
+					{
+						IupMessage("",toStringz(e.toString));
+					}
+				+/
+				case Process.Result.Error, Process.Result.Signal, Process.Result.Exit, Process.Result.Stop:
 					if( command.length )
 					{
 						if( command[0] == '"' && command[length-1] == '"' )

@@ -177,7 +177,9 @@ extern(C) // Callback for CArgOptionDialog
 			{
 				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" )
 				{
-					actionManager.SearchAction.addListItem( _listOptions, fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup, 10 );
+					char[] text = Util.trim( fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup );
+					if( !text.length ) text = " ";					
+					actionManager.SearchAction.addListItem( _listOptions, text, 10 );
 					
 					GLOBAL.recentOptions.length = 0;
 					for( int i = 1; i <= IupGetInt( _listOptions, "COUNT" ); ++ i )
@@ -193,7 +195,9 @@ extern(C) // Callback for CArgOptionDialog
 			{
 				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" )
 				{
-					actionManager.SearchAction.addListItem( _listArgs, fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup , 10 );
+					char[] text = Util.trim( fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup );
+					if( !text.length ) text = " ";					
+					actionManager.SearchAction.addListItem( _listArgs, text, 10 );
 
 					GLOBAL.recentArgs.length = 0;
 					for( int i = 1; i <= IupGetInt( _listArgs, "COUNT" ); ++ i )

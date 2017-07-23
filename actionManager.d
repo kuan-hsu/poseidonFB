@@ -1849,10 +1849,19 @@ struct SearchAction
 			
 			for( int i = 1; i <= itemCount; ++ i )
 			{
-				if( fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ) ) ) ).dup == text )
+				char[] itemText = fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ) ) ) ).dup;
+				
+				if( itemText.length )
+				{
+					if( itemText == text )
+					{
+						IupSetInt( ih, "REMOVEITEM", i );
+						break;
+					}
+				}
+				else
 				{
 					IupSetInt( ih, "REMOVEITEM", i );
-					break;
 				}
 			}
 			

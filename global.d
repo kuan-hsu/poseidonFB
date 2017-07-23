@@ -112,6 +112,7 @@ struct GLOBAL
 	static char[]				compilerAnootation = "ON";
 	static char[]				compilerWindow = "ON";
 	static char[]				delExistExe = "ON";
+	static char[]				consoleExe = "ON";
 	static IupString			debuggerFullPath, x64debuggerFullPath;
 	static IupString			manualPath;
 	static IupString			colorTemplate;
@@ -492,6 +493,7 @@ struct GLOBAL
 						GLOBAL.languageItems["errorannotation"] = new IupString( cast(char[]) "Show Compiler Errors/Warnings Using Annotation" );
 						GLOBAL.languageItems["showresultwindow"] = new IupString( cast(char[]) "Show Compiled Result Window" );
 						GLOBAL.languageItems["delexistexe"] = new IupString( cast(char[]) "Before Compile, Delete Existed Execute File" );
+						GLOBAL.languageItems["consoleexe"] = new IupString( cast(char[]) "Use Console Launcher To Run Program" );
 					GLOBAL.languageItems["parsersetting"] = new IupString( cast(char[]) "Parser Settings" );
 						GLOBAL.languageItems["enablekeyword"] = new IupString( cast(char[]) "Enable Keyword Autocomplete" );
 						GLOBAL.languageItems["enableparser"] = new IupString( cast(char[]) "Enable Parser" );

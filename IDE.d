@@ -646,6 +646,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
 			doc ~= setINILineData( "delexistexe", GLOBAL.delExistExe );
+			doc ~= setINILineData( "consoleexe", GLOBAL.consoleExe );
 
 			// parser
 			doc ~= setINILineData( "[parser]");
@@ -969,6 +970,7 @@ struct IDECONFIG
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
 							case "annotation":				GLOBAL.compilerAnootation = right;						break;
 							case "delexistexe":				GLOBAL.delExistExe = right;								break;
+							case "consoleexe":				GLOBAL.consoleExe = right;								break;
 							default:
 						}
 						break;

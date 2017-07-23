@@ -115,8 +115,13 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleDelPrevEXE = IupToggle( GLOBAL.languageItems["delexistexe"].toCString, null );
 		IupSetAttribute( toggleDelPrevEXE, "VALUE", toStringz(GLOBAL.delExistExe.dup) );
 		IupSetHandle( "toggleDelPrevEXE", toggleDelPrevEXE );
+		
+		Ihandle* toggleConsoleExe = IupToggle( GLOBAL.languageItems["consoleexe"].toCString, null );
+		IupSetAttribute( toggleConsoleExe, "VALUE", toStringz(GLOBAL.consoleExe.dup) );
+		IupSetHandle( "toggleConsoleExe", toggleConsoleExe );
+		
 
-		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleDelPrevEXE, null );
+		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleDelPrevEXE, toggleConsoleExe, null );
 
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
@@ -577,7 +582,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* colorTemplateList = IupList( null );
 		IupSetHandle( "colorTemplateList", colorTemplateList );
 		version(Windows) IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,EXPAND=YES,DROPDOWN=YES,VISIBLEITEMS=5" ); else IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,SIZE=120x12,DROPDOWN=YES,VISIBLEITEMS=5" );;
-		IupSetAttribute( colorTemplateList, "SIZE", "210x12" );
+		IupSetAttribute( colorTemplateList, "SIZE", "190x12" );
 		
 		scope templateFP = new FilePath( "settings/colorTemplates" );
 		if( templateFP.exists() )
@@ -730,7 +735,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=3,GAPCOL=30,MARGIN=2x10,SIZELIN=1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
+		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=3,GAPCOL=30,MARGIN=2x10,SIZELIN=-1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
 
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -1362,6 +1367,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleAnnotation", null );
 		IupSetHandle( "toggleShowResultWindow", null );
 		IupSetHandle( "toggleDelPrevEXE", null );
+		IupSetHandle( "toggleConsoleExe", null );
 
 		IupSetHandle( "toggleLineMargin", null );
 		IupSetHandle( "toggleBookmarkMargin", null );
@@ -1888,6 +1894,14 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.MultiSelection			= fromStringz(IupGetAttribute( IupGetHandle( "toggleMultiSelection" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.LoadPrevDoc				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadprev" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.HighlightCurrentWord		= fromStringz(IupGetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE" )).dup;
+			if( GLOBAL.editorSetting00.HighlightCurrentWord != "ON" )
+			{
+				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
+				{
+					Ihandle* _ih = IupGetChild( GLOBAL.documentTabs, i );
+					if( _ih != null ) IupScintillaSendMessage( _ih, 2505, 0, IupGetInt( _ih, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+				}
+			}
 			
 			GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
@@ -2033,6 +2047,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
 			GLOBAL.delExistExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleDelPrevEXE" ), "VALUE" ) ).dup;
+			GLOBAL.consoleExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE" ) ).dup;
 
 			GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
 			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;

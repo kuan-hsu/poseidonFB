@@ -93,6 +93,7 @@ options=Options
 				errorannotation=Show Compiler Errors/Warnings Using Annotation
 				showresultwindow=Show Compiled Result Window
 				delexistexe=Before Compile, Delete Existed Execute File
+				consoleexe=Use Console Launcher To Run Program
 			parsersetting=Parser Settings
 				enablekeyword=Enable Keyword Autocomplete
 				enableparser=Enable Parser

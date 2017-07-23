@@ -76,7 +76,7 @@ class CScintilla
 				IupSetAttribute( sci, "TABIMAGE", "icon_document" );
 			}
 			IupSetHandle( fullPath.toCString, sci );
-			IupSetAttribute( sci, "TABTITLE", title.toCString );
+			//IupSetAttribute( sci, "TABTITLE", title.toCString );
 
 			if( insertPos == -1 )
 			{
@@ -95,7 +95,7 @@ class CScintilla
 			IupRefresh( GLOBAL.documentTabs );
 			
 			int newDocumentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
-			//IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, title.toCString );
+			IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, title.toCString );
 			// For IupFlatTabs
 			version(FLATTAB) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
 		}		
