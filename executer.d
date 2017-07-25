@@ -17,130 +17,81 @@ struct ExecuterAction
 	// Inner Class
 	class ExecuterThread : Thread
 	{
-		private :
-		char[] command, cwd;
+		protected :
+		char[]	command, args, cwd;
+		bool	bQuickRun;
 
 		public:
-		this( char[] _command, char[] _cwd = null )
+		this( char[] _command, char[] _args, char[] _cwd = null, bool _bQuickRun = false )
 		{
-			command = _command;
-			cwd = _cwd;
+			command		= _command;
+			args		= _args;
+			cwd 		= _cwd;
+			bQuickRun	= _bQuickRun;
+			
 			super( &run );
 		}
 
 		void run()
 		{
-			char[] scommand;
-			if( GLOBAL.consoleExe == "ON" ) scommand = "consoleLanucher " ~ command; else scommand = command;
+			Process	p;
+			char[]		scommand;
 			
-			Process p = new Process( true, scommand );
+			if( GLOBAL.consoleExe == "ON" )
+			{
+				version(Windows)
+				{
+					scommand = "consoleLauncher " ~ command ~ args;
+				}
+				else
+				{
+					if( command[0] == '"' && command[length-1] == '"' )
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ command[1..length-1] ~ args ~ "\"";
+					else
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ command ~ args ~ "\"";
+				}
+			}
+			else
+			{
+				version(Windows) scommand = command ~ args; else scommand = "\"" ~ command ~ args ~ "\"";
+			}
+			
+			version( Windows )
+			{
+				p = new Process( true, scommand );
+			}
+			else
+			{
+				p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand );
+			}
+			
 			if( cwd.length ) p.workDir( cwd );
 			p.redirect( Redirect.None );
 			p.execute;
 			
-			p.wait;
-		}
-	}
-
-	class QuickRunThread : Thread
-	{
-		private:
-		char[] command, args, cwd, options;
-
-		public:
-		this( char[] _command, char[] _args, char[] _cwd = null, char[] _options = null )
-		{
-			command = _command;
-			args = _args;
-			cwd = _cwd;
-			options = _options;
-			super( &run );
-		}
-
-		void run()
-		{
-			Process		p;
-			char[]		scommand;
-			
-			if( GLOBAL.consoleExe == "ON" ) scommand = "consoleLanucher " ~ command; else scommand = command;
-			
-			version( Windows )
-			{
-				p = new Process( true, scommand ~ args );
-			}
-			else
-			{
-				if( Util.index( options, "-s gui" ) < options.length ) p = new Process( true, scommand ~ args ); else p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand ~ args );
-			}
-
-			if( cwd.length ) p.workDir( cwd );
-			p.setRedirect( Redirect.None );
-			p.execute;
-			
 			auto result = p.wait;
 			
-			switch( result.reason )
+			if( bQuickRun )
 			{
-				/+
-				case Process.Result.Error:
-					IupMessage("","ERROR");
-					
-				case  Process.Result.Signal:
-					IupMessage("","Signal");
-					
-				case  Process.Result.Exit:
-					IupMessage("","Exit");
-				
-				case Process.Result.Stop:
-					IupMessage("","Stop");
-					
-					bool	bError, bWarning;
-					char[]	stdoutMessage, stderrMessage;
-					
-					if( p.stderr is null ) IupMessage("stderr", "NULL");
-					if( p.stdout is null ) IupMessage("stdout", "NULL");
-					try
-					{
-						if( p.stderr !is null )
+				switch( result.reason )
+				{
+					case Process.Result.Error, Process.Result.Signal, Process.Result.Exit, Process.Result.Stop:
+						if( command.length )
 						{
-							foreach( line; new Lines!(char)(p.stderr) )  
+							if( command[0] == '"' && command[length-1] == '"' )
 							{
-								stderrMessage ~= ( line ~ "\n" );
+								scope _f = new FilePath( command[1..length-1] );
+								_f.remove();
 							}
 						}
+						break;
 						
-						if( p.stdout !is null )
-						{
-							foreach( line; new Lines!(char)(p.stdout) )
-							{
-								stdoutMessage ~= ( line ~ "\n" );
-							}
-						}
-						
-						if( stderrMessage.length ) IupMessage( "stderrMessage", toStringz( stderrMessage ) ); else IupMessage( "stderrMessage", toStringz("NULL" ) );
-						if( stdoutMessage.length ) IupMessage( "stdoutMessage", toStringz( stdoutMessage ) ); else IupMessage( "stdoutMessage", toStringz("NULL" ) );
-					}
-					catch( Exception e )
-					{
-						IupMessage("",toStringz(e.toString));
-					}
-				+/
-				case Process.Result.Error, Process.Result.Signal, Process.Result.Exit, Process.Result.Stop:
-					if( command.length )
-					{
-						if( command[0] == '"' && command[length-1] == '"' )
-						{
-							scope _f = new FilePath( command[1..length-1] );
-							_f.remove();
-						}
-					}
-					break;
-					
-				default:
-			}
+					default:
+				}
+				}
 		}
 	}
-
+	
 	static void showAnnotation( char[] message )
 	{
 		if( GLOBAL.compilerAnootation != "ON" ) return;
@@ -242,15 +193,28 @@ struct ExecuterAction
 			// Compiler Command
 			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n" ) );
 
-			foreach( line; new Lines!(char)(p.stderr) )  
+			foreach (line; new Lines!(char)(p.stderr))  
 			{
 				if( !bWarning )
 				{
-					if( Util.index( line, "warning:" ) < line.length ) bWarning = true;
+					if( Util.index( line, "warning:" ) < line.length )
+					{
+						bWarning = true;
+						stderrMessage ~= ( line ~ "\n" );
+						continue;
+					}
 				}
+				
 				if( !bError )
 				{
-					if( Util.index( line, "Error:" ) < line.length ) bError = true;
+					if( Util.index( line, "Error:" ) < line.length )
+					{
+						bError = true;
+					}
+					else if( Util.index( line, ":fake:" ) < line.length )
+					{
+						bError = true;
+					}
 				}				
 
 				stderrMessage ~= ( line ~ "\n" );
@@ -454,13 +418,8 @@ struct ExecuterAction
 				}
 			}
 
-			if( options.length )
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
-							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ options ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-			else
-				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~  executeName ~  ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
-							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-
+			txtCommand = "\"" ~ compilePath.toString ~ "\"" ~  executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
+							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
 			if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
 
@@ -478,11 +437,24 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					if( Util.index( line, "warning:" ) < line.length ) bWarning = true;
+					if( Util.index( line, "warning:" ) < line.length )
+					{
+						bWarning = true;
+						stderrMessage ~= ( line ~ "\n" );
+						continue;
+					}
 				}
+				
 				if( !bError )
 				{
-					if( Util.index( line, "Error:" ) < line.length ) bError = true;
+					if( Util.index( line, "Error:" ) < line.length )
+					{
+						bError = true;
+					}
+					else if( Util.index( line, ":fake:" ) < line.length )
+					{
+						bError = true;
+					}
 				}				
 
 				stderrMessage ~= ( line ~ "\n" );
@@ -639,11 +611,24 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					if( Util.index( line, "warning:" ) < line.length ) bWarning = true;
+					if( Util.index( line, "warning:" ) < line.length )
+					{
+						bWarning = true;
+						stderrMessage ~= ( line ~ "\n" );
+						continue;
+					}
 				}
+				
 				if( !bError )
 				{
-					if( Util.index( line, "Error:" ) < line.length ) bError = true;
+					if( Util.index( line, "Error:" ) < line.length )
+					{
+						bError = true;
+					}
+					else if( Util.index( line, ":fake:" ) < line.length )
+					{
+						bError = true;
+					}
 				}				
 
 				stderrMessage ~= ( line ~ "\n" );
@@ -703,13 +688,13 @@ struct ExecuterAction
 				}
 
 				char[] command;
-
 				scope _f = new FilePath( fileName );
 				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ "./" ~ _f.name;
 				_f.remove();
 				
 				if( args.length ) args = " " ~ args; else args = "";
-				QuickRunThread	derived = new QuickRunThread( "\"" ~ command ~ "\"", args, _f.path, options );
+				
+				ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
 				derived.start();
 
 				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\nRunning " ~ command ~ args ~ "......" ) );
@@ -839,7 +824,7 @@ struct ExecuterAction
 			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ args ~ "......" ) );
 
 			ExecuterThread derived;
-			version( Windows ) derived = new ExecuterThread( "\"" ~ command ~ "\"" ~ args, f.path ); else derived = new ExecuterThread( GLOBAL.linuxTermName ~ " -e " ~ "\"" ~ command ~ "\"" ~ args, f.path );
+			version( Windows ) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );
 			derived.start();
 		}
 		else

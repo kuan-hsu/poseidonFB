@@ -1847,6 +1847,23 @@ struct SearchAction
 		{
 			int itemCount = IupGetInt( ih, "COUNT" );
 			
+			for( int i = itemCount; i > 0; --i )
+			{
+				char[] itemText = fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ) ) ) ).dup;
+				if( itemText.length )
+				{
+					if( itemText == text )
+					{
+						IupSetInt( ih, "REMOVEITEM", i );
+					}
+				}
+				else
+				{
+					IupSetInt( ih, "REMOVEITEM", i );
+				}				
+			}
+			
+			/+
 			for( int i = 1; i <= itemCount; ++ i )
 			{
 				char[] itemText = fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ) ) ) ).dup;
@@ -1864,6 +1881,7 @@ struct SearchAction
 					IupSetInt( ih, "REMOVEITEM", i );
 				}
 			}
+			+/
 			
 			itemCount = IupGetInt( ih, "COUNT" );
 			if( itemCount == limit )
