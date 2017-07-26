@@ -150,9 +150,14 @@ extern(C)
 			GLOBAL.prevDoc.length = 0;
 			if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
 			{
-				foreach( CScintilla sci; GLOBAL.scintillaManager )
+				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
 				{
-					if( sci !is null ) GLOBAL.prevDoc ~= sci.getFullPath;
+					Ihandle* documentHandle = IupGetChild( GLOBAL.documentTabs, i );
+					if( documentHandle != null )
+					{
+						auto cSci = ScintillaAction.getCScintilla( documentHandle );
+						if( cSci !is null )  GLOBAL.prevDoc ~= cSci.getFullPath;
+					}
 				}
 			}
 			

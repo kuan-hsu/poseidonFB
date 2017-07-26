@@ -10,19 +10,19 @@ private import tango.stdc.stringz;
 class CArgOptionDialog : CBaseDialog
 {
 	private:
-	Ihandle*			labelOptions, labelArgs, listOptions, listArgs;
+	Ihandle*			labelOptions, labelArgs, listOptions, listArgs, btnApply;
 	IupString[2]		cStrings;
 	IupString[20]		_recentOptions, _recentArgs;
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton();
+		Ihandle* bottom = createDlgButton( "40x12" );
 		
 		cStrings[0] = new IupString( GLOBAL.languageItems["prjopts"].toDString() ~ ":" );
 		cStrings[1] = new IupString( GLOBAL.languageItems["prjargs"].toDString() ~ ":" );		
 
 		listOptions = IupList( null );
-		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
+		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=140x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
 		{
 			_recentOptions[i] = new IupString( GLOBAL.recentOptions[i] );
@@ -32,11 +32,12 @@ class CArgOptionDialog : CBaseDialog
 		IupSetHandle( "CArgOptionDialog_listOptions", listOptions );
 
 		labelOptions = IupLabel( cStrings[0].toCString );
+		IupSetAttribute( labelOptions, "SIZE", "60x16" );
 		Ihandle* hBox00 = IupHbox( labelOptions, listOptions, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 
 		listArgs = IupList( null );
-		IupSetAttributes( listArgs, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=5");
+		IupSetAttributes( listArgs, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=140x12,VISIBLE_ITEMS=5");
 		for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 		{
 			_recentArgs[i] = new IupString( GLOBAL.recentArgs[i] );
@@ -46,6 +47,7 @@ class CArgOptionDialog : CBaseDialog
 		IupSetHandle( "CArgOptionDialog_listArgs", listArgs );
 
 		labelArgs = IupLabel( cStrings[1].toCString );
+		IupSetAttribute( labelArgs, "SIZE", "60x16" );
 		Ihandle* hBox01 = IupHbox( labelArgs, listArgs, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
 
@@ -78,6 +80,7 @@ class CArgOptionDialog : CBaseDialog
 
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
+		IupSetCallback( btnApply, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
 
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_argOption" );
 		IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK_argOption" );

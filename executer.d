@@ -134,6 +134,24 @@ struct ExecuterAction
 		}
 	}
 	
+	static char[] getCustomCompilerOption()
+	{
+		char[] name = GLOBAL.statusBar.getCompileOptionSelection();
+		if( name.length )
+		{
+			foreach( char[] s; GLOBAL.customCompilerOptions )
+			{
+				int pos = Util.rindex( s, " %::% " );
+				if( pos < s.length )
+				{
+					if( s[pos+6..$] == name ) return s[0..pos];
+				}			
+			}
+		}
+		
+		return null;
+	}
+	
 	public:
 	static bool compile( char[] options = null, char[] optionDebug = null )
 	{
@@ -169,6 +187,7 @@ struct ExecuterAction
 				return false;
 			}
 
+			if( !options.length ) options = getCustomCompilerOption();
 			cSci = ScintillaAction.getActiveCScintilla();
 			command = "\"" ~ compilePath.toString ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 		}
@@ -418,6 +437,7 @@ struct ExecuterAction
 				}
 			}
 
+			if( !options.length ) options = getCustomCompilerOption();
 			txtCommand = "\"" ~ compilePath.toString ~ "\"" ~  executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
 							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
@@ -594,6 +614,7 @@ struct ExecuterAction
 		
 		try
 		{
+			if( !options.length ) options = getCustomCompilerOption();
 			char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
 			
 			if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -s gui";

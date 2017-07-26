@@ -222,6 +222,9 @@ options=Options
 	language=language
 		openlanguage=Choose Language...
 	about=About
+	
+	configuration=Configuration...
+	setcustomoption=Set Custom Compiler Options...
 
 bookmark=Mark Bookmark
 bookmarkprev=Previous Bookmark

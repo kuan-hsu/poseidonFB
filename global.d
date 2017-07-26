@@ -174,6 +174,9 @@ struct GLOBAL
 	static int					KeyNumber;
 	
 	static CustomTool[10]		customTools;
+	
+	static char[][]				customCompilerOptions;
+	static IupString			currentCustomCompilerOption;
 
 	static this()
 	{
@@ -251,6 +254,7 @@ struct GLOBAL
 		GLOBAL.defaultOption = new IupString();
 		
 		GLOBAL.widthFunctionTitle = new IupString( cast(char[]) "200" );
+		GLOBAL.currentCustomCompilerOption = new IupString( cast(char[]) "" );
 		
 		
 		GLOBAL.cString = new IupString;
@@ -623,7 +627,10 @@ struct GLOBAL
 			GLOBAL.languageItems["language"] = new IupString( cast(char[]) "Language" );
 				GLOBAL.languageItems["openlanguage"] = new IupString( cast(char[]) "Choose Language..." );
 			GLOBAL.languageItems["about"] = new IupString( cast(char[]) "About" );
-		
+			
+			GLOBAL.languageItems["configuration"] = new IupString( cast(char[]) "Configuration..." );
+			GLOBAL.languageItems["setcustomoption"] = new IupString( cast(char[]) "Set Custom Compiler Options..." );
+			
 		GLOBAL.languageItems["bookmark"] = new IupString( cast(char[]) "Mark Bookmark" );
 		GLOBAL.languageItems["bookmarkprev"] = new IupString( cast(char[]) "Previous Bookmark" );
 		GLOBAL.languageItems["bookmarknext"] = new IupString( cast(char[]) "Next Bookmark" );

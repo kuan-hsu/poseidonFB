@@ -152,6 +152,7 @@ struct IDECONFIG
 		return result;
 	}	
 
+	/+
 	static void save()
 	{
 		try
@@ -453,7 +454,8 @@ struct IDECONFIG
 			saveINI( "settings/exception_editorSettings.ini" );
 		}
 	}
-
+	+/
+	
 	static void saveINI( char[] fullpath = "settings/editorSettings.ini" )
 	{
 		try
@@ -691,12 +693,18 @@ struct IDECONFIG
 			doc ~= setINILineData( "[recentArgs]" );
 			for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.recentArgs[i] );
+
+			// customCompilerOptions
+			doc ~= setINILineData( "[customCompilerOptions]" );
+			doc ~= setINILineData( "current", GLOBAL.currentCustomCompilerOption.toDString );
+			for( int i = 0; i < GLOBAL.customCompilerOptions.length; ++i )
+				doc ~= setINILineData( "name", GLOBAL.customCompilerOptions[i] );
 				
 			// prevLoadDoc
 			doc ~= setINILineData( "[prevDocs]" );
 			for( int i = 0; i < GLOBAL.prevDoc.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.prevDoc[i] );
-			
+				
 			actionManager.FileAction.saveFile( fullpath, doc );
 		}
 		catch( Exception e )
@@ -704,7 +712,6 @@ struct IDECONFIG
 			IupMessage( "Save editorSettings.ini Error", toStringz( e.toString ) );
 		}
 	}
-	
 	
 	static void loadINI()
 	{
@@ -716,8 +723,8 @@ struct IDECONFIG
 			scope settingFilePath = new FilePath( "settings/editorSettings.ini" );
 			if( !settingFilePath.exists() )
 			{
-				load(); // load xml
 				/+
+				load(); // load xml
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
 				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
@@ -1023,10 +1030,19 @@ struct IDECONFIG
 						if( left == "name" ) GLOBAL.recentArgs ~= right;
 						break;
 
+					case "[customCompilerOptions]":
+						switch( left )
+						{
+							case "current":						GLOBAL.currentCustomCompilerOption = right;					break;
+							case "name":						GLOBAL.customCompilerOptions ~= right;						break;
+							default:
+						}
+						break;
+						
 					case "[prevDocs]":
 						if( left == "name" ) GLOBAL.prevDoc ~= right;
 						break;
-			
+						
 					default:
 				}
 			}
@@ -1038,6 +1054,7 @@ struct IDECONFIG
 		}
 	}
 
+	/+
 	static void load()
 	{
 		try
@@ -1849,6 +1866,7 @@ struct IDECONFIG
 			
 		}
 	}
+	+/
 	
 	static void saveColorTemplate( char[] templateName )
 	{

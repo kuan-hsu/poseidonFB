@@ -223,6 +223,9 @@ options=選項
 		openlanguage=選定語言...
 	about=關於
 	
+	configuration=設定...
+	setcustomoption=設定自定義編譯器選項...
+	
 bookmark=標記書籤
 bookmarkprev=前一書籤
 bookmarknext=後一書籤

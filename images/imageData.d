@@ -106,6 +106,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_dooropen", XPM.getIUPimage( "icons/xpm/door_open.xpm" ) );
 	IupSetHandle( "icon_type", XPM.getIUPimage( "icons/xpm/type.xpm" ) );
 	IupSetHandle( "icon_comment", XPM.getIUPimage( "icons/xpm/comment.xpm" ) );
+	IupSetHandle( "icon_customoption", XPM.getIUPimage( "icons/xpm/custom_option.xpm" ) );
 
 	IupSetHandle( "icon_prj_open", XPM.getIUPimage( "icons/xpm/prjfolderopen.xpm" ) ); // IupSetHandle("icon_prj_open", load_image_prj_open());
 	IupSetHandle( "icon_prj", XPM.getIUPimage( "icons/xpm/prjfolder.xpm" ) ); // IupSetHandle("icon_prj", load_image_prj()); 

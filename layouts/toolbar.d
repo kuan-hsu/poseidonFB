@@ -233,13 +233,11 @@ class CToolBar
 		version(Windows) IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=OFF" ); else IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=ON" );
 		IupSetAttribute( bitButton, "TIP", "32 / 64 bit" );
 		
-
 		listHandle = IupList( null );
 		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO" );
 		IupSetAttribute( listHandle, "SIZE", GLOBAL.widthFunctionTitle.toCString );
 		IupSetAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
-		
 		
 		// IUP Container to put buttons on~
 		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
@@ -268,7 +266,7 @@ class CToolBar
 	{
 		return listHandle;
 	}
-	
+
 	Ihandle* getGuiButtonHandle()
 	{
 		return guiButton;
@@ -290,7 +288,7 @@ class CToolBar
 		if( fromStringz( IupGetAttribute( bitButton, "VALUE" ) ) == "ON" ) return 64;
 		return 32;
 	}
-	
+
 	void showList( bool status )
 	{
 		if( status ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );

@@ -13,15 +13,15 @@ class CBaseDialog
 	Ihandle*			btnOK, btnCANCEL;//, btnAPPLY;
 	IupString			titleString;
 	
-	Ihandle* createDlgButton()
+	Ihandle* createDlgButton( char[] buttonSize = "40x20" )
 	{
 		btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
 		IupSetHandle( "btnOK", btnOK );
-		IupSetAttributes( btnOK, "SIZE=40x20");//,IMAGE=IUP_ActionOk" );
+		IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );//,IMAGE=IUP_ActionOk" );
 		
 		btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
-		IupSetAttributes( btnCANCEL, "SIZE=40x20" );// ,IMAGE=IUP_ActionCancel
+		IupSetAttributes( btnCANCEL, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
 		
 		/+
