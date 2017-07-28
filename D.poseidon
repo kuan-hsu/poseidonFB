@@ -5,7 +5,7 @@
   <MainFile/>
   <TargetName/>
   <CompilerArgs/>
-  <CompilerOption>-release -L/SUBSYSTEM:windows:4 -odobjs -version=FLATTAB</CompilerOption>
+  <CompilerOption>-debug -L/SUBSYSTEM:windows:4 -odobjs -version=FLATTAB</CompilerOption>
   <Comment/>
   <CompilerPath/>
   <IncludeDirs/>

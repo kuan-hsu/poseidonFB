@@ -29,6 +29,7 @@ class CFileList
 		IupSetCallback( filelistButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* filelistToolbarTitleImage = IupLabel( null );

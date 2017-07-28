@@ -140,6 +140,7 @@ extern(C) // Callback for CBaseDialog
 				IupSetCallback( itemNULL, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					GLOBAL.statusBar.setCompileOptionSelection( "" );
+					return IUP_DEFAULT;
 				});				
 				
 				Ihandle* itemConfig = IupItem( GLOBAL.languageItems["configuration"].toCString, null );
@@ -171,6 +172,8 @@ extern(C) // Callback for CBaseDialog
 						scope dlg = new CCustomCompilerOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString(), false );
 						dlg.show( x, y - 200 );
 					}
+					
+					return IUP_DEFAULT;
 				});
 				
 				

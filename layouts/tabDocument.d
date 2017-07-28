@@ -93,6 +93,7 @@ extern(C)
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* _closeothers = IupItem( GLOBAL.languageItems["closeothers"].toCString, null );
@@ -108,6 +109,7 @@ extern(C)
 		IupSetCallback( _closeall, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			actionManager.ScintillaAction.closeAllDocument();
+			return IUP_DEFAULT;
 		});
 		
 		Ihandle* popupMenu = IupMenu( 

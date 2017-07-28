@@ -60,6 +60,7 @@ void createMenu()
 	{
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+		return IUP_DEFAULT;
 	});
 
 	Ihandle* item_closeAll = IupItem( GLOBAL.languageItems["closeall"].toCString, null );
@@ -67,6 +68,7 @@ void createMenu()
 	IupSetCallback( item_closeAll, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		actionManager.ScintillaAction.closeAllDocument();
+		return IUP_DEFAULT;
 	});
 
 
@@ -267,6 +269,7 @@ void createMenu()
 			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
 
 		StatusBarAction.update();
+		return IUP_DEFAULT;
 	});	
 	
 	Ihandle* _macEOL = IupItem( toStringz( "Mac" ), null );
@@ -278,6 +281,7 @@ void createMenu()
 			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
 		
 		StatusBarAction.update();
+		return IUP_DEFAULT;
 	});	
 	
 	Ihandle* _unixEOL = IupItem( toStringz( "Unix" ), null );
@@ -289,6 +293,7 @@ void createMenu()
 			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
 
 		StatusBarAction.update();
+		return IUP_DEFAULT;
 	});
 
 	Ihandle* _eolSubMenu = IupMenu( _windowsEOL, _macEOL, _unixEOL, null  );
@@ -312,6 +317,7 @@ void createMenu()
 			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 0, 0 ); // SCI_CONVERTEOLS 2029
 			actionManager.StatusBarAction.update();
 		}
+		return IUP_DEFAULT;
 	});	
 	
 	Ihandle* macEOL = IupItem( toStringz( "Mac" ), null );
@@ -324,6 +330,7 @@ void createMenu()
 			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 1, 0 ); // SCI_CONVERTEOLS 2029
 			actionManager.StatusBarAction.update();
 		}
+		return IUP_DEFAULT;
 	});	
 	
 	Ihandle* unixEOL = IupItem( toStringz( "Unix" ), null );
@@ -336,6 +343,7 @@ void createMenu()
 			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 2, 0 ); // SCI_CONVERTEOLS 2029
 			actionManager.StatusBarAction.update();
 		}
+		return IUP_DEFAULT;
 	});	
 
 	Ihandle* eolSubMenu = IupMenu( windowsEOL, macEOL, unixEOL, null  );
@@ -370,6 +378,7 @@ void createMenu()
 	IupSetCallback( upperCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		_convertKeyWordCase( 2 );
+		return IUP_DEFAULT;
 	});	
 	
 	Ihandle* lowerCase = IupItem( GLOBAL.languageItems["lowercase"].toCString, null );
@@ -377,6 +386,7 @@ void createMenu()
 	IupSetCallback( lowerCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		_convertKeyWordCase( 1 );
+		return IUP_DEFAULT;
 	});	
 	
 	Ihandle* mixedCase = IupItem( GLOBAL.languageItems["mixercase"].toCString, null );
@@ -384,6 +394,7 @@ void createMenu()
 	IupSetCallback( mixedCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		_convertKeyWordCase( 3 );
+		return IUP_DEFAULT;
 	});	
 
 	Ihandle* caseSubMenu = IupMenu( upperCase, lowerCase, mixedCase, null  );
@@ -432,7 +443,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.293\nBy Kuan Hsu (Taiwan)\n2017.07.26" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.294\nBy Kuan Hsu (Taiwan)\n2017.07.28" );
+		return IUP_DEFAULT;
 	});
 
 	file_menu = IupMenu( 	item_new, 
@@ -1339,13 +1351,13 @@ extern(C)
 
 	int compile_cb( Ihandle *ih )
 	{
-		ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) );
+		ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
 		return IUP_DEFAULT;
 	}
 
 	int buildrun_cb( Ihandle *ih )
 	{
-		if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) ) ) ExecuterAction.run();
+		if( ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ ) ) ExecuterAction.run();
 		return IUP_DEFAULT;
 	}	
 
@@ -1358,7 +1370,7 @@ extern(C)
 
 	int quickRun_cb( Ihandle *ih )
 	{
-		ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption.toDString ) );
+		ExecuterAction.quickRun( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
 		return IUP_DEFAULT;
 	}
 

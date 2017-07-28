@@ -669,6 +669,7 @@ class COutline
 					}
 				}
 			}
+			return IUP_DEFAULT;
 		});
 		
 		Ihandle* outlineButtonPR = IupButton( null, "PR" );
@@ -692,6 +693,7 @@ class COutline
 			}
 
 			GLOBAL.outlineTree.changePR();
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* outlineToggleAnyWord = IupToggle( null, null );
@@ -707,6 +709,7 @@ class COutline
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			GLOBAL.outlineTree.refresh( cSci );
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* outlineButtonHide = IupButton( null, null );
@@ -715,6 +718,7 @@ class COutline
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* outlineToolbarTitleImage = IupLabel( null );

@@ -644,7 +644,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "x64compilerpath", GLOBAL.x64compilerFullPath.toDString );
 			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath.toDString );
 			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath.toDString );
-			doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
+			//doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
 			doc ~= setINILineData( "delexistexe", GLOBAL.delExistExe );
@@ -973,7 +973,7 @@ struct IDECONFIG
 							case "x64compilerpath":			GLOBAL.x64compilerFullPath = right;						break;
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
 							case "x64debuggerpath":			GLOBAL.x64debuggerFullPath = right;						break;
-							case "defaultoption":			GLOBAL.defaultOption = right;							break;
+							//case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
 							case "annotation":				GLOBAL.compilerAnootation = right;						break;
 							case "delexistexe":				GLOBAL.delExistExe = right;								break;

@@ -437,7 +437,10 @@ struct ExecuterAction
 				}
 			}
 
-			if( !options.length ) options = getCustomCompilerOption();
+			if( !options.length )
+			{
+				if( !GLOBAL.projectManager[activePrjName].compilerOption.length ) options = getCustomCompilerOption();
+			}
 			txtCommand = "\"" ~ compilePath.toString ~ "\"" ~  executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
 							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			

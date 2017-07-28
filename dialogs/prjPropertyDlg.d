@@ -105,6 +105,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetCallback( btnCompilerOpts, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			GLOBAL.compilerHelpDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+			return IUP_DEFAULT;
 		});	
 		
 		Ihandle* hBox05 = IupHbox( labelCompilerOpts, textCompilerOpts, btnCompilerOpts, null );

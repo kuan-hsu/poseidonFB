@@ -10,9 +10,30 @@ private import tango.stdc.stringz;
 class CArgOptionDialog : CBaseDialog
 {
 	private:
-	Ihandle*			labelOptions, labelArgs, listOptions, listArgs, btnApply;
+	Ihandle*			labelOptions, labelArgs, listOptions, listArgs, btnAPPLY, btnERASE;
 	IupString[2]		cStrings;
 	IupString[20]		_recentOptions, _recentArgs;
+	
+	Ihandle* createDlgButton( char[] buttonSize = "40x20" )
+	{
+		btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
+		IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );//,IMAGE=IUP_ActionOk" );
+		
+		btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
+		IupSetAttributes( btnCANCEL, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
+		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
+
+		btnAPPLY = IupButton( GLOBAL.languageItems["add"].toCString, null );
+		IupSetAttributes( btnAPPLY, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
+
+		btnERASE = IupButton( GLOBAL.languageItems["delete"].toCString, null );
+		IupSetAttributes( btnERASE, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
+
+		Ihandle* hBox_DlgButton = IupHbox( btnERASE, btnAPPLY, IupFill(), btnOK, btnCANCEL, null );
+		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ABOTTOM,GAP=5,MARGIN=1x0" );
+
+		return hBox_DlgButton;
+	}	
 
 	void createLayout()
 	{
@@ -75,12 +96,17 @@ class CArgOptionDialog : CBaseDialog
 
 		createLayout();
 
+		IupSetHandle( "btnAPPLY_argOption", btnAPPLY );
 		IupSetHandle( "btnCANCEL_argOption", btnCANCEL );
 		IupSetHandle( "btnOK_argOption", btnOK );
 
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
-		IupSetCallback( btnApply, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
+		IupSetCallback( btnAPPLY, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
+		IupSetCallback( btnERASE, "ACTION", cast(Icallback) &CArgOptionDialog_btnERASE_cb );
+		
+		
+		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["run"].toCString );
 
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_argOption" );
 		IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK_argOption" );
@@ -181,15 +207,21 @@ extern(C) // Callback for CArgOptionDialog
 				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" )
 				{
 					char[] text = Util.trim( fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup );
-					if( !text.length ) text = " ";					
-					actionManager.SearchAction.addListItem( _listOptions, text, 10 );
-					
-					GLOBAL.recentOptions.length = 0;
-					for( int i = 1; i <= IupGetInt( _listOptions, "COUNT" ); ++ i )
+					if( text.length )
 					{
-						GLOBAL.recentOptions ~= fromStringz( IupGetAttribute( _listOptions, toStringz( Integer.toString( i ) ) ) ).dup;
+						actionManager.SearchAction.addListItem( _listOptions, text, 10 );
+						
+						GLOBAL.recentOptions.length = 0;
+						for( int i = 1; i <= IupGetInt( _listOptions, "COUNT" ); ++ i )
+						{
+							GLOBAL.recentOptions ~= fromStringz( IupGetAttribute( _listOptions, toStringz( Integer.toString( i ) ) ) ).dup;
+						}
+						if( GLOBAL.recentOptions.length ) IupSetAttribute( _listOptions, "VALUE", toStringz( GLOBAL.recentOptions[0] ) );
 					}
-					if( GLOBAL.recentOptions.length ) IupSetAttribute( _listOptions, "VALUE", toStringz( GLOBAL.recentOptions[0] ) );
+					else
+					{
+						IupSetAttribute( _listOptions, "VALUE", "" );
+					}
 				}
 			}
 
@@ -199,24 +231,96 @@ extern(C) // Callback for CArgOptionDialog
 				if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" )
 				{
 					char[] text = Util.trim( fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup );
-					if( !text.length ) text = " ";					
-					actionManager.SearchAction.addListItem( _listArgs, text, 10 );
-
-					GLOBAL.recentArgs.length = 0;
-					for( int i = 1; i <= IupGetInt( _listArgs, "COUNT" ); ++ i )
+					if( text.length )
 					{
-						GLOBAL.recentArgs ~= fromStringz( IupGetAttribute( _listArgs, toStringz( Integer.toString( i ) ) ) ).dup;
+						actionManager.SearchAction.addListItem( _listArgs, text, 10 );
+
+						GLOBAL.recentArgs.length = 0;
+						for( int i = 1; i <= IupGetInt( _listArgs, "COUNT" ); ++ i )
+						{
+							GLOBAL.recentArgs ~= fromStringz( IupGetAttribute( _listArgs, toStringz( Integer.toString( i ) ) ) ).dup;
+						}
+						if( GLOBAL.recentArgs.length ) IupSetAttribute( _listArgs, "VALUE", toStringz( GLOBAL.recentArgs[0] ) );
 					}
-					if( GLOBAL.recentArgs.length ) IupSetAttribute( _listArgs, "VALUE", toStringz( GLOBAL.recentArgs[0] ) );					
+					else
+					{
+						IupSetAttribute( _listArgs, "VALUE", "" );
+					}
 				}
-			}			
+			}
 			
+			if( ih == IupGetHandle( "btnAPPLY_argOption" ) ) return IUP_DEFAULT;
 			IupHide( GLOBAL.argsDlg._dlg );
 		}
 
 		return IUP_DEFAULT;
 	}
 
+	private int CArgOptionDialog_btnERASE_cb( Ihandle* ih )
+	{
+		if( GLOBAL.argsDlg !is null )
+		{
+			Ihandle* _listOptions = IupGetHandle( "CArgOptionDialog_listOptions" );
+			if( _listOptions != null )
+			{
+				if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" )
+				{
+					char[] text = fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup;
+					for( int i = IupGetInt( _listOptions, "COUNT" ); i > 0; -- i )
+					{
+						char[] itemText = Util.trim( fromStringz( IupGetAttributeId( _listOptions, "", i ) ) ).dup;
+						if( itemText.length )
+						{
+							if( fromStringz( IupGetAttributeId( _listOptions, "", i ) ) == text )
+							{
+								IupSetAttribute( _listOptions, "VALUE", "" );
+								IupSetInt( _listOptions, "REMOVEITEM", i );
+							}
+						}
+						else
+						{
+							IupSetInt( _listOptions, "REMOVEITEM", i );							
+						}
+					}
+					GLOBAL.recentOptions.length = 0;
+					for( int i = 1; i <= IupGetInt( _listOptions, "COUNT" ); ++ i )
+					{
+						GLOBAL.recentOptions ~= fromStringz( IupGetAttributeId( _listOptions, "", i ) ).dup;
+					}					
+				}
+			}
+
+			Ihandle* _listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
+			if( _listArgs != null )
+			{
+				char[] text = fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup;
+				for( int i = IupGetInt( _listArgs, "COUNT" ); i > 0; -- i )
+				{
+					char[] itemText = Util.trim( fromStringz( IupGetAttributeId( _listArgs, "", i ) ) ).dup;
+					if( itemText.length )
+					{
+						if( fromStringz( IupGetAttributeId( _listArgs, "", i ) ) == text )
+						{
+							IupSetAttribute( _listArgs, "VALUE", "" );
+							IupSetInt( _listArgs, "REMOVEITEM", i );
+						}
+					}
+					else
+					{
+						IupSetInt( _listArgs, "REMOVEITEM", i );							
+					}
+				}
+				GLOBAL.recentArgs.length = 0;
+				for( int i = 1; i <= IupGetInt( _listArgs, "COUNT" ); ++ i )
+				{
+					GLOBAL.recentArgs ~= fromStringz( IupGetAttributeId( _listArgs, "", i ) ).dup;
+				}
+			}
+		}
+
+		return IUP_DEFAULT;
+	}
+	
 	private int CArgOptionDialog_CLOSE_cb( Ihandle *ih )
 	{
 		return CArgOptionDialog_btnCancel_cb( ih );

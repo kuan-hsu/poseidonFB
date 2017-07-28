@@ -52,7 +52,25 @@ void createExplorerWindow()
 	createMessagePanel();
 
 	GLOBAL.debugPanel = new CDebugger();
-	
+
+	/+
+	version(FLATTAB)
+	{
+		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "1" );
+		IupSetAttributes( GLOBAL.messageWindowTabs, "SHOWCLOSE=YES,TABSPADDING=5x3" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGE", "icon_debug_clear" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
+		IupSetCallback( GLOBAL.messageWindowTabs, "TABCLOSE_CB", cast(Icallback) &messageWindowTabs_tabClose_cb );
+	}
+	else
+	{
+		GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
+	}
+	+/
 	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
 
@@ -542,6 +560,7 @@ extern(C)
 				scope _fp = new FilePath( GLOBAL.manualPath.toDString );
 				if( !_fp.isAbsolute() )	_fp.set( GLOBAL.poseidonPath ~ GLOBAL.manualPath.toDString );				
 				GLOBAL.manualPanel.setValue( _fp.toString );
+				return IUP_DEFAULT;
 			});			
 			popupMenu = IupMenu( _home, null );
 		}
@@ -560,6 +579,7 @@ extern(C)
 				{
 					IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", null );
 				}
+				return IUP_DEFAULT;
 			});
 			popupMenu = IupMenu( _clear, null );
 		}
@@ -569,4 +589,29 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
+	
+	/+
+	version(FLATTAB)
+	{
+		// Close the document Iuptab......
+		private int messageWindowTabs_tabClose_cb( Ihandle* ih, int pos )
+		{
+			if( pos < 2 )
+			{
+				int valuePos = IupGetInt( GLOBAL.messageWindowTabs, "VALUEPOS" );
+				if( valuePos == 0 )
+				{
+					IupSetAttribute( GLOBAL.outputPanel, "VALUE", "" );
+				}
+				else if( valuePos == 1 )
+				{
+					IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", "" );
+				}
+			}
+			version(FLATTAB) return IUP_IGNORE;
+			
+			return IUP_DEFAULT;
+		}
+	}
+	+/
 }

@@ -81,7 +81,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( hBox02x64, "ALIGNMENT=ACENTER,MARGIN=5x0,ACTIVE=NO" );
 		
 		
-
+		/+
 		Ihandle* labelDefaultOption = IupLabel( toStringz( GLOBAL.languageItems["compileropts"].toDString ~ ":" ) );
 		IupSetAttributes( labelDefaultOption, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
@@ -95,12 +95,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnCompilerOpts, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			GLOBAL.compilerHelpDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+			return IUP_DEFAULT;
 		});	
 
 
 		Ihandle* hBox03 = IupHbox( labelDefaultOption, textDefaultOption, btnCompilerOpts, null );
 		IupSetAttributes( hBox03, "ALIGNMENT=ACENTER,MARGIN=5x0" );
-
+		+/
 
 
 		// compiler Setting
@@ -279,7 +280,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, hBox03, frameCompiler, frameParser, frameLive, null );
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, /*hBox03,*/ frameCompiler, frameParser, frameLive, null );
 		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
@@ -2043,7 +2044,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.x64compilerFullPath					= fromStringz( IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.debuggerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.x64debuggerFullPath					= fromStringz( IupGetAttribute( IupGetHandle( "x64debuggerPath_Handle" ), "VALUE" ) ).dup;
-			GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
+			//GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
 			GLOBAL.delExistExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleDelPrevEXE" ), "VALUE" ) ).dup;

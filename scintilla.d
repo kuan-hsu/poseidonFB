@@ -814,6 +814,7 @@ extern(C)
 				{
 					Ihandle* _sci = actionManager.ScintillaAction.getActiveIupScintilla();
 					if( _sci != null ) IupSetAttribute( _sci, "SELECTEDTEXT", "" );
+					return IUP_DEFAULT;
 
 				});
 
@@ -828,7 +829,7 @@ extern(C)
 				{
 					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
-					//IupScintillaSendMessage( cSci.getIupScintilla, 2548, 3, 0 );
+					return IUP_DEFAULT;
 				});
 				
 				Ihandle* _hideAnnotation = IupItem( GLOBAL.languageItems["hideannotation"].toCString, null );
@@ -837,6 +838,7 @@ extern(C)
 				{
 					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
+					return IUP_DEFAULT;
 				});
 
 				Ihandle* _removeAllAnnotation = IupItem( GLOBAL.languageItems["removeannotation"].toCString, null );
@@ -845,6 +847,7 @@ extern(C)
 				{
 					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
+					return IUP_DEFAULT;
 				});
 				
 				Ihandle* _tempAnnotationMenu = IupMenu( _showAnnotation, _hideAnnotation, _removeAllAnnotation, null  );
@@ -858,6 +861,7 @@ extern(C)
 				{
 					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 					GLOBAL.outlineTree.refresh( cSci );
+					return IUP_DEFAULT;
 				});
 
 				Ihandle* _goto = IupItem( GLOBAL.languageItems["sc_gotodef"].toCString, null );
@@ -865,6 +869,7 @@ extern(C)
 				IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.toDefintionAndType( 1 );
+					return IUP_DEFAULT;
 				});
 				
 				Ihandle* _back = IupItem( GLOBAL.languageItems["sc_backdefinition"].toCString, null );
@@ -872,6 +877,7 @@ extern(C)
 				IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.backDefinition();
+					return IUP_DEFAULT;
 				});
 				
 				Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
@@ -879,6 +885,7 @@ extern(C)
 				IupSetCallback( _gotoProcedure, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.toDefintionAndType( 2 );
+					return IUP_DEFAULT;
 				});
 				
 				
@@ -888,6 +895,7 @@ extern(C)
 				IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					AutoComplete.toDefintionAndType( 0 );
+					return IUP_DEFAULT;
 				});				
 				
 				
@@ -900,16 +908,28 @@ extern(C)
 
 				//selectedMarkerIndex
 				Ihandle* _maker0 = IupItem( GLOBAL.languageItems["maker0"].toCString, null );
-				IupSetCallback( _maker0, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 0; });
+				IupSetCallback( _maker0, "ACTION", cast(Icallback) function( Ihandle* ih ){ 
+					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 0;
+					return IUP_DEFAULT;
+				});
 				
 				Ihandle* _maker1 = IupItem( GLOBAL.languageItems["maker1"].toCString, null );
-				IupSetCallback( _maker1, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 1; });
+				IupSetCallback( _maker1, "ACTION", cast(Icallback) function( Ihandle* ih ){
+					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 1;
+					return IUP_DEFAULT;
+				});
 				
 				Ihandle* _maker2 = IupItem( GLOBAL.languageItems["maker2"].toCString, null );
-				IupSetCallback( _maker2, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 2; });
+				IupSetCallback( _maker2, "ACTION", cast(Icallback) function( Ihandle* ih ){
+					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 2;
+					return IUP_DEFAULT;
+				});
 				
 				Ihandle* _maker3 = IupItem( GLOBAL.languageItems["maker3"].toCString, null );
-				IupSetCallback( _maker3, "ACTION", cast(Icallback) function( Ihandle* ih ){ ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 3; });
+				IupSetCallback( _maker3, "ACTION", cast(Icallback) function( Ihandle* ih ){
+					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 3;
+					return IUP_DEFAULT;
+				});
 				
 				switch( cSci.selectedMarkerIndex )
 				{
@@ -1009,6 +1029,7 @@ extern(C)
 							IupSetIntId( actSci.getIupScintilla, "MARKERADD", currentLine, actSci.selectedMarkerIndex + 5 );
 						}
 					}
+					return IUP_DEFAULT;
 				});
 				
 				Ihandle* _delHighlightLine = IupItem( GLOBAL.languageItems["delhighlghtlines"].toCString, null );
@@ -1054,6 +1075,7 @@ extern(C)
 							}
 						}
 					}
+					return IUP_DEFAULT;
 				});					
 
 				Ihandle* itemHighlight = IupSubmenu( GLOBAL.languageItems["colorhighlght"].toCString, _makerSubMenu );

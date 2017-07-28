@@ -104,7 +104,8 @@ class CToolBar
 				{
 					IupSetIntId( ih, "MARKERADD", currentLine, 1 );
 				}
-			}		
+			}
+			return IUP_DEFAULT;
 		});
 		
 		IupSetAttributes( btnMarkPrev, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markprev" );
@@ -132,7 +133,7 @@ class CToolBar
 				IupSetFocus( ih );
 				if( markLineNumber > -1 ) IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
 				StatusBarAction.update();
-			}		
+			}
 		});
 		
 		IupSetAttributes( btnMarkNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_marknext" );
@@ -168,6 +169,7 @@ class CToolBar
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 			if( ih != null ) IupSetInt( ih, "MARKERDELETEALL", 1 );
+			return IUP_DEFAULT;
 		});
 
 
@@ -213,6 +215,7 @@ class CToolBar
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outline_cb( GLOBAL.menuOutlineWindow );
+			return IUP_DEFAULT;
 		});		
 
 		messageButtonHide = IupToggle( null, "HideMessage" );
@@ -222,6 +225,7 @@ class CToolBar
 		IupSetCallback( messageButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.message_cb( GLOBAL.menuMessageWindow );
+			return IUP_DEFAULT;
 		});		
 		
 		
@@ -309,7 +313,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) );
+				ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{
@@ -355,7 +359,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				if( ExecuterAction.compile( Util.trim( GLOBAL.defaultOption.toDString ) ) ) ExecuterAction.run();
+				if( ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ ) ) ExecuterAction.run();
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{
@@ -404,7 +408,7 @@ extern( C )
 		{
 			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
 			{
-				ExecuterAction.quickRun( Util.trim( GLOBAL.defaultOption.toDString ) );
+				ExecuterAction.quickRun( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
 			}
 			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
 			{

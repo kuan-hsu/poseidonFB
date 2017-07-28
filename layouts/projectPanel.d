@@ -97,6 +97,7 @@ class CProjectTree
 					}
 				}
 			}
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* projectButtonHide = IupButton( null, null );
@@ -105,6 +106,7 @@ class CProjectTree
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* projectToolbarTitleImage = IupLabel( null );
@@ -849,6 +851,7 @@ extern(C)
 						proc.execute;
 						proc.wait;
 					}
+					return IUP_DEFAULT;
 				});
 
 				Ihandle* popupMenu = IupMenu( 	itemProperty,

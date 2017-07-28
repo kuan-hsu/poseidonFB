@@ -117,7 +117,7 @@ struct GLOBAL
 	static IupString			manualPath;
 	static IupString			colorTemplate;
 	//static char[]				maxError = "30";
-	static IupString			defaultOption;
+	//static IupString			defaultOption;
 	static char[]				recentOpenDir;
 	static char[][]				recentOptions, recentArgs, prevDoc;
 	static IupString[]			recentFiles, recentProjects;
@@ -251,7 +251,7 @@ struct GLOBAL
 		GLOBAL.x64debuggerFullPath = new IupString();
 		GLOBAL.manualPath = new IupString();
 		GLOBAL.colorTemplate = new IupString();
-		GLOBAL.defaultOption = new IupString();
+		//GLOBAL.defaultOption = new IupString();
 		
 		GLOBAL.widthFunctionTitle = new IupString( cast(char[]) "200" );
 		GLOBAL.currentCustomCompilerOption = new IupString( cast(char[]) "" );
