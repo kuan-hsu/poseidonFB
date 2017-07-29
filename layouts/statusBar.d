@@ -28,9 +28,20 @@ class CStatusBar
 		IupSetAttribute( image, "TIP", GLOBAL.languageItems["setcustomoption"].toCString );
 		IupSetCallback( image, "BUTTON_CB", cast(Icallback) &CStatusBar_BUTTON_CB );
 		
-		compileOptionSelection = IupLabel( GLOBAL.currentCustomCompilerOption.toCString );
+		compileOptionSelection = IupLabel( "" );
 		IupSetHandle( "compileOptionSelection", compileOptionSelection );
 		IupSetAttribute( compileOptionSelection, "SIZE", "150x" );
+		if( !GLOBAL.currentCustomCompilerOption.toDString.length )
+		{
+			IupSetAttribute( compileOptionSelection, "FGCOLOR", "255 0 0" );
+			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
+		}
+		else
+		{
+			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 255" );
+			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
+		}
+	
 		
 		Ihandle*[5] labelSEPARATOR;
 		for( int i = 0; i < 5; i++ )
@@ -122,6 +133,7 @@ class CStatusBar
 		if( compileOptionSelection != null )
 		{
 			GLOBAL.currentCustomCompilerOption = os;
+			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 255" );
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 		}
 	}
@@ -139,7 +151,14 @@ extern(C) // Callback for CBaseDialog
 				IupSetAttribute( itemNULL, "IMAGE", "icon_clear" );
 				IupSetCallback( itemNULL, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
-					GLOBAL.statusBar.setCompileOptionSelection( "" );
+					Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" );
+					if( selectionHandle != null )
+					{
+						IupSetAttribute( selectionHandle, "FGCOLOR", "255 0 0" );
+						IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
+						GLOBAL.currentCustomCompilerOption = cast(char[])"";
+					}
+					//GLOBAL.statusBar.setCompileOptionSelection( "" );
 					return IUP_DEFAULT;
 				});				
 				
@@ -213,6 +232,7 @@ extern(C) // Callback for CBaseDialog
 		if( selectionHandle != null )
 		{
 			GLOBAL.currentCustomCompilerOption = IupGetAttribute( ih, "TITLE" );
+			IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 255" );
 			IupSetAttribute( selectionHandle, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 		}
 

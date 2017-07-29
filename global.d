@@ -120,6 +120,7 @@ struct GLOBAL
 	//static IupString			defaultOption;
 	static char[]				recentOpenDir;
 	static char[][]				recentOptions, recentArgs, prevDoc;
+	static int					maxRecentOptions = 15, maxRecentArgs = 15;
 	static IupString[]			recentFiles, recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;
@@ -176,7 +177,7 @@ struct GLOBAL
 	static CustomTool[10]		customTools;
 	
 	static char[][]				customCompilerOptions;
-	static IupString			currentCustomCompilerOption;
+	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
 
 	static this()
 	{
@@ -254,8 +255,8 @@ struct GLOBAL
 		//GLOBAL.defaultOption = new IupString();
 		
 		GLOBAL.widthFunctionTitle = new IupString( cast(char[]) "200" );
-		GLOBAL.currentCustomCompilerOption = new IupString( cast(char[]) "" );
-		
+		GLOBAL.currentCustomCompilerOption = new IupString( cast(char*) "" );
+		GLOBAL.noneCustomCompilerOption = new IupString( cast(char*) "None Custom Compile Option" );
 		
 		GLOBAL.cString = new IupString;
 		GLOBAL.scanner = new CScanner;

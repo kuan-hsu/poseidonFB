@@ -553,17 +553,22 @@ extern(C) // Callback for CFindInFilesDialog
 		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 		
+		Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		if( textHandle == null ) return IUP_DEFAULT;
+		
 		int index = IupGetInt( toolsHandle, "VALUE" ); // Get current item #no
 		if( index < 1 ) return IUP_DEFAULT;
 		
 		IupSetAttribute( toolsHandle, "REMOVEITEM", IupGetAttribute( toolsHandle, "VALUE" ) );
+		IupSetAttribute( textHandle, "VALUE", "" );
 		
 		if( IupGetInt( toolsHandle, "COUNT" ) > 0 )
 		{
-			if( index > 1 ) IupSetInt( toolsHandle, "VALUE", index - 1 ); else IupSetInt( toolsHandle, "VALUE", 1 ); // Set Focus
+			if( index > 1 ) IupSetInt( toolsHandle, "VALUE", index - 1 );// else IupSetInt( toolsHandle, "VALUE", 1 ); // Set Focus
 		}
 		else
 		{
+			CCustomCompilerOptionDialog.tempCustomCompilerOptions.length = 0;
 			return IUP_DEFAULT;
 		}
 		
@@ -575,9 +580,6 @@ extern(C) // Callback for CFindInFilesDialog
 		CCustomCompilerOptionDialog.tempCustomCompilerOptions.length = CCustomCompilerOptionDialog.tempCustomCompilerOptions.length - 1;
 
 		int id = IupGetInt( toolsHandle, "VALUE" ); // Get current item #no
-		Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
-		IupSetAttribute( textHandle, "VALUE", "" );
-		
 		if( id > 0 )
 		{
 			if( textHandle != null )

@@ -686,17 +686,20 @@ struct IDECONFIG
 
 			// recentProjects
 			doc ~= setINILineData( "[recentOptions]" );
+			doc ~= setINILineData( "max", Integer.toString( GLOBAL.maxRecentOptions ) );
 			for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.recentOptions[i] );
 
 			// recentProjects
 			doc ~= setINILineData( "[recentArgs]" );
+			doc ~= setINILineData( "max", Integer.toString( GLOBAL.maxRecentArgs ) );
 			for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.recentArgs[i] );
 
 			// customCompilerOptions
 			doc ~= setINILineData( "[customCompilerOptions]" );
 			doc ~= setINILineData( "current", GLOBAL.currentCustomCompilerOption.toDString );
+			doc ~= setINILineData( "none", GLOBAL.noneCustomCompilerOption.toDString );
 			for( int i = 0; i < GLOBAL.customCompilerOptions.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.customCompilerOptions[i] );
 				
@@ -1023,17 +1026,28 @@ struct IDECONFIG
 						break;
 
 					case "[recentOptions]":
-						if( left == "name" ) GLOBAL.recentOptions ~= right;
+						switch( left )
+						{
+							case "max":							GLOBAL.maxRecentOptions = Integer.toInt( right );			break; // Hiddle Option
+							case "name":						GLOBAL.recentOptions ~= right;								break;
+							default:
+						}					
 						break;
 
 					case "[recentArgs]":
-						if( left == "name" ) GLOBAL.recentArgs ~= right;
+						switch( left )
+						{
+							case "max":							GLOBAL.maxRecentArgs = Integer.toInt( right );				break; // Hiddle Option
+							case "name":						GLOBAL.recentArgs ~= right;									break;
+							default:
+						}					
 						break;
 
 					case "[customCompilerOptions]":
 						switch( left )
 						{
 							case "current":						GLOBAL.currentCustomCompilerOption = right;					break;
+							case "none":						GLOBAL.noneCustomCompilerOption = right;					break; // Hiddle Option
 							case "name":						GLOBAL.customCompilerOptions ~= right;						break;
 							default:
 						}

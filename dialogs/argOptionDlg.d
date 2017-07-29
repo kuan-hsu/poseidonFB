@@ -209,7 +209,7 @@ extern(C) // Callback for CArgOptionDialog
 					char[] text = Util.trim( fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup );
 					if( text.length )
 					{
-						actionManager.SearchAction.addListItem( _listOptions, text, 10 );
+						actionManager.SearchAction.addListItem( _listOptions, text, GLOBAL.maxRecentOptions );
 						
 						GLOBAL.recentOptions.length = 0;
 						for( int i = 1; i <= IupGetInt( _listOptions, "COUNT" ); ++ i )
@@ -233,7 +233,7 @@ extern(C) // Callback for CArgOptionDialog
 					char[] text = Util.trim( fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup );
 					if( text.length )
 					{
-						actionManager.SearchAction.addListItem( _listArgs, text, 10 );
+						actionManager.SearchAction.addListItem( _listArgs, text, GLOBAL.maxRecentArgs );
 
 						GLOBAL.recentArgs.length = 0;
 						for( int i = 1; i <= IupGetInt( _listArgs, "COUNT" ); ++ i )

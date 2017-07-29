@@ -136,15 +136,14 @@ struct ExecuterAction
 	
 	static char[] getCustomCompilerOption()
 	{
-		char[] name = GLOBAL.statusBar.getCompileOptionSelection();
-		if( name.length )
+		if( GLOBAL.currentCustomCompilerOption.toDString.length )
 		{
 			foreach( char[] s; GLOBAL.customCompilerOptions )
 			{
 				int pos = Util.rindex( s, " %::% " );
 				if( pos < s.length )
 				{
-					if( s[pos+6..$] == name ) return s[0..pos];
+					if( s[pos+6..$] == GLOBAL.currentCustomCompilerOption.toDString ) return s[0..pos];
 				}			
 			}
 		}
