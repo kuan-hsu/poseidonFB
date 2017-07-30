@@ -140,10 +140,10 @@ struct ExecuterAction
 		{
 			foreach( char[] s; GLOBAL.customCompilerOptions )
 			{
-				int pos = Util.rindex( s, " %::% " );
+				int pos = Util.rindex( s, "%::% " );
 				if( pos < s.length )
 				{
-					if( s[pos+6..$] == GLOBAL.currentCustomCompilerOption.toDString ) return s[0..pos];
+					if( s[pos+5..$] == GLOBAL.currentCustomCompilerOption.toDString ) return s[0..pos];
 				}			
 			}
 		}
@@ -657,25 +657,18 @@ struct ExecuterAction
 				stderrMessage ~= ( line ~ "\n" );
 			}
 			
-			foreach (line; new Lines!(char)(p.stdout))  
+			foreach( line; new Lines!(char)(p.stdout) )
 			{
-				int openPos = Util.index( line, "(" );
-				if( openPos < line.length )
-				{
-					line = ( cSci.getFullPath() ~ line[openPos..length] ).dup;
-				}
-				
-				stdoutMessage ~= ( line ~ "\n" );
-
-				if( !bError )
-				{
-					if( Util.index( line, ") error " ) < line.length ) bError = true;
-				}
-
 				if( !bWarning )
 				{
-					if( Util.index( line, ") warning " ) < line.length ) bWarning = true;
+					if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+				}
+				if( !bError )
+				{
+					if( Util.index( line, "error " ) < line.length ) bError = true;
 				}				
+				
+				stdoutMessage ~= ( line ~ "\n" );
 			}
 
 			auto result = p.wait;

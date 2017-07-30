@@ -91,7 +91,7 @@ struct GLOBAL
 	static CSearchDialog		searchDlg;
 	static CFindInFilesDialog	serachInFilesDlg;
 	static CCompilerHelpDialog	compilerHelpDlg;
-	static CArgOptionDialog		argsDlg;
+	//static CArgOptionDialog		argsDlg;
 
 	static CStatusBar			statusBar;
 
@@ -674,8 +674,8 @@ struct GLOBAL
 			GLOBAL.languageItems["prjdir"] = new IupString( cast(char[]) "Project Dir" );
 			GLOBAL.languageItems["prjmainfile"] = new IupString( cast(char[]) "Main file" );
 			GLOBAL.languageItems["prjtarget"] = new IupString( cast(char[]) "Target Name" );
-			GLOBAL.languageItems["prjargs"] = new IupString( cast(char[]) "Execute Args" );
-			GLOBAL.languageItems["prjopts"] = new IupString( cast(char[]) "Compile Opt" );
+			GLOBAL.languageItems["prjargs"] = new IupString( cast(char[]) "Execute Args:" );
+			GLOBAL.languageItems["prjopts"] = new IupString( cast(char[]) "Compile Opts:" );
 			GLOBAL.languageItems["prjcomment"] = new IupString( cast(char[]) "Comment" );
 			GLOBAL.languageItems["prjcompiler"] = new IupString( cast(char[]) "FBC Path" );
 		GLOBAL.languageItems["include"] = new IupString( cast(char[]) "Include..." );
@@ -774,6 +774,7 @@ struct GLOBAL
 		GLOBAL.languageItems["exitdebug1"] = new IupString( cast(char[]) "Exit debug right now?" );
 		GLOBAL.languageItems["exitdebug2"] = new IupString( cast(char[]) "No debugging symbols found!! Exit debug!" );
 		GLOBAL.languageItems["applycolor"] = new IupString( cast(char[]) "Apply to other scintilla background color settings?" );
+		GLOBAL.languageItems["noselect"] = new IupString( cast(char[]) "No Selected!!" );
 		GLOBAL.languageItems["quest"] = new IupString( cast(char[]) "Quest" );
 		GLOBAL.languageItems["alarm"] = new IupString( cast(char[]) "Alarm" );
 		GLOBAL.languageItems["error"] = new IupString( cast(char[]) "Error" );

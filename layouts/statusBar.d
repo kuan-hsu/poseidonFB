@@ -1,7 +1,7 @@
 ﻿module layouts.statusBar;
 
 import		iup.iup;
-import		global, tools, dialogs.customDlg;
+import		global, tools, dialogs.argOptionDlg;
 import		tango.stdc.stringz;
 
 class CStatusBar
@@ -11,7 +11,7 @@ class CStatusBar
 	import		Integer = tango.text.convert.Integer;
 	
 	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection;
-	IupString	_name, _lc, _ins, _eol, _en;
+	IupString	_name, _lc, _ins, _eol, _en, tipString;
 	
 	
 	void createLayout()
@@ -40,6 +40,7 @@ class CStatusBar
 		{
 			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 255" );
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
+			setTip( GLOBAL.currentCustomCompilerOption.toDString );
 		}
 	
 		
@@ -73,6 +74,8 @@ class CStatusBar
 		_ins = new IupString();
 		_eol = new IupString();
 		_en = new IupString();
+		
+		tipString = new IupString();
 		
 		createLayout();
 	}
@@ -122,12 +125,31 @@ class CStatusBar
 		IupSetAttribute( EncodingType, "TITLE", _en.toCString );
 	}
 	
-	char[] getCompileOptionSelection()
+	void setTip( char[] name )
 	{
-		if( compileOptionSelection != null ) return fromStringz( IupGetAttribute( compileOptionSelection, "TITLE" ) ).dup;
-		return null;
+		tipString = cast(char[])"";
+		IupSetAttribute( compileOptionSelection, "TIP", tipString.toCString );
+		
+		if( name.length )
+		{
+			foreach( char[] s; GLOBAL.customCompilerOptions )
+			{
+				int pos = Util.rindex( s, "%::% " );
+				if( pos < s.length )
+				{
+					if( s[pos+5..$] == name )
+					{
+						tipString = s[0..pos].dup;
+						IupSetAttribute( compileOptionSelection, "TIP", tipString.toCString );
+						IupRefresh( compileOptionSelection );
+						break;
+					}
+				}			
+			}			
+		}
 	}
 	
+	/+
 	void setCompileOptionSelection( char[] os )
 	{
 		if( compileOptionSelection != null )
@@ -137,6 +159,7 @@ class CStatusBar
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 		}
 	}
+	+/
 }
 
 extern(C) // Callback for CBaseDialog
@@ -157,8 +180,8 @@ extern(C) // Callback for CBaseDialog
 						IupSetAttribute( selectionHandle, "FGCOLOR", "255 0 0" );
 						IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 						GLOBAL.currentCustomCompilerOption = cast(char[])"";
+						GLOBAL.statusBar.setTip( "" );
 					}
-					//GLOBAL.statusBar.setCompileOptionSelection( "" );
 					return IUP_DEFAULT;
 				});				
 				
@@ -183,13 +206,13 @@ extern(C) // Callback for CBaseDialog
 					
 					version(Windows)
 					{
-						scope dlg = new CCustomCompilerOptionDialog( 480, -1, GLOBAL.languageItems["setcustomoption"].toDString(), false );
-						dlg.show( x, y - 200 );
+						scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
+						dlg.show( x, y - 200, -1 );
 					}
 					else
 					{
 						scope dlg = new CCustomCompilerOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString(), false );
-						dlg.show( x, y - 200 );
+						dlg.show( x, y - 200,-1 );
 					}
 					
 					return IUP_DEFAULT;
@@ -206,10 +229,10 @@ extern(C) // Callback for CBaseDialog
 											
 				for( int i = GLOBAL.customCompilerOptions.length - 1; i >= 0; -- i )
 				{
-					int pos = Util.index( GLOBAL.customCompilerOptions[i], " %::% " );
+					int pos = Util.index( GLOBAL.customCompilerOptions[i], "%::% " );
 					if( pos < GLOBAL.customCompilerOptions[i].length )
 					{
-						char[] Name = GLOBAL.customCompilerOptions[i][pos+6..$];
+						char[] Name = GLOBAL.customCompilerOptions[i][pos+5..$];
 						Ihandle* _new = IupItem( toStringz( Name ), null );
 						IupSetCallback( _new, "ACTION", cast(Icallback) &customCompilerOptions_click_cb );
 						IupInsert( popupMenu, null, _new );
@@ -234,6 +257,7 @@ extern(C) // Callback for CBaseDialog
 			GLOBAL.currentCustomCompilerOption = IupGetAttribute( ih, "TITLE" );
 			IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 255" );
 			IupSetAttribute( selectionHandle, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
+			GLOBAL.statusBar.setTip( GLOBAL.currentCustomCompilerOption.toDString );
 		}
 
 		return IUP_DEFAULT;

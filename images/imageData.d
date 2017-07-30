@@ -58,6 +58,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_gui", XPM.getIUPimage( "icons/xpm/gui.xpm" ) );
 	IupSetHandle( "icon_32", XPM.getIUPimage( "icons/xpm/32.xpm" ) );
 	IupSetHandle( "icon_64", XPM.getIUPimage( "icons/xpm/64.xpm" ) );
+	IupSetHandle( "icon_apply", XPM.getIUPimage( "icons/xpm/apply.xpm" ) );
 
 	IupSetHandle( "icon_copy", XPM.getIUPimage( "icons/xpm/copy.xpm" ) ); // IupSetHandle("icon_copy", load_image_copy_edit());
 	IupSetHandle( "icon_save", XPM.getIUPimage( "icons/xpm/save.xpm" ) ); // IupSetHandle("icon_save", load_image_save_edit());

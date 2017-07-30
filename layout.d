@@ -107,7 +107,7 @@ void createLayout()
 void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"].toDString );
-	GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
+	//GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
 	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString );
 	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString );
 }

@@ -82,7 +82,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
 
 		// Line 5
-		Ihandle* labelArgs = IupLabel( toStringz( GLOBAL.languageItems["prjargs"].toDString ~ ":" ) );
+		Ihandle* labelArgs = IupLabel( GLOBAL.languageItems["prjargs"].toCString );
 		IupSetAttributes( labelArgs, "SIZE=54x20" );
 		
 		textArgs = IupText( null );
@@ -93,7 +93,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute( hBox04, "ALIGNMENT", "ACENTER" );
 
 		// Line 6
-		Ihandle* labelCompilerOpts = IupLabel( toStringz( GLOBAL.languageItems["prjopts"].toDString ~ ":" ) );
+		Ihandle* labelCompilerOpts = IupLabel( GLOBAL.languageItems["prjopts"].toCString );
 		IupSetAttributes( labelCompilerOpts, "SIZE=54x20" );
 		
 		textCompilerOpts = IupText( null );

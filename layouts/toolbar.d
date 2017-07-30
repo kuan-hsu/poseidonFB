@@ -1,7 +1,7 @@
 ﻿module layouts.toolbar;
 
 private import iup.iup;
-private import global, actionManager, menu, executer;
+private import global, actionManager, menu, executer, dialogs.argOptionDlg;
 private import Util = tango.text.Util, tango.stdc.stringz;;
 
 
@@ -319,11 +319,16 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
+					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
+					if( result.length == 1 ) ExecuterAction.compile( result[0] );
+					/*
 					if( GLOBAL.argsDlg !is null )
 					{
 						char[][] result = GLOBAL.argsDlg.show( 1 );
 						if( result.length == 1 ) ExecuterAction.compile( result[0] );
 					}
+					*/
 				}
 			}
 		}
@@ -342,11 +347,16 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
+					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
+					if( result.length == 1 ) ExecuterAction.buildAll( result[0] );
+					/*
 					if( GLOBAL.argsDlg !is null )
 					{
 						char[][] result = GLOBAL.argsDlg.show( 1 );
 						if( result.length == 1 ) ExecuterAction.buildAll( result[0] );
 					}
+					*/
 				}
 			}
 		}
@@ -365,6 +375,13 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
+					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
+					if( result.length == 2 )
+					{
+						if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1] );
+					}
+					/*
 					if( GLOBAL.argsDlg !is null )
 					{
 						char[][] result = GLOBAL.argsDlg.show( 3 );
@@ -373,6 +390,7 @@ extern( C )
 							if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1] );
 						}
 					}
+					*/
 				}
 			}
 		}
@@ -391,11 +409,16 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
+					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 2 );
+					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 2  );
+					if( result.length == 1 ) ExecuterAction.run( result[0] );
+					/*
 					if( GLOBAL.argsDlg !is null )
 					{
 						char[][] result = GLOBAL.argsDlg.show( 2 );
 						if( result.length == 1 ) ExecuterAction.run( result[0] );
 					}
+					*/
 				}
 			}
 		}
@@ -414,11 +437,16 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
+					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
+					if( result.length == 2 ) ExecuterAction.quickRun( result[0], result[1] );
+					/*
 					if( GLOBAL.argsDlg !is null )
 					{
 						char[][] result = GLOBAL.argsDlg.show( 3 );
 						if( result.length == 2 ) ExecuterAction.quickRun( result[0], result[1] );
 					}
+					*/
 				}
 			}
 		}
