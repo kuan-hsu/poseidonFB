@@ -387,6 +387,9 @@ extern(C) // Callback for CFindInFilesDialog
 			if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" )
 			{
 				char[] text = Util.trim( fromStringz( IupGetAttribute( _listOptions, "VALUE" ) ).dup );
+				
+				if( !text.length ) text = " ";
+
 				if( text.length )
 				{
 					actionManager.SearchAction.addListItem( _listOptions, text, GLOBAL.maxRecentOptions );
@@ -398,10 +401,12 @@ extern(C) // Callback for CFindInFilesDialog
 					}
 					if( GLOBAL.recentOptions.length ) IupSetAttribute( _listOptions, "VALUE", toStringz( GLOBAL.recentOptions[0] ) );
 				}
+				/+
 				else
 				{
 					IupSetAttribute( _listOptions, "VALUE", "" );
 				}
+				+/
 			}
 		}
 
@@ -411,6 +416,9 @@ extern(C) // Callback for CFindInFilesDialog
 			if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" )
 			{
 				char[] text = Util.trim( fromStringz( IupGetAttribute( _listArgs, "VALUE" ) ).dup );
+				
+				if( !text.length ) text = " ";
+				
 				if( text.length )
 				{
 					actionManager.SearchAction.addListItem( _listArgs, text, GLOBAL.maxRecentArgs );
@@ -422,10 +430,12 @@ extern(C) // Callback for CFindInFilesDialog
 					}
 					if( GLOBAL.recentArgs.length ) IupSetAttribute( _listArgs, "VALUE", toStringz( GLOBAL.recentArgs[0] ) );
 				}
+				/+
 				else
 				{
 					IupSetAttribute( _listArgs, "VALUE", "" );
 				}
+				+/
 			}
 		}
 		//IupHide( GLOBAL.argsDlg._dlg );

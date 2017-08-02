@@ -96,20 +96,21 @@ class CFileList
 	{
 		if( _sci !is null )
 		{
+			int addIndex = IupGetInt( tree, "COUNT" );
 			if( GLOBAL.fileListTree.fullPathState == 0 )
 			{
-				IupSetAttributeId( tree, "ADDLEAF", -1, GLOBAL.cString.convert( _sci.getFullPath ) );
-				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.filelistFore.toCString );
+				IupSetAttributeId( tree, "ADDLEAF", addIndex - 1, GLOBAL.cString.convert( _sci.getFullPath ) );
+				IupSetAttributeId( tree, "COLOR", addIndex, GLOBAL.editColor.filelistFore.toCString );
 			}
 			else
 			{
 				scope _fullPath = new FilePath( _sci.getFullPath );
-				IupSetAttributeId( tree, "ADDLEAF", -1, GLOBAL.cString.convert( _fullPath.file() ) );
-				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.filelistFore.toCString );
+				IupSetAttributeId( tree, "ADDLEAF", addIndex - 1, GLOBAL.cString.convert( _fullPath.file() ) );
+				IupSetAttributeId( tree, "COLOR", addIndex, GLOBAL.editColor.filelistFore.toCString );
 			}
 			
-			IupSetAttributeId( tree, "USERDATA", 0, cast(char*) _sci  );
-			version(Windows) IupSetAttributeId( tree, "MARKED", 0, "YES" ); else IupSetInt( tree, "VALUE", 0 );
+			IupSetAttributeId( tree, "USERDATA", addIndex, cast(char*) _sci );
+			version(Windows) IupSetAttributeId( tree, "MARKED", addIndex, "YES" ); else IupSetInt( tree, "VALUE", addIndex );
 		}
 	}
 
@@ -181,11 +182,17 @@ extern(C)
 	{
 
 		CScintilla _sci = cast(CScintilla) IupGetAttributeId( ih, "USERDATA", drag_id );
+		CScintilla _dropSci;
 
 		if( _sci !is null )
 		{
+			if( drop_id >= IupGetInt( ih, "COUNT" ) - 1 ) 
+				_dropSci = null;
+			else
+				_dropSci = cast(CScintilla) IupGetAttributeId( ih, "USERDATA", drop_id + 1 );
+			
+			
 			char[]		_title = fromStringz( IupGetAttributeId( ih, "TITLE", drag_id ) );
-
 			GLOBAL.fileListTree.removeItem( _sci );
 
 			if( drop_id < drag_id )
@@ -200,9 +207,21 @@ extern(C)
 			{
 				return IUP_DEFAULT;
 			}
-
+			
 			IupSetAttributeId( ih, "USERDATA", drop_id, cast(char*) _sci  );
 			version(Windows) IupSetAttributeId( ih, "MARKED", drop_id, "YES" ); else IupSetInt( ih, "VALUE", drop_id );
+			
+			// Change Document Tab Order
+			if( _dropSci !is null )
+				IupReparent( _sci.getIupScintilla, GLOBAL.documentTabs, _dropSci.getIupScintilla );
+			else
+				IupReparent( _sci.getIupScintilla, GLOBAL.documentTabs, null );
+
+			int newDocumentPos = IupGetChildPos( GLOBAL.documentTabs, _sci.getIupScintilla );
+			IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, _sci.getTitleHandle.toCString );
+			DocumentTabAction.resetTip();
+			IupRefresh( GLOBAL.documentTabs );
+			IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newDocumentPos );
 		}
 
 		return IUP_DEFAULT;

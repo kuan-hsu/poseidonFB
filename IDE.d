@@ -497,6 +497,8 @@ struct IDECONFIG
 			doc ~= setINILineData( "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
 			doc ~= setINILineData( "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
 			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
+			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
+			doc ~= setINILineData( "Bit64", GLOBAL.editorSetting00.Bit64 );
 			
 			
 			
@@ -646,6 +648,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath.toDString );
 			//doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
+			doc ~= setINILineData( "usesfx", GLOBAL.compilerSFX );
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
 			doc ~= setINILineData( "delexistexe", GLOBAL.delExistExe );
 			doc ~= setINILineData( "consoleexe", GLOBAL.consoleExe );
@@ -822,6 +825,8 @@ struct IDECONFIG
 							case "MultiSelection":			GLOBAL.editorSetting00.MultiSelection = right;			break;
 							case "LoadPrevDoc":				GLOBAL.editorSetting00.LoadPrevDoc = right;				break;
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
+							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
+							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
 							default:
 						}
 						break;
@@ -978,6 +983,7 @@ struct IDECONFIG
 							case "x64debuggerpath":			GLOBAL.x64debuggerFullPath = right;						break;
 							//case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
+							case "usesfx":					GLOBAL.compilerSFX = right;								break;
 							case "annotation":				GLOBAL.compilerAnootation = right;						break;
 							case "delexistexe":				GLOBAL.delExistExe = right;								break;
 							case "consoleexe":				GLOBAL.consoleExe = right;								break;

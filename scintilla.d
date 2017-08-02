@@ -91,6 +91,8 @@ class CScintilla
 				}
 			}
 			
+			version(NOBORDER) IupSetAttribute( sci, "BORDER", "NO" );
+			
 			IupMap( sci );
 			IupRefresh( GLOBAL.documentTabs );
 			
@@ -120,6 +122,7 @@ class CScintilla
 	{
 		sci = IupScintilla();
 		IupSetAttribute( sci, "EXPAND", "YES" );
+		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
 		
 		fullPath = new IupString();
 		title = new IupString();

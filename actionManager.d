@@ -379,9 +379,10 @@ struct DocumentTabAction
 		return IUP_DEFAULT;
 	}
 	
-	version(FLATTAB)
+
+	static void resetTip()
 	{
-		static void resetTip()
+		version(FLATTAB)
 		{
 			for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
 			{
@@ -1849,7 +1850,7 @@ struct SearchAction
 			
 			for( int i = itemCount; i > 0; --i )
 			{
-				char[] itemText = fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ) ) ) ).dup;
+				char[] itemText = fromStringz( IupGetAttributeId( ih, "", i ) ).dup;
 				if( itemText.length )
 				{
 					if( itemText == text )
@@ -1862,26 +1863,6 @@ struct SearchAction
 					IupSetInt( ih, "REMOVEITEM", i );
 				}				
 			}
-			
-			/+
-			for( int i = 1; i <= itemCount; ++ i )
-			{
-				char[] itemText = fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( i ) ) ) ).dup;
-				
-				if( itemText.length )
-				{
-					if( itemText == text )
-					{
-						IupSetInt( ih, "REMOVEITEM", i );
-						break;
-					}
-				}
-				else
-				{
-					IupSetInt( ih, "REMOVEITEM", i );
-				}
-			}
-			+/
 			
 			itemCount = IupGetInt( ih, "COUNT" );
 			if( itemCount == limit )

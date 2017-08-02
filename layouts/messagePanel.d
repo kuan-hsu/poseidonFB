@@ -18,6 +18,7 @@ void createMessagePanel()
 	GLOBAL.outputPanel = IupText( null );
 	IupSetAttributes( GLOBAL.outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.outputPanel, "VISIBLECOLUMNS", null );
+	version(NOBORDER) IupSetAttribute( GLOBAL.outputPanel, "BORDER", "NO" );
 	IupSetAttribute( GLOBAL.outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
 	version(Windows) IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
 	IupSetCallback( GLOBAL.outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
@@ -27,6 +28,7 @@ void createMessagePanel()
 	GLOBAL.searchOutputPanel = IupText( null );
 	IupSetAttributes( GLOBAL.searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLECOLUMNS", null );
+	version(NOBORDER) IupSetAttribute( GLOBAL.searchOutputPanel, "BORDER", "NO" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
 	version(Windows) IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", GLOBAL.editColor.searchBack.toCString );
 	

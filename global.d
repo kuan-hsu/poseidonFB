@@ -12,7 +12,7 @@ _HandleClipboardText dllHandleClipboardText;
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", GUI = "OFF", Bit64 = "OFF";
 }
 
 struct EditorLayoutSize
@@ -111,6 +111,7 @@ struct GLOBAL
 	static IupString			compilerFullPath, x64compilerFullPath;
 	static char[]				compilerAnootation = "ON";
 	static char[]				compilerWindow = "ON";
+	static char[]				compilerSFX = "OFF";
 	static char[]				delExistExe = "ON";
 	static char[]				consoleExe = "ON";
 	static IupString			debuggerFullPath, x64debuggerFullPath;
@@ -497,6 +498,7 @@ struct GLOBAL
 					GLOBAL.languageItems["compilersetting"] = new IupString( cast(char[]) "Compiler Setting" );
 						GLOBAL.languageItems["errorannotation"] = new IupString( cast(char[]) "Show Compiler Errors/Warnings Using Annotation" );
 						GLOBAL.languageItems["showresultwindow"] = new IupString( cast(char[]) "Show Compiled Result Window" );
+						GLOBAL.languageItems["usesfx"] = new IupString( cast(char[]) "Play Result SFX( When Result Window is OFF )" );
 						GLOBAL.languageItems["delexistexe"] = new IupString( cast(char[]) "Before Compile, Delete Existed Execute File" );
 						GLOBAL.languageItems["consoleexe"] = new IupString( cast(char[]) "Use Console Launcher To Run Program" );
 					GLOBAL.languageItems["parsersetting"] = new IupString( cast(char[]) "Parser Settings" );

@@ -230,12 +230,25 @@ class CToolBar
 		
 		
 		guiButton = IupToggle( null, "GUI" );
-		IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,VALUE=OFF" );
+		IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui" );
+		IupSetAttribute( guiButton, "VALUE", toStringz( GLOBAL.editorSetting00.GUI ) );
 		IupSetAttribute( guiButton, "TIP", "Console / GUI" );
+		IupSetCallback( guiButton, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			if( GLOBAL.editorSetting00.GUI == "ON" ) GLOBAL.editorSetting00.GUI = "OFF"; else GLOBAL.editorSetting00.GUI = "ON";
+			return IUP_DEFAULT;
+		});			
 		
 		bitButton = IupToggle( null, "bit" );
-		version(Windows) IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=OFF" ); else IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,VALUE=ON" );
+		version(Windows) IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64" ); else IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64" );
+		IupSetAttribute( bitButton, "VALUE", toStringz( GLOBAL.editorSetting00.Bit64 ) );
 		IupSetAttribute( bitButton, "TIP", "32 / 64 bit" );
+		IupSetCallback( bitButton, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			if( GLOBAL.editorSetting00.Bit64 == "ON" ) GLOBAL.editorSetting00.Bit64 = "OFF"; else GLOBAL.editorSetting00.Bit64 = "ON";
+			return IUP_DEFAULT;
+		});			
+		
 		
 		listHandle = IupList( null );
 		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO" );

@@ -25,7 +25,7 @@ class CFileDlg
 		if( DIALOGTYPE == "OPEN" && MULTIPLEFILES == "YES" )
 		{
 			bMultiFiles = true;
-			IupSetAttribute( dlg, "MULTIPLEFILES", GLOBAL.cString.convert( MULTIPLEFILES ) );
+			IupSetAttribute( dlg, "MULTIPLEFILES", toStringz( MULTIPLEFILES ) );
 		}
 
 		//char[] txtIupFilterAttribute = "FILTER = \"" ~ filter ~ "\", FILTERINFO = \"" ~  fileInfo ~ "\"";
@@ -71,10 +71,13 @@ class CFileDlg
 					}
 				}
 				
-				scope _fp = new FilePath( fileString );
-				if( _fp.exists() )
+				if( filesName.length )
 				{
-					if( _fp.isFolder() ) GLOBAL.recentOpenDir = _fp.toString; else GLOBAL.recentOpenDir = _fp.path;
+					scope _fp = new FilePath( filesName[0] );
+					if( _fp.exists() )
+					{
+						if( _fp.isFolder() ) GLOBAL.recentOpenDir = _fp.toString; else GLOBAL.recentOpenDir = _fp.path;
+					}
 				}
 			}
 		}

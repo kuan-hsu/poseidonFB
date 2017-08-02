@@ -25,7 +25,7 @@ void createTabs()
 	{
 		GLOBAL.documentTabs = IupTabs( null );
 		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x3" );
-		version( linux ) IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
+		version( linux ) IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" ); else IupSetAttribute( GLOBAL.documentTabs, "MULTILINE", "YES" );
 	}
 
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );

@@ -440,7 +440,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.296\nBy Kuan Hsu (Taiwan)\n2017.07.30" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.297\nBy Kuan Hsu (Taiwan)\n2017.08.3" );
 		return IUP_DEFAULT;
 	});
 
@@ -645,20 +645,14 @@ extern(C)
 	
 	int openFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|" );
-		char[] fileName = fileSecectDlg.getFileName();
-		
-		//Util.substitute( fileName, "\\", "/" );
-		if( fileName.length )
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
+		foreach( char[] s; fileSecectDlg.getFilesName() )
 		{
-			//Stdout( fileName ).newline;
-			ScintillaAction.openFile( fileName );
-			actionManager.ScintillaAction.updateRecentFiles( fileName );
-		}
-		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
-			//writefln( "Nothing" );
+			if( s.length )
+			{
+				ScintillaAction.openFile( s );
+				actionManager.ScintillaAction.updateRecentFiles( s );
+			}
 		}
 
 		return IUP_DEFAULT;

@@ -58,13 +58,14 @@ void createExplorerWindow()
 	{
 		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "1" );
-		IupSetAttributes( GLOBAL.messageWindowTabs, "SHOWCLOSE=YES,TABSPADDING=5x3" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGE", "icon_debug_clear" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x5" );
+		//IupSetAttribute( GLOBAL.messageWindowTab, "SHOWCLOSE", "YES" );
+		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGE", "icon_debug_clear" );
+		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-		IupSetCallback( GLOBAL.messageWindowTabs, "TABCLOSE_CB", cast(Icallback) &messageWindowTabs_tabClose_cb );
+		//IupSetCallback( GLOBAL.messageWindowTabs, "TABCLOSE_CB", cast(Icallback) &messageWindowTabs_tabClose_cb );
 	}
 	else
 	{

@@ -202,8 +202,11 @@ struct ExecuterAction
 			
 			if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";
 			
+			scope _filePath = new FilePath( cSci.getFullPath() );
+			
 			Process p = new Process( true, command );
 			p.gui( true );
+			p.workDir( _filePath.path );
 			p.execute;
 
 			bool	bError, bWarning;
@@ -225,6 +228,8 @@ struct ExecuterAction
 				
 				if( !bError )
 				{
+					if( line.length ) bError = true;
+					/+
 					if( Util.index( line, "Error:" ) < line.length )
 					{
 						bError = true;
@@ -233,6 +238,7 @@ struct ExecuterAction
 					{
 						bError = true;
 					}
+					+/
 				}				
 
 				stderrMessage ~= ( line ~ "\n" );
@@ -269,6 +275,17 @@ struct ExecuterAction
 					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
+				else
+				{
+					version(Windows) 
+					{
+						if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
+					}
+					else
+					{
+						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+					}
+				}
 				
 				if( GLOBAL.delExistExe == "ON" )
 				{
@@ -292,6 +309,17 @@ struct ExecuterAction
 						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
+						}							
+					}
 				}
 				else
 				{
@@ -304,6 +332,17 @@ struct ExecuterAction
 						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
 						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+						}							
 					}
 				}
 				
@@ -469,6 +508,8 @@ struct ExecuterAction
 				
 				if( !bError )
 				{
+					if( line.length ) bError = true;
+					/*
 					if( Util.index( line, "Error:" ) < line.length )
 					{
 						bError = true;
@@ -477,6 +518,7 @@ struct ExecuterAction
 					{
 						bError = true;
 					}
+					*/
 				}				
 
 				stderrMessage ~= ( line ~ "\n" );
@@ -517,6 +559,17 @@ struct ExecuterAction
 					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
+				else
+				{
+					version(Windows)
+					{
+						if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
+					}
+					else
+					{
+						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+					}							
+				}
 				
 				if( GLOBAL.delExistExe == "ON" )
 				{
@@ -540,6 +593,17 @@ struct ExecuterAction
 						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
+						}							
+					}
 				}
 				else
 				{
@@ -553,6 +617,17 @@ struct ExecuterAction
 						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
+					else
+					{
+						version(Windows) if( GLOBAL.compilerSFX == "ON" )
+						{
+							IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+						}							
+					}				
 				}
 			}
 			IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
@@ -621,8 +696,11 @@ struct ExecuterAction
 			
 			if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -s gui";
 			
+			scope _filePath = new FilePath( cSci.getFullPath() );
+			
 			Process p = new Process( true, commandString );
 			p.gui( true );
+			p.workDir( _filePath.path() );
 			p.execute;
 
 			char[]	stdoutMessage, stderrMessage;
@@ -644,6 +722,8 @@ struct ExecuterAction
 				
 				if( !bError )
 				{
+					if( line.length ) bError = true;
+					/*
 					if( Util.index( line, "Error:" ) < line.length )
 					{
 						bError = true;
@@ -652,6 +732,7 @@ struct ExecuterAction
 					{
 						bError = true;
 					}
+					*/
 				}				
 
 				stderrMessage ~= ( line ~ "\n" );
@@ -689,6 +770,17 @@ struct ExecuterAction
 						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 					}
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
+						}							
+					}					
 				}
 				else
 				{
@@ -700,6 +792,17 @@ struct ExecuterAction
 						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
 						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
 						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
+					else
+					{
+						version(Windows) if( GLOBAL.compilerSFX == "ON" )
+						{
+							IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+						}							
 					}					
 				}
 
@@ -726,6 +829,17 @@ struct ExecuterAction
 					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
 					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				}
+				else
+				{
+					version(Windows)
+					{
+						if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );	
+					}
+					else
+					{
+						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+					}							
 				}
 				
 				scope _f = new FilePath( fileName );

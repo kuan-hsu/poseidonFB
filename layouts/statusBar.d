@@ -207,12 +207,12 @@ extern(C) // Callback for CBaseDialog
 					version(Windows)
 					{
 						scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
-						dlg.show( x, y - 200, -1 );
+						dlg.show( x, y - 210, -1 );
 					}
 					else
 					{
-						scope dlg = new CCustomCompilerOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString(), false );
-						dlg.show( x, y - 200,-1 );
+						scope dlg = new CArgOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString(), false );
+						dlg.show( x, y - 210,-1 );
 					}
 					
 					return IUP_DEFAULT;

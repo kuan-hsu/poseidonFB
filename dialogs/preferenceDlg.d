@@ -112,6 +112,10 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleShowResultWindow = IupToggle( GLOBAL.languageItems["showresultwindow"].toCString, null );
 		IupSetAttribute( toggleShowResultWindow, "VALUE", toStringz(GLOBAL.compilerWindow.dup) );
 		IupSetHandle( "toggleShowResultWindow", toggleShowResultWindow );
+		
+		Ihandle* toggleSFX = IupToggle( GLOBAL.languageItems["usesfx"].toCString, null );
+		IupSetAttribute( toggleSFX, "VALUE", toStringz(GLOBAL.compilerSFX.dup) );
+		IupSetHandle( "toggleSFX", toggleSFX );
 
 		Ihandle* toggleDelPrevEXE = IupToggle( GLOBAL.languageItems["delexistexe"].toCString, null );
 		IupSetAttribute( toggleDelPrevEXE, "VALUE", toStringz(GLOBAL.delExistExe.dup) );
@@ -122,7 +126,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleConsoleExe", toggleConsoleExe );
 		
 
-		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleDelPrevEXE, toggleConsoleExe, null );
+		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, null );
 
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
@@ -1367,6 +1371,7 @@ class CPreferenceDialog : CBaseDialog
 	
 		IupSetHandle( "toggleAnnotation", null );
 		IupSetHandle( "toggleShowResultWindow", null );
+		IupSetHandle( "toggleSFX", null );
 		IupSetHandle( "toggleDelPrevEXE", null );
 		IupSetHandle( "toggleConsoleExe", null );
 
@@ -2047,6 +2052,8 @@ extern(C) // Callback for CPreferenceDialog
 			//GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
+			GLOBAL.compilerSFX							= fromStringz( IupGetAttribute( IupGetHandle( "toggleSFX" ), "VALUE" ) ).dup;
+			
 			GLOBAL.delExistExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleDelPrevEXE" ), "VALUE" ) ).dup;
 			GLOBAL.consoleExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE" ) ).dup;
 
