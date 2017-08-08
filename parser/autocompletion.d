@@ -12,7 +12,7 @@ struct AutoComplete
 
 	import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf;
 	import tango.stdc.stringz;
-	import tango.io.FilePath, tango.sys.Environment;
+	import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
 	import tango.io.Stdout;
 
 	static char[][]				listContainer;
@@ -369,7 +369,7 @@ struct AutoComplete
 		}
 
 		// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-		_path.set( GLOBAL.compilerFullPath.toDString );
+		_path.set( Path.normalize( GLOBAL.compilerFullPath.toDString ) );
 		version( Windows )
 		{
 			testPath = _path.path() ~ "inc/" ~ include;

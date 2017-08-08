@@ -303,6 +303,19 @@ class CScintilla
 	{
 		try
 		{
+			/+
+			auto doc = new IupString( IupGetAttribute( sci, "VALUE" ) );
+			
+			if( !doc.toDString.length )
+			{
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+				IupSetAttribute( messageDlg, "VALUE",  toStringz( fullPath.toDString ~ ": NULL File Saving??\nMaybe poseidonFB Got Wrong!\nESCAPE!!" ) );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
+				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				return false;
+			}
+			+/
 			version(REV298)
 			{
 				if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
@@ -337,6 +350,7 @@ class CScintilla
 			return false;
 		}
 
+		IupSetFocus( sci );
 		return true;
 	}
 

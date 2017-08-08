@@ -17,7 +17,7 @@ class CMessageAndSearch
 {
 	private:
 	Ihandle*		outputPanel, searchOutputPanel;
-	Ihandle* 		formattag;
+	//Ihandle* 		formattag;
 
 
 	void createMessagePanel()
@@ -58,36 +58,50 @@ class CMessageAndSearch
 	
 	void printOutputPanel( char[] txt, bool bClear = false )
 	{
-		if( bClear ) IupSetAttribute( outputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( outputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+		if( txt.length )
+		{
+			if( bClear ) IupSetAttribute( outputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( outputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+		}
+		else
+		{
+			if( bClear ) IupSetAttribute( outputPanel, "VALUE", "" ); else IupSetAttribute( outputPanel, "APPEND", "" );
+		}
 		applyOutputPanelFormat();
 	}
 	
 	void printSearchOutputPanel( char[] txt, bool bClear = false )
 	{
-		if( bClear ) IupSetAttribute( searchOutputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( searchOutputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+		if( txt.length )
+		{
+			if( bClear ) IupSetAttribute( searchOutputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( searchOutputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+		}
+		else
+		{
+			if( bClear ) IupSetAttribute( searchOutputPanel, "VALUE", "" ); else IupSetAttribute( searchOutputPanel, "APPEND", "" );
+		}
 		applySearchOutputPanelFormat();
 	}
 	
 	void applyOutputPanelFormat()
 	{
 		version(Windows) IupSetAttribute( outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
-		
-		if( formattag != null ) IupDestroy( formattag );
-		formattag = IupUser();
+
+		auto formattag = IupUser();
 		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
 		IupSetAttribute(formattag, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
-		IupSetAttribute( outputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
+		IupSetAttribute( outputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattag);
+		IupMap( outputPanel );
 	}
 	
 	void applySearchOutputPanelFormat()
 	{
 		version(Windows) IupSetAttribute( searchOutputPanel, "BGCOLOR", GLOBAL.editColor.searchBack.toCString );
-		
-		if( formattag != null ) IupDestroy( formattag );
-		formattag = IupUser();
+
+		auto formattag = IupUser();
 		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
 		IupSetAttribute(formattag, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
-		IupSetAttribute( searchOutputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
+		IupSetAttribute( searchOutputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattag);
+		IupMap( searchOutputPanel );
 	}
 
 	void scrollOutputPanel( int pos )

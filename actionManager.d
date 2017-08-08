@@ -950,14 +950,15 @@ struct ScintillaAction
 
 				cSci.saveFile();
 				GLOBAL.outlineTree.refresh( cSci ); //Update Parser
-				IupSetFocus( cSci.getIupScintilla );
 			}
 		}
-		catch
+		catch( Exception e )
 		{
+			debug IupMessage( "actionManager", toStringz( "saveFile Error:" ~ cSci.getFullPath ) );
 			return false;
 		}
-
+		
+		IupSetFocus( cSci.getIupScintilla );
 		return true;
 	}
 
@@ -1071,7 +1072,6 @@ struct ScintillaAction
 						
 						_sci.saveFile();
 						GLOBAL.outlineTree.refresh( _sci );
-						IupSetFocus( _sci.getIupScintilla );
 						break;
 					}
 				}
