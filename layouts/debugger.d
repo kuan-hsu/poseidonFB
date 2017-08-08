@@ -1166,8 +1166,9 @@ class CDebugger
 						//IupMessage( "", toStringz(GLOBAL.projectManager[activePrjName].type ) );
 						if( GLOBAL.projectManager[activePrjName].type != "1" )
 						{
-							IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
-							IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Debug Static / Dynamic Library directlly............Debug Error!" ) );
+							//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+							//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Debug Static / Dynamic Library directlly............Debug Error!" ) );
+							GLOBAL.messagePanel.printOutputPanel( "Can't Debug Static / Dynamic Library directlly............Debug Error!", true );
 							return false;
 						}
 					}
@@ -1218,18 +1219,21 @@ class CDebugger
 			}
 		}
 
-		IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
 		scope f = new FilePath( command );
 		if( f.exists() )
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ "......", true );
 			DebugControl = new DebugThread( "\"" ~ command ~ "\"", f.path );
 			//version(Windows) DebugControl.start();
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!", true );
 			return false;
 		}
 
@@ -1398,8 +1402,10 @@ class DebugThread //: Thread
 		Ihandle* SecondChild = IupGetChild( GLOBAL.messageSplit, 1 );
 		IupSetAttribute( SecondChild, "ACTIVE", "YES" );
 
-		IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "NO" );
-		IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
+		//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "NO" );
+		IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
+		//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
+		IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
 		
 
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
@@ -1420,8 +1426,10 @@ class DebugThread //: Thread
 			IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
 			//IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "YES" );
-			IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
-			IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
+			//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
+			IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "YES" );
+			//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
+			IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "YES" );
 
 			// Show the Debug window
 			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "YES" );

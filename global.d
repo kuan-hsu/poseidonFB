@@ -24,7 +24,7 @@ struct EditorColorUint
 {
 	IupString[4]	keyWord;
 	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha, errorFore, errorBack, warningFore, warringBack, currentWord, currentWordAlpha;
-	IupString		scintillaFore, scintillaBack, manualFore, manualBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
+	IupString		scintillaFore, scintillaBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
 	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
@@ -58,7 +58,7 @@ struct GLOBAL
 	import tango.stdc.stringz;
 
 	
-	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.manualPanel, layouts.statusBar, layouts.debugger;
+	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
@@ -82,8 +82,10 @@ struct GLOBAL
 	static CFileList 			fileListTree;
 	
 	
-	static Ihandle* 			outputPanel;
-	static Ihandle* 			searchOutputPanel;
+	//static Ihandle* 			outputPanel;
+	//static Ihandle* 			searchOutputPanel;
+	static CMessageAndSearch	messagePanel;
+	
 	static CDebugger 			debugPanel;
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
 	static int					messageSplit_value = 800;
@@ -97,8 +99,6 @@ struct GLOBAL
 
 	static Ihandle*				menuOutlineWindow, menuMessageWindow;
 	
-	static CManual				manualPanel;
-
 	static char[]				linuxTermName;
 
 	// Setting
@@ -114,7 +114,7 @@ struct GLOBAL
 	static char[]				compilerSFX = "OFF";
 	static char[]				delExistExe = "ON";
 	static char[]				consoleExe = "ON";
-	static IupString			debuggerFullPath, x64debuggerFullPath;
+	static IupString			debuggerFullPath;
 	static IupString			manualPath;
 	static IupString			colorTemplate;
 	//static char[]				maxError = "30";
@@ -138,9 +138,6 @@ struct GLOBAL
 	static char[]				toggleShowAllMember = "ON";
 	
 	static char[]				toggleUseManual = "OFF";
-	static char[]				toggleManualDefinition = "OFF";
-	static char[]				toggleManualShowType = "OFF";
-	
 	
 
 	static CScintilla[char[]]	scintillaManager;
@@ -179,6 +176,9 @@ struct GLOBAL
 	
 	static char[][]				customCompilerOptions;
 	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
+	
+	
+	static int					tabDocumentPos = -1;
 
 	static this()
 	{
@@ -208,8 +208,6 @@ struct GLOBAL
 		GLOBAL.editColor.currentWord = new IupString( cast(char[]) "0 128 0" );
 		GLOBAL.editColor.currentWordAlpha = new IupString( cast(char[]) "80" );
 		
-		GLOBAL.editColor.manualFore = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.manualBack = new IupString( cast(char[]) "80 80 80" );
 		GLOBAL.editColor.braceFore = new IupString( cast(char[]) "255 0 0" );
 		GLOBAL.editColor.braceBack = new IupString( cast(char[]) "0 255 0" );
 		
@@ -250,7 +248,6 @@ struct GLOBAL
 		GLOBAL.compilerFullPath = new IupString();
 		GLOBAL.x64compilerFullPath = new IupString();
 		GLOBAL.debuggerFullPath = new IupString();
-		GLOBAL.x64debuggerFullPath = new IupString();
 		GLOBAL.manualPath = new IupString();
 		GLOBAL.colorTemplate = new IupString();
 		//GLOBAL.defaultOption = new IupString();
@@ -393,10 +390,7 @@ struct GLOBAL
 
 		fu.name = "annotation";
 		GLOBAL.fonts ~= fu;
-		
-		fu.name = "manual";
-		GLOBAL.fonts ~= fu;
-		
+
 		fu.name = "statusbar";
 		GLOBAL.fonts ~= fu;
 		
@@ -576,7 +570,6 @@ struct GLOBAL
 							GLOBAL.languageItems["bracehighlight"] = new IupString( cast(char[]) "Brace Highlight" );
 							GLOBAL.languageItems["manualerrorannotation"] = new IupString( cast(char[]) "Error Annotation" );
 							GLOBAL.languageItems["manualwarningannotation"] = new IupString( cast(char[]) "Warning Annotation" );
-							GLOBAL.languageItems["manualannotation"] = new IupString( cast(char[]) "Manual Annotation" );
 							GLOBAL.languageItems["scintilla"] = new IupString( cast(char[]) "Scintilla" );
 							GLOBAL.languageItems["SCE_B_COMMENT"] = new IupString( cast(char[]) "SCE_B_COMMENT" );
 							GLOBAL.languageItems["SCE_B_NUMBER"] = new IupString( cast(char[]) "SCE_B_NUMBER" );
@@ -623,9 +616,6 @@ struct GLOBAL
 					// GLOBAL.languageItems["manual"] = new IupString( cast(char[]) "Manual" );
 						GLOBAL.languageItems["manualpath"] = new IupString( cast(char[]) "Manual Path" );
 						GLOBAL.languageItems["manualusing"] = new IupString( cast(char[]) "Use Help Manual" );
-						GLOBAL.languageItems["manualdefinition"] = new IupString( cast(char[]) "Use \"Goto Definition\" To Show The Relative Manual Page" );
-						GLOBAL.languageItems["manualshowtype"] = new IupString( cast(char[]) "Use \"Show Type\" To Show The Description At Annotation" );
-						GLOBAL.languageItems["manualhome"] = new IupString( cast(char[]) "Home" );
 					
 			GLOBAL.languageItems["language"] = new IupString( cast(char[]) "Language" );
 				GLOBAL.languageItems["openlanguage"] = new IupString( cast(char[]) "Choose Language..." );

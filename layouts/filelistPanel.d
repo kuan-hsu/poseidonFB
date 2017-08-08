@@ -77,6 +77,11 @@ class CFileList
 		return tree;
 	}
 	
+	int getFullPathState()
+	{
+		return fullPathState;
+	}
+	
 	void setTitleFont()
 	{
 		scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );
@@ -197,11 +202,11 @@ extern(C)
 
 			if( drop_id < drag_id )
 			{
-				IupSetAttributeId( ih, "INSERTLEAF", drop_id ++, GLOBAL.cString.convert( _title ) );
+				IupSetAttributeId( ih, "INSERTLEAF", drop_id ++, GLOBAL.fileListTree.getFullPathState ? _sci.getTitleHandle.toCString : _sci.getFullPath_IupString.toCString );
 			}
 			else if( drop_id > drag_id )
 			{
-				IupSetAttributeId( ih, "INSERTLEAF", drop_id - 1, GLOBAL.cString.convert( _title ) );
+				IupSetAttributeId( ih, "INSERTLEAF", drop_id - 1,  GLOBAL.fileListTree.getFullPathState ? _sci.getTitleHandle.toCString : _sci.getFullPath_IupString.toCString );
 			}
 			else
 			{

@@ -450,7 +450,8 @@ struct ScintillaAction
 			{
 				if( GLOBAL.editorSetting00.Message == "ON" ) 
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Parse File: [" ~ pFullPath ~ "]"  ) );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Parse File: [" ~ pFullPath ~ "]"  ) );
+					GLOBAL.messagePanel.printOutputPanel( "Parse File: [" ~ pFullPath ~ "]" );
 					version(linux)
 					{
 						int count = IupGetInt( GLOBAL.outputPanel, "COUNT" );
@@ -949,6 +950,7 @@ struct ScintillaAction
 
 				cSci.saveFile();
 				GLOBAL.outlineTree.refresh( cSci ); //Update Parser
+				IupSetFocus( cSci.getIupScintilla );
 			}
 		}
 		catch
@@ -1069,11 +1071,10 @@ struct ScintillaAction
 						
 						_sci.saveFile();
 						GLOBAL.outlineTree.refresh( _sci );
+						IupSetFocus( _sci.getIupScintilla );
 						break;
 					}
 				}
-
-				
 			}
 		}
 
@@ -1824,7 +1825,8 @@ struct SearchAction
 						if( buttonIndex == 0 )
 						{
 							char[] outputWords = fullPath ~ "(" ~ Integer.toString( lineNum ) ~ "): " ~ line;
-							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", GLOBAL.cString.convert( outputWords ) );
+							//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", GLOBAL.cString.convert( outputWords ) );
+							GLOBAL.messagePanel.printSearchOutputPanel( outputWords );
 						}
 						else if( buttonIndex == 3 )
 						{

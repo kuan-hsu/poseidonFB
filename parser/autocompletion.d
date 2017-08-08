@@ -7,7 +7,7 @@ struct AutoComplete
 	import iup.iup_scintilla;
 
 	import global, actionManager, menu;
-	import tools, layouts.manualPanel;
+	import tools;
 	import parser.ast;
 
 	import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf;
@@ -425,7 +425,7 @@ struct AutoComplete
 				{
 					if( GLOBAL.editorSetting00.Message == "ON" ) 
 					{
-						version(Windows) IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+						version(Windows) GLOBAL.messagePanel.printOutputPanel( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
 					}
 					
 					includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
@@ -1880,17 +1880,46 @@ struct AutoComplete
 				{
 					if( GLOBAL.toggleUseManual == "ON" )
 					{
-						if( TYPE & 1 )
+						if( TYPE == 0 )
 						{
-							if( GLOBAL.toggleManualDefinition == "ON" )
+							scope chmPath = new FilePath( GLOBAL.manualPath.toDString );
+							if( chmPath.exists() )
 							{
-								CManual.bShowType = false;
-								if( GLOBAL.manualPanel.jumpDefinition( splitWord[0] ) ) GLOBAL.manualPanel.showTab( true );
+								char[]	keyWord = splitWord[0];
+
+								foreach( IupString _s; GLOBAL.KEYWORDS )
+								{
+									foreach( char[] targetText; Util.split( _s.toDString, " " ) )
+									{
+										if( keyWord == targetText )
+										{
+											keyWord = lowerCase( keyWord );
+											if ( keyWord[0] >= 'a' && keyWord[0] <= 'z' ) keyWord[0] = keyWord[0] - 32;
+											
+											version(Windows)
+											{
+												char[]	keyPg;
+												
+												switch( lowerCase( keyWord ) )
+												{
+													case "select":			keyPg = "::KeyPgSelectcase.html";			break;
+													case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
+													default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
+												}											
+
+												IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+											}
+											else
+											{
+												IupExecute( "kchmviewer", toStringz( "--sindex " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );
+												// "kchmviewer --sindex %s /chm-path
+											}
+
+											return;
+										}
+									}
+								}
 							}
-						}
-						else
-						{
-							if( GLOBAL.toggleManualShowType == "ON" ) GLOBAL.manualPanel.showType( splitWord[0] );
 						}
 						
 						if( splitWord[0] == "constructor" || splitWord[0] == "destructor" ) return;

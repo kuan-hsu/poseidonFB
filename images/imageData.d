@@ -59,6 +59,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_32", XPM.getIUPimage( "icons/xpm/32.xpm" ) );
 	IupSetHandle( "icon_64", XPM.getIUPimage( "icons/xpm/64.xpm" ) );
 	IupSetHandle( "icon_apply", XPM.getIUPimage( "icons/xpm/apply.xpm" ) );
+	IupSetHandle( "icon_fbmanual", XPM.getIUPimage( "icons/xpm/fbmanual.xpm" ) );
 
 	IupSetHandle( "icon_copy", XPM.getIUPimage( "icons/xpm/copy.xpm" ) ); // IupSetHandle("icon_copy", load_image_copy_edit());
 	IupSetHandle( "icon_save", XPM.getIUPimage( "icons/xpm/save.xpm" ) ); // IupSetHandle("icon_save", load_image_save_edit());
@@ -90,6 +91,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_mac", XPM.getIUPimage( "icons/xpm/mac.xpm" ) ); // IupSetHandle("icon_mac", load_image_mac());
 	IupSetHandle( "icon_linux", XPM.getIUPimage( "icons/xpm/linux.xpm" ) ); // IupSetHandle("icon_linux", load_image_linux());
 	IupSetHandle( "icon_tools", XPM.getIUPimage( "icons/xpm/tools.xpm" ) );
+	IupSetHandle( "icon_toolitem", XPM.getIUPimage( "icons/xpm/toolitem.xpm" ) );
 	IupSetHandle( "icon_properties", XPM.getIUPimage( "icons/xpm/properties.xpm" ) );
 	IupSetHandle( "icon_preference", XPM.getIUPimage( "icons/xpm/preference.xpm" ) );
 	IupSetHandle( "icon_shift_r", XPM.getIUPimage( "icons/xpm/shift_r_edit.xpm" ) );

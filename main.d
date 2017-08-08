@@ -21,7 +21,6 @@ version(Windows)
 	pragma(lib, "ole32.lib");
 	pragma(lib, "iup.lib");
 	pragma(lib, "iup_scintilla.lib");
-	pragma(lib, "iupweb.lib");
 }
 else
 {
@@ -37,7 +36,6 @@ else
 	pragma(lib, "glib-2.0");
 	pragma(lib, "iup");
 	pragma(lib, "iup_scintilla");
-	pragma(lib, "iupweb");
 }
 
 /+
@@ -272,10 +270,10 @@ void main( char[][] args )
 	scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 	scope prjString = new IupString( GLOBAL.fonts[4].fontString ); 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
 	scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", messageString.toCString );// Bottom
-	scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
-	scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
+	scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString );//IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
+	scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
 	scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
-	scope statusString = new IupString( GLOBAL.fonts[12].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
+	scope statusString = new IupString( GLOBAL.fonts[11].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
 	scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline
 	
 	

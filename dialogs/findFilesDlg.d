@@ -260,10 +260,16 @@ extern(C) // Callback for CFindInFilesDialog
 			{
 				switch( buttonIndex )
 				{
+					case 0:		GLOBAL.messagePanel.printSearchOutputPanel( "Seraching......", true ); break;
+					case 1:		GLOBAL.messagePanel.printSearchOutputPanel( "Replace......", true ); break;
+					case 2:		GLOBAL.messagePanel.printSearchOutputPanel( "Counting......", true ); break;
+					default:	GLOBAL.messagePanel.printSearchOutputPanel( "Marking......", true );
+					/+
 					case 0:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Seraching......") ); break;
 					case 1:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Replace......") ); break;
 					case 2:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Counting......") ); break;
 					default:	IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Marking......") );
+					+/
 				}
 
 				int _findCase, _findMethod, count;
@@ -324,7 +330,8 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
-							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Active Project Be Selected.\n" ) );
+							//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Active Project Be Selected.\n" ) );
+							GLOBAL.messagePanel.printSearchOutputPanel( "\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Active Project Be Selected.\n" );
 							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
 							return IUP_DEFAULT;
 						}
@@ -345,14 +352,16 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
-							IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Any Project Be Selected.\n" ) );
+							//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Any Project Be Selected.\n" ) );
+							GLOBAL.messagePanel.printSearchOutputPanel( "\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Any Project Be Selected.\n" );
 							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
 							return IUP_DEFAULT;
 						}
 				}
 
 				actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
-				IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results." ) );
+				//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results." ) );
+				GLOBAL.messagePanel.printSearchOutputPanel( "\nTotal found " ~ Integer.toString(count) ~ " Results." );
 				IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
 			}
 		}

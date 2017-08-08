@@ -2,7 +2,7 @@ module dialogs.customDlg;
 
 private import iup.iup;
 
-private import global, project, actionManager;
+private import global, project, actionManager, menu;
 private import dialogs.baseDlg, dialogs.singleTextDlg, dialogs.fileDlg;
 
 private import tango.stdc.stringz, Util = tango.text.Util;
@@ -138,6 +138,23 @@ extern(C) // Callback for CFindInFilesDialog
 {
 	int CCustomDialog_btnOK( Ihandle* ih )
 	{
+		Ihandle* toolsSubMenuHandle = IupGetHandle( "toolsSubMenu" );
+		if( toolsSubMenuHandle != null )
+		{
+			for( int i = IupGetChildCount( toolsSubMenuHandle ); i > 0; --i )
+			{
+				Ihandle* menuItemHandle = IupGetChild( toolsSubMenuHandle, i );
+				if( menuItemHandle != null )
+				{
+					if( fromStringz( IupGetAttribute( menuItemHandle, "TITLE" ) ).length )
+						IupDestroy( menuItemHandle );
+					else
+						break;
+				}
+			}
+		}
+		
+		
 		Ihandle* toolsHandle = IupGetHandle( "listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 		
@@ -150,6 +167,26 @@ extern(C) // Callback for CFindInFilesDialog
 			GLOBAL.customTools[id].name = IupGetAttribute( toolsHandle, IupGetAttribute( toolsHandle, "VALUE" ) );
 			GLOBAL.customTools[id].dir = IupGetAttribute( dirHandle, "VALUE" );
 			GLOBAL.customTools[id].args = IupGetAttribute( argsHandle, "VALUE" );
+			
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["ok"].toCString() );
+			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["apply"].toCString() );
+			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
+		}
+		
+		if( toolsSubMenuHandle != null )
+		{
+			for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
+			{
+				if( GLOBAL.customTools[i].name.toDString.length )
+				{
+					Ihandle* _new = IupItem( GLOBAL.customTools[i].name.toCString, null );
+					IupSetCallback( _new, "ACTION", cast(Icallback) &menu.customtool_menu_click_cb );
+					IupAppend( toolsSubMenuHandle, _new );
+					IupMap( _new );
+				}
+			}
 		}
 		
 		return IUP_DEFAULT;

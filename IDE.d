@@ -254,7 +254,6 @@ struct IDECONFIG
 			.attribute( null, "Search", GLOBAL.fonts[8].fontString )
 			.attribute( null, "Debugger", GLOBAL.fonts[9].fontString )
 			.attribute( null, "Annotation", GLOBAL.fonts[10].fontString )
-			.attribute( null, "Manual", GLOBAL.fonts[11].fontString )
 			.attribute( null, "StatusBar", GLOBAL.fonts[12].fontString );
 
 			//<color caretLine="255 255 0" cursor="0 0 0" selectionFore="255 255 255" selectionBack="0 0 255" linenumFore="0 0 0" linenumBack="200 200 200" fold="200 208 208"></color>
@@ -540,8 +539,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "Search", GLOBAL.fonts[8].fontString );
 			doc ~= setINILineData( "Debugger", GLOBAL.fonts[9].fontString );
 			doc ~= setINILineData( "Annotation", GLOBAL.fonts[10].fontString );
-			doc ~= setINILineData( "Manual", GLOBAL.fonts[11].fontString );
-			doc ~= setINILineData( "StatusBar", GLOBAL.fonts[12].fontString );
+			doc ~= setINILineData( "StatusBar", GLOBAL.fonts[11].fontString );
 
 			// color
 			doc ~= setINILineData( "[color]");
@@ -566,8 +564,6 @@ struct IDECONFIG
 			doc ~= setINILineData( "errorBack", GLOBAL.editColor.errorBack.toDString );
 			doc ~= setINILineData( "warningFore", GLOBAL.editColor.warningFore.toDString );
 			doc ~= setINILineData( "warningBack", GLOBAL.editColor.warringBack.toDString );
-			doc ~= setINILineData( "manualFore", GLOBAL.editColor.manualFore.toDString );
-			doc ~= setINILineData( "manualBack", GLOBAL.editColor.manualBack.toDString );
 			doc ~= setINILineData( "scintillaFore", GLOBAL.editColor.scintillaFore.toDString );
 			doc ~= setINILineData( "scintillaBack", GLOBAL.editColor.scintillaBack.toDString );
 			doc ~= setINILineData( "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore.toDString );
@@ -645,7 +641,6 @@ struct IDECONFIG
 			doc ~= setINILineData( "compilerpath", GLOBAL.compilerFullPath.toDString );
 			doc ~= setINILineData( "x64compilerpath", GLOBAL.x64compilerFullPath.toDString );
 			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath.toDString );
-			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath.toDString );
 			//doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "usesfx", GLOBAL.compilerSFX );
@@ -674,8 +669,6 @@ struct IDECONFIG
 			doc ~= setINILineData( "[manual]");
 			doc ~= setINILineData( "manualpath", GLOBAL.manualPath.toDString );
 			doc ~= setINILineData( "manualusing", GLOBAL.toggleUseManual );
-			doc ~= setINILineData( "manualdefinition", GLOBAL.toggleManualDefinition );
-			doc ~= setINILineData( "manualshowtype", GLOBAL.toggleManualShowType );
 
 			// recentFiles
 			doc ~= setINILineData( "[recentFiles]" );
@@ -859,8 +852,7 @@ struct IDECONFIG
 							case "Search":					GLOBAL.fonts[8].fontString = right; 					break;		break;
 							case "Debugger":				GLOBAL.fonts[9].fontString  = right;					break;
 							case "Annotation":				GLOBAL.fonts[10].fontString = right;					break;
-							case "Manual":					GLOBAL.fonts[11].fontString = right;					break;
-							case "StatusBar":				GLOBAL.fonts[12].fontString = right;					break;
+							case "StatusBar":				GLOBAL.fonts[11].fontString = right;					break;
 							default:
 						}
 						break;
@@ -889,8 +881,6 @@ struct IDECONFIG
 							case "errorBack":				GLOBAL.editColor.errorBack = right;						break;
 							case "warningFore":				GLOBAL.editColor.warningFore = right;					break;
 							case "warningBack":				GLOBAL.editColor.warringBack = right;					break;
-							case "manualFore":				GLOBAL.editColor.manualFore = right;					break;
-							case "manualBack":				GLOBAL.editColor.manualBack = right;					break;
 							case "scintillaFore":			GLOBAL.editColor.scintillaFore = right;					break;
 							case "scintillaBack":			GLOBAL.editColor.scintillaBack = right;					break;
 							case "SCE_B_COMMENT_Fore":		GLOBAL.editColor.SCE_B_COMMENT_Fore = right;			break;
@@ -980,7 +970,6 @@ struct IDECONFIG
 							case "compilerpath":			GLOBAL.compilerFullPath = right;						break;
 							case "x64compilerpath":			GLOBAL.x64compilerFullPath = right;						break;
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
-							case "x64debuggerpath":			GLOBAL.x64debuggerFullPath = right;						break;
 							//case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
 							case "usesfx":					GLOBAL.compilerSFX = right;								break;
@@ -1017,8 +1006,6 @@ struct IDECONFIG
 						{
 							case "manualpath":				GLOBAL.manualPath = right;										break;
 							case "manualusing":				GLOBAL.toggleUseManual = right;									break;
-							case "manualdefinition":		GLOBAL.toggleManualDefinition = right;							break;
-							case "manualshowtype":			GLOBAL.toggleManualShowType = right;							break;
 							default:
 						}
 						break;
@@ -1457,13 +1444,8 @@ struct IDECONFIG
 			result = root.query.descendant("font").attribute( "Annotation" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[10].fontString = e.value;
 			
-			fu.name = "manual";
-			GLOBAL.fonts[11] = fu;
-			result = root.query.descendant("font").attribute( "Manual" );
-			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[11].fontString = e.value;
-
 			fu.name = "statusbar";
-			GLOBAL.fonts[12] = fu;
+			GLOBAL.fonts[11] = fu;
 			result = root.query.descendant("font").attribute( "StatusBar" );
 			foreach( e; result ) if( e.value.length ) GLOBAL.fonts[12].fontString = e.value;
 			
@@ -1917,8 +1899,6 @@ struct IDECONFIG
 		.attribute( null, "errorBack", GLOBAL.editColor.errorBack.toDString )
 		.attribute( null, "warningFore", GLOBAL.editColor.warningFore.toDString )
 		.attribute( null, "warningBack", GLOBAL.editColor.warringBack.toDString )
-		.attribute( null, "manualFore", GLOBAL.editColor.manualFore.toDString )
-		.attribute( null, "manualBack", GLOBAL.editColor.manualBack.toDString )
 		.attribute( null, "scintillaFore", GLOBAL.editColor.scintillaFore.toDString )
 		.attribute( null, "scintillaBack", GLOBAL.editColor.scintillaBack.toDString )
 		.attribute( null, "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore.toDString )

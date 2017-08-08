@@ -3,7 +3,7 @@
 import iup.iup, iup.iup_scintilla, iup.iupweb;
 
 import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
-import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.manualPanel, layouts.debugger, actionManager, menu;
+import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
 import layouts.statusBar;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
@@ -47,9 +47,8 @@ void createExplorerWindow()
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 
-	GLOBAL.manualPanel = new CManual();
-
-	createMessagePanel();
+	//createMessagePanel();
+	GLOBAL.messagePanel = new CMessageAndSearch();
 
 	GLOBAL.debugPanel = new CDebugger();
 
@@ -72,7 +71,8 @@ void createExplorerWindow()
 		GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
 	}
 	+/
-	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
+	//GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
+	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
 
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
@@ -552,19 +552,6 @@ extern(C)
 		{
 			return IUP_DEFAULT;
 		}
-		else if( pos == 3 )
-		{
-			Ihandle* _home = IupItem( toStringz( "Home" ), null );//IupItem( toStringz( GLOBAL.languageItems["clear"] ), null );
-			IupSetAttribute( _home, "IMAGE", "icon_manual_home" );
-			IupSetCallback( _home, "ACTION", cast(Icallback) function( Ihandle* _ih )
-			{
-				scope _fp = new FilePath( GLOBAL.manualPath.toDString );
-				if( !_fp.isAbsolute() )	_fp.set( GLOBAL.poseidonPath ~ GLOBAL.manualPath.toDString );				
-				GLOBAL.manualPanel.setValue( _fp.toString );
-				return IUP_DEFAULT;
-			});			
-			popupMenu = IupMenu( _home, null );
-		}
 		else
 		{
 			Ihandle* _clear = IupItem( GLOBAL.languageItems["clear"].toCString, null );
@@ -574,11 +561,13 @@ extern(C)
 				int valuePos = IupGetInt( GLOBAL.messageWindowTabs, "VALUEPOS" );
 				if( valuePos == 0 )
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "VALUE", null );
+					//IupSetAttribute( GLOBAL.outputPanel, "VALUE", null );
+					GLOBAL.messagePanel.printOutputPanel( "", true );
 				}
 				else if( valuePos == 1 )
 				{
-					IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", null );
+					//IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", null );
+					GLOBAL.messagePanel.printSearchOutputPanel( "", true );
 				}
 				return IUP_DEFAULT;
 			});

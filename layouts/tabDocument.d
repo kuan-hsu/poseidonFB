@@ -20,6 +20,9 @@ void createTabs()
 		IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
 		//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
+		
+		version(Windows) IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	}
 	else
 	{
@@ -30,8 +33,7 @@ void createTabs()
 
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
-	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
-	//IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
+	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );	
 }
 
 extern(C)
@@ -128,37 +130,72 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	/+
 	private int tabbutton_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		IupMessage( "CLIENTSIZE", IupGetAttribute( ih, "CLIENTSIZE" ) );
-		IupMessage( "POSITION", IupGetAttribute( ih, "POSITION" ) );
-		IupMessage( "MINSIZE", IupGetAttribute( ih, "MINSIZE" ) );
+		int pos = IupConvertXYToPos( ih, x, y );
 		
-		/+
 		if( pressed == 0 )
 		{
-			if( button == '2' ) // IUP_BUTTON1 = '2' = 50
+			if( button == IUP_BUTTON2 )
 			{
-				char* ScreenPos = IupGetGlobal( "CURSORPOS" );
-				
-				scope mouse = new IupString( Integer.toString(x) ~ "x" ~ Integer.toString(y) ~ " 1 1" );
-				IupSetGlobal( "MOUSEBUTTON", mouse.toCString );
-				mouse = Integer.toString(x) ~ "x" ~ Integer.toString(y) ~ " 1 0";
-				IupSetGlobal( "MOUSEBUTTON", mouse.toCString );
-				
-				IupSetGlobal( "CURSORPOS", ScreenPos );
-				
-				
-				int pos = IupGetInt( ih, "VALUEPOS" );
-				
-				
-				IupMessage( "", toStringz(Integer.toString(pos) ) );
-				
-
+				return tabClose_cb( ih, pos );
 			}
-		}+/
+			else if( button == IUP_BUTTON1 )
+			{
+				IupSetAttribute( ih, "CURSOR", "ARROW" );
+				
+				if( GLOBAL.tabDocumentPos == pos ) return IUP_DEFAULT;
+				if( GLOBAL.tabDocumentPos > -1 && pos > -1 )
+				{
+					Ihandle* dragHandle = IupGetChild(  GLOBAL.documentTabs, GLOBAL.tabDocumentPos );
+					Ihandle* dropHandle = IupGetChild(  GLOBAL.documentTabs, pos );
+					
+					if( dragHandle != null && dropHandle != null )
+					{
+						if( GLOBAL.tabDocumentPos > pos )
+							IupReparent( dragHandle, GLOBAL.documentTabs, dropHandle );
+						else
+						{
+							if( pos < IupGetInt( GLOBAL.documentTabs, "COUNT" ) - 1 )
+							{
+								IupReparent( dragHandle, GLOBAL.documentTabs, IupGetChild(  GLOBAL.documentTabs, pos + 1 ) );
+							}
+							else
+							{
+								IupReparent( dragHandle, GLOBAL.documentTabs, null );
+							}
+						}
+						
+						int childPos = IupGetChildPos( GLOBAL.documentTabs, dragHandle );
+						auto dragSci = ScintillaAction.getCScintilla( dragHandle );
+						if( dragSci !is null )
+						{
+							IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", childPos, dragSci.getTitleHandle.toCString );
+							DocumentTabAction.resetTip();
+							IupRefresh( GLOBAL.documentTabs );
+							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", childPos );
+							
+							// Change Filelist
+							GLOBAL.fileListTree.removeItem( dragSci );
+							IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "INSERTLEAF", pos - 1, GLOBAL.fileListTree.getFullPathState ? dragSci.getTitleHandle.toCString : dragSci.getFullPath_IupString.toCString );
+							IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", pos, cast(char*) dragSci  );
+							version(Windows) IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "MARKED", pos, "YES" ); else IupSetInt( GLOBAL.fileListTree.getTreeHandle, "VALUE", pos );
+						}
+					}
+				}
+				else
+				{
+					GLOBAL.tabDocumentPos = -1;
+				}
+			}
+		}
+		else
+		{
+			GLOBAL.tabDocumentPos = pos;
+			IupSetAttribute( ih, "CURSOR", "HAND" );
+		}
+
 		return IUP_DEFAULT;
 	}
-	+/
+	
 }

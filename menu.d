@@ -187,11 +187,6 @@ void createMenu()
 	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
 	
-	Ihandle* manualWindow = IupItem( GLOBAL.languageItems["manual"].toCString, null);
-	IupSetAttribute( manualWindow, "VALUE", "OFF");
-	IupSetHandle( "menuManualWindow", manualWindow );
-	IupSetCallback( manualWindow, "ACTION", cast(Icallback)&manualMenuItem_cb);	
-
 	// Project
 	item_newProject= IupItem( GLOBAL.languageItems["newprj"].toCString, null);
 	IupSetAttribute(item_newProject, "IMAGE", "icon_newprj");
@@ -400,14 +395,30 @@ void createMenu()
 	Ihandle* caseSubMenu = IupMenu( upperCase, lowerCase, mixedCase, null  );
 	Ihandle* convertCase = IupSubmenu( GLOBAL.languageItems["convertcase"].toCString, caseSubMenu );
 	
-	Ihandle* coustomTooledit = IupItem( GLOBAL.languageItems["setcustomtool"].toCString, null );
-	//IupSetAttribute( coustomTooledit, "ACTIVE", "NO" );
-	IupSetCallback( coustomTooledit, "ACTION", cast(Icallback)&coustomTooledit_cb );
-
-
-	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), coustomTooledit, null  );
+	Ihandle* customTooledit = IupItem( GLOBAL.languageItems["setcustomtool"].toCString, null );
+	IupSetAttribute( customTooledit, "IMAGE", "icon_toolitem" );
+	//IupSetAttribute( customTooledit, "ACTIVE", "NO" );
+	IupSetCallback( customTooledit, "ACTION", cast(Icallback)&coustomTooledit_cb );
+	
+	Ihandle* markIupSeparator = IupSeparator();
+	IupSetAttribute( markIupSeparator, "TITLE", "" );
+	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
+	IupSetHandle( "toolsSubMenu", toolsSubMenu );
+	
 	item_tool = IupSubmenu( GLOBAL.languageItems["tools"].toCString, toolsSubMenu );
 	IupSetAttribute(item_tool, "IMAGE", "icon_tools");
+
+	for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
+	{
+		if( GLOBAL.customTools[i].name.toDString.length )
+		{
+			Ihandle* _new = IupItem( GLOBAL.customTools[i].name.toCString, null );
+			IupSetCallback( _new, "ACTION", cast(Icallback) &customtool_menu_click_cb );
+			IupAppend( toolsSubMenu, _new );
+			IupMap( _new );
+		}
+	}
+	IupRefresh( toolsSubMenu );	
 
 
 	item_preference = IupItem( GLOBAL.languageItems["preference"].toCString, null);
@@ -440,9 +451,17 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.297\nBy Kuan Hsu (Taiwan)\n2017.08.3" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.298\nBy Kuan Hsu (Taiwan)\n2017.08.08" );
 		return IUP_DEFAULT;
 	});
+	
+	Ihandle* item_manual = IupItem( GLOBAL.languageItems["manual"].toCString, null );
+	IupSetAttribute( item_manual, "IMAGE", "icon_fbmanual" );
+	IupSetCallback( item_manual, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		IupExecute( GLOBAL.manualPath.toCString, "" );
+		return IUP_DEFAULT;
+	});	
 
 	file_menu = IupMenu( 	item_new, 
 							item_open, 
@@ -483,7 +502,6 @@ void createMenu()
 
 	view_menu = IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
-							manualWindow,
 							null );
 
 	project_menu = IupMenu( item_newProject,
@@ -518,6 +536,8 @@ void createMenu()
 	option_menu= IupMenu( 	item_tool,
 							item_language,
 							item_preference,
+							item_manual,
+							IupSeparator(),
 							item_about,
 							null );
 
@@ -1050,24 +1070,6 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	int manualMenuItem_cb( Ihandle *ih )
-	{
-		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
-		{
-			IupSetAttribute( ih, "VALUE", "OFF" );
-			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 3, "NO" ); // Hide
-		}
-		else
-		{
-			IupSetAttribute( ih, "VALUE", "ON" );
-			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 3, "YES" ); // Show
-			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 3 );
-		}
-		
-		
-		return IUP_DEFAULT;
-	}
-
 	int messageMenuItem_cb( Ihandle *ih )
 	{
 		Ihandle* buttonHandle = IupGetHandle( "messageButtonHide" );
@@ -1098,8 +1100,10 @@ extern(C)
 			Ihandle* SecondChild = IupGetChild( GLOBAL.messageSplit, 1 );
 			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
 
-			IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "NO" );
-			IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
+			//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "NO" );
+			//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
+			IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
+			IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
 
 			if( fileListTreeH == 0 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 		}
@@ -1108,8 +1112,10 @@ extern(C)
 			IupSetAttribute( ih, "VALUE", "ON" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "YES" );
-			IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
-			IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
+			//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
+			//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
+			IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "YES" );
+			IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "YES" );
 		}
 		
 		return IUP_DEFAULT;
@@ -1196,7 +1202,7 @@ extern(C)
 			}
 
 			GLOBAL.projectManager[activePrjName].saveFile();
-			if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
+			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
 			GLOBAL.projectManager.remove( activePrjName );
 
 			int countChild = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
@@ -1281,7 +1287,7 @@ extern(C)
 				}
 			}
 
-			if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
+			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
 		}
 
 		foreach( char[] s; prjsDir )
@@ -1413,6 +1419,53 @@ extern(C)
 			ScintillaAction.saveFile( cSci, true );
 			actionManager.StatusBarAction.update();
 		}
+		return IUP_DEFAULT;
+	}
+	
+	// Also import by customDlg.d
+	int customtool_menu_click_cb( Ihandle* ih )
+	{
+		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) );
+
+		for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
+		{
+			if( GLOBAL.customTools[i].name.toDString.length )
+			{
+				if( GLOBAL.customTools[i].name.toDString == title )
+				{
+					if( GLOBAL.customTools[i].dir.toDString.length )
+					{
+						auto cSci = ScintillaAction.getActiveCScintilla();
+						char[] args;
+						if( cSci !is null )
+						{
+							// %s Selected Text
+							char[] s = fromStringz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
+							
+							args = Util.substitute( GLOBAL.customTools[i].args.toDString, "%s ", s ~ " " );
+							args = Util.substitute( args, "%\"s\" ", "\"" ~ s ~ "\"" ~ " " );
+							// %f Active File
+							s = cSci.getFullPath();
+							args = Util.substitute( args, "%f ", s ~ " " );
+							args = Util.substitute( args, "%\"f\" ", "\"" ~ s ~ "\"" ~ " " );
+						}
+						
+						version(Windows)
+						{
+							IupExecute( GLOBAL.customTools[i].dir.toCString, toStringz( args ) );
+						}
+						else
+						{
+							Process p = new Process( true, GLOBAL.customTools[tailNum].dir.toDString ~ " " ~ args );
+							//p.gui( true );
+							p.execute;
+						}
+						break;
+					}
+				}
+			}
+		}
+		
 		return IUP_DEFAULT;
 	}
 }

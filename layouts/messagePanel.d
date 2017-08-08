@@ -13,12 +13,111 @@ private import Util = tango.text.Util;
 
 import tango.io.Stdout;
 
+class CMessageAndSearch
+{
+	private:
+	Ihandle*		outputPanel, searchOutputPanel;
+	Ihandle* 		formattag;
+
+
+	void createMessagePanel()
+	{
+		outputPanel = IupText( null );
+		IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
+		IupSetAttribute( outputPanel, "VISIBLECOLUMNS", null );
+		IupSetAttribute( outputPanel, "BORDER", "NO" );
+		IupSetAttribute( outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
+		version(Windows) IupSetAttribute( outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
+		IupSetCallback( outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
+		IupSetCallback( outputPanel, "VALUECHANGED_CB", cast(Icallback) &outputPanel_VALUECHANGED_CB );
+		
+
+		searchOutputPanel = IupText( null );
+		IupSetAttributes( searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
+		IupSetAttribute( searchOutputPanel, "VISIBLECOLUMNS", null );
+		IupSetAttribute( searchOutputPanel, "BORDER", "NO" );
+		IupSetAttribute( searchOutputPanel, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
+		version(Windows) IupSetAttribute( searchOutputPanel, "BGCOLOR", GLOBAL.editColor.searchBack.toCString );
+		
+		IupSetCallback( searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
+		IupSetCallback( searchOutputPanel, "VALUECHANGED_CB", cast(Icallback) &searchOutput_VALUECHANGED_CB );
+
+
+		IupSetAttribute( outputPanel, "TABTITLE", GLOBAL.languageItems["output"].toCString );
+		IupSetAttribute( searchOutputPanel, "TABTITLE", GLOBAL.languageItems["search"].toCString );
+		
+		IupSetAttribute( outputPanel, "TABIMAGE", "icon_message" );
+		IupSetAttribute( searchOutputPanel, "TABIMAGE", "icon_search" );
+	}
+
+	public:
+	this()
+	{
+		createMessagePanel();
+	}
+	
+	void printOutputPanel( char[] txt, bool bClear = false )
+	{
+		if( bClear ) IupSetAttribute( outputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( outputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+		applyOutputPanelFormat();
+	}
+	
+	void printSearchOutputPanel( char[] txt, bool bClear = false )
+	{
+		if( bClear ) IupSetAttribute( searchOutputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( searchOutputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+		applySearchOutputPanelFormat();
+	}
+	
+	void applyOutputPanelFormat()
+	{
+		version(Windows) IupSetAttribute( outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
+		
+		if( formattag != null ) IupDestroy( formattag );
+		formattag = IupUser();
+		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
+		IupSetAttribute(formattag, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
+		IupSetAttribute( outputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
+	}
+	
+	void applySearchOutputPanelFormat()
+	{
+		version(Windows) IupSetAttribute( searchOutputPanel, "BGCOLOR", GLOBAL.editColor.searchBack.toCString );
+		
+		if( formattag != null ) IupDestroy( formattag );
+		formattag = IupUser();
+		IupSetAttribute(formattag, "SELECTIONPOS", toStringz( "ALL" ));
+		IupSetAttribute(formattag, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
+		IupSetAttribute( searchOutputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattag);	
+	}
+
+	void scrollOutputPanel( int pos )
+	{
+		IupSetInt( outputPanel, "SCROLLTOPOS", pos );
+	}
+	
+	void scrollSearchOutputPanel( int pos )
+	{
+		IupSetInt( searchOutputPanel, "SCROLLTOPOS", pos );
+	}
+	
+	Ihandle* getOutputPanelHandle()
+	{
+		return outputPanel;
+	}
+	
+	Ihandle* getSearchOutputPanelHandle()
+	{
+		return searchOutputPanel;
+	}
+}
+
+/+
 void createMessagePanel()
 {
 	GLOBAL.outputPanel = IupText( null );
 	IupSetAttributes( GLOBAL.outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.outputPanel, "VISIBLECOLUMNS", null );
-	version(NOBORDER) IupSetAttribute( GLOBAL.outputPanel, "BORDER", "NO" );
+	IupSetAttribute( GLOBAL.outputPanel, "BORDER", "NO" );
 	IupSetAttribute( GLOBAL.outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
 	version(Windows) IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
 	IupSetCallback( GLOBAL.outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
@@ -28,7 +127,7 @@ void createMessagePanel()
 	GLOBAL.searchOutputPanel = IupText( null );
 	IupSetAttributes( GLOBAL.searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES,FORMATTING=YES" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLECOLUMNS", null );
-	version(NOBORDER) IupSetAttribute( GLOBAL.searchOutputPanel, "BORDER", "NO" );
+	IupSetAttribute( GLOBAL.searchOutputPanel, "BORDER", "NO" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
 	version(Windows) IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", GLOBAL.editColor.searchBack.toCString );
 	
@@ -43,7 +142,7 @@ void createMessagePanel()
 	IupSetAttribute( GLOBAL.outputPanel, "TABIMAGE", "icon_message" );
 	IupSetAttribute( GLOBAL.searchOutputPanel, "TABIMAGE", "icon_search" );
 }
-
++/
 
 extern(C)
 {

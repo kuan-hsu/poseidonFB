@@ -65,20 +65,20 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 		
 		
-		Ihandle* labelx64Debugger = IupLabel( toStringz( GLOBAL.languageItems["x64path"].toDString ~ ":" ) );
-		IupSetAttributes( labelx64Debugger, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		Ihandle* labelchm = IupLabel( toStringz( GLOBAL.languageItems["manualpath"].toDString ~ ":" ) );
+		IupSetAttributes( labelchm, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
 		
-		Ihandle* textx64DebuggerPath = IupText( null );
-		IupSetAttribute( textx64DebuggerPath, "SIZE", "210x12" );
-		IupSetAttribute( textx64DebuggerPath, "VALUE", GLOBAL.x64debuggerFullPath.toCString );
-		IupSetHandle( "x64debuggerPath_Handle", textx64DebuggerPath );
+		Ihandle* textchm = IupText( null );
+		IupSetAttribute( textchm, "SIZE", "210x12" );
+		IupSetAttribute( textchm, "VALUE", GLOBAL.manualPath.toCString );
+		IupSetHandle( "textchm", textchm );
 		
-		Ihandle* btnx64OpenDebugger = IupButton( null, null );
-		IupSetAttribute( btnx64OpenDebugger, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnx64OpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_Openx64DebuggerBinFile_cb );
+		Ihandle* btnchm = IupButton( null, null );
+		IupSetAttribute( btnchm, "IMAGE", "icon_openfile" );
+		IupSetCallback( btnchm, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCHM_cb );
 
-		Ihandle* hBox02x64 = IupHbox( labelx64Debugger, textx64DebuggerPath, btnx64OpenDebugger, null );
-		IupSetAttributes( hBox02x64, "ALIGNMENT=ACENTER,MARGIN=5x0,ACTIVE=NO" );
+		Ihandle* hBox02x64 = IupHbox( labelchm, textchm, btnchm, null );
+		IupSetAttributes( hBox02x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 		
 		
 		/+
@@ -243,48 +243,20 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		// Manual
-		Ihandle* labelManualPath = IupLabel( toStringz( GLOBAL.languageItems["manualpath"].toDString ~ ":" ) );
-		IupSetAttributes( labelManualPath, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
-		
-		Ihandle* textManualPath = IupText( null );
-		IupSetAttribute( textManualPath, "SIZE", "210x12" );
-		IupSetAttribute( textManualPath, "VALUE", GLOBAL.manualPath.toCString );
-		IupSetHandle( "textManualPath", textManualPath );
-		
-		Ihandle* btnManualOpen = IupButton( null, null );
-		IupSetAttribute( btnManualOpen, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnManualOpen, "ACTION", cast(Icallback) &CPreferenceDialog_ManualOpen_cb );
-		
-		Ihandle* hboxManualPath = IupHbox( labelManualPath, textManualPath, btnManualOpen, null );
-		IupSetAttributes( hboxManualPath, "ALIGNMENT=ACENTER,MARGIN=5x5" );
-
 		Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
 		IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
 		IupSetHandle( "toggleUseManual", toggleUseManual );
 		
-		Ihandle* toggleManualLinkDefinition = IupToggle( GLOBAL.languageItems["manualdefinition"].toCString(), null );
-		IupSetAttribute( toggleManualLinkDefinition, "VALUE", toStringz(GLOBAL.toggleManualDefinition.dup) );
-		IupSetHandle( "toggleManualLinkDefinition", toggleManualLinkDefinition );
-		
-		Ihandle* toggleManualLinkShowType = IupToggle( GLOBAL.languageItems["manualshowtype"].toCString(), null );
-		IupSetAttribute( toggleManualLinkShowType, "VALUE", toStringz(GLOBAL.toggleManualShowType.dup) );
-		IupSetHandle( "toggleManualLinkShowType", toggleManualLinkShowType );
-		
-		Ihandle* labelManualWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"].toDString ~ ":" ) );
-		Ihandle* textManualWidth = IupText( null );
-		IupSetAttribute( textManualWidth, "VALUE", toStringz(GLOBAL.editorSetting00.TabWidth) );
-		IupSetHandle( "textManualWidth", textManualWidth );
-		//Ihandle* hBoxTab = IupHbox( labelManualWidth, textManualWidth, null );
-		//IupSetAttribute( hBoxTab, "ALIGNMENT", "ACENTER" );
-		
-		Ihandle* vboxManualPath = IupVbox( hboxManualPath, toggleUseManual, toggleManualLinkDefinition, toggleManualLinkShowType, null );
-		Ihandle* manuFrame = IupFrame( vboxManualPath );
+		Ihandle* manuFrame = IupFrame( toggleUseManual );
 		IupSetAttribute( manuFrame, "TITLE", GLOBAL.languageItems["manual"].toCString() );
-		IupSetAttribute( manuFrame, "SIZE", "288x");
+		IupSetAttribute( manuFrame, "SIZE", "288x");	
+
+
+
 		
+	
 		
-		
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, /*hBox03,*/ frameCompiler, frameParser, frameLive, null );
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, /*hBox03,*/ frameCompiler, frameParser, frameLive, manuFrame, null );
 		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
@@ -1051,26 +1023,6 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttribute( btnWarning_BG, "SIZE", "64x10" );
 		}		
 		
-		Ihandle* labelManual= IupLabel( toStringz( GLOBAL.languageItems["manualannotation"].toDString ~ ":" ) );
-		Ihandle* btnManual_FG = IupButton( null, null );
-		Ihandle* btnManual_BG = IupButton( null, null );
-		IupSetAttribute( btnManual_FG, "BGCOLOR", GLOBAL.editColor.manualFore.toCString );
-		IupSetAttribute( btnManual_BG, "BGCOLOR", GLOBAL.editColor.manualBack.toCString );	
-		IupSetHandle( "btnManual_FG", btnManual_FG );
-		IupSetHandle( "btnManual_BG", btnManual_BG );
-		IupSetCallback( btnManual_FG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		IupSetCallback( btnManual_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		version(Windows)
-		{
-			IupSetAttribute( btnManual_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnManual_BG, "SIZE", "64x8" );
-		}
-		else
-		{
-			IupSetAttribute( btnManual_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnManual_BG, "SIZE", "64x10" );
-		}
-		
 		Ihandle* labelBrace= IupLabel( toStringz( GLOBAL.languageItems["bracehighlight"].toDString ~ ":" ) );
 		Ihandle* btnBrace_FG = IupButton( null, null );
 		Ihandle* btnBrace_BG = IupButton( null, null );
@@ -1139,10 +1091,6 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( labelWarning, "" ),
 			IupSetAttributes( btnWarning_FG, "" ),
 			IupSetAttributes( btnWarning_BG, "" ),			
-			
-			IupSetAttributes( labelManual, "" ),
-			IupSetAttributes( btnManual_FG, "" ),
-			IupSetAttributes( btnManual_BG, "" ),			
 			
 			
 			IupSetAttributes( label_Scintilla, "" ),
@@ -1309,12 +1257,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( vColor, "TABTITLE", GLOBAL.languageItems["color"].toCString() );
 		IupSetAttribute( shortCutList, "TABTITLE", GLOBAL.languageItems["shortcut"].toCString() );
 		IupSetAttribute( keyWordVbox, "TABTITLE", GLOBAL.languageItems["keywords"].toCString() );
-		IupSetAttribute( manuFrame, "TABTITLE", GLOBAL.languageItems["manual"].toCString() );
+		//IupSetAttribute( manuFrame, "TABTITLE", GLOBAL.languageItems["manual"].toCString() );
 		IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
 	
 		
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, manuFrame, null );
+		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, /*manuFrame,*/ null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
 
@@ -1520,16 +1468,16 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_DEFAULT;
 	}
 	
-	private int CPreferenceDialog_Openx64DebuggerBinFile_cb( Ihandle* ih )
+	private int CPreferenceDialog_OpenCHM_cb( Ihandle* ih )
 	{
 		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )
 		{
-			GLOBAL.x64debuggerFullPath = fileName;
-			Ihandle* _debuggerPath_Handle = IupGetHandle( "x64debuggerPath_Handle" );
-			if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", toStringz( fileName ) );
+			GLOBAL.manualPath = fileName;
+			Ihandle* _chm_Handle = IupGetHandle( "textchm" );
+			if( _chm_Handle != null ) IupSetAttribute( _chm_Handle, "VALUE", GLOBAL.manualPath.toCString );
 		}
 		else
 		{
@@ -1538,24 +1486,6 @@ extern(C) // Callback for CPreferenceDialog
 
 		return IUP_DEFAULT;
 	}	
-	
-	private int CPreferenceDialog_ManualOpen_cb( Ihandle* ih )
-	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
-		char[] _fullPath = fileSecectDlg.getFileName();
-
-		if( _fullPath.length )
-		{
-			Ihandle* textManualPath = IupGetHandle( "textManualPath" );
-			if( textManualPath != null ) IupSetAttribute( textManualPath, "VALUE", toStringz( _fullPath ) );
-		}
-		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
-		}
-
-		return IUP_DEFAULT;
-	}
 
 	private int CPreferenceDialog_shortCutList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
@@ -1997,8 +1927,6 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.errorBack					= IupGetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR" );
 			GLOBAL.editColor.warningFore				= IupGetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR" );
 			GLOBAL.editColor.warringBack				= IupGetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.manualFore					= IupGetAttribute( IupGetHandle( "btnManual_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.manualBack					= IupGetAttribute( IupGetHandle( "btnManual_BG" ), "BGCOLOR" );
 			GLOBAL.editColor.braceFore					= IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR" );
 			GLOBAL.editColor.braceBack					= IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR" );
 			
@@ -2012,17 +1940,23 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.outlineTree.changeColor();
 			GLOBAL.fileListTree.changeColor();
 			
+			/+
 			version(Windows) IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR" ) );
 			Ihandle* formattagOutput = IupUser();
 			IupSetAttribute(formattagOutput, "SELECTIONPOS", toStringz( "ALL" ));
 			IupSetAttribute(formattagOutput, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
 			IupSetAttribute( GLOBAL.outputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattagOutput);
+			+/
+			GLOBAL.messagePanel.applyOutputPanelFormat();
 				
+			/+
 			version(Windows) IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR" ) );
 			Ihandle* formattagSearch = IupUser();
 			IupSetAttribute(formattagSearch, "SELECTIONPOS", toStringz( "ALL" ));
-			IupSetAttribute(formattagSearch, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
+			IupSetAttribute(formattagSearch, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
 			IupSetAttribute( GLOBAL.searchOutputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattagSearch);
+			+/
+			GLOBAL.messagePanel.applySearchOutputPanelFormat();
 			
 			char[] templateName = Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE" ) ) );
 			if( templateName.length )
@@ -2048,7 +1982,6 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.x64compilerFullPath					= fromStringz( IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.debuggerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
-			GLOBAL.x64debuggerFullPath					= fromStringz( IupGetAttribute( IupGetHandle( "x64debuggerPath_Handle" ), "VALUE" ) ).dup;
 			//GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
@@ -2141,23 +2074,15 @@ extern(C) // Callback for CPreferenceDialog
 			scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 			scope prjString = new IupString( GLOBAL.fonts[4].fontString ); 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
 			scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", messageString.toCString );// Bottom
-			scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
-			scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
+			scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString ); //IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
+			scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
 			scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
-			scope statusString = new IupString( GLOBAL.fonts[12].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
+			scope statusString = new IupString( GLOBAL.fonts[11].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
 			scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline	
 			GLOBAL.debugPanel.setFont();
 			
-			GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textManualPath" ), "VALUE" );
+			GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textchm" ), "VALUE" );
 			GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;
-			GLOBAL.toggleManualDefinition				= fromStringz(IupGetAttribute( IupGetHandle( "toggleManualLinkDefinition" ), "VALUE" )).dup;
-			GLOBAL.toggleManualShowType					= fromStringz(IupGetAttribute( IupGetHandle( "toggleManualLinkShowType" ), "VALUE" )).dup;
-			/*
-			if( GLOBAL.manualPath.toDString.length )
-			{
-				if( GLOBAL.toggleUseManual == "ON" ) GLOBAL.manualPanel.setValue( GLOBAL.manualPath.toCString );
-			}
-			*/
 			
 			/*
 			// Save Setup to Xml

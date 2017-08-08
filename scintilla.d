@@ -151,9 +151,9 @@ class CScintilla
 		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
 
 		init( _fullPath, insertPos );
-
 		setText( _text );
 		setEncoding( _encode );
+		
 
 		// Set margin size
 		int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
@@ -201,7 +201,16 @@ class CScintilla
 	{
 		IupSetAttribute( sci, "CLEARALL", "" );
 		IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text ) );
-		IupSetAttribute( sci, "SAVEDSTATE", "YES" );
+		
+		version(REV298)
+		{
+			IupSetAttribute( sci, "SAVEDSTATE", "NO" );
+			IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014
+		}
+		else
+		{
+			IupSetAttribute( sci, "SAVEDSTATE", "YES" );
+		}
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 	}
 
@@ -294,16 +303,30 @@ class CScintilla
 	{
 		try
 		{
-			if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
+			version(REV298)
 			{
-				if( fromStringz( IupGetAttribute( sci, "SAVEDSTATE" ) ) == "YES" )
+				if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
 				{
-					IupSetAttribute( sci, "SAVEDSTATE", "NO" );
-
-					int pos = IupGetChildPos( GLOBAL.documentTabs, sci );
-					if( pos > -1 )
+					if( fromStringz( IupGetAttribute( sci, "SAVEDSTATE" ) ) == "YES" )
 					{
-						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toCString );
+						IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014
+						// Auto trigger SAVEPOINT_CB........
+					}
+				}
+			}
+			else
+			{
+				if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
+				{
+					if( fromStringz( IupGetAttribute( sci, "SAVEDSTATE" ) ) == "YES" )
+					{
+						IupSetAttribute( sci, "SAVEDSTATE", "NO" );
+
+						int pos = IupGetChildPos( GLOBAL.documentTabs, sci );
+						if( pos > -1 )
+						{
+							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toCString );
+						}
 					}
 				}
 			}
@@ -401,13 +424,6 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEBGCOLOR41", GLOBAL.editColor.warringBack.toCString);
 		IupSetAttribute(sci, "STYLEFONT41",  toStringz( font.dup ) );
 		IupSetAttribute(sci, "STYLEFONTSIZE41",  toStringz( size.dup ) );
-
-		getFontAndSize( 11, font, Bold, Italic, Underline, Strikeout, size );
-		IupSetAttribute(sci, "STYLEFGCOLOR42", GLOBAL.editColor.manualFore.toCString);	
-		IupSetAttribute(sci, "STYLEBGCOLOR42", GLOBAL.editColor.manualBack.toCString);
-		IupSetAttribute(sci, "STYLEFONT42",  toStringz( font.dup ) );
-		IupSetAttribute(sci, "STYLEFONTSIZE42",  toStringz( "8" ) );		
-		
 
 		int tabSize = Integer.atoi( GLOBAL.editorSetting00.TabWidth );
 		GLOBAL.editorSetting00.TabWidth = Integer.toString( tabSize );
@@ -734,6 +750,10 @@ extern(C)
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;
 						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
+						version(REV298)
+						{
+							if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "NO" ) IupSetAttribute( ih, "SAVEDSTATE", "YES" );
+						}
 					}
 					else
 					{
@@ -756,6 +776,10 @@ extern(C)
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;							
 						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
+						version(REV298)
+						{
+							if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "YES" ) IupSetAttribute( ih, "SAVEDSTATE", "NO" );
+						}						
 					}
 					else
 					{
@@ -1214,6 +1238,7 @@ extern(C)
 					}
 				}
 			}
+			/+
 			else if( button == '1' )
 			{
 				if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" )
@@ -1222,6 +1247,7 @@ extern(C)
 					HighlightWord( ih, IupConvertXYToPos( ih, x, y ) );
 				}
 			}
+			+/
 		}
 		
 		return IUP_DEFAULT;
@@ -1480,7 +1506,7 @@ extern(C)
 						{
 							char[]	tailChar = sk.name[$-1..$];
 							int		tailNum = Integer.atoi( tailChar );
-							if( tailNum > 0 && tailNum < 6 )
+							if( tailNum > 0 && tailNum < 10 )
 							{
 								if( GLOBAL.customTools[tailNum].name.toDString.length )
 								{
@@ -1843,6 +1869,12 @@ extern(C)
 					}
 				}
 			}
+			
+			if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" )
+			{
+				IupScintillaSendMessage( ih, 2505, 0, IupGetInt( ih, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+				HighlightWord( ih, pos );
+			}			
 
 			actionManager.StatusBarAction.update();
 		}

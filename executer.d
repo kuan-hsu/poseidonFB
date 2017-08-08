@@ -154,7 +154,8 @@ struct ExecuterAction
 	public:
 	static bool compile( char[] options = null, char[] optionDebug = null )
 	{
-		IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
 		char[] command;
 		auto cSci = ScintillaAction.getActiveCScintilla();
@@ -176,13 +177,15 @@ struct ExecuterAction
 			scope compilePath = new FilePath( fbcFullPath );
 			if( !compilePath.exists() )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
 				return false;
 			}
 
 			if( !ScintillaAction.saveFile( cSci ) )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile Cancel By User.\n\nCompile Cancel!" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile Cancel By User.\n\nCompile Cancel!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "Compile Cancel By User.\n\nCompile Cancel!", true );
 				return false;
 			}
 
@@ -192,7 +195,8 @@ struct ExecuterAction
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nCompile Error!" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nCompile Error!" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nCompile Error!", true );
 			return false;
 		}
 
@@ -212,7 +216,8 @@ struct ExecuterAction
 			bool	bError, bWarning;
 			char[]	stdoutMessage, stderrMessage;
 			// Compiler Command
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
@@ -261,11 +266,12 @@ struct ExecuterAction
 			auto result = p.wait;
 
 			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
 			
 			if( bError )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "Compile Error!" );
 
 				if( GLOBAL.compilerWindow == "ON" )
 				{
@@ -299,7 +305,8 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
+					GLOBAL.messagePanel.printOutputPanel( "Compile Success!" );
 
 					if( GLOBAL.compilerWindow == "ON" )
 					{
@@ -323,7 +330,8 @@ struct ExecuterAction
 				}
 				else
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
+					GLOBAL.messagePanel.printOutputPanel( "Compile Success! But got warning..." );
 
 					if( GLOBAL.compilerWindow == "ON" )
 					{
@@ -346,13 +354,15 @@ struct ExecuterAction
 					}
 				}
 				
-				IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
+				//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
+				GLOBAL.messagePanel.scrollOutputPanel( 0 );
 				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 				
 				return true;
 			}
 
-			IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
+			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
+			GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		catch( ProcessException e )
@@ -375,11 +385,13 @@ struct ExecuterAction
 		try
 		{
 			// Clean outputPanel
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") );
+			GLOBAL.messagePanel.printOutputPanel( "", true );
 			
 			if( !activePrjName.length )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert("No Project has been selected......?\n\nBuild Error!") );
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert("No Project has been selected......?\n\nBuild Error!") );
+				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
 				return false;
 			}			
 			
@@ -396,7 +408,8 @@ struct ExecuterAction
 			
 			if( !compilePath.exists() )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
 				return false;
 			}			
 
@@ -424,7 +437,8 @@ struct ExecuterAction
 
 			if( !txtSources.length )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without source files......?\n\nBuild Error!" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without source files......?\n\nBuild Error!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "Without source files......?\n\nBuild Error!", true );
 				return false;
 			}
 
@@ -492,7 +506,8 @@ struct ExecuterAction
 			bool	bError, bWarning;
 			char[] stdoutMessage, stderrMessage;
 			// Compiler Command
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
@@ -544,12 +559,13 @@ struct ExecuterAction
 			auto result = p.wait;
 
 			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
 
 
 			if( bError )
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
 
 				if( GLOBAL.compilerWindow == "ON" )
 				{
@@ -583,7 +599,8 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
+					GLOBAL.messagePanel.printOutputPanel( "Build Success!" );
 
 					if( GLOBAL.compilerWindow == "ON" )
 					{
@@ -607,7 +624,8 @@ struct ExecuterAction
 				}
 				else
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
+					GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." );
 
 					if( GLOBAL.compilerWindow == "ON" )
 					{
@@ -630,7 +648,8 @@ struct ExecuterAction
 					}				
 				}
 			}
-			IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
+			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
+			GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 			
@@ -647,7 +666,8 @@ struct ExecuterAction
 
 	static bool quickRun( char[] options = null, char[] args = null )
 	{
-		IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		GLOBAL.messagePanel.printOutputPanel( "", true );
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
@@ -664,7 +684,8 @@ struct ExecuterAction
 		scope compilePath = new FilePath( fbcFullPath );
 		if( !compilePath.exists() )
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
+			GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
 			return false;
 		}
 		
@@ -685,7 +706,8 @@ struct ExecuterAction
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nBuild Error!" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nBuild Error!" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nBuild Error!", true );
 			return false;
 		}
 		
@@ -706,7 +728,8 @@ struct ExecuterAction
 			char[]	stdoutMessage, stderrMessage;
 			bool	bError, bWarning;
 			// Compiler Command
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Quick Run......\n\n" ~ commandString ~ "\n" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Quick Run......\n\n" ~ commandString ~ "\n" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Quick Run......\n\n" ~ commandString ~ "\n", true );
 
 			foreach (line; new Lines!(char)(p.stderr))  
 			{
@@ -755,13 +778,14 @@ struct ExecuterAction
 			auto result = p.wait;
 
 			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
 
 			if( !bError )
 			{
 				if( !bWarning )
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
+					GLOBAL.messagePanel.printOutputPanel( "Compile Success!" );
 					if( GLOBAL.compilerWindow == "ON" )
 					{
 						Ihandle* messageDlg = IupMessageDlg();
@@ -784,7 +808,8 @@ struct ExecuterAction
 				}
 				else
 				{
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
+					GLOBAL.messagePanel.printOutputPanel( "Compile Success! But got warning..." );
 					if( GLOBAL.compilerWindow == "ON" )
 					{
 						Ihandle* messageDlg = IupMessageDlg();
@@ -816,11 +841,13 @@ struct ExecuterAction
 				ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
 				derived.start();
 
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\nRunning " ~ command ~ args ~ "......" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\nRunning " ~ command ~ args ~ "......" ) );
+				GLOBAL.messagePanel.printOutputPanel( "\nRunning " ~ command ~ args ~ "......" );
 			}
 			else
 			{
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
+				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "Compile Error!" );
 
 				if( GLOBAL.compilerWindow == "ON" )
 				{
@@ -847,7 +874,8 @@ struct ExecuterAction
 			}
 
 			// Back to top of outputPanel
-			IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
+			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
+			GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 
 			return true;
@@ -886,8 +914,9 @@ struct ExecuterAction
 						//IupMessage( "", toStringz(GLOBAL.projectManager[activePrjName].type ) );
 						if( GLOBAL.projectManager[activePrjName].type != "1" )
 						{
-							IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
-							IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Run Static / Dynamic Library............Run Error!" ) );
+							//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+							//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Run Static / Dynamic Library............Run Error!" ) );
+							GLOBAL.messagePanel.printOutputPanel( "Can't Run Static / Dynamic Library............Run Error!", true );
 							return false;
 						}
 					}
@@ -944,14 +973,16 @@ struct ExecuterAction
 			}
 		}
 
-		IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
 		scope f = new FilePath( command );
 		if( f.exists() )
 		{
 			if( args.length ) args = " " ~ args; else args = "";
 			
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ args ~ "......" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ args ~ "......" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ args ~ "......", true );
 
 			ExecuterThread derived;
 			version( Windows ) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );
@@ -959,7 +990,8 @@ struct ExecuterAction
 		}
 		else
 		{
-			IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" ) );
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" ) );
+			GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!", true );
 			return false;
 		}
 

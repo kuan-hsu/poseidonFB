@@ -74,8 +74,6 @@ class CArgOptionDialog : CBaseDialog
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_ACTION );
 		IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomCompilerOptionDialog_DBLCLICK_CB );
 		
-		
-		
 		for( int i = 0; i < GLOBAL.customCompilerOptions.length; ++ i )
 		{
 			CArgOptionDialog.tempCustomCompilerOptions ~= GLOBAL.customCompilerOptions[i].dup;
@@ -276,10 +274,26 @@ class CArgOptionDialog : CBaseDialog
 			}
 
 			if( fromStringz( IupGetAttribute( listOptions, "ACTIVE" ) ) == "YES" )
-				if( IupGetInt( listOptions, "COUNT" ) > 0 ) IupSetAttribute( listOptions, "VALUE", IupGetAttribute( listOptions, "1" ) );
+			{
+				if( IupGetInt( listOptions, "COUNT" ) > 0 )
+				{
+					if( Util.trim( fromStringz( IupGetAttribute( listOptions, "1" ) ) ).length )
+						IupSetAttribute( listOptions, "VALUE", IupGetAttribute( listOptions, "1" ) );
+					else
+						IupSetAttribute( listOptions, "VALUE", "" );
+				}
+			}
 
 			if( fromStringz( IupGetAttribute( listArgs, "ACTIVE" ) ) == "YES" )
-				if( IupGetInt( listArgs, "COUNT" ) > 0 ) IupSetAttribute( listArgs, "VALUE", IupGetAttribute( listArgs, "1" ) );
+			{
+				if( IupGetInt( listArgs, "COUNT" ) > 0 )
+				{
+					if( Util.trim( fromStringz( IupGetAttribute( listArgs, "1" ) ) ).length )
+						IupSetAttribute( listArgs, "VALUE", IupGetAttribute( listArgs, "1" ) );
+					else
+						IupSetAttribute( listArgs, "VALUE", "" );
+				}
+			}
 		}
 			
 

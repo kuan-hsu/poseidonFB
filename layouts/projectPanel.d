@@ -348,7 +348,7 @@ class CProjectTree
 			return true;
 		}
 
-		if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
+		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Load Project: [" ~ setupDir ~ "]", true ); //IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
 		
 		char[] setupFileName = setupDir ~ "/.poseidon";
 
@@ -388,7 +388,7 @@ class CProjectTree
 		subThread.start();
 		+/
 
-		if( GLOBAL.editorSetting00.Message == "ON" ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Done."  ) );
+		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Done." );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Done."  ) );
 
 		return true;
 	}
