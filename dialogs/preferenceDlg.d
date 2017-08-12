@@ -577,9 +577,31 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( colorDefaultRefresh, "TIP", GLOBAL.languageItems["default"].toCString() );
 		IupSetCallback( colorDefaultRefresh, "ACTION", cast(Icallback) &colorTemplateList_reset_ACTION );
 
-
+		Ihandle* colorTemplateRemove = IupButton( null, null );
+		IupSetAttributes( colorTemplateRemove, "FLAT=NO,IMAGE=icon_debug_clear" );
+		IupSetAttribute( colorTemplateRemove, "TIP", GLOBAL.languageItems["remove"].toCString() );
+		IupSetCallback( colorTemplateRemove, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			Ihandle* _listHandle = IupGetHandle( "colorTemplateList" );
+			if( _listHandle != null )
+			{
+				char[] templateName = Util.trim( fromStringz( IupGetAttribute( _listHandle, "VALUE" ) ) ).dup;
+				for( int i = IupGetInt( _listHandle, "COUNT" ); i >= 1; -- i )
+				{
+					if( fromStringz( IupGetAttributeId( _listHandle, "", i ) ).dup == templateName )
+					{
+						scope templateFP = new FilePath( "settings/colorTemplates/" ~ templateName ~ ".xml" );
+						if( templateFP.exists() ) templateFP.remove;
+						IupSetInt( _listHandle, "REMOVEITEM", i );
+						return colorTemplateList_reset_ACTION( _listHandle );
+					}
+				}
+			}
+			
+			return IUP_DEFAULT;
+		});
 		
-		Ihandle* hboxColorPath = IupHbox( labelColorPath, colorTemplateList, colorDefaultRefresh, null );
+		Ihandle* hboxColorPath = IupHbox( labelColorPath, colorTemplateList, colorDefaultRefresh, colorTemplateRemove, null );
 		IupSetAttributes( hboxColorPath, "ALIGNMENT=ACENTER,MARGIN=0x0,EXPAND=NO,SIZE=200x12" );
 		
 		
@@ -1470,7 +1492,8 @@ extern(C) // Callback for CPreferenceDialog
 	
 	private int CPreferenceDialog_OpenCHM_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["chmfile"].toDString() ~ "|*.chm|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
+		//scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )
@@ -1500,7 +1523,7 @@ extern(C) // Callback for CPreferenceDialog
 	{
 		try
 		{
-			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			if( button == IUP_BUTTON1 ) // Left Click
 			{
 				char[] _s = fromStringz( status ).dup;
 				
@@ -1948,21 +1971,12 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( GLOBAL.outputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattagOutput);
 			+/
 			GLOBAL.messagePanel.applyOutputPanelFormat();
-				
-			/+
-			version(Windows) IupSetAttribute( GLOBAL.searchOutputPanel, "BGCOLOR", IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR" ) );
-			Ihandle* formattagSearch = IupUser();
-			IupSetAttribute(formattagSearch, "SELECTIONPOS", toStringz( "ALL" ));
-			IupSetAttribute(formattagSearch, "FGCOLOR", GLOBAL.editColor.searchFore.toCString );
-			IupSetAttribute( GLOBAL.searchOutputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattagSearch);
-			+/
-			GLOBAL.messagePanel.applySearchOutputPanelFormat();
 			
-			char[] templateName = Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE" ) ) );
+			char[] templateName = Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE" ) ) ).dup;
 			if( templateName.length )
 			{
 				IDECONFIG.saveColorTemplate( templateName );
-				GLOBAL.colorTemplate = templateName;
+				GLOBAL.colorTemplate = templateName.dup;
 			}
 
 			// GLOBAL.editColor.keyWord is IupString class
@@ -2073,7 +2087,14 @@ extern(C) // Callback for CPreferenceDialog
 			scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
 			scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 			scope prjString = new IupString( GLOBAL.fonts[4].fontString ); 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
-			scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", messageString.toCString );// Bottom
+			version(FLATTAB)
+			{
+				scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
+			}
+			else
+			{
+				scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", messageString.toCString );// Bottom
+			}
 			scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString ); //IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
 			scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
 			scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
@@ -2089,6 +2110,9 @@ extern(C) // Callback for CPreferenceDialog
 			IDECONFIG.save();
 			*/
 			IDECONFIG.saveINI();
+			
+			// Update Filelist Size
+			if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );					
 		}
 		catch( Exception e )
 		{
@@ -2171,7 +2195,7 @@ extern(C) // Callback for CPreferenceDialog
 		char[]		templateName = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 		char[][]	colors = IDECONFIG.loadColorTemplate( templateName );
 		
-		if( colors.length == 50 )
+		if( colors.length == 48 )
 		{
 			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR", toStringz( colors[0] ) );
 			IupSetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR", toStringz( colors[1] ) );
@@ -2192,52 +2216,50 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR", toStringz( colors[11] ) );
 			IupSetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR", toStringz( colors[12] ) );
 			IupSetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR", toStringz( colors[13] ) );
-			IupSetAttribute( IupGetHandle( "btnManual_FG" ), "BGCOLOR", toStringz( colors[14] ) );
-			IupSetAttribute( IupGetHandle( "btnManual_BG" ), "BGCOLOR", toStringz( colors[15] ) );
 
 
-			IupSetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR", toStringz( colors[16] ) );
-			IupSetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR", toStringz( colors[17] ) );
+			IupSetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR", toStringz( colors[14] ) );
+			IupSetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR", toStringz( colors[15] ) );
 
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR", toStringz( colors[18] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR", toStringz( colors[19] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR", toStringz( colors[20] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR", toStringz( colors[21] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR", toStringz( colors[22] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR", toStringz( colors[23] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR", toStringz( colors[24] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR", toStringz( colors[25] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR", toStringz( colors[26] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR", toStringz( colors[27] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR", toStringz( colors[28] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR", toStringz( colors[29] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR", toStringz( colors[30] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR", toStringz( colors[31] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR", toStringz( colors[16] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR", toStringz( colors[17] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR", toStringz( colors[18] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR", toStringz( colors[19] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR", toStringz( colors[20] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR", toStringz( colors[21] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR", toStringz( colors[22] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR", toStringz( colors[23] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR", toStringz( colors[24] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR", toStringz( colors[25] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR", toStringz( colors[26] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR", toStringz( colors[27] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR", toStringz( colors[28] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR", toStringz( colors[29] ) );
 			
-			IupSetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR", toStringz( colors[32] ) );
-			IupSetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR", toStringz( colors[33] ) );
-			IupSetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR", toStringz( colors[34] ) );
-			IupSetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR", toStringz( colors[35] ) );
-			IupSetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR", toStringz( colors[36] ) );
-			IupSetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR", toStringz( colors[37] ) );
-			IupSetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR", toStringz( colors[38] ) );
-			IupSetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR", toStringz( colors[39] ) );
-			IupSetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR", toStringz( colors[40] ) );
-			IupSetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR", toStringz( colors[41] ) );
+			IupSetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR", toStringz( colors[30] ) );
+			IupSetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR", toStringz( colors[31] ) );
+			IupSetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR", toStringz( colors[32] ) );
+			IupSetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR", toStringz( colors[33] ) );
+			IupSetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR", toStringz( colors[34] ) );
+			IupSetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR", toStringz( colors[35] ) );
+			IupSetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR", toStringz( colors[36] ) );
+			IupSetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR", toStringz( colors[37] ) );
+			IupSetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR", toStringz( colors[38] ) );
+			IupSetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR", toStringz( colors[39] ) );
 			
-			IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", toStringz( colors[42] ) );
-			IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( colors[43] ) );
+			IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", toStringz( colors[40] ) );
+			IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( colors[41] ) );
 			
-			IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR", toStringz( colors[44] ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", toStringz( colors[45] ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", toStringz( colors[46] ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", toStringz( colors[47] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR", toStringz( colors[42] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", toStringz( colors[43] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", toStringz( colors[44] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", toStringz( colors[45] ) );
 			
-			IupSetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR", toStringz( colors[48] ) );
+			IupSetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR", toStringz( colors[46] ) );
 			version(Windows)
-				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", toStringz( colors[49] ) );
+				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", toStringz( colors[47] ) );
 			else
-				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", toStringz( colors[49] ) );			
+				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", toStringz( colors[47] ) );			
 		}
 		
 		return IUP_DEFAULT;
@@ -2251,7 +2273,7 @@ extern(C) // Callback for CPreferenceDialog
 		IupSetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR", toStringz( "0 0 255" ) );
 		IupSetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR", toStringz( "0 0 0" ) );
 		IupSetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR", toStringz( "200 200 200" ) );
-		IupSetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR", toStringz( "200 208 208" ) );
+		IupSetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR", toStringz( "241 243 243" ) );
 
 		version(Windows)
 			IupSetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE", toStringz( "255" ) );
@@ -2313,7 +2335,7 @@ extern(C) // Callback for CPreferenceDialog
 		
 		
 		IupSetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE", null );
-		GLOBAL.colorTemplate = cast(char[]) " ";
+		GLOBAL.colorTemplate = cast(char[]) "";
 	
 		return IUP_DEFAULT;
 	}

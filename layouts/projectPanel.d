@@ -56,40 +56,40 @@ class CProjectTree
 		IupSetAttribute( projectButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			Ihandle* tree = GLOBAL.projectTree.getTreeHandle();
-			if( tree != null )
+			Ihandle* _tree = GLOBAL.projectTree.getTreeHandle();
+			if( _tree != null )
 			{
-				int id = IupGetInt( tree, "VALUE" );
+				int id = IupGetInt( _tree, "VALUE" );
 				
 				if( id <= 0 )
 				{
-					if( fromStringz( IupGetAttributeId( tree, "STATE", 0 ) ) == "EXPANDED" )
-						IupSetAttribute( tree, "EXPANDALL", "NO" );
+					if( fromStringz( IupGetAttributeId( _tree, "STATE", 0 ) ) == "EXPANDED" )
+						IupSetAttribute( _tree, "EXPANDALL", "NO" );
 					else
 					{
-						IupSetAttribute( tree, "EXPANDALL", "YES" );
-						IupSetAttribute( tree, "TOPITEM", "YES" ); // Set position to top
+						IupSetAttribute( _tree, "EXPANDALL", "YES" );
+						IupSetAttribute( _tree, "TOPITEM", "YES" ); // Set position to top
 					}
 				}
 				else
 				{
-					int 	nowDepth = IupGetIntId( tree, "DEPTH", id );
-					char*	nowState = IupGetAttributeId( tree, "STATE", id );
+					int 	nowDepth = IupGetIntId( _tree, "DEPTH", id );
+					char*	nowState = IupGetAttributeId( _tree, "STATE", id );
 					
 					if( nowState != null )
 					{
-						for( int i = IupGetInt( tree, "COUNT" ) - 1; i > 0; --i )
+						for( int i = IupGetInt( _tree, "COUNT" ) - 1; i > 0; --i )
 						{
-							if( IupGetIntId( tree, "DEPTH", i ) == nowDepth )
+							if( IupGetIntId( _tree, "DEPTH", i ) == nowDepth )
 							{
-								if( IupGetIntId( tree, "CHILDCOUNT", i ) > 0 )
+								if( IupGetIntId( _tree, "CHILDCOUNT", i ) > 0 )
 								{
-									if( fromStringz( IupGetAttributeId( tree, "KIND", i ) ) == "BRANCH" )
+									if( fromStringz( IupGetAttributeId( _tree, "KIND", i ) ) == "BRANCH" )
 									{
 										if( fromStringz( nowState ) == "EXPANDED" )
-											IupSetAttributeId( tree, "STATE", i, "COLLAPSED" );
+											IupSetAttributeId( _tree, "STATE", i, "COLLAPSED" );
 										else
-											IupSetAttributeId( tree, "STATE", i, "EXPANDED" );
+											IupSetAttributeId( _tree, "STATE", i, "EXPANDED" );
 									}
 								}
 							}
@@ -119,7 +119,7 @@ class CProjectTree
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 		tree = IupTree();
-		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL" );
+		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO" );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );		
 		
@@ -293,6 +293,9 @@ class CProjectTree
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
 		GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[setupDir].name );
 		//IupSetInt( GLOBAL.fileListSplit, "VALUE", IupGetInt( GLOBAL.fileListSplit, "VALUE" ) + 12 );
+		
+		// Update Filelist Size
+		if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );		
 	}
 
 	void CreateNewProject( char[] prjName, char[] prjDir )

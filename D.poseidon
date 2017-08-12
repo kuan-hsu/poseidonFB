@@ -5,12 +5,12 @@
   <MainFile/>
   <TargetName/>
   <CompilerArgs/>
-  <CompilerOption>-debug -L/SUBSYSTEM:windows:4 -odobjs -version=FLATTAB -version=REV298</CompilerOption>
+  <CompilerOption>-release -L/SUBSYSTEM:windows:4 -odobjs -version=FLATTAB -version=IUPSVN</CompilerOption>
   <Comment/>
   <CompilerPath/>
   <IncludeDirs/>
   <LibDirs>
-    <Name>K:/IUP_Lib298</Name>
+    <Name>K:/IUP_SVN</Name>
   </LibDirs>
   <Sources>
     <Name>IDE.d</Name>

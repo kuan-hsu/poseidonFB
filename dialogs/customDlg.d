@@ -15,7 +15,7 @@ class CCustomDialog : CBaseDialog
 	import				tools;
 	Ihandle*			listTools;
 	Ihandle*			labelStatus;
-	char[]				paramTip = "Special Parameters:\n%s = Selected Text\n%f = Active File Fullpath";
+	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%pn% = Active Prj Name\n%p% = Active Prj Files";
 
 	void createLayout()
 	{

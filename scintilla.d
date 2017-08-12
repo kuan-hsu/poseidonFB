@@ -10,7 +10,7 @@ private
 	import parser.autocompletion, parser.live;
 
 	import Integer = tango.text.convert.Integer;
-	import tango.stdc.stringz, tango.sys.Process;
+	import tango.stdc.stringz;
 	import tango.io.FilePath;
 	import tango.text.convert.Utf;
 }
@@ -91,8 +91,7 @@ class CScintilla
 				}
 			}
 			
-			version(NOBORDER) IupSetAttribute( sci, "BORDER", "NO" );
-			
+			IupSetAttribute( sci, "BORDER", "NO" );
 			IupMap( sci );
 			IupRefresh( GLOBAL.documentTabs );
 			
@@ -166,7 +165,7 @@ class CScintilla
 		else
 		{
 			IupSetAttribute( sci, "MARGINWIDTH0", "0" );
-		}		
+		}
 	}	
 
 	~this()
@@ -201,16 +200,7 @@ class CScintilla
 	{
 		IupSetAttribute( sci, "CLEARALL", "" );
 		IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text ) );
-		
-		version(REV298)
-		{
-			IupSetAttribute( sci, "SAVEDSTATE", "NO" );
-			IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014
-		}
-		else
-		{
-			IupSetAttribute( sci, "SAVEDSTATE", "YES" );
-		}
+		IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014		
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 	}
 
@@ -303,44 +293,12 @@ class CScintilla
 	{
 		try
 		{
-			/+
-			auto doc = new IupString( IupGetAttribute( sci, "VALUE" ) );
-			
-			if( !doc.toDString.length )
+			if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
 			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-				IupSetAttribute( messageDlg, "VALUE",  toStringz( fullPath.toDString ~ ": NULL File Saving??\nMaybe poseidonFB Got Wrong!\nESCAPE!!" ) );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-				return false;
-			}
-			+/
-			version(REV298)
-			{
-				if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
+				if( ScintillaAction.getModify( sci ) != 0 )
 				{
-					if( fromStringz( IupGetAttribute( sci, "SAVEDSTATE" ) ) == "YES" )
-					{
-						IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014
-						// Auto trigger SAVEPOINT_CB........
-					}
-				}
-			}
-			else
-			{
-				if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
-				{
-					if( fromStringz( IupGetAttribute( sci, "SAVEDSTATE" ) ) == "YES" )
-					{
-						IupSetAttribute( sci, "SAVEDSTATE", "NO" );
-
-						int pos = IupGetChildPos( GLOBAL.documentTabs, sci );
-						if( pos > -1 )
-						{
-							IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toCString );
-						}
-					}
+					IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014
+					// Auto trigger SAVEPOINT_CB........
 				}
 			}
 		}
@@ -764,10 +722,7 @@ extern(C)
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;
 						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
-						version(REV298)
-						{
-							if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "NO" ) IupSetAttribute( ih, "SAVEDSTATE", "YES" );
-						}
+						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "NO" ) IupSetAttribute( ih, "SAVEDSTATE", "YES" );
 					}
 					else
 					{
@@ -790,10 +745,7 @@ extern(C)
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;							
 						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
-						version(REV298)
-						{
-							if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "YES" ) IupSetAttribute( ih, "SAVEDSTATE", "NO" );
-						}						
+						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "YES" ) IupSetAttribute( ih, "SAVEDSTATE", "NO" );
 					}
 					else
 					{
@@ -827,7 +779,7 @@ extern(C)
 	{
 		if( pressed == 0 ) //release
 		{
-			if( button == '3' ) // Right Click
+			if( button == IUP_BUTTON3 ) // Right Click
 			{
 				Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
 				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
@@ -1194,7 +1146,7 @@ extern(C)
 				}
 			}
 			+/
-			else if( button == '2' )
+			else if( button == IUP_BUTTON2 ) // Middle Click
 			{
 				if( GLOBAL.editorSetting00.MultiSelection == "ON" )
 				{
@@ -1228,9 +1180,8 @@ extern(C)
 							SCFIND_POSIX = 0x00400000,
 							*/								
 							IupScintillaSendMessage( ih, 2198, 2, 0 ); // SCI_SETSEARCHFLAGS = 2198,
-							//IupSetInt( ih, "TARGETSTART", 0 );
-							IupScintillaSendMessage( ih, 2190, 0, 0 ); 								// SCI_SETTARGETSTART = 2190,
-							IupSetInt( ih, "TARGETEND", 0 );
+							IupScintillaSendMessage( ih, 2190, 0, 0 ); 							// SCI_SETTARGETSTART = 2190,
+							IupScintillaSendMessage( ih, 2192, IupGetInt( ih, "COUNT" ), 0 );	// SCI_SETTARGETEND = 2192,
 							
 							int count;
 							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
@@ -1242,9 +1193,8 @@ extern(C)
 								else
 									IupScintillaSendMessage( ih, 2573, cast(int) findPos, cast(int) ( findPos + word.length ) ); // SCI_ADDSELECTION 2573
 
-								//IupSetInt( ih, "TARGETSTART", findPos + word.length );
 								IupScintillaSendMessage( ih, 2190, findPos + word.length, 0 ); 	// SCI_SETTARGETSTART = 2190,
-								IupSetInt( ih, "TARGETEND", 0 );
+								IupScintillaSendMessage( ih, 2192, IupGetInt( ih, "COUNT" ), 0 );	// SCI_SETTARGETEND = 2192,
 								
 								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
 							}
@@ -1526,30 +1476,7 @@ extern(C)
 								{
 									if( GLOBAL.customTools[tailNum].dir.toDString.length )
 									{
-										// %s Selected Text
-										char[] s = fromStringz( IupGetAttribute( ih, toStringz("SELECTEDTEXT") ) );
-										char[] args = Util.substitute( GLOBAL.customTools[tailNum].args.toDString, "%s ", s ~ " " );
-										
-										args = Util.substitute( args, "%\"s\" ", "\"" ~ s ~ "\"" ~ " " );
-										// %f Active File
-										CScintilla cSci = actionManager.ScintillaAction.getCScintilla( ih );
-										if( cSci !is null )
-										{
-											s = cSci.getFullPath();
-											args = Util.substitute( args, "%f ", s ~ " " );
-											args = Util.substitute( args, "%\"f\" ", "\"" ~ s ~ "\"" ~ " " );
-										}
-										
-										version(Windows)
-										{
-											IupExecute( GLOBAL.customTools[tailNum].dir.toCString, toStringz( args ) );
-										}
-										else
-										{
-											Process p = new Process( true, GLOBAL.customTools[tailNum].dir.toDString ~ " " ~ args );
-											//p.gui( true );
-											p.execute;
-										}
+										CustomToolAction.run( GLOBAL.customTools[tailNum] );
 									}
 								}
 							}

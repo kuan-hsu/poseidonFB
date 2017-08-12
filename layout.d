@@ -27,7 +27,7 @@ void createExplorerWindow()
 
 
 	GLOBAL.projectViewTabs = IupTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
-	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL" );
+	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL,BORDER=NO" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
 
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
@@ -40,6 +40,7 @@ void createExplorerWindow()
 	Ihandle* dndEmptylabel = IupLabel( null );
 	IupSetAttribute( dndEmptylabel, "EXPAND", "YES" );
 	IupSetCallback( dndEmptylabel, "DROPFILES_CB",cast(Icallback) &label_dropfiles_cb );
+	IupSetCallback( dndEmptylabel, "BUTTON_CB",cast(Icallback) &emptyLabel_button_cb );
 	GLOBAL.dndDocumentZBox = IupZbox( dndEmptylabel, GLOBAL.documentTabs, null  );
 
 	//GLOBAL.explorerSplit = IupSplit( _split, GLOBAL.dndDocumentZBox );
@@ -52,13 +53,12 @@ void createExplorerWindow()
 
 	GLOBAL.debugPanel = new CDebugger();
 
-	/+
 	version(FLATTAB)
 	{
-		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
+		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x5" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
 		//IupSetAttribute( GLOBAL.messageWindowTab, "SHOWCLOSE", "YES" );
 		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGE", "icon_debug_clear" );
 		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
@@ -68,20 +68,19 @@ void createExplorerWindow()
 	}
 	else
 	{
-		GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
+		GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
 	}
-	+/
-	//GLOBAL.messageWindowTabs = IupTabs( GLOBAL.outputPanel, GLOBAL.searchOutputPanel, GLOBAL.debugPanel.getMainHandle, GLOBAL.manualPanel.getLayoutHandle, null );
-	GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+	//GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
+	version(IUPSVN)
+	{
+		version(Windows) IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &messageWindowTabs_BUTTON_CB );
+	}	
 
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
 	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
-	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 3, "NO" ); // Hide the Manual window
-
 	
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
-	 
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
@@ -229,6 +228,9 @@ extern(C)
 		}
 		//IupMessage("",toStringz(GLOBAL.editorSetting01.PLACEMENT));
 		if( GLOBAL.editorSetting01.PLACEMENT != "MINIMIZED" ) GLOBAL.statusBar.setPrjNameSize( width );
+		
+		// Update Filelist Size
+		if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 		
 		return IUP_DEFAULT;
 	}
@@ -454,7 +456,24 @@ extern(C)
 		}
 
 		return IUP_DEFAULT;
-	}	
+	}
+	
+	private int emptyLabel_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		// On/OFF Outline Window
+		if( button == IUP_BUTTON1 ) // Left Click
+		{
+			char[] _s = fromStringz( status ).dup;
+			if( _s.length > 5 )
+			{
+				if( _s[5] == 'D' ) // Double Click
+				{
+					menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
 	
 	private int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
 	{
@@ -577,6 +596,23 @@ extern(C)
 		IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 		IupDestroy( popupMenu );
 
+		return IUP_DEFAULT;
+	}
+	
+	private int messageWindowTabs_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		// On/OFF Outline Window
+		if( button == IUP_BUTTON1 ) // Left Click
+		{
+			char[] _s = fromStringz( status ).dup;
+			if( _s.length > 5 )
+			{
+				if( _s[5] == 'D' ) // Double Click
+				{
+					menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+				}
+			}
+		}
 		return IUP_DEFAULT;
 	}
 	

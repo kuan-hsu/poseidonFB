@@ -9,14 +9,14 @@ class CSingleTextDialog : CBaseDialog
 	private:
 	import		global;
 	
-	Ihandle*	textResult;
+	Ihandle*	label, textResult;
 	char[]		labelName;
 
 	void createLayout( char[] textWH )
 	{
 		Ihandle* bottom = createDlgButton();
 
-		Ihandle* label = IupLabel( GLOBAL.cString.convert( labelName ) );
+		label = IupLabel( GLOBAL.cString.convert( labelName ) );
 		
 		textResult = IupText( null );
 		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
@@ -77,6 +77,16 @@ class CSingleTextDialog : CBaseDialog
 
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );
 		return fromStringz(IupGetAttribute( textHandle, "VALUE" ) ).dup;
+	}
+	
+	Ihandle* getTextHandle()
+	{
+		return textResult;
+	}
+	
+	Ihandle* getLabelHandle()
+	{
+		return label;
 	}	
 }
 

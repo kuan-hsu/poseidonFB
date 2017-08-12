@@ -251,7 +251,7 @@ class COutline
 			switch( lowerCase( _node.protection ) )
 			{
 				case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
-				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "232 116 0" ) ); break;
+				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 201 14" ) ); break;
 				default:
 			}
 		}
@@ -1565,7 +1565,7 @@ extern(C)
 
 		try
 		{
-			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			if( button == IUP_BUTTON1 ) // Left Click
 			{
 				char[] _s = fromStringz( status ).dup;
 				

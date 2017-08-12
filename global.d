@@ -775,6 +775,7 @@ struct GLOBAL
 		GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "freeBASIC Sources" );
 		GLOBAL.languageItems["bifile"] = new IupString( cast(char[]) "freeBASIC Includes" );
 		GLOBAL.languageItems["lngfile"] = new IupString( cast(char[]) "Language Files" );
+		GLOBAL.languageItems["chmfile"] = new IupString( cast(char[]) "Microsoft Compiled HTML Help" );
 		GLOBAL.languageItems["allfile"] = new IupString( cast(char[]) "All Files" );
 		GLOBAL.languageItems["fbeditfile"] = new IupString( cast(char[]) "FbEdit Projects" );
 	}	

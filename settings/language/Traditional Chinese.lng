@@ -375,5 +375,6 @@ exefile=執行檔
 basfile=程式源碼
 bifile=引含檔
 lngfile=語言檔
+chmfile=微軟已編譯幫助文件
 allfile=所有檔案
 fbeditfile=FbEdit專案

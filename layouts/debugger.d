@@ -1393,6 +1393,7 @@ class DebugThread //: Thread
 		proc.kill();
 		delete proc;
 
+		/+
 		IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "OFF" );
 		GLOBAL.messageSplit_value = 800;
 		IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
@@ -1406,14 +1407,17 @@ class DebugThread //: Thread
 		IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
 		//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
 		IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
-		
+		+/
 
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
 			//#define SCI_MARKERDELETEALL 2045
+			IupScintillaSendMessage( cSci.getIupScintilla, 2045, 2, 0 );
 			IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 );
 			IupScintillaSendMessage( cSci.getIupScintilla, 2045, 4, 0 );
 		}
+		
+		IupSetAttribute( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", "ALL" );
 	}
 
 	void run()
@@ -1421,16 +1425,7 @@ class DebugThread //: Thread
 		try
 		{
 			if( bExecuted ) return;
-
-			// Show bottom panel
-			IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
-			//IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
-			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "YES" );
-			//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
-			IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "YES" );
-			//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
-			IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "YES" );
-
+			
 			// Show the Debug window
 			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "YES" );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 2 );
@@ -1616,11 +1611,11 @@ extern( C )
 		{
 			if( GLOBAL.debugPanel.isExecuting() )
 			{
-				if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+				if( button == IUP_BUTTON1 ) // Left Click
 				{
 					if( !GLOBAL.debugPanel.isRunning() ) GLOBAL.debugPanel.sendCommand( "r\n" ); else GLOBAL.debugPanel.sendCommand( "continue\n" );
 				}
-				else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+				else if( button == IUP_BUTTON3 ) // Right Click
 				{
 					if( !GLOBAL.debugPanel.isRunning() )
 					{

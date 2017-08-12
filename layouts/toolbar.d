@@ -324,11 +324,11 @@ extern( C )
 	{
 		if( pressed == 0 )
 		{
-			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			if( button == IUP_BUTTON1 ) // Left Click
 			{
 				ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
 			}
-			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			else if( button == IUP_BUTTON3 ) // Right Click
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
@@ -352,11 +352,11 @@ extern( C )
 	{
 		if( pressed == 0 )
 		{
-			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			if( button == IUP_BUTTON1 ) // Left Click
 			{
 				ExecuterAction.buildAll();
 			}
-			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			else if( button == IUP_BUTTON3 ) // Right Click
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
@@ -380,11 +380,11 @@ extern( C )
 	{
 		if( pressed == 0 )
 		{
-			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			if( button == IUP_BUTTON1 ) // Left Click
 			{
 				if( ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ ) ) ExecuterAction.run();
 			}
-			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			else if( button == IUP_BUTTON3 ) // Right Click
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
@@ -414,11 +414,11 @@ extern( C )
 	{
 		if( pressed == 0 )
 		{
-			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			if( button == IUP_BUTTON1 ) // Left Click
 			{
 				ExecuterAction.run();
 			}
-			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			else if( button == IUP_BUTTON3 ) // Right Click
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
@@ -442,11 +442,11 @@ extern( C )
 	{
 		if( pressed == 0 )
 		{
-			if( button == 49 ) // IUP_BUTTON1 = '1' = 49
+			if( button == IUP_BUTTON1 ) // Left Click
 			{
 				ExecuterAction.quickRun( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
 			}
-			else if( button == 51 ) // IUP_BUTTON1 = '3' = 51
+			else if( button == IUP_BUTTON3 ) // Right Click
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{

@@ -545,7 +545,7 @@ struct ScintillaAction
 				int prjID = actionManager.ProjectAction.getActiveProjectID();
 				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
 				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
-			}		
+			}
 
 			return true;
 		}
@@ -596,6 +596,9 @@ struct ScintillaAction
 
 			StatusBarAction.update();
 
+			// Update Filelist Size
+			if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+			
 			return true;
 		}
 		catch
@@ -697,7 +700,18 @@ struct ScintillaAction
 	{
 		openFile( fileName, lineNum );
 	}
+	
+	static int getModify( CScintilla cSci )
+	{
+		if( cSci !is null )	return IupScintillaSendMessage( cSci.getIupScintilla, 2159, 0, 0 ); // SCI_GETMODIFY = 2159
+		return 0;
+	}
 
+	static int getModify( Ihandle* ih )
+	{
+		if( ih != null ) return IupScintillaSendMessage( ih, 2159, 0, 0 ); // SCI_GETMODIFY = 2159
+		return 0;
+	}
 
 	static void closeAndMoveDocument( CScintilla cSci, bool bShowNew = false )
 	{
@@ -738,7 +752,7 @@ struct ScintillaAction
 			CScintilla	cSci		= GLOBAL.scintillaManager[upperCase(fullPath)];
 			Ihandle*	iupSci		= cSci.getIupScintilla;
 
-			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
+			if( ScintillaAction.getModify( iupSci ) != 0 )
 			{
 				if( pos > -1 ) IupSetInt( GLOBAL.documentTabs, "VALUEPOS" , pos ); 
 				scope cStringDocument = new IupString( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
@@ -750,7 +764,11 @@ struct ScintillaAction
 				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				//int button = IupAlarm( toStringz( GLOBAL.languageItems["alarm"] ), GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] ), toStringz( GLOBAL.languageItems["yes"] ), toStringz( GLOBAL.languageItems["no"] ), toStringz( GLOBAL.languageItems["cancel"] ) );
 				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
-				if( button == 3 ) return IUP_IGNORE;
+				if( button == 3 )
+				{
+					IupSetFocus( iupSci );
+					return IUP_IGNORE;
+				}
 				if( button == 1 )
 				{
 					if( fullPath.length >= 7 )
@@ -785,7 +803,7 @@ struct ScintillaAction
 			{
 				Ihandle* iupSci = cSci.getIupScintilla;
 				
-				if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
+				if( ScintillaAction.getModify( iupSci ) != 0 )
 				{
 					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 					
@@ -800,6 +818,7 @@ struct ScintillaAction
 					//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
 					if( button == 3 )
 					{
+						IupSetFocus( iupSci );
 						break;
 					}
 					else if( button == 2 )
@@ -858,7 +877,7 @@ struct ScintillaAction
 		{
 			Ihandle* iupSci = cSci.getIupScintilla;
 			
-			if( fromStringz( IupGetAttribute( iupSci, "SAVEDSTATE" ) ) == "YES" )
+			if( ScintillaAction.getModify( iupSci ) != 0 )
 			{
 				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				
@@ -934,7 +953,7 @@ struct ScintillaAction
 		
 		try
 		{
-			if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "SAVEDSTATE" ) ) == "YES" || bForce )
+			if( ScintillaAction.getModify( cSci.getIupScintilla ) != 0 || bForce )
 			{
 				char[] fullPath = cSci.getFullPath();
 
@@ -1051,7 +1070,7 @@ struct ScintillaAction
 		{
 			Ihandle* _child = IupGetChild( GLOBAL.documentTabs, i );
 
-			if( fromStringz( IupGetAttribute( _child, "SAVEDSTATE" ) ) == "YES" )
+			if( ScintillaAction.getModify( _child ) != 0 )
 			{
 				foreach( CScintilla _sci; GLOBAL.scintillaManager )
 				{
@@ -1375,7 +1394,7 @@ struct StatusBarAction
 			{
 				int pos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2008, 0, 0 );
 				int line = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; // 0 based
-				int col = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2129, pos, 0 );
+				int col = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2129, pos, 0 ) + 1;  // 0 based
 				int bOverType = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2187, pos, 0 );
 				int eolType = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2030, 0, 0 );
 
@@ -1594,8 +1613,7 @@ struct SearchAction
 		if( targetText.length )
 		{
 			IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-			
-			if( bNext )	IupSetInt( ih, "TARGETEND", 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
+			if( bNext )	IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
 
 			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
 			
@@ -1876,6 +1894,66 @@ struct SearchAction
 			{
 				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text.dup ) );
 			}
+		}
+	}
+}
+
+
+// Action for FILE operate
+struct CustomToolAction
+{
+	version(linux) import tango.sys.Process;
+	
+	static void run( CustomTool tool )
+	{
+		auto cSci = ScintillaAction.getActiveCScintilla();
+		char[] args;
+		if( cSci !is null )
+		{
+			// %s Selected Text
+			char[] s = fromStringz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
+			
+			// %s% Selected Word
+			args = Util.substitute( tool.args.toDString, "%s%", s );
+			args = Util.substitute( args, "\"%s%\"", "\"" ~ s ~ "\"" );
+			
+			// %f% Active File
+			s = cSci.getFullPath();
+			args = Util.substitute( args, "%f%", s );
+			args = Util.substitute( args, "\"%f%\"", "\"" ~ s ~ "\"" );
+		}
+		
+		char[] pn = ProjectAction.getActiveProjectName;
+		if( pn.length )
+		{
+			// %pn% Project Name
+			args = Util.substitute( tool.args.toDString, "%pn%", pn );
+			args = Util.substitute( args, "\"%pn%\"", "\"" ~ pn ~ "\"" );
+			
+			char[] pAllFiles;
+			foreach( char[] s; GLOBAL.projectManager[pn].sources )
+				pAllFiles ~= ( s ~ " " );
+
+			foreach( char[] s; GLOBAL.projectManager[pn].includes )
+				pAllFiles ~= ( s ~ " " );
+				
+			
+			pAllFiles = Util.trim( pAllFiles );
+			// %pn% Project Name
+			args = Util.substitute( tool.args.toDString, "%p%", pAllFiles );
+			args = Util.substitute( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );			
+		}
+		
+		
+		version(Windows)
+		{
+			IupExecute( tool.dir.toCString, toStringz( args ) );
+		}
+		else
+		{
+			Process p = new Process( true, tool.dir.toDString ~ " " ~ args );
+			//p.gui( true );
+			p.execute;
 		}
 	}
 }

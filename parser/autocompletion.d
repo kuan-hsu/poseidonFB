@@ -1894,7 +1894,7 @@ struct AutoComplete
 										if( keyWord == targetText )
 										{
 											keyWord = lowerCase( keyWord );
-											if ( keyWord[0] >= 'a' && keyWord[0] <= 'z' ) keyWord[0] = keyWord[0] - 32;
+											if ( keyWord[0] >= 'a' && keyWord[0] <= 'z' ) keyWord[0] = cast(char) ( keyWord[0] - 32 );
 											
 											version(Windows)
 											{
@@ -2197,28 +2197,28 @@ struct AutoComplete
 							{
 								fullPath = _fp.path() ~ _fp.name ~ ".bas";
 								AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
-								
-								if( AST_Head !is null )
+							}
+	
+							if( AST_Head !is null )
+							{
+								switch( oriNode.kind )
 								{
-									switch( oriNode.kind )
-									{
-										case B_SUB, B_FUNCTION, B_OPERATOR, B_PROPERTY:
-											sonProcedureNode = searchMatchMemberNode( AST_Head, className ~ "." ~ procedureName, oriNode.kind );
-											break;
+									case B_SUB, B_FUNCTION, B_OPERATOR, B_PROPERTY:
+										sonProcedureNode = searchMatchMemberNode( AST_Head, className ~ "." ~ procedureName, oriNode.kind );
+										break;
 
-										case B_CTOR, B_DTOR:
-											sonProcedureNode = searchMatchMemberNode( AST_Head, className, oriNode.kind );
-											break;
-										
-										default:
-											return;
-									}
+									case B_CTOR, B_DTOR:
+										sonProcedureNode = searchMatchMemberNode( AST_Head, className, oriNode.kind );
+										break;
 									
-									if( sonProcedureNode !is null )
-									{
-										if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+									default:
 										return;
-									}
+								}
+								
+								if( sonProcedureNode !is null )
+								{
+									if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+									return;
 								}
 							}
 							return;

@@ -255,6 +255,7 @@ void createMenu()
 	IupSetCallback( item_quickRun, "ACTION", cast(Icallback)&quickRun_cb );
 
 	// Option
+	/+
 	Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
 	//IupSetAttribute(_windowsEOL, "IMAGE", "icon_windows");
 	IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -301,45 +302,19 @@ void createMenu()
 		default:
 	}
 	Ihandle* setEOL = IupSubmenu( GLOBAL.languageItems["seteol"].toCString, _eolSubMenu );
+	+/
 
 	Ihandle* windowsEOL = IupItem( toStringz( "Windows" ), null );
 	IupSetAttribute(windowsEOL, "IMAGE", "icon_windows");
-	IupSetCallback( windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
-	{
-		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )
-		{
-			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 0, 0 ); // SCI_CONVERTEOLS 2029
-			actionManager.StatusBarAction.update();
-		}
-		return IUP_DEFAULT;
-	});	
+	IupSetCallback( windowsEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 	
 	Ihandle* macEOL = IupItem( toStringz( "Mac" ), null );
 	IupSetAttribute(macEOL, "IMAGE", "icon_mac");
-	IupSetCallback( macEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
-	{
-		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )
-		{
-			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 1, 0 ); // SCI_CONVERTEOLS 2029
-			actionManager.StatusBarAction.update();
-		}
-		return IUP_DEFAULT;
-	});	
+	IupSetCallback( macEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 	
 	Ihandle* unixEOL = IupItem( toStringz( "Unix" ), null );
 	IupSetAttribute(unixEOL, "IMAGE", "icon_linux");
-	IupSetCallback( unixEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
-	{
-		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-		if( cSci !is null )
-		{
-			IupScintillaSendMessage( cSci.getIupScintilla, 2029, 2, 0 ); // SCI_CONVERTEOLS 2029
-			actionManager.StatusBarAction.update();
-		}
-		return IUP_DEFAULT;
-	});	
+	IupSetCallback( unixEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 
 	Ihandle* eolSubMenu = IupMenu( windowsEOL, macEOL, unixEOL, null  );
 	Ihandle* convertEOL = IupSubmenu( GLOBAL.languageItems["converteol"].toCString, eolSubMenu );
@@ -402,7 +377,7 @@ void createMenu()
 	
 	Ihandle* markIupSeparator = IupSeparator();
 	IupSetAttribute( markIupSeparator, "TITLE", "" );
-	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
+	Ihandle* toolsSubMenu = IupMenu( /*setEOL,*/ convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
 	IupSetHandle( "toolsSubMenu", toolsSubMenu );
 	
 	item_tool = IupSubmenu( GLOBAL.languageItems["tools"].toCString, toolsSubMenu );
@@ -451,7 +426,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB V0.299\nBy Kuan Hsu (Taiwan)\n2017.08.09" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.300)\nBy Kuan Hsu (Taiwan)\n2017.08.13" );
 		return IUP_DEFAULT;
 	});
 	
@@ -580,6 +555,7 @@ private void _convertKeyWordCase( int type )
 	if( cSci !is null )
 	{
 		Ihandle* iupSci = cSci.getIupScintilla;
+		int	documentLength = IupGetInt( iupSci, "COUNT" );
 
 		IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
 
@@ -593,14 +569,15 @@ private void _convertKeyWordCase( int type )
 					char[]	replaceText = tools.convertKeyWordCase( type, targetText );
 
 					IupScintillaSendMessage( iupSci, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
-					IupSetInt( iupSci, "TARGETEND", 0 );
+					IupScintillaSendMessage( iupSci, 2192, documentLength, 0 ); 		// SCI_SETTARGETEND = 2192,
 
 					int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 					while( posHead >= 0 )
 					{
 						IupSetAttribute( iupSci, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
-						IupScintillaSendMessage( iupSci, 2190, posHead + replaceTextLength, 0 );													// SCI_SETTARGETSTART = 2190,
-						IupSetInt( iupSci, "TARGETEND", 0 );
+						IupScintillaSendMessage( iupSci, 2190, posHead + replaceTextLength, 0 );	// SCI_SETTARGETSTART = 2190,
+						IupScintillaSendMessage( iupSci, 2192, documentLength, 0 );					// SCI_SETTARGETSTART = 2190,
+					
 						posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 					}					
 				}
@@ -1017,7 +994,53 @@ extern(C)
 			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false );
 			char[] lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
-			if( lineNum.length) actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
+			lineNum = Util.trim( lineNum );
+			if( lineNum.length)
+			{
+				int pos = Util.rindex( lineNum, "x" );
+				if( pos >= lineNum.length )	pos = Util.rindex( lineNum, ":" );
+				if( pos < lineNum.length )
+				{
+					try
+					{
+						int left = Integer.atoi( Util.trim( lineNum[0..pos] ) );
+						int right = Integer.atoi( Util.trim( lineNum[pos+1..$] ) );
+						
+						
+						char[] LineCol = Integer.toString( left - 1 )  ~ "," ~ Integer.toString( right - 1 );
+						IupSetAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol.dup ) );
+						actionManager.StatusBarAction.update();
+						IupSetFocus( cSci.getIupScintilla );
+					}
+					catch
+					{
+					}
+					return;
+				}
+				else
+				{
+					try
+					{
+						if( lineNum[0] == '-' )
+						{
+							int value = Integer.atoi( lineNum[1..$] );
+							value --;
+							
+							IupSetAttribute( cSci.getIupScintilla, "CARETPOS", toStringz( Integer.toString(value).dup ) );
+							actionManager.StatusBarAction.update();
+							IupSetFocus( cSci.getIupScintilla );
+							return;
+						}
+					}
+					catch
+					{
+						return;
+					}
+				}
+				
+				actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
+				actionManager.StatusBarAction.update();
+			}
 		}
 	}
 	
@@ -1100,10 +1123,8 @@ extern(C)
 			Ihandle* SecondChild = IupGetChild( GLOBAL.messageSplit, 1 );
 			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
 
-			//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "NO" );
-			//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
-			IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
-			IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
+			//IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
+			//IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
 
 			if( fileListTreeH == 0 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 		}
@@ -1112,10 +1133,8 @@ extern(C)
 			IupSetAttribute( ih, "VALUE", "ON" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "YES" );
-			//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "YES" );
-			//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "YES" );
-			IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "YES" );
-			IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "YES" );
+			//IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "YES" );
+			//IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "YES" );
 		}
 		
 		return IUP_DEFAULT;
@@ -1395,7 +1414,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	private int encode_cb( Ihandle *ih )
+	int encode_cb( Ihandle *ih )
 	{
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )
@@ -1422,6 +1441,28 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
+	int SetAndConvertEOL_CB( Ihandle *ih )
+	{
+		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+		if( cSci !is null )
+		{
+			int type;
+			switch( fromStringz( IupGetAttribute( ih, "TITLE" ) ) )
+			{
+				case "Windows":	type = 0; break;
+				case "Mac":		type = 1; break;
+				case "Unix":	type = 2; break;
+				default:		return IUP_DEFAULT;
+			}
+				
+			IupScintillaSendMessage( cSci.getIupScintilla, 2029, type, 0 ); // SCI_CONVERTEOLS 2029
+			IupScintillaSendMessage( cSci.getIupScintilla, 2031, type, 0 ); // SCI_SETEOLMODE 2031
+			actionManager.StatusBarAction.update();
+		}
+		
+		return IUP_DEFAULT;
+	}
+	
 	// Also import by customDlg.d
 	int customtool_menu_click_cb( Ihandle* ih )
 	{
@@ -1435,31 +1476,7 @@ extern(C)
 				{
 					if( GLOBAL.customTools[i].dir.toDString.length )
 					{
-						auto cSci = ScintillaAction.getActiveCScintilla();
-						char[] args;
-						if( cSci !is null )
-						{
-							// %s Selected Text
-							char[] s = fromStringz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
-							
-							args = Util.substitute( GLOBAL.customTools[i].args.toDString, "%s ", s ~ " " );
-							args = Util.substitute( args, "%\"s\" ", "\"" ~ s ~ "\"" ~ " " );
-							// %f Active File
-							s = cSci.getFullPath();
-							args = Util.substitute( args, "%f ", s ~ " " );
-							args = Util.substitute( args, "%\"f\" ", "\"" ~ s ~ "\"" ~ " " );
-						}
-						
-						version(Windows)
-						{
-							IupExecute( GLOBAL.customTools[i].dir.toCString, toStringz( args ) );
-						}
-						else
-						{
-							Process p = new Process( true, GLOBAL.customTools[tailNum].dir.toDString ~ " " ~ args );
-							//p.gui( true );
-							p.execute;
-						}
+						CustomToolAction.run( GLOBAL.customTools[i] );
 						break;
 					}
 				}

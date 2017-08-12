@@ -1,7 +1,8 @@
 ﻿module layouts.statusBar;
 
-import		iup.iup;
-import		global, tools, dialogs.argOptionDlg;
+import		iup.iup, iup.iup_scintilla;
+import		global, tools, menu, actionManager;
+import		dialogs.singleTextDlg, dialogs.argOptionDlg;
 import		tango.stdc.stringz;
 
 class CStatusBar
@@ -18,15 +19,24 @@ class CStatusBar
 	{
 		prjName = IupLabel( null );
 		IupSetAttribute( prjName, "SIZE", "250x" );
+		IupSetCallback( prjName, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+
 		LINExCOL = IupLabel( "             " );
+		IupSetCallback( LINExCOL, "BUTTON_CB", cast(Icallback) &CStatusBar_LINExCOL_BUTTON_CB );
+		
 		Ins = IupLabel( "   " );
+		IupSetCallback( Ins, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+		
 		EOLType = IupLabel( "        " );
+		IupSetCallback( EOLType, "BUTTON_CB", cast(Icallback) &CStatusBar_EOL_BUTTON_CB );
+
 		EncodingType = IupLabel( "           " );
+		IupSetCallback( EncodingType, "BUTTON_CB", cast(Icallback) &CStatusBar_Encode_BUTTON_CB );
 		
 		Ihandle* image = IupLabel( "" );
 		IupSetAttribute( image, "IMAGE", "icon_customoption" );
 		IupSetAttribute( image, "TIP", GLOBAL.languageItems["setcustomoption"].toCString );
-		IupSetCallback( image, "BUTTON_CB", cast(Icallback) &CStatusBar_BUTTON_CB );
+		IupSetCallback( image, "BUTTON_CB", cast(Icallback) &CStatusBar_CustomOption_BUTTON_CB );
 		
 		compileOptionSelection = IupLabel( "" );
 		IupSetHandle( "compileOptionSelection", compileOptionSelection );
@@ -42,6 +52,7 @@ class CStatusBar
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 			setTip( GLOBAL.currentCustomCompilerOption.toDString );
 		}
+		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Encode_BUTTON_CB );
 	
 		
 		Ihandle*[5] labelSEPARATOR;
@@ -50,10 +61,12 @@ class CStatusBar
 			labelSEPARATOR[i] = IupLabel( null ); 
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 		}
-		
 		// Ihandle* StatusBar = IupHbox( GLOBAL.statusBar_PrjName, IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
-		layoutHandle = IupHbox( image, compileOptionSelection, labelSEPARATOR[4], prjName, IupFill(), labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
-		IupSetAttributes( layoutHandle, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
+		Ihandle* _hbox = IupHbox( image, compileOptionSelection, labelSEPARATOR[4], prjName, IupFill(), labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
+		IupSetAttributes( _hbox, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
+		
+		layoutHandle = IupBackgroundBox( _hbox );
+		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		
 		version(Windows)
 		{
@@ -164,11 +177,31 @@ class CStatusBar
 
 extern(C) // Callback for CBaseDialog
 {
-	int CStatusBar_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	private int CStatusBar_Empty_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
+		// On/OFF Message Window
+		if( button == IUP_BUTTON1 ) // Left Click
+		{
+			char[] _s = fromStringz( status ).dup;
+			if( _s.length > 5 )
+			{
+				if( _s[5] == 'D' ) // Double Click
+				{
+					menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+					return IUP_IGNORE;
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
+	int CStatusBar_CustomOption_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		
 		if( pressed == 0 ) //release
 		{
-			if( button == '1' ) 
+			if( button == IUP_BUTTON3 ) // Right Click
 			{
 				Ihandle* itemNULL = IupItem( GLOBAL.languageItems["none"].toCString, null );
 				IupSetAttribute( itemNULL, "IMAGE", "icon_clear" );
@@ -240,6 +273,180 @@ extern(C) // Callback for CBaseDialog
 					}
 				}
 				IupRefresh( popupMenu );
+				
+				
+				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+				IupDestroy( popupMenu );
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
+	private int CStatusBar_LINExCOL_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		
+		if( pressed == 0 ) //release
+		{
+			if( button == IUP_BUTTON3 ) // Right Click
+			{
+				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+				if( cSci !is null )
+				{
+					char[]	mousePos = fromStringz( IupGetGlobal( "CURSORPOS" ) );
+					
+					int crossSign = Util.index( mousePos, "x" );
+					if( crossSign < mousePos.length )
+					{
+						x = Integer.atoi( mousePos[0..crossSign] );
+						y = Integer.atoi( mousePos[crossSign+1..$] );
+					}
+					else
+					{
+						x = IUP_MOUSEPOS;
+						y = IUP_CURRENT;
+					}						
+					
+					// Open Dialog Window
+					scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false );
+					IupSetAttributes( gotoLineDlg.getIhandle, "BORDER=NO,RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,OPACITY=198" );
+					//IupSetAttribute( gotoLineDlg.getIhandle, "BGCOLOR", "255 255 255" );
+					//IupSetAttribute( gotoLineDlg.getIhandle, "BACKGROUND", "0 255 0" );
+					IupSetAttribute( gotoLineDlg.getIhandle, "TITLE", null );
+					
+					char[] lineNum = gotoLineDlg.show( x, y - 60 );
+					
+					lineNum = Util.trim( lineNum );
+					if( lineNum.length)
+					{
+						int pos = Util.rindex( lineNum, "x" );
+						if( pos >= lineNum.length )	pos = Util.rindex( lineNum, ":" );
+						if( pos < lineNum.length )
+						{
+							try
+							{
+								int left = Integer.atoi( Util.trim( lineNum[0..pos] ) );
+								int right = Integer.atoi( Util.trim( lineNum[pos+1..$] ) );
+								
+								
+								char[] LineCol = Integer.toString( left - 1 )  ~ "," ~ Integer.toString( right - 1 );
+								IupSetAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol.dup ) );
+								actionManager.StatusBarAction.update();
+								IupSetFocus( cSci.getIupScintilla );
+							}
+							catch
+							{
+							}
+							return IUP_DEFAULT;
+						}
+						else
+						{
+							try
+							{
+								if( lineNum[0] == '-' )
+								{
+									int value = Integer.atoi( lineNum[1..$] );
+									value --;
+									
+									IupSetAttribute( cSci.getIupScintilla, "CARETPOS", toStringz( Integer.toString( value).dup ) );
+									actionManager.StatusBarAction.update();
+									IupSetFocus( cSci.getIupScintilla );
+									return IUP_DEFAULT;
+								}
+							}
+							catch
+							{
+								return IUP_DEFAULT;
+							}
+						}
+						
+						actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
+						actionManager.StatusBarAction.update();
+					}
+				}					
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
+	private int CStatusBar_EOL_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		
+		if( pressed == 0 ) //release
+		{
+			if( button == IUP_BUTTON3 ) // Right Click
+			{
+				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 0 ) return IUP_DEFAULT;
+				
+				Ihandle* windowsEOL = IupItem( toStringz( "Windows" ), null );
+				IupSetAttribute(windowsEOL, "IMAGE", "icon_windows");
+				IupSetCallback( windowsEOL, "ACTION", cast(Icallback) &menu.SetAndConvertEOL_CB );
+				
+				Ihandle* macEOL = IupItem( toStringz( "Mac" ), null );
+				IupSetAttribute(macEOL, "IMAGE", "icon_mac");
+				IupSetCallback( macEOL, "ACTION", cast(Icallback) &menu.SetAndConvertEOL_CB );
+				
+				Ihandle* unixEOL = IupItem( toStringz( "Unix" ), null );
+				IupSetAttribute(unixEOL, "IMAGE", "icon_linux");
+				IupSetCallback( unixEOL, "ACTION", cast(Icallback) &menu.SetAndConvertEOL_CB );
+				
+				Ihandle* popupMenu = IupMenu( 	
+												windowsEOL,
+												macEOL,
+												unixEOL,
+												null
+											);
+				
+				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+				IupDestroy( popupMenu );
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
+	private int CStatusBar_Encode_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		
+		if( pressed == 0 ) //release
+		{
+			if( button == IUP_BUTTON3 ) // Right Click
+			{
+				if( !Util.trim( fromStringz( IupGetAttribute( ih, "TITLE" ) ) ).length ) return IUP_DEFAULT;
+				
+				Ihandle* encodeDefault = IupItem( toStringz( "Default" ), null );
+				IupSetCallback( encodeDefault, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF8 = IupItem( toStringz( "UTF8" ), null );
+				IupSetCallback( encodeUTF8, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF8BOM = IupItem( toStringz( "UTF8.BOM" ), null );
+				IupSetCallback( encodeUTF8BOM, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF16BEBOM = IupItem( toStringz( "UTF16BE.BOM" ), null );
+				IupSetCallback( encodeUTF16BEBOM, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF16LEBOM = IupItem( toStringz( "UTF16LE.BOM" ), null );
+				IupSetCallback( encodeUTF16LEBOM, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF32BE = IupItem( toStringz( "UTF32BE" ), null );
+				IupSetCallback( encodeUTF32BE, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF32BEBOM = IupItem( toStringz( "UTF32BE.BOM" ), null );
+				IupSetCallback( encodeUTF32BEBOM, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF32LE = IupItem( toStringz( "UTF32LE" ), null );
+				IupSetCallback( encodeUTF32LE, "ACTION", cast(Icallback) &menu.encode_cb );
+				Ihandle* encodeUTF32LEBOM = IupItem( toStringz( "UTF32LE.BOM" ), null );
+				IupSetCallback( encodeUTF32LEBOM, "ACTION", cast(Icallback) &menu.encode_cb );
+				
+				Ihandle* popupMenu = IupMenu( 	
+												encodeDefault,
+												encodeUTF8,
+												encodeUTF8BOM,
+												encodeUTF16BEBOM,
+												encodeUTF16LEBOM,
+												encodeUTF32BE,
+												encodeUTF32BEBOM,
+												encodeUTF32LE,
+												encodeUTF32LEBOM,
+												null
+											);
+
 				
 				
 				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );

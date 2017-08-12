@@ -24,11 +24,19 @@ class CFileList
 		IupSetCallback( filelistButtonFilename, "ACTION", cast(Icallback) &fileList_Filename_ACTION );
 
 		Ihandle* filelistButtonHide = IupButton( null, null );
-		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_b" );
-		IupSetAttribute( filelistButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
+		IupSetAttributes( filelistButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse2" );
+		IupSetAttribute( filelistButtonHide, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( filelistButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+			if( GLOBAL.fileListTree.getTreeH() <= 1 )
+			{
+				IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
+			}
+			else
+			{
+				GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) );
+				IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+			}
 			return IUP_DEFAULT;
 		});
 
@@ -36,25 +44,26 @@ class CFileList
 		IupSetAttributes( filelistToolbarTitleImage, "IMAGE=icon_filelist,ALIGNMENT=ALEFT:ACENTER" );
 
 		filelistToolbarTitle = IupLabel( GLOBAL.languageItems["filelist"].toCString() );
+		IupSetAttribute( filelistToolbarTitle, "SIZE", "100x8" );// Leftside
 		setTitleFont();
-		IupSetAttribute( filelistToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );
+		IupSetCallback( filelistToolbarTitle, "BUTTON_CB", cast(Icallback) &fileList_Empty_BUTTON_CB );
 
 		Ihandle* filelistToolbarH = IupHbox( filelistToolbarTitleImage, filelistToolbarTitle, IupFill, filelistButtonFilename, filelistButtonHide, null );
 		IupSetAttributes( filelistToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 		tree = IupTree();
-		IupSetAttributes( tree, "ADDROOT=NO,EXPAND=YES,SIZE=NULL" );
+		IupSetAttributes( tree, "ADDROOT=NO,EXPAND=YES,SIZE=NULL,BORDER=NO" );
 		IupSetAttributes( tree, "SHOWDRAGDROP=YES" );
 		version(Windows) IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.filelistFore.toCString );
-		version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.filelistBack.toCString );		
+		version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.filelistBack.toCString );
 		
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &fileList_SELECTION_CB );
 		IupSetCallback( tree, "DRAGDROP_CB", cast(Icallback) &fileList_DRAGDROP_CB );
 
 		Ihandle* _v = IupVbox( filelistToolbarH, tree, null );
 		IupSetAttributes( _v, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT" ) );
-		
 		layoutHandle = IupBackgroundBox( _v );
+		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &fileList_Empty_BUTTON_CB );
 	}
 
 	public:
@@ -85,7 +94,7 @@ class CFileList
 	void setTitleFont()
 	{
 		scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );
-		IupSetAttribute( filelistToolbarTitle, "FONT", leftsideString.toCString );// Leftside                	                                9  
+		IupSetAttribute( filelistToolbarTitle, "FONT", leftsideString.toCString );// Leftside
 	}
 	
 	void changeColor()
@@ -154,12 +163,31 @@ class CFileList
 	{
 		if( _sci !is null ) removeItem( _sci.getFullPath );
 	}
+	
+	int getTreeH()
+	{
+		try
+		{
+			char[] treeSize = fromStringz( IupGetAttribute( tree, "SIZE" ) );
+			if( treeSize.length )
+			{
+				int crossPos = Util.rindex( treeSize, "x" );
+				if( crossPos < treeSize.length ) return Integer.atoi( treeSize[crossPos+1..$] );
+			}
+		}
+		catch( Exception e )
+		{
+			debug IupMessage( "CFileList getTreeH()", toStringz( e.toString ) );
+		}
+		
+		return 4096;
+	}
 }
 
 
 extern(C)
 {
-	// Open File...
+	// File Select...
 	private int fileList_SELECTION_CB( Ihandle *ih, int id, int status )
 	{
 		try
@@ -182,6 +210,34 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	private int fileList_Empty_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		// On/OFF fILELIST Window
+		if( button == IUP_BUTTON1 ) // Left Click
+		{
+			char[] _s = fromStringz( status ).dup;
+			if( _s.length > 5 )
+			{
+				if( _s[5] == 'D' ) // Double Click
+				{
+					char[] treeSize = fromStringz( IupGetAttribute( GLOBAL.fileListTree.getTreeHandle, "SIZE" ) );
+					if( treeSize.length )
+					{
+						if( GLOBAL.fileListTree.getTreeH() <= 1 )
+						{
+							IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
+						}
+						else
+						{
+							GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) );
+							IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+						}
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
 
 	private int fileList_DRAGDROP_CB( Ihandle *ih, int drag_id, int drop_id, int isshift, int iscontrol )
 	{

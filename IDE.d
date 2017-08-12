@@ -1993,11 +1993,6 @@ struct IDECONFIG
 			result = root.query.descendant("color").attribute("warningBack");
 			foreach( e; result ) results ~= e.value;
 
-			result = root.query.descendant("color").attribute("manualFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("manualBack");
-			foreach( e; result ) results ~= e.value;
-
 			result = root.query.descendant("color").attribute("scintillaFore");
 			foreach( e; result ) results ~= e.value;
 			result = root.query.descendant("color").attribute("scintillaBack");

@@ -29,7 +29,7 @@ class CMessageAndSearch
 		IupSetAttribute( outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
 		version(Windows) IupSetAttribute( outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
 		IupSetCallback( outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
-		IupSetCallback( outputPanel, "VALUECHANGED_CB", cast(Icallback) &outputPanel_VALUECHANGED_CB );
+		//IupSetCallback( outputPanel, "VALUECHANGED_CB", cast(Icallback) &outputPanel_VALUECHANGED_CB );
 		
 
 		searchOutputPanel = IupText( null );
@@ -40,7 +40,7 @@ class CMessageAndSearch
 		version(Windows) IupSetAttribute( searchOutputPanel, "BGCOLOR", GLOBAL.editColor.searchBack.toCString );
 		
 		IupSetCallback( searchOutputPanel, "BUTTON_CB", cast(Icallback) &searchOutputButton_cb );
-		IupSetCallback( searchOutputPanel, "VALUECHANGED_CB", cast(Icallback) &searchOutput_VALUECHANGED_CB );
+		//IupSetCallback( searchOutputPanel, "VALUECHANGED_CB", cast(Icallback) &searchOutput_VALUECHANGED_CB );
 
 
 		IupSetAttribute( outputPanel, "TABTITLE", GLOBAL.languageItems["output"].toCString );

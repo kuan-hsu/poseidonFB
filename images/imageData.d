@@ -114,6 +114,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_prj_open", XPM.getIUPimage( "icons/xpm/prjfolderopen.xpm" ) ); // IupSetHandle("icon_prj_open", load_image_prj_open());
 	IupSetHandle( "icon_prj", XPM.getIUPimage( "icons/xpm/prjfolder.xpm" ) ); // IupSetHandle("icon_prj", load_image_prj()); 
 	IupSetHandle( "icon_collapse", XPM.getIUPimage( "icons/xpm/collapse.xpm" ) ); // IupSetHandle("icon_collapse", load_image_collapse());
+	IupSetHandle( "icon_collapse2", XPM.getIUPimage( "icons/xpm/collapse2.xpm" ) ); // IupSetHandle("icon_collapse", load_image_collapse());
 	IupSetHandle( "icon_show_pr", XPM.getIUPimage( "icons/xpm/show_pr.xpm" ) ); // IupSetHandle("icon_show_pr", load_image_show_pr());
 	IupSetHandle( "icon_show_p", XPM.getIUPimage( "icons/xpm/show_p.xpm" ) ); // IupSetHandle("icon_show_p", load_image_show_p());
 	IupSetHandle( "icon_show_r", XPM.getIUPimage( "icons/xpm/show_r.xpm" ) ); // IupSetHandle("icon_show_r", load_image_show_r()); 

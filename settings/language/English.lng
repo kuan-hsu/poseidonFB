@@ -375,5 +375,6 @@ exefile=Execute Files
 basfile=freeBASIC Sources
 bifile=freeBASIC Includes
 lngfile=Language Files
+chmfile=Microsoft Compiled HTML Help
 allfile=All Files
 fbeditfile=FbEdit Projects

@@ -294,7 +294,8 @@ struct LiveParser
 
 				//IupSetInt( cSci.getIupScintilla, "TARGETSTART", posHead );
 				IupScintillaSendMessage( cSci.getIupScintilla, 2190, posHead, 0 ); 	// SCI_SETTARGETSTART = 2190,
-				IupSetInt( cSci.getIupScintilla, "TARGETEND", posTail );
+				//IupSetInt( cSci.getIupScintilla, "TARGETEND", posTail );
+				IupScintillaSendMessage( cSci.getIupScintilla, 2192, posTail, 0 );	// SCI_SETTARGETEND = 2192,
 				
 				CASTnode newHead;
 				version(Windows)
