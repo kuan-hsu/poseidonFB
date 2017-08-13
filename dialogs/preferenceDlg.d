@@ -1229,7 +1229,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* btnKeyWord0Color = IupButton( null, null );
 		IupSetAttribute( btnKeyWord0Color, "BGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
 		version(Windows) IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord0Color, "SIZE", "24x10" );
-		IupSetHandle( toStringz( "btnKeyWord0Color" ), btnKeyWord0Color );
+		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
 		IupSetCallback( btnKeyWord0Color, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelKeyWord1 = IupLabel( GLOBAL.languageItems["keyword1"].toCString() );
@@ -1417,10 +1417,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnSCE_B_COMMENTBLOCK_FG", null );
 		IupSetHandle( "btnSCE_B_COMMENTBLOCK_BG", null );		
 
-		IupSetHandle( "btnKeyWord0Color", null );
-		IupSetHandle( "btnKeyWord1Color", null );
-		IupSetHandle( "btnKeyWord2Color", null );
-		IupSetHandle( "btnKeyWord3Color", null );
+		//IupSetHandle( "btnKeyWord0Color", null );
+		//IupSetHandle( "btnKeyWord1Color", null );
+		//IupSetHandle( "btnKeyWord2Color", null );
+		//IupSetHandle( "btnKeyWord3Color", null );
 
 		IupSetHandle( "keyWordText0", null );
 		IupSetHandle( "keyWordText1", null );
@@ -1698,133 +1698,6 @@ extern(C) // Callback for CPreferenceDialog
 		return IUP_DEFAULT;
 	}
 
-	/+
-	private int CPreferenceDialog_fontList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
-	{
-		char[] listString = fromStringz( text ).dup;
-		char[] _ls;
-		
-		if( listString.length > 10 ) _ls = listString[10..length].dup; else return IUP_DEFAULT;
-
-		version(linux)
-		{
-			_ls = "";
-			foreach( char c; listString[10..length].dup )
-			{
-				if( c != ' ' && c != ',' )
-				{
-					_ls ~= c;
-				}
-				else if( c == ' ' )
-				{
-					if( _ls.length )
-					{
-						if( _ls[length-1] != ' ' ) _ls ~= ' ' ;
-					}
-				}
-			}
-		}		
-
-		// Set IupFontDlg
-		try
-		{
-			Ihandle* dlg = IupFontDlg();
-
-			if( dlg == null )
-			{
-				IupMessage( "Error", toStringz( "IupFontDlg created fail!" ) );
-				return IUP_IGNORE;
-			}
-
-			IupSetAttribute( dlg, "VALUE", toStringz( _ls.dup ) );
-			
-			// Open IupFontDlg
-			IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
-
-			if( IupGetInt( dlg, "STATUS" ) )
-			{
-				char[] fontInformation = fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup;
-				char[] Bold, Italic, Underline, Strikeout, size, fontName;
-				char[][] strings = Util.split( fontInformation, "," );
-				if( strings.length == 2 )
-				{
-					if( !strings[0].length )
-					{
-						version( Windows )
-						{
-							strings[0] = "Courier New";
-						}
-						else
-						{
-							strings[0] = "Monospace";
-						}
-					}
-					else
-					{
-						strings[0] = Util.trim( strings[0] );
-					}
-					strings[1] = Util.trim( strings[1] );
-
-					foreach( char[] s; Util.split( strings[1], " " ) )
-					{
-						switch( s )
-						{
-							case "Bold":		Bold = s;		break;
-							case "Italic":		Italic = s;		break;
-							case "Underline":	Underline = s;	break;
-							case "Strikeout":	Strikeout = s;	break;
-							default:
-								size = s;
-						}
-					}
-
-					char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.languageItems[GLOBAL.fonts[item-1].name].toDString, strings[0], Bold, Italic, Underline, Strikeout, size );
-					IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
-				}
-				else
-				{
-					version(linux)
-					{
-						foreach( char[] s; Util.split( fontInformation, " " ) )
-						{
-							switch( s )
-							{
-								case "Bold":		Bold = s;		break;
-								case "Italic":		Italic = s;		break;
-								case "Underline":	Underline = s;	break;
-								case "Strikeout":	Strikeout = s;	break;
-								default:
-									if( s.length )
-									{
-										if( s[0] >= 48 && s[0] <= 57 )
-										{
-											size = s;
-											break;
-										}
-
-										fontName ~= ( s ~ " " );
-									}
-							}
-						}
-
-						fontName = Util.trim( fontName );
-						char[] _string = Stdout.layout.convert( "{,-10} {,-18},{,-4} {,-6} {,-9} {,-9} {,-3}", GLOBAL.languageItems[GLOBAL.fonts[item-1].name].toDString, fontName, Bold, Italic, Underline, Strikeout, size );
-						IupSetAttribute( ih, toStringz( Integer.toString( item ) ), toStringz( _string ) );
-					}
-				}			
-			}
-
-			IupDestroy( dlg ); 
-		}
-		catch( Exception e )
-		{
-			IupMessage( "Error", toStringz( e.toString ) );
-		}
-
-		return IUP_DEFAULT;
-	}
-	+/
-
 	private int CPreferenceDialog_btnOK_cb( Ihandle* ih )
 	{
 		try
@@ -1972,18 +1845,18 @@ extern(C) // Callback for CPreferenceDialog
 			+/
 			GLOBAL.messagePanel.applyOutputPanelFormat();
 			
-			char[] templateName = Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE" ) ) ).dup;
-			if( templateName.length )
-			{
-				IDECONFIG.saveColorTemplate( templateName );
-				GLOBAL.colorTemplate = templateName.dup;
-			}
-
 			// GLOBAL.editColor.keyWord is IupString class
 			GLOBAL.editColor.keyWord[0]					= IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" );
 			GLOBAL.editColor.keyWord[1]					= IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" );
 			GLOBAL.editColor.keyWord[2]					= IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR" );
 			GLOBAL.editColor.keyWord[3]					= IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR" );
+			
+			char[] templateName = Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE" ) ) ).dup;
+			if( templateName.length )
+			{
+				IDECONFIG.saveColorTemplate( templateName );
+				GLOBAL.colorTemplate = templateName.dup;
+			}			
 
 			scope numberString_0 = new IupString( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) );
 			scope numberString_1 = new IupString( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) );
@@ -2195,71 +2068,75 @@ extern(C) // Callback for CPreferenceDialog
 		char[]		templateName = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 		char[][]	colors = IDECONFIG.loadColorTemplate( templateName );
 		
+		static		IupString[48]		kbg;
+		for( int i = 0; i < 48; i ++ )
+			if( kbg[i] is null ) kbg[i] = new IupString( colors[i] ); else kbg[i] = colors[i];
+		
 		if( colors.length == 48 )
 		{
-			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR", toStringz( colors[0] ) );
-			IupSetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR", toStringz( colors[1] ) );
-			IupSetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR", toStringz( colors[2] ) );
-			IupSetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR", toStringz( colors[3] ) );
-			IupSetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR", toStringz( colors[4] ) );
-			IupSetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR", toStringz( colors[5] ) );
-			IupSetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR", toStringz( colors[6] ) );
+			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR", kbg[0].toCString );
+			IupSetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR", kbg[1].toCString );
+			IupSetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR", kbg[2].toCString );
+			IupSetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR", kbg[3].toCString );
+			IupSetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR", kbg[4].toCString );
+			IupSetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR", kbg[5].toCString );
+			IupSetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR", kbg[6].toCString );
 
 			version(Windows)
-				IupSetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE", toStringz( colors[7] ) );
+				IupSetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE", kbg[7].toCString );
 			else
-				IupSetAttribute( IupGetHandle( "textAlpha" ), "VALUE", toStringz( colors[7] ) );
+				IupSetAttribute( IupGetHandle( "textAlpha" ), "VALUE", kbg[7].toCString );
 
-			IupSetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR", toStringz( colors[8] ) );
-			IupSetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR", toStringz( colors[9] ) );
-			IupSetAttribute( IupGetHandle( "btnError_FG" ), "BGCOLOR", toStringz( colors[10] ) );
-			IupSetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR", toStringz( colors[11] ) );
-			IupSetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR", toStringz( colors[12] ) );
-			IupSetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR", toStringz( colors[13] ) );
+			IupSetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR", kbg[8].toCString );
+			IupSetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR", kbg[9].toCString );
+			IupSetAttribute( IupGetHandle( "btnError_FG" ), "BGCOLOR", kbg[10].toCString );
+			IupSetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR", kbg[11].toCString );
+			IupSetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR", kbg[12].toCString );
+			IupSetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR", kbg[13].toCString );
 
 
-			IupSetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR", toStringz( colors[14] ) );
-			IupSetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR", toStringz( colors[15] ) );
+			IupSetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR", kbg[14].toCString );
+			IupSetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR", kbg[15].toCString );
 
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR", toStringz( colors[16] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR", toStringz( colors[17] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR", toStringz( colors[18] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR", toStringz( colors[19] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR", toStringz( colors[20] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR", toStringz( colors[21] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR", toStringz( colors[22] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR", toStringz( colors[23] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR", toStringz( colors[24] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR", toStringz( colors[25] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR", toStringz( colors[26] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR", toStringz( colors[27] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR", toStringz( colors[28] ) );
-			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR", toStringz( colors[29] ) );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR", kbg[16].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR", kbg[17].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR", kbg[18].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR", kbg[19].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR", kbg[20].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR", kbg[21].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR", kbg[22].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR", kbg[23].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR", kbg[24].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR", kbg[25].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR", kbg[26].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR", kbg[27].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR", kbg[28].toCString );
+			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR", kbg[29].toCString );
 			
-			IupSetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR", toStringz( colors[30] ) );
-			IupSetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR", toStringz( colors[31] ) );
-			IupSetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR", toStringz( colors[32] ) );
-			IupSetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR", toStringz( colors[33] ) );
-			IupSetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR", toStringz( colors[34] ) );
-			IupSetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR", toStringz( colors[35] ) );
-			IupSetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR", toStringz( colors[36] ) );
-			IupSetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR", toStringz( colors[37] ) );
-			IupSetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR", toStringz( colors[38] ) );
-			IupSetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR", toStringz( colors[39] ) );
+			IupSetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR", kbg[30].toCString );
+			IupSetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR", kbg[31].toCString );
+			IupSetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR", kbg[32].toCString );
+			IupSetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR", kbg[33].toCString );
+			IupSetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR", kbg[34].toCString );
+			IupSetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR", kbg[35].toCString );
+			IupSetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR", kbg[36].toCString );
+			IupSetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR", kbg[37].toCString );
+			IupSetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR", kbg[38].toCString );
+			IupSetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR", kbg[39].toCString );
 			
-			IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", toStringz( colors[40] ) );
-			IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", toStringz( colors[41] ) );
+			IupSetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR", kbg[40].toCString );
+			IupSetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR", kbg[41].toCString );
 			
-			IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR", toStringz( colors[42] ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", toStringz( colors[43] ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", toStringz( colors[44] ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", toStringz( colors[45] ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR", kbg[42].toCString );
+			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR", kbg[43].toCString );
+			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR", kbg[44].toCString );
+			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR", kbg[45].toCString );
 			
-			IupSetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR", toStringz( colors[46] ) );
+			IupSetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR", kbg[46].toCString );
 			version(Windows)
-				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", toStringz( colors[47] ) );
+				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", kbg[47].toCString );
 			else
-				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", toStringz( colors[47] ) );			
+				IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", kbg[47].toCString );			
 		}
 		
 		return IUP_DEFAULT;

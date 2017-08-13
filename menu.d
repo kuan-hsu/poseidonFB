@@ -426,7 +426,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.300)\nBy Kuan Hsu (Taiwan)\n2017.08.13" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.301)\nBy Kuan Hsu (Taiwan)\n2017.08.13" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1243,11 +1243,10 @@ extern(C)
 				}
 			}
 
-			if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 )	GLOBAL.statusBar.setPrjName( "" );//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
-			/*
-			int 	id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Get Focus TreeNode
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", id, "SELECTED" );
-			*/
+			if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) GLOBAL.statusBar.setPrjName( "" );
+
+			// Update Filelist Size
+			if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );			
 		}
 
 		return IUP_DEFAULT;
@@ -1316,6 +1315,9 @@ extern(C)
 		}
 
 		if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) GLOBAL.statusBar.setPrjName( "" );//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+		
+		// Update Filelist Size
+		if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 
 		return IUP_DEFAULT;
 	}	
