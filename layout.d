@@ -77,7 +77,7 @@ void createExplorerWindow()
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
 	version(IUPSVN)
 	{
-		version(Windows) IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &messageWindowTabs_BUTTON_CB );
+		version(Windows) IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 	}	
 
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
@@ -604,7 +604,8 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
-	
+
+	/+
 	private int messageWindowTabs_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		// On/OFF Outline Window
@@ -621,8 +622,7 @@ extern(C)
 		}
 		return IUP_DEFAULT;
 	}
-	
-	/+
+
 	version(FLATTAB)
 	{
 		// Close the document Iuptab......

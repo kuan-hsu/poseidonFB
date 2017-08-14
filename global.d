@@ -11,7 +11,7 @@ _HandleClipboardText dllHandleClipboardText;
 
 struct EditorToggleUint
 {
-	char[] LineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
+	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
 	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", GUI = "OFF", Bit64 = "OFF";
 }
 
@@ -515,6 +515,7 @@ struct GLOBAL
 						GLOBAL.languageItems["includelevel"] = new IupString( cast(char[]) "Include Levels" );
 					GLOBAL.languageItems["editor"] = new IupString( cast(char[]) "Editor" );
 						GLOBAL.languageItems["lnmargin"] = new IupString( cast(char[]) "Show Linenumber Margin" );
+						GLOBAL.languageItems["fixedlnmargin"] = new IupString( cast(char[]) "Fixed Linenumber Margin Size" );
 						GLOBAL.languageItems["bkmargin"] = new IupString( cast(char[]) "Show Bookmark Margin" );
 						GLOBAL.languageItems["fdmargin"] = new IupString( cast(char[]) "Show Folding Margin" );
 						GLOBAL.languageItems["indentguide"] = new IupString( cast(char[]) "Show Indentation Guide" );

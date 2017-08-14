@@ -426,7 +426,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.301)\nBy Kuan Hsu (Taiwan)\n2017.08.13" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.302)\nBy Kuan Hsu (Taiwan)\n2017.08.14" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1087,6 +1087,8 @@ extern(C)
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
 		}
 
+		if( GLOBAL.fileListTree.getTreeH <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+
 		Ihandle* _activeDocument = ScintillaAction.getActiveIupScintilla();
 		if( _activeDocument != null ) IupSetFocus( _activeDocument ); else IupSetFocus( GLOBAL.mainDlg );
 		
@@ -1109,12 +1111,7 @@ extern(C)
 		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
-			
-			int fileListTreeH = -1;
-			char[] size = fromStringz( IupGetAttribute( GLOBAL.fileListTree.getTreeHandle, "SIZE" ) );
-			int xPos = Util.index( size, "x" );
-			if( xPos < size.length ) fileListTreeH = Integer.atoi( size[++xPos..length] );
-			
+
 			GLOBAL.messageSplit_value = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
 
@@ -1125,8 +1122,6 @@ extern(C)
 
 			//IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
 			//IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
-
-			if( fileListTreeH == 0 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 		}
 		else
 		{

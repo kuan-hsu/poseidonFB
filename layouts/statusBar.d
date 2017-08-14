@@ -179,17 +179,22 @@ class CStatusBar
 
 extern(C) // Callback for CBaseDialog
 {
-	private int CStatusBar_Empty_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	int CStatusBar_Empty_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
+		static int oriH;
+		
 		// On/OFF Message Window
 		if( button == IUP_BUTTON1 ) // Left Click
 		{
+			if( pressed == 0 ) oriH = GLOBAL.fileListTree.getTreeH();
+			
 			char[] _s = fromStringz( status ).dup;
 			if( _s.length > 5 )
 			{
 				if( _s[5] == 'D' ) // Double Click
 				{
 					menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+					if( oriH <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 					return IUP_IGNORE;
 				}
 			}

@@ -115,6 +115,7 @@ options=選項
 				includelevel=引含檔案的層數
 			editor=編輯器
 				lnmargin=顯示行號欄位
+				fixedlnmargin=固定行號欄位寬度
 				bkmargin=顯示書籤欄位
 				fdmargin=顯示代碼摺疊欄位
 				indentguide=顯示定位點

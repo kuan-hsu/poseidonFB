@@ -155,12 +155,19 @@ class CScintilla
 		
 
 		// Set margin size
-		int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+		int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 		if( GLOBAL.editorSetting00.LineMargin == "ON" )
 		{
 			int lineCount = IupGetInt( sci, "LINECOUNT" );
 			char[] lc = Integer.toString( lineCount );
-			if( lc.length > 6 ) IupSetInt( sci, "MARGINWIDTH0", lc.length * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+			if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+			{
+				IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 2 ) * textWidth );
+			}
+			else
+			{
+				if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 )* textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+			}
 		}
 		else
 		{
@@ -403,12 +410,19 @@ class CScintilla
 
 		if( !bFirstTime )
 		{
-			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
 				char[] lc = Integer.toString( lineCount );
-				if( lc.length > 6 ) IupSetInt( sci, "MARGINWIDTH0", lc.length * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+				if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+				{
+					IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 2 ) * textWidth );
+				}
+				else
+				{
+					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+				}
 			}
 			else
 			{
@@ -549,7 +563,7 @@ class CScintilla
 		// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR 2634
 		if(GLOBAL.toggleCaseInsensitive == "ON" ) IupScintillaSendMessage( sci, 2634, 1, 0 ); else IupScintillaSendMessage( sci, 2634, 0, 0 );
 		
-		IupScintillaSendMessage( sci, 2118, 0, 0 ); // SCI_AUTOCSETAUTOHIDE 2118
+		//IupScintillaSendMessage( sci, 2118, 0, 0 ); // SCI_AUTOCSETAUTOHIDE 2118
 		IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 
 		IupSetAttribute( sci, "SIZE", "NULL" );
@@ -1574,6 +1588,21 @@ extern(C)
 
 				if( insert == 1 )
 				{
+					if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+					{
+						if( dText == "\n" )
+						{
+							// Set margin size
+							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+							if( GLOBAL.editorSetting00.LineMargin == "ON" )
+							{
+								int lineCount = IupGetInt( ih, "LINECOUNT" );
+								char[] lc = Integer.toString( lineCount + 1 );
+								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 2 ) * textWidth );
+							}						
+						}
+					}
+					
 					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 					{
 						int countNewLine = Util.count( dText, "\n" );
@@ -1640,7 +1669,8 @@ extern(C)
 
 		
 		// If un-release the key, cancel
-		if( !GLOBAL.bKeyUp ) return IUP_DEFAULT;else GLOBAL.bKeyUp = false;
+		//if( !GLOBAL.bKeyUp ) return IUP_DEFAULT;else GLOBAL.bKeyUp = false;
+		if( GLOBAL.bKeyUp ) GLOBAL.bKeyUp = false;
 		
 		if( GLOBAL.enableParser != "ON" ) return IUP_DEFAULT;
 		

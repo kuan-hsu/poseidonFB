@@ -475,6 +475,7 @@ struct IDECONFIG
 			// toggle
 			doc ~= setINILineData( "[toggle]");
 			doc ~= setINILineData( "LineMargin", GLOBAL.editorSetting00.LineMargin );
+			doc ~= setINILineData( "FixedLineMargin", GLOBAL.editorSetting00.FixedLineMargin );
 			doc ~= setINILineData( "BookmarkMargin", GLOBAL.editorSetting00.BookmarkMargin );
 			doc ~= setINILineData( "FoldMargin", GLOBAL.editorSetting00.FoldMargin );
 			doc ~= setINILineData( "IndentGuide", GLOBAL.editorSetting00.IndentGuide );
@@ -796,6 +797,7 @@ struct IDECONFIG
 						switch( left )
 						{
 							case "LineMargin":	 			GLOBAL.editorSetting00.LineMargin = right;				break;
+							case "FixedLineMargin":			GLOBAL.editorSetting00.FixedLineMargin = right;			break;
 							case "BookmarkMargin":			GLOBAL.editorSetting00.BookmarkMargin = right;			break;
 							case "FoldMargin":				GLOBAL.editorSetting00.FoldMargin = right;				break;
 							case "IndentGuide":				GLOBAL.editorSetting00.IndentGuide = right;				break;

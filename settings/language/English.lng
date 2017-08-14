@@ -31,7 +31,7 @@ search=Search
 view=View
 	outline=Outline
 	message=Message
-	manual=Manual
+
 	
 prj=Project
 	newprj=New Project
@@ -83,6 +83,8 @@ options=Options
 			customtool7=Custom Tool(7)
 			customtool8=Custom Tool(8)
 			customtool9=Custom Tool(9)
+	language=Language
+		openlanguage=Choose Language...
 	preference=Preference
 		compiler=Compiler
 			compilerpath=Compiler Path
@@ -115,6 +117,7 @@ options=Options
 				includelevel=Include Levels
 			editor=Editor
 				lnmargin=Show Linenumber Margin
+				fixedlnmargin=Fixed Linenumber Margin Size
 				bkmargin=Show Bookmark Margin
 				fdmargin=Show Folding Margin
 				indentguide=Show Indentation Guide
@@ -133,7 +136,7 @@ options=Options
 				multiselection=Enable Document Multi Selection
 				loadprevdoc=Load Previous Documents
 				tabwidth=Tab Width
-				columnedge=Colume Edge
+				columnedge=Column Edge
 				maker0=Maker0
 				maker1=Maker1
 				maker2=Maker2
@@ -215,11 +218,10 @@ options=Options
 			'manual=Manual
 				manualpath=Manual Path
 				manualusing=Use Help Manual
-				
-	language=language
-		openlanguage=Choose Language...
+
+	manual=Manual
 	about=About
-	
+
 	configuration=Configuration...
 	setcustomoption=Set Custom Compiler Options...
 
@@ -375,6 +377,5 @@ exefile=Execute Files
 basfile=freeBASIC Sources
 bifile=freeBASIC Includes
 lngfile=Language Files
-chmfile=Microsoft Compiled HTML Help
 allfile=All Files
 fbeditfile=FbEdit Projects
