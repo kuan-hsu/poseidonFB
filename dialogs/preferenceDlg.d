@@ -721,7 +721,7 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0" );
 			IupSetAttribute( textIndicatorAlpha, "VALUE", GLOBAL.editColor.currentWordAlpha.toCString );
 		}
-		IupSetAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
+		//IupSetAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
 		IupSetHandle( "textIndicatorAlpha", textIndicatorAlpha );
 
 

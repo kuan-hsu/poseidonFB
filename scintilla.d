@@ -162,7 +162,7 @@ class CScintilla
 			char[] lc = Integer.toString( lineCount );
 			if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 			{
-				IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 2 ) * textWidth );
+				IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
 			}
 			else
 			{
@@ -417,7 +417,7 @@ class CScintilla
 				char[] lc = Integer.toString( lineCount );
 				if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 				{
-					IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 2 ) * textWidth );
+					IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
 				}
 				else
 				{
@@ -531,12 +531,22 @@ class CScintilla
 		IupScintillaSendMessage( sci, 2098, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.caretLine.toDString ), 0 ); //SCI_SETCARETLINEBACK = 2098
 
 		uint alpha = Integer.atoi( GLOBAL.editColor.selAlpha.toDString );
-		if( alpha > 255 || alpha <= 0 ) alpha = 255;
+		if( alpha > 255 )
+			alpha = 255;
+		else if( alpha < 0 )
+			alpha = 0;
 
 		if( alpha == 255 )
 		{
 			IupScintillaSendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
 			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+		}
+		else if( alpha == 0 )
+		{
+			IupScintillaSendMessage( sci, 2067, false, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else
 		{
@@ -1592,14 +1602,28 @@ extern(C)
 					{
 						if( dText == "\n" )
 						{
-							// Set margin size
-							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 							if( GLOBAL.editorSetting00.LineMargin == "ON" )
 							{
+								// Set margin size
+								int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 								int lineCount = IupGetInt( ih, "LINECOUNT" );
 								char[] lc = Integer.toString( lineCount + 1 );
-								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 2 ) * textWidth );
+								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
 							}						
+						}
+						else
+						{
+							if( dText.length > 1 )
+							{
+								int count =  Util.count( dText, "\n" );
+								if( count > 0 )
+								{
+									int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+									int lineCount = IupGetInt( ih, "LINECOUNT" );
+									char[] lc = Integer.toString( lineCount + 1 + count );
+									IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+								}
+							}
 						}
 					}
 					
@@ -1635,6 +1659,25 @@ extern(C)
 				}
 				else
 				{
+					if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+					{
+						if( GLOBAL.editorSetting00.LineMargin == "ON" )
+						{
+							// Set margin size
+							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+							int count;
+							
+							char[] selText = fromStringz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
+							
+							if( !selText.length ) count =  Util.count( selText, "\n" );
+							
+							int lineCount = IupGetInt( ih, "LINECOUNT" );
+							char[] lc = Integer.toString( lineCount - 1 - count );
+							IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+						}
+					}					
+					
+					if( dText[0] == 8 ) IupMessage("","");
 					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 					{
 						int		minusCount = -1;
@@ -1835,7 +1878,7 @@ extern(C)
 						IupSetAttributeId( ih, "INSERT", -1, toStringz( Util.trim( word ).dup ) );
 						IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
 						IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
-						IupScintillaSendMessage( ih, 2126, lin, lineInd + 4 ); // SCI_SETLINEINDENTATION = 2126
+						IupScintillaSendMessage( ih, 2126, lin, lineInd + Integer.atoi( GLOBAL.editorSetting00.TabWidth ) ); // SCI_SETLINEINDENTATION = 2126
 						IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136
 					}
 				}

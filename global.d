@@ -563,7 +563,7 @@ struct GLOBAL
 							GLOBAL.languageItems["ln"] = new IupString( cast(char[]) "Linenumber" );
 							GLOBAL.languageItems["foldcolor"] = new IupString( cast(char[]) "FoldingMargin Color" );
 							GLOBAL.languageItems["selalpha"] = new IupString( cast(char[]) "Selection Alpha" );
-								GLOBAL.languageItems["alphatip"] = new IupString( cast(char[]) "Set 255 To Disable Alpha" );
+								GLOBAL.languageItems["alphatip"] = new IupString( cast(char[]) "Set 255 To Use Fore/BackColor\nSet 0 To Keep ForeColor" );
 							GLOBAL.languageItems["hlcurrentword"] = new IupString( cast(char[]) "Highlight Current Word" );								
 							GLOBAL.languageItems["hlcurrentwordalpha"] = new IupString( cast(char[]) "Indicator Alpha" );
 							
