@@ -234,16 +234,13 @@ void main( char[][] args )
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
 	IupSetCallback( GLOBAL.mainDlg, "RESIZE_CB", cast(Icallback) &mainDialog_RESIZE_cb );
 	version(Windows) IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB );
-	
-	
-		
-	createLayout();
 
-	
+	createLayout();
 	
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
+	
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
@@ -312,8 +309,9 @@ void main( char[][] args )
 			ScintillaAction.openFile( s );
 		}
 	}
-
-
+	
+	if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" ) IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
+	
 	//IUP main Loop
 	IupMainLoop();
 	IupClose();

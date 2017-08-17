@@ -3,7 +3,7 @@
 import iup.iup;
 import iup.iup_scintilla;
 
-import global, actionManager, scintilla, project, tools;
+import global, actionManager, scintilla, project, tools, layout;
 import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg;
 
 import tango.io.Stdout;
@@ -122,7 +122,10 @@ void createMenu()
 	Ihandle* item_recent = IupSubmenu( GLOBAL.languageItems["recentprjs"].toCString, recentPrjsSubMenu );
 
 	item_exit = IupItem( GLOBAL.languageItems["exit"].toCString, null);
-	IupSetCallback(item_exit, "ACTION", cast(Icallback)&exit_cb);
+	IupSetCallback(item_exit, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		return layout.mainDialog_CLOSE_cb( null );
+	});
 
 	// Edit
 	item_undo = IupItem( GLOBAL.languageItems["undo"].toCString, null);
@@ -181,11 +184,16 @@ void createMenu()
 	//IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
 	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outlineMenuItem_cb);
 	
-
 	GLOBAL.menuMessageWindow = IupItem( GLOBAL.languageItems["message"].toCString, null);
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
 	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
+
+	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
+	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
+	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
+	
+	
 	
 	// Project
 	item_newProject= IupItem( GLOBAL.languageItems["newprj"].toCString, null);
@@ -426,7 +434,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.303)\nBy Kuan Hsu (Taiwan)\n2017.08.16" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.304)\nBy Kuan Hsu (Taiwan)\n2017.08.18" );
 		return IUP_DEFAULT;
 	});
 	
@@ -477,6 +485,8 @@ void createMenu()
 
 	view_menu = IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
+							IupSeparator(),
+							fullScreenItem,
 							null );
 
 	project_menu = IupMenu( item_newProject,
@@ -773,11 +783,6 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}	
-
-	int exit_cb()
-	{
-		return IUP_CLOSE;
-	}
 
 	void undo_cb()
 	{
@@ -1095,6 +1100,25 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
+	int fullscreenMenuItem_cb( Ihandle *ih )
+	{
+		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "OFF" )
+		{
+			IupSetAttribute( ih, "VALUE", "ON" );
+			GLOBAL.editorSetting01.USEFULLSCREEN = "ON";
+			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
+		}
+		else
+		{
+			IupSetAttribute( ih, "VALUE", "OFF" );
+			GLOBAL.editorSetting01.USEFULLSCREEN = "OFF";
+			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "NO" );
+			IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+		}
+		
+		return IUP_DEFAULT;
+	}
+	
 	int messageMenuItem_cb( Ihandle *ih )
 	{
 		Ihandle* buttonHandle = IupGetHandle( "messageButtonHide" );
@@ -1111,25 +1135,25 @@ extern(C)
 		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
+			
+			bool bCloseFileListTree;
+			if( GLOBAL.fileListTree.getTreeH <= 1 ) bCloseFileListTree = true;
 
 			GLOBAL.messageSplit_value = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
+
+			if( bCloseFileListTree ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "NO" );
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
 			Ihandle* SecondChild = IupGetChild( GLOBAL.messageSplit, 1 );
 			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
-
-			//IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
-			//IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
 		}
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "YES" );
-			//IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "YES" );
-			//IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "YES" );
 		}
 		
 		return IUP_DEFAULT;

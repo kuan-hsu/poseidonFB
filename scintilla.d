@@ -148,6 +148,7 @@ class CScintilla
 		IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
 		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
 		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
+		IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
 
 		init( _fullPath, insertPos );
 		setText( _text );
@@ -155,7 +156,7 @@ class CScintilla
 		
 
 		// Set margin size
-		int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+		int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 		if( GLOBAL.editorSetting00.LineMargin == "ON" )
 		{
 			int lineCount = IupGetInt( sci, "LINECOUNT" );
@@ -311,7 +312,7 @@ class CScintilla
 		}
 		catch
 		{
-			IupMessage("","ERROR");
+			IupMessage("saveFile","ERROR");
 			return false;
 		}
 
@@ -410,7 +411,7 @@ class CScintilla
 
 		if( !bFirstTime )
 		{
-			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
@@ -606,14 +607,23 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2565, 0, 0 ); 
 		}
 		
-		IupScintillaSendMessage( sci, 2080, 8, 7 ); //SCI_INDICSETSTYLE = 2080
+		IupScintillaSendMessage( sci, 2080, 8, GLOBAL.indicatorStyle ); //SCI_INDICSETSTYLE = 2080
 		//IupScintillaSendMessage( sci, 2284, 1, 0 ); //SCI_SETTWOPHASEDRAW = 2284		
 		//IupScintillaSendMessage( sci, 2510, 8, 1 ); //SCI_INDICSETUNDER = 2510
 		IupScintillaSendMessage( sci, 2082, 8, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.currentWord.toDString ) ); // SCI_INDICSETFORE = 2082
-		alpha = Integer.atoi( GLOBAL.editColor.currentWordAlpha.toDString );
-		if( alpha > 255 || alpha <= 0 ) alpha = 255;		
-		IupScintillaSendMessage( sci, 2523, 8, alpha ); // SCI_INDICSETALPHA = 2523
 		
+		alpha = Integer.atoi( GLOBAL.editColor.currentWordAlpha.toDString );
+		if( alpha <= 0 )
+			alpha = 0;
+		else if( alpha > 255 )
+			alpha = 255;
+		
+		IupScintillaSendMessage( sci, 2523, 8, alpha ); // SCI_INDICSETALPHA = 2523
+		if( alpha + 64 <= 255 ) 
+			IupScintillaSendMessage( sci, 2558, 8, alpha + 64 ); // SCI_INDICSETOUTLINEALPHA 2558
+		else
+			IupScintillaSendMessage( sci, 2558, 8, 255 ); // SCI_INDICSETOUTLINEALPHA 2558			
+
 		
 		// Autocompletion XPM Image
 		IupScintillaSendMessage( sci, 2624, 16, 0 ); // SCI_RGBAIMAGESETWIDTH 2624
@@ -1600,12 +1610,12 @@ extern(C)
 				{
 					if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 					{
-						if( dText == "\n" )
+						if( dText == "\n" || dText == "\r\n" )
 						{
 							if( GLOBAL.editorSetting00.LineMargin == "ON" )
 							{
 								// Set margin size
-								int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+								int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 								int lineCount = IupGetInt( ih, "LINECOUNT" );
 								char[] lc = Integer.toString( lineCount + 1 );
 								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
@@ -1618,7 +1628,7 @@ extern(C)
 								int count =  Util.count( dText, "\n" );
 								if( count > 0 )
 								{
-									int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+									int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 									int lineCount = IupGetInt( ih, "LINECOUNT" );
 									char[] lc = Integer.toString( lineCount + 1 + count );
 									IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
@@ -1664,20 +1674,30 @@ extern(C)
 						if( GLOBAL.editorSetting00.LineMargin == "ON" )
 						{
 							// Set margin size
-							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 10, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 							int count;
 							
 							char[] selText = fromStringz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
 							
-							if( !selText.length ) count =  Util.count( selText, "\n" );
+							if( selText.length )
+							{
+								count =  Util.count( selText, "\n" );
+							}
+							else
+							{
+								char[] prevWord = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
+								if( prevWord == "\n" || prevWord == "\r" ) count = 1;
+							}
 							
-							int lineCount = IupGetInt( ih, "LINECOUNT" );
-							char[] lc = Integer.toString( lineCount - 1 - count );
-							IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+							if( count > 0 )
+							{
+								int lineCount = IupGetInt( ih, "LINECOUNT" );
+								char[] lc = Integer.toString( lineCount - count );
+								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+							}
 						}
 					}					
 					
-					if( dText[0] == 8 ) IupMessage("","");
 					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 					{
 						int		minusCount = -1;
@@ -1976,6 +1996,27 @@ extern(C)
 				
 				if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 			}
+		}
+		
+		return IUP_DEFAULT;
+	}
+	
+	private int CScintilla_zoom_cb( Ihandle *ih, int zoomInPoints )
+	{
+		try
+		{
+			int	fontWidth;
+			int commaPos = Util.rindex( GLOBAL.fonts[1].fontString, "," );
+			if( commaPos < GLOBAL.fonts[1].fontString.length ) fontWidth = Integer.atoi( Util.trim( GLOBAL.fonts[1].fontString[commaPos+1..$] ) ) - 2;
+			
+			int lineCount = IupGetInt( ih, "LINECOUNT" );
+			char[] lc = Integer.toString( lineCount );
+
+			IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * ( fontWidth + zoomInPoints )  );
+		}
+		catch( Exception e )
+		{
+			debug IupMessage( "CScintilla_zoom_cb", toStringz( e.toString ) );
 		}
 		
 		return IUP_DEFAULT;

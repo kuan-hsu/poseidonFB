@@ -471,6 +471,8 @@ struct IDECONFIG
 
 			for( int i = 1; i < 10; ++ i )
 				doc ~= setINILineData( "customtools" ~ Integer.toString( i ), Util.trim( GLOBAL.customTools[i].name.toDString ) ~ "," ~ Util.trim( GLOBAL.customTools[i].dir.toDString ) ~ "," ~ Util.trim( GLOBAL.customTools[i].args.toDString ) );
+				
+			doc ~= setINILineData( "indicatorStyle", Integer.toString( GLOBAL.indicatorStyle ) );
 
 			// toggle
 			doc ~= setINILineData( "[toggle]");
@@ -520,6 +522,7 @@ struct IDECONFIG
 			// size
 			doc ~= setINILineData( "[size]");
 			if( GLOBAL.editorSetting01.PLACEMENT == "MINIMIZED" ) doc ~= setINILineData( "PLACEMENT", "NORMAL" ); else doc ~= setINILineData( "PLACEMENT", GLOBAL.editorSetting01.PLACEMENT );
+			doc ~= setINILineData( "USEFULLSCREEN", GLOBAL.editorSetting01.USEFULLSCREEN );
 			doc ~= setINILineData( "RASTERSIZE", GLOBAL.editorSetting01.RASTERSIZE );
 			doc ~= setINILineData( "ExplorerSplit", GLOBAL.editorSetting01.ExplorerSplit );
 			doc ~= setINILineData( "MessageSplit", GLOBAL.editorSetting01.MessageSplit );
@@ -767,11 +770,12 @@ struct IDECONFIG
 					case "[editor]":
 						switch( left )
 						{
-							case "lexer":			GLOBAL.lexer = right;			break;
-							case "keyword0":		GLOBAL.KEYWORDS[0] = right;		break;
-							case "keyword1":		GLOBAL.KEYWORDS[1] = right;		break;
-							case "keyword2":		GLOBAL.KEYWORDS[2] = right;		break;
-							case "keyword3":		GLOBAL.KEYWORDS[3] = right;		break;
+							case "lexer":			GLOBAL.lexer = right;							break;
+							case "keyword0":		GLOBAL.KEYWORDS[0] = right;						break;
+							case "keyword1":		GLOBAL.KEYWORDS[1] = right;						break;
+							case "keyword2":		GLOBAL.KEYWORDS[2] = right;						break;
+							case "keyword3":		GLOBAL.KEYWORDS[3] = right;						break;
+							case "indicatorStyle":	GLOBAL.indicatorStyle = Integer.atoi( right );	break;
 							case "language":
 								GLOBAL.language = right;
 								loadLocalization(); // Load Language lng
@@ -829,6 +833,7 @@ struct IDECONFIG
 					case "[size]":
 						switch( left )
 						{
+							case "USEFULLSCREEN":	 		GLOBAL.editorSetting01.USEFULLSCREEN = right;			break;
 							case "PLACEMENT":	 			GLOBAL.editorSetting01.PLACEMENT = right;				break;
 							case "RASTERSIZE":				GLOBAL.editorSetting01.RASTERSIZE = right;				break;
 							case "ExplorerSplit":			GLOBAL.editorSetting01.ExplorerSplit = right;			break;

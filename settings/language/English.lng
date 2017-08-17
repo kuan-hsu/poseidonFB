@@ -31,7 +31,7 @@ search=Search
 view=View
 	outline=Outline
 	message=Message
-
+	fullscreen=Fullscreen
 	
 prj=Project
 	newprj=New Project

@@ -17,7 +17,7 @@ struct EditorToggleUint
 
 struct EditorLayoutSize
 {
-	char[] PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON";
+	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON";
 }
 
 struct EditorColorUint
@@ -139,6 +139,8 @@ struct GLOBAL
 	
 	static char[]				toggleUseManual = "OFF";
 	
+	static int					indicatorStyle = 16;
+	
 
 	static CScintilla[char[]]	scintillaManager;
 
@@ -179,6 +181,7 @@ struct GLOBAL
 	
 	
 	static int					tabDocumentPos = -1;
+
 
 	static this()
 	{
@@ -431,6 +434,7 @@ struct GLOBAL
 			//GLOBAL.languageItems["outline"] = new IupString( cast(char[]) "Outline" );
 			GLOBAL.languageItems["message"]= new IupString( cast(char[]) "Message" );
 			GLOBAL.languageItems["manual"]= new IupString( cast(char[]) "Manual" );
+			GLOBAL.languageItems["fullscreen"]= new IupString( cast(char[]) "Fullscreen" );
 			
 		GLOBAL.languageItems["prj"] = new IupString( cast(char[]) "Project" );
 			GLOBAL.languageItems["newprj"] = new IupString( cast(char[]) "New Project" );

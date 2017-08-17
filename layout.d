@@ -67,7 +67,7 @@ void createExplorerWindow()
 		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-		//IupSetCallback( GLOBAL.messageWindowTabs, "TABCLOSE_CB", cast(Icallback) &messageWindowTabs_tabClose_cb );
+		IupSetCallback( GLOBAL.messageWindowTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 	}
 	else
 	{
@@ -226,6 +226,8 @@ extern(C)
 	
 	int mainDialog_RESIZE_cb( Ihandle *ih, int width, int height )
 	{
+		if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" ) return IUP_DEFAULT;
+		
 		if( GLOBAL.editorSetting01.PLACEMENT != "MAXIMIZED" )
 		{
 			scope rasterSize = new IupString;

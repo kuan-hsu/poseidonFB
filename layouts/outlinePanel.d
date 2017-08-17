@@ -1513,7 +1513,8 @@ class COutline
 						GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
 						delete temp;
 
-						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" ); 
+						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
+						IupSetAttributeId( actTree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
 						foreach_reverse( CASTnode t; astHeadNode.getChildren() )
 						{
 							append( actTree, t, 0 );

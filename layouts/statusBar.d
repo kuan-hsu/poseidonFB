@@ -194,7 +194,6 @@ extern(C) // Callback for CBaseDialog
 				if( _s[5] == 'D' ) // Double Click
 				{
 					menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-					if( oriH <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 					return IUP_IGNORE;
 				}
 			}

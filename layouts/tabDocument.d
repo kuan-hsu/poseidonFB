@@ -21,6 +21,7 @@ void createTabs()
 		//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
+		IupSetCallback( GLOBAL.documentTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 		
 		version(IUPSVN)
 		{
