@@ -5,7 +5,7 @@
   <MainFile/>
   <TargetName/>
   <CompilerArgs/>
-  <CompilerOption>-debug -L/SUBSYSTEM:windows:4 -odobjs -version=FLATTAB -version=IUPSVN -version=BUGMODIFIED</CompilerOption>
+  <CompilerOption>-debug -L/SUBSYSTEM:windows:4 -odobjs -version=FLATTAB -version=IUPSVN</CompilerOption>
   <Comment/>
   <CompilerPath/>
   <IncludeDirs/>

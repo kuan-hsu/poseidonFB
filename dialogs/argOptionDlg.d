@@ -375,7 +375,18 @@ extern(C) // Callback for CFindInFilesDialog
 			}
 			else
 			{
-				IupMessageError( null, GLOBAL.languageItems["noselect"].toCString() );
+				if( IupGetInt( toolsHandle, "COUNT" ) <= 0 )
+				{
+					Ihandle* messageDlg = IupMessageDlg();
+					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["ok"].toCString() );
+					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["apply"].toCString() );
+					IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
+				}
+				else
+				{
+					IupMessageError( null, GLOBAL.languageItems["noselect"].toCString() );
+				}
 			}
 		}
 		

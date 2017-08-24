@@ -355,14 +355,14 @@ struct ExecuterAction
 				}
 				
 				//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
-				GLOBAL.messagePanel.scrollOutputPanel( 0 );
+				//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 				
 				return true;
 			}
 
 			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
-			GLOBAL.messagePanel.scrollOutputPanel( 0 );
+			//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		catch( ProcessException e )
@@ -649,7 +649,7 @@ struct ExecuterAction
 				}
 			}
 			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
-			GLOBAL.messagePanel.scrollOutputPanel( 0 );
+			//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 			
@@ -875,7 +875,7 @@ struct ExecuterAction
 
 			// Back to top of outputPanel
 			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
-			GLOBAL.messagePanel.scrollOutputPanel( 0 );
+			//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 
 			return true;

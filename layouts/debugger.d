@@ -269,6 +269,8 @@ class CDebugger
 
 		Ihandle* varSplit = IupSplit( var1ScrollBox, var0ScrollBox );
 		IupSetAttributes( varSplit, "ORIENTATION=VERTICAL,BARSIZE=5,SHOWGRIP=LINES,VALUE=500,LAYOUTDRAG=NO" );
+		// Strange Bugs Fixed
+		IupSetCallback( IupGetChild( varSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });		
 
 		//Ihandle* HBoxVar = IupHbox( var1Frame, var0Frame, null );
 
@@ -327,10 +329,14 @@ class CDebugger
 
 		Ihandle* rightSplitHandle = IupSplit( backtraceHandle, tabResultsHandle  );
 		IupSetAttributes( rightSplitHandle, "ORIENTATION=HORIZONTAL,SHOWGRIP=LINES,VALUE=300,LAYOUTDRAG=NO" );
+		// Strange Bugs Fixed
+		IupSetCallback( IupGetChild( rightSplitHandle, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });			
 		
-
 		Ihandle* mainSplit = IupSplit( leftScrollBox, rightSplitHandle );
 		IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=260,LAYOUTDRAG=NO" );
+		// Strange Bugs Fixed
+		IupSetCallback( IupGetChild( mainSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });			
+		
 
 		mainHandle = IupScrollBox( mainSplit );
 		IupSetAttribute( mainHandle, "TABTITLE", GLOBAL.languageItems["caption_debug"].toCString );

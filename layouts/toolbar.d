@@ -18,7 +18,7 @@ class CToolBar
 	Ihandle* 			btnCut, btnCopy, btnPaste;
 	Ihandle* 			btnMark, btnMarkPrev, btnMarkNext, btnMarkClean;
 	Ihandle* 			btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun;
-	Ihandle*			outlineButtonHide, messageButtonHide;
+	//Ihandle*			outlineButtonHide, messageButtonHide;
 	Ihandle*[7]			labelSEPARATOR;
 
 	void createToolBar()
@@ -200,14 +200,7 @@ class CToolBar
 			labelSEPARATOR[i] = IupLabel( null ); 
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 		}
-
 		/+
-		listGUIHandle = IupList( null );
-		IupSetAttributes( listGUIHandle, "ACTIVE=YES,SIZE=50x12,SCROLLBAR=NO" );
-		IupSetAttribute( listGUIHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
-		IupSetAttributes( listGUIHandle, "1=\"Console\",2=\"GUI\",SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=2");
-		+/
-		
 		outlineButtonHide = IupToggle( null, "Hide" );
 		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_r,IMPRESS=icon_shift_l" );
 		IupSetAttribute( outlineButtonHide, "TIP", GLOBAL.languageItems["sc_leftwindow"].toCString );
@@ -227,7 +220,7 @@ class CToolBar
 			menu.message_cb( GLOBAL.menuMessageWindow );
 			return IUP_DEFAULT;
 		});		
-		
+		+/
 		
 		guiButton = IupToggle( null, "GUI" );
 		IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui" );
@@ -258,7 +251,7 @@ class CToolBar
 		
 		// IUP Container to put buttons on~
 		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
-						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], outlineButtonHide, messageButtonHide, labelSEPARATOR[6], guiButton, bitButton, listHandle, null );/* labelSEPARATOR[5],
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], /*outlineButtonHide, messageButtonHide, labelSEPARATOR[6],*/ bitButton, guiButton, listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 		IupSetAttributes( handle, "GAP=3,ALIGNMENT=ACENTER" );
 	}

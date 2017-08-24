@@ -1299,7 +1299,8 @@ struct AutoComplete
 					default:
 				}
 			}
-
+			
+			if( pos >= documentLength ) break;
 			if( bBackEnd ) break;
 		}
 		while( ++pos < documentLength )
@@ -1352,52 +1353,55 @@ struct AutoComplete
 				{
 					//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
 					char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-					dchar[] sd = UTF.toString32( _s );
-					dchar s = sd[0];
-					switch( s )
+					if( _s.length )
 					{
-						case ')':
-							if( countBracket == 0 ) countParen++;
-							break;
+						dchar[] sd = UTF.toString32( _s );
+						dchar s = sd[0];
+						switch( s )
+						{
+							case ')':
+								if( countBracket == 0 ) countParen++;
+								break;
 
-						case '(':
-							if( countBracket == 0 ) countParen--;
-							if( countParen < 0 ) return word;
-							break;
-							
-						case ']':
-							if( countParen == 0 ) countBracket++;
-							break;
+							case '(':
+								if( countBracket == 0 ) countParen--;
+								if( countParen < 0 ) return word;
+								break;
+								
+							case ']':
+								if( countParen == 0 ) countBracket++;
+								break;
 
-						case '[':
-							if( countParen == 0 ) countBracket--;
-							if( countBracket < 0 ) return word;
-							break;
-							
-						case '>':
-							if( pos > 0 && countParen == 0 && countBracket == 0 )
-							{
-								if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+							case '[':
+								if( countParen == 0 ) countBracket--;
+								if( countBracket < 0 ) return word;
+								break;
+								
+							case '>':
+								if( pos > 0 && countParen == 0 && countBracket == 0 )
 								{
-									word ~= ">-";
-									pos--;
-									break;
+									if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+									{
+										word ~= ">-";
+										pos--;
+										break;
+									}
 								}
-							}
-						case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '\\', '<', '=', ',', '@':
-							if( countParen == 0 && countBracket == 0 ) return word;
-							
-						default: 
-							if( countParen == 0 && countBracket == 0 )
-							{
-								if( UTF.isValid( s ) )
+							case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '\\', '<', '=', ',', '@':
+								if( countParen == 0 && countBracket == 0 ) return word;
+								
+							default: 
+								if( countParen == 0 && countBracket == 0 )
 								{
-									word32 = "";
-									word32 ~= s;
-									word ~= Util.trim( UTF.toString( word32 ) );
-									//word ~= s;
+									if( UTF.isValid( s ) )
+									{
+										word32 = "";
+										word32 ~= s;
+										word ~= Util.trim( UTF.toString( word32 ) );
+										//word ~= s;
+									}
 								}
-							}
+						}
 					}
 				}
 			}
@@ -2446,6 +2450,7 @@ struct AutoComplete
 
 			alreadyInput = splitWord[length-1];
 
+			/+
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" )
 			{
 				IupSetAttribute( ih, "AUTOCSELECT\0", GLOBAL.cString.convert( alreadyInput ) );
@@ -2453,6 +2458,7 @@ struct AutoComplete
 			}
 			else
 			{
+			+/
 				if( text == "(" )
 				{
 					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
@@ -2466,7 +2472,7 @@ struct AutoComplete
 				{
 					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
 				}
-			}
+			//}
 
 			return false;
 		}

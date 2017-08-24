@@ -1726,7 +1726,7 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				debug IupMessage( "CScintilla_action_cb", toStringz( "LiveParser Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				debug IupMessage( "CScintilla_action_cb", toStringz( "LiveParser lineNumberAdd Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 
@@ -1743,6 +1743,13 @@ extern(C)
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
 
 		if( ScintillaAction.isComment( ih, pos ) ) return IUP_DEFAULT;
+
+		if( GLOBAL.bUndoRedoAction )
+		{
+			if( fromStringz( IupGetAttribute( ih, "REDO" ) ) == "NO" ) GLOBAL.bUndoRedoAction = false;
+			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+			return IUP_DEFAULT;
+		}
 
 		if( insert == 1 )
 		{
@@ -1808,11 +1815,12 @@ extern(C)
 					if( !bDot && !bOpenParen )
 					{
 						if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
+						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) break;
 					}
 
 					try
 					{
-						/*bWithoutList = */AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
+						/*bWithoutList = */ AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
 					}
 					catch( Exception e )
 					{
@@ -1820,7 +1828,10 @@ extern(C)
 					}
 			}
 		}
-
+		
+		//GLOBAL.messagePanel.printOutputPanel( Integer.toString( IupGetInt( ih, "AUTOCSELECTEDINDEX" ) ) );
+		
+		//GLOBAL.messagePanel.printOutputPanel( fromStringz( _text ) );
 		//prevPos = pos;
 		return IUP_DEFAULT;
 	}

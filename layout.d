@@ -90,6 +90,10 @@ void createExplorerWindow()
 	version(Windows) IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 ); else IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
 	// Strange Bugs Fixed
 	IupSetCallback( IupGetChild( GLOBAL.messageSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* ih ){
+		if( GLOBAL.fileListTree.getTreeH <= 6 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );		
+		return IUP_IGNORE;
+	});
 	
 
 	GLOBAL.statusBar = new CStatusBar();

@@ -434,7 +434,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.304)\nBy Kuan Hsu (Taiwan)\n2017.08.18" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.305)\nBy Kuan Hsu (Taiwan)\n2017.08.25" );
 		return IUP_DEFAULT;
 	});
 	
@@ -791,6 +791,7 @@ extern(C)
 		{
 			if( fromStringz(IupGetAttribute( ih, "UNDO" )) == "YES" )
 			{
+				GLOBAL.bUndoRedoAction = true;
 				IupSetAttribute( ih, "UNDO", "YES" );
 				IupSetFocus( ih );
 			}
@@ -804,6 +805,7 @@ extern(C)
 		{
 			if( fromStringz(IupGetAttribute( ih, "REDO" )) == "YES" )
 			{
+				GLOBAL.bUndoRedoAction = true;
 				IupSetAttribute( ih, "REDO", "YES" );
 				IupSetFocus( ih );
 			}
@@ -1051,12 +1053,13 @@ extern(C)
 	
 	int outlineMenuItem_cb( Ihandle *ih )
 	{
+		/*
 		Ihandle* buttonHandle = IupGetHandle( "outlineButtonHide" );
 		if( buttonHandle != null )
 		{
 			if( fromStringz( IupGetAttribute( buttonHandle, "VALUE" ) ) == "ON" ) IupSetAttribute( buttonHandle, "VALUE", "OFF" ); else IupSetAttribute( buttonHandle, "VALUE", "ON" );
 		}
-		
+		*/
 		return outline_cb( ih );
 	}
 
@@ -1121,12 +1124,13 @@ extern(C)
 	
 	int messageMenuItem_cb( Ihandle *ih )
 	{
+		/*
 		Ihandle* buttonHandle = IupGetHandle( "messageButtonHide" );
 		if( buttonHandle != null )
 		{
 			if( fromStringz( IupGetAttribute( buttonHandle, "VALUE" ) ) == "ON" ) IupSetAttribute( buttonHandle, "VALUE", "OFF" ); else IupSetAttribute( buttonHandle, "VALUE", "ON" );
 		}
-		
+		*/
 		return message_cb( ih );
 	}
 	

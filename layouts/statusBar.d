@@ -52,7 +52,7 @@ class CStatusBar
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 			setTip( GLOBAL.currentCustomCompilerOption.toDString );
 		}
-		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Encode_BUTTON_CB );
+		//IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Encode_BUTTON_CB );
 	
 		
 		Ihandle*[5] labelSEPARATOR;
