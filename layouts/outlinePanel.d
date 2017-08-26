@@ -73,7 +73,7 @@ class COutline
 	}
 	+/
 
-	Ihandle*			layoutHandle, zBoxHandle;
+	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList;
 	CASTnode[]			listItemASTs;
 	int[]				listItemTreeID;
 	int					showIndex= 0;
@@ -251,7 +251,7 @@ class COutline
 			switch( lowerCase( _node.protection ) )
 			{
 				case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
-				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 201 14" ) ); break;
+				case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 127 39" ) ); break;
 				default:
 			}
 		}
@@ -731,9 +731,10 @@ class COutline
 		IupSetAttributes( outlineToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 
-		Ihandle* outlineTreeNodeList = IupList( null );
+		outlineTreeNodeList = IupList( null );
 		IupSetAttributes( outlineTreeNodeList, "ACTIVE=YES,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8" );
-
+		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
 		IupSetCallback( outlineTreeNodeList, "ACTION",cast(Icallback) &COutline_List_ACTION );
 		
@@ -773,6 +774,9 @@ class COutline
 
 	void changeColor()
 	{
+		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+		
 		for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
 		{
 			Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
@@ -817,6 +821,7 @@ class COutline
 				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
 				
 				toBoldTitle( tree, 0 );
+				//IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &COutline_SELECTION_CB );
 				IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
 
 				IupAppend( zBoxHandle, tree );
@@ -1560,6 +1565,37 @@ class COutline
 
 extern(C) 
 {
+	private int COutline_SELECTION_CB( Ihandle *ih, int id, int status )
+	{
+		if( id > 0 )
+		{
+			if( status == 1 ) IupSetAttribute( ih, "HLCOLOR", IupGetAttributeId( ih, "COLOR", id ) );
+		}
+		
+		return IUP_DEFAULT;
+		/+
+		if( id > 0 )
+		{
+			if( status == 1 )
+			{
+				CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
+				if( _node !is null )
+				{
+					if( _node.protection == "protected" || _node.protection == "private" )
+					{
+						IupSetAttribute( ih, "HLCOLOR", IupGetAttributeId( ih, "COLOR", id ) );
+						return IUP_DEFAULT;
+					}
+				}
+			}
+		}
+		IupSetAttribute( ih, "HLCOLOR", IupGetAttributeId( ih, "COLOR", id ) );
+		//IupSetAttribute( ih, "HLCOLOR", IupGetGlobal( "TXTHLCOLOR" ) );
+		return IUP_DEFAULT;
+		+/
+	}
+	
+	
 	private int COutline_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		int id = IupConvertXYToPos( ih, x, y );

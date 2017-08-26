@@ -73,7 +73,7 @@ class CScintilla
 			}
 			else
 			{
-				IupSetAttribute( sci, "TABIMAGE", "icon_document" );
+				IupSetAttribute( sci, "TABIMAGE", "icon_txt" );
 			}
 			IupSetHandle( fullPath.toCString, sci );
 			//IupSetAttribute( sci, "TABTITLE", title.toCString );
@@ -322,7 +322,9 @@ class CScintilla
 
 	void setGlobalSetting( bool bFirstTime = false )
 	{
-		IupSetAttribute(sci, "LEXERLANGUAGE", toStringz( GLOBAL.lexer ) );
+		scope mypath = new FilePath( fullPath.toDString );
+		if( lowerCase( mypath.ext ) == "bas" || lowerCase( mypath.ext ) == "bi" ) IupSetAttribute(sci, "LEXERLANGUAGE", toStringz( GLOBAL.lexer ) );
+		
 
 		IupSetAttribute(sci, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
 		IupSetAttribute(sci, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
@@ -504,7 +506,15 @@ class CScintilla
 		if( GLOBAL.editorSetting00.CaretLine == "ON" ) IupScintillaSendMessage( sci, 2096, 1, 0 ); else IupScintillaSendMessage( sci, 2096, 0, 0 ); // SCI_SETCARETLINEVISIBLE = 2096
 		//if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupSetAttribute( sci, "WORDWRAP", "YES" ); else IupSetAttribute( sci, "WORDWRAP", "NO" );
 		if( GLOBAL.editorSetting00.WordWrap == "ON" ) IupScintillaSendMessage( sci, 2268, 1, 0 ); else IupScintillaSendMessage( sci, 2268, 0, 0 ); //#define SCI_SETWRAPMODE 2268
-		if( GLOBAL.editorSetting00.TabUseingSpace == "ON" ) IupSetAttribute( sci, "USETABS", "NO" ); else IupSetAttribute( sci, "USETABS", "YES" );
+		if( GLOBAL.editorSetting00.TabUseingSpace == "ON" )
+		{
+			IupSetAttribute( sci, "USETABS", "NO" );
+			IupScintillaSendMessage( sci, 2262, 1, 0 ); // SCI_SETBACKSPACEUNINDENTS 2262
+		}
+		else
+		{
+			IupSetAttribute( sci, "USETABS", "YES" );
+		}
 		IupScintillaSendMessage( sci, 2106, cast(int) '^', 0 ); //#define SCI_AUTOCSETSEPARATOR 2106
 		IupSetAttribute( sci, "APPENDNEWLINE", "NO" );
 
