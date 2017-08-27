@@ -128,6 +128,7 @@ struct GLOBAL
 	static EditorColorUint		editColor;
 	//static Ihandle*			functionTitleHandle;
 	static char[]				enableKeywordComplete = "ON";
+	static char[]				enableIncludeComplete = "ON";
 	static char[]				enableParser = "ON";
 	static char[]				showFunctionTitle = "OFF";
 	static IupString			widthFunctionTitle;
@@ -502,6 +503,7 @@ struct GLOBAL
 						GLOBAL.languageItems["consoleexe"] = new IupString( cast(char[]) "Use Console Launcher To Run Program" );
 					GLOBAL.languageItems["parsersetting"] = new IupString( cast(char[]) "Parser Settings" );
 						GLOBAL.languageItems["enablekeyword"] = new IupString( cast(char[]) "Enable Keyword Autocomplete" );
+						GLOBAL.languageItems["enableinclude"] = new IupString( cast(char[]) "Enable Include Autocomplete" );
 						GLOBAL.languageItems["enableparser"] = new IupString( cast(char[]) "Enable Parser" );
 						GLOBAL.languageItems["showtitle"] = new IupString( cast(char[]) "Show Function Title" );
 						GLOBAL.languageItems["width"] = new IupString( cast(char[]) "Width" );

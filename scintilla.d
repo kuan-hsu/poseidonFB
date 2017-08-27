@@ -687,6 +687,11 @@ class CScintilla
 		
 		IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 		IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		
+		IupScintillaSendMessage( sci, 2627, 35, cast(int) XPM.bas_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 36, cast(int) XPM.bi_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		IupScintillaSendMessage( sci, 2627, 37, cast(int) XPM.folder_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+		
 
 		// BOOKMARK
 		IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toCString ); // SCI_MARKERDEFINERGBAIMAGE 2626
@@ -1461,6 +1466,21 @@ extern(C)
 
 							if( pos > 0 ) lastChar = fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ).dup; else return IUP_IGNORE;
 
+							if( GLOBAL.enableIncludeComplete == "ON" )
+							{
+								if( AutoComplete.checkIscludeDeclare( ih, pos - 1 ) )
+								{
+									alreadyInput = lastChar.dup;
+									char[] list = AutoComplete.includeComplete( ih, pos - 1, alreadyInput );
+									if( list.length )
+									{
+										if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, GLOBAL.cString.convert( list ) );
+										return IUP_IGNORE;
+									}
+								}
+							}	
+
+
 							if( pos > 1 )
 							{
 								if( lastChar == ">" )
@@ -1751,15 +1771,29 @@ extern(C)
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
-
-		if( ScintillaAction.isComment( ih, pos ) ) return IUP_DEFAULT;
-
+		
 		if( GLOBAL.bUndoRedoAction )
 		{
 			if( fromStringz( IupGetAttribute( ih, "REDO" ) ) == "NO" ) GLOBAL.bUndoRedoAction = false;
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 			return IUP_DEFAULT;
+		}		
+		
+		if( GLOBAL.enableIncludeComplete == "ON" )
+		{
+			if( AutoComplete.checkIscludeDeclare( ih, pos ) )
+			{
+				char[] alreadyInput = fromStringz( _text );
+				char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
+				if( list.length )
+				{
+					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+					return IUP_DEFAULT;
+				}
+			}
 		}
+
+		if( ScintillaAction.isComment( ih, pos ) ) return IUP_DEFAULT;
 
 		if( insert == 1 )
 		{

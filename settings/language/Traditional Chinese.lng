@@ -98,6 +98,7 @@ options=選項
 				consoleexe=使用Console啟動器執行程式
 			parsersetting=分析器設定
 				enablekeyword=啟用關鍵字自動完成
+				enableinclude=啟用引含自動完成
 				enableparser=啟動分析器
 				showtitle=顯示函式名稱
 				width=寬度

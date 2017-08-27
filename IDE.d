@@ -655,6 +655,7 @@ struct IDECONFIG
 			// parser
 			doc ~= setINILineData( "[parser]");
 			doc ~= setINILineData( "enablekeywordcomplete", GLOBAL.enableKeywordComplete );
+			doc ~= setINILineData( "enableincludecomplete", GLOBAL.enableIncludeComplete );
 			doc ~= setINILineData( "enableparser", GLOBAL.enableParser );
 			doc ~= setINILineData( "parsertrigger", Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) );
 			doc ~= setINILineData( "showfunctiontitle", GLOBAL.showFunctionTitle );
@@ -991,6 +992,7 @@ struct IDECONFIG
 						switch( left )
 						{
 							case "enablekeywordcomplete":	GLOBAL.enableKeywordComplete = right;							break;
+							case "enableincludecomplete":	GLOBAL.enableIncludeComplete = right;							break;
 							case "enableparser":			GLOBAL.enableParser = right;									break;
 							case "parsertrigger":			GLOBAL.autoCompletionTriggerWordCount = Integer.atoi( right );	break;
 							case "showfunctiontitle":		GLOBAL.showFunctionTitle = right;								break;

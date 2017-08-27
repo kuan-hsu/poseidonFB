@@ -139,6 +139,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleKeywordComplete, "VALUE", toStringz(GLOBAL.enableKeywordComplete.dup) );
 		IupSetHandle( "toggleKeywordComplete", toggleKeywordComplete );
 		
+		Ihandle* toggleIncludeComplete = IupToggle( GLOBAL.languageItems["enableinclude"].toCString, null );
+		IupSetAttribute( toggleIncludeComplete, "VALUE", toStringz(GLOBAL.enableIncludeComplete.dup) );
+		IupSetHandle( "toggleIncludeComplete", toggleIncludeComplete );
+		
 		Ihandle* toggleUseParser = IupToggle( GLOBAL.languageItems["enableparser"].toCString, null );
 		IupSetAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.enableParser.dup) );
 		IupSetHandle( "toggleUseParser", toggleUseParser );
@@ -235,7 +239,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleUseParser, hBoxFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBox00, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleIncludeComplete, toggleUseParser, hBoxFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=NO" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
@@ -1345,6 +1349,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "textIncludeLevel", null );
 		IupSetHandle( "toggleFunctionTitle", null );
 		IupSetHandle( "toggleKeywordComplete", null );
+		IupSetHandle( "toggleIncludeComplete", null );
 		IupSetHandle( "toggleUseParser", null );
 		IupSetHandle( "toggleWithParams", null );
 		IupSetHandle( "toggleIGNORECASE", null );
@@ -1897,6 +1902,8 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.consoleExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE" ) ).dup;
 
 			GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
+			GLOBAL.enableIncludeComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleIncludeComplete" ), "VALUE" ) ).dup;
+			
 			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
 			GLOBAL.showFunctionTitle					= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
 			GLOBAL.widthFunctionTitle					= IupGetAttribute( IupGetHandle( "textFunctionTitle" ), "VALUE" );

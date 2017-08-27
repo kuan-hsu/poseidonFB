@@ -99,6 +99,7 @@ options=Options
 				consoleexe=Use Console Launcher To Run Program
 			parsersetting=Parser Settings
 				enablekeyword=Enable Keyword Autocomplete
+				enableinclude=Enable Include Autocomplete
 				enableparser=Enable Parser
 				showtitle=Show Function Title
 				width=Width

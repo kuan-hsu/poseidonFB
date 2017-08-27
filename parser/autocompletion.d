@@ -796,7 +796,7 @@ struct AutoComplete
 
 		return true;
 	}
-
+	
 	static char[] callTipList( CASTnode[] groupAST, char[] word = null )
 	{
 		char[][] results;
@@ -1004,6 +1004,259 @@ struct AutoComplete
 		if( level > 0 ) level--;
 
 		return results;
+	}
+	
+	static char[] includeComplete( Ihandle* iupSci, int pos, inout char[] text )
+	{
+		// Nested Delegate Filter Function
+		bool dirFilter( FilePath _fp, bool _isFfolder )
+		{
+			if( _isFfolder ) return true;
+			if( lowerCase( _fp.ext ) == "bas" || lowerCase( _fp.ext ) == "bi" ) return true;
+		
+			return false;
+		}
+		
+		bool delegate( FilePath, bool ) _dirFilter;
+		_dirFilter = &dirFilter;
+		// End of Nested Function
+		
+		if( !text.length )  return null;
+		
+		dchar[] word32;
+		char[]	word = text;
+		bool	bExitLoopFlag;		
+		
+		if( text != "/" && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) ) return null;
+
+		listContainer.length = 0;
+		if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL\0", "YES\0" );		
+
+		try
+		{
+			while( pos > -1 )
+			{
+				--pos;
+				if( pos < 0 ) break;
+				
+				char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+				if( _s.length )
+				{
+					dchar[] sd = UTF.toString32( _s );
+					dchar s = sd[0];
+					switch( s )
+					{
+						case '"':								bExitLoopFlag = true; break;
+						case ' ', '\t', ':', '\n', '\r':		bExitLoopFlag = true; break;
+						default: 
+							if( UTF.isValid( s ) )
+							{
+								word32 = "";
+								word32 ~= s;
+								word ~= Util.trim( UTF.toString( word32 ) );
+							}
+					}
+				}
+				
+				if( bExitLoopFlag ) break;
+			}
+			
+			if( !word.length ) return null;
+			
+			version(Windows) word = word.dup.reverse; else word = lowerCase( word.dup.reverse );
+			//if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return null;
+			
+			char[][]	words = Util.split( Path.normalize( word ), "/" );
+			char[][]	tempList;
+
+			if( !words.length ) return null;
+
+			// Step 1: Relative from the directory of the source file
+			FilePath  _path1 = new FilePath( ScintillaAction.getActiveCScintilla.getFullPath ); // Tail include /
+			_path1.set( _path1.path );
+			
+			// Step 2: Relative from the current working directory
+			FilePath  _path2;
+			char[] prjDir = actionManager.ProjectAction.fileInProject( ScintillaAction.getActiveCScintilla.getFullPath );
+			if( prjDir.length )
+				_path2 = new FilePath( prjDir ~ "/" );
+			else
+				_path2 = new FilePath( Environment.cwd() ); // Tail include /
+
+			// Step 3: Relative from addition directories specified with the -i command line option
+			// Work on Project
+			FilePath[]  _path3;
+			prjDir = actionManager.ProjectAction.fileInProject( ScintillaAction.getActiveCScintilla.getFullPath );
+			if( prjDir.length )
+			{
+				foreach( char[] s; GLOBAL.projectManager[prjDir].includeDirs ) // without \
+					_path3 ~= new FilePath( s ); // Reset
+			}			
+			
+			// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
+			char[] testPath;
+			FilePath _path4 = new FilePath( Path.normalize( GLOBAL.compilerFullPath.toDString ) );
+			version( Windows )
+			{
+				testPath = _path4.path() ~ "inc/";
+			}
+			else
+			{
+				testPath = _path4.path();
+				int pos = Util.rindex( testPath, "/bin/" );
+				if( pos > 0 && pos < testPath.length )
+				{
+					testPath = testPath[0..pos] ~ "/include/freebasic/" ~ include;
+				}
+			}
+			_path4.set( testPath ); // Reset			
+			
+			int index;
+			for( int i = 0; i < words.length; ++ i )
+			{
+				if( i == words.length - 1 )
+				{
+					// Step 1: Relative from the directory of the source file
+					if( _path1.exists )
+					{
+						foreach( FilePath _fp; _path1.toList( _dirFilter ) )
+							tempList ~= _fp.file;
+					}
+					
+					// Step 2: Relative from the current working directory
+					if( _path2.exists )
+					{
+						foreach( FilePath _fp; _path2.toList( _dirFilter ) )
+							tempList ~= _fp.file;
+					}
+					
+					// Step 3: Relative from addition directories specified with the -i command line option
+					// Work on Project
+					foreach( FilePath _fp3; _path3 )
+					{
+						if( _fp3.exists )
+						{
+							foreach( FilePath _fp; _fp3.toList( _dirFilter ) )
+								tempList ~= _fp.file;
+						}
+					}
+					
+					// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
+					if( _path4.exists )
+					{
+						foreach( FilePath _fp; _path4.toList( _dirFilter ) )
+							tempList ~= _fp.file;
+					}
+				}
+				else
+				{
+					_path1 = _path1.set( _path1.toString ~ words[i] ~ "/" );
+					_path2 = _path2.set( _path2.toString ~ words[i] ~ "/" );
+					for( int j = 0; j < _path3.length; ++ j )
+						_path3[j] = _path3[j].set( _path3[j].toString ~ words[i] ~ "/" );
+					_path4 = _path4.set( _path4.toString ~ words[i] ~ "/" );
+				}
+			}
+			
+			
+			if( word == "\"" )
+			{
+				foreach( char[] s; tempList )
+				{
+					if( s.length )
+					{
+						char[] iconNum = "37";
+						
+						if( s.length > 4 )
+						{
+							if( lowerCase( s[$-4..$] ) == ".bas" ) iconNum = "35";
+						}
+						
+						if( s.length > 3 )
+						{
+							if( lowerCase( s[$-3..$] ) == ".bi" ) iconNum = "36";
+						}
+						
+						listContainer ~= ( s ~ "?" ~ iconNum );
+					}
+				}
+				
+				text = "";
+			}
+			else
+			{
+				foreach( char[] s; tempList )
+				{
+					if( s.length )
+					{
+						char[] iconNum = "37";
+						
+						if( s.length > 4 )
+						{
+							if( lowerCase( s[$-4..$] ) == ".bas" ) iconNum = "35";
+						}
+						
+						if( s.length > 3 )
+						{
+							if( lowerCase( s[$-3..$] ) == ".bi" ) iconNum = "36";
+						}
+						
+						if( !words[$-1].length )
+						{
+							listContainer ~= ( s ~ "?" ~ iconNum );
+						}
+						else
+						{
+							if( word == "\"" )
+								listContainer ~= ( s ~ "?" ~ iconNum );
+							else
+							{
+								if( Util.index( lowerCase( s ), lowerCase( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
+							}
+						}
+					}
+				}
+				
+				text = words[$-1];
+			}
+
+			listContainer.sort;
+			
+			char[] list;
+			for( int i = 0; i < listContainer.length; ++ i )
+			{
+				if( listContainer[i].length )
+				{
+					if( i > 0 )
+					{
+						if( listContainer[i] != listContainer[i-1] ) list ~= ( listContainer[i] ~ "^" );
+					}
+					else
+					{
+						list ~= ( listContainer[i] ~ "^" );
+					}
+				}
+			}			
+			
+			if( list.length )
+				if( list[length-1] == '^' ) list = list[0..length-1];
+				
+			// Release FilePath Class Objects
+			delete _path1;
+			delete _path2;
+			delete _path4;
+			foreach( FilePath _p; _path3 )
+				delete _p;
+			
+			return list;
+			
+		}
+		catch( Exception e )
+		{
+			IupMessage( "includeComplete Error", toStringz( e.toString ) );
+		}
+		
+		return null;
 	}
 	
 	static int getProcedurePos( Ihandle* iupSci, int pos, char[] targetText )
@@ -1311,8 +1564,33 @@ struct AutoComplete
 		return getWholeWordReverse( iupSci, pos, dummyHeadPos );
 	}
 
-	static char[] checkIsInclude( Ihandle* iupSci, int pos = -1 )
+	static bool checkIscludeDeclare( Ihandle* iupSci, int pos = -1 )
 	{
+		char[]	result;
+		int		documentLength = IupGetInt( iupSci, "COUNT" );
+
+		do
+		{
+			char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+			if( s == ":" || s == "\n" ) break;
+			result ~= s;
+		}
+		while( --pos >= 0 )
+		
+		result = lowerCase( Util.trim( result.reverse ) ).dup;
+		
+		if( result.length > 7 )
+		{
+			if( result[0..8] == "#include" ) return true;
+		}
+
+		return false;
+	}
+
+	static char[] getIncludeString( Ihandle* iupSci, int pos = -1 )
+	{
+		if( !checkIscludeDeclare( iupSci, pos ) ) return null;
+		
 		char[]	result;
 		int		documentLength = IupGetInt( iupSci, "COUNT" );
 		
@@ -1978,25 +2256,26 @@ struct AutoComplete
 				}				
 
 				// Goto Includes
-				char[] includeString = checkIsInclude( cSci.getIupScintilla, currentPos );
-				char[] includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
-
-				if( includeFullPath.length )
+				char[] includeString = getIncludeString( cSci.getIupScintilla, currentPos );
+				if( includeString.length )
 				{
-					if( TYPE & 1 )
+					char[] includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
+
+					if( includeFullPath.length )
 					{
-						actionManager.ScintillaAction.openFile( includeFullPath );
+						if( TYPE & 1 )
+						{
+							actionManager.ScintillaAction.openFile( includeFullPath );
+						}
+						else
+						{
+							IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( includeFullPath.dup ) ); // SCI_CALLTIPSHOW 2200
+						}
+						return;
 					}
-					else
-					{
-						IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
-						IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( includeFullPath.dup ) ); // SCI_CALLTIPSHOW 2200
-					}
-					return;
 				}
-				
-				
 
 				if( AST_Head is null ) return;
 				
