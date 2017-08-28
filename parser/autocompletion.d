@@ -1027,10 +1027,10 @@ struct AutoComplete
 		char[]	word = text;
 		bool	bExitLoopFlag;		
 		
-		if( text != "/" && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) ) return null;
+		if( text != "\\" && text != "/" && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) ) return null;
 
 		listContainer.length = 0;
-		if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL\0", "YES\0" );		
+		if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );		
 
 		try
 		{
@@ -1159,67 +1159,35 @@ struct AutoComplete
 			}
 			
 			
-			if( word == "\"" )
+			if( word == "\"" ) words[$-1] = "";
+			foreach( char[] s; tempList )
 			{
-				foreach( char[] s; tempList )
+				if( s.length )
 				{
-					if( s.length )
+					char[] iconNum = "37";
+					
+					if( s.length > 4 )
 					{
-						char[] iconNum = "37";
-						
-						if( s.length > 4 )
-						{
-							if( lowerCase( s[$-4..$] ) == ".bas" ) iconNum = "35";
-						}
-						
-						if( s.length > 3 )
-						{
-							if( lowerCase( s[$-3..$] ) == ".bi" ) iconNum = "36";
-						}
-						
+						if( lowerCase( s[$-4..$] ) == ".bas" ) iconNum = "35";
+					}
+					
+					if( s.length > 3 )
+					{
+						if( lowerCase( s[$-3..$] ) == ".bi" ) iconNum = "36";
+					}
+					
+					if( !words[$-1].length )
+					{
 						listContainer ~= ( s ~ "?" ~ iconNum );
 					}
-				}
-				
-				text = "";
-			}
-			else
-			{
-				foreach( char[] s; tempList )
-				{
-					if( s.length )
+					else
 					{
-						char[] iconNum = "37";
-						
-						if( s.length > 4 )
-						{
-							if( lowerCase( s[$-4..$] ) == ".bas" ) iconNum = "35";
-						}
-						
-						if( s.length > 3 )
-						{
-							if( lowerCase( s[$-3..$] ) == ".bi" ) iconNum = "36";
-						}
-						
-						if( !words[$-1].length )
-						{
-							listContainer ~= ( s ~ "?" ~ iconNum );
-						}
-						else
-						{
-							if( word == "\"" )
-								listContainer ~= ( s ~ "?" ~ iconNum );
-							else
-							{
-								if( Util.index( lowerCase( s ), lowerCase( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
-							}
-						}
+						if( Util.index( lowerCase( s ), lowerCase( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
 					}
 				}
-				
-				text = words[$-1];
 			}
-
+			
+			text = words[$-1];
 			listContainer.sort;
 			
 			char[] list;
@@ -1569,13 +1537,12 @@ struct AutoComplete
 		char[]	result;
 		int		documentLength = IupGetInt( iupSci, "COUNT" );
 
-		do
+		while( --pos >= 0 )
 		{
 			char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 			if( s == ":" || s == "\n" ) break;
 			result ~= s;
 		}
-		while( --pos >= 0 )
 		
 		result = lowerCase( Util.trim( result.reverse ) ).dup;
 		

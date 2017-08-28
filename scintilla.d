@@ -1474,6 +1474,7 @@ extern(C)
 									char[] list = AutoComplete.includeComplete( ih, pos - 1, alreadyInput );
 									if( list.length )
 									{
+										//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 										if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, GLOBAL.cString.convert( list ) );
 										return IUP_IGNORE;
 									}
@@ -1787,6 +1788,7 @@ extern(C)
 				char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
 				if( list.length )
 				{
+					//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
 					return IUP_DEFAULT;
 				}
