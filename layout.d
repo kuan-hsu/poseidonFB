@@ -34,7 +34,7 @@ void createExplorerWindow()
 	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=NO,SHOWGRIP=LINES" );
 	version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
 	// Strange Bugs Fixed
-	IupSetCallback( IupGetChild( GLOBAL.fileListSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+	//IupSetCallback( IupGetChild( GLOBAL.fileListSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 
 	createTabs();
 
@@ -49,7 +49,7 @@ void createExplorerWindow()
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 	// Strange Bugs Fixed
-	IupSetCallback( IupGetChild( GLOBAL.explorerSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+	//IupSetCallback( IupGetChild( GLOBAL.explorerSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
@@ -67,7 +67,7 @@ void createExplorerWindow()
 		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-		IupSetCallback( GLOBAL.messageWindowTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+		//IupSetCallback( GLOBAL.messageWindowTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 	}
 	else
 	{
@@ -89,7 +89,7 @@ void createExplorerWindow()
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 ); else IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
 	// Strange Bugs Fixed
-	IupSetCallback( IupGetChild( GLOBAL.messageSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+	//IupSetCallback( IupGetChild( GLOBAL.messageSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* ih ){
 		if( GLOBAL.fileListTree.getTreeH <= 6 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );		
 		return IUP_IGNORE;

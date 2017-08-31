@@ -263,7 +263,6 @@ void createMenu()
 	IupSetCallback( item_quickRun, "ACTION", cast(Icallback)&quickRun_cb );
 
 	// Option
-	/+
 	Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
 	//IupSetAttribute(_windowsEOL, "IMAGE", "icon_windows");
 	IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -310,7 +309,6 @@ void createMenu()
 		default:
 	}
 	Ihandle* setEOL = IupSubmenu( GLOBAL.languageItems["seteol"].toCString, _eolSubMenu );
-	+/
 
 	Ihandle* windowsEOL = IupItem( toStringz( "Windows" ), null );
 	IupSetAttribute(windowsEOL, "IMAGE", "icon_windows");
@@ -385,7 +383,7 @@ void createMenu()
 	
 	Ihandle* markIupSeparator = IupSeparator();
 	IupSetAttribute( markIupSeparator, "TITLE", "" );
-	Ihandle* toolsSubMenu = IupMenu( /*setEOL,*/ convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
+	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
 	IupSetHandle( "toolsSubMenu", toolsSubMenu );
 	
 	item_tool = IupSubmenu( GLOBAL.languageItems["tools"].toCString, toolsSubMenu );
@@ -434,7 +432,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.308)\nBy Kuan Hsu (Taiwan)\n2017.08.28" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.309)\nBy Kuan Hsu (Taiwan)\n2017.08.31" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1481,8 +1479,8 @@ extern(C)
 			}
 				
 			IupScintillaSendMessage( cSci.getIupScintilla, 2029, type, 0 ); // SCI_CONVERTEOLS 2029
-			IupScintillaSendMessage( cSci.getIupScintilla, 2031, type, 0 ); // SCI_SETEOLMODE 2031
-			actionManager.StatusBarAction.update();
+			//IupScintillaSendMessage( cSci.getIupScintilla, 2031, type, 0 ); // SCI_SETEOLMODE 2031
+			//actionManager.StatusBarAction.update();
 		}
 		
 		return IUP_DEFAULT;

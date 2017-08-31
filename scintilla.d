@@ -138,7 +138,7 @@ class CScintilla
 		fullPath = new IupString();
 		title = new IupString();
 		*/
-
+		IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
@@ -207,7 +207,15 @@ class CScintilla
 	void setText( char[] _text )
 	{
 		IupSetAttribute( sci, "CLEARALL", "" );
-		IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text ) );
+		IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text.dup ) );
+		
+		/*
+		Ihandle* clipboard = IupClipboard();
+		IupSetAttribute(clipboard, "TEXT", GLOBAL.cString.convert( _text.dup ) );
+		IupSetAttribute( sci, "CLIPBOARD", "PASTE" );
+		IupDestroy(clipboard);
+			*/	
+		//IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text ) );
 		IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014		
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 	}
@@ -703,6 +711,18 @@ class CScintilla
 
 extern(C)
 {
+	private int CScintilla_linesChanged_cb( Ihandle* ih, int lin, int num )
+	{
+		//IupMessage( "", toStringz( "Num=" ~ Integer.toString( num ) ~ "\nLin=" ~ Integer.toString( lin + 1 ) ) );
+		
+		CScintilla cSci = ScintillaAction.getActiveCScintilla;
+		
+		if( cSci !is null )
+			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )	LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], lin + 1, num );
+		
+		return IUP_DEFAULT;
+	}
+	
 	private int marginclick_cb( Ihandle* ih, int margin, int line, char* status )
 	{
 		char[] statusString = fromStringz( status ).dup;
@@ -1634,8 +1654,8 @@ extern(C)
 			try
 			{
 				char[]	dText = fromStringz( _text );
-				auto	cSci = ScintillaAction.getActiveCScintilla();
-				int		currentLineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,				
+				//auto	cSci = ScintillaAction.getActiveCScintilla();
+				int		currentLineNum = cast(int) IupScintillaSendMessage( ih, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,				
 
 				if( insert == 1 )
 				{
@@ -1667,7 +1687,7 @@ extern(C)
 							}
 						}
 					}
-					
+					/+
 					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 					{
 						int countNewLine = Util.count( dText, "\n" );
@@ -1697,6 +1717,7 @@ extern(C)
 							}
 						}
 					}
+					+/
 				}
 				else
 				{
@@ -1728,7 +1749,7 @@ extern(C)
 							}
 						}
 					}					
-					
+					/+
 					if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
 					{
 						int		minusCount = -1;
@@ -1753,6 +1774,7 @@ extern(C)
 							}
 						}
 					}
+					+/
 				}
 			}
 			catch( Exception e )

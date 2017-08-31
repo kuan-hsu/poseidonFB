@@ -68,7 +68,7 @@ class CStatusBar
 		layoutHandle = IupBackgroundBox( _hbox );
 		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		// Strange Bugs Fixed
-		IupSetCallback( layoutHandle, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+		//IupSetCallback( layoutHandle, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 		
 		version(Windows)
 		{
@@ -383,29 +383,58 @@ extern(C) // Callback for CBaseDialog
 		{
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
-				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 0 ) return IUP_DEFAULT;
+				//if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 0 ) return IUP_DEFAULT;
+				Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
+				IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					GLOBAL.editorSetting00.EolType = "0";
+					foreach( cSci; GLOBAL.scintillaManager )
+						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
+
+					StatusBarAction.update();
+					return IUP_DEFAULT;
+				});	
 				
-				Ihandle* windowsEOL = IupItem( toStringz( "Windows" ), null );
-				IupSetAttribute(windowsEOL, "IMAGE", "icon_windows");
-				IupSetCallback( windowsEOL, "ACTION", cast(Icallback) &menu.SetAndConvertEOL_CB );
+				Ihandle* _macEOL = IupItem( toStringz( "Mac" ), null );
+				IupSetCallback( _macEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					GLOBAL.editorSetting00.EolType = "1";
+					foreach( cSci; GLOBAL.scintillaManager )
+						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
+					
+					StatusBarAction.update();
+					return IUP_DEFAULT;
+				});	
 				
-				Ihandle* macEOL = IupItem( toStringz( "Mac" ), null );
-				IupSetAttribute(macEOL, "IMAGE", "icon_mac");
-				IupSetCallback( macEOL, "ACTION", cast(Icallback) &menu.SetAndConvertEOL_CB );
-				
-				Ihandle* unixEOL = IupItem( toStringz( "Unix" ), null );
-				IupSetAttribute(unixEOL, "IMAGE", "icon_linux");
-				IupSetCallback( unixEOL, "ACTION", cast(Icallback) &menu.SetAndConvertEOL_CB );
+				Ihandle* _unixEOL = IupItem( toStringz( "Unix" ), null );
+				IupSetCallback( _unixEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					GLOBAL.editorSetting00.EolType = "2";
+					foreach( cSci; GLOBAL.scintillaManager )
+						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
+
+					StatusBarAction.update();
+					return IUP_DEFAULT;
+				});
 				
 				Ihandle* popupMenu = IupMenu( 	
-												windowsEOL,
-												macEOL,
-												unixEOL,
+												_windowsEOL,
+												_macEOL,
+												_unixEOL,
 												null
 											);
+											
+				IupSetAttribute( popupMenu, "RADIO", "YES" );
+				switch( GLOBAL.editorSetting00.EolType )
+				{
+					case "0":	IupSetAttribute( _windowsEOL, "VALUE", "ON"); break;
+					case "1":	IupSetAttribute( _macEOL, "VALUE", "ON"); break;
+					case "2":	IupSetAttribute( _unixEOL, "VALUE", "ON"); break;
+					default:
+				}				
 				
 				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
-				IupDestroy( popupMenu );
+				IupDestroy( popupMenu );				
 			}
 		}
 		return IUP_DEFAULT;

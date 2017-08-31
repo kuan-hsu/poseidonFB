@@ -65,7 +65,7 @@ class CFileList
 		layoutHandle = IupBackgroundBox( _v );
 		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &fileList_Empty_BUTTON_CB );
 		// Strange Bugs Fixed
-		IupSetCallback( layoutHandle, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+		//IupSetCallback( layoutHandle, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 	}
 
 	public:
