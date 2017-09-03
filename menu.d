@@ -26,10 +26,11 @@ void createMenu()
 	Ihandle* item_newProject, item_openProject, item_closeProject, item_saveProject, item_projectProperties, project_menu;
 	Ihandle* item_compile, item_buildrun, item_run, item_build, item_buildAll, item_quickRun, build_menu;
 	Ihandle* item_runDebug, item_withDebug, item_BuildwithDebug, debug_menu;
+	Ihandle* misc_menu;
 	Ihandle* item_tool, item_preference, item_language, option_menu;
 	
 
-	Ihandle* mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu8_Option;
+	Ihandle* mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option;
 
 	// File -> New
 	item_new = IupItem( GLOBAL.languageItems["new"].toCString, null);
@@ -178,22 +179,109 @@ void createMenu()
 	IupSetAttribute(item_goto, "IMAGE", "icon_goto");
 	IupSetCallback( item_goto, "ACTION", cast(Icallback) &item_goto_cb );
 
-	// View
-	GLOBAL.menuOutlineWindow = IupItem( GLOBAL.languageItems["outline"].toCString, null);
-	IupSetAttribute(GLOBAL.menuOutlineWindow, "VALUE", "ON");
-	//IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
-	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outlineMenuItem_cb);
-	
-	GLOBAL.menuMessageWindow = IupItem( GLOBAL.languageItems["message"].toCString, null);
-	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
-	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
-	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
 
-	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
-	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
-	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
+	// View
+	Ihandle* LineMargin = IupItem( GLOBAL.languageItems["lnmargin"].toCString, null);
+	IupSetAttribute( LineMargin, "VALUE", toStringz( GLOBAL.editorSetting00.LineMargin.dup ) );
+	IupSetAttribute( LineMargin, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuLineMargin", LineMargin );
+	IupSetCallback( LineMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.LineMargin == "ON" ) GLOBAL.editorSetting00.LineMargin = "OFF"; else GLOBAL.editorSetting00.LineMargin = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});	
+
+	Ihandle* BookmarkMargin = IupItem( GLOBAL.languageItems["bkmargin"].toCString, null);
+	IupSetAttribute( BookmarkMargin, "VALUE", toStringz( GLOBAL.editorSetting00.BookmarkMargin.dup ) );
+	IupSetAttribute( BookmarkMargin, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuBookmarkMargin", BookmarkMargin );
+	IupSetCallback( BookmarkMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.BookmarkMargin == "ON" ) GLOBAL.editorSetting00.BookmarkMargin = "OFF"; else GLOBAL.editorSetting00.BookmarkMargin = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});	
 	
+	Ihandle* FoldMargin = IupItem( GLOBAL.languageItems["fdmargin"].toCString, null);
+	IupSetAttribute( FoldMargin, "VALUE", toStringz( GLOBAL.editorSetting00.FoldMargin.dup ) );
+	IupSetAttribute( FoldMargin, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuFoldMargin", FoldMargin );
+	IupSetCallback( FoldMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.FoldMargin == "ON" ) GLOBAL.editorSetting00.FoldMargin = "OFF"; else GLOBAL.editorSetting00.FoldMargin = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});	
 	
+	Ihandle* IndentGuide = IupItem( GLOBAL.languageItems["indentguide"].toCString, null);
+	IupSetAttribute( IndentGuide, "VALUE", toStringz( GLOBAL.editorSetting00.IndentGuide.dup ) );
+	IupSetAttribute( IndentGuide, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuIndentGuide", IndentGuide );
+	IupSetCallback( IndentGuide, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.IndentGuide == "ON" ) GLOBAL.editorSetting00.IndentGuide = "OFF"; else GLOBAL.editorSetting00.IndentGuide = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});	
+
+	Ihandle* ShowEOL = IupItem( GLOBAL.languageItems["showeol"].toCString, null);
+	IupSetAttribute( ShowEOL, "VALUE", toStringz( GLOBAL.editorSetting00.ShowEOL.dup ) );
+	IupSetAttribute( ShowEOL, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuShowEOL", ShowEOL );
+	IupSetCallback( ShowEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.ShowEOL == "ON" ) GLOBAL.editorSetting00.ShowEOL = "OFF"; else GLOBAL.editorSetting00.ShowEOL = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});
+	
+	Ihandle* ShowSpace = IupItem( GLOBAL.languageItems["showspacetab"].toCString, null);
+	IupSetAttribute( ShowSpace, "VALUE", toStringz( GLOBAL.editorSetting00.ShowSpace.dup ) );
+	IupSetAttribute( ShowSpace, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuShowSpace", ShowSpace );
+	IupSetCallback( ShowSpace, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.ShowSpace == "ON" ) GLOBAL.editorSetting00.ShowSpace = "OFF"; else GLOBAL.editorSetting00.ShowSpace = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});		
+	
+	Ihandle* BraceMatch = IupItem( GLOBAL.languageItems["bracematchhighlight"].toCString, null);
+	IupSetAttribute( BraceMatch, "VALUE", toStringz( GLOBAL.editorSetting00.BraceMatchHighlight.dup ) );
+	IupSetAttribute( BraceMatch, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuBraceMatch", BraceMatch );
+	IupSetCallback( BraceMatch, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" ) GLOBAL.editorSetting00.BraceMatchHighlight = "OFF"; else GLOBAL.editorSetting00.BraceMatchHighlight = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});	
+	
+	Ihandle* BoldKeyword = IupItem( GLOBAL.languageItems["boldkeyword"].toCString, null);
+	IupSetAttribute( BoldKeyword, "VALUE", toStringz( GLOBAL.editorSetting00.BoldKeyword.dup ) );
+	IupSetAttribute( BoldKeyword, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuBoldKeyword", BoldKeyword );
+	IupSetCallback( BoldKeyword, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.BoldKeyword == "ON" ) GLOBAL.editorSetting00.BoldKeyword = "OFF"; else GLOBAL.editorSetting00.BoldKeyword = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});	
+
+	Ihandle* CaretLine = IupItem( GLOBAL.languageItems["showcaretline"].toCString, null);
+	IupSetAttribute( CaretLine, "VALUE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
+	IupSetAttribute( CaretLine, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuCaretLine", CaretLine );
+	IupSetCallback( CaretLine, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.CaretLine == "ON" ) GLOBAL.editorSetting00.CaretLine = "OFF"; else GLOBAL.editorSetting00.CaretLine = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});	
+
+
+
 	
 	// Project
 	item_newProject= IupItem( GLOBAL.languageItems["newprj"].toCString, null);
@@ -261,6 +349,22 @@ void createMenu()
 	item_quickRun = IupItem( GLOBAL.languageItems["quickrun"].toCString, null);
 	IupSetAttribute( item_quickRun, "IMAGE", "icon_quickrun" );
 	IupSetCallback( item_quickRun, "ACTION", cast(Icallback)&quickRun_cb );
+
+
+	// Miscelaneous 
+	GLOBAL.menuOutlineWindow = IupItem( GLOBAL.languageItems["outline"].toCString, null);
+	IupSetAttribute(GLOBAL.menuOutlineWindow, "VALUE", "ON");
+	//IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
+	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outlineMenuItem_cb);
+	
+	GLOBAL.menuMessageWindow = IupItem( GLOBAL.languageItems["message"].toCString, null);
+	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
+	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
+	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
+
+	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
+	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
+	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);	
 
 	// Option
 	Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
@@ -432,7 +536,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.309)\nBy Kuan Hsu (Taiwan)\n2017.08.31" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.310)\nBy Kuan Hsu (Taiwan)\n2017.09.03" );
 		return IUP_DEFAULT;
 	});
 	
@@ -480,13 +584,19 @@ void createMenu()
 							IupSeparator(),
 							item_goto,
 							null );
-
-	view_menu = IupMenu( 	GLOBAL.menuOutlineWindow,
-							GLOBAL.menuMessageWindow,
+	
+	view_menu = IupMenu( 	LineMargin,
+							BookmarkMargin,
+							FoldMargin,
 							IupSeparator(),
-							fullScreenItem,
+							IndentGuide,
+							ShowEOL,
+							ShowSpace,
+							BraceMatch,
+							BoldKeyword,
+							CaretLine,
 							null );
-
+	
 	project_menu = IupMenu( item_newProject,
 							item_openProject,
 							IupSeparator(),
@@ -514,7 +624,13 @@ void createMenu()
 	debug_menu= IupMenu( 	item_runDebug,
 							item_withDebug,
 							item_BuildwithDebug,
-							null );							
+							null );
+							
+	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
+							GLOBAL.menuMessageWindow,
+							IupSeparator(),
+							fullScreenItem,
+							null );
 
 	option_menu= IupMenu( 	item_tool,
 							item_language,
@@ -531,9 +647,10 @@ void createMenu()
 	mainMenu5_Project = IupSubmenu( GLOBAL.languageItems["prj"].toCString, project_menu );
 	mainMenu6_Build = IupSubmenu( GLOBAL.languageItems["build"].toCString, build_menu );
 	mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
+	mainMenu_Misc = IupSubmenu( GLOBAL.languageItems["windows"].toCString, misc_menu );
 	mainMenu8_Option = IupSubmenu( GLOBAL.languageItems["options"].toCString, option_menu );
 
-	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu8_Option, null );
+	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option, null );
 	IupSetAttribute( menu, "GAP", "30" );
 	
 	IupSetHandle("mymenu", menu);

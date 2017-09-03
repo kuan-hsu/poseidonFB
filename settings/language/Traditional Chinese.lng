@@ -28,6 +28,7 @@ search=尋找
 	goto=跳到指定行
 		line=行
 
+windows=視窗
 view=檢視
 	'outline=大綱
 	message=訊息

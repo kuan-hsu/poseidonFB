@@ -10,10 +10,10 @@ import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
 import tango.sys.Process, tango.io.stream.Lines;
 
-//import tango.sys.SharedLib;
-
 version(Windows)
 {
+	import tango.sys.SharedLib;
+	
 	pragma(lib, "gdi32.lib");
 	pragma(lib, "user32.lib");
 	pragma(lib, "comdlg32.lib");
@@ -111,36 +111,39 @@ void main( char[][] args )
 		*/
 	}
 	+/
-	/+
-	SharedLib lib = SharedLib.load(`sci.dll` );
-	try
+
+	version(Windows)
 	{
-        //Stdout("Library successfully loaded").newline;
-        void* ptr = lib.getSymbol("openDialog");
-        if( ptr )
+		SharedLib sharedlib;
+		GLOBAL.htmlHelp = null;
+		
+		try
 		{
-            //Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
-            
-            // binding function address from DLL to our function pointer
-            void **point = cast(void **)&dllHandleClipboardText;
-            *point = ptr;
-            
-            // using our function
-            //dllprint();
-			Stdout("DONE").newline;
-        }
-		else
+			sharedlib = SharedLib.load( `hhctrl.ocx` );
+			
+			//Stdout("Library successfully loaded").newline;
+			
+			void* ptr = sharedlib.getSymbol("HtmlHelpW");
+			if( ptr )
+			{
+				//Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
+				void **point = cast(void **)&GLOBAL.htmlHelp; // binding function address from DLL to our function pointer
+				*point = ptr;
+				
+				//Stdout("DONE").newline;
+			}
+			else
+			{
+				//Stdout("Symbol not found").newline;
+			}
+		}
+		catch( Exception e )
 		{
-			Stdout("Symbol not found").newline;
-            //Trace.formatln("Symbol dllprint not found");
-        }
-    }
-	catch( Exception e )
-	{
-		Stdout(e.toString).newline;
-        //Trace.formatln("Could not load the library");
-    }	
-	+/
+			GLOBAL.htmlHelp = null;
+			//Stdout(e.toString).newline;
+		}
+	}
+
 	
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
@@ -316,7 +319,7 @@ void main( char[][] args )
 	IupMainLoop();
 	IupClose();
 	
-	//lib.unload();
+	version(Windows) sharedlib.unload();
 	/*
 	version( Windows )
 	{

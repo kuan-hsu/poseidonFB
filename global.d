@@ -9,6 +9,13 @@ typedef extern (C) void function( Ihandle* iih ) _HandleClipboardText;
 _HandleClipboardText dllHandleClipboardText;
 */
 
+version(Windows)
+{	
+	// For chm help
+	import tango.sys.win32.Types;
+	typedef extern (C) void function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
+}
+
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
@@ -64,6 +71,9 @@ struct GLOBAL
 	
 
 	public:
+	version(Windows) static _htmlHelp	htmlHelp;
+	
+	
 	static Ihandle*				mainDlg;
 	static Ihandle*				documentTabs, projectViewTabs, messageWindowTabs;
 	static Ihandle*				dndDocumentZBox;
@@ -432,6 +442,7 @@ struct GLOBAL
 			GLOBAL.languageItems["goto"] = new IupString( cast(char[]) "Goto Line" );
 				GLOBAL.languageItems["line"] = new IupString( cast(char[]) "Line" );
 
+		GLOBAL.languageItems["windows"] = new IupString( cast(char[]) "Windows" );
 		GLOBAL.languageItems["view"] = new IupString( cast(char[]) "View" );
 			//GLOBAL.languageItems["outline"] = new IupString( cast(char[]) "Outline" );
 			GLOBAL.languageItems["message"]= new IupString( cast(char[]) "Message" );

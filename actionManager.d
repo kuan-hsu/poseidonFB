@@ -1233,7 +1233,15 @@ struct ScintillaAction
 	
 			IupRefresh( recentFile_ih );
 		}
-	}	
+	}
+	
+	static void applyAllSetting()
+	{
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+		{
+			if( cSci !is null ) cSci.setGlobalSetting();
+		}
+	}
 }
 
 

@@ -612,6 +612,9 @@ class CScintilla
 		
 		IupSetAttribute( sci, "USEPOPUP", "NO" );
 		
+		
+		if( GLOBAL.editorSetting00.BraceMatchHighlight == "OFF" ) IupSetInt( sci, "BRACEBADLIGHT", -1 );
+		
 		// SCI_SETMULTIPLESELECTION 2563
 		// SCI_SETADDITIONALSELECTIONTYPING 2565
 		if( GLOBAL.editorSetting00.MultiSelection == "ON" )

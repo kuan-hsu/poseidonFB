@@ -28,6 +28,7 @@ search=Search
 	goto=Goto Line
 		line=Line
 
+windows=Windows
 view=View
 	outline=Outline
 	message=Message

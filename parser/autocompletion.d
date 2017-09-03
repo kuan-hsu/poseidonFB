@@ -15,6 +15,23 @@ struct AutoComplete
 	import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
 	import tango.io.Stdout;
 
+	version(Windows)
+	{
+		import tango.sys.win32.Types;
+		
+		struct HH_AKLINK
+		{
+			int       cbStruct;     // sizeof this structure
+			BOOL      fReserved;    // must be FALSE (really!)
+			LPCTSTR   pszKeywords;  // semi-colon separated keywords
+			LPCTSTR   pszUrl;       // URL to jump to if no keywords found (may be NULL)
+			LPCTSTR   pszMsgText;   // Message text to display in MessageBox if pszUrl is NULL and no keyword match
+			LPCTSTR   pszMsgTitle;  // Message text to display in MessageBox if pszUrl is NULL and no keyword match
+			LPCTSTR   pszWindow;    // Window to display URL in
+			BOOL      fIndexOnFail; // Displays index if keyword lookup fails.
+		}
+	}
+
 	static char[][]				listContainer;
 	static CASTnode[char[]]		includesMarkContainer;
 	
@@ -2147,16 +2164,32 @@ struct AutoComplete
 											
 											version(Windows)
 											{
-												char[]	keyPg;
-												
-												switch( lowerCase( keyWord ) )
+												if( GLOBAL.htmlHelp != null )
 												{
-													case "select":			keyPg = "::KeyPgSelectcase.html";			break;
-													case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
-													default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
-												}											
+													wchar[] keyWord16 = UTF.toString16( keyWord );
+													wchar[]	_path =  UTF.toString16( GLOBAL.manualPath.toDString );
+													
+													HH_AKLINK	akLink;
+													akLink.cbStruct = HH_AKLINK.sizeof;
+													akLink.fReserved = 0;
+													akLink.pszKeywords = toString16z( keyWord16 );
+													akLink.fIndexOnFail = 0;
+													GLOBAL.htmlHelp( null, toString16z( _path ), 0x000D, cast(uint) &akLink ); //#define HH_KEYWORD_LOOKUP       &h000D
+												}
+												else
+												{
+													char[]	keyPg;
+													
+													switch( lowerCase( keyWord ) )
+													{
+														case "select":			keyPg = "::KeyPgSelectcase.html";			break;
+														case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
+														default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
+													}											
 
-												IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+													//IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+													IupExecute( "hh", toStringz( "\"its:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+												}
 											}
 											else
 											{
