@@ -265,7 +265,7 @@ extern(C) // Callback for CSingleTextDialog
 			Ihandle* listFind_handle = IupGetHandle( "CSearchDialog_listFind" );
 			if( listFind_handle != null )
 			{
-				char[] findText = fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) );
+				char[] findText = fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
 
 				if( findText.length )
 				{
@@ -308,20 +308,21 @@ extern(C) // Callback for CSingleTextDialog
 			Ihandle* listReplace_handle	=  IupGetHandle( "CSearchDialog_listReplace" );
 			if( listFind_handle != null && listReplace_handle != null )
 			{
-				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) );
-				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) );
+				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
+				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup;
 
 				if( findText.length )
 				{
 					Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
 					if( direction_handle != null )
 					{
-						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" ));
-						if( targetText == findText )
-						{
-							IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
-						}
+						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
 						
+						
+						if( targetText.length )
+						{
+							if( targetText == findText ) IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+						}
 						
 						if( fromStringz(IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
 						{
@@ -350,15 +351,15 @@ extern(C) // Callback for CSingleTextDialog
 			Ihandle* listReplace_handle	=  IupGetHandle( "CSearchDialog_listReplace" );
 			if( listFind_handle != null && listReplace_handle != null )
 			{
-				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) );
-				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) );
+				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
+				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup;
 
 				if( findText.length )
 				{
 					Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
 					if( direction_handle != null )
 					{
-						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" ));
+						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
 						if( targetText == findText )
 						{
 							IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
@@ -403,8 +404,8 @@ extern(C) // Callback for CSingleTextDialog
 			
 			if( listFind_handle != null && listReplace_handle != null )
 			{
-				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) );
-				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) );
+				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
+				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup;
 				int documentLength	= IupGetInt( iupSci, "COUNT" );
 				
 				if( findText.length )

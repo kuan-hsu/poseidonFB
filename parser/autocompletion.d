@@ -2138,7 +2138,7 @@ struct AutoComplete
 				
 				word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
 				word = lowerCase( word.dup.reverse );
-
+				
 				char[][] splitWord = getDivideWord( word );
 				
 				// Manual
@@ -2311,6 +2311,8 @@ struct AutoComplete
 							if( AST_Head is null ) return;
 						}
 				}
+				
+				cleanIncludesMarkContainer();
 				
 				for( int i = 0; i < splitWord.length; i++ )
 				{

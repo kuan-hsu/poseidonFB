@@ -280,7 +280,16 @@ void createMenu()
 		return IUP_DEFAULT;
 	});	
 
-
+	Ihandle* HighlightCurrentWord = IupItem( GLOBAL.languageItems["hlcurrentword"].toCString, null);
+	IupSetAttribute( HighlightCurrentWord, "VALUE", toStringz( GLOBAL.editorSetting00.HighlightCurrentWord.dup ) );
+	IupSetAttribute( HighlightCurrentWord, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuHighlightCurrentWord", HighlightCurrentWord );
+	IupSetCallback( HighlightCurrentWord, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" ) GLOBAL.editorSetting00.HighlightCurrentWord = "OFF"; else GLOBAL.editorSetting00.HighlightCurrentWord = "ON";
+		ScintillaAction.applyAllSetting();
+		return IUP_DEFAULT;
+	});
 
 	
 	// Project
@@ -536,7 +545,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.310)\nBy Kuan Hsu (Taiwan)\n2017.09.03" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.311)\nBy Kuan Hsu (Taiwan)\n2017.09.06" );
 		return IUP_DEFAULT;
 	});
 	
@@ -594,7 +603,9 @@ void createMenu()
 							ShowSpace,
 							BraceMatch,
 							BoldKeyword,
+							IupSeparator(),
 							CaretLine,
+							HighlightCurrentWord,
 							null );
 	
 	project_menu = IupMenu( item_newProject,
