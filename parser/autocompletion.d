@@ -2204,7 +2204,7 @@ struct AutoComplete
 							}
 						}
 						
-						if( splitWord[0] == "constructor" || splitWord[0] == "destructor" ) return;
+						//if( splitWord[0] == "constructor" || splitWord[0] == "destructor" ) return;
 					}
 				}
 

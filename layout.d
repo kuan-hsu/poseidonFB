@@ -363,6 +363,19 @@ extern(C)
 						}
 					}
 				}
+				/*
+				if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" )
+				{
+					//IupMessage( "", toStringz( Integer.toString(c)));
+					if( c == 65307 )
+					{
+						GLOBAL.editorSetting01.USEFULLSCREEN = "OFF";
+						if( IupGetHandle( "Menu_fullScreenItem" ) != null ) IupSetAttribute( IupGetHandle( "Menu_fullScreenItem" ), "VALUE", "OFF" );
+						IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "NO" );
+						IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+					}
+				}
+				*/
 			}
 			catch( Exception e )
 			{

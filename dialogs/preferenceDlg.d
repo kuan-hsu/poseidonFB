@@ -67,22 +67,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 		
 		
-		Ihandle* labelchm = IupLabel( toStringz( GLOBAL.languageItems["manualpath"].toDString ~ ":" ) );
-		IupSetAttributes( labelchm, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
-		
-		Ihandle* textchm = IupText( null );
-		IupSetAttribute( textchm, "SIZE", "210x12" );
-		IupSetAttribute( textchm, "VALUE", GLOBAL.manualPath.toCString );
-		IupSetHandle( "textchm", textchm );
-		
-		Ihandle* btnchm = IupButton( null, null );
-		IupSetAttribute( btnchm, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnchm, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCHM_cb );
-
-		Ihandle* hBox02x64 = IupHbox( labelchm, textchm, btnchm, null );
-		IupSetAttributes( hBox02x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
-		
-		
 		/+
 		Ihandle* labelDefaultOption = IupLabel( toStringz( GLOBAL.languageItems["compileropts"].toDString ~ ":" ) );
 		IupSetAttributes( labelDefaultOption, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
@@ -129,6 +113,7 @@ class CPreferenceDialog : CBaseDialog
 		
 
 		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, null );
+		IupSetAttributes( vBoxCompiler, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
@@ -165,22 +150,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "textIncludeLevel", textIncludeLevel );
 
 		
-
-		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
-		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
-		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
-		
-		Ihandle* labelFunctionTitle = IupLabel( GLOBAL.languageItems["width"].toCString );
-		IupSetAttributes( labelFunctionTitle, "SIZE=80x12,ALIGNMENT=ARIGHT:ACENTER" ); 
-		Ihandle* textFunctionTitle = IupText( null );
-		IupSetAttribute( textFunctionTitle, "SIZE", "30x12" );
-		IupSetAttribute( textFunctionTitle, "VALUE", GLOBAL.widthFunctionTitle.toCString );
-		IupSetHandle( "textFunctionTitle", textFunctionTitle );
-		
-		Ihandle* hBoxFunctionTitle = IupHbox( toggleFunctionTitle, labelFunctionTitle, textFunctionTitle, null );
-		IupSetAttribute( hBoxFunctionTitle, "ALIGNMENT", "ACENTER" ); 
-		
-
 		Ihandle* toggleWithParams = IupToggle( GLOBAL.languageItems["showtypeparam"].toCString, null );
 		IupSetAttribute( toggleWithParams, "VALUE", toStringz(GLOBAL.showTypeWithParams.dup) );
 		IupSetHandle( "toggleWithParams", toggleWithParams );
@@ -200,6 +169,20 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleSHOWALLMEMBER = IupToggle( GLOBAL.languageItems["showallmembers"].toCString, null );
 		IupSetAttribute( toggleSHOWALLMEMBER, "VALUE", toStringz(GLOBAL.toggleShowAllMember.dup) );
 		IupSetHandle( "toggleSHOWALLMEMBER", toggleSHOWALLMEMBER );
+		
+		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
+		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
+		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
+		
+		Ihandle* labelFunctionTitle = IupLabel( GLOBAL.languageItems["width"].toCString );
+		IupSetAttributes( labelFunctionTitle, "SIZE=80x12,ALIGNMENT=ARIGHT:ACENTER" ); 
+		Ihandle* textFunctionTitle = IupText( null );
+		IupSetAttribute( textFunctionTitle, "SIZE", "30x12" );
+		IupSetAttribute( textFunctionTitle, "VALUE", GLOBAL.widthFunctionTitle.toCString );
+		IupSetHandle( "textFunctionTitle", textFunctionTitle );
+		
+		Ihandle* hBoxFunctionTitle = IupHbox( toggleFunctionTitle, labelFunctionTitle, textFunctionTitle, null );
+		IupSetAttribute( hBoxFunctionTitle, "ALIGNMENT", "ACENTER" ); 		
 
 
 		Ihandle* toggleLiveNone = IupToggle( GLOBAL.languageItems["none"].toCString, null );
@@ -239,8 +222,8 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleIncludeComplete, toggleUseParser, hBoxFunctionTitle, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBox00, null );
-		IupSetAttributes( vBox00, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=NO" );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleIncludeComplete, toggleUseParser, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxFunctionTitle, hBox00, null );
+		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
 		IupSetAttribute( frameParser, "TITLE",  GLOBAL.languageItems["parsersetting"].toCString );
@@ -248,21 +231,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( frameParser, "SIZE", "288x");
 		
 		
-		// Manual
-		Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
-		IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
-		IupSetHandle( "toggleUseManual", toggleUseManual );
-		
-		Ihandle* manuFrame = IupFrame( toggleUseManual );
-		IupSetAttribute( manuFrame, "TITLE", GLOBAL.languageItems["manual"].toCString() );
-		IupSetAttribute( manuFrame, "SIZE", "288x");	
-
-
-
-		
-	
-		
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, /*hBox03,*/ frameCompiler, frameParser, frameLive, manuFrame, null );
+		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, /*hBox02x64,*/ /*hBox03,*/ frameCompiler, frameParser, frameLive, /*manuFrame,*/ null );
 		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
 
@@ -416,7 +385,7 @@ class CPreferenceDialog : CBaseDialog
 
 		//IupSetAttribute(gbox, "SIZECOL", "1");
 		//IupSetAttribute(gbox, "SIZELIN", "4");
-		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=2,GAPCOL=100,MARGIN=0x0" );
+		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=10,GAPCOL=100,MARGIN=0x0" );
 		
 		
 		// Mark High Light Line
@@ -493,6 +462,36 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( frameKeywordCase, "SIZE=288x,GAP=1" );
 		IupSetAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].toCString );
 		
+		
+		// Manual
+		Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
+		IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
+		IupSetHandle( "toggleUseManual", toggleUseManual );
+		
+		Ihandle* labelchm = IupLabel( toStringz( GLOBAL.languageItems["manualpath"].toDString ~ ":" ) );
+		IupSetAttributes( labelchm, "SIZE=60x12,ALIGNMENT=ALEFT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
+		
+		Ihandle* textchm = IupText( null );
+		IupSetAttribute( textchm, "SIZE", "180x12" );
+		IupSetAttribute( textchm, "VALUE", GLOBAL.manualPath.toCString );
+		IupSetHandle( "textchm", textchm );
+		
+		Ihandle* btnchm = IupButton( null, null );
+		IupSetAttribute( btnchm, "IMAGE", "icon_openfile" );
+		IupSetCallback( btnchm, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCHM_cb );
+
+		Ihandle* hBoxChm = IupHbox( labelchm, textchm, btnchm, null );
+		IupSetAttributes( hBoxChm, "ALIGNMENT=ALEFT,MARGIN=5x0" );
+		
+		Ihandle* vBoxChm = IupVbox( hBoxChm, toggleUseManual, null );
+		//IupSetAttributes( vBoxChm, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+		
+		
+		Ihandle* manuFrame = IupFrame( vBoxChm );
+		IupSetAttribute( manuFrame, "TITLE", GLOBAL.languageItems["manual"].toCString() );
+		IupSetAttribute( manuFrame, "SIZE", "288x");	
+		
+		
 		Ihandle*[15]	lableString, flatFrame;
 		
 		for( int i = 0; i < GLOBAL.fonts.length; ++ i )
@@ -555,13 +554,13 @@ class CPreferenceDialog : CBaseDialog
 		}
 		
 		Ihandle* visibleBox = IupVbox( flatFrame[0], flatFrame[1], flatFrame[2], flatFrame[3], flatFrame[4], flatFrame[5], flatFrame[6], flatFrame[7], flatFrame[8], flatFrame[9], flatFrame[10], flatFrame[11], flatFrame[12], null );
-		IupSetAttributes( visibleBox, "GAP=0,MARGIN=5x1,EXPANDCHILDREN=YES");
+		IupSetAttributes( visibleBox, "GAP=10,MARGIN=5x1,EXPANDCHILDREN=YES");
 		Ihandle* sb = IupFlatScrollBox ( visibleBox );
-		IupSetAttributes( sb, "EXPAND=NO,SIZE=300x170,ALIGNMENT=ACENTER" );
+		IupSetAttributes( sb, "EXPAND=NO,SIZE=300x300,ALIGNMENT=ACENTER" );
 		
 		
-		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, sb, null );
-		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
+		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, manuFrame, /*sb,*/ null );
+		IupSetAttributes( vBoxPage02, "GAP=15,MARGIN=0x1,EXPANDCHILDREN=YES" );
 
 		// Color
 		Ihandle* labelColorPath = IupLabel( toStringz( GLOBAL.languageItems["colorfile"].toDString() ~ ":" ) );
@@ -755,7 +754,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=3,GAPCOL=30,MARGIN=2x10,SIZELIN=-1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
+		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=30,MARGIN=2x10,SIZELIN=-1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
 
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -1178,7 +1177,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=20,MARGIN=2x10" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=20,MARGIN=2x10" );
+		version(Windows) IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=20,MARGIN=2x10" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=20,MARGIN=2x10" );
 
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -1297,6 +1296,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		IupSetAttribute( vBoxPage01, "TABTITLE", GLOBAL.languageItems["compiler"].toCString() );
 		IupSetAttribute( vBoxPage02, "TABTITLE", GLOBAL.languageItems["editor"].toCString() );
+		IupSetAttribute( sb, "TABTITLE", GLOBAL.languageItems["font"].toCString() );
 		IupSetAttribute( vColor, "TABTITLE", GLOBAL.languageItems["color"].toCString() );
 		IupSetAttribute( shortCutList, "TABTITLE", GLOBAL.languageItems["shortcut"].toCString() );
 		IupSetAttribute( keyWordVbox, "TABTITLE", GLOBAL.languageItems["keywords"].toCString() );
@@ -1305,9 +1305,11 @@ class CPreferenceDialog : CBaseDialog
 	
 		
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, vColor, shortCutList, keyWordVbox, /*manuFrame,*/ null );
+		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, sb, vColor, shortCutList, keyWordVbox, /*manuFrame,*/ null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
+		IupSetAttribute( preferenceTabs, "CHILDOFFSET", "5x10" );
+		
 
 		
 		Ihandle* vBox = IupVbox( preferenceTabs, bottom, null );

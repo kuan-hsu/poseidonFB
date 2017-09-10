@@ -237,8 +237,16 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
 
+		char[][] rootfiles;
 		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].others )
 		{
+			scope _tempFilePath = new FilePath( s );
+			if( _tempFilePath.path != GLOBAL.projectManager[setupDir].dir ~ "/" )
+			{
+				rootfiles ~= s;
+				continue;
+			}
+			
 			char[]		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
 			
@@ -247,6 +255,16 @@ class CProjectTree
 			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
 			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 		}
+		foreach( char[] s; rootfiles )
+		{
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
+			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+		}			
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
@@ -254,8 +272,16 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
 		
+		rootfiles.length = 0;
 		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].includes )
 		{
+			scope _tempFilePath = new FilePath( s );
+			if( _tempFilePath.path != GLOBAL.projectManager[setupDir].dir ~ "/" )
+			{
+				rootfiles ~= s;
+				continue;
+			}
+			
 			char[]		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
 			
@@ -264,6 +290,16 @@ class CProjectTree
 			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
 			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 		}
+		foreach( char[] s; rootfiles )
+		{
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
+			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+		}		
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
@@ -272,8 +308,16 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		
 		
+		rootfiles.length = 0;
 		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].sources )
 		{
+			scope _tempFilePath = new FilePath( s );
+			if( _tempFilePath.path != GLOBAL.projectManager[setupDir].dir ~ "/" )
+			{
+				rootfiles ~= s;
+				continue;
+			}
+			
 			char[]		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
 			
@@ -282,6 +326,17 @@ class CProjectTree
 			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
 			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 		}
+		foreach( char[] s; rootfiles )
+		{
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
+			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+		}		
+		
 
 		// Switch to project tree tab
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );

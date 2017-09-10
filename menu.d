@@ -373,6 +373,7 @@ void createMenu()
 
 	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
 	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
+	//IupSetHandle( "Menu_fullScreenItem", fullScreenItem );
 	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);	
 
 	// Option
@@ -545,7 +546,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.311)\nBy Kuan Hsu (Taiwan)\n2017.09.06" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.312)\nBy Kuan Hsu (Taiwan)\n2017.09.10" );
 		return IUP_DEFAULT;
 	});
 	
@@ -646,9 +647,9 @@ void createMenu()
 	option_menu= IupMenu( 	item_tool,
 							item_language,
 							item_preference,
-							item_manual,
 							IupSeparator(),
 							item_about,
+							item_manual,
 							null );
 
 	mainMenu1_File = IupSubmenu( GLOBAL.languageItems["file"].toCString, file_menu );
