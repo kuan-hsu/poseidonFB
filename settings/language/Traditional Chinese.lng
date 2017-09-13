@@ -97,6 +97,7 @@ options=選項
 				usesfx=播放編譯結果音效( 當關閉結果視窗時 )
 				delexistexe=編譯前清除既有執行檔
 				consoleexe=使用Console啟動器執行程式
+		parser=分析器
 			parsersetting=分析器設定
 				enablekeyword=啟用關鍵字自動完成
 				enableinclude=啟用引含自動完成

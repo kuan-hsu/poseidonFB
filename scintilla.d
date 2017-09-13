@@ -38,6 +38,9 @@ class CScintilla
 				}
 
 				strings[1] = Util.trim( strings[1] );
+				
+				Bold = Italic = Underline = Strikeout = "NO";
+				size = "10";
 
 				foreach( char[] s; Util.split( strings[1], " " ) )
 				{
@@ -355,6 +358,10 @@ class CScintilla
 		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
 		IupSetAttribute( sci, "STYLEFGCOLOR32", GLOBAL.editColor.scintillaFore.toCString );		// 32
 		IupSetAttribute( sci, "STYLEBGCOLOR32", GLOBAL.editColor.scintillaBack.toCString );		// 32
+		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Bold ) );
+		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Italic ) );
+		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.cString.convert( Underline ) );
+
 		
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		
@@ -399,10 +406,6 @@ class CScintilla
 			IupSetAttribute(sci, "STYLEBOLD11", "YES");
 			IupSetAttribute(sci, "STYLEBOLD12", "YES");
 		}
-
-		IupSetAttribute( sci, "STYLEBOLD32", GLOBAL.cString.convert( Bold ) );
-		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Italic ) );
-		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.cString.convert( Underline ) );
 
 		getFontAndSize( 10, font, Bold, Italic, Underline, Strikeout, size );
 		IupSetAttribute(sci, "STYLEFGCOLOR40", GLOBAL.editColor.errorFore.toCString);	

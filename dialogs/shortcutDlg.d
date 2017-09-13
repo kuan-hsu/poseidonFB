@@ -18,7 +18,7 @@ class CShortCutDialog : CBaseDialog
 		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );		
 		
 		char[]		shortKeyValue;
-		foreach( char[] s; Util.split( listText[30..length], "+" ) )
+		foreach( char[] s; Util.split( listText[0..30], "+" ) )
 		{
 			s = Util.trim( s );
 			if( s.length )
@@ -26,10 +26,25 @@ class CShortCutDialog : CBaseDialog
 				if( shortKeyValue.length ) shortKeyValue ~= ( " + " ~ s ); else shortKeyValue ~= s;
 			}
 		}
+		
+		if( item < 8 )
+			item --;
+		else if( item < 17 )
+			item -= 2;
+		else if( item < 24 )
+			item -= 3;
+		else if( item < 29 )
+			item -= 4;
+		else if( item < 32 )
+			item -= 5;
+		else if( item < 32 )
+			item -= 5;
+		else if( item < 42 )
+			item -= 6;
 
-		Ihandle* label0 = IupLabel( toStringz( GLOBAL.languageItems["shortcutname"].toDString() ~ ": " ~ GLOBAL.shortKeys[item-1].name ) );
+
+		Ihandle* label0 = IupLabel( toStringz( GLOBAL.languageItems["shortcutname"].toDString() ~ ": " ~ GLOBAL.shortKeys[item-1].title ) );
 		IupSetHandle( "labelKeyName", label0 );
-
 		
 		Ihandle* label1 = IupLabel( toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ": " ~ shortKeyValue ) );
 
@@ -65,7 +80,7 @@ class CShortCutDialog : CBaseDialog
 
 		listOptions ~= ( "39=\"TAB\"," );
 
-		listOptions ~=  "DROPDOWN=YES,VALUESTRING=" ~ Util.trim( listText[length-5..length] );
+		listOptions ~=  "DROPDOWN=YES,VALUESTRING=" ~ Util.trim( listText[25..30] );
 		IupSetAttributes( keyList, toStringz( listOptions ) );
 
 		Ihandle* HBox0 = IupHbox( toggleCtrl, toggleShift, toggleAlt, keyList, null );
@@ -201,7 +216,7 @@ extern(C) // Callback for CSingleTextDialog
 				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
 			}
 			
-			char[] string = Stdout.layout.convert( "{,-30} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[pos].title, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
+			char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
 
 			scope _cString = new IupString ;
 			IupSetAttribute( shortCutList, _cString.convert( Integer.toString( pos + 1 ) ), GLOBAL.cString.convert( string ) );

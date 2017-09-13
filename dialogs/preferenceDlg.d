@@ -10,14 +10,14 @@ private import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath;
 class CPreferenceDialog : CBaseDialog
 {
 	private:
-	Ihandle*	textCompilerPath, textDebuggerPath;
-	IupString	_compilersetting, _parserlive, _parsersetting, _autoconvertkeyword, _font, _color, _colorfgbg;
+	Ihandle*			textCompilerPath, textDebuggerPath;
+	IupString[15]		_stringOfLabel;
 	
 	static		IupString[48]		kbg;
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton();
+		Ihandle* bottom = createDlgButton( "40x12");
 
 		Ihandle* labelCompiler = IupLabel( toStringz( GLOBAL.languageItems["compilerpath"].toDString ~ ":" ) );
 		IupSetAttributes( labelCompiler, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
@@ -33,7 +33,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnOpen, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCompileBinFile_cb );
 
 		Ihandle* hBox01 = IupHbox( labelCompiler, textCompilerPath, btnOpen, null );
-		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER,MARGIN=5x5" );
 		
 		Ihandle* labelx64Compiler = IupLabel( toStringz( GLOBAL.languageItems["x64path"].toDString ~ ":" ) );
 		IupSetAttributes( labelx64Compiler, "SIZE=60x12,ALIGNMENT=ARIGHT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
@@ -48,7 +48,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnx64Open, "ACTION", cast(Icallback) &CPreferenceDialog_Openx64CompileBinFile_cb );		
 
 		Ihandle* hBox01x64 = IupHbox( labelx64Compiler, textx64CompilerPath, btnx64Open, null );
-		IupSetAttributes( hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+		IupSetAttributes( hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x5" );
 
 		
 		Ihandle* labelDebugger = IupLabel( toStringz( GLOBAL.languageItems["debugpath"].toDString ~ ":" ) );
@@ -64,7 +64,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenDebuggerBinFile_cb );
 
 		Ihandle* hBox02 = IupHbox( labelDebugger, textDebuggerPath, btnOpenDebugger, null );
-		IupSetAttributes( hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+		IupSetAttributes( hBox02, "ALIGNMENT=ACENTER,MARGIN=5x5" );
 		
 		
 		/+
@@ -118,6 +118,21 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=288x");
+		
+		
+		
+		Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02,frameCompiler, null );
+		IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
+		IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 		// Parser Setting
 		Ihandle* toggleKeywordComplete = IupToggle( GLOBAL.languageItems["enablekeyword"].toCString, null );
@@ -229,25 +244,27 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( frameParser, "TITLE",  GLOBAL.languageItems["parsersetting"].toCString );
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 		IupSetAttribute( frameParser, "SIZE", "288x");
+
+
+		
+		Ihandle* vBoxParserSettings = IupVbox( frameParser, frameLive, null );
+		IupSetAttributes( vBoxParserSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
+		IupSetAttribute( vBoxParserSettings, "EXPANDCHILDREN", "YES");
 		
 		
+		
+		
+		
+		
+		
+		/+
 		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, /*hBox02x64,*/ /*hBox03,*/ frameCompiler, frameParser, frameLive, /*manuFrame,*/ null );
 		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
-
-/+
-
-
-		Ihandle* labelMaxError = IupLabel( "Max errors occurred to stop:" );
-		IupSetAttributes( labelCompiler, "VISIBLELINES=1,VISIBLECOLUMNS=1" );
-		
-		textCompilerPath = IupText( null );
-		IupSetAttribute( textCompilerPath, "SIZE", "200x12" );
-		IupSetAttribute( textCompilerPath, "VALUE", toStringz(GLOBAL.compilerFullPath) );
-		IupSetHandle( "compilerPath_Handle", textCompilerPath );
+		+/
 
 
-+/
+
 		Ihandle* toggleLineMargin = IupToggle( GLOBAL.languageItems["lnmargin"].toCString, null );
 		IupSetAttribute( toggleLineMargin, "VALUE", toStringz(GLOBAL.editorSetting00.LineMargin.dup) );
 		IupSetHandle( "toggleLineMargin", toggleLineMargin );
@@ -431,7 +448,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=2,GAPCOL=0,MARGIN=0x0,SIZELIN=0,HOMOGENEOUSCOL=YES" );		
+		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=0,GAPCOL=0,MARGIN=0x5,SIZELIN=0,HOMOGENEOUSCOL=YES" );		
 		
 		
 		Ihandle* radioKeywordCase0 = IupToggle( GLOBAL.languageItems["none"].toCString, null );
@@ -506,20 +523,26 @@ class CPreferenceDialog : CBaseDialog
 
 				foreach( char[] s; Util.split( strings[1], " " ) )
 				{
-					switch( s )
+					if( s.length )
 					{
-						case "Bold":		Bold = s;		break;
-						case "Italic":		Italic = s;		break;
-						case "Underline":	Underline = s;	break;
-						case "Strikeout":	Strikeout = s;	break;
-						default:
-							size = s;
+						switch( s )
+						{
+							case "Bold":		Bold = s;		break;
+							case "Italic":		Italic = s;		break;
+							case "Underline":	Underline = s;	break;
+							case "Strikeout":	Strikeout = s;	break;
+							default:
+								size = s;
+						}
 					}
 				}
 				
-				char[] _string = Stdout.layout.convert( "{,-32}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+				if( _stringOfLabel[i] is null ) 
+					_stringOfLabel[i] = new IupString( Stdout.layout.convert( "{,-32}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size ) );
+				else
+					_stringOfLabel[i] = Stdout.layout.convert( "{,-32}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
 				
-				lableString[i]	= IupLabel( toStringz( _string ) );
+				lableString[i]	= IupLabel( _stringOfLabel[i].toCString );
 				IupSetAttributes( lableString[i], "SIZE=275x,EXPAND=YES");
 				
 				scope IupFlatFrameString = new IupString( "customFont_" ~ Integer.toString( i ) );
@@ -554,13 +577,13 @@ class CPreferenceDialog : CBaseDialog
 		}
 		
 		Ihandle* visibleBox = IupVbox( flatFrame[0], flatFrame[1], flatFrame[2], flatFrame[3], flatFrame[4], flatFrame[5], flatFrame[6], flatFrame[7], flatFrame[8], flatFrame[9], flatFrame[10], flatFrame[11], flatFrame[12], null );
-		IupSetAttributes( visibleBox, "GAP=10,MARGIN=5x1,EXPANDCHILDREN=YES");
+		IupSetAttributes( visibleBox, "GAP=1,MARGIN=5x1,EXPANDCHILDREN=YES");
 		Ihandle* sb = IupFlatScrollBox ( visibleBox );
-		IupSetAttributes( sb, "EXPAND=NO,SIZE=300x300,ALIGNMENT=ACENTER" );
+		IupSetAttributes( sb, "EXPAND=NO,SIZE=300x230,ALIGNMENT=ACENTER" );
 		
 		
 		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, manuFrame, /*sb,*/ null );
-		IupSetAttributes( vBoxPage02, "GAP=15,MARGIN=0x1,EXPANDCHILDREN=YES" );
+		IupSetAttributes( vBoxPage02, "MARGIN=0x1,EXPANDCHILDREN=YES" );
 
 		// Color
 		Ihandle* labelColorPath = IupLabel( toStringz( GLOBAL.languageItems["colorfile"].toDString() ~ ":" ) );
@@ -642,26 +665,26 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* labelSelectFore = IupLabel( toStringz( GLOBAL.languageItems["sel"].toDString ~ ":" ) );
 		Ihandle* btnSelectFore = IupButton( null, null );
 		IupSetAttribute( btnSelectFore, "BGCOLOR", GLOBAL.editColor.selectionFore.toCString );
-		version(Windows) IupSetAttribute( btnSelectFore, "SIZE", "64x8" ); else IupSetAttribute( btnSelectFore, "SIZE", "64x10" );
+		version(Windows) IupSetAttribute( btnSelectFore, "SIZE", "16x8" ); else IupSetAttribute( btnSelectFore, "SIZE", "16x10" );
 		IupSetHandle( "btnSelectFore", btnSelectFore );
 		IupSetCallback( btnSelectFore, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* btnSelectBack = IupButton( null, null );
 		IupSetAttribute( btnSelectBack, "BGCOLOR", GLOBAL.editColor.selectionBack.toCString );
-		version(Windows) IupSetAttribute( btnSelectBack, "SIZE", "64x8" ); else IupSetAttribute( btnSelectBack, "SIZE", "64x10" );
+		version(Windows) IupSetAttribute( btnSelectBack, "SIZE", "16x8" ); else IupSetAttribute( btnSelectBack, "SIZE", "16x10" );
 		IupSetHandle( "btnSelectBack", btnSelectBack );
 		IupSetCallback( btnSelectBack, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelLinenumFore = IupLabel( toStringz( GLOBAL.languageItems["ln"].toDString ~ ":" ) );
 		Ihandle* btnLinenumFore = IupButton( null, null );
 		IupSetAttribute( btnLinenumFore, "BGCOLOR", GLOBAL.editColor.linenumFore.toCString );
-		version(Windows) IupSetAttribute( btnLinenumFore, "SIZE", "64x8" ); else IupSetAttribute( btnLinenumFore, "SIZE", "64x10" );
+		version(Windows) IupSetAttribute( btnLinenumFore, "SIZE", "16x8" ); else IupSetAttribute( btnLinenumFore, "SIZE", "16x10" );
 		IupSetHandle( "btnLinenumFore", btnLinenumFore );
 		IupSetCallback( btnLinenumFore, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* btnLinenumBack = IupButton( null, null );
 		IupSetAttribute( btnLinenumBack, "BGCOLOR", GLOBAL.editColor.linenumBack.toCString );
-		version(Windows) IupSetAttribute( btnLinenumBack, "SIZE", "64x8" ); else IupSetAttribute( btnLinenumBack, "SIZE", "64x10" );
+		version(Windows) IupSetAttribute( btnLinenumBack, "SIZE", "16x8" ); else IupSetAttribute( btnLinenumBack, "SIZE", "16x10" );
 		IupSetHandle( "btnLinenumBack", btnLinenumBack );
 		IupSetCallback( btnLinenumBack, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
@@ -754,7 +777,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=30,MARGIN=2x10,SIZELIN=-1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
+		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=30,MARGIN=2x10,SIZELIN=-1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
 
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -774,13 +797,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btn_Scintilla_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChooseScintilla_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btn_Scintilla_FG, "SIZE", "64x8" );
-			IupSetAttribute( btn_Scintilla_BG, "SIZE", "64x8" );
+			IupSetAttribute( btn_Scintilla_FG, "SIZE", "16x8" );
+			IupSetAttribute( btn_Scintilla_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btn_Scintilla_FG, "SIZE", "64x10" );
-			IupSetAttribute( btn_Scintilla_BG, "SIZE", "64x10" );
+			IupSetAttribute( btn_Scintilla_FG, "SIZE", "16x10" );
+			IupSetAttribute( btn_Scintilla_BG, "SIZE", "16x10" );
 		}
 
 		Ihandle* labelSCE_B_COMMENT = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_COMMENT"].toDString ~ ":" ) );
@@ -794,13 +817,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSCE_B_COMMENT_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSCE_B_COMMENT_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSCE_B_COMMENT_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_COMMENT_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSCE_B_COMMENT_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSCE_B_COMMENT_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSCE_B_COMMENT_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSCE_B_COMMENT_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSCE_B_COMMENT_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelSCE_B_NUMBER = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_NUMBER"].toDString ~ ":" ) );
@@ -814,13 +837,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSCE_B_NUMBER_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSCE_B_NUMBER_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSCE_B_NUMBER_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_NUMBER_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSCE_B_NUMBER_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSCE_B_NUMBER_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSCE_B_NUMBER_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSCE_B_NUMBER_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSCE_B_NUMBER_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelSCE_B_STRING = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_STRING"].toDString ~ ":" ) );
@@ -834,13 +857,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSCE_B_STRING_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSCE_B_STRING_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSCE_B_STRING_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_STRING_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSCE_B_STRING_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSCE_B_STRING_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSCE_B_STRING_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSCE_B_STRING_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSCE_B_STRING_BG, "SIZE", "16x10" );
 		}		
 		
 		Ihandle* labelSCE_B_PREPROCESSOR = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_PREPROCESSOR"].toDString ~ ":" ) );
@@ -854,13 +877,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSCE_B_PREPROCESSOR_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSCE_B_PREPROCESSOR_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSCE_B_PREPROCESSOR_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSCE_B_PREPROCESSOR_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSCE_B_PREPROCESSOR_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSCE_B_PREPROCESSOR_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelSCE_B_OPERATOR = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_OPERATOR"].toDString ~ ":" ) );
@@ -874,13 +897,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSCE_B_OPERATOR_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSCE_B_OPERATOR_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSCE_B_OPERATOR_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_OPERATOR_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSCE_B_OPERATOR_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSCE_B_OPERATOR_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSCE_B_OPERATOR_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSCE_B_OPERATOR_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSCE_B_OPERATOR_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelSCE_B_IDENTIFIER = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_IDENTIFIER"].toDString ~ ":" ) );
@@ -894,13 +917,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSCE_B_IDENTIFIER_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSCE_B_IDENTIFIER_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSCE_B_IDENTIFIER_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_IDENTIFIER_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSCE_B_IDENTIFIER_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSCE_B_IDENTIFIER_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSCE_B_IDENTIFIER_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSCE_B_IDENTIFIER_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSCE_B_IDENTIFIER_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelSCE_B_COMMENTBLOCK = IupLabel( toStringz( GLOBAL.languageItems["SCE_B_COMMENTBLOCK"].toDString ~ ":" ) );
@@ -914,18 +937,18 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSCE_B_COMMENTBLOCK_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSCE_B_COMMENTBLOCK_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSCE_B_COMMENTBLOCK_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSCE_B_COMMENTBLOCK_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSCE_B_COMMENTBLOCK_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSCE_B_COMMENTBLOCK_BG, "SIZE", "16x10" );
 		}
 		
 		
 		Ihandle* labelPrj = IupLabel( toStringz( GLOBAL.languageItems["caption_prj"].toDString ~ ":" ) );
-		IupSetAttribute( labelPrj, "SIZE", toStringz("100x") );
+		//IupSetAttribute( labelPrj, "SIZE", toStringz("100x") );
 		Ihandle* btnPrj_FG = IupButton( null, null );
 		Ihandle* btnPrj_BG = IupButton( null, null );
 		IupSetAttribute( btnPrj_FG, "BGCOLOR", GLOBAL.editColor.projectFore.toCString );
@@ -936,13 +959,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnPrj_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnPrj_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnPrj_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnPrj_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnPrj_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnPrj_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnPrj_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnPrj_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnPrj_BG, "SIZE", "16x10" );
 		}		
 		
 		Ihandle* labelOutline = IupLabel( toStringz( GLOBAL.languageItems["outline"].toDString ~ ":" ) );
@@ -956,13 +979,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnOutline_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnOutline_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnOutline_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnOutline_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnOutline_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnOutline_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnOutline_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnOutline_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnOutline_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelFilelist= IupLabel( toStringz( GLOBAL.languageItems["filelist"].toDString ~ ":" ) );
@@ -976,13 +999,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnFilelist_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnFilelist_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnFilelist_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnFilelist_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnFilelist_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnFilelist_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnFilelist_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnFilelist_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnFilelist_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelOutput= IupLabel( toStringz( GLOBAL.languageItems["output"].toDString ~ ":" ) );
@@ -996,13 +1019,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnOutput_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnOutput_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnOutput_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnOutput_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnOutput_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnOutput_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnOutput_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnOutput_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnOutput_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelSearch= IupLabel( toStringz( GLOBAL.languageItems["caption_search"].toDString ~ ":" ) );
@@ -1016,13 +1039,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnSearch_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnSearch_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnSearch_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnSearch_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnSearch_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnSearch_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnSearch_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnSearch_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnSearch_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelError= IupLabel( toStringz( GLOBAL.languageItems["manualerrorannotation"].toDString ~ ":" ) );
@@ -1036,13 +1059,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnError_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnError_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnError_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnError_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnError_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnError_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnError_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnError_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnError_BG, "SIZE", "16x10" );
 		}
 		
 		Ihandle* labelWarning= IupLabel( toStringz( GLOBAL.languageItems["manualwarningannotation"].toDString ~ ":" ) );
@@ -1056,13 +1079,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnWarning_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnWarning_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnWarning_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnWarning_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnWarning_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnWarning_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnWarning_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnWarning_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnWarning_BG, "SIZE", "16x10" );
 		}		
 		
 		Ihandle* labelBrace= IupLabel( toStringz( GLOBAL.languageItems["bracehighlight"].toDString ~ ":" ) );
@@ -1076,43 +1099,37 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnBrace_BG, "ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		version(Windows)
 		{
-			IupSetAttribute( btnBrace_FG, "SIZE", "64x8" );
-			IupSetAttribute( btnBrace_BG, "SIZE", "64x8" );
+			IupSetAttribute( btnBrace_FG, "SIZE", "16x8" );
+			IupSetAttribute( btnBrace_BG, "SIZE", "16x8" );
 		}
 		else
 		{
-			IupSetAttribute( btnBrace_FG, "SIZE", "64x10" );
-			IupSetAttribute( btnBrace_BG, "SIZE", "64x10" );
+			IupSetAttribute( btnBrace_FG, "SIZE", "16x10" );
+			IupSetAttribute( btnBrace_BG, "SIZE", "16x10" );
 		}			
 		
 		Ihandle* gboxColor_1 = IupGridBox
 		(
 			IupSetAttributes( labelPrj, "" ),
-			//IupFill(),
 			IupSetAttributes( btnPrj_FG, "" ),
 			IupSetAttributes( btnPrj_BG, "" ),
-
+			IupFill(),
 			IupSetAttributes( labelOutline, "" ),
-			//IupFill(),
 			IupSetAttributes( btnOutline_FG, "" ),
 			IupSetAttributes( btnOutline_BG, "" ),
 
 			IupSetAttributes( labelFilelist, "" ),
-			//IupFill(),
 			IupSetAttributes( btnFilelist_FG, "" ),
 			IupSetAttributes( btnFilelist_BG, "" ),
-
+			IupFill(),
 			IupSetAttributes( labelOutput, "" ),
-			//IupFill(),
 			IupSetAttributes( btnOutput_FG, "" ),
 			IupSetAttributes( btnOutput_BG, "" ),
 
 			IupSetAttributes( labelSearch, "" ),
-			//IupFill(),
 			IupSetAttributes( btnSearch_FG, "" ),
 			IupSetAttributes( btnSearch_BG, "" ),
-			
-			
+			IupFill(),
 			IupSetAttributes( labelSelectFore, "" ),
 			IupSetAttributes( btnSelectFore, "" ),
 			IupSetAttributes( btnSelectBack, "" ),
@@ -1120,8 +1137,7 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( labelLinenumFore, "" ),
 			IupSetAttributes( btnLinenumFore, "" ),
 			IupSetAttributes( btnLinenumBack, "" ),
-
-
+			IupFill(),
 			IupSetAttributes( labelBrace, "" ),
 			IupSetAttributes( btnBrace_FG, "" ),
 			IupSetAttributes( btnBrace_BG, "" ),
@@ -1129,7 +1145,7 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( labelError, "" ),
 			IupSetAttributes( btnError_FG, "" ),
 			IupSetAttributes( btnError_BG, "" ),			
-
+			IupFill(),
 			IupSetAttributes( labelWarning, "" ),
 			IupSetAttributes( btnWarning_FG, "" ),
 			IupSetAttributes( btnWarning_BG, "" ),			
@@ -1139,7 +1155,7 @@ class CPreferenceDialog : CBaseDialog
 			//IupFill(),
 			IupSetAttributes( btn_Scintilla_FG,"" ),
 			IupSetAttributes( btn_Scintilla_BG, "" ),
-
+			IupFill(),
 			IupSetAttributes( labelSCE_B_COMMENT, "" ),
 			//IupFill(),
 			IupSetAttributes( btnSCE_B_COMMENT_FG,"" ),
@@ -1149,7 +1165,7 @@ class CPreferenceDialog : CBaseDialog
 			//IupFill(),
 			IupSetAttributes( btnSCE_B_NUMBER_FG, "" ),
 			IupSetAttributes( btnSCE_B_NUMBER_BG, "" ),
-
+			IupFill(),
 			IupSetAttributes( labelSCE_B_STRING, "" ),
 			//IupFill(),
 			IupSetAttributes( btnSCE_B_STRING_FG, "" ),
@@ -1159,7 +1175,7 @@ class CPreferenceDialog : CBaseDialog
 			//IupFill(),
 			IupSetAttributes( btnSCE_B_PREPROCESSOR_FG, "" ),
 			IupSetAttributes( btnSCE_B_PREPROCESSOR_BG, "" ),
-
+			IupFill(),
 			IupSetAttributes( labelSCE_B_OPERATOR, "" ),
 			//IupFill(),
 			IupSetAttributes( btnSCE_B_OPERATOR_FG, "" ),
@@ -1169,7 +1185,7 @@ class CPreferenceDialog : CBaseDialog
 			//IupFill(),
 			IupSetAttributes( btnSCE_B_IDENTIFIER_FG, "" ),
 			IupSetAttributes( btnSCE_B_IDENTIFIER_BG, "" ),
-
+			IupFill(),
 			IupSetAttributes( labelSCE_B_COMMENTBLOCK, "" ),
 			//IupFill(),
 			IupSetAttributes( btnSCE_B_COMMENTBLOCK_FG, "" ),
@@ -1177,74 +1193,13 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=20,MARGIN=2x10" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=9,GAPCOL=20,MARGIN=2x10" );
+		version(Windows) IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=5,MARGIN=2x8" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=20,MARGIN=2x10" );
 
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetAttribute( frameColor_1, "SIZE", "288x" );//IupGetAttribute( frameFont, "SIZE" ) );
 		IupSetAttribute( frameColor_1, "TITLE", GLOBAL.languageItems["colorfgbg"].toCString );
 		
-		
-		
-		/*
-		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, frameColor, null );
-		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
-		*/
-		Ihandle* vColor = IupVbox( hboxColorPath, frameColor, frameColor_1, null );
-		IupSetAttributes( vColor, "EXPANDCHILDREN=NO,SIZE=261x0,HOMOGENEOUS=NO" );		
-
-
-		// Short Cut
-		Ihandle* shortCutList = IupList( null );
-		IupSetAttributes( shortCutList, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES,AUTOHIDE=YES" );
-		version( Windows )
-		{
-			IupSetAttribute( shortCutList, "FONT", "Courier New,10" );
-		}
-		else
-		{
-			IupSetAttribute( shortCutList, "FONT", "FreeMono,Bold 10" );
-		}
-		IupSetHandle( "shortCutList", shortCutList );
-		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
-
-
-		for( int i = 0; i < GLOBAL.shortKeys.length; ++ i )
-		{
-			char[] keyValue = IDECONFIG.convertShortKeyValue2String( GLOBAL.shortKeys[i].keyValue );
-			char[][] splitWord = Util.split( keyValue, "+" );
-
-			if(  splitWord.length == 4 ) 
-			{
-				if( splitWord[0] == "C" )  splitWord[0] = "Ctrl";
-				if( splitWord[1] == "S" )  splitWord[1] = "Shift";
-				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
-			}
-			
-			char[] string = Stdout.layout.convert( "{,-30} {,-5} + {,-5} + {,-5} + {,-5}", GLOBAL.shortKeys[i].title, splitWord[0], splitWord[1], splitWord[2], splitWord[3] );
-
-			IupSetAttribute( shortCutList, toStringz( Integer.toString( i + 1 ) ), toStringz( string ) );
-		}
-
-
-		Ihandle* keyWordText0 = IupText( null );
-		IupSetAttributes( keyWordText0, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText0, "VALUE", GLOBAL.KEYWORDS[0].toCString );
-		IupSetHandle( "keyWordText0", keyWordText0 );
-		Ihandle* keyWordText1 = IupText( null );
-		IupSetAttributes( keyWordText1, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText1, "VALUE", GLOBAL.KEYWORDS[1].toCString );
-		IupSetHandle( "keyWordText1", keyWordText1 );
-		Ihandle* keyWordText2 = IupText( null );
-		IupSetAttributes( keyWordText2, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText2, "VALUE", GLOBAL.KEYWORDS[2].toCString );
-		IupSetHandle( "keyWordText2", keyWordText2 );
-		Ihandle* keyWordText3 = IupText( null );
-		IupSetAttributes( keyWordText3, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,WORDWRAP=YES" );
-		IupSetAttribute( keyWordText3, "VALUE", GLOBAL.KEYWORDS[3].toCString );
-		IupSetHandle( "keyWordText3", keyWordText3 );
-
-
 		Ihandle* labelKeyWord0 = IupLabel( GLOBAL.languageItems["keyword0"].toCString() );
 		Ihandle* btnKeyWord0Color = IupButton( null, null );
 		IupSetAttribute( btnKeyWord0Color, "BGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
@@ -1287,28 +1242,151 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		IupSetAttributes( gboxKeyWordColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=0,GAPCOL=0,MARGIN=0x0,SIZELIN=0,HOMOGENEOUSCOL=YES" );
+		IupSetAttributes( gboxKeyWordColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ACENTER,GAPLIN=5,GAPCOL=5,MARGIN=0x5,SIZELIN=0,EXPANDCHILDREN=YES" );
+		Ihandle* frameKeywordColor = IupFrame( gboxKeyWordColor );
+		IupSetAttributes( frameKeywordColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
+		IupSetAttribute( frameKeywordColor, "SIZE", "288x" );//IupGetAttribute( frameFont, "SIZE" ) );
+		IupSetAttribute( frameKeywordColor, "TITLE", GLOBAL.languageItems["keywords"].toCString );		
+		
+		
+		/*
+		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, frameColor, null );
+		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
+		*/
+		Ihandle* vColor = IupVbox( hboxColorPath, frameColor, frameColor_1, frameKeywordColor, null );
+		IupSetAttributes( vColor, "EXPANDCHILDREN=NO,SIZE=261x0,HOMOGENEOUS=NO" );		
 
 
+		// Short Cut
+		Ihandle* shortCutList = IupList( null );
+		IupSetAttributes( shortCutList, "SIZE=150x200,MULTIPLE=NO,MARGIN=2x10,VISIBLECOLUMNS=YES,EXPAND=YES,AUTOHIDE=YES,SHOWIMAGE=YES" );
+		version( Windows )
+		{
+			IupSetAttribute( shortCutList, "FONT", "Courier New,9" );
+		}
+		else
+		{
+			IupSetAttribute( shortCutList, "FONT", "FreeMono,Bold 9" );
+		}
+		IupSetHandle( "shortCutList", shortCutList );
+		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
+
+		int ID = 0;
+		for( int i = 0; i < GLOBAL.shortKeys.length; ++ i )
+		{
+			ID ++;
+			switch( i )
+			{
+				case 0:
+					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["file"].toDString ~ "]" ) ); 
+					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_prj_open" ); 
+					ID++;
+					break;
+				case 6:
+					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["edit"].toDString ~ "]" ) );
+					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_search" ); 
+					ID++;
+					break;
+				case 14:
+					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["parser"].toDString ~ "]" ) );
+					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_refresh" ); 
+					ID++;
+					break;
+				case 20:
+					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["build"].toDString ~ "]" ) );
+					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_compile" );
+					ID++;
+					break;
+				case 24:
+					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["windows"].toDString ~ "]" ) );
+					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_gui" );
+					ID++;
+					break;
+				case 26:
+					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["setcustomtool"].toDString ~ "]" ) );
+					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_toolitem" );
+					ID++;
+					break;
+				default:
+			}
+			
+			char[] keyValue = IDECONFIG.convertShortKeyValue2String( GLOBAL.shortKeys[i].keyValue );
+			char[][] splitWord = Util.split( keyValue, "+" );
+
+			if(  splitWord.length == 4 ) 
+			{
+				if( splitWord[0] == "C" )  splitWord[0] = "Ctrl";
+				if( splitWord[1] == "S" )  splitWord[1] = "Shift";
+				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
+			}
+			
+			char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[i].title );
+
+			IupSetAttributeId( shortCutList, "",  ID, toStringz( string ) );
+		}
+
+
+
+
+
+
+		Ihandle* keyWordText0 = IupText( null );
+		IupSetAttributes( keyWordText0, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
+		IupSetAttribute( keyWordText0, "VALUE", GLOBAL.KEYWORDS[0].toCString );
+		IupSetHandle( "keyWordText0", keyWordText0 );
+		Ihandle* keyWordText1 = IupText( null );
+		IupSetAttributes( keyWordText1, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
+		IupSetAttribute( keyWordText1, "VALUE", GLOBAL.KEYWORDS[1].toCString );
+		IupSetHandle( "keyWordText1", keyWordText1 );
+		Ihandle* keyWordText2 = IupText( null );
+		IupSetAttributes( keyWordText2, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
+		IupSetAttribute( keyWordText2, "VALUE", GLOBAL.KEYWORDS[2].toCString );
+		IupSetHandle( "keyWordText2", keyWordText2 );
+		Ihandle* keyWordText3 = IupText( null );
+		IupSetAttributes( keyWordText3, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
+		IupSetAttribute( keyWordText3, "VALUE", GLOBAL.KEYWORDS[3].toCString );
+		IupSetHandle( "keyWordText3", keyWordText3 );
+		
+		IupSetAttribute( keyWordText0, "TABTITLE", GLOBAL.languageItems["keyword0"].toCString() );
+		IupSetAttribute( keyWordText1, "TABTITLE", GLOBAL.languageItems["keyword1"].toCString() );
+		IupSetAttribute( keyWordText2, "TABTITLE", GLOBAL.languageItems["keyword2"].toCString() );
+		IupSetAttribute( keyWordText3, "TABTITLE", GLOBAL.languageItems["keyword3"].toCString() );
+		Ihandle* keywordTabs = IupTabs( keyWordText0, keyWordText1, keyWordText2, keyWordText3, null );
+		IupSetAttribute( keywordTabs, "TABTYPE", "TOP" );
+		IupSetAttribute( keywordTabs, "EXPAND", "YES" );
+		IupSetAttribute( keywordTabs, "CHILDOFFSET", "2x5" );
+		
+		
+		
+		
+
+
+
+
+/*
 		Ihandle* keyWordVbox = IupVbox( keyWordText0, keyWordText1, keyWordText2, keyWordText3, gboxKeyWordColor, null );
 		IupSetAttribute( keyWordVbox, "ALIGNMENT", toStringz( "ACENTER" ) );
-		
-		
+	*/	
+		/*
 		IupSetAttribute( vBoxPage01, "TABTITLE", GLOBAL.languageItems["compiler"].toCString() );
+		*/
+		IupSetAttribute( vBoxCompilerSettings, "TABTITLE", GLOBAL.languageItems["compiler"].toCString() );
+		IupSetAttribute( vBoxParserSettings, "TABTITLE", GLOBAL.languageItems["parser"].toCString() );
+		
 		IupSetAttribute( vBoxPage02, "TABTITLE", GLOBAL.languageItems["editor"].toCString() );
 		IupSetAttribute( sb, "TABTITLE", GLOBAL.languageItems["font"].toCString() );
 		IupSetAttribute( vColor, "TABTITLE", GLOBAL.languageItems["color"].toCString() );
 		IupSetAttribute( shortCutList, "TABTITLE", GLOBAL.languageItems["shortcut"].toCString() );
-		IupSetAttribute( keyWordVbox, "TABTITLE", GLOBAL.languageItems["keywords"].toCString() );
+		IupSetAttribute( keywordTabs, "TABTITLE", GLOBAL.languageItems["keywords"].toCString() );
 		//IupSetAttribute( manuFrame, "TABTITLE", GLOBAL.languageItems["manual"].toCString() );
-		IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
+		//IupSetAttribute( vBoxPage01, "EXPAND", "YES" );
 	
 		
 		
-		Ihandle* preferenceTabs = IupTabs( vBoxPage01, vBoxPage02, sb, vColor, shortCutList, keyWordVbox, /*manuFrame,*/ null );
+		Ihandle* preferenceTabs = IupTabs( /*vBoxPage01,*/vBoxCompilerSettings, vBoxParserSettings, vBoxPage02, sb, vColor, shortCutList, keywordTabs, /*manuFrame,*/ null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
-		IupSetAttribute( preferenceTabs, "CHILDOFFSET", "5x10" );
+		IupSetAttribute( preferenceTabs, "CHILDOFFSET", "5x5" );
 		
 
 		
@@ -1339,7 +1417,7 @@ class CPreferenceDialog : CBaseDialog
 		createLayout();
 		
 		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
-		version(Windows) IupSetAttribute( _dlg, "SIZE", "322x380" ); else IupSetAttribute( _dlg, "SIZE", "322x442" );
+		version(Windows) IupSetAttribute( _dlg, "SIZE", "322x295" ); else IupSetAttribute( _dlg, "SIZE", "322x312" );
 	}
 
 	~this()
@@ -1453,6 +1531,9 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "keyWordText3", null );
 		
 		IupSetHandle( "shortCutList", null );
+		
+		for( int i = 0; i < 15; ++ i )
+			if( _stringOfLabel[i] !is null ) delete _stringOfLabel[i];
 	}
 }
 
@@ -1537,6 +1618,12 @@ extern(C) // Callback for CPreferenceDialog
 
 	private int CPreferenceDialog_shortCutList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
+		char[] itemText = fromStringz( text ).dup;
+		if( itemText.length )
+		{
+			if( itemText[0] == '[' ) return IUP_DEFAULT;
+		}
+
 		scope skDialog = new CShortCutDialog( 300, 140, item, fromStringz( text ).dup );
 		skDialog.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
@@ -1618,7 +1705,7 @@ extern(C) // Callback for CPreferenceDialog
 								id = 12;
 							else
 								return IUP_DEFAULT;
-								
+
 							auto fontInformation = new IupString( IupGetAttribute( dlg, "VALUE" ) );
 							char[] Bold, Italic, Underline, Strikeout, size, fontName;
 							char[][] strings = Util.split( fontInformation.toDString, "," );

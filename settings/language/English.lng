@@ -98,6 +98,7 @@ options=Options
 				usesfx=Play Result SFX( When Result Window is OFF )
 				delexistexe=Before Compile, Delete Existed Execute File
 				consoleexe=Use Console Launcher To Run Program
+		parser=Parser
 			parsersetting=Parser Settings
 				enablekeyword=Enable Keyword Autocomplete
 				enableinclude=Enable Include Autocomplete

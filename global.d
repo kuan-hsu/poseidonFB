@@ -286,80 +286,84 @@ struct GLOBAL
 			GLOBAL.customTools[i].dir = new IupString();
 			GLOBAL.customTools[i].args = new IupString();
 		}
-
-
-		ShortKey sk0 = { "find", "Find/Replace", 536870982 };
+		
+		ShortKey sk0 = { "save", "Save File", 536870995 };
 		GLOBAL.shortKeys ~= sk0;
-		ShortKey sk1 = { "findinfile", "Find/Replace In Files", 805306438 };
+		ShortKey sk1 = { "saveall", "Save All", 805306451 };
 		GLOBAL.shortKeys ~= sk1;
-		ShortKey sk2 = { "findnext", "Find Next", 65472 };
-		GLOBAL.shortKeys ~= sk1;
-		ShortKey sk3 = { "findprev", "Find Previous", 536936419 };
+		ShortKey sk2 = { "close", "Close File", 536870999 };
+		GLOBAL.shortKeys ~= sk2;
+		ShortKey sk3 = { "newtab", "New Tab", 536870990 };
 		GLOBAL.shortKeys ~= sk3;
-		ShortKey sk4 = { "gotoline", "Goto Line", 536870983 };
+		ShortKey sk4 = { "nexttab", "Next Tab", 536870921 };
 		GLOBAL.shortKeys ~= sk4;
-		ShortKey sk5 = { "undo", "Undo", 536871002 };
+		ShortKey sk5 = { "prevtab","Previous Tab", 805306377 };
 		GLOBAL.shortKeys ~= sk5;
-		ShortKey sk6 = { "redo", "Redo", 805306458 };
+
+		ShortKey sk6 = { "find", "Find/Replace", 536870982 };
 		GLOBAL.shortKeys ~= sk6;
-		ShortKey sk7 = { "defintion", "Goto Defintion", 1073741895 };
+		ShortKey sk7 = { "findinfile", "Find/Replace In Files", 805306438 };
 		GLOBAL.shortKeys ~= sk7;
-		ShortKey sk8 = { "quickrun", "Quick Run", 268500930 };
+		ShortKey sk8 = { "findnext", "Find Next", 65472 };
 		GLOBAL.shortKeys ~= sk8;
-		ShortKey sk9 = { "run", "Run", 65474 };
+		ShortKey sk9 = { "findprev", "Find Previous", 536936419 };
 		GLOBAL.shortKeys ~= sk9;
-		ShortKey sk10 = { "build", "Build", 65475 };
+		ShortKey sk10 = { "gotoline", "Goto Line", 536870983 };
 		GLOBAL.shortKeys ~= sk10;
-		ShortKey sk11 = { "outlinewindow", "On/Off Left-side Window", 65480 };
+		ShortKey sk11 = { "undo", "Undo", 536871002 };
 		GLOBAL.shortKeys ~= sk11;
-		ShortKey sk12 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
+		ShortKey sk12 = { "redo", "Redo", 805306458 };
 		GLOBAL.shortKeys ~= sk12;
-		ShortKey sk13 = { "showtype", "Show Type", 65470 };
+		ShortKey sk13 = { "comment", "(Un)comment", 536870994 };
 		GLOBAL.shortKeys ~= sk13;
-		ShortKey sk14 = { "reparse", "Reparse", 65471 };
-		GLOBAL.shortKeys ~= sk14;
-		ShortKey sk15 = { "save", "Save File", 536870995 };
+		
+		ShortKey sk14 = { "showtype", "Show Type", 65470 };
+		GLOBAL.shortKeys ~= sk14;		
+		ShortKey sk15 = { "defintion", "Goto Defintion", 1073741895 };
 		GLOBAL.shortKeys ~= sk15;
-		ShortKey sk16 = { "saveall", "Save All", 805306451 };
-		GLOBAL.shortKeys ~= sk16;
-		ShortKey sk17 = { "close", "Close File", 536870999 };
+		ShortKey sk16 = { "backdefinition", "Back Definition", 1342177351 };
+		GLOBAL.shortKeys ~= sk16;		
+		ShortKey sk17 = { "procedure", "Goto Member Procedure", 536870992 };		
 		GLOBAL.shortKeys ~= sk17;
-		ShortKey sk18 = { "nexttab", "Next Tab", 536870921 };
+		ShortKey sk18 = { "autocomplete", "Autocomplete", 536870993 };
 		GLOBAL.shortKeys ~= sk18;
-		ShortKey sk19 = { "prevtab","Previous Tab", 805306377 };
+		ShortKey sk19 = { "reparse", "Reparse", 65471 };
 		GLOBAL.shortKeys ~= sk19;
-		ShortKey sk20 = { "newtab", "New Tab", 536870990 };
+
+		ShortKey sk20 = { "compilerun", "Compile & Run", 536936386 };
 		GLOBAL.shortKeys ~= sk20;
-		ShortKey sk21 = { "autocomplete", "Autocomplete", 536870993 };
+		ShortKey sk21 = { "quickrun", "Quick Run", 268500930 };
 		GLOBAL.shortKeys ~= sk21;
-		ShortKey sk22 = { "compilerun", "Compile & Run", 536936386 };
+		ShortKey sk22 = { "run", "Run", 65474 };
 		GLOBAL.shortKeys ~= sk22;
-		ShortKey sk23 = { "comment", "(Un)comment", 536870994 };
+		ShortKey sk23 = { "build", "Build", 65475 };
 		GLOBAL.shortKeys ~= sk23;
-		ShortKey sk24 = { "backdefinition", "Back Definition", 1342177351 };
+		
+		ShortKey sk24 = { "outlinewindow", "On/Off Left-side Window", 65480 };
 		GLOBAL.shortKeys ~= sk24;
-
-		ShortKey sk25 = { "customtool1", "Custom Tool(1)", 805371838 };
+		ShortKey sk25 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
 		GLOBAL.shortKeys ~= sk25;
-		ShortKey sk26 = { "customtool2", "Custom Tool(2)", 805371839 };
-		GLOBAL.shortKeys ~= sk26;
-		ShortKey sk27 = { "customtool3", "Custom Tool(3)", 805371840 };
-		GLOBAL.shortKeys ~= sk27;
-		ShortKey sk28 = { "customtool4", "Custom Tool(4)", 805371841 };
-		GLOBAL.shortKeys ~= sk28;
-		ShortKey sk29 = { "customtool5", "Custom Tool(5)", 805371842 };
-		GLOBAL.shortKeys ~= sk29;
-		ShortKey sk30 = { "customtool6", "Custom Tool(6)", 805371843 };
-		GLOBAL.shortKeys ~= sk30;
-		ShortKey sk31 = { "customtool7", "Custom Tool(7)", 805371844 };
-		GLOBAL.shortKeys ~= sk31;
-		ShortKey sk32 = { "customtool8", "Custom Tool(8)", 805371845 };
-		GLOBAL.shortKeys ~= sk32;
-		ShortKey sk33 = { "customtool9", "Custom Tool(9)", 805371846 };		
-		GLOBAL.shortKeys ~= sk33;
 
-		ShortKey sk34 = { "procedure", "Goto Member Procedure", 536870992 };		
+		ShortKey sk26 = { "customtool1", "Custom Tool(1)", 805371838 };
+		GLOBAL.shortKeys ~= sk26;
+		ShortKey sk27 = { "customtool2", "Custom Tool(2)", 805371839 };
+		GLOBAL.shortKeys ~= sk27;
+		ShortKey sk28 = { "customtool3", "Custom Tool(3)", 805371840 };
+		GLOBAL.shortKeys ~= sk28;
+		ShortKey sk29 = { "customtool4", "Custom Tool(4)", 805371841 };
+		GLOBAL.shortKeys ~= sk29;
+		ShortKey sk30 = { "customtool5", "Custom Tool(5)", 805371842 };
+		GLOBAL.shortKeys ~= sk30;
+		ShortKey sk31 = { "customtool6", "Custom Tool(6)", 805371843 };
+		GLOBAL.shortKeys ~= sk31;
+		ShortKey sk32 = { "customtool7", "Custom Tool(7)", 805371844 };
+		GLOBAL.shortKeys ~= sk32;
+		ShortKey sk33 = { "customtool8", "Custom Tool(8)", 805371845 };
+		GLOBAL.shortKeys ~= sk33;
+		ShortKey sk34 = { "customtool9", "Custom Tool(9)", 805371846 };		
 		GLOBAL.shortKeys ~= sk34;
+
+
 
 
 		fontUint fu;
@@ -512,6 +516,7 @@ struct GLOBAL
 						GLOBAL.languageItems["usesfx"] = new IupString( cast(char[]) "Play Result SFX( When Result Window is OFF )" );
 						GLOBAL.languageItems["delexistexe"] = new IupString( cast(char[]) "Before Compile, Delete Existed Execute File" );
 						GLOBAL.languageItems["consoleexe"] = new IupString( cast(char[]) "Use Console Launcher To Run Program" );
+				GLOBAL.languageItems["parser"] = new IupString( cast(char[]) "Parser" );
 					GLOBAL.languageItems["parsersetting"] = new IupString( cast(char[]) "Parser Settings" );
 						GLOBAL.languageItems["enablekeyword"] = new IupString( cast(char[]) "Enable Keyword Autocomplete" );
 						GLOBAL.languageItems["enableinclude"] = new IupString( cast(char[]) "Enable Include Autocomplete" );
