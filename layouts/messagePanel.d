@@ -283,6 +283,8 @@ extern(C)
 										char[] lineNumber_char = lineText[openPos+1..closePos];
 										lineNumber = Integer.atoi( lineNumber_char );
 										fileName = Path.normalize( lineText[0..openPos] );
+										
+										if( ExecuterAction.quickRunFile.length ) fileName = ExecuterAction.quickRunFile;
 
 										if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
 										{

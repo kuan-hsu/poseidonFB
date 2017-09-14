@@ -98,6 +98,7 @@ options=オプション
 				usesfx=プレイ結果 SFX（結果ウィンドウ OFF 時）
 				delexistexe=コンパイル前に、既存の実行ファイルを削除
 				consoleexe=コンソールランチャーを使ってプログラムを実行
+		parser=構文解析
 			parsersetting=構文解析設定
 				enablekeyword=キーワード自動補完を有効に
 				enableinclude=Include 自動補完を有効にする

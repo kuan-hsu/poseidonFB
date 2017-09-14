@@ -88,7 +88,7 @@ struct ExecuterAction
 						
 					default:
 				}
-				}
+			}
 		}
 	}
 	
@@ -116,6 +116,9 @@ struct ExecuterAction
 					if( lineNumberHead < lineNumberTail - 1 )
 					{
 						char[]	filePath = Path.normalize( s[0..lineNumberHead++] );
+
+						if( quickRunFile.length ) filePath = quickRunFile;
+						
 						if( filePath == cSci.getFullPath )
 						{
 							int		lineNumber = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
@@ -152,9 +155,12 @@ struct ExecuterAction
 	}
 	
 	public:
+	static char[] quickRunFile;
+	
 	static bool compile( char[] options = null, char[] optionDebug = null )
 	{
-		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		quickRunFile ="";
+		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
 		char[] command;
@@ -377,6 +383,8 @@ struct ExecuterAction
 	
 	static bool buildAll( char[] options = null, char[] optionDebug = null )
 	{
+		quickRunFile ="";
+		
 		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
@@ -666,7 +674,8 @@ struct ExecuterAction
 
 	static bool quickRun( char[] options = null, char[] args = null )
 	{
-		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+		quickRunFile = "";
+		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
@@ -777,6 +786,9 @@ struct ExecuterAction
 
 			auto result = p.wait;
 
+			// Set quickRunFile to active document fullpath
+			quickRunFile = cSci.getFullPath;
+			
 			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
 			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
 
@@ -808,7 +820,6 @@ struct ExecuterAction
 				}
 				else
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
 					GLOBAL.messagePanel.printOutputPanel( "Compile Success! But got warning..." );
 					if( GLOBAL.compilerWindow == "ON" )
 					{
@@ -846,7 +857,6 @@ struct ExecuterAction
 			}
 			else
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
 				GLOBAL.messagePanel.printOutputPanel( "Compile Error!" );
 
 				if( GLOBAL.compilerWindow == "ON" )
