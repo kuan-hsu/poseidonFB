@@ -1630,8 +1630,78 @@ class CParser
 							{
 								_type ~= "*";
 								parseToken();
-							}							
+							}
+							
+							while( token().tok == TOK.Tidentifier )
+							{
+								_lineNum = token().lineNumber;
+								_name	= token().identifier;
+								
+								parseToken( TOK.Tidentifier );
 
+								// Array
+								if( token().tok == TOK.Topenparen ) _name ~= parseArray();
+								
+								// As DataType fieldname : bits [= initializer], ...
+								if( token().tok == TOK.Tcolon )
+								{
+									parseToken( TOK.Tcolon );
+									if( token().tok == TOK.Tnumbers ) parseToken( TOK.Tnumbers );else return false;
+								}								
+								
+								if( token().tok == TOK.Tassign )
+								{
+									parseToken( TOK.Tassign );
+
+									int countCurly, countParen;
+
+									while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
+									{
+										if( token().tok == TOK.Topencurly )
+										{
+											countCurly ++;
+										}
+										else if( token().tok == TOK.Tclosecurly )
+										{
+											countCurly --;
+										}
+										else if( token().tok == TOK.Topenparen )
+										{
+											countParen ++;
+										}
+										else if( token().tok == TOK.Tcloseparen )
+										{
+											countParen --;
+										}
+
+										if( token().tok == TOK.Tcomma )
+										{
+											if( countParen == 0 && countCurly == 0 ) break;
+										}
+										parseToken();
+										if( tokenIndex >= tokens.length ) break;
+									}
+								}
+
+								if( token().tok == TOK.Tcomma )
+								{
+									activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
+									parseToken( TOK.Tcomma );
+								}
+								else if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+								{
+									activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
+									parseToken();
+									break;
+								}
+								else
+								{
+									return false;
+								}
+							}
+								
+							
+							/+
 							while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 							{
 								_lineNum	= token().lineNumber;
@@ -1739,6 +1809,7 @@ class CParser
 									return false;
 								}
 							}
+							+/
 						}
 						else
 						{
