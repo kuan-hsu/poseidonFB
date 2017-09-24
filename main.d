@@ -236,6 +236,7 @@ void main( char[][] args )
 	IupSetCallback( GLOBAL.mainDlg, "SHOW_CB", cast(Icallback) &mainDialog_SHOW_cb );
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
 	IupSetCallback( GLOBAL.mainDlg, "RESIZE_CB", cast(Icallback) &mainDialog_RESIZE_cb );
+	
 	version(Windows) IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB );
 
 	createLayout();
@@ -243,6 +244,11 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
+	IupSetAttribute( GLOBAL.mainDlg, "STARTFOCUS", "YES" );
+	IupSetCallback( GLOBAL.mainDlg, "FOCUS_CB", cast(Icallback) &mainDialog_FOCUS_cb );
+
+	
+	
 	
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 

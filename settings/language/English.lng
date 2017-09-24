@@ -138,6 +138,7 @@ options=Options
 				bracematchdoubleside=Use Double-Side Brace Match
 				multiselection=Enable Document Multi Selection
 				loadprevdoc=Load Previous Documents
+				middlescroll=Middle Button Scroll
 				tabwidth=Tab Width
 				columnedge=Column Edge
 				maker0=Maker0

@@ -499,6 +499,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
 			doc ~= setINILineData( "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
 			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
+			doc ~= setINILineData( "MiddleScroll", GLOBAL.editorSetting00.MiddleScroll );
 			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
 			doc ~= setINILineData( "Bit64", GLOBAL.editorSetting00.Bit64 );
 			
@@ -829,6 +830,7 @@ struct IDECONFIG
 							case "MultiSelection":			GLOBAL.editorSetting00.MultiSelection = right;			break;
 							case "LoadPrevDoc":				GLOBAL.editorSetting00.LoadPrevDoc = right;				break;
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
+							case "MiddleScroll":			GLOBAL.editorSetting00.MiddleScroll = right;			break;
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
 							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
 							default:

@@ -113,8 +113,7 @@ class CScintilla
 			case "1":	IupScintillaSendMessage( sci, 2031, 1, 0 ); break;
 			case "2":	IupScintillaSendMessage( sci, 2031, 2, 0 ); break;
 			default:
-		}		
-		
+		}
 	}	
 
 	public:
@@ -143,7 +142,6 @@ class CScintilla
 		*/
 		IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
-		//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_valuechanged_cb );
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
 		IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
 		IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
@@ -152,6 +150,9 @@ class CScintilla
 		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
 		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
 		IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
+		
+		IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
+		//IupSetCallback( sci, "GETFOCUS_CB",cast(Icallback) &CScintilla_GETFOCUS_CB );
 
 		init( _fullPath, insertPos );
 		setText( _text );
@@ -854,6 +855,15 @@ extern(C)
 	{
 		if( pressed == 0 ) //release
 		{
+			if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+			{
+				if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" )
+				{
+					IupHide( GLOBAL.scrollICONHandle );
+					return IUP_DEFAULT;
+				}
+			}
+			
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
 				Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
@@ -1223,6 +1233,31 @@ extern(C)
 			+/
 			else if( button == IUP_BUTTON2 ) // Middle Click
 			{
+				if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+				{
+					if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "NO" )
+					{
+						int _x, _y;
+						char[]	mousePos = fromStringz( IupGetGlobal( "CURSORPOS" ) );
+					
+						int crossSign = Util.index( mousePos, "x" );
+						if( crossSign < mousePos.length )
+						{
+							_x = Integer.atoi( mousePos[0..crossSign] );
+							_y = Integer.atoi( mousePos[crossSign+1..$] );
+							_x -= 16;
+							_y -= 16;
+							if( _x < 0 ) _x = 0;
+							if( _y < 0 ) _y = 0;
+							
+							IupShowXY( GLOBAL.scrollICONHandle, _x, _y );
+
+							IupSetFocus( ih );							
+						}
+						return IUP_DEFAULT;
+					}
+				}
+					
 				if( GLOBAL.editorSetting00.MultiSelection == "ON" )
 				{
 					int pos = IupConvertXYToPos( ih, x, y );
@@ -1277,6 +1312,8 @@ extern(C)
 					}
 				}
 			}
+			
+
 			/+
 			else if( button == '1' )
 			{
@@ -1291,6 +1328,68 @@ extern(C)
 		
 		return IUP_DEFAULT;
 	}
+	
+	/*
+	private int CScintilla_GETFOCUS_CB( Ihandle *ih )
+	{
+		return IUP_DEFAULT;
+	}
+	*/
+	
+	private int CScintilla_MOTION_CB( Ihandle *ih, int x, int y, char *status )
+	{
+		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+		{
+			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" )
+			{
+				//IupMessage("","");
+				char[] cursorString = fromStringz( IupGetGlobal( "CURSORPOS" ) );
+				
+				int		cursorX, cursorY, iconX, iconY;
+				int 	crossSign = Util.index( cursorString, "x" );
+				if( crossSign < cursorString.length )
+				{
+					cursorX = Integer.atoi( cursorString[0..crossSign] );
+					cursorY = Integer.atoi( cursorString[crossSign+1..$] );
+				}
+				
+				char[] iconString = fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
+				crossSign = Util.index( iconString, "," );
+				if( crossSign < iconString.length )
+				{
+					iconX = Integer.atoi( iconString[0..crossSign] );
+					iconY = Integer.atoi( iconString[crossSign+1..$] );
+				}
+				
+				if( cursorY > iconY )
+				{
+					int add = ( cursorY - iconY ) / 100 + 1;
+					IupScintillaSendMessage( ih, 2168, 0, add ); // SCI_LINESCROLL 2168
+					
+				}
+				else if( cursorY < iconY )
+				{
+					int minus = ( cursorY - iconY ) / 100 - 1;
+					IupScintillaSendMessage( ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
+				}
+				
+				if( cursorX > iconX )
+				{
+					int add = ( cursorX - iconX ) / 400 + 1;
+					IupScintillaSendMessage( ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
+					
+				}
+				else if( cursorX < iconX )
+				{
+					int minus = ( cursorX - iconX ) / 400 - 1;
+					IupScintillaSendMessage( ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
+				}
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}
+	
 
 	private int CScintilla_keyany_cb( Ihandle *ih, int c ) 
 	{

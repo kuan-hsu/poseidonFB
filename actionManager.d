@@ -1386,6 +1386,11 @@ struct StatusBarAction
 	public:
 	static void update( Ihandle* _handle = null )
 	{
+		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+		{
+			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
+		}
+		
 		int childCount = IupGetInt( GLOBAL.documentTabs, "COUNT" );
 		if( childCount > 0 )
 		{

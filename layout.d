@@ -101,6 +101,14 @@ void createExplorerWindow()
 	Ihandle* VBox = IupVbox( GLOBAL.toolbar.getHandle, GLOBAL.messageSplit, GLOBAL.statusBar.getLayoutHandle, null );
 	IupAppend( GLOBAL.mainDlg, VBox );
 	//IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
+	
+	Ihandle* _scrolllabel = IupLabel( null );
+	IupSetStrAttribute( _scrolllabel, "IMAGE", "icon_scroll" );
+	
+	GLOBAL.scrollICONHandle = IupDialog( _scrolllabel );
+	IupSetStrAttribute( GLOBAL.scrollICONHandle, "OPACITYIMAGE", "icon_scroll" );
+	IupSetAttributes( GLOBAL.scrollICONHandle, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO" );
+	IupSetAttribute( GLOBAL.scrollICONHandle, "TOPMOST", "YES" );
 }
 
 void createEditorSetting()
@@ -224,7 +232,21 @@ extern(C)
 			case IUP_MINIMIZE:	GLOBAL.editorSetting01.PLACEMENT = "MINIMIZED";		break;
 			default:
 		}
+		
+		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
 
+		return IUP_DEFAULT;
+	}
+	
+	int mainDialog_FOCUS_cb( Ihandle *ih, int focus )
+	{
+		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+		{
+			if( focus == 0 )
+				if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
+		}
+			
 		return IUP_DEFAULT;
 	}
 	

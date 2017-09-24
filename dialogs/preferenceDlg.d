@@ -344,7 +344,10 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleCurrentWord = IupToggle( GLOBAL.languageItems["hlcurrentword"].toCString, null );
 		IupSetAttribute( toggleCurrentWord, "VALUE", toStringz(GLOBAL.editorSetting00.HighlightCurrentWord.dup) );
 		IupSetHandle( "toggleCurrentWord", toggleCurrentWord );			
-		
+
+		Ihandle* toggleMiddleScroll = IupToggle( GLOBAL.languageItems["middlescroll"].toCString, null );
+		IupSetAttribute( toggleMiddleScroll, "VALUE", toStringz(GLOBAL.editorSetting00.MiddleScroll.dup) );
+		IupSetHandle( "toggleMiddleScroll", toggleMiddleScroll );			
 		
 		Ihandle* labelTabWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"].toDString ~ ":" ) );
 		Ihandle* textTabWidth = IupText( null );
@@ -394,6 +397,10 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttributes( toggleLoadprev, "" ),
 			IupSetAttributes( toggleCurrentWord, "" ),
 			
+			IupSetAttributes( toggleMiddleScroll, "" ),
+			IupFill(),
+			
+			
 			IupSetAttributes( hBoxTab, "" ),
 			IupSetAttributes( hBoxColumn, "" ),
 			
@@ -402,7 +409,7 @@ class CPreferenceDialog : CBaseDialog
 
 		//IupSetAttribute(gbox, "SIZECOL", "1");
 		//IupSetAttribute(gbox, "SIZELIN", "4");
-		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=10,GAPCOL=100,MARGIN=0x0" );
+		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=9,GAPCOL=100,MARGIN=0x0" );
 		
 		
 		// Mark High Light Line
@@ -1467,7 +1474,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleMultiSelection", null );
 		IupSetHandle( "toggleLoadprev", null );
 		IupSetHandle( "toggleCurrentWord", null );
-		
+		IupSetHandle( "toggleMiddleScroll", null );
 		
 		IupSetHandle( "textTabWidth", null );
 		IupSetHandle( "textColumnEdge", null );
@@ -1849,6 +1856,9 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.LoadPrevDoc				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadprev" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.HighlightCurrentWord		= fromStringz(IupGetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE" )).dup;
 				if( IupGetHandle( "menuHighlightCurrentWord" ) != null ) IupSetAttribute( IupGetHandle( "menuHighlightCurrentWord" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE" ) );
+				
+			GLOBAL.editorSetting00.MiddleScroll				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMiddleScroll" ), "VALUE" )).dup;
+			
 			
 			GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
