@@ -254,6 +254,7 @@ void main( char[][] args )
 
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
+	version(Windows) IupSetFunction( "GLOBALWHEEL_CB", cast(Icallback) &GlobalWHEEL_CB );
 	
 	if( GLOBAL.editorSetting01.PLACEMENT == "MAXIMIZED" ) IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" ); else IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
 

@@ -2238,7 +2238,6 @@ struct AutoComplete
 					while( _fatherNode.kind & ( B_WITH | B_SCOPE ) )
 				}
 				
-				
 				if( _fatherNode.name.length )
 				{
 					if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
@@ -2247,10 +2246,16 @@ struct AutoComplete
 					}
 					else
 					{
-						int dotPos = Util.index( _fatherNode.name, "." );
-						if( dotPos < _fatherNode.name.length )
+						if( _fatherNode.kind & ( B_BI | B_BAS ) )
 						{
-							memberFunctionMotherName = _fatherNode.name[0..dotPos];
+						}
+						else
+						{
+							int dotPos = Util.index( _fatherNode.name, "." );
+							if( dotPos < _fatherNode.name.length )
+							{
+								memberFunctionMotherName = _fatherNode.name[0..dotPos];
+							}
 						}
 					}
 				}				
@@ -2463,6 +2468,8 @@ struct AutoComplete
 							}
 						}
 					}
+					
+					
 
 					// Get lineNum
 					lineNum = AST_Head.lineNumber;
@@ -2549,28 +2556,41 @@ struct AutoComplete
 					{
 						if( oriNode.kind & ( B_SUB | B_FUNCTION ) )
 						{
-							if( oriNode.lineNumber < oriNode.endLineNum ) // Not Declare
+							/*
+							if( !memberFunctionMotherName.length )
 							{
-								if( lowerCase( _fp.ext ) == "bas" )
+								IupMessage( "AST_Head",toStringz(AST_Head.name));
+								IupMessage( "oriNode",toStringz(oriNode.name));
+							}
+							*/
+							
+							if( memberFunctionMotherName.length )
+							{
+								if( oriNode.lineNumber < oriNode.endLineNum ) // Not Declare
 								{
-									fullPath = _fp.path() ~ _fp.name ~ ".bi";
-									AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
-									
-									if( AST_Head !is null )
+									if( lowerCase( _fp.ext ) == "bas" )
 									{
-										foreach( CASTnode son; getMembers( AST_Head ) )
+										fullPath = _fp.path() ~ _fp.name ~ ".bi";
+										AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
+										
+										if( AST_Head !is null )
 										{
-											if( son.kind & oriNode.kind )
-												if( son.name == oriNode.name )
-													if( son.lineNumber == son.endLineNum ) // Declare
-													{
-														if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
-														return;
-													}
-										}
-									}										
+											foreach( CASTnode son; getMembers( AST_Head ) )
+											{
+												if( son.kind & oriNode.kind )
+													if( son.name == oriNode.name )
+														if( son.lineNumber == son.endLineNum ) // Declare
+														{
+															if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+															return;
+														}
+											}
+										}										
+									}
 								}
 							}
+							
+							//IupMessage( "!",toStringz("!!!!!"));
 						}
 					}
 					

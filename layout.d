@@ -269,6 +269,14 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
+	int GlobalWHEEL_CB( Ihandle *ih, float delta, int x, int y, char *status )
+	{
+		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
+			
+		return IUP_DEFAULT;
+	}
+	
 	int GlobalKeyPress_CB( int c, int press )
 	{
 		if( press == 0 ) 
