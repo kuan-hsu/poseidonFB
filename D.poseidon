@@ -21,6 +21,7 @@
     <Name>dialogs/fileDlg.d</Name>
     <Name>dialogs/findFilesDlg.d</Name>
     <Name>dialogs/helpDlg.d</Name>
+    <Name>dialogs/idemessageDlg.d</Name>
     <Name>dialogs/preferenceDlg.d</Name>
     <Name>dialogs/prjPropertyDlg.d</Name>
     <Name>dialogs/searchDlg.d</Name>
