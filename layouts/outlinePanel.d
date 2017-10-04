@@ -1630,7 +1630,8 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "COutline_BUTTON_CB", toStringz( "COutline_BUTTON_CB Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			GLOBAL.IDEMessageDlg.print( "COutline_BUTTON_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug IupMessage( "COutline_BUTTON_CB", toStringz( "COutline_BUTTON_CB Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return IUP_DEFAULT;

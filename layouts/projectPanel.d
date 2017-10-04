@@ -119,7 +119,7 @@ class CProjectTree
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
 		tree = IupTree();
-		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO" );
+		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE" );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );		
 		
@@ -128,6 +128,8 @@ class CProjectTree
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
 		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_ExecuteLeaf_cb );
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
+		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
+		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,GAP=2" ) );
@@ -341,8 +343,12 @@ class CProjectTree
 		// Switch to project tree tab
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
 		//IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
+
+		IupSetAttribute( tree, "MARK", "CLEARALL" );
+		
 		// Set Focus to Project Tree
-		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
+		IupSetAttributeId( tree, "MARKED", 1, "YES" );
+		IupSetInt( tree, "VALUE", 1 );
 
 		// Recent Projects
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
@@ -406,7 +412,7 @@ class CProjectTree
 			return true;
 		}
 
-		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Load Project: [" ~ setupDir ~ "]", true ); //IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
+		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Load Project: [" ~ setupDir ~ "]", true ); //IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
 		
 		char[] setupFileName = setupDir ~ "/.poseidon";
 
@@ -446,7 +452,7 @@ class CProjectTree
 		subThread.start();
 		+/
 
-		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Done." );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Done."  ) );
+		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Done." );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Done."  ) );
 
 		return true;
 	}
@@ -728,10 +734,12 @@ extern(C)
 		// SELECTION_CB will trigger 2 times, preSelect -> Select, we only catch second signal
 		if( status == 1 )
 		{
+			//IupMessage("Select", toStringz( Integer.toString( id ) ) );
+			
 			try
 			{
 				// Swith the doument tabs by select Tree Node, if the doument isn't exist, do nothing
-				if( fromStringz( IupGetAttribute( ih, "KIND" ) ) == "LEAF" )
+				if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "LEAF" )
 				{
 					char*	_fullpath = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
 					
@@ -743,6 +751,24 @@ extern(C)
 						{
 							actionManager.ScintillaAction.openFile( fullPath.dup );
 						}
+					}
+					
+					char[] 	_selectedStatus = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
+					for( int i = 0; i < _selectedStatus.length; ++ i )
+					{
+						if( _selectedStatus[i] == '+' )
+						{
+							if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" ) IupSetAttributeId( ih, "MARKED", i, "NO" );
+						}
+					}					
+				}
+				else
+				{
+					int[] ids = actionManager.ProjectAction.getSelectIDs();
+					if( ids.length )
+					{
+						IupSetAttribute( ih, "MARK", "CLEARALL" );
+						IupSetAttributeId( ih, "MARKED", id, "YES" );
 					}
 				}
 
@@ -760,8 +786,13 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				debug IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				GLOBAL.IDEMessageDlg.print( "CProjectTree_Selection_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//debug IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
+		}
+		else
+		{
+			//IupMessage("UnSelect", toStringz( Integer.toString( id ) ) );
 		}
 
 		return IUP_DEFAULT;
@@ -806,7 +837,8 @@ extern(C)
 				}
 				catch( Exception e )
 				{
-					debug IupMessage( "CProjectTree_ExecuteLeaf_cb", toStringz( "CProjectTree_ExecuteLeaf_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+					GLOBAL.IDEMessageDlg.print( "CProjectTree_ExecuteLeaf_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+					//debug IupMessage( "CProjectTree_ExecuteLeaf_cb", toStringz( "CProjectTree_ExecuteLeaf_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 				}
 			}
 		}
@@ -821,11 +853,66 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
+	
+	private int CProjectTree_MULTISELECTION_CB( Ihandle *ih, int* ids, int n )
+	{
+		char[] status = fromStringz( IupGetAttribute(ih,"MARKEDNODES") );
+		for( int i = 0; i < status.length; ++ i )
+		{
+			if( status[i] == '+' )
+			{
+				if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" )
+				{
+					IupSetAttributeId( ih, "MARKED", i, "NO" );
+				}
+			}
+		}
+		
+		//IupMessage("MultiSelect",IupGetAttribute(ih,"MARKEDNODES"));
+		return IUP_DEFAULT;
+	}
+	
+	private int CProjectTree_MULTIUNSELECTION_CB( Ihandle *ih, int* ids, int n )
+	{
+		char[] status = fromStringz( IupGetAttribute(ih,"MARKEDNODES") );
+		
+		if( status.length >= n )
+		{
+			for( int i = 0; i < n; ++ i )
+			{
+				status[ids[i]] = '-';
+			}
+			
+			for( int i = 0; i < status.length; ++ i )
+			{
+				if( status[i] == '+' )
+				{
+					if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "LEAF" )
+					{
+						char[]	fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i ) );
+						if( upperCase(fullPath) in GLOBAL.scintillaManager )
+						{
+							ScintillaAction.openFile( fullPath );
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return IUP_DEFAULT;
+	}
+
 
 	// 
 	private int CProjectTree_RightClick_cb( Ihandle *ih, int id )
 	{
-		version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
+		if( fromStringz( IupGetAttributeId( ih, "MARKED", id ) ) == "NO" )
+		{
+			IupSetAttribute( ih, "MARK", "CLEARALL" );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+		}
+		IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
 
 		char[] nodeKind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) );
 
@@ -850,9 +937,27 @@ extern(C)
 
 			return IUP_DEFAULT;
 		}
-
 		
-		//IupMessage( "USERDATA", IupGetAttribute( GLOBAL.projectTree.getTreeHandle,  ("USERDATA" ~ Integer.toString( id )).ptr ) );
+		/+
+					char[] 	_selectedStatus = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
+					for( int i = 0; i < _selectedStatus.length; ++ i )
+					{
+						if( _selectedStatus[i] == '+' )
+						{
+							if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" ) IupSetAttributeId( ih, "MARKED", i, "NO" );
+						}
+					}					
+				}
+				else
+				{
+					int[] ids = actionManager.ProjectAction.getSelectIDs();
+					if( ids.length )
+					{
+						IupSetAttribute( ih, "MARK", "CLEARALL" );
+						IupSetAttributeId( ih, "MARKED", id, "YES" );
+					}
+				}		
+		+/
 		int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", id );
 
 		switch( depth )
@@ -1150,15 +1255,21 @@ extern(C)
 					else
 					{
 						//Util.substitute( fullPath, "/", "\\" );
+						bool bExitChildLoop;
 						foreach( char[] s; GLOBAL.projectManager[prjDirName].sources ~ GLOBAL.projectManager[prjDirName].includes ~ GLOBAL.projectManager[prjDirName].others )
 						{
 							if( s == fullPath )
 							{
+								bExitChildLoop = true;
+								break;
+								/*
 								char[] ext = lowerCase( fn.ext() );
 								if( ext == "bi" || ext == "bas" ) actionManager.ScintillaAction.openFile( s.dup );
 								return IUP_DEFAULT;
+								*/
 							}
 						}
+						if( bExitChildLoop ) continue;
 					}
 
 					// Wrong Ext, exit!
@@ -1245,6 +1356,59 @@ extern(C)
 
 	private int CProjectTree_Open_cb( Ihandle *ih )
 	{
+		int[] selectedIDs = actionManager.ProjectAction.getSelectIDs();
+		
+		if( selectedIDs.length > 0 )
+		{
+			foreach( int _i; selectedIDs )
+			{
+				if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" )
+				{
+					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) );
+					scope fp = new FilePath( fullPath );
+					char[] ext = lowerCase( fp.ext );
+
+					if( ext == "bi" || ext == "bas" )
+					{
+						actionManager.ScintillaAction.openFile( fullPath.dup );
+					}
+					else
+					{
+						try
+						{
+							version(Windows)
+							{
+								Process p = new Process( true, "cmd", "/c", fullPath );
+								p.gui( true );
+								p.execute;
+							}
+							else
+							{
+								Process p = new Process( true, "xdg-open", fullPath );
+								p.gui( true );
+								p.execute;
+							}
+						}
+						catch{}
+					}
+				}
+			}
+			
+			// Move the tabDocument 
+			int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+			char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
+			scope fp = new FilePath( fullPath );
+			char[] ext = lowerCase( fp.ext );
+			if( ext == "bi" || ext == "bas" ) actionManager.ScintillaAction.openFile( fullPath.dup );
+			
+			// Erase Project Treeitems And Left Only One Item
+			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+		}
+		
+		return IUP_DEFAULT;
+		
+		/+
 		// Get Focus Tree Node ID
 		int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
@@ -1277,59 +1441,71 @@ extern(C)
 		}
 
 		return IUP_DEFAULT;
+		+/
 	}
 
 	private int CProjectTree_remove_cb( Ihandle* ih )
 	{
-		// Get Focus Tree Node ID
-		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
-		int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
-		char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others
-
-		if( actionManager.ScintillaAction.closeDocument( fullPath ) == IUP_IGNORE ) return IUP_IGNORE;
-
-		switch( prjFilesFolderName )
+		int[] selectedIDs = actionManager.ProjectAction.getSelectIDs();
+		
+		if( selectedIDs.length > 0 )
 		{
-			case "Sources":
-				char[][] temp;
-				foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].sources )
-					if( s != fullPath ) temp ~= s;
-				GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].sources = temp;
-				break;
+			foreach_reverse( int id; selectedIDs )
+			{			
+		
+				// Get Focus Tree Node ID
+				//int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+				IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
 				
-			case "Includes":
-				char[][] temp;
-				foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes )
-					if( s != fullPath ) temp ~= s;
-				GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes = temp;
-				break;
-				
-			default:
-				char[][] temp;
-				foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others )
-					if( s != fullPath ) temp ~= s;
-				GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others = temp;
-				break;
-		}		
+				char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+				int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
+				char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others
 
-		char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
-		if( user != null ) delete user;
-		int parentID = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", id );
-		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", id, "SELECTED" );
+				if( actionManager.ScintillaAction.closeDocument( fullPath ) == IUP_IGNORE ) return IUP_IGNORE;
 
-		// Del empty folder( branch )
-		while( IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", parentID ) > 2 )
-		{
-			if( IupGetIntId( GLOBAL.projectTree.getTreeHandle, "CHILDCOUNT", parentID ) < 1 )
-			{
-				int beDelParentID = parentID;
-				parentID = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", beDelParentID );
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", beDelParentID, "SELECTED" );
-			}
-			else
-			{
-				break;
+				switch( prjFilesFolderName )
+				{
+					case "Sources":
+						char[][] temp;
+						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].sources )
+							if( s != fullPath ) temp ~= s;
+						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].sources = temp;
+						break;
+						
+					case "Includes":
+						char[][] temp;
+						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes )
+							if( s != fullPath ) temp ~= s;
+						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes = temp;
+						break;
+						
+					default:
+						char[][] temp;
+						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others )
+							if( s != fullPath ) temp ~= s;
+						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others = temp;
+						break;
+				}		
+
+				char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
+				if( user != null ) delete user;
+				int parentID = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", id );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", id, "SELECTED" );
+
+				// Del empty folder( branch )
+				while( IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", parentID ) > 2 )
+				{
+					if( IupGetIntId( GLOBAL.projectTree.getTreeHandle, "CHILDCOUNT", parentID ) < 1 )
+					{
+						int beDelParentID = parentID;
+						parentID = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", beDelParentID );
+						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", beDelParentID, "SELECTED" );
+					}
+					else
+					{
+						break;
+					}
+				}
 			}
 		}
 		
@@ -1340,6 +1516,11 @@ extern(C)
 	{
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+
+		// Erase Project Treeitems And Left Only One Item
+		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
+		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+
 
 		Ihandle* messageDlg = IupMessageDlg();
 		IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONS=OKCANCEL" );
@@ -1365,6 +1546,10 @@ extern(C)
 	{
 		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 		char[]	fullPath	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+		
+		// Erase Project Treeitems And Left Only One Item
+		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
+		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );		
 
 		scope fp = new FilePath( fullPath );
 

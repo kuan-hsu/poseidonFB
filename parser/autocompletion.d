@@ -442,7 +442,7 @@ struct AutoComplete
 				{
 					if( GLOBAL.editorSetting00.Message == "ON" ) 
 					{
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+						version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
 					}
 					
 					includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
@@ -704,6 +704,32 @@ struct AutoComplete
 		}
 
 		return resultNode;
+	}
+	
+	static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
+	{
+		CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, B_KIND, true );
+
+		//if( !resultNodes.length )
+		//{
+			if( originalNode.getFather() !is null )
+			{
+				resultNodes = searchMatchNodes( originalNode.getFather(), word, B_KIND );
+			}
+			else
+			{
+				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+
+				//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word );
+				if( upperCase(cSci.getFullPath) in GLOBAL.parserManager ) 
+				{
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
+					if( resultIncludeNodes.length )	resultNodes ~= resultIncludeNodes;
+				}
+			}
+		//}
+		
+		return resultNodes;
 	}
 
 	static CASTnode[] getMembers( CASTnode AST_Head )
@@ -1552,20 +1578,32 @@ struct AutoComplete
 	static bool checkIscludeDeclare( Ihandle* iupSci, int pos = -1 )
 	{
 		char[]	result;
+		dchar[]	resultd;
+		
 		int		documentLength = IupGetInt( iupSci, "COUNT" );
 
-		while( --pos >= 0 )
+		try
 		{
-			char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-			if( s == ":" || s == "\n" ) break;
-			result ~= s;
+			while( --pos >= 0 )
+			{
+				dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+
+				if( _dcharString == ":" || _dcharString == "\n" ) break;
+				
+				resultd ~= _dcharString;
+			}
+
+			resultd = Util.trim!(dchar)( resultd.reverse ).dup;
+			if( resultd.length > 7 )
+			{
+				result = lowerCase( UTF.toString( resultd ) );
+				if( result[0..8] == "#include" ) return true;
+			}
 		}
-		
-		result = lowerCase( Util.trim( result.reverse ) ).dup;
-		
-		if( result.length > 7 )
+		catch( Exception e )
 		{
-			if( result[0..8] == "#include" ) return true;
+			GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
 		}
 
 		return false;
@@ -1613,6 +1651,50 @@ struct AutoComplete
 				
 				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 				{
+					dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+					if( _dcharString.length )
+					{
+						switch( _dcharString )
+						{
+							case ")":
+								if( countBracket == 0 ) countParen++;
+								break;
+
+							case "(":
+								if( countBracket == 0 ) countParen--;
+								if( countParen < 0 ) return UTF.toString( word32 );
+								break;
+								
+							case "]":
+								if( countParen == 0 ) countBracket++;
+								break;
+
+							case "[":
+								if( countParen == 0 ) countBracket--;
+								if( countBracket < 0 ) return UTF.toString( word32 );
+								break;
+								
+							case ">":
+								if( pos > 0 && countParen == 0 && countBracket == 0 )
+								{
+									if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+									{
+										word32 ~= ">-";
+										pos--;
+										break;
+									}
+								}
+							case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+								if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
+								
+							default: 
+								if( countParen == 0 && countBracket == 0 )
+								{
+									word32 ~= _dcharString;
+								}
+						}
+					}
+					/+
 					//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
 					char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 					if( _s.length )
@@ -1665,17 +1747,20 @@ struct AutoComplete
 								}
 						}
 					}
+					+/
 				}
 			}
 			
 		}
 		catch( Exception e )
 		{
-			IupMessage( "Error", toStringz( e.toString ) );
+			GLOBAL.IDEMessageDlg.print( "getWholeWordReverse() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug IupMessage( "AutoComplete.getWholeWordReverse() Error", toStringz( e.toString ) );
 			return null;
 		}
 
-		return word;
+		return UTF.toString( word32 );
+		//return word;
 	}
 	
 	static char[] charAdd( Ihandle* iupSci, int pos, char[] text )
@@ -1821,6 +1906,10 @@ struct AutoComplete
 						{
 							if( s != "" ) splitWord ~= removeArrayAndPointerWord( s );
 						}						
+					}
+					else
+					{
+						return null;
 					}
 				}
 				
@@ -2265,7 +2354,6 @@ struct AutoComplete
 				if( includeString.length )
 				{
 					char[] includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
-
 					if( includeFullPath.length )
 					{
 						if( TYPE & 1 )
@@ -2281,6 +2369,8 @@ struct AutoComplete
 						return;
 					}
 				}
+				
+				if( !splitWord[0].length ) return;
 
 				if( AST_Head is null ) return;
 				
@@ -2325,6 +2415,25 @@ struct AutoComplete
 					
 					if( i == 0 )
 					{
+						/+
+						CASTnode[] _nodes = searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB );
+						if( _nodes.length )
+						{
+							foreach( CASTnode _n; _nodes )
+							{
+								CASTnode _nFather = _n;
+								if( _nFather.getFather !is null )
+								{
+									_nFather = _nFather.getFather;
+								}
+								
+								IupMessage( "", toStringz( _n.name ~ " : " ~ Integer.toString( _n.lineNumber ) ~ "\n" ~ _nFather.name ) );
+								
+							}
+							
+						}
+						+/
+						
 						AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
 						if( AST_Head is null )
 						{

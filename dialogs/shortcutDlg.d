@@ -212,7 +212,6 @@ extern(C) // Callback for CSingleTextDialog
 		
 		if( pos == -1 )
 		{
-					
 			IupMessage( "Error", "Key Name( pos ) Error" );
 			return  IUP_CLOSE;
 		}
@@ -247,7 +246,7 @@ extern(C) // Callback for CSingleTextDialog
 
 			scope _cString = new IupString ;
 			IupSetAttributeId( shortCutList, "", pos + 1, GLOBAL.cString.convert( string ) );
-			version(Windows) IupSetAttributeId( shortCutList, "MARKED", pos+1, "YES" ); else IupSetInt( shortCutList, "VALUE", pos+1 );
+			IupSetInt( shortCutList, "VALUE", pos+1 ); // Set focus node identifier
 		}
 
 		return IUP_CLOSE;

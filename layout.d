@@ -5,7 +5,7 @@ import iup.iup, iup.iup_scintilla, iup.iupweb;
 import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
 import layouts.statusBar;
-import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
+import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.idemessageDlg;
 import parser.live, parser.autocompletion;
 
 import tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
@@ -114,7 +114,13 @@ void createExplorerWindow()
 void createEditorSetting()
 {
 	//IDECONFIG.load();
+	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( 400, 600, GLOBAL.languageItems["message"].toDString );
+	GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 0 );
+	IupHide( GLOBAL.IDEMessageDlg.getHandle );
+
 	IDECONFIG.loadINI();
+	
+	GLOBAL.IDEMessageDlg.setFont( GLOBAL.fonts[7].fontString );
 }
 
 void createLayout()

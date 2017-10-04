@@ -363,7 +363,6 @@ class CScintilla
 		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Italic ) );
 		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.cString.convert( Underline ) );
 
-		
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		
 		/*
@@ -396,8 +395,17 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEBGCOLOR34", GLOBAL.editColor.braceBack.toCString);
 		IupSetAttribute(sci, "STYLEFGCOLOR35", "255 255 0");
 		IupSetAttribute(sci, "STYLEBGCOLOR35", "255 0 255");
+		
 		IupSetAttribute(sci, "STYLEBOLD34", "YES");
 		//IupScintillaSendMessage( sci, 2053, 34, 1 );
+		
+		
+		// Character representations
+		// Set Control Character to <space>
+		IupScintillaSendMessage( sci, 2388, Integer.atoi( GLOBAL.editorSetting00.ControlCharSymbol ), 0 ); // SCI_SETCONTROLCHARSYMBOL 2388
+		//IupSetAttribute(sci, "STYLEFGCOLOR36", "255 255 0");
+		//IupSetAttribute(sci, "STYLEBGCOLOR36", "255 255 255");
+		//IupSetAttribute(sci, "STYLEFONTSIZE36", "60");		
 
 		// Set Keywords to Bold
 		if( GLOBAL.editorSetting00.BoldKeyword == "ON" )
@@ -864,6 +872,22 @@ extern(C)
 				}
 			}
 			
+			// Ctrl + Click for Goto Definition
+			char[] statusString = fromStringz( status ).dup;
+			if( statusString.length > 1 )
+			{
+				if( statusString[1] == 'C' )
+				{
+					if( button == IUP_BUTTON1 )
+						AutoComplete.toDefintionAndType( 1 );
+					if( button == IUP_BUTTON3 )
+						AutoComplete.toDefintionAndType( 2 );
+						
+					return IUP_DEFAULT;
+				}
+			}
+			
+			
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
 				Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
@@ -1312,18 +1336,6 @@ extern(C)
 					}
 				}
 			}
-			
-
-			/+
-			else if( button == '1' )
-			{
-				if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" )
-				{
-					IupScintillaSendMessage( ih, 2505, 0, IupGetInt( ih, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-					HighlightWord( ih, IupConvertXYToPos( ih, x, y ) );
-				}
-			}
-			+/
 		}
 		
 		return IUP_DEFAULT;
@@ -1623,7 +1635,8 @@ extern(C)
 							}
 							catch( Exception e )
 							{
-								debug IupMessage( "ShortCut Error", toStringz( "autocompleten" ~ e.toString ) );
+								GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+								//debug IupMessage( "ShortCut Error", toStringz( "autocompleten" ~ e.toString ) );
 							}
 
 							return IUP_IGNORE;
@@ -1691,7 +1704,8 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "CScintilla_keyany_cb", toStringz( "CScintilla_keyany_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			GLOBAL.IDEMessageDlg.print( "CScintilla_keyany_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug IupMessage( "CScintilla_keyany_cb", toStringz( "CScintilla_keyany_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 		
 		return IUP_DEFAULT;
@@ -1884,7 +1898,8 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				debug IupMessage( "CScintilla_action_cb", toStringz( "LiveParser lineNumberAdd Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				GLOBAL.IDEMessageDlg.print( "LiveParser lineNumberAdd() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//debug IupMessage( "CScintilla_action_cb", toStringz( "LiveParser lineNumberAdd Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 
@@ -1997,7 +2012,8 @@ extern(C)
 					}
 					catch( Exception e )
 					{
-						debug IupMessage( "CScintilla_action_cb", toStringz( "callAutocomplete Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+						GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+						//debug IupMessage( "CScintilla_action_cb", toStringz( "callAutocomplete Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 					}
 			}
 		}
@@ -2098,7 +2114,8 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "CScintilla_caret_cb", toStringz( "CScintilla_caret_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			GLOBAL.IDEMessageDlg.print( "CScintilla_caret_cb Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug IupMessage( "CScintilla_caret_cb", toStringz( "CScintilla_caret_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 		return IUP_DEFAULT;
 	}
@@ -2200,7 +2217,8 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "CScintilla_zoom_cb", toStringz( e.toString ) );
+			GLOBAL.IDEMessageDlg.print( "CScintilla_zoom_cb Error: " ~ e.toString );
+			//debug IupMessage( "CScintilla_zoom_cb", toStringz( e.toString ) );
 		}
 		
 		return IUP_DEFAULT;

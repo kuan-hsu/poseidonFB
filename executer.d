@@ -711,7 +711,7 @@ struct ExecuterAction
 			scope time = Clock.now.unix;
 			
 			fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
-			FileAction.saveFile( fileName, cSci.getText() );
+			FileAction.saveFile( fileName, cSci.getText() ); // Create a file with UTF8 With Bom
 		}
 		else
 		{

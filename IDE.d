@@ -51,7 +51,8 @@ struct IDECONFIG
 							}
 							catch( Exception e )
 							{
-								IupMessage( toStringz( "Language Error!" ), toStringz( Util.trim( s[0..assignIndex] ) ~ "=Error" ) );
+								GLOBAL.IDEMessageDlg.print( Util.trim( s[0..assignIndex] ) ~ "=Error" );
+								//IupMessage( toStringz( "Language Error!" ), toStringz( Util.trim( s[0..assignIndex] ) ~ "=Error" ) );
 							}
 						}
 					}
@@ -500,6 +501,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
 			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
 			doc ~= setINILineData( "MiddleScroll", GLOBAL.editorSetting00.MiddleScroll );
+			doc ~= setINILineData( "ControlCharSymbol", GLOBAL.editorSetting00.ControlCharSymbol );
 			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
 			doc ~= setINILineData( "Bit64", GLOBAL.editorSetting00.Bit64 );
 			
@@ -831,6 +833,7 @@ struct IDECONFIG
 							case "LoadPrevDoc":				GLOBAL.editorSetting00.LoadPrevDoc = right;				break;
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
 							case "MiddleScroll":			GLOBAL.editorSetting00.MiddleScroll = right;			break;
+							case "ControlCharSymbol":		GLOBAL.editorSetting00.ControlCharSymbol = right;		break;
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
 							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
 							default:

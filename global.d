@@ -19,7 +19,7 @@ version(Windows)
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF";
 }
 
 struct EditorLayoutSize
@@ -66,7 +66,7 @@ struct GLOBAL
 
 	
 	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger;
-	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
+	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.idemessageDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
 
@@ -103,6 +103,7 @@ struct GLOBAL
 	static CSearchDialog		searchDlg;
 	static CFindInFilesDialog	serachInFilesDlg;
 	static CCompilerHelpDialog	compilerHelpDlg;
+	static CIDEMessageDialog	IDEMessageDlg;
 	static Ihandle*				scrollICONHandle;
 	//static CArgOptionDialog		argsDlg;
 
@@ -558,6 +559,7 @@ struct GLOBAL
 						GLOBAL.languageItems["multiselection"] = new IupString( cast(char[]) "Enable Document Multi Selection" );
 						GLOBAL.languageItems["loadprevdoc"] = new IupString( cast(char[]) "Load Previous Documents" );
 						GLOBAL.languageItems["middlescroll"] = new IupString( cast(char[]) "Middle Button Scroll" );
+						GLOBAL.languageItems["controlcharsymbol"] = new IupString( cast(char[]) "Set Control Char Symbol" );
 						GLOBAL.languageItems["tabwidth"] = new IupString( cast(char[]) "Tab Width" );
 						GLOBAL.languageItems["columnedge"] = new IupString( cast(char[]) "Column Edge" );
 						GLOBAL.languageItems["maker0"] = new IupString( cast(char[]) "Maker0" );

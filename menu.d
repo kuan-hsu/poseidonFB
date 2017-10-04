@@ -374,7 +374,19 @@ void createMenu()
 	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
 	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
 	//IupSetHandle( "Menu_fullScreenItem", fullScreenItem );
-	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);	
+	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
+	
+	Ihandle* ideMessage = IupItem( GLOBAL.languageItems["showidemessage"].toCString, null);
+	IupSetCallback( ideMessage, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.IDEMessageDlg !is null )
+		{
+			IupSetAttribute( GLOBAL.IDEMessageDlg.getHandle, "TOPMOST", "YES" );
+			IupShow( GLOBAL.IDEMessageDlg.getHandle );
+		}
+		return IUP_DEFAULT;
+	});
+	
 
 	// Option
 	Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
@@ -546,7 +558,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.317)\nBy Kuan Hsu (Taiwan)\n2017.09.30" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.318)\nBy Kuan Hsu (Taiwan)\n2017.10.04" );
 		return IUP_DEFAULT;
 	});
 	
@@ -642,6 +654,8 @@ void createMenu()
 							GLOBAL.menuMessageWindow,
 							IupSeparator(),
 							fullScreenItem,
+							IupSeparator(),
+							ideMessage,
 							null );
 
 	option_menu= IupMenu( 	item_tool,
@@ -761,7 +775,7 @@ extern(C)
 
 		if( !noname.length ) noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".bas";
 
-		actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
+		version(Windows) actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false ); else actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
 
 		/+
 		scope dlg = new CFileDlg( "Create New File", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
@@ -1371,7 +1385,7 @@ extern(C)
 			}
 
 			GLOBAL.projectManager[activePrjName].saveFile();
-			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
+			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
 			GLOBAL.projectManager.remove( activePrjName );
 
 			int countChild = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
@@ -1455,7 +1469,7 @@ extern(C)
 				}
 			}
 
-			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.messagePanel.printOutputPanel( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
+			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
 		}
 
 		foreach( char[] s; prjsDir )
@@ -1571,7 +1585,7 @@ extern(C)
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )
 		{
-			if( !ScintillaAction.saveFile( cSci ) ) return IUP_DEFAULT;
+			//if( !ScintillaAction.saveFile( cSci ) ) return IUP_DEFAULT;
 			
 			switch( fromStringz( IupGetAttribute( ih, "TITLE" ) ) )
 			{
@@ -1585,6 +1599,17 @@ extern(C)
 				case "UTF32LE"		: cSci.setEncoding( 10 ); break;
 				case "UTF32LE.BOM"	: cSci.setEncoding( Encoding.UTF_32LE ); break;
 				default: return IUP_DEFAULT;
+			}
+			
+			scope 	_fp = new FilePath( cSci.getFullPath );
+			char[]	fp = _fp.name();
+			if( fp.length >= 7 )
+			{
+				if( fp[0..7] == "NONAME#" )
+				{
+					actionManager.StatusBarAction.update();
+					return IUP_DEFAULT;
+				}
 			}
 
 			ScintillaAction.saveFile( cSci, true );

@@ -356,6 +356,9 @@ struct DocumentTabAction
 					IupSetFocus( _child );
 
 					// Marked the trees( FileList & ProjectTree )
+
+					IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
+					
 					if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
 					{
 						GLOBAL.statusBar.setPrjName( "                                            " );
@@ -448,15 +451,20 @@ struct ScintillaAction
 
 			if( pParseTree !is null )
 			{
-				if( GLOBAL.editorSetting00.Message == "ON" ) 
+				if( GLOBAL.editorSetting00.Message == "ON" )
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Parse File: [" ~ pFullPath ~ "]"  ) );
-					GLOBAL.messagePanel.printOutputPanel( "Parse File: [" ~ pFullPath ~ "]" );
+					version(Windows) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ pFullPath ~ "]" );
+					/*
 					version(linux)
 					{
 						int count = IupGetInt( GLOBAL.outputPanel, "COUNT" );
 						IupSetInt( GLOBAL.outputPanel, "CARETPOS", count );
 					}
+					else
+					{
+						GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ pFullPath ~ "]" );
+					}
+					*/
 				}
 			}
 				
@@ -1374,6 +1382,32 @@ struct ProjectAction
 
 		return null;
 	}
+	
+	static int getSelectCount()
+	{
+		int		result;
+		char[] 	status = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
+		
+		for( int i = 0; i < status.length; ++ i )
+		{
+			if( status[i] == '+' ) result ++;
+		}
+		
+		return result;
+	}
+	
+	static int[] getSelectIDs()
+	{
+		int[]	result;
+		char[] 	status = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
+		
+		for( int i = 0; i < status.length; ++ i )
+		{
+			if( status[i] == '+' ) result ~= i;
+		}
+		
+		return result;
+	}	
 }
 
 

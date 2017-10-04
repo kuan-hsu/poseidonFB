@@ -179,7 +179,8 @@ class CFileList
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "CFileList getTreeH()", toStringz( e.toString ) );
+			GLOBAL.IDEMessageDlg.print( "CFileList.getTreeH() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug IupMessage( "CFileList getTreeH()", toStringz( e.toString ) );
 		}
 		
 		return 4096;
@@ -200,13 +201,18 @@ extern(C)
 				if( status == 1 )
 				{
 					CScintilla _sci = cast(CScintilla) IupGetAttributeId( ih, "USERDATA", id );
-					if( _sci !is null ) ScintillaAction.openFile( _sci.getFullPath.dup );
+					if( _sci !is null )
+					{
+						IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
+						ScintillaAction.openFile( _sci.getFullPath.dup );
+					}
 				}
 			}
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "fileList_SELECTION_CB", toStringz( "fileList_SELECTION_CB Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			GLOBAL.IDEMessageDlg.print( "fileList_SELECTION_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug IupMessage( "fileList_SELECTION_CB", toStringz( "fileList_SELECTION_CB Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return IUP_DEFAULT;
