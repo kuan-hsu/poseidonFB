@@ -373,16 +373,17 @@ void createMenu()
 
 	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
 	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
-	//IupSetHandle( "Menu_fullScreenItem", fullScreenItem );
+	IupSetAttribute( fullScreenItem, "IMAGE", "icon_fullscreen" );
 	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
 	
 	Ihandle* ideMessage = IupItem( GLOBAL.languageItems["showidemessage"].toCString, null);
+	IupSetAttribute( ideMessage, "IMAGE", "icon_idemessage" );
 	IupSetCallback( ideMessage, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.IDEMessageDlg !is null )
 		{
-			IupSetAttribute( GLOBAL.IDEMessageDlg.getHandle, "TOPMOST", "YES" );
-			IupShow( GLOBAL.IDEMessageDlg.getHandle );
+			IupSetAttribute( GLOBAL.IDEMessageDlg.getIhandle, "TOPMOST", "YES" );
+			IupShow( GLOBAL.IDEMessageDlg.getIhandle );
 		}
 		return IUP_DEFAULT;
 	});
@@ -558,7 +559,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.319)\nBy Kuan Hsu (Taiwan)\n2017.10.04" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.320)\nBy Kuan Hsu (Taiwan)\n2017.10.12" );
 		return IUP_DEFAULT;
 	});
 	

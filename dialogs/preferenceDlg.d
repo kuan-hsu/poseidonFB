@@ -610,12 +610,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( vBoxPage02, "MARGIN=0x1,EXPANDCHILDREN=YES" );
 
 		// Color
-		Ihandle* labelColorPath = IupLabel( toStringz( GLOBAL.languageItems["colorfile"].toDString() ~ ":" ) );
-		
 		Ihandle* colorTemplateList = IupList( null );
 		IupSetHandle( "colorTemplateList", colorTemplateList );
 		version(Windows) IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,EXPAND=YES,DROPDOWN=YES,VISIBLEITEMS=5" ); else IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,SIZE=120x12,DROPDOWN=YES,VISIBLEITEMS=5" );;
-		IupSetAttribute( colorTemplateList, "SIZE", "240x12" );
+		IupSetAttribute( colorTemplateList, "SIZE", "310x12" );
 		
 		scope templateFP = new FilePath( "settings/colorTemplates" );
 		if( templateFP.exists() )
@@ -668,8 +666,16 @@ class CPreferenceDialog : CBaseDialog
 			return IUP_DEFAULT;
 		});
 		
-		Ihandle* hboxColorPath = IupHbox( labelColorPath, colorTemplateList, colorDefaultRefresh, colorTemplateRemove, null );
-		IupSetAttributes( hboxColorPath, "ALIGNMENT=ACENTER,MARGIN=0x0,EXPAND=NO,SIZE=200x12" );
+		
+		
+		Ihandle* _hboxColorPath = IupHbox( colorTemplateList, colorDefaultRefresh, colorTemplateRemove, null );
+		IupSetAttributes( _hboxColorPath, "ALIGNMENT=ACENTER,MARGIN=0x0,EXPAND=NO,SIZE=200x12" );
+		
+
+		Ihandle* colorTemplateFrame = IupFrame( _hboxColorPath );
+		IupSetAttribute( colorTemplateFrame, "TITLE", GLOBAL.languageItems["colorfile"].toCString() );
+		IupSetAttributes( colorTemplateFrame, "EXPANDCHILDREN=YES,SIZE=346x");
+		
 		
 		
 		Ihandle* labelCaretLine = IupLabel( toStringz( GLOBAL.languageItems["caretline"].toDString ~ ":" ) );
@@ -801,7 +807,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=30,MARGIN=2x10,SIZELIN=-1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
+		version(Windows) IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=30,MARGIN=2x8,SIZELIN=-1" ); else IupSetAttributes( gboxColor, "EXPAND=YES,NUMDIV=4,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=30,MARGIN=2x10,SIZELIN=1" );
 
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -1277,8 +1283,8 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, frameColor, null );
 		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 		*/
-		Ihandle* vColor = IupVbox( hboxColorPath, frameColor, frameColor_1, frameKeywordColor, null );
-		IupSetAttributes( vColor, "EXPANDCHILDREN=NO,SIZE=261x0,HOMOGENEOUS=NO" );		
+		Ihandle* vColor = IupVbox( colorTemplateFrame, frameColor, frameColor_1, frameKeywordColor, null );
+		IupSetAttributes( vColor, "ALIGNMENT=ACENTER,EXPANDCHILDREN=YES,HOMOGENEOUS=NO,GAP=0" );		
 
 
 		// Short Cut
@@ -1410,7 +1416,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* preferenceTabs = IupTabs( /*vBoxPage01,*/vBoxCompilerSettings, vBoxParserSettings, vBoxPage02, sb, vColor, shortCutList, keywordTabs, /*manuFrame,*/ null );
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
-		IupSetAttribute( preferenceTabs, "CHILDOFFSET", "5x5" );
+		IupSetAttribute( preferenceTabs, "CHILDOFFSET", "0x0" );
 		
 
 		

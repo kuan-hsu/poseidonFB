@@ -1,0 +1,31 @@
+/* XPM */
+static char *idemessage_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c None",
+". c #8394ad",
+"# c #ccc9c1",
+"a c #ba9566",
+"b c #c2b08b",
+"c c #5c76a2",
+"d c #eff3fc",
+"e c #99a3b6",
+/* pixels */
+"``````.##.``````",
+"`````.####.`````",
+"``#aaceeeecaa#``",
+"``bbc......cbb``",
+"``bbddddddddbb``",
+"``bbddddddddbb``",
+"``bbdecccccdbb``",
+"``bbddddddddbb``",
+"``bbdecccccdbb``",
+"``aeddddddddea``",
+"``aedecccccdea``",
+"``aeddddddddea``",
+"``a.dddddddd.a``",
+"``a..........a``",
+"``#aaaaaaaaaa#``",
+"````````````````"
+};

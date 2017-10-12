@@ -1,6 +1,6 @@
 ﻿module tools;
 
-import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz;
+import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz, Util = tango.text.Util;
 
 class IupString
 {
@@ -158,6 +158,21 @@ char[] convertKeyWordCase( int type, char[] replaceText )
 	}
 
 	return replaceText;
+}
+
+char[] setINILineData( char[] left, char[] right = "" )
+{
+	return left ~ "=" ~ right ~ "\n";
+}
+
+void getINILineData( char[] lineData, out char[] left, out char[] right )
+{
+	int assignPos = Util.index( lineData, "=" );
+	if( assignPos < lineData.length )
+	{
+		left	= Util.trim( lineData[0..assignPos] );
+		right	= Util.trim( lineData[assignPos+1..$] );
+	}			
 }
 
 /+

@@ -30,6 +30,7 @@ struct PROJECT
 	char[][]	includes;
 	char[][]	others;
 
+	/*
 	void saveFile()
 	{
 		char[] _replaceDir( char[] _fullPath, char[] _dir )
@@ -107,8 +108,166 @@ struct PROJECT
 		scope print = new DocPrinter!(char);
 		FileAction.saveFile( dir ~ "/.poseidon", print.print( doc ) );
 	}
+	*/
+	
+	void saveFile()
+	{
+		char[] _replaceDir( char[] _fullPath, char[] _dir )
+		{
+			int pos;
+			
+			version(Windows)
+			{
+				pos = Util.index( tools.lowerCase( _fullPath ), tools.lowerCase( _dir ) );
+				if( pos == 0 ) return _fullPath[_dir.length..length].dup;
+			}
+			else
+			{
+				pos = Util.index( _fullPath, _dir );
+				if( pos == 0 ) return _fullPath[_dir.length..length].dup;
+			}
 
+			return _fullPath;
+		}
+		
+		char[]	PATH = dir ~ "/";
+		char[]	doc;
+		
+		// Editor
+		doc ~= setINILineData( "[Project]");
+		
+		doc ~= setINILineData( "ProjectName", name );
+		doc ~= setINILineData( "Type", type );
+		doc ~= setINILineData( "MainFile", mainFile );
+		doc ~= setINILineData( "TargetName", targetName );
+		doc ~= setINILineData( "CompilerArgs", args );
+		doc ~= setINILineData( "CompilerOption", compilerOption );
+		doc ~= setINILineData( "Comment", comment );
+		doc ~= setINILineData( "CompilerPath", compilerPath );
+		
+		doc ~= setINILineData( "[IncludeDirs]");
+		foreach( char[] s; includeDirs )
+			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+
+		doc ~= setINILineData( "[LibDirs]");
+		foreach( char[] s; libDirs ) 
+			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+
+		doc ~= setINILineData( "[Sources]");
+		foreach( char[] s; sources ) 
+			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+
+		doc ~= setINILineData( "[Includes]");
+		foreach( char[] s; includes ) 
+			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+
+		doc ~= setINILineData( "[Others]");
+		foreach( char[] s; others ) 
+			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+		
+		actionManager.FileAction.saveFile( dir ~ "/.poseidon", doc );
+	}
+	
+	
 	PROJECT loadFile( char[] settingFileName )
+	{
+		char[] _replaceDir( char[] _fullPath, char[] _dir )
+		{
+			scope _fp = new FilePath( _fullPath  );
+			if( !_fp.isAbsolute() ) return _dir ~ "/" ~ _fullPath;			
+			
+			return _fullPath;
+		}
+		
+		PROJECT s;
+		char[]	left, right;
+		
+		try
+		{
+			scope file = new UnicodeFile!(char)( settingFileName, Encoding.Unknown );
+			char[] doc = file.read();
+			
+			scope _dir = new FilePath( settingFileName );
+			s.dir = _dir.path[0..length-1];			
+			
+			char[]	blockText;
+			foreach( char[] lineData; Util.splitLines( doc ) )
+			{
+				lineData = Util.trim( lineData );
+				if( lineData.length )
+				{
+					// If .poseidon is xml format......
+					if( lineData[0] == '<' )
+					{
+						return loadXMLFile( settingFileName );
+					}
+					else if( lineData[0] == '[' )
+					{
+						int assignPos = Util.rindex( lineData, "=" );
+						if( assignPos < lineData.length )
+						{
+							blockText = lineData[0..assignPos];
+							continue;
+						}
+					}
+				}
+				else
+				{
+					continue;
+				}
+				
+				// Get Line Data
+				getINILineData( lineData, left, right );
+				
+				switch( blockText )
+				{
+					case "[Project]":
+						switch( left )
+						{
+							case "ProjectName":		s.name = right;							break;
+							case "Type":			s.type = right;							break;
+							case "MainFile":		s.mainFile = right;						break;
+							case "TargetName":		s.targetName = right;					break;
+							case "CompilerArgs":	s.args = right;							break;
+							case "CompilerOption":	s.compilerOption = right;				break;
+							case "Comment":			s.comment = right;						break;
+							case "CompilerPath":	s.compilerPath = right;					break;
+							default:
+						}
+						break;
+					
+					case "[IncludeDirs]":
+						if( left == "name" ) s.includeDirs ~= _replaceDir( right, s.dir );	break;
+
+					case "[LibDirs]":	
+						if( left == "name" ) s.libDirs ~= _replaceDir( right, s.dir );		break;
+					
+					case "[Sources]":
+						if( left == "name" ) s.sources ~= _replaceDir( right, s.dir );		break;
+
+					case "[Includes]":
+						if( left == "name" ) s.includes ~= _replaceDir( right, s.dir );		break;
+						
+					case "[Others]":
+						if( left == "name" ) s.others ~= _replaceDir( right, s.dir );		break;
+					
+					default:
+				}
+			}
+			
+			s.sources.sort;
+			s.includes.sort;
+			s.others.sort;
+		}
+		catch( Exception e )
+		{
+			//GLOBAL.IDEMessageDlg.print( "Project File " ~ settingFileName ~ " Load Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+		}
+		
+		return s;			
+	}
+
+	PROJECT loadXMLFile( char[] settingFileName )
 	{
 		PROJECT s;
 		

@@ -532,6 +532,9 @@ struct ScintillaAction
 		if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 		{
 			Ihandle* ih = GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla;
+
+			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
+			
 			
 			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)ih );
 			IupSetFocus( ih );
@@ -573,6 +576,8 @@ struct ScintillaAction
 			// Set documentTabs to visible
 			if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
 
+			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
+			
 			// Set new tabitem to focus
 			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci.getIupScintilla );
 			IupSetFocus( _sci.getIupScintilla );

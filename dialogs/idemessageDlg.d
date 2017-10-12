@@ -8,8 +8,6 @@ import tango.stdc.stringz, Integer = tango.text.convert.Integer;
 class CIDEMessageDialog : CBaseDialog
 {
 	private:
-	//import actionManager, global, tools;
-	import tango.stdc.stringz;
 	import tango.time.WallClock;
 
 	Ihandle*	text, val;
@@ -21,15 +19,15 @@ class CIDEMessageDialog : CBaseDialog
 
 		val = IupVal( null );
 		IupSetAttributes( val, "MAX=240,MIN=100,VALUE=180" );
-		IupSetCallback( val, "VALUECHANGED_CB", cast(Icallback) &CIDEMessageDialog_VALUECHANGED_CB_cb );
+		IupSetCallback( val, "VALUECHANGED_CB", cast(Icallback) &dialogs.idemessageDlg.val_VALUECHANGED_CB );
 		
 		btnOK = IupButton( GLOBAL.languageItems["clear"].toCString, null );
 		IupSetAttribute( btnOK, "SIZE", "40x12" );
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CIDEMessageDialog_btnClear_cb );
+		IupSetCallback( btnOK, "ACTION", cast(Icallback) &dialogs.idemessageDlg.btnClear_ACTION_CB );
 		
 		btnCANCEL = IupButton( GLOBAL.languageItems["close"].toCString, null );
 		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CIDEMessageDialog_btnClose_cb );
+		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &dialogs.idemessageDlg.btnClose_ACTION_CB );
 		
 		
 		Ihandle* hBox_DlgButton = IupHbox( IupFill(), val, btnOK, btnCANCEL, null );
@@ -42,7 +40,7 @@ class CIDEMessageDialog : CBaseDialog
 		
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) function( Ihandle* ih )
 		{
-			return CIDEMessageDialog_btnClose_cb( ih );
+			return dialogs.idemessageDlg.btnClose_ACTION_CB( ih );
 		});
 	}	
 
@@ -51,6 +49,7 @@ class CIDEMessageDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttributes( _dlg, "MAXBOX=NO,MINBOX=NO,SIZE=QUARTERxFULL,OPACITY=180,SHRINK=YES" );
+		IupSetAttribute( _dlg, "ICON", "icon_idemessage" );
 
 		createLayout();
 	}
@@ -63,11 +62,6 @@ class CIDEMessageDialog : CBaseDialog
 	{
 		IupShowXY( _dlg, x, y );
 		return null;
-	}
-	
-	Ihandle* getHandle()
-	{
-		return _dlg;
 	}
 	
 	void setFont( char[] _font )
@@ -101,22 +95,22 @@ class CIDEMessageDialog : CBaseDialog
 
 extern(C) // Callback for CSingleTextDialog
 {
-	private int CIDEMessageDialog_VALUECHANGED_CB_cb( Ihandle *ih )
+	private int val_VALUECHANGED_CB( Ihandle *ih )
 	{
 		char[] value = fromStringz( IupGetAttribute( ih, "VALUE" ) );
-		IupSetInt( GLOBAL.IDEMessageDlg.getHandle, "OPACITY", Integer.atoi( value ) );
+		IupSetInt( GLOBAL.IDEMessageDlg.getIhandle, "OPACITY", Integer.atoi( value ) );
 		//IupSetFocus( GLOBAL.IDEMessageDlg.getHandle );
 		
 		return IUP_DEFAULT;
 	}
 	
-	private int CIDEMessageDialog_btnClose_cb( Ihandle* ih )
+	private int btnClose_ACTION_CB( Ihandle* ih )
 	{
-		if( GLOBAL.IDEMessageDlg !is null ) IupHide( GLOBAL.IDEMessageDlg.getHandle );
+		if( GLOBAL.IDEMessageDlg !is null ) IupHide( GLOBAL.IDEMessageDlg.getIhandle );
 		return IUP_DEFAULT;
 	}
 
-	private int CIDEMessageDialog_btnClear_cb( Ihandle* ih )
+	private int btnClear_ACTION_CB( Ihandle* ih )
 	{
 		if( GLOBAL.IDEMessageDlg !is null )	GLOBAL.IDEMessageDlg.print( "[CLEAR......][done]\n", true, true );
 		return IUP_DEFAULT;

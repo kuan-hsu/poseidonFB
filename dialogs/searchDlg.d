@@ -27,8 +27,7 @@ class CSearchDialog : CBaseDialog
 		IupSetAttributes( listFind, "1=\"Console Application\",2=\"Static Library\",3=\"Dynamic Link Library\","
                                    "SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,EDITBOX=YES,SIZE=100x12,VISIBLE_ITEMS=3");
 		*/
-		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3");
-		IupSetHandle( "CSearchDialog_listFind", listFind );
+		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3,NAME=list_Find");
 		
 		cStrings[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
 		Ihandle* label0 = IupLabel( cStrings[0].toCString );
@@ -39,8 +38,7 @@ class CSearchDialog : CBaseDialog
 
 
 		listReplace = IupList( null );
-		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3");
-		IupSetHandle( "CSearchDialog_listReplace", listReplace );
+		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3,NAME=list_Replace");
 		
 		cStrings[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
 		Ihandle* label1 = IupLabel( cStrings[1].toCString );
@@ -50,12 +48,10 @@ class CSearchDialog : CBaseDialog
 		IupSetCallback( listReplace, "K_ANY", cast(Icallback) &CSearchDialog_listReplace_K_ANY_CB );
 
 		Ihandle* toggleForward = IupToggle( GLOBAL.languageItems["forward"].toCString, null );
-		IupSetAttributes( toggleForward, "RADIO=YES");
-		IupSetHandle( "CSearchDialog_toggleForward", toggleForward );
+		IupSetAttributes( toggleForward, "RADIO=YES,NAME=toggle_Forward");
 		
 		Ihandle* toggleBackward = IupToggle( GLOBAL.languageItems["backward"].toCString, null );
-		IupSetAttributes( toggleBackward, "RADIO=YES");
-		IupSetHandle( "CSearchDialog_toggleBackward", toggleBackward );
+		IupSetAttributes( toggleBackward, "RADIO=YES,NAME=toggle_Backward");
 		
 		Ihandle* vBoxDirection = IupVbox( toggleForward, toggleBackward, null );
 		IupSetAttributes( vBoxDirection, "EXPAND=YES,EXPANDCHILDREN=YES" );
@@ -83,8 +79,7 @@ class CSearchDialog : CBaseDialog
 
 		// Options
 		Ihandle* toggleCaseSensitive = IupToggle( GLOBAL.languageItems["casesensitive"].toCString, null );
-		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES" );
-		IupSetHandle( "toggleCaseSensitive", toggleCaseSensitive );
+		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES,NAME=toggle_CaseSensitive" );
 		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &CSearchDialog_toggleAction_cb );
 
 		Ihandle* toggleWholeWord = IupToggle( GLOBAL.languageItems["wholeword"].toCString, null );
@@ -100,27 +95,21 @@ class CSearchDialog : CBaseDialog
 
 
 		Ihandle* btnFind = IupButton( GLOBAL.languageItems["find"].toCString, null );
-		IupSetHandle( "CSearchDialog_btnFind", btnFind );
 		IupSetCallback( btnFind, "ACTION", cast(Icallback) &CSearchDialog_btnFind_cb );
 		
 		Ihandle* btnReplaceFind = IupButton( GLOBAL.languageItems["replacefind"].toCString, null );
-		IupSetHandle( "btnReplaceFind", btnReplaceFind );
 		IupSetCallback( btnReplaceFind, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceFind_cb );
 		
 		Ihandle* btnReplace = IupButton( GLOBAL.languageItems["replace"].toCString, null );
-		IupSetHandle( "btnReplace", btnReplace );
 		IupSetCallback( btnReplace, "ACTION", cast(Icallback) &CSearchDialog_btnReplace_cb );
 		
 		Ihandle* btnReplaceAll = IupButton( GLOBAL.languageItems["replaceall"].toCString, null );
-		IupSetHandle( "btnReplaceAll", btnReplaceAll );
 		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceAll_cb );
 		
 		Ihandle* btnCountAll = IupButton( GLOBAL.languageItems["countall"].toCString, null );
-		IupSetHandle( "btnCountAll", btnCountAll );
 		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &CSearchDialog_btnCountAll_cb );
 		
 		Ihandle* btnMarkAll = IupButton( GLOBAL.languageItems["bookmarkall"].toCString, null );
-		IupSetHandle( "btnMarkAll", btnMarkAll );
 		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &CSearchDialog_btnMarkAll_cb );
 
 		Ihandle* gbox = IupGridBox
@@ -179,19 +168,13 @@ class CSearchDialog : CBaseDialog
 
 		//IupSetAttribute( _dlg, "DEFAULTENTER", "CSearchDialog_btnFind" );
 		IupSetHandle( "btnCANCEL_search", btnCANCEL );
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSearchDialog_btnCancel_cb );
+		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSearchDialog_btnCancel_ACTION_CB );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_search" );
-		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CSearchDialog_btnCancel_cb );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CSearchDialog_btnCancel_ACTION_CB );
 	}
 
 	~this()
 	{
-		IupSetHandle( "CSearchDialog_listFind", null );
-		IupSetHandle( "CSearchDialog_listReplace", null );
-
-		IupSetHandle( "CSearchDialog_toggleForward", null );
-		IupSetHandle( "CSearchDialog_toggleBackward", null );
-
 		IupSetHandle( "btnCANCEL_search", null );
 	}
 
@@ -200,7 +183,7 @@ class CSearchDialog : CBaseDialog
 		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord.dup ) );
 		IupShow( _dlg );
 		return null;
-	}	
+	}
 
 	char[] show( int x, int y ) // Overload form CBaseDialog
 	{
@@ -217,7 +200,7 @@ class CSearchDialog : CBaseDialog
 
 extern(C) // Callback for CSingleTextDialog
 {
-	private int CSearchDialog_btnCancel_cb( Ihandle* ih )
+	private int CSearchDialog_btnCancel_ACTION_CB( Ihandle* ih )
 	{
 		if( GLOBAL.searchDlg !is null ) IupHide( GLOBAL.searchDlg._dlg );
 
@@ -242,8 +225,7 @@ extern(C) // Callback for CSingleTextDialog
 
 	private int CSearchDialog_toggleAction_cb( Ihandle* ih, int state )
 	{
-		if( IupGetHandle( "toggleCaseSensitive" ) == ih )
-		//if( fromStringz(IupGetAttribute( ih, "TITLE" )) == "Case Sensitive" )
+		if( IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "toggle_CaseSensitive" ) == ih )
 		{
 			if( state == 1 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule | 4;
 			if( state == 0 ) GLOBAL.searchDlg.searchRule = GLOBAL.searchDlg.searchRule & 2;
@@ -262,14 +244,14 @@ extern(C) // Callback for CSingleTextDialog
 		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( iupSci != null )
 		{
-			Ihandle* listFind_handle = IupGetHandle( "CSearchDialog_listFind" );
+			Ihandle* listFind_handle = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "list_Find" );
 			if( listFind_handle != null )
 			{
 				char[] findText = fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
 
 				if( findText.length )
 				{
-					Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
+					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "toggle_Forward" );
 					if( direction_handle != null )
 					{
 						bool bForward;
@@ -304,8 +286,8 @@ extern(C) // Callback for CSingleTextDialog
 		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( iupSci != null )
 		{
-			Ihandle* listFind_handle	= IupGetHandle( "CSearchDialog_listFind" );
-			Ihandle* listReplace_handle	=  IupGetHandle( "CSearchDialog_listReplace" );
+			Ihandle* listFind_handle	= IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "list_Find" );
+			Ihandle* listReplace_handle	= IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "list_Replace" );
 			if( listFind_handle != null && listReplace_handle != null )
 			{
 				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
@@ -313,18 +295,17 @@ extern(C) // Callback for CSingleTextDialog
 
 				if( findText.length )
 				{
-					Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
+					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "toggle_Forward" );
 					if( direction_handle != null )
 					{
 						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
-						
 						
 						if( targetText.length )
 						{
 							if( targetText == findText ) IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
 						}
 						
-						if( fromStringz(IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
+						if( fromStringz( IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
 						{
 							pos = actionManager.SearchAction.search( iupSci, findText, GLOBAL.searchDlg.searchRule, true );
 						}
@@ -347,8 +328,8 @@ extern(C) // Callback for CSingleTextDialog
 		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( iupSci != null )
 		{
-			Ihandle* listFind_handle	= IupGetHandle( "CSearchDialog_listFind" );
-			Ihandle* listReplace_handle	=  IupGetHandle( "CSearchDialog_listReplace" );
+			Ihandle* listFind_handle	= IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "list_Find" );
+			Ihandle* listReplace_handle	= IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "list_Replace" );
 			if( listFind_handle != null && listReplace_handle != null )
 			{
 				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
@@ -356,7 +337,7 @@ extern(C) // Callback for CSingleTextDialog
 
 				if( findText.length )
 				{
-					Ihandle* direction_handle = IupGetHandle( "CSearchDialog_toggleForward" );
+					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "toggle_Forward" );
 					if( direction_handle != null )
 					{
 						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
@@ -399,8 +380,8 @@ extern(C) // Callback for CSingleTextDialog
 		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( iupSci !is null )
 		{
-			Ihandle* listFind_handle	= IupGetHandle( "CSearchDialog_listFind" );
-			Ihandle* listReplace_handle	= IupGetHandle( "CSearchDialog_listReplace" );
+			Ihandle* listFind_handle	= IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "list_Find" );
+			Ihandle* listReplace_handle	= IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "list_Replace" );
 			
 			if( listFind_handle != null && listReplace_handle != null )
 			{

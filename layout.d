@@ -116,7 +116,7 @@ void createEditorSetting()
 	//IDECONFIG.load();
 	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( 400, 600, GLOBAL.languageItems["message"].toDString );
 	GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 0 );
-	IupHide( GLOBAL.IDEMessageDlg.getHandle );
+	IupHide( GLOBAL.IDEMessageDlg.getIhandle );
 
 	IDECONFIG.loadINI();
 	
@@ -209,7 +209,14 @@ extern(C)
 			// Save All Project	
 			foreach( PROJECT p; GLOBAL.projectManager )
 			{
-				p.saveFile();
+				try
+				{
+					p.saveFile();
+				}
+				catch
+				{
+					debug IupMessage("","FUCK");
+				}
 			}
 
 			//IDECONFIG.save();

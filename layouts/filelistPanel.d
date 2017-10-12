@@ -203,7 +203,7 @@ extern(C)
 					CScintilla _sci = cast(CScintilla) IupGetAttributeId( ih, "USERDATA", id );
 					if( _sci !is null )
 					{
-						IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
+						//IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 						ScintillaAction.openFile( _sci.getFullPath.dup );
 					}
 				}

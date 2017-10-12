@@ -28,16 +28,14 @@ class CFindInFilesDialog : CBaseDialog
 		cStrings[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
 
 		listFind = IupList( null );
-		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
-		IupSetHandle( "CFindInFilesDialog_listFind", listFind );
+		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3,NAME=list_Find");
 		Ihandle* label00 = IupLabel( cStrings[0].toCString );
 		IupSetAttribute( label00, "SIZE", "60x12" );
 		Ihandle* hBox00 = IupHbox( label00, listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 
 		listReplace = IupList( null );
-		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3");
-		IupSetHandle( "CFindInFilesDialog_listReplace", listReplace );
+		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3,NAME=list_Replace");
 		Ihandle* label01 = IupLabel( cStrings[1].toCString );
 		IupSetAttribute( label01, "SIZE", "60x12" );
 		Ihandle* hBox01 = IupHbox( label01, listReplace, null );
@@ -46,14 +44,12 @@ class CFindInFilesDialog : CBaseDialog
 
 		// Options
 		Ihandle* toggleCaseSensitive = IupToggle( GLOBAL.languageItems["casesensitive"].toCString, null );
-		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES" );
-		IupSetHandle( "CFindInFilesDialog_toggleCaseSensitive", toggleCaseSensitive );
-		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleAction_cb );
+		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES,NAME=toggle_CaseSensitive" );
+		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
 
 		Ihandle* toggleWholeWord = IupToggle( GLOBAL.languageItems["wholeword"].toCString, null );
-		IupSetAttributes( toggleWholeWord, "VALUE=ON,EXPAND=YES" );
-		IupSetHandle( "CFindInFilesDialog_toggleWholeWord", toggleWholeWord );
-		IupSetCallback( toggleWholeWord, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleAction_cb );
+		IupSetAttributes( toggleWholeWord, "VALUE=ON,EXPAND=YES,NAME=toggle_WholeWord" );
+		IupSetCallback( toggleWholeWord, "ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
 
 		Ihandle* hBoxOption = IupHbox( toggleCaseSensitive, toggleWholeWord, null );
 		IupSetAttributes( hBoxOption, "ALIGNMENT=ACENTER,EXPAND=YES,MARGIN=0x0,GAP=0" );
@@ -64,25 +60,23 @@ class CFindInFilesDialog : CBaseDialog
 
 		// Scope
 		Ihandle* toggleDocument = IupToggle( GLOBAL.languageItems["document"].toCString, null );
-		IupSetHandle( "CFindInFilesDialog_toggleDocument", toggleDocument );
-		IupSetCallback( toggleDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+		IupSetAttribute( toggleDocument, "NAME", "toggle_Document" );
+		IupSetCallback( toggleDocument, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 		
 		Ihandle* toggleAllDocument = IupToggle( GLOBAL.languageItems["alldocument"].toCString, null );
-		IupSetHandle( "CFindInFilesDialog_toggleAllDocument", toggleAllDocument );
-		IupSetCallback( toggleAllDocument, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+		IupSetAttribute( toggleAllDocument, "NAME", "toggle_AllDocuments" );
+		IupSetCallback( toggleAllDocument, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 		
 		Ihandle* togglePrj = IupToggle( GLOBAL.languageItems["prj"].toCString, null );
-		IupSetAttributes( togglePrj, "VALUE=ON");
-		IupSetHandle( "CFindInFilesDialog_togglePrj", togglePrj );
-		IupSetCallback( togglePrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+		IupSetAttributes( togglePrj, "VALUE=ON,NAME=toggle_Project");
+		IupSetCallback( togglePrj, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 
 		Ihandle* toggleAllPrj = IupToggle( GLOBAL.languageItems["allproject"].toCString, null );
-		IupSetHandle( "CFindInFilesDialog_toggletoggleAllPrj", toggleAllPrj );
-		IupSetCallback( toggleAllPrj, "ACTION", cast(Icallback) &CFindInFilesDialog_toggleRadioAction_cb );
+		IupSetAttribute( toggleAllPrj, "NAME", "toggle_AllProjects" );
+		IupSetCallback( toggleAllPrj, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 
 
 		Ihandle* vBoxScope = IupVbox( toggleDocument, toggleAllDocument, togglePrj, toggleAllPrj, null );
-		//IupSetAttributes( vBoxScope, "" );
 		Ihandle* radioScope = IupRadio( vBoxScope );
 		Ihandle* frameScope = IupFrame( radioScope );
 		IupSetAttribute( frameScope, "TITLE", GLOBAL.languageItems["scope"].toCString );		
@@ -90,25 +84,20 @@ class CFindInFilesDialog : CBaseDialog
 
 		// Buttons
 		Ihandle* btnFindAll = IupButton( GLOBAL.languageItems["findall"].toCString, null );
-		IupSetHandle( "CFindInFilesDialog_btnFindAll", btnFindAll );
-		IupSetAttributes( btnFindAll, "EXPAND=YES" );
-		IupSetCallback( btnFindAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
+		IupSetAttributes( btnFindAll, "EXPAND=YES,NAME=btn_Find" );
+		IupSetCallback( btnFindAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		Ihandle* btnReplaceAll = IupButton( GLOBAL.languageItems["replaceall"].toCString, null );
-		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", btnReplaceAll );
-		IupSetAttributes( btnReplaceAll, "EXPAND=YES" );
-		//IupSetAttribute( btnReplaceAll, "ACTIVE", "NO" );
-		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
+		IupSetAttributes( btnReplaceAll, "EXPAND=YES,NAME=btn_Replace" );
+		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		Ihandle* btnCountAll = IupButton( GLOBAL.languageItems["countall"].toCString, null );
-		IupSetHandle( "CFindInFilesDialog_btnCountAll", btnCountAll );
-		IupSetAttributes( btnCountAll, "EXPAND=YES" );
-		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
+		IupSetAttributes( btnCountAll, "EXPAND=YES,NAME=btn_Count" );
+		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		Ihandle* btnMarkAll = IupButton( GLOBAL.languageItems["bookmarkall"].toCString, null );
-		IupSetHandle( "CFindInFilesDialog_btnMarkAll", btnMarkAll );
-		IupSetAttributes( btnMarkAll, "EXPAND=YES" );
-		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &CFindInFilesDialog_btnFindAll_cb );
+		IupSetAttributes( btnMarkAll, "EXPAND=YES,NAME=btn_Mark" );
+		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 
 		Ihandle* vBoxButton = IupVbox( btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll, null );
 		IupSetAttributes( vBoxScope, "EXPANDCHILDREN=YES,GAP=2" );
@@ -147,30 +136,14 @@ class CFindInFilesDialog : CBaseDialog
 		createLayout();
 
 		IupSetAttribute( listFind, "VALUE", GLOBAL.cString.convert( findWhat ) );
-
 		IupSetHandle( "btnCANCEL_findinfiles", btnCANCEL );
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
+		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_findinfiles" );
-		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CFindInFilesDialog_btnCancel_cb );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 	}
 
 	~this()
 	{
-		IupSetHandle( "CFindInFilesDialog_listFind", null );
-		IupSetHandle( "CFindInFilesDialog_listReplace", null );
-		IupSetHandle( "CFindInFilesDialog_toggleCaseSensitive", null );
-		IupSetHandle( "CFindInFilesDialog_toggleWholeWord", null );
-
-		IupSetHandle( "CFindInFilesDialog_toggleDocument", null );
-		IupSetHandle( "CFindInFilesDialog_toggleAllDocument", null );
-		IupSetHandle( "CFindInFilesDialog_togglePrj", null );
-		IupSetHandle( "CFindInFilesDialog_toggletoggleAllPrj", null );
-
-		IupSetHandle( "CFindInFilesDialog_btnFindAll", null );
-		IupSetHandle( "CFindInFilesDialog_btnReplaceAll", null );
-		IupSetHandle( "CFindInFilesDialog_btnCountAll", null );
-		IupSetHandle( "CFindInFilesDialog_btnMarkAll", null );
-
 		IupSetHandle( "btnCANCEL_findinfiles", null );	
 	}
 
@@ -196,16 +169,16 @@ class CFindInFilesDialog : CBaseDialog
 
 extern(C) // Callback for CFindInFilesDialog
 {
-	private int CFindInFilesDialog_btnCancel_cb( Ihandle* ih )
+	private int btnCancel_ACTION_CB( Ihandle* ih )
 	{
 		if( GLOBAL.serachInFilesDlg !is null ) IupHide( GLOBAL.serachInFilesDlg._dlg );
 
 		return IUP_DEFAULT;
 	}
 
-	private int CFindInFilesDialog_toggleAction_cb( Ihandle* ih, int state )
+	private int toggle_ACTION_CB( Ihandle* ih, int state )
 	{
-		if( ih == IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ) )
+		if( ih == IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_CaseSensitive" ) )
 		{
 			if( state == 1 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule | 4;
 			if( state == 0 ) GLOBAL.serachInFilesDlg.searchRule = GLOBAL.serachInFilesDlg.searchRule & 2;
@@ -219,7 +192,7 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 
-	private int CFindInFilesDialog_toggleRadioAction_cb( Ihandle* ih, int state )
+	private int radioTarget_ACTION_CB( Ihandle* ih, int state )
 	{
 		if( ih == IupGetHandle( "CFindInFilesDialog_togglePrj" ) || ih == IupGetHandle( "CFindInFilesDialog_toggletoggleAllPrj" ) )
 		{
@@ -233,23 +206,23 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 
-	private int CFindInFilesDialog_btnFindAll_cb( Ihandle* ih )
+	private int btnExecute_ACTION_CB( Ihandle* ih )
 	{
 		int		buttonIndex;
 		char[]	findText, replaceText;
 
-		if( IupGetHandle( toStringz("CFindInFilesDialog_btnFindAll") ) == ih )
+		if( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "btn_Find" ) == ih )
 			buttonIndex = 0;
-		else if( IupGetHandle( toStringz("CFindInFilesDialog_btnReplaceAll") ) == ih )
+		else if( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "btn_Replace" ) == ih )
 			buttonIndex = 1;
-		else if( IupGetHandle( toStringz("CFindInFilesDialog_btnCountAll") ) == ih )
+		else if( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "btn_Count" ) == ih )
 			buttonIndex = 2;
 		else
 			buttonIndex = 3;
 			
 
-		Ihandle* listFind_ih = IupGetHandle( toStringz( "CFindInFilesDialog_listFind" ) );
-		Ihandle* listReplace_ih = IupGetHandle( toStringz( "CFindInFilesDialog_listReplace" ) );
+		Ihandle* listFind_ih = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "list_Find" );
+		Ihandle* listReplace_ih = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "list_Replace" ); // IupGetHandle( toStringz( "CFindInFilesDialog_listReplace" ) );
 		if( listReplace_ih != null ) replaceText = fromStringz( IupGetAttribute( listReplace_ih, "VALUE" )).dup;
 		
 		
@@ -264,22 +237,16 @@ extern(C) // Callback for CFindInFilesDialog
 					case 1:		GLOBAL.messagePanel.printSearchOutputPanel( "Replace......", true ); break;
 					case 2:		GLOBAL.messagePanel.printSearchOutputPanel( "Counting......", true ); break;
 					default:	GLOBAL.messagePanel.printSearchOutputPanel( "Marking......", true );
-					/+
-					case 0:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Seraching......") ); break;
-					case 1:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Replace......") ); break;
-					case 2:		IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Counting......") ); break;
-					default:	IupSetAttribute( GLOBAL.searchOutputPanel, "VALUE", toStringz("Marking......") );
-					+/
 				}
 
 				int _findCase, _findMethod, count;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleDocument" ), "VALUE" ) ) == "ON" ) _findCase = 1;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleAllDocument" ), "VALUE" ) ) == "ON" ) _findCase = 2;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_togglePrj" ), "VALUE" ) ) == "ON" ) _findCase = 3;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggletoggleAllPrj" ), "VALUE" ) ) == "ON" ) _findCase = 4;
+				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_Document" ), "VALUE" ) ) == "ON" ) _findCase = 1;
+				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_AllDocuments" ), "VALUE" ) ) == "ON" ) _findCase = 2;
+				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_Project" ), "VALUE" ) ) == "ON" ) _findCase = 3;
+				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_AllProjects" ), "VALUE" ) ) == "ON" ) _findCase = 4;
 
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleWholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "CFindInFilesDialog_toggleCaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 4;
+				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_WholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
+				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_CaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 4;
 
 
 				if( buttonIndex == 1 )
@@ -330,7 +297,6 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
-							//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Active Project Be Selected.\n" ) );
 							GLOBAL.messagePanel.printSearchOutputPanel( "\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Active Project Be Selected.\n" );
 							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
 							return IUP_DEFAULT;
@@ -352,7 +318,6 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 							actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
-							//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Any Project Be Selected.\n" ) );
 							GLOBAL.messagePanel.printSearchOutputPanel( "\nTotal found " ~ Integer.toString(count) ~ " Results.\nNo Any Project Be Selected.\n" );
 							IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
 							return IUP_DEFAULT;
@@ -360,7 +325,6 @@ extern(C) // Callback for CFindInFilesDialog
 				}
 
 				actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
-				//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz("\nTotal found " ~ Integer.toString(count) ~ " Results." ) );
 				GLOBAL.messagePanel.printSearchOutputPanel( "\nTotal found " ~ Integer.toString(count) ~ " Results." );
 				IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "1" );
 			}

@@ -11,21 +11,6 @@ struct IDECONFIG
 	import tango.text.xml.Document, tango.text.xml.DocPrinter, tango.io.UnicodeFile, tango.io.stream.Lines;
 	import tango.io.FilePath;
 	
-	static char[] setINILineData( char[] left, char[] right = "" )
-	{
-		return left ~ "=" ~ right ~ "\n";
-	}
-
-	static void getINILineData( char[] lineData, out char[] left, out char[] right )
-	{
-		int assignPos = Util.index( lineData, "=" );
-		if( assignPos < lineData.length )
-		{
-			left	= Util.trim( lineData[0..assignPos] );
-			right	= Util.trim( lineData[assignPos+1..$] );
-		}			
-	}
-	
 	static bool loadLocalization()
 	{
 		// Load Language lng

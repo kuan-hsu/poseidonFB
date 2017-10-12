@@ -191,6 +191,8 @@ void main( char[][] args )
 	}
 	
 	// Init IDE
+	load_all_images_icons();
+	
 	createEditorSetting();
 
 	IupScintillaOpen();
@@ -225,8 +227,6 @@ void main( char[][] args )
 
 	IupSetGlobal( "UTF8MODE", "YES" );
 	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
-
-	load_all_images_icons();
 
 	createMenu();
 	// Creates a dialog containing the control
