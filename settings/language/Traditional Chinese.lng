@@ -109,6 +109,7 @@ options=選項
 				selectcase=選擇自動完成項目不分大小寫
 				showlisttype=自動完成項目顯示種類
 				showallmembers=顯示所有成員
+				enabledwell=啟用滑鼠停留顯示種類
 				parserlive=自動更新等級
 					none=無
 					light=輕量

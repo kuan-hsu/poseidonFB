@@ -8,33 +8,19 @@ import tango.stdc.stringz;
 
 void createTabs()
 {
-	version(FLATTAB)
-	{
-		GLOBAL.documentTabs = IupFlatTabs( null );
-		
-		IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
-		IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "1" );
-		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
-		IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
-		IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
-		IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
-		//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
-		//IupSetCallback( GLOBAL.documentTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
-		
-		version(IUPSVN)
-		{
-			version(Windows) IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
-		}
-	}
-	else
-	{
-		GLOBAL.documentTabs = IupTabs( null );
-		IupSetAttributes( GLOBAL.documentTabs, "CHILDOFFSET=0x3" );
-		version( linux ) IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" ); else IupSetAttribute( GLOBAL.documentTabs, "MULTILINE", "YES" );
-	}
-
+	GLOBAL.documentTabs = IupFlatTabs( null );
+	
+	IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
+	IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "1" );
+	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
+	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
+	IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
+	IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
+	//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
+	IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
+	IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
+	//IupSetCallback( GLOBAL.documentTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+	IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );	
@@ -76,9 +62,7 @@ extern(C)
 			if( result == IUP_IGNORE ) return IUP_IGNORE;
 		}
 
-		version(FLATTAB) return IUP_CONTINUE;
-		
-		return IUP_DEFAULT;
+		return IUP_CONTINUE;
 	}
 
 	private int tabRightClick_cb( Ihandle* ih, int pos )
@@ -134,94 +118,91 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	version(IUPSVN)
+	private int tabbutton_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		private int tabbutton_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+		int pos = IupConvertXYToPos( ih, x, y );
+		
+		// On/OFF Outline Window
+		if( button == IUP_BUTTON1 ) // Left Click
 		{
-			int pos = IupConvertXYToPos( ih, x, y );
-			
-			// On/OFF Outline Window
-			if( button == IUP_BUTTON1 ) // Left Click
+			char[] _s = fromStringz( status ).dup;
+			if( _s.length > 5 )
 			{
-				char[] _s = fromStringz( status ).dup;
-				if( _s.length > 5 )
+				if( _s[5] == 'D' ) // Double Click
 				{
-					if( _s[5] == 'D' ) // Double Click
-					{
-						menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
-						return IUP_DEFAULT;
-					}
+					menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+					return IUP_DEFAULT;
 				}
 			}
-			
-			if( pressed == 0 )
+		}
+		
+		if( pressed == 0 )
+		{
+			if( button == IUP_BUTTON2 )
 			{
-				if( button == IUP_BUTTON2 )
+				return tabClose_cb( ih, pos );
+			}
+			else if( button == IUP_BUTTON1 )
+			{
+				IupSetAttribute( ih, "CURSOR", "ARROW" );
+				
+				if( GLOBAL.tabDocumentPos == pos ) return IUP_DEFAULT;
+				if( GLOBAL.tabDocumentPos > -1 && pos > -1 )
 				{
-					return tabClose_cb( ih, pos );
-				}
-				else if( button == IUP_BUTTON1 )
-				{
-					IupSetAttribute( ih, "CURSOR", "ARROW" );
+					Ihandle* dragHandle = IupGetChild(  GLOBAL.documentTabs, GLOBAL.tabDocumentPos );
+					Ihandle* dropHandle = IupGetChild(  GLOBAL.documentTabs, pos );
 					
-					if( GLOBAL.tabDocumentPos == pos ) return IUP_DEFAULT;
-					if( GLOBAL.tabDocumentPos > -1 && pos > -1 )
+					if( dragHandle != null && dropHandle != null )
 					{
-						Ihandle* dragHandle = IupGetChild(  GLOBAL.documentTabs, GLOBAL.tabDocumentPos );
-						Ihandle* dropHandle = IupGetChild(  GLOBAL.documentTabs, pos );
-						
-						if( dragHandle != null && dropHandle != null )
+						if( GLOBAL.tabDocumentPos > pos )
+							IupReparent( dragHandle, GLOBAL.documentTabs, dropHandle );
+						else
 						{
-							if( GLOBAL.tabDocumentPos > pos )
-								IupReparent( dragHandle, GLOBAL.documentTabs, dropHandle );
+							if( pos < IupGetInt( GLOBAL.documentTabs, "COUNT" ) - 1 )
+							{
+								IupReparent( dragHandle, GLOBAL.documentTabs, IupGetChild(  GLOBAL.documentTabs, pos + 1 ) );
+							}
 							else
 							{
-								if( pos < IupGetInt( GLOBAL.documentTabs, "COUNT" ) - 1 )
-								{
-									IupReparent( dragHandle, GLOBAL.documentTabs, IupGetChild(  GLOBAL.documentTabs, pos + 1 ) );
-								}
-								else
-								{
-									IupReparent( dragHandle, GLOBAL.documentTabs, null );
-								}
-							}
-							
-							int childPos = IupGetChildPos( GLOBAL.documentTabs, dragHandle );
-							auto dragSci = ScintillaAction.getCScintilla( dragHandle );
-							if( dragSci !is null )
-							{
-								IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", childPos, dragSci.getTitleHandle.toCString );
-								DocumentTabAction.resetTip();
-								IupRefresh( GLOBAL.documentTabs );
-								IupSetInt( GLOBAL.documentTabs, "VALUEPOS", childPos );
-								
-								// Change Filelist
-								GLOBAL.fileListTree.removeItem( dragSci );
-								IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "INSERTLEAF", pos - 1, GLOBAL.fileListTree.getFullPathState ? dragSci.getTitleHandle.toCString : dragSci.getFullPath_IupString.toCString );
-								IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", pos, cast(char*) dragSci  );
-								version(Windows) IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "MARKED", pos, "YES" ); else IupSetInt( GLOBAL.fileListTree.getTreeHandle, "VALUE", pos );
+								IupReparent( dragHandle, GLOBAL.documentTabs, null );
 							}
 						}
-					}
-					else
-					{
-						GLOBAL.tabDocumentPos = -1;
+						
+						int childPos = IupGetChildPos( GLOBAL.documentTabs, dragHandle );
+						auto dragSci = ScintillaAction.getCScintilla( dragHandle );
+						if( dragSci !is null )
+						{
+							IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", childPos, dragSci.getTitleHandle.toCString );
+							DocumentTabAction.resetTip();
+							IupRefresh( GLOBAL.documentTabs );
+							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", childPos );
+							
+							// Change Filelist
+							GLOBAL.fileListTree.removeItem( dragSci );
+							IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "INSERTLEAF", pos - 1, GLOBAL.fileListTree.getFullPathState ? dragSci.getTitleHandle.toCString : dragSci.getFullPath_IupString.toCString );
+							IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", pos, cast(char*) dragSci  );
+							version(Windows) IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "MARKED", pos, "YES" ); else IupSetInt( GLOBAL.fileListTree.getTreeHandle, "VALUE", pos );
+						}
 					}
 				}
-			}
-			else
-			{
-				if( pos > -1 )
+				else
 				{
-					if( button == IUP_BUTTON1 )
-					{
-						GLOBAL.tabDocumentPos = pos;
-						IupSetAttribute( ih, "CURSOR", "HAND" );
-					}
+					GLOBAL.tabDocumentPos = -1;
 				}
 			}
-
-			return IUP_DEFAULT;
 		}
+		else
+		{
+			if( pos > -1 )
+			{
+				if( button == IUP_BUTTON1 )
+				{
+					GLOBAL.tabDocumentPos = pos;
+					IupSetAttribute( ih, "CURSOR", "HAND" );
+				}
+			}
+		}
+
+		return IUP_DEFAULT;
 	}
 }

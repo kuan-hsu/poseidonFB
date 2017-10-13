@@ -17,7 +17,7 @@ class CPreferenceDialog : CBaseDialog
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton( "40x12");
+		Ihandle* bottom = createDlgButton( "40x12" );
 
 		textCompilerPath = IupText( null );
 		IupSetAttribute( textCompilerPath, "SIZE", "320x12" );
@@ -193,6 +193,11 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleSHOWALLMEMBER, "VALUE", toStringz(GLOBAL.toggleShowAllMember.dup) );
 		IupSetHandle( "toggleSHOWALLMEMBER", toggleSHOWALLMEMBER );
 		
+		Ihandle* toggleDWELL = IupToggle( GLOBAL.languageItems["enabledwell"].toCString, null );
+		IupSetAttribute( toggleDWELL, "VALUE", toStringz(GLOBAL.toggleEnableDwell.dup) );
+		IupSetHandle( "toggleDWELL", toggleDWELL );
+		
+		
 		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
 		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
@@ -245,7 +250,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleIncludeComplete, toggleUseParser, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleIncludeComplete, toggleUseParser, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, hBoxFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
@@ -561,10 +566,20 @@ class CPreferenceDialog : CBaseDialog
 					}
 				}
 				
-				if( _stringOfLabel[i] is null ) 
-					_stringOfLabel[i] = new IupString( Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size ) );
+				version(Windows)
+				{
+					if( _stringOfLabel[i] is null ) 
+						_stringOfLabel[i] = new IupString( Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size ) );
+					else
+						_stringOfLabel[i] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+				}
 				else
-					_stringOfLabel[i] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+				{
+					if( _stringOfLabel[i] is null ) 
+						_stringOfLabel[i] = new IupString( Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size ) );
+					else
+						_stringOfLabel[i] = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+				}
 				
 				lableString[i]	= IupLabel( _stringOfLabel[i].toCString );
 				IupSetAttributes( lableString[i], "SIZE=275x,EXPAND=YES");
@@ -593,7 +608,7 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttribute( flatFrame[i], "TITLEBGCOLOR", "64 128 255");
 				IupSetAttribute( flatFrame[i], "TITLECOLOR", "255 255 255");
 				
-				version( Windows ) IupSetAttribute( lableString[i], "FONTFACE", "Courier New" ); else IupSetAttribute( lableString[i], "FONTFACE", "Monospace" );
+				version( Windows ) IupSetAttribute( lableString[i], "FONTFACE", "Courier New" ); else IupSetAttribute( lableString[i], "FONTFACE", "FreeMono" );
 				
 				scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( i ) );
 				IupSetHandle( _IupFlatFrameString.toCString, flatFrame[i] );
@@ -1223,7 +1238,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		version(Windows) IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=5,MARGIN=2x8" ); else IupSetAttributes( gboxColor_1, "FITTOCHILDREN=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=20,MARGIN=2x10" );
+		IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=6,GAPCOL=5,MARGIN=2x8" );
 
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
@@ -1447,7 +1462,7 @@ class CPreferenceDialog : CBaseDialog
 		createLayout();
 		
 		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
-		version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x295" ); else IupSetAttribute( _dlg, "SIZE", "322x312" );
+		version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x295" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
 	}
 
 	~this()
@@ -1466,6 +1481,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleCASEINSENSITIVE", null );
 		IupSetHandle( "toggleSHOWLISTTYPE", null );
 		IupSetHandle( "toggleSHOWALLMEMBER", null );
+		IupSetHandle( "toggleDWELL", null );
 		IupSetHandle( "toggleLiveNone", null );
 		IupSetHandle( "toggleLiveLight", null );
 		IupSetHandle( "toggleLiveFull", null );		
@@ -1773,7 +1789,11 @@ extern(C) // Callback for CPreferenceDialog
 											size = s;
 									}
 								}
-								fontInformation = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+								version(Window)
+									fontInformation = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+								else
+									fontInformation = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+									
 								IupSetAttribute( ih, "TITLE", fontInformation.toCString );
 
 								scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
@@ -1813,7 +1833,10 @@ extern(C) // Callback for CPreferenceDialog
 									}
 
 									fontName = Util.trim( fontName );
-									fontInformation = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
+									version(Windows)
+										fontInformation = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
+									else
+										fontInformation = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
 									IupSetAttribute( ih, "TITLE", fontInformation.toCString );
 									
 									scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
@@ -2040,7 +2063,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.toggleCaseInsensitive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
 			GLOBAL.toggleShowListType					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWLISTTYPE" ), "VALUE" ) ).dup;
 			GLOBAL.toggleShowAllMember					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWALLMEMBER" ), "VALUE" ) ).dup;
-
+			GLOBAL.toggleEnableDwell					= fromStringz( IupGetAttribute( IupGetHandle( "toggleDWELL" ), "VALUE" ) ).dup;
 
 			if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveNone" ), "VALUE" ) ) == "ON" )
 				GLOBAL.liveLevel = 0;
@@ -2107,21 +2130,14 @@ extern(C) // Callback for CPreferenceDialog
 				}
 			}			
 			scope docTabString = new IupString( GLOBAL.fonts[0].fontString );
-			version(FLATTAB) IupSetAttribute( GLOBAL.documentTabs, "TABFONT", docTabString.toCString ); else IupSetAttribute( GLOBAL.documentTabs, "FONT", docTabString.toCString );
+			IupSetAttribute( GLOBAL.documentTabs, "TABFONT", docTabString.toCString );
 			IupRefresh( GLOBAL.documentTabs );
 			
 			GLOBAL.fileListTree.setTitleFont(); // Change Filelist Title Font
 			scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
 			scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 			scope prjString = new IupString( GLOBAL.fonts[4].fontString ); 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
-			version(FLATTAB)
-			{
-				scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
-			}
-			else
-			{
-				scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "FONT", messageString.toCString );// Bottom
-			}
+			scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
 			scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString ); //IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
 			scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
 			scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)

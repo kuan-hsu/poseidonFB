@@ -352,7 +352,7 @@ struct DocumentTabAction
 				if( cSci !is null )
 				{
 					StatusBarAction.update( _child );
-					version(FLATTAB) IupSetInt( ih, "VALUEPOS" , new_pos );
+					IupSetInt( ih, "VALUEPOS" , new_pos );
 					IupSetFocus( _child );
 
 					// Marked the trees( FileList & ProjectTree )
@@ -370,7 +370,7 @@ struct DocumentTabAction
 						GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
 					}
 					
-					version(FLATTAB) return IUP_CONTINUE;
+					return IUP_CONTINUE;
 				}
 			}
 		}
@@ -385,16 +385,13 @@ struct DocumentTabAction
 
 	static void resetTip()
 	{
-		version(FLATTAB)
+		for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
 		{
-			for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
+			Ihandle* _ih = IupGetChild( GLOBAL.documentTabs, i );
+			if( _ih != null )
 			{
-				Ihandle* _ih = IupGetChild( GLOBAL.documentTabs, i );
-				if( _ih != null )
-				{
-					auto _cSci = ScintillaAction.getCScintilla( _ih );
-					if( _cSci !is null ) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", i, _cSci.getFullPath_IupString.toCString );
-				}
+				auto _cSci = ScintillaAction.getCScintilla( _ih );
+				if( _cSci !is null ) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", i, _cSci.getFullPath_IupString.toCString );
 			}
 		}
 	}
@@ -405,7 +402,7 @@ struct DocumentTabAction
 		{
 			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE" , cast(char*) ih );
 			IupSetFocus( ih );
-			version(FLATTAB) return IUP_CONTINUE;
+			return IUP_CONTINUE;
 		}
 		
 		return IUP_DEFAULT;
@@ -417,7 +414,7 @@ struct DocumentTabAction
 		{
 			IupSetInt( GLOBAL.documentTabs, "VALUEPOS" , pos );
 			IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.documentTabs, pos ) );
-			version(FLATTAB) return IUP_CONTINUE;
+			return IUP_CONTINUE;
 		}
 		
 		return IUP_DEFAULT;
@@ -801,7 +798,7 @@ struct ScintillaAction
 		}
 
 		StatusBarAction.update();
-		version( FLATTAB) DocumentTabAction.resetTip();
+		DocumentTabAction.resetTip();
 
 		return IUP_DEFAULT;
 	}
@@ -876,7 +873,7 @@ struct ScintillaAction
 		}
 
 		StatusBarAction.update();
-		version( FLATTAB) DocumentTabAction.resetTip();
+		DocumentTabAction.resetTip();
 
 		return IUP_DEFAULT;
 	}	
@@ -955,7 +952,7 @@ struct ScintillaAction
 		if( bCancel ) return IUP_IGNORE;
 
 		StatusBarAction.update();
-		version( FLATTAB) DocumentTabAction.resetTip();
+		DocumentTabAction.resetTip();
 		
 		return IUP_DEFAULT;
 	}

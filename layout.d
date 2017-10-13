@@ -56,29 +56,18 @@ void createExplorerWindow()
 
 	GLOBAL.debugPanel = new CDebugger();
 
-	version(FLATTAB)
-	{
-		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
-		//IupSetAttribute( GLOBAL.messageWindowTab, "SHOWCLOSE", "YES" );
-		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGE", "icon_debug_clear" );
-		//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-		//IupSetCallback( GLOBAL.messageWindowTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
-	}
-	else
-	{
-		GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
-	}
-	//GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
+	//IupSetAttribute( GLOBAL.messageWindowTab, "SHOWCLOSE", "YES" );
+	//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGE", "icon_debug_clear" );
+	//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
+
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
-	version(IUPSVN)
-	{
-		version(Windows) IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
-	}	
+	IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
 	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
@@ -213,9 +202,9 @@ extern(C)
 				{
 					p.saveFile();
 				}
-				catch
+				catch( Exception e )
 				{
-					debug IupMessage("","FUCK");
+					IupMessage("Project Save Fail!",toStringz(e.toString()));
 				}
 			}
 
@@ -227,7 +216,7 @@ extern(C)
 				if( parser !is null ) delete parser;
 			}
 		}
-		catch(Exception e )
+		catch( Exception e )
 		{
 			debug IupMessage("",toStringz(e.toString()));
 		}
@@ -666,46 +655,4 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
-
-	/+
-	private int messageWindowTabs_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
-	{
-		// On/OFF Outline Window
-		if( button == IUP_BUTTON1 ) // Left Click
-		{
-			char[] _s = fromStringz( status ).dup;
-			if( _s.length > 5 )
-			{
-				if( _s[5] == 'D' ) // Double Click
-				{
-					menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-				}
-			}
-		}
-		return IUP_DEFAULT;
-	}
-
-	version(FLATTAB)
-	{
-		// Close the document Iuptab......
-		private int messageWindowTabs_tabClose_cb( Ihandle* ih, int pos )
-		{
-			if( pos < 2 )
-			{
-				int valuePos = IupGetInt( GLOBAL.messageWindowTabs, "VALUEPOS" );
-				if( valuePos == 0 )
-				{
-					IupSetAttribute( GLOBAL.outputPanel, "VALUE", "" );
-				}
-				else if( valuePos == 1 )
-				{
-					IupSetAttribute( GLOBAL.searchOutputPanel , "VALUE", "" );
-				}
-			}
-			version(FLATTAB) return IUP_IGNORE;
-			
-			return IUP_DEFAULT;
-		}
-	}
-	+/
 }

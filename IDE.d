@@ -658,6 +658,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "caseinsensitive", GLOBAL.toggleCaseInsensitive );
 			doc ~= setINILineData( "showlisttype", GLOBAL.toggleShowListType );
 			doc ~= setINILineData( "showallmember", GLOBAL.toggleShowAllMember );
+			doc ~= setINILineData( "enabledwell", GLOBAL.toggleEnableDwell );
 			doc ~= setINILineData( "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 			doc ~= setINILineData( "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 			doc ~= setINILineData( "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
@@ -1002,6 +1003,7 @@ struct IDECONFIG
 							case "caseinsensitive":			GLOBAL.toggleCaseInsensitive = right;							break;
 							case "showlisttype":			GLOBAL.toggleShowListType = right;								break;
 							case "showallmember":			GLOBAL.toggleShowAllMember = right;								break;
+							case "enabledwell":				GLOBAL.toggleEnableDwell = right;								break;
 							case "livelevel":				GLOBAL.liveLevel = Integer.atoi( right );						break;
 							case "updateoutlinelive":		GLOBAL.toggleUpdateOutlineLive = right;							break;
 							case "keywordcase":				GLOBAL.keywordCase = Integer.atoi( right );						break;

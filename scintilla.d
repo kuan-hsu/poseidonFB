@@ -100,12 +100,14 @@ class CScintilla
 			
 			int newDocumentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
 			IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, title.toCString );
+			
 			// For IupFlatTabs
-			version(FLATTAB) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
+			IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
 		}		
 
 		//IupSetAttribute( sci, "CLEARALL", "" );
 		setGlobalSetting( true );
+		
 
 		switch( GLOBAL.editorSetting00.EolType )
 		{
@@ -152,7 +154,9 @@ class CScintilla
 		IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
 		
 		IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
-		//IupSetCallback( sci, "GETFOCUS_CB",cast(Icallback) &CScintilla_GETFOCUS_CB );
+		
+		IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
+		IupSetInt( sci, "MOUSEDWELLTIME", 1500 );
 
 		init( _fullPath, insertPos );
 		setText( _text );
@@ -1341,12 +1345,28 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	/*
-	private int CScintilla_GETFOCUS_CB( Ihandle *ih )
+	private int CScintilla_DWELL_CB( Ihandle *ih, int state, int pos, int x, int y )
 	{
+		if( GLOBAL.toggleEnableDwell == "ON" )
+		{
+			if( state == 1 )
+			{
+				if( pos != -1 )
+				{
+					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
+					{
+						AutoComplete.toDefintionAndType( 0, pos ); // SCI_CALLTIPACTIVE 2202
+					}
+				}
+			}
+			else
+			{
+				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
+			}
+		}
+		
 		return IUP_DEFAULT;
 	}
-	*/
 	
 	private int CScintilla_MOTION_CB( Ihandle *ih, int x, int y, char *status )
 	{

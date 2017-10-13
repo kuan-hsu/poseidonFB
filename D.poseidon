@@ -5,12 +5,12 @@
   <MainFile/>
   <TargetName/>
   <CompilerArgs/>
-  <CompilerOption>-debug -L/SUBSYSTEM:windows:4 -odobjs -version=FLATTAB -version=IUPSVN</CompilerOption>
+  <CompilerOption>-debug -L/SUBSYSTEM:windows:4 -odobjs</CompilerOption>
   <Comment/>
   <CompilerPath/>
   <IncludeDirs/>
   <LibDirs>
-    <Name>K:/IUP_SVN</Name>
+    <Name>K:/CodingPark/GameKYO/lib/iup/iup323DLL10</Name>
   </LibDirs>
   <Sources>
     <Name>IDE.d</Name>

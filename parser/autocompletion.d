@@ -1146,10 +1146,10 @@ struct AutoComplete
 			else
 			{
 				testPath = _path4.path();
-				int pos = Util.rindex( testPath, "/bin/" );
-				if( pos > 0 && pos < testPath.length )
+				int _pos = Util.rindex( testPath, "/bin/" );
+				if( _pos > 0 && _pos < testPath.length )
 				{
-					testPath = testPath[0..pos] ~ "/include/freebasic/" ~ include;
+					testPath = testPath[0.._pos] ~ "/include/freebasic/";
 				}
 			}
 			_path4.set( testPath ); // Reset			
@@ -1584,20 +1584,36 @@ struct AutoComplete
 
 		try
 		{
-			while( --pos >= 0 )
+			version(Winodws)
 			{
-				dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+				while( --pos >= 0 )
+				{
+					dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+					if( _dcharString == ":" || _dcharString == "\n" ) break;
+					resultd ~= _dcharString;
+				}
 
-				if( _dcharString == ":" || _dcharString == "\n" ) break;
-				
-				resultd ~= _dcharString;
+				resultd = Util.trim!(dchar)( resultd.reverse ).dup;
+				if( resultd.length > 7 )
+				{
+					result = lowerCase( UTF.toString( resultd ) );
+					if( result[0..8] == "#include" ) return true;
+				}
 			}
-
-			resultd = Util.trim!(dchar)( resultd.reverse ).dup;
-			if( resultd.length > 7 )
+			else
 			{
-				result = lowerCase( UTF.toString( resultd ) );
-				if( result[0..8] == "#include" ) return true;
+				while( --pos >= 0 )
+				{
+					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					if( s == ":" || s == "\n" ) break;
+					result ~= s;
+				}
+				
+				result = lowerCase( Util.trim( result.reverse ) ).dup;
+				if( result.length > 7 )
+				{
+					if( result[0..8] == "#include" ) return true;
+				}
 			}
 		}
 		catch( Exception e )
@@ -2209,20 +2225,21 @@ struct AutoComplete
 		TYPE = 1		goto definition
 		TYPE = 2		goto member procedure
 	*/
-	static void toDefintionAndType( int TYPE )
+	static void toDefintionAndType( int TYPE, int currentPos = -1 )
 	{
 		if( GLOBAL.enableParser != "ON" ) return;
 		
 		try
 		{
-			char[] word;
+			char[]	word;
+			bool	bDwell;
 			
 			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
 			{
 				if( upperCase(cSci.getFullPath) in GLOBAL.parserManager ){} else{ return; }
 				
-				int currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+				if( currentPos == -1 ) currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla ); else bDwell = true;
 				if( currentPos < 1 ) return;
 				
 				word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
@@ -2235,7 +2252,7 @@ struct AutoComplete
 				{
 					if( GLOBAL.toggleUseManual == "ON" )
 					{
-						if( TYPE == 0 )
+						if( TYPE == 0 && !bDwell )
 						{
 							scope chmPath = new FilePath( GLOBAL.manualPath.toDString );
 							if( chmPath.exists() )
@@ -2282,7 +2299,7 @@ struct AutoComplete
 											}
 											else
 											{
-												IupExecute( "kchmviewer", toStringz( "--sindex " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );
+												IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );
 												// "kchmviewer --sindex %s /chm-path
 											}
 

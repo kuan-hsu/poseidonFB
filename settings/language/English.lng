@@ -110,6 +110,7 @@ options=Options
 				selectcase=Selection Of Autocomplete List Is Case Insensitive
 				showlisttype=Show Autocomplete List Type
 				showallmembers=Show All Members( public, protected, private )
+				enabledwell=Enable Mouse Dwell to Show Type
 				parserlive=ParseLive! Level
 					none=None
 					light=Light

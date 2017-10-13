@@ -149,6 +149,7 @@ struct GLOBAL
 	static char[]				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
 	static char[]				toggleShowListType = "OFF";
 	static char[]				toggleShowAllMember = "ON";
+	static char[]				toggleEnableDwell = "OFF";
 	
 	static char[]				toggleUseManual = "OFF";
 	
@@ -530,6 +531,7 @@ struct GLOBAL
 						GLOBAL.languageItems["selectcase"] = new IupString( cast(char[]) "Selection Of Autocomplete List Is Case Insensitive" );
 						GLOBAL.languageItems["showlisttype"] = new IupString( cast(char[]) "Show Autocomplete List Type" );
 						GLOBAL.languageItems["showallmembers"] = new IupString( cast(char[]) "Show All Members( public, protected, private )" );
+						GLOBAL.languageItems["enabledwell"] = new IupString( cast(char[]) "Enable Mouse Dwell to Show Type" );
 						GLOBAL.languageItems["parserlive"] = new IupString( cast(char[]) "ParseLive! Level" );
 							GLOBAL.languageItems["none"] = new IupString( cast(char[]) "None" );
 							GLOBAL.languageItems["light"] = new IupString( cast(char[]) "Light" );

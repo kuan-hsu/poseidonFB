@@ -559,7 +559,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.320)\nBy Kuan Hsu (Taiwan)\n2017.10.12" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.321)\nBy Kuan Hsu (Taiwan)\n2017.10.13" );
 		return IUP_DEFAULT;
 	});
 	
@@ -567,7 +567,7 @@ void createMenu()
 	IupSetAttribute( item_manual, "IMAGE", "icon_fbmanual" );
 	IupSetCallback( item_manual, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupExecute( GLOBAL.manualPath.toCString, "" );
+		version(Windows) IupExecute( GLOBAL.manualPath.toCString, "" ); else IupExecute( "kchmviewer", GLOBAL.manualPath.toCString );
 		return IUP_DEFAULT;
 	});	
 
