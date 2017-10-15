@@ -244,8 +244,11 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
-	IupSetAttribute( GLOBAL.mainDlg, "STARTFOCUS", "YES" );
-	IupSetCallback( GLOBAL.mainDlg, "FOCUS_CB", cast(Icallback) &mainDialog_FOCUS_cb );
+	version(Windows)
+	{
+		IupSetAttribute( GLOBAL.mainDlg, "STARTFOCUS", "YES" );
+		IupSetCallback( GLOBAL.mainDlg, "FOCUS_CB", cast(Icallback) &mainDialog_FOCUS_cb );
+	}
 
 	
 	
@@ -284,6 +287,7 @@ void main( char[][] args )
 	scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline
 	
 	GLOBAL.fileListTree.setTitleFont(); // Change Filelist Title Font
+	GLOBAL.messagePanel.setScintillaColor(); // Set MessagePanel Color
 	
 	if( args.length > 1 )
 	{

@@ -2011,20 +2011,14 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.outlineTree.changeColor();
 			GLOBAL.fileListTree.changeColor();
 			
-			/+
-			version(Windows) IupSetAttribute( GLOBAL.outputPanel, "BGCOLOR", IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR" ) );
-			Ihandle* formattagOutput = IupUser();
-			IupSetAttribute(formattagOutput, "SELECTIONPOS", toStringz( "ALL" ));
-			IupSetAttribute(formattagOutput, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
-			IupSetAttribute( GLOBAL.outputPanel, "ADDFORMATTAG_HANDLE", cast(char*) formattagOutput);
-			+/
-			GLOBAL.messagePanel.applyOutputPanelFormat();
-			
 			// GLOBAL.editColor.keyWord is IupString class
 			GLOBAL.editColor.keyWord[0]					= IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" );
 			GLOBAL.editColor.keyWord[1]					= IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" );
 			GLOBAL.editColor.keyWord[2]					= IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR" );
 			GLOBAL.editColor.keyWord[3]					= IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR" );
+			
+			// Set GLOBAL.messagePanel Color
+			GLOBAL.messagePanel.applyColor();
 			
 			char[] templateName = Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE" ) ) ).dup;
 			if( templateName.length )

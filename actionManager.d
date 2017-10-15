@@ -648,7 +648,8 @@ struct ScintillaAction
 						char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
 						if( upperCase(s) == upperCase(fullPath) )
 						{
-							version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
+							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+							IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
 							result = result | 2;
 							break;
 						}
@@ -664,19 +665,6 @@ struct ScintillaAction
 	{
 		int pos = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
 		return IupGetChild( GLOBAL.documentTabs, pos );
-
-		/*
-		for( int i = 0; i < IupGetChildCount( GLOBAL.documentTabs ); i++ )
-		{
-			Ihandle* _child = IupGetChild( GLOBAL.documentTabs, i );
-			if( fromStringz( IupGetAttribute( _child, "VISIBLE" ) ) == "YES" )  // Active Tab Child
-			{
-				return _child;
-			}
-		}
-
-		return null;
-		*/
 	}
 
 	static CScintilla getActiveCScintilla()

@@ -233,6 +233,8 @@ class CArgOptionDialog : CBaseDialog
 			IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 			GLOBAL.currentCustomCompilerOption = cast(char[])"";
 		}
+		
+		IupDestroy( _dlg );
 	}
 	
 	char[][] show( int x, int y, int dummy = -1 ) // Overload form CBaseDialog

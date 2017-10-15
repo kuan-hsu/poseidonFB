@@ -233,12 +233,28 @@ class CToolBar
 		});			
 		
 		bitButton = IupToggle( null, "bit" );
-		version(Windows) IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64" ); else IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64" );
-		IupSetAttribute( bitButton, "VALUE", toStringz( GLOBAL.editorSetting00.Bit64 ) );
+		version(Windows)
+		{
+			IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64" );
+			IupSetAttribute( bitButton, "VALUE", toStringz( GLOBAL.editorSetting00.Bit64 ) );
+		}
+		else
+		{
+			IupSetAttribute( bitButton, "ACTIVE", "NO" );
+			IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_64,IMPRESS=icon_64" );
+			GLOBAL.editorSetting00.Bit64 = "ON";
+		}
 		IupSetAttribute( bitButton, "TIP", "32 / 64 bit" );
 		IupSetCallback( bitButton, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			if( GLOBAL.editorSetting00.Bit64 == "ON" ) GLOBAL.editorSetting00.Bit64 = "OFF"; else GLOBAL.editorSetting00.Bit64 = "ON";
+			version(Windows)
+			{
+				if( GLOBAL.editorSetting00.Bit64 == "ON" ) GLOBAL.editorSetting00.Bit64 = "OFF"; else GLOBAL.editorSetting00.Bit64 = "ON";
+			}
+			else
+			{
+				GLOBAL.editorSetting00.Bit64 = "ON";
+			}
 			return IUP_DEFAULT;
 		});			
 		
@@ -325,16 +341,10 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 1 ) ExecuterAction.compile( result[0] );
-					/*
-					if( GLOBAL.argsDlg !is null )
-					{
-						char[][] result = GLOBAL.argsDlg.show( 1 );
-						if( result.length == 1 ) ExecuterAction.compile( result[0] );
-					}
-					*/
+					delete dlg;
 				}
 			}
 		}
@@ -353,16 +363,10 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 1 ) ExecuterAction.buildAll( result[0] );
-					/*
-					if( GLOBAL.argsDlg !is null )
-					{
-						char[][] result = GLOBAL.argsDlg.show( 1 );
-						if( result.length == 1 ) ExecuterAction.buildAll( result[0] );
-					}
-					*/
+					delete dlg;
 				}
 			}
 		}
@@ -381,22 +385,13 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
 					if( result.length == 2 )
 					{
 						if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1] );
 					}
-					/*
-					if( GLOBAL.argsDlg !is null )
-					{
-						char[][] result = GLOBAL.argsDlg.show( 3 );
-						if( result.length == 2 )
-						{
-							if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1] );
-						}
-					}
-					*/
+					delete dlg;
 				}
 			}
 		}
@@ -415,16 +410,10 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 2 );
+					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 2 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 2  );
 					if( result.length == 1 ) ExecuterAction.run( result[0] );
-					/*
-					if( GLOBAL.argsDlg !is null )
-					{
-						char[][] result = GLOBAL.argsDlg.show( 2 );
-						if( result.length == 1 ) ExecuterAction.run( result[0] );
-					}
-					*/
+					delete dlg;
 				}
 			}
 		}
@@ -443,16 +432,10 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
 					if( result.length == 2 ) ExecuterAction.quickRun( result[0], result[1] );
-					/*
-					if( GLOBAL.argsDlg !is null )
-					{
-						char[][] result = GLOBAL.argsDlg.show( 3 );
-						if( result.length == 2 ) ExecuterAction.quickRun( result[0], result[1] );
-					}
-					*/
+					delete dlg;
 				}
 			}
 		}

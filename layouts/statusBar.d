@@ -67,8 +67,6 @@ class CStatusBar
 		
 		layoutHandle = IupBackgroundBox( _hbox );
 		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
-		// Strange Bugs Fixed
-		//IupSetCallback( layoutHandle, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 		
 		version(Windows)
 		{

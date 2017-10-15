@@ -275,6 +275,9 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							count = actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, replaceText, _findMethod, buttonIndex );
 						}
+						
+						GLOBAL.messagePanel.applySearchOutputPanelINDICATOR();
+						
 						break;
 						
 					case 2:
@@ -282,6 +285,9 @@ extern(C) // Callback for CFindInFilesDialog
 						{
 							count = count + actionManager.SearchAction.findInOneFile( cSci.getFullPath, findText, replaceText, _findMethod, buttonIndex );
 						}
+						
+						GLOBAL.messagePanel.applySearchOutputPanelINDICATOR();
+						
 						break;
 						
 					case 3:
@@ -292,6 +298,8 @@ extern(C) // Callback for CFindInFilesDialog
 							{
 								count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
 							}
+							
+							GLOBAL.messagePanel.applySearchOutputPanelINDICATOR();
 						}
 						else
 						{
@@ -313,6 +321,8 @@ extern(C) // Callback for CFindInFilesDialog
 									count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
 								}
 							}
+							
+							GLOBAL.messagePanel.applySearchOutputPanelINDICATOR();
 						}
 						else
 						{

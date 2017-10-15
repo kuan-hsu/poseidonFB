@@ -23,7 +23,31 @@ void createTabs()
 	IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
+	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
+	/*
+	GLOBAL.documentTabs = IupFlatTabs( null );
+	
+	IupSetAttribute( GLOBAL.documentTabs, "SHOWCLOSE", "YES" );
+	IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "1" );
+	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
+	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
+	IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
+	IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
+	// Current Tabs
+	IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", GLOBAL.editColor.keyWord[1].toCString );
+	IupSetAttribute( GLOBAL.documentTabs, "BGCOLOR", GLOBAL.editColor.scintillaBack.toCString );
+	// Not The Current Tabs
+	IupSetAttribute( GLOBAL.documentTabs , "TABSFORECOLOR", GLOBAL.editColor.scintillaFore.toCString );
+	IupSetAttribute( GLOBAL.documentTabs , "TABSBACKCOLOR", GLOBAL.editColor.scintillaBack.toCString );
+	// Highlight
+	IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", GLOBAL.editColor.keyWord[2].toCString );
+	IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", GLOBAL.editColor.fold.toCString );
+	
+	IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
+	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
+	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );	
+	*/
 }
 
 extern(C)

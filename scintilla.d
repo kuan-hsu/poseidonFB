@@ -1342,6 +1342,24 @@ extern(C)
 			}
 		}
 		
+		// Using IupFlatTabs at Linux, Double Click will trigget BUTTON_CB on IupScintilla, then BUTTON_CB on IupFlatTabs
+		version(linux)
+		{
+			if( pressed == 1 ) // in
+			{
+				if( button == IUP_BUTTON2 ) return IUP_IGNORE;
+			}
+		
+			if( button == IUP_BUTTON1 ) // Left Click
+			{
+				char[] _s = fromStringz( status ).dup;
+				if( _s.length > 5 )
+				{
+					if( _s[5] == 'D' ) return IUP_IGNORE;
+				}
+			}
+		}
+		
 		return IUP_DEFAULT;
 	}
 	

@@ -33,8 +33,6 @@ void createExplorerWindow()
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
 	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=NO,LAYOUTDRAG=NO,SHOWGRIP=LINES" );
 	version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
-	// Strange Bugs Fixed
-	//IupSetCallback( IupGetChild( GLOBAL.fileListSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 
 	createTabs();
 
@@ -48,37 +46,60 @@ void createExplorerWindow()
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.fileListSplit, GLOBAL.dndDocumentZBox );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
-	// Strange Bugs Fixed
-	//IupSetCallback( IupGetChild( GLOBAL.explorerSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
 
 	GLOBAL.debugPanel = new CDebugger();
-
-	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
-	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
-	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
-	//IupSetAttribute( GLOBAL.messageWindowTab, "SHOWCLOSE", "YES" );
-	//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGE", "icon_debug_clear" );
-	//IupSetAttribute( GLOBAL.messageWindowTabs, "CLOSEIMAGEPRESS", "icon_debug_clear" );
-	IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
-	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-
-	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
-	IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
-
-	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
-	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+	/*
+	version(Windows)
+	{
+	*/
+		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
+		IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
+		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
+		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+		/*
+		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
+		IupSetAttribute( GLOBAL.messageWindowTabs , "TABSFORECOLOR", GLOBAL.editColor.outputFore.toCString );
+		IupSetAttribute( GLOBAL.messageWindowTabs , "TABSBACKCOLOR", GLOBAL.editColor.outputBack.toCString );
+	
+		IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
+		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
+		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+		*/
+	/*
+	}
+	else
+	{
+		GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
+		IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
+		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+	
+	}
+	*/
 	
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 ); else IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
-	// Strange Bugs Fixed
-	//IupSetCallback( IupGetChild( GLOBAL.messageSplit, 0 ), "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* ih ){
 		if( GLOBAL.fileListTree.getTreeH <= 6 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );		
 		return IUP_IGNORE;

@@ -568,7 +568,8 @@ struct ExecuterAction
 
 			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
 			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
-
+			
+			GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 			if( bError )
 			{
