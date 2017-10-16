@@ -385,54 +385,75 @@ extern(C)
 										fileName = Path.normalize( lineText[0..openPos] );
 										
 										if( ExecuterAction.quickRunFile.length ) fileName = ExecuterAction.quickRunFile;
-
-										if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
+										
+										if( upperCase(fileName.dup) in GLOBAL.scintillaManager )
 										{
-											if( GLOBAL.compilerAnootation == "ON" )
+											ScintillaAction.openFile( fileName.dup, lineNumber );
+										}
+										else
+										{
+											if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
 											{
-												char[] allMessage = fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup;
-
-												foreach( char[] s; Util.splitLines( allMessage ) )
+												if( GLOBAL.compilerAnootation == "ON" )
 												{
-													if( s.length )
+													char[] allMessage = fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup;
+													
+													int prevLineNumber, prevLineNumberCount;
+
+													foreach( char[] s; Util.splitLines( allMessage ) )
 													{
-														bool bWarning;
-														int lineNumberTail = Util.index( s, ") error" );
-														if( lineNumberTail >= s.length )
+														if( s.length )
 														{
-															lineNumberTail = Util.index( s, ") warning" );
-															bWarning = true;
-														}
-
-														if( lineNumberTail < s.length )
-														{
-															int lineNumberHead = Util.index( s, "(" );
-															if( lineNumberHead < lineNumberTail - 1 )
+															bool bWarning;
+															int lineNumberTail = Util.index( s, ") error" );
+															if( lineNumberTail >= s.length )
 															{
-																char[]	filePath = Path.normalize( s[0..lineNumberHead++] );
-																if( fileName == filePath )
+																lineNumberTail = Util.index( s, ") warning" );
+																bWarning = true;
+															}
+
+															if( lineNumberTail < s.length )
+															{
+																int lineNumberHead = Util.index( s, "(" );
+																if( lineNumberHead < lineNumberTail - 1 )
 																{
-																	if( upperCase(filePath) in GLOBAL.scintillaManager )
+																	char[]	filePath = Path.normalize( s[0..lineNumberHead++] );
+																	if( fileName == filePath )
 																	{
-																		CScintilla cSci = GLOBAL.scintillaManager[upperCase(filePath)];
-
-																		int		ln = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
-																		char[]	annotationText = s[lineNumberTail+2..length];
-																		char[]	getText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln ) ).dup;
-																		if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
-
-																		if( IupGetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln ) < 40 )
+																		if( upperCase(filePath) in GLOBAL.scintillaManager )
 																		{
-																			IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( s[lineNumberTail+2..length] ) );
+																			CScintilla cSci = GLOBAL.scintillaManager[upperCase(filePath)];
+
+																			int		ln = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
+																			char[]	annotationText = s[lineNumberTail+2..length];
+																			
+																			if( ln != prevLineNumber )
+																			{
+																				prevLineNumber = ln;
+																				prevLineNumberCount = 1;
+																				annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
+																				prevLineNumberCount ++;
+																			}
+																			else
+																			{
+																				annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
+																				prevLineNumberCount ++;
+																			}
+																	
+																			char[]	getText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln ) ).dup;
+																			if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
+
+																			IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( annotationText ) );
 																			if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 40 );
+																			IupSetAttribute( GLOBAL.scintillaManager[upperCase(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 																		}
 																	}
 																}
 															}
 														}
 													}
+													//IupSetAttribute( GLOBAL.scintillaManager[upperCase(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 												}
-												IupSetAttribute( GLOBAL.scintillaManager[upperCase(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 											}
 										}
 

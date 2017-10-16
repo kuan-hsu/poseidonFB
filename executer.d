@@ -100,6 +100,8 @@ struct ExecuterAction
 		{
 			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			
+			int prevLineNumber, prevLineNumberCount;
+			
 			foreach( char[] s; Util.splitLines( message ) )
 			{
 				bool bWarning;
@@ -124,6 +126,20 @@ struct ExecuterAction
 							int		lineNumber = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
 
 							char[]	annotationText = s[lineNumberTail+2..length];
+							
+							if( lineNumber != prevLineNumber )
+							{
+								prevLineNumber = lineNumber;
+								prevLineNumberCount = 1;
+								annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
+								prevLineNumberCount ++;
+							}
+							else
+							{
+								annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
+								prevLineNumberCount ++;
+							}
+							
 							char[]	getText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber ) );
 							if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
 							IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber, toStringz( annotationText ) );
@@ -273,6 +289,8 @@ struct ExecuterAction
 
 			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
 			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+			
+			GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 			
 			if( bError )
 			{
@@ -792,6 +810,8 @@ struct ExecuterAction
 			
 			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
 			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+
+			GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 			if( !bError )
 			{
