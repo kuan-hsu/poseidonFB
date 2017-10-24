@@ -109,7 +109,7 @@ class CFindInFilesDialog : CBaseDialog
 	
 		Ihandle* vBox = IupVbox( hBox00, hBox01, frameOption, hBoxButton, bottom, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=0,EXPANDCHILDREN=YES" );
-		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "FreeMono,Bold 9" );
+		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "Ubuntu Mono, 9" );
 
 		IupAppend( _dlg, vBox );
 	}	
@@ -130,7 +130,7 @@ class CFindInFilesDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );
 		}
 		
 		createLayout();

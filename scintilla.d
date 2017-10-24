@@ -354,7 +354,7 @@ class CScintilla
 		}
 		else
 		{
-			font = "FreeMono";
+			font = "Ubuntu Mono";
 		}
 
 		getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
@@ -878,7 +878,7 @@ extern(C)
 			
 			// Ctrl + Click for Goto Definition
 			char[] statusString = fromStringz( status ).dup;
-			if( statusString.length > 1 )
+			if( statusString.length > 6 )
 			{
 				if( statusString[1] == 'C' )
 				{
@@ -889,8 +889,22 @@ extern(C)
 						
 					return IUP_DEFAULT;
 				}
-			}
-			
+				else if( statusString[6] == 'A' )
+				{
+					if( button == IUP_BUTTON1 )
+					{
+						auto cacheUnit = GLOBAL.navigation.back();
+						if( cacheUnit._line != -1 ) ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+					}
+					else if( button == IUP_BUTTON3 )
+					{
+						auto cacheUnit = GLOBAL.navigation.forward();
+						if( cacheUnit._line != -1 ) ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+					}
+						
+					return IUP_DEFAULT;
+				}
+			}				
 			
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
@@ -978,13 +992,15 @@ extern(C)
 					return IUP_DEFAULT;
 				});
 				
+				/*
 				Ihandle* _back = IupItem( GLOBAL.languageItems["sc_backdefinition"].toCString, null );
 				IupSetAttribute( _back, "IMAGE", "icon_back" );
 				IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
-					AutoComplete.backDefinition();
+					//AutoComplete.backDefinition();
 					return IUP_DEFAULT;
 				});
+				*/
 				
 				Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
 				IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" );
@@ -1218,7 +1234,9 @@ extern(C)
 												_refresh,
 												_goto,
 												_gotoProcedure,
+												/*
 												_back,
+												*/
 												_showType,
 												null
 											);
@@ -1445,7 +1463,7 @@ extern(C)
 	{
 		try
 		{
-			//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Keycode:" ~ Integer.toString( c ) ) );
+			//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
 			AutoComplete.bAutocompletionPressEnter = false;
 			
 			if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
@@ -1697,13 +1715,23 @@ extern(C)
 						}
 						break;
 						
-					case "backdefinition":
+					case "backnav":
 						if( sk.keyValue == c )
 						{
-							AutoComplete.backDefinition();
+							auto cacheUnit = GLOBAL.navigation.back();
+							if( cacheUnit._line != -1 ) ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
 							return IUP_IGNORE;
 						}
 						break;
+
+					case "forwardnav":
+						if( sk.keyValue == c )
+						{
+							auto cacheUnit = GLOBAL.navigation.forward();
+							if( cacheUnit._line != -1 ) ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+							return IUP_IGNORE;
+						}
+						break;		
 					
 					// Custom Tools
 					case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":

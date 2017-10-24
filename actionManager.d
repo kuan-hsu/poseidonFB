@@ -1122,6 +1122,14 @@ struct ScintillaAction
 		
 		return -1;
 	}
+	
+	static int getCurrentLine( Ihandle* ih )
+	{
+		if( ih != null ) return getLinefromPos( ih, getCurrentPos( ih ) ) + 1;
+		
+		return -1;
+	}
+	
 
 	static char[] getCurrentChar( int bias, Ihandle* ih = null )
 	{
@@ -1800,7 +1808,7 @@ struct SearchAction
 					}
 					else
 					{
-						findIndex = Util.index( toLower( document ), toLower( findText ), findIndex );
+						findIndex = Util.index( lowerCase( document ), toLower( findText ), findIndex );
 					}
 					
 					if( findIndex < document.length )
@@ -1847,7 +1855,7 @@ struct SearchAction
 					int pos;
 					if(!( searchRule & MATCHCASE ) )
 					{
-						pos = Util.index( toLower( line ) , toLower( findText ) );
+						pos = Util.index( lowerCase( line ) , toLower( findText ) );
 					}
 					else
 					{

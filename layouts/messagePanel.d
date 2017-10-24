@@ -128,6 +128,11 @@ class CMessageAndSearch
 			IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 		
+		// Caret Line ( Current Line )
+		IupSetAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
+		IupSetAttribute( outputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
+
+		
 		// searchOutputPanel
 		IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR32", GLOBAL.editColor.searchFore.toCString );		// 32
 		IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR32", GLOBAL.editColor.searchBack.toCString );		// 32
@@ -173,7 +178,11 @@ class CMessageAndSearch
 			IupScintillaSendMessage( searchOutputPanel, 2067, false, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
 			IupScintillaSendMessage( searchOutputPanel, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( searchOutputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
-		}		
+		}
+
+		// Caret Line ( Current Line )
+		IupSetAttribute( searchOutputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
+		IupSetAttribute( searchOutputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
 	}
 	
 	void printOutputPanel( char[] txt, bool bClear = false )
@@ -253,20 +262,14 @@ class CMessageAndSearch
 				int openPos = Util.index( lineText, "(" );
 				if( openPos < lineText.length )
 				{
-					int closePos = Util.index( lineText, "):", openPos );
-					if( closePos < lineText.length )
+					int closePos = Util.index( lineText, "): ", openPos );
+					if( closePos < lineText.length - 2 )
 					{
-						if( closePos > openPos+1 )
+						if( closePos > openPos + 1 )
 						{
-							if( closePos < lineText.length - 1 )
-							{
-								if( lineText[closePos+1] == ':' )
-								{
-									int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-									IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos+2 ); // SCI_INDICATORFILLRANGE =  2504
-									IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos+3, lineText.length - closePos - 2 ); // SCI_INDICATORFILLRANGE =  2504
-								}
-							}
+							int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
 						}
 					}
 				}

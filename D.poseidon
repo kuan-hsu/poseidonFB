@@ -51,6 +51,7 @@
     <Name>project.d</Name>
     <Name>scintilla.d</Name>
     <Name>tools.d</Name>
+    <Name>navcache.d</Name>
   </Sources>
   <Includes/>
   <Others>

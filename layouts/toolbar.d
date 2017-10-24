@@ -16,6 +16,7 @@ class CToolBar
 	Ihandle* 			btnSave, btnSaveAll;
 	Ihandle* 			btnUndo, btnRedo;
 	Ihandle* 			btnCut, btnCopy, btnPaste;
+	Ihandle* 			btnBackNav, btnForwardNav, btnClearNav;
 	Ihandle* 			btnMark, btnMarkPrev, btnMarkNext, btnMarkClean;
 	Ihandle* 			btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun;
 	//Ihandle*			outlineButtonHide, messageButtonHide;
@@ -35,6 +36,10 @@ class CToolBar
 		btnCut		= IupButton( null, "Cut" );
 		btnCopy		= IupButton( null, "Copy" );
 		btnPaste	= IupButton( null, "Paste" );
+
+		btnBackNav		= IupButton( null, "Back" );
+		btnForwardNav	= IupButton( null, "Forward" );
+		btnClearNav		= IupButton( null, "Clear" );
 
 		btnMark		= IupButton( null, "Mark" );
 		btnMarkPrev	= IupButton( null, "MarkPrev" );
@@ -85,6 +90,36 @@ class CToolBar
 		IupSetAttributes( btnPaste, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_paste" );
 		IupSetAttribute( btnPaste, "TIP", GLOBAL.languageItems["caption_paste"].toCString );
 		IupSetCallback( btnPaste, "ACTION", cast(Icallback) &menu.paste_cb ); // From menu.d
+
+		// Nav
+		IupSetAttributes( btnBackNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left,,ACTIVE=NO" );
+		IupSetAttribute( btnBackNav, "TIP", GLOBAL.languageItems["sc_backnav"].toCString );
+		IupSetHandle( "toolbar_BackNav", btnBackNav );
+		IupSetCallback( btnBackNav, "ACTION", cast(Icallback) function()
+		{
+			auto cacheUnit = GLOBAL.navigation.back();
+			if( cacheUnit._line != -1 ) ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+			return IUP_DEFAULT;
+		});		
+		
+		IupSetAttributes( btnForwardNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_right,ACTIVE=NO" );
+		IupSetAttribute( btnForwardNav, "TIP", GLOBAL.languageItems["sc_forwardnav"].toCString );
+		IupSetHandle( "toolbar_ForwardNav", btnForwardNav );
+		IupSetCallback( btnForwardNav, "ACTION", cast(Icallback) function()
+		{
+			auto cacheUnit = GLOBAL.navigation.forward();
+			if( cacheUnit._line != -1 ) ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+			return IUP_DEFAULT;
+		});			
+		
+		IupSetAttributes( btnClearNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear" );
+		IupSetAttribute( btnClearNav, "TIP", GLOBAL.languageItems["clear"].toCString );
+		IupSetHandle( "toolbar_ClearNav", btnClearNav );
+		IupSetCallback( btnClearNav, "ACTION", cast(Icallback) function()
+		{
+			GLOBAL.navigation.clear();
+			return IUP_DEFAULT;
+		});
 
 		IupSetAttributes( btnMark, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_mark" );
 		IupSetAttribute( btnMark, "TIP", GLOBAL.languageItems["bookmark"].toCString );
@@ -188,6 +223,7 @@ class CToolBar
 		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild" );
 		IupSetAttribute( btnBuildAll, "TIP", GLOBAL.languageItems["sc_build"].toCString );
 		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
+		IupSetHandle( "toolbar_BuildAll", btnBuildAll );
 
 		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun" );
 		IupSetAttribute( btnQuickRun, "TIP", GLOBAL.languageItems["sc_quickrun"].toCString );
@@ -266,7 +302,7 @@ class CToolBar
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		
 		// IUP Container to put buttons on~
-		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[2], btnMark, btnMarkPrev,
+		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[6], btnBackNav, btnForwardNav, btnClearNav, labelSEPARATOR[2], btnMark, btnMarkPrev,
 						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], /*outlineButtonHide, messageButtonHide, labelSEPARATOR[6],*/ bitButton, guiButton, listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 		IupSetAttributes( handle, "GAP=3,ALIGNMENT=ACENTER" );

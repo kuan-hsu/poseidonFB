@@ -29,17 +29,15 @@ class CShortCutDialog : CBaseDialog
 		
 		if( item < 8 )
 			item --;
-		else if( item < 17 )
+		else if( item < 19 )
 			item -= 2;
-		else if( item < 24 )
+		else if( item < 25 )
 			item -= 3;
-		else if( item < 29 )
+		else if( item < 30 )
 			item -= 4;
-		else if( item < 32 )
+		else if( item < 33 )
 			item -= 5;
-		else if( item < 32 )
-			item -= 5;
-		else if( item < 42 )
+		else if( item < 43 )
 			item -= 6;
 
 
@@ -107,7 +105,7 @@ class CShortCutDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );
 		}		
 
 		createLayout( item, listText );
@@ -180,31 +178,32 @@ extern(C) // Callback for CSingleTextDialog
 			case "undo":						pos = 11;	break;
 			case "redo":						pos = 12;	break;
 			case "comment":						pos = 13;	break;
+			case "backnav":						pos = 14;	break;
+			case "forwardnav":					pos = 15;	break;
 			
-			case "showtype":					pos = 14;	break;
-			case "defintion":					pos = 15;	break;
-			case "backdefinition":				pos = 16;	break;
-			case "procedure":					pos = 17;	break;
-			case "autocomplete":				pos = 18;	break;
-			case "reparse":						pos = 19;	break;
+			case "showtype":					pos = 16;	break;
+			case "defintion":					pos = 17;	break;
+			case "procedure":					pos = 18;	break;
+			case "autocomplete":				pos = 19;	break;
+			case "reparse":						pos = 20;	break;
 			
-			case "compilerun":					pos = 20;	break;
-			case "quickrun":					pos = 21;	break;
-			case "run":							pos = 22;	break;
-			case "build":						pos = 23;	break;
+			case "compilerun":					pos = 21;	break;
+			case "quickrun":					pos = 22;	break;
+			case "run":							pos = 23;	break;
+			case "build":						pos = 24;	break;
 			
-			case "outlinewindow":				pos = 24;	break;
-			case "messagewindow":				pos = 25;	break;
+			case "outlinewindow":				pos = 25;	break;
+			case "messagewindow":				pos = 26;	break;
 			
-			case "customtool1":					pos = 26;	break;
-			case "customtool2":					pos = 27;	break;
-			case "customtool3":					pos = 28;	break;
-			case "customtool4":					pos = 29;	break;
-			case "customtool5":					pos = 30;	break;
-			case "customtool6":					pos = 31;	break;
-			case "customtool7":					pos = 32;	break;
-			case "customtool8":					pos = 33;	break;
-			case "customtool9":					pos = 34;	break;
+			case "customtool1":					pos = 27;	break;
+			case "customtool2":					pos = 28;	break;
+			case "customtool3":					pos = 29;	break;
+			case "customtool4":					pos = 30;	break;
+			case "customtool5":					pos = 31;	break;
+			case "customtool6":					pos = 32;	break;
+			case "customtool7":					pos = 33;	break;
+			case "customtool8":					pos = 34;	break;
+			case "customtool9":					pos = 35;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;
@@ -233,15 +232,15 @@ extern(C) // Callback for CSingleTextDialog
 			char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
 			if( pos < 6 )
 				pos ++;
-			else if( pos < 14 )
+			else if( pos < 16 )
 				pos += 2;
-			else if( pos < 20 )
+			else if( pos < 21 )
 				pos += 3;
-			else if( pos < 24 )
+			else if( pos < 25 )
 				pos += 4;
-			else if( pos < 26 )
+			else if( pos < 27 )
 				pos += 5;
-			else if( pos < 35 )
+			else if( pos < 36 )
 				pos += 6;
 
 			scope _cString = new IupString ;

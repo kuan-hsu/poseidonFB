@@ -64,7 +64,7 @@ struct GLOBAL
 
 	import tango.stdc.stringz;
 
-	
+	import navcache;
 	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.idemessageDlg;
 	import parser.ast, parser.scanner, parser.parser;
@@ -183,7 +183,7 @@ struct GLOBAL
 
 	static fontUint[]			fonts;
 	
-	static char[][]				stackGotoDefinition;
+	//static char[][]				stackGotoDefinition;
 
 	static bool					bKeyUp = true;
 	static int					KeyNumber;
@@ -196,6 +196,9 @@ struct GLOBAL
 	
 	
 	static int					tabDocumentPos = -1;
+	
+	//
+	static CNavCache			navigation;
 
 
 	static this()
@@ -319,52 +322,54 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk12;
 		ShortKey sk13 = { "comment", "(Un)comment", 536870994 };
 		GLOBAL.shortKeys ~= sk13;
-		
-		ShortKey sk14 = { "showtype", "Show Type", 65470 };
-		GLOBAL.shortKeys ~= sk14;		
-		ShortKey sk15 = { "defintion", "Goto Defintion", 1073741895 };
+		ShortKey sk14 = { "backnav", "Backward Navigation", 536870984 };
+		GLOBAL.shortKeys ~= sk14;
+		ShortKey sk15 = { "forwardnav", "Forkward Navigation", 805306440 };
 		GLOBAL.shortKeys ~= sk15;
-		ShortKey sk16 = { "backdefinition", "Back Definition", 1342177351 };
-		GLOBAL.shortKeys ~= sk16;		
-		ShortKey sk17 = { "procedure", "Goto Member Procedure", 536870992 };		
-		GLOBAL.shortKeys ~= sk17;
-		ShortKey sk18 = { "autocomplete", "Autocomplete", 536870993 };
-		GLOBAL.shortKeys ~= sk18;
-		ShortKey sk19 = { "reparse", "Reparse", 65471 };
-		GLOBAL.shortKeys ~= sk19;
-
-		ShortKey sk20 = { "compilerun", "Compile & Run", 536936386 };
-		GLOBAL.shortKeys ~= sk20;
-		ShortKey sk21 = { "quickrun", "Quick Run", 268500930 };
-		GLOBAL.shortKeys ~= sk21;
-		ShortKey sk22 = { "run", "Run", 65474 };
-		GLOBAL.shortKeys ~= sk22;
-		ShortKey sk23 = { "build", "Build", 65475 };
-		GLOBAL.shortKeys ~= sk23;
 		
-		ShortKey sk24 = { "outlinewindow", "On/Off Left-side Window", 65480 };
-		GLOBAL.shortKeys ~= sk24;
-		ShortKey sk25 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
-		GLOBAL.shortKeys ~= sk25;
+		ShortKey sk16 = { "showtype", "Show Type", 65470 };
+		GLOBAL.shortKeys ~= sk16;		
+		ShortKey sk17 = { "defintion", "Goto Defintion", 1073741895 };
+		GLOBAL.shortKeys ~= sk17;
+		ShortKey sk18 = { "procedure", "Goto Member Procedure", 536870992 };		
+		GLOBAL.shortKeys ~= sk18;
+		ShortKey sk19 = { "autocomplete", "Autocomplete", 536870993 };
+		GLOBAL.shortKeys ~= sk19;
+		ShortKey sk20 = { "reparse", "Reparse", 65471 };
+		GLOBAL.shortKeys ~= sk20;
 
-		ShortKey sk26 = { "customtool1", "Custom Tool(1)", 805371838 };
+		ShortKey sk21 = { "compilerun", "Compile & Run", 536936386 };
+		GLOBAL.shortKeys ~= sk21;
+		ShortKey sk22 = { "quickrun", "Quick Run", 268500930 };
+		GLOBAL.shortKeys ~= sk22;
+		ShortKey sk23 = { "run", "Run", 65474 };
+		GLOBAL.shortKeys ~= sk23;
+		ShortKey sk24 = { "build", "Build", 65475 };
+		GLOBAL.shortKeys ~= sk24;
+		
+		ShortKey sk25 = { "outlinewindow", "On/Off Left-side Window", 65480 };
+		GLOBAL.shortKeys ~= sk25;
+		ShortKey sk26 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
 		GLOBAL.shortKeys ~= sk26;
-		ShortKey sk27 = { "customtool2", "Custom Tool(2)", 805371839 };
+
+		ShortKey sk27 = { "customtool1", "Custom Tool(1)", 805371838 };
 		GLOBAL.shortKeys ~= sk27;
-		ShortKey sk28 = { "customtool3", "Custom Tool(3)", 805371840 };
+		ShortKey sk28 = { "customtool2", "Custom Tool(2)", 805371839 };
 		GLOBAL.shortKeys ~= sk28;
-		ShortKey sk29 = { "customtool4", "Custom Tool(4)", 805371841 };
+		ShortKey sk29 = { "customtool3", "Custom Tool(3)", 805371840 };
 		GLOBAL.shortKeys ~= sk29;
-		ShortKey sk30 = { "customtool5", "Custom Tool(5)", 805371842 };
+		ShortKey sk30 = { "customtool4", "Custom Tool(4)", 805371841 };
 		GLOBAL.shortKeys ~= sk30;
-		ShortKey sk31 = { "customtool6", "Custom Tool(6)", 805371843 };
+		ShortKey sk31 = { "customtool5", "Custom Tool(5)", 805371842 };
 		GLOBAL.shortKeys ~= sk31;
-		ShortKey sk32 = { "customtool7", "Custom Tool(7)", 805371844 };
+		ShortKey sk32 = { "customtool6", "Custom Tool(6)", 805371843 };
 		GLOBAL.shortKeys ~= sk32;
-		ShortKey sk33 = { "customtool8", "Custom Tool(8)", 805371845 };
+		ShortKey sk33 = { "customtool7", "Custom Tool(7)", 805371844 };
 		GLOBAL.shortKeys ~= sk33;
-		ShortKey sk34 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		ShortKey sk34 = { "customtool8", "Custom Tool(8)", 805371845 };
 		GLOBAL.shortKeys ~= sk34;
+		ShortKey sk35 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		GLOBAL.shortKeys ~= sk35;
 
 
 
@@ -378,7 +383,7 @@ struct GLOBAL
 		else
 		{
 			fu.name ="default";
-			fu.fontString = "FreeMono,Bold 10";
+			fu.fontString = "Ubuntu Mono, 10";
 		}
 
 		GLOBAL.fonts ~= fu;
@@ -636,6 +641,8 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_autocomplete"] = new IupString( cast(char[]) "Auto Complete" );
 						GLOBAL.languageItems["sc_compilerun"] = new IupString( cast(char[]) "Compile File And Run" );
 						GLOBAL.languageItems["sc_comment"] = new IupString( cast(char[]) "(Un)comment" );
+						GLOBAL.languageItems["sc_backnav"] = new IupString( cast(char[]) "Backward Navigation" );
+						GLOBAL.languageItems["sc_forwardnav"] = new IupString( cast(char[]) "Forward Navigation" );
 						GLOBAL.languageItems["sc_backdefinition"] = new IupString( cast(char[]) "Back Definition" );
 						
 					GLOBAL.languageItems["keywords"] = new IupString( cast(char[]) "Keywords" );

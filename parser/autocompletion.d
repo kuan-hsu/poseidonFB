@@ -2375,7 +2375,7 @@ struct AutoComplete
 					{
 						if( TYPE & 1 )
 						{
-							actionManager.ScintillaAction.openFile( includeFullPath );
+							if( GLOBAL.navigation.addCache( includeFullPath, 1 ) ) actionManager.ScintillaAction.openFile( includeFullPath );
 						}
 						else
 						{
@@ -2635,7 +2635,8 @@ struct AutoComplete
 								
 								if( sonProcedureNode !is null )
 								{
-									if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+									if( GLOBAL.navigation.addCache( fullPath, sonProcedureNode.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber );
+									//if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 									return;
 								}
 							}
@@ -2650,7 +2651,8 @@ struct AutoComplete
 									if( son.name == procedureName )
 										if( son.lineNumber < son.endLineNum )
 										{
-											if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+											if( GLOBAL.navigation.addCache( fullPath, son.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, son.lineNumber );
+											//if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 											return;
 										}
 							}
@@ -2669,7 +2671,8 @@ struct AutoComplete
 											if( son.name == procedureName )
 												if( son.lineNumber < son.endLineNum )
 												{
-													if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+													if( GLOBAL.navigation.addCache( fullPath, son.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, son.lineNumber );
+													//if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 													return;
 												}
 									}
@@ -2707,7 +2710,8 @@ struct AutoComplete
 													if( son.name == oriNode.name )
 														if( son.lineNumber == son.endLineNum ) // Declare
 														{
-															if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+															if( GLOBAL.navigation.addCache( fullPath, son.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, son.lineNumber );
+															//if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 															return;
 														}
 											}
@@ -2720,7 +2724,8 @@ struct AutoComplete
 						}
 					}
 					
-					if( actionManager.ScintillaAction.openFile( fullPath, lineNum ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
+					if( GLOBAL.navigation.addCache( fullPath, lineNum ) ) actionManager.ScintillaAction.openFile( fullPath, lineNum );
+					//if( actionManager.ScintillaAction.openFile( fullPath, lineNum ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 				}
 			}
 		}
@@ -2730,6 +2735,7 @@ struct AutoComplete
 		}
 	}
 	
+	/+
 	static void backDefinition()
 	{
 		if( GLOBAL.stackGotoDefinition.length > 0 )
@@ -2747,7 +2753,8 @@ struct AutoComplete
 			}
 		}
 	}
-
+	+/
+	
 	static CASTnode getFunctionAST( CASTnode head, int _kind, char[] functionTitle, int line )
 	{
 		foreach_reverse( CASTnode node; head.getChildren() )

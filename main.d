@@ -3,7 +3,7 @@
 import iup.iup;
 import iup.iup_scintilla;
 
-import global, layout, images.imageData, tools;
+import global, layout, images.imageData, tools, navcache;
 import menu, scintilla, actionManager;
 
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
@@ -316,6 +316,9 @@ void main( char[][] args )
 	}
 	
 	if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" ) IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
+	
+	// Init Nav Cache
+	GLOBAL.navigation = new CNavCache();
 	
 	//IUP main Loop
 	IupMainLoop();

@@ -201,7 +201,7 @@ class CArgOptionDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );
 		}
 		
 		createLayout();
@@ -375,20 +375,29 @@ extern(C) // Callback for CFindInFilesDialog
 				}
 				*/
 			}
-			else
+			else // No Select
 			{
+				/*
 				if( IupGetInt( toolsHandle, "COUNT" ) <= 0 )
 				{
+				*/
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
 					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["ok"].toCString() );
 					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["apply"].toCString() );
-					IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
+					IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );		
+					GLOBAL.customCompilerOptions.length = 0;
+					foreach( char[] s; CArgOptionDialog.tempCustomCompilerOptions )
+					{
+						GLOBAL.customCompilerOptions ~= s.dup;
+					}					
+				/*
 				}
 				else
 				{
 					IupMessageError( null, GLOBAL.languageItems["noselect"].toCString() );
 				}
+				*/
 			}
 		}
 		

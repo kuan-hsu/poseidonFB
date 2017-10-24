@@ -598,8 +598,8 @@ class CPreferenceDialog : CBaseDialog
 				}
 				else
 				{
-					IupSetAttribute( lableString[i], "FONT", "FreeMono,Bold 9" );
-					IupSetAttribute( flatFrame[i], "FONT", "FreeMono,Bold 9" );
+					IupSetAttribute( lableString[i], "FONT", "Ubuntu Mono, 9" );
+					IupSetAttribute( flatFrame[i], "FONT", "Ubuntu Mono, 9" );
 				}
 				
 				scope _fontSyle = new IupString( strings[0] );
@@ -608,7 +608,7 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttribute( flatFrame[i], "TITLEBGCOLOR", "64 128 255");
 				IupSetAttribute( flatFrame[i], "TITLECOLOR", "255 255 255");
 				
-				version( Windows ) IupSetAttribute( lableString[i], "FONTFACE", "Courier New" ); else IupSetAttribute( lableString[i], "FONTFACE", "FreeMono" );
+				version( Windows ) IupSetAttribute( lableString[i], "FONTFACE", "Courier New" ); else IupSetAttribute( lableString[i], "FONTFACE", "Ubuntu Mono" );
 				
 				scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( i ) );
 				IupSetHandle( _IupFlatFrameString.toCString, flatFrame[i] );
@@ -1311,7 +1311,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( shortCutList, "FONT", "FreeMono,Bold 9" );
+			IupSetAttribute( shortCutList, "FONT", "Ubuntu Mono, 9" );
 		}
 		IupSetHandle( "shortCutList", shortCutList );
 		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
@@ -1332,22 +1332,22 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_search" ); 
 					ID++;
 					break;
-				case 14:
+				case 16:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["parser"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_refresh" ); 
 					ID++;
 					break;
-				case 20:
+				case 21:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["build"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_compile" );
 					ID++;
 					break;
-				case 24:
+				case 25:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["windows"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_gui" );
 					ID++;
 					break;
-				case 26:
+				case 27:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["setcustomtool"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_toolitem" );
 					ID++;
@@ -1456,7 +1456,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );
 		}
 		
 		createLayout();
@@ -1768,7 +1768,7 @@ extern(C) // Callback for CPreferenceDialog
 									}
 									else
 									{
-										strings[0] = "Monospace";
+										strings[0] = "Ubuntu Mono";
 									}
 								}
 								else
@@ -1802,7 +1802,7 @@ extern(C) // Callback for CPreferenceDialog
 								{
 									scope _fontSyle = new IupString( strings[0] );
 									IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
-									version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Monospace" );
+									version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Ubuntu Mono" );
 									IupRefresh( _flatFrameHandle );
 								}
 							}
@@ -1845,7 +1845,7 @@ extern(C) // Callback for CPreferenceDialog
 									{
 										scope _fontSyle = new IupString( fontName );
 										IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
-										version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Monospace" );
+										version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Ubuntu Mono" );
 										IupRefresh( _flatFrameHandle );
 									}									
 								}

@@ -135,7 +135,7 @@ class CSearchDialog : CBaseDialog
 		
 		Ihandle* vBox = IupVbox( hBox00, hBox01, hBox02, frameOption, gbox, bottom, labelSEPARATOR, labelStatus, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=2,EXPAND=YES,EXPANDCHILDREN=YES" );
-		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "FreeMono,Bold 9" );
+		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "Ubuntu Mono, 9" );
 
 		IupAppend( _dlg, vBox );
 	}	
@@ -159,7 +159,7 @@ class CSearchDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "FreeMono,Bold 9" ) );;
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );;
 		}		
 
 		createLayout();
@@ -211,8 +211,24 @@ extern(C) // Callback for CSingleTextDialog
 	{
 		if( c == 13 )
 		{
+			auto cSci = ScintillaAction.getActiveCScintilla();
+			if( cSci !is null )
+			{
+				GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+				GLOBAL.navigation.eraseTail();
+			}
+			
 			int pos = CSearchDialog_search();
-			if( pos > -1 ) GLOBAL.searchDlg.setStatusBar( "Found Word." ); else GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
+			if( pos > -1 )
+			{
+				if( cSci !is null ) GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+				GLOBAL.searchDlg.setStatusBar( "Found Word." );
+			}
+			else
+			{
+				if( cSci !is null ) GLOBAL.navigation.eraseTail();
+				GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
+			}
 		}
 		return IUP_DEFAULT;
 	}
@@ -272,8 +288,24 @@ extern(C) // Callback for CSingleTextDialog
 	{
 		GLOBAL.searchDlg.setStatusBar( "" );
 
+		auto cSci = ScintillaAction.getActiveCScintilla();
+		if( cSci !is null )
+		{
+			GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+			GLOBAL.navigation.eraseTail();
+		}
+		
 		int pos = CSearchDialog_search();
-		if( pos > -1 ) GLOBAL.searchDlg.setStatusBar( "Found Word." ); else GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
+		if( pos > -1 )
+		{
+			if( cSci !is null ) GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+			GLOBAL.searchDlg.setStatusBar( "Found Word." );
+		}
+		else
+		{
+			if( cSci !is null ) GLOBAL.navigation.eraseTail();
+			GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
+		}
 	
 		return IUP_DEFAULT;;
 	}
