@@ -42,6 +42,7 @@
     <Name>layouts/toolbar.d</Name>
     <Name>main.d</Name>
     <Name>menu.d</Name>
+    <Name>navcache.d</Name>
     <Name>parser/ast.d</Name>
     <Name>parser/autocompletion.d</Name>
     <Name>parser/live.d</Name>
@@ -51,7 +52,6 @@
     <Name>project.d</Name>
     <Name>scintilla.d</Name>
     <Name>tools.d</Name>
-    <Name>navcache.d</Name>
   </Sources>
   <Includes/>
   <Others>

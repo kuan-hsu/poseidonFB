@@ -74,7 +74,7 @@ class CStatusBar
 		}
 		else
 		{
-			IupSetAttribute( layoutHandle, "FONT", "Ubuntu Mono, 9" );
+			IupSetAttribute( layoutHandle, "FONT", "Ubuntu Mono, 10" );
 		}			
 	}
 	

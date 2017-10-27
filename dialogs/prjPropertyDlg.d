@@ -19,7 +19,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton();
+		Ihandle* bottom = createDlgButton( "40x12" );
 
 		// PAGE 1 General
 		// Line 1
@@ -272,7 +272,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
 		 
 		createLayout();

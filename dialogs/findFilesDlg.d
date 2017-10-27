@@ -17,26 +17,27 @@ class CFindInFilesDialog : CBaseDialog
 	Ihandle*			listFind, listReplace;
 	Ihandle*			labelStatus;
 	
-	IupString[2]		cStrings;
+	IupString[2]		labelTitle;
+	IupString			FINDWHAT;
 
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton();
 		IupSetAttribute( btnOK, "VISIBLE", "NO" );
 
-		cStrings[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
-		cStrings[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
+		labelTitle[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
+		labelTitle[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
 
 		listFind = IupList( null );
 		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3,NAME=list_Find");
-		Ihandle* label00 = IupLabel( cStrings[0].toCString );
+		Ihandle* label00 = IupLabel( labelTitle[0].toCString );
 		IupSetAttribute( label00, "SIZE", "60x12" );
 		Ihandle* hBox00 = IupHbox( label00, listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
 
 		listReplace = IupList( null );
 		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3,NAME=list_Replace");
-		Ihandle* label01 = IupLabel( cStrings[1].toCString );
+		Ihandle* label01 = IupLabel( labelTitle[1].toCString );
 		IupSetAttribute( label01, "SIZE", "60x12" );
 		Ihandle* hBox01 = IupHbox( label01, listReplace, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
@@ -109,7 +110,7 @@ class CFindInFilesDialog : CBaseDialog
 	
 		Ihandle* vBox = IupVbox( hBox00, hBox01, frameOption, hBoxButton, bottom, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=0,EXPANDCHILDREN=YES" );
-		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "Ubuntu Mono, 9" );
+		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONT", "Ubuntu Mono, 10" );
 
 		IupAppend( _dlg, vBox );
 	}	
@@ -130,12 +131,14 @@ class CFindInFilesDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
+		
+		FINDWHAT = new IupString( findWhat );
 		
 		createLayout();
 
-		IupSetAttribute( listFind, "VALUE", GLOBAL.cString.convert( findWhat ) );
+		IupSetAttribute( listFind, "VALUE", FINDWHAT.toCString );
 		IupSetHandle( "btnCANCEL_findinfiles", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_findinfiles" );
@@ -144,12 +147,20 @@ class CFindInFilesDialog : CBaseDialog
 
 	~this()
 	{
-		IupSetHandle( "btnCANCEL_findinfiles", null );	
+		IupSetHandle( "btnCANCEL_findinfiles", null );
+		
+		delete FINDWHAT;
+		delete labelTitle[0];
+		delete labelTitle[1];
 	}
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog
 	{
-		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE", GLOBAL.cString.convert( selectedWord ) );
+		if( selectedWord.length )
+		{
+			FINDWHAT = selectedWord;
+			IupSetAttribute( listFind, "VALUE", FINDWHAT.toCString );
+		}
 		IupShow( _dlg );
 		return null;
 	}	

@@ -598,13 +598,13 @@ class CPreferenceDialog : CBaseDialog
 				}
 				else
 				{
-					IupSetAttribute( lableString[i], "FONT", "Ubuntu Mono, 9" );
-					IupSetAttribute( flatFrame[i], "FONT", "Ubuntu Mono, 9" );
+					IupSetAttribute( lableString[i], "FONT", "Ubuntu Mono, 10" );
+					IupSetAttribute( flatFrame[i], "FONT", "Ubuntu Mono, 10" );
 				}
 				
 				scope _fontSyle = new IupString( strings[0] );
 				IupSetAttribute( flatFrame[i], "FONTFACE", _fontSyle.toCString );
-				version(Windows) IupSetAttributes( flatFrame[i], "TITLETEXTALIGNMENT=ACENTER,EXPAND=YES,FONTSIZE=9" ); else IupSetAttributes( flatFrame[i], "SIZE=285x,EXPAND=YES,FONTSIZE=9" );
+				version(Windows) IupSetAttributes( flatFrame[i], "TITLETEXTALIGNMENT=ACENTER,EXPAND=YES,FONTSIZE=9" ); else IupSetAttributes( flatFrame[i], "SIZE=285x,EXPAND=YES,FONTSIZE=10" );
 				IupSetAttribute( flatFrame[i], "TITLEBGCOLOR", "64 128 255");
 				IupSetAttribute( flatFrame[i], "TITLECOLOR", "255 255 255");
 				
@@ -1311,7 +1311,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( shortCutList, "FONT", "Ubuntu Mono, 9" );
+			IupSetAttribute( shortCutList, "FONT", "Ubuntu Mono, 10" );
 		}
 		IupSetHandle( "shortCutList", shortCutList );
 		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
@@ -1456,7 +1456,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 9" ) );
+			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
 		
 		createLayout();
