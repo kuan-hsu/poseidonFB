@@ -2613,8 +2613,12 @@ struct AutoComplete
 						{
 							if( lowerCase( _fp.ext ) == "bi" )
 							{
-								fullPath = _fp.path() ~ _fp.name ~ ".bas";
-								AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
+								_fp.set( _fp.path() ~ _fp.name ~ ".bas" );
+								if( _fp.exists )
+								{
+									fullPath = _fp.toString;
+									AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
+								}
 							}
 	
 							if( AST_Head !is null )

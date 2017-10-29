@@ -383,6 +383,7 @@ error=錯誤
 exefile=執行檔
 basfile=程式源碼
 bifile=引含檔
+supportfile=所有支援的格式
 lngfile=語言檔
 chmfile=微軟已編譯幫助文件
 allfile=所有檔案

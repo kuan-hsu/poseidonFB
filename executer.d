@@ -1,5 +1,26 @@
 ﻿module executer;
 
+version(Windows)
+{
+	extern(Windows) bool PlaySound( char*, void*, uint );
+}
+/*
+const SND_SYNC = &h0000
+const SND_ASYNC = &h0001
+const SND_NODEFAULT = &h0002
+const SND_MEMORY = &h0004
+const SND_LOOP = &h0008
+const SND_NOSTOP = &h0010
+const SND_NOWAIT = &h00002000
+const SND_ALIAS = &h00010000
+const SND_ALIAS_ID = &h00110000
+const SND_FILENAME = &h00020000
+const SND_RESOURCE = &h00040004
+const SND_PURGE = &h0040
+const SND_APPLICATION = &h0080
+const SND_ALIAS_START = 0
+*/
+
 struct ExecuterAction
 {
 	private:
@@ -13,7 +34,8 @@ struct ExecuterAction
 
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;
-
+	
+	
 	// Inner Class
 	class ExecuterThread : Thread
 	{
@@ -56,7 +78,7 @@ struct ExecuterAction
 				version(Windows) scommand = command ~ args; else scommand = "\"" ~ command ~ args ~ "\"";
 			}
 			
-			version( Windows )
+			version(Windows)
 			{
 				p = new Process( true, scommand );
 			}
@@ -309,7 +331,8 @@ struct ExecuterAction
 				{
 					version(Windows) 
 					{
-						if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
+						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
+						//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
 					}
 					else
 					{
@@ -344,7 +367,8 @@ struct ExecuterAction
 					{
 						version(Windows)
 						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
 						}
 						else
 						{
@@ -369,7 +393,8 @@ struct ExecuterAction
 					{
 						version(Windows)
 						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
 						}
 						else
 						{
@@ -606,7 +631,8 @@ struct ExecuterAction
 				{
 					version(Windows)
 					{
-						if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
+						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
+						//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
 					}
 					else
 					{
@@ -641,7 +667,8 @@ struct ExecuterAction
 					{
 						version(Windows)
 						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
 						}
 						else
 						{
@@ -664,9 +691,10 @@ struct ExecuterAction
 					}
 					else
 					{
-						version(Windows) if( GLOBAL.compilerSFX == "ON" )
+						version(Windows)
 						{
-							IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
 						}
 						else
 						{
@@ -831,7 +859,8 @@ struct ExecuterAction
 					{
 						version(Windows)
 						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
 						}
 						else
 						{
@@ -852,9 +881,10 @@ struct ExecuterAction
 					}
 					else
 					{
-						version(Windows) if( GLOBAL.compilerSFX == "ON" )
+						version(Windows)
 						{
-							IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
 						}
 						else
 						{
@@ -892,7 +922,8 @@ struct ExecuterAction
 				{
 					version(Windows)
 					{
-						if( GLOBAL.compilerSFX == "ON" ) IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );	
+						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
+						//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );	
 					}
 					else
 					{
@@ -973,7 +1004,7 @@ struct ExecuterAction
 			if( !bRunProject ) 
 			{
 				scope _f = new FilePath( activeCScintilla.getFullPath() );
-				version( Windows )
+				version(Windows)
 				{
 					command = _f.path ~ _f.name ~ ".exe";
 				}
@@ -987,7 +1018,7 @@ struct ExecuterAction
 		{
 			if( activePrjName.length )
 			{
-				version( Windows )
+				version(Windows)
 				{
 					if( GLOBAL.projectManager[activePrjName].targetName.length )
 						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName ~ ".exe";
@@ -1016,7 +1047,7 @@ struct ExecuterAction
 			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ args ~ "......", true );
 
 			ExecuterThread derived;
-			version( Windows ) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );
+			version(Windows) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );
 			derived.start();
 		}
 		else

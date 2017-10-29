@@ -559,7 +559,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.325)\nBy Kuan Hsu (Taiwan)\n2017.10.28" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.326)\nBy Kuan Hsu (Taiwan)\n2017.10.29" );
 		return IUP_DEFAULT;
 	});
 	
@@ -778,23 +778,13 @@ extern(C)
 
 		version(Windows) actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false ); else actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
 
-		/+
-		scope dlg = new CFileDlg( "Create New File", "Source File|*.bas|Inculde File|*.bi|All Files|*.*", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
-		char[] fullPath = dlg.getFileName();
-
-		if( fullPath.length )
-		{
-			actionManager.ScintillaAction.newFile( fullPath );
-		}
-		+/
-
 		return IUP_DEFAULT;
 	}
 
 	
 	int openFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.bas;*.bi|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
 		foreach( char[] s; fileSecectDlg.getFilesName() )
 		{
 			if( s.length )
@@ -1248,18 +1238,16 @@ extern(C)
 	
 	int fullscreenMenuItem_cb( Ihandle *ih )
 	{
-		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "OFF" )
+		if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" )
 		{
-			IupSetAttribute( ih, "VALUE", "ON" );
-			GLOBAL.editorSetting01.USEFULLSCREEN = "ON";
-			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
-		}
-		else
-		{
-			IupSetAttribute( ih, "VALUE", "OFF" );
 			GLOBAL.editorSetting01.USEFULLSCREEN = "OFF";
 			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "NO" );
 			IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+		}
+		else
+		{
+			GLOBAL.editorSetting01.USEFULLSCREEN = "ON";
+			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
 		}
 		
 		return IUP_DEFAULT;

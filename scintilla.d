@@ -873,83 +873,61 @@ extern(C)
 			{
 				if( button == IUP_BUTTON2 ) return IUP_IGNORE;
 			}
-			
-			// Ctrl + Click for Goto Definition
-			char[] statusString = fromStringz( status ).dup;
-			if( statusString.length > 6 )
-			{
-				if( statusString[1] == 'C' )
-				{
-					if( statusString[6] == 'A' )
-					{
-						if( button == IUP_BUTTON1 )
-						{
-							auto cacheUnit = GLOBAL.navigation.back();
-							if( cacheUnit._line != -1 )
-							{
-								ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
-								return IUP_IGNORE;
-							}
-						}
-						else if( button == IUP_BUTTON3 )
-						{
-							auto cacheUnit = GLOBAL.navigation.forward();
-							if( cacheUnit._line != -1 )
-							{
-								ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
-								return IUP_IGNORE;
-							}
-						}
-					}
-					else if( statusString[0] != 'S' )
-					{
-						if( button == IUP_BUTTON1 )
-							AutoComplete.toDefintionAndType( 1 );
-						else if( button == IUP_BUTTON3 )
-							AutoComplete.toDefintionAndType( 2 );
-					}
-						
-					return IUP_DEFAULT;
-				}
-				else if( statusString[5] == 'D' )
-				{
-					return IUP_IGNORE;
-				}
-			}				
 		}
-		else
+	
+		char[] statusString = fromStringz( status ).dup;
+		if( statusString.length > 6 )
 		{
-			char[] statusString = fromStringz( status ).dup;
-			if( statusString.length > 6 )
+			// Ctrl + Click for Goto Definition / Goto Procedure
+			if( statusString[1] == 'C' )
 			{
-				// Ctrl + Click for Goto Definition / Goto Procedure
-				if( statusString[1] == 'C' )
+				if( statusString[6] != 'A' && statusString[0] != 'S' )
 				{
-					if( statusString[6] != 'A' && statusString[0] != 'S' )
+					if( button == IUP_BUTTON1 )
 					{
-						if( button == IUP_BUTTON1 )
+						if( pressed == 1 )
 						{
-							if( pressed == 1 )
-							{
-								int _pos = IupScintillaSendMessage( ih, 2022, x, y ); // SCI_POSITIONFROMPOINT
-								IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
-								AutoComplete.toDefintionAndType( 1, _pos );
-							}
-							return IUP_IGNORE;
+							int _pos = IupScintillaSendMessage( ih, 2022, x, y ); // SCI_POSITIONFROMPOINT
+							IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
+							AutoComplete.toDefintionAndType( 1, _pos );
 						}
-						else if( button == IUP_BUTTON3 )
-						{
-							if( pressed == 1 )
-							{							
-								int _pos = IupScintillaSendMessage( ih, 2022, x, y ); // SCI_POSITIONFROMPOINT
-								IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
-								AutoComplete.toDefintionAndType( 2, _pos );
-							}
-							return IUP_IGNORE;
+						return IUP_IGNORE;
+					}
+					else if( button == IUP_BUTTON3 )
+					{
+						if( pressed == 1 )
+						{							
+							int _pos = IupScintillaSendMessage( ih, 2022, x, y ); // SCI_POSITIONFROMPOINT
+							IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
+							AutoComplete.toDefintionAndType( 2, _pos );
 						}
+						return IUP_IGNORE;
 					}
 				}
 				else if( statusString[6] == 'A' )
+				{
+					version(linux)
+					{
+						if( pressed == 0 )
+						{
+							if( button == IUP_BUTTON1 )
+							{
+								auto cacheUnit = GLOBAL.navigation.back();
+								if( cacheUnit._line != -1 )	ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+							}
+							else if( button == IUP_BUTTON3 )
+							{
+								auto cacheUnit = GLOBAL.navigation.forward();
+								if( cacheUnit._line != -1 )	ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+							}
+						}
+						return IUP_IGNORE;
+					}
+				}
+			}
+			else if( statusString[6] == 'A' )
+			{
+				version(Windows)
 				{
 					if( statusString[1] != 'C' && statusString[0] != 'S' )
 					{
@@ -970,8 +948,12 @@ extern(C)
 					}
 				}
 			}
-		}
-		
+			else if( statusString[5] == 'D' )
+			{
+				version(linux) return IUP_IGNORE;
+			}
+		}			
+
 	
 		if( pressed == 0 ) //release
 		{

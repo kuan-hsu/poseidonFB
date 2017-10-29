@@ -811,6 +811,7 @@ struct GLOBAL
 		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
 		GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "freeBASIC Sources" );
 		GLOBAL.languageItems["bifile"] = new IupString( cast(char[]) "freeBASIC Includes" );
+		GLOBAL.languageItems["supportfile"] = new IupString( cast(char[]) "All Supported Files" );
 		GLOBAL.languageItems["lngfile"] = new IupString( cast(char[]) "Language Files" );
 		GLOBAL.languageItems["chmfile"] = new IupString( cast(char[]) "Microsoft Compiled HTML Help" );
 		GLOBAL.languageItems["allfile"] = new IupString( cast(char[]) "All Files" );

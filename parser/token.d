@@ -140,6 +140,7 @@ enum TOK
 	Toperator,
 	Tthis,
 	Tbase,
+	Toverride,
 
 
 	//
@@ -318,6 +319,8 @@ static this()
 	identToTOK["operator"]		= TOK.Toperator;
 	identToTOK["this"]			= TOK.Tthis;
 	identToTOK["base"]			= TOK.Tbase;
+	identToTOK["override"]		= TOK.Toverride;
+	
 
 	identToTOK["include"]		= TOK.Tinclude;
 	identToTOK["libpath"]		= TOK.Tlibpath;

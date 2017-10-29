@@ -410,7 +410,7 @@ class CParser
 								if( _kind == B_SUB ) activeASTnode.addChild( _name, _kind, null, __param, null, _lineNum ); else return null;
 							}
 							
-							if( token().tok == TOK.Tstatic || token().tok == TOK.Texport  ) parseToken();
+							if( token().tok == TOK.Tstatic || token().tok == TOK.Texport ) parseToken();
 
 							if( token().tok == TOK.Tcomma || token().tok == TOK.Tcloseparen )
 							{
@@ -1497,7 +1497,7 @@ class CParser
 						}
 					}
 
-					if( token().tok == TOK.Tstatic || token().tok == TOK.Texport  ) parseToken();
+					if( token().tok == TOK.Tstatic || token().tok == TOK.Texport || token().tok == TOK.Toverride ) parseToken();
 					
 					if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
 					{
@@ -2023,7 +2023,7 @@ class CParser
 					}
 				}
 
-				if( token().tok == TOK.Tstatic || token().tok == TOK.Texport  ) parseToken();
+				if( token().tok == TOK.Tstatic || token().tok == TOK.Texport || token().tok == TOK.Toverride ) parseToken();
 				
 				if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
 				{
@@ -2319,7 +2319,7 @@ class CParser
 
 			switch( token().tok )
 			{
-				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope, TOK.Twith:
+				case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope, TOK.Twith, TOK.Tclass:
 					parseToken();
 					if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 

@@ -985,7 +985,7 @@ struct ScintillaAction
 
 		try
 		{
-			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...",  GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )
