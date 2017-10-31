@@ -276,7 +276,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		}
 		 
 		createLayout();
-
+		
 		if( !bCreateNew )
 		{
 			IupSetAttribute( textProjectDir, "ACTIVE", "NO" );
@@ -311,6 +311,9 @@ class CProjectPropertiesDialog : CBaseDialog
 			IupSetAttribute( btnProjectDir, "ACTIVE", "YES" );
 			IupSetAttribute( textProjectDir, "BGCOLOR",  IupGetGlobal("TXTBGCOLOR") );
 		}
+		
+		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.projectDlg ) );
+		IupMap( _dlg );
 	}
 
 	~this()

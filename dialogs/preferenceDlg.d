@@ -1463,6 +1463,9 @@ class CPreferenceDialog : CBaseDialog
 		
 		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
 		version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x295" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
+		
+		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
+		IupMap( _dlg );
 	}
 
 	~this()

@@ -306,6 +306,7 @@ class CToolBar
 						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], /*outlineButtonHide, messageButtonHide, labelSEPARATOR[6],*/ bitButton, guiButton, listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
 		IupSetAttributes( handle, "GAP=3,ALIGNMENT=ACENTER" );
+		version(linux) IupSetAttributes( handle, "MARGIN=0x4" );
 	}
 
 

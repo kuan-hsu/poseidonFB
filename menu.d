@@ -559,7 +559,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.326)\nBy Kuan Hsu (Taiwan)\n2017.10.29" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.327)\nBy Kuan Hsu (Taiwan)\n2017.10.31" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1131,6 +1131,8 @@ extern(C)
 		{
 			// Open Dialog Window
 			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false );
+			IupSetAttribute( gotoLineDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.gotoDlg ) );
+			
 			char[] lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
 			lineNum = Util.trim( lineNum );

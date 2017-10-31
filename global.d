@@ -55,6 +55,10 @@ struct CustomTool
 	IupString	name, dir, args;
 }
 
+struct EditorOpacity
+{
+	char[]	searchDlg = "255", findfilesDlg = "255", preferenceDlg = "255", projectDlg = "255", gotoDlg = "255", newfileDlg = "255";
+}
 
 struct GLOBAL
 {
@@ -137,6 +141,7 @@ struct GLOBAL
 	static IupString[]			recentFiles, recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;
+	static EditorOpacity		editorSetting02;
 	static EditorColorUint		editColor;
 	//static Ihandle*			functionTitleHandle;
 	static char[]				enableKeywordComplete = "ON";

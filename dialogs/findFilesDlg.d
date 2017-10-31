@@ -143,6 +143,9 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_findinfiles" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
+		
+		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
+		IupMap( _dlg );
 	}
 
 	~this()

@@ -171,6 +171,9 @@ class CSearchDialog : CBaseDialog
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSearchDialog_btnCancel_ACTION_CB );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_search" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CSearchDialog_btnCancel_ACTION_CB );
+		
+		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.searchDlg ) );
+		IupMap( _dlg );
 	}
 
 	~this()

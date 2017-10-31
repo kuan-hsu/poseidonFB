@@ -1077,6 +1077,7 @@ extern(C)
 	{
 		// Open Dialog Window
 		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfile"].toDString(), GLOBAL.languageItems["filename"].toDString() ~ ":", "120x", null, false, "MAIN_DIALOG", "icon_newfile" );
+		IupSetAttribute( test.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.newfileDlg ) );
 		char[] fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )

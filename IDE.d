@@ -703,6 +703,15 @@ struct IDECONFIG
 			for( int i = 0; i < GLOBAL.prevDoc.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.prevDoc[i] );
 				
+			// opacity
+			doc ~= setINILineData( "[opacity]");
+			doc ~= setINILineData( "searchdlg", GLOBAL.editorSetting02.searchDlg );
+			doc ~= setINILineData( "findfilesdlg", GLOBAL.editorSetting02.findfilesDlg );
+			doc ~= setINILineData( "preferencedlg", GLOBAL.editorSetting02.preferenceDlg );
+			doc ~= setINILineData( "projectdlg", GLOBAL.editorSetting02.preferenceDlg );
+			doc ~= setINILineData( "gotodlg", GLOBAL.editorSetting02.gotoDlg );
+			doc ~= setINILineData( "newfiledlg", GLOBAL.editorSetting02.newfileDlg );
+			
 			actionManager.FileAction.saveFile( fullpath, doc );
 		}
 		catch( Exception e )
@@ -1060,6 +1069,19 @@ struct IDECONFIG
 						
 					case "[prevDocs]":
 						if( left == "name" ) GLOBAL.prevDoc ~= right;
+						break;
+					
+					case "[opacity]":
+						switch( left )
+						{
+							case "searchdlg":					GLOBAL.editorSetting02.searchDlg = right;					break;
+							case "findfilesdlg":				GLOBAL.editorSetting02.findfilesDlg = right;				break;
+							case "preferencedlg":				GLOBAL.editorSetting02.preferenceDlg = right;				break;
+							case "projectdlg":					GLOBAL.editorSetting02.projectDlg = right;					break;
+							case "gotodlg":						GLOBAL.editorSetting02.gotoDlg = right;						break;
+							case "newfiledlg":					GLOBAL.editorSetting02.newfileDlg = right;					break;
+							default:
+						}
 						break;
 						
 					default:
