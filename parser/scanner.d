@@ -131,20 +131,25 @@ class CScanner
 
 				if( bStringFlag )
 				{
-					if( data[i] == '"' )
+					if( bEscapeSequences )
 					{
-						if( bEscapeSequences )
+						if( data[i] == '\\' )
 						{
-							if( i > 0 )
+							if( i < data.length - 1 )
 							{
-								if( data[i-1] == '\\' )
-								{
-									identifier ~= data[i];
-									continue;
-								}
+								identifier ~= data[i];
+								identifier ~= data[++i];
+								continue;
+							}
+							else
+							{
+								break; // Out Array Bound
 							}
 						}
-							
+					}
+					
+					if( data[i] == '"' )
+					{
 						bStringFlag = false;
 						bEscapeSequences = false;
 						identifier ~= data[i];
@@ -153,6 +158,7 @@ class CScanner
 						identifier = "";
 						continue;
 					}
+					
 					identifier ~= data[i];
 					continue;
 				}

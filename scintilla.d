@@ -219,11 +219,14 @@ class CScintilla
 		
 		/*
 		Ihandle* clipboard = IupClipboard();
-		IupSetAttribute(clipboard, "TEXT", GLOBAL.cString.convert( _text.dup ) );
+		IupSetAttribute( clipboard, "TEXT", toStringz( _text ) );
 		IupSetAttribute( sci, "CLIPBOARD", "PASTE" );
 		IupDestroy(clipboard);
-			*/	
-		//IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text ) );
+		
+		IupSetInt( sci, "FIRSTVISIBLELINE", 0 );
+		IupSetInt( sci, "CARETPOS", 0 );
+		*/	
+
 		IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014		
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 	}

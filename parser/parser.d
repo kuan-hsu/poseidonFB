@@ -1632,7 +1632,7 @@ class CParser
 								parseToken();
 							}
 							
-							while( token().tok == TOK.Tidentifier )
+							while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 							{
 								_lineNum = token().lineNumber;
 								_name	= token().identifier;
@@ -1859,36 +1859,38 @@ class CParser
 						break;
 
 					case TOK.Tunion, TOK.Ttype:
-						TOK nestUnnameTOK = token().tok;
-						_lineNum = token().lineNumber;
-						
-						parseToken();
-						
-						if( token().tok == TOK.Tfield )
+						if( next().tok != TOK.Tas ) // If Not Variable......
 						{
+							TOK nestUnnameTOK = token().tok;
+							_lineNum = token().lineNumber;
 							
-							if( next().tok == TOK.Tassign )
+							parseToken();
+							
+							if( token().tok == TOK.Tfield )
 							{
-								parseToken( TOK.Tfield );
-								parseToken( TOK.Tassign );
-								parseToken( TOK.Tnumbers );//else return false;
+								if( next().tok == TOK.Tassign )
+								{
+									parseToken( TOK.Tfield );
+									parseToken( TOK.Tassign );
+									parseToken( TOK.Tnumbers );//else return false;
+								}
+								else
+								{
+									return false;
+								}
+							}						
+
+							if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+							{
+								tokenIndex += 1;
+								activeASTnode = activeASTnode.addChild( null, ( nestUnnameTOK == TOK.Tunion ? B_UNION : B_TYPE ), null, null, null, _lineNum );
+								parseTypeBody( activeASTnode.kind );
+								break;
 							}
 							else
 							{
 								return false;
 							}
-						}						
-
-						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
-						{
-							tokenIndex += 1;
-							activeASTnode = activeASTnode.addChild( null, ( nestUnnameTOK == TOK.Tunion ? B_UNION : B_TYPE ), null, null, null, _lineNum );
-							parseTypeBody( activeASTnode.kind );
-							break;
-						}
-						else
-						{
-							return false;
 						}
 
 					//case TOK.Tidentifier:
