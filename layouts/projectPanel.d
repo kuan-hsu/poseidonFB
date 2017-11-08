@@ -130,6 +130,10 @@ class CProjectTree
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
+		IupSetCallback( tree, "BUTTON_CB", cast(Icallback)  function( Ihandle* ih )
+		{
+			return IUP_DEFAULT;
+		});
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,GAP=2" ) );
@@ -805,9 +809,9 @@ extern(C)
 		
 		if( _fullpath != null )
 		{
-			char[] fullPath = fromStringz( _fullpath );
+			scope fullPath = new IupString( _fullpath );
 			
-			scope fp = new FilePath( fullPath );
+			scope fp = new FilePath( fullPath.toDString );
 			
 			if( fp.exists() )
 			{
@@ -817,19 +821,19 @@ extern(C)
 				{
 					if( ext == "bas" || ext == "bi" )
 					{
-						actionManager.ScintillaAction.openFile( fp.toString );
+						actionManager.ScintillaAction.openFile( fullPath.toDString );
 					}
 					else
 					{
 						version(Windows)
 						{
-							Process p = new Process( true, "cmd", "/c", fullPath );
+							Process p = new Process( true, "cmd", "/c", fullPath.toDString );
 							p.gui( true );
 							p.execute;
 						}
 						else
 						{
-							Process p = new Process( true, "xdg-open", fullPath );
+							Process p = new Process( true, "xdg-open", fullPath.toDString );
 							p.gui( true );
 							p.execute;
 						}
@@ -1239,7 +1243,7 @@ extern(C)
 			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["addfile"].toDString() ~ "...", filter, "OPEN", "YES" );
 			//char[] fullPath = fileSecectDlg.getFileName();
 			
-			foreach( char[] fullPath; fileSecectDlg.getFilesName() )
+			foreach_reverse( char[] fullPath; fileSecectDlg.getFilesName().sort )
 			{
 				if( fullPath.length )
 				{

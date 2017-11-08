@@ -532,9 +532,8 @@ struct ScintillaAction
 
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 			
+			DocumentTabAction.setFocus( ih );
 			
-			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)ih );
-			IupSetFocus( ih );
 			if( lineNumber > -1 )
 			{
 				IupScintillaSendMessage( ih, 2024, --lineNumber, 0 ); // SCI_GOTOLINE 2024
@@ -576,8 +575,7 @@ struct ScintillaAction
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 			
 			// Set new tabitem to focus
-			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci.getIupScintilla );
-			IupSetFocus( _sci.getIupScintilla );
+			if( DocumentTabAction.setFocus( _sci.getIupScintilla ) == IUP_DEFAULT ) return false;
 			if( lineNumber > -1 )
 			{
 				IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024

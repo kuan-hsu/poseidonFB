@@ -648,7 +648,19 @@ struct AutoComplete
 		{
 			if( _node.kind & B_KIND )
 			{
-				if( lowerCase( removeArrayAndPointerWord( _node.name ) ) == lowerCase( word ) ) return _node;
+				char[] name = lowerCase( removeArrayAndPointerWord( _node.name ) );
+				
+				if( name.length )
+				{
+					if( name == lowerCase( word ) ) return _node;
+				}
+				else
+				{
+					foreach( CASTnode _enumMember; anonymousEnumMembers( _node ) )
+					{
+						if( lowerCase( _enumMember.name ) == lowerCase( word ) ) return _enumMember;
+					}
+				}
 			}
 		}
 
@@ -659,6 +671,8 @@ struct AutoComplete
 	{
 		CASTnode[] results;
 		
+		word = lowerCase( word );
+		
 		foreach( CASTnode _node; getMembers( originalNode ) )
 		{
 			if( _node.kind & B_KIND )
@@ -667,11 +681,23 @@ struct AutoComplete
 
 				if( bWholeWord )
 				{
-					if( name == lowerCase( word ) ) results ~= _node;
+					if( name == word ) results ~= _node;
 				}
 				else
 				{
-					if( Util.index( name, lowerCase( word ) ) == 0 ) results ~= _node;
+					//if( Util.index( name, lowerCase( word ) ) == 0 ) results ~= _node;
+					if( name.length )
+					{
+						if( Util.index( name, word ) == 0 ) results ~= _node;
+					}
+					else
+					{
+						if( _node.kind & B_ENUM )
+						{
+							CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _node, word );
+							if( enumResult.length ) results ~= enumResult;
+						}
+					}					
 				}
 			}
 		}
@@ -1085,19 +1111,23 @@ struct AutoComplete
 				char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 				if( _s.length )
 				{
-					dchar[] sd = UTF.toString32( _s );
-					dchar s = sd[0];
-					switch( s )
+					int key = cast(int) _s[0];
+					if( key >= 0 && key <= 127 )
 					{
-						case '"':								bExitLoopFlag = true; break;
-						case ' ', '\t', ':', '\n', '\r':		bExitLoopFlag = true; break;
-						default: 
-							if( UTF.isValid( s ) )
-							{
-								word32 = "";
-								word32 ~= s;
-								word ~= Util.trim( UTF.toString( word32 ) );
-							}
+						dchar[] sd = UTF.toString32( _s );
+						dchar s = sd[0];
+						switch( s )
+						{
+							case '"':								bExitLoopFlag = true; break;
+							case ' ', '\t', ':', '\n', '\r':		bExitLoopFlag = true; break;
+							default: 
+								if( UTF.isValid( s ) )
+								{
+									word32 = "";
+									word32 ~= s;
+									word ~= Util.trim( UTF.toString( word32 ) );
+								}
+						}
 					}
 				}
 				
@@ -1584,6 +1614,7 @@ struct AutoComplete
 
 		try
 		{
+			/+
 			version(Winodws)
 			{
 				while( --pos >= 0 )
@@ -1615,6 +1646,26 @@ struct AutoComplete
 					if( result[0..8] == "#include" ) return true;
 				}
 			}
+			+/
+			while( --pos >= 0 )
+			{
+				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+				if( s.length )
+				{
+					int key = cast(int) s[0];
+					if( key >= 0 && key <= 127 )
+					{
+						if( s == ":" || s == "\n" ) break;
+						result ~= s;
+					}
+				}
+			}
+			
+			result = lowerCase( Util.trim( result.reverse ) ).dup;
+			if( result.length > 7 )
+			{
+				if( result[0..8] == "#include" ) return true;
+			}			
 		}
 		catch( Exception e )
 		{
@@ -1667,47 +1718,53 @@ struct AutoComplete
 				
 				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 				{
-					dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
-					if( _dcharString.length )
+					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					int key = cast(int) s[0];
+					if( key >= 0 && key <= 127 )
 					{
-						switch( _dcharString )
+						//dchar[] _dcharString = UTF.toString32( s );
+						dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+						if( _dcharString.length )
 						{
-							case ")":
-								if( countBracket == 0 ) countParen++;
-								break;
+							switch( _dcharString )
+							{
+								case ")":
+									if( countBracket == 0 ) countParen++;
+									break;
 
-							case "(":
-								if( countBracket == 0 ) countParen--;
-								if( countParen < 0 ) return UTF.toString( word32 );
-								break;
-								
-							case "]":
-								if( countParen == 0 ) countBracket++;
-								break;
+								case "(":
+									if( countBracket == 0 ) countParen--;
+									if( countParen < 0 ) return UTF.toString( word32 );
+									break;
+									
+								case "]":
+									if( countParen == 0 ) countBracket++;
+									break;
 
-							case "[":
-								if( countParen == 0 ) countBracket--;
-								if( countBracket < 0 ) return UTF.toString( word32 );
-								break;
-								
-							case ">":
-								if( pos > 0 && countParen == 0 && countBracket == 0 )
-								{
-									if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+								case "[":
+									if( countParen == 0 ) countBracket--;
+									if( countBracket < 0 ) return UTF.toString( word32 );
+									break;
+									
+								case ">":
+									if( pos > 0 && countParen == 0 && countBracket == 0 )
 									{
-										word32 ~= ">-";
-										pos--;
-										break;
+										if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+										{
+											word32 ~= ">-";
+											pos--;
+											break;
+										}
 									}
-								}
-							case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
-								if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
-								
-							default: 
-								if( countParen == 0 && countBracket == 0 )
-								{
-									word32 ~= _dcharString;
-								}
+								case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+									if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
+									
+								default: 
+									if( countParen == 0 && countBracket == 0 )
+									{
+										word32 ~= _dcharString;
+									}
+							}
 						}
 					}
 					/+
@@ -2510,12 +2567,13 @@ struct AutoComplete
 					
 					switch( AST_Head.kind )
 					{
-						case B_FUNCTION, B_SUB: if( !_type.length ) _type = "void"; break;
-						case B_TYPE: _type = "TYPE"; break;
-						case B_CLASS: _type = "CLASS"; break;
-						case B_UNION: _type = "UNION"; break;
-						case B_ENUM: _type = "ENUM"; break;
-						case B_NAMESPACE: _type = "NAMESPACE"; break;
+						case B_FUNCTION, B_SUB: 	if( !_type.length ) _type = "void"; 	break;
+						case B_TYPE:				_type = "TYPE"; 						break;
+						case B_CLASS:				_type = "CLASS"; 						break;
+						case B_UNION:				_type = "UNION"; 						break;
+						case B_ENUM:				_type = "ENUM"; 						break;
+						case B_ENUMMEMBER:			_type = "ENUMMEMBER"; 					break;
+						case B_NAMESPACE: 			_type = "NAMESPACE"; 					break;
 						case B_BI, B_BAS:
 							return;
 						default:

@@ -559,7 +559,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.328)\nBy Kuan Hsu (Taiwan)\n2017.11.04" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.329)\nBy Kuan Hsu (Taiwan)\n2017.11.08" );
 		return IUP_DEFAULT;
 	});
 	
@@ -862,6 +862,12 @@ extern(C)
 		{
 			if( !ScintillaAction.openFile( title ) )
 			{
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ title ~ "\"\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
+				
 				IupDestroy( ih );
 				
 				IupString[] _recentFiles;
@@ -872,8 +878,8 @@ extern(C)
 				
 				foreach( s; GLOBAL.recentFiles )
 					delete s;
-				GLOBAL.recentFiles.length = 0;
 				
+				GLOBAL.recentFiles.length = 0;
 				GLOBAL.recentFiles = _recentFiles;
 			}
 		}
@@ -907,8 +913,8 @@ extern(C)
 				
 				foreach( s; GLOBAL.recentProjects )
 					delete s;
+					
 				GLOBAL.recentProjects.length = 0;
-				
 				GLOBAL.recentProjects = _recentProjects;
 			}
 		}

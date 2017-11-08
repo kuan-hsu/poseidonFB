@@ -798,6 +798,7 @@ struct GLOBAL
 		GLOBAL.languageItems["opened"] = new IupString( cast(char[]) "had already opened!" );
 		GLOBAL.languageItems["existed"] = new IupString( cast(char[]) "had already existed!" );
 		GLOBAL.languageItems["wrongext"] = new IupString( cast(char[]) "Wrong Ext Name!" );
+		GLOBAL.languageItems["filelost"] = new IupString( cast(char[]) "isn't existed!" );
 		GLOBAL.languageItems[".poseidonbroken"] = new IupString( cast(char[]) "Project setup file loading error! Xml format may be broken!" );
 		GLOBAL.languageItems[".poseidonlost"] = new IupString( cast(char[]) "had lost setting xml file!" );
 		GLOBAL.languageItems["continueimport"] = new IupString( cast(char[]) "The Dir has poseidonFB Project File, Continue Import Anyway?" );

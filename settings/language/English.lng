@@ -365,6 +365,7 @@ suredelete=Are you sure to delete file?
 opened=had already opened!
 existed=had already existed!
 wrongext=Wrong Ext Name!!
+filelost=isn't existed!
 .poseidonbroken=Project setup file loading error!!Xml format may be broken!!
 .poseidonlost=had lost setting xml file!
 continueimport=The Dir has poseidonFB Project File, Continue Import Anyway?
