@@ -813,6 +813,9 @@ struct GLOBAL
 		GLOBAL.languageItems["quest"] = new IupString( cast(char[]) "Quest" );
 		GLOBAL.languageItems["alarm"] = new IupString( cast(char[]) "Alarm" );
 		GLOBAL.languageItems["error"] = new IupString( cast(char[]) "Error" );
+		GLOBAL.languageItems["foundword"] = new IupString( cast(char[]) "Found Word." );
+		GLOBAL.languageItems["foundnothing"] = new IupString( cast(char[]) "Found Nothing!" );
+
 
 		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
 		GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "freeBASIC Sources" );

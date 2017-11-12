@@ -124,13 +124,14 @@ void createExplorerWindow()
 void createEditorSetting()
 {
 	//IDECONFIG.load();
-	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( 400, 600, GLOBAL.languageItems["message"].toDString );
-	GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 0 );
+	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( -1, -1, GLOBAL.languageItems["message"].toDString );
+	GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 24 );
 	IupHide( GLOBAL.IDEMessageDlg.getIhandle );
 
 	IDECONFIG.loadINI();
 	
 	GLOBAL.IDEMessageDlg.setFont( GLOBAL.fonts[7].fontString );
+	GLOBAL.IDEMessageDlg.setLocalization();
 }
 
 void createLayout()
@@ -250,9 +251,12 @@ extern(C)
 	{
 		switch( state )
 		{
-			case IUP_MAXIMIZE:	GLOBAL.editorSetting01.PLACEMENT = "MAXIMIZED";		break;
-			case IUP_RESTORE:	GLOBAL.editorSetting01.PLACEMENT = "NORMAL";		break;
-			case IUP_MINIMIZE:	GLOBAL.editorSetting01.PLACEMENT = "MINIMIZED";		break;
+			case IUP_MAXIMIZE:			GLOBAL.editorSetting01.PLACEMENT = "MAXIMIZED";		break;
+			case IUP_RESTORE:			GLOBAL.editorSetting01.PLACEMENT = "NORMAL";		break;
+			case IUP_MINIMIZE:
+				GLOBAL.editorSetting01.PLACEMENT = "MINIMIZED";
+				if( GLOBAL.IDEMessageDlg.getRestore ) IupHide( GLOBAL.IDEMessageDlg.getIhandle );
+				break;
 			default:
 		}
 		
@@ -288,6 +292,18 @@ extern(C)
 		
 		// Update Filelist Size
 		if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+		
+		if( GLOBAL.IDEMessageDlg !is null )
+		{
+			if( fromStringz( IupGetAttribute( GLOBAL.IDEMessageDlg.getIhandle, "VISIBLE" ) ) == "NO" )
+			{
+				if( GLOBAL.IDEMessageDlg.getRestore )
+				{
+					IupSetAttribute( GLOBAL.IDEMessageDlg.getIhandle, "TOPMOST", "YES" );
+					IupShow( GLOBAL.IDEMessageDlg.getIhandle );
+				}		
+			}
+		}
 		
 		return IUP_DEFAULT;
 	}

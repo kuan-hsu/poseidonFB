@@ -749,25 +749,22 @@ struct IDECONFIG
 			foreach( char[] lineData; Util.splitLines( doc ) )
 			{
 				lineData = Util.trim( lineData );
-				if( lineData.length )
+				
+				// Get Line Data
+				int _result = getINILineData( lineData, left, right );
+				if( _result == 1 )
 				{
-					if( lineData[0] == '[' )
-					{
-						int assignPos = Util.rindex( lineData, "=" );
-						if( assignPos < lineData.length )
-						{
-							blockText = lineData[0..assignPos];
-							continue;
-						}
-					}
+					blockText = left;
+					continue;
 				}
-				else
+				else if( _result == 0 )
 				{
 					continue;
 				}
-				
-				// Get Line Data
-				getINILineData( lineData, left, right );
+				else
+				{
+					if( !right.length ) continue;
+				}
 				
 				switch( blockText )
 				{

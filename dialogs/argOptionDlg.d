@@ -229,7 +229,7 @@ class CArgOptionDialog : CBaseDialog
 				}			
 			}			
 			
-			IupSetAttribute( selectionHandle, "FGCOLOR", "255 0 0" );
+			IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 0" );
 			IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 			GLOBAL.currentCustomCompilerOption = cast(char[])"";
 		}

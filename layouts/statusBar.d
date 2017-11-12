@@ -43,7 +43,7 @@ class CStatusBar
 		IupSetAttribute( compileOptionSelection, "SIZE", "150x" );
 		if( !GLOBAL.currentCustomCompilerOption.toDString.length )
 		{
-			IupSetAttribute( compileOptionSelection, "FGCOLOR", "255 0 0" );
+			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 0" );
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 		}
 		else
@@ -214,7 +214,7 @@ extern(C) // Callback for CBaseDialog
 					Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" );
 					if( selectionHandle != null )
 					{
-						IupSetAttribute( selectionHandle, "FGCOLOR", "255 0 0" );
+						IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 0" );
 						IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 						GLOBAL.currentCustomCompilerOption = cast(char[])"";
 						GLOBAL.statusBar.setTip( "" );

@@ -162,17 +162,41 @@ char[] convertKeyWordCase( int type, char[] replaceText )
 
 char[] setINILineData( char[] left, char[] right = "" )
 {
+	if( !right.length )
+	{
+		if( left.length > 1 )
+		{
+			if( left[0] == '[' && left[$-1] == ']' ) return left ~ "\n";
+		}
+	}
 	return left ~ "=" ~ right ~ "\n";
 }
 
-void getINILineData( char[] lineData, out char[] left, out char[] right )
+// Return: 1 = Block, 2 = Items, 0 = Illegal
+int getINILineData( char[] lineData, out char[] left, out char[] right )
 {
 	int assignPos = Util.index( lineData, "=" );
 	if( assignPos < lineData.length )
 	{
 		left	= Util.trim( lineData[0..assignPos] );
 		right	= Util.trim( lineData[assignPos+1..$] );
-	}			
+		
+		// For previous reversion.....
+		if( left.length > 1 )
+			if( left[0] == '[' && left[$-1] == ']' ) return 1;
+
+		return 2;
+	}
+	else
+	{
+		if( lineData.length > 1 )
+		{
+			lineData = Util.trim( lineData );
+			if( lineData[0] == '[' && lineData[$-1] == ']' ) left = lineData;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 /+

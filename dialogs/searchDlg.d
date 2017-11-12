@@ -225,12 +225,12 @@ extern(C) // Callback for CSingleTextDialog
 			if( pos > -1 )
 			{
 				if( cSci !is null ) GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
-				GLOBAL.searchDlg.setStatusBar( "Found Word." );
+				GLOBAL.searchDlg.setStatusBar( GLOBAL.languageItems["foundword"].toDString );
 			}
 			else
 			{
 				if( cSci !is null ) GLOBAL.navigation.eraseTail();
-				GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
+				GLOBAL.searchDlg.setStatusBar( GLOBAL.languageItems["foundnothing"].toDString );
 			}
 		}
 		return IUP_DEFAULT;
@@ -302,12 +302,12 @@ extern(C) // Callback for CSingleTextDialog
 		if( pos > -1 )
 		{
 			if( cSci !is null ) GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
-			GLOBAL.searchDlg.setStatusBar( "Found Word." );
+			GLOBAL.searchDlg.setStatusBar( GLOBAL.languageItems["foundword"].toDString );
 		}
 		else
 		{
 			if( cSci !is null ) GLOBAL.navigation.eraseTail();
-			GLOBAL.searchDlg.setStatusBar( "Find Nothing!" );
+			GLOBAL.searchDlg.setStatusBar( GLOBAL.languageItems["foundnothing"].toDString );
 		}
 	
 		return IUP_DEFAULT;;

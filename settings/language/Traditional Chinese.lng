@@ -139,6 +139,7 @@ options=選項
 				multiselection=開啟文件多重選擇
 				loadprevdoc=載入先前編輯的檔案
 				middlescroll=中鍵捲動
+				controlcharsymbol=設定特殊字元
 				tabwidth=跳位字元寬度
 				columnedge=顯示列末線
 				maker0=標記0
@@ -379,6 +380,8 @@ noselect=無選用項目
 quest=問題
 alarm=警告
 error=錯誤
+foundword=找到目標字
+foundnothing=找不到目標字!
 
 exefile=執行檔
 basfile=程式源碼

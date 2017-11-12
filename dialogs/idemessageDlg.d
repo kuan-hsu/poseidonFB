@@ -11,6 +11,7 @@ class CIDEMessageDialog : CBaseDialog
 	import tango.time.WallClock;
 
 	Ihandle*	text, val;
+	bool		bCanRestore;
 
 	void createLayout()
 	{
@@ -42,13 +43,18 @@ class CIDEMessageDialog : CBaseDialog
 		{
 			return dialogs.idemessageDlg.btnClose_ACTION_CB( ih );
 		});
-	}	
+	}
+	
 
 	public:
 	this( int w, int h, char[] title, bool bResize = true, char[] parent = "MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
-		IupSetAttributes( _dlg, "MAXBOX=NO,MINBOX=NO,SIZE=QUARTERxFULL,OPACITY=180,SHRINK=YES" );
+		
+		IupSetAttribute( _dlg, "TITLE", null );
+		//IupSetAttribute( _dlg, "MENUBOX", "NO" );
+		
+		IupSetAttributes( _dlg, "MAXBOX=NO,MINBOX=NO,BORDER=NO,SIZE=QUARTERxHALF,OPACITY=180,SHRINK=YES" );
 		IupSetAttribute( _dlg, "ICON", "icon_idemessage" );
 
 		createLayout();
@@ -89,7 +95,25 @@ class CIDEMessageDialog : CBaseDialog
 			IupSetAttribute( text, "VALUE", toStringz( txt ~ "\n" ) );
 		else
 			IupSetAttribute( text, "APPEND", toStringz( txt ~ "\n" ) );
-	}	
+	}
+	
+	void setRestore( bool _b )
+	{
+		bCanRestore = _b;
+	}
+	
+	bool getRestore()
+	{
+		return bCanRestore;
+	}
+	
+	void setLocalization()
+	{
+		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["clear"].toCString );
+		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
+		//titleString = GLOBAL.languageItems["message"].toDString;
+		//IupSetAttribute( _dlg, "TITLE", titleString.toCString );
+	}
 }
 
 
@@ -106,7 +130,12 @@ extern(C) // Callback for CSingleTextDialog
 	
 	private int btnClose_ACTION_CB( Ihandle* ih )
 	{
-		if( GLOBAL.IDEMessageDlg !is null ) IupHide( GLOBAL.IDEMessageDlg.getIhandle );
+		if( GLOBAL.IDEMessageDlg !is null )
+		{
+			IupHide( GLOBAL.IDEMessageDlg.getIhandle );
+			GLOBAL.IDEMessageDlg.setRestore( false );
+		}
+		
 		return IUP_DEFAULT;
 	}
 

@@ -159,6 +159,13 @@ extern(C)
 				}
 			}
 		}
+		else
+		{
+			version(linux)
+			{
+				if( button == IUP_BUTTON3 && pos > -1) return tabRightClick_cb( ih, pos ); // For Linux MOD
+			}
+		}
 		
 		if( pressed == 0 )
 		{
@@ -209,11 +216,9 @@ extern(C)
 						}
 					}
 				}
-				else
-				{
-					GLOBAL.tabDocumentPos = -1;
-				}
 			}
+			
+			GLOBAL.tabDocumentPos = -1;
 		}
 		else
 		{

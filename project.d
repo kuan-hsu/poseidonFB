@@ -201,13 +201,23 @@ struct PROJECT
 					{
 						return loadXMLFile( settingFileName );
 					}
-					else if( lineData[0] == '[' )
+					else
 					{
-						int assignPos = Util.rindex( lineData, "=" );
-						if( assignPos < lineData.length )
+						// Get Line Data
+						int _result = getINILineData( lineData, left, right );
+						
+						if( _result == 1 )
 						{
-							blockText = lineData[0..assignPos];
+							blockText = left;
 							continue;
+						}
+						else if( _result == 0 )
+						{
+							continue;
+						}
+						else
+						{
+							if( !right.length ) continue;
 						}
 					}
 				}
@@ -215,9 +225,6 @@ struct PROJECT
 				{
 					continue;
 				}
-				
-				// Get Line Data
-				getINILineData( lineData, left, right );
 				
 				switch( blockText )
 				{

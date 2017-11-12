@@ -140,6 +140,7 @@ options=Options
 				multiselection=Enable Document Multi Selection
 				loadprevdoc=Load Previous Documents
 				middlescroll=Middle Button Scroll
+				controlcharsymbol=Set Control Char Symbol
 				tabwidth=Tab Width
 				columnedge=Column Edge
 				maker0=Maker0
@@ -380,6 +381,8 @@ noselect=No Selected!
 quest=Quest
 alarm=Alarm
 error=Error
+foundword=Found Word.
+foundnothing=Found Nothing!
 
 exefile=Execute Files
 basfile=freeBASIC Sources

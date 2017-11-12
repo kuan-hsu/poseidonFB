@@ -1311,35 +1311,10 @@ extern(C)
 				for( int i = 0; i < 4; ++ i )
 				{
 					IupDestroy( pixelsImage[i] );
-				}				
-			}
-			/+
-			else if( button == '1' )
-			{
-				// BRACEMATCH
-				if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
-				{
-					int pos = actionManager.ScintillaAction.getCurrentPos( ih );
-					int close = IupGetIntId( ih, "BRACEMATCH", pos );
-					if( close > -1 )
-					{
-						IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
-					}
-					else
-					{
-						if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
-						{
-							--pos;
-							close = IupGetIntId( ih, "BRACEMATCH", pos );
-							if( close > -1 )
-							{
-								IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
-							}
-						}
-					}
 				}
+				
+				version(linux) return IUP_IGNORE; // For Linux MOD
 			}
-			+/
 			else if( button == IUP_BUTTON2 ) // Middle Click
 			{
 				if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
