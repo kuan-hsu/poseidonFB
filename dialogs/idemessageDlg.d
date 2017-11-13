@@ -9,6 +9,7 @@ class CIDEMessageDialog : CBaseDialog
 {
 	private:
 	import tango.time.WallClock;
+	import Util = tango.text.Util;
 
 	Ihandle*	text, val;
 	bool		bCanRestore;
@@ -16,7 +17,7 @@ class CIDEMessageDialog : CBaseDialog
 	void createLayout()
 	{
 		text = IupText( null );
-		IupSetAttributes( text, "EXPAND=YES,MULTILINE=YES,READONLY=YES,WORDWRAP=YES,APPENDNEWLINE=NO" );
+		IupSetAttributes( text, "EXPAND=YES,MULTILINE=YES,READONLY=YES,WORDWRAP=YES,APPENDNEWLINE=NO,NAME=IDEMESSAGETEXT" );
 
 		val = IupVal( null );
 		IupSetAttributes( val, "MAX=240,MIN=100,VALUE=180" );
@@ -54,10 +55,31 @@ class CIDEMessageDialog : CBaseDialog
 		IupSetAttribute( _dlg, "TITLE", null );
 		//IupSetAttribute( _dlg, "MENUBOX", "NO" );
 		
-		IupSetAttributes( _dlg, "MAXBOX=NO,MINBOX=NO,BORDER=NO,SIZE=QUARTERxHALF,OPACITY=180,SHRINK=YES" );
+		IupSetAttributes( _dlg, "MAXBOX=NO,MINBOX=NO,BORDER=NO,SIZE=QUARTERxFULL,OPACITY=180,SHRINK=YES" );
 		IupSetAttribute( _dlg, "ICON", "icon_idemessage" );
 
 		createLayout();
+		
+		try
+		{
+			char[] _size = fromStringz( IupGetAttribute( _dlg, "SIZE" ) );
+			if( _size.length )
+			{
+				int crossPos = Util.rindex( _size, "x" );
+				if( crossPos < _size.length )
+				{
+					int _sizeINT = Integer.atoi( _size[crossPos+1..$] );
+					if( _sizeINT > 24 )
+					{
+						_sizeINT -= 24;
+						_size = _size[0..crossPos] ~ "x" ~ Integer.toString( _sizeINT );
+						IupSetAttribute( _dlg, "SIZE", toStringz( _size ) );
+					}
+				}
+			}
+		}
+		catch{}
+		
 	}
 
 	~this()
@@ -97,16 +119,6 @@ class CIDEMessageDialog : CBaseDialog
 			IupSetAttribute( text, "APPEND", toStringz( txt ~ "\n" ) );
 	}
 	
-	void setRestore( bool _b )
-	{
-		bCanRestore = _b;
-	}
-	
-	bool getRestore()
-	{
-		return bCanRestore;
-	}
-	
 	void setLocalization()
 	{
 		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["clear"].toCString );
@@ -123,18 +135,13 @@ extern(C) // Callback for CSingleTextDialog
 	{
 		char[] value = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 		IupSetInt( GLOBAL.IDEMessageDlg.getIhandle, "OPACITY", Integer.atoi( value ) );
-		//IupSetFocus( GLOBAL.IDEMessageDlg.getHandle );
 		
 		return IUP_DEFAULT;
 	}
 	
 	private int btnClose_ACTION_CB( Ihandle* ih )
 	{
-		if( GLOBAL.IDEMessageDlg !is null )
-		{
-			IupHide( GLOBAL.IDEMessageDlg.getIhandle );
-			GLOBAL.IDEMessageDlg.setRestore( false );
-		}
+		if( GLOBAL.IDEMessageDlg !is null )	IupHide( GLOBAL.IDEMessageDlg.getIhandle );
 		
 		return IUP_DEFAULT;
 	}

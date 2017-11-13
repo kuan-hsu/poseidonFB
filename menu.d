@@ -380,12 +380,7 @@ void createMenu()
 	IupSetAttribute( ideMessage, "IMAGE", "icon_idemessage" );
 	IupSetCallback( ideMessage, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		if( GLOBAL.IDEMessageDlg !is null )
-		{
-			IupSetAttribute( GLOBAL.IDEMessageDlg.getIhandle, "TOPMOST", "YES" );
-			IupShow( GLOBAL.IDEMessageDlg.getIhandle );
-			GLOBAL.IDEMessageDlg.setRestore( true );
-		}
+		if( GLOBAL.IDEMessageDlg !is null )	GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 24 );
 		return IUP_DEFAULT;
 	});
 	
@@ -560,7 +555,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.330)\nBy Kuan Hsu (Taiwan)\n2017.11.12" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.331)\nBy Kuan Hsu (Taiwan)\n2017.11.13" );
 		return IUP_DEFAULT;
 	});
 	

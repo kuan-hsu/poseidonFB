@@ -232,7 +232,7 @@ void main( char[][] args )
 	createMenu();
 	// Creates a dialog containing the control
 	GLOBAL.mainDlg = IupDialog( null );
-	IupSetHandle( "MAIN_DIALOG",GLOBAL.mainDlg );
+	IupSetHandle( "MAIN_DIALOG", GLOBAL.mainDlg );
 	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
 	IupSetCallback( GLOBAL.mainDlg, "SHOW_CB", cast(Icallback) &mainDialog_SHOW_cb );
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
@@ -245,15 +245,6 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
-	version(Windows)
-	{
-		IupSetAttribute( GLOBAL.mainDlg, "STARTFOCUS", "YES" );
-		IupSetCallback( GLOBAL.mainDlg, "FOCUS_CB", cast(Icallback) &mainDialog_FOCUS_cb );
-	}
-
-	
-	
-	
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );

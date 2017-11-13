@@ -11,7 +11,7 @@ class CBaseDialog
 	
 	Ihandle*			_dlg;
 	Ihandle*			btnOK, btnCANCEL;//, btnAPPLY;
-	IupString			titleString;
+	IupString			titleString, parentName;
 	
 	Ihandle* createDlgButton( char[] buttonSize = "40x20" )
 	{
@@ -54,7 +54,8 @@ class CBaseDialog
 		
 		if( parent.length)
 		{
-			IupSetAttribute( _dlg, "PARENTDIALOG", GLOBAL.cString.convert( parent ) );
+			parentName = new IupString( parent );
+			IupSetAttribute( _dlg, "PARENTDIALOG", parentName.toCString );
 		}
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
 	}

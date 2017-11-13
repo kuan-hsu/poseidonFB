@@ -20,7 +20,8 @@ class CSearchDialog : CBaseDialog
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton();
-		IupSetAttribute( btnOK, "VISIBLE", "NO" );
+		IupDestroy( btnOK );
+		//IupSetAttribute( btnOK, "VISIBLE", "NO" );
 
 		listFind = IupList( null );
 		/*
@@ -95,21 +96,27 @@ class CSearchDialog : CBaseDialog
 
 
 		Ihandle* btnFind = IupButton( GLOBAL.languageItems["find"].toCString, null );
+		IupSetAttribute( btnFind,"SIZE","x12" );
 		IupSetCallback( btnFind, "ACTION", cast(Icallback) &CSearchDialog_btnFind_cb );
 		
 		Ihandle* btnReplaceFind = IupButton( GLOBAL.languageItems["replacefind"].toCString, null );
+		IupSetAttribute( btnReplaceFind,"SIZE","x12" );
 		IupSetCallback( btnReplaceFind, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceFind_cb );
 		
 		Ihandle* btnReplace = IupButton( GLOBAL.languageItems["replace"].toCString, null );
+		IupSetAttribute( btnReplace,"SIZE","x12" );
 		IupSetCallback( btnReplace, "ACTION", cast(Icallback) &CSearchDialog_btnReplace_cb );
 		
 		Ihandle* btnReplaceAll = IupButton( GLOBAL.languageItems["replaceall"].toCString, null );
+		IupSetAttribute( btnReplaceAll,"SIZE","x12" );
 		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceAll_cb );
 		
 		Ihandle* btnCountAll = IupButton( GLOBAL.languageItems["countall"].toCString, null );
+		IupSetAttribute( btnCountAll,"SIZE","x12" );
 		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &CSearchDialog_btnCountAll_cb );
 		
 		Ihandle* btnMarkAll = IupButton( GLOBAL.languageItems["bookmarkall"].toCString, null );
+		IupSetAttribute( btnMarkAll,"SIZE","x12" );
 		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &CSearchDialog_btnMarkAll_cb );
 
 		Ihandle* gbox = IupGridBox
@@ -149,7 +156,6 @@ class CSearchDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_find" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 		
 		statusString = new IupString;
 		

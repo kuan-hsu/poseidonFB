@@ -142,6 +142,7 @@ class CScintilla
 		fullPath = new IupString();
 		title = new IupString();
 		*/
+		//IupSetAttribute( sci, "SCROLLBAR", "YES" );
 		IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
@@ -1341,7 +1342,7 @@ extern(C)
 						return IUP_DEFAULT;
 					}
 				}
-					
+	
 				if( GLOBAL.editorSetting00.MultiSelection == "ON" )
 				{
 					int pos = IupConvertXYToPos( ih, x, y );

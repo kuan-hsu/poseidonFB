@@ -118,15 +118,15 @@ void createExplorerWindow()
 	GLOBAL.scrollICONHandle = IupDialog( _scrolllabel );
 	IupSetStrAttribute( GLOBAL.scrollICONHandle, "OPACITYIMAGE", "icon_scroll" );
 	IupSetAttributes( GLOBAL.scrollICONHandle, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO" );
-	IupSetAttribute( GLOBAL.scrollICONHandle, "TOPMOST", "YES" );
+	IupSetAttribute(  GLOBAL.scrollICONHandle, "PARENTDIALOG", "MAIN_DIALOG" );
 }
 
 void createEditorSetting()
 {
 	//IDECONFIG.load();
-	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( -1, -1, GLOBAL.languageItems["message"].toDString );
-	GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 24 );
-	IupHide( GLOBAL.IDEMessageDlg.getIhandle );
+	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( -1, -1, GLOBAL.languageItems["message"].toDString, true, "MAIN_DIALOG" );
+	//GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 24 );
+	//IupHide( GLOBAL.IDEMessageDlg.getIhandle );
 
 	IDECONFIG.loadINI();
 	
@@ -143,8 +143,8 @@ void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"].toDString );
 	//GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
-	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString );
-	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString );
+	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "MAIN_DIALOG" );
+	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString, null, false, "MAIN_DIALOG" );
 }
 
 
@@ -253,27 +253,10 @@ extern(C)
 		{
 			case IUP_MAXIMIZE:			GLOBAL.editorSetting01.PLACEMENT = "MAXIMIZED";		break;
 			case IUP_RESTORE:			GLOBAL.editorSetting01.PLACEMENT = "NORMAL";		break;
-			case IUP_MINIMIZE:
-				GLOBAL.editorSetting01.PLACEMENT = "MINIMIZED";
-				if( GLOBAL.IDEMessageDlg.getRestore ) IupHide( GLOBAL.IDEMessageDlg.getIhandle );
-				break;
+			case IUP_MINIMIZE:			GLOBAL.editorSetting01.PLACEMENT = "MINIMIZED";		break;
 			default:
 		}
-		
-		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
-			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
 
-		return IUP_DEFAULT;
-	}
-	
-	int mainDialog_FOCUS_cb( Ihandle *ih, int focus )
-	{
-		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
-		{
-			if( focus == 0 )
-				if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
-		}
-			
 		return IUP_DEFAULT;
 	}
 	
@@ -292,18 +275,6 @@ extern(C)
 		
 		// Update Filelist Size
 		if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
-		
-		if( GLOBAL.IDEMessageDlg !is null )
-		{
-			if( fromStringz( IupGetAttribute( GLOBAL.IDEMessageDlg.getIhandle, "VISIBLE" ) ) == "NO" )
-			{
-				if( GLOBAL.IDEMessageDlg.getRestore )
-				{
-					IupSetAttribute( GLOBAL.IDEMessageDlg.getIhandle, "TOPMOST", "YES" );
-					IupShow( GLOBAL.IDEMessageDlg.getIhandle );
-				}		
-			}
-		}
 		
 		return IUP_DEFAULT;
 	}
@@ -408,9 +379,22 @@ extern(C)
 					
 					if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
+						char[] s = ScintillaAction.getCurrentChar( -1,  cSci.getIupScintilla );
+						if( s.length ) c = cast(int) s[$-1];
+						//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
+						
 						switch( c )
 						{
-							case 8, 9, 10, 13, 65535:
+							case 10, 13: // Eneter
+								switch( GLOBAL.liveLevel )
+								{
+									case 1: LiveParser.parseCurrentLine( true ); break;
+									case 2: LiveParser.parseCurrentBlock(); break;
+									default:
+								}
+								break;
+
+							case 8, 9, 65535:
 								switch( GLOBAL.liveLevel )
 								{
 									case 1: LiveParser.parseCurrentLine(); break;

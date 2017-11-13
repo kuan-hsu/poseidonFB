@@ -23,7 +23,8 @@ class CFindInFilesDialog : CBaseDialog
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton();
-		IupSetAttribute( btnOK, "VISIBLE", "NO" );
+		IupDestroy( btnOK );
+		//IupSetAttribute( btnOK, "VISIBLE", "NO" );
 
 		labelTitle[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
 		labelTitle[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
@@ -124,7 +125,7 @@ class CFindInFilesDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_findfiles" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		IupSetAttribute( _dlg, "TOPMOST", "YES" );
+
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
