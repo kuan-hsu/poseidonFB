@@ -139,7 +139,7 @@ struct LiveParser
 		}
 	}
 
-	static void parseCurrentLine( bool bEnter = false )
+	static void parseCurrentLine( int _ln = -1 )
 	{
 		try
 		{
@@ -150,19 +150,22 @@ struct LiveParser
 
 				if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
 				
-				int	currentLineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-				char[] currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
+				int	currentLineNum; // = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				char[] currentLineText; // = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
 				
-				/*
-				if( bEnter )
+				if( _ln != -1 )
 				{
-					GLOBAL.messagePanel.printOutputPanel( "1:" ~fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", currentLineNum - 2 ) ) );
-					GLOBAL.messagePanel.printOutputPanel( "2:"~currentLineText );
-					
-					currentLineText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", currentLineNum - 2 ) ).dup ~ currentLineText;
-					//currentLineNum -= 1;
+					currentLineNum = _ln;
+					currentLineText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", _ln - 1 ) ).dup; // 0 BASE
+				}
+				else
+				{
+					currentLineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+					currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
 				}
 				
+				if( !Util.trim( currentLineText).length ) return;
+				/*
 				GLOBAL.messagePanel.printOutputPanel( currentLineText );
 				*/
 				

@@ -142,7 +142,8 @@ class CScintilla
 		fullPath = new IupString();
 		title = new IupString();
 		*/
-		//IupSetAttribute( sci, "SCROLLBAR", "YES" );
+		IupSetAttribute( sci, "SCROLLBAR", "YES" );
+		
 		IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
 		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
@@ -162,6 +163,15 @@ class CScintilla
 		init( _fullPath, insertPos );
 		setText( _text );
 		setEncoding( _encode );
+		
+		if( sci != null )
+		{
+			char[] _size = fromStringz( IupGetAttribute( sci, "SIZE" ) );
+			int crossPos = Util.index( _size, "x" );
+			if( crossPos < _size.length ) IupSetAttribute( sci, "SCROLLWIDTH", toStringz( _size[0..crossPos] ) );
+		}		
+		IupScintillaSendMessage( sci, 2516, 1, 0 ); // SCI_SETSCROLLWIDTHTRACKING 2516
+		//IupScintillaSendMessage( sci, 2277, 1, 0 ); // SCI_SETENDATLASTLINE 2277
 		
 
 		// Set margin size
@@ -741,7 +751,19 @@ extern(C)
 		CScintilla cSci = ScintillaAction.getActiveCScintilla;
 		
 		if( cSci !is null )
-			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )	LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], lin + 1, num );
+			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+			{
+				char[] prevLineText = fromStringz( IupGetAttributeId( ih, "LINE", lin ) );
+				if( !Util.trim( prevLineText ).length )
+				{
+					LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], lin, num );
+					//IupMessage( "", toStringz( "Num=" ~ Integer.toString( num ) ~ "\nLin=" ~ Integer.toString( lin ) ) );
+				}
+				else
+				{
+					LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], lin + 1, num );
+				}
+			}
 		
 		return IUP_DEFAULT;
 	}

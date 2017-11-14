@@ -54,9 +54,9 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetCallback( toggleWholeWord, "ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
 
 		Ihandle* hBoxOption = IupHbox( toggleCaseSensitive, toggleWholeWord, null );
-		IupSetAttributes( hBoxOption, "ALIGNMENT=ACENTER,EXPAND=YES,MARGIN=0x0,GAP=0" );
+		IupSetAttributes( hBoxOption, "ALIGNMENT=ACENTER,EXPAND=YES,MARGIN=0x0,GAP=0,HOMOGENEOUS=YES" );
 		Ihandle* frameOption = IupFrame( hBoxOption );
-		IupSetAttributes( frameOption, "MARGIN=0x0,GAP=0,SIZE=0x20");
+		//IupSetAttributes( frameOption, "MARGIN=20x0,GAP=0");
 		IupSetAttribute( frameOption, "TITLE", GLOBAL.languageItems["options"].toCString );
 
 
@@ -81,6 +81,7 @@ class CFindInFilesDialog : CBaseDialog
 		Ihandle* vBoxScope = IupVbox( toggleDocument, toggleAllDocument, togglePrj, toggleAllPrj, null );
 		Ihandle* radioScope = IupRadio( vBoxScope );
 		Ihandle* frameScope = IupFrame( radioScope );
+		//IupSetAttributes( frameScope, "MARGIN=0x0,GAP=0");
 		IupSetAttribute( frameScope, "TITLE", GLOBAL.languageItems["scope"].toCString );		
 
 
@@ -102,10 +103,10 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 
 		Ihandle* vBoxButton = IupVbox( btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll, null );
-		IupSetAttributes( vBoxScope, "EXPANDCHILDREN=YES,GAP=2" );
+		IupSetAttributes( vBoxScope, "EXPANDCHILDREN=YES,GAP=5" );
 
 		Ihandle* hBoxButton = IupHbox( frameScope, vBoxButton, null );
-		IupSetAttributes( hBoxButton, "EXPAND=YES,HOMOGENEOUS=YES" );
+		IupSetAttributes( hBoxButton, "EXPAND=YES,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
 
 
 	

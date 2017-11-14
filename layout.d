@@ -379,7 +379,7 @@ extern(C)
 					
 					if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
-						char[] s = ScintillaAction.getCurrentChar( -1,  cSci.getIupScintilla );
+						char[] s = ScintillaAction.getCurrentChar( -1, cSci.getIupScintilla );
 						if( s.length ) c = cast(int) s[$-1];
 						//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
 						
@@ -388,7 +388,18 @@ extern(C)
 							case 10, 13: // Eneter
 								switch( GLOBAL.liveLevel )
 								{
-									case 1: LiveParser.parseCurrentLine( true ); break;
+									case 1:
+										int prevLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 1;
+										char[] prevLineText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
+										//GLOBAL.messagePanel.printOutputPanel( "prevLine(" ~ Integer.toString(prevLine) ~ "): " ~ prevLineText );
+										
+										if( Util.trim( prevLineText ).length )
+										{
+											LiveParser.parseCurrentLine( prevLine );
+											LiveParser.parseCurrentLine();
+										}
+										break;
+										
 									case 2: LiveParser.parseCurrentBlock(); break;
 									default:
 								}
