@@ -395,8 +395,11 @@ extern(C)
 										
 										if( Util.trim( prevLineText ).length )
 										{
-											LiveParser.parseCurrentLine( prevLine );
-											LiveParser.parseCurrentLine();
+											if( Util.trim( fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ) ).length )
+											{
+												LiveParser.parseCurrentLine( prevLine );
+												LiveParser.parseCurrentLine();
+											}
 										}
 										break;
 										

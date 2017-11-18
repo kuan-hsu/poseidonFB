@@ -61,6 +61,8 @@ struct AutoComplete
 	{
 		if( GLOBAL.toggleShowAllMember == "OFF" )
 			if( node.protection == "private" ) return null;
+			
+		if( Util.count( node.name, "." ) > 0 ) return null;
 		
 		int protAdd;
 		switch( node.protection )
@@ -1134,9 +1136,9 @@ struct AutoComplete
 				if( bExitLoopFlag ) break;
 			}
 			
-			if( !word.length ) return null;
+			if( !word.length ) return null; else word = word.dup.reverse;
 			
-			version(Windows) word = word.dup.reverse; else word = lowerCase( word.dup.reverse );
+			//version(Windows) word = word.dup.reverse; else word = lowerCase( word.dup.reverse );
 			//if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return null;
 			
 			char[][]	words = Util.split( Path.normalize( word ), "/" );
@@ -1722,108 +1724,100 @@ struct AutoComplete
 					int key = cast(int) s[0];
 					if( key >= 0 && key <= 127 )
 					{
-						//dchar[] _dcharString = UTF.toString32( s );
-						dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
-						if( _dcharString.length )
+						version(Windows)
 						{
-							switch( _dcharString )
+							dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+							if( _dcharString.length )
 							{
-								case ")":
-									if( countBracket == 0 ) countParen++;
-									break;
+								switch( _dcharString )
+								{
+									case ")":
+										if( countBracket == 0 ) countParen++;
+										break;
 
-								case "(":
-									if( countBracket == 0 ) countParen--;
-									if( countParen < 0 ) return UTF.toString( word32 );
-									break;
-									
-								case "]":
-									if( countParen == 0 ) countBracket++;
-									break;
+									case "(":
+										if( countBracket == 0 ) countParen--;
+										if( countParen < 0 ) return UTF.toString( word32 );
+										break;
+										
+									case "]":
+										if( countParen == 0 ) countBracket++;
+										break;
 
-								case "[":
-									if( countParen == 0 ) countBracket--;
-									if( countBracket < 0 ) return UTF.toString( word32 );
-									break;
-									
-								case ">":
-									if( pos > 0 && countParen == 0 && countBracket == 0 )
-									{
-										if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+									case "[":
+										if( countParen == 0 ) countBracket--;
+										if( countBracket < 0 ) return UTF.toString( word32 );
+										break;
+										
+									case ">":
+										if( pos > 0 && countParen == 0 && countBracket == 0 )
 										{
-											word32 ~= ">-";
-											pos--;
-											break;
+											if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+											{
+												word32 ~= ">-";
+												pos--;
+												break;
+											}
 										}
-									}
-								case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
-									if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
-									
-								default: 
-									if( countParen == 0 && countBracket == 0 )
-									{
-										word32 ~= _dcharString;
-									}
+									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+										if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
+										
+									default: 
+										if( countParen == 0 && countBracket == 0 )
+										{
+											word32 ~= _dcharString;
+										}
+								}
+							}
+						}
+						else
+						{
+							if( s.length )
+							{
+								switch( s )
+								{
+									case ")":
+										if( countBracket == 0 ) countParen++;
+										break;
+
+									case "(":
+										if( countBracket == 0 ) countParen--;
+										if( countParen < 0 ) return word;
+										break;
+										
+									case "]":
+										if( countParen == 0 ) countBracket++;
+										break;
+
+									case "[":
+										if( countParen == 0 ) countBracket--;
+										if( countBracket < 0 ) return word;
+										break;
+										
+									case ">":
+										if( pos > 0 && countParen == 0 && countBracket == 0 )
+										{
+											if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+											{
+												word ~= ">-";
+												pos--;
+												break;
+											}
+										}
+									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+										if( countParen == 0 && countBracket == 0 ) return word;
+										
+									default: 
+										if( countParen == 0 && countBracket == 0 )
+										{
+											word ~= s;
+										}
+								}
 							}
 						}
 					}
-					/+
-					//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
-					char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-					if( _s.length )
-					{
-						dchar[] sd = UTF.toString32( _s );
-						dchar s = sd[0];
-						switch( s )
-						{
-							case ')':
-								if( countBracket == 0 ) countParen++;
-								break;
-
-							case '(':
-								if( countBracket == 0 ) countParen--;
-								if( countParen < 0 ) return word;
-								break;
-								
-							case ']':
-								if( countParen == 0 ) countBracket++;
-								break;
-
-							case '[':
-								if( countParen == 0 ) countBracket--;
-								if( countBracket < 0 ) return word;
-								break;
-								
-							case '>':
-								if( pos > 0 && countParen == 0 && countBracket == 0 )
-								{
-									if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
-									{
-										word ~= ">-";
-										pos--;
-										break;
-									}
-								}
-							case ' ', '\t', ':', '\n', '\r', '+', '-', '*', '/', '\\', '<', '=', ',', '@':
-								if( countParen == 0 && countBracket == 0 ) return word;
-								
-							default: 
-								if( countParen == 0 && countBracket == 0 )
-								{
-									if( UTF.isValid( s ) )
-									{
-										word32 = "";
-										word32 ~= s;
-										word ~= Util.trim( UTF.toString( word32 ) );
-										//word ~= s;
-									}
-								}
-						}
-					}
-					+/
 				}
 			}
-			
 		}
 		catch( Exception e )
 		{
@@ -1831,9 +1825,10 @@ struct AutoComplete
 			//debug IupMessage( "AutoComplete.getWholeWordReverse() Error", toStringz( e.toString ) );
 			return null;
 		}
+		
+		version(Windows) word = UTF.toString( word32 );
 
-		return UTF.toString( word32 );
-		//return word;
+		return word;
 	}
 	
 	static char[] charAdd( Ihandle* iupSci, int pos, char[] text )

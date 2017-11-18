@@ -79,6 +79,7 @@ class CFindInFilesDialog : CBaseDialog
 
 
 		Ihandle* vBoxScope = IupVbox( toggleDocument, toggleAllDocument, togglePrj, toggleAllPrj, null );
+		IupSetAttributes( vBoxScope, "EXPANDCHILDREN=YES,GAP=0" );
 		Ihandle* radioScope = IupRadio( vBoxScope );
 		Ihandle* frameScope = IupFrame( radioScope );
 		//IupSetAttributes( frameScope, "MARGIN=0x0,GAP=0");
@@ -103,8 +104,6 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 
 		Ihandle* vBoxButton = IupVbox( btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll, null );
-		IupSetAttributes( vBoxScope, "EXPANDCHILDREN=YES,GAP=5" );
-
 		Ihandle* hBoxButton = IupHbox( frameScope, vBoxButton, null );
 		IupSetAttributes( hBoxButton, "EXPAND=YES,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
 

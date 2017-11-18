@@ -812,6 +812,8 @@ class COutline
 			if( head.kind == B_BAS || head.kind == B_BI )
 			{
 				char[] fullPath = head.name;
+				
+				cleanTree( fullPath );
 
 				Ihandle* tree = IupTree();
 				IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
@@ -868,6 +870,20 @@ class COutline
 				{
 					IupSetAttribute( ih, "DELNODE", "ALL" );
 					if( bDestroy ) IupDestroy( ih );
+
+					if( fullPath.length >= 7 )
+					{
+						if( fullPath[0..7] == "NONAME#" )
+						{
+							if( upperCase( fullPath ) in GLOBAL.parserManager )
+							{
+								auto pParser = GLOBAL.parserManager[upperCase(fullPath)];
+								delete pParser;
+								GLOBAL.parserManager.remove( upperCase(fullPath) );
+							}
+						}
+					}
+					
 					break;
 				}
 			}

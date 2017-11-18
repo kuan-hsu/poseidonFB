@@ -1243,7 +1243,7 @@ extern(C)
 			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["addfile"].toDString() ~ "...", filter, "OPEN", "YES" );
 			//char[] fullPath = fileSecectDlg.getFileName();
 			
-			foreach_reverse( char[] fullPath; fileSecectDlg.getFilesName().sort )
+			foreach_reverse( char[] fullPath; fileSecectDlg.getFilesName() )
 			{
 				if( fullPath.length )
 				{
