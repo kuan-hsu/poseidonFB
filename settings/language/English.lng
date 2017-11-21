@@ -363,6 +363,7 @@ bechange=has been changed, save it now?
 samekey=The same key value with
 needrestart=Need Restart To Change Language
 suredelete=Are you sure to delete file?
+sureexit=Are you sure exit poseidonFB?
 opened=had already opened!
 existed=had already existed!
 wrongext=Wrong Ext Name!!

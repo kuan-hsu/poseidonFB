@@ -363,6 +363,7 @@ bechange=內容已更改, 進行儲存?
 samekey=相同組合鍵
 needrestart=需要重新啟動更新介面語言
 suredelete=確認要刪除檔案?
+sureexit=確認要離開poseidonFB?
 opened=已經開啟!
 existed=已經存在!
 wrongext=錯誤的附屬檔名!!

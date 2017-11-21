@@ -125,7 +125,15 @@ void createMenu()
 	item_exit = IupItem( GLOBAL.languageItems["exit"].toCString, null);
 	IupSetCallback(item_exit, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		return layout.mainDialog_CLOSE_cb( null );
+		int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["sureexit"].toCString, "YESNO" );
+		if( result == 1 )
+		{
+			return layout.mainDialog_CLOSE_cb( null );
+		}
+		else
+		{
+			return IUP_IGNORE;
+		}
 	});
 
 	// Edit
@@ -370,6 +378,10 @@ void createMenu()
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
 	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
+	
+	GLOBAL.menuFistlistWindow = IupItem( GLOBAL.languageItems["filelist"].toCString, null);
+	IupSetAttribute( GLOBAL.menuFistlistWindow, "VALUE", "ON");
+	IupSetCallback( GLOBAL.menuFistlistWindow, "ACTION", cast(Icallback) &fileListMenuItem_cb );
 
 	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
 	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
@@ -550,12 +562,11 @@ void createMenu()
 	
 	item_language = IupSubmenu( GLOBAL.languageItems["language"].toCString, languageSubMenu );
 	
-	
 	Ihandle* item_about = IupItem( GLOBAL.languageItems["about"].toCString, null );
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.333)\nBy Kuan Hsu (Taiwan)\n2017.11.18" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.334)\nBy Kuan Hsu (Taiwan)\n2017.11.22" );
 		return IUP_DEFAULT;
 	});
 	
@@ -649,6 +660,7 @@ void createMenu()
 							
 	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
+							GLOBAL.menuFistlistWindow,
 							IupSeparator(),
 							fullScreenItem,
 							IupSeparator(),
@@ -1208,7 +1220,6 @@ extern(C)
 			GLOBAL.explorerSplit_value = IupGetInt( GLOBAL.explorerSplit, "VALUE" );
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", 0 );
 			IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 0 );
-			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 0 );
 
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "NO" );
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
@@ -1221,18 +1232,14 @@ extern(C)
 			version(Windows)
 			{
 				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 );
-				IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 );
 			}
 			else
 			{
 				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
-				IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
 			}
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
 		}
-
-		if( GLOBAL.fileListTree.getTreeH <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 
 		Ihandle* _activeDocument = ScintillaAction.getActiveIupScintilla();
 		if( _activeDocument != null ) IupSetFocus( _activeDocument ); else IupSetFocus( GLOBAL.mainDlg );
@@ -1275,13 +1282,8 @@ extern(C)
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
 			
-			bool bCloseFileListTree;
-			if( GLOBAL.fileListTree.getTreeH <= 1 ) bCloseFileListTree = true;
-
 			GLOBAL.messageSplit_value = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
-
-			if( bCloseFileListTree ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 
 			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "NO" );
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
@@ -1297,6 +1299,32 @@ extern(C)
 		
 		return IUP_DEFAULT;
 	}
+	
+	int fileListMenuItem_cb( Ihandle *ih )
+	{
+		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
+		{
+			IupSetAttribute( ih, "VALUE", "OFF" );
+			
+			GLOBAL.fileListSplit_value = IupGetInt( GLOBAL.fileListSplit, "VALUE" );
+			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 0 );
+			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
+
+			IupSetAttribute( GLOBAL.fileListSplit, "ACTIVE", "NO" );
+			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
+			Ihandle* SecondChild = IupGetChild( GLOBAL.fileListSplit, 1 );
+			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
+		}
+		else
+		{
+			IupSetAttribute( ih, "VALUE", "ON" );
+			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 );
+			IupSetInt( GLOBAL.fileListSplit, "VALUE", GLOBAL.fileListSplit_value );
+			IupSetAttribute( GLOBAL.fileListSplit, "ACTIVE", "YES" );
+		}
+		
+		return IUP_DEFAULT;
+	}	
 	
 	int coustomTooledit_cb( Ihandle *ih )
 	{
@@ -1402,9 +1430,6 @@ extern(C)
 			}
 
 			if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) GLOBAL.statusBar.setPrjName( "" );
-
-			// Update Filelist Size
-			if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );			
 		}
 
 		return IUP_DEFAULT;
@@ -1473,9 +1498,6 @@ extern(C)
 		}
 
 		if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) GLOBAL.statusBar.setPrjName( "" );//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
-		
-		// Update Filelist Size
-		if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 
 		return IUP_DEFAULT;
 	}	

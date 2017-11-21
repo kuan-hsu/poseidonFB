@@ -238,6 +238,8 @@ void main( char[][] args )
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
 	IupSetCallback( GLOBAL.mainDlg, "RESIZE_CB", cast(Icallback) &mainDialog_RESIZE_cb );
 	
+	IupSetAttributes( GLOBAL.mainDlg, "SHRINK=YES" );
+	
 	version(Windows) IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB );
 
 	createLayout();
@@ -263,6 +265,7 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
 	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 	if( GLOBAL.editorSetting01.MessageWindow == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+	if( GLOBAL.editorSetting01.FilelistWindow == "OFF" ) menu.fileListMenuItem_cb( GLOBAL.menuFistlistWindow );
 	
 
 	createDialog();

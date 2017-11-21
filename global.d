@@ -24,7 +24,7 @@ struct EditorToggleUint
 
 struct EditorLayoutSize
 {
-	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON";
+	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON", FilelistWindow = "ON";
 }
 
 struct EditorColorUint
@@ -84,6 +84,7 @@ struct GLOBAL
 
 	// LAYOUT
 	static Ihandle* 			fileListSplit;
+	static int					fileListSplit_value = 700;
 	
 	static Ihandle* 			explorerWindow;
 	static Ihandle* 			explorerSplit; // which split explorerWindow & editWindow
@@ -113,7 +114,7 @@ struct GLOBAL
 
 	static CStatusBar			statusBar;
 
-	static Ihandle*				menuOutlineWindow, menuMessageWindow;
+	static Ihandle*				menuOutlineWindow, menuMessageWindow, menuFistlistWindow;
 	
 	static char[]				linuxTermName;
 
@@ -795,6 +796,7 @@ struct GLOBAL
 		GLOBAL.languageItems["samekey"] = new IupString( cast(char[]) "The same key value with" );
 		GLOBAL.languageItems["needrestart"] = new IupString( cast(char[]) "Need Restart To Change Language" );
 		GLOBAL.languageItems["suredelete"] = new IupString( cast(char[]) "Are you sure to delete file?" );
+		GLOBAL.languageItems["sureexit"] = new IupString( cast(char[]) "Are you sure exit poseidonFB?" );
 		GLOBAL.languageItems["opened"] = new IupString( cast(char[]) "had already opened!" );
 		GLOBAL.languageItems["existed"] = new IupString( cast(char[]) "had already existed!" );
 		GLOBAL.languageItems["wrongext"] = new IupString( cast(char[]) "Wrong Ext Name!" );

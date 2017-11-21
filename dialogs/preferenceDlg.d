@@ -2150,9 +2150,6 @@ extern(C) // Callback for CPreferenceDialog
 			IDECONFIG.save();
 			*/
 			IDECONFIG.saveINI();
-			
-			// Update Filelist Size
-			if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );					
 		}
 		catch( Exception e )
 		{

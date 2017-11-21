@@ -891,7 +891,8 @@ extern(C)
 	*/
 	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-	
+		GLOBAL.tabDocumentPos = -1;
+		
 		// Using IupFlatTabs at Linux, Double Click will trigget BUTTON_CB on IupScintilla, then BUTTON_CB on IupFlatTabs
 		version(linux)
 		{
@@ -909,11 +910,12 @@ extern(C)
 			{
 				if( statusString[6] != 'A' && statusString[0] != 'S' )
 				{
+					int _pos = cast(int) IupScintillaSendMessage( ih, 2022, x, y ); // SCI_POSITIONFROMPOINT
+					
 					if( button == IUP_BUTTON1 )
 					{
 						if( pressed == 1 )
 						{
-							int _pos = IupScintillaSendMessage( ih, 2022, x, y ); // SCI_POSITIONFROMPOINT
 							IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
 							AutoComplete.toDefintionAndType( 1, _pos );
 						}
@@ -923,12 +925,27 @@ extern(C)
 					{
 						if( pressed == 1 )
 						{							
-							int _pos = IupScintillaSendMessage( ih, 2022, x, y ); // SCI_POSITIONFROMPOINT
 							IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
 							AutoComplete.toDefintionAndType( 2, _pos );
 						}
 						return IUP_IGNORE;
 					}
+					else if( button == IUP_BUTTON2 )
+					{
+						for( int i = _pos; i > -1; -- i )
+						{
+							int close = IupGetIntId( ih, "BRACEMATCH", i );
+							if( close > -1 )
+							{
+								if( close > _pos )
+								{
+									IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( ++i ) ~ ":" ~ Integer.toString( close ) ) );
+									break;
+								}
+							}
+						}
+						return IUP_IGNORE;
+					}					
 				}
 				else if( statusString[6] == 'A' )
 				{
@@ -953,24 +970,49 @@ extern(C)
 			}
 			else if( statusString[6] == 'A' )
 			{
+				/+
+				// SCI_SETSELECTIONMODE 2422
+				// SCI_GETSELECTIONMODE 2423
+				//IupMessage("",toStringz( Integer.toString( cast(int) IupScintillaSendMessage( ih, 2423, 0, 0 ))) );
+				
+				if( pressed == 1 )
+				{
+					IupScintillaSendMessage( ih, 2422, 3, 0 ); // SCI_SETSELECTIONMODE 2422
+					IupMessage("",toStringz( Integer.toString( cast(int) IupScintillaSendMessage( ih, 2423, 0, 0 ))) );
+				}
+				else
+				{
+					//IupScintillaSendMessage( ih, 2422, 0, 0 ); // SCI_SETSELECTIONMODE 2422
+				}				
+				
+				+/
 				version(Windows)
 				{
 					if( statusString[1] != 'C' && statusString[0] != 'S' )
 					{
 						if( pressed == 0 )
 						{
-							if( button == IUP_BUTTON1 )
+							int bSelectEMPTY = cast(int) IupScintillaSendMessage( ih, 2650, 0, 0 ); // SCI_GETSELECTIONEMPTY 2650
+							if( bSelectEMPTY == 1 )
 							{
-								auto cacheUnit = GLOBAL.navigation.back();
-								if( cacheUnit._line != -1 )	ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+								if( button == IUP_BUTTON1 )
+								{
+									auto cacheUnit = GLOBAL.navigation.back();
+									if( cacheUnit._line != -1 )	ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+								}
+								else if( button == IUP_BUTTON3 )
+								{
+									auto cacheUnit = GLOBAL.navigation.forward();
+									if( cacheUnit._line != -1 )	ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+								}
+								return IUP_DEFAULT;
+								//return IUP_IGNORE;
 							}
-							else if( button == IUP_BUTTON3 )
+							else
 							{
-								auto cacheUnit = GLOBAL.navigation.forward();
-								if( cacheUnit._line != -1 )	ScintillaAction.openFile( cacheUnit._fullPath, cacheUnit._line );
+								// SELECTIONISRECTANGLE
 							}
 						}
-						return IUP_IGNORE;
 					}
 				}
 			}

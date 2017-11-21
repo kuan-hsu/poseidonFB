@@ -501,11 +501,18 @@ struct IDECONFIG
 				GLOBAL.editorSetting01.MessageSplit = Integer.toString( GLOBAL.messageSplit_value ).dup;
 			else
 				GLOBAL.editorSetting01.MessageSplit = fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) ).dup;
-			
+
+			if( fromStringz( IupGetAttribute( GLOBAL.menuFistlistWindow, "VALUE" ) ) == "OFF" )
+				GLOBAL.editorSetting01.FileListSplit = Integer.toString( GLOBAL.fileListSplit_value ).dup;
+			else
+				GLOBAL.editorSetting01.MessageSplit = fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) ).dup;
 			
 			GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) ).dup;
+			
 			GLOBAL.editorSetting01.OutlineWindow = fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ).dup;
 			GLOBAL.editorSetting01.MessageWindow = fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ).dup;
+			GLOBAL.editorSetting01.FilelistWindow = fromStringz( IupGetAttribute( GLOBAL.menuFistlistWindow, "VALUE" ) ).dup;
+			//FilelistWindow
 
 			// size
 			doc ~= setINILineData( "[size]");
@@ -517,6 +524,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "FileListSplit", GLOBAL.editorSetting01.FileListSplit );
 			doc ~= setINILineData( "OutlineWindow", GLOBAL.editorSetting01.OutlineWindow );
 			doc ~= setINILineData( "MessageWindow", GLOBAL.editorSetting01.MessageWindow );
+			doc ~= setINILineData( "FilelistWindow", GLOBAL.editorSetting01.FilelistWindow );
 			
 			// font
 			doc ~= setINILineData( "[font]");
@@ -844,6 +852,7 @@ struct IDECONFIG
 							case "FileListSplit":			GLOBAL.editorSetting01.FileListSplit = right;			break;
 							case "OutlineWindow":			GLOBAL.editorSetting01.OutlineWindow = right;			break;
 							case "MessageWindow":			GLOBAL.editorSetting01.MessageWindow = right;			break;
+							case "FilelistWindow":			GLOBAL.editorSetting01.FilelistWindow = right;			break;
 							default:
 						}
 						break;

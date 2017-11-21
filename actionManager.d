@@ -603,10 +603,7 @@ struct ScintillaAction
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
 			StatusBarAction.update();
-
-			// Update Filelist Size
-			if( GLOBAL.fileListTree.getTreeH() <= 1 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
-			
+		
 			return true;
 		}
 		catch
