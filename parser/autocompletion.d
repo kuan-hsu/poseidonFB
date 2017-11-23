@@ -265,7 +265,7 @@ struct AutoComplete
 		{
 			if( child.kind & B_KIND )
 			{
-				if( lowerCase( child.name ) == lowerCase( word ) )
+				if( lowerCase( removeArrayAndPointerWord( child.name ) ) == lowerCase( word ) )
 				{
 					if( line < 0 )
 					{
@@ -511,7 +511,7 @@ struct AutoComplete
 					{
 						if( child.name.length )
 						{
-							if( lowerCase( child.name ) == lowerCase( word ) )
+							if( lowerCase( removeArrayAndPointerWord( child.name ) ) == lowerCase( word ) )
 							{
 								results ~= child;
 							}

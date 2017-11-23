@@ -914,6 +914,8 @@ extern(C)
 					
 					if( button == IUP_BUTTON1 )
 					{
+						if( GLOBAL.editorSetting00.MultiSelection == "ON" ) return IUP_DEFAULT;
+						
 						if( pressed == 1 )
 						{
 							IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,

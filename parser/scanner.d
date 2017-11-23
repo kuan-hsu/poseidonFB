@@ -6,7 +6,7 @@ class CScanner
 	private:
 	import iup.iup;
 
-	import global, tools;
+	import global, tools, actionManager;
 	import parser.token;
 
 	import Integer = tango.text.convert.Integer;
@@ -32,7 +32,9 @@ class CScanner
 			}
 			else
 			{
-				document = cast(char[]) File.get( fullPath );
+				//document = cast(char[]) File.get( fullPath );
+				int _encoding;
+				document = FileAction.loadFile( fullPath, _encoding );
 			}
 
 			return scan( document );
