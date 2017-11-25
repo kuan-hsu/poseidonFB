@@ -941,7 +941,7 @@ struct AutoComplete
 			}
 		}
 	}
-
+	
 	static char[][] getDivideWord( char[] word )
 	{
 		char[][]	splitWord;
@@ -999,6 +999,39 @@ struct AutoComplete
 	static bool bEnter;
 	static bool bAutocompletionPressEnter;
 
+	static char[] getKeywordContainerList( char[] word, bool bCleanContainer = true )
+	{
+		char[] result;
+		
+		if( bCleanContainer ) listContainer.length = 0;
+		
+		keyWordlist( word );
+
+		if( listContainer.length )
+		{
+			for( int i = 0; i < listContainer.length; ++ i )
+			{
+				if( listContainer[i].length )
+				{
+					if( i > 0 )
+					{
+						if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
+					}
+					else
+					{
+						result ~= ( listContainer[i] ~ "^" );
+					}
+				}
+			}
+
+			if( result.length )
+				if( result[length-1] == '^' ) result = result[0..length-1];
+
+			return Util.trim( result.sort );
+		}
+		
+		return null;
+	}
 
 	static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false )
 	{
@@ -1101,7 +1134,7 @@ struct AutoComplete
 		if( text != "\\" && text != "/" && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) ) return null;
 
 		listContainer.length = 0;
-		if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );		
+		if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
 
 		try
 		{
@@ -1878,22 +1911,6 @@ struct AutoComplete
 			word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 		}
 
-		/+
-		// Check first dot '.' at With Block
-		if( !word.length && bDot )
-		{
-			if( checkWithBlock( iupSci, pos ) )
-			{
-				char[] withTitle = searchHead( iupSci, pos, "with" );
-				if( withTitle.length ) word = word ~ withTitle.reverse;
-			}
-		}
-		if( !bDot && !bCallTip )
-		{
-			if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return null;
-		}
-		+/
-
 		word = lowerCase( word.dup.reverse );
 
 		auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
@@ -1928,37 +1945,7 @@ struct AutoComplete
 
 				if( AST_Head is null )
 				{
-					if( GLOBAL.enableKeywordComplete == "ON" )
-					{
-						keyWordlist( splitWord[0] );
-
-						if( listContainer.length )
-						{
-							//listContainer.sort;
-
-							for( int i = 0; i < listContainer.length; ++ i )
-							{
-								if( listContainer[i].length )
-								{
-									if( i > 0 )
-									{
-										if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
-									}
-									else
-									{
-										result ~= ( listContainer[i] ~ "^" );
-									}
-								}
-							}
-
-
-							if( result.length )
-								if( result[length-1] == '^' ) result = result[0..length-1];
-
-							return Util.trim( result );
-						}
-					}
-
+					if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 					return null;
 				}
 
@@ -2935,35 +2922,23 @@ struct AutoComplete
 
 		if( list.length )
 		{
-			/*char[][] splitWord = Util.split( alreadyInput, "." );
-			if( splitWord.length == 1 ) splitWord = Util.split( alreadyInput, "->" );*/
 			char[][] splitWord = getDivideWord( alreadyInput );
 
 			alreadyInput = splitWord[length-1];
 
-			/+
-			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" )
+			if( text == "(" )
 			{
-				IupSetAttribute( ih, "AUTOCSELECT\0", GLOBAL.cString.convert( alreadyInput ) );
-				if( IupGetInt( ih, "AUTOCSELECTEDINDEX\0" ) == -1 ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
+				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
+
+				IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
+				IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+
+				IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
 			}
 			else
 			{
-			+/
-				if( text == "(" )
-				{
-					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
-
-					IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
-					IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-
-					IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
-				}
-				else
-				{
-					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
-				}
-			//}
+				if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+			}
 
 			return false;
 		}

@@ -1761,7 +1761,6 @@ extern(C)
 								}
 							}	
 
-
 							if( pos > 1 )
 							{
 								if( lastChar == ">" )
@@ -1774,6 +1773,24 @@ extern(C)
 						
 							try
 							{
+								if( GLOBAL.enableParser != "ON" )
+								{
+									// Check Keyword Autocomplete
+									if( GLOBAL.enableKeywordComplete == "ON" )
+									{
+										if( alreadyInput.length )
+										{
+											if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) != "YES" )
+											{
+												char[] list = AutoComplete.getKeywordContainerList( alreadyInput );
+												if( list.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
+											}
+										}
+									}
+									
+									return IUP_IGNORE;
+								}
+								
 								if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
 							}
 							catch( Exception e )
@@ -2061,8 +2078,6 @@ extern(C)
 		//if( !GLOBAL.bKeyUp ) return IUP_DEFAULT;else GLOBAL.bKeyUp = false;
 		if( GLOBAL.bKeyUp ) GLOBAL.bKeyUp = false;
 		
-		if( GLOBAL.enableParser != "ON" ) return IUP_DEFAULT;
-		
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 
@@ -2073,7 +2088,9 @@ extern(C)
 			if( fromStringz( IupGetAttribute( ih, "REDO" ) ) == "NO" ) GLOBAL.bUndoRedoAction = false;
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 			return IUP_DEFAULT;
-		}		
+		}
+		
+		if( ScintillaAction.isComment( ih, pos ) ) return IUP_DEFAULT;
 		
 		if( GLOBAL.enableIncludeComplete == "ON" )
 		{
@@ -2089,9 +2106,40 @@ extern(C)
 				}
 			}
 		}
-
-		if( ScintillaAction.isComment( ih, pos ) ) return IUP_DEFAULT;
-
+		
+		if( GLOBAL.enableParser != "ON" )
+		{
+			// Check Keyword Autocomplete
+			if( GLOBAL.enableKeywordComplete == "ON" )
+			{
+				int dummyHeadPos;
+				char[] sKeyin = fromStringz( _text );
+				
+				switch( sKeyin )
+				{
+					case " ", "\n", "\t", "\r", ")":
+						IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+						break;
+						
+					default:
+						char[] word = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos );
+						word = ( word.reverse ~ sKeyin ).dup;
+						if( word.length )
+						{
+							if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
+							
+							char[] list;
+							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) != "YES" ) list = AutoComplete.getKeywordContainerList( word );
+							
+							if( list.length )
+								if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", word.length - 1, GLOBAL.cString.convert( list ) );
+						}
+				}
+			}
+			
+			return IUP_DEFAULT;
+		}		
+		
 		if( insert == 1 )
 		{
 			if( length > 1 ) return IUP_DEFAULT;
@@ -2134,23 +2182,6 @@ extern(C)
 						bOpenParen = true;
 					}
 					
-					/*
-					if( bWithoutList )
-					{
-						if( pos > 0 )
-						{
-							if( prevPos == pos - 1 )
-							{
-								break;
-							}
-							else
-							{
-								bWithoutList = false;
-							}
-						}
-					}
-					*/
-
 					if( !alreadyInput.length ) alreadyInput = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos ).reverse ~ text;
 
 					if( !bDot && !bOpenParen )
@@ -2166,15 +2197,10 @@ extern(C)
 					catch( Exception e )
 					{
 						GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-						//debug IupMessage( "CScintilla_action_cb", toStringz( "callAutocomplete Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 					}
 			}
 		}
 		
-		//GLOBAL.messagePanel.printOutputPanel( Integer.toString( IupGetInt( ih, "AUTOCSELECTEDINDEX" ) ) );
-		
-		//GLOBAL.messagePanel.printOutputPanel( fromStringz( _text ) );
-		//prevPos = pos;
 		return IUP_DEFAULT;
 	}
 
@@ -2242,17 +2268,29 @@ extern(C)
 					char[] insertEndText = AutoComplete.InsertEnd( ih, lin, pos );
 					if( insertEndText.length )
 					{
-						char[] word;
-						foreach( char[] s; Util.split( insertEndText, " " ) )
+						if( insertEndText == "end if" )
 						{
-							if( s.length ) word ~= ( tools.convertKeyWordCase( GLOBAL.keywordCase, s ) ~ " " );
+							char[] lineText = Util.trim( fromStringz( IupGetAttributeId( ih, "LINE", lin - 1 ) ) ); // 0 BASE
+							if( lineText.length > 3 )
+							{
+								if( lowerCase( Util.trim( lineText[$-4..$] ) ) != "then" ) bAutoInsert = false;
+							}
 						}
 						
-						IupSetAttributeId( ih, "INSERT", -1, toStringz( Util.trim( word ).dup ) );
-						IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
-						IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
-						IupScintillaSendMessage( ih, 2126, lin, lineInd + Integer.atoi( GLOBAL.editorSetting00.TabWidth ) ); // SCI_SETLINEINDENTATION = 2126
-						IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136
+						if( bAutoInsert )
+						{
+							char[] word;
+							foreach( char[] s; Util.split( insertEndText, " " ) )
+							{
+								if( s.length ) word ~= ( tools.convertKeyWordCase( GLOBAL.keywordCase, s ) ~ " " );
+							}
+							
+							IupSetAttributeId( ih, "INSERT", -1, toStringz( Util.trim( word ).dup ) );
+							IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
+							IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
+							IupScintillaSendMessage( ih, 2126, lin, lineInd + Integer.atoi( GLOBAL.editorSetting00.TabWidth ) ); // SCI_SETLINEINDENTATION = 2126
+							IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136
+						}
 					}
 				}
 			}

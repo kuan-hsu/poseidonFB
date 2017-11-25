@@ -8,11 +8,13 @@ import tango.stdc.stringz, Integer = tango.text.convert.Integer;
 class CIDEMessageDialog : CBaseDialog
 {
 	private:
+	import tools;
 	import tango.time.WallClock;
 	import Util = tango.text.Util;
 
 	Ihandle*	text, val;
 	bool		bCanRestore;
+	IupString	fontString;
 
 	void createLayout()
 	{
@@ -80,10 +82,12 @@ class CIDEMessageDialog : CBaseDialog
 		}
 		catch{}
 		
+		fontString = new IupString();
 	}
 
 	~this()
 	{
+		delete fontString;
 	}
 
 	char[] show( int x, int y )
@@ -94,7 +98,8 @@ class CIDEMessageDialog : CBaseDialog
 	
 	void setFont( char[] _font )
 	{
-		IupSetAttribute( text, "FONT", toStringz( _font ) );//IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output		
+		fontString = _font;
+		IupSetAttribute( text, "FONT", fontString.toCString );
 	}
 	
 	void print( char[] txt, bool bClock = true, bool bClear = false )
