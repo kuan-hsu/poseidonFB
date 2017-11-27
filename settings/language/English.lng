@@ -253,6 +253,8 @@ output=Output
 
 'tab
 closeothers=Close Others
+torighttabs=To Right Document Tabs
+tolefttabs=To Left Document Tabs
 
 'popup window
 highlightmaker=Highlight Maker...

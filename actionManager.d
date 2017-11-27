@@ -385,13 +385,13 @@ struct DocumentTabAction
 
 	static void resetTip()
 	{
-		for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
+		for( int i = 0; i < IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" ); ++ i )
 		{
-			Ihandle* _ih = IupGetChild( GLOBAL.documentTabs, i );
+			Ihandle* _ih = IupGetChild( GLOBAL.activeDocumentTabs, i );
 			if( _ih != null )
 			{
 				auto _cSci = ScintillaAction.getCScintilla( _ih );
-				if( _cSci !is null ) IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", i, _cSci.getFullPath_IupString.toCString );
+				if( _cSci !is null ) IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", i, _cSci.getFullPath_IupString.toCString );
 			}
 		}
 	}
@@ -400,7 +400,7 @@ struct DocumentTabAction
 	{
 		if( ih != null )
 		{
-			IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE" , cast(char*) ih );
+			IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE" , cast(char*) ih );
 			IupSetFocus( ih );
 			return IUP_CONTINUE;
 		}
@@ -410,15 +410,142 @@ struct DocumentTabAction
 	
 	static int setFocus( int pos )
 	{
-		if( pos >= 0 && pos <= IupGetInt( GLOBAL.documentTabs, "COUNT" ) )
+		if( pos >= 0 && pos <= IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" ) )
 		{
-			IupSetInt( GLOBAL.documentTabs, "VALUEPOS" , pos );
-			IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.documentTabs, pos ) );
+			IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , pos );
+			IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.activeDocumentTabs, pos ) );
 			return IUP_CONTINUE;
 		}
 		
 		return IUP_DEFAULT;
-	}	
+	}
+	
+	static Ihandle* getDocumentTabs( Ihandle* sci )
+	{
+		int documentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
+		
+		if( documentPos > -1 )
+		{
+			return GLOBAL.documentTabs;
+		}
+		else
+		{
+			documentPos = IupGetChildPos( GLOBAL.documentTabs_Right, sci );
+			if( documentPos > -1 ) return GLOBAL.documentTabs_Right;
+		}
+		
+		return null;
+	}
+	
+	static int getDocumentPos( Ihandle* sci )
+	{
+		int documentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
+		
+		if( documentPos > -1 )
+		{
+			return documentPos;
+		}
+		else
+		{
+			documentPos = IupGetChildPos( GLOBAL.documentTabs_Right, sci );
+			if( documentPos > -1 ) return documentPos;
+		}
+		
+		return -1;
+	}
+	
+	static Ihandle* getDocumentAndPos( Ihandle* sci, out int documentPos = -1 )
+	{
+		documentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
+		
+		if( documentPos > -1 )
+		{
+			return GLOBAL.documentTabs;
+		}
+		else
+		{
+			documentPos = IupGetChildPos( GLOBAL.documentTabs_Right, sci );
+			if( documentPos > -1 ) return GLOBAL.documentTabs;
+		}
+		
+		return null;
+	}
+	
+	static void moveBetweenTabs( Ihandle* srcTabs, Ihandle* DestTabs )
+	{
+		for( int i = IupGetChildCount( srcTabs ) - 1; i >= 0; --i )
+		{
+			Ihandle* dragHandle = IupGetChild( srcTabs, i );
+			auto beMoveDocumentCSci = ScintillaAction.getCScintilla( dragHandle );
+
+			if( beMoveDocumentCSci !is null )
+			{
+				//Ihandle* dragHandle = IupGetChild( GLOBAL.documentTabs, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
+				Ihandle* dropHandle = IupGetChild( DestTabs, 0 );
+				
+				if( dragHandle != null )
+				{
+					int newDocumentPos = 0;
+					if( IupGetChildCount( DestTabs ) == 0 )
+					{
+						IupReparent( dragHandle, DestTabs, null );
+						newDocumentPos = IupGetChildCount( DestTabs ) - 1;
+					}
+					else
+					{
+						IupReparent( dragHandle, DestTabs, IupGetChild( DestTabs, 0 ) );
+					}
+					IupSetAttributeId( DestTabs, "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
+					IupSetAttributeId( DestTabs, "TABTIP", newDocumentPos, beMoveDocumentCSci.getFullPath_IupString.toCString );
+				}				
+			}		
+		}
+		
+		IupRefresh( DestTabs );
+	}
+	
+	static void setActiveDocumentTabs( Ihandle* _tabs )
+	{
+		GLOBAL.activeDocumentTabs = _tabs;
+		
+		if( GLOBAL.activeDocumentTabs == GLOBAL.documentTabs )
+		{
+			IupSetAttribute( GLOBAL.documentTabs, "SHOWLINES", "YES" );
+			IupSetAttribute( GLOBAL.documentTabs_Right, "SHOWLINES", "NO" );
+		}
+		else if( GLOBAL.activeDocumentTabs == GLOBAL.documentTabs_Right )
+		{
+			IupSetAttribute( GLOBAL.documentTabs, "SHOWLINES", "NO" );
+			IupSetAttribute( GLOBAL.documentTabs_Right, "SHOWLINES", "YES" );
+		}
+	}
+	
+	static void updateTabsLayout()
+	{
+		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 )
+		{
+			if( IupGetChildCount( GLOBAL.documentTabs_Right ) > 0 )
+				DocumentTabAction.moveBetweenTabs( GLOBAL.documentTabs_Right, GLOBAL.documentTabs );
+			else
+				IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
+
+			DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
+		}
+		
+		if( IupGetChildCount( GLOBAL.documentTabs_Right ) == 0 )
+		{
+			DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
+			if( fromStringz( IupGetAttribute( GLOBAL.documentSplit, "ACTIVE" ) ) == "YES" )
+			{
+				GLOBAL.documentSplit_value = IupGetInt( GLOBAL.documentSplit, "VALUE" );
+				IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0,ACTIVE=NO" );
+				IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
+				IupSetAttribute( GLOBAL.documentTabs_Right, "ACTIVE","YES" );
+			}
+			
+			DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
+		}		
+	}
 }
 
 
@@ -497,7 +624,7 @@ struct ScintillaAction
 		if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
 
 		// Set new tabitem to focus
-		IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*)_sci.getIupScintilla );
+		IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*)_sci.getIupScintilla );
 		IupSetFocus( _sci.getIupScintilla );
 
 		//StatusBarAction.update();
@@ -529,6 +656,9 @@ struct ScintillaAction
 		if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
 		{
 			Ihandle* ih = GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla;
+			
+			Ihandle* _documentTabs = DocumentTabAction.getDocumentTabs( ih );
+			if( _documentTabs != null )	DocumentTabAction.setActiveDocumentTabs( _documentTabs ); else return false;
 
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 			
@@ -658,8 +788,8 @@ struct ScintillaAction
 
 	static Ihandle* getActiveIupScintilla()
 	{
-		int pos = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
-		return IupGetChild( GLOBAL.documentTabs, pos );
+		int pos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
+		return IupGetChild( GLOBAL.activeDocumentTabs, pos );
 	}
 
 	static CScintilla getActiveCScintilla()
@@ -711,31 +841,32 @@ struct ScintillaAction
 		if( !bShowNew )
 		{
 			// Change Tree Selection and move new tab pos to left 1
-			int oldPos = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+			int oldPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 			int newPos = 0;
 			if( oldPos > 0 )
 			{
 				newPos = oldPos - 1;
-				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newPos );
+				IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", newPos );
 			}
 			else
 			{
 				newPos = 1;
-				IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newPos );
+				IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", newPos );
 			}
 			
-			actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, newPos );
+			actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, newPos );
 		}
 		
 		
 		IupDestroy( cSci.getIupScintilla );
-		IupRefresh( GLOBAL.documentTabs );
+		IupRefresh( GLOBAL.activeDocumentTabs );
 		GLOBAL.fileListTree.removeItem( cSci );
 		GLOBAL.scintillaManager.remove( tools.upperCase( cSci.getFullPath ) );
 		GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
 		delete cSci;
 		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", null );
-		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
+		
+		DocumentTabAction.updateTabsLayout();
 	}
 
 	static int closeDocument( char[] fullPath, int pos = -1 )
@@ -747,7 +878,7 @@ struct ScintillaAction
 
 			if( ScintillaAction.getModify( iupSci ) != 0 )
 			{
-				if( pos > -1 ) IupSetInt( GLOBAL.documentTabs, "VALUEPOS" , pos ); 
+				if( pos > -1 ) IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , pos ); 
 				scope cStringDocument = new IupString( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 				
 				Ihandle* messageDlg = IupMessageDlg();
@@ -796,9 +927,11 @@ struct ScintillaAction
 			{
 				Ihandle* iupSci = cSci.getIupScintilla;
 				
+				if( DocumentTabAction.getDocumentTabs( iupSci ) != GLOBAL.activeDocumentTabs ) continue;
+				
 				if( ScintillaAction.getModify( iupSci ) != 0 )
 				{
-					IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
+					IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 					
 					scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 					
@@ -870,9 +1003,11 @@ struct ScintillaAction
 		{
 			Ihandle* iupSci = cSci.getIupScintilla;
 			
+			if( DocumentTabAction.getDocumentTabs( iupSci ) != GLOBAL.activeDocumentTabs ) continue;
+			
 			if( ScintillaAction.getModify( iupSci ) != 0 )
 			{
-				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) iupSci );
+				IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				
 				scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 				
@@ -929,8 +1064,8 @@ struct ScintillaAction
 
 			GLOBAL.scintillaManager.remove( upperCase(s) );
 		}
-
-		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
+		
+		DocumentTabAction.updateTabsLayout();
 
 		if( bCancel ) return IUP_IGNORE;
 
@@ -954,8 +1089,8 @@ struct ScintillaAction
 				{
 					if( fullPath[0..7] == "NONAME#" )
 					{
-						IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) cSci.getIupScintilla );
-						int oldPos = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );						
+						IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) cSci.getIupScintilla );
+						int oldPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );						
 						return saveAs( cSci, true, true, oldPos );
 					}
 				}
@@ -1059,9 +1194,9 @@ struct ScintillaAction
 	{
 		CScintilla[] NoNameGroup;
 		
-		for( int i = 0; i < IupGetChildCount( GLOBAL.documentTabs ); i++ )
+		for( int i = 0; i < IupGetChildCount( GLOBAL.activeDocumentTabs ); i++ )
 		{
-			Ihandle* _child = IupGetChild( GLOBAL.documentTabs, i );
+			Ihandle* _child = IupGetChild( GLOBAL.activeDocumentTabs, i );
 
 			if( ScintillaAction.getModify( _child ) != 0 )
 			{
@@ -1094,8 +1229,8 @@ struct ScintillaAction
 		{
 			foreach( CScintilla _sci; NoNameGroup )
 			{
-				IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) _sci.getIupScintilla );
-				int oldPos = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+				IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) _sci.getIupScintilla );
+				int oldPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 				saveAs( _sci, true, true, oldPos );
 			}
 
@@ -1418,7 +1553,7 @@ struct StatusBarAction
 			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
 		}
 		
-		int childCount = IupGetInt( GLOBAL.documentTabs, "COUNT" );
+		int childCount = IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" );
 		if( childCount > 0 )
 		{
 			// SCI_GETCURRENTPOS = 2008
@@ -1432,6 +1567,18 @@ struct StatusBarAction
 
 			if( cSci !is null )
 			{
+				Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Undo" );
+				if( _undo != null ) // SCI_CANUNDO 2174
+				{
+					if( ( cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2174, 0, 0 ) ) == 0 ) IupSetAttribute( _undo, "ACTIVE", "NO" ); else IupSetAttribute( _undo, "ACTIVE", "YES" );
+				}					
+				Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Redo" );
+				if( _redo != null ) // SCI_CANREDO 2016
+				{
+					if( ( cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2016, 0, 0 ) ) == 0 ) IupSetAttribute( _redo, "ACTIVE", "NO" ); else IupSetAttribute( _redo, "ACTIVE", "YES" );
+				}					
+				
+				
 				int pos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2008, 0, 0 );
 				int line = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; // 0 based
 				int col = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2129, pos, 0 ) + 1;  // 0 based

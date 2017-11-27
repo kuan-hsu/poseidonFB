@@ -566,7 +566,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.336)\nBy Kuan Hsu (Taiwan)\n2017.11.25" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.337)\nBy Kuan Hsu (Taiwan)\n2017.11.27" );
 		return IUP_DEFAULT;
 	});
 	
@@ -939,8 +939,8 @@ extern(C)
 			{
 				GLOBAL.bUndoRedoAction = true;
 				IupSetAttribute( ih, "UNDO", "YES" );
-				IupSetFocus( ih );
 			}
+			IupSetFocus( ih );
 		}
 	}
 
@@ -953,8 +953,8 @@ extern(C)
 			{
 				GLOBAL.bUndoRedoAction = true;
 				IupSetAttribute( ih, "REDO", "YES" );
-				IupSetFocus( ih );
 			}
+			IupSetFocus( ih );
 		}
 	}
 
@@ -1061,6 +1061,7 @@ extern(C)
 
 	void findReplace_cb()
 	{
+		/*
 		if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 		{
 			if( GLOBAL.searchDlg !is null )
@@ -1070,6 +1071,17 @@ extern(C)
 				if( ih !is null ) targetText = fromStringz(IupGetAttribute( ih, toStringz("SELECTEDTEXT") ));
 
 				//if( fromStringz(IupGetAttribute( GLOBAL.searchDlg.getIhandle, "VISIBLE" )) == "NO" ) GLOBAL.searchDlg.show( targetText );
+				GLOBAL.searchDlg.show( targetText );
+			}
+		}
+		*/
+		if( GLOBAL.searchDlg !is null )
+		{
+			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
+			if( ih != null )
+			{
+				char[] targetText;
+				targetText = fromStringz(IupGetAttribute( ih, toStringz("SELECTEDTEXT") ));
 				GLOBAL.searchDlg.show( targetText );
 			}
 		}
@@ -1405,6 +1417,8 @@ extern(C)
 			{
 				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE ) return IUP_DEFAULT;
 			}
+			
+			DocumentTabAction.updateTabsLayout();			
 
 			GLOBAL.projectManager[activePrjName].saveFile();
 			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
@@ -1456,6 +1470,8 @@ extern(C)
 					return IUP_DEFAULT; 
 				}
 			}
+			
+			DocumentTabAction.updateTabsLayout();
 
 			prjsDir ~= p.dir.dup;
 			p.saveFile();

@@ -277,7 +277,7 @@ extern(C)
 			
 			IupSetAttributeId( ih, "USERDATA", drop_id, cast(char*) _sci  );
 			version(Windows) IupSetAttributeId( ih, "MARKED", drop_id, "YES" ); else IupSetInt( ih, "VALUE", drop_id );
-			
+			/*
 			// Change Document Tab Order
 			if( _dropSci !is null )
 				IupReparent( _sci.getIupScintilla, GLOBAL.documentTabs, _dropSci.getIupScintilla );
@@ -289,6 +289,7 @@ extern(C)
 			DocumentTabAction.resetTip();
 			IupRefresh( GLOBAL.documentTabs );
 			IupSetInt( GLOBAL.documentTabs, "VALUEPOS", newDocumentPos );
+			*/
 		}
 
 		return IUP_DEFAULT;

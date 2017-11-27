@@ -818,7 +818,18 @@ extern(C)
 				{
 					if( ext == "bas" || ext == "bi" )
 					{
-						actionManager.ScintillaAction.openFile( fullPath.toDString );
+						char[] normalizeFullPath = Path.normalize( fullPath.toDString );
+						if( upperCase( normalizeFullPath ) in GLOBAL.scintillaManager )
+						{
+							actionManager.ScintillaAction.openFile( fullPath.toDString );
+						}
+						else
+						{
+							Ihandle* tempActiveDocumentTabs = GLOBAL.activeDocumentTabs;
+							DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
+							actionManager.ScintillaAction.openFile( fullPath.toDString );
+							DocumentTabAction.setActiveDocumentTabs( tempActiveDocumentTabs );
+						}
 					}
 					else
 					{

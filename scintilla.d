@@ -83,26 +83,26 @@ class CScintilla
 
 			if( insertPos == -1 )
 			{
-				IupAppend( GLOBAL.documentTabs, sci );
+				IupAppend( GLOBAL.activeDocumentTabs, sci );
 			}
 			else
 			{
-				if( IupGetChildCount( GLOBAL.documentTabs ) > insertPos )
+				if( IupGetChildCount( GLOBAL.activeDocumentTabs ) > insertPos )
 				{
-					Ihandle* refChild = IupGetChild( GLOBAL.documentTabs, insertPos );
-					IupInsert( GLOBAL.documentTabs, refChild, sci );
+					Ihandle* refChild = IupGetChild( GLOBAL.activeDocumentTabs, insertPos );
+					IupInsert( GLOBAL.activeDocumentTabs, refChild, sci );
 				}
 			}
 			
 			IupSetAttribute( sci, "BORDER", "NO" );
 			IupMap( sci );
-			IupRefresh( GLOBAL.documentTabs );
+			IupRefresh( GLOBAL.activeDocumentTabs );
 			
-			int newDocumentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
-			IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, title.toCString );
+			int newDocumentPos = IupGetChildPos( GLOBAL.activeDocumentTabs, sci );
+			IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTITLE", newDocumentPos, title.toCString );
 			
 			// For IupFlatTabs
-			IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
+			IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
 		}		
 
 		//IupSetAttribute( sci, "CLEARALL", "" );
@@ -289,10 +289,10 @@ class CScintilla
 		scope mypath = new FilePath( fullPath.toDString );
 		title = mypath.file();
 
-		int pos = IupGetChildPos( GLOBAL.documentTabs, sci );
+		int pos = IupGetChildPos( GLOBAL.activeDocumentTabs, sci );
 		if( pos > -1 )
 		{
-			IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, title.toCString );
+			IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos, title.toCString );
 		}		
 		IupSetHandle( fullPath.toCString, sci );
 
@@ -806,7 +806,7 @@ extern(C)
 				break;
 				
 			case 2:
-				IupSetfAttribute( ih, "FOLDTOGGLE", "%d", line );
+				IupSetInt( ih, "FOLDTOGGLE", line );
 				break;
 				
 			default:
@@ -818,10 +818,10 @@ extern(C)
 	private int savePoint_cb( Ihandle *ih, int status )
 	{
 		char[]	_title;
-		int 	pos = IupGetChildPos( GLOBAL.documentTabs, ih );
+		int 	pos = IupGetChildPos( GLOBAL.activeDocumentTabs, ih );
 		
-		pos = IupGetChildPos( GLOBAL.documentTabs, ih );
-		if( pos > -1 ) _title = fromStringz( IupGetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos ) ).dup; else return IUP_CONTINUE;
+		pos = IupGetChildPos( GLOBAL.activeDocumentTabs, ih );
+		if( pos > -1 ) _title = fromStringz( IupGetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos ) ).dup; else return IUP_CONTINUE;
 		
 		if( status == 0 )
 		{
@@ -835,7 +835,7 @@ extern(C)
 					{
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;
-						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
+						IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos, titleHandle.toCString );
 						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "NO" ) IupSetAttribute( ih, "SAVEDSTATE", "YES" );
 					}
 					else
@@ -858,7 +858,7 @@ extern(C)
 					{
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;							
-						IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, titleHandle.toCString );
+						IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos, titleHandle.toCString );
 						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "YES" ) IupSetAttribute( ih, "SAVEDSTATE", "NO" );
 					}
 					else
@@ -891,7 +891,16 @@ extern(C)
 	*/
 	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		GLOBAL.tabDocumentPos = -1;
+		GLOBAL.tabDocumentPos = -1;	GLOBAL.dragDocumentTabs = null;
+		
+		// Change GLOBAL.activeDocumentTabs
+		Ihandle* _documentTabs = IupGetParent( ih );
+		if( _documentTabs != null )
+		{
+			if( GLOBAL.activeDocumentTabs != _documentTabs ) DocumentTabAction.tabChangePOS( _documentTabs, IupGetInt( _documentTabs, "VALUEPOS" ) );
+			DocumentTabAction.setActiveDocumentTabs( _documentTabs );
+		}
+		
 		
 		// Using IupFlatTabs at Linux, Double Click will trigget BUTTON_CB on IupScintilla, then BUTTON_CB on IupFlatTabs
 		version(linux)
@@ -1040,10 +1049,12 @@ extern(C)
 			{
 				Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
 				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
+				if( fromStringz(IupGetAttribute( ih, "UNDO" )) != "YES" ) IupSetAttribute( _undo, "ACTIVE", "NO" );
 				IupSetCallback( _undo, "ACTION", cast(Icallback) &menu.undo_cb ); // from menu.d
 
 				Ihandle* _redo = IupItem( GLOBAL.languageItems["sc_redo"].toCString, null );
 				IupSetAttribute( _redo, "IMAGE", "icon_redo" );
+				if( fromStringz(IupGetAttribute( ih, "REDO" )) != "YES" ) IupSetAttribute( _redo, "ACTIVE", "NO" );
 				IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
 
 				Ihandle* _cut = IupItem( GLOBAL.languageItems["caption_cut"].toCString, null );
@@ -1703,13 +1714,13 @@ extern(C)
 					case "nexttab":
 						if( sk.keyValue == c )
 						{
-							int count = IupGetChildCount( GLOBAL.documentTabs );
+							int count = IupGetChildCount( GLOBAL.activeDocumentTabs );
 							if( count > 1 )
 							{
-								int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+								int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 								if( id < count - 1 ) ++id; else id = 0;
-								IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
+								IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 							}
 							return IUP_IGNORE;
 						}
@@ -1718,13 +1729,13 @@ extern(C)
 					case "prevtab":
 						if( sk.keyValue == c )
 						{
-							int count = IupGetChildCount( GLOBAL.documentTabs );
+							int count = IupGetChildCount( GLOBAL.activeDocumentTabs );
 							if( count > 1 )
 							{
-								int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+								int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 								if( id > 0 ) --id; else id = --count;
-								IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
+								IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 							}
 							return IUP_IGNORE;
 						}

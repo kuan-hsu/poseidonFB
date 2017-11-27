@@ -253,6 +253,8 @@ output=輸出
 
 'tab
 closeothers=關閉其它
+torighttabs=移到右邊文件頁籤
+tolefttabs=移到左邊文件頁籤
 
 'popup window
 highlightmaker=高亮背景記號

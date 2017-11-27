@@ -35,6 +35,7 @@ void createExplorerWindow()
 	version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
 
 	createTabs();
+	createTabs2();
 
 	Ihandle* dndEmptylabel = IupLabel( null );
 	IupSetAttribute( dndEmptylabel, "EXPAND", "YES" );
@@ -42,10 +43,16 @@ void createExplorerWindow()
 	IupSetCallback( dndEmptylabel, "BUTTON_CB",cast(Icallback) &emptyLabel_button_cb );
 	GLOBAL.dndDocumentZBox = IupZbox( dndEmptylabel, GLOBAL.documentTabs, null  );
 	
+	GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, GLOBAL.documentTabs_Right );
+	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=NO,SHOWGRIP=NO" );
+	IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
+	IupSetAttribute( GLOBAL.documentTabs_Right, "ACTIVE","YES" );
 	
+	GLOBAL.activeDocumentTabs = GLOBAL.documentTabs;
+
 	Ihandle* projectViewBackground = IupBackgroundBox( GLOBAL.fileListSplit );
 	
-	GLOBAL.explorerSplit = IupSplit( projectViewBackground, GLOBAL.dndDocumentZBox );
+	GLOBAL.explorerSplit = IupSplit( projectViewBackground, GLOBAL.documentSplit );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 
@@ -208,6 +215,16 @@ extern(C)
 				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
 				{
 					Ihandle* documentHandle = IupGetChild( GLOBAL.documentTabs, i );
+					if( documentHandle != null )
+					{
+						auto cSci = ScintillaAction.getCScintilla( documentHandle );
+						if( cSci !is null )  GLOBAL.prevDoc ~= cSci.getFullPath;
+					}
+				}
+
+				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs_Right, "COUNT" ); ++ i )
+				{
+					Ihandle* documentHandle = IupGetChild( GLOBAL.documentTabs_Right, i );
 					if( documentHandle != null )
 					{
 						auto cSci = ScintillaAction.getCScintilla( documentHandle );
@@ -507,13 +524,13 @@ extern(C)
 				case "nexttab":
 					if( sk.keyValue == c )
 					{
-						int count = IupGetChildCount( GLOBAL.documentTabs );
+						int count = IupGetChildCount( GLOBAL.activeDocumentTabs );
 						if( count > 1 )
 						{
-							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+							int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 							if( id < count - 1 ) ++id; else id = 0;
-							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
+							IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 						}
 						return IUP_IGNORE;
 					}
@@ -522,13 +539,13 @@ extern(C)
 				case "prevtab":
 					if( sk.keyValue == c )
 					{
-						int count = IupGetChildCount( GLOBAL.documentTabs );
+						int count = IupGetChildCount( GLOBAL.activeDocumentTabs );
 						if( count > 1 )
 						{
-							int id = IupGetInt( GLOBAL.documentTabs, "VALUEPOS" );
+							int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 							if( id > 0 ) --id; else id = --count;
-							IupSetInt( GLOBAL.documentTabs, "VALUEPOS", id );
-							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, id );
+							IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 						}
 						return IUP_IGNORE;
 					}

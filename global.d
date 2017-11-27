@@ -79,10 +79,18 @@ struct GLOBAL
 	
 	
 	static Ihandle*				mainDlg;
-	static Ihandle*				documentTabs, projectViewTabs, messageWindowTabs;
+	static Ihandle*				documentTabs, documentTabs_Right, projectViewTabs, messageWindowTabs;
 	static Ihandle*				dndDocumentZBox;
+	
+	static Ihandle*				activeDocumentTabs;
+	static Ihandle*				dragDocumentTabs;
+	
+	static int					tabDocumentPos = -1;	
 
 	// LAYOUT
+	static Ihandle* 			documentSplit;
+	static int					documentSplit_value = 500;
+
 	static Ihandle* 			fileListSplit;
 	static int					fileListSplit_value = 700;
 	
@@ -199,9 +207,6 @@ struct GLOBAL
 	
 	static char[][]				customCompilerOptions;
 	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
-	
-	
-	static int					tabDocumentPos = -1;
 	
 	//
 	static CNavCache			navigation;
@@ -687,6 +692,8 @@ struct GLOBAL
 
 		//'tab
 		GLOBAL.languageItems["closeothers"] = new IupString( cast(char[]) "Close Others" );
+		GLOBAL.languageItems["torighttabs"] = new IupString( cast(char[]) "To Right Document Tabs" );
+		GLOBAL.languageItems["tolefttabs"] = new IupString( cast(char[]) "To Left Document Tabs" );
 
 		//'popup window
 		GLOBAL.languageItems["highlightmaker"] = new IupString( cast(char[]) "Highlight Maker..." );
