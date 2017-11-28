@@ -393,10 +393,19 @@ extern(C)
 							{
 								if( dropTabs == null )
 								{
-									if( screenX - tabs2X < tabs1X )
+									char[] documentTabs_RightSize = fromStringz( IupGetAttribute( GLOBAL.documentTabs_Right, "RASTERSIZE" ) );
+									if( documentTabs_RightSize.length )
 									{
-										dropTabs = GLOBAL.documentTabs_Right;
-										dropHandle = null;
+										int crossPos = Util.index( documentTabs_RightSize, "x" );
+										if( crossPos < documentTabs_RightSize.length )
+										{
+											tabs1X = Integer.atoi( documentTabs_RightSize[0..crossPos] );
+											if( screenX > tabs2X && screenX < tabs2X + tabs1X )
+											{
+												dropTabs = GLOBAL.documentTabs_Right;
+												dropHandle = null;
+											}
+										}
 									}
 								}
 							}

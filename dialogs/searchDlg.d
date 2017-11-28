@@ -343,7 +343,15 @@ extern(C) // Callback for CSingleTextDialog
 						
 						if( targetText.length )
 						{
-							if( targetText == findText ) IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+							if( targetText == findText )
+							{
+								if( !ReplaceText.length )
+									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+								else
+									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+								
+								DocumentTabAction.setFocus( iupSci );
+							}
 						}
 						
 						if( fromStringz( IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
@@ -384,7 +392,12 @@ extern(C) // Callback for CSingleTextDialog
 						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
 						if( targetText == findText )
 						{
-							IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+							if( !ReplaceText.length )
+								IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+							else
+								IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+							
+							DocumentTabAction.setFocus( iupSci );
 						}
 					}
 				}
@@ -447,7 +460,10 @@ extern(C) // Callback for CSingleTextDialog
 								if( !( IupGetIntId( iupSci, "MARKERGET", linNum ) & 2 ) ) IupSetIntId( iupSci, "MARKERADD", linNum, 1 );
 								break;
 							case 2:
-								IupSetAttribute( iupSci, "REPLACETARGET", toStringz( ReplaceText ) );
+								if( !ReplaceText.length )
+									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+								else
+									IupSetAttribute( iupSci, "REPLACETARGET", toStringz( ReplaceText ) );
 								break;
 							default:
 						}

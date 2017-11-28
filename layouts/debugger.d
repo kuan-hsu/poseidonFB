@@ -268,7 +268,7 @@ class CDebugger
 	
 
 		Ihandle* varSplit = IupSplit( var1ScrollBox, var0ScrollBox );
-		IupSetAttributes( varSplit, "ORIENTATION=VERTICAL,BARSIZE=5,SHOWGRIP=LINES,VALUE=500,LAYOUTDRAG=NO" );
+		IupSetAttributes( varSplit, "ORIENTATION=VERTICAL,BARSIZE=2,SHOWGRIP=LINES,VALUE=500,LAYOUTDRAG=NO" );
 
 		//Ihandle* HBoxVar = IupHbox( var1Frame, var0Frame, null );
 
@@ -326,10 +326,10 @@ class CDebugger
 		
 
 		Ihandle* rightSplitHandle = IupSplit( backtraceHandle, tabResultsHandle  );
-		IupSetAttributes( rightSplitHandle, "ORIENTATION=HORIZONTAL,SHOWGRIP=LINES,VALUE=300,LAYOUTDRAG=NO" );
+		IupSetAttributes( rightSplitHandle, "ORIENTATION=HORIZONTAL,SHOWGRIP=LINES,VALUE=300,LAYOUTDRAG=NO,BARSIZE=3" );
 		
 		Ihandle* mainSplit = IupSplit( leftScrollBox, rightSplitHandle );
-		IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=260,LAYOUTDRAG=NO" );
+		IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=260,LAYOUTDRAG=NO,BARSIZE=2" );
 		
 
 		mainHandle = IupScrollBox( mainSplit );

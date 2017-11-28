@@ -353,7 +353,8 @@ struct DocumentTabAction
 				{
 					StatusBarAction.update( _child );
 					IupSetInt( ih, "VALUEPOS" , new_pos );
-					IupSetFocus( _child );
+					//IupSetFocus( _child );
+					IupScintillaSendMessage( _child, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 
 					// Marked the trees( FileList & ProjectTree )
 
@@ -401,7 +402,8 @@ struct DocumentTabAction
 		if( ih != null )
 		{
 			IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE" , cast(char*) ih );
-			IupSetFocus( ih );
+			IupScintillaSendMessage( ih, 2380, 1, 0 ); // SCI_SETFOCUS 2380
+			//IupSetFocus( ih );
 			return IUP_CONTINUE;
 		}
 		
@@ -413,7 +415,8 @@ struct DocumentTabAction
 		if( pos >= 0 && pos <= IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" ) )
 		{
 			IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , pos );
-			IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.activeDocumentTabs, pos ) );
+			IupScintillaSendMessage( IupGetChild( GLOBAL.activeDocumentTabs, pos ), 2380, 1, 0 ); // SCI_SETFOCUS 2380
+			//IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.activeDocumentTabs, pos ) );
 			return IUP_CONTINUE;
 		}
 		
@@ -1918,7 +1921,7 @@ struct SearchAction
 	*/
 	static int findInOneFile( char[] fullPath, char[] findText, char[] replaceText, int searchRule = 6, int buttonIndex = 0 )
 	{
-		int count;
+		int count, _encoding;
 
 		scope f = new FilePath( fullPath );
 		if( f.exists() )
@@ -1935,7 +1938,7 @@ struct SearchAction
 			else
 			{
 				if( buttonIndex == 3 ) return 0;
-				document = cast(char[]) File.get( fullPath );
+				document = cast(char[]) FileAction.loadFile( fullPath, _encoding );
 			}			
 			//scope file = new File( fullPath, File.ReadExisting );
 
@@ -1977,13 +1980,17 @@ struct SearchAction
 					}
 				}
 
-				File.set( fullPath, document );
 				if( upperCase( fullPath ) in GLOBAL.scintillaManager )
 				{
+					FileAction.saveFile( fullPath, document, GLOBAL.scintillaManager[upperCase( fullPath )].encoding );
 					GLOBAL.scintillaManager[upperCase( fullPath )].setText( document );
 					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase( fullPath )] );
-					
 				}
+				else
+				{
+					FileAction.saveFile( fullPath, document, _encoding );
+				}
+				
 				return count;
 			}
 
