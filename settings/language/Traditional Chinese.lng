@@ -6,6 +6,7 @@
 	saveall=儲存全部
 	close=關閉
 	closeall=關閉全部
+	closealltabs=關閉所有文件頁籤
 	recentfiles=最近開啟檔案
 	recentprjs=最近開啟專案
 	clearall=清除所有記錄
@@ -253,8 +254,9 @@ output=輸出
 
 'tab
 closeothers=關閉其它
-torighttabs=移到右邊文件頁籤
-tolefttabs=移到左邊文件頁籤
+torighttabs=移到副文件頁籤
+tolefttabs=移到主文件頁籤
+rotatetabs=旋轉移位副文件頁籤
 
 'popup window
 highlightmaker=高亮背景記號

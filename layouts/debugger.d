@@ -1227,8 +1227,20 @@ class CDebugger
 		{
 			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ "......", true );
-			DebugControl = new DebugThread( "\"" ~ command ~ "\"", f.path );
-			//version(Windows) DebugControl.start();
+			
+			scope debuggerEXE = new FilePath( GLOBAL.debuggerFullPath.toDString );
+			if( debuggerEXE.exists() )
+			{
+				if( lowerCase( debuggerEXE.file() ) == "fbdebugger.exe" )
+				{
+					IupExecute( toStringz( "\"" ~ GLOBAL.debuggerFullPath.toDString ~ "\"" ), toStringz( command ) );
+				}
+				else
+				{
+					DebugControl = new DebugThread( "\"" ~ command ~ "\"", f.path );
+					//version(Windows) DebugControl.start();
+				}
+			}
 		}
 		else
 		{

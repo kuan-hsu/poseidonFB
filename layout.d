@@ -43,16 +43,23 @@ void createExplorerWindow()
 	IupSetCallback( dndEmptylabel, "BUTTON_CB",cast(Icallback) &emptyLabel_button_cb );
 	GLOBAL.dndDocumentZBox = IupZbox( dndEmptylabel, GLOBAL.documentTabs, null  );
 	
-	GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, GLOBAL.documentTabs_Right );
-	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=NO,SHOWGRIP=NO" );
+	// RIGHT
+	GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, null );
+	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=YES,SHOWGRIP=NO" );
 	IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "ACTIVE","YES" );
+	//IupSetAttribute( GLOBAL.documentTabs_Sub, "ACTIVE","YES" );
+
+	// BOTTOM
+	GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, null );
+	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=YES,SHOWGRIP=LINES" );
+	IupSetAttribute( GLOBAL.documentSplit2, "ACTIVE","YES" );
+	
 	
 	GLOBAL.activeDocumentTabs = GLOBAL.documentTabs;
 
 	Ihandle* projectViewBackground = IupBackgroundBox( GLOBAL.fileListSplit );
 	
-	GLOBAL.explorerSplit = IupSplit( projectViewBackground, GLOBAL.documentSplit );
+	GLOBAL.explorerSplit = IupSplit( projectViewBackground, GLOBAL.documentSplit2 );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 
@@ -222,9 +229,9 @@ extern(C)
 					}
 				}
 
-				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs_Right, "COUNT" ); ++ i )
+				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs_Sub, "COUNT" ); ++ i )
 				{
-					Ihandle* documentHandle = IupGetChild( GLOBAL.documentTabs_Right, i );
+					Ihandle* documentHandle = IupGetChild( GLOBAL.documentTabs_Sub, i );
 					if( documentHandle != null )
 					{
 						auto cSci = ScintillaAction.getCScintilla( documentHandle );

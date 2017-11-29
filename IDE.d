@@ -525,6 +525,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "OutlineWindow", GLOBAL.editorSetting01.OutlineWindow );
 			doc ~= setINILineData( "MessageWindow", GLOBAL.editorSetting01.MessageWindow );
 			doc ~= setINILineData( "FilelistWindow", GLOBAL.editorSetting01.FilelistWindow );
+			doc ~= setINILineData( "RotateTabs", GLOBAL.editorSetting01.RotateTabs );
 			
 			// font
 			doc ~= setINILineData( "[font]");
@@ -853,6 +854,7 @@ struct IDECONFIG
 							case "OutlineWindow":			GLOBAL.editorSetting01.OutlineWindow = right;			break;
 							case "MessageWindow":			GLOBAL.editorSetting01.MessageWindow = right;			break;
 							case "FilelistWindow":			GLOBAL.editorSetting01.FilelistWindow = right;			break;
+							case "RotateTabs":				GLOBAL.editorSetting01.RotateTabs = right;				break;
 							default:
 						}
 						break;

@@ -72,6 +72,14 @@ void createMenu()
 		return IUP_DEFAULT;
 	});
 
+	Ihandle* item_closeAllTabs = IupItem( GLOBAL.languageItems["closealltabs"].toCString, null );
+	IupSetAttribute( item_closeAllTabs, "IMAGE", "icon_deleteall" );
+	IupSetCallback( item_closeAllTabs, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( ScintillaAction.closeAllDocument( GLOBAL.documentTabs_Sub ) == IUP_DEFAULT ) ScintillaAction.closeAllDocument( GLOBAL.documentTabs );
+		return IUP_DEFAULT;
+	});
+
 
 	Ihandle* recentFilesSubMenu;
 	recentFilesSubMenu = IupMenu( null );
@@ -382,6 +390,50 @@ void createMenu()
 	GLOBAL.menuFistlistWindow = IupItem( GLOBAL.languageItems["filelist"].toCString, null);
 	IupSetAttribute( GLOBAL.menuFistlistWindow, "VALUE", "ON");
 	IupSetCallback( GLOBAL.menuFistlistWindow, "ACTION", cast(Icallback) &fileListMenuItem_cb );
+	
+	GLOBAL.menuRotateTabs = IupItem( GLOBAL.languageItems["rotatetabs"].toCString, null);
+	IupSetAttribute( GLOBAL.menuRotateTabs, "VALUE", toStringz( GLOBAL.editorSetting01.RotateTabs ) );
+	IupSetCallback( GLOBAL.menuRotateTabs, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( fromStringz( IupGetAttribute( GLOBAL.menuRotateTabs, "VALUE" ) ) == "OFF" )
+		{
+			Ihandle* child = IupGetNextChild( GLOBAL.documentSplit, GLOBAL.dndDocumentZBox );
+			if( child != null )
+			{
+				IupReparent( GLOBAL.documentTabs_Sub, GLOBAL.documentSplit2, null );
+				IupRefresh( GLOBAL.documentSplit2 );
+				if( IupGetChildCount( child ) > 0 )
+				{
+					IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=2" );
+					IupSetInt( GLOBAL.documentSplit2, "VALUE", GLOBAL.documentSplit2_value );
+					IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0" );
+				}
+			}
+			GLOBAL.editorSetting01.RotateTabs = "ON";
+			IupSetAttribute( GLOBAL.menuRotateTabs, "VALUE", "ON" );
+		}
+		else
+		{
+			Ihandle* child = IupGetNextChild( GLOBAL.documentSplit2, GLOBAL.documentSplit );
+			if( child != null )
+			{
+				IupReparent( GLOBAL.documentTabs_Sub, GLOBAL.documentSplit, null );
+				IupRefresh( GLOBAL.documentSplit );
+				if( IupGetChildCount( child ) > 0 )
+				{
+					IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
+					IupSetInt( GLOBAL.documentSplit, "VALUE", GLOBAL.documentSplit_value );
+					IupSetAttributes( GLOBAL.documentSplit2, "VALUE=1000,BARSIZE=0" );
+				}
+			}
+			GLOBAL.editorSetting01.RotateTabs = "OFF";
+			IupSetAttribute( GLOBAL.menuRotateTabs, "VALUE", "OFF" );
+		}
+		
+
+		return IUP_DEFAULT;
+	});
+	
 
 	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
 	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
@@ -566,7 +618,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.338)\nBy Kuan Hsu (Taiwan)\n2017.11.28" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.339)\nBy Kuan Hsu (Taiwan)\n2017.11.30" );
 		return IUP_DEFAULT;
 	});
 	
@@ -586,7 +638,8 @@ void createMenu()
 							item_saveAll,
 							IupSeparator(),
 							item_close,
-							item_closeAll,
+							//item_closeAll,
+							item_closeAllTabs,
 							IupSeparator(),
 							item_recentFiles,
 							item_recent,
@@ -661,6 +714,7 @@ void createMenu()
 	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
 							GLOBAL.menuFistlistWindow,
+							GLOBAL.menuRotateTabs,
 							IupSeparator(),
 							fullScreenItem,
 							IupSeparator(),

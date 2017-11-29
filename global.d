@@ -24,7 +24,7 @@ struct EditorToggleUint
 
 struct EditorLayoutSize
 {
-	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON", FilelistWindow = "ON";
+	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON", FilelistWindow = "ON", RotateTabs = "OFF";
 }
 
 struct EditorColorUint
@@ -79,17 +79,21 @@ struct GLOBAL
 	
 	
 	static Ihandle*				mainDlg;
-	static Ihandle*				documentTabs, documentTabs_Right, projectViewTabs, messageWindowTabs;
+	static Ihandle*				documentTabs, documentTabs_Sub, projectViewTabs, messageWindowTabs;
 	static Ihandle*				dndDocumentZBox;
 	
 	static Ihandle*				activeDocumentTabs;
 	static Ihandle*				dragDocumentTabs;
+	//static char[]				activeSubTabsDirection = "VERTICAL"; // HORIZONTAL, VERTICAL
 	
 	static int					tabDocumentPos = -1;	
 
 	// LAYOUT
 	static Ihandle* 			documentSplit;
 	static int					documentSplit_value = 500;
+	static Ihandle* 			documentSplit2;
+	static int					documentSplit2_value = 500;
+	
 
 	static Ihandle* 			fileListSplit;
 	static int					fileListSplit_value = 700;
@@ -122,7 +126,7 @@ struct GLOBAL
 
 	static CStatusBar			statusBar;
 
-	static Ihandle*				menuOutlineWindow, menuMessageWindow, menuFistlistWindow;
+	static Ihandle*				menuOutlineWindow, menuMessageWindow, menuFistlistWindow,menuRotateTabs;
 	
 	static char[]				linuxTermName;
 
@@ -442,6 +446,7 @@ struct GLOBAL
 			GLOBAL.languageItems["saveall"] = new IupString( cast(char[]) "Save All" );
 			GLOBAL.languageItems["close"] = new IupString( cast(char[]) "Close" );
 			GLOBAL.languageItems["closeall"] = new IupString( cast(char[]) "Close All" );
+			GLOBAL.languageItems["closealltabs"] = new IupString( cast(char[]) "Close All Tabs" );
 			GLOBAL.languageItems["recentfiles"] = new IupString( cast(char[]) "Recent Files" );
 			GLOBAL.languageItems["recentprjs"] = new IupString( cast(char[]) "Recent Projects" );
 			GLOBAL.languageItems["clearall"] = new IupString( cast(char[]) "Clear All" );
@@ -692,8 +697,9 @@ struct GLOBAL
 
 		//'tab
 		GLOBAL.languageItems["closeothers"] = new IupString( cast(char[]) "Close Others" );
-		GLOBAL.languageItems["torighttabs"] = new IupString( cast(char[]) "To Right Document Tabs" );
-		GLOBAL.languageItems["tolefttabs"] = new IupString( cast(char[]) "To Left Document Tabs" );
+		GLOBAL.languageItems["torighttabs"] = new IupString( cast(char[]) "To Sub Document Tabs" );
+		GLOBAL.languageItems["tolefttabs"] = new IupString( cast(char[]) "To Main Document Tabs" );
+		GLOBAL.languageItems["rotatetabs"] = new IupString( cast(char[]) "Rotate Sub Document Tabs" );
 
 		//'popup window
 		GLOBAL.languageItems["highlightmaker"] = new IupString( cast(char[]) "Highlight Maker..." );

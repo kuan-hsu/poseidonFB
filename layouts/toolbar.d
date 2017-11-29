@@ -92,7 +92,7 @@ class CToolBar
 			Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Redo" );
 			if( _redo != null ) IupSetAttribute( _redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
 			
-			IupSetFocus( sci );
+			DocumentTabAction.setFocus( sci );
 			return IUP_DEFAULT;
 		});		
 		

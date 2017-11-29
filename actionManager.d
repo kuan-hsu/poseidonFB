@@ -433,8 +433,8 @@ struct DocumentTabAction
 		}
 		else
 		{
-			documentPos = IupGetChildPos( GLOBAL.documentTabs_Right, sci );
-			if( documentPos > -1 ) return GLOBAL.documentTabs_Right;
+			documentPos = IupGetChildPos( GLOBAL.documentTabs_Sub, sci );
+			if( documentPos > -1 ) return GLOBAL.documentTabs_Sub;
 		}
 		
 		return null;
@@ -450,7 +450,7 @@ struct DocumentTabAction
 		}
 		else
 		{
-			documentPos = IupGetChildPos( GLOBAL.documentTabs_Right, sci );
+			documentPos = IupGetChildPos( GLOBAL.documentTabs_Sub, sci );
 			if( documentPos > -1 ) return documentPos;
 		}
 		
@@ -467,7 +467,7 @@ struct DocumentTabAction
 		}
 		else
 		{
-			documentPos = IupGetChildPos( GLOBAL.documentTabs_Right, sci );
+			documentPos = IupGetChildPos( GLOBAL.documentTabs_Sub, sci );
 			if( documentPos > -1 ) return GLOBAL.documentTabs;
 		}
 		
@@ -514,12 +514,12 @@ struct DocumentTabAction
 		if( GLOBAL.activeDocumentTabs == GLOBAL.documentTabs )
 		{
 			IupSetAttribute( GLOBAL.documentTabs, "SHOWLINES", "YES" );
-			IupSetAttribute( GLOBAL.documentTabs_Right, "SHOWLINES", "NO" );
+			IupSetAttribute( GLOBAL.documentTabs_Sub, "SHOWLINES", "NO" );
 		}
-		else if( GLOBAL.activeDocumentTabs == GLOBAL.documentTabs_Right )
+		else if( GLOBAL.activeDocumentTabs == GLOBAL.documentTabs_Sub )
 		{
 			IupSetAttribute( GLOBAL.documentTabs, "SHOWLINES", "NO" );
-			IupSetAttribute( GLOBAL.documentTabs_Right, "SHOWLINES", "YES" );
+			IupSetAttribute( GLOBAL.documentTabs_Sub, "SHOWLINES", "YES" );
 		}
 	}
 	
@@ -527,25 +527,35 @@ struct DocumentTabAction
 	{
 		if( IupGetChildCount( GLOBAL.documentTabs ) == 0 )
 		{
-			if( IupGetChildCount( GLOBAL.documentTabs_Right ) > 0 )
-				DocumentTabAction.moveBetweenTabs( GLOBAL.documentTabs_Right, GLOBAL.documentTabs );
+			if( IupGetChildCount( GLOBAL.documentTabs_Sub ) > 0 )
+				DocumentTabAction.moveBetweenTabs( GLOBAL.documentTabs_Sub, GLOBAL.documentTabs );
 			else
 				IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 0 );
 
 			DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
 		}
 		
-		if( IupGetChildCount( GLOBAL.documentTabs_Right ) == 0 )
+		if( IupGetChildCount( GLOBAL.documentTabs_Sub ) == 0 )
 		{
 			DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
-			if( fromStringz( IupGetAttribute( GLOBAL.documentSplit, "ACTIVE" ) ) == "YES" )
-			{
-				GLOBAL.documentSplit_value = IupGetInt( GLOBAL.documentSplit, "VALUE" );
-				IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0,ACTIVE=NO" );
-				IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
-				IupSetAttribute( GLOBAL.documentTabs_Right, "ACTIVE","YES" );
-			}
 			
+			if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
+			{
+				if( IupGetInt( GLOBAL.documentSplit, "BARSIZE" ) > 0 )
+				{
+					GLOBAL.documentSplit_value = IupGetInt( GLOBAL.documentSplit, "VALUE" );
+					IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0" );
+				}
+			}
+			else
+			{
+				if( IupGetInt( GLOBAL.documentSplit2, "BARSIZE" ) > 0 )
+				{
+					GLOBAL.documentSplit2_value = IupGetInt( GLOBAL.documentSplit2, "VALUE" );
+					IupSetAttributes( GLOBAL.documentSplit2, "VALUE=1000,BARSIZE=0" );
+				}
+			}			
+		
 			DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
 		}		
 	}
@@ -997,20 +1007,22 @@ struct ScintillaAction
 		return IUP_DEFAULT;
 	}	
 
-	static int closeAllDocument()
+	static int closeAllDocument( Ihandle* _activeTabs = null )
 	{
 		char[][] 	KEYS;
 		bool 		bCancel;
+		
+		if( _activeTabs == null ) _activeTabs = GLOBAL.activeDocumentTabs;
 		
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
 			Ihandle* iupSci = cSci.getIupScintilla;
 			
-			if( DocumentTabAction.getDocumentTabs( iupSci ) != GLOBAL.activeDocumentTabs ) continue;
+			if( DocumentTabAction.getDocumentTabs( iupSci ) != _activeTabs ) continue;
 			
 			if( ScintillaAction.getModify( iupSci ) != 0 )
 			{
-				IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) iupSci );
+				IupSetAttribute( _activeTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				
 				scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 				

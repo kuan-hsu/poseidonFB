@@ -6,6 +6,7 @@
 	saveall=Save All
 	close=Close
 	closeall=Close All
+	closealltabs=Close All Tabs
 	recentfiles=Recent Files
 	recentprjs=Recent Projects
 	clearall=Clear All
@@ -253,8 +254,9 @@ output=Output
 
 'tab
 closeothers=Close Others
-torighttabs=To Right Document Tabs
-tolefttabs=To Left Document Tabs
+torighttabs=To Sub Document Tabs
+tolefttabs=To Main Document Tabs
+rotatetabs=Rotate Sub Document Tabs
 
 'popup window
 highlightmaker=Highlight Maker...

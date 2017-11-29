@@ -1056,6 +1056,24 @@ extern(C)
 				IupSetAttribute( _redo, "IMAGE", "icon_redo" );
 				if( fromStringz(IupGetAttribute( ih, "REDO" )) != "YES" ) IupSetAttribute( _redo, "ACTIVE", "NO" );
 				IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
+				
+				Ihandle* _clearBuffer = IupItem( GLOBAL.languageItems["clear"].toCString, null );
+				IupSetAttribute( _clearBuffer, "IMAGE", "icon_clear" );
+				IupSetCallback( _clearBuffer, "ACTION", cast(Icallback) function( Ihandle* ih )
+				{
+					auto sci = ScintillaAction.getActiveIupScintilla;
+					if( sci != null ) IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
+					
+					Ihandle* __undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Undo" );
+					if( __undo != null ) IupSetAttribute( __undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
+
+					Ihandle* __redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Redo" );
+					if( __redo != null ) IupSetAttribute( __redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
+					
+					DocumentTabAction.setFocus( sci );
+					return IUP_DEFAULT;
+				});					
+				
 
 				Ihandle* _cut = IupItem( GLOBAL.languageItems["caption_cut"].toCString, null );
 				IupSetAttribute( _cut, "IMAGE", "icon_cut" );
@@ -1350,6 +1368,7 @@ extern(C)
 				Ihandle* popupMenu = IupMenu(
 												_undo,
 												_redo,
+												_clearBuffer,
 												IupSeparator(),
 
 												_cut,

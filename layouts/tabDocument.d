@@ -28,20 +28,20 @@ void createTabs()
 
 void createTabs2()
 {
-	GLOBAL.documentTabs_Right = IupFlatTabs( null );
+	GLOBAL.documentTabs_Sub = IupFlatTabs( null );
 	
-	IupSetAttribute( GLOBAL.documentTabs_Right, "SHOWCLOSE", "YES" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "TABSIMAGESPACING", "1" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "CLOSEIMAGE", "icon_clear" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "CLOSEIMAGEPRESS", "icon_clear" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "TABSPADDING", "5x5" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "SIZE", "NULL" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "HIGHCOLOR", "0 0 255" );
-	IupSetAttribute( GLOBAL.documentTabs_Right, "TABSHIGHCOLOR", "240 255 240" );
-	IupSetCallback( GLOBAL.documentTabs_Right, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
-	IupSetCallback( GLOBAL.documentTabs_Right, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
-	IupSetCallback( GLOBAL.documentTabs_Right, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
-	version(Windows) IupSetCallback( GLOBAL.documentTabs_Right, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "SHOWCLOSE", "YES" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSIMAGESPACING", "1" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGE", "icon_clear" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGEPRESS", "icon_clear" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "5x5" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "SIZE", "NULL" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "HIGHCOLOR", "0 0 255" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSHIGHCOLOR", "240 255 240" );
+	IupSetCallback( GLOBAL.documentTabs_Sub, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
+	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
+	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
+	version(Windows) IupSetCallback( GLOBAL.documentTabs_Sub, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
 }
 
 
@@ -133,7 +133,7 @@ extern(C)
 		if( GLOBAL.activeDocumentTabs == GLOBAL.documentTabs )
 		{
 			_moveDocument = IupItem( GLOBAL.languageItems["torighttabs"].toCString, null );//IupItem( GLOBAL.languageItems["closeall"].toCString, null );
-			IupSetAttribute( _moveDocument, "IMAGE", "icon_debug_right" );
+			if( GLOBAL.editorSetting01.RotateTabs == "OFF" ) IupSetAttribute( _moveDocument, "IMAGE", "icon_debug_right" ); else IupSetAttribute( _moveDocument, "IMAGE", "icon_downarrow");
 			if( IupGetChildCount( GLOBAL.activeDocumentTabs ) == 1 ) IupSetAttribute( _moveDocument, "ACTIVE", "NO" );
 			IupSetCallback( _moveDocument, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
@@ -142,27 +142,48 @@ extern(C)
 				if( beMoveDocumentCSci !is null )
 				{
 					Ihandle* dragHandle = IupGetChild( GLOBAL.documentTabs, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
-					//Ihandle* dropHandle = IupGetChild( GLOBAL.documentTabs_Right, 0 );
+					//Ihandle* dropHandle = IupGetChild( GLOBAL.documentTabs_Sub, 0 );
 					
 					if( dragHandle != null )
 					{
-						IupReparent( dragHandle, GLOBAL.documentTabs_Right, null );
-						IupRefresh( GLOBAL.documentTabs_Right );
+						if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
+						{
+							IupAppend( GLOBAL.documentSplit, GLOBAL.documentTabs_Sub );
+							IupMap( GLOBAL.documentTabs_Sub );
+							IupRefresh( GLOBAL.documentSplit );
+						}
+						else
+						{
+							IupAppend( GLOBAL.documentSplit2, GLOBAL.documentTabs_Sub );
+							IupMap( GLOBAL.documentTabs_Sub );
+							IupRefresh( GLOBAL.documentSplit2 );
+						}
+						
+						IupReparent( dragHandle, GLOBAL.documentTabs_Sub, null );
+						IupRefresh( GLOBAL.documentTabs_Sub );
 						
 						DocumentTabAction.resetTip();
 
-						int newDocumentPos = IupGetChildCount( GLOBAL.documentTabs_Right ) - 1;
-						IupSetAttributeId( GLOBAL.documentTabs_Right , "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
-						IupSetAttributeId( GLOBAL.documentTabs_Right , "TABTIP", newDocumentPos,  beMoveDocumentCSci.getFullPath_IupString.toCString );
-						DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs_Right );
+						int newDocumentPos = IupGetChildCount( GLOBAL.documentTabs_Sub ) - 1;
+						IupSetAttributeId( GLOBAL.documentTabs_Sub , "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
+						IupSetAttributeId( GLOBAL.documentTabs_Sub , "TABTIP", newDocumentPos,  beMoveDocumentCSci.getFullPath_IupString.toCString );
+						DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs_Sub );
 						
-						IupSetAttribute( GLOBAL.documentTabs_Right , "VALUE_HANDLE", cast(char*) beMoveDocumentCSci.getIupScintilla );
+						IupSetAttribute( GLOBAL.documentTabs_Sub , "VALUE_HANDLE", cast(char*) beMoveDocumentCSci.getIupScintilla );
 						if( newDocumentPos == 0 )
 						{
-							IupSetAttributes( GLOBAL.documentSplit, "ACTIVE=YES,BARSIZE=2" );
-							IupSetInt( GLOBAL.documentSplit, "VALUE", GLOBAL.documentSplit_value );
+							if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
+							{
+								IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
+								IupSetInt( GLOBAL.documentSplit, "VALUE", GLOBAL.documentSplit_value );
+							}
+							else
+							{
+								IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=2" );
+								IupSetInt( GLOBAL.documentSplit2, "VALUE", GLOBAL.documentSplit2_value );
+							}
 						}
-						DocumentTabAction.tabChangePOS( GLOBAL.documentTabs_Right, newDocumentPos );
+						DocumentTabAction.tabChangePOS( GLOBAL.documentTabs_Sub, newDocumentPos );
 					}				
 				}
 				
@@ -172,14 +193,14 @@ extern(C)
 		else
 		{
 			_moveDocument = IupItem( GLOBAL.languageItems["tolefttabs"].toCString, null );//IupItem( GLOBAL.languageItems["closeall"].toCString, null );
-			IupSetAttribute( _moveDocument, "IMAGE", "icon_debug_left" );
+			if( GLOBAL.editorSetting01.RotateTabs == "OFF" ) IupSetAttribute( _moveDocument, "IMAGE", "icon_debug_left" ); else IupSetAttribute( _moveDocument, "IMAGE", "icon_uparrow");
 			IupSetCallback( _moveDocument, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
 				CScintilla beMoveDocumentCSci = ScintillaAction.getActiveCScintilla;
 
 				if( beMoveDocumentCSci !is null )
 				{
-					Ihandle* dragHandle = IupGetChild( GLOBAL.documentTabs_Right, IupGetInt( GLOBAL.documentTabs_Right, "VALUEPOS" ) );
+					Ihandle* dragHandle = IupGetChild( GLOBAL.documentTabs_Sub, IupGetInt( GLOBAL.documentTabs_Sub, "VALUEPOS" ) );
 					//Ihandle* dropHandle = IupGetChild( GLOBAL.documentTabs, 0 );
 					
 					if( dragHandle != null )
@@ -195,12 +216,18 @@ extern(C)
 						DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
 						
 						IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) beMoveDocumentCSci.getIupScintilla );
-						if( IupGetChildCount( GLOBAL.documentTabs_Right ) == 0 )
+						if( IupGetChildCount( GLOBAL.documentTabs_Sub ) == 0 )
 						{
-							GLOBAL.documentSplit_value = IupGetInt( GLOBAL.documentSplit, "VALUE" );
-							IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0,ACTIVE=NO" );
-							IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
-							IupSetAttribute( GLOBAL.documentTabs_Right, "ACTIVE","YES" );							
+							if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
+							{
+								GLOBAL.documentSplit_value = IupGetInt( GLOBAL.documentSplit, "VALUE" );
+								IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0" );
+							}
+							else
+							{
+								GLOBAL.documentSplit2_value = IupGetInt( GLOBAL.documentSplit2, "VALUE" );
+								IupSetAttributes( GLOBAL.documentSplit2, "VALUE=1000,BARSIZE=0" );
+							}
 						}
 						DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, newDocumentPos );
 					}				
@@ -258,7 +285,15 @@ extern(C)
 		IupMessage( "CURSORPOS", IupGetGlobal( "CURSORPOS" ) );
 		IupMessage( "SCREENPOSITION", IupGetAttribute( ih, "SCREENPOSITION" ) );
 		IupMessage( "", toStringz( Integer.toString(x) ~ "x" ~ Integer.toString(y) ) );
+		IupMessage( "SIZE", IupGetAttribute( ih, "SIZE" ) );
+		IupMessage( "CLIENTSIZE ", IupGetAttribute( ih, "CLIENTSIZE" ) );
+		IupMessage( "RASTERSIZE ", IupGetAttribute( ih, "RASTERSIZE" ) );
+		
+		IupMessage( "messageSplit SCREENPOSITION", IupGetAttribute( GLOBAL.messageSplit, "SCREENPOSITION" ) );
+		
+		IupMessage( "messageSplit POSITION", IupGetAttribute( GLOBAL.messageSplit, "POSITION" ) );
 		*/
+		
 		if( pressed == 1 )
 		{
 			GLOBAL.tabDocumentPos = -1;
@@ -307,8 +342,8 @@ extern(C)
 						int		tabs1X, tabs1Y, tabs2X, tabs2Y;
 						char[]	screenPos	= fromStringz( IupGetGlobal( "CURSORPOS" ) );
 						char[]	tabs1Pos	= fromStringz( IupGetAttribute( GLOBAL.documentTabs, "SCREENPOSITION" ) );
-						char[]	tabs2Pos	= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Right, "SCREENPOSITION" ) );
-							
+						char[]	tabs2Pos	= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "SCREENPOSITION" ) );
+
 						if( screenPos.length )
 						{
 							int crossPos = Util.index( screenPos, "x" );
@@ -374,36 +409,74 @@ extern(C)
 						{
 							dropHandle = null;
 							
-							if( y == screenY - tabs1Y )
+							
+							char[] documentTabs_Size = fromStringz( IupGetAttribute( GLOBAL.documentTabs, "RASTERSIZE" ) );
+							if( documentTabs_Size.length )
 							{
-								if( screenX > tabs1X && screenX < tabs2X )
+								if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
 								{
-									dropTabs = GLOBAL.documentTabs;
-									dropHandle = null;
+									if( screenX > tabs1X && screenX < tabs2X )
+									{
+										int crossPos = Util.index( documentTabs_Size, "x" );
+										if( crossPos < documentTabs_Size.length )
+										{
+											tabs2Y = Integer.atoi( documentTabs_Size[crossPos+1..$] );
+											
+											if( screenY > tabs1Y && screenY < tabs1Y + tabs2Y )
+											{
+												dropTabs = GLOBAL.documentTabs;
+												dropHandle = null;
+											}
+										}									
+									}
+								}
+								else
+								{
+									if( screenY > tabs1Y && screenY < tabs2Y )
+									{
+										int crossPos = Util.index( documentTabs_Size, "x" );
+										if( crossPos < documentTabs_Size.length )
+										{
+											tabs2X = Integer.atoi( documentTabs_Size[0..crossPos] );
+											
+											if( screenX > tabs1X && screenX < tabs1X + tabs2X )
+											{
+												dropTabs = GLOBAL.documentTabs;
+												dropHandle = null;
+											}
+										}
+									}
 								}
 							}
 							
-							dropPos = IupConvertXYToPos( GLOBAL.documentTabs_Right, screenX - tabs2X, screenY - tabs2Y );								
+							
+							
+							dropPos = IupConvertXYToPos( GLOBAL.documentTabs_Sub, screenX - tabs2X, screenY - tabs2Y );								
 							if( dropPos > -1 )
 							{
-								dropTabs = GLOBAL.documentTabs_Right;
-								dropHandle = IupGetChild( GLOBAL.documentTabs_Right, dropPos );
+								dropTabs = GLOBAL.documentTabs_Sub;
+								dropHandle = IupGetChild( GLOBAL.documentTabs_Sub, dropPos );
 							}
 							else
 							{
 								if( dropTabs == null )
 								{
-									char[] documentTabs_RightSize = fromStringz( IupGetAttribute( GLOBAL.documentTabs_Right, "RASTERSIZE" ) );
-									if( documentTabs_RightSize.length )
+									char[] documentTabs_SubSize = fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );
+									if( documentTabs_SubSize.length )
 									{
-										int crossPos = Util.index( documentTabs_RightSize, "x" );
-										if( crossPos < documentTabs_RightSize.length )
+										int crossPos = Util.index( documentTabs_SubSize, "x" );
+										if( crossPos < documentTabs_SubSize.length )
 										{
-											tabs1X = Integer.atoi( documentTabs_RightSize[0..crossPos] );
+											tabs1X = Integer.atoi( documentTabs_SubSize[0..crossPos] );
+											tabs1Y = Integer.atoi( documentTabs_SubSize[crossPos+1..$] );
+											
 											if( screenX > tabs2X && screenX < tabs2X + tabs1X )
 											{
-												dropTabs = GLOBAL.documentTabs_Right;
-												dropHandle = null;
+												if( screenY > tabs2Y && screenY < tabs2Y + tabs1Y )
+												{
+													dropTabs = GLOBAL.documentTabs_Sub;
+													dropHandle = null;
+												}
 											}
 										}
 									}
