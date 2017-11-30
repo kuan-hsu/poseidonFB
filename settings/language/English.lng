@@ -254,9 +254,9 @@ output=Output
 
 'tab
 closeothers=Close Others
-torighttabs=To Sub Document Tabs
-tolefttabs=To Main Document Tabs
-rotatetabs=Rotate Sub Document Tabs
+torighttabs=Send To Secondary View
+tolefttabs=Send to Main View
+rotatetabs=Split Views Horizontally
 
 'popup window
 highlightmaker=Highlight Maker...

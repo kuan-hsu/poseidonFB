@@ -618,7 +618,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.339)\nBy Kuan Hsu (Taiwan)\n2017.11.30" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.340)\nBy Kuan Hsu (Taiwan)\n2017.11.30" );
 		return IUP_DEFAULT;
 	});
 	

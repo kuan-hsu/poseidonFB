@@ -237,18 +237,31 @@ extern(C)
 			});
 		}
 		
-		
-		Ihandle* popupMenu = IupMenu( 
-										_close,
-										_closeothers,
-										_closeall,
-										IupSeparator(),
-										_save,
-										IupSeparator(),
-										_moveDocument,
-										null
-									);
-
+		Ihandle* popupMenu;
+		if( fromStringz( IupGetAttribute( _moveDocument, "ACTIVE" ) ) == "YES" )
+		{
+			popupMenu= IupMenu( 
+								_close,
+								_closeothers,
+								_closeall,
+								IupSeparator(),
+								_save,
+								IupSeparator(),
+								_moveDocument,
+								null
+								);
+		}
+		else
+		{
+			popupMenu= IupMenu( 
+								_close,
+								_closeothers,
+								_closeall,
+								IupSeparator(),
+								_save,
+								null
+								);
+		}
 
 		IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 		IupDestroy( popupMenu );		
@@ -288,10 +301,6 @@ extern(C)
 		IupMessage( "SIZE", IupGetAttribute( ih, "SIZE" ) );
 		IupMessage( "CLIENTSIZE ", IupGetAttribute( ih, "CLIENTSIZE" ) );
 		IupMessage( "RASTERSIZE ", IupGetAttribute( ih, "RASTERSIZE" ) );
-		
-		IupMessage( "messageSplit SCREENPOSITION", IupGetAttribute( GLOBAL.messageSplit, "SCREENPOSITION" ) );
-		
-		IupMessage( "messageSplit POSITION", IupGetAttribute( GLOBAL.messageSplit, "POSITION" ) );
 		*/
 		
 		if( pressed == 1 )
@@ -409,20 +418,29 @@ extern(C)
 						{
 							dropHandle = null;
 							
+							char[] documentTabs_CLIENTSIZE = fromStringz( IupGetAttribute( ih, "CLIENTSIZE" ) );
+							char[] documentTabs_RASTERSIZE = fromStringz( IupGetAttribute( ih, "RASTERSIZE" ) );
 							
-							char[] documentTabs_Size = fromStringz( IupGetAttribute( GLOBAL.documentTabs, "RASTERSIZE" ) );
-							if( documentTabs_Size.length )
+							int titleH, CLIENT_H, RASTER_H;
+							
+							int crossPos = Util.index( documentTabs_CLIENTSIZE, "x" );
+							if( crossPos < documentTabs_CLIENTSIZE.length )	CLIENT_H = Integer.atoi( documentTabs_CLIENTSIZE[crossPos+1..$] );
+							crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
+							if( crossPos < documentTabs_RASTERSIZE.length )	RASTER_H = Integer.atoi( documentTabs_RASTERSIZE[crossPos+1..$] );
+							titleH = RASTER_H - CLIENT_H; 
+							
+							
+							if( documentTabs_RASTERSIZE.length )
 							{
 								if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
 								{
 									if( screenX > tabs1X && screenX < tabs2X )
 									{
-										int crossPos = Util.index( documentTabs_Size, "x" );
-										if( crossPos < documentTabs_Size.length )
+										crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
+										if( crossPos < documentTabs_RASTERSIZE.length )
 										{
-											tabs2Y = Integer.atoi( documentTabs_Size[crossPos+1..$] );
-											
-											if( screenY > tabs1Y && screenY < tabs1Y + tabs2Y )
+											//tabs2Y = Integer.atoi( documentTabs_RASTERSIZE[crossPos+1..$] );
+											if( screenY > tabs1Y && screenY < tabs1Y + titleH )
 											{
 												dropTabs = GLOBAL.documentTabs;
 												dropHandle = null;
@@ -432,12 +450,12 @@ extern(C)
 								}
 								else
 								{
-									if( screenY > tabs1Y && screenY < tabs2Y )
+									if( screenY > tabs1Y && screenY < tabs1Y + titleH )
 									{
-										int crossPos = Util.index( documentTabs_Size, "x" );
-										if( crossPos < documentTabs_Size.length )
+										crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
+										if( crossPos < documentTabs_RASTERSIZE.length )
 										{
-											tabs2X = Integer.atoi( documentTabs_Size[0..crossPos] );
+											tabs2X = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
 											
 											if( screenX > tabs1X && screenX < tabs1X + tabs2X )
 											{
@@ -464,7 +482,7 @@ extern(C)
 									char[] documentTabs_SubSize = fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );
 									if( documentTabs_SubSize.length )
 									{
-										int crossPos = Util.index( documentTabs_SubSize, "x" );
+										crossPos = Util.index( documentTabs_SubSize, "x" );
 										if( crossPos < documentTabs_SubSize.length )
 										{
 											tabs1X = Integer.atoi( documentTabs_SubSize[0..crossPos] );
@@ -472,7 +490,7 @@ extern(C)
 											
 											if( screenX > tabs2X && screenX < tabs2X + tabs1X )
 											{
-												if( screenY > tabs2Y && screenY < tabs2Y + tabs1Y )
+												if( screenY > tabs2Y && screenY < tabs2Y + titleH )
 												{
 													dropTabs = GLOBAL.documentTabs_Sub;
 													dropHandle = null;

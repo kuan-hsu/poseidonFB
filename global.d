@@ -18,7 +18,7 @@ version(Windows)
 
 struct EditorToggleUint
 {
-	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF";
+	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF";
 	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", BraceMatchDoubleSidePos = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF";
 }
 
@@ -574,6 +574,7 @@ struct GLOBAL
 						GLOBAL.languageItems["showeol"] = new IupString( cast(char[]) "Show EOL Sign" );
 						GLOBAL.languageItems["showspacetab"] = new IupString( cast(char[]) "Show Space/Tab" );
 						GLOBAL.languageItems["autoinsertend"] = new IupString( cast(char[]) "Auto Insert Block End" );
+						GLOBAL.languageItems["autoclose"] = new IupString( cast(char[]) "Auto Close( quotes... )" );
 						GLOBAL.languageItems["coloroutline"] = new IupString( cast(char[]) "Colorize Outline Item" );
 						GLOBAL.languageItems["showidemessage"] = new IupString( cast(char[]) "Show IDE Message" );
 						GLOBAL.languageItems["boldkeyword"] = new IupString( cast(char[]) "Bold Keywords" );
@@ -697,9 +698,9 @@ struct GLOBAL
 
 		//'tab
 		GLOBAL.languageItems["closeothers"] = new IupString( cast(char[]) "Close Others" );
-		GLOBAL.languageItems["torighttabs"] = new IupString( cast(char[]) "To Sub Document Tabs" );
-		GLOBAL.languageItems["tolefttabs"] = new IupString( cast(char[]) "To Main Document Tabs" );
-		GLOBAL.languageItems["rotatetabs"] = new IupString( cast(char[]) "Rotate Sub Document Tabs" );
+		GLOBAL.languageItems["torighttabs"] = new IupString( cast(char[]) "Send To Secondary View" );
+		GLOBAL.languageItems["tolefttabs"] = new IupString( cast(char[]) "Send to Main View" );
+		GLOBAL.languageItems["rotatetabs"] = new IupString( cast(char[]) "Split Views Horizontally" );
 
 		//'popup window
 		GLOBAL.languageItems["highlightmaker"] = new IupString( cast(char[]) "Highlight Maker..." );

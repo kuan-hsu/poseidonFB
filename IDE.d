@@ -474,6 +474,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "ShowEOL", GLOBAL.editorSetting00.ShowEOL );
 			doc ~= setINILineData( "ShowSpace", GLOBAL.editorSetting00.ShowSpace );
 			doc ~= setINILineData( "AutoEnd", GLOBAL.editorSetting00.AutoEnd );
+			doc ~= setINILineData( "AutoClose", GLOBAL.editorSetting00.AutoClose );
 			doc ~= setINILineData( "TabWidth", GLOBAL.editorSetting00.TabWidth );
 			doc ~= setINILineData( "ColumnEdge", GLOBAL.editorSetting00.ColumnEdge );
 			doc ~= setINILineData( "EolType", GLOBAL.editorSetting00.EolType );
@@ -822,6 +823,7 @@ struct IDECONFIG
 							case "ShowEOL":					GLOBAL.editorSetting00.ShowEOL = right;					break;
 							case "ShowSpace":				GLOBAL.editorSetting00.ShowSpace = right;				break;
 							case "AutoEnd":					GLOBAL.editorSetting00.AutoEnd = right;					break;
+							case "AutoClose":				GLOBAL.editorSetting00.AutoClose = right;				break;
 							case "TabWidth":				GLOBAL.editorSetting00.TabWidth = right;				break;
 					
 							case "ColumnEdge":				GLOBAL.editorSetting00.ColumnEdge = right;				break;

@@ -1589,6 +1589,22 @@ extern(C)
 			{
 				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 			}
+			
+			if( GLOBAL.editorSetting00.AutoClose == "ON" )
+			{
+				switch( c )
+				{
+					case 34: // "
+						IupSetAttributeId( ih, "INSERT", -1, toStringz( "\"" ) ); break;
+					case 40: // (
+						IupSetAttributeId( ih, "INSERT", -1, toStringz( ")" ) ); break;
+					case 91: // [
+						IupSetAttributeId( ih, "INSERT", -1, toStringz( "]" ) ); break;
+					case 123: // {
+						IupSetAttributeId( ih, "INSERT", -1, toStringz( "}" ) ); break;
+					default:
+				}
+			}
 
 			foreach( ShortKey sk; GLOBAL.shortKeys )
 			{
