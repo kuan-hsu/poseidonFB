@@ -14,7 +14,7 @@ class CSingleTextDialog : CBaseDialog
 
 	void createLayout( char[] textWH )
 	{
-		Ihandle* bottom = createDlgButton();
+		Ihandle* bottom = createDlgButton( "40x12" );
 
 		label = IupLabel( GLOBAL.cString.convert( labelName ) );
 		

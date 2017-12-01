@@ -19,9 +19,7 @@ class CSearchDialog : CBaseDialog
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton();
-		IupDestroy( btnOK );
-		//IupSetAttribute( btnOK, "VISIBLE", "NO" );
+		Ihandle* bottom = createDlgButton( "40x16", "c");
 
 		listFind = IupList( null );
 		/*

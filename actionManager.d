@@ -557,6 +557,15 @@ struct DocumentTabAction
 			}			
 		
 			DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
+		}
+		
+		if( !GLOBAL.scintillaManager.length )
+		{
+			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Undo" );
+			if( _undo != null ) IupSetAttribute( _undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
+
+			Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Redo" );
+			if( _redo != null ) IupSetAttribute( _redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
 		}		
 	}
 }

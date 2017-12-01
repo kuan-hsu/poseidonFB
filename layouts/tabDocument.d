@@ -146,6 +146,7 @@ extern(C)
 					
 					if( dragHandle != null )
 					{
+						/*
 						if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
 						{
 							IupAppend( GLOBAL.documentSplit, GLOBAL.documentTabs_Sub );
@@ -158,6 +159,7 @@ extern(C)
 							IupMap( GLOBAL.documentTabs_Sub );
 							IupRefresh( GLOBAL.documentSplit2 );
 						}
+						*/
 						
 						IupReparent( dragHandle, GLOBAL.documentTabs_Sub, null );
 						IupRefresh( GLOBAL.documentTabs_Sub );
@@ -179,7 +181,7 @@ extern(C)
 							}
 							else
 							{
-								IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=2" );
+								IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=3" );
 								IupSetInt( GLOBAL.documentSplit2, "VALUE", GLOBAL.documentSplit2_value );
 							}
 						}
@@ -344,7 +346,6 @@ extern(C)
 						int			dropPos = -1;
 						Ihandle* 	dropHandle;
 						Ihandle* 	dragHandle = IupGetChild( GLOBAL.dragDocumentTabs, GLOBAL.tabDocumentPos );
-						Ihandle*	dragTabs;
 						Ihandle*	dropTabs;
 						
 						int		screenX, screenY;
@@ -411,7 +412,8 @@ extern(C)
 						{
 							GLOBAL.tabDocumentPos = -1;	GLOBAL.dragDocumentTabs = null;
 							return IUP_DEFAULT;
-						}						
+						}				
+						
 						
 						dropPos = IupConvertXYToPos( GLOBAL.documentTabs, screenX - tabs1X, screenY - tabs1Y );
 						if( dropPos < 0 )
@@ -421,74 +423,52 @@ extern(C)
 							char[] documentTabs_CLIENTSIZE = fromStringz( IupGetAttribute( ih, "CLIENTSIZE" ) );
 							char[] documentTabs_RASTERSIZE = fromStringz( IupGetAttribute( ih, "RASTERSIZE" ) );
 							
-							int titleH, CLIENT_H, RASTER_H;
+							int titleH = -1, CLIENT_H = -1, RASTER_H = -1, RASTER_W = -1;
 							
 							int crossPos = Util.index( documentTabs_CLIENTSIZE, "x" );
 							if( crossPos < documentTabs_CLIENTSIZE.length )	CLIENT_H = Integer.atoi( documentTabs_CLIENTSIZE[crossPos+1..$] );
-							crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
-							if( crossPos < documentTabs_RASTERSIZE.length )	RASTER_H = Integer.atoi( documentTabs_RASTERSIZE[crossPos+1..$] );
-							titleH = RASTER_H - CLIENT_H; 
 							
+							crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
+							if( crossPos < documentTabs_RASTERSIZE.length )
+							{
+								RASTER_H = Integer.atoi( documentTabs_RASTERSIZE[crossPos+1..$] );
+								RASTER_W = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
+								titleH = RASTER_H - CLIENT_H; 
+							}
+							
+							if( titleH < 0 || RASTER_W < 0 || RASTER_H < 0 || CLIENT_H < 0 )
+							{
+								GLOBAL.tabDocumentPos = -1;	GLOBAL.dragDocumentTabs = null;
+								return IUP_DEFAULT;
+							}
 							
 							if( documentTabs_RASTERSIZE.length )
 							{
-								if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
-								{
-									if( screenX > tabs1X && screenX < tabs2X )
-									{
-										crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
-										if( crossPos < documentTabs_RASTERSIZE.length )
-										{
-											//tabs2Y = Integer.atoi( documentTabs_RASTERSIZE[crossPos+1..$] );
-											if( screenY > tabs1Y && screenY < tabs1Y + titleH )
-											{
-												dropTabs = GLOBAL.documentTabs;
-												dropHandle = null;
-											}
-										}									
-									}
-								}
-								else
+								if( screenX > tabs1X && screenX < tabs1X + RASTER_W )
 								{
 									if( screenY > tabs1Y && screenY < tabs1Y + titleH )
 									{
-										crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
-										if( crossPos < documentTabs_RASTERSIZE.length )
-										{
-											tabs2X = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
-											
-											if( screenX > tabs1X && screenX < tabs1X + tabs2X )
-											{
-												dropTabs = GLOBAL.documentTabs;
-												dropHandle = null;
-											}
-										}
-									}
+										dropTabs = GLOBAL.documentTabs;
+										dropHandle = null;
+									}									
 								}
 							}
 							
 							
-							
-							dropPos = IupConvertXYToPos( GLOBAL.documentTabs_Sub, screenX - tabs2X, screenY - tabs2Y );								
-							if( dropPos > -1 )
+							if( dropTabs == null )
 							{
-								dropTabs = GLOBAL.documentTabs_Sub;
-								dropHandle = IupGetChild( GLOBAL.documentTabs_Sub, dropPos );
-							}
-							else
-							{
-								if( dropTabs == null )
+								dropPos = IupConvertXYToPos( GLOBAL.documentTabs_Sub, screenX - tabs2X, screenY - tabs2Y );								
+								if( dropPos < 0 )
 								{
-									char[] documentTabs_SubSize = fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );
-									if( documentTabs_SubSize.length )
+									documentTabs_RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );
+									if( documentTabs_RASTERSIZE.length )
 									{
-										crossPos = Util.index( documentTabs_SubSize, "x" );
-										if( crossPos < documentTabs_SubSize.length )
+										crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
+										if( crossPos < documentTabs_RASTERSIZE.length )
 										{
-											tabs1X = Integer.atoi( documentTabs_SubSize[0..crossPos] );
-											tabs1Y = Integer.atoi( documentTabs_SubSize[crossPos+1..$] );
+											RASTER_W = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
 											
-											if( screenX > tabs2X && screenX < tabs2X + tabs1X )
+											if( screenX > tabs2X && screenX < tabs2X + RASTER_W )
 											{
 												if( screenY > tabs2Y && screenY < tabs2Y + titleH )
 												{
@@ -499,6 +479,11 @@ extern(C)
 										}
 									}
 								}
+								else
+								{
+									dropTabs = GLOBAL.documentTabs_Sub;
+									dropHandle = IupGetChild( GLOBAL.documentTabs_Sub, dropPos );
+								}
 							}
 						}
 						else
@@ -507,27 +492,27 @@ extern(C)
 							dropHandle = IupGetChild( GLOBAL.documentTabs, dropPos );
 						}
 						
+						
 						if( dragHandle != null  )
 						{
-							dragTabs = IupGetParent( dragHandle );
-							//dropTabs = IupGetParent( dropHandle );
-							
 							if( dragHandle != dropHandle )
 							{
-								if( dragTabs == dropTabs )
+								if( GLOBAL.dragDocumentTabs == dropTabs )
 								{
-									if( GLOBAL.tabDocumentPos > pos )
+									if( dropHandle == null )
+									{
+										IupReparent( dragHandle, GLOBAL.activeDocumentTabs, null ); // pos = -1
+									}
+									else if( GLOBAL.tabDocumentPos > pos )
+									{
 										IupReparent( dragHandle, GLOBAL.activeDocumentTabs, dropHandle );
+									}
 									else
 									{
 										if( pos < IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" ) - 1 )
-										{
 											IupReparent( dragHandle, GLOBAL.activeDocumentTabs, IupGetChild(  GLOBAL.activeDocumentTabs, pos + 1 ) );
-										}
 										else
-										{
 											IupReparent( dragHandle, GLOBAL.activeDocumentTabs, null );
-										}
 									}
 								}
 								else
@@ -566,6 +551,10 @@ extern(C)
 			{
 				if( button == IUP_BUTTON1 )
 				{
+					if( ih == GLOBAL.documentTabs )
+						if( IupGetChildCount( ih ) == 1 ) return IUP_DEFAULT;
+							
+					
 					GLOBAL.tabDocumentPos = pos;
 					GLOBAL.dragDocumentTabs = GLOBAL.activeDocumentTabs;
 					IupSetAttribute( ih, "CURSOR", "HAND" );

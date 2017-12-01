@@ -71,11 +71,11 @@ class CToolBar
 		IupSetAttribute( btnSaveAll, "TIP", GLOBAL.languageItems["sc_saveall"].toCString );
 		IupSetCallback( btnSaveAll, "ACTION", cast(Icallback) &menu.saveAllFile_cb ); // From menu.d
 
-		IupSetAttributes( btnUndo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_undo,NAME=toolbar_Undo" );
+		IupSetAttributes( btnUndo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_undo,NAME=toolbar_Undo,ACTIVE=NO" );
 		IupSetAttribute( btnUndo, "TIP", GLOBAL.languageItems["sc_undo"].toCString );
 		IupSetCallback( btnUndo, "ACTION", cast(Icallback) &menu.undo_cb ); // From menu.d
 		
-		IupSetAttributes( btnRedo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_redo,NAME=toolbar_Redo" );
+		IupSetAttributes( btnRedo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_redo,NAME=toolbar_Redo,ACTIVE=NO" );
 		IupSetAttribute( btnRedo, "TIP", GLOBAL.languageItems["sc_redo"].toCString );
 		IupSetCallback( btnRedo, "ACTION", cast(Icallback) &menu.redo_cb ); // From menu.d
 		

@@ -22,9 +22,7 @@ class CFindInFilesDialog : CBaseDialog
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton();
-		IupDestroy( btnOK );
-		//IupSetAttribute( btnOK, "VISIBLE", "NO" );
+		Ihandle* bottom = createDlgButton( "40x16", "c" );
 
 		labelTitle[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
 		labelTitle[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );

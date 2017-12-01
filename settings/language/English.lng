@@ -133,6 +133,7 @@ options=Options
 				showeol=Show EOL Sign
 				showspacetab=Show Space/Tab
 				autoinsertend=Auto Insert Block End
+				autoclose=Auto Close( quotes... )
 				coloroutline=Colorize Outline Item
 				showidemessage=Show IDE Message
 				boldkeyword=Bold Keywords

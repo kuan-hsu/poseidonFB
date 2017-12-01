@@ -17,7 +17,7 @@ class CPreferenceDialog : CBaseDialog
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton( "40x12" );
+		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
 
 		textCompilerPath = IupText( null );
 		IupSetAttribute( textCompilerPath, "SIZE", "320x12" );
@@ -34,8 +34,6 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBox01 = IupFrame( _hBox01 );
 		IupSetAttribute( hBox01, "TITLE", GLOBAL.languageItems["compilerpath"].toCString );
 		IupSetAttributes( hBox01, "EXPANDCHILDREN=YES,SIZE=346x");
-		
-
 
 		
 		Ihandle* textx64CompilerPath = IupText( null );
@@ -53,10 +51,9 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBox01x64 = IupFrame( _hBox01x64 );
 		IupSetAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
 		IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
-		
 
-		
-		
+
+
 		textDebuggerPath = IupText( null );
 		IupSetAttribute( textDebuggerPath, "SIZE", "320x12" );
 		IupSetAttribute( textDebuggerPath, "VALUE", GLOBAL.debuggerFullPath.toCString );
@@ -1445,13 +1442,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=10x10,GAP=5" );
 
 		IupAppend( _dlg, vBox );
-
-		// Set btnOK Action
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CPreferenceDialog_btnOK_cb );
 	}
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
+	this( int w, int h, char[] title, bool bResize = true, char[] parent = "MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
@@ -1471,6 +1465,14 @@ class CPreferenceDialog : CBaseDialog
 		version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x295" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
 		
 		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
+		
+		// Bottom Button
+		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
+		IupSetCallback( btnAPPLY, "ACTION", cast(Icallback) &CPreferenceDialog_btnApply_cb );
+		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CPreferenceDialog_btnOK_cb );
+		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CPreferenceDialog_btnCancel_cb );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CPreferenceDialog_btnCancel_cb );		
+		
 		IupMap( _dlg );
 	}
 
@@ -1592,7 +1594,15 @@ class CPreferenceDialog : CBaseDialog
 		
 		for( int i = 0; i < 15; ++ i )
 			if( _stringOfLabel[i] !is null ) delete _stringOfLabel[i];
+			
+		IupDestroy( _dlg );
 	}
+	
+	char[] show( int x, int y )
+	{
+		IupShowXY( _dlg, x, y );
+		return null;
+	}	
 }
 
 extern(C) // Callback for CPreferenceDialog
@@ -1874,8 +1884,21 @@ extern(C) // Callback for CPreferenceDialog
 		
 		return IUP_DEFAULT;
 	}
+	
+	private int CPreferenceDialog_btnCancel_cb( Ihandle* ih )
+	{
+		IupHide( GLOBAL.preferenceDlg.getIhandle );
+		return IUP_DEFAULT;
+	}
 
 	private int CPreferenceDialog_btnOK_cb( Ihandle* ih )
+	{
+		CPreferenceDialog_btnApply_cb( ih );
+		IupHide( GLOBAL.preferenceDlg.getIhandle );
+		return IUP_DEFAULT;
+	}
+
+	private int CPreferenceDialog_btnApply_cb( Ihandle* ih )
 	{
 		try
 		{
@@ -2164,7 +2187,7 @@ extern(C) // Callback for CPreferenceDialog
 			IupMessage( "CPreferenceDialog_btnOK_cb", toStringz( e.toString ) ); 
 		}
 
-		return IUP_CLOSE;
+		return IUP_DEFAULT;
 	}
 
 	private int CPreferenceDialog_colorChoose_cb( Ihandle* ih )

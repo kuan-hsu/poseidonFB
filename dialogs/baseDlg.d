@@ -10,18 +10,22 @@ class CBaseDialog
 	import tango.stdc.stringz, Integer = tango.text.convert.Integer;
 	
 	Ihandle*			_dlg;
-	Ihandle*			btnOK, btnCANCEL;//, btnAPPLY;
+	Ihandle*			btnAPPLY, btnOK, btnCANCEL;
 	IupString			titleString, parentName;
 	
-	Ihandle* createDlgButton( char[] buttonSize = "40x20" )
+	Ihandle* createDlgButton( char[] buttonSize = "40x20", char[] buttons = "oc" )
 	{
+		btnAPPLY = IupButton( GLOBAL.languageItems["apply"].toCString, null );
+		IupSetHandle( "btnAPPLY", btnAPPLY );
+		IupSetAttributes( btnAPPLY, toStringz( "SIZE=" ~ buttonSize ) );
+		
 		btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
 		IupSetHandle( "btnOK", btnOK );
-		IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );//,IMAGE=IUP_ActionOk" );
+		IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );
 		
 		btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
-		IupSetAttributes( btnCANCEL, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
+		IupSetAttributes( btnCANCEL, toStringz( "SIZE=" ~ buttonSize ) );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
 		
 		/+
@@ -30,13 +34,16 @@ class CBaseDialog
 		IupSetAttribute( btnAPPLY, "IMAGE", "IUP_NavigateRefresh" );
 		+/
 		
-		Ihandle* hBox_DlgButton = IupHbox( IupFill(), btnOK, btnCANCEL, null );
+		Ihandle* hBox_DlgButton = IupHbox( IupFill(), btnAPPLY, btnOK, btnCANCEL, null );
 		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ABOTTOM,GAP=5,MARGIN=1x0" );
 
 		IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK" );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CBaseDialog_btnCancel_cb );
 
+		if( Util.count( buttons, "a" ) == 0 ) IupDestroy( btnAPPLY );
+		if( Util.count( buttons, "o" ) == 0 ) IupDestroy( btnOK );
+		if( Util.count( buttons, "c" ) == 0 ) IupDestroy( btnCANCEL );
 
 		return hBox_DlgButton;
 	}

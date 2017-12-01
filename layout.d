@@ -44,13 +44,21 @@ void createExplorerWindow()
 	GLOBAL.dndDocumentZBox = IupZbox( dndEmptylabel, GLOBAL.documentTabs, null  );
 	
 	// RIGHT
-	GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, null );
+	if( GLOBAL.editorSetting01.RotateTabs == "ON" )
+		GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, null );
+	else
+		GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, GLOBAL.documentTabs_Sub );
+		
 	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=YES,SHOWGRIP=NO" );
 	IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
 	//IupSetAttribute( GLOBAL.documentTabs_Sub, "ACTIVE","YES" );
 
 	// BOTTOM
-	GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, null );
+	if( GLOBAL.editorSetting01.RotateTabs == "ON" )
+		GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, GLOBAL.documentTabs_Sub );
+	else
+		GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, null );
+		
 	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=YES,SHOWGRIP=LINES" );
 	IupSetAttribute( GLOBAL.documentSplit2, "ACTIVE","YES" );
 	

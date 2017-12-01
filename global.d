@@ -70,7 +70,7 @@ struct GLOBAL
 
 	import navcache;
 	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger;
-	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.idemessageDlg;
+	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.idemessageDlg, dialogs.preferenceDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
 
@@ -117,12 +117,12 @@ struct GLOBAL
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
 	static int					messageSplit_value = 800;
 
+	static CPreferenceDialog	preferenceDlg;
 	static CSearchDialog		searchDlg;
 	static CFindInFilesDialog	serachInFilesDlg;
 	static CCompilerHelpDialog	compilerHelpDlg;
 	static CIDEMessageDialog	IDEMessageDlg;
 	static Ihandle*				scrollICONHandle;
-	//static CArgOptionDialog		argsDlg;
 
 	static CStatusBar			statusBar;
 
