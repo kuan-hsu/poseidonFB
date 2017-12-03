@@ -3,9 +3,10 @@
 	open=Открыть
 	save=Сохранить
 	saveas=Сохранить как...
-	saveall=Сохранить все
+	saveall=Сохранить всё
 	close=Закрыть
-	closeall=Закрыть все
+	closeall=Закрыть всё
+	closealltabs=Закрыть все вкладки
 	recentfiles=Недавние файлы
 	recentprjs=Недавние проекты
 	clearall=Очистить все
@@ -132,6 +133,7 @@ parsersetting=Настройки парсера
 				showeol=Показывать символ завершения строки
 				showspacetab=Показывать пробелы и табуляции
 				autoinsertend=Автоматическая вставка завершения блока
+				autoclose=Автозакрытие (кавычки, скобки и т.д)
 				coloroutline=Выделять цветом пункты обзора проекта
 				showidemessage=Показать сообщения редактора
 				boldkeyword=Выделять служебные слова
@@ -253,6 +255,9 @@ output=Вывод
 
 'tab
 closeothers=Закрыть другие
+torighttabs=Переместить в дочернее окно
+tolefttabs=Переместить в главное окно
+rotatetabs=Разделить по горизонтали
 
 'popup window
 highlightmaker=Выделение...

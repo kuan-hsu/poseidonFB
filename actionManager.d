@@ -22,7 +22,7 @@ struct FileAction
 	{
 		for( int i = 0; i < data.length; ++ i )
 		{
-			if( data[i] < 0x80 )
+			if( (cast(int)data[i]) < 0x80 )
 			{
 				continue;
 			}
@@ -31,13 +31,13 @@ struct FileAction
 				bool bChecked;
 				for( int k = 1; k < 6; ++ k )
 				{
-					if( ( data[i] >> k ) == ( (254 >> k) - 1 ) )
+					if( ( (cast(int)data[i]) >> k ) == ( (254 >> k ) - 1 ) )
 					{
 						if( i <= data.length - ( 7 - k ) )
 						{
-							for( int j = 1; j < (7 - k); ++ j)
+							for( int j = 1; j < (7 - k ); ++ j)
 							{
-								if( data[i+j] >> 6 != 2 ) return false;
+								if( ( (cast(int)data[i+j]) ) >> 6 != 2 ) return false;
 							}
 
 							bChecked = true;
@@ -62,13 +62,13 @@ struct FileAction
 		
 		for( int i = 0; i < data.length; i += 2 )
 		{
-			if( data[i] == 0 )
+			if( (cast(int)data[i]) == 0 )
 			{
-				if( data[i+1] == 0x0a || data[i+1] == 0x0d ) countBE++;
+				if( (cast(int)data[i+1]) == 0x0a || (cast(int)data[i+1]) == 0x0d ) countBE++;
 			}
-			else if( data[i+1] == 0 )
+			else if( (cast(int)data[i+1]) == 0 )
 			{
-				if( data[i] == 0x0a || data[i] == 0x0d ) countLE++;
+				if( (cast(int)data[i]) == 0x0a || (cast(int)data[i]) == 0x0d ) countLE++;
 			}
 		}
 
@@ -82,14 +82,14 @@ struct FileAction
 		countBE = countLE = 0;
 		for( int i = 0; i < data.length; i += 2 )
 		{
-			if( data[i] == 0 ) countBE++;
+			if( (cast(int)data[i]) == 0 ) countBE++;
 		}
 
 		if( countBE > data.length / 3 ) return 1;
 
 		for( int i = 1; i < data.length; i += 2 )
 		{
-			if( data[i] == 0 ) countLE++;
+			if( (cast(int)data[i]) == 0 ) countLE++;
 		}
 
 		if( countLE > data.length / 3 ) return 2;
@@ -106,9 +106,9 @@ struct FileAction
 
 		for( int i = 0; i < data.length; i += 4 )
 		{
-			if( data[i] == 0 ) // BE
+			if( (cast(int)data[i]) == 0 ) // BE
 			{
-				if( data[i+1] <= 0x10 )
+				if( (cast(int)data[i+1]) <= 0x10 )
 				{
 					if( BELE == 2 ) return 0;
 					BELE = 1;
@@ -119,9 +119,9 @@ struct FileAction
 					return 0;
 				}
 			}
-			else if( data[i+3] == 0 ) //LE
+			else if( (cast(int)data[i+3]) == 0 ) //LE
 			{
-				if( data[i+2] <= 0x10 )
+				if( (cast(int)data[i+2]) <= 0x10 )
 				{
 					if( BELE == 1 ) return 0;
 					BELE = 2;
@@ -402,8 +402,8 @@ struct DocumentTabAction
 		if( ih != null )
 		{
 			IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE" , cast(char*) ih );
-			IupScintillaSendMessage( ih, 2380, 1, 0 ); // SCI_SETFOCUS 2380
-			//IupSetFocus( ih );
+			//IupScintillaSendMessage( ih, 2380, 1, 0 ); // SCI_SETFOCUS 2380
+			IupSetFocus( ih );
 			return IUP_CONTINUE;
 		}
 		
@@ -728,6 +728,8 @@ struct ScintillaAction
 			
 			// Set new tabitem to focus
 			if( DocumentTabAction.setFocus( _sci.getIupScintilla ) == IUP_DEFAULT ) return false;
+			
+			IupScintillaSendMessage(  _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 			if( lineNumber > -1 )
 			{
 				IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
@@ -1902,22 +1904,22 @@ struct SearchAction
 
 	static bool IsWholeWord( char[] lineData, char[] target, int pos )
 	{
-		char targetPLUS1, targetMinus1;
+		int targetPLUS1, targetMinus1;
 		
 		if( pos == 0 )
 		{
 			targetMinus1 = 32; // Ascii 32 = space
-			if( lineData.length == target.length ) targetPLUS1 = ' ';else targetPLUS1 = lineData[target.length];
+			if( lineData.length == target.length ) targetPLUS1 = 32;else targetPLUS1 = cast(int)lineData[target.length];
 		}
 		else if( pos + target.length == lineData.length )
 		{
-			targetMinus1 = lineData[pos-1];
+			targetMinus1 = cast(int)lineData[pos-1];
 			targetPLUS1 = 32; // Ascii 32 = space
 		}
 		else
 		{
-			targetMinus1 = lineData[pos-1];
-			targetPLUS1 = lineData[pos+target.length];
+			targetMinus1 = cast(int)lineData[pos-1];
+			targetPLUS1 = cast(int)lineData[pos+target.length];
 		}
 
 		//IupMessage( "Minus:Plus", toStringz( Integer.toString( targetMinus1 ) ~ ":" ~ Integer.toString( targetPLUS1 ) ) );

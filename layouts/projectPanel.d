@@ -126,11 +126,11 @@ class CProjectTree
 		toBoldTitle( tree, 0 );
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
-		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_ExecuteLeaf_cb );
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
-		IupSetCallback( tree, "BUTTON_CB", cast(Icallback)  function( Ihandle* ih )
+		IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) function( Ihandle* ih )
 		{
 			return IUP_DEFAULT;
 		});
@@ -761,7 +761,8 @@ extern(C)
 						{
 							if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" ) IupSetAttributeId( ih, "MARKED", i, "NO" );
 						}
-					}					
+					}
+					DocumentTabAction.setFocus( ScintillaAction.getActiveIupScintilla() ); 
 				}
 				else
 				{
@@ -799,6 +800,27 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	private int CProjectTree_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 1 )
+		{
+			if( button == IUP_BUTTON1 ) // Left Click
+			{
+				char[] _s = fromStringz( status ).dup;
+				if( _s.length > 5 )
+				{
+					if( _s[5] == 'D' ) // Double Click
+					{
+						CProjectTree_Open_cb( ih );
+						return IUP_IGNORE;
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
+	/+
 	// Leaf Node has been Double-Click
 	private int CProjectTree_ExecuteLeaf_cb( Ihandle *ih, int id )
 	{
@@ -857,6 +879,7 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
+	+/
 
 	private int CProjectTree_NodeRemoved_cb( Ihandle *ih, void* userdata )
 	{
@@ -1407,13 +1430,15 @@ extern(C)
 				}
 			}
 			
+			int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+			/+
 			// Move the tabDocument 
 			int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 			char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 			scope fp = new FilePath( fullPath );
 			char[] ext = lowerCase( fp.ext );
 			if( ext == "bi" || ext == "bas" ) actionManager.ScintillaAction.openFile( fullPath.dup );
-			
+			+/
 			// Erase Project Treeitems And Left Only One Item
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );

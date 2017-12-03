@@ -897,8 +897,20 @@ extern(C)
 		Ihandle* _documentTabs = IupGetParent( ih );
 		if( _documentTabs != null )
 		{
-			if( GLOBAL.activeDocumentTabs != _documentTabs ) DocumentTabAction.tabChangePOS( _documentTabs, IupGetInt( _documentTabs, "VALUEPOS" ) );
-			DocumentTabAction.setActiveDocumentTabs( _documentTabs );
+			if( GLOBAL.activeDocumentTabs != _documentTabs )
+			{
+				DocumentTabAction.tabChangePOS( _documentTabs, IupGetInt( _documentTabs, "VALUEPOS" ) );
+				DocumentTabAction.setActiveDocumentTabs( _documentTabs );
+			}
+			else
+			{
+				auto cSci = ScintillaAction.getCScintilla( ih );
+				if( cSci !is null )
+				{
+					IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
+					ScintillaAction.toTreeMarked( cSci.getFullPath, 2 );
+				}
+			}
 		}
 		
 		
@@ -1754,7 +1766,8 @@ extern(C)
 							{
 								int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 								if( id < count - 1 ) ++id; else id = 0;
-								IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+								//IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+								DocumentTabAction.setFocus( IupGetChild( GLOBAL.activeDocumentTabs, id ) );
 								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 							}
 							return IUP_IGNORE;
@@ -1769,7 +1782,8 @@ extern(C)
 							{
 								int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 								if( id > 0 ) --id; else id = --count;
-								IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+								//IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
+								DocumentTabAction.setFocus( IupGetChild( GLOBAL.activeDocumentTabs, id ) );
 								actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 							}
 							return IUP_IGNORE;
@@ -2429,9 +2443,71 @@ extern(C)
 			}
 			else
 			{
+				bool bSkip;
+				//char[]	documentTabs1_CLIENTSIZE	= fromStringz( IupGetAttribute( GLOBAL.documentTabs, "CLIENTSIZE" ) );
+				char[]	documentTabs1_RASTERSIZE	= fromStringz( IupGetAttribute( GLOBAL.documentTabs, "RASTERSIZE" ) );				
+				//char[]	documentTabs2_CLIENTSIZE	= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "CLIENTSIZE" ) );
+				char[]	documentTabs2_RASTERSIZE	= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );				
+				char[]	tabs1Pos					= fromStringz( IupGetAttribute( GLOBAL.documentTabs, "SCREENPOSITION" ) );
+				//char[]	tabs2Pos					= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "SCREENPOSITION" ) );
+				char[]	screenPos					= fromStringz( IupGetGlobal( "CURSORPOS" ) );
+				if( screenPos.length )
+				{
+					int crossPos = Util.index( screenPos, "x" );
+					if( crossPos < screenPos.length )
+					{
+						int		screenX = Integer.atoi( screenPos[0..crossPos] );
+						int		screenY = Integer.atoi( screenPos[crossPos+1..$] );
+						int		tabs1X, tabs1Y;
+						
+						if( tabs1Pos.length )
+						{
+							int commaPos = Util.index( tabs1Pos, "," );
+							if( commaPos < tabs1Pos.length )
+							{
+								tabs1X = Integer.atoi( tabs1Pos[0..commaPos] );
+								tabs1Y = Integer.atoi( tabs1Pos[commaPos+1..$] );
+							}
+						}						
+						
+						int		title1_H, RASTER1_W, RASTER1_H, CLIENT1_H; 
+						
+						//if( documentTabs1_CLIENTSIZE.length && documentTabs1_RASTERSIZE.length )
+						if( documentTabs1_RASTERSIZE.length )
+						{
+							//crossPos = Util.index( documentTabs1_CLIENTSIZE, "x" );
+							//if( crossPos < documentTabs1_CLIENTSIZE.length ) CLIENT1_H = Integer.atoi( documentTabs1_CLIENTSIZE[crossPos+1..$] );
+							
+							crossPos = Util.index( documentTabs1_RASTERSIZE, "x" );
+							if( crossPos < documentTabs1_RASTERSIZE.length )
+							{
+								RASTER1_W = Integer.atoi( documentTabs1_RASTERSIZE[0..crossPos] );
+								RASTER1_H = Integer.atoi( documentTabs1_RASTERSIZE[crossPos+1..$] );
+								//title1_H = RASTER1_H - CLIENT1_H; 
+							}
+						}
+						
+						if( screenX > tabs1X && screenX < tabs1X + RASTER1_W )
+						{
+							if( screenY > tabs1Y && screenY < tabs1Y + RASTER1_H )
+							{
+								DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
+								bSkip = true;
+							}
+						}
+
+						if( !bSkip )
+						{
+							if( IupGetInt( GLOBAL.documentSplit, "VALUE" ) != 1000 || IupGetInt( GLOBAL.documentSplit2, "VALUE" ) != 1000 )
+							{
+								DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs_Sub );
+							}
+						}
+					}
+				}
+				
 				actionManager.ScintillaAction.openFile( f.toString  );
 				actionManager.ScintillaAction.updateRecentFiles( f.toString );
-				
 				if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 			}
 		}

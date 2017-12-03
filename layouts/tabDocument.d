@@ -146,21 +146,6 @@ extern(C)
 					
 					if( dragHandle != null )
 					{
-						/*
-						if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
-						{
-							IupAppend( GLOBAL.documentSplit, GLOBAL.documentTabs_Sub );
-							IupMap( GLOBAL.documentTabs_Sub );
-							IupRefresh( GLOBAL.documentSplit );
-						}
-						else
-						{
-							IupAppend( GLOBAL.documentSplit2, GLOBAL.documentTabs_Sub );
-							IupMap( GLOBAL.documentTabs_Sub );
-							IupRefresh( GLOBAL.documentSplit2 );
-						}
-						*/
-						
 						IupReparent( dragHandle, GLOBAL.documentTabs_Sub, null );
 						IupRefresh( GLOBAL.documentTabs_Sub );
 						
@@ -186,6 +171,7 @@ extern(C)
 							}
 						}
 						DocumentTabAction.tabChangePOS( GLOBAL.documentTabs_Sub, newDocumentPos );
+						IupSetFocus( dragHandle );
 					}				
 				}
 				
@@ -232,6 +218,7 @@ extern(C)
 							}
 						}
 						DocumentTabAction.tabChangePOS( GLOBAL.documentTabs, newDocumentPos );
+						IupSetFocus( dragHandle );
 					}				
 				}
 				
@@ -537,12 +524,13 @@ extern(C)
 									DocumentTabAction.updateTabsLayout();
 								}
 							}
+							IupSetFocus( dragHandle );
 						}
 					}
 				}
 
 				GLOBAL.tabDocumentPos = -1;
-				GLOBAL.dragDocumentTabs = null;				
+				GLOBAL.dragDocumentTabs = null;
 			}
 		}
 		else

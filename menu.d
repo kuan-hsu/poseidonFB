@@ -618,7 +618,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.341)\nBy Kuan Hsu (Taiwan)\n2017.12.02" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.342)\nBy Kuan Hsu (Taiwan)\n2017.12.03" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1135,8 +1135,8 @@ extern(C)
 			if( ih != null )
 			{
 				char[] targetText;
-				targetText = fromStringz(IupGetAttribute( ih, toStringz("SELECTEDTEXT") ));
-				GLOBAL.searchDlg.show( targetText );
+				targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );
+				if( targetText.length ) GLOBAL.searchDlg.show( targetText.dup ); else GLOBAL.searchDlg.show( null );
 			}
 		}
 	}
@@ -1147,10 +1147,11 @@ extern(C)
 		{
 			char[] targetText;
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
-			if( ih !is null ) targetText = fromStringz(IupGetAttribute( ih, toStringz("SELECTEDTEXT") ));
-
-			//if( fromStringz(IupGetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE" )) == "NO" ) GLOBAL.serachInFilesDlg.show( targetText );
-			GLOBAL.serachInFilesDlg.show( targetText );
+			if( ih !is null ) 
+			{
+				targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );
+				if( targetText.length) GLOBAL.serachInFilesDlg.show( targetText.dup ); else GLOBAL.serachInFilesDlg.show( null );
+			}
 		}
 
 	}

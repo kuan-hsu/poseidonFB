@@ -2302,47 +2302,50 @@ struct AutoComplete
 								{
 									foreach( char[] targetText; Util.split( _s.toDString, " " ) )
 									{
-										if( keyWord == targetText )
+										if( keyWord.length )
 										{
-											keyWord = lowerCase( keyWord );
-											if ( keyWord[0] >= 'a' && keyWord[0] <= 'z' ) keyWord[0] = cast(char) ( keyWord[0] - 32 );
-											
-											version(Windows)
+											if( keyWord == targetText )
 											{
-												if( GLOBAL.htmlHelp != null )
+												keyWord = lowerCase( keyWord );
+												if ( keyWord[0] >= 'a' && keyWord[0] <= 'z' ) keyWord[0] = cast(char) ( cast(int)keyWord[0] - 32 );
+												
+												version(Windows)
 												{
-													wchar[] keyWord16 = UTF.toString16( keyWord );
-													wchar[]	_path =  UTF.toString16( GLOBAL.manualPath.toDString );
-													
-													HH_AKLINK	akLink;
-													akLink.cbStruct = HH_AKLINK.sizeof;
-													akLink.fReserved = 0;
-													akLink.pszKeywords = toString16z( keyWord16 );
-													akLink.fIndexOnFail = 0;
-													GLOBAL.htmlHelp( null, toString16z( _path ), 0x000D, cast(uint) &akLink ); //#define HH_KEYWORD_LOOKUP       &h000D
+													if( GLOBAL.htmlHelp != null )
+													{
+														wchar[] keyWord16 = UTF.toString16( keyWord );
+														wchar[]	_path =  UTF.toString16( GLOBAL.manualPath.toDString );
+														
+														HH_AKLINK	akLink;
+														akLink.cbStruct = HH_AKLINK.sizeof;
+														akLink.fReserved = 0;
+														akLink.pszKeywords = toString16z( keyWord16 );
+														akLink.fIndexOnFail = 0;
+														GLOBAL.htmlHelp( null, toString16z( _path ), 0x000D, cast(uint) &akLink ); //#define HH_KEYWORD_LOOKUP       &h000D
+													}
+													else
+													{
+														char[]	keyPg;
+														
+														switch( lowerCase( keyWord ) )
+														{
+															case "select":			keyPg = "::KeyPgSelectcase.html";			break;
+															case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
+															default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
+														}											
+
+														//IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+														IupExecute( "hh", toStringz( "\"its:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+													}
 												}
 												else
 												{
-													char[]	keyPg;
-													
-													switch( lowerCase( keyWord ) )
-													{
-														case "select":			keyPg = "::KeyPgSelectcase.html";			break;
-														case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
-														default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
-													}											
-
-													//IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
-													IupExecute( "hh", toStringz( "\"its:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+													IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );
+													// "kchmviewer --sindex %s /chm-path
 												}
-											}
-											else
-											{
-												IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );
-												// "kchmviewer --sindex %s /chm-path
-											}
 
-											return;
+												return;
+											}
 										}
 									}
 								}

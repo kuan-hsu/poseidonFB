@@ -187,7 +187,7 @@ class CSearchDialog : CBaseDialog
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog
 	{
-		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord.dup ) );
+		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord.dup ) );else IupSetAttribute( listFind, "VALUE", "" );
 		IupShow( _dlg );
 		return null;
 	}
