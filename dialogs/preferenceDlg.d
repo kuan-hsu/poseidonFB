@@ -508,7 +508,7 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ACENTER,GAPLIN=0,GAPCOL=10,MARGIN=0x5,SIZELIN=0,HOMOGENEOUSCOL=YES" );		
+		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ACENTER,GAPLIN=0,GAPCOL=10,MARGIN=0x5,SIZELIN=0,HOMOGENEOUSCOL=YES,NAME=gridbox_Maker" );
 		
 		
 		Ihandle* radioKeywordCase0 = IupToggle( GLOBAL.languageItems["none"].toCString, null );
@@ -1459,6 +1459,8 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
 		
+		IupSetHandle( "PreferenceHandle", getIhandle );
+		
 		createLayout();
 		
 		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
@@ -1616,7 +1618,7 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			GLOBAL.compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "compilerPath_Handle" );
-			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", toStringz( fileName ) );
+			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.compilerFullPath.toCString );
 		}
 		else
 		{
@@ -1635,7 +1637,7 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			GLOBAL.x64compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "x64compilerPath_Handle" );
-			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", toStringz( fileName ) );
+			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.x64compilerFullPath.toCString );
 		}
 		else
 		{
@@ -1654,7 +1656,7 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			GLOBAL.debuggerFullPath = fileName;
 			Ihandle* _debuggerPath_Handle = IupGetHandle( "debuggerPath_Handle" );
-			if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", toStringz( fileName ) );
+			if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", GLOBAL.debuggerFullPath.toCString );
 		}
 		else
 		{
@@ -1977,79 +1979,78 @@ extern(C) // Callback for CPreferenceDialog
 			}
 			
 
-			GLOBAL.editColor.caretLine					= IupGetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR" );
-			GLOBAL.editColor.cursor						= IupGetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR" );
+			GLOBAL.editColor.caretLine					<< IupGetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR" );
+			GLOBAL.editColor.cursor						<< IupGetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR" );
 
-			GLOBAL.editColor.selectionFore				= IupGetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR" );
-			GLOBAL.editColor.selectionBack				= IupGetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR" );
-			GLOBAL.editColor.linenumFore				= IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR" );
-			GLOBAL.editColor.linenumBack				= IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" );
-			GLOBAL.editColor.fold						= IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" );
+			GLOBAL.editColor.selectionFore				<< IupGetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR" );
+			GLOBAL.editColor.selectionBack				<< IupGetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR" );
+			GLOBAL.editColor.linenumFore				<< IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR" );
+			GLOBAL.editColor.linenumBack				<< IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" );
+			GLOBAL.editColor.fold						<< IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" );
 			version(Windows)
 				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" );
 			else
 				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" );
 			
-			GLOBAL.editColor.currentWord				= IupGetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR" );
+			GLOBAL.editColor.currentWord				<< IupGetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR" );
 			version(Windows)
 				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE" );
 			else
 				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE" );
 				
 				
-			GLOBAL.editColor.scintillaFore				= IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.scintillaBack				= IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_COMMENT_Fore			= IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_COMMENT_Back			= IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_NUMBER_Fore			= IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_NUMBER_Back			= IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_STRING_Fore			= IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_STRING_Back			= IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore	= IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_PREPROCESSOR_Back	= IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_OPERATOR_Fore		= IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_OPERATOR_Back		= IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_IDENTIFIER_Fore		= IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_IDENTIFIER_Back		= IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore	= IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back	= IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.prjTitle					= IupGetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR" );
-			GLOBAL.editColor.prjSourceType				= IupGetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR" );
+			GLOBAL.editColor.scintillaFore				<< IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.scintillaBack				<< IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENT_Fore			<< IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENT_Back			<< IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_NUMBER_Fore			<< IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_NUMBER_Back			<< IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_STRING_Fore			<< IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_STRING_Back			<< IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore	<< IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_PREPROCESSOR_Back	<< IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_OPERATOR_Fore		<< IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_OPERATOR_Back		<< IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_IDENTIFIER_Fore		<< IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_IDENTIFIER_Back		<< IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore	<< IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back	<< IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.prjTitle					<< IupGetAttribute( IupGetHandle( "btnPrjTitle" ), "BGCOLOR" );
+			GLOBAL.editColor.prjSourceType				<< IupGetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "BGCOLOR" );
 			
 			
-			GLOBAL.editColor.projectFore				= IupGetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.projectBack				= IupGetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.outlineFore				= IupGetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.outlineBack				= IupGetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.filelistFore				= IupGetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.filelistBack				= IupGetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.outputFore					= IupGetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.outputBack					= IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.searchFore					= IupGetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.searchBack					= IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.projectFore				<< IupGetAttribute( IupGetHandle( "btnPrj_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.projectBack				<< IupGetAttribute( IupGetHandle( "btnPrj_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.outlineFore				<< IupGetAttribute( IupGetHandle( "btnOutline_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.outlineBack				<< IupGetAttribute( IupGetHandle( "btnOutline_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.filelistFore				<< IupGetAttribute( IupGetHandle( "btnFilelist_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.filelistBack				<< IupGetAttribute( IupGetHandle( "btnFilelist_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.outputFore					<< IupGetAttribute( IupGetHandle( "btnOutput_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.outputBack					<< IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.searchFore					<< IupGetAttribute( IupGetHandle( "btnSearch_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.searchBack					<< IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "BGCOLOR" );
 			
-			GLOBAL.editColor.errorFore					= IupGetAttribute( IupGetHandle( "btnError_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.errorBack					= IupGetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.warningFore				= IupGetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.warringBack				= IupGetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR" );
-			GLOBAL.editColor.braceFore					= IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR" );
-			GLOBAL.editColor.braceBack					= IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.errorFore					<< IupGetAttribute( IupGetHandle( "btnError_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.errorBack					<< IupGetAttribute( IupGetHandle( "btnError_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.warningFore				<< IupGetAttribute( IupGetHandle( "btnWarning_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.warringBack				<< IupGetAttribute( IupGetHandle( "btnWarning_BG" ), "BGCOLOR" );
+			GLOBAL.editColor.braceFore					<< IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "BGCOLOR" );
+			GLOBAL.editColor.braceBack					<< IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "BGCOLOR" );
 			
-			GLOBAL.editColor.maker[0]					= IupGetAttribute( IupGetHandle( "btnMarker0Color" ), "BGCOLOR" );
-			GLOBAL.editColor.maker[1]					= IupGetAttribute( IupGetHandle( "btnMarker1Color" ), "BGCOLOR" );
-			GLOBAL.editColor.maker[2]					= IupGetAttribute( IupGetHandle( "btnMarker2Color" ), "BGCOLOR" );
-			GLOBAL.editColor.maker[3]					= IupGetAttribute( IupGetHandle( "btnMarker3Color" ), "BGCOLOR" );
-			
+			GLOBAL.editColor.maker[0]					<< IupGetAttribute( IupGetHandle( "btnMarker0Color" ), "BGCOLOR" );
+			GLOBAL.editColor.maker[1]					<< IupGetAttribute( IupGetHandle( "btnMarker1Color" ), "BGCOLOR" );
+			GLOBAL.editColor.maker[2]					<< IupGetAttribute( IupGetHandle( "btnMarker2Color" ), "BGCOLOR" );
+			GLOBAL.editColor.maker[3]					<< IupGetAttribute( IupGetHandle( "btnMarker3Color" ), "BGCOLOR" );
 
 			GLOBAL.projectTree.changeColor();
 			GLOBAL.outlineTree.changeColor();
 			GLOBAL.fileListTree.changeColor();
 			
 			// GLOBAL.editColor.keyWord is IupString class
-			GLOBAL.editColor.keyWord[0]					= IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" );
-			GLOBAL.editColor.keyWord[1]					= IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" );
-			GLOBAL.editColor.keyWord[2]					= IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR" );
-			GLOBAL.editColor.keyWord[3]					= IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR" );
+			GLOBAL.editColor.keyWord[0]					<< IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "BGCOLOR" );
+			GLOBAL.editColor.keyWord[1]					<< IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "BGCOLOR" );
+			GLOBAL.editColor.keyWord[2]					<< IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "BGCOLOR" );
+			GLOBAL.editColor.keyWord[3]					<< IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "BGCOLOR" );
 			
 			// Set GLOBAL.messagePanel Color
 			GLOBAL.messagePanel.applyColor();
@@ -2069,9 +2070,9 @@ extern(C) // Callback for CPreferenceDialog
 
 			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 
-			GLOBAL.compilerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
-			GLOBAL.x64compilerFullPath					= fromStringz( IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" ) ).dup;
-			GLOBAL.debuggerFullPath						= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
+			GLOBAL.compilerFullPath						= IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" );
+			GLOBAL.x64compilerFullPath					= IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" );
+			GLOBAL.debuggerFullPath						= IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" );
 			//GLOBAL.defaultOption						= fromStringz( IupGetAttribute( IupGetHandle( "defaultOption_Handle" ), "VALUE" ) ).dup;
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
@@ -2181,6 +2182,8 @@ extern(C) // Callback for CPreferenceDialog
 			IDECONFIG.save();
 			*/
 			IDECONFIG.saveINI();
+			
+			IupRefreshChildren( IupGetHandle( "PreferenceHandle" ) );
 		}
 		catch( Exception e )
 		{

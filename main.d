@@ -249,6 +249,8 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 
+
+	IupSetGlobal( "IMAGEAUTOSCALE", "DPI" );
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
 	version(Windows) IupSetFunction( "GLOBALWHEEL_CB", cast(Icallback) &GlobalWHEEL_CB );

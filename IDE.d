@@ -496,19 +496,19 @@ struct IDECONFIG
 			if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
 				GLOBAL.editorSetting01.ExplorerSplit = Integer.toString( GLOBAL.explorerSplit_value );
 			else
-				GLOBAL.editorSetting01.ExplorerSplit = fromStringz( IupGetAttribute( GLOBAL.explorerSplit, "VALUE" ) ).dup;
+				GLOBAL.editorSetting01.ExplorerSplit = IupGetInt( GLOBAL.explorerSplit, "VALUE" ) <= 0 ? "180" : fromStringz( IupGetAttribute( GLOBAL.explorerSplit, "VALUE" ) ).dup;
 			
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
 				GLOBAL.editorSetting01.MessageSplit = Integer.toString( GLOBAL.messageSplit_value ).dup;
 			else
-				GLOBAL.editorSetting01.MessageSplit = fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) ).dup;
+				GLOBAL.editorSetting01.MessageSplit = IupGetInt( GLOBAL.messageSplit, "VALUE" ) >= 1000 ? "850" : fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) ).dup;
 
 			if( fromStringz( IupGetAttribute( GLOBAL.menuFistlistWindow, "VALUE" ) ) == "OFF" )
 				GLOBAL.editorSetting01.FileListSplit = Integer.toString( GLOBAL.fileListSplit_value ).dup;
 			else
-				GLOBAL.editorSetting01.MessageSplit = fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) ).dup;
-			
-			GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) ).dup;
+				GLOBAL.editorSetting01.FileListSplit = IupGetInt( GLOBAL.fileListSplit, "VALUE" ) >= 1000 ? "900" : fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) ).dup;
+				
+			//GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) ).dup;
 			
 			GLOBAL.editorSetting01.OutlineWindow = fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ).dup;
 			GLOBAL.editorSetting01.MessageWindow = fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ).dup;

@@ -333,7 +333,8 @@ class CScintilla
 		{
 			if( FileAction.saveFile( fullPath.toDString, getText(), cast(Encoding) encoding ) )
 			{
-				if( ScintillaAction.getModify( sci ) != 0 )
+				//if( ScintillaAction.getModify( sci ) != 0 )
+				if( ScintillaAction.getModifyByTitle( this ) )
 				{
 					IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014
 					// Auto trigger SAVEPOINT_CB........
@@ -1074,7 +1075,10 @@ extern(C)
 				IupSetCallback( _clearBuffer, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					auto sci = ScintillaAction.getActiveIupScintilla;
-					if( sci != null ) IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
+					if( sci != null )
+					{
+						IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
+					}
 					
 					Ihandle* __undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Undo" );
 					if( __undo != null ) IupSetAttribute( __undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174

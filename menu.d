@@ -618,7 +618,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.342)\nBy Kuan Hsu (Taiwan)\n2017.12.03" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.343)\nBy Kuan Hsu (Taiwan)\n2017.12.05" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1290,6 +1290,8 @@ extern(C)
 
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "NO" );
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
+			Ihandle* SecondChild = IupGetChild( GLOBAL.explorerSplit, 1 );
+			IupSetAttribute( SecondChild, "ACTIVE", "YES" );			
 			Ihandle* thirdChild = IupGetChild( GLOBAL.explorerSplit, 2 );
 			IupSetAttribute( thirdChild, "ACTIVE", "YES" );
 		}
@@ -1356,6 +1358,8 @@ extern(C)
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
 			Ihandle* SecondChild = IupGetChild( GLOBAL.messageSplit, 1 );
 			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
+			Ihandle* thirdChild = IupGetChild( GLOBAL.messageSplit, 2 );
+			IupSetAttribute( thirdChild, "ACTIVE", "YES" );
 		}
 		else
 		{
@@ -1381,6 +1385,8 @@ extern(C)
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
 			Ihandle* SecondChild = IupGetChild( GLOBAL.fileListSplit, 1 );
 			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
+			Ihandle* thirdChild = IupGetChild( GLOBAL.fileListSplit, 2 );
+			IupSetAttribute( thirdChild, "ACTIVE", "YES" );
 		}
 		else
 		{

@@ -84,7 +84,10 @@ class CToolBar
 		IupSetCallback( btnClearUndoBuffer, "ACTION", cast(Icallback) function()
 		{
 			auto sci = ScintillaAction.getActiveIupScintilla;
-			if( sci != null ) IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
+			if( sci != null )
+			{
+				IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
+			}
 			
 			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Undo" );
 			if( _undo != null ) IupSetAttribute( _undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174

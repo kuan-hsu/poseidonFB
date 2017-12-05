@@ -848,6 +848,19 @@ struct ScintillaAction
 		openFile( fileName, lineNum );
 	}
 	
+	static bool getModifyByTitle( CScintilla cSci )
+	{
+		if( cSci !is null )
+		{
+			char[] _title = cSci.getTitle();
+			if( _title.length )
+			{
+				if( _title[0] == '*' ) return true;
+			}
+		}
+		return false;
+	}
+	
 	static int getModify( CScintilla cSci )
 	{
 		if( cSci !is null )	return IupScintillaSendMessage( cSci.getIupScintilla, 2159, 0, 0 ); // SCI_GETMODIFY = 2159
@@ -900,7 +913,8 @@ struct ScintillaAction
 			CScintilla	cSci		= GLOBAL.scintillaManager[upperCase(fullPath)];
 			Ihandle*	iupSci		= cSci.getIupScintilla;
 
-			if( ScintillaAction.getModify( iupSci ) != 0 )
+			//if( ScintillaAction.getModify( iupSci ) != 0 )
+			if( ScintillaAction.getModifyByTitle( cSci ) )
 			{
 				if( pos > -1 ) IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , pos ); 
 				scope cStringDocument = new IupString( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
@@ -953,7 +967,8 @@ struct ScintillaAction
 				
 				if( DocumentTabAction.getDocumentTabs( iupSci ) != GLOBAL.activeDocumentTabs ) continue;
 				
-				if( ScintillaAction.getModify( iupSci ) != 0 )
+				//if( ScintillaAction.getModify( iupSci ) != 0 )
+				if( ScintillaAction.getModifyByTitle( cSci ) )
 				{
 					IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) iupSci );
 					
@@ -1031,7 +1046,8 @@ struct ScintillaAction
 			
 			if( DocumentTabAction.getDocumentTabs( iupSci ) != _activeTabs ) continue;
 			
-			if( ScintillaAction.getModify( iupSci ) != 0 )
+			//if( ScintillaAction.getModify( iupSci ) != 0 )
+			if( ScintillaAction.getModifyByTitle( cSci ) )
 			{
 				IupSetAttribute( _activeTabs, "VALUE_HANDLE", cast(char*) iupSci );
 				
@@ -1107,7 +1123,8 @@ struct ScintillaAction
 		
 		try
 		{
-			if( ScintillaAction.getModify( cSci.getIupScintilla ) != 0 || bForce )
+			//if( ScintillaAction.getModify( cSci.getIupScintilla ) != 0 || bForce )
+			if( ScintillaAction.getModifyByTitle( cSci ) || bForce )
 			{
 				char[] fullPath = cSci.getFullPath();
 
@@ -1223,30 +1240,29 @@ struct ScintillaAction
 		for( int i = 0; i < IupGetChildCount( GLOBAL.activeDocumentTabs ); i++ )
 		{
 			Ihandle* _child = IupGetChild( GLOBAL.activeDocumentTabs, i );
-
-			if( ScintillaAction.getModify( _child ) != 0 )
+			
+			auto _cSci = ScintillaAction.getCScintilla( _child );
+			
+			if( _cSci !is null )
 			{
-				foreach( CScintilla _sci; GLOBAL.scintillaManager )
+				if( ScintillaAction.getModifyByTitle( _cSci ) )
 				{
-					if( _sci.getIupScintilla == _child )
+					if( _cSci.getFullPath.length >= 7 )
 					{
-						if( _sci.getFullPath.length >= 7 )
+						if( _cSci.getFullPath[0..7] == "NONAME#" )
 						{
-							if( _sci.getFullPath[0..7] == "NONAME#" )
-							{
-								NoNameGroup ~= _sci;
-								/*
-								IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) _child );
-								actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), false, false );
-								*/
-								break;
-							}
+							NoNameGroup ~= _cSci;
+							/*
+							IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) _child );
+							actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), false, false );
+							*/
+							break;
 						}
-						
-						_sci.saveFile();
-						GLOBAL.outlineTree.refresh( _sci );
-						break;
 					}
+					
+					_cSci.saveFile();
+					GLOBAL.outlineTree.refresh( _cSci );
+					break;
 				}
 			}
 		}

@@ -51,6 +51,21 @@ public:
 	{
 		convert( fromStringz( rhs ).dup );
 	}
+	
+	void opShl( char* rhs )
+	{
+		_DString = fromStringz( rhs );
+		
+		if( rhs == _CstringPointer ) return;
+
+		if( strlen( rhs ) == strlen( _CstringPointer ) - 1 )
+		{
+			free( _CstringPointer );
+			int _len = strlen( rhs );
+			_CstringPointer = cast(char*)calloc( 1, _len + 1 );
+			memcpy( _CstringPointer, rhs, _len );			
+		}
+	}
 
 	char* convert( char[] Dstring )
 	{

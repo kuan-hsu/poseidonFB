@@ -471,7 +471,8 @@ struct ExecuterAction
 			{
 				if( upperCase(s) in GLOBAL.scintillaManager )
 				{
-					if( ScintillaAction.getModify( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
+					//if( ScintillaAction.getModify( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
 					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
 				}
 			}
@@ -481,7 +482,8 @@ struct ExecuterAction
 				txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
 				if( upperCase(s) in GLOBAL.scintillaManager )
 				{
-					if( ScintillaAction.getModify( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
+					//if( ScintillaAction.getModify( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
 					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
 				}
 			}
