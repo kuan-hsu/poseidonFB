@@ -55,6 +55,6 @@
   </Sources>
   <Includes/>
   <Others>
-    <Name>poseidonFB_ dpiaware.res</Name>
+    <Name>poseidonFB.res</Name>
   </Others>
 </Project>

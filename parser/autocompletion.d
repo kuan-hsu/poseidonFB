@@ -1384,7 +1384,7 @@ struct AutoComplete
 					{
 						char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
 
-						if( _s[0] == 13 || _s == ":" || _s == "\n" )
+						if( cast(int) _s[0] == 13 || _s == ":" || _s == "\n" )
 						{
 							break;
 						}
@@ -1463,7 +1463,7 @@ struct AutoComplete
 								}
 							}
 							
-							if( beforeWord == "eralced" || beforeWord == "dne" || beforeWord == "=" ) bReSearch = true; else bReSearch = false;
+							if( beforeWord == "eralced" || beforeWord == "dne" || beforeWord == "=" || beforeWord == "sa" ) bReSearch = true; else bReSearch = false;
 							break;
 						}
 					}
@@ -2829,6 +2829,96 @@ struct AutoComplete
 		// #define SCI_LINEFROMPOSITION 2166
 		lin--; // ScintillaAction.getLinefromPos( iupSci, POS ) ) begin from 0
 		
+		bool _isHead( int _pos )
+		{
+			char[] _word;
+			
+			while( --_pos >= 0 )
+			{
+				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", _pos ) );
+				
+				int key = cast(int) s[0];
+				if( key >= 0 && key <= 127 )
+				{
+					if( s == ":" || s == "\n" ) break;
+					_word ~= s;
+				}
+			}
+			
+			//IupMessage( "",toStringz( "*"~_word~"*" ));
+			if( Util.trim( _word ).length ) return false;
+			
+			return true;
+		}
+		
+		bool _isTail( int _pos )
+		{
+			char[] _word;
+			
+			while( _pos < cast(int) IupScintillaSendMessage( iupSci, 2136, lin, 0 ) ) // SCI_GETLINEENDPOSITION 2136 )
+			{
+				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", ++_pos ) );
+				int key = cast(int) s[0];
+				if( key >= 0 && key <= 127 )
+				{
+					if( s == ":" || s == "\n" ) break;
+					_word ~= s;
+				}
+			}
+			
+			//IupMessage( "",toStringz( "*"~_word~"*" ));
+			if( Util.trim( _word ).length ) return false;
+			
+			return true;
+		}
+		
+		/*
+			target....	or	target	= -1 ( _checkType )
+			target		= 0 ( _checkType )
+			target....	= 1 ( _checkType )
+		....target		= 2 ( _checkType )
+		....target....	= 3 ( _checkType )
+		*/
+		bool _check( char[] target, int _checkType )
+		{
+			int POS = skipCommentAndString( iupSci, pos, target, 0 );
+			if( POS > -1 )
+			{
+				if( lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
+				{
+					if( _checkType == -1 )
+					{
+						if( _isHead( POS ) ) return true; else return false;
+					}
+					else if( _checkType == 0 )
+					{
+						if( !_isTail( POS + target.length ) ) return false;
+						if( !_isHead( POS ) ) return false;
+					}
+					
+					if( _checkType & 1 )
+					{
+						if( _isTail( POS + target.length ) ) return false;
+					}
+					
+					if( _checkType & 2 )
+					{
+						if( _isHead( POS ) ) return false;
+					}
+					else
+					{
+						if( !_isHead( POS ) ) return false;
+					}
+
+					return true;
+				}
+			}
+			
+			return false;
+		}
+		
+
+		
 		int POS		= getProcedurePos( iupSci, pos, "sub" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end sub";
 
@@ -2859,14 +2949,13 @@ struct AutoComplete
 		POS		= getProcedurePos( iupSci, pos, "if" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end if";
 		
-		POS		= getProcedurePos( iupSci, pos, "with" );
-		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end with";
-
+		/+
 		POS		= getProcedurePos( iupSci, pos, "select case" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end select";
 
 		POS		= getProcedurePos( iupSci, pos, "namespace" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end namespace";
+		+/
 
 		POS		= getProcedurePos( iupSci, pos, "type" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end type";
@@ -2880,41 +2969,15 @@ struct AutoComplete
 		POS		= getProcedurePos( iupSci, pos, "operator" );
 		if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end operator";
 		 
-
-		POS			= skipCommentAndString( iupSci, pos, "enum", 0 );
-		int ENDPOS	= skipCommentAndString( iupSci, pos, "end enum", 0 );
-		if( POS > -1 && POS != ENDPOS + 4)
-			if( lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end enum";
-
-		POS		= skipCommentAndString( iupSci, pos, "scope", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "end scope", 0 );
-		if( POS > -1 && POS != ENDPOS + 4)
-			if( lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "end scope";
-
-		POS		= skipCommentAndString( iupSci, pos, "for", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "exit for", 0 );
-		if( POS > -1 && POS != ENDPOS + 5 )
-		{
-			POS		= getProcedurePos( iupSci, pos, "for" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "next";
-		}
-
-
-		POS		= skipCommentAndString( iupSci, pos, "while", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "do while", 0 );
-		if( POS > -1 && POS != ENDPOS + 3 )
-		{
-			POS		= getProcedurePos( iupSci, pos, "while" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "wend";
-		}
-
-		POS		= skipCommentAndString( iupSci, pos, "do", 0 );
-		ENDPOS	= skipCommentAndString( iupSci, pos, "exit do", 0 );
-		if( POS > -1 && POS != ENDPOS + 5 )
-		{
-			if( lin == ScintillaAction.getLinefromPos( iupSci, POS ) ) return "loop";
-		}
 		
+		if( _check( "select", 1 ) ) return "end select";
+		if( _check( "namespace", 1 ) ) return "end namespace";
+		if( _check( "with", 1 ) ) return "end with";
+		if( _check( "enum", -1 ) ) return "end enum";
+		if( _check( "scope", 0 ) ) return "end scope";
+		if( _check( "for", 1 ) ) return "next";
+		if( _check( "do", -1 ) ) return "loop";
+		if( _check( "while", 1 ) ) return "wend";
 
 		return null;
 	}
