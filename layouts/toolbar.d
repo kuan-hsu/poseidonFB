@@ -18,7 +18,7 @@ class CToolBar
 	Ihandle* 			btnCut, btnCopy, btnPaste;
 	Ihandle* 			btnBackNav, btnForwardNav, btnClearNav;
 	Ihandle* 			btnMark, btnMarkPrev, btnMarkNext, btnMarkClean;
-	Ihandle* 			btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun;
+	Ihandle* 			btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun;
 	//Ihandle*			outlineButtonHide, messageButtonHide;
 	Ihandle*[7]			labelSEPARATOR;
 
@@ -51,6 +51,7 @@ class CToolBar
 		btnBuildRun = IupButton( null, "BuildRun" );
 		btnRun		= IupButton( null, "Run" );
 		btnBuildAll	= IupButton( null, "BuildAll" );
+		btnReBuild	= IupButton( null, "ReBuild" );
 		btnQuickRun = IupButton( null, "QuickRun" );
 
 
@@ -244,10 +245,15 @@ class CToolBar
 		IupSetAttribute( btnRun, "TIP", GLOBAL.languageItems["sc_run"].toCString );
 		IupSetCallback( btnRun, "BUTTON_CB", cast(Icallback) &run_button_cb );
 
-		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild" );
+		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_build" );
 		IupSetAttribute( btnBuildAll, "TIP", GLOBAL.languageItems["sc_build"].toCString );
-		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
+		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &build_button_cb );
 		IupSetHandle( "toolbar_BuildAll", btnBuildAll );
+		
+		IupSetAttributes( btnReBuild, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild" );
+		IupSetAttribute( btnReBuild, "TIP", GLOBAL.languageItems["rebuildprj"].toCString );
+		IupSetCallback( btnReBuild, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
+		IupSetHandle( "toolbar_ReBuild", btnReBuild );		
 
 		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun" );
 		IupSetAttribute( btnQuickRun, "TIP", GLOBAL.languageItems["sc_quickrun"].toCString );
@@ -327,9 +333,9 @@ class CToolBar
 		
 		// IUP Container to put buttons on~
 		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, btnClearUndoBuffer, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[6], btnBackNav, btnForwardNav, btnClearNav, labelSEPARATOR[2], btnMark, btnMarkPrev,
-						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], /*outlineButtonHide, messageButtonHide, labelSEPARATOR[6],*/ bitButton, guiButton, listHandle, null );/* labelSEPARATOR[5],
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun, labelSEPARATOR[5], /*outlineButtonHide, messageButtonHide, labelSEPARATOR[6],*/ bitButton, guiButton, listHandle, null );/* labelSEPARATOR[5],
 						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
-		IupSetAttributes( handle, "GAP=3,ALIGNMENT=ACENTER" );
+		IupSetAttributes( handle, "GAP=2,ALIGNMENT=ACENTER" );
 		version(linux) IupSetAttributes( handle, "MARGIN=0x4" );
 	}
 
@@ -411,7 +417,29 @@ extern( C )
 		}
 		return IUP_DEFAULT;
 	}
-
+	
+	private int build_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 )
+		{
+			if( button == IUP_BUTTON1 ) // Left Click
+			{
+				ExecuterAction.build();
+			}
+			else if( button == IUP_BUTTON3 ) // Right Click
+			{
+				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
+				{
+					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
+					if( result.length == 1 ) ExecuterAction.build( result[0] );
+					delete dlg;
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
 	private int buildall_button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( pressed == 0 )

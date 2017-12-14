@@ -60,6 +60,7 @@ build=建立
 	compilerun=編譯檔案及執行
 	run=執行
 	buildprj=建立專案
+	rebuildprj=重建專案
 	quickrun=快速執行
 	
 debug=除錯

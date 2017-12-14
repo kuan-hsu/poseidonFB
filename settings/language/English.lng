@@ -59,6 +59,7 @@ build=Build
 	compilerun=Compile File And Run
 	run=Run
 	buildprj=Build Project
+	rebuildprj=ReBuild Project
 	quickrun=Quick Run
 	
 debug=Debug

@@ -94,7 +94,8 @@ void load_all_images_icons()
 	IupSetHandle( "icon_saveas", XPM.getIUPimage( "icons/xpm/saveas.xpm" ) ); // IupSetHandle("icon_saveas", load_image_saveas());
 	IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/bas.xpm" ) ); // IupSetHandle("icon_bas", load_image_bas());
 	IupSetHandle( "icon_txt", XPM.getIUPimage( "icons/xpm/txt.xpm" ) ); // IupSetHandle("icon_txt", load_image_new_untitled_text_file());
-	IupSetHandle( "icon_rebuild", XPM.getIUPimage( "icons/xpm/build.xpm" ) ); // IupSetHandle( "icon_rebuild", load_image_rebuild());
+	IupSetHandle( "icon_build", XPM.getIUPimage( "icons/xpm/build.xpm" ) ); // IupSetHandle( "icon_rebuild", load_image_rebuild());
+	IupSetHandle( "icon_rebuild", XPM.getIUPimage( "icons/xpm/rebuild.xpm" ) ); // IupSetHandle( "icon_rebuild", load_image_rebuild());
 	IupSetHandle( "icon_buildrun", XPM.getIUPimage( "icons/xpm/buildrun.xpm" ) );
 	IupSetHandle( "icon_console", XPM.getIUPimage( "icons/xpm/console.xpm" ) );
 	IupSetHandle( "icon_gui", XPM.getIUPimage( "icons/xpm/gui.xpm" ) );

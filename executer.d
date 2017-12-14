@@ -424,6 +424,477 @@ struct ExecuterAction
 		return false;
 	}
 	
+	static bool build( char[] options = null, char[] optionDebug = null )
+	{
+		quickRunFile ="";
+		
+		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
+
+		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+		IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
+
+		try
+		{
+			// Clean outputPanel
+			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") );
+			GLOBAL.messagePanel.printOutputPanel( "", true );
+			
+			if( !activePrjName.length )
+			{
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert("No Project has been selected......?\n\nBuild Error!") );
+				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
+				if( GLOBAL.compilerSFX == "ON" )
+				{
+					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+				}				
+				return false;
+			}			
+			
+			char[] fbcFullPath = GLOBAL.projectManager[activePrjName].compilerPath.length ? GLOBAL.projectManager[activePrjName].compilerPath : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
+			version(Windows)
+			{
+				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
+				{
+					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
+				}				
+			}
+			
+			scope compilePath = new FilePath( fbcFullPath );
+			
+			if( !compilePath.exists() )
+			{
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
+				GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
+				if( GLOBAL.compilerSFX == "ON" )
+				{
+					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+				}
+				return false;
+			}
+			
+			if( !GLOBAL.projectManager[activePrjName].mainFile.length )
+			{
+				GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
+				if( GLOBAL.compilerSFX == "ON" )
+				{
+					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+				}
+				return false;
+			}
+
+
+			char[] txtCommand, txtSources, txtIncludeDirs, txtLibDirs;
+			
+			foreach( char[] s; GLOBAL.projectManager[activePrjName].includes )
+			{
+				if( upperCase(s) in GLOBAL.scintillaManager )
+				{
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
+					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
+				}
+			}
+
+			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
+			{
+				if( upperCase(s) in GLOBAL.scintillaManager )
+				{
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
+					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
+				}
+				
+				scope fPath = new FilePath( s );
+				scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
+				if( oPath.exists() )
+				{
+					if( fPath.modified > oPath.modified ) txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+				}
+				else
+				{
+					txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+				}
+			}
+
+			if( !txtSources.length )
+			{
+				if( !GLOBAL.projectManager[activePrjName].sources.length )
+				{
+					GLOBAL.messagePanel.printOutputPanel( "Without source files......?\n\nBuild Error!", true );
+					if( GLOBAL.compilerSFX == "ON" )
+					{
+						version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+					}					
+					return false;
+				}
+				else
+				{
+					GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\nDirectly Link Objs......", true );
+				}
+			}
+
+			char[] executeName, _targetName;
+
+			if( GLOBAL.projectManager[activePrjName].targetName.length ) _targetName = GLOBAL.projectManager[activePrjName].targetName; else _targetName = GLOBAL.projectManager[activePrjName].name;
+			version(Windows)
+			{
+				switch( GLOBAL.projectManager[activePrjName].type )
+				{
+					case "2":
+						executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						break;
+					case "3":
+						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+						break;
+					default:
+						executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+				}
+			}
+			else
+			{
+				switch( GLOBAL.projectManager[activePrjName].type )
+				{
+					case "2":
+						executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						break;
+					case "3":
+						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+						break;
+					default:
+						executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+				}
+			}
+
+			if( !options.length )
+			{
+				if( !GLOBAL.projectManager[activePrjName].compilerOption.length ) options = getCustomCompilerOption();
+			}
+			/*
+			txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
+							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+			if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
+			*/
+			
+			bool	bError, bWarning;
+			char[] stdoutMessage, stderrMessage;			
+			
+			if( txtSources.length )
+			{
+				txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+
+				Process p = new Process( true, txtCommand );
+				p.workDir( GLOBAL.projectManager[activePrjName].dir );
+				p.gui( true );
+				p.execute;
+
+
+				// Compiler Command
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
+				GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
+
+				foreach (line; new Lines!(char)(p.stderr))  
+				{
+					if( !bWarning )
+					{
+						if( Util.index( line, "warning:" ) < line.length )
+						{
+							bWarning = true;
+							stderrMessage ~= ( line ~ "\n" );
+							continue;
+						}
+					}
+					
+					if( !bError )
+					{
+						if( line.length ) bError = true;
+						/*
+						if( Util.index( line, "Error:" ) < line.length )
+						{
+							bError = true;
+						}
+						else if( Util.index( line, ":fake:" ) < line.length )
+						{
+							bError = true;
+						}
+						*/
+					}				
+
+					stderrMessage ~= ( line ~ "\n" );
+				}
+
+				foreach (line; new Lines!(char)(p.stdout))  
+				{
+					if( !bWarning )
+					{
+						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					}
+					if( !bError )
+					{
+						if( Util.index( line, "error " ) < line.length )
+							bError = true;
+						else if( Util.index( line, "Error!" ) < line.length )
+							bError = true;
+					}				
+					
+					stdoutMessage ~= ( line ~ "\n" );
+				}				
+		
+				auto result = p.wait;
+
+				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+				
+				GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+
+				if( bError )
+				{
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
+					GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
+
+					if( GLOBAL.compilerWindow == "ON" )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+						}							
+					}
+					
+					if( GLOBAL.delExistExe == "ON" )
+					{
+						// Remove the execute file
+						version(Windows) _targetName ~= ".exe";
+						scope targetFilePath = new FilePath( _targetName );
+						if( targetFilePath.exists() ) targetFilePath.remove();
+					}
+				}
+				else
+				{
+					if( !bWarning )
+					{
+						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
+						GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success!" );
+					}
+					else
+					{
+						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
+						GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success! But got warning..." );
+					}
+				}
+			}
+
+			if( !bError )
+			{
+				bWarning = bError = false;
+				txtSources = stdoutMessage = stderrMessage = "";
+				
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].others )
+				{
+					txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+				}				
+
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
+				{
+					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
+				}
+
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].libDirs )
+				{
+					txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
+				}				
+				
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
+				{
+					scope fPath = new FilePath( s );
+					if( fPath.exists() )
+					{
+						scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
+						if( oPath.exists() ) txtSources = txtSources ~ " -a \"" ~ oPath.toString ~ "\"" ; 
+					}
+				}
+				
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~
+							GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				
+				if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui"; else txtCommand ~= " -s console";
+				
+				Process p2 = new Process( true, txtCommand );
+				p2.workDir( GLOBAL.projectManager[activePrjName].dir );
+				p2.gui( true );
+				p2.execute;
+
+				// Compiler Command
+				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
+				GLOBAL.messagePanel.printOutputPanel( "\n\nContinue Link Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" );
+
+				foreach (line; new Lines!(char)(p2.stderr))  
+				{
+					if( !bWarning )
+					{
+						if( Util.index( line, "warning:" ) < line.length )
+						{
+							bWarning = true;
+							stderrMessage ~= ( line ~ "\n" );
+							continue;
+						}
+					}
+					
+					if( !bError )
+					{
+						if( line.length ) bError = true;
+						/*
+						if( Util.index( line, "Error:" ) < line.length )
+						{
+							bError = true;
+						}
+						else if( Util.index( line, ":fake:" ) < line.length )
+						{
+							bError = true;
+						}
+						*/
+					}				
+
+					stderrMessage ~= ( line ~ "\n" );
+				}
+
+				foreach (line; new Lines!(char)(p2.stdout))  
+				{
+					if( !bWarning )
+					{
+						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					}
+					if( !bError )
+					{
+						if( Util.index( line, "error " ) < line.length )
+							bError = true;
+						else if( Util.index( line, "Error!" ) < line.length )
+							bError = true;
+					}				
+					
+					stdoutMessage ~= ( line ~ "\n" );
+				}				
+		
+				auto result2 = p2.wait;
+
+				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
+				
+				GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+
+				if( bError )
+				{
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
+					GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
+
+					if( GLOBAL.compilerWindow == "ON" )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					}
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
+							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
+						}
+						else
+						{
+							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+						}							
+					}
+					
+					if( GLOBAL.delExistExe == "ON" )
+					{
+						// Remove the execute file
+						version(Windows) _targetName ~= ".exe";
+						scope targetFilePath = new FilePath( _targetName );
+						if( targetFilePath.exists() ) targetFilePath.remove();
+					}
+				}
+				else
+				{
+					if( !bWarning )
+					{
+						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
+						GLOBAL.messagePanel.printOutputPanel( "Build Success!" );
+
+						if( GLOBAL.compilerWindow == "ON" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
+							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+						}
+						else
+						{
+							version(Windows)
+							{
+								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+								//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
+							}
+							else
+							{
+								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
+							}							
+						}
+					}
+					else
+					{
+						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
+						GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." );
+
+						if( GLOBAL.compilerWindow == "ON" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
+							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+						}
+						else
+						{
+							version(Windows)
+							{
+								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
+								//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
+							}
+							else
+							{
+								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+							}							
+						}				
+					}
+				}
+			}
+			
+			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+			
+			return true;
+		}
+		catch( Exception e )
+		{
+			IupMessage( "",toStringz( e.toString ) );
+			return false;
+		}
+
+		return true;
+	}	
+	
 	static bool buildAll( char[] options = null, char[] optionDebug = null )
 	{
 		quickRunFile ="";
@@ -490,7 +961,6 @@ struct ExecuterAction
 
 			if( !txtSources.length )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without source files......?\n\nBuild Error!" ) );
 				GLOBAL.messagePanel.printOutputPanel( "Without source files......?\n\nBuild Error!", true );
 				return false;
 			}

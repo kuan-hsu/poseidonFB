@@ -501,6 +501,7 @@ struct GLOBAL
 			GLOBAL.languageItems["compilerun"]= new IupString( cast(char[]) "Compile File And Run" );
 			GLOBAL.languageItems["run"] = new IupString( cast(char[]) "Run" );
 			GLOBAL.languageItems["buildprj"] = new IupString( cast(char[]) "Build Project" );
+			GLOBAL.languageItems["rebuildprj"] = new IupString( cast(char[]) "ReBuild Project" );
 			GLOBAL.languageItems["quickrun"] = new IupString( cast(char[]) "Quick Run" );
 			
 		GLOBAL.languageItems["debug"] = new IupString( cast(char[]) "Debug" );

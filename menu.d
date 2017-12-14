@@ -24,7 +24,7 @@ void createMenu()
 	Ihandle* item_findReplace, item_findNext, item_findPrevious, item_findReplaceInFiles, item_goto, search_menu;
 	Ihandle* view_menu;
 	Ihandle* item_newProject, item_openProject, item_closeProject, item_saveProject, item_projectProperties, project_menu;
-	Ihandle* item_compile, item_buildrun, item_run, item_build, item_buildAll, item_quickRun, build_menu;
+	Ihandle* item_compile, item_buildrun, item_run, item_build, item_buildAll, item_reBuild, item_clearBuild, item_quickRun, build_menu;
 	Ihandle* item_runDebug, item_withDebug, item_BuildwithDebug, debug_menu;
 	Ihandle* misc_menu;
 	Ihandle* item_tool, item_preference, item_language, option_menu;
@@ -366,10 +366,20 @@ void createMenu()
 	IupSetAttribute(item_BuildwithDebug, "IMAGE", "icon_debugbuild");
 	IupSetCallback( item_BuildwithDebug, "ACTION", cast(Icallback)&buildAllWithDebug_cb );
 	
-
 	item_buildAll = IupItem( GLOBAL.languageItems["buildprj"].toCString, null);
-	IupSetAttribute(item_buildAll, "IMAGE", "icon_rebuild");
+	IupSetAttribute(item_buildAll, "IMAGE", "icon_build");
 	IupSetCallback( item_buildAll, "ACTION", cast(Icallback)&buildAll_cb );
+	
+	item_reBuild = IupItem( GLOBAL.languageItems["rebuildprj"].toCString, null);
+	IupSetAttribute( item_reBuild, "IMAGE", "icon_rebuild" );
+	IupSetCallback( item_reBuild, "ACTION", cast(Icallback)&reBuild_cb );
+
+	item_clearBuild = IupItem( GLOBAL.languageItems["clearall"].toCString, null);
+	IupSetAttribute( item_clearBuild, "IMAGE", "icon_clear" );
+	IupSetCallback( item_clearBuild, "ACTION", cast(Icallback)&clearBuild_cb );
+	
+	
+	
 
 	item_quickRun = IupItem( GLOBAL.languageItems["quickrun"].toCString, null);
 	IupSetAttribute( item_quickRun, "IMAGE", "icon_quickrun" );
@@ -618,7 +628,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.344)\nBy Kuan Hsu (Taiwan)\n2017.12.13" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.345)\nBy Kuan Hsu (Taiwan)\n2017.12.15" );
 		return IUP_DEFAULT;
 	});
 	
@@ -698,8 +708,11 @@ void createMenu()
 
 	build_menu= IupMenu( 	item_compile,
 							item_buildrun,
+							IupSeparator(),
 							item_run,
 							item_buildAll,
+							item_reBuild,
+							item_clearBuild,
 							IupSeparator(),
 							//item_clean,
 							//IupSeparator(),
@@ -1639,7 +1652,78 @@ extern(C)
 	int buildAll_cb( Ihandle *ih )
 	{
 		//saveAllFile_cb( ih );
+		ExecuterAction.build();
+		return IUP_DEFAULT;
+	}
+	
+	int reBuild_cb( Ihandle *ih )
+	{
+		//saveAllFile_cb( ih );
 		ExecuterAction.buildAll();
+		return IUP_DEFAULT;
+	}
+	
+	int clearBuild_cb( Ihandle *ih )
+	{
+		GLOBAL.messagePanel.printOutputPanel( "Clean All Objs & Target In Project......", true );
+		
+		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
+		if( activePrjName.length )
+		{
+			if( activePrjName in GLOBAL.projectManager )
+			{
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
+				{
+					scope fPath = new FilePath( s );
+					scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
+					if( oPath.exists() ) oPath.remove();
+				}
+				
+				char[] executeName, _targetName;
+				if( GLOBAL.projectManager[activePrjName].targetName.length ) _targetName = GLOBAL.projectManager[activePrjName].targetName; else _targetName = GLOBAL.projectManager[activePrjName].name;
+				version(Windows)
+				{
+					switch( GLOBAL.projectManager[activePrjName].type )
+					{
+						case "2":
+							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a";
+							break;
+						case "3":
+							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll";
+							break;
+						default:
+							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe";
+					}
+				}
+				else
+				{
+					switch( GLOBAL.projectManager[activePrjName].type )
+					{
+						case "2":
+							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a";
+							break;
+						case "3":
+							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so";
+							break;
+						default:
+							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName;
+					}
+				}				
+				
+				if( executeName.length )
+				{
+					scope fPath = new FilePath( executeName );
+					if( fPath.exists ) fPath.remove();
+				}
+				
+				GLOBAL.messagePanel.printOutputPanel( "Done." );
+			}
+		}
+		else
+		{
+			GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?" );
+		}		
+		
 		return IUP_DEFAULT;
 	}
 
