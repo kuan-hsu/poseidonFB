@@ -1487,8 +1487,8 @@ extern(C)
 							SCFIND_POSIX = 0x00400000,
 							*/								
 							IupScintillaSendMessage( ih, 2198, 2, 0 ); // SCI_SETSEARCHFLAGS = 2198,
-							IupScintillaSendMessage( ih, 2190, 0, 0 ); 							// SCI_SETTARGETSTART = 2190,
-							IupScintillaSendMessage( ih, 2192, IupGetInt( ih, "COUNT" ), 0 );	// SCI_SETTARGETEND = 2192,
+							IupSetInt( ih, "TARGETSTART", 0 );
+							IupSetInt( ih, "TARGETEND", -1 );
 							
 							int count;
 							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
@@ -1500,9 +1500,8 @@ extern(C)
 								else
 									IupScintillaSendMessage( ih, 2573, cast(int) findPos, cast(int) ( findPos + word.length ) ); // SCI_ADDSELECTION 2573
 
-								IupScintillaSendMessage( ih, 2190, findPos + word.length, 0 ); 	// SCI_SETTARGETSTART = 2190,
-								IupScintillaSendMessage( ih, 2192, IupGetInt( ih, "COUNT" ), 0 );	// SCI_SETTARGETEND = 2192,
-								
+								IupSetInt( ih, "TARGETSTART", findPos + word.length );
+								IupSetInt( ih, "TARGETEND", -1 );
 								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
 							}
 						}
@@ -2563,26 +2562,24 @@ extern(C)
 	
 	private void _HighlightWord( Ihandle* ih, char[] targetText )
 	{
-		int targetStart, TargetEnd, documentLength = IupGetInt( ih, "COUNT" );
+		int targetStart, TargetEnd;
 
 		IupScintillaSendMessage( ih, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
 		// Search Document
 		IupSetAttribute( ih, "SEARCHFLAGS", null );
-		IupScintillaSendMessage( ih, 2190, 0, 0 );					// SCI_SETTARGETSTART = 2190
-		IupScintillaSendMessage( ih, 2192, documentLength, 0 );		// SCI_SETTARGETEND = 2192
-		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+		IupSetInt( ih, "TARGETSTART", 0 );
+		IupSetInt( ih, "TARGETEND", -1 );
+		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); // SCI_SEARCHINTARGET = 2197,
 		
 		while( findPos != -1 )
 		{
 			targetStart = IupGetInt( ih, "TARGETSTART" );
 			TargetEnd = IupGetInt( ih, "TARGETEND" );
 			IupScintillaSendMessage( ih, 2504, targetStart, TargetEnd - targetStart ); // SCI_INDICATORFILLRANGE =  2504
-			
-			IupScintillaSendMessage( ih, 2190, TargetEnd, 0 ); 		// SCI_SETTARGETSTART = 2190
-			IupScintillaSendMessage( ih, 2192, documentLength, 0 );	// SCI_SETTARGETEND = 2192
-			
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+			IupSetInt( ih, "TARGETSTART", TargetEnd );
+			IupSetInt( ih, "TARGETEND", -1 );
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); // SCI_SEARCHINTARGET = 2197,
 		}
 	}
 }

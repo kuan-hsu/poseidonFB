@@ -13,7 +13,7 @@ class CSearchDialog : CBaseDialog
 	import				tools;
 	
 	Ihandle*			listFind, listReplace;
-	Ihandle*			labelStatus;
+	Ihandle*			labelStatus, toggleSelection;
 	IupString[2]		cStrings;
 	IupString			statusString;
 
@@ -62,10 +62,34 @@ class CSearchDialog : CBaseDialog
 
 
 		Ihandle* toggleAll = IupToggle( GLOBAL.languageItems["all"].toCString, null );
-		IupSetAttributes( toggleAll, "RADIO=YES");		
-		Ihandle* toggleSelection = IupToggle( GLOBAL.languageItems["selection"].toCString, null );
-		IupSetAttributes( toggleSelection, "RADIO=YES");
-		IupSetAttribute( toggleSelection, "ACTIVE", "NO" );
+		IupSetAttributes( toggleAll, "RADIO=YES");
+		IupSetCallback( toggleAll, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			Ihandle* _ih = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "btn_Find" );
+			if( _ih != null ) IupSetAttribute( _ih, "ACTIVE", "YES" );
+			_ih = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "btn_ReplaceFind" );
+			if( _ih != null ) IupSetAttribute( _ih, "ACTIVE", "YES" );
+			_ih = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "btn_Replace" );
+			if( _ih != null ) IupSetAttribute( _ih, "ACTIVE", "YES" );
+
+			return IUP_DEFAULT;
+		});			
+		
+		toggleSelection = IupToggle( GLOBAL.languageItems["selection"].toCString, null );
+		IupSetAttributes( toggleSelection, "RADIO=YES,NAME=toggle_Selection");
+		IupSetCallback( toggleSelection, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			Ihandle* _ih = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "btn_Find" );
+			if( _ih != null ) IupSetAttribute( _ih, "ACTIVE", "NO" );
+			_ih = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "btn_ReplaceFind" );
+			if( _ih != null ) IupSetAttribute( _ih, "ACTIVE", "NO" );
+			_ih = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "btn_Replace" );
+			if( _ih != null ) IupSetAttribute( _ih, "ACTIVE", "NO" );
+
+			return IUP_DEFAULT;
+		});					
+		
+		//IupSetAttribute( toggleSelection, "ACTIVE", "NO" );
 		Ihandle* vBoxScope = IupVbox( toggleAll, toggleSelection, null );
 		IupSetAttributes( vBoxScope, "EXPAND=YES,EXPANDCHILDREN=YES" );
 		Ihandle* radioScope = IupRadio( vBoxScope );
@@ -94,19 +118,19 @@ class CSearchDialog : CBaseDialog
 
 
 		Ihandle* btnFind = IupButton( GLOBAL.languageItems["find"].toCString, null );
-		IupSetAttribute( btnFind,"SIZE","x12" );
+		IupSetAttributes( btnFind, "SIZE=x12,NAME=btn_Find" );
 		IupSetCallback( btnFind, "ACTION", cast(Icallback) &CSearchDialog_btnFind_cb );
 		
 		Ihandle* btnReplaceFind = IupButton( GLOBAL.languageItems["replacefind"].toCString, null );
-		IupSetAttribute( btnReplaceFind,"SIZE","x12" );
+		IupSetAttributes( btnReplaceFind, "SIZE=x12,NAME=btn_ReplaceFind" );
 		IupSetCallback( btnReplaceFind, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceFind_cb );
 		
 		Ihandle* btnReplace = IupButton( GLOBAL.languageItems["replace"].toCString, null );
-		IupSetAttribute( btnReplace,"SIZE","x12" );
+		IupSetAttributes( btnReplace, "SIZE=x12,NAME=btn_Replace" );
 		IupSetCallback( btnReplace, "ACTION", cast(Icallback) &CSearchDialog_btnReplace_cb );
 		
 		Ihandle* btnReplaceAll = IupButton( GLOBAL.languageItems["replaceall"].toCString, null );
-		IupSetAttribute( btnReplaceAll,"SIZE","x12" );
+		IupSetAttribute( btnReplaceAll, "SIZE", "x12" );
 		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &CSearchDialog_btnReplaceAll_cb );
 		
 		Ihandle* btnCountAll = IupButton( GLOBAL.languageItems["countall"].toCString, null );
@@ -167,7 +191,6 @@ class CSearchDialog : CBaseDialog
 		}		
 
 		createLayout();
-
 		IupSetAttribute( listFind, "VALUE",toStringz( findWhat ) );
 
 		//IupSetAttribute( _dlg, "DEFAULTENTER", "CSearchDialog_btnFind" );
@@ -188,6 +211,8 @@ class CSearchDialog : CBaseDialog
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog
 	{
 		if( selectedWord.length ) IupSetAttribute( listFind, "VALUE",toStringz( selectedWord.dup ) );else IupSetAttribute( listFind, "VALUE", "" );
+		if( fromStringz( IupGetAttribute( toggleSelection, "VALUE" ) ) == "ON" ) IupSetAttribute( listFind, "VALUE", "" );
+		
 		IupShow( _dlg );
 		return null;
 	}
@@ -334,6 +359,9 @@ extern(C) // Callback for CSingleTextDialog
 
 				if( findText.length )
 				{
+					actionManager.SearchAction.addListItem( listFind_handle, findText, 15 );
+					if( ReplaceText.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText, 15 );
+					
 					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "toggle_Forward" );
 					if( direction_handle != null )
 					{
@@ -384,6 +412,8 @@ extern(C) // Callback for CSingleTextDialog
 
 				if( findText.length )
 				{
+					if( ReplaceText.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText, 15 );
+					
 					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "toggle_Forward" );
 					if( direction_handle != null )
 					{
@@ -439,14 +469,33 @@ extern(C) // Callback for CSingleTextDialog
 			{
 				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
 				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup;
-				int documentLength	= IupGetInt( iupSci, "COUNT" );
 				
 				if( findText.length )
 				{
+					bool	bScopeSelection;
+					Ihandle* _ih = IupGetDialogChild( GLOBAL.searchDlg.getIhandle, "toggle_Selection" );
+					if( _ih != null )
+					{
+						if( fromStringz( IupGetAttribute( _ih, "VALUE" ) ) == "ON" )
+						{
+							IupSetAttribute( iupSci, "TARGETFROMSELECTION", "YES" );
+							bScopeSelection = true;
+						}
+						else
+						{
+							IupSetAttribute( iupSci, "TARGETWHOLEDOCUMENT", "YES" );
+						}
+					}
+					else
+					{
+						return IUP_DEFAULT;
+					}
+
 					IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchDlg.searchRule, 0 );	// SCI_SETSEARCHFLAGS = 2198,
 					
-					IupScintillaSendMessage( iupSci, 2190, 0, 0 ); 								// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( iupSci, 2192, documentLength, 0 ); 				// SCI_SETTARGETEND = 2192
+					actionManager.SearchAction.addListItem( listFind_handle, findText, 15 );
+					if( flag == 2 && ReplaceText.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText, 15 );
+					
 
 					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
 					while( findPos > -1 )
@@ -467,9 +516,11 @@ extern(C) // Callback for CSingleTextDialog
 						}
 						
 						counts ++;
+						
+						if( !bScopeSelection ) IupSetInt( iupSci, "TARGETEND", -1 ); else IupSetAttribute( iupSci, "TARGETFROMSELECTION", "YES" );
 						//if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos );
-						if( flag < 2 ) IupScintillaSendMessage( iupSci, 2190, findPos + findText.length, 0 ); else IupScintillaSendMessage( iupSci, 2190, findPos + ReplaceText.length, 0 ); // SCI_SETTARGETSTART = 2190,
-						IupScintillaSendMessage( iupSci, 2192, documentLength, 0 );	// SCI_SETTARGETEND = 2192,
+						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + ReplaceText.length );
+						
 						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
 					}
 				}

@@ -352,8 +352,8 @@ struct DocumentTabAction
 				if( cSci !is null )
 				{
 					StatusBarAction.update( _child );
-					IupSetInt( ih, "VALUEPOS" , new_pos );
-					//IupSetFocus( _child );
+					//IupSetInt( ih, "VALUEPOS" , new_pos );
+					IupSetFocus( _child );
 					IupScintillaSendMessage( _child, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 
 					// Marked the trees( FileList & ProjectTree )
@@ -371,7 +371,7 @@ struct DocumentTabAction
 						GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
 					}
 					
-					return IUP_CONTINUE;
+					return IUP_DEFAULT;
 				}
 			}
 		}
@@ -1879,7 +1879,7 @@ struct SearchAction
 					pos = Integer.toString( findPos+targetText.length ) ~ ":" ~ Integer.toString( findPos );
 				}
 				IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
-		
+				//DocumentTabAction.setFocus( ih );
 			}
 			return findPos;
 		}

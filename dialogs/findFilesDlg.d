@@ -244,6 +244,8 @@ extern(C) // Callback for CFindInFilesDialog
 			findText = fromStringz( IupGetAttribute( listFind_ih, "VALUE" ) ).dup;
 			if( findText.length )
 			{
+				actionManager.SearchAction.addListItem( listFind_ih, findText, 15 );
+				
 				switch( buttonIndex )
 				{
 					case 0:		GLOBAL.messagePanel.printSearchOutputPanel( "Seraching......", true ); break;
@@ -261,7 +263,6 @@ extern(C) // Callback for CFindInFilesDialog
 				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_WholeWord" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 2;
 				if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "toggle_CaseSensitive" ), "VALUE" ) ) == "ON" ) _findMethod = _findMethod | 4;
 
-
 				if( buttonIndex == 1 )
 				{
 					IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "NO" );
@@ -278,6 +279,7 @@ extern(C) // Callback for CFindInFilesDialog
 						return IUP_DEFAULT;
 					}
 					IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "YES" );
+					if( replaceText.length ) actionManager.SearchAction.addListItem( listReplace_ih, replaceText, 15 );
 				}
 
 				switch( _findCase )

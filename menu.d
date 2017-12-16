@@ -628,7 +628,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.345)\nBy Kuan Hsu (Taiwan)\n2017.12.15" );
+		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.346)\nBy Kuan Hsu (Taiwan)\n2017.12.16" );
 		return IUP_DEFAULT;
 	});
 	
@@ -782,8 +782,6 @@ private void _convertKeyWordCase( int type )
 	if( cSci !is null )
 	{
 		Ihandle* iupSci = cSci.getIupScintilla;
-		int	documentLength = IupGetInt( iupSci, "COUNT" );
-
 		IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
 
 		foreach( IupString _s; GLOBAL.KEYWORDS )
@@ -795,16 +793,15 @@ private void _convertKeyWordCase( int type )
 					int		replaceTextLength = targetText.length;
 					char[]	replaceText = tools.convertKeyWordCase( type, targetText );
 
-					IupScintillaSendMessage( iupSci, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( iupSci, 2192, documentLength, 0 ); 		// SCI_SETTARGETEND = 2192,
+					IupSetInt( iupSci, "TARGETSTART", 0 );
+					IupSetInt( iupSci, "TARGETEND", -1 );
 
 					int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 					while( posHead >= 0 )
 					{
 						IupSetAttribute( iupSci, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
-						IupScintillaSendMessage( iupSci, 2190, posHead + replaceTextLength, 0 );	// SCI_SETTARGETSTART = 2190,
-						IupScintillaSendMessage( iupSci, 2192, documentLength, 0 );					// SCI_SETTARGETSTART = 2190,
-					
+						IupSetInt( iupSci, "TARGETSTART", posHead + replaceTextLength );
+						IupSetInt( iupSci, "TARGETEND", -1 );
 						posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 					}					
 				}

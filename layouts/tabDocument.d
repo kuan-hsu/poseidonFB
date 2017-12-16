@@ -267,7 +267,7 @@ extern(C)
 		if( IupGetChildCount( GLOBAL.activeDocumentTabs ) == 1 || pos < 0 )
 		{
 			CScintilla cSci = ScintillaAction.getCScintilla( cast(Ihandle*) IupGetAttribute( ih, "VALUE_HANDLE" ) );
-			
+			IupSetFocus( cSci.getIupScintilla );
 			StatusBarAction.update( cSci.getIupScintilla );
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 			
@@ -407,8 +407,8 @@ extern(C)
 						{
 							dropHandle = null;
 							
-							char[] documentTabs_CLIENTSIZE = fromStringz( IupGetAttribute( ih, "CLIENTSIZE" ) );
-							char[] documentTabs_RASTERSIZE = fromStringz( IupGetAttribute( ih, "RASTERSIZE" ) );
+							char[] documentTabs_CLIENTSIZE = fromStringz( IupGetAttribute( GLOBAL.documentTabs, "CLIENTSIZE" ) );
+							char[] documentTabs_RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.documentTabs, "RASTERSIZE" ) );
 							
 							int titleH = -1, CLIENT_H = -1, RASTER_H = -1, RASTER_W = -1;
 							

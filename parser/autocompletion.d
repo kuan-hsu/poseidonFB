@@ -1530,13 +1530,21 @@ struct AutoComplete
 
 		if( direct == 0 )
 		{
+			IupSetInt( iupSci, "TARGETSTART", pos );
+			IupSetInt( iupSci, "TARGETEND", 0 );
+			/*
 			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
 			IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+			*/
 		}
 		else
 		{
+			IupSetInt( iupSci, "TARGETSTART", pos );
+			IupSetInt( iupSci, "TARGETEND", -1 );
+			/*
 			IupScintillaSendMessage( iupSci, 2190, pos, 0 );
 			IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
+			*/
 		}
 		pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 		
@@ -1547,14 +1555,22 @@ struct AutoComplete
 			{
 				if( direct == 0 )
 				{
+					IupSetInt( iupSci, "TARGETSTART", pos - 1 );
+					IupSetInt( iupSci, "TARGETEND", 0 );
+					/*
 					IupScintillaSendMessage( iupSci, 2190, pos - 1, 0 );
 					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					*/
 					pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 				}
 				else
 				{
+					IupSetInt( iupSci, "TARGETSTART", pos + targetText.length );
+					IupSetInt( iupSci, "TARGETEND", -1 );
+					/*
 					IupScintillaSendMessage( iupSci, 2190, pos + targetText.length, 0 );
 					IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );							// SCI_SETTARGETEND = 2192,
+					*/
 					pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 				}
 			}
