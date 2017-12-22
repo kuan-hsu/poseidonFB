@@ -52,19 +52,22 @@ public:
 		convert( fromStringz( rhs ).dup );
 	}
 	
-	void opShl( char* rhs )
+	char* opShl( char* rhs )
 	{
-		_DString = fromStringz( rhs );
-		
-		if( rhs == _CstringPointer ) return;
-
-		if( strlen( rhs ) == strlen( _CstringPointer ) - 1 )
+		if( rhs != null )
 		{
-			free( _CstringPointer );
-			int _len = strlen( rhs );
-			_CstringPointer = cast(char*)calloc( 1, _len + 1 );
-			memcpy( _CstringPointer, rhs, _len );			
+			char* _tempPointer = _CstringPointer;
+			copy( fromStringz( rhs ).dup );
+			if( _tempPointer != null ) free( _tempPointer );
 		}
+		else
+		{
+			if( _CstringPointer != null ) free( _CstringPointer );
+			_DString.length = 0;
+			return null;
+		}
+		
+		return _CstringPointer;
 	}
 
 	char* convert( char[] Dstring )

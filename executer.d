@@ -63,14 +63,25 @@ struct ExecuterAction
 			{
 				version(Windows)
 				{
-					scommand = "consoleLauncher " ~ command ~ args;
+					//scommand = "consoleLauncher " ~ command ~ args;
+					if( GLOBAL.consoleWindow.id < GLOBAL.monitors.length )
+					{
+						int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
+						int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
+						
+						scommand = "consoleLauncher 0 " ~ Integer.toString( x ) ~ " " ~ Integer.toString( y ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command ~ args;
+					}
+					else
+					{
+						scommand = "consoleLauncher 0 0 0 0 0 " ~ command ~ args;
+					}
 				}
 				else
 				{
-					if( command[0] == '"' && command[length-1] == '"' )
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ command[1..length-1] ~ args ~ "\"";
+					if( command[0] == '"' && command[$-1] == '"' )
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command[1..$-1] ~ args ~ "\"";
 					else
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ command ~ args ~ "\"";
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command ~ args ~ "\"";
 				}
 			}
 			else
@@ -84,7 +95,19 @@ struct ExecuterAction
 			}
 			else
 			{
-				p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand );
+				// --hide-menubar
+				// --geometry
+				// -t poseidonFB_terminal
+				char[] geoString;
+				if( GLOBAL.consoleWindow.id < GLOBAL.monitors.length )
+				{
+					int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
+					int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
+					geoString = " --geometry=80x24+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
+				}
+				
+				//	p = new Process( true, GLOBAL.linuxTermName ~ geoString ~ " -e " ~ scommand );
+				p = new Process( true, GLOBAL.linuxTermName ~ " -t poseidonFB_terminal" ~ geoString ~ " -e " ~ scommand );
 			}
 			
 			if( cwd.length ) p.workDir( cwd );

@@ -60,6 +60,11 @@ struct EditorOpacity
 	char[]	searchDlg = "255", findfilesDlg = "255", preferenceDlg = "255", projectDlg = "255", gotoDlg = "255", newfileDlg = "255";
 }
 
+struct Monitor
+{
+	int x, y, w, h, id;
+}
+
 struct GLOBAL
 {
 	private:
@@ -214,7 +219,9 @@ struct GLOBAL
 	
 	//
 	static CNavCache			navigation;
-
+	
+	static Monitor[]			monitors;
+	static Monitor				consoleWindow;
 
 	static this()
 	{

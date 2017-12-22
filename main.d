@@ -313,7 +313,34 @@ void main( char[][] args )
 	}
 	
 	if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" ) IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
+	/*
+	IupMessage("",IupGetGlobal( "MONITORSCOUNT" ) );
+	IupMessage("MONITORSINFO",IupGetGlobal( "MONITORSINFO" ) );
+	IupMessage("VIRTUALSCREEN",IupGetGlobal( "VIRTUALSCREEN" ) );
+	*/
 	
+	int monitorID;
+	foreach( char[] s; Util.splitLines( fromStringz( IupGetGlobal( "MONITORSINFO" ) ) ) )
+	{
+		if( s.length )
+		{
+			char[][] information = Util.split( s, " " );
+			if( information.length == 4 )
+			{
+				Monitor m = { Integer.atoi( information[0] ), Integer.atoi( information[1] ), Integer.atoi( information[2] ), Integer.atoi( information[3] ), monitorID++ };
+				GLOBAL.monitors ~= m;
+			}
+		}
+	}
+	/*
+	if( GLOBAL.monitors.length )
+	{
+		for( int i = 0; i < GLOBAL.monitors.length; ++i )
+			IupMessage( "", toStringz( Integer.toString( GLOBAL.monitors[i].id ) ~ ", " ~ Integer.toString( GLOBAL.monitors[i].x ) ~ ", " ~ Integer.toString( GLOBAL.monitors[i].y ) ~ ", " ~
+			Integer.toString( GLOBAL.monitors[i].w ) ~ "x" ~ Integer.toString( GLOBAL.monitors[i].h ) ) );
+	}
+	*/
+
 	// Init Nav Cache
 	GLOBAL.navigation = new CNavCache();
 	

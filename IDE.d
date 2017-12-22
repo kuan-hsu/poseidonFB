@@ -654,6 +654,11 @@ struct IDECONFIG
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
 			doc ~= setINILineData( "delexistexe", GLOBAL.delExistExe );
 			doc ~= setINILineData( "consoleexe", GLOBAL.consoleExe );
+			doc ~= setINILineData( "consoleid", Integer.toString( GLOBAL.consoleWindow.id ) );
+			doc ~= setINILineData( "consolex", Integer.toString( GLOBAL.consoleWindow.x ) );
+			doc ~= setINILineData( "consoley", Integer.toString( GLOBAL.consoleWindow.y ) );
+			doc ~= setINILineData( "consolew", Integer.toString( GLOBAL.consoleWindow.w ) );
+			doc ~= setINILineData( "consoleh", Integer.toString( GLOBAL.consoleWindow.h ) );
 
 			// parser
 			doc ~= setINILineData( "[parser]");
@@ -1005,6 +1010,11 @@ struct IDECONFIG
 							case "annotation":				GLOBAL.compilerAnootation = right;						break;
 							case "delexistexe":				GLOBAL.delExistExe = right;								break;
 							case "consoleexe":				GLOBAL.consoleExe = right;								break;
+							case "consoleid":				GLOBAL.consoleWindow.id = Integer.atoi( right );		break;
+							case "consolex":				GLOBAL.consoleWindow.x = Integer.atoi( right );			break;
+							case "consoley":				GLOBAL.consoleWindow.y = Integer.atoi( right );			break;
+							case "consolew":				GLOBAL.consoleWindow.w = Integer.atoi( right );			break;
+							case "consoleh":				GLOBAL.consoleWindow.h = Integer.atoi( right );			break;
 							default:
 						}
 						break;
