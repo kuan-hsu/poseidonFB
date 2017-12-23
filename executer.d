@@ -1445,7 +1445,7 @@ struct ExecuterAction
 		}
 	}
 
-	static bool run( char[] args = null )
+	static bool run( char[] args = null, bool bForceCompileOne = false )
 	{
 		bool	bRunProject;
 		char[]	command;
@@ -1457,43 +1457,50 @@ struct ExecuterAction
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 			IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 			
-			int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
-			for( int id = 1; id <= nodeCount; id++ )
+			if( !bForceCompileOne )
 			{
-				char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ); //fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ); // shadow
-				if( _cstring == activeCScintilla.getFullPath() )
+				int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
+				for( int id = 1; id <= nodeCount; id++ )
 				{
-					version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
-					bRunProject = true;
+					char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ); //fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ); // shadow
+					if( _cstring == activeCScintilla.getFullPath() )
+					{
+						version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
+						bRunProject = true;
 
-					if( GLOBAL.projectManager[activePrjName].type.length )
-					{
-						//IupMessage( "", toStringz(GLOBAL.projectManager[activePrjName].type ) );
-						if( GLOBAL.projectManager[activePrjName].type != "1" )
+						if( GLOBAL.projectManager[activePrjName].type.length )
 						{
-							//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
-							//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Run Static / Dynamic Library............Run Error!" ) );
-							GLOBAL.messagePanel.printOutputPanel( "Can't Run Static / Dynamic Library............Run Error!", true );
-							return false;
+							//IupMessage( "", toStringz(GLOBAL.projectManager[activePrjName].type ) );
+							if( GLOBAL.projectManager[activePrjName].type != "1" )
+							{
+								//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
+								//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Run Static / Dynamic Library............Run Error!" ) );
+								GLOBAL.messagePanel.printOutputPanel( "Can't Run Static / Dynamic Library............Run Error!", true );
+								return false;
+							}
 						}
-					}
-					
-					version(Windows)
-					{
-						if( GLOBAL.projectManager[activePrjName].targetName.length )
-							command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName ~ ".exe";
+						
+						version(Windows)
+						{
+							if( GLOBAL.projectManager[activePrjName].targetName.length )
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName ~ ".exe";
+							else
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
+						}
 						else
-							command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
+						{
+							if( GLOBAL.projectManager[activePrjName].targetName.length )
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].targetName;
+							else
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].name;
+						}
+						break;
 					}
-					else
-					{
-						if( GLOBAL.projectManager[activePrjName].targetName.length )
-							command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].targetName;
-						else
-							command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].name;
-					}
-					break;
 				}
+			}
+			else
+			{
+				bRunProject = false;
 			}
 
 			if( !bRunProject ) 

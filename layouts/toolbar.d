@@ -468,19 +468,18 @@ extern( C )
 		{
 			if( button == IUP_BUTTON1 ) // Left Click
 			{
-				if( ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ ) ) ExecuterAction.run();
+				if( ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ ) ) ExecuterAction.run( null, true );
 			}
 			else if( button == IUP_BUTTON3 ) // Right Click
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
 					if( result.length == 2 )
 					{
-						if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1] );
+						if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1], true );
 					}
-					delete dlg;
 				}
 			}
 		}

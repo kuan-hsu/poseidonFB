@@ -27,16 +27,19 @@ class CArgOptionDialog : CBaseDialog
 
 	Ihandle* createDlgButton( char[] buttonSize = "40x20" )
 	{
-		btnCANCEL = IupButton( GLOBAL.languageItems["close"].toCString, null );
+		btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
 		IupSetAttributes( btnCANCEL, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
-		
 		
 		Ihandle* hBox_DlgButton;
 		if( !QuickMode )
 		{
+			btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
+			IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
+			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnOKtoApply_cb );
+			
 			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
-			hBox_DlgButton = IupHbox( IupFill(), btnCANCEL, null );
+			hBox_DlgButton = IupHbox( IupFill(), btnCANCEL, btnOK, null );
 		}
 		else
 		{
@@ -52,7 +55,7 @@ class CArgOptionDialog : CBaseDialog
 			
 			IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK" );
 			
-			hBox_DlgButton = IupHbox( /*btnQuick,*/ IupFill(), btnOK, btnCANCEL, null );
+			hBox_DlgButton = IupHbox( /*btnQuick,*/ IupFill(), btnCANCEL, btnOK, null );
 			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnCancel_cb );
 		}
 		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ABOTTOM,GAP=5,MARGIN=1x0" );
@@ -72,7 +75,7 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
 		IupSetHandle( "CCustomCompilerOptionDialog_listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_ACTION );
-		IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomCompilerOptionDialog_DBLCLICK_CB );
+		
 		
 		for( int i = 0; i < GLOBAL.customCompilerOptions.length; ++ i )
 		{
@@ -85,49 +88,50 @@ class CArgOptionDialog : CBaseDialog
 			}
 		}
 		
-		Ihandle* btnToolsAdd = IupButton( null, null );
-		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
-		IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
-		IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsAdd );
+		Ihandle* frameList;
+		if( !QuickMode )
+		{
+			IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomCompilerOptionDialog_DBLCLICK_CB );
+			
+			Ihandle* btnToolsAdd = IupButton( null, null );
+			IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
+			IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
+			IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsAdd );
 
-		Ihandle* btnToolsErase = IupButton( null, null );
-		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES" );
-		IupSetAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
-		IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsErase );
-		
-		Ihandle* btnToolsUp = IupButton( null, null );
-		IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES" );
-		IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsUp );
-		
-		Ihandle* btnToolsDown = IupButton( null, null );
-		IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES" );
-		IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsDown );
-
-		Ihandle* btnToolsApply = IupButton( null, null );
-		IupSetAttributes( btnToolsApply, "IMAGE=icon_apply,FLAT=YES" );
-		IupSetAttribute( btnToolsApply, "TIP", GLOBAL.languageItems["apply"].toCString );
-		IupSetCallback( btnToolsApply, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnAPPLY );
-		
-		Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, btnToolsApply, null );
-		Ihandle* frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
+			Ihandle* btnToolsErase = IupButton( null, null );
+			IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES" );
+			IupSetAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
+			IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsErase );
+			
+			Ihandle* btnToolsUp = IupButton( null, null );
+			IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES" );
+			IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsUp );
+			
+			Ihandle* btnToolsDown = IupButton( null, null );
+			IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES" );
+			IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsDown );
+			
+			/*
+			Ihandle* btnToolsApply = IupButton( null, null );
+			IupSetAttributes( btnToolsApply, "IMAGE=icon_apply,FLAT=YES" );
+			IupSetAttribute( btnToolsApply, "TIP", GLOBAL.languageItems["apply"].toCString );
+			IupSetCallback( btnToolsApply, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnAPPLY );
+			*/
+			
+			Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, /*btnToolsApply,*/ null );
+			frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
+		}
+		else
+		{
+			IupSetAttributes( listTools, "VISIBLELINES=5" );
+			frameList = IupFrame( listTools );
+		}
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
+
 		
 		Ihandle* labelOptions = IupLabel( GLOBAL.languageItems["prjopts"].toCString );
 		IupSetAttributes( labelOptions, "SIZE=60x16" );
-		
-		/+
-		Ihandle* textOptions = IupText( null );
-		IupSetAttribute( textOptions, "SIZE", "210x12" );	
-		IupSetHandle( "CCustomCompilerOptionDialog_textOptions", textOptions );
-		if( IupGetInt( listTools, "COUNT" ) > 0 )
-		{
-			IupSetAttribute( listTools, "VALUE", "1" ); // Set Focus
-			
-			char[] Name, Option;
-			getCustomCompilerOptionValue( 0, Name, Option );
-			IupSetAttribute( textOptions, "VALUE", toStringz( Option ) );
-		}
-		+/
+
 		listOptions = IupList(null);
 		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=200x12,VISIBLE_ITEMS=5");
 		IupSetHandle( "CCustomCompilerOptionDialog_textOptions", listOptions );
@@ -136,17 +140,12 @@ class CArgOptionDialog : CBaseDialog
 			_recentOptions ~= new IupString( GLOBAL.recentOptions[i] );
 			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), _recentOptions[i].toCString );
 		}		
-		/*
-		if( IupGetInt( listTools, "COUNT" ) > 0 )
+
+		if( !QuickMode )
 		{
-			IupSetAttribute( listTools, "VALUE", "1" ); // Set Focus
-			
-			char[] Name, Option;
-			getCustomCompilerOptionValue( 0, Name, Option );
-			IupSetAttribute( listOptions, "VALUE", toStringz( Option ) );
+			IupSetAttribute( listOptions, "DROPDOWN", "NO" );
+			IupSetCallback( listOptions, "EDIT_CB", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 		}
-		*/
-		if( !QuickMode ) IupSetAttribute( listOptions, "DROPDOWN", "NO" );
 		
 		hBoxOptions = IupHbox( labelOptions, listOptions, null );
 		IupSetAttributes( hBoxOptions, "ALIGNMENT=ACENTER,MARGIN=2x0" );
@@ -244,35 +243,19 @@ class CArgOptionDialog : CBaseDialog
 			if( QuickMode & 1 )
 			{
 				IupSetAttribute( hBoxOptions, "ACTIVE", "YES" );
-				/*
-				IupSetAttribute( listTools, "ACTIVE", "YES" );
-				IupSetAttribute( labelOptions, "ACTIVE", "YES" );
-				*/
 			}
 			else
 			{
 				IupSetAttribute( hBoxOptions, "ACTIVE", "NO" );
-				/*
-				IupSetAttribute( listOptions, "ACTIVE", "NO" );
-				IupSetAttribute( labelOptions, "ACTIVE", "NO" );
-				*/
 			}
 
 			if( QuickMode & 2 )
 			{
 				IupSetAttribute( hBoxArgs, "ACTIVE", "YES" );
-				/*
-				IupSetAttribute( listArgs, "ACTIVE", "YES" );
-				IupSetAttribute( labelArgs, "ACTIVE", "YES" );
-				*/
 			}
 			else
 			{
 				IupSetAttribute( hBoxArgs, "ACTIVE", "NO" );
-				/*
-				IupSetAttribute( listArgs, "ACTIVE", "NO" );
-				IupSetAttribute( labelArgs, "ACTIVE", "NO" );
-				*/
 			}
 
 			if( fromStringz( IupGetAttribute( listOptions, "ACTIVE" ) ) == "YES" )
@@ -336,6 +319,29 @@ extern(C) // Callback for CFindInFilesDialog
 				Name	= Util.trim( s[pos+5..$] );
 			}
 		}
+	}
+	
+	private int CCustomCompilerOptionDialog_listOptions_EDIT_CB( Ihandle *ih, int c, char *new_value )
+	{
+		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
+		if( toolsHandle == null ) return IUP_DEFAULT;
+		
+		Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		int id = IupGetInt( toolsHandle, "VALUE" );
+		
+		if( textHandle != null )
+		{
+			if( IupGetInt( toolsHandle, "VALUE" ) > 0 )
+			{
+				char[] optionText = Util.trim( fromStringz( new_value ) ).dup;
+				if( id > 0 ) CArgOptionDialog.tempCustomCompilerOptions[id-1] = optionText ~ "%::% " ~ fromStringz( IupGetAttributeId( toolsHandle, "", id ) ).dup;
+			}
+			else // No Select
+			{
+			}
+		}
+		
+		return IUP_DEFAULT;
 	}
 	
 	private int CCustomCompilerOptionDialog_btnAPPLY( Ihandle* ih )
@@ -413,7 +419,16 @@ extern(C) // Callback for CFindInFilesDialog
 		if( listArgs != null ) IupSetAttribute( listArgs, "ACTIVE", "NO" );
 
 		return IUP_CLOSE;
-	}	
+	}
+	
+	private int CCustomCompilerOptionDialog_btnOKtoApply_cb( Ihandle* ih )
+	{
+		GLOBAL.customCompilerOptions.length = 0;
+		foreach( char[] s; CArgOptionDialog.tempCustomCompilerOptions )
+			GLOBAL.customCompilerOptions ~= s.dup;
+		
+		return IUP_CLOSE;
+	}		
 	
 	private int CCustomCompilerOptionDialog_btnOK_cb( Ihandle* ih )
 	{
