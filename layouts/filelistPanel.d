@@ -210,7 +210,6 @@ extern(C)
 		catch( Exception e )
 		{
 			GLOBAL.IDEMessageDlg.print( "fileList_SELECTION_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-			//debug IupMessage( "fileList_SELECTION_CB", toStringz( "fileList_SELECTION_CB Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return IUP_DEFAULT;

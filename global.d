@@ -118,7 +118,7 @@ struct GLOBAL
 	//static Ihandle* 			searchOutputPanel;
 	static CMessageAndSearch	messagePanel;
 	
-	static CDebugger 			debugPanel;
+	version(FBIDE)		static CDebugger 			debugPanel;
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
 	static int					messageSplit_value = 800;
 
@@ -216,8 +216,14 @@ struct GLOBAL
 	
 	static char[][]				customCompilerOptions;
 	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
+
+	version(DIDE)
+	{
+		static char[][]				defaultImportPaths;
+		static char[]				objectParserFullPath;
+		static char[]				toggleSkipUnittest = "OFF";
+	}
 	
-	//
 	static CNavCache			navigation;
 	
 	static Monitor[]			monitors;
@@ -303,10 +309,20 @@ struct GLOBAL
 		GLOBAL.scanner = new CScanner;
 		GLOBAL.Parser = new CParser;
 		
-		GLOBAL.KEYWORDS[0] = new IupString( cast(char[]) "__date__ __date_iso__ __fb_64bit__ __fb_argc__ __fb_argv__ __fb_arm__ __fb_asm__ __fb_backend__ __fb_bigendian__ __fb_build_date__ __fb_cygwin__ __fb_darwin__ __fb_debug__ __fb_dos__ __fb_err__ __fb_fpmode__ __fb_fpu__ __fb_freebsd__ __fb_gcc__ __fb_lang__ __fb_linux__ __fb_main__ __fb_min_version__ __fb_mt__ __fb_netbsd__ __fb_openbsd__ __fb_option_byval__ __fb_option_dynamic__ __fb_option_escape__ __fb_option_explicit__ __fb_option_gosub__ __fb_option_private__ __fb_out_dll__ __fb_out_exe__ __fb_out_lib__ __fb_out_obj__ __fb_pcos__ __fb_signature__ __fb_sse__ __fb_unix__ __fb_vectorize__ __fb_ver_major__ __fb_ver_minor__ __fb_ver_patch__ __fb_version__ __fb_win32__ __fb_xbox__ __file__ __file_nq__ __function__ __function_nq__ __line__ __path__ __time__ #assert #define #else #elseif #endif #endmacro #error #if #ifdef #ifndef #inclib #include #lang #libpath #line #macro #pragma #print #undef $dynamic $include $static $lang  abs abstract access acos add alias allocate alpha and andalso any append as assert assertwarn asc asin asm atan2 atn base beep bin binary bit bitreset bitset bload bsave byref byte byval call callocate case cast cbyte cdbl cdecl chain chdir" );
-		GLOBAL.KEYWORDS[1] = new IupString( cast(char[]) "chr cint circle class clear clng clngint close cls color command common condbroadcast condcreate conddestroy condsignal condwait const constructor continue cos cptr cshort csign csng csrlin cubyte cuint culng culngint cunsg curdir cushort custom cvd cvi cvl cvlongint cvs cvshort data date dateadd datediff datepart dateserial datevalue day deallocate declare defbyte defdbl defined defint deflng deflongint defshort defsng defstr defubyte defuint defulongint defushort delete destructor dim dir do double draw dylibfree dylibload dylibsymbol else elseif encoding end enum environ eof eqv erase erfn erl ermn err error event exec exepath exit exp export extends extern field fileattr filecopy filedatetime fileexists filelen fix flip for format frac fre freefile function get getjoystick getkey getmouse gosub goto hex hibyte hiword" );
-		GLOBAL.KEYWORDS[2] = new IupString( cast(char[]) "hour if iif imageconvertrow imagecreate imagedestroy imageinfo imp implements import inkey inp input instr instrrev int integer is isdate isredirected kill lbound lcase left len let lib line lobyte loc local locate lock lof log long longint loop loword lpos lprint lset ltrim mid minute mkd mkdir mki mkl mklongint mks mkshort mod month monthname multikey mutexcreate mutexdestroy mutexlock mutexunlock naked name namespace next new not now object oct offsetof on once open operator option or orelse out output overload override paint palette pascal pcopy peek pmap point pointcoord pointer poke pos preserve preset print private procptr property protected pset ptr public put random randomize read reallocate redim rem reset restore resume return rgb rgba right rmdir" );
-		GLOBAL.KEYWORDS[3] = new IupString( cast(char[]) "rnd rset rtrim run sadd scope screen screencopy screencontrol screenevent screeninfo screenglproc screenlist screenlock screenptr screenres screenset screensync screenunlock second seek select setdate setenviron setmouse settime sgn shared shell shl shr short sin single sizeof sleep space spc sqr static stdcall step stick stop str strig string strptr sub swap system tab tan then this threadcall threadcreate threaddetach threadwait time timeserial timevalue timer to trans trim type typeof ubound ubyte ucase uinteger ulong ulongint union unlock unsigned until ushort using va_arg va_first va_next val vallng valint valuint valulng var varptr view virtual wait wbin wchr weekday weekdayname wend while whex width window windowtitle winput with woct write wspace wstr wstring xor year zstring" );
+		version(FBIDE)
+		{
+			GLOBAL.KEYWORDS[0] = new IupString( cast(char[]) "__date__ __date_iso__ __fb_64bit__ __fb_argc__ __fb_argv__ __fb_arm__ __fb_asm__ __fb_backend__ __fb_bigendian__ __fb_build_date__ __fb_cygwin__ __fb_darwin__ __fb_debug__ __fb_dos__ __fb_err__ __fb_fpmode__ __fb_fpu__ __fb_freebsd__ __fb_gcc__ __fb_lang__ __fb_linux__ __fb_main__ __fb_min_version__ __fb_mt__ __fb_netbsd__ __fb_openbsd__ __fb_option_byval__ __fb_option_dynamic__ __fb_option_escape__ __fb_option_explicit__ __fb_option_gosub__ __fb_option_private__ __fb_out_dll__ __fb_out_exe__ __fb_out_lib__ __fb_out_obj__ __fb_pcos__ __fb_signature__ __fb_sse__ __fb_unix__ __fb_vectorize__ __fb_ver_major__ __fb_ver_minor__ __fb_ver_patch__ __fb_version__ __fb_win32__ __fb_xbox__ __file__ __file_nq__ __function__ __function_nq__ __line__ __path__ __time__ #assert #define #else #elseif #endif #endmacro #error #if #ifdef #ifndef #inclib #include #lang #libpath #line #macro #pragma #print #undef $dynamic $include $static $lang  abs abstract access acos add alias allocate alpha and andalso any append as assert assertwarn asc asin asm atan2 atn base beep bin binary bit bitreset bitset bload bsave byref byte byval call callocate case cast cbyte cdbl cdecl chain chdir" );
+			GLOBAL.KEYWORDS[1] = new IupString( cast(char[]) "chr cint circle class clear clng clngint close cls color command common condbroadcast condcreate conddestroy condsignal condwait const constructor continue cos cptr cshort csign csng csrlin cubyte cuint culng culngint cunsg curdir cushort custom cvd cvi cvl cvlongint cvs cvshort data date dateadd datediff datepart dateserial datevalue day deallocate declare defbyte defdbl defined defint deflng deflongint defshort defsng defstr defubyte defuint defulongint defushort delete destructor dim dir do double draw dylibfree dylibload dylibsymbol else elseif encoding end enum environ eof eqv erase erfn erl ermn err error event exec exepath exit exp export extends extern field fileattr filecopy filedatetime fileexists filelen fix flip for format frac fre freefile function get getjoystick getkey getmouse gosub goto hex hibyte hiword" );
+			GLOBAL.KEYWORDS[2] = new IupString( cast(char[]) "hour if iif imageconvertrow imagecreate imagedestroy imageinfo imp implements import inkey inp input instr instrrev int integer is isdate isredirected kill lbound lcase left len let lib line lobyte loc local locate lock lof log long longint loop loword lpos lprint lset ltrim mid minute mkd mkdir mki mkl mklongint mks mkshort mod month monthname multikey mutexcreate mutexdestroy mutexlock mutexunlock naked name namespace next new not now object oct offsetof on once open operator option or orelse out output overload override paint palette pascal pcopy peek pmap point pointcoord pointer poke pos preserve preset print private procptr property protected pset ptr public put random randomize read reallocate redim rem reset restore resume return rgb rgba right rmdir" );
+			GLOBAL.KEYWORDS[3] = new IupString( cast(char[]) "rnd rset rtrim run sadd scope screen screencopy screencontrol screenevent screeninfo screenglproc screenlist screenlock screenptr screenres screenset screensync screenunlock second seek select setdate setenviron setmouse settime sgn shared shell shl shr short sin single sizeof sleep space spc sqr static stdcall step stick stop str strig string strptr sub swap system tab tan then this threadcall threadcreate threaddetach threadwait time timeserial timevalue timer to trans trim type typeof ubound ubyte ucase uinteger ulong ulongint union unlock unsigned until ushort using va_arg va_first va_next val vallng valint valuint valulng var varptr view virtual wait wbin wchr weekday weekdayname wend while whex width window windowtitle winput with woct write wspace wstr wstring xor year zstring" );
+		}
+		version(DIDE)
+		{
+			GLOBAL.KEYWORDS[0] = new IupString( cast(char[]) "abstract alias align asm assert auto body bool break byte case cast catch cdouble cent cfloat char class const continue creal dchar debug default delegate delete deprecated do double" );
+			GLOBAL.KEYWORDS[1] = new IupString( cast(char[]) "else enum export extern false final finally float for foreach foreach_reverse function goto idouble if ifloat immutable import in inout int interface invariant ireal is lazy long macro mixin module" );
+			GLOBAL.KEYWORDS[2] = new IupString( cast(char[]) "new nothrow null out override package pragma private protected public pure real ref return scope shared short static struct super switch synchronized template this throw true try typedef typeid typeof" );
+			GLOBAL.KEYWORDS[3] = new IupString( cast(char[]) "ubyte ucent uint ulong union unittest ushort version void volatile wchar while with __FILE__ __FILE_FULL_PATH__ __MODULE__ __LINE__ __FUNCTION__ __PRETTY_FUNCTION__ __gshared __traits __vector __parameters" );
+		}
 
 		for( int i = 0; i < 10; ++i )
 		{
@@ -648,7 +664,8 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_undo"] = new IupString( cast(char[]) "Undo" );
 						GLOBAL.languageItems["sc_redo"] = new IupString( cast(char[]) "Redo" );
 						GLOBAL.languageItems["sc_gotodef"] = new IupString( cast(char[]) "Goto Definition" );
-						GLOBAL.languageItems["sc_procedure"] = new IupString( cast(char[]) "Goto Member Procedure" );
+						version(FBIDE)	GLOBAL.languageItems["sc_procedure"] = new IupString( cast(char[]) "Goto Member Procedure" );
+						version(DIDE)	GLOBAL.languageItems["sc_procedure"] = new IupString( cast(char[]) "Goto Top Definition" );
 						GLOBAL.languageItems["sc_quickrun"] = new IupString( cast(char[]) "Quick Run" );
 						GLOBAL.languageItems["sc_run"] = new IupString( cast(char[]) "Run" );
 						GLOBAL.languageItems["sc_compile"] = new IupString( cast(char[]) "Compile" );
@@ -734,7 +751,7 @@ struct GLOBAL
 			GLOBAL.languageItems["prjargs"] = new IupString( cast(char[]) "Execute Args:" );
 			GLOBAL.languageItems["prjopts"] = new IupString( cast(char[]) "Compile Opts:" );
 			GLOBAL.languageItems["prjcomment"] = new IupString( cast(char[]) "Comment" );
-			GLOBAL.languageItems["prjcompiler"] = new IupString( cast(char[]) "FBC Path" );
+			GLOBAL.languageItems["prjcompiler"] = new IupString( cast(char[]) "Compiler Path" );
 		GLOBAL.languageItems["include"] = new IupString( cast(char[]) "Include..." );
 			GLOBAL.languageItems["includepath"] = new IupString( cast(char[]) "Include Paths" );
 			GLOBAL.languageItems["librarypath"] = new IupString( cast(char[]) "Libraries Paths" );
@@ -818,14 +835,14 @@ struct GLOBAL
 		GLOBAL.languageItems["samekey"] = new IupString( cast(char[]) "The same key value with" );
 		GLOBAL.languageItems["needrestart"] = new IupString( cast(char[]) "Need Restart To Change Language" );
 		GLOBAL.languageItems["suredelete"] = new IupString( cast(char[]) "Are you sure to delete file?" );
-		GLOBAL.languageItems["sureexit"] = new IupString( cast(char[]) "Are you sure exit poseidonFB?" );
+		GLOBAL.languageItems["sureexit"] = new IupString( cast(char[]) "Are you sure exit poseidon?" );
 		GLOBAL.languageItems["opened"] = new IupString( cast(char[]) "had already opened!" );
 		GLOBAL.languageItems["existed"] = new IupString( cast(char[]) "had already existed!" );
 		GLOBAL.languageItems["wrongext"] = new IupString( cast(char[]) "Wrong Ext Name!" );
 		GLOBAL.languageItems["filelost"] = new IupString( cast(char[]) "isn't existed!" );
 		GLOBAL.languageItems[".poseidonbroken"] = new IupString( cast(char[]) "Project setup file loading error! Xml format may be broken!" );
 		GLOBAL.languageItems[".poseidonlost"] = new IupString( cast(char[]) "had lost setting xml file!" );
-		GLOBAL.languageItems["continueimport"] = new IupString( cast(char[]) "The Dir has poseidonFB Project File, Continue Import Anyway?" );
+		GLOBAL.languageItems["continueimport"] = new IupString( cast(char[]) "The Dir has poseidon Project File, Continue Import Anyway?" );
 		GLOBAL.languageItems["compilefailure"] = new IupString( cast(char[]) "Compile Failure!" );
 		GLOBAL.languageItems["compilewarning"] = new IupString( cast(char[]) "Compile Done, But Got Warnings!" );
 		GLOBAL.languageItems["compileok"] = new IupString( cast(char[]) "Compile Success!" );
@@ -842,8 +859,16 @@ struct GLOBAL
 
 
 		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
-		GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "freeBASIC Sources" );
-		GLOBAL.languageItems["bifile"] = new IupString( cast(char[]) "freeBASIC Includes" );
+		version(FBIDE)
+		{
+			GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "freeBASIC Sources" );
+			GLOBAL.languageItems["bifile"] = new IupString( cast(char[]) "freeBASIC Includes" );
+		}
+		version(DIDE)
+		{
+			GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "D Sources" );
+			GLOBAL.languageItems["bifile"] = new IupString( cast(char[]) "D Includes" );
+		}
 		GLOBAL.languageItems["supportfile"] = new IupString( cast(char[]) "All Supported Files" );
 		GLOBAL.languageItems["lngfile"] = new IupString( cast(char[]) "Language Files" );
 		GLOBAL.languageItems["chmfile"] = new IupString( cast(char[]) "Microsoft Compiled HTML Help" );

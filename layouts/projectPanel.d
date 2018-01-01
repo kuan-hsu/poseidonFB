@@ -202,14 +202,30 @@ class CProjectTree
 				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.projectFore.toCString );
 				scope _fp = new FilePath( fromStringz( IupGetAttributeId( tree, "TITLE", i ) ) );
 
-				switch( tools.lowerCase( _fp.ext() ) )
+				version(FBIDE)
 				{
-					case "bas":
-						IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bas" ) );	break;
-					case "bi":
-						IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bi" ) );		break;
-					default:
-						IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_txt" ) );
+					switch( tools.lowerCase( _fp.ext() ) )
+					{
+						case "bas":
+							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bas" ) );	break;
+						case "bi":
+							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bi" ) );		break;
+						default:
+							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_txt" ) );
+					}
+				}
+				
+				version(DIDE)
+				{
+					switch( tools.lowerCase( _fp.ext() ) )
+					{
+						case "d":
+							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bas" ) );	break;
+						case "di":
+							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bi" ) );		break;
+						default:
+							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_txt" ) );
+					}
 				}
 			}
 		}
@@ -415,7 +431,8 @@ class CProjectTree
 
 		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Load Project: [" ~ setupDir ~ "]", true ); //IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
 		
-		char[] setupFileName = setupDir ~ "/.poseidon";
+		version(FBIDE)	char[] setupFileName = setupDir ~ "/.poseidon";
+		version(DIDE)	char[] setupFileName = setupDir ~ "/D.poseidon";
 
 		scope sFN = new FilePath( setupFileName );
 
@@ -458,205 +475,189 @@ class CProjectTree
 		return true;
 	}
 
-	bool importFbEditProject()
+	version(FBIDE)
 	{
-		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"].toDString() ~ "...",  GLOBAL.languageItems["fbeditfile"].toDString() ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|" );
-		char[] fbpFullPath = fileSelectDlg.getFileName();
-
-		if( !fbpFullPath.length ) return false;
-
-		scope sFN = new FilePath( fbpFullPath );
-		char[] _dir = sFN.path(); // include tail /
-
-		if( _dir.length )
-			if( _dir[length-1] == '/' ) _dir = _dir[0..length-1].dup;
-
-		if( _dir in GLOBAL.projectManager )
+		bool importFbEditProject()
 		{
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ _dir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString() ) );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
-			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );				
-			return false;
-		}
+			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"].toDString() ~ "...",  GLOBAL.languageItems["fbeditfile"].toDString() ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|" );
+			char[] fbpFullPath = fileSelectDlg.getFileName();
 
-		scope poseidonFN = new FilePath( sFN.path ~ ".poseidon" );
+			if( !fbpFullPath.length ) return false;
 
-		if( poseidonFN.exists() )
-		{
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONDEFAULT=2,BUTTONS=YESNO" );
-			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["continueimport"].toCString );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
-			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+			scope sFN = new FilePath( fbpFullPath );
+			char[] _dir = sFN.path(); // include tail /
 
-			if( IupGetInt( messageDlg, "BUTTONRESPONSE") == 2 ) return false;
-		}
+			if( _dir.length )
+				if( _dir[length-1] == '/' ) _dir = _dir[0..length-1].dup;
 
-		scope file = new File( fbpFullPath, File.ReadExisting );
-
-		PROJECT			prj;
-		int				blockType; // blockType = 1 [Project], 2 [Make], 3 [TabOrder], 4 [File], 5 [BreakPoint], 6 [FileInfo], 7 [NoDebug]
-		char[][char[]]	fileArrays, optionArrays;
-		char[]			currentOption;
-
-		prj.dir = _dir;
-		prj.name = sFN.name;
-
-		foreach( line; new Lines!(char)(file) )
-		{
-			if( line.length )
+			if( _dir in GLOBAL.projectManager )
 			{
-				char[] _lineData = Util.trim( line );
-				bool bContinue;
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ _dir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString() ) );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
+				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );				
+				return false;
+			}
 
-				switch( _lineData )
-				{
-					case "[Project]":		blockType = 1; bContinue = true; break;
-					case "[Make]":			blockType = 2; bContinue = true; break;
-					case "[TabOrder]":		blockType = 3; bContinue = true; break;
-					case "[File]":			blockType = 4; bContinue = true; break;
-					case "[BreakPoint]":	blockType = 5; bContinue = true; break;
-					case "[FileInfo]":		blockType = 6; bContinue = true; break;
-					case "[NoDebug]":		blockType = 7; bContinue = true; break;
-					default:
-				}
+			scope poseidonFN = new FilePath( sFN.path ~ ".poseidon" );
 
-				if( !bContinue )
+			if( poseidonFN.exists() )
+			{
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONDEFAULT=2,BUTTONS=YESNO" );
+				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["continueimport"].toCString );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
+				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+
+				if( IupGetInt( messageDlg, "BUTTONRESPONSE") == 2 ) return false;
+			}
+
+			scope file = new File( fbpFullPath, File.ReadExisting );
+
+			PROJECT			prj;
+			int				blockType; // blockType = 1 [Project], 2 [Make], 3 [TabOrder], 4 [File], 5 [BreakPoint], 6 [FileInfo], 7 [NoDebug]
+			char[][char[]]	fileArrays, optionArrays;
+			char[]			currentOption;
+
+			prj.dir = _dir;
+			prj.name = sFN.name;
+
+			foreach( line; new Lines!(char)(file) )
+			{
+				if( line.length )
 				{
-					switch( blockType )
+					char[] _lineData = Util.trim( line );
+					bool bContinue;
+
+					switch( _lineData )
 					{
-						case 1:
-							int assignPos = Util.index( _lineData, "=" );
-							if( assignPos < _lineData.length - 1 )
-							{
-								char[] 	_keyWord = _lineData[0..assignPos];
-								char[]	_value = _lineData[assignPos+1..length];
-								if( _keyWord == "Description" )
-								{
-									prj.comment = _value;
-								}
-							}
-
-						case 2:
-							int assignPos = Util.index( _lineData, "=" );
-							if( assignPos < _lineData.length - 1 )
-							{
-								char[] 	_keyWord = _lineData[0..assignPos];
-								char[]	_value = _lineData[assignPos+1..length];
-
-								if( _keyWord == "Output" )
-								{
-									scope _fp = new FilePath( _value );
-									prj.targetName = _fp.name;
-								}
-								else if( _keyWord == "Run" )
-								{
-									prj.args = _value;
-								}
-								else  if( _keyWord == "Current" )
-								{
-									currentOption = _value;
-								}
-								else
-								{
-									if( _keyWord[0] > 48 && _keyWord[0] < 58 )
-										if( Integer.atoi( _keyWord ) < 1000 ) optionArrays[_keyWord] = _value;
-								}
-							}
-							break;
-
-						case 4:
-							int assignPos = Util.index( _lineData, "=" );
-							if( assignPos < _lineData.length - 1 )
-							{
-								char[] 	_keyWord = _lineData[0..assignPos];
-								char[]	_value = _lineData[assignPos+1..length];
-
-								if( _keyWord == "Main" )
-								{
-									if( fileArrays.length )	prj.mainFile = fileArrays[_value];
-									break;
-								}
-				
-								fileArrays[_keyWord] = _value;
-
-								scope _fp = new FilePath( Path.normalize( _value ) );
-								if( lowerCase( _fp.ext ) == "bas" )
-								{
-									if( !_fp.isAbsolute ) prj.sources ~= ( prj.dir ~ "/" ~ _value ); else prj.sources ~= _value;
-								}
-								else if( lowerCase( _fp.ext ) == "bi" )
-								{
-									if( !_fp.isAbsolute ) prj.includes ~= ( prj.dir ~ "/" ~ _value ); else prj.includes ~= _value;
-								}
-								else
-								{
-									if( !_fp.isAbsolute ) prj.others ~= ( prj.dir ~ "/" ~ _value ); else prj.others ~= _value;
-								}
-							}
-							break;
-
+						case "[Project]":		blockType = 1; bContinue = true; break;
+						case "[Make]":			blockType = 2; bContinue = true; break;
+						case "[TabOrder]":		blockType = 3; bContinue = true; break;
+						case "[File]":			blockType = 4; bContinue = true; break;
+						case "[BreakPoint]":	blockType = 5; bContinue = true; break;
+						case "[FileInfo]":		blockType = 6; bContinue = true; break;
+						case "[NoDebug]":		blockType = 7; bContinue = true; break;
 						default:
+					}
+
+					if( !bContinue )
+					{
+						switch( blockType )
+						{
+							case 1:
+								int assignPos = Util.index( _lineData, "=" );
+								if( assignPos < _lineData.length - 1 )
+								{
+									char[] 	_keyWord = _lineData[0..assignPos];
+									char[]	_value = _lineData[assignPos+1..length];
+									if( _keyWord == "Description" )
+									{
+										prj.comment = _value;
+									}
+								}
+
+							case 2:
+								int assignPos = Util.index( _lineData, "=" );
+								if( assignPos < _lineData.length - 1 )
+								{
+									char[] 	_keyWord = _lineData[0..assignPos];
+									char[]	_value = _lineData[assignPos+1..length];
+
+									if( _keyWord == "Output" )
+									{
+										scope _fp = new FilePath( _value );
+										prj.targetName = _fp.name;
+									}
+									else if( _keyWord == "Run" )
+									{
+										prj.args = _value;
+									}
+									else  if( _keyWord == "Current" )
+									{
+										currentOption = _value;
+									}
+									else
+									{
+										if( _keyWord[0] > 48 && _keyWord[0] < 58 )
+											if( Integer.atoi( _keyWord ) < 1000 ) optionArrays[_keyWord] = _value;
+									}
+								}
+								break;
+
+							case 4:
+								int assignPos = Util.index( _lineData, "=" );
+								if( assignPos < _lineData.length - 1 )
+								{
+									char[] 	_keyWord = _lineData[0..assignPos];
+									char[]	_value = _lineData[assignPos+1..length];
+
+									if( _keyWord == "Main" )
+									{
+										if( fileArrays.length )	prj.mainFile = fileArrays[_value];
+										break;
+									}
+					
+									fileArrays[_keyWord] = _value;
+
+									scope _fp = new FilePath( Path.normalize( _value ) );
+									version(FBIDE)
+									{
+										switch( lowerCase( _fp.ext ) )
+										{
+											case "bas":		if( !_fp.isAbsolute ) prj.sources ~= ( prj.dir ~ "/" ~ _value ); else prj.sources ~= _value;	break;
+											case "bi":		if( !_fp.isAbsolute ) prj.includes ~= ( prj.dir ~ "/" ~ _value ); else prj.includes ~= _value;	break;
+											default:		if( !_fp.isAbsolute ) prj.others ~= ( prj.dir ~ "/" ~ _value ); else prj.others ~= _value;		break;
+											
+										}
+									}
+									version(DIDE)
+									{
+										switch( lowerCase( _fp.ext ) )
+										{
+											case "d":		if( !_fp.isAbsolute ) prj.sources ~= ( prj.dir ~ "/" ~ _value ); else prj.sources ~= _value;	break;
+											case "di":		if( !_fp.isAbsolute ) prj.includes ~= ( prj.dir ~ "/" ~ _value ); else prj.includes ~= _value;	break;
+											default:		if( !_fp.isAbsolute ) prj.others ~= ( prj.dir ~ "/" ~ _value ); else prj.others ~= _value;		break;
+											
+										}
+									}
+								}
+								break;
+
+							default:
+						}
 					}
 				}
 			}
-		}
 
-		if( currentOption.length )
-		{
-			if( currentOption in optionArrays )
+			if( currentOption.length )
 			{
-				char[] option = optionArrays[currentOption];
-				int posComma = Util.index( option, "," );
-				if( posComma < option.length )
+				if( currentOption in optionArrays )
 				{
-					option = option[posComma+1..length];
-					option = Util.substitute( option, "fbc ", "" );
-					prj.compilerOption = Util.trim( option );
+					char[] option = optionArrays[currentOption];
+					int posComma = Util.index( option, "," );
+					if( posComma < option.length )
+					{
+						option = option[posComma+1..length];
+						option = Util.substitute( option, "fbc ", "" );
+						prj.compilerOption = Util.trim( option );
+					}
 				}
 			}
+
+			prj.type = "1";
+
+			GLOBAL.projectManager[prj.dir] = prj;
+			createProjectTree( prj.dir );
+			return true;
 		}
-
-		prj.type = "1";
-
-		GLOBAL.projectManager[prj.dir] = prj;
-		createProjectTree( prj.dir );
-		return true;
 	}	
 
 	void updateRecentProjects( char[] prjDir, char[] prjName )
 	{
 		char[] title;
 		
-		/+
-		if( prjDir.length )
-		{
-			IupString[]	temps;
-			
-			title = prjDir ~ " : " ~ prjName;
-			
-			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
-			{
-				if( GLOBAL.recentProjects[i].toDString != title ) temps ~= GLOBAL.recentProjects[i];
-			}
-
-			temps ~= new IupString( title );
-			GLOBAL.recentProjects.length = 0;
-			GLOBAL.recentProjects = temps;
-		}
-		
-		// Recent Projects
-		if( GLOBAL.recentProjects.length > 8 )
-		{
-			for( int i = 0; i < GLOBAL.recentProjects.length - 8; ++ i ) 
-				delete GLOBAL.recentProjects[i];			
-			
-			GLOBAL.recentProjects[0..8] = GLOBAL.recentProjects[$-8..$];
-			GLOBAL.recentProjects.length = 8;
-		}
-		+/
 		if( prjDir.length )
 		{
 			IupString[]	temps;
@@ -820,67 +821,6 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	/+
-	// Leaf Node has been Double-Click
-	private int CProjectTree_ExecuteLeaf_cb( Ihandle *ih, int id )
-	{
-		char*	_fullpath = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
-		
-		if( _fullpath != null )
-		{
-			scope fullPath = new IupString( _fullpath );
-			
-			scope fp = new FilePath( fullPath.toDString );
-			
-			if( fp.exists() )
-			{
-				char[] ext = lowerCase( fp.ext );
-
-				try
-				{
-					if( ext == "bas" || ext == "bi" )
-					{
-						char[] normalizeFullPath = Path.normalize( fullPath.toDString );
-						if( upperCase( normalizeFullPath ) in GLOBAL.scintillaManager )
-						{
-							actionManager.ScintillaAction.openFile( fullPath.toDString );
-						}
-						else
-						{
-							Ihandle* tempActiveDocumentTabs = GLOBAL.activeDocumentTabs;
-							DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
-							actionManager.ScintillaAction.openFile( fullPath.toDString );
-							DocumentTabAction.setActiveDocumentTabs( tempActiveDocumentTabs );
-						}
-					}
-					else
-					{
-						version(Windows)
-						{
-							Process p = new Process( true, "cmd", "/c", fullPath.toDString );
-							p.gui( true );
-							p.execute;
-						}
-						else
-						{
-							Process p = new Process( true, "xdg-open", fullPath.toDString );
-							p.gui( true );
-							p.execute;
-						}
-					}
-				}
-				catch( Exception e )
-				{
-					GLOBAL.IDEMessageDlg.print( "CProjectTree_ExecuteLeaf_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-					//debug IupMessage( "CProjectTree_ExecuteLeaf_cb", toStringz( "CProjectTree_ExecuteLeaf_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
-				}
-			}
-		}
-
-		return IUP_DEFAULT;
-	}
-	+/
-
 	private int CProjectTree_NodeRemoved_cb( Ihandle *ih, void* userdata )
 	{
 		char* dataPointer = cast(char*) userdata;
@@ -1160,40 +1100,81 @@ extern(C)
 			}
 			
 			// Wrong Ext, exit!
-			switch( lowerCase( fn.ext ) )
+			version(FBIDE)
 			{
-				case "bas":
-					if( prjFilesFolderName != "Sources" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
-						return IUP_DEFAULT;
-					}
-					break;
-				case "bi":
-					if( prjFilesFolderName != "Includes" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
-						return IUP_DEFAULT;
-					}
-					break;
-				default:
-					if( prjFilesFolderName != "Others" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
-						return IUP_DEFAULT;
-					}
+				switch( lowerCase( fn.ext ) )
+				{
+					case "bas":
+						if( prjFilesFolderName != "Sources" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							return IUP_DEFAULT;
+						}
+						break;
+					case "bi":
+						if( prjFilesFolderName != "Includes" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							return IUP_DEFAULT;
+						}
+						break;
+					default:
+						if( prjFilesFolderName != "Others" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							return IUP_DEFAULT;
+						}
+				}
+			}
+			version(DIDE)
+			{
+				switch( lowerCase( fn.ext ) )
+				{
+					case "d":
+						if( prjFilesFolderName != "Sources" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							return IUP_DEFAULT;
+						}
+						break;
+					case "di":
+						if( prjFilesFolderName != "Includes" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							return IUP_DEFAULT;
+						}
+						break;
+					default:
+						if( prjFilesFolderName != "Others" )
+						{
+							Ihandle* messageDlg = IupMessageDlg();
+							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							return IUP_DEFAULT;
+						}
+				}
 			}
 
 			// Reset FilePath Object
@@ -1264,12 +1245,25 @@ extern(C)
 			char[]	prjDirName 			= actionManager.ProjectAction.getActiveProjectName();
 			char[]	filter;
 
-			switch( prjFilesFolderName )
+			version(FBIDE)
 			{
-				case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
-				case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
-				default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+				switch( prjFilesFolderName )
+				{
+					case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+					case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+					default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+				}
 			}
+			version(DIDE)
+			{
+				switch( prjFilesFolderName )
+				{
+					case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+					case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+					default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+				}
+			}
+			
 			
 			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["addfile"].toDString() ~ "...", filter, "OPEN", "YES" );
 			//char[] fullPath = fileSecectDlg.getFileName();
@@ -1298,63 +1292,113 @@ extern(C)
 							{
 								bExitChildLoop = true;
 								break;
-								/*
-								char[] ext = lowerCase( fn.ext() );
-								if( ext == "bi" || ext == "bas" ) actionManager.ScintillaAction.openFile( s.dup );
-								return IUP_DEFAULT;
-								*/
 							}
 						}
 						if( bExitChildLoop ) continue;
 					}
 
 					// Wrong Ext, exit!
-					switch( lowerCase( fn.ext ) )
+					
+					// Version Condition
+					version(FBIDE)
 					{
-						case "bas":
-							if( prjFilesFolderName != "Sources" )
-							{
-								Ihandle* messageDlg = IupMessageDlg();
-								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
-								return IUP_DEFAULT;
-							}
-							else
-							{
-								GLOBAL.projectManager[prjDirName].sources ~= fullPath;
-							}
-							break;
-						case "bi":
-							if( prjFilesFolderName != "Includes" )
-							{
-								Ihandle* messageDlg = IupMessageDlg();
-								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
-								return IUP_DEFAULT;
-							}
-							else
-							{
-								GLOBAL.projectManager[prjDirName].includes ~= fullPath;
-							}
-							break;
-						default:
-							if( prjFilesFolderName != "Others" )
-							{
-								Ihandle* messageDlg = IupMessageDlg();
-								IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-								IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
-								return IUP_DEFAULT;
-							}
-							else
-							{
-								GLOBAL.projectManager[prjDirName].others ~= fullPath;
-							}
+						switch( lowerCase( fn.ext ) )
+						{
+							case "bas":
+								if( prjFilesFolderName != "Sources" )
+								{
+									Ihandle* messageDlg = IupMessageDlg();
+									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									return IUP_DEFAULT;
+								}
+								else
+								{
+									GLOBAL.projectManager[prjDirName].sources ~= fullPath;
+								}
+								break;
+							case "bi":
+								if( prjFilesFolderName != "Includes" )
+								{
+									Ihandle* messageDlg = IupMessageDlg();
+									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									return IUP_DEFAULT;
+								}
+								else
+								{
+									GLOBAL.projectManager[prjDirName].includes ~= fullPath;
+								}
+								break;
+							default:
+								if( prjFilesFolderName != "Others" )
+								{
+									Ihandle* messageDlg = IupMessageDlg();
+									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									return IUP_DEFAULT;
+								}
+								else
+								{
+									GLOBAL.projectManager[prjDirName].others ~= fullPath;
+								}
+						}
+					}
+					version(DIDE)
+					{
+						switch( lowerCase( fn.ext ) )
+						{
+							case "d":
+								if( prjFilesFolderName != "Sources" )
+								{
+									Ihandle* messageDlg = IupMessageDlg();
+									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									return IUP_DEFAULT;
+								}
+								else
+								{
+									GLOBAL.projectManager[prjDirName].sources ~= fullPath;
+								}
+								break;
+							case "di":
+								if( prjFilesFolderName != "Includes" )
+								{
+									Ihandle* messageDlg = IupMessageDlg();
+									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									return IUP_DEFAULT;
+								}
+								else
+								{
+									GLOBAL.projectManager[prjDirName].includes ~= fullPath;
+								}
+								break;
+							default:
+								if( prjFilesFolderName != "Others" )
+								{
+									Ihandle* messageDlg = IupMessageDlg();
+									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
+									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
+									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									return IUP_DEFAULT;
+								}
+								else
+								{
+									GLOBAL.projectManager[prjDirName].others ~= fullPath;
+								}
+						}
 					}
 
 					/*
@@ -1403,8 +1447,16 @@ extern(C)
 					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) );
 					scope fp = new FilePath( fullPath );
 					char[] ext = lowerCase( fp.ext );
+					
+					// Version Condition
+					char[] _source_ = "bas", _include_ = "bi";
+					version(DIDE)
+					{
+						_source_	= "d";
+						_include_	= "di";
+					}					
 
-					if( ext == "bi" || ext == "bas" )
+					if( ext == _include_ || ext == _source_ )
 					{
 						actionManager.ScintillaAction.openFile( fullPath.dup );
 					}
@@ -1431,55 +1483,12 @@ extern(C)
 			}
 			
 			int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-			/+
-			// Move the tabDocument 
-			int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-			char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
-			scope fp = new FilePath( fullPath );
-			char[] ext = lowerCase( fp.ext );
-			if( ext == "bi" || ext == "bas" ) actionManager.ScintillaAction.openFile( fullPath.dup );
-			+/
 			// Erase Project Treeitems And Left Only One Item
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 		}
 		
 		return IUP_DEFAULT;
-		
-		/+
-		// Get Focus Tree Node ID
-		int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-		char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
-
-		scope fp = new FilePath( fullPath );
-		char[] ext = lowerCase( fp.ext );
-
-		if( ext == "bi" || ext == "bas" )
-		{
-			actionManager.ScintillaAction.openFile( fullPath.dup );
-		}
-		else
-		{
-			try
-			{
-				version(Windows)
-				{
-					Process p = new Process( true, "cmd", "/c", fullPath );
-					p.gui( true );
-					p.execute;
-				}
-				else
-				{
-					Process p = new Process( true, "xdg-open", fullPath );
-					p.gui( true );
-					p.execute;
-				}
-			}
-			catch{}
-		}
-
-		return IUP_DEFAULT;
-		+/
 	}
 
 	private int CProjectTree_remove_cb( Ihandle* ih )
@@ -1614,50 +1623,69 @@ extern(C)
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, GLOBAL.cString.convert( fp.file ) );
 
 			char[] activeProjectDirName = actionManager.ProjectAction.getActiveProjectName;
-
-			switch( lowerCase( oldExt ) )
+			
+			version(FBIDE)
 			{
-				case "bas":
-					/*
-					char[][] tempSources = GLOBAL.projectManager[GLOBAL.activeProjectDirName].sources;
-					GLOBAL.projectManager[GLOBAL.activeProjectDirName].sources.length = 0;
-					*/
-					char[][] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
-					GLOBAL.projectManager[activeProjectDirName].sources.length = 0;
-					foreach( char[] s; tempSources )
-					{
-						//if( s != fullPath ) GLOBAL.projectManager[GLOBAL.activeProjectDirName].sources ~= s;else GLOBAL.projectManager[GLOBAL.activeProjectDirName].sources ~= fp.toString;
-						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= fp.toString;
-					}
-					
-					break;
+				switch( lowerCase( oldExt ) )
+				{
+					case "bas":
+						char[][] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
+						GLOBAL.projectManager[activeProjectDirName].sources.length = 0;
+						foreach( char[] s; tempSources )
+						{
+							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= fp.toString;
+						}
+						
+						break;
 
-				case "bi":
-					/*
-					char[][] tempIncludes = GLOBAL.projectManager[GLOBAL.activeProjectDirName].includes;
-					GLOBAL.projectManager[GLOBAL.activeProjectDirName].includes.length = 0;
-					*/
-					char[][] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
-					GLOBAL.projectManager[activeProjectDirName].includes.length = 0;
-					foreach( char[] s; tempIncludes )
-					{
-						//if( s != fullPath ) GLOBAL.projectManager[GLOBAL.activeProjectDirName].includes ~= s;else GLOBAL.projectManager[GLOBAL.activeProjectDirName].includes ~= fp.toString;
-						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= fp.toString;
-					}
-					break;
-				default:
-					/*
-					char[][] tempOthers = GLOBAL.projectManager[GLOBAL.activeProjectDirName].others;
-					GLOBAL.projectManager[GLOBAL.activeProjectDirName].others.length = 0;
-					*/
-					char[][] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
-					GLOBAL.projectManager[activeProjectDirName].others.length = 0;
-					foreach( char[] s; tempOthers )
-					{
-						//if( s != fullPath ) GLOBAL.projectManager[GLOBAL.activeProjectDirName].others ~= s;else GLOBAL.projectManager[GLOBAL.activeProjectDirName].others ~= fp.toString;
-						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
-					}
+					case "bi":
+						char[][] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
+						GLOBAL.projectManager[activeProjectDirName].includes.length = 0;
+						foreach( char[] s; tempIncludes )
+						{
+							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= fp.toString;
+						}
+						break;
+					default:
+						char[][] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
+						GLOBAL.projectManager[activeProjectDirName].others.length = 0;
+						foreach( char[] s; tempOthers )
+						{
+							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
+						}
+				}
 			}
+			version(DIDE)
+			{
+				switch( lowerCase( oldExt ) )
+				{
+					case "d":
+						char[][] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
+						GLOBAL.projectManager[activeProjectDirName].sources.length = 0;
+						foreach( char[] s; tempSources )
+						{
+							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= fp.toString;
+						}
+						
+						break;
+
+					case "di":
+						char[][] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
+						GLOBAL.projectManager[activeProjectDirName].includes.length = 0;
+						foreach( char[] s; tempIncludes )
+						{
+							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= fp.toString;
+						}
+						break;
+					default:
+						char[][] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
+						GLOBAL.projectManager[activeProjectDirName].others.length = 0;
+						foreach( char[] s; tempOthers )
+						{
+							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
+						}
+				}
+			}			
 		}
 		
 		return IUP_DEFAULT;

@@ -74,12 +74,14 @@ void createExplorerWindow()
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
 
-	GLOBAL.debugPanel = new CDebugger();
+	version(FBIDE) GLOBAL.debugPanel = new CDebugger();
 	/*
 	version(Windows)
 	{
 	*/
-		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		version(FBIDE)	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		version(DIDE)	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, null );
+		
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
@@ -327,59 +329,62 @@ extern(C)
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
 				{
-					// Auto convert keyword case......
-					if( GLOBAL.keywordCase > 0 )
+					version(FBIDE)
 					{
-						if( cast(int)IupScintillaSendMessage( cSci.getIupScintilla, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
+						// Auto convert keyword case......
+						if( GLOBAL.keywordCase > 0 )
 						{
-							if( ( c > 31 && c < 127 ) || c == 9 || c == 32 )
+							if( cast(int)IupScintillaSendMessage( cSci.getIupScintilla, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
 							{
-								int currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-								if( c == 9 || c == 32 ) currentPos--;
-								
-								char[]	nextChar = lowerCase( fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", currentPos ) ) );
-								bool	bContinue = true;
-								
-								
-								if( nextChar.length )
+								if( ( c > 31 && c < 127 ) || c == 9 || c == 32 )
 								{
-									if( nextChar[0] >= 'a' && nextChar[0] <= 'z' ) bContinue = false;
-								}
-
-								if( bContinue )
-								{
-									int		headPos;
-									char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, currentPos, headPos );
-									word = lowerCase( word.reverse );
-									if( word.length )
+									int currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+									if( c == 9 || c == 32 ) currentPos--;
+									
+									char[]	nextChar = lowerCase( fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", currentPos ) ) );
+									bool	bContinue = true;
+									
+									
+									if( nextChar.length )
 									{
-										bool bExitFlag;
-										foreach( IupString _keyword; GLOBAL.KEYWORDS )
-										{
-											foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
-											{	
-												if( _k.length )
-												{
-													if( lowerCase( _k ) == word )
-													{
-														if( c == 9 || c == 32 )
-														{
-															currentPos++;
-															//word ~= c;
-														}
-														//IupMessage("",toStringz( Integer.toString( ++headPos ) ~ ":" ~ Integer.toString( currentPos ) ) );
-														++headPos;
-														IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
-														word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
-														IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
-														IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos , 0 ); // sci_gotopos = 2025,
+										if( nextChar[0] >= 'a' && nextChar[0] <= 'z' ) bContinue = false;
+									}
 
-														bExitFlag = true;
-														break;
+									if( bContinue )
+									{
+										int		headPos;
+										char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, currentPos, headPos );
+										word = lowerCase( word.reverse );
+										if( word.length )
+										{
+											bool bExitFlag;
+											foreach( IupString _keyword; GLOBAL.KEYWORDS )
+											{
+												foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
+												{	
+													if( _k.length )
+													{
+														if( lowerCase( _k ) == word )
+														{
+															if( c == 9 || c == 32 )
+															{
+																currentPos++;
+																//word ~= c;
+															}
+															//IupMessage("",toStringz( Integer.toString( ++headPos ) ~ ":" ~ Integer.toString( currentPos ) ) );
+															++headPos;
+															IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
+															word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
+															IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
+															IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos , 0 ); // sci_gotopos = 2025,
+
+															bExitFlag = true;
+															break;
+														}
 													}
 												}
+												if( bExitFlag ) break;
 											}
-											if( bExitFlag ) break;
 										}
 									}
 								}

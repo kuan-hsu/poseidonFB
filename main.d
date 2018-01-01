@@ -39,80 +39,9 @@ else
 	pragma(lib, "iup_scintilla");
 }
 
-/+
-version(Windows)
-{
-	import tango.sys.win32.UserGdi;
-
-	bool bRunAgain;
-	
-	extern( Windows ) BOOL enumWindowsProc( HWND hWnd, LPARAM lParam )
-	{
-		int length = GetWindowTextLengthA( hWnd );
-
-		char[] title;
-		title.length = length + 1;
-		
-		GetWindowTextA( hWnd, title.ptr, length + 1 );
-
-		if( title.length > 13 )
-		{
-			// poseidonFB - FreeBasic IDE
-			if( title[length-14..length] == "FreeBasic IDE\0" )
-			{
-				if( IsIconic( hWnd ) )
-				{
-					ShowWindow( hWnd, SW_RESTORE);  
-				}
-				else
-				{
-					SetForegroundWindow( hWnd );
-				}
-				bRunAgain = true;
-				
-				//if( _args.length > 1 )
-				//{
-					COPYDATASTRUCT copy;
-					copy.cbData = _args[0].length;
-					copy.lpData = cast(int*) _args[0].ptr;
-					
-					Stdout( _args[0] ).newline;
-
-					//int WM_COPYDATA = 0x004A;
-					SendMessageA( hWnd, 74, null, &copy );
-				//}
-				
-				return false;
-			}
-		}
-
-		return TRUE;
-	}
-}
-+/
-
 void main( char[][] args )
 {
-	/+
-	version(Windows)
-	{
-		_args = args;
-		
-		EnumWindows( &enumWindowsProc, 0 );
-		if( bRunAgain ) return;
-
-		/*
-		HANDLE handle = CreateMutexA( NULL, FALSE, "poseidonFB.exe" );
-
-		if( GetLastError( ) == ERROR_ALREADY_EXISTS )
-		{
-			EnumWindows( &enumWindowsProc, 0 );
-			return;
-		}
-		*/
-	}
-	+/
-
+	
 	version(Windows)
 	{
 		SharedLib sharedlib;
@@ -151,17 +80,21 @@ void main( char[][] args )
 		Stdout( "IUP open error!!!" ).newline;
 		return;
 	}
-	
+	/*
 	version(Windows)
 	{
-		IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
+		version(FBIDE)
+			IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
+		else
+			IupSetGlobal("SINGLEINSTANCE", "poseidonD - D Programming Language IDE");
+			
 		if( IupGetGlobal( toStringz( "SINGLEINSTANCE" ) ) == null  )
 		{
 			IupClose();
 			return;
 		}
 	}
-	
+	*/
 	//  Get poseidonFB exePath & set the new cwd
 	scope _poseidonPath = new FilePath( args[0] );
 	if( _poseidonPath.exists() )
@@ -171,23 +104,6 @@ void main( char[][] args )
 		version(Windows)
 		{
 			GLOBAL.EnvironmentVars = Environment.get();
-/+
-			Process p = new Process( true, "cmd /C set" );
-			p.gui( true );
-			p.execute;
-
-			foreach( line; new Lines!(char)(p.stdout) )
-			{
-				line = Util.trim(line);
-				if( !line.length ) break;
-				int posAssign = Util.index( line, "=" );
-				if( posAssign < line.length )
-				{
-					char[] key = Util.trim( line[0..posAssign] ).dup;
-					char[] value = Util.trim( line[posAssign+1..$] ).dup;
-					if( key.length ) GLOBAL.EnvironmentVars[key] = value;
-				}
-			}+/
 		}
 	}
 	
@@ -244,7 +160,7 @@ void main( char[][] args )
 
 	createLayout();
 	
-	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+	version(FBIDE) IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" ); else IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonD - D Programming Language IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
@@ -279,7 +195,11 @@ void main( char[][] args )
 	scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
 	scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString );//IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
 	scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
-	scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
+	version(FBIDE)
+	{
+		scope debugString = new IupString( GLOBAL.fonts[8].fontString );
+		IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
+	}
 	scope statusString = new IupString( GLOBAL.fonts[11].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
 	scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline
 	
@@ -291,15 +211,31 @@ void main( char[][] args )
 		scope argPath = new FilePath( args[1] );
 		if( argPath.exists() )
 		{
-			if( argPath.file == ".poseidon" )
+			version(FBIDE)
 			{
-				char[] dir = argPath.path;
-				if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
-				GLOBAL.projectTree.openProject( dir );				
+				if( argPath.file == ".poseidon" )
+				{
+					char[] dir = argPath.path;
+					if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
+					GLOBAL.projectTree.openProject( dir );				
+				}
+				else
+				{
+					if( lowerCase( argPath.ext ) == "bas" || lowerCase( argPath.ext ) == "bi" )	ScintillaAction.openFile( args[1] );
+				}
 			}
-			else
+			version(DIDE)
 			{
-				ScintillaAction.openFile( args[1] );
+				if( argPath.file == "D.poseidon" )
+				{
+					char[] dir = argPath.path;
+					if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
+					GLOBAL.projectTree.openProject( dir );				
+				}
+				else
+				{
+					if( lowerCase( argPath.ext ) == "d" || lowerCase( argPath.ext ) == "di" )	ScintillaAction.openFile( args[1] );
+				}
 			}
 		}
 	}
@@ -349,14 +285,4 @@ void main( char[][] args )
 	IupClose();
 	
 	version(Windows) sharedlib.unload();
-	/*
-	version( Windows )
-	{
-		if( handle != null )
-		{
-			ReleaseMutex( handle );
-			CloseHandle( handle );
-		}
-	}
-	*/
 }

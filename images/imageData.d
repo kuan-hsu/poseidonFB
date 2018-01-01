@@ -4,28 +4,57 @@ import iup.iup;
 
 import tools, images.xpm;
 
-Ihandle* load_image_poseidonFBico()
+version(FBIDE)
 {
-	ubyte imgdata[] = [
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 17, 16, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 16, 16, 16, 32, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 46, 41, 255, 17, 16, 16, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 42, 46, 47, 128, 45, 53, 56, 239, 31, 31, 27, 112, 0, 0, 0, 0, 0, 0, 0, 0, 58, 58, 45, 239, 44, 33, 30, 239, 14, 12, 11, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 15, 15, 16, 48, 111, 113, 108, 255, 92, 84, 65, 239, 4, 4, 4, 16, 0, 0, 0, 0, 39, 36, 28, 159, 92, 90, 74, 255, 38, 27, 24, 239, 16, 13, 13, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 20, 20, 20, 80, 64, 62, 47, 159, 91, 82, 55, 207, 18, 18, 15, 16, 0, 0, 0, 0, 33, 33, 28, 96, 91, 92, 75, 255, 41, 36, 31, 255, 22, 16, 16, 159, 21, 18, 20, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 58, 44, 159, 84, 81, 65, 207, 31, 30, 26, 16, 0, 0, 0, 0, 24, 25, 21, 64, 82, 90, 81, 239, 60, 62, 54, 255, 39, 32, 26, 255, 16, 15, 16, 143, 14, 14, 15, 80, 0, 0, 0, 0, 0, 0, 0, 0,
-	27, 27, 28, 96, 29, 33, 36, 128, 19, 22, 24, 96, 21, 21, 21, 32, 0, 0, 0, 0, 55, 59, 55, 159, 100, 101, 91, 239, 35, 33, 27, 48, 0, 0, 0, 0, 11, 12, 12, 32, 62, 66, 58, 191, 86, 95, 81, 255, 65, 75, 65, 255, 46, 50, 40, 255, 31, 28, 24, 255, 17, 17, 18, 80,
-	11, 10, 11, 32, 54, 48, 50, 207, 66, 63, 60, 255, 64, 58, 46, 207, 0, 0, 0, 0, 16, 17, 18, 16, 76, 84, 84, 207, 100, 104, 90, 255, 39, 36, 29, 96, 0, 0, 0, 0, 0, 0, 0, 0, 43, 43, 37, 96, 96, 101, 90, 223, 101, 117, 118, 255, 39, 35, 36, 239, 15, 14, 15, 111,
-	0, 0, 0, 0, 0, 0, 0, 16, 65, 56, 57, 175, 120, 107, 98, 255, 59, 52, 37, 159, 0, 0, 0, 0, 20, 22, 22, 16, 75, 85, 85, 207, 98, 106, 95, 255, 61, 57, 45, 159, 1, 1, 1, 16, 0, 0, 0, 0, 46, 50, 43, 191, 104, 119, 119, 255, 17, 12, 12, 223, 13, 13, 14, 96,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 77, 78, 175, 129, 120, 107, 255, 59, 54, 44, 143, 0, 0, 0, 0, 35, 37, 38, 64, 96, 107, 105, 239, 101, 113, 109, 255, 84, 81, 67, 207, 31, 34, 34, 112, 95, 106, 97, 255, 85, 92, 93, 255, 10, 8, 9, 223, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 16, 138, 131, 129, 239, 100, 97, 87, 255, 30, 27, 22, 64, 0, 0, 0, 0, 38, 39, 34, 80, 103, 113, 102, 255, 109, 125, 126, 255, 135, 145, 144, 255, 119, 129, 129, 255, 36, 33, 32, 223, 13, 12, 14, 127, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 62, 65, 128, 122, 117, 117, 255, 105, 100, 86, 239, 5, 5, 5, 16, 0, 0, 0, 0, 67, 68, 55, 159, 140, 146, 137, 255, 126, 127, 129, 255, 103, 101, 101, 255, 39, 32, 31, 255, 25, 25, 25, 64, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 16, 80, 121, 111, 110, 223, 82, 87, 84, 255, 85, 76, 61, 175, 33, 37, 32, 128, 121, 122, 96, 255, 148, 150, 137, 255, 132, 139, 140, 255, 127, 139, 140, 255, 95, 77, 66, 255, 38, 29, 25, 175, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 78, 78, 144, 97, 97, 96, 255, 126, 135, 127, 255, 136, 146, 130, 255, 125, 128, 110, 239, 60, 53, 47, 255, 55, 48, 48, 239, 120, 117, 92, 255, 126, 124, 80, 255, 96, 74, 54, 255, 36, 23, 19, 159,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 48, 46, 44, 48, 110, 102, 98, 255, 70, 74, 74, 239, 37, 33, 33, 255, 10, 8, 9, 191, 9, 8, 9, 159, 18, 18, 20, 96, 88, 82, 80, 239, 119, 113, 83, 255, 74, 64, 43, 255, 81, 58, 46, 239,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 32, 33, 191, 19, 18, 19, 175, 19, 18, 19, 111, 13, 13, 15, 48, 0, 0, 0, 0, 0, 0, 0, 0, 19, 16, 17, 48, 100, 88, 84, 239, 46, 40, 35, 223, 8, 7, 6, 127];
+	Ihandle* load_image_poseidonFBico()
+	{
+		ubyte imgdata[] = [
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 17, 16, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 16, 16, 16, 32, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 46, 41, 255, 17, 16, 16, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 42, 46, 47, 128, 45, 53, 56, 239, 31, 31, 27, 112, 0, 0, 0, 0, 0, 0, 0, 0, 58, 58, 45, 239, 44, 33, 30, 239, 14, 12, 11, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 15, 15, 16, 48, 111, 113, 108, 255, 92, 84, 65, 239, 4, 4, 4, 16, 0, 0, 0, 0, 39, 36, 28, 159, 92, 90, 74, 255, 38, 27, 24, 239, 16, 13, 13, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 20, 20, 20, 80, 64, 62, 47, 159, 91, 82, 55, 207, 18, 18, 15, 16, 0, 0, 0, 0, 33, 33, 28, 96, 91, 92, 75, 255, 41, 36, 31, 255, 22, 16, 16, 159, 21, 18, 20, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 58, 44, 159, 84, 81, 65, 207, 31, 30, 26, 16, 0, 0, 0, 0, 24, 25, 21, 64, 82, 90, 81, 239, 60, 62, 54, 255, 39, 32, 26, 255, 16, 15, 16, 143, 14, 14, 15, 80, 0, 0, 0, 0, 0, 0, 0, 0,
+		27, 27, 28, 96, 29, 33, 36, 128, 19, 22, 24, 96, 21, 21, 21, 32, 0, 0, 0, 0, 55, 59, 55, 159, 100, 101, 91, 239, 35, 33, 27, 48, 0, 0, 0, 0, 11, 12, 12, 32, 62, 66, 58, 191, 86, 95, 81, 255, 65, 75, 65, 255, 46, 50, 40, 255, 31, 28, 24, 255, 17, 17, 18, 80,
+		11, 10, 11, 32, 54, 48, 50, 207, 66, 63, 60, 255, 64, 58, 46, 207, 0, 0, 0, 0, 16, 17, 18, 16, 76, 84, 84, 207, 100, 104, 90, 255, 39, 36, 29, 96, 0, 0, 0, 0, 0, 0, 0, 0, 43, 43, 37, 96, 96, 101, 90, 223, 101, 117, 118, 255, 39, 35, 36, 239, 15, 14, 15, 111,
+		0, 0, 0, 0, 0, 0, 0, 16, 65, 56, 57, 175, 120, 107, 98, 255, 59, 52, 37, 159, 0, 0, 0, 0, 20, 22, 22, 16, 75, 85, 85, 207, 98, 106, 95, 255, 61, 57, 45, 159, 1, 1, 1, 16, 0, 0, 0, 0, 46, 50, 43, 191, 104, 119, 119, 255, 17, 12, 12, 223, 13, 13, 14, 96,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 77, 78, 175, 129, 120, 107, 255, 59, 54, 44, 143, 0, 0, 0, 0, 35, 37, 38, 64, 96, 107, 105, 239, 101, 113, 109, 255, 84, 81, 67, 207, 31, 34, 34, 112, 95, 106, 97, 255, 85, 92, 93, 255, 10, 8, 9, 223, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 16, 138, 131, 129, 239, 100, 97, 87, 255, 30, 27, 22, 64, 0, 0, 0, 0, 38, 39, 34, 80, 103, 113, 102, 255, 109, 125, 126, 255, 135, 145, 144, 255, 119, 129, 129, 255, 36, 33, 32, 223, 13, 12, 14, 127, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 62, 65, 128, 122, 117, 117, 255, 105, 100, 86, 239, 5, 5, 5, 16, 0, 0, 0, 0, 67, 68, 55, 159, 140, 146, 137, 255, 126, 127, 129, 255, 103, 101, 101, 255, 39, 32, 31, 255, 25, 25, 25, 64, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 16, 80, 121, 111, 110, 223, 82, 87, 84, 255, 85, 76, 61, 175, 33, 37, 32, 128, 121, 122, 96, 255, 148, 150, 137, 255, 132, 139, 140, 255, 127, 139, 140, 255, 95, 77, 66, 255, 38, 29, 25, 175, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 78, 78, 144, 97, 97, 96, 255, 126, 135, 127, 255, 136, 146, 130, 255, 125, 128, 110, 239, 60, 53, 47, 255, 55, 48, 48, 239, 120, 117, 92, 255, 126, 124, 80, 255, 96, 74, 54, 255, 36, 23, 19, 159,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 48, 46, 44, 48, 110, 102, 98, 255, 70, 74, 74, 239, 37, 33, 33, 255, 10, 8, 9, 191, 9, 8, 9, 159, 18, 18, 20, 96, 88, 82, 80, 239, 119, 113, 83, 255, 74, 64, 43, 255, 81, 58, 46, 239,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 32, 33, 191, 19, 18, 19, 175, 19, 18, 19, 111, 13, 13, 15, 48, 0, 0, 0, 0, 0, 0, 0, 0, 19, 16, 17, 48, 100, 88, 84, 239, 46, 40, 35, 223, 8, 7, 6, 127];
 
-	Ihandle* image = IupImageRGBA( 16, 16, imgdata.ptr );
-	return image;
+		Ihandle* image = IupImageRGBA( 16, 16, imgdata.ptr );
+		return image;
+	}
+}
+else
+{
+	Ihandle* load_image_poseidonFBico()
+	{
+		ubyte imgdata[] = [
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 4, 0, 0, 0, 0, 5, 2, 2, 24, 25, 8, 8, 107, 0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 7, 2, 2, 35, 2, 1, 1, 28, 0, 0, 0, 0, 0, 0, 0, 0, 8, 3, 3, 17, 88, 25, 25, 233, 12, 4, 4, 73, 0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 62, 19, 19, 127, 119, 34, 34, 254, 30, 6, 6, 100, 0, 0, 0, 0, 0, 0, 0, 11, 119, 35, 35, 229, 87, 21, 21, 246, 0, 0, 0, 52, 0, 0, 0, 0, 1, 0, 0, 5, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 22, 12, 12, 54, 189, 88, 88, 255, 152, 61, 61, 238, 4, 2, 2, 28, 0, 0, 0, 0, 66, 20, 20, 149, 176, 59, 59, 255, 72, 17, 17, 240, 8, 2, 2, 95, 0, 1, 1, 0, 1, 0, 0, 2, 1, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0,
+		2, 0, 0, 3, 0, 0, 0, 0, 16, 7, 7, 70, 104, 51, 51, 175, 136, 66, 66, 214, 4, 1, 1, 16, 0, 0, 0, 0, 51, 22, 22, 105, 171, 62, 62, 255, 88, 25, 25, 252, 23, 4, 4, 157, 7, 3, 3, 40, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 102, 49, 49, 169, 146, 64, 64, 218, 7, 0, 0, 19, 0, 0, 0, 0, 32, 13, 13, 72, 155, 61, 61, 234, 141, 46, 46, 255, 66, 14, 14, 248, 25, 7, 7, 138, 4, 2, 2, 70, 1, 0, 0, 18, 1, 0, 0, 1,
+		34, 10, 10, 101, 54, 16, 16, 143, 21, 6, 6, 101, 9, 2, 2, 36, 0, 0, 0, 0, 114, 45, 45, 169, 182, 78, 78, 248, 22, 8, 8, 57, 0, 0, 0, 0, 13, 6, 6, 38, 117, 50, 50, 185, 173, 66, 66, 255, 155, 46, 46, 252, 108, 29, 29, 253, 56, 16, 16, 237, 23, 7, 7, 93,
+		8, 3, 3, 51, 95, 26, 26, 209, 159, 49, 49, 255, 102, 37, 37, 199, 0, 0, 0, 0, 0, 0, 0, 13, 152, 65, 65, 203, 201, 80, 80, 255, 45, 18, 18, 102, 0, 0, 0, 0, 0, 0, 0, 6, 47, 23, 23, 94, 166, 71, 71, 215, 238, 79, 79, 255, 85, 22, 22, 241, 10, 3, 3, 117,
+		0, 0, 0, 0, 0, 0, 0, 14, 101, 37, 37, 167, 199, 86, 86, 255, 80, 31, 31, 153, 0, 0, 0, 0, 2, 0, 0, 17, 154, 59, 59, 204, 215, 81, 81, 255, 89, 37, 37, 158, 2, 2, 2, 14, 0, 0, 0, 0, 94, 29, 29, 182, 224, 82, 82, 255, 42, 13, 13, 228, 7, 2, 2, 89,
+		1, 0, 0, 2, 2, 1, 1, 2, 0, 0, 0, 0, 115, 60, 60, 167, 203, 105, 105, 255, 76, 31, 31, 142, 0, 0, 0, 0, 31, 15, 15, 62, 192, 73, 73, 241, 235, 79, 79, 255, 132, 52, 52, 190, 46, 14, 14, 118, 210, 78, 78, 255, 176, 65, 65, 255, 9, 2, 2, 208, 6, 2, 2, 16,
+		0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 6, 4, 4, 23, 169, 105, 105, 232, 178, 82, 82, 255, 35, 14, 14, 73, 0, 0, 0, 0, 43, 21, 21, 89, 207, 73, 73, 255, 232, 93, 93, 254, 227, 120, 120, 253, 225, 100, 100, 255, 69, 24, 24, 238, 12, 3, 3, 116, 3, 1, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 4, 0, 0, 0, 0, 83, 54, 54, 128, 197, 103, 103, 255, 154, 60, 60, 227, 9, 5, 5, 26, 0, 0, 0, 0, 99, 46, 46, 168, 239, 129, 129, 255, 235, 108, 108, 248, 172, 78, 78, 254, 55, 17, 17, 255, 29, 12, 12, 63, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 19, 3, 3, 66, 152, 77, 77, 232, 189, 73, 73, 255, 112, 49, 49, 166, 45, 11, 11, 120, 197, 109, 109, 247, 236, 127, 127, 255, 220, 106, 106, 253, 220, 113, 113, 251, 170, 55, 55, 255, 49, 9, 9, 167, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 4, 0, 0, 0, 0, 87, 54, 54, 138, 183, 83, 83, 255, 233, 111, 111, 250, 231, 125, 125, 255, 203, 115, 115, 246, 83, 38, 38, 240, 108, 41, 41, 236, 224, 91, 91, 255, 228, 87, 87, 253, 172, 52, 52, 255, 56, 10, 10, 164,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 3, 0, 0, 0, 0, 37, 24, 24, 54, 153, 81, 81, 255, 119, 52, 52, 244, 72, 33, 33, 250, 15, 0, 0, 205, 5, 1, 1, 141, 17, 3, 3, 84, 150, 57, 57, 230, 215, 89, 89, 255, 123, 47, 47, 235, 124, 27, 27, 247,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 2, 2, 14, 61, 22, 22, 183, 24, 3, 3, 183, 15, 2, 2, 126, 12, 4, 4, 55, 5, 2, 2, 3, 0, 0, 0, 0, 13, 3, 3, 57, 171, 69, 69, 253, 74, 30, 30, 178, 8, 0, 0, 103];
+
+		Ihandle* image = IupImageRGBA( 16, 16, imgdata.ptr );
+		return image;
+	}
 }
 
 Ihandle* load_image_scroll()
@@ -92,7 +121,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_marknext", XPM.getIUPimage( "icons/xpm/mark_next.xpm" ) ); // IupSetHandle("icon_marknext", load_image_mark_next());
 	IupSetHandle( "icon_uparrow", XPM.getIUPimage( "icons/xpm/up.xpm" ) ); // IupSetHandle("icon_uparrow", load_image_prev_nav());
 	IupSetHandle( "icon_saveas", XPM.getIUPimage( "icons/xpm/saveas.xpm" ) ); // IupSetHandle("icon_saveas", load_image_saveas());
-	IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/bas.xpm" ) ); // IupSetHandle("icon_bas", load_image_bas());
+	version(FBIDE) IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/bas.xpm" ) ); else IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/d.xpm" ) );
 	IupSetHandle( "icon_txt", XPM.getIUPimage( "icons/xpm/txt.xpm" ) ); // IupSetHandle("icon_txt", load_image_new_untitled_text_file());
 	IupSetHandle( "icon_build", XPM.getIUPimage( "icons/xpm/build.xpm" ) ); // IupSetHandle( "icon_rebuild", load_image_rebuild());
 	IupSetHandle( "icon_rebuild", XPM.getIUPimage( "icons/xpm/rebuild.xpm" ) ); // IupSetHandle( "icon_rebuild", load_image_rebuild());
@@ -109,7 +138,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_goto", XPM.getIUPimage( "icons/xpm/goto.xpm" ) ); // IupSetHandle("icon_goto", load_image_goto_obj());
 	IupSetHandle( "icon_gotomember", XPM.getIUPimage( "icons/xpm/goto_member.xpm" ) ); // IupSetHandle("icon_goto", load_image_goto_obj());
 	IupSetHandle( "icon_back", XPM.getIUPimage( "icons/xpm/back.xpm" ) ); // IupSetHandle("icon_goto", load_image_goto_obj());
-	IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/bi.xpm" ) ); // IupSetHandle( "icon_bi", load_image_bi());
+	version(FBIDE) IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/bi.xpm" ) ); else IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/di.xpm" ) );
 	IupSetHandle( "icon_markprev", XPM.getIUPimage( "icons/xpm/mark_prev.xpm" ) ); // IupSetHandle("icon_markprev", load_image_mark_prev());
 	IupSetHandle( "icon_run", XPM.getIUPimage( "icons/xpm/run.xpm" ) ); // IupSetHandle("icon_run", load_image_lrun_obj());
 	IupSetHandle( "icon_delete", XPM.getIUPimage( "icons/xpm/remove.xpm" ) ); // IupSetHandle("icon_delete", load_image_delete_obj());
@@ -180,28 +209,72 @@ void load_all_images_icons()
 	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );//IupSetHandle("IUP_variable", load_image_variable_obj());
 
 
+	version(FBIDE)
+	{
+		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );//IupSetHandle("IUP_ctor", load_image_ctor_obj());
+		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );//IupSetHandle("IUP_dtor", load_image_dtor_obj());
+		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class_obj.xpm" ) );//IupSetHandle("IUP_class", load_image_class_obj());
+		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/struct_obj.xpm" ) );//IupSetHandle("IUP_struct", load_image_struct_obj());
+		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property_obj.xpm" ) );//IupSetHandle("IUP_property", load_image_property_obj());
+		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );//IupSetHandle("IUP_property_var", load_image_property_var());
+		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );//IupSetHandle("IUP_operator", load_image_operator());
+		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_protected", load_image_variable_protected_obj());
+		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
+		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_obj.xpm" ) ); //IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
+		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private_obj.xpm" ) );  //IupSetHandle("IUP_variable_private", load_image_variable_private_obj());  
+		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member_obj.xpm" ) );//IupSetHandle("IUP_enummember", load_image_enum_member_obj());
+		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum_obj.xpm" ) );//IupSetHandle("IUP_enum", load_image_enum_obj());
+		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias_obj.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
+		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union_obj.xpm" ) );//IupSetHandle("IUP_union", load_image_union_obj());
+		IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace_obj.xpm" ) );//IupSetHandle("IUP_namespace", load_image_namespace_obj());
+		IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );//IupSetHandle("IUP_macro", load_image_macro());
+		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
+		IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );// IupSetHandle("IUP_define_fun", load_image_define_fun());
+		IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
+		IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
+	}
+	version(DIDE)
+	{
+		IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) ); //IupSetHandle("IUP_function", load_image_function_public_obj());
+		//IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) );
+		IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) ); //IupSetHandle("IUP_function_protected", load_image_function_protected_obj());
+		IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );// IupSetHandle("IUP_function_private", load_image_function_private_obj());
+		//IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
+		//IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
+		IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_obj.xpm" ) );//IupSetHandle("IUP_variable_array", load_image_variable_array_public_obj());
+		IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );//IupSetHandle("IUP_variable", load_image_variable_obj());
 
-	IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );//IupSetHandle("IUP_ctor", load_image_ctor_obj());
-	IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );//IupSetHandle("IUP_dtor", load_image_dtor_obj());
-	IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class_obj.xpm" ) );//IupSetHandle("IUP_class", load_image_class_obj());
-	IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/struct_obj.xpm" ) );//IupSetHandle("IUP_struct", load_image_struct_obj());
-	IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property_obj.xpm" ) );//IupSetHandle("IUP_property", load_image_property_obj());
-	IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );//IupSetHandle("IUP_property_var", load_image_property_var());
-	IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );//IupSetHandle("IUP_operator", load_image_operator());
-	IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_protected", load_image_variable_protected_obj());
-	IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
-	IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_obj.xpm" ) ); //IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
-	IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private_obj.xpm" ) );  //IupSetHandle("IUP_variable_private", load_image_variable_private_obj());  
-	IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member_obj.xpm" ) );//IupSetHandle("IUP_enummember", load_image_enum_member_obj());
-	IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum_obj.xpm" ) );//IupSetHandle("IUP_enum", load_image_enum_obj());
-	IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias_obj.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
-	IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union_obj.xpm" ) );//IupSetHandle("IUP_union", load_image_union_obj());
-	IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace_obj.xpm" ) );//IupSetHandle("IUP_namespace", load_image_namespace_obj());
-	IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );//IupSetHandle("IUP_macro", load_image_macro());
-	IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
-	IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );// IupSetHandle("IUP_define_fun", load_image_define_fun());
-	IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
-	IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
+		IupSetHandle( "IUP_debugspec", XPM.getIUPimage( "icons/xpm/outline/debug_spec_obj.xpm" ) );
+		IupSetHandle( "IUP_debug", XPM.getIUPimage( "icons/xpm/outline/debug_obj.xpm" ) );
+		IupSetHandle( "IUP_versionspec", XPM.getIUPimage( "icons/xpm/outline/version_spec_obj.xpm" ) );
+		IupSetHandle( "IUP_version", XPM.getIUPimage( "icons/xpm/outline/version_obj.xpm" ) );
+		IupSetHandle( "IUP_module", XPM.getIUPimage( "icons/xpm/outline/module_obj.xpm" ) );
+		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class.xpm" ) );
+		IupSetHandle( "IUP_template", XPM.getIUPimage( "icons/xpm/outline/template_obj.xpm" ) );
+		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );//IupSetHandle("IUP_ctor", load_image_ctor_obj());
+		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );//IupSetHandle("IUP_dtor", load_image_dtor_obj());
+		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class_obj.xpm" ) );//IupSetHandle("IUP_class", load_image_class_obj());
+		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/struct_obj.xpm" ) );//IupSetHandle("IUP_struct", load_image_struct_obj());
+		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property_obj.xpm" ) );//IupSetHandle("IUP_property", load_image_property_obj());
+		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );//IupSetHandle("IUP_property_var", load_image_property_var());
+		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );//IupSetHandle("IUP_operator", load_image_operator());
+		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_protected", load_image_variable_protected_obj());
+		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
+		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_obj.xpm" ) ); //IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
+		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private_obj.xpm" ) );  //IupSetHandle("IUP_variable_private", load_image_variable_private_obj());  
+		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member_obj.xpm" ) );//IupSetHandle("IUP_enummember", load_image_enum_member_obj());
+		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum_obj.xpm" ) );//IupSetHandle("IUP_enum", load_image_enum_obj());
+		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias_obj.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
+		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union_obj.xpm" ) );//IupSetHandle("IUP_union", load_image_union_obj());
+		//IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace_obj.xpm" ) );//IupSetHandle("IUP_namespace", load_image_namespace_obj());
+		//IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );//IupSetHandle("IUP_macro", load_image_macro());
+		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
+		//IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );// IupSetHandle("IUP_define_fun", load_image_define_fun());
+		//IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
+		IupSetHandle( "IUP_import", XPM.getIUPimage( "icons/xpm/outline/import_obj.xpm" ) );
+		IupSetHandle( "IUP_import_private", XPM.getIUPimage( "icons/xpm/outline/import_private_obj.xpm" ) );
+		IupSetHandle( "IUP_interface", XPM.getIUPimage( "icons/xpm/outline/interface_obj.xpm" ) );
+	}
 
 
 	IupSetHandle( "icon_debug_until", XPM.getIUPimage( "icons/xpm/debug/until.xpm" ) );//IupSetHandle("icon_debug_until", load_image_until());
@@ -220,6 +293,6 @@ void load_all_images_icons()
 	IupSetHandle( "icon_debug_return", XPM.getIUPimage( "icons/xpm/debug/return.xpm" ) );//IupSetHandle("icon_debug_return", load_image_return());
 	IupSetHandle( "icon_debug_clear", XPM.getIUPimage( "icons/xpm/debug/clear.xpm" ) );//IupSetHandle("icon_debug_clear", load_image_clear());
 
-	IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
+	version(FBIDE) IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() ); else IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
 	IupSetHandle( "icon_scroll", load_image_scroll() );
 }

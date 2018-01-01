@@ -165,7 +165,8 @@ struct PROJECT
 		foreach( char[] s; others ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
 		
-		actionManager.FileAction.saveFile( dir ~ "/.poseidon", doc );
+		version(FBIDE) actionManager.FileAction.saveFile( dir ~ "/.poseidon", doc );
+		version(DIDE) actionManager.FileAction.saveFile( dir ~ "/D.poseidon", doc );
 	}
 	
 	

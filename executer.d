@@ -35,6 +35,10 @@ struct ExecuterAction
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;
 	
+	version(DIDE)
+	{
+		import tango.sys.win32.UserGdi, UTF = tango.text.convert.Utf;
+	}
 	
 	// Inner Class
 	class ExecuterThread : Thread
@@ -150,11 +154,20 @@ struct ExecuterAction
 			foreach( char[] s; Util.splitLines( message ) )
 			{
 				bool bWarning;
-				int lineNumberTail = Util.index( s, ") error" );
-				if( lineNumberTail >= s.length )
+				
+				version(FBIDE)
 				{
-					lineNumberTail = Util.index( s, ") warning" );
-					bWarning = true;
+					int lineNumberTail = Util.index( s, ") error" );
+					if( lineNumberTail >= s.length )
+					{
+						lineNumberTail = Util.index( s, ") warning" );
+						bWarning = true;
+					}
+				}
+				version(DIDE)
+				{
+					if( Util.index( s, "warning - " ) == 0 ) bWarning = true;
+					int lineNumberTail = Util.index( s, "): " );
 				}
 
 				if( lineNumberTail < s.length )
@@ -198,6 +211,9 @@ struct ExecuterAction
 		}
 	}
 	
+	public:
+	static char[] quickRunFile;
+
 	static char[] getCustomCompilerOption()
 	{
 		if( GLOBAL.currentCustomCompilerOption.toDString.length )
@@ -214,9 +230,6 @@ struct ExecuterAction
 		
 		return null;
 	}
-	
-	public:
-	static char[] quickRunFile;
 	
 	static bool compile( char[] options = null, char[] optionDebug = null )
 	{
@@ -244,25 +257,23 @@ struct ExecuterAction
 			scope compilePath = new FilePath( fbcFullPath );
 			if( !compilePath.exists() )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
-				GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
+				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
 				return false;
 			}
 
 			if( !ScintillaAction.saveFile( cSci ) )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile Cancel By User.\n\nCompile Cancel!" ) );
 				GLOBAL.messagePanel.printOutputPanel( "Compile Cancel By User.\n\nCompile Cancel!", true );
 				return false;
 			}
 
 			if( !options.length ) options = getCustomCompilerOption();
 			cSci = ScintillaAction.getActiveCScintilla();
-			command = "\"" ~ compilePath.toString ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+			version(FBIDE) command = "\"" ~ compilePath.toString ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+			version(DIDE) command = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 		}
 		else
 		{
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nCompile Error!" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nCompile Error!", true );
 			return false;
 		}
@@ -271,7 +282,8 @@ struct ExecuterAction
 		{
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
-			if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";
+			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";
+			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:windows:4";
 			
 			scope _filePath = new FilePath( cSci.getFullPath() );
 			
@@ -283,51 +295,64 @@ struct ExecuterAction
 			bool	bError, bWarning;
 			char[]	stdoutMessage, stderrMessage;
 			// Compiler Command
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 
-			foreach (line; new Lines!(char)(p.stderr))  
+			version(FBIDE)
 			{
-				if( !bWarning )
+				foreach (line; new Lines!(char)(p.stderr))  
 				{
-					if( Util.index( line, "warning:" ) < line.length )
+					if( !bWarning )
 					{
-						bWarning = true;
-						stderrMessage ~= ( line ~ "\n" );
-						continue;
+						if( Util.index( line, "warning:" ) < line.length )
+						{
+							bWarning = true;
+							stderrMessage ~= ( line ~ "\n" );
+							continue;
+						}
 					}
-				}
-				
-				if( !bError )
-				{
-					if( line.length ) bError = true;
-					/+
-					if( Util.index( line, "Error:" ) < line.length )
+					
+					if( !bError )
 					{
-						bError = true;
-					}
-					else if( Util.index( line, ":fake:" ) < line.length )
-					{
-						bError = true;
-					}
-					+/
-				}				
+						if( line.length ) bError = true;
+					}				
 
-				stderrMessage ~= ( line ~ "\n" );
+					stderrMessage ~= ( line ~ "\n" );
+				}
+
+				foreach( line; new Lines!(char)(p.stdout) )
+				{
+					if( !bWarning )
+					{
+						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					}
+					if( !bError )
+					{
+						if( Util.index( line, "error " ) < line.length ) bError = true;
+					}				
+					
+					stdoutMessage ~= ( line ~ "\n" );
+				}
 			}
-
-			foreach( line; new Lines!(char)(p.stdout) )
+			version(DIDE)
 			{
-				if( !bWarning )
+				foreach( line; new Lines!(char)(p.stderr) )  
 				{
-					if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					if( Util.trim( line ).length ) bError = true;
+					stderrMessage ~= ( line ~ "\n" );
 				}
-				if( !bError )
+
+				foreach( line; new Lines!(char)(p.stdout) )
 				{
-					if( Util.index( line, "error " ) < line.length ) bError = true;
-				}				
-				
-				stdoutMessage ~= ( line ~ "\n" );
+					if( !bError )
+					{
+						if( Util.index( line, "): " ) < line.length )
+							bError = true;
+						else if( Util.index( line, "Error " ) < line.length )
+							bError = true;
+					}				
+					
+					stdoutMessage ~= ( line ~ "\n" );
+				}
 			}
 
 			auto result = p.wait;
@@ -339,7 +364,6 @@ struct ExecuterAction
 			
 			if( bError )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Error!" ) );
 				GLOBAL.messagePanel.printOutputPanel( "Compile Error!" );
 
 				if( GLOBAL.compilerWindow == "ON" )
@@ -355,7 +379,6 @@ struct ExecuterAction
 					version(Windows) 
 					{
 						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-						//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
 					}
 					else
 					{
@@ -375,7 +398,6 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
 					GLOBAL.messagePanel.printOutputPanel( "Compile Success!" );
 
 					if( GLOBAL.compilerWindow == "ON" )
@@ -391,7 +413,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
 						}
 						else
 						{
@@ -401,7 +422,6 @@ struct ExecuterAction
 				}
 				else
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success! But got warning..." ) );
 					GLOBAL.messagePanel.printOutputPanel( "Compile Success! But got warning..." );
 
 					if( GLOBAL.compilerWindow == "ON" )
@@ -417,7 +437,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
 						}
 						else
 						{
@@ -426,15 +445,11 @@ struct ExecuterAction
 					}
 				}
 				
-				//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
-				//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 				
 				return true;
 			}
 
-			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 ); // Back to top of outputPanel
-			//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		catch( ProcessException e )
@@ -459,12 +474,10 @@ struct ExecuterAction
 		try
 		{
 			// Clean outputPanel
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") );
 			GLOBAL.messagePanel.printOutputPanel( "", true );
 			
 			if( !activePrjName.length )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert("No Project has been selected......?\n\nBuild Error!") );
 				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
 				if( GLOBAL.compilerSFX == "ON" )
 				{
@@ -486,8 +499,7 @@ struct ExecuterAction
 			
 			if( !compilePath.exists() )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
-				GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
+				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
 				if( GLOBAL.compilerSFX == "ON" )
 				{
 					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
@@ -495,14 +507,17 @@ struct ExecuterAction
 				return false;
 			}
 			
-			if( !GLOBAL.projectManager[activePrjName].mainFile.length )
+			version(FBIDE)
 			{
-				GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
-				if( GLOBAL.compilerSFX == "ON" )
+				if( !GLOBAL.projectManager[activePrjName].mainFile.length )
 				{
-					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+					GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
+					if( GLOBAL.compilerSFX == "ON" )
+					{
+						version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+					}
+					return false;
 				}
-				return false;
 			}
 
 
@@ -525,17 +540,75 @@ struct ExecuterAction
 					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
 				}
 				
-				scope fPath = new FilePath( s );
-				scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-				if( oPath.exists() )
+				version(FBIDE)
 				{
-					if( fPath.modified > oPath.modified ) txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+					scope fPath = new FilePath( s );
+					scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
+					if( oPath.exists() )
+					{
+						if( fPath.modified > oPath.modified ) txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+					}
+					else
+					{
+						txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+					}
 				}
-				else
+				version(DIDE)
 				{
-					txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+					scope fPath = new FilePath( s );
+					
+					char[]		objPath = GLOBAL.projectManager[activePrjName].dir ~ "/";
+					char[] 		_totalOptions = GLOBAL.projectManager[activePrjName].compilerOption ~ " " ~ options;
+					FilePath	oPath;
+					
+					int ofPos = Util.index( _totalOptions, "-od" );
+					if( ofPos < _totalOptions.length )
+					{
+						char[] outputName;
+						for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
+						{
+							if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
+							outputName ~= _totalOptions[i];
+						}
+						
+						// Got Obj Path -od
+						if( outputName.length ) objPath ~= ( outputName ~ "/" );
+					}
+
+					version(Windows) oPath = new FilePath( objPath ~ fPath.name ~ ".obj" ); else oPath = new FilePath( objPath ~ fPath.name ~ ".o" );
+					if( oPath.exists() )
+					{
+						if( fPath.modified > oPath.modified ) txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+					}
+					else
+					{
+						txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+					}
+					
+					delete oPath;
 				}
 			}
+
+			// Set Include( Import ) Path......
+			version(FBIDE)
+			{
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
+				{
+					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
+				}
+			}			
+			version(DIDE)
+			{
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
+				{
+					txtIncludeDirs = txtIncludeDirs ~ " -I\"" ~ s ~ "\"";
+				}
+			}
+
+
+
+
+
 
 			if( !txtSources.length )
 			{
@@ -568,7 +641,8 @@ struct ExecuterAction
 						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
 						break;
 					default:
-						executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
 				}
 			}
 			else
@@ -582,7 +656,9 @@ struct ExecuterAction
 						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
 						break;
 					default:
-						executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
+						
 				}
 			}
 
@@ -590,18 +666,22 @@ struct ExecuterAction
 			{
 				if( !GLOBAL.projectManager[activePrjName].compilerOption.length ) options = getCustomCompilerOption();
 			}
-			/*
-			txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
-							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-			if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
-			*/
+
+
 			
 			bool	bError, bWarning;
 			char[] stdoutMessage, stderrMessage;			
 			
 			if( txtSources.length )
 			{
-				txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				version(FBIDE)
+				{
+					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
+				}
+				version(DIDE)
+				{
+					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
+				}
 
 				Process p = new Process( true, txtCommand );
 				p.workDir( GLOBAL.projectManager[activePrjName].dir );
@@ -610,55 +690,69 @@ struct ExecuterAction
 
 
 				// Compiler Command
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
 				GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
-
-				foreach (line; new Lines!(char)(p.stderr))  
+				
+				version(FBIDE)
 				{
-					if( !bWarning )
+					foreach (line; new Lines!(char)(p.stderr))  
 					{
-						if( Util.index( line, "warning:" ) < line.length )
+						if( !bWarning )
 						{
-							bWarning = true;
-							stderrMessage ~= ( line ~ "\n" );
-							continue;
+							if( Util.index( line, "warning:" ) < line.length )
+							{
+								bWarning = true;
+								stderrMessage ~= ( line ~ "\n" );
+								continue;
+							}
 						}
-					}
-					
-					if( !bError )
-					{
-						if( line.length ) bError = true;
-						/*
-						if( Util.index( line, "Error:" ) < line.length )
+						
+						if( !bError )
 						{
-							bError = true;
-						}
-						else if( Util.index( line, ":fake:" ) < line.length )
-						{
-							bError = true;
-						}
-						*/
-					}				
+							if( line.length ) bError = true;
+						}				
 
-					stderrMessage ~= ( line ~ "\n" );
+						stderrMessage ~= ( line ~ "\n" );
+					}
+
+					foreach (line; new Lines!(char)(p.stdout))  
+					{
+						if( !bWarning )
+						{
+							if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+						}
+						if( !bError )
+						{
+							if( Util.index( line, "error " ) < line.length )
+								bError = true;
+							else if( Util.index( line, "Error!" ) < line.length )
+								bError = true;
+						}				
+						
+						stdoutMessage ~= ( line ~ "\n" );
+					}
 				}
-
-				foreach (line; new Lines!(char)(p.stdout))  
+				version(DIDE)
 				{
-					if( !bWarning )
+					foreach (line; new Lines!(char)(p.stderr))  
 					{
-						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+						if( Util.trim( line ).length ) bError = true;
+						stderrMessage ~= ( line ~ "\n" );
 					}
-					if( !bError )
+
+					foreach (line; new Lines!(char)(p.stdout))  
 					{
-						if( Util.index( line, "error " ) < line.length )
-							bError = true;
-						else if( Util.index( line, "Error!" ) < line.length )
-							bError = true;
-					}				
-					
-					stdoutMessage ~= ( line ~ "\n" );
-				}				
+						if( !bError )
+						{
+							if( Util.index( line, "): " ) < line.length )
+								bError = true;
+							else if( Util.index( line, "Error " ) < line.length )
+								bError = true;
+							
+						}				
+						
+						stdoutMessage ~= ( line ~ "\n" );
+					}
+				}
 		
 				auto result = p.wait;
 
@@ -669,7 +763,6 @@ struct ExecuterAction
 
 				if( bError )
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
 					GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
 
 					if( GLOBAL.compilerWindow == "ON" )
@@ -685,7 +778,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
 						}
 						else
 						{
@@ -705,12 +797,10 @@ struct ExecuterAction
 				{
 					if( !bWarning )
 					{
-						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
 						GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success!" );
 					}
 					else
 					{
-						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
 						GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success! But got warning..." );
 					}
 				}
@@ -726,30 +816,107 @@ struct ExecuterAction
 					txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
 				}				
 
-				foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
+				version(FBIDE)
 				{
-					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
+					foreach( char[] s; GLOBAL.projectManager[activePrjName].libDirs )
+					{
+						txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
+					}
 				}
-
-				foreach( char[] s; GLOBAL.projectManager[activePrjName].libDirs )
+				version(DIDE)
 				{
-					txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
-				}				
+					foreach( char[] s; GLOBAL.projectManager[activePrjName].libDirs )
+					{
+						if( s.length )
+						{
+							version(Windows)
+							{
+								if( s[$-1] != '/' ) s ~= '/';
+								s = Util.replace( s.dup, '/', '\\' );
+
+								if( Util.contains( s, ' ' ) )
+								{
+									wchar[] ws = ( UTF.toString16( s ) ).dup;
+									wchar[] shortName;
+									shortName.length = ws.length + 1;
+									shortName[] = ' ';
+
+									DWORD len = GetShortPathNameW( toString16z( ws ), shortName.ptr, ws.length + 1  );
+									if( len > 0 && len <= ws.length )
+									{
+										s = Util.trim( UTF.toString( shortName[0..len] ) );
+									}
+									else
+									{
+										Ihandle* messageDlg = IupMessageDlg();
+										IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
+										IupSetAttribute( messageDlg, "VALUE", toStringz( "Libraries Path Error!" ) );
+										IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );	
+										return false;
+									}
+								}
+								
+								if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+							}
+							else
+							{
+								txtLibDirs = " -L-L\"" ~ s ~ "\"";
+							}
+						}
+					}
+				}
 				
 				foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
 				{
 					scope fPath = new FilePath( s );
 					if( fPath.exists() )
 					{
-						scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-						if( oPath.exists() ) txtSources = txtSources ~ " -a \"" ~ oPath.toString ~ "\"" ; 
+						version(FBIDE)
+						{
+							scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
+							if( oPath.exists() ) txtSources = txtSources ~ " -a \"" ~ oPath.toString ~ "\"" ; 
+						}
+						version(DIDE)
+						{
+							char[]		objPath = GLOBAL.projectManager[activePrjName].dir ~ "/";
+							char[] 		_totalOptions = GLOBAL.projectManager[activePrjName].compilerOption ~ " " ~ options;
+							FilePath	oPath;
+							
+							int ofPos = Util.index( _totalOptions, "-od" );
+							if( ofPos < _totalOptions.length )
+							{
+								char[] outputName;
+								for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
+								{
+									if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
+									outputName ~= _totalOptions[i];
+								}
+								
+								// Got Obj Path -od
+								if( outputName.length ) objPath ~= ( outputName ~ "/" );
+							}
+
+							version(Windows) oPath = new FilePath( objPath ~ fPath.name ~ ".obj" ); else oPath = new FilePath( objPath ~ fPath.name ~ ".o" );
+							if( oPath.exists() ) txtSources = txtSources ~ " \"" ~ oPath.toString ~ "\"" ;
+							
+							delete oPath;
+						}
 					}
 				}
 				
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~
-							GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				version(FBIDE)
+				{
+					txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ txtSources ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~
+								GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				}
+				version(DIDE)
+				{
+					txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~
+								GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" );
+				}
 				
-				if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui"; else txtCommand ~= " -s console";
+				version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";// else txtCommand ~= " -s console";
+				version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:windows:4";
 				
 				Process p2 = new Process( true, txtCommand );
 				p2.workDir( GLOBAL.projectManager[activePrjName].dir );
@@ -757,55 +924,69 @@ struct ExecuterAction
 				p2.execute;
 
 				// Compiler Command
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
 				GLOBAL.messagePanel.printOutputPanel( "\n\nContinue Link Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" );
-
-				foreach (line; new Lines!(char)(p2.stderr))  
+				
+				version(FBIDE)
 				{
-					if( !bWarning )
+					foreach (line; new Lines!(char)(p2.stderr))  
 					{
-						if( Util.index( line, "warning:" ) < line.length )
+						if( !bWarning )
 						{
-							bWarning = true;
-							stderrMessage ~= ( line ~ "\n" );
-							continue;
+							if( Util.index( line, "warning:" ) < line.length )
+							{
+								bWarning = true;
+								stderrMessage ~= ( line ~ "\n" );
+								continue;
+							}
 						}
-					}
-					
-					if( !bError )
-					{
-						if( line.length ) bError = true;
-						/*
-						if( Util.index( line, "Error:" ) < line.length )
+						
+						if( !bError )
 						{
-							bError = true;
-						}
-						else if( Util.index( line, ":fake:" ) < line.length )
-						{
-							bError = true;
-						}
-						*/
-					}				
+							if( line.length ) bError = true;
+						}				
 
-					stderrMessage ~= ( line ~ "\n" );
+						stderrMessage ~= ( line ~ "\n" );
+					}
+
+					foreach (line; new Lines!(char)(p2.stdout))  
+					{
+						if( !bWarning )
+						{
+							if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+						}
+						if( !bError )
+						{
+							if( Util.index( line, "error " ) < line.length )
+								bError = true;
+							else if( Util.index( line, "Error!" ) < line.length )
+								bError = true;
+						}				
+						
+						stdoutMessage ~= ( line ~ "\n" );
+					}
 				}
-
-				foreach (line; new Lines!(char)(p2.stdout))  
+				version(DIDE)
 				{
-					if( !bWarning )
+					foreach (line; new Lines!(char)(p2.stderr))  
 					{
-						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+						if( Util.trim( line ).length ) bError = true;
+						stderrMessage ~= ( line ~ "\n" );
 					}
-					if( !bError )
+
+					foreach (line; new Lines!(char)(p2.stdout))  
 					{
-						if( Util.index( line, "error " ) < line.length )
-							bError = true;
-						else if( Util.index( line, "Error!" ) < line.length )
-							bError = true;
-					}				
-					
-					stdoutMessage ~= ( line ~ "\n" );
-				}				
+						if( !bError )
+						{
+							if( Util.index( line, "): " ) < line.length )
+								bError = true;
+							else if( Util.index( line, "Error " ) < line.length )
+								bError = true;
+							
+						}				
+						
+						stdoutMessage ~= ( line ~ "\n" );
+					}
+				}
 		
 				auto result2 = p2.wait;
 
@@ -816,7 +997,6 @@ struct ExecuterAction
 
 				if( bError )
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
 					GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
 
 					if( GLOBAL.compilerWindow == "ON" )
@@ -832,7 +1012,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
 						}
 						else
 						{
@@ -852,7 +1031,6 @@ struct ExecuterAction
 				{
 					if( !bWarning )
 					{
-						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
 						GLOBAL.messagePanel.printOutputPanel( "Build Success!" );
 
 						if( GLOBAL.compilerWindow == "ON" )
@@ -868,7 +1046,6 @@ struct ExecuterAction
 							version(Windows)
 							{
 								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-								//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
 							}
 							else
 							{
@@ -878,7 +1055,6 @@ struct ExecuterAction
 					}
 					else
 					{
-						//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
 						GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." );
 
 						if( GLOBAL.compilerWindow == "ON" )
@@ -930,12 +1106,10 @@ struct ExecuterAction
 		try
 		{
 			// Clean outputPanel
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") );
 			GLOBAL.messagePanel.printOutputPanel( "", true );
 			
 			if( !activePrjName.length )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert("No Project has been selected......?\n\nBuild Error!") );
 				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
 				return false;
 			}			
@@ -953,8 +1127,7 @@ struct ExecuterAction
 			
 			if( !compilePath.exists() )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
-				GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
+				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
 				return false;
 			}			
 
@@ -965,7 +1138,6 @@ struct ExecuterAction
 			{
 				if( upperCase(s) in GLOBAL.scintillaManager )
 				{
-					//if( ScintillaAction.getModify( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
 					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
 					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
 				}
@@ -973,10 +1145,10 @@ struct ExecuterAction
 
 			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
 			{
-				txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+				version(FBIDE)	txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+				version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
 				if( upperCase(s) in GLOBAL.scintillaManager )
 				{
-					//if( ScintillaAction.getModify( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
 					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
 					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
 				}
@@ -993,18 +1165,68 @@ struct ExecuterAction
 				txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
 			}				
 
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
+			version(FBIDE)
 			{
-				txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
-			}
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
+				{
+					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
+				}
 
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].libDirs )
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].libDirs )
+				{
+					txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
+				}
+			}
+			version(DIDE)
 			{
-				txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].includeDirs )
+				{
+					txtIncludeDirs = txtIncludeDirs ~ " -I\"" ~ s ~ "\"";
+				}
+				
+				foreach( char[] s; GLOBAL.projectManager[activePrjName].libDirs )
+				{
+					if( s.length )
+					{
+						version(Windows)
+						{
+							if( s[$-1] != '/' ) s ~= '/';
+							s = Util.replace( s.dup, '/', '\\' );
+
+							if( Util.contains( s, ' ' ) )
+							{
+								wchar[] ws = ( UTF.toString16( s ) ).dup;
+								wchar[] shortName;
+								shortName.length = ws.length + 1;
+								shortName[] = ' ';
+
+								DWORD len = GetShortPathNameW( toString16z( ws ), shortName.ptr, ws.length + 1  );
+								if( len > 0 && len <= ws.length )
+								{
+									s = Util.trim( UTF.toString( shortName[0..len] ) );
+								}
+								else
+								{
+									Ihandle* messageDlg = IupMessageDlg();
+									IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
+									IupSetAttribute( messageDlg, "VALUE", toStringz( "Libraries Path Error!" ) );
+									IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );	
+									return false;
+								}
+							}
+							
+							if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+						}
+						else
+						{
+							txtLibDirs = " -L-L\"" ~ s ~ "\"";
+						}
+					}
+				}
 			}
 
 			char[] executeName, _targetName;
-
+			
 			if( GLOBAL.projectManager[activePrjName].targetName.length ) _targetName = GLOBAL.projectManager[activePrjName].targetName; else _targetName = GLOBAL.projectManager[activePrjName].name;
 			version(Windows)
 			{
@@ -1017,7 +1239,8 @@ struct ExecuterAction
 						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
 						break;
 					default:
-						executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
 				}
 			}
 			else
@@ -1031,7 +1254,9 @@ struct ExecuterAction
 						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
 						break;
 					default:
-						executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
+						
 				}
 			}
 
@@ -1039,10 +1264,21 @@ struct ExecuterAction
 			{
 				if( !GLOBAL.projectManager[activePrjName].compilerOption.length ) options = getCustomCompilerOption();
 			}
-			txtCommand = "\"" ~ compilePath.toString ~ "\"" ~  executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ 
-							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~ GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+
+			version(FBIDE)
+			{
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~
+							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~	GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+			}
+			version(DIDE)
+			{
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~
+							GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" );
+			}
 			
-			if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
+			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
+			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:windows:4";
+
 
 			Process p = new Process( true, txtCommand );
 			p.workDir( GLOBAL.projectManager[activePrjName].dir );
@@ -1051,55 +1287,70 @@ struct ExecuterAction
 
 			bool	bError, bWarning;
 			char[] stdoutMessage, stderrMessage;
+
 			// Compiler Command
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
 
-			foreach (line; new Lines!(char)(p.stderr))  
+			version(FBIDE)
 			{
-				if( !bWarning )
+				foreach (line; new Lines!(char)(p.stderr))  
 				{
-					if( Util.index( line, "warning:" ) < line.length )
+					if( !bWarning )
 					{
-						bWarning = true;
-						stderrMessage ~= ( line ~ "\n" );
-						continue;
+						if( Util.index( line, "warning:" ) < line.length )
+						{
+							bWarning = true;
+							stderrMessage ~= ( line ~ "\n" );
+							continue;
+						}
 					}
-				}
-				
-				if( !bError )
-				{
-					if( line.length ) bError = true;
-					/*
-					if( Util.index( line, "Error:" ) < line.length )
+					
+					if( !bError )
 					{
-						bError = true;
-					}
-					else if( Util.index( line, ":fake:" ) < line.length )
-					{
-						bError = true;
-					}
-					*/
-				}				
+						if( line.length ) bError = true;
+					}				
 
-				stderrMessage ~= ( line ~ "\n" );
+					stderrMessage ~= ( line ~ "\n" );
+				}
+
+				foreach (line; new Lines!(char)(p.stdout))  
+				{
+					if( !bWarning )
+					{
+						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					}
+					if( !bError )
+					{
+						if( Util.index( line, "error " ) < line.length )
+							bError = true;
+						else if( Util.index( line, "Error!" ) < line.length )
+							bError = true;
+					}				
+					
+					stdoutMessage ~= ( line ~ "\n" );
+				}
 			}
-
-			foreach (line; new Lines!(char)(p.stdout))  
+			version(DIDE)
 			{
-				if( !bWarning )
+				foreach (line; new Lines!(char)(p.stderr))  
 				{
-					if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					if( Util.trim( line ).length ) bError = true;
+					stderrMessage ~= ( line ~ "\n" );
 				}
-				if( !bError )
+
+				foreach (line; new Lines!(char)(p.stdout))  
 				{
-					if( Util.index( line, "error " ) < line.length )
-						bError = true;
-					else if( Util.index( line, "Error!" ) < line.length )
-						bError = true;
-				}				
-				
-				stdoutMessage ~= ( line ~ "\n" );
+					if( !bError )
+					{
+						if( Util.index( line, "): " ) < line.length )
+							bError = true;
+						else if( Util.index( line, "Error " ) < line.length )
+							bError = true;
+						
+					}				
+					
+					stdoutMessage ~= ( line ~ "\n" );
+				}
 			}				
 	
 			auto result = p.wait;
@@ -1111,7 +1362,6 @@ struct ExecuterAction
 
 			if( bError )
 			{
-				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Error!" ) );
 				GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
 
 				if( GLOBAL.compilerWindow == "ON" )
@@ -1127,7 +1377,6 @@ struct ExecuterAction
 					version(Windows)
 					{
 						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-						//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );
 					}
 					else
 					{
@@ -1147,7 +1396,6 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert("Build Success!" ) );
 					GLOBAL.messagePanel.printOutputPanel( "Build Success!" );
 
 					if( GLOBAL.compilerWindow == "ON" )
@@ -1163,7 +1411,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
 						}
 						else
 						{
@@ -1173,7 +1420,6 @@ struct ExecuterAction
 				}
 				else
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Build Success! But got warning..." ) );
 					GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." );
 
 					if( GLOBAL.compilerWindow == "ON" )
@@ -1189,7 +1435,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
 						}
 						else
 						{
@@ -1198,8 +1443,6 @@ struct ExecuterAction
 					}				
 				}
 			}
-			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
-			//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 			
@@ -1236,7 +1479,7 @@ struct ExecuterAction
 		if( !compilePath.exists() )
 		{
 			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
-			GLOBAL.messagePanel.printOutputPanel( "FBC Compiler isn't existed......?\n\nCompiler Path Error!", true );
+			GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
 			return false;
 		}
 		
@@ -1245,14 +1488,12 @@ struct ExecuterAction
 		
 		if( cSci !is null )
 		{
-			/*
-			ScintillaAction.saveFile( cSci.getIupScintilla() );
-			fileName = cSci.getFullPath();
-			*/
 			scope _f = new FilePath( cSci.getFullPath() );
 			scope time = Clock.now.unix;
 			
-			fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
+			version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
+			version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
+			
 			FileAction.saveFile( fileName, cSci.getText(), cSci.encoding ); // Create a file with UTF8 With Bom
 		}
 		else
@@ -1265,9 +1506,16 @@ struct ExecuterAction
 		try
 		{
 			if( !options.length ) options = getCustomCompilerOption();
-			char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
-			
-			if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -s gui";
+			version(FBIDE)
+			{
+				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
+				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -s gui";
+			}
+			version(DIDE)
+			{
+				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
+				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:windows:4";
+			}
 			
 			scope _filePath = new FilePath( cSci.getFullPath() );
 			
@@ -1279,51 +1527,64 @@ struct ExecuterAction
 			char[]	stdoutMessage, stderrMessage;
 			bool	bError, bWarning;
 			// Compiler Command
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Quick Run......\n\n" ~ commandString ~ "\n" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Quick Run......\n\n" ~ commandString ~ "\n", true );
 
-			foreach (line; new Lines!(char)(p.stderr))  
+			version(FBIDE)
 			{
-				if( !bWarning )
+				foreach (line; new Lines!(char)(p.stderr))  
 				{
-					if( Util.index( line, "warning:" ) < line.length )
+					if( !bWarning )
 					{
-						bWarning = true;
-						stderrMessage ~= ( line ~ "\n" );
-						continue;
+						if( Util.index( line, "warning:" ) < line.length )
+						{
+							bWarning = true;
+							stderrMessage ~= ( line ~ "\n" );
+							continue;
+						}
 					}
-				}
-				
-				if( !bError )
-				{
-					if( line.length ) bError = true;
-					/*
-					if( Util.index( line, "Error:" ) < line.length )
+					
+					if( !bError )
 					{
-						bError = true;
-					}
-					else if( Util.index( line, ":fake:" ) < line.length )
-					{
-						bError = true;
-					}
-					*/
-				}				
+						if( line.length ) bError = true;
+					}				
 
-				stderrMessage ~= ( line ~ "\n" );
-			}
-			
-			foreach( line; new Lines!(char)(p.stdout) )
-			{
-				if( !bWarning )
-				{
-					if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					stderrMessage ~= ( line ~ "\n" );
 				}
-				if( !bError )
-				{
-					if( Util.index( line, "error " ) < line.length ) bError = true;
-				}				
 				
-				stdoutMessage ~= ( line ~ "\n" );
+				foreach( line; new Lines!(char)(p.stdout) )
+				{
+					if( !bWarning )
+					{
+						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
+					}
+					if( !bError )
+					{
+						if( Util.index( line, "error " ) < line.length ) bError = true;
+					}				
+					
+					stdoutMessage ~= ( line ~ "\n" );
+				}
+			}
+			version(DIDE)
+			{
+				foreach (line; new Lines!(char)(p.stderr))  
+				{
+					if( Util.trim( line ).length ) bError = true;
+					stderrMessage ~= ( line ~ "\n" );
+				}
+				
+				foreach (line; new Lines!(char)(p.stdout))  
+				{
+					if( !bError )
+					{
+						if( Util.index( line, "): " ) < line.length )
+							bError = true;
+						else if( Util.index( line, "Error " ) < line.length )
+							bError = true;						
+					}
+
+					stdoutMessage ~= ( line ~ "\n" );
+				}
 			}
 
 			auto result = p.wait;
@@ -1340,7 +1601,6 @@ struct ExecuterAction
 			{
 				if( !bWarning )
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Compile Success!" ) );
 					GLOBAL.messagePanel.printOutputPanel( "Compile Success!" );
 					if( GLOBAL.compilerWindow == "ON" )
 					{
@@ -1355,7 +1615,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/success.wav" );
 						}
 						else
 						{
@@ -1379,7 +1638,6 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-							//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
 						}
 						else
 						{
@@ -1398,7 +1656,6 @@ struct ExecuterAction
 				ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
 				derived.start();
 
-				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\nRunning " ~ command ~ args ~ "......" ) );
 				GLOBAL.messagePanel.printOutputPanel( "\nRunning " ~ command ~ args ~ "......" );
 			}
 			else
@@ -1418,7 +1675,6 @@ struct ExecuterAction
 					version(Windows)
 					{
 						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-						//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/error.wav" );	
 					}
 					else
 					{
@@ -1430,9 +1686,6 @@ struct ExecuterAction
 				_f.remove();				
 			}
 
-			// Back to top of outputPanel
-			//IupSetInt( GLOBAL.outputPanel, "SCROLLTOPOS", 0 );
-			//GLOBAL.messagePanel.scrollOutputPanel( 0 );
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 
 			return true;
@@ -1470,11 +1723,8 @@ struct ExecuterAction
 
 						if( GLOBAL.projectManager[activePrjName].type.length )
 						{
-							//IupMessage( "", toStringz(GLOBAL.projectManager[activePrjName].type ) );
 							if( GLOBAL.projectManager[activePrjName].type != "1" )
 							{
-								//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
-								//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Can't Run Static / Dynamic Library............Run Error!" ) );
 								GLOBAL.messagePanel.printOutputPanel( "Can't Run Static / Dynamic Library............Run Error!", true );
 								return false;
 							}
@@ -1537,7 +1787,6 @@ struct ExecuterAction
 			}
 		}
 
-		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
 		scope f = new FilePath( command );
@@ -1545,7 +1794,6 @@ struct ExecuterAction
 		{
 			if( args.length ) args = " " ~ args; else args = "";
 			
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ args ~ "......" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ args ~ "......", true );
 
 			ExecuterThread derived;
@@ -1554,7 +1802,6 @@ struct ExecuterAction
 		}
 		else
 		{
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!", true );
 			return false;
 		}

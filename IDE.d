@@ -786,7 +786,13 @@ struct IDECONFIG
 					case "[editor]":
 						switch( left )
 						{
-							case "lexer":			GLOBAL.lexer = right;							break;
+							case "lexer":			
+								version(DIDE)
+									GLOBAL.lexer = "d";
+								else
+									GLOBAL.lexer = right;
+								break;
+
 							case "keyword0":		GLOBAL.KEYWORDS[0] = right;						break;
 							case "keyword1":		GLOBAL.KEYWORDS[1] = right;						break;
 							case "keyword2":		GLOBAL.KEYWORDS[2] = right;						break;
@@ -1001,8 +1007,11 @@ struct IDECONFIG
 					case "[buildtools]":
 						switch( left )
 						{
-							case "compilerpath":			GLOBAL.compilerFullPath = right;						break;
-							case "x64compilerpath":			GLOBAL.x64compilerFullPath = right;						break;
+							case "compilerpath":			
+								GLOBAL.compilerFullPath = right;
+								version(DIDE) GLOBAL.x64compilerFullPath = right;
+								break;
+							case "x64compilerpath":			version(FBIDE) GLOBAL.x64compilerFullPath = right;		break;
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
 							//case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
@@ -1113,6 +1122,9 @@ struct IDECONFIG
 			IupMessage( "Load editorSettings.ini Error Left", toStringz( left ) );
 			IupMessage( "Load editorSettings.ini Error Right", toStringz( right ) );
 		}
+		
+		// Get and Set Default Import Path
+		version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath.toDString );		
 	}
 
 	/+

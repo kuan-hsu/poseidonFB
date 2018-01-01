@@ -51,7 +51,7 @@ class CToolBar
 		btnBuildRun = IupButton( null, "BuildRun" );
 		btnRun		= IupButton( null, "Run" );
 		btnBuildAll	= IupButton( null, "BuildAll" );
-		btnReBuild	= IupButton( null, "ReBuild" );
+		version(FBIDE)	btnReBuild	= IupButton( null, "ReBuild" );
 		btnQuickRun = IupButton( null, "QuickRun" );
 
 
@@ -250,10 +250,13 @@ class CToolBar
 		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &build_button_cb );
 		IupSetHandle( "toolbar_BuildAll", btnBuildAll );
 		
-		IupSetAttributes( btnReBuild, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild" );
-		IupSetAttribute( btnReBuild, "TIP", GLOBAL.languageItems["rebuildprj"].toCString );
-		IupSetCallback( btnReBuild, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
-		IupSetHandle( "toolbar_ReBuild", btnReBuild );		
+		version(FBIDE)
+		{
+			IupSetAttributes( btnReBuild, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild" );
+			IupSetAttribute( btnReBuild, "TIP", GLOBAL.languageItems["rebuildprj"].toCString );
+			IupSetCallback( btnReBuild, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
+			IupSetHandle( "toolbar_ReBuild", btnReBuild );
+		}
 
 		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun" );
 		IupSetAttribute( btnQuickRun, "TIP", GLOBAL.languageItems["sc_quickrun"].toCString );
@@ -332,9 +335,17 @@ class CToolBar
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		
 		// IUP Container to put buttons on~
-		handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, btnClearUndoBuffer, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[6], btnBackNav, btnForwardNav, btnClearNav, labelSEPARATOR[2], btnMark, btnMarkPrev,
-						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun, labelSEPARATOR[5], /*outlineButtonHide, messageButtonHide, labelSEPARATOR[6],*/ bitButton, guiButton, listHandle, null );/* labelSEPARATOR[5],
-						btnResume, btnStop, btnStep, btnNext, btnReturn, null );*/
+		version(FBIDE)
+		{
+			handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, btnClearUndoBuffer, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[6], btnBackNav, btnForwardNav, btnClearNav, labelSEPARATOR[2], btnMark, btnMarkPrev,
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun, labelSEPARATOR[5], bitButton, guiButton, listHandle, null );
+		}
+		version(DIDE)
+		{
+			handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, btnClearUndoBuffer, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[6], btnBackNav, btnForwardNav, btnClearNav, labelSEPARATOR[2], btnMark, btnMarkPrev,
+						btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnQuickRun, labelSEPARATOR[5], bitButton, guiButton, listHandle, null );
+			
+		}
 		IupSetAttributes( handle, "GAP=2,ALIGNMENT=ACENTER" );
 		version(linux) IupSetAttributes( handle, "MARGIN=0x4" );
 	}

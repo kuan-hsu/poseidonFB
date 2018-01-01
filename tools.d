@@ -1,6 +1,7 @@
 ﻿module tools;
 
-import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz, Util = tango.text.Util;
+import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz;
+import Util = tango.text.Util, tango.io.device.File, tango.io.stream.Lines, tango.io.FilePath, Path = tango.io.Path;
 
 class IupString
 {
@@ -155,27 +156,30 @@ int upperCase( int num )
 	return result;
 }
 
-char[] convertKeyWordCase( int type, char[] replaceText )
+version(FBIDE)
 {
-	switch( type )
+	char[] convertKeyWordCase( int type, char[] replaceText )
 	{
-		case 1: replaceText = lowerCase( replaceText ); break; // lowercase
-		case 2: replaceText = upperCase( replaceText ); break; // UPPERCASE
-		case 3: // MixedCase
-			replaceText = lowerCase( replaceText );
-			for( int i = 0; i < replaceText.length; ++ i )
-			{
-				if( replaceText[i] >= 'a' && replaceText[i] <= 'z' )
+		switch( type )
+		{
+			case 1: replaceText = lowerCase( replaceText ); break; // lowercase
+			case 2: replaceText = upperCase( replaceText ); break; // UPPERCASE
+			case 3: // MixedCase
+				replaceText = lowerCase( replaceText );
+				for( int i = 0; i < replaceText.length; ++ i )
 				{
-					replaceText[i] = cast(char) ( replaceText[i] - 32 );
-					break;
+					if( replaceText[i] >= 'a' && replaceText[i] <= 'z' )
+					{
+						replaceText[i] = cast(char) ( replaceText[i] - 32 );
+						break;
+					}
 				}
-			}
-			break;
-		default:
-	}
+				break;
+			default:
+		}
 
-	return replaceText;
+		return replaceText;
+	}
 }
 
 char[] setINILineData( char[] left, char[] right = "" )
@@ -215,6 +219,329 @@ int getINILineData( char[] lineData, out char[] left, out char[] right )
 		}
 	}
 	return 0;
+}
+
+version(DIDE)
+{
+	char[] removeArrayAndPointer( char[] word )
+	{
+		char[] result;
+
+		foreach( char c; word )
+		{
+			if( c == '[' || c == '*' || c == '!' ) break; else result ~= c;
+		}
+
+		return result;
+	}
+
+	char[] getSeparateType( char[] _string, bool bemoveArrayAndPoint = false )
+	{
+		int openParenPos = Util.index( _string, "(" );
+
+		if( openParenPos > 0 && openParenPos < _string.length )
+		{
+			if( _string[openParenPos-1] == '!' ) openParenPos = Util.index( _string, "(", openParenPos + 1 );
+		}
+		
+		if( openParenPos < _string.length )
+		{
+			if( bemoveArrayAndPoint ) return removeArrayAndPointer( _string[0..openParenPos] ); else return _string[0..openParenPos];
+		}
+
+		return !bemoveArrayAndPoint ? _string : removeArrayAndPointer( _string );
+	}
+
+	char[] getSeparateParam( char[] _string )
+	{
+		int openParenPos = Util.index( _string, "(" );
+
+		if( openParenPos > 0 && openParenPos < _string.length )
+		{
+			if( _string[openParenPos-1] == '!' ) openParenPos = Util.index( _string, "(", openParenPos + 1 );
+		}
+		
+		if( openParenPos < _string.length )
+		{
+			return _string[openParenPos..$];
+		}
+
+		return null;
+	}
+
+	char[] convertGoUPLevel( char[] oriPath )
+	{
+		scope _sp = new FilePath;
+		
+		int upPos = Util.index( oriPath, "../" );
+
+		while( upPos < oriPath.length )
+		{
+			if( upPos > 0 )
+			{
+				_sp.set( oriPath[0..upPos] );
+				oriPath = _sp.parent ~ oriPath[upPos+2..$];
+
+				upPos = Util.index( oriPath, "../" );
+
+				continue;
+			}
+		}
+
+		return oriPath;
+	}
+
+	char[][] getImportPath( char[] compilerFullPath )
+	{
+		char[][] _split( char[] txt )
+		{
+			char[][]	_results;
+			char[]		_tempTxt;
+			bool		bString;
+			
+			foreach( char c; txt )
+			{
+				switch( c )
+				{
+					case '"':
+						if( !bString ) bString = true; else bString = false;
+						_tempTxt ~= c;
+						break;
+					
+					case ' ':
+						if( !bString )
+						{
+							if( _tempTxt.length ) _results ~= _tempTxt;
+							_tempTxt = "";
+						}
+						else
+						{
+							_tempTxt ~= c;
+						}
+						break;
+						
+					default:
+						_tempTxt ~= c;
+				}
+			}
+			
+			if( _tempTxt.length && !bString ) _results ~= _tempTxt;
+			
+			return _results;
+		}
+
+		// Get and Set Default Import Path
+		scope filePath = new FilePath( compilerFullPath );
+
+		FilePath sc;
+		version(Windows) sc = new FilePath( filePath.path() ~ "sc.ini" ); else sc = new FilePath( filePath.path() ~ "dmd.conf" );
+
+		char[][] results;
+		
+		if( sc.exists() )
+		{
+			scope scfile = new File( sc.toString(), File.ReadExisting );
+		
+			foreach( line; new Lines!(char)(scfile) )
+			{
+				if( line.length > 7 )
+				{
+					if( line[0..7] == "DFLAGS=" )
+					{
+						line = line[7..$];
+						if( line.length )
+						{
+							Util.replace( line, '\t', ' ' );
+							foreach( char[] _section; _split( line ) )
+							{
+								if( _section.length > 2 )
+								{
+									if( _section[0..3] == "\"-I" )
+									{
+										int endPos = Util.index( _section, "\"", 3 );
+										if( endPos < _section.length )
+										{
+											_section = _section[3..endPos];
+											foreach( char[] s; Util.split( _section, ";" ) )
+											{
+												if( s.length )
+												{
+													char[] compilerPath = filePath.path();
+													if( compilerPath.length )
+														if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
+
+													s = Util.substitute( s, "%@P%", compilerPath );
+													s = Path.normalize( s );
+													if(s[$-1] != '/' ) s ~= '/';
+													results ~= convertGoUPLevel( s );
+												}
+											}
+										}
+									}
+									else if( _section[0..2] == "-I" )
+									{
+										_section = _section[2..$];
+										foreach( char[] s; Util.split( _section, ";" ) )
+										{
+											if( s.length )
+											{
+												char[] compilerPath = filePath.path();
+												if( compilerPath.length )
+													if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
+
+												s = Util.substitute( s, "%@P%", compilerPath );
+												s = Path.normalize( s );
+												if(s[$-1] != '/' ) s ~= '/';
+												results ~= convertGoUPLevel( s );
+											}
+										}								
+									}
+								}
+							}
+						}
+					}
+				}
+			
+				/+
+				if( line.length > 7 )
+				{
+					if( line[0..7] == "DFLAGS=" )
+					{
+						int importPos;
+
+						do
+						{
+							line = Path.normalize( line );
+							
+							importPos = Util.index( line, "\"-I", importPos );
+							if( importPos < line.length )
+							{
+								int endPos = Util.index( line, "\"", importPos + 3 );
+								if( endPos < line.length )
+								{
+									char[] importString = line[importPos+3..endPos];
+
+									foreach( char[] s; Util.split( importString, ";" ) )
+									{
+										if( s.length )
+										{
+											char[] compilerPath = filePath.path();
+											if( compilerPath.length )
+												if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
+
+											s = Util.substitute( s, "%@P%", compilerPath );
+											Util.replace( s, '\\', '/' );
+											if(s[$-1] != '/' ) s ~= '/';
+											results ~= convertGoUPLevel( s );
+										}
+									}
+								}
+
+								importPos = endPos;
+							}
+							else
+							{
+								importPos = Util.index( line, "-I", importPos );
+								if( importPos < line.length )
+								{
+									int		i;
+									char[]	importString;
+									
+									for( i = importPos + 2; i < line.length; ++ i )
+									{
+										if( line[i] != ' ' && line[i] != '\t' )
+										{
+											importString ~= line[i];
+										}
+										else
+										{
+											break;
+										}
+									}
+
+									importPos = i;
+
+									foreach( char[] s; Util.split( importString, ";" ) )
+									{
+										if( s.length )
+										{
+											char[] compilerPath = filePath.path();
+											if( compilerPath.length )
+												if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
+
+											s = Util.substitute( s, "%@P%", compilerPath );
+											Util.replace( s, '\\', '/' );
+											if(s[$-1] != '/' ) s ~= '/';
+											results ~= convertGoUPLevel( s );
+										}
+									}								
+								}
+							}
+						}
+						while( importPos < line.length )
+					}
+				}
+				+/
+			}
+		}
+
+		delete sc;	
+		return results;
+	}
+
+	class CContainer( T )
+	{
+	protected:
+		int     container_size = 0, max_container_size;
+		T[]     container;
+
+	public:
+		this(){}
+		
+		this( int size ){ container.length = max_container_size = size; }
+
+		~this(){ container.length = 0; }
+
+		// Overload []
+		T opIndex( int i ){ return container[i]; }
+		
+		int size(){ return container_size; }
+
+		bool empty(){ if( container_size == 0 ) return true;else return false; }
+
+		void clear()
+		{
+			container_size = 0;
+			container.length = 0;
+		}
+	}
+
+
+	class CStack( T ) : CContainer!( T )
+	{
+	public:
+		this(){ super( 50 ); }
+		
+		this( int size ){ super( size ); }
+
+		~this(){ delete container; }
+
+		void push( T t )
+		{
+			container_size   ++;
+			if( container_size > max_container_size )
+			{
+				max_container_size = container_size + 50;
+				container.length   = max_container_size; // Resize
+			}
+
+			container[container_size - 1] = t;
+		}
+
+		void pop(){ if( container_size < 1 ) return;else container_size --; }
+
+		T top(){ if( container_size < 1 ) return null; else return container[container_size - 1]; }
+	}
 }
 
 /+

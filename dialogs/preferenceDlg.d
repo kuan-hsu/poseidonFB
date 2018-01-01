@@ -35,40 +35,42 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( hBox01, "TITLE", GLOBAL.languageItems["compilerpath"].toCString );
 		IupSetAttributes( hBox01, "EXPANDCHILDREN=YES,SIZE=346x");
 
-		
-		Ihandle* textx64CompilerPath = IupText( null );
-		IupSetAttribute( textx64CompilerPath, "SIZE", "320x12" );
-		IupSetAttribute( textx64CompilerPath, "VALUE", GLOBAL.x64compilerFullPath.toCString );
-		IupSetHandle( "x64compilerPath_Handle", textx64CompilerPath );
-		
-		Ihandle* btnx64Open = IupButton( null, null );
-		IupSetAttribute( btnx64Open, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnx64Open, "ACTION", cast(Icallback) &CPreferenceDialog_Openx64CompileBinFile_cb );
-		
-		Ihandle* _hBox01x64 = IupHbox( textx64CompilerPath, btnx64Open, null );
-		IupSetAttributes( _hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
-		
-		Ihandle* hBox01x64 = IupFrame( _hBox01x64 );
-		IupSetAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
-		IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
+		version(FBIDE)
+		{
+			Ihandle* textx64CompilerPath = IupText( null );
+			IupSetAttribute( textx64CompilerPath, "SIZE", "320x12" );
+			IupSetAttribute( textx64CompilerPath, "VALUE", GLOBAL.x64compilerFullPath.toCString );
+			IupSetHandle( "x64compilerPath_Handle", textx64CompilerPath );
+			
+			Ihandle* btnx64Open = IupButton( null, null );
+			IupSetAttribute( btnx64Open, "IMAGE", "icon_openfile" );
+			IupSetCallback( btnx64Open, "ACTION", cast(Icallback) &CPreferenceDialog_Openx64CompileBinFile_cb );
+			
+			Ihandle* _hBox01x64 = IupHbox( textx64CompilerPath, btnx64Open, null );
+			IupSetAttributes( _hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+			
+			Ihandle* hBox01x64 = IupFrame( _hBox01x64 );
+			IupSetAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
+			IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
 
 
 
-		textDebuggerPath = IupText( null );
-		IupSetAttribute( textDebuggerPath, "SIZE", "320x12" );
-		IupSetAttribute( textDebuggerPath, "VALUE", GLOBAL.debuggerFullPath.toCString );
-		IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
-		
-		Ihandle* btnOpenDebugger = IupButton( null, null );
-		IupSetAttribute( btnOpenDebugger, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenDebuggerBinFile_cb );
+			textDebuggerPath = IupText( null );
+			IupSetAttribute( textDebuggerPath, "SIZE", "320x12" );
+			IupSetAttribute( textDebuggerPath, "VALUE", GLOBAL.debuggerFullPath.toCString );
+			IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
+			
+			Ihandle* btnOpenDebugger = IupButton( null, null );
+			IupSetAttribute( btnOpenDebugger, "IMAGE", "icon_openfile" );
+			IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenDebuggerBinFile_cb );
 
-		Ihandle* _hBox02 = IupHbox( textDebuggerPath, btnOpenDebugger, null );
-		IupSetAttributes( _hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
-		
-		Ihandle* hBox02 = IupFrame( _hBox02 );
-		IupSetAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
-		IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");
+			Ihandle* _hBox02 = IupHbox( textDebuggerPath, btnOpenDebugger, null );
+			IupSetAttributes( _hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+			
+			Ihandle* hBox02 = IupFrame( _hBox02 );
+			IupSetAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
+			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");
+		}
 		
 		
 		
@@ -157,7 +159,8 @@ class CPreferenceDialog : CBaseDialog
 		
 
 		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, hBoxConsole, null );
-		IupSetAttributes( vBoxCompiler, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
+		version(FBIDE)	IupSetAttributes( vBoxCompiler, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
+		version(DIDE)	IupSetAttributes( vBoxCompiler, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
 
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
 		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
@@ -193,14 +196,18 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( manuFrame, "SIZE", "346x");		
 		
 		
-		
-		Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, frameCompiler, manuFrame, null );
-		IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
-		IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
-		
-		
-		
-		
+		version(FBIDE)
+		{
+			Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, frameCompiler, manuFrame, null );
+			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
+			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
+		}
+		version(DIDE)
+		{
+			Ihandle* vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, manuFrame, null );
+			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
+			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
+		}
 		
 		
 		
@@ -316,7 +323,8 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
 		Ihandle* vBox00 = IupVbox( toggleKeywordComplete, toggleIncludeComplete, toggleUseParser, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, hBoxFunctionTitle, hBox00, null );
-		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
+		version(FBIDE)	IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
+		version(DIDE)	IupSetAttributes( vBox00, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
 		IupSetAttribute( frameParser, "TITLE",  GLOBAL.languageItems["parsersetting"].toCString );
@@ -332,17 +340,6 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		
-		
-		
-		
-		/+
-		Ihandle* vBoxPage01 = IupVbox( hBox01, hBox01x64, hBox02, /*hBox02x64,*/ /*hBox03,*/ frameCompiler, frameParser, frameLive, /*manuFrame,*/ null );
-		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x5");
-		IupSetAttribute( vBoxPage01, "EXPANDCHILDREN", "YES");
-		+/
-
-
-
 		Ihandle* toggleLineMargin = IupToggle( GLOBAL.languageItems["lnmargin"].toCString, null );
 		IupSetAttribute( toggleLineMargin, "VALUE", toStringz(GLOBAL.editorSetting00.LineMargin.dup) );
 		IupSetHandle( "toggleLineMargin", toggleLineMargin );
@@ -387,9 +384,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleShowSpace, "VALUE", toStringz(GLOBAL.editorSetting00.ShowSpace.dup) );
 		IupSetHandle( "toggleShowSpace", toggleShowSpace );
 
-		Ihandle* toggleAutoEnd = IupToggle( GLOBAL.languageItems["autoinsertend"].toCString, null );
-		IupSetAttribute( toggleAutoEnd, "VALUE", toStringz(GLOBAL.editorSetting00.AutoEnd.dup) );
-		IupSetHandle( "toggleAutoEnd", toggleAutoEnd );
+		version(FBIDE)
+		{
+			Ihandle* toggleAutoEnd = IupToggle( GLOBAL.languageItems["autoinsertend"].toCString, null );
+			IupSetAttribute( toggleAutoEnd, "VALUE", toStringz(GLOBAL.editorSetting00.AutoEnd.dup) );
+			IupSetHandle( "toggleAutoEnd", toggleAutoEnd );
+		}
 		
 		Ihandle* toggleAutoClose = IupToggle( GLOBAL.languageItems["autoclose"].toCString, null );
 		IupSetAttribute( toggleAutoClose, "VALUE", toStringz(GLOBAL.editorSetting00.AutoClose.dup) );
@@ -455,49 +455,94 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBoxColumn = IupHbox( labelColumnEdge, textColumnEdge, null );
 		IupSetAttribute( hBoxColumn, "ALIGNMENT", "ACENTER" );
 
-			
-		Ihandle* gbox = IupGridBox
-		(
-			IupSetAttributes( toggleLineMargin, "" ),
-			IupSetAttributes( toggleFixedLineMargin, "" ),
-			
-			IupSetAttributes( toggleBookmarkMargin,"" ),
-			IupSetAttributes( toggleFoldMargin, "" ),
-			
-			IupSetAttributes( toggleIndentGuide, "" ),
-			IupSetAttributes( toggleCaretLine, "" ),
-			
-			IupSetAttributes( toggleWordWrap, "" ),
-			IupSetAttributes( toggleTabUseingSpace, "" ),
-			
-			IupSetAttributes( toggleShowEOL, "" ),
-			IupSetAttributes( toggleShowSpace, "" ),
+		version(FBIDE)
+		{
+			Ihandle* gbox = IupGridBox
+			(
+				IupSetAttributes( toggleLineMargin, "" ),
+				IupSetAttributes( toggleFixedLineMargin, "" ),
+				
+				IupSetAttributes( toggleBookmarkMargin,"" ),
+				IupSetAttributes( toggleFoldMargin, "" ),
+				
+				IupSetAttributes( toggleIndentGuide, "" ),
+				IupSetAttributes( toggleCaretLine, "" ),
+				
+				IupSetAttributes( toggleWordWrap, "" ),
+				IupSetAttributes( toggleTabUseingSpace, "" ),
+				
+				IupSetAttributes( toggleShowEOL, "" ),
+				IupSetAttributes( toggleShowSpace, "" ),
 
-			IupSetAttributes( toggleAutoIndent, "" ),
-			IupSetAttributes( toggleAutoEnd, "" ),
-			
-			IupSetAttributes( toggleAutoClose, "" ),
-			IupSetAttributes( toggleColorOutline, "" ),
-			
-			IupSetAttributes( toggleMessage, "" ),
-			IupSetAttributes( toggleBoldKeyword, "" ),
-			
-			IupSetAttributes( toggleBraceMatch, "" ),
-			IupSetAttributes( toggleBraceMatchDB, "" ),
+				IupSetAttributes( toggleAutoIndent, "" ),
+				IupSetAttributes( toggleAutoEnd, "" ),
+				
+				IupSetAttributes( toggleAutoClose, "" ),
+				IupSetAttributes( toggleColorOutline, "" ),
+				
+				IupSetAttributes( toggleMessage, "" ),
+				IupSetAttributes( toggleBoldKeyword, "" ),
+				
+				IupSetAttributes( toggleBraceMatch, "" ),
+				IupSetAttributes( toggleBraceMatchDB, "" ),
 
-			IupSetAttributes( toggleLoadprev, "" ),
-			IupSetAttributes( toggleMultiSelection, "" ),
+				IupSetAttributes( toggleLoadprev, "" ),
+				IupSetAttributes( toggleMultiSelection, "" ),
 
-			IupSetAttributes( toggleCurrentWord, "" ),
-			IupSetAttributes( toggleMiddleScroll, "" ),
-			
-			IupSetAttributes( hBoxTab, "" ),
-			IupSetAttributes( hBoxColumn, "" ),
-			
-			hBoxControlChar,
-			
-			null
-		);
+				IupSetAttributes( toggleCurrentWord, "" ),
+				IupSetAttributes( toggleMiddleScroll, "" ),
+				
+				IupSetAttributes( hBoxTab, "" ),
+				IupSetAttributes( hBoxColumn, "" ),
+				
+				hBoxControlChar,
+				
+				null
+			);
+		}
+		version(DIDE)
+		{
+			Ihandle* gbox = IupGridBox
+			(
+				IupSetAttributes( toggleLineMargin, "" ),
+				IupSetAttributes( toggleFixedLineMargin, "" ),
+				
+				IupSetAttributes( toggleBookmarkMargin,"" ),
+				IupSetAttributes( toggleFoldMargin, "" ),
+				
+				IupSetAttributes( toggleIndentGuide, "" ),
+				IupSetAttributes( toggleCaretLine, "" ),
+				
+				IupSetAttributes( toggleWordWrap, "" ),
+				IupSetAttributes( toggleTabUseingSpace, "" ),
+				
+				IupSetAttributes( toggleShowEOL, "" ),
+				IupSetAttributes( toggleShowSpace, "" ),
+
+				IupSetAttributes( toggleAutoIndent, "" ),
+				IupSetAttributes( toggleAutoClose, "" ),
+				
+				IupSetAttributes( toggleColorOutline, "" ),
+				IupSetAttributes( toggleMessage, "" ),
+
+				IupSetAttributes( toggleBoldKeyword, "" ),
+				IupSetAttributes( toggleLoadprev, "" ),
+				
+				IupSetAttributes( toggleBraceMatch, "" ),
+				IupSetAttributes( toggleBraceMatchDB, "" ),
+
+				IupSetAttributes( toggleMultiSelection, "" ),
+				IupSetAttributes( toggleCurrentWord, "" ),
+
+				IupSetAttributes( toggleMiddleScroll, "" ),
+				hBoxControlChar,
+				
+				IupSetAttributes( hBoxTab, "" ),
+				IupSetAttributes( hBoxColumn, "" ),
+				
+				null
+			);
+		}
 
 		//IupSetAttribute(gbox, "SIZECOL", "1");
 		//IupSetAttribute(gbox, "SIZELIN", "4");
@@ -549,34 +594,36 @@ class CPreferenceDialog : CBaseDialog
 		);
 		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ACENTER,GAPLIN=0,GAPCOL=10,MARGIN=0x5,SIZELIN=0,HOMOGENEOUSCOL=YES,NAME=gridbox_Maker" );
 		
-		
-		Ihandle* radioKeywordCase0 = IupToggle( GLOBAL.languageItems["none"].toCString, null );
-		IupSetHandle( "radioKeywordCase0", radioKeywordCase0 );
-
-		Ihandle* radioKeywordCase1 = IupToggle( GLOBAL.languageItems["lowercase"].toCString, null );
-		IupSetHandle( "radioKeywordCase1", radioKeywordCase1 );
-		
-		Ihandle* radioKeywordCase2 = IupToggle( GLOBAL.languageItems["uppercase"].toCString, null );
-		IupSetHandle( "radioKeywordCase2", radioKeywordCase2 );
-
-		Ihandle* radioKeywordCase3 = IupToggle( GLOBAL.languageItems["mixercase"].toCString, null );
-		IupSetHandle( "radioKeywordCase3", radioKeywordCase3 );
-
-		switch( GLOBAL.keywordCase )
+		version(FBIDE)
 		{
-			case 0:		IupSetAttribute( radioKeywordCase0, "VALUE", "ON" ); break;
-			case 1:		IupSetAttribute( radioKeywordCase1, "VALUE", "ON" ); break;
-			case 2:		IupSetAttribute( radioKeywordCase2, "VALUE", "ON" ); break;
-			default:	IupSetAttribute( radioKeywordCase3, "VALUE", "ON" ); break;
+			Ihandle* radioKeywordCase0 = IupToggle( GLOBAL.languageItems["none"].toCString, null );
+			IupSetHandle( "radioKeywordCase0", radioKeywordCase0 );
+
+			Ihandle* radioKeywordCase1 = IupToggle( GLOBAL.languageItems["lowercase"].toCString, null );
+			IupSetHandle( "radioKeywordCase1", radioKeywordCase1 );
+			
+			Ihandle* radioKeywordCase2 = IupToggle( GLOBAL.languageItems["uppercase"].toCString, null );
+			IupSetHandle( "radioKeywordCase2", radioKeywordCase2 );
+
+			Ihandle* radioKeywordCase3 = IupToggle( GLOBAL.languageItems["mixercase"].toCString, null );
+			IupSetHandle( "radioKeywordCase3", radioKeywordCase3 );
+
+			switch( GLOBAL.keywordCase )
+			{
+				case 0:		IupSetAttribute( radioKeywordCase0, "VALUE", "ON" ); break;
+				case 1:		IupSetAttribute( radioKeywordCase1, "VALUE", "ON" ); break;
+				case 2:		IupSetAttribute( radioKeywordCase2, "VALUE", "ON" ); break;
+				default:	IupSetAttribute( radioKeywordCase3, "VALUE", "ON" ); break;
+			}
+
+			Ihandle* hBoxKeywordCase = IupHbox( radioKeywordCase0, radioKeywordCase1, radioKeywordCase2, radioKeywordCase3, null );
+			IupSetAttributes( hBoxKeywordCase, "GAP=30,MARGIN=30x,ALIGNMENT=ACENTER" );
+			Ihandle* radioKeywordCase = IupRadio( hBoxKeywordCase );
+
+			Ihandle* frameKeywordCase = IupFrame( radioKeywordCase );
+			IupSetAttributes( frameKeywordCase, "SIZE=346x,GAP=1" );
+			IupSetAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].toCString );
 		}
-
-		Ihandle* hBoxKeywordCase = IupHbox( radioKeywordCase0, radioKeywordCase1, radioKeywordCase2, radioKeywordCase3, null );
-		IupSetAttributes( hBoxKeywordCase, "GAP=30,MARGIN=30x,ALIGNMENT=ACENTER" );
-		Ihandle* radioKeywordCase = IupRadio( hBoxKeywordCase );
-
-		Ihandle* frameKeywordCase = IupFrame( radioKeywordCase );
-		IupSetAttributes( frameKeywordCase, "SIZE=346x,GAP=1" );
-		IupSetAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].toCString );
 		
 		
 		
@@ -657,13 +704,16 @@ class CPreferenceDialog : CBaseDialog
 			}
 		}
 		
+		version(DIDE) IupSetAttribute( flatFrame[9], "ACTIVE", "NO" );
+		
 		Ihandle* visibleBox = IupVbox( flatFrame[0], flatFrame[1], flatFrame[2], flatFrame[3], flatFrame[4], flatFrame[5], flatFrame[6], flatFrame[7], flatFrame[8], flatFrame[9], flatFrame[10], flatFrame[11], flatFrame[12], null );
 		IupSetAttributes( visibleBox, "GAP=1,MARGIN=5x1,EXPANDCHILDREN=YES");
 		Ihandle* sb = IupFlatScrollBox ( visibleBox );
 		IupSetAttributes( sb, "EXPAND=EXPAND,ALIGNMENT=ACENTER" );
 		
 		
-		Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, /*manuFrame, sb,*/ null );
+		version(FBIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, null );
+		version(DIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, null );
 		IupSetAttributes( vBoxPage02, "MARGIN=0x1,EXPANDCHILDREN=YES" );
 
 		// Color
@@ -1556,7 +1606,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleAutoIndent", null );
 		IupSetHandle( "toggleShowEOL", null );
 		IupSetHandle( "toggleShowSpace", null );
-		IupSetHandle( "toggleAutoEnd", null );
+		version(FBIDE)	IupSetHandle( "toggleAutoEnd", null );
 		IupSetHandle( "toggleAutoClose", null );
 		IupSetHandle( "toggleColorOutline", null );
 		IupSetHandle( "toggleMessage", null );
@@ -1966,7 +2016,7 @@ extern(C) // Callback for CPreferenceDialog
 				if( IupGetHandle( "menuShowEOL" ) != null ) IupSetAttribute( IupGetHandle( "menuShowEOL" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE" ) );
 			GLOBAL.editorSetting00.ShowSpace				= fromStringz(IupGetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE" )).dup;
 				if( IupGetHandle( "menuShowSpace" ) != null ) IupSetAttribute( IupGetHandle( "menuShowSpace" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE" ) );
-			GLOBAL.editorSetting00.AutoEnd					= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
+			version(FBIDE)	GLOBAL.editorSetting00.AutoEnd					= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.AutoClose				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoClose" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColorOutline				= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorOutline" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.Message					= fromStringz(IupGetAttribute( IupGetHandle( "toggleMessage" ), "VALUE" )).dup;
@@ -2348,10 +2398,14 @@ extern(C) // Callback for CPreferenceDialog
 			scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
 			scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString ); //IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
 			scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
-			scope debugString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
+			version(FBIDE)
+			{
+				scope debugString = new IupString( GLOBAL.fonts[8].fontString );
+				IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "FONT", debugString.toCString );// Debugger (shared Search)
+			}
 			scope statusString = new IupString( GLOBAL.fonts[11].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
 			scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline	
-			GLOBAL.debugPanel.setFont();
+			version(FBIDE) GLOBAL.debugPanel.setFont();
 			
 			GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textchm" ), "VALUE" );
 			GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;

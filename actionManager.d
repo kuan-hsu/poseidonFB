@@ -568,6 +568,128 @@ struct DocumentTabAction
 			if( _redo != null ) IupSetAttribute( _redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
 		}		
 	}
+	
+	static char[] getBeforeWord( Ihandle* iupSci, int pos )
+	{
+		// Check before targetText word.......
+		char[]	beforeWord;
+		for( int j = pos; j >= 0; --j )
+		{
+			char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+			int key = cast(int) _s[0];
+			
+			if( key >= 0 && key <= 127 )
+			{
+				if( key == 13 || _s == ":" || _s == "\n" )
+				{
+					break;
+				}
+				else if( _s == " " || _s == "\t" )
+				{
+					if( beforeWord.length ) break;
+				}
+				else
+				{
+					beforeWord ~= _s;
+				}
+			}
+		}
+		
+		return beforeWord.reverse;
+	}
+	
+	static char[] getAfterWord( Ihandle* iupSci, int pos )
+	{
+		// Check after targetText word.......
+		char[]	afterWord;
+		for( int j = pos; j < IupGetInt( iupSci, "COUNT" ); ++j )
+		{
+			char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+			int key = cast(int) _s[0];
+			
+			if( key >= 0 && key <= 127 )
+			{
+				if( key == 13 || _s == ":" || _s == "\n" )
+				{
+					break;
+				}
+				else if( _s == " " || _s == "\t" )
+				{
+					if( afterWord.length ) break;
+				}
+				else
+				{
+					afterWord ~= _s;
+				}
+			}
+		}
+		
+		return afterWord;
+	}
+	
+	static char[] getTailWord( Ihandle* iupSci, int pos )
+	{
+		// Check after targetText word.......
+		char[]	tailWord;
+		int line = ScintillaAction.getLinefromPos( iupSci, pos );
+		int lineEndPos = cast(int) IupScintillaSendMessage( iupSci, 2136, line, 0 ); // SCI_GETLINEENDPOSITION 2136
+		
+		for( int j = --lineEndPos; j >= 0; --j )
+		{
+			char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+			int key = cast(int) _s[0];
+			
+			if( key >= 0 && key <= 127 )
+			{
+				if( key == 13 || _s == ":" || _s == "\n" )
+				{
+					break;
+				}
+				else if( _s == " " || _s == "\t" )
+				{
+					if( tailWord.length ) break;
+				}
+				else
+				{
+					tailWord ~= _s;
+				}
+			}
+		}
+		
+		return tailWord.reverse;
+	}	
+	
+	// hasTail = -1  Whatever, hasTail = 0  No Tail, hasTail = 1  Tail
+	
+	static int getKeyWordCount( Ihandle* iupSci, char[] target, char[] beforeWord, char[] tailWord = "" )
+	{
+		int count;
+		
+		// Search Document
+		IupSetAttribute( iupSci, "SEARCHFLAGS", "WHOLEWORD" );
+		IupSetInt( iupSci, "TARGETSTART", 0 );
+		IupSetInt( iupSci, "TARGETEND", -1 );
+		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) GLOBAL.cString.convert( target ) ); // SCI_SEARCHINTARGET = 2197,
+		
+		while( findPos != -1 )
+		{
+			if( getBeforeWord( iupSci, findPos - 1 ) == lowerCase( beforeWord ) )
+			{
+				if( tailWord.length )
+				{
+					if( getTailWord( iupSci, findPos ) == lowerCase(tailWord) ) count++;
+				}
+				else
+					count++;
+			}
+			
+			IupSetInt( iupSci, "TARGETSTART", findPos + target.length );
+			IupSetInt( iupSci, "TARGETEND", -1 );
+			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) GLOBAL.cString.convert( target ) ); // SCI_SEARCHINTARGET = 2197,
+		}		
+		
+		return count;
+	}
 }
 
 
@@ -657,10 +779,21 @@ struct ScintillaAction
 
 		scope f = new FilePath( fullPath );
 
-		if( lowerCase( f.ext() ) == "bas" || lowerCase( f.ext() ) == "bi" )
+		version(FBIDE)
 		{
-			//Parser
-			GLOBAL.outlineTree.loadFile( fullPath );
+			if( lowerCase( f.ext() ) == "bas" || lowerCase( f.ext() ) == "bi" )
+			{
+				//Parser
+				GLOBAL.outlineTree.loadFile( fullPath );
+			}
+		}
+		version(DIDE)
+		{
+			if( lowerCase( f.ext() ) == "d" || lowerCase( f.ext() ) == "di" )
+			{
+				//Parser
+				GLOBAL.outlineTree.loadFile( fullPath );
+			}
 		}
 
 		if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
@@ -1158,23 +1291,47 @@ struct ScintillaAction
 
 		try
 		{
-			scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			version(FBIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			version(DIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )
 			{
 				case "1":
-					if( fullPath.length > 4 )
+					version(FBIDE)
 					{
-						if( fullPath[length-4..length] == ".bas" ) fullPath = fullPath[0..length-4];
+						if( fullPath.length > 4 )
+						{
+							if( fullPath[$-4..$] == ".bas" ) fullPath = fullPath[0..$-4];
+						}
+						fullPath ~= ".bas";
 					}
-					fullPath ~= ".bas";	break;
+					version(DIDE)
+					{
+						if( fullPath.length > 2 )
+						{
+							if( fullPath[$-2..$] == ".bas" ) fullPath = fullPath[0..$-2];
+						}
+						fullPath ~= ".d";
+					}
+					break;
 				case "2":
-					if( fullPath.length > 3 )
+					version(FBIDE)
 					{
-						if( fullPath[length-3..length] == ".bi" ) fullPath = fullPath[0..length-3];
+						if( fullPath.length > 3 )
+						{
+							if( fullPath[$-3..$] == ".bi" ) fullPath = fullPath[0..$-3];
+						}
+						fullPath ~= ".bi";
 					}
-					fullPath ~= ".bi";
+					version(FBIDE)
+					{
+						if( fullPath.length > 3 )
+						{
+							if( fullPath[$-3..$] == ".di" ) fullPath = fullPath[0..$-3];
+						}
+						fullPath ~= ".di";
+					}					
 					break;
 				default:
 			}
@@ -1186,22 +1343,6 @@ struct ScintillaAction
 				char[] newDocument = fromStringz( IupGetAttribute( cSci.getIupScintilla, "VALUE" ) ).dup;
 				if( bShowNew ) ScintillaAction.newFile( fullPath, cast(Encoding) cSci.encoding, newDocument, true, insertPos );
 				FileAction.saveFile( fullPath, newDocument, cast(Encoding) cSci.encoding );
-				/+
-				if( originalFullPath.length >= 7 )
-				{
-					if( originalFullPath[0..7] == "NONAME#" )
-					{
-						if( bCloseOld )
-						{
-							IupDestroy( cSci.getIupScintilla );
-							GLOBAL.fileListTree.removeItem( cSci );
-							GLOBAL.scintillaManager.remove( upperCase(originalFullPath) );
-							delete cSci;
-							GLOBAL.outlineTree.cleanTree( originalFullPath );
-						}
-					}
-				}
-				+/
 				if( bCloseOld )	closeAndMoveDocument( cSci, bShowNew );
 			}
 			else
@@ -1213,22 +1354,6 @@ struct ScintillaAction
 		{
 			return false;
 		}
-
-		
-		/+
-		if( iupSci == null ) return false;
-		
-		try
-		{
-			char[] _text = fromStringz( IupGetAttribute( iupSci, "VALUE" ) ).dup;
-
-			return ScintillaAction.newFile( fullPath, Encoding.UTF_8, _text );
-		}
-		catch
-		{
-			return false;
-		}
-		+/
 
 		return true;
 	}	
@@ -1553,6 +1678,24 @@ struct ProjectAction
 		return null;
 	}
 	
+	static char[] getActiveProjectDir()
+	{
+		auto cSci = ScintillaAction.getActiveCScintilla();
+
+		if( cSci !is null )
+		{
+			foreach( p; GLOBAL.projectManager )
+			{
+				foreach( char[] prjFileFullPath; p.sources ~ p.includes )
+				{
+					if( cSci.getFullPath() == prjFileFullPath ) return p.dir;
+				}
+			}
+		}
+
+		return null;
+	}	
+	
 	static int getSelectCount()
 	{
 		int		result;
@@ -1690,29 +1833,63 @@ struct StatusBarAction
 							
 							if( AST_Head !is null )
 							{
-								if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+								version(FBIDE)
 								{
-									do
+									if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
 									{
-										if( AST_Head.getFather !is null ) AST_Head = AST_Head.getFather; else break;
+										do
+										{
+											if( AST_Head.getFather !is null ) AST_Head = AST_Head.getFather; else break;
+										}
+										while( AST_Head.kind & ( B_WITH | B_SCOPE ) )
 									}
-									while( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+									
+									IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+									switch( AST_Head.kind )
+									{
+										case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
+										case B_SUB:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );			break;
+										case B_TYPE:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );		break;
+										case B_ENUM:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );			break;
+										case B_UNION:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );		break;
+										case B_CTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );			break;
+										case B_DTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );			break;
+										case B_PROPERTY:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );		break;
+										case B_OPERATOR:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );		break;
+										default:
+											IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
+									}
 								}
-								
-								IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
-								switch( AST_Head.kind )
+								version(DIDE)
 								{
-									case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
-									case B_SUB:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );			break;
-									case B_TYPE:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );		break;
-									case B_ENUM:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );			break;
-									case B_UNION:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );		break;
-									case B_CTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );			break;
-									case B_DTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );			break;
-									case B_PROPERTY:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );		break;
-									case B_OPERATOR:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );		break;
-									default:
-										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
+									IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+									
+									if( AST_Head.kind & D_MODULE )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_module" );
+									else if( AST_Head.kind & D_FUNCTION )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );
+									else if( AST_Head.kind & D_VERSION )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_version" );
+									else if( AST_Head.kind & D_STRUCT )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );
+									else if( AST_Head.kind & D_ENUM )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_enum" );
+									else if( AST_Head.kind & D_UNION )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_union" );
+									else if( AST_Head.kind & D_CLASS )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_class" );
+									else if( AST_Head.kind & D_INTERFACE )
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_interface" );
+									else if( AST_Head.kind & D_CTOR )
+									{
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( "this" ) );
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );
+									}
+									else if( AST_Head.kind & D_DTOR )
+									{
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( "~this") );
+										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );
+									}
 								}
 							}
 							else
@@ -1783,8 +1960,18 @@ struct ParserAction
 		return null;
 	}
 	
-	static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line, uint _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE )
+	static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line, int _kind = -1 )
 	{
+		version(FBIDE)
+		{
+			if( _kind == -1 ) _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE;
+		}
+		version(DIDE)
+		{
+			if( _kind == -1 ) _kind = D_MODULE | D_FUNCTION | D_CLASS | D_STRUCT | D_INTERFACE | D_UNION | D_ENUM | D_CTOR | D_DTOR | D_TEMPLATE | D_VERSION;
+		}
+		
+		
 		if( _fatherNode !is null )
 		{
 			//if( _fatherNode.kind & (D_CTOR | D_DTOR ) )

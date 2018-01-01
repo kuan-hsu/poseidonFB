@@ -317,10 +317,12 @@ void createMenu()
 	IupSetAttribute(item_openProject, "IMAGE", "icon_openprj");
 	IupSetCallback(item_openProject, "ACTION", cast(Icallback)&openProject_cb);
 
-	Ihandle* item_import = IupItem( GLOBAL.languageItems["importprj"].toCString, null);
-	IupSetAttribute(item_import, "IMAGE", "icon_importprj");
-	IupSetCallback(item_import, "ACTION", cast(Icallback)&importProject_cb);
-	
+	version(FBIDE)
+	{
+		Ihandle* item_import = IupItem( GLOBAL.languageItems["importprj"].toCString, null);
+		IupSetAttribute(item_import, "IMAGE", "icon_importprj");
+		IupSetCallback(item_import, "ACTION", cast(Icallback)&importProject_cb);
+	}
 
 	item_closeProject = IupItem( GLOBAL.languageItems["closeprj"].toCString, null);
 	IupSetAttribute(item_closeProject, "IMAGE", "icon_clear");
@@ -352,39 +354,41 @@ void createMenu()
 	item_run = IupItem( GLOBAL.languageItems["run"].toCString, null);
 	IupSetAttribute(item_run, "IMAGE", "icon_run");
 	IupSetCallback( item_run, "ACTION", cast(Icallback)&run_cb );
+	
+	item_quickRun = IupItem( GLOBAL.languageItems["quickrun"].toCString, null);
+	IupSetAttribute( item_quickRun, "IMAGE", "icon_quickrun" );
+	IupSetCallback( item_quickRun, "ACTION", cast(Icallback)&quickRun_cb );	
 
 	// Debug
-	item_runDebug = IupItem( GLOBAL.languageItems["rundebug"].toCString, null);
-	IupSetAttribute(item_runDebug, "IMAGE", "icon_debugrun");
-	IupSetCallback( item_runDebug, "ACTION", cast(Icallback)&runDebug_cb );
+	version(FBIDE)
+	{
+		item_runDebug = IupItem( GLOBAL.languageItems["rundebug"].toCString, null);
+		IupSetAttribute(item_runDebug, "IMAGE", "icon_debugrun");
+		IupSetCallback( item_runDebug, "ACTION", cast(Icallback)&runDebug_cb );
 
-	item_withDebug = IupItem( GLOBAL.languageItems["compiledebug"].toCString, null);
-	IupSetAttribute(item_withDebug, "IMAGE", "icon_debugbuild");
-	IupSetCallback( item_withDebug, "ACTION", cast(Icallback)&compileWithDebug_cb );
-	
-	item_BuildwithDebug = IupItem( GLOBAL.languageItems["builddebug"].toCString, null);
-	IupSetAttribute(item_BuildwithDebug, "IMAGE", "icon_debugbuild");
-	IupSetCallback( item_BuildwithDebug, "ACTION", cast(Icallback)&buildAllWithDebug_cb );
+		item_withDebug = IupItem( GLOBAL.languageItems["compiledebug"].toCString, null);
+		IupSetAttribute(item_withDebug, "IMAGE", "icon_debugbuild");
+		IupSetCallback( item_withDebug, "ACTION", cast(Icallback)&compileWithDebug_cb );
+		
+		item_BuildwithDebug = IupItem( GLOBAL.languageItems["builddebug"].toCString, null);
+		IupSetAttribute(item_BuildwithDebug, "IMAGE", "icon_debugbuild");
+		IupSetCallback( item_BuildwithDebug, "ACTION", cast(Icallback)&buildAllWithDebug_cb );
+	}
 	
 	item_buildAll = IupItem( GLOBAL.languageItems["buildprj"].toCString, null);
 	IupSetAttribute(item_buildAll, "IMAGE", "icon_build");
 	IupSetCallback( item_buildAll, "ACTION", cast(Icallback)&buildAll_cb );
 	
-	item_reBuild = IupItem( GLOBAL.languageItems["rebuildprj"].toCString, null);
-	IupSetAttribute( item_reBuild, "IMAGE", "icon_rebuild" );
-	IupSetCallback( item_reBuild, "ACTION", cast(Icallback)&reBuild_cb );
+	version(FBIDE)
+	{
+		item_reBuild = IupItem( GLOBAL.languageItems["rebuildprj"].toCString, null);
+		IupSetAttribute( item_reBuild, "IMAGE", "icon_rebuild" );
+		IupSetCallback( item_reBuild, "ACTION", cast(Icallback)&reBuild_cb );
+	}
 
 	item_clearBuild = IupItem( GLOBAL.languageItems["clearall"].toCString, null);
 	IupSetAttribute( item_clearBuild, "IMAGE", "icon_clear" );
 	IupSetCallback( item_clearBuild, "ACTION", cast(Icallback)&clearBuild_cb );
-	
-	
-	
-
-	item_quickRun = IupItem( GLOBAL.languageItems["quickrun"].toCString, null);
-	IupSetAttribute( item_quickRun, "IMAGE", "icon_quickrun" );
-	IupSetCallback( item_quickRun, "ACTION", cast(Icallback)&quickRun_cb );
-
 
 	// Miscelaneous 
 	GLOBAL.menuOutlineWindow = IupItem( GLOBAL.languageItems["outline"].toCString, null);
@@ -545,33 +549,36 @@ void createMenu()
 	Ihandle* encodeSubMenu = IupMenu( encodeDefault, encodeUTF8, encodeUTF8BOM, encodeUTF16BEBOM, encodeUTF16LEBOM, encodeUTF32BE, encodeUTF32BEBOM, encodeUTF32LE, encodeUTF32LEBOM, null  );
 	Ihandle* convertEncoding = IupSubmenu( GLOBAL.languageItems["convertencoding"].toCString, encodeSubMenu );
 
-	// Convert Keyword
-	Ihandle* upperCase = IupItem( GLOBAL.languageItems["uppercase"].toCString, null );
-	//IupSetAttribute(upperCase, "IMAGE", "icon_windows");
-	IupSetCallback( upperCase, "ACTION", cast(Icallback) function( Ihandle* ih )
+	version(FBIDE)
 	{
-		_convertKeyWordCase( 2 );
-		return IUP_DEFAULT;
-	});	
-	
-	Ihandle* lowerCase = IupItem( GLOBAL.languageItems["lowercase"].toCString, null );
-	//IupSetAttribute(lowerCase, "IMAGE", "icon_mac");
-	IupSetCallback( lowerCase, "ACTION", cast(Icallback) function( Ihandle* ih )
-	{
-		_convertKeyWordCase( 1 );
-		return IUP_DEFAULT;
-	});	
-	
-	Ihandle* mixedCase = IupItem( GLOBAL.languageItems["mixercase"].toCString, null );
-	//IupSetAttribute(mixedCase, "IMAGE", "icon_linux");
-	IupSetCallback( mixedCase, "ACTION", cast(Icallback) function( Ihandle* ih )
-	{
-		_convertKeyWordCase( 3 );
-		return IUP_DEFAULT;
-	});	
+		// Convert Keyword
+		Ihandle* upperCase = IupItem( GLOBAL.languageItems["uppercase"].toCString, null );
+		//IupSetAttribute(upperCase, "IMAGE", "icon_windows");
+		IupSetCallback( upperCase, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			_convertKeyWordCase( 2 );
+			return IUP_DEFAULT;
+		});	
+		
+		Ihandle* lowerCase = IupItem( GLOBAL.languageItems["lowercase"].toCString, null );
+		//IupSetAttribute(lowerCase, "IMAGE", "icon_mac");
+		IupSetCallback( lowerCase, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			_convertKeyWordCase( 1 );
+			return IUP_DEFAULT;
+		});	
+		
+		Ihandle* mixedCase = IupItem( GLOBAL.languageItems["mixercase"].toCString, null );
+		//IupSetAttribute(mixedCase, "IMAGE", "icon_linux");
+		IupSetCallback( mixedCase, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			_convertKeyWordCase( 3 );
+			return IUP_DEFAULT;
+		});	
 
-	Ihandle* caseSubMenu = IupMenu( upperCase, lowerCase, mixedCase, null  );
-	Ihandle* convertCase = IupSubmenu( GLOBAL.languageItems["convertcase"].toCString, caseSubMenu );
+		Ihandle* caseSubMenu = IupMenu( upperCase, lowerCase, mixedCase, null  );
+		Ihandle* convertCase = IupSubmenu( GLOBAL.languageItems["convertcase"].toCString, caseSubMenu );
+	}
 	
 	Ihandle* customTooledit = IupItem( GLOBAL.languageItems["setcustomtool"].toCString, null );
 	IupSetAttribute( customTooledit, "IMAGE", "icon_toolitem" );
@@ -580,7 +587,10 @@ void createMenu()
 	
 	Ihandle* markIupSeparator = IupSeparator();
 	IupSetAttribute( markIupSeparator, "TITLE", "" );
-	Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
+	
+	version(FBIDE) Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
+	version(DIDE) Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, IupSeparator(), customTooledit, markIupSeparator, null  );
+		
 	IupSetHandle( "toolsSubMenu", toolsSubMenu );
 	
 	item_tool = IupSubmenu( GLOBAL.languageItems["tools"].toCString, toolsSubMenu );
@@ -628,7 +638,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.348)\nBy Kuan Hsu (Taiwan)\n2017.12.23" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.349)\nBy Kuan Hsu (Taiwan)\n2018.01.01" );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.020)\nBy Kuan Hsu (Taiwan)\n2018.01.01" );
 		return IUP_DEFAULT;
 	});
 	
@@ -692,6 +703,8 @@ void createMenu()
 							HighlightCurrentWord,
 							null );
 	
+	version(FBIDE)
+	{
 	project_menu = IupMenu( item_newProject,
 							item_openProject,
 							IupSeparator(),
@@ -704,8 +717,26 @@ void createMenu()
 							item_closeAllProject,
 							IupSeparator(),
 							item_projectProperties,
-							null );							
+							null );
+	}
+	version(DIDE)
+	{
+	project_menu = IupMenu( item_newProject,
+							item_openProject,
+							IupSeparator(),
+							IupSeparator(),
+							item_saveProject,
+							item_saveAllProject,
+							IupSeparator(),
+							item_closeProject,
+							item_closeAllProject,
+							IupSeparator(),
+							item_projectProperties,
+							null );
+	}
 
+	version(FBIDE)
+	{
 	build_menu= IupMenu( 	item_compile,
 							item_buildrun,
 							IupSeparator(),
@@ -718,11 +749,25 @@ void createMenu()
 							//IupSeparator(),
 							item_quickRun,
 							null );
-
+							
 	debug_menu= IupMenu( 	item_runDebug,
 							item_withDebug,
 							item_BuildwithDebug,
 							null );
+	}
+	
+	version(DIDE)
+	{
+	build_menu= IupMenu( 	item_compile,
+							item_buildrun,
+							IupSeparator(),
+							item_run,
+							item_buildAll,
+							item_clearBuild,
+							IupSeparator(),
+							item_quickRun,
+							null );
+	}
 							
 	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
@@ -748,62 +793,68 @@ void createMenu()
 	mainMenu4_View = IupSubmenu( GLOBAL.languageItems["view"].toCString, view_menu );
 	mainMenu5_Project = IupSubmenu( GLOBAL.languageItems["prj"].toCString, project_menu );
 	mainMenu6_Build = IupSubmenu( GLOBAL.languageItems["build"].toCString, build_menu );
-	mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
+	version(FBIDE) mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
 	mainMenu_Misc = IupSubmenu( GLOBAL.languageItems["windows"].toCString, misc_menu );
 	mainMenu8_Option = IupSubmenu( GLOBAL.languageItems["options"].toCString, option_menu );
 
-	menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option, null );
+	version(FBIDE)
+		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option, null );
+	else
+		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu_Misc, mainMenu8_Option, null );
+		
 	IupSetAttribute( menu, "GAP", "30" );
 	
 	IupSetHandle("mymenu", menu);
 }
 
-
-private void _convertKeyWordCase( int type )
+version(FBIDE)
 {
-	/*
-	SCI_SETTARGETSTART = 2190,
-	SCI_GETTARGETSTART = 2191,
-	SCI_SETTARGETEND = 2192,
-	SCI_GETTARGETEND = 2193,
-	SCI_REPLACETARGET 2194
-	SCI_SEARCHINTARGET = 2197,
-	SCI_SETSEARCHFLAGS = 2198,
-	SCFIND_WHOLEWORD = 2,
-	SCFIND_MATCHCASE = 4,
-
-	SCFIND_WHOLEWORD = 2,
-	SCFIND_MATCHCASE = 4,
-	SCFIND_WORDSTART = 0x00100000,
-	SCFIND_REGEXP = 0x00200000,
-	SCFIND_POSIX = 0x00400000,
-	*/		
-	CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-	if( cSci !is null )
+	private void _convertKeyWordCase( int type )
 	{
-		Ihandle* iupSci = cSci.getIupScintilla;
-		IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
+		/*
+		SCI_SETTARGETSTART = 2190,
+		SCI_GETTARGETSTART = 2191,
+		SCI_SETTARGETEND = 2192,
+		SCI_GETTARGETEND = 2193,
+		SCI_REPLACETARGET 2194
+		SCI_SEARCHINTARGET = 2197,
+		SCI_SETSEARCHFLAGS = 2198,
+		SCFIND_WHOLEWORD = 2,
+		SCFIND_MATCHCASE = 4,
 
-		foreach( IupString _s; GLOBAL.KEYWORDS )
+		SCFIND_WHOLEWORD = 2,
+		SCFIND_MATCHCASE = 4,
+		SCFIND_WORDSTART = 0x00100000,
+		SCFIND_REGEXP = 0x00200000,
+		SCFIND_POSIX = 0x00400000,
+		*/		
+		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+		if( cSci !is null )
 		{
-			foreach( char[] targetText; Util.split( _s.toDString, " " ) )
+			Ihandle* iupSci = cSci.getIupScintilla;
+			IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
+
+			foreach( IupString _s; GLOBAL.KEYWORDS )
 			{
-				if( targetText.length )
+				foreach( char[] targetText; Util.split( _s.toDString, " " ) )
 				{
-					int		replaceTextLength = targetText.length;
-					char[]	replaceText = tools.convertKeyWordCase( type, targetText );
-
-					IupSetInt( iupSci, "TARGETSTART", 0 );
-					IupSetInt( iupSci, "TARGETEND", -1 );
-
-					int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-					while( posHead >= 0 )
+					if( targetText.length )
 					{
-						IupSetAttribute( iupSci, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
-						IupSetInt( iupSci, "TARGETSTART", posHead + replaceTextLength );
+						int		replaceTextLength = targetText.length;
+						char[]	replaceText = tools.convertKeyWordCase( type, targetText );
+
+						IupSetInt( iupSci, "TARGETSTART", 0 );
 						IupSetInt( iupSci, "TARGETEND", -1 );
-						posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-					}					
+
+						int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+						while( posHead >= 0 )
+						{
+							IupSetAttribute( iupSci, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
+							IupSetInt( iupSci, "TARGETSTART", posHead + replaceTextLength );
+							IupSetInt( iupSci, "TARGETEND", -1 );
+							posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+						}					
+					}
 				}
 			}
 		}
@@ -832,7 +883,8 @@ extern(C)
 		
 		if( !existedID.length )
 		{
-			noname = "NONAME#0.bas";
+			version(FBIDE)	noname = "NONAME#0.bas";
+			version(DIDE)	noname = "NONAME#0.d";
 		}
 		else
 		{
@@ -840,13 +892,18 @@ extern(C)
 			{
 				if( i < existedID[i] )
 				{
-					noname = "NONAME#" ~ Integer.toString( i ) ~ ".bas";
+					version(FBIDE)	noname = "NONAME#" ~ Integer.toString( i ) ~ ".bas";
+					version(DIDE)	noname = "NONAME#" ~ Integer.toString( i ) ~ ".d";
 					break;
 				}
 			}
 		}
 
-		if( !noname.length ) noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".bas";
+		if( !noname.length )
+		{
+			version(FBIDE)	noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".bas";
+			version(DIDE)	noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".d";
+		}
 
 		version(Windows) actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false ); else actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
 
@@ -856,7 +913,8 @@ extern(C)
 	
 	int openFile_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.bas;*.bi|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
+		version(FBIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.bas;*.bi|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
+		version(DIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.d;*.di|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
 		foreach( char[] s; fileSecectDlg.getFilesName() )
 		{
 			if( s.length )
@@ -1472,10 +1530,13 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int importProject_cb( Ihandle *ih )
+	version(FBIDE)
 	{
-		GLOBAL.projectTree.importFbEditProject();
-		return IUP_DEFAULT;
+		int importProject_cb( Ihandle *ih )
+		{
+			GLOBAL.projectTree.importFbEditProject();
+			return IUP_DEFAULT;
+		}
 	}
 
 	int closeProject_cb( Ihandle* ih )
@@ -1671,9 +1732,79 @@ extern(C)
 			{
 				foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
 				{
-					scope fPath = new FilePath( s );
-					scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-					if( oPath.exists() ) oPath.remove();
+					version(FBIDE)
+					{
+						scope fPath = new FilePath( s );
+						scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
+						if( oPath.exists() ) oPath.remove();
+					}
+					version(DIDE)
+					{
+						scope fPath = new FilePath( s );
+						version(Windows)
+						{
+							scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".obj" );
+							if( oPath.exists() ) oPath.remove();
+
+							oPath.set( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ fPath.name ~ ".obj" );
+							if( oPath.exists() ) oPath.remove();
+						}
+						else
+						{
+							scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
+							if( oPath.exists() ) oPath.remove();
+
+							oPath.set( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ fPath.name ~ ".o" );
+							if( oPath.exists() ) oPath.remove();
+						}
+					}
+				}
+				
+				version(DIDE)
+				{
+					int ofPos = Util.index( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
+					if( ofPos < GLOBAL.projectManager[activePrjName].compilerOption.length )
+					{
+						char[] outputName;
+						for( int i = ofPos + 3; i < GLOBAL.projectManager[activePrjName].compilerOption.length; ++ i )
+						{
+							if( GLOBAL.projectManager[activePrjName].compilerOption[i] == '\t' || GLOBAL.projectManager[activePrjName].compilerOption[i] == ' ' ) break;
+							outputName ~= GLOBAL.projectManager[activePrjName].compilerOption[i];
+						}
+						
+						// Got Obj Path -od
+						if( outputName.length )
+						{
+							scope oPath = new FilePath( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ outputName );
+							if( oPath.exists() )
+							{
+								if( oPath.isFolder )
+								{
+									// Nested Delegate Filter Function
+									bool dirFilter( FilePath _fp, bool _isFfolder )
+									{
+										if( _isFfolder ) return true;
+										if( _fp.isFile )
+										{
+											if( lowerCase( _fp.ext ) == "obj" || lowerCase( _fp.ext ) == "o" ) return true;
+										}
+									
+										return false;
+									}
+									
+									bool delegate( FilePath, bool ) _dirFilter;
+									_dirFilter = &dirFilter;
+									// End of Nested Function
+									
+
+									foreach( FilePath _fp; oPath.toList( _dirFilter ) )
+										_fp.remove();
+
+									oPath.remove();
+								}
+							}
+						}
+					}
 				}
 				
 				char[] executeName, _targetName;
@@ -1736,22 +1867,25 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	int runDebug_cb( Ihandle *ih )
+	version(FBIDE)
 	{
-		if( !GLOBAL.debugPanel.isExecuting && !GLOBAL.debugPanel.isRunning ) GLOBAL.debugPanel.runDebug();
-		return IUP_DEFAULT;
-	}
+		int runDebug_cb( Ihandle *ih )
+		{
+			if( !GLOBAL.debugPanel.isExecuting && !GLOBAL.debugPanel.isRunning ) GLOBAL.debugPanel.runDebug();
+			return IUP_DEFAULT;
+		}
 
-	int compileWithDebug_cb( Ihandle *ih )
-	{
-		GLOBAL.debugPanel.compileWithDebug();
-		return IUP_DEFAULT;
-	}
+		int compileWithDebug_cb( Ihandle *ih )
+		{
+			GLOBAL.debugPanel.compileWithDebug();
+			return IUP_DEFAULT;
+		}
 
-	int buildAllWithDebug_cb( Ihandle *ih )
-	{
-		GLOBAL.debugPanel.buildAllWithDebug();
-		return IUP_DEFAULT;
+		int buildAllWithDebug_cb( Ihandle *ih )
+		{
+			GLOBAL.debugPanel.buildAllWithDebug();
+			return IUP_DEFAULT;
+		}
 	}
 
 	int encode_cb( Ihandle *ih )

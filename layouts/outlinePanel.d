@@ -88,163 +88,303 @@ class COutline
 			if( _node.protection != "public" && _node.protection != "shared" ) prot = "_" ~ _node.protection;
 		}
 
-		switch( _node.kind )
+		version(FBIDE)
 		{
-			case B_DEFINE | B_VARIABLE:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_var" ) );
-				break;
+			switch( _node.kind )
+			{
+				case B_DEFINE | B_VARIABLE:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_var" ) );
+					break;
 
-			case B_DEFINE | B_FUNCTION:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_fun" ) );
-				break;
-				
-			case B_VARIABLE:
-				if( _node.name.length )
-				{
-					if( _node.name[length-1] == ')' )
-						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable_array" ~ prot ) );
-					else
-						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ~ prot ) );
-				}
-				break;
-
-			case B_FUNCTION:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
-				}
-				break;
-
-			case B_SUB:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
-				}
-				break;
-
-			case B_OPERATOR:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_operator") );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_operator" ) );
-				}
-				
-				break;
-
-			case B_PROPERTY:
-				if(_node.type.length )
-				{
-					if( _node.type[0] == '(' )
+				case B_DEFINE | B_FUNCTION:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_define_fun" ) );
+					break;
+					
+				case B_VARIABLE:
+					if( _node.name.length )
 					{
-						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
-						if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+						if( _node.name[length-1] == ')' )
+							IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable_array" ~ prot ) );
+						else
+							IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ~ prot ) );
 					}
-					else
+					break;
+
+				case B_FUNCTION:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
+					if( _node.getChildrenCount > 0 )
 					{
-						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
-						if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
 					}
-				}
-				
-				break;
+					break;
 
-			case B_CTOR:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
-				}
-				break;
+				case B_SUB:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
+					}
+					break;
 
-			case B_DTOR:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
-				}
-				break;
+				case B_OPERATOR:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_operator") );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_operator" ) );
+					}
+					
+					break;
 
-			case B_TYPE:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
-				}
-				break;
+				case B_PROPERTY:
+					if(_node.type.length )
+					{
+						if( _node.type[0] == '(' )
+						{
+							IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+							if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property" ) );
+						}
+						else
+						{
+							IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
+							if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_property_var" ) );
+						}
+					}
+					
+					break;
 
-			case B_CLASS:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
-				}
-				break;
+				case B_CTOR:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+					}
+					break;
 
-			case B_ENUM:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
-				}
-				break;				
+				case B_DTOR:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+					}
+					break;
 
-			case B_ENUMMEMBER:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
-				}
-				break;
+				case B_TYPE:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+					}
+					break;
 
-			case B_UNION:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
-				}
-				break;				
+				case B_CLASS:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+					}
+					break;
 
-			case B_ALIAS:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_alias" ) );
-				break;
+				case B_ENUM:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+					}
+					break;				
 
-			case B_NAMESPACE:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
-				}				
-				break;
+				case B_ENUMMEMBER:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+					}
+					break;
 
-			case B_MACRO:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
-				}				
-				break;
+				case B_UNION:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+					}
+					break;				
 
-			case B_SCOPE:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
-				}				
-				break;
-				
-			case B_WITH:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_with" ) );
-				if( _node.getChildrenCount > 0 )
-				{
-					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_with" ) );
-				}				
-				break;
+				case B_ALIAS:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_alias" ) );
+					break;
 
-			default:
-				IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
+				case B_NAMESPACE:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_namespace" ) );
+					}				
+					break;
+
+				case B_MACRO:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_macro" ) );
+					}				
+					break;
+
+				case B_SCOPE:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_scope" ) );
+					}				
+					break;
+					
+				case B_WITH:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_with" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_with" ) );
+					}				
+					break;
+
+				default:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
+			}
 		}
+		
+		version(DIDE)
+		{
+			switch( _node.kind )
+			{
+				case D_IMPORT:
+					if( _node.protection != "public" ) prot = "_private";
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_import" ~ prot ) );
+					break;
+					
+				case D_VARIABLE:
+					if( _node.type.length )
+					{
+						if( _node.type[length-1] == ']' )
+							IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable_array" ~ prot ) );
+						else
+							IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ~ prot ) );
+					}
+					break;
+
+				case D_FUNCTION:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_function" ~ prot ) );
+					}
+					break;
+
+				case D_TEMPLATE:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_template" ) );//~ prot ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_template" ) );// ~ prot ) );
+					}
+					break;
+
+				case D_CTOR:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+					}
+					break;
+
+				case D_DTOR:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+					}
+					break;
+
+				case D_STRUCT:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_struct" ) );
+					}
+					break;
+
+				case D_CLASS:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_class" ) );
+					}
+					break;
+
+				case D_INTERFACE:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_interface" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_interface" ) );
+					}
+					break;
+
+				case D_ENUM:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enum" ) );
+					}
+					break;				
+
+				case D_ENUMMEMBER:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_enummember" ) );
+					}
+					break;
+
+				case D_UNION:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_union" ) );
+					}
+					break;				
+
+				case D_ALIAS:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_alias" ) );
+					break;
+
+				case D_VERSION:
+					if( _node.type.length )
+					{
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_versionspec" ) );
+						break;
+					}
+					
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_version" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_version" ) );
+					}				
+					break;
+
+				case D_DEBUG:
+					if( _node.type.length )
+					{
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_debugspec" ) );
+						break;
+					}
+				
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_debug" ) );
+					if( _node.getChildrenCount > 0 )
+					{
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_debug" ) );
+					}				
+					break;
+
+				default:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable" ) );
+			}
+		}
+		
 
 		if( GLOBAL.editorSetting00.ColorOutline == "ON" )
 		{
@@ -270,82 +410,162 @@ class COutline
 				
 				if( _node !is null )
 				{
-					switch( _node.kind )
+					version(FBIDE)
 					{
-						case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-							char[] _type = _node.type;
-							char[] _paramString;
+						switch( _node.kind )
+						{
+							case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+								char[] _type = _node.type;
+								char[] _paramString;
 
-							int parenPos = Util.index( _node.type, "(" );
-							if( parenPos < _node.type.length )
-							{
-								_type = _node.type[0..parenPos];
-								_paramString = _node.type[parenPos..length];
-							}
+								int parenPos = Util.index( _node.type, "(" );
+								if( parenPos < _node.type.length )
+								{
+									_type = _node.type[0..parenPos];
+									_paramString = _node.type[parenPos..length];
+								}
 
 
-							if( _node.kind & B_DEFINE )
-							{
+								if( _node.kind & B_DEFINE )
+								{
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+											break;
+										default:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+											break;
+									}
+									break;
+								}
+								
 								switch( showIndex )
 								{
-									case 0, 1:
+									case 0:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+										break;
+									case 1:
 										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+										break;
+									case 2:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
 										break;
 									default:
 										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
 										break;
 								}
 								break;
-							}
-							
-							switch( showIndex )
-							{
-								case 0:
-									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
-									break;
-								case 1:
-									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
-									break;
-								case 2:
-									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
-									break;
-								default:
-									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
-									break;
-							}
-							break;
 
-						case B_SUB, B_CTOR, B_DTOR, B_MACRO:
-							switch( showIndex )
-							{
-								case 0, 1:
-									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _node.type ) );
-									break;
-								default:
-									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
-									break;
-							}
-							break;
+							case B_SUB, B_CTOR, B_DTOR, B_MACRO:
+								switch( showIndex )
+								{
+									case 0, 1:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+										break;
+									default:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+										break;
+								}
+								break;
 
-						case B_VARIABLE, B_ALIAS:
-							if( _node.kind & B_DEFINE )
-							{
+							case B_VARIABLE, B_ALIAS:
+								if( _node.kind & B_DEFINE )
+								{
+									if( showIndex == 0 || showIndex == 2 )
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+									else
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+									
+									break;
+								}					
+
 								if( showIndex == 0 || showIndex == 2 )
 									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
 								else
 									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
 								
-								break;
-							}					
+								break;						
 
-							if( showIndex == 0 || showIndex == 2 )
-								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
-							else
-								IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
-							
-							break;						
+							default:
+						}
+						
+						version(DIDE)
+						{
+							switch( _node.kind )
+							{
+								case D_FUNCTION: //, B_PROPERTY, B_OPERATOR:
+									char[] _type = _node.type;
+									char[] _paramString;
 
-						default:
+									int parenPos = Util.index( _node.type, "(" );
+									if( parenPos < _node.type.length )
+									{
+										_type = _node.type[0..parenPos];
+										_paramString = _node.type[parenPos..length];
+									}
+
+									switch( showIndex )
+									{
+										case 0:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+											break;
+										case 1:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+											break;
+										case 2:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+											break;
+										default:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+											break;
+									}
+									break;
+
+								case D_CTOR:
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "this" ~ _node.type ) );
+											break;
+										default:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "this" ) );
+											break;
+									}
+									break;
+
+								case D_DTOR:
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "~this()" ) );
+											break;
+										default:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "~this" ) );
+											break;
+									}
+									break;
+
+								case D_CLASS, D_INTERFACE:
+									if( showIndex == 0 || showIndex == 2 )
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.base.length ? " : " ~ _node.base : "" ) ) );
+									else
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+									
+									break;	
+									
+
+								case D_VARIABLE://, B_ALIAS:
+									if( showIndex == 0 || showIndex == 2 )
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+									else
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+									
+									break;						
+
+								default:
+							}
+						}
 					}
 				}
 			}
@@ -376,71 +596,173 @@ class COutline
 
 		if( _node.getChildrenCount > 0 )
 		{
-			switch( _node.kind )
+			version(FBIDE)
 			{
-				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-					char[] _type = _node.type;
-					char[] _paramString;
+				switch( _node.kind )
+				{
+					case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+						char[] _type = _node.type;
+						char[] _paramString;
 
-					int pos = Util.index( _node.type, "(" );
-					if( pos < _node.type.length )
-					{
-						_type = _node.type[0..pos];
-						_paramString = _node.type[pos..length];
-					}
+						int pos = Util.index( _node.type, "(" );
+						if( pos < _node.type.length )
+						{
+							_type = _node.type[0..pos];
+							_paramString = _node.type[pos..length];
+						}
 
-					switch( showIndex )
-					{
-						case 0:
-							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-						case 1:
-							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-						case 2:
-							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-						default:
-							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-					}					
-					break;
+						switch( showIndex )
+						{
+							case 0:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 1:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 2:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}					
+						break;
 
-				case B_SUB, B_CTOR, B_DTOR, B_MACRO:
-					switch( showIndex )
-					{
-						case 0, 1:
-							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-						default:
-							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-					}
-					break;
+					case B_SUB, B_CTOR, B_DTOR, B_MACRO:
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}
+						break;
 
-				case B_SCOPE:
-					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, null );
-					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-					break;
-					
-				case B_TYPE, B_CLASS:
-					if( _node.base.length )
-					{
-						IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ " : " ~ _node.base ) );
+					case B_SCOPE:
+						IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, null );
 						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 						break;
-					}
+						
+					case B_TYPE, B_CLASS:
+						if( _node.base.length )
+						{
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ " : " ~ _node.base ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						}
 
-				default:
-					IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
-					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					default:
+						IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+				}
 			}
+			version(DIDE)
+			{
+				switch( _node.kind )
+				{
+					case D_FUNCTION://, B_PROPERTY, B_OPERATOR:
+						char[] _type = _node.type;
+						char[] _paramString;
+
+						int pos = Util.index( _node.type, "(" );
+						if( pos < _node.type.length )
+						{
+							_type = _node.type[0..pos];
+							_paramString = _node.type[pos..length];
+						}
+
+						switch( showIndex )
+						{
+							case 0:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 1:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 2:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}					
+						break;
+
+					case D_CTOR:
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( "this" ~ _node.type ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( "this" ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}
+						break;
+
+					case D_DTOR:
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( "~this()" ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( "~this" ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}
+						break;
+
+					case D_CLASS, D_INTERFACE:
+						switch( showIndex )
+						{
+							case 0, 2:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.base.length ? " : " ~ _node.base : _node.base ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+								
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}
+						break;					
+
+					case D_ENUM:	
+						if( !_node.name.length )
+						{
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( "-Anonymous-" ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+						}
+						else
+						{
+							IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+						}
+						
+						break;				
+
+					default:
+						IupSetAttributeId( rootTree, sCovert.convert( BRANCH ), bracchID, GLOBAL.cString.convert( _node.name ) );
+						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+				}
+			}
+			
 			lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
 			setImage( rootTree, _node );
 			IupSetAttributeId( rootTree, "USERDATA", lastAddNode, cast(char*) _node );
@@ -453,25 +775,49 @@ class COutline
 		else
 		{
 			bool bNoImage;
-			switch( _node.kind & 4194303 )
+			version(FBIDE)
 			{
-				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-					char[] _type = _node.type;
-					char[] _paramString;
-					
-					int pos = Util.index( _node.type, "(" );
-					if( pos < _node.type.length )
-					{
-						_type = _node.type[0..pos];
-						_paramString = _node.type[pos..length];
-					}
+				switch( _node.kind & 4194303 )
+				{
+					case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+						char[] _type = _node.type;
+						char[] _paramString;
+						
+						int pos = Util.index( _node.type, "(" );
+						if( pos < _node.type.length )
+						{
+							_type = _node.type[0..pos];
+							_paramString = _node.type[pos..length];
+						}
 
-					if( _node.kind & B_DEFINE )
-					{
+						if( _node.kind & B_DEFINE )
+						{
+							switch( showIndex )
+							{
+								case 0, 1:
+									IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+									IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+									break;
+								default:
+									IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+									IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+									break;
+							}
+							break;
+						}					
+
 						switch( showIndex )
 						{
-							case 0, 1:
+							case 0:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 1:
 								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 2:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
 								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 								break;
 							default:
@@ -480,46 +826,38 @@ class COutline
 								break;
 						}
 						break;
-					}					
 
-					switch( showIndex )
-					{
-						case 0:
-							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-						case 1:
-							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-						case 2:
-							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-						default:
-							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-					}
-					break;
+					case B_SUB, B_CTOR, B_DTOR:
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}				
+						break;
 
-				case B_SUB, B_CTOR, B_DTOR:
-					switch( showIndex )
-					{
-						case 0, 1:
-							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _node.type ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					case B_VARIABLE, B_ALIAS:
+						if( _node.kind & B_DEFINE )
+						{
+							if( showIndex == 0 || showIndex == 2 )
+							{
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							}
+							else
+							{
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							}
+							
 							break;
-						default:
-							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-					}				
-					break;
+						}					
 
-				case B_VARIABLE, B_ALIAS:
-					if( _node.kind & B_DEFINE )
-					{
 						if( showIndex == 0 || showIndex == 2 )
 						{
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
@@ -532,36 +870,142 @@ class COutline
 						}
 						
 						break;
-					}					
 
-					if( showIndex == 0 || showIndex == 2 )
-					{
-						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
-						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-					}
-					else
-					{
+					case B_ENUMMEMBER, B_WITH:
 						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-					}
-					
-					break;
+						break;
+						
+					case B_TYPE, B_CLASS:
+						if( _node.base.length )
+						{
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ " : " ~ _node.base ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						}
 
-				case B_ENUMMEMBER, B_WITH:
-					IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
-					IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-					break;
-					
-				case B_TYPE, B_CLASS:
-					if( _node.base.length )
-					{
-						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ " : " ~ _node.base ) );
+					default:
+						bNoImage = true;
+				}
+			}
+			version(DIDE)
+			{
+				switch( _node.kind & 2097151 )
+				{
+					case D_IMPORT:
+						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+						break;
+						
+					case D_FUNCTION://, B_PROPERTY, B_OPERATOR:
+						char[] _type = _node.type;
+						char[] _paramString;
+						
+						int pos = Util.index( _node.type, "(" );
+						if( pos < _node.type.length )
+						{
+							_type = _node.type[0..pos];
+							_paramString = _node.type[pos..length];
+						}
+
+						/*
+						if( _node.kind & B_DEFINE )
+						{
+							switch( showIndex )
+							{
+								case 0, 1:
+									IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+									break;
+								default:
+									IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+									break;
+							}
+							break;
+						}
+						*/
+
+						switch( showIndex )
+						{
+							case 0:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 1:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							case 2:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}
+						break;
+
+					case D_CTOR:
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( "this" ~ _node.type ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( "this" ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}				
+						break;
+
+					case D_DTOR:
+						switch( showIndex )
+						{
+							case 0, 1:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( "~this()" ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+							default:
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( "~this" ) );
+								IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								break;
+						}				
+						break;
+						
+					case D_VARIABLE, D_ALIAS:
+						/*
+						if( _node.kind & B_DEFINE )
+						{
+							if( showIndex == 0 || showIndex == 2 )
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+							else
+								IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							
+							break;
+						}
+						*/
+
+						if( showIndex == 0 || showIndex == 2 )
+						{
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+						}
+						else
+						{
+							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+							IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+						}
+						
+						break;
+
+					case D_ENUMMEMBER, D_VERSION, D_DEBUG:
+						IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
 						IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 						break;
-					}
 
-				default:
-					bNoImage = true;
+					default:
+						bNoImage = true;
+				}
 			}
 
 			if( !bNoImage )
@@ -809,32 +1253,64 @@ class COutline
 	{
 		if( head !is null )
 		{
-			if( head.kind == B_BAS || head.kind == B_BI )
+			version(FBIDE)
 			{
-				char[] fullPath = head.name;
-				
-				cleanTree( fullPath );
-
-				Ihandle* tree = IupTree();
-				IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
-				version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-				
-				IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
-				IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
-				
-				toBoldTitle( tree, 0 );
-				//IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &COutline_SELECTION_CB );
-				IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-
-				IupAppend( zBoxHandle, tree );
-				IupMap( tree );
-				IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
-				foreach_reverse( CASTnode t; head.getChildren() )
+				if( head.kind == B_BAS || head.kind == B_BI )
 				{
-					append( tree, t, 0 );
+					char[] fullPath = head.name;
+					
+					cleanTree( fullPath );
+
+					Ihandle* tree = IupTree();
+					IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
+					version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+					
+					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
+					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
+					
+					toBoldTitle( tree, 0 );
+					//IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &COutline_SELECTION_CB );
+					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+
+					IupAppend( zBoxHandle, tree );
+					IupMap( tree );
+					IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
+					foreach_reverse( CASTnode t; head.getChildren() )
+					{
+						append( tree, t, 0 );
+					}
+					
+					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 				}
-				
-				IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+			}
+			version(DIDE)
+			{
+				if( head.kind == D_MODULE )
+				{
+					char[] fullPath = head.name;
+
+					Ihandle* tree = IupTree();
+					IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
+					version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+					IupSetAttributeId( tree, "USERDATA", 0, cast(char*) head );
+					IupSetAttributeId( tree, "IMAGE", 0, GLOBAL.cString.convert( "IUP_module" ) );
+					IupSetAttributeId( tree, "IMAGEEXPANDED", 0, GLOBAL.cString.convert( "IUP_module" ) );				
+					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
+					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
+					
+					IupSetAttributeId( tree, "FONTSTYLE", 0, "BOLD" ); // Bold
+					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+
+					IupAppend( zBoxHandle, tree );
+					IupMap( tree );
+					IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
+					foreach_reverse( CASTnode t; head.getChildren() )
+					{
+						append( tree, t, 0 );
+					}
+					
+					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+				}
 			}
 		}
 	}
@@ -847,6 +1323,11 @@ class COutline
 			if( ih != null )
 			{
 				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+				version(DIDE)
+				{
+					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
+					if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
+				}
 
 				if( fullPath == _fullPath )
 				{
@@ -865,6 +1346,11 @@ class COutline
 			if( ih != null )
 			{
 				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+				version(DIDE)
+				{
+					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
+					if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
+				}
 
 				if( fullPath == _fullPath )
 				{
@@ -898,6 +1384,11 @@ class COutline
 			if( ih != null )
 			{
 				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+				version(DIDE)
+				{
+					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
+					if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
+				}				
 
 				if( fullPath == _fullPath ) return ih;
 			}
@@ -918,7 +1409,8 @@ class COutline
 
 		char[] _ext = toLower( f.ext() );
 
-		if( _ext != "bas" && _ext != "bi" ) return null;
+		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
+		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
 
 		
 		CScintilla actCSci;
@@ -979,7 +1471,8 @@ class COutline
 
 		char[] _ext = toLower( f.ext() );
 
-		if( _ext != "bas" && _ext != "bi" ) return null;
+		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
+		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;		
 
 		if( upperCase(fullPath) in GLOBAL.parserManager )
 		{
@@ -989,7 +1482,7 @@ class COutline
 		{
 			// Don't Create Tree
 			// Parser
-			if( f.ext() )
+			if( f.exists() )
 			{
 				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
 				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
@@ -1008,39 +1501,75 @@ class COutline
 			if( _node.protection != "public" && _node.protection != "shared" ) prot = "_" ~ _node.protection;
 		}
 
-		switch( _node.kind )
+		version(FBIDE)
 		{
-			case B_DEFINE | B_VARIABLE: return "IUP_define_var";
-			case B_DEFINE | B_FUNCTION: return "IUP_define_fun";
-			case B_VARIABLE:
-				if( _node.name.length )
-				{
-					if( _node.name[length-1] == ')' ) return ( "IUP_variable_array" ~ prot ); else return( "IUP_variable" ~ prot );
-				}
-				break;
+			switch( _node.kind )
+			{
+				case B_DEFINE | B_VARIABLE: return "IUP_define_var";
+				case B_DEFINE | B_FUNCTION: return "IUP_define_fun";
+				case B_VARIABLE:
+					if( _node.name.length )
+					{
+						if( _node.name[length-1] == ')' ) return ( "IUP_variable_array" ~ prot ); else return( "IUP_variable" ~ prot );
+					}
+					break;
 
-			case B_FUNCTION:			return ( "IUP_function" ~ prot );
-			case B_SUB:					return ( "IUP_sub" ~ prot );
-			case B_OPERATOR:			return "IUP_operator";
-			case B_PROPERTY:	
-				if(_node.type.length )
-				{
-					if( _node.type[0] == '(' ) return "IUP_property"; else return "IUP_property_var";
-				}
-				break;
+				case B_FUNCTION:			return ( "IUP_function" ~ prot );
+				case B_SUB:					return ( "IUP_sub" ~ prot );
+				case B_OPERATOR:			return "IUP_operator";
+				case B_PROPERTY:	
+					if(_node.type.length )
+					{
+						if( _node.type[0] == '(' ) return "IUP_property"; else return "IUP_property_var";
+					}
+					break;
 
-			case B_CTOR:				return "IUP_ctor";
-			case B_DTOR:				return "IUP_dtor";
-			case B_TYPE:				return "IUP_struct";
-			case B_CLASS:				return "IUP_class";
-			case B_ENUM:				return "IUP_enum";
-			case B_ENUMMEMBER:			return "IUP_enummember";
-			case B_UNION:				return "IUP_union";
-			case B_ALIAS:				return "IUP_alias";
-			case B_NAMESPACE:			return "IUP_namespace";
-			case B_MACRO:				return "IUP_macro";
-			case B_SCOPE:				return "IUP_scope";
-			default:					return "IUP_variable";
+				case B_CTOR:				return "IUP_ctor";
+				case B_DTOR:				return "IUP_dtor";
+				case B_TYPE:				return "IUP_struct";
+				case B_CLASS:				return "IUP_class";
+				case B_ENUM:				return "IUP_enum";
+				case B_ENUMMEMBER:			return "IUP_enummember";
+				case B_UNION:				return "IUP_union";
+				case B_ALIAS:				return "IUP_alias";
+				case B_NAMESPACE:			return "IUP_namespace";
+				case B_MACRO:				return "IUP_macro";
+				case B_SCOPE:				return "IUP_scope";
+				default:					return "IUP_variable";
+			}
+		}
+		
+		version(DIDE)
+		{
+			switch( _node.kind )
+			{
+				case D_IMPORT:
+					if( _node.protection != "public" ) prot = "_private";
+					return ( "IUP_import" ~ prot );
+
+				case D_VARIABLE:
+					if( _node.type.length )
+					{
+						if( _node.type[length-1] == ']' ) return ( "IUP_variable_array" ~ prot ); else return( "IUP_variable" ~ prot );
+					}
+					break;
+
+		
+				case D_FUNCTION:			return ( "IUP_function" ~ prot );
+				case D_INTERFACE:			return "IUP_interface";
+				case D_TEMPLATE:			return "IUP_template";
+				case D_CTOR:				return "IUP_ctor";
+				case D_DTOR:				return "IUP_dtor";
+				case D_STRUCT:				return "IUP_struct";
+				case D_CLASS:				return "IUP_class";
+				case D_ENUM:				return "IUP_enum";
+				case D_ENUMMEMBER:			return "IUP_enummember";
+				case D_UNION:				return "IUP_union";
+				case D_ALIAS:				return "IUP_alias";
+				case D_VERSION:				if( _node.type.length) return "IUP_versionspec"; else return "IUP_version";
+				case D_DEBUG:				if( _node.type.length) return "IUP_debugspec"; else return "IUP_debug";
+				default:					return "IUP_variable";
+			}
 		}
 
 		return "IUP_variable";
@@ -1101,77 +1630,6 @@ class COutline
 						{
 							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
 						}
-						
-						/+
-						if( _node.lineNumber == _ln  )
-						{
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", i - 1 ) ) == "LEAF" )
-							{
-								int sonID = i - 1;
-								int parentID = IupGetIntId( actTree, "PARENT", sonID );
-								
-								while( parentID > 0 )
-								{
-									CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
-									if( _parentNode is null ) throw new Exception( "Insert & Remove Outline Tree Node Error!" );
-
-									if( _parentNode.endLineNum < _ln )
-									{
-										sonID = insertID = parentID; // New node out BRANCH block
-										parentID = IupGetIntId( actTree, "PARENT", sonID );
-									}
-									else
-									{
-										insertID = sonID; // New node in BRANCH block
-										break;
-									}
-								}
-								
-								if( parentID <= 0 ) insertID = i - 1; // parentID = 0 = root node
-							}
-							else
-							{
-								insertID = -( i - 1 );
-							}
-
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-							bEqual = true;
-						}
-						else if( _node.lineNumber < _ln )
-						{
-							if( bEqual ) break;
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "LEAF" )
-							{
-								int	sonID = i;
-								int parentID = IupGetIntId( actTree, "PARENT", sonID );
-								
-								while( parentID > 0 )
-								{
-									CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
-									if( _parentNode is null ) throw new Exception( "Insert & Remove Outline Tree Node Error!" );
-
-									if( _parentNode.endLineNum < _ln )
-									{
-										sonID = insertID = parentID; // New node out BRANCH block
-										parentID = IupGetIntId( actTree, "PARENT", sonID );
-									}
-									else
-									{
-										insertID = sonID; // New node in BRANCH block
-										break;
-									}									
-								}
-								
-								if( parentID <= 0 ) insertID = i; // parentID = 0 = root node
-							}
-							else
-							{
-								insertID = -i; // AddNODE, depth +1 
-							}
-							
-							break;
-						}
-						+/
 					}
 				}
 			}
@@ -1184,94 +1642,6 @@ class COutline
 
 		return insertID;
 	}
-
-	/+
-	int removeNodeByLineNumber( int _ln )
-	{
-		int insertID = 0;
-		
-		try
-		{
-			Ihandle* actTree = getActiveTree();
-			
-			if( actTree != null )
-			{
-				bool bEqual;
-				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-				{
-					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					if( _node !is null )
-					{
-						if( _node.lineNumber == _ln  )
-						{
-							/+
-							insertID = i - 1;
-							// Check if the be deleted node is the first child node of branch or not
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", insertID ) ) == "BRANCH" ) insertID = -insertID;
-
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-							+/
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", i - 1 ) ) == "LEAF" )
-							{
-								int parentID = IupGetIntId( actTree, "PARENT", i - 1 );
-								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
-								if( parentID > 0 )
-								{
-									if( _parentNode.endLineNum < _ln ) 
-										insertID = parentID; // New node out BRANCH block
-									else
-										insertID = i - 1; // New node in BRANCH block
-								}
-								else
-								{
-									insertID = i - 1; // parentID = 0 = root node
-								}								
-							}
-							else
-							{
-								insertID = -( i - 1 );
-							}
-
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-							bEqual = true;
-						}
-						else if( _node.lineNumber < _ln )
-						{
-							if( bEqual ) break;
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "LEAF" )
-							{
-								int parentID = IupGetIntId( actTree, "PARENT", i );
-								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
-								if( parentID > 0 )
-								{
-									if( _parentNode.endLineNum < _ln ) 
-										insertID = parentID; // New node out BRANCH block
-									else
-										insertID = i; // New node in BRANCH block
-								}
-								else
-								{
-									insertID = i; // parentID = 0 = root node
-								}
-
-								//if( parentID == i - 1 ) insertID = -i; // If insertID <=0, using "ADDLEAF"; insertID > 0, using "INSERTLEAF"
-							}
-							else
-							{
-								insertID = -i;
-							}
-							
-							break;
-						}						
-					}
-				}
-			}
-		}
-		catch( Exception e ){}
-
-		return insertID;
-	}
-	+/
 
 	void insertNodeByLineNumber( CASTnode[] newASTNodes, int insertID )
 	{
@@ -1294,127 +1664,6 @@ class COutline
 		}
 		catch( Exception e ){}		
 	}
-
-	/+
-	int removeBlockNodeByLineNumber( int _ln )
-	{
-		/+
-		int insertID = -1;
-		
-		try
-		{
-			Ihandle* actTree = getActiveTree();
-			if( actTree != null )
-			{
-				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-				{
-					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					if( _node !is null )
-					{
-						if( _node.lineNumber == _ln  )
-						{
-							insertID = i;
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-							break;
-						}
-					}
-					else if( _node.lineNumber < _ln )
-					{
-						insertID = i + 1;
-						break;
-					}					
-				}
-
-				if( insertID > 0 ) insertID --;
-			}
-		}
-		catch( Exception e ){}
-		+/
-
-		int insertID = 0;
-
-		try
-		{
-			Ihandle* actTree = getActiveTree();
-			
-			if( actTree != null )
-			{
-				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-				{
-					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					if( _node !is null )
-					{
-						if( _node.lineNumber == _ln  )
-						{
-							//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( " InsertID= " ~ Integer.toString(i) ) );
-
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", i - 1 ) ) == "LEAF" )
-							{
-								int parentID = IupGetIntId( actTree, "PARENT", i - 1 );
-								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
-								if( parentID > 0 )
-								{
-									if( _parentNode.endLineNum < _ln ) 
-										insertID = parentID; // New node out BRANCH block
-									else
-										insertID = i - 1; // New node in BRANCH block
-								}
-								else
-								{
-									insertID = i - 1; // parentID = 0 = root node
-								}								
-							}
-							else
-							{
-								insertID = -( i - 1 );
-							}
-
-							
-							/*
-							insertID = i - 1;
-							// Check if the be deleted node is the first child node of branch or not
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", insertID ) ) == "BRANCH" ) insertID = -insertID;
-							*/
-
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-							break;
-						}
-						else if( _node.lineNumber < _ln )
-						{
-							if( fromStringz( IupGetAttributeId( actTree, "KIND", i ) ) == "LEAF" )
-							{
-								int parentID = IupGetIntId( actTree, "PARENT", i );
-								CASTnode _parentNode = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", parentID );
-								if( parentID > 0 )
-								{
-									if( _parentNode.endLineNum < _ln ) 
-										insertID = parentID; // New node out BRANCH block
-									else
-										insertID = i; // New node in BRANCH block
-								}
-								else
-								{
-									insertID = i; // parentID = 0 = root node
-								}
-
-								//if( parentID == i - 1 ) insertID = -i; // If insertID <=0, using "ADDLEAF"; insertID > 0, using "INSERTLEAF"
-							}
-							else
-							{
-								insertID = -i;
-							}
-							
-							break;
-						}						
-					}
-				}
-			}
-		}
-		catch( Exception e ){}		
-
-		return insertID;
-	}
-	+/
 
 	void insertBlockNodeByLineNumber( CASTnode newASTNode, int insertID )
 	{
@@ -1514,7 +1763,8 @@ class COutline
 		scope f = new FilePath( cSci.getFullPath );
 
 		char[] _ext = toLower( f.ext() );
-		if( _ext != "bas" && _ext != "bi" ) return false;
+		version(FBIDE)	if( _ext != "bas" && _ext != "bi" ) return false;
+		version(DIDE)	if( _ext != "d" && _ext != "di" ) 	return false;
 		
 		if( cSci !is null )
 		{
@@ -1535,6 +1785,11 @@ class COutline
 						delete temp;
 
 						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
+						version(DIDE)
+						{
+							IupSetAttributeId( actTree, "USERDATA", 0, cast(char*) astHeadNode );
+							IupSetAttribute( actTree, "TITLE", toStringz( astHeadNode.name ) );						
+						}
 						IupSetAttributeId( actTree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
 						foreach_reverse( CASTnode t; astHeadNode.getChildren() )
 						{
@@ -1569,49 +1824,43 @@ class COutline
 		{
 			// Parser
 			GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) );
-			return GLOBAL.Parser.parse( "_.bas", B_KIND );
+			version(FBIDE) return GLOBAL.Parser.parse( "_.bas", B_KIND );
+			version(DIDE) return GLOBAL.Parser.parse( "_.d", true );
 		}
 		catch( Exception e )
 		{
 		}
 
 		return null;
-	}	
+	}
+	
+	version(DIDE)
+	{
+		CASTnode loadObjectParser()
+		{
+			scope objectFilePath = new FilePath( GLOBAL.compilerFullPath.toDString );
+			objectFilePath.set( objectFilePath.path );
+			char[] _path = objectFilePath.parent;
+			
+			if( _path.length )
+				if( _path[$-1] != '/' ) _path ~= '/';
+			
+			
+			objectFilePath.set( _path ~ "import/object.di" );
+			
+			if( objectFilePath.exists )
+			{
+				GLOBAL.objectParserFullPath = upperCase( _path ~ "import/object.di" );
+				return loadFile( objectFilePath.toString() );
+			}
+			
+			return null;
+		}
+	}
 }
 
 extern(C) 
 {
-	private int COutline_SELECTION_CB( Ihandle *ih, int id, int status )
-	{
-		if( id > 0 )
-		{
-			if( status == 1 ) IupSetAttribute( ih, "HLCOLOR", IupGetAttributeId( ih, "COLOR", id ) );
-		}
-		
-		return IUP_DEFAULT;
-		/+
-		if( id > 0 )
-		{
-			if( status == 1 )
-			{
-				CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
-				if( _node !is null )
-				{
-					if( _node.protection == "protected" || _node.protection == "private" )
-					{
-						IupSetAttribute( ih, "HLCOLOR", IupGetAttributeId( ih, "COLOR", id ) );
-						return IUP_DEFAULT;
-					}
-				}
-			}
-		}
-		IupSetAttribute( ih, "HLCOLOR", IupGetAttributeId( ih, "COLOR", id ) );
-		//IupSetAttribute( ih, "HLCOLOR", IupGetGlobal( "TXTHLCOLOR" ) );
-		return IUP_DEFAULT;
-		+/
-	}
-	
-	
 	private int COutline_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		int id = IupConvertXYToPos( ih, x, y );
@@ -1633,6 +1882,11 @@ extern(C)
 							if( _node !is null )
 							{
 								char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
+								version(DIDE)
+								{
+									CASTnode _headnode = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
+									if( _headnode !is null ) _fullPath = _headnode.type; else _fullPath = "";
+								}
 							
 								ScintillaAction.openFile( _fullPath, _node.lineNumber );
 								version(Windows) IupSetAttributeId( ih, "MARKED", id, "YES" ); else IupSetInt( ih, "VALUE", id );
@@ -1647,7 +1901,6 @@ extern(C)
 		catch( Exception e )
 		{
 			GLOBAL.IDEMessageDlg.print( "COutline_BUTTON_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-			//debug IupMessage( "COutline_BUTTON_CB", toStringz( "COutline_BUTTON_CB Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return IUP_DEFAULT;
