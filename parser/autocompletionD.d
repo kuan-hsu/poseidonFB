@@ -22,116 +22,8 @@ version(DIDE)
 		static CASTnode[char[]]		includesMarkContainer;
 		
 		static char[][]				VersionCondition;
-
-		static char[] importCompletion( char[][] splitWord, int wordIndex, int pos )
-		{
-			bool _filterFolder( FilePath path, bool isFolder )
-			{
-				if( isFolder ) return true; 
-				return false;
-			}
-
-			bool _filterFile( FilePath path, bool isFolder )
-			{
-				if( !isFolder )
-					if( path.ext() == "d" || path.ext() == "di" ) return true;
-
-					
-				return false;
-			}
-			
-			
-			FilePath[]	paths;
-			auto		cSci = actionManager.ScintillaAction.getActiveCScintilla();
-
-			// Get cwd
-			if( cSci.getFullPath in GLOBAL.parserManager )
-			{
-				auto headNode = GLOBAL.parserManager[upperCase( cSci.getFullPath )];
-					
-				if( headNode.kind & D_MODULE )
-				{
-					int dotCount = Util.count( headNode.name, "." );
-					scope cwdFilePath = new FilePath( headNode.type );
-
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "D_MODULE Name: [" ~ originalNode.name ~ "]"  ) );
-
-					char[] cwdPath = cwdFilePath.path();
-					for( int i = 0; i < dotCount; ++ i )
-					{
-						cwdFilePath.set( cwdPath );
-						cwdPath = cwdFilePath.parent();
-					}
-
-					if( cwdPath.length )
-						if( cwdPath[$-1] != '/' ) cwdPath ~= '/';
-
-					paths ~= new FilePath( cwdPath );
-				}
-			}
-
-			char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
-
-			if( prjDir.length )
-			{
-				char[][] includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-				foreach( char[] s; includeDirs )
-				{
-					if(s[$-1] != '/' || s[$-1] != '\\' ) s ~= '/';
-					paths ~= new FilePath( s );
-				}
-
-				if( GLOBAL.projectManager[prjDir].compilerPath.length )
-				{
-					foreach( char[] _p; tools.getImportPath( GLOBAL.projectManager[prjDir].compilerPath ) )
-					{
-						paths ~= new FilePath( _p );
-					}
-				}
-				else
-				{
-					// Step 2: Default *.ini DFLAGS
-					foreach( char[] _p; GLOBAL.defaultImportPaths )
-					{
-						paths ~= new FilePath( _p );
-					}
-				}
-			}
-			else
-			{
-				// Step 2: Default *.ini DFLAGS
-				foreach( char[] _p; GLOBAL.defaultImportPaths )
-				{
-					paths ~= new FilePath( _p );
-				}
-			}
-			/+
-			char[]	result;
-			for( int i = 0; i < splitWord.length; ++ i )
-			{
-				foreach( FilePath _fp; paths )
-				{
-					FilePath[] _tempFilePaths = _fp.toList( null );
-					if( Util.index( _tempFilePaths
-
-
-				}
-			}
-			+/
-
-			foreach( FilePath _fp; paths )
-			{
-				if( _fp.toList( &_filterFolder ) ) IupMessage( "", toStringz( _fp.toString ) );
-			}
-
-			delete paths;
-			
-			return null;
-
-		}
-
-
-
+		
+		
 		static CASTnode importComplete( CASTnode AST_Head, int lineNum, int completeCase, char[][] splitWord, int wordIndex )
 		{
 			auto		cSci = actionManager.ScintillaAction.getActiveCScintilla();
@@ -1371,6 +1263,287 @@ version(DIDE)
 		public:
 		static bool bEnter, bInsertBrace;
 		static bool bAutocompletionPressEnter;
+		
+		static bool checkIsclmportDeclare( Ihandle* iupSci, int pos = -1 )
+		{
+			char[]	result;
+			dchar[]	resultd;
+			
+			int		documentLength = IupGetInt( iupSci, "COUNT" );
+			try
+			{
+				while( --pos >= 0 )
+				{
+					if( !ScintillaAction.isComment( iupSci, pos ) )
+					{
+						char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+						if( s.length )
+						{
+							int key = cast(int) s[0];
+							if( key >= 0 && key <= 127 )
+							{
+								if( s == ";" ) break;
+								result ~= s;
+							}
+						}
+					}	
+				}
+				
+				result = lowerCase( Util.trim( result.reverse ) ).dup;
+				if( Util.count( result, "import " ) > 0 ) return true;
+				if( Util.count( result, "import\t" ) > 0 ) return true;
+			}
+			catch( Exception e )
+			{
+				GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
+			}
+
+			return false;
+		}
+		
+		static char[] includeComplete( Ihandle* iupSci, int pos, inout char[] text )
+		{
+			// Nested Delegate Filter Function
+			bool dirFilter( FilePath _fp, bool _isFfolder )
+			{
+				if( _isFfolder ) return true;
+				if( lowerCase( _fp.ext ) == "d" || lowerCase( _fp.ext ) == "di" ) return true;
+			
+				return false;
+			}
+			
+			bool delegate( FilePath, bool ) _dirFilter;
+			_dirFilter = &dirFilter;
+			// End of Nested Function
+			
+			if( !text.length )  return null;
+			
+			dchar[] word32;
+			char[]	word = text;
+			bool	bExitLoopFlag;		
+			
+			if( text != "." && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) ) return null;
+
+			listContainer.length = 0;
+			if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
+
+			try
+			{
+				while( pos > -1 )
+				{
+					--pos;
+					if( pos < 0 ) break;
+					
+					char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					if( _s.length )
+					{
+						int key = cast(int) _s[0];
+						if( key >= 0 && key <= 127 )
+						{
+							dchar[] sd = UTF.toString32( _s );
+							dchar s = sd[0];
+							switch( s )
+							{
+								case ' ', '\t', ';', '\n', '\r':		bExitLoopFlag = true; break;
+								default: 
+									if( UTF.isValid( s ) )
+									{
+										word32 = "";
+										word32 ~= s;
+										word ~= Util.trim( UTF.toString( word32 ) );
+									}
+							}
+						}
+					}
+					
+					if( bExitLoopFlag ) break;
+				}
+				if( !word.length ) return null; else word = word.dup.reverse;
+				
+				char[][]	words = Util.split( word, "." );
+				char[][]	tempList;
+
+				if( !words.length ) return null;
+				
+				// Step 1: Relative from the directory of the source file
+				FilePath  _path1;
+				
+				// Get cwd
+				auto cSci = ScintillaAction.getCScintilla( iupSci );
+				if( cSci !is null )
+				{
+					if( upperCase(cSci.getFullPath) in GLOBAL.parserManager )
+					{
+						auto headNode = GLOBAL.parserManager[upperCase( cSci.getFullPath )];
+						if( headNode.kind & D_MODULE )
+						{
+							int dotCount = Util.count( headNode.name, "." );
+							scope cwdFilePath = new FilePath( headNode.type );
+
+							//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "D_MODULE Name: [" ~ originalNode.name ~ "]"  ) );
+
+							char[] _cwd = cwdFilePath.path();
+							for( int i = 0; i < dotCount; ++ i )
+							{
+								cwdFilePath.set( _cwd );
+								_cwd = cwdFilePath.parent();
+							}
+
+							if( _cwd.length )
+								if( _cwd[$-1] != '/' ) _cwd ~= '/';
+
+							_path1 = new FilePath( _cwd );
+						}
+					}
+				}
+
+				// Step 3: Relative from addition directories specified with the -i command line option
+				// Work on Project
+				FilePath[]  _path2, _path3;
+				
+				char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
+				if( prjDir.length )
+				{
+					foreach( char[] s; GLOBAL.projectManager[prjDir].includeDirs )
+						_path3 ~= new FilePath( s );
+
+
+					if( GLOBAL.projectManager[prjDir].compilerPath.length )
+					{
+						foreach( char[] _p; tools.getImportPath( GLOBAL.projectManager[prjDir].compilerPath ) )
+							_path3 ~= new FilePath( _p );
+					}
+					else
+					{
+						// Step 2: Default *.ini DFLAGS
+						foreach( char[] _p; GLOBAL.defaultImportPaths )
+							_path2 ~= new FilePath( _p );
+					}
+				}
+				else
+				{
+					// Step 2: Default *.ini DFLAGS
+					foreach( char[] _p; GLOBAL.defaultImportPaths )
+						_path2 ~= new FilePath( _p );
+				}
+				
+
+				int index;
+				for( int i = 0; i < words.length; ++ i )
+				{
+					if( i == words.length - 1 )
+					{
+						// Step 1: Relative from the directory of the source file
+						if( _path1.exists )
+						{
+							foreach( FilePath _fp; _path1.toList( _dirFilter ) )
+								tempList ~= _fp.file;
+						}
+						
+						// Step 2:  Default *.ini DFLAGS
+						foreach( FilePath _fp2; _path2 )
+						{
+							if( _fp2.exists )
+							{
+								foreach( FilePath _fp; _fp2.toList( _dirFilter ) )
+									tempList ~= _fp.file;
+							}
+						}
+						
+						// Step 3: Relative from addition directories specified with the -i command line option
+						// Work on Project
+						foreach( FilePath _fp3; _path3 )
+						{
+							if( _fp3.exists )
+							{
+								foreach( FilePath _fp; _fp3.toList( _dirFilter ) )
+									tempList ~= _fp.file;
+							}
+						}
+					}
+					else
+					{
+						_path1 = _path1.set( _path1.toString ~ words[i] ~ "/" );
+						for( int j = 0; j < _path2.length; ++ j )
+							_path2[j] = _path2[j].set( _path2[j].toString ~ words[i] ~ "/" );
+						for( int j = 0; j < _path3.length; ++ j )
+							_path3[j] = _path3[j].set( _path3[j].toString ~ words[i] ~ "/" );
+					}
+				}
+
+				foreach( char[] s; tempList )
+				{
+					if( s.length )
+					{
+						char[] iconNum = "37";
+						
+						if( s.length > 2 )
+						{
+							if( lowerCase( s[$-2..$] ) == ".d" )
+							{
+								iconNum = "35";
+								s = s[0..$-2];
+							}
+						}
+						
+						if( s.length > 3 )
+						{
+							if( lowerCase( s[$-3..$] ) == ".di" )
+							{
+								iconNum = "36";
+								s = s[0..$-3];
+							}
+						}
+						
+						if( !words[$-1].length )
+						{
+							listContainer ~= ( s ~ "?" ~ iconNum );
+						}
+						else
+						{
+							if( Util.index( lowerCase( s ), lowerCase( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
+						}
+					}
+				}
+				
+				text = words[$-1];
+				listContainer.sort;
+				
+				char[] list;
+				for( int i = 0; i < listContainer.length; ++ i )
+				{
+					if( listContainer[i].length )
+					{
+						if( i > 0 )
+						{
+							if( listContainer[i] != listContainer[i-1] ) list ~= ( listContainer[i] ~ "^" );
+						}
+						else
+						{
+							list ~= ( listContainer[i] ~ "^" );
+						}
+					}
+				}			
+				
+				if( list.length )
+					if( list[length-1] == '^' ) list = list[0..length-1];
+
+				// Release FilePath Class Objects
+				delete _path1;
+				foreach( FilePath _p; _path2 )
+					delete _p;
+				foreach( FilePath _p; _path3 )
+					delete _p;
+				
+				return list;				
+			}
+			catch( Exception e )
+			{
+			}
+			
+			return null;
+		}		
 
 		static char[] getKeywordContainerList( char[] word, bool bCleanContainer = true )
 		{

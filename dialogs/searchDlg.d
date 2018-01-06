@@ -193,7 +193,7 @@ class CSearchDialog : CBaseDialog
 		createLayout();
 		IupSetAttribute( listFind, "VALUE",toStringz( findWhat ) );
 
-		//IupSetAttribute( _dlg, "DEFAULTENTER", "CSearchDialog_btnFind" );
+		IupSetAttribute( _dlg, "DEFAULTENTER", null );
 		IupSetHandle( "btnCANCEL_search", btnCANCEL );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSearchDialog_btnCancel_ACTION_CB );
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_search" );

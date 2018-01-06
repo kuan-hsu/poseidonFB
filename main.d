@@ -41,7 +41,6 @@ else
 
 void main( char[][] args )
 {
-	
 	version(Windows)
 	{
 		SharedLib sharedlib;
@@ -80,7 +79,7 @@ void main( char[][] args )
 		Stdout( "IUP open error!!!" ).newline;
 		return;
 	}
-	/*
+	
 	version(Windows)
 	{
 		version(FBIDE)
@@ -94,7 +93,7 @@ void main( char[][] args )
 			return;
 		}
 	}
-	*/
+
 	//  Get poseidonFB exePath & set the new cwd
 	scope _poseidonPath = new FilePath( args[0] );
 	if( _poseidonPath.exists() )

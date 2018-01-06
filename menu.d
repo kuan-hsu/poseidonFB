@@ -379,12 +379,9 @@ void createMenu()
 	IupSetAttribute(item_buildAll, "IMAGE", "icon_build");
 	IupSetCallback( item_buildAll, "ACTION", cast(Icallback)&buildAll_cb );
 	
-	version(FBIDE)
-	{
-		item_reBuild = IupItem( GLOBAL.languageItems["rebuildprj"].toCString, null);
-		IupSetAttribute( item_reBuild, "IMAGE", "icon_rebuild" );
-		IupSetCallback( item_reBuild, "ACTION", cast(Icallback)&reBuild_cb );
-	}
+	item_reBuild = IupItem( GLOBAL.languageItems["rebuildprj"].toCString, null);
+	IupSetAttribute( item_reBuild, "IMAGE", "icon_rebuild" );
+	IupSetCallback( item_reBuild, "ACTION", cast(Icallback)&reBuild_cb );
 
 	item_clearBuild = IupItem( GLOBAL.languageItems["clearall"].toCString, null);
 	IupSetAttribute( item_clearBuild, "IMAGE", "icon_clear" );
@@ -638,8 +635,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.349)\nBy Kuan Hsu (Taiwan)\n2018.01.01" );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.020)\nBy Kuan Hsu (Taiwan)\n2018.01.01" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.350)\nBy Kuan Hsu (Taiwan)\n2018.01.06" );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.023)\nBy Kuan Hsu (Taiwan)\n2018.01.06" );
 		return IUP_DEFAULT;
 	});
 	
@@ -735,8 +732,7 @@ void createMenu()
 							null );
 	}
 
-	version(FBIDE)
-	{
+
 	build_menu= IupMenu( 	item_compile,
 							item_buildrun,
 							IupSeparator(),
@@ -749,26 +745,15 @@ void createMenu()
 							//IupSeparator(),
 							item_quickRun,
 							null );
-							
+
+	version(FBIDE)
+	{							
 	debug_menu= IupMenu( 	item_runDebug,
 							item_withDebug,
 							item_BuildwithDebug,
 							null );
 	}
 	
-	version(DIDE)
-	{
-	build_menu= IupMenu( 	item_compile,
-							item_buildrun,
-							IupSeparator(),
-							item_run,
-							item_buildAll,
-							item_clearBuild,
-							IupSeparator(),
-							item_quickRun,
-							null );
-	}
-							
 	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
 							GLOBAL.menuFistlistWindow,

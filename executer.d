@@ -1442,6 +1442,28 @@ struct ExecuterAction
 						}							
 					}				
 				}
+				
+				char[]		objPath = GLOBAL.projectManager[activePrjName].dir ~ "/";
+				char[] 		_totalOptions = GLOBAL.projectManager[activePrjName].compilerOption ~ " " ~ options;
+			
+				int ofPos = Util.index( _totalOptions, "-od" );
+				if( ofPos < _totalOptions.length )
+				{
+					char[] outputName;
+					for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
+					{
+						if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
+						outputName ~= _totalOptions[i];
+					}
+					
+					// Got Obj Path -od
+					if( outputName.length ) objPath ~= ( outputName ~ "/" );
+				}
+				
+				version(Windows) objPath ~= ( _targetName ~ ".obj" ); else objPath ~= ( _targetName ~ ".o" );
+				
+				scope oFilePath = new FilePath( objPath );
+				if( oFilePath.exists ) oFilePath.remove;
 			}
 			
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );

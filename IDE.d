@@ -482,7 +482,6 @@ struct IDECONFIG
 			doc ~= setINILineData( "Message", GLOBAL.editorSetting00.Message );
 			doc ~= setINILineData( "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword );
 			doc ~= setINILineData( "BraceMatchHighlight", GLOBAL.editorSetting00.BraceMatchHighlight );
-			doc ~= setINILineData( "BraceMatchDoubleSidePos", GLOBAL.editorSetting00.BraceMatchDoubleSidePos );
 			doc ~= setINILineData( "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
 			doc ~= setINILineData( "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
 			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
@@ -843,7 +842,6 @@ struct IDECONFIG
 							case "Message":					GLOBAL.editorSetting00.Message = right;					break;
 							case "BoldKeyword":				GLOBAL.editorSetting00.BoldKeyword = right;				break;
 							case "BraceMatchHighlight":		GLOBAL.editorSetting00.BraceMatchHighlight = right;		break;
-							case "BraceMatchDoubleSidePos":	GLOBAL.editorSetting00.BraceMatchDoubleSidePos = right;	break;
 							case "MultiSelection":			GLOBAL.editorSetting00.MultiSelection = right;			break;
 							case "LoadPrevDoc":				GLOBAL.editorSetting00.LoadPrevDoc = right;				break;
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;

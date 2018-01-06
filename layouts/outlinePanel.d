@@ -1227,11 +1227,20 @@ class COutline
 			if( ih != null )
 			{
 				version(Windows) IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+				for( int j = 1; j < IupGetInt( ih, "COUNT" ); ++ j )
+				{
+					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", j );
+					if( _node !is null )
+					{
+						switch( lowerCase( _node.protection ) )
+						{
+							case "private", "protected":	break;
+							default:						IupSetAttributeId( ih, "COLOR", j, GLOBAL.editColor.outlineFore.toCString );
+						}
+					}
+				}
 			}
 		}
-		
-		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-			refresh( cSci );
 	}
 
 

@@ -1431,37 +1431,56 @@ version(FBIDE)
 					}
 
 
-					if( !bReSearch )
+				if( !bReSearch )
+				{
+					// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
+					for( int i = posHead + targetText.length; i < documentLength; ++ i )
 					{
-						// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
-						for( int i = posHead + targetText.length; i < documentLength; ++ i )
-						{
-							char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+						char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
 
-							if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
+						if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
+						{
+							bReSearch = true;
+							break;
+						}
+						else if( s != " " && s != "\t" )
+						{
+							// Check before targetText word.......
+							char[]	beforeWord;
+							for( int j = posHead - 1; j >= 0; --j )
 							{
-								bReSearch = true;
-								break;
+								char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+								
+								if( _s[0] == 13 || _s == ":" || _s == "\n" )
+								{
+									break;
+								}
+								else if( _s == " " || _s == "\t" )
+								{
+									if( beforeWord.length ) break;
+								}
+								else
+								{
+									beforeWord ~= _s;
+								}
 							}
-							else if( s != " " && s != "\t" )
-							{
-								char[] beforeWord = DocumentTabAction.getBeforeWord( iupSci, posHead - 1 );
-								if( beforeWord == "eralced" || beforeWord == "dne" || beforeWord == "=" || beforeWord == "sa" ) bReSearch = true; else bReSearch = false;
-								break;
-							}
+							
+							if( beforeWord == "eralced" || beforeWord == "dne" || beforeWord == "=" || beforeWord == "sa" ) bReSearch = true; else bReSearch = false;
+							break;
 						}
 					}
+				}
 
-					if( bReSearch )
-					{
-						IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
-						IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-						posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-					}
-					else
-					{
-						break;
-					}
+				if( bReSearch )
+				{
+					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
+					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+				}
+				else
+				{
+					break;
+				}
 				}
 			}
 			

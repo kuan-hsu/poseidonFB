@@ -194,7 +194,9 @@ extern(C)
 				scope argPath = new FilePath( args[1] );
 				if( argPath.exists() )
 				{
-					if( argPath.file == ".poseidon" )
+					version(FBIDE)	char[] PRJFILE = ".poseidon";
+					version(DIDE)	char[] PRJFILE = "D.poseidon";
+					if( argPath.file == PRJFILE )
 					{
 						char[] dir = argPath.path;
 						if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
@@ -418,6 +420,38 @@ extern(C)
 						}
 					}
 					+/
+					if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
+					{
+						switch( c )
+						{
+							case 40, 41, 91, 93, 123, 125: // (, ), [, ], {, }
+								int pos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+								if( !actionManager.ScintillaAction.isComment( cSci.getIupScintilla, pos ) )
+								{
+									int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", --pos );
+									if( close > -1 ) IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); else IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
+								}
+								break;
+							case 8, 65535: // Back, Del
+								int pos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+								if( !actionManager.ScintillaAction.isComment( cSci.getIupScintilla, pos ) )
+								{
+									int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
+									if( close > -1 )
+										IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); 
+									else
+									{
+										close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", --pos );
+										if( close > -1 ) IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); else IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
+									}
+								}
+								break;
+								
+							
+							default:
+						}
+					}
+
 					
 					if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
@@ -675,7 +709,9 @@ extern(C)
 		
 		if( f.exists() )
 		{
-			if( f.name == ".poseidon" )
+			version(FBIDE)	char[] PRJFILE = ".poseidon";
+			version(DIDE)	char[] PRJFILE = "D.poseidon";
+			if( f.name == PRJFILE )
 			{
 				char[] dir = f.path;
 				if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'

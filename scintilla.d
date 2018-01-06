@@ -713,7 +713,7 @@ class CScintilla
 		
 		IupSetAttribute( sci, "USEPOPUP", "NO" );
 		
-		if( GLOBAL.editorSetting00.BraceMatchHighlight == "OFF" ) IupSetInt( sci, "BRACEBADLIGHT", -1 );
+		if( GLOBAL.editorSetting00.BraceMatchHighlight == "OFF" ) IupScintillaSendMessage( sci, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
 		if( GLOBAL.editorSetting00.HighlightCurrentWord != "ON" ) IupScintillaSendMessage( sci, 2505, 0, IupGetInt( sci, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		
 		// SCI_SETMULTIPLESELECTION 2563
@@ -864,6 +864,10 @@ class CScintilla
 
 			IupScintillaSendMessage( sci, 2627, 33, cast(int) XPM.define_var_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 34, cast(int) XPM.define_fun_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+
+			IupScintillaSendMessage( sci, 2627, 35, cast(int) XPM.bas_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 36, cast(int) XPM.bi_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 37, cast(int) XPM.folder_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 
 			// BOOKMARK
 			IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toCString ); // SCI_MARKERDEFINERGBAIMAGE 2626
@@ -2003,6 +2007,21 @@ extern(C)
 							}
 							version(DIDE)
 							{
+								if( GLOBAL.enableIncludeComplete == "ON" )
+								{
+									if( AutoComplete.checkIsclmportDeclare( ih, pos - 1 ) )
+									{
+										alreadyInput = lastChar.dup;
+										char[] list = AutoComplete.includeComplete( ih, pos - 1, alreadyInput );
+										if( list.length )
+										{
+											//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, GLOBAL.cString.convert( list ) );
+											return IUP_IGNORE;
+										}
+									}
+								}								
+							
 								if( pos > 1 )
 								{
 									if( lastChar == ">" )
@@ -2275,6 +2294,23 @@ extern(C)
 				}
 			}
 		}
+		version(DIDE)
+		{
+			if( GLOBAL.enableIncludeComplete == "ON" )
+			{
+				if( AutoComplete.checkIsclmportDeclare( ih, pos ) )
+				{
+					char[] alreadyInput = fromStringz( _text );
+					char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
+					if( list.length )
+					{
+						//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+						return IUP_DEFAULT;
+					}
+				}
+			}
+		}		
 		
 		if( GLOBAL.enableParser != "ON" )
 		{
@@ -2405,30 +2441,26 @@ extern(C)
 	{
 		try
 		{
-			//IupSetInt( ih, "BRACEBADLIGHT", -1 );
 			// BRACEMATCH
 			if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
 			{
-				IupSetInt( ih, "BRACEBADLIGHT", -1 );
+				// IupSetInt( ih, "BRACEBADLIGHT", -1 );
 				if( !actionManager.ScintillaAction.isComment( ih, pos ) )
 				{
-					//int pos = actionManager.ScintillaAction.getCurrentPos( ih );
-					int close = IupGetIntId( ih, "BRACEMATCH", pos );
+					int close = IupGetIntId( ih, "BRACEMATCH", pos - 1 );
 					if( close > -1 )
 					{
-						IupScintillaSendMessage( ih, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
+						IupScintillaSendMessage( ih, 2351, pos - 1, close ); // SCI_BRACEHIGHLIGHT 2351
 					}
 					else
 					{
-						if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
-						{
-							close = IupGetIntId( ih, "BRACEMATCH", pos - 1 );
-							if( close > -1 )
-							{
-								IupScintillaSendMessage( ih, 2351, pos - 1, close ); // SCI_BRACEHIGHLIGHT 2351
-							}
-						}
+						close = IupGetIntId( ih, "BRACEMATCH", pos );
+						if( close > -1 ) IupScintillaSendMessage( ih, 2351, pos, close ); else IupScintillaSendMessage( ih, 2351, -1, -1 );
 					}
+				}
+				else
+				{
+					IupScintillaSendMessage( ih, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
 				}
 			}		
 			
@@ -2575,7 +2607,9 @@ extern(C)
 
 		if( f.exists() )
 		{
-			if( f.name == ".poseidon" )
+			version(FBIDE)	char[] PRJFILE = ".poseidon";
+			version(DIDE)	char[] PRJFILE = "D.poseidon";
+			if( f.name == PRJFILE )
 			{
 				char[] dir = f.path;
 				if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'

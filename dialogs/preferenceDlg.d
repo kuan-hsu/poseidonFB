@@ -134,6 +134,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( textConsoleY, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.y ) ) );
 		IupSetAttribute( textConsoleW, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.w ) ) );
 		IupSetAttribute( textConsoleH, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.h ) ) );
+
+		IupSetAttribute( textMonitorID, "SIZE", "20x" );
+		IupSetAttribute( textConsoleX, "SIZE", "20x" );
+		IupSetAttribute( textConsoleY, "SIZE", "20x" );
+		IupSetAttribute( textConsoleW, "SIZE", "20x" );
+		IupSetAttribute( textConsoleH, "SIZE", "20x" );
 		
 		if( GLOBAL.monitors.length == 1 )
 		{
@@ -187,11 +193,15 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBoxChm = IupHbox( labelchm, textchm, btnchm, null );
 		IupSetAttributes( hBoxChm, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 		
-		Ihandle* vBoxChm = IupVbox( hBoxChm, toggleUseManual, null );
-		//IupSetAttributes( vBoxChm, "ALIGNMENT=ACENTER,MARGIN=5x0" );
-		
-		
-		Ihandle* manuFrame = IupFrame( vBoxChm );
+		version(FBIDE)
+		{
+			Ihandle* vBoxChm = IupVbox( hBoxChm, toggleUseManual, null );
+			Ihandle* manuFrame = IupFrame( vBoxChm );
+		}
+		version(DIDE)
+		{
+			Ihandle* manuFrame = IupFrame( hBoxChm );
+		}
 		IupSetAttribute( manuFrame, "TITLE", GLOBAL.languageItems["manual"].toCString() );
 		IupSetAttribute( manuFrame, "SIZE", "346x");		
 		
@@ -411,10 +421,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleBraceMatch, "VALUE", toStringz(GLOBAL.editorSetting00.BraceMatchHighlight.dup) );
 		IupSetHandle( "toggleBraceMatch", toggleBraceMatch );		
 
-		Ihandle* toggleBraceMatchDB = IupToggle( GLOBAL.languageItems["bracematchdoubleside"].toCString, null );
-		IupSetAttribute( toggleBraceMatchDB, "VALUE", toStringz(GLOBAL.editorSetting00.BraceMatchDoubleSidePos.dup) );
-		IupSetHandle( "toggleBraceMatchDB", toggleBraceMatchDB );
-		
 		Ihandle* toggleMultiSelection = IupToggle( GLOBAL.languageItems["multiselection"].toCString, null );
 		IupSetAttribute( toggleMultiSelection, "VALUE", toStringz(GLOBAL.editorSetting00.MultiSelection.dup) );
 		IupSetHandle( "toggleMultiSelection", toggleMultiSelection );			
@@ -484,18 +490,18 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttributes( toggleBoldKeyword, "" ),
 				
 				IupSetAttributes( toggleBraceMatch, "" ),
-				IupSetAttributes( toggleBraceMatchDB, "" ),
-
 				IupSetAttributes( toggleLoadprev, "" ),
-				IupSetAttributes( toggleMultiSelection, "" ),
 
+				IupSetAttributes( toggleMultiSelection, "" ),
 				IupSetAttributes( toggleCurrentWord, "" ),
+
 				IupSetAttributes( toggleMiddleScroll, "" ),
+				hBoxControlChar,
 				
 				IupSetAttributes( hBoxTab, "" ),
 				IupSetAttributes( hBoxColumn, "" ),
 				
-				hBoxControlChar,
+				
 				
 				null
 			);
@@ -529,16 +535,16 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttributes( toggleLoadprev, "" ),
 				
 				IupSetAttributes( toggleBraceMatch, "" ),
-				IupSetAttributes( toggleBraceMatchDB, "" ),
-
 				IupSetAttributes( toggleMultiSelection, "" ),
-				IupSetAttributes( toggleCurrentWord, "" ),
 
+				IupSetAttributes( toggleCurrentWord, "" ),
 				IupSetAttributes( toggleMiddleScroll, "" ),
-				hBoxControlChar,
-				
+
 				IupSetAttributes( hBoxTab, "" ),
 				IupSetAttributes( hBoxColumn, "" ),
+				
+				hBoxControlChar,
+				IupFill(),
 				
 				null
 			);
@@ -1558,6 +1564,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
 		
 		// Bottom Button
+		IupSetAttribute( _dlg, "DEFAULTENTER", null );
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
 		IupSetCallback( btnAPPLY, "ACTION", cast(Icallback) &CPreferenceDialog_btnApply_cb );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CPreferenceDialog_btnOK_cb );
@@ -1612,7 +1619,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleMessage", null );
 		IupSetHandle( "toggleBoldKeyword", null );
 		IupSetHandle( "toggleBraceMatch", null );
-		IupSetHandle( "toggleBraceMatchDB", null );
 		IupSetHandle( "toggleMultiSelection", null );
 		IupSetHandle( "toggleLoadprev", null );
 		IupSetHandle( "toggleCurrentWord", null );
@@ -2024,7 +2030,6 @@ extern(C) // Callback for CPreferenceDialog
 				if( IupGetHandle( "menuBoldKeyword" ) != null ) IupSetAttribute( IupGetHandle( "menuBoldKeyword" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE" ) );
 			GLOBAL.editorSetting00.BraceMatchHighlight		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE" )).dup;
 				if( IupGetHandle( "menuBraceMatch" ) != null ) IupSetAttribute( IupGetHandle( "menuBraceMatch" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE" ) );
-			GLOBAL.editorSetting00.BraceMatchDoubleSidePos	= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatchDB" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.MultiSelection			= fromStringz(IupGetAttribute( IupGetHandle( "toggleMultiSelection" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.LoadPrevDoc				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadprev" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.HighlightCurrentWord		= fromStringz(IupGetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE" )).dup;
