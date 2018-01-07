@@ -313,7 +313,7 @@ version(FBIDE)
 		identToTOK["public"]		= TOK.Tpublic;
 		identToTOK["extends"]		= TOK.Textends;
 		identToTOK["object"]		= TOK.Tobject;
-		identToTOK["virtural"]		= TOK.Tvirtual;
+		identToTOK["virtual"]		= TOK.Tvirtual;
 		identToTOK["abstract"]		= TOK.Tabstract;
 		identToTOK["constructor"]	= TOK.Tconstructor;
 		identToTOK["destructor"]	= TOK.Tdestructor;
