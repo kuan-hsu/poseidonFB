@@ -499,10 +499,20 @@ class CScintilla
 		// Set Keywords to Bold
 		if( GLOBAL.editorSetting00.BoldKeyword == "ON" )
 		{
-			IupSetAttribute(sci, "STYLEBOLD3", "YES");
-			IupSetAttribute(sci, "STYLEBOLD10", "YES");
-			IupSetAttribute(sci, "STYLEBOLD11", "YES");
-			IupSetAttribute(sci, "STYLEBOLD12", "YES");
+			version(FBIDE)
+			{
+				IupSetAttribute(sci, "STYLEBOLD3", "YES");
+				IupSetAttribute(sci, "STYLEBOLD10", "YES");
+				IupSetAttribute(sci, "STYLEBOLD11", "YES");
+				IupSetAttribute(sci, "STYLEBOLD12", "YES");
+			}
+			version(DIDE)
+			{
+				IupSetAttribute(sci, "STYLEBOLD6", "YES");
+				IupSetAttribute(sci, "STYLEBOLD7", "YES");
+				IupSetAttribute(sci, "STYLEBOLD20", "YES");
+				IupSetAttribute(sci, "STYLEBOLD21", "YES");
+			}
 		}
 
 		getFontAndSize( 10, font, Bold, Italic, Underline, Strikeout, size );

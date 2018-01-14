@@ -429,7 +429,30 @@ extern(C)
 								if( !actionManager.ScintillaAction.isComment( cSci.getIupScintilla, pos ) )
 								{
 									int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", --pos );
-									if( close > -1 ) IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); else IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
+									if( close > -1 )
+									{
+										IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close );
+										version(DIDE)
+										{
+											if( GLOBAL.editorSetting00.AutoIndent == "ON" )
+											{
+												if( c == 125 )
+												{
+													int currentLine = ScintillaAction.getLinefromPos( cSci.getIupScintilla, pos );
+													int matchLine = ScintillaAction.getLinefromPos( cSci.getIupScintilla, close );
+													if( matchLine < currentLine )
+													{
+														int matchInd = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2127, matchLine, 0 ); // SCI_GETLINEINDENTATION = 2127
+														IupScintillaSendMessage( cSci.getIupScintilla, 2126, currentLine, matchInd ); // SCI_SETLINEINDENTATION = 2126
+														int changeLinePos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2128, currentLine, 0 ); // SCI_GETLINEINDENTPOSITION 2128
+														IupScintillaSendMessage( cSci.getIupScintilla, 2025, ++changeLinePos , 0 );// SCI_GOTOPOS = 2025,
+													}
+												}
+											}
+										}
+									}
+									else
+										IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
 								}
 								break;
 							case 8, 65535: // Back, Del
@@ -446,9 +469,37 @@ extern(C)
 									}
 								}
 								break;
-								
 							
 							default:
+						}
+					}
+					else
+					{
+						version(DIDE)
+						{
+							if( GLOBAL.editorSetting00.AutoIndent == "ON" )
+							{
+								if( c == 125 )
+								{
+									int pos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+									if( !actionManager.ScintillaAction.isComment( cSci.getIupScintilla, pos ) )
+									{
+										int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", --pos );
+										if( close > -1 )
+										{								
+											int currentLine = ScintillaAction.getLinefromPos( cSci.getIupScintilla, pos );
+											int matchLine = ScintillaAction.getLinefromPos( cSci.getIupScintilla, close );
+											if( matchLine < currentLine )
+											{
+												int matchInd = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2127, matchLine, 0 ); // SCI_GETLINEINDENTATION = 2127
+												IupScintillaSendMessage( cSci.getIupScintilla, 2126, currentLine, matchInd ); // SCI_SETLINEINDENTATION = 2126
+												int changeLinePos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2128, currentLine, 0 ); // SCI_GETLINEINDENTPOSITION 2128
+												IupScintillaSendMessage( cSci.getIupScintilla, 2025, ++changeLinePos , 0 );// SCI_GOTOPOS = 2025,
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 

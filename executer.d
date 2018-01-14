@@ -111,7 +111,26 @@ struct ExecuterAction
 				}
 				
 				//	p = new Process( true, GLOBAL.linuxTermName ~ geoString ~ " -e " ~ scommand );
-				p = new Process( true, GLOBAL.linuxTermName ~ " -t poseidonFB_terminal" ~ geoString ~ " -e " ~ scommand );
+				auto terminalExe = new FilePath( GLOBAL.linuxTermName );
+				if( terminalExe !is null )
+				{
+					char[] terminalExeName = lowerCase( terminalExe.file );
+					switch( lowerCase( terminalExe.file ) )
+					{
+						case "xterm", "uxterm":
+							p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							break;
+						case "gnome-terminal", "mate-terminal" ,"xfce4-terminal" ,"lxterminal":
+							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							break;
+						default:
+							p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand );
+					}
+				}
+				else
+				{
+					return;
+				}
 			}
 			
 			if( cwd.length ) p.workDir( cwd );
@@ -357,9 +376,21 @@ struct ExecuterAction
 
 			auto result = p.wait;
 
-			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
-			
+			version(FBIDE)
+			{
+				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+			}
+			version(DIDE)
+			{
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
+				{
+					GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
+					showAnnotation( stdoutMessage ~ stderrMessage );
+				}
+				else
+					showAnnotation( null );
+			}
 			GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 			
 			if( bError )
@@ -756,9 +787,21 @@ struct ExecuterAction
 		
 				auto result = p.wait;
 
-				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
-				
+				version(FBIDE)
+				{
+					if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+				}
+				version(DIDE)
+				{
+					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
+					{
+						GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
+						showAnnotation( stdoutMessage ~ stderrMessage );
+					}
+					else
+						showAnnotation( null );
+				}
 				GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 				if( bError )
@@ -990,9 +1033,21 @@ struct ExecuterAction
 		
 				auto result2 = p2.wait;
 
-				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
-				
+				version(FBIDE)
+				{
+					if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+				}
+				version(DIDE)
+				{
+					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
+					{
+						GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
+						showAnnotation( stdoutMessage ~ stderrMessage );
+					}
+					else
+						showAnnotation( null );
+				}
 				GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 				if( bError )
@@ -1355,9 +1410,21 @@ struct ExecuterAction
 	
 			auto result = p.wait;
 
-			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
-			
+			version(FBIDE)
+			{
+				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+			}
+			version(DIDE)
+			{
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
+				{
+					GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
+					showAnnotation( stdoutMessage ~ stderrMessage );
+				}
+				else
+					showAnnotation( null );
+			}
 			GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 			if( bError )
@@ -1614,9 +1681,21 @@ struct ExecuterAction
 			// Set quickRunFile to active document fullpath
 			quickRunFile = cSci.getFullPath;
 			
-			if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );			
-
+			version(FBIDE)
+			{
+				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
+			}
+			version(DIDE)
+			{
+				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
+				{
+					GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
+					showAnnotation( stdoutMessage ~ stderrMessage );
+				}
+				else
+					showAnnotation( null );
+			}
 			GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 			if( !bError )
