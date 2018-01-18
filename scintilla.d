@@ -1092,6 +1092,14 @@ extern(C)
 							version(FBIDE) AutoComplete.toDefintionAndType( 1, _pos );
 							version(DIDE) AutoComplete.toDefintionAndType( 1 );
 						}
+						
+						version(linux)
+						{
+							int wRange = IupGetInt( ih, "MARGINWIDTH0" );
+							wRange += IupGetInt( ih, "MARGINWIDTH1" );
+							if( x < wRange && GLOBAL.debugPanel.isExecuting ) return IUP_DEFAULT;
+						}
+						
 						return IUP_IGNORE;
 					}
 					else if( button == IUP_BUTTON3 )
@@ -2007,7 +2015,11 @@ extern(C)
 										return IUP_IGNORE;
 									}
 									
-									if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
+									if( alreadyInput.length )
+									{
+										AutoComplete.resetLastPos();
+										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
+									}
 								}
 								catch( Exception e )
 								{
@@ -2044,7 +2056,11 @@ extern(C)
 							
 								try
 								{
-									if( alreadyInput.length ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
+									if( alreadyInput.length )
+									{
+										AutoComplete.resetLastPos();
+										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
+									}
 								}
 								catch( Exception e )
 								{

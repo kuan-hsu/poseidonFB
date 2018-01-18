@@ -36,6 +36,7 @@ version(FBIDE)
 
 		static char[][]				listContainer;
 		static CASTnode[char[]]		includesMarkContainer;
+		static int 					lastPos = -99;
 		
 		
 		static void cleanIncludesMarkContainer()
@@ -1000,6 +1001,11 @@ version(FBIDE)
 		public:
 		static bool bEnter;
 		static bool bAutocompletionPressEnter;
+		
+		static void resetLastPos()
+		{
+			lastPos = -99;
+		}
 
 		static char[] getKeywordContainerList( char[] word, bool bCleanContainer = true )
 		{
@@ -3196,6 +3202,12 @@ version(FBIDE)
 
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput )
 		{
+			if( lastPos == pos - 1 )
+			{
+				lastPos = pos;
+				return false;
+			}
+			
 			char[] list = charAdd( ih, pos, text );
 
 			if( list.length )
@@ -3217,11 +3229,16 @@ version(FBIDE)
 				{
 					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
 				}
-
-				return false;
+				
+				lastPos = -99;
+				return true;
+			}
+			else
+			{
+				lastPos = pos;
 			}
 
-			return true;
+			return false;
 		}
 	}
 }

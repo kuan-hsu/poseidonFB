@@ -1184,7 +1184,10 @@ version(FBIDE)
 						}
 						else
 						{
-							command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
+							if( GLOBAL.projectManager[activePrjName].targetName.length )
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName;
+							else
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
 						}
 						break;
 					}
@@ -1216,7 +1219,10 @@ version(FBIDE)
 					}
 					else
 					{
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
+						if( GLOBAL.projectManager[activePrjName].targetName.length )
+							command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName;
+						else
+							command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
 					}
 				}
 			}
@@ -1242,6 +1248,10 @@ version(FBIDE)
 						DebugControl = new DebugThread( "\"" ~ command ~ "\"", f.path );
 						//version(Windows) DebugControl.start();
 					}
+				}
+				else
+				{
+					version(linux) DebugControl = new DebugThread( "\"" ~ command ~ "\"", f.path );
 				}
 			}
 			else

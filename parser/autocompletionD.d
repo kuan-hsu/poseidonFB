@@ -20,7 +20,7 @@ version(DIDE)
 
 		static char[][]				listContainer;
 		static CASTnode[char[]]		includesMarkContainer;
-		
+		static int 					lastPos = -99;
 		static char[][]				VersionCondition;
 		
 		
@@ -1263,6 +1263,11 @@ version(DIDE)
 		public:
 		static bool bEnter, bInsertBrace;
 		static bool bAutocompletionPressEnter;
+		
+		static void resetLastPos()
+		{
+			lastPos = -99;
+		}
 		
 		static bool checkIsclmportDeclare( Ihandle* iupSci, int pos = -1 )
 		{

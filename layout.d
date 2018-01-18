@@ -73,52 +73,37 @@ void createExplorerWindow()
 
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
+	
+	bool bUseIupTabs;
 
-	version(FBIDE) GLOBAL.debugPanel = new CDebugger();
-	/*
-	version(Windows)
+	version(FBIDE)
 	{
-	*/
-		version(FBIDE)	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
-		version(DIDE)	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, null );
+		GLOBAL.debugPanel = new CDebugger();
 		
-		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-		IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
-		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
-		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
-		/*
-		GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-		IupSetAttribute( GLOBAL.messageWindowTabs , "TABSFORECOLOR", GLOBAL.editColor.outputFore.toCString );
-		IupSetAttribute( GLOBAL.messageWindowTabs , "TABSBACKCOLOR", GLOBAL.editColor.outputBack.toCString );
-	
-		IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
-		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
-		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
-		*/
-	/*
+		version(Windows)
+			GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		else
+		{
+			GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+			bUseIupTabs = true;
+		}
 	}
-	else
+	version(DIDE)	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, null );
+
+	if( !bUseIupTabs )
 	{
-		GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
-		IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
-		IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
-	
+		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
+		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 	}
-	*/
+	
+	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
+	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+
 	
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
 
