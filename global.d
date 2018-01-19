@@ -703,7 +703,7 @@ struct GLOBAL
 			GLOBAL.languageItems["configuration"] = new IupString( cast(char[]) "Configuration..." );
 			GLOBAL.languageItems["setcustomoption"] = new IupString( cast(char[]) "Set Custom Compiler Options..." );
 			
-		GLOBAL.languageItems["bookmark"] = new IupString( cast(char[]) "Mark Bookmark" );
+		GLOBAL.languageItems["bookmark"] = new IupString( cast(char[]) "Bookmark" );
 		GLOBAL.languageItems["bookmarkprev"] = new IupString( cast(char[]) "Previous Bookmark" );
 		GLOBAL.languageItems["bookmarknext"] = new IupString( cast(char[]) "Next Bookmark" );
 		GLOBAL.languageItems["bookmarkclear"] = new IupString( cast(char[]) "Clear Bookmark" );
@@ -736,6 +736,8 @@ struct GLOBAL
 		GLOBAL.languageItems["showannotation"] = new IupString( cast(char[]) "Show Annotation" );
 		GLOBAL.languageItems["hideannotation"] = new IupString( cast(char[]) "Hide Annotation" );
 		GLOBAL.languageItems["removeannotation"] = new IupString( cast(char[]) "Remove All Annotation" );
+		GLOBAL.languageItems["expandall"] = new IupString( cast(char[]) "Expand All" );
+		GLOBAL.languageItems["contractall"] = new IupString( cast(char[]) "Contract All" );
 
 		//'properties
 		GLOBAL.languageItems["prjproperties"] = new IupString( cast(char[]) "Project Properties" );

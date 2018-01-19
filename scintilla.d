@@ -139,6 +139,7 @@ class CScintilla
 
 	public:
 	int				encoding;
+	int				lastPos = -99;
 	
 	this()
 	{
@@ -1095,9 +1096,12 @@ extern(C)
 						
 						version(linux)
 						{
-							int wRange = IupGetInt( ih, "MARGINWIDTH0" );
-							wRange += IupGetInt( ih, "MARGINWIDTH1" );
-							if( x < wRange && GLOBAL.debugPanel.isExecuting ) return IUP_DEFAULT;
+							version(FBIDE)
+							{
+								int wRange = IupGetInt( ih, "MARGINWIDTH0" );
+								wRange += IupGetInt( ih, "MARGINWIDTH1" );
+								if( x < wRange && GLOBAL.debugPanel.isExecuting ) return IUP_DEFAULT;
+							}
 						}
 						
 						return IUP_IGNORE;
@@ -1218,6 +1222,124 @@ extern(C)
 			
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
+				int Range0 = IupGetInt( ih, "MARGINWIDTH0" );
+				int Range1 = IupGetInt( ih, "MARGINWIDTH1" );
+				int Range2 = IupGetInt( ih, "MARGINWIDTH2" );
+			
+				if( GLOBAL.editorSetting00.BookmarkMargin == "ON" )
+				{
+					// Click at MARGINWIDTH1
+					if( x > Range0 && x < Range0 + Range1 )
+					{
+						Ihandle* _expand = IupItem( GLOBAL.languageItems["bookmark"].toCString, null );
+						IupSetAttribute( _expand, "IMAGE", "icon_mark" );
+						IupSetCallback( _expand, "ACTION", cast(Icallback) function( Ihandle* __ih )
+						{
+							Ihandle* _ih = actionManager.ScintillaAction.getActiveIupScintilla();
+							if( _ih != null )
+							{
+								int currentLine = ScintillaAction.getCurrentLine( _ih ) - 1;
+								if( IupGetIntId( _ih, "MARKERGET", currentLine ) & 2 )
+								{
+									IupSetIntId( _ih, "MARKERDELETE", currentLine, 1 );
+								}
+								else
+								{
+									IupSetIntId( _ih, "MARKERADD", currentLine, 1 );
+								}
+							}
+							return IUP_DEFAULT;
+						});
+
+						version(FBIDE)
+						{
+							Ihandle* _contract = IupItem( GLOBAL.languageItems["bp"].toCString, null );
+							IupSetAttribute( _contract, "IMAGE", "IUP_variable_private" );
+							if( !GLOBAL.debugPanel.isExecuting() ) IupSetAttribute( _contract, "ACTIVE", "NO" );
+							IupSetCallback( _contract, "ACTION", cast(Icallback) function( Ihandle* __ih )
+							{
+								if( GLOBAL.debugPanel.isExecuting() )
+								{
+									Ihandle* _ih = actionManager.ScintillaAction.getActiveIupScintilla();
+									if( _ih != null )
+									{
+										int line = ScintillaAction.getCurrentLine( _ih ) - 1;
+										uint state = IupGetIntId( _ih, "MARKERGET", line );
+										if( state & ( 1 << 2 ) )
+										{
+											IupScintillaSendMessage( _ih, 2044, line, cast(int) 2 ); // #define SCI_MARKERDELETE 2044
+											GLOBAL.debugPanel.removeBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+										}
+										else
+										{
+											IupScintillaSendMessage( _ih, 2043, line, cast(int) 2 ); // #define SCI_MARKERADD 2043
+											GLOBAL.debugPanel.addBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+										}
+									}
+								}
+								return IUP_DEFAULT;
+							});
+							
+							Ihandle* popupMenu = IupMenu(
+															_expand,
+															_contract,
+															null
+														);
+						}
+						else
+						{
+							Ihandle* popupMenu = IupMenu(
+															_expand,
+															null
+														);
+						}
+
+						IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+						IupDestroy( popupMenu );					
+					
+						return IUP_DEFAULT;
+					}
+				}
+				
+					
+				if( GLOBAL.editorSetting00.FoldMargin == "ON" )
+				{
+					// Click at MARGINWIDTH2
+					if( x > Range0 + Range1 && x < Range0 + Range1 + Range2 )
+					{
+						Ihandle* _expand = IupItem( GLOBAL.languageItems["expandall"].toCString, null );
+						IupSetAttribute( _expand, "IMAGE", "icon_collapse1" );
+						IupSetCallback( _expand, "ACTION", cast(Icallback) function( Ihandle* __ih )
+						{
+							Ihandle* _sci = actionManager.ScintillaAction.getActiveIupScintilla();
+							if( _sci != null ) IupSetAttribute( _sci, "FOLDALL", "EXPAND" );
+							return IUP_DEFAULT;
+						});
+
+						Ihandle* _contract = IupItem( GLOBAL.languageItems["contractall"].toCString, null );
+						IupSetAttribute( _contract, "IMAGE", "icon_collapse" );
+						IupSetCallback( _contract, "ACTION", cast(Icallback) function( Ihandle* __ih )
+						{
+							Ihandle* _sci = actionManager.ScintillaAction.getActiveIupScintilla();
+							if( _sci != null ) IupSetAttribute( _sci, "FOLDALL", "CONTRACT" );
+							return IUP_DEFAULT;
+						});
+						
+						Ihandle* popupMenu = IupMenu(
+														_expand,
+														_contract,
+														null
+													);
+
+						IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+						IupDestroy( popupMenu );					
+					
+						return IUP_DEFAULT;
+					}
+				}
+			
+			
+			
 				Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
 				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
 				if( fromStringz(IupGetAttribute( ih, "UNDO" )) != "YES" ) IupSetAttribute( _undo, "ACTIVE", "NO" );
@@ -2017,7 +2139,8 @@ extern(C)
 									
 									if( alreadyInput.length )
 									{
-										AutoComplete.resetLastPos();
+										auto cSci = ScintillaAction.getCScintilla( ih );
+										if( cSci !is null ) cSci.lastPos = -99;
 										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
 									}
 								}
@@ -2058,7 +2181,8 @@ extern(C)
 								{
 									if( alreadyInput.length )
 									{
-										AutoComplete.resetLastPos();
+										auto cSci = ScintillaAction.getCScintilla( ih );
+										if( cSci !is null ) cSci.lastPos = -99;
 										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
 									}
 								}

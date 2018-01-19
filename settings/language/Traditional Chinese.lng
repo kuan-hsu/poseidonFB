@@ -236,7 +236,7 @@ options=選項
 	configuration=設定...
 	setcustomoption=設定自定義編譯器選項...
 	
-bookmark=標記書籤
+bookmark=書籤
 bookmarkprev=前一書籤
 bookmarknext=後一書籤
 bookmarkclear=清除所有書籤
@@ -269,6 +269,8 @@ delete=刪除
 showannotation=顯示註解
 hideannotation=隱藏註解
 removeannotation=移除所有註解
+expandall=展開全部
+contractall=收縮全部
 
 'properties
 prjproperties=專案性質

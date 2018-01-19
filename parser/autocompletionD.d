@@ -20,7 +20,6 @@ version(DIDE)
 
 		static char[][]				listContainer;
 		static CASTnode[char[]]		includesMarkContainer;
-		static int 					lastPos = -99;
 		static char[][]				VersionCondition;
 		
 		
@@ -1263,12 +1262,7 @@ version(DIDE)
 		public:
 		static bool bEnter, bInsertBrace;
 		static bool bAutocompletionPressEnter;
-		
-		static void resetLastPos()
-		{
-			lastPos = -99;
-		}
-		
+
 		static bool checkIsclmportDeclare( Ihandle* iupSci, int pos = -1 )
 		{
 			char[]	result;
@@ -2932,6 +2926,15 @@ version(DIDE)
 		
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput )
 		{
+			auto cSci = ScintillaAction.getCScintilla( ih );
+			if( cSci is null ) return false;
+			
+			if( cSci.lastPos == pos - 1 )
+			{
+				cSci.lastPos = pos;
+				return false;
+			}
+			
 			char[] list = charAdd( ih, pos, text );
 
 			if( list.length )
@@ -2964,10 +2967,15 @@ version(DIDE)
 					}
 				}
 
-				return false;
+				cSci.lastPos = -99;
+				return true;
+			}
+			else
+			{
+				cSci.lastPos = pos;
 			}
 
-			return true;
+			return false;
 		}
 	}
 }

@@ -236,7 +236,7 @@ options=Options
 	configuration=Configuration...
 	setcustomoption=Set Custom Compiler Options...
 
-bookmark=Mark Bookmark
+bookmark=Bookmark
 bookmarkprev=Previous Bookmark
 bookmarknext=Next Bookmark
 bookmarkclear=Clear Bookmark
@@ -269,6 +269,8 @@ delete=Delete
 showannotation=Show Annotation
 hideannotation=Hide Annotation
 removeannotation=Remove All Annotation
+expandall=Expand All
+contractall=Contract All
 
 'properties
 prjproperties=Project Properties

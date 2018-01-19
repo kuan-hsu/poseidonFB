@@ -92,10 +92,22 @@ version(FBIDE)
 
 			//
 			backtraceHandle = IupTree();
-			IupSetAttributes( backtraceHandle, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=YES" ) );
+			version(Windows)
+			{
+				IupSetAttributes( backtraceHandle, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=YES" ) );
+			}
+			else
+			{
+				IupSetAttributes( backtraceHandle, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=NO" ) );
+				IupSetCallback( backtraceHandle, "BRANCHCLOSE_CB", cast(Icallback) function( Ihandle* __ih )
+				{
+					return IUP_IGNORE;
+				});
+			}
 			IupSetCallback( backtraceHandle, "BUTTON_CB", cast(Icallback) &backtraceBUTTON_CB );
 			IupSetCallback( backtraceHandle, "NODEREMOVED_CB", cast(Icallback) &backtraceNODEREMOVED_CB );
 
+	
 
 			Ihandle* btnLeft		= IupButton( null, "Left" );
 			Ihandle* btnRefresh		= IupButton( null, "Refresh" );
@@ -285,7 +297,7 @@ version(FBIDE)
 			regListHandle = IupList( null );
 			IupSetAttributes( regListHandle, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES,AUTOHIDE=YES" );
 			
-			version( Windows )
+			version(Windows)
 			{
 				//watchTreeHandle, localTreeHandle, argTreeHandle, shareTreeHandle, varTabHandle;
 				IupSetAttribute( watchTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
@@ -1706,8 +1718,9 @@ version(FBIDE)
 				
 				if( _s.length > 5 )
 				{
-					if( _s[5] == 'D' ) // Double Click
+					if( _s[5] == 'D' )
 					{
+						
 						if( GLOBAL.debugPanel.isRunning )
 						{
 							int id = IupConvertXYToPos( ih, x, y );
@@ -1746,12 +1759,6 @@ version(FBIDE)
 								}
 							}
 							return IUP_IGNORE;
-							/*
-							else
-							{
-								return IUP_IGNORE;
-							}
-							*/
 						}
 					}
 				}
@@ -1759,7 +1766,7 @@ version(FBIDE)
 
 			return IUP_DEFAULT;
 		}
-
+		
 		private int watchListBUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 		{
 			if( button == IUP_BUTTON1 ) // IUP_BUTTON1 = '1' = 49
