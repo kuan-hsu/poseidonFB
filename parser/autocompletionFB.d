@@ -36,13 +36,16 @@ version(FBIDE)
 
 		static char[][]				listContainer;
 		static CASTnode[char[]]		includesMarkContainer;
+		static bool[char[]]			noIncludeNodeContainer;
 		
 		
 		static void cleanIncludesMarkContainer()
 		{
 			foreach( char[] key; includesMarkContainer.keys )
 				includesMarkContainer.remove( key );
-			//IupMessage("",toStringz(Integer.toString(includesMarkContainer.length)));
+			
+			foreach( char[] key; noIncludeNodeContainer.keys )
+				noIncludeNodeContainer.remove( key );
 		}
 		
 		static void getTypeAndParameter( CASTnode node, inout char[] _type, inout char[] _param )
@@ -459,12 +462,108 @@ version(FBIDE)
 
 			return results;
 		}
+		
+		static CASTnode[] getInsertCodeBI( CASTnode originalNode, char[] originalFullPath, char[] word, bool bWholeWord, int ln = 2147483647 )
+		{
+			bool bHasInclude;
+			
+			// Check Insert-Code-BI or not
+			foreach( CASTnode _node; originalNode.getChildren )
+			{
+				if( _node.kind & B_INCLUDE )
+				{
+					bHasInclude = true;
+					break;
+				}
+			}
+			
+			if( bHasInclude )
+			{
+				foreach( CASTnode _node; originalNode.getChildren )
+				{
+					if( _node.kind & B_VARIABLE )
+					{
+						if( !( _node.kind & B_DEFINE ) )
+						{
+							bHasInclude = false;
+							break;
+						}
+					}
+				}
+			}
 
-		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int B_KIND )
+			// Insert-Code-BI, go
+			if( !bHasInclude )
+			{
+				if( originalFullPath in noIncludeNodeContainer )
+				{
+				}
+				else
+				{
+					char[] activePrjName = ProjectAction.getActiveProjectName();
+					if( activePrjName in GLOBAL.projectManager )
+					{
+						foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
+						{
+							if( s != originalFullPath )
+							{
+								if( upperCase(s) in GLOBAL.parserManager )
+								{
+									foreach( CASTnode _node; GLOBAL.parserManager[upperCase(s)].getChildren )
+									{
+										if( _node.kind & B_INCLUDE ) 
+										{
+											char[] name = checkIncludeExist( _node.name, s );
+											if( name == originalFullPath )
+											{
+												noIncludeNodeContainer[originalFullPath] = true;
+												if( bWholeWord )
+													return getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(s)], s, word, _node.lineNumber );
+												else
+													return getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(s)], s, word, _node.lineNumber );
+											}
+										}
+									}
+								}
+								else
+								{
+									CASTnode _createFileNode = GLOBAL.outlineTree.loadFile( s );
+									
+									if( _createFileNode !is null )
+									{
+										includesMarkContainer[upperCase(s)] = _createFileNode;
+										foreach( CASTnode _node; _createFileNode.getChildren )
+										{
+											if( _node.kind & B_INCLUDE ) 
+											{
+												char[] name = checkIncludeExist( _node.name, s );
+												if( name == originalFullPath )
+												{
+													noIncludeNodeContainer[originalFullPath] = true;
+													if( bWholeWord )
+														return getMatchIncludesFromWholeWord( _createFileNode, s, word, _node.lineNumber );
+													else
+														return getMatchIncludesFromWord( _createFileNode, s, word, _node.lineNumber );
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			return null;
+		}
+
+		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
 			
-			CASTnode[] results;
+			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, true, ln );
+			if( results.length ) return results;
 
 			/+
 			foreach( char[] key; includesMarkContainer.keys )
@@ -473,7 +572,7 @@ version(FBIDE)
 			
 			// Parse Include
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			getIncludes( originalNode, originalFullPath, true );
+			getIncludes( originalNode, originalFullPath, true, ln );
 
 			foreach( includeAST; includesMarkContainer )
 			{
@@ -548,25 +647,21 @@ version(FBIDE)
 			return results;
 		}	
 
-		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, char[] originalFullPath, char[] word )
+		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, char[] originalFullPath, char[] word, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
 			
-			CASTnode[] results;
+			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, false, ln );
+			if( results.length ) return results;
 
-			/+
-			foreach( char[] key; includesMarkContainer.keys )
-				includesMarkContainer.remove( key );
-			+/
 
-			// Parse Include
-			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			getIncludes( originalNode, originalFullPath, true );
+			getIncludes( originalNode, originalFullPath, true, ln );
 
 			/*
 			foreach( CASTnode n; includesMarkContainer )
 				Stdout( n.name ).newline;
 			*/
+
 			foreach( includeAST; includesMarkContainer )
 			{
 				if( includeAST !is null )
@@ -1035,7 +1130,7 @@ version(FBIDE)
 			return null;
 		}
 
-		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false )
+		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1062,45 +1157,48 @@ version(FBIDE)
 			{
 				if( _node.kind & B_INCLUDE )
 				{
-					if( _node.type == "__FB_WIN32__" )
+					if( _node.lineNumber < 2147483647 )
 					{
-						version(Windows)
+						if( _node.type == "__FB_WIN32__" )
 						{
-							//Stdout( "Include(Win32): " ~ _node.name ).newline;
-							CASTnode[] _results = check( _node.name, originalFullPath );
-							if( _results.length ) results ~= _results;
+							version(Windows)
+							{
+								//Stdout( "Include(Win32): " ~ _node.name ).newline;
+								CASTnode[] _results = check( _node.name, originalFullPath );
+								if( _results.length ) results ~= _results;
+							}
 						}
-					}
-					else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
-					{
-						version(linux)
+						else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
 						{
-							CASTnode[] _results = check( _node.name, originalFullPath );
-							if( _results.length ) results ~= _results;
+							version(linux)
+							{
+								CASTnode[] _results = check( _node.name, originalFullPath );
+								if( _results.length ) results ~= _results;
+							}
 						}
-					}
-					else if( _node.type == "!__FB_WIN32__" )
-					{
-						version(Windows){}
+						else if( _node.type == "!__FB_WIN32__" )
+						{
+							version(Windows){}
+							else
+							{
+								CASTnode[] _results = check( _node.name, originalFullPath );
+								if( _results.length ) results ~= _results;
+							}
+						}
+						else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
+						{
+							version(linux){}
+							else
+							{
+								CASTnode[] _results = check( _node.name, originalFullPath );
+								if( _results.length ) results ~= _results;
+							}
+						}
 						else
 						{
-							CASTnode[] _results = check( _node.name, originalFullPath );
-							if( _results.length ) results ~= _results;
+							CASTnode[] _result = check( _node.name, originalFullPath );
+							if( _result.length ) results ~= _result;
 						}
-					}
-					else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
-					{
-						version(linux){}
-						else
-						{
-							CASTnode[] _results = check( _node.name, originalFullPath );
-							if( _results.length ) results ~= _results;
-						}
-					}
-					else
-					{
-						CASTnode[] _result = check( _node.name, originalFullPath );
-						if( _result.length ) results ~= _result;
 					}
 				}
 			}

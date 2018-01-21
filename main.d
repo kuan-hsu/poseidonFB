@@ -164,7 +164,7 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 
-
+	version(linux) IupSetGlobal( "OVERLAYSCROLLBAR", "YES" );
 	//IupSetGlobal( "IMAGEAUTOSCALE", "DPI" );
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );

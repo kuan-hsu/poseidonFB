@@ -251,19 +251,12 @@ class CScintilla
 	{
 		IupSetAttribute( sci, "CLEARALL", "" );
 		IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text.dup ) );
-		
-		/*
-		Ihandle* clipboard = IupClipboard();
-		IupSetAttribute( clipboard, "TEXT", toStringz( _text ) );
-		IupSetAttribute( sci, "CLIPBOARD", "PASTE" );
-		IupDestroy(clipboard);
-		
-		IupSetInt( sci, "FIRSTVISIBLELINE", 0 );
-		IupSetInt( sci, "CARETPOS", 0 );
-		*/	
 
 		IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014		
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
+		
+		// Reparse Lexer
+		version(FBIDE) IupScintillaSendMessage( sci, 4003, 0, -1 ); // SCI_COLOURISE 4003
 	}
 
 	char[] getText()
@@ -599,10 +592,23 @@ class CScintilla
 			IupSetAttribute(sci, "PROPERTY", "fold=1");
 			IupSetAttribute(sci, "PROPERTY", "fold.compact=0");
 			IupSetAttribute(sci, "PROPERTY", "fold.comment=1");
+
+			/+
+			IupSetAttribute(sci, "PROPERTY", "fold=1");
+			IupSetAttribute(sci, "PROPERTY", "fold.basic.comment.explicit=0");
+			IupSetAttribute(sci, "PROPERTY", "fold.basic.explicit.anywhere=0");
+			IupSetAttribute(sci, "PROPERTY", "fold.basic.explicit.end=1");
+			IupSetAttribute(sci, "PROPERTY", "fold.basic.explicit.start=1");
+			IupSetAttribute(sci, "PROPERTY", "fold.basic.syntax.based=1");
+			IupSetAttribute(sci, "PROPERTY", "fold.compact=0");
+			IupSetAttribute(sci, "PROPERTY", "fold.compact=0");
+			IupSetAttribute(sci, "PROPERTY", "fold.comment=1");
 			IupSetAttribute(sci, "PROPERTY", "fold.preprocessor=1");
-			
+			+/
+
 			IupSetAttribute( sci, "MARGINWIDTH2", "20" );
-			IupSetAttribute( sci, "MARGINMASKFOLDERS2",  "Yes" );
+			IupSetAttribute( sci, "MARGINMASKFOLDERS2",  "YES" );
+			
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDER=PLUS");
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDEROPEN=MINUS" );
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDEREND=EMPTY" );
@@ -610,6 +616,15 @@ class CScintilla
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDEROPENMID=EMPTY" );
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDERSUB=EMPTY" );
 			IupSetAttribute( sci, "MARKERDEFINE", "FOLDERTAIL=EMPTY" );
+			/+
+			IupSetAttribute( sci, "MARKERDEFINE", "FOLDER=BOXPLUS");
+			IupSetAttribute( sci, "MARKERDEFINE", "FOLDEROPEN=BOXMINUS" );
+			IupSetAttribute( sci, "MARKERDEFINE", "FOLDEREND=BOXPLUSCONNECTED" );
+			IupSetAttribute( sci, "MARKERDEFINE", "FOLDERMIDTAIL=TCORNER" );
+			IupSetAttribute( sci, "MARKERDEFINE", "FOLDEROPENMID=BOXMINUSCONNECTED" );
+			IupSetAttribute( sci, "MARKERDEFINE", "FOLDERSUB=VLINE" );
+			IupSetAttribute( sci, "MARKERDEFINE", "FOLDERTAIL=TCORNER" );
+			+/
 			IupSetAttribute( sci, "FOLDFLAGS", "LINEAFTER_CONTRACTED" );
 			IupSetAttribute( sci, "MARGINSENSITIVE2", "YES" );
 			IupSetAttribute( sci, "FOLDMARGINCOLOR", GLOBAL.editColor.fold.toCString );

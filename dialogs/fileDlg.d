@@ -90,12 +90,12 @@ class CFileDlg
 	}
 
 	public:
-	this( char[] title, char[] filefilter = "All Files|*.*|", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
+	this( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
 	{
 		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
 	}
 
-	char[][] open( char[] title, char[] filefilter = "All Files|*.*|", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
+	char[][] open( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
 	{
 		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
 
