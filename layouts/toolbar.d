@@ -191,7 +191,11 @@ class CToolBar
 				}			
 				
 				IupSetFocus( ih );
-				if( markLineNumber > -1 ) IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
+				if( markLineNumber > -1 )
+				{
+					IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+					IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
+				}
 				StatusBarAction.update();
 			}
 		});
@@ -218,6 +222,7 @@ class CToolBar
 				}
 
 				IupSetFocus( ih );
+				IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 				IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
 				StatusBarAction.update();
 			}

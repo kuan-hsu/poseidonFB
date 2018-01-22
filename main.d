@@ -79,7 +79,7 @@ void main( char[][] args )
 		Stdout( "IUP open error!!!" ).newline;
 		return;
 	}
-	/*
+	
 	version(Windows)
 	{
 		version(FBIDE)
@@ -93,7 +93,7 @@ void main( char[][] args )
 			return;
 		}
 	}
-	*/
+	
 	//  Get poseidonFB exePath & set the new cwd
 	scope _poseidonPath = new FilePath( args[0] );
 	if( _poseidonPath.exists() )
@@ -164,7 +164,6 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 
-	version(linux) IupSetGlobal( "OVERLAYSCROLLBAR", "YES" );
 	//IupSetGlobal( "IMAGEAUTOSCALE", "DPI" );
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );

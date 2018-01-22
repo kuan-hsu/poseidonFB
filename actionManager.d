@@ -821,7 +821,8 @@ struct ScintillaAction
 			
 			if( lineNumber > -1 )
 			{
-				IupScintillaSendMessage( ih, 2024, --lineNumber, 0 ); // SCI_GOTOLINE 2024
+				IupScintillaSendMessage( ih, 2234, --lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+				IupScintillaSendMessage( ih, 2024, lineNumber, 0 );		// SCI_GOTOLINE 2024
 
 				// If debug window is on, don't scroll to top
 				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )	IupSetInt( ih, "FIRSTVISIBLELINE", lineNumber );
@@ -862,9 +863,10 @@ struct ScintillaAction
 			// Set new tabitem to focus
 			if( DocumentTabAction.setFocus( _sci.getIupScintilla ) == IUP_DEFAULT ) return false;
 			
-			IupScintillaSendMessage(  _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
+			IupScintillaSendMessage( _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 			if( lineNumber > -1 )
 			{
+				IupScintillaSendMessage( _sci.getIupScintilla, 2234, lineNumber - 1, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 				IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
 				IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber - 1 );
 			}
@@ -1450,21 +1452,25 @@ struct ScintillaAction
 	static bool isComment( Ihandle* ih, int pos )
 	{
 		int style = cast(int) IupScintillaSendMessage( ih, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
-		if( style == 1 || style == 19 || style == 4 )
+		
+		version(FBIDE)
 		{
-			return true;
+			if( style == 1 || style == 19 || style == 4 ) return true;
 		}
-		else
+		version(DIDE)
 		{
-			int lineStartPos = cast(int) IupScintillaSendMessage( ih, 2167, IupScintillaSendMessage( ih, 2166, pos, 0 ), 0 ); // SCI_LINEFROMPOSITION = 2166, SCI_POSITIONFROMLINE=2167
-			//IupMessage("", toStringz( Integer.toString(pos) ~ " / " ~ Integer.toString(lineStartPos) ) );
+			if( style == 1 || style == 2 || style == 3 || style == 4 || style == 10 ) return true;
+		}
+		
+		
+		int lineStartPos = cast(int) IupScintillaSendMessage( ih, 2167, IupScintillaSendMessage( ih, 2166, pos, 0 ), 0 ); // SCI_LINEFROMPOSITION = 2166, SCI_POSITIONFROMLINE=2167
+		//IupMessage("", toStringz( Integer.toString(pos) ~ " / " ~ Integer.toString(lineStartPos) ) );
 
-			if( pos == 0 ) return false;
+		if( pos == 0 ) return false;
 			
-			for( int i = pos - 1; i >= lineStartPos; --i )
-			{
-				if( IupScintillaSendMessage( ih, 2010, i, 0 ) == 1 ) return true;
-			}
+		for( int i = pos - 1; i >= lineStartPos; --i )
+		{
+			if( IupScintillaSendMessage( ih, 2010, i, 0 ) == 1 ) return true;
 		}
 		return false;
 	}

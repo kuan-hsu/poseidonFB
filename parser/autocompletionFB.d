@@ -2396,6 +2396,29 @@ version(FBIDE)
 					
 					if( currentPos == -1 ) currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla ); else bDwell = true;
 					if( currentPos < 1 ) return;
+				
+					// Goto Includes
+					char[] includeString = getIncludeString( cSci.getIupScintilla, currentPos );
+					if( includeString.length )
+					{
+						char[] includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
+						if( includeFullPath.length )
+						{
+							if( TYPE & 1 )
+							{
+								if( GLOBAL.navigation.addCache( includeFullPath, 1 ) ) actionManager.ScintillaAction.openFile( includeFullPath );
+							}
+							else
+							{
+								IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
+								IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+								IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( includeFullPath.dup ) ); // SCI_CALLTIPSHOW 2200
+							}
+							return;
+						}
+					}					
+					
+					if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
 					
 					word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
 					word = lowerCase( word.dup.reverse );
@@ -2523,27 +2546,6 @@ version(FBIDE)
 							}
 						}
 					}				
-
-					// Goto Includes
-					char[] includeString = getIncludeString( cSci.getIupScintilla, currentPos );
-					if( includeString.length )
-					{
-						char[] includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
-						if( includeFullPath.length )
-						{
-							if( TYPE & 1 )
-							{
-								if( GLOBAL.navigation.addCache( includeFullPath, 1 ) ) actionManager.ScintillaAction.openFile( includeFullPath );
-							}
-							else
-							{
-								IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
-								IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-								IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( includeFullPath.dup ) ); // SCI_CALLTIPSHOW 2200
-							}
-							return;
-						}
-					}
 					
 					if( !splitWord[0].length ) return;
 
@@ -2590,26 +2592,29 @@ version(FBIDE)
 						
 						if( i == 0 )
 						{
-							/+
-							CASTnode[] _nodes = searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB );
-							if( _nodes.length )
-							{
-								foreach( CASTnode _n; _nodes )
-								{
-									CASTnode _nFather = _n;
-									if( _nFather.getFather !is null )
-									{
-										_nFather = _nFather.getFather;
-									}
-									
-									IupMessage( "", toStringz( _n.name ~ " : " ~ Integer.toString( _n.lineNumber ) ~ "\n" ~ _nFather.name ) );
-									
-								}
-								
-							}
-							+/
-							
+							CASTnode zeroOriBaseNode = AST_Head;
 							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
+							
+							// When TYPE = 1, Declare SYB/FUNCTION is the first choice, so we need check if is declare or not...
+							if( TYPE == 1 ) 
+							{
+								if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
+								{
+									if( AST_Head.lineNumber != AST_Head.endLineNum ) // NOT DECLARE
+									{
+										CASTnode[] matchNodes = searchMatchNodes( zeroOriBaseNode, splitWord[i], B_FIND | B_SUB );
+										foreach( CASTnode _node; matchNodes )
+										{
+											if( _node.lineNumber == _node.endLineNum )
+											{
+												AST_Head = _node;
+												break;
+											}
+										}
+									}
+								}
+							}
+							
 							if( AST_Head is null )
 							{
 								// For Type Objects

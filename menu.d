@@ -645,7 +645,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.357)\nBy Kuan Hsu (Taiwan)\n2018.01.21" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.358)\nBy Kuan Hsu (Taiwan)\n2018.01.22" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.025)\nBy Kuan Hsu (Taiwan)\n2018.01.14" );
 		return IUP_DEFAULT;
 	});
@@ -1293,6 +1293,7 @@ extern(C)
 						
 						
 						char[] LineCol = Integer.toString( left - 1 )  ~ "," ~ Integer.toString( right - 1 );
+						IupScintillaSendMessage( cSci.getIupScintilla, 2234, left - 1, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 						IupSetAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol.dup ) );
 						actionManager.StatusBarAction.update();
 						IupSetFocus( cSci.getIupScintilla );
@@ -1310,7 +1311,7 @@ extern(C)
 						{
 							int value = Integer.atoi( lineNum[1..$] );
 							value --;
-							
+							IupScintillaSendMessage( cSci.getIupScintilla, 2234, ScintillaAction.getLinefromPos( cSci.getIupScintilla, value ), 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 							IupSetAttribute( cSci.getIupScintilla, "CARETPOS", toStringz( Integer.toString(value).dup ) );
 							actionManager.StatusBarAction.update();
 							IupSetFocus( cSci.getIupScintilla );

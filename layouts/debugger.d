@@ -529,7 +529,7 @@ version(FBIDE)
 			}
 			else
 			{
-				IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
+				if( bClean ) IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
 			}
 		}
 
