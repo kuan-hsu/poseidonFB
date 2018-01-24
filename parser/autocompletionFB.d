@@ -507,9 +507,13 @@ version(FBIDE)
 						{
 							if( s != originalFullPath )
 							{
+								CASTnode _createFileNode;
 								if( upperCase(s) in GLOBAL.parserManager )
 								{
-									foreach( CASTnode _node; GLOBAL.parserManager[upperCase(s)].getChildren )
+									_createFileNode = GLOBAL.parserManager[upperCase(s)];
+
+									includesMarkContainer[upperCase(s)] = _createFileNode;
+									foreach( CASTnode _node; _createFileNode.getChildren )
 									{
 										if( _node.kind & B_INCLUDE ) 
 										{
@@ -518,16 +522,16 @@ version(FBIDE)
 											{
 												noIncludeNodeContainer[originalFullPath] = true;
 												if( bWholeWord )
-													return getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(s)], s, word, _node.lineNumber );
+													return searchMatchMemberNodes( _createFileNode, word, B_ALL, true ) ~ getMatchIncludesFromWholeWord( _createFileNode, s, word, _node.lineNumber );
 												else
-													return getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(s)], s, word, _node.lineNumber );
+													return searchMatchMemberNodes( _createFileNode, word, B_ALL, false ) ~ getMatchIncludesFromWord( _createFileNode, s, word, _node.lineNumber );
 											}
 										}
 									}
 								}
 								else
 								{
-									CASTnode _createFileNode = GLOBAL.outlineTree.loadFile( s );
+									_createFileNode = GLOBAL.outlineTree.loadFile( s );
 									
 									if( _createFileNode !is null )
 									{
@@ -541,9 +545,9 @@ version(FBIDE)
 												{
 													noIncludeNodeContainer[originalFullPath] = true;
 													if( bWholeWord )
-														return getMatchIncludesFromWholeWord( _createFileNode, s, word, _node.lineNumber );
+														return searchMatchMemberNodes( _createFileNode, word, B_ALL, true ) ~  getMatchIncludesFromWholeWord( _createFileNode, s, word, _node.lineNumber );
 													else
-														return getMatchIncludesFromWord( _createFileNode, s, word, _node.lineNumber );
+														return searchMatchMemberNodes( _createFileNode, word, B_ALL, false ) ~ getMatchIncludesFromWord( _createFileNode, s, word, _node.lineNumber );
 												}
 											}
 										}
@@ -2593,6 +2597,39 @@ version(FBIDE)
 						if( i == 0 )
 						{
 							CASTnode zeroOriBaseNode = AST_Head;
+							
+							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
+							
+							if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
+							{
+								foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB ) )
+								{
+									if( TYPE == 1 )
+									{
+										if( _node.lineNumber == _node.endLineNum ) // Is Declare
+										{
+											AST_Head = _node;
+											break;
+										}
+									}
+									else if( TYPE == 2 )
+									{
+										if( _node.lineNumber < _node.endLineNum ) // Not Declare
+										{
+											AST_Head = _node;
+											break;
+										}									
+									}
+									else
+									{
+										break;
+									}
+
+								}
+							}
+							
+							/+
+							CASTnode zeroOriBaseNode = AST_Head;
 							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
 							
 							// When TYPE = 1, Declare SYB/FUNCTION is the first choice, so we need check if is declare or not...
@@ -2614,7 +2651,9 @@ version(FBIDE)
 									}
 								}
 							}
+							+/
 							
+
 							if( AST_Head is null )
 							{
 								// For Type Objects

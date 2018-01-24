@@ -1379,17 +1379,12 @@ struct ScintillaAction
 						if( _cSci.getFullPath[0..7] == "NONAME#" )
 						{
 							NoNameGroup ~= _cSci;
-							/*
-							IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) _child );
-							actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), false, false );
-							*/
-							break;
+							continue;
 						}
 					}
 					
 					_cSci.saveFile();
 					GLOBAL.outlineTree.refresh( _cSci );
-					break;
 				}
 			}
 		}
@@ -1402,7 +1397,6 @@ struct ScintillaAction
 				int oldPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 				saveAs( _sci, true, true, oldPos );
 			}
-
 		}
 
 		return true;
