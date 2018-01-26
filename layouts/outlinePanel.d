@@ -1461,9 +1461,12 @@ class COutline
 			{
 				// Don't Create Tree
 				// Parser
-				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
-				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
-				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( fullPath ) );
+				if( f.exists() )
+				{
+					GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
+					GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
+					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( fullPath ) );
+				}
 			}
 		}
 

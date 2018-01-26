@@ -885,9 +885,13 @@ struct ScintillaAction
 			}			
 			
 			// Parser
-			//GLOBAL.outlineTree.loadFile( fullPath );
-			ParseThread subThread = new ParseThread( fullPath );
-			subThread.start();
+			version(Windows)
+			{
+				ParseThread subThread = new ParseThread( fullPath );
+				subThread.start();
+			}
+			else
+				GLOBAL.outlineTree.loadFile( fullPath );
 
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
@@ -2002,7 +2006,17 @@ struct ParserAction
 		}
 
 		return null;
-	}	
+	}
+	
+	static CASTnode getRoot( CASTnode node )
+	{
+		if( node !is null )
+		{
+			while( node.getFather !is null )
+				node = node.getFather();
+		}
+		return node;
+	}
 }
 
 

@@ -507,11 +507,9 @@ version(FBIDE)
 						{
 							if( s != originalFullPath )
 							{
-								CASTnode _createFileNode;
-								if( upperCase(s) in GLOBAL.parserManager )
+								CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( s );
+								if( _createFileNode !is null )
 								{
-									_createFileNode = GLOBAL.parserManager[upperCase(s)];
-
 									includesMarkContainer[upperCase(s)] = _createFileNode;
 									foreach( CASTnode _node; _createFileNode.getChildren )
 									{
@@ -529,33 +527,59 @@ version(FBIDE)
 										}
 									}
 								}
-								else
-								{
-									_createFileNode = GLOBAL.outlineTree.loadFile( s );
-									
-									if( _createFileNode !is null )
-									{
-										includesMarkContainer[upperCase(s)] = _createFileNode;
-										foreach( CASTnode _node; _createFileNode.getChildren )
-										{
-											if( _node.kind & B_INCLUDE ) 
-											{
-												char[] name = checkIncludeExist( _node.name, s );
-												if( name == originalFullPath )
-												{
-													noIncludeNodeContainer[originalFullPath] = true;
-													if( bWholeWord )
-														return searchMatchMemberNodes( _createFileNode, word, B_ALL, true ) ~  getMatchIncludesFromWholeWord( _createFileNode, s, word, _node.lineNumber );
-													else
-														return searchMatchMemberNodes( _createFileNode, word, B_ALL, false ) ~ getMatchIncludesFromWord( _createFileNode, s, word, _node.lineNumber );
-												}
-											}
-										}
-									}
-								}
 							}
 						}
 					}
+				}
+			}
+			
+			return null;
+		}
+		
+		static CASTnode getMatchNodeInFile( char[] word, char[] fileName, int B_KIND, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
+		{
+			CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( fileName );
+		
+			if( _createFileNode !is null )
+			{
+				foreach( CASTnode _node; getMembers( _createFileNode ) )
+				{
+					if( _node.kind & B_KIND ) 
+					{
+						if( lowerCase( word ) == lowerCase( _node.name ) )
+						{
+							if( bOnlyProcedureBody )
+							{
+								if( _node.lineNumber < _node.endLineNum ) return _node;
+							}
+							else if( bOnlyDeclare )
+							{
+								if( _node.lineNumber == _node.endLineNum ) return _node;
+							}
+							else
+							{
+								return _node;
+							}
+						}
+					}
+				}
+			}
+			
+			return null;
+		}
+		
+		static CASTnode getMatchNodeInProject( char[] word, char[] prjName, int B_KIND, char[][] exceptFileNames, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
+		{
+			if( prjName in GLOBAL.projectManager )
+			{
+				foreach( char[] s; GLOBAL.projectManager[prjName].sources ~ GLOBAL.projectManager[prjName].includes )
+				{
+					foreach( char[] e; exceptFileNames )
+						if( s == e ) continue;
+					
+					
+					CASTnode _createFileNode = getMatchNodeInFile( word, s, B_KIND, bOnlyDeclare, bOnlyProcedureBody );
+					if( _createFileNode !is null ) return _createFileNode;
 				}
 			}
 			
@@ -2596,53 +2620,19 @@ version(FBIDE)
 						
 						if( i == 0 )
 						{
-							CASTnode zeroOriBaseNode = AST_Head;
-							
 							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
-							
-							if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
-							{
-								foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB ) )
-								{
-									if( TYPE == 1 )
-									{
-										if( _node.lineNumber == _node.endLineNum ) // Is Declare
-										{
-											AST_Head = _node;
-											break;
-										}
-									}
-									else if( TYPE == 2 )
-									{
-										if( _node.lineNumber < _node.endLineNum ) // Not Declare
-										{
-											AST_Head = _node;
-											break;
-										}									
-									}
-									else
-									{
-										break;
-									}
 
-								}
-							}
 							
-							/+
-							CASTnode zeroOriBaseNode = AST_Head;
-							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
-							
-							// When TYPE = 1, Declare SYB/FUNCTION is the first choice, so we need check if is declare or not...
-							if( TYPE == 1 ) 
+							if( AST_Head !is null )
 							{
+								//IupMessage( "AST_Head", toStringz( Integer.toString( AST_Head.kind ) ~ "\n" ~ AST_Head.name ~ "\n" ~ Integer.toString( AST_Head.lineNumber ) ) );
 								if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
 								{
-									if( AST_Head.lineNumber != AST_Head.endLineNum ) // NOT DECLARE
+									foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB ) )
 									{
-										CASTnode[] matchNodes = searchMatchNodes( zeroOriBaseNode, splitWord[i], B_FIND | B_SUB );
-										foreach( CASTnode _node; matchNodes )
+										if( TYPE == 1 )
 										{
-											if( _node.lineNumber == _node.endLineNum )
+											if( _node.lineNumber == _node.endLineNum ) // Is Declare
 											{
 												AST_Head = _node;
 												break;
@@ -2651,9 +2641,7 @@ version(FBIDE)
 									}
 								}
 							}
-							+/
 							
-
 							if( AST_Head is null )
 							{
 								// For Type Objects
@@ -2703,7 +2691,7 @@ version(FBIDE)
 							}
 						}
 					}
-
+					
 					if( TYPE == 0 )
 					{
 						char[]	_param, _type;
@@ -2740,7 +2728,7 @@ version(FBIDE)
 					else
 					{
 						bool		bGotoMemberProcedure;
-						char[]		className, procedureName, fullPath;
+						char[]		className, procedureName;
 						CASTnode	sonProcedureNode, oriNode = AST_Head;
 						
 						if( TYPE & 2 )
@@ -2753,7 +2741,7 @@ version(FBIDE)
 									if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 									{
 										bGotoMemberProcedure = true;
-										className = AST_Head.getFather.name;
+										className = AST_Head.getFather.name; // Get Class Name
 										procedureName = AST_Head.name;
 									}
 									else if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
@@ -2798,96 +2786,62 @@ version(FBIDE)
 							}
 						}
 						
-						
-
 						// Get lineNum
 						lineNum = AST_Head.lineNumber;
-						while( AST_Head.getFather() !is null )
-						{
-							AST_Head = AST_Head.getFather();
-						}
-						fullPath = AST_Head.name;
 						
+						CASTnode	_rootNode = ParserAction.getRoot( AST_Head );
+						char[]		fullPath = _rootNode.name;
 						scope _fp = new FilePath( fullPath );
 						
-						if( bGotoMemberProcedure )
+						if( bGotoMemberProcedure ) // Mean Goto Function with code( Type = 2 )
 						{
+							//IupMessage( "AST_Head", toStringz( Integer.toString( AST_Head.kind ) ~ "\n" ~ AST_Head.name ~ "\n" ~ Integer.toString( AST_Head.lineNumber ) ) );
+							char[][] exceptFiles;
+							exceptFiles ~= fullPath;
+							
 							if( className.length )
 							{
-								if( lowerCase( _fp.ext ) == "bi" )
+								switch( AST_Head.kind )
 								{
-									_fp.set( _fp.path() ~ _fp.name ~ ".bas" );
-									if( _fp.exists )
-									{
-										fullPath = _fp.toString;
-										AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
-									}
+									case B_SUB, B_FUNCTION, B_OPERATOR, B_PROPERTY:				procedureName = className ~ "." ~ procedureName; break;
+									case B_CTOR, B_DTOR:										procedureName = className;						 break;
+									default:
 								}
-		
-								if( AST_Head !is null )
-								{
-									switch( oriNode.kind )
-									{
-										case B_SUB, B_FUNCTION, B_OPERATOR, B_PROPERTY:
-											sonProcedureNode = searchMatchMemberNode( AST_Head, className ~ "." ~ procedureName, oriNode.kind );
-											break;
+							}
+							
 
-										case B_CTOR, B_DTOR:
-											sonProcedureNode = searchMatchMemberNode( AST_Head, className, oriNode.kind );
-											break;
-										
-										default:
-											return;
-									}
-									
-									if( sonProcedureNode !is null )
-									{
-										if( GLOBAL.navigation.addCache( fullPath, sonProcedureNode.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber );
-										//if( actionManager.ScintillaAction.openFile( fullPath, sonProcedureNode.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
-										return;
-									}
-								}
+							// Declare & procedure body at same file
+							CASTnode _resultNode = getMatchNodeInFile( procedureName, fullPath, AST_Head.kind );
+							if( _resultNode !is null )
+							{
+								if( GLOBAL.navigation.addCache( fullPath, _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, _resultNode.lineNumber );
 								return;
 							}
-							else
+							
+							// Not Same File, Continue search
+							// Check BAS file first								
+							if( lowerCase( _fp.ext ) == "bi" )
 							{
-								// Declare & procedure body at same file
-								foreach_reverse( CASTnode son; getMembers( AST_Head ) )
+								exceptFiles ~= ( _fp.path() ~ _fp.name ~ ".bas" );
+								_resultNode = getMatchNodeInFile( procedureName, exceptFiles[$-1], AST_Head.kind );
+								if( _resultNode !is null )
 								{
-									if( son.kind & oriNode.kind )
-										if( son.name == procedureName )
-											if( son.lineNumber < son.endLineNum )
-											{
-												if( GLOBAL.navigation.addCache( fullPath, son.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, son.lineNumber );
-												//if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
-												return;
-											}
+									if( GLOBAL.navigation.addCache( exceptFiles[$-1], _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( exceptFiles[$-1], _resultNode.lineNumber );
+									return;
 								}
-								
-								// Check BAS file
-								if( lowerCase( _fp.ext ) == "bi" )
-								{
-									fullPath = _fp.path() ~ _fp.name ~ ".bas";
-									AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
-									
-									if( AST_Head !is null )
-									{
-										foreach_reverse( CASTnode son; getMembers( AST_Head ) )
-										{
-											if( son.kind & oriNode.kind )
-												if( son.name == procedureName )
-													if( son.lineNumber < son.endLineNum )
-													{
-														if( GLOBAL.navigation.addCache( fullPath, son.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, son.lineNumber );
-														//if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
-														return;
-													}
-										}
-									}
-								}							
-								
+							}
+							
+							// Check All Project
+							_resultNode = getMatchNodeInProject( procedureName, ProjectAction.getActiveProjectName(), B_SUB | B_FUNCTION, exceptFiles );
+							_rootNode = ParserAction.getRoot( _resultNode );
+							if( _rootNode !is null )
+							{
+								//IupMessage( "KIND", toStringz( Integer.toString( _resultNode.kind ) ~ "\n" ~ _resultNode.name ~ "\n" ~ Integer.toString( _resultNode.lineNumber ) ) );
+								if( GLOBAL.navigation.addCache( _rootNode.name, _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( _rootNode.name, _resultNode.lineNumber );
+								return;
 							}
 						}
+						/+
 						else
 						{
 							if( oriNode.kind & ( B_SUB | B_FUNCTION ) )
@@ -2904,6 +2858,7 @@ version(FBIDE)
 								{
 									if( oriNode.lineNumber < oriNode.endLineNum ) // Not Declare
 									{
+										IupMessage("","NOTDECLARE");
 										if( lowerCase( _fp.ext ) == "bas" )
 										{
 											fullPath = _fp.path() ~ _fp.name ~ ".bi";
@@ -2930,9 +2885,9 @@ version(FBIDE)
 								//IupMessage( "!",toStringz("!!!!!"));
 							}
 						}
+						+/
 						
 						if( GLOBAL.navigation.addCache( fullPath, lineNum ) ) actionManager.ScintillaAction.openFile( fullPath, lineNum );
-						//if( actionManager.ScintillaAction.openFile( fullPath, lineNum ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
 					}
 				}
 			}
