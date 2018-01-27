@@ -30,7 +30,7 @@ struct EditorLayoutSize
 struct EditorColorUint
 {
 	IupString[4]	keyWord;
-	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, selAlpha, errorFore, errorBack, warningFore, warringBack, currentWord, currentWordAlpha;
+	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, bookmark, selAlpha, errorFore, errorBack, warningFore, warringBack, currentWord, currentWordAlpha;
 	IupString		scintillaFore, scintillaBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
@@ -249,6 +249,7 @@ struct GLOBAL
 		GLOBAL.editColor.linenumFore = new IupString( cast(char[]) "0 0 0" );
 		GLOBAL.editColor.linenumBack = new IupString( cast(char[]) "200 200 200" );
 		GLOBAL.editColor.fold = new IupString( cast(char[]) "238 238 238" );
+		GLOBAL.editColor.bookmark = new IupString( cast(char[]) "238 238 238" );
 		GLOBAL.editColor.selAlpha = new IupString( cast(char[]) "255" );
 		GLOBAL.editColor.errorFore = new IupString( cast(char[]) "102 69 3" );
 		GLOBAL.editColor.errorBack = new IupString( cast(char[]) "255 200 227" );

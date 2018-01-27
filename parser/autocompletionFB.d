@@ -590,8 +590,26 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 			
+			char[][] prevKeys = includesMarkContainer.keys;
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, true, ln );
-			if( results.length ) return results;
+			if( results.length )
+				return results;
+			else
+			{
+				foreach( char[] key; includesMarkContainer.keys )
+				{
+					bool bRemove = true;
+					foreach( char[] pKey; prevKeys )
+					{
+						if( pKey == key )
+						{
+							bRemove = false;
+							break;
+						}
+					}
+					if( bRemove ) includesMarkContainer.remove( key );
+				}
+			}
 
 			/+
 			foreach( char[] key; includesMarkContainer.keys )
@@ -2628,14 +2646,17 @@ version(FBIDE)
 								//IupMessage( "AST_Head", toStringz( Integer.toString( AST_Head.kind ) ~ "\n" ~ AST_Head.name ~ "\n" ~ Integer.toString( AST_Head.lineNumber ) ) );
 								if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
 								{
-									foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB ) )
+									if( TYPE == 1 )
 									{
-										if( TYPE == 1 )
+										if( AST_Head.lineNumber < AST_Head.endLineNum ) // Not Declare
 										{
-											if( _node.lineNumber == _node.endLineNum ) // Is Declare
+											foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB ) )
 											{
-												AST_Head = _node;
-												break;
+												if( _node.lineNumber == _node.endLineNum ) // Is Declare
+												{
+													AST_Head = _node;
+													break;
+												}
 											}
 										}
 									}

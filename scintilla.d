@@ -959,14 +959,16 @@ extern(C)
 					}
 					break;
 				}
-				
-				if( IupGetIntId( ih, "MARKERGET", line ) & 2 )
-				{
-					IupSetIntId( ih, "MARKERDELETE", line, 1 );
-				}
 				else
 				{
-					IupSetIntId( ih, "MARKERADD", line, 1 );
+					if( IupGetIntId( ih, "MARKERGET", line ) & 2 )
+					{
+						IupSetIntId( ih, "MARKERDELETE", line, 1 );
+					}
+					else
+					{
+						IupSetIntId( ih, "MARKERADD", line, 1 );
+					}
 				}
 				break;
 				
@@ -1102,6 +1104,16 @@ extern(C)
 					{
 						if( GLOBAL.editorSetting00.MultiSelection == "ON" ) return IUP_DEFAULT;
 						
+						version(linux)
+						{
+							int margin0W = IupGetInt( ih, "MARGINWIDTH0" );
+							int margin1W = IupGetInt( ih, "MARGINWIDTH1" );
+							int margin2W = IupGetInt( ih, "MARGINWIDTH2" );
+							int marginSubTotal = margin0W + margin1W + margin2W;
+							
+							if( x < marginSubTotal ) return IUP_DEFAULT;
+						}
+						
 						if( pressed == 1 )
 						{
 							IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
@@ -1109,20 +1121,20 @@ extern(C)
 							version(DIDE) AutoComplete.toDefintionAndType( 1 );
 						}
 						
-						version(linux)
-						{
-							version(FBIDE)
-							{
-								int wRange = IupGetInt( ih, "MARGINWIDTH0" );
-								wRange += IupGetInt( ih, "MARGINWIDTH1" );
-								if( x < wRange && GLOBAL.debugPanel.isExecuting ) return IUP_DEFAULT;
-							}
-						}
-						
 						return IUP_IGNORE;
 					}
 					else if( button == IUP_BUTTON3 )
 					{
+						version(linux)
+						{
+							int margin0W = IupGetInt( ih, "MARGINWIDTH0" );
+							int margin1W = IupGetInt( ih, "MARGINWIDTH1" );
+							int margin2W = IupGetInt( ih, "MARGINWIDTH2" );
+							int marginSubTotal = margin0W + margin1W + margin2W;
+							
+							if( x < marginSubTotal ) return IUP_DEFAULT;
+						}
+						
 						if( pressed == 1 )
 						{							
 							IupScintillaSendMessage( ih, 2025, _pos , 0 );// SCI_GOTOPOS = 2025,
@@ -1354,371 +1366,373 @@ extern(C)
 				}
 			
 			
-			
-				Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
-				IupSetAttribute( _undo, "IMAGE", "icon_undo" );
-				if( fromStringz(IupGetAttribute( ih, "UNDO" )) != "YES" ) IupSetAttribute( _undo, "ACTIVE", "NO" );
-				IupSetCallback( _undo, "ACTION", cast(Icallback) &menu.undo_cb ); // from menu.d
-
-				Ihandle* _redo = IupItem( GLOBAL.languageItems["sc_redo"].toCString, null );
-				IupSetAttribute( _redo, "IMAGE", "icon_redo" );
-				if( fromStringz(IupGetAttribute( ih, "REDO" )) != "YES" ) IupSetAttribute( _redo, "ACTIVE", "NO" );
-				IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
-				
-				Ihandle* _clearBuffer = IupItem( GLOBAL.languageItems["clear"].toCString, null );
-				IupSetAttribute( _clearBuffer, "IMAGE", "icon_clear" );
-				IupSetCallback( _clearBuffer, "ACTION", cast(Icallback) function( Ihandle* ih )
+				if( x > Range0 + Range1 + Range2 )
 				{
-					auto sci = ScintillaAction.getActiveIupScintilla;
-					if( sci != null )
-					{
-						IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
-					}
+					Ihandle* _undo = IupItem( GLOBAL.languageItems["sc_undo"].toCString, null );
+					IupSetAttribute( _undo, "IMAGE", "icon_undo" );
+					if( fromStringz(IupGetAttribute( ih, "UNDO" )) != "YES" ) IupSetAttribute( _undo, "ACTIVE", "NO" );
+					IupSetCallback( _undo, "ACTION", cast(Icallback) &menu.undo_cb ); // from menu.d
+
+					Ihandle* _redo = IupItem( GLOBAL.languageItems["sc_redo"].toCString, null );
+					IupSetAttribute( _redo, "IMAGE", "icon_redo" );
+					if( fromStringz(IupGetAttribute( ih, "REDO" )) != "YES" ) IupSetAttribute( _redo, "ACTIVE", "NO" );
+					IupSetCallback( _redo, "ACTION", cast(Icallback) &menu.redo_cb ); // from menu.d
 					
-					Ihandle* __undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Undo" );
-					if( __undo != null ) IupSetAttribute( __undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
-
-					Ihandle* __redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Redo" );
-					if( __redo != null ) IupSetAttribute( __redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
-					
-					DocumentTabAction.setFocus( sci );
-					return IUP_DEFAULT;
-				});					
-				
-
-				Ihandle* _cut = IupItem( GLOBAL.languageItems["caption_cut"].toCString, null );
-				IupSetAttribute( _cut, "IMAGE", "icon_cut" );
-				IupSetCallback( _cut, "ACTION", cast(Icallback) &menu.cut_cb ); // from menu.d
-
-				Ihandle* _copy = IupItem( GLOBAL.languageItems["caption_copy"].toCString, null );
-				IupSetAttribute( _copy, "IMAGE", "icon_copy" );
-				IupSetCallback( _copy, "ACTION", cast(Icallback) &menu.copy_cb ); // from menu.d
-
-				Ihandle* _paste = IupItem( GLOBAL.languageItems["caption_paste"].toCString, null );
-				IupSetAttribute( _paste, "IMAGE", "icon_paste" );
-				IupSetCallback( _paste, "ACTION", cast(Icallback) &menu.paste_cb ); // from menu.d
-
-				Ihandle* _delete = IupItem( GLOBAL.languageItems["delete"].toCString, null );
-				IupSetAttribute( _delete, "IMAGE", "icon_clear" );
-				IupSetCallback( _delete, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					Ihandle* _sci = actionManager.ScintillaAction.getActiveIupScintilla();
-					if( _sci != null ) IupSetAttribute( _sci, "SELECTEDTEXT", "" );
-					return IUP_DEFAULT;
-
-				});
-
-				Ihandle* _selectall = IupItem( GLOBAL.languageItems["selectall"].toCString, null );
-				IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
-				IupSetCallback( _selectall, "ACTION", cast(Icallback) &menu.selectall_cb ); // from menu.d
-
-				// Annotation
-				Ihandle* _showAnnotation = IupItem( GLOBAL.languageItems["showannotation"].toCString, null );
-				IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
-				IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
-					return IUP_DEFAULT;
-				});
-				
-				Ihandle* _hideAnnotation = IupItem( GLOBAL.languageItems["hideannotation"].toCString, null );
-				IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
-				IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback)function( Ihandle* ih )
-				{
-					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
-					return IUP_DEFAULT;
-				});
-
-				Ihandle* _removeAllAnnotation = IupItem( GLOBAL.languageItems["removeannotation"].toCString, null );
-				IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
-				IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
-					return IUP_DEFAULT;
-				});
-				
-				Ihandle* _tempAnnotationMenu = IupMenu( _showAnnotation, _hideAnnotation, _removeAllAnnotation, null  );
-				Ihandle* _AnnotationSubMenu = IupSubmenu( GLOBAL.languageItems["annotation"].toCString ,_tempAnnotationMenu  );
-				IupSetAttribute( _AnnotationSubMenu, "IMAGE", "icon_annotation" );
-			
-
-				Ihandle* _refresh = IupItem( GLOBAL.languageItems["sc_reparse"].toCString, null );
-				IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
-				IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					GLOBAL.outlineTree.refresh( cSci );
-					return IUP_DEFAULT;
-				});
-
-				Ihandle* _goto = IupItem( GLOBAL.languageItems["sc_gotodef"].toCString, null );
-				IupSetAttribute( _goto, "IMAGE", "icon_goto" );
-				IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					AutoComplete.toDefintionAndType( 1 );
-					return IUP_DEFAULT;
-				});
-				
-				/*
-				Ihandle* _back = IupItem( GLOBAL.languageItems["sc_backdefinition"].toCString, null );
-				IupSetAttribute( _back, "IMAGE", "icon_back" );
-				IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					//AutoComplete.backDefinition();
-					return IUP_DEFAULT;
-				});
-				*/
-				
-				Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
-				IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" );
-				IupSetCallback( _gotoProcedure, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					AutoComplete.toDefintionAndType( 2 );
-					return IUP_DEFAULT;
-				});
-				
-				
-
-				Ihandle* _showType = IupItem( GLOBAL.languageItems["sc_showtype"].toCString, null );
-				IupSetAttribute( _showType, "IMAGE", "icon_type" );
-				IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
-				{
-					AutoComplete.toDefintionAndType( 0 );
-					return IUP_DEFAULT;
-				});				
-				
-				
-				// High Light......
-				CScintilla	cSci = actionManager.ScintillaAction.getActiveCScintilla();
-				ubyte[256]	pixel;
-				
-				pixel[] = 0;
-				Ihandle* pixelImage = IupImage( 16, 16, pixel.ptr );
-
-				//selectedMarkerIndex
-				Ihandle* _maker0 = IupItem( GLOBAL.languageItems["maker0"].toCString, null );
-				IupSetCallback( _maker0, "ACTION", cast(Icallback) function( Ihandle* ih ){ 
-					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 0;
-					return IUP_DEFAULT;
-				});
-				
-				Ihandle* _maker1 = IupItem( GLOBAL.languageItems["maker1"].toCString, null );
-				IupSetCallback( _maker1, "ACTION", cast(Icallback) function( Ihandle* ih ){
-					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 1;
-					return IUP_DEFAULT;
-				});
-				
-				Ihandle* _maker2 = IupItem( GLOBAL.languageItems["maker2"].toCString, null );
-				IupSetCallback( _maker2, "ACTION", cast(Icallback) function( Ihandle* ih ){
-					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 2;
-					return IUP_DEFAULT;
-				});
-				
-				Ihandle* _maker3 = IupItem( GLOBAL.languageItems["maker3"].toCString, null );
-				IupSetCallback( _maker3, "ACTION", cast(Icallback) function( Ihandle* ih ){
-					ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 3;
-					return IUP_DEFAULT;
-				});
-				
-				switch( cSci.selectedMarkerIndex )
-				{
-					case 0:
-						IupSetAttribute( _maker0, "VALUE", "ON");
-						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[0].toCString );
-						break;
-					case 1:
-						IupSetAttribute( _maker1, "VALUE", "ON");
-						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[1].toCString );
-						break;
-					case 2:
-						IupSetAttribute( _maker2, "VALUE", "ON");
-						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[2].toCString );
-						break;
-					case 3:
-						IupSetAttribute( _maker3, "VALUE", "ON");
-						IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[3].toCString );
-						break;
-					default: 
-				}				
-				
-				Ihandle* _makerSubMenu = IupMenu( _maker0, _maker1, _maker2, _maker3, null  );
-				IupSetAttribute( _makerSubMenu, "RADIO", "YES");
-				IupSetHandle( "icon_color", pixelImage );
-				
-				
-				ubyte[4][256]	pixels;
-				
-				pixel[0] = pixel[1] = pixel[2] = pixel[3] = 0;
-				Ihandle*[4] pixelsImage;
-				for( int i = 0; i < 4; ++ i )
-				{
-					pixelsImage[i]	= IupImage( 16, 16, pixels[i].ptr );
-					IupSetAttribute( pixelsImage[i], "0", GLOBAL.editColor.maker[i].toCString );
-				}
-				IupSetHandle( "icon_color0", pixelsImage[0] );
-				IupSetHandle( "icon_color1", pixelsImage[1] );
-				IupSetHandle( "icon_color2", pixelsImage[2] );
-				IupSetHandle( "icon_color3", pixelsImage[3] );
-				
-				IupSetAttribute( _maker0, "TITLEIMAGE", "icon_color0" );
-				IupSetAttribute( _maker1, "TITLEIMAGE", "icon_color1" );
-				IupSetAttribute( _maker2, "TITLEIMAGE", "icon_color2" );
-				IupSetAttribute( _maker3, "TITLEIMAGE", "icon_color3" );
-
-				Ihandle* _highlightLine = IupItem( GLOBAL.languageItems["highlghtlines"].toCString, null );
-				IupSetAttribute( _highlightLine, "IMAGE", "icon_color" );
-				IupSetCallback( _highlightLine, "ACTION", cast(Icallback) function( )
-				{
-					CScintilla actSci = ScintillaAction.getActiveCScintilla;
-					if( actSci !is null )
+					Ihandle* _clearBuffer = IupItem( GLOBAL.languageItems["clear"].toCString, null );
+					IupSetAttribute( _clearBuffer, "IMAGE", "icon_clear" );
+					IupSetCallback( _clearBuffer, "ACTION", cast(Icallback) function( Ihandle* ih )
 					{
-						int currentPos			= cast(int) IupScintillaSendMessage( actSci.getIupScintilla, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-						int currentLine  		= cast(int) IupScintillaSendMessage( actSci.getIupScintilla, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
-						
-						switch( actSci.selectedMarkerIndex )
+						auto sci = ScintillaAction.getActiveIupScintilla;
+						if( sci != null )
 						{
-							case 0:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR5",  GLOBAL.editColor.maker[0].toCString ); break;
-							case 1:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR6",  GLOBAL.editColor.maker[1].toCString ); break;
-							case 2:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR7",  GLOBAL.editColor.maker[2].toCString ); break;
-							case 3:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR8",  GLOBAL.editColor.maker[3].toCString ); break;
-							default: 
-						}							
-						
-						char[] lines = fromStringz( IupGetAttribute( actSci.getIupScintilla, "SELECTION" ) );
-						if( lines.length )
-						{
-							char[][] splitText = Util.split( lines, "," );
-							if( splitText.length > 2 )
-							{
-								char[][] splitText2 = Util.split( splitText[1], ":" );
-								if( splitText2.length > 1 )
-								{
-									int startLine = Integer.atoi( splitText[0] );
-									int tailLine = Integer.atoi( splitText2[1] );
-									if( tailLine >= startLine )
-									{
-										for( int i = startLine; i <= tailLine; ++i )
-										{
-											for( int j = 5; j < 9; ++ j )
-											{
-												IupSetIntId( actSci.getIupScintilla, "MARKERDELETE", i, j );
-											}
-											IupSetIntId( actSci.getIupScintilla, "MARKERADD", i, actSci.selectedMarkerIndex + 5 );
-										}
-									}
-								}
-							}
+							IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
 						}
-						else
+						
+						Ihandle* __undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Undo" );
+						if( __undo != null ) IupSetAttribute( __undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
+
+						Ihandle* __redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "toolbar_Redo" );
+						if( __redo != null ) IupSetAttribute( __redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
+						
+						DocumentTabAction.setFocus( sci );
+						return IUP_DEFAULT;
+					});					
+					
+
+					Ihandle* _cut = IupItem( GLOBAL.languageItems["caption_cut"].toCString, null );
+					IupSetAttribute( _cut, "IMAGE", "icon_cut" );
+					IupSetCallback( _cut, "ACTION", cast(Icallback) &menu.cut_cb ); // from menu.d
+
+					Ihandle* _copy = IupItem( GLOBAL.languageItems["caption_copy"].toCString, null );
+					IupSetAttribute( _copy, "IMAGE", "icon_copy" );
+					IupSetCallback( _copy, "ACTION", cast(Icallback) &menu.copy_cb ); // from menu.d
+
+					Ihandle* _paste = IupItem( GLOBAL.languageItems["caption_paste"].toCString, null );
+					IupSetAttribute( _paste, "IMAGE", "icon_paste" );
+					IupSetCallback( _paste, "ACTION", cast(Icallback) &menu.paste_cb ); // from menu.d
+
+					Ihandle* _delete = IupItem( GLOBAL.languageItems["delete"].toCString, null );
+					IupSetAttribute( _delete, "IMAGE", "icon_clear" );
+					IupSetCallback( _delete, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						Ihandle* _sci = actionManager.ScintillaAction.getActiveIupScintilla();
+						if( _sci != null ) IupSetAttribute( _sci, "SELECTEDTEXT", "" );
+						return IUP_DEFAULT;
+
+					});
+
+					Ihandle* _selectall = IupItem( GLOBAL.languageItems["selectall"].toCString, null );
+					IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
+					IupSetCallback( _selectall, "ACTION", cast(Icallback) &menu.selectall_cb ); // from menu.d
+
+					// Annotation
+					Ihandle* _showAnnotation = IupItem( GLOBAL.languageItems["showannotation"].toCString, null );
+					IupSetAttribute( _showAnnotation, "IMAGE", "icon_annotation" );
+					IupSetCallback( _showAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+						IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+						return IUP_DEFAULT;
+					});
+					
+					Ihandle* _hideAnnotation = IupItem( GLOBAL.languageItems["hideannotation"].toCString, null );
+					IupSetAttribute( _hideAnnotation, "IMAGE", "icon_annotation_hide" );
+					IupSetCallback( _hideAnnotation, "ACTION", cast(Icallback)function( Ihandle* ih )
+					{
+						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+						IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "HIDDEN" );
+						return IUP_DEFAULT;
+					});
+
+					Ihandle* _removeAllAnnotation = IupItem( GLOBAL.languageItems["removeannotation"].toCString, null );
+					IupSetAttribute( _removeAllAnnotation, "IMAGE", "icon_annotation_remove" );
+					IupSetCallback( _removeAllAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+						IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
+						return IUP_DEFAULT;
+					});
+					
+					Ihandle* _tempAnnotationMenu = IupMenu( _showAnnotation, _hideAnnotation, _removeAllAnnotation, null  );
+					Ihandle* _AnnotationSubMenu = IupSubmenu( GLOBAL.languageItems["annotation"].toCString ,_tempAnnotationMenu  );
+					IupSetAttribute( _AnnotationSubMenu, "IMAGE", "icon_annotation" );
+				
+
+					Ihandle* _refresh = IupItem( GLOBAL.languageItems["sc_reparse"].toCString, null );
+					IupSetAttribute( _refresh, "IMAGE", "icon_refresh" );
+					IupSetCallback( _refresh, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+						GLOBAL.outlineTree.refresh( cSci );
+						return IUP_DEFAULT;
+					});
+
+					Ihandle* _goto = IupItem( GLOBAL.languageItems["sc_gotodef"].toCString, null );
+					IupSetAttribute( _goto, "IMAGE", "icon_goto" );
+					IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						AutoComplete.toDefintionAndType( 1 );
+						return IUP_DEFAULT;
+					});
+					
+					/*
+					Ihandle* _back = IupItem( GLOBAL.languageItems["sc_backdefinition"].toCString, null );
+					IupSetAttribute( _back, "IMAGE", "icon_back" );
+					IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						//AutoComplete.backDefinition();
+						return IUP_DEFAULT;
+					});
+					*/
+					
+					Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
+					IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" );
+					IupSetCallback( _gotoProcedure, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						AutoComplete.toDefintionAndType( 2 );
+						return IUP_DEFAULT;
+					});
+					
+					
+
+					Ihandle* _showType = IupItem( GLOBAL.languageItems["sc_showtype"].toCString, null );
+					IupSetAttribute( _showType, "IMAGE", "icon_type" );
+					IupSetCallback( _showType, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						AutoComplete.toDefintionAndType( 0 );
+						return IUP_DEFAULT;
+					});				
+					
+					
+					// High Light......
+					CScintilla	cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					ubyte[256]	pixel;
+					
+					pixel[] = 0;
+					Ihandle* pixelImage = IupImage( 16, 16, pixel.ptr );
+
+					//selectedMarkerIndex
+					Ihandle* _maker0 = IupItem( GLOBAL.languageItems["maker0"].toCString, null );
+					IupSetCallback( _maker0, "ACTION", cast(Icallback) function( Ihandle* ih ){ 
+						ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 0;
+						return IUP_DEFAULT;
+					});
+					
+					Ihandle* _maker1 = IupItem( GLOBAL.languageItems["maker1"].toCString, null );
+					IupSetCallback( _maker1, "ACTION", cast(Icallback) function( Ihandle* ih ){
+						ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 1;
+						return IUP_DEFAULT;
+					});
+					
+					Ihandle* _maker2 = IupItem( GLOBAL.languageItems["maker2"].toCString, null );
+					IupSetCallback( _maker2, "ACTION", cast(Icallback) function( Ihandle* ih ){
+						ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 2;
+						return IUP_DEFAULT;
+					});
+					
+					Ihandle* _maker3 = IupItem( GLOBAL.languageItems["maker3"].toCString, null );
+					IupSetCallback( _maker3, "ACTION", cast(Icallback) function( Ihandle* ih ){
+						ScintillaAction.getActiveCScintilla.selectedMarkerIndex = 3;
+						return IUP_DEFAULT;
+					});
+					
+					switch( cSci.selectedMarkerIndex )
+					{
+						case 0:
+							IupSetAttribute( _maker0, "VALUE", "ON");
+							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[0].toCString );
+							break;
+						case 1:
+							IupSetAttribute( _maker1, "VALUE", "ON");
+							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[1].toCString );
+							break;
+						case 2:
+							IupSetAttribute( _maker2, "VALUE", "ON");
+							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[2].toCString );
+							break;
+						case 3:
+							IupSetAttribute( _maker3, "VALUE", "ON");
+							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[3].toCString );
+							break;
+						default: 
+					}				
+					
+					Ihandle* _makerSubMenu = IupMenu( _maker0, _maker1, _maker2, _maker3, null  );
+					IupSetAttribute( _makerSubMenu, "RADIO", "YES");
+					IupSetHandle( "icon_color", pixelImage );
+					
+					
+					ubyte[4][256]	pixels;
+					
+					pixel[0] = pixel[1] = pixel[2] = pixel[3] = 0;
+					Ihandle*[4] pixelsImage;
+					for( int i = 0; i < 4; ++ i )
+					{
+						pixelsImage[i]	= IupImage( 16, 16, pixels[i].ptr );
+						IupSetAttribute( pixelsImage[i], "0", GLOBAL.editColor.maker[i].toCString );
+					}
+					IupSetHandle( "icon_color0", pixelsImage[0] );
+					IupSetHandle( "icon_color1", pixelsImage[1] );
+					IupSetHandle( "icon_color2", pixelsImage[2] );
+					IupSetHandle( "icon_color3", pixelsImage[3] );
+					
+					IupSetAttribute( _maker0, "TITLEIMAGE", "icon_color0" );
+					IupSetAttribute( _maker1, "TITLEIMAGE", "icon_color1" );
+					IupSetAttribute( _maker2, "TITLEIMAGE", "icon_color2" );
+					IupSetAttribute( _maker3, "TITLEIMAGE", "icon_color3" );
+
+					Ihandle* _highlightLine = IupItem( GLOBAL.languageItems["highlghtlines"].toCString, null );
+					IupSetAttribute( _highlightLine, "IMAGE", "icon_color" );
+					IupSetCallback( _highlightLine, "ACTION", cast(Icallback) function( )
+					{
+						CScintilla actSci = ScintillaAction.getActiveCScintilla;
+						if( actSci !is null )
 						{
-							for( int j = 5; j < 9; ++ j )
+							int currentPos			= cast(int) IupScintillaSendMessage( actSci.getIupScintilla, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+							int currentLine  		= cast(int) IupScintillaSendMessage( actSci.getIupScintilla, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+							
+							switch( actSci.selectedMarkerIndex )
 							{
-								IupSetIntId( actSci.getIupScintilla, "MARKERDELETE", currentLine, j );
+								case 0:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR5",  GLOBAL.editColor.maker[0].toCString ); break;
+								case 1:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR6",  GLOBAL.editColor.maker[1].toCString ); break;
+								case 2:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR7",  GLOBAL.editColor.maker[2].toCString ); break;
+								case 3:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR8",  GLOBAL.editColor.maker[3].toCString ); break;
+								default: 
 							}							
-							IupSetIntId( actSci.getIupScintilla, "MARKERADD", currentLine, actSci.selectedMarkerIndex + 5 );
-						}
-					}
-					return IUP_DEFAULT;
-				});
-				
-				Ihandle* _delHighlightLine = IupItem( GLOBAL.languageItems["delhighlghtlines"].toCString, null );
-				IupSetAttribute( _delHighlightLine, "IMAGE", "icon_clear" );
-				IupSetCallback( _delHighlightLine, "ACTION", cast(Icallback) function( )
-				{
-					Ihandle* ih = ScintillaAction.getActiveIupScintilla;
-					if( ih != null )
-					{
-						int currentPos			= cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
-						int currentLine  		= cast(int) IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
-						
-						char[] lines = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
-						if( lines.length )
-						{
-							char[][] splitText = Util.split( lines, "," );
-							if( splitText.length > 2 )
+							
+							char[] lines = fromStringz( IupGetAttribute( actSci.getIupScintilla, "SELECTION" ) );
+							if( lines.length )
 							{
-								char[][] splitText2 = Util.split( splitText[1], ":" );
-								if( splitText2.length > 1 )
+								char[][] splitText = Util.split( lines, "," );
+								if( splitText.length > 2 )
 								{
-									int startLine = Integer.atoi( splitText[0] );
-									int tailLine = Integer.atoi( splitText2[1] );
-									if( tailLine >= startLine )
+									char[][] splitText2 = Util.split( splitText[1], ":" );
+									if( splitText2.length > 1 )
 									{
-										
-										for( int i = startLine; i <= tailLine; ++i )
+										int startLine = Integer.atoi( splitText[0] );
+										int tailLine = Integer.atoi( splitText2[1] );
+										if( tailLine >= startLine )
 										{
-											for( int j = 5; j < 9; ++ j )
+											for( int i = startLine; i <= tailLine; ++i )
 											{
-												IupSetIntId( ih, "MARKERDELETE", i, j );
-											}											
+												for( int j = 5; j < 9; ++ j )
+												{
+													IupSetIntId( actSci.getIupScintilla, "MARKERDELETE", i, j );
+												}
+												IupSetIntId( actSci.getIupScintilla, "MARKERADD", i, actSci.selectedMarkerIndex + 5 );
+											}
 										}
 									}
 								}
 							}
-						}
-						else
-						{
-							for( int j = 5; j < 9; ++ j )
+							else
 							{
-								IupSetIntId( ih, "MARKERDELETE", currentLine, j );
+								for( int j = 5; j < 9; ++ j )
+								{
+									IupSetIntId( actSci.getIupScintilla, "MARKERDELETE", currentLine, j );
+								}							
+								IupSetIntId( actSci.getIupScintilla, "MARKERADD", currentLine, actSci.selectedMarkerIndex + 5 );
 							}
 						}
+						return IUP_DEFAULT;
+					});
+					
+					Ihandle* _delHighlightLine = IupItem( GLOBAL.languageItems["delhighlghtlines"].toCString, null );
+					IupSetAttribute( _delHighlightLine, "IMAGE", "icon_clear" );
+					IupSetCallback( _delHighlightLine, "ACTION", cast(Icallback) function( )
+					{
+						Ihandle* ih = ScintillaAction.getActiveIupScintilla;
+						if( ih != null )
+						{
+							int currentPos			= cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
+							int currentLine  		= cast(int) IupScintillaSendMessage( ih, 2166, currentPos, 0 ); // SCI_LINEFROMPOSITION = 2166
+							
+							char[] lines = fromStringz( IupGetAttribute( ih, "SELECTION" ) );
+							if( lines.length )
+							{
+								char[][] splitText = Util.split( lines, "," );
+								if( splitText.length > 2 )
+								{
+									char[][] splitText2 = Util.split( splitText[1], ":" );
+									if( splitText2.length > 1 )
+									{
+										int startLine = Integer.atoi( splitText[0] );
+										int tailLine = Integer.atoi( splitText2[1] );
+										if( tailLine >= startLine )
+										{
+											
+											for( int i = startLine; i <= tailLine; ++i )
+											{
+												for( int j = 5; j < 9; ++ j )
+												{
+													IupSetIntId( ih, "MARKERDELETE", i, j );
+												}											
+											}
+										}
+									}
+								}
+							}
+							else
+							{
+								for( int j = 5; j < 9; ++ j )
+								{
+									IupSetIntId( ih, "MARKERDELETE", currentLine, j );
+								}
+							}
+						}
+						return IUP_DEFAULT;
+					});					
+
+					Ihandle* itemHighlight = IupSubmenu( GLOBAL.languageItems["colorhighlght"].toCString, _makerSubMenu );
+					IupSetAttribute( itemHighlight, "IMAGE", "icon_colormark" );
+					Ihandle* temp = IupMenu( _highlightLine, _delHighlightLine, itemHighlight, null );
+					Ihandle* itemMainHighlight = IupSubmenu( GLOBAL.languageItems["highlightmaker"].toCString, temp );
+					IupSetAttribute( itemMainHighlight, "IMAGE", "icon_colormark" );
+					
+					Ihandle* popupMenu = IupMenu(
+													_undo,
+													_redo,
+													_clearBuffer,
+													IupSeparator(),
+
+													_cut,
+													_copy,
+													_paste,
+													_delete,
+													IupSeparator(),
+
+													_selectall,
+													IupSeparator(),
+													
+													itemMainHighlight,
+													IupSeparator(),
+													
+													_AnnotationSubMenu,
+													/*
+													_showAnnotation,
+													_hideAnnotation,
+													_removeAllAnnotation,
+													*/
+													IupSeparator(),
+													
+													_refresh,
+													_goto,
+													_gotoProcedure,
+													/*
+													_back,
+													*/
+													_showType,
+													null
+												);
+
+
+					IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+					IupDestroy( popupMenu );
+					IupDestroy( pixelImage );
+					for( int i = 0; i < 4; ++ i )
+					{
+						IupDestroy( pixelsImage[i] );
 					}
-					return IUP_DEFAULT;
-				});					
-
-				Ihandle* itemHighlight = IupSubmenu( GLOBAL.languageItems["colorhighlght"].toCString, _makerSubMenu );
-				IupSetAttribute( itemHighlight, "IMAGE", "icon_colormark" );
-				Ihandle* temp = IupMenu( _highlightLine, _delHighlightLine, itemHighlight, null );
-				Ihandle* itemMainHighlight = IupSubmenu( GLOBAL.languageItems["highlightmaker"].toCString, temp );
-				IupSetAttribute( itemMainHighlight, "IMAGE", "icon_colormark" );
-				
-				Ihandle* popupMenu = IupMenu(
-												_undo,
-												_redo,
-												_clearBuffer,
-												IupSeparator(),
-
-												_cut,
-												_copy,
-												_paste,
-												_delete,
-												IupSeparator(),
-
-												_selectall,
-												IupSeparator(),
-												
-												itemMainHighlight,
-												IupSeparator(),
-												
-												_AnnotationSubMenu,
-												/*
-												_showAnnotation,
-												_hideAnnotation,
-												_removeAllAnnotation,
-												*/
-												IupSeparator(),
-												
-												_refresh,
-												_goto,
-												_gotoProcedure,
-												/*
-												_back,
-												*/
-												_showType,
-												null
-											);
-
-
-				IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
-				IupDestroy( popupMenu );
-				IupDestroy( pixelImage );
-				for( int i = 0; i < 4; ++ i )
-				{
-					IupDestroy( pixelsImage[i] );
 				}
 				
 				version(linux) return IUP_IGNORE; // For Linux MOD
