@@ -1243,6 +1243,7 @@ extern(C)
 				if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" )
 				{
 					IupHide( GLOBAL.scrollICONHandle );
+					IupSetAttribute( GLOBAL.scrollTimer, "RUN", "NO" );
 					return IUP_DEFAULT;
 				}
 			}
@@ -1757,10 +1758,11 @@ extern(C)
 							if( _y < 0 ) _y = 0;
 							
 							IupShowXY( GLOBAL.scrollICONHandle, _x, _y );
+							IupSetAttribute( GLOBAL.scrollTimer, "RUN", "YES" );
 
 							IupSetFocus( ih );							
 						}
-						return IUP_DEFAULT;
+						version(linux) return IUP_IGNORE; else return IUP_DEFAULT;
 					}
 				}
 	
@@ -1871,27 +1873,27 @@ extern(C)
 					iconY = Integer.atoi( iconString[crossSign+1..$] );
 				}
 				
-				if( cursorY > iconY )
+				if( cursorY > iconY + 16 )
 				{
-					int add = ( cursorY - iconY ) / 100 + 1;
+					int add = ( cursorY - iconY - 16 ) / 50 + 1;
 					IupScintillaSendMessage( ih, 2168, 0, add ); // SCI_LINESCROLL 2168
 					
 				}
-				else if( cursorY < iconY )
+				else if( cursorY < iconY + 16 )
 				{
-					int minus = ( cursorY - iconY ) / 100 - 1;
+					int minus = ( cursorY - iconY - 16 ) / 50 - 1;
 					IupScintillaSendMessage( ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
 				}
 				
-				if( cursorX > iconX )
+				if( cursorX > iconX + 16 )
 				{
-					int add = ( cursorX - iconX ) / 400 + 1;
+					int add = ( cursorX - iconX - 16 ) / 20 + 1;
 					IupScintillaSendMessage( ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
 					
 				}
-				else if( cursorX < iconX )
+				else if( cursorX < iconX + 16 )
 				{
-					int minus = ( cursorX - iconX ) / 400 - 1;
+					int minus = ( cursorX - iconX - 16 ) / 40 - 1;
 					IupScintillaSendMessage( ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
 				}
 			}
@@ -1935,6 +1937,36 @@ extern(C)
 			{
 				switch( sk.name )
 				{
+					case "cut":
+						if( sk.keyValue > 0 )
+						{
+							if( sk.keyValue == c )
+							{
+								menu.cut_cb();
+								return IUP_IGNORE;
+							}
+						}
+						break;
+					case "copy":
+						if( sk.keyValue > 0 )
+						{
+							if( sk.keyValue == c )
+							{
+								menu.copy_cb();
+								return IUP_IGNORE;
+							}
+						}
+						break;
+					case "paste":
+						if( sk.keyValue > 0 )
+						{
+							if( sk.keyValue == c )
+							{
+								menu.paste_cb();
+								return IUP_IGNORE;
+							}
+						}
+						break;
 					case "find":				
 						if( sk.keyValue == c )
 						{

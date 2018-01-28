@@ -24,7 +24,7 @@ struct EditorToggleUint
 
 struct EditorLayoutSize
 {
-	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON", FilelistWindow = "ON", RotateTabs = "OFF";
+	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON", FilelistWindow = "ON", RotateTabs = "OFF", BarSize = "2";
 }
 
 struct EditorColorUint
@@ -127,7 +127,7 @@ struct GLOBAL
 	static CFindInFilesDialog	serachInFilesDlg;
 	static CCompilerHelpDialog	compilerHelpDlg;
 	static CIDEMessageDialog	IDEMessageDlg;
-	static Ihandle*				scrollICONHandle;
+	static Ihandle*				scrollICONHandle, scrollTimer;
 
 	static CStatusBar			statusBar;
 
@@ -345,72 +345,76 @@ struct GLOBAL
 		ShortKey sk5 = { "prevtab","Previous Tab", 805306377 };
 		GLOBAL.shortKeys ~= sk5;
 
-		ShortKey sk6 = { "find", "Find/Replace", 536870982 };
+		ShortKey sk6 = { "cut", "Cut", 0 };
 		GLOBAL.shortKeys ~= sk6;
-		ShortKey sk7 = { "findinfile", "Find/Replace In Files", 805306438 };
+		ShortKey sk7 = { "copy", "Copy", 0 };
 		GLOBAL.shortKeys ~= sk7;
-		ShortKey sk8 = { "findnext", "Find Next", 65472 };
+		ShortKey sk8 = { "paste", "Paste", 0 };
 		GLOBAL.shortKeys ~= sk8;
-		ShortKey sk9 = { "findprev", "Find Previous", 536936419 };
+		ShortKey sk9 = { "find", "Find/Replace", 536870982 };
 		GLOBAL.shortKeys ~= sk9;
-		ShortKey sk10 = { "gotoline", "Goto Line", 536870983 };
+		ShortKey sk10 = { "findinfile", "Find/Replace In Files", 805306438 };
 		GLOBAL.shortKeys ~= sk10;
-		ShortKey sk11 = { "undo", "Undo", 536871002 };
+		ShortKey sk11 = { "findnext", "Find Next", 65472 };
 		GLOBAL.shortKeys ~= sk11;
-		ShortKey sk12 = { "redo", "Redo", 805306458 };
+		ShortKey sk12 = { "findprev", "Find Previous", 536936419 };
 		GLOBAL.shortKeys ~= sk12;
-		ShortKey sk13 = { "comment", "(Un)comment", 536870994 };
+		ShortKey sk13 = { "gotoline", "Goto Line", 536870983 };
 		GLOBAL.shortKeys ~= sk13;
-		ShortKey sk14 = { "backnav", "Backward Navigation", 536870984 };
+		ShortKey sk14 = { "undo", "Undo", 536871002 };
 		GLOBAL.shortKeys ~= sk14;
-		ShortKey sk15 = { "forwardnav", "Forkward Navigation", 805306440 };
+		ShortKey sk15 = { "redo", "Redo", 805306458 };
 		GLOBAL.shortKeys ~= sk15;
-		
-		ShortKey sk16 = { "showtype", "Show Type", 65470 };
-		GLOBAL.shortKeys ~= sk16;		
-		ShortKey sk17 = { "defintion", "Goto Defintion", 1073741895 };
+		ShortKey sk16 = { "comment", "(Un)comment", 536870994 };
+		GLOBAL.shortKeys ~= sk16;
+		ShortKey sk17 = { "backnav", "Backward Navigation", 536870984 };
 		GLOBAL.shortKeys ~= sk17;
-		ShortKey sk18 = { "procedure", "Goto Member Procedure", 536870992 };		
+		ShortKey sk18 = { "forwardnav", "Forkward Navigation", 805306440 };
 		GLOBAL.shortKeys ~= sk18;
-		ShortKey sk19 = { "autocomplete", "Autocomplete", 536870993 };
-		GLOBAL.shortKeys ~= sk19;
-		ShortKey sk20 = { "reparse", "Reparse", 65471 };
-		GLOBAL.shortKeys ~= sk20;
-
-		ShortKey sk21 = { "compilerun", "Compile & Run", 536936386 };
-		GLOBAL.shortKeys ~= sk21;
-		ShortKey sk22 = { "quickrun", "Quick Run", 268500930 };
-		GLOBAL.shortKeys ~= sk22;
-		ShortKey sk23 = { "run", "Run", 65474 };
-		GLOBAL.shortKeys ~= sk23;
-		ShortKey sk24 = { "build", "Build", 65475 };
-		GLOBAL.shortKeys ~= sk24;
 		
-		ShortKey sk25 = { "outlinewindow", "On/Off Left-side Window", 65480 };
+		ShortKey sk19 = { "showtype", "Show Type", 65470 };
+		GLOBAL.shortKeys ~= sk19;		
+		ShortKey sk20 = { "defintion", "Goto Defintion", 1073741895 };
+		GLOBAL.shortKeys ~= sk20;
+		ShortKey sk21 = { "procedure", "Goto Member Procedure", 536870992 };		
+		GLOBAL.shortKeys ~= sk21;
+		ShortKey sk22 = { "autocomplete", "Autocomplete", 536870993 };
+		GLOBAL.shortKeys ~= sk22;
+		ShortKey sk23 = { "reparse", "Reparse", 65471 };
+		GLOBAL.shortKeys ~= sk23;
+
+		ShortKey sk24 = { "compilerun", "Compile & Run", 536936386 };
+		GLOBAL.shortKeys ~= sk24;
+		ShortKey sk25 = { "quickrun", "Quick Run", 268500930 };
 		GLOBAL.shortKeys ~= sk25;
-		ShortKey sk26 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
+		ShortKey sk26 = { "run", "Run", 65474 };
 		GLOBAL.shortKeys ~= sk26;
-
-		ShortKey sk27 = { "customtool1", "Custom Tool(1)", 805371838 };
+		ShortKey sk27 = { "build", "Build", 65475 };
 		GLOBAL.shortKeys ~= sk27;
-		ShortKey sk28 = { "customtool2", "Custom Tool(2)", 805371839 };
+		
+		ShortKey sk28 = { "outlinewindow", "On/Off Left-side Window", 65480 };
 		GLOBAL.shortKeys ~= sk28;
-		ShortKey sk29 = { "customtool3", "Custom Tool(3)", 805371840 };
+		ShortKey sk29 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
 		GLOBAL.shortKeys ~= sk29;
-		ShortKey sk30 = { "customtool4", "Custom Tool(4)", 805371841 };
+
+		ShortKey sk30 = { "customtool1", "Custom Tool(1)", 805371838 };
 		GLOBAL.shortKeys ~= sk30;
-		ShortKey sk31 = { "customtool5", "Custom Tool(5)", 805371842 };
+		ShortKey sk31 = { "customtool2", "Custom Tool(2)", 805371839 };
 		GLOBAL.shortKeys ~= sk31;
-		ShortKey sk32 = { "customtool6", "Custom Tool(6)", 805371843 };
+		ShortKey sk32 = { "customtool3", "Custom Tool(3)", 805371840 };
 		GLOBAL.shortKeys ~= sk32;
-		ShortKey sk33 = { "customtool7", "Custom Tool(7)", 805371844 };
+		ShortKey sk33 = { "customtool4", "Custom Tool(4)", 805371841 };
 		GLOBAL.shortKeys ~= sk33;
-		ShortKey sk34 = { "customtool8", "Custom Tool(8)", 805371845 };
+		ShortKey sk34 = { "customtool5", "Custom Tool(5)", 805371842 };
 		GLOBAL.shortKeys ~= sk34;
-		ShortKey sk35 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		ShortKey sk35 = { "customtool6", "Custom Tool(6)", 805371843 };
 		GLOBAL.shortKeys ~= sk35;
-
-
+		ShortKey sk36 = { "customtool7", "Custom Tool(7)", 805371844 };
+		GLOBAL.shortKeys ~= sk36;
+		ShortKey sk37 = { "customtool8", "Custom Tool(8)", 805371845 };
+		GLOBAL.shortKeys ~= sk37;
+		ShortKey sk38 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		GLOBAL.shortKeys ~= sk38;
 
 
 		fontUint fu;
@@ -611,6 +615,8 @@ struct GLOBAL
 						GLOBAL.languageItems["controlcharsymbol"] = new IupString( cast(char[]) "Set Control Char Symbol" );
 						GLOBAL.languageItems["tabwidth"] = new IupString( cast(char[]) "Tab Width" );
 						GLOBAL.languageItems["columnedge"] = new IupString( cast(char[]) "Column Edge" );
+						GLOBAL.languageItems["barsize"] = new IupString( cast(char[]) "Bar Size" );
+							GLOBAL.languageItems["barsizetip"] = new IupString( cast(char[]) "Need Restart Poseidon (2~5)" );
 						GLOBAL.languageItems["maker0"] = new IupString( cast(char[]) "Maker0" );
 						GLOBAL.languageItems["maker1"] = new IupString( cast(char[]) "Maker1" );
 						GLOBAL.languageItems["maker2"] = new IupString( cast(char[]) "Maker2" );

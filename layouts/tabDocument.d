@@ -161,12 +161,14 @@ extern(C)
 						{
 							if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
 							{
-								IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
+								//IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
+								IupSetInt( GLOBAL.documentSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 								IupSetInt( GLOBAL.documentSplit, "VALUE", GLOBAL.documentSplit_value );
 							}
 							else
 							{
-								IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=3" );
+								//IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=3" );
+								IupSetInt( GLOBAL.documentSplit2, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 								IupSetInt( GLOBAL.documentSplit2, "VALUE", GLOBAL.documentSplit2_value );
 							}
 						}

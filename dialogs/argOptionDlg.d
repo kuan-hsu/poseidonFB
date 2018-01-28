@@ -132,19 +132,23 @@ class CArgOptionDialog : CBaseDialog
 		Ihandle* labelOptions = IupLabel( GLOBAL.languageItems["prjopts"].toCString );
 		IupSetAttributes( labelOptions, "SIZE=60x16" );
 
-		listOptions = IupList(null);
-		IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=200x12,VISIBLE_ITEMS=5");
-		IupSetHandle( "CCustomCompilerOptionDialog_textOptions", listOptions );
-		for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
+		if( QuickMode )
 		{
-			_recentOptions ~= new IupString( GLOBAL.recentOptions[i] );
-			IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), _recentOptions[i].toCString );
-		}		
-
-		if( !QuickMode )
+			listOptions = IupList(null);
+			IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=200x12,VISIBLE_ITEMS=5");
+			IupSetHandle( "CCustomCompilerOptionDialog_textOptions", listOptions );
+			for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
+			{
+				_recentOptions ~= new IupString( GLOBAL.recentOptions[i] );
+				IupSetAttribute( listOptions, toStringz( Integer.toString( i + 1 ) ), _recentOptions[i].toCString );
+			}
+		}
+		else	
 		{
-			IupSetAttribute( listOptions, "DROPDOWN", "NO" );
-			IupSetCallback( listOptions, "EDIT_CB", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
+			listOptions = IupText(null);
+			IupSetAttributes( listOptions, "SIZE=200x12");
+			IupSetHandle( "CCustomCompilerOptionDialog_textOptions", listOptions );
+			IupSetCallback( listOptions, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 		}
 		
 		hBoxOptions = IupHbox( labelOptions, listOptions, null );

@@ -248,7 +248,7 @@ extern(C) // Callback for CBaseDialog
 					}
 					else
 					{
-						scope dlg = new CArgOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString(), false );
+						scope dlg = new CArgOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
 						dlg.show( x, y - 210,-1 );
 					}
 					

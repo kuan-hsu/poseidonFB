@@ -32,7 +32,8 @@ void createExplorerWindow()
 
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
 	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES" );
-	version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
+	IupSetInt( GLOBAL.fileListSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+	//version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
 
 	createTabs();
 	createTabs2();
@@ -69,7 +70,8 @@ void createExplorerWindow()
 	
 	GLOBAL.explorerSplit = IupSplit( projectViewBackground, GLOBAL.documentSplit2 );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
-	version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
+	//version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
+	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
@@ -109,7 +111,8 @@ void createExplorerWindow()
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
-	IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
+	//IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
+	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 	/*
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* ih ){
 		if( GLOBAL.fileListTree.getTreeH <= 6 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );		
@@ -129,7 +132,67 @@ void createExplorerWindow()
 	GLOBAL.scrollICONHandle = IupDialog( _scrolllabel );
 	IupSetStrAttribute( GLOBAL.scrollICONHandle, "OPACITYIMAGE", "icon_scroll" );
 	IupSetAttributes( GLOBAL.scrollICONHandle, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO" );
-	IupSetAttribute(  GLOBAL.scrollICONHandle, "PARENTDIALOG", "MAIN_DIALOG" );
+	IupSetAttribute( GLOBAL.scrollICONHandle, "PARENTDIALOG", "MAIN_DIALOG" );
+	GLOBAL.scrollTimer = IupTimer();
+	IupSetAttributes( GLOBAL.scrollTimer, "TIME=200,RUN=NO" );
+	IupSetCallback( GLOBAL.scrollTimer, "ACTION_CB", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
+		{
+			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" )
+			{
+				Ihandle* _ih = ScintillaAction.getActiveIupScintilla();
+				
+				if( _ih != null )
+				{
+					char[] cursorString = fromStringz( IupGetGlobal( "CURSORPOS" ) );
+					
+					int		cursorX, cursorY, iconX, iconY;
+					int 	crossSign = Util.index( cursorString, "x" );
+					if( crossSign < cursorString.length )
+					{
+						cursorX = Integer.atoi( cursorString[0..crossSign] );
+						cursorY = Integer.atoi( cursorString[crossSign+1..$] );
+					}
+					
+					char[] iconString = fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
+					crossSign = Util.index( iconString, "," );
+					
+					if( crossSign < iconString.length )
+					{
+						iconX = Integer.atoi( iconString[0..crossSign] );
+						iconY = Integer.atoi( iconString[crossSign+1..$] );
+					}
+					
+					if( cursorY > iconY + 16 )
+					{
+						int add = ( cursorY - iconY - 16 ) / 5 + 1;
+						IupScintillaSendMessage( _ih, 2168, 0, add ); // SCI_LINESCROLL 2168
+						
+					}
+					else if( cursorY < iconY + 16 )
+					{
+						int minus = ( cursorY - iconY - 16 ) / 5 - 1;
+						IupScintillaSendMessage( _ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
+					}
+					
+					if( cursorX > iconX + 16 )
+					{
+						int add = ( cursorX - iconX - 16 ) / 100;
+						IupScintillaSendMessage( _ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
+						
+					}
+					else if( cursorX < iconX + 16 )
+					{
+						int minus = ( cursorX - iconX - 16 ) / 100;
+						IupScintillaSendMessage( _ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
+					}
+				}
+			}
+		}
+		
+		return IUP_DEFAULT;
+	});
 }
 
 void createEditorSetting()
@@ -260,6 +323,8 @@ extern(C)
 			{
 				if( parser !is null ) delete parser;
 			}
+			
+			if( GLOBAL.scrollTimer != null ) IupDestroy( GLOBAL.scrollTimer );
 		}
 		catch( Exception e )
 		{
@@ -302,7 +367,11 @@ extern(C)
 	int GlobalWHEEL_CB( Ihandle *ih, float delta, int x, int y, char *status )
 	{
 		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
-			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
+			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" )
+			{
+				IupHide( GLOBAL.scrollICONHandle );
+				IupSetAttribute( GLOBAL.scrollTimer, "RUN", "NO" );
+			}
 			
 		return IUP_DEFAULT;
 	}

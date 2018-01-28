@@ -24,7 +24,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		// PAGE 1 General
 		// Line 1
 		Ihandle* labelProjectName = IupLabel( toStringz( GLOBAL.languageItems["prjname"].toDString ~ ":" ) );
-		IupSetAttributes( labelProjectName, "SIZE=54x20" );
+		IupSetAttributes( labelProjectName, "SIZE=60x20" );
 		
 		textProjectName = IupText( null );
 		IupSetAttribute( textProjectName, "SIZE", "140x12" );
@@ -46,7 +46,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Line 2
 		Ihandle* labelProjectDir = IupLabel( toStringz( GLOBAL.languageItems["prjdir"].toDString ~ ":" ) );
-		IupSetAttributes( labelProjectDir, "SIZE=54x20" );
+		IupSetAttributes( labelProjectDir, "SIZE=60x20" );
 		
 		textProjectDir = IupText( null );
 		IupSetAttribute( textProjectDir, "SIZE", "276x12" );
@@ -61,7 +61,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Line 3
 		Ihandle* labelMainFile = IupLabel( toStringz( GLOBAL.languageItems["prjmainfile"].toDString ~ ":" ) );
-		IupSetAttributes( labelMainFile, "SIZE=54x20" );
+		IupSetAttributes( labelMainFile, "SIZE=60x20" );
 		
 		textMainFile = IupText( null );
 		IupSetAttribute( textMainFile, "SIZE", "276x12" );
@@ -72,7 +72,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Line 4
 		Ihandle* labelTargetName = IupLabel( toStringz( GLOBAL.languageItems["prjtarget"].toDString ~ ":" ) );
-		IupSetAttributes( labelTargetName, "SIZE=54x20" );
+		IupSetAttributes( labelTargetName, "SIZE=60x20" );
 		
 		textTargetName = IupText( null );
 		IupSetAttribute( textTargetName, "SIZE", "276x12" );
@@ -83,7 +83,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Line 5
 		Ihandle* labelArgs = IupLabel( GLOBAL.languageItems["prjargs"].toCString );
-		IupSetAttributes( labelArgs, "SIZE=54x20" );
+		IupSetAttributes( labelArgs, "SIZE=60x20" );
 		
 		textArgs = IupText( null );
 		IupSetAttribute( textArgs, "SIZE", "276x12" );
@@ -94,7 +94,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Line 6
 		Ihandle* labelCompilerOpts = IupLabel( GLOBAL.languageItems["prjopts"].toCString );
-		IupSetAttributes( labelCompilerOpts, "SIZE=54x20" );
+		IupSetAttributes( labelCompilerOpts, "SIZE=60x20" );
 		
 		textCompilerOpts = IupText( null );
 		IupSetAttribute( textCompilerOpts, "SIZE", "276x12" );
@@ -113,7 +113,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Line 7
 		Ihandle* labelComment = IupLabel( toStringz( GLOBAL.languageItems["prjcomment"].toDString ~ ":" ) );
-		IupSetAttributes( labelComment, "SIZE=54x20" );
+		IupSetAttributes( labelComment, "SIZE=60x20" );
 		
 		textComment = IupText( null );
 		IupSetAttributes( textComment, "SIZE=276x20,MULTILINE=YES,SCROLLBAR=VERTICAL" );
@@ -124,7 +124,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Line 8
 		Ihandle* labelCompilerPath = IupLabel( toStringz( GLOBAL.languageItems["prjcompiler"].toDString ~ ":" ) );
-		IupSetAttributes( labelCompilerPath, "SIZE=54x20" );
+		IupSetAttributes( labelCompilerPath, "SIZE=60x20" );
 		
 		textCompilerPath = IupText( null );
 		IupSetAttribute( textCompilerPath, "SIZE", "276x12" );

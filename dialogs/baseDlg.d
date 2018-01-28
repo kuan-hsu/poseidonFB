@@ -57,7 +57,18 @@ class CBaseDialog
 		IupSetAttribute( _dlg, "TITLE", titleString.toCString );
 
 		char[] size = Integer.toString( w ) ~ "x" ~ Integer.toString( h );
-		if( w < 0 || h < 0 ) IupSetAttribute( _dlg, "RASTERSIZE", "NULL" ); else IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );
+		if( w < 0 || h < 0 ) 
+		{
+			IupSetAttribute( _dlg, "RASTERSIZE", "NULL" );
+			if( w < 0 && h > 0)
+				IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( "x" ~ Integer.toString( h ) ) );
+			else if( w > 0 && h < 0)
+				IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( Integer.toString( w) ~ "x" ) );
+		}
+		else
+		{
+			IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );
+		}
 		
 		if( parent.length)
 		{

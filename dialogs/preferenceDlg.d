@@ -461,6 +461,15 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBoxColumn = IupHbox( labelColumnEdge, textColumnEdge, null );
 		IupSetAttribute( hBoxColumn, "ALIGNMENT", "ACENTER" );
 
+		Ihandle* labelBarsize = IupLabel( toStringz( GLOBAL.languageItems["barsize"].toDString ~ ":" ) );
+		Ihandle* textBarSize = IupText( null );
+		IupSetAttribute( textBarSize, "VALUE", toStringz(GLOBAL.editorSetting01.BarSize.dup) );
+		IupSetAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
+		IupSetHandle( "textBarSize", textBarSize );
+		Ihandle* hBoxBarSize = IupHbox( labelBarsize, textBarSize, null );
+		IupSetAttribute( hBoxBarSize, "ALIGNMENT", "ACENTER" );
+
+
 		version(FBIDE)
 		{
 			Ihandle* gbox = IupGridBox
@@ -501,7 +510,8 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttributes( hBoxTab, "" ),
 				IupSetAttributes( hBoxColumn, "" ),
 				
-				
+				IupSetAttributes( hBoxBarSize, "" ),
+				IupFill(),
 				
 				null
 			);
@@ -544,7 +554,7 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttributes( hBoxColumn, "" ),
 				
 				hBoxControlChar,
-				IupFill(),
+				IupSetAttributes( hBoxBarSize, "" ),
 				
 				null
 			);
@@ -1430,22 +1440,22 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_search" ); 
 					ID++;
 					break;
-				case 16:
+				case 19:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["parser"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_refresh" ); 
 					ID++;
 					break;
-				case 21:
+				case 24:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["build"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_compile" );
 					ID++;
 					break;
-				case 25:
+				case 28:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["windows"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_gui" );
 					ID++;
 					break;
-				case 27:
+				case 30:
 					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["setcustomtool"].toDString ~ "]" ) );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_toolitem" );
 					ID++;
@@ -1628,6 +1638,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		IupSetHandle( "textTabWidth", null );
 		IupSetHandle( "textColumnEdge", null );
+		IupSetHandle( "textBarSize", null );
 
 		IupSetHandle( "radioKeywordCase0", null );
 		IupSetHandle( "radioKeywordCase1", null );
@@ -1789,7 +1800,7 @@ extern(C) // Callback for CPreferenceDialog
 			if( itemText[0] == '[' ) return IUP_DEFAULT;
 		}
 
-		scope skDialog = new CShortCutDialog( 300, 140, item, fromStringz( text ).dup );
+		scope skDialog = new CShortCutDialog( -1, -1, item, fromStringz( text ).dup );
 		skDialog.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
@@ -2042,6 +2053,18 @@ extern(C) // Callback for CPreferenceDialog
 			
 			GLOBAL.editorSetting00.TabWidth				= fromStringz(IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz(IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" )).dup;
+			GLOBAL.editorSetting01.BarSize				= fromStringz(IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" )).dup;
+			int _barSize = Integer.atoi( GLOBAL.editorSetting01.BarSize );
+			if( _barSize < 2 )
+			{
+				GLOBAL.editorSetting01.BarSize = "2";
+				IupSetAttribute( IupGetHandle( "textBarSize" ), "VALUE", "2" );
+			}
+			if( _barSize > 5 )
+			{
+				GLOBAL.editorSetting01.BarSize = "5";
+				IupSetAttribute( IupGetHandle( "textBarSize" ), "VALUE", "5" );
+			}
 			
 			// Save Font Style
 			for( int i = 0; i < GLOBAL.fonts.length; ++ i )

@@ -1739,7 +1739,11 @@ struct StatusBarAction
 	{
 		if( GLOBAL.editorSetting00.MiddleScroll == "ON" )
 		{
-			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" ) IupHide( GLOBAL.scrollICONHandle );
+			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" )
+			{
+				IupHide( GLOBAL.scrollICONHandle );
+				IupSetAttribute( GLOBAL.scrollTimer, "RUN", "NO" );
+			}
 		}
 		
 		int childCount = IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" );

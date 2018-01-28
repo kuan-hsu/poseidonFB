@@ -425,7 +425,8 @@ void createMenu()
 				IupRefresh( GLOBAL.documentSplit2 );
 				if( IupGetChildCount( child ) > 0 )
 				{
-					IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=2" );
+					//IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=2" );
+					IupSetInt( GLOBAL.documentSplit2, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 					IupSetInt( GLOBAL.documentSplit2, "VALUE", GLOBAL.documentSplit2_value );
 					IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0" );
 				}
@@ -442,7 +443,8 @@ void createMenu()
 				IupRefresh( GLOBAL.documentSplit );
 				if( IupGetChildCount( child ) > 0 )
 				{
-					IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
+					//IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
+					IupSetInt( GLOBAL.documentSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 					IupSetInt( GLOBAL.documentSplit, "VALUE", GLOBAL.documentSplit_value );
 					IupSetAttributes( GLOBAL.documentSplit2, "VALUE=1000,BARSIZE=0" );
 				}
@@ -645,7 +647,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.361)\nBy Kuan Hsu (Taiwan)\n2018.01.27" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.362)\nBy Kuan Hsu (Taiwan)\n2018.01.28" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.025)\nBy Kuan Hsu (Taiwan)\n2018.01.14" );
 		return IUP_DEFAULT;
 	});
@@ -1362,14 +1364,7 @@ extern(C)
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
-			version(Windows)
-			{
-				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 );
-			}
-			else
-			{
-				IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
-			}
+			IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
 		}
@@ -1455,7 +1450,8 @@ extern(C)
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
-			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 );
+			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+			//IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 );
 			IupSetInt( GLOBAL.fileListSplit, "VALUE", GLOBAL.fileListSplit_value );
 			IupSetAttribute( GLOBAL.fileListSplit, "ACTIVE", "YES" );
 		}

@@ -12,11 +12,9 @@ class CShortCutDialog : CBaseDialog
 
 	void createLayout( int item, char[] listText )
 	{
-		Ihandle* bottom = createDlgButton();
+		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
+		IupSetAttribute( btnAPPLY, "TITLE", GLOBAL.languageItems["clear"].toCString );
 
-		IupSetAttribute( btnOK, "SIZE", "40x12" );
-		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );		
-		
 		char[]		shortKeyValue;
 		foreach( char[] s; Util.split( listText[0..30], "+" ) )
 		{
@@ -29,15 +27,15 @@ class CShortCutDialog : CBaseDialog
 		
 		if( item < 8 )
 			item --;
-		else if( item < 19 )
+		else if( item < 22 )
 			item -= 2;
-		else if( item < 25 )
+		else if( item < 28 )
 			item -= 3;
-		else if( item < 30 )
-			item -= 4;
 		else if( item < 33 )
+			item -= 4;
+		else if( item < 36 )
 			item -= 5;
-		else if( item < 43 )
+		else if( item < 46 )
 			item -= 6;
 
 
@@ -45,6 +43,7 @@ class CShortCutDialog : CBaseDialog
 		IupSetHandle( "labelKeyName", label0 );
 		
 		Ihandle* label1 = IupLabel( toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ": " ~ shortKeyValue ) );
+		IupSetHandle( "labelKeyValue", label1 );
 		
 		Ihandle* label2 = IupLabel( toStringz( GLOBAL.shortKeys[item-1].name ) );
 		IupSetHandle( "labelName", label2 );
@@ -110,6 +109,7 @@ class CShortCutDialog : CBaseDialog
 
 		createLayout( item, listText );
 
+		IupSetCallback( btnAPPLY, "ACTION", cast(Icallback) &CShortCutDialog_btnClear_cb );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CShortCutDialog_btnOK_cb );
 	}
 
@@ -134,6 +134,88 @@ class CShortCutDialog : CBaseDialog
 
 extern(C) // Callback for CSingleTextDialog
 {
+	private int CShortCutDialog_btnClear_cb( Ihandle* ih )
+	{
+	
+		Ihandle* label1_handle = IupGetHandle( "labelKeyValue" );
+		if( label1_handle != null ) IupSetAttribute( label1_handle, "TITLE", toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ":" ) );
+		
+		Ihandle* _ctrl = IupGetHandle( "toggleCtrl" );
+		Ihandle* _shift = IupGetHandle( "toggleShift" );
+		Ihandle* _alt = IupGetHandle( "toggleAlt" );
+		Ihandle* _list = IupGetHandle( "keyList" );
+		
+		IupSetAttribute( _ctrl, "VALUE", "OFF" );
+		IupSetAttribute( _shift, "VALUE", "OFF" );
+		IupSetAttribute( _alt, "VALUE", "OFF" );
+		IupSetAttribute( _list, "VALUE", "" );
+		
+		Ihandle* label = IupGetHandle( "labelName" );
+		char[] name = fromStringz( IupGetAttribute( label, "TITLE" ) ).dup;
+		int pos = -1;
+		
+		switch( name )
+		{
+			case "save":						pos = 0;	break;
+			case "saveall":						pos = 1;	break;
+			case "close":						pos = 2;	break;
+			case "newtab":						pos = 3;	break;
+			case "nexttab":						pos = 4;	break;
+			case "prevtab":						pos = 5;	break;
+			
+			case "cut":							pos = 6;	break;
+			case "copy":						pos = 7;	break;
+			case "paste":						pos = 8;	break;
+			case "find":						pos = 9;	break;
+			case "findinfile":					pos = 10;	break;
+			case "findnext":					pos = 11;	break;
+			case "findprev":					pos = 12;	break;
+			case "gotoline":					pos = 13;	break;
+			case "undo":						pos = 14;	break;
+			case "redo":						pos = 15;	break;
+			case "comment":						pos = 16;	break;
+			case "backnav":						pos = 17;	break;
+			case "forwardnav":					pos = 18;	break;
+			
+			case "showtype":					pos = 19;	break;
+			case "defintion":					pos = 20;	break;
+			case "procedure":					pos = 21;	break;
+			case "autocomplete":				pos = 22;	break;
+			case "reparse":						pos = 23;	break;
+			
+			case "compilerun":					pos = 24;	break;
+			case "quickrun":					pos = 25;	break;
+			case "run":							pos = 26;	break;
+			case "build":						pos = 27;	break;
+			
+			case "outlinewindow":				pos = 28;	break;
+			case "messagewindow":				pos = 29;	break;
+			
+			case "customtool1":					pos = 30;	break;
+			case "customtool2":					pos = 31;	break;
+			case "customtool3":					pos = 32;	break;
+			case "customtool4":					pos = 33;	break;
+			case "customtool5":					pos = 34;	break;
+			case "customtool6":					pos = 35;	break;
+			case "customtool7":					pos = 36;	break;
+			case "customtool8":					pos = 37;	break;
+			case "customtool9":					pos = 39;	break;
+			default:
+				IupMessage( "Error", "Key Name Error" );
+				return IUP_CLOSE;
+		}
+		
+		if( pos == -1 )
+		{
+			IupMessage( "Error", "Key Name( pos ) Error" );
+			return  IUP_CLOSE;
+		}
+
+		GLOBAL.shortKeys[pos].keyValue = 0;
+
+		return IUP_DEFAULT;
+	}
+	
 	private int CShortCutDialog_btnOK_cb( Ihandle* ih )
 	{
 		char[] keyValue;
@@ -150,10 +232,13 @@ extern(C) // Callback for CSingleTextDialog
 		int value = IDECONFIG.convertShortKeyValue2Integer( keyValue );
 		foreach( ShortKey sk; GLOBAL.shortKeys )
 		{
-			if( sk.keyValue == value )
+			if( value > 0 )
 			{
-				IupMessage( "Alarm", toStringz( GLOBAL.languageItems["samekey"].toDString() ~ " \"" ~ sk.name ~ "\"" ) );
-				return IUP_CONTINUE;
+				if( sk.keyValue == value )
+				{
+					IupMessage( "Alarm", toStringz( GLOBAL.languageItems["samekey"].toDString() ~ " \"" ~ sk.name ~ "\"" ) );
+					return IUP_CONTINUE;
+				}
 			}
 		}
 		
@@ -170,40 +255,43 @@ extern(C) // Callback for CSingleTextDialog
 			case "nexttab":						pos = 4;	break;
 			case "prevtab":						pos = 5;	break;
 			
-			case "find":						pos = 6;	break;
-			case "findinfile":					pos = 7;	break;
-			case "findnext":					pos = 8;	break;
-			case "findprev":					pos = 9;	break;
-			case "gotoline":					pos = 10;	break;
-			case "undo":						pos = 11;	break;
-			case "redo":						pos = 12;	break;
-			case "comment":						pos = 13;	break;
-			case "backnav":						pos = 14;	break;
-			case "forwardnav":					pos = 15;	break;
+			case "cut":							pos = 6;	break;
+			case "copy":						pos = 7;	break;
+			case "paste":						pos = 8;	break;
+			case "find":						pos = 9;	break;
+			case "findinfile":					pos = 10;	break;
+			case "findnext":					pos = 11;	break;
+			case "findprev":					pos = 12;	break;
+			case "gotoline":					pos = 13;	break;
+			case "undo":						pos = 14;	break;
+			case "redo":						pos = 15;	break;
+			case "comment":						pos = 16;	break;
+			case "backnav":						pos = 17;	break;
+			case "forwardnav":					pos = 18;	break;
 			
-			case "showtype":					pos = 16;	break;
-			case "defintion":					pos = 17;	break;
-			case "procedure":					pos = 18;	break;
-			case "autocomplete":				pos = 19;	break;
-			case "reparse":						pos = 20;	break;
+			case "showtype":					pos = 19;	break;
+			case "defintion":					pos = 20;	break;
+			case "procedure":					pos = 21;	break;
+			case "autocomplete":				pos = 22;	break;
+			case "reparse":						pos = 23;	break;
 			
-			case "compilerun":					pos = 21;	break;
-			case "quickrun":					pos = 22;	break;
-			case "run":							pos = 23;	break;
-			case "build":						pos = 24;	break;
+			case "compilerun":					pos = 24;	break;
+			case "quickrun":					pos = 25;	break;
+			case "run":							pos = 26;	break;
+			case "build":						pos = 27;	break;
 			
-			case "outlinewindow":				pos = 25;	break;
-			case "messagewindow":				pos = 26;	break;
+			case "outlinewindow":				pos = 28;	break;
+			case "messagewindow":				pos = 29;	break;
 			
-			case "customtool1":					pos = 27;	break;
-			case "customtool2":					pos = 28;	break;
-			case "customtool3":					pos = 29;	break;
-			case "customtool4":					pos = 30;	break;
-			case "customtool5":					pos = 31;	break;
-			case "customtool6":					pos = 32;	break;
-			case "customtool7":					pos = 33;	break;
-			case "customtool8":					pos = 34;	break;
-			case "customtool9":					pos = 35;	break;
+			case "customtool1":					pos = 30;	break;
+			case "customtool2":					pos = 31;	break;
+			case "customtool3":					pos = 32;	break;
+			case "customtool4":					pos = 33;	break;
+			case "customtool5":					pos = 34;	break;
+			case "customtool6":					pos = 35;	break;
+			case "customtool7":					pos = 36;	break;
+			case "customtool8":					pos = 37;	break;
+			case "customtool9":					pos = 39;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;
@@ -232,15 +320,15 @@ extern(C) // Callback for CSingleTextDialog
 			char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
 			if( pos < 6 )
 				pos ++;
-			else if( pos < 16 )
+			else if( pos < 19 )
 				pos += 2;
-			else if( pos < 21 )
+			else if( pos < 24 )
 				pos += 3;
-			else if( pos < 25 )
+			else if( pos < 28 )
 				pos += 4;
-			else if( pos < 27 )
+			else if( pos < 30 )
 				pos += 5;
-			else if( pos < 36 )
+			else if( pos < 39 )
 				pos += 6;
 
 			scope _cString = new IupString ;
