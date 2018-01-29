@@ -38,7 +38,7 @@ class CPreferenceDialog : CBaseDialog
 		version(FBIDE)
 		{
 			Ihandle* textx64CompilerPath = IupText( null );
-			IupSetAttribute( textx64CompilerPath, "SIZE", "320x12" );
+			IupSetAttribute( textx64CompilerPath, "SIZE", "320x16" );
 			IupSetAttribute( textx64CompilerPath, "VALUE", GLOBAL.x64compilerFullPath.toCString );
 			IupSetHandle( "x64compilerPath_Handle", textx64CompilerPath );
 			

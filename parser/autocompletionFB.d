@@ -443,7 +443,7 @@ version(FBIDE)
 				else
 				{
 					//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
-					CASTnode _createFileNode = GLOBAL.outlineTree.loadFile( includeFullPath );
+					CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
 					
 					if( _createFileNode !is null )
 					{

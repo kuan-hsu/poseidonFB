@@ -154,49 +154,25 @@ struct FileAction
 	{
 		char[] result;
 
-		
-		scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
-		char[] text = file.read;
-		/*
-		IupMessage( "", toStringz( Integer.toString( file.encoding() ) ) );
-		IupMessage( "", toStringz( text[0..4] ) );
-		*/
-		if( !file.bom.encoded )
+		try
 		{
-			// IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
-			if( isUTF8WithouBOM( text ) )
+			scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
+			char[] text = file.read;
+			/*
+			IupMessage( "", toStringz( Integer.toString( file.encoding() ) ) );
+			IupMessage( "", toStringz( text[0..4] ) );
+			*/
+			if( !file.bom.encoded )
 			{
-				result = text;
-				_encoding = Encoding.UTF_8N;
-			}
-			else
-			{	
-				int BELE = isUTF32WithouBOM( text );
-				if( BELE > 0 )
+				// IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
+				if( isUTF8WithouBOM( text ) )
 				{
-					ubyte[]	bomData;
-					scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
-					
-					if( BELE == 1 )
-					{
-						bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
-						_encoding = 9;
-					}
-					else
-					{
-						bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
-						_encoding = 10;
-					}
-
-					for( int i = 3; i > -1; -- i )
-						text = cast(char)bomData[i] ~ text;
-
-					result = _bom.decode( text );
+					result = text;
+					_encoding = Encoding.UTF_8N;
 				}
 				else
-				{
-					//IupMessage( "No Bom 16", toStringz( Integer.toString( BELE ) ) );
-					BELE = isUTF16WithouBOM( text );
+				{	
+					int BELE = isUTF32WithouBOM( text );
 					if( BELE > 0 )
 					{
 						ubyte[]	bomData;
@@ -204,50 +180,81 @@ struct FileAction
 						
 						if( BELE == 1 )
 						{
-							bomData = [ 0xFE, 0xFF ];
-							_encoding = Encoding.UTF_16BE;
+							bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
+							_encoding = 9;
 						}
 						else
 						{
-							bomData = [ 0xFF, 0xFE ];
-							_encoding = Encoding.UTF_16LE;
+							bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
+							_encoding = 10;
 						}
-						
 
-						for( int i = 1; i >= 0; -- i )
+						for( int i = 3; i > -1; -- i )
 							text = cast(char)bomData[i] ~ text;
 
 						result = _bom.decode( text );
 					}
 					else
 					{
-						version( Windows )
+						//IupMessage( "No Bom 16", toStringz( Integer.toString( BELE ) ) );
+						BELE = isUTF16WithouBOM( text );
+						if( BELE > 0 )
 						{
-							if( !CodePage.isAscii( text ) ) // MBCS
+							ubyte[]	bomData;
+							scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
+							
+							if( BELE == 1 )
 							{
-								char[] _text;
-								_text.length = 2 * text.length;
-								result = CodePage.from( text, _text );
-								_text.length = result.length;
-								_encoding = Encoding.Unknown;
+								bomData = [ 0xFE, 0xFF ];
+								_encoding = Encoding.UTF_16BE;
+							}
+							else
+							{
+								bomData = [ 0xFF, 0xFE ];
+								_encoding = Encoding.UTF_16LE;
+							}
+							
+
+							for( int i = 1; i >= 0; -- i )
+								text = cast(char)bomData[i] ~ text;
+
+							result = _bom.decode( text );
+						}
+						else
+						{
+							version( Windows )
+							{
+								if( !CodePage.isAscii( text ) ) // MBCS
+								{
+									char[] _text;
+									_text.length = 2 * text.length;
+									result = CodePage.from( text, _text );
+									_text.length = result.length;
+									_encoding = Encoding.Unknown;
+								}
+								else
+								{
+									result = text;
+								}
 							}
 							else
 							{
 								result = text;
 							}
 						}
-						else
-						{
-							result = text;
-						}
-					}
-				}					
+					}					
+				}
+			}
+			else
+			{
+				_encoding = file.encoding();
+				result = text;
 			}
 		}
-		else
+		catch( Exception e )
 		{
-			_encoding = file.encoding();
-			result = text;
+			GLOBAL.IDEMessageDlg.print( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return result;
@@ -850,10 +857,15 @@ struct ScintillaAction
 
 			Encoding		_encoding;
 			char[] 	_text = FileAction.loadFile( fullPath, _encoding );
+			
+			debug GLOBAL.IDEMessageDlg.print( "DEBUG -- Loading '" ~ fullPath ~ "' Text....... Done " );
+			
 			auto 	_sci = new CScintilla( fullPath, _text, _encoding );
 			//_sci.setEncoding( _encoding );
 			//_sci.setText( _text );
 			GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
+
+			debug GLOBAL.IDEMessageDlg.print( "DEBUG -- Loading '" ~ fullPath ~ "' Scintilla....... Done " );
 
 			// Set documentTabs to visible
 			if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
@@ -873,6 +885,9 @@ struct ScintillaAction
 			//StatusBarAction.update();
 
 			GLOBAL.fileListTree.addItem( _sci );
+			
+			debug GLOBAL.IDEMessageDlg.print( "DEBUG -- Add '" ~ fullPath ~ "' To Filelist....... Done " );
+			
 			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
@@ -899,8 +914,10 @@ struct ScintillaAction
 		
 			return true;
 		}
-		catch
+		catch( Exception e )
 		{
+			GLOBAL.IDEMessageDlg.print( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessage( "Bug", toStringz( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return false;

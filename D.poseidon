@@ -4,7 +4,7 @@ Type=1
 MainFile=
 TargetName=
 CompilerArgs=
-CompilerOption=-release -L/SUBSYSTEM:windows:4 -odobjs -version=FBIDE
+CompilerOption=-L/SUBSYSTEM:windows:4 -odobjs -version=FBIDE
 Comment=
 CompilerPath=
 [IncludeDirs]

@@ -50,14 +50,14 @@ version(FBIDE)
 			}
 			
 			
-			IupSetAttributes( btnClear, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_clear" );				IupSetAttribute( btnClear, "TIP", GLOBAL.languageItems["clear"].toCString );
-			IupSetAttributes( btnResume, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_resume" );				IupSetAttribute( btnResume, "TIP", GLOBAL.languageItems["runcontinue"].toCString );
-			IupSetAttributes( btnStop, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_stop" );					IupSetAttribute( btnStop, "TIP", GLOBAL.languageItems["stop"].toCString );
-			IupSetAttributes( btnStep, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_step" );					IupSetAttribute( btnStep, "TIP", GLOBAL.languageItems["step"].toCString );
-			IupSetAttributes( btnNext, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_next" );					IupSetAttribute( btnNext, "TIP", GLOBAL.languageItems["next"].toCString );
-			IupSetAttributes( btnReturn, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_return" );				IupSetAttribute( btnReturn, "TIP", GLOBAL.languageItems["return"].toCString );
-			IupSetAttributes( btnUntil, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_until" );				IupSetAttribute( btnUntil, "TIP", GLOBAL.languageItems["until"].toCString );
-			IupSetAttributes( btnTerminate, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnTerminate, "TIP", GLOBAL.languageItems["terminate"].toCString );
+			IupSetAttributes( btnClear, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_clear" );				IupSetAttribute( btnClear, "TIP", GLOBAL.languageItems["clear"].toCString );
+			IupSetAttributes( btnResume, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_resume" );				IupSetAttribute( btnResume, "TIP", GLOBAL.languageItems["runcontinue"].toCString );
+			IupSetAttributes( btnStop, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_stop" );					IupSetAttribute( btnStop, "TIP", GLOBAL.languageItems["stop"].toCString );
+			IupSetAttributes( btnStep, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_step" );					IupSetAttribute( btnStep, "TIP", GLOBAL.languageItems["step"].toCString );
+			IupSetAttributes( btnNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_next" );					IupSetAttribute( btnNext, "TIP", GLOBAL.languageItems["next"].toCString );
+			IupSetAttributes( btnReturn, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_return" );				IupSetAttribute( btnReturn, "TIP", GLOBAL.languageItems["return"].toCString );
+			IupSetAttributes( btnUntil, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_until" );				IupSetAttribute( btnUntil, "TIP", GLOBAL.languageItems["until"].toCString );
+			IupSetAttributes( btnTerminate, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnTerminate, "TIP", GLOBAL.languageItems["terminate"].toCString );
 			
 
 			IupSetCallback( btnClear, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -77,7 +77,7 @@ version(FBIDE)
 			
 			// IUP Container to put buttons on~
 			hBox_toolbar = IupHbox( btnClear, IupFill(), btnResume, btnStop, btnStep, btnNext, btnReturn, btnUntil, labelSEPARATOR[0], txtConsoleCommand, labelSEPARATOR[1], btnTerminate, null );
-			IupSetAttributes( hBox_toolbar, "ALIGNMENT=ACENTER,GAP=5" );
+			IupSetAttributes( hBox_toolbar, "ALIGNMENT=ACENTER,GAP=2" );
 
 
 			consoleHandle = IupText( null );
@@ -86,7 +86,7 @@ version(FBIDE)
 			IupSetCallback( consoleHandle, "VALUECHANGED_CB", cast(Icallback) &consoleOutputChange_cb );
 
 			vBox_LEFT = IupVbox( hBox_toolbar, consoleHandle, null );
-			IupSetAttributes( vBox_LEFT, "GAP=5,EXPAND=YES" );
+			IupSetAttributes( vBox_LEFT, "GAP=2,EXPAND=YES,ALIGNMENT=ACENTER" );
 
 			Ihandle* leftScrollBox = IupScrollBox( vBox_LEFT );
 
@@ -112,8 +112,8 @@ version(FBIDE)
 			Ihandle* btnLeft		= IupButton( null, "Left" );
 			Ihandle* btnRefresh		= IupButton( null, "Refresh" );
 			
-			IupSetAttributes( btnLeft, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_left" );	IupSetAttribute( btnLeft, "TIP", GLOBAL.languageItems["addtowatch"].toCString );
-			IupSetAttributes( btnRefresh, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );
+			IupSetAttributes( btnLeft, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left" );	IupSetAttribute( btnLeft, "TIP", GLOBAL.languageItems["addtowatch"].toCString );
+			IupSetAttributes( btnRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );
 			IupSetCallback( btnLeft, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
 				if( GLOBAL.debugPanel.isRunning )
@@ -153,7 +153,7 @@ version(FBIDE)
 
 
 			Ihandle* hBoxVar0_toolbar = IupHbox( btnLeft, btnRefresh, null );
-			IupSetAttributes( hBoxVar0_toolbar, "ALIGNMENT=ACENTER,GAP=5" );
+			IupSetAttributes( hBoxVar0_toolbar, "ALIGNMENT=ACENTER,GAP=2" );
 
 			watchTreeHandle = IupTree();
 			IupSetAttributes( watchTreeHandle, "EXPAND=YES,ADDROOT=NO" );//,RASTERSIZE=0x,TITLE=FileList" );
@@ -196,12 +196,12 @@ version(FBIDE)
 			Ihandle* btnDel		= IupButton( null, "Del" );
 			Ihandle* btnDelAll	= IupButton( null, "RemoveAll" );
 			
-			IupSetAttributes( btnAdd, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_debug_add" );		IupSetAttribute( btnAdd, "TIP", GLOBAL.languageItems["add"].toCString );
-			IupSetAttributes( btnDel, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_delete" );			IupSetAttribute( btnDel, "TIP", GLOBAL.languageItems["remove"].toCString );
-			IupSetAttributes( btnDelAll, "ALIGNMENT=ALEFT:ATOP,FLAT=YES,IMAGE=icon_deleteall" );	IupSetAttribute( btnDelAll, "TIP", GLOBAL.languageItems["removeall"].toCString );
+			IupSetAttributes( btnAdd, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_add" );		IupSetAttribute( btnAdd, "TIP", GLOBAL.languageItems["add"].toCString );
+			IupSetAttributes( btnDel, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );			IupSetAttribute( btnDel, "TIP", GLOBAL.languageItems["remove"].toCString );
+			IupSetAttributes( btnDelAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_deleteall" );	IupSetAttribute( btnDelAll, "TIP", GLOBAL.languageItems["removeall"].toCString );
 
 			Ihandle* hBoxVar1_toolbar = IupHbox( IupFill(), btnAdd, btnDel, /*btnUp, btnDown, */btnDelAll, null );
-			IupSetAttributes( hBoxVar1_toolbar, "ALIGNMENT=ACENTER,GAP=5" );
+			IupSetAttributes( hBoxVar1_toolbar, "ALIGNMENT=ACENTER,GAP=2" );
 
 			
 			IupSetCallback( btnAdd, "ACTION", cast(Icallback) function( Ihandle* ih )

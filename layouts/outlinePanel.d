@@ -1420,8 +1420,33 @@ class COutline
 
 		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
 		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
-
 		
+		if( upperCase(fullPath) in GLOBAL.scintillaManager )
+		{
+			if( upperCase(fullPath) in GLOBAL.parserManager )
+			{
+				Ihandle* _tree = getTree( fullPath );
+				if( _tree == null ) createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+			}
+			else
+			{
+				char[] document = GLOBAL.scintillaManager[upperCase(fullPath)].getText();
+				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
+				/*
+				Ihandle* _tree = getTree( fullPath );
+				if( _tree != null )	cleanTree( fullPath );
+				*/
+				createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+			}
+			changeTree( fullPath );
+		}
+		else
+		{
+			return null;
+		}
+
+		/+
 		CScintilla actCSci;
 		
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
@@ -1469,6 +1494,7 @@ class COutline
 				}
 			}
 		}
+		+/
 
 		return GLOBAL.parserManager[upperCase(fullPath)];
 

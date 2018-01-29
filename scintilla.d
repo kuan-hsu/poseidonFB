@@ -153,65 +153,73 @@ class CScintilla
 
 	this( char[] _fullPath, char[] _text = null, int _encode = Encoding.UTF_8, int insertPos = -1 )
 	{
-		this();
-		/*
-		sci = IupScintilla();
-		IupSetAttribute( sci, "EXPAND", "YES" );
-		version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
-		
-		fullPath = new IupString();
-		title = new IupString();
-		*/
-		IupSetAttribute( sci, "SCROLLBAR", "YES" );
-		
-		IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
-		IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
-		IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
-		IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
-		IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
-		IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
-		IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
-		IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
-		IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
-		IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
-		
-		IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
-		
-		IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
-		IupSetInt( sci, "MOUSEDWELLTIME", 1500 );
-
-		init( _fullPath, insertPos );
-		setText( _text );
-		setEncoding( _encode );
-		
-		if( sci != null )
+		try
 		{
-			char[] _size = fromStringz( IupGetAttribute( sci, "SIZE" ) );
-			int crossPos = Util.index( _size, "x" );
-			if( crossPos < _size.length ) IupSetAttribute( sci, "SCROLLWIDTH", toStringz( _size[0..crossPos] ) );
-		}		
-		IupScintillaSendMessage( sci, 2516, 1, 0 ); // SCI_SETSCROLLWIDTHTRACKING 2516
-		//IupScintillaSendMessage( sci, 2277, 1, 0 ); // SCI_SETENDATLASTLINE 2277
-		
+			this();
+			/*
+			sci = IupScintilla();
+			IupSetAttribute( sci, "EXPAND", "YES" );
+			version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
+			
+			fullPath = new IupString();
+			title = new IupString();
+			*/
+			IupSetAttribute( sci, "SCROLLBAR", "YES" );
+			
+			IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
+			IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
+			IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
+			IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
+			IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
+			IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
+			IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
+			IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
+			IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
+			IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
+			
+			IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
+			
+			IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
+			IupSetInt( sci, "MOUSEDWELLTIME", 1500 );
 
-		// Set margin size
-		int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
-		if( GLOBAL.editorSetting00.LineMargin == "ON" )
-		{
-			int lineCount = IupGetInt( sci, "LINECOUNT" );
-			char[] lc = Integer.toString( lineCount );
-			if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+			init( _fullPath, insertPos );
+			setText( _text );
+			setEncoding( _encode );
+			
+			if( sci != null )
 			{
-				IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+				char[] _size = fromStringz( IupGetAttribute( sci, "SIZE" ) );
+				int crossPos = Util.index( _size, "x" );
+				if( crossPos < _size.length ) IupSetAttribute( sci, "SCROLLWIDTH", toStringz( _size[0..crossPos] ) );
+			}		
+			IupScintillaSendMessage( sci, 2516, 1, 0 ); // SCI_SETSCROLLWIDTHTRACKING 2516
+			//IupScintillaSendMessage( sci, 2277, 1, 0 ); // SCI_SETENDATLASTLINE 2277
+			
+
+			// Set margin size
+			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			if( GLOBAL.editorSetting00.LineMargin == "ON" )
+			{
+				int lineCount = IupGetInt( sci, "LINECOUNT" );
+				char[] lc = Integer.toString( lineCount );
+				if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+				{
+					IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+				}
+				else
+				{
+					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 )* textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+				}
 			}
 			else
 			{
-				if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 )* textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+				IupSetAttribute( sci, "MARGINWIDTH0", "0" );
 			}
 		}
-		else
+		catch( Exception e )
 		{
-			IupSetAttribute( sci, "MARGINWIDTH0", "0" );
+			GLOBAL.IDEMessageDlg.print( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessage( "Bug", toStringz( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 	}	
 
@@ -249,8 +257,8 @@ class CScintilla
 
 	void setText( char[] _text )
 	{
-		IupSetAttribute( sci, "CLEARALL", "" );
-		IupSetAttribute( sci, "VALUE", GLOBAL.cString.convert( _text.dup ) );
+		//IupSetAttribute( sci, "CLEARALL", "" );
+		IupSetAttribute( sci, "VALUE", toStringz( _text ) );
 
 		IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014		
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
@@ -526,7 +534,7 @@ class CScintilla
 
 		if( !bFirstTime )
 		{
-			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) '9' ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
@@ -684,20 +692,20 @@ class CScintilla
 
 		if( alpha == 255 )
 		{
-			IupScintillaSendMessage( sci, 2067, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else if( alpha == 0 )
 		{
-			IupScintillaSendMessage( sci, 2067, false, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 0, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else
 		{
-			IupScintillaSendMessage( sci, 2067, false, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, true, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 0, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 		

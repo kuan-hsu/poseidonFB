@@ -1182,7 +1182,7 @@ extern(C)
 			if( !fn.exists() ) fn.create(); // Create Folder On Disk
 
 			actionManager.ScintillaAction.newFile( fullPath );
-			GLOBAL.outlineTree.loadFile( fullPath );
+			//GLOBAL.outlineTree.loadFile( fullPath );
 
 			id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Re-Get Active Focus Node ID
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fileName ) );

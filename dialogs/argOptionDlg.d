@@ -146,7 +146,8 @@ class CArgOptionDialog : CBaseDialog
 		else	
 		{
 			listOptions = IupText(null);
-			IupSetAttributes( listOptions, "SIZE=200x12");
+			//IupSetAttribute( listOptions, "SIZE", "200x8" );
+			IupSetAttribute( listOptions, "EXPAND", "HORIZONTAL" );
 			IupSetHandle( "CCustomCompilerOptionDialog_textOptions", listOptions );
 			IupSetCallback( listOptions, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 		}

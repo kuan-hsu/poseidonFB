@@ -638,16 +638,18 @@ version(DIDE)
 				else
 				{
 					//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
-					GLOBAL.outlineTree.loadFile( includeFullPath );
-					if( GLOBAL.editorSetting00.Message == "ON" ) 
+					if( GLOBAL.outlineTree.loadParser( includeFullPath ) !is null )
 					{
-						version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
-					}
-					
-					results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
-					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], _cwd, false );
+						if( GLOBAL.editorSetting00.Message == "ON" ) 
+						{
+							version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+						}
+						
+						results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
+						results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], _cwd, false );
 
-					includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
+						includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
+					}
 				}
 			}
 
