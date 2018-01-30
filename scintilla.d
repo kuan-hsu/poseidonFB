@@ -534,7 +534,7 @@ class CScintilla
 
 		if( !bFirstTime )
 		{
-			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) '9' ); // SCI_TEXTWIDTH 2276
+			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );

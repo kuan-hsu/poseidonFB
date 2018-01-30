@@ -4772,8 +4772,10 @@ class CParser
 		updateTokens( _tokens );
 	}
 
-	void updateTokens( TokenUnit[] _tokens )
+	bool updateTokens( TokenUnit[] _tokens )
 	{
+		if( !_tokens.length ) return false;
+		
 		tokenIndex = 0;
 		delete tokens;
 		tokens.length = 0;
@@ -4791,6 +4793,8 @@ class CParser
 			protStack	= new CStack!(char[]);
 			parseStack	= new CStack!(char[]);
 		}
+		
+		return true;
 	}
 	
 	version(FBIDE)

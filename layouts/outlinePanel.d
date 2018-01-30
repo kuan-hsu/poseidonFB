@@ -1431,13 +1431,15 @@ class COutline
 			else
 			{
 				char[] document = GLOBAL.scintillaManager[upperCase(fullPath)].getText();
-				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
-				/*
-				Ihandle* _tree = getTree( fullPath );
-				if( _tree != null )	cleanTree( fullPath );
-				*/
-				createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) ) )
+				{
+					GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
+					/*
+					Ihandle* _tree = getTree( fullPath );
+					if( _tree != null )	cleanTree( fullPath );
+					*/
+					createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+				}
 			}
 			changeTree( fullPath );
 		}
@@ -1522,9 +1524,11 @@ class COutline
 			// Parser
 			if( f.exists() )
 			{
-				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
-				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
-				return GLOBAL.parserManager[upperCase(fullPath)];
+				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) ) )
+				{
+					GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
+					return GLOBAL.parserManager[upperCase(fullPath)];
+				}
 			}
 		}
 
@@ -1814,27 +1818,29 @@ class COutline
 					try
 					{
 						char[] document = cSci.getText();
-						GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
 						
-						CASTnode astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
-						CASTnode temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
-
-						GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
-						delete temp;
-
-						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
-						version(DIDE)
+						if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) ) )
 						{
-							IupSetAttributeId( actTree, "USERDATA", 0, cast(char*) astHeadNode );
-							IupSetAttribute( actTree, "TITLE", toStringz( astHeadNode.name ) );						
-						}
-						IupSetAttributeId( actTree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
-						foreach_reverse( CASTnode t; astHeadNode.getChildren() )
-						{
-							append( actTree, t, 0 );
-						}
+							CASTnode astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
+							CASTnode temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
 
-						return true;
+							GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
+							delete temp;
+
+							IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
+							version(DIDE)
+							{
+								IupSetAttributeId( actTree, "USERDATA", 0, cast(char*) astHeadNode );
+								IupSetAttribute( actTree, "TITLE", toStringz( astHeadNode.name ) );						
+							}
+							IupSetAttributeId( actTree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
+							foreach_reverse( CASTnode t; astHeadNode.getChildren() )
+							{
+								append( actTree, t, 0 );
+							}
+
+							return true;
+						}
 					}
 					catch( Exception e ){}
 				}
@@ -1861,9 +1867,11 @@ class COutline
 		try
 		{
 			// Parser
-			GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) );
-			version(FBIDE) return GLOBAL.Parser.parse( "_.bas", B_KIND );
-			version(DIDE) return GLOBAL.Parser.parse( "_.d", true );
+			if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) ) )
+			{
+				version(FBIDE) return GLOBAL.Parser.parse( "_.bas", B_KIND );
+				version(DIDE) return GLOBAL.Parser.parse( "_.d", true );
+			}
 		}
 		catch( Exception e )
 		{

@@ -1458,7 +1458,10 @@ extern(C)
 
 					if( ext == _include_ || ext == _source_ )
 					{
-						actionManager.ScintillaAction.openFile( fullPath.dup );
+						if( selectedIDs.length == 1 )
+							actionManager.ScintillaAction.openFile( fullPath.dup, -1, true );
+						else
+							actionManager.ScintillaAction.openFile( fullPath.dup );
 					}
 					else
 					{

@@ -705,7 +705,7 @@ struct ScintillaAction
 	private:
 	import tango.io.UnicodeFile, tango.io.FilePath, dialogs.fileDlg;
 	import scintilla, menu;
-	import parser.scanner,  parser.token, parser.parser;
+	import parser.scanner,  parser.token, parser.parser, parser.autocompletion;
 
 
 	import tango.core.Thread, Path = tango.io.Path;
@@ -713,7 +713,7 @@ struct ScintillaAction
 	class ParseThread : Thread
 	{
 		private:
-		import			parser.ast, parser.autocompletion;
+		import			parser.ast;
 		
 		char[]			pFullPath;
 		CASTnode		pParseTree;
@@ -810,7 +810,7 @@ struct ScintillaAction
 		return true;
 	}
 	
-	static bool openFile( char[] fullPath, int lineNumber = -1 )
+	static bool openFile( char[] fullPath, int lineNumber = -1, bool backThread = false )
 	{
 		fullPath =  Path.normalize( fullPath );
 		
@@ -900,14 +900,43 @@ struct ScintillaAction
 			}			
 			
 			// Parser
-			version(Windows)
+			/*
+			version(linux) // Linux load too many files at same time make crash!
+			{
+				if( backThread )
+				{
+					ParseThread subThread = new ParseThread( fullPath );
+					subThread.start();
+				}
+				else
+				{
+					auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
+					if( pParseTree !is null ) AutoComplete.getIncludes( pParseTree, fullPath, true );
+				}
+			}
+			else
+			{
+				ParseThread subThread = new ParseThread( fullPath );
+				subThread.start();
+			}
+			*/
+			
+			if( backThread )
 			{
 				ParseThread subThread = new ParseThread( fullPath );
 				subThread.start();
 			}
 			else
-				GLOBAL.outlineTree.loadFile( fullPath );
-
+			{
+				auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
+				if( pParseTree !is null ) AutoComplete.getIncludes( pParseTree, fullPath, true );
+			}
+			
+			/*
+			auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
+			if( pParseTree !is null ) AutoComplete.getIncludes( pParseTree, fullPath, true );
+			*/
+			
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
 			StatusBarAction.update();

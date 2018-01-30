@@ -28,7 +28,11 @@ class CScanner
 			//char[]	splitLineDocument;
 			if( upperCase(fullPath) in GLOBAL.scintillaManager )
 			{
-				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
+				auto cSci = GLOBAL.scintillaManager[upperCase(fullPath)];
+				if( cSci !is null )
+					document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
+				else
+					return null;
 			}
 			else
 			{

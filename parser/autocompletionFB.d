@@ -431,7 +431,7 @@ version(FBIDE)
 			if( includeFullPath.length )
 			{
 				if( upperCase(includeFullPath) in includesMarkContainer ) return null;
-
+GLOBAL.IDEMessageDlg.print( "INCLUDE: " ~ includeFullPath );
 				CASTnode includeAST;
 				if( upperCase(includeFullPath) in GLOBAL.parserManager )
 				{
@@ -697,10 +697,27 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 			
+			char[][] prevKeys = includesMarkContainer.keys;
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, false, ln );
-			if( results.length ) return results;
-
-
+			if( results.length )
+				return results;
+			else
+			{
+				foreach( char[] key; includesMarkContainer.keys )
+				{
+					bool bRemove = true;
+					foreach( char[] pKey; prevKeys )
+					{
+						if( pKey == key )
+						{
+							bRemove = false;
+							break;
+						}
+					}
+					if( bRemove ) includesMarkContainer.remove( key );
+				}
+			}			
+			
 			getIncludes( originalNode, originalFullPath, true, ln );
 
 			/*
