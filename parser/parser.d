@@ -4774,8 +4774,6 @@ class CParser
 
 	bool updateTokens( TokenUnit[] _tokens )
 	{
-		if( !_tokens.length ) return false;
-		
 		tokenIndex = 0;
 		delete tokens;
 		tokens.length = 0;
@@ -4793,6 +4791,8 @@ class CParser
 			protStack	= new CStack!(char[]);
 			parseStack	= new CStack!(char[]);
 		}
+		
+		if( !_tokens.length ) return false;
 		
 		return true;
 	}

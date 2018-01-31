@@ -1431,15 +1431,12 @@ class COutline
 			else
 			{
 				char[] document = GLOBAL.scintillaManager[upperCase(fullPath)].getText();
-				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) ) )
-				{
-					GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
-					/*
-					Ihandle* _tree = getTree( fullPath );
-					if( _tree != null )	cleanTree( fullPath );
-					*/
-					createTree( GLOBAL.parserManager[upperCase(fullPath)] );
-				}
+				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+				GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
+					
+				Ihandle* _tree = getTree( fullPath );
+				if( _tree != null )	cleanTree( fullPath );
+				createTree( GLOBAL.parserManager[upperCase(fullPath)] );
 			}
 			changeTree( fullPath );
 		}
