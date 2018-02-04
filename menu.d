@@ -649,7 +649,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.365)\nBy Kuan Hsu (Taiwan)\n2018.01.31" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.366)\nBy Kuan Hsu (Taiwan)\n2018.02.04" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.026)\nBy Kuan Hsu (Taiwan)\n2018.01.28" );
 		return IUP_DEFAULT;
 	});
@@ -927,12 +927,25 @@ extern(C)
 	{
 		version(FBIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.bas;*.bi|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
 		version(DIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.d;*.di|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
-		foreach( char[] s; fileSecectDlg.getFilesName() )
+		
+		char[][] files = fileSecectDlg.getFilesName();
+		if( files.length == 1 )
 		{
-			if( s.length )
+			if( files[0].length )
 			{
-				ScintillaAction.openFile( s );
-				actionManager.ScintillaAction.updateRecentFiles( s );
+				ScintillaAction.openFile( files[0], -1, true );
+				actionManager.ScintillaAction.updateRecentFiles( files[0] );
+			}
+		}
+		else
+		{
+			foreach( char[] s; files )
+			{
+				if( s.length )
+				{
+					ScintillaAction.openFile( s );
+					actionManager.ScintillaAction.updateRecentFiles( s );
+				}
 			}
 		}
 
@@ -1002,7 +1015,7 @@ extern(C)
 		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
 		if( title.length )
 		{
-			if( !ScintillaAction.openFile( title ) )
+			if( !ScintillaAction.openFile( title, -1, true ) )
 			{
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );

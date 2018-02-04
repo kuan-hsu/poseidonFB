@@ -1086,7 +1086,7 @@ version(DIDE)
 		{
 			foreach( IupString _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] s; Util.split( _s.toDString, " " ) )
+				foreach( char[] s; Util.split( _s.toDString, " " ).sort )
 				{
 					if( s.length )
 					{
@@ -1574,7 +1574,7 @@ version(DIDE)
 				if( result.length )
 					if( result[length-1] == '^' ) result = result[0..length-1];
 
-				return Util.trim( result.sort );
+				return Util.trim( result );
 			}
 			
 			return null;

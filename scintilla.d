@@ -2210,7 +2210,7 @@ extern(C)
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
 										if( cSci !is null ) cSci.lastPos = -99;
-										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
+										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
 								catch( Exception e )
@@ -2482,9 +2482,6 @@ extern(C)
 		//if( !GLOBAL.bKeyUp ) return IUP_DEFAULT;else GLOBAL.bKeyUp = false;
 		if( GLOBAL.bKeyUp ) GLOBAL.bKeyUp = false;
 		
-		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
-		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
-
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
 		
 		if( GLOBAL.bUndoRedoAction )
@@ -2494,8 +2491,11 @@ extern(C)
 			return IUP_DEFAULT;
 		}
 		
+		if( GLOBAL.enableIncludeComplete != "ON" && GLOBAL.enableKeywordComplete != "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) return IUP_DEFAULT;
+		
 		if( ScintillaAction.isComment( ih, pos ) ) return IUP_DEFAULT;
 		
+		// Include Autocomplete
 		version(FBIDE)
 		{
 			if( GLOBAL.enableIncludeComplete == "ON" )
@@ -2531,7 +2531,7 @@ extern(C)
 			}
 		}		
 		
-		if( GLOBAL.enableParser != "ON" )
+		if( GLOBAL.enableParser != "ON" || ( GLOBAL.enableParser == "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) )
 		{
 			// Check Keyword Autocomplete
 			if( GLOBAL.enableKeywordComplete == "ON" )
@@ -2548,13 +2548,20 @@ extern(C)
 					default:
 						char[] word = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos );
 						word = ( word.reverse ~ sKeyin ).dup;
+						
 						if( word.length )
 						{
-							if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
+							if( GLOBAL.autoCompletionTriggerWordCount > 0 )
+							{
+								if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
+							}
+							else
+							{
+								if( word.length < 2 ) return IUP_DEFAULT;
+							}
 							
 							char[] list;
 							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) != "YES" ) list = AutoComplete.getKeywordContainerList( word );
-							
 							if( list.length )
 								if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", word.length - 1, GLOBAL.cString.convert( list ) );
 						}
@@ -2562,7 +2569,10 @@ extern(C)
 			}
 			
 			return IUP_DEFAULT;
-		}		
+		}
+		
+		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
+		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;		
 		
 		if( insert == 1 )
 		{
