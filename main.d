@@ -30,11 +30,13 @@ else
 	//pragma(lib, "gtk-x11-2.0");
 	//pragma(lib, "gdk-x11-2.0");
 	//pragma(lib, "pangox-1.0");
-	//pragma(lib, "gdk_pixbuf-2.0");
-	////pragma(lib, "pango-1.0");
-	//pragma(lib, "gobject-2.0");
-	//pragma(lib, "gmodule-2.0");
-	//pragma(lib, "glib-2.0");
+	/*
+	pragma(lib, "gdk_pixbuf-2.0");
+	pragma(lib, "pango-1.0");
+	pragma(lib, "gobject-2.0");
+	pragma(lib, "gmodule-2.0");
+	pragma(lib, "glib-2.0");
+	*/
 	pragma(lib, "iup");
 	pragma(lib, "iup_scintilla");
 }

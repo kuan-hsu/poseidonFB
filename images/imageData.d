@@ -131,7 +131,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_32", XPM.getIUPimage( "icons/xpm/32.xpm" ) );
 	IupSetHandle( "icon_64", XPM.getIUPimage( "icons/xpm/64.xpm" ) );
 	IupSetHandle( "icon_apply", XPM.getIUPimage( "icons/xpm/apply.xpm" ) );
-	IupSetHandle( "icon_fbmanual", XPM.getIUPimage( "icons/xpm/fbmanual.xpm" ) );
+	IupSetHandle( "icon_fbmanual", XPM.getIUPimage( "icons/xpm/manual.xpm" ) );
 
 	IupSetHandle( "icon_copy", XPM.getIUPimage( "icons/xpm/copy.xpm" ) ); // IupSetHandle("icon_copy", load_image_copy_edit());
 	IupSetHandle( "icon_save", XPM.getIUPimage( "icons/xpm/save.xpm" ) ); // IupSetHandle("icon_save", load_image_save_edit());
@@ -208,6 +208,9 @@ void load_all_images_icons()
 	IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );//IupSetHandle("IUP_sub_private", load_image_sub_private_obj());
 	IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_obj.xpm" ) );//IupSetHandle("IUP_variable_array", load_image_variable_array_public_obj());
 	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );//IupSetHandle("IUP_variable", load_image_variable_obj());
+
+	IupSetHandle( "IUP_codecomplete_on", XPM.getIUPimage( "icons/xpm/codecompleteon.xpm" ) );
+	IupSetHandle( "IUP_codecomplete_off", XPM.getIUPimage( "icons/xpm/codecompleteoff.xpm" ) );
 
 
 	version(FBIDE)
@@ -293,6 +296,8 @@ void load_all_images_icons()
 	IupSetHandle( "icon_debug_right", XPM.getIUPimage( "icons/xpm/debug/right.xpm" ) );
 	IupSetHandle( "icon_debug_return", XPM.getIUPimage( "icons/xpm/debug/return.xpm" ) );//IupSetHandle("icon_debug_return", load_image_return());
 	IupSetHandle( "icon_debug_clear", XPM.getIUPimage( "icons/xpm/debug/clear.xpm" ) );//IupSetHandle("icon_debug_clear", load_image_clear());
+	IupSetHandle( "icon_debug_at", XPM.getIUPimage( "icons/xpm/debug/at.xpm" ) );
+	IupSetHandle( "icon_debug_star", XPM.getIUPimage( "icons/xpm/debug/star.xpm" ) );
 
 	version(FBIDE) IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() ); else IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
 	IupSetHandle( "icon_scroll", load_image_scroll() );

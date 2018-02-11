@@ -1086,7 +1086,7 @@ version(DIDE)
 		{
 			foreach( IupString _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] s; Util.split( _s.toDString, " " ).sort )
+				foreach( char[] s; Util.split( _s.toDString, " " ) )
 				{
 					if( s.length )
 					{
@@ -2403,7 +2403,7 @@ version(DIDE)
 			return result;
 		}
 		
-		static char[] charAdd( Ihandle* iupSci, int pos = -1, char[] text = "" )
+		static char[] charAdd( Ihandle* iupSci, int pos = -1, char[] text = "", bool bForce = false )
 		{
 			int		dummyHeadPos;
 			char[] 	word, result;
@@ -2480,40 +2480,18 @@ version(DIDE)
 					CASTnode		AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
 					char[]			memberFunctionMotherName;
 
-
 					if( AST_Head is null )
 					{
-						if( GLOBAL.enableKeywordComplete == "ON" )
-						{
-							keyWordlist( splitWord[0] );
-
-							if( listContainer.length )
-							{
-								//listContainer.sort;
-								for( int i = 0; i < listContainer.length; ++ i )
-								{
-									if( listContainer[i].length )
-									{
-										if( i > 0 )
-										{
-											if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
-										}
-										else
-										{
-											result ~= ( listContainer[i] ~ "^" );
-										}
-									}
-								}
-
-								if( result.length )
-									if( result[length-1] == '^' ) result = result[0..length-1];
-
-								return Util.trim( result );
-							}
-						}
-
+						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
 					}
+
+					if( GLOBAL.autoCompletionTriggerWordCount < 1 && !bForce ) 
+					{
+						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
+						return null;
+					}
+					
 					
 					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, pos, bDot, bCallTip, true );
 
@@ -2926,7 +2904,7 @@ version(DIDE)
 		}
 		+/
 		
-		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput )
+		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
@@ -2937,7 +2915,7 @@ version(DIDE)
 				return false;
 			}
 			
-			char[] list = charAdd( ih, pos, text );
+			char[] list = charAdd( ih, pos, text, bForce );
 
 			if( list.length )
 			{

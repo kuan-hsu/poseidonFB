@@ -8,6 +8,7 @@ private
 
 	import global, actionManager, menu, tools;
 	import parser.autocompletion, parser.live;
+	import layouts.debugger;
 
 	import Integer = tango.text.convert.Integer;
 	import tango.stdc.stringz;
@@ -1698,41 +1699,125 @@ extern(C)
 					Ihandle* itemMainHighlight = IupSubmenu( GLOBAL.languageItems["highlightmaker"].toCString, temp );
 					IupSetAttribute( itemMainHighlight, "IMAGE", "icon_colormark" );
 					
-					Ihandle* popupMenu = IupMenu(
-													_undo,
-													_redo,
-													_clearBuffer,
-													IupSeparator(),
+					
+					Ihandle* popupMenu;
+					
+					if( GLOBAL.debugPanel.isRunning )
+					{
+						Ihandle* itemDebugList = IupItem( toStringz( GLOBAL.languageItems["add"].toDString ~ " " ~ GLOBAL.languageItems["watchlist"].toDString ), null );
+						IupSetAttribute( itemDebugList, "IMAGE", "icon_debug_add" );
+						IupSetCallback( itemDebugList, "ACTION", cast(Icallback) function( Ihandle* ih ){
+						
+							CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+							if( cSci !is null )
+							{
+								char[] varName = Util.trim( fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTEDTEXT" ) ) );
+								//if( varName.length ) GLOBAL.debugPanel.sendCommand( "display " ~ upperCase( varName ) ~ "\n", false );
 
-													_cut,
-													_copy,
-													_paste,
-													_delete,
-													IupSeparator(),
+								scope varDlg = new CVarDlg( 260, 96, "Add Display Variable...", "Var Name:", null, varName );
+								varName = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
-													_selectall,
-													IupSeparator(),
-													
-													itemMainHighlight,
-													IupSeparator(),
-													
-													_AnnotationSubMenu,
-													/*
-													_showAnnotation,
-													_hideAnnotation,
-													_removeAllAnnotation,
-													*/
-													IupSeparator(),
-													
-													_refresh,
-													_goto,
-													_gotoProcedure,
-													/*
-													_back,
-													*/
-													_showType,
-													null
-												);
+								if( varName == "#_close_#" ) return IUP_DEFAULT;
+
+								GLOBAL.debugPanel.sendCommand( "display " ~ upperCase( Util.trim( varName ) ) ~ "\n", false );
+							}
+							return IUP_DEFAULT;
+						});
+						
+						Ihandle* itemBP = IupItem( GLOBAL.languageItems["bp"].toCString, null );
+						IupSetAttribute( itemBP, "IMAGE", "IUP_variable_private" );
+						IupSetCallback( itemBP, "ACTION", cast(Icallback) function( Ihandle* __ih )
+						{
+							Ihandle* _ih = actionManager.ScintillaAction.getActiveIupScintilla();
+							if( _ih != null )
+							{
+								int line = ScintillaAction.getCurrentLine( _ih ) - 1;
+								uint state = IupGetIntId( _ih, "MARKERGET", line );
+								if( state & ( 1 << 2 ) )
+								{
+									IupScintillaSendMessage( _ih, 2044, line, cast(int) 2 ); // #define SCI_MARKERDELETE 2044
+									GLOBAL.debugPanel.removeBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+								}
+								else
+								{
+									IupScintillaSendMessage( _ih, 2043, line, cast(int) 2 ); // #define SCI_MARKERADD 2043
+									GLOBAL.debugPanel.addBP( actionManager.ScintillaAction.getActiveCScintilla.getFullPath, Integer.toString( ++line ) );
+								}
+							}
+							return IUP_DEFAULT;
+						});						
+					
+						popupMenu = IupMenu(
+												_undo,
+												_redo,
+												_clearBuffer,
+												IupSeparator(),
+
+												_cut,
+												_copy,
+												_paste,
+												_delete,
+												IupSeparator(),
+
+												_selectall,
+												IupSeparator(),
+												
+												itemMainHighlight,
+												IupSeparator(),
+												
+												_AnnotationSubMenu,
+												IupSeparator(),
+												
+												_refresh,
+												_goto,
+												_gotoProcedure,
+												_showType,
+												IupSeparator(),
+												
+												itemDebugList,
+												itemBP,
+												
+												null
+											);					
+					}
+					else
+					{
+						popupMenu = IupMenu(
+												_undo,
+												_redo,
+												_clearBuffer,
+												IupSeparator(),
+
+												_cut,
+												_copy,
+												_paste,
+												_delete,
+												IupSeparator(),
+
+												_selectall,
+												IupSeparator(),
+												
+												itemMainHighlight,
+												IupSeparator(),
+												
+												_AnnotationSubMenu,
+												/*
+												_showAnnotation,
+												_hideAnnotation,
+												_removeAllAnnotation,
+												*/
+												IupSeparator(),
+												
+												_refresh,
+												_goto,
+												_gotoProcedure,
+												/*
+												_back,
+												*/
+												_showType,
+												null
+											);
+					}
 
 
 					IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
@@ -1842,6 +1927,17 @@ extern(C)
 				{
 					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
 					{
+						/*
+						if( GLOBAL.debugPanel.isRunning )
+						{
+							version(FBIDE) AutoComplete.toDefintionAndType( -1, pos ); // SCI_CALLTIPACTIVE 2202
+						}
+						else
+						{
+							version(FBIDE) AutoComplete.toDefintionAndType( 0, pos ); // SCI_CALLTIPACTIVE 2202
+							version(DIDE) AutoComplete.toDefintionAndType( 0 ); // SCI_CALLTIPACTIVE 2202
+						}
+						*/
 						version(FBIDE) AutoComplete.toDefintionAndType( 0, pos ); // SCI_CALLTIPACTIVE 2202
 						version(DIDE) AutoComplete.toDefintionAndType( 0 ); // SCI_CALLTIPACTIVE 2202
 					}
@@ -2248,11 +2344,30 @@ extern(C)
 							
 								try
 								{
+									if( GLOBAL.enableParser != "ON" )
+									{
+										// Check Keyword Autocomplete
+										if( GLOBAL.enableKeywordComplete == "ON" )
+										{
+											if( alreadyInput.length )
+											{
+												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) != "YES" )
+												{
+													char[] list = AutoComplete.getKeywordContainerList( alreadyInput );
+													if( list.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
+												}
+											}
+										}
+										
+										return IUP_IGNORE;
+									}								
+								
+								
 									if( alreadyInput.length )
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
 										if( cSci !is null ) cSci.lastPos = -99;
-										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " " );
+										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
 								catch( Exception e )

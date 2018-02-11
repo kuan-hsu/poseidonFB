@@ -316,6 +316,30 @@ void createMenu()
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});
+	
+	Ihandle* FunctionTitle = IupItem( GLOBAL.languageItems["showtitle"].toCString, null );
+	IupSetAttribute( FunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
+	IupSetAttribute( FunctionTitle, "AUTOTOGGLE", "YES" );
+	IupSetAttribute( FunctionTitle, "NAME", "function_titlw" );
+	IupSetHandle( "FunctionTitle", FunctionTitle );	
+	IupSetCallback( FunctionTitle, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.showFunctionTitle == "ON" ) GLOBAL.showFunctionTitle = "OFF"; else GLOBAL.showFunctionTitle = "ON";
+		if( IupGetHandle( "FunctionTitle" ) != null ) IupSetAttribute( IupGetHandle( "FunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
+
+		if( GLOBAL.showFunctionTitle == "ON" )
+		{
+			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" );
+			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", GLOBAL.widthFunctionTitle.toCString );
+			IupRefresh( GLOBAL.toolbar.getListHandle() );
+		}
+		else
+			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "NO" );
+		
+		
+		
+		return IUP_DEFAULT;
+	});
 
 	
 	// Project
@@ -649,8 +673,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.366)\nBy Kuan Hsu (Taiwan)\n2018.02.04" );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.026)\nBy Kuan Hsu (Taiwan)\n2018.01.28" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.367)\nBy Kuan Hsu (Taiwan)\n2018.02.11" );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.027)\nBy Kuan Hsu (Taiwan)\n2018.02.04" );
 		return IUP_DEFAULT;
 	});
 	
@@ -712,6 +736,8 @@ void createMenu()
 							IupSeparator(),
 							CaretLine,
 							HighlightCurrentWord,
+							IupSeparator(),
+							FunctionTitle,
 							null );
 	
 	version(FBIDE)
@@ -933,8 +959,7 @@ extern(C)
 		{
 			if( files[0].length )
 			{
-				ScintillaAction.openFile( files[0], -1, true );
-				actionManager.ScintillaAction.updateRecentFiles( files[0] );
+				if( ScintillaAction.openFile( files[0], -1, true ) ) actionManager.ScintillaAction.updateRecentFiles( files[0] );
 			}
 		}
 		else
@@ -943,8 +968,7 @@ extern(C)
 			{
 				if( s.length )
 				{
-					ScintillaAction.openFile( s );
-					actionManager.ScintillaAction.updateRecentFiles( s );
+					if( ScintillaAction.openFile( s ) )	actionManager.ScintillaAction.updateRecentFiles( s );
 				}
 			}
 		}

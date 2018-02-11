@@ -2293,6 +2293,7 @@ extern(C) // Callback for CPreferenceDialog
 			scope numberString_1 = new IupString( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) );
 			
 			GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( numberString_0.toDString );
+			GLOBAL.statusBar.setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
 			GLOBAL.includeLevel							= Integer.atoi( numberString_1.toDString );
 
 			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;

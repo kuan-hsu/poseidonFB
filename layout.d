@@ -316,6 +316,7 @@ extern(C)
 				}
 			}
 
+			GLOBAL.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger();
 			//IDECONFIG.save();
 			IDECONFIG.saveINI();
 

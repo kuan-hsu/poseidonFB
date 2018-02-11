@@ -1,0 +1,31 @@
+/* XPM */
+static char *codecompleteoff_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c #ec1e24",
+". c #b18934",
+"# c #82743b",
+"a c #ecdab4",
+"b c #f44e54",
+"c c None",
+"d c #f4868c",
+"e c #fcfefc",
+/* pixels */
+"cccccccccccccccc",
+"cccccccccccccccc",
+"cccccccccccccccc",
+"ccc...........cc",
+"ccc.aaaaaaaaa.cc",
+"c```````eeeee.cc",
+"c`ddddd`eeeee.cc",
+"c`dbbbd`eeeee.cc",
+"c`dbbbd`eeeee#cc",
+"c`dbbbd`eeeee#cc",
+"c`ddddd`eeeee#cc",
+"c```````eeeee#cc",
+"ccc#aaaaaaaaa#cc",
+"cccc#########ccc",
+"cccccccccccccccc",
+"cccccccccccccccc"
+};

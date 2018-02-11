@@ -1088,7 +1088,7 @@ GLOBAL.IDEMessageDlg.print( "INCLUDE: " ~ includeFullPath );
 		{
 			foreach( IupString _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] s; Util.split( _s.toDString, " " ).sort )
+				foreach( char[] s; Util.split( _s.toDString, " " ) )
 				{
 					if( s.length )
 					{
@@ -1749,7 +1749,7 @@ GLOBAL.IDEMessageDlg.print( "INCLUDE: " ~ includeFullPath );
 		static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 		{
 			int		countParen, countBracket;
-			int		oriPos = pos;
+			//int		oriPos = pos;
 			bool	bForntEnd, bBackEnd;
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
 
@@ -1813,7 +1813,7 @@ GLOBAL.IDEMessageDlg.print( "INCLUDE: " ~ includeFullPath );
 			}
 			while( ++pos < documentLength )
 
-			if( oriPos == pos ) return null;
+			//if( oriPos == pos ) return null;
 
 			int dummyHeadPos;
 			return getWholeWordReverse( iupSci, pos, dummyHeadPos );
@@ -2491,6 +2491,49 @@ GLOBAL.IDEMessageDlg.print( "INCLUDE: " ~ includeFullPath );
 					word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
 					word = lowerCase( word.dup.reverse );
 					
+					/+
+					if( GLOBAL.debugPanel.isRunning )
+					{
+						if( TYPE == -1 )
+						{
+							if( word.length )
+							{
+								word = upperCase( Util.substitute( word, "->", "." ).dup );
+								char[] typeName, value, title, title1;
+								char[] title0 = GLOBAL.debugPanel.getTypeValueByName( word, word, typeName, value ).dup;
+								/+
+								if( typeName.length )
+								{
+									if( typeName[$-1] == '*' )
+									{
+										int spacePos = Util.index( typeName, " " );
+										if( spacePos < typeName.length )
+										{
+											if( typeName[0..spacePos] != "VOID" ) title1 = GLOBAL.debugPanel.getTypeValueByName( "*" ~ word, word, typeName, value );
+										}
+									}
+								}
+								
+								if( title0.length && title1.length )
+									title = title0 ~ "\n" ~ title1;
+								else if( title0.length )
+									title = title0;
+								else if( title1.length )
+									title = title1;
+								else
+									return;
+								+/
+								if( title0.length )
+								{
+									IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0x000000, 0 ); //SCI_CALLTIPSETFORE 2206
+									IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFD7FF, 0 ); //SCI_CALLTIPSETBACK 2205
+									IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) toStringz( title0.dup ) ); // SCI_CALLTIPSHOW 2200
+								}
+							}
+							return;
+						}
+					}
+					+/
 					char[][] splitWord = getDivideWord( word );
 					
 					// Manual
@@ -2936,7 +2979,8 @@ GLOBAL.IDEMessageDlg.print( "INCLUDE: " ~ includeFullPath );
 			}
 			catch( Exception e )
 			{
-				//IupMessage( "Error", toStringz( e.toString ) );
+				GLOBAL.IDEMessageDlg.print( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				IupMessage( "Bug", toStringz( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 		

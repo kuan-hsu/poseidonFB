@@ -810,6 +810,8 @@ struct GLOBAL
 			GLOBAL.languageItems["locals"] = new IupString( cast(char[]) "Locals" );
 			GLOBAL.languageItems["args"] = new IupString( cast(char[]) "Arguments" );
 			GLOBAL.languageItems["shared"] = new IupString( cast(char[]) "Shared" );
+			GLOBAL.languageItems["showvalue"] = new IupString( cast(char[]) "Show Value *" );
+			GLOBAL.languageItems["showaddress"] = new IupString( cast(char[]) "Show Address @" );
 		GLOBAL.languageItems["register"] = new IupString( cast(char[]) "Registers" );
 
 		// caption

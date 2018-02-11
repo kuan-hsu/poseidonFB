@@ -11,9 +11,10 @@ class CStatusBar
 
 	import		Integer = tango.text.convert.Integer;
 	
-	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection;
+	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection, codecomplete;
 	IupString	_name, _lc, _ins, _eol, _en, tipString;
 	
+	int			originalTrigger;
 	
 	void createLayout()
 	{
@@ -52,7 +53,12 @@ class CStatusBar
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 			setTip( GLOBAL.currentCustomCompilerOption.toDString );
 		}
-		//IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Encode_BUTTON_CB );
+		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+		
+		codecomplete = IupLabel( "" );
+		if( GLOBAL.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_on" ); else IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_off" );
+		IupSetAttribute( codecomplete, "NAME", "label_Codecomplete" );
+		IupSetCallback( codecomplete, "BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
 	
 		
 		Ihandle*[5] labelSEPARATOR;
@@ -62,7 +68,7 @@ class CStatusBar
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 		}
 		// Ihandle* StatusBar = IupHbox( GLOBAL.statusBar_PrjName, IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
-		Ihandle* _hbox = IupHbox( image, compileOptionSelection, labelSEPARATOR[4], prjName, IupFill(), labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
+		Ihandle* _hbox = IupHbox( image, compileOptionSelection, labelSEPARATOR[4], prjName, IupFill(), codecomplete, labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
 		IupSetAttributes( _hbox, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
 		
 		layoutHandle = IupBackgroundBox( _hbox );
@@ -91,6 +97,7 @@ class CStatusBar
 		tipString = new IupString();
 		
 		createLayout();
+		setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
 	}
 	
 	~this()
@@ -101,6 +108,16 @@ class CStatusBar
 	Ihandle* getLayoutHandle()
 	{
 		return layoutHandle;
+	}
+	
+	void setOriginalTrigger( int trigger )
+	{
+		originalTrigger = trigger;
+	}
+	
+	int getOriginalTrigger()
+	{
+		return originalTrigger;
 	}
 	
 	void setPrjNameSize( int width )
@@ -160,6 +177,11 @@ class CStatusBar
 				}			
 			}			
 		}
+	}
+	
+	void setCompleteIcon( bool bStatus )
+	{
+		if( bStatus ) IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_on" ); else IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_off" );
 	}
 	
 	/+
@@ -502,4 +524,29 @@ extern(C) // Callback for CBaseDialog
 
 		return IUP_DEFAULT;
 	}
+	
+	private int CStatusBar_Codecomplete_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 ) //release
+		{
+			Ihandle* codecompleteHandle = IupGetDialogChild( GLOBAL.statusBar.layoutHandle, "label_Codecomplete" );
+			if( codecompleteHandle != null )
+			{
+				Ihandle* preferenceTriggerHandle = IupGetHandle( "textTrigger" );
+				if( fromStringz( IupGetAttribute( codecompleteHandle, "IMAGE" ) ) == "IUP_codecomplete_on" )
+				{
+					GLOBAL.statusBar.setCompleteIcon( false );
+					GLOBAL.autoCompletionTriggerWordCount = 0;
+				}
+				else
+				{
+					GLOBAL.statusBar.setCompleteIcon( true );
+					GLOBAL.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger;
+				}
+				if( preferenceTriggerHandle != null ) IupSetAttribute( preferenceTriggerHandle, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
+			}
+		}
+
+		return IUP_DEFAULT;
+	}	
 }
