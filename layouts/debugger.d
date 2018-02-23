@@ -1030,8 +1030,8 @@ version(FBIDE)
 						return null;
 					}
 				}
-			}			
-
+			}
+			
 			char[][] splitCommand;
 			foreach( char[] s; Util.split( Util.trim( command ), " " ) ) // Util.trim() remove \n
 			{
@@ -1823,6 +1823,7 @@ version(FBIDE)
 	{
 		private :
 		import		tango.io.stream.Data, tango.sys.Process;
+		import		tango.sys.win32.Types, tango.sys.win32.UserGdi;
 		
 		char[]		executeFullPath, cwd;
 		int			caretPos, splitValue;
@@ -1844,7 +1845,7 @@ version(FBIDE)
 					try
 					{
 						char[1] c;
-						if( proc.stdout.read( c ) == -1 ) break;
+						if( proc.stdout.read( c ) <= 0 ) break;
 						
 						result ~= c;
 
@@ -1893,6 +1894,7 @@ version(FBIDE)
 
 		public:
 		bool		bExecuted;
+		HANDLE		dupWriteHandle;
 		
 		this( char[] _executeFullPath, char[] _cwd = null )
 		{
@@ -1959,7 +1961,6 @@ version(FBIDE)
 				if( cwd.length ) proc.workDir( cwd );
 				proc.redirect( Redirect.All );
 				proc.execute;
-				
 				//auto proc_result = proc.wait;
 
 				char[] result = getGDBmessage();
@@ -2055,6 +2056,7 @@ version(FBIDE)
 		char[] sendCommand( char[] command, bool bShow = true )
 		{
 			proc.stdin.write( command );
+			
 			if( bShow )
 			{
 				IupSetInt( GLOBAL.debugPanel.getConsoleHandle, "CARETPOS", caretPos );
@@ -2073,7 +2075,9 @@ version(FBIDE)
 		}
 	}
 
-
+	import tango.time.Clock;
+	
+	
 	extern( C )
 	{
 		private int CConsoleDlg_btnCancel_cb( Ihandle* ih )
@@ -2091,7 +2095,10 @@ version(FBIDE)
 		{
 			return IUP_IGNORE;
 		}
-
+		
+		import tango.sys.Process, tango.core.Exception, tango.io.stream.Lines, tango.io.stream.Iterator;
+		import tango.sys.win32.Types, tango.sys.win32.UserGdi;
+		
 		private int consoleInput_cb( Ihandle *ih, int c, char *new_value )
 		{
 			static char[] prevCommand;
@@ -2120,6 +2127,26 @@ version(FBIDE)
 				IupSetFocus( GLOBAL.debugPanel.getConsoleCommandInputHandle );
 				return IUP_IGNORE;
 			}
+			else if( c == '\t' )
+			{
+				char[] _command = Util.trim( fromStringz( new_value ) );
+				_command ~= "\n";
+				
+				
+				//GLOBAL.debugPanel.DebugControl.proc.stdin.write( _command );
+				
+				uint beWritten;
+				WriteFile( GLOBAL.debugPanel.DebugControl.dupWriteHandle, _command.ptr, _command.length, &beWritten, null );
+				
+
+				auto lines = new Lines!(char)( GLOBAL.debugPanel.DebugControl.proc.stdout );
+				_command = lines.next();
+				IupMessage( "", toStringz( _command ) );
+				
+				_command = lines.next();
+				IupMessage( "", toStringz( _command ) );
+			}
+			
 			return IUP_DEFAULT;
 		}
 

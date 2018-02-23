@@ -673,8 +673,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.367)\nBy Kuan Hsu (Taiwan)\n2018.02.11" );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.027)\nBy Kuan Hsu (Taiwan)\n2018.02.04" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.368)\nBy Kuan Hsu (Taiwan)\n2018.02.23" );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.027)\nBy Kuan Hsu (Taiwan)\n2018.02.27" );
 		return IUP_DEFAULT;
 	});
 	
@@ -760,7 +760,6 @@ void createMenu()
 	{
 	project_menu = IupMenu( item_newProject,
 							item_openProject,
-							IupSeparator(),
 							IupSeparator(),
 							item_saveProject,
 							item_saveAllProject,

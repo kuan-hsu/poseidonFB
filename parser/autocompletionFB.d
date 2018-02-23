@@ -342,81 +342,92 @@ version(FBIDE)
 
 		static char[] checkIncludeExist( char[] include, char[] originalFullPath )
 		{
-			if( include.length > 2 )
+			try
 			{
-				if( include[0] == '"' && include[length-1] == '"' ) include = include[1..length-1];
-			}
-			else
-			{
-				return null;
-			}
-			
-			// Step 1: Relative from the directory of the source file
-			scope  _path = new FilePath( originalFullPath ); // Tail include /
-			char[] testPath = _path.path() ~ include;
-			_path.set( testPath ); // Reset
-			if( _path.exists() ) return testPath;
-
-
-			// Step 2: Relative from the current working directory
-			char[] dir = actionManager.ProjectAction.fileInProject( originalFullPath );
-			if( dir.length )
-			{
-				if( dir[$-1] != '/' ) dir ~= "/";
-				testPath = dir ~ include;
-
-				_path.set( testPath ); // Reset
-				if( _path.exists() ) return testPath;
-			}
-
-			testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
-			_path.set( testPath ); // Reset
-			if( _path.exists() ) return testPath;
-
-
-			// Step 3: Relative from addition directories specified with the -i command line option
-			// Work on Project
-			char[] prjDir = actionManager.ProjectAction.fileInProject( originalFullPath );
-
-			if( prjDir.length )
-			{
-				//Stdout( "Project Dir: " ~ prjDir ).newline;
-				char[][] includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-				foreach( char[] s; includeDirs )
+				if( include.length > 2 )
 				{
-					testPath = s ~ "/" ~ include;
-					
-					_path.set( testPath ); // Reset
-
-					if( _path.exists() ) return testPath;
-				}
-			}
-
-			// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-			_path.set( Path.normalize( GLOBAL.compilerFullPath.toDString ) );
-			version( Windows )
-			{
-				testPath = _path.path() ~ "inc/" ~ include;
-			}
-			else
-			{
-				testPath = _path.path();
-				int pos = Util.rindex( testPath, "/bin/" );
-				if( pos > 0 && pos < testPath.length )
-				{
-					testPath = testPath[0..pos] ~ "/include/freebasic/" ~ include;
+					if( include[0] == '"' && include[length-1] == '"' ) include = include[1..length-1];
 				}
 				else
 				{
 					return null;
 				}
+				
+				include = Util.substitute( include, "\\", "/" );
+				originalFullPath = Path.normalize( originalFullPath );
+				
+				// Step 1: Relative from the directory of the source file
+				scope  _path = new FilePath( originalFullPath ); // Tail include /
+				char[] testPath = _path.path() ~ include;
+				_path.set( testPath ); // Reset
+				if( _path.exists() ) return testPath;
+
+
+				// Step 2: Relative from the current working directory
+				char[] dir = actionManager.ProjectAction.fileInProject( originalFullPath );
+				if( dir.length )
+				{
+					if( dir[$-1] != '/' ) dir ~= "/";
+					testPath = dir ~ include;
+
+					_path.set( testPath ); // Reset
+					if( _path.exists() ) return testPath;
+				}
+
+				testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
+				_path.set( testPath ); // Reset
+				if( _path.exists() ) return testPath;
+
+
+				// Step 3: Relative from addition directories specified with the -i command line option
+				// Work on Project
+				char[] prjDir = actionManager.ProjectAction.fileInProject( originalFullPath );
+
+				if( prjDir.length )
+				{
+					//Stdout( "Project Dir: " ~ prjDir ).newline;
+					char[][] includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+					foreach( char[] s; includeDirs )
+					{
+						testPath = s ~ "/" ~ include;
+						
+						_path.set( testPath ); // Reset
+
+						if( _path.exists() ) return testPath;
+					}
+				}
+
+				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
+				_path.set( Path.normalize( GLOBAL.compilerFullPath.toDString ) );
+				version( Windows )
+				{
+					testPath = _path.path() ~ "inc/" ~ include;
+				}
+				else
+				{
+					testPath = _path.path();
+					int pos = Util.rindex( testPath, "/bin/" );
+					if( pos > 0 && pos < testPath.length )
+					{
+						testPath = testPath[0..pos] ~ "/include/freebasic/" ~ include;
+					}
+					else
+					{
+						return null;
+					}
+				}
+						
+				_path.set( testPath ); // Reset
+				if( _path.exists() )
+				{
+					//Stdout( "Bi fullpath :" ~ _path.toString ).newline; 
+					return testPath;
+				}
 			}
-					
-			_path.set( testPath ); // Reset
-			if( _path.exists() )
+			catch( Exception e )
 			{
-				//Stdout( "Bi fullpath :" ~ _path.toString ).newline; 
-				return testPath;
+				GLOBAL.IDEMessageDlg.print( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 			
 			return null;
@@ -431,7 +442,7 @@ version(FBIDE)
 			if( includeFullPath.length )
 			{
 				if( upperCase(includeFullPath) in includesMarkContainer ) return null;
-GLOBAL.IDEMessageDlg.print( "INCLUDE: " ~ includeFullPath );
+
 				CASTnode includeAST;
 				if( upperCase(includeFullPath) in GLOBAL.parserManager )
 				{

@@ -453,7 +453,10 @@ extern(C)
 											lineNumber = Integer.atoi( lineNumber_char );
 											fileName = Path.normalize( lineText[0..openPos] );
 											
-											if( ExecuterAction.quickRunFile.length ) fileName = ExecuterAction.quickRunFile;
+											if( ExecuterAction.quickRunFile.length )
+											{
+												if( !Path.parent( fileName ).length ) fileName = ExecuterAction.quickRunFile;
+											}
 											
 											if( upperCase(fileName.dup) in GLOBAL.scintillaManager )
 											{

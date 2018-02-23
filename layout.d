@@ -825,7 +825,7 @@ extern(C)
 			}
 			else
 			{
-				actionManager.ScintillaAction.openFile( f.toString  );
+				actionManager.ScintillaAction.openFile( f.toString, true );
 				actionManager.ScintillaAction.updateRecentFiles( f.toString );
 				
 				if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );

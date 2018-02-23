@@ -1,6 +1,6 @@
 ﻿module tools;
 
-import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz;
+import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz, tango.time.Clock;
 import Util = tango.text.Util, tango.io.device.File, tango.io.stream.Lines, tango.io.FilePath, Path = tango.io.Path;
 
 class IupString
@@ -154,6 +154,15 @@ int upperCase( int num )
 	if ( num >= 'a' && num <= 'z' ) result = cast(char)( num - 32 );
 
 	return result;
+}
+
+void sleep( uint millisecond )
+{
+	auto now = Clock.now.span.millis;
+	
+	while( Clock.now.span.millis - now < millisecond )
+	{
+	}
 }
 
 version(FBIDE)

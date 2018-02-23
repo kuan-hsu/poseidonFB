@@ -1362,7 +1362,7 @@ struct ScintillaAction
 					{
 						if( fullPath.length > 2 )
 						{
-							if( fullPath[$-2..$] == ".bas" ) fullPath = fullPath[0..$-2];
+							if( fullPath[$-2..$] == ".d" ) fullPath = fullPath[0..$-2];
 						}
 						fullPath ~= ".d";
 					}
@@ -1376,7 +1376,7 @@ struct ScintillaAction
 						}
 						fullPath ~= ".bi";
 					}
-					version(FBIDE)
+					version(DIDE)
 					{
 						if( fullPath.length > 3 )
 						{
