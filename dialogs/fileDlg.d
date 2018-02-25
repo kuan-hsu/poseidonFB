@@ -13,19 +13,24 @@ class CFileDlg
 	char[][]	filesName;
 	char[]		filterUsed;
 	
-	void callIupFileDlg( char[] title, char[] filter, char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
+	void callIupFileDlg( char[] title, char[] filter, char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO", char[] _fileName = "" )
 	{
 		Ihandle *dlg = IupFileDlg(); 
 
 		IupSetAttribute( dlg, "DIALOGTYPE",  toStringz( DIALOGTYPE.dup ) );
 		IupSetAttribute( dlg, "TITLE", toStringz( title.dup ) );
 		if( GLOBAL.recentOpenDir.length ) IupSetAttribute( dlg, "DIRECTORY", toStringz( GLOBAL.recentOpenDir ) );
+		
 
 		bool bMultiFiles;
 		if( DIALOGTYPE == "OPEN" && MULTIPLEFILES == "YES" )
 		{
 			bMultiFiles = true;
 			IupSetAttribute( dlg, "MULTIPLEFILES", toStringz( MULTIPLEFILES ) );
+		}
+		else if( DIALOGTYPE == "SAVE" )
+		{
+			if( _fileName.length ) IupSetAttribute( dlg, "FILE", toStringz( _fileName.dup ) );
 		}
 
 		//char[] txtIupFilterAttribute = "FILTER = \"" ~ filter ~ "\", FILTERINFO = \"" ~  fileInfo ~ "\"";
@@ -90,14 +95,14 @@ class CFileDlg
 	}
 
 	public:
-	this( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
+	this( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO", char[] _fn = "" )
 	{
-		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
+		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES, _fn );
 	}
 
-	char[][] open( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO" )
+	char[][] open( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO", char[] _fn = "" )
 	{
-		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES );
+		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES, _fn );
 
 		return filesName;
 	}

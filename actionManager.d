@@ -1343,8 +1343,8 @@ struct ScintillaAction
 
 		try
 		{
-			version(FBIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
-			version(DIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE" );//"Source File|*.bas|Include File|*.bi" );
+			version(FBIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
+			version(DIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )
@@ -2411,8 +2411,16 @@ struct CustomToolAction
 		if( pn.length )
 		{
 			// %pn% Project Name
-			args = Util.substitute( tool.args.toDString, "%pn%", pn );
-			args = Util.substitute( args, "\"%pn%\"", "\"" ~ pn ~ "\"" );
+			if( GLOBAL.projectManager[pn].targetName.length )
+			{
+				args = Util.substitute( args, "%pn%", GLOBAL.projectManager[pn].dir ~ "/" ~ GLOBAL.projectManager[pn].targetName );
+				args = Util.substitute( args, "\"%pn%\"", "\"" ~ GLOBAL.projectManager[pn].dir ~ "/" ~ GLOBAL.projectManager[pn].targetName~ "\"" );
+			}
+			else
+			{
+				args = Util.substitute( args, "%pn%", pn ~ "/" );
+				args = Util.substitute( args, "\"%pn%\"", "\"" ~ pn ~ "/" ~ "\"" );
+			}
 			
 			char[] pAllFiles;
 			foreach( char[] s; GLOBAL.projectManager[pn].sources )
@@ -2424,9 +2432,14 @@ struct CustomToolAction
 			
 			pAllFiles = Util.trim( pAllFiles );
 			// %pn% Project Name
-			args = Util.substitute( tool.args.toDString, "%p%", pAllFiles );
+			args = Util.substitute( args, "%p%", pAllFiles );
 			args = Util.substitute( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );			
 		}
+		else
+		{
+			args = Util.substitute( args, "%pn%", "" );
+			args = Util.substitute( args, "\"%pn%\"", "" );
+		}		
 		
 		
 		version(Windows)

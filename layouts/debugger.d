@@ -2127,25 +2127,6 @@ version(FBIDE)
 				IupSetFocus( GLOBAL.debugPanel.getConsoleCommandInputHandle );
 				return IUP_IGNORE;
 			}
-			else if( c == '\t' )
-			{
-				char[] _command = Util.trim( fromStringz( new_value ) );
-				_command ~= "\n";
-				
-				
-				//GLOBAL.debugPanel.DebugControl.proc.stdin.write( _command );
-				
-				uint beWritten;
-				WriteFile( GLOBAL.debugPanel.DebugControl.dupWriteHandle, _command.ptr, _command.length, &beWritten, null );
-				
-
-				auto lines = new Lines!(char)( GLOBAL.debugPanel.DebugControl.proc.stdout );
-				_command = lines.next();
-				IupMessage( "", toStringz( _command ) );
-				
-				_command = lines.next();
-				IupMessage( "", toStringz( _command ) );
-			}
 			
 			return IUP_DEFAULT;
 		}

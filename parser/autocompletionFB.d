@@ -3130,84 +3130,122 @@ version(FBIDE)
 				return -1;
 			}
 			
-			bool _secondCheck( char[] targetText, char[] beforeWordKey, int _pos )
+			char[] _checkProcedures( char[] keyword )
 			{
-				int nextTargetPos = skipCommentAndString( iupSci, _pos, targetText, 1 );
-				if( nextTargetPos < 0 )
+				int _pos = _check( keyword, 1 );
+				if( _pos > -1 )
 				{
-					return true;
+					int c0 = DocumentTabAction.getKeyWordCount( iupSci, keyword, "" );
+					c0 += DocumentTabAction.getKeyWordCount( iupSci, keyword, "private" );
+					c0 += DocumentTabAction.getKeyWordCount( iupSci, keyword, "protected" );
+					c0 += DocumentTabAction.getKeyWordCount( iupSci, keyword, "public" );
+					int c1 = DocumentTabAction.getKeyWordCount( iupSci, keyword, "end" );
+					if( c0 > c1 ) return "end " ~ keyword;
 				}
 				else
 				{
-					char[] beforeWord = DocumentTabAction.getBeforeWord( iupSci, nextTargetPos - 1 );
-					//IupMessage( "", toStringz( "*"~ beforeWord~"*" ));
-					if( beforeWord != beforeWordKey ) return true;
+					_pos = _check( keyword, 3 );
+					if( _pos > -1 )
+					{
+						char[] beforeWord = DocumentTabAction.getBeforeWord( iupSci, _pos - 1 );
+						switch( beforeWord )
+						{
+							case "private", "protected", "public":
+								int c0 = DocumentTabAction.getKeyWordCount( iupSci, keyword, "" );
+								c0 += DocumentTabAction.getKeyWordCount( iupSci, keyword, "private" );
+								c0 += DocumentTabAction.getKeyWordCount( iupSci, keyword, "protected" );
+								c0 += DocumentTabAction.getKeyWordCount( iupSci, keyword, "public" );							
+								int c1 = DocumentTabAction.getKeyWordCount( iupSci, keyword, "end" );
+								if( c0 > c1 ) return "end " ~ keyword;
+							default:
+						}
+					}
 				}
 				
-				return false;
+				return null;
+			}
+			
+			
+			
+			int		POS;
+			char[]	resultProcedures = _checkProcedures( "sub" );
+			if( resultProcedures.length ) return resultProcedures;
+
+			resultProcedures = _checkProcedures( "property" );
+			if( resultProcedures.length ) return resultProcedures;
+			
+			resultProcedures = _checkProcedures( "operator" );
+			if( resultProcedures.length ) return resultProcedures;
+			
+			resultProcedures = _checkProcedures( "constructor" );
+			if( resultProcedures.length ) return resultProcedures;
+
+			resultProcedures = _checkProcedures( "destructor" );
+			if( resultProcedures.length ) return resultProcedures;
+
+			
+			POS = _check( "function", 1 );
+			if( POS > -1 )
+			{
+				char[] afterWord = DocumentTabAction.getAfterWord( iupSci, POS + 8 );
+				if( afterWord.length )
+				{
+					if( afterWord[0] != '=' )
+					{
+						int c0 = DocumentTabAction.getKeyWordCount( iupSci, "function", "" );
+						c0 += DocumentTabAction.getKeyWordCount( iupSci, "function", "private" );
+						c0 += DocumentTabAction.getKeyWordCount( iupSci, "function", "protected" );
+						c0 += DocumentTabAction.getKeyWordCount( iupSci, "function", "public" );
+						int c1 = DocumentTabAction.getKeyWordCount( iupSci, "function", "end" );
+						if( c0 > c1 ) return "end function";
+					}
+				}
+			}
+			else
+			{
+				POS = _check( "function", 3 );
+				if( POS > -1 )
+				{
+					char[] beforeWord = DocumentTabAction.getBeforeWord( iupSci, POS - 1 );
+					switch( beforeWord )
+					{
+						case "private", "protected", "public":
+							int c0 = DocumentTabAction.getKeyWordCount( iupSci, "function", "" );
+							c0 += DocumentTabAction.getKeyWordCount( iupSci, "function", "private" );
+							c0 += DocumentTabAction.getKeyWordCount( iupSci, "function", "protected" );
+							c0 += DocumentTabAction.getKeyWordCount( iupSci, "function", "public" );							
+							int c1 = DocumentTabAction.getKeyWordCount( iupSci, "function", "end" );
+							if( c0 > c1 ) return "end function";
+						default:
+					}
+				}
 			}
 
-			
-			int POS		= getProcedurePos( iupSci, pos, "sub" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "sub", "dne", POS + 3 ) ) return "end sub";
-
-			POS		= getProcedurePos( iupSci, pos, "function" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "function", "dne", POS + 8 ) ) return "end function";
-			
-			POS		= getProcedurePos( iupSci, pos, "property" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "property", "dne", POS + 8 ) ) return "end property";
-			
-			POS		= getProcedurePos( iupSci, pos, "constructor" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "constructor", "dne", POS + 11 ) ) return "end constructor";
-
-			POS		= getProcedurePos( iupSci, pos, "destructor" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "destructor", "dne", POS + 10 ) ) return "end destructor";
-				
-			POS		= getProcedurePos( iupSci, pos, "operator" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "operator", "dne", POS + 8 ) ) return "end operator";
-				
-			POS		= getProcedurePos( iupSci, pos, "type" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "type", "dne", POS + 4 ) ) return "end type";
-
-			POS		= getProcedurePos( iupSci, pos, "union" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "union", "dne", POS + 5 ) ) return "end union";
-			
-			POS		= getProcedurePos( iupSci, pos, "extern" );
-			if( POS > -1 && lin == ScintillaAction.getLinefromPos( iupSci, POS ) )
-				if( _secondCheck( "extern", "dne", POS + 6 ) ) return "end extern";			
 
 
-			
-			/+
-			POS= _check( "select", 1 );
+
+			POS= _check( "extern", 1 );
 			if( POS > -1 )
-				if( _secondCheck( "select", "dne", POS + 6 ) ) return "end select";
-
-			POS = _check( "namespace", 1 );
+			{
+				char[] afterWord = DocumentTabAction.getAfterWord( iupSci, POS + 6 );
+				if( afterWord.length )
+				{
+					if( afterWord[0] == '"' )
+					{
+						int c0 = DocumentTabAction.getKeyWordCount( iupSci, "extern", "" );
+						int c1 = DocumentTabAction.getKeyWordCount( iupSci, "extern", "end" );
+						if( c0 > c1 ) return "end type";
+					}
+				}
+			}		
+		
+			POS= _check( "type", 1 );
 			if( POS > -1 )
-				if( _secondCheck( "namespace", "dne", POS + 9 ) ) return "end namespace";
-
-			POS = _check( "with", 1 );
-			if( POS > -1 )
-				if( _secondCheck( "with", "dne", POS + 4 ) ) return "end with";
-			
-			POS = _check( "enum", -1 );
-			if( POS > -1 )
-				if( _secondCheck( "enum", "dne", POS + 4 ) ) return "end enum";
-
-			POS = _check( "scope", 0 );
-			if( POS > -1 ) 
-				if( _secondCheck( "scope", "dne", POS + 5 ) ) return "end scope";
-			+/
-
+			{
+				int c0 = DocumentTabAction.getKeyWordCount( iupSci, "type", "" );
+				int c1 = DocumentTabAction.getKeyWordCount( iupSci, "type", "end" );
+				if( c0 > c1 ) return "end type";
+			}
 
 			POS= _check( "select", 1 );
 			if( POS > -1 )
