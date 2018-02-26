@@ -5,7 +5,7 @@ private import iup.iup, iup.iup_scintilla;
 private import global, project, scintilla, actionManager;
 private import dialogs.baseDlg, dialogs.fileDlg;
 
-private import tango.stdc.stringz, Util = tango.text.Util, Path = tango.io.Path;
+private import tango.stdc.stringz, tango.io.FilePath, Util = tango.text.Util, Path = tango.io.Path;
 
 class CProjectPropertiesDialog : CBaseDialog
 {
@@ -368,6 +368,12 @@ extern(C) // Callback for CProjectPropertiesDialog
 				char[]	_prjCompilerOptions	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerOpts" ), "VALUE" ) ) ).dup;
 				char[]	_prjComment			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textComment" ), "VALUE" ) ) ).dup;
 				char[]	_prjCompilerPath	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerPath" ), "VALUE" ) ) ).dup;
+				
+				if( !_prjName.length )
+				{
+					scope _fp = new FilePath( Path.normalize( _prjDir ) );
+					_prjName = _fp.name;
+				}
 
 				PROJECT s;
 				s.name				= _prjName;
@@ -422,7 +428,21 @@ extern(C) // Callback for CProjectPropertiesDialog
 		if( fileName.length )
 		{
 			Ihandle* textPrjPath = IupGetHandle( "textProjectDir" );
-			if( textPrjPath != null ) IupSetAttribute( textPrjPath, "VALUE", toStringz( fileName ) );
+			if( textPrjPath != null )
+			{
+				IupSetAttribute( textPrjPath, "VALUE", toStringz( fileName ) );
+				
+				Ihandle* textProjectName = IupGetHandle( "textProjectName" );
+				if( textProjectName != null )
+				{
+					char[] projectName = Util.trim( fromStringz( IupGetAttribute( textProjectName, "VALUE" ) ) ).dup;
+					if( !projectName.length )
+					{
+						scope _fp = new FilePath( Path.normalize( fileName ) );
+						IupSetAttribute( textProjectName, "VALUE", toStringz( _fp.name.dup ) );
+					}
+				}
+			}
 		}
 		else
 		{

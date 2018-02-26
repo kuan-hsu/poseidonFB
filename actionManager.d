@@ -2407,26 +2407,23 @@ struct CustomToolAction
 			args = Util.substitute( args, "\"%f%\"", "\"" ~ s ~ "\"" );
 		}
 		
-		char[] pn = ProjectAction.getActiveProjectName;
-		if( pn.length )
+		char[] pDir = ProjectAction.getActiveProjectDir;
+		if( pDir.length )
 		{
-			// %pn% Project Name
-			if( GLOBAL.projectManager[pn].targetName.length )
-			{
-				args = Util.substitute( args, "%pn%", GLOBAL.projectManager[pn].dir ~ "/" ~ GLOBAL.projectManager[pn].targetName );
-				args = Util.substitute( args, "\"%pn%\"", "\"" ~ GLOBAL.projectManager[pn].dir ~ "/" ~ GLOBAL.projectManager[pn].targetName~ "\"" );
-			}
-			else
-			{
-				args = Util.substitute( args, "%pn%", pn ~ "/" );
-				args = Util.substitute( args, "\"%pn%\"", "\"" ~ pn ~ "/" ~ "\"" );
-			}
+			char[] pName = GLOBAL.projectManager[pDir].name;
+			char[] pTargetName = GLOBAL.projectManager[pDir].targetName;
+			char[] pTotal;
+			
+			if( !pTargetName.length ) pTotal = pDir ~ "/" ~ pName; else	pTotal = pDir ~ "/" ~ pTargetName;
+			
+			args = Util.substitute( args, "%pn%", pTotal );
+			args = Util.substitute( args, "\"%pn%\"", "\"" ~ pTotal ~ "\"" );
 			
 			char[] pAllFiles;
-			foreach( char[] s; GLOBAL.projectManager[pn].sources )
+			foreach( char[] s; GLOBAL.projectManager[pDir].sources )
 				pAllFiles ~= ( s ~ " " );
 
-			foreach( char[] s; GLOBAL.projectManager[pn].includes )
+			foreach( char[] s; GLOBAL.projectManager[pDir].includes )
 				pAllFiles ~= ( s ~ " " );
 				
 			
