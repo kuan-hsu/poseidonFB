@@ -479,7 +479,7 @@ class CProjectTree
 	{
 		bool importFbEditProject()
 		{
-			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"].toDString() ~ "...",  GLOBAL.languageItems["fbeditfile"].toDString() ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|" );
+			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"].toDString() ~ "...",  GLOBAL.languageItems["fbeditfile"].toDString() ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" );
 			char[] fbpFullPath = fileSelectDlg.getFileName();
 
 			if( !fbpFullPath.length ) return false;
@@ -1251,18 +1251,18 @@ extern(C)
 			{
 				switch( prjFilesFolderName )
 				{
-					case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
-					case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
-					default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+					case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*"; break;
+					case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*"; break;
+					default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*"; break;
 				}
 			}
 			version(DIDE)
 			{
 				switch( prjFilesFolderName )
 				{
-					case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
-					case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
-					default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|"; break;
+					case "Sources":		filter = GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*"; break;
+					case "Includes":	filter = GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*"; break;
+					default:			filter = GLOBAL.languageItems["allfile"].toDString() ~ "|*.*"; break;
 				}
 			}
 			

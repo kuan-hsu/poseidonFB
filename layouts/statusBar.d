@@ -58,6 +58,7 @@ class CStatusBar
 		codecomplete = IupLabel( "" );
 		if( GLOBAL.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_on" ); else IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_off" );
 		IupSetAttribute( codecomplete, "NAME", "label_Codecomplete" );
+		IupSetAttribute( codecomplete, "TIP", GLOBAL.languageItems["codecompletiononoff"].toCString );
 		IupSetCallback( codecomplete, "BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
 	
 		

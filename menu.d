@@ -673,7 +673,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.370)\nBy Kuan Hsu (Taiwan)\n2018.02.27" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.371)\nBy Kuan Hsu (Taiwan)\n2018.03.03" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.027)\nBy Kuan Hsu (Taiwan)\n2018.02.27" );
 		return IUP_DEFAULT;
 	});
@@ -950,8 +950,8 @@ extern(C)
 	
 	int openFile_cb( Ihandle* ih )
 	{
-		version(FBIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.bas;*.bi|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
-		version(DIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.d;*.di|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
+		version(FBIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.bas;*.bi|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "OPEN", "YES" );
+		version(DIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.d;*.di|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "OPEN", "YES" );
 		
 		char[][] files = fileSecectDlg.getFilesName();
 		if( files.length == 1 )
@@ -1006,7 +1006,7 @@ extern(C)
 		IupSetAttribute( dlg, "DIALOGTYPE", "OPEN" );
 		IupSetAttribute( dlg, "TITLE", GLOBAL.languageItems["openlanguage"].toCString );
 		IupSetAttribute( dlg, "DIRECTORY", "settings/language" );
-		IupSetAttribute( dlg, "EXTFILTER", toStringz( GLOBAL.languageItems["lngfile"].toDString() ~ "|*.lng|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|" ) );
+		IupSetAttribute( dlg, "EXTFILTER", toStringz( GLOBAL.languageItems["lngfile"].toDString() ~ "|*.lng|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" ) );
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 		
 		if( IupGetInt( dlg, "STATUS") == 0 )

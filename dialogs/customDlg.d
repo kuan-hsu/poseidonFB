@@ -217,7 +217,7 @@ extern(C) // Callback for CFindInFilesDialog
 	
 	int CCustomDialog_OPENDIR( Ihandle* ih ) 
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|" );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )

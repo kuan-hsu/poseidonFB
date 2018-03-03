@@ -48,7 +48,7 @@ class CArgOptionDialog : CBaseDialog
 			//IupSetAttribute( btnQuick, "VISIBLE", "NO" );
 			//IupSetAttribute( btnQuick, "IMAGE", "IUP_NavigateRefresh" );
 
-			btnOK = IupButton( GLOBAL.languageItems["run"].toCString, null );
+			btnOK = IupButton( GLOBAL.languageItems["go"].toCString, null );
 			IupSetHandle( "btnOK", btnOK );
 			IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );//,IMAGE=IUP_ActionOk" );
 			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnOK_cb );

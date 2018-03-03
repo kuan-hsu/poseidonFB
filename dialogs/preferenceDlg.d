@@ -1774,7 +1774,7 @@ extern(C) // Callback for CPreferenceDialog
 	
 	private int CPreferenceDialog_OpenCHM_cb( Ihandle* ih )
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["chmfile"].toDString() ~ "|*.chm|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "OPEN", "YES" );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["chmfile"].toDString() ~ "|*.chm|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "OPEN", "YES" );
 		//scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
 		char[] fileName = fileSecectDlg.getFileName();
 

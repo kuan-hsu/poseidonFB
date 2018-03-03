@@ -549,6 +549,10 @@ struct ExecuterAction
 					}
 					return false;
 				}
+				else
+				{
+					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" ) return buildAll( options, optionDebug );
+				}
 			}
 
 
@@ -1198,9 +1202,51 @@ struct ExecuterAction
 				}
 			}
 
+			bool bGotOneFileBuildSuccess;
 			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
 			{
-				version(FBIDE)	txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+				version(FBIDE)
+				{
+					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
+					{
+						if( GLOBAL.projectManager[activePrjName].mainFile.length )
+						{
+							scope mainFilePath = new FilePath( GLOBAL.projectManager[activePrjName].mainFile );
+							mainFilePath.standard();
+							
+							if( s.length > 4 )
+							{
+								if( lowerCase( s[$-3..$] ) == "bas" )
+								{
+									if( mainFilePath.isAbsolute() )
+									{
+										if( lowerCase( s[0..$-4] ) == lowerCase( mainFilePath.toString ) )
+										{
+											txtSources = " -b \"" ~ s ~ "\"";
+											bGotOneFileBuildSuccess = true;
+											break;
+										}
+									}
+									else
+									{
+										char[] relativePath = Util.substitute( s[0..$-4], GLOBAL.projectManager[activePrjName].dir ~ "/", "" );
+										if( lowerCase( relativePath ) == lowerCase( mainFilePath.toString ) ) 
+										{
+											txtSources = " -b \"" ~ s ~ "\"";
+											bGotOneFileBuildSuccess = true;
+											break;
+										}
+									}
+								}
+							}
+						}
+						break;
+					}
+					else
+					{
+						txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+					}
+				}
 				version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
 				if( upperCase(s) in GLOBAL.scintillaManager )
 				{
@@ -1322,7 +1368,7 @@ struct ExecuterAction
 
 			version(FBIDE)
 			{
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ) ~
 							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( GLOBAL.projectManager[activePrjName].compilerOption.length ? " " ~	GLOBAL.projectManager[activePrjName].compilerOption: "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			}
 			version(DIDE)

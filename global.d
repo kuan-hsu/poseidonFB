@@ -589,6 +589,7 @@ struct GLOBAL
 							GLOBAL.languageItems["update"] = new IupString( cast(char[]) "Update Outline" );
 						GLOBAL.languageItems["trigger"] = new IupString( cast(char[]) "Autocompletion Trigger" );
 							GLOBAL.languageItems["triggertip"] = new IupString( cast(char[]) "Set 0 To Disable" );
+							GLOBAL.languageItems["codecompletiononoff"] = new IupString( cast(char[]) "Code Completion On/Off" );
 						GLOBAL.languageItems["includelevel"] = new IupString( cast(char[]) "Include Levels" );
 					GLOBAL.languageItems["editor"] = new IupString( cast(char[]) "Editor" );
 						GLOBAL.languageItems["lnmargin"] = new IupString( cast(char[]) "Show Linenumber Margin" );
@@ -756,6 +757,7 @@ struct GLOBAL
 				GLOBAL.languageItems["dynamic"] = new IupString( cast(char[]) "Dynamic Link Library" );
 			GLOBAL.languageItems["prjdir"] = new IupString( cast(char[]) "Project Dir" );
 			GLOBAL.languageItems["prjmainfile"] = new IupString( cast(char[]) "Main file" );
+			GLOBAL.languageItems["prjonefile"] = new IupString( cast(char[]) "Pass One File To Compiler" );
 			GLOBAL.languageItems["prjtarget"] = new IupString( cast(char[]) "Target Name" );
 			GLOBAL.languageItems["prjargs"] = new IupString( cast(char[]) "Execute Args:" );
 			GLOBAL.languageItems["prjopts"] = new IupString( cast(char[]) "Compile Opts:" );
@@ -842,6 +844,7 @@ struct GLOBAL
 		GLOBAL.languageItems["no"] = new IupString( cast(char[]) "No" );
 		GLOBAL.languageItems["cancel"] = new IupString( cast(char[]) "Cancel" );
 		GLOBAL.languageItems["apply"] = new IupString( cast(char[]) "Apply" );
+		GLOBAL.languageItems["go"] = new IupString( cast(char[]) "Go" );
 		GLOBAL.languageItems["bechange"] = new IupString( cast(char[]) "has been changed, save it now?" );
 		GLOBAL.languageItems["samekey"] = new IupString( cast(char[]) "The same key value with" );
 		GLOBAL.languageItems["needrestart"] = new IupString( cast(char[]) "Need Restart To Change Language" );

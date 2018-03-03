@@ -1343,8 +1343,8 @@ struct ScintillaAction
 
 		try
 		{
-			version(FBIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
-			version(DIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*|", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
+			version(FBIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
+			version(DIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
 
 			char[] fullPath = dlg.getFileName();
 			switch( dlg.getFilterUsed )

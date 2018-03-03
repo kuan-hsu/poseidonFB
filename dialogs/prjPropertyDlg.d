@@ -11,7 +11,7 @@ class CProjectPropertiesDialog : CBaseDialog
 {
 	private:
 	
-	Ihandle*	textProjectName, listType, textProjectDir, textMainFile, textTargetName, textArgs, textCompilerOpts, textComment, textCompilerPath;
+	Ihandle*	textProjectName, listType, textProjectDir, textMainFile, toggleOneFile, textTargetName, textArgs, textCompilerOpts, textComment, textCompilerPath;
 	Ihandle*	btnProjectDir;
 	Ihandle*	listIncludePath, listLibPath;
 	
@@ -64,11 +64,22 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelMainFile, "SIZE=60x20" );
 		
 		textMainFile = IupText( null );
-		IupSetAttribute( textMainFile, "SIZE", "276x12" );
+		IupSetAttribute( textMainFile, "SIZE", "146x12" );
 		IupSetHandle( "textMainFile", textMainFile );
 		
-		Ihandle* hBox02 = IupHbox( labelMainFile, textMainFile, null );
+		version(FBIDE)
+		{
+			toggleOneFile = IupToggle( GLOBAL.languageItems["prjonefile"].toCString, null );
+			IupSetHandle( "toggleOneFile", toggleOneFile );
+		
+			Ihandle* hBox02 = IupHbox( labelMainFile, textMainFile, IupFill, toggleOneFile, IupFill, null );
+		}
+		version(DIDE)
+		{
+			Ihandle* hBox02 = IupHbox( labelMainFile, textMainFile, null );
+		}
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
+
 
 		// Line 4
 		Ihandle* labelTargetName = IupLabel( toStringz( GLOBAL.languageItems["prjtarget"].toDString ~ ":" ) );
@@ -290,6 +301,7 @@ class CProjectPropertiesDialog : CBaseDialog
 			IupSetAttribute( listType, "VALUE", toStringz( activeP.type ) );
 			IupSetAttribute( textProjectDir, "VALUE", toStringz( activeP.dir ) );
 			IupSetAttribute( textMainFile, "VALUE", toStringz( activeP.mainFile ) );
+			version(FBIDE) if( activeP.passOneFile == "ON" ) IupSetAttribute( toggleOneFile, "VALUE", "ON" );
 			IupSetAttribute( textTargetName, "VALUE", toStringz( activeP.targetName ) );
 			IupSetAttribute( textArgs, "VALUE", toStringz( activeP.args ) );
 			IupSetAttribute( textCompilerOpts, "VALUE", toStringz( activeP.compilerOption ) );
@@ -324,6 +336,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetHandle( "textProjectDir", null );
 		IupSetHandle( "btnProjectDir", null );
 		IupSetHandle( "textMainFile", null );
+		version(FBIDE) IupSetHandle( "toggleOneFile", null );
 		IupSetHandle( "textTargetName", null );
 		IupSetHandle( "textArgs", null );
 		IupSetHandle( "textCompilerOpts", null );
@@ -363,6 +376,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 				char[]	_prjName			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textProjectName" ), "VALUE" ) ) ).dup;
 				char[]	_prjType			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "listType" ), "VALUE" ) ) ).dup;
 				char[]	_prjMainFile		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textMainFile" ), "VALUE" ) ) ).dup;
+				version(FBIDE) char[]	_prjPassOneFile		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "toggleOneFile" ), "VALUE" ) ) ).dup;
 				char[]	_prjTargetName		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textTargetName" ), "VALUE" ) ) ).dup;
 				char[]	_prjArgs			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textArgs" ), "VALUE" ) ) ).dup;
 				char[]	_prjCompilerOptions	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerOpts" ), "VALUE" ) ) ).dup;
@@ -380,6 +394,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 				s.type				= _prjType;
 				s.dir				= Path.normalize( _prjDir );
 				s.mainFile			= _prjMainFile;
+				version(FBIDE) s.passOneFile		= _prjPassOneFile;
 				s.targetName		= _prjTargetName;
 				s.args				= _prjArgs;
 				s.compilerOption	= _prjCompilerOptions;

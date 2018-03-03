@@ -17,6 +17,7 @@ struct PROJECT
 	char[]		type;
 	char[]		dir;
 	char[]		mainFile;
+	char[]		passOneFile;
 	char[]		targetName;
 	char[]		args;
 	char[]		compilerOption;
@@ -139,6 +140,7 @@ struct PROJECT
 		doc ~= setINILineData( "ProjectName", name );
 		doc ~= setINILineData( "Type", type );
 		doc ~= setINILineData( "MainFile", mainFile );
+		doc ~= setINILineData( "PassOneFile", passOneFile );
 		doc ~= setINILineData( "TargetName", targetName );
 		doc ~= setINILineData( "CompilerArgs", args );
 		doc ~= setINILineData( "CompilerOption", compilerOption );
@@ -235,6 +237,7 @@ struct PROJECT
 							case "ProjectName":		s.name = right;							break;
 							case "Type":			s.type = right;							break;
 							case "MainFile":		s.mainFile = right;						break;
+							case "PassOneFile":		s.passOneFile = right;					break;
 							case "TargetName":		s.targetName = right;					break;
 							case "CompilerArgs":	s.args = right;							break;
 							case "CompilerOption":	s.compilerOption = right;				break;
