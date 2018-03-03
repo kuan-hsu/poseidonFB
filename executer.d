@@ -1205,15 +1205,26 @@ struct ExecuterAction
 			bool bGotOneFileBuildSuccess;
 			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
 			{
-				version(FBIDE)
+				version(FBIDE)	txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+				version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+				if( upperCase(s) in GLOBAL.scintillaManager )
 				{
-					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
+					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
+				}
+			}
+			
+			version(FBIDE)
+			{
+				if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
+				{
+					if( GLOBAL.projectManager[activePrjName].mainFile.length )
 					{
-						if( GLOBAL.projectManager[activePrjName].mainFile.length )
+						scope mainFilePath = new FilePath( GLOBAL.projectManager[activePrjName].mainFile );
+						mainFilePath.standard();
+					
+						foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
 						{
-							scope mainFilePath = new FilePath( GLOBAL.projectManager[activePrjName].mainFile );
-							mainFilePath.standard();
-							
 							if( s.length > 4 )
 							{
 								if( lowerCase( s[$-3..$] ) == "bas" )
@@ -1240,20 +1251,20 @@ struct ExecuterAction
 								}
 							}
 						}
-						break;
 					}
 					else
 					{
-						txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Project is set One File Mode.", true );
+						if( GLOBAL.compilerSFX == "ON" )
+						{
+							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+						}
+						return false;
 					}
 				}
-				version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
-				if( upperCase(s) in GLOBAL.scintillaManager )
-				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
-					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
-				}
 			}
+			
+			
 
 			if( !txtSources.length )
 			{
