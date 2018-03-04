@@ -2,6 +2,7 @@
 ProjectName=poseidonFB
 Type=1
 MainFile=
+PassOneFile=
 TargetName=
 CompilerArgs=
 CompilerOption=-L/SUBSYSTEM:windows:4 -odobjs -version=FBIDE

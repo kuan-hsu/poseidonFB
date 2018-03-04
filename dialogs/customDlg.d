@@ -16,6 +16,7 @@ class CCustomDialog : CBaseDialog
 	Ihandle*			listTools;
 	Ihandle*			labelStatus;
 	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%pn% = Active Prj Name\n%p% = Active Prj Files";
+	IupString			_tools, _args;
 	
 	
 	static	CustomTool[10]		editCustomTools;	
@@ -70,8 +71,8 @@ class CCustomDialog : CBaseDialog
 		Ihandle* frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		
-		
-		Ihandle* labelToolsDir = IupLabel( toStringz( GLOBAL.languageItems["tools"].toDString ~ ":" ) );
+		_tools = new IupString( " " ~ GLOBAL.languageItems["tools"].toDString ~ ":" );
+		Ihandle* labelToolsDir = IupLabel( _tools.toCString );
 		IupSetAttributes( labelToolsDir, "SIZE=54x16" );
 		Ihandle* textToolsDir = IupText( null );
 		IupSetAttribute( textToolsDir, "SIZE", "200x12" );
@@ -86,7 +87,8 @@ class CCustomDialog : CBaseDialog
 		Ihandle* hBox00 = IupHbox( labelToolsDir, textToolsDir, btnToolsDir, null );
 		IupSetAttribute( hBox00, "ALIGNMENT", "ACENTER" );
 		
-		Ihandle* labelToolsArgs = IupLabel( toStringz( GLOBAL.languageItems["args"].toDString ~ ":" ) );
+		_args = new IupString( " " ~ GLOBAL.languageItems["args"].toDString ~ ":" );
+		Ihandle* labelToolsArgs = IupLabel( _args.toCString );
 		IupSetAttributes( labelToolsArgs, "SIZE=54x16" );
 		IupSetAttribute( labelToolsArgs, "TIP", toStringz( paramTip ) );
 		
@@ -147,6 +149,9 @@ class CCustomDialog : CBaseDialog
 		IupSetHandle( "listTools_Handle", null );
 		IupSetHandle( "textToolsDir", null );
 		IupSetHandle( "textToolsArgs", null );
+		
+		delete _tools;
+		delete _args;
 	}
 }
 

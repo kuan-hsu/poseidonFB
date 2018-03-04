@@ -11,21 +11,23 @@ class CBaseDialog
 	
 	Ihandle*			_dlg;
 	Ihandle*			btnAPPLY, btnOK, btnCANCEL;
-	IupString			titleString, parentName;
+	IupString			_buttonSize, size, onlyW, onlyH, titleString, parentName;
 	
 	Ihandle* createDlgButton( char[] buttonSize = "40x20", char[] buttons = "oc" )
 	{
+		_buttonSize = new IupString( buttonSize );
+		
 		btnAPPLY = IupButton( GLOBAL.languageItems["apply"].toCString, null );
 		IupSetHandle( "btnAPPLY", btnAPPLY );
-		IupSetAttributes( btnAPPLY, toStringz( "SIZE=" ~ buttonSize ) );
+		IupSetAttribute( btnAPPLY, "SIZE", _buttonSize.toCString );
 		
 		btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
 		IupSetHandle( "btnOK", btnOK );
-		IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );
+		IupSetAttribute( btnOK, "SIZE", _buttonSize.toCString );
 		
 		btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
-		IupSetAttributes( btnCANCEL, toStringz( "SIZE=" ~ buttonSize ) );
+		IupSetAttribute( btnCANCEL, "SIZE", _buttonSize.toCString );
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
 		
 		/+
@@ -56,18 +58,20 @@ class CBaseDialog
 		titleString = new IupString( title );
 		IupSetAttribute( _dlg, "TITLE", titleString.toCString );
 
-		char[] size = Integer.toString( w ) ~ "x" ~ Integer.toString( h );
+		size	= new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
+		onlyW	= new IupString( Integer.toString( w ) ~ "x" );
+		onlyH	= new IupString( "x" ~ Integer.toString( h ) );
 		if( w < 0 || h < 0 ) 
 		{
 			IupSetAttribute( _dlg, "RASTERSIZE", "NULL" );
 			if( w < 0 && h > 0)
-				IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( "x" ~ Integer.toString( h ) ) );
+				IupSetAttribute( _dlg, "RASTERSIZE", onlyH.toCString );
 			else if( w > 0 && h < 0)
-				IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( Integer.toString( w) ~ "x" ) );
+				IupSetAttribute( _dlg, "RASTERSIZE", onlyW.toCString );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "RASTERSIZE", GLOBAL.cString.convert( size ) );
+			IupSetAttribute( _dlg, "RASTERSIZE", size.toCString );
 		}
 		
 		if( parent.length)
@@ -83,6 +87,13 @@ class CBaseDialog
 		IupSetHandle( "btnCANCEL", null );
 		IupSetHandle( "btnOK", null );
 		IupDestroy( _dlg );
+		
+		delete _buttonSize;
+		delete size;
+		delete onlyW;
+		delete onlyH;
+		delete titleString;
+		delete parentName;
 	}
 
 	char[] show( int x, int y )

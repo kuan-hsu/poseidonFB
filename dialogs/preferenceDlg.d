@@ -689,8 +689,8 @@ class CPreferenceDialog : CBaseDialog
 				lableString[i]	= IupLabel( _stringOfLabel[i].toCString );
 				IupSetAttributes( lableString[i], "SIZE=275x,EXPAND=YES");
 				
-				scope IupFlatFrameString = new IupString( "customFont_" ~ Integer.toString( i ) );
-				IupSetHandle( IupFlatFrameString.toCString, lableString[i] );
+				auto IupFlatFrameString = new IupString( "customFont_" ~ Integer.toString( i ) );
+				IupSetAttribute( lableString[i], "NAME", IupFlatFrameString.toCString );
 				IupSetCallback( lableString[i], "BUTTON_CB", cast(Icallback) &CPreferenceDialog_font_BUTTON_CB );
 				
 				flatFrame[i] = IupFlatFrame( lableString[i] );
@@ -1645,20 +1645,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "radioKeywordCase2", null );
 		IupSetHandle( "radioKeywordCase3", null );
 
-		IupSetHandle( "customFont_0", null );
-		IupSetHandle( "customFont_1", null );
-		IupSetHandle( "customFont_2", null );
-		IupSetHandle( "customFont_3", null );
-		IupSetHandle( "customFont_4", null );
-		IupSetHandle( "customFont_5", null );
-		IupSetHandle( "customFont_6", null );
-		IupSetHandle( "customFont_7", null );
-		IupSetHandle( "customFont_8", null );
-		IupSetHandle( "customFont_9", null );
-		IupSetHandle( "customFont_10", null );
-		IupSetHandle( "customFont_11", null );
-		IupSetHandle( "customFont_12", null );
-
 		IupSetHandle( "btnCaretLine", null );
 		IupSetHandle( "btnCursor", null );
 		IupSetHandle( "btnSelectFore", null );
@@ -1846,42 +1832,27 @@ extern(C) // Callback for CPreferenceDialog
 							IupMessage( "Error", toStringz( "IupFontDlg created fail!" ) );
 							return IUP_IGNORE;
 						}
-
+						Ihandle* parent = IupGetParent( ih );
+						if( parent != null ) IupSetAttribute( dlg, "TITLE", IupGetAttribute( parent, "TITLE" ) );
 						IupSetAttribute( dlg, "VALUE", toStringz( Util.substitute( _ls.dup, "\t", ",") ) );
 						IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );						
 						
 						if( IupGetInt( dlg, "STATUS" ) )
 						{
 							int id;
-							if( ih == IupGetHandle( "customFont_0" ) )
-								id = 0;
-							else if( ih == IupGetHandle( "customFont_1" ) )
-								id = 1;
-							else if( ih == IupGetHandle( "customFont_2" ) )
-								id = 2;
-							else if( ih == IupGetHandle( "customFont_3" ) )
-								id = 3;
-							else if( ih == IupGetHandle( "customFont_4" ) )
-								id = 4;
-							else if( ih == IupGetHandle( "customFont_5" ) )
-								id = 5;
-							else if( ih == IupGetHandle( "customFont_6" ) )
-								id = 6;
-							else if( ih == IupGetHandle( "customFont_7" ) )
-								id = 7;
-							else if( ih == IupGetHandle( "customFont_8" ) )
-								id = 8;
-							else if( ih == IupGetHandle( "customFont_9" ) )
-								id = 9;
-							else if( ih == IupGetHandle( "customFont_10" ) )
-								id = 10;
-							else if( ih == IupGetHandle( "customFont_11" ) )
-								id = 11;
-							else if( ih == IupGetHandle( "customFont_12" ) )
-								id = 12;
+							char[] _name = fromStringz( IupGetAttribute( ih, "NAME" ) );
+							if( _name.length > 11 )
+							{
+								if( _name[0..11] == "customFont_" )
+								{
+									id = Integer.atoi( _name[11..$] );
+								}
+								else
+									return IUP_DEFAULT;
+							}
 							else
 								return IUP_DEFAULT;
-
+							
 							auto fontInformation = new IupString( IupGetAttribute( dlg, "VALUE" ) );
 							char[] Bold, Italic, Underline, Strikeout, size, fontName;
 							char[][] strings = Util.split( fontInformation.toDString, "," );
