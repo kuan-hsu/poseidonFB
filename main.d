@@ -92,6 +92,7 @@ void main( char[][] args )
 		if( IupGetGlobal( toStringz( "SINGLEINSTANCE" ) ) == null  )
 		{
 			IupClose();
+			if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 			return;
 		}
 	}
@@ -138,13 +139,13 @@ void main( char[][] args )
 						break;
 					}
 				}
-				
 			}
 		}
 	}
 
 	IupSetGlobal( "UTF8MODE", "YES" );
 	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
+	//IupSetGlobal( "TXTHLCOLOR", "154 184 124" );
 
 	createMenu();
 	// Creates a dialog containing the control
@@ -284,5 +285,5 @@ void main( char[][] args )
 	IupMainLoop();
 	IupClose();
 	
-	version(Windows) sharedlib.unload();
+	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 }

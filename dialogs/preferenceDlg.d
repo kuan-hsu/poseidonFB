@@ -689,8 +689,8 @@ class CPreferenceDialog : CBaseDialog
 				lableString[i]	= IupLabel( _stringOfLabel[i].toCString );
 				IupSetAttributes( lableString[i], "SIZE=275x,EXPAND=YES");
 				
-				auto IupFlatFrameString = new IupString( "customFont_" ~ Integer.toString( i ) );
-				IupSetAttribute( lableString[i], "NAME", IupFlatFrameString.toCString );
+				scope IupFlatFrameString = new IupString( "customFont_" ~ Integer.toString( i ) );
+				IupSetHandle( IupFlatFrameString.toCString, lableString[i] );
 				IupSetCallback( lableString[i], "BUTTON_CB", cast(Icallback) &CPreferenceDialog_font_BUTTON_CB );
 				
 				flatFrame[i] = IupFlatFrame( lableString[i] );
@@ -725,7 +725,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* visibleBox = IupVbox( flatFrame[0], flatFrame[1], flatFrame[2], flatFrame[3], flatFrame[4], flatFrame[5], flatFrame[6], flatFrame[7], flatFrame[8], flatFrame[9], flatFrame[10], flatFrame[11], flatFrame[12], null );
 		IupSetAttributes( visibleBox, "GAP=1,MARGIN=5x1,EXPANDCHILDREN=YES");
 		Ihandle* sb = IupFlatScrollBox ( visibleBox );
-		IupSetAttributes( sb, "EXPAND=EXPAND,ALIGNMENT=ACENTER" );
+		IupSetAttributes( sb, "ALIGNMENT=ACENTER" );
 		
 		
 		version(FBIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, null );
@@ -1355,6 +1355,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* labelKeyWord0 = IupLabel( GLOBAL.languageItems["keyword0"].toCString() );
 		Ihandle* btnKeyWord0Color = IupButton( null, null );
+		IupSetAttribute( btnKeyWord0Color, "FGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
 		IupSetAttribute( btnKeyWord0Color, "BGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
 		version(Windows) IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord0Color, "SIZE", "24x10" );
 		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
@@ -1395,10 +1396,9 @@ class CPreferenceDialog : CBaseDialog
 
 			null
 		);
-		IupSetAttributes( gboxKeyWordColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ACENTER,GAPLIN=5,GAPCOL=5,MARGIN=0x5,SIZELIN=0,EXPANDCHILDREN=YES" );
+		IupSetAttributes( gboxKeyWordColor, "SIZELIN=-1,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
 		Ihandle* frameKeywordColor = IupFrame( gboxKeyWordColor );
-		IupSetAttributes( frameKeywordColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
-		IupSetAttribute( frameKeywordColor, "SIZE", "288x" );//IupGetAttribute( frameFont, "SIZE" ) );
+		IupSetAttributes( frameKeywordColor, "MARGIN=0x0" );
 		IupSetAttribute( frameKeywordColor, "TITLE", GLOBAL.languageItems["keywords"].toCString );		
 		
 		
@@ -1569,7 +1569,7 @@ class CPreferenceDialog : CBaseDialog
 		createLayout();
 		
 		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
-		version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x295" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
+		version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x310" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
 		
 		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
 		
@@ -1644,6 +1644,20 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "radioKeywordCase1", null );
 		IupSetHandle( "radioKeywordCase2", null );
 		IupSetHandle( "radioKeywordCase3", null );
+
+		IupSetHandle( "customFont_0", null );
+		IupSetHandle( "customFont_1", null );
+		IupSetHandle( "customFont_2", null );
+		IupSetHandle( "customFont_3", null );
+		IupSetHandle( "customFont_4", null );
+		IupSetHandle( "customFont_5", null );
+		IupSetHandle( "customFont_6", null );
+		IupSetHandle( "customFont_7", null );
+		IupSetHandle( "customFont_8", null );
+		IupSetHandle( "customFont_9", null );
+		IupSetHandle( "customFont_10", null );
+		IupSetHandle( "customFont_11", null );
+		IupSetHandle( "customFont_12", null );
 
 		IupSetHandle( "btnCaretLine", null );
 		IupSetHandle( "btnCursor", null );
@@ -1832,27 +1846,42 @@ extern(C) // Callback for CPreferenceDialog
 							IupMessage( "Error", toStringz( "IupFontDlg created fail!" ) );
 							return IUP_IGNORE;
 						}
-						Ihandle* parent = IupGetParent( ih );
-						if( parent != null ) IupSetAttribute( dlg, "TITLE", IupGetAttribute( parent, "TITLE" ) );
+
 						IupSetAttribute( dlg, "VALUE", toStringz( Util.substitute( _ls.dup, "\t", ",") ) );
 						IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );						
 						
 						if( IupGetInt( dlg, "STATUS" ) )
 						{
 							int id;
-							char[] _name = fromStringz( IupGetAttribute( ih, "NAME" ) );
-							if( _name.length > 11 )
-							{
-								if( _name[0..11] == "customFont_" )
-								{
-									id = Integer.atoi( _name[11..$] );
-								}
-								else
-									return IUP_DEFAULT;
-							}
+							if( ih == IupGetHandle( "customFont_0" ) )
+								id = 0;
+							else if( ih == IupGetHandle( "customFont_1" ) )
+								id = 1;
+							else if( ih == IupGetHandle( "customFont_2" ) )
+								id = 2;
+							else if( ih == IupGetHandle( "customFont_3" ) )
+								id = 3;
+							else if( ih == IupGetHandle( "customFont_4" ) )
+								id = 4;
+							else if( ih == IupGetHandle( "customFont_5" ) )
+								id = 5;
+							else if( ih == IupGetHandle( "customFont_6" ) )
+								id = 6;
+							else if( ih == IupGetHandle( "customFont_7" ) )
+								id = 7;
+							else if( ih == IupGetHandle( "customFont_8" ) )
+								id = 8;
+							else if( ih == IupGetHandle( "customFont_9" ) )
+								id = 9;
+							else if( ih == IupGetHandle( "customFont_10" ) )
+								id = 10;
+							else if( ih == IupGetHandle( "customFont_11" ) )
+								id = 11;
+							else if( ih == IupGetHandle( "customFont_12" ) )
+								id = 12;
 							else
 								return IUP_DEFAULT;
-							
+
 							auto fontInformation = new IupString( IupGetAttribute( dlg, "VALUE" ) );
 							char[] Bold, Italic, Underline, Strikeout, size, fontName;
 							char[][] strings = Util.split( fontInformation.toDString, "," );

@@ -393,55 +393,36 @@ extern(C)
 						{
 							if( cast(int)IupScintillaSendMessage( cSci.getIupScintilla, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
 							{
-								if( ( c > 31 && c < 127 ) || c == 9 || c == 32 )
+								if( ( c > 32 && c < 127 ) )
 								{
-									int currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-									if( c == 9 || c == 32 ) currentPos--;
+									int		headPos;
+									int 	pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+									char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, headPos );
 									
-									char[]	nextChar = lowerCase( fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", currentPos ) ) );
-									bool	bContinue = true;
-									
-									
-									if( nextChar.length )
+									if( word.length )
 									{
-										if( nextChar[0] >= 'a' && nextChar[0] <= 'z' ) bContinue = false;
-									}
-
-									if( bContinue )
-									{
-										int		headPos;
-										char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, currentPos, headPos );
 										word = lowerCase( word.reverse );
-										if( word.length )
-										{
-											bool bExitFlag;
-											foreach( IupString _keyword; GLOBAL.KEYWORDS )
-											{
-												foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
-												{	
-													if( _k.length )
-													{
-														if( lowerCase( _k ) == word )
-														{
-															if( c == 9 || c == 32 )
-															{
-																currentPos++;
-																//word ~= c;
-															}
-															//IupMessage("",toStringz( Integer.toString( ++headPos ) ~ ":" ~ Integer.toString( currentPos ) ) );
-															++headPos;
-															IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
-															word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
-															IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
-															IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos , 0 ); // sci_gotopos = 2025,
 
-															bExitFlag = true;
-															break;
-														}
+										bool bExitFlag;
+										foreach( IupString _keyword; GLOBAL.KEYWORDS )
+										{
+											foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
+											{	
+												if( _k.length )
+												{
+													if( lowerCase( _k ) == word )
+													{
+														IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
+														word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
+														IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
+														IupScintillaSendMessage( cSci.getIupScintilla, 2025, pos , 0 ); // sci_gotopos = 2025,
+
+														bExitFlag = true;
+														break;
 													}
 												}
-												if( bExitFlag ) break;
 											}
+											if( bExitFlag ) break;
 										}
 									}
 								}

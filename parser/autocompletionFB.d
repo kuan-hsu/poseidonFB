@@ -1937,105 +1937,121 @@ version(FBIDE)
 			{
 				while( pos > -1 )
 				{
-					--pos;
 					headPos = pos;
+					--pos;
 					if( pos < 0 ) break;
 					
-					if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
+					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					int key = cast(int) s[0];
+					if( key >= 0 && key <= 127 )
 					{
-						char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-						int key = cast(int) s[0];
-						if( key >= 0 && key <= 127 )
+						version(Windows)
 						{
-							version(Windows)
+							dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+							if( _dcharString.length )
 							{
-								dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
-								if( _dcharString.length )
+								if( actionManager.ScintillaAction.isComment( iupSci, pos ) )
 								{
-									switch( _dcharString )
+									if( _dcharString == "\r" || _dcharString == "\n" )
 									{
-										case ")":
-											if( countBracket == 0 ) countParen++;
-											break;
-
-										case "(":
-											if( countBracket == 0 ) countParen--;
-											if( countParen < 0 ) return UTF.toString( word32 );
-											break;
-											
-										case "]":
-											if( countParen == 0 ) countBracket++;
-											break;
-
-										case "[":
-											if( countParen == 0 ) countBracket--;
-											if( countBracket < 0 ) return UTF.toString( word32 );
-											break;
-											
-										case ">":
-											if( pos > 0 && countParen == 0 && countBracket == 0 )
-											{
-												if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
-												{
-													word32 ~= ">-";
-													pos--;
-													break;
-												}
-											}
-										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
-											if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
-											
-										default: 
-											if( countParen == 0 && countBracket == 0 )
-											{
-												word32 ~= _dcharString;
-											}
+										if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 ); else continue;
+									}
+									else
+									{
+										continue;
 									}
 								}
-							}
-							else
-							{
-								if( s.length )
+								
+								switch( _dcharString )
 								{
-									switch( s )
+									case ")":
+										if( countBracket == 0 ) countParen++;
+										break;
+
+									case "(":
+										if( countBracket == 0 ) countParen--;
+										if( countParen < 0 ) return UTF.toString( word32 );
+										break;
+										
+									case "]":
+										if( countParen == 0 ) countBracket++;
+										break;
+
+									case "[":
+										if( countParen == 0 ) countBracket--;
+										if( countBracket < 0 ) return UTF.toString( word32 );
+										break;
+										
+									case ">":
+										if( pos > 0 && countParen == 0 && countBracket == 0 )
+										{
+											if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+											{
+												word32 ~= ">-";
+												pos--;
+												break;
+											}
+										}
+									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+										if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
+										
+									default: 
+										if( countParen == 0 && countBracket == 0 ) word32 ~= _dcharString;
+								}
+							}
+						}
+						else
+						{
+							if( s.length )
+							{
+								if( actionManager.ScintillaAction.isComment( iupSci, pos ) )
+								{
+									if( s == "\r" || s == "\n" )
 									{
-										case ")":
-											if( countBracket == 0 ) countParen++;
-											break;
-
-										case "(":
-											if( countBracket == 0 ) countParen--;
-											if( countParen < 0 ) return word;
-											break;
-											
-										case "]":
-											if( countParen == 0 ) countBracket++;
-											break;
-
-										case "[":
-											if( countParen == 0 ) countBracket--;
-											if( countBracket < 0 ) return word;
-											break;
-											
-										case ">":
-											if( pos > 0 && countParen == 0 && countBracket == 0 )
-											{
-												if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
-												{
-													word ~= ">-";
-													pos--;
-													break;
-												}
-											}
-										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
-											if( countParen == 0 && countBracket == 0 ) return word;
-											
-										default: 
-											if( countParen == 0 && countBracket == 0 )
-											{
-												word ~= s;
-											}
+										if( countParen == 0 && countBracket == 0 ) return word; else continue;
 									}
+									else
+										continue;
+								}
+								
+								switch( s )
+								{
+									case ")":
+										if( countBracket == 0 ) countParen++;
+										break;
+
+									case "(":
+										if( countBracket == 0 ) countParen--;
+										if( countParen < 0 ) return word;
+										break;
+										
+									case "]":
+										if( countParen == 0 ) countBracket++;
+										break;
+
+									case "[":
+										if( countParen == 0 ) countBracket--;
+										if( countBracket < 0 ) return word;
+										break;
+										
+									case ">":
+										if( pos > 0 && countParen == 0 && countBracket == 0 )
+										{
+											if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+											{
+												word ~= ">-";
+												pos--;
+												break;
+											}
+										}
+									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+										if( countParen == 0 && countBracket == 0 ) return word;
+										
+									default: 
+										if( countParen == 0 && countBracket == 0 )
+										{
+											if( !actionManager.ScintillaAction.isComment( iupSci, pos ) ) word ~= s;
+										}
 								}
 							}
 						}
@@ -3435,7 +3451,19 @@ version(FBIDE)
 			if( cSci.lastPos == pos - 1 )
 			{
 				cSci.lastPos = pos;
-				return false;
+				version(FBIDE)
+				{                                                                                                     
+					if( text == ">" )
+					{
+						if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) != "-" ) return false;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				
+				version(DIDE) return false;
 			}
 			
 			char[] list = charAdd( ih, pos, text, bForce );

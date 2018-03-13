@@ -124,11 +124,6 @@ class CMessageAndSearch
 				IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 			}
 			
-			// Caret Line ( Current Line )
-			IupSetAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
-			IupSetAttribute( outputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
-
-			
 			// searchOutputPanel
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR32", GLOBAL.editColor.searchFore.toCString );		// 32
 			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR32", GLOBAL.editColor.searchBack.toCString );		// 32
@@ -218,6 +213,11 @@ class CMessageAndSearch
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
 			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13	
 		}
+
+		// Caret Line ( Current Line )
+		IupSetAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
+		IupSetAttribute( outputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
+		
 		
 		/*
 		IupSetAttribute(searchOutputPanel, "STYLEBOLD3", "YES");
@@ -683,7 +683,7 @@ extern(C)
 									if( lineText[closePos+1] == ':' )
 									{
 										char[] lineNumber_char = lineText[openPos+1..closePos];
-										lineNumber = Integer.atoi( lineNumber_char );
+										lineNumber = Integer.toInt( lineNumber_char );
 										fileName = lineText[0..openPos];
 										ScintillaAction.openFile( fileName.dup, lineNumber );
 

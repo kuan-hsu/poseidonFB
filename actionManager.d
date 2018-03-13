@@ -1169,7 +1169,7 @@ struct ScintillaAction
 					if( button == 3 )
 					{
 						IupSetFocus( iupSci );
-						break;
+						return IUP_DEFAULT;
 					}
 					else if( button == 2 )
 					{
@@ -1199,18 +1199,38 @@ struct ScintillaAction
 				{
 					KEYS ~= cSci.getFullPath;
 				}
-
+				/*
 				GLOBAL.fileListTree.removeItem( cSci );
 				GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
 				IupDestroy( iupSci );
 				delete cSci;
+				*/
 			}
 		}
 
+		/*
 		foreach( char[] s; KEYS )
 		{
 			if( upperCase(s) != upperCase(fullPath) ) GLOBAL.scintillaManager.remove( upperCase(s) );
 		}
+		*/
+		
+		foreach( char[] s; KEYS )
+		{
+			if( upperCase(s) in GLOBAL.scintillaManager )
+			{
+				CScintilla cSci = GLOBAL.scintillaManager[upperCase(s)];
+				if( cSci !is null )
+				{
+					GLOBAL.fileListTree.removeItem( cSci );
+					GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
+					//IupDestroy( cSci );				
+					delete cSci;
+				}
+
+				GLOBAL.scintillaManager.remove( upperCase(s) );
+			}
+		}		
 
 		StatusBarAction.update();
 		DocumentTabAction.resetTip();
@@ -1220,6 +1240,71 @@ struct ScintillaAction
 
 	static int closeAllDocument( Ihandle* _activeTabs = null )
 	{
+		if( _activeTabs == null ) _activeTabs = GLOBAL.activeDocumentTabs;
+		
+		if( _activeTabs == null ) return -1;
+		
+		
+		char[][] 	KEYS;
+		bool 		bCancel;		
+		
+		foreach( CScintilla cSci; GLOBAL.scintillaManager )
+		{
+			if( cSci !is null )
+			{
+				Ihandle* iupSci = cSci.getIupScintilla;
+				
+				if( IupGetChildPos( _activeTabs, iupSci ) != -1 )
+				{
+					if( ScintillaAction.getModifyByTitle( cSci ) )
+					{
+						IupSetAttribute( _activeTabs, "VALUE_HANDLE", cast(char*) iupSci );
+						
+						scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
+						
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
+						IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
+						int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
+						if( button == 3 ) // Cancel the Close All action...
+						{
+							return IUP_DEFAULT;
+						}
+						else if( button == 2 )
+						{
+							KEYS ~= cSci.getFullPath;
+						}
+						else if( button == 1 )
+						{
+							bool bNoNameFile;
+							if( cSci.getFullPath.length >= 7 )
+							{
+								if( cSci.getFullPath[0..7] == "NONAME#" )
+								{
+									saveAs( cSci, false, false );
+									KEYS ~= cSci.getFullPath;
+									bNoNameFile = true;
+								}
+							}
+
+							if( !bNoNameFile )
+							{
+								KEYS ~= cSci.getFullPath;
+								cSci.saveFile();
+							}
+						}
+					}
+					else
+					{
+						KEYS ~= cSci.getFullPath;
+					}
+				}
+			}
+		}
+
+		/+
 		char[][] 	KEYS;
 		bool 		bCancel;
 		
@@ -1227,69 +1312,85 @@ struct ScintillaAction
 		
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
-			Ihandle* iupSci = cSci.getIupScintilla;
-			
-			if( DocumentTabAction.getDocumentTabs( iupSci ) != _activeTabs ) continue;
-			
-			//if( ScintillaAction.getModify( iupSci ) != 0 )
-			if( ScintillaAction.getModifyByTitle( cSci ) )
+			if( cSci !is null )
 			{
-				IupSetAttribute( _activeTabs, "VALUE_HANDLE", cast(char*) iupSci );
+				Ihandle* iupSci = cSci.getIupScintilla;
 				
-				scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
-				
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-				IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
-				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
-				int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
-				//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
-				if( button == 3 )
+				if( iupSci != null )
 				{
-					bCancel = true;
-					break;
-				}
-				else if( button == 2 )
-				{
-					KEYS ~= cSci.getFullPath;
-				}
-				else if( button == 1 )
-				{
-					bool bNoNameFile;
-					if( cSci.getFullPath.length >= 7 )
+					if( DocumentTabAction.getDocumentTabs( iupSci ) != _activeTabs ) continue;
+					
+					//if( ScintillaAction.getModify( iupSci ) != 0 )
+					if( ScintillaAction.getModifyByTitle( cSci ) )
 					{
-						if( cSci.getFullPath[0..7] == "NONAME#" )
+						IupSetAttribute( _activeTabs, "VALUE_HANDLE", cast(char*) iupSci );
+						
+						scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
+						
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
+						IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
+						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
+						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
+						int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
+						//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
+						if( button == 3 )
 						{
-							saveAs( cSci, false, false );
+							bCancel = true;
+							break;
+						}
+						else if( button == 2 )
+						{
 							KEYS ~= cSci.getFullPath;
-							bNoNameFile = true;
+						}
+						else if( button == 1 )
+						{
+							bool bNoNameFile;
+							if( cSci.getFullPath.length >= 7 )
+							{
+								if( cSci.getFullPath[0..7] == "NONAME#" )
+								{
+									saveAs( cSci, false, false );
+									KEYS ~= cSci.getFullPath;
+									bNoNameFile = true;
+								}
+							}
+
+							if( !bNoNameFile )
+							{
+								KEYS ~= cSci.getFullPath;
+								cSci.saveFile();
+							}
 						}
 					}
-
-					if( !bNoNameFile )
+					else
 					{
 						KEYS ~= cSci.getFullPath;
-						cSci.saveFile();
 					}
+
+					GLOBAL.fileListTree.removeItem( cSci );
+					GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
+					IupDestroy( iupSci );
 				}
 			}
-			else
-			{
-				KEYS ~= cSci.getFullPath;
-			}
-
-			GLOBAL.fileListTree.removeItem( cSci );
-			GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
-			IupDestroy( iupSci );
 		}
+		+/
 
 		foreach( char[] s; KEYS )
 		{
-			CScintilla cSci = GLOBAL.scintillaManager[upperCase(s)];
-			delete cSci;
+			if( upperCase(s) in GLOBAL.scintillaManager )
+			{
+				CScintilla cSci = GLOBAL.scintillaManager[upperCase(s)];
+				if( cSci !is null )
+				{
+					GLOBAL.fileListTree.removeItem( cSci );
+					GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
+					//IupDestroy( cSci );				
+					delete cSci;
+				}
 
-			GLOBAL.scintillaManager.remove( upperCase(s) );
+				GLOBAL.scintillaManager.remove( upperCase(s) );
+			}
 		}
 		
 		DocumentTabAction.updateTabsLayout();
