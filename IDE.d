@@ -619,32 +619,33 @@ struct IDECONFIG
 			doc ~= setINILineData( "undo", convertShortKeyValue2String( GLOBAL.shortKeys[14].keyValue ) );
 			doc ~= setINILineData( "redo", convertShortKeyValue2String( GLOBAL.shortKeys[15].keyValue ) );
 			doc ~= setINILineData( "comment", convertShortKeyValue2String( GLOBAL.shortKeys[16].keyValue ) );
-			doc ~= setINILineData( "backnav", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) );
-			doc ~= setINILineData( "forwardnav", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) );
+			doc ~= setINILineData( "uncomment", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) );
+			doc ~= setINILineData( "backnav", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) );
+			doc ~= setINILineData( "forwardnav", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) );
 
-			doc ~= setINILineData( "showtype", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) );
-			doc ~= setINILineData( "defintion", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) );
-			doc ~= setINILineData( "procedure", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) );
-			doc ~= setINILineData( "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) );
-			doc ~= setINILineData( "reparse", convertShortKeyValue2String( GLOBAL.shortKeys[23].keyValue ) );
+			doc ~= setINILineData( "showtype", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) );
+			doc ~= setINILineData( "defintion", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) );
+			doc ~= setINILineData( "procedure", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) );
+			doc ~= setINILineData( "autocomplete", convertShortKeyValue2String( GLOBAL.shortKeys[23].keyValue ) );
+			doc ~= setINILineData( "reparse", convertShortKeyValue2String( GLOBAL.shortKeys[24].keyValue ) );
 			
-			doc ~= setINILineData( "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[24].keyValue ) );
-			doc ~= setINILineData( "quickrun", convertShortKeyValue2String( GLOBAL.shortKeys[25].keyValue ) );
-			doc ~= setINILineData( "run", convertShortKeyValue2String( GLOBAL.shortKeys[26].keyValue ) );
-			doc ~= setINILineData( "build", convertShortKeyValue2String( GLOBAL.shortKeys[27].keyValue ) );
+			doc ~= setINILineData( "compilerun", convertShortKeyValue2String( GLOBAL.shortKeys[25].keyValue ) );
+			doc ~= setINILineData( "quickrun", convertShortKeyValue2String( GLOBAL.shortKeys[26].keyValue ) );
+			doc ~= setINILineData( "run", convertShortKeyValue2String( GLOBAL.shortKeys[27].keyValue ) );
+			doc ~= setINILineData( "build", convertShortKeyValue2String( GLOBAL.shortKeys[28].keyValue ) );
 			
-			doc ~= setINILineData( "outlinewindow", convertShortKeyValue2String( GLOBAL.shortKeys[28].keyValue ) );
-			doc ~= setINILineData( "messagewindow", convertShortKeyValue2String( GLOBAL.shortKeys[29].keyValue ) );
+			doc ~= setINILineData( "outlinewindow", convertShortKeyValue2String( GLOBAL.shortKeys[29].keyValue ) );
+			doc ~= setINILineData( "messagewindow", convertShortKeyValue2String( GLOBAL.shortKeys[30].keyValue ) );
 			
-			doc ~= setINILineData( "customtool1", convertShortKeyValue2String( GLOBAL.shortKeys[30].keyValue ) );
-			doc ~= setINILineData( "customtool2", convertShortKeyValue2String( GLOBAL.shortKeys[31].keyValue ) );
-			doc ~= setINILineData( "customtool3", convertShortKeyValue2String( GLOBAL.shortKeys[32].keyValue ) );
-			doc ~= setINILineData( "customtool4", convertShortKeyValue2String( GLOBAL.shortKeys[33].keyValue ) );
-			doc ~= setINILineData( "customtool5", convertShortKeyValue2String( GLOBAL.shortKeys[34].keyValue ) );
-			doc ~= setINILineData( "customtool6", convertShortKeyValue2String( GLOBAL.shortKeys[35].keyValue ) );
-			doc ~= setINILineData( "customtool7", convertShortKeyValue2String( GLOBAL.shortKeys[36].keyValue ) );
-			doc ~= setINILineData( "customtool8", convertShortKeyValue2String( GLOBAL.shortKeys[37].keyValue ) );
-			doc ~= setINILineData( "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[38].keyValue ) );
+			doc ~= setINILineData( "customtool1", convertShortKeyValue2String( GLOBAL.shortKeys[31].keyValue ) );
+			doc ~= setINILineData( "customtool2", convertShortKeyValue2String( GLOBAL.shortKeys[32].keyValue ) );
+			doc ~= setINILineData( "customtool3", convertShortKeyValue2String( GLOBAL.shortKeys[33].keyValue ) );
+			doc ~= setINILineData( "customtool4", convertShortKeyValue2String( GLOBAL.shortKeys[34].keyValue ) );
+			doc ~= setINILineData( "customtool5", convertShortKeyValue2String( GLOBAL.shortKeys[35].keyValue ) );
+			doc ~= setINILineData( "customtool6", convertShortKeyValue2String( GLOBAL.shortKeys[36].keyValue ) );
+			doc ~= setINILineData( "customtool7", convertShortKeyValue2String( GLOBAL.shortKeys[37].keyValue ) );
+			doc ~= setINILineData( "customtool8", convertShortKeyValue2String( GLOBAL.shortKeys[38].keyValue ) );
+			doc ~= setINILineData( "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[39].keyValue ) );
 			
 			// buildtools
 			doc ~= setINILineData( "[buildtools]");
@@ -983,25 +984,26 @@ struct IDECONFIG
 							case "undo":					index =14; title = GLOBAL.languageItems["sc_undo"].toDString();						break;
 							case "redo":					index =15; title = GLOBAL.languageItems["sc_redo"].toDString();						break;
 							case "comment":					index =16; title = GLOBAL.languageItems["sc_comment"].toDString();					break;
-							case "backnav":					index =17; title = GLOBAL.languageItems["sc_backnav"].toDString();					break;
-							case "forwardnav":				index =18; title = GLOBAL.languageItems["sc_forwardnav"].toDString();				break;
+							case "uncomment":				index =17; title = GLOBAL.languageItems["sc_uncomment"].toDString();				break;
+							case "backnav":					index =18; title = GLOBAL.languageItems["sc_backnav"].toDString();					break;
+							case "forwardnav":				index =19; title = GLOBAL.languageItems["sc_forwardnav"].toDString();				break;
 							
-							case "showtype":				index =19; title = GLOBAL.languageItems["sc_showtype"].toDString();					break;
-							case "defintion":				index =20; title = GLOBAL.languageItems["sc_gotodef"].toDString();					break;
-							case "procedure":				index =21; title = GLOBAL.languageItems["sc_procedure"].toDString();				break;
-							case "autocomplete":			index =22; title = GLOBAL.languageItems["sc_autocomplete"].toDString();				break;
-							case "reparse":					index =23; title = GLOBAL.languageItems["sc_reparse"].toDString();					break;
+							case "showtype":				index =20; title = GLOBAL.languageItems["sc_showtype"].toDString();					break;
+							case "defintion":				index =21; title = GLOBAL.languageItems["sc_gotodef"].toDString();					break;
+							case "procedure":				index =22; title = GLOBAL.languageItems["sc_procedure"].toDString();				break;
+							case "autocomplete":			index =23; title = GLOBAL.languageItems["sc_autocomplete"].toDString();				break;
+							case "reparse":					index =24; title = GLOBAL.languageItems["sc_reparse"].toDString();					break;
 
-							case "compilerun":				index =24; title = GLOBAL.languageItems["sc_compilerun"].toDString();				break;
-							case "quickrun":				index =25; title = GLOBAL.languageItems["sc_quickrun"].toDString();					break;
-							case "run":						index =26; title = GLOBAL.languageItems["sc_run"].toDString();						break;
-							case "build":					index =27; title = GLOBAL.languageItems["sc_build"].toDString();					break;
+							case "compilerun":				index =25; title = GLOBAL.languageItems["sc_compilerun"].toDString();				break;
+							case "quickrun":				index =26; title = GLOBAL.languageItems["sc_quickrun"].toDString();					break;
+							case "run":						index =27; title = GLOBAL.languageItems["sc_run"].toDString();						break;
+							case "build":					index =28; title = GLOBAL.languageItems["sc_build"].toDString();					break;
 
-							case "outlinewindow":			index =28; title = GLOBAL.languageItems["sc_leftwindow"].toDString();				break;
-							case "messagewindow":			index =29; title = GLOBAL.languageItems["sc_bottomwindow"].toDString();				break;
+							case "outlinewindow":			index =29; title = GLOBAL.languageItems["sc_leftwindow"].toDString();				break;
+							case "messagewindow":			index =30; title = GLOBAL.languageItems["sc_bottomwindow"].toDString();				break;
 							
 							case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":
-								index = Integer.atoi( left[$-1..$] ) + 29;
+								index = Integer.atoi( left[$-1..$] ) + 30;
 								title = GLOBAL.languageItems[left].toDString();
 								break;
 							default:

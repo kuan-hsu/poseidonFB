@@ -895,7 +895,27 @@ extern(C)
 
 		if( nodeKind == "LEAF" ) // On File(*.bas, *.bi) Node
 		{
-			Ihandle* popupMenu = IupMenu( 
+			Ihandle* popupMenu;
+			
+			scope titleFP = new FilePath( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ) );
+			if( lowerCase( titleFP.ext ) == "bas" )
+			{
+				popupMenu = IupMenu( 
+										IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
+										IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
+										IupSeparator(),
+										IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
+										IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
+										IupSeparator(),
+										IupItem( GLOBAL.languageItems["setmainmodule"].toCString, "CProjectTree_setmainmodule" ),
+										null
+									);
+									
+				IupSetFunction( "CProjectTree_setmainmodule", cast(Icallback) &CProjectTree_setmainmodule_cb );
+			}
+			else
+			{
+				popupMenu = IupMenu( 
 										IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
 										IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
 										IupSeparator(),
@@ -903,6 +923,7 @@ extern(C)
 										IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
 										null
 									);
+			}
 
 			IupSetFunction( "CProjectTree_open", cast(Icallback) &CProjectTree_Open_cb );
 			IupSetFunction( "CProjectTree_remove", cast(Icallback) &CProjectTree_remove_cb );
@@ -1693,6 +1714,26 @@ extern(C)
 			}			
 		}
 		
+		return IUP_DEFAULT;
+	}
+	
+	private int CProjectTree_setmainmodule_cb( Ihandle* ih )
+	{
+		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+		char[]	fullPath	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+		
+		// Erase Project Treeitems And Left Only One Item
+		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
+		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+		
+		scope fp = new FilePath( fullPath );
+		char[] _prjName = ProjectAction.getActiveProjectName;
+		if( _prjName in GLOBAL.projectManager )
+		{
+			char[] _mainModule = fp.path ~ fp.name;
+			GLOBAL.projectManager[_prjName].mainFile = Util.substitute( _mainModule, GLOBAL.projectManager[_prjName].dir ~ "/", "" );
+		}
+
 		return IUP_DEFAULT;
 	}
 

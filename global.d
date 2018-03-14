@@ -365,56 +365,58 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk14;
 		ShortKey sk15 = { "redo", "Redo", 805306458 };
 		GLOBAL.shortKeys ~= sk15;
-		ShortKey sk16 = { "comment", "(Un)comment", 536870994 };
+		ShortKey sk16 = { "comment", "Comment", 536870994 };
 		GLOBAL.shortKeys ~= sk16;
-		ShortKey sk17 = { "backnav", "Backward Navigation", 536870984 };
+		ShortKey sk17 = { "uncomment", "UnComment", 805306450 };
 		GLOBAL.shortKeys ~= sk17;
-		ShortKey sk18 = { "forwardnav", "Forkward Navigation", 805306440 };
+		ShortKey sk18 = { "backnav", "Backward Navigation", 536870984 };
 		GLOBAL.shortKeys ~= sk18;
+		ShortKey sk19 = { "forwardnav", "Forkward Navigation", 805306440 };
+		GLOBAL.shortKeys ~= sk19;
 		
-		ShortKey sk19 = { "showtype", "Show Type", 65470 };
-		GLOBAL.shortKeys ~= sk19;		
-		ShortKey sk20 = { "defintion", "Goto Defintion", 1073741895 };
+		ShortKey sk20 = { "showtype", "Show Type", 65470 };
 		GLOBAL.shortKeys ~= sk20;
-		ShortKey sk21 = { "procedure", "Goto Member Procedure", 536870992 };		
+		ShortKey sk21 = { "defintion", "Goto Defintion", 1073741895 };
 		GLOBAL.shortKeys ~= sk21;
-		ShortKey sk22 = { "autocomplete", "Autocomplete", 536870993 };
+		ShortKey sk22 = { "procedure", "Goto Member Procedure", 536870992 };		
 		GLOBAL.shortKeys ~= sk22;
-		ShortKey sk23 = { "reparse", "Reparse", 65471 };
+		ShortKey sk23 = { "autocomplete", "Autocomplete", 536870993 };
 		GLOBAL.shortKeys ~= sk23;
-
-		ShortKey sk24 = { "compilerun", "Compile & Run", 536936386 };
+		ShortKey sk24 = { "reparse", "Reparse", 65471 };
 		GLOBAL.shortKeys ~= sk24;
-		ShortKey sk25 = { "quickrun", "Quick Run", 268500930 };
-		GLOBAL.shortKeys ~= sk25;
-		ShortKey sk26 = { "run", "Run", 65474 };
-		GLOBAL.shortKeys ~= sk26;
-		ShortKey sk27 = { "build", "Build", 65475 };
-		GLOBAL.shortKeys ~= sk27;
-		
-		ShortKey sk28 = { "outlinewindow", "On/Off Left-side Window", 65480 };
-		GLOBAL.shortKeys ~= sk28;
-		ShortKey sk29 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
-		GLOBAL.shortKeys ~= sk29;
 
-		ShortKey sk30 = { "customtool1", "Custom Tool(1)", 805371838 };
+		ShortKey sk25 = { "compilerun", "Compile & Run", 536936386 };
+		GLOBAL.shortKeys ~= sk25;
+		ShortKey sk26 = { "quickrun", "Quick Run", 268500930 };
+		GLOBAL.shortKeys ~= sk26;
+		ShortKey sk27 = { "run", "Run", 65474 };
+		GLOBAL.shortKeys ~= sk27;
+		ShortKey sk28 = { "build", "Build", 65475 };
+		GLOBAL.shortKeys ~= sk28;
+		
+		ShortKey sk29 = { "outlinewindow", "On/Off Left-side Window", 65480 };
+		GLOBAL.shortKeys ~= sk29;
+		ShortKey sk30 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
 		GLOBAL.shortKeys ~= sk30;
-		ShortKey sk31 = { "customtool2", "Custom Tool(2)", 805371839 };
+
+		ShortKey sk31 = { "customtool1", "Custom Tool(1)", 805371838 };
 		GLOBAL.shortKeys ~= sk31;
-		ShortKey sk32 = { "customtool3", "Custom Tool(3)", 805371840 };
+		ShortKey sk32 = { "customtool2", "Custom Tool(2)", 805371839 };
 		GLOBAL.shortKeys ~= sk32;
-		ShortKey sk33 = { "customtool4", "Custom Tool(4)", 805371841 };
+		ShortKey sk33 = { "customtool3", "Custom Tool(3)", 805371840 };
 		GLOBAL.shortKeys ~= sk33;
-		ShortKey sk34 = { "customtool5", "Custom Tool(5)", 805371842 };
+		ShortKey sk34 = { "customtool4", "Custom Tool(4)", 805371841 };
 		GLOBAL.shortKeys ~= sk34;
-		ShortKey sk35 = { "customtool6", "Custom Tool(6)", 805371843 };
+		ShortKey sk35 = { "customtool5", "Custom Tool(5)", 805371842 };
 		GLOBAL.shortKeys ~= sk35;
-		ShortKey sk36 = { "customtool7", "Custom Tool(7)", 805371844 };
+		ShortKey sk36 = { "customtool6", "Custom Tool(6)", 805371843 };
 		GLOBAL.shortKeys ~= sk36;
-		ShortKey sk37 = { "customtool8", "Custom Tool(8)", 805371845 };
+		ShortKey sk37 = { "customtool7", "Custom Tool(7)", 805371844 };
 		GLOBAL.shortKeys ~= sk37;
-		ShortKey sk38 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		ShortKey sk38 = { "customtool8", "Custom Tool(8)", 805371845 };
 		GLOBAL.shortKeys ~= sk38;
+		ShortKey sk39 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		GLOBAL.shortKeys ~= sk39;
 
 
 		fontUint fu;
@@ -486,7 +488,8 @@ struct GLOBAL
 			GLOBAL.languageItems["cut"] = new IupString( cast(char[]) "Cut" );
 			GLOBAL.languageItems["copy"] = new IupString( cast(char[]) "Copy" );
 			GLOBAL.languageItems["paste"] = new IupString( cast(char[]) "Paste" );
-			GLOBAL.languageItems["commentline"] = new IupString( cast(char[]) "(Un)Comment Line" );
+			GLOBAL.languageItems["commentline"] = new IupString( cast(char[]) "Comment Line" );
+			GLOBAL.languageItems["uncommentline"] = new IupString( cast(char[]) "UnComment Line" );
 			GLOBAL.languageItems["selectall"] = new IupString( cast(char[]) "Select All" );
 			GLOBAL.languageItems["selectmulti"] = new IupString( cast(char[]) "Multi-Select By Word" );
 			
@@ -518,6 +521,7 @@ struct GLOBAL
 			GLOBAL.languageItems["openinexplorer"] = new IupString( cast(char[]) "Open In Explorer" );
 			GLOBAL.languageItems["removefromprj"] = new IupString( cast(char[]) "Remove From Project" );
 			GLOBAL.languageItems["rename"] = new IupString( cast(char[]) "Rename File" );
+			GLOBAL.languageItems["setmainmodule"] = new IupString( cast(char[]) "Set As Main Module" );
 			GLOBAL.languageItems["newfile"] = new IupString( cast(char[]) "New File" );
 				GLOBAL.languageItems["filename"] = new IupString( cast(char[]) "File Name" );
 			GLOBAL.languageItems["newfolder"] = new IupString( cast(char[]) "New Folder" );
@@ -690,7 +694,8 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_newtab"] = new IupString( cast(char[]) "New Tab" );
 						GLOBAL.languageItems["sc_autocomplete"] = new IupString( cast(char[]) "Auto Complete" );
 						GLOBAL.languageItems["sc_compilerun"] = new IupString( cast(char[]) "Compile File And Run" );
-						GLOBAL.languageItems["sc_comment"] = new IupString( cast(char[]) "(Un)comment" );
+						GLOBAL.languageItems["sc_comment"] = new IupString( cast(char[]) "Comment" );
+						GLOBAL.languageItems["sc_uncomment"] = new IupString( cast(char[]) "UnComment" );
 						GLOBAL.languageItems["sc_backnav"] = new IupString( cast(char[]) "Backward Navigation" );
 						GLOBAL.languageItems["sc_forwardnav"] = new IupString( cast(char[]) "Forward Navigation" );
 						GLOBAL.languageItems["sc_backdefinition"] = new IupString( cast(char[]) "Back Definition" );

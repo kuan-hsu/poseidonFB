@@ -173,6 +173,11 @@ void createMenu()
 	Ihandle* item_comment = IupItem( GLOBAL.languageItems["commentline"].toCString, null);
 	IupSetAttribute(item_comment, "IMAGE", "icon_comment");
 	IupSetCallback( item_comment, "ACTION", cast(Icallback) &comment_cb );
+	
+	Ihandle* item_uncomment = IupItem( GLOBAL.languageItems["uncommentline"].toCString, null);
+	//IupSetAttribute(item_comment, "IMAGE", "icon_comment");
+	IupSetCallback( item_uncomment, "ACTION", cast(Icallback) &uncomment_cb );
+	
 
 	// Search
 	item_findReplace = IupItem( GLOBAL.languageItems["findreplace"].toCString, null );
@@ -673,8 +678,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.374)\nBy Kuan Hsu (Taiwan)\n2018.03.14" );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.027)\nBy Kuan Hsu (Taiwan)\n2018.03.04" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.375)\nBy Kuan Hsu (Taiwan)\n2018.03.15" );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.028)\nBy Kuan Hsu (Taiwan)\n2018.03.15" );
 		return IUP_DEFAULT;
 	});
 	
@@ -711,6 +716,7 @@ void createMenu()
 							item_paste,
 							IupSeparator(),
 							item_comment,
+							item_uncomment,
 							IupSeparator(),
 							item_selectAll,
 							null );
@@ -1173,17 +1179,15 @@ extern(C)
 				char[] currentLineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) ).dup;
 				if( currentLineText.length )
 				{
-					//SCI_POSITIONFROMLINE   2167
-					if( currentLineText[0] == '\'' )
-					{
-						lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
-						IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
-					}
-					else
+					version(FBIDE)
 					{
 						lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
 						IupSetAttributeId( iupSci, "INSERT", lineheadPos, "'" );
-					
+					}
+					version(DIDE)
+					{
+						lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
+						IupSetAttributeId( iupSci, "INSERT", lineheadPos, "//" );
 					}
 				}
 			}
@@ -1210,16 +1214,16 @@ extern(C)
 						char[] currentLineText = fromStringz( IupGetAttributeId( iupSci, "LINE", i ) ).dup;
 						if( currentLineText.length )
 						{
-							//SCI_POSITIONFROMLINE   2167
-							if( currentLineText[0] == '\'' )
-							{
-								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
-								IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
-							}
-							else
+							version(FBIDE)
 							{
 								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
 								IupSetAttributeId( iupSci, "INSERT", lineheadPos, "'" );
+							
+							}
+							version(DBIDE)
+							{
+								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
+								IupSetAttributeId( iupSci, "INSERT", lineheadPos, "//" );
 							
 							}
 						}					
@@ -1229,6 +1233,93 @@ extern(C)
 		}
 	}
 
+	void uncomment_cb()
+	{
+		Ihandle*	iupSci = actionManager.ScintillaAction.getActiveIupScintilla();
+		if( iupSci != null )
+		{
+			int			lineheadPos;
+			int			currentPos = actionManager.ScintillaAction.getCurrentPos( iupSci );
+			int			currentLine = cast(int) IupScintillaSendMessage( iupSci, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			
+			char* _selectText = IupGetAttribute( iupSci, "SELECTION" );
+			if( _selectText == null ) // Non Selection
+			{
+				char[] currentLineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) ).dup;
+				if( currentLineText.length )
+				{
+					version(FBIDE)
+					{
+						//SCI_POSITIONFROMLINE   2167
+						if( currentLineText[0] == '\'' )
+						{
+							lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
+							IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
+						}
+					}
+					version(DIDE)
+					{
+						if( currentLineText.length > 1 )
+						{
+							if( currentLineText[0..2] == "//" )
+							{
+								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
+								IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "2" ) );
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				char[] selectText = fromStringz( _selectText );
+				int headCommaPos = Util.index( selectText, "," );
+				int headColonPos = Util.index( selectText, ":" );
+				int tailCommaPos = Util.rindex( selectText, "," );
+				if( tailCommaPos > headCommaPos )
+				{
+					int line1 = Integer.atoi( selectText[0..headCommaPos] );
+					int line2 = Integer.atoi( selectText[headColonPos+1..tailCommaPos] );
+					
+					if( line1 > line2 )
+					{
+						int temp = line1;
+						line1 = line2;
+						line2 = temp;
+					}
+					
+					for( int i = line1; i <= line2; ++ i )
+					{
+						char[] currentLineText = fromStringz( IupGetAttributeId( iupSci, "LINE", i ) ).dup;
+						if( currentLineText.length )
+						{
+							version(FBIDE)
+							{
+								//SCI_POSITIONFROMLINE   2167
+								if( currentLineText[0] == '\'' )
+								{
+									lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
+									IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
+								}
+							}						
+							version(DIDE)
+							{
+								if( currentLineText.length > 1 )
+								{
+									if( currentLineText[0..2] == "//" )
+									{
+										lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
+										IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "2" ) );
+									}
+								}
+							}						
+						}					
+					}
+				}
+			}
+		}
+	}
+	
 	void findReplace_cb()
 	{
 		/*

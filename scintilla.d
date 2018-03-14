@@ -2437,6 +2437,14 @@ extern(C)
 						}
 						break;
 						
+					case "uncomment":
+						if( sk.keyValue == c )
+						{
+							menu.uncomment_cb();
+							return IUP_IGNORE;
+						}
+						break;						
+						
 					case "backnav":
 						if( sk.keyValue == c )
 						{

@@ -1080,7 +1080,7 @@ struct ScintillaAction
 		}
 		
 		
-		IupDestroy( cSci.getIupScintilla );
+		//IupDestroy( cSci.getIupScintilla );
 		IupRefresh( GLOBAL.activeDocumentTabs );
 		GLOBAL.fileListTree.removeItem( cSci );
 		GLOBAL.scintillaManager.remove( tools.upperCase( cSci.getFullPath ) );

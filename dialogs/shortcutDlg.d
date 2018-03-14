@@ -27,15 +27,15 @@ class CShortCutDialog : CBaseDialog
 		
 		if( item < 8 )
 			item --;
-		else if( item < 22 )
+		else if( item < 23 )
 			item -= 2;
-		else if( item < 28 )
+		else if( item < 29 )
 			item -= 3;
-		else if( item < 33 )
+		else if( item < 34 )
 			item -= 4;
-		else if( item < 36 )
+		else if( item < 37 )
 			item -= 5;
-		else if( item < 46 )
+		else if( item < 47 )
 			item -= 6;
 
 
@@ -174,31 +174,32 @@ extern(C) // Callback for CSingleTextDialog
 			case "undo":						pos = 14;	break;
 			case "redo":						pos = 15;	break;
 			case "comment":						pos = 16;	break;
-			case "backnav":						pos = 17;	break;
-			case "forwardnav":					pos = 18;	break;
+			case "uncomment":					pos = 17;	break;
+			case "backnav":						pos = 18;	break;
+			case "forwardnav":					pos = 19;	break;
 			
-			case "showtype":					pos = 19;	break;
-			case "defintion":					pos = 20;	break;
-			case "procedure":					pos = 21;	break;
-			case "autocomplete":				pos = 22;	break;
-			case "reparse":						pos = 23;	break;
+			case "showtype":					pos = 20;	break;
+			case "defintion":					pos = 21;	break;
+			case "procedure":					pos = 22;	break;
+			case "autocomplete":				pos = 23;	break;
+			case "reparse":						pos = 24;	break;
 			
-			case "compilerun":					pos = 24;	break;
-			case "quickrun":					pos = 25;	break;
-			case "run":							pos = 26;	break;
-			case "build":						pos = 27;	break;
+			case "compilerun":					pos = 25;	break;
+			case "quickrun":					pos = 26;	break;
+			case "run":							pos = 27;	break;
+			case "build":						pos = 28;	break;
 			
-			case "outlinewindow":				pos = 28;	break;
-			case "messagewindow":				pos = 29;	break;
+			case "outlinewindow":				pos = 29;	break;
+			case "messagewindow":				pos = 30;	break;
 			
-			case "customtool1":					pos = 30;	break;
-			case "customtool2":					pos = 31;	break;
-			case "customtool3":					pos = 32;	break;
-			case "customtool4":					pos = 33;	break;
-			case "customtool5":					pos = 34;	break;
-			case "customtool6":					pos = 35;	break;
-			case "customtool7":					pos = 36;	break;
-			case "customtool8":					pos = 37;	break;
+			case "customtool1":					pos = 31;	break;
+			case "customtool2":					pos = 32;	break;
+			case "customtool3":					pos = 33;	break;
+			case "customtool4":					pos = 34;	break;
+			case "customtool5":					pos = 35;	break;
+			case "customtool6":					pos = 36;	break;
+			case "customtool7":					pos = 37;	break;
+			case "customtool8":					pos = 38;	break;
 			case "customtool9":					pos = 39;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
@@ -266,31 +267,32 @@ extern(C) // Callback for CSingleTextDialog
 			case "undo":						pos = 14;	break;
 			case "redo":						pos = 15;	break;
 			case "comment":						pos = 16;	break;
-			case "backnav":						pos = 17;	break;
-			case "forwardnav":					pos = 18;	break;
+			case "uncomment":					pos = 17;	break;
+			case "backnav":						pos = 18;	break;
+			case "forwardnav":					pos = 19;	break;
 			
-			case "showtype":					pos = 19;	break;
-			case "defintion":					pos = 20;	break;
-			case "procedure":					pos = 21;	break;
-			case "autocomplete":				pos = 22;	break;
-			case "reparse":						pos = 23;	break;
+			case "showtype":					pos = 20;	break;
+			case "defintion":					pos = 21;	break;
+			case "procedure":					pos = 22;	break;
+			case "autocomplete":				pos = 23;	break;
+			case "reparse":						pos = 24;	break;
 			
-			case "compilerun":					pos = 24;	break;
-			case "quickrun":					pos = 25;	break;
-			case "run":							pos = 26;	break;
-			case "build":						pos = 27;	break;
+			case "compilerun":					pos = 25;	break;
+			case "quickrun":					pos = 26;	break;
+			case "run":							pos = 27;	break;
+			case "build":						pos = 28;	break;
 			
-			case "outlinewindow":				pos = 28;	break;
-			case "messagewindow":				pos = 29;	break;
+			case "outlinewindow":				pos = 29;	break;
+			case "messagewindow":				pos = 30;	break;
 			
-			case "customtool1":					pos = 30;	break;
-			case "customtool2":					pos = 31;	break;
-			case "customtool3":					pos = 32;	break;
-			case "customtool4":					pos = 33;	break;
-			case "customtool5":					pos = 34;	break;
-			case "customtool6":					pos = 35;	break;
-			case "customtool7":					pos = 36;	break;
-			case "customtool8":					pos = 37;	break;
+			case "customtool1":					pos = 31;	break;
+			case "customtool2":					pos = 32;	break;
+			case "customtool3":					pos = 33;	break;
+			case "customtool4":					pos = 34;	break;
+			case "customtool5":					pos = 35;	break;
+			case "customtool6":					pos = 36;	break;
+			case "customtool7":					pos = 37;	break;
+			case "customtool8":					pos = 38;	break;
 			case "customtool9":					pos = 39;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
@@ -320,15 +322,15 @@ extern(C) // Callback for CSingleTextDialog
 			char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
 			if( pos < 6 )
 				pos ++;
-			else if( pos < 19 )
+			else if( pos < 20 )
 				pos += 2;
-			else if( pos < 24 )
+			else if( pos < 25 )
 				pos += 3;
-			else if( pos < 28 )
+			else if( pos < 29 )
 				pos += 4;
-			else if( pos < 30 )
+			else if( pos < 31 )
 				pos += 5;
-			else if( pos < 39 )
+			else if( pos < 40 )
 				pos += 6;
 
 			scope _cString = new IupString ;
