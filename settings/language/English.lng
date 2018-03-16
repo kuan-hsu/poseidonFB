@@ -294,6 +294,7 @@ general=General
 	prjopts=Compile Opts:
 	prjcomment=Comment
 	prjcompiler=FBC Path
+	nodirmessage=Without Project Dir!!
 include=Include...
 	includepath=Include Paths
 	librarypath=Library Paths

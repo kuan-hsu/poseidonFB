@@ -678,7 +678,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.375)\nBy Kuan Hsu (Taiwan)\n2018.03.15" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.376)\nBy Kuan Hsu (Taiwan)\n2018.03.16" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.028)\nBy Kuan Hsu (Taiwan)\n2018.03.15" );
 		return IUP_DEFAULT;
 	});
@@ -1220,7 +1220,7 @@ extern(C)
 								IupSetAttributeId( iupSci, "INSERT", lineheadPos, "'" );
 							
 							}
-							version(DBIDE)
+							version(DIDE)
 							{
 								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
 								IupSetAttributeId( iupSci, "INSERT", lineheadPos, "//" );

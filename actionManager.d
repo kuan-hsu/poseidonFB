@@ -828,11 +828,17 @@ struct ScintillaAction
 			
 			if( lineNumber > -1 )
 			{
-				IupScintillaSendMessage( ih, 2234, --lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				IupScintillaSendMessage( ih, 2024, lineNumber, 0 );		// SCI_GOTOLINE 2024
+				--lineNumber;
+				IupScintillaSendMessage( ih, 2234, lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+				IupScintillaSendMessage( ih, 2024, lineNumber, 0 );	// SCI_GOTOLINE 2024
 
 				// If debug window is on, don't scroll to top
-				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )	IupSetInt( ih, "FIRSTVISIBLELINE", lineNumber );
+				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )
+				{
+					int visibleLINE = IupScintillaSendMessage( ih, 2220, lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
+					if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
+					IupSetInt( ih, "FIRSTVISIBLELINE", lineNumber );
+				}
 			}
 			StatusBarAction.update();
 

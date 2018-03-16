@@ -429,6 +429,16 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ _prjName );
 			}
+			else
+			{
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["nodirmessage"].toCString() );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
+				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				
+				return IUP_DEFAULT;
+			}			
 		}
 
 		return IUP_CLOSE;

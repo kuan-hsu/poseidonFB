@@ -4941,7 +4941,7 @@ class CParser
 				}
 			}
 
-			if( activeASTnode != head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+			if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
 			//printAST( head );
 
 			return head;
@@ -5423,7 +5423,7 @@ class CParser
 			}
 			catch( Exception e ){}
 
-			if( activeASTnode != head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+			if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
 			//printAST( head );
 
 			return head;

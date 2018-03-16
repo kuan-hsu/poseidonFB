@@ -393,12 +393,22 @@ extern(C)
 						{
 							if( cast(int)IupScintillaSendMessage( cSci.getIupScintilla, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
 							{
-								if( ( c > 32 && c < 127 ) )
+								//IupMessage("",toStringz( Integer.toString( c ) ) );
+								if( c == 32 || c == 9 || c == 13 || c == 40 )
 								{
-									int		headPos;
-									int 	pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-									char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, headPos );
+									int		pos, headPos;
+									int 	currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
 									
+									if( c != 13 )
+									{
+										pos = currentPos - 1;
+									}
+									else
+									{
+										pos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2136, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 2, 0 ); // SCI_GETLINEENDPOSITION 2136
+									}
+									
+									char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, headPos );
 									if( word.length )
 									{
 										word = lowerCase( word.reverse );
@@ -415,7 +425,7 @@ extern(C)
 														IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
 														word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
 														IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
-														IupScintillaSendMessage( cSci.getIupScintilla, 2025, pos , 0 ); // sci_gotopos = 2025,
+														IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos, 0 ); // sci_gotopos = 2025,
 
 														bExitFlag = true;
 														break;

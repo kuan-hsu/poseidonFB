@@ -768,6 +768,7 @@ struct GLOBAL
 			GLOBAL.languageItems["prjopts"] = new IupString( cast(char[]) "Compile Opts:" );
 			GLOBAL.languageItems["prjcomment"] = new IupString( cast(char[]) "Comment" );
 			GLOBAL.languageItems["prjcompiler"] = new IupString( cast(char[]) "Compiler Path" );
+			GLOBAL.languageItems["nodirmessage"] = new IupString( cast(char[]) "Without Project Dir!!" );
 		GLOBAL.languageItems["include"] = new IupString( cast(char[]) "Include..." );
 			GLOBAL.languageItems["includepath"] = new IupString( cast(char[]) "Include Paths" );
 			GLOBAL.languageItems["librarypath"] = new IupString( cast(char[]) "Libraries Paths" );
