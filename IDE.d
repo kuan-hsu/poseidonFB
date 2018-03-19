@@ -486,6 +486,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "LoadPrevDoc", GLOBAL.editorSetting00.LoadPrevDoc );
 			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
 			doc ~= setINILineData( "MiddleScroll", GLOBAL.editorSetting00.MiddleScroll );
+			doc ~= setINILineData( "SaveDocStatus", GLOBAL.editorSetting00.DocStatus );
 			doc ~= setINILineData( "ControlCharSymbol", GLOBAL.editorSetting00.ControlCharSymbol );
 			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
 			doc ~= setINILineData( "Bit64", GLOBAL.editorSetting00.Bit64 );
@@ -851,6 +852,7 @@ struct IDECONFIG
 							case "LoadPrevDoc":				GLOBAL.editorSetting00.LoadPrevDoc = right;				break;
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
 							case "MiddleScroll":			GLOBAL.editorSetting00.MiddleScroll = right;			break;
+							case "SaveDocStatus":			GLOBAL.editorSetting00.DocStatus = right;				break;
 							case "ControlCharSymbol":		GLOBAL.editorSetting00.ControlCharSymbol = right;		break;
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
 							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
@@ -1139,6 +1141,101 @@ struct IDECONFIG
 		// Get and Set Default Import Path
 		version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath.toDString );		
 	}
+	
+	static void saveFileStatus()
+	{
+		try
+		{
+			char[] doc;
+			
+			// Editor
+			doc ~= "[poseidonDocStatus]\n";
+			
+			foreach( char[] f; GLOBAL.fileStatusManager.keys )
+			{
+				char[] lineData;
+				
+				doc ~= ( f ~ "=" );
+				
+				foreach( int i, int value; GLOBAL.fileStatusManager[f] )
+				{
+					if( i == 0 )
+						doc ~= ( "(" ~ Integer.toString( value ) ~ ")" );
+					else
+					{
+						doc ~= ( Integer.toString( value ) ~ "," );
+					}
+				}
+				
+				doc ~= "\n";
+			}
+			
+			actionManager.FileAction.saveFile( "settings/docStatus.ini", doc );
+		}
+		catch( Exception e )
+		{
+		
+		}
+	}	
+
+	static void loadFileStatus()
+	{
+		try
+		{
+			scope settingFilePath = new FilePath( "settings/docStatus.ini" );
+			if( !settingFilePath.exists() ) return;
+			
+			// Load INI
+			scope file = new UnicodeFile!(char)( "settings/docStatus.ini", Encoding.Unknown );
+			char[] doc = file.read();
+			
+			char[]	blockText;
+			bool	bCheckPass;
+			foreach( char[] lineData; Util.splitLines( doc ) )
+			{
+				lineData = Util.trim( lineData );
+				
+				if( !bCheckPass )
+				{
+					if( lineData == "[poseidonDocStatus]" )
+					{
+						bCheckPass = true;
+						continue;
+					}
+					else
+					{
+						return;
+					}
+				}
+				
+				// Get Line Data
+				int assignPos = Util.index( lineData, "=" );
+				if( assignPos < lineData.length )
+				{
+					int		pos;
+					char[]	fullPath = Path.normalize( lineData[0..assignPos] );
+					char[]	rightData = lineData[assignPos+1..$];
+					
+					int closeParenPos = Util.index( rightData, ")" );
+					if( closeParenPos < rightData.length )
+					{
+						pos = Integer.toInt( rightData[1..closeParenPos] );
+						GLOBAL.fileStatusManager[fullPath] ~= pos;
+					
+						foreach( char[] s; Util.split( rightData[closeParenPos+1..$], "," ) )
+						{
+							if( s.length ) GLOBAL.fileStatusManager[fullPath] ~= Integer.toInt(s);
+						}
+					}
+				}
+			}
+		}
+		catch( Exception e )
+		{
+		
+		}
+	}
+	
 
 	/+
 	static void load()

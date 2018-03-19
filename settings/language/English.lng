@@ -146,6 +146,7 @@ options=Options
 				multiselection=Enable Document Multi Selection
 				loadprevdoc=Load Previous Documents
 				middlescroll=Middle Button Scroll
+				savedocstatus=Save Document Status
 				controlcharsymbol=Set Control Character Symbol
 				tabwidth=Tab Width
 				columnedge=Column Edge

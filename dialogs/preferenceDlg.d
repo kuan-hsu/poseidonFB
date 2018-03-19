@@ -437,6 +437,11 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleMiddleScroll, "VALUE", toStringz(GLOBAL.editorSetting00.MiddleScroll.dup) );
 		IupSetHandle( "toggleMiddleScroll", toggleMiddleScroll );
 		
+		Ihandle* toggleDocStatus = IupToggle( GLOBAL.languageItems["savedocstatus"].toCString, null );
+		IupSetAttribute( toggleDocStatus, "VALUE", toStringz(GLOBAL.editorSetting00.DocStatus.dup) );
+		IupSetHandle( "toggleDocStatus", toggleDocStatus );
+		
+		
 		Ihandle* labelSetControlCharSymbol = IupLabel( toStringz( GLOBAL.languageItems["controlcharsymbol"].toDString ~ ":" ) );
 		Ihandle* textSetControlCharSymbol = IupText( null );
 		IupSetAttribute( textSetControlCharSymbol, "VALUE", toStringz(GLOBAL.editorSetting00.ControlCharSymbol) );
@@ -505,13 +510,13 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttributes( toggleCurrentWord, "" ),
 
 				IupSetAttributes( toggleMiddleScroll, "" ),
+				IupSetAttributes( toggleDocStatus, "" ),
+				
 				hBoxControlChar,
-				
 				IupSetAttributes( hBoxTab, "" ),
+
 				IupSetAttributes( hBoxColumn, "" ),
-				
 				IupSetAttributes( hBoxBarSize, "" ),
-				IupFill(),
 				
 				null
 			);
@@ -549,12 +554,15 @@ class CPreferenceDialog : CBaseDialog
 
 				IupSetAttributes( toggleCurrentWord, "" ),
 				IupSetAttributes( toggleMiddleScroll, "" ),
-
-				IupSetAttributes( hBoxTab, "" ),
-				IupSetAttributes( hBoxColumn, "" ),
 				
+				IupSetAttributes( toggleDocStatus, "" ),
+				IupSetAttributes( hBoxTab, "" ),
+
+				IupSetAttributes( hBoxColumn, "" ),
 				hBoxControlChar,
+				
 				IupSetAttributes( hBoxBarSize, "" ),
+				IupFill(),
 				
 				null
 			);
@@ -1633,6 +1641,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleLoadprev", null );
 		IupSetHandle( "toggleCurrentWord", null );
 		IupSetHandle( "toggleMiddleScroll", null );
+		IupSetHandle( "toggleDocStatus", null );
 		IupSetHandle( "textSetControlCharSymbol", null );
 		
 		
@@ -2047,6 +2056,8 @@ extern(C) // Callback for CPreferenceDialog
 				if( IupGetHandle( "menuHighlightCurrentWord" ) != null ) IupSetAttribute( IupGetHandle( "menuHighlightCurrentWord" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE" ) );
 				
 			GLOBAL.editorSetting00.MiddleScroll				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMiddleScroll" ), "VALUE" )).dup;
+			GLOBAL.editorSetting00.DocStatus				= fromStringz(IupGetAttribute( IupGetHandle( "toggleDocStatus" ), "VALUE" )).dup;
+			
 			GLOBAL.editorSetting00.ControlCharSymbol		= fromStringz(IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" )).dup;
 			
 			

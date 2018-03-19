@@ -141,7 +141,13 @@ class CScintilla
 	public:
 	int				encoding;
 	int				lastPos = -99;
-	
+
+	this( void* _beCopiedDocument )
+	{
+		sci = IupScintilla();
+		IupScintillaSendMessage( sci, 2358, 0 , cast(int) _beCopiedDocument ); // SCI_SETDOCPOINTER 2358
+	}
+
 	this()
 	{
 		sci = IupScintilla();
@@ -245,6 +251,19 @@ class CScintilla
 						if( fn == fullPath.toDString ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
 					}
 				}			
+			}
+		}
+		
+		if( GLOBAL.editorSetting00.DocStatus == "ON" )
+		{
+			GLOBAL.fileStatusManager[fullPath.toDString].length = 0;
+			GLOBAL.fileStatusManager[fullPath.toDString] ~= ScintillaAction.getCurrentPos( sci );
+			for( int i = 0; i < IupGetInt( sci, "LINECOUNT" ); ++ i )
+			{
+				if( cast(int) IupScintillaSendMessage( sci, 2230, i, 0 ) == 0 ) // SCI_GETFOLDEXPANDED 2230
+				{
+					GLOBAL.fileStatusManager[fullPath.toDString] ~= i;
+				}
 			}
 		}
 

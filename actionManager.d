@@ -882,11 +882,45 @@ struct ScintillaAction
 			if( DocumentTabAction.setFocus( _sci.getIupScintilla ) == IUP_DEFAULT ) return false;
 			
 			IupScintillaSendMessage( _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
-			if( lineNumber > -1 )
+			
+			int	fileStatusPos = -1;
+			if( GLOBAL.editorSetting00.DocStatus == "ON" )
 			{
-				IupScintillaSendMessage( _sci.getIupScintilla, 2234, lineNumber - 1, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber - 1, 0 ); // SCI_GOTOLINE = 2024
-				IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber - 1 );
+				if( fullPath in GLOBAL.fileStatusManager )
+				{
+					foreach( int _pos, int value; GLOBAL.fileStatusManager[fullPath] )
+					{
+						if( _pos == 0 )
+						{
+							lineNumber = ScintillaAction.getLinefromPos( _sci.getIupScintilla, value );
+							fileStatusPos = value;
+						}
+						else
+						{
+							//IupScintillaSendMessage( _sci.getIupScintilla, 2229, value, 0 ); //  SCI_SETFOLDEXPANDED 2229
+							IupSetInt( _sci.getIupScintilla, "FOLDTOGGLE", value );
+						}
+					}
+				}
+			}			
+			
+			if( fileStatusPos > -1 )
+			{
+				IupScintillaSendMessage( _sci.getIupScintilla, 2234, lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+				IupScintillaSendMessage( _sci.getIupScintilla, 2025, fileStatusPos, 0 ); // SCI_GOTOPOS 2025
+
+				int visibleLINE = IupScintillaSendMessage( _sci.getIupScintilla, 2220, lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
+				if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
+				IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );				
+			}
+			else
+			{
+				if( lineNumber > -1 )
+				{
+					IupScintillaSendMessage( _sci.getIupScintilla, 2234, --lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+					IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
+					IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );				
+				}
 			}
 			//StatusBarAction.update();
 

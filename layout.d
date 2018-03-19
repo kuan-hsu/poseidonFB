@@ -206,6 +206,8 @@ void createEditorSetting()
 	
 	GLOBAL.IDEMessageDlg.setFont( GLOBAL.fonts[7].fontString );
 	GLOBAL.IDEMessageDlg.setLocalization();
+	
+	if( GLOBAL.editorSetting00.DocStatus == "ON" ) IDECONFIG.loadFileStatus();
 }
 
 void createLayout()
@@ -325,6 +327,8 @@ extern(C)
 				if( parser !is null ) delete parser;
 			}
 			
+			if( GLOBAL.editorSetting00.DocStatus == "ON" ) IDECONFIG.saveFileStatus();
+			
 			if( GLOBAL.scrollTimer != null ) IupDestroy( GLOBAL.scrollTimer );
 		}
 		catch( Exception e )
@@ -389,50 +393,53 @@ extern(C)
 					version(FBIDE)
 					{
 						// Auto convert keyword case......
-						if( GLOBAL.keywordCase > 0 )
+						int 	currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+						if( !ScintillaAction.isComment( cSci.getIupScintilla, currentPos ))
 						{
-							if( cast(int)IupScintillaSendMessage( cSci.getIupScintilla, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
+							if( GLOBAL.keywordCase > 0 )
 							{
-								//IupMessage("",toStringz( Integer.toString( c ) ) );
-								if( c == 32 || c == 9 || c == 13 || c == 40 )
+								if( cast(int)IupScintillaSendMessage( cSci.getIupScintilla, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
 								{
-									int		pos, headPos;
-									int 	currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-									
-									if( c != 13 )
+									//IupMessage("",toStringz( Integer.toString( c ) ) );
+									if( c == 32 || c == 9 || c == 13 || c == 40 )
 									{
-										pos = currentPos - 1;
-									}
-									else
-									{
-										pos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2136, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 2, 0 ); // SCI_GETLINEENDPOSITION 2136
-									}
-									
-									char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, headPos );
-									if( word.length )
-									{
-										word = lowerCase( word.reverse );
-
-										bool bExitFlag;
-										foreach( IupString _keyword; GLOBAL.KEYWORDS )
+										int		pos, headPos;
+										
+										if( c != 13 )
 										{
-											foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
-											{	
-												if( _k.length )
-												{
-													if( lowerCase( _k ) == word )
-													{
-														IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
-														word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
-														IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
-														IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos, 0 ); // sci_gotopos = 2025,
+											pos = currentPos - 1;
+										}
+										else
+										{
+											pos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2136, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 2, 0 ); // SCI_GETLINEENDPOSITION 2136
+										}
+										
+										char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, headPos );
+										if( word.length )
+										{
+											word = lowerCase( word.reverse );
 
-														bExitFlag = true;
-														break;
+											bool bExitFlag;
+											foreach( IupString _keyword; GLOBAL.KEYWORDS )
+											{
+												foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
+												{	
+													if( _k.length )
+													{
+														if( lowerCase( _k ) == word )
+														{
+															IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
+															word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
+															IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
+															IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos, 0 ); // sci_gotopos = 2025,
+
+															bExitFlag = true;
+															break;
+														}
 													}
 												}
+												if( bExitFlag ) break;
 											}
-											if( bExitFlag ) break;
 										}
 									}
 								}
