@@ -123,7 +123,8 @@ struct GLOBAL
 	static int					messageSplit_value = 800;
 
 	static CPreferenceDialog	preferenceDlg;
-	static CSearchDialog		searchDlg;
+	//static CSearchDialog		searchDlg;
+	static CSearchExpander		searchExpander;
 	static CFindInFilesDialog	serachInFilesDlg;
 	static CCompilerHelpDialog	compilerHelpDlg;
 	static CIDEMessageDialog	IDEMessageDlg;

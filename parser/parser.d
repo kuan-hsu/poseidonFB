@@ -1112,7 +1112,7 @@ class CParser
 								}
 
 								activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, _returnType ~ "()", null, _lineNum );
-								if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+								if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 								break;
 							}
 						}
@@ -1153,7 +1153,7 @@ class CParser
 
 									activeASTnode.type = _returnType ~ _param;
 								
-									if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+									if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 									break;
 								}
 							}
@@ -1194,13 +1194,13 @@ class CParser
 									}
 
 									activeASTnode.type = _returnType ~ _param;
-									if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+									if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 								}
 							}
 							else // delete
 							{
 								activeASTnode.type = _param;
-								if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+								if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 							}
 							break;
 						}
@@ -1310,7 +1310,7 @@ class CParser
 									_param = parseParam( bDeclare );
 
 									activeASTnode.type = _param;
-									if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+									if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 									if( token().tok == TOK.Texport ) parseToken( TOK.Texport );
 									break;
 								}
@@ -1346,7 +1346,7 @@ class CParser
 										}
 				
 										activeASTnode.type = _returnType ~ _param;
-										if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+										if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 										if( token().tok == TOK.Texport ) parseToken( TOK.Texport );
 										break;
 									}
@@ -1503,7 +1503,7 @@ class CParser
 								}
 							
 								activeASTnode.type = _returnType ~ _param;
-								if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+								if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 
 								if( token().tok == TOK.Tstatic ) parseToken( TOK.Tstatic );
 								
@@ -1516,7 +1516,7 @@ class CParser
 						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
 						{
 							activeASTnode.type = _param;
-							if( bDeclare ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+							if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
 							return true;
 						}						
 					}
@@ -1864,7 +1864,7 @@ class CParser
 							if( token().tok == TOK.Tend || next().tok == TOK.Tenum )
 							{
 								tokenIndex += 2;
-								activeASTnode = activeASTnode.getFather( token().lineNumber );
+								if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 							}
 							else
 							{
@@ -1972,7 +1972,7 @@ class CParser
 				if( token().tok == TOK.Tend && next().tok == B_KIND )
 				{
 					tokenIndex += 2;
-					activeASTnode = activeASTnode.getFather( token().lineNumber );
+					if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 					return true;
 				}			
 			}
@@ -4151,7 +4151,7 @@ class CParser
 							if( token().tok == TOK.Tclosecurly )
 							{
 								parseToken( TOK.Tclosecurly );
-								activeASTnode = activeASTnode.getFather();
+								if( activeASTnode.getFather !is null )activeASTnode = activeASTnode.getFather();
 								return true;
 							}
 						}
@@ -4192,7 +4192,7 @@ class CParser
 							if( token().tok == TOK.Tclosecurly )
 							{
 								parseToken( TOK.Tclosecurly );
-								activeASTnode = activeASTnode.getFather();
+								if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 								return true;
 							}
 						}
@@ -4683,7 +4683,7 @@ class CParser
 							parseStack.push( "version" );
 							parse( null ); //getTokenIdentifierUntil( TOK.Tsemicolon );
 							activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-							activeASTnode = activeASTnode.getFather();
+							if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 
 							if( token().tok == TOK.Telse )
 							{
@@ -4705,7 +4705,7 @@ class CParser
 										}									
 										parse( null );//getTokenIdentifierUntil( TOK.Tsemicolon );
 										activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-										activeASTnode = activeASTnode.getFather();
+										if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 									}
 									else
 									{
@@ -4932,7 +4932,7 @@ class CParser
 						break;
 
 					case TOK.Tendmacro:
-						activeASTnode = activeASTnode.getFather( token().lineNumber );
+						if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 
 					default:
 						tokenIndex ++;
@@ -5236,7 +5236,7 @@ class CParser
 												{
 													activeASTnode.endLineNum = token().lineNumber;
 													_name = activeASTnode.name;
-													activeASTnode = activeASTnode.getFather();
+													if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 												}
 
 												if( next().tok == TOK.Telse )
@@ -5262,7 +5262,7 @@ class CParser
 															}
 															parse( null );//getTokenIdentifierUntil( TOK.Tsemicolon );
 															activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-															activeASTnode = activeASTnode.getFather();
+															if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 														}
 														else
 														{
@@ -5292,7 +5292,7 @@ class CParser
 												if( activeASTnode.getFather !is null )
 												{
 													activeASTnode.endLineNum = token().lineNumber;
-													activeASTnode = activeASTnode.getFather();
+													if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 												}
 										}
 										/+

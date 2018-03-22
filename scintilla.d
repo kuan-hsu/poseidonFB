@@ -2554,13 +2554,21 @@ extern(C)
 				{
 					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
-					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text[0.._pos].dup ) );
+					int tail = AutoComplete.getWholeWordTailPos( ih, pos );
+					if( tail > pos )
+					{
+						IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
+						//IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( pos ) ~ ":" ~  Integer.toString( tail ) ) );
+						//IupScintillaSendMessage( ih, 2025, tail, 0 ); // SCI_GOTOPOS 2025
+					}
+					
+					IupSetAttribute( ih, "SELECTEDTEXT", textCovert.convert( _text[0.._pos].dup ) );
 					return IUP_DEFAULT;
 				}
 			}
 
-			if( GLOBAL.toggleShowListType == "ON" )
-			{
+			//if( GLOBAL.toggleShowListType == "ON" )
+			//{
 				IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 				IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
 
@@ -2570,9 +2578,17 @@ extern(C)
 				}
 				else
 				{
+					int tail = AutoComplete.getWholeWordTailPos( ih, pos );
+					if( tail > pos )
+					{
+						IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
+						//IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( pos ) ~ ":" ~  Integer.toString( tail ) ) );
+						//IupScintillaSendMessage( ih, 2025, tail, 0 ); // SCI_GOTOPOS 2025
+					}
+					
 					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );
 				}
-			}
+			//}
 		}
 
 		return IUP_DEFAULT;

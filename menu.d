@@ -678,7 +678,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.377)\nBy Kuan Hsu (Taiwan)\n2018.03.19" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.378)\nBy Kuan Hsu (Taiwan)\n2018.03.23" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.028)\nBy Kuan Hsu (Taiwan)\n2018.03.15" );
 		return IUP_DEFAULT;
 	});
@@ -1320,20 +1320,13 @@ extern(C)
 	
 	void findReplace_cb()
 	{
-		/*
-		if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
+		Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
+		if( ih != null )
 		{
-			if( GLOBAL.searchDlg !is null )
-			{
-				char[] targetText;
-				Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
-				if( ih !is null ) targetText = fromStringz(IupGetAttribute( ih, toStringz("SELECTEDTEXT") ));
-
-				//if( fromStringz(IupGetAttribute( GLOBAL.searchDlg.getIhandle, "VISIBLE" )) == "NO" ) GLOBAL.searchDlg.show( targetText );
-				GLOBAL.searchDlg.show( targetText );
-			}
+			char[] targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );		
+			if( targetText.length ) GLOBAL.searchExpander.show( targetText.dup ); else GLOBAL.searchExpander.show( null );
 		}
-		*/
+		/+
 		if( GLOBAL.searchDlg !is null )
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -1344,6 +1337,7 @@ extern(C)
 				if( targetText.length ) GLOBAL.searchDlg.show( targetText.dup ); else GLOBAL.searchDlg.show( null );
 			}
 		}
+		+/
 	}
 
 	void findReplaceInFiles()
@@ -1378,7 +1372,7 @@ extern(C)
 			if( targetText.length )
 			{
 				IupSetAttribute( ih, "SELECTIONPOS", IupGetAttribute( ih, "SELECTIONPOS" ) );
-				actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, true );
+				actionManager.SearchAction.search( ih, targetText, GLOBAL.searchExpander.searchRule, true );
 			}
 		}
 	}
@@ -1399,12 +1393,10 @@ extern(C)
 					{
 						char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
 						IupSetAttribute( ih, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
-						actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
+						actionManager.SearchAction.search( ih, targetText, GLOBAL.searchExpander.searchRule, false );
 					}
 				}
-				
 			}
-			
 			//actionManager.SearchAction.findPrev( ih, targetText, GLOBAL.searchDlg.searchRule );
 			//actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
 		}

@@ -63,18 +63,20 @@ void createExplorerWindow()
 	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=YES,SHOWGRIP=LINES" );
 	IupSetAttribute( GLOBAL.documentSplit2, "ACTIVE","YES" );
 	
-	
+	GLOBAL.searchExpander = new CSearchExpander;
 	GLOBAL.activeDocumentTabs = GLOBAL.documentTabs;
 
 	Ihandle* projectViewBackground = IupBackgroundBox( GLOBAL.fileListSplit );
 	
-	GLOBAL.explorerSplit = IupSplit( projectViewBackground, GLOBAL.documentSplit2 );
+	GLOBAL.explorerSplit = IupSplit( projectViewBackground, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES");
 	//version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
+	
+	//IupDestroy( test );	
 	
 	bool bUseIupTabs;
 
@@ -219,7 +221,7 @@ void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"].toDString );
 	//GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
-	GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "MAIN_DIALOG" );
+	//GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "MAIN_DIALOG" );
 	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString, null, false, "MAIN_DIALOG" );
 }
 

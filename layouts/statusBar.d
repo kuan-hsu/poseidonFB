@@ -11,15 +11,15 @@ class CStatusBar
 
 	import		Integer = tango.text.convert.Integer;
 	
-	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection, codecomplete;
-	IupString	_name, _lc, _ins, _eol, _en, tipString;
+	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection, codecomplete, findMessage;
+	IupString	_name, _lc, _ins, _eol, _en, tipString, findString;
 	
 	int			originalTrigger;
 	
 	void createLayout()
 	{
 		prjName = IupLabel( null );
-		IupSetAttribute( prjName, "SIZE", "250x" );
+		IupSetAttribute( prjName, "SIZE", "150x" );
 		IupSetCallback( prjName, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 
 		LINExCOL = IupLabel( "             " );
@@ -60,6 +60,11 @@ class CStatusBar
 		IupSetAttribute( codecomplete, "NAME", "label_Codecomplete" );
 		IupSetAttribute( codecomplete, "TIP", GLOBAL.languageItems["codecompletiononoff"].toCString );
 		IupSetCallback( codecomplete, "BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
+		
+		findMessage = IupLabel( "" );
+		IupSetAttribute( findMessage, "ELLIPSIS", "YES" );
+		IupSetAttributes( findMessage, "EXPAND=HORIZONTAL,ALIGNMENT=ARIGHT" );
+		IupSetCallback( findMessage, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 	
 		
 		Ihandle*[5] labelSEPARATOR;
@@ -69,7 +74,7 @@ class CStatusBar
 			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
 		}
 		// Ihandle* StatusBar = IupHbox( GLOBAL.statusBar_PrjName, IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
-		Ihandle* _hbox = IupHbox( image, compileOptionSelection, labelSEPARATOR[4], prjName, IupFill(), codecomplete, labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
+		Ihandle* _hbox = IupHbox( image, compileOptionSelection, labelSEPARATOR[4], prjName, findMessage, IupFill(), codecomplete, labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
 		IupSetAttributes( _hbox, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
 		
 		layoutHandle = IupBackgroundBox( _hbox );
@@ -183,6 +188,14 @@ class CStatusBar
 	void setCompleteIcon( bool bStatus )
 	{
 		if( bStatus ) IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_on" ); else IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_off" );
+	}
+	
+	void setFindMessage( char[] message )
+	{
+		if( findString is null ) findString = new IupString( message ); else findString = message;
+		IupSetAttribute( findMessage, "TITLE", "" );
+
+		if( message.length ) IupSetAttribute( findMessage, "TITLE", findString.toCString );
 	}
 	
 	/+

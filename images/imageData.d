@@ -211,6 +211,12 @@ void load_all_images_icons()
 
 	IupSetHandle( "IUP_codecomplete_on", XPM.getIUPimage( "icons/xpm/codecompleteon.xpm" ) );
 	IupSetHandle( "IUP_codecomplete_off", XPM.getIUPimage( "icons/xpm/codecompleteoff.xpm" ) );
+	
+	
+	//TEST
+	IupSetHandle( "icon_wholeword", XPM.getIUPimage( "icons/xpm/wholeword.xpm" ) );
+	IupSetHandle( "icon_casesensitive", XPM.getIUPimage( "icons/xpm/casesensitive.xpm" ) );
+	IupSetHandle( "icon_close", XPM.getIUPimage( "icons/xpm/close.xpm" ) );
 
 
 	version(FBIDE)

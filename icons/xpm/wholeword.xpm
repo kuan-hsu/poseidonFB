@@ -1,0 +1,31 @@
+/* XPM */
+static char *wholeword_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c #060506",
+". c #939293",
+"# c #d8d8d8",
+"a c #4f4f4f",
+"b c None",
+"c c #bbbabb",
+"d c #7a7c7a",
+"e c #2e2d2e",
+/* pixels */
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"db..b.bbbbbbbb.#",
+"db..b.bbbbbbbb.#",
+".b..b.#`ebdec`a#",
+"c#.cc.db#.dcab.#",
+"#.c#dcdb#..bdb.#",
+"be#be##`e#.bc`a#",
+"bbbbbbbbbbbbbbbb",
+"bdbbbbbbbbbbbbdb",
+"ddbbbbbbbbbbbbdd",
+"````````````````",
+"ddbbbbbbbbbbbbdd",
+"bdbbbbbbbbbbbbdb",
+"bbbbbbbbbbbbbbbb"
+};

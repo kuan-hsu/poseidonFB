@@ -2020,6 +2020,39 @@ version(DIDE)
 			return result;
 		}	
 
+		static int getWholeWordTailPos( Ihandle* iupSci, int startPos )
+		{
+			try
+			{
+				while( startPos < IupGetInt( iupSci, "COUNT" ) )
+				{
+					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", startPos ) );
+					int key = cast(int) s[0];
+					if( key >= 0 && key <= 127 )
+					{
+						if( s.length )
+						{
+							if( actionManager.ScintillaAction.isComment( iupSci, startPos ) ) return startPos;
+							
+							switch( s )
+							{
+								case "(", ")", "[", "]", "{", "}":																	return startPos;
+								case " ", "\t", ":", ";", ",", ".", "\n", "\r", "+", "-", "*", "/", "\\", "<", ">", "=", "&":		return startPos;
+								default: 
+							}
+						}
+					}
+					startPos ++;
+				}
+			}
+			catch( Exception e )
+			{
+				//return -1;
+			}
+
+			return startPos;
+		}
+		
 		static char[] getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
 		{
 			dchar[] word32;

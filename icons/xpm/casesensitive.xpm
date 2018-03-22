@@ -1,0 +1,31 @@
+/* XPM */
+static char *casesensitive_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c #1b191b",
+". c #909090",
+"# c #535353",
+"a c #e5e4e5",
+"b c #383838",
+"c c #b5b6b5",
+"d c #727372",
+"e c None",
+/* pixels */
+"eeeeeeeeeeeeeeee",
+"eeeeeeeeeeeeeeee",
+"eeeeeeeeeeeeeeee",
+"eeeeeeeeeeeeeeee",
+"eeeddeeeeeeeeeee",
+"eea`baeeeeeeeeee",
+"ee.dd.eeee.bb.ae",
+"eebccbeeeadaa#.e",
+"ea`ee`aeeeeee.be",
+"e.`##`.eeadb##`e",
+"ebdcc.beeddeec`e",
+"a`aeee`aebceed`e",
+".beeee#.ec`bbc`e",
+"eeeeeeeeeeeaeeee",
+"eeeeeeeeeeeeeeee",
+"eeeeeeeeeeeeeeee"
+};
