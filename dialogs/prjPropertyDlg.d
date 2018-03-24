@@ -197,7 +197,8 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 		Ihandle* vBoxButtonIncludePath = IupVbox( btnIncludePathAdd, btnIncludePathErase, btnIncludePathEdit, btnIncludePathUp, btnIncludePathDown, null );
 		Ihandle* hBoxIncludePath = IupHbox( listIncludePath, vBoxButtonIncludePath, null );
-		
+		IupSetAttribute( hBoxIncludePath, "NORMALIZESIZE", "VERTICAL" );
+
 		Ihandle* frameIncludePath = IupFrame( hBoxIncludePath );
 		IupSetAttributes( frameIncludePath, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		IupSetAttribute( frameIncludePath, "TITLE", GLOBAL.languageItems["includepath"].toCString() );
@@ -236,7 +237,8 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		Ihandle* vBoxButtonLibPath = IupVbox( btnLibPathAdd, btnLibPathErase, btnLibPathEdit, btnLibPathUp, btnLibPathDown, null );
 		Ihandle* hBoxLibPath = IupHbox( listLibPath, vBoxButtonLibPath, null );
-				
+		IupSetAttribute( hBoxLibPath, "NORMALIZESIZE", "VERTICAL" );
+		
 		Ihandle* frameLibPath = IupFrame( hBoxLibPath );
 		IupSetAttributes( frameLibPath, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		IupSetAttribute( frameLibPath, "TITLE", GLOBAL.languageItems["librarypath"].toCString() );

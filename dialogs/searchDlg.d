@@ -562,8 +562,8 @@ class CSearchExpander
 	void createLayout()
 	{
 		// Group 0
-		cStrings[0] = new IupString( " " ~ GLOBAL.languageItems["find"].toDString ~ ":" );
-		cStrings[1] = new IupString( " " ~ GLOBAL.languageItems["replace"].toDString ~ ":" );
+		cStrings[0] = new IupString( " " ~ GLOBAL.languageItems["findwhat"].toDString ~ ":" );
+		cStrings[1] = new IupString( " " ~ GLOBAL.languageItems["replacewith"].toDString ~ ":" );
 		
 		Ihandle* label0 = IupLabel( cStrings[0].toCString );
 		IupSetAttribute( label0, "SIZE", "x12" );	
@@ -666,32 +666,62 @@ class CSearchExpander
 		
 		// Group 3
 		Ihandle* btnCase = IupToggle( null, null );
-		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,VALUE=ON,NAME=toggle_Case" );
+		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,VALUE=ON,NAME=toggle_Case,SIZE=x12" );
+		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
 		IupSetCallback( btnCase, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		Ihandle* btnWhole = IupToggle( null, null );
-		IupSetAttributes( btnWhole, "IMAGE=icon_wholeword,FLAT=YES,VALUE=ON,NAME=toggle_Whole" );
+		IupSetAttributes( btnWhole, "IMAGE=icon_wholeword,FLAT=YES,VALUE=ON,NAME=toggle_Whole,SIZE=x12" );
+		IupSetAttribute( btnWhole, "TIP", GLOBAL.languageItems["wholeword"].toCString );
 		IupSetCallback( btnWhole, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		Ihandle* btnScope = IupToggle( null, null );
-		IupSetAttributes( btnScope, "IMAGE=icon_selectall,FLAT=YES,VALUE=ON,NAME=toggle_Scope" );
+		IupSetAttributes( btnScope, "IMAGE=icon_selectall,FLAT=YES,VALUE=ON,NAME=toggle_Scope,SIZE=x12" );
+		IupSetAttribute( btnScope, "TIP", GLOBAL.languageItems["scope"].toCString );
 		//IupSetCallback( btnScope, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		Ihandle* btnDirection = IupToggle( null, null );
-		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,FLAT=YES,VALUE=ON,NAME=toggle_Direction" );
+		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,FLAT=YES,VALUE=ON,NAME=toggle_Direction,SIZE=x12" );
+		IupSetAttribute( btnDirection, "TIP", GLOBAL.languageItems["direction"].toCString );
 		//IupSetCallback( btnDirection, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 		
 		Ihandle* btnClose = IupButton( null, null );
-		IupSetAttributes( btnClose, "IMAGE=icon_close,FLAT=YES,NAME=btn_Close" );
+		IupSetAttributes( btnClose, "IMAGE=icon_close,FLAT=YES,NAME=btn_Close,SIZE=x12" );
 		IupSetCallback( btnClose, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			GLOBAL.searchExpander.contract();
+			Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
+			if( iupSci != null ) IupSetFocus( iupSci );
+		});
+		/*
+		Ihandle* btnCase = IupFlatButton( null );
+		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,VALUE=ON,NAME=toggle_Case,TOGGLE=YES,SIZE=16x12" );
+		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
+		IupSetCallback( btnCase, "FLAT_ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );		
+
+		Ihandle* btnWhole = IupFlatButton( null );
+		IupSetAttributes( btnWhole, "IMAGE=icon_wholeword,VALUE=ON,NAME=toggle_Whole,TOGGLE=YES,SIZE=16x12" );
+		IupSetAttribute( btnWhole, "TIP", GLOBAL.languageItems["wholeword"].toCString );
+		IupSetCallback( btnWhole, "FLAT_ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
+
+		Ihandle* btnScope = IupFlatButton( null );
+		IupSetAttributes( btnScope, "IMAGE=icon_selectall,VALUE=ON,NAME=toggle_Scope,TOGGLE=YES,SIZE=16x12" );
+		IupSetAttribute( btnScope, "TIP", GLOBAL.languageItems["scope"].toCString );
+
+		Ihandle* btnDirection = IupFlatButton( null );
+		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,VALUE=ON,NAME=toggle_Direction,TOGGLE=YES,SIZE=16x12" );
+		IupSetAttribute( btnDirection, "TIP", GLOBAL.languageItems["direction"].toCString );
+		
+		Ihandle* btnClose = IupFlatButton( null );
+		IupSetAttributes( btnClose, "IMAGE=icon_close,NAME=btn_Close,SIZE=16x12" );
+		IupSetCallback( btnClose, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			GLOBAL.statusBar.setFindMessage( "" );
 			GLOBAL.searchExpander.contract();
 			Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
 			if( iupSci != null ) DocumentTabAction.setFocus( iupSci );
-						
-			
 		});
+		*/
 		
 		Ihandle* _group3 = IupGridBox
 		(
@@ -734,6 +764,7 @@ class CSearchExpander
 	void contract()
 	{
 		IupSetAttribute( expander, "STATE", "CLOSE" );
+		GLOBAL.statusBar.setFindMessage( "" );
 	}
 
 	bool isVisible()
@@ -754,10 +785,12 @@ class CSearchExpander
 			if( _scope != null )
 			{
 				if( fromStringz( IupGetAttribute( _scope, "VALUE" ) ) == "OFF" ) IupSetAttribute( _find, "VALUE", "" );
-			}			
+			}
 		}
 		
 		expand();
+		
+		if( _find != null ) IupSetFocus( _find );
 	}
 }
 
@@ -838,7 +871,7 @@ extern(C)
 		int counts;
 
 		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
-		if( iupSci !is null )
+		if( iupSci != null )
 		{
 			Ihandle* listFind_handle	= IupGetDialogChild( GLOBAL.searchExpander.getHandle, "list_Find" );
 			Ihandle* listReplace_handle	= IupGetDialogChild( GLOBAL.searchExpander.getHandle, "list_Replace" );
@@ -929,21 +962,22 @@ extern(C)
 			GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
 			GLOBAL.navigation.eraseTail();
 		}
+		else
+		{
+			return IUP_DEFAULT;;
+		}
 		
 		int pos;
 		if( fromStringz( IupGetAttribute( ih, "NAME" ) ) == "btn_FindPrev" )
 		{
-			if( cSci !is null )
+			char[] beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+			if( beginEndPos.length )
 			{
-				char[] beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
-				if( beginEndPos.length )
+				int colonPos = Util.index( beginEndPos, ":" );
+				if( colonPos < beginEndPos.length )
 				{
-					int colonPos = Util.index( beginEndPos, ":" );
-					if( colonPos < beginEndPos.length )
-					{
-						char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
-						IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
-					}
+					char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
+					IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 				}
 			}
 		
@@ -951,18 +985,18 @@ extern(C)
 		}
 		else
 		{
-			if( cSci !is null ) IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+			IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
 			pos = CSearchExpander_search( 2 );
 		}
 
 		if( pos > -1 )
 		{
-			if( cSci !is null ) GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+			GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
 			GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundword"].toDString );
 		}
 		else
 		{
-			if( cSci !is null ) GLOBAL.navigation.eraseTail();
+			GLOBAL.navigation.eraseTail();
 			GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundnothing"].toDString );
 		}
 		
@@ -1042,33 +1076,60 @@ extern(C)
 	
 	private int CSearchExpander_listFind_K_ANY( Ihandle *ih, int c ) 
 	{
-		if( c == 13 )
+		auto cSci = ScintillaAction.getActiveCScintilla();
+		if( cSci !is null )
 		{
-			auto cSci = ScintillaAction.getActiveCScintilla();
-			if( cSci !is null )
+			if( c == 13 )
 			{
 				GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
 				GLOBAL.navigation.eraseTail();
+				
+				int pos = CSearchExpander_search( 0 );
+				if( pos > -1 )
+				{
+					GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+					GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundword"].toDString );
+				}
+				else
+				{
+					GLOBAL.navigation.eraseTail();
+					GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundnothing"].toDString );
+				}
 			}
-			
-			int pos = CSearchExpander_search( 0 );
-			if( pos > -1 )
+			else if( c == 65307 ) // ESC = 65307
 			{
-				if( cSci !is null ) GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
-				GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundword"].toDString );
-			}
-			else
-			{
-				if( cSci !is null ) GLOBAL.navigation.eraseTail();
-				GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundnothing"].toDString );
+				GLOBAL.searchExpander.contract();
+				IupSetFocus( cSci.getIupScintilla );
 			}
 		}
+		else
+		{
+			if( c == 65307 ) GLOBAL.searchExpander.contract(); // ESC = 65307
+		}
+	
 		return IUP_DEFAULT;
 	}
 
 	private int CSearchDialog_listReplace_K_ANY( Ihandle *ih, int c ) 
 	{
-		if( c  == 13 ) CSearchExpander_btnReplaceFind_ACTION();
+		Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
+		if( iupSci != null )
+		{
+			if( c == 13 )
+			{
+				CSearchExpander_btnReplaceFind_ACTION();
+			}
+			else if( c == 65307 ) // ESC = 65307
+			{
+				GLOBAL.searchExpander.contract();
+				IupSetFocus( iupSci );
+			}
+		}
+		else
+		{
+			if( c == 65307 ) GLOBAL.searchExpander.contract(); // ESC = 65307
+		}
+		
 		return IUP_DEFAULT;
 	}	
 }

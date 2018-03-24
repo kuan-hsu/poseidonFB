@@ -642,7 +642,7 @@ version(DIDE)
 					{
 						if( GLOBAL.editorSetting00.Message == "ON" ) 
 						{
-							version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+							GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
 						}
 						
 						results ~= GLOBAL.parserManager[upperCase(includeFullPath)];

@@ -985,7 +985,7 @@ struct ScintillaAction
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//GLOBAL.IDEMessageDlg.print( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
