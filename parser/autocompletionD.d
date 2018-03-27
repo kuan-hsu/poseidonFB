@@ -2628,6 +2628,31 @@ version(DIDE)
 					
 					//if( AST_Head !is null ) IupMessage("NOT NULL", toStringz( Integer.toString( AST_Head.kind ) ~ " " ~ ( AST_Head.name ) ~ " : " ~ AST_Head.type ) ); else IupMessage("",toStringz("NULL"));
 
+
+					//
+					AutoComplete.VersionCondition.length = 0;
+					
+					char[] options = ExecuterAction.getCustomCompilerOption();
+					char[] activePrjName = ProjectAction.getActiveProjectName;
+					if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+					if( options.length )
+					{
+						int _versionPos = Util.index( options, "-version=" );
+						while( _versionPos < options.length )
+						{
+							char[] versionName;
+							for( int i = _versionPos + 9; i < options.length; ++ i )
+							{
+								if( options[i] == '\t' || options[i] == ' ' ) break;
+								versionName ~= options[i];
+							}							
+							if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
+							
+							_versionPos = Util.index( options, "-version=", _versionPos + 9 );
+						}
+					}
+					
+
 					// Goto Import Modules
 					if( runType > 0 )
 					{
@@ -2660,7 +2685,7 @@ version(DIDE)
 							char[] fullPath = checkIncludeExist( string, cwdPath );
 							if( fullPath.length )
 							{
-								actionManager.ScintillaAction.openFile( fullPath );
+								if( GLOBAL.navigation.addCache( fullPath, 1 ) ) actionManager.ScintillaAction.openFile( fullPath );
 								return;
 							}
 						}
@@ -2818,7 +2843,7 @@ version(DIDE)
 								runTypeNode = runTypeNode.getFather();
 							}
 
-							actionManager.ScintillaAction.openFile( runTypeNode.type, lineNum );
+							if( GLOBAL.navigation.addCache( runTypeNode.type, lineNum ) ) actionManager.ScintillaAction.openFile( runTypeNode.type, lineNum );
 						}
 					}
 				}

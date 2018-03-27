@@ -267,12 +267,17 @@ class CScintilla
 			}
 		}
 
+		GLOBAL.fileListTree.removeItem( this );
+		GLOBAL.outlineTree.cleanTree( fullPath.toDString );
+		if( upperCase(fullPath.toDString) in GLOBAL.scintillaManager ) GLOBAL.scintillaManager.remove( upperCase(fullPath.toDString) );
 		
 		if( title !is null ) delete title;
-		if( sci != null ) IupDestroy( sci );
-		
-		delete fullPath;
-		delete title;
+		if( fullPath !is null ) delete fullPath;
+		if( sci != null )
+		{
+			IupDestroy( sci );
+			sci = null;
+		}
 	}
 
 	void setText( char[] _text )
@@ -2546,7 +2551,38 @@ extern(C)
 		if( _text.length )
 		{
 			scope textCovert = new IupString;
+
+			if( _text[length-1] == ')' )
+			{
+				int _pos = Util.index( _text, "(" );
+				if( _pos < _text.length ) _text = _text[0.._pos];
+			}
 			
+			if( GLOBAL.toggleOverWrite == "ON" )
+			{
+				int tail = AutoComplete.getWholeWordTailPos( ih, pos );
+				if( tail > pos )
+				{
+					IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
+					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );
+				}
+				else if( tail == pos )
+				{
+					IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
+				}				
+			}
+			else
+			{
+				IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+				IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
+				
+				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
+					IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
+				else
+					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );			
+			}
+			
+			/+
 			if( _text[length-1] == ')' )
 			{
 				int _pos = Util.index( _text, "(" );
@@ -2570,6 +2606,7 @@ extern(C)
 			//if( GLOBAL.toggleShowListType == "ON" )
 			//{
 				IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+				/*
 				IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
 
 				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
@@ -2578,6 +2615,7 @@ extern(C)
 				}
 				else
 				{
+				*/
 					int tail = AutoComplete.getWholeWordTailPos( ih, pos );
 					if( tail > pos )
 					{
@@ -2585,10 +2623,15 @@ extern(C)
 						//IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( pos ) ~ ":" ~  Integer.toString( tail ) ) );
 						//IupScintillaSendMessage( ih, 2025, tail, 0 ); // SCI_GOTOPOS 2025
 					}
+					else if( tail == pos )
+					{
+						IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
+					}
 					
 					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );
-				}
+				//}
 			//}
+			+/
 		}
 
 		return IUP_DEFAULT;
@@ -2833,6 +2876,8 @@ extern(C)
 					{
 						version(DIDE)
 						{
+							AutoComplete.VersionCondition.length = 0;
+							
 							char[] options = ExecuterAction.getCustomCompilerOption();
 							char[] activePrjName = ProjectAction.getActiveProjectName;
 							if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
@@ -2854,7 +2899,10 @@ extern(C)
 							}
 						}
 						
-						AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
+						if( GLOBAL.toggleCompleteAtBackThread == "ON" )
+							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
+						else
+							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );
 					}
 					catch( Exception e )
 					{
@@ -2862,7 +2910,7 @@ extern(C)
 					}
 			}
 		}
-		
+
 		return IUP_DEFAULT;
 	}
 

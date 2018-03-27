@@ -680,6 +680,8 @@ struct IDECONFIG
 			doc ~= setINILineData( "showlisttype", GLOBAL.toggleShowListType );
 			doc ~= setINILineData( "showallmember", GLOBAL.toggleShowAllMember );
 			doc ~= setINILineData( "enabledwell", GLOBAL.toggleEnableDwell );
+			doc ~= setINILineData( "enableoverwrite", GLOBAL.toggleOverWrite );
+			doc ~= setINILineData( "completeatbackthread", GLOBAL.toggleCompleteAtBackThread );
 			doc ~= setINILineData( "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 			doc ~= setINILineData( "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 			doc ~= setINILineData( "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
@@ -1059,6 +1061,8 @@ struct IDECONFIG
 							case "showlisttype":			GLOBAL.toggleShowListType = right;								break;
 							case "showallmember":			GLOBAL.toggleShowAllMember = right;								break;
 							case "enabledwell":				GLOBAL.toggleEnableDwell = right;								break;
+							case "enableoverwrite":			GLOBAL.toggleOverWrite = right;									break;
+							case "completeatbackthread":	GLOBAL.toggleCompleteAtBackThread = right;						break;
 							case "livelevel":				GLOBAL.liveLevel = Integer.atoi( right );						break;
 							case "updateoutlinelive":		GLOBAL.toggleUpdateOutlineLive = right;							break;
 							case "keywordcase":				GLOBAL.keywordCase = Integer.atoi( right );						break;

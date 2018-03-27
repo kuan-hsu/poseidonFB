@@ -376,5 +376,4 @@ struct PROJECT
 
 		return s;
 	}
-	
 }

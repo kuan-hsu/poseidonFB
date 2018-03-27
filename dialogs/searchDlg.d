@@ -15,7 +15,7 @@ class CSearchDialog : CBaseDialog
 	
 	Ihandle*			listFind, listReplace;
 	Ihandle*			labelStatus, toggleSelection;
-	IupString[2]		cStrings;
+	IupString[2]		labelTitle;
 	IupString			statusString;
 
 	void createLayout()
@@ -29,8 +29,8 @@ class CSearchDialog : CBaseDialog
 		*/
 		IupSetAttributes( listFind, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3,NAME=list_Find");
 		
-		cStrings[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
-		Ihandle* label0 = IupLabel( cStrings[0].toCString );
+		labelTitle[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
+		Ihandle* label0 = IupLabel( labelTitle[0].toCString );
 		IupSetAttribute( label0, "SIZE", "60x16" );
 		Ihandle* hBox00 = IupHbox( label0, listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
@@ -40,8 +40,8 @@ class CSearchDialog : CBaseDialog
 		listReplace = IupList( null );
 		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=120x12,VISIBLE_ITEMS=3,NAME=list_Replace");
 		
-		cStrings[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
-		Ihandle* label1 = IupLabel( cStrings[1].toCString );
+		labelTitle[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
+		Ihandle* label1 = IupLabel( labelTitle[1].toCString );
 		IupSetAttribute( label1, "SIZE", "60x16" );
 		Ihandle* hBox01 = IupHbox( label1, listReplace, null );
 		IupSetAttributes( hBox01, "ALIGNMENT=ACENTER" );
@@ -557,18 +557,20 @@ class CSearchExpander
 	import				tools;
 	
 	Ihandle*			expander;
-	IupString[2] 		cStrings;
+	IupString[2] 		labelTitle, findButton;
 
 	void createLayout()
 	{
 		// Group 0
-		cStrings[0] = new IupString( " " ~ GLOBAL.languageItems["findwhat"].toDString ~ ":" );
-		cStrings[1] = new IupString( " " ~ GLOBAL.languageItems["replacewith"].toDString ~ ":" );
+		labelTitle[0] = new IupString( " " ~ GLOBAL.languageItems["findwhat"].toDString ~ ":" );
+		labelTitle[1] = new IupString( " " ~ GLOBAL.languageItems["replacewith"].toDString ~ ":" );
+		findButton[0] = new IupString( GLOBAL.languageItems["find"].toDString ~ " ^" );
+		findButton[1] = new IupString( GLOBAL.languageItems["find"].toDString ~ " v" );
 		
-		Ihandle* label0 = IupLabel( cStrings[0].toCString );
+		Ihandle* label0 = IupLabel( labelTitle[0].toCString );
 		IupSetAttribute( label0, "SIZE", "x12" );	
 		
-		Ihandle* label1 = IupLabel( cStrings[1].toCString );
+		Ihandle* label1 = IupLabel( labelTitle[1].toCString );
 		IupSetAttribute( label1, "SIZE", "x12" );	
 		
 		Ihandle* _group0 = IupVbox( label0, label1, null );
@@ -587,11 +589,11 @@ class CSearchExpander
 		Ihandle* _group1 = IupVbox( listFind, listReplace, null );
 		
 		// Group 2
-		Ihandle* btnFindPrev = IupButton( toStringz( "Find ^" ), null );
+		Ihandle* btnFindPrev = IupButton( findButton[0].toCString, null ); // GLOBAL.languageItems["find"]
 		IupSetAttributes( btnFindPrev, "SIZE=x12,NAME=btn_FindPrev,FLAT=YES,FONTSTYLE=Underline" );
 		IupSetCallback( btnFindPrev, "ACTION", cast(Icallback) &CSearchExpander_Find_ACTION );
 
-		Ihandle* btnFindNext = IupButton( toStringz( "Find v" ), null );
+		Ihandle* btnFindNext = IupButton( findButton[1].toCString, null );
 		IupSetAttributes( btnFindNext, "SIZE=x12,NAME=btn_FindNext,FLAT=YES,FONTSTYLE=Underline" );
 		IupSetCallback( btnFindNext, "ACTION", cast(Icallback) &CSearchExpander_Find_ACTION );
 

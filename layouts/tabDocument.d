@@ -16,6 +16,7 @@ void createTabs()
 	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
 	IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
+	IupSetAttribute( GLOBAL.documentTabs, "NAME", "MAIN" );
 	//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
@@ -36,6 +37,7 @@ void createTabs2()
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGEPRESS", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "5x5" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "SIZE", "NULL" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "NAME", "SUB" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSHIGHCOLOR", "240 255 240" );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
@@ -57,37 +59,31 @@ extern(C)
 	// Close the document Iuptab......
 	private int tabClose_cb( Ihandle* ih, int pos )
 	{
-		DocumentTabAction.setActiveDocumentTabs( ih );
-		
+		// The GLOBAL.activeDocumentTabs had already change to ih
+		// DocumentTabAction.setActiveDocumentTabs( ih );
 		Ihandle* _child = IupGetChild( ih, pos );
 		CScintilla cSci = ScintillaAction.getCScintilla( _child );
+
 		if( cSci !is null )
 		{
 			int result;
 			
-			Ihandle* oldHandle = cast(Ihandle*) IupGetAttribute( ih, "VALUE_HANDLE" );
-			
-			if( oldHandle != cSci.getIupScintilla )
+			Ihandle* oriHandle			= cast(Ihandle*) IupGetAttribute( ih, "VALUE_HANDLE" );
+			if( oriHandle != null )
 			{
-				Ihandle* _documentTabs = IupGetParent( cSci.getIupScintilla );
-				
-				result = actionManager.ScintillaAction.closeDocument( cSci.getFullPath(), pos );
-				if( IupGetInt( ih, "COUNT" ) > 0 && oldHandle != null )
+				if( oriHandle != _child )
 				{
-					int oldPos = IupGetChildPos( ih, oldHandle );
-					DocumentTabAction.tabChangePOS( ih, oldPos );
-					IupRefresh( _documentTabs );
+					result = actionManager.ScintillaAction.closeDocument( cSci.getFullPath(), pos );
+					if( result == IUP_DEFAULT )	IupSetAttribute( ih, "VALUE_HANDLE", cast(char*) oriHandle );
+				}
+				else
+				{
+					result = actionManager.ScintillaAction.closeDocument( cSci.getFullPath(), pos );
 				}
 			}
-			else
-			{
-				result = actionManager.ScintillaAction.closeDocument( cSci.getFullPath(), pos );
-			}
-			
-			if( result == IUP_IGNORE ) return IUP_IGNORE;
 		}
 
-		return IUP_CONTINUE;
+		return IUP_IGNORE; // Because delete CScintilla will call ~this() which include IupDestroy( sci )
 	}
 
 	private int tabRightClick_cb( Ihandle* ih, int pos )

@@ -278,6 +278,17 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleDWELL = IupToggle( GLOBAL.languageItems["enabledwell"].toCString, null );
 		IupSetAttribute( toggleDWELL, "VALUE", toStringz(GLOBAL.toggleEnableDwell.dup) );
 		IupSetHandle( "toggleDWELL", toggleDWELL );
+
+		Ihandle* toggleOverWrite = IupToggle( GLOBAL.languageItems["enableoverwrite"].toCString, null );
+		IupSetAttribute( toggleOverWrite, "VALUE", toStringz(GLOBAL.toggleOverWrite.dup) );
+		IupSetHandle( "toggleOverWrite", toggleOverWrite );
+
+		Ihandle* toggleBackThread = IupToggle( GLOBAL.languageItems["completeatbackthread"].toCString, null );
+		IupSetAttribute( toggleBackThread, "VALUE", toStringz(GLOBAL.toggleCompleteAtBackThread.dup) );
+		IupSetHandle( "toggleBackThread", toggleBackThread );
+
+
+
 		
 		
 		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
@@ -332,7 +343,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
-		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, hBoxFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, toggleOverWrite, toggleBackThread, hBoxFunctionTitle, hBox00, null );
 		version(FBIDE)	IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		version(DIDE)	IupSetAttributes( vBox00, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
 	
@@ -1609,6 +1620,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleSHOWLISTTYPE", null );
 		IupSetHandle( "toggleSHOWALLMEMBER", null );
 		IupSetHandle( "toggleDWELL", null );
+		IupSetHandle( "toggleOverWrite", null );
+		IupSetHandle( "toggleBackThread", null );
 		IupSetHandle( "toggleLiveNone", null );
 		IupSetHandle( "toggleLiveLight", null );
 		IupSetHandle( "toggleLiveFull", null );		
@@ -2362,6 +2375,9 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.toggleShowListType					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWLISTTYPE" ), "VALUE" ) ).dup;
 			GLOBAL.toggleShowAllMember					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWALLMEMBER" ), "VALUE" ) ).dup;
 			GLOBAL.toggleEnableDwell					= fromStringz( IupGetAttribute( IupGetHandle( "toggleDWELL" ), "VALUE" ) ).dup;
+			GLOBAL.toggleOverWrite						= fromStringz( IupGetAttribute( IupGetHandle( "toggleOverWrite" ), "VALUE" ) ).dup;
+			GLOBAL.toggleCompleteAtBackThread			= fromStringz( IupGetAttribute( IupGetHandle( "toggleBackThread" ), "VALUE" ) ).dup;
+			
 
 			if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveNone" ), "VALUE" ) ) == "ON" )
 				GLOBAL.liveLevel = 0;

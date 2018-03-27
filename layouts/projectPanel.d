@@ -129,11 +129,8 @@ class CProjectTree
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
-		IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) function( Ihandle* ih )
-		{
-			return IUP_DEFAULT;
-		});
+		//IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_EXECUTELEAF_CB );
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,GAP=2" ) );
@@ -822,6 +819,11 @@ extern(C)
 		}
 		return IUP_DEFAULT;
 	}
+	
+	private int CProjectTree_EXECUTELEAF_CB( Ihandle* ih, int id )
+	{
+		return CProjectTree_Open_cb( ih );
+	}	
 	
 	private int CProjectTree_NodeRemoved_cb( Ihandle *ih, void* userdata )
 	{

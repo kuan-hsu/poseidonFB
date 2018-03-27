@@ -16,6 +16,7 @@ version(FBIDE)
 		import tango.stdc.stringz;
 		import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
 		import tango.io.Stdout;
+		import tango.core.Thread;
 
 		version(Windows)
 		{
@@ -38,6 +39,83 @@ version(FBIDE)
 		static CASTnode[char[]]		includesMarkContainer;
 		static bool[char[]]			noIncludeNodeContainer;
 		
+		class CShowListThread : Thread
+		{
+			private:
+			import scintilla;
+			
+			CScintilla	cSci;
+			int			pos;
+			char[]		text, alreadyInput;
+			
+			bool		bForce, bStop;
+
+			public:
+			this( CScintilla _cSci, int _pos, char[] _text, char[] _alreadyInput, bool _bForce  )
+			{
+				cSci			= _cSci;
+				pos				= _pos;
+				text			= _text.dup;
+				alreadyInput	= _alreadyInput.dup;
+				bForce			= _bForce;
+				
+				super( &run );
+			}
+
+			void run()
+			{
+				char[] list = charAdd( cSci.getIupScintilla, pos, text, bForce );
+				
+				if( bStop ) return;
+
+				if( list.length )
+				{
+					// Get alreadyInput
+					int _pos = ScintillaAction.getCurrentPos( cSci.getIupScintilla ), dummyHeadPos;
+					if( _pos > 1 )
+					{
+						if( text == ">" )
+						{
+							if( fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", _pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, _pos - 2, dummyHeadPos ).reverse ~ "->";
+						}
+					}
+
+					if( text == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, _pos - 1, dummyHeadPos ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, _pos, dummyHeadPos ).reverse;				
+				
+
+					char[][] splitWord = getDivideWord( alreadyInput );
+
+					alreadyInput = splitWord[$-1];
+
+					if( text == "(" )
+					{
+						if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( cSci.getIupScintilla, "AUTOCCANCEL\0", "YES\0" );
+
+						IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+
+						IupScintillaSendMessage( cSci.getIupScintilla, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+					}
+					else
+					{
+						//IupMessage("alreadyInput",toStringz(alreadyInput));
+						if( alreadyInput.length ) IupScintillaSendMessage( cSci.getIupScintilla, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) ); else IupScintillaSendMessage( cSci.getIupScintilla, 2100, 0, cast(int) GLOBAL.cString.convert( list ) );
+					}
+					cSci.lastPos = -99;
+				}
+				else
+				{
+					cSci.lastPos = pos;
+				}				
+			}
+			
+			void stop()
+			{
+				bStop = true;
+			}
+		}
+		
+		static CShowListThread showListThread;
 		
 		static void cleanIncludesMarkContainer()
 		{
@@ -214,11 +292,11 @@ version(FBIDE)
 					resultNode = _searchMatchNode( originalNode.getFather(), word, B_KIND );
 				}
 				else
-				{
+				{/*
 					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 					CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], cSci.getFullPath, word );
 
-					if( resultIncludeNodes.length ) resultNode = resultIncludeNodes[0];
+					if( resultIncludeNodes.length ) resultNode = resultIncludeNodes[0];*/
 				}
 			}
 
@@ -735,7 +813,128 @@ version(FBIDE)
 			foreach( CASTnode n; includesMarkContainer )
 				Stdout( n.name ).newline;
 			*/
-
+			CASTnode[] includeASTNODES;
+			/+
+			foreach( includeAST; includesMarkContainer )
+			{
+				includeASTNODES ~= includeAST;
+			}
+			
+			
+			auto tg = new ThreadGroup();
+			
+			tg.create(
+			{
+				for( int i = 0; i < includeASTNODES.length / 2; ++ i )
+				{
+					foreach( child; includeASTNODES[i].getChildren )
+					{
+						if( child.kind & B_NAMESPACE )
+						{
+							if( child.name.length )
+							{
+								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+								{
+									results ~= child;
+								}
+								else
+								{
+									foreach( _child; child.getChildren )
+									{
+										if( _child.name.length )
+										{
+											// Bug
+											if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
+											{
+												results ~= _child;
+											}
+										}
+										else
+										{
+											CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
+											if( enumResult.length ) results ~= enumResult;
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							if( child.name.length )
+							{
+								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+								{
+									results ~= child;
+								}
+							}
+							else
+							{
+								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+								if( enumResult.length ) results ~= enumResult;
+							}
+						}
+					}			
+				
+				}
+			});
+			
+			tg.create(
+			{
+				for( int i = includeASTNODES.length / 2; i < includeASTNODES.length; ++ i )
+				{
+					foreach( child; includeASTNODES[i].getChildren )
+					{
+						if( child.kind & B_NAMESPACE )
+						{
+							if( child.name.length )
+							{
+								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+								{
+									results ~= child;
+								}
+								else
+								{
+									foreach( _child; child.getChildren )
+									{
+										if( _child.name.length )
+										{
+											// Bug
+											if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
+											{
+												results ~= _child;
+											}
+										}
+										else
+										{
+											CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
+											if( enumResult.length ) results ~= enumResult;
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							if( child.name.length )
+							{
+								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+								{
+									results ~= child;
+								}
+							}
+							else
+							{
+								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+								if( enumResult.length ) results ~= enumResult;
+							}
+						}
+					}
+				}
+			});
+			
+			tg.joinAll();
+			+/
+			
 			foreach( includeAST; includesMarkContainer )
 			{
 				if( includeAST !is null )
@@ -789,6 +988,7 @@ version(FBIDE)
 					}
 				}
 			}
+			
 
 			return results;
 		}
@@ -2110,7 +2310,7 @@ version(FBIDE)
 			int		dummyHeadPos;
 			char[] 	word, result;
 			bool	bDot, bCallTip;
-
+			
 			if( text == "(" )
 			{
 				bCallTip = true;
@@ -2142,7 +2342,7 @@ version(FBIDE)
 			{
 				word = text;
 			}
-
+			
 			if( text == ">" && bDot )
 			{
 				word = word ~ getWholeWordReverse( iupSci, pos - 1, dummyHeadPos );
@@ -2151,7 +2351,7 @@ version(FBIDE)
 			{
 				word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 			}
-
+			
 			word = lowerCase( word.dup.reverse );
 
 			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
@@ -3501,34 +3701,67 @@ version(FBIDE)
 				version(DIDE) return false;
 			}
 			
-			char[] list = charAdd( ih, pos, text, bForce );
-
-			if( list.length )
+			if( !bForce )
 			{
-				char[][] splitWord = getDivideWord( alreadyInput );
-
-				alreadyInput = splitWord[length-1];
-
-				if( text == "(" )
+				try
 				{
-					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
-
-					IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
-					IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-
-					IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+					if( showListThread is null )
+					{
+						showListThread = new CShowListThread( cSci, pos, text, alreadyInput, bForce );
+						showListThread.start();
+					}
+					else
+					{
+						if( showListThread.isRunning )
+						{
+							return true;
+							/*
+							showListThread.stop();
+							showListThread.join();
+							*/
+						}
+						delete showListThread;
+						
+						showListThread = new CShowListThread( cSci, pos, text, alreadyInput, bForce );
+						showListThread.start();
+					}
 				}
-				else
+				catch( Exception e )
 				{
-					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+					IupMessage("ERROR","");
 				}
-				
-				cSci.lastPos = -99;
-				return true;
 			}
 			else
 			{
-				cSci.lastPos = pos;
+				char[] list = charAdd( ih, pos, text, bForce );
+
+				if( list.length )
+				{
+					char[][] splitWord = getDivideWord( alreadyInput );
+
+					alreadyInput = splitWord[length-1];
+
+					if( text == "(" )
+					{
+						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
+
+						IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+
+						IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+					}
+					else
+					{
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+					}
+					
+					cSci.lastPos = -99;
+					return true;
+				}
+				else
+				{
+					cSci.lastPos = pos;
+				}
 			}
 
 			return false;

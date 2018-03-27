@@ -611,6 +611,102 @@ extern(C)
 								}
 						}
 					}
+					
+					/+
+					// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
+					if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;		
+					
+					if( c > 32 && c < 123 )
+					{
+						//if( length > 1 ) return IUP_DEFAULT;
+
+						int dummyHeadPos;
+						// Below code are fixed because of IUP DLL10 and D 1.076
+						char _c = cast(char) c;
+						char[] text;
+						text ~= _c;//fromStringz( _text );
+						//text ~= _text[0];
+						int 	pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla )-1;
+						switch( text )
+						{
+							case " ", "\n", "\t", "\r", ")":
+								IupSetAttribute( cSci.getIupScintilla, "AUTOCCANCEL", "YES" );
+								//bWithoutList = false;
+								break;
+
+							default:
+								char[]	alreadyInput;
+								bool	bDot, bOpenParen;
+
+								if( text == ">" )
+								{
+									version(FBIDE)
+									{
+										if( pos > 0 )
+										{
+											if( fromStringz( IupGetAttributeId(  cSci.getIupScintilla, "CHAR", pos - 1 ) ) == "-" )
+											{
+												//IupMessage("POINTER","");
+												alreadyInput = AutoComplete.getWholeWordReverse(  cSci.getIupScintilla, pos - 1, dummyHeadPos ).reverse ~ "->";
+												bDot = true;
+												//bWithoutList = false;
+											}
+										}
+									}
+								}
+								else if( text == "." )
+								{
+									bDot = true;
+								}
+								else if( text == "(" )
+								{
+									bOpenParen = true;
+								}
+								
+								if( !alreadyInput.length ) alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, dummyHeadPos ).reverse ~ text;
+
+								if( !bDot && !bOpenParen )
+								{
+									if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
+									if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "AUTOCACTIVE\0" ) ) == "YES" ) break;
+								}
+
+								try
+								{
+									version(DIDE)
+									{
+										AutoComplete.VersionCondition.length = 0;
+										
+										char[] options = ExecuterAction.getCustomCompilerOption();
+										char[] activePrjName = ProjectAction.getActiveProjectName;
+										if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+										if( options.length )
+										{
+											int _versionPos = Util.index( options, "-version=" );
+											while( _versionPos < options.length )
+											{
+												char[] versionName;
+												for( int i = _versionPos + 9; i < options.length; ++ i )
+												{
+													if( options[i] == '\t' || options[i] == ' ' ) break;
+													versionName ~= options[i];
+												}								
+												if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
+												
+												_versionPos = Util.index( options, "-version=", _versionPos + 9 );
+											}
+										}
+									}
+									
+									AutoComplete.callAutocomplete(  cSci.getIupScintilla, pos, text, alreadyInput );
+								}
+								catch( Exception e )
+								{
+									GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+								}
+						}
+					}					
+					+/
 				}
 				/*
 				if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" )
