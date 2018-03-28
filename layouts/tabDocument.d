@@ -2,7 +2,7 @@
 
 private import iup.iup;
 private import iup.iup_scintilla;
-private import global, actionManager, scintilla, menu, tools;
+private import global, actionManager, scintilla, menu, tools, parser.autocompletion;
 
 import tango.stdc.stringz;
 
@@ -51,6 +51,8 @@ extern(C)
 {
 	private int tabchangePos_cb( Ihandle* ih, int new_pos, int old_pos )
 	{
+		if( AutoComplete.timer != null ) IupSetAttribute( AutoComplete.timer, "RUN", "NO" );
+		
 		DocumentTabAction.setActiveDocumentTabs( ih );
 		
 		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos );

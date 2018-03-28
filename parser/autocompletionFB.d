@@ -11,12 +11,13 @@ version(FBIDE)
 		import global, actionManager, menu;
 		import tools;
 		import parser.ast;
+		import scintilla;
 
 		import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf;
 		import tango.stdc.stringz;
 		import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
 		import tango.io.Stdout;
-		import tango.core.Thread;
+		import tango.core.Thread, tango.core.ThreadPool;
 
 		version(Windows)
 		{
@@ -46,17 +47,16 @@ version(FBIDE)
 			
 			CScintilla	cSci;
 			int			pos;
-			char[]		text, alreadyInput;
+			char[]		text;
 			
-			bool		bForce, bStop;
+			bool		bForce;
 
 			public:
-			this( CScintilla _cSci, int _pos, char[] _text, char[] _alreadyInput, bool _bForce  )
+			this( CScintilla _cSci, int _pos, char[] _text, bool _bForce  )
 			{
 				cSci			= _cSci;
 				pos				= _pos;
 				text			= _text.dup;
-				alreadyInput	= _alreadyInput.dup;
 				bForce			= _bForce;
 				
 				super( &run );
@@ -64,58 +64,14 @@ version(FBIDE)
 
 			void run()
 			{
-				char[] list = charAdd( cSci.getIupScintilla, pos, text, bForce );
-				
-				if( bStop ) return;
-
-				if( list.length )
-				{
-					// Get alreadyInput
-					int _pos = ScintillaAction.getCurrentPos( cSci.getIupScintilla ), dummyHeadPos;
-					if( _pos > 1 )
-					{
-						if( text == ">" )
-						{
-							if( fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", _pos - 2 ) ) == "-" ) alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, _pos - 2, dummyHeadPos ).reverse ~ "->";
-						}
-					}
-
-					if( text == "(" ) alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, _pos - 1, dummyHeadPos ).reverse; else alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, _pos, dummyHeadPos ).reverse;				
-				
-
-					char[][] splitWord = getDivideWord( alreadyInput );
-
-					alreadyInput = splitWord[$-1];
-
-					if( text == "(" )
-					{
-						if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( cSci.getIupScintilla, "AUTOCCANCEL\0", "YES\0" );
-
-						IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
-						IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-
-						IupScintillaSendMessage( cSci.getIupScintilla, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
-					}
-					else
-					{
-						//IupMessage("alreadyInput",toStringz(alreadyInput));
-						if( alreadyInput.length ) IupScintillaSendMessage( cSci.getIupScintilla, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) ); else IupScintillaSendMessage( cSci.getIupScintilla, 2100, 0, cast(int) GLOBAL.cString.convert( list ) );
-					}
-					cSci.lastPos = -99;
-				}
-				else
-				{
-					cSci.lastPos = pos;
-				}				
-			}
-			
-			void stop()
-			{
-				bStop = true;
+				completeLIST = "";
+				completeLIST = charAdd( cSci.getIupScintilla, pos, text, bForce );
 			}
 		}
 		
 		static CShowListThread showListThread;
+		static char[] completeLIST;
+		static Ihandle* timer = null;
 		
 		static void cleanIncludesMarkContainer()
 		{
@@ -3682,7 +3638,7 @@ version(FBIDE)
 		{
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
-			
+			/*
 			if( cSci.lastPos == pos - 1 )
 			{
 				cSci.lastPos = pos;
@@ -3700,30 +3656,124 @@ version(FBIDE)
 				
 				version(DIDE) return false;
 			}
-			
+			*/
 			if( !bForce )
 			{
 				try
 				{
-					if( showListThread is null )
+					if( timer == null )
 					{
-						showListThread = new CShowListThread( cSci, pos, text, alreadyInput, bForce );
-						showListThread.start();
+						timer = IupTimer();
+						IupSetAttributes( timer, "TIME=100,RUN=NO" );
+						IupSetCallback( timer, "ACTION_CB", cast(Icallback) function( Ihandle* ih )
+						{
+							if( AutoComplete.showListThread !is null )
+							{
+								if( !AutoComplete.showListThread.isRunning )
+								{
+									if( completeLIST.length )
+									{
+										auto sci = ScintillaAction.getActiveIupScintilla();
+										if( sci != null )
+										{
+											if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
+											{
+												int		_pos = ScintillaAction.getCurrentPos( sci );
+												int		dummyHeadPos;
+												char[]	_alreadyInput;
+												char[]	lastChar = fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
+												
+												if( _pos > 1 )
+												{
+													if( lastChar == ">" )
+													{
+														if( fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 2 ) ) == "-" ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos - 2, dummyHeadPos ).reverse ~ "->";
+													}
+												}
+
+												if( lastChar == "(" ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos - 1, dummyHeadPos ).reverse; else _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).reverse;									
+											
+											
+											
+												char[][] splitWord = getDivideWord( _alreadyInput );
+												_alreadyInput = splitWord[$-1];									
+											
+												if( lastChar == "(" )
+												{
+													if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( sci, "AUTOCCANCEL", "YES" );
+
+													IupScintillaSendMessage( sci, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
+													IupScintillaSendMessage( sci, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+
+													IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) );
+												}
+												else
+												{
+													if( _alreadyInput.length ) IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) ); else IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) );
+												}
+											}
+										}
+									}
+									else
+									{
+										// No Match List.....
+									}
+
+									IupSetAttribute( AutoComplete.timer, "RUN", "NO" );
+									AutoComplete.completeLIST = "";
+									delete showListThread;
+								}
+							}
+							
+							return IUP_DEFAULT;
+						});	
 					}
 					else
 					{
-						if( showListThread.isRunning )
-						{
-							return true;
-							/*
-							showListThread.stop();
-							showListThread.join();
-							*/
-						}
-						delete showListThread;
-						
-						showListThread = new CShowListThread( cSci, pos, text, alreadyInput, bForce );
+						//IupSetAttribute( timer, "RUN", "NO" );
+					}
+					
+					if( showListThread is null )
+					{
+						showListThread = new CShowListThread( cSci, pos, text, bForce );
 						showListThread.start();
+						
+						if( timer != null )	IupSetAttribute( timer, "RUN", "YES" );
+					}
+					else
+					{
+						/+
+						if( !showListThread.isRunning )
+						{
+							if( completeLIST.length )
+							{
+								char[][] splitWord = getDivideWord( alreadyInput );
+								alreadyInput = splitWord[$-1];							
+							
+								if( text == "(" )
+								{
+									if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+
+									IupScintillaSendMessage( ih, 2206, 0x707070, 0 ); //SCI_CALLTIPSETFORE 2206
+									IupScintillaSendMessage( ih, 2205, 0xFFFFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+
+									IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( completeLIST ) );
+								}
+								else
+								{
+									if( alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( completeLIST ) ); else IupScintillaSendMessage( ih, 2100, 0, cast(int) GLOBAL.cString.convert( completeLIST ) );
+								}
+								
+								cSci.lastPos = -99;
+							}
+							else
+							{
+								cSci.lastPos = pos;
+							}
+							
+							delete showListThread;
+						}
+						+/
 					}
 				}
 				catch( Exception e )
@@ -3733,13 +3783,15 @@ version(FBIDE)
 			}
 			else
 			{
+				if( timer != null )	IupSetAttribute( timer, "RUN", "NO" );
+				
 				char[] list = charAdd( ih, pos, text, bForce );
 
 				if( list.length )
 				{
 					char[][] splitWord = getDivideWord( alreadyInput );
 
-					alreadyInput = splitWord[length-1];
+					alreadyInput = splitWord[$-1];
 
 					if( text == "(" )
 					{

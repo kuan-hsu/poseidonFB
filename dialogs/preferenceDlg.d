@@ -286,7 +286,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleBackThread = IupToggle( GLOBAL.languageItems["completeatbackthread"].toCString, null );
 		IupSetAttribute( toggleBackThread, "VALUE", toStringz(GLOBAL.toggleCompleteAtBackThread.dup) );
 		IupSetHandle( "toggleBackThread", toggleBackThread );
-
+		//version(linux) IupSetAttributes( toggleBackThread, "VALUE=OFF,ACTIVE=NO" );
 
 
 		

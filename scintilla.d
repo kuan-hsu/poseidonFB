@@ -1091,6 +1091,8 @@ extern(C)
 	*/
 	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
+		if( AutoComplete.timer != null ) IupSetAttribute( AutoComplete.timer, "RUN", "NO" );
+		
 		GLOBAL.tabDocumentPos = -1;	GLOBAL.dragDocumentTabs = null;
 		
 		// Change GLOBAL.activeDocumentTabs
@@ -2536,11 +2538,12 @@ extern(C)
 		//Stdout( "CScintilla_AUTOCSELECTION_cb" ).newline;
 		
 		AutoComplete.bEnter = false;
-
 		AutoComplete.bAutocompletionPressEnter = true;
+		
+		IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 			
 		char[] _text = fromStringz( text ).dup;
-
+		
 		if( GLOBAL.toggleShowListType == "ON" )
 		{
 			int colonPos = Util.rindex( _text, "::" );
@@ -2550,13 +2553,13 @@ extern(C)
 		
 		if( _text.length )
 		{
-			scope textCovert = new IupString;
-
-			if( _text[length-1] == ')' )
+			if( _text[$-1] == ')' )
 			{
 				int _pos = Util.index( _text, "(" );
 				if( _pos < _text.length ) _text = _text[0.._pos];
 			}
+			
+			scope textCovert = new IupString( _text.dup );
 			
 			if( GLOBAL.toggleOverWrite == "ON" )
 			{
@@ -2564,74 +2567,25 @@ extern(C)
 				if( tail > pos )
 				{
 					IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
-					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );
+					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.toCString );
 				}
 				else if( tail == pos )
 				{
-					IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
+					IupSetAttribute( ih , "PREPEND", textCovert.toCString );
 				}				
 			}
 			else
 			{
-				IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 				IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
 				
+				textCovert = _text;
 				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
-					IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
-				else
-					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );			
-			}
-			
-			/+
-			if( _text[length-1] == ')' )
-			{
-				int _pos = Util.index( _text, "(" );
-				if( _pos < _text.length )
-				{
-					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-					IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
-					int tail = AutoComplete.getWholeWordTailPos( ih, pos );
-					if( tail > pos )
-					{
-						IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
-						//IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( pos ) ~ ":" ~  Integer.toString( tail ) ) );
-						//IupScintillaSendMessage( ih, 2025, tail, 0 ); // SCI_GOTOPOS 2025
-					}
-					
-					IupSetAttribute( ih, "SELECTEDTEXT", textCovert.convert( _text[0.._pos].dup ) );
-					return IUP_DEFAULT;
-				}
-			}
-
-			//if( GLOBAL.toggleShowListType == "ON" )
-			//{
-				IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-				/*
-				IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
-
-				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
-				{
-					IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
+				{	
+					IupSetAttribute( ih , "PREPEND", textCovert.toCString );
 				}
 				else
-				{
-				*/
-					int tail = AutoComplete.getWholeWordTailPos( ih, pos );
-					if( tail > pos )
-					{
-						IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
-						//IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( pos ) ~ ":" ~  Integer.toString( tail ) ) );
-						//IupScintillaSendMessage( ih, 2025, tail, 0 ); // SCI_GOTOPOS 2025
-					}
-					else if( tail == pos )
-					{
-						IupSetAttribute( ih , "PREPEND", textCovert.convert( _text.dup ) );
-					}
-					
-					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.convert( _text.dup ) );
-				//}
-			//}
-			+/
+					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.toCString );			
+			}
 		}
 
 		return IUP_DEFAULT;
@@ -2900,9 +2854,14 @@ extern(C)
 						}
 						
 						if( GLOBAL.toggleCompleteAtBackThread == "ON" )
-							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
+						{
+							if( text == "(" ) AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true ); else AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
+							//version(Windows) AutoComplete.callAutocomplete( ih, pos, text, alreadyInput ); else AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );
+						}
 						else
 							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );
+							
+						return IUP_DEFAULT;
 					}
 					catch( Exception e )
 					{
@@ -2911,6 +2870,7 @@ extern(C)
 			}
 		}
 
+		if( AutoComplete.timer != null ) IupSetAttribute( AutoComplete.timer, "RUN", "NO" );
 		return IUP_DEFAULT;
 	}
 

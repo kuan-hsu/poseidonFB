@@ -719,17 +719,17 @@ struct ScintillaAction
 		CASTnode		pParseTree;
 
 		public:
-		this( char[] _pFullPath )
+		this( CASTnode _pParseTree, char[] _pFullPath )
 		{
 			pFullPath = _pFullPath;
-			pParseTree = GLOBAL.outlineTree.loadFile( pFullPath );
+			pParseTree = _pParseTree;
 
 			if( pParseTree !is null )
 			{
 				if( GLOBAL.editorSetting00.Message == "ON" )
 				{
-					version(Windows) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ pFullPath ~ "]" );
 					/*
+					version(Windows) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ pFullPath ~ "]" );
 					version(linux)
 					{
 						int count = IupGetInt( GLOBAL.outputPanel, "COUNT" );
@@ -947,31 +947,12 @@ struct ScintillaAction
 			}			
 			
 			// Parser
-			/*
-			version(linux) // Linux load too many files at same time make crash!
-			{
-				if( backThread )
-				{
-					ParseThread subThread = new ParseThread( fullPath );
-					subThread.start();
-				}
-				else
-				{
-					auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
-					if( pParseTree !is null ) AutoComplete.getIncludes( pParseTree, fullPath, true );
-				}
-			}
-			else
-			{
-				ParseThread subThread = new ParseThread( fullPath );
-				subThread.start();
-			}
-			*/
 			version(BACKTHREAD)
 			{
 				if( backThread )
 				{
-					ParseThread subThread = new ParseThread( fullPath );
+					auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
+					ParseThread subThread = new ParseThread( pParseTree, fullPath );
 					subThread.start();
 				}
 				else
