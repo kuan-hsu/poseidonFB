@@ -5,6 +5,7 @@ import iup.iup_scintilla;
 
 import global, layout, images.imageData, tools, navcache;
 import menu, scintilla, actionManager;
+import parser.autocompletion;
 
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
@@ -280,6 +281,9 @@ void main( char[][] args )
 
 	// Init Nav Cache
 	GLOBAL.navigation = new CNavCache();
+	
+	// Init
+	version(FBIDE) AutoComplete.init();
 	
 	//IUP main Loop
 	IupMainLoop();

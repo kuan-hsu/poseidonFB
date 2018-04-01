@@ -176,6 +176,7 @@ struct GLOBAL
 	static char[]				toggleEnableDwell = "OFF";
 	static char[]				toggleOverWrite = "OFF";
 	static char[]				toggleCompleteAtBackThread = "OFF";
+	static IupString			completeDelay;
 	
 	static char[]				toggleUseManual = "OFF";
 	
@@ -304,6 +305,7 @@ struct GLOBAL
 		GLOBAL.debuggerFullPath = new IupString();
 		GLOBAL.manualPath = new IupString();
 		GLOBAL.colorTemplate = new IupString();
+		GLOBAL.completeDelay = new IupString( cast(char[]) "0" );
 		//GLOBAL.defaultOption = new IupString();
 		
 		GLOBAL.widthFunctionTitle = new IupString( cast(char[]) "200" );
@@ -592,6 +594,7 @@ struct GLOBAL
 						GLOBAL.languageItems["enabledwell"] = new IupString( cast(char[]) "Enable Mouse Dwell to Show Type" );
 						GLOBAL.languageItems["enableoverwrite"] = new IupString( cast(char[]) "Overwrite To Non Identifier Character" );
 						GLOBAL.languageItems["completeatbackthread"] = new IupString( cast(char[]) "Enable Codecomplete AT Back Thread" );
+						GLOBAL.languageItems["completedelay"] = new IupString( cast(char[]) "  Display Delay(ms):" );
 						GLOBAL.languageItems["parserlive"] = new IupString( cast(char[]) "ParseLive! Level" );
 							GLOBAL.languageItems["none"] = new IupString( cast(char[]) "None" );
 							GLOBAL.languageItems["light"] = new IupString( cast(char[]) "Light" );

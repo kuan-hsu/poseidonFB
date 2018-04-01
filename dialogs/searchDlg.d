@@ -748,10 +748,7 @@ class CSearchExpander
 		createLayout();
 	}
 	
-	~this()
-	{
-	
-	}
+	~this(){}
 	
 	Ihandle* getHandle()
 	{
@@ -781,7 +778,7 @@ class CSearchExpander
 		Ihandle* _find = IupGetDialogChild( expander, "list_Find" );
 		if( _find != null )
 		{
-			if( selectedWord.length ) IupSetAttribute( _find, "VALUE",toStringz( selectedWord.dup ) ); else IupSetAttribute( _find, "VALUE", "" );
+			if( selectedWord.length ) IupSetAttribute( _find, "VALUE",toStringz( selectedWord.dup ) );// else IupSetAttribute( _find, "VALUE", "" );
 			
 			Ihandle* _scope = IupGetDialogChild( expander, "toggle_Scope" );
 			if( _scope != null )

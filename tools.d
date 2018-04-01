@@ -3,6 +3,60 @@
 import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz, tango.time.Clock;
 import Util = tango.text.Util, tango.io.device.File, tango.io.stream.Lines, tango.io.FilePath, Path = tango.io.Path;
 
+class CContainer( T )
+{
+protected:
+	int     container_size = 0, max_container_size;
+	T[]     container;
+
+public:
+	this(){}
+	
+	this( int size ){ container.length = max_container_size = size; }
+
+	~this(){ container.length = 0; }
+
+	// Overload []
+	T opIndex( int i ){ return container[i]; }
+	
+	int size(){ return container_size; }
+
+	bool empty(){ if( container_size == 0 ) return true;else return false; }
+
+	void clear()
+	{
+		container_size = 0;
+		//container.length = 0;
+	}
+}
+
+
+class CStack( T ) : CContainer!( T )
+{
+public:
+	this(){ super( 50 ); }
+	
+	this( int size ){ super( size ); }
+
+	~this(){ delete container; }
+
+	void push( T t )
+	{
+		container_size   ++;
+		if( container_size > max_container_size )
+		{
+			max_container_size = container_size + 50;
+			container.length   = max_container_size; // Resize
+		}
+
+		container[container_size - 1] = t;
+	}
+
+	void pop(){ if( container_size < 1 ) return;else container_size --; }
+
+	T top(){ if( container_size < 1 ) return null; else return container[container_size - 1]; }
+}
+	
 class IupString
 {
 private:
@@ -496,60 +550,6 @@ version(DIDE)
 
 		delete sc;	
 		return results;
-	}
-
-	class CContainer( T )
-	{
-	protected:
-		int     container_size = 0, max_container_size;
-		T[]     container;
-
-	public:
-		this(){}
-		
-		this( int size ){ container.length = max_container_size = size; }
-
-		~this(){ container.length = 0; }
-
-		// Overload []
-		T opIndex( int i ){ return container[i]; }
-		
-		int size(){ return container_size; }
-
-		bool empty(){ if( container_size == 0 ) return true;else return false; }
-
-		void clear()
-		{
-			container_size = 0;
-			container.length = 0;
-		}
-	}
-
-
-	class CStack( T ) : CContainer!( T )
-	{
-	public:
-		this(){ super( 50 ); }
-		
-		this( int size ){ super( size ); }
-
-		~this(){ delete container; }
-
-		void push( T t )
-		{
-			container_size   ++;
-			if( container_size > max_container_size )
-			{
-				max_container_size = container_size + 50;
-				container.length   = max_container_size; // Resize
-			}
-
-			container[container_size - 1] = t;
-		}
-
-		void pop(){ if( container_size < 1 ) return;else container_size --; }
-
-		T top(){ if( container_size < 1 ) return null; else return container[container_size - 1]; }
 	}
 }
 

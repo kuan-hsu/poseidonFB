@@ -2967,12 +2967,6 @@ version(DIDE)
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
 			
-			if( cSci.lastPos == pos - 1 )
-			{
-				cSci.lastPos = pos;
-				return false;
-			}
-			
 			char[] list = charAdd( ih, pos, text, bForce );
 
 			if( list.length )
@@ -3005,12 +2999,7 @@ version(DIDE)
 					}
 				}
 
-				cSci.lastPos = -99;
 				return true;
-			}
-			else
-			{
-				cSci.lastPos = pos;
 			}
 
 			return false;

@@ -140,7 +140,6 @@ class CScintilla
 
 	public:
 	int				encoding;
-	int				lastPos = -99;
 
 	this( void* _beCopiedDocument )
 	{
@@ -188,6 +187,19 @@ class CScintilla
 			
 			IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
 			IupSetInt( sci, "MOUSEDWELLTIME", 1500 );
+			/*
+			IupSetCallback( sci, "AUTOCCANCELLED_CB", cast(Icallback) function( Ihandle* _ih )
+			{
+				IupMessage("AUTOCCANCELLED_CB","" );
+				return IUP_DEFAULT;
+			});
+
+			IupSetCallback( sci, "AUTOCCHARDELETED_CB", cast(Icallback) function( Ihandle* _ih )
+			{
+				IupMessage("AUTOCCHARDELETED_CB","" );
+				return IUP_DEFAULT;
+			});
+			*/	
 
 			init( _fullPath, insertPos );
 			setText( _text );
@@ -1091,8 +1103,6 @@ extern(C)
 	*/
 	private int button_cb( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		if( AutoComplete.timer != null ) IupSetAttribute( AutoComplete.timer, "RUN", "NO" );
-		
 		GLOBAL.tabDocumentPos = -1;	GLOBAL.dragDocumentTabs = null;
 		
 		// Change GLOBAL.activeDocumentTabs
@@ -2088,6 +2098,34 @@ extern(C)
 				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 			}
 			
+			version(FBIDE)
+			{
+				// For CallTip
+				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
+				{
+					int pos;
+					if( c == 65361 ) // LEFT
+					{
+						pos = ScintillaAction.getCurrentPos( ih ) - 1;
+						if( pos > -1 )
+						{
+							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) == "," ) pos --;
+						}
+						
+						if( pos > -1 ) AutoComplete.updateCallTipByDirectKey( ih, pos );
+					}
+					else if( c == 65363 ) // RIGHT
+					{
+						pos = ScintillaAction.getCurrentPos( ih ) + 1;
+						if( pos < IupGetInt( ih, "COUNT" ) )
+						{
+							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) == "," ) pos --;
+							AutoComplete.updateCallTipByDirectKey( ih, pos );
+						}
+					}
+				}
+			}
+			
 			if( GLOBAL.editorSetting00.AutoClose == "ON" )
 			{
 				switch( c )
@@ -2372,7 +2410,6 @@ extern(C)
 									if( alreadyInput.length )
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
-										if( cSci !is null ) cSci.lastPos = -99;
 										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
@@ -2433,7 +2470,6 @@ extern(C)
 									if( alreadyInput.length )
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
-										if( cSci !is null ) cSci.lastPos = -99;
 										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
@@ -2770,8 +2806,11 @@ extern(C)
 			return IUP_DEFAULT;
 		}
 		
+		// 
+		version(FBIDE) AutoComplete.updateCallTip( ih, pos, _text );
+		
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
-		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;		
+		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 		
 		if( insert == 1 )
 		{
@@ -2870,7 +2909,6 @@ extern(C)
 			}
 		}
 
-		if( AutoComplete.timer != null ) IupSetAttribute( AutoComplete.timer, "RUN", "NO" );
 		return IUP_DEFAULT;
 	}
 
