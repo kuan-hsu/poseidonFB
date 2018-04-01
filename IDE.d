@@ -599,6 +599,9 @@ struct IDECONFIG
 			doc ~= setINILineData( "maker1", GLOBAL.editColor.maker[1].toDString );
 			doc ~= setINILineData( "maker2", GLOBAL.editColor.maker[2].toDString );
 			doc ~= setINILineData( "maker3", GLOBAL.editColor.maker[3].toDString );
+			doc ~= setINILineData( "calltipFore", GLOBAL.editColor.callTip_Fore.toDString );
+			doc ~= setINILineData( "calltipBack", GLOBAL.editColor.callTip_Back.toDString );
+			doc ~= setINILineData( "calltipHLT", GLOBAL.editColor.callTip_HLT.toDString );
 			
 			// shortkeys
 			doc ~= setINILineData( "[shortkeys]");
@@ -961,6 +964,11 @@ struct IDECONFIG
 							case "maker1":					GLOBAL.editColor.maker[1] = right;						break;
 							case "maker2":					GLOBAL.editColor.maker[2] = right;						break;
 							case "maker3":					GLOBAL.editColor.maker[3] = right;						break;
+							
+							case "calltipFore":				GLOBAL.editColor.callTip_Fore = right;					break;
+							case "calltipBack":				GLOBAL.editColor.callTip_Back = right;					break;
+							case "calltipHLT":				GLOBAL.editColor.callTip_HLT = right;					break;
+							
 							default:
 						}
 						break;

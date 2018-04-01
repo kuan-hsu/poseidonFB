@@ -283,7 +283,7 @@ void main( char[][] args )
 	GLOBAL.navigation = new CNavCache();
 	
 	// Init
-	version(FBIDE) AutoComplete.init();
+	AutoComplete.init();
 	
 	//IUP main Loop
 	IupMainLoop();

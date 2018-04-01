@@ -13,7 +13,7 @@ class CPreferenceDialog : CBaseDialog
 	Ihandle*			textCompilerPath, textDebuggerPath;
 	IupString[15]		_stringOfLabel;
 	
-	static		IupString[48]		kbg;
+	static		IupString[48]		kbg, stringSC;
 	static		IupString[5]		stringMonitor;
 	static		IupString			stringTrigger, stringLevel, stringCharSymbol, stringTabWidth, stringColumnEdge, stringBarSize;
 
@@ -362,8 +362,8 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
 		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, toggleOverWrite, hBoxCompleteDalay, hBoxFunctionTitle, hBox00, null );
-		version(FBIDE)	IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
-		version(DIDE)	IupSetAttributes( vBox00, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
+		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
+		
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
 		IupSetAttribute( frameParser, "TITLE",  GLOBAL.languageItems["parsersetting"].toCString );
@@ -1470,32 +1470,38 @@ class CPreferenceDialog : CBaseDialog
 			switch( i )
 			{
 				case 0:
-					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["file"].toDString ~ "]" ) ); 
+					if( stringSC[ID-1] is null ) stringSC[ID-1] = new IupString( "[" ~ GLOBAL.languageItems["file"].toDString ~ "]" );
+					IupSetAttributeId( shortCutList, "", ID, stringSC[ID-1].toCString ); 
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_prj_open" ); 
 					ID++;
 					break;
 				case 6:
-					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["edit"].toDString ~ "]" ) );
+					if( stringSC[ID-1] is null ) stringSC[ID-1] = new IupString( "[" ~ GLOBAL.languageItems["edit"].toDString ~ "]" );
+					IupSetAttributeId( shortCutList, "", ID, stringSC[ID-1].toCString );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_search" ); 
 					ID++;
 					break;
 				case 20:
-					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["parser"].toDString ~ "]" ) );
+					if( stringSC[ID-1] is null ) stringSC[ID-1] = new IupString( "[" ~ GLOBAL.languageItems["parser"].toDString ~ "]" );
+					IupSetAttributeId( shortCutList, "", ID, stringSC[ID-1].toCString );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_refresh" ); 
 					ID++;
 					break;
 				case 25:
-					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["build"].toDString ~ "]" ) );
+					if( stringSC[ID-1] is null ) stringSC[ID-1] = new IupString( "[" ~ GLOBAL.languageItems["build"].toDString ~ "]" );
+					IupSetAttributeId( shortCutList, "", ID, stringSC[ID-1].toCString );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_compile" );
 					ID++;
 					break;
 				case 29:
-					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["windows"].toDString ~ "]" ) );
+					if( stringSC[ID-1] is null ) stringSC[ID-1] = new IupString( "[" ~ GLOBAL.languageItems["windows"].toDString ~ "]" );
+					IupSetAttributeId( shortCutList, "", ID, stringSC[ID-1].toCString );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_gui" );
 					ID++;
 					break;
 				case 31:
-					IupSetAttributeId( shortCutList, "", ID, toStringz( "[" ~ GLOBAL.languageItems["setcustomtool"].toDString ~ "]" ) );
+					if( stringSC[ID-1] is null ) stringSC[ID-1] = new IupString( "[" ~ GLOBAL.languageItems["setcustomtool"].toDString ~ "]" );
+					IupSetAttributeId( shortCutList, "", ID, stringSC[ID-1].toCString );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_toolitem" );
 					ID++;
 					break;
@@ -1505,16 +1511,16 @@ class CPreferenceDialog : CBaseDialog
 			char[] keyValue = IDECONFIG.convertShortKeyValue2String( GLOBAL.shortKeys[i].keyValue );
 			char[][] splitWord = Util.split( keyValue, "+" );
 
-			if(  splitWord.length == 4 ) 
+			if( splitWord.length == 4 ) 
 			{
 				if( splitWord[0] == "C" )  splitWord[0] = "Ctrl";
 				if( splitWord[1] == "S" )  splitWord[1] = "Shift";
 				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
 			}
 			
-			char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[i].title );
-
-			IupSetAttributeId( shortCutList, "",  ID, toStringz( string ) );
+			if( stringSC[ID-1] is null ) stringSC[ID-1] = new IupString( Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[i].title ) );
+			IupSetAttributeId( shortCutList, "",  ID, stringSC[ID-1].toCString );
+			
 		}
 
 

@@ -140,6 +140,7 @@ class CScintilla
 
 	public:
 	int				encoding;
+	int				lastPos = -99;
 
 	this( void* _beCopiedDocument )
 	{
@@ -182,24 +183,13 @@ class CScintilla
 			IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
 			IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
 			IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
+			//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_VALUECHANGED_CB );
 			
 			IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
 			
 			IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
 			IupSetInt( sci, "MOUSEDWELLTIME", 1500 );
-			/*
-			IupSetCallback( sci, "AUTOCCANCELLED_CB", cast(Icallback) function( Ihandle* _ih )
-			{
-				IupMessage("AUTOCCANCELLED_CB","" );
-				return IUP_DEFAULT;
-			});
 
-			IupSetCallback( sci, "AUTOCCHARDELETED_CB", cast(Icallback) function( Ihandle* _ih )
-			{
-				IupMessage("AUTOCCHARDELETED_CB","" );
-				return IUP_DEFAULT;
-			});
-			*/	
 
 			init( _fullPath, insertPos );
 			setText( _text );
@@ -553,12 +543,22 @@ class CScintilla
 				IupSetAttribute(sci, "STYLEBOLD21", "YES");
 			}
 		}
+		
 
 		getFontAndSize( 10, font, Bold, Italic, Underline, Strikeout, size );
 		IupSetAttribute(sci, "STYLEFGCOLOR40", GLOBAL.editColor.errorFore.toCString);	
 		IupSetAttribute(sci, "STYLEBGCOLOR40", GLOBAL.editColor.errorBack.toCString);
 		IupSetAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
 		IupSetAttribute(sci, "STYLEFONTSIZE40",  toStringz( size.dup ) );
+
+		IupScintillaSendMessage( sci, 2207, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+		/*
+		IupSetAttribute(sci, "STYLEFONTSIZE38",  "10" );
+		IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( "210 255 255" ), 0 ); // SCI_CALLTIPSETBACK 2205
+		IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( "0 0 255" ), 0 ); // SCI_CALLTIPSETFORE 2206
+		IupScintillaSendMessage( sci, 2212, 4, 0 );
+		//IupSetAttribute(sci, "STYLEBOLD38", "YES");
+		*/
 		
 		IupSetAttribute(sci, "STYLEFGCOLOR41", GLOBAL.editColor.warningFore.toCString);
 		IupSetAttribute(sci, "STYLEBGCOLOR41", GLOBAL.editColor.warringBack.toCString);
@@ -2098,9 +2098,10 @@ extern(C)
 				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 			}
 			
-			version(FBIDE)
-			{
-				// For CallTip
+			// For CallTip
+			//version(FBIDE)
+			//{
+				
 				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
 				{
 					int pos;
@@ -2123,8 +2124,23 @@ extern(C)
 							AutoComplete.updateCallTipByDirectKey( ih, pos );
 						}
 					}
+					else if( c == 13 || c == 65362 || c == 65364 ) // RIGHT
+					{
+						AutoComplete.cleanCalltipContainer();
+					}
+					else if( c == 8 )
+					{
+						// For Reduce The CallTip window close automatically
+						pos = ScintillaAction.getCurrentPos( ih );
+						IupScintillaSendMessage( ih, 2160, pos, pos-1 ); // SCI_SETSEL = 2160
+						IupSetAttribute( ih , "SELECTEDTEXT", "" );
+						
+						return IUP_IGNORE;
+					}
+					
+					return IUP_DEFAULT;
 				}
-			}
+			//}
 			
 			if( GLOBAL.editorSetting00.AutoClose == "ON" )
 			{
@@ -2410,6 +2426,7 @@ extern(C)
 									if( alreadyInput.length )
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
+										if( cSci !is null ) cSci.lastPos = -99;
 										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
@@ -2470,6 +2487,7 @@ extern(C)
 									if( alreadyInput.length )
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
+										if( cSci !is null ) cSci.lastPos = -99;
 										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
@@ -2629,9 +2647,6 @@ extern(C)
 
 	private int CScintilla_action_cb( Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
-		//static bool bWithoutList;
-		//static int	prevPos;
-		//if( insert == 0 )IupSetInt( ih, "BRACEBADLIGHT", -1 );
 		if( GLOBAL.liveLevel > 0 )
 		{
 			try
@@ -2806,8 +2821,8 @@ extern(C)
 			return IUP_DEFAULT;
 		}
 		
-		// 
-		version(FBIDE) AutoComplete.updateCallTip( ih, pos, _text );
+		// version(FBIDE) AutoComplete.updateCallTip( ih, pos, _text );
+		AutoComplete.updateCallTip( ih, pos, _text );
 		
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
@@ -2894,8 +2909,7 @@ extern(C)
 						
 						if( GLOBAL.toggleCompleteAtBackThread == "ON" )
 						{
-							if( text == "(" ) AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true ); else AutoComplete.callAutocomplete( ih, pos, text, alreadyInput );
-							//version(Windows) AutoComplete.callAutocomplete( ih, pos, text, alreadyInput ); else AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );
+							if( text == "(" ) AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true ); else AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, false );
 						}
 						else
 							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );
