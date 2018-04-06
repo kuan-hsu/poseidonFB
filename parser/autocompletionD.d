@@ -28,18 +28,19 @@ version(DIDE)
 			private:
 			import scintilla;
 			
-			CScintilla	cSci;
-			int			pos;
+			Ihandle*	sci;
+			int			pos, ext;
 			char[]		text;
+			char[]		result;
+			bool		bStop;
 			
-			bool		bForce;
-
 			public:
-			this( CScintilla _cSci, int _pos, char[] _text  )
+			this( Ihandle* _sci, int _pos, char[] _text, int _ext = -1  )
 			{
-				cSci			= _cSci;
+				sci				= _sci;
 				pos				= _pos;
 				text			= _text.dup;
+				ext				= _ext;
 				
 				super( &run );
 			}
@@ -49,15 +50,24 @@ version(DIDE)
 				int _delay = Integer.toInt( GLOBAL.completeDelay.toDString );
 				if( _delay > 0 ) Thread.sleep( cast(float) _delay / 1000.0 );
 				
-				completeLIST = "";
-				completeLIST = charAdd( cSci.getIupScintilla, pos, text );
+				result = charAdd( sci, pos, text );
 			}
+			
+			char[] getResult()
+			{
+				return result;
+			}
+			
+			void stop()
+			{
+				bStop = true;
+			}			
 		}
 		
 		static CStack!(char[])		calltipContainer;
 		
 		static CShowListThread showListThread;
-		static char[] completeLIST;
+		static CShowListThread showCallTipThread;
 		static Ihandle* timer = null;
 		
 		static CASTnode importComplete( CASTnode AST_Head, int lineNum, int completeCase, char[][] splitWord, int wordIndex )
@@ -654,11 +664,11 @@ version(DIDE)
 			return null;
 		}
 
-		static CASTnode[] check( char[] name, char[] _cwd )
+		static CASTnode[] check( char[] name, char[] originalFullPath )
 		{
 			CASTnode[] results;
 			
-			char[] includeFullPath = checkIncludeExist( name, _cwd );
+			char[] includeFullPath = checkIncludeExist( name, originalFullPath );
 
 			if( includeFullPath.length )
 			{
@@ -670,22 +680,32 @@ version(DIDE)
 					includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
 						
 					results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
-					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], _cwd, false );
+					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
 				}
 				else
 				{
 					//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
-					if( GLOBAL.outlineTree.loadParser( includeFullPath ) !is null )
+					CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
+					
+					if( _createFileNode !is null )
 					{
 						if( GLOBAL.editorSetting00.Message == "ON" ) 
 						{
-							GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+							version(BACKTHREAD)
+							{
+								version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+							}
+							else
+							{
+								GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );
+								//GLOBAL.statusBar.setFindMessage( "Pre-Parse file: [" ~ includeFullPath ~ "]" );
+							}
 						}
 						
-						results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
-						results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], _cwd, false );
-
-						includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
+						includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
+						
+						results ~= _createFileNode;
+						results ~= getIncludes( _createFileNode, includeFullPath );
 					}
 				}
 			}
@@ -706,6 +726,8 @@ version(DIDE)
 
 			foreach( includeAST; includesMarkContainer )
 			{
+				if( !checkBackThreadGoing ) return null;
+				
 				if( D_KIND & D_MODULE )
 				{
 					if( includeAST.kind & D_KIND )
@@ -753,6 +775,8 @@ version(DIDE)
 			{
 				foreach( child; getMembers( includeAST ) )//includeAST.getChildren )
 				{
+					if( !checkBackThreadGoing ) return null;
+					
 					if( child.kind & D_KIND )
 					{
 						if( child.name.length )
@@ -1186,6 +1210,54 @@ version(DIDE)
 			highlightEnd = -1;
 		}
 		
+		static char[] parseProcedureForCalltip( Ihandle* ih, int lineHeadPos, char[] lineHeadText, inout int commaCount, inout int parenCount, inout int firstOpenParenPos )
+		{
+			if( ih == null ) return null;
+			
+			bool	bGetName;
+			char[]	procedureName;
+			
+			if( lineHeadPos == -1 )	lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
+			
+			for( int i = lineHeadText.length - 1; i >= 0; --i ) //SCI_POSITIONFROMLINE 2167
+			{
+				if( !bGetName )
+				{
+					switch( lineHeadText[i] )
+					{
+						case ')':
+							parenCount --;
+							break;
+
+						case '(':
+							parenCount ++;
+							if( parenCount == 1 )
+							{
+								commaCount ++;
+								firstOpenParenPos = lineHeadPos + i;
+								bGetName = true;
+							}
+							break;
+							
+						case ',':
+							if( parenCount == 0 ) commaCount ++;
+							break;
+
+						default:
+					}
+				}
+				else
+				{
+					if( lineHeadText[i] == ' ' || lineHeadText[i] == '\t' || lineHeadText[i] == '\n' || lineHeadText[i] == '\r' || lineHeadText[i] == '.' || lineHeadText[i] == ';')
+						break;
+					else
+						procedureName = lineHeadText[i] ~ procedureName;
+				}
+			}
+			
+			return procedureName;
+		}		
+		
 		static char[] parseProcedureForCalltip( Ihandle* ih, int pos, inout int commaCount, inout int parenCount, inout int firstOpenParenPos )
 		{
 			if( ih == null ) return null;
@@ -1219,7 +1291,7 @@ version(DIDE)
 						case ",":
 							if( parenCount == 0 ) commaCount ++;
 							break;
-							
+
 						default:
 					}
 				}
@@ -1233,7 +1305,7 @@ version(DIDE)
 			}
 			
 			return procedureName;
-		}		
+		}
 
 		static void keyWordlist( char[] word )
 		{
@@ -1750,6 +1822,32 @@ version(DIDE)
 			
 			return null;
 		}
+		
+		static bool checkBackThreadGoing()
+		{
+			if( GLOBAL.toggleCompleteAtBackThread )
+			{
+				auto _thread = cast( CShowListThread ) Thread.getThis();
+				
+				if( showListThread !is null )
+				{
+					if( _thread.text != "(" )
+					{
+						if( showListThread.bStop ) return false;
+					}
+				}
+				
+				if( showCallTipThread !is null )
+				{
+					if( _thread.text == "(" )
+					{
+						if( showCallTipThread.bStop ) return false;
+					}
+				}
+			}
+			
+			return true;
+		}		
 
 		static CASTnode[] getIncludes( CASTnode originalNode, char[] cwdPath = null, bool bRootCall = false )
 		{
@@ -1784,6 +1882,8 @@ version(DIDE)
 
 			foreach( CASTnode _node; getMembers( originalNode ) )
 			{
+				if( !checkBackThreadGoing ) return null;
+				
 				if( _node.kind & D_IMPORT )
 				{
 					//IupMessage( "D_IMPORT", toStringz( _node.name ));
@@ -3148,12 +3248,38 @@ version(DIDE)
 			{
 				try
 				{
-					if( showListThread is null )
+					if( text == "(" )
 					{
-						showListThread = new CShowListThread( cSci, pos, text );
-						showListThread.start();
-						
-						if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+						if( alreadyInput.length )
+						{
+							if( alreadyInput[$-1] == ' ' ) // Check if Short-Cut Trigger
+							{
+								if( showCallTipThread is null )
+								{
+									showCallTipThread = new CShowListThread( ih, pos, text, 1 );
+									showCallTipThread.start();
+									
+									if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+								}
+							}
+						}
+					}
+					else
+					{
+						if( showListThread is null )
+						{
+							showListThread = new CShowListThread( ih, pos, text );
+							showListThread.start();
+							
+							if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+							
+							// CodeComplete is high priority than CallTip, Stop showCallTipThread
+							if( showCallTipThread !is null ) showCallTipThread.stop;
+						}
+						else
+						{
+							if( text == "," || text == ";" ) showListThread.stop();
+						}						
 					}
 				}
 				catch( Exception e )
@@ -3213,8 +3339,18 @@ version(DIDE)
 				
 				bool	bContinue;
 				int		commaCount, parenCount, firstOpenParenPosFromDocument;
-				char[]	procedureNameFromList;
+				char[]	procedureNameFromList, LineHeadText;
 				int		lineNumber, currentLn = ScintillaAction.getCurrentLine( ih ) - 1;
+				int		lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
+				
+				
+				char[] _getLineHeadText( int _pos, char[] _result = "" )
+				{
+					while( _pos >= lineHeadPos )
+						_result = fromStringz( IupGetAttributeId( ih, "CHAR", _pos-- ) ) ~ _result;
+						
+					return _result;
+				}
 				
 				
 				if( singleWord == null )
@@ -3222,42 +3358,23 @@ version(DIDE)
 					int currentPos = ScintillaAction.getCurrentPos( ih );
 					if( currentPos > pos ) // BS
 					{
-						char[] s = ScintillaAction.getCurrentChar( -1, ih );
-						if( s == "," ) 
-							commaCount = -1;
-						else if( s == ")" )
-							parenCount = 1;
-						else if( s == "(" )
-							parenCount = -1;
+						LineHeadText = _getLineHeadText( pos - 2 );
 					}
 					else // DEL
 					{
-						char[] s = ScintillaAction.getCurrentChar( 0, ih );
-						if( s == "," ) 
-							commaCount = -1;
-						else if( s == ")" )
-							parenCount = 1;
-						else if( s == "(" )
-							parenCount = -1;
+						LineHeadText = _getLineHeadText( pos - 1 );
 					}
 				
 				}
 				else
 				{
 					char[] s = fromStringz( singleWord );
-					if( s == "," || s == "(" )
-						commaCount = 1;
-					else if( s == ")" )
-						parenCount = -1;
+					LineHeadText = _getLineHeadText( pos - 1, s );
 				}
 
-				char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
-				/*
-				GLOBAL.IDEMessageDlg.print( "procedureNameFromDocument: " ~ procedureNameFromDocument );
-				GLOBAL.IDEMessageDlg.print( Integer.toString( commaCount ) );
-				GLOBAL.IDEMessageDlg.print( "commaCount = " ~ Integer.toString( commaCount ) );
-				GLOBAL.IDEMessageDlg.print( "parenCount = " ~ Integer.toString( parenCount ) );
-				*/
+				char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, lineHeadPos, LineHeadText, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+				//char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+
 				if( commaCount == 0 )
 				{
 					calltipContainer.pop();
@@ -3304,15 +3421,29 @@ version(DIDE)
 				}
 				else
 				{
-					// commaCount != 0 and calltipContainer is empty, Re-get the list
-					list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
-					if( list.length )
+					if( GLOBAL.toggleCompleteAtBackThread == "ON" )
 					{
-						bContinue = true;
-						if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						if( showCallTipThread is null )
+						{
+							showCallTipThread = new CShowListThread( ih, firstOpenParenPosFromDocument, "(", commaCount );
+							showCallTipThread.start();
+							
+							if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+						}				
+						
+						return false;
+					}
+					else
+					{
+						// commaCount != 0 and calltipContainer is empty, Re-get the list
+						list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
+						if( list.length )
+						{
+							bContinue = true;
+							if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						}
 					}
 				}
-				
 				
 				if( !bContinue )
 				{
@@ -3348,6 +3479,7 @@ version(DIDE)
 						{
 							IupScintillaSendMessage( ih, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 							IupScintillaSendMessage( ih, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+							
 							IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
 						}
 					
@@ -3419,7 +3551,7 @@ version(DIDE)
 		{
 			if( !AutoComplete.showListThread.isRunning )
 			{
-				if( AutoComplete.completeLIST.length )
+				if( AutoComplete.showListThread.getResult.length )
 				{
 					auto sci = ScintillaAction.getActiveIupScintilla();
 					if( sci != null )
@@ -3431,6 +3563,14 @@ version(DIDE)
 							char[]	_alreadyInput;
 							char[]	lastChar = fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
 							
+							if( _pos > 1 )
+							{
+								if( lastChar == ">" )
+								{
+									if( fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 2 ) ) == "-" ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos - 2, dummyHeadPos ).reverse ~ "->";
+								}
+							}
+
 							if( lastChar == "(" ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos - 1, dummyHeadPos ).reverse; else _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).reverse;
 						
 							char[][] splitWord = AutoComplete.getDivideWord( _alreadyInput );
@@ -3440,21 +3580,21 @@ version(DIDE)
 							{
 								IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 								IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-								IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) );
+								IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 								
-								if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, _pos ) ) ~ ";" ~ AutoComplete.completeLIST );
+								if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, _pos ) ) ~ ";" ~ AutoComplete.showListThread.getResult );
 								
 								int highlightStart, highlightEnd;
-								AutoComplete.callTipSetHLT( AutoComplete.completeLIST, 1, highlightStart, highlightEnd );
+								AutoComplete.callTipSetHLT( AutoComplete.showListThread.getResult, 1, highlightStart, highlightEnd );
 								if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
 							}
 							else
 							{
-								if( _alreadyInput.length ) IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) ); else IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) );
+								if( _alreadyInput.length ) IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) ); else IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 							}
 							
 							auto cSci = ScintillaAction.getActiveCScintilla();
-							if( cSci !is null ) cSci.lastPos = -99;							
+							if( cSci !is null ) cSci.lastPos = -99;
 						}
 					}
 				}
@@ -3462,16 +3602,54 @@ version(DIDE)
 				{
 					auto cSci = ScintillaAction.getActiveCScintilla();
 					if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-				}				
+				}
 
 				delete AutoComplete.showListThread;
 			}
 		}
-		else
+		
+		
+		if( AutoComplete.showCallTipThread !is null )
 		{
-			IupSetAttribute( ih, "RUN", "NO" );
-		}	
+			if( !AutoComplete.showCallTipThread.isRunning )
+			{
+				if( AutoComplete.showCallTipThread.getResult.length )
+				{
+					auto sci = ScintillaAction.getActiveIupScintilla();
+					if( sci != null )
+					{
+						if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
+						{
+							int		_pos = ScintillaAction.getCurrentPos( sci );
+
+							IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
+							
+							if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+							
+							int highlightStart, highlightEnd;
+							AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
+							if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							
+							auto cSci = ScintillaAction.getActiveCScintilla();
+							if( cSci !is null ) cSci.lastPos = -99;
+						}
+					}
+				}
+				else
+				{
+					auto cSci = ScintillaAction.getActiveCScintilla();
+					if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+				}
+
+				delete AutoComplete.showCallTipThread;
+			}
+		}		
+		
+		
+		if( AutoComplete.showListThread is null && AutoComplete.showCallTipThread is null )	IupSetAttribute( ih, "RUN", "NO" );
 		
 		return IUP_IGNORE;
-	}
+	}	
 }

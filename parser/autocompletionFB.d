@@ -49,18 +49,19 @@ version(FBIDE)
 			private:
 			import scintilla;
 			
-			CScintilla	cSci;
-			int			pos;
+			Ihandle*	sci;
+			int			pos, ext;
 			char[]		text;
+			char[]		result;
+			bool		bStop;
 			
-			bool		bForce;
-
 			public:
-			this( CScintilla _cSci, int _pos, char[] _text  )
+			this( Ihandle* _sci, int _pos, char[] _text, int _ext = -1  )
 			{
-				cSci			= _cSci;
+				sci				= _sci;
 				pos				= _pos;
 				text			= _text.dup;
+				ext				= _ext;
 				
 				super( &run );
 			}
@@ -70,13 +71,22 @@ version(FBIDE)
 				int _delay = Integer.toInt( GLOBAL.completeDelay.toDString );
 				if( _delay > 0 ) Thread.sleep( cast(float) _delay / 1000.0 );
 				
-				completeLIST = "";
-				completeLIST = charAdd( cSci.getIupScintilla, pos, text );
+				result = charAdd( sci, pos, text );
+			}
+			
+			char[] getResult()
+			{
+				return result;
+			}
+			
+			void stop()
+			{
+				bStop = true;
 			}
 		}
 		
 		static CShowListThread showListThread;
-		static char[] completeLIST;
+		static CShowListThread showCallTipThread;
 		static Ihandle* timer = null;
 		
 		static void cleanIncludesMarkContainer()
@@ -500,7 +510,15 @@ version(FBIDE)
 					{
 						if( GLOBAL.editorSetting00.Message == "ON" ) 
 						{
-							version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+							version(BACKTHREAD)
+							{
+								version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
+							}
+							else
+							{
+								GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );
+								//GLOBAL.statusBar.setFindMessage( "Pre-Parse file: [" ~ includeFullPath ~ "]" );
+							}
 						}
 						
 						includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
@@ -677,6 +695,8 @@ version(FBIDE)
 				{
 					foreach( child; includeAST.getChildren )
 					{
+						if( !checkBackThreadGoing ) return null;
+						
 						if( child.kind & B_NAMESPACE )
 						{
 							if( child.name.length )
@@ -775,127 +795,6 @@ version(FBIDE)
 			foreach( CASTnode n; includesMarkContainer )
 				Stdout( n.name ).newline;
 			*/
-			CASTnode[] includeASTNODES;
-			/+
-			foreach( includeAST; includesMarkContainer )
-			{
-				includeASTNODES ~= includeAST;
-			}
-			
-			
-			auto tg = new ThreadGroup();
-			
-			tg.create(
-			{
-				for( int i = 0; i < includeASTNODES.length / 2; ++ i )
-				{
-					foreach( child; includeASTNODES[i].getChildren )
-					{
-						if( child.kind & B_NAMESPACE )
-						{
-							if( child.name.length )
-							{
-								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
-								{
-									results ~= child;
-								}
-								else
-								{
-									foreach( _child; child.getChildren )
-									{
-										if( _child.name.length )
-										{
-											// Bug
-											if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
-											{
-												results ~= _child;
-											}
-										}
-										else
-										{
-											CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
-											if( enumResult.length ) results ~= enumResult;
-										}
-									}
-								}
-							}
-						}
-						else
-						{
-							if( child.name.length )
-							{
-								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
-								{
-									results ~= child;
-								}
-							}
-							else
-							{
-								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
-								if( enumResult.length ) results ~= enumResult;
-							}
-						}
-					}			
-				
-				}
-			});
-			
-			tg.create(
-			{
-				for( int i = includeASTNODES.length / 2; i < includeASTNODES.length; ++ i )
-				{
-					foreach( child; includeASTNODES[i].getChildren )
-					{
-						if( child.kind & B_NAMESPACE )
-						{
-							if( child.name.length )
-							{
-								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
-								{
-									results ~= child;
-								}
-								else
-								{
-									foreach( _child; child.getChildren )
-									{
-										if( _child.name.length )
-										{
-											// Bug
-											if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
-											{
-												results ~= _child;
-											}
-										}
-										else
-										{
-											CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
-											if( enumResult.length ) results ~= enumResult;
-										}
-									}
-								}
-							}
-						}
-						else
-						{
-							if( child.name.length )
-							{
-								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
-								{
-									results ~= child;
-								}
-							}
-							else
-							{
-								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
-								if( enumResult.length ) results ~= enumResult;
-							}
-						}
-					}
-				}
-			});
-			
-			tg.joinAll();
-			+/
 			
 			foreach( includeAST; includesMarkContainer )
 			{
@@ -903,6 +802,8 @@ version(FBIDE)
 				{
 					foreach( child; includeAST.getChildren )
 					{
+						if( !checkBackThreadGoing ) return null;
+						
 						if( child.kind & B_NAMESPACE )
 						{
 							if( child.name.length )
@@ -1324,6 +1225,54 @@ version(FBIDE)
 			highlightEnd = -1;
 		}
 		
+		static char[] parseProcedureForCalltip( Ihandle* ih, int lineHeadPos, char[] lineHeadText, inout int commaCount, inout int parenCount, inout int firstOpenParenPos )
+		{
+			if( ih == null ) return null;
+			
+			bool	bGetName;
+			char[]	procedureName;
+			
+			if( lineHeadPos == -1 )	lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
+			
+			for( int i = lineHeadText.length - 1; i >= 0; --i ) //SCI_POSITIONFROMLINE 2167
+			{
+				if( !bGetName )
+				{
+					switch( lineHeadText[i] )
+					{
+						case ')':
+							parenCount --;
+							break;
+
+						case '(':
+							parenCount ++;
+							if( parenCount == 1 )
+							{
+								commaCount ++;
+								firstOpenParenPos = lineHeadPos + i;
+								bGetName = true;
+							}
+							break;
+							
+						case ',':
+							if( parenCount == 0 ) commaCount ++;
+							break;
+
+						default:
+					}
+				}
+				else
+				{
+					if( lineHeadText[i] == ' ' || lineHeadText[i] == '\t' || lineHeadText[i] == '\n' || lineHeadText[i] == '\r'  || lineHeadText[i] == '.' )
+						break;
+					else
+						procedureName = lineHeadText[i] ~ procedureName;
+				}
+			}
+			
+			return procedureName;
+		}		
+		
 		static char[] parseProcedureForCalltip( Ihandle* ih, int pos, inout int commaCount, inout int parenCount, inout int firstOpenParenPos )
 		{
 			if( ih == null ) return null;
@@ -1499,6 +1448,32 @@ version(FBIDE)
 			
 			return null;
 		}
+		
+		static bool checkBackThreadGoing()
+		{
+			if( GLOBAL.toggleCompleteAtBackThread )
+			{
+				auto _thread = cast( CShowListThread ) Thread.getThis();
+				
+				if( showListThread !is null )
+				{
+					if( _thread.text != "(" )
+					{
+						if( showListThread.bStop ) return false;
+					}
+				}
+				
+				if( showCallTipThread !is null )
+				{
+					if( _thread.text == "(" )
+					{
+						if( showCallTipThread.bStop ) return false;
+					}
+				}
+			}
+			
+			return true;
+		}
 
 		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false, int ln = 2147483647 )
 		{
@@ -1529,6 +1504,8 @@ version(FBIDE)
 				{
 					if( _node.lineNumber < 2147483647 )
 					{
+						if( !checkBackThreadGoing ) return null;
+						
 						if( _node.type == "__FB_WIN32__" )
 						{
 							version(Windows)
@@ -3789,12 +3766,38 @@ version(FBIDE)
 			{
 				try
 				{
-					if( showListThread is null )
+					if( text == "(" )
 					{
-						showListThread = new CShowListThread( cSci, pos, text );
-						showListThread.start();
-						
-						if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+						if( alreadyInput.length )
+						{
+							if( alreadyInput[$-1] == ' ' ) // Check if Short-Cut Trigger
+							{
+								if( showCallTipThread is null )
+								{
+									showCallTipThread = new CShowListThread( ih, pos, text, 1 );
+									showCallTipThread.start();
+									
+									if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+								}
+							}
+						}
+					}
+					else
+					{
+						if( showListThread is null )
+						{
+							showListThread = new CShowListThread( ih, pos, text );
+							showListThread.start();
+							
+							if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+	
+							// CodeComplete is high priority than CallTip, Stop showCallTipThread
+							if( showCallTipThread !is null ) showCallTipThread.stop;
+						}
+						else
+						{
+							if( text == "," ) showListThread.stop();
+						}
 					}
 				}
 				catch( Exception e )
@@ -3854,8 +3857,18 @@ version(FBIDE)
 				
 				bool	bContinue;
 				int		commaCount, parenCount, firstOpenParenPosFromDocument;
-				char[]	procedureNameFromList;
+				char[]	procedureNameFromList, LineHeadText;
 				int		lineNumber, currentLn = ScintillaAction.getCurrentLine( ih ) - 1;
+				int		lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
+				
+				
+				char[] _getLineHeadText( int _pos, char[] _result = "" )
+				{
+					while( _pos >= lineHeadPos )
+						_result = fromStringz( IupGetAttributeId( ih, "CHAR", _pos-- ) ) ~ _result;
+						
+					return _result;
+				}
 				
 				
 				if( singleWord == null )
@@ -3863,42 +3876,23 @@ version(FBIDE)
 					int currentPos = ScintillaAction.getCurrentPos( ih );
 					if( currentPos > pos ) // BS
 					{
-						char[] s = ScintillaAction.getCurrentChar( -1, ih );
-						if( s == "," ) 
-							commaCount = -1;
-						else if( s == ")" )
-							parenCount = 1;
-						else if( s == "(" )
-							parenCount = -1;
+						LineHeadText = _getLineHeadText( pos - 2 );
 					}
 					else // DEL
 					{
-						char[] s = ScintillaAction.getCurrentChar( 0, ih );
-						if( s == "," ) 
-							commaCount = -1;
-						else if( s == ")" )
-							parenCount = 1;
-						else if( s == "(" )
-							parenCount = -1;
+						LineHeadText = _getLineHeadText( pos - 1 );
 					}
 				
 				}
 				else
 				{
 					char[] s = fromStringz( singleWord );
-					if( s == "," || s == "(" )
-						commaCount = 1;
-					else if( s == ")" )
-						parenCount = -1;
+					LineHeadText = _getLineHeadText( pos - 1, s );
 				}
 
-				char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
-				/*
-				GLOBAL.IDEMessageDlg.print( "procedureNameFromDocument: " ~ procedureNameFromDocument );
-				GLOBAL.IDEMessageDlg.print( Integer.toString( commaCount ) );
-				GLOBAL.IDEMessageDlg.print( "commaCount = " ~ Integer.toString( commaCount ) );
-				GLOBAL.IDEMessageDlg.print( "parenCount = " ~ Integer.toString( parenCount ) );
-				*/
+				char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, lineHeadPos, LineHeadText, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+				//char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+
 				if( commaCount == 0 )
 				{
 					calltipContainer.pop();
@@ -3945,15 +3939,29 @@ version(FBIDE)
 				}
 				else
 				{
-					// commaCount != 0 and calltipContainer is empty, Re-get the list
-					list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
-					if( list.length )
+					if( GLOBAL.toggleCompleteAtBackThread == "ON" )
 					{
-						bContinue = true;
-						if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						if( showCallTipThread is null )
+						{
+							showCallTipThread = new CShowListThread( ih, firstOpenParenPosFromDocument, "(", commaCount );
+							showCallTipThread.start();
+							
+							if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
+						}				
+						
+						return false;
+					}
+					else
+					{
+						// commaCount != 0 and calltipContainer is empty, Re-get the list
+						list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
+						if( list.length )
+						{
+							bContinue = true;
+							if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						}
 					}
 				}
-				
 				
 				if( !bContinue )
 				{
@@ -4055,13 +4063,13 @@ version(FBIDE)
 		}
 	}
 
-	extern(C) private int CompleteTimer_ACTION( Ihandle* ih )
+	extern(C) private int CompleteTimer_ACTION( Ihandle* _ih )
 	{
 		if( AutoComplete.showListThread !is null )
 		{
 			if( !AutoComplete.showListThread.isRunning )
 			{
-				if( AutoComplete.completeLIST.length )
+				if( AutoComplete.showListThread.getResult.length )
 				{
 					auto sci = ScintillaAction.getActiveIupScintilla();
 					if( sci != null )
@@ -4090,17 +4098,17 @@ version(FBIDE)
 							{
 								IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 								IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-								IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) );
+								IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 								
-								if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, _pos ) ) ~ ";" ~ AutoComplete.completeLIST );
+								if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showListThread.getResult );
 								
 								int highlightStart, highlightEnd;
-								AutoComplete.callTipSetHLT( AutoComplete.completeLIST, 1, highlightStart, highlightEnd );
+								AutoComplete.callTipSetHLT( AutoComplete.showListThread.getResult, 1, highlightStart, highlightEnd );
 								if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
 							}
 							else
 							{
-								if( _alreadyInput.length ) IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) ); else IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.completeLIST ) );
+								if( _alreadyInput.length ) IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) ); else IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 							}
 							
 							auto cSci = ScintillaAction.getActiveCScintilla();
@@ -4117,10 +4125,48 @@ version(FBIDE)
 				delete AutoComplete.showListThread;
 			}
 		}
-		else
+		
+		
+		if( AutoComplete.showCallTipThread !is null )
 		{
-			IupSetAttribute( ih, "RUN", "NO" );
-		}	
+			if( !AutoComplete.showCallTipThread.isRunning )
+			{
+				if( AutoComplete.showCallTipThread.getResult.length )
+				{
+					auto sci = ScintillaAction.getActiveIupScintilla();
+					if( sci != null )
+					{
+						if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 0 )
+						{
+							int		_pos = ScintillaAction.getCurrentPos( sci );
+
+							IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
+							
+							if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+							
+							int highlightStart, highlightEnd;
+							AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
+							if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							
+							auto cSci = ScintillaAction.getActiveCScintilla();
+							if( cSci !is null ) cSci.lastPos = -99;
+						}
+					}
+				}
+				else
+				{
+					auto cSci = ScintillaAction.getActiveCScintilla();
+					if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+				}
+
+				delete AutoComplete.showCallTipThread;
+			}
+		}		
+		
+		
+		if( AutoComplete.showListThread is null && AutoComplete.showCallTipThread is null )	IupSetAttribute( _ih, "RUN", "NO" );
 		
 		return IUP_IGNORE;
 	}	

@@ -16,6 +16,13 @@ version(Windows)
 	typedef extern (C) void function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
 }
 
+version(PLUGIN)
+{
+	typedef extern (C) void function( Ihandle* ) _Send_PoseidonFB_HANDLE;
+	typedef extern (C) void function( Ihandle* ) _Send_SCINTILLA;
+	typedef extern (C) void function() _Dll_Go;
+}
+
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "ON";
@@ -83,6 +90,12 @@ struct GLOBAL
 	public:
 	version(Windows) static _htmlHelp	htmlHelp;
 	
+	version(PLUGIN)
+	{
+		static _Send_PoseidonFB_HANDLE			Send_PoseidonFB_HANDLE;
+		static _Send_SCINTILLA					Send_SCINTILLA;
+		static _Dll_Go							Dll_go;
+	}
 	
 	static Ihandle*				mainDlg;
 	static Ihandle*				documentTabs, documentTabs_Sub, projectViewTabs, messageWindowTabs;

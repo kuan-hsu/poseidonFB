@@ -2096,51 +2096,8 @@ extern(C)
 			if( c == 65307 ) // ESC
 			{
 				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
 			}
-			
-			// For CallTip
-			//version(FBIDE)
-			//{
-				
-				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
-				{
-					int pos;
-					if( c == 65361 ) // LEFT
-					{
-						pos = ScintillaAction.getCurrentPos( ih ) - 1;
-						if( pos > -1 )
-						{
-							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) == "," ) pos --;
-						}
-						
-						if( pos > -1 ) AutoComplete.updateCallTipByDirectKey( ih, pos );
-					}
-					else if( c == 65363 ) // RIGHT
-					{
-						pos = ScintillaAction.getCurrentPos( ih ) + 1;
-						if( pos < IupGetInt( ih, "COUNT" ) )
-						{
-							if( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) == "," ) pos --;
-							AutoComplete.updateCallTipByDirectKey( ih, pos );
-						}
-					}
-					else if( c == 13 || c == 65362 || c == 65364 ) // RIGHT
-					{
-						AutoComplete.cleanCalltipContainer();
-					}
-					else if( c == 8 )
-					{
-						// For Reduce The CallTip window close automatically
-						pos = ScintillaAction.getCurrentPos( ih );
-						IupScintillaSendMessage( ih, 2160, pos, pos-1 ); // SCI_SETSEL = 2160
-						IupSetAttribute( ih , "SELECTEDTEXT", "" );
-						
-						return IUP_IGNORE;
-					}
-					
-					return IUP_DEFAULT;
-				}
-			//}
 			
 			if( GLOBAL.editorSetting00.AutoClose == "ON" )
 			{
@@ -2412,7 +2369,7 @@ extern(C)
 										{
 											if( alreadyInput.length )
 											{
-												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) != "YES" )
+												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" )
 												{
 													char[] list = AutoComplete.getKeywordContainerList( alreadyInput );
 													if( list.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
@@ -2427,7 +2384,7 @@ extern(C)
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
 										if( cSci !is null ) cSci.lastPos = -99;
-										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
 								catch( Exception e )
@@ -2488,7 +2445,8 @@ extern(C)
 									{
 										auto cSci = ScintillaAction.getCScintilla( ih );
 										if( cSci !is null ) cSci.lastPos = -99;
-										AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+										//AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
 								catch( Exception e )
@@ -2575,6 +2533,53 @@ extern(C)
 					*/
 						
 					default:
+				}
+			}
+			
+			// For CallTip
+			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
+			{
+				int pos;
+				if( c == 65361 ) // LEFT
+				{
+					pos = ScintillaAction.getCurrentPos( ih ) - 2;
+					if( pos > -1 )
+					{
+						char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
+						if( s == "\n" || s == "\r" )
+						{
+							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+						}
+						else
+							AutoComplete.updateCallTipByDirectKey( ih, pos );
+					}
+				}
+				else if( c == 65363 ) // RIGHT
+				{
+					pos = ScintillaAction.getCurrentPos( ih );// + 1;
+					if( pos < IupGetInt( ih, "COUNT" ) )
+					{
+						char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
+						if( s == "\n" || s == "\r" )
+						{
+							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+						}
+						else
+							AutoComplete.updateCallTipByDirectKey( ih, pos );
+					}
+				}
+				else if( c == 13 || c == 65362 || c == 65364 ) // RIGHT
+				{
+					AutoComplete.cleanCalltipContainer();
+				}
+				else if( c == 8 )
+				{
+					// For Reduce The CallTip window close automatically
+					pos = ScintillaAction.getCurrentPos( ih );
+					IupScintillaSendMessage( ih, 2160, pos, pos-1 ); // SCI_SETSEL = 2160
+					IupSetAttribute( ih , "SELECTEDTEXT", "" );
+					
+					return IUP_IGNORE;
 				}
 			}
 		}
@@ -2909,7 +2914,7 @@ extern(C)
 						
 						if( GLOBAL.toggleCompleteAtBackThread == "ON" )
 						{
-							if( text == "(" ) AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true ); else AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, false );
+							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, false );
 						}
 						else
 							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );

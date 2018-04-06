@@ -25,6 +25,7 @@ void createTabs()
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	version(Windows) IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
+	IupSetHandle( "MAIN_TABS", GLOBAL.documentTabs );
 }
 
 void createTabs2()
@@ -325,7 +326,15 @@ extern(C)
 		{
 			if( button == IUP_BUTTON2 )
 			{
-				return tabClose_cb( ih, pos );
+				version(PLUGIN)
+				{
+					GLOBAL.Send_PoseidonFB_HANDLE( GLOBAL.mainDlg );
+					GLOBAL.Send_SCINTILLA( IupGetChild( ih, pos ) );
+					GLOBAL.Dll_go();
+					return IUP_DEFAULT;
+				}
+				else
+					return tabClose_cb( ih, pos );
 			}
 			else if( button == IUP_BUTTON1 )
 			{
