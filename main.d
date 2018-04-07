@@ -11,7 +11,7 @@ import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
 import tango.sys.Process, tango.io.stream.Lines;
 
-version(PLUGIN)
+version(PLUGIN) 
 	import tango.sys.SharedLib;
 else
 {
@@ -348,6 +348,8 @@ void main( char[][] args )
 	
 	// Init
 	AutoComplete.init();
+	
+	IupRefresh( GLOBAL.mainDlg );
 	
 	//IUP main Loop
 	IupMainLoop();

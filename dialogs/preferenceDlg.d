@@ -11,8 +11,9 @@ class CPreferenceDialog : CBaseDialog
 {
 	private:
 	Ihandle*			textCompilerPath, textDebuggerPath;
-	IupString[15]		_stringOfLabel;
 	
+	
+	static		IupString[15]		_stringOfLabel;
 	static		IupString[48]		kbg, stringSC;
 	static		IupString[5]		stringMonitor;
 	static		IupString			stringTrigger, stringLevel, stringCharSymbol, stringTabWidth, stringColumnEdge, stringBarSize;
@@ -1967,11 +1968,11 @@ extern(C) // Callback for CPreferenceDialog
 									}
 								}
 								version(Window)
-									fontInformation = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+									CPreferenceDialog._stringOfLabel[id] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
 								else
-									fontInformation = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+									CPreferenceDialog._stringOfLabel[id] = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
 									
-								IupSetAttribute( ih, "TITLE", fontInformation.toCString );
+								IupSetAttribute( ih, "TITLE", CPreferenceDialog._stringOfLabel[id].toCString );
 
 								scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
 								Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );
@@ -2010,11 +2011,13 @@ extern(C) // Callback for CPreferenceDialog
 									}
 
 									fontName = Util.trim( fontName );
+									/*
 									version(Windows)
-										fontInformation = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
+										CPreferenceDialog._stringOfLabel[id] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
 									else
-										fontInformation = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
-									IupSetAttribute( ih, "TITLE", fontInformation.toCString );
+									*/
+										CPreferenceDialog._stringOfLabel[id] = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
+									IupSetAttribute( ih, "TITLE", CPreferenceDialog._stringOfLabel[id].toCString );
 									
 									scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
 									Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );

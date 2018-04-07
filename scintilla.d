@@ -99,6 +99,7 @@ class CScintilla
 			}			
 			
 			IupSetHandle( fullPath.toCString, sci );
+			IupSetAttribute( sci, "NAME", fullPath.toCString );
 			//IupSetAttribute( sci, "TABTITLE", title.toCString );
 
 			if( insertPos == -1 )
@@ -183,7 +184,8 @@ class CScintilla
 			IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
 			IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
 			IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
-			//IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_VALUECHANGED_CB );
+			
+			//IupSetCallback( sci, "MAP_CB",cast(Icallback) &scintilla_MAP_CB );
 			
 			IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
 			
@@ -2382,8 +2384,10 @@ extern(C)
 									
 									if( alreadyInput.length )
 									{
+										/*
 										auto cSci = ScintillaAction.getCScintilla( ih );
 										if( cSci !is null ) cSci.lastPos = -99;
+										*/
 										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
@@ -2443,8 +2447,10 @@ extern(C)
 								
 									if( alreadyInput.length )
 									{
+										/*
 										auto cSci = ScintillaAction.getCScintilla( ih );
 										if( cSci !is null ) cSci.lastPos = -99;
+										*/
 										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 										//AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
@@ -2549,6 +2555,7 @@ extern(C)
 						if( s == "\n" || s == "\r" )
 						{
 							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							AutoComplete.noneListProcedureName = "";
 						}
 						else
 							AutoComplete.updateCallTipByDirectKey( ih, pos );
@@ -2563,6 +2570,7 @@ extern(C)
 						if( s == "\n" || s == "\r" )
 						{
 							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							AutoComplete.noneListProcedureName = "";
 						}
 						else
 							AutoComplete.updateCallTipByDirectKey( ih, pos );
@@ -2571,6 +2579,7 @@ extern(C)
 				else if( c == 13 || c == 65362 || c == 65364 ) // RIGHT
 				{
 					AutoComplete.cleanCalltipContainer();
+					AutoComplete.noneListProcedureName = "";
 				}
 				else if( c == 8 )
 				{
@@ -2578,6 +2587,7 @@ extern(C)
 					pos = ScintillaAction.getCurrentPos( ih );
 					IupScintillaSendMessage( ih, 2160, pos, pos-1 ); // SCI_SETSEL = 2160
 					IupSetAttribute( ih , "SELECTEDTEXT", "" );
+					AutoComplete.noneListProcedureName = "";
 					
 					return IUP_IGNORE;
 				}
