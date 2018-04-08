@@ -966,10 +966,11 @@ extern(C)
 			return IUP_DEFAULT;;
 		}
 		
-		int pos;
+		int		pos;
+		char[]	beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+		
 		if( fromStringz( IupGetAttribute( ih, "NAME" ) ) == "btn_FindPrev" )
 		{
-			char[] beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
 			if( beginEndPos.length )
 			{
 				int colonPos = Util.index( beginEndPos, ":" );
@@ -984,7 +985,8 @@ extern(C)
 		}
 		else
 		{
-			IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+			if( beginEndPos.length ) IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( beginEndPos.dup ) );
+			
 			pos = CSearchExpander_search( 2 );
 		}
 

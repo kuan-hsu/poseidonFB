@@ -57,6 +57,7 @@ extern(C)
 		{
 			if( fromStringz( IupGetAttribute( _oldChild, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( _oldChild, "AUTOCCANCEL", "YES" );
 			if( cast(int) IupScintillaSendMessage( _oldChild, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( _oldChild, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+			AutoComplete.cleanCalltipContainer();
 		}
 		
 		DocumentTabAction.setActiveDocumentTabs( ih );

@@ -2092,6 +2092,7 @@ extern(C)
 		{
 			//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
 			AutoComplete.bAutocompletionPressEnter = false;
+			AutoComplete.bSkipAutoComplete = false;
 			
 			if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
 
@@ -2576,12 +2577,12 @@ extern(C)
 							AutoComplete.updateCallTipByDirectKey( ih, pos );
 					}
 				}
-				else if( c == 13 || c == 65362 || c == 65364 ) // RIGHT
+				else if( c == 13 || c == 65362 || c == 65364 ) // Enter / UP / DOWN
 				{
 					AutoComplete.cleanCalltipContainer();
 					AutoComplete.noneListProcedureName = "";
 				}
-				else if( c == 8 )
+				else if( c == 8 ) // BS
 				{
 					// For Reduce The CallTip window close automatically
 					pos = ScintillaAction.getCurrentPos( ih );
@@ -2592,6 +2593,8 @@ extern(C)
 					return IUP_IGNORE;
 				}
 			}
+			
+			if( c == 9 || c == 268435465 ) AutoComplete.bSkipAutoComplete = true;
 		}
 		catch( Exception e )
 		{
@@ -2746,12 +2749,16 @@ extern(C)
 		
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
 		
-		if( GLOBAL.bUndoRedoAction )
+		
+		if( AutoComplete.bSkipAutoComplete )
 		{
-			if( fromStringz( IupGetAttribute( ih, "REDO" ) ) == "NO" ) GLOBAL.bUndoRedoAction = false;
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+			
+			//GLOBAL.IDEMessageDlg.print( "bSkipAutoComplete = true" );
 			return IUP_DEFAULT;
 		}
+		
 		
 		if( GLOBAL.enableIncludeComplete != "ON" && GLOBAL.enableKeywordComplete != "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) return IUP_DEFAULT;
 		
@@ -2796,6 +2803,7 @@ extern(C)
 			}
 		}		
 		
+		// Check Keyword Autocomplete
 		if( GLOBAL.enableParser != "ON" || ( GLOBAL.enableParser == "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) )
 		{
 			// Check Keyword Autocomplete
@@ -2836,11 +2844,13 @@ extern(C)
 			return IUP_DEFAULT;
 		}
 		
-		// version(FBIDE) AutoComplete.updateCallTip( ih, pos, _text );
+
+		// Check CallTip
 		AutoComplete.updateCallTip( ih, pos, _text );
-		
+
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
+		
 		
 		if( insert == 1 )
 		{
@@ -2892,7 +2902,7 @@ extern(C)
 					if( !bDot && !bOpenParen )
 					{
 						if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) break;
+						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) break;
 					}
 
 					try

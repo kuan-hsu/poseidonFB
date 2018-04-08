@@ -229,7 +229,6 @@ struct GLOBAL
 
 	static bool					bKeyUp = true;
 	static int					KeyNumber;
-	static bool					bUndoRedoAction;
 	
 	static CustomTool[10]		customTools;
 	

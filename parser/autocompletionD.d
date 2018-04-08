@@ -1301,7 +1301,7 @@ version(DIDE)
 				}
 				else
 				{
-					if( s == " " || s == "\t" || s == "\n" || s == "\r"  || s == "." )
+					if( s == " " || s == "\t" || s == "\n" || s == "\r"  || s == "." || s == ";" )
 						break;
 					else
 						procedureName = s ~ procedureName;
@@ -1493,6 +1493,7 @@ version(DIDE)
 		public:
 		static bool bEnter, bInsertBrace;
 		static bool bAutocompletionPressEnter;
+		static bool	bSkipAutoComplete;
 		
 		static void init()
 		{
@@ -3241,12 +3242,19 @@ version(DIDE)
 		{
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
-			
-			if( cSci.lastPos == pos - 1 )
+			switch( text )
 			{
-				cSci.lastPos = pos;
-				return false;
-			}			
+				case "(", ")", ",", ":", ".":	
+					cSci.lastPos = -99;
+					break;
+					
+				default:
+					if( cSci.lastPos == pos - 1 )
+					{
+						cSci.lastPos = pos;
+						return false;
+					}
+			}		
 
 			if( !bForce )
 			{
@@ -3337,12 +3345,14 @@ version(DIDE)
 		
 		static bool updateCallTip( Ihandle* ih, int pos, char* singleWord )
 		{
+			if( !bSkipAutoComplete ) bSkipAutoComplete = true; else return false;
+			
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
 			{
 				if( singleWord != null )
 				{
 					char[] s = fromStringz( singleWord );
-					if( s == "(" || s == ")" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
+					if( s == "(" || s == ")" || s == "," ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
 				}
 				else
 				{
@@ -3374,19 +3384,36 @@ version(DIDE)
 				if( singleWord == null )
 				{
 					int currentPos = ScintillaAction.getCurrentPos( ih );
+					LineHeadText = _getLineHeadText( pos - 1 );
+					/+
 					if( currentPos > pos ) // BS
 					{
+						/*
+						01234567
+						KUAN,
+						Before pos at 5, after press BS, the current pos = 4
+						*/
 						LineHeadText = _getLineHeadText( pos - 2 );
 					}
 					else // DEL
 					{
 						LineHeadText = _getLineHeadText( pos - 1 );
 					}
-				
+					+/
 				}
 				else
 				{
 					char[] s = fromStringz( singleWord );
+					
+					// Press Enter, leave...
+					if( s == "\n" )
+					{
+						if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+						noneListProcedureName = "";
+						cleanCalltipContainer();
+						return false;
+					}
+					
 					LineHeadText = _getLineHeadText( pos - 1, s );
 				}
 

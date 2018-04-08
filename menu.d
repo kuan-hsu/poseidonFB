@@ -4,6 +4,7 @@ import iup.iup;
 import iup.iup_scintilla;
 
 import global, actionManager, scintilla, project, tools, layout;
+import parser.autocompletion;
 import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg;
 
 import tango.io.Stdout;
@@ -678,7 +679,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.384)\nBy Kuan Hsu (Taiwan)\n2018.04.06" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.386)\nBy Kuan Hsu (Taiwan)\n2018.04.08" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.028)\nBy Kuan Hsu (Taiwan)\n2018.03.15" );
 		return IUP_DEFAULT;
 	});
@@ -1113,7 +1114,7 @@ extern(C)
 		{
 			if( fromStringz(IupGetAttribute( ih, "UNDO" )) == "YES" )
 			{
-				GLOBAL.bUndoRedoAction = true;
+				AutoComplete.bSkipAutoComplete = true;
 				IupSetAttribute( ih, "UNDO", "YES" );
 			}
 			IupSetFocus( ih );
@@ -1127,7 +1128,7 @@ extern(C)
 		{
 			if( fromStringz(IupGetAttribute( ih, "REDO" )) == "YES" )
 			{
-				GLOBAL.bUndoRedoAction = true;
+				AutoComplete.bSkipAutoComplete = true;
 				IupSetAttribute( ih, "REDO", "YES" );
 			}
 			IupSetFocus( ih );

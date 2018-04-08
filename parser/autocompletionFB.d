@@ -18,7 +18,7 @@ version(FBIDE)
 
 		import Integer = tango.text.convert.Integer, UTF = tango.text.convert.Utf;
 		import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
-		import tango.io.Stdout;
+		import tango.io.Stdout, tango.util.container.more.Stack;
 		import tango.core.Thread;
 
 		version(Windows)
@@ -38,7 +38,8 @@ version(FBIDE)
 			}
 		}
 		
-		static CStack!(char[])		calltipContainer;
+		//static CStack!(char[])		calltipContainer;
+		static Stack!(char[])		calltipContainer;
 		static char[]				noneListProcedureName;
 
 		static char[][]				listContainer;
@@ -1265,7 +1266,7 @@ version(FBIDE)
 				}
 				else
 				{
-					if( lineHeadText[i] == ' ' || lineHeadText[i] == '\t' || lineHeadText[i] == '\n' || lineHeadText[i] == '\r'  || lineHeadText[i] == '.' )
+					if( lineHeadText[i] == ' ' || lineHeadText[i] == '\t' || lineHeadText[i] == '\n' || lineHeadText[i] == '\r' || lineHeadText[i] == '.'  || lineHeadText[i] == ':' )
 						break;
 					else
 						procedureName = lineHeadText[i] ~ procedureName;
@@ -1314,7 +1315,7 @@ version(FBIDE)
 				}
 				else
 				{
-					if( s == " " || s == "\t" || s == "\n" || s == "\r"  || s == "." )
+					if( s == " " || s == "\t" || s == "\n" || s == "\r"  || s == "." || s == ":" )
 						break;
 					else
 						procedureName = s ~ procedureName;
@@ -1398,6 +1399,7 @@ version(FBIDE)
 		public:
 		static bool bEnter;
 		static bool bAutocompletionPressEnter;
+		static bool	bSkipAutoComplete;
 		
 		static void init()
 		{
@@ -1409,12 +1411,13 @@ version(FBIDE)
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
 			}
 			
-			if( calltipContainer is null ) calltipContainer = new CStack!(char[]);
+			//if( calltipContainer is null ) calltipContainer = new CStack!(char[]);
 		}
 		
 		static void cleanCalltipContainer()
 		{
-			if( calltipContainer is null ) calltipContainer.clear();
+			//if( calltipContainer is null ) calltipContainer.clear();
+			calltipContainer.clear();
 		}
 		
 		static char[] getKeywordContainerList( char[] word, bool bCleanContainer = true )
@@ -3755,7 +3758,6 @@ version(FBIDE)
 
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{
-
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
 			switch( text )
@@ -3838,7 +3840,8 @@ version(FBIDE)
 						//SCI_CALLTIPSETHLT 2204
 						IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
 						
-						if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
 						int highlightStart, highlightEnd;
 						callTipSetHLT( list, 1, highlightStart, highlightEnd );
@@ -3862,22 +3865,23 @@ version(FBIDE)
 		
 		static bool updateCallTip( Ihandle* ih, int pos, char* singleWord )
 		{
+			if( !bSkipAutoComplete ) bSkipAutoComplete = true; else return false;
+			
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
 			{
 				if( singleWord != null )
 				{
 					char[] s = fromStringz( singleWord );
-					if( s == "(" || s == ")" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
+					if( s == "(" || s == ")" || s == "," ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
 				}
 				else
 				{
 					return false;
 				}
 			}
-			
 		
-			if( calltipContainer !is null )
-			{
+			//if( calltipContainer !is null )
+			//{
 				// debug GLOBAL.IDEMessageDlg.print( "calltipContainer Size: " ~ Integer.toString( calltipContainer.size ) );
 				
 				bool	bContinue;
@@ -3899,19 +3903,36 @@ version(FBIDE)
 				if( singleWord == null )
 				{
 					int currentPos = ScintillaAction.getCurrentPos( ih );
+					LineHeadText = _getLineHeadText( pos - 1 );
+					/+
 					if( currentPos > pos ) // BS
 					{
+						/*
+						01234567
+						KUAN,
+						Before pos at 5, after press BS, the current pos = 4
+						*/
 						LineHeadText = _getLineHeadText( pos - 2 );
 					}
 					else // DEL
 					{
 						LineHeadText = _getLineHeadText( pos - 1 );
 					}
-				
+					+/
 				}
 				else
 				{
 					char[] s = fromStringz( singleWord );
+					
+					// Press Enter, leave...
+					if( s == "\n" )
+					{
+						if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+						noneListProcedureName = "";
+						cleanCalltipContainer();
+						return false;
+					}
+					
 					LineHeadText = _getLineHeadText( pos - 1, s );
 				}
 
@@ -3920,7 +3941,7 @@ version(FBIDE)
 
 				if( commaCount == 0 )
 				{
-					calltipContainer.pop();
+					if( calltipContainer.size > 0 ) calltipContainer.pop();
 					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 					return false;
 				}
@@ -3934,7 +3955,7 @@ version(FBIDE)
 		
 		
 				char[]	list;
-				char[]	listInContainer = calltipContainer.top();
+				char[]	listInContainer = calltipContainer.size > 0 ? calltipContainer.top() : "";
 				
 				if( listInContainer.length )
 				{
@@ -4001,15 +4022,16 @@ version(FBIDE)
 						if( list.length )
 						{
 							bContinue = true;
-							if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+							//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+							calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						}
 					}
 				}
 				
 				if( !bContinue )
 				{
-					if( calltipContainer !is null )	
-					{
+					//if( calltipContainer !is null )	
+					//{
 						if( calltipContainer.size > 1 )
 						{
 							calltipContainer.pop();
@@ -4021,13 +4043,13 @@ version(FBIDE)
 								bContinue = true;
 							}
 						}
-					}
+					//}
 				}
 				
 				
 				if( !bContinue )
 				{
-					if( calltipContainer !is null )
+					//if( calltipContainer !is null )
 						if( calltipContainer.size > 0 )
 						{
 							calltipContainer.clear();
@@ -4047,7 +4069,8 @@ version(FBIDE)
 							
 							IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
 							
-							if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+							//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+							calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						}
 					
 						if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
@@ -4071,7 +4094,7 @@ version(FBIDE)
 						}
 					}
 				}
-			}
+			//}
 			
 			return false;
 		}
@@ -4204,7 +4227,8 @@ version(FBIDE)
 								IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 								IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
 								
-								if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+								//if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+								AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 								
 								int highlightStart, highlightEnd;
 								AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
