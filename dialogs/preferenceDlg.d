@@ -1596,7 +1596,7 @@ class CPreferenceDialog : CBaseDialog
 	}
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, bool bResize = true, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );

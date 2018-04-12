@@ -2,17 +2,16 @@ module dialogs.customDlg;
 
 private import iup.iup;
 
-private import global, project, actionManager, menu;
+private import global, project, actionManager, menu, tools;
 private import dialogs.baseDlg, dialogs.singleTextDlg, dialogs.fileDlg;
 
-private import tango.stdc.stringz, Util = tango.text.Util;
+private import tango.stdc.stringz, Util = tango.text.Util, tango.io.FilePath;
 private import Integer = tango.text.convert.Integer;
 
 
 class CCustomDialog : CBaseDialog
 {
 	private:
-	import				tools;
 	Ihandle*			listTools;
 	Ihandle*			labelStatus;
 	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%pn% = Active Prj Name\n%p% = Active Prj Files";
@@ -26,19 +25,12 @@ class CCustomDialog : CBaseDialog
 		Ihandle* bottom = createDlgButton( "40x12" );
 		
 		for( int i = 1; i < 10; ++ i )
-		{
-			if( CCustomDialog.editCustomTools[i].args !is null ) delete CCustomDialog.editCustomTools[i].args;
-			if( CCustomDialog.editCustomTools[i].dir !is null ) delete CCustomDialog.editCustomTools[i].dir;
-			if( CCustomDialog.editCustomTools[i].name !is null ) delete CCustomDialog.editCustomTools[i].name;
-		}		
-
-		for( int i = 1; i < 10; ++ i )
-		{
-			CCustomDialog.editCustomTools[i].args = new IupString( GLOBAL.customTools[i].args.toDString );
-			CCustomDialog.editCustomTools[i].dir = new IupString( GLOBAL.customTools[i].dir.toDString );
-			CCustomDialog.editCustomTools[i].name = new IupString( GLOBAL.customTools[i].name.toDString );
+		{	
+			if( editCustomTools[i].args is null ) editCustomTools[i].args = new IupString( GLOBAL.customTools[i].args.toDString ); else editCustomTools[i].args = GLOBAL.customTools[i].args.toDString;
+			if( editCustomTools[i].dir is null ) editCustomTools[i].dir = new IupString( GLOBAL.customTools[i].dir.toDString ); else editCustomTools[i].dir = GLOBAL.customTools[i].dir.toDString;
+			if( editCustomTools[i].name is null ) editCustomTools[i].name = new IupString( GLOBAL.customTools[i].name.toDString ); else editCustomTools[i].name = GLOBAL.customTools[i].name.toDString;
 		}
-
+		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
 		IupSetHandle( "listTools_Handle", listTools );
@@ -71,12 +63,17 @@ class CCustomDialog : CBaseDialog
 		Ihandle* frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		
+		
+		
+		
 		_tools = new IupString( " " ~ GLOBAL.languageItems["tools"].toDString ~ ":" );
 		Ihandle* labelToolsDir = IupLabel( _tools.toCString );
 		IupSetAttributes( labelToolsDir, "SIZE=54x16" );
+		
 		Ihandle* textToolsDir = IupText( null );
-		IupSetAttribute( textToolsDir, "SIZE", "200x12" );
+		IupSetAttribute( textToolsDir, "EXPAND", "HORIZONTAL" );
 		IupSetHandle( "textToolsDir", textToolsDir );
+		IupSetCallback( textToolsDir, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 		
 		Ihandle* btnToolsDir = IupButton( null, null );
 		IupSetAttributes( btnToolsDir, "IMAGE=icon_openfile,FLAT=YES" );
@@ -95,6 +92,7 @@ class CCustomDialog : CBaseDialog
 		Ihandle* textToolsArgs = IupText( null );
 		IupSetAttribute( textToolsArgs, "SIZE", "210x12" );	
 		IupSetHandle( "textToolsArgs", textToolsArgs );
+		IupSetCallback( textToolsArgs, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 
 		Ihandle* hBox01 = IupHbox( labelToolsArgs, textToolsArgs, null );
 		IupSetAttribute( hBox01, "ALIGNMENT", "ACENTER" );
@@ -121,7 +119,7 @@ class CCustomDialog : CBaseDialog
 
 	public:
 	
-	this( int w, int h, char[] title, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, bool bResize = false, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_tools" );
@@ -140,7 +138,7 @@ class CCustomDialog : CBaseDialog
 		
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
 		
-		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["apply"].toCString );
+		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["ok"].toCString );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomDialog_btnApply );
 	}
 
@@ -159,6 +157,13 @@ extern(C) // Callback for CFindInFilesDialog
 {
 	int CCustomDialog_btnApply( Ihandle* ih )
 	{
+		for( int i = 1; i < 10; ++ i )
+		{
+			GLOBAL.customTools[i].args = CCustomDialog.editCustomTools[i].args.toDString;
+			GLOBAL.customTools[i].dir = CCustomDialog.editCustomTools[i].dir.toDString;
+			GLOBAL.customTools[i].name = CCustomDialog.editCustomTools[i].name.toDString;
+		}
+		
 		Ihandle* toolsSubMenuHandle = IupGetHandle( "toolsSubMenu" );
 		if( toolsSubMenuHandle != null )
 		{
@@ -175,34 +180,6 @@ extern(C) // Callback for CFindInFilesDialog
 			}
 		}
 		
-		
-		Ihandle* toolsHandle = IupGetHandle( "listTools_Handle" );
-		if( toolsHandle == null ) return IUP_DEFAULT;
-		
-		int id = IupGetInt( toolsHandle, "VALUE" );
-		if( id > 0 && id < 10 )
-		{
-			Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
-			Ihandle* argsHandle = IupGetHandle( "textToolsArgs" );
-			
-			CCustomDialog.editCustomTools[id].name = IupGetAttribute( toolsHandle, IupGetAttribute( toolsHandle, "VALUE" ) );
-			CCustomDialog.editCustomTools[id].dir = IupGetAttribute( dirHandle, "VALUE" );
-			CCustomDialog.editCustomTools[id].args = IupGetAttribute( argsHandle, "VALUE" );
-			
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["ok"].toCString() );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["apply"].toCString() );
-			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
-		}
-		
-		for( int i = 1; i < 10; ++ i )
-		{
-			GLOBAL.customTools[i].args =  CCustomDialog.editCustomTools[i].args.toDString;
-			GLOBAL.customTools[i].dir =  CCustomDialog.editCustomTools[i].dir.toDString;
-			GLOBAL.customTools[i].name =  CCustomDialog.editCustomTools[i].name.toDString;
-		}		
-		
 		if( toolsSubMenuHandle != null )
 		{
 			for( int i = 1; i < GLOBAL.customTools.length; ++ i )
@@ -215,9 +192,9 @@ extern(C) // Callback for CFindInFilesDialog
 					IupMap( _new );
 				}
 			}
-		}
+		}		
 		
-		return IUP_DEFAULT;
+		return IUP_CLOSE;	
 	}
 	
 	int CCustomDialog_OPENDIR( Ihandle* ih ) 
@@ -229,6 +206,13 @@ extern(C) // Callback for CFindInFilesDialog
 		{
 			Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
 			if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", toStringz( fileName ) );
+			
+			Ihandle* toolsHandle = IupGetHandle( "listTools_Handle" );
+			if( toolsHandle != null )
+			{
+				int id = IupGetInt( toolsHandle, "VALUE" );
+				if( IupGetInt( toolsHandle, "VALUE" ) > 0 )	CCustomDialog.editCustomTools[id].dir = fileName;
+			}
 		}
 		
 		return IUP_DEFAULT;
@@ -238,15 +222,6 @@ extern(C) // Callback for CFindInFilesDialog
 	{
 		Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
 		Ihandle* argsHandle = IupGetHandle( "textToolsArgs" );
-		
-		/+
-		if( CCustomDialog.prevIndex > 0 && CCustomDialog.prevIndex < 6 && CCustomDialog.prevIndex != item )
-		{
-			GLOBAL.customTools[CCustomDialog.prevIndex].name = fromStringz( IupGetAttribute( ih, toStringz( Integer.toString( CCustomDialog.prevIndex ) ) ) );
-			if( dirHandle != null ) GLOBAL.customTools[CCustomDialog.prevIndex].dir = fromStringz( IupGetAttribute( dirHandle, "VALUE" ) );
-			if( argsHandle != null ) GLOBAL.customTools[CCustomDialog.prevIndex].args = fromStringz( IupGetAttribute( argsHandle, "VALUE" ) );
-		}
-		+/
 		
 		if( CCustomDialog.editCustomTools[item].name.toDString.length )
 		{
@@ -261,6 +236,33 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 	
+	private int CCustomCompilerOptionDialog_listOptions_EDIT_CB( Ihandle *ih, int c, char *new_value )
+	{
+		Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
+		Ihandle* argsHandle = IupGetHandle( "textToolsArgs" );
+		
+		Ihandle* toolsHandle = IupGetHandle( "listTools_Handle" );
+		if( toolsHandle != null )
+		{
+			int id = IupGetInt( toolsHandle, "VALUE" );
+			
+			if( IupGetInt( toolsHandle, "VALUE" ) > 0 )
+			{
+				char[] optionText = Util.trim( fromStringz( new_value ) ).dup;
+				if(id > 0 )
+				{
+					if( ih == dirHandle )
+						CCustomDialog.editCustomTools[id].dir = optionText;
+					else
+						CCustomDialog.editCustomTools[id].args = optionText;
+				}
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}	
+	
+
 	private int CCustomDialog_btnToolsAdd( Ihandle* ih ) 
 	{
 		Ihandle* toolsHandle = IupGetHandle( "listTools_Handle" );
@@ -269,7 +271,7 @@ extern(C) // Callback for CFindInFilesDialog
 		int index = IupGetInt( toolsHandle, "COUNT" );
 		if( index >= 5 ) return IUP_DEFAULT;
 		
-		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomtool"].toDString(), GLOBAL.languageItems["tools"].toDString() ~ ":", "120x", null, false, "MAIN_DIALOG", "icon_newfile" );
+		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomtool"].toDString(), GLOBAL.languageItems["tools"].toDString() ~ ":", "120x", null, false, "POSEIDONFB_MAIN_DIALOG", "icon_newfile" );
 		char[] fileName = description.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 		
 		if( fileName.length )
@@ -370,12 +372,6 @@ extern(C) // Callback for CFindInFilesDialog
 			CCustomDialog.editCustomTools[itemNumber].name = temp.name;
 			CCustomDialog.editCustomTools[itemNumber].dir = temp.dir;
 			CCustomDialog.editCustomTools[itemNumber].args = temp.args;
-			
-			/*
-			CustomTool temp = GLOBAL.customTools[index-1];
-			GLOBAL.customTools[index-1] = GLOBAL.customTools[index];
-			GLOBAL.customTools[index] = temp;
-			*/
 		}
 
 		return IUP_DEFAULT;

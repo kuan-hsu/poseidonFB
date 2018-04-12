@@ -36,7 +36,7 @@ class CArgOptionDialog : CBaseDialog
 		{
 			btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
 			IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnOKtoApply_cb );
+			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
 			
 			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
 			hBox_DlgButton = IupHbox( IupFill(), btnCANCEL, btnOK, null );
@@ -51,17 +51,17 @@ class CArgOptionDialog : CBaseDialog
 			btnOK = IupButton( GLOBAL.languageItems["go"].toCString, null );
 			IupSetHandle( "btnOK", btnOK );
 			IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );//,IMAGE=IUP_ActionOk" );
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnOK_cb );
+			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
 			
 			IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK" );
 			
 			hBox_DlgButton = IupHbox( /*btnQuick,*/ IupFill(), btnCANCEL, btnOK, null );
-			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnCancel_cb );
+			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
 		}
 		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ABOTTOM,GAP=5,MARGIN=1x0" );
 		
 		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL" );
-		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CCustomCompilerOptionDialog_btnCancel_cb );
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
 
 		return hBox_DlgButton;
 	}
@@ -73,8 +73,8 @@ class CArgOptionDialog : CBaseDialog
 		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
-		IupSetHandle( "CCustomCompilerOptionDialog_listTools_Handle", listTools );
-		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_ACTION );
+		IupSetHandle( "CArgOptionDialog_listTools_Handle", listTools );
+		IupSetCallback( listTools, "ACTION", cast(Icallback) &CArgOptionDialog_ACTION );
 		
 		
 		for( int i = 0; i < GLOBAL.customCompilerOptions.length; ++ i )
@@ -91,31 +91,31 @@ class CArgOptionDialog : CBaseDialog
 		Ihandle* frameList;
 		if( !QuickMode )
 		{
-			IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomCompilerOptionDialog_DBLCLICK_CB );
+			IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CArgOptionDialog_DBLCLICK_CB );
 			
 			Ihandle* btnToolsAdd = IupButton( null, null );
 			IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
 			IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
-			IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsAdd );
+			IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsAdd );
 
 			Ihandle* btnToolsErase = IupButton( null, null );
 			IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES" );
 			IupSetAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
-			IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsErase );
+			IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsErase );
 			
 			Ihandle* btnToolsUp = IupButton( null, null );
 			IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES" );
-			IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsUp );
+			IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsUp );
 			
 			Ihandle* btnToolsDown = IupButton( null, null );
 			IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES" );
-			IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnToolsDown );
+			IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsDown );
 			
 			/*
 			Ihandle* btnToolsApply = IupButton( null, null );
 			IupSetAttributes( btnToolsApply, "IMAGE=icon_apply,FLAT=YES" );
 			IupSetAttribute( btnToolsApply, "TIP", GLOBAL.languageItems["apply"].toCString );
-			IupSetCallback( btnToolsApply, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_btnAPPLY );
+			IupSetCallback( btnToolsApply, "ACTION", cast(Icallback) &CArgOptionDialog_btnAPPLY );
 			*/
 			
 			Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, /*btnToolsApply,*/ null );
@@ -136,7 +136,7 @@ class CArgOptionDialog : CBaseDialog
 		{
 			listOptions = IupList(null);
 			IupSetAttributes( listOptions, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=200x12,VISIBLE_ITEMS=5");
-			IupSetHandle( "CCustomCompilerOptionDialog_textOptions", listOptions );
+			IupSetHandle( "CArgOptionDialog_textOptions", listOptions );
 			for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
 			{
 				_recentOptions ~= new IupString( GLOBAL.recentOptions[i] );
@@ -148,8 +148,8 @@ class CArgOptionDialog : CBaseDialog
 			listOptions = IupText(null);
 			//IupSetAttribute( listOptions, "SIZE", "200x8" );
 			IupSetAttribute( listOptions, "EXPAND", "HORIZONTAL" );
-			IupSetHandle( "CCustomCompilerOptionDialog_textOptions", listOptions );
-			IupSetCallback( listOptions, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
+			IupSetHandle( "CArgOptionDialog_textOptions", listOptions );
+			IupSetCallback( listOptions, "ACTION", cast(Icallback) &CArgOptionDialog_listOptions_EDIT_CB );
 		}
 		
 		hBoxOptions = IupHbox( labelOptions, listOptions, null );
@@ -159,7 +159,7 @@ class CArgOptionDialog : CBaseDialog
 		{
 			listArgs = IupList( null );
 			IupSetAttributes( listArgs, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=200x12,VISIBLE_ITEMS=5");
-			IupSetHandle( "CCustomCompilerOptionDialog_listArgs", listArgs );
+			IupSetHandle( "CArgOptionDialog_listArgs", listArgs );
 			for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 			{
 				_recentArgs ~= new IupString( GLOBAL.recentArgs[i] );
@@ -191,7 +191,7 @@ class CArgOptionDialog : CBaseDialog
 
 	public:
 	
-	this( int w, int h, char[] title, int _QuickMode = 0, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, int _QuickMode = 0, bool bResize = false, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
 	{
 		QuickMode = _QuickMode;
 		
@@ -213,8 +213,8 @@ class CArgOptionDialog : CBaseDialog
 
 	~this()
 	{
-		IupSetHandle( "CCustomCompilerOptionDialog_listTools_Handle", null );
-		IupSetHandle( "CCustomCompilerOptionDialog_textOptions", null );
+		IupSetHandle( "CArgOptionDialog_listTools_Handle", null );
+		IupSetHandle( "CArgOptionDialog_textOptions", null );
 		CArgOptionDialog.tempCustomCompilerOptions.length = 0;
 		
 		Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" );
@@ -326,12 +326,12 @@ extern(C) // Callback for CFindInFilesDialog
 		}
 	}
 	
-	private int CCustomCompilerOptionDialog_listOptions_EDIT_CB( Ihandle *ih, int c, char *new_value )
+	private int CArgOptionDialog_listOptions_EDIT_CB( Ihandle *ih, int c, char *new_value )
 	{
-		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
+		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 		
-		Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		Ihandle* textHandle = IupGetHandle( "CArgOptionDialog_textOptions" );
 		int id = IupGetInt( toolsHandle, "VALUE" );
 		
 		if( textHandle != null )
@@ -349,12 +349,13 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 	
-	private int CCustomCompilerOptionDialog_btnAPPLY( Ihandle* ih )
+	/+
+	private int CArgOptionDialog_btnAPPLY( Ihandle* ih )
 	{
-		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
+		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 		
-		Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		Ihandle* textHandle = IupGetHandle( "CArgOptionDialog_textOptions" );
 		int id = IupGetInt( toolsHandle, "VALUE" );
 		
 		if( textHandle != null )
@@ -414,19 +415,20 @@ extern(C) // Callback for CFindInFilesDialog
 		
 		return IUP_DEFAULT;
 	}
+	+/
 	
-	private int CCustomCompilerOptionDialog_btnCancel_cb( Ihandle* ih )
+	private int CArgOptionDialog_btnCancel_cb( Ihandle* ih )
 	{
-		Ihandle* listOptions = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		Ihandle* listOptions = IupGetHandle( "CArgOptionDialog_textOptions" );
 		if( listOptions != null ) IupSetAttribute( listOptions, "ACTIVE", "NO" );
 
-		Ihandle* listArgs = IupGetHandle( "CCustomCompilerOptionDialog_listArgs" );
+		Ihandle* listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
 		if( listArgs != null ) IupSetAttribute( listArgs, "ACTIVE", "NO" );
 
 		return IUP_CLOSE;
 	}
 	
-	private int CCustomCompilerOptionDialog_btnOKtoApply_cb( Ihandle* ih )
+	private int CArgOptionDialog_btnOKtoApply_cb( Ihandle* ih )
 	{
 		GLOBAL.customCompilerOptions.length = 0;
 		foreach( char[] s; CArgOptionDialog.tempCustomCompilerOptions )
@@ -435,9 +437,9 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_CLOSE;
 	}		
 	
-	private int CCustomCompilerOptionDialog_btnOK_cb( Ihandle* ih )
+	private int CArgOptionDialog_btnOK_cb( Ihandle* ih )
 	{
-		Ihandle* _listOptions = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		Ihandle* _listOptions = IupGetHandle( "CArgOptionDialog_textOptions" );
 		if( _listOptions != null )
 		{
 			if( fromStringz( IupGetAttribute( _listOptions, "ACTIVE" ) ) == "YES" )
@@ -466,7 +468,7 @@ extern(C) // Callback for CFindInFilesDialog
 			}
 		}
 
-		Ihandle* _listArgs = IupGetHandle( "CCustomCompilerOptionDialog_listArgs" );
+		Ihandle* _listArgs = IupGetHandle( "CArgOptionDialog_listArgs" );
 		if( _listArgs != null )
 		{
 			if( fromStringz( IupGetAttribute( _listArgs, "ACTIVE" ) ) == "YES" )
@@ -499,9 +501,9 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_CLOSE;
 	}	
 	
-	private int CCustomCompilerOptionDialog_ACTION( Ihandle *ih, char *text, int item, int state )
+	private int CArgOptionDialog_ACTION( Ihandle *ih, char *text, int item, int state )
 	{
-		Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		Ihandle* textHandle = IupGetHandle( "CArgOptionDialog_textOptions" );
 		
 		if( textHandle != null )
 		{
@@ -513,7 +515,7 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 	
-	private int CCustomCompilerOptionDialog_DBLCLICK_CB( Ihandle *ih, int item, char *text )
+	private int CArgOptionDialog_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
 		if( GLOBAL.statusBar !is null )
 		{
@@ -542,9 +544,9 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 	
-	private int CCustomCompilerOptionDialog_btnToolsAdd( Ihandle* ih ) 
+	private int CArgOptionDialog_btnToolsAdd( Ihandle* ih ) 
 	{
-		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
+		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 		
 		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomoption"].toDString(), GLOBAL.languageItems["prjtarget"].toDString() ~":", "120x" );
@@ -558,19 +560,19 @@ extern(C) // Callback for CFindInFilesDialog
 			CArgOptionDialog.tempCustomCompilerOptions.length = CArgOptionDialog.tempCustomCompilerOptions.length + 1;
 			CArgOptionDialog.tempCustomCompilerOptions[$-1] = "%::% " ~ newFileName;
 			
-			Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+			Ihandle* textHandle = IupGetHandle( "CArgOptionDialog_textOptions" );
 			if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", "" );
 		}
 		
 		return IUP_DEFAULT;
 	}
 	
-	private int CCustomCompilerOptionDialog_btnToolsErase( Ihandle* ih ) 
+	private int CArgOptionDialog_btnToolsErase( Ihandle* ih ) 
 	{
-		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
+		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 		
-		Ihandle* textHandle = IupGetHandle( "CCustomCompilerOptionDialog_textOptions" );
+		Ihandle* textHandle = IupGetHandle( "CArgOptionDialog_textOptions" );
 		if( textHandle == null ) return IUP_DEFAULT;
 		
 		int index = IupGetInt( toolsHandle, "VALUE" ); // Get current item #no
@@ -611,9 +613,9 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}	
 
-	private int CCustomCompilerOptionDialog_btnToolsUp( Ihandle* ih ) 
+	private int CArgOptionDialog_btnToolsUp( Ihandle* ih ) 
 	{
-		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
+		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 
 		int itemNumber = IupGetInt( toolsHandle, "VALUE" );
@@ -628,7 +630,7 @@ extern(C) // Callback for CFindInFilesDialog
 
 			IupSetAttribute( toolsHandle, "VALUE", toStringz( Integer.toString(itemNumber-1) ) ); // Set Foucs
 			
-			// IupList item start from 1, CCustomCompilerOptionDialog.tempCustomCompilerOptions start from 0
+			// IupList item start from 1, CArgOptionDialog.tempCustomCompilerOptions start from 0
 			itemNumber--;
 			
 			char[] temp = CArgOptionDialog.tempCustomCompilerOptions[itemNumber-1];
@@ -639,9 +641,9 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 	
-	private int CCustomCompilerOptionDialog_btnToolsDown( Ihandle* ih ) 
+	private int CArgOptionDialog_btnToolsDown( Ihandle* ih ) 
 	{
-		Ihandle* toolsHandle = IupGetHandle( "CCustomCompilerOptionDialog_listTools_Handle" );
+		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
 		if( toolsHandle == null ) return IUP_DEFAULT;
 
 		int itemNumber = IupGetInt( toolsHandle, "VALUE" );
@@ -657,7 +659,7 @@ extern(C) // Callback for CFindInFilesDialog
 
 			IupSetAttribute( toolsHandle, "VALUE", toStringz( Integer.toString(itemNumber+1) ) );  // Set Foucs
 			
-			// IupList item start from 1, CCustomCompilerOptionDialog.tempCustomCompilerOptions start from 0
+			// IupList item start from 1, CArgOptionDialog.tempCustomCompilerOptions start from 0
 			itemNumber--;
 			
 			char[] temp = CArgOptionDialog.tempCustomCompilerOptions[itemNumber+1];

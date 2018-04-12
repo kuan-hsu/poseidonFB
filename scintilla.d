@@ -2285,6 +2285,7 @@ extern(C)
 						{
 							CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 							if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+							return IUP_IGNORE;
 						}
 						break;
 
@@ -2319,6 +2320,7 @@ extern(C)
 							return IUP_IGNORE;
 						}
 						break;
+						
 					case "newtab":
 						if( sk.keyValue == c )
 						{
@@ -2326,6 +2328,7 @@ extern(C)
 							return IUP_IGNORE;
 						}
 						break;
+						
 					case "autocomplete":
 						if( sk.keyValue == c )
 						{

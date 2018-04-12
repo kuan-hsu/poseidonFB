@@ -16,7 +16,7 @@ void createTabs()
 	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
 	IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
-	IupSetAttribute( GLOBAL.documentTabs, "NAME", "MAIN" );
+	IupSetAttribute( GLOBAL.documentTabs, "NAME", "POSEIDONFB_MAIN_TABS" );
 	//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
@@ -25,7 +25,6 @@ void createTabs()
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
 	version(Windows) IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
-	IupSetHandle( "MAIN_TABS", GLOBAL.documentTabs );
 }
 
 void createTabs2()
@@ -38,7 +37,7 @@ void createTabs2()
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGEPRESS", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "5x5" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "SIZE", "NULL" );
-	IupSetAttribute( GLOBAL.documentTabs_Sub, "NAME", "SUB" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "NAME", "POSEIDONFB_SUB_TABS" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSHIGHCOLOR", "240 255 240" );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
@@ -327,6 +326,7 @@ extern(C)
 		{
 			if( button == IUP_BUTTON2 )
 			{
+				/+
 				version(PLUGIN)
 				{
 					GLOBAL.Send_PoseidonFB_HANDLE( GLOBAL.mainDlg );
@@ -335,6 +335,7 @@ extern(C)
 					return IUP_DEFAULT;
 				}
 				else
+				+/
 					return tabClose_cb( ih, pos );
 			}
 			else if( button == IUP_BUTTON1 )

@@ -2512,68 +2512,158 @@ struct SearchAction
 // Action for FILE operate
 struct CustomToolAction
 {
-	version(linux) import tango.sys.Process;
+	version(linux)	import tango.sys.Process;
+	import tango.io.FilePath;
 	
 	static void run( CustomTool tool )
 	{
-		auto cSci = ScintillaAction.getActiveCScintilla();
-		char[] args;
-		if( cSci !is null )
-		{
-			// %s Selected Text
-			char[] s = fromStringz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
-			
-			// %s% Selected Word
-			args = Util.substitute( tool.args.toDString, "%s%", s );
-			args = Util.substitute( args, "\"%s%\"", "\"" ~ s ~ "\"" );
-			
-			// %f% Active File
-			s = cSci.getFullPath();
-			args = Util.substitute( args, "%f%", s );
-			args = Util.substitute( args, "\"%f%\"", "\"" ~ s ~ "\"" );
-		}
+		scope toolPath = new FilePath( tool.dir.toDString );
 		
-		char[] pDir = ProjectAction.getActiveProjectDir;
-		if( pDir.length )
+		if( lowerCase( toolPath.suffix ) == ".dll" )
 		{
-			char[] pName = GLOBAL.projectManager[pDir].name;
-			char[] pTargetName = GLOBAL.projectManager[pDir].targetName;
-			char[] pTotal;
-			
-			if( !pTargetName.length ) pTotal = pDir ~ "/" ~ pName; else	pTotal = pDir ~ "/" ~ pTargetName;
-			
-			args = Util.substitute( args, "%pn%", pTotal );
-			args = Util.substitute( args, "\"%pn%\"", "\"" ~ pTotal ~ "\"" );
-			
-			char[] pAllFiles;
-			foreach( char[] s; GLOBAL.projectManager[pDir].sources )
-				pAllFiles ~= ( s ~ " " );
-
-			foreach( char[] s; GLOBAL.projectManager[pDir].includes )
-				pAllFiles ~= ( s ~ " " );
+			version(Windows)
+			{
+				try
+				{
+					if( tool.name.toDString in GLOBAL.pluginMnager )
+					{
+						if( GLOBAL.pluginMnager[tool.name.toDString] !is null )
+						{
+							if( GLOBAL.pluginMnager[tool.name.toDString].getPath == tool.dir.toDString )
+								GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
+							else
+							{
+								auto temp = GLOBAL.pluginMnager[tool.name.toDString];
+								delete temp;
+								GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
+								GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
+							}
+						}
+					}
+					else
+					{
+						GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
+						GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
+					}
+				}
+				catch( Exception e ){}
+			}
+		}
+		else if( lowerCase( toolPath.suffix ) == ".so" )
+		{
+			version(linux)
+			{
+				try
+				{
+					if( tool.name.toDString in GLOBAL.pluginMnager )
+					{
+						if( GLOBAL.pluginMnager[tool.name.toDString] !is null ) GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
+					}
+					else
+					{
+						auto temp = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
+						GLOBAL.pluginMnager[tool.name.toDString] = temp;
+						GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
+					}
+				}
+				catch( Exception e ){}
+			}
+		}
+		else
+		{
+			auto cSci = ScintillaAction.getActiveCScintilla();
+			char[] args;
+			if( cSci !is null )
+			{
+				// %s Selected Text
+				char[] s = fromStringz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
 				
+				// %s% Selected Word
+				args = Util.substitute( tool.args.toDString, "%s%", s );
+				args = Util.substitute( args, "\"%s%\"", "\"" ~ s ~ "\"" );
+				
+				// %f% Active File
+				s = cSci.getFullPath();
+				args = Util.substitute( args, "%f%", s );
+				args = Util.substitute( args, "\"%f%\"", "\"" ~ s ~ "\"" );
+			}
 			
-			pAllFiles = Util.trim( pAllFiles );
-			// %pn% Project Name
-			args = Util.substitute( args, "%p%", pAllFiles );
-			args = Util.substitute( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );			
-		}
-		else
-		{
-			args = Util.substitute( args, "%pn%", "" );
-			args = Util.substitute( args, "\"%pn%\"", "" );
-		}		
-		
-		
-		version(Windows)
-		{
-			IupExecute( tool.dir.toCString, toStringz( args ) );
-		}
-		else
-		{
-			Process p = new Process( true, tool.dir.toDString ~ " " ~ args );
-			//p.gui( true );
-			p.execute;
+			char[] pDir = ProjectAction.getActiveProjectDir;
+			if( pDir.length )
+			{
+				char[] pName = GLOBAL.projectManager[pDir].name;
+				char[] pTargetName = GLOBAL.projectManager[pDir].targetName;
+				char[] pTotal;
+				
+				if( !pTargetName.length ) pTotal = pDir ~ "/" ~ pName; else	pTotal = pDir ~ "/" ~ pTargetName;
+				
+				args = Util.substitute( args, "%pn%", pTotal );
+				args = Util.substitute( args, "\"%pn%\"", "\"" ~ pTotal ~ "\"" );
+				
+				char[] pAllFiles;
+				foreach( char[] s; GLOBAL.projectManager[pDir].sources )
+					pAllFiles ~= ( s ~ " " );
+
+				foreach( char[] s; GLOBAL.projectManager[pDir].includes )
+					pAllFiles ~= ( s ~ " " );
+					
+				
+				pAllFiles = Util.trim( pAllFiles );
+				// %pn% Project Name
+				args = Util.substitute( args, "%p%", pAllFiles );
+				args = Util.substitute( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );			
+			}
+			else
+			{
+				args = Util.substitute( args, "%pn%", "" );
+				args = Util.substitute( args, "\"%pn%\"", "" );
+			}		
+			
+			
+			version(Windows)
+			{
+				IupExecute( tool.dir.toCString, toStringz( args ) );
+			}
+			else
+			{
+				Process p = new Process( true, tool.dir.toDString ~ " " ~ args );
+				//p.gui( true );
+				p.execute;
+			}
 		}
 	}
+	
+	/+
+	version(PLUGIN)
+	{
+		static bool initPlugin()
+		{
+			for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
+			{
+				if( GLOBAL.customTools[i].name.toDString.length )
+				{
+					scope dirPath = new FilePath( GLOBAL.customTools[i].dir.toDString );
+					if( lowerCase( dirPath.suffix ) == ".dll" )
+					{
+						version(Windows)
+						{
+							auto _plugin = new CPLUGIN( GLOBAL.customTools[i].name.toDString, GLOBAL.customTools[i].dir.toDString );
+							GLOBAL.pluginMnager[GLOBAL.customTools[i].name.toDString] = _plugin;
+						}
+					}
+					else if( lowerCase( dirPath.suffix ) == ".so" )
+					{
+						version(linux)
+						{
+							auto _plugin = new CPLUGIN( GLOBAL.customTools[i].name.toDString, GLOBAL.customTools[i].dir.toDString );
+							GLOBAL.pluginMnager[GLOBAL.customTools[i].name.toDString] = _plugin;
+						}
+					}					
+				}
+			}		
+			
+			return true;
+		}
+	}
+	+/
 }

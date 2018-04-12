@@ -174,7 +174,7 @@ class CSearchDialog : CBaseDialog
 
 	int			searchRule = 6;
 	
-	this( int w, int h, char[] title, char[] findWhat = null, bool bResize = false, char[] parent = "MAIN_DIALOG" )
+	this( int w, int h, char[] title, char[] findWhat = null, bool bResize = false, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_find" );

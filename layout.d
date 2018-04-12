@@ -27,7 +27,7 @@ void createExplorerWindow()
 
 
 	GLOBAL.projectViewTabs = IupTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
-	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL,BORDER=NO" );
+	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL,BORDER=NO,NAME=POSEIDONFB_LEFT_TABS" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
 
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
@@ -101,6 +101,7 @@ void createExplorerWindow()
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDONFB_BOTTOM_TABS" );
 		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 	}
 	
@@ -134,7 +135,7 @@ void createExplorerWindow()
 	GLOBAL.scrollICONHandle = IupDialog( _scrolllabel );
 	IupSetStrAttribute( GLOBAL.scrollICONHandle, "OPACITYIMAGE", "icon_scroll" );
 	IupSetAttributes( GLOBAL.scrollICONHandle, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO" );
-	IupSetAttribute( GLOBAL.scrollICONHandle, "PARENTDIALOG", "MAIN_DIALOG" );
+	IupSetAttribute( GLOBAL.scrollICONHandle, "PARENTDIALOG", "POSEIDONFB_MAIN_DIALOG" );
 	GLOBAL.scrollTimer = IupTimer();
 	IupSetAttributes( GLOBAL.scrollTimer, "TIME=200,RUN=NO" );
 	IupSetCallback( GLOBAL.scrollTimer, "ACTION_CB", cast(Icallback) function( Ihandle* ih )
@@ -200,7 +201,7 @@ void createExplorerWindow()
 void createEditorSetting()
 {
 	//IDECONFIG.load();
-	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( -1, -1, GLOBAL.languageItems["message"].toDString, true, "MAIN_DIALOG" );
+	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( -1, -1, GLOBAL.languageItems["message"].toDString, true, "POSEIDONFB_MAIN_DIALOG" );
 	//GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 24 );
 	//IupHide( GLOBAL.IDEMessageDlg.getIhandle );
 
@@ -221,8 +222,8 @@ void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"].toDString );
 	//GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
-	//GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "MAIN_DIALOG" );
-	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString, null, false, "MAIN_DIALOG" );
+	//GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "POSEIDONFB_MAIN_DIALOG" );
+	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString, null, false, "POSEIDONFB_MAIN_DIALOG" );
 }
 
 
@@ -332,12 +333,19 @@ extern(C)
 			if( GLOBAL.editorSetting00.DocStatus == "ON" ) IDECONFIG.saveFileStatus();
 			
 			if( GLOBAL.scrollTimer != null ) IupDestroy( GLOBAL.scrollTimer );
+			
+			version(PLUGIN)
+			{
+				foreach( _plugin; GLOBAL.pluginMnager )
+				{
+					if( _plugin !is null ) delete _plugin;
+				}
+			}			
 		}
 		catch( Exception e )
 		{
 			debug IupMessage("",toStringz(e.toString()));
 		}
-
 
 		return IUP_CLOSE;
 	}

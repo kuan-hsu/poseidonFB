@@ -82,6 +82,7 @@ void main( char[][] args )
 		}
 	}
 	
+	/+
 	version(PLUGIN)
 	{
 		SharedLib iupSharedlib;
@@ -139,7 +140,7 @@ void main( char[][] args )
 			Stdout(e.toString).newline;
 		}
 	}
-
+	+/
 	
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
@@ -178,7 +179,7 @@ void main( char[][] args )
 	load_all_images_icons();
 	
 	createEditorSetting();
-
+	
 	IupScintillaOpen();
 
 	// Set Default Font
@@ -215,7 +216,7 @@ void main( char[][] args )
 	createMenu();
 	// Creates a dialog containing the control
 	GLOBAL.mainDlg = IupDialog( null );
-	IupSetHandle( "MAIN_DIALOG", GLOBAL.mainDlg );
+	IupSetHandle( "POSEIDONFB_MAIN_DIALOG", GLOBAL.mainDlg );
 	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
 	IupSetCallback( GLOBAL.mainDlg, "SHOW_CB", cast(Icallback) &mainDialog_SHOW_cb );
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );
@@ -356,4 +357,12 @@ void main( char[][] args )
 	IupClose();
 	
 	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
+	
+	version(PLUGIN)
+	{
+		foreach( _plugin; GLOBAL.pluginMnager )
+		{
+			if( _plugin !is null ) delete _plugin;
+		}
+	}
 }
