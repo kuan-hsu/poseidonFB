@@ -15,11 +15,10 @@ class CParser
 	TokenUnit[]		tokens;
 	int				tokenIndex;
 	CASTnode		activeASTnode;
+	CASTnode		head;
 	
 	version(DIDE)
 	{
-		CASTnode		head;
-		
 		char[]			activeProt;
 		bool			bAssignExpress;
 
@@ -54,7 +53,13 @@ class CParser
 		throw new Exception( "Method next2(), out of range!" );
 	}
 
-	void parseToken( TOK t = TOK.Tidentifier ){ tokenIndex ++;}
+	void parseToken( TOK t = TOK.Tidentifier )
+	{
+		if( tokenIndex < tokens.length - 1 ) 
+			tokenIndex ++;
+		else
+			throw new Exception( "Method parseToken(), out of range!" );
+	}
 
 	TokenUnit getToken(){ return tokens[tokenIndex]; }
 
@@ -226,6 +231,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parsePreprocessor" ).newline;
 				return false;
 			}
@@ -294,6 +300,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  getVariableType" ).newline;
 			}
 			
@@ -521,6 +528,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseParam" ).newline;
 				return null;
 			}
@@ -583,6 +591,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseArray" ).newline;
 			}
 			
@@ -927,6 +936,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseVariable" ).newline;
 			}
 
@@ -986,6 +996,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parserVar" ).newline;
 				return false;
 			}
@@ -1007,6 +1018,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseNamespace" ).newline;
 			}
 
@@ -1361,8 +1373,9 @@ class CParser
 						return false;
 				}
 			}
-			catch
+			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseOperator" ).newline;
 				return false;
 			}
@@ -1524,6 +1537,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseProcedure" ).newline;
 			}
 
@@ -1978,6 +1992,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
 			}
 
@@ -2050,6 +2065,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseFunctionPointer" ).newline;
 			}
 
@@ -2152,6 +2168,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 			}
 
 			return false;
@@ -2198,6 +2215,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
 			}
 			
@@ -2269,6 +2287,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseEnum" ).newline;
 			}
 
@@ -2291,6 +2310,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseScope" ).newline;
 				return false;
 			}
@@ -2321,6 +2341,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseWith" ).newline;
 			}
 			
@@ -2346,6 +2367,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
+				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseEnd" ).newline;
 			}
 
@@ -2430,38 +2452,44 @@ class CParser
 			int		_countParen, _countCurly, _countBracket;
 			bool	bExitFlag;
 			
-			do
+			try
 			{
-				if( token().tok == TOK.Topenparen )
-					_countParen ++;
-				else if( token().tok == TOK.Tcloseparen )
-					_countParen --;
-				else if( token().tok == TOK.Topenbracket )
-					_countBracket ++;
-				else if( token().tok == TOK.Tclosebracket )
-					_countBracket --;
-				else if( token().tok == TOK.Topencurly )
-					_countCurly ++;
-				else if( token().tok == TOK.Tclosecurly )
-					_countCurly --;
-
-				foreach( int _tok; _tokens )
+				while( tokenIndex < tokens.length )
 				{
-					if( token().tok == _tok )
+					if( token().tok == TOK.Topenparen )
+						_countParen ++;
+					else if( token().tok == TOK.Tcloseparen )
+						_countParen --;
+					else if( token().tok == TOK.Topenbracket )
+						_countBracket ++;
+					else if( token().tok == TOK.Tclosebracket )
+						_countBracket --;
+					else if( token().tok == TOK.Topencurly )
+						_countCurly ++;
+					else if( token().tok == TOK.Tclosecurly )
+						_countCurly --;
+
+					foreach( int _tok; _tokens )
 					{
-						if( _countParen <= 0 && _countBracket <= 0 && _countCurly <= 0 )
+						if( token().tok == _tok )
 						{
-							bExitFlag = true;
-							break;
+							if( _countParen <= 0 && _countBracket <= 0 && _countCurly <= 0 )
+							{
+								bExitFlag = true;
+								break;
+							}
 						}
 					}
-				}
 
-				if( bExitFlag ) break;
-				_result ~= token().identifier;
-				parseToken();
+					if( bExitFlag ) break;
+					_result ~= token().identifier;
+					parseToken();
+				}
 			}
-			while( 1 )
+			catch( Exception e )
+			{
+				throw e;
+			}
 
 			return _result;
 		}
@@ -2561,7 +2589,7 @@ class CParser
 			}
 			catch( Exception e )
 			{
-				//Stdout( e.toString ).newline;
+				throw e;
 			}
 			
 			return _type;
@@ -2584,34 +2612,41 @@ class CParser
 		{
 			char[] _type;
 
-			if( token().tok == TOK.Tdelegate || token().tok == TOK.Tfunction )
+			try
 			{
-				_type ~= ( " " ~ token().identifier );
-				parseToken();
-
-				if( token().tok == TOK.Topenparen )
+				if( token().tok == TOK.Tdelegate || token().tok == TOK.Tfunction )
 				{
-					// Variable
-					int funTailIndex = getFunctionDeclareTailIndex();
-					if( tokens[funTailIndex].tok == TOK.Tidentifier ) _type ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+					_type ~= ( " " ~ token().identifier );
+					parseToken();
+
+					if( token().tok == TOK.Topenparen )
+					{
+						// Variable
+						int funTailIndex = getFunctionDeclareTailIndex();
+						if( tokens[funTailIndex].tok == TOK.Tidentifier ) _type ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+					}
+				}
+				else
+				{
+					do
+					{
+						if( token().tok == TOK.Ttimes ) // Check Pointer
+						{
+							_type ~= "*";
+							parseToken( TOK.Ttimes );
+						}
+
+						if( token().tok == TOK.Topenbracket ) // Check Array
+						{
+							_type ~= getDelimitedString( TOK.Topenbracket, TOK.Tclosebracket ); // Include [.......]
+						}
+					}
+					while( token().tok == TOK.Ttimes || token().tok == TOK.Topenbracket )
 				}
 			}
-			else
+			catch( Exception e )
 			{
-				do
-				{
-					if( token().tok == TOK.Ttimes ) // Check Pointer
-					{
-						_type ~= "*";
-						parseToken( TOK.Ttimes );
-					}
-
-					if( token().tok == TOK.Topenbracket ) // Check Array
-					{
-						_type ~= getDelimitedString( TOK.Topenbracket, TOK.Tclosebracket ); // Include [.......]
-					}
-				}
-				while( token().tok == TOK.Ttimes || token().tok == TOK.Topenbracket )
+				throw e;
 			}
 
 			return _type;
@@ -2656,7 +2691,10 @@ class CParser
 					_result ~= getIdentifierList();
 				}
 			}
-			catch( Exception e ){}
+			catch( Exception e )
+			{
+				throw e;
+			}
 
 			return _result;
 		}
@@ -2673,33 +2711,40 @@ class CParser
 		{
 			char[]	_type;
 			
-			if( token().tok == TOK.Ttypeof )
+			try
 			{
-				parseToken( TOK.Ttypeof );
-				if( token().tok == TOK.Topenparen )
+				if( token().tok == TOK.Ttypeof )
 				{
-					parseToken( TOK.Topenparen );
-					
-					if( token().tok == TOK.Treturn || token().tok == TOK.Tthis || token().tok == TOK.Tsuper )
+					parseToken( TOK.Ttypeof );
+					if( token().tok == TOK.Topenparen )
 					{
-						_type = token().identifier;
-						parseToken();
-						if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
-					}
-					else if( token().tok == TOK.Tnumbers )
-					{
-						_type = "int";
-						if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
+						parseToken( TOK.Topenparen );
+						
+						if( token().tok == TOK.Treturn || token().tok == TOK.Tthis || token().tok == TOK.Tsuper )
+						{
+							_type = token().identifier;
+							parseToken();
+							if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
+						}
+						else if( token().tok == TOK.Tnumbers )
+						{
+							_type = "int";
+							if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
+						}
+						else
+						{
+							_type = getDelimitedString( TOK.Topenparen,TOK.Tcloseparen );
+						}
 					}
 					else
 					{
-						_type = getDelimitedString( TOK.Topenparen,TOK.Tcloseparen );
+						throw new Exception( "Typeof Parse Error!" );
 					}
 				}
-				else
-				{
-					throw new Exception( "Typeof Parse Error!" );
-				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return _type;
@@ -2709,21 +2754,28 @@ class CParser
 		{
 			char[]	_type;
 			
-			if( token().tok == TOK.T__vector )
+			try
 			{
-				parseToken( TOK.T__vector );
-				if( token().tok == TOK.Topenparen )
+				if( token().tok == TOK.T__vector )
 				{
-					parseToken( TOK.Topenparen );
+					parseToken( TOK.T__vector );
+					if( token().tok == TOK.Topenparen )
+					{
+						parseToken( TOK.Topenparen );
 
-					_type = getType();
+						_type = getType();
 
-					if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
+						if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
+					}
+					else
+					{
+						throw new Exception( "Typeof Parse Error!" );
+					}
 				}
-				else
-				{
-					throw new Exception( "Typeof Parse Error!" );
-				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return _type;
@@ -2859,49 +2911,35 @@ class CParser
 			
 			if( _tempTokenIndex >= tokens.length ) throw new Exception( "out of range!" );
 
-			do
+			try
 			{
-				if( tokens[_tempTokenIndex].tok == TOK.Topenparen )
-					_countDemlimit ++;
-				else if( tokens[_tempTokenIndex].tok == TOK.Tcloseparen )
-					_countDemlimit --;
-				else if( tokens[_tempTokenIndex].tok == TOK.Tsemicolon )
+				do
 				{
-					throw new Exception( "isFunctionDeclare Break Error!" );
+					if( tokens[_tempTokenIndex].tok == TOK.Topenparen )
+						_countDemlimit ++;
+					else if( tokens[_tempTokenIndex].tok == TOK.Tcloseparen )
+						_countDemlimit --;
+					else if( tokens[_tempTokenIndex].tok == TOK.Tsemicolon )
+					{
+						throw new Exception( "isFunctionDeclare Break Error!" );
+					}
+
+					_tempTokenIndex ++;
 				}
+				while( _countDemlimit != 0 )
 
-				_tempTokenIndex ++;
+				// Pass MemberFunctionAttribute
+				while( isMemberFunctionAttribute( _tempTokenIndex ) )
+				{
+					_tempTokenIndex ++;
+				}
 			}
-			while( _countDemlimit != 0 )
-
-			// Pass MemberFunctionAttribute
-			while( isMemberFunctionAttribute( _tempTokenIndex ) )
+			catch( Exception e )
 			{
-				_tempTokenIndex ++;
+				throw e;
 			}
 
 			return _tempTokenIndex;
-
-			/+
-			if( tokens[_tempTokenIndex].tok == TOK.Tsemicolon )
-			{
-				return 0;
-			}
-			else if( tokens[_tempTokenIndex].tok == TOK.Topencurly )
-			{
-				return 1;
-			}
-			else if( tokens[_tempTokenIndex].tok == TOK.Topenparen )
-			{
-				return 2; // Template Function
-			}
-			else if( tokens[_tempTokenIndex].tok == TOK.Tassign )
-			{
-				return -1; // Not Function, is  StorageClasses AutoDeclarationX ;
-			}		
-
-			return -99;
-			+/
 		}
 
 
@@ -2944,17 +2982,24 @@ class CParser
 		{
 			char[] _result;
 
-			if( token().tok == TOK.Tidentifier )
+			try
 			{
-				_result = token().identifier;
-				parseToken( TOK.Tidentifier );
-
-				if( token().tok == TOK.Tdot )
+				if( token().tok == TOK.Tidentifier )
 				{
-					_result ~= ".";
-					parseToken( TOK.Tdot );
-					_result ~= getModuleName();
+					_result = token().identifier;
+					parseToken( TOK.Tidentifier );
+
+					if( token().tok == TOK.Tdot )
+					{
+						_result ~= ".";
+						parseToken( TOK.Tdot );
+						_result ~= getModuleName();
+					}
 				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return _result;
@@ -2965,31 +3010,38 @@ class CParser
 		{
 			bool bDeprecated;
 			
-			if( tokenIndex > 0 )
-				if( prev().tok == TOK.Tdeprecated ) bDeprecated = true;
-
-
-			parseToken( TOK.Tmodule );
-			int _ln = token().lineNumber;
-			
-			if( token().tok == TOK.Tidentifier )
+			try
 			{
-				char[] moduleName = getModuleName();
-				if( moduleName.length )
+				if( tokenIndex > 0 )
+					if( prev().tok == TOK.Tdeprecated ) bDeprecated = true;
+
+
+				parseToken( TOK.Tmodule );
+				int _ln = token().lineNumber;
+				
+				if( token().tok == TOK.Tidentifier )
 				{
-					CASTnode _head = activeASTnode;
-					while( _head.getFather !is null )
-						_head = _head.getFather;
-
-					if( _head.kind & D_MODULE )
+					char[] moduleName = getModuleName();
+					if( moduleName.length )
 					{
-						_head.name = moduleName;
-						_head.protection = bDeprecated ? "deprecated" : "";
-						_head.lineNumber = _ln;
-					}
+						CASTnode _head = activeASTnode;
+						while( _head.getFather !is null )
+							_head = _head.getFather;
 
-					return true;
+						if( _head.kind & D_MODULE )
+						{
+							_head.name = moduleName;
+							_head.protection = bDeprecated ? "deprecated" : "";
+							_head.lineNumber = _ln;
+						}
+
+						return true;
+					}
 				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return false;
@@ -3020,37 +3072,44 @@ class CParser
 			char[]	importName, bindName, baseName;
 			int		_ln = token().lineNumber;
 			
-			if( token().tok == TOK.Tidentifier )
+			try
 			{
-				importName = getModuleName();
-				
-				if( importName.length )
+				if( token().tok == TOK.Tidentifier )
 				{
-					if( token().tok == TOK.Tassign )
-					{
-						parseToken( TOK.Tassign );
-						bindName = getModuleName();
-					}
+					importName = getModuleName();
 					
-					if( token().tok == TOK.Tcolon )
+					if( importName.length )
 					{
-						parseToken( TOK.Tcolon );
-						baseName = getModuleName();
-					}			
-					
-					if( token().tok == TOK.Tcomma )
-					{
-						activeASTnode.addChild( importName, D_IMPORT, getProt(), bindName, baseName, _ln );
-						parseToken( TOK.Tcomma );
-						parseImportList();
-					}
-					else if( token().tok == TOK.Tsemicolon )
-					{
-						activeASTnode.addChild( importName, D_IMPORT, getProt(), bindName, baseName, _ln );
-						return true;
+						if( token().tok == TOK.Tassign )
+						{
+							parseToken( TOK.Tassign );
+							bindName = getModuleName();
+						}
+						
+						if( token().tok == TOK.Tcolon )
+						{
+							parseToken( TOK.Tcolon );
+							baseName = getModuleName();
+						}			
+						
+						if( token().tok == TOK.Tcomma )
+						{
+							activeASTnode.addChild( importName, D_IMPORT, getProt(), bindName, baseName, _ln );
+							parseToken( TOK.Tcomma );
+							parseImportList();
+						}
+						else if( token().tok == TOK.Tsemicolon )
+						{
+							activeASTnode.addChild( importName, D_IMPORT, getProt(), bindName, baseName, _ln );
+							return true;
+						}
 					}
 				}
-			}	
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}
 			
 			return false;
 		}
@@ -3241,8 +3300,9 @@ class CParser
 					}
 				}
 			}
-			catch
+			catch( Exception e )
 			{
+				throw e;
 			}
 
 			return false;
@@ -3305,8 +3365,10 @@ class CParser
 					return parseVariableOrFunction( _type );
 				}
 			}
-			catch{}
-			
+			catch( Exception e )
+			{
+				throw e;
+			}
 
 			return false;
 		}
@@ -3324,7 +3386,10 @@ class CParser
 					return parseVariable( _type );
 				}
 			}
-			catch{}
+			catch( Exception e )
+			{
+				throw e;
+			}
 
 			return false;
 		}
@@ -3403,15 +3468,15 @@ class CParser
 		{
 			char[]	_name = token().identifier;
 			int		_ln = token().lineNumber;
-
-			parseToken( TOK.Tidentifier );
-
-			if( token().tok == TOK.Topenparen )
+			
+			try
 			{
-				char[] _params;
+				parseToken( TOK.Tidentifier );
 
-				try
+				if( token().tok == TOK.Topenparen )
 				{
+					char[] _params;
+
 					int funTailIndex = getFunctionDeclareTailIndex();
 					if( funTailIndex >= tokens.length )
 					{
@@ -3462,12 +3527,12 @@ class CParser
 
 					parseConstraint();
 				}
-				catch( Exception e )
-				{
-					throw e;
-				}
 			}
-
+			catch( Exception e )
+			{
+				throw e;
+			}
+			
 			return false;
 		}
 
@@ -3613,26 +3678,32 @@ class CParser
 		{
 			char[]	_result;
 
-			if( token().tok == TOK.Topenparen )
+			try
 			{
-				_result = "(";
-				parseToken( TOK.Topenparen );
-				
-				if( token().tok == TOK.Tcloseparen )
+				if( token().tok == TOK.Topenparen )
 				{
-					parseToken( TOK.Tcloseparen );
-					return "()";
+					_result = "(";
+					parseToken( TOK.Topenparen );
+					
+					if( token().tok == TOK.Tcloseparen )
+					{
+						parseToken( TOK.Tcloseparen );
+						return "()";
+					}
+					else
+					{
+						_result ~= parseParameterList();
+					}
 				}
 				else
 				{
-					_result ~= parseParameterList();
+					throw new Exception( "Parameters Parse Error!" );
 				}
 			}
-			else
+			catch( Exception e )
 			{
-				throw new Exception( "Parameters Parse Error!" );
+				throw e;
 			}
-			
 
 			return _result;
 		}
@@ -3647,102 +3718,109 @@ class CParser
 		{
 			char[]	_result, _type, _name;
 			int		_ln;
-
-			if( token().tok == TOK.Tdotdotdot )
+			
+			try
 			{
-				_result ~= "...";
-				parseToken( TOK.Tdotdotdot );
-			}
-			else
-			{
-				while( isInOut() )
+				if( token().tok == TOK.Tdotdotdot )
 				{
-					_type ~= ( token().identifier ~ " " );
-					parseToken();
+					_result ~= "...";
+					parseToken( TOK.Tdotdotdot );
 				}
-
-				_type ~= getBasicType();
-				_type ~= getBasicType2();
-				_result ~= ( _type ~ " " );
-
-				/*
-				VarDeclarator:
-					BasicType2<opt> Identifier
-
-				AltDeclarator:
-					BasicType2<opt> Identifier AltDeclaratorSuffixes
-				*/
-				if( token().tok == TOK.Tidentifier )
+				else
 				{
-					_name = token().identifier;
-					_ln		= token().lineNumber;
-					parseToken( TOK.Tidentifier );
-					_result ~= _name;
-				}
-				else if( token().tok == TOK.Topenparen )
-				{
+					while( isInOut() )
+					{
+						_type ~= ( token().identifier ~ " " );
+						parseToken();
+					}
+
+					_type ~= getBasicType();
+					_type ~= getBasicType2();
+					_result ~= ( _type ~ " " );
+
 					/*
+					VarDeclarator:
+						BasicType2<opt> Identifier
+
 					AltDeclarator:
 						BasicType2<opt> Identifier AltDeclaratorSuffixes
-						BasicType2<opt> ( AltDeclaratorX )
-						BasicType2<opt> ( AltDeclaratorX ) AltFuncDeclaratorSuffix
-						BasicType2<opt> ( AltDeclaratorX ) AltDeclaratorSuffixes
-
-					AltDeclaratorX:
-						BasicType2<opt> Identifier
-						BasicType2<opt> Identifier AltFuncDeclaratorSuffix
-						AltDeclarator
 					*/
-					_result ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+					if( token().tok == TOK.Tidentifier )
+					{
+						_name = token().identifier;
+						_ln		= token().lineNumber;
+						parseToken( TOK.Tidentifier );
+						_result ~= _name;
+					}
+					else if( token().tok == TOK.Topenparen )
+					{
+						/*
+						AltDeclarator:
+							BasicType2<opt> Identifier AltDeclaratorSuffixes
+							BasicType2<opt> ( AltDeclaratorX )
+							BasicType2<opt> ( AltDeclaratorX ) AltFuncDeclaratorSuffix
+							BasicType2<opt> ( AltDeclaratorX ) AltDeclaratorSuffixes
 
-					/*
-					AltDeclaratorSuffixes:
-						AltDeclaratorSuffix
-						AltDeclaratorSuffix AltDeclaratorSuffixes
+						AltDeclaratorX:
+							BasicType2<opt> Identifier
+							BasicType2<opt> Identifier AltFuncDeclaratorSuffix
+							AltDeclarator
+						*/
+						_result ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
 
-					AltDeclaratorSuffix:
-						[ ]
-						[ AssignExpression ]
-						[ Type ]
-					*/
-					while( token().tok == TOK.Topenbracket )
-						_result ~= getDelimitedString( TOK.Topenbracket, TOK.Tclosebracket );
+						/*
+						AltDeclaratorSuffixes:
+							AltDeclaratorSuffix
+							AltDeclaratorSuffix AltDeclaratorSuffixes
 
-					/*
-					AltFuncDeclaratorSuffix:
-						Parameters MemberFunctionAttributes<opt>
-					*/
-					if( token().tok == TOK.Topenparen ) _result ~= getParameters();
+						AltDeclaratorSuffix:
+							[ ]
+							[ AssignExpression ]
+							[ Type ]
+						*/
+						while( token().tok == TOK.Topenbracket )
+							_result ~= getDelimitedString( TOK.Topenbracket, TOK.Tclosebracket );
+
+						/*
+						AltFuncDeclaratorSuffix:
+							Parameters MemberFunctionAttributes<opt>
+						*/
+						if( token().tok == TOK.Topenparen ) _result ~= getParameters();
+					}
+				}
+
+				if( token().tok == TOK.Tassign )
+				{
+					// _result ~= "=";
+					parseToken();
+
+					getTokenIdentifierUntil( TOK.Tcomma, TOK.Tcloseparen );
+				}
+				
+				if( token().tok == TOK.Tdotdotdot )
+				{
+					_result ~= "...";
+					parseToken( TOK.Tdotdotdot );
+				}			
+				
+				if( token().tok == TOK.Tcomma )
+				{
+					_result ~= ",";
+					parseToken( TOK.Tcomma );
+					activeASTnode.addChild( _name, D_PARAM, null, _type, null, _ln );
+					_type = _name = "";
+					_result ~= parseParameterList();
+				}
+				else if( token().tok == TOK.Tcloseparen ) // Tail
+				{
+					_result ~= ")";
+					parseToken( TOK.Tcloseparen );
+					activeASTnode.addChild( _name, D_PARAM, null, _type, null, _ln );
 				}
 			}
-
-			if( token().tok == TOK.Tassign )
+			catch( Exception e )
 			{
-				// _result ~= "=";
-				parseToken();
-
-				getTokenIdentifierUntil( TOK.Tcomma, TOK.Tcloseparen );
-			}
-			
-			if( token().tok == TOK.Tdotdotdot )
-			{
-				_result ~= "...";
-				parseToken( TOK.Tdotdotdot );
-			}			
-			
-			if( token().tok == TOK.Tcomma )
-			{
-				_result ~= ",";
-				parseToken( TOK.Tcomma );
-				activeASTnode.addChild( _name, D_PARAM, null, _type, null, _ln );
-				_type = _name = "";
-				_result ~= parseParameterList();
-			}
-			else if( token().tok == TOK.Tcloseparen ) // Tail
-			{
-				_result ~= ")";
-				parseToken( TOK.Tcloseparen );
-				activeASTnode.addChild( _name, D_PARAM, null, _type, null, _ln );
+				throw e;
 			}
 
 			return _result;
@@ -3826,54 +3904,60 @@ class CParser
 			else
 				return false;
 
-			
-			parseToken(); // parseToken( TOK.Tclass ) or parseToken( TOK.Tinterface );
-			
-			if( token().tok == TOK.Tidentifier )
+			try
 			{
-				char[]	_baseName, _name = token().identifier;
-				int		_ln = token().lineNumber;
-
-				parseToken( TOK.Tidentifier );
-
-				if( token().tok == TOK.Topenparen )
+				parseToken(); // parseToken( TOK.Tclass ) or parseToken( TOK.Tinterface );
+				
+				if( token().tok == TOK.Tidentifier )
 				{
-					/*
-					ClassTemplateDeclaration:
-					InterfaceTemplateDeclaration:
-					*/				
-					if( !parseAggregateTemplates( D_KIND, _name, _baseName ) ) return false;
-				}
-				else
-				{
-					if( token().tok == TOK.Tsemicolon )
+					char[]	_baseName, _name = token().identifier;
+					int		_ln = token().lineNumber;
+
+					parseToken( TOK.Tidentifier );
+
+					if( token().tok == TOK.Topenparen )
 					{
-						//parseToken( TOK.Tsemicolon );
-						activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
-						return true;
+						/*
+						ClassTemplateDeclaration:
+						InterfaceTemplateDeclaration:
+						*/				
+						if( !parseAggregateTemplates( D_KIND, _name, _baseName ) ) return false;
 					}
-					else if( token().tok == TOK.Tcolon )
+					else
 					{
-						parseToken( TOK.Tcolon );
-						
-						// Not in Language Reference
-						if( isVisibilityAttribute() ) parseToken();
-						
-						_baseName = getBasicType();
-						if( token().tok == TOK.Tcomma )
+						if( token().tok == TOK.Tsemicolon )
 						{
-							parseToken( TOK.Tcomma );
-							_baseName ~= ( "," ~ getBasicType() );
+							//parseToken( TOK.Tsemicolon );
+							activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
+							return true;
+						}
+						else if( token().tok == TOK.Tcolon )
+						{
+							parseToken( TOK.Tcolon );
+							
+							// Not in Language Reference
+							if( isVisibilityAttribute() ) parseToken();
+							
+							_baseName = getBasicType();
+							if( token().tok == TOK.Tcomma )
+							{
+								parseToken( TOK.Tcomma );
+								_baseName ~= ( "," ~ getBasicType() );
+							}
 						}
 					}
-				}
 
-				if( token().tok == TOK.Topencurly )
-				{
-					activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, _baseName, _ln );
-					curlyStack.push( "CLASS" );
-					return true;
+					if( token().tok == TOK.Topencurly )
+					{
+						activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, _baseName, _ln );
+						curlyStack.push( "CLASS" );
+						return true;
+					}
 				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return false;
@@ -3890,48 +3974,55 @@ class CParser
 		*/
 		bool parseConstructor()
 		{
-			if( token().tok == TOK.Tthis && next().tok == TOK.Topenparen )
+			try
 			{
-				char[]	_params;
-				int		_ln = token().lineNumber;
+				if( token().tok == TOK.Tthis && next().tok == TOK.Topenparen )
+				{
+					char[]	_params;
+					int		_ln = token().lineNumber;
 
-				parseToken( TOK.Tthis );
+					parseToken( TOK.Tthis );
 
-				int funTailIndex = getFunctionDeclareTailIndex();
-				if( tokens[funTailIndex].tok == TOK.Tsemicolon )
-				{
-					_params = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-					//activeASTnode.addChild( null, D_CTOR, null, _params, null, _ln );
-					return true;
-				}
-				else if( tokens[funTailIndex].tok == TOK.Topencurly )
-				{
-					activeASTnode = activeASTnode.addChild( null, D_CTOR, null, _params, null, _ln );
-					_params = getParameters();
-					activeASTnode.type = _params;
-					curlyStack.push( "CTOR" );
-				}
-				else if( tokens[funTailIndex].tok == TOK.Tin || tokens[funTailIndex].tok == TOK.Tout )
-				{
-					if( tokens[funTailIndex+1].tok == TOK.Topencurly )
+					int funTailIndex = getFunctionDeclareTailIndex();
+					if( tokens[funTailIndex].tok == TOK.Tsemicolon )
+					{
+						_params = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+						//activeASTnode.addChild( null, D_CTOR, null, _params, null, _ln );
+						return true;
+					}
+					else if( tokens[funTailIndex].tok == TOK.Topencurly )
 					{
 						activeASTnode = activeASTnode.addChild( null, D_CTOR, null, _params, null, _ln );
 						_params = getParameters();
 						activeASTnode.type = _params;
 						curlyStack.push( "CTOR" );
-						curlyStack.push( "{" );
-						
-						while( isMemberFunctionAttribute() )
-							parseToken();
-							
-						return true;
 					}
-				}			
+					else if( tokens[funTailIndex].tok == TOK.Tin || tokens[funTailIndex].tok == TOK.Tout )
+					{
+						if( tokens[funTailIndex+1].tok == TOK.Topencurly )
+						{
+							activeASTnode = activeASTnode.addChild( null, D_CTOR, null, _params, null, _ln );
+							_params = getParameters();
+							activeASTnode.type = _params;
+							curlyStack.push( "CTOR" );
+							curlyStack.push( "{" );
+							
+							while( isMemberFunctionAttribute() )
+								parseToken();
+								
+							return true;
+						}
+					}			
 
-				while( isMemberFunctionAttribute() )
-					parseToken();
+					while( isMemberFunctionAttribute() )
+						parseToken();
 
-				if( token().tok == TOK.Topencurly ) return true;
+					if( token().tok == TOK.Topencurly ) return true;
+				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return false;
@@ -3944,31 +4035,38 @@ class CParser
 		*/
 		bool parseDestructor()
 		{
-			if( token().tok == TOK.Ttilde && next().tok == TOK.Tthis && next2().tok == TOK.Topenparen )
+			try
 			{
-				int		_ln = token().lineNumber;
-
-				parseToken( TOK.Ttilde );
-				parseToken( TOK.Tthis );
-
-				int funTailIndex = getFunctionDeclareTailIndex();
-				if( tokens[funTailIndex].tok == TOK.Tsemicolon )
+				if( token().tok == TOK.Ttilde && next().tok == TOK.Tthis && next2().tok == TOK.Topenparen )
 				{
-					getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-					activeASTnode.addChild( null, D_DTOR, null, null, null, _ln );
-					return true;
+					int		_ln = token().lineNumber;
+
+					parseToken( TOK.Ttilde );
+					parseToken( TOK.Tthis );
+
+					int funTailIndex = getFunctionDeclareTailIndex();
+					if( tokens[funTailIndex].tok == TOK.Tsemicolon )
+					{
+						getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+						activeASTnode.addChild( null, D_DTOR, null, null, null, _ln );
+						return true;
+					}
+					else if( tokens[funTailIndex].tok == TOK.Topencurly )
+					{
+						getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+						activeASTnode = activeASTnode.addChild( null, D_DTOR, null, null, null, _ln );
+						curlyStack.push( "DTOR" );
+					}			
+
+					while( isMemberFunctionAttribute() )
+						parseToken();
+
+					if( token().tok == TOK.Topencurly ) return true;
 				}
-				else if( tokens[funTailIndex].tok == TOK.Topencurly )
-				{
-					getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-					activeASTnode = activeASTnode.addChild( null, D_DTOR, null, null, null, _ln );
-					curlyStack.push( "DTOR" );
-				}			
-
-				while( isMemberFunctionAttribute() )
-					parseToken();
-
-				if( token().tok == TOK.Topencurly ) return true;
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return false;
@@ -4011,47 +4109,53 @@ class CParser
 				return false;
 
 			int		_ln =  token().lineNumber;
-
-			parseToken(); // parseToken( TOK.Tstruct ) or parseToken( TOK.Tunion )
-
-			if( token().tok == TOK.Tidentifier )
+			
+			try
 			{
-				char[]	_baseName, _name = token().identifier;
+				parseToken(); // parseToken( TOK.Tstruct ) or parseToken( TOK.Tunion )
 
-				parseToken( TOK.Tidentifier );
-
-				if( token().tok == TOK.Topenparen )
+				if( token().tok == TOK.Tidentifier )
 				{
-					/*
-					ClassTemplateDeclaration:
-					InterfaceTemplateDeclaration:
-					*/				
-					if( !parseAggregateTemplates( D_KIND, _name, _baseName ) ) return false;
+					char[]	_baseName, _name = token().identifier;
+
+					parseToken( TOK.Tidentifier );
+
+					if( token().tok == TOK.Topenparen )
+					{
+						/*
+						ClassTemplateDeclaration:
+						InterfaceTemplateDeclaration:
+						*/				
+						if( !parseAggregateTemplates( D_KIND, _name, _baseName ) ) return false;
+					}
+					else
+					{
+						if( token().tok == TOK.Tsemicolon )
+						{
+							//parseToken( TOK.Tsemicolon );
+							activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
+							return true;
+						}
+						else if( token().tok == TOK.Topencurly )
+						{
+							activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
+							curlyStack.push( "CLASS" );
+							return true;
+						}
+					}
 				}
-				else
+				else if( token().tok == TOK.Topencurly )
 				{
-					if( token().tok == TOK.Tsemicolon )
-					{
-						//parseToken( TOK.Tsemicolon );
-						activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
-						return true;
-					}
-					else if( token().tok == TOK.Topencurly )
-					{
-						activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
-						curlyStack.push( "CLASS" );
-						return true;
-					}
+					// AnonStructDeclaration
+					activeASTnode = activeASTnode.addChild( "-Anonymous-", D_KIND, null, null, null, _ln );
+					curlyStack.push( "CLASS" );
+					return true;
 				}
 			}
-			else if( token().tok == TOK.Topencurly )
+			catch( Exception e )
 			{
-				// AnonStructDeclaration
-				activeASTnode = activeASTnode.addChild( "-Anonymous-", D_KIND, null, null, null, _ln );
-				curlyStack.push( "CLASS" );
-				return true;
+				throw e;
 			}
-
 
 			return false;
 		}
@@ -4102,102 +4206,109 @@ class CParser
 		*/
 		bool parseEnum()
 		{
-			if( token().tok == TOK.Tenum )
+			try
 			{
-				parseToken( TOK.Tenum );
-
-				int		_ln =  token().lineNumber;
-				char[]	_EnumBaseType;
-				
-				if( token().tok == TOK.Tidentifier )
+				if( token().tok == TOK.Tenum )
 				{
-					char[]	_name = token().identifier;
+					parseToken( TOK.Tenum );
+
+					int		_ln =  token().lineNumber;
+					char[]	_EnumBaseType;
 					
-					parseToken( TOK.Tidentifier );
-					/*
-					EnumBody:
-						{ EnumMembers }
-						;
-
-					EnumMembers:
-						EnumMember
-						EnumMember ,
-						EnumMember , EnumMembers
-
-					EnumMember:
-						Identifier
-						Identifier = AssignExpression				
-					*/
-					if( token().tok == TOK.Tcolon )
+					if( token().tok == TOK.Tidentifier )
 					{
-						parseToken( TOK.Tcolon );
-						_EnumBaseType = getBasicType();
-					}
-					
-					if( token().tok == TOK.Tsemicolon )
-					{
-						//parseToken( TOK.Tsemicolon );
-						activeASTnode.addChild( _name, D_ENUM, null, null, _EnumBaseType, _ln );
-						return true;
-					}
-					else if( token().tok == TOK.Topencurly )
-					{
-						activeASTnode = activeASTnode.addChild( _name, D_ENUM, null, null, _EnumBaseType, _ln );
+						char[]	_name = token().identifier;
+						
+						parseToken( TOK.Tidentifier );
+						/*
+						EnumBody:
+							{ EnumMembers }
+							;
 
-						// Since Enum Body is spacial.......
-						parseToken( TOK.Topencurly );					
-						if( parseEnumMembers( false, _EnumBaseType ) )
+						EnumMembers:
+							EnumMember
+							EnumMember ,
+							EnumMember , EnumMembers
+
+						EnumMember:
+							Identifier
+							Identifier = AssignExpression				
+						*/
+						if( token().tok == TOK.Tcolon )
 						{
-							if( token().tok == TOK.Tclosecurly )
+							parseToken( TOK.Tcolon );
+							_EnumBaseType = getBasicType();
+						}
+						
+						if( token().tok == TOK.Tsemicolon )
+						{
+							//parseToken( TOK.Tsemicolon );
+							activeASTnode.addChild( _name, D_ENUM, null, null, _EnumBaseType, _ln );
+							return true;
+						}
+						else if( token().tok == TOK.Topencurly )
+						{
+							activeASTnode = activeASTnode.addChild( _name, D_ENUM, null, null, _EnumBaseType, _ln );
+
+							// Since Enum Body is spacial.......
+							parseToken( TOK.Topencurly );					
+							if( parseEnumMembers( false, _EnumBaseType ) )
 							{
-								parseToken( TOK.Tclosecurly );
-								if( activeASTnode.getFather !is null )activeASTnode = activeASTnode.getFather();
-								return true;
+								if( token().tok == TOK.Tclosecurly )
+								{
+									parseToken( TOK.Tclosecurly );
+									if( activeASTnode.getFather !is null )activeASTnode = activeASTnode.getFather();
+									return true;
+								}
+							}
+						}
+					}
+					else
+					{
+						/*
+						AnonymousEnumDeclaration:
+							enum : EnumBaseType { EnumMembers }
+							enum { EnumMembers }
+							enum { AnonymousEnumMembers }
+
+						AnonymousEnumMembers:
+							AnonymousEnumMember
+							AnonymousEnumMember ,
+							AnonymousEnumMember , AnonymousEnumMembers
+
+						AnonymousEnumMember:
+							EnumMember
+							Type Identifier = AssignExpression
+						*/
+						if( token().tok == TOK.Tcolon )
+						{
+							parseToken( TOK.Tcolon );
+							_EnumBaseType = getType();
+						}
+						
+						if( token().tok == TOK.Topencurly )
+						{
+							activeASTnode = activeASTnode.addChild( null, D_ENUM, null, null, _EnumBaseType, _ln );
+
+							// Since Enum Body is spacial.......
+							parseToken( TOK.Topencurly );
+
+							if( parseEnumMembers( true, _EnumBaseType ) )
+							{
+								if( token().tok == TOK.Tclosecurly )
+								{
+									parseToken( TOK.Tclosecurly );
+									if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+									return true;
+								}
 							}
 						}
 					}
 				}
-				else
-				{
-					/*
-					AnonymousEnumDeclaration:
-						enum : EnumBaseType { EnumMembers }
-						enum { EnumMembers }
-						enum { AnonymousEnumMembers }
-
-					AnonymousEnumMembers:
-						AnonymousEnumMember
-						AnonymousEnumMember ,
-						AnonymousEnumMember , AnonymousEnumMembers
-
-					AnonymousEnumMember:
-						EnumMember
-						Type Identifier = AssignExpression
-					*/
-					if( token().tok == TOK.Tcolon )
-					{
-						parseToken( TOK.Tcolon );
-						_EnumBaseType = getType();
-					}
-					
-					if( token().tok == TOK.Topencurly )
-					{
-						activeASTnode = activeASTnode.addChild( null, D_ENUM, null, null, _EnumBaseType, _ln );
-
-						// Since Enum Body is spacial.......
-						parseToken( TOK.Topencurly );
-
-						if( parseEnumMembers( true, _EnumBaseType ) )
-						{
-							if( token().tok == TOK.Tclosecurly )
-							{
-								parseToken( TOK.Tclosecurly );
-								if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
-								return true;
-							}
-						}
-					}
-				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return false;
@@ -4206,38 +4317,45 @@ class CParser
 		bool parseEnumMembers( bool bAnonymous, char[] _EnumBaseType )
 		{
 			char[]	_name, _type;
-
-			if( bAnonymous )
+			
+			try
 			{
-				if( next().tok != TOK.Tassign && next().tok != TOK.Tcomma && next().tok != TOK.Tclosecurly )
+				if( bAnonymous )
 				{
-					// Type Identifier = AssignExpression
-					_type = getType();
+					if( next().tok != TOK.Tassign && next().tok != TOK.Tcomma && next().tok != TOK.Tclosecurly )
+					{
+						// Type Identifier = AssignExpression
+						_type = getType();
+					}
+				}
+				
+				if( token().tok == TOK.Tidentifier )
+				{
+					_name = token().identifier;
+					int		_ln =  token().lineNumber;
+					
+					parseToken( TOK.Tidentifier );
+					
+					if( token().tok == TOK.Tassign )
+					{
+						while( token().tok != TOK.Tcomma && token().tok != TOK.Tclosecurly )
+							parseToken();
+					}
+
+					activeASTnode.addChild( _name, D_ENUMMEMBER, null, _type.length ? _type : _EnumBaseType, null, _ln );
+
+					if( token().tok == TOK.Tcomma )
+					{
+						parseToken( TOK.Tcomma );
+						parseEnumMembers( bAnonymous, _EnumBaseType );
+					}
+
+					return true;
 				}
 			}
-			
-			if( token().tok == TOK.Tidentifier )
+			catch( Exception e )
 			{
-				_name = token().identifier;
-				int		_ln =  token().lineNumber;
-				
-				parseToken( TOK.Tidentifier );
-				
-				if( token().tok == TOK.Tassign )
-				{
-					while( token().tok != TOK.Tcomma && token().tok != TOK.Tclosecurly )
-						parseToken();
-				}
-
-				activeASTnode.addChild( _name, D_ENUMMEMBER, null, _type.length ? _type : _EnumBaseType, null, _ln );
-
-				if( token().tok == TOK.Tcomma )
-				{
-					parseToken( TOK.Tcomma );
-					parseEnumMembers( bAnonymous, _EnumBaseType );
-				}
-
-				return true;
+				throw e;
 			}
 
 			return false;
@@ -4272,31 +4390,38 @@ class CParser
 		*/
 		bool parseTemplate()
 		{
-			if( token().tok == TOK.Ttemplate )
+			try
 			{
-				parseToken( TOK.Ttemplate );
-
-				if( token().tok == TOK.Tidentifier )
+				if( token().tok == TOK.Ttemplate )
 				{
-					char[]	_params, _name = token().identifier;
-					int		_ln =  token().lineNumber;
-					
-					parseToken( TOK.Tidentifier );
+					parseToken( TOK.Ttemplate );
 
-					if( token().tok == TOK.Topenparen )
+					if( token().tok == TOK.Tidentifier )
 					{
-						_params = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+						char[]	_params, _name = token().identifier;
+						int		_ln =  token().lineNumber;
+						
+						parseToken( TOK.Tidentifier );
 
-						if( token().tok == TOK.Tif ) parseConstraint();
-
-						if( token().tok == TOK.Topencurly )
+						if( token().tok == TOK.Topenparen )
 						{
-							activeASTnode = activeASTnode.addChild( _name, D_TEMPLATE, null, _params, null, _ln );
-							curlyStack.push( "TEMPLATE" );
-							return true;
+							_params = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+
+							if( token().tok == TOK.Tif ) parseConstraint();
+
+							if( token().tok == TOK.Topencurly )
+							{
+								activeASTnode = activeASTnode.addChild( _name, D_TEMPLATE, null, _params, null, _ln );
+								curlyStack.push( "TEMPLATE" );
+								return true;
+							}
 						}
 					}
 				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return false;
@@ -4347,46 +4472,53 @@ class CParser
 		{
 			char[] _Instance;
 			
-			if( token().tok == TOK.Tidentifier && next().tok == TOK.Tnot ) // !
+			try
 			{
-				_Instance = token().identifier;
-				parseToken();
-				_Instance ~= "!";
-				parseToken( TOK.Tnot );
-
-				if( token.tok == TOK.Topenparen )
+				if( token().tok == TOK.Tidentifier && next().tok == TOK.Tnot ) // !
 				{
-					_Instance ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+					_Instance = token().identifier;
+					parseToken();
+					_Instance ~= "!";
+					parseToken( TOK.Tnot );
 
-					if( token().tok == TOK.Tdot && next().tok == TOK.Tidentifier )
+					if( token.tok == TOK.Topenparen )
 					{
-						_Instance ~= ".";
-						parseToken( TOK.Tdot );
-						_Instance ~= getIdentifierList();
-					}
-				}
-				else // TemplateSingleArgument
-				{
-					switch( token().tok )
-					{
-						case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
-							TOK.Tchar, TOK.Tdchar, TOK.Twchar,
-							TOK.Tfloat, TOK.Tdouble, TOK.Treal, TOK.Tifloat, TOK.Tidouble, TOK.Tireal, TOK.Tcfloat, TOK.Tcdouble, TOK.Tcreal,
-							TOK.Tvoid:
+						_Instance ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
 
-						case TOK.Tstrings, TOK.Tnumbers:
-						case TOK.Ttrue, TOK.Tfalse:
-						case TOK.Tnull, TOK.Tthis:
-						case TOK.T__FILE__, TOK.T__FILE_FULL_PATH__, TOK.T__MODULE__, TOK.T__LINE__, TOK.T__FUNCTION__, TOK.T__PRETTY_FUNCTION__: // SpecialKeyword
-
-						case TOK.Tidentifier:
+						if( token().tok == TOK.Tdot && next().tok == TOK.Tidentifier )
+						{
+							_Instance ~= ".";
+							parseToken( TOK.Tdot );
 							_Instance ~= getIdentifierList();
-							break;
-
-						default:
+						}
 					}
-				}	
+					else // TemplateSingleArgument
+					{
+						switch( token().tok )
+						{
+							case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
+								TOK.Tchar, TOK.Tdchar, TOK.Twchar,
+								TOK.Tfloat, TOK.Tdouble, TOK.Treal, TOK.Tifloat, TOK.Tidouble, TOK.Tireal, TOK.Tcfloat, TOK.Tcdouble, TOK.Tcreal,
+								TOK.Tvoid:
+
+							case TOK.Tstrings, TOK.Tnumbers:
+							case TOK.Ttrue, TOK.Tfalse:
+							case TOK.Tnull, TOK.Tthis:
+							case TOK.T__FILE__, TOK.T__FILE_FULL_PATH__, TOK.T__MODULE__, TOK.T__LINE__, TOK.T__FUNCTION__, TOK.T__PRETTY_FUNCTION__: // SpecialKeyword
+
+							case TOK.Tidentifier:
+								_Instance ~= getIdentifierList();
+								break;
+
+							default:
+						}
+					}	
+				}
 			}
+			catch( Exception e )
+			{
+				throw e;
+			}			
 
 			return _Instance;
 		}
@@ -4411,17 +4543,34 @@ class CParser
 			char[]	templateParam;
 			int		_ln = token().lineNumber;
 
-			// ClassTemplateDeclaration:
-			if( token().tok == TOK.Topenparen )
+			try
 			{
-				templateParam = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-
-				if( D_KIND == D_CLASS || D_KIND == D_INTERFACE )
+				// ClassTemplateDeclaration:
+				if( token().tok == TOK.Topenparen )
 				{
-					if( token().tok == TOK.Tif )
+					templateParam = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+
+					if( D_KIND == D_CLASS || D_KIND == D_INTERFACE )
 					{
-						parseConstraint();
-						if( token().tok == TOK.Tcolon )
+						if( token().tok == TOK.Tif )
+						{
+							parseConstraint();
+							if( token().tok == TOK.Tcolon )
+							{
+								parseToken( TOK.Tcolon );
+								
+								// Not in Language Reference
+								if( isVisibilityAttribute() ) parseToken();
+								
+								_baseName = getBasicType();
+								if( token().tok == TOK.Tcomma )
+								{
+									parseToken( TOK.Tcomma );
+									_baseName ~= ( "," ~ getBasicType() );
+								}
+							}					
+						}
+						else if( token().tok == TOK.Tcolon )
 						{
 							parseToken( TOK.Tcolon );
 							
@@ -4434,61 +4583,51 @@ class CParser
 								parseToken( TOK.Tcomma );
 								_baseName ~= ( "," ~ getBasicType() );
 							}
-						}					
-					}
-					else if( token().tok == TOK.Tcolon )
-					{
-						parseToken( TOK.Tcolon );
-						
-						// Not in Language Reference
-						if( isVisibilityAttribute() ) parseToken();
-						
-						_baseName = getBasicType();
-						if( token().tok == TOK.Tcomma )
-						{
-							parseToken( TOK.Tcomma );
-							_baseName ~= ( "," ~ getBasicType() );
-						}
 
+							if( token().tok == TOK.Tif ) parseConstraint();
+						}
+					}
+					else
+					{
 						if( token().tok == TOK.Tif ) parseConstraint();
 					}
-				}
-				else
-				{
-					if( token().tok == TOK.Tif ) parseConstraint();
-				}
 
-				if( token().tok == TOK.Topencurly )
-				{
-					activeASTnode = activeASTnode.addChild( _name, D_TEMPLATE, null, null, _baseName, _ln );
-					curlyStack.push( "Aggregate Templates" );
-					
-					return true;
+					if( token().tok == TOK.Topencurly )
+					{
+						activeASTnode = activeASTnode.addChild( _name, D_TEMPLATE, null, null, _baseName, _ln );
+						curlyStack.push( "Aggregate Templates" );
+						
+						return true;
+					}
 				}
 			}
-
+			catch( Exception e )
+			{
+				throw e;
+			}
+			
 			return false;
 		}
 
 		bool parseConstraint()
 		{
-			if( token().tok == TOK.Tif )
+			try
 			{
-				if( next().tok == TOK.Topenparen )
+				if( token().tok == TOK.Tif )
 				{
-					parseToken( TOK.Tif );
-					try
+					if( next().tok == TOK.Topenparen )
 					{
+						parseToken( TOK.Tif );
 						getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-					}
-					catch( Exception e )
-					{
-						throw e;
-					}
 
-					return true;
+						return true;
+					}
 				}
 			}
+			catch( Exception e )
+			{
+				throw e;
+			}			
 
 			return false;
 		}
@@ -4539,29 +4678,90 @@ class CParser
 		bool parseAlias()
 		{
 			char[] _name, _type;
-			if( token().tok == TOK.Talias )
+			
+			try
 			{
-				parseToken( TOK.Talias );
-
-				if( ( token().tok == TOK.Tidentifier && next().tok == TOK.Tassign ) || ( token().tok == TOK.Tidentifier && next().tok == TOK.Topenparen )  )
+				if( token().tok == TOK.Talias )
 				{
-					return parseAliasDeclarationY();
-				}
-				else
-				{
-					parseStorageClass();
-					_type = getType();
+					parseToken( TOK.Talias );
 
-					if( token.tok == TOK.Tidentifier )
+					if( ( token().tok == TOK.Tidentifier && next().tok == TOK.Tassign ) || ( token().tok == TOK.Tidentifier && next().tok == TOK.Topenparen )  )
 					{
-						if( parseVariable( _type ) )
+						return parseAliasDeclarationY();
+					}
+					else
+					{
+						parseStorageClass();
+						_type = getType();
+
+						if( token.tok == TOK.Tidentifier )
 						{
-							auto _node = activeASTnode.getChild( activeASTnode.getChildrenCount - 1 );
-							_node.kind = D_ALIAS;
+							if( parseVariable( _type ) )
+							{
+								auto _node = activeASTnode.getChild( activeASTnode.getChildrenCount - 1 );
+								_node.kind = D_ALIAS;
+							}
+							else
+							{
+								return false;
+							}
 						}
 						else
 						{
 							return false;
+						}
+					}
+
+				}
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}			
+
+			return false;
+		}
+
+		bool parseAliasDeclarationY()
+		{
+			try
+			{
+				if( token().tok == TOK.Tidentifier )
+				{
+					char[]	_type, _name = token().identifier;
+					int		_ln = token().lineNumber;
+
+					parseToken( TOK.Tidentifier );
+					
+					if( token().tok == TOK.Topenparen ) _name ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+					if( token().tok == TOK.Tassign )
+					{
+						parseToken( TOK.Tassign );
+
+						switch( token().tok )
+						{
+							case TOK.Tdelegate, TOK.Tfunction:
+							case TOK.Topencurly: // BlockStatement
+							case TOK.Tin, TOK.Tout, TOK.Tbody: // FunctionContracts
+							case TOK.Topenparen:
+								// TODO.....
+								break;
+
+							default:
+								parseStorageClass();
+								_type = getType();
+						}
+
+						activeASTnode.addChild( _name, D_ALIAS, getProt(), _type, null, _ln );
+
+						if( token().tok == TOK.Tcomma )
+						{
+							parseToken( TOK.Tcomma );
+							return parseAliasDeclarationY();
+						}
+						else if( token().tok == TOK.Tsemicolon )
+						{
+							return true;
 						}
 					}
 					else
@@ -4569,57 +4769,11 @@ class CParser
 						return false;
 					}
 				}
-
 			}
-
-			return false;
-		}
-
-		bool parseAliasDeclarationY()
-		{
-			if( token().tok == TOK.Tidentifier )
+			catch( Exception e )
 			{
-				char[]	_type, _name = token().identifier;
-				int		_ln = token().lineNumber;
-
-				parseToken( TOK.Tidentifier );
-				
-				if( token().tok == TOK.Topenparen ) _name ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-				if( token().tok == TOK.Tassign )
-				{
-					parseToken( TOK.Tassign );
-
-					switch( token().tok )
-					{
-						case TOK.Tdelegate, TOK.Tfunction:
-						case TOK.Topencurly: // BlockStatement
-						case TOK.Tin, TOK.Tout, TOK.Tbody: // FunctionContracts
-						case TOK.Topenparen:
-							// TODO.....
-							break;
-
-						default:
-							parseStorageClass();
-							_type = getType();
-					}
-
-					activeASTnode.addChild( _name, D_ALIAS, getProt(), _type, null, _ln );
-
-					if( token().tok == TOK.Tcomma )
-					{
-						parseToken( TOK.Tcomma );
-						return parseAliasDeclarationY();
-					}
-					else if( token().tok == TOK.Tsemicolon )
-					{
-						return true;
-					}
-				}
-				else
-				{
-					return false;
-				}
-			}
+				throw e;
+			}			
 
 			return false;
 		}
@@ -4656,100 +4810,108 @@ class CParser
 			int		_ln = token().lineNumber;
 
 			int		D_KIND;
-			if( token().tok == TOK.Tversion )
-				D_KIND = D_VERSION;
-			else if( token().tok == TOK.Tdebug )
-				D_KIND = D_DEBUG;
-			else if( token().tok == TOK.Tstatic && next().tok == TOK.Tif )
-				D_KIND = D_STATICIF;
-			else
-				return false;
-
 			
-			
-			switch( token().tok )
+			try
 			{
-				case TOK.Tversion, TOK.Tdebug:
-					parseToken();
+				if( token().tok == TOK.Tversion )
+					D_KIND = D_VERSION;
+				else if( token().tok == TOK.Tdebug )
+					D_KIND = D_DEBUG;
+				else if( token().tok == TOK.Tstatic && next().tok == TOK.Tif )
+					D_KIND = D_STATICIF;
+				else
+					return false;
 
-					if( token().tok == TOK.Topenparen )
-					{
-						_name = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-						if( _name.length > 2 ) _name = _name[1..$-1];
-						activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
+				
+				
+				switch( token().tok )
+				{
+					case TOK.Tversion, TOK.Tdebug:
+						parseToken();
 
-						if( token().tok != TOK.Topencurly )
+						if( token().tok == TOK.Topenparen )
 						{
-							parseStack.push( "version" );
-							parse( null ); //getTokenIdentifierUntil( TOK.Tsemicolon );
-							activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-							if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+							_name = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+							if( _name.length > 2 ) _name = _name[1..$-1];
+							activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
 
-							if( token().tok == TOK.Telse )
+							if( token().tok != TOK.Topencurly )
 							{
-								_ln = token().lineNumber;
-								parseToken( TOK.Telse );
+								parseStack.push( "version" );
+								parse( null ); //getTokenIdentifierUntil( TOK.Tsemicolon );
+								activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
+								if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 
-								if( token().tok != TOK.Tversion && token().tok != TOK.Tdebug )
+								if( token().tok == TOK.Telse )
 								{
-									activeASTnode = activeASTnode.addChild( "-else-", D_KIND, getProt(), null, _name, _ln );
-									
-									if( token().tok != TOK.Topencurly )
+									_ln = token().lineNumber;
+									parseToken( TOK.Telse );
+
+									if( token().tok != TOK.Tversion && token().tok != TOK.Tdebug )
 									{
-										switch( D_KIND )
+										activeASTnode = activeASTnode.addChild( "-else-", D_KIND, getProt(), null, _name, _ln );
+										
+										if( token().tok != TOK.Topencurly )
 										{
-											case D_VERSION:		parseStack.push( "version else" ); break;
-											case D_DEBUG:		parseStack.push( "debug else" ); break;
-											case D_STATICIF:	parseStack.push( "staticif else" ); break;
-											default:
-										}									
-										parse( null );//getTokenIdentifierUntil( TOK.Tsemicolon );
-										activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-										if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+											switch( D_KIND )
+											{
+												case D_VERSION:		parseStack.push( "version else" ); break;
+												case D_DEBUG:		parseStack.push( "debug else" ); break;
+												case D_STATICIF:	parseStack.push( "staticif else" ); break;
+												default:
+											}									
+											parse( null );//getTokenIdentifierUntil( TOK.Tsemicolon );
+											activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
+											if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+										}
+										else
+										{
+											switch( D_KIND )
+											{
+												case D_VERSION:		curlyStack.push( "version else" ); break;
+												case D_DEBUG:		curlyStack.push( "debug else" ); break;
+												case D_STATICIF:	curlyStack.push( "staticif else" ); break;
+												default:			return false;
+											}
+										}
 									}
 									else
 									{
-										switch( D_KIND )
-										{
-											case D_VERSION:		curlyStack.push( "version else" ); break;
-											case D_DEBUG:		curlyStack.push( "debug else" ); break;
-											case D_STATICIF:	curlyStack.push( "staticif else" ); break;
-											default:			return false;
-										}
+										//parseCondition();
 									}
 								}
-								else
+							}
+							else
+							{
+								switch( D_KIND )
 								{
-									//parseCondition();
+									case D_VERSION:		curlyStack.push( "version" ); break;
+									case D_DEBUG:		curlyStack.push( "debug" ); break;
+									case D_STATICIF:	curlyStack.push( "staticif" ); break;
+									default:			return false;
 								}
 							}
+						}
+						else if( token().tok == TOK.Tassign )
+						{
+							parseToken( TOK.Tassign );
+							char[] _type = getTokenIdentifierUntil( TOK.Tsemicolon );
+							activeASTnode.addChild( _type, D_KIND, getProt(), _type, null, _ln );
 						}
 						else
 						{
-							switch( D_KIND )
-							{
-								case D_VERSION:		curlyStack.push( "version" ); break;
-								case D_DEBUG:		curlyStack.push( "debug" ); break;
-								case D_STATICIF:	curlyStack.push( "staticif" ); break;
-								default:			return false;
-							}
+							return false;
 						}
-					}
-					else if( token().tok == TOK.Tassign )
-					{
-						parseToken( TOK.Tassign );
-						char[] _type = getTokenIdentifierUntil( TOK.Tsemicolon );
-						activeASTnode.addChild( _type, D_KIND, getProt(), _type, null, _ln );
-					}
-					else
-					{
+						break;
+					
+					default:
 						return false;
-					}
-					break;
-				
-				default:
-					return false;
+				}
 			}
+			catch( Exception e )
+			{
+				throw e;
+			}			
 
 			return true;
 		}
@@ -4779,10 +4941,10 @@ class CParser
 		tokens.length = 0;
 		tokens = _tokens;
 		
+		head = null;
+		
 		version(DIDE)
 		{
-			head = null;
-			
 			delete curlyStack;
 			delete protStack;
 			delete parseStack;
@@ -4801,144 +4963,148 @@ class CParser
 	{
 		CASTnode parse( char[] fullPath, int B_KIND = 0 )
 		{
-			scope f = new FilePath( fullPath );
-
-			CASTnode		head;
-
-			
-			char[]		_ext;
-			if( toLower( f.ext() ) == "bas" ) 
+			try
 			{
-				head = new CASTnode( fullPath, B_BAS, null, null, null, 0, 2147483647 );
-			}
-			else
-			{
-				head = new CASTnode( fullPath, B_BI, null, null, null, 0, 2147483647 );
-			}
-
-			activeASTnode = head;
-
-			while( tokenIndex < tokens.length )
-			{
-				if( B_KIND > 0 )
+				scope f = new FilePath( fullPath );
+				
+				char[]		_ext;
+				if( toLower( f.ext() ) == "bas" ) 
 				{
-					if( B_KIND & ( B_TYPE | B_UNION ) )
-						parseTypeBody( B_TYPE );
-					else if( B_KIND & B_ENUM )
-						parseEnumBody();
-						
-					break;
+					head = new CASTnode( fullPath, B_BAS, null, null, null, 0, 2147483647 );
+				}
+				else
+				{
+					head = new CASTnode( fullPath, B_BI, null, null, null, 0, 2147483647 );
 				}
 
-				// Pass Member Acdess
-				if( tokenIndex > 0 )
+				activeASTnode = head;
+
+				while( tokenIndex < tokens.length )
 				{
-					if( prev().tok == TOK.Tdot || prev.tok == TOK.Tptraccess )
+					if( B_KIND > 0 )
 					{
-						tokenIndex ++;
-						continue;
+						if( B_KIND & ( B_TYPE | B_UNION ) )
+							parseTypeBody( B_TYPE );
+						else if( B_KIND & B_ENUM )
+							parseEnumBody();
+							
+						break;
+					}
+
+					// Pass Member Acdess
+					if( tokenIndex > 0 )
+					{
+						if( prev().tok == TOK.Tdot || prev.tok == TOK.Tptraccess )
+						{
+							tokenIndex ++;
+							continue;
+						}
+					}
+					
+					switch( tokens[tokenIndex].tok )
+					{
+						case TOK.Tprivate:
+							parseToken( TOK.Tprivate );
+							if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "private" );
+							break;
+
+						case TOK.Tprotected:
+							parseToken( TOK.Tprotected );
+							if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "protected" );
+							break;
+							
+						case TOK.Tpublic:
+							parseToken( TOK.Tpublic );
+							if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "public" );
+							break;
+						
+						case TOK.Tpound:
+							parsePreprocessor();
+							break;
+
+						case TOK.Tconst:
+						case TOK.Tcommon:
+						case TOK.Tstatic:
+						case TOK.Tdim:
+						case TOK.Tredim:
+							parseVariable();
+							break;
+
+						case TOK.Tvar:
+							parserVar();
+							break;
+
+						case TOK.Tfunction, TOK.Tsub, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor:
+							parseProcedure( false, null );
+							break;
+
+						case TOK.Toperator:
+							parseOperator( false, null );
+							break;
+
+						case TOK.Tend:
+							parseEnd();
+							break;
+
+						case TOK.Ttype:
+							parseType();
+							break;
+
+						case TOK.Tclass:
+							parseType( true );
+							break;
+
+						case TOK.Tunion:
+							parseType();
+							break;
+							
+						case TOK.Tenum:
+							parseEnum();
+							break;
+
+						case TOK.Tscope:
+							parseScope();
+							break;
+							
+						case TOK.Twith:
+							parseWith();
+							break;
+
+						case TOK.Tnamespace:
+							parseNamespace();
+							break;
+							
+						case TOK.Tdeclare:
+							parseToken( TOK.Tdeclare );
+							
+							if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub || token().tok == TOK.Tconstructor || token().tok == TOK.Tdestructor || token().tok == TOK.Tproperty )
+							{
+								parseProcedure( true, null );
+							}
+							else if( token().tok == TOK.Toperator )
+							{
+								parseOperator( true, null );
+							}
+							break;
+
+						case TOK.Tassign:
+							parseToken( TOK.Tassign );
+
+							break;
+
+						case TOK.Tendmacro:
+							if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+
+						default:
+							tokenIndex ++;
+							//Stdout( tokenIndex );
+							//Stdout( "   " ~ token().identifier ).newline;
 					}
 				}
-				
-				switch( tokens[tokenIndex].tok )
-				{
-					case TOK.Tprivate:
-						parseToken( TOK.Tprivate );
-						if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "private" );
-						break;
-
-					case TOK.Tprotected:
-						parseToken( TOK.Tprotected );
-						if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "protected" );
-						break;
-						
-					case TOK.Tpublic:
-						parseToken( TOK.Tpublic );
-						if( token().tok == TOK.Tsub || token().tok == TOK.Tfunction ) parseProcedure( false, "public" );
-						break;
-					
-					case TOK.Tpound:
-						parsePreprocessor();
-						break;
-
-					case TOK.Tconst:
-					case TOK.Tcommon:
-					case TOK.Tstatic:
-					case TOK.Tdim:
-					case TOK.Tredim:
-						parseVariable();
-						break;
-
-					case TOK.Tvar:
-						parserVar();
-						break;
-
-					case TOK.Tfunction, TOK.Tsub, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor:
-						parseProcedure( false, null );
-						break;
-
-					case TOK.Toperator:
-						parseOperator( false, null );
-						break;
-
-					case TOK.Tend:
-						parseEnd();
-						break;
-
-					case TOK.Ttype:
-						parseType();
-						break;
-
-					case TOK.Tclass:
-						parseType( true );
-						break;
-
-					case TOK.Tunion:
-						parseType();
-						break;
-						
-					case TOK.Tenum:
-						parseEnum();
-						break;
-
-					case TOK.Tscope:
-						parseScope();
-						break;
-						
-					case TOK.Twith:
-						parseWith();
-						break;
-
-					case TOK.Tnamespace:
-						parseNamespace();
-						break;
-						
-					case TOK.Tdeclare:
-						parseToken( TOK.Tdeclare );
-						
-						if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub || token().tok == TOK.Tconstructor || token().tok == TOK.Tdestructor || token().tok == TOK.Tproperty )
-						{
-							parseProcedure( true, null );
-						}
-						else if( token().tok == TOK.Toperator )
-						{
-							parseOperator( true, null );
-						}
-						break;
-
-					case TOK.Tassign:
-						parseToken( TOK.Tassign );
-
-						break;
-
-					case TOK.Tendmacro:
-						if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
-
-					default:
-						tokenIndex ++;
-						//Stdout( tokenIndex );
-						//Stdout( "   " ~ token().identifier ).newline;
-				}
+			}
+			catch( Exception e )
+			{
+				debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			}
 
 			if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
@@ -5421,7 +5587,10 @@ class CParser
 					}
 				}
 			}
-			catch( Exception e ){}
+			catch( Exception e )
+			{
+				debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			}
 
 			if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
 			//printAST( head );
