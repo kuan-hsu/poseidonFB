@@ -125,7 +125,7 @@ class CScintilla
 			// For IupFlatTabs
 			IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
 		}		
-
+	
 		//IupSetAttribute( sci, "CLEARALL", "" );
 		setGlobalSetting( true );
 		
@@ -2597,6 +2597,7 @@ extern(C)
 				}
 			}
 			
+			// TAB || SHIFT+TAB
 			if( c == 9 || c == 268435465 ) AutoComplete.bSkipAutoComplete = true;
 		}
 		catch( Exception e )
@@ -2616,7 +2617,7 @@ extern(C)
 		AutoComplete.bAutocompletionPressEnter = true;
 		
 		IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-			
+	
 		char[] _text = fromStringz( text ).dup;
 		
 		if( GLOBAL.toggleShowListType == "ON" )
@@ -2668,7 +2669,9 @@ extern(C)
 
 	private int CScintilla_action_cb( Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
-		if( GLOBAL.liveLevel > 0 )
+		
+		// Modified LineNumber Margin Width
+		if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 		{
 			try
 			{
@@ -2678,65 +2681,59 @@ extern(C)
 
 				if( insert == 1 )
 				{
-					if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+					if( dText == "\n" || dText == "\r\n" )
 					{
-						if( dText == "\n" || dText == "\r\n" )
+						if( GLOBAL.editorSetting00.LineMargin == "ON" )
 						{
-							if( GLOBAL.editorSetting00.LineMargin == "ON" )
+							// Set margin size
+							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+							int lineCount = IupGetInt( ih, "LINECOUNT" );
+							char[] lc = Integer.toString( lineCount + 1 );
+							IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+						}						
+					}
+					else
+					{
+						if( dText.length > 1 )
+						{
+							int count =  Util.count( dText, "\n" );
+							if( count > 0 )
 							{
-								// Set margin size
 								int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 								int lineCount = IupGetInt( ih, "LINECOUNT" );
-								char[] lc = Integer.toString( lineCount + 1 );
+								char[] lc = Integer.toString( lineCount + 1 + count );
 								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
-							}						
-						}
-						else
-						{
-							if( dText.length > 1 )
-							{
-								int count =  Util.count( dText, "\n" );
-								if( count > 0 )
-								{
-									int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
-									int lineCount = IupGetInt( ih, "LINECOUNT" );
-									char[] lc = Integer.toString( lineCount + 1 + count );
-									IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
-								}
 							}
 						}
 					}
 				}
 				else
 				{
-					if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
+					if( GLOBAL.editorSetting00.LineMargin == "ON" )
 					{
-						if( GLOBAL.editorSetting00.LineMargin == "ON" )
+						// Set margin size
+						int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+						int count;
+						
+						char[] selText = fromStringz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
+						
+						if( selText.length )
 						{
-							// Set margin size
-							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
-							int count;
-							
-							char[] selText = fromStringz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
-							
-							if( selText.length )
-							{
-								count =  Util.count( selText, "\n" );
-							}
-							else
-							{
-								char[] prevWord = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
-								if( prevWord == "\n" || prevWord == "\r" ) count = 1;
-							}
-							
-							if( count > 0 )
-							{
-								int lineCount = IupGetInt( ih, "LINECOUNT" );
-								char[] lc = Integer.toString( lineCount - count );
-								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
-							}
+							count =  Util.count( selText, "\n" );
 						}
-					}					
+						else
+						{
+							char[] prevWord = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
+							if( prevWord == "\n" || prevWord == "\r" ) count = 1;
+						}
+						
+						if( count > 0 )
+						{
+							int lineCount = IupGetInt( ih, "LINECOUNT" );
+							char[] lc = Integer.toString( lineCount - count );
+							IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+						}
+					}
 				}
 			}
 			catch( Exception e )
@@ -2752,6 +2749,7 @@ extern(C)
 		
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
 		
+		if( AutoComplete.showListThread !is null ) return IUP_DEFAULT;
 		
 		if( AutoComplete.bSkipAutoComplete )
 		{
@@ -2771,82 +2769,84 @@ extern(C)
 		}
 		
 		// Include Autocomplete
-		version(FBIDE)
+		if( AutoComplete.showListThread is null )
 		{
-			if( GLOBAL.enableIncludeComplete == "ON" )
+			version(FBIDE)
 			{
-				if( AutoComplete.checkIscludeDeclare( ih, pos ) )
+				if( GLOBAL.enableIncludeComplete == "ON" )
 				{
-					char[] alreadyInput = fromStringz( _text );
-					char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
-					if( list.length )
+					if( AutoComplete.checkIscludeDeclare( ih, pos ) )
 					{
-						//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
-						return IUP_DEFAULT;
-					}
-				}
-			}
-		}
-		version(DIDE)
-		{
-			if( GLOBAL.enableIncludeComplete == "ON" )
-			{
-				if( AutoComplete.checkIsclmportDeclare( ih, pos ) )
-				{
-					char[] alreadyInput = fromStringz( _text );
-					char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
-					if( list.length )
-					{
-						//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
-						return IUP_DEFAULT;
-					}
-				}
-			}
-		}		
-		
-		// Check Keyword Autocomplete
-		if( GLOBAL.enableParser != "ON" || ( GLOBAL.enableParser == "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) )
-		{
-			// Check Keyword Autocomplete
-			if( GLOBAL.enableKeywordComplete == "ON" )
-			{
-				int dummyHeadPos;
-				char[] sKeyin = fromStringz( _text );
-				
-				switch( sKeyin )
-				{
-					case " ", "\n", "\t", "\r", ")":
-						IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-						break;
-						
-					default:
-						char[] word = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos );
-						word = ( word.reverse ~ sKeyin ).dup;
-						
-						if( word.length )
+						char[] alreadyInput = fromStringz( _text );
+						char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
+						if( list.length )
 						{
-							if( GLOBAL.autoCompletionTriggerWordCount > 0 )
-							{
-								if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
-							}
-							else
-							{
-								if( word.length < 2 ) return IUP_DEFAULT;
-							}
-							
-							char[] list;
-							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) != "YES" ) list = AutoComplete.getKeywordContainerList( word );
-							if( list.length )
-								if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", word.length - 1, GLOBAL.cString.convert( list ) );
+							//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+							if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+							return IUP_DEFAULT;
 						}
+					}
 				}
 			}
+			version(DIDE)
+			{
+				if( GLOBAL.enableIncludeComplete == "ON" )
+				{
+					if( AutoComplete.checkIsclmportDeclare( ih, pos ) )
+					{
+						char[] alreadyInput = fromStringz( _text );
+						char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
+						if( list.length )
+						{
+							//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+							if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+							return IUP_DEFAULT;
+						}
+					}
+				}
+			}		
 			
-			return IUP_DEFAULT;
+			// Check Keyword Autocomplete
+			if( GLOBAL.enableParser != "ON" || ( GLOBAL.enableParser == "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) )
+			{
+				// Check Keyword Autocomplete
+				if( GLOBAL.enableKeywordComplete == "ON" )
+				{
+					int dummyHeadPos;
+					char[] sKeyin = fromStringz( _text );
+					
+					switch( sKeyin )
+					{
+						case " ", "\n", "\t", "\r", ")":
+							IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+							break;
+							
+						default:
+							char[] word = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos );
+							word = ( word.reverse ~ sKeyin ).dup;
+							
+							if( word.length )
+							{
+								if( GLOBAL.autoCompletionTriggerWordCount > 0 )
+								{
+									if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
+								}
+								else
+								{
+									if( word.length < 2 ) return IUP_DEFAULT;
+								}
+								
+								char[] list;
+								if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" ) list = AutoComplete.getKeywordContainerList( word );
+								if( list.length )
+									if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", word.length - 1, GLOBAL.cString.convert( list ) );
+							}
+					}
+				}
+				
+				return IUP_DEFAULT;
+			}
 		}
-		
 
 		// Check CallTip
 		AutoComplete.updateCallTip( ih, pos, _text );
@@ -2907,6 +2907,10 @@ extern(C)
 						if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) break;
 					}
+					else
+					{
+						if( AutoComplete.showListThread !is null ) AutoComplete.showListThread.stop();
+					}
 
 					try
 					{
@@ -2928,7 +2932,11 @@ extern(C)
 										if( options[i] == '\t' || options[i] == ' ' ) break;
 										versionName ~= options[i];
 									}								
-									if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
+									if( versionName.length )
+									{	
+										AutoComplete.VersionCondition ~= versionName;
+										GLOBAL.IDEMessageDlg.print( "VersionName= " ~ versionName );
+									}
 									
 									_versionPos = Util.index( options, "-version=", _versionPos + 9 );
 								}

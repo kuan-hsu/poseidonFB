@@ -1,6 +1,6 @@
 ﻿module layouts.toolbar;
 
-private import iup.iup;
+private import iup.iup, iup.iup_scintilla;
 private import global, actionManager, menu, executer, dialogs.argOptionDlg;
 private import Util = tango.text.Util, tango.stdc.stringz;;
 
@@ -530,35 +530,81 @@ extern( C )
 		}
 		return IUP_DEFAULT;
 	}
-	
+
+	/*
+	For plugins......
+	*/
 	private int command_SAVEPOINT_CB( Ihandle *ih, int status )
 	{
-		if( status == 1 )
+		if( status == 0 )
 		{
+			IupScintillaSendMessage( ih, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
+			
 			char[] command = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 			if( command.length )
 			{
-				switch( command )
+				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+				if( cSci !is null )
 				{
-					case "NewFile":
-						return menu.newFile_cb( ih );
+					switch( command )
+					{
+						case "NewFile":
+							return menu.newFile_cb( cSci.getIupScintilla );
+							
+						case "OpenFile":
+							return menu.openFile_cb( cSci.getIupScintilla );
 						
-					case "OpenFile":
-						return menu.openFile_cb( ih );
-					
-					case "SaveFile":
-						return menu.saveFile_cb( ih );
-						
-					case "SaveAs":
-						return menu.saveAsFile_cb( ih );
-						
-					case "CloseFile":
-						auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-						if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
-						return IUP_IGNORE;					
-						
-					default:
+						case "SaveFile":
+							return menu.saveFile_cb( cSci.getIupScintilla );
+							
+						case "SaveAs":
+							return menu.saveAsFile_cb( cSci.getIupScintilla );
+							
+						case "CloseFile":
+							actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+							return IUP_DEFAULT;	
+							
+						case "NewProject":
+							return menu.newProject_cb( cSci.getIupScintilla );
 
+						case "OpenProject":
+							return menu.openProject_cb( cSci.getIupScintilla );
+							
+						case "CloseProject":
+							return menu.closeProject_cb( cSci.getIupScintilla );
+							
+						case "CloseAllProject":
+							return menu.closeAllProject_cb( cSci.getIupScintilla );
+
+						case "SaveProject":
+							return menu.saveProject_cb( cSci.getIupScintilla );
+
+						case "SaveAllProject":
+							return menu.saveAllProject_cb( cSci.getIupScintilla );
+							
+						case "ProjectProperties":
+							return menu.projectProperties_cb( cSci.getIupScintilla );
+							
+						case "Compile":
+							return menu.compile_cb( cSci.getIupScintilla );
+
+						case "CompileRun":
+							return menu.buildrun_cb( cSci.getIupScintilla );
+
+						case "Run":
+							return menu.run_cb( cSci.getIupScintilla );
+
+						case "Build":
+							return menu.buildAll_cb( cSci.getIupScintilla );
+
+						case "ReBuild":
+							return menu.reBuild_cb( cSci.getIupScintilla );
+
+						case "QuickRun":
+							return menu.quickRun_cb( cSci.getIupScintilla );
+							
+						default:
+					}
 				}
 			}
 		}

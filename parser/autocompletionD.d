@@ -684,7 +684,7 @@ version(DIDE)
 					includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
 						
 					results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
-					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
+					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], "" );
 				}
 				else
 				{
@@ -709,7 +709,8 @@ version(DIDE)
 						includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
 						
 						results ~= _createFileNode;
-						results ~= getIncludes( _createFileNode, includeFullPath );
+						//results ~= getIncludes( _createFileNode, includeFullPath );
+						results ~= getIncludes( _createFileNode, "" );
 					}
 				}
 			}
@@ -3668,7 +3669,12 @@ version(DIDE)
 							else
 							{
 							+/
-								if( _alreadyInput.length ) IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) ); else IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
+								if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+								
+								if( _alreadyInput.length )
+									IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
+								else
+									IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 							//}
 							auto cSci = ScintillaAction.getActiveCScintilla();
 							if( cSci !is null ) cSci.lastPos = -99;
@@ -3701,6 +3707,8 @@ version(DIDE)
 							//if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 0 )
 							//{
 								int		_pos = ScintillaAction.getCurrentPos( sci );
+								
+								if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 
 								IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 								IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206

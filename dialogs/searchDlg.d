@@ -1102,6 +1102,42 @@ extern(C)
 				GLOBAL.searchExpander.contract();
 				IupSetFocus( cSci.getIupScintilla );
 			}
+			else
+			{
+				foreach( ShortKey sk; GLOBAL.shortKeys )
+				{
+					if( sk.name == "findnext" )
+					{
+						if( c == sk.keyValue )
+						{
+							char[]	beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+							if( beginEndPos.length ) IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( beginEndPos.dup ) );
+							
+							CSearchExpander_search( 2 );
+							break;
+						}
+					}
+					else if( sk.name == "findprev" )
+					{
+						if( c == sk.keyValue )
+						{
+							char[]	beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+							if( beginEndPos.length )
+							{
+								int colonPos = Util.index( beginEndPos, ":" );
+								if( colonPos < beginEndPos.length )
+								{
+									char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
+									IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
+								}
+							}						
+							
+							CSearchExpander_search( 1 );
+							break;
+						}
+					}
+				}
+			}
 		}
 		else
 		{

@@ -1433,21 +1433,21 @@ struct ScintillaAction
 		
 		try
 		{
+			char[] fullPath = cSci.getFullPath();
 			//if( ScintillaAction.getModify( cSci.getIupScintilla ) != 0 || bForce )
+			
+			if( fullPath.length >= 7 )
+			{
+				if( fullPath[0..7] == "NONAME#" )
+				{
+					IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) cSci.getIupScintilla );
+					int oldPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );						
+					return saveAs( cSci, true, true, oldPos );
+				}
+			}
+			
 			if( ScintillaAction.getModifyByTitle( cSci ) || bForce )
 			{
-				char[] fullPath = cSci.getFullPath();
-
-				if( fullPath.length >= 7 )
-				{
-					if( fullPath[0..7] == "NONAME#" )
-					{
-						IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) cSci.getIupScintilla );
-						int oldPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );						
-						return saveAs( cSci, true, true, oldPos );
-					}
-				}
-
 				cSci.saveFile();
 				GLOBAL.outlineTree.refresh( cSci ); //Update Parser
 			}

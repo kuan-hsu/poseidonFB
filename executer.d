@@ -271,7 +271,11 @@ struct ExecuterAction
 				{
 					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 				}
-			}			
+			}
+			else
+			{
+				fbcFullPath = GLOBAL.compilerFullPath.toDString;
+			}
 			
 			scope compilePath = new FilePath( fbcFullPath );
 			if( !compilePath.exists() )
@@ -524,6 +528,10 @@ struct ExecuterAction
 				{
 					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 				}				
+			}
+			else
+			{
+				fbcFullPath = GLOBAL.compilerFullPath.toDString;
 			}
 			
 			scope compilePath = new FilePath( fbcFullPath );
@@ -1181,6 +1189,10 @@ struct ExecuterAction
 					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 				}				
 			}
+			else
+			{
+				fbcFullPath = GLOBAL.compilerFullPath.toDString;
+			}
 			
 			scope compilePath = new FilePath( fbcFullPath );
 			
@@ -1619,7 +1631,11 @@ struct ExecuterAction
 			{
 				fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 			}
-		}			
+		}
+		else
+		{
+			fbcFullPath = GLOBAL.compilerFullPath.toDString;
+		}
 
 		scope compilePath = new FilePath( fbcFullPath );
 		if( !compilePath.exists() )

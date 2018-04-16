@@ -8,7 +8,7 @@ class CParser
 
 	import			tango.io.FilePath, tango.text.Ascii, Path = tango.io.Path;
 	import			Util = tango.text.Util;
-	import 			tango.io.Stdout;
+	import 			tango.io.Stdout, Integer = tango.text.convert.Integer;
 
 	import			global, tools;
 
@@ -710,126 +710,6 @@ class CParser
 										parseToken();
 										if( tokenIndex >= tokens.length ) break;
 									}
-
-									/+
-									switch( token().tok )
-									{
-										case TOK.Topencurly:
-											do
-											{
-												if( token().tok == TOK.Topencurly )
-												{
-													countCurly ++;
-												}
-												else if( token().tok == TOK.Tclosecurly )
-												{
-													if( --countCurly == 0 )
-													{
-														parseToken( TOK.Tclosecurly );
-														break;
-													}
-													
-												}
-												else if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
-												{
-													break;
-												}
-
-												parseToken();
-											}
-											while( tokenIndex < tokens.length )
-											break;
-
-										case TOK.Topenparen:
-											do
-											{
-												if( token().tok == TOK.Topenparen )
-												{
-													countParen ++;
-												}
-												else if( token().tok == TOK.Tcloseparen )
-												{
-													if( --countParen == 0 )
-													{
-														parseToken( TOK.Tcloseparen );
-														break;
-													}
-													
-												}
-												else if( token().tok == TOK.Teol ||  token().tok == TOK.Tcolon  )
-												{
-													break;
-												}
-
-												parseToken();
-											}
-											while( tokenIndex < tokens.length )
-											break;
-
-										default:
-											while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
-											{
-												if( token().tok == TOK.Tcomma )
-												{
-													if( countParen == 0 && countCurly == 0 ) break;
-												}
-												parseToken();
-												if( tokenIndex >= tokens.length ) break;
-											}
-									}
-									+/
-
-									/*
-									int countParen;
-									do
-									{
-										if( token().tok == TOK.Topenparen )
-										{
-											countParen ++;
-										}
-										else if( token().tok == TOK.Tcloseparen )
-										{
-											countParen --;
-										}
-										else if( token().tok == TOK.Tcomma )
-										{
-											if( countParen == 0 ) break;
-										}
-										else if( token().tok == TOK.Tcolon )
-										{
-											if( countParen == 0 )
-											{
-												parseToken();
-												break;
-											}
-										}
-										else if( token().tok == TOK.Topencurly )
-										{
-											int countCurly = 1;
-											parseToken( TOK.Topencurly );
-
-											while( countCurly != 0 )
-											{
-												if( tokenIndex >= tokens.length ) break;
-												
-												if( token().tok == TOK.Topencurly )
-												{
-													countCurly ++;
-												}
-												else if( token().tok == TOK.Tclosecurly )
-												{
-													countCurly --;
-												}
-
-												tokenIndex ++;
-											}
-										}
-										
-										if( tokenIndex >= tokens.length ) break;
-										parseToken();
-									}
-									while( token().tok != TOK.Teol )
-									*/
 								}
 
 								if( token().tok == TOK.Tcomma )
@@ -1727,117 +1607,6 @@ class CParser
 										return false;
 									}
 								}
-									
-								
-								/+
-								while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
-								{
-									_lineNum	= token().lineNumber;
-									_name		= token().identifier;
-									
-									parseToken( TOK.Tidentifier );
-
-									// Array
-									if( token().tok == TOK.Topenparen ) _name ~= parseArray();
-
-									// As DataType fieldname : bits [= initializer], ...
-									if( token().tok == TOK.Tcolon )
-									{
-										parseToken( TOK.Tcolon );
-										if( token().tok == TOK.Tnumbers ) parseToken( TOK.Tnumbers );else return false;
-									}
-
-									// [= initializer]
-									if( token().tok == TOK.Tassign )
-									{
-										parseToken( TOK.Tassign );
-
-										switch( token().tok )
-										{
-											case TOK.Topencurly:
-												int countCurly;
-
-												do
-												{
-													if( token().tok == TOK.Topencurly )
-													{
-														countCurly ++;
-													}
-													else if( token().tok == TOK.Tclosecurly )
-													{
-														if( --countCurly == 0 )
-														{
-															parseToken( TOK.Tclosecurly );
-															break;
-														}
-														
-													}
-													else if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
-													{
-														break;
-													}
-
-													parseToken();
-												}
-												while( tokenIndex < tokens.length )
-												break;
-
-											case TOK.Topenparen:
-												int countParen;
-
-												do
-												{
-													if( token().tok == TOK.Topenparen )
-													{
-														countParen ++;
-													}
-													else if( token().tok == TOK.Tcloseparen )
-													{
-														if( --countParen == 0 )
-														{
-															parseToken( TOK.Tcloseparen );
-															break;
-														}
-														
-													}
-													else if( token().tok == TOK.Teol ||  token().tok == TOK.Tcolon  )
-													{
-														break;
-													}
-
-													parseToken();
-												}
-												while( tokenIndex < tokens.length )
-												break;
-
-											default:
-												while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
-												{
-													parseToken();
-													if( tokenIndex >= tokens.length ) break;
-												}
-										}
-
-										//if( token().tok == TOK.Tstring || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
-									}
-
-									if( token().tok == TOK.Tcomma )
-									{
-										activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
-										parseToken( TOK.Tcomma );
-									}
-									else if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
-									{
-										activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );
-										parseToken();
-										break;
-									}
-									else
-									{
-										return false;
-									}
-								}
-								+/
 							}
 							else
 							{
@@ -2248,40 +2017,6 @@ class CParser
 						parseToken( TOK.Teol );
 
 						parseEnumBody();
-
-						/+
-						while( token().tok != TOK.Tend && next().tok !=TOK.Tenum )
-						{
-							if( token().tok == TOK.Tidentifier )
-							{
-								_name = token().identifier;
-								_lineNum = token().lineNumber;
-								parseToken( TOK.Tidentifier );
-
-								if( token().tok == TOK.Tassign )
-								{
-									parseToken( TOK.Tassign );
-									//if( token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken(); else break;
-								}
-
-								// Pass the maybe complicated express
-								while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
-								{
-									parseToken();
-								}
-
-								if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
-								{
-									activeASTnode.addChild( _name, B_ENUMMEMBER, null, null, null, _lineNum );
-									parseToken();
-								}
-							}
-							else
-							{
-								break;
-							}
-						}
-						+/
 					}
 				}
 			}
@@ -2403,7 +2138,11 @@ class CParser
 						
 						parseToken();
 					}
-					while( _countDemlimit > 0 )
+					while( _countDemlimit > 0 && tokenIndex < tokens.length )
+				}
+				else
+				{
+					parseToken();
 				}
 
 				_params = Util.trim( _params );
@@ -2718,16 +2457,16 @@ class CParser
 					parseToken( TOK.Ttypeof );
 					if( token().tok == TOK.Topenparen )
 					{
-						parseToken( TOK.Topenparen );
-						
-						if( token().tok == TOK.Treturn || token().tok == TOK.Tthis || token().tok == TOK.Tsuper )
+						if( next().tok == TOK.Treturn || next().tok == TOK.Tthis || next().tok == TOK.Tsuper )
 						{
+							parseToken( TOK.Topenparen );
 							_type = token().identifier;
 							parseToken();
 							if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
 						}
-						else if( token().tok == TOK.Tnumbers )
+						else if( next().tok == TOK.Tnumbers )
 						{
+							parseToken( TOK.Topenparen );
 							_type = "int";
 							if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "Typeof Parse Error!" );
 						}
@@ -2926,7 +2665,7 @@ class CParser
 
 					_tempTokenIndex ++;
 				}
-				while( _countDemlimit != 0 )
+				while( _countDemlimit != 0 && _tempTokenIndex < tokens.length )
 
 				// Pass MemberFunctionAttribute
 				while( isMemberFunctionAttribute( _tempTokenIndex ) )
