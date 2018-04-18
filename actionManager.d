@@ -15,38 +15,52 @@ private import tango.stdc.stringz;
 struct FileAction
 {
 	private:
-	import tango.text.convert.Utf, tango.io.UnicodeFile, tango.io.device.File;
-	version( Windows ) import tango.sys.win32.CodePage;
+	import	tango.text.convert.Utf, tango.io.UnicodeFile, tango.io.device.File;
+	import	Path = tango.io.Path;
+	
+	version(Windows) import tango.sys.win32.CodePage;
 
 	static bool isUTF8WithouBOM( char[] data )
 	{
-		for( int i = 0; i < data.length; ++ i )
+		int size = data.length;
+		
+		for( int i = 0; i < size; ++ i )
 		{
-			if( (cast(int)data[i]) < 0x80 )
+			if( ( ( cast(int)data[i] ) & 0x80 ) == 0x00 )
 			{
 				continue;
 			}
-			else
+			else if( ( ( cast(int)data[i] ) & 0xE0 ) == 0xC0 )
 			{
-				bool bChecked;
-				for( int k = 1; k < 6; ++ k )
-				{
-					if( ( (cast(int)data[i]) >> k ) == ( (254 >> k ) - 1 ) )
-					{
-						if( i <= data.length - ( 7 - k ) )
-						{
-							for( int j = 1; j < (7 - k ); ++ j)
-							{
-								if( ( (cast(int)data[i+j]) ) >> 6 != 2 ) return false;
-							}
+				if( i + 1 >= size ) return false; // data tail
+	 
+				if( ( (cast(int)data[i + 1] ) & 0xC0 ) != 0x80 ) return false;
+	 
+				i += 1;
+			}
+			else if( ( ( cast(int)data[i] ) & 0xF0 ) == 0xE0 )
+			{
 
-							bChecked = true;
-							i += ( 7 - k - 1 );
-							break;
-						}
-					}
-				}
-				if( !bChecked ) return false;
+				if( i + 2 >= size ) return false;
+	 
+				if( ( ( cast(int)data[i + 1] ) & 0xC0 ) != 0x80 ) return false;
+				if( ( ( cast(int)data[i + 2] ) & 0xC0 ) != 0x80 ) return false;
+	 
+				i += 2;
+			}
+			else if( ( ( cast(int)data[i] ) & 0xF8 ) == 0xF0 )
+			{
+				if( i + 3 >= size ) return false;
+				
+				if( ( ( cast(int)data[i + 1] ) & 0xC0 ) != 0x80 ) return false;
+				if( ( ( cast(int)data[i + 2] ) & 0xC0 ) != 0x80 ) return false;
+				if( ( ( cast(int)data[i + 3] ) & 0xC0 ) != 0x80 ) return false;
+	 
+				i += 3;
+			}
+			else
+			{ 
+				return false;
 			}
 		}
 
@@ -72,12 +86,10 @@ struct FileAction
 			}
 		}
 
-		if( countBE && countLE ) return 0;
-
 		if( countBE && !countLE ) return 1;
-
 		if( !countBE && countLE ) return 2;
-
+		
+		
 		// ASCII
 		countBE = countLE = 0;
 		for( int i = 0; i < data.length; i += 2 )
@@ -156,13 +168,19 @@ struct FileAction
 
 		try
 		{
+			if( !Path.exists( fullPath ) )
+			{
+				IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+				throw new Exception( "FileAction.loadFile() Error:\n" ~ fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() );
+			}
+			
 			scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 			char[] text = file.read;
 			/*
 			IupMessage( "", toStringz( Integer.toString( file.encoding() ) ) );
 			IupMessage( "", toStringz( text[0..4] ) );
 			*/
-			if( !file.bom.encoded )
+			if( !file.bom.encoded ) 
 			{
 				// IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
 				if( isUTF8WithouBOM( text ) )
@@ -235,11 +253,13 @@ struct FileAction
 								else
 								{
 									result = text;
+									_encoding = file.encoding();
 								}
 							}
 							else
 							{
 								result = text;
+								_encoding = file.encoding();
 							}
 						}
 					}					
@@ -255,10 +275,12 @@ struct FileAction
 		{
 			GLOBAL.IDEMessageDlg.print( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			throw e;
 		}
 
 		return result;
 	}
+
 
 	static bool saveFile( char[] fullPath, char[] data, int encoding = Encoding.UTF_8 )
 	{
@@ -2354,7 +2376,7 @@ struct SearchAction
 			else
 			{
 				if( buttonIndex == 3 ) return 0;
-				document = cast(char[]) FileAction.loadFile( fullPath, _encoding );
+				document = FileAction.loadFile( fullPath, _encoding );
 			}			
 			//scope file = new File( fullPath, File.ReadExisting );
 

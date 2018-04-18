@@ -24,25 +24,34 @@ class CScanner
 		scope f = new FilePath( fullPath );
 		if( f.exists() )
 		{
-			char[] 	document;
-			//char[]	splitLineDocument;
-			if( upperCase(fullPath) in GLOBAL.scintillaManager )
+			try
 			{
-				auto cSci = GLOBAL.scintillaManager[upperCase(fullPath)];
-				if( cSci !is null )
-					document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
+				char[] 	document;
+				//char[]	splitLineDocument;
+				if( upperCase(fullPath) in GLOBAL.scintillaManager )
+				{
+					auto cSci = GLOBAL.scintillaManager[upperCase(fullPath)];
+					if( cSci !is null )
+						document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
+					else
+						return null;
+				}
 				else
-					return null;
-			}
-			else
-			{
-				//document = cast(char[]) File.get( fullPath );
-				int _encoding;
-				document = FileAction.loadFile( fullPath, _encoding );
-			}
+				{
+					//document = cast(char[]) File.get( fullPath );
+					int _encoding;
+					document = FileAction.loadFile( fullPath, _encoding );
+				}
 
-			return scan( document );
-		}				
+				return scan( document );
+			}
+			catch( Exception e )
+			{
+				IupMessage( "BUG", toStringz( e.toString ) );
+			}
+		}
+		
+		return null;
 	}
 	
 	version(FBIDE)

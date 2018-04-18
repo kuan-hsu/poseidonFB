@@ -1471,41 +1471,49 @@ extern(C)
 				{
 					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) );
 					scope fp = new FilePath( fullPath );
-					char[] ext = lowerCase( fp.ext );
 					
-					// Version Condition
-					char[] _source_ = "bas", _include_ = "bi";
-					version(DIDE)
+					if( fp.exists )
 					{
-						_source_	= "d";
-						_include_	= "di";
-					}					
+						char[] ext = lowerCase( fp.ext );
+						
+						// Version Condition
+						char[] _source_ = "bas", _include_ = "bi";
+						version(DIDE)
+						{
+							_source_	= "d";
+							_include_	= "di";
+						}					
 
-					if( ext == _include_ || ext == _source_ )
-					{
-						if( selectedIDs.length == 1 )
-							actionManager.ScintillaAction.openFile( fullPath.dup, -1, true );
+						if( ext == _include_ || ext == _source_ )
+						{
+							if( selectedIDs.length == 1 )
+								actionManager.ScintillaAction.openFile( fullPath.dup, -1, true );
+							else
+								actionManager.ScintillaAction.openFile( fullPath.dup );
+						}
 						else
-							actionManager.ScintillaAction.openFile( fullPath.dup );
+						{
+							try
+							{
+								version(Windows)
+								{
+									Process p = new Process( true, "cmd", "/c", fullPath );
+									p.gui( true );
+									p.execute;
+								}
+								else
+								{
+									Process p = new Process( true, "xdg-open", fullPath );
+									p.gui( true );
+									p.execute;
+								}
+							}
+							catch{}
+						}
 					}
 					else
 					{
-						try
-						{
-							version(Windows)
-							{
-								Process p = new Process( true, "cmd", "/c", fullPath );
-								p.gui( true );
-								p.execute;
-							}
-							else
-							{
-								Process p = new Process( true, "xdg-open", fullPath );
-								p.gui( true );
-								p.execute;
-							}
-						}
-						catch{}
+						IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
 					}
 				}
 			}
