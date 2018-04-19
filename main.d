@@ -309,10 +309,11 @@ void main( char[][] args )
 
 	if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
 	{
+		foreach( char[] s; GLOBAL.prevPrj )
+			GLOBAL.projectTree.openProject( s );
+	
 		foreach( char[] s; GLOBAL.prevDoc )
-		{
 			ScintillaAction.openFile( s );
-		}
 	}
 	
 	if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" ) IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );

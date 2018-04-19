@@ -476,6 +476,16 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleDocStatus = IupToggle( GLOBAL.languageItems["savedocstatus"].toCString, null );
 		IupSetAttribute( toggleDocStatus, "VALUE", toStringz(GLOBAL.editorSetting00.DocStatus.dup) );
 		IupSetHandle( "toggleDocStatus", toggleDocStatus );
+
+		Ihandle* toggleLoadAtBackThread = IupToggle( GLOBAL.languageItems["loadfileatbackthread"].toCString, null );
+		version(BACKTHREAD)
+			IupSetAttribute( toggleLoadAtBackThread, "VALUE", toStringz(GLOBAL.editorSetting00.LoadAtBackThread.dup) );
+		else
+		{
+			IupSetAttribute( toggleLoadAtBackThread, "VALUE", "OFF" );
+			IupSetAttribute( toggleLoadAtBackThread, "ACTIVE", "NO" );
+		}
+		IupSetHandle( "toggleLoadAtBackThread", toggleLoadAtBackThread );
 		
 		
 		stringCharSymbol = new IupString( GLOBAL.editorSetting00.ControlCharSymbol );
@@ -550,11 +560,14 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttributes( toggleMiddleScroll, "" ),
 				IupSetAttributes( toggleDocStatus, "" ),
 				
-				hBoxControlChar,
+				IupSetAttributes( toggleLoadAtBackThread, "" ),
+				IupFill(),
+				
 				IupSetAttributes( hBoxTab, "" ),
-
 				IupSetAttributes( hBoxColumn, "" ),
+
 				IupSetAttributes( hBoxBarSize, "" ),
+				hBoxControlChar,
 				
 				null
 			);
@@ -594,13 +607,13 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttributes( toggleMiddleScroll, "" ),
 				
 				IupSetAttributes( toggleDocStatus, "" ),
-				IupSetAttributes( hBoxTab, "" ),
-
-				IupSetAttributes( hBoxColumn, "" ),
-				hBoxControlChar,
+				IupSetAttributes( toggleLoadAtBackThread, "" ),
 				
+				IupSetAttributes( hBoxTab, "" ),
+				IupSetAttributes( hBoxColumn, "" ),
+
 				IupSetAttributes( hBoxBarSize, "" ),
-				IupFill(),
+				hBoxControlChar,
 				
 				null
 			);
@@ -1689,6 +1702,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleCurrentWord", null );
 		IupSetHandle( "toggleMiddleScroll", null );
 		IupSetHandle( "toggleDocStatus", null );
+		IupSetHandle( "toggleLoadAtBackThread", null );
 		IupSetHandle( "textSetControlCharSymbol", null );
 		
 		
@@ -2106,7 +2120,8 @@ extern(C) // Callback for CPreferenceDialog
 				
 			GLOBAL.editorSetting00.MiddleScroll				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMiddleScroll" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.DocStatus				= fromStringz(IupGetAttribute( IupGetHandle( "toggleDocStatus" ), "VALUE" )).dup;
-			
+			GLOBAL.editorSetting00.LoadAtBackThread			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadAtBackThread" ), "VALUE" )).dup;
+
 			
 			IupSetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE", CPreferenceDialog.stringCharSymbol << IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) );
 			GLOBAL.editorSetting00.ControlCharSymbol		= CPreferenceDialog.stringCharSymbol.toDString;

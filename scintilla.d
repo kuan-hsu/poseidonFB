@@ -231,6 +231,7 @@ class CScintilla
 		{
 			GLOBAL.IDEMessageDlg.print( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			throw e;
 		}
 	}	
 

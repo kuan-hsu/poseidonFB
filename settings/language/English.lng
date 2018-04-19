@@ -149,6 +149,7 @@ options=Options
 				loadprevdoc=Load Previous Documents
 				middlescroll=Middle Button Scroll
 				savedocstatus=Save Document Status
+				loadfileatbackthread=Load File(s) AT Back Thread
 				controlcharsymbol=Set Control Character Symbol
 				tabwidth=Tab Width
 				columnedge=Column Edge

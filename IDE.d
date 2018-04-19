@@ -487,6 +487,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
 			doc ~= setINILineData( "MiddleScroll", GLOBAL.editorSetting00.MiddleScroll );
 			doc ~= setINILineData( "SaveDocStatus", GLOBAL.editorSetting00.DocStatus );
+			doc ~= setINILineData( "LoadAtBackThread", GLOBAL.editorSetting00.LoadAtBackThread );
 			doc ~= setINILineData( "ControlCharSymbol", GLOBAL.editorSetting00.ControlCharSymbol );
 			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
 			doc ~= setINILineData( "Bit64", GLOBAL.editorSetting00.Bit64 );
@@ -723,7 +724,12 @@ struct IDECONFIG
 			doc ~= setINILineData( "none", GLOBAL.noneCustomCompilerOption.toDString );
 			for( int i = 0; i < GLOBAL.customCompilerOptions.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.customCompilerOptions[i] );
-				
+
+			// prevLoadPrj
+			doc ~= setINILineData( "[prevPrjs]" );
+			for( int i = 0; i < GLOBAL.prevPrj.length; ++i )
+				doc ~= setINILineData( "name", GLOBAL.prevPrj[i] );
+
 			// prevLoadDoc
 			doc ~= setINILineData( "[prevDocs]" );
 			for( int i = 0; i < GLOBAL.prevDoc.length; ++i )
@@ -859,6 +865,7 @@ struct IDECONFIG
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
 							case "MiddleScroll":			GLOBAL.editorSetting00.MiddleScroll = right;			break;
 							case "SaveDocStatus":			GLOBAL.editorSetting00.DocStatus = right;				break;
+							case "LoadAtBackThread":		GLOBAL.editorSetting00.LoadAtBackThread = right;		break;
 							case "ControlCharSymbol":		GLOBAL.editorSetting00.ControlCharSymbol = right;		break;
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
 							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
@@ -1125,9 +1132,8 @@ struct IDECONFIG
 						}
 						break;
 						
-					case "[prevDocs]":
-						if( left == "name" ) GLOBAL.prevDoc ~= right;
-						break;
+					case "[prevPrjs]":							if( left == "name" ) GLOBAL.prevPrj ~= right;				break;
+					case "[prevDocs]":							if( left == "name" ) GLOBAL.prevDoc ~= right;				break;
 					
 					case "[opacity]":
 						switch( left )

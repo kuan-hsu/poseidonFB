@@ -506,21 +506,19 @@ version(FBIDE)
 				}
 				else
 				{
-					//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", toStringz( includeFullPath ));
 					CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
 					
 					if( _createFileNode !is null )
 					{
 						if( GLOBAL.editorSetting00.Message == "ON" ) 
 						{
-							version(BACKTHREAD)
+							if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
 							{
 								version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
 							}
 							else
 							{
 								GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );
-								//GLOBAL.statusBar.setFindMessage( "Pre-Parse file: [" ~ includeFullPath ~ "]" );
 							}
 						}
 						

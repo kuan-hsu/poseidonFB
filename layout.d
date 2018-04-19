@@ -308,16 +308,18 @@ extern(C)
 			int ret = ScintillaAction.closeAllDocument();
 			if( ret == IUP_IGNORE ) return IUP_IGNORE;
 			
-			// Save All Project	
+			// Save All Project
+			GLOBAL.prevPrj.length = 0;
 			foreach( PROJECT p; GLOBAL.projectManager )
 			{
 				try
 				{
 					p.saveFile();
+					if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" ) GLOBAL.prevPrj ~= p.dir;
 				}
 				catch( Exception e )
 				{
-					IupMessage("Project Save Fail!",toStringz(e.toString()));
+					IupMessage( "Project Save Fail!",toStringz( e.toString() ) );
 				}
 			}
 

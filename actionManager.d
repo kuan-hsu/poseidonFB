@@ -745,26 +745,7 @@ struct ScintillaAction
 		{
 			pFullPath = _pFullPath;
 			pParseTree = _pParseTree;
-
-			if( pParseTree !is null )
-			{
-				if( GLOBAL.editorSetting00.Message == "ON" )
-				{
-					/*
-					version(Windows) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ pFullPath ~ "]" );
-					version(linux)
-					{
-						int count = IupGetInt( GLOBAL.outputPanel, "COUNT" );
-						IupSetInt( GLOBAL.outputPanel, "CARETPOS", count );
-					}
-					else
-					{
-						GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ pFullPath ~ "]" );
-					}
-					*/
-				}
-			}
-				
+	
 			super( &run );
 		}
 
@@ -885,19 +866,11 @@ struct ScintillaAction
 
 			Encoding		_encoding;
 			char[] 	_text = FileAction.loadFile( fullPath, _encoding );
-			
-			debug GLOBAL.IDEMessageDlg.print( "DEBUG -- Loading '" ~ fullPath ~ "' Text....... Done " );
-			
 			auto 	_sci = new CScintilla( fullPath, _text, _encoding );
-			//_sci.setEncoding( _encoding );
-			//_sci.setText( _text );
 			GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
-
-			debug GLOBAL.IDEMessageDlg.print( "DEBUG -- Loading '" ~ fullPath ~ "' Scintilla....... Done " );
 
 			// Set documentTabs to visible
 			if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
-
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 			
 			// Set new tabitem to focus
@@ -954,9 +927,6 @@ struct ScintillaAction
 			//StatusBarAction.update();
 
 			GLOBAL.fileListTree.addItem( _sci );
-			
-			debug GLOBAL.IDEMessageDlg.print( "DEBUG -- Add '" ~ fullPath ~ "' To Filelist....... Done " );
-			
 			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
@@ -969,24 +939,34 @@ struct ScintillaAction
 			}			
 			
 			// Parser
-			version(BACKTHREAD)
+			auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
+			if( pParseTree !is null ) 
 			{
-				if( backThread )
+				if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );			
+			
+				if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
 				{
-					auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
-					ParseThread subThread = new ParseThread( pParseTree, fullPath );
-					subThread.start();
+					version(BACKTHREAD_ONE)
+					{
+						if( backThread )
+						{
+							ParseThread subThread = new ParseThread( pParseTree, fullPath );
+							subThread.start();
+						}
+						else
+						{
+							AutoComplete.getIncludes( pParseTree, fullPath, true );
+						}					}
+					else
+					{
+						ParseThread subThread = new ParseThread( pParseTree, fullPath );
+						subThread.start();
+					}
 				}
 				else
 				{
-					auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
-					if( pParseTree !is null ) AutoComplete.getIncludes( pParseTree, fullPath, true );
+					AutoComplete.getIncludes( pParseTree, fullPath, true );
 				}
-			}
-			else
-			{
-				auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
-				if( pParseTree !is null ) AutoComplete.getIncludes( pParseTree, fullPath, true );
 			}
 			
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
@@ -999,6 +979,14 @@ struct ScintillaAction
 		{
 			//GLOBAL.IDEMessageDlg.print( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+
+			if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
+			{
+				auto _sci = GLOBAL.scintillaManager[upperCase(fullPath)];
+				if( _sci !is null ) delete _sci;
+					
+				GLOBAL.scintillaManager.remove( upperCase(fullPath) );
+			}
 		}
 
 		return false;
