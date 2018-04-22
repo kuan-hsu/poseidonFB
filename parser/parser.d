@@ -4676,7 +4676,7 @@ class CParser
 	bool updateTokens( TokenUnit[] _tokens )
 	{
 		tokenIndex = 0;
-		delete tokens;
+		//delete tokens; // Make Crash
 		tokens.length = 0;
 		tokens = _tokens;
 		
@@ -4684,9 +4684,9 @@ class CParser
 		
 		version(DIDE)
 		{
-			delete curlyStack;
-			delete protStack;
-			delete parseStack;
+			if( curlyStack !is null ) delete curlyStack;
+			if( protStack !is null ) delete protStack;
+			if( parseStack !is null ) delete parseStack;
 			
 			curlyStack	= new CStack!(char[]);
 			protStack	= new CStack!(char[]);

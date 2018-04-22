@@ -255,7 +255,7 @@ outline=Outline
 	collapse=Collapse
 	showpr=Change Outline Node Title
 	refresh=Refresh
-	searchanyword=Search Any Word
+	searchanyword=Search Whole Word
 	hide=Hide
 
 filelist=FileList

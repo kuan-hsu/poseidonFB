@@ -2529,54 +2529,44 @@ struct CustomToolAction
 	{
 		scope toolPath = new FilePath( tool.dir.toDString );
 		
-		if( lowerCase( toolPath.suffix ) == ".dll" )
+		bool bGoPlugin;
+		version(Windows)
 		{
-			version(Windows)
+			if( lowerCase( toolPath.suffix ) == ".dll" ) bGoPlugin = true;
+		}
+		version(linux)
+		{
+			if( lowerCase( toolPath.suffix ) == ".so" ) bGoPlugin = true;
+		}
+		
+		if( bGoPlugin )
+		{
+			try
 			{
-				try
+				if( tool.name.toDString in GLOBAL.pluginMnager )
 				{
-					if( tool.name.toDString in GLOBAL.pluginMnager )
+					if( GLOBAL.pluginMnager[tool.name.toDString] !is null )
 					{
-						if( GLOBAL.pluginMnager[tool.name.toDString] !is null )
+						if( GLOBAL.pluginMnager[tool.name.toDString].getPath == tool.dir.toDString )
+							GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
+						else
 						{
-							if( GLOBAL.pluginMnager[tool.name.toDString].getPath == tool.dir.toDString )
-								GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
-							else
-							{
-								auto temp = GLOBAL.pluginMnager[tool.name.toDString];
-								delete temp;
-								GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
-								GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
-							}
+							auto temp = GLOBAL.pluginMnager[tool.name.toDString];
+							delete temp;
+							GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
+							GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
 						}
 					}
-					else
-					{
-						GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
-						GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
-					}
 				}
-				catch( Exception e ){}
-			}
-		}
-		else if( lowerCase( toolPath.suffix ) == ".so" )
-		{
-			version(linux)
-			{
-				try
+				else
 				{
-					if( tool.name.toDString in GLOBAL.pluginMnager )
-					{
-						if( GLOBAL.pluginMnager[tool.name.toDString] !is null ) GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
-					}
-					else
-					{
-						auto temp = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
-						GLOBAL.pluginMnager[tool.name.toDString] = temp;
-						GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
-					}
+					GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
+					GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
 				}
-				catch( Exception e ){}
+			}
+			catch( Exception e )
+			{
+				IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );
 			}
 		}
 		else
@@ -2642,38 +2632,4 @@ struct CustomToolAction
 			}
 		}
 	}
-	
-	/+
-	version(PLUGIN)
-	{
-		static bool initPlugin()
-		{
-			for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
-			{
-				if( GLOBAL.customTools[i].name.toDString.length )
-				{
-					scope dirPath = new FilePath( GLOBAL.customTools[i].dir.toDString );
-					if( lowerCase( dirPath.suffix ) == ".dll" )
-					{
-						version(Windows)
-						{
-							auto _plugin = new CPLUGIN( GLOBAL.customTools[i].name.toDString, GLOBAL.customTools[i].dir.toDString );
-							GLOBAL.pluginMnager[GLOBAL.customTools[i].name.toDString] = _plugin;
-						}
-					}
-					else if( lowerCase( dirPath.suffix ) == ".so" )
-					{
-						version(linux)
-						{
-							auto _plugin = new CPLUGIN( GLOBAL.customTools[i].name.toDString, GLOBAL.customTools[i].dir.toDString );
-							GLOBAL.pluginMnager[GLOBAL.customTools[i].name.toDString] = _plugin;
-						}
-					}					
-				}
-			}		
-			
-			return true;
-		}
-	}
-	+/
 }

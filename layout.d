@@ -1,6 +1,6 @@
 ﻿module layout;
 
-import iup.iup, iup.iup_scintilla, iup.iupweb;
+import iup.iup, iup.iup_scintilla;
 
 import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
 import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
@@ -336,13 +336,10 @@ extern(C)
 			
 			if( GLOBAL.scrollTimer != null ) IupDestroy( GLOBAL.scrollTimer );
 			
-			version(PLUGIN)
+			foreach( _plugin; GLOBAL.pluginMnager )
 			{
-				foreach( _plugin; GLOBAL.pluginMnager )
-				{
-					if( _plugin !is null ) delete _plugin;
-				}
-			}			
+				if( _plugin !is null ) delete _plugin;
+			}
 		}
 		catch( Exception e )
 		{

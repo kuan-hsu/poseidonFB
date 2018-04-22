@@ -178,8 +178,7 @@ struct XPM
 					if( line[0] == '"' )
 					{
 						int rPos = Util.rindex( line, "\"" );
-						char[] temp;
-						data ~= toStringz( line[1..rPos].dup, temp ); delete temp;
+						data ~= toStringz( line[1..rPos].dup );
 					}					
 				}
 			}

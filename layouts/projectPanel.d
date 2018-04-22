@@ -14,39 +14,7 @@ class CProjectTree
 	private:
 	import				project, tango.io.device.File, tango.io.stream.Lines;
 	import				tango.core.Thread, parser.autocompletion;
-	
-	/+
-	// Inner Class
-	class ParseThread : Thread
-	{
-		private:
-
-		PROJECT 	p;
-
-		public:
-		this( PROJECT _p )
-		{
-			p = _p;
-			super( &run );
-		}
-
-		void run()
-		{
-			foreach( char[] s; p.sources ~ p.includes )
-			{
-				auto _parserTree = GLOBAL.outlineTree.loadFile( s );
-				auto _parsers = AutoComplete.getIncludes( _parserTree, s, true );
-				/*
-				IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( s ) );
-				foreach( _p; _parsers )
-					IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\t" ~ _p.name ) );
-				*/
-			}
-		}
-	}
-	+/
-	
-	Ihandle*	layoutHandle, tree;
+	Ihandle*			layoutHandle, tree;
 
 	void createLayout()
 	{

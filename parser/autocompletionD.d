@@ -2187,7 +2187,7 @@ version(DIDE)
 			int		oriPos = pos;
 			bool	bForntEnd, bBackEnd;
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
-
+			/+
 			do
 			{
 				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
@@ -2230,7 +2230,29 @@ version(DIDE)
 				if( bBackEnd ) break;
 			}
 			while( ++pos < documentLength )
+			+/
+			do
+			{
+				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
+				{
+					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 
+					switch( s )
+					{
+						case "(", ")", "[", "]", "{", "}":
+						case " ", "\t", ":", ";", "\n", "\r", "+", "-", "*", "/", "\\", ">", "<", "=", ",", "!":
+							bBackEnd = true;
+							break;
+
+						default:
+					}
+				}
+				
+				if( pos >= documentLength ) break;
+				if( bBackEnd ) break;
+			}
+			while( ++pos < documentLength )
+			
 			if( oriPos == pos ) return null;
 
 			int dummyHeadPos;

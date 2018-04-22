@@ -494,7 +494,7 @@ version(FBIDE)
 
 			if( includeFullPath.length )
 			{
-				if( upperCase(includeFullPath) in includesMarkContainer ) return null;
+				//if( upperCase(includeFullPath) in includesMarkContainer ) return null;
 
 				CASTnode includeAST;
 				if( upperCase(includeFullPath) in GLOBAL.parserManager )
@@ -1507,7 +1507,7 @@ version(FBIDE)
 				{
 					if( _node.lineNumber < 2147483647 )
 					{
-						if( !checkBackThreadGoing ) return null;
+						//if( !checkBackThreadGoing ) return null;
 						
 						if( _node.type == "__FB_WIN32__" )
 						{
@@ -2034,12 +2034,12 @@ version(FBIDE)
 		}	
 
 		static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
-		{
+		{			
 			int		countParen, countBracket;
-			//int		oriPos = pos;
-			bool	bForntEnd, bBackEnd;
+			int		oriPos = pos;
+			bool	bBackEnd;
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
-
+			/+
 			do
 			{
 				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
@@ -2101,7 +2101,31 @@ version(FBIDE)
 			while( ++pos < documentLength )
 
 			//if( oriPos == pos ) return null;
+			+/
+			do
+			{
+				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
+				{
+					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 
+					switch( s )
+					{
+						case "(", ")", "[", "]", "{", "}":
+						case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", ">", "<", "=", ",", "@":
+							bBackEnd = true;
+							break;
+
+						default:
+					}
+				}
+				
+				if( pos >= documentLength ) break;
+				if( bBackEnd ) break;
+			}
+			while( ++pos < documentLength )
+			
+			if( oriPos == pos ) return null;
+			
 			int dummyHeadPos;
 			return getWholeWordReverse( iupSci, pos, dummyHeadPos );
 		}

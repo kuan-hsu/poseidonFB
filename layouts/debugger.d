@@ -1141,7 +1141,7 @@ version(FBIDE)
 											if( Util.trim( fromStringz(_itemID) ) == _id )
 											{
 												IupSetAttributeId( watchTreeHandle, "DELNODE", i, "SELECTED" );
-												delete _itemID;
+												if( _itemID != null ) delete _itemID;
 											}
 										}
 									}
@@ -1166,7 +1166,7 @@ version(FBIDE)
 									if( Util.trim( fromStringz(_itemID) ) == _id )
 									{
 										IupSetAttributeId( watchTreeHandle, "DELNODE", i, "SELECTED" );
-										delete _itemID;
+										if( _itemID != null ) delete _itemID;
 									}
 								}
 							}

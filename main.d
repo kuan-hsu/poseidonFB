@@ -11,12 +11,7 @@ import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
 import tango.sys.Process, tango.io.stream.Lines;
 
-version(PLUGIN) 
-	import tango.sys.SharedLib;
-else
-{
-	version(Windows) import tango.sys.SharedLib;
-}
+import tango.sys.SharedLib;
 
 version(Windows)
 {
@@ -81,66 +76,7 @@ void main( char[][] args )
 			//Stdout(e.toString).newline;
 		}
 	}
-	
-	/+
-	version(PLUGIN)
-	{
-		SharedLib iupSharedlib;
-		
-		try
-		{
-			version(Windows) iupSharedlib = SharedLib.load( `iupDll.dll` ); else iupSharedlib = SharedLib.load( "myDll.so" );
-			
-			Stdout("iupSharedlib successfully loaded").newline;
-			
-			void* iupptr = iupSharedlib.getSymbol("Dll_Go");
-			if( iupptr )
-			{
-				//Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
-				void **point = cast(void **)&GLOBAL.Dll_go; // binding function address from DLL to our function pointer
-				*point = iupptr;
-				
-				Stdout("Dll_Go DONE").newline;
-			}
-			else
-			{
-				Stdout("Dll_Go Symbol not found").newline;
-			}			
 
-			void* iupsciptr = iupSharedlib.getSymbol("Send_SCINTILLA");
-			if( iupsciptr )
-			{
-				//Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
-				void **point = cast(void **)&GLOBAL.Send_SCINTILLA; // binding function address from DLL to our function pointer
-				*point = iupsciptr;
-				
-				Stdout("Send_SCINTILLA DONE").newline;
-			}
-			else
-			{
-				Stdout("Send_SCINTILLA Symbol not found").newline;
-			}			
-			
-			void* poseidonFBptr = iupSharedlib.getSymbol("Send_PoseidonFB_HANDLE");
-			if( poseidonFBptr )
-			{
-				//Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
-				void **point = cast(void **)&GLOBAL.Send_PoseidonFB_HANDLE; // binding function address from DLL to our function pointer
-				*point = poseidonFBptr;
-				
-				Stdout("Send_PoseidonFB_HANDLE DONE").newline;
-			}
-			else
-			{
-				Stdout("Send_PoseidonFB_HANDLE Symbol not found").newline;
-			}			
-		}
-		catch( Exception e )
-		{
-			Stdout(e.toString).newline;
-		}
-	}
-	+/
 	
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
@@ -359,11 +295,8 @@ void main( char[][] args )
 	
 	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 	
-	version(PLUGIN)
+	foreach( _plugin; GLOBAL.pluginMnager )
 	{
-		foreach( _plugin; GLOBAL.pluginMnager )
-		{
-			if( _plugin !is null ) delete _plugin;
-		}
+		if( _plugin !is null ) delete _plugin;
 	}
 }

@@ -556,85 +556,81 @@ version(DIDE)
 	}
 }
 
-
-version(PLUGIN)
+class CPLUGIN
 {
-	class CPLUGIN
+	private:
+	import											iup.iup;
+	import											tango.sys.SharedLib;
+	import											tango.stdc.stringz;
+	
+	extern(C) void function( Ihandle* )				poseidonFB_Dll_Go;
+	
+	SharedLib										sharedLib;
+	char[]											pluginName, pluginPath;
+	bool											bSuccess;
+	
+	public:
+	
+	/*
+	typedef extern (C) void function( Ihandle* ) 	_Send_PoseidonFB_HANDLE;
+	typedef extern (C) void function( Ihandle* ) 	_Send_SCINTILLA;
+	typedef extern (C) void function( Ihandle* ) 	_poseidonFB_Dll_Go;
+	*/
+	
+	this( char[] name, char[] fullPath )
 	{
-		private:
-		import											iup.iup;
-		import											tango.sys.SharedLib;
-		import											tango.stdc.stringz;
-		
-		extern(C) void function( Ihandle* )				poseidonFB_Dll_Go;
-		
-		SharedLib										sharedLib;
-		char[]											pluginName, pluginPath;
-		bool											bSuccess;
-		
-		public:
-		
-		/*
-		typedef extern (C) void function( Ihandle* ) 	_Send_PoseidonFB_HANDLE;
-		typedef extern (C) void function( Ihandle* ) 	_Send_SCINTILLA;
-		typedef extern (C) void function( Ihandle* ) 	_poseidonFB_Dll_Go;
-		*/
-		
-		this( char[] name, char[] fullPath )
+		try
 		{
-			try
+			pluginName = name;
+			pluginPath = fullPath;
+			
+			sharedLib = SharedLib.load( fullPath );
+			
+			void* iupPtr = sharedLib.getSymbol( "poseidonFB_Dll_Go" );
+			if( iupPtr )
 			{
-				pluginName = name;
-				pluginPath = fullPath;
-				
-				sharedLib = SharedLib.load( fullPath );
-				
-				void* iupPtr = sharedLib.getSymbol( "poseidonFB_Dll_Go" );
-				if( iupPtr )
-				{
-					void **point = cast(void **) &poseidonFB_Dll_Go; // binding function address from DLL to our function pointer
-					*point = iupPtr;
-					bSuccess = true;
-				}
-				else
-				{
-					unload();
-					IupMessage( "Error", toStringz( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" ) );
-					throw new Exception( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" );
-				}
+				void **point = cast(void **) &poseidonFB_Dll_Go; // binding function address from DLL to our function pointer
+				*point = iupPtr;
+				bSuccess = true;
 			}
-			catch( Exception e )
+			else
 			{
 				unload();
-				IupMessage( "Error", toStringz( "Load " ~ name ~ " Error!\n" ~ e.toString ) );
-				throw new Exception( "Load " ~ name ~ " Error!\n" ~ e.toString );
+				IupMessage( "Error", toStringz( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" ) );
+				throw new Exception( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" );
 			}
 		}
-		
-		~this()
+		catch( Exception e )
 		{
-			if( sharedLib !is null ) sharedLib.unload();
+			unload();
+			IupMessage( "Error", toStringz( "Load " ~ name ~ " Error!\n" ~ e.toString ) );
+			throw new Exception( "Load " ~ name ~ " Error!\n" ~ e.toString );
 		}
-		
-		void go( Ihandle* poseidonFB_MainHandle )
-		{
-			if( bSuccess ) poseidonFB_Dll_Go( poseidonFB_MainHandle );
-		}
-		
-		bool isSuccess()
-		{
-			return bSuccess;
-		}
-		
-		char[] getPath()
-		{
-			return pluginPath;
-		}
-		
-		void unload()
-		{
-			if( sharedLib !is null ) sharedLib.unload();
-		}
+	}
+	
+	~this()
+	{
+		if( sharedLib !is null ) sharedLib.unload();
+	}
+	
+	void go( Ihandle* poseidonFB_MainHandle )
+	{
+		if( bSuccess ) poseidonFB_Dll_Go( poseidonFB_MainHandle );
+	}
+	
+	bool isSuccess()
+	{
+		return bSuccess;
+	}
+	
+	char[] getPath()
+	{
+		return pluginPath;
+	}
+	
+	void unload()
+	{
+		if( sharedLib !is null ) sharedLib.unload();
 	}
 }
 

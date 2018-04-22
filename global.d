@@ -79,11 +79,10 @@ struct GLOBAL
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.idemessageDlg, dialogs.preferenceDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
-	//version(PLUGIN) import tango.sys.SharedLib;
-
 	public:
 	version(Windows) 	static _htmlHelp		htmlHelp;
-	version(PLUGIN)		static CPLUGIN[char[]]	pluginMnager;
+	
+	static CPLUGIN[char[]]	pluginMnager;
 	
 	
 	static Ihandle*				mainDlg;
@@ -743,7 +742,7 @@ struct GLOBAL
 			GLOBAL.languageItems["collapse"] = new IupString( cast(char[]) "Collapse" );
 			GLOBAL.languageItems["showpr"] = new IupString( cast(char[]) "Change Outline Node Title" );
 			GLOBAL.languageItems["refresh"] = new IupString( cast(char[]) "Refresh" );
-			GLOBAL.languageItems["searchanyword"] = new IupString( cast(char[]) "Search Any Word" );
+			GLOBAL.languageItems["searchanyword"] = new IupString( cast(char[]) "Search Whole Word" );
 			GLOBAL.languageItems["hide"] = new IupString( cast(char[]) "Hide" );
 
 		GLOBAL.languageItems["filelist"] = new IupString( cast(char[]) "FileList" );

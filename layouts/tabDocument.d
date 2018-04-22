@@ -326,17 +326,7 @@ extern(C)
 		{
 			if( button == IUP_BUTTON2 )
 			{
-				/+
-				version(PLUGIN)
-				{
-					GLOBAL.Send_PoseidonFB_HANDLE( GLOBAL.mainDlg );
-					GLOBAL.Send_SCINTILLA( IupGetChild( ih, pos ) );
-					GLOBAL.Dll_go();
-					return IUP_DEFAULT;
-				}
-				else
-				+/
-					return tabClose_cb( ih, pos );
+				return tabClose_cb( ih, pos );
 			}
 			else if( button == IUP_BUTTON1 )
 			{

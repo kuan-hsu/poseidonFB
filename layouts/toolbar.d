@@ -19,7 +19,6 @@ class CToolBar
 	Ihandle* 			btnBackNav, btnForwardNav, btnClearNav;
 	Ihandle* 			btnMark, btnMarkPrev, btnMarkNext, btnMarkClean;
 	Ihandle* 			btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun;
-	//Ihandle*			outlineButtonHide, messageButtonHide;
 	Ihandle*[7]			labelSEPARATOR;
 
 	void createToolBar()

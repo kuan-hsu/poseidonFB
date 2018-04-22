@@ -15,65 +15,8 @@ class COutline
 	private:
 	import				parser.scanner, parser.token, parser.parser;
 
-	/+
-	import tango.core.Thread;
-	// Inner Class
-	class ReparseThread : Thread
-	{
-		private:
-		import			parser.ast, parser.autocompletion;
-		
-		CScintilla 		cSci;
-
-		public:
-		this( CScintilla _cSci )
-		{
-			cSci = _cSci;
-			super( &run );
-		}
-
-		void run()
-		{
-			if( GLOBAL.enableParser != "ON" ) return;
-			
-			if( cSci !is null )
-			{
-				scope f = new FilePath( cSci.getFullPath );
-
-				char[] _ext = toLower( f.ext() );
-				if( _ext != "bas" && _ext != "bi" ) return;
-				
-				if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
-				{
-					Ihandle* actTree = getTree( cSci.getFullPath );
-					if( actTree != null )
-					{
-						try
-						{
-							char[] document = cSci.getText();
-							GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-							
-							CASTnode astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
-							CASTnode temp = GLOBAL.parserManager[upperCase(cSci.getFullPath)];
-
-							GLOBAL.parserManager[upperCase(cSci.getFullPath)] = astHeadNode;
-							delete temp;
-
-							IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" ); 
-							foreach_reverse( CASTnode t; astHeadNode.getChildren() )
-							{
-								append( actTree, t, 0 );
-							}
-						}
-						catch( Exception e ){}
-					}
-				}
-			}
-		}
-	}
-	+/
-
 	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList;
+	Ihandle*			outlineButtonCollapse, outlineButtonPR, outlineToggleAnyWord, outlineButtonFresh;
 	CASTnode[]			listItemASTs;
 	int[]				listItemTreeID;
 	int					showIndex= 0;
@@ -1067,8 +1010,8 @@ class COutline
 	void createLayout()
 	{
 		// Outline Toolbar
-		Ihandle* outlineButtonCollapse = IupButton( null, null );
-		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse" );
+		outlineButtonCollapse = IupButton( null, null );
+		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,VISIBLE=NO" );
 		IupSetAttribute( outlineButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( outlineButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1116,15 +1059,14 @@ class COutline
 			return IUP_DEFAULT;
 		});
 		
-		Ihandle* outlineButtonPR = IupButton( null, "PR" );
-		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_pr" );
+		outlineButtonPR = IupButton( null, "PR" );
+		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_pr,VISIBLE=NO,NAME=button_OutlinePR" );
 		IupSetAttribute( outlineButtonPR, "TIP", GLOBAL.languageItems["showpr"].toCString );
-		IupSetHandle( "outlineButtonPR", outlineButtonPR );
 		IupSetCallback( outlineButtonPR, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			if( GLOBAL.outlineTree.showIndex == 3 ) GLOBAL.outlineTree.showIndex = 0; else GLOBAL.outlineTree.showIndex ++;
 
-			Ihandle* _ih = IupGetHandle( "outlineButtonPR" );
+			Ihandle* _ih = IupGetDialogChild( GLOBAL.mainDlg, "button_OutlinePR" );
 			if( _ih != null )
 			{
 				switch( GLOBAL.outlineTree.showIndex )
@@ -1140,14 +1082,13 @@ class COutline
 			return IUP_DEFAULT;
 		});
 
-		Ihandle* outlineToggleAnyWord = IupToggle( null, null );
-		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_searchany,VALUE=TOGGLE" );
+		outlineToggleAnyWord = IupToggle( null, null );
+		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_wholeword,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineWholeWord" );
 		IupSetAttribute( outlineToggleAnyWord, "TIP", GLOBAL.languageItems["searchanyword"].toCString );
-		IupSetHandle( "outlineToggleAnyWord", outlineToggleAnyWord );
 
 
-		Ihandle* outlineButtonFresh = IupButton( null, null );
-		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_refresh" );
+		outlineButtonFresh = IupButton( null, null );
+		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_refresh,VISIBLE=NO" );
 		IupSetAttribute( outlineButtonFresh, "TIP", GLOBAL.languageItems["sc_reparse"].toCString );
 		IupSetCallback( outlineButtonFresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1176,7 +1117,7 @@ class COutline
 
 
 		outlineTreeNodeList = IupList( null );
-		IupSetAttributes( outlineTreeNodeList, "ACTIVE=YES,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8" );
+		IupSetAttributes( outlineTreeNodeList, "ACTIVE=YES,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8,VISIBLE=NO" );
 		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
@@ -1212,8 +1153,6 @@ class COutline
 
 	~this()
 	{
-		IupSetHandle( "outlineButtonPR", null );
-		IupSetHandle( "outlineToggleAnyWord", null );
 	}
 
 	void changeColor()
@@ -1321,6 +1260,15 @@ class COutline
 					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 				}
 			}
+			
+			if( IupGetChildCount( zBoxHandle ) > 0 )
+			{
+				IupSetAttribute( outlineTreeNodeList, "VISIBLE", "YES" );
+				IupSetAttribute( outlineButtonCollapse, "VISIBLE", "YES" );
+				IupSetAttribute( outlineButtonPR, "VISIBLE", "YES" );
+				IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "YES" );
+				IupSetAttribute( outlineButtonFresh, "VISIBLE", "YES" );
+			}
 		}
 	}
 
@@ -1382,6 +1330,16 @@ class COutline
 					break;
 				}
 			}
+		}
+		
+		if( IupGetChildCount( zBoxHandle ) == 0 )
+		{
+			IupSetAttribute( outlineTreeNodeList, "VISIBLE", "NO" );
+			IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
+			IupSetAttribute( outlineButtonCollapse, "VISIBLE", "NO" );
+			IupSetAttribute( outlineButtonPR, "VISIBLE", "NO" );
+			IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "NO" );
+			IupSetAttribute( outlineButtonFresh, "VISIBLE", "NO" );
 		}
 	}
 
@@ -1965,7 +1923,11 @@ extern(C)
 				GLOBAL.outlineTree.listItemTreeID.length = 0;
 
 				bool bAnyWord, bGo;
-				if( fromStringz( IupGetAttribute( IupGetHandle( "outlineToggleAnyWord" ), "VALUE" ) ) == "ON" ) bAnyWord = true; else bAnyWord = false;
+				Ihandle* _wholeWordHandle = IupGetDialogChild( GLOBAL.mainDlg, "button_OutlineWholeWord" );
+				if( _wholeWordHandle != null ) 
+				{
+					if( fromStringz( IupGetAttribute( _wholeWordHandle, "VALUE" ) ) == "OFF" ) bAnyWord = true; else bAnyWord = false;
+				}
 				
 				for( int i = 1; i < IupGetInt( actTree, "COUNT" ); ++ i )
 				{
