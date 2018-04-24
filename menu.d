@@ -679,8 +679,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.392)\nBy Kuan Hsu (Taiwan)\n2018.04.22" );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.030)\nBy Kuan Hsu (Taiwan)\n2018.04.22" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.393)\nBy Kuan Hsu (Taiwan)\n2018.04.23" );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.031)\nBy Kuan Hsu (Taiwan)\n2018.04.22" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1669,112 +1669,13 @@ extern(C)
 
 	int closeProject_cb( Ihandle* ih )
 	{
-		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
-
-		if( activePrjName.length )
-		{
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes ~ GLOBAL.projectManager[activePrjName].others )
-			{
-				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE ) return IUP_DEFAULT;
-			}
-			
-			DocumentTabAction.updateTabsLayout();			
-
-			GLOBAL.projectManager[activePrjName].saveFile();
-			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
-			GLOBAL.projectManager.remove( activePrjName );
-
-			int countChild = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
-			for( int i = 1; i <= countChild; ++ i )
-			{
-				int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", i );
-				if( depth == 1 )
-				{
-					//if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i )) == activePrjName )
-					if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i )) == activePrjName )
-					{
-						char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i );
-						if( user != null ) delete user;
-						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", i, "SELECTED" );
-						// Shadow
-						//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
-						break;
-					}
-				}
-			}
-
-			if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) GLOBAL.statusBar.setPrjName( "" );
-		}
-
+		GLOBAL.projectTree.closeProject();
 		return IUP_DEFAULT;
 	}
 
 	int closeAllProject_cb( Ihandle* ih )
 	{
-		char[][] prjsDir;
-		
-		foreach( PROJECT p; GLOBAL.projectManager )
-		{
-			//IupMessage("",toStringz(p.dir) );
-			foreach( char[] s; p.sources ~ p.includes ~ p.others )
-			{
-				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE )
-				{
-					foreach( char[] _s; prjsDir )
-					{
-						GLOBAL.projectManager.remove( _s );
-					}
-
-					//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
-					GLOBAL.statusBar.setPrjName( "" );
-					return IUP_DEFAULT; 
-				}
-			}
-			
-			DocumentTabAction.updateTabsLayout();
-
-			prjsDir ~= p.dir.dup;
-			p.saveFile();
-			
-			int countChild = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
-			for( int i = countChild - 1; i > 0; -- i )
-			{
-				int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", i );
-				if( depth == 1 )
-				{
-					try
-					{
-						//char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", i ) );
-						char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i ) );
-						if( _cstring == p.dir )
-						{
-							char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i );
-							if( user != null ) delete user;
-							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", i, "SELECTED" );
-							// Shadow
-							//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "DELNODE", i, "SELECTED" );
-
-							break;
-						}
-					}
-					catch( Exception e )
-					{
-						//IupMessage( "", toStringz( e.toString ) );
-					}
-				}
-			}
-
-			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
-		}
-
-		foreach( char[] s; prjsDir )
-		{
-			GLOBAL.projectManager.remove( s );
-			//IupMessage("Remove",toStringz(s) );
-		}
-
-		if( IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" ) == 1 ) GLOBAL.statusBar.setPrjName( "" );//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
-
+		GLOBAL.projectTree.closeAllProjects();
 		return IUP_DEFAULT;
 	}	
 

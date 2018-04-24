@@ -1132,6 +1132,8 @@ class COutline
 
 		layoutHandle = IupVbox( outlineToolbarH, outlineTreeNodeList, zBoxHandle, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" ) );
+		
+		version(DIDE) loadObjectParser();
 	}
 
 	void toBoldTitle( Ihandle* _tree, int id )
@@ -1852,7 +1854,7 @@ class COutline
 			if( objectFilePath.exists )
 			{
 				GLOBAL.objectParserFullPath = upperCase( _path ~ "import/object.di" );
-				return loadFile( objectFilePath.toString() );
+				return loadParser( objectFilePath.toString() );
 			}
 			
 			return null;

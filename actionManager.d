@@ -1304,7 +1304,7 @@ struct ScintillaAction
 						int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
 						if( button == 3 ) // Cancel the Close All action...
 						{
-							return IUP_DEFAULT;
+							return IUP_IGNORE;
 						}
 						else if( button == 2 )
 						{
@@ -1337,78 +1337,6 @@ struct ScintillaAction
 				}
 			}
 		}
-
-		/+
-		char[][] 	KEYS;
-		bool 		bCancel;
-		
-		if( _activeTabs == null ) _activeTabs = GLOBAL.activeDocumentTabs;
-		
-		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-		{
-			if( cSci !is null )
-			{
-				Ihandle* iupSci = cSci.getIupScintilla;
-				
-				if( iupSci != null )
-				{
-					if( DocumentTabAction.getDocumentTabs( iupSci ) != _activeTabs ) continue;
-					
-					//if( ScintillaAction.getModify( iupSci ) != 0 )
-					if( ScintillaAction.getModifyByTitle( cSci ) )
-					{
-						IupSetAttribute( _activeTabs, "VALUE_HANDLE", cast(char*) iupSci );
-						
-						scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
-						
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-						IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
-						int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
-						//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
-						if( button == 3 )
-						{
-							bCancel = true;
-							break;
-						}
-						else if( button == 2 )
-						{
-							KEYS ~= cSci.getFullPath;
-						}
-						else if( button == 1 )
-						{
-							bool bNoNameFile;
-							if( cSci.getFullPath.length >= 7 )
-							{
-								if( cSci.getFullPath[0..7] == "NONAME#" )
-								{
-									saveAs( cSci, false, false );
-									KEYS ~= cSci.getFullPath;
-									bNoNameFile = true;
-								}
-							}
-
-							if( !bNoNameFile )
-							{
-								KEYS ~= cSci.getFullPath;
-								cSci.saveFile();
-							}
-						}
-					}
-					else
-					{
-						KEYS ~= cSci.getFullPath;
-					}
-
-					GLOBAL.fileListTree.removeItem( cSci );
-					GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
-					IupDestroy( iupSci );
-				}
-			}
-		}
-		+/
 
 		foreach( char[] s; KEYS )
 		{
@@ -1428,8 +1356,6 @@ struct ScintillaAction
 		}
 		
 		DocumentTabAction.updateTabsLayout();
-
-		if( bCancel ) return IUP_IGNORE;
 
 		StatusBarAction.update();
 		DocumentTabAction.resetTip();

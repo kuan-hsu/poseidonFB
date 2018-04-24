@@ -14,13 +14,14 @@ class CProjectTree
 	private:
 	import				project, tango.io.device.File, tango.io.stream.Lines;
 	import				tango.core.Thread, parser.autocompletion;
-	Ihandle*			layoutHandle, tree;
+	
+	Ihandle*			layoutHandle, tree, projectButtonCollapse;
 
 	void createLayout()
 	{
 		// Outline Toolbar
-		Ihandle* projectButtonCollapse = IupButton( null, null );
-		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse" );
+		projectButtonCollapse = IupButton( null, null );
+		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,VISIBLE=NO" );
 		IupSetAttribute( projectButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -338,7 +339,8 @@ class CProjectTree
 		// Recent Projects
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
 		GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[setupDir].name );
-		//IupSetInt( GLOBAL.fileListSplit, "VALUE", IupGetInt( GLOBAL.fileListSplit, "VALUE" ) + 12 );
+		
+		if( IupGetInt( tree, "COUNT" ) > 1 ) IupSetAttribute( projectButtonCollapse, "VISIBLE", "YES" );
 	}
 
 	void CreateNewProject( char[] prjName, char[] prjDir )
@@ -369,7 +371,9 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
 		// Set Focus to Project Tree
-		IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
+		IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) tree );
+		
+		if( IupGetInt( tree, "COUNT" ) > 1 ) IupSetAttribute( projectButtonCollapse, "VISIBLE", "YES" );
 	}
 
 	bool openProject( char[] setupDir = null )
@@ -617,7 +621,116 @@ class CProjectTree
 			createProjectTree( prj.dir );
 			return true;
 		}
-	}	
+	}
+	
+	void closeProject()
+	{
+		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
+
+		if( activePrjName.length )
+		{
+			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes ~ GLOBAL.projectManager[activePrjName].others )
+			{
+				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE ) return;
+			}
+			
+			DocumentTabAction.updateTabsLayout();			
+
+			GLOBAL.projectManager[activePrjName].saveFile();
+			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
+			GLOBAL.projectManager.remove( activePrjName );
+
+			int countChild = IupGetInt( tree, "COUNT" );
+			for( int i = 1; i <= countChild; ++ i )
+			{
+				int depth = IupGetIntId( tree, "DEPTH", i );
+				if( depth == 1 )
+				{
+					if( fromStringz( IupGetAttributeId( tree, "USERDATA", i )) == activePrjName )
+					{
+						char* user = IupGetAttributeId( tree, "USERDATA", i );
+						if( user != null ) delete user;
+						IupSetAttributeId( tree, "DELNODE", i, "SELECTED" );
+						break;
+					}
+				}
+			}
+
+			if( IupGetInt( tree, "COUNT" ) == 1 )
+			{
+				GLOBAL.statusBar.setPrjName( "" );
+				IupSetAttribute( projectButtonCollapse, "VISIBLE", "NO" );
+			}
+		}
+	}
+	
+	void closeAllProjects()
+	{
+		char[][] prjsDir;
+		
+		foreach( PROJECT p; GLOBAL.projectManager )
+		{
+			//IupMessage("",toStringz(p.dir) );
+			foreach( char[] s; p.sources ~ p.includes ~ p.others )
+			{
+				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE )
+				{
+					foreach( char[] _s; prjsDir )
+					{
+						GLOBAL.projectManager.remove( _s );
+					}
+
+					//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+					GLOBAL.statusBar.setPrjName( "" );
+					return; 
+				}
+			}
+			
+			DocumentTabAction.updateTabsLayout();
+
+			prjsDir ~= p.dir.dup;
+			p.saveFile();
+			
+			int countChild = IupGetInt( tree, "COUNT" );
+			for( int i = countChild - 1; i > 0; -- i )
+			{
+				int depth = IupGetIntId( tree, "DEPTH", i );
+				if( depth == 1 )
+				{
+					try
+					{
+						char[] _cstring = fromStringz( IupGetAttributeId( tree, "USERDATA", i ) );
+						if( _cstring == p.dir )
+						{
+							char* user = IupGetAttributeId( tree, "USERDATA", i );
+							if( user != null ) delete user;
+							IupSetAttributeId( tree, "DELNODE", i, "SELECTED" );
+
+							break;
+						}
+					}
+					catch( Exception e )
+					{
+						//IupMessage( "", toStringz( e.toString ) );
+					}
+				}
+			}
+
+			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
+		}
+
+		foreach( char[] s; prjsDir )
+		{
+			GLOBAL.projectManager.remove( s );
+			//IupMessage("Remove",toStringz(s) );
+		}
+
+		if( IupGetInt( tree, "COUNT" ) == 1 )
+		{
+			GLOBAL.statusBar.setPrjName( "" );
+			IupSetAttribute( projectButtonCollapse, "VISIBLE", "NO" );
+		}
+	}
 
 	void updateRecentProjects( char[] prjDir, char[] prjName )
 	{
@@ -1741,8 +1854,7 @@ extern(C)
 			if( splitText[counterSplitText].length )
 			{
 				int 	countChild = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "TOTALCHILDCOUNT", folderLocateId );
-				//int 	countChild = IupGetIntId( tree, "COUNT", folderLocateId );
-				bool bFolerExist = false;
+				bool	bFolerExist = false;
 				for( int i = 1; i <= countChild; ++ i )
 				{
 					char[]	kind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );

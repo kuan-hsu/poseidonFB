@@ -281,7 +281,7 @@ extern(C)
 	{
 		try
 		{
-			GLOBAL.prevDoc.length = 0;
+			char[][] tempPrevDocs;
 			if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
 			{
 				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
@@ -290,7 +290,7 @@ extern(C)
 					if( documentHandle != null )
 					{
 						auto cSci = ScintillaAction.getCScintilla( documentHandle );
-						if( cSci !is null )  GLOBAL.prevDoc ~= cSci.getFullPath;
+						if( cSci !is null ) tempPrevDocs ~= cSci.getFullPath;
 					}
 				}
 
@@ -300,13 +300,15 @@ extern(C)
 					if( documentHandle != null )
 					{
 						auto cSci = ScintillaAction.getCScintilla( documentHandle );
-						if( cSci !is null )  GLOBAL.prevDoc ~= cSci.getFullPath;
+						if( cSci !is null ) tempPrevDocs ~= cSci.getFullPath;
 					}
 				}
 			}
 			
 			int ret = ScintillaAction.closeAllDocument();
 			if( ret == IUP_IGNORE ) return IUP_IGNORE;
+			
+			GLOBAL.prevDoc = tempPrevDocs;
 			
 			// Save All Project
 			GLOBAL.prevPrj.length = 0;

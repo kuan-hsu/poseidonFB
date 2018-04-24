@@ -90,7 +90,8 @@ class CCustomDialog : CBaseDialog
 		IupSetAttribute( labelToolsArgs, "TIP", toStringz( paramTip ) );
 		
 		Ihandle* textToolsArgs = IupText( null );
-		IupSetAttribute( textToolsArgs, "SIZE", "210x12" );	
+		//IupSetAttribute( textToolsArgs, "SIZE", "-1x12" );
+		IupSetAttribute( textToolsArgs, "EXPAND", "HORIZONTAL" );
 		IupSetHandle( "textToolsArgs", textToolsArgs );
 		IupSetCallback( textToolsArgs, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 
