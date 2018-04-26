@@ -3,11 +3,13 @@
 class CParser
 {
 	private:
+	import			iup.iup;
+	
 	import			parser.ast;
 	import			parser.token, parser.autocompletion;
 
 	import			tango.io.FilePath, tango.text.Ascii, Path = tango.io.Path;
-	import			Util = tango.text.Util;
+	import			Util = tango.text.Util, tango.stdc.stringz;
 	import 			tango.io.Stdout, Integer = tango.text.convert.Integer;
 
 	import			global, tools;
@@ -2610,6 +2612,16 @@ class CParser
 		
 
 		/*
+		FunctionAttributes:
+			FunctionAttribute
+			FunctionAttribute FunctionAttributes
+
+		FunctionAttribute:
+			nothrow
+			pure
+			Property		
+
+
 		MemberFunctionAttributes:
 			MemberFunctionAttribute
 			MemberFunctionAttribute MemberFunctionAttributes
@@ -2621,11 +2633,6 @@ class CParser
 			return
 			shared
 			FunctionAttribute
-
-		FunctionAttribute:
-			nothrow
-			pure
-			Property		
 		*/
 		bool isMemberFunctionAttribute( int _tempTokenIndex = -1 )
 		{
@@ -2634,8 +2641,15 @@ class CParser
 			
 			switch( tokens[_tempTokenIndex].tok )
 			{
-				case TOK.Tconst, TOK.Timmutable, TOK.Tinout, TOK.Treturn, TOK.Tshared, TOK.Tnothrow, TOK.Tpure://, TOK.TProperty:
-					return false;
+				case TOK.Tnothrow, TOK.Tpure:
+					return true;
+				
+				case TOK.TatProperty, TOK.TatSafe, TOK.TatTrusted, TOK.TatSystem, TOK.TatDisable, TOK.TatNogc:
+					return true;
+				
+				case TOK.Tconst, TOK.Timmutable, TOK.Tinout, TOK.Treturn, TOK.Tshared:
+					return true;
+					
 				default:
 			}
 
@@ -3571,6 +3585,14 @@ class CParser
 			{
 				case TOK.Tauto, TOK.Tfinal, TOK.Tin, TOK.Tlazy, TOK.Tout, TOK.Tref, TOK.Tscope:
 					return true;
+					
+				case TOK.Treturn:
+					if( next().tok == TOK.Tref )
+					{
+						parseToken( TOK.Treturn );
+						return true;
+					}
+					break;
 
 				default:
 					if( isTypeCtor() ) return true;
@@ -3586,9 +3608,14 @@ class CParser
 			switch( _token )
 			{
 				case TOK.Tdeprecated, TOK.Tenum, TOK.Tstatic, TOK.Tabstract, TOK.Tfinal, TOK.Toverride, TOK.Tsynchronized, TOK.Tauto, TOK.Tscope, TOK.Tconst,
-					TOK.Timmutable, TOK.Tinout, TOK.Tshared, TOK.T__gshared, TOK.TProperty, TOK.Tnothrow,TOK.Tpure, TOK.Tref:
-						return true;
-
+					TOK.Timmutable, TOK.Tinout, TOK.Tshared, TOK.T__gshared, TOK.TProperty, TOK.Tnothrow, TOK.Tpure, TOK.Tref:
+					return true;
+				
+				// Property
+				case TOK.TatProperty, TOK.TatSafe, TOK.TatTrusted, TOK.TatSystem, TOK.TatDisable, TOK.TatNogc:
+					return true;
+				
+				// LinkageAttribute. AlignAttribute
 				case TOK.Textern, TOK.Talign:
 					return true;
 
@@ -4235,15 +4262,30 @@ class CParser
 					{
 						switch( token().tok )
 						{
+							case TOK.Tstrings:
+								_Instance = "char[]";
+								break;
+							
+							case TOK.Tnumbers:
+								_Instance = "int";
+								break;
+							
 							case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
 								TOK.Tchar, TOK.Tdchar, TOK.Twchar,
 								TOK.Tfloat, TOK.Tdouble, TOK.Treal, TOK.Tifloat, TOK.Tidouble, TOK.Tireal, TOK.Tcfloat, TOK.Tcdouble, TOK.Tcreal,
 								TOK.Tvoid:
-
-							case TOK.Tstrings, TOK.Tnumbers:
 							case TOK.Ttrue, TOK.Tfalse:
 							case TOK.Tnull, TOK.Tthis:
 							case TOK.T__FILE__, TOK.T__FILE_FULL_PATH__, TOK.T__MODULE__, TOK.T__LINE__, TOK.T__FUNCTION__, TOK.T__PRETTY_FUNCTION__: // SpecialKeyword
+								foreach( key; identToTOK.keys )
+								{
+									if( identToTOK[key] == token().tok )
+									{
+										_Instance ~= key;
+										break;
+									}
+								}
+								break;
 
 							case TOK.Tidentifier:
 								_Instance ~= getIdentifierList();
@@ -4717,9 +4759,26 @@ class CParser
 				}
 
 				activeASTnode = head;
+				
+				int	prevTokenIndex;
+				int	repeatCount;
 
 				while( tokenIndex < tokens.length )
 				{
+					if( tokenIndex == prevTokenIndex )
+					{
+						if( ++repeatCount > 10 ) 
+						{
+							IupMessageError( GLOBAL.mainDlg, "Infinite Loop of parse() function" );
+							break;
+						}
+					}
+					else
+					{
+						prevTokenIndex = tokenIndex;
+						repeatCount = 0;
+					}
+				
 					if( B_KIND > 0 )
 					{
 						if( B_KIND & ( B_TYPE | B_UNION ) )
@@ -4865,9 +4924,27 @@ class CParser
 
 					activeASTnode = head;
 				}
+				
+				
+				int	prevTokenIndex;
+				int	repeatCount;
 
 				while( tokenIndex < tokens.length )
 				{
+					if( tokenIndex == prevTokenIndex )
+					{
+						if( ++repeatCount > 10 )
+						{
+							IupMessageError( GLOBAL.mainDlg, "Infinite Loop of parse() function" );
+							break;
+						}
+					}
+					else
+					{
+						prevTokenIndex = tokenIndex;
+						repeatCount = 0;
+					}				
+				
 					switch( tokens[tokenIndex].tok )
 					{
 						case TOK.Tmodule:
@@ -5263,7 +5340,7 @@ class CParser
 								}
 
 
-								while( isStorageClass( tokenIndex + 1 ) )
+								while( isStorageClass( next().tok ) )
 									parseToken();
 									
 								

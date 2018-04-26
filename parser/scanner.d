@@ -262,11 +262,11 @@ class CScanner
 								{
 									TokenUnit t;
 									
-									if( identifier[0] >= 48 && identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
+									if( cast(int) identifier[0] >= 48 && cast(int) identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
 
 									if( identifier.length > 1 )
 									{
-										if( identifier[0] == 45 && identifier[1] >=48 && identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
+										if( cast(int) identifier[0] == 45 && cast(int) identifier[1] >=48 && cast(int) identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
 
 										if( identifier.length > 2 )
 										{
@@ -306,10 +306,10 @@ class CScanner
 								{
 									TokenUnit t;
 									
-									if( identifier[0] >= 48 && identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
+									if( cast(int) identifier[0] >= 48 && cast(int) identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
 									if( identifier.length > 1 )
 									{
-										if( identifier[0] == 45 && identifier[1] >=48 && identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
+										if( cast(int) identifier[0] == 45 && cast(int) identifier[1] >=48 && cast(int) identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
 
 										if( identifier.length > 2 )
 										{
@@ -353,7 +353,7 @@ class CScanner
 						case '.':
 							if( identifier.length )
 							{
-								if( identifier[0] < 48 || identifier[0] > 57 )
+								if( cast(int) identifier[0] < 48 || cast(int) identifier[0] > 57 )
 								{
 									if( lowerCase( identifier.dup ) in identToTOK )
 									{
@@ -625,11 +625,11 @@ class CScanner
 								{
 									TokenUnit t;
 									
-									if( identifier[0] >= 48 && identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
+									if( cast(int) identifier[0] >= 48 && cast(int) identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
 
 									if( identifier.length > 1 )
 									{
-										if( identifier[0] == 45 && identifier[1] >=48 && identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
+										if( cast(int) identifier[0] == 45 && cast(int) identifier[1] >=48 && cast(int) identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
 
 										if( identifier.length > 2 )
 										{
@@ -685,10 +685,10 @@ class CScanner
 								{
 									TokenUnit t;
 									
-									if( identifier[0] >= 48 && identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
+									if( cast(int) identifier[0] >= 48 && cast(int) identifier[0] <= 57 ) t.tok = TOK.Tnumbers; else	t.tok = TOK.Tidentifier;
 									if( identifier.length > 1 )
 									{
-										if( identifier[0] == 45 && identifier[1] >=48 && identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
+										if( cast(int) identifier[0] == 45 && cast(int) identifier[1] >=48 && cast(int) identifier[1] <= 57 ) t.tok = TOK.Tnumbers;
 
 										if( identifier.length > 2 )
 										{
@@ -712,7 +712,7 @@ class CScanner
 						case '.':
 							if( identifier.length )
 							{
-								if( identifier[0] < 48 || identifier[0] > 57 )
+								if( cast(int) identifier[0] < 48 || cast(int) identifier[0] > 57 )
 								{
 									if( identifier in identToTOK )
 									{

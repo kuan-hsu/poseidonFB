@@ -428,6 +428,13 @@ version(DIDE)
 		Tprotected,
 		Tpublic,
 		Tpure,
+		
+		TatProperty,
+		TatSafe,
+		TatTrusted,
+		TatSystem,
+		TatDisable,
+		TatNogc,
 
 		Treal,
 		Tref,
@@ -624,7 +631,14 @@ version(DIDE)
 		identToTOK["protected"]		= TOK.Tprotected;
 		identToTOK["public"]		= TOK.Tpublic;
 		identToTOK["pure"]			= TOK.Tpure;
-
+		
+		identToTOK["@property"]		= TOK.TatProperty;
+		identToTOK["@safe"]			= TOK.TatSafe;
+		identToTOK["@trusted"]		= TOK.TatTrusted;
+		identToTOK["@system"]		= TOK.TatSystem;
+		identToTOK["@disable"]		= TOK.TatDisable;
+		identToTOK["@nogc"]			= TOK.TatNogc;
+		
 		identToTOK["real"]			= TOK.Treal;
 		identToTOK["ref"]			= TOK.Tref;
 		identToTOK["return"]		= TOK.Treturn;

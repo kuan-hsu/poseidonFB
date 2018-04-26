@@ -679,8 +679,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.393)\nBy Kuan Hsu (Taiwan)\n2018.04.23" );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.031)\nBy Kuan Hsu (Taiwan)\n2018.04.22" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.394)\nBy Kuan Hsu (Taiwan)\n2018.04.26" );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.033)\nBy Kuan Hsu (Taiwan)\n2018.04.26" );
 		return IUP_DEFAULT;
 	});
 	
@@ -917,7 +917,11 @@ extern(C)
 			// NONAME#....bas
 			if( s.length >= 7 )
 			{
-				if( s[0..7] == "NONAME#" ) existedID ~= Integer.atoi( s[7..length-4] );
+				if( s[0..7] == "NONAME#" )
+				{
+					version(FBIDE)	existedID ~= Integer.atoi( s[7..$-4] );
+					version(DIDE)	existedID ~= Integer.atoi( s[7..$-2] );
+				}
 			}
 		}
 
