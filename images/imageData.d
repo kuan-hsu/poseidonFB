@@ -181,6 +181,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_dooropen", XPM.getIUPimage( "icons/xpm/door_open.xpm" ) );
 	IupSetHandle( "icon_type", XPM.getIUPimage( "icons/xpm/type.xpm" ) );
 	IupSetHandle( "icon_comment", XPM.getIUPimage( "icons/xpm/comment.xpm" ) );
+	IupSetHandle( "icon_uncomment", XPM.getIUPimage( "icons/xpm/uncomment.xpm" ) );
 	IupSetHandle( "icon_customoption", XPM.getIUPimage( "icons/xpm/custom_option.xpm" ) );
 	IupSetHandle( "icon_fullscreen", XPM.getIUPimage( "icons/xpm/fullscreen.xpm" ) );
 	IupSetHandle( "icon_idemessage", XPM.getIUPimage( "icons/xpm/idemessage.xpm" ) );

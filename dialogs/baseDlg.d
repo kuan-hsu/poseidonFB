@@ -80,6 +80,8 @@ class CBaseDialog
 			IupSetAttribute( _dlg, "PARENTDIALOG", parentName.toCString );
 		}
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
+		
+		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
 	}
 
 	~this()

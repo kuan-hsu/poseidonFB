@@ -228,7 +228,7 @@ struct GLOBAL
 	{
 		static char[][]				defaultImportPaths;
 		static char[]				objectParserFullPath;
-		static char[]				toggleSkipUnittest = "OFF";
+		static char[]				toggleSkipUnittest = "ON";
 	}
 	
 	static CNavCache			navigation;

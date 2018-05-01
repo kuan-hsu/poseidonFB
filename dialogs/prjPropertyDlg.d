@@ -279,6 +279,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		bCreateNew = bNew;
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "ICON", "icon_properties" );
+		/*
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -287,7 +288,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
-		 
+		*/
 		createLayout();
 		
 		if( !bCreateNew )

@@ -602,6 +602,12 @@ extern( C )
 						case "QuickRun":
 							return menu.quickRun_cb( cSci.getIupScintilla );
 							
+						case "Comment":
+							return menu.comment_cb( null );
+
+						case "UnComment":
+							return menu.uncomment_cb( null );
+							
 						default:
 					}
 				}

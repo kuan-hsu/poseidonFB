@@ -2509,9 +2509,15 @@ struct CustomToolAction
 				args = Util.substitute( args, "\"%s%\"", "\"" ~ s ~ "\"" );
 				
 				// %f% Active File
-				s = cSci.getFullPath();
-				args = Util.substitute( args, "%f%", s );
-				args = Util.substitute( args, "\"%f%\"", "\"" ~ s ~ "\"" );
+				scope fPath = new FilePath( cSci.getFullPath() );
+				args = Util.substitute( args, "%f%", fPath.toString );
+				args = Util.substitute( args, "\"%f%\"", "\"" ~ fPath.toString ~ "\"" );
+				
+				args = Util.substitute( args, "%fn%", fPath.path ~ "/" ~ fPath.name );
+				args = Util.substitute( args, "\"%fn%\"", "\"" ~ fPath.path ~ "/" ~ fPath.name ~ "\"" );
+				
+				args = Util.substitute( args, "%fdir%", fPath.path );
+				args = Util.substitute( args, "\"%fdir%\"", "\"" ~ fPath.path ~ "\"" );
 			}
 			
 			char[] pDir = ProjectAction.getActiveProjectDir;
@@ -2532,22 +2538,29 @@ struct CustomToolAction
 
 				foreach( char[] s; GLOBAL.projectManager[pDir].includes )
 					pAllFiles ~= ( s ~ " " );
-					
 				
 				pAllFiles = Util.trim( pAllFiles );
-				// %pn% Project Name
 				args = Util.substitute( args, "%p%", pAllFiles );
-				args = Util.substitute( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );			
+				args = Util.substitute( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );
+				
+				args = Util.substitute( args, "%pdir%", pDir );
+				args = Util.substitute( args, "\"%pdir%\"", "\"" ~ pDir ~ "\"" );			
 			}
 			else
 			{
 				args = Util.substitute( args, "%pn%", "" );
 				args = Util.substitute( args, "\"%pn%\"", "" );
+				
+				args = Util.substitute( args, "%p%", "" );
+				args = Util.substitute( args, "\"%p%\"", "" );
+				
+				args = Util.substitute( args, "%pdir%", "" );
+				args = Util.substitute( args, "\"%pdir%\"", "" );
 			}		
-			
-			
+
 			version(Windows)
 			{
+				args = Util.substitute( args, "/", "\\" );
 				IupExecute( tool.dir.toCString, toStringz( args ) );
 			}
 			else

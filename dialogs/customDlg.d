@@ -14,7 +14,8 @@ class CCustomDialog : CBaseDialog
 	private:
 	Ihandle*			listTools;
 	Ihandle*			labelStatus;
-	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%pn% = Active Prj Name\n%p% = Active Prj Files";
+	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n
+									%p% = Active Prj Files\n%pdir% = Active Prj Dir";
 	IupString			_tools, _args;
 	
 	
@@ -32,7 +33,7 @@ class CCustomDialog : CBaseDialog
 		}
 		
 		listTools = IupList( null );
-		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
+		IupSetAttributes( listTools, "EXPAND=HORIZONTAL" );
 		IupSetHandle( "listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomDialog_ACTION );
 		
@@ -44,11 +45,12 @@ class CCustomDialog : CBaseDialog
 		
 		Ihandle* btnToolsAdd = IupButton( null, null );
 		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
-		//IupSetHandle( "btnIncludePathAdd_Handle", btnIncludePathAdd );
+		IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
 		IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CCustomDialog_btnToolsAdd );
 
 		Ihandle* btnToolsErase = IupButton( null, null );
 		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES" );
+		IupSetAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
 		IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CCustomDialog_btnToolsErase );
 		
 		Ihandle* btnToolsUp = IupButton( null, null );
@@ -60,7 +62,11 @@ class CCustomDialog : CBaseDialog
 		IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CCustomDialog_btnToolsDown );
 		
 		Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, null );
-		Ihandle* frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
+		
+		Ihandle* listHbox = IupHbox( listTools, vBoxButtonTools, null );
+		IupSetAttributes( listHbox, "NORMALIZESIZE=VERTICAL" );
+		
+		Ihandle* frameList = IupFrame( listHbox );
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		
 		
@@ -77,6 +83,7 @@ class CCustomDialog : CBaseDialog
 		
 		Ihandle* btnToolsDir = IupButton( null, null );
 		IupSetAttributes( btnToolsDir, "IMAGE=icon_openfile,FLAT=YES" );
+		IupSetAttribute( btnToolsDir, "TIP", GLOBAL.languageItems["open"].toCString );
 		IupSetCallback( btnToolsDir, "ACTION", cast(Icallback) &CCustomDialog_OPENDIR );			
 		
 		
@@ -126,6 +133,7 @@ class CCustomDialog : CBaseDialog
 		IupSetAttribute( _dlg, "ICON", "icon_tools" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		
+		/*
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -134,7 +142,8 @@ class CCustomDialog : CBaseDialog
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
-		
+		*/
+
 		createLayout();
 		
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
@@ -187,7 +196,7 @@ extern(C) // Callback for CFindInFilesDialog
 			{
 				if( GLOBAL.customTools[i].name.toDString.length )
 				{
-					Ihandle* _new = IupItem( GLOBAL.customTools[i].name.toCString, null );
+					Ihandle* _new = IupItem( toStringz( Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name.toDString ), null );
 					IupSetCallback( _new, "ACTION", cast(Icallback) &menu.customtool_menu_click_cb );
 					IupAppend( toolsSubMenuHandle, _new );
 					IupMap( _new );

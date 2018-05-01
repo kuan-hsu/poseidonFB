@@ -198,7 +198,7 @@ class CArgOptionDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_tools" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		
+		/*
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -207,7 +207,7 @@ class CArgOptionDialog : CBaseDialog
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
-		
+		*/
 		createLayout();
 	}
 

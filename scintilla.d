@@ -2115,6 +2115,64 @@ extern(C)
 						IupSetAttributeId( ih, "INSERT", -1, toStringz( "]" ) ); break;
 					case 123: // {
 						IupSetAttributeId( ih, "INSERT", -1, toStringz( "}" ) ); break;
+
+					case 8:		// BS
+					case 65535:	// DEL
+						int		pos, currentPos = actionManager.ScintillaAction.getCurrentPos( ih );
+						char[]	eraseWord;
+						
+						if( c == 8 )
+						{
+							eraseWord = ScintillaAction.getCurrentChar( -1, ih );
+							pos = currentPos - 1;
+						}
+						else
+						{
+							eraseWord = ScintillaAction.getCurrentChar( 0, ih );
+							pos = currentPos;
+							currentPos ++;
+						}
+						
+						switch( eraseWord )
+						{
+							case "(":
+								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == ")" )
+								{
+									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									//IupScintillaSendMessage( ih, 2160, pos, pos + 2 ); // SCI_SETSEL = 2160
+									//IupSetAttribute( ih, "SELECTEDTEXT", "" );
+									return IUP_IGNORE;
+								}
+								break;
+								
+							case "[":
+								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == "]" )
+								{
+									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									return IUP_IGNORE;
+								}
+								break;
+								
+							case "{":
+								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == "}" )
+								{
+									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									return IUP_IGNORE;
+								}
+								break;
+								
+							case "\"":
+								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == "\"" )
+								{
+									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									return IUP_IGNORE;
+								}
+								break;
+								
+							default:
+						}
+						break;
+						
 					default:
 				}
 			}
@@ -2481,7 +2539,7 @@ extern(C)
 					case "comment":
 						if( sk.keyValue == c )
 						{
-							menu.comment_cb();
+							menu.comment_cb( null );
 							return IUP_IGNORE;
 						}
 						break;
@@ -2489,7 +2547,7 @@ extern(C)
 					case "uncomment":
 						if( sk.keyValue == c )
 						{
-							menu.uncomment_cb();
+							menu.uncomment_cb( null );
 							return IUP_IGNORE;
 						}
 						break;						
@@ -2851,7 +2909,7 @@ extern(C)
 
 		// Check CallTip
 		AutoComplete.updateCallTip( ih, pos, _text );
-
+		
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 		

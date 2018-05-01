@@ -123,7 +123,7 @@ class CFindInFilesDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_findfiles" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-
+		/*
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -132,7 +132,7 @@ class CFindInFilesDialog : CBaseDialog
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
-		
+		*/
 		FINDWHAT = new IupString( findWhat );
 		
 		createLayout();

@@ -117,6 +117,7 @@ options=Options
 				enabledwell=Enable Mouse Dwell to Show Type
 				enableoverwrite=Overwrite To Non Identifier Character
 				completeatbackthread=Enable Codecomplete AT Back Thread
+				completedelay=  Display Delay(ms):
 				parserlive=ParseLive! Level
 					none=None
 					light=Light

@@ -10,7 +10,7 @@ Comment=
 CompilerPath=
 [IncludeDirs]
 [LibDirs]
-name=K:/CodingPark/GameKYO/lib/iup/iup323DLL10
+name=K:/CodingPark/GameKYO/lib/iup/iup324DLL10
 [Sources]
 name=IDE.d
 name=actionManager.d
@@ -42,12 +42,15 @@ name=layouts/toolbar.d
 name=main.d
 name=menu.d
 name=navcache.d
+name=parser/_parser.d
 name=parser/ast.d
 name=parser/autocompletion.d
 name=parser/autocompletionD.d
 name=parser/autocompletionFB.d
 name=parser/live.d
 name=parser/parser.d
+name=parser/parserD.d
+name=parser/parserFB.d
 name=parser/scanner.d
 name=parser/token.d
 name=project.d

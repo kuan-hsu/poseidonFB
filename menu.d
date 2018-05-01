@@ -176,7 +176,7 @@ void createMenu()
 	IupSetCallback( item_comment, "ACTION", cast(Icallback) &comment_cb );
 	
 	Ihandle* item_uncomment = IupItem( GLOBAL.languageItems["uncommentline"].toCString, null);
-	//IupSetAttribute(item_comment, "IMAGE", "icon_comment");
+	IupSetAttribute(item_uncomment, "IMAGE", "icon_uncomment");
 	IupSetCallback( item_uncomment, "ACTION", cast(Icallback) &uncomment_cb );
 	
 
@@ -641,7 +641,7 @@ void createMenu()
 	{
 		if( GLOBAL.customTools[i].name.toDString.length )
 		{
-			Ihandle* _new = IupItem( GLOBAL.customTools[i].name.toCString, null );
+			Ihandle* _new = IupItem( toStringz( Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name.toDString ), null );
 			IupSetCallback( _new, "ACTION", cast(Icallback) &customtool_menu_click_cb );
 			IupAppend( toolsSubMenu, _new );
 			IupMap( _new );
@@ -679,7 +679,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.394)\nBy Kuan Hsu (Taiwan)\n2018.04.26" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.395)\nBy Kuan Hsu (Taiwan)\n2018.05.01" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.033)\nBy Kuan Hsu (Taiwan)\n2018.04.26" );
 		return IUP_DEFAULT;
 	});
@@ -1169,7 +1169,7 @@ extern(C)
 		if( ih != null ) IupSetAttribute( ih, "SELECTION", "ALL" );
 	}
 	
-	void comment_cb()
+	int comment_cb( Ihandle* ih )
 	{
 		Ihandle*	iupSci = actionManager.ScintillaAction.getActiveIupScintilla();
 		if( iupSci != null )
@@ -1234,9 +1234,11 @@ extern(C)
 				}
 			}
 		}
+		
+		return IUP_DEFAULT;
 	}
 
-	void uncomment_cb()
+	int uncomment_cb( Ihandle* ih )
 	{
 		Ihandle*	iupSci = actionManager.ScintillaAction.getActiveIupScintilla();
 		if( iupSci != null )
@@ -1321,6 +1323,8 @@ extern(C)
 				}
 			}
 		}
+		
+		return IUP_DEFAULT;
 	}
 	
 	void findReplace_cb()
@@ -1472,13 +1476,6 @@ extern(C)
 	
 	int outlineMenuItem_cb( Ihandle *ih )
 	{
-		/*
-		Ihandle* buttonHandle = IupGetHandle( "outlineButtonHide" );
-		if( buttonHandle != null )
-		{
-			if( fromStringz( IupGetAttribute( buttonHandle, "VALUE" ) ) == "ON" ) IupSetAttribute( buttonHandle, "VALUE", "OFF" ); else IupSetAttribute( buttonHandle, "VALUE", "ON" );
-		}
-		*/
 		return outline_cb( ih );
 	}
 
@@ -1534,13 +1531,6 @@ extern(C)
 	
 	int messageMenuItem_cb( Ihandle *ih )
 	{
-		/*
-		Ihandle* buttonHandle = IupGetHandle( "messageButtonHide" );
-		if( buttonHandle != null )
-		{
-			if( fromStringz( IupGetAttribute( buttonHandle, "VALUE" ) ) == "ON" ) IupSetAttribute( buttonHandle, "VALUE", "OFF" ); else IupSetAttribute( buttonHandle, "VALUE", "ON" );
-		}
-		*/
 		return message_cb( ih );
 	}
 	
@@ -1603,12 +1593,12 @@ extern(C)
 	{
 		version(Windows)
 		{
-			scope dlg = new CCustomDialog( 480, 240, GLOBAL.languageItems["setcustomtool"].toDString(), false );
+			scope dlg = new CCustomDialog( 480, -1, GLOBAL.languageItems["setcustomtool"].toDString(), false );
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 		else
 		{
-			scope dlg = new CCustomDialog( 492, 250, GLOBAL.languageItems["setcustomtool"].toDString(), false );
+			scope dlg = new CCustomDialog( 492, -1, GLOBAL.languageItems["setcustomtool"].toDString(), false );
 			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 		
@@ -1618,19 +1608,7 @@ extern(C)
 
 	int preference_cb( Ihandle *ih )
 	{
-		/*
-		version( Windows ) 
-		{
-			scope dlg = new CPreferenceDialog( 546, 560, "Preference", true );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		}
-		else
-		{
-			scope dlg = new CPreferenceDialog( 546, 576, "Preference", true );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		}
-		*/
-		if( GLOBAL.preferenceDlg is null ) GLOBAL.preferenceDlg = new CPreferenceDialog( -1, 380, GLOBAL.languageItems["caption_preference"].toDString(), true, "POSEIDONFB_MAIN_DIALOG" );
+		if( GLOBAL.preferenceDlg is null ) GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), true, "POSEIDONFB_MAIN_DIALOG" );
 		GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
@@ -1638,18 +1616,6 @@ extern(C)
 
 	int newProject_cb( Ihandle *ih )
 	{
-		/*
-		version( Windows )
-		{
-			scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, true );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		}
-		else
-		{
-			scope dlg = new CProjectPropertiesDialog( 660, 470, "Project Properties", true, true );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		}
-		*/
 		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), true, true );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
@@ -1710,18 +1676,6 @@ extern(C)
 		//if( !GLOBAL.activeProjectDirName.length ) return IUP_DEFAULT;
 		if( !actionManager.ProjectAction.getActiveProjectName.length ) return IUP_DEFAULT;
 
-		/*
-		version( Windows )
-		{
-			scope dlg = new CProjectPropertiesDialog( 648, 426, "Project Properties", true, false );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		}
-		else
-		{
-			scope dlg = new CProjectPropertiesDialog( 656, 470, "Project Properties", true, false );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		}
-		*/
 		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), true, false );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
@@ -1985,6 +1939,9 @@ extern(C)
 	int customtool_menu_click_cb( Ihandle* ih )
 	{
 		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) );
+		
+		int dotPos = Util.index( title, ". " );
+		if( dotPos < title.length ) title = title[dotPos+2..$];
 
 		for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
 		{

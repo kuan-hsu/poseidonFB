@@ -33,7 +33,7 @@ class CSingleTextDialog : CBaseDialog
 
 		IupSetAttribute( btnOK, "SIZE", "40x12" );
 		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );
-		version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "Ubuntu Mono, 10" );
+		//version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "Ubuntu Mono, 10" );
 
 		IupAppend( _dlg, vBox );
 	}	
@@ -44,6 +44,7 @@ class CSingleTextDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "ICON", toStringz( iconName.dup ) );
+		/*
 		version( Windows )
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
@@ -52,9 +53,10 @@ class CSingleTextDialog : CBaseDialog
 		{
 			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
+		*/
 
 		labelName = _labelText ;
-		 
+
 		createLayout( textWH );
 
 		//if( text.length) IupSetAttribute( textResult, "SELECTIONPOS", "ALL" );

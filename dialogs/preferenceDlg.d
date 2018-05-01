@@ -237,8 +237,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		
-		
-		
+
 
 		// Parser Setting
 		Ihandle* toggleKeywordComplete = IupToggle( GLOBAL.languageItems["enablekeyword"].toCString, null );
@@ -252,6 +251,8 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleUseParser = IupToggle( GLOBAL.languageItems["enableparser"].toCString, null );
 		IupSetAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.enableParser.dup) );
 		IupSetHandle( "toggleUseParser", toggleUseParser );
+		
+		
 		
 		Ihandle* labelTrigger = IupLabel( toStringz( GLOBAL.languageItems["trigger"].toDString ~ ":" ) );
 		IupSetAttributes( labelTrigger, "SIZE=120x12" );
@@ -368,6 +369,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
+		
 		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, toggleOverWrite, hBoxCompleteDalay, hBoxFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
@@ -755,6 +757,7 @@ class CPreferenceDialog : CBaseDialog
 				flatFrame[i] = IupFlatFrame( lableString[i] );
 				IupSetAttribute( flatFrame[i], "TITLE", GLOBAL.languageItems[GLOBAL.fonts[i].name].toCString );
 				
+				/*
 				version( Windows )
 				{
 					IupSetAttribute( lableString[i], "FONT", "Courier New,9" );
@@ -765,6 +768,7 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttribute( lableString[i], "FONT", "Ubuntu Mono, 10" );
 					IupSetAttribute( flatFrame[i], "FONT", "Ubuntu Mono, 10" );
 				}
+				*/
 				
 				scope _fontSyle = new IupString( strings[0] );
 				IupSetAttribute( flatFrame[i], "FONTFACE", _fontSyle.toCString );
@@ -1622,11 +1626,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( _dlg, "ICON", "icon_preference" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
+			IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
+			//IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
+			IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
+			//IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Ubuntu Mono, 10" ) );
 		}
 		
 		IupSetHandle( "PreferenceHandle", getIhandle );
@@ -2438,7 +2444,6 @@ extern(C) // Callback for CPreferenceDialog
 				if( _mHandle != null ) IupSetAttribute( _mHandle, "VALUE", "1" );
 			}
 			
-
 			GLOBAL.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
 			GLOBAL.enableIncludeComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleIncludeComplete" ), "VALUE" ) ).dup;
 			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
