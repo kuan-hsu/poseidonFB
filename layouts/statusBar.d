@@ -20,7 +20,7 @@ class CStatusBar
 	{
 		prjName = IupLabel( null );
 		IupSetAttribute( prjName, "SIZE", "150x" );
-		IupSetCallback( prjName, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+		IupSetCallback( prjName, "BUTTON_CB", cast(Icallback) &CStatusBar_PROJECTFOCUS_CB );
 
 		LINExCOL = IupLabel( "             " );
 		IupSetCallback( LINExCOL, "BUTTON_CB", cast(Icallback) &CStatusBar_LINExCOL_BUTTON_CB );
@@ -131,10 +131,25 @@ class CStatusBar
 		IupSetAttribute( prjName, "SIZE", toStringz( Integer.toString( width / 5 ) ~ "x" ) );
 	}
 	
-	void setPrjName( char[] name )
+	void setPrjName( char[] name, bool bFull = false )
 	{
-		_name = name;
-		IupSetAttribute( prjName, "TITLE", _name.toCString );
+		if( !bFull )
+		{
+			_name = name;
+			IupSetAttribute( prjName, "TITLE", _name.toCString );
+		}
+		else
+		{
+			int prjID = actionManager.ProjectAction.getActiveProjectID();
+			scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+			scope	_prjDir = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", prjID ) );
+			
+			char[] focusName;
+			if( _prjDir.toDString in GLOBAL.projectManager ) focusName = GLOBAL.projectManager[_prjDir.toDString].focusOn;
+			
+			_name = GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString ~ ( focusName.length ? " [" ~ focusName ~ "]" : ""  );
+			IupSetAttribute( prjName, "TITLE", _name.toCString );
+		}
 	}
 	
 	void setLINExCOL( char[] lc )
@@ -319,6 +334,60 @@ extern(C) // Callback for CBaseDialog
 				IupDestroy( popupMenu );
 			}
 		}
+		return IUP_DEFAULT;
+	}
+	
+	private int CStatusBar_PROJECTFOCUS_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		
+		if( pressed == 0 ) //release
+		{
+			if( button == IUP_BUTTON3 ) // Right Click
+			{
+				char[] activePrjDir = ProjectAction.getActiveProjectName();
+				if( activePrjDir.length )
+				{
+					if( activePrjDir in GLOBAL.projectManager )
+					{
+						if( GLOBAL.projectManager[activePrjDir].focusUnit.length )
+						{
+							Ihandle* popupMenu = IupMenu( null );
+							IupSetAttribute( popupMenu, "RADIO", "YES" );
+							
+							Ihandle* _emptyItem = IupItem( toStringz( "<null>" ), null );
+							IupSetCallback( _emptyItem, "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
+							IupAppend( popupMenu, _emptyItem );
+							if( !GLOBAL.projectManager[activePrjDir].focusOn.length ) IupSetAttribute( _emptyItem, "VALUE", "ON");
+							
+							foreach( char[] key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
+							{
+								Ihandle* _item = IupItem( toStringz( key ), null );
+								IupSetCallback( _item, "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
+								IupAppend( popupMenu, _item );
+								if( key == GLOBAL.projectManager[activePrjDir].focusOn ) IupSetAttribute( _item, "VALUE", "ON");
+							}
+							
+							IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
+							IupDestroy( popupMenu );								
+						}
+					}
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	}
+	
+	private int CStatusBar_PROJECTFOCUS_popupMenu_Action( Ihandle* ih )
+	{
+		char[] focusTitle = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
+		char[] activePrjDir = ProjectAction.getActiveProjectName();
+		
+		if( focusTitle != "<null>" ) GLOBAL.projectManager[activePrjDir].focusOn = focusTitle; else GLOBAL.projectManager[activePrjDir].focusOn = "";
+		IupSetAttribute( ih, "VALUE", "ON" );
+		
+		GLOBAL.statusBar.setPrjName( null, true );
+		
 		return IUP_DEFAULT;
 	}
 	

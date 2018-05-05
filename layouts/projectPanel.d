@@ -338,7 +338,8 @@ class CProjectTree
 
 		// Recent Projects
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
-		GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[setupDir].name );
+		GLOBAL.statusBar.setPrjName( null, true );
+		//GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[setupDir].name );
 		
 		if( IupGetInt( tree, "COUNT" ) > 1 ) IupSetAttribute( projectButtonCollapse, "VISIBLE", "YES" );
 	}
@@ -857,9 +858,7 @@ extern(C)
 
 				if( id > 0 )
 				{
-					int prjID = actionManager.ProjectAction.getActiveProjectID();
-					scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-					GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+					GLOBAL.statusBar.setPrjName( null, true );
 				}
 				else
 				{

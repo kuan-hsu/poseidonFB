@@ -283,9 +283,7 @@ extern(C)
 			}
 			else
 			{
-				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+				GLOBAL.statusBar.setPrjName( null, true );
 			}				
 		}
 

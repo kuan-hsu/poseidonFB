@@ -23,7 +23,7 @@ class CMessageAndSearch
 	void createMessagePanel()
 	{
 		outputPanel = IupScintilla( );
-		IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO" );
+		IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=YES,EXPAND=YES,BORDER=NO" );
 		IupSetCallback( outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
 		
 		searchOutputPanel = IupScintilla();
@@ -254,6 +254,7 @@ class CMessageAndSearch
 		if( txt.length )
 		{
 			if( bClear ) IupSetAttribute( outputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( outputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+			scrollOutputPanel( -1 );
 		}
 		else
 		{
@@ -275,7 +276,7 @@ class CMessageAndSearch
 	
 	void applyOutputPanelINDICATOR()
 	{
-		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
 		int LineNum;
@@ -344,12 +345,14 @@ class CMessageAndSearch
 	
 	void scrollOutputPanel( int pos )
 	{
-		IupSetInt( outputPanel, "SCROLLTOPOS", pos );
+		//IupSetInt( outputPanel, "SCROLLTOPOS", pos );
+		if( pos < 0 ) IupSetInt( outputPanel, "CARETPOS", IupGetInt( outputPanel, "COUNT" ) ); else IupSetInt( outputPanel, "CARETPOS", pos );
 	}
 	
 	void scrollSearchOutputPanel( int pos )
 	{
-		IupSetInt( searchOutputPanel, "SCROLLTOPOS", pos );
+		//IupSetInt( searchOutputPanel, "SCROLLTOPOS", pos );
+		if( pos < 0 ) IupSetInt( searchOutputPanel, "CARETPOS", IupGetInt( searchOutputPanel, "COUNT" ) ); else IupSetInt( searchOutputPanel, "CARETPOS", pos );
 	}
 	
 	Ihandle* getOutputPanelHandle()

@@ -12,14 +12,18 @@ class CProjectPropertiesDialog : CBaseDialog
 	private:
 	
 	Ihandle*	textProjectName, listType, textProjectDir, textMainFile, toggleOneFile, textTargetName, textArgs, textCompilerOpts, textComment, textCompilerPath;
+	Ihandle*	listFocus;
 	Ihandle*	btnProjectDir;
 	Ihandle*	listIncludePath, listLibPath;
 	
 	bool		bCreateNew = true;
+	
+	static PROJECT	tempProject;
+	
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton( "40x12" );
+		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
 
 		// PAGE 1 General
 		// Line 1
@@ -27,18 +31,17 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelProjectName, "SIZE=60x20" );
 		
 		textProjectName = IupText( null );
-		IupSetAttribute( textProjectName, "SIZE", "140x12" );
+		IupSetAttributes( textProjectName, "SIZE=130x12,NAME=PRJPROPERTY_ProjectName" );
 		IupSetHandle( "textProjectName", textProjectName );
 		
 		Ihandle* labelType = IupLabel( toStringz( GLOBAL.languageItems["prjtype"].toDString ~ ":" ) );
-		IupSetAttributes( labelType, "SIZE=40x20" );
+		IupSetAttributes( labelType, "SIZE=40x20,ALIGNMENT=ACENTER" );
 		
 		listType = IupList( null );
-		IupSetAttributes( listType, "SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=3" );
+		IupSetAttributes( listType, "SHOWIMAGE=NO,VALUE=1,DROPDOWN=YES,VISIBLE_ITEMS=3,SIZE=106x,NAME=PRJPROPERTY_TypeList" );
 		IupSetAttribute( listType, "1", GLOBAL.languageItems["console"].toCString() );
 		IupSetAttribute( listType, "2", GLOBAL.languageItems["static"].toCString() );
 		IupSetAttribute( listType, "3", GLOBAL.languageItems["dynamic"].toCString() );
-		IupSetHandle( "listType", listType );
 
 		Ihandle* hBox00 = IupHbox( labelProjectName, textProjectName, labelType, listType, null );
 		IupSetAttribute( hBox00, "ALIGNMENT", "ACENTER" );
@@ -49,7 +52,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelProjectDir, "SIZE=60x20" );
 		
 		textProjectDir = IupText( null );
-		IupSetAttribute( textProjectDir, "SIZE", "276x12" );
+		IupSetAttributes( textProjectDir, "SIZE=276x12,NAME=PRJPROPERTY_ProjectDir" );
 		IupSetHandle( "textProjectDir", textProjectDir );
 
 		btnProjectDir = IupButton( null, null );
@@ -64,13 +67,12 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelMainFile, "SIZE=60x20" );
 		
 		textMainFile = IupText( null );
-		IupSetAttribute( textMainFile, "SIZE", "146x12" );
-		IupSetHandle( "textMainFile", textMainFile );
+		IupSetAttributes( textMainFile, "SIZE=130x12,NAME=PRJPROPERTY_ProjectMainFile" );
 		
 		version(FBIDE)
 		{
 			toggleOneFile = IupToggle( GLOBAL.languageItems["prjonefile"].toCString, null );
-			IupSetHandle( "toggleOneFile", toggleOneFile );
+			IupSetAttributes( toggleOneFile, "SIZE=140x12,NAME=PRJPROPERTY_ToggleOneFile" );
 		
 			Ihandle* hBox02 = IupHbox( labelMainFile, textMainFile, IupFill, toggleOneFile, IupFill, null );
 		}
@@ -79,17 +81,117 @@ class CProjectPropertiesDialog : CBaseDialog
 			Ihandle* hBox02 = IupHbox( labelMainFile, textMainFile, null );
 		}
 		IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );
+		
+		
 
-
+		
 		// Line 4
 		Ihandle* labelTargetName = IupLabel( toStringz( GLOBAL.languageItems["prjtarget"].toDString ~ ":" ) );
 		IupSetAttributes( labelTargetName, "SIZE=60x20" );
 		
 		textTargetName = IupText( null );
-		IupSetAttribute( textTargetName, "SIZE", "276x12" );
-		IupSetHandle( "textTargetName", textTargetName );
+		IupSetAttributes( textTargetName, "SIZE=130x12,NAME=PRJPROPERTY_TargetName" );
 		
-		Ihandle* hBox03 = IupHbox( labelTargetName, textTargetName, null );
+		//
+		Ihandle* labelFocus = IupLabel( "Focus:" );//IupLabel( toStringz( GLOBAL.languageItems["prjtarget"].toDString ~ ":" ) );
+		IupSetAttributes( labelFocus, "SIZE=40x12,ALIGNMENT=ACENTER" );
+		
+		listFocus = IupList( null );
+		IupSetAttributes( listFocus, "SHOWIMAGE=NO,EDITBOX=YES,DROPDOWN=YES,VISIBLE_ITEMS=5,SIZE=106x12,NAME=PRJPROPERTY_FocusList" );
+		IupSetCallback( listFocus, "VALUECHANGED_CB",cast(Icallback) cast(Icallback) function( Ihandle* ih )
+		{
+			Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
+			
+			if( _dlg != null )
+			{
+				Ihandle* _focusList = IupGetDialogChild( _dlg, "PRJPROPERTY_FocusList" );
+				if( _focusList != null )
+				{
+					char[] focusTitle = Util.trim( fromStringz( IupGetAttribute( _focusList, "VALUE" ) ) ).dup;
+					if( !focusTitle.length )
+					{
+						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.targetName ) );
+						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerOption ) );
+						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerPath ) );
+
+						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "REMOVEITEM", "ALL" );
+						for( int i = 0; i < CProjectPropertiesDialog.tempProject.includeDirs.length; ++ i )
+							IupSetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.includeDirs[i] ) );
+						
+						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "REMOVEITEM", "ALL" );
+						for( int i = 0; i < CProjectPropertiesDialog.tempProject.libDirs.length; ++ i )
+							IupSetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.libDirs[i] ) );
+					}
+					else
+					{
+						if( focusTitle in CProjectPropertiesDialog.tempProject.focusUnit )
+						{
+							IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Target ) );
+							IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Option ) );
+							IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Compiler ) );
+							
+							IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "REMOVEITEM", "ALL" );
+							for( int i = 0; i < CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].IncDir.length; ++ i )
+								IupSetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].IncDir[i] ) );
+							
+							IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "REMOVEITEM", "ALL" );
+							for( int i = 0; i < CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].LibDir.length; ++ i )
+								IupSetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].LibDir[i] ) );
+						}
+					}
+				}
+			}
+			
+			return IUP_DEFAULT;
+		});
+		
+		Ihandle* focusRemove = IupButton( null, null );
+		IupSetAttributes( focusRemove, "FLAT=YES,IMAGE=icon_debug_clear" );
+		IupSetCallback( focusRemove, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
+			
+			if( _dlg != null )
+			{
+				Ihandle* _focusList = IupGetDialogChild( _dlg, "PRJPROPERTY_FocusList" );
+				if( _focusList != null )
+				{
+					char[] focusTitle = Util.trim( fromStringz( IupGetAttribute( _focusList, "VALUE" ) ) ).dup;
+			
+					if( focusTitle.length )
+					{
+						for( int j = IupGetInt( _focusList, "COUNT" ); j >= 1; -- j )
+						{
+							if( fromStringz( IupGetAttributeId( _focusList, "", j ) ) == focusTitle )
+							{
+								if( focusTitle in tempProject.focusUnit ) tempProject.focusUnit.remove( focusTitle );
+								IupSetInt( _focusList, "REMOVEITEM", j );
+								tempProject.focusOn = "";
+								IupSetAttribute( _focusList, "VALUE", "" );
+
+								IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.targetName ) );
+								IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerOption ) );
+								IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerPath ) );
+
+								IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "REMOVEITEM", "ALL" );
+								for( int i = 0; i < CProjectPropertiesDialog.tempProject.includeDirs.length; ++ i )
+									IupSetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.includeDirs[i] ) );
+								
+								IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "REMOVEITEM", "ALL" );
+								for( int i = 0; i < CProjectPropertiesDialog.tempProject.libDirs.length; ++ i )
+									IupSetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.libDirs[i] ) );
+								
+								break;
+							}
+						}
+					}
+				}
+			}
+			
+			return IUP_DEFAULT;
+		});			
+		
+		Ihandle* hBox03 = IupHbox( labelTargetName, textTargetName, labelFocus, listFocus, focusRemove, null );
 		IupSetAttribute( hBox03, "ALIGNMENT", "ACENTER" );
 
 		// Line 5
@@ -97,8 +199,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelArgs, "SIZE=60x20" );
 		
 		textArgs = IupText( null );
-		IupSetAttribute( textArgs, "SIZE", "276x12" );
-		IupSetHandle( "textArgs", textArgs );
+		IupSetAttributes( textArgs, "SIZE=276x12,NAME=PRJPROPERTY_Args" );
 		
 		Ihandle* hBox04 = IupHbox( labelArgs, textArgs, null );
 		IupSetAttribute( hBox04, "ALIGNMENT", "ACENTER" );
@@ -108,8 +209,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelCompilerOpts, "SIZE=60x20" );
 		
 		textCompilerOpts = IupText( null );
-		IupSetAttribute( textCompilerOpts, "SIZE", "276x12" );
-		IupSetHandle( "textCompilerOpts", textCompilerOpts );
+		IupSetAttributes( textCompilerOpts, "SIZE=276x12,NAME=PRJPROPERTY_Options" );
 
 		Ihandle* btnCompilerOpts = IupButton( null, null );
 		IupSetAttributes( btnCompilerOpts, "IMAGE=icon_help,FLAT=YES" );
@@ -127,8 +227,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelComment, "SIZE=60x20" );
 		
 		textComment = IupText( null );
-		IupSetAttributes( textComment, "SIZE=276x20,MULTILINE=YES,SCROLLBAR=VERTICAL" );
-		IupSetHandle( "textComment", textComment );
+		IupSetAttributes( textComment, "SIZE=276x20,MULTILINE=YES,SCROLLBAR=VERTICAL,NAME=PRJPROPERTY_Comment" );
 		
 		Ihandle* hBox06 = IupHbox( labelComment, textComment, null );
 		IupSetAttribute( hBox06, "ALIGNMENT", "ACENTER" );
@@ -138,8 +237,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( labelCompilerPath, "SIZE=60x20" );
 		
 		textCompilerPath = IupText( null );
-		IupSetAttribute( textCompilerPath, "SIZE", "276x12" );
-		IupSetHandle( "textCompilerPath", textCompilerPath );
+		IupSetAttributes( textCompilerPath, "SIZE=276x12,NAME=PRJPROPERTY_CompilerPath" );
 
 		Ihandle* btnCompilerPath = IupButton( null, null );
 		IupSetAttributes( btnCompilerPath, "IMAGE=icon_openfile,FLAT=YES" );
@@ -167,7 +265,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		// PAGE 2 Include...
 		// Include Paths
 		listIncludePath = IupList( null );
-		IupSetAttributes( listIncludePath, "MULTIPLE=NO, SIZE=326x64" );
+		IupSetAttributes( listIncludePath, "MULTIPLE=NO,SIZE=326x64,NAME=PRJPROPERTY_IncludePaths" );
 		IupSetHandle( "listIncludePath_Handle", listIncludePath );
 		
 		Ihandle* btnIncludePathAdd = IupButton( null, null );
@@ -207,7 +305,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Library Paths
 		listLibPath = IupList( null );
-		IupSetAttributes( listLibPath, "MULTIPLE=NO, SIZE=328x64" );
+		IupSetAttributes( listLibPath, "MULTIPLE=NO,SIZE=328x64,NAME=PRJPROPERTY_LibPaths" );
 		IupSetHandle( "listLibPath_Handle", listLibPath );
 
 		Ihandle* btnLibPathAdd = IupButton( null, null );
@@ -270,6 +368,7 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Set btnOK Action
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CProjectPropertiesDialog_btnOK_cb );
+		IupSetCallback( btnAPPLY, "ACTION", cast(Icallback) &CProjectPropertiesDialog_btnApply_cb );
 	}
 
 	public:
@@ -277,8 +376,12 @@ class CProjectPropertiesDialog : CBaseDialog
 	{
 		super( w, h, title, bResize, parent );
 		bCreateNew = bNew;
-		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		IupSetAttribute( _dlg, "ICON", "icon_properties" );
+		IupSetAttributes( _dlg, "MINBOX=NO,MAXBOX=NO,ICON=icon_properties" );
+		IupSetHandle( "PRJPROPERTY_DIALOG", _dlg );
+		
+		// Init the tempProject
+		PROJECT emptyProject;
+		tempProject = emptyProject;
 		/*
 		version( Windows )
 		{
@@ -296,29 +399,52 @@ class CProjectPropertiesDialog : CBaseDialog
 			IupSetAttribute( textProjectDir, "ACTIVE", "NO" );
 			IupSetAttribute( btnProjectDir, "ACTIVE", "NO" );
 			IupSetAttribute( textProjectDir, "BGCOLOR",  IupGetGlobal("DLGBGCOLOR") );
+			
+			// Set tempProject = Active Project
+			tempProject = GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName];
+			
+			IupSetAttribute( textProjectName, "VALUE", toStringz( tempProject.name ) );
+			IupSetAttribute( listType, "VALUE", toStringz( tempProject.type ) );
+			IupSetAttribute( textProjectDir, "VALUE", toStringz( tempProject.dir ) );
+			version(FBIDE) if( tempProject.passOneFile == "ON" ) IupSetAttribute( toggleOneFile, "VALUE", "ON" );
+			IupSetAttribute( textArgs, "VALUE", toStringz( tempProject.args ) );
+			IupSetAttribute( textComment, "VALUE", toStringz( tempProject.comment ) );
+			IupSetAttribute( textMainFile, "VALUE", toStringz( tempProject.mainFile ) );
+			
+			int _item;
+			if( tempProject.focusUnit.length > 0 ) IupSetAttributeId( listFocus, "", ++_item, "" );
+			foreach( int i, char[] key; tempProject.focusUnit.keys )
+				IupSetAttributeId( listFocus, "", ++_item, toStringz( key ) );
+				
+			if( tempProject.focusOn.length ) IupSetAttribute( listFocus, "VALUE", toStringz( tempProject.focusOn ) );
+			
+			
+			if( tempProject.focusOn in tempProject.focusUnit )
+			{
+				FocusUnit beFocusUnit = tempProject.focusUnit[tempProject.focusOn];
 
-			//PROJECT activeP = GLOBAL.projectManager[GLOBAL.activeProjectDirName];
-			PROJECT activeP = GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName];
+				IupSetAttribute( textTargetName, "VALUE", toStringz( beFocusUnit.Target ) );
+				IupSetAttribute( textCompilerOpts, "VALUE", toStringz( beFocusUnit.Option ) );
+				IupSetAttribute( textCompilerPath, "VALUE", toStringz( beFocusUnit.Compiler ) );
+				
+				for( int i = 0; i < beFocusUnit.IncDir.length; ++ i )
+					IupSetAttributeId( listIncludePath, "", i + 1, toStringz( beFocusUnit.IncDir[i] ) );
+				
+				for( int i = 0; i < beFocusUnit.LibDir.length; ++ i )
+					IupSetAttributeId( listLibPath, "", i + 1, toStringz( beFocusUnit.LibDir[i] ) );				
+			}
+			else
+			{
+				IupSetAttribute( textTargetName, "VALUE", toStringz( tempProject.targetName ) );
+				IupSetAttribute( textCompilerOpts, "VALUE", toStringz( tempProject.compilerOption ) );
+				IupSetAttribute( textCompilerPath, "VALUE", toStringz( tempProject.compilerPath ) );
+				
+				for( int i = 0; i < tempProject.includeDirs.length; i++ )
+					IupSetAttributeId( listIncludePath, "", i + 1, toStringz(tempProject.includeDirs[i]) );
 
-			IupSetAttribute( textProjectName, "VALUE", toStringz( activeP.name ) );
-			IupSetAttribute( listType, "VALUE", toStringz( activeP.type ) );
-			IupSetAttribute( textProjectDir, "VALUE", toStringz( activeP.dir ) );
-			IupSetAttribute( textMainFile, "VALUE", toStringz( activeP.mainFile ) );
-			version(FBIDE) if( activeP.passOneFile == "ON" ) IupSetAttribute( toggleOneFile, "VALUE", "ON" );
-			IupSetAttribute( textTargetName, "VALUE", toStringz( activeP.targetName ) );
-			IupSetAttribute( textArgs, "VALUE", toStringz( activeP.args ) );
-			IupSetAttribute( textCompilerOpts, "VALUE", toStringz( activeP.compilerOption ) );
-			IupSetAttribute( textComment, "VALUE", toStringz( activeP.comment ) );
-			IupSetAttribute( textCompilerPath, "VALUE", toStringz( activeP.compilerPath ) );
-
-
-			//IupSetAttribute( list, "APPENDITEM", toStringz(fileName) );
-			//Ihandle*	listIncludePath, listLibPath;
-			for( int i = 0; i < activeP.includeDirs.length; i++ )
-				IupSetAttribute( listIncludePath, toStringz( Integer.toString( i+1 ) ), toStringz(activeP.includeDirs[i]) );
-
-			for( int i = 0; i < activeP.libDirs.length; i++ )
-				IupSetAttribute( listLibPath, toStringz( Integer.toString( i+1 ) ), toStringz(activeP.libDirs[i]) );
+				for( int i = 0; i < tempProject.libDirs.length; i++ )
+					IupSetAttributeId( listLibPath, "", i + 1, toStringz(tempProject.libDirs[i]) );				
+			}
 		}
 		else
 		{
@@ -335,16 +461,8 @@ class CProjectPropertiesDialog : CBaseDialog
 	{
 		// Free text and list's handle
 		IupSetHandle( "textProjectName", null );
-		IupSetHandle( "listType", null );
 		IupSetHandle( "textProjectDir", null );
 		IupSetHandle( "btnProjectDir", null );
-		IupSetHandle( "textMainFile", null );
-		version(FBIDE) IupSetHandle( "toggleOneFile", null );
-		IupSetHandle( "textTargetName", null );
-		IupSetHandle( "textArgs", null );
-		IupSetHandle( "textCompilerOpts", null );
-		IupSetHandle( "textComment", null );
-		IupSetHandle( "textCompilerPath", null );
 		
 		
 		IupSetHandle( "listIncludePath_Handle", null );
@@ -361,6 +479,11 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetHandle( "btnLibPathUp_Handle", null );
 		IupSetHandle( "btnLibPathDown_Handle", null );
 	}
+	
+	Ihandle* getHandle()
+	{
+		return _dlg;
+	}
 }
 
 private:
@@ -368,85 +491,141 @@ extern(C) // Callback for CProjectPropertiesDialog
 {
 	int CProjectPropertiesDialog_btnOK_cb( Ihandle* ih )
 	{
-		Ihandle* dirHandle = IupGetHandle( "textProjectDir" );
+		// Apply First!!!
+		if( CProjectPropertiesDialog_btnApply_cb( null ) == IUP_IGNORE )
+		{
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["nodirmessage"].toCString() );
+			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
+			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+		
+			return IUP_IGNORE;
+		}
+		
+		
+		Ihandle* dirHandle = IupGetDialogChild( IupGetHandle( "PRJPROPERTY_DIALOG" ), "PRJPROPERTY_ProjectDir" );
 		if( dirHandle != null )
 		{
-
-			char[]	_prjDir				= Util.trim( fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup );
-
-			if( _prjDir.length )
+			if( !CProjectPropertiesDialog.tempProject.name.length )
 			{
-				char[]	_prjName			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textProjectName" ), "VALUE" ) ) ).dup;
-				char[]	_prjType			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "listType" ), "VALUE" ) ) ).dup;
-				char[]	_prjMainFile		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textMainFile" ), "VALUE" ) ) ).dup;
-				version(FBIDE) char[]	_prjPassOneFile		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "toggleOneFile" ), "VALUE" ) ) ).dup;
-				char[]	_prjTargetName		= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textTargetName" ), "VALUE" ) ) ).dup;
-				char[]	_prjArgs			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textArgs" ), "VALUE" ) ) ).dup;
-				char[]	_prjCompilerOptions	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerOpts" ), "VALUE" ) ) ).dup;
-				char[]	_prjComment			= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textComment" ), "VALUE" ) ) ).dup;
-				char[]	_prjCompilerPath	= Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "textCompilerPath" ), "VALUE" ) ) ).dup;
-				
-				if( !_prjName.length )
+				scope _fp = new FilePath( Path.normalize( CProjectPropertiesDialog.tempProject.dir ) );
+				CProjectPropertiesDialog.tempProject.name = _fp.name;
+				IupSetAttribute( IupGetDialogChild( IupGetHandle( "PRJPROPERTY_DIALOG" ), "PRJPROPERTY_ProjectName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.name.dup ) );
+			}		
+		
+			if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "NO" ) // Created project
+			{
+				if( CProjectPropertiesDialog.tempProject.dir in GLOBAL.projectManager )
 				{
-					scope _fp = new FilePath( Path.normalize( _prjDir ) );
-					_prjName = _fp.name;
+					CProjectPropertiesDialog.tempProject.sources = GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].sources.dup;
+					CProjectPropertiesDialog.tempProject.includes = GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].includes.dup;
+					CProjectPropertiesDialog.tempProject.others = GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].others.dup;
 				}
-
-				PROJECT s;
-				s.name				= _prjName;
-				s.type				= _prjType;
-				s.dir				= Path.normalize( _prjDir );
-				s.mainFile			= _prjMainFile;
-				version(FBIDE) s.passOneFile		= _prjPassOneFile;
-				s.targetName		= _prjTargetName;
-				s.args				= _prjArgs;
-				s.compilerOption	= _prjCompilerOptions;
-				s.comment			= _prjComment;
-				s.compilerPath		= _prjCompilerPath;
-
-				if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "NO" ) // Created project
-				{
-					if( _prjDir in GLOBAL.projectManager )
-					{
-						s.sources = GLOBAL.projectManager[_prjDir].sources.dup;
-						s.includes = GLOBAL.projectManager[_prjDir].includes.dup;
-						s.others = GLOBAL.projectManager[_prjDir].others.dup;
-					}
-				}
-
-				int		includeCount = IupGetInt( IupGetHandle( "listIncludePath_Handle" ), "COUNT" );
-				for( int i = 1; i <= includeCount; i++ )
-					s.includeDirs ~= fromStringz( IupGetAttribute( IupGetHandle( "listIncludePath_Handle" ), toStringz( Integer.toString( i ) ) ) ).dup;
-				
-				int		libCount = IupGetInt( IupGetHandle( "listLibPath_Handle" ), "COUNT" );
-				for( int i = 1; i <= libCount; i++ )
-					s.libDirs ~= fromStringz( IupGetAttribute( IupGetHandle( "listLibPath_Handle" ), toStringz( Integer.toString( i ) ) ) ).dup;
-
-				GLOBAL.projectManager[_prjDir] = s;
-				GLOBAL.projectManager[_prjDir].saveFile();
-
-				// Recent Projects
-				GLOBAL.projectTree.updateRecentProjects( _prjDir, _prjName );
-
-				if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "YES" ) GLOBAL.projectTree.CreateNewProject( _prjName, _prjDir );
-
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ _prjName );
 			}
-			else
-			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["nodirmessage"].toCString() );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-				
-				return IUP_DEFAULT;
-			}			
+
+			GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir] = CProjectPropertiesDialog.tempProject;
+			GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].saveFile();
+
+			// Recent Projects
+			GLOBAL.projectTree.updateRecentProjects( CProjectPropertiesDialog.tempProject.dir, CProjectPropertiesDialog.tempProject.name );
+			if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "YES" ) GLOBAL.projectTree.CreateNewProject( CProjectPropertiesDialog.tempProject.name, CProjectPropertiesDialog.tempProject.dir );
+			GLOBAL.statusBar.setPrjName( null, true );
+			//GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].name );
 		}
 
 		return IUP_CLOSE;
 	}
 
+	int CProjectPropertiesDialog_btnApply_cb( Ihandle* ih )
+	{
+		//PRJPROPERTY_FocusList
+		Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
+		if( _dlg != null )
+		{
+			Ihandle* dirHandle = IupGetDialogChild( _dlg, "PRJPROPERTY_ProjectDir" );
+			if( dirHandle != null )
+			{
+				char[]	_prjDir				= Util.trim( fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup );
+
+				if( _prjDir.length )
+				{
+					CProjectPropertiesDialog.tempProject.name = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_ProjectName" ), "VALUE" ) ) ).dup;
+					CProjectPropertiesDialog.tempProject.dir = Path.normalize( _prjDir ).dup;
+					CProjectPropertiesDialog.tempProject.type = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TypeList" ), "VALUE" ) ) ).dup;
+					CProjectPropertiesDialog.tempProject.mainFile = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_ProjectMainFile" ), "VALUE" ) ) ).dup;
+					CProjectPropertiesDialog.tempProject.args = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Args" ), "VALUE" ) ) ).dup;
+					CProjectPropertiesDialog.tempProject.comment = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Comment" ), "VALUE" ) ) ).dup;
+					CProjectPropertiesDialog.tempProject.focusOn = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_FocusList" ), "VALUE" ) ) ).dup;
+					version(FBIDE)
+						CProjectPropertiesDialog.tempProject.passOneFile = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_ToggleOneFile" ), "VALUE" ) ) ).dup;
+				}
+				else
+				{
+					return IUP_IGNORE;
+				}
+			}
+			else
+			{
+				return IUP_IGNORE;
+			}
+		
+		
+			Ihandle* focusList = IupGetDialogChild( _dlg, "PRJPROPERTY_FocusList" );
+			if( focusList != null )
+			{
+				char[] focusTitle = Util.trim( fromStringz( IupGetAttribute( focusList, "VALUE" ) ) ).dup;
+				if( focusTitle.length )
+				{
+					FocusUnit _focusUnit;
+					_focusUnit.Target = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE" ) ) ).dup;
+					_focusUnit.Option = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE" ) ) ).dup;
+					_focusUnit.Compiler = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE" ) ) ).dup;
+					
+					//PRJPROPERTY_IncludePaths, PRJPROPERTY_LibPaths
+					int		includeCount = IupGetInt( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "COUNT" );
+					for( int i = 1; i <= includeCount; i++ )
+						_focusUnit.IncDir ~= fromStringz( IupGetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i ) ).dup;
+					
+					int		libCount = IupGetInt( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "COUNT" );
+					for( int i = 1; i <= libCount; i++ )
+						_focusUnit.LibDir ~= fromStringz( IupGetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i ) ).dup;
+						
+					CProjectPropertiesDialog.tempProject.focusUnit[focusTitle] = _focusUnit;
+					actionManager.SearchAction.addListItem( focusList, focusTitle, 100 );
+					IupSetAttributeId( focusList, "INSERTITEM", 1, "" );
+					IupSetAttribute( focusList, "VALUE", toStringz( focusTitle ) );
+				}
+				else
+				{
+					CProjectPropertiesDialog.tempProject.targetName	= Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE" ) ) ).dup;
+					CProjectPropertiesDialog.tempProject.compilerOption	= Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE" ) ) ).dup;
+					CProjectPropertiesDialog.tempProject.compilerPath = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE" ) ) ).dup;
+					
+					CProjectPropertiesDialog.tempProject.includeDirs.length = 0;
+					int		includeCount = IupGetInt( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "COUNT" );
+					for( int i = 1; i <= includeCount; i++ )
+						CProjectPropertiesDialog.tempProject.includeDirs ~= fromStringz( IupGetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i ) ).dup;
+					
+					CProjectPropertiesDialog.tempProject.libDirs.length = 0;
+					int		libCount = IupGetInt( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "COUNT" );
+					for( int i = 1; i <= libCount; i++ )
+						CProjectPropertiesDialog.tempProject.libDirs ~= fromStringz( IupGetAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i ) ).dup;
+				}
+			}
+			else
+			{
+				return IUP_IGNORE;
+			}
+		}
+		else
+		{
+			return IUP_IGNORE;
+		}
+		
+		
+		return IUP_DEFAULT;
+	}
 	
 	int CProjectPropertiesDialog_btnProjectDir_cb( Ihandle* ih )
 	{
@@ -482,13 +661,17 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 	int CProjectPropertiesDialog_btnCompilerPath_cb( Ihandle* ih ) 
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["exefile"].toDString() ~ "|*.exe|" );
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["exefile"].toDString() ~ "|*.exe" );
 		char[] fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )
 		{
-			Ihandle* _compilerPath = IupGetHandle( "textCompilerPath" );
-			if( _compilerPath != null ) IupSetAttribute( _compilerPath, "VALUE", toStringz( fileName ) );
+			Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
+			if( _dlg != null )
+			{
+				Ihandle* _compilerPath = IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" );
+				if( _compilerPath != null ) IupSetAttribute( _compilerPath, "VALUE", toStringz( fileName ) );
+			}
 		}
 		else
 		{

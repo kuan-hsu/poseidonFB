@@ -395,9 +395,7 @@ struct DocumentTabAction
 					}
 					else
 					{
-						int prjID = actionManager.ProjectAction.getActiveProjectID();
-						scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-						GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+						GLOBAL.statusBar.setPrjName( null, true );
 					}
 					
 					return IUP_DEFAULT;
@@ -851,9 +849,7 @@ struct ScintillaAction
 			}
 			else
 			{
-				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+				GLOBAL.statusBar.setPrjName( null, true );
 			}
 
 			return true;
@@ -933,9 +929,7 @@ struct ScintillaAction
 			}
 			else
 			{
-				int prjID = actionManager.ProjectAction.getActiveProjectID();
-				scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-				GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString );
+				GLOBAL.statusBar.setPrjName( null, true );
 			}			
 			
 			// Parser

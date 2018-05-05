@@ -1,5 +1,11 @@
 ﻿module project;
 
+struct FocusUnit
+{
+	char[]		Target, Option, Compiler;
+	char[][]	IncDir, LibDir;
+}
+	
 struct PROJECT
 {
 	private:
@@ -9,6 +15,9 @@ struct PROJECT
 	import tango.text.xml.DocPrinter;
 	import tango.io.UnicodeFile;
 	import tango.io.FilePath;//tango.io.Stdout;
+	import tango.stdc.stringz;
+	
+	import iup.iup;
 
 
 	public:
@@ -30,6 +39,11 @@ struct PROJECT
 	char[][]	sources;
 	char[][]	includes;
 	char[][]	others;
+	
+	// Focus
+	char[]					focusOn;
+	FocusUnit[char[]]		focusUnit;
+	
 
 	void saveFile()
 	{
@@ -62,6 +76,7 @@ struct PROJECT
 		doc ~= setINILineData( "MainFile", mainFile );
 		doc ~= setINILineData( "PassOneFile", passOneFile );
 		doc ~= setINILineData( "TargetName", targetName );
+		doc ~= setINILineData( "FocusOn", focusOn );
 		doc ~= setINILineData( "CompilerArgs", args );
 		doc ~= setINILineData( "CompilerOption", compilerOption );
 		doc ~= setINILineData( "Comment", comment );
@@ -86,6 +101,21 @@ struct PROJECT
 		doc ~= setINILineData( "[Others]");
 		foreach( char[] s; others ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			
+		doc ~= setINILineData( "[Focus]");
+		foreach( char[] key; focusUnit.keys )
+		{
+			doc ~= setINILineData( "title",  key );
+			doc ~= setINILineData( "target",  focusUnit[key].Target );
+			doc ~= setINILineData( "option",  focusUnit[key].Option );
+			doc ~= setINILineData( "compiler",  focusUnit[key].Compiler );
+
+			char[] joined = Util.join( focusUnit[key].IncDir, ";" );
+			if( joined.length ) doc ~= setINILineData( "incdir", joined );
+
+			joined = Util.join( focusUnit[key].LibDir, ";" );
+			if( joined.length ) doc ~= setINILineData( "libdir", joined );
+		}
 		
 		version(FBIDE) actionManager.FileAction.saveFile( dir ~ "/.poseidon", doc );
 		version(DIDE) actionManager.FileAction.saveFile( dir ~ "/D.poseidon", doc );
@@ -113,7 +143,7 @@ struct PROJECT
 			scope _dir = new FilePath( settingFileName );
 			s.dir = _dir.path[0..length-1];			
 			
-			char[]	blockText;
+			char[]	blockText, focusName;
 			foreach( char[] lineData; Util.splitLines( doc ) )
 			{
 				lineData = Util.trim( lineData );
@@ -159,6 +189,7 @@ struct PROJECT
 							case "MainFile":		s.mainFile = right;						break;
 							case "PassOneFile":		s.passOneFile = right;					break;
 							case "TargetName":		s.targetName = right;					break;
+							case "FocusOn":			s.focusOn = right;						break;
 							case "CompilerArgs":	s.args = right;							break;
 							case "CompilerOption":	s.compilerOption = right;				break;
 							case "Comment":			s.comment = right;						break;
@@ -181,6 +212,40 @@ struct PROJECT
 						
 					case "[Others]":
 						if( left == "name" ) s.others ~= _replaceDir( right, s.dir );		break;
+						
+					case "[Focus]":
+						switch( left )
+						{
+							case "title":
+								focusName = right;
+								FocusUnit _fs;
+								s.focusUnit[focusName] = _fs;
+								break;
+							case "target":
+								if( focusName.length )	s.focusUnit[focusName].Target = right;
+								break;
+							case "option":
+								if( focusName.length )	s.focusUnit[focusName].Option = right;
+								break;
+							case "compiler":
+								if( focusName.length )	s.focusUnit[focusName].Compiler = right;
+								break;
+							case "incdir":
+								if( focusName.length )
+								{
+									foreach( char[] dir; Util.split( right, ";" ) )
+										s.focusUnit[focusName].IncDir ~= _replaceDir( dir, s.dir );
+								}
+								break;
+							case "libdir":
+								if( focusName.length )
+								{
+									foreach( char[] dir; Util.split( right, ";" ) )
+										s.focusUnit[focusName].LibDir ~= _replaceDir( dir, s.dir );
+								}
+								break;
+							default:
+						}
 					
 					default:
 				}

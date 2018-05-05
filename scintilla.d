@@ -2702,11 +2702,11 @@ extern(C)
 				if( tail > pos )
 				{
 					IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
-					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.toCString );
+					IupSetAttribute( ih, "SELECTEDTEXT", textCovert.toCString );
 				}
 				else if( tail == pos )
 				{
-					IupSetAttribute( ih , "PREPEND", textCovert.toCString );
+					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int)textCovert.toCString ); // SCI_ADDTEXT 2001
 				}				
 			}
 			else
@@ -2714,12 +2714,12 @@ extern(C)
 				IupScintillaSendMessage( ih, 2026, pos, 0 ); //SCI_SETANCHOR = 2026
 				
 				textCovert = _text;
-				if( IupGetAttribute( ih , "SELECTEDTEXT" ) == null )
+				if( IupGetAttribute( ih, "SELECTEDTEXT" ) == null )
 				{	
-					IupSetAttribute( ih , "PREPEND", textCovert.toCString );
+					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int)textCovert.toCString ); // SCI_ADDTEXT 2001
 				}
 				else
-					IupSetAttribute( ih , "SELECTEDTEXT", textCovert.toCString );			
+					IupSetAttribute( ih, "SELECTEDTEXT", textCovert.toCString );			
 			}
 		}
 
