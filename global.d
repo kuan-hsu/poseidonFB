@@ -151,6 +151,7 @@ struct GLOBAL
 	static char[]				compilerSFX = "OFF";
 	static char[]				delExistExe = "ON";
 	static char[]				consoleExe = "ON";
+	static char[]				toggleCompileAtBackThread = "ON";
 	static IupString			debuggerFullPath;
 	static IupString			manualPath;
 	static IupString			colorTemplate;
@@ -585,6 +586,7 @@ struct GLOBAL
 						GLOBAL.languageItems["usesfx"] = new IupString( cast(char[]) "Play Result SFX( When Result Window is OFF )" );
 						GLOBAL.languageItems["delexistexe"] = new IupString( cast(char[]) "Before Compile, Delete Existed Execute File" );
 						GLOBAL.languageItems["consoleexe"] = new IupString( cast(char[]) "Use Console Launcher To Run Program" );
+						GLOBAL.languageItems["compileatbackthread"] = new IupString( cast(char[]) "Enable Compile At Back Thread" );
 				GLOBAL.languageItems["parser"] = new IupString( cast(char[]) "Parser" );
 					GLOBAL.languageItems["parsersetting"] = new IupString( cast(char[]) "Parser Settings" );
 						GLOBAL.languageItems["enablekeyword"] = new IupString( cast(char[]) "Enable Keyword Autocomplete" );
@@ -599,7 +601,7 @@ struct GLOBAL
 						GLOBAL.languageItems["showallmembers"] = new IupString( cast(char[]) "Show All Members( public, protected, private )" );
 						GLOBAL.languageItems["enabledwell"] = new IupString( cast(char[]) "Enable Mouse Dwell to Show Type" );
 						GLOBAL.languageItems["enableoverwrite"] = new IupString( cast(char[]) "Overwrite To Non Identifier Character" );
-						GLOBAL.languageItems["completeatbackthread"] = new IupString( cast(char[]) "Enable Codecomplete AT Back Thread" );
+						GLOBAL.languageItems["completeatbackthread"] = new IupString( cast(char[]) "Enable Codecomplete At Back Thread" );
 						GLOBAL.languageItems["completedelay"] = new IupString( cast(char[]) "  Display Delay(ms):" );
 						GLOBAL.languageItems["parserlive"] = new IupString( cast(char[]) "ParseLive! Level" );
 							GLOBAL.languageItems["none"] = new IupString( cast(char[]) "None" );
@@ -781,6 +783,7 @@ struct GLOBAL
 			GLOBAL.languageItems["prjmainfile"] = new IupString( cast(char[]) "Main file" );
 			GLOBAL.languageItems["prjonefile"] = new IupString( cast(char[]) "Pass One File To Compiler" );
 			GLOBAL.languageItems["prjtarget"] = new IupString( cast(char[]) "Target Name" );
+			GLOBAL.languageItems["prjfocus"] = new IupString( cast(char[]) "Focus" );
 			GLOBAL.languageItems["prjargs"] = new IupString( cast(char[]) "Execute Args:" );
 			GLOBAL.languageItems["prjopts"] = new IupString( cast(char[]) "Compile Opts:" );
 			GLOBAL.languageItems["prjcomment"] = new IupString( cast(char[]) "Comment" );
@@ -877,7 +880,7 @@ struct GLOBAL
 		GLOBAL.languageItems["existed"] = new IupString( cast(char[]) "had already existed!" );
 		GLOBAL.languageItems["wrongext"] = new IupString( cast(char[]) "Wrong Ext Name!" );
 		GLOBAL.languageItems["filelost"] = new IupString( cast(char[]) "isn't existed!" );
-		GLOBAL.languageItems[".poseidonbroken"] = new IupString( cast(char[]) "Project setup file loading error! Xml format may be broken!" );
+		GLOBAL.languageItems[".poseidonbroken"] = new IupString( cast(char[]) "Project setup file loading error!" );
 		GLOBAL.languageItems[".poseidonlost"] = new IupString( cast(char[]) "had lost setting xml file!" );
 		GLOBAL.languageItems["continueimport"] = new IupString( cast(char[]) "The Dir has poseidon Project File, Continue Import Anyway?" );
 		GLOBAL.languageItems["compilefailure"] = new IupString( cast(char[]) "Compile Failure!" );
@@ -888,6 +891,7 @@ struct GLOBAL
 		GLOBAL.languageItems["exitdebug2"] = new IupString( cast(char[]) "No debugging symbols found!! Exit debug!" );
 		GLOBAL.languageItems["applycolor"] = new IupString( cast(char[]) "Apply to other scintilla background color settings?" );
 		GLOBAL.languageItems["noselect"] = new IupString( cast(char[]) "No Selected!!" );
+		GLOBAL.languageItems["nodirandcreate"] = new IupString( cast(char[]) "No This Dir!! Create New One?" );
 		GLOBAL.languageItems["quest"] = new IupString( cast(char[]) "Quest" );
 		GLOBAL.languageItems["alarm"] = new IupString( cast(char[]) "Alarm" );
 		GLOBAL.languageItems["error"] = new IupString( cast(char[]) "Error" );

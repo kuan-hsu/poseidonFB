@@ -9,7 +9,7 @@ struct FocusUnit
 struct PROJECT
 {
 	private:
-	import actionManager, tools;
+	import global, actionManager, tools;
 	
 	import tango.text.xml.Document;
 	import tango.text.xml.DocPrinter;
@@ -45,7 +45,7 @@ struct PROJECT
 	FocusUnit[char[]]		focusUnit;
 	
 
-	void saveFile()
+	bool saveFile()
 	{
 		char[] _replaceDir( char[] _fullPath, char[] _dir )
 		{
@@ -63,6 +63,23 @@ struct PROJECT
 			}
 
 			return _fullPath;
+		}
+		
+		scope destPath = new FilePath( dir );
+		if( !destPath.exists() )
+		{	
+			Ihandle* prjPropertyDialog = IupGetHandle( "PRJPROPERTY_DIALOG" );
+			if( prjPropertyDialog == null ) prjPropertyDialog = GLOBAL.mainDlg;
+			try
+			{
+				int result = IupMessageAlarm( prjPropertyDialog, GLOBAL.languageItems["alarm"].toCString(), toStringz( destPath.toString ~ "\n" ~ GLOBAL.languageItems["nodirandcreate"].toDString() ), "YESNO" );
+				if( result == 1 ) destPath.create(); else return false;
+			}
+			catch( Exception e )
+			{
+				IupMessageError( prjPropertyDialog, toStringz( e.toString ) );
+				return false;
+			}
 		}
 		
 		char[]	PATH = dir ~ "/";
@@ -119,6 +136,8 @@ struct PROJECT
 		
 		version(FBIDE) actionManager.FileAction.saveFile( dir ~ "/.poseidon", doc );
 		version(DIDE) actionManager.FileAction.saveFile( dir ~ "/D.poseidon", doc );
+		
+		return true;
 	}
 	
 	

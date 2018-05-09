@@ -252,7 +252,7 @@ extern(C) // Callback for CBaseDialog
 	
 	int CStatusBar_CustomOption_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_IGNORE;
 		
 		if( pressed == 0 ) //release
 		{
@@ -339,7 +339,7 @@ extern(C) // Callback for CBaseDialog
 	
 	private int CStatusBar_PROJECTFOCUS_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_IGNORE;
 		
 		if( pressed == 0 ) //release
 		{
@@ -393,7 +393,7 @@ extern(C) // Callback for CBaseDialog
 	
 	private int CStatusBar_LINExCOL_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_IGNORE;
 		
 		if( pressed == 0 ) //release
 		{
@@ -480,7 +480,7 @@ extern(C) // Callback for CBaseDialog
 	
 	private int CStatusBar_EOL_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_IGNORE;
 		
 		if( pressed == 0 ) //release
 		{
@@ -545,7 +545,7 @@ extern(C) // Callback for CBaseDialog
 	
 	private int CStatusBar_Encode_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_DEFAULT;
+		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_IGNORE;
 		
 		if( pressed == 0 ) //release
 		{

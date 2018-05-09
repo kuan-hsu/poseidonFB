@@ -398,7 +398,7 @@ class CScintilla
 		}
 		catch
 		{
-			IupMessage("saveFile","ERROR");
+			IupMessage( "Scintilla.saveFile", "ERROR" );
 			return false;
 		}
 

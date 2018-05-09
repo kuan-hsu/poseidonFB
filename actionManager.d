@@ -352,7 +352,7 @@ struct FileAction
 		}
 		catch
 		{
-			IupMessage("","ERROR");
+			IupMessage("FileAction.saveFile","ERROR");
 			return false;
 		}
 

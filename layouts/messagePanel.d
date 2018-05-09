@@ -249,12 +249,12 @@ class CMessageAndSearch
 		IupSetAttribute( searchOutputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
 	}
 	
-	void printOutputPanel( char[] txt, bool bClear = false )
+	void printOutputPanel( char[] txt, bool bClear = false, bool bScrolltoBottom = true )
 	{
 		if( txt.length )
 		{
 			if( bClear ) IupSetAttribute( outputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( outputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
-			scrollOutputPanel( -1 );
+			if( bScrolltoBottom ) scrollOutputPanel( -1 );
 		}
 		else
 		{
@@ -262,11 +262,12 @@ class CMessageAndSearch
 		}
 	}
 	
-	void printSearchOutputPanel( char[] txt, bool bClear = false )
+	void printSearchOutputPanel( char[] txt, bool bClear = false, bool bScrolltoBottom = true )
 	{
 		if( txt.length )
 		{
 			if( bClear ) IupSetAttribute( searchOutputPanel, "VALUE", GLOBAL.cString.convert( txt ) ); else IupSetAttribute( searchOutputPanel, "APPEND", GLOBAL.cString.convert( txt ) );
+			if( bScrolltoBottom ) scrollSearchOutputPanel( -1 );
 		}
 		else
 		{

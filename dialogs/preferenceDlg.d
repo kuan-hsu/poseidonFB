@@ -123,6 +123,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleConsoleExe, "VALUE", toStringz(GLOBAL.consoleExe.dup) );
 		IupSetHandle( "toggleConsoleExe", toggleConsoleExe );
 		
+		Ihandle* toggleCompileAtBackThread = IupToggle( GLOBAL.languageItems["compileatbackthread"].toCString, null );
+		IupSetAttribute( toggleCompileAtBackThread, "VALUE", toStringz(GLOBAL.toggleCompileAtBackThread.dup) );
+		IupSetHandle( "toggleCompileAtBackThread", toggleCompileAtBackThread );		
+		
 		Ihandle* labelMonitorID = IupLabel( "ID:" );
 		Ihandle* labelConsoleX = IupLabel( "ConsoleX:" );
 		Ihandle* labelConsoleY = IupLabel( "ConsoleY:" );
@@ -176,7 +180,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( hBoxConsole, "ALIGNMENT=ACENTER" );
 		
 
-		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, hBoxConsole, null );
+		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, toggleCompileAtBackThread, hBoxConsole, null );
 		version(FBIDE)	IupSetAttributes( vBoxCompiler, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		version(DIDE)	IupSetAttributes( vBoxCompiler, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
 
@@ -1685,6 +1689,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleSFX", null );
 		IupSetHandle( "toggleDelPrevEXE", null );
 		IupSetHandle( "toggleConsoleExe", null );
+		IupSetHandle( "toggleCompileAtBackThread", null );
+		
 
 		IupSetHandle( "toggleLineMargin", null );
 		IupSetHandle( "toggleFixedLineMargin", null );
@@ -2396,6 +2402,8 @@ extern(C) // Callback for CPreferenceDialog
 			
 			GLOBAL.delExistExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleDelPrevEXE" ), "VALUE" ) ).dup;
 			GLOBAL.consoleExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE" ) ).dup;
+			GLOBAL.toggleCompileAtBackThread			= fromStringz( IupGetAttribute( IupGetHandle( "toggleCompileAtBackThread" ), "VALUE" ) ).dup;
+			
 			
 			try
 			{

@@ -4,6 +4,7 @@ Type=1
 MainFile=
 PassOneFile=
 TargetName=
+FocusOn=
 CompilerArgs=
 CompilerOption=-odobjs -L/SUBSYSTEM:windows:4 -version=FBIDE
 Comment=
@@ -59,3 +60,4 @@ name=tools.d
 [Includes]
 [Others]
 name=poseidonFB.res
+[Focus]

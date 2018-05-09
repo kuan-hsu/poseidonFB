@@ -662,6 +662,10 @@ class CProjectTree
 				GLOBAL.statusBar.setPrjName( "" );
 				IupSetAttribute( projectButtonCollapse, "VISIBLE", "NO" );
 			}
+			else
+			{
+				GLOBAL.statusBar.setPrjName( null, true );
+			}
 		}
 	}
 	

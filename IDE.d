@@ -360,6 +360,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
 			doc ~= setINILineData( "delexistexe", GLOBAL.delExistExe );
 			doc ~= setINILineData( "consoleexe", GLOBAL.consoleExe );
+			doc ~= setINILineData( "compileatbackthread", GLOBAL.toggleCompileAtBackThread );
 			doc ~= setINILineData( "consoleid", Integer.toString( GLOBAL.consoleWindow.id ) );
 			doc ~= setINILineData( "consolex", Integer.toString( GLOBAL.consoleWindow.x ) );
 			doc ~= setINILineData( "consoley", Integer.toString( GLOBAL.consoleWindow.y ) );
@@ -749,6 +750,7 @@ struct IDECONFIG
 							case "annotation":				GLOBAL.compilerAnootation = right;						break;
 							case "delexistexe":				GLOBAL.delExistExe = right;								break;
 							case "consoleexe":				GLOBAL.consoleExe = right;								break;
+							case "compileatbackthread":		GLOBAL.toggleCompileAtBackThread = right;				break;
 							case "consoleid":				GLOBAL.consoleWindow.id = Integer.atoi( right );		break;
 							case "consolex":				GLOBAL.consoleWindow.x = Integer.atoi( right );			break;
 							case "consoley":				GLOBAL.consoleWindow.y = Integer.atoi( right );			break;

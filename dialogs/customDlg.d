@@ -14,8 +14,7 @@ class CCustomDialog : CBaseDialog
 	private:
 	Ihandle*			listTools;
 	Ihandle*			labelStatus;
-	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n
-									%p% = Active Prj Files\n%pdir% = Active Prj Dir";
+	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n%p% = Active Prj Files\n%pdir% = Active Prj Dir";
 	IupString			_tools, _args;
 	
 	

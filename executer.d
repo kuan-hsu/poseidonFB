@@ -43,7 +43,7 @@ struct ExecuterAction
 	// Inner Class
 	class ExecuterThread : Thread
 	{
-		protected :
+		private:
 		char[]	command, args, cwd;
 		bool	bQuickRun;
 
@@ -163,7 +163,7 @@ struct ExecuterAction
 	
 	class CompileThread : Thread
 	{
-		protected :
+		private:
 		PROJECT		activePrj;
 		char[]		cwd, command;
 		FocusUnit	focus;
@@ -355,7 +355,7 @@ struct ExecuterAction
 	
 	class BuildThread : Thread
 	{
-		protected :
+		private:
 		PROJECT		activePrj;
 		char[]		command, extraOptions, optionDebug, compilePath, executeName;
 		FocusUnit	focus;
@@ -576,7 +576,7 @@ struct ExecuterAction
 										IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
 										IupSetAttribute( messageDlg, "VALUE", toStringz( "Libraries Path Error!" ) );
 										IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );	
-										return false;
+										return;
 									}
 								}
 								
@@ -833,7 +833,7 @@ struct ExecuterAction
 	
 	class ReBuildThread : Thread
 	{
-		protected :
+		private:
 		PROJECT		activePrj;
 		char[]		command, extraOptions;
 		FocusUnit	focus;
@@ -1063,7 +1063,6 @@ struct ExecuterAction
 				
 				scope oFilePath = new FilePath( objPath );
 				if( oFilePath.exists ) oFilePath.remove;
-				
 			}
 		}
 	}	
@@ -1224,193 +1223,10 @@ struct ExecuterAction
 			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 			scope _filePath = new FilePath( cSci.getFullPath() );
 
-			//version(FBIDE)
-			//{
-				CompileThread _compileThread = new CompileThread( _filePath.path.dup, command );
-				_compileThread.start;
-			/+
-			}
-			else
-			{
-				Process p = new Process( true, command );
-				p.gui( true );
-				p.workDir( _filePath.path );
-				p.execute;
+			auto _compileThread = new CompileThread( _filePath.path.dup, command );
+			_compileThread.start();
+			if( GLOBAL.toggleCompileAtBackThread != "ON" ) _compileThread.join();
 
-				bool	bError, bWarning;
-				char[]	stdoutMessage, stderrMessage;
-
-				version(FBIDE)
-				{
-					foreach (line; new Lines!(char)(p.stderr))  
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning:" ) < line.length )
-							{
-								bWarning = true;
-								stderrMessage ~= ( line ~ "\n" );
-								GLOBAL.messagePanel.printOutputPanel( line );
-								continue;
-							}
-						}
-						
-						if( !bError )
-						{
-							if( line.length ) bError = true;
-						}				
-
-						stderrMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-
-					foreach( line; new Lines!(char)(p.stdout) )
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-						}
-						if( !bError )
-						{
-							if( Util.index( line, "error " ) < line.length ) bError = true;
-						}				
-						
-						stdoutMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-				}
-				version(DIDE)
-				{
-					foreach( line; new Lines!(char)(p.stderr) )  
-					{
-						if( Util.trim( line ).length ) bError = true;
-						stderrMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-
-					foreach( line; new Lines!(char)(p.stdout) )
-					{
-						if( !bError )
-						{
-							if( Util.index( line, "): " ) < line.length )
-								bError = true;
-							else if( Util.index( line, "Error " ) < line.length )
-								bError = true;
-						}				
-						
-						stdoutMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-				}
-
-				auto result = p.wait;
-
-				version(FBIDE)
-				{
-					if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-					//if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
-				}
-				version(DIDE)
-				{
-					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-					{
-						//GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
-						showAnnotation( stdoutMessage ~ stderrMessage );
-					}
-					else
-						showAnnotation( null );
-				}
-				GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-				
-				if( bError )
-				{
-					GLOBAL.messagePanel.printOutputPanel( "Compile Error!" );
-
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows) 
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-						}
-					}
-					
-					if( GLOBAL.delExistExe == "ON" )
-					{
-						// Remove the execute file
-						scope targetFilePath = new FilePath( cSci.getFullPath() );
-						version(Windows) targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() ~ ".exe" ); else targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() );
-						if( targetFilePath.exists() ) targetFilePath.remove();
-					}
-				}
-				else
-				{
-					if( !bWarning )
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Compile Success!" );
-
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-							}							
-						}
-					}
-					else
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Compile Success! But got warning..." );
-
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-							}							
-						}
-					}
-					
-					if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
-					
-					return true;
-				}
-			}
-			+/
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		catch( ProcessException e )
@@ -1661,467 +1477,14 @@ struct ExecuterAction
 				}
 			}
 			
-			//version(Windows)
-			//{
-				// Start Thread this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
-				auto BuildThread = new BuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options, optionDebug, compilePath.toString, executeName );
-				BuildThread.start();
-			/+
-			}
-			else
-			{
-				bool	bError, bWarning;
-				char[] stdoutMessage, stderrMessage;			
-				
-				if( txtSources.length )
-				{
-					version(FBIDE)
-					{
-						txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
-					}
-					version(DIDE)
-					{
-						txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option: "" ) ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
-					}
-
-					Process p = new Process( true, txtCommand );
-					p.workDir( GLOBAL.projectManager[activePrjName].dir );
-					p.gui( true );
-					p.execute;
-
-
-					// Compiler Command
-					GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
-					
-					version(FBIDE)
-					{
-						foreach (line; new Lines!(char)(p.stderr))  
-						{
-							if( !bWarning )
-							{
-								if( Util.index( line, "warning:" ) < line.length )
-								{
-									bWarning = true;
-									stderrMessage ~= ( line ~ "\n" );
-									GLOBAL.messagePanel.printOutputPanel( line );
-									continue;
-								}
-							}
-							
-							if( !bError )
-							{
-								if( line.length ) bError = true;
-							}				
-
-							stderrMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-
-						foreach (line; new Lines!(char)(p.stdout))  
-						{
-							if( !bWarning )
-							{
-								if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-							}
-							if( !bError )
-							{
-								if( Util.index( line, "error " ) < line.length )
-									bError = true;
-								else if( Util.index( line, "Error!" ) < line.length )
-									bError = true;
-							}				
-							
-							stdoutMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-					}
-					version(DIDE)
-					{
-						foreach (line; new Lines!(char)(p.stderr))  
-						{
-							if( Util.trim( line ).length ) bError = true;
-							stderrMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-
-						foreach (line; new Lines!(char)(p.stdout))  
-						{
-							if( !bError )
-							{
-								if( Util.index( line, "): " ) < line.length )
-									bError = true;
-								else if( Util.index( line, "Error " ) < line.length )
-									bError = true;
-								
-							}				
-							
-							stdoutMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-					}
+			// Compiler Command
+			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );			
 			
-					auto result = p.wait;
+			// Start Thread this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
+			auto _buildThread = new BuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options, optionDebug, compilePath.toString, executeName );
+			_buildThread.start();
+			if( GLOBAL.toggleCompileAtBackThread != "ON" ) _buildThread.join();
 
-					version(FBIDE)
-					{
-						if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-						//if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
-					}
-					version(DIDE)
-					{
-						if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-						{
-							//GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
-							showAnnotation( stdoutMessage ~ stderrMessage );
-						}
-						else
-							showAnnotation( null );
-					}
-					GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-
-					if( bError )
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
-
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-							}							
-						}
-						
-						if( GLOBAL.delExistExe == "ON" )
-						{
-							// Remove the execute file
-							version(Windows) _targetName ~= ".exe";
-							scope targetFilePath = new FilePath( _targetName );
-							if( targetFilePath.exists() ) targetFilePath.remove();
-						}
-					}
-					else
-					{
-						if( !bWarning )
-						{
-							GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success!" );
-						}
-						else
-						{
-							GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success! But got warning..." );
-						}
-					}
-				}
-
-				if( !bError )
-				{
-					bWarning = bError = false;
-					txtSources = stdoutMessage = stderrMessage = "";
-					
-					foreach( char[] s; GLOBAL.projectManager[activePrjName].others )
-					{
-						txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
-					}				
-
-					version(FBIDE)
-					{
-						foreach( char[] s; _focus.LibDir )
-						{
-							txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
-						}
-					}
-					version(DIDE)
-					{
-						foreach( char[] s; _focus.LibDir )
-						{
-							if( s.length )
-							{
-								version(Windows)
-								{
-									if( s[$-1] != '/' ) s ~= '/';
-									s = Util.replace( s.dup, '/', '\\' );
-
-									if( Util.contains( s, ' ' ) )
-									{
-										wchar[] ws = ( UTF.toString16( s ) ).dup;
-										wchar[] shortName;
-										shortName.length = ws.length + 1;
-										shortName[] = ' ';
-
-										DWORD len = GetShortPathNameW( toString16z( ws ), shortName.ptr, ws.length + 1  );
-										if( len > 0 && len <= ws.length )
-										{
-											s = Util.trim( UTF.toString( shortName[0..len] ) );
-										}
-										else
-										{
-											Ihandle* messageDlg = IupMessageDlg();
-											IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
-											IupSetAttribute( messageDlg, "VALUE", toStringz( "Libraries Path Error!" ) );
-											IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );	
-											return false;
-										}
-									}
-									
-									if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
-								}
-								else
-								{
-									txtLibDirs = " -L-L\"" ~ s ~ "\"";
-								}
-							}
-						}
-					}
-					
-					foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
-					{
-						scope fPath = new FilePath( s );
-						if( fPath.exists() )
-						{
-							version(FBIDE)
-							{
-								scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-								if( oPath.exists() ) txtSources = txtSources ~ " -a \"" ~ oPath.toString ~ "\"" ; 
-							}
-							version(DIDE)
-							{
-								char[]		objPath = GLOBAL.projectManager[activePrjName].dir ~ "/";
-								char[] 		_totalOptions = GLOBAL.projectManager[activePrjName].compilerOption ~ " " ~ options;
-								FilePath	oPath;
-								
-								int ofPos = Util.index( _totalOptions, "-od" );
-								if( ofPos < _totalOptions.length )
-								{
-									char[] outputName;
-									for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
-									{
-										if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
-										outputName ~= _totalOptions[i];
-									}
-									
-									// Got Obj Path -od
-									if( outputName.length ) objPath ~= ( outputName ~ "/" );
-								}
-
-								version(Windows) oPath = new FilePath( objPath ~ fPath.name ~ ".obj" ); else oPath = new FilePath( objPath ~ fPath.name ~ ".o" );
-								if( oPath.exists() ) txtSources = txtSources ~ " \"" ~ oPath.toString ~ "\"" ;
-								
-								delete oPath;
-							}
-						}
-					}
-					
-					version(FBIDE)
-					{
-						txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ txtSources ~ txtLibDirs ~ ( _focus.Option.length ? " " ~
-									_focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-					}
-					version(DIDE)
-					{
-						txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtLibDirs ~ ( _focus.Option.length ? " " ~
-									_focus.Option : "" ) ~ ( options.length ? " " ~ options : "" );
-					}
-					
-					version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";// else txtCommand ~= " -s console";
-					version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:windows:4";
-					
-					scope fp = new FilePath( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName );
-					fp.set( fp.path );
-					if( !fp.exists ) fp.create;
-
-					
-					Process p2 = new Process( true, txtCommand );
-					p2.workDir( GLOBAL.projectManager[activePrjName].dir );
-					p2.gui( true );
-					p2.execute;
-
-					// Compiler Command
-					GLOBAL.messagePanel.printOutputPanel( "\n\nContinue Link Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n" );
-					
-					version(FBIDE)
-					{
-						foreach (line; new Lines!(char)(p2.stderr))  
-						{
-							if( !bWarning )
-							{
-								if( Util.index( line, "warning:" ) < line.length )
-								{
-									bWarning = true;
-									stderrMessage ~= ( line ~ "\n" );
-									GLOBAL.messagePanel.printOutputPanel( line );
-									continue;
-								}
-							}
-							
-							if( !bError )
-							{
-								if( line.length ) bError = true;
-							}				
-
-							stderrMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-
-						foreach (line; new Lines!(char)(p2.stdout))  
-						{
-							if( !bWarning )
-							{
-								if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-							}
-							if( !bError )
-							{
-								if( Util.index( line, "error " ) < line.length )
-									bError = true;
-								else if( Util.index( line, "Error!" ) < line.length )
-									bError = true;
-							}				
-							
-							stdoutMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-					}
-					version(DIDE)
-					{
-						foreach (line; new Lines!(char)(p2.stderr))  
-						{
-							if( Util.trim( line ).length ) bError = true;
-							stderrMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-
-						foreach (line; new Lines!(char)(p2.stdout))  
-						{
-							if( !bError )
-							{
-								if( Util.index( line, "): " ) < line.length )
-									bError = true;
-								else if( Util.index( line, "Error " ) < line.length )
-									bError = true;
-								
-							}				
-							
-							stdoutMessage ~= ( line ~ "\n" );
-							GLOBAL.messagePanel.printOutputPanel( line );
-						}
-					}
-			
-					auto result2 = p2.wait;
-
-					version(FBIDE)
-					{
-						if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-						//if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
-					}
-					version(DIDE)
-					{
-						if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-						{
-							//GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
-							showAnnotation( stdoutMessage ~ stderrMessage );
-						}
-						else
-							showAnnotation( null );
-					}
-					GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-
-					if( bError )
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
-
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-							}							
-						}
-						
-						if( GLOBAL.delExistExe == "ON" )
-						{
-							// Remove the execute file
-							version(Windows) _targetName ~= ".exe";
-							scope targetFilePath = new FilePath( _targetName );
-							if( targetFilePath.exists() ) targetFilePath.remove();
-						}
-					}
-					else
-					{
-						if( !bWarning )
-						{
-							GLOBAL.messagePanel.printOutputPanel( "Build Success!" );
-
-							if( GLOBAL.compilerWindow == "ON" )
-							{
-								Ihandle* messageDlg = IupMessageDlg();
-								IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-								IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-							}
-							else
-							{
-								version(Windows)
-								{
-									if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-								}
-								else
-								{
-									if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-								}							
-							}
-						}
-						else
-						{
-							GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." );
-
-							if( GLOBAL.compilerWindow == "ON" )
-							{
-								Ihandle* messageDlg = IupMessageDlg();
-								IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-								IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-								IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-								IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-							}
-							else
-							{
-								version(Windows)
-								{
-									if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-									//IupExecute( toStringz( GLOBAL.poseidonPath ~ "settings/sound/playsound" ), "settings/sound/warning.wav" );
-								}
-								else
-								{
-									if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-								}							
-							}				
-						}
-					}
-				}
-			}
-			+/
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 			
 			return true;
@@ -2400,224 +1763,11 @@ struct ExecuterAction
 			fp.set( fp.path );
 			if( !fp.exists ) fp.create;
 			
-			//version(FBIDE)
-			//{
-				// Start Thread
-				auto buildThread = new ReBuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options );
-				buildThread.start();
-			/+
-			}
-			else
-			{
-				Process p = new Process( true, txtCommand );
-				p.workDir( GLOBAL.projectManager[activePrjName].dir );
-				p.gui( true );
-				p.execute;
+			// Start Thread
+			auto _reBuildThread = new ReBuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options );
+			_reBuildThread.start();
+			if( GLOBAL.toggleCompileAtBackThread != "ON" ) _reBuildThread.join();
 
-				bool	bError, bWarning;
-				char[] stdoutMessage, stderrMessage;
-
-				// Compiler Command
-				GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
-
-				version(FBIDE)
-				{
-					foreach (line; new Lines!(char)(p.stderr))  
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning:" ) < line.length )
-							{
-								bWarning = true;
-								stderrMessage ~= ( line ~ "\n" );
-								GLOBAL.messagePanel.printOutputPanel( line );
-								continue;
-							}
-						}
-						
-						if( !bError )
-						{
-							if( line.length ) bError = true;
-						}				
-
-						stderrMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-
-					foreach (line; new Lines!(char)(p.stdout))  
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-						}
-						if( !bError )
-						{
-							if( Util.index( line, "error " ) < line.length )
-								bError = true;
-							else if( Util.index( line, "Error!" ) < line.length )
-								bError = true;
-						}				
-						
-						stdoutMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-				}
-				version(DIDE)
-				{
-					foreach (line; new Lines!(char)(p.stderr))  
-					{
-						if( Util.trim( line ).length ) bError = true;
-						stderrMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-
-					foreach (line; new Lines!(char)(p.stdout))  
-					{
-						if( !bError )
-						{
-							if( Util.index( line, "): " ) < line.length )
-								bError = true;
-							else if( Util.index( line, "Error " ) < line.length )
-								bError = true;
-							
-						}				
-						
-						stdoutMessage ~= ( line ~ "\n" );
-						GLOBAL.messagePanel.printOutputPanel( line );
-					}
-				}				
-		
-				auto result = p.wait;
-
-				version(FBIDE)
-				{
-					if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-					//if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
-				}
-				version(DIDE)
-				{
-					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-					{
-						//GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
-						showAnnotation( stdoutMessage ~ stderrMessage );
-					}
-					else
-						showAnnotation( null );
-				}
-				GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-
-				if( bError )
-				{
-					GLOBAL.messagePanel.printOutputPanel( "Build Error!" );
-
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-						}							
-					}
-					
-					if( GLOBAL.delExistExe == "ON" )
-					{
-						// Remove the execute file
-						version(Windows) _targetName ~= ".exe";
-						scope targetFilePath = new FilePath( _targetName );
-						if( targetFilePath.exists() ) targetFilePath.remove();
-					}
-				}
-				else
-				{
-					if( !bWarning )
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Build Success!" );
-						
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-							}							
-						}
-					}
-					else
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." );
-
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-							}							
-						}				
-					}
-					
-					char[]		objPath = GLOBAL.projectManager[activePrjName].dir ~ "/";
-					char[] 		_totalOptions = GLOBAL.projectManager[activePrjName].compilerOption ~ " " ~ options;
-				
-					version(DIDE)
-					{
-						int ofPos = Util.index( _totalOptions, "-od" );
-						if( ofPos < _totalOptions.length )
-						{
-							char[] outputName;
-							for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
-							{
-								if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
-								outputName ~= _totalOptions[i];
-							}
-							
-							// Got Obj Path -od
-							if( outputName.length ) objPath ~= ( outputName ~ "/" );
-						}
-					}
-					
-					version(Windows) objPath ~= ( _targetName ~ ".obj" ); else objPath ~= ( _targetName ~ ".o" );
-					
-					scope oFilePath = new FilePath( objPath );
-					if( oFilePath.exists ) oFilePath.remove;
-					
-					GLOBAL.messagePanel.scrollOutputPanel( -1 );
-				}
-			}
-			+/
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 
 			return true;
@@ -2893,6 +2043,19 @@ struct ExecuterAction
 		bool	bRunProject;
 		char[]	command;
 		char[]	activePrjName	= actionManager.ProjectAction.getActiveProjectName();
+		
+		// Set Multiple Focus Project
+		FocusUnit _focus;
+		//_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
+		//_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
+		_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+		//_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
+		//_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
+		if( GLOBAL.projectManager[activePrjName].focusOn.length )
+		{
+			if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+		}			
+
 
 		auto activeCScintilla = actionManager.ScintillaAction.getActiveCScintilla();
 		if( activeCScintilla !is null )
@@ -2922,15 +2085,15 @@ struct ExecuterAction
 						
 						version(Windows)
 						{
-							if( GLOBAL.projectManager[activePrjName].targetName.length )
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName ~ ".exe";
+							if( _focus.Target.length )
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target ~ ".exe";
 							else
 								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
 						}
 						else
 						{
-							if( GLOBAL.projectManager[activePrjName].targetName.length )
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].targetName;
+							if( _focus.Target.length )
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ _focus.Target;
 							else
 								command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].name;
 						}
@@ -2962,15 +2125,15 @@ struct ExecuterAction
 			{
 				version(Windows)
 				{
-					if( GLOBAL.projectManager[activePrjName].targetName.length )
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName ~ ".exe";
+					if( _focus.Target.length )
+						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target ~ ".exe";
 					else
 						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
 				}
 				else
 				{
-					if( GLOBAL.projectManager[activePrjName].targetName.length )
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].targetName;
+					if( _focus.Target.length )
+						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target;
 					else
 						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
 				}

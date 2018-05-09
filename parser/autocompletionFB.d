@@ -3837,7 +3837,7 @@ version(FBIDE)
 				}
 				catch( Exception e )
 				{
-					IupMessage("ERROR","");
+					IupMessage( "ERROR", "callAutocomplete Exceprtion!" );
 				}
 			}
 			else

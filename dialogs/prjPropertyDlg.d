@@ -32,7 +32,6 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 		textProjectName = IupText( null );
 		IupSetAttributes( textProjectName, "SIZE=130x12,NAME=PRJPROPERTY_ProjectName" );
-		IupSetHandle( "textProjectName", textProjectName );
 		
 		Ihandle* labelType = IupLabel( toStringz( GLOBAL.languageItems["prjtype"].toDString ~ ":" ) );
 		IupSetAttributes( labelType, "SIZE=40x20,ALIGNMENT=ACENTER" );
@@ -53,7 +52,6 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 		textProjectDir = IupText( null );
 		IupSetAttributes( textProjectDir, "SIZE=276x12,NAME=PRJPROPERTY_ProjectDir" );
-		IupSetHandle( "textProjectDir", textProjectDir );
 
 		btnProjectDir = IupButton( null, null );
 		IupSetAttributes( btnProjectDir, "IMAGE=icon_openfile,FLAT=YES" );
@@ -93,7 +91,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttributes( textTargetName, "SIZE=130x12,NAME=PRJPROPERTY_TargetName" );
 		
 		//
-		Ihandle* labelFocus = IupLabel( "Focus:" );//IupLabel( toStringz( GLOBAL.languageItems["prjtarget"].toDString ~ ":" ) );
+		Ihandle* labelFocus = IupLabel( toStringz( GLOBAL.languageItems["prjfocus"].toDString ~ ":" ) );
 		IupSetAttributes( labelFocus, "SIZE=40x12,ALIGNMENT=ACENTER" );
 		
 		listFocus = IupList( null );
@@ -460,11 +458,6 @@ class CProjectPropertiesDialog : CBaseDialog
 	~this()
 	{
 		// Free text and list's handle
-		IupSetHandle( "textProjectName", null );
-		IupSetHandle( "textProjectDir", null );
-		IupSetHandle( "btnProjectDir", null );
-		
-		
 		IupSetHandle( "listIncludePath_Handle", null );
 		IupSetHandle( "btnIncludePathAdd_Handle", null );
 		IupSetHandle( "btnIncludePathErase_Handle", null );
@@ -525,13 +518,18 @@ extern(C) // Callback for CProjectPropertiesDialog
 			}
 
 			GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir] = CProjectPropertiesDialog.tempProject;
-			GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].saveFile();
+			if( !GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].saveFile() )
+			{
+				GLOBAL.projectManager.remove( CProjectPropertiesDialog.tempProject.dir );
+				return IUP_CLOSE;
+			}
 
 			// Recent Projects
 			GLOBAL.projectTree.updateRecentProjects( CProjectPropertiesDialog.tempProject.dir, CProjectPropertiesDialog.tempProject.name );
 			if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "YES" ) GLOBAL.projectTree.CreateNewProject( CProjectPropertiesDialog.tempProject.name, CProjectPropertiesDialog.tempProject.dir );
-			GLOBAL.statusBar.setPrjName( null, true );
-			//GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].name );
+			//GLOBAL.statusBar.setPrjName( null, true );
+			GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].name 
+										~ ( GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].focusOn.length ? " [" ~ GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].focusOn ~ "]" : "" ) );
 		}
 
 		return IUP_CLOSE;
@@ -634,19 +632,23 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 		if( fileName.length )
 		{
-			Ihandle* textPrjPath = IupGetHandle( "textProjectDir" );
-			if( textPrjPath != null )
+			Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
+			if( _dlg != null )
 			{
-				IupSetAttribute( textPrjPath, "VALUE", toStringz( fileName ) );
-				
-				Ihandle* textProjectName = IupGetHandle( "textProjectName" );
-				if( textProjectName != null )
+				Ihandle* textPrjPath = IupGetDialogChild( _dlg, "PRJPROPERTY_ProjectDir" );
+				if( textPrjPath != null )
 				{
-					char[] projectName = Util.trim( fromStringz( IupGetAttribute( textProjectName, "VALUE" ) ) ).dup;
-					if( !projectName.length )
+					IupSetAttribute( textPrjPath, "VALUE", toStringz( fileName.dup ) );
+					
+					Ihandle* textProjectName = IupGetDialogChild( _dlg, "PRJPROPERTY_ProjectName" );
+					if( textProjectName != null )
 					{
-						scope _fp = new FilePath( Path.normalize( fileName ) );
-						IupSetAttribute( textProjectName, "VALUE", toStringz( _fp.name.dup ) );
+						char[] projectName = Util.trim( fromStringz( IupGetAttribute( textProjectName, "VALUE" ) ) ).dup;
+						if( !projectName.length )
+						{
+							scope _fp = new FilePath( Path.normalize( fileName ) );
+							IupSetAttribute( textProjectName, "VALUE", toStringz( _fp.name.dup ) );
+						}
 					}
 				}
 			}
