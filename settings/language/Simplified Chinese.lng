@@ -47,6 +47,7 @@ prj=专案
 	closeallprj=关闭所有专案
 	properties=属性...
 	
+	importall=导入目录下所有档案
 	openinexplorer=在资源管理器中打开
 	removefromprj=从专案中移除
 	rename=重命名文件

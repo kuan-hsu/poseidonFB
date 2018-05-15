@@ -531,6 +531,7 @@ struct GLOBAL
 			GLOBAL.languageItems["closeallprj"] = new IupString( cast(char[]) "Close All Projects" );
 			GLOBAL.languageItems["properties"] = new IupString( cast(char[]) "Properties..." );
 			
+			GLOBAL.languageItems["importall"] = new IupString( cast(char[]) "Import All Files" );
 			GLOBAL.languageItems["openinexplorer"] = new IupString( cast(char[]) "Open In Explorer" );
 			GLOBAL.languageItems["removefromprj"] = new IupString( cast(char[]) "Remove From Project" );
 			GLOBAL.languageItems["rename"] = new IupString( cast(char[]) "Rename File" );

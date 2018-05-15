@@ -2969,6 +2969,7 @@ extern(C)
 					else
 					{
 						if( AutoComplete.showListThread !is null ) AutoComplete.showListThread.stop();
+						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					}
 
 					try

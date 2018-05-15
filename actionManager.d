@@ -2188,8 +2188,9 @@ struct SearchAction
 				IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
 				//DocumentTabAction.setFocus( ih );
 			}
-			return findPos;
 		}
+		
+		return findPos;
 	}
 
 	/*

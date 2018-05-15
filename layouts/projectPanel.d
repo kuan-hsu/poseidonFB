@@ -206,7 +206,6 @@ class CProjectTree
 
 	void createProjectTree( char[] setupDir )
 	{
-		
 		char[] prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
 
 		// Add Project's Name to Tree
@@ -218,6 +217,7 @@ class CProjectTree
 		IupSetAttributeId( tree, "COLOR", 1, GLOBAL.editColor.prjTitle.toCString );
 		toBoldTitle( tree, 1 );
 
+
 	
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
@@ -225,34 +225,34 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
 
-		char[][] rootfiles;
+		// Create Sub Dir
+		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].others )
+			_createTree( prjDirName, s );
+			
 		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].others )
 		{
-			scope _tempFilePath = new FilePath( s );
-			if( _tempFilePath.path != GLOBAL.projectManager[setupDir].dir ~ "/" )
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
 			{
-				rootfiles ~= s;
-				continue;
+				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
+				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				int insertID = IupGetInt( tree, "LASTADDNODE" );
+				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
-			
-			char[]		userData = s;
-			int			folderLocateId = _createTree( prjDirName, s );
-			
-			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
-			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+			else
+			{
+				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+			}
 		}
-		foreach( char[] s; rootfiles )
-		{
-			char[]		userData = s;
-			int			folderLocateId = _createTree( prjDirName, s );
-			
-			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
-			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
-		}			
+
+
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
@@ -260,34 +260,34 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		toBoldTitle( tree, 2 );
 		
-		rootfiles.length = 0;
+		// Create Sub Dir
 		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].includes )
+			_createTree( prjDirName, s );
+			
+		foreach( char[] s; GLOBAL.projectManager[setupDir].includes )
 		{
-			scope _tempFilePath = new FilePath( s );
-			if( _tempFilePath.path != GLOBAL.projectManager[setupDir].dir ~ "/" )
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
 			{
-				rootfiles ~= s;
-				continue;
+				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
+				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				int insertID = IupGetInt( tree, "LASTADDNODE" );
+				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_bi" ) );
+				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
-			
-			char[]		userData = s;
-			int			folderLocateId = _createTree( prjDirName, s );
-			
-			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
-			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+			else
+			{
+				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+			}
 		}
-		foreach( char[] s; rootfiles )
-		{
-			char[]		userData = s;
-			int			folderLocateId = _createTree( prjDirName, s );
-			
-			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
-			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
-		}		
+
+
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
@@ -295,35 +295,34 @@ class CProjectTree
 		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
 		
-		
-		rootfiles.length = 0;
+		// Create Sub Dir
 		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].sources )
+			_createTree( prjDirName, s );
+		
+		
+		foreach( char[] s; GLOBAL.projectManager[setupDir].sources )
 		{
-			scope _tempFilePath = new FilePath( s );
-			if( _tempFilePath.path != GLOBAL.projectManager[setupDir].dir ~ "/" )
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
 			{
-				rootfiles ~= s;
-				continue;
+				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
+				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				int insertID = IupGetInt( tree, "LASTADDNODE" );
+				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_bas" ) );
+				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
-			
-			char[]		userData = s;
-			int			folderLocateId = _createTree( prjDirName, s );
-			
-			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
-			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+			else
+			{
+				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+			}
 		}
-		foreach( char[] s; rootfiles )
-		{
-			char[]		userData = s;
-			int			folderLocateId = _createTree( prjDirName, s );
-			
-			IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
-			IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-			IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
-			IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
-		}		
+		
 		
 
 		// Switch to project tree tab
@@ -1021,27 +1020,9 @@ extern(C)
 
 			return IUP_DEFAULT;
 		}
-		
-		/+
-					char[] 	_selectedStatus = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
-					for( int i = 0; i < _selectedStatus.length; ++ i )
-					{
-						if( _selectedStatus[i] == '+' )
-						{
-							if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" ) IupSetAttributeId( ih, "MARKED", i, "NO" );
-						}
-					}					
-				}
-				else
-				{
-					int[] ids = actionManager.ProjectAction.getSelectIDs();
-					if( ids.length )
-					{
-						IupSetAttribute( ih, "MARK", "CLEARALL" );
-						IupSetAttributeId( ih, "MARKED", id, "YES" );
-					}
-				}		
-		+/
+
+
+
 		int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", id );
 
 		switch( depth )
@@ -1072,6 +1053,10 @@ extern(C)
 				break;
 
 			case 1:		// On Project Name Node
+				Ihandle* itemImportAll = IupItem( GLOBAL.languageItems["importall"].toCString, null );
+				IupSetAttribute(itemImportAll, "IMAGE", "icon_importall");
+				IupSetCallback( itemImportAll, "ACTION", cast(Icallback) &CProjectTree_importall_cb );
+			
 				Ihandle* itemProperty = IupItem( GLOBAL.languageItems["properties"].toCString, null );
 				IupSetAttribute(itemProperty, "IMAGE", "icon_properties");
 				IupSetCallback( itemProperty, "ACTION", cast(Icallback) &menu.projectProperties_cb ); // From menu.d
@@ -1101,7 +1086,8 @@ extern(C)
 					return IUP_DEFAULT;
 				});
 
-				Ihandle* popupMenu = IupMenu( 	itemProperty,
+				Ihandle* popupMenu = IupMenu(	itemImportAll,
+												itemProperty,
 												IupSeparator(),
 												itemExplorer,
 												IupSeparator(),
@@ -1830,6 +1816,97 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
+	
+	private int CProjectTree_importall_cb( Ihandle* ih )
+	{
+		// Nested Delegate Filter Function
+		bool dirFilter( FilePath _fp, bool _isFfolder )
+		{
+			if( _isFfolder ) return true;
+			version(FBIDE)	if( lowerCase( _fp.ext ) == "bas" || lowerCase( _fp.ext ) == "bi" ) return true;
+			version(DIDE)	if( lowerCase( _fp.ext ) == "d" || lowerCase( _fp.ext ) == "di" ) return true;
+			return false;
+		}
+		
+		bool delegate( FilePath, bool ) _dirFilter;
+		_dirFilter = &dirFilter;
+		// End of Nested Function
+		
+		char[][] _getFiles( FilePath _fatherPath, char[] ext )
+		{
+			char[][]	results;
+			FilePath[]	files;
+			
+			foreach( FilePath _fp; _fatherPath.toList( _dirFilter ) )
+			{
+				if( _fp.isFolder )
+				{
+					results ~= _getFiles( _fp, ext );
+				}
+				else
+				{
+					if( lowerCase( _fp.ext ) == ext ) files ~= _fp;
+				}
+			}
+			
+			foreach( _fp; files )
+				results ~= _fp.toString;
+				
+			return results;
+		}
+		
+		
+	
+	
+		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+		char[]	prjDirName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
+		int		sourceID	= id + 1;
+		int		includesID	= IupGetIntId( GLOBAL.projectTree.getTreeHandle, "NEXT", sourceID );
+		
+		scope prjPath = new FilePath( prjDirName );
+		if( prjPath.isFolder )
+		{
+			GLOBAL.projectManager[prjDirName].includes.length = 0;
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", includesID, "CHILDREN" );
+			
+			char[] _ext;
+			version(FBIDE) _ext = "bi";	version(DIDE) _ext = "di";
+			
+			foreach_reverse( char[] s; _getFiles( prjPath, _ext ) )
+			{
+				GLOBAL.projectManager[prjDirName].includes ~= s;
+			
+				char[]		titleName = Path.normalize( s );
+				int			folderLocateId = _createTree( prjDirName ~ "/", titleName, includesID );
+				char[]		userData = s;
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( titleName ) );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+				
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
+			}
+			
+			GLOBAL.projectManager[prjDirName].sources.length = 0;
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", sourceID, "CHILDREN" );
+			version(FBIDE) _ext = "bas"; version(DIDE) _ext = "d";
+			
+			foreach_reverse( char[] s; _getFiles( prjPath, _ext ) )
+			{
+				GLOBAL.projectManager[prjDirName].sources ~= s;
+			
+				char[]		titleName = Path.normalize( s );
+				int			folderLocateId = _createTree( prjDirName ~ "/", titleName, sourceID );
+				char[]		userData = s;
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( titleName ) );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+				
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
+			}			
+		}
+
+		return IUP_DEFAULT;
+	}	
 
 	private int _createTree( char[] _prjDirName, inout char[] _titleName, int startID = 2 )
 	{
@@ -1865,7 +1942,6 @@ extern(C)
 					{
 						if( splitText[counterSplitText] == fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", folderLocateId + i ) ) )
 						{
-							// folder already exist
 							folderLocateId = folderLocateId+i;
 							bFolerExist = true;
 							break;
@@ -1887,7 +1963,7 @@ extern(C)
 		}
 
 		if( splitText.length > 1 ) _titleName = splitText[length-1];
-		
+
 		return folderLocateId;
 	}		
 }

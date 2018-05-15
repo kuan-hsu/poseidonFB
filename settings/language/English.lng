@@ -46,6 +46,7 @@ prj=Project
 	closeallprj=Close All Projects
 	properties=Properties...
 	
+	importall=Import All Files
 	openinexplorer=Open In Explorer
 	removefromprj=Remove From Project
 	rename=Rename File
