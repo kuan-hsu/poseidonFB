@@ -100,6 +100,8 @@ class CProjectTree
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
 		//IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
 		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_EXECUTELEAF_CB );
+		//IupSetCallback( tree, "BRANCHOPEN_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
+		//IupSetCallback( tree, "BRANCHCLOSE_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,GAP=2" ) );
@@ -398,7 +400,7 @@ class CProjectTree
 			return true;
 		}
 
-		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Load Project: [" ~ setupDir ~ "]", true ); //IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
+		//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Load Project: [" ~ setupDir ~ "]", true ); //IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
 		
 		version(FBIDE)	char[] setupFileName = setupDir ~ "/.poseidon";
 		version(DIDE)	char[] setupFileName = setupDir ~ "/D.poseidon";
@@ -439,7 +441,7 @@ class CProjectTree
 		subThread.start();
 		+/
 
-		if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Done." );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Done."  ) );
+		//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Done." );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Done."  ) );
 
 		return true;
 	}
@@ -637,7 +639,7 @@ class CProjectTree
 			DocumentTabAction.updateTabsLayout();			
 
 			GLOBAL.projectManager[activePrjName].saveFile();
-			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
+			//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
 			GLOBAL.projectManager.remove( activePrjName );
 
 			int countChild = IupGetInt( tree, "COUNT" );
@@ -720,7 +722,7 @@ class CProjectTree
 				}
 			}
 
-			if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
+			//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
 		}
 
 		foreach( char[] s; prjsDir )
@@ -822,7 +824,7 @@ extern(C)
 			
 			try
 			{
-				IupSetInt( ih, "VALUE", id );
+				//IupSetInt( ih, "VALUE", id ); // Make Crash
 				
 				// Swith the doument tabs by select Tree Node, if the doument isn't exist, do nothing
 				if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "LEAF" )
@@ -871,8 +873,8 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "CProjectTree_Selection_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				//debug IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				//GLOBAL.IDEMessageDlg.print( "CProjectTree_Selection_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 		else
@@ -883,6 +885,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	/*
 	private int CProjectTree_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( pressed == 1 )
@@ -902,6 +905,23 @@ extern(C)
 		}
 		return IUP_DEFAULT;
 	}
+	*/
+	
+	/*
+	private int CProjectTree_BRANCH_CB( Ihandle* ih, int id )
+	{
+		/+
+		if( IupGetInt( ih, "VALUE" ) != id )
+		{
+			IupSetAttribute( ih, "MARK", "CLEARALL" );
+			IupSetAttributeId( ih, "MARKED", id, "YES" );
+			IupSetInt( ih, "VALUE", id );
+		}
+		//IupMessage("TOGGLLE","");
+		+/
+		return IUP_DEFAULT;
+	}
+	*/
 	
 	private int CProjectTree_EXECUTELEAF_CB( Ihandle* ih, int id )
 	{
@@ -1539,7 +1559,7 @@ extern(C)
 			{
 				if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" )
 				{
-					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) );
+					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) ).dup;
 					scope fp = new FilePath( fullPath );
 					
 					if( fp.exists )

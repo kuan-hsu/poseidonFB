@@ -1544,8 +1544,8 @@ version(DIDE)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				//debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
+				//GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
 			}
 
 			return false;

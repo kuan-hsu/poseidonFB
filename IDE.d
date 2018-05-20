@@ -36,8 +36,8 @@ struct IDECONFIG
 							}
 							catch( Exception e )
 							{
-								GLOBAL.IDEMessageDlg.print( Util.trim( s[0..assignIndex] ) ~ "=Error" );
-								//IupMessage( toStringz( "Language Error!" ), toStringz( Util.trim( s[0..assignIndex] ) ~ "=Error" ) );
+								//GLOBAL.IDEMessageDlg.print( Util.trim( s[0..assignIndex] ) ~ "=Error" );
+								debug IupMessage( toStringz( "Language Error!" ), toStringz( Util.trim( s[0..assignIndex] ) ~ "=Error" ) );
 							}
 						}
 					}

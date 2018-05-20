@@ -177,8 +177,8 @@ class CFileList
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "CFileList.getTreeH() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-			//debug IupMessage( "CFileList getTreeH()", toStringz( e.toString ) );
+			//GLOBAL.IDEMessageDlg.print( "CFileList.getTreeH() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			debug IupMessage( "CFileList getTreeH()", toStringz( e.toString ) );
 		}
 		
 		return 4096;
@@ -209,7 +209,8 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "fileList_SELECTION_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessage( "ERROR", toStringz( "fileList_SELECTION_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			//GLOBAL.IDEMessageDlg.print( "fileList_SELECTION_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 		}
 
 		return IUP_DEFAULT;

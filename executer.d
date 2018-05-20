@@ -2046,16 +2046,15 @@ struct ExecuterAction
 		
 		// Set Multiple Focus Project
 		FocusUnit _focus;
-		//_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
-		//_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
-		_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
-		//_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
-		//_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
-		if( GLOBAL.projectManager[activePrjName].focusOn.length )
+		
+		if( activePrjName.length )
 		{
-			if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
-		}			
-
+			_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+			if( GLOBAL.projectManager[activePrjName].focusOn.length )
+			{
+				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+			}
+		}
 
 		auto activeCScintilla = actionManager.ScintillaAction.getActiveCScintilla();
 		if( activeCScintilla !is null )

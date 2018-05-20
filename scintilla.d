@@ -229,7 +229,7 @@ class CScintilla
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//debug GLOBAL.IDEMessageDlg.print( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			throw e;
 		}
@@ -2456,8 +2456,8 @@ extern(C)
 								}
 								catch( Exception e )
 								{
-									GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-									//debug IupMessage( "ShortCut Error", toStringz( "autocompleten" ~ e.toString ) );
+									//debug GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+									debug IupMessage( "ShortCut Error", toStringz( "autocompleten" ~ e.toString ) );
 								}
 							}
 							version(DIDE)
@@ -2661,8 +2661,8 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "CScintilla_keyany_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-			//debug IupMessage( "CScintilla_keyany_cb", toStringz( "CScintilla_keyany_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			//GLOBAL.IDEMessageDlg.print( "CScintilla_keyany_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			debug IupMessage( "CScintilla_keyany_cb", toStringz( "CScintilla_keyany_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 		
 		return IUP_DEFAULT;
@@ -2728,6 +2728,7 @@ extern(C)
 
 	private int CScintilla_action_cb( Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
+		if( AutoComplete.showListThread !is null ) return IUP_DEFAULT;
 		
 		// Modified LineNumber Margin Width
 		if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
@@ -2797,7 +2798,7 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "LiveParser lineNumberAdd() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//GLOBAL.IDEMessageDlg.print( "LiveParser lineNumberAdd() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			}
 		}
 
@@ -2969,7 +2970,7 @@ extern(C)
 					else
 					{
 						if( AutoComplete.showListThread !is null ) AutoComplete.showListThread.stop();
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+						//if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					}
 
 					try
@@ -2995,7 +2996,7 @@ extern(C)
 									if( versionName.length )
 									{	
 										AutoComplete.VersionCondition ~= versionName;
-										GLOBAL.IDEMessageDlg.print( "VersionName= " ~ versionName );
+										//GLOBAL.IDEMessageDlg.print( "VersionName= " ~ versionName );
 									}
 									
 									_versionPos = Util.index( options, "-version=", _versionPos + 9 );
@@ -3014,7 +3015,7 @@ extern(C)
 					}
 					catch( Exception e )
 					{
-						GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+						//GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 					}
 			}
 		}
@@ -3125,7 +3126,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "CScintilla_caret_cb Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//GLOBAL.IDEMessageDlg.print( "CScintilla_caret_cb Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 		}
 		return IUP_DEFAULT;
 	}
@@ -3291,7 +3292,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "CScintilla_zoom_cb Error: " ~ e.toString );
+			//GLOBAL.IDEMessageDlg.print( "CScintilla_zoom_cb Error: " ~ e.toString );
 		}
 		
 		return IUP_DEFAULT;

@@ -273,7 +273,7 @@ struct FileAction
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			//GLOBAL.IDEMessageDlg.print( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			throw e;
 		}
@@ -936,7 +936,7 @@ struct ScintillaAction
 			auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
 			if( pParseTree !is null ) 
 			{
-				if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );			
+				//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );			
 			
 				if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
 				{

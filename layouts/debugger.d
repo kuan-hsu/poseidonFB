@@ -1867,7 +1867,7 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "getGDBmessage() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				debug GLOBAL.IDEMessageDlg.print( "getGDBmessage() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			}
 			/*
 			try

@@ -479,7 +479,7 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//GLOBAL.IDEMessageDlg.print( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 			
@@ -2194,8 +2194,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				//debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
+				//GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
 			}
 
 			return false;
@@ -2395,8 +2395,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "getWholeWordReverse() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				//debug IupMessage( "AutoComplete.getWholeWordReverse() Error", toStringz( e.toString ) );
+				//GLOBAL.IDEMessageDlg.print( "getWholeWordReverse() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				debug IupMessage( "AutoComplete.getWholeWordReverse() Error", toStringz( e.toString ) );
 				return null;
 			}
 			
@@ -3341,7 +3341,7 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//GLOBAL.IDEMessageDlg.print( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				IupMessage( "Bug", toStringz( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
@@ -3780,6 +3780,7 @@ version(FBIDE)
 
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{
+			
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
 			switch( text )
@@ -3809,6 +3810,9 @@ version(FBIDE)
 							{
 								if( showCallTipThread is null )
 								{
+									if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+									if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+								
 									showCallTipThread = new CShowListThread( ih, pos, text, 1 );
 									showCallTipThread.start();
 									
@@ -3821,13 +3825,16 @@ version(FBIDE)
 					{
 						if( showListThread is null )
 						{
+							//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+							
 							showListThread = new CShowListThread( ih, pos, text );
 							showListThread.start();
 							
 							if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
 	
 							// CodeComplete is high priority than CallTip, Stop showCallTipThread
-							if( showCallTipThread !is null ) showCallTipThread.stop;
+							//if( showCallTipThread !is null ) showCallTipThread.stop;
 						}
 						else
 						{
@@ -4190,34 +4197,14 @@ version(FBIDE)
 							char[][] splitWord = AutoComplete.getDivideWord( _alreadyInput );
 							_alreadyInput = splitWord[$-1];
 							
-							/+
-							if( lastChar == "(" ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos - 1, dummyHeadPos ).reverse; else _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).reverse;
-						
-							char[][] splitWord = AutoComplete.getDivideWord( _alreadyInput );
-							_alreadyInput = splitWord[$-1];									
-						
-							if( lastChar == "(" )
-							{
-								IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-								IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-								IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
-								
-								if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showListThread.getResult );
-								
-								int highlightStart, highlightEnd;
-								AutoComplete.callTipSetHLT( AutoComplete.showListThread.getResult, 1, highlightStart, highlightEnd );
-								if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							}
+							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							
+							if( _alreadyInput.length )
+								IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 							else
-							{
-							+/
-								if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+								IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 								
-								if( _alreadyInput.length )
-									IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
-								else
-									IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
-							//}
+
 							auto cSci = ScintillaAction.getActiveCScintilla();
 							if( cSci !is null ) cSci.lastPos = -99;
 						}
@@ -4246,28 +4233,25 @@ version(FBIDE)
 					{
 						if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
 						{
-							//if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 0 )
-							//{
-								int		_pos = ScintillaAction.getCurrentPos( sci );
+							int		_pos = ScintillaAction.getCurrentPos( sci );
 
-								if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 
-								IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-								IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-								IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
-								
-								//if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
-								AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
-								
-								int highlightStart, highlightEnd;
-								AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
-								if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-								
-								AutoComplete.noneListProcedureName = "";
-								
-								auto cSci = ScintillaAction.getActiveCScintilla();
-								if( cSci !is null ) cSci.lastPos = -99;
-							//}
+							IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
+							
+							//if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+							AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+							
+							int highlightStart, highlightEnd;
+							AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
+							if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							
+							AutoComplete.noneListProcedureName = "";
+							
+							auto cSci = ScintillaAction.getActiveCScintilla();
+							if( cSci !is null ) cSci.lastPos = -99;
 						}
 					}
 				}

@@ -3242,7 +3242,7 @@ version(DIDE)
 			}
 			catch( Exception e )
 			{
-				debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			}
 
 			if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
