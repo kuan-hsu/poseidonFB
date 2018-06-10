@@ -14,7 +14,7 @@ void createTabs()
 	IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "1" );
 	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
-	IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
+	IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "3x2" );
 	IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
 	IupSetAttribute( GLOBAL.documentTabs, "NAME", "POSEIDONFB_MAIN_TABS" );
 	//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
@@ -35,7 +35,7 @@ void createTabs2()
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSIMAGESPACING", "1" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGE", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGEPRESS", "icon_clear" );
-	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "5x5" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "3x2" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "SIZE", "NULL" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "NAME", "POSEIDONFB_SUB_TABS" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "HIGHCOLOR", "0 0 255" );
@@ -116,13 +116,32 @@ extern(C)
 			if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
 			return IUP_DEFAULT;
 		});
-
+		
+		Ihandle* _closeRight = IupItem( GLOBAL.languageItems["closeright"].toCString, null );
+		IupSetAttribute( _closeRight, "IMAGE", "icon_deleteright" );
+		IupSetCallback( _closeRight, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			int currentPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
+			for( int i = IupGetChildCount( GLOBAL.activeDocumentTabs ); i > currentPos; -- i )
+			{
+				CScintilla cSci = ScintillaAction.getCScintilla( IupGetChild( GLOBAL.activeDocumentTabs, i ) );
+				if( cSci !is null )
+				{
+					if( ScintillaAction.closeDocument( cSci.getFullPath, i ) == IUP_IGNORE ) break;
+				}
+			}
+			DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, currentPos );
+			IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , currentPos ); 
+			return IUP_DEFAULT;
+		});		
+		
 		Ihandle* _closeothers = IupItem( GLOBAL.languageItems["closeothers"].toCString, null );
 		IupSetAttribute( _closeothers, "IMAGE", "icon_deleteothers" );
 		IupSetCallback( _closeothers, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )	actionManager.ScintillaAction.closeOthersDocument( cSci.getFullPath() );
+			return IUP_DEFAULT;
 		});
 
 		Ihandle* _closeall = IupItem( GLOBAL.languageItems["closeall"].toCString, null );
@@ -235,6 +254,22 @@ extern(C)
 		Ihandle* popupMenu;
 		if( fromStringz( IupGetAttribute( _moveDocument, "ACTIVE" ) ) == "YES" )
 		{
+			if( IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" ) < IupGetChildCount( GLOBAL.activeDocumentTabs ) - 1 )
+			{
+			popupMenu= IupMenu( 
+								_close,
+								_closeRight,
+								_closeothers,
+								_closeall,
+								IupSeparator(),
+								_save,
+								IupSeparator(),
+								_moveDocument,
+								null
+								);
+			}
+			else
+			{
 			popupMenu= IupMenu( 
 								_close,
 								_closeothers,
@@ -245,6 +280,7 @@ extern(C)
 								_moveDocument,
 								null
 								);
+			}
 		}
 		else
 		{

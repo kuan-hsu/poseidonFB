@@ -267,6 +267,7 @@ output=输出
 
 'tab
 closeothers=关闭其他
+closeright=关闭右方文件
 torighttabs=转到副文件页签
 tolefttabs=移到主文件页签
 rotatetabs=旋转移位副文件页签

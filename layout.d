@@ -85,11 +85,20 @@ void createExplorerWindow()
 		GLOBAL.debugPanel = new CDebugger();
 		
 		version(Windows)
+		{
 			GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+		}
 		else
 		{
-			GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
-			bUseIupTabs = true;
+			if( GLOBAL.IUP_VERSION > 3.24 )
+			{
+				GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+			}
+			else
+			{
+				GLOBAL.messageWindowTabs = IupTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, GLOBAL.debugPanel.getMainHandle, null );
+				bUseIupTabs = true;
+			}
 		}
 	}
 	version(DIDE)	GLOBAL.messageWindowTabs = IupFlatTabs( GLOBAL.messagePanel.getOutputPanelHandle, GLOBAL.messagePanel.getSearchOutputPanelHandle, null );
@@ -98,7 +107,7 @@ void createExplorerWindow()
 	{
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x3" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDONFB_BOTTOM_TABS" );

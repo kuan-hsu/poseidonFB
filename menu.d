@@ -679,7 +679,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB Sparta (V0.399)\nBy Kuan Hsu (Taiwan)\n2018.05.20" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.400)\nBy Kuan Hsu (Taiwan)\n2018.06.10" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.034)\nBy Kuan Hsu (Taiwan)\n2018.05.05" );
 		return IUP_DEFAULT;
 	});
@@ -688,7 +688,15 @@ void createMenu()
 	IupSetAttribute( item_manual, "IMAGE", "icon_fbmanual" );
 	IupSetCallback( item_manual, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(Windows) IupExecute( GLOBAL.manualPath.toCString, "" ); else IupExecute( "kchmviewer", GLOBAL.manualPath.toCString );
+		scope manualPath = new FilePath( GLOBAL.manualPath.toDString );
+		if( manualPath.exists )
+		{
+			if( tools.lowerCase( manualPath.ext ) == "chm" )
+			{
+				version(Windows) IupExecute( GLOBAL.manualPath.toCString, "" ); else IupExecute( "kchmviewer", GLOBAL.manualPath.toCString );
+			}
+		}
+		
 		return IUP_DEFAULT;
 	});	
 

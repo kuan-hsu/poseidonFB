@@ -269,6 +269,7 @@ output=Output
 
 'tab
 closeothers=Close Others
+closeright=Close Right
 torighttabs=Send To Secondary View
 tolefttabs=Send to Main View
 rotatetabs=Split Views Horizontally

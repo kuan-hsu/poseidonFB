@@ -682,6 +682,7 @@ version(DIDE)
 				if( upperCase(includeFullPath) in GLOBAL.parserManager )
 				{
 					includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
+					//GLOBAL.messagePanel.printOutputPanel( includeFullPath );
 						
 					results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
 					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], "" );
@@ -706,6 +707,7 @@ version(DIDE)
 						}
 						
 						includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
+						//GLOBAL.messagePanel.printOutputPanel( includeFullPath );
 						
 						results ~= _createFileNode;
 						//results ~= getIncludes( _createFileNode, includeFullPath );
@@ -726,7 +728,15 @@ version(DIDE)
 			
 			// Parse Include
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
+			
+			auto _headNode = originalNode;
+			while( _headNode.getFather !is null )
+				_headNode = _headNode.getFather;
+				
+			//if( _headNode.kind & D_MODULE ) cleanIncludeContainer( _headNode );
+			
 			getIncludes( originalNode, "", true );
+			
 
 			foreach( includeAST; includesMarkContainer )
 			{
@@ -763,13 +773,20 @@ version(DIDE)
 		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, char[] originalFullPath, char[] word, bool bCaseSensitive, int D_KIND )
 		{
 			CASTnode[] results;
-
+			
 			foreach( char[] key; includesMarkContainer.keys )
 				includesMarkContainer.remove( key );
 
 			// Parse Include
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
+			auto _headNode = originalNode;
+			while( _headNode.getFather !is null )
+				_headNode = _headNode.getFather;
+				
+			//if( _headNode.kind & D_MODULE ) cleanIncludeContainer( _headNode );
+			
 			getIncludes( originalNode, "", true );
+			
 
 			/*
 			foreach( CASTnode n; includesMarkContainer )
@@ -1033,6 +1050,9 @@ version(DIDE)
 					// AutoDeclaration
 					if( originalNode.base.length ) splitWord = getDivideWord( convertRightExpressWord( originalNode.base ) ); else return null;
 				}
+				
+				foreach( char[] s; splitWord )
+					if( s == originalNode.name ) return null;
 
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, ScintillaAction.getCurrentPos( ScintillaAction.getActiveIupScintilla ), true, false, false );
 				if( originalNode !is null )
@@ -1508,6 +1528,17 @@ version(DIDE)
 			if( calltipContainer is null ) calltipContainer = new CStack!(char[]);
 		}
 		
+		static void cleanIncludeContainer( CASTnode afterCleanAddParserTree )
+		{
+			foreach( char[] key; includesMarkContainer.keys )
+				includesMarkContainer.remove( key );
+				
+			if( afterCleanAddParserTree !is null )
+			{
+				if( afterCleanAddParserTree.kind & D_MODULE ) includesMarkContainer[upperCase(afterCleanAddParserTree.type)] = afterCleanAddParserTree;
+			}
+		}
+		
 		static void cleanCalltipContainer()
 		{
 			if( calltipContainer is null ) calltipContainer.clear();
@@ -1544,8 +1575,8 @@ version(DIDE)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
+				GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
 			}
 
 			return false;
@@ -3262,6 +3293,7 @@ version(DIDE)
 		
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{
+			
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
 			switch( text )
@@ -3276,7 +3308,8 @@ version(DIDE)
 						cSci.lastPos = pos;
 						return false;
 					}
-			}		
+			}
+			
 
 			if( !bForce )
 			{
@@ -3290,6 +3323,9 @@ version(DIDE)
 							{
 								if( showCallTipThread is null )
 								{
+									if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+									if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+								
 									showCallTipThread = new CShowListThread( ih, pos, text, 1 );
 									showCallTipThread.start();
 									
@@ -3302,23 +3338,26 @@ version(DIDE)
 					{
 						if( showListThread is null )
 						{
+							//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+							
 							showListThread = new CShowListThread( ih, pos, text );
 							showListThread.start();
 							
 							if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
-							
+	
 							// CodeComplete is high priority than CallTip, Stop showCallTipThread
-							if( showCallTipThread !is null ) showCallTipThread.stop;
+							//if( showCallTipThread !is null ) showCallTipThread.stop;
 						}
 						else
 						{
-							if( text == "," || text == ";" ) showListThread.stop();
-						}						
+							if( text == "," ) showListThread.stop();
+						}
 					}
 				}
 				catch( Exception e )
 				{
-					IupMessage( "ERROR","callAutocomplete Exceprtion!" );
+					IupMessage( "ERROR", "callAutocomplete Exceprtion!" );
 				}
 			}
 			else
@@ -3343,7 +3382,8 @@ version(DIDE)
 						//SCI_CALLTIPSETHLT 2204
 						IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
 						
-						if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
 						int highlightStart, highlightEnd;
 						callTipSetHLT( list, 1, highlightStart, highlightEnd );
@@ -3360,7 +3400,7 @@ version(DIDE)
 				{
 					cSci.lastPos = pos;
 				}
-			}			
+			}
 
 			return false;
 		}

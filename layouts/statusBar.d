@@ -353,19 +353,20 @@ extern(C) // Callback for CBaseDialog
 						if( GLOBAL.projectManager[activePrjDir].focusUnit.length )
 						{
 							Ihandle* popupMenu = IupMenu( null );
-							IupSetAttribute( popupMenu, "RADIO", "YES" );
 							
 							Ihandle* _emptyItem = IupItem( toStringz( "<null>" ), null );
 							IupSetCallback( _emptyItem, "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
 							IupAppend( popupMenu, _emptyItem );
 							if( !GLOBAL.projectManager[activePrjDir].focusOn.length ) IupSetAttribute( _emptyItem, "VALUE", "ON");
 							
-							foreach( char[] key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
+							
+							Ihandle*[100] _item;
+							foreach( int i, char[] key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
 							{
-								Ihandle* _item = IupItem( toStringz( key ), null );
-								IupSetCallback( _item, "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
-								IupAppend( popupMenu, _item );
-								if( key == GLOBAL.projectManager[activePrjDir].focusOn ) IupSetAttribute( _item, "VALUE", "ON");
+								_item[i] = IupItem( toStringz( key ), null );
+								IupSetCallback( _item[i], "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
+								IupAppend( popupMenu, _item[i] );
+								if( key == GLOBAL.projectManager[activePrjDir].focusOn ) IupSetAttribute( _item[i], "VALUE", "ON");
 							}
 							
 							IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );

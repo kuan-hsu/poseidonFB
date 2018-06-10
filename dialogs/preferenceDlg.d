@@ -23,7 +23,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
 
 		textCompilerPath = IupText( null );
-		IupSetAttribute( textCompilerPath, "SIZE", "320x16" );
+		IupSetAttribute( textCompilerPath, "SIZE", "320x" );
 		IupSetAttribute( textCompilerPath, "VALUE", GLOBAL.compilerFullPath.toCString );
 		IupSetHandle( "compilerPath_Handle", textCompilerPath );
 		
@@ -43,7 +43,7 @@ class CPreferenceDialog : CBaseDialog
 			version(Windows)
 			{
 				Ihandle* textx64CompilerPath = IupText( null );
-				IupSetAttribute( textx64CompilerPath, "SIZE", "320x16" );
+				IupSetAttribute( textx64CompilerPath, "SIZE", "320x" );
 				IupSetAttribute( textx64CompilerPath, "VALUE", GLOBAL.x64compilerFullPath.toCString );
 				IupSetHandle( "x64compilerPath_Handle", textx64CompilerPath );
 				
@@ -61,7 +61,7 @@ class CPreferenceDialog : CBaseDialog
 
 
 			textDebuggerPath = IupText( null );
-			IupSetAttribute( textDebuggerPath, "SIZE", "320x16" );
+			IupSetAttribute( textDebuggerPath, "SIZE", "320x" );
 			IupSetAttribute( textDebuggerPath, "VALUE", GLOBAL.debuggerFullPath.toCString );
 			IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
 			

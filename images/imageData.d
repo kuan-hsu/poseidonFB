@@ -152,7 +152,8 @@ void load_all_images_icons()
 	IupSetHandle( "icon_search", XPM.getIUPimage( "icons/xpm/search.xpm" ) ); // IupSetHandle("icon_find", load_image_find_obj());
 	IupSetHandle( "icon_message", XPM.getIUPimage( "icons/xpm/message.xpm" ) ); // IupSetHandle("icon_message", load_image_details_view());
 	IupSetHandle( "icon_help", XPM.getIUPimage( "icons/xpm/help.xpm" ) ); // IupSetHandle("icon_help", load_image_help());
-	IupSetHandle( "icon_deleteothers", XPM.getIUPimage( "icons/xpm/removeothers.xpm" ) ); // IupSetHandle("icon_deleteothers", load_image_delete_others());
+	IupSetHandle( "icon_deleteothers", XPM.getIUPimage( "icons/xpm/removeothers.xpm" ) );
+	IupSetHandle( "icon_deleteright", XPM.getIUPimage( "icons/xpm/removeright.xpm" ) );
 	IupSetHandle( "icon_deleteall", XPM.getIUPimage( "icons/xpm/removeall.xpm" ) ); // IupSetHandle("icon_deleteall", load_image_removeall());
 	IupSetHandle( "icon_refresh", XPM.getIUPimage( "icons/xpm/refresh.xpm" ) ); // IupSetHandle("icon_refresh", load_image_refresh());
 	IupSetHandle( "icon_annotation", XPM.getIUPimage( "icons/xpm/annotate.xpm" ) ); // IupSetHandle("icon_annotation", load_image_annotation());

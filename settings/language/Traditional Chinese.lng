@@ -266,6 +266,7 @@ output=輸出
 
 'tab
 closeothers=關閉其它
+closeright=關閉右方文件
 torighttabs=移到副文件頁籤
 tolefttabs=移到主文件頁籤
 rotatetabs=旋轉移位副文件頁籤

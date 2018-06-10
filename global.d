@@ -84,6 +84,7 @@ struct GLOBAL
 	
 	static CPLUGIN[char[]]	pluginMnager;
 	
+	static float				IUP_VERSION;
 	
 	static Ihandle*				mainDlg;
 	static Ihandle*				documentTabs, documentTabs_Sub, projectViewTabs, messageWindowTabs;
@@ -756,6 +757,7 @@ struct GLOBAL
 
 		//'tab
 		GLOBAL.languageItems["closeothers"] = new IupString( cast(char[]) "Close Others" );
+		GLOBAL.languageItems["closeright"] = new IupString( cast(char[]) "Close Right" );
 		GLOBAL.languageItems["torighttabs"] = new IupString( cast(char[]) "Send To Secondary View" );
 		GLOBAL.languageItems["tolefttabs"] = new IupString( cast(char[]) "Send to Main View" );
 		GLOBAL.languageItems["rotatetabs"] = new IupString( cast(char[]) "Split Views Horizontally" );

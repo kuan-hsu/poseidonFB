@@ -319,7 +319,7 @@ class CToolBar
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		
 		Ihandle* commandText = IupScintilla();
-		IupSetAttributes( commandText, "ACTIVE=YES,NAME=POSEIDONFB_COMMANDLINE,VISIBLE=NO,SIZE=1x12" );
+		IupSetAttributes( commandText, "ACTIVE=YES,NAME=POSEIDONFB_COMMANDLINE,VISIBLE=NO,SIZE=1x8" );
 		IupSetCallback( commandText, "SAVEPOINT_CB", cast(Icallback) &command_SAVEPOINT_CB );
 		
 		

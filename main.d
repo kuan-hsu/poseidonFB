@@ -7,7 +7,7 @@ import global, layout, images.imageData, tools, navcache;
 import menu, scintilla, actionManager;
 import parser.autocompletion;
 
-import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer;
+import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer, Float = tango.text.convert.Float;
 import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
 import tango.sys.Process, tango.io.stream.Lines;
 
@@ -147,7 +147,24 @@ void main( char[][] args )
 
 	IupSetGlobal( "UTF8MODE", "YES" );
 	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
-	//IupSetGlobal( "TXTHLCOLOR", "154 184 124" );
+	
+	char[] iupVersion = fromStringz( IupGetGlobal( "VERSION" ) );
+	if( Util.count( iupVersion, "." ) == 2 )
+	{
+		int tailDotPos = Util.rindex( iupVersion, "." );
+		if( tailDotPos < iupVersion.length ) GLOBAL.IUP_VERSION = Float.toFloat( iupVersion[0..tailDotPos] );
+	}
+	else
+	{
+		GLOBAL.IUP_VERSION = Float.toFloat( iupVersion );
+	}
+	
+	if( GLOBAL.IUP_VERSION > 3.24 )
+	{
+		//IupMessage( "", toStringz( Float.toString( GLOBAL.IUP_VERSION ) ) );
+		version(linux) if( fromStringz( IupGetGlobal( "TXTHLCOLOR" ) ) == "255 255 255" ) IupSetGlobal( "TXTHLCOLOR", "154 184 124" );
+	}
+	
 
 	createMenu();
 	// Creates a dialog containing the control

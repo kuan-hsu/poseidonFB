@@ -563,7 +563,7 @@ struct IDECONFIG
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
 							case "MiddleScroll":			GLOBAL.editorSetting00.MiddleScroll = right;			break;
 							case "SaveDocStatus":			GLOBAL.editorSetting00.DocStatus = right;				break;
-							case "LoadAtBackThread":		GLOBAL.editorSetting00.LoadAtBackThread = right;		break;
+							case "LoadAtBackThread":		version(BACKTHREAD) GLOBAL.editorSetting00.LoadAtBackThread = right; else GLOBAL.editorSetting00.LoadAtBackThread = "OFF"; break;
 							case "ControlCharSymbol":		GLOBAL.editorSetting00.ControlCharSymbol = right;		break;
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
 							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
