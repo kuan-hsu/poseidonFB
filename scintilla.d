@@ -1152,15 +1152,15 @@ extern(C)
 					{
 						if( GLOBAL.editorSetting00.MultiSelection == "ON" ) return IUP_DEFAULT;
 						
-						version(linux)
-						{
+						//version(linux)
+						//{
 							int margin0W = IupGetInt( ih, "MARGINWIDTH0" );
 							int margin1W = IupGetInt( ih, "MARGINWIDTH1" );
 							int margin2W = IupGetInt( ih, "MARGINWIDTH2" );
 							int marginSubTotal = margin0W + margin1W + margin2W;
 							
 							if( x < marginSubTotal ) return IUP_DEFAULT;
-						}
+						//}
 						
 						if( pressed == 1 )
 						{
@@ -1173,15 +1173,15 @@ extern(C)
 					}
 					else if( button == IUP_BUTTON3 )
 					{
-						version(linux)
-						{
+						//version(linux)
+						//{
 							int margin0W = IupGetInt( ih, "MARGINWIDTH0" );
 							int margin1W = IupGetInt( ih, "MARGINWIDTH1" );
 							int margin2W = IupGetInt( ih, "MARGINWIDTH2" );
 							int marginSubTotal = margin0W + margin1W + margin2W;
 							
 							if( x < marginSubTotal ) return IUP_DEFAULT;
-						}
+						//}
 						
 						if( pressed == 1 )
 						{							

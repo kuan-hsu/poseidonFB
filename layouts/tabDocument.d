@@ -14,7 +14,7 @@ void createTabs()
 	IupSetAttribute( GLOBAL.documentTabs, "TABSIMAGESPACING", "1" );
 	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGE", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs, "CLOSEIMAGEPRESS", "icon_clear" );
-	IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "3x2" );
+	if( GLOBAL.IUP_VERSION > 3.24 ) IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "3x2" ); else IupSetAttribute( GLOBAL.documentTabs, "TABSPADDING", "5x5" );
 	IupSetAttribute( GLOBAL.documentTabs, "SIZE", "NULL" );
 	IupSetAttribute( GLOBAL.documentTabs, "NAME", "POSEIDONFB_MAIN_TABS" );
 	//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
@@ -35,7 +35,7 @@ void createTabs2()
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSIMAGESPACING", "1" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGE", "icon_clear" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "CLOSEIMAGEPRESS", "icon_clear" );
-	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "3x2" );
+	if( GLOBAL.IUP_VERSION > 3.24 ) IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "3x2" ); else IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSPADDING", "5x5" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "SIZE", "NULL" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "NAME", "POSEIDONFB_SUB_TABS" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "HIGHCOLOR", "0 0 255" );

@@ -264,9 +264,27 @@ void main( char[][] args )
 	{
 		foreach( char[] s; GLOBAL.prevPrj )
 			GLOBAL.projectTree.openProject( s );
-	
+		
+		int activePos = -1;
 		foreach( char[] s; GLOBAL.prevDoc )
-			ScintillaAction.openFile( s );
+		{
+			if( s.length )
+			{
+				if( s[0] == '*' )
+				{
+					ScintillaAction.openFile( s[1..$] );
+					activePos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
+				}
+				else
+					ScintillaAction.openFile( s );
+			}
+		}
+		
+		if( activePos > -1 )
+		{
+			DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, activePos );
+			IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", activePos );
+		}
 	}
 	
 	if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" ) IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );

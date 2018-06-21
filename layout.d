@@ -107,11 +107,15 @@ void createExplorerWindow()
 	{
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x3" );
+		if( GLOBAL.IUP_VERSION > 3.24 ) IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x2" ); else IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDONFB_BOTTOM_TABS" );
 		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+		/*
+		IupSetAttribute( GLOBAL.messageWindowTabs, "EXTRABUTTONS", "1" );
+		IupSetAttributeId( GLOBAL.messageWindowTabs, "EXTRAIMAGE", 1, "icon_downarrow" );
+		*/
 	}
 	
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
@@ -293,13 +297,18 @@ extern(C)
 			char[][] tempPrevDocs;
 			if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
 			{
+				Ihandle* activeHandle = cast(Ihandle*) IupGetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE" );
+				
 				for( int i = 0; i < IupGetInt( GLOBAL.documentTabs, "COUNT" ); ++ i )
 				{
 					Ihandle* documentHandle = IupGetChild( GLOBAL.documentTabs, i );
 					if( documentHandle != null )
 					{
 						auto cSci = ScintillaAction.getCScintilla( documentHandle );
-						if( cSci !is null ) tempPrevDocs ~= cSci.getFullPath;
+						if( cSci !is null )
+						{
+							if( activeHandle == documentHandle ) tempPrevDocs ~= ( "*" ~ cSci.getFullPath ); else	tempPrevDocs ~= cSci.getFullPath;
+						}
 					}
 				}
 
@@ -309,7 +318,10 @@ extern(C)
 					if( documentHandle != null )
 					{
 						auto cSci = ScintillaAction.getCScintilla( documentHandle );
-						if( cSci !is null ) tempPrevDocs ~= cSci.getFullPath;
+						if( cSci !is null )
+						{
+							if( activeHandle == documentHandle ) tempPrevDocs ~= ( "*" ~ cSci.getFullPath ); else tempPrevDocs ~= cSci.getFullPath;
+						}
 					}
 				}
 			}

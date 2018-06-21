@@ -679,7 +679,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.400)\nBy Kuan Hsu (Taiwan)\n2018.06.10" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.401)\nBy Kuan Hsu (Taiwan)\n2018.06.21" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.034)\nBy Kuan Hsu (Taiwan)\n2018.05.05" );
 		return IUP_DEFAULT;
 	});
