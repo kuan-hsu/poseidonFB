@@ -336,7 +336,7 @@ class CToolBar
 		}
 
 		IupSetAttributes( handle, "GAP=2,ALIGNMENT=ACENTER,NAME=POSEIDONFB_TOOLBAR" );
-		version(linux) IupSetAttributes( handle, "MARGIN=0x4" );
+		version(linux) IupSetAttributes( handle, "MARGIN=0x2" );
 	}
 
 
@@ -468,18 +468,20 @@ extern( C )
 		{
 			if( button == IUP_BUTTON1 ) // Left Click
 			{
-				if( ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ ) ) ExecuterAction.run( null, true );
+				ExecuterAction.compile( null, null, null, true );
 			}
 			else if( button == IUP_BUTTON3 ) // Right Click
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
-					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
+					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  ).dup;
 					if( result.length == 2 )
 					{
-						if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1], true );
+						ExecuterAction.compile( result[0], null, result[1], true ); // 3rd parameter = " " is compile & run
+						//if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1], true );
 					}
+					delete dlg;
 				}
 			}
 		}

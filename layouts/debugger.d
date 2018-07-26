@@ -1732,7 +1732,7 @@ version(FBIDE)
 			return true;
 		}
 
-		bool compileWithDebug()
+		int compileWithDebug()
 		{
 			return ExecuterAction.compile( null, "-g" );
 		}

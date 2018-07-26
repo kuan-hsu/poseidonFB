@@ -443,7 +443,7 @@ class CScintilla
 		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
 		IupSetAttribute( sci, "STYLEFGCOLOR32", GLOBAL.editColor.scintillaFore.toCString );		// 32
 		IupSetAttribute( sci, "STYLEBGCOLOR32", GLOBAL.editColor.scintillaBack.toCString );		// 32
-		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Bold ) );
+		IupSetAttribute( sci, "STYLEBOLD32", GLOBAL.cString.convert( Bold ) );
 		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Italic ) );
 		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.cString.convert( Underline ) );
 

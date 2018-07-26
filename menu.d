@@ -679,7 +679,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.401)\nBy Kuan Hsu (Taiwan)\n2018.06.21" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.402)\nBy Kuan Hsu (Taiwan)\n2018.07.26" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.034)\nBy Kuan Hsu (Taiwan)\n2018.05.05" );
 		return IUP_DEFAULT;
 	});
@@ -1698,7 +1698,8 @@ extern(C)
 
 	int buildrun_cb( Ihandle *ih )
 	{
-		if( ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ ) ) ExecuterAction.run( null, true );
+		ExecuterAction.compile( null, null, null, true );
+		//if( ExecuterAction.compile() ) ExecuterAction.run( null, true );
 		return IUP_DEFAULT;
 	}	
 

@@ -55,10 +55,10 @@ struct ExecuterAction
 			cwd 		= _cwd;
 			bQuickRun	= _bQuickRun;
 			
-			super( &run );
+			super( &go );
 		}
 
-		void run()
+		void go()
 		{
 			Process	p;
 			char[]		scommand;
@@ -165,7 +165,7 @@ struct ExecuterAction
 	{
 		private:
 		PROJECT		activePrj;
-		char[]		cwd, command;
+		char[]		cwd, command, args;
 		FocusUnit	focus;
 
 		public:
@@ -174,10 +174,20 @@ struct ExecuterAction
 			cwd				= _cwd;
 			command			= _command;
 			
-			super( &run );
+			super( &go );
 		}
+		
+		this( char[] _cwd, char[] _command, char[] _args )
+		{
+			cwd				= _cwd;
+			command			= _command;
+			args			= _args;
+			
+			if( !args.length ) args = " ";
+			super( &go );
+		}		
 
-		void run()
+		void go()
 		{
 			Process p = new Process( true, command );
 			p.gui( true );
@@ -297,6 +307,8 @@ struct ExecuterAction
 					version(Windows) targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() ~ ".exe" ); else targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() );
 					if( targetFilePath.exists() ) targetFilePath.remove();
 				}
+				
+				return;
 			}
 			else
 			{
@@ -349,8 +361,42 @@ struct ExecuterAction
 					}
 				}
 			}
+			
+			
+			if( args.length )
+			{
+				auto activeCScintilla = actionManager.ScintillaAction.getActiveCScintilla();
+				if( activeCScintilla !is null )
+				{
+					scope _f = new FilePath( activeCScintilla.getFullPath() );
+					version(Windows)
+					{
+						command = _f.path ~ _f.name ~ ".exe";
+					}
+					else
+					{
+						command = _f.path ~ "./" ~ _f.name;
+					}
+				}
+
+				scope f = new FilePath( command );
+				if( f.exists() )
+				{
+					if( args.length ) args = " " ~ args; else args = "";
+					
+					GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ args ~ "......" );
+
+					ExecuterThread derived;
+					version(Windows) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );
+					derived.start();
+				}
+				else
+				{
+					GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" );
+				}
+			}
 		}
-	}		
+	}
 	
 	
 	class BuildThread : Thread
@@ -380,10 +426,10 @@ struct ExecuterAction
 				if( _prj.focusOn in _prj.focusUnit ) focus = _prj.focusUnit[_prj.focusOn];
 			
 			
-			super( &run );
+			super( &go );
 		}
 
-		void run()
+		void go()
 		{
 			bool	bError, bWarning;
 			char[]	stdoutMessage, stderrMessage;			
@@ -855,10 +901,10 @@ struct ExecuterAction
 				if( _prj.focusOn in _prj.focusUnit ) focus = _prj.focusUnit[_prj.focusOn];
 			
 			
-			super( &run );
+			super( &go );
 		}
 
-		void run()
+		void go()
 		{
 			Process p = new Process( true, command );
 			p.workDir( activePrj.dir );
@@ -1161,7 +1207,7 @@ struct ExecuterAction
 		return null;
 	}
 	
-	static bool compile( char[] options = null, char[] optionDebug = null )
+	static int compile( char[] options = null, char[] optionDebug = null, char[] args = null, bool bRun = false )
 	{
 		quickRunFile ="";
 		
@@ -1212,6 +1258,7 @@ struct ExecuterAction
 			return false;
 		}
 
+		
 		try
 		{
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
@@ -1223,16 +1270,24 @@ struct ExecuterAction
 			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 			scope _filePath = new FilePath( cSci.getFullPath() );
 
-			auto _compileThread = new CompileThread( _filePath.path.dup, command );
-			_compileThread.start();
-			if( GLOBAL.toggleCompileAtBackThread != "ON" ) _compileThread.join();
+			CompileThread _compileThread;
+			if( !bRun ) _compileThread = new CompileThread( _filePath.path.dup, command ); else _compileThread = new CompileThread( _filePath.path.dup, command, args );
+		
+			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
+			{
+				_compileThread.go();
+				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
+			}
+			else
+			{
+				_compileThread.start();
+			}
 
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		catch( ProcessException e )
 		{
 		  // Stdout.formatln ("Process execution failed: {}", e);
-
 		   return false;
 		}
 
@@ -1482,9 +1537,16 @@ struct ExecuterAction
 			
 			// Start Thread this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
 			auto _buildThread = new BuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options, optionDebug, compilePath.toString, executeName );
-			_buildThread.start();
-			if( GLOBAL.toggleCompileAtBackThread != "ON" ) _buildThread.join();
-
+			
+			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
+			{
+				_buildThread.go();
+				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
+			}
+			else
+			{
+				_buildThread.start();
+			}			
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 			
 			return true;
@@ -1765,9 +1827,17 @@ struct ExecuterAction
 			
 			// Start Thread
 			auto _reBuildThread = new ReBuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options );
-			_reBuildThread.start();
-			if( GLOBAL.toggleCompileAtBackThread != "ON" ) _reBuildThread.join();
-
+			
+			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
+			{
+				_reBuildThread.go();
+				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
+			}
+			else
+			{
+				_reBuildThread.start();
+			}			
+			
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 
 			return true;
