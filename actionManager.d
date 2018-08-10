@@ -2226,6 +2226,10 @@ struct SearchAction
 
 		// IUP_IGNORE = -1, IUP_DEFAULT = -2, 
 		if( pos == -1 ) return -2;
+		
+		int ln = ScintillaAction.getLinefromPos( iupSci, pos );
+		IupScintillaSendMessage( iupSci, 2234, ln, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+		
 		return pos;
 	}	
 

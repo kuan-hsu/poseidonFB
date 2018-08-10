@@ -3321,6 +3321,8 @@ version(DIDE)
 						{
 							if( alreadyInput[$-1] == ' ' ) // Check if Short-Cut Trigger
 							{
+								if( showListThread !is null ) return false;
+								
 								if( showCallTipThread is null )
 								{
 									if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
@@ -3336,6 +3338,8 @@ version(DIDE)
 					}
 					else
 					{
+						if( showCallTipThread !is null ) return false;
+						
 						if( showListThread is null )
 						{
 							//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
@@ -3797,7 +3801,7 @@ version(DIDE)
 				}
 
 				delete AutoComplete.showCallTipThread;
-				AutoComplete.showListThread = null;
+				AutoComplete.showCallTipThread = null;
 			}
 		}		
 		
