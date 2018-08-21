@@ -818,7 +818,11 @@ class CScintilla
 		if( alpha + 64 <= 255 ) 
 			IupScintillaSendMessage( sci, 2558, 8, alpha + 64 ); // SCI_INDICSETOUTLINEALPHA 2558
 		else
-			IupScintillaSendMessage( sci, 2558, 8, 255 ); // SCI_INDICSETOUTLINEALPHA 2558			
+			IupScintillaSendMessage( sci, 2558, 8, 255 ); // SCI_INDICSETOUTLINEALPHA 2558
+		
+		// Scintilla White space
+		IupScintillaSendMessage( sci, 2525, Integer.toInt( GLOBAL.editorSetting01.EXTRAASCENT ), 0 ); // SCI_SETEXTRAASCENT 2525
+		IupScintillaSendMessage( sci, 2527, Integer.toInt( GLOBAL.editorSetting01.EXTRADESCENT ), 0 ); // SCI_SETEXTRADESCENT 2527
 
 		version(FBIDE)
 		{

@@ -44,7 +44,8 @@ class CFindInFilesDialog : CBaseDialog
 
 		// Options
 		Ihandle* toggleCaseSensitive = IupToggle( GLOBAL.languageItems["casesensitive"].toCString, null );
-		IupSetAttributes( toggleCaseSensitive, "VALUE=ON,EXPAND=YES,NAME=toggle_CaseSensitive" );
+		IupSetAttributes( toggleCaseSensitive, "EXPAND=YES,NAME=toggle_CaseSensitive" );
+		version(DIDE) IupSetAttribute( toggleCaseSensitive, "VALUE", "OFF" );
 		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
 
 		Ihandle* toggleWholeWord = IupToggle( GLOBAL.languageItems["wholeword"].toCString, null );

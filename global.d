@@ -25,6 +25,7 @@ struct EditorToggleUint
 struct EditorLayoutSize
 {
 	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", FileListSplit = "1000", OutlineWindow = "ON", MessageWindow = "ON", FilelistWindow = "ON", RotateTabs = "OFF", BarSize = "2";
+	char[] EXTRAASCENT = "0", EXTRADESCENT = "0";
 }
 
 struct EditorColorUint

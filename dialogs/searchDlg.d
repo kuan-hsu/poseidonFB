@@ -124,7 +124,8 @@ class CSearchExpander
 		
 		// Group 3
 		Ihandle* btnCase = IupToggle( null, null );
-		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,VALUE=ON,NAME=toggle_Case,SIZE=x12" );
+		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,NAME=toggle_Case,SIZE=x12" );
+		version(DIDE) IupSetAttribute( btnCase, "VALUE", "OFF" );
 		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
 		IupSetCallback( btnCase, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
@@ -168,8 +169,12 @@ class CSearchExpander
 
 	public:
 	
-	int			searchRule = 6;
-	
+	// SCFIND_WHOLEWORD = 2, SCFIND_MATCHCASE = 4
+	version(FBIDE)
+		int			searchRule = 2;
+	else
+		int			searchRule = 6;
+		
 	this()
 	{
 		createLayout();

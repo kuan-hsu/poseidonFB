@@ -226,6 +226,8 @@ struct IDECONFIG
 			doc ~= setINILineData( "FilelistWindow", GLOBAL.editorSetting01.FilelistWindow );
 			doc ~= setINILineData( "RotateTabs", GLOBAL.editorSetting01.RotateTabs );
 			doc ~= setINILineData( "BarSize", GLOBAL.editorSetting01.BarSize );
+			doc ~= setINILineData( "EXTRAASCENT", GLOBAL.editorSetting01.EXTRAASCENT );
+			doc ~= setINILineData( "EXTRADESCENT", GLOBAL.editorSetting01.EXTRADESCENT );
 			
 			// font
 			doc ~= setINILineData( "[font]");
@@ -590,6 +592,8 @@ struct IDECONFIG
 								if( _size < 2 ) GLOBAL.editorSetting01.BarSize = "2";
 								if( _size > 5 ) GLOBAL.editorSetting01.BarSize = "5";
 								break;
+							case "EXTRAASCENT":				GLOBAL.editorSetting01.EXTRAASCENT = right;				break;
+							case "EXTRADESCENT":			GLOBAL.editorSetting01.EXTRADESCENT = right;			break;
 							default:
 						}
 						break;
