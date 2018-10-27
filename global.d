@@ -536,6 +536,7 @@ struct GLOBAL
 			GLOBAL.languageItems["importall"] = new IupString( cast(char[]) "Import All Files" );
 			GLOBAL.languageItems["openinexplorer"] = new IupString( cast(char[]) "Open In Explorer" );
 			GLOBAL.languageItems["removefromprj"] = new IupString( cast(char[]) "Remove From Project" );
+			GLOBAL.languageItems["openinposeidon"] = new IupString( cast(char[]) "Open In Poseidon" );
 			GLOBAL.languageItems["rename"] = new IupString( cast(char[]) "Rename File" );
 			GLOBAL.languageItems["setmainmodule"] = new IupString( cast(char[]) "Set As Main Module" );
 			GLOBAL.languageItems["newfile"] = new IupString( cast(char[]) "New File" );

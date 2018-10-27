@@ -49,6 +49,7 @@ prj=Project
 	importall=Import All Files
 	openinexplorer=Open In Explorer
 	removefromprj=Remove From Project
+	openinposeidon=Open In Poseidon
 	rename=Rename File
 	setmainmodule=Set As Main Module
 	newfile=New File

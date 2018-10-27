@@ -39,6 +39,7 @@ struct PROJECT
 	char[][]	sources;
 	char[][]	includes;
 	char[][]	others;
+	char[][]	misc;
 	
 	// Focus
 	char[]					focusOn;
@@ -118,6 +119,11 @@ struct PROJECT
 		doc ~= setINILineData( "[Others]");
 		foreach( char[] s; others ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+
+		doc ~= setINILineData( "[Misc]");
+		foreach( char[] s; misc ) 
+			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			
 			
 		doc ~= setINILineData( "[Focus]");
 		foreach( char[] key; focusUnit.keys )
@@ -231,7 +237,10 @@ struct PROJECT
 						
 					case "[Others]":
 						if( left == "name" ) s.others ~= _replaceDir( right, s.dir );		break;
-						
+
+					case "[Misc]":
+						if( left == "name" ) s.misc ~= _replaceDir( right, s.dir );		break;
+
 					case "[Focus]":
 						switch( left )
 						{
@@ -273,6 +282,7 @@ struct PROJECT
 			s.sources.sort;
 			s.includes.sort;
 			s.others.sort;
+			s.misc.sort;
 		}
 		catch( Exception e )
 		{

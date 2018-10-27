@@ -218,7 +218,41 @@ class CProjectTree
 		IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
 		IupSetAttributeId( tree, "COLOR", 1, GLOBAL.editColor.prjTitle.toCString );
 		toBoldTitle( tree, 1 );
-
+		
+		// Miscellaneous
+		IupSetAttribute( tree, "ADDBRANCH1", "Miscellaneous" );
+		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		toBoldTitle( tree, 2 );
+		
+		// Create Sub Dir
+		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].misc )
+			_createTree( prjDirName, s );
+			
+		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].misc )
+		{
+			char[]		userData = s;
+			int			folderLocateId = _createTree( prjDirName, s );
+			
+			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
+			{
+				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
+				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				int insertID = IupGetInt( tree, "LASTADDNODE" );
+				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
+			}
+			else
+			{
+				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
+				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+			}
+		}		
+		
 
 	
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
@@ -355,6 +389,12 @@ class CProjectTree
 		IupSetAttributeId( tree, "COLOR", 1, toStringz( "128 0 0" ) );
 		toBoldTitle( tree, 1 );
 
+		IupSetAttribute( tree, "ADDBRANCH1", "Miscellaneous" );
+		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
+		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		toBoldTitle( tree, 2 );
+		
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
 		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
 		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
@@ -631,7 +671,7 @@ class CProjectTree
 
 		if( activePrjName.length )
 		{
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes ~ GLOBAL.projectManager[activePrjName].others )
+			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes ~ GLOBAL.projectManager[activePrjName].others ~ GLOBAL.projectManager[activePrjName].misc )
 			{
 				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE ) return;
 			}
@@ -677,7 +717,7 @@ class CProjectTree
 		foreach( PROJECT p; GLOBAL.projectManager )
 		{
 			//IupMessage("",toStringz(p.dir) );
-			foreach( char[] s; p.sources ~ p.includes ~ p.others )
+			foreach( char[] s; p.sources ~ p.includes ~ p.others ~ p.misc )
 			{
 				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE )
 				{
@@ -1003,33 +1043,57 @@ extern(C)
 			Ihandle* popupMenu;
 			
 			scope titleFP = new FilePath( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ) );
-			if( lowerCase( titleFP.ext ) == "bas" )
+			
+			int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
+			char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others or Miscellaneous
+			
+			switch( prjFilesFolderName )
 			{
-				popupMenu = IupMenu( 
-										IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
-										IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
-										IupSeparator(),
-										IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
-										IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
-										IupSeparator(),
-										IupItem( GLOBAL.languageItems["setmainmodule"].toCString, "CProjectTree_setmainmodule" ),
-										null
-									);
-									
-				IupSetFunction( "CProjectTree_setmainmodule", cast(Icallback) &CProjectTree_setmainmodule_cb );
+				case "Others":
+				case "Miscellaneous":
+					popupMenu = IupMenu( 
+											IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
+											IupItem( GLOBAL.languageItems["openinposeidon"].toCString, "CProjectTree_openin" ),
+											IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
+											IupSeparator(),
+											IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
+											IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
+											IupSeparator(),
+											IupItem( GLOBAL.languageItems["setmainmodule"].toCString, "CProjectTree_setmainmodule" ),
+											null
+										);
+					IupSetFunction( "CProjectTree_openin", cast(Icallback) &CProjectTree_Openin_cb );
+					break;
+					
+				default:
+					if( lowerCase( titleFP.ext ) == "bas" )
+					{
+						popupMenu = IupMenu( 
+												IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
+												IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
+												IupSeparator(),
+												IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
+												IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
+												IupSeparator(),
+												IupItem( GLOBAL.languageItems["setmainmodule"].toCString, "CProjectTree_setmainmodule" ),
+												null
+											);
+											
+						IupSetFunction( "CProjectTree_setmainmodule", cast(Icallback) &CProjectTree_setmainmodule_cb );
+					}
+					else
+					{
+						popupMenu = IupMenu( 
+												IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
+												IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
+												IupSeparator(),
+												IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
+												IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
+												null
+											);
+					}				
 			}
-			else
-			{
-				popupMenu = IupMenu( 
-										IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
-										IupItem( GLOBAL.languageItems["removefromprj"].toCString, "CProjectTree_remove" ),
-										IupSeparator(),
-										IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
-										IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
-										null
-									);
-			}
-
+			
 			IupSetFunction( "CProjectTree_open", cast(Icallback) &CProjectTree_Open_cb );
 			IupSetFunction( "CProjectTree_remove", cast(Icallback) &CProjectTree_remove_cb );
 			IupSetFunction( "CProjectTree_delete", cast(Icallback) &CProjectTree_delete_cb );
@@ -1242,7 +1306,7 @@ extern(C)
 						}
 						break;
 					default:
-						if( prjFilesFolderName != "Others" )
+						if( prjFilesFolderName != "Others" && prjFilesFolderName != "Miscellaneous" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
 							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
@@ -1280,7 +1344,7 @@ extern(C)
 						}
 						break;
 					default:
-						if( prjFilesFolderName != "Others" )
+						if( prjFilesFolderName != "Others" && prjFilesFolderName != "Miscellaneous" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
 							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
@@ -1316,8 +1380,12 @@ extern(C)
 					GLOBAL.projectManager[activeProjectDirName].includes ~= fullPath;
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, GLOBAL.cString.convert( "icon_bi" ) );
 					break;
-				default:
+				case "Others":
 					GLOBAL.projectManager[activeProjectDirName].others ~= fullPath;
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, GLOBAL.cString.convert( "icon_txt" ) );
+					break;
+				default:
+					GLOBAL.projectManager[activeProjectDirName].misc ~= fullPath;
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, GLOBAL.cString.convert( "icon_txt" ) );
 					break;
 			}
@@ -1401,7 +1469,7 @@ extern(C)
 					{
 						//Util.substitute( fullPath, "/", "\\" );
 						bool bExitChildLoop;
-						foreach( char[] s; GLOBAL.projectManager[prjDirName].sources ~ GLOBAL.projectManager[prjDirName].includes ~ GLOBAL.projectManager[prjDirName].others )
+						foreach( char[] s; GLOBAL.projectManager[prjDirName].sources ~ GLOBAL.projectManager[prjDirName].includes ~ GLOBAL.projectManager[prjDirName].others ~ GLOBAL.projectManager[prjDirName].misc )
 						{
 							if( s == fullPath )
 							{
@@ -1450,7 +1518,11 @@ extern(C)
 								}
 								break;
 							default:
-								if( prjFilesFolderName != "Others" )
+								if( prjFilesFolderName == "Others" )
+									GLOBAL.projectManager[prjDirName].others ~= fullPath;
+								else if( prjFilesFolderName == "Miscellaneous" )
+									GLOBAL.projectManager[prjDirName].misc ~= fullPath;
+								else
 								{
 									Ihandle* messageDlg = IupMessageDlg();
 									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
@@ -1458,10 +1530,6 @@ extern(C)
 									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 									return IUP_DEFAULT;
-								}
-								else
-								{
-									GLOBAL.projectManager[prjDirName].others ~= fullPath;
 								}
 						}
 					}
@@ -1500,7 +1568,11 @@ extern(C)
 								}
 								break;
 							default:
-								if( prjFilesFolderName != "Others" )
+								if( prjFilesFolderName == "Others" )
+									GLOBAL.projectManager[prjDirName].others ~= fullPath; 
+								else if( prjFilesFolderName == "Miscellaneous" )
+									GLOBAL.projectManager[prjDirName].misc ~= fullPath;
+								else
 								{
 									Ihandle* messageDlg = IupMessageDlg();
 									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
@@ -1508,10 +1580,6 @@ extern(C)
 									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
 									return IUP_DEFAULT;
-								}
-								else
-								{
-									GLOBAL.projectManager[prjDirName].others ~= fullPath;
 								}
 						}
 					}
@@ -1617,6 +1685,42 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	private int CProjectTree_Openin_cb( Ihandle *ih )
+	{
+		int[] selectedIDs = actionManager.ProjectAction.getSelectIDs();
+		
+		if( selectedIDs.length > 0 )
+		{
+			foreach( int _i; selectedIDs )
+			{
+				if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" )
+				{
+					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) ).dup;
+					scope fp = new FilePath( fullPath );
+					
+					if( fp.exists )
+					{
+						if( selectedIDs.length == 1 )
+							actionManager.ScintillaAction.openFile( fullPath.dup, -1, true );
+						else
+							actionManager.ScintillaAction.openFile( fullPath.dup );
+					}
+					else
+					{
+						IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+					}
+				}
+			}
+			
+			int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+			// Erase Project Treeitems And Left Only One Item
+			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+		}
+		
+		return IUP_DEFAULT;
+	}
+
 	private int CProjectTree_remove_cb( Ihandle* ih )
 	{
 		int[] selectedIDs = actionManager.ProjectAction.getSelectIDs();
@@ -1632,7 +1736,7 @@ extern(C)
 				
 				char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
 				int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
-				char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others
+				char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others or Miscellaneous
 
 				if( actionManager.ScintillaAction.closeDocument( fullPath ) == IUP_IGNORE ) return IUP_IGNORE;
 
@@ -1652,11 +1756,18 @@ extern(C)
 						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes = temp;
 						break;
 						
-					default:
+					case "Others":
 						char[][] temp;
 						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others )
 							if( s != fullPath ) temp ~= s;
 						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others = temp;
+						break;
+
+					case "Miscellaneous":
+						char[][] temp;
+						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].misc )
+							if( s != fullPath ) temp ~= s;
+						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].misc = temp;
 						break;
 				}		
 
@@ -1748,8 +1859,51 @@ extern(C)
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id, tools.getCString( fp.toString ) );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, GLOBAL.cString.convert( fp.file ) );
 
-			char[] activeProjectDirName = actionManager.ProjectAction.getActiveProjectName;
+			char[]	activeProjectDirName = actionManager.ProjectAction.getActiveProjectName;
+			int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
+			char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others or Miscellaneous
 			
+			switch( prjFilesFolderName )
+			{
+				case "Sources":
+					char[][] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
+					GLOBAL.projectManager[activeProjectDirName].sources.length = 0;
+					foreach( char[] s; tempSources )
+					{
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= fp.toString;
+					}
+					break;
+					
+				case "Includes":
+					char[][] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
+					GLOBAL.projectManager[activeProjectDirName].includes.length = 0;
+					foreach( char[] s; tempIncludes )
+					{
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= fp.toString;
+					}
+					break;
+					
+				case "Others":
+					char[][] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
+					GLOBAL.projectManager[activeProjectDirName].others.length = 0;
+					foreach( char[] s; tempOthers )
+					{
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
+					}
+					break;
+
+				case "Miscellaneous":
+					char[][] tempMisc = GLOBAL.projectManager[activeProjectDirName].misc;
+					GLOBAL.projectManager[activeProjectDirName].misc.length = 0;
+					foreach( char[] s; tempMisc )
+					{
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].misc ~= s;else GLOBAL.projectManager[activeProjectDirName].misc ~= fp.toString;
+					}
+					break;
+				default:
+			}				
+			
+			/+
 			version(FBIDE)
 			{
 				switch( lowerCase( oldExt ) )
@@ -1811,7 +1965,8 @@ extern(C)
 							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
 						}
 				}
-			}			
+			}
+			+/
 		}
 		
 		return IUP_DEFAULT;
