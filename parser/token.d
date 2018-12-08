@@ -94,6 +94,7 @@ version(FBIDE)
 		Toverload,
 		Talias,
 		Texport,
+		Tnaked,
 
 		// data
 		Tbyte,
@@ -268,6 +269,7 @@ version(FBIDE)
 		identToTOK["overload"]	= TOK.Toverload;
 		identToTOK["alias"]		= TOK.Talias;
 		identToTOK["export"]	= TOK.Texport;
+		identToTOK["naked"]		= TOK.Tnaked;
 
 		
 

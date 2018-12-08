@@ -43,7 +43,7 @@ class CScanner
 					document = FileAction.loadFile( fullPath, _encoding );
 				}
 
-				return scan( document );
+				return scan( document.dup );
 			}
 			catch( Exception e )
 			{

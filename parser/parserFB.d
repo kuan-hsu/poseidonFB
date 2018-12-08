@@ -1286,10 +1286,15 @@ version(FBIDE)
 						}
 						+/
 						
-						if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) 
-							parseToken();
-						else if( token().tok == TOK.Tidentifier ) // like " Declare Function app_oninit_cb WXCALL () As wxBool "
-							parseToken( TOK.Tidentifier );
+						if( _kind & ( B_FUNCTION | B_SUB ) )
+						{	
+							if( token().tok == TOK.Tnaked ) parseToken();
+						
+							if( token().tok == TOK.Tstdcall || token().tok == TOK.Tcdecl || token().tok == TOK.Tpascal ) 
+								parseToken();
+							else if( token().tok == TOK.Tidentifier ) // like " Declare Function app_oninit_cb WXCALL () As wxBool "
+								parseToken( TOK.Tidentifier );
+						}
 
 						// Overload
 						if( token().tok == TOK.Toverload ) parseToken( TOK.Toverload );
@@ -2176,8 +2181,15 @@ version(FBIDE)
 						case TOK.Tvar:
 							parserVar();
 							break;
-
-						case TOK.Tfunction, TOK.Tsub, TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor:
+							
+						case TOK.Tsub:
+							if( next().tok == TOK.Tidentifier && next2().tok == TOK.Tcomma )
+							{
+								// ASM Command
+								parseToken( TOK.Tsub );
+								break;
+							}
+						case TOK.Tfunction, /*TOK.Tsub,*/ TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor:
 							parseProcedure( false, null );
 							break;
 
