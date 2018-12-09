@@ -15,6 +15,8 @@ import tango.sys.SharedLib;
 
 version(Windows)
 {
+	import tango.sys.win32.UserGdi;
+	
 	pragma(lib, "gdi32.lib");
 	pragma(lib, "user32.lib");
 	pragma(lib, "comdlg32.lib");
@@ -284,6 +286,17 @@ void main( char[][] args )
 		{
 			DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, activePos );
 			IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", activePos );
+		}
+	}
+	
+	version(Windows)
+	{
+		if( GLOBAL.editorSetting00.AutoKBLayout == "ON" )
+		{
+			// From WQ1980
+			//HKL enghkl = LoadKeyboardLayoutA( "00000409",KLF_ACTIVATE & KLF_SETFORPROCESS );
+			HKL enghkl = LoadKeyboardLayoutA( "00000409", 0x00000001 | 0x00000100 ); // 00000409 English layout
+			ActivateKeyboardLayout( enghkl, 0x00000100 );
 		}
 	}
 	

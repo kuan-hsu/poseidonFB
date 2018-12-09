@@ -60,4 +60,5 @@ name=tools.d
 [Includes]
 [Others]
 name=poseidonFB.res
+[Misc]
 [Focus]

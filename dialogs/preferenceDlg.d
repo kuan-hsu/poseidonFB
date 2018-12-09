@@ -493,6 +493,10 @@ class CPreferenceDialog : CBaseDialog
 		}
 		IupSetHandle( "toggleLoadAtBackThread", toggleLoadAtBackThread );
 		
+		Ihandle* toggleAutoKBLayout = IupToggle( GLOBAL.languageItems["autokblayout"].toCString, null );
+		IupSetAttribute( toggleAutoKBLayout, "VALUE", toStringz(GLOBAL.editorSetting00.AutoKBLayout.dup) );
+		IupSetHandle( "toggleAutoKBLayout", toggleAutoKBLayout );
+		
 		
 		stringCharSymbol = new IupString( GLOBAL.editorSetting00.ControlCharSymbol );
 		Ihandle* labelSetControlCharSymbol = IupLabel( toStringz( GLOBAL.languageItems["controlcharsymbol"].toDString ~ ":" ) );
@@ -531,98 +535,202 @@ class CPreferenceDialog : CBaseDialog
 
 		version(FBIDE)
 		{
-			Ihandle* gbox = IupGridBox
-			(
-				IupSetAttributes( toggleLineMargin, "" ),
-				IupSetAttributes( toggleFixedLineMargin, "" ),
-				
-				IupSetAttributes( toggleBookmarkMargin,"" ),
-				IupSetAttributes( toggleFoldMargin, "" ),
-				
-				IupSetAttributes( toggleIndentGuide, "" ),
-				IupSetAttributes( toggleCaretLine, "" ),
-				
-				IupSetAttributes( toggleWordWrap, "" ),
-				IupSetAttributes( toggleTabUseingSpace, "" ),
-				
-				IupSetAttributes( toggleShowEOL, "" ),
-				IupSetAttributes( toggleShowSpace, "" ),
+			version(Windows)
+			{
+				Ihandle* gbox = IupGridBox
+				(
+					IupSetAttributes( toggleLineMargin, "" ),
+					IupSetAttributes( toggleFixedLineMargin, "" ),
+					
+					IupSetAttributes( toggleBookmarkMargin,"" ),
+					IupSetAttributes( toggleFoldMargin, "" ),
+					
+					IupSetAttributes( toggleIndentGuide, "" ),
+					IupSetAttributes( toggleCaretLine, "" ),
+					
+					IupSetAttributes( toggleWordWrap, "" ),
+					IupSetAttributes( toggleTabUseingSpace, "" ),
+					
+					IupSetAttributes( toggleShowEOL, "" ),
+					IupSetAttributes( toggleShowSpace, "" ),
 
-				IupSetAttributes( toggleAutoIndent, "" ),
-				IupSetAttributes( toggleAutoEnd, "" ),
-				
-				IupSetAttributes( toggleAutoClose, "" ),
-				IupSetAttributes( toggleColorOutline, "" ),
-				
-				IupSetAttributes( toggleMessage, "" ),
-				IupSetAttributes( toggleBoldKeyword, "" ),
-				
-				IupSetAttributes( toggleBraceMatch, "" ),
-				IupSetAttributes( toggleLoadprev, "" ),
+					IupSetAttributes( toggleAutoIndent, "" ),
+					IupSetAttributes( toggleAutoEnd, "" ),
+					
+					IupSetAttributes( toggleAutoClose, "" ),
+					IupSetAttributes( toggleColorOutline, "" ),
+					
+					IupSetAttributes( toggleMessage, "" ),
+					IupSetAttributes( toggleBoldKeyword, "" ),
+					
+					IupSetAttributes( toggleBraceMatch, "" ),
+					IupSetAttributes( toggleLoadprev, "" ),
 
-				IupSetAttributes( toggleMultiSelection, "" ),
-				IupSetAttributes( toggleCurrentWord, "" ),
+					IupSetAttributes( toggleMultiSelection, "" ),
+					IupSetAttributes( toggleCurrentWord, "" ),
 
-				IupSetAttributes( toggleMiddleScroll, "" ),
-				IupSetAttributes( toggleDocStatus, "" ),
-				
-				IupSetAttributes( toggleLoadAtBackThread, "" ),
-				IupFill(),
-				
-				IupSetAttributes( hBoxTab, "" ),
-				IupSetAttributes( hBoxColumn, "" ),
+					IupSetAttributes( toggleMiddleScroll, "" ),
+					IupSetAttributes( toggleDocStatus, "" ),
+					
+					IupSetAttributes( toggleLoadAtBackThread, "" ),
+					IupSetAttributes( toggleAutoKBLayout, "" ),
+					
+					IupSetAttributes( hBoxTab, "" ),
+					IupSetAttributes( hBoxColumn, "" ),
 
-				IupSetAttributes( hBoxBarSize, "" ),
-				hBoxControlChar,
-				
-				null
-			);
+					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxControlChar,
+					
+					null
+				);
+			}
+			else
+			{
+				Ihandle* gbox = IupGridBox
+				(
+					IupSetAttributes( toggleLineMargin, "" ),
+					IupSetAttributes( toggleFixedLineMargin, "" ),
+					
+					IupSetAttributes( toggleBookmarkMargin,"" ),
+					IupSetAttributes( toggleFoldMargin, "" ),
+					
+					IupSetAttributes( toggleIndentGuide, "" ),
+					IupSetAttributes( toggleCaretLine, "" ),
+					
+					IupSetAttributes( toggleWordWrap, "" ),
+					IupSetAttributes( toggleTabUseingSpace, "" ),
+					
+					IupSetAttributes( toggleShowEOL, "" ),
+					IupSetAttributes( toggleShowSpace, "" ),
+
+					IupSetAttributes( toggleAutoIndent, "" ),
+					IupSetAttributes( toggleAutoEnd, "" ),
+					
+					IupSetAttributes( toggleAutoClose, "" ),
+					IupSetAttributes( toggleColorOutline, "" ),
+					
+					IupSetAttributes( toggleMessage, "" ),
+					IupSetAttributes( toggleBoldKeyword, "" ),
+					
+					IupSetAttributes( toggleBraceMatch, "" ),
+					IupSetAttributes( toggleLoadprev, "" ),
+
+					IupSetAttributes( toggleMultiSelection, "" ),
+					IupSetAttributes( toggleCurrentWord, "" ),
+
+					IupSetAttributes( toggleMiddleScroll, "" ),
+					IupSetAttributes( toggleDocStatus, "" ),
+					
+					IupSetAttributes( toggleLoadAtBackThread, "" ),
+					IupFill(),
+					
+					IupSetAttributes( hBoxTab, "" ),
+					IupSetAttributes( hBoxColumn, "" ),
+
+					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxControlChar,
+					
+					null
+				);
+			}
 		}
 		version(DIDE)
 		{
-			Ihandle* gbox = IupGridBox
-			(
-				IupSetAttributes( toggleLineMargin, "" ),
-				IupSetAttributes( toggleFixedLineMargin, "" ),
-				
-				IupSetAttributes( toggleBookmarkMargin,"" ),
-				IupSetAttributes( toggleFoldMargin, "" ),
-				
-				IupSetAttributes( toggleIndentGuide, "" ),
-				IupSetAttributes( toggleCaretLine, "" ),
-				
-				IupSetAttributes( toggleWordWrap, "" ),
-				IupSetAttributes( toggleTabUseingSpace, "" ),
-				
-				IupSetAttributes( toggleShowEOL, "" ),
-				IupSetAttributes( toggleShowSpace, "" ),
+			version(Windows)
+			{
+				Ihandle* gbox = IupGridBox
+				(
+					IupSetAttributes( toggleLineMargin, "" ),
+					IupSetAttributes( toggleFixedLineMargin, "" ),
+					
+					IupSetAttributes( toggleBookmarkMargin,"" ),
+					IupSetAttributes( toggleFoldMargin, "" ),
+					
+					IupSetAttributes( toggleIndentGuide, "" ),
+					IupSetAttributes( toggleCaretLine, "" ),
+					
+					IupSetAttributes( toggleWordWrap, "" ),
+					IupSetAttributes( toggleTabUseingSpace, "" ),
+					
+					IupSetAttributes( toggleShowEOL, "" ),
+					IupSetAttributes( toggleShowSpace, "" ),
 
-				IupSetAttributes( toggleAutoIndent, "" ),
-				IupSetAttributes( toggleAutoClose, "" ),
-				
-				IupSetAttributes( toggleColorOutline, "" ),
-				IupSetAttributes( toggleMessage, "" ),
+					IupSetAttributes( toggleAutoIndent, "" ),
+					IupSetAttributes( toggleAutoClose, "" ),
+					
+					IupSetAttributes( toggleColorOutline, "" ),
+					IupSetAttributes( toggleMessage, "" ),
 
-				IupSetAttributes( toggleBoldKeyword, "" ),
-				IupSetAttributes( toggleLoadprev, "" ),
-				
-				IupSetAttributes( toggleBraceMatch, "" ),
-				IupSetAttributes( toggleMultiSelection, "" ),
+					IupSetAttributes( toggleBoldKeyword, "" ),
+					IupSetAttributes( toggleLoadprev, "" ),
+					
+					IupSetAttributes( toggleBraceMatch, "" ),
+					IupSetAttributes( toggleMultiSelection, "" ),
 
-				IupSetAttributes( toggleCurrentWord, "" ),
-				IupSetAttributes( toggleMiddleScroll, "" ),
-				
-				IupSetAttributes( toggleDocStatus, "" ),
-				IupSetAttributes( toggleLoadAtBackThread, "" ),
-				
-				IupSetAttributes( hBoxTab, "" ),
-				IupSetAttributes( hBoxColumn, "" ),
+					IupSetAttributes( toggleCurrentWord, "" ),
+					IupSetAttributes( toggleMiddleScroll, "" ),
+					
+					IupSetAttributes( toggleDocStatus, "" ),
+					IupSetAttributes( toggleAutoKBLayout, "" ),
+					//IupSetAttributes( toggleLoadAtBackThread, "" ),
+					
+					IupSetAttributes( hBoxTab, "" ),
+					IupSetAttributes( hBoxColumn, "" ),
 
-				IupSetAttributes( hBoxBarSize, "" ),
-				hBoxControlChar,
-				
-				null
-			);
+					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxControlChar,
+					
+					null
+				);
+			}
+			else
+			{
+				Ihandle* gbox = IupGridBox
+				(
+					IupSetAttributes( toggleLineMargin, "" ),
+					IupSetAttributes( toggleFixedLineMargin, "" ),
+					
+					IupSetAttributes( toggleBookmarkMargin,"" ),
+					IupSetAttributes( toggleFoldMargin, "" ),
+					
+					IupSetAttributes( toggleIndentGuide, "" ),
+					IupSetAttributes( toggleCaretLine, "" ),
+					
+					IupSetAttributes( toggleWordWrap, "" ),
+					IupSetAttributes( toggleTabUseingSpace, "" ),
+					
+					IupSetAttributes( toggleShowEOL, "" ),
+					IupSetAttributes( toggleShowSpace, "" ),
+
+					IupSetAttributes( toggleAutoIndent, "" ),
+					IupSetAttributes( toggleAutoClose, "" ),
+					
+					IupSetAttributes( toggleColorOutline, "" ),
+					IupSetAttributes( toggleMessage, "" ),
+
+					IupSetAttributes( toggleBoldKeyword, "" ),
+					IupSetAttributes( toggleLoadprev, "" ),
+					
+					IupSetAttributes( toggleBraceMatch, "" ),
+					IupSetAttributes( toggleMultiSelection, "" ),
+
+					IupSetAttributes( toggleCurrentWord, "" ),
+					IupSetAttributes( toggleMiddleScroll, "" ),
+					
+					IupSetAttributes( toggleDocStatus, "" ),
+					IupFill(),
+					//IupSetAttributes( toggleAutoKBLayout, "" ),
+					//IupSetAttributes( toggleLoadAtBackThread, "" ),
+					
+					IupSetAttributes( hBoxTab, "" ),
+					IupSetAttributes( hBoxColumn, "" ),
+
+					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxControlChar,
+					
+					null
+				);
+			}
 		}
 
 		//IupSetAttribute(gbox, "SIZECOL", "1");
@@ -1716,6 +1824,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleMiddleScroll", null );
 		IupSetHandle( "toggleDocStatus", null );
 		IupSetHandle( "toggleLoadAtBackThread", null );
+		IupSetHandle( "toggleAutoKBLayout", null );
 		IupSetHandle( "textSetControlCharSymbol", null );
 		
 		
@@ -2134,6 +2243,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.MiddleScroll				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMiddleScroll" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.DocStatus				= fromStringz(IupGetAttribute( IupGetHandle( "toggleDocStatus" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.LoadAtBackThread			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadAtBackThread" ), "VALUE" )).dup;
+			GLOBAL.editorSetting00.AutoKBLayout				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoKBLayout" ), "VALUE" )).dup;
 
 			
 			IupSetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE", CPreferenceDialog.stringCharSymbol << IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) );

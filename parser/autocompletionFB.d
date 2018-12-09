@@ -2031,7 +2031,7 @@ version(FBIDE)
 			}
 
 			return pos;
-		}	
+		}
 
 		static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 		{			
@@ -2111,6 +2111,7 @@ version(FBIDE)
 					switch( s )
 					{
 						case "(", ")", "[", "]", "{", "}":
+						case ".":
 						case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", ">", "<", "=", ",", "@":
 							bBackEnd = true;
 							break;

@@ -154,6 +154,7 @@ options=Options
 				middlescroll=Middle Button Scroll
 				savedocstatus=Save Document Status
 				loadfileatbackthread=Load File(s) AT Back Thread
+				autokblayout=Auto en-Keyboard Layout
 				controlcharsymbol=Set Control Character Symbol
 				tabwidth=Tab Width
 				columnedge=Column Edge
