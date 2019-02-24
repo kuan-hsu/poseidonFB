@@ -630,6 +630,7 @@ class CPLUGIN
 	
 	void unload()
 	{
+		IupMessage("DLL UNLOAD","");
 		if( sharedLib !is null ) sharedLib.unload();
 	}
 }

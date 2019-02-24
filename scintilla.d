@@ -141,7 +141,7 @@ class CScintilla
 
 	public:
 	int				encoding;
-	int				lastPos = -99;
+	//int				lastPos = -99;
 
 	this( void* _beCopiedDocument )
 	{
@@ -226,6 +226,8 @@ class CScintilla
 			{
 				IupSetAttribute( sci, "MARGINWIDTH0", "0" );
 			}
+			
+			//init( _fullPath, insertPos );
 		}
 		catch( Exception e )
 		{
@@ -2180,6 +2182,63 @@ extern(C)
 					default:
 				}
 			}
+			
+			version(FBIDE)
+			{
+				// Auto convert keyword case......
+				int 	currentPos = actionManager.ScintillaAction.getCurrentPos( ih );
+				if( !ScintillaAction.isComment( ih, currentPos ))
+				{
+					if( GLOBAL.keywordCase > 0 )
+					{
+						if( cast(int)IupScintillaSendMessage( ih, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
+						{
+							//IupMessage("",toStringz( Integer.toString( c ) ) );
+							if( c == 32 || c == 9 || c == 13 || c == 40 )
+							{
+								int		pos, headPos;
+								
+								if( c != 13 )
+								{
+									pos = currentPos;// - 1;
+								}
+								else
+								{
+									pos = cast(int) IupScintillaSendMessage( ih, 2136, ScintillaAction.getCurrentLine( ih ) - 1/*2*/, 0 ); // SCI_GETLINEENDPOSITION 2136
+								}
+								
+								char[]	word = AutoComplete.getWholeWordReverse( ih, pos, headPos );
+								if( word.length )
+								{
+									word = lowerCase( word.reverse );
+
+									bool bExitFlag;
+									foreach( IupString _keyword; GLOBAL.KEYWORDS )
+									{
+										foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
+										{	
+											if( _k.length )
+											{
+												if( lowerCase( _k ) == word )
+												{
+													IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
+													word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
+													IupSetAttribute( ih, "SELECTEDTEXT", toStringz( word ) );
+													IupScintillaSendMessage( ih, 2025, currentPos, 0 ); // sci_gotopos = 2025,
+
+													bExitFlag = true;
+													break;
+												}
+											}
+										}
+										if( bExitFlag ) break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}			
 
 			foreach( ShortKey sk; GLOBAL.shortKeys )
 			{
@@ -2218,35 +2277,35 @@ extern(C)
 					case "find":				
 						if( sk.keyValue == c )
 						{
-							menu.findReplace_cb();
+							menu.findReplace_cb( ih );
 							return IUP_IGNORE;
 						}
 						break;
 					case "findinfile":
 						if( sk.keyValue == c )
 						{ 
-							menu.findReplaceInFiles();
+							menu.findReplaceInFiles( ih );
 							return IUP_IGNORE;
 						}
 						break;
 					case "findnext":
 						if( sk.keyValue == c )
 						{
-							menu.findNext_cb();
+							menu.findNext_cb( ih );
 							return IUP_IGNORE;
 						}
 						break;
 					case "findprev":
 						if( sk.keyValue == c )
 						{
-							menu.findPrev_cb();
+							menu.findPrev_cb( ih );
 							return IUP_IGNORE;
 						}
 						break;
 					case "gotoline":
 						if( sk.keyValue == c )
 						{
-							menu.item_goto_cb();
+							menu.item_goto_cb( ih );
 							return IUP_IGNORE;
 						}
 						break;

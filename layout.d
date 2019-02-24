@@ -422,6 +422,7 @@ extern(C)
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
 				{
+					/+
 					version(FBIDE)
 					{
 						// Auto convert keyword case......
@@ -478,6 +479,7 @@ extern(C)
 							}
 						}
 					}
+					+/
 					
 					/+
 					// BRACEMATCH

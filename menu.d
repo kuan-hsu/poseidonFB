@@ -679,7 +679,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.407)\nBy Kuan Hsu (Taiwan)\n2018.12.09" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.408)\nBy Kuan Hsu (Taiwan)\n2019.02.24" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.036)\nBy Kuan Hsu (Taiwan)\n2018.12.09" );
 		return IUP_DEFAULT;
 	});
@@ -1335,7 +1335,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	void findReplace_cb()
+	int findReplace_cb( Ihandle* _iHandle )
 	{
 		Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null )
@@ -1343,6 +1343,8 @@ extern(C)
 			char[] targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );		
 			if( targetText.length ) GLOBAL.searchExpander.show( targetText.dup ); else GLOBAL.searchExpander.show( null );
 		}
+		
+		return IUP_DEFAULT;
 		/+
 		if( GLOBAL.searchDlg !is null )
 		{
@@ -1357,7 +1359,7 @@ extern(C)
 		+/
 	}
 
-	void findReplaceInFiles()
+	int findReplaceInFiles( Ihandle* _iHandle )
 	{
 		if( GLOBAL.serachInFilesDlg !is null )
 		{
@@ -1369,7 +1371,7 @@ extern(C)
 				if( targetText.length) GLOBAL.serachInFilesDlg.show( targetText.dup ); else GLOBAL.serachInFilesDlg.show( null );
 			}
 		}
-
+		return IUP_DEFAULT;
 	}
 
 	
@@ -1380,7 +1382,7 @@ extern(C)
     SCFIND_REGEXP = 0x00200000,
     SCFIND_POSIX = 0x00400000,
 	*/
-	void findNext_cb()
+	int findNext_cb( Ihandle* _iHandle )
 	{
 		Ihandle* ih	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null )
@@ -1392,9 +1394,10 @@ extern(C)
 				actionManager.SearchAction.search( ih, targetText, GLOBAL.searchExpander.searchRule, true );
 			}
 		}
+		return IUP_DEFAULT;
 	}
 
-	void findPrev_cb()
+	int findPrev_cb( Ihandle* _iHandle )
 	{
 		Ihandle* ih	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null )
@@ -1417,9 +1420,10 @@ extern(C)
 			//actionManager.SearchAction.findPrev( ih, targetText, GLOBAL.searchDlg.searchRule );
 			//actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
 		}
+		return IUP_DEFAULT;
 	}
 
-	void item_goto_cb()
+	int item_goto_cb( Ihandle* _iHandle )
 	{
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )
@@ -1452,7 +1456,7 @@ extern(C)
 					catch
 					{
 					}
-					return;
+					return IUP_DEFAULT;
 				}
 				else
 				{
@@ -1466,20 +1470,23 @@ extern(C)
 							IupSetAttribute( cSci.getIupScintilla, "CARETPOS", toStringz( Integer.toString(value).dup ) );
 							actionManager.StatusBarAction.update();
 							IupSetFocus( cSci.getIupScintilla );
-							return;
+							return IUP_DEFAULT;
 						}
 					}
 					catch
 					{
-						return;
+						return IUP_DEFAULT;
 					}
 				}
 				
 				GLOBAL.navigation.addCache( cSci.getFullPath, Integer.atoi( lineNum ) );
 				actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
 				actionManager.StatusBarAction.update();
+				
+				return IUP_DEFAULT;
 			}
 		}
+		return IUP_DEFAULT;
 	}
 	
 	int outlineMenuItem_cb( Ihandle *ih )

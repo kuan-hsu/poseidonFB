@@ -1062,12 +1062,12 @@ version(FBIDE)
 							{
 								if( isDefaultType( _type ) ) return null;
 
-								resultNode = searchMatchNode( originalNode, _type, B_TYPE | B_CLASS | B_ENUM | B_UNION );
+								resultNode = searchMatchNode( originalNode, _type, B_TYPE | B_CLASS | B_ENUM | B_UNION | B_NAMESPACE );
 								
 								if( resultNode is null )
 								{
 									resultNode = searchMatchNode( originalNode, _type, B_ALIAS );
-									if( resultNode !is null ) resultNode = searchMatchNode( originalNode, resultNode.type, B_TYPE | B_CLASS | B_ENUM | B_UNION );
+									if( resultNode !is null ) resultNode = searchMatchNode( originalNode, resultNode.type, B_TYPE | B_CLASS | B_ENUM | B_UNION | B_NAMESPACE ); else return null;
 								}
 							}
 							else
@@ -3784,6 +3784,7 @@ version(FBIDE)
 			
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
+			/+
 			switch( text )
 			{
 				case "(", ")", ",", ":", ".":	
@@ -3797,7 +3798,7 @@ version(FBIDE)
 						return false;
 					}
 			}
-			
+			+/
 
 			if( !bForce )
 			{
@@ -3885,12 +3886,12 @@ version(FBIDE)
 					{
 						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
 					}
-					cSci.lastPos = -99;
+					//cSci.lastPos = -99;
 					return true;
 				}
 				else
 				{
-					cSci.lastPos = pos;
+					//cSci.lastPos = pos;
 				}
 			}
 
@@ -4211,14 +4212,14 @@ version(FBIDE)
 								
 
 							auto cSci = ScintillaAction.getActiveCScintilla();
-							if( cSci !is null ) cSci.lastPos = -99;
+							//if( cSci !is null ) cSci.lastPos = -99;
 						}
 					}
 				}
 				else
 				{
-					auto cSci = ScintillaAction.getActiveCScintilla();
-					if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+					//auto cSci = ScintillaAction.getActiveCScintilla();
+					//if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
 				}
 
 				delete AutoComplete.showListThread;
@@ -4256,7 +4257,7 @@ version(FBIDE)
 							AutoComplete.noneListProcedureName = "";
 							
 							auto cSci = ScintillaAction.getActiveCScintilla();
-							if( cSci !is null ) cSci.lastPos = -99;
+							//if( cSci !is null ) cSci.lastPos = -99;
 						}
 					}
 				}
@@ -4264,8 +4265,8 @@ version(FBIDE)
 				{
 					AutoComplete.noneListProcedureName = Integer.toString( AutoComplete.showCallTipThread.pos ) ~ ";" ~ AutoComplete.showCallTipThread.extString;
 					//AutoComplete.cleanCalltipContainer();
-					auto cSci = ScintillaAction.getActiveCScintilla();
-					if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+					//auto cSci = ScintillaAction.getActiveCScintilla();
+					//if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
 				}
 
 				delete AutoComplete.showCallTipThread;

@@ -2021,6 +2021,12 @@ version(FBIDE)
 					parseToken( TOK.Tidentifier );
 					return true;
 				}
+				else if( token().tok == TOK.Tthis )
+				{
+					activeASTnode = activeASTnode.addChild( "this", B_WITH, null, null, null, token().lineNumber );
+					parseToken( TOK.Tthis );
+					return true;
+				}
 			}
 			catch( Exception e )
 			{
