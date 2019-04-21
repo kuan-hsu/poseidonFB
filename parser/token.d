@@ -114,7 +114,7 @@ version(FBIDE)
 		
 		Tconst,
 		Tpointer, Tptr,
-		Tptraccess,
+		Tptraccess,			// ->
 		Tunsigned,
 		Textern,
 		Tcommon,

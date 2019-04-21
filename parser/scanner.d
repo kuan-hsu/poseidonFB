@@ -236,6 +236,17 @@ class CScanner
 							}
 							*/
 						case '>':
+							if( results[$-1].tok == TOK.Tminus )
+							{
+								TokenUnit t;
+								t.tok = TOK.Tptraccess;
+								t.identifier = "->";
+								t.lineNumber = lineNum;
+								results[$-1] = t;
+								identifier = "";
+								break;
+							}						
+							/*
 							if( identifier == "-" )
 							{
 								TokenUnit t;
@@ -246,6 +257,7 @@ class CScanner
 								identifier = "";
 								break;
 							}
+							*/
 
 						case ',', '+', '*', '/', ':', '(', ')', '[', ']', '<', '=', '{', '}': // '>', 
 							if( lowerCase( identifier.dup ) in identToTOK )

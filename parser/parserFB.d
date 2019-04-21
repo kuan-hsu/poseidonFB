@@ -1793,6 +1793,15 @@ version(FBIDE)
 		{
 			try
 			{
+				if( tokenIndex > 0 )
+				{
+					if( prev().tok == TOK.Tdot || prev().tok == TOK.Tptraccess )
+					{
+						parseToken();
+						return false;
+					}
+				}
+			
 				char[] 	_name, _param, _type, _base;
 				int		_lineNum, _kind;
 
@@ -2250,7 +2259,6 @@ version(FBIDE)
 
 						case TOK.Tassign:
 							parseToken( TOK.Tassign );
-
 							break;
 
 						case TOK.Tendmacro:

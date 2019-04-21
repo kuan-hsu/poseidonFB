@@ -290,7 +290,10 @@ class CScintilla
 	void setText( char[] _text )
 	{
 		//IupSetAttribute( sci, "CLEARALL", "" );
-		IupSetAttribute( sci, "VALUE", toStringz( _text ) );
+		//IupSetAttribute( sci, "VALUE", toStringz( _text ) );
+		
+		scope doc = new IupString( _text );
+		IupSetAttribute( sci, "VALUE", doc.toCString );		
 
 		IupScintillaSendMessage( sci, 2014, 0, 0 ); // SCI_SETSAVEPOINT = 2014		
 		IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
