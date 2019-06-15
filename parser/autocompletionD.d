@@ -3297,6 +3297,7 @@ version(DIDE)
 			
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
+			/*
 			switch( text )
 			{
 				case "(", ")", ",", ":", ".":	
@@ -3310,7 +3311,7 @@ version(DIDE)
 						return false;
 					}
 			}
-			
+			*/
 
 			if( !bForce )
 			{
@@ -3398,13 +3399,15 @@ version(DIDE)
 					{
 						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
 					}
-					cSci.lastPos = -99;
+					//cSci.lastPos = -99;
 					return true;
 				}
+				/*
 				else
 				{
 					cSci.lastPos = pos;
 				}
+				*/
 			}
 
 			return false;
@@ -3743,15 +3746,17 @@ version(DIDE)
 									IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 							//}
 							auto cSci = ScintillaAction.getActiveCScintilla();
-							if( cSci !is null ) cSci.lastPos = -99;
+							//if( cSci !is null ) cSci.lastPos = -99;
 						}
 					}
 				}
+				/*
 				else
 				{
 					auto cSci = ScintillaAction.getActiveCScintilla();
 					if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
 				}
+				*/
 
 				delete AutoComplete.showListThread;
 				AutoComplete.showListThread = null;
@@ -3788,7 +3793,7 @@ version(DIDE)
 								
 								AutoComplete.noneListProcedureName = "";
 								auto cSci = ScintillaAction.getActiveCScintilla();
-								if( cSci !is null ) cSci.lastPos = -99;
+								//if( cSci !is null ) cSci.lastPos = -99;
 							//}
 						}
 					}
@@ -3797,8 +3802,10 @@ version(DIDE)
 				{
 					AutoComplete.noneListProcedureName = Integer.toString( AutoComplete.showCallTipThread.pos ) ~ ";" ~ AutoComplete.showCallTipThread.extString;
 					//AutoComplete.cleanCalltipContainer();
+					/*
 					auto cSci = ScintillaAction.getActiveCScintilla();
 					if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+					*/
 				}
 
 				delete AutoComplete.showCallTipThread;

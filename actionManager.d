@@ -857,6 +857,8 @@ struct ScintillaAction
 
 		try
 		{
+			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+			
 			scope filePath = new FilePath( fullPath );
 			if( !filePath.exists ) return false;
 
@@ -966,7 +968,7 @@ struct ScintillaAction
 				}
 			}
 			
-			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+			//if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
 			StatusBarAction.update();
 		
@@ -2093,7 +2095,7 @@ struct ParserAction
 			
 			if( _fatherNode.kind & _kind )
 			{
-				if( line > _fatherNode.lineNumber && line < _fatherNode.endLineNum )
+				if( line >= _fatherNode.lineNumber && line < _fatherNode.endLineNum )
 				{
 					//IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
 					

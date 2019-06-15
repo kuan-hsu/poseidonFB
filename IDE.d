@@ -189,7 +189,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "ControlCharSymbol", GLOBAL.editorSetting00.ControlCharSymbol );
 			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
 			doc ~= setINILineData( "Bit64", GLOBAL.editorSetting00.Bit64 );
-			
+			doc ~= setINILineData( "QBCase", GLOBAL.editorSetting00.QBCase );
 			
 			
 			if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
@@ -303,6 +303,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "calltipFore", GLOBAL.editColor.callTip_Fore.toDString );
 			doc ~= setINILineData( "calltipBack", GLOBAL.editColor.callTip_Back.toDString );
 			doc ~= setINILineData( "calltipHLT", GLOBAL.editColor.callTip_HLT.toDString );
+			doc ~= setINILineData( "functionTitle", GLOBAL.editColor.functionTitle.toDString );
 			
 			// shortkeys
 			doc ~= setINILineData( "[shortkeys]");
@@ -571,6 +572,7 @@ struct IDECONFIG
 							case "ControlCharSymbol":		GLOBAL.editorSetting00.ControlCharSymbol = right;		break;
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
 							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
+							case "QBCase":					GLOBAL.editorSetting00.QBCase = right;					break;
 							default:
 						}
 						break;
@@ -679,6 +681,10 @@ struct IDECONFIG
 							case "calltipFore":				GLOBAL.editColor.callTip_Fore = right;					break;
 							case "calltipBack":				GLOBAL.editColor.callTip_Back = right;					break;
 							case "calltipHLT":				GLOBAL.editColor.callTip_HLT = right;					break;
+							
+							case "functionTitle":			GLOBAL.editColor.functionTitle = right;					break;
+							
+							
 							
 							default:
 						}

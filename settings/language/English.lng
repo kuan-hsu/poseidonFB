@@ -165,6 +165,7 @@ options=Options
 				maker2=Maker2
 				maker3=Maker3
 				autoconvertkeyword=Keyword case conversion
+				qbcase=Use QB-IDE Convert Case
 				font=Font
 					default=Default
 					'document=Document

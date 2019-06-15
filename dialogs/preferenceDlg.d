@@ -325,14 +325,15 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
 		
+		/*
 		Ihandle* labelFunctionTitle = IupLabel( GLOBAL.languageItems["width"].toCString );
 		IupSetAttributes( labelFunctionTitle, "SIZE=80x12,ALIGNMENT=ARIGHT:ACENTER" ); 
 		Ihandle* textFunctionTitle = IupText( null );
 		IupSetAttribute( textFunctionTitle, "SIZE", "30x12" );
 		IupSetAttribute( textFunctionTitle, "VALUE", GLOBAL.widthFunctionTitle.toCString );
 		IupSetHandle( "textFunctionTitle", textFunctionTitle );
-		
-		Ihandle* hBoxFunctionTitle = IupHbox( toggleFunctionTitle, labelFunctionTitle, textFunctionTitle, null );
+		*/
+		Ihandle* hBoxFunctionTitle = IupHbox( toggleFunctionTitle, null );
 		IupSetAttribute( hBoxFunctionTitle, "ALIGNMENT", "ACENTER" ); 		
 
 
@@ -497,6 +498,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleAutoKBLayout, "VALUE", toStringz(GLOBAL.editorSetting00.AutoKBLayout.dup) );
 		IupSetHandle( "toggleAutoKBLayout", toggleAutoKBLayout );
 		
+		version(FBIDE)
+		{
+			Ihandle* toggleQBCase = IupToggle( GLOBAL.languageItems["qbcase"].toCString, null );
+			IupSetAttribute( toggleQBCase, "VALUE", toStringz(GLOBAL.editorSetting00.QBCase.dup) );
+			IupSetHandle( "toggleQBCase", toggleQBCase );
+		}		
+		
 		
 		stringCharSymbol = new IupString( GLOBAL.editorSetting00.ControlCharSymbol );
 		Ihandle* labelSetControlCharSymbol = IupLabel( toStringz( GLOBAL.languageItems["controlcharsymbol"].toDString ~ ":" ) );
@@ -575,6 +583,10 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleLoadAtBackThread, "" ),
 					IupSetAttributes( toggleAutoKBLayout, "" ),
 					
+					IupSetAttributes( toggleQBCase, "" ),
+					IupFill(),
+					
+					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
 
@@ -622,7 +634,7 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleDocStatus, "" ),
 					
 					IupSetAttributes( toggleLoadAtBackThread, "" ),
-					IupFill(),
+					IupSetAttributes( toggleQBCase, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -1825,6 +1837,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleDocStatus", null );
 		IupSetHandle( "toggleLoadAtBackThread", null );
 		IupSetHandle( "toggleAutoKBLayout", null );
+		IupSetHandle( "toggleQBCase", null );
 		IupSetHandle( "textSetControlCharSymbol", null );
 		
 		
@@ -2244,6 +2257,8 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.DocStatus				= fromStringz(IupGetAttribute( IupGetHandle( "toggleDocStatus" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.LoadAtBackThread			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadAtBackThread" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.AutoKBLayout				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoKBLayout" ), "VALUE" )).dup;
+			GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
+			
 
 			
 			IupSetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE", CPreferenceDialog.stringCharSymbol << IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) );
@@ -2568,7 +2583,8 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
 			
 			GLOBAL.showFunctionTitle					= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
-			GLOBAL.widthFunctionTitle					= IupGetAttribute( IupGetHandle( "textFunctionTitle" ), "VALUE" );
+			//GLOBAL.widthFunctionTitle					= IupGetAttribute( IupGetHandle( "textFunctionTitle" ), "VALUE" );
+			
 			
 			GLOBAL.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
 			GLOBAL.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
@@ -2611,7 +2627,13 @@ extern(C) // Callback for CPreferenceDialog
 			if( GLOBAL.showFunctionTitle == "ON" )
 			{
 				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" );
-				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", GLOBAL.widthFunctionTitle.toCString );
+				//IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", GLOBAL.widthFunctionTitle.toCString );
+				char[][] size = Util.split( GLOBAL.fonts[0].fontString, "," );
+				if( size.length > 1 )
+					IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", toStringz( GLOBAL.widthFunctionTitle.toDString ~ "x" ~ Integer.toString( Integer.toInt( size[$-1] )  + 1 ) ) );
+				else
+					IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", GLOBAL.widthFunctionTitle.toCString );
+					
 				IupRefresh( GLOBAL.toolbar.getListHandle() );
 			}
 			else
@@ -2702,7 +2724,11 @@ extern(C) // Callback for CPreferenceDialog
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 
 		//if( IupGetInt( dlg, "STATUS" ) ) IupSetAttribute( ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
-		if( IupGetInt( dlg, "STATUS" ) ) IupSetAttribute( ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) ); // For IupFlatButton
+		if( IupGetInt( dlg, "STATUS" ) )
+		{
+			IupSetAttribute( ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) ); // For IupFlatButton
+			IupSetFocus( GLOBAL.preferenceDlg.getIhandle );
+		}
 
 		return IUP_DEFAULT;
 	}
@@ -2752,7 +2778,7 @@ extern(C) // Callback for CPreferenceDialog
 				_ih = IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" );
 				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
 			}			
-			
+			IupSetFocus( GLOBAL.preferenceDlg.getIhandle );
 		}
 
 		return IUP_DEFAULT;

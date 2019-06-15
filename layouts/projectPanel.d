@@ -98,7 +98,7 @@ class CProjectTree
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
-		//IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
 		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_EXECUTELEAF_CB );
 		//IupSetCallback( tree, "BRANCHOPEN_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		//IupSetCallback( tree, "BRANCHCLOSE_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
@@ -925,6 +925,10 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+	private int CProjectTree_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		return IUP_DEFAULT;
+	}
 	/*
 	private int CProjectTree_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
@@ -1645,7 +1649,10 @@ extern(C)
 						if( ext == _include_ || ext == _source_ )
 						{
 							if( selectedIDs.length == 1 )
+							{
 								actionManager.ScintillaAction.openFile( fullPath.dup, -1, true );
+								break;
+							}
 							else
 								actionManager.ScintillaAction.openFile( fullPath.dup );
 						}
@@ -1666,12 +1673,16 @@ extern(C)
 									p.execute;
 								}
 							}
-							catch{}
+							catch
+							{
+								break;
+							}
 						}
 					}
 					else
 					{
 						IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+						break;
 					}
 				}
 			}

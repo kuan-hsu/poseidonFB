@@ -690,12 +690,14 @@ extern(C)
 										lineNumber = Integer.toInt( lineNumber_char );
 										fileName = lineText[0..openPos];
 										ScintillaAction.openFile( fileName.dup, lineNumber );
-
+										
 										// Make all line be selected
 										int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
-										IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",0:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length - 1 ) ) );										
-
-										return IUP_IGNORE;
+										int	lineHead = cast(int) IupScintillaSendMessage( ih, 2167, _line, 0 ); // SCI_POSITIONFROMLINE 2167
+										int	lineTail = cast(int) IupScintillaSendMessage( ih, 2136, _line, 0 ); // SCI_GETLINEENDPOSITION 2136
+										IupScintillaSendMessage( ih, 2160, lineHead, lineTail ); // SCI_SETSEL 2160
+										
+										return IUP_DEFAULT;
 									}
 								}
 							}
@@ -715,7 +717,7 @@ extern(C)
 		else if( button == IUP_BUTTON3 )
 		{
 			right_click();
-			return IUP_IGNORE;
+			//return IUP_IGNORE;
 		}
 
 		return IUP_DEFAULT;

@@ -19,7 +19,7 @@ version(Windows)
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "ON", LoadAtBackThread = "OFF", AutoKBLayout = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF";
 }
 
 struct EditorLayoutSize
@@ -38,6 +38,7 @@ struct EditorColorUint
 	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
 	IupString[4]	maker;
 	IupString		callTip_Fore, callTip_Back, callTip_HLT;
+	IupString		functionTitle;
 }
 
 struct ShortKey
@@ -308,6 +309,8 @@ struct GLOBAL
 		GLOBAL.editColor.callTip_Fore = new IupString( cast(char[]) "112 112 112" );
 		GLOBAL.editColor.callTip_Back = new IupString( cast(char[]) "255 255 255" );
 		GLOBAL.editColor.callTip_HLT = new IupString( cast(char[]) "128 0 255" );
+		
+		GLOBAL.editColor.functionTitle = new IupString( cast(char[]) "0 0 0" );
 		
 		GLOBAL.compilerFullPath = new IupString();
 		GLOBAL.x64compilerFullPath = new IupString();
@@ -651,6 +654,7 @@ struct GLOBAL
 						GLOBAL.languageItems["maker2"] = new IupString( cast(char[]) "Maker2" );
 						GLOBAL.languageItems["maker3"] = new IupString( cast(char[]) "Maker3" );
 						GLOBAL.languageItems["autoconvertkeyword"] = new IupString( cast(char[]) "Auto Convert Keyword Case" );
+						GLOBAL.languageItems["qbcase"] = new IupString( cast(char[]) "Use QB-IDE Convert Case" );
 						GLOBAL.languageItems["font"] = new IupString( cast(char[]) "Font" );
 							GLOBAL.languageItems["default"] = new IupString( cast(char[]) "Default" );
 							//GLOBAL.languageItems["document"] = new IupString( cast(char[]) "Document" );

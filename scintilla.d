@@ -67,6 +67,7 @@ class CScintilla
 		
 		if( GLOBAL.documentTabs != null )
 		{
+			/*
 			version(FBIDE)
 			{
 				if( lowerCase( mypath.ext )== "bas" )
@@ -96,31 +97,69 @@ class CScintilla
 				{
 					IupSetAttribute( sci, "TABIMAGE", "icon_txt" );
 				}
-			}			
-			
+			}	
+			*/
+			IupSetAttribute( sci, "BORDER", "NO" );
 			IupSetHandle( fullPath.toCString, sci );
-			IupSetAttribute( sci, "NAME", fullPath.toCString );
+			//IupSetAttribute( sci, "NAME", fullPath.toCString );
 			//IupSetAttribute( sci, "TABTITLE", title.toCString );
 
 			if( insertPos == -1 )
 			{
-				IupAppend( GLOBAL.activeDocumentTabs, sci );
+				if( IupAppend( GLOBAL.activeDocumentTabs, sci ) == null )
+				{
+					IupMessage( "ERROR", "IUP IupAppend ERROR!" );
+					return;
+				}
 			}
 			else
 			{
 				if( IupGetChildCount( GLOBAL.activeDocumentTabs ) > insertPos )
 				{
 					Ihandle* refChild = IupGetChild( GLOBAL.activeDocumentTabs, insertPos );
-					IupInsert( GLOBAL.activeDocumentTabs, refChild, sci );
+					if( IupInsert( GLOBAL.activeDocumentTabs, refChild, sci ) == null )
+					{
+						IupMessage( "ERROR", "IUP IupInsert ERROR!" );
+						return;
+					}
 				}
 			}
 			
-			IupSetAttribute( sci, "BORDER", "NO" );
 			IupMap( sci );
 			IupRefresh( GLOBAL.activeDocumentTabs );
 			
 			int newDocumentPos = IupGetChildPos( GLOBAL.activeDocumentTabs, sci );
-			IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTITLE", newDocumentPos, title.toCString );
+			IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", newDocumentPos, title.toCString );
+			version(FBIDE)
+			{
+				if( lowerCase( mypath.ext )== "bas" )
+				{
+					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bas" );
+				}
+				else if( lowerCase( mypath.ext )== "bi" )
+				{
+					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bi" );
+				}
+				else
+				{
+					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_txt" );
+				}
+			}
+			version(DIDE)
+			{
+				if( lowerCase( mypath.ext )== "d" )
+				{
+					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bas" );
+				}
+				else if( lowerCase( mypath.ext )== "di" )
+				{
+					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bi" );
+				}
+				else
+				{
+					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_txt" );
+				}
+			}				
 			
 			// For IupFlatTabs
 			IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
@@ -164,34 +203,6 @@ class CScintilla
 		try
 		{
 			this();
-			/*
-			sci = IupScintilla();
-			IupSetAttribute( sci, "EXPAND", "YES" );
-			version(Windows) IupSetAttribute( sci, "KEYSUNICODE", "YES" );
-			
-			fullPath = new IupString();
-			title = new IupString();
-			*/
-			IupSetAttribute( sci, "SCROLLBAR", "YES" );
-			
-			IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
-			IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
-			IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
-			IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
-			IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
-			IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
-			IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
-			IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
-			IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
-			IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
-			
-			//IupSetCallback( sci, "MAP_CB",cast(Icallback) &scintilla_MAP_CB );
-			
-			IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
-			
-			IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
-			IupSetInt( sci, "MOUSEDWELLTIME", 1500 );
-
 
 			init( _fullPath, insertPos );
 			setText( _text );
@@ -228,6 +239,25 @@ class CScintilla
 			}
 			
 			//init( _fullPath, insertPos );
+			IupSetAttribute( sci, "SCROLLBAR", "YES" );
+			
+			IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
+			IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
+			IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
+			IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
+			IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
+			IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
+			IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
+			IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
+			IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
+			IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
+			
+			//IupSetCallback( sci, "MAP_CB",cast(Icallback) &scintilla_MAP_CB );
+			
+			IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
+			
+			IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
+			IupSetInt( sci, "MOUSEDWELLTIME", 1500 );			
 		}
 		catch( Exception e )
 		{
@@ -2188,60 +2218,113 @@ extern(C)
 			
 			version(FBIDE)
 			{
-				// Auto convert keyword case......
-				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" )
+				// Nested Function
+				void _convertCase()
 				{
-					int 	currentPos = actionManager.ScintillaAction.getCurrentPos( ih );
+					int currentPos = actionManager.ScintillaAction.getCurrentPos( ih );
 					if( !ScintillaAction.isComment( ih, currentPos ))
 					{
-						if( GLOBAL.keywordCase > 0 )
+						if( cast(int)IupScintillaSendMessage( ih, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
 						{
-							if( cast(int)IupScintillaSendMessage( ih, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
+							//IupMessage("",toStringz( Integer.toString( c ) ) );
+							if( c == 32 || c == 9 || c == 13 || ( c >= 40 && c <= 43 ) || c == 45 || c == 47)
 							{
-								//IupMessage("",toStringz( Integer.toString( c ) ) );
-								if( c == 32 || c == 9 || c == 13 || c == 40 )
+								int		pos, headPos;
+								
+								if( c != 13 )
 								{
-									int		pos, headPos;
-									
-									if( c != 13 )
-									{
-										pos = currentPos;// - 1;
-									}
-									else
-									{
-										pos = cast(int) IupScintillaSendMessage( ih, 2136, ScintillaAction.getCurrentLine( ih ) - 1/*2*/, 0 ); // SCI_GETLINEENDPOSITION 2136
-									}
-									
-									char[]	word = AutoComplete.getWholeWordReverse( ih, pos, headPos );
-									if( word.length )
-									{
-										word = lowerCase( word.reverse );
+									pos = currentPos;// - 1;
+								}
+								else
+								{
+									pos = cast(int) IupScintillaSendMessage( ih, 2136, ScintillaAction.getCurrentLine( ih ) - 1/*2*/, 0 ); // SCI_GETLINEENDPOSITION 2136
+								}
+								
+								char[]	word = AutoComplete.getWholeWordReverse( ih, pos, headPos );
+								if( word.length )
+								{
+									word = lowerCase( word.reverse );
 
-										bool bExitFlag;
-										foreach( IupString _keyword; GLOBAL.KEYWORDS )
-										{
-											foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
-											{	
-												if( _k.length )
+									bool bExitFlag;
+									foreach( IupString _keyword; GLOBAL.KEYWORDS )
+									{
+										foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
+										{	
+											if( _k.length )
+											{
+												if( lowerCase( _k ) == word )
 												{
-													if( lowerCase( _k ) == word )
-													{
-														IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
-														word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
-														IupSetAttribute( ih, "SELECTEDTEXT", toStringz( word ) );
-														IupScintillaSendMessage( ih, 2025, currentPos, 0 ); // sci_gotopos = 2025,
+													IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
+													word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
+													IupSetAttribute( ih, "SELECTEDTEXT", toStringz( word ) );
+													IupScintillaSendMessage( ih, 2025, currentPos, 0 ); // sci_gotopos = 2025,
 
-														bExitFlag = true;
-														break;
-													}
+													bExitFlag = true;
+													break;
 												}
 											}
-											if( bExitFlag ) break;
 										}
+										if( bExitFlag ) break;
 									}
 								}
 							}
 						}
+					}
+				}				
+				
+				if( GLOBAL.keywordCase > 0 )
+				{
+					// Auto convert keyword case......
+					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" )
+					{
+						if( GLOBAL.editorSetting00.QBCase == "ON" )
+						{
+							if( c == 13 )
+							{
+								int lineNum = actionManager.ScintillaAction.getCurrentLine( ih ) - 1;
+								int	lineHead = cast(int) IupScintillaSendMessage( ih, 2167, lineNum, 0 );
+								int lineTail = ScintillaAction.getCurrentPos( ih );
+								bool bGetMatch;
+								
+								IupScintillaSendMessage( ih, 2198, 2, 0 );		// SCFIND_WHOLEWORD = 2,				// SCI_SETSEARCHFLAGS = 2198
+								foreach( IupString _s; GLOBAL.KEYWORDS )
+								{
+									foreach( char[] targetText; Util.split( _s.toDString, " " ) )
+									{
+										if( targetText.length )
+										{
+											int		replaceTextLength = targetText.length;
+											char[]	replaceText = tools.convertKeyWordCase( GLOBAL.keywordCase, targetText );
+
+											IupSetInt( ih, "TARGETSTART", lineTail );
+											IupSetInt( ih, "TARGETEND", lineHead );
+
+											int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+											if( posHead > 0 ) bGetMatch = true;
+											
+											while( posHead >= 0 )
+											{
+												IupSetAttribute( ih, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
+												IupSetInt( ih, "TARGETSTART", posHead );
+												IupSetInt( ih, "TARGETEND", lineHead );
+												posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+											}					
+										}
+									}
+								}
+								
+								if( bGetMatch ) IupScintillaSendMessage( ih, 2025, lineTail, 0 );
+								IupMessage("","");
+							}
+						}
+						else
+						{
+							_convertCase();
+						}
+					}
+					else if( c != 13 )
+					{
+						if( GLOBAL.editorSetting00.QBCase == "OFF" ) _convertCase();
 					}
 				}
 			}			
