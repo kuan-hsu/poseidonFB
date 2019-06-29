@@ -58,6 +58,8 @@ class CScanner
 	{
 		TokenUnit[]	scan( char[] data )
 		{
+			if( !data.length ) return null;
+			
 			bool			bStringFlag, bEscapeSequences, bCommentFlag, bCommentBlockFlag;
 			char[]			identifier;
 			int				lineNum = 1;
@@ -410,6 +412,8 @@ class CScanner
 	{
 		TokenUnit[]	scan( char[] data )
 		{
+			if( !data.length ) return null;
+			
 			bool			bStringFlag, bCommentFlag, bCommentBlockFlag, bNestCommentBlockFlag;
 			char[]			charSign;
 			

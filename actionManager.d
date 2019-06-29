@@ -827,16 +827,16 @@ struct ScintillaAction
 			
 			DocumentTabAction.setFocus( ih );
 			
-			if( lineNumber > -1 )
+			if( lineNumber > 0 )
 			{
 				--lineNumber;
-				IupScintillaSendMessage( ih, 2234, lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				IupScintillaSendMessage( ih, 2024, lineNumber, 0 );	// SCI_GOTOLINE 2024
+				IupScintillaSendMessage( ih, 2234, cast(ulong) lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+				IupScintillaSendMessage( ih, 2024, cast(ulong) lineNumber, 0 );	// SCI_GOTOLINE 2024
 
 				// If debug window is on, don't scroll to top
 				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )
 				{
-					int visibleLINE = IupScintillaSendMessage( ih, 2220, lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
+					int visibleLINE = IupScintillaSendMessage( ih, 2220, cast(ulong) lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
 					if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
 					IupSetInt( ih, "FIRSTVISIBLELINE", lineNumber );
 				}
@@ -935,36 +935,46 @@ struct ScintillaAction
 			}			
 			
 			// Parser
-			auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
-			if( pParseTree !is null ) 
+			if( upperCase(fullPath) in GLOBAL.parserManager )
 			{
-				if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );			
-			
-				if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
+				Ihandle* _tree = GLOBAL.outlineTree.getTree( fullPath );
+				if( _tree == null )	GLOBAL.outlineTree.createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+				
+				GLOBAL.outlineTree.changeTree( fullPath );
+			}
+			else
+			{
+				auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
+				if( pParseTree !is null ) 
 				{
-					version(BACKTHREAD)
+					if( GLOBAL.editorSetting00.Message == "ON" )GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );			
+					
+					if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
 					{
-						if( backThread )
+						version(BACKTHREAD)
 						{
-							ParseThread subThread = new ParseThread( pParseTree, fullPath );
-							subThread.start();
+							if( backThread )
+							{
+								ParseThread subThread = new ParseThread( pParseTree, fullPath );
+								subThread.start();
+							}
+							else
+							{
+								AutoComplete.getIncludes( pParseTree, fullPath, true );
+							}
 						}
 						else
 						{
 							AutoComplete.getIncludes( pParseTree, fullPath, true );
+							//ParseThread subThread = new ParseThread( pParseTree, fullPath );
+							//subThread.start();
 						}
 					}
 					else
 					{
+						//AutoComplete.cleanIncludeContainer( pParseTree );
 						AutoComplete.getIncludes( pParseTree, fullPath, true );
-						//ParseThread subThread = new ParseThread( pParseTree, fullPath );
-						//subThread.start();
 					}
-				}
-				else
-				{
-					//AutoComplete.cleanIncludeContainer( pParseTree );
-					AutoComplete.getIncludes( pParseTree, fullPath, true );
 				}
 			}
 			

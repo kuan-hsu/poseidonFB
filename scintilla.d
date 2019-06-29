@@ -2286,35 +2286,37 @@ extern(C)
 								int lineTail = ScintillaAction.getCurrentPos( ih );
 								bool bGetMatch;
 								
-								IupScintillaSendMessage( ih, 2198, 2, 0 );		// SCFIND_WHOLEWORD = 2,				// SCI_SETSEARCHFLAGS = 2198
-								foreach( IupString _s; GLOBAL.KEYWORDS )
+								//IupMessage( "", toStringz( Integer.toString(lineHead)~","~Integer.toString(lineTail) ) );
+								
+								if( lineTail > lineHead )
 								{
-									foreach( char[] targetText; Util.split( _s.toDString, " " ) )
+									IupScintillaSendMessage( ih, 2198, 2, 0 );		// SCFIND_WHOLEWORD = 2,				// SCI_SETSEARCHFLAGS = 2198
+									foreach( IupString _s; GLOBAL.KEYWORDS )
 									{
-										if( targetText.length )
+										foreach( char[] targetText; Util.split( _s.toDString, " " ) )
 										{
-											int		replaceTextLength = targetText.length;
-											char[]	replaceText = tools.convertKeyWordCase( GLOBAL.keywordCase, targetText );
-
-											IupSetInt( ih, "TARGETSTART", lineTail );
-											IupSetInt( ih, "TARGETEND", lineHead );
-
-											int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-											if( posHead > 0 ) bGetMatch = true;
-											
-											while( posHead >= 0 )
+											if( targetText.length )
 											{
-												IupSetAttribute( ih, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
-												IupSetInt( ih, "TARGETSTART", posHead );
+												char[]	replaceText = tools.convertKeyWordCase( GLOBAL.keywordCase, targetText );
+
+												IupSetInt( ih, "TARGETSTART", lineTail );
 												IupSetInt( ih, "TARGETEND", lineHead );
-												posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
-											}					
+												int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+												
+												while( posHead >= 0 )
+												{
+													IupSetAttribute( ih, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
+													bGetMatch = true;
+													IupSetInt( ih, "TARGETSTART", posHead );
+													IupSetInt( ih, "TARGETEND", lineHead );
+													posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+												}					
+											}
 										}
 									}
+									
+									if( bGetMatch ) IupScintillaSendMessage( ih, 2025, lineTail, 0 );
 								}
-								
-								if( bGetMatch ) IupScintillaSendMessage( ih, 2025, lineTail, 0 );
-								IupMessage("","");
 							}
 						}
 						else

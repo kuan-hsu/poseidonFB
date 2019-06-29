@@ -1491,7 +1491,7 @@ struct ExecuterAction
 						break;
 					default:
 						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? ".exe" : "" ) ~ "\"";
 				}
 			}
 			else
@@ -1507,7 +1507,6 @@ struct ExecuterAction
 					default:
 						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
 						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
-						
 				}
 			}
 
@@ -1533,7 +1532,7 @@ struct ExecuterAction
 			}
 			
 			// Compiler Command
-			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );			
+			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
 			
 			// Start Thread this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
 			auto _buildThread = new BuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options, optionDebug, compilePath.toString, executeName );
@@ -1777,7 +1776,7 @@ struct ExecuterAction
 						break;
 					default:
 						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? ".exe" : "" ) ~ "\"";
 				}
 			}
 			else

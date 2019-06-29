@@ -437,21 +437,24 @@ version(DIDE)
 				{
 					if( originalNode.base.length )
 					{
-						// Search BaseNode, using originalNode.getFather to prevent infinite loop
-						CASTnode mother = searchMatchNode( originalNode.getFather, tools.removeArrayAndPointer( originalNode.base ), D_CLASS | D_INTERFACE | D_TEMPLATE );
-
-						if( mother !is null )
+						if( originalNode.getFather !is null )
 						{
-							if( mother.kind & D_TEMPLATE )
-							{
-								auto temp = getAggregateTemplate( mother );
-								if( temp !is null ) mother = temp;
-							}
-							
-							foreach( CASTnode _node; mother.getChildren() )
-								if( _node.protection != "private" ) results ~= _node;
+							// Search BaseNode, using originalNode.getFather to prevent infinite loop
+							CASTnode mother = searchMatchNode( originalNode.getFather, tools.removeArrayAndPointer( originalNode.base ), D_CLASS | D_INTERFACE | D_TEMPLATE );
 
-							results ~= getBaseNodeMembers( mother );
+							if( mother !is null )
+							{
+								if( mother.kind & D_TEMPLATE )
+								{
+									auto temp = getAggregateTemplate( mother );
+									if( temp !is null ) mother = temp;
+								}
+								
+								foreach( CASTnode _node; mother.getChildren() )
+									if( _node.protection != "private" ) results ~= _node;
+
+								results ~= getBaseNodeMembers( mother );
+							}
 						}
 					}
 				}
@@ -713,6 +716,10 @@ version(DIDE)
 						//results ~= getIncludes( _createFileNode, includeFullPath );
 						results ~= getIncludes( _createFileNode, "" );
 					}
+					else
+					{
+						includesMarkContainer[upperCase(includeFullPath)] = null;
+					}
 				}
 			}
 
@@ -872,6 +879,8 @@ version(DIDE)
 
 		static CASTnode searchMatchNode( CASTnode originalNode, char[] word, int D_KIND = D_ALL )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode resultNode = searchMatchMemberNode( originalNode, word, D_KIND );
 
 			if( resultNode is null )
@@ -1888,6 +1897,8 @@ version(DIDE)
 		static CASTnode[] getIncludes( CASTnode originalNode, char[] cwdPath = null, bool bRootCall = false )
 		{
 			CASTnode[] results;
+			
+			if( originalNode is null ) return null;
 
 			if( !cwdPath.length )
 			{

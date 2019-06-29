@@ -71,7 +71,7 @@ private:
 	void copy( char[] Dstring )
 	{
 		_DString = Dstring;
-		_CstringPointer = cast(char*)calloc( 1, Dstring.length + 1 );
+		_CstringPointer = cast(char*)calloc( Dstring.length + 1, 1 );
 		memcpy( _CstringPointer, Dstring.ptr, Dstring.length );
 	}
 
@@ -90,7 +90,7 @@ public:
 			_DString = fromStringz( Cstring );
 			
 			int _len = strlen( Cstring );
-			_CstringPointer = cast(char*)calloc( 1, _len + 1 );
+			_CstringPointer = cast(char*)calloc( _len + 1, 1 );
 			memcpy( _CstringPointer, Cstring, _len );
 		}
 	}	

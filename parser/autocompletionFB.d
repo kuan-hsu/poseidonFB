@@ -527,6 +527,10 @@ version(FBIDE)
 						results ~= _createFileNode;
 						results ~= getIncludes( _createFileNode, includeFullPath );
 					}
+					else
+					{
+						includesMarkContainer[upperCase(includeFullPath)] = null;
+					}
 				}
 			}
 
