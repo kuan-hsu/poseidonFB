@@ -671,7 +671,7 @@ version(DIDE)
 			return null;
 		}
 
-		static CASTnode[] check( char[] name, char[] originalFullPath )
+		static CASTnode[] check( char[] name, char[] originalFullPath, bool bCheckOnlyOnce = false )
 		{
 			CASTnode[] results;
 			
@@ -685,10 +685,9 @@ version(DIDE)
 				if( upperCase(includeFullPath) in GLOBAL.parserManager )
 				{
 					includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
-					//GLOBAL.messagePanel.printOutputPanel( includeFullPath );
-						
+
 					results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
-					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], "" );
+					if( !bCheckOnlyOnce ) results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], "" );
 				}
 				else
 				{
@@ -710,11 +709,9 @@ version(DIDE)
 						}
 						
 						includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
-						//GLOBAL.messagePanel.printOutputPanel( includeFullPath );
 						
 						results ~= _createFileNode;
-						//results ~= getIncludes( _createFileNode, includeFullPath );
-						results ~= getIncludes( _createFileNode, "" );
+						if( !bCheckOnlyOnce ) results ~= getIncludes( _createFileNode, "" );
 					}
 					else
 					{
@@ -1894,7 +1891,7 @@ version(DIDE)
 			return true;
 		}		
 
-		static CASTnode[] getIncludes( CASTnode originalNode, char[] cwdPath = null, bool bRootCall = false )
+		static CASTnode[] getIncludes( CASTnode originalNode, char[] cwdPath = null, bool bRootCall = false, bool bCheckOnlyOnce = false )
 		{
 			CASTnode[] results;
 			
@@ -1926,6 +1923,11 @@ version(DIDE)
 					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "cwdPath Name: [" ~ cwdPath ~ "]"  ) );
 				}
 			}
+			else
+			{
+				scope cwdFilePath = new FilePath( cwdPath );
+				cwdPath = cwdFilePath.path();
+			}
 
 			foreach( CASTnode _node; getMembers( originalNode ) )
 			{
@@ -1937,36 +1939,16 @@ version(DIDE)
 					//IupMessage( "cwdPath", toStringz( cwdPath ));
 					if( bRootCall )
 					{
-						if( _node.type.length ) results ~= check( _node.type, cwdPath ); else results ~= check( _node.name, cwdPath );
+						if( _node.type.length ) results ~= check( _node.type, cwdPath, bCheckOnlyOnce ); else results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
 					}
 					else
 					{
 						if( _node.protection == "public" )
 						{
-							if( _node.type.length ) results ~= check( _node.type, cwdPath ); else results ~= check( _node.name, cwdPath );
+							if( _node.type.length ) results ~= check( _node.type, cwdPath, bCheckOnlyOnce ); else results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
 						}
 					}
 				}
-				/+
-				else if( _node.kind & D_VERSION )
-				{
-					version(Windows)
-					{
-						if( _node.name == "Windows" || _node.name == "Win32" || ( _node.name == "-else-" && _node.base == "linux" ) )
-						{
-							results ~= getIncludes( _node, cwdPath, bRootCall );
-						}
-					}
-
-					version(linux)
-					{
-						if( _node.name == "linux" || ( _node.name == "-else-" && _node.base != "linux" ) )
-						{
-							results ~= getIncludes( _node, cwdPath, bRootCall );
-						}
-					}
-				}
-				+/
 			}
 
 			return results;
@@ -2207,21 +2189,7 @@ version(DIDE)
 
 			return pos;
 		}	
-		/+
-		static CASTnode getTitleAST( Ihandle* iupSci, int pos, CASTnode head )
-		{
-			int _kind;
-			
-			char[] titleName = getFunctionTitle( iupSci, pos, _kind );
-			if( titleName.length )
-			{
-				int	lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-				return getFunctionAST( head, _kind, titleName, lineNum );
-			}
 
-			return null;
-		}
-		+/
 
 		static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 		{
@@ -3195,113 +3163,6 @@ version(DIDE)
 			}
 		}
 
-		/+
-		static CASTnode getFunctionAST( CASTnode head, int _kind, char[] functionTitle, int line )
-		{
-			foreach_reverse( CASTnode node; head.getChildren() )
-			{
-				if( node.kind & _kind )
-				{
-					if( node.name == functionTitle )
-					{
-						if( line >= node.lineNumber ) return node;
-					}
-				}
-
-				if( node.getChildrenCount )
-				{
-					CASTnode _node = getFunctionAST( node, _kind, functionTitle, line );
-					if( _node !is null ) return _node;
-				}
-			}
-
-			return null;
-		}
-
-		static char[] getFunctionTitle( Ihandle* iupSci, int pos, out int code )
-		{
-			
-			char[] result = searchHead( iupSci, pos, "sub" );
-			/+
-			if( result.length )
-			{
-				code = D_FUNCTION;//B_SUB;
-			}
-			else
-			{
-				result = searchHead( iupSci, pos, "function" );
-				if( result.length )
-				{
-					code = D_FUNCTION;
-				}
-				else
-				{
-					result = searchHead( iupSci, pos, "property" );
-					if( result.length )
-					{
-						code = B_PROPERTY;
-					}
-					else
-					{
-						result = searchHead( iupSci, pos, "operator" );
-						if( result.length )
-						{
-							code = B_OPERATOR;
-						}
-						else
-						{
-							result = searchHead( iupSci, pos, "type" );
-							if( result.length )
-							{
-								code = B_TYPE;
-							}
-							else
-							{
-								result = searchHead( iupSci, pos, "union" );
-								if( result.length )
-								{
-									code = B_UNION;
-								}
-								else
-								{
-									result = searchHead( iupSci, pos, "enum" );
-									if( result.length )
-									{
-										code = B_ENUM;
-									}
-									else
-									{
-										result = searchHead( iupSci, pos, "constructor" );
-										if( result.length )
-										{
-											code = B_CTOR | 1;
-										}
-										else
-										{
-											result = searchHead( iupSci, pos, "destructor" );
-											if( result.length )
-											{
-												code = B_DTOR | 1;
-											}
-										}
-									}				
-								}				
-							}				
-						}				
-					}				
-				}
-			}
-			
-			if( result.length )
-			{
-				if( Util.index( result, "." ) < result.length ) code = code | 1;
-			}
-
-			//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "Title: " ~ result ) );
-			+/
-			return result;
-		}
-		+/
 		
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{

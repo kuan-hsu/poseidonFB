@@ -155,6 +155,8 @@ class CFindInFilesDialog : CBaseDialog
 		delete FINDWHAT;
 		delete labelTitle[0];
 		delete labelTitle[1];
+		
+		IupDestroy( _dlg );
 	}
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog

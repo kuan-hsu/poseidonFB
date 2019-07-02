@@ -88,6 +88,7 @@ class CIDEMessageDialog : CBaseDialog
 	~this()
 	{
 		delete fontString;
+		IupDestroy( _dlg );
 	}
 
 	char[] show( int x, int y )

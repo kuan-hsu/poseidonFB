@@ -239,6 +239,7 @@ class CScintilla
 			}
 			
 			//init( _fullPath, insertPos );
+			IupSetAttribute( sci, "DROPFILESTARGET", "YES" );
 			IupSetAttribute( sci, "SCROLLBAR", "YES" );
 			
 			IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );

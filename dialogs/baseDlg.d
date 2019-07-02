@@ -88,7 +88,7 @@ class CBaseDialog
 	{
 		IupSetHandle( "btnCANCEL", null );
 		IupSetHandle( "btnOK", null );
-		IupDestroy( _dlg );
+		//IupDestroy( _dlg );
 		
 		delete _buttonSize;
 		delete size;

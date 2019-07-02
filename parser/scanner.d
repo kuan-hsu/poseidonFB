@@ -9,9 +9,7 @@ class CScanner
 	import global, tools, actionManager;
 	import parser.token;
 
-	import Integer = tango.text.convert.Integer;
-	import tango.io.FilePath, tango.text.Ascii, tango.stdc.stringz, Util = tango.text.Util;//, tango.io.UnicodeFile;
-	import tango.io.device.File;//, tango.io.stream.Lines;
+	import tango.io.FilePath, tango.stdc.stringz;
 	import tango.io.Stdout;
 
 

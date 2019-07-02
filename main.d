@@ -339,6 +339,11 @@ void main( char[][] args )
 	
 	//IUP main Loop
 	IupMainLoop();
+	
+	if( GLOBAL.compilerHelpDlg !is null ) delete GLOBAL.compilerHelpDlg;
+	if( GLOBAL.serachInFilesDlg !is null ) delete GLOBAL.serachInFilesDlg;
+	if( GLOBAL.IDEMessageDlg !is null ) delete GLOBAL.IDEMessageDlg;
+	
 	IupClose();
 	
 	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();

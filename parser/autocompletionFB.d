@@ -486,7 +486,7 @@ version(FBIDE)
 			return null;
 		}
 
-		static CASTnode[] check( char[] name, char[] originalFullPath )
+		static CASTnode[] check( char[] name, char[] originalFullPath, bool bCheckOnlyOnce = false )
 		{
 			CASTnode[] results;
 			
@@ -502,7 +502,7 @@ version(FBIDE)
 					includesMarkContainer[upperCase(includeFullPath)] = GLOBAL.parserManager[upperCase(includeFullPath)];
 						
 					results ~= GLOBAL.parserManager[upperCase(includeFullPath)];
-					results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
+					if( !bCheckOnlyOnce ) results ~= getIncludes( GLOBAL.parserManager[upperCase(includeFullPath)], includeFullPath );
 				}
 				else
 				{
@@ -525,7 +525,7 @@ version(FBIDE)
 						includesMarkContainer[upperCase(includeFullPath)] = _createFileNode;
 						
 						results ~= _createFileNode;
-						results ~= getIncludes( _createFileNode, includeFullPath );
+						if( !bCheckOnlyOnce ) results ~= getIncludes( _createFileNode, includeFullPath );
 					}
 					else
 					{
@@ -692,7 +692,7 @@ version(FBIDE)
 			
 			// Parse Include
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			getIncludes( originalNode, originalFullPath, true, ln );
+			getIncludes( originalNode, originalFullPath, true );
 
 			foreach( includeAST; includesMarkContainer )
 			{
@@ -794,7 +794,7 @@ version(FBIDE)
 				}
 			}			
 			
-			getIncludes( originalNode, originalFullPath, true, ln );
+			getIncludes( originalNode, originalFullPath, true );
 
 			/*
 			foreach( CASTnode n; includesMarkContainer )
@@ -1482,7 +1482,7 @@ version(FBIDE)
 			return true;
 		}
 
-		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false, int ln = 2147483647 )
+		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false, bool bCheckOnlyOnce = false )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1526,7 +1526,7 @@ version(FBIDE)
 						{
 							version(linux)
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath );
+								CASTnode[] _results = check( _node.name, originalFullPath, false, bCheckOnlyOnce );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -1535,7 +1535,7 @@ version(FBIDE)
 							version(Windows){}
 							else
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath );
+								CASTnode[] _results = check( _node.name, originalFullPath, false, bCheckOnlyOnce );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -1544,13 +1544,13 @@ version(FBIDE)
 							version(linux){}
 							else
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath );
+								CASTnode[] _results = check( _node.name, originalFullPath, bCheckOnlyOnce );
 								if( _results.length ) results ~= _results;
 							}
 						}
 						else
 						{
-							CASTnode[] _result = check( _node.name, originalFullPath );
+							CASTnode[] _result = check( _node.name, originalFullPath, bCheckOnlyOnce );
 							if( _result.length ) results ~= _result;
 						}
 					}

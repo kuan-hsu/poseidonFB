@@ -1062,8 +1062,10 @@ extern(C)
 											IupSeparator(),
 											IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
 											IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
+											/*
 											IupSeparator(),
 											IupItem( GLOBAL.languageItems["setmainmodule"].toCString, "CProjectTree_setmainmodule" ),
+											*/
 											null
 										);
 					IupSetFunction( "CProjectTree_openin", cast(Icallback) &CProjectTree_Openin_cb );

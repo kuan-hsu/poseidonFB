@@ -70,7 +70,7 @@ class CSingleTextDialog : CBaseDialog
 	~this()
 	{
 		IupSetHandle( "textResult", null );
-		IupDestroy( _dlg );
+		//IupDestroy( _dlg );
 	}
 
 	char[] show( int x, int y ) // Overload form CBaseDialog

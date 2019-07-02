@@ -751,7 +751,7 @@ struct ScintillaAction
 		{
 			if( pParseTree !is null )
 			{
-				AutoComplete.getIncludes( pParseTree, pFullPath, true );
+				version(FBIDE) AutoComplete.getIncludes( pParseTree, pFullPath, true ); else AutoComplete.getIncludes( pParseTree, pFullPath, true, true );
 			}
 		}
 	}
@@ -960,20 +960,21 @@ struct ScintillaAction
 							}
 							else
 							{
-								AutoComplete.getIncludes( pParseTree, fullPath, true );
+								AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+								//version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, true ); else AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 							}
 						}
 						else
 						{
-							AutoComplete.getIncludes( pParseTree, fullPath, true );
-							//ParseThread subThread = new ParseThread( pParseTree, fullPath );
-							//subThread.start();
+							AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+							//version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, true ); else AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 						}
 					}
 					else
 					{
+						AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 						//AutoComplete.cleanIncludeContainer( pParseTree );
-						AutoComplete.getIncludes( pParseTree, fullPath, true );
+						//version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, true ); else AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 					}
 				}
 			}

@@ -1907,8 +1907,6 @@ class CPreferenceDialog : CBaseDialog
 		
 		for( int i = 0; i < 15; ++ i )
 			if( _stringOfLabel[i] !is null ) delete _stringOfLabel[i];
-			
-		IupDestroy( _dlg );
 	}
 	
 	char[] show( int x, int y )
