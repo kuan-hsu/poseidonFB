@@ -30,7 +30,7 @@ class CScanner
 				{
 					auto cSci = GLOBAL.scintillaManager[upperCase(fullPath)];
 					if( cSci !is null )
-						document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
+						document = cSci.getText();
 					else
 						return null;
 				}
@@ -45,7 +45,7 @@ class CScanner
 			}
 			catch( Exception e )
 			{
-				IupMessage( "BUG", toStringz( e.toString ) );
+				IupMessage( "scanFile BUG", toStringz( e.toString ) );
 			}
 		}
 		
@@ -236,16 +236,19 @@ class CScanner
 							}
 							*/
 						case '>':
-							if( results[$-1].tok == TOK.Tminus )
+							if( results.length > 0 )
 							{
-								TokenUnit t;
-								t.tok = TOK.Tptraccess;
-								t.identifier = "->";
-								t.lineNumber = lineNum;
-								results[$-1] = t;
-								identifier = "";
-								break;
-							}						
+								if( results[$-1].tok == TOK.Tminus )
+								{
+									TokenUnit t;
+									t.tok = TOK.Tptraccess;
+									t.identifier = "->";
+									t.lineNumber = lineNum;
+									results[$-1] = t;
+									identifier = "";
+									break;
+								}
+							}
 							/*
 							if( identifier == "-" )
 							{
@@ -344,7 +347,7 @@ class CScanner
 									if( results[$-1].tok != TOK.Tunderline )
 									{
 										// Keep the TOK.Teol just only one
-										if( results[length-1].tok != TOK.Teol )
+										if( results[$-1].tok != TOK.Teol )
 										{
 											TokenUnit t = { TOK.Teol, "\n", lineNum };
 											results ~= t;
@@ -397,7 +400,7 @@ class CScanner
 			}
 			catch( Exception e )
 			{
-				// IupMessage( "Token Scanner", toStringz( e.toString ) );
+				// IupMessage( "Token Scanner Error", toStringz( e.toString ) );
 			}
 
 			//print( results );
@@ -436,21 +439,27 @@ class CScanner
 						{
 							if( data[i] == '/' )
 							{
-								if( data[i+1] == '+' ) // Check if /+
+								if( i < data.length - 1 )
 								{
-									nestCommentCount ++;
-									break;
+									if( data[i+1] == '+' ) // Check if /+
+									{
+										nestCommentCount ++;
+										break;
+									}
 								}
 							}
 							else if( data[i] == '+' ) // +
 							{
-								if( data[i+1] == '/' ) // /
+								if( i < data.length - 1 )
 								{
-									if( --nestCommentCount == 0 )
+									if( data[i+1] == '/' ) // /
 									{
-										bNestCommentBlockFlag = false;
-										i++;
-										break;
+										if( --nestCommentCount == 0 )
+										{
+											bNestCommentBlockFlag = false;
+											i++;
+											break;
+										}
 									}
 								}
 							}
@@ -472,21 +481,27 @@ class CScanner
 						{
 							if( data[i] == '/' )
 							{
-								if( data[i+1] == '*' ) // Check if /*
+								if( i < data.length - 1 )
 								{
-									commentCount ++;
-									break;;
+									if( data[i+1] == '*' ) // Check if /*
+									{
+										commentCount ++;
+										break;;
+									}
 								}
 							}
 							else if( data[i] == '*' ) // *
 							{
-								if( data[i+1] == '/' ) // /
+								if( i < data.length - 1 )
 								{
-									if( --commentCount == 0 )
+									if( data[i+1] == '/' ) // /
 									{
-										bCommentBlockFlag = false;
-										i++;
-										break;
+										if( --commentCount == 0 )
+										{
+											bCommentBlockFlag = false;
+											i++;
+											break;
+										}
 									}
 								}
 							}
@@ -508,32 +523,37 @@ class CScanner
 						{
 							if( data[i] == '/' )
 							{
-								if( data[i+1] == '*' ) // Check if /*
+								if( i < data.length - 1 )
 								{
-									bCommentBlockFlag = true;
-									commentCount = 1;
-									++i;
-									continue;
-								}
-								else if( data[i+1] == '+' ) // Check if /+
-								{
-									bNestCommentBlockFlag = true;
-									nestCommentCount = 1;
-									++i;
-									continue;
-								}
-								else if( data[i+1] == '/' ) // Check if //
-								{
-									while( ++i < data.length )
+									if( data[i+1] == '*' ) // Check if /*
 									{
-										if( data[i] == '\n' ) break;
+										bCommentBlockFlag = true;
+										commentCount = 1;
+										++i;
+										continue;
 									}
-									lineNum ++;
-									continue;
+									else if( data[i+1] == '+' ) // Check if /+
+									{
+										bNestCommentBlockFlag = true;
+										nestCommentCount = 1;
+										++i;
+										continue;
+									}
+									else if( data[i+1] == '/' ) // Check if //
+									{
+										while( ++i < data.length )
+										{
+											if( data[i] == '\n' ) break;
+										}
+										lineNum ++;
+										continue;
+									}
 								}
 							}
 						}
 					}
+					
+					if( i >= data.length ) break;
 
 					if( bStringFlag )
 					{
@@ -570,6 +590,8 @@ class CScanner
 								
 							default:
 						}
+						
+						if( i >= data.length ) break;
 
 						if( charSign == null )
 						{
@@ -618,10 +640,13 @@ class CScanner
 					switch( data[i]  )
 					{
 						case '-':
-							if( results[length-1].tok == TOK.Tassign )
+							if( results.length )
 							{
-								identifier ~= data[i];
-								break;
+								if( results[$-1].tok == TOK.Tassign )
+								{
+									identifier ~= data[i];
+									break;
+								}
 							}
 
 						case ',', '+', '*', '/', ';', ':', '(', ')', '[', ']', '>', '<', '=', '{', '}', '!', '~': // '>', 
@@ -768,7 +793,10 @@ class CScanner
 					}
 				}
 			}
-			catch( Exception e ){}
+			catch( Exception e )
+			{
+				IupMessage( "Token Scanner Error", toStringz( e.toString ) );
+			}
 
 			//print( results );
 

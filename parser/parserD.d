@@ -622,6 +622,8 @@ version(DIDE)
 					_tempTokenIndex ++;
 				}
 				
+				if( _tempTokenIndex >= tokens.length ) throw new Exception( "out of range!" );
+				
 				// Pass Constraint
 				if( tokens[_tempTokenIndex].tok == TOK.Tif )
 				{
@@ -1549,21 +1551,28 @@ version(DIDE)
 
 		bool isInOut()
 		{
-			switch( token().tok )
+			try
 			{
-				case TOK.Tauto, TOK.Tfinal, TOK.Tin, TOK.Tlazy, TOK.Tout, TOK.Tref, TOK.Tscope:
-					return true;
-					
-				case TOK.Treturn:
-					if( next().tok == TOK.Tref )
-					{
-						parseToken( TOK.Treturn );
+				switch( token().tok )
+				{
+					case TOK.Tauto, TOK.Tfinal, TOK.Tin, TOK.Tlazy, TOK.Tout, TOK.Tref, TOK.Tscope:
 						return true;
-					}
-					break;
+						
+					case TOK.Treturn:
+						if( next().tok == TOK.Tref )
+						{
+							parseToken( TOK.Treturn );
+							return true;
+						}
+						break;
 
-				default:
-					if( isTypeCtor() ) return true;
+					default:
+						if( isTypeCtor() ) return true;
+				}
+			}
+			catch( Exception e )
+			{
+				throw e;
 			}
 
 			return false;

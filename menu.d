@@ -336,13 +336,6 @@ void createMenu()
 		if( GLOBAL.showFunctionTitle == "ON" )
 		{
 			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" );
-			//IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", GLOBAL.widthFunctionTitle.toCString );
-			char[][] size = Util.split( GLOBAL.fonts[0].fontString, "," );
-			if( size.length > 1 )
-				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", toStringz( GLOBAL.widthFunctionTitle.toDString ~ "x" ~ Integer.toString( Integer.toInt( size[$-1] )  + 1 ) ) );
-			else
-				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "SIZE", GLOBAL.widthFunctionTitle.toCString );
-
 			IupRefresh( GLOBAL.toolbar.getListHandle() );
 		}
 		else
@@ -685,7 +678,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.413)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.414)\nBy Kuan Hsu (Taiwan)\n2019.07.20" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.040)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
 		return IUP_DEFAULT;
 	});

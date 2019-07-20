@@ -2228,7 +2228,7 @@ extern(C)
 						if( cast(int)IupScintillaSendMessage( ih, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
 						{
 							//IupMessage("",toStringz( Integer.toString( c ) ) );
-							if( c == 32 || c == 9 || c == 13 || ( c >= 40 && c <= 43 ) || c == 45 || c == 47)
+							if( c == 32 || c == 9 || c == 13 || ( c >= 40 && c <= 43 ) || c == 45 || c == 47 )
 							{
 								int		pos, headPos;
 								
@@ -2325,7 +2325,7 @@ extern(C)
 							_convertCase();
 						}
 					}
-					else if( c != 13 )
+					else if( c != 13 && c != 9 )
 					{
 						if( GLOBAL.editorSetting00.QBCase == "OFF" ) _convertCase();
 					}

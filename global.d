@@ -18,7 +18,7 @@ version(Windows)
 
 struct EditorToggleUint
 {
-	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "ON", LoadAtBackThread = "OFF", AutoKBLayout = "OFF";
+	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", LoadAtBackThread = "OFF", AutoKBLayout = "OFF";
 	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF";
 }
 
@@ -145,16 +145,17 @@ struct GLOBAL
 	version(Windows)	static char[][char[]]	EnvironmentVars;
 	
 	static char[]				poseidonPath;			// Include Tail /
+	static char[]				linuxHome;
 	static char[]				lexer = "freebasic";
 	static IupString[4]			KEYWORDS;
 	static int					keywordCase = 0;	
 	static IupString			compilerFullPath, x64compilerFullPath;
 	static char[]				compilerAnootation = "ON";
-	static char[]				compilerWindow = "ON";
-	static char[]				compilerSFX = "OFF";
+	static char[]				compilerWindow = "OFF";
+	static char[]				compilerSFX = "ON";
 	static char[]				delExistExe = "ON";
-	static char[]				consoleExe = "ON";
-	static char[]				toggleCompileAtBackThread = "ON";
+	static char[]				consoleExe = "OFF";
+	static char[]				toggleCompileAtBackThread = "OFF";
 	static IupString			debuggerFullPath;
 	static IupString			manualPath;
 	static IupString			colorTemplate;
@@ -173,7 +174,6 @@ struct GLOBAL
 	static char[]				enableIncludeComplete = "ON";
 	static char[]				enableParser = "ON";
 	static char[]				showFunctionTitle = "OFF";
-	static IupString			widthFunctionTitle;
 	static char[]				showTypeWithParams = "OFF";
 	static char[]				toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
 	static char[]				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
@@ -320,7 +320,6 @@ struct GLOBAL
 		GLOBAL.completeDelay = new IupString( cast(char[]) "0" );
 		//GLOBAL.defaultOption = new IupString();
 		
-		GLOBAL.widthFunctionTitle = new IupString( cast(char[]) "200" );
 		GLOBAL.currentCustomCompilerOption = new IupString( cast(char*) "" );
 		GLOBAL.noneCustomCompilerOption = new IupString( cast(char*) "None Custom Compile Option" );
 		

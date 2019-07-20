@@ -350,9 +350,9 @@ struct FileAction
 					file.write( data, true );
 			}
 		}
-		catch
+		catch( Exception e )
 		{
-			IupMessage("FileAction.saveFile","ERROR");
+			IupMessage( "FileAction.saveFile Error", toStringz( e.toString ) );
 			return false;
 		}
 
@@ -851,7 +851,7 @@ struct ScintillaAction
 			{
 				GLOBAL.statusBar.setPrjName( null, true );
 			}
-
+			
 			return true;
 		}
 
@@ -961,20 +961,16 @@ struct ScintillaAction
 							else
 							{
 								AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-								//version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, true ); else AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 							}
 						}
 						else
 						{
 							AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-							//version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, true ); else AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 						}
 					}
 					else
 					{
 						AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-						//AutoComplete.cleanIncludeContainer( pParseTree );
-						//version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, true ); else AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 					}
 				}
 			}
@@ -982,7 +978,7 @@ struct ScintillaAction
 			//if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
 			StatusBarAction.update();
-		
+			
 			return true;
 		}
 		catch( Exception e )

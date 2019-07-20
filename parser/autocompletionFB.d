@@ -1526,7 +1526,7 @@ version(FBIDE)
 						{
 							version(linux)
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, false, bCheckOnlyOnce );
+								CASTnode[] _results = check( _node.name, originalFullPath, bCheckOnlyOnce );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -1535,7 +1535,7 @@ version(FBIDE)
 							version(Windows){}
 							else
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, false, bCheckOnlyOnce );
+								CASTnode[] _results = check( _node.name, originalFullPath, bCheckOnlyOnce );
 								if( _results.length ) results ~= _results;
 							}
 						}

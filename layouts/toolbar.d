@@ -314,12 +314,6 @@ class CToolBar
 		
 		listHandle = IupList( null );
 		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDONFB_TOOLBAR_FunctionList" );
-		char[][] size = Util.split( GLOBAL.fonts[0].fontString, "," );
-		if( size.length > 1 )
-			IupSetAttribute( listHandle, "SIZE", toStringz( GLOBAL.widthFunctionTitle.toDString ~ "x" ~ Integer.toString( Integer.toInt( size[$-1] )  + 1 ) ) );
-		else
-			IupSetAttribute( listHandle, "SIZE", GLOBAL.widthFunctionTitle.toCString );
-
 		IupSetAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetAttribute( listHandle, "EXPAND", "HORIZONTAL" );
 		IupSetAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.functionTitle.toCString );

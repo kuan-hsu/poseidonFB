@@ -13,6 +13,14 @@ import tango.sys.Process, tango.io.stream.Lines;
 
 import tango.sys.SharedLib;
 
+version(linux)
+{
+	import tango.stdc.posix.pwd;
+	
+	extern(C) uid_t geteuid();
+	extern(C) uid_t getuid();
+}
+
 version(Windows)
 {
 	import tango.sys.win32.UserGdi;
@@ -30,6 +38,8 @@ else
 {
 	// libgtk2.0-dev
 	//-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
+	
+	// -lgtk-3 gdk-3 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo   -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lXext -lX11 -lm  (for GTK 3)
 	//pragma(lib, "gtk-x11-2.0");
 	//pragma(lib, "gdk-x11-2.0");
 	//pragma(lib, "pangox-1.0");
@@ -40,6 +50,15 @@ else
 	pragma(lib, "gmodule-2.0");
 	pragma(lib, "glib-2.0");
 	*/
+	/*
+	pragma(lib, "gtk-3");
+	pragma(lib, "gdk-3");
+	pragma(lib, "gdk_pixbuf-2.0");
+	pragma(lib, "pangocairo-1.0");
+	pragma(lib, "pango-1.0");
+	pragma(lib, "cairo");
+	*/
+
 	pragma(lib, "iup");
 	pragma(lib, "iup_scintilla");
 }
@@ -110,6 +129,21 @@ void main( char[][] args )
 		version(Windows)
 		{
 			GLOBAL.EnvironmentVars = Environment.get();
+		}
+		else
+		{
+			auto user = getpwuid( getuid() );
+			char[] home = fromStringz( user.pw_dir );
+			
+			if( Util.index( GLOBAL.poseidonPath, home ) != 0 )
+			{
+				GLOBAL.linuxHome = home.dup;
+				scope dotPath = new FilePath( GLOBAL.linuxHome ~ "/.poseidonFB" );
+				if( !dotPath.exists() )	dotPath.create();
+				
+				dotPath.set( GLOBAL.linuxHome ~ "/.poseidonFB/settings" );
+				if( !dotPath.exists() )	dotPath.create();
+			}
 		}
 	}
 	

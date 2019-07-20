@@ -1888,8 +1888,24 @@ struct ExecuterAction
 			scope _f = new FilePath( cSci.getFullPath() );
 			scope time = Clock.now.unix;
 			
-			version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
-			version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
+			version(Windows)
+			{
+				version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
+				version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
+			}
+			else
+			{
+				if( GLOBAL.linuxHome.length )
+				{
+					version(FBIDE) fileName = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ Integer.toString( time.seconds ) ~ ".bas";
+					version(DIDE) fileName = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ Integer.toString( time.seconds ) ~ ".d";
+				}
+				else
+				{
+					version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
+					version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
+				}
+			}
 			
 			FileAction.saveFile( fileName, cSci.getText(), cSci.encoding ); // Create a file with UTF8 With Bom
 		}

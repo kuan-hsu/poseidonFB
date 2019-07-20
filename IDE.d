@@ -11,6 +11,9 @@ struct IDECONFIG
 	import tango.text.xml.Document, tango.text.xml.DocPrinter, tango.io.UnicodeFile, tango.io.stream.Lines;
 	import tango.io.FilePath;
 	
+
+	
+	
 	static bool loadLocalization()
 	{
 		// Load Language lng
@@ -142,6 +145,14 @@ struct IDECONFIG
 	{
 		try
 		{
+			version(linux)
+			{
+				if( fullpath == "settings/editorSettings.ini" )
+				{
+					if( GLOBAL.linuxHome.length ) fullpath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/editorSettings.ini";
+				}
+			}
+			
 			char[] doc;
 			
 			// Editor
@@ -378,7 +389,6 @@ struct IDECONFIG
 			doc ~= setINILineData( "enableparser", GLOBAL.enableParser );
 			doc ~= setINILineData( "parsertrigger", Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) );
 			doc ~= setINILineData( "showfunctiontitle", GLOBAL.showFunctionTitle );
-			doc ~= setINILineData( "widthfunctiontitle", GLOBAL.widthFunctionTitle.toDString );
 			doc ~= setINILineData( "showtypewithparams", GLOBAL.showTypeWithParams );
 			doc ~= setINILineData( "includelevel", Integer.toString( GLOBAL.includeLevel ) );
 			doc ~= setINILineData( "ignorecase", GLOBAL.toggleIgnoreCase );
@@ -459,24 +469,39 @@ struct IDECONFIG
 		char[]	left, right;
 		try
 		{
-			version( linux ) setLinuxTerminal(); // Get linux terminal program name
+			char[] iniPath = "settings/editorSettings.ini";
 			
-			scope settingFilePath = new FilePath( "settings/editorSettings.ini" );
-			if( !settingFilePath.exists() )
+			version(linux)
 			{
-				/+
-				load(); // load xml
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
-				+/
-				return;
+				setLinuxTerminal(); // Get linux terminal program name
+				
+				if( !GLOBAL.linuxHome.length ) // Not AppImage
+				{
+					scope settingFilePath = new FilePath( "settings/editorSettings.ini" );
+					if( !settingFilePath.exists() )	return;
+				}
+				else
+				{
+					scope settingFilePath = new FilePath( GLOBAL.linuxHome ~ "/.poseidonFB/settings/editorSettings.ini" );
+					if( !settingFilePath.exists() )
+					{
+						return;
+					}
+					else
+					{
+						iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/editorSettings.ini";
+					}
+				}
 			}
+			else
+			{
+				scope settingFilePath = new FilePath( "settings/editorSettings.ini" );
+				if( !settingFilePath.exists() ) return;
+			}
+
 			
 			// Load INI
-			scope file = new UnicodeFile!(char)( "settings/editorSettings.ini", Encoding.Unknown );
+			scope file = new UnicodeFile!(char)( iniPath, Encoding.Unknown );
 			char[] doc = file.read();
 			
 			char[]	blockText;
@@ -780,7 +805,6 @@ struct IDECONFIG
 							case "enableparser":			GLOBAL.enableParser = right;									break;
 							case "parsertrigger":			GLOBAL.autoCompletionTriggerWordCount = Integer.atoi( right );	break;
 							case "showfunctiontitle":		GLOBAL.showFunctionTitle = right;								break;
-							case "widthfunctiontitle":		GLOBAL.widthFunctionTitle = right;								break;
 							case "showtypewithparams":		GLOBAL.showTypeWithParams = right;								break;
 							case "includelevel":			GLOBAL.includeLevel = Integer.atoi( right );					break;
 							case "ignorecase":				GLOBAL.toggleIgnoreCase = right;								break;
@@ -900,8 +924,10 @@ struct IDECONFIG
 				
 				doc ~= "\n";
 			}
-			
-			actionManager.FileAction.saveFile( "settings/docStatus.ini", doc );
+
+			char[] iniPath = "settings/docStatus.ini";
+			version(linux) if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/docStatus.ini"; // Under AppImage
+			actionManager.FileAction.saveFile( iniPath, doc );
 		}
 		catch( Exception e )
 		{
@@ -913,11 +939,14 @@ struct IDECONFIG
 	{
 		try
 		{
-			scope settingFilePath = new FilePath( "settings/docStatus.ini" );
+			char[] iniPath = "settings/docStatus.ini";
+			version(linux) if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/docStatus.ini"; // Under AppImage
+		
+			scope settingFilePath = new FilePath( iniPath );
 			if( !settingFilePath.exists() ) return;
 			
 			// Load INI
-			scope file = new UnicodeFile!(char)( "settings/docStatus.ini", Encoding.Unknown );
+			scope file = new UnicodeFile!(char)( iniPath, Encoding.Unknown );
 			char[] doc = file.read();
 			
 			char[]	blockText;
