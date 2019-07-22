@@ -158,7 +158,7 @@ struct GLOBAL
 	static char[]				toggleCompileAtBackThread = "OFF";
 	static IupString			debuggerFullPath;
 	static IupString			manualPath;
-	static IupString			colorTemplate;
+	//static IupString			colorTemplate;
 	//static char[]				maxError = "30";
 	//static IupString			defaultOption;
 	static char[]				recentOpenDir;
@@ -184,7 +184,7 @@ struct GLOBAL
 	static char[]				toggleCompleteAtBackThread = "OFF";
 	static IupString			completeDelay;
 	
-	static char[]				toggleUseManual = "OFF";
+	static char[]				toggleUseManual = "OFF", toggleDummy = "ON";
 	
 	static int					indicatorStyle = 16;
 	
@@ -316,7 +316,7 @@ struct GLOBAL
 		GLOBAL.x64compilerFullPath = new IupString();
 		GLOBAL.debuggerFullPath = new IupString();
 		GLOBAL.manualPath = new IupString();
-		GLOBAL.colorTemplate = new IupString();
+		//GLOBAL.colorTemplate = new IupString();
 		GLOBAL.completeDelay = new IupString( cast(char[]) "0" );
 		//GLOBAL.defaultOption = new IupString();
 		

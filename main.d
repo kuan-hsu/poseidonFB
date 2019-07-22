@@ -143,6 +143,9 @@ void main( char[][] args )
 				
 				dotPath.set( GLOBAL.linuxHome ~ "/.poseidonFB/settings" );
 				if( !dotPath.exists() )	dotPath.create();
+				
+				dotPath.set( GLOBAL.linuxHome ~ "/.poseidonFB/settings/colorTemplates" );
+				if( !dotPath.exists() )	dotPath.create();
 			}
 		}
 	}

@@ -1118,11 +1118,8 @@ class COutline
 
 		outlineTreeNodeList = IupList( null );
 		IupSetAttributes( outlineTreeNodeList, "ACTIVE=YES,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8,VISIBLE=NO" );
-		version(Windows)
-		{
-			IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-			IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-		}
+		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
 		IupSetCallback( outlineTreeNodeList, "ACTION",cast(Icallback) &COutline_List_ACTION );
 		
@@ -1170,16 +1167,23 @@ class COutline
 			Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
 			if( ih != null )
 			{
-				version(Windows) IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-				for( int j = 1; j < IupGetInt( ih, "COUNT" ); ++ j )
+				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+				for( int j = 0; j < IupGetInt( ih, "COUNT" ); ++ j )
 				{
-					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", j );
-					if( _node !is null )
+					if( j == 0 )
 					{
-						switch( lowerCase( _node.protection ) )
+						IupSetAttributeId( ih, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
+					}
+					else
+					{
+						auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", j );
+						if( _node !is null )
 						{
-							case "private", "protected":	break;
-							default:						IupSetAttributeId( ih, "COLOR", j, GLOBAL.editColor.outlineFore.toCString );
+							switch( lowerCase( _node.protection ) )
+							{
+								case "private", "protected":	break;
+								default:						IupSetAttributeId( ih, "COLOR", j, GLOBAL.editColor.outlineFore.toCString );
+							}
 						}
 					}
 				}
@@ -1216,10 +1220,10 @@ class COutline
 
 					Ihandle* tree = IupTree();
 					IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
-					version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 					
 					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
-					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
+					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
 					
 					toBoldTitle( tree, 0 );
 					//IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &COutline_SELECTION_CB );
@@ -1234,6 +1238,8 @@ class COutline
 					}
 					
 					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 				}
 			}
 			version(DIDE)
@@ -1244,12 +1250,12 @@ class COutline
 
 					Ihandle* tree = IupTree();
 					IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
-					version(Windows) IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 					IupSetAttributeId( tree, "USERDATA", 0, cast(char*) head );
 					IupSetAttributeId( tree, "IMAGE", 0, GLOBAL.cString.convert( "IUP_module" ) );
 					IupSetAttributeId( tree, "IMAGEEXPANDED", 0, GLOBAL.cString.convert( "IUP_module" ) );				
 					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
-					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
+					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
 					
 					IupSetAttributeId( tree, "FONTSTYLE", 0, "BOLD" ); // Bold
 					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
@@ -1263,6 +1269,8 @@ class COutline
 					}
 					
 					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 				}
 			}
 			
@@ -1371,6 +1379,28 @@ class COutline
 	
 
 	Ihandle* getZBoxHandle(){ return zBoxHandle; }
+
+
+	CASTnode createParserByText( char[] fullPath, char[] document )
+	{
+		if( GLOBAL.enableParser != "ON" ) return null;
+		
+		scope f = new FilePath( fullPath );
+		char[] _ext = toLower( f.ext() );
+
+		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
+		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
+		
+		
+		GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+		GLOBAL.parserManager[upperCase(fullPath)] = GLOBAL.Parser.parse( fullPath );
+
+		Ihandle* _tree = getTree( fullPath );
+		if( _tree != null )	cleanTree( fullPath );
+		createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+		
+		return GLOBAL.parserManager[upperCase(fullPath)];
+	}
 
 
 	CASTnode loadFile( char[] fullPath )

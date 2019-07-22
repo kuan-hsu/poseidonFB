@@ -262,7 +262,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "keyword1", GLOBAL.editColor.keyWord[1].toDString );
 			doc ~= setINILineData( "keyword2", GLOBAL.editColor.keyWord[2].toDString );
 			doc ~= setINILineData( "keyword3", GLOBAL.editColor.keyWord[3].toDString );	
-			doc ~= setINILineData( "template", GLOBAL.colorTemplate.toDString );
+			//doc ~= setINILineData( "template", GLOBAL.colorTemplate.toDString );
 			doc ~= setINILineData( "caretLine", GLOBAL.editColor.caretLine.toDString );
 			doc ~= setINILineData( "cursor", GLOBAL.editColor.cursor.toDString );
 			doc ~= setINILineData( "selectionFore", GLOBAL.editColor.selectionFore.toDString );
@@ -653,7 +653,7 @@ struct IDECONFIG
 							case "keyword1":				GLOBAL.editColor.keyWord[1] = right;					break;
 							case "keyword2":				GLOBAL.editColor.keyWord[2] = right;					break;
 							case "keyword3":				GLOBAL.editColor.keyWord[3] = right;					break;
-							case "template":				GLOBAL.colorTemplate = right;							break;
+							//case "template":				GLOBAL.colorTemplate = right;							break;
 							case "caretLine":				GLOBAL.editColor.caretLine = right;						break;
 							case "cursor":					GLOBAL.editColor.cursor = right;						break;
 							case "selectionFore":			GLOBAL.editColor.selectionFore = right;					break;
@@ -997,6 +997,144 @@ struct IDECONFIG
 	}
 	
 	
+	static void saveColorTemplateINI( char[] templateName )
+	{
+		char[] templatePath = "settings/colorTemplates";
+
+		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
+		
+		scope _fp = new FilePath( templatePath );
+		if( !_fp.exists() )	_fp.create();
+		
+
+		char[] doc = "[color]\n";
+			
+		// Editor
+		doc ~= setINILineData( "caretLine", GLOBAL.editColor.caretLine.toDString );
+		doc ~= setINILineData( "cursor", GLOBAL.editColor.cursor.toDString );
+		doc ~= setINILineData( "selectionFore", GLOBAL.editColor.selectionFore.toDString );
+		doc ~= setINILineData( "selectionBack", GLOBAL.editColor.selectionBack.toDString );
+		doc ~= setINILineData( "linenumFore", GLOBAL.editColor.linenumFore.toDString );
+		doc ~= setINILineData( "linenumBack", GLOBAL.editColor.linenumBack.toDString );
+		doc ~= setINILineData( "fold", GLOBAL.editColor.fold.toDString );
+		doc ~= setINILineData( "selAlpha", GLOBAL.editColor.selAlpha.toDString );
+		doc ~= setINILineData( "braceFore", GLOBAL.editColor.braceFore.toDString );
+		doc ~= setINILineData( "braceBack", GLOBAL.editColor.braceBack.toDString );
+		doc ~= setINILineData( "errorFore", GLOBAL.editColor.errorFore.toDString );
+		doc ~= setINILineData( "errorBack", GLOBAL.editColor.errorBack.toDString );
+		doc ~= setINILineData( "warningFore", GLOBAL.editColor.warningFore.toDString );
+		doc ~= setINILineData( "warningBack", GLOBAL.editColor.warringBack.toDString );
+		doc ~= setINILineData( "scintillaFore", GLOBAL.editColor.scintillaFore.toDString );
+		doc ~= setINILineData( "scintillaBack", GLOBAL.editColor.scintillaBack.toDString );
+		doc ~= setINILineData( "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore.toDString );
+		doc ~= setINILineData( "SCE_B_COMMENT_Back", GLOBAL.editColor.SCE_B_COMMENT_Back.toDString );
+		doc ~= setINILineData( "SCE_B_NUMBER_Fore", GLOBAL.editColor.SCE_B_NUMBER_Fore.toDString );
+		doc ~= setINILineData( "SCE_B_NUMBER_Back", GLOBAL.editColor.SCE_B_NUMBER_Back.toDString );
+		doc ~= setINILineData( "SCE_B_STRING_Fore", GLOBAL.editColor.SCE_B_STRING_Fore.toDString );
+		doc ~= setINILineData( "SCE_B_STRING_Back", GLOBAL.editColor.SCE_B_STRING_Back.toDString );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Fore", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toDString );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Back", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toDString );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Fore", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toDString );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Back", GLOBAL.editColor.SCE_B_OPERATOR_Back.toDString );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Fore", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toDString );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Back", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toDString );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Fore", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toDString );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Back", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toDString );
+		doc ~= setINILineData( "projectFore", GLOBAL.editColor.projectFore.toDString );
+		doc ~= setINILineData( "projectBack", GLOBAL.editColor.projectBack.toDString );
+		doc ~= setINILineData( "outlineFore", GLOBAL.editColor.outlineFore.toDString );
+		doc ~= setINILineData( "outlineBack", GLOBAL.editColor.outlineBack.toDString );		
+		doc ~= setINILineData( "filelistFore", GLOBAL.editColor.filelistFore.toDString );
+		doc ~= setINILineData( "filelistBack", GLOBAL.editColor.filelistBack.toDString );
+		doc ~= setINILineData( "outputFore", GLOBAL.editColor.outputFore.toDString );
+		doc ~= setINILineData( "outputBack", GLOBAL.editColor.outputBack.toDString );
+		doc ~= setINILineData( "searchFore", GLOBAL.editColor.searchFore.toDString );
+		doc ~= setINILineData( "searchBack", GLOBAL.editColor.searchBack.toDString );
+		doc ~= setINILineData( "prjTitle", GLOBAL.editColor.prjTitle.toDString );
+		doc ~= setINILineData( "prjSourceType", GLOBAL.editColor.prjSourceType.toDString );
+		doc ~= setINILineData( "keyword0", GLOBAL.editColor.keyWord[0].toDString );
+		doc ~= setINILineData( "keyword1", GLOBAL.editColor.keyWord[1].toDString );
+		doc ~= setINILineData( "keyword2", GLOBAL.editColor.keyWord[2].toDString );
+		doc ~= setINILineData( "keyword3", GLOBAL.editColor.keyWord[3].toDString );
+		doc ~= setINILineData( "currentword", GLOBAL.editColor.currentWord.toDString );
+		doc ~= setINILineData( "currentwordAlpha", GLOBAL.editColor.currentWordAlpha.toDString );
+		
+		if( !actionManager.FileAction.saveFile( templatePath ~ "/" ~ templateName ~ ".ini", doc ) ) throw new Exception( "Save File Error" );
+	}
+	
+	static char[][] loadColorTemplateINI( char[] templateName )
+	{
+		char[][] results;
+		
+		try
+		{
+			char[] iniPath = "settings/colorTemplates/" ~ templateName ~ ".ini";
+			
+			if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/colorTemplates/" ~ templateName ~ ".ini";
+			
+			scope _fp = new FilePath( iniPath );
+			if( !_fp.exists() )
+			{
+				//return null;
+				return loadColorTemplate( templateName );
+			}
+			
+			
+			scope file = new UnicodeFile!(char)( iniPath, Encoding.Unknown );
+			char[] doc = file.read();
+			
+			char[]	blockText;
+			foreach( char[] lineData; Util.splitLines( doc ) )
+			{
+				char[]	left, right;
+				lineData = Util.trim( lineData );
+				
+				
+				// Get Line Data
+				int _result = getINILineData( lineData, left, right );
+				if( _result == 1 )
+				{
+					blockText = left;
+					continue;
+				}
+				else if( _result == 0 )
+				{
+					continue;
+				}
+				else
+				{
+					if( !right.length ) continue;
+				}
+				
+				switch( blockText )
+				{
+					case "[color]":
+						switch( left )
+						{
+							case	"caretLine", "cursor", "selectionFore", "selectionBack", "linenumFore", "linenumBack", "fold", "selAlpha",
+									"braceFore", "braceBack", "errorFore", "errorBack", "warningFore", "warningBack", "scintillaFore", "scintillaBack",
+									"SCE_B_COMMENT_Fore", "SCE_B_COMMENT_Back", "SCE_B_NUMBER_Fore", "SCE_B_NUMBER_Back", "SCE_B_STRING_Fore", "SCE_B_STRING_Back", "SCE_B_PREPROCESSOR_Fore", "SCE_B_PREPROCESSOR_Back",
+									"SCE_B_OPERATOR_Fore", "SCE_B_OPERATOR_Back", "SCE_B_IDENTIFIER_Fore", "SCE_B_IDENTIFIER_Back", "SCE_B_COMMENTBLOCK_Fore", "SCE_B_COMMENTBLOCK_Back", "projectFore", "projectBack",
+									"outlineFore", "outlineBack", "filelistFore", "filelistBack", "outputFore", "outputBack", "searchFore", "searchBack",
+									"prjTitle", "prjSourceType", "keyword0", "keyword1", "keyword2", "keyword3", "currentword", "currentwordAlpha":
+									results ~= right;
+									break;
+							default:
+						}
+						break;
+					default:
+				}
+			}
+			
+		}
+		catch( Exception e )
+		{
+		}
+		
+		return results;
+	}	
+	
+	/+
 	static void saveColorTemplate( char[] templateName )
 	{
 		// Write Setting File...
@@ -1063,6 +1201,7 @@ struct IDECONFIG
 		
 		actionManager.FileAction.saveFile( "settings/colorTemplates/" ~ templateName ~ ".xml", print.print( doc ) );
 	}
+	+/
 	
 	static char[][] loadColorTemplate( char[] templateName )
 	{
@@ -1070,8 +1209,12 @@ struct IDECONFIG
 		
 		try
 		{
+			char[] xmlPath = "settings/colorTemplates/" ~ templateName ~ ".xml";
+			
+			if( GLOBAL.linuxHome.length ) xmlPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/colorTemplates/" ~ templateName ~ ".xml";
+		
 			// Loading Key Word...
-			scope _fp = new FilePath( "settings/colorTemplates/" ~ templateName ~ ".xml" );
+			scope _fp = new FilePath( xmlPath );
 			if( !_fp.exists() ) return null;
 			
 			scope file = new UnicodeFile!(char)( _fp.toString, Encoding.Unknown );

@@ -678,7 +678,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.414)\nBy Kuan Hsu (Taiwan)\n2019.07.20" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.415)\nBy Kuan Hsu (Taiwan)\n2019.07.22" );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.040)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
 		return IUP_DEFAULT;
 	});
@@ -1623,7 +1623,14 @@ extern(C)
 	int preference_cb( Ihandle *ih )
 	{
 		if( GLOBAL.preferenceDlg is null ) GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), true, "POSEIDONFB_MAIN_DIALOG" );
-		GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		if( GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT ) != "OK" )
+		{
+			IupDestroy( GLOBAL.preferenceDlg.getIhandle );
+			delete GLOBAL.preferenceDlg;
+			
+			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), true, "POSEIDONFB_MAIN_DIALOG" );
+			auto dummy = GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		}
 
 		return IUP_DEFAULT;
 	}

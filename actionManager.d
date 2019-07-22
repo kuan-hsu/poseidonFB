@@ -864,6 +864,54 @@ struct ScintillaAction
 
 			Encoding		_encoding;
 			char[] 	_text = FileAction.loadFile( fullPath, _encoding );
+			
+			
+			
+			// Parser
+			if( upperCase(fullPath) in GLOBAL.parserManager )
+			{
+				Ihandle* _tree = GLOBAL.outlineTree.getTree( fullPath );
+				if( _tree == null )	GLOBAL.outlineTree.createTree( GLOBAL.parserManager[upperCase(fullPath)] );
+				
+				GLOBAL.outlineTree.changeTree( fullPath );
+			}
+			else
+			{
+				auto pParseTree = GLOBAL.outlineTree.createParserByText( fullPath, _text );
+				if( pParseTree !is null ) 
+				{
+					if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );
+					
+					AutoComplete.cleanIncludeContainer();
+					
+					if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
+					{
+						version(BACKTHREAD)
+						{
+							if( backThread )
+							{
+								ParseThread subThread = new ParseThread( pParseTree, fullPath );
+								subThread.start();
+							}
+							else
+							{
+								auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+							}
+						}
+						else
+						{
+							auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+						}
+					}
+					else
+					{
+						auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+					}
+				}
+			}
+			
+			
+			
 			auto 	_sci = new CScintilla( fullPath, _text, _encoding );
 			GLOBAL.scintillaManager[upperCase(fullPath)] = _sci;
 
@@ -934,6 +982,7 @@ struct ScintillaAction
 				GLOBAL.statusBar.setPrjName( null, true );
 			}			
 			
+			/+
 			// Parser
 			if( upperCase(fullPath) in GLOBAL.parserManager )
 			{
@@ -947,7 +996,9 @@ struct ScintillaAction
 				auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
 				if( pParseTree !is null ) 
 				{
-					if( GLOBAL.editorSetting00.Message == "ON" )GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );			
+					if( GLOBAL.editorSetting00.Message == "ON" )GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );
+					
+					AutoComplete.cleanIncludeContainer();
 					
 					if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
 					{
@@ -960,21 +1011,21 @@ struct ScintillaAction
 							}
 							else
 							{
-								AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+								auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 							}
 						}
 						else
 						{
-							AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+							auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 						}
 					}
 					else
 					{
-						AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+						auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 					}
 				}
 			}
-			
+			+/
 			//if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
 			StatusBarAction.update();

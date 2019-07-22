@@ -692,7 +692,7 @@ version(FBIDE)
 			
 			// Parse Include
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			getIncludes( originalNode, originalFullPath, true );
+			auto dummyASTs = getIncludes( originalNode, originalFullPath, true );
 
 			foreach( includeAST; includesMarkContainer )
 			{
@@ -794,7 +794,7 @@ version(FBIDE)
 				}
 			}			
 			
-			getIncludes( originalNode, originalFullPath, true );
+			auto dummyASTs = getIncludes( originalNode, originalFullPath, true );
 
 			/*
 			foreach( CASTnode n; includesMarkContainer )
@@ -1415,6 +1415,12 @@ version(FBIDE)
 			
 			//if( calltipContainer is null ) calltipContainer = new CStack!(char[]);
 		}
+		
+		static void cleanIncludeContainer()
+		{
+			foreach( char[] key; includesMarkContainer.keys )
+				includesMarkContainer.remove( key );
+		}		
 		
 		static void cleanCalltipContainer()
 		{
