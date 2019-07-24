@@ -908,7 +908,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* colorTemplateList = IupList( null );
 		IupSetHandle( "colorTemplateList", colorTemplateList );
 		IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,EXPAND=HORIZONTAL,DROPDOWN=YES,VISIBLEITEMS=5" );
-		IupSetAttributeId( colorTemplateList, "", 1, toStringz( " " ) );
+		version(linux)IupSetAttributeId( colorTemplateList, "", 1, toStringz( " " ) );
 		//IupSetAttribute( colorTemplateList, "VALUE", GLOBAL.colorTemplate.toCString );
 		IupSetCallback( colorTemplateList, "DROPDOWN_CB",cast(Icallback) &colorTemplateList_DROPDOWN_CB );
 		IupSetCallback( colorTemplateList, "ACTION",cast(Icallback) &colorTemplateList_ACTION_CB );
@@ -973,7 +973,7 @@ class CPreferenceDialog : CBaseDialog
 			{
 				try
 				{
-					IDECONFIG.saveColorTemplateINI( templateName );
+					GLOBAL.preferenceDlg.saveColorTemplateINI( templateName );
 					IupMessage( GLOBAL.languageItems["colorfile"].toCString(), toStringz( GLOBAL.languageItems["save"].toDString() ~ " " ~GLOBAL.languageItems["ok"].toDString() ) );
 				}
 				catch( Exception e )
@@ -1753,6 +1753,76 @@ class CPreferenceDialog : CBaseDialog
 
 		IupAppend( _dlg, vBox );
 	}
+	
+	void saveColorTemplateINI( char[] templateName )
+	{
+		char[] templatePath = "settings/colorTemplates";
+
+		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
+		
+		scope _fp = new FilePath( templatePath );
+		if( !_fp.exists() )	_fp.create();
+		
+
+		char[] doc = "[color]\n";
+			
+		// Editor
+		doc ~= setINILineData( "caretLine", fromStringz( IupGetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "cursor", fromStringz( IupGetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "selectionFore", fromStringz( IupGetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "selectionBack", fromStringz( IupGetAttribute( IupGetHandle( "btnSelectBack" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "linenumFore", fromStringz( IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "linenumBack", fromStringz( IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "fold", fromStringz( IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "FGCOLOR" ) ).dup );
+		
+		doc ~= setINILineData( "selAlpha", fromStringz( IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" ) ).dup );
+		doc ~= setINILineData( "braceFore", fromStringz( IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "braceBack", fromStringz( IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "errorFore", fromStringz( IupGetAttribute( IupGetHandle( "btnError_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "errorBack", fromStringz( IupGetAttribute( IupGetHandle( "btnError_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "warningFore", fromStringz( IupGetAttribute( IupGetHandle( "btnWarning_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "warningBack", fromStringz( IupGetAttribute( IupGetHandle( "btnWarning_BG" ), "FGCOLOR" ) ).dup );
+		
+		doc ~= setINILineData( "scintillaFore", fromStringz( IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "scintillaBack", fromStringz( IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "FGCOLOR" ) ).dup );
+		
+		doc ~= setINILineData( "SCE_B_COMMENT_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_COMMENT_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_NUMBER_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_NUMBER_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_STRING_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_STRING_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "FGCOLOR" ) ).dup );
+		
+		doc ~= setINILineData( "projectFore", fromStringz( IupGetAttribute( IupGetHandle( "btnPrj_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "projectBack", fromStringz( IupGetAttribute( IupGetHandle( "btnPrj_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "outlineFore", fromStringz( IupGetAttribute( IupGetHandle( "btnOutline_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "outlineBack", fromStringz( IupGetAttribute( IupGetHandle( "btnOutline_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "filelistFore", fromStringz( IupGetAttribute( IupGetHandle( "btnFilelist_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "filelistBack", fromStringz( IupGetAttribute( IupGetHandle( "btnFilelist_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "outputFore", fromStringz( IupGetAttribute( IupGetHandle( "btnOutput_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "outputBack", fromStringz( IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "searchFore", fromStringz( IupGetAttribute( IupGetHandle( "btnSearch_FG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "searchBack", fromStringz( IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "FGCOLOR" ) ).dup );
+		
+		doc ~= setINILineData( "prjTitle", fromStringz( IupGetAttribute( IupGetHandle( "btnPrjTitle" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "prjSourceType", fromStringz( IupGetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "keyword0", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "keyword1", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "keyword2", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "keyword3", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "currentword", fromStringz( IupGetAttribute( IupGetHandle( "btnIndicator" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "currentwordAlpha", fromStringz( IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE" ) ).dup );
+		
+		if( !actionManager.FileAction.saveFile( templatePath ~ "/" ~ templateName ~ ".ini", doc ) ) throw new Exception( "Save File Error" );
+	}	
 
 	public:
 	this( int w, int h, char[] title, bool bResize = true, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
@@ -2618,7 +2688,7 @@ extern(C) // Callback for CPreferenceDialog
 			//IDECONFIG.save();
 			IDECONFIG.saveINI();
 
-			//IupRefreshChildren( IupGetHandle( "PreferenceHandle" ) );
+			IupRefreshChildren( IupGetHandle( "PreferenceHandle" ) );
 		}
 		catch( Exception e )
 		{
@@ -2710,7 +2780,7 @@ extern(C) // Callback for CPreferenceDialog
 			if( templateFP.exists() )
 			{
 				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
-				IupSetAttributeId( ih, "", 1, toStringz( " " ) );
+				version(linux) IupSetAttributeId( ih, "", 1, toStringz( " " ) );
 				foreach( _fp; templateFP.toList )
 				{
 					if( _fp.ext == "ini" ) IupSetAttribute( ih, "APPENDITEM", toStringz( _fp.name.dup ) );

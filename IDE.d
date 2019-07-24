@@ -996,7 +996,7 @@ struct IDECONFIG
 		}
 	}
 	
-	
+	/*
 	static void saveColorTemplateINI( char[] templateName )
 	{
 		char[] templatePath = "settings/colorTemplates";
@@ -1061,6 +1061,7 @@ struct IDECONFIG
 		
 		if( !actionManager.FileAction.saveFile( templatePath ~ "/" ~ templateName ~ ".ini", doc ) ) throw new Exception( "Save File Error" );
 	}
+	*/
 	
 	static char[][] loadColorTemplateINI( char[] templateName )
 	{
