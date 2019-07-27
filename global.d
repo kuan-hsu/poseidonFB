@@ -139,7 +139,7 @@ struct GLOBAL
 
 	static Ihandle*				menuOutlineWindow, menuMessageWindow, menuFistlistWindow,menuRotateTabs;
 	
-	static char[]				linuxTermName;
+	
 
 	// Setting
 	version(Windows)	static char[][char[]]	EnvironmentVars;
@@ -157,6 +157,7 @@ struct GLOBAL
 	static char[]				consoleExe = "OFF";
 	static char[]				toggleCompileAtBackThread = "OFF";
 	static IupString			debuggerFullPath;
+	static IupString			linuxTermName;	
 	static IupString			manualPath;
 	//static IupString			colorTemplate;
 	//static char[]				maxError = "30";
@@ -315,6 +316,7 @@ struct GLOBAL
 		GLOBAL.compilerFullPath = new IupString();
 		GLOBAL.x64compilerFullPath = new IupString();
 		GLOBAL.debuggerFullPath = new IupString();
+		GLOBAL.linuxTermName = new IupString();
 		GLOBAL.manualPath = new IupString();
 		//GLOBAL.colorTemplate = new IupString();
 		GLOBAL.completeDelay = new IupString( cast(char[]) "0" );
@@ -445,7 +447,7 @@ struct GLOBAL
 		else
 		{
 			fu.name ="default";
-			fu.fontString = "Ubuntu Mono, 10";
+			fu.fontString = "Monospace, 10";
 		}
 
 		GLOBAL.fonts ~= fu;
@@ -584,6 +586,7 @@ struct GLOBAL
 				GLOBAL.languageItems["compiler"] = new IupString( cast(char[]) "Compiler" );
 					GLOBAL.languageItems["compilerpath"] = new IupString( cast(char[]) "Compiler Path" );
 					GLOBAL.languageItems["debugpath"] = new IupString( cast(char[]) "Debugger Path" );
+					GLOBAL.languageItems["terminalpath"] = new IupString( cast(char[]) "Terminal Path" );
 					GLOBAL.languageItems["x64path"] = new IupString( cast(char[]) "x64 Path" );
 					GLOBAL.languageItems["compileropts"] = new IupString( cast(char[]) "Compiler Opts" );
 					GLOBAL.languageItems["compilersetting"] = new IupString( cast(char[]) "Compiler Setting" );

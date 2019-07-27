@@ -12,8 +12,6 @@ struct IDECONFIG
 	import tango.io.FilePath;
 	
 
-	
-	
 	static bool loadLocalization()
 	{
 		// Load Language lng
@@ -51,6 +49,7 @@ struct IDECONFIG
 		return false;
 	}
 	
+	/*
 	version(linux) static void setLinuxTerminal()
 	{
 		// Get linux terminal program name
@@ -73,7 +72,7 @@ struct IDECONFIG
 			}
 		}
 	}
-
+	*/
 
 	public:
 
@@ -369,6 +368,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "compilerpath", GLOBAL.compilerFullPath.toDString );
 			doc ~= setINILineData( "x64compilerpath", GLOBAL.x64compilerFullPath.toDString );
 			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath.toDString );
+			doc ~= setINILineData( "terminalpath", GLOBAL.linuxTermName.toDString );
 			//doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "usesfx", GLOBAL.compilerSFX );
@@ -473,8 +473,7 @@ struct IDECONFIG
 			
 			version(linux)
 			{
-				setLinuxTerminal(); // Get linux terminal program name
-				
+				//setLinuxTerminal(); // Get linux terminal program name
 				if( !GLOBAL.linuxHome.length ) // Not AppImage
 				{
 					scope settingFilePath = new FilePath( "settings/editorSettings.ini" );
@@ -781,6 +780,7 @@ struct IDECONFIG
 								break;
 							case "x64compilerpath":			version(FBIDE) GLOBAL.x64compilerFullPath = right;		break;
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
+							case "terminalpath":			GLOBAL.linuxTermName = right;							break;
 							//case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
 							case "usesfx":					GLOBAL.compilerSFX = right;								break;

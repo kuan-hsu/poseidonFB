@@ -111,20 +111,18 @@ struct ExecuterAction
 				}
 				
 				//	p = new Process( true, GLOBAL.linuxTermName ~ geoString ~ " -e " ~ scommand );
-				auto terminalExe = new FilePath( GLOBAL.linuxTermName );
-				if( terminalExe !is null )
+				if( GLOBAL.linuxTermName.toDString.length )
 				{
-					char[] terminalExeName = lowerCase( terminalExe.file );
-					switch( lowerCase( terminalExe.file ) )
+					switch( Util.trim( GLOBAL.linuxTermName.toDString ) )
 					{
 						case "xterm", "uxterm":
-							p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							p = new Process( true, GLOBAL.linuxTermName.toDString ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
 						case "gnome-terminal", "mate-terminal" ,"xfce4-terminal" ,"lxterminal":
-							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							p = new Process( true, GLOBAL.linuxTermName.toDString ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
 						default:
-							p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand );
+							p = new Process( true, GLOBAL.linuxTermName.toDString ~ " -e " ~ scommand );
 					}
 				}
 				else

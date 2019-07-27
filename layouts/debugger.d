@@ -295,11 +295,11 @@ version(FBIDE)
 				IupSetAttribute( shareTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 				IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 
-				IupSetAttribute( var0Frame, "FONT", "Ubuntu Mono, 10" );
-				IupSetAttribute( var1Frame, "FONT", "Ubuntu Mono, 10" );
-				IupSetAttribute( bpListHandle, "FONT", "Ubuntu Mono, 10" );
-				IupSetAttribute( bpFrame, "FONT", "Ubuntu Mono, 10" );
-				IupSetAttribute( regListHandle, "FONT", "Ubuntu Mono, 10" );
+				IupSetAttribute( var0Frame, "FONT", "Monospace, 10" );
+				IupSetAttribute( var1Frame, "FONT", "Monospace, 10" );
+				IupSetAttribute( bpListHandle, "FONT", "Monospace, 10" );
+				IupSetAttribute( bpFrame, "FONT", "Monospace, 10" );
+				IupSetAttribute( regListHandle, "FONT", "Monospace, 10" );
 			}
 			
 			

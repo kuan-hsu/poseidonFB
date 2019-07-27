@@ -20,13 +20,12 @@ private struct PreferenceDialogParameters
 class CPreferenceDialog : CBaseDialog
 {
 	private:
-	Ihandle*			textCompilerPath, textDebuggerPath;
 
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
 
-		textCompilerPath = IupText( null );
+		Ihandle* textCompilerPath = IupText( null );
 		IupSetAttribute( textCompilerPath, "SIZE", "320x" );
 		IupSetAttribute( textCompilerPath, "VALUE", GLOBAL.compilerFullPath.toCString );
 		IupSetHandle( "compilerPath_Handle", textCompilerPath );
@@ -64,7 +63,7 @@ class CPreferenceDialog : CBaseDialog
 			}
 
 
-			textDebuggerPath = IupText( null );
+			Ihandle* textDebuggerPath = IupText( null );
 			IupSetAttribute( textDebuggerPath, "SIZE", "320x" );
 			IupSetAttribute( textDebuggerPath, "VALUE", GLOBAL.debuggerFullPath.toCString );
 			IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
@@ -72,14 +71,33 @@ class CPreferenceDialog : CBaseDialog
 			Ihandle* btnOpenDebugger = IupButton( null, null );
 			IupSetAttribute( btnOpenDebugger, "IMAGE", "icon_openfile" );
 			IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenDebuggerBinFile_cb );
-
+			
 			Ihandle* _hBox02 = IupHbox( textDebuggerPath, btnOpenDebugger, null );
 			IupSetAttributes( _hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 			
 			Ihandle* hBox02 = IupFrame( _hBox02 );
 			IupSetAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
-			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");
+			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");			
 		}
+		
+		version(linux)
+		{
+			Ihandle* textTerminalPath = IupText( null );
+			IupSetAttribute( textTerminalPath, "SIZE", "320x" );
+			IupSetAttribute( textTerminalPath, "VALUE", GLOBAL.linuxTermName.toCString );
+			IupSetHandle( "textTerminalPath", textTerminalPath );
+		
+			Ihandle* btnOpenTerminal = IupButton( null, null );
+			IupSetAttribute( btnOpenTerminal, "IMAGE", "icon_openfile" );
+			IupSetCallback( btnOpenTerminal, "ACTION", cast(Icallback) &CPreferenceDialog_OpenTerminalBinFile_cb );
+			
+			Ihandle* _hBox03 = IupHbox( textTerminalPath, btnOpenTerminal, null );
+			IupSetAttributes( _hBox03, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+			
+			Ihandle* hBox03 = IupFrame( _hBox03 );
+			IupSetAttribute( hBox03, "TITLE", GLOBAL.languageItems["terminalpath"].toCString );
+			IupSetAttributes( hBox03, "EXPANDCHILDREN=YES,SIZE=346x");			
+		}		
 		
 		// Dummy
 		Ihandle* toggleDummy = IupToggle( GLOBAL.languageItems["errorannotation"].toCString, null );		
@@ -205,20 +223,23 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( manuFrame, "TITLE", GLOBAL.languageItems["manual"].toCString() );
 		IupSetAttribute( manuFrame, "SIZE", "346x");		
 		
-		
 		version(FBIDE)
 		{
 			version(Windows)
 				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, frameCompiler, manuFrame, null );
 			else
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox02, frameCompiler, manuFrame, null );
+				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, frameCompiler, manuFrame, null );
 				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
 		}
 		version(DIDE)
 		{
-			Ihandle* vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, manuFrame, null );
+			version(Windows)
+				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, manuFrame, null );
+			else
+				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox03, frameCompiler, manuFrame, null );
+				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
 		}
@@ -885,7 +906,7 @@ class CPreferenceDialog : CBaseDialog
 				IupSetAttribute( flatFrame[i], "TITLEBGCOLOR", "64 128 255");
 				IupSetAttribute( flatFrame[i], "TITLECOLOR", "255 255 255");
 				
-				version( Windows ) IupSetAttribute( lableString[i], "FONTFACE", "Courier New" ); else IupSetAttribute( lableString[i], "FONTFACE", "Ubuntu Mono" );
+				version( Windows ) IupSetAttribute( lableString[i], "FONTFACE", "Courier New" ); else IupSetAttribute( lableString[i], "FONTFACE", "Monospace" );
 				
 				scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( i ) );
 				IupSetHandle( _IupFlatFrameString.toCString, flatFrame[i] );
@@ -1618,7 +1639,7 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( shortCutList, "FONT", "Ubuntu Mono, 10" );
+			IupSetAttribute( shortCutList, "FONT", "Monospace, 10" );
 		}
 		IupSetHandle( "shortCutList", shortCutList );
 		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
@@ -1865,6 +1886,7 @@ class CPreferenceDialog : CBaseDialog
 	{
 		IupSetHandle( "compilerPath_Handle", null );
 		IupSetHandle( "debuggerPath_Handle", null );
+		IupSetHandle( "textTerminalPath", null );
 		IupSetHandle( "defaultOption_Handle", null );
 		IupSetHandle( "textTrigger", null );
 		IupSetHandle( "textIncludeLevel", null );
@@ -2016,7 +2038,7 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			GLOBAL.compilerFullPath = fileName;
+			//GLOBAL.compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "compilerPath_Handle" );
 			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.compilerFullPath.toCString );
 		}
@@ -2035,13 +2057,9 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			GLOBAL.x64compilerFullPath = fileName;
+			//GLOBAL.x64compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "x64compilerPath_Handle" );
 			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.x64compilerFullPath.toCString );
-		}
-		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
 		}
 
 		return IUP_DEFAULT;
@@ -2054,17 +2072,30 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			GLOBAL.debuggerFullPath = fileName;
+			//GLOBAL.debuggerFullPath = fileName;
 			Ihandle* _debuggerPath_Handle = IupGetHandle( "debuggerPath_Handle" );
 			if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", GLOBAL.debuggerFullPath.toCString );
 		}
 		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
-		}
 
 		return IUP_DEFAULT;
 	}
+	
+	private int CPreferenceDialog_OpenTerminalBinFile_cb( Ihandle* ih )
+	{
+		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
+		char[] fileName = fileSecectDlg.getFileName();
+
+		if( fileName.length )
+		{
+			//GLOBAL.linuxTermName = fileName;
+			Ihandle* _terminalPath_Handle = IupGetHandle( "textTerminalPath" );
+			if( _terminalPath_Handle != null ) IupSetAttribute( _terminalPath_Handle, "VALUE", GLOBAL.linuxTermName.toCString );
+		}
+		else
+
+		return IUP_DEFAULT;
+	}	
 	
 	private int CPreferenceDialog_OpenCHM_cb( Ihandle* ih )
 	{
@@ -2079,9 +2110,6 @@ extern(C) // Callback for CPreferenceDialog
 			if( _chm_Handle != null ) IupSetAttribute( _chm_Handle, "VALUE", GLOBAL.manualPath.toCString );
 		}
 		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
-		}
 
 		return IUP_DEFAULT;
 	}	
@@ -2190,7 +2218,7 @@ extern(C) // Callback for CPreferenceDialog
 									}
 									else
 									{
-										strings[0] = "Ubuntu Mono";
+										strings[0] = "Monospace";
 									}
 								}
 								else
@@ -2224,7 +2252,7 @@ extern(C) // Callback for CPreferenceDialog
 								{
 									scope _fontSyle = new IupString( strings[0] );
 									IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
-									version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Ubuntu Mono" );
+									version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Monospace" );
 									IupRefresh( _flatFrameHandle );
 								}
 							}
@@ -2269,7 +2297,7 @@ extern(C) // Callback for CPreferenceDialog
 									{
 										scope _fontSyle = new IupString( fontName );
 										IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
-										version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Ubuntu Mono" );
+										version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Monospace" );
 										IupRefresh( _flatFrameHandle );
 									}									
 								}
@@ -2517,6 +2545,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.compilerFullPath						= IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" );
 			version(Windows) GLOBAL.x64compilerFullPath	= IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" );
 			version(FBIDE) GLOBAL.debuggerFullPath		= IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" );
+			version(linux) GLOBAL.linuxTermName			= IupGetAttribute( IupGetHandle( "textTerminalPath" ), "VALUE" );
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
 			GLOBAL.compilerSFX							= fromStringz( IupGetAttribute( IupGetHandle( "toggleSFX" ), "VALUE" ) ).dup;

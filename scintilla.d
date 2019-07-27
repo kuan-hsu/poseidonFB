@@ -470,7 +470,7 @@ class CScintilla
 		}
 		else
 		{
-			font = "Ubuntu Mono";
+			font = "Monospace";
 		}
 
 		getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );

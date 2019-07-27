@@ -96,6 +96,7 @@ options=Options
 		compiler=Compiler
 			compilerpath=Compiler Path
 			debugpath=Debugger Path
+			terminalpath=Terminal Path
 			x64path=x64 Compiler Path
 			compileropts=Compiler Options
 			compilersetting=Compiler Settings
