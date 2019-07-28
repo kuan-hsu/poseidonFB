@@ -508,7 +508,14 @@ class CPreferenceDialog : CBaseDialog
 			Ihandle* toggleQBCase = IupToggle( GLOBAL.languageItems["qbcase"].toCString, null );
 			IupSetAttribute( toggleQBCase, "VALUE", toStringz(GLOBAL.editorSetting00.QBCase.dup) );
 			IupSetHandle( "toggleQBCase", toggleQBCase );
-		}		
+		}
+
+		version(Windows)
+		{
+			Ihandle* toggleNewDocBOM = IupToggle( GLOBAL.languageItems["newdocbom"].toCString, null );
+			IupSetAttribute( toggleNewDocBOM, "VALUE", toStringz(GLOBAL.editorSetting00.NewDocBOM.dup) );
+			IupSetHandle( "toggleNewDocBOM", toggleNewDocBOM );
+		}
 		
 		
 		PreferenceDialogParameters.stringCharSymbol = new IupString( GLOBAL.editorSetting00.ControlCharSymbol );
@@ -589,8 +596,7 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleAutoKBLayout, "" ),
 					
 					IupSetAttributes( toggleQBCase, "" ),
-					IupFill(),
-					
+					IupSetAttributes( toggleNewDocBOM, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -689,6 +695,9 @@ class CPreferenceDialog : CBaseDialog
 					
 					IupSetAttributes( toggleDocStatus, "" ),
 					IupSetAttributes( toggleAutoKBLayout, "" ),
+					
+					IupSetAttributes( toggleNewDocBOM, "" ),
+					IupFill(),
 					//IupSetAttributes( toggleLoadAtBackThread, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
@@ -1944,6 +1953,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleLoadAtBackThread", null );
 		IupSetHandle( "toggleAutoKBLayout", null );
 		IupSetHandle( "toggleQBCase", null );
+		IupSetHandle( "toggleNewDocBOM", null );
 		IupSetHandle( "textSetControlCharSymbol", null );
 		
 		
@@ -2375,6 +2385,8 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.LoadAtBackThread			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadAtBackThread" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.AutoKBLayout				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoKBLayout" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
+			GLOBAL.editorSetting00.NewDocBOM				= fromStringz(IupGetAttribute( IupGetHandle( "toggleNewDocBOM" ), "VALUE" )).dup;
+			
 			
 
 			

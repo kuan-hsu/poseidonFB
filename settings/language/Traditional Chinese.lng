@@ -163,6 +163,7 @@ options=選項
 				maker3=標記3
 				autoconvertkeyword=自動轉換關鍵字大小寫
 				qbcase=使用QB-IDE方式轉換關鍵字大小寫
+				newdocbom=建立新文件包含BOM
 				font=字型
 					default=內定
 					'document=文件

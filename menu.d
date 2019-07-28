@@ -678,7 +678,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "FreeBasic IDE\nPoseidonFB(V0.417)\nBy Kuan Hsu (Taiwan)\n2019.07.27" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.418)\nBy Kuan Hsu (Taiwan)\n2019.07.28" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.040)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
 		return IUP_DEFAULT;
 	});
@@ -960,7 +960,12 @@ extern(C)
 			version(DIDE)	noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".d";
 		}
 
-		version(Windows) actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false ); else actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
+		version(Windows)
+		{
+			if( GLOBAL.editorSetting00.NewDocBOM == "ON" ) actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false ); else actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
+		}
+		else
+			actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
 
 		return IUP_DEFAULT;
 	}

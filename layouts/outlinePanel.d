@@ -510,6 +510,99 @@ class COutline
 							}
 						}
 					}
+					
+					version(DIDE)
+					{
+						switch( _node.kind )
+						{
+							case D_FUNCTION: //, B_PROPERTY, B_OPERATOR:
+								char[] _type = _node.type;
+								char[] _paramString;
+
+								int parenPos = Util.index( _node.type, "(" );
+								if( parenPos < _node.type.length )
+								{
+									_type = _node.type[0..parenPos];
+									_paramString = _node.type[parenPos..length];
+								}
+
+								/*
+								if( _node.kind & B_DEFINE )
+								{
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+											break;
+										default:
+											IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+											break;
+									}
+									break;
+								}
+								*/
+								
+								switch( showIndex )
+								{
+									case 0:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ) );
+										break;
+									case 1:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ _paramString ) );
+										break;
+									case 2:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ) );
+										break;
+									default:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+										break;
+								}
+								break;
+
+							case D_CTOR:
+								switch( showIndex )
+								{
+									case 0, 1:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "this" ~ _node.type ) );
+										break;
+									default:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "this" ) );
+										break;
+								}
+								break;
+
+							case D_DTOR:
+								switch( showIndex )
+								{
+									case 0, 1:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "~this()" ) );
+										break;
+									default:
+										IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( "~this" ) );
+										break;
+								}
+								break;
+
+							case D_CLASS, D_INTERFACE:
+								if( showIndex == 0 || showIndex == 2 )
+									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.base.length ? " : " ~ _node.base : "" ) ) );
+								else
+									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+								
+								break;	
+								
+
+							case D_VARIABLE://, B_ALIAS:
+								if( showIndex == 0 || showIndex == 2 )
+									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
+								else
+									IupSetAttributeId( actTree, "TITLE", i, GLOBAL.cString.convert( _node.name ) );
+								
+								break;						
+
+							default:
+						}
+					}
 				}
 			}
 		}		

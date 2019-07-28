@@ -167,6 +167,7 @@ options=Options
 				maker3=Maker3
 				autoconvertkeyword=Keyword case conversion
 				qbcase=Use QB-IDE Convert Case
+				newdocbom=Create New Doc With BOM
 				font=Font
 					default=Default
 					'document=Document

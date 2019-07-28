@@ -200,6 +200,7 @@ struct IDECONFIG
 			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
 			doc ~= setINILineData( "Bit64", GLOBAL.editorSetting00.Bit64 );
 			doc ~= setINILineData( "QBCase", GLOBAL.editorSetting00.QBCase );
+			doc ~= setINILineData( "NewDocBOM", GLOBAL.editorSetting00.NewDocBOM );
 			
 			
 			if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
@@ -597,6 +598,7 @@ struct IDECONFIG
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
 							case "Bit64":					GLOBAL.editorSetting00.Bit64 = right;					break;
 							case "QBCase":					GLOBAL.editorSetting00.QBCase = right;					break;
+							case "NewDocBOM":				GLOBAL.editorSetting00.NewDocBOM= right;				break;
 							default:
 						}
 						break;

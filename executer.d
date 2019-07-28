@@ -187,6 +187,14 @@ struct ExecuterAction
 
 		void go()
 		{
+			if( GLOBAL.delExistExe == "ON" )
+			{
+				// Remove the execute file
+				scope targetFilePath = new FilePath( ScintillaAction.getActiveCScintilla.getFullPath() );
+				version(Windows) targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() ~ ".exe" ); else targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() );
+				if( targetFilePath.exists() ) targetFilePath.remove();
+			}		
+		
 			Process p = new Process( true, command );
 			p.gui( true );
 			p.workDir( cwd );
@@ -297,7 +305,7 @@ struct ExecuterAction
 						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
 					}
 				}
-				
+				/*
 				if( GLOBAL.delExistExe == "ON" )
 				{
 					// Remove the execute file
@@ -305,7 +313,7 @@ struct ExecuterAction
 					version(Windows) targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() ~ ".exe" ); else targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() );
 					if( targetFilePath.exists() ) targetFilePath.remove();
 				}
-				
+				*/
 				return;
 			}
 			else
@@ -434,6 +442,17 @@ struct ExecuterAction
 			
 			if( command.length )
 			{
+				if( GLOBAL.delExistExe == "ON" )
+				{
+					// Remove the execute file
+					char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
+					
+					version(Windows) _targetName ~= ".exe";
+
+					scope targetFilePath = new FilePath( _targetName );
+					if( targetFilePath.exists() ) targetFilePath.remove();
+				}
+			
 				Process p = new Process( true, command );
 				p.workDir( activePrj.dir );
 				p.gui( true );
@@ -547,7 +566,7 @@ struct ExecuterAction
 							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
 						}							
 					}
-					
+					/*
 					if( GLOBAL.delExistExe == "ON" )
 					{
 						// Remove the execute file
@@ -557,7 +576,8 @@ struct ExecuterAction
 
 						scope targetFilePath = new FilePath( _targetName );
 						if( targetFilePath.exists() ) targetFilePath.remove();
-					}					
+					}
+					*/
 				}
 				else
 				{
@@ -690,6 +710,17 @@ struct ExecuterAction
 				fp.set( fp.path );
 				if( !fp.exists ) fp.create;
 
+				if( GLOBAL.delExistExe == "ON" )
+				{
+					// Remove the execute file
+					char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
+					
+					version(Windows) _targetName ~= ".exe";
+
+					scope targetFilePath = new FilePath( _targetName );
+					if( targetFilePath.exists() ) targetFilePath.remove();
+				}
+
 				
 				Process p2 = new Process( true, command );
 				p2.workDir( activePrj.dir );
@@ -807,7 +838,7 @@ struct ExecuterAction
 							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
 						}							
 					}
-					
+					/*
 					if( GLOBAL.delExistExe == "ON" )
 					{
 						// Remove the execute file
@@ -818,6 +849,7 @@ struct ExecuterAction
 						scope targetFilePath = new FilePath( _targetName );
 						if( targetFilePath.exists() ) targetFilePath.remove();
 					}
+					*/
 				}
 				else
 				{
@@ -904,6 +936,17 @@ struct ExecuterAction
 
 		void go()
 		{
+			if( GLOBAL.delExistExe == "ON" )
+			{
+				// Remove the execute file
+				char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
+				
+				version(Windows) _targetName ~= ".exe";
+
+				scope targetFilePath = new FilePath( _targetName );
+				if( targetFilePath.exists() ) targetFilePath.remove();
+			}
+	
 			Process p = new Process( true, command );
 			p.workDir( activePrj.dir );
 			p.redirect( Redirect.All );
@@ -1020,7 +1063,7 @@ struct ExecuterAction
 						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
 					}							
 				}
-				
+				/*
 				if( GLOBAL.delExistExe == "ON" )
 				{
 					// Remove the execute file
@@ -1031,6 +1074,7 @@ struct ExecuterAction
 					scope targetFilePath = new FilePath( _targetName );
 					if( targetFilePath.exists() ) targetFilePath.remove();
 				}
+				*/
 			}
 			else
 			{
@@ -2105,8 +2149,21 @@ struct ExecuterAction
 					}							
 				}
 				
+				char[] command;
 				scope _f = new FilePath( fileName );
-				_f.remove();				
+				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ "./" ~ _f.name;
+				_f.remove();
+
+				_f.set( command );
+				if( _f.exists() )
+				{
+					if( args.length ) args = " " ~ args; else args = "";
+					
+					ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
+					derived.start();
+
+					GLOBAL.messagePanel.printOutputPanel( "\nBut Got Execute, Running " ~ command ~ args ~ "......" );
+				}
 			}
 
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
