@@ -486,13 +486,10 @@ void createMenu()
 		return IUP_DEFAULT;
 	});
 	
-	version(Windows)
-	{
-		Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
-		IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
-		IupSetAttribute( fullScreenItem, "IMAGE", "icon_fullscreen" );
-		IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
-	}
+	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
+	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
+	IupSetAttribute( fullScreenItem, "IMAGE", "icon_fullscreen" );
+	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
 	
 	Ihandle* ideMessage = IupItem( GLOBAL.languageItems["showidemessage"].toCString, null);
 	IupSetAttribute( ideMessage, "IMAGE", "icon_idemessage" );
@@ -678,7 +675,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.418)\nBy Kuan Hsu (Taiwan)\n2019.07.28" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.419)\nBy Kuan Hsu (Taiwan)\n2019.08.01" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.040)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
 		return IUP_DEFAULT;
 	});
@@ -807,8 +804,6 @@ void createMenu()
 							null );
 	}
 	
-	version(Windows)
-	{
 	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
 							GLOBAL.menuFistlistWindow,
@@ -818,17 +813,6 @@ void createMenu()
 							IupSeparator(),
 							ideMessage,
 							null );
-	}
-	else
-	{
-	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
-							GLOBAL.menuMessageWindow,
-							GLOBAL.menuFistlistWindow,
-							GLOBAL.menuRotateTabs,
-							IupSeparator(),
-							ideMessage,
-							null );
-	}
 
 	option_menu= IupMenu( 	item_tool,
 							item_language,
@@ -1528,24 +1512,21 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	version(Windows)
+	int fullscreenMenuItem_cb( Ihandle *ih )
 	{
-		int fullscreenMenuItem_cb( Ihandle *ih )
+		if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" )
 		{
-			if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" )
-			{
-				GLOBAL.editorSetting01.USEFULLSCREEN = "OFF";
-				IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "NO" );
-				IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
-			}
-			else
-			{
-				GLOBAL.editorSetting01.USEFULLSCREEN = "ON";
-				IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
-			}
-			
-			return IUP_DEFAULT;
+			GLOBAL.editorSetting01.USEFULLSCREEN = "OFF";
+			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "NO" );
+			IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 		}
+		else
+		{
+			GLOBAL.editorSetting01.USEFULLSCREEN = "ON";
+			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "YES" );
+		}
+		
+		return IUP_DEFAULT;
 	}
 	
 	int messageMenuItem_cb( Ihandle *ih )

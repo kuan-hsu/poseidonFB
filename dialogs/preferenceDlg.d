@@ -2048,13 +2048,9 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			//GLOBAL.compilerFullPath = fileName;
+			GLOBAL.compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "compilerPath_Handle" );
 			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.compilerFullPath.toCString );
-		}
-		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
 		}
 
 		return IUP_DEFAULT;
@@ -2067,7 +2063,7 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			//GLOBAL.x64compilerFullPath = fileName;
+			GLOBAL.x64compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "x64compilerPath_Handle" );
 			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.x64compilerFullPath.toCString );
 		}
@@ -2082,30 +2078,31 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			//GLOBAL.debuggerFullPath = fileName;
+			GLOBAL.debuggerFullPath = fileName;
 			Ihandle* _debuggerPath_Handle = IupGetHandle( "debuggerPath_Handle" );
 			if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", GLOBAL.debuggerFullPath.toCString );
 		}
-		else
 
 		return IUP_DEFAULT;
 	}
 	
-	private int CPreferenceDialog_OpenTerminalBinFile_cb( Ihandle* ih )
+	version(linux)
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
-		char[] fileName = fileSecectDlg.getFileName();
-
-		if( fileName.length )
+		private int CPreferenceDialog_OpenTerminalBinFile_cb( Ihandle* ih )
 		{
-			//GLOBAL.linuxTermName = fileName;
-			Ihandle* _terminalPath_Handle = IupGetHandle( "textTerminalPath" );
-			if( _terminalPath_Handle != null ) IupSetAttribute( _terminalPath_Handle, "VALUE", GLOBAL.linuxTermName.toCString );
-		}
-		else
+			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
+			char[] fileName = fileSecectDlg.getFileName();
 
-		return IUP_DEFAULT;
-	}	
+			if( fileName.length )
+			{
+				GLOBAL.linuxTermName = fileName;
+				Ihandle* _terminalPath_Handle = IupGetHandle( "textTerminalPath" );
+				if( _terminalPath_Handle != null ) IupSetAttribute( _terminalPath_Handle, "VALUE", GLOBAL.linuxTermName.toCString );
+			}
+
+			return IUP_DEFAULT;
+		}
+	}
 	
 	private int CPreferenceDialog_OpenCHM_cb( Ihandle* ih )
 	{
@@ -2119,7 +2116,6 @@ extern(C) // Callback for CPreferenceDialog
 			Ihandle* _chm_Handle = IupGetHandle( "textchm" );
 			if( _chm_Handle != null ) IupSetAttribute( _chm_Handle, "VALUE", GLOBAL.manualPath.toCString );
 		}
-		else
 
 		return IUP_DEFAULT;
 	}	

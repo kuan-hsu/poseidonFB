@@ -13,6 +13,7 @@ private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii;
 class COutline
 {
 	private:
+	import 				iup.iup_scintilla;
 	import				parser.scanner, parser.token, parser.parser;
 
 	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList;
@@ -1921,6 +1922,9 @@ class COutline
 							{
 								append( actTree, t, 0 );
 							}
+							
+							// Reparse Lexer
+							version(FBIDE) IupScintillaSendMessage( cSci.getIupScintilla, 4003, 0, -1 ); // SCI_COLOURISE 4003
 
 							return true;
 						}
