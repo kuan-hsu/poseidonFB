@@ -2241,7 +2241,7 @@ extern(C)
 									pos = cast(int) IupScintillaSendMessage( ih, 2136, ScintillaAction.getCurrentLine( ih ) - 1/*2*/, 0 ); // SCI_GETLINEENDPOSITION 2136
 								}
 								
-								char[]	word = AutoComplete.getWholeWordReverse( ih, pos, headPos );
+								char[]	word = AutoComplete.getKeyWordReverse( ih, pos, headPos );
 								if( word.length )
 								{
 									word = lowerCase( word.reverse );

@@ -2273,6 +2273,84 @@ version(FBIDE)
 			return startPos;
 		}
 
+		static char[] getKeyWordReverse( Ihandle* iupSci, int pos, out int headPos )
+		{
+			dchar[] word32;
+			char[]	word;
+			int		countParen, countBracket;
+
+			try
+			{
+				while( pos > -1 )
+				{
+					headPos = pos;
+					--pos;
+					if( pos < 0 ) break;
+					
+					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					int key = cast(int) s[0];
+					if( key >= 0 && key <= 127 )
+					{
+						version(Windows)
+						{
+							dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+							if( _dcharString.length )
+							{
+								if( actionManager.ScintillaAction.isComment( iupSci, pos ) )
+								{
+									return UTF.toString( word32 );
+								}
+								else
+								{
+									switch( _dcharString )
+									{
+										case ")", "(", "[", "]", "<", ">", "{", "}":
+										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "=", ",", "@":
+											return UTF.toString( word32 );
+											
+										default: 
+											word32 ~= _dcharString;
+									}
+								}
+							}
+						}
+						else
+						{
+							if( s.length )
+							{
+								if( actionManager.ScintillaAction.isComment( iupSci, pos ) )
+								{
+									return word;
+								}
+								else
+								{
+									switch( s )
+									{
+										case ")", "(", "[", "]", "<", ">", "{", "}":
+										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "=", ",", "@":
+											return word;
+											
+										default: 
+											word ~= s;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			catch( Exception e )
+			{
+				//GLOBAL.IDEMessageDlg.print( "getWholeWordReverse() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				debug IupMessage( "AutoComplete.getKeyWordReverse() Error", toStringz( e.toString ) );
+				return null;
+			}
+			
+			version(Windows) word = UTF.toString( word32 );
+
+			return word;
+		}
+
 		static char[] getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
 		{
 			dchar[] word32;
