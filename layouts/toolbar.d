@@ -545,72 +545,96 @@ extern( C )
 			char[] command = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 			if( command.length )
 			{
-				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-				if( cSci !is null )
+				char[][] splitCommand = Util.split( command, "," );
+				
+				if( splitCommand.length == 1 )
 				{
-					switch( command )
+					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					if( cSci !is null )
 					{
-						case "NewFile":
-							return menu.newFile_cb( cSci.getIupScintilla );
+						switch( command )
+						{
+							case "NewFile":
+								return menu.newFile_cb( cSci.getIupScintilla );
+								
+							case "OpenFile":
+								return menu.openFile_cb( cSci.getIupScintilla );
 							
-						case "OpenFile":
-							return menu.openFile_cb( cSci.getIupScintilla );
-						
-						case "SaveFile":
-							return menu.saveFile_cb( cSci.getIupScintilla );
-							
-						case "SaveAs":
-							return menu.saveAsFile_cb( cSci.getIupScintilla );
-							
-						case "CloseFile":
-							actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
-							return IUP_DEFAULT;	
-							
-						case "NewProject":
-							return menu.newProject_cb( cSci.getIupScintilla );
+							case "SaveFile":
+								return menu.saveFile_cb( cSci.getIupScintilla );
+								
+							case "SaveAs":
+								return menu.saveAsFile_cb( cSci.getIupScintilla );
+								
+							case "CloseFile":
+								actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
+								return IUP_DEFAULT;	
+								
+							case "NewProject":
+								return menu.newProject_cb( cSci.getIupScintilla );
 
-						case "OpenProject":
-							return menu.openProject_cb( cSci.getIupScintilla );
-							
-						case "CloseProject":
-							return menu.closeProject_cb( cSci.getIupScintilla );
-							
-						case "CloseAllProject":
-							return menu.closeAllProject_cb( cSci.getIupScintilla );
+							case "OpenProject":
+								return menu.openProject_cb( cSci.getIupScintilla );
+								
+							case "CloseProject":
+								return menu.closeProject_cb( cSci.getIupScintilla );
+								
+							case "CloseAllProject":
+								return menu.closeAllProject_cb( cSci.getIupScintilla );
 
-						case "SaveProject":
-							return menu.saveProject_cb( cSci.getIupScintilla );
+							case "SaveProject":
+								return menu.saveProject_cb( cSci.getIupScintilla );
 
-						case "SaveAllProject":
-							return menu.saveAllProject_cb( cSci.getIupScintilla );
-							
-						case "ProjectProperties":
-							return menu.projectProperties_cb( cSci.getIupScintilla );
-							
-						case "Compile":
-							return menu.compile_cb( cSci.getIupScintilla );
+							case "SaveAllProject":
+								return menu.saveAllProject_cb( cSci.getIupScintilla );
+								
+							case "ProjectProperties":
+								return menu.projectProperties_cb( cSci.getIupScintilla );
+								
+							case "Compile":
+								return menu.compile_cb( cSci.getIupScintilla );
 
-						case "CompileRun":
-							return menu.buildrun_cb( cSci.getIupScintilla );
+							case "CompileRun":
+								return menu.buildrun_cb( cSci.getIupScintilla );
 
-						case "Run":
-							return menu.run_cb( cSci.getIupScintilla );
+							case "Run":
+								return menu.run_cb( cSci.getIupScintilla );
 
-						case "Build":
-							return menu.buildAll_cb( cSci.getIupScintilla );
+							case "Build":
+								return menu.buildAll_cb( cSci.getIupScintilla );
 
-						case "ReBuild":
-							return menu.reBuild_cb( cSci.getIupScintilla );
+							case "ReBuild":
+								return menu.reBuild_cb( cSci.getIupScintilla );
 
-						case "QuickRun":
-							return menu.quickRun_cb( cSci.getIupScintilla );
-							
-						case "Comment":
-							return menu.comment_cb( null );
+							case "QuickRun":
+								return menu.quickRun_cb( cSci.getIupScintilla );
+								
+							case "Comment":
+								return menu.comment_cb( null );
 
-						case "UnComment":
-							return menu.uncomment_cb( null );
-							
+							case "UnComment":
+								return menu.uncomment_cb( null );
+								
+							default:
+						}
+					}
+				}
+				else if( splitCommand.length == 2 )
+				{
+					switch( Util.trim( splitCommand[0] ) )
+					{
+						case "FBCx32":
+							GLOBAL.compilerFullPath = Util.trim( splitCommand[1] ).dup;
+							if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE", GLOBAL.compilerFullPath.toCString );
+							break;
+
+						case "FBCx64":
+							version(Windows)
+							{
+								GLOBAL.x64compilerFullPath = Util.trim( splitCommand[1] ).dup;
+								if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE", GLOBAL.x64compilerFullPath.toCString );
+							}
+							break;
 						default:
 					}
 				}

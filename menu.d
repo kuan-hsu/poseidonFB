@@ -134,7 +134,12 @@ void createMenu()
 	item_exit = IupItem( GLOBAL.languageItems["exit"].toCString, null);
 	IupSetCallback(item_exit, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["sureexit"].toCString, "YESNO" );
+		int result;
+		version(Windows)
+			result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["sureexit"].toCString, "YESNO" );
+		else
+			result = IupAlarm( GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["sureexit"].toCString, GLOBAL.languageItems["yes"].toCString, GLOBAL.languageItems["no"].toCString, null );
+			
 		if( result == 1 )
 		{
 			return layout.mainDialog_CLOSE_cb( null );
@@ -675,7 +680,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.420)\nBy Kuan Hsu (Taiwan)\n2019.08.11" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.421)\nBy Kuan Hsu (Taiwan)\n2019.09.07" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.040)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
 		return IUP_DEFAULT;
 	});

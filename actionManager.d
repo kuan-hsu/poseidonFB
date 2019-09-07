@@ -2335,17 +2335,20 @@ struct SearchAction
 	*/
 	static int findInOneFile( char[] fullPath, char[] findText, char[] replaceText, int searchRule = 6, int buttonIndex = 0 )
 	{
-		int count, _encoding;
+		int		count, _encoding;
+		bool	bInDocument;
 
+		if( upperCase(fullPath) in GLOBAL.scintillaManager ) bInDocument = true;
 		scope f = new FilePath( fullPath );
-		if( f.exists() )
+		
+		if( f.exists() || bInDocument )
 		{
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 1 );
 
 			char[] 	document;
 			//char[]	splitLineDocument;
-			if( upperCase(fullPath) in GLOBAL.scintillaManager )
+			if( bInDocument )
 			{
 				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, "VALUE" ) );
 			}

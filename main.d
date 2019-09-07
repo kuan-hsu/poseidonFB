@@ -381,12 +381,12 @@ void main( char[][] args )
 	if( GLOBAL.serachInFilesDlg !is null ) delete GLOBAL.serachInFilesDlg;
 	if( GLOBAL.IDEMessageDlg !is null ) delete GLOBAL.IDEMessageDlg;
 	
-	IupClose();
-	
-	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
-	
 	foreach( _plugin; GLOBAL.pluginMnager )
 	{
 		if( _plugin !is null ) delete _plugin;
-	}
+	}	
+	
+	IupClose();
+	
+	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 }

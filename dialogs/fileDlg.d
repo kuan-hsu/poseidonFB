@@ -75,7 +75,7 @@ class CFileDlg
 						filesName ~= fileString;
 					}
 				}
-				
+					
 				if( filesName.length )
 				{
 					scope _fp = new FilePath( filesName[0] );

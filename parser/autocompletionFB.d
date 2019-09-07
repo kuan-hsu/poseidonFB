@@ -439,14 +439,17 @@ version(FBIDE)
 				if( prjDir.length )
 				{
 					//Stdout( "Project Dir: " ~ prjDir ).newline;
-					char[][] includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-					foreach( char[] s; includeDirs )
+					if( prjDir in GLOBAL.projectManager )
 					{
-						testPath = s ~ "/" ~ include;
-						
-						_path.set( testPath ); // Reset
+						char[][] includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+						foreach( char[] s; includeDirs )
+						{
+							testPath = s ~ "/" ~ include;
+							
+							_path.set( testPath ); // Reset
 
-						if( _path.exists() ) return testPath;
+							if( _path.exists() ) return testPath;
+						}
 					}
 				}
 
@@ -3674,7 +3677,7 @@ version(FBIDE)
 					{
 						int c0 = DocumentTabAction.getKeyWordCount( iupSci, "extern", "" );
 						int c1 = DocumentTabAction.getKeyWordCount( iupSci, "extern", "end" );
-						if( c0 > c1 ) return "end type";
+						if( c0 > c1 ) return "end extern";
 					}
 				}
 			}		
