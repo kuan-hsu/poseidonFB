@@ -33,6 +33,8 @@ class CFindInFilesDialog : CBaseDialog
 		IupSetAttribute( label00, "SIZE", "60x12" );
 		Ihandle* hBox00 = IupHbox( label00, listFind, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" );
+		IupSetCallback( listFind, "K_ANY", cast(Icallback) &findList_K_ANY );
+		
 
 		listReplace = IupList( null );
 		IupSetAttributes( listReplace, "SHOWIMAGE=NO,DROPDOWN=YES,EDITBOX=YES,SIZE=160x12,VISIBLE_ITEMS=3,NAME=list_Replace");
@@ -185,6 +187,12 @@ class CFindInFilesDialog : CBaseDialog
 
 extern(C) // Callback for CFindInFilesDialog
 {
+	private int findList_K_ANY( Ihandle *ih, int c )
+	{
+		if( c == 13 ) return btnExecute_ACTION_CB( IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "btn_Find" ) );
+		return IUP_DEFAULT;
+	}
+	
 	private int btnCancel_ACTION_CB( Ihandle* ih )
 	{
 		if( GLOBAL.serachInFilesDlg !is null ) IupHide( GLOBAL.serachInFilesDlg._dlg );

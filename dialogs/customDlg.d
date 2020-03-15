@@ -35,6 +35,7 @@ class CCustomDialog : CBaseDialog
 		IupSetAttributes( listTools, "EXPAND=HORIZONTAL" );
 		IupSetHandle( "listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomDialog_ACTION );
+		IupSetCallback( listTools, "BUTTON_CB", cast(Icallback) &CCustomDialog_BUTTON_CB );
 		
 		for( int i = 1; i < 10; ++ i )
 		{
@@ -245,6 +246,38 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 	
+	private int CCustomDialog_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	{
+		if( pressed == 0 ) // release
+		{
+			if( button == IUP_BUTTON3 )
+			{
+				char* id = IupGetAttribute( ih, "VALUE" );
+				char[] name = fromStringz( IupGetAttribute( ih, id ) ).dup;
+				if( name in GLOBAL.pluginMnager )
+				{
+					auto p = GLOBAL.pluginMnager[name];
+					
+					Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
+					char[] dir = fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup;
+					
+					// Double Confirm......
+					if( p.getPath == dir )
+					{
+						int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, "Unload The Plugin?", "YESNO" );
+						if( result == 1 )
+						{
+							delete p;
+							GLOBAL.pluginMnager.remove( name );
+						}
+					}
+				}
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}
+	
 	private int CCustomCompilerOptionDialog_listOptions_EDIT_CB( Ihandle *ih, int c, char *new_value )
 	{
 		Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
@@ -306,6 +339,28 @@ extern(C) // Callback for CFindInFilesDialog
 		
 		int index = IupGetInt( toolsHandle, "VALUE" );
 		if( index < 1 ) return IUP_DEFAULT;
+		
+		
+		char[] name = fromStringz( IupGetAttribute( toolsHandle, IupGetAttribute( toolsHandle, "VALUE" ) ) ).dup;
+		if( name in GLOBAL.pluginMnager )
+		{
+			auto p = GLOBAL.pluginMnager[name];
+	
+			Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
+			char[] dir = fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup;
+					
+			// Double Confirm......
+			if( p.getPath == dir )
+			{
+				int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, "Plugin Is Running, Unload The Plugin?", "YESNO" );
+				if( result == 1 )
+				{
+					delete p;
+					GLOBAL.pluginMnager.remove( name );
+				}
+			}
+		}
+		
 		
 		IupSetAttribute( toolsHandle, "REMOVEITEM", IupGetAttribute( toolsHandle, "VALUE" ) );
 		

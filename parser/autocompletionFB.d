@@ -181,7 +181,7 @@ version(FBIDE)
 				case B_ENUM: 					return name ~ "?" ~ Integer.toString( 12 + protAdd );
 				case B_PARAM:					return bShowType ? name ~ "~" ~ type ~ "?18" : name ~ "?18";
 				case B_ENUMMEMBER:				return name ~ "?19";
-				case B_ALIAS:					return name ~ "?20";
+				case B_ALIAS:					return bShowType ? name ~ "~" ~ type ~ "?20" : name ~ "?20";//name ~ "?20";
 				case B_NAMESPACE:				return name ~ "?24";
 				case B_INCLUDE, B_CTOR, B_DTOR:	return null;
 				case B_OPERATOR:				return null;

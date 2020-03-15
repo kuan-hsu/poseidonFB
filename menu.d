@@ -680,7 +680,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.421)\nBy Kuan Hsu (Taiwan)\n2019.09.07" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.422)\nBy Kuan Hsu (Taiwan)\n2020.03.15" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.040)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
 		return IUP_DEFAULT;
 	});
@@ -1362,6 +1362,10 @@ extern(C)
 			{
 				targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );
 				if( targetText.length) GLOBAL.serachInFilesDlg.show( targetText.dup ); else GLOBAL.serachInFilesDlg.show( null );
+			}
+			else
+			{
+				GLOBAL.serachInFilesDlg.show( null );
 			}
 		}
 		return IUP_DEFAULT;

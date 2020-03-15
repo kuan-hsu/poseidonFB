@@ -263,6 +263,10 @@ char[] setINILineData( char[] left, char[] right = "" )
 // Return: 1 = Block, 2 = Items, 0 = Illegal
 int getINILineData( char[] lineData, out char[] left, out char[] right )
 {
+	if( lineData.length )
+		if( lineData[0] == '\'' ) return 0;
+
+		
 	int assignPos = Util.index( lineData, "=" );
 	if( assignPos < lineData.length )
 	{
@@ -652,10 +656,19 @@ class CPLUGIN
 		return pluginPath;
 	}
 	
+	char[] getName()
+	{
+		return pluginName;
+	}
+	
 	void unload()
 	{
-		IupMessage("DLL UNLOAD","");
-		if( sharedLib !is null ) sharedLib.unload();
+		if( sharedLib !is null )
+		{
+			//IupMessage( "DLL UNLOAD", toStringz( pluginName ) );
+			if( bReleaseSuccess) poseidonFB_Dll_Release();
+			sharedLib.unload();
+		}
 	}
 }
 

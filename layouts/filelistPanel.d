@@ -74,6 +74,17 @@ class CFileList
 	
 	~this()
 	{
+		/*
+		for( int id = 0; id < IupGetInt( tree, "COUNT" ); id++ ) // Not include Parent "FileList" node
+		{
+			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( tree, "USERDATA", id );
+			if( _sci_node.getFullPath == fullPath )
+			{
+				IupSetAttributeId( tree, "DELNODE", id, "SELECTED" );
+				break;
+			}			
+		}
+		*/
 	}	
 	
 	Ihandle* getLayoutHandle()
@@ -113,13 +124,13 @@ class CFileList
 			int addIndex = IupGetInt( tree, "COUNT" );
 			if( GLOBAL.fileListTree.fullPathState == 0 )
 			{
-				IupSetAttributeId( tree, "ADDLEAF", addIndex - 1, GLOBAL.cString.convert( _sci.getFullPath ) );
+				IupSetAttributeId( tree, "ADDLEAF", addIndex - 1, tools.getCString( _sci.getFullPath ) );
 				IupSetAttributeId( tree, "COLOR", addIndex, GLOBAL.editColor.filelistFore.toCString );
 			}
 			else
 			{
 				scope _fullPath = new FilePath( _sci.getFullPath );
-				IupSetAttributeId( tree, "ADDLEAF", addIndex - 1, GLOBAL.cString.convert( _fullPath.file() ) );
+				IupSetAttributeId( tree, "ADDLEAF", addIndex - 1, tools.getCString( _fullPath.file() ) );
 				IupSetAttributeId( tree, "COLOR", addIndex, GLOBAL.editColor.filelistFore.toCString );
 			}
 			

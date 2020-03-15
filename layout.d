@@ -778,6 +778,13 @@ extern(C)
 		{
 			switch( sk.name )
 			{
+				case "findinfile":
+					if( sk.keyValue == c )
+					{ 
+						menu.findReplaceInFiles( ih );
+						return IUP_IGNORE;
+					}
+					break;			
 				case "quickrun":
 					if( sk.keyValue == c )
 					{
