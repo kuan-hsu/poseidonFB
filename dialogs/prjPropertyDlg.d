@@ -426,10 +426,12 @@ class CProjectPropertiesDialog : CBaseDialog
 				IupSetAttribute( textCompilerPath, "VALUE", toStringz( beFocusUnit.Compiler ) );
 				
 				for( int i = 0; i < beFocusUnit.IncDir.length; ++ i )
+					//IupSetAttribute( listIncludePath, "APPENDITEM", toStringz( beFocusUnit.IncDir[i] ) );
 					IupSetAttributeId( listIncludePath, "", i + 1, toStringz( beFocusUnit.IncDir[i] ) );
 				
 				for( int i = 0; i < beFocusUnit.LibDir.length; ++ i )
-					IupSetAttributeId( listLibPath, "", i + 1, toStringz( beFocusUnit.LibDir[i] ) );				
+					//IupSetAttribute( listLibPath, "APPENDITEM", toStringz( beFocusUnit.LibDir[i] ) );				
+					IupSetAttributeId( listLibPath, "", i + 1, toStringz( beFocusUnit.LibDir[i] ) );
 			}
 			else
 			{
@@ -438,9 +440,11 @@ class CProjectPropertiesDialog : CBaseDialog
 				IupSetAttribute( textCompilerPath, "VALUE", toStringz( tempProject.compilerPath ) );
 				
 				for( int i = 0; i < tempProject.includeDirs.length; i++ )
+					//IupSetAttribute( listIncludePath, "APPENDITEM", toStringz(tempProject.includeDirs[i] ) );
 					IupSetAttributeId( listIncludePath, "", i + 1, toStringz(tempProject.includeDirs[i]) );
 
 				for( int i = 0; i < tempProject.libDirs.length; i++ )
+					//IupSetAttribute( listLibPath, "APPENDITEM", toStringz(tempProject.libDirs[i] ) );
 					IupSetAttributeId( listLibPath, "", i + 1, toStringz(tempProject.libDirs[i]) );				
 			}
 		}
@@ -557,6 +561,9 @@ extern(C) // Callback for CProjectPropertiesDialog
 					CProjectPropertiesDialog.tempProject.focusOn = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_FocusList" ), "VALUE" ) ) ).dup;
 					version(FBIDE)
 						CProjectPropertiesDialog.tempProject.passOneFile = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_ToggleOneFile" ), "VALUE" ) ) ).dup;
+					
+					// Change Project Tree Title
+					if( actionManager.ProjectAction.getActiveProjectTreeNodeTitle != CProjectPropertiesDialog.tempProject.name ) actionManager.ProjectAction.changeActiveProjectTreeNodeTitle( CProjectPropertiesDialog.tempProject.name );
 				}
 				else
 				{

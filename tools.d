@@ -108,6 +108,10 @@ public:
 	void opAssign( char* rhs )
 	{
 		convert( fromStringz( rhs ).dup );
+		/*
+		if( _CstringPointer != null ) free( _CstringPointer );
+		_CstringPointer = rhs;
+		*/
 	}
 	
 	char* opShl( char* rhs )

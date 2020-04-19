@@ -4,7 +4,7 @@ private import iup.iup;
 private import iup.iup_scintilla;
 private import global, actionManager, scintilla, menu, tools, parser.autocompletion;
 
-import tango.stdc.stringz;
+import tango.stdc.stringz, tango.io.Stdout;;
 
 void createTabs()
 {
@@ -323,14 +323,6 @@ extern(C)
 			}				
 		}
 
-		/*
-		IupMessage( "CURSORPOS", IupGetGlobal( "CURSORPOS" ) );
-		IupMessage( "SCREENPOSITION", IupGetAttribute( ih, "SCREENPOSITION" ) );
-		IupMessage( "", toStringz( Integer.toString(x) ~ "x" ~ Integer.toString(y) ) );
-		IupMessage( "SIZE", IupGetAttribute( ih, "SIZE" ) );
-		IupMessage( "CLIENTSIZE ", IupGetAttribute( ih, "CLIENTSIZE" ) );
-		IupMessage( "RASTERSIZE ", IupGetAttribute( ih, "RASTERSIZE" ) );
-		*/
 		
 		if( pressed == 1 )
 		{
@@ -341,13 +333,29 @@ extern(C)
 		// On/OFF Outline Window
 		if( button == IUP_BUTTON1 ) // Left Click
 		{
-			char[] _s = fromStringz( status ).dup;
-			if( _s.length > 5 )
+			if( DocumentTabAction.isDoubleClick( status ) )
 			{
-				if( _s[5] == 'D' ) // Double Click
+				if( pos > -1 )
 				{
 					menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 					return IUP_DEFAULT;
+				}
+				else
+				{
+					int		RASTER_W = -1;
+					char[]	documentTabs_RASTERSIZE = fromStringz( IupGetAttribute(ih, "RASTERSIZE" ) );
+					int		crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
+					
+					if( crossPos < documentTabs_RASTERSIZE.length )
+					{
+						RASTER_W = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
+
+						if( ( x > 12 && x < RASTER_W - 12 ) )
+						{
+							menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+							return IUP_DEFAULT;
+						}
+					}
 				}
 			}
 		}

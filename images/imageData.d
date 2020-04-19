@@ -8,7 +8,7 @@ version(FBIDE)
 {
 	Ihandle* load_image_poseidonFBico()
 	{
-		ubyte imgdata[] = [
+		ubyte[] imgdata = [
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 17, 16, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 16, 16, 16, 32, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 46, 41, 255, 17, 16, 16, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 42, 46, 47, 128, 45, 53, 56, 239, 31, 31, 27, 112, 0, 0, 0, 0, 0, 0, 0, 0, 58, 58, 45, 239, 44, 33, 30, 239, 14, 12, 11, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -34,7 +34,7 @@ else
 {
 	Ihandle* load_image_poseidonFBico()
 	{
-		ubyte imgdata[] = [
+		ubyte[] imgdata = [
 		0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 4, 0, 0, 0, 0, 5, 2, 2, 24, 25, 8, 8, 107, 0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 7, 2, 2, 35, 2, 1, 1, 28, 0, 0, 0, 0, 0, 0, 0, 0, 8, 3, 3, 17, 88, 25, 25, 233, 12, 4, 4, 73, 0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 62, 19, 19, 127, 119, 34, 34, 254, 30, 6, 6, 100, 0, 0, 0, 0, 0, 0, 0, 11, 119, 35, 35, 229, 87, 21, 21, 246, 0, 0, 0, 52, 0, 0, 0, 0, 1, 0, 0, 5, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -59,7 +59,7 @@ else
 
 Ihandle* load_image_scroll()
 {
-  ubyte imgdata[] = [
+  ubyte[] imgdata = [
     0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
     0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
     0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
@@ -242,7 +242,7 @@ void load_all_images_icons()
 		IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );//IupSetHandle("IUP_macro", load_image_macro());
 		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
 		IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );// IupSetHandle("IUP_define_fun", load_image_define_fun());
-		IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
+		IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_var.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
 		IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
 	}
 	version(DIDE)
@@ -261,7 +261,6 @@ void load_all_images_icons()
 		IupSetHandle( "IUP_versionspec", XPM.getIUPimage( "icons/xpm/outline/version_spec_obj.xpm" ) );
 		IupSetHandle( "IUP_version", XPM.getIUPimage( "icons/xpm/outline/version_obj.xpm" ) );
 		IupSetHandle( "IUP_module", XPM.getIUPimage( "icons/xpm/outline/module_obj.xpm" ) );
-		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class.xpm" ) );
 		IupSetHandle( "IUP_template", XPM.getIUPimage( "icons/xpm/outline/template_obj.xpm" ) );
 		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );//IupSetHandle("IUP_ctor", load_image_ctor_obj());
 		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );//IupSetHandle("IUP_dtor", load_image_dtor_obj());

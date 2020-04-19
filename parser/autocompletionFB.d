@@ -2136,7 +2136,7 @@ version(FBIDE)
 				if( pos >= documentLength ) break;
 				if( bBackEnd ) break;
 			}
-			while( ++pos < documentLength )
+			while( ++pos < documentLength );
 			
 			if( oriPos == pos ) return null;
 			
@@ -2227,7 +2227,8 @@ version(FBIDE)
 				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 				if( s == "\"" || s == "\n" ) break;
 			}
-			while( ++pos < documentLength )
+			while( ++pos < documentLength );
+			
 			--pos;
 
 			do
@@ -2236,7 +2237,7 @@ version(FBIDE)
 				if( s == "\"" || s == "\n" ) break;
 				result ~= s;
 			}
-			while( --pos >= 0 )
+			while( --pos >= 0 );
 			 
 			return result.dup.reverse;
 		}
@@ -2614,7 +2615,7 @@ version(FBIDE)
 						{
 							if( _fatherNode.getFather !is null ) _fatherNode = _fatherNode.getFather; else break;
 						}
-						while( _fatherNode.kind & ( B_WITH | B_SCOPE ) )
+						while( _fatherNode.kind & ( B_WITH | B_SCOPE ) );
 					}
 					
 					if( _fatherNode.name.length )
@@ -3087,7 +3088,7 @@ version(FBIDE)
 						{
 							if( _fatherNode.getFather !is null ) _fatherNode = _fatherNode.getFather; else break;
 						}
-						while( _fatherNode.kind & ( B_WITH | B_SCOPE ) )
+						while( _fatherNode.kind & ( B_WITH | B_SCOPE ) );
 					}
 					
 					if( _fatherNode.name.length )

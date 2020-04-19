@@ -773,7 +773,7 @@ version(FBIDE)
 					{
 						char[]	title;
 						char[]	varName;
-						int		parnetID = id, _depth = IupGetIntId( _tree, "DEPTH", id );;
+						int		parnetID = id, _depth = IupGetIntId( _tree, "DEPTH", id );
 						while( _depth >= 0 )
 						{
 							title = fromStringz( IupGetAttributeId( _tree, "TITLE", parnetID ) ).dup; // Get Tree Title
@@ -2204,52 +2204,46 @@ version(FBIDE)
 		{
 			if( button == IUP_BUTTON1 ) // IUP_BUTTON1 = '1' = 49
 			{
-				char[] _s = fromStringz( status ).dup;
-				
-				if( _s.length > 5 )
+				if( DocumentTabAction.isDoubleClick( status ) )
 				{
-					if( _s[5] == 'D' )
+					if( GLOBAL.debugPanel.isRunning )
 					{
-						
-						if( GLOBAL.debugPanel.isRunning )
+						int id = IupConvertXYToPos( ih, x, y );
+						if( id > 0 )
 						{
-							int id = IupConvertXYToPos( ih, x, y );
-							if( id > 0 )
+							if( fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBacktraceHandle, "COLOR" ) ).dup != "0 0 255" )
 							{
-								if( fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBacktraceHandle, "COLOR" ) ).dup != "0 0 255" )
+								char[] title = fromStringz( IupGetAttributeId( GLOBAL.debugPanel.getBacktraceHandle, "TITLE", id ) ).dup;
+								char[] selectedFrame;
+								for( int i = 0; i < title.length; ++ i )
 								{
-									char[] title = fromStringz( IupGetAttributeId( GLOBAL.debugPanel.getBacktraceHandle, "TITLE", id ) ).dup;
-									char[] selectedFrame;
-									for( int i = 0; i < title.length; ++ i )
+									if( title[i] != ' ' ) 
 									{
-										if( title[i] != ' ' ) 
-										{
-											if( title[i] != '#' ) selectedFrame ~= title[i];
-										}
-										else
-										{
-											break;
-										}
+										if( title[i] != '#' ) selectedFrame ~= title[i];
 									}
-
-									if( selectedFrame.length )
+									else
 									{
-										GLOBAL.debugPanel.sendCommand( "select-frame " ~ selectedFrame ~ "\n", false );
-										version(Windows) IupSetAttributeId( GLOBAL.debugPanel.backtraceHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.debugPanel.backtraceHandle, "VALUE", id );
-
-										char[][]	frameFullPathandLineNumber = GLOBAL.debugPanel.getFrameFullPathandLineNumber();
-										if( frameFullPathandLineNumber.length == 2 )
-										{
-											char[]		fullPath = Path.normalize( frameFullPathandLineNumber[0] );
-											actionManager.ScintillaAction.openFile( fullPath );
-										}
-
-										return IUP_IGNORE;
+										break;
 									}
 								}
+
+								if( selectedFrame.length )
+								{
+									GLOBAL.debugPanel.sendCommand( "select-frame " ~ selectedFrame ~ "\n", false );
+									version(Windows) IupSetAttributeId( GLOBAL.debugPanel.backtraceHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.debugPanel.backtraceHandle, "VALUE", id );
+
+									char[][]	frameFullPathandLineNumber = GLOBAL.debugPanel.getFrameFullPathandLineNumber();
+									if( frameFullPathandLineNumber.length == 2 )
+									{
+										char[]		fullPath = Path.normalize( frameFullPathandLineNumber[0] );
+										actionManager.ScintillaAction.openFile( fullPath );
+									}
+
+									return IUP_IGNORE;
+								}
 							}
-							return IUP_IGNORE;
 						}
+						return IUP_IGNORE;
 					}
 				}
 			}
@@ -2261,41 +2255,36 @@ version(FBIDE)
 		{
 			if( button == IUP_BUTTON1 ) // IUP_BUTTON1 = '1' = 49
 			{
-				char[] _s = fromStringz( status ).dup;
-				
-				if( _s.length > 5 )
+				if( DocumentTabAction.isDoubleClick( status ) )
 				{
-					if( _s[5] == 'D' ) // Double Click
+					if( GLOBAL.debugPanel.isRunning )
 					{
-						if( GLOBAL.debugPanel.isRunning )
+						int id = IupConvertXYToPos( ih, x, y );
+						
+						char[] kind = fromStringz( IupGetAttributeId( ih, "KIND", id ) ).dup; // Get Tree Kind
+						if( kind == "LEAF" )
 						{
-							int id = IupConvertXYToPos( ih, x, y );
+							char[] title = fromStringz( IupGetAttributeId( ih, "TITLE", id ) ).dup; // Get Tree Title
+							char[] varName = GLOBAL.debugPanel.getFullVarNameInTree( ih, true );						
 							
-							char[] kind = fromStringz( IupGetAttributeId( ih, "KIND", id ) ).dup; // Get Tree Kind
-							if( kind == "LEAF" )
-							{
-								char[] title = fromStringz( IupGetAttributeId( ih, "TITLE", id ) ).dup; // Get Tree Title
-								char[] varName = GLOBAL.debugPanel.getFullVarNameInTree( ih, true );						
-								
-								if( title.length )
-									if( title[0] == '*' ) varName = "*" ~ varName;
-								
-								scope varDlg = new CVarDlg( 360, -1, "Evaluate " ~ varName, "Value = " );
-								char[] value = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+							if( title.length )
+								if( title[0] == '*' ) varName = "*" ~ varName;
+							
+							scope varDlg = new CVarDlg( 360, -1, "Evaluate " ~ varName, "Value = " );
+							char[] value = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
-								if( value == "#_close_#" ) return IUP_DEFAULT;
-								
-								int assignPos = Util.index( title, " = " );
+							if( value == "#_close_#" ) return IUP_DEFAULT;
+							
+							int assignPos = Util.index( title, " = " );
 
-								GLOBAL.debugPanel.sendCommand( "set var " ~ varName ~ " = " ~  value ~ "\n", false );
+							GLOBAL.debugPanel.sendCommand( "set var " ~ varName ~ " = " ~  value ~ "\n", false );
 
-								int posCloseParen = Util.index( title, ") " );
-								if( posCloseParen < title.length ) IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..posCloseParen+2] ~ value ) );else IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..assignPos+3] ~ value ) );
-							}
-							else
-							{
-								return GLOBAL.debugPanel.expandVarTree( ih, id );
-							}
+							int posCloseParen = Util.index( title, ") " );
+							if( posCloseParen < title.length ) IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..posCloseParen+2] ~ value ) );else IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..assignPos+3] ~ value ) );
+						}
+						else
+						{
+							return GLOBAL.debugPanel.expandVarTree( ih, id );
 						}
 					}
 				}
@@ -2375,15 +2364,10 @@ version(FBIDE)
 		{
 			if( button == IUP_BUTTON1 ) // IUP_BUTTON1 = '1' = 49
 			{
-				char[] _s = fromStringz( status ).dup;
-				
-				if( _s.length > 5 )
+				if( DocumentTabAction.isDoubleClick( status ) )
 				{
-					if( _s[5] == 'D' ) // Double Click
-					{
-						int id = IupConvertXYToPos( ih, x, y );
-						if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ).dup == "BRANCH" ) return GLOBAL.debugPanel.expandVarTree( ih, id );
-					}
+					int id = IupConvertXYToPos( ih, x, y );
+					if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ).dup == "BRANCH" ) return GLOBAL.debugPanel.expandVarTree( ih, id );
 				}
 			}
 			else if( button == IUP_BUTTON3 )

@@ -512,6 +512,11 @@ version(DIDE)
 		Tand,				// &
 		Tor,				// |
 
+
+		Tandand,			// &&
+		Toror,				// ||
+
+
 		Tdot,				// .
 		Tcolon,				// :
 		Tsemicolon,			// ;
@@ -529,6 +534,7 @@ version(DIDE)
 		Tclosebracket,		// ]
 		Topencurly,			// {
 		Tclosecurly,		// }
+		Tdotdot,			// ..
 		Tdotdotdot,			// ...
 
 		//
@@ -715,6 +721,9 @@ version(DIDE)
 		identToTOK["&"]			= TOK.Tand;
 		identToTOK["|"]			= TOK.Tor;
 
+		identToTOK["&&"]		= TOK.Tandand;
+		identToTOK["|I"]		= TOK.Toror;
+
 		identToTOK["."]			= TOK.Tdot;
 		identToTOK[":"]			= TOK.Tcolon;
 		identToTOK[";"]			= TOK.Tsemicolon;
@@ -731,6 +740,7 @@ version(DIDE)
 		identToTOK["]"]			= TOK.Tclosebracket;
 		identToTOK["{"]			= TOK.Topencurly;
 		identToTOK["}"]			= TOK.Tclosecurly;
+		identToTOK[".."]		= TOK.Tdotdot;
 		identToTOK["..."]		= TOK.Tdotdotdot;
 	}
 }

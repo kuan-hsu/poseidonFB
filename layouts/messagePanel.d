@@ -675,7 +675,32 @@ extern(C)
 						bool	bGetFileName = true;
 						char[]	fileName;
 						char[]	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) );
-
+						
+						int closePos = Util.index( lineText, "):" );
+						if( closePos < lineText.length )
+						{
+							lineText = lineText[0..closePos];
+							int openPos = Util.rindex( lineText[], "(" );
+							if( openPos < lineText.length )
+							{
+								char[] lineNumber_char = lineText[openPos+1..$];
+								lineNumber = Integer.toInt( lineNumber_char );
+								fileName = lineText[0..openPos];
+								if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
+								{
+									int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
+									int	lineHead = cast(int) IupScintillaSendMessage( ih, 2167, _line, 0 ); // SCI_POSITIONFROMLINE 2167
+									int	lineTail = cast(int) IupScintillaSendMessage( ih, 2136, _line, 0 ); // SCI_GETLINEENDPOSITION 2136
+									IupScintillaSendMessage( ih, 2160, lineHead, lineTail ); // SCI_SETSEL 2160
+									
+									version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
+								}
+							}
+						}
+						
+						version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
+						
+						/*
 						int openPos = Util.index( lineText, "(" );
 						if( openPos < lineText.length )
 						{
@@ -713,6 +738,7 @@ extern(C)
 						{
 							version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
 						}
+						*/
 					}
 				}
 			}

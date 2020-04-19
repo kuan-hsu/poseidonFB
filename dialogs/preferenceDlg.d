@@ -491,12 +491,15 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* toggleLoadAtBackThread = IupToggle( GLOBAL.languageItems["loadfileatbackthread"].toCString, null );
 		version(BACKTHREAD)
+		{
 			IupSetAttribute( toggleLoadAtBackThread, "VALUE", toStringz(GLOBAL.editorSetting00.LoadAtBackThread.dup) );
+		}
 		else
 		{
 			IupSetAttribute( toggleLoadAtBackThread, "VALUE", "OFF" );
 			IupSetAttribute( toggleLoadAtBackThread, "ACTIVE", "NO" );
 		}
+
 		IupSetHandle( "toggleLoadAtBackThread", toggleLoadAtBackThread );
 		
 		Ihandle* toggleAutoKBLayout = IupToggle( GLOBAL.languageItems["autokblayout"].toCString, null );
@@ -697,8 +700,8 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleAutoKBLayout, "" ),
 					
 					IupSetAttributes( toggleNewDocBOM, "" ),
-					IupFill(),
-					//IupSetAttributes( toggleLoadAtBackThread, "" ),
+					//IupFill(),
+					IupSetAttributes( toggleLoadAtBackThread, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -744,9 +747,9 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleMiddleScroll, "" ),
 					
 					IupSetAttributes( toggleDocStatus, "" ),
-					IupFill(),
+					//IupFill(),
 					//IupSetAttributes( toggleAutoKBLayout, "" ),
-					//IupSetAttributes( toggleLoadAtBackThread, "" ),
+					IupSetAttributes( toggleLoadAtBackThread, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -1893,6 +1896,7 @@ class CPreferenceDialog : CBaseDialog
 
 	~this()
 	{
+		/+
 		IupSetHandle( "compilerPath_Handle", null );
 		IupSetHandle( "debuggerPath_Handle", null );
 		IupSetHandle( "textTerminalPath", null );
@@ -2009,17 +2013,13 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "btnSCE_B_COMMENTBLOCK_FG", null );
 		IupSetHandle( "btnSCE_B_COMMENTBLOCK_BG", null );		
 
-		//IupSetHandle( "btnKeyWord0Color", null );
-		//IupSetHandle( "btnKeyWord1Color", null );
-		//IupSetHandle( "btnKeyWord2Color", null );
-		//IupSetHandle( "btnKeyWord3Color", null );
-
 		IupSetHandle( "keyWordText0", null );
 		IupSetHandle( "keyWordText1", null );
 		IupSetHandle( "keyWordText2", null );
 		IupSetHandle( "keyWordText3", null );
 		
 		IupSetHandle( "shortCutList", null );
+		+/
 		
 		for( int i = 0; i < 15; ++ i )
 			if( PreferenceDialogParameters._stringOfLabel[i] !is null ) delete PreferenceDialogParameters._stringOfLabel[i];
@@ -2141,99 +2141,128 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			if( button == IUP_BUTTON1 ) // Left Click
 			{
-				char[] _s = fromStringz( status ).dup;
-				
-				if( _s.length > 5 )
+				if( DocumentTabAction.isDoubleClick( status ) )
 				{
-					if( _s[5] == 'D' ) // Double Click
+					char[] listString = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
+					char[] _ls;
+					
+					if( listString.length <= 32 ) return IUP_DEFAULT;
+					
+					foreach( char c; listString )
 					{
-						char[] listString = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
-						char[] _ls;
-						
-						if( listString.length <= 32 ) return IUP_DEFAULT;
-						
-						foreach( char c; listString )
+						if( c == ' ' )
 						{
-							if( c == ' ' )
+							if( _ls.length )
 							{
-								if( _ls.length )
+								if( _ls[length-1] != ' ' ) _ls ~= ' ';
+							}
+						}
+						else
+						{
+							_ls ~= c;
+						}							
+					}
+
+					// Open IupFontDlg
+					Ihandle* dlg = IupFontDlg();
+					if( dlg == null )
+					{
+						IupMessage( "Error", toStringz( "IupFontDlg created fail!" ) );
+						return IUP_IGNORE;
+					}
+
+					IupSetAttribute( dlg, "VALUE", toStringz( Util.substitute( _ls.dup, "\t", ",") ) );
+					IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );						
+					
+					if( IupGetInt( dlg, "STATUS" ) )
+					{
+						int id;
+						if( ih == IupGetHandle( "customFont_0" ) )
+							id = 0;
+						else if( ih == IupGetHandle( "customFont_1" ) )
+							id = 1;
+						else if( ih == IupGetHandle( "customFont_2" ) )
+							id = 2;
+						else if( ih == IupGetHandle( "customFont_3" ) )
+							id = 3;
+						else if( ih == IupGetHandle( "customFont_4" ) )
+							id = 4;
+						else if( ih == IupGetHandle( "customFont_5" ) )
+							id = 5;
+						else if( ih == IupGetHandle( "customFont_6" ) )
+							id = 6;
+						else if( ih == IupGetHandle( "customFont_7" ) )
+							id = 7;
+						else if( ih == IupGetHandle( "customFont_8" ) )
+							id = 8;
+						else if( ih == IupGetHandle( "customFont_9" ) )
+							id = 9;
+						else if( ih == IupGetHandle( "customFont_10" ) )
+							id = 10;
+						else if( ih == IupGetHandle( "customFont_11" ) )
+							id = 11;
+						else if( ih == IupGetHandle( "customFont_12" ) )
+							id = 12;
+						else
+							return IUP_DEFAULT;
+
+						auto fontInformation = new IupString( IupGetAttribute( dlg, "VALUE" ) );
+						char[] Bold, Italic, Underline, Strikeout, size, fontName;
+						char[][] strings = Util.split( fontInformation.toDString, "," );
+						
+						if( strings.length == 2 )
+						{
+							if( !strings[0].length )
+							{
+								version( Windows )
 								{
-									if( _ls[length-1] != ' ' ) _ls ~= ' ';
+									strings[0] = "Courier New";
+								}
+								else
+								{
+									strings[0] = "Monospace";
 								}
 							}
 							else
 							{
-								_ls ~= c;
-							}							
-						}
+								strings[0] = Util.trim( strings[0] );
+							}
+							strings[1] = Util.trim( strings[1] );
 
-						// Open IupFontDlg
-						Ihandle* dlg = IupFontDlg();
-						if( dlg == null )
-						{
-							IupMessage( "Error", toStringz( "IupFontDlg created fail!" ) );
-							return IUP_IGNORE;
-						}
-
-						IupSetAttribute( dlg, "VALUE", toStringz( Util.substitute( _ls.dup, "\t", ",") ) );
-						IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );						
-						
-						if( IupGetInt( dlg, "STATUS" ) )
-						{
-							int id;
-							if( ih == IupGetHandle( "customFont_0" ) )
-								id = 0;
-							else if( ih == IupGetHandle( "customFont_1" ) )
-								id = 1;
-							else if( ih == IupGetHandle( "customFont_2" ) )
-								id = 2;
-							else if( ih == IupGetHandle( "customFont_3" ) )
-								id = 3;
-							else if( ih == IupGetHandle( "customFont_4" ) )
-								id = 4;
-							else if( ih == IupGetHandle( "customFont_5" ) )
-								id = 5;
-							else if( ih == IupGetHandle( "customFont_6" ) )
-								id = 6;
-							else if( ih == IupGetHandle( "customFont_7" ) )
-								id = 7;
-							else if( ih == IupGetHandle( "customFont_8" ) )
-								id = 8;
-							else if( ih == IupGetHandle( "customFont_9" ) )
-								id = 9;
-							else if( ih == IupGetHandle( "customFont_10" ) )
-								id = 10;
-							else if( ih == IupGetHandle( "customFont_11" ) )
-								id = 11;
-							else if( ih == IupGetHandle( "customFont_12" ) )
-								id = 12;
-							else
-								return IUP_DEFAULT;
-
-							auto fontInformation = new IupString( IupGetAttribute( dlg, "VALUE" ) );
-							char[] Bold, Italic, Underline, Strikeout, size, fontName;
-							char[][] strings = Util.split( fontInformation.toDString, "," );
-							
-							if( strings.length == 2 )
+							foreach( char[] s; Util.split( strings[1], " " ) )
 							{
-								if( !strings[0].length )
+								switch( s )
 								{
-									version( Windows )
-									{
-										strings[0] = "Courier New";
-									}
-									else
-									{
-										strings[0] = "Monospace";
-									}
+									case "Bold":		Bold = s;		break;
+									case "Italic":		Italic = s;		break;
+									case "Underline":	Underline = s;	break;
+									case "Strikeout":	Strikeout = s;	break;
+									default:
+										size = s;
 								}
-								else
-								{
-									strings[0] = Util.trim( strings[0] );
-								}
-								strings[1] = Util.trim( strings[1] );
+							}
+							version(Window)
+								PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+							else
+								PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
+								
+							IupSetAttribute( ih, "TITLE", PreferenceDialogParameters._stringOfLabel[id].toCString );
 
-								foreach( char[] s; Util.split( strings[1], " " ) )
+							scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
+							Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );
+							if( _flatFrameHandle != null )
+							{
+								scope _fontSyle = new IupString( strings[0] );
+								IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
+								version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Monospace" );
+								IupRefresh( _flatFrameHandle );
+							}
+						}
+						else
+						{
+							version(linux)
+							{
+								foreach( char[] s; Util.split( fontInformation.toDString, " " ) )
 								{
 									switch( s )
 									{
@@ -2242,76 +2271,42 @@ extern(C) // Callback for CPreferenceDialog
 										case "Underline":	Underline = s;	break;
 										case "Strikeout":	Strikeout = s;	break;
 										default:
-											size = s;
+											if( s.length )
+											{
+												if( s[0] >= 48 && s[0] <= 57 )
+												{
+													size = s;
+													break;
+												}
+
+												fontName ~= ( s ~ " " );
+											}
 									}
 								}
-								version(Window)
-									PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
-								else
-									PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", strings[0], Bold, Italic, Underline, Strikeout, size );
-									
-								IupSetAttribute( ih, "TITLE", PreferenceDialogParameters._stringOfLabel[id].toCString );
 
+								fontName = Util.trim( fontName );
+								/*
+								version(Windows)
+									PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
+								else
+								*/
+									PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
+								IupSetAttribute( ih, "TITLE", PreferenceDialogParameters._stringOfLabel[id].toCString );
+								
 								scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
 								Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );
 								if( _flatFrameHandle != null )
 								{
-									scope _fontSyle = new IupString( strings[0] );
+									scope _fontSyle = new IupString( fontName );
 									IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
 									version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Monospace" );
 									IupRefresh( _flatFrameHandle );
-								}
+								}									
 							}
-							else
-							{
-								version(linux)
-								{
-									foreach( char[] s; Util.split( fontInformation.toDString, " " ) )
-									{
-										switch( s )
-										{
-											case "Bold":		Bold = s;		break;
-											case "Italic":		Italic = s;		break;
-											case "Underline":	Underline = s;	break;
-											case "Strikeout":	Strikeout = s;	break;
-											default:
-												if( s.length )
-												{
-													if( s[0] >= 48 && s[0] <= 57 )
-													{
-														size = s;
-														break;
-													}
-
-													fontName ~= ( s ~ " " );
-												}
-										}
-									}
-
-									fontName = Util.trim( fontName );
-									/*
-									version(Windows)
-										PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-48}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
-									else
-									*/
-										PreferenceDialogParameters._stringOfLabel[id] = Stdout.layout.convert( "{,-46}\t{,-4} {,-6} {,-9} {,-9} {,-3}", fontName, Bold, Italic, Underline, Strikeout, size );
-									IupSetAttribute( ih, "TITLE", PreferenceDialogParameters._stringOfLabel[id].toCString );
-									
-									scope _IupFlatFrameString = new IupString( "customFlatFrame_" ~ Integer.toString( id ) );
-									Ihandle* _flatFrameHandle = IupGetHandle( _IupFlatFrameString.toCString );
-									if( _flatFrameHandle != null )
-									{
-										scope _fontSyle = new IupString( fontName );
-										IupSetAttribute( _flatFrameHandle, "FONTFACE", _fontSyle.toCString );
-										version( Windows ) IupSetAttribute( ih, "FONTFACE", "Courier New" ); else IupSetAttribute( ih, "FONTFACE", "Monospace" );
-										IupRefresh( _flatFrameHandle );
-									}									
-								}
-							}			
-						}
-						
-						IupDestroy( dlg );
+						}			
 					}
+					
+					IupDestroy( dlg );
 				}
 			}
 		}

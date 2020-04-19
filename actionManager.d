@@ -14,7 +14,7 @@ private import tango.stdc.stringz;
 // Action for FILE operate
 struct FileAction
 {
-	private:
+private:
 	import	tango.text.convert.Utf, tango.io.UnicodeFile, tango.io.device.File;
 	import	Path = tango.io.Path;
 	
@@ -153,7 +153,7 @@ struct FileAction
 		return BELE;
 	}		
 
-	public:
+public:
 	static void newFile( char[] fullPath )
 	{
 		auto _file = new File( fullPath, File.ReadWriteCreate );
@@ -364,11 +364,10 @@ struct FileAction
 
 struct DocumentTabAction
 {
-	private:
+private:
 	import scintilla;
 	
-	public:
-	
+public:
 	static int tabChangePOS( Ihandle* ih, int new_pos )
 	{
 		try
@@ -717,12 +716,27 @@ struct DocumentTabAction
 		
 		return count;
 	}
+	
+	
+	static bool isDoubleClick( char* status )
+	{
+		char[] _s = fromStringz( status ).dup;
+		if( _s.length > 5 )
+		{
+			if( _s[5] == 'D' ) // Double Click
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }
 
 
 struct ScintillaAction
 {
-	private:
+private:
 	import tango.io.UnicodeFile, tango.io.FilePath, dialogs.fileDlg, parser.ast;
 	import scintilla, menu;
 	import parser.scanner,  parser.token, parser.parser, parser.autocompletion;
@@ -755,9 +769,8 @@ struct ScintillaAction
 			}
 		}
 	}
-	
 
-	public:
+public:
 	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8N, char[] existData = null, bool bCreateActualFile = true, int insertPos = -1 )
 	{
 		// FullPath had already opened
@@ -811,7 +824,7 @@ struct ScintillaAction
 		return true;
 	}
 	
-	static bool openFile( char[] fullPath, int lineNumber = -1, bool backThread = false )
+	static bool openFile( char[] fullPath, int lineNumber = -1 )
 	{
 		fullPath =  Path.normalize( fullPath );
 		
@@ -886,26 +899,12 @@ struct ScintillaAction
 					
 					if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
 					{
-						version(BACKTHREAD)
-						{
-							if( backThread )
-							{
-								ParseThread subThread = new ParseThread( pParseTree, fullPath );
-								subThread.start();
-							}
-							else
-							{
-								auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-							}
-						}
-						else
-						{
-							auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-						}
+						ParseThread subThread = new ParseThread( pParseTree, fullPath );
+						subThread.start();
 					}
 					else
 					{
-						auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+						AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 					}
 				}
 			}
@@ -981,52 +980,7 @@ struct ScintillaAction
 			{
 				GLOBAL.statusBar.setPrjName( null, true );
 			}			
-			
-			/+
-			// Parser
-			if( upperCase(fullPath) in GLOBAL.parserManager )
-			{
-				Ihandle* _tree = GLOBAL.outlineTree.getTree( fullPath );
-				if( _tree == null )	GLOBAL.outlineTree.createTree( GLOBAL.parserManager[upperCase(fullPath)] );
-				
-				GLOBAL.outlineTree.changeTree( fullPath );
-			}
-			else
-			{
-				auto pParseTree = GLOBAL.outlineTree.loadFile( fullPath );
-				if( pParseTree !is null ) 
-				{
-					if( GLOBAL.editorSetting00.Message == "ON" )GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );
-					
-					AutoComplete.cleanIncludeContainer();
-					
-					if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
-					{
-						version(BACKTHREAD)
-						{
-							if( backThread )
-							{
-								ParseThread subThread = new ParseThread( pParseTree, fullPath );
-								subThread.start();
-							}
-							else
-							{
-								auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-							}
-						}
-						else
-						{
-							auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-						}
-					}
-					else
-					{
-						auto dummyASTs = AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-					}
-				}
-			}
-			+/
-			//if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
+
 
 			StatusBarAction.update();
 			
@@ -1754,6 +1708,26 @@ struct ProjectAction
 		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 	}
 
+	static char[] getActiveProjectTreeNodeTitle()
+	{
+		int id = getActiveProjectID();
+
+		if( id < 1 ) return null;
+		
+		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup;//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+	}
+	
+	static bool changeActiveProjectTreeNodeTitle( char[] newName )
+	{
+		int id = getActiveProjectID();
+
+		if( id < 1 ) return false;
+		
+		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, toStringz( newName.dup ) );
+
+		return true;
+	}
+
 	static int addTreeNode( char[] _prjDirName, char[] fullPath, int folderLocateId )
 	{
 		char[] _titleName;
@@ -2013,7 +1987,7 @@ struct StatusBarAction
 										{
 											if( AST_Head.getFather !is null ) AST_Head = AST_Head.getFather; else break;
 										}
-										while( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+										while( AST_Head.kind & ( B_WITH | B_SCOPE ) );
 									}
 									
 									IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );

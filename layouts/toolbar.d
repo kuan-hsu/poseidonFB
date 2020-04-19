@@ -2,7 +2,7 @@
 
 private import iup.iup, iup.iup_scintilla;
 private import global, actionManager, menu, executer, dialogs.argOptionDlg;
-private import Util = tango.text.Util, tango.stdc.stringz;;
+private import Util = tango.text.Util, tango.stdc.stringz;
 
 
 class CToolBar
@@ -185,7 +185,7 @@ class CToolBar
 					int count = IupGetInt( ih, "LINECOUNT" );
 					IupSetIntId( ih, "MARKERPREVIOUS", count, 2 );
 					markLineNumber = IupGetInt( ih, "LASTMARKERFOUND" );
-					if( markLineNumber < 0 ) return IUP_DEFAULT;;
+					if( markLineNumber < 0 ) return IUP_DEFAULT;
 				}			
 				
 				IupSetFocus( ih );

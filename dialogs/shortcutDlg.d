@@ -2,7 +2,7 @@
 
 import iup.iup;
 import global, IDE, tools, dialogs.baseDlg;
-import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util, tango.io.Stdout;;
+import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util, tango.io.Stdout;
 
 class CShortCutDialog : CBaseDialog
 {

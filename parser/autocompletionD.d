@@ -80,6 +80,33 @@ version(DIDE)
 			
 			switch( completeCase )
 			{
+				case 0:
+					CASTnode[]	resultNodes			= getMatchASTfromWholeWord( AST_Head, lowerCase( splitWord[0] ), lineNum, D_IMPORT );
+					CASTnode[]	resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], null, splitWord[0], D_IMPORT );
+					
+					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
+					{
+						if( !_node.type.length )
+						{
+							if( _node.name == splitWord[0] )
+							{
+								// Get Module AST From Import AST
+								return searchMatchNode( AST_Head, _node.name, D_MODULE );
+							}
+						}
+						else
+						{
+							if( _node.name == splitWord[0] )
+							{
+								// Get Module AST From Import AST
+								return searchMatchNode( AST_Head, _node.type, D_MODULE );
+							}
+						}
+					}
+					
+					return null;
+					break;
+					
 				case 1: // wordIndex = 0; Using word full match
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, lowerCase( splitWord[0] ), lineNum, D_IMPORT );
 					CASTnode[]	resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[upperCase(cSci.getFullPath)], null, splitWord[0], false, D_IMPORT );
@@ -371,6 +398,8 @@ version(DIDE)
 
 		static CASTnode[] anonymousEnumMembers( CASTnode originalNode )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode[] results;
 			
 			if( originalNode.kind & D_ENUM )
@@ -386,6 +415,8 @@ version(DIDE)
 
 		static CASTnode[] getAnonymousEnumMemberFromWord( CASTnode originalNode, char[] word, bool bCaseSensitive )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode[] results;
 			
 			if( originalNode.kind & D_ENUM )
@@ -429,32 +460,31 @@ version(DIDE)
 
 		static CASTnode[] getBaseNodeMembers( CASTnode originalNode )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode[] results;
 
-			if( originalNode !is null )
+			if( originalNode.kind & ( D_CLASS | D_INTERFACE ) )
 			{
-				if( originalNode.kind & ( D_CLASS | D_INTERFACE ) )
+				if( originalNode.base.length )
 				{
-					if( originalNode.base.length )
+					if( originalNode.getFather !is null )
 					{
-						if( originalNode.getFather !is null )
+						// Search BaseNode, using originalNode.getFather to prevent infinite loop
+						CASTnode mother = searchMatchNode( originalNode.getFather, tools.removeArrayAndPointer( originalNode.base ), D_CLASS | D_INTERFACE | D_TEMPLATE );
+
+						if( mother !is null )
 						{
-							// Search BaseNode, using originalNode.getFather to prevent infinite loop
-							CASTnode mother = searchMatchNode( originalNode.getFather, tools.removeArrayAndPointer( originalNode.base ), D_CLASS | D_INTERFACE | D_TEMPLATE );
-
-							if( mother !is null )
+							if( mother.kind & D_TEMPLATE )
 							{
-								if( mother.kind & D_TEMPLATE )
-								{
-									auto temp = getAggregateTemplate( mother );
-									if( temp !is null ) mother = temp;
-								}
-								
-								foreach( CASTnode _node; mother.getChildren() )
-									if( _node.protection != "private" ) results ~= _node;
-
-								results ~= getBaseNodeMembers( mother );
+								auto temp = getAggregateTemplate( mother );
+								if( temp !is null ) mother = temp;
 							}
+							
+							foreach( CASTnode _node; mother.getChildren() )
+								if( _node.protection != "private" ) results ~= _node;
+
+							results ~= getBaseNodeMembers( mother );
 						}
 					}
 				}
@@ -508,6 +538,8 @@ version(DIDE)
 
 		static CASTnode[] getMatchASTfromWholeWord( CASTnode node, char[] word, int line, int B_KIND )
 		{
+			if( node is null ) return null;
+			
 			CASTnode[] results;
 			
 			foreach( child; node.getChildren() )
@@ -548,6 +580,8 @@ version(DIDE)
 
 		static CASTnode[] getMatchASTfromWord( CASTnode node, char[] word, int line, int D_KIND )
 		{
+			if( node is null ) return null;
+			
 			CASTnode[] results;
 			
 			foreach( child; node.getChildren() )
@@ -725,6 +759,8 @@ version(DIDE)
 
 		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int D_KIND )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode[] results;
 
 			foreach( char[] key; includesMarkContainer.keys )
@@ -776,6 +812,8 @@ version(DIDE)
 
 		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, char[] originalFullPath, char[] word, bool bCaseSensitive, int D_KIND )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode[] results;
 			
 			foreach( char[] key; includesMarkContainer.keys )
@@ -798,10 +836,21 @@ version(DIDE)
 			*/
 			foreach( includeAST; includesMarkContainer )
 			{
+				if( !checkBackThreadGoing ) return null;
+				
+				if( D_KIND & D_MODULE )
+				{
+					if( includeAST.kind & D_KIND )
+					{
+						int _pos;
+						if( bCaseSensitive ) _pos = Util.index( includeAST.name, word ); else _pos = Util.index( lowerCase( includeAST.name ), lowerCase( word ) );
+						if( _pos == 0 ) results ~= includeAST;
+					}
+				}			
+			
 				foreach( child; getMembers( includeAST ) )//includeAST.getChildren )
 				{
-					if( !checkBackThreadGoing ) return null;
-					
+					//if( !checkBackThreadGoing ) return null;
 					if( child.kind & D_KIND )
 					{
 						if( child.name.length )
@@ -833,6 +882,8 @@ version(DIDE)
 
 		static CASTnode searchMatchMemberNode( CASTnode originalNode, char[] word, int D_KIND = D_ALL )
 		{
+			if( originalNode is null ) return null;
+			
 			foreach( CASTnode _node; getMembers( originalNode ) )
 			{
 				if( _node.kind & D_KIND )
@@ -846,6 +897,8 @@ version(DIDE)
 
 		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode[] results;
 			
 			foreach( CASTnode _node; getMembers( originalNode ) )
@@ -903,6 +956,8 @@ version(DIDE)
 
 		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, D_KIND, bWholeWord, bCaseSensitive );
 
 			if( bWholeWord )
@@ -935,6 +990,8 @@ version(DIDE)
 
 		static CASTnode[] getMembers( CASTnode AST_Head )
 		{
+			if( AST_Head is null ) return null;
+			
 			CASTnode[] result;
 
 			CASTnode[] childrenNodes = AST_Head.getChildren();
@@ -1041,6 +1098,8 @@ version(DIDE)
 		
 		static CASTnode getType( CASTnode originalNode )
 		{
+			if( originalNode is null ) return null;
+			
 			CASTnode resultNode;
 
 			if( originalNode.kind & ( D_ALIAS | D_VARIABLE | D_PARAM | D_FUNCTION ) )
@@ -1393,7 +1452,7 @@ version(DIDE)
 					if( _countDemlimit == 0 ) break;
 					_index ++;
 				}
-				while( _countDemlimit > 0 )
+				while( _countDemlimit > 0 );
 
 				return _index;
 			}
@@ -2075,7 +2134,7 @@ version(DIDE)
 				if( pos >= documentLength ) break;
 				if( bBackEnd ) break;
 			}
-			while( ++pos < documentLength )
+			while( ++pos < documentLength );
 			
 			if( oriPos == pos ) return null;
 
@@ -2094,7 +2153,8 @@ version(DIDE)
 				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 				if( s == ";" || s == "," ) break;
 			}
-			while( ++pos < documentLength )
+			while( ++pos < documentLength );
+			
 			--pos;
 			fullStringEndPos = fullStringPos = pos;
 
@@ -2103,7 +2163,8 @@ version(DIDE)
 				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 				if( s == ";" || s == "{" || s == "{" || s == "," || s =="=" ) break;
 			}
-			while( --pos >= 0 )
+			while( --pos >= 0 );
+			
 			moduleStartPos = pos;
 
 			do
@@ -2111,7 +2172,7 @@ version(DIDE)
 				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", fullStringPos ) );
 				if( s == ";" || s == "{" || s == "{" ) break;
 			}
-			while( --fullStringPos >= 0 )
+			while( --fullStringPos >= 0 );
 			
 			int importPos = skipCommentAndString( iupSci, fullStringEndPos, "import", 0 );
 			if( importPos < fullStringPos )
@@ -2748,10 +2809,6 @@ version(DIDE)
 
 					if( AST_Head is null ) return;
 					
-					//if( AST_Head !is null ) IupMessage("NOT NULL", toStringz( Integer.toString( AST_Head.kind ) ~ " " ~ ( AST_Head.name ) ~ " : " ~ AST_Head.type ) ); else IupMessage("",toStringz("NULL"));
-
-
-					//
 					AutoComplete.VersionCondition.length = 0;
 					
 					char[] options = ExecuterAction.getCustomCompilerOption();
@@ -2815,24 +2872,45 @@ version(DIDE)
 
 					CASTnode	firstASTNode, finalASTNode, _sub_ori_AST_Head = AST_Head;
 					char[]		_list;
+					bool		bIsModuleCheck;
 				
 					for( int i = 0; i < splitWord.length; i++ )
 					{
-						//IupMessage(toStringz(Integer.toString(i)),toStringz( tools.removeArrayAndPointer( splitWord[i] ) ));
 						if( i == 0 )
 						{
-							//IupMessage("",toStringz(removeArrayAndPointerWord( splitWord[i] )));
-							//IupMessage("",toStringz(AST_Head.name ~ " : " ~ AST_Head.type));
 							AST_Head = searchMatchNode( AST_Head, Util.stripl( tools.removeArrayAndPointer( splitWord[i] ), '&' ), D_FIND ); // NOTE!!!! Using "searchMatchNode()"
 							
 							if( AST_Head is null ) AST_Head = searchObjectModule( splitWord[i], D_FIND );
 							
 							if( AST_Head is null )
 							{
-								AST_Head = importComplete( _sub_ori_AST_Head, lineNum, 1, splitWord, 0 );
-								if( AST_Head is null ) return;
+								// Check Module
+								AST_Head = importComplete( _sub_ori_AST_Head, lineNum, 0, splitWord, 0 );
+								if( AST_Head is null )
+								{
+									CASTnode[]	resultNodes;
+									resultNodes = getMatchASTfromWord( _sub_ori_AST_Head, splitWord[0], lineNum, D_IMPORT );
+									if( !resultNodes.length )
+									{
+										resultNodes	= getMatchIncludesFromWord( _sub_ori_AST_Head, null, splitWord[0], false, D_MODULE );
+										if( resultNodes.length )
+										{
+											AST_Head = _sub_ori_AST_Head;
+											bIsModuleCheck = true;
+										}
+										else
+										{
+											return;
+										}
+									}
+									else
+									{
+										AST_Head = _sub_ori_AST_Head;
+										bIsModuleCheck = true;
+									}
+									continue;
+								}
 							}
-							//if( AST_Head is null ) return;
 
 							firstASTNode = AST_Head;
 
@@ -2867,6 +2945,45 @@ version(DIDE)
 						{
 							if( AST_Head !is null )
 							{
+								if( bIsModuleCheck )
+								{
+									char[] _moduleName = splitWord[0];
+
+									// Combine splitWord[0..i]	
+									for( int j = 1; j <= i; j++ )
+										_moduleName ~= ( "." ~ splitWord[j] );
+									
+									AST_Head = searchMatchNode( AST_Head, _moduleName, D_MODULE );
+									if( AST_Head is null )
+									{
+										CASTnode[]	resultNodes;
+										resultNodes = getMatchASTfromWord( _sub_ori_AST_Head, _moduleName, lineNum, D_IMPORT );
+										if( !resultNodes.length )
+										{
+											resultNodes	= getMatchIncludesFromWord( _sub_ori_AST_Head, null, _moduleName, false, D_MODULE );
+											if( resultNodes.length )
+											{
+												AST_Head = _sub_ori_AST_Head;
+											}
+											else
+											{
+												return;
+											}
+										}
+										else
+										{
+											AST_Head = _sub_ori_AST_Head;
+										}
+									}
+									else
+									{
+										firstASTNode = AST_Head;
+										bIsModuleCheck = false;
+									}
+
+									continue;
+								}
+							
 								AST_Head = searchMatchMemberNode( AST_Head, tools.removeArrayAndPointer( splitWord[i] ), D_FIND );
 								
 								if( AST_Head is null ) return;
@@ -2945,10 +3062,13 @@ version(DIDE)
 							if( _list.length ) _list ~= "\n";
 							_list ~= ( "Top Layer:  " ~ ( _type.length ? _type ~ " " : null ) ~ finalASTNode.name ~ _param ).dup;
 						}
-
-						IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
-						IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
+						
+						if( _list.length )
+						{
+							IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
+						}
 					}
 					else
 					{

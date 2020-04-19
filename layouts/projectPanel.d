@@ -1652,7 +1652,7 @@ extern(C)
 						{
 							if( selectedIDs.length == 1 )
 							{
-								actionManager.ScintillaAction.openFile( fullPath.dup, -1, true );
+								actionManager.ScintillaAction.openFile( fullPath.dup, -1 );
 								break;
 							}
 							else
@@ -1714,7 +1714,7 @@ extern(C)
 					if( fp.exists )
 					{
 						if( selectedIDs.length == 1 )
-							actionManager.ScintillaAction.openFile( fullPath.dup, -1, true );
+							actionManager.ScintillaAction.openFile( fullPath.dup, -1 );
 						else
 							actionManager.ScintillaAction.openFile( fullPath.dup );
 					}

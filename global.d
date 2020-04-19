@@ -202,7 +202,7 @@ struct GLOBAL
 	static char[]				toggleUpdateOutlineLive = "OFF";
 
 	//Parser
-	static CScanner				scanner;
+	static Scanner				scanner;
 	static CParser				Parser;
 
 
@@ -326,7 +326,6 @@ struct GLOBAL
 		GLOBAL.noneCustomCompilerOption = new IupString( cast(char*) "None Custom Compile Option" );
 		
 		GLOBAL.cString = new IupString;
-		GLOBAL.scanner = new CScanner;
 		GLOBAL.Parser = new CParser;
 		
 		version(FBIDE)

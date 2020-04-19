@@ -1383,7 +1383,7 @@ struct ExecuterAction
 			}
 			else
 			{
-				fbcFullPath = GLOBAL.compilerFullPath.toDString;
+				fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath.toDString;//GLOBAL.compilerFullPath.toDString;
 			}
 			
 			scope compilePath = new FilePath( fbcFullPath );
@@ -1645,7 +1645,7 @@ struct ExecuterAction
 			}
 			else
 			{
-				fbcFullPath = GLOBAL.compilerFullPath.toDString;
+				fbcFullPath = fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath.toDString;//GLOBAL.compilerFullPath.toDString;
 			}
 			
 			scope compilePath = new FilePath( fbcFullPath );

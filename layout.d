@@ -874,15 +874,9 @@ extern(C)
 		// On/OFF Outline Window
 		if( button == IUP_BUTTON1 ) // Left Click
 		{
-			char[] _s = fromStringz( status ).dup;
-			if( _s.length > 5 )
-			{
-				if( _s[5] == 'D' ) // Double Click
-				{
-					menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
-				}
-			}
+			if( DocumentTabAction.isDoubleClick( status ) )	menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 		}
+		
 		return IUP_DEFAULT;
 	}
 	

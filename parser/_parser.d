@@ -17,7 +17,6 @@ class _PARSER
 		TokenUnit[]		tokens;
 		int				tokenIndex;
 		CASTnode		activeASTnode;
-		CASTnode		head;
 		
 		TokenUnit token()
 		{
@@ -47,7 +46,7 @@ class _PARSER
 
 		void parseToken( TOK t = TOK.Tidentifier )
 		{
-			if( tokenIndex < tokens.length - 1 ) 
+			if( tokenIndex < tokens.length ) 
 				tokenIndex ++;
 			else
 				throw new Exception( "Method parseToken(), out of range!" );
@@ -87,8 +86,6 @@ class _PARSER
 			tokenIndex = 0;
 			tokens.length = 0;
 			tokens = _tokens;
-			
-			head = null;
 			
 			if( !_tokens.length ) return false;
 			

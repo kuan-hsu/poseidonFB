@@ -237,16 +237,13 @@ extern(C) // Callback for CBaseDialog
 		{
 			if( pressed == 0 ) oriH = GLOBAL.fileListTree.getTreeH();
 			
-			char[] _s = fromStringz( status ).dup;
-			if( _s.length > 5 )
+			if( DocumentTabAction.isDoubleClick( status ) )
 			{
-				if( _s[5] == 'D' ) // Double Click
-				{
-					menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-					return IUP_IGNORE;
-				}
+				menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+				return IUP_IGNORE;
 			}
 		}
+		
 		return IUP_DEFAULT;
 	}
 	

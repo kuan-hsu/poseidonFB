@@ -1,18 +1,23 @@
 ﻿module parser.parserD;
 
+
+import parser._parser;
+
 version(DIDE)
 {
-	import parser._parser;
-	
 	class CParser : _PARSER
 	{
 		private :
+		import			tools;
+		import			parser.ast, parser.token;
+		import			Util = tango.text.Util;
+		
 		char[]			activeProt;
 		bool			bAssignExpress;
 
 		CStack!(char[]) curlyStack;
 		CStack!(char[])	protStack;
-		CStack!(char[])	parseStack;
+		CStack!(char[])	conditionStack;
 		
 		
 		int getDelimitedTailIndex( int _tokOpen, int _tokClose, int _startIndex = -1, bool bSemiColonBreak = true )
@@ -39,7 +44,7 @@ version(DIDE)
 
 					_tempTokenIndex ++;
 				}
-				while( _countDemlimit != 0 && _tempTokenIndex < tokens.length )
+				while( _countDemlimit != 0 && _tempTokenIndex < tokens.length );
 			}
 			catch( Exception e )
 			{
@@ -75,7 +80,7 @@ version(DIDE)
 						
 						parseToken();
 					}
-					while( _countDemlimit > 0 && tokenIndex < tokens.length )
+					while( _countDemlimit > 0 && tokenIndex < tokens.length );
 				}
 				else
 				{
@@ -88,6 +93,7 @@ version(DIDE)
 					case TOK.Topenparen:		_params = "(" ~ _params ~ ")"; break;
 					case TOK.Topenbracket:		_params = "[" ~ _params ~ "]"; break;
 					case TOK.Topencurly:		_params = "{" ~ _params ~ "}"; break;
+					default:					break;
 				}
 				
 				return _params;
@@ -121,17 +127,25 @@ version(DIDE)
 
 			return activeProt;
 		}
+		
 
 		char[] getTokenIdentifierUntil( int[] _tokens ... )
 		{
 			char[]	_result;
 			int		_countParen, _countCurly, _countBracket;
-			bool	bExitFlag;
-			
+
 			try
 			{
 				while( tokenIndex < tokens.length )
 				{
+					foreach( int _tok; _tokens )
+					{
+						if( token().tok == _tok )
+						{
+							if( _countParen <= 0 && _countBracket <= 0 && _countCurly <= 0 ) return _result;
+						}
+					}
+				
 					if( token().tok == TOK.Topenparen )
 						_countParen ++;
 					else if( token().tok == TOK.Tcloseparen )
@@ -145,19 +159,7 @@ version(DIDE)
 					else if( token().tok == TOK.Tclosecurly )
 						_countCurly --;
 
-					foreach( int _tok; _tokens )
-					{
-						if( token().tok == _tok )
-						{
-							if( _countParen <= 0 && _countBracket <= 0 && _countCurly <= 0 )
-							{
-								bExitFlag = true;
-								break;
-							}
-						}
-					}
 
-					if( bExitFlag ) break;
 					_result ~= token().identifier;
 					parseToken();
 				}
@@ -317,7 +319,7 @@ version(DIDE)
 							_type ~= getDelimitedString( TOK.Topenbracket, TOK.Tclosebracket ); // Include [.......]
 						}
 					}
-					while( token().tok == TOK.Ttimes || token().tok == TOK.Topenbracket )
+					while( token().tok == TOK.Ttimes || token().tok == TOK.Topenbracket );
 				}
 			}
 			catch( Exception e )
@@ -614,7 +616,7 @@ version(DIDE)
 
 					_tempTokenIndex ++;
 				}
-				while( _countDemlimit != 0 && _tempTokenIndex < tokens.length )
+				while( _countDemlimit != 0 && _tempTokenIndex < tokens.length );
 
 				// Pass MemberFunctionAttribute
 				while( isMemberFunctionAttribute( _tempTokenIndex ) )
@@ -630,7 +632,7 @@ version(DIDE)
 					if( tokens[_tempTokenIndex+1].tok == TOK.Topenparen )
 					{
 						_tempTokenIndex ++;
-						_tempTokenIndex = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, _tempTokenIndex );
+						_tempTokenIndex = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, _tempTokenIndex, false );
 					}
 				}				
 			}
@@ -759,7 +761,7 @@ version(DIDE)
 					if( token().tok == TOK.Tidentifier ) return parseImportList();
 				}
 			}
-			catch
+			catch( Exception e )
 			{
 				throw new Exception( "parseImport Error!!" );
 			}
@@ -910,7 +912,7 @@ version(DIDE)
 					}
 					else
 					{
-						parseToken();
+						if( next().tok != TOK.Topenparen ) parseToken(); else break;
 					}
 				}
 			}
@@ -1194,6 +1196,19 @@ version(DIDE)
 					{
 						_params = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
 						activeASTnode.addChild( _name, D_FUNCTION, getProt(), _type ~ _params, null, _ln );
+						if( curlyStack.top() == "Aggregate Templates" )
+						{
+							if( activeASTnode.getFather !is null )
+							{
+								activeASTnode.endLineNum = tokens[funTailIndex].lineNumber;
+								activeASTnode = activeASTnode.getFather;
+							}
+							/*
+							else
+								throw new Exception( "parseFunction() over top error!" );
+							*/
+							curlyStack.pop();
+						}
 						return true;
 					}
 					else if( tokens[funTailIndex].tok == TOK.Topencurly )
@@ -1220,7 +1235,8 @@ version(DIDE)
 						{
 							activeASTnode = activeASTnode.addChild( _name, D_FUNCTION, getProt(), _type, null, _ln );
 							_params = getParameters();
-							activeASTnode.type = _params;
+							activeASTnode.type = _type ~ _params;
+							curlyStack.push( "Function" );
 							
 							while( isMemberFunctionAttribute() )
 								parseToken();
@@ -1248,7 +1264,7 @@ version(DIDE)
 
 		bool parseTempleFunction( char[] _type )
 		{
-			Stdout( _type ).newline;
+			//writeln( _type );
 			return true;
 			/+
 			char[]	_name = getSeparateParam( _type )token().identifier;
@@ -1518,6 +1534,7 @@ version(DIDE)
 					parseToken();
 
 					getTokenIdentifierUntil( TOK.Tcomma, TOK.Tcloseparen );
+					
 				}
 				
 				if( token().tok == TOK.Tdotdotdot )
@@ -1548,18 +1565,40 @@ version(DIDE)
 
 			return _result;
 		}
-
+		
+		// Parameter Storage Classes
+		/*
+		Parameter Storage Classes Storage Class	Description:
+		
+		none		parameter becomes a mutable copy of its argument
+		in			defined as scope const. However in has not yet been properly implemented so it's current implementation is equivalent to const. It is recommended to avoid using in until it is properly defined and implemented. Use scope const or const explicitly instead.
+		out			parameter is initialized upon function entry with the default value for its type
+		ref			parameter is passed by reference
+		scope		references in the parameter cannot be escaped (e.g. assigned to a global variable). Ignored for parameters with no references
+		return		Parameter may be returned or copied to the first parameter, but otherwise does not escape from the function. Such copies are required not to outlive the argument(s) they were derived from. Ignored for parameters with no references. See Scope Parameters.
+		lazy		argument is evaluated by the called function and not by the caller
+		const		argument is implicitly converted to a const type
+		immutable	argument is implicitly converted to an immutable type
+		shared		argument is implicitly converted to a shared type
+		inout		argument is implicitly converted to an inout type		
+		*/
 		bool isInOut()
 		{
 			try
 			{
 				switch( token().tok )
 				{
+					case TOK.Tin, TOK.Tout, TOK.Tref, TOK.Tscope, TOK.Tlazy:
+						return true;
+					/*
 					case TOK.Tauto, TOK.Tfinal, TOK.Tin, TOK.Tlazy, TOK.Tout, TOK.Tref, TOK.Tscope:
 						return true;
-						
+					*/
+					case TOK.Tauto, TOK.Tfinal:
+						return true;
+					
 					case TOK.Treturn:
-						if( next().tok == TOK.Tref )
+						if( next().tok == TOK.Tref || next().tok == TOK.Tscope ) // Return Ref Parameters & Return Scope Parameters
 						{
 							parseToken( TOK.Treturn );
 							return true;
@@ -1760,7 +1799,7 @@ version(DIDE)
 							_params = getParameters();
 							activeASTnode.type = _params;
 							curlyStack.push( "CTOR" );
-							curlyStack.push( "{" );
+							//curlyStack.push( "{" );
 							
 							while( isMemberFunctionAttribute() )
 								parseToken();
@@ -2017,7 +2056,15 @@ version(DIDE)
 								if( token().tok == TOK.Tclosecurly )
 								{
 									parseToken( TOK.Tclosecurly );
-									if( activeASTnode.getFather !is null )activeASTnode = activeASTnode.getFather();
+									if( activeASTnode.getFather !is null )
+									{
+										activeASTnode.endLineNum = prev().lineNumber;
+										activeASTnode = activeASTnode.getFather();
+									}
+									/*
+									else
+										throw new Exception( "parseEnum() over top error!" );
+									*/
 									return true;
 								}
 							}
@@ -2058,7 +2105,15 @@ version(DIDE)
 								if( token().tok == TOK.Tclosecurly )
 								{
 									parseToken( TOK.Tclosecurly );
-									if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+									if( activeASTnode.getFather !is null )
+									{
+										activeASTnode.endLineNum = prev().lineNumber;
+										activeASTnode = activeASTnode.getFather();
+									}
+									/*
+									else
+										throw new Exception( "parseEnum() over top error!" );
+									*/
 									return true;
 								}
 							}
@@ -2258,10 +2313,12 @@ version(DIDE)
 						{
 							case TOK.Tstrings:
 								_Instance = "char[]";
+								parseToken();
 								break;
 							
 							case TOK.Tnumbers:
 								_Instance = "int";
+								parseToken();
 								break;
 							
 							case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
@@ -2276,6 +2333,7 @@ version(DIDE)
 									if( identToTOK[key] == token().tok )
 									{
 										_Instance ~= key;
+										parseToken();
 										break;
 									}
 								}
@@ -2313,7 +2371,7 @@ version(DIDE)
 		UnionTemplateDeclaration:
 			union Identifier TemplateParameters Constraint<opt> AggregateBody
 		*/
-		bool parseAggregateTemplates( int D_KIND, char[] _name, inout char[] _baseName )
+		bool parseAggregateTemplates( int D_KIND, char[] _name, ref char[] _baseName )
 		{
 			char[]	templateParam;
 			int		_ln = token().lineNumber;
@@ -2453,7 +2511,7 @@ version(DIDE)
 		bool parseAlias()
 		{
 			char[] _name, _type;
-			
+			//alias AsciiString = immutable(AsciiChar)[];
 			try
 			{
 				if( token().tok == TOK.Talias )
@@ -2612,49 +2670,14 @@ version(DIDE)
 
 							if( token().tok != TOK.Topencurly )
 							{
-								parseStack.push( "version" );
-								parse( null ); //getTokenIdentifierUntil( TOK.Tsemicolon );
-								activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-								if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
-
-								if( token().tok == TOK.Telse )
+								switch( D_KIND )
 								{
-									_ln = token().lineNumber;
-									parseToken( TOK.Telse );
-
-									if( token().tok != TOK.Tversion && token().tok != TOK.Tdebug )
-									{
-										activeASTnode = activeASTnode.addChild( "-else-", D_KIND, getProt(), null, _name, _ln );
-										
-										if( token().tok != TOK.Topencurly )
-										{
-											switch( D_KIND )
-											{
-												case D_VERSION:		parseStack.push( "version else" ); break;
-												case D_DEBUG:		parseStack.push( "debug else" ); break;
-												case D_STATICIF:	parseStack.push( "staticif else" ); break;
-												default:
-											}									
-											parse( null );//getTokenIdentifierUntil( TOK.Tsemicolon );
-											activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-											if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
-										}
-										else
-										{
-											switch( D_KIND )
-											{
-												case D_VERSION:		curlyStack.push( "version else" ); break;
-												case D_DEBUG:		curlyStack.push( "debug else" ); break;
-												case D_STATICIF:	curlyStack.push( "staticif else" ); break;
-												default:			return false;
-											}
-										}
-									}
-									else
-									{
-										//parseCondition();
-									}
+									case D_VERSION:		conditionStack.push( "version" ); break;
+									case D_DEBUG:		conditionStack.push( "debug" ); break;
+									//case D_STATICIF:	conditionStack.push( "staticif" ); break;
+									default:			return false;
 								}
+								break;
 							}
 							else
 							{
@@ -2662,7 +2685,7 @@ version(DIDE)
 								{
 									case D_VERSION:		curlyStack.push( "version" ); break;
 									case D_DEBUG:		curlyStack.push( "debug" ); break;
-									case D_STATICIF:	curlyStack.push( "staticif" ); break;
+									//case D_STATICIF:	curlyStack.push( "staticif" ); break;
 									default:			return false;
 								}
 							}
@@ -2691,19 +2714,26 @@ version(DIDE)
 			return true;
 		}
 
-
 		public:
 		this()
 		{
 			curlyStack	= new CStack!(char[]);
 			protStack	= new CStack!(char[]);
-			parseStack	= new CStack!(char[]);
+			conditionStack	= new CStack!(char[]);
 		}
 		
 		this( TokenUnit[] _tokens )
 		{
 			updateTokens( _tokens );
 		}
+		
+		~this()
+		{
+			if( curlyStack !is null )	delete curlyStack;
+			if( protStack !is null )	delete protStack;
+			if( conditionStack !is null )	delete conditionStack;
+		}
+		
 
 		bool updateTokens( TokenUnit[] _tokens )
 		{
@@ -2711,29 +2741,33 @@ version(DIDE)
 			tokens.length = 0;
 			tokens = _tokens;
 			
-			head = null;
+			activeProt = "";
+			bAssignExpress = false;
 			
 			if( curlyStack !is null ) delete curlyStack;
 			if( protStack !is null ) delete protStack;
-			if( parseStack !is null ) delete parseStack;
+			if( conditionStack !is null ) delete conditionStack;
 			
 			curlyStack	= new CStack!(char[]);
 			protStack	= new CStack!(char[]);
-			parseStack	= new CStack!(char[]);
+			conditionStack	= new CStack!(char[]);
 			
 			if( !_tokens.length ) return false;
 			
 			return true;
 		}
 		
-		CASTnode parse( char[] fullPath, bool bSkipFlag = false )
+		CASTnode parse( char[] fullPath )
 		{
+			if( !tokens.length ) return null;
+			
+			CASTnode	head = null;
+			
 			try
 			{
 				if( fullPath.length )
 				{
 					head = new CASTnode( fullPath, D_MODULE, null, fullPath, null, 0, 2147483647 );
-
 					activeASTnode = head;
 				}
 				
@@ -2748,6 +2782,7 @@ version(DIDE)
 						if( ++repeatCount > 10 )
 						{
 							IupMessageError( GLOBAL.mainDlg, "Infinite Loop of parse() function" );
+							//Stdout( "Infinite Loop of parse() function" ).newline;
 							break;
 						}
 					}
@@ -2825,6 +2860,10 @@ version(DIDE)
 								default:
 									parseToken();
 							}
+							break;
+						
+						case TOK.Tdotdot:
+							parseToken( TOK.Tidentifier );
 							break;
 							
 						case TOK.Tidentifier:
@@ -2941,7 +2980,7 @@ version(DIDE)
 									if( token().tok == TOK.Tcloseparen && next().tok == TOK.Topencurly )
 									{
 										parseToken( TOK.Tcloseparen );
-										parseToken( TOK.Topencurly );
+										//parseToken( TOK.Topencurly );
 										curlyStack.push( "out" );
 										break;
 									}
@@ -2949,7 +2988,9 @@ version(DIDE)
 								parseToken();
 								break;
 							}
-						
+							// break; // Stranger
+							goto case;
+							
 						case TOK.Tdo:
 							if( next().tok == TOK.Topencurly )
 							{
@@ -2958,7 +2999,7 @@ version(DIDE)
 									int tailIndex = getDelimitedTailIndex( TOK.Topencurly, TOK.Tclosecurly, tokenIndex + 1, false );
 									if( tokens[tailIndex].tok != TOK.Twhile )
 									{
-										curlyStack.push( "do" );
+										//curlyStack.push( "do" );
 										parseToken( TOK.Tdo );
 										break;
 									}
@@ -2988,14 +3029,16 @@ version(DIDE)
 						case TOK.Tunittest:
 							if( next().tok == TOK.Topencurly )
 							{
-								if( GLOBAL.toggleSkipUnittest == "ON" || bSkipFlag == true )
-								{
+								//if( GLOBAL.toggleSkipUnittest == "ON" || bSkipFlag == true )
+								//{
 									parseToken( TOK.Tunittest );
 									getDelimitedString( TOK.Topencurly, TOK.Tclosecurly );
 									break;
-								}
+								//}
+								/*
 								activeASTnode = activeASTnode.addChild( null, D_UNITTEST, null, null, null, token().lineNumber );
 								curlyStack.push( "unittest" );
+								*/
 							}
 							parseToken( TOK.Tunittest );
 							break;
@@ -3009,18 +3052,18 @@ version(DIDE)
 							
 							parseToken( TOK.Topencurly );
 							break;
-
+							
 						case TOK.Tclosecurly:
-
-							if( parseStack.size > 0 )
+							/*
+							if( conditionStack.size > 0 )
 							{
-								if( parseStack.top().length )
+								if( conditionStack.top().length )
 								{
-									parseStack.pop();
+									conditionStack.pop();
 									return null;
 								}
 							}
-
+							*/
 
 
 							bool	bSkipParseToken;
@@ -3029,6 +3072,7 @@ version(DIDE)
 								curlyStack.pop();
 
 								int		D_KIND = -1;
+								
 								switch( curlyStack.top() )
 								{
 									case "{":
@@ -3036,9 +3080,11 @@ version(DIDE)
 
 									case "debug":
 										if( D_KIND < 0 ) D_KIND = D_DEBUG;
+										goto case;
 
 									case "staticif":
 										if( D_KIND < 0 ) D_KIND = D_STATICIF;
+										goto case;
 										
 									case "version":
 										if( D_KIND < 0 ) D_KIND = D_VERSION;
@@ -3050,7 +3096,11 @@ version(DIDE)
 										{
 											activeASTnode.endLineNum = token().lineNumber;
 											_name = activeASTnode.name;
-											if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+											activeASTnode = activeASTnode.getFather();
+										}
+										else
+										{
+											throw new Exception( "parse()--TOK.Tclosecurly--'version' over top error!" );
 										}
 
 										if( next().tok == TOK.Telse )
@@ -3069,14 +3119,11 @@ version(DIDE)
 												{
 													switch( D_KIND )
 													{
-														case D_VERSION:		parseStack.push( "version else" ); break;
-														case D_DEBUG:		parseStack.push( "debug else" ); break;
-														case D_STATICIF:	parseStack.push( "staticif else" ); break;
+														case D_VERSION:		conditionStack.push( "version else" ); break;
+														case D_DEBUG:		conditionStack.push( "debug else" ); break;
+														//case D_STATICIF:	conditionStack.push( "staticif else" ); break;
 														default:
 													}
-													parse( null );//getTokenIdentifierUntil( TOK.Tsemicolon );
-													activeASTnode.endLineNum = prev().lineNumber; // prev().tok = TOK.Tcomma
-													if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
 												}
 												else
 												{
@@ -3084,7 +3131,7 @@ version(DIDE)
 													{
 														case D_VERSION:		curlyStack.push( "version else" ); break;
 														case D_DEBUG:		curlyStack.push( "debug else" ); break;
-														case D_STATICIF:	curlyStack.push( "staticif else" ); break;
+														//case D_STATICIF:	curlyStack.push( "staticif else" ); break;
 														default:
 													}
 												}									
@@ -3096,12 +3143,30 @@ version(DIDE)
 											}
 										}
 										break;
+										
+									case "version else", "debug else": //, "staticif else":
+										curlyStack.pop();
+
+										if( activeASTnode.getFather !is null )
+										{
+											activeASTnode.endLineNum = token().lineNumber;
+											activeASTnode = activeASTnode.getFather();
+										}
+										else
+										{
+											throw new Exception( "parse()--TOK.Tclosecurly--'version else, debug else' over top error!" );
+										}
+										break;
 									
 									// Contract Programming
 									case "in", "out":
 										curlyStack.pop();
 										break;
-
+										
+									case "do":
+										curlyStack.pop();
+										goto default;
+										
 									default:
 										curlyStack.pop();
 										if( activeASTnode.getFather !is null )
@@ -3109,6 +3174,13 @@ version(DIDE)
 											activeASTnode.endLineNum = token().lineNumber;
 											activeASTnode = activeASTnode.getFather();
 										}
+										/*
+										else
+										{
+											throw new Exception( "parse()--TOK.Tclosecurly over top error!" );
+										}
+										*/
+										break;
 								}
 
 								// Aggregate Templates
@@ -3119,6 +3191,10 @@ version(DIDE)
 									{
 										activeASTnode.endLineNum = token().lineNumber;
 										activeASTnode = activeASTnode.getFather();
+									}
+									else
+									{
+										throw new Exception( "parse()--TOK.Tclosecurly--'Aggregate Templates' over top error!" );
 									}
 								}
 							}
@@ -3144,12 +3220,65 @@ version(DIDE)
 							parseToken( TOK.Tsemicolon );
 							bAssignExpress = false;
 							activeProt = "";
-							if( parseStack.size > 0 )
+							
+
+							int		prevD_KIND;
+							switch( conditionStack.top() )
 							{
-								if( parseStack.top().length )
+								case "version":		prevD_KIND = D_VERSION;		break;
+								case "debug":		prevD_KIND = D_DEBUG;		break;
+								//case "staticif":	D_KIND = D_STATICIF;	break;
+								default:
+							}
+							
+							if( conditionStack.size > 0 )
+							{
+								conditionStack.pop();
+								activeASTnode.endLineNum = prev().lineNumber;
+								
+								if( activeASTnode.getFather !is null )
 								{
-									parseStack.pop();
-									return null;
+									activeASTnode = activeASTnode.getFather();
+								}
+								else
+								{
+									throw new Exception( "parse()--TOK.Tsemicolon--'Condition' over top error!" );
+								}
+							
+								if( prevD_KIND & D_VERSION )
+								{
+									if( token().tok == TOK.Telse )
+									{
+										int _ln = token().lineNumber;
+										
+										parseToken( TOK.Telse );
+
+										if( token().tok != TOK.Tversion && token().tok != TOK.Tdebug )
+										{
+											activeASTnode = activeASTnode.addChild( "-else-", prevD_KIND, getProt(), null, "", _ln );
+											
+											if( token().tok != TOK.Topencurly )
+											{
+												switch( prevD_KIND )
+												{
+													case D_VERSION:		conditionStack.push( "version else" ); break;
+													case D_DEBUG:		conditionStack.push( "debug else" ); break;
+													//case D_STATICIF:	conditionStack.push( "staticif else" ); break;
+													default:
+												}
+											}
+											else
+											{
+												switch( prevD_KIND )
+												{
+													case D_VERSION:		curlyStack.push( "version else" ); break;
+													case D_DEBUG:		curlyStack.push( "debug else" ); break;
+													//case D_STATICIF:	curlyStack.push( "staticif else" ); break;
+													default:
+												}
+											}									
+										}
+									}
 								}
 							}
 							break;
@@ -3163,6 +3292,19 @@ version(DIDE)
 									{
 										parseEnum();
 										break;
+									}
+								}
+								
+								if( token().tok == TOK.Tstatic )
+								{
+									if( next().tok == TOK.Tidentifier )
+									{
+										if( next().identifier == "opCall" )
+										{
+											parseToken();
+											parseFunction( "AUTO" );
+											break;
+										}
 									}
 								}
 								
@@ -3188,7 +3330,7 @@ version(DIDE)
 									while( isStorageClass( next().tok ) )
 										parseToken();									
 								}
-	
+
 								
 								if( token().tok == TOK.Tconst || token().tok == TOK.Timmutable || token().tok == TOK.Tinout || token().tok == TOK.Tshared )
 								{
@@ -3252,9 +3394,14 @@ version(DIDE)
 			catch( Exception e )
 			{
 				//debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				//Stdout( e.toString ~"\n" ~ fullPath ~ ": " ~ Integer.toString( tokenIndex ) ).newline;
 			}
 
-			if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+			if( head !is null )
+			{
+				if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+			}
+				
 			//printAST( head );
 
 			return head;

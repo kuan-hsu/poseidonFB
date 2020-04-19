@@ -10,7 +10,7 @@ import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dia
 import tango.io.Stdout;
 import tango.stdc.stringz;
 import Integer = tango.text.convert.Integer;
-import Util = tango.text.Util, tango.io.UnicodeFile, tango.io.FilePath;;
+import Util = tango.text.Util, tango.io.UnicodeFile, tango.io.FilePath;
 
 import parser.scanner,  parser.token, parser.parser;
 
@@ -680,8 +680,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.422)\nBy Kuan Hsu (Taiwan)\n2020.03.15" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.040)\nBy Kuan Hsu (Taiwan)\n2019.07.02" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.423)\nBy Kuan Hsu (Taiwan)\n2020.04.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.043)\nBy Kuan Hsu (Taiwan)\n2020.04.19" );
 		return IUP_DEFAULT;
 	});
 	
@@ -970,7 +970,7 @@ extern(C)
 		{
 			if( files[0].length )
 			{
-				if( ScintillaAction.openFile( files[0], -1, true ) ) actionManager.ScintillaAction.updateRecentFiles( files[0] );
+				if( ScintillaAction.openFile( files[0], -1 ) ) actionManager.ScintillaAction.updateRecentFiles( files[0] );
 			}
 		}
 		else
@@ -1050,7 +1050,7 @@ extern(C)
 		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
 		if( title.length )
 		{
-			if( !ScintillaAction.openFile( title, -1, true ) )
+			if( !ScintillaAction.openFile( title, -1 ) )
 			{
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );

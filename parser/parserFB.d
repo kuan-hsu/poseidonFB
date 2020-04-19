@@ -104,11 +104,13 @@ version(FBIDE)
 									{
 										type = "integer";
 									}
-									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, type, null, lineNumber );				
+									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, type, null, lineNumber );
+									parseToken();
 								}
 								else if( token().tok == TOK.Tstrings  )
 								{
 									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, "string", null, lineNumber );	
+									parseToken();
 								}
 								else if( token().tok == TOK.Topenparen )
 								{
@@ -124,11 +126,13 @@ version(FBIDE)
 										}
 										parseToken();
 									}
-									activeASTnode.addChild( name, B_FUNCTION | B_DEFINE, null, param, null, lineNumber );	
+									activeASTnode.addChild( name, B_FUNCTION | B_DEFINE, null, param, null, lineNumber );
+									parseToken();
 								}
 								else if( token().tok == TOK.Tidentifier )
 								{
-									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, null, null, lineNumber );	
+									activeASTnode.addChild( name, B_ALIAS | B_DEFINE, null, null, null, lineNumber );
+									parseToken();
 								}
 							}
 						}
@@ -176,7 +180,6 @@ version(FBIDE)
 			{
 				throw e;
 				//debug Stdout( e.toString ~ "  ::  parsePreprocessor" ).newline;
-				return false;
 			}
 
 			return true;
@@ -415,6 +418,8 @@ version(FBIDE)
 									int countParen;
 									do
 									{
+										if( tokenIndex >= tokens.length - 1 ) break;
+										
 										if( token().tok == TOK.Topenparen )
 										{
 											countParen ++;
@@ -429,10 +434,9 @@ version(FBIDE)
 											if( countParen == 0 ) break;
 										}
 										
-										if( tokenIndex >= tokens.length ) break;
 										parseToken();
 									}
-									while( token().tok != TOK.Teol )
+									while( token().tok != TOK.Teol );
 								}							
 
 							
@@ -473,7 +477,6 @@ version(FBIDE)
 			{
 				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseParam" ).newline;
-				return null;
 			}
 
 			return _param;
@@ -529,7 +532,7 @@ version(FBIDE)
 								parseToken();
 						}
 					}
-					while( tokenIndex < tokens.length )
+					while( tokenIndex < tokens.length );
 				}
 			}
 			catch( Exception e )
@@ -571,7 +574,7 @@ version(FBIDE)
 				{
 					if( token().tok == TOK.Tconst ) bConst = true;
 
-					if( token().tok == TOK.Tredim &&  next().tok == TOK.Tpreserve ) parseToken( TOK.Tredim );
+					if( token().tok == TOK.Tredim && next().tok == TOK.Tpreserve ) parseToken( TOK.Tredim );
 
 					parseToken();
 
@@ -629,6 +632,8 @@ version(FBIDE)
 
 									while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
 									{
+										if( tokenIndex >= tokens.length - 1 ) break;
+										
 										if( token().tok == TOK.Topencurly )
 										{
 											countCurly ++;
@@ -651,7 +656,6 @@ version(FBIDE)
 											if( countParen == 0 && countCurly == 0 ) break;
 										}
 										parseToken();
-										if( tokenIndex >= tokens.length ) break;
 									}
 								}
 
@@ -697,8 +701,8 @@ version(FBIDE)
 										
 										if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 										{
-											parseToken( );
 											if( bSingle ) activeASTnode.addChild( _name, B_VARIABLE, null, "single", null, _lineNum ); else activeASTnode.addChild( _name, B_VARIABLE, null, "integer", null, _lineNum );
+											parseToken( );
 											return true;
 										}
 										else
@@ -821,7 +825,6 @@ version(FBIDE)
 			{
 				throw e;
 				//debug Stdout( e.toString ~ "  ::  parserVar" ).newline;
-				return false;
 			}
 
 			return true;
@@ -1200,7 +1203,6 @@ version(FBIDE)
 			{
 				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseOperator" ).newline;
-				return false;
 			}
 
 			return true;
@@ -1513,6 +1515,8 @@ version(FBIDE)
 
 										while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
 										{
+											if( tokenIndex >= tokens.length - 1 ) break;
+											
 											if( token().tok == TOK.Topencurly )
 											{
 												countCurly ++;
@@ -1535,7 +1539,6 @@ version(FBIDE)
 												if( countParen == 0 && countCurly == 0 ) break;
 											}
 											parseToken();
-											if( tokenIndex >= tokens.length ) break;
 										}
 									}
 
@@ -1587,7 +1590,8 @@ version(FBIDE)
 							break;
 
 						case TOK.Teol, TOK.Tcolon:
-							tokenIndex ++;
+							parseToken();
+							//tokenIndex ++;
 							break;
 
 						case TOK.Tenum:
@@ -2004,7 +2008,6 @@ version(FBIDE)
 			{
 				throw e;
 				//debug Stdout( e.toString ~ "  ::  parseScope" ).newline;
-				return false;
 			}
 
 			return true;
@@ -2024,7 +2027,7 @@ version(FBIDE)
 						user_defined_var ~= token().identifier;
 						parseToken();
 					}
-					while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+					while( token().tok != TOK.Teol && token().tok != TOK.Tcolon );
 						
 					activeASTnode = activeASTnode.addChild( user_defined_var, B_WITH, null, null, null, token().lineNumber );
 					parseToken( TOK.Tidentifier );
@@ -2055,8 +2058,8 @@ version(FBIDE)
 				switch( token().tok )
 				{
 					case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope, TOK.Twith, TOK.Tclass:
-						parseToken();
 						if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+						parseToken();
 
 						break;
 					default:
@@ -2085,23 +2088,9 @@ version(FBIDE)
 		bool updateTokens( TokenUnit[] _tokens )
 		{
 			tokenIndex = 0;
-			//delete tokens; // Make Crash
 			tokens.length = 0;
 			tokens = _tokens;
-			
-			head = null;
-			
-			version(DIDE)
-			{
-				if( curlyStack !is null ) delete curlyStack;
-				if( protStack !is null ) delete protStack;
-				if( parseStack !is null ) delete parseStack;
-				
-				curlyStack	= new CStack!(char[]);
-				protStack	= new CStack!(char[]);
-				parseStack	= new CStack!(char[]);
-			}
-			
+
 			if( !_tokens.length ) return false;
 			
 			return true;
@@ -2109,6 +2098,8 @@ version(FBIDE)
 		
 		CASTnode parse( char[] fullPath, int B_KIND = 0 )
 		{
+			CASTnode head = null;
+			
 			try
 			{
 				scope f = new FilePath( fullPath );
@@ -2263,6 +2254,8 @@ version(FBIDE)
 
 						case TOK.Tendmacro:
 							if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+							parseToken( TOK.Tendmacro );
+							break;
 
 						default:
 							tokenIndex ++;
@@ -2274,9 +2267,17 @@ version(FBIDE)
 			catch( Exception e )
 			{
 				debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				/*
+				Stdout( fullPath );
+				Stdout( "\t\t" );
+				Stdout( e.toString ).newline;
+				*/
 			}
 
-			if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+			if( head !is null )
+			{
+				if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+			}
 			//printAST( head );
 
 			return head;

@@ -47,7 +47,7 @@ class CFindInFilesDialog : CBaseDialog
 		// Options
 		Ihandle* toggleCaseSensitive = IupToggle( GLOBAL.languageItems["casesensitive"].toCString, null );
 		IupSetAttributes( toggleCaseSensitive, "EXPAND=YES,NAME=toggle_CaseSensitive" );
-		version(DIDE) IupSetAttribute( toggleCaseSensitive, "VALUE", "OFF" );
+		version(DIDE) IupSetAttribute( toggleCaseSensitive, "VALUE", "ON" );
 		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
 
 		Ihandle* toggleWholeWord = IupToggle( GLOBAL.languageItems["wholeword"].toCString, null );
@@ -152,13 +152,15 @@ class CFindInFilesDialog : CBaseDialog
 
 	~this()
 	{
+		/*
 		IupSetHandle( "btnCANCEL_findinfiles", null );
-		
+		*/
 		delete FINDWHAT;
 		delete labelTitle[0];
 		delete labelTitle[1];
-		
+		/*
 		IupDestroy( _dlg );
+		*/
 	}
 
 	char[] show( char[] selectedWord ) // Overload form CBaseDialog

@@ -1,9 +1,9 @@
 ﻿module parser.scanner;
 
 
-class CScanner
+struct Scanner
 {
-	private:
+private:
 	import iup.iup;
 
 	import global, tools, actionManager;
@@ -13,11 +13,8 @@ class CScanner
 	import tango.io.Stdout;
 
 
-	public:
-	this(){}
-	~this(){}
-
-	TokenUnit[] scanFile( char[] fullPath )
+public:
+	static TokenUnit[] scanFile( char[] fullPath )
 	{
 		scope f = new FilePath( fullPath );
 		if( f.exists() )
@@ -54,7 +51,7 @@ class CScanner
 	
 	version(FBIDE)
 	{
-		TokenUnit[]	scan( char[] data )
+		static TokenUnit[] scan( char[] data )
 		{
 			if( !data.length ) return null;
 			
@@ -411,7 +408,7 @@ class CScanner
 	
 	version(DIDE)
 	{
-		TokenUnit[]	scan( char[] data )
+		static TokenUnit[]	scan( char[] data )
 		{
 			if( !data.length ) return null;
 			
@@ -581,10 +578,15 @@ class CScanner
 								}
 								break;
 							case '\\':
-								identifier ~= data[i];
-								i ++;
+								if( charSign == "`" )
+								{
+								}
+								else
+								{
+									identifier ~= data[i];
+									i ++;
+								}
 								break;
-								
 							case '\n':
 								lineNum ++;
 								
@@ -649,6 +651,7 @@ class CScanner
 								}
 							}
 
+						case '&', '|', '^':
 						case ',', '+', '*', '/', ';', ':', '(', ')', '[', ']', '>', '<', '=', '{', '}', '!', '~': // '>', 
 							if( identifier in identToTOK )
 							{
@@ -782,6 +785,18 @@ class CScanner
 									break;
 								}
 							}
+							
+							if( i < data.length - 1 )
+							{
+								if( data[i+1] == '.' )
+								{
+									identifier = "";
+									TokenUnit t = { TOK.Tdotdot, "..", lineNum };
+									results ~= t;
+									i += 1;
+									break;
+								}
+							}
 
 							identifier = "";
 							TokenUnit t = { TOK.Tdot, ".", lineNum };
@@ -804,7 +819,7 @@ class CScanner
 		}
 	}
 
-	void print( TokenUnit[] token_units )
+	static void print( TokenUnit[] token_units )
 	{
 		foreach( TokenUnit t; token_units )
 		{

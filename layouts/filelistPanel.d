@@ -232,23 +232,19 @@ extern(C)
 		// On/OFF fILELIST Window
 		if( button == IUP_BUTTON1 ) // Left Click
 		{
-			char[] _s = fromStringz( status ).dup;
-			if( _s.length > 5 )
+			if( DocumentTabAction.isDoubleClick( status ) )
 			{
-				if( _s[5] == 'D' ) // Double Click
+				char[] treeSize = fromStringz( IupGetAttribute( GLOBAL.fileListTree.getTreeHandle, "SIZE" ) );
+				if( treeSize.length )
 				{
-					char[] treeSize = fromStringz( IupGetAttribute( GLOBAL.fileListTree.getTreeHandle, "SIZE" ) );
-					if( treeSize.length )
+					if( GLOBAL.fileListTree.getTreeH() <= 1 )
 					{
-						if( GLOBAL.fileListTree.getTreeH() <= 1 )
-						{
-							IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
-						}
-						else
-						{
-							GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) );
-							IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
-						}
+						IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
+					}
+					else
+					{
+						GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) );
+						IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 					}
 				}
 			}

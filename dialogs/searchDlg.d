@@ -395,7 +395,7 @@ extern(C)
 		}
 		else
 		{
-			return IUP_DEFAULT;;
+			return IUP_DEFAULT;
 		}
 		
 		int		pos;
@@ -434,7 +434,7 @@ extern(C)
 			GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundnothing"].toDString );
 		}
 		
-		return IUP_DEFAULT;;
+		return IUP_DEFAULT;
 	}
 	
 	private int CSearchExpander_Toggle_ACTION( Ihandle* ih )
@@ -454,7 +454,7 @@ extern(C)
 			default:
 		}
 		
-		return IUP_DEFAULT;;
+		return IUP_DEFAULT;
 	}
 	
 	private int CSearchExpander_btnReplaceFind_ACTION()
