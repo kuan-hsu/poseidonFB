@@ -32,7 +32,7 @@ version(Windows)
 	pragma(lib, "winmm.lib");
 	pragma(lib, "ole32.lib");
 	pragma(lib, "iup.lib");
-	pragma(lib, "iup_scintilla.lib");
+	pragma(lib, "iup_scintilla.lib"); 
 }
 else
 {
@@ -173,7 +173,7 @@ void main( char[][] args )
 				{
 					if( GLOBAL.fonts[0].fontString[i] < 48 || GLOBAL.fonts[0].fontString[i] > 57 )
 					{
-						IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..length] ).dup ) );
+						IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..$] ).dup ) );
 
 						if( ++comma  < i ) IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
 						
@@ -275,7 +275,7 @@ void main( char[][] args )
 				if( argPath.file == ".poseidon" )
 				{
 					char[] dir = argPath.path;
-					if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
+					if( dir.length ) dir = dir[0..$-1]; // Remove tail '/'
 					GLOBAL.projectTree.openProject( dir );				
 				}
 				else
@@ -288,7 +288,7 @@ void main( char[][] args )
 				if( argPath.file == "D.poseidon" )
 				{
 					char[] dir = argPath.path;
-					if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
+					if( dir.length ) dir = dir[0..$-1]; // Remove tail '/'
 					GLOBAL.projectTree.openProject( dir );				
 				}
 				else

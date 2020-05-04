@@ -272,15 +272,18 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( textTrigger, "TIP", GLOBAL.languageItems["triggertip"].toCString );
 		IupSetAttribute( textTrigger, "VALUE", PreferenceDialogParameters.stringTrigger.toCString );
 		IupSetHandle( "textTrigger", textTrigger );
-
-		Ihandle* labelIncludeLevel = IupLabel( toStringz( GLOBAL.languageItems["includelevel"].toDString ~ ":" ) );
-		IupSetAttributes( labelIncludeLevel, "SIZE=120x12,GAP=0" );
 		
-		PreferenceDialogParameters.stringLevel = new IupString( Integer.toString( GLOBAL.includeLevel ) );
-		Ihandle* textIncludeLevel = IupText( null );
-		IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
-		IupSetAttribute( textIncludeLevel, "VALUE", PreferenceDialogParameters.stringLevel.toCString );
-		IupSetHandle( "textIncludeLevel", textIncludeLevel );
+		version(FBIDE)
+		{
+			Ihandle* labelIncludeLevel = IupLabel( toStringz( GLOBAL.languageItems["includelevel"].toDString ~ ":" ) );
+			IupSetAttributes( labelIncludeLevel, "SIZE=120x12,GAP=0" );
+
+			PreferenceDialogParameters.stringLevel = new IupString( Integer.toString( GLOBAL.includeLevel ) );
+			Ihandle* textIncludeLevel = IupText( null );
+			IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
+			IupSetAttribute( textIncludeLevel, "VALUE", PreferenceDialogParameters.stringLevel.toCString );
+			IupSetHandle( "textIncludeLevel", textIncludeLevel );
+		}
 
 		
 		Ihandle* toggleWithParams = IupToggle( GLOBAL.languageItems["showtypeparam"].toCString, null );
@@ -314,17 +317,6 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleBackThread = IupToggle( GLOBAL.languageItems["completeatbackthread"].toCString, null );
 		IupSetAttribute( toggleBackThread, "VALUE", toStringz(GLOBAL.toggleCompleteAtBackThread.dup) );
 		IupSetHandle( "toggleBackThread", toggleBackThread );
-		
-		
-		Ihandle* labelCompleteDalay = IupLabel( GLOBAL.languageItems["completedelay"].toCString );
-		Ihandle* textCompleteDalay = IupText( null );
-		IupSetAttribute( textCompleteDalay, "SIZE", "30x12" );
-		IupSetAttribute( textCompleteDalay, "VALUE", GLOBAL.completeDelay.toCString );
-		IupSetHandle( "textCompleteDalay", textCompleteDalay );
-
-		Ihandle* hBoxCompleteDalay = IupHbox( toggleBackThread, labelCompleteDalay, textCompleteDalay, null );
-		IupSetAttribute( hBoxCompleteDalay, "ALIGNMENT", "ACENTER" );
-		
 		
 		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
 		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
@@ -377,10 +369,11 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( frameLive, "TITLE", GLOBAL.languageItems["parserlive"].toCString );
 
 
-		Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
+		version(FBIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
+		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
 		
-		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, toggleOverWrite, hBoxCompleteDalay, hBoxFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, toggleOverWrite, toggleBackThread, hBoxFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
 	
@@ -2154,7 +2147,7 @@ extern(C) // Callback for CPreferenceDialog
 						{
 							if( _ls.length )
 							{
-								if( _ls[length-1] != ' ' ) _ls ~= ' ';
+								if( _ls[$-1] != ' ' ) _ls ~= ' ';
 							}
 						}
 						else
@@ -2538,10 +2531,14 @@ extern(C) // Callback for CPreferenceDialog
 
 			GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ) );
 			GLOBAL.statusBar.setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
-			GLOBAL.includeLevel							= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) );
+			
+			version(FBIDE)
+			{
+				GLOBAL.includeLevel			= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) );
+				IupSetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE", PreferenceDialogParameters.stringLevel << IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) );
+			}
 			
 			IupSetAttribute( IupGetHandle( "textTrigger" ), "VALUE", PreferenceDialogParameters.stringTrigger << IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) );
-			IupSetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE", PreferenceDialogParameters.stringLevel << IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) );
 
 			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 
@@ -2597,7 +2594,7 @@ extern(C) // Callback for CPreferenceDialog
 					IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[4] << IupGetAttribute( _mHandle, "VALUE" ) );
 				}
 			}
-			catch
+			catch( Exception e )
 			{
 				GLOBAL.consoleWindow.id = 0;
 				GLOBAL.consoleWindow.x = GLOBAL.consoleWindow.y = GLOBAL.consoleWindow.w = GLOBAL.consoleWindow.h = 0;
@@ -2622,14 +2619,6 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.toggleOverWrite						= fromStringz( IupGetAttribute( IupGetHandle( "toggleOverWrite" ), "VALUE" ) ).dup;
 			GLOBAL.toggleCompleteAtBackThread			= fromStringz( IupGetAttribute( IupGetHandle( "toggleBackThread" ), "VALUE" ) ).dup;
 			
-			char[]	_completeDelay = fromStringz( IupGetAttribute( IupGetHandle( "textCompleteDalay" ), "VALUE" ) ).dup;
-			int		_completeDelayINT = Integer.toInt( _completeDelay );
-			if( _completeDelayINT > 1000 ) IupSetAttribute( IupGetHandle( "textCompleteDalay" ), "VALUE", "1000" );
-			if( _completeDelayINT < 0 ) IupSetAttribute( IupGetHandle( "textCompleteDalay" ), "VALUE", "0" );
-			IupSetAttribute( IupGetHandle( "textCompleteDalay" ), "VALUE", GLOBAL.completeDelay << IupGetAttribute( IupGetHandle( "textCompleteDalay" ), "VALUE" ) );
-			
-			
-
 			if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveNone" ), "VALUE" ) ) == "ON" )
 				GLOBAL.liveLevel = 0;
 			else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveLight" ), "VALUE" ) ) == "ON" )
@@ -2682,7 +2671,7 @@ extern(C) // Callback for CPreferenceDialog
 						{
 							if( GLOBAL.fonts[0].fontString[i] < 48 || GLOBAL.fonts[0].fontString[i] > 57 )
 							{
-								IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..length] ).dup ) );
+								IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..$] ).dup ) );
 
 								if( ++comma  < i ) IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
 								

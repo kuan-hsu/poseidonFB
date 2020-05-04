@@ -312,7 +312,7 @@ class CArgOptionDialog : CBaseDialog
 
 extern(C) // Callback for CFindInFilesDialog
 {
-	private void getCustomCompilerOptionValue( int index, inout char[] Name, inout char[] Option )
+	private void getCustomCompilerOptionValue( int index, ref char[] Name, ref char[] Option )
 	{
 		if( index < CArgOptionDialog.tempCustomCompilerOptions.length )
 		{

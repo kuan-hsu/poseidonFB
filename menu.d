@@ -594,17 +594,17 @@ void createMenu()
 	version(FBIDE)
 	{
 		// Convert Keyword
-		Ihandle* upperCase = IupItem( GLOBAL.languageItems["uppercase"].toCString, null );
-		//IupSetAttribute(upperCase, "IMAGE", "icon_windows");
-		IupSetCallback( upperCase, "ACTION", cast(Icallback) function( Ihandle* ih )
+		Ihandle* upperCaseHandle = IupItem( GLOBAL.languageItems["uppercase"].toCString, null );
+		//IupSetAttribute(upperCaseHandle, "IMAGE", "icon_windows");
+		IupSetCallback( upperCaseHandle, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			_convertKeyWordCase( 2 );
 			return IUP_DEFAULT;
 		});	
 		
-		Ihandle* lowerCase = IupItem( GLOBAL.languageItems["lowercase"].toCString, null );
-		//IupSetAttribute(lowerCase, "IMAGE", "icon_mac");
-		IupSetCallback( lowerCase, "ACTION", cast(Icallback) function( Ihandle* ih )
+		Ihandle* lowerCaseHandle = IupItem( GLOBAL.languageItems["lowercase"].toCString, null );
+		//IupSetAttribute(lowerCaseHandle, "IMAGE", "icon_mac");
+		IupSetCallback( lowerCaseHandle, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			_convertKeyWordCase( 1 );
 			return IUP_DEFAULT;
@@ -618,7 +618,7 @@ void createMenu()
 			return IUP_DEFAULT;
 		});	
 
-		Ihandle* caseSubMenu = IupMenu( upperCase, lowerCase, mixedCase, null  );
+		Ihandle* caseSubMenu = IupMenu( upperCaseHandle, lowerCaseHandle, mixedCase, null  );
 		Ihandle* convertCase = IupSubmenu( GLOBAL.languageItems["convertcase"].toCString, caseSubMenu );
 	}
 	
@@ -680,8 +680,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.423)\nBy Kuan Hsu (Taiwan)\n2020.04.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.043)\nBy Kuan Hsu (Taiwan)\n2020.04.19" );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.424)\nBy Kuan Hsu (Taiwan)\n2020.05.04" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, "D Programming IDE\nPoseidonD (V0.047)\nBy Kuan Hsu (Taiwan)\n2020.05.01" );
 		return IUP_DEFAULT;
 	});
 	
@@ -1408,7 +1408,7 @@ extern(C)
 					int colonPos = Util.index( beginEndPos, ":" );
 					if( colonPos < beginEndPos.length )
 					{
-						char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
+						char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
 						IupSetAttribute( ih, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 						actionManager.SearchAction.search( ih, targetText, GLOBAL.searchExpander.searchRule, false );
 					}
@@ -1450,7 +1450,7 @@ extern(C)
 						actionManager.StatusBarAction.update();
 						IupSetFocus( cSci.getIupScintilla );
 					}
-					catch
+					catch( Exception e )
 					{
 					}
 					return IUP_DEFAULT;
@@ -1470,7 +1470,7 @@ extern(C)
 							return IUP_DEFAULT;
 						}
 					}
-					catch
+					catch( Exception e )
 					{
 						return IUP_DEFAULT;
 					}

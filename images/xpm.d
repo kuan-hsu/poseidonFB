@@ -119,7 +119,7 @@ struct XPM
 									}
 									else
 									{
-										_color.value = ( splitData[2][1..length] ~ "ff" ).dup;
+										_color.value = ( splitData[2][1..$] ~ "ff" ).dup;
 										
 									}
 
@@ -185,7 +185,7 @@ struct XPM
 
 			return data.dup;
 		}
-		catch
+		catch( Exception e )
 		{
 			return null;
 		}
@@ -197,7 +197,7 @@ struct XPM
 		{
 			return convert( filePath );
 		}
-		catch
+		catch( Exception e )
 		{
 		}
 
@@ -360,8 +360,8 @@ struct XPM
 			protected_variable_rgba 		= getRGBA( "icons/xpm/outline/variable_protected_obj.xpm" );
 			public_variable_rgba 			= getRGBA( "icons/xpm/outline/variable_obj.xpm" );
 			
-			//class_private_obj_rgba 		= getRGBA( "icons/xpm/outline/class_private_obj.xpm" );
-			//class_protected_obj_rgba		= getRGBA( "icons/xpm/outline/class_protected_obj.xpm" );
+			class_private_obj_rgba 			= getRGBA( "icons/xpm/outline/class_private_obj.xpm" );
+			class_protected_obj_rgba		= getRGBA( "icons/xpm/outline/class_protected_obj.xpm" );
 			class_obj_rgba 					= getRGBA( "icons/xpm/outline/class_obj.xpm" );
 			struct_private_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_private_obj.xpm" );
 			struct_protected_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_protected_obj.xpm" );
@@ -411,8 +411,8 @@ struct XPM
 			protected_variable_rgba 		= getRGBA( "icons/xpm/outline/variable_protected_obj.xpm" );
 			public_variable_rgba 			= getRGBA( "icons/xpm/outline/variable_obj.xpm" );
 			
-			//class_private_obj_rgba 		= getRGBA( "icons/xpm/outline/class_private_obj.xpm" );
-			//class_protected_obj_rgba		= getRGBA( "icons/xpm/outline/class_protected_obj.xpm" );
+			class_private_obj_rgba 			= getRGBA( "icons/xpm/outline/class_private_obj.xpm" );
+			class_protected_obj_rgba		= getRGBA( "icons/xpm/outline/class_protected_obj.xpm" );
 			class_obj_rgba 					= getRGBA( "icons/xpm/outline/class_obj.xpm" );
 			struct_private_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_private_obj.xpm" );
 			struct_protected_obj_rgba 		= getRGBA( "icons/xpm/outline/struct_protected_obj.xpm" );

@@ -11,7 +11,7 @@ private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.c
 
 class CProjectTree
 {
-	private:
+private:
 	import				project, tango.io.device.File, tango.io.stream.Lines;
 	import				tango.core.Thread, parser.autocompletion;
 	
@@ -90,7 +90,8 @@ class CProjectTree
 		tree = IupTree();
 		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDONFB_PROJECT_Tree" );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
-		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );		
+		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
+		version(Windows) if( GLOBAL.editColor.project_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.project_HLT.toCString );
 		
 		toBoldTitle( tree, 0 );
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
@@ -118,8 +119,7 @@ class CProjectTree
 	}
 
 
-
-	public:
+public:
 	this()
 	{
 		createLayout();
@@ -499,7 +499,7 @@ class CProjectTree
 			char[] _dir = sFN.path(); // include tail /
 
 			if( _dir.length )
-				if( _dir[length-1] == '/' ) _dir = _dir[0..length-1].dup;
+				if( _dir[$-1] == '/' ) _dir = _dir[0..$-1].dup;
 
 			if( _dir in GLOBAL.projectManager )
 			{
@@ -562,7 +562,7 @@ class CProjectTree
 								if( assignPos < _lineData.length - 1 )
 								{
 									char[] 	_keyWord = _lineData[0..assignPos];
-									char[]	_value = _lineData[assignPos+1..length];
+									char[]	_value = _lineData[assignPos+1..$];
 									if( _keyWord == "Description" )
 									{
 										prj.comment = _value;
@@ -574,7 +574,7 @@ class CProjectTree
 								if( assignPos < _lineData.length - 1 )
 								{
 									char[] 	_keyWord = _lineData[0..assignPos];
-									char[]	_value = _lineData[assignPos+1..length];
+									char[]	_value = _lineData[assignPos+1..$];
 
 									if( _keyWord == "Output" )
 									{
@@ -602,7 +602,7 @@ class CProjectTree
 								if( assignPos < _lineData.length - 1 )
 								{
 									char[] 	_keyWord = _lineData[0..assignPos];
-									char[]	_value = _lineData[assignPos+1..length];
+									char[]	_value = _lineData[assignPos+1..$];
 
 									if( _keyWord == "Main" )
 									{
@@ -650,7 +650,7 @@ class CProjectTree
 					int posComma = Util.index( option, "," );
 					if( posComma < option.length )
 					{
-						option = option[posComma+1..length];
+						option = option[posComma+1..$];
 						option = Util.substitute( option, "fbc ", "" );
 						prj.compilerOption = Util.trim( option );
 					}
@@ -875,7 +875,7 @@ extern(C)
 					{
 						char[] fullPath = fromStringz( _fullpath );
 
-						if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
+						if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 						{
 							actionManager.ScintillaAction.openFile( fullPath.dup );
 						}
@@ -1016,7 +1016,7 @@ extern(C)
 					if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "LEAF" )
 					{
 						char[]	fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i ) );
-						if( upperCase(fullPath) in GLOBAL.scintillaManager )
+						if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
 						{
 							ScintillaAction.openFile( fullPath );
 							break;
@@ -1675,7 +1675,7 @@ extern(C)
 									p.execute;
 								}
 							}
-							catch
+							catch( Exception e )
 							{
 								break;
 							}
@@ -1860,9 +1860,9 @@ extern(C)
 			// ReName On Disk & Change fn
 			fp.rename( fp.path ~ newFileName ~ fp.suffix );
 
-			if( upperCase(fullPath) in GLOBAL.scintillaManager ) 
+			if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 			{
-				GLOBAL.scintillaManager[upperCase(fullPath)].rename( fp.toString );
+				GLOBAL.scintillaManager[fullPathByOS(fullPath)].rename( fp.toString );
 			}
 
 			
@@ -2096,7 +2096,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}	
 
-	private int _createTree( char[] _prjDirName, inout char[] _titleName, int startID = 2 )
+	private int _createTree( char[] _prjDirName, ref char[] _titleName, int startID = 2 )
 	{
 		int		pos;
 		int		folderLocateId = startID;
@@ -2105,12 +2105,12 @@ extern(C)
 		version(Windows)
 		{
 			pos = Util.index( lowerCase( fullPath ), lowerCase( _prjDirName ) );
-			if( pos == 0 ) _titleName = fullPath[_prjDirName.length..length].dup;
+			if( pos == 0 ) _titleName = fullPath[_prjDirName.length..$].dup;
 		}
 		else
 		{
 			pos = Util.index( fullPath, _prjDirName );
-			if( pos == 0 )  _titleName = fullPath[_prjDirName.length..length].dup; //_titleName = Util.substitute( fullPath, _prjDirName, "" );
+			if( pos == 0 )  _titleName = fullPath[_prjDirName.length..$].dup; //_titleName = Util.substitute( fullPath, _prjDirName, "" );
 		}
 
 		// Check the child Folder
@@ -2150,7 +2150,7 @@ extern(C)
 			}
 		}
 
-		if( splitText.length > 1 ) _titleName = splitText[length-1];
+		if( splitText.length > 1 ) _titleName = splitText[$-1];
 
 		return folderLocateId;
 	}		

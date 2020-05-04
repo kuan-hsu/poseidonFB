@@ -141,7 +141,7 @@ version(FBIDE)
 					case TOK.Tifdef:
 						parseToken( TOK.Tifdef );
 
-						_type = toUpper( token().identifier );
+						_type = upperCase( token().identifier );
 						parseToken();
 						break;
 
@@ -152,11 +152,11 @@ version(FBIDE)
 						{
 							if( _type[0] == '!' )
 							{
-								_type = toUpper( _type[1..length] );
+								_type = upperCase( _type[1..$] );
 							}
 							else
 							{
-								_type = toUpper( "!" ~ _type );
+								_type = upperCase( "!" ~ _type );
 							}
 						}
 						break;
@@ -469,7 +469,7 @@ version(FBIDE)
 				if( token().tok == TOK.Tcloseparen )
 				{
 					parseToken( TOK.Tcloseparen );
-					if( _param[length-1] == ' ' ) _param = _param[0..length-1];
+					if( _param[$-1] == ' ' ) _param = _param[0..$-1];
 					_param ~= ")";
 				}
 			}
@@ -797,7 +797,7 @@ version(FBIDE)
 						{
 							parseToken( TOK.Topenparen );
 
-							activeASTnode.addChild( _name, B_VARIABLE, null, toLower( token().identifier ), null, _lineNum );
+							activeASTnode.addChild( _name, B_VARIABLE, null, lowerCase( token().identifier ), null, _lineNum );
 
 							while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 							{
@@ -2105,7 +2105,7 @@ version(FBIDE)
 				scope f = new FilePath( fullPath );
 				
 				char[]		_ext;
-				if( toLower( f.ext() ) == "bas" ) 
+				if( lowerCase( f.ext() ) == "bas" ) 
 				{
 					head = new CASTnode( fullPath, B_BAS, null, null, null, 0, 2147483647 );
 				}

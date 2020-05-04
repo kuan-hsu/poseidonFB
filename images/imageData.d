@@ -202,14 +202,14 @@ void load_all_images_icons()
 	IupSetHandle( "icon_manual_home", XPM.getIUPimage( "icons/xpm/home.xpm" ) );
 	
 
-	IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) ); //IupSetHandle("IUP_function", load_image_function_public_obj());
-	IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) ); //IupSetHandle("IUP_sub", load_image_sub_public_obj());
-	IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) ); //IupSetHandle("IUP_function_protected", load_image_function_protected_obj());
-	IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );// IupSetHandle("IUP_function_private", load_image_function_private_obj());
-	IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );//IupSetHandle("IUP_sub_protected", load_image_sub_protected_obj());
-	IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );//IupSetHandle("IUP_sub_private", load_image_sub_private_obj());
-	IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_obj.xpm" ) );//IupSetHandle("IUP_variable_array", load_image_variable_array_public_obj());
-	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );//IupSetHandle("IUP_variable", load_image_variable_obj());
+	IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) );
+	IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) );
+	IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) );
+	IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );
+	IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
+	IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
+	IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_obj.xpm" ) );
+	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );
 
 	IupSetHandle( "IUP_codecomplete_on", XPM.getIUPimage( "icons/xpm/codecompleteon.xpm" ) );
 	IupSetHandle( "IUP_codecomplete_off", XPM.getIUPimage( "icons/xpm/codecompleteoff.xpm" ) );
@@ -253,7 +253,7 @@ void load_all_images_icons()
 		IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );// IupSetHandle("IUP_function_private", load_image_function_private_obj());
 		//IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
 		//IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
-		IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_obj.xpm" ) );//IupSetHandle("IUP_variable_array", load_image_variable_array_public_obj());
+		IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_D.xpm" ) );//IupSetHandle("IUP_variable_array", load_image_variable_array_public_obj());
 		IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );//IupSetHandle("IUP_variable", load_image_variable_obj());
 
 		IupSetHandle( "IUP_debugspec", XPM.getIUPimage( "icons/xpm/outline/debug_spec_obj.xpm" ) );
@@ -270,21 +270,21 @@ void load_all_images_icons()
 		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );//IupSetHandle("IUP_property_var", load_image_property_var());
 		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );//IupSetHandle("IUP_operator", load_image_operator());
 		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_protected", load_image_variable_protected_obj());
-		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
-		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_obj.xpm" ) ); //IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
+		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_D.xpm" ) );//IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
+		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_D.xpm" ) ); //IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
 		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private_obj.xpm" ) );  //IupSetHandle("IUP_variable_private", load_image_variable_private_obj());  
 		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member_obj.xpm" ) );//IupSetHandle("IUP_enummember", load_image_enum_member_obj());
 		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum_obj.xpm" ) );//IupSetHandle("IUP_enum", load_image_enum_obj());
 		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias_obj.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
 		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union_obj.xpm" ) );//IupSetHandle("IUP_union", load_image_union_obj());
-		//IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace_obj.xpm" ) );//IupSetHandle("IUP_namespace", load_image_namespace_obj());
-		//IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );//IupSetHandle("IUP_macro", load_image_macro());
 		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
-		//IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );// IupSetHandle("IUP_define_fun", load_image_define_fun());
-		//IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
 		IupSetHandle( "IUP_import", XPM.getIUPimage( "icons/xpm/outline/import_obj.xpm" ) );
 		IupSetHandle( "IUP_import_private", XPM.getIUPimage( "icons/xpm/outline/import_private_obj.xpm" ) );
 		IupSetHandle( "IUP_interface", XPM.getIUPimage( "icons/xpm/outline/interface_obj.xpm" ) );
+		IupSetHandle( "IUP_anonymous", XPM.getIUPimage( "icons/xpm/outline/anonymous.xpm" ) );
+		IupSetHandle( "IUP_funptr_private", XPM.getIUPimage( "icons/xpm/outline/funptr_private.xpm" ) );
+		IupSetHandle( "IUP_funptr_protected", XPM.getIUPimage( "icons/xpm/outline/funptr_protected.xpm" ) );
+		IupSetHandle( "IUP_funptr", XPM.getIUPimage( "icons/xpm/outline/funptr_public.xpm" ) );
 	}
 
 

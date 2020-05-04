@@ -41,6 +41,8 @@ struct PROJECT
 	char[][]	others;
 	char[][]	misc;
 	
+	version(DIDE) char[][]	defaultImportPaths;
+	
 	// Focus
 	char[]					focusOn;
 	FocusUnit[char[]]		focusUnit;
@@ -55,12 +57,12 @@ struct PROJECT
 			version(Windows)
 			{
 				pos = Util.index( tools.lowerCase( _fullPath ), tools.lowerCase( _dir ) );
-				if( pos == 0 ) return _fullPath[_dir.length..length].dup;
+				if( pos == 0 ) return _fullPath[_dir.length..$].dup;
 			}
 			else
 			{
 				pos = Util.index( _fullPath, _dir );
-				if( pos == 0 ) return _fullPath[_dir.length..length].dup;
+				if( pos == 0 ) return _fullPath[_dir.length..$].dup;
 			}
 
 			return _fullPath;
@@ -166,7 +168,7 @@ struct PROJECT
 			char[] doc = file.read();
 			
 			scope _dir = new FilePath( settingFileName );
-			s.dir = _dir.path[0..length-1];			
+			s.dir = _dir.path[0..$-1];			
 			
 			char[]	blockText, focusName;
 			foreach( char[] lineData; Util.splitLines( doc ) )
@@ -218,7 +220,10 @@ struct PROJECT
 							case "CompilerArgs":	s.args = right;							break;
 							case "CompilerOption":	s.compilerOption = right;				break;
 							case "Comment":			s.comment = right;						break;
-							case "CompilerPath":	s.compilerPath = right;					break;
+							case "CompilerPath":
+								s.compilerPath = right;					
+								version(DIDE) if( right.length ) s.defaultImportPaths = tools.getImportPath( right );
+								break;
 							default:
 						}
 						break;
@@ -318,7 +323,7 @@ struct PROJECT
 			*/
 			
 			scope _dir = new FilePath( settingFileName );
-			s.dir = _dir.path[0..length-1];
+			s.dir = _dir.path[0..$-1];
 			
 			result = root.query.descendant( "MainFile" );
 			foreach( e; result ){ s.mainFile = e.value;	}
@@ -342,40 +347,40 @@ struct PROJECT
 			foreach( e; result )
 			{ 
 				s.includeDirs ~= e.value;
-				scope _fp = new FilePath( s.includeDirs[length-1]  );
-				if( !_fp.isAbsolute() ) s.includeDirs[length-1] = s.dir ~ "/" ~ s.includeDirs[length-1];
+				scope _fp = new FilePath( s.includeDirs[$-1]  );
+				if( !_fp.isAbsolute() ) s.includeDirs[$-1] = s.dir ~ "/" ~ s.includeDirs[$-1];
 			}
 			
 			result = root.query["LibDirs"]["Name"];
 			foreach( e; result )
 			{
 				s.libDirs ~= e.value;
-				scope _fp = new FilePath( s.libDirs[length-1]  );
-				if( !_fp.isAbsolute() ) s.libDirs[length-1] = s.dir ~ "/" ~ s.libDirs[length-1];
+				scope _fp = new FilePath( s.libDirs[$-1]  );
+				if( !_fp.isAbsolute() ) s.libDirs[$-1] = s.dir ~ "/" ~ s.libDirs[$-1];
 			}
 
 			result = root.query["Sources"]["Name"];
 			foreach( e; result )
 			{
 				s.sources ~= e.value;
-				scope _fp = new FilePath( s.sources[length-1]  );
-				if( !_fp.isAbsolute() ) s.sources[length-1] = s.dir ~ "/" ~ s.sources[length-1];
+				scope _fp = new FilePath( s.sources[$-1]  );
+				if( !_fp.isAbsolute() ) s.sources[$-1] = s.dir ~ "/" ~ s.sources[$-1];
 			}
 		
 			result = root.query["Includes"]["Name"];
 			foreach( e; result )
 			{
 				s.includes ~= e.value;
-				scope _fp = new FilePath( s.includes[length-1]  );
-				if( !_fp.isAbsolute() ) s.includes[length-1] = s.dir ~ "/" ~ s.includes[length-1];
+				scope _fp = new FilePath( s.includes[$-1]  );
+				if( !_fp.isAbsolute() ) s.includes[$-1] = s.dir ~ "/" ~ s.includes[$-1];
 			}
 
 			result = root.query["Others"]["Name"];
 			foreach( e; result )
 			{
 				s.others ~= e.value;
-				scope _fp = new FilePath( s.others[length-1]  );
-				if( !_fp.isAbsolute() ) s.others[length-1] = s.dir ~ "/" ~ s.others[length-1];
+				scope _fp = new FilePath( s.others[$-1]  );
+				if( !_fp.isAbsolute() ) s.others[$-1] = s.dir ~ "/" ~ s.others[$-1];
 			}
 
 			s.sources.sort;

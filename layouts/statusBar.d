@@ -441,7 +441,7 @@ extern(C) // Callback for CBaseDialog
 								actionManager.StatusBarAction.update();
 								IupSetFocus( cSci.getIupScintilla );
 							}
-							catch
+							catch( Exception e )
 							{
 							}
 							return IUP_DEFAULT;
@@ -461,7 +461,7 @@ extern(C) // Callback for CBaseDialog
 									return IUP_DEFAULT;
 								}
 							}
-							catch
+							catch( Exception e )
 							{
 								return IUP_DEFAULT;
 							}

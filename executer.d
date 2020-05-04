@@ -144,10 +144,21 @@ struct ExecuterAction
 					case Process.Result.Error, Process.Result.Signal, Process.Result.Exit, Process.Result.Stop:
 						if( command.length )
 						{
-							if( command[0] == '"' && command[length-1] == '"' )
+							if( command[0] == '"' && command[$-1] == '"' )
 							{
-								scope _f = new FilePath( command[1..length-1] );
+								scope _f = new FilePath( command[1..$-1] );
 								_f.remove();
+
+								version(Windows)
+								{
+									_f.set( _f.name ~ ".obj" );
+									if( _f.exists ) _f.remove();
+								}
+								else
+								{
+									_f.set( _f.name ~ ".o" );
+									if( _f.exists ) _f.remove();
+								}
 							}
 						}
 						break;
@@ -670,6 +681,28 @@ struct ExecuterAction
 							char[] 		_totalOptions = focus.Option ~ " " ~ extraOptions;
 							FilePath	oPath;
 							
+							int optionPos = Util.index( _totalOptions, "-op" );
+							if( optionPos < _totalOptions.length )
+							{
+								objPath = fPath.path ~ "/";
+							}
+							else
+							{
+								optionPos = Util.index( _totalOptions, "-od" );
+								if( optionPos < _totalOptions.length )
+								{
+									char[] outputName;
+									for( int i = optionPos + 3; i < _totalOptions.length; ++ i )
+									{
+										if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
+										outputName ~= _totalOptions[i];
+									}
+									
+									// Got Obj Path -od
+									if( outputName.length ) objPath ~= ( outputName ~ "/" );
+								}
+							}
+							/*
 							int ofPos = Util.index( _totalOptions, "-od" );
 							if( ofPos < _totalOptions.length )
 							{
@@ -683,7 +716,7 @@ struct ExecuterAction
 								// Got Obj Path -od
 								if( outputName.length ) objPath ~= ( outputName ~ "/" );
 							}
-
+							*/
 							version(Windows) oPath = new FilePath( objPath ~ fPath.name ~ ".obj" ); else oPath = new FilePath( objPath ~ fPath.name ~ ".o" );
 							if( oPath.exists() ) txtSources = txtSources ~ " \"" ~ oPath.toString ~ "\"" ;
 							
@@ -1201,7 +1234,7 @@ struct ExecuterAction
 						{
 							int		lineNumber = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
 
-							char[]	annotationText = s[lineNumberTail+2..length];
+							char[]	annotationText = s[lineNumberTail+2..$];
 							
 							if( lineNumber != prevLineNumber )
 							{
@@ -1420,19 +1453,25 @@ struct ExecuterAction
 			
 			foreach( char[] s; GLOBAL.projectManager[activePrjName].includes )
 			{
-				if( upperCase(s) in GLOBAL.scintillaManager )
+				if( fullPathByOS(s) in GLOBAL.scintillaManager )
 				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
-					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
+					{
+						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
+						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
+					}
 				}
 			}
 
 			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
 			{
-				if( upperCase(s) in GLOBAL.scintillaManager )
+				if( fullPathByOS(s) in GLOBAL.scintillaManager )
 				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
-					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
+					{
+						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
+						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
+					}
 				}
 				
 				version(FBIDE)
@@ -1456,18 +1495,28 @@ struct ExecuterAction
 					char[] 		_totalOptions = _focus.Option ~ " " ~ options;
 					FilePath	oPath;
 					
-					int ofPos = Util.index( _totalOptions, "-od" );
-					if( ofPos < _totalOptions.length )
+					// Check -op
+					int optionPos = Util.index( _totalOptions, "-op" );
+					if( optionPos < _totalOptions.length )
 					{
-						char[] outputName;
-						for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
+						objPath = fPath.path ~ "/";
+					}
+					else
+					{
+						// Check -od
+						optionPos = Util.index( _totalOptions, "-od" );
+						if( optionPos < _totalOptions.length )
 						{
-							if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
-							outputName ~= _totalOptions[i];
+							char[] outputName;
+							for( int i = optionPos + 3; i < _totalOptions.length; ++ i )
+							{
+								if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
+								outputName ~= _totalOptions[i];
+							}
+							
+							// Got Obj Path -od
+							if( outputName.length ) objPath ~= ( outputName ~ "/" );
 						}
-						
-						// Got Obj Path -od
-						if( outputName.length ) objPath ~= ( outputName ~ "/" );
 					}
 
 					version(Windows) oPath = new FilePath( objPath ~ fPath.name ~ ".obj" ); else oPath = new FilePath( objPath ~ fPath.name ~ ".o" );
@@ -1526,6 +1575,42 @@ struct ExecuterAction
 				switch( GLOBAL.projectManager[activePrjName].type )
 				{
 					case "2":
+						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib\"";
+						break;
+					case "3":
+						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+						break;
+					default:
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? ".exe" : "" ) ~ "\"";
+				}
+			}
+			else
+			{
+				switch( GLOBAL.projectManager[activePrjName].type )
+				{
+					case "2":
+						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						break;
+					case "3":
+						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+						break;
+					default:
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
+						
+				}
+			}
+			/+
+			version(Windows)
+			{
+				switch( GLOBAL.projectManager[activePrjName].type )
+				{
+					case "2":
 						executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
 						break;
 					case "3":
@@ -1551,6 +1636,7 @@ struct ExecuterAction
 						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
 				}
 			}
+			+/
 
 			if( !options.length )
 			{
@@ -1661,10 +1747,13 @@ struct ExecuterAction
 			
 			foreach( char[] s; GLOBAL.projectManager[activePrjName].includes )
 			{
-				if( upperCase(s) in GLOBAL.scintillaManager )
+				if( fullPathByOS(s) in GLOBAL.scintillaManager )
 				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
-					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
+					{
+						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
+						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
+					}
 				}
 			}
 
@@ -1673,10 +1762,13 @@ struct ExecuterAction
 			{
 				version(FBIDE)	txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
 				version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
-				if( upperCase(s) in GLOBAL.scintillaManager )
+				if( fullPathByOS(s) in GLOBAL.scintillaManager )
 				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[upperCase(s)] ) ) GLOBAL.scintillaManager[upperCase(s)].saveFile();
-					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[upperCase(s)] ); //Update Parser
+					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
+					{
+						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
+						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
+					}
 				}
 			}
 			
@@ -1811,10 +1903,12 @@ struct ExecuterAction
 				switch( GLOBAL.projectManager[activePrjName].type )
 				{
 					case "2":
-						executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib\"";
 						break;
 					case "3":
-						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
 						break;
 					default:
 						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
@@ -1826,10 +1920,12 @@ struct ExecuterAction
 				switch( GLOBAL.projectManager[activePrjName].type )
 				{
 					case "2":
-						executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
 						break;
 					case "3":
-						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
 						break;
 					default:
 						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";

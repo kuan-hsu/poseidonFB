@@ -282,7 +282,7 @@ class CScintilla
 					char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
 					char[] id = Util.trim( listValue[0..6] );
 					char[] ln = Util.trim( listValue[6..12] );
-					char[] fn = Util.trim( listValue[12..length] );
+					char[] fn = Util.trim( listValue[12..$] );
 
 					if( id == "-1" )
 					{
@@ -307,7 +307,7 @@ class CScintilla
 
 		GLOBAL.fileListTree.removeItem( this );
 		GLOBAL.outlineTree.cleanTree( fullPath.toDString );
-		if( upperCase(fullPath.toDString) in GLOBAL.scintillaManager ) GLOBAL.scintillaManager.remove( upperCase(fullPath.toDString) );
+		if( fullPathByOS(fullPath.toDString) in GLOBAL.scintillaManager ) GLOBAL.scintillaManager.remove( fullPathByOS(fullPath.toDString) );
 		
 		if( title !is null ) delete title;
 		if( fullPath !is null ) delete fullPath;
@@ -373,7 +373,7 @@ class CScintilla
 	{
 		// Remove Old Handle
 		IupSetHandle( fullPath.toCString, null );
-		GLOBAL.scintillaManager.remove( upperCase(fullPath.toDString) );
+		GLOBAL.scintillaManager.remove( fullPathByOS(fullPath.toDString) );
 
 		fullPath = newFullPath;
 		
@@ -387,13 +387,13 @@ class CScintilla
 		}		
 		IupSetHandle( fullPath.toCString, sci );
 
-		GLOBAL.scintillaManager[upperCase(fullPath.toDString)] = this;
+		GLOBAL.scintillaManager[fullPathByOS(fullPath.toDString)] = this;
 		
-		if( upperCase(fullPath.toDString) in GLOBAL.parserManager )
+		if( fullPathByOS(fullPath.toDString) in GLOBAL.parserManager )
 		{
-			auto temp = GLOBAL.parserManager[upperCase(fullPath.toDString)];
-			delete temp;
-			GLOBAL.parserManager.remove( upperCase(fullPath.toDString) );
+			auto temp = GLOBAL.parserManager[fullPathByOS(fullPath.toDString)];
+			if( temp !is null ) delete temp;
+			GLOBAL.parserManager.remove( fullPathByOS(fullPath.toDString) );
 			GLOBAL.outlineTree.cleanTree( fullPath.toDString );
 
 			GLOBAL.outlineTree.loadFile( newFullPath );
@@ -432,7 +432,7 @@ class CScintilla
 				}
 			}
 		}
-		catch
+		catch( Exception e )
 		{
 			IupMessage( "Scintilla.saveFile", "ERROR" );
 			return false;
@@ -590,11 +590,11 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
 		IupSetAttribute(sci, "STYLEFONTSIZE40",  toStringz( size.dup ) );
 
-		IupScintillaSendMessage( sci, 2207, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+		IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 		/*
 		IupSetAttribute(sci, "STYLEFONTSIZE38",  "10" );
-		IupScintillaSendMessage( sci, 2205, actionManager.ToolAction.convertIupColor( "210 255 255" ), 0 ); // SCI_CALLTIPSETBACK 2205
-		IupScintillaSendMessage( sci, 2206, actionManager.ToolAction.convertIupColor( "0 0 255" ), 0 ); // SCI_CALLTIPSETFORE 2206
+		IupScintillaSendMessage( sci, 2205, tools.convertIupColor( "210 255 255" ), 0 ); // SCI_CALLTIPSETBACK 2205
+		IupScintillaSendMessage( sci, 2206, tools.convertIupColor( "0 0 255" ), 0 ); // SCI_CALLTIPSETFORE 2206
 		IupScintillaSendMessage( sci, 2212, 4, 0 );
 		//IupSetAttribute(sci, "STYLEBOLD38", "YES");
 		*/
@@ -749,7 +749,7 @@ class CScintilla
 		{
 			IupScintillaSendMessage( sci, 2021, 1, 0 );
 			IupScintillaSendMessage( sci, 2086, 2, 0 );
-			IupScintillaSendMessage( sci, 2084, 1, actionManager.ToolAction.convertIupColor( "177 177 177" ) );
+			IupScintillaSendMessage( sci, 2084, 1, tools.convertIupColor( "177 177 177" ) );
 		}
 		else
 		{
@@ -758,7 +758,7 @@ class CScintilla
 
 
 		// Color
-		IupScintillaSendMessage( sci, 2098, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.caretLine.toDString ), 0 ); //SCI_SETCARETLINEBACK = 2098
+		IupScintillaSendMessage( sci, 2098, tools.convertIupColor( GLOBAL.editColor.caretLine.toDString ), 0 ); //SCI_SETCARETLINEBACK = 2098
 
 		uint alpha = Integer.atoi( GLOBAL.editColor.selAlpha.toDString );
 		if( alpha > 255 )
@@ -768,20 +768,20 @@ class CScintilla
 
 		if( alpha == 255 )
 		{
-			IupScintillaSendMessage( sci, 2067, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 1, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else if( alpha == 0 )
 		{
-			IupScintillaSendMessage( sci, 2067, 0, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 0, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else
 		{
-			IupScintillaSendMessage( sci, 2067, 0, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, 1, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 0, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 		
@@ -791,7 +791,7 @@ class CScintilla
 		/*
 		IupScintillaSendMessage( sci, 2290, 0, 0xffffff ); // SCI_SETFOLDMARGINCOLOUR = 2290,
 		*/
-		IupScintillaSendMessage( sci, 2069, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.cursor.toDString ), 0 ); // SCI_SETCARETFORE = 2069,
+		IupScintillaSendMessage( sci, 2069, tools.convertIupColor( GLOBAL.editColor.cursor.toDString ), 0 ); // SCI_SETCARETFORE = 2069,
 
 		//IupSetAttribute( sci, "FOLDFLAGS", "LEVELNUMBERS" );  
 
@@ -842,7 +842,7 @@ class CScintilla
 		IupScintillaSendMessage( sci, 2080, 8, GLOBAL.indicatorStyle ); //SCI_INDICSETSTYLE = 2080
 		//IupScintillaSendMessage( sci, 2284, 1, 0 ); //SCI_SETTWOPHASEDRAW = 2284		
 		//IupScintillaSendMessage( sci, 2510, 8, 1 ); //SCI_INDICSETUNDER = 2510
-		IupScintillaSendMessage( sci, 2082, 8, actionManager.ToolAction.convertIupColor( GLOBAL.editColor.currentWord.toDString ) ); // SCI_INDICSETFORE = 2082
+		IupScintillaSendMessage( sci, 2082, 8, tools.convertIupColor( GLOBAL.editColor.currentWord.toDString ) ); // SCI_INDICSETFORE = 2082
 		
 		alpha = Integer.atoi( GLOBAL.editColor.currentWordAlpha.toDString );
 		if( alpha <= 0 )
@@ -875,8 +875,8 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 5, cast(int) XPM.public_variable_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			
-			//IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
-			//IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 8, cast(int) XPM.class_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			
 			IupScintillaSendMessage( sci, 2627, 9, cast(int) XPM.struct_private_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
@@ -938,8 +938,8 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2627, 4, cast(int) XPM.protected_variable_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 5, cast(int) XPM.public_variable_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			
-			//IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
-			//IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 6, cast(int) XPM.class_private_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 7, cast(int) XPM.class_protected_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 8, cast(int) XPM.class_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			
 			IupScintillaSendMessage( sci, 2627, 9, cast(int) XPM.struct_private_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
@@ -1001,17 +1001,17 @@ extern(C)
 		CScintilla cSci = ScintillaAction.getActiveCScintilla;
 		
 		if( cSci !is null )
-			if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+			if( fullPathByOS( cSci.getFullPath ) in GLOBAL.parserManager )
 			{
 				char[] prevLineText = fromStringz( IupGetAttributeId( ih, "LINE", lin ) );
 				if( !Util.trim( prevLineText ).length )
 				{
-					LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], lin, num );
+					LiveParser.lineNumberAdd( GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], lin, num );
 					//IupMessage( "", toStringz( "Num=" ~ Integer.toString( num ) ~ "\nLin=" ~ Integer.toString( lin ) ) );
 				}
 				else
 				{
-					LiveParser.lineNumberAdd( GLOBAL.parserManager[upperCase( cSci.getFullPath )], lin + 1, num );
+					LiveParser.lineNumberAdd( GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], lin + 1, num );
 				}
 			}
 		
@@ -1107,7 +1107,7 @@ extern(C)
 			{
 				if( _title[0] == '*' )
 				{
-					_title = _title[1..length];
+					_title = _title[1..$];
 					auto cSci = ScintillaAction.getCScintilla( ih );
 					if( cSci !is null )
 					{
@@ -2772,7 +2772,7 @@ extern(C)
 						char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
 						if( s == "\n" || s == "\r" )
 						{
-							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							AutoComplete.noneListProcedureName = "";
 						}
 						else
@@ -2787,7 +2787,7 @@ extern(C)
 						char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
 						if( s == "\n" || s == "\r" )
 						{
-							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							AutoComplete.noneListProcedureName = "";
 						}
 						else
@@ -2896,6 +2896,7 @@ extern(C)
 
 				if( insert == 1 )
 				{
+					/*
 					if( dText == "\n" || dText == "\r\n" )
 					{
 						if( GLOBAL.editorSetting00.LineMargin == "ON" )
@@ -2919,6 +2920,32 @@ extern(C)
 								char[] lc = Integer.toString( lineCount + 1 + count );
 								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
 							}
+						}
+					}
+					*/
+					if( dText.length > 2 )
+					{
+						int count =  Util.count( dText, "\n" );
+						if( count > 0 )
+						{
+							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+							int lineCount = IupGetInt( ih, "LINECOUNT" );
+							char[] lc = Integer.toString( lineCount + 1 + count );
+							IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+						}
+					}
+					else
+					{
+						if( dText == "\n" || dText == "\r\n" )
+						{
+							if( GLOBAL.editorSetting00.LineMargin == "ON" )
+							{
+								// Set margin size
+								int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+								int lineCount = IupGetInt( ih, "LINECOUNT" );
+								char[] lc = Integer.toString( lineCount + 1 );
+								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+							}						
 						}
 					}
 				}
@@ -2969,7 +2996,7 @@ extern(C)
 		if( AutoComplete.bSkipAutoComplete )
 		{
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+			//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 			
 			//GLOBAL.IDEMessageDlg.print( "bSkipAutoComplete = true" );
 			return IUP_DEFAULT;
@@ -2982,6 +3009,8 @@ extern(C)
 		{
 			if( ScintillaAction.isComment( ih, pos - 1 ) ) return IUP_DEFAULT;
 		}
+		
+		if( length > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
 		
 		// Include Autocomplete
 		if( AutoComplete.showListThread is null )
@@ -3072,7 +3101,7 @@ extern(C)
 		
 		if( insert == 1 )
 		{
-			if( length > 1 ) return IUP_DEFAULT;
+			//if( length > 1 ) return IUP_DEFAULT;
 
 			int dummyHeadPos;
 			// Below code are fixed because of IUP DLL10 and D 1.076
@@ -3355,7 +3384,7 @@ extern(C)
 			if( f.name == PRJFILE )
 			{
 				char[] dir = f.path;
-				if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'
+				if( dir.length ) dir = dir[0..$-1]; else return IUP_DEFAULT; // Remove tail '/'
 				GLOBAL.projectTree.openProject( dir );
 			}
 			else

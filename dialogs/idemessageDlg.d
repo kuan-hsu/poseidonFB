@@ -80,7 +80,8 @@ class CIDEMessageDialog : CBaseDialog
 				}
 			}
 		}
-		catch{}
+		catch( Exception e )
+		{}
 		
 		fontString = new IupString();
 	}

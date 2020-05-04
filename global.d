@@ -39,6 +39,7 @@ struct EditorColorUint
 	IupString[4]	maker;
 	IupString		callTip_Fore, callTip_Back, callTip_HLT;
 	IupString		functionTitle;
+	IupString		project_HLT, outline_HLT;
 }
 
 struct ShortKey
@@ -84,7 +85,7 @@ struct GLOBAL
 	public:
 	version(Windows) 	static _htmlHelp		htmlHelp;
 	
-	static CPLUGIN[char[]]	pluginMnager;
+	static CPLUGIN[char[]]		pluginMnager;
 	
 	static float				IUP_VERSION;
 	
@@ -183,7 +184,6 @@ struct GLOBAL
 	static char[]				toggleEnableDwell = "OFF";
 	static char[]				toggleOverWrite = "OFF";
 	static char[]				toggleCompleteAtBackThread = "OFF";
-	static IupString			completeDelay;
 	
 	static char[]				toggleUseManual = "OFF", toggleDummy = "ON";
 	
@@ -307,11 +307,15 @@ struct GLOBAL
 		GLOBAL.editColor.prjTitle = new IupString( cast(char[]) "128 0 0" );
 		GLOBAL.editColor.prjSourceType = new IupString( cast(char[]) "0 0 255" );
 		
-		GLOBAL.editColor.callTip_Fore = new IupString( cast(char[]) "112 112 112" );
-		GLOBAL.editColor.callTip_Back = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.callTip_HLT = new IupString( cast(char[]) "128 0 255" );
+		GLOBAL.editColor.callTip_Fore = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.callTip_Back = new IupString( cast(char[]) "234 248 192" );
+		GLOBAL.editColor.callTip_HLT = new IupString( cast(char[]) "202 0 0" );
 		
 		GLOBAL.editColor.functionTitle = new IupString( cast(char[]) "0 0 0" );
+		
+		GLOBAL.editColor.project_HLT = new IupString;
+		GLOBAL.editColor.outline_HLT = new IupString;
+		
 		
 		GLOBAL.compilerFullPath = new IupString();
 		GLOBAL.x64compilerFullPath = new IupString();
@@ -319,7 +323,6 @@ struct GLOBAL
 		GLOBAL.linuxTermName = new IupString();
 		GLOBAL.manualPath = new IupString();
 		//GLOBAL.colorTemplate = new IupString();
-		GLOBAL.completeDelay = new IupString( cast(char[]) "0" );
 		//GLOBAL.defaultOption = new IupString();
 		
 		GLOBAL.currentCustomCompilerOption = new IupString( cast(char*) "" );
@@ -610,7 +613,6 @@ struct GLOBAL
 						GLOBAL.languageItems["enabledwell"] = new IupString( cast(char[]) "Enable Mouse Dwell to Show Type" );
 						GLOBAL.languageItems["enableoverwrite"] = new IupString( cast(char[]) "Overwrite To Non Identifier Character" );
 						GLOBAL.languageItems["completeatbackthread"] = new IupString( cast(char[]) "Enable Codecomplete At Back Thread" );
-						GLOBAL.languageItems["completedelay"] = new IupString( cast(char[]) "  Display Delay(ms):" );
 						GLOBAL.languageItems["parserlive"] = new IupString( cast(char[]) "ParseLive! Level" );
 							GLOBAL.languageItems["none"] = new IupString( cast(char[]) "None" );
 							GLOBAL.languageItems["light"] = new IupString( cast(char[]) "Light" );

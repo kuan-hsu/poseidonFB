@@ -125,7 +125,8 @@ class CSearchExpander
 		// Group 3
 		Ihandle* btnCase = IupToggle( null, null );
 		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,NAME=toggle_Case,SIZE=x12" );
-		version(DIDE) IupSetAttribute( btnCase, "VALUE", "OFF" );
+		version(DIDE) IupSetAttribute( btnCase, "VALUE", "ON" );
+		version(FBIDE) IupSetAttribute( btnCase, "VALUE", "OFF" );
 		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
 		IupSetCallback( btnCase, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
@@ -263,7 +264,7 @@ extern(C)
 									int colonPos = Util.index( beginEndPos, ":" );
 									if( colonPos < beginEndPos.length )
 									{
-										char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
+										char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
 										IupSetAttribute( iupSci, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 									}
 								}
@@ -408,7 +409,7 @@ extern(C)
 				int colonPos = Util.index( beginEndPos, ":" );
 				if( colonPos < beginEndPos.length )
 				{
-					char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
+					char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
 					IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 				}
 			}
@@ -564,7 +565,7 @@ extern(C)
 								int colonPos = Util.index( beginEndPos, ":" );
 								if( colonPos < beginEndPos.length )
 								{
-									char[] newBeginEndPos = beginEndPos[colonPos+1..length] ~ ":" ~ beginEndPos[0..colonPos];
+									char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
 									IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 								}
 							}						

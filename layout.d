@@ -265,7 +265,7 @@ extern(C)
 					if( argPath.file == PRJFILE )
 					{
 						char[] dir = argPath.path;
-						if( dir.length ) dir = dir[0..length-1]; // Remove tail '/'
+						if( dir.length ) dir = dir[0..$-1]; // Remove tail '/'
 						GLOBAL.projectTree.openProject( dir );				
 					}
 					else
@@ -949,7 +949,7 @@ extern(C)
 			if( f.name == PRJFILE )
 			{
 				char[] dir = f.path;
-				if( dir.length ) dir = dir[0..length-1]; else return IUP_DEFAULT; // Remove tail '/'
+				if( dir.length ) dir = dir[0..$-1]; else return IUP_DEFAULT; // Remove tail '/'
 				GLOBAL.projectTree.openProject( dir );
 			}
 			else

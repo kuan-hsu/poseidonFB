@@ -454,9 +454,9 @@ struct LiveParser
 						//IupMessage( "newHead", toStringz( newHead[0].name ~ " " ~ newHead[0].type ~ " (" ~ Integer.toString( newHead[0].lineNumber ) ~ ")" ) );
 
 						// Get oringnal head
-						if( upperCase( cSci.getFullPath ) in GLOBAL.parserManager )
+						if( fullPathByOS( cSci.getFullPath ) in GLOBAL.parserManager )
 						{
-							CASTnode oldHead = AutoComplete.getFunctionAST( GLOBAL.parserManager[upperCase( cSci.getFullPath )], newHead[0].kind, lowerCase( newHead[0].name ), newHead[0].lineNumber );
+							CASTnode oldHead = AutoComplete.getFunctionAST( GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], newHead[0].kind, lowerCase( newHead[0].name ), newHead[0].lineNumber );
 							//if( oldHead !is null ) IupMessage( "oldHead", toStringz( oldHead.name ~ " " ~oldHead.type ~ " (" ~ Integer.toString( oldHead.lineNumber ) ~ ")" ) ); else IupMessage("","NULL");
 							if( oldHead !is null )
 							{

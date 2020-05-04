@@ -2,13 +2,13 @@
 
 class CASTnode
 {
-	private:
+private:
 	CASTnode			father;
 	CASTnode[]			children;
 	
-	public:
+public:
 	char[]				name;
-	int					kind;
+	uint				kind;
 	char[]				protection;
 	char[]				type;
 	char[]				base;
@@ -71,7 +71,7 @@ class CASTnode
 				children = _child ~ children;
 				return 0;
 			}
-			else if( children[length-1].lineNumber <= _ln )
+			else if( children[$-1].lineNumber <= _ln )
 			{
 				return addChild( _child );
 			}
@@ -104,7 +104,7 @@ class CASTnode
 			}
 
 			_child.father = this;
-			tempChildren = children[0..low] ~ _child ~ children[low..length];
+			tempChildren = children[0..low] ~ _child ~ children[low..$];
 			this.children = tempChildren;
 		}
 		else
@@ -136,22 +136,22 @@ class CASTnode
 
 version(FBIDE)
 {
-	const int B_VARIABLE = 1;
-	const int B_FUNCTION = 2;
-	const int B_SUB = 4;
-	const int B_PROPERTY = 8;
-	const int B_CTOR = 16;
-	const int B_DTOR = 32;
-	const int B_PARAM = 64;
-	const int B_TYPE = 128;
-	const int B_ENUM = 256;
-	const int B_UNION = 512;
-	const int B_CLASS = 1024;
-	const int B_INCLUDE = 2048;
-	const int B_ENUMMEMBER = 4096;
-	const int B_ALIAS = 8192;
-	const int B_BAS = 16384;
-	const int B_BI = 32768;
+	const uint B_VARIABLE = 1;
+	const uint B_FUNCTION = 2;
+	const uint B_SUB = 4;
+	const uint B_PROPERTY = 8;
+	const uint B_CTOR = 16;
+	const uint B_DTOR = 32;
+	const uint B_PARAM = 64;
+	const uint B_TYPE = 128;
+	const uint B_ENUM = 256;
+	const uint B_UNION = 512;
+	const uint B_CLASS = 1024;
+	const uint B_INCLUDE = 2048;
+	const uint B_ENUMMEMBER = 4096;
+	const uint B_ALIAS = 8192;
+	const uint B_BAS = 16384;
+	const uint B_BI = 32768;
 	const uint B_NAMESPACE = 65536;
 	const uint B_MACRO = 131072;
 	const uint B_SCOPE = 262144;
@@ -159,34 +159,36 @@ version(FBIDE)
 	const uint B_OPERATOR  = 1048576;
 	const uint B_WITH  = 2097152;
 
-	const int B_ALL = B_VARIABLE | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_PARAM | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_INCLUDE | B_ENUMMEMBER | B_ALIAS | B_NAMESPACE | B_MACRO;
-	const int B_FIND = B_VARIABLE | B_FUNCTION | B_PROPERTY | B_OPERATOR | B_PARAM | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_ALIAS | B_NAMESPACE | B_MACRO;// | B_SUB;
+	const uint B_ALL = B_VARIABLE | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_PARAM | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_INCLUDE | B_ENUMMEMBER | B_ALIAS | B_NAMESPACE | B_MACRO;
+	const uint B_FIND = B_VARIABLE | B_FUNCTION | B_PROPERTY | B_OPERATOR | B_PARAM | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_ALIAS | B_NAMESPACE | B_MACRO;// | B_SUB;
 }
 
 version(DIDE)
 {
-	const int D_VARIABLE = 1;
-	const int D_FUNCTION = 2;
-	const int D_STRUCT = 4;
-	const int D_CLASS = 8;
-	const int D_CTOR = 16;
-	const int D_DTOR = 32;
-	const int D_UNION = 64;
-	const int D_ENUM = 128;
-	const int D_ENUMMEMBER = 256;
-	const int D_TEMPLATE = 512;
-	const int D_INTERFACE = 1024;
-	const int D_ALIAS = 2048;
-	const int D_VERSION = 4096;
-	const int D_DEBUG = 8192;
-	const int D_SCOPE = 16384;
-	const int D_IMPORT = 32768;
+	const uint D_VARIABLE = 1;
+	const uint D_FUNCTION = 2;
+	const uint D_STRUCT = 4;
+	const uint D_CLASS = 8;
+	const uint D_CTOR = 16;
+	const uint D_DTOR = 32;
+	const uint D_UNION = 64;
+	const uint D_ENUM = 128;
+	const uint D_ENUMMEMBER = 256;
+	const uint D_TEMPLATE = 512;
+	const uint D_INTERFACE = 1024;
+	const uint D_ALIAS = 2048;
+	const uint D_VERSION = 4096;
+	const uint D_DEBUG = 8192;
+	const uint D_SCOPE = 16384;
+	const uint D_IMPORT = 32768;
 	const uint D_MIXIN = 65536;
 	const uint D_MODULE = 131072;
 	const uint D_PARAM = 262144;
 	const uint D_STATICIF = 524288;
 	const uint D_UNITTEST  = 1048576;
+	const uint D_FUNCTIONLITERALS = 2097152;
+	const uint D_FUNCTIONPTR = 4194304;
 
-	const int D_ALL = D_VARIABLE | D_FUNCTION | D_STRUCT | D_CLASS | D_CTOR | D_DTOR | D_UNION | D_ENUM | D_ENUMMEMBER | D_TEMPLATE | D_INTERFACE | D_ALIAS | D_VERSION | D_DEBUG | D_SCOPE | D_IMPORT | D_MIXIN | D_MODULE | D_PARAM | D_STATICIF;
-	const int D_FIND = D_VARIABLE | D_PARAM | D_FUNCTION | D_STRUCT | D_UNION | D_CLASS | D_INTERFACE | D_ENUM | D_ALIAS | D_TEMPLATE;
+	const uint D_ALL = D_VARIABLE | D_FUNCTION | D_STRUCT | D_CLASS | D_CTOR | D_DTOR | D_UNION | D_ENUM | D_ENUMMEMBER | D_TEMPLATE | D_INTERFACE | D_ALIAS | D_VERSION | D_DEBUG | D_SCOPE | D_IMPORT | D_MIXIN | D_MODULE | D_PARAM | D_STATICIF | D_FUNCTIONLITERALS | D_FUNCTIONPTR;
+	const uint D_FIND = D_VARIABLE | D_PARAM | D_FUNCTION | D_STRUCT | D_UNION | D_CLASS | D_INTERFACE | D_ENUM | D_ALIAS | D_TEMPLATE | D_FUNCTIONLITERALS | D_FUNCTIONPTR;
 }

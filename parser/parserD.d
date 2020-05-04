@@ -1,13 +1,12 @@
 ﻿module parser.parserD;
 
-
-import parser._parser;
-
 version(DIDE)
 {
+	import parser._parser;
+
 	class CParser : _PARSER
 	{
-		private :
+	private :
 		import			tools;
 		import			parser.ast, parser.token;
 		import			Util = tango.text.Util;
@@ -67,14 +66,18 @@ version(DIDE)
 					{
 						if( token().tok == _tokOpen )
 						{
+							if( _countDemlimit > 0 ) _params ~= token().identifier;
 							_countDemlimit ++;
 						}
 						else if( token().tok == _tokClose )
 						{
 							_countDemlimit --;
+							if( _countDemlimit > 0 ) _params ~= token().identifier;
 						}
-						else if( token().tok == TOK.Tidentifier )
+						else if( token().tok == TOK.Tidentifier || token().tok == TOK.Tfunction || token().tok == TOK.Tdelegate )
+						{
 							_params ~= ( " " ~ token().identifier );
+						}
 						else
 							_params ~= token().identifier;
 						
@@ -88,6 +91,7 @@ version(DIDE)
 				}
 
 				_params = Util.trim( _params );
+				
 				switch( _tokOpen )
 				{
 					case TOK.Topenparen:		_params = "(" ~ _params ~ ")"; break;
@@ -114,14 +118,9 @@ version(DIDE)
 			{
 				char[] _stackValue = protStack.top();
 				
-				if( _stackValue != "{" )
+				if( _stackValue.length > 1 )
 				{
-					if( _stackValue.length > 1 )
-					{
-						if( _stackValue[$-1] == '{' ||  _stackValue[$-1] == ':' )  _stackValue =  _stackValue[0..$-1];
-					}
-				
-					return _stackValue;
+					if( _stackValue[$-1] == ':' ) return _stackValue[0..$-1]; else return _stackValue;
 				}
 			}
 
@@ -292,6 +291,21 @@ version(DIDE)
 
 			try
 			{
+				do
+				{
+					if( token().tok == TOK.Ttimes ) // Check Pointer
+					{
+						_type ~= "*";
+						parseToken( TOK.Ttimes );
+					}
+
+					if( token().tok == TOK.Topenbracket ) // Check Array
+					{
+						_type ~= getDelimitedString( TOK.Topenbracket, TOK.Tclosebracket ); // Include [.......]
+					}
+				}
+				while( ( token().tok == TOK.Ttimes || token().tok == TOK.Topenbracket ) && tokenIndex < tokens.length );			
+
 				if( token().tok == TOK.Tdelegate || token().tok == TOK.Tfunction )
 				{
 					_type ~= ( " " ~ token().identifier );
@@ -303,23 +317,6 @@ version(DIDE)
 						int funTailIndex = getFunctionDeclareTailIndex();
 						if( tokens[funTailIndex].tok == TOK.Tidentifier ) _type ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
 					}
-				}
-				else
-				{
-					do
-					{
-						if( token().tok == TOK.Ttimes ) // Check Pointer
-						{
-							_type ~= "*";
-							parseToken( TOK.Ttimes );
-						}
-
-						if( token().tok == TOK.Topenbracket ) // Check Array
-						{
-							_type ~= getDelimitedString( TOK.Topenbracket, TOK.Tclosebracket ); // Include [.......]
-						}
-					}
-					while( token().tok == TOK.Ttimes || token().tok == TOK.Topenbracket );
 				}
 			}
 			catch( Exception e )
@@ -972,6 +969,63 @@ version(DIDE)
 								if( _type.length ) _type = _type[1..$-1];
 							}
 						}
+						else if( token().tok == TOK.Tstrings )
+						{
+							_type = "char[]";
+							parseToken( TOK.Tstrings );
+							switch( token().identifier )
+							{
+								case "c":			_type = "char[]";	parseToken();	break;
+								case "w":			_type = "wchar[]";	parseToken();	break;
+								case "d":			_type = "dchar[]";	parseToken();	break;
+								default:	break;
+							}
+						}
+						else if( token().tok == TOK.Tnumbers )
+						{
+							if( token().identifier.length )
+							{
+								char[] tail2;
+								if( token().identifier.length > 1 ) tail2 = token().identifier[$-2..$];
+								
+								if( Util.count( token().identifier, "." ) <= 0 )
+								{
+									_type = "int";
+									switch( token().identifier[$-1] )
+									{
+										case 'L':			_type = "long";		break;
+										case 'U':			_type = "uint";		break;
+										case 'f', 'F':		_type = "float";	break;
+										case 'i':			_type = "idouble";	break;
+										default:	break;
+									}
+									
+									if( tail2 == "UL" ) _type = "ulong";
+								}
+								else
+								{
+									_type = "float";
+									switch( token().identifier[$-1] )
+									{
+										case 'f', 'F':		_type = "float";	break;
+										case 'L':			_type = "real";		break;
+										case 'i':			_type = "idouble";	break;
+										default:			break;
+									}
+									
+									if( token().identifier.length > 1 )
+									{
+										switch( tail2 )
+										{
+											case "fi", "Fi":	_type = "ifloat";	break;
+											case "Li":			_type = "ireal";	break;
+											default:	break;
+										}										
+									}
+								}
+							}
+							parseToken( TOK.Tnumbers );
+						}
 
 						while( token().tok != TOK.Tcomma && token().tok != TOK.Tsemicolon )
 						{
@@ -1100,6 +1154,28 @@ version(DIDE)
 		{
 			char[]	_name, _rightName;
 			int		_ln;
+			
+			void _addChild()
+			{
+				/*
+				if( Util.index( _type, " function(" ) < _type.length )
+					activeASTnode.addChild( _name, D_FUNCTIONPTR, getProt(), _type, _rightName, _ln );
+				else if( Util.index( _type, " delegate(" ) < _type.length )
+					activeASTnode.addChild( _name, D_FUNCTIONPTR, getProt(), _type, _rightName, _ln );
+				else
+					activeASTnode.addChild( _name, D_VARIABLE, getProt(), _type, _rightName, _ln );
+				*/
+				int keyPos = Util.index( _type, " function(" );
+				if( keyPos >= _type.length ) keyPos = Util.index( _type, " delegate(" );
+				if( keyPos < _type.length )
+				{
+					activeASTnode.addChild( _name, D_FUNCTIONPTR, getProt(), _type[0..keyPos] ~ _type[keyPos+9..$], _rightName, _ln );
+				}
+				else
+				{
+					activeASTnode.addChild( _name, D_VARIABLE, getProt(), _type, _rightName, _ln );
+				}				
+			}
 
 			try
 			{
@@ -1124,13 +1200,13 @@ version(DIDE)
 						
 					if( token().tok == TOK.Tcomma )
 					{
-						activeASTnode.addChild( _name, D_VARIABLE, getProt(), _type, _rightName, _ln );
+						_addChild();
 						parseToken( TOK.Tcomma );
 						parseVariable( _type );
 					}
 					else if( token().tok == TOK.Tsemicolon )
 					{
-						activeASTnode.addChild( _name, D_VARIABLE, getProt(), _type, _rightName, _ln );
+						_addChild();
 						return true;
 					}
 				}
@@ -1225,7 +1301,8 @@ version(DIDE)
 						
 						if( tokens[funTailIndex+1].tok == TOK.Topencurly )
 							bContract = true;
-						else if( tokens[funTailIndex].tok == TOK.Tout && tokens[funTailIndex+1].tok == TOK.Topenparen  )
+						//else if( tokens[funTailIndex].tok == TOK.Tout && tokens[funTailIndex+1].tok == TOK.Topenparen  )
+						else if( tokens[funTailIndex+1].tok == TOK.Topenparen  )
 						{
 							int tailPos = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, funTailIndex+1 );
 							if( tokens[tailPos].tok == TOK.Topencurly ) bContract = true;
@@ -1328,7 +1405,7 @@ version(DIDE)
 
 					parseConstraint();
 				}
-				catch
+				catch( Exception e )
 				{
 
 				}
@@ -1779,7 +1856,7 @@ version(DIDE)
 					if( tokens[funTailIndex].tok == TOK.Tsemicolon )
 					{
 						_params = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-						//activeASTnode.addChild( null, D_CTOR, null, _params, null, _ln );
+						activeASTnode.addChild( null, D_CTOR, null, _params, null, _ln );
 						parseConstraint();
 						
 						return true;
@@ -2162,9 +2239,13 @@ version(DIDE)
 					if( token().tok == TOK.Tcomma )
 					{
 						parseToken( TOK.Tcomma );
-						parseEnumMembers( bAnonymous, _EnumBaseType );
+						if( token().tok != TOK.Tclosecurly ) parseEnumMembers( bAnonymous, _EnumBaseType );
 					}
 
+					return true;
+				}
+				else if( token().tok == TOK.Tclosecurly )
+				{
 					return true;
 				}
 			}
@@ -2714,11 +2795,11 @@ version(DIDE)
 			return true;
 		}
 
-		public:
+	public:
 		this()
 		{
-			curlyStack	= new CStack!(char[]);
-			protStack	= new CStack!(char[]);
+			curlyStack		= new CStack!(char[]);
+			protStack		= new CStack!(char[]);
 			conditionStack	= new CStack!(char[]);
 		}
 		
@@ -2729,8 +2810,8 @@ version(DIDE)
 		
 		~this()
 		{
-			if( curlyStack !is null )	delete curlyStack;
-			if( protStack !is null )	delete protStack;
+			if( curlyStack !is null )		delete curlyStack;
+			if( protStack !is null )		delete protStack;
 			if( conditionStack !is null )	delete conditionStack;
 		}
 		
@@ -2748,8 +2829,8 @@ version(DIDE)
 			if( protStack !is null ) delete protStack;
 			if( conditionStack !is null ) delete conditionStack;
 			
-			curlyStack	= new CStack!(char[]);
-			protStack	= new CStack!(char[]);
+			curlyStack		= new CStack!(char[]);
+			protStack		= new CStack!(char[]);
 			conditionStack	= new CStack!(char[]);
 			
 			if( !_tokens.length ) return false;
@@ -2759,8 +2840,6 @@ version(DIDE)
 		
 		CASTnode parse( char[] fullPath )
 		{
-			if( !tokens.length ) return null;
-			
 			CASTnode	head = null;
 			
 			try
@@ -2814,7 +2893,6 @@ version(DIDE)
 
 								protStack.push( "private:" );
 							}
-							
 							break;
 
 						case TOK.Tpublic:
@@ -2829,7 +2907,6 @@ version(DIDE)
 
 								protStack.push( "public:" );
 							}
-							
 							break;
 
 						case TOK.Tprotected:
@@ -2844,7 +2921,6 @@ version(DIDE)
 								
 								protStack.push( "protected:" );
 							}
-							
 							break;
 
 						// Basic Type
@@ -2921,7 +2997,30 @@ version(DIDE)
 						case TOK.Ttemplate:
 							parseTemplate();
 							break;
+							
+						case TOK.Tfunction, TOK.Tdelegate:
+							if( next().tok == TOK.Topenparen )
+							{
+								int tailIndex = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, tokenIndex + 1, false );
+								if( tokens[tailIndex].tok == TOK.Topencurly )
+								{
+									parseToken(); // TOK.Tfunction, TOK.Tdelegate
+									activeASTnode = activeASTnode.addChild( "-Anonymous-", D_FUNCTIONLITERALS, "private", null, null, token().lineNumber );
+									activeASTnode.type = getParameters();
+									curlyStack.push( "D_FUNCTIONLITERALS" );
+								}
+								else
+								{
+									parseToken();
+								}
+							}
+							else
+							{
+								parseToken();
+							}
 
+							break;							
+						
 						// Speed UP!!!!!!!
 						case TOK.Tif, TOK.Twhile, TOK.Tswitch:
 							parseToken();
@@ -2968,9 +3067,23 @@ version(DIDE)
 							}
 							break;
 
-						case TOK.Tout:
+						/+
+						Pre and Post Contracts
+						
+						in (expression)
+						in (expression, "failure string")
+						out (identifier; expression)
+						out (identifier; expression, "failure string")
+						out (; expression)
+						out (; expression, "failure string")
+						{
+							...function body...
+						}							
+						+/
+						case TOK.Tout, TOK.Tin:
 							if( next().tok == TOK.Topenparen )
 							{
+								/+
 								if( next2().tok == TOK.Tidentifier )
 								{
 									parseToken( TOK.Tout );
@@ -2987,9 +3100,15 @@ version(DIDE)
 								}
 								parseToken();
 								break;
+								+/
+								int tailIndex = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, tokenIndex + 1, false );
+								if( tokens[tailIndex].tok == TOK.Topencurly )
+								{
+									//curlyStack.push( token().identifier );
+									tokenIndex = tailIndex;
+									break;
+								}
 							}
-							// break; // Stranger
-							goto case;
 							
 						case TOK.Tdo:
 							if( next().tok == TOK.Topencurly )
@@ -3009,10 +3128,10 @@ version(DIDE)
 							parseToken( TOK.Tdo );
 							break;
 
-						case TOK.Tin, TOK.Tbody:
+						case /*TOK.Tin,*/ TOK.Tbody:
 							if( next().tok == TOK.Topencurly )
 							{
-								curlyStack.push( token().identifier );
+								//curlyStack.push( token().identifier );
 								parseToken();
 								//parseToken( TOK.Topencurly );
 								break;
@@ -3045,26 +3164,25 @@ version(DIDE)
 
 						case TOK.Topencurly:
 							curlyStack.push( "{" );
-
+							
+							// Protection
 							activeProt = "";
-							if( prev().tok == TOK.Tprivate || prev().tok == TOK.Tprotected || prev().tok == TOK.Tpublic ) protStack.push( prev().identifier ~ "{" ); else protStack.push( "{" ); 
-							//if( activeProt.length ) protStack.push( activeProt ~ "{" ); else protStack.push( "{" ); 
+							protStack.push( "{" );
+							if( prev().tok == TOK.Tprivate || prev().tok == TOK.Tprotected || prev().tok == TOK.Tpublic ) protStack.push( prev().identifier );
 							
 							parseToken( TOK.Topencurly );
 							break;
 							
 						case TOK.Tclosecurly:
-							/*
-							if( conditionStack.size > 0 )
+							// Protection
+							if( protStack.size() > 0 )
 							{
-								if( conditionStack.top().length )
-								{
-									conditionStack.pop();
-									return null;
-								}
+								while( protStack.top() != "{" && protStack.top() != "" )
+									protStack.pop();
+								
+								if( protStack.top() == "{" ) protStack.pop();
 							}
-							*/
-
+							
 
 							bool	bSkipParseToken;
 							if( curlyStack.top() == "{" )
@@ -3080,11 +3198,11 @@ version(DIDE)
 
 									case "debug":
 										if( D_KIND < 0 ) D_KIND = D_DEBUG;
-										goto case;
+										// goto case; // D2 compiler
 
 									case "staticif":
 										if( D_KIND < 0 ) D_KIND = D_STATICIF;
-										goto case;
+										// goto case; // D2 compiler
 										
 									case "version":
 										if( D_KIND < 0 ) D_KIND = D_VERSION;
@@ -3159,13 +3277,9 @@ version(DIDE)
 										break;
 									
 									// Contract Programming
-									case "in", "out":
+									case "in", "out", "do":
 										curlyStack.pop();
-										break;
-										
-									case "do":
-										curlyStack.pop();
-										goto default;
+										//goto default;  		// D2 compiler
 										
 									default:
 										curlyStack.pop();
@@ -3200,20 +3314,6 @@ version(DIDE)
 							}
 							
 							if( !bSkipParseToken ) parseToken( TOK.Tclosecurly );
-
-
-							switch( protStack.top() )
-							{
-								case "puclic{", "private{", "protected{":
-									protStack.pop();
-									break;
-
-								case "puclic:", "private:", "protected:":
-									protStack.pop();
-									
-								default:
-									protStack.pop();
-							}
 							break;
 
 						case TOK.Tsemicolon:
@@ -3308,12 +3408,8 @@ version(DIDE)
 									}
 								}
 								
-
-								if( token().tok != TOK.Tauto )
-								{
-									while( isStorageClass( next().tok ) )
-										parseToken();
-								}
+								while( isStorageClass( next().tok ) && token().tok != TOK.Tauto )
+									parseToken();
 								
 								// Auto Functions & Auto Ref Functions
 								if( token().tok == TOK.Tauto )

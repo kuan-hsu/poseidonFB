@@ -336,7 +336,7 @@ version(FBIDE)
 				type = Util.trim( type[0..length-5] ); // remove (gdb)
 			
 				int posAssign = Util.index( type, " = " );
-				if( posAssign < type.length ) return type[posAssign+3..length].dup;
+				if( posAssign < type.length ) return type[posAssign+3..$].dup;
 			}
 			return "?";
 		}
@@ -350,7 +350,7 @@ version(FBIDE)
 				value = value[0..length-5]; // remove (gdb)
 				
 				int posAssign = Util.index( value, " = " );
-				if( posAssign < value.length ) return value[posAssign+3..length].dup;
+				if( posAssign < value.length ) return value[posAssign+3..$].dup;
 			}
 			return "?";
 		}
@@ -403,7 +403,7 @@ version(FBIDE)
 							if( fnHead < lnHead )
 							{
 								results ~= valueString[fnHead+4..lnHead];
-								results ~= valueString[lnHead+1..length];
+								results ~= valueString[lnHead+1..$];
 
 								return results;
 							}
@@ -428,11 +428,11 @@ version(FBIDE)
 				if( ScintillaAction.openFile( fullPath, lineNumber ) )
 				{	
 					//#define SCI_MARKERDELETEALL 2045
-					IupScintillaSendMessage( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, 2045, 3, 0 );
-					IupScintillaSendMessage( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, 2045, 4, 0 );
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2045, 3, 0 );
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2045, 4, 0 );
 				
-					IupScintillaSendMessage( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, 2043, lineNumber - 1, 3 ); // #define SCI_MARKERADD 2043
-					IupScintillaSendMessage( GLOBAL.scintillaManager[upperCase(fullPath)].getIupScintilla, 2043, lineNumber - 1, 4 ); // #define SCI_MARKERADD 2043
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2043, lineNumber - 1, 3 ); // #define SCI_MARKERADD 2043
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2043, lineNumber - 1, 4 ); // #define SCI_MARKERADD 2043
 				}
 			}
 		}
@@ -473,14 +473,14 @@ version(FBIDE)
 								if( bIsNum )
 								{
 									char[] _id = trueLineData[0..colonPos];
-									trueLineData = trueLineData[colonPos+2..length];
+									trueLineData = trueLineData[colonPos+2..$];
 									int assignPos = Util.index( trueLineData, " = " );
 									if( assignPos < trueLineData.length )
 									{
 										ids ~= _id;
 										char[] tempVar = Util.trim( trueLineData[0..assignPos] );
 										vars ~= tempVar;
-										char[] tempValue = Util.trim( trueLineData[assignPos+3..length] );
+										char[] tempValue = Util.trim( trueLineData[assignPos+3..$] );
 										values ~= tempValue;
 
 										if( tempValue[0] != '(' ) types ~= ( "(" ~ getWhatIs( tempVar ) ~") " );else types ~= "";
@@ -621,7 +621,7 @@ version(FBIDE)
 			return  _result;
 		}
 
-		void getTypeVarValueByLines( char[] gdbMessage, inout char[][] types, inout char[][] vars, inout char[][] values )
+		void getTypeVarValueByLines( char[] gdbMessage, ref char[][] types, ref char[][] vars, ref char[][] values )
 		{
 			foreach( char[] s; Util.splitLines( fixGDBMessage( gdbMessage ) ) )
 			{
@@ -630,7 +630,7 @@ version(FBIDE)
 				{
 					char[] tempVar = Util.trim( s[0..assignPos] );
 					vars ~= tempVar;
-					values ~= Util.trim( s[assignPos+3..length] );
+					values ~= Util.trim( s[assignPos+3..$] );
 					types ~= getWhatIs( tempVar );
 				}
 			}
@@ -695,7 +695,7 @@ version(FBIDE)
 			return varTabHandle;
 		}
 		
-		char[] getTypeValueByName( char[] varName, char[] originTitle, inout char[] type, inout char[] value )
+		char[] getTypeValueByName( char[] varName, char[] originTitle, ref char[] type, ref char[] value )
 		{
 			char[] nodeTitle;
 			
@@ -804,7 +804,7 @@ version(FBIDE)
 
 						if( varName.length )
 						{
-							if( varName[length-1] == '.' ) varName = varName[0..length-1];
+							if( varName[$-1] == '.' ) varName = varName[0..$-1];
 							return varName;
 						}
 					}
@@ -914,7 +914,7 @@ version(FBIDE)
 										else
 										{
 											type = " = (" ~ GLOBAL.debugPanel.getWhatIs( varName ~ "." ~ data[0..assignPos] ) ~ ")";
-											results ~= Util.trim( data[0..assignPos]  ~ type ~ " " ~ data[assignPos+3..length] );
+											results ~= Util.trim( data[0..assignPos]  ~ type ~ " " ~ data[assignPos+3..$] );
 										}
 									}
 									else
@@ -938,7 +938,7 @@ version(FBIDE)
 									else
 									{
 										type = " = (" ~ GLOBAL.debugPanel.getWhatIs( varName ~ "." ~ data[0..assignPos] ) ~ ")";
-										results ~= Util.trim( data[0..assignPos]  ~ type ~ " " ~ data[assignPos+3..length] );
+										results ~= Util.trim( data[0..assignPos]  ~ type ~ " " ~ data[assignPos+3..$] );
 									}
 								}
 								else
@@ -975,7 +975,7 @@ version(FBIDE)
 											results ~= Util.trim( data ~ type ~ " {...}" );
 											i = j + 1;
 											//IupMessage("",toStringz(Integer.toString( i ) ) );
-											//IupMessage("length",toStringz(Integer.toString( result[length-1] ) ) );
+											//IupMessage("length",toStringz(Integer.toString( result[$-1] ) ) );
 											data = "";
 											break;
 										}
@@ -1110,7 +1110,7 @@ version(FBIDE)
 									char[] listValue	= fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
 									char[] _listID		= Util.trim( listValue[0..6] );
 									char[] _lineNum		= Util.trim( listValue[6..12] );
-									char[] _fullPath	= Util.trim( listValue[12..length] );
+									char[] _fullPath	= Util.trim( listValue[12..$] );
 											
 
 									if( _listID == _id )
@@ -1251,7 +1251,7 @@ version(FBIDE)
 														if( fnHead < lnHead )
 														{
 															char[] _fn = branchString[fnHead+4..lnHead];
-															char[] _ln = branchString[lnHead+1..length];
+															char[] _ln = branchString[lnHead+1..$];
 															
 															IupSetAttributeId( backtraceHandle, "USERDATA", lastID, tools.getCString( _fn ~ ":" ~ _ln ) );
 														}
@@ -1480,15 +1480,15 @@ version(FBIDE)
 												{
 													if( !bBeginGetVar )
 													{
-														if( Util.index( upperCase(s), upperCase(frameFullPath) ) < s.length ) bBeginGetVar = true;
+														if( Util.index( fullPathByOS(s), fullPathByOS(frameFullPath) ) < s.length ) bBeginGetVar = true;
 													}
 													else
 													{
 														if( s.length )
 														{
-															if( s[length-1] == ';' )
+															if( s[$-1] == ';' )
 															{
-																char[][] splitData = Util.split( s[0..length-1], " " );
+																char[][] splitData = Util.split( s[0..$-1], " " );
 																if( splitData.length == 2 )
 																{
 																	varsName ~= splitData[1];
@@ -1775,7 +1775,7 @@ version(FBIDE)
 					char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
 					char[] id = Util.trim( listValue[0..6] );
 					char[] ln = Util.trim( listValue[6..12] );
-					char[] fn = Util.trim( listValue[12..length] );
+					char[] fn = Util.trim( listValue[12..$] );
 
 					if( fn == _fullPath && ln == _lineNum )
 					{
@@ -1791,7 +1791,7 @@ version(FBIDE)
 					char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
 					char[] id = Util.trim( listValue[0..6] );
 					char[] ln = Util.trim( listValue[6..12] );
-					char[] fn = Util.trim( listValue[12..length] );
+					char[] fn = Util.trim( listValue[12..$] );
 
 					if( fn == _fullPath && ln == _lineNum ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
 				}
@@ -1853,7 +1853,7 @@ version(FBIDE)
 						{
 							if( result.length >= 5 )
 							{
-								if( result[length-5..length] == "(gdb)" ) break;
+								if( result[$-5..$] == "(gdb)" ) break;
 							}
 						}
 					}
@@ -1999,7 +1999,7 @@ version(FBIDE)
 					{
 						char[] id = Util.trim( listValue[0..6] );
 						char[] ln = Util.trim( listValue[6..12] );
-						char[] fn = Util.trim( listValue[12..length] );
+						char[] fn = Util.trim( listValue[12..$] );
 
 						if( id == "-1" )
 						{

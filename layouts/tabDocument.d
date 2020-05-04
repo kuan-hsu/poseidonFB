@@ -4,7 +4,7 @@ private import iup.iup;
 private import iup.iup_scintilla;
 private import global, actionManager, scintilla, menu, tools, parser.autocompletion;
 
-import tango.stdc.stringz, tango.io.Stdout;;
+import tango.stdc.stringz, tango.io.Stdout;
 
 void createTabs()
 {

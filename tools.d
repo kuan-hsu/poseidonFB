@@ -1,7 +1,9 @@
 ﻿module tools;
 
 import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz, tango.time.Clock;
-import Util = tango.text.Util, tango.io.device.File, tango.io.stream.Lines, tango.io.FilePath, Path = tango.io.Path;
+import Util = tango.text.Util, tango.io.device.File, tango.io.stream.Lines, tango.io.FilePath, Path = tango.io.Path, Integer = tango.text.convert.Integer;
+
+import iup.iup;
 
 version(DIDE)
 {
@@ -23,13 +25,9 @@ version(DIDE)
 		
 		int size(){ return container_size; }
 
-		bool empty(){ if( container_size == 0 ) return true;else return false; }
+		bool empty(){ if( container_size == 0 ) return true; else return false; }
 
-		void clear()
-		{
-			container_size = 0;
-			//container.length = 0;
-		}
+		void clear(){ container_size = 0; }
 	}
 
 
@@ -54,7 +52,7 @@ version(DIDE)
 			container[container_size - 1] = t;
 		}
 
-		void pop(){ if( container_size < 1 ) return;else container_size --; }
+		void pop(){ if( container_size < 1 ) return; else container_size --; }
 
 		T top(){ if( container_size < 1 ) return null; else return container[container_size - 1]; }
 	}
@@ -217,6 +215,12 @@ int upperCase( int num )
 	return result;
 }
 
+char[] fullPathByOS( char[] s )
+{
+	version(Windows) return upperCase( s );
+	return s;
+}
+
 void sleep( uint millisecond )
 {
 	auto now = Clock.now.span.millis;
@@ -225,6 +229,36 @@ void sleep( uint millisecond )
 	{
 	}
 }
+
+
+int convertIupColor( char[] color )
+{
+	int result = 0xffffff;
+	
+	if( color.length > 1 )
+	{
+		if( color[0] == '#' )
+		{
+			color = "0x" ~ color[1..$];
+			result = Integer.atoi( color );
+		}
+		else if( color[0..2] == "0x" )
+		{
+			result = Integer.atoi( color );
+		}
+		else
+		{
+			char[][] colors = Util.split( color, " " );
+			if( colors.length == 3 )
+			{
+				result = ( Integer.atoi( colors[2] ) << 16 ) | ( Integer.atoi( colors[1] ) << 8 ) | ( Integer.atoi( colors[0] ) );
+			}
+		}
+	}
+
+	return result;
+}
+
 
 version(FBIDE)
 {
@@ -297,52 +331,6 @@ int getINILineData( char[] lineData, out char[] left, out char[] right )
 
 version(DIDE)
 {
-	char[] removeArrayAndPointer( char[] word )
-	{
-		char[] result;
-
-		foreach( char c; word )
-		{
-			if( c == '[' || c == '*' || c == '!' ) break; else result ~= c;
-		}
-
-		return result;
-	}
-
-	char[] getSeparateType( char[] _string, bool bemoveArrayAndPoint = false )
-	{
-		int openParenPos = Util.index( _string, "(" );
-
-		if( openParenPos > 0 && openParenPos < _string.length )
-		{
-			if( _string[openParenPos-1] == '!' ) openParenPos = Util.index( _string, "(", openParenPos + 1 );
-		}
-		
-		if( openParenPos < _string.length )
-		{
-			if( bemoveArrayAndPoint ) return removeArrayAndPointer( _string[0..openParenPos] ); else return _string[0..openParenPos];
-		}
-
-		return !bemoveArrayAndPoint ? _string : removeArrayAndPointer( _string );
-	}
-
-	char[] getSeparateParam( char[] _string )
-	{
-		int openParenPos = Util.index( _string, "(" );
-
-		if( openParenPos > 0 && openParenPos < _string.length )
-		{
-			if( _string[openParenPos-1] == '!' ) openParenPos = Util.index( _string, "(", openParenPos + 1 );
-		}
-		
-		if( openParenPos < _string.length )
-		{
-			return _string[openParenPos..$];
-		}
-
-		return null;
-	}
-
 	char[] convertGoUPLevel( char[] oriPath )
 	{
 		scope _sp = new FilePath;
@@ -425,8 +413,7 @@ version(DIDE)
 						line = line[7..$];
 						if( line.length )
 						{
-							Util.replace( line, '\t', ' ' );
-							foreach( char[] _section; _split( line ) )
+							foreach( char[] _section; _split( Util.replace( line, '\t', ' ' ) ) )
 							{
 								if( _section.length > 2 )
 								{
@@ -475,90 +462,9 @@ version(DIDE)
 						}
 					}
 				}
-			
-				/+
-				if( line.length > 7 )
-				{
-					if( line[0..7] == "DFLAGS=" )
-					{
-						int importPos;
-
-						do
-						{
-							line = Path.normalize( line );
-							
-							importPos = Util.index( line, "\"-I", importPos );
-							if( importPos < line.length )
-							{
-								int endPos = Util.index( line, "\"", importPos + 3 );
-								if( endPos < line.length )
-								{
-									char[] importString = line[importPos+3..endPos];
-
-									foreach( char[] s; Util.split( importString, ";" ) )
-									{
-										if( s.length )
-										{
-											char[] compilerPath = filePath.path();
-											if( compilerPath.length )
-												if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
-
-											s = Util.substitute( s, "%@P%", compilerPath );
-											Util.replace( s, '\\', '/' );
-											if(s[$-1] != '/' ) s ~= '/';
-											results ~= convertGoUPLevel( s );
-										}
-									}
-								}
-
-								importPos = endPos;
-							}
-							else
-							{
-								importPos = Util.index( line, "-I", importPos );
-								if( importPos < line.length )
-								{
-									int		i;
-									char[]	importString;
-									
-									for( i = importPos + 2; i < line.length; ++ i )
-									{
-										if( line[i] != ' ' && line[i] != '\t' )
-										{
-											importString ~= line[i];
-										}
-										else
-										{
-											break;
-										}
-									}
-
-									importPos = i;
-
-									foreach( char[] s; Util.split( importString, ";" ) )
-									{
-										if( s.length )
-										{
-											char[] compilerPath = filePath.path();
-											if( compilerPath.length )
-												if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
-
-											s = Util.substitute( s, "%@P%", compilerPath );
-											Util.replace( s, '\\', '/' );
-											if(s[$-1] != '/' ) s ~= '/';
-											results ~= convertGoUPLevel( s );
-										}
-									}								
-								}
-							}
-						}
-						while( importPos < line.length )
-					}
-				}
-				+/
 			}
 		}
-
+		
 		delete sc;	
 		return results;
 	}
@@ -571,20 +477,15 @@ class CPLUGIN
 	import											tango.sys.SharedLib;
 	import											tango.stdc.stringz;
 	
-	extern(C) void function( Ihandle* )				poseidonFB_Dll_Go;
-	extern(C) void function()						poseidonFB_Dll_Release;
+	//extern(C) void function()						poseidon_Dll_Go;
+	extern(C) void function( char* _fullPath )		poseidon_Dll_Go;
+	extern(C) void function()						poseidon_Dll_Release;
 	
 	SharedLib										sharedLib;
 	char[]											pluginName, pluginPath;
 	bool											bSuccess, bReleaseSuccess;
 	
 	public:
-	
-	/*
-	typedef extern (C) void function( Ihandle* ) 	_Send_PoseidonFB_HANDLE;
-	typedef extern (C) void function( Ihandle* ) 	_Send_SCINTILLA;
-	typedef extern (C) void function( Ihandle* ) 	_poseidonFB_Dll_Go;
-	*/
 	
 	this( char[] name, char[] fullPath )
 	{
@@ -595,18 +496,18 @@ class CPLUGIN
 			
 			sharedLib = SharedLib.load( fullPath );
 			
-			void* iupPtr = sharedLib.getSymbol( "poseidonFB_Dll_Go" );
+			void* iupPtr = sharedLib.getSymbol( "poseidon_Dll_Go" );
 			if( iupPtr )
 			{
-				void **point = cast(void **) &poseidonFB_Dll_Go; // binding function address from DLL to our function pointer
+				void **point = cast(void **) &poseidon_Dll_Go; // binding function address from DLL to our function pointer
 				*point = iupPtr;
 				bSuccess = true;
 				
 				// Release
-				void* iupPtrRelease = sharedLib.getSymbol( "poseidonFB_Dll_Release" );
+				void* iupPtrRelease = sharedLib.getSymbol( "poseidon_Dll_Release" );
 				if( iupPtrRelease )
 				{
-					void **pointRelease = cast(void **) &poseidonFB_Dll_Release; // binding function address from DLL to our function pointer
+					void **pointRelease = cast(void **) &poseidon_Dll_Release; // binding function address from DLL to our function pointer
 					*pointRelease = iupPtrRelease;
 					bReleaseSuccess = true;
 				}				
@@ -614,8 +515,8 @@ class CPLUGIN
 			else
 			{
 				unload();
-				IupMessage( "Error", toStringz( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" ) );
-				throw new Exception( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" );
+				IupMessage( "Error", toStringz( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" ) );
+				throw new Exception( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" );
 			}
 			
 
@@ -623,8 +524,8 @@ class CPLUGIN
 			else
 			{
 				unload();
-				IupMessage( "Error", toStringz( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" ) );
-				throw new Exception( "Load poseidonFB_Dll_Go Symbol in " ~ name ~ " Error!" );
+				IupMessage( "Error", toStringz( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" ) );
+				throw new Exception( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" );
 			}
 			+/
 		}
@@ -641,13 +542,13 @@ class CPLUGIN
 	
 	~this()
 	{
-		if( bReleaseSuccess) poseidonFB_Dll_Release();
+		if( bReleaseSuccess) poseidon_Dll_Release();
 		if( sharedLib !is null ) sharedLib.unload();
 	}
 	
-	void go( Ihandle* poseidonFB_MainHandle )
+	void go()
 	{
-		if( bSuccess ) poseidonFB_Dll_Go( poseidonFB_MainHandle );
+		if( bSuccess ) poseidon_Dll_Go( toStringz( pluginPath ) );
 	}
 	
 	bool isSuccess()
@@ -670,7 +571,7 @@ class CPLUGIN
 		if( sharedLib !is null )
 		{
 			//IupMessage( "DLL UNLOAD", toStringz( pluginName ) );
-			if( bReleaseSuccess) poseidonFB_Dll_Release();
+			if( bReleaseSuccess) poseidon_Dll_Release();
 			sharedLib.unload();
 		}
 	}

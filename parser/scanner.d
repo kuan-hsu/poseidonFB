@@ -23,9 +23,9 @@ public:
 			{
 				char[] 	document;
 				//char[]	splitLineDocument;
-				if( upperCase(fullPath) in GLOBAL.scintillaManager )
+				if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
 				{
-					auto cSci = GLOBAL.scintillaManager[upperCase(fullPath)];
+					auto cSci = GLOBAL.scintillaManager[fullPathByOS(fullPath)];
 					if( cSci !is null )
 						document = cSci.getText();
 					else
@@ -483,7 +483,7 @@ public:
 									if( data[i+1] == '*' ) // Check if /*
 									{
 										commentCount ++;
-										break;;
+										break;
 									}
 								}
 							}

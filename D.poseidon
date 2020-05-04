@@ -27,6 +27,7 @@ name=dialogs/prjPropertyDlg.d
 name=dialogs/searchDlg.d
 name=dialogs/shortcutDlg.d
 name=dialogs/singleTextDlg.d
+name=dialogs/textOpenDlg.d
 name=executer.d
 name=global.d
 name=images/imageData.d

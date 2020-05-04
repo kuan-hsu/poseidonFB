@@ -2,7 +2,7 @@
 
 struct IDECONFIG
 {
-	private:
+private:
 	import iup.iup;
 	
 	import global, actionManager, tools;
@@ -48,34 +48,9 @@ struct IDECONFIG
 		}
 		return false;
 	}
-	
-	/*
-	version(linux) static void setLinuxTerminal()
-	{
-		// Get linux terminal program name
-		
-		//char[] termNameFile = cast(char[]) File.get( "/etc/alternatives/x-terminal-emulator" );
-		GLOBAL.linuxTermName = "/etc/alternatives/x-terminal-emulator";
-		scope term = new UnicodeFile!(char)( "/etc/alternatives/x-terminal-emulator", Encoding.Unknown );
-		char[] termNameFile = term.read;
-		if( termNameFile.length )
-		{
-			int pos = Util.rindex( termNameFile, "exec('" ); 
-			if( pos < termNameFile.length )
-			{
-				GLOBAL.linuxTermName = "";
-				for( int i = pos + 6; i < termNameFile.length; ++ i )
-				{
-					if( termNameFile[i] == '\'' ) break;
-					GLOBAL.linuxTermName ~= termNameFile[i];
-				}
-			}
-		}
-	}
-	*/
 
-	public:
 
+public:
 	static char[] convertShortKeyValue2String( int keyValue )
 	{
 		char[] result;
@@ -130,7 +105,7 @@ struct IDECONFIG
 						{
 							if( splitWord[3].length > 1 )
 							{
-								result = result + 0xFFBD + Integer.atoi( splitWord[3][1..length] );
+								result = result + 0xFFBD + Integer.atoi( splitWord[3][1..$] );
 							}
 						}
 				}
@@ -315,6 +290,8 @@ struct IDECONFIG
 			doc ~= setINILineData( "calltipBack", GLOBAL.editColor.callTip_Back.toDString );
 			doc ~= setINILineData( "calltipHLT", GLOBAL.editColor.callTip_HLT.toDString );
 			doc ~= setINILineData( "functionTitle", GLOBAL.editColor.functionTitle.toDString );
+			doc ~= setINILineData( "projectHLT", GLOBAL.editColor.project_HLT.toDString );
+			doc ~= setINILineData( "outlineHLT", GLOBAL.editColor.outline_HLT.toDString );
 			
 			// shortkeys
 			doc ~= setINILineData( "[shortkeys]");
@@ -399,7 +376,6 @@ struct IDECONFIG
 			doc ~= setINILineData( "enabledwell", GLOBAL.toggleEnableDwell );
 			doc ~= setINILineData( "enableoverwrite", GLOBAL.toggleOverWrite );
 			doc ~= setINILineData( "completeatbackthread", GLOBAL.toggleCompleteAtBackThread );
-			doc ~= setINILineData( "completedelay", GLOBAL.completeDelay.toDString );
 			doc ~= setINILineData( "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 			doc ~= setINILineData( "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 			doc ~= setINILineData( "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
@@ -710,7 +686,8 @@ struct IDECONFIG
 							
 							case "functionTitle":			GLOBAL.editColor.functionTitle = right;					break;
 							
-							
+							case "projectHLT":				GLOBAL.editColor.project_HLT = right;					break;
+							case "outlineHLT":				GLOBAL.editColor.outline_HLT = right;					break;
 							
 							default:
 						}
@@ -816,7 +793,6 @@ struct IDECONFIG
 							case "enabledwell":				GLOBAL.toggleEnableDwell = right;								break;
 							case "enableoverwrite":			GLOBAL.toggleOverWrite = right;									break;
 							case "completeatbackthread":	GLOBAL.toggleCompleteAtBackThread = right;						break;
-							case "completedelay":			GLOBAL.completeDelay = right;									break;
 							case "livelevel":				GLOBAL.liveLevel = Integer.atoi( right );						break;
 							case "updateoutlinelive":		GLOBAL.toggleUpdateOutlineLive = right;							break;
 							case "keywordcase":				GLOBAL.keywordCase = Integer.atoi( right );						break;

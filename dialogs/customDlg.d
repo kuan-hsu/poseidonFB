@@ -12,13 +12,15 @@ private import Integer = tango.text.convert.Integer;
 class CCustomDialog : CBaseDialog
 {
 	private:
-	Ihandle*			listTools;
+	Ihandle*			listTools, listPluginStatus;
 	Ihandle*			labelStatus;
 	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n%p% = Active Prj Files\n%pdir% = Active Prj Dir";
 	IupString			_tools, _args;
 	
 	
-	static	CustomTool[10]		editCustomTools;	
+	static	CustomTool[10]			editCustomTools;
+	
+	static	char[][]				pluginFullPath;
 
 	void createLayout()
 	{
@@ -35,8 +37,6 @@ class CCustomDialog : CBaseDialog
 		IupSetAttributes( listTools, "EXPAND=HORIZONTAL" );
 		IupSetHandle( "listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomDialog_ACTION );
-		IupSetCallback( listTools, "BUTTON_CB", cast(Icallback) &CCustomDialog_BUTTON_CB );
-		
 		for( int i = 1; i < 10; ++ i )
 		{
 			if( !CCustomDialog.editCustomTools[i].name.toDString.length ) break;
@@ -120,7 +120,65 @@ class CCustomDialog : CBaseDialog
 
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
-		Ihandle* vBoxLayout = IupVbox( frameList, vBoxDescription, labelSEPARATOR, bottom, null );
+		
+		
+		// Plugin manager
+		listPluginStatus = IupList( null );
+		IupSetAttributes( listPluginStatus, "EXPAND=HORIZONTAL,SIZE=x50" );
+		IupSetHandle( "listPluginStatus_Handle", listPluginStatus );
+		int count;
+		foreach( CPLUGIN p; GLOBAL.pluginMnager )
+		{
+			IupSetAttributeId( listPluginStatus, "", ++count, toStringz( p.getName ) );
+			CCustomDialog.pluginFullPath ~= p.getPath;
+		}
+		
+		Ihandle* unloadButton = IupButton( "   Unload   ", null );
+		IupSetCallback( unloadButton, "ACTION", cast(Icallback) function( Ihandle* _ih )
+		{
+			Ihandle* ih = IupGetHandle( "listPluginStatus_Handle" );
+			if( ih != null )
+			{
+				char*	id = IupGetAttribute( ih, "VALUE" );
+				int		numID = IupGetInt( ih, "VALUE" );
+				
+				if( numID > 0 )
+				{
+					char[] name = fromStringz( IupGetAttribute( ih, id ) ).dup;
+					if( name in GLOBAL.pluginMnager )
+					{
+						auto p = GLOBAL.pluginMnager[name];
+						
+						if( CCustomDialog.pluginFullPath.length >= numID )
+						{
+							if( CCustomDialog.pluginFullPath[numID-1] == p.getPath ) // Double confirm
+							{
+								int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, "Unload The Plugin?", "YESNO" );
+								if( result == 1 )
+								{
+									delete p;
+									GLOBAL.pluginMnager.remove( name );
+									IupSetAttribute( ih, "REMOVEITEM", id );
+									
+									char[][] temp;
+									for( int i = 0; i < CCustomDialog.pluginFullPath.length; ++ i )
+									{
+										if( i != numID - 1 ) temp ~= CCustomDialog.pluginFullPath[i];
+									}
+									CCustomDialog.pluginFullPath = temp;
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+		
+		Ihandle* vBoxStatus = IupVbox( listPluginStatus, IupHbox( IupFill, unloadButton, null ), null );
+		Ihandle* frameListPlugin = IupFrame( vBoxStatus );
+		IupSetAttribute( frameListPlugin, "TITLE", "Plugins Status" );
+
+		Ihandle* vBoxLayout = IupVbox( frameList, vBoxDescription, labelSEPARATOR, bottom, frameListPlugin, null );
 		
 		IupAppend( _dlg, vBoxLayout );
 	}	
@@ -161,6 +219,12 @@ class CCustomDialog : CBaseDialog
 		delete _tools;
 		delete _args;
 	}
+	
+	char[] show( int x, int y )
+	{
+		IupPopup( _dlg, x, y );
+		return null;
+	}	
 }
 
 extern(C) // Callback for CFindInFilesDialog
@@ -241,38 +305,6 @@ extern(C) // Callback for CFindInFilesDialog
 		else
 		{
 			return IUP_DEFAULT;
-		}
-		
-		return IUP_DEFAULT;
-	}
-	
-	private int CCustomDialog_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
-	{
-		if( pressed == 0 ) // release
-		{
-			if( button == IUP_BUTTON3 )
-			{
-				char* id = IupGetAttribute( ih, "VALUE" );
-				char[] name = fromStringz( IupGetAttribute( ih, id ) ).dup;
-				if( name in GLOBAL.pluginMnager )
-				{
-					auto p = GLOBAL.pluginMnager[name];
-					
-					Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
-					char[] dir = fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup;
-					
-					// Double Confirm......
-					if( p.getPath == dir )
-					{
-						int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, "Unload The Plugin?", "YESNO" );
-						if( result == 1 )
-						{
-							delete p;
-							GLOBAL.pluginMnager.remove( name );
-						}
-					}
-				}
-			}
 		}
 		
 		return IUP_DEFAULT;

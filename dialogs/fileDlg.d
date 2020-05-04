@@ -57,7 +57,7 @@ class CFileDlg
 				}
 				else
 				{
-					if( fileString[length-1] == '|' ) // > 1 files
+					if( fileString[$-1] == '|' ) // > 1 files
 					{
 						char[][] _files = Util.split( fileString, "|" );
 						if( _files.length )
