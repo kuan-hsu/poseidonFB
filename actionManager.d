@@ -585,10 +585,10 @@ public:
 		
 		if( !GLOBAL.scintillaManager.length )
 		{
-			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Undo" );
+			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Undo" );
 			if( _undo != null ) IupSetAttribute( _undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
 
-			Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Redo" );
+			Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Redo" );
 			if( _redo != null ) IupSetAttribute( _redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
 		}		
 	}
@@ -1896,12 +1896,12 @@ public:
 
 			if( cSci !is null )
 			{
-				Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Undo" );
+				Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Undo" );
 				if( _undo != null ) // SCI_CANUNDO 2174
 				{
 					if( ( cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2174, 0, 0 ) ) == 0 ) IupSetAttribute( _undo, "ACTIVE", "NO" ); else IupSetAttribute( _undo, "ACTIVE", "YES" );
 				}					
-				Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Redo" );
+				Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Redo" );
 				if( _redo != null ) // SCI_CANREDO 2016
 				{
 					if( ( cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2016, 0, 0 ) ) == 0 ) IupSetAttribute( _redo, "ACTIVE", "NO" ); else IupSetAttribute( _redo, "ACTIVE", "YES" );

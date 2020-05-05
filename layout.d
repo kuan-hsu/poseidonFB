@@ -27,7 +27,7 @@ void createExplorerWindow()
 
 
 	GLOBAL.projectViewTabs = IupTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
-	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL,BORDER=NO,NAME=POSEIDONFB_LEFT_TABS" );
+	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL,BORDER=NO,NAME=POSEIDON_LEFT_TABS" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
 
 	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
@@ -69,7 +69,7 @@ void createExplorerWindow()
 	Ihandle* projectViewBackground = IupBackgroundBox( GLOBAL.fileListSplit );
 	
 	GLOBAL.explorerSplit = IupSplit( projectViewBackground, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
-	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDONFB_LEFT_SPLIT");
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT");
 	//version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 
@@ -110,7 +110,7 @@ void createExplorerWindow()
 		if( GLOBAL.IUP_VERSION > 3.24 ) IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x2" ); else IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-		IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDONFB_BOTTOM_TABS" );
+		IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDON_BOTTOM_TABS" );
 		IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		/*
 		IupSetAttribute( GLOBAL.messageWindowTabs, "EXTRABUTTONS", "1" );
@@ -126,7 +126,7 @@ void createExplorerWindow()
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
-	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDONFB_BOTTOM_SPLIT");
+	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_BOTTOM_SPLIT");
 	//IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 	/*
@@ -148,7 +148,7 @@ void createExplorerWindow()
 	GLOBAL.scrollICONHandle = IupDialog( _scrolllabel );
 	IupSetStrAttribute( GLOBAL.scrollICONHandle, "OPACITYIMAGE", "icon_scroll" );
 	IupSetAttributes( GLOBAL.scrollICONHandle, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO" );
-	IupSetAttribute( GLOBAL.scrollICONHandle, "PARENTDIALOG", "POSEIDONFB_MAIN_DIALOG" );
+	IupSetAttribute( GLOBAL.scrollICONHandle, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
 	GLOBAL.scrollTimer = IupTimer();
 	IupSetAttributes( GLOBAL.scrollTimer, "TIME=200,RUN=NO" );
 	IupSetCallback( GLOBAL.scrollTimer, "ACTION_CB", cast(Icallback) function( Ihandle* ih )
@@ -214,7 +214,7 @@ void createExplorerWindow()
 void createEditorSetting()
 {
 	//IDECONFIG.load();
-	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( -1, -1, GLOBAL.languageItems["message"].toDString, true, "POSEIDONFB_MAIN_DIALOG" );
+	GLOBAL.IDEMessageDlg	= new CIDEMessageDialog( -1, -1, GLOBAL.languageItems["message"].toDString, true, "POSEIDON_MAIN_DIALOG" );
 	//GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 24 );
 	//IupHide( GLOBAL.IDEMessageDlg.getIhandle );
 
@@ -235,8 +235,8 @@ void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"].toDString );
 	//GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
-	//GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "POSEIDONFB_MAIN_DIALOG" );
-	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString, null, false, "POSEIDONFB_MAIN_DIALOG" );
+	//GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "POSEIDON_MAIN_DIALOG" );
+	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString, null, false, "POSEIDON_MAIN_DIALOG" );
 }
 
 

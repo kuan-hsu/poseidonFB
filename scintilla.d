@@ -1477,10 +1477,10 @@ extern(C)
 							IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
 						}
 						
-						Ihandle* __undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Undo" );
+						Ihandle* __undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Undo" );
 						if( __undo != null ) IupSetAttribute( __undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
 
-						Ihandle* __redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Redo" );
+						Ihandle* __redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Redo" );
 						if( __redo != null ) IupSetAttribute( __redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
 						
 						DocumentTabAction.setFocus( sci );

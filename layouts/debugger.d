@@ -1804,7 +1804,7 @@ version(FBIDE)
 	class CVarDlg : CSingleTextDialog
 	{
 		public:
-		this( int w, int h, char[] title, char[] _labelText = null,  char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
+		this( int w, int h, char[] title, char[] _labelText = null,  char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG" )
 		{
 			super( w, h, title, _labelText, textWH, text, bResize, parent );
 			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CConsoleDlg_btnCancel_cb );

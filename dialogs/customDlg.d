@@ -12,15 +12,13 @@ private import Integer = tango.text.convert.Integer;
 class CCustomDialog : CBaseDialog
 {
 	private:
-	Ihandle*			listTools, listPluginStatus;
+	Ihandle*			listTools, treePluginStatus;
 	Ihandle*			labelStatus;
 	char[]				paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n%p% = Active Prj Files\n%pdir% = Active Prj Dir";
 	IupString			_tools, _args;
 	
 	
 	static	CustomTool[10]			editCustomTools;
-	
-	static	char[][]				pluginFullPath;
 
 	void createLayout()
 	{
@@ -123,69 +121,59 @@ class CCustomDialog : CBaseDialog
 		
 		
 		// Plugin manager
-		listPluginStatus = IupList( null );
-		IupSetAttributes( listPluginStatus, "EXPAND=HORIZONTAL,SIZE=x50" );
-		IupSetHandle( "listPluginStatus_Handle", listPluginStatus );
-		int count;
-		foreach( CPLUGIN p; GLOBAL.pluginMnager )
-		{
-			IupSetAttributeId( listPluginStatus, "", ++count, toStringz( p.getName ) );
-			CCustomDialog.pluginFullPath ~= p.getPath;
-		}
+		treePluginStatus = IupTree();
+		IupSetAttributes( treePluginStatus, "ADDROOT=NO" );
+		IupSetHandle( "treePluginStatus_Handle", treePluginStatus );
+
 		
 		Ihandle* unloadButton = IupButton( "   Unload   ", null );
 		IupSetCallback( unloadButton, "ACTION", cast(Icallback) function( Ihandle* _ih )
 		{
-			Ihandle* ih = IupGetHandle( "listPluginStatus_Handle" );
+			Ihandle* ih = IupGetHandle( "treePluginStatus_Handle" );
 			if( ih != null )
 			{
-				char*	id = IupGetAttribute( ih, "VALUE" );
-				int		numID = IupGetInt( ih, "VALUE" );
-				
-				if( numID > 0 )
+				int id = IupGetInt( ih, "VALUE" );
+
+				if( id > -1 )
 				{
-					char[] name = fromStringz( IupGetAttribute( ih, id ) ).dup;
+					char[] name = fromStringz( IupGetAttributeId( ih, "TITLE", id ) );
+					char[] path = fromStringz( IupGetAttributeId( ih, "USERDATA", id ) );
+					
 					if( name in GLOBAL.pluginMnager )
 					{
 						auto p = GLOBAL.pluginMnager[name];
-						
-						if( CCustomDialog.pluginFullPath.length >= numID )
+						if( p.getPath() == path )
 						{
-							if( CCustomDialog.pluginFullPath[numID-1] == p.getPath ) // Double confirm
-							{
-								int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, "Unload The Plugin?", "YESNO" );
-								if( result == 1 )
-								{
-									delete p;
-									GLOBAL.pluginMnager.remove( name );
-									IupSetAttribute( ih, "REMOVEITEM", id );
-									
-									char[][] temp;
-									for( int i = 0; i < CCustomDialog.pluginFullPath.length; ++ i )
-									{
-										if( i != numID - 1 ) temp ~= CCustomDialog.pluginFullPath[i];
-									}
-									CCustomDialog.pluginFullPath = temp;
-								}
-							}
+							IupSetAttribute( ih, "DELNODE", "SELECTED" );
+							delete p;
+							GLOBAL.pluginMnager.remove( name );
 						}
 					}
 				}
 			}
 		});
 		
-		Ihandle* vBoxStatus = IupVbox( listPluginStatus, IupHbox( IupFill, unloadButton, null ), null );
+		Ihandle* vBoxStatus = IupVbox( treePluginStatus, IupHbox( IupFill, unloadButton, null ), null );
 		Ihandle* frameListPlugin = IupFrame( vBoxStatus );
 		IupSetAttribute( frameListPlugin, "TITLE", "Plugins Status" );
 
 		Ihandle* vBoxLayout = IupVbox( frameList, vBoxDescription, labelSEPARATOR, bottom, frameListPlugin, null );
 		
 		IupAppend( _dlg, vBoxLayout );
+
+		// Must ADDLEAF after IupMap
+		IupMap( _dlg );
+		foreach( CPLUGIN p; GLOBAL.pluginMnager )
+		{
+			auto fp = new IupString( p.getPath );
+			IupSetAttributeId( treePluginStatus, "ADDLEAF", IupGetInt( treePluginStatus, "COUNT" ) - 1, toStringz( p.getName ) );
+			IupSetAttributeId( treePluginStatus, "USERDATA", IupGetInt( treePluginStatus, "COUNT" ) - 1, fp.toCString );
+		}
 	}	
 
 	public:
 	
-	this( int w, int h, char[] title, bool bResize = false, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
+	this( int w, int h, char[] title, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_tools" );
@@ -345,7 +333,7 @@ extern(C) // Callback for CFindInFilesDialog
 		int index = IupGetInt( toolsHandle, "COUNT" );
 		if( index >= 5 ) return IUP_DEFAULT;
 		
-		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomtool"].toDString(), GLOBAL.languageItems["tools"].toDString() ~ ":", "120x", null, false, "POSEIDONFB_MAIN_DIALOG", "icon_newfile" );
+		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomtool"].toDString(), GLOBAL.languageItems["tools"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile" );
 		char[] fileName = description.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 		
 		if( fileName.length )

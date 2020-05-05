@@ -191,7 +191,7 @@ class CArgOptionDialog : CBaseDialog
 
 	public:
 	
-	this( int w, int h, char[] title, int _QuickMode = 0, bool bResize = false, char[] parent = "POSEIDONFB_MAIN_DIALOG" )
+	this( int w, int h, char[] title, int _QuickMode = 0, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		QuickMode = _QuickMode;
 		

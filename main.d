@@ -208,7 +208,7 @@ void main( char[][] args )
 	createMenu();
 	// Creates a dialog containing the control
 	GLOBAL.mainDlg = IupDialog( null );
-	IupSetHandle( "POSEIDONFB_MAIN_DIALOG", GLOBAL.mainDlg );
+	IupSetHandle( "POSEIDON_MAIN_DIALOG", GLOBAL.mainDlg );
 	IupSetCallback( GLOBAL.mainDlg, "CLOSE_CB", cast(Icallback) &mainDialog_CLOSE_cb );
 	IupSetCallback( GLOBAL.mainDlg, "SHOW_CB", cast(Icallback) &mainDialog_SHOW_cb );
 	IupSetCallback( GLOBAL.mainDlg, "K_ANY", cast(Icallback) &mainKany_cb );

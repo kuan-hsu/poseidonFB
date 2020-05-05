@@ -54,31 +54,31 @@ class CToolBar
 		btnQuickRun			= IupButton( null, "QuickRun" );
 
 
-		IupSetAttributes( btnNew, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_newfile,NAME=POSEIDONFB_TOOLBAR_New" );
+		IupSetAttributes( btnNew, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_newfile,NAME=POSEIDON_TOOLBAR_New" );
 		IupSetAttribute( btnNew, "TIP", GLOBAL.languageItems["caption_new"].toCString );
 		IupSetCallback( btnNew, "ACTION", cast(Icallback) &menu.newFile_cb ); // From menu.d
 
-		IupSetAttributes( btnOpen, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_openfile,NAME=POSEIDONFB_TOOLBAR_Open" );
+		IupSetAttributes( btnOpen, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_openfile,NAME=POSEIDON_TOOLBAR_Open" );
 		IupSetAttribute( btnOpen, "TIP", GLOBAL.languageItems["caption_open"].toCString );
 		IupSetCallback( btnOpen, "ACTION", cast(Icallback) &menu.openFile_cb ); // From menu.d
 
-		IupSetAttributes( btnSave, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_save,NAME=POSEIDONFB_TOOLBAR_Save" );
+		IupSetAttributes( btnSave, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_save,NAME=POSEIDON_TOOLBAR_Save" );
 		IupSetAttribute( btnSave, "TIP", GLOBAL.languageItems["sc_save"].toCString );
 		IupSetCallback( btnSave, "ACTION", cast(Icallback) &menu.saveFile_cb ); // From menu.d
 
-		IupSetAttributes( btnSaveAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_saveall,NAME=POSEIDONFB_TOOLBAR_SaveAll" );
+		IupSetAttributes( btnSaveAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_saveall,NAME=POSEIDON_TOOLBAR_SaveAll" );
 		IupSetAttribute( btnSaveAll, "TIP", GLOBAL.languageItems["sc_saveall"].toCString );
 		IupSetCallback( btnSaveAll, "ACTION", cast(Icallback) &menu.saveAllFile_cb ); // From menu.d
 
-		IupSetAttributes( btnUndo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_undo,ACTIVE=NO,NAME=POSEIDONFB_TOOLBAR_Undo" );
+		IupSetAttributes( btnUndo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_undo,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_Undo" );
 		IupSetAttribute( btnUndo, "TIP", GLOBAL.languageItems["sc_undo"].toCString );
 		IupSetCallback( btnUndo, "ACTION", cast(Icallback) &menu.undo_cb ); // From menu.d
 		
-		IupSetAttributes( btnRedo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_redo,ACTIVE=NO,NAME=POSEIDONFB_TOOLBAR_Redo" );
+		IupSetAttributes( btnRedo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_redo,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_Redo" );
 		IupSetAttribute( btnRedo, "TIP", GLOBAL.languageItems["sc_redo"].toCString );
 		IupSetCallback( btnRedo, "ACTION", cast(Icallback) &menu.redo_cb ); // From menu.d
 		
-		IupSetAttributes( btnClearUndoBuffer, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDONFB_TOOLBAR_ClearUndoBuffer" );
+		IupSetAttributes( btnClearUndoBuffer, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDON_TOOLBAR_ClearUndoBuffer" );
 		IupSetAttribute( btnClearUndoBuffer, "TIP", GLOBAL.languageItems["clear"].toCString );
 		IupSetCallback( btnClearUndoBuffer, "ACTION", cast(Icallback) function()
 		{
@@ -88,10 +88,10 @@ class CToolBar
 				IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
 			}
 			
-			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Undo" );
+			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Undo" );
 			if( _undo != null ) IupSetAttribute( _undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
 
-			Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDONFB_TOOLBAR_Redo" );
+			Ihandle* _redo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Redo" );
 			if( _redo != null ) IupSetAttribute( _redo, "ACTIVE", "NO" ); // SCI_CANREDO 2016
 			
 			DocumentTabAction.setFocus( sci );
@@ -99,22 +99,22 @@ class CToolBar
 		});		
 		
 
-		IupSetAttributes( btnCut, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_cut,NAME=POSEIDONFB_TOOLBAR_Cut" );
+		IupSetAttributes( btnCut, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_cut,NAME=POSEIDON_TOOLBAR_Cut" );
 		IupSetAttribute( btnCut, "TIP", GLOBAL.languageItems["caption_cut"].toCString );
 		IupSetCallback( btnCut, "ACTION", cast(Icallback) &menu.cut_cb ); // From menu.d
 		
-		IupSetAttributes( btnCopy, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_copy,NAME=POSEIDONFB_TOOLBAR_Copy" );
+		IupSetAttributes( btnCopy, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_copy,NAME=POSEIDON_TOOLBAR_Copy" );
 		IupSetAttribute( btnCopy, "TIP", GLOBAL.languageItems["caption_copy"].toCString );
 		IupSetCallback( btnCopy, "ACTION", cast(Icallback) &menu.copy_cb ); // From menu.d
 		
-		IupSetAttributes( btnPaste, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_paste,NAME=POSEIDONFB_TOOLBAR_Paste" );
+		IupSetAttributes( btnPaste, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_paste,NAME=POSEIDON_TOOLBAR_Paste" );
 		IupSetAttribute( btnPaste, "TIP", GLOBAL.languageItems["caption_paste"].toCString );
 		IupSetCallback( btnPaste, "ACTION", cast(Icallback) &menu.paste_cb ); // From menu.d
 
 
 
 		// Nav
-		IupSetAttributes( btnBackNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left,ACTIVE=NO,NAME=POSEIDONFB_TOOLBAR_BackwardNav" );
+		IupSetAttributes( btnBackNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_BackwardNav" );
 		IupSetAttribute( btnBackNav, "TIP", GLOBAL.languageItems["sc_backnav"].toCString );
 		IupSetHandle( "toolbar_BackNav", btnBackNav );
 		IupSetCallback( btnBackNav, "ACTION", cast(Icallback) function()
@@ -124,7 +124,7 @@ class CToolBar
 			return IUP_DEFAULT;
 		});		
 		
-		IupSetAttributes( btnForwardNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_right,ACTIVE=NO,NAME=POSEIDONFB_TOOLBAR_ForwardNav" );
+		IupSetAttributes( btnForwardNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_right,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_ForwardNav" );
 		IupSetAttribute( btnForwardNav, "TIP", GLOBAL.languageItems["sc_forwardnav"].toCString );
 		IupSetHandle( "toolbar_ForwardNav", btnForwardNav );
 		IupSetCallback( btnForwardNav, "ACTION", cast(Icallback) function()
@@ -134,7 +134,7 @@ class CToolBar
 			return IUP_DEFAULT;
 		});			
 		
-		IupSetAttributes( btnClearNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDONFB_TOOLBAR_ClearNav" );
+		IupSetAttributes( btnClearNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDON_TOOLBAR_ClearNav" );
 		IupSetAttribute( btnClearNav, "TIP", GLOBAL.languageItems["clear"].toCString );
 		IupSetHandle( "toolbar_ClearNav", btnClearNav );
 		IupSetCallback( btnClearNav, "ACTION", cast(Icallback) function()
@@ -144,7 +144,7 @@ class CToolBar
 		});
 
 
-		IupSetAttributes( btnMark, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_mark,NAME=POSEIDONFB_TOOLBAR_Mark" );
+		IupSetAttributes( btnMark, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_mark,NAME=POSEIDON_TOOLBAR_Mark" );
 		IupSetAttribute( btnMark, "TIP", GLOBAL.languageItems["bookmark"].toCString );
 		IupSetCallback( btnMark, "ACTION", cast(Icallback) function()
 		{
@@ -166,7 +166,7 @@ class CToolBar
 			return IUP_DEFAULT;
 		});
 		
-		IupSetAttributes( btnMarkPrev, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markprev,NAME=POSEIDONFB_TOOLBAR_MarkPrev" );
+		IupSetAttributes( btnMarkPrev, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markprev,NAME=POSEIDON_TOOLBAR_MarkPrev" );
 		IupSetAttribute( btnMarkPrev, "TIP", GLOBAL.languageItems["bookmarkprev"].toCString );
 		IupSetCallback( btnMarkPrev, "ACTION", cast(Icallback) function()
 		{
@@ -200,7 +200,7 @@ class CToolBar
 			return IUP_DEFAULT;
 		});
 		
-		IupSetAttributes( btnMarkNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_marknext,NAME=POSEIDONFB_TOOLBAR_MarkNext" );
+		IupSetAttributes( btnMarkNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_marknext,NAME=POSEIDON_TOOLBAR_MarkNext" );
 		IupSetAttribute( btnMarkNext, "TIP", GLOBAL.languageItems["bookmarknext"].toCString );
 		IupSetCallback( btnMarkNext, "ACTION", cast(Icallback) function()
 		{
@@ -230,7 +230,7 @@ class CToolBar
 			return IUP_DEFAULT;
 		});
 		
-		IupSetAttributes( btnMarkClean, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markclear,NAME=POSEIDONFB_TOOLBAR_MarkClear" );
+		IupSetAttributes( btnMarkClean, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markclear,NAME=POSEIDON_TOOLBAR_MarkClear" );
 		IupSetAttribute( btnMarkClean, "TIP", GLOBAL.languageItems["bookmarkclear"].toCString );
 		IupSetCallback( btnMarkClean, "ACTION", cast(Icallback) function()
 		{
@@ -240,29 +240,29 @@ class CToolBar
 		});
 
 
-		IupSetAttributes( btnCompile, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_compile,NAME=POSEIDONFB_TOOLBAR_Compile" );
+		IupSetAttributes( btnCompile, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_compile,NAME=POSEIDON_TOOLBAR_Compile" );
 		IupSetAttribute( btnCompile, "TIP", GLOBAL.languageItems["sc_compile"].toCString );
 		IupSetCallback( btnCompile, "BUTTON_CB", cast(Icallback) &compile_button_cb );
 
-		IupSetAttributes( btnBuildRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_buildrun,NAME=POSEIDONFB_TOOLBAR_CompileRun" );
+		IupSetAttributes( btnBuildRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_buildrun,NAME=POSEIDON_TOOLBAR_CompileRun" );
 		IupSetAttribute( btnBuildRun, "TIP", GLOBAL.languageItems["sc_compilerun"].toCString );
 		IupSetCallback( btnBuildRun, "BUTTON_CB", cast(Icallback) &buildrun_button_cb );
 
-		IupSetAttributes( btnRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_run,NAME=POSEIDONFB_TOOLBAR_Run" );
+		IupSetAttributes( btnRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_run,NAME=POSEIDON_TOOLBAR_Run" );
 		IupSetAttribute( btnRun, "TIP", GLOBAL.languageItems["sc_run"].toCString );
 		IupSetCallback( btnRun, "BUTTON_CB", cast(Icallback) &run_button_cb );
 
-		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_build,NAME=POSEIDONFB_TOOLBAR_Build" );
+		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_build,NAME=POSEIDON_TOOLBAR_Build" );
 		IupSetAttribute( btnBuildAll, "TIP", GLOBAL.languageItems["sc_build"].toCString );
 		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &build_button_cb );
 		IupSetHandle( "toolbar_BuildAll", btnBuildAll );
 		
-		IupSetAttributes( btnReBuild, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild,NAME=POSEIDONFB_TOOLBAR_ReBuild" );
+		IupSetAttributes( btnReBuild, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild,NAME=POSEIDON_TOOLBAR_ReBuild" );
 		IupSetAttribute( btnReBuild, "TIP", GLOBAL.languageItems["rebuildprj"].toCString );
 		IupSetCallback( btnReBuild, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
 		IupSetHandle( "toolbar_ReBuild", btnReBuild );
 
-		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun,NAME=POSEIDONFB_TOOLBAR_QuickRun" );
+		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun,NAME=POSEIDON_TOOLBAR_QuickRun" );
 		IupSetAttribute( btnQuickRun, "TIP", GLOBAL.languageItems["sc_quickrun"].toCString );
 		IupSetCallback( btnQuickRun, "BUTTON_CB", cast(Icallback) &quickRun_button_cb );
 
@@ -277,7 +277,7 @@ class CToolBar
 		version(Windows)
 		{
 			guiButton = IupToggle( null, "GUI" );
-			IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,NAME=POSEIDONFB_TOOLBAR_Gui" );
+			IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,NAME=POSEIDON_TOOLBAR_Gui" );
 			IupSetAttribute( guiButton, "VALUE", toStringz( GLOBAL.editorSetting00.GUI ) );
 			IupSetAttribute( guiButton, "TIP", "Console / GUI" );
 			IupSetCallback( guiButton, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -287,13 +287,13 @@ class CToolBar
 			});			
 			
 			bitButton = IupToggle( null, "bit" );
-			IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,NAME=POSEIDONFB_TOOLBAR_Bit" );
+			IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,NAME=POSEIDON_TOOLBAR_Bit" );
 			IupSetAttribute( bitButton, "VALUE", toStringz( GLOBAL.editorSetting00.Bit64 ) );
 			/*
 			else
 			{
 				IupSetAttribute( bitButton, "ACTIVE", "NO" );
-				IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_64,IMPRESS=icon_64,NAME=POSEIDONFB_TOOLBAR_Bit" );
+				IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_64,IMPRESS=icon_64,NAME=POSEIDON_TOOLBAR_Bit" );
 				GLOBAL.editorSetting00.Bit64 = "ON";
 			}
 			*/
@@ -313,14 +313,14 @@ class CToolBar
 		
 		
 		listHandle = IupList( null );
-		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDONFB_TOOLBAR_FunctionList" );
+		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDON_TOOLBAR_FunctionList" );
 		IupSetAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetAttribute( listHandle, "EXPAND", "HORIZONTAL" );
 		IupSetAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.functionTitle.toCString );
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		
 		Ihandle* commandText = IupScintilla();
-		IupSetAttributes( commandText, "ACTIVE=YES,NAME=POSEIDONFB_COMMANDLINE,VISIBLE=NO,SIZE=1x8" );
+		IupSetAttributes( commandText, "ACTIVE=YES,NAME=POSEIDON_COMMANDLINE,VISIBLE=NO,SIZE=1x8" );
 		IupSetCallback( commandText, "SAVEPOINT_CB", cast(Icallback) &command_SAVEPOINT_CB );
 		
 		
@@ -336,7 +336,7 @@ class CToolBar
 					btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun, listHandle, commandText, null );
 		}
 
-		IupSetAttributes( handle, "GAP=2,ALIGNMENT=ACENTER,NAME=POSEIDONFB_TOOLBAR" );
+		IupSetAttributes( handle, "GAP=2,ALIGNMENT=ACENTER,NAME=POSEIDON_TOOLBAR" );
 		version(linux) IupSetAttributes( handle, "MARGIN=0x2" );
 	}
 
