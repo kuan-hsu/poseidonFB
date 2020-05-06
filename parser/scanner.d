@@ -38,7 +38,7 @@ public:
 					document = FileAction.loadFile( fullPath, _encoding );
 				}
 
-				return scan( document.dup );
+				return scan( document );
 			}
 			catch( Exception e )
 			{
@@ -260,11 +260,11 @@ public:
 							*/
 
 						case ',', '+', '*', '/', ':', '(', ')', '[', ']', '<', '=', '{', '}': // '>', 
-							if( lowerCase( identifier.dup ) in identToTOK )
+							if( lowerCase( identifier ) in identToTOK )
 							{
 								if( identifier.length )
 								{
-									TokenUnit t = {identToTOK[lowerCase( identifier.dup )], identifier, lineNum};
+									TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
 									results ~= t;
 								}
 							}
@@ -304,11 +304,11 @@ public:
 							break;
 						
 						case '\t', ' ', '\n':
-							if( lowerCase( identifier.dup ) in identToTOK )
+							if( lowerCase( identifier ) in identToTOK )
 							{
 								if( identifier.length )
 								{
-									TokenUnit t = {identToTOK[lowerCase( identifier.dup )], identifier, lineNum};
+									TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
 									results ~= t;
 								}
 							}
@@ -367,9 +367,9 @@ public:
 							{
 								if( cast(int) identifier[0] < 48 || cast(int) identifier[0] > 57 )
 								{
-									if( lowerCase( identifier.dup ) in identToTOK )
+									if( lowerCase( identifier ) in identToTOK )
 									{
-										TokenUnit t = {identToTOK[lowerCase( identifier.dup )], identifier, lineNum};
+										TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
 										results ~= t;
 									}
 									else

@@ -1213,7 +1213,7 @@ class COutline
 		layoutHandle = IupVbox( outlineToolbarH, outlineTreeNodeList, zBoxHandle, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" ) );
 		
-		version(DIDE) loadObjectParser();
+		loadObjectParser();
 	}
 
 	void toBoldTitle( Ihandle* _tree, int id )
@@ -1952,9 +1952,20 @@ class COutline
 		return null;
 	}
 	
-	version(DIDE)
+	CASTnode loadObjectParser()
 	{
-		CASTnode loadObjectParser()
+		version(FBIDE)
+		{
+			scope objectFilePath = new FilePath( "settings/FB_BuiltinFunctions.bi" );
+			if( objectFilePath.exists )
+			{
+				GLOBAL.objectParserFullPath = fullPathByOS( objectFilePath.toString() );
+				
+				return loadParser( GLOBAL.objectParserFullPath );
+			}
+		}
+		
+		version(DIDE)
 		{
 			scope objectFilePath = new FilePath( GLOBAL.compilerFullPath.toDString );
 			objectFilePath.set( objectFilePath.path );
@@ -1969,11 +1980,27 @@ class COutline
 			if( objectFilePath.exists )
 			{
 				GLOBAL.objectParserFullPath = fullPathByOS( _path ~ "import/object.di" );
-				return loadParser( objectFilePath.toString() );
+				return loadParser( GLOBAL.objectParserFullPath );
 			}
-			
-			return null;
+			else
+			{	
+				objectFilePath.set( GLOBAL.compilerFullPath.toDString );
+				objectFilePath.set( objectFilePath.path );
+				objectFilePath.set( objectFilePath.parent );
+				_path = objectFilePath.parent;
+				if( _path.length )
+					if( _path[$-1] != '/' ) _path ~= '/';
+				
+				objectFilePath.set( _path ~ "src/druntime/import/object.d" );
+				if( objectFilePath.exists )
+				{
+					GLOBAL.objectParserFullPath = fullPathByOS( objectFilePath.toString() );
+					return loadParser( GLOBAL.objectParserFullPath );
+				}
+			}
 		}
+		
+		return null;
 	}
 }
 

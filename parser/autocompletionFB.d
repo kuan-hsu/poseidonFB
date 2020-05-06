@@ -2518,7 +2518,7 @@ version(FBIDE)
 			if( text == "(" )
 			{
 				bCallTip = true;
-				IupSetAttribute( iupSci, "AUTOCCANCEL\0", "YES\0" ); // Prevent autocomplete -> calltip issue
+				IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" ); // Prevent autocomplete -> calltip issue
 			}
 			else if( text == "." )
 			{
@@ -2662,8 +2662,14 @@ version(FBIDE)
 
 									if( bCallTip )
 									{
-										resultNodes			= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
-										resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
+										if( GLOBAL.objectParserFullPath.length )
+										{
+											if( fullPathByOS(GLOBAL.objectParserFullPath) in GLOBAL.parserManager )
+												resultNodes	= getMatchASTfromWholeWord( GLOBAL.parserManager[fullPathByOS(GLOBAL.objectParserFullPath)], splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
+										}
+											
+										resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+										resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
 
 										// For Type Objects
 										if( memberFunctionMotherName.length )

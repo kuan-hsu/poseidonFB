@@ -229,10 +229,10 @@ struct GLOBAL
 	static char[][]				customCompilerOptions;
 	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
 
+	static char[]				objectParserFullPath;
 	version(DIDE)
 	{
 		static char[][]				defaultImportPaths;
-		static char[]				objectParserFullPath;
 		static char[]				toggleSkipUnittest = "ON";
 	}
 	

@@ -126,7 +126,7 @@ version(FBIDE)
 		Tredim,
 		Tvar,
 		Tpreserve,
-		Terase,
+		//Terase,
 		
 		// class
 		Tclass,
@@ -306,7 +306,7 @@ version(FBIDE)
 		identToTOK["redim"]		= TOK.Tredim;
 		identToTOK["var"]		= TOK.Tvar;
 		identToTOK["preserve"]	= TOK.Tpreserve;
-		identToTOK["erase"]		= TOK.Terase;
+		//identToTOK["erase"]		= TOK.Terase;
 
 		// class
 		identToTOK["class"]			= TOK.Tclass;
