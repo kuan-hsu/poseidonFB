@@ -1673,31 +1673,28 @@ version(DIDE)
 			CASTnode[] resultNodes;
 			
 			// object.di
-			if( GLOBAL.objectParserFullPath.length )
+			if( GLOBAL.objectDefaultParser !is null )
 			{
-				if( GLOBAL.objectParserFullPath in GLOBAL.parserManager )
+				foreach( CASTnode child; GLOBAL.objectDefaultParser.getChildren )
 				{
-					foreach( CASTnode child; GLOBAL.parserManager[GLOBAL.objectParserFullPath].getChildren )
+					if( child.kind & D_KIND )
 					{
-						if( child.kind & D_KIND )
+						if( bWholeWord )
 						{
-							if( bWholeWord )
+							if( child.name == word ) resultNodes ~= child;
+						}
+						else
+						{
+							if( bCaseSensitive )
 							{
-								if( child.name == word ) resultNodes ~= child;
+								if( Util.index( child.name, word ) == 0 ) resultNodes ~= child;
 							}
 							else
 							{
-								if( bCaseSensitive )
-								{
-									if( Util.index( child.name, word ) == 0 ) resultNodes ~= child;
-								}
-								else
-								{
-									if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 ) resultNodes ~= child;
-								}
+								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 ) resultNodes ~= child;
 							}
-						}	
-					}
+						}
+					}	
 				}
 			}
 
@@ -3441,7 +3438,7 @@ version(DIDE)
 
 					if( text == "(" )
 					{
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
+						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 
 						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206

@@ -390,14 +390,9 @@ extern(C)
 	{
 		auto cSci = ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )
-		{
-			GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
-			GLOBAL.navigation.eraseTail();
-		}
+			GLOBAL.navigation.addCache();
 		else
-		{
 			return IUP_DEFAULT;
-		}
 		
 		int		pos;
 		char[]	beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
@@ -425,13 +420,12 @@ extern(C)
 
 		if( pos > -1 )
 		{
-			GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+			GLOBAL.navigation.addCache();
 			GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundword"].toDString );
 			actionManager.StatusBarAction.update();
 		}
 		else
 		{
-			GLOBAL.navigation.eraseTail();
 			GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundnothing"].toDString );
 		}
 		
@@ -518,19 +512,17 @@ extern(C)
 		{
 			if( c == 13 )
 			{
-				GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
-				GLOBAL.navigation.eraseTail();
+				GLOBAL.navigation.addCache();
 				
 				int pos = CSearchExpander_search( 0 );
 				if( pos > -1 )
 				{
-					GLOBAL.navigation.addCache( cSci.getFullPath, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) );
+					GLOBAL.navigation.addCache();
 					GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundword"].toDString );
 					actionManager.StatusBarAction.update();
 				}
 				else
 				{
-					GLOBAL.navigation.eraseTail();
 					GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundnothing"].toDString );
 				}
 			}

@@ -402,13 +402,16 @@ version(FBIDE)
 			return results;
 		}
 
-		static char[] checkIncludeExist( char[] include, char[] originalFullPath )
+		static char[] checkIncludeExist( char[] _include, char[] originalFullPath )
 		{
 			try
 			{
-				if( include.length > 2 )
+				char[] include;
+				
+				if( _include.length > 2 )
 				{
-					if( include[0] == '"' && include[$-1] == '"' ) include = include[1..$-1];
+					if( _include[0] == '"' && _include[$-1] == '"' ) _include = _include[1..$-1];
+					include = _include.dup;
 				}
 				else
 				{
@@ -1029,6 +1032,7 @@ version(FBIDE)
 
 			return result;
 		}
+		
 
 		static CASTnode getType( CASTnode originalNode )
 		{
@@ -1036,6 +1040,7 @@ version(FBIDE)
 			
 			CASTnode resultNode;
 
+			/+
 			if( originalNode.type.length >= 4 )
 			{
 				if( originalNode.type[0..4] == "Var(" )
@@ -1048,21 +1053,6 @@ version(FBIDE)
 						varTypeName = ParserAction.removeArrayAndPointer( varNode.type );
 						return searchMatchNode( originalNode, varTypeName, B_TYPE | B_CLASS | B_ENUM | B_UNION );					
 					}
-					/+
-					CASTnode[] varNodes = AutoComplete.getMatchASTfromWholeWord( originalNode, varTypeName, originalNode.lineNumber, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
-					if( !varNodes.length )
-					{
-						auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-						if( cSci !is null )	varNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, varTypeName, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE );
-					}
-	;
-					if( varNodes.length )
-					{
-						varTypeName = removeArrayAndPointerWord( varNodes[0].type );
-						resultNode = searchMatchNode( originalNode, varTypeName, B_TYPE | B_CLASS | B_ENUM | B_UNION );
-						return resultNode;
-					}
-					+/
 				}
 			}
 
@@ -1103,6 +1093,22 @@ version(FBIDE)
 
 				default:
 			}
+			+/
+
+			if( originalNode.kind & ( B_ALIAS | B_VARIABLE | B_PARAM | B_FUNCTION ) )
+			{
+				char[][]	splitWord;
+				char[]		_type;
+				
+				if( originalNode.type.length ) _type = originalNode.type; else _type = originalNode.base;
+				
+				splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
+				foreach( char[] s; splitWord )
+					if( s == originalNode.name ) return null;
+
+				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, ScintillaAction.getCurrentPos( ScintillaAction.getActiveIupScintilla ), true, false, false );
+				if( originalNode !is null ) resultNode = originalNode;
+			}			
 			
 			return resultNode;
 		}
@@ -1411,6 +1417,247 @@ version(FBIDE)
 			return splitWord;
 		}
 
+
+		static char[] analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, char[][] splitWord, int pos, bool bDot, bool bCallTip, bool bPushContainer  )
+		{
+			if( AST_Head is null ) return null;
+			
+			auto		cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			auto		function_originalAST_Head = AST_Head;
+
+			if( cSci is null ) return null;
+			
+
+			int			lineNum = IupScintillaSendMessage( cSci.getIupScintilla(), 2166, ScintillaAction.getCurrentPos( cSci.getIupScintilla() ), 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			char[]		memberFunctionMotherName, result;
+
+			if( !splitWord[0].length )
+			{
+				if( AST_Head.kind & B_WITH )
+				{
+					char[][] splitWithTile = getDivideWord( AST_Head.name );
+					char[][] tempSplitWord = splitWord;
+					splitWord.length = 0;						
+					foreach( char[] s; splitWithTile ~ tempSplitWord )
+					{
+						if( s != "" ) splitWord ~= ParserAction.removeArrayAndPointer( s );
+					}						
+				}
+				else
+				{
+					return null;
+				}
+			}
+			
+			// Get memberFunctionMotherName
+			auto _fatherNode = AST_Head;
+			if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
+			{
+				do
+				{
+					if( _fatherNode.getFather !is null ) _fatherNode = _fatherNode.getFather; else break;
+				}
+				while( _fatherNode.kind & ( B_WITH | B_SCOPE ) );
+			}
+			
+			if( _fatherNode.name.length )
+			{
+				if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
+				{
+					memberFunctionMotherName = _fatherNode.name;
+				}
+				else
+				{
+					int dotPos = Util.index( _fatherNode.name, "." );
+					if( dotPos < _fatherNode.name.length )
+					{
+						memberFunctionMotherName = _fatherNode.name[0..dotPos];
+					}
+				}
+			}
+			
+			cleanIncludesMarkContainer();
+			
+			for( int i = 0; i < splitWord.length; i++ )
+			{
+				listContainer.length = 0;
+				
+				if( i == 0 )
+				{
+					if( splitWord.length == 1 )
+					{
+						if( !bDot )
+						{
+							CASTnode[] resultNodes;
+							CASTnode[] resultIncludeNodes;
+
+							if( bCallTip )
+							{
+								if( !bPushContainer ) return null;
+								
+								if( GLOBAL.objectDefaultParser !is null )
+									resultNodes	= getMatchASTfromWholeWord( GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
+									
+								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+								resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+
+								// For Type Objects
+								if( memberFunctionMotherName.length )
+								{
+									// "_searchMatchNode" also search includes
+									CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode, splitWord[i], B_ALL );
+								}
+
+								result = callTipList( resultNodes ~ resultIncludeNodes, splitWord[i] );
+								return Util.trim( result );
+							}
+
+
+							if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
+							//IupMessage("",toStringz(AST_Head.name));
+							if( AST_Head !is null )
+							{
+								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
+								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
+								
+								//cleanIncludesMarkContainer();
+								// For Type Objects
+								if( memberFunctionMotherName.length )
+								{
+									CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode,  splitWord[i] , B_ALL, false );
+								}
+								
+								if( bPushContainer )
+								{
+									foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
+									{
+										listContainer ~= getListImage( _node );
+										//listContainer ~= _node;
+									}
+								}
+							}
+						}
+						else
+						{
+							// Get Members
+							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+							if( AST_Head is null )
+							{
+								// For Type Objects
+								if( memberFunctionMotherName.length )
+								{
+									//AST_Head = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
+									CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+									if( memberFunctionMotherNode !is null )
+									{
+										if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+									}
+								}					
+							}
+
+							if( AST_Head is null ) return null;
+
+							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+							{
+								AST_Head = getType( AST_Head );
+								if( AST_Head is null ) return null;
+							}
+							
+							if( bPushContainer )
+							{
+								if( AST_Head.kind & ( B_TYPE | B_ENUM | B_UNION | B_CLASS | B_NAMESPACE ) )
+								{
+									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+									{
+										listContainer ~= getListImage( _child );
+									}
+								}
+							}
+						}
+
+						break;
+					}
+
+					AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+					if( AST_Head is null )
+					{
+						// For Type Objects
+						if( memberFunctionMotherName.length )
+						{
+							CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+							if( memberFunctionMotherNode !is null )
+							{
+								if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+								//AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+							}
+						}					
+					}
+
+					if( AST_Head is null ) return null;
+
+					if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+					{
+						AST_Head = getType( AST_Head );
+						if( AST_Head is null ) return null;
+					}
+				}
+				else if( i == splitWord.length -1 )
+				{
+					if( !bDot )
+					{
+						if( bCallTip )
+						{
+							if( !bPushContainer ) return null;
+							
+							result = callTipList( AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ), splitWord[i] );
+							return Util.trim( result );
+						}
+
+						foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+						{
+							if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 ) listContainer ~= getListImage( _child );
+						}							
+					}
+					else
+					{
+						if( AST_Head.kind & B_NAMESPACE )
+						{
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
+						}
+						else
+						{
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+						}
+						
+						if( bPushContainer )
+						{
+							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+							{
+								listContainer ~= getListImage( _child );
+							}
+						}
+					}
+					
+				}
+				else
+				{
+					if( AST_Head.kind & B_NAMESPACE )
+					{
+						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
+					}
+					else
+					{
+						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+					}
+				}
+			}		
+		
+		
+			return result;
+		}
+		
 
 		public:
 		static bool bEnter;
@@ -2570,22 +2817,19 @@ version(FBIDE)
 					return null;
 				}
 				
-				if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) )
+				if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) )
 				{}
 				else
 				{
 					// Clean listContainer
 					listContainer.length = 0;
 					
-					if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL\0", "YES\0" );
+					if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
 
 					// Divide word
-					/*char[][] splitWord = Util.split( word, "." );
-					if( splitWord.length == 1 ) splitWord = Util.split( word, "->" );*/
 					char[][]	splitWord = getDivideWord( word );
 					int			lineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					CASTnode	AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
-					char[]		memberFunctionMotherName;
 
 
 					if( AST_Head is null )
@@ -2599,227 +2843,8 @@ version(FBIDE)
 						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
 					}
-
-					if( !splitWord[0].length )
-					{
-						if( AST_Head.kind & B_WITH )
-						{
-							char[][] splitWithTile = getDivideWord( AST_Head.name );
-							char[][] tempSplitWord = splitWord;
-							splitWord.length = 0;						
-							foreach( char[] s; splitWithTile ~ tempSplitWord )
-							{
-								if( s != "" ) splitWord ~= ParserAction.removeArrayAndPointer( s );
-							}						
-						}
-						else
-						{
-							return null;
-						}
-					}
 					
-					// Get memberFunctionMotherName
-					auto _fatherNode = AST_Head;
-					if( AST_Head.kind & ( B_WITH | B_SCOPE ) )
-					{
-						do
-						{
-							if( _fatherNode.getFather !is null ) _fatherNode = _fatherNode.getFather; else break;
-						}
-						while( _fatherNode.kind & ( B_WITH | B_SCOPE ) );
-					}
-					
-					if( _fatherNode.name.length )
-					{
-						if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
-						{
-							memberFunctionMotherName = _fatherNode.name;
-						}
-						else
-						{
-							int dotPos = Util.index( _fatherNode.name, "." );
-							if( dotPos < _fatherNode.name.length )
-							{
-								memberFunctionMotherName = _fatherNode.name[0..dotPos];
-							}
-						}
-					}
-					
-					cleanIncludesMarkContainer();
-					
-					for( int i = 0; i < splitWord.length; i++ )
-					{
-						listContainer.length = 0;
-						
-						if( i == 0 )
-						{
-							if( splitWord.length == 1 )
-							{
-								if( !bDot )
-								{
-									CASTnode[] resultNodes;
-									CASTnode[] resultIncludeNodes;
-
-									if( bCallTip )
-									{
-										if( GLOBAL.objectParserFullPath.length )
-										{
-											if( fullPathByOS(GLOBAL.objectParserFullPath) in GLOBAL.parserManager )
-												resultNodes	= getMatchASTfromWholeWord( GLOBAL.parserManager[fullPathByOS(GLOBAL.objectParserFullPath)], splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
-										}
-											
-										resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
-										resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
-
-										// For Type Objects
-										if( memberFunctionMotherName.length )
-										{
-											// "_searchMatchNode" also search includes
-											CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
-											if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode, splitWord[i], B_ALL );
-										}
-
-										result = callTipList( resultNodes ~ resultIncludeNodes, splitWord[i] );
-										return Util.trim( result );
-									}
-
-
-									if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
-									//IupMessage("",toStringz(AST_Head.name));
-									if( AST_Head !is null )
-									{
-										resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
-										resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
-										
-										//cleanIncludesMarkContainer();
-										// For Type Objects
-										if( memberFunctionMotherName.length )
-										{
-											CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
-											if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode,  splitWord[i] , B_ALL, false );
-										}
-										foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
-										{
-											listContainer ~= getListImage( _node );
-											//listContainer ~= _node;
-										}
-									}
-								}
-								else
-								{
-									// Get Members
-									AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
-									if( AST_Head is null )
-									{
-										// For Type Objects
-										if( memberFunctionMotherName.length )
-										{
-											//AST_Head = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
-											CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-											if( memberFunctionMotherNode !is null )
-											{
-												if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
-											}
-										}					
-									}
-
-									if( AST_Head is null ) return null;
-
-									if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
-									{
-										AST_Head = getType( AST_Head );
-										if( AST_Head is null ) return null;
-									}
-
-									if( AST_Head.kind & ( B_TYPE | B_ENUM | B_UNION | B_CLASS | B_NAMESPACE ) )
-									{
-										foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
-										{
-											listContainer ~= getListImage( _child );
-										}
-									}
-								}
-
-								break;
-							}
-
-							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
-							if( AST_Head is null )
-							{
-								// For Type Objects
-								if( memberFunctionMotherName.length )
-								{
-									CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-									if( memberFunctionMotherNode !is null )
-									{
-										if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
-										//AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
-									}
-								}					
-							}
-
-							if( AST_Head is null ) return null;
-
-							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
-							{
-								AST_Head = getType( AST_Head );
-								if( AST_Head is null ) return null;
-							}
-						}
-						else if( i == splitWord.length -1 )
-						{
-							if( !bDot )
-							{
-								if( bCallTip )
-								{
-									result = callTipList( AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ), splitWord[i] );
-									return Util.trim( result );
-								}
-
-								foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
-								{
-									if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 ) listContainer ~= getListImage( _child );
-								}							
-							}
-							else
-							{
-								if( AST_Head.kind & B_NAMESPACE )
-								{
-									if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
-								}
-								else
-								{
-									if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
-								}
-
-								foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
-								{
-									listContainer ~= getListImage( _child );
-								}								
-							}
-							
-						}
-						else
-						{
-							if( AST_Head.kind & B_NAMESPACE )
-							{
-								if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
-							}
-							else
-							{
-								if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
-							}
-						}
-					}
-
-					/+
-					scope sortTool = new CNameSort!(CASTnode)( listContainer );
-					listContainer = sortTool.dump();
-					foreach( CASTnode _node; listContainer )
-					{
-						if( !( _node.kind & ( B_CTOR | B_DTOR ) ) )	result ~= ( getListImage( _node ) ~ " " );
-					}
-					+/
+					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, pos, bDot, bCallTip, true );
 
 					if( listContainer.length )
 					{
@@ -2876,30 +2901,10 @@ version(FBIDE)
 									}
 
 									result ~= ( _string ~ "^" );
-									/*
-									if( i > 0 )
-									{
-										if( _string != listContainer[i-1] ) result ~= ( _string ~ "^" );
-									}
-									else
-									{
-										result ~= ( _string ~ "^" );
-									}
-									*/
 								}
 								else
 								{
 									result ~= ( listContainer[i] ~ "^" );
-									/*
-									if( i > 0 )
-									{
-										if( listContainer[i] != listContainer[i-1] ) result ~= ( listContainer[i] ~ "^" );
-									}
-									else
-									{
-										result ~= ( listContainer[i] ~ "^" );
-									}
-									*/
 								}
 							}
 						}

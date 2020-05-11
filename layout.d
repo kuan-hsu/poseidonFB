@@ -354,6 +354,8 @@ extern(C)
 			{
 				if( parser !is null ) delete parser;
 			}
+
+			if( GLOBAL.objectDefaultParser !is null ) delete GLOBAL.objectDefaultParser;
 			
 			if( GLOBAL.editorSetting00.DocStatus == "ON" ) IDECONFIG.saveFileStatus();
 			

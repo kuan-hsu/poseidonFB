@@ -4,9 +4,9 @@ class CNavCache
 {
 	private:
 	import iup.iup;
-	import actionManager;
+	import global, actionManager;
 	
-	import tango.io.FilePath;
+	import tango.io.FilePath, tango.stdc.stringz;
 
 	// Nested Struct
 	struct CacheUnit
@@ -17,45 +17,146 @@ class CNavCache
 	
 	int				index;
 	CacheUnit		nullElement = { null, -1 };
-	CacheUnit[1000]	cache;
+	CacheUnit[2000]	cache;
 
 	public:
 	this()
 	{
-		//cache.length	= 1000;
 		index			= 0;
 		cache[]			= nullElement;
 	}
 	
-	bool addCache( char[] fullPath, int line )
+	
+	bool addCache()
 	{
-		CacheUnit _element = { fullPath, line };
-		
-		if( index == 0 && cache[0]._line == -1 )
+		auto cSci = ScintillaAction.getActiveCScintilla;
+		if( cSci !is null )
 		{
-			scope fp = new FilePath( fullPath );
+			char[] nowFullPath	= cSci.getFullPath;
+			int nowLine			= ScintillaAction.getCurrentLine( cSci.getIupScintilla );
 			
-			if( !fp.exists() ) return false;
 			
-			auto cSci = ScintillaAction.getActiveCScintilla;
-			if( cSci !is null )
+			if( cache[index]._line != -1 ) index += 1;
+			
+			if( index > 1998 )
 			{
-				cache[0]._fullPath = cSci.getFullPath;
-				cache[0]._line = ScintillaAction.getCurrentLine( cSci.getIupScintilla ); // 1 based
+				CacheUnit[] temp;
+				temp.length = index - 1000;
+				temp = cache[1000..index];
+				cache[] = nullElement;
+				cache[0..temp.length] = temp;
+				
+				index = temp.length;
 			}
-		}
-		
-		if( index >= 999 )
-		{
-			cache[0..999] = cache[1..999];
-			cache[999] = _element;
+			else
+			{
+				cache[index+1] = nullElement;
+			}			
+			
+			if( index > 0 )
+			{
+				if( nowLine == cache[index - 1]._line )
+				{
+					if( nowFullPath == cache[index - 1]._fullPath ) return false;
+				}
+				
+				cache[index]._fullPath = nowFullPath;
+				cache[index]._line = nowLine;
+				index += 1;
+			}
+			else
+			{
+				cache[index]._fullPath = nowFullPath;
+				cache[index]._line = nowLine;
+				index += 1;
+			}
+			
+			IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "YES" );
+			IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" );
 		}
 		else
 		{
-			cache[++index] = _element;
+			return false;
+		}
+
+		return true;
+	}	
+	
+	
+	bool addCache( char[] fullPath, int line )
+	{
+		CacheUnit _element = { fullPath.dup, line };
+		
+		if( fullPath in GLOBAL.scintillaManager )
+		{}
+		else
+		{
+			scope fp = new FilePath( fullPath );
+			if( !fp.exists() ) return false;
 		}
 		
+		
+		if( cache[index]._line != -1 ) index += 1;
+		
+		if( index > 1998 )
+		{
+			CacheUnit[] temp;
+			temp.length = index - 1000;
+			temp = cache[1000..index];
+			cache[] = nullElement;
+			cache[0..temp.length] = temp;
+			
+			index = temp.length;
+		}
+		else
+		{
+			cache[index+1] = nullElement;
+		}
+		
+		
 		IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "YES" );
+		IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" );
+		
+		auto cSci = ScintillaAction.getActiveCScintilla;
+		if( cSci !is null )
+		{
+			char[] nowFullPath	= cSci.getFullPath;
+			int nowLine			= ScintillaAction.getCurrentLine( cSci.getIupScintilla );
+			
+			if( index > 0 )
+			{
+				if( nowLine == cache[index - 1]._line )
+				{
+					if( nowFullPath == cache[index - 1]._fullPath )
+					{
+						cache[index++] = _element;
+						IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "YES" );
+						IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" );
+						return true;
+					}
+				}
+				
+				cache[index]._fullPath = nowFullPath;
+				cache[index]._line = nowLine;
+				index += 1;
+				cache[index] = _element;
+				index += 1;
+			}
+			else
+			{
+				cache[index]._fullPath = nowFullPath;
+				cache[index]._line = nowLine;
+				index += 1;
+				cache[index] = _element;
+				index += 1;
+			}
+		}
+		else
+		{
+			cache[index++] = _element;
+			IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "NO" );
+		}
+		
 		
 		return true;
 	}
@@ -64,10 +165,25 @@ class CNavCache
 	{
 		if( index > 0 )
 		{
-			if( index == 1 ) IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "NO" );
+			if( index > 1 )
+			{
+				auto cSci = ScintillaAction.getActiveCScintilla;
+				if( cSci !is null )
+				{
+					if( ScintillaAction.getCurrentLine( cSci.getIupScintilla ) == cache[index - 1]._line )
+					{
+						if( cSci.getFullPath == cache[index - 1]._fullPath ) index -= 1;
+					}
+				}
+			}
+
 			if( cache[index]._line != -1 ) IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "YES" );
-			return cache[--index];
+			index -= 1;
+			if( index == 0 ) IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "NO" );
+			
+			return cache[index];
 		}
+		
 		return nullElement;
 	}
 	
@@ -101,21 +217,4 @@ class CNavCache
 		IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "NO" );
 		IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" );
 	}
-	
-	void eraseTail()
-	{
-		cache[index] = nullElement;
-		if( index > 0 ) --index;
-	}
-	/*
-	int getIndex()
-	{
-		return index;
-	}
-	
-	CacheUnit getCache( int _index )
-	{
-		if( _index < 1000 ) return cache[_index];
-	}
-	*/
 }

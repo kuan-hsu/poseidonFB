@@ -229,7 +229,7 @@ struct GLOBAL
 	static char[][]				customCompilerOptions;
 	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
 
-	static char[]				objectParserFullPath;
+	static CASTnode				objectDefaultParser;
 	version(DIDE)
 	{
 		static char[][]				defaultImportPaths;

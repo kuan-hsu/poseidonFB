@@ -98,7 +98,7 @@ class COutline
 					break;
 					
 				case B_VARIABLE:
-					if( _node.name.length )
+					if( _node.type.length )
 					{
 						if( _node.name[$-1] == ')' )
 							IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_variable_array" ~ prot ) );
@@ -869,7 +869,27 @@ class COutline
 						}
 						break;
 
-					case B_VARIABLE, B_ALIAS:
+					case B_VARIABLE:
+						if( !_node.type.length )
+							if( _node.base.length )
+							{
+								char[][] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
+								
+								char[] autoType = Util.join( types, "." );
+								if( showIndex == 0 || showIndex == 2 )
+								{
+									IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( autoType.length ? " : " ~ autoType : "" ) ) );
+									IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								}
+								else
+								{
+									IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ) );
+									IupSetAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+								}
+								break;
+							}					
+					
+					case  B_ALIAS:
 						if( showIndex == 0 || showIndex == 2 )
 						{
 							IupSetAttributeId( rootTree, sCovert.convert( LEAF ), bracchID, GLOBAL.cString.convert( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ) );
@@ -1213,7 +1233,7 @@ class COutline
 		layoutHandle = IupVbox( outlineToolbarH, outlineTreeNodeList, zBoxHandle, null );
 		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" ) );
 		
-		loadObjectParser();
+		GLOBAL.objectDefaultParser = loadObjectParser();
 	}
 
 	void toBoldTitle( Ihandle* _tree, int id )
@@ -1933,7 +1953,7 @@ class COutline
 		return true;
 	}
 
-	CASTnode parserText( char[] text, int B_KIND = 0 )
+	CASTnode parserText( char[] text )
 	{
 		// Don't Create Tree
 		try
@@ -1941,7 +1961,7 @@ class COutline
 			// Parser
 			if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) ) )
 			{
-				version(FBIDE) return GLOBAL.Parser.parse( "_.bas", B_KIND );
+				version(FBIDE) return GLOBAL.Parser.parse( "_.bas" );
 				version(DIDE) return GLOBAL.Parser.parse( "_.d" );
 			}
 		}
@@ -1959,9 +1979,7 @@ class COutline
 			scope objectFilePath = new FilePath( "settings/FB_BuiltinFunctions.bi" );
 			if( objectFilePath.exists )
 			{
-				GLOBAL.objectParserFullPath = fullPathByOS( objectFilePath.toString() );
-				
-				return loadParser( GLOBAL.objectParserFullPath );
+				return loadParser( fullPathByOS( objectFilePath.toString() ) );
 			}
 		}
 		
@@ -1979,8 +1997,7 @@ class COutline
 			
 			if( objectFilePath.exists )
 			{
-				GLOBAL.objectParserFullPath = fullPathByOS( _path ~ "import/object.di" );
-				return loadParser( GLOBAL.objectParserFullPath );
+				return loadParser( fullPathByOS( _path ~ "import/object.di" ) );
 			}
 			else
 			{	
@@ -1994,8 +2011,7 @@ class COutline
 				objectFilePath.set( _path ~ "src/druntime/import/object.d" );
 				if( objectFilePath.exists )
 				{
-					GLOBAL.objectParserFullPath = fullPathByOS( objectFilePath.toString() );
-					return loadParser( GLOBAL.objectParserFullPath );
+					return loadParser( fullPathByOS( objectFilePath.toString() ) );
 				}
 			}
 		}

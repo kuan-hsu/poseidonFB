@@ -213,7 +213,7 @@ public:
 		}
 
 		// Caret Line ( Current Line )
-		IupSetAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
+		IupSetAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
 		IupSetAttribute( outputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
 		
 		
@@ -243,7 +243,7 @@ public:
 		}
 
 		// Caret Line ( Current Line )
-		IupSetAttribute( searchOutputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
+		IupSetAttribute( searchOutputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
 		IupSetAttribute( searchOutputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
 	}
 	
@@ -427,7 +427,7 @@ extern(C)
 	{
 		if( button == IUP_BUTTON1 )
 		{
-			char[] statusUTF8 = fromStringz( status );
+			char[] statusUTF8 = fromStringz( status ).dup;
 			if( statusUTF8.length > 5 )
 			{
 				if( statusUTF8[5] == 'D' )
@@ -460,13 +460,14 @@ extern(C)
 												if( !Path.parent( fileName ).length ) fileName = ExecuterAction.quickRunFile;
 											}
 											
-											if( fullPathByOS(fileName.dup) in GLOBAL.scintillaManager )
+											if( fullPathByOS(fileName) in GLOBAL.scintillaManager )
 											{
-												ScintillaAction.openFile( fileName.dup, lineNumber );
+												if( GLOBAL.navigation.addCache( fileName, lineNumber ) ) ScintillaAction.openFile( fileName, lineNumber );
 											}
 											else
 											{
-												if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
+												GLOBAL.navigation.addCache( fileName, lineNumber );
+												if( ScintillaAction.openFile( fileName, lineNumber ) )
 												{
 													if( GLOBAL.compilerAnootation == "ON" )
 													{
@@ -519,7 +520,7 @@ extern(C)
 
 																				IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( annotationText ) );
 																				if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 40 );
-																				IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+																				IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 																			}
 																		}
 																	}
@@ -564,11 +565,12 @@ extern(C)
 								if( Util.index( lineText, "warning - " ) == 0 )	fileName = Path.normalize( lineText[10..openPos] ); else fileName =  Path.normalize( lineText[0..openPos] );
 								if( fullPathByOS(fileName) in GLOBAL.scintillaManager )
 								{
-									ScintillaAction.openFile( fileName.dup, lineNumber );
+									if( GLOBAL.navigation.addCache( fileName, lineNumber ) ) ScintillaAction.openFile( fileName, lineNumber );
 								}
 								else
 								{
-									if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
+									GLOBAL.navigation.addCache( fileName, lineNumber );
+									if( ScintillaAction.openFile( fileName, lineNumber ) )
 									{
 										if( GLOBAL.compilerAnootation == "ON" )
 										{
@@ -618,7 +620,7 @@ extern(C)
 
 																	IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( annotationText ) );
 																	if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 40 );
-																	IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+																	IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 																}
 															}
 														}
@@ -662,7 +664,7 @@ extern(C)
 	{
 		if( button == IUP_BUTTON1 )
 		{
-			char[] statusUTF8 = fromStringz( status );
+			char[] statusUTF8 = fromStringz( status ).dup;
 			if( statusUTF8.length > 5 )
 			{
 				if( pressed == 1 )
@@ -672,7 +674,7 @@ extern(C)
 						int		lineNumber;
 						bool	bGetFileName = true;
 						char[]	fileName;
-						char[]	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) );
+						char[]	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) ).dup;
 						
 						int closePos = Util.index( lineText, "):" );
 						if( closePos < lineText.length )
@@ -684,7 +686,8 @@ extern(C)
 								char[] lineNumber_char = lineText[openPos+1..$];
 								lineNumber = Integer.toInt( lineNumber_char );
 								fileName = lineText[0..openPos];
-								if( ScintillaAction.openFile( fileName.dup, lineNumber ) )
+								GLOBAL.navigation.addCache( fileName, lineNumber );
+								if( ScintillaAction.openFile( fileName, lineNumber ) )
 								{
 									int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
 									int	lineHead = cast(int) IupScintillaSendMessage( ih, 2167, _line, 0 ); // SCI_POSITIONFROMLINE 2167
@@ -697,46 +700,6 @@ extern(C)
 						}
 						
 						version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
-						
-						/*
-						int openPos = Util.index( lineText, "(" );
-						if( openPos < lineText.length )
-						{
-							int closePos = Util.index( lineText, "):", openPos );
-							if( closePos < lineText.length )
-							{
-								if( closePos > openPos+1 )
-								{
-									if( closePos < lineText.length - 1 )
-									{
-										if( lineText[closePos+1] == ':' )
-										{
-											char[] lineNumber_char = lineText[openPos+1..closePos];
-											lineNumber = Integer.toInt( lineNumber_char );
-											fileName = lineText[0..openPos];
-											ScintillaAction.openFile( fileName.dup, lineNumber );
-											
-											// Make all line be selected
-											int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
-											int	lineHead = cast(int) IupScintillaSendMessage( ih, 2167, _line, 0 ); // SCI_POSITIONFROMLINE 2167
-											int	lineTail = cast(int) IupScintillaSendMessage( ih, 2136, _line, 0 ); // SCI_GETLINEENDPOSITION 2136
-											IupScintillaSendMessage( ih, 2160, lineHead, lineTail ); // SCI_SETSEL 2160
-											
-											version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
-										}
-									}
-								}
-							}
-							else
-							{
-								version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
-							}
-						}
-						else
-						{
-							version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
-						}
-						*/
 					}
 				}
 			}

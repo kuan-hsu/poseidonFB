@@ -775,50 +775,64 @@ version(FBIDE)
 		{
 			try
 			{
-				char[] 	_name;
-				int 	_lineNum;
+				char[]	_name, _type, _rightExpress;
+				int 	_lineNum = token().lineNumber;
 				
 				parseToken( TOK.Tvar );
 
 				if( token().tok == TOK.Tshared ) parseToken( TOK.Tshared );
-
-				_name = token().identifier;
-				_lineNum = token().lineNumber;
-				parseToken();
-
-				if( token().tok == TOK.Tassign )
+				
+				if( token().tok == TOK.Tidentifier && next().tok == TOK.Tassign )
 				{
+					_name = token().identifier;
+					parseToken( TOK.Tidentifier );
 					parseToken( TOK.Tassign );
-					if( token().tok == TOK.Tcast )
+					
+					if( token().tok == TOK.Tnew )
+					{
+						parseToken( TOK.Tnew );
+						while( token().tok != TOK.Teol && token().tok != TOK.Tcolon && token().tok != TOK.Topenparen )
+						{
+							_type ~= token().identifier;
+							parseToken();
+						}
+					}
+					else if( token().tok == TOK.Tcast )
 					{
 						parseToken( TOK.Tcast );
 						
 						if( token().tok == TOK.Topenparen )
 						{
 							parseToken( TOK.Topenparen );
-
-							activeASTnode.addChild( _name, B_VARIABLE, null, lowerCase( token().identifier ), null, _lineNum );
-
-							while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+							while( token().tok != TOK.Tcomma && token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 							{
-								if( tokenIndex < tokens.length ) parseToken(); else return false;
+								_type ~= token().identifier;								
 								parseToken();
 							}
-							parseToken();
 						}
 					}
-					else
+					else if( token().tok == TOK.Tstrings )
 					{
-						char[] _typeName = token().identifier;
-						parseToken();
-
-						activeASTnode.addChild( _name, B_VARIABLE, null, "Var(" ~ _typeName ~ ")", null, _lineNum );
-						while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
-						{
-							if( tokenIndex < tokens.length ) parseToken(); else return false;
-						}
-						parseToken();				
+						_type = "string";
+						parseToken( TOK.Tstrings );
 					}
+					else if( token().tok == TOK.Tnumbers )
+					{
+						if( Util.count( token().identifier, "." ) > 0 ) _type = "double"; else _type = "integer";
+						parseToken( TOK.Tnumbers );
+					}
+					
+					while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+					{
+						_rightExpress ~= token().identifier;
+						parseToken();
+					}
+					
+					activeASTnode.addChild( _name, B_VARIABLE, null, _type, _rightExpress, _lineNum );
+				}
+				else
+				{
+					return  false;
 				}
 			}
 			catch( Exception e )
@@ -2096,7 +2110,7 @@ version(FBIDE)
 			return true;
 		}
 		
-		CASTnode parse( char[] fullPath, int B_KIND = 0 )
+		CASTnode parse( char[] fullPath )
 		{
 			CASTnode head = null;
 			
@@ -2134,26 +2148,7 @@ version(FBIDE)
 						prevTokenIndex = tokenIndex;
 						repeatCount = 0;
 					}
-				
-					if( B_KIND > 0 )
-					{
-						if( B_KIND & ( B_TYPE | B_UNION ) )
-							parseTypeBody( B_TYPE );
-						else if( B_KIND & B_ENUM )
-							parseEnumBody();
-							
-						break;
-					}
-
-					// Pass Member Acdess
-					if( tokenIndex > 0 )
-					{
-						if( prev().tok == TOK.Tdot || prev.tok == TOK.Tptraccess )
-						{
-							tokenIndex ++;
-							continue;
-						}
-					}
+					
 					
 					switch( tokens[tokenIndex].tok )
 					{
@@ -2195,6 +2190,7 @@ version(FBIDE)
 								parseToken( TOK.Tsub );
 								break;
 							}
+							
 						case TOK.Tfunction, /*TOK.Tsub,*/ TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor:
 							parseProcedure( false, null );
 							break;
@@ -2259,15 +2255,14 @@ version(FBIDE)
 
 						default:
 							tokenIndex ++;
-							//Stdout( tokenIndex );
-							//Stdout( "   " ~ token().identifier ).newline;
 					}
 				}
 			}
 			catch( Exception e )
 			{
-				debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				/*
+				debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				
 				Stdout( fullPath );
 				Stdout( "\t\t" );
 				Stdout( e.toString ).newline;
@@ -2276,7 +2271,7 @@ version(FBIDE)
 
 			if( head !is null )
 			{
-				if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+				if( activeASTnode != head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
 			}
 			//printAST( head );
 

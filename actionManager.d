@@ -171,7 +171,7 @@ public:
 			if( !Path.exists( fullPath ) )
 			{
 				IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
-				throw new Exception( "FileAction.loadFile() Error:\n" ~ fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() );
+				return null;
 			}
 			
 			scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
@@ -2220,19 +2220,29 @@ public:
 	{
 		int _getDelimitedString( int _index, char _delimitedOpen, char _delimitedClose )
 		{
-			int		_countDemlimit;
+			int		_countDemlimit, _i;
 			
+			for( _i = _index; _i < word.length; ++ _i )
+			{
+				if( word[_i] == _delimitedOpen ) _countDemlimit ++;
+				if( word[_i] == _delimitedClose ) _countDemlimit --;
+			
+				if( _countDemlimit <= 0 ) break;
+			}
+			/*
 			do
 			{
 				if( word[_index] == _delimitedOpen ) _countDemlimit ++;
 				if( word[_index] == _delimitedClose ) _countDemlimit --;
 
 				if( _countDemlimit == 0 ) break;
-				_index ++;
+				if( ++_index >= word.length ) break;
 			}
 			while( _countDemlimit > 0 );
 
 			return _index;
+			*/
+			return _i;
 		}
 
 		char[][]	splitWord;
@@ -2269,6 +2279,22 @@ public:
 				}
 				else
 				{
+					version(FBIDE)
+					{
+						if( i > 0 )
+						{
+							if( word[i] == '>' )
+							{
+								if( word[i-1] == '-' )
+								{
+									splitWord ~= ParserAction.removeArrayAndPointer( tempWord );
+									tempWord = "";
+									continue;
+								}
+							}
+						}
+					}
+				
 					tempWord ~= word[i];
 				}
 			}			

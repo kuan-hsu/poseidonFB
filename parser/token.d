@@ -61,6 +61,7 @@ version(FBIDE)
 		Tloop,
 		Twhile,
 		Twend,
+		Tuntil,
 		Tif,
 		Tthen,
 		Telse,
@@ -238,6 +239,7 @@ version(FBIDE)
 		identToTOK["loop"]		= TOK.Tloop;
 		identToTOK["while"]		= TOK.Twhile;
 		identToTOK["wend"]		= TOK.Twend;
+		identToTOK["until"]		= TOK.Tuntil;
 		identToTOK["if"]		= TOK.Tif;
 		identToTOK["then"]		= TOK.Tthen;
 		identToTOK["else"]		= TOK.Telse;

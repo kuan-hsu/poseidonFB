@@ -3495,7 +3495,7 @@ version(DIDE)
 
 			if( head !is null )
 			{
-				if( activeASTnode !is head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
+				if( activeASTnode != head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
 			}
 				
 			//printAST( head );
