@@ -61,6 +61,8 @@ extern(C)
 		
 		DocumentTabAction.setActiveDocumentTabs( ih );
 		
+		GLOBAL.outlineTree.cleanListItems();
+		
 		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos );
 	}
 

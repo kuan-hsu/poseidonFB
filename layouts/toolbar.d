@@ -313,7 +313,7 @@ class CToolBar
 		
 		scope fontStr = new IupString( GLOBAL.fonts[0].fontString );
 		listHandle = IupList( null );
-		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,VISIBLELINES=1,NAME=POSEIDON_TOOLBAR_FunctionList" );
+		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDON_TOOLBAR_FunctionList" );
 		IupSetAttribute( listHandle, "FONT", fontStr.toCString );
 		IupSetAttribute( listHandle, "EXPAND", "HORIZONTAL" );
 		IupSetAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.functionTitle.toCString );

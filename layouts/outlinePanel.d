@@ -21,6 +21,7 @@ class COutline
 	Ihandle*			outlineButtonCollapse, outlineButtonPR, outlineToggleAnyWord, outlineButtonFresh;
 	CASTnode[]			listItemASTs;
 	int[]				listItemTreeID;
+	int					listItemIndex;
 	int					showIndex= 0; 
 	
 	/+
@@ -1226,7 +1227,6 @@ class COutline
 
 		version(linux)
 		{
-			IupSetCallback( outlineTreeNodeList, "EDIT_CB",cast(Icallback) &COutline_List_EDIT_CB );
 			IupSetCallback( outlineTreeNodeList, "K_ANY",cast(Icallback) &COutline_List_K_ANY );
 		}
 
@@ -2018,6 +2018,15 @@ class COutline
 		
 		return null;
 	}
+	
+	
+	void cleanListItems()
+	{
+		IupSetAttribute( outlineTreeNodeList, "REMOVEITEM", "ALL" );
+		listItemASTs.length = 0;
+		listItemTreeID.length = 0;
+		listItemIndex = 0;
+	}
 }
 
 extern(C) 
@@ -2064,8 +2073,10 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
+
 	private int COutline_List_DROPDOWN_CB( Ihandle *ih, int state )
 	{
+		// ListBox open
 		if( state == 1 )
 		{
 			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
@@ -2078,6 +2089,7 @@ extern(C)
 				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
 				GLOBAL.outlineTree.listItemASTs.length = 0;
 				GLOBAL.outlineTree.listItemTreeID.length = 0;
+				GLOBAL.outlineTree.listItemIndex = 0;
 
 				bool bAnyWord, bGo;
 				Ihandle* _wholeWordHandle = IupGetDialogChild( GLOBAL.mainDlg, "button_OutlineWholeWord" );
@@ -2113,27 +2125,90 @@ extern(C)
 						}
 					}
 				}
-
-				if( IupGetInt( ih, "COUNT" ) > 0 ) IupSetAttribute( ih, "VALUE", IupGetAttribute( ih, "1" ) );
+				
+				version(Windows) if( IupGetInt( ih, "COUNT" ) > 0 ) IupSetAttribute( ih, "VALUE", IupGetAttribute( ih, "1" ) );
 			}
+		}
+		else	// ListBox close
+		{
+			/*
+			Check module layout -- GlobalKeyPress_CB
+			KeyDown = 13
+			Trigger Order: keydown -> DROPDOWN_CB -> keyup
+			*/
+			if( GLOBAL.KeyNumber == 13 ) 
+			{
+				version(Windows)
+				{
+					if( IupGetInt( ih, "COUNT" ) > 0 )
+					{
+						if( GLOBAL.outlineTree.listItemIndex > 0 )
+						{
+							if( GLOBAL.outlineTree.listItemIndex <= GLOBAL.outlineTree.listItemASTs.length )
+							{
+								char[] text = Util.trim( fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup );
+								if( text.length )
+								{
+									ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[--GLOBAL.outlineTree.listItemIndex].lineNumber );
+									IupSetFocus( ih );
+									IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
+									Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
+									if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex] );
+								}
+							}
+						}
+					}
+				}
+			}
+			else if( GLOBAL.KeyNumber == 65307 ) // ESC
+			{
+				GLOBAL.outlineTree.cleanListItems();
+				IupSetAttribute( ih, "VALUE", "" );
+			}
+			else
+			{
+				//IupMessage( "",toStringz( Integer.toString( GLOBAL.KeyNumber ) ) );
+			}
+
 		}
 		
 		return IUP_DEFAULT;
 	}
 
+
 	private int COutline_List_ACTION( Ihandle *ih, char *text, int item, int state )
 	{
-		//IupMessage("BEFORE",toStringz(Integer.toString(item)));
-
 		if( state == 1 )
 		{
-			if( IupGetInt( ih, "COUNT" ) > 0 )
+			GLOBAL.outlineTree.listItemIndex = item;
+			
+			bool bGo;;
+			
+			version(Windows)
 			{
-				if( item <= GLOBAL.outlineTree.listItemASTs.length )
+				if( GLOBAL.KeyNumber == -1 ) bGo = true;								// Mouse Click item
+			}
+			else
+			{
+				if( GLOBAL.KeyNumber == -1 || GLOBAL.KeyNumber == 13 ) bGo = true;		// Mouse Click item or Enter
+			}
+			
+			
+			if( bGo )
+			{
+				if( IupGetInt( ih, "COUNT" ) > 0 )
 				{
-					ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[--item].lineNumber );
-					Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-					if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+					if( item > 0 )
+					{
+						if( item <= GLOBAL.outlineTree.listItemASTs.length )
+						{
+							ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[--item].lineNumber );
+							IupSetFocus( ih );
+							IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
+							Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
+							if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+						}
+					}
 				}
 			}
 		}
@@ -2141,17 +2216,9 @@ extern(C)
 		return IUP_DEFAULT;
 	}	
 
+
 	version(linux)
 	{
-		private int COutline_List_EDIT_CB( Ihandle *ih, int c, char *new_value )
-		{
-			//IupMessage("new_value",new_value);
-			//IupMessage("c",toStringz(Integer.toString(c)));
-			IupSetAttribute( ih, "APPENDITEM", toStringz( "DUMMY" ) );
-
-			return IUP_DEFAULT;
-		}
-
 		private int COutline_List_K_ANY( Ihandle *ih, int c )
 		{
 			if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )

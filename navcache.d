@@ -189,11 +189,25 @@ class CNavCache
 	
 	CacheUnit forward()
 	{
-		if( index < 999 )
+		if( index < 1999 )
+		{
+			auto cSci = ScintillaAction.getActiveCScintilla;
+			if( cSci !is null )
+			{
+				if( ScintillaAction.getCurrentLine( cSci.getIupScintilla ) == cache[index + 1]._line )
+				{
+					if( cSci.getFullPath == cache[index + 1]._fullPath ) index += 1;
+				}
+			}
+		}	
+	
+	
+	
+		if( index < 1999 )
 		{
 			if( cache[index+1]._line != -1 )
 			{
-				if( index < 998 )
+				if( index < 1998 )
 				{
 					if( cache[index+2]._line == -1 ) IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" );
 				}
@@ -206,6 +220,9 @@ class CNavCache
 				return cache[++index];
 			}
 		}
+
+		IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" );
+		IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "YES" );
 		
 		return nullElement;
 	}
