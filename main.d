@@ -138,13 +138,16 @@ void main( char[][] args )
 			if( Util.index( GLOBAL.poseidonPath, home ) != 0 )
 			{
 				GLOBAL.linuxHome = home.dup;
-				scope dotPath = new FilePath( GLOBAL.linuxHome ~ "/.poseidonFB" );
+				version(FBIDE)	GLOBAL.linuxHome ~= "/.poseidonFB";
+				version(DIDE)	GLOBAL.linuxHome ~= "/.poseidonD";
+				
+				scope dotPath = new FilePath( GLOBAL.linuxHome );
 				if( !dotPath.exists() )	dotPath.create();
 				
-				dotPath.set( GLOBAL.linuxHome ~ "/.poseidonFB/settings" );
+				dotPath.set( GLOBAL.linuxHome ~ "/settings" );
 				if( !dotPath.exists() )	dotPath.create();
 				
-				dotPath.set( GLOBAL.linuxHome ~ "/.poseidonFB/settings/colorTemplates" );
+				dotPath.set( GLOBAL.linuxHome ~ "/colorTemplates" );
 				if( !dotPath.exists() )	dotPath.create();
 			}
 		}

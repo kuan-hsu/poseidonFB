@@ -2035,8 +2035,8 @@ struct ExecuterAction
 			{
 				if( GLOBAL.linuxHome.length )
 				{
-					version(FBIDE) fileName = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ Integer.toString( time.seconds ) ~ ".bas";
-					version(DIDE) fileName = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ Integer.toString( time.seconds ) ~ ".d";
+					version(FBIDE) fileName = GLOBAL.linuxHome ~ "/" ~ Integer.toString( time.seconds ) ~ ".bas";
+					version(DIDE) fileName = GLOBAL.linuxHome ~ "/" ~ Integer.toString( time.seconds ) ~ ".d";
 				}
 				else
 				{

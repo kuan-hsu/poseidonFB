@@ -448,19 +448,23 @@ class CScintilla
 		
 		version(FBIDE)
 		{
-			if( lowerCase( mypath.ext ) == "bas" || lowerCase( mypath.ext ) == "bi" ) IupSetAttribute(sci, "LEXERLANGUAGE", toStringz( GLOBAL.lexer ) );
+			if( lowerCase( mypath.ext ) == "bas" || lowerCase( mypath.ext ) == "bi" ) IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic" );
 			IupSetAttribute(sci, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
 			IupSetAttribute(sci, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
 			IupSetAttribute(sci, "KEYWORDS2", GLOBAL.KEYWORDS[2].toCString );
 			IupSetAttribute(sci, "KEYWORDS3", GLOBAL.KEYWORDS[3].toCString );
+			IupSetAttribute(sci, "KEYWORDS4", GLOBAL.KEYWORDS[4].toCString );
+			IupSetAttribute(sci, "KEYWORDS5", GLOBAL.KEYWORDS[5].toCString );
 		}
 		version(DIDE)
 		{
 			if( lowerCase( mypath.ext ) == "d" || lowerCase( mypath.ext ) == "di" ) IupSetAttribute(sci, "LEXERLANGUAGE", "d" );
 			IupSetAttribute(sci, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
 			IupSetAttribute(sci, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
-			IupSetAttribute(sci, "KEYWORDS4", GLOBAL.KEYWORDS[2].toCString );
-			IupSetAttribute(sci, "KEYWORDS5", GLOBAL.KEYWORDS[3].toCString );		
+			IupSetAttribute(sci, "KEYWORDS3", GLOBAL.KEYWORDS[2].toCString );
+			IupSetAttribute(sci, "KEYWORDS4", GLOBAL.KEYWORDS[3].toCString );
+			IupSetAttribute(sci, "KEYWORDS5", GLOBAL.KEYWORDS[4].toCString );
+			IupSetAttribute(sci, "KEYWORDS6", GLOBAL.KEYWORDS[5].toCString );
 		}
 
 		char[] font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
@@ -510,6 +514,8 @@ class CScintilla
 			IupSetAttribute(sci, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
 			IupSetAttribute(sci, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
 			IupSetAttribute(sci, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
+			IupSetAttribute(sci, "STYLEFGCOLOR23",  GLOBAL.editColor.keyWord[4].toCString );	// SCE_B_KEYWORD5 23
+			IupSetAttribute(sci, "STYLEFGCOLOR24",  GLOBAL.editColor.keyWord[5].toCString );	// SCE_B_KEYWORD6 24
 		}
 		version(DIDE)
 		{
@@ -542,8 +548,10 @@ class CScintilla
 			
 			IupSetAttribute(sci, "STYLEFGCOLOR6", GLOBAL.editColor.keyWord[0].toCString );			// SCE_D_WORD 6	
 			IupSetAttribute(sci, "STYLEFGCOLOR7", GLOBAL.editColor.keyWord[1].toCString );			// SCE_D_WORD2 7
-			IupSetAttribute(sci, "STYLEFGCOLOR20",  GLOBAL.editColor.keyWord[2].toCString );		// SCE_D_WORD5 20
-			IupSetAttribute(sci, "STYLEFGCOLOR21",  GLOBAL.editColor.keyWord[3].toCString );		// SCE_D_WORD6 21
+			IupSetAttribute(sci, "STYLEFGCOLOR9", GLOBAL.editColor.keyWord[2].toCString );			// SCE_D_TYPEDEF 9
+			IupSetAttribute(sci, "STYLEFGCOLOR20",  GLOBAL.editColor.keyWord[3].toCString );		// SCE_D_WORD5 20
+			IupSetAttribute(sci, "STYLEFGCOLOR21",  GLOBAL.editColor.keyWord[4].toCString );		// SCE_D_WORD6 21
+			IupSetAttribute(sci, "STYLEFGCOLOR22",  GLOBAL.editColor.keyWord[5].toCString );		// SCE_D_WORD7 22
 		}
 		
 

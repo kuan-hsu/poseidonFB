@@ -10,7 +10,7 @@ private import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath;
 private struct PreferenceDialogParameters
 {
 	static		IupString[15]		_stringOfLabel;
-	static		IupString[48]		kbg, stringSC;
+	static		IupString[50]		kbg, stringSC;
 	static		IupString[5]		stringMonitor;
 	static		IupString			stringCharSymbol, stringTabWidth, stringColumnEdge, stringBarSize, stringTrigger, stringLevel;
 }
@@ -956,7 +956,7 @@ class CPreferenceDialog : CBaseDialog
 				if( templateName.length )
 				{
 					char[] templatePath = "settings/colorTemplates";
-					if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null						
+					if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null						
 				
 					for( int i = IupGetInt( _listHandle, "COUNT" ); i >= 1; -- i )
 					{
@@ -1578,34 +1578,55 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( frameColor_1, "SIZE", "288x" );//IupGetAttribute( frameFont, "SIZE" ) );
 		IupSetAttribute( frameColor_1, "TITLE", GLOBAL.languageItems["colorfgbg"].toCString );
 		
-		Ihandle* labelKeyWord0 = IupLabel( GLOBAL.languageItems["keyword0"].toCString() );
+		Ihandle* labelKeyWord0 = IupLabel( "#0:" );
+		IupSetAttribute( labelKeyWord0, "ALIGNMENT", "ARIGHT" );
 		Ihandle* btnKeyWord0Color = IupFlatButton( null );
-		IupSetAttribute( btnKeyWord0Color, "FGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
 		IupSetAttribute( btnKeyWord0Color, "FGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
 		version(Windows) IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord0Color, "SIZE", "24x10" );
 		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
 		IupSetCallback( btnKeyWord0Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelKeyWord1 = IupLabel( GLOBAL.languageItems["keyword1"].toCString() );
+		Ihandle* labelKeyWord1 = IupLabel( "#1:" );
+		IupSetAttribute( labelKeyWord1, "ALIGNMENT", "ARIGHT" );
 		Ihandle* btnKeyWord1Color = IupFlatButton( null );
 		IupSetAttribute( btnKeyWord1Color, "FGCOLOR", GLOBAL.editColor.keyWord[1].toCString );
 		version(Windows) IupSetAttribute( btnKeyWord1Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord1Color, "SIZE", "24x10" );
 		IupSetHandle( "btnKeyWord1Color", btnKeyWord1Color );
 		IupSetCallback( btnKeyWord1Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelKeyWord2 = IupLabel( GLOBAL.languageItems["keyword2"].toCString() );
+		Ihandle* labelKeyWord2 = IupLabel( "#2:" );
+		IupSetAttribute( labelKeyWord2, "ALIGNMENT", "ARIGHT" );
 		Ihandle* btnKeyWord2Color = IupFlatButton( null );
 		IupSetAttribute( btnKeyWord2Color, "FGCOLOR", GLOBAL.editColor.keyWord[2].toCString );
 		version(Windows) IupSetAttribute( btnKeyWord2Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord2Color, "SIZE", "24x10" );
 		IupSetHandle( "btnKeyWord2Color", btnKeyWord2Color );
 		IupSetCallback( btnKeyWord2Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelKeyWord3 = IupLabel( GLOBAL.languageItems["keyword3"].toCString() );
+		Ihandle* labelKeyWord3 = IupLabel( "#3:" );
+		IupSetAttribute( labelKeyWord3, "ALIGNMENT", "ARIGHT" );
 		Ihandle* btnKeyWord3Color = IupFlatButton( null );
 		IupSetAttribute( btnKeyWord3Color, "FGCOLOR",GLOBAL.editColor.keyWord[3].toCString );
 		version(Windows) IupSetAttribute( btnKeyWord3Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord3Color, "SIZE", "24x10" );
 		IupSetHandle( "btnKeyWord3Color", btnKeyWord3Color );
 		IupSetCallback( btnKeyWord3Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelKeyWord4 = IupLabel( "#4:" );
+		IupSetAttribute( labelKeyWord4, "ALIGNMENT", "ARIGHT" );
+		Ihandle* btnKeyWord4Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord4Color, "FGCOLOR",GLOBAL.editColor.keyWord[4].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord4Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord4Color, "SIZE", "24x10" );
+		IupSetHandle( "btnKeyWord4Color", btnKeyWord4Color );
+		IupSetCallback( btnKeyWord4Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelKeyWord5 = IupLabel( "#5:" );//GLOBAL.languageItems["keyword5"].toCString() );
+		IupSetAttribute( labelKeyWord5, "ALIGNMENT", "ARIGHT" );
+		Ihandle* btnKeyWord5Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord5Color, "FGCOLOR",GLOBAL.editColor.keyWord[5].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord5Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord5Color, "SIZE", "24x10" );
+		IupSetHandle( "btnKeyWord5Color", btnKeyWord5Color );
+		IupSetCallback( btnKeyWord5Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+
 
 		Ihandle* gboxKeyWordColor = IupGridBox
 		(
@@ -1618,10 +1639,16 @@ class CPreferenceDialog : CBaseDialog
 			btnKeyWord2Color,
 			labelKeyWord3,
 			btnKeyWord3Color,
+			
+			labelKeyWord4,
+			btnKeyWord4Color,
+			labelKeyWord5,
+			btnKeyWord5Color,
+			
 
 			null
 		);
-		IupSetAttributes( gboxKeyWordColor, "SIZELIN=-1,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
+		IupSetAttributes( gboxKeyWordColor, "SIZELIN=-1,NUMDIV=12,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
 		Ihandle* frameKeywordColor = IupFrame( gboxKeyWordColor );
 		IupSetAttributes( frameKeywordColor, "MARGIN=0x0" );
 		IupSetAttribute( frameKeywordColor, "TITLE", GLOBAL.languageItems["keywords"].toCString );		
@@ -1730,12 +1757,24 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( keyWordText3, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
 		IupSetAttribute( keyWordText3, "VALUE", GLOBAL.KEYWORDS[3].toCString );
 		IupSetHandle( "keyWordText3", keyWordText3 );
+		Ihandle* keyWordText4 = IupText( null );
+		IupSetAttributes( keyWordText4, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
+		IupSetAttribute( keyWordText4, "VALUE", GLOBAL.KEYWORDS[4].toCString );
+		IupSetHandle( "keyWordText4", keyWordText4 );
+		Ihandle* keyWordText5 = IupText( null );
+		IupSetAttributes( keyWordText5, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
+		IupSetAttribute( keyWordText5, "VALUE", GLOBAL.KEYWORDS[5].toCString );
+		IupSetHandle( "keyWordText5", keyWordText5 );
+		
+		
 		
 		IupSetAttribute( keyWordText0, "TABTITLE", GLOBAL.languageItems["keyword0"].toCString() );
 		IupSetAttribute( keyWordText1, "TABTITLE", GLOBAL.languageItems["keyword1"].toCString() );
 		IupSetAttribute( keyWordText2, "TABTITLE", GLOBAL.languageItems["keyword2"].toCString() );
 		IupSetAttribute( keyWordText3, "TABTITLE", GLOBAL.languageItems["keyword3"].toCString() );
-		Ihandle* keywordTabs = IupTabs( keyWordText0, keyWordText1, keyWordText2, keyWordText3, null );
+		IupSetAttribute( keyWordText4, "TABTITLE", GLOBAL.languageItems["keyword4"].toCString() );
+		IupSetAttribute( keyWordText5, "TABTITLE", GLOBAL.languageItems["keyword5"].toCString() );
+		Ihandle* keywordTabs = IupTabs( keyWordText0, keyWordText1, keyWordText2, keyWordText3, keyWordText4, keyWordText5, null );
 		IupSetAttribute( keywordTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( keywordTabs, "EXPAND", "YES" );
 		IupSetAttribute( keywordTabs, "CHILDOFFSET", "2x5" );
@@ -1784,7 +1823,7 @@ class CPreferenceDialog : CBaseDialog
 	{
 		char[] templatePath = "settings/colorTemplates";
 
-		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
+		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
 		
 		scope _fp = new FilePath( templatePath );
 		if( !_fp.exists() )	_fp.create();
@@ -1846,6 +1885,9 @@ class CPreferenceDialog : CBaseDialog
 		doc ~= setINILineData( "keyword3", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR" ) ).dup );
 		doc ~= setINILineData( "currentword", fromStringz( IupGetAttribute( IupGetHandle( "btnIndicator" ), "FGCOLOR" ) ).dup );
 		doc ~= setINILineData( "currentwordAlpha", fromStringz( IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE" ) ).dup );
+		doc ~= setINILineData( "keyword4", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "keyword5", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR" ) ).dup );
+		
 		
 		if( !actionManager.FileAction.saveFile( templatePath ~ "/" ~ templateName ~ ".ini", doc ) ) throw new Exception( "Save File Error" );
 	}	
@@ -2332,6 +2374,8 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.KEYWORDS[1] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText1" ), "VALUE" ))).dup;
 			GLOBAL.KEYWORDS[2] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText2" ), "VALUE" ))).dup;
 			GLOBAL.KEYWORDS[3] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText3" ), "VALUE" ))).dup;
+			GLOBAL.KEYWORDS[4] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText4" ), "VALUE" ))).dup;
+			GLOBAL.KEYWORDS[5] = Util.trim( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText5" ), "VALUE" ))).dup;
 			
 			GLOBAL.editorSetting00.LineMargin				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
 				if( IupGetHandle( "menuLineMargin" ) != null ) IupSetAttribute( IupGetHandle( "menuLineMargin" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" ) );
@@ -2514,6 +2558,8 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[1] << IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[2] << IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[3] << IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR" ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[4] << IupGetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR" ) );
+			IupSetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[5] << IupGetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR" ) );
 
 
 			
@@ -2797,7 +2843,7 @@ extern(C) // Callback for CPreferenceDialog
 	{
 		if( state == 1 )
 		{
-			scope templateFP = new FilePath( GLOBAL.linuxHome.length ? ( GLOBAL.linuxHome ~ "/.poseidonFB/settings/colorTemplates" ) : "settings/colorTemplates" );
+			scope templateFP = new FilePath( GLOBAL.linuxHome.length ? ( GLOBAL.linuxHome ~ "/settings/colorTemplates" ) : "settings/colorTemplates" );
 			if( templateFP.exists() )
 			{
 				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
@@ -2822,13 +2868,13 @@ extern(C) // Callback for CPreferenceDialog
 			
 			char[][]	colors = IDECONFIG.loadColorTemplateINI( templateName );
 			
-			if( colors.length != 48 ) return IUP_DEFAULT;
+			if( colors.length > 50 ) return IUP_DEFAULT;
 			
-			for( int i = 0; i < 48; i ++ )
+			for( int i = 0; i < colors.length; i ++ )
 				if( PreferenceDialogParameters.kbg[i] is null ) PreferenceDialogParameters.kbg[i] = new IupString( colors[i] ); else PreferenceDialogParameters.kbg[i] = colors[i];
 			
-			if( colors.length == 48 )
-			{
+			//if( colors.length == 48 )
+			//{
 				IupSetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR", PreferenceDialogParameters.kbg[0].toCString );					IupSetFocus( IupGetHandle( "btnCaretLine" ) );
 				IupSetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR", PreferenceDialogParameters.kbg[1].toCString );						IupSetFocus( IupGetHandle( "btnCursor" ) );
 				IupSetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR", PreferenceDialogParameters.kbg[2].toCString );					IupSetFocus( IupGetHandle( "btnSelectFore" ) );
@@ -2892,7 +2938,10 @@ extern(C) // Callback for CPreferenceDialog
 					IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", PreferenceDialogParameters.kbg[47].toCString );
 				else
 					IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", PreferenceDialogParameters.kbg[47].toCString );			
-			}
+					
+				IupSetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR", PreferenceDialogParameters.kbg[48].toCString );				IupSetFocus( IupGetHandle( "btnKeyWord4Color" ) );
+				IupSetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR", PreferenceDialogParameters.kbg[49].toCString );				IupSetFocus( IupGetHandle( "btnKeyWord5Color" ) );
+			//}
 		}
 		
 		return IUP_DEFAULT;
@@ -2973,6 +3022,16 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", "80" );
 		else
 			IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", "80" );			
+
+
+		for( int i = 48; i < 50; i ++ )
+			if( PreferenceDialogParameters.kbg[i] is null ) PreferenceDialogParameters.kbg[i] = new IupString;
+		PreferenceDialogParameters.kbg[48] = cast(char[]) "255 0 0";
+		PreferenceDialogParameters.kbg[49] = cast(char[]) "0 255 0";
+		IupSetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR", PreferenceDialogParameters.kbg[48].toCString );	IupSetFocus( IupGetHandle( "btnKeyWord4Color" ) );
+		IupSetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR", PreferenceDialogParameters.kbg[49].toCString );	IupSetFocus( IupGetHandle( "btnKeyWord5Color" ) );
+
+
 		
 		
 		IupSetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE", "" );

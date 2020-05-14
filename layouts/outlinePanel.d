@@ -2085,11 +2085,7 @@ extern(C)
 				Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
 
 				char[] imageName, editText = Util.trim( fromStringz( IupGetAttribute( ih, "VALUE" ) ) );
-
-				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
-				GLOBAL.outlineTree.listItemASTs.length = 0;
-				GLOBAL.outlineTree.listItemTreeID.length = 0;
-				GLOBAL.outlineTree.listItemIndex = 0;
+				GLOBAL.outlineTree.cleanListItems();
 
 				bool bAnyWord, bGo;
 				Ihandle* _wholeWordHandle = IupGetDialogChild( GLOBAL.mainDlg, "button_OutlineWholeWord" );
@@ -2126,7 +2122,11 @@ extern(C)
 					}
 				}
 				
-				version(Windows) if( IupGetInt( ih, "COUNT" ) > 0 ) IupSetAttribute( ih, "VALUE", IupGetAttribute( ih, "1" ) );
+				if( IupGetInt( actTree, "COUNT" ) > 0 )
+				{
+					GLOBAL.outlineTree.listItemIndex = 1;
+					version(Windows) IupSetAttribute( ih, "VALUE", IupGetAttribute( ih, "1" ) );
+				}
 			}
 		}
 		else	// ListBox close

@@ -123,7 +123,7 @@ public:
 			{
 				if( fullpath == "settings/editorSettings.ini" )
 				{
-					if( GLOBAL.linuxHome.length ) fullpath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/editorSettings.ini";
+					if( GLOBAL.linuxHome.length ) fullpath = GLOBAL.linuxHome ~ "/settings/editorSettings.ini";
 				}
 			}
 			
@@ -131,10 +131,9 @@ public:
 			
 			// Editor
 			doc ~= setINILineData( "[editor]");
-			doc ~= setINILineData( "lexer", GLOBAL.lexer );
 			doc ~= setINILineData( "language", GLOBAL.language );
 			
-			for( int i = 0; i < 4; ++ i )
+			for( int i = 0; i < 6; ++ i )
 				doc ~= setINILineData( "keyword" ~ Integer.toString( i ), Util.trim( GLOBAL.KEYWORDS[i].toDString ) );
 
 			for( int i = 1; i < 10; ++ i )
@@ -237,6 +236,8 @@ public:
 			doc ~= setINILineData( "keyword1", GLOBAL.editColor.keyWord[1].toDString );
 			doc ~= setINILineData( "keyword2", GLOBAL.editColor.keyWord[2].toDString );
 			doc ~= setINILineData( "keyword3", GLOBAL.editColor.keyWord[3].toDString );	
+			doc ~= setINILineData( "keyword4", GLOBAL.editColor.keyWord[4].toDString );
+			doc ~= setINILineData( "keyword5", GLOBAL.editColor.keyWord[5].toDString );	
 			//doc ~= setINILineData( "template", GLOBAL.colorTemplate.toDString );
 			doc ~= setINILineData( "caretLine", GLOBAL.editColor.caretLine.toDString );
 			doc ~= setINILineData( "cursor", GLOBAL.editColor.cursor.toDString );
@@ -458,14 +459,14 @@ public:
 				}
 				else
 				{
-					scope settingFilePath = new FilePath( GLOBAL.linuxHome ~ "/.poseidonFB/settings/editorSettings.ini" );
+					scope settingFilePath = new FilePath( GLOBAL.linuxHome ~ "/settings/editorSettings.ini" );
 					if( !settingFilePath.exists() )
 					{
 						return;
 					}
 					else
 					{
-						iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/editorSettings.ini";
+						iniPath = GLOBAL.linuxHome ~ "/settings/editorSettings.ini";
 					}
 				}
 			}
@@ -506,17 +507,12 @@ public:
 					case "[editor]":
 						switch( left )
 						{
-							case "lexer":			
-								version(DIDE)
-									GLOBAL.lexer = "d";
-								else
-									GLOBAL.lexer = right;
-								break;
-
 							case "keyword0":		GLOBAL.KEYWORDS[0] = right;						break;
 							case "keyword1":		GLOBAL.KEYWORDS[1] = right;						break;
 							case "keyword2":		GLOBAL.KEYWORDS[2] = right;						break;
 							case "keyword3":		GLOBAL.KEYWORDS[3] = right;						break;
+							case "keyword4":		GLOBAL.KEYWORDS[4] = right;						break;
+							case "keyword5":		GLOBAL.KEYWORDS[5] = right;						break;
 							case "indicatorStyle":	GLOBAL.indicatorStyle = Integer.atoi( right );	break;
 							case "language":
 								GLOBAL.language = right;
@@ -630,6 +626,8 @@ public:
 							case "keyword1":				GLOBAL.editColor.keyWord[1] = right;					break;
 							case "keyword2":				GLOBAL.editColor.keyWord[2] = right;					break;
 							case "keyword3":				GLOBAL.editColor.keyWord[3] = right;					break;
+							case "keyword4":				GLOBAL.editColor.keyWord[4] = right;					break;
+							case "keyword5":				GLOBAL.editColor.keyWord[5] = right;					break;
 							//case "template":				GLOBAL.colorTemplate = right;							break;
 							case "caretLine":				GLOBAL.editColor.caretLine = right;						break;
 							case "cursor":					GLOBAL.editColor.cursor = right;						break;
@@ -904,7 +902,7 @@ public:
 			}
 
 			char[] iniPath = "settings/docStatus.ini";
-			version(linux) if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/docStatus.ini"; // Under AppImage
+			version(linux) if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/settings/docStatus.ini"; // Under AppImage
 			actionManager.FileAction.saveFile( iniPath, doc );
 		}
 		catch( Exception e )
@@ -918,7 +916,7 @@ public:
 		try
 		{
 			char[] iniPath = "settings/docStatus.ini";
-			version(linux) if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/docStatus.ini"; // Under AppImage
+			version(linux) if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/settings/docStatus.ini"; // Under AppImage
 		
 			scope settingFilePath = new FilePath( iniPath );
 			if( !settingFilePath.exists() ) return;
@@ -979,7 +977,7 @@ public:
 	{
 		char[] templatePath = "settings/colorTemplates";
 
-		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/.poseidonFB/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
+		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
 		
 		scope _fp = new FilePath( templatePath );
 		if( !_fp.exists() )	_fp.create();
@@ -1049,7 +1047,7 @@ public:
 		{
 			char[] iniPath = "settings/colorTemplates/" ~ templateName ~ ".ini";
 			
-			if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/colorTemplates/" ~ templateName ~ ".ini";
+			if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ templateName ~ ".ini";
 			
 			scope _fp = new FilePath( iniPath );
 			if( !_fp.exists() )
@@ -1061,6 +1059,8 @@ public:
 			
 			scope file = new UnicodeFile!(char)( iniPath, Encoding.Unknown );
 			char[] doc = file.read();
+			
+			results.length = 50;
 			
 			char[]	blockText;
 			foreach( char[] lineData; Util.splitLines( doc ) )
@@ -1090,14 +1090,72 @@ public:
 					case "[color]":
 						switch( left )
 						{
+							case	"caretLine":				results[0] = right;		break;
+							case	"cursor":					results[1] = right;		break;
+							case	"selectionFore":			results[2] = right;		break;
+							case	"selectionBack":			results[3] = right;		break;
+							case	"linenumFore":				results[4] = right;		break;
+							case	"linenumBack":				results[5] = right;		break;
+							case	"fold":						results[6] = right;		break;
+							
+							case	"selAlpha":					results[7] = right;		break;
+							case	"braceFore":				results[8] = right;		break;
+							case	"braceBack":				results[9] = right;		break;
+							case	"errorFore":				results[10] = right;	break;
+							case	"errorBack":				results[11] = right;	break;
+							case	"warningFore":				results[12] = right;	break;
+							case	"warningBack":				results[13] = right;	break;
+
+							case	"scintillaFore":			results[14] = right;	break;
+							case	"scintillaBack":			results[15] = right;	break;
+
+							case	"SCE_B_COMMENT_Fore":		results[16] = right;	break;
+							case	"SCE_B_COMMENT_Back":		results[17] = right;	break;
+							case	"SCE_B_NUMBER_Fore":		results[18] = right;	break;
+							case	"SCE_B_NUMBER_Back":		results[19] = right;	break;
+							case	"SCE_B_STRING_Fore":		results[20] = right;	break;
+							case	"SCE_B_STRING_Back":		results[21] = right;	break;
+							case	"SCE_B_PREPROCESSOR_Fore":	results[22] = right;	break;
+							case	"SCE_B_PREPROCESSOR_Back":	results[23] = right;	break;
+							case	"SCE_B_OPERATOR_Fore":		results[24] = right;	break;
+							case	"SCE_B_OPERATOR_Back":		results[25] = right;	break;
+							case	"SCE_B_IDENTIFIER_Fore":	results[26] = right;	break;
+							case	"SCE_B_IDENTIFIER_Back":	results[27] = right;	break;
+							case	"SCE_B_COMMENTBLOCK_Fore":	results[28] = right;	break;
+							case	"SCE_B_COMMENTBLOCK_Back":	results[29] = right;	break;
+
+							case	"projectFore":				results[30] = right;	break;
+							case	"projectBack":				results[31] = right;	break;
+							case	"outlineFore":				results[32] = right;	break;
+							case	"outlineBack":				results[33] = right;	break;
+							case	"filelistFore":				results[34] = right;	break;
+							case	"filelistBack":				results[35] = right;	break;
+							case	"outputFore":				results[36] = right;	break;
+							case	"outputBack":				results[37] = right;	break;
+							case	"searchFore":				results[38] = right;	break;
+							case	"searchBack":				results[39] = right;	break;
+
+							case	"prjTitle":					results[40] = right;	break;
+							case	"prjSourceType":			results[41] = right;	break;
+							case	"keyword0":					results[42] = right;	break;
+							case	"keyword1":					results[43] = right;	break;
+							case	"keyword2":					results[44] = right;	break;
+							case	"keyword3":					results[45] = right;	break;
+							case	"currentword":				results[46] = right;	break;
+							case	"currentwordAlpha":			results[47] = right;	break;
+							case	"keyword4":					results[48] = right;	break;
+							case	"keyword5":					results[49] = right;	break;
+
+							/*
 							case	"caretLine", "cursor", "selectionFore", "selectionBack", "linenumFore", "linenumBack", "fold", "selAlpha",
 									"braceFore", "braceBack", "errorFore", "errorBack", "warningFore", "warningBack", "scintillaFore", "scintillaBack",
 									"SCE_B_COMMENT_Fore", "SCE_B_COMMENT_Back", "SCE_B_NUMBER_Fore", "SCE_B_NUMBER_Back", "SCE_B_STRING_Fore", "SCE_B_STRING_Back", "SCE_B_PREPROCESSOR_Fore", "SCE_B_PREPROCESSOR_Back",
 									"SCE_B_OPERATOR_Fore", "SCE_B_OPERATOR_Back", "SCE_B_IDENTIFIER_Fore", "SCE_B_IDENTIFIER_Back", "SCE_B_COMMENTBLOCK_Fore", "SCE_B_COMMENTBLOCK_Back", "projectFore", "projectBack",
 									"outlineFore", "outlineBack", "filelistFore", "filelistBack", "outputFore", "outputBack", "searchFore", "searchBack",
-									"prjTitle", "prjSourceType", "keyword0", "keyword1", "keyword2", "keyword3", "currentword", "currentwordAlpha":
+									"prjTitle", "prjSourceType", "keyword0", "keyword1", "keyword2", "keyword3", "keyword4", "keyword5", "currentword", "currentwordAlpha":
 									results ~= right;
 									break;
+							*/
 							default:
 						}
 						break;
@@ -1190,7 +1248,7 @@ public:
 		{
 			char[] xmlPath = "settings/colorTemplates/" ~ templateName ~ ".xml";
 			
-			if( GLOBAL.linuxHome.length ) xmlPath = GLOBAL.linuxHome ~ "/.poseidonFB/settings/colorTemplates/" ~ templateName ~ ".xml";
+			if( GLOBAL.linuxHome.length ) xmlPath = GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ templateName ~ ".xml";
 		
 			// Loading Key Word...
 			scope _fp = new FilePath( xmlPath );
@@ -1322,6 +1380,12 @@ public:
 			foreach( e; result ) results ~= e.value;
 
 			result = root.query.descendant("color").attribute("keyword3");
+			foreach( e; result ) results ~= e.value;
+			
+			result = root.query.descendant("color").attribute("keyword4");
+			foreach( e; result ) results ~= e.value;
+
+			result = root.query.descendant("color").attribute("keyword5");
 			foreach( e; result ) results ~= e.value;
 			
 			result = root.query.descendant("color").attribute("currentword");

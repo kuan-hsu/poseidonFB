@@ -30,7 +30,7 @@ struct EditorLayoutSize
 
 struct EditorColorUint
 {
-	IupString[4]	keyWord;
+	IupString[6]	keyWord;
 	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, bookmark, selAlpha, errorFore, errorBack, warningFore, warringBack, currentWord, currentWordAlpha;
 	IupString		scintillaFore, scintillaBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
@@ -147,8 +147,7 @@ struct GLOBAL
 	
 	static char[]				poseidonPath;			// Include Tail /
 	static char[]				linuxHome;
-	static char[]				lexer = "freebasic";
-	static IupString[4]			KEYWORDS;
+	static IupString[6]			KEYWORDS;
 	static int					keywordCase = 0;	
 	static IupString			compilerFullPath, x64compilerFullPath;
 	static char[]				compilerAnootation = "ON";
@@ -248,6 +247,9 @@ struct GLOBAL
 		GLOBAL.editColor.keyWord[1] = new IupString( cast(char[]) "0 0 255" );
 		GLOBAL.editColor.keyWord[2] = new IupString( cast(char[]) "231 144 0" );
 		GLOBAL.editColor.keyWord[3] = new IupString( cast(char[]) "16 108 232" );
+		GLOBAL.editColor.keyWord[4] = new IupString( cast(char[]) "255 0 0" );
+		GLOBAL.editColor.keyWord[5] = new IupString( cast(char[]) "0 255 0" );
+		
 		
 		GLOBAL.editColor.maker[0] = new IupString( cast(char[]) "200 255 200" );
 		GLOBAL.editColor.maker[1] = new IupString( cast(char[]) "255 200 255" );
@@ -337,6 +339,8 @@ struct GLOBAL
 			GLOBAL.KEYWORDS[1] = new IupString( cast(char[]) "chr cint circle class clear clng clngint close cls color command common condbroadcast condcreate conddestroy condsignal condwait const constructor continue cos cptr cshort csign csng csrlin cubyte cuint culng culngint cunsg curdir cushort custom cvd cvi cvl cvlongint cvs cvshort data date dateadd datediff datepart dateserial datevalue day deallocate declare defbyte defdbl defined defint deflng deflongint defshort defsng defstr defubyte defuint defulongint defushort delete destructor dim dir do double draw dylibfree dylibload dylibsymbol else elseif encoding end enum environ eof eqv erase erfn erl ermn err error event exec exepath exit exp export extends extern field fileattr filecopy filedatetime fileexists filelen fix flip for format frac fre freefile function get getjoystick getkey getmouse gosub goto hex hibyte hiword" );
 			GLOBAL.KEYWORDS[2] = new IupString( cast(char[]) "hour if iif imageconvertrow imagecreate imagedestroy imageinfo imp implements import inkey inp input instr instrrev int integer is isdate isredirected kill lbound lcase left len let lib line lobyte loc local locate lock lof log long longint loop loword lpos lprint lset ltrim mid minute mkd mkdir mki mkl mklongint mks mkshort mod month monthname multikey mutexcreate mutexdestroy mutexlock mutexunlock naked name namespace next new not now object oct offsetof on once open operator option or orelse out output overload override paint palette pascal pcopy peek pmap point pointcoord pointer poke pos preserve preset print private procptr property protected pset ptr public put random randomize read reallocate redim rem reset restore resume return rgb rgba right rmdir" );
 			GLOBAL.KEYWORDS[3] = new IupString( cast(char[]) "rnd rset rtrim run sadd scope screen screencopy screencontrol screenevent screeninfo screenglproc screenlist screenlock screenptr screenres screenset screensync screenunlock second seek select setdate setenviron setmouse settime sgn shared shell shl shr short sin single sizeof sleep space spc sqr static stdcall step stick stop str strig string strptr sub swap system tab tan then this threadcall threadcreate threaddetach threadwait time timeserial timevalue timer to trans trim type typeof ubound ubyte ucase uinteger ulong ulongint union unlock unsigned until ushort using va_arg va_first va_next val vallng valint valuint valulng var varptr view virtual wait wbin wchr weekday weekdayname wend while whex width window windowtitle winput with woct write wspace wstr wstring xor year zstring" );
+			GLOBAL.KEYWORDS[4] = new IupString( cast(char[]) "" );
+			GLOBAL.KEYWORDS[5] = new IupString( cast(char[]) "" );
 		}
 		version(DIDE)
 		{
@@ -344,6 +348,8 @@ struct GLOBAL
 			GLOBAL.KEYWORDS[1] = new IupString( cast(char[]) "else enum export extern false final finally float for foreach foreach_reverse function goto idouble if ifloat immutable import in inout int interface invariant ireal is lazy long macro mixin module" );
 			GLOBAL.KEYWORDS[2] = new IupString( cast(char[]) "new nothrow null out override package pragma private protected public pure real ref return scope shared short static struct super switch synchronized template this throw true try typedef typeid typeof" );
 			GLOBAL.KEYWORDS[3] = new IupString( cast(char[]) "ubyte ucent uint ulong union unittest ushort version void volatile wchar while with __FILE__ __FILE_FULL_PATH__ __MODULE__ __LINE__ __FUNCTION__ __PRETTY_FUNCTION__ __gshared __traits __vector __parameters" );
+			GLOBAL.KEYWORDS[4] = new IupString( cast(char[]) "" );
+			GLOBAL.KEYWORDS[5] = new IupString( cast(char[]) "" );
 		}
 
 		for( int i = 0; i < 10; ++i )
@@ -737,6 +743,8 @@ struct GLOBAL
 						GLOBAL.languageItems["keyword1"] = new IupString( cast(char[]) "Keyword1" );
 						GLOBAL.languageItems["keyword2"] = new IupString( cast(char[]) "Keyword2" );
 						GLOBAL.languageItems["keyword3"] = new IupString( cast(char[]) "Keyword3" );
+						GLOBAL.languageItems["keyword4"] = new IupString( cast(char[]) "Keyword4" );
+						GLOBAL.languageItems["keyword5"] = new IupString( cast(char[]) "Keyword5" );
 					// GLOBAL.languageItems["manual"] = new IupString( cast(char[]) "Manual" );
 						GLOBAL.languageItems["manualpath"] = new IupString( cast(char[]) "Manual Path" );
 						GLOBAL.languageItems["manualusing"] = new IupString( cast(char[]) "Use Help Manual" );
