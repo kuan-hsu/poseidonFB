@@ -264,6 +264,7 @@ outline=概観
 	showpr=概観ノードの表示を変更
 	refresh=パーサーを再読込み
 	searchanyword=単語全体を検索
+	showln=行番号を表示
 	hide=隠す
 
 filelist=ファイル一覧

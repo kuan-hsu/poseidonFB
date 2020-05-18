@@ -32,8 +32,9 @@ search=Search
 
 windows=Windows
 view=View
-	outline=Outline
+	'outline=Outline
 	message=Message
+	manual=Manual
 	fullscreen=Fullscreen
 	
 prj=Project
@@ -73,6 +74,8 @@ debug=Debug
 	
 options=Options
 	tools=Tools
+		unload=Unload
+		pluginstatus=Plugin Status
 		seteol=Set EOL Character
 		converteol=Convert EOL Character
 		convertencoding=Convert Encoding
@@ -263,7 +266,8 @@ outline=Outline
 	collapse=Collapse
 	showpr=Change Outline Node Title
 	refresh=Refresh
-	searchanyword=Search Whole Word
+	searchanyword=Search Word From Head
+	showln=Show Line Number
 	hide=Hide
 
 filelist=FileList

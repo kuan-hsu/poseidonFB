@@ -209,7 +209,7 @@ class CNavCache
 			{
 				if( index < 1998 )
 				{
-					if( cache[index+2]._line == -1 ) IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" );
+					if( cache[index+2]._line == -1 ) IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "NO" ); else  IupSetAttribute( IupGetHandle( "toolbar_ForwardNav" ), "ACTIVE", "YES" );
 				}
 				else
 				{

@@ -572,6 +572,8 @@ struct GLOBAL
 			
 		GLOBAL.languageItems["options"] = new IupString( cast(char[]) "Options" );
 			GLOBAL.languageItems["tools"] = new IupString( cast(char[]) "Tools" );
+				GLOBAL.languageItems["unload"] = new IupString( cast(char[]) "Unload" );
+				GLOBAL.languageItems["pluginstatus"] = new IupString( cast(char[]) "Plugin Status" );
 				GLOBAL.languageItems["seteol"] = new IupString( cast(char[]) "Set Eol Character" );
 				GLOBAL.languageItems["converteol"] = new IupString( cast(char[]) "Convert Eol Character" );
 				GLOBAL.languageItems["convertencoding"] = new IupString( cast(char[]) "Convert Encoding" );
@@ -764,8 +766,9 @@ struct GLOBAL
 		GLOBAL.languageItems["outline"] = new IupString( cast(char[]) "Outline" );
 			GLOBAL.languageItems["collapse"] = new IupString( cast(char[]) "Collapse" );
 			GLOBAL.languageItems["showpr"] = new IupString( cast(char[]) "Change Outline Node Title" );
+			GLOBAL.languageItems["showln"] = new IupString( cast(char[]) "Show Line Number" );
 			GLOBAL.languageItems["refresh"] = new IupString( cast(char[]) "Refresh" );
-			GLOBAL.languageItems["searchanyword"] = new IupString( cast(char[]) "Search Whole Word" );
+			GLOBAL.languageItems["searchanyword"] = new IupString( cast(char[]) "Search Word From Head" );
 			GLOBAL.languageItems["hide"] = new IupString( cast(char[]) "Hide" );
 
 		GLOBAL.languageItems["filelist"] = new IupString( cast(char[]) "FileList" );

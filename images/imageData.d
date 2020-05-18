@@ -196,6 +196,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_show_p", XPM.getIUPimage( "icons/xpm/show_p.xpm" ) ); // IupSetHandle("icon_show_p", load_image_show_p());
 	IupSetHandle( "icon_show_r", XPM.getIUPimage( "icons/xpm/show_r.xpm" ) ); // IupSetHandle("icon_show_r", load_image_show_r()); 
 	IupSetHandle( "icon_show_nopr", XPM.getIUPimage( "icons/xpm/show_nopr.xpm" ) ); // IupSetHandle("icon_show_nopr", load_image_show_nopr());
+	IupSetHandle( "icon_show_linenum", XPM.getIUPimage( "icons/xpm/show_linenum.xpm" ) );
 	IupSetHandle( "icon_importall", XPM.getIUPimage( "icons/xpm/importall.xpm" ) ); // IupSetHandle("icon_prj_open", load_image_prj_open());
 
 	IupSetHandle( "icon_manual", XPM.getIUPimage( "icons/xpm/manual.xpm" ) );

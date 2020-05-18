@@ -126,7 +126,8 @@ class CCustomDialog : CBaseDialog
 		IupSetHandle( "treePluginStatus_Handle", treePluginStatus );
 
 		
-		Ihandle* unloadButton = IupButton( "   Unload   ", null );
+		Ihandle* unloadButton = IupButton( GLOBAL.languageItems["unload"].toCString, null );
+		IupSetAttribute( unloadButton, "SIZE", "40x12" );
 		IupSetCallback( unloadButton, "ACTION", cast(Icallback) function( Ihandle* _ih )
 		{
 			Ihandle* ih = IupGetHandle( "treePluginStatus_Handle" );
@@ -155,7 +156,7 @@ class CCustomDialog : CBaseDialog
 		
 		Ihandle* vBoxStatus = IupVbox( treePluginStatus, IupHbox( IupFill, unloadButton, null ), null );
 		Ihandle* frameListPlugin = IupFrame( vBoxStatus );
-		IupSetAttribute( frameListPlugin, "TITLE", "Plugins Status" );
+		IupSetAttribute( frameListPlugin, "TITLE", GLOBAL.languageItems["pluginstatus"].toCString );
 
 		Ihandle* vBoxLayout = IupVbox( frameList, vBoxDescription, labelSEPARATOR, bottom, frameListPlugin, null );
 		
