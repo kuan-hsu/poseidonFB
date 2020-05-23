@@ -34,13 +34,11 @@ public:
 		}
 	}
 
-	/*
 	// Overload []
 	CASTnode opIndex( int i )
 	{ 
 		if( i < children.length ) return children[i]; else return null;
 	}
-	*/
 	
 	// Return index of children
 	int addChild( CASTnode _child )

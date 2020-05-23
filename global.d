@@ -207,6 +207,7 @@ struct GLOBAL
 
 
 	static PROJECT[char[]]		projectManager;
+	static char[]				activeProjectPath;
 	
 	static char[]				language;
 	static IupString[char[]]	languageItems;

@@ -690,10 +690,9 @@ version(FBIDE)
 				}
 				else
 				{
-					char[] activePrjName = ProjectAction.getActiveProjectName();
-					if( activePrjName in GLOBAL.projectManager )
+					if( GLOBAL.activeProjectPath in GLOBAL.projectManager )
 					{
-						foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
+						foreach( char[] s; GLOBAL.projectManager[GLOBAL.activeProjectPath].sources ~ GLOBAL.projectManager[GLOBAL.activeProjectPath].includes )
 						{
 							if( s != originalFullPath )
 							{
@@ -701,6 +700,7 @@ version(FBIDE)
 								if( _createFileNode !is null )
 								{
 									includesMarkContainer[fullPathByOS(s)] = _createFileNode;
+									
 									foreach( CASTnode _node; _createFileNode.getChildren )
 									{
 										if( _node.kind & B_INCLUDE ) 
@@ -779,7 +779,7 @@ version(FBIDE)
 		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
-			
+
 			char[][] prevKeys = includesMarkContainer.keys;
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, true, ln );
 			if( results.length )
@@ -1533,10 +1533,10 @@ version(FBIDE)
 		{
 			if( AST_Head is null ) return null;
 			
-			auto		cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			auto		function_originalAST_Head = AST_Head;
-
-			if( cSci is null ) return null;
+			auto		_rootNode = ParserAction.getRoot( function_originalAST_Head );
+			char[]		fullPath = _rootNode !is null ? _rootNode.name : "";
+			
 			
 			if( bPushContainer )
 			{
@@ -1611,9 +1611,9 @@ version(FBIDE)
 								
 								if( GLOBAL.objectDefaultParser !is null )
 									resultNodes	= getMatchASTfromWholeWord( GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
-									
+
 								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
-								resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+								resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
 
 								// For Type Objects
 								if( memberFunctionMotherName.length )
@@ -1654,7 +1654,7 @@ version(FBIDE)
 							if( AST_Head !is null )
 							{
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
-								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, splitWord[i] );
+								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i] );
 								
 								//cleanIncludesMarkContainer();
 								// For Type Objects
@@ -1685,7 +1685,7 @@ version(FBIDE)
 								if( memberFunctionMotherName.length )
 								{
 									//AST_Head = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
-									CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+									CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
 									if( memberFunctionMotherNode !is null )
 									{
 										if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
@@ -1724,7 +1724,7 @@ version(FBIDE)
 						// For Type Objects
 						if( memberFunctionMotherName.length )
 						{
-							CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+							CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
 							if( memberFunctionMotherNode !is null )
 							{
 								if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );

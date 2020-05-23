@@ -1838,13 +1838,9 @@ version(DIDE)
 		{
 			if( AST_Head is null ) return null;
 			
-			auto		cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			auto		function_originalAST_Head = AST_Head;
 
-			if( cSci is null ) return null;
-			
 			char[]		result;
-			
 			char[]		wordWithoutSymbol;
 			CASTnode	tempReturnNode;
 			bool		bBracket;

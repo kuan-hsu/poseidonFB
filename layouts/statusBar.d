@@ -144,6 +144,8 @@ class CStatusBar
 			scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
 			scope	_prjDir = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", prjID ) );
 			
+			GLOBAL.activeProjectPath = _prjDir.toDString;
+			
 			char[] focusName;
 			if( _prjDir.toDString in GLOBAL.projectManager ) focusName = GLOBAL.projectManager[_prjDir.toDString].focusOn;
 			
