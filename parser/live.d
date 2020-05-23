@@ -28,7 +28,7 @@ struct LiveParser
 
 				foreach_reverse( CASTnode child; head.getChildren() )
 				{
-					if( child.getChildrenCount )
+					if( child.getChildrenCount > 0 )
 					{
 						if( child.lineNumber < fixedLn )
 						{
@@ -260,7 +260,7 @@ struct LiveParser
 					}
 
 					// Parse complete, but no any result
-					if( !newHead.getChildrenCount )
+					if( newHead.getChildrenCount == 0 )
 					{
 						delete newHead;
 						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
@@ -389,9 +389,10 @@ struct LiveParser
 					CASTnode newHead;
 					version(Windows)
 					{
-						scope blockText = new char[posTail-posHead];
+						auto blockText = new char[posTail-posHead];
 						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
 						newHead = GLOBAL.outlineTree.parserText( blockText );
+						delete blockText;
 					}
 					else
 					{
@@ -407,7 +408,7 @@ struct LiveParser
 						CASTnode[]	beAliveNodes;
 
 
-						if( !newHead.getChildrenCount )
+						if( newHead.getChildrenCount == 0 )
 						{
 							delete newHead;
 							return;
@@ -450,13 +451,13 @@ struct LiveParser
 						}
 
 						int headLine = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-						lineNumberAdd( newHead, newHead[0].lineNumber - 1, headLine - 1 );
+						lineNumberAdd( newHead, newHead.getChild(0).lineNumber - 1, headLine - 1 );
 						//IupMessage( "newHead", toStringz( newHead[0].name ~ " " ~ newHead[0].type ~ " (" ~ Integer.toString( newHead[0].lineNumber ) ~ ")" ) );
 
 						// Get oringnal head
 						if( fullPathByOS( cSci.getFullPath ) in GLOBAL.parserManager )
 						{
-							CASTnode oldHead = AutoComplete.getFunctionAST( GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], newHead[0].kind, lowerCase( newHead[0].name ), newHead[0].lineNumber );
+							CASTnode oldHead = AutoComplete.getFunctionAST( GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], newHead.getChild(0).kind, lowerCase( newHead.getChild(0).name ), newHead.getChild(0).lineNumber );
 							//if( oldHead !is null ) IupMessage( "oldHead", toStringz( oldHead.name ~ " " ~oldHead.type ~ " (" ~ Integer.toString( oldHead.lineNumber ) ~ ")" ) ); else IupMessage("","NULL");
 							if( oldHead !is null )
 							{
@@ -485,9 +486,9 @@ struct LiveParser
 								}
 								
 								//if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.updateOneLineNodeByNumber( currentLineNum, newChildren );
-								father.insertChildByLineNumber( newHead[0], headLine );
+								father.insertChildByLineNumber( newHead.getChild(0), headLine );
 
-								if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], insertID );
+								if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead.getChild(0), insertID );
 								
 								newHead.zeroChildCount();
 								delete newHead;
@@ -592,7 +593,7 @@ struct LiveParser
 						CASTnode[]	beAliveNodes;
 
 
-						if( !newHead.getChildrenCount )
+						if( newHead.getChildrenCount == 0 )
 						{
 							delete newHead;
 							return;

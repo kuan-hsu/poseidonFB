@@ -25,34 +25,39 @@ class _PARSER
 
 		TokenUnit prev()
 		{
-			if( tokenIndex > 0 ) return tokens[tokenIndex-1];
+			if( tokenIndex > 0 && tokenIndex < tokens.length ) return tokens[tokenIndex-1];
 
 			throw new Exception( "Method prev(), out of range!" );
 		}
 		
 		TokenUnit next()
 		{
-			if( tokenIndex < tokens.length - 1 ) return tokens[tokenIndex+1];
+			if( tokenIndex < tokens.length - 1 && tokenIndex >= 0 ) return tokens[tokenIndex+1];
 
 			throw new Exception( "Method next(), out of range!" );
 		}
 
 		TokenUnit next2()
 		{
-			if( tokenIndex < tokens.length - 2 ) return tokens[tokenIndex+2];
+			if( tokenIndex < tokens.length - 2 && tokenIndex >= 0 ) return tokens[tokenIndex+2];
 			
 			throw new Exception( "Method next2(), out of range!" );
 		}
 
 		void parseToken( TOK t = TOK.Tidentifier )
 		{
-			if( tokenIndex < tokens.length ) 
+			if( tokenIndex < tokens.length && tokenIndex >= 0 ) 
 				tokenIndex ++;
 			else
 				throw new Exception( "Method parseToken(), out of range!" );
 		}
 
-		TokenUnit getToken(){ return tokens[tokenIndex]; }	
+		TokenUnit getToken()
+		{
+			if( tokenIndex < tokens.length && tokenIndex >= 0 ) return tokens[tokenIndex];
+			
+			throw new Exception( "Method getToken(), out of range!" );
+		}	
 
 		void printAST( CASTnode _node, char[] space = "" )
 		{

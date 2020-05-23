@@ -2044,7 +2044,7 @@ class COutline
 			
 			if( objectFilePath.exists )
 			{
-				return loadParser( fullPathByOS( _path ~ "import/object.di" ) );
+				return loadParser( _path ~ "import/object.di" );
 			}
 			else
 			{	

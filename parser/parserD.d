@@ -2816,7 +2816,7 @@ version(DIDE)
 		}
 		
 
-		bool updateTokens( TokenUnit[] _tokens )
+		override bool updateTokens( TokenUnit[] _tokens )
 		{
 			tokenIndex = 0;
 			tokens.length = 0;

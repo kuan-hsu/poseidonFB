@@ -922,7 +922,7 @@ struct GLOBAL
 		GLOBAL.languageItems["error"] = new IupString( cast(char[]) "Error" );
 		GLOBAL.languageItems["foundword"] = new IupString( cast(char[]) "Found Word." );
 		GLOBAL.languageItems["foundnothing"] = new IupString( cast(char[]) "Found Nothing!" );
-
+		GLOBAL.languageItems["pluginrunningunload"] = new IupString( cast(char[]) "Plugin Is Running, Unload The Plugin?" );
 
 		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
 		version(FBIDE)

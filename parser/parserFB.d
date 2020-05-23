@@ -2099,17 +2099,6 @@ version(FBIDE)
 			updateTokens( _tokens );
 		}
 
-		bool updateTokens( TokenUnit[] _tokens )
-		{
-			tokenIndex = 0;
-			tokens.length = 0;
-			tokens = _tokens;
-
-			if( !_tokens.length ) return false;
-			
-			return true;
-		}
-		
 		CASTnode parse( char[] fullPath )
 		{
 			CASTnode head = null;

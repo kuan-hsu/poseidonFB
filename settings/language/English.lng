@@ -421,6 +421,7 @@ alarm=Alarm
 error=Error
 foundword=Found Word.
 foundnothing=Found Nothing!
+pluginrunningunload=Plugin Is Running, Unload The Plugin?
 
 exefile=Executables
 basfile=freeBASIC Sources

@@ -373,11 +373,27 @@ extern(C) // Callback for CFindInFilesDialog
 			// Double Confirm......
 			if( p.getPath == dir )
 			{
-				int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, "Plugin Is Running, Unload The Plugin?", "YESNO" );
+				int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["pluginrunningunload"].toCString, "YESNO" );
 				if( result == 1 )
 				{
-					delete p;
-					GLOBAL.pluginMnager.remove( name );
+					Ihandle* treeHandle = IupGetHandle( "treePluginStatus_Handle" );
+					if( treeHandle != null )
+					{
+						for( int i = 0; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
+						{
+							char[] _name = fromStringz( IupGetAttributeId( treeHandle, "TITLE", i ) );
+							char[] _path = fromStringz( IupGetAttributeId( treeHandle, "USERDATA", i ) );
+							
+							if( name == _name && dir == _path )
+							{
+								IupSetInt( treeHandle, "VALUE", i );
+								IupSetAttributeId( treeHandle, "DELNODE", i, "SELECTED" );
+								delete p;
+								GLOBAL.pluginMnager.remove( name );
+								break;
+							}
+						}
+					}				
 				}
 			}
 		}

@@ -759,7 +759,7 @@ class CPreferenceDialog : CBaseDialog
 		//IupSetAttribute(gbox, "SIZELIN", "4");
 		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=10,EXPANDCHILDREN=YES,MARGIN=0x0" );
 		
-		
+		/+
 		// Mark High Light Line
 		Ihandle* labelMarker0 = IupLabel( toStringz( GLOBAL.languageItems["maker0"].toDString ~ ": " ) );
 		Ihandle* btnMarker0Color = IupFlatButton(  null );
@@ -804,6 +804,7 @@ class CPreferenceDialog : CBaseDialog
 			null
 		);
 		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ACENTER,GAPLIN=0,GAPCOL=10,MARGIN=0x5,SIZELIN=0,HOMOGENEOUSCOL=YES,NAME=gridbox_Maker" );
+		+/
 		
 		version(FBIDE)
 		{
@@ -926,8 +927,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( sb, "ALIGNMENT=ACENTER" );
 		
 		
-		version(FBIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, frameKeywordCase, null );
-		version(DIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, gboxMarkerColor, null );
+		version(FBIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, /*gboxMarkerColor,*/ frameKeywordCase, null );
+		version(DIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, /*gboxMarkerColor,*/ null );
 		IupSetAttributes( vBoxPage02, "MARGIN=0x1,EXPANDCHILDREN=YES" );
 
 		// Color
@@ -1573,11 +1574,67 @@ class CPreferenceDialog : CBaseDialog
 		);
 		version(Windows) IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=8,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" ); else IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=10,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
 
+		
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
-		IupSetAttribute( frameColor_1, "SIZE", "288x" );//IupGetAttribute( frameFont, "SIZE" ) );
+		//IupSetAttribute( frameColor_1, "SIZE", "288x" );//IupGetAttribute( frameFont, "SIZE" ) );
 		IupSetAttribute( frameColor_1, "TITLE", GLOBAL.languageItems["colorfgbg"].toCString );
 		
+		
+		
+		// Mark High Light Line
+		Ihandle* labelMarker0 = IupLabel( toStringz( GLOBAL.languageItems["maker0"].toDString ~ ": " ) );
+		IupSetAttribute( labelMarker0, "ALIGNMENT", "ARIGHT" );
+		Ihandle* btnMarker0Color = IupFlatButton(  null );
+		IupSetAttribute( btnMarker0Color, "FGCOLOR",GLOBAL.editColor.maker[0].toCString );
+		version(Windows) IupSetAttribute( btnMarker0Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker0Color, "SIZE", "24x10" );
+		IupSetHandle( "btnMarker0Color", btnMarker0Color );
+		IupSetCallback( btnMarker0Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		
+		Ihandle* labelMarker1 = IupLabel( toStringz( GLOBAL.languageItems["maker1"].toDString ~ ": " ) );
+		IupSetAttribute( labelMarker1, "ALIGNMENT", "ARIGHT" );
+		Ihandle* btnMarker1Color = IupFlatButton( null );
+		IupSetAttribute( btnMarker1Color, "FGCOLOR",GLOBAL.editColor.maker[1].toCString );
+		version(Windows) IupSetAttribute( btnMarker1Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker1Color, "SIZE", "24x10" );
+		IupSetHandle( "btnMarker1Color", btnMarker1Color );
+		IupSetCallback( btnMarker1Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelMarker2 = IupLabel( toStringz( GLOBAL.languageItems["maker2"].toDString ~ ": " ) );
+		IupSetAttribute( labelMarker2, "ALIGNMENT", "ARIGHT" );
+		Ihandle* btnMarker2Color = IupFlatButton( null );
+		IupSetAttribute( btnMarker2Color, "FGCOLOR",GLOBAL.editColor.maker[2].toCString );
+		version(Windows) IupSetAttribute( btnMarker2Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker2Color, "SIZE", "24x10" );
+		IupSetHandle( "btnMarker2Color", btnMarker2Color );
+		IupSetCallback( btnMarker2Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* labelMarker3 = IupLabel( toStringz( GLOBAL.languageItems["maker3"].toDString ~ ": " ) );
+		IupSetAttribute( labelMarker3, "ALIGNMENT", "ARIGHT" );
+		Ihandle* btnMarker3Color = IupFlatButton( null );
+		IupSetAttribute( btnMarker3Color, "FGCOLOR",GLOBAL.editColor.maker[3].toCString );
+		version(Windows) IupSetAttribute( btnMarker3Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker3Color, "SIZE", "24x10" );
+		IupSetHandle( "btnMarker3Color", btnMarker3Color );
+		IupSetCallback( btnMarker3Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		
+		Ihandle* gboxMarkerColor = IupGridBox
+		(
+			labelMarker0,
+			btnMarker0Color,
+			labelMarker1,
+			btnMarker1Color,
+
+			labelMarker2,
+			btnMarker2Color,
+			labelMarker3,
+			btnMarker3Color,
+
+			null
+		);
+		IupSetAttributes( gboxMarkerColor, "SIZELIN=-1,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
+		
+		Ihandle* frameColor_2 = IupFrame( gboxMarkerColor );
+		IupSetAttributes( frameColor_2, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
+		
+		/+
 		Ihandle* labelKeyWord0 = IupLabel( "#0:" );
 		IupSetAttribute( labelKeyWord0, "ALIGNMENT", "ARIGHT" );
 		Ihandle* btnKeyWord0Color = IupFlatButton( null );
@@ -1652,13 +1709,13 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameKeywordColor = IupFrame( gboxKeyWordColor );
 		IupSetAttributes( frameKeywordColor, "MARGIN=0x0" );
 		IupSetAttribute( frameKeywordColor, "TITLE", GLOBAL.languageItems["keywords"].toCString );		
-		
+		+/
 		
 		/*
 		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, frameColor, null );
 		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
 		*/
-		Ihandle* vColor = IupVbox( colorTemplateFrame, frameColor, frameColor_1, frameKeywordColor, null );
+		Ihandle* vColor = IupVbox( colorTemplateFrame, frameColor, frameColor_1, frameColor_2, /*frameKeywordColor,*/ null );
 		IupSetAttributes( vColor, "ALIGNMENT=ACENTER,EXPANDCHILDREN=YES,HOMOGENEOUS=NO,GAP=0" );		
 
 
@@ -1768,16 +1825,83 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		
+		Ihandle* btnKeyWord0Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord0Color, "FGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord0Color, "SIZE", "36x8" ); else IupSetAttribute( btnKeyWord0Color, "SIZE", "36x10" );
+		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
+		IupSetCallback( btnKeyWord0Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* btnKeyWord1Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord1Color, "FGCOLOR", GLOBAL.editColor.keyWord[1].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord1Color, "SIZE", "36x8" ); else IupSetAttribute( btnKeyWord1Color, "SIZE", "36x10" );
+		IupSetHandle( "btnKeyWord1Color", btnKeyWord1Color );
+		IupSetCallback( btnKeyWord1Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* btnKeyWord2Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord2Color, "FGCOLOR", GLOBAL.editColor.keyWord[2].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord2Color, "SIZE", "36x8" ); else IupSetAttribute( btnKeyWord2Color, "SIZE", "36x10" );
+		IupSetHandle( "btnKeyWord2Color", btnKeyWord2Color );
+		IupSetCallback( btnKeyWord2Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* btnKeyWord3Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord3Color, "FGCOLOR",GLOBAL.editColor.keyWord[3].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord3Color, "SIZE", "36x8" ); else IupSetAttribute( btnKeyWord3Color, "SIZE", "36x10" );
+		IupSetHandle( "btnKeyWord3Color", btnKeyWord3Color );
+		IupSetCallback( btnKeyWord3Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* btnKeyWord4Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord4Color, "FGCOLOR",GLOBAL.editColor.keyWord[4].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord4Color, "SIZE", "36x8" ); else IupSetAttribute( btnKeyWord4Color, "SIZE", "36x10" );
+		IupSetHandle( "btnKeyWord4Color", btnKeyWord4Color );
+		IupSetCallback( btnKeyWord4Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+
+		Ihandle* btnKeyWord5Color = IupFlatButton( null );
+		IupSetAttribute( btnKeyWord5Color, "FGCOLOR",GLOBAL.editColor.keyWord[5].toCString );
+		version(Windows) IupSetAttribute( btnKeyWord5Color, "SIZE", "36x8" ); else IupSetAttribute( btnKeyWord5Color, "SIZE", "36x10" );
+		IupSetHandle( "btnKeyWord5Color", btnKeyWord5Color );
+		IupSetCallback( btnKeyWord5Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		
+		
+		
+		Ihandle* vBoxKeyWord0 = IupVbox( btnKeyWord0Color, keyWordText0, null );
+		IupSetAttribute( vBoxKeyWord0, "TABTITLE", GLOBAL.languageItems["keyword0"].toCString() );
+		IupSetAttribute( vBoxKeyWord0, "MARGIN", "0" );
+
+		Ihandle* vBoxKeyWord1 = IupVbox( btnKeyWord1Color, keyWordText1, null );
+		IupSetAttribute( vBoxKeyWord1, "TABTITLE", GLOBAL.languageItems["keyword1"].toCString() );
+		IupSetAttribute( vBoxKeyWord1, "MARGIN", "0" );
+
+		Ihandle* vBoxKeyWord2 = IupVbox( btnKeyWord2Color, keyWordText2, null );
+		IupSetAttribute( vBoxKeyWord2, "TABTITLE", GLOBAL.languageItems["keyword2"].toCString() );
+		IupSetAttribute( vBoxKeyWord2, "MARGIN", "0" );
+
+		Ihandle* vBoxKeyWord3 = IupVbox( btnKeyWord3Color, keyWordText3, null );
+		IupSetAttribute( vBoxKeyWord3, "TABTITLE", GLOBAL.languageItems["keyword3"].toCString() );
+		IupSetAttribute( vBoxKeyWord3, "MARGIN", "0" );
+
+		Ihandle* vBoxKeyWord4 = IupVbox( btnKeyWord4Color, keyWordText4, null );
+		IupSetAttribute( vBoxKeyWord4, "TABTITLE", GLOBAL.languageItems["keyword4"].toCString() );
+		IupSetAttribute( vBoxKeyWord4, "MARGIN", "0" );
+
+		Ihandle* vBoxKeyWord5 = IupVbox( btnKeyWord5Color, keyWordText5, null );
+		IupSetAttribute( vBoxKeyWord5, "TABTITLE", GLOBAL.languageItems["keyword5"].toCString() );
+		IupSetAttribute( vBoxKeyWord5, "MARGIN", "0" );
+
+		Ihandle* keywordTabs = IupTabs( vBoxKeyWord0, vBoxKeyWord1, vBoxKeyWord2, vBoxKeyWord3, vBoxKeyWord4, vBoxKeyWord5, null );
+		/*
 		IupSetAttribute( keyWordText0, "TABTITLE", GLOBAL.languageItems["keyword0"].toCString() );
 		IupSetAttribute( keyWordText1, "TABTITLE", GLOBAL.languageItems["keyword1"].toCString() );
 		IupSetAttribute( keyWordText2, "TABTITLE", GLOBAL.languageItems["keyword2"].toCString() );
 		IupSetAttribute( keyWordText3, "TABTITLE", GLOBAL.languageItems["keyword3"].toCString() );
 		IupSetAttribute( keyWordText4, "TABTITLE", GLOBAL.languageItems["keyword4"].toCString() );
 		IupSetAttribute( keyWordText5, "TABTITLE", GLOBAL.languageItems["keyword5"].toCString() );
-		Ihandle* keywordTabs = IupTabs( keyWordText0, keyWordText1, keyWordText2, keyWordText3, keyWordText4, keyWordText5, null );
+		Ihandle* keywordTabs = IupTabs( vBoxKeyWord0, keyWordText1, keyWordText2, keyWordText3, keyWordText4, keyWordText5, null );
+		*/
 		IupSetAttribute( keywordTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( keywordTabs, "EXPAND", "YES" );
-		IupSetAttribute( keywordTabs, "CHILDOFFSET", "2x5" );
+		IupSetAttribute( keywordTabs, "CHILDOFFSET", "0x0" );
+		
+		 
 		
 		
 		

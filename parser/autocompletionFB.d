@@ -20,6 +20,7 @@ version(FBIDE)
 		import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
 		import tango.io.Stdout, tango.util.container.more.Stack;
 		import tango.core.Thread;
+		import tango.util.container.SortedMap;
 
 		version(Windows)
 		{
@@ -38,51 +39,149 @@ version(FBIDE)
 			}
 		}
 		
-		//static CStack!(char[])		calltipContainer;
-		static Stack!(char[])		calltipContainer;
-		static char[]				noneListProcedureName;
 
-		static char[][]				listContainer;
-		static CASTnode[char[]]		includesMarkContainer;
-		static bool[char[]]			noIncludeNodeContainer;
+		static SortedMap!(char[], char[])	map;
+		static Stack!(char[])				calltipContainer;
+		static char[]						noneListProcedureName;
+
+		static char[][]						listContainer;
+		static CASTnode[char[]]				includesMarkContainer;
+		static bool[char[]]					noIncludeNodeContainer;
 		
+
 		class CShowListThread : Thread
 		{
-			private:
-			import scintilla;
-			
-			Ihandle*	sci;
-			int			pos, ext;
+		private:
+			int			ext;
 			char[]		text, extString;
 			char[]		result;
-			bool		bStop;
 			
-			public:
-			this( Ihandle* _sci, int _pos, char[] _text, int _ext = -1, char[] _extString = "" )
+			CASTnode	AST_Head;
+			int			pos, lineNum;
+			bool		bDot, bCallTip;
+			char[][]	splitWord;
+			
+		public:
+			this( CASTnode _AST_Head, int _pos, int _lineNum, bool _bDot, bool _bCallTip, char[][] _splitWord, char[] _text, int _ext = -1, char[] _extString = ""  )
 			{
-				sci				= _sci;
+				AST_Head		= _AST_Head;
 				pos				= _pos;
-				text			= _text.dup;
+				lineNum			= _lineNum;
+				bDot			= _bDot;
+				bCallTip		= _bCallTip;
+				splitWord		= _splitWord;
+				text			= _text;
 				ext				= _ext;
-				extString		= _extString;
+				_extString		= _extString;
 				
 				super( &run );
 			}
 
+			// If using IUP command in Thread, join() occur infinite loop, so......
 			void run()
 			{
-				result = charAdd( sci, pos, text );
+				if( AST_Head is null )
+				{
+					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
+					return;
+				}
+
+				if( GLOBAL.autoCompletionTriggerWordCount < 1 ) 
+				{
+					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
+					return;
+				}
+				
+				result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
+
+				if( listContainer.length )
+				{
+					char[]	_type, _list;
+					int		maxLeft, maxRight;
+
+					if( GLOBAL.toggleShowListType == "ON" )
+					{
+						for( int i = 0; i < listContainer.length; ++ i )
+						{
+							if( listContainer[i].length )
+							{
+								int dollarPos = Util.rindex( listContainer[i], "~" );
+								if( dollarPos < listContainer[i].length )
+								{
+									_type = listContainer[i][dollarPos+1..$];
+									if( _type.length > maxRight ) maxRight = _type.length;
+									_list = listContainer[i][0..dollarPos];
+									if( _list.length > maxLeft ) maxLeft = _list.length;
+								}
+								else
+								{
+									if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
+								}
+							}
+						}
+					}
+
+					char[] formatString = "{,-" ~ Integer.toString( maxLeft ) ~ "} :: {,-" ~ Integer.toString( maxRight ) ~ "}";
+					
+					for( int i = 0; i < listContainer.length; ++ i )
+					{
+						if( i < listContainer.length - 1 )
+						{
+							int questPos = Util.rindex( listContainer[i], "?0" );
+							if( questPos < listContainer[i].length )
+							{
+								char[]	_keyWord = listContainer[i][0..questPos];
+								char[]	compareWord;
+								
+								int tildePos = Util.rindex( listContainer[i+1], "~" );
+								if( tildePos < listContainer[i+1].length )
+									compareWord = listContainer[i+1][0..tildePos];
+								else
+								{
+									questPos = Util.rindex( listContainer[i+1], "?" );
+									if( questPos < listContainer[i+1].length ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
+								}
+								
+								if( lowerCase( _keyWord ) == lowerCase( compareWord ) ) continue;
+							}
+						}
+
+						if( listContainer[i].length )
+						{
+							if( GLOBAL.toggleShowListType == "ON" )
+							{
+								char[] _string;
+								
+								int dollarPos = Util.rindex( listContainer[i], "~" );
+								if( dollarPos < listContainer[i].length )
+								{
+									_type = listContainer[i][dollarPos+1..$];
+									_list = listContainer[i][0..dollarPos];
+									_string = Util.trim( Stdout.layout.convert( formatString, _list, _type ) );
+								}
+								else
+								{
+									_string = listContainer[i];
+								}
+
+								result ~= ( _string ~ "^" );
+							}
+							else
+							{
+								result ~= ( listContainer[i] ~ "^" );
+							}
+						}
+					}
+				}
+
+				if( result.length )
+					if( result[$-1] == '^' ) result = result[0..$-1];
 			}
 			
 			char[] getResult()
 			{
 				return result;
-			}
-			
-			void stop()
-			{
-				bStop = true;
-			}
+			}			
 		}
 		
 		static CShowListThread showListThread;
@@ -162,7 +261,7 @@ version(FBIDE)
 				case B_VARIABLE:
 					if( node.name.length )
 					{
-						if( node.name[$-1] == ')' ) return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 0 + protAdd ) : name ~ "?" ~ Integer.toString( 0 + protAdd ); else return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 3 + protAdd ) : name ~ "?" ~ Integer.toString( 3 + protAdd );
+						if( node.name[$-1] == ')' ) return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 1 + protAdd ) : name ~ "?" ~ Integer.toString( 0 + protAdd ); else return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 4 + protAdd ) : name ~ "?" ~ Integer.toString( 3 + protAdd );
 					}
 					break;
 
@@ -173,8 +272,8 @@ version(FBIDE)
 					}
 					break;
 					
-				case B_CLASS:					return name ~ "?" ~ Integer.toString( 6 + protAdd );
-				case B_TYPE: 					return name ~ "?" ~ Integer.toString( 9 + protAdd );
+				case B_CLASS:					return name ~ "?" ~ Integer.toString( 7 + protAdd );
+				case B_TYPE: 					return name ~ "?" ~ Integer.toString( 10 + protAdd );
 				case B_ENUM: 					return name ~ "?" ~ Integer.toString( 12 + protAdd );
 				case B_PARAM:					return bShowType ? name ~ "~" ~ type ~ "?18" : name ~ "?18";
 				case B_ENUMMEMBER:				return name ~ "?19";
@@ -717,8 +816,6 @@ version(FBIDE)
 				{
 					foreach( child; includeAST.getChildren )
 					{
-						if( !checkBackThreadGoing ) return null;
-						
 						if( child.kind & B_NAMESPACE )
 						{
 							if( child.name.length )
@@ -824,8 +921,6 @@ version(FBIDE)
 				{
 					foreach( child; includeAST.getChildren )
 					{
-						if( !checkBackThreadGoing ) return null;
-						
 						if( child.kind & B_NAMESPACE )
 						{
 							if( child.name.length )
@@ -1034,66 +1129,11 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode getType( CASTnode originalNode )
+		static CASTnode getType( CASTnode originalNode, int lineNum )
 		{
 			if( originalNode is null ) return null;
 			
 			CASTnode resultNode;
-
-			/+
-			if( originalNode.type.length >= 4 )
-			{
-				if( originalNode.type[0..4] == "Var(" )
-				{
-					char[] varTypeName = ParserAction.removeArrayAndPointer( originalNode.type[4..$-1] );
-
-					CASTnode varNode = searchMatchNode( originalNode, varTypeName, B_FUNCTION | B_PROPERTY  );
-					if( varNode !is null )
-					{
-						varTypeName = ParserAction.removeArrayAndPointer( varNode.type );
-						return searchMatchNode( originalNode, varTypeName, B_TYPE | B_CLASS | B_ENUM | B_UNION );					
-					}
-				}
-			}
-
-			switch( originalNode.kind )
-			{
-				case B_VARIABLE, B_PARAM:
-					int countLoop = -1;
-					foreach( char[] s; Util.split( originalNode.type, "." ) )
-					{
-						if( s.length )
-						{
-							char[] _type = ParserAction.removeArrayAndPointer( s );
-							
-							if( ++countLoop == 0 )
-							{
-								if( isDefaultType( _type ) ) return null;
-
-								resultNode = searchMatchNode( originalNode, _type, B_TYPE | B_CLASS | B_ENUM | B_UNION | B_NAMESPACE );
-								
-								if( resultNode is null )
-								{
-									resultNode = searchMatchNode( originalNode, _type, B_ALIAS );
-									if( resultNode !is null ) resultNode = searchMatchNode( originalNode, resultNode.type, B_TYPE | B_CLASS | B_ENUM | B_UNION | B_NAMESPACE ); else return null;
-								}
-							}
-							else
-							{
-								if( !stepByStep( resultNode, _type, B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_ALIAS ) ) return null;
-							}
-						}
-					}
-					break;
-
-				case B_FUNCTION:
-					char[] _ReturnType = ParserAction.removeArrayAndPointer( originalNode.type );
-					resultNode = searchMatchNode( originalNode, _ReturnType, B_TYPE | B_CLASS | B_ENUM | B_UNION );
-					break;
-
-				default:
-			}
-			+/
 
 			if( originalNode.kind & ( B_ALIAS | B_VARIABLE | B_PARAM | B_FUNCTION ) )
 			{
@@ -1106,21 +1146,21 @@ version(FBIDE)
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
 
-				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, ScintillaAction.getCurrentPos( ScintillaAction.getActiveIupScintilla ), true, false, false );
+				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
 				if( originalNode !is null ) resultNode = originalNode;
 			}			
 			
 			return resultNode;
 		}
 
-		static bool stepByStep( ref CASTnode AST_Head, char[] word, int B_KIND )
+		static bool stepByStep( ref CASTnode AST_Head, char[] word, int B_KIND, int lineNum )
 		{
 			AST_Head = searchMatchMemberNode( AST_Head, word, B_KIND );
 			if( AST_Head is null ) return false;
 
 			if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 			{
-				AST_Head = getType( AST_Head );
+				AST_Head = getType( AST_Head, lineNum );
 				if( AST_Head is null ) return false;
 			}	
 
@@ -1358,12 +1398,83 @@ version(FBIDE)
 						if( Util.index( lowerCase( s ), lowerCase( word ) ) == 0 )
 						{
 							s = tools.convertKeyWordCase( GLOBAL.keywordCase, s );
-							listContainer ~= ( s ~ "?21" );
+							listContainer ~= ( s ~ "?0" );
 						}
 					}
 				}
 			}
 		}
+
+
+		static char[][] getNeedDataForThread( Ihandle* iupSci, char[] text, int pos, ref int lineNum, ref bool bDot, ref bool bCallTip, ref CASTnode AST_Head )
+		{
+			int		dummyHeadPos;
+			char[] 	word, result;
+
+			if( text == "(" )
+			{
+				bCallTip = true;
+				IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" ); // Prevent autocomplete -> calltip issue
+			}
+			else if( text == "." )
+			{
+				bDot = true;
+			}
+			else if( text == ">" )
+			{
+				if( pos > 0 )
+				{
+					if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "-" )
+					{
+						bDot = true;
+					}
+					else
+					{
+						word = text;
+					}
+				}
+				else
+				{
+					word = text;
+				}
+			}
+			else
+			{
+				word = text;
+			}
+			
+			if( text == ">" && bDot )
+			{
+				word = word ~ getWholeWordReverse( iupSci, pos - 1, dummyHeadPos );
+			}
+			else
+			{
+				word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
+			}
+			
+			word = lowerCase( word.dup.reverse );
+
+			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			if( cSci !is null )
+			{
+				if( !bDot && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) )
+				{}
+				else
+				{
+					// Clean listContainer
+					listContainer.length = 0;
+					IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
+
+					lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+					AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
+					
+					return getDivideWord( word );
+				}
+			}
+			
+			return null;
+		}
+		
 		
 		static char[][] getDivideWord( char[] word )
 		{
@@ -1418,7 +1529,7 @@ version(FBIDE)
 		}
 
 
-		static char[] analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, char[][] splitWord, int pos, bool bDot, bool bCallTip, bool bPushContainer  )
+		static char[] analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, char[][] splitWord, int lineNum, bool bDot, bool bCallTip, bool bPushContainer  )
 		{
 			if( AST_Head is null ) return null;
 			
@@ -1427,8 +1538,11 @@ version(FBIDE)
 
 			if( cSci is null ) return null;
 			
-
-			int			lineNum = IupScintillaSendMessage( cSci.getIupScintilla(), 2166, ScintillaAction.getCurrentPos( cSci.getIupScintilla() ), 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+			if( bPushContainer )
+			{
+				if( map is null ) map = new SortedMap!(char[], char[]); else map.reset();
+			}
+			
 			char[]		memberFunctionMotherName, result;
 
 			if( !splitWord[0].length )
@@ -1514,8 +1628,29 @@ version(FBIDE)
 							}
 
 
-							if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
-							//IupMessage("",toStringz(AST_Head.name));
+							if( GLOBAL.enableKeywordComplete == "ON" )
+							{
+								if( bPushContainer )
+								{
+									foreach( IupString _s; GLOBAL.KEYWORDS )
+									{
+										foreach( char[] s; Util.split( _s.toDString, " " ) )
+										{
+											if( s.length )
+											{
+												if( Util.index( lowerCase( s ), lowerCase( splitWord[i] ) ) == 0 )
+												{
+													s = tools.convertKeyWordCase( GLOBAL.keywordCase, s );
+													map.add( upperCase( s ~ "?0" ), s ~ "?0" );
+													//listContainer ~= ( s ~ "?0" );
+												}
+											}
+										}
+									}							
+									//keyWordlist( splitWord[i] );
+								}
+							}
+
 							if( AST_Head !is null )
 							{
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
@@ -1533,8 +1668,9 @@ version(FBIDE)
 								{
 									foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 									{
-										listContainer ~= getListImage( _node );
-										//listContainer ~= _node;
+										char[] _list = getListImage( _node );
+										map.add( upperCase( _list ), _list );
+										//listContainer ~= getListImage( _node );
 									}
 								}
 							}
@@ -1561,7 +1697,7 @@ version(FBIDE)
 
 							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 							{
-								AST_Head = getType( AST_Head );
+								AST_Head = getType( AST_Head, lineNum );
 								if( AST_Head is null ) return null;
 							}
 							
@@ -1571,7 +1707,9 @@ version(FBIDE)
 								{
 									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 									{
-										listContainer ~= getListImage( _child );
+										char[] _list = getListImage( _child );
+										map.add( upperCase( _list ), _list );
+										//listContainer ~= getListImage( _child );
 									}
 								}
 							}
@@ -1599,7 +1737,7 @@ version(FBIDE)
 
 					if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 					{
-						AST_Head = getType( AST_Head );
+						AST_Head = getType( AST_Head, lineNum );
 						if( AST_Head is null ) return null;
 					}
 				}
@@ -1614,46 +1752,60 @@ version(FBIDE)
 							result = callTipList( AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ), splitWord[i] );
 							return Util.trim( result );
 						}
-
-						foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+						
+						if( bPushContainer )
 						{
-							if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 ) listContainer ~= getListImage( _child );
-						}							
+							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+							{
+								if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 )
+								{
+									char[] _list = getListImage( _child );
+									map.add( upperCase( _list ), _list );
+									//listContainer ~= getListImage( _child );
+								}
+							}
+						}
 					}
 					else
 					{
 						if( AST_Head.kind & B_NAMESPACE )
 						{
-							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION, lineNum ) ) return null;
 						}
 						else
 						{
-							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
 						}
 						
 						if( bPushContainer )
 						{
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
-								listContainer ~= getListImage( _child );
+								char[] _list = getListImage( _child );
+								map.add( upperCase( _list ), _list );
+								//listContainer ~= getListImage( _child );
 							}
 						}
 					}
-					
 				}
 				else
 				{
 					if( AST_Head.kind & B_NAMESPACE )
 					{
-						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION ) ) return null;
+						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION, lineNum ) ) return null;
 					}
 					else
 					{
-						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY ) ) return null;
+						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
 					}
 				}
 			}		
 		
+			if( bPushContainer )
+			{
+				foreach( key, value; map )
+					listContainer ~= value;
+			}
 		
 			return result;
 		}
@@ -1723,31 +1875,6 @@ version(FBIDE)
 			return null;
 		}
 		
-		static bool checkBackThreadGoing()
-		{
-			if( GLOBAL.toggleCompleteAtBackThread )
-			{
-				auto _thread = cast( CShowListThread ) Thread.getThis();
-				
-				if( showListThread !is null )
-				{
-					if( _thread.text != "(" )
-					{
-						if( showListThread.bStop ) return false;
-					}
-				}
-				
-				if( showCallTipThread !is null )
-				{
-					if( _thread.text == "(" )
-					{
-						if( showCallTipThread.bStop ) return false;
-					}
-				}
-			}
-			
-			return true;
-		}
 
 		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false, bool bCheckOnlyOnce = false )
 		{
@@ -2879,8 +3006,34 @@ version(FBIDE)
 						
 						for( int i = 0; i < listContainer.length; ++ i )
 						{
+							/*
 							if( i > 0 )
+							{
 								if( listContainer[i] == listContainer[i-1] ) continue;
+							}
+							*/
+							
+							if( i < listContainer.length - 1 )
+							{
+								int questPos = Util.rindex( listContainer[i], "?0" );
+								if( questPos < listContainer[i].length )
+								{
+									char[]	_keyWord = listContainer[i][0..questPos];
+									char[]	compareWord;
+									
+									int tildePos = Util.rindex( listContainer[i+1], "~" );
+									if( tildePos < listContainer[i+1].length )
+										compareWord = listContainer[i+1][0..tildePos];
+									else
+									{
+										questPos = Util.rindex( listContainer[i+1], "?" );
+										if( questPos < listContainer[i+1].length ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
+									}
+									
+									if( lowerCase( _keyWord ) == lowerCase( compareWord ) ) continue;
+								}
+							}
+
 
 							if( listContainer[i].length )
 							{
@@ -3238,7 +3391,7 @@ version(FBIDE)
 						{
 							if( AST_Head.kind & ( B_VARIABLE | B_PARAM ) )// | B_FUNCTION ) )
 							{
-								AST_Head = getType( AST_Head );
+								AST_Head = getType( AST_Head, lineNum );
 								if( AST_Head is null ) return;
 							}
 						}
@@ -3248,7 +3401,7 @@ version(FBIDE)
 							{
 								if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 								{
-									AST_Head = getType( AST_Head );
+									AST_Head = getType( AST_Head, lineNum );
 									if( AST_Head is null ) return;
 								}
 							}
@@ -3892,32 +4045,19 @@ version(FBIDE)
 
 			return null;
 		}
-
+		
+		
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{
 			
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
-			/+
-			switch( text )
-			{
-				case "(", ")", ",", ":", ".":	
-					cSci.lastPos = -99;
-					break;
-					
-				default:
-					if( cSci.lastPos == pos - 1 )
-					{
-						cSci.lastPos = pos;
-						return false;
-					}
-			}
-			+/
 
 			if( !bForce )
 			{
 				try
 				{
+					/+
 					if( text == "(" )
 					{
 						if( alreadyInput.length )
@@ -3940,25 +4080,40 @@ version(FBIDE)
 						}
 					}
 					else
+					+/
+					if( text != ")" && text != "," && text != "(" && text != "\n" )
 					{
-						if( showCallTipThread !is null ) return false;
-						
 						if( showListThread is null )
 						{
-							//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 							
-							showListThread = new CShowListThread( ih, pos, text );
+							// wait showCallTipThread thread done
+							try
+							{
+								if( showCallTipThread !is null )
+									if( showCallTipThread.isRunning ) showCallTipThread.join();
+							}
+							catch( Exception e){}
+							
+							
+							// If using IUP command in Thread, join() occur infinite loop, so......
+							bool		bDot, bCallTip;
+							CASTnode	AST_Head;
+							int			lineNum;
+							char[][] 	splitWord = getNeedDataForThread( ih, text, pos, lineNum, bDot, bCallTip, AST_Head );
+							
+							showListThread = new CShowListThread( AST_Head, pos, lineNum, bDot, bCallTip, splitWord, text );
 							showListThread.start();
 							
 							if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
-	
-							// CodeComplete is high priority than CallTip, Stop showCallTipThread
-							//if( showCallTipThread !is null ) showCallTipThread.stop;
 						}
-						else
+					}
+					else
+					{
+						if( showListThread !is null )
 						{
-							if( text == "," ) showListThread.stop();
+							delete showListThread;
+							showListThread = null;
 						}
 					}
 				}
@@ -3981,7 +4136,7 @@ version(FBIDE)
 
 					if( text == "(" )
 					{
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL\0", "YES\0" );
+						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 
 						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
@@ -4154,8 +4309,21 @@ version(FBIDE)
 								{
 									if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 									
-									showCallTipThread = new CShowListThread( ih, firstOpenParenPosFromDocument, "(", commaCount, procedureNameFromDocument );
-									showCallTipThread.start();
+									try
+									{
+										if( showListThread !is null ) return false;
+											//if( showListThread.isRunning ) showListThread.join();
+									}
+									catch( Exception e){}
+
+									// If using IUP command in Thread, join() occur infinite loop, so......
+									bool		bDot, bCallTip;
+									CASTnode	AST_Head;
+									int			lineNum;
+									char[][] 	splitWord = getNeedDataForThread( ih, "(", firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, AST_Head );
+									
+									showCallTipThread = new CShowListThread( AST_Head, firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, splitWord, "(", commaCount, procedureNameFromDocument );									
+									showCallTipThread.start();									
 									
 									if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
 								}
@@ -4326,16 +4494,10 @@ version(FBIDE)
 								
 
 							auto cSci = ScintillaAction.getActiveCScintilla();
-							//if( cSci !is null ) cSci.lastPos = -99;
 						}
 					}
 				}
-				else
-				{
-					//auto cSci = ScintillaAction.getActiveCScintilla();
-					//if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-				}
-
+				
 				delete AutoComplete.showListThread;
 				AutoComplete.showListThread = null;
 			}
@@ -4371,16 +4533,12 @@ version(FBIDE)
 							AutoComplete.noneListProcedureName = "";
 							
 							auto cSci = ScintillaAction.getActiveCScintilla();
-							//if( cSci !is null ) cSci.lastPos = -99;
 						}
 					}
 				}
 				else
 				{
 					AutoComplete.noneListProcedureName = Integer.toString( AutoComplete.showCallTipThread.pos ) ~ ";" ~ AutoComplete.showCallTipThread.extString;
-					//AutoComplete.cleanCalltipContainer();
-					//auto cSci = ScintillaAction.getActiveCScintilla();
-					//if( cSci !is null ) cSci.lastPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
 				}
 
 				delete AutoComplete.showCallTipThread;
@@ -4388,7 +4546,7 @@ version(FBIDE)
 			}
 		}		
 		
-		if( AutoComplete.showListThread is null && AutoComplete.showCallTipThread is null )	IupSetAttribute( _ih, "RUN", "NO" );
+		if( AutoComplete.showListThread is null && AutoComplete.showCallTipThread is null )	IupSetAttribute( _ih, "RUN", "NO" );		
 		
 		return IUP_IGNORE;
 	}	
