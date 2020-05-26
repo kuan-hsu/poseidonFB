@@ -249,7 +249,8 @@ options=選項
 				keyword3=關鍵字3
 			'manual=Manual
 				manualpath=手冊路徑
-				manualusing=使用手冊功能
+				manualusing=搜尋使用手冊
+				name=名稱
 				
 	manual=手冊
 	about=關於

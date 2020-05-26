@@ -13,7 +13,7 @@ version(Windows)
 {	
 	// For chm help
 	import tango.sys.win32.Types;
-	typedef extern (C) void function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
+	typedef extern (C) HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
 }
 
 struct EditorToggleUint
@@ -158,7 +158,7 @@ struct GLOBAL
 	static char[]				toggleCompileAtBackThread = "OFF";
 	static IupString			debuggerFullPath;
 	static IupString			linuxTermName;	
-	static IupString			manualPath;
+	static char[][]				manuals;
 	//static IupString			colorTemplate;
 	//static char[]				maxError = "30";
 	//static IupString			defaultOption;
@@ -224,7 +224,7 @@ struct GLOBAL
 	static bool					bKeyUp = true;
 	static int					KeyNumber;
 	
-	static CustomTool[10]		customTools;
+	static CustomTool[13]		customTools;
 	
 	static char[][]				customCompilerOptions;
 	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
@@ -324,7 +324,6 @@ struct GLOBAL
 		GLOBAL.x64compilerFullPath = new IupString();
 		GLOBAL.debuggerFullPath = new IupString();
 		GLOBAL.linuxTermName = new IupString();
-		GLOBAL.manualPath = new IupString();
 		//GLOBAL.colorTemplate = new IupString();
 		//GLOBAL.defaultOption = new IupString();
 		
@@ -353,7 +352,7 @@ struct GLOBAL
 			GLOBAL.KEYWORDS[5] = new IupString( cast(char[]) "" );
 		}
 
-		for( int i = 0; i < 10; ++i )
+		for( int i = 0; i < 13; ++i )
 		{
 			GLOBAL.customTools[i].name = new IupString();
 			GLOBAL.customTools[i].dir = new IupString();
@@ -445,6 +444,12 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk38;
 		ShortKey sk39 = { "customtool9", "Custom Tool(9)", 805371846 };		
 		GLOBAL.shortKeys ~= sk39;
+		ShortKey sk40 = { "customtool10", "Custom Tool(10)", 805371847 };		
+		GLOBAL.shortKeys ~= sk40;
+		ShortKey sk41 = { "customtool11", "Custom Tool(11)", 805371848 };		
+		GLOBAL.shortKeys ~= sk41;
+		ShortKey sk42 = { "customtool12", "Custom Tool(12)", 805371849 };		
+		GLOBAL.shortKeys ~= sk42;
 
 
 		fontUint fu;
@@ -592,6 +597,9 @@ struct GLOBAL
 					GLOBAL.languageItems["customtool7"] = new IupString( cast(char[]) "Custom Tool(7)" );
 					GLOBAL.languageItems["customtool8"] = new IupString( cast(char[]) "Custom Tool(8)" );
 					GLOBAL.languageItems["customtool9"] = new IupString( cast(char[]) "Custom Tool(9)" );
+					GLOBAL.languageItems["customtool10"] = new IupString( cast(char[]) "Custom Tool(10)" );
+					GLOBAL.languageItems["customtool11"] = new IupString( cast(char[]) "Custom Tool(11)" );
+					GLOBAL.languageItems["customtool12"] = new IupString( cast(char[]) "Custom Tool(12)" );
 				
 			GLOBAL.languageItems["preference"] = new IupString( cast(char[]) "Preference" );
 				GLOBAL.languageItems["compiler"] = new IupString( cast(char[]) "Compiler" );
@@ -750,7 +758,8 @@ struct GLOBAL
 						GLOBAL.languageItems["keyword5"] = new IupString( cast(char[]) "Keyword5" );
 					// GLOBAL.languageItems["manual"] = new IupString( cast(char[]) "Manual" );
 						GLOBAL.languageItems["manualpath"] = new IupString( cast(char[]) "Manual Path" );
-						GLOBAL.languageItems["manualusing"] = new IupString( cast(char[]) "Use Help Manual" );
+						GLOBAL.languageItems["manualusing"] = new IupString( cast(char[]) "Search Help Manual" );
+						GLOBAL.languageItems["name"] = new IupString( cast(char[]) "Name" );
 					
 			GLOBAL.languageItems["language"] = new IupString( cast(char[]) "Language" );
 				GLOBAL.languageItems["openlanguage"] = new IupString( cast(char[]) "Choose Language..." );

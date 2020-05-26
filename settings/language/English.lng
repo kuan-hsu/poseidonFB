@@ -249,7 +249,8 @@ options=Options
 				keyword3=Keyword3
 			'manual=Manual
 				manualpath=Manual Path
-				manualusing=Use Help Manual
+				manualusing=Search Help Manual
+				name=Name
 
 	manual=Manual
 	about=About

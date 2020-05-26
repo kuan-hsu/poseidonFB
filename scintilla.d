@@ -2643,7 +2643,7 @@ extern(C)
 								catch( Exception e )
 								{
 									//debug GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-									debug IupMessage( "ShortCut Error", toStringz( "autocompleten" ~ e.toString ) );
+									debug IupMessage( "ShortCut Error", toStringz( "autocomplete\n" ~ e.toString ) );
 								}
 							}
 							version(DIDE)
@@ -2682,7 +2682,7 @@ extern(C)
 										{
 											if( alreadyInput.length )
 											{
-												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE\0" ) ) != "YES" )
+												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" )
 												{
 													char[] list = AutoComplete.getKeywordContainerList( alreadyInput );
 													if( list.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
@@ -2706,7 +2706,7 @@ extern(C)
 								}
 								catch( Exception e )
 								{
-									debug IupMessage( "ShortCut Error", toStringz( "autocompleten" ~ e.toString ) );
+									debug IupMessage( "ShortCut Error", toStringz( "autocomplete\n" ~ e.toString ) );
 								}
 							}
 
@@ -2757,12 +2757,12 @@ extern(C)
 						break;		
 					
 					// Custom Tools
-					case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":
+					case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9", "customtool10", "customtool11", "customtool12":
 						if( sk.keyValue == c )
 						{
-							char[]	tailChar = sk.name[$-1..$];
+							char[]	tailChar = sk.name[10..$];
 							int		tailNum = Integer.atoi( tailChar );
-							if( tailNum > 0 && tailNum < 10 )
+							if( tailNum > 0 && tailNum < 13 )
 							{
 								if( GLOBAL.customTools[tailNum].name.toDString.length )
 								{
@@ -2776,17 +2776,7 @@ extern(C)
 							return IUP_IGNORE;
 						}
 						break;					
-						
-					/*
-					case "testplugin":
-						if( sk.keyValue == c )
-						{
-							dllHandleClipboardText( ih );
-							return IUP_IGNORE;
-						}
-						break;
-					*/
-						
+
 					default:
 				}
 			}

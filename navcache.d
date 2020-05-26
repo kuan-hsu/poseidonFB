@@ -85,7 +85,7 @@ class CNavCache
 	
 	bool addCache( char[] fullPath, int line )
 	{
-		CacheUnit _element = { fullPath.dup, line };
+		CacheUnit _element = { fullPath, line };
 		
 		if( fullPath in GLOBAL.scintillaManager )
 		{}

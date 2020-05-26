@@ -277,7 +277,7 @@ version(DIDE)
 				{
 					if( _node.getFather !is null )
 					{
-						foreach( CASTnode funNode; searchMatchNodes( _node.getFather, _node.name, D_FUNCTION ) )
+						foreach( CASTnode funNode; searchMatchNodes( _node.getFather, _node.name, D_FUNCTION, _node.lineNumber ) )
 						{
 							result ~= "\n";
 							if( GLOBAL.showTypeWithParams != "ON" )
@@ -815,7 +815,8 @@ version(DIDE)
 			
 			CASTnode[] results;
 			
-			foreach( child; node.getChildren() )
+			//foreach( child; node.getChildren() )
+			foreach( child; getMembers( node ) )
 			{
 				if( child.kind & B_KIND )
 				{
@@ -857,7 +858,8 @@ version(DIDE)
 			
 			CASTnode[] results;
 			
-			foreach( child; node.getChildren() )
+			//foreach( child; node.getChildren() )
+			foreach( child; getMembers( node ) )
 			{
 				if( child.kind & D_KIND )
 				{
@@ -910,7 +912,7 @@ version(DIDE)
 		{
 			if( importName.length )
 			{
-				importName = Util.replace( importName.dup, '.', '/' );
+				importName = Util.replace( importName, '.', '/' );
 				char[] importFullPath = _cwd ~ importName;
 		
 			
@@ -998,11 +1000,12 @@ version(DIDE)
 				}
 				else
 				{
-					//GLOBAL.IDEMessageDlg.print( "Load Parser: " ~ includeFullPath );
 					CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
 					
 					if( _createFileNode !is null )
 					{
+						// Comment for thread call, prevents infinite loop / crash
+						/*
 						if( GLOBAL.editorSetting00.Message == "ON" ) 
 						{
 							if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
@@ -1014,6 +1017,7 @@ version(DIDE)
 								GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );
 							}
 						}
+						*/
 						
 						includesMarkContainer[fullPathByOS(includeFullPath)] = _createFileNode;
 						
@@ -1175,7 +1179,7 @@ version(DIDE)
 			return null;
 		}
 
-		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
+		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, int lineNum = 2147483647, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1195,11 +1199,13 @@ version(DIDE)
 
 					if( bWholeWord )
 					{
-						if( name == word ) results ~= _node;
+						if( name == word )
+							if( lineNum >= _node.lineNumber ) results ~= _node;
 					}
 					else
 					{
-						if( Util.index( name, word ) == 0 ) results ~= _node;
+						if( Util.index( name, word ) == 0 )
+							if( lineNum >= _node.lineNumber ) results ~= _node;
 					}
 				}
 			}
@@ -1234,11 +1240,11 @@ version(DIDE)
 			return resultNode;
 		}
 
-		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
+		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, int lineNum = 2147483647, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
 			if( originalNode is null ) return null;
 			
-			CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, D_KIND, bWholeWord, bCaseSensitive );
+			CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, D_KIND, lineNum, bWholeWord, bCaseSensitive );
 
 			if( bWholeWord )
 				resultNodes ~=  getMatchIncludesFromWholeWord( originalNode, null, word, D_KIND );
@@ -1248,7 +1254,7 @@ version(DIDE)
 
 			if( originalNode.getFather() !is null )
 			{
-				resultNodes ~= searchMatchNodes( originalNode.getFather(), word, D_KIND, bWholeWord, bCaseSensitive );
+				resultNodes ~= searchMatchNodes( originalNode.getFather(), word, D_KIND, 2147483647, bWholeWord, bCaseSensitive );
 			}
 			else
 			{
@@ -1839,6 +1845,9 @@ version(DIDE)
 			if( AST_Head is null ) return null;
 			
 			auto		function_originalAST_Head = AST_Head;
+			auto		_rootNode = ParserAction.getRoot( function_originalAST_Head );
+			char[]		fullPath = _rootNode !is null ? _rootNode.name : "";
+			
 
 			char[]		result;
 			char[]		wordWithoutSymbol;
@@ -1863,7 +1872,7 @@ version(DIDE)
 							CASTnode[] resultNodes;
 							if( bCallTip )
 							{
-								foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND )  ) // NOTE!!!! Using "searchMatchNode()"
+								foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND, lineNum, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND )  ) // NOTE!!!! Using "searchMatchNode()"
 								{
 									if( node !is null )
 									{
@@ -1895,7 +1904,7 @@ version(DIDE)
 
 							if( bPushContainer )
 							{
-								foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], D_ALL, false, false )  ~ searchObjectModuleMembers( splitWord[i], D_FIND, false, false ) )
+								foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], D_ALL, lineNum, false, false )  ~ searchObjectModuleMembers( splitWord[i], D_FIND, false, false ) )
 								{
 									if( _node.kind & D_IMPORT )
 									{
@@ -2005,7 +2014,7 @@ version(DIDE)
 							CASTnode[] childrenNodes;// =  AST_Head.getChildren();
 							//getBaseNodeMembers( AST_Head, childrenNodes );
 
-							foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND ) ) // NOTE!!!! Using "searchMatchNode()"
+							foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND, lineNum, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND ) ) // NOTE!!!! Using "searchMatchNode()"
 							{
 								if( node !is null )
 								{
@@ -3095,7 +3104,7 @@ version(DIDE)
 				if( result.length )
 					if( result[$-1] == '^' ) result = result[0..$-1];
 
-				return result.dup;
+				return result;
 			}
 
 			return null;
@@ -3104,6 +3113,21 @@ version(DIDE)
 		static void toDefintionAndType( int runType )
 		{
 			if( GLOBAL.enableParser != "ON" ) return;
+			
+			try
+			{
+				if( showListThread !is null )
+				{
+					if( showListThread.isRunning ) showListThread.join();
+				}
+				
+				if( showCallTipThread !is null )
+				{
+					if( showCallTipThread.isRunning ) showCallTipThread.join();
+				}
+				
+			}
+			catch( Exception e){}
 			
 			try
 			{

@@ -341,6 +341,9 @@ public:
 			doc ~= setINILineData( "customtool7", convertShortKeyValue2String( GLOBAL.shortKeys[37].keyValue ) );
 			doc ~= setINILineData( "customtool8", convertShortKeyValue2String( GLOBAL.shortKeys[38].keyValue ) );
 			doc ~= setINILineData( "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[39].keyValue ) );
+			doc ~= setINILineData( "customtool10", convertShortKeyValue2String( GLOBAL.shortKeys[40].keyValue ) );
+			doc ~= setINILineData( "customtool11", convertShortKeyValue2String( GLOBAL.shortKeys[41].keyValue ) );
+			doc ~= setINILineData( "customtool12", convertShortKeyValue2String( GLOBAL.shortKeys[42].keyValue ) );
 			
 			// buildtools
 			doc ~= setINILineData( "[buildtools]");
@@ -383,8 +386,9 @@ public:
 			
 			// manual
 			doc ~= setINILineData( "[manual]");
-			doc ~= setINILineData( "manualpath", GLOBAL.manualPath.toDString );
 			doc ~= setINILineData( "manualusing", GLOBAL.toggleUseManual );
+			for( int i = 0; i < GLOBAL.manuals.length; ++ i )
+				doc ~= setINILineData( "name", GLOBAL.manuals[i] );			
 
 			// recentFiles
 			doc ~= setINILineData( "[recentFiles]" );
@@ -733,8 +737,8 @@ public:
 							case "outlinewindow":			index =29; title = GLOBAL.languageItems["sc_leftwindow"].toDString();				break;
 							case "messagewindow":			index =30; title = GLOBAL.languageItems["sc_bottomwindow"].toDString();				break;
 							
-							case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9":
-								index = Integer.atoi( left[$-1..$] ) + 30;
+							case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9", "customtool10", "customtool11", "customtool12":
+								index = Integer.atoi( left[10..$] ) + 30;
 								title = GLOBAL.languageItems[left].toDString();
 								break;
 							default:
@@ -801,8 +805,8 @@ public:
 					case "[manual]":
 						switch( left )
 						{
-							case "manualpath":				GLOBAL.manualPath = right;										break;
 							case "manualusing":				GLOBAL.toggleUseManual = right;									break;
+							case "name":					GLOBAL.manuals ~= right;										break;
 							default:
 						}
 						break;

@@ -140,7 +140,14 @@ class CStatusBar
 		}
 		else
 		{
-			int prjID = actionManager.ProjectAction.getActiveProjectID();
+			int prjID;
+			
+			if( name.length )
+				prjID = Integer.toInt( name );
+			else
+				prjID = actionManager.ProjectAction.getActiveProjectID();
+			
+			
 			scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
 			scope	_prjDir = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", prjID ) );
 			

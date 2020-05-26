@@ -1583,6 +1583,10 @@ version(FBIDE)
 						case TOK.Tstatic:
 							parseToken( TOK.Tstatic );
 							break;
+							
+						case TOK.Tconst:
+							parseToken( TOK.Tconst );
+							break;
 
 						case TOK.Tdeclare:
 							parseToken( TOK.Tdeclare );
