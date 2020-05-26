@@ -767,6 +767,8 @@ private:
 			}
 		}
 	}
+	
+	version(SPEED) static ParseThread parseIncludeThread;
 
 public:
 	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8N, char[] existData = null, bool bCreateActualFile = true, int insertPos = -1 )
@@ -888,6 +890,13 @@ public:
 			}
 			else
 			{
+				version(SPEED)
+				{
+					if( parseIncludeThread !is null )
+						if( parseIncludeThread.isRunning ) parseIncludeThread.join();
+				}
+					
+					
 				auto pParseTree = GLOBAL.outlineTree.createParserByText( fullPath, _text );
 				if( pParseTree !is null ) 
 				{
@@ -895,10 +904,31 @@ public:
 					
 					AutoComplete.cleanIncludeContainer();
 					
+					/*
 					if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
 					{
 						ParseThread subThread = new ParseThread( pParseTree, fullPath );
 						subThread.start();
+					}
+					else
+					{
+						AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+					}
+					*/
+					version(SPEED)
+					{
+						if( parseIncludeThread !is null )
+						{
+							if( parseIncludeThread.isRunning )
+							{
+								parseIncludeThread.join();
+								if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Wait......" );
+							}
+							delete parseIncludeThread;
+						}
+						
+						parseIncludeThread = new ParseThread( pParseTree, fullPath );
+						parseIncludeThread.start();
 					}
 					else
 					{
@@ -1033,6 +1063,7 @@ public:
 						{
 							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 							IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
+							GLOBAL.statusBar.setPrjName( null, true );
 							result = result | 2;
 							break;
 						}

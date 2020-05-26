@@ -35,7 +35,7 @@ class CShortCutDialog : CBaseDialog
 			item -= 4;
 		else if( item < 37 )
 			item -= 5;
-		else if( item < 47 )
+		else if( item < 50 )
 			item -= 6;
 
 
@@ -201,6 +201,9 @@ extern(C) // Callback for CSingleTextDialog
 			case "customtool7":					pos = 37;	break;
 			case "customtool8":					pos = 38;	break;
 			case "customtool9":					pos = 39;	break;
+			case "customtool10":				pos = 40;	break;
+			case "customtool11":				pos = 41;	break;
+			case "customtool12":				pos = 42;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;
@@ -294,6 +297,9 @@ extern(C) // Callback for CSingleTextDialog
 			case "customtool7":					pos = 37;	break;
 			case "customtool8":					pos = 38;	break;
 			case "customtool9":					pos = 39;	break;
+			case "customtool10":				pos = 40;	break;
+			case "customtool11":				pos = 41;	break;
+			case "customtool12":				pos = 42;	break;
 			default:
 				IupMessage( "Error", "Key Name Error" );
 				return IUP_CLOSE;
@@ -330,7 +336,7 @@ extern(C) // Callback for CSingleTextDialog
 				pos += 4;
 			else if( pos < 31 )
 				pos += 5;
-			else if( pos < 40 )
+			else if( pos < 43 )
 				pos += 6;
 
 			scope _cString = new IupString ;

@@ -58,6 +58,7 @@ name=parser/token.d
 name=project.d
 name=scintilla.d
 name=tools.d
+name=dialogs/manualDlg.d
 [Includes]
 [Others]
 name=poseidonFB.res

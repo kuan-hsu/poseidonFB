@@ -182,7 +182,7 @@ char[] lowerCase( char[] text )
 		if ( c >= 'A' && c <= 'Z' ) result ~= cast(char)( c + 32 );else result ~= c;
 	}
 
-	return result.dup;
+	return result;
 }
 
 char[] upperCase( char[] text )
@@ -194,7 +194,7 @@ char[] upperCase( char[] text )
 		if ( c >= 'a' && c <= 'z' ) result ~= cast(char)( c - 32 );else result ~= c;
 	}
 
-	return result.dup;
+	return result;
 }
 
 int lowerCase( int num )

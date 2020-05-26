@@ -5,7 +5,7 @@ import iup.iup_scintilla;
 
 import global, actionManager, scintilla, project, tools, layout;
 import parser.autocompletion;
-import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg;
+import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg, dialogs.manualDlg;
 
 import tango.io.Stdout;
 import tango.stdc.stringz;
@@ -680,7 +680,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.432)\nBy Kuan Hsu (Taiwan)\n2020.05.23" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.433)\nBy Kuan Hsu (Taiwan)\n2020.05.27" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.051)\nBy Kuan Hsu (Taiwan)\n2020.05.23" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
@@ -689,17 +689,13 @@ void createMenu()
 	IupSetAttribute( item_manual, "IMAGE", "icon_fbmanual" );
 	IupSetCallback( item_manual, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		scope manualPath = new FilePath( GLOBAL.manualPath.toDString );
-		if( manualPath.exists )
-		{
-			if( tools.lowerCase( manualPath.ext ) == "chm" )
-			{
-				version(Windows) IupExecute( GLOBAL.manualPath.toCString, "" ); else IupExecute( "kchmviewer", GLOBAL.manualPath.toCString );
-			}
-		}
+		scope dlg = new CManualDialog( 480, -1, GLOBAL.languageItems["manual"].toDString(), false );
+		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );		
 		
 		return IUP_DEFAULT;
 	});	
+	
+	
 
 	file_menu = IupMenu( 	item_new, 
 							item_open, 
@@ -824,7 +820,9 @@ void createMenu()
 							item_preference,
 							IupSeparator(),
 							item_about,
+							IupSeparator(),
 							item_manual,
+							IupSeparator(),
 							null );
 
 	mainMenu1_File = IupSubmenu( GLOBAL.languageItems["file"].toCString, file_menu );
@@ -836,6 +834,7 @@ void createMenu()
 	version(FBIDE) mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
 	mainMenu_Misc = IupSubmenu( GLOBAL.languageItems["windows"].toCString, misc_menu );
 	mainMenu8_Option = IupSubmenu( GLOBAL.languageItems["options"].toCString, option_menu );
+	IupSetHandle( "optionsMenu", option_menu );
 
 	version(FBIDE)
 		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option, null );
@@ -843,6 +842,20 @@ void createMenu()
 		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu_Misc, mainMenu8_Option, null );
 		
 	IupSetAttribute( menu, "GAP", "30" );
+
+
+	for( int i = 0; i < GLOBAL.manuals.length; ++ i )
+	{
+		char[][] splitWords = Util.split( GLOBAL.manuals[i], "," );
+		if( splitWords.length == 2 )
+		{
+			Ihandle* _new = IupItem( toStringz( Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
+			IupSetCallback( _new, "ACTION", cast(Icallback) &manual_menu_click_cb );
+			IupAppend( option_menu, _new );
+			IupMap( _new );
+		}
+	}
+
 	
 	IupSetHandle("mymenu", menu);
 }
@@ -1971,6 +1984,36 @@ extern(C)
 						CustomToolAction.run( GLOBAL.customTools[i] );
 						break;
 					}
+				}
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}
+	
+	int manual_menu_click_cb( Ihandle* ih )
+	{
+		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
+		
+		int dotPos = Util.index( title, ". " );
+		if( dotPos < title.length ) title = title[dotPos+2..$];
+
+		for( int i = 0; i < GLOBAL.manuals.length; ++ i )
+		{
+			char[][] splitWords = Util.split( GLOBAL.manuals[i], "," );
+			if( splitWords.length == 2 )
+			{
+				if( title == splitWords[0] )
+				{
+					scope manualPath = new FilePath( splitWords[1] );
+					if( manualPath.exists )
+					{
+						if( tools.lowerCase( manualPath.ext ) == "chm" )
+						{
+							version(Windows) IupExecute( toStringz( splitWords[1] ), "" ); else IupExecute( "kchmviewer", toStringz( splitWords[1] ) );
+						}
+					}
+					break;
 				}
 			}
 		}

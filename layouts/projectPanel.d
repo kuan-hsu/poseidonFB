@@ -873,11 +873,11 @@ extern(C)
 					
 					if( _fullpath != null )
 					{
-						char[] fullPath = fromStringz( _fullpath );
+						char[] fullPath = fromStringz( _fullpath ).dup;
 
 						if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 						{
-							actionManager.ScintillaAction.openFile( fullPath.dup );
+							actionManager.ScintillaAction.openFile( fullPath );
 						}
 					}
 					
@@ -903,7 +903,15 @@ extern(C)
 
 				if( id > 0 )
 				{
-					GLOBAL.statusBar.setPrjName( null, true );
+					int 	depth	= IupGetIntId( ih, "DEPTH", id );
+				
+					while( depth > 1 )
+					{
+						id = IupGetIntId( ih, "PARENT", id );
+						depth = IupGetIntId( ih, "DEPTH", id );
+					}				
+
+					GLOBAL.statusBar.setPrjName( Integer.toString( id ), true );
 				}
 				else
 				{
@@ -1652,11 +1660,11 @@ extern(C)
 						{
 							if( selectedIDs.length == 1 )
 							{
-								actionManager.ScintillaAction.openFile( fullPath.dup, -1 );
+								actionManager.ScintillaAction.openFile( fullPath );
 								break;
 							}
 							else
-								actionManager.ScintillaAction.openFile( fullPath.dup );
+								actionManager.ScintillaAction.openFile( fullPath );
 						}
 						else
 						{

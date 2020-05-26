@@ -191,44 +191,12 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=346x");
 		
 		
-		// Manual
-		Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
-		IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
-		IupSetHandle( "toggleUseManual", toggleUseManual );
-		
-		Ihandle* labelchm = IupLabel( toStringz( GLOBAL.languageItems["manualpath"].toDString ~ ":" ) );
-		IupSetAttributes( labelchm, "SIZE=94x12,ALIGNMENT=ALEFT:ACENTER,VISIBLELINES=1,VISIBLECOLUMNS=1" );
-		
-		Ihandle* textchm = IupText( null );
-		IupSetAttribute( textchm, "SIZE", "224x12" );
-		IupSetAttribute( textchm, "VALUE", GLOBAL.manualPath.toCString );
-		IupSetHandle( "textchm", textchm );
-		
-		Ihandle* btnchm = IupButton( null, null );
-		IupSetAttribute( btnchm, "IMAGE", "icon_openfile" );
-		IupSetCallback( btnchm, "ACTION", cast(Icallback) &CPreferenceDialog_OpenCHM_cb );
-
-		Ihandle* hBoxChm = IupHbox( labelchm, textchm, btnchm, null );
-		IupSetAttributes( hBoxChm, "ALIGNMENT=ACENTER,MARGIN=5x0" );
-		
-		version(FBIDE)
-		{
-			Ihandle* vBoxChm = IupVbox( hBoxChm, toggleUseManual, null );
-			Ihandle* manuFrame = IupFrame( vBoxChm );
-		}
-		version(DIDE)
-		{
-			Ihandle* manuFrame = IupFrame( hBoxChm );
-		}
-		IupSetAttribute( manuFrame, "TITLE", GLOBAL.languageItems["manual"].toCString() );
-		IupSetAttribute( manuFrame, "SIZE", "346x");		
-		
 		version(FBIDE)
 		{
 			version(Windows)
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, frameCompiler, manuFrame, null );
+				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, frameCompiler, null );
 			else
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, frameCompiler, manuFrame, null );
+				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, frameCompiler, null );
 				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
@@ -504,6 +472,11 @@ class CPreferenceDialog : CBaseDialog
 			Ihandle* toggleQBCase = IupToggle( GLOBAL.languageItems["qbcase"].toCString, null );
 			IupSetAttribute( toggleQBCase, "VALUE", toStringz(GLOBAL.editorSetting00.QBCase.dup) );
 			IupSetHandle( "toggleQBCase", toggleQBCase );
+			
+			Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
+			IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
+			IupSetHandle( "toggleUseManual", toggleUseManual );
+			
 		}
 
 		version(Windows)
@@ -588,11 +561,12 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleMiddleScroll, "" ),
 					IupSetAttributes( toggleDocStatus, "" ),
 					
-					IupSetAttributes( toggleLoadAtBackThread, "" ),
+					//IupSetAttributes( toggleLoadAtBackThread, "" ),
 					IupSetAttributes( toggleAutoKBLayout, "" ),
-					
 					IupSetAttributes( toggleQBCase, "" ),
+
 					IupSetAttributes( toggleNewDocBOM, "" ),
+					IupSetAttributes( toggleUseManual, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -640,8 +614,9 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleMiddleScroll, "" ),
 					IupSetAttributes( toggleDocStatus, "" ),
 					
-					IupSetAttributes( toggleLoadAtBackThread, "" ),
+					//IupSetAttributes( toggleLoadAtBackThread, "" ),
 					IupSetAttributes( toggleQBCase, "" ),
+					IupSetAttributes( toggleUseManual, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -693,8 +668,8 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleAutoKBLayout, "" ),
 					
 					IupSetAttributes( toggleNewDocBOM, "" ),
-					//IupFill(),
-					IupSetAttributes( toggleLoadAtBackThread, "" ),
+					IupFill(),
+					//IupSetAttributes( toggleLoadAtBackThread, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -740,9 +715,9 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributes( toggleMiddleScroll, "" ),
 					
 					IupSetAttributes( toggleDocStatus, "" ),
-					//IupFill(),
+					IupFill(),
 					//IupSetAttributes( toggleAutoKBLayout, "" ),
-					IupSetAttributes( toggleLoadAtBackThread, "" ),
+					//IupSetAttributes( toggleLoadAtBackThread, "" ),
 					
 					IupSetAttributes( hBoxTab, "" ),
 					IupSetAttributes( hBoxColumn, "" ),
@@ -1788,7 +1763,7 @@ class CPreferenceDialog : CBaseDialog
 				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
 			}
 			
-			if( PreferenceDialogParameters.stringSC[ID-1] is null  )PreferenceDialogParameters.stringSC[ID-1] = new IupString( Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[i].title ) );
+			if( PreferenceDialogParameters.stringSC[ID-1] is null ) PreferenceDialogParameters.stringSC[ID-1] = new IupString( Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[i].title ) );
 			IupSetAttributeId( shortCutList, "",  ID, PreferenceDialogParameters.stringSC[ID-1].toCString );
 			
 		}
@@ -2263,21 +2238,6 @@ extern(C) // Callback for CPreferenceDialog
 		}
 	}
 	
-	private int CPreferenceDialog_OpenCHM_cb( Ihandle* ih )
-	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["chmfile"].toDString() ~ "|*.chm|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "OPEN", "YES" );
-		//scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString ~ "..." );
-		char[] fileName = fileSecectDlg.getFileName();
-
-		if( fileName.length )
-		{
-			GLOBAL.manualPath = fileName;
-			Ihandle* _chm_Handle = IupGetHandle( "textchm" );
-			if( _chm_Handle != null ) IupSetAttribute( _chm_Handle, "VALUE", GLOBAL.manualPath.toCString );
-		}
-
-		return IUP_DEFAULT;
-	}	
 
 	private int CPreferenceDialog_shortCutList_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
@@ -2872,7 +2832,6 @@ extern(C) // Callback for CPreferenceDialog
 			scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline	
 			version(FBIDE) GLOBAL.debugPanel.setFont();
 			
-			GLOBAL.manualPath							= IupGetAttribute( IupGetHandle( "textchm" ), "VALUE" );
 			GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;
 			
 			// Save Setup to Xml
