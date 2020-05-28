@@ -424,91 +424,6 @@ extern(C)
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
 				{
-					/+
-					version(FBIDE)
-					{
-						// Auto convert keyword case......
-						int 	currentPos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-						if( !ScintillaAction.isComment( cSci.getIupScintilla, currentPos ))
-						{
-							if( GLOBAL.keywordCase > 0 )
-							{
-								if( cast(int)IupScintillaSendMessage( cSci.getIupScintilla, 2381, 0, 0 ) > 0 ) // SCI_GETFOCUS 2381
-								{
-									//IupMessage("",toStringz( Integer.toString( c ) ) );
-									if( c == 32 || c == 9 || c == 13 || c == 40 )
-									{
-										int		pos, headPos;
-										
-										if( c != 13 )
-										{
-											pos = currentPos - 1;
-										}
-										else
-										{
-											pos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2136, ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 2, 0 ); // SCI_GETLINEENDPOSITION 2136
-										}
-										
-										char[]	word = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, headPos );
-										if( word.length )
-										{
-											word = lowerCase( word.reverse );
-
-											bool bExitFlag;
-											foreach( IupString _keyword; GLOBAL.KEYWORDS )
-											{
-												foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
-												{	
-													if( _k.length )
-													{
-														if( lowerCase( _k ) == word )
-														{
-															IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
-															word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
-															IupSetAttribute( cSci.getIupScintilla, "SELECTEDTEXT", toStringz( word ) );
-															IupScintillaSendMessage( cSci.getIupScintilla, 2025, currentPos, 0 ); // sci_gotopos = 2025,
-
-															bExitFlag = true;
-															break;
-														}
-													}
-												}
-												if( bExitFlag ) break;
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					+/
-					
-					/+
-					// BRACEMATCH
-					if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
-					{
-						IupSetInt( cSci.getIupScintilla, "BRACEBADLIGHT", -1 );
-						
-						int pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-						int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
-						if( close > -1 )
-						{
-							IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
-						}
-						else
-						{
-							if( GLOBAL.editorSetting00.BraceMatchDoubleSidePos == "ON" )
-							{
-								--pos;
-								close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
-								if( close > -1 )
-								{
-									IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); // SCI_BRACEHIGHLIGHT 2351
-								}
-							}
-						}
-					}
-					+/
 					if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
 					{
 						switch( c )
@@ -595,166 +510,60 @@ extern(C)
 					
 					if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
-						char[] s = ScintillaAction.getCurrentChar( -1, cSci.getIupScintilla );
-						if( s.length ) c = cast(int) s[$-1];
-						//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
-						
-						switch( c )
+						if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
 						{
-							case 10, 13: // Eneter
-								switch( GLOBAL.liveLevel )
-								{
-									case 1:
-										int prevLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 1;
-										char[] prevLineText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
-										//GLOBAL.messagePanel.printOutputPanel( "prevLine(" ~ Integer.toString(prevLine) ~ "): " ~ prevLineText );
-										
-										if( Util.trim( prevLineText ).length )
-										{
-											if( Util.trim( fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ) ).length )
+							char[] s = ScintillaAction.getCurrentChar( -1, cSci.getIupScintilla );
+							if( s.length ) c = cast(int) s[$-1];
+							//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
+							
+							switch( c )
+							{
+								case 10, 13: // Eneter
+									switch( GLOBAL.liveLevel )
+									{
+										case 1:
+											int prevLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 1;
+											char[] prevLineText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
+											//GLOBAL.messagePanel.printOutputPanel( "prevLine(" ~ Integer.toString(prevLine) ~ "): " ~ prevLineText );
+											
+											if( Util.trim( prevLineText ).length )
 											{
-												LiveParser.parseCurrentLine( prevLine );
-												LiveParser.parseCurrentLine();
+												if( Util.trim( fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ) ).length )
+												{
+													LiveParser.parseCurrentLine( prevLine );
+													LiveParser.parseCurrentLine();
+												}
 											}
-										}
-										break;
-										
-									case 2: LiveParser.parseCurrentBlock(); break;
-									default:
-								}
-								break;
+											break;
+											
+										case 2: LiveParser.parseCurrentBlock(); break;
+										default:
+									}
+									break;
 
-							case 8, 9, 65535:
-								switch( GLOBAL.liveLevel )
-								{
-									case 1: LiveParser.parseCurrentLine(); break;
-									case 2: LiveParser.parseCurrentBlock(); break;
-									default:
-								}
-								break;
-								
-							default:
-								if( c > 31 && c < 127 )
-								{
+								case 8, 9, 65535:
 									switch( GLOBAL.liveLevel )
 									{
 										case 1: LiveParser.parseCurrentLine(); break;
 										case 2: LiveParser.parseCurrentBlock(); break;
 										default:
 									}
-								}
-						}
-					}
-					
-					/+
-					// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
-					if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;		
-					
-					if( c > 32 && c < 123 )
-					{
-						//if( length > 1 ) return IUP_DEFAULT;
-
-						int dummyHeadPos;
-						// Below code are fixed because of IUP DLL10 and D 1.076
-						char _c = cast(char) c;
-						char[] text;
-						text ~= _c;//fromStringz( _text );
-						//text ~= _text[0];
-						int 	pos = actionManager.ScintillaAction.getCurrentPos( cSci.getIupScintilla )-1;
-						switch( text )
-						{
-							case " ", "\n", "\t", "\r", ")":
-								IupSetAttribute( cSci.getIupScintilla, "AUTOCCANCEL", "YES" );
-								//bWithoutList = false;
-								break;
-
-							default:
-								char[]	alreadyInput;
-								bool	bDot, bOpenParen;
-
-								if( text == ">" )
-								{
-									version(FBIDE)
-									{
-										if( pos > 0 )
-										{
-											if( fromStringz( IupGetAttributeId(  cSci.getIupScintilla, "CHAR", pos - 1 ) ) == "-" )
-											{
-												//IupMessage("POINTER","");
-												alreadyInput = AutoComplete.getWholeWordReverse(  cSci.getIupScintilla, pos - 1, dummyHeadPos ).reverse ~ "->";
-												bDot = true;
-												//bWithoutList = false;
-											}
-										}
-									}
-								}
-								else if( text == "." )
-								{
-									bDot = true;
-								}
-								else if( text == "(" )
-								{
-									bOpenParen = true;
-								}
-								
-								if( !alreadyInput.length ) alreadyInput = AutoComplete.getWholeWordReverse( cSci.getIupScintilla, pos, dummyHeadPos ).reverse ~ text;
-
-								if( !bDot && !bOpenParen )
-								{
-									if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
-									if( fromStringz( IupGetAttribute( cSci.getIupScintilla, "AUTOCACTIVE\0" ) ) == "YES" ) break;
-								}
-
-								try
-								{
-									version(DIDE)
-									{
-										AutoComplete.VersionCondition.length = 0;
-										
-										char[] options = ExecuterAction.getCustomCompilerOption();
-										char[] activePrjName = ProjectAction.getActiveProjectName;
-										if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
-										if( options.length )
-										{
-											int _versionPos = Util.index( options, "-version=" );
-											while( _versionPos < options.length )
-											{
-												char[] versionName;
-												for( int i = _versionPos + 9; i < options.length; ++ i )
-												{
-													if( options[i] == '\t' || options[i] == ' ' ) break;
-													versionName ~= options[i];
-												}								
-												if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
-												
-												_versionPos = Util.index( options, "-version=", _versionPos + 9 );
-											}
-										}
-									}
+									break;
 									
-									AutoComplete.callAutocomplete(  cSci.getIupScintilla, pos, text, alreadyInput );
-								}
-								catch( Exception e )
-								{
-									GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-								}
+								default:
+									if( c > 31 && c < 127 )
+									{
+										switch( GLOBAL.liveLevel )
+										{
+											case 1: LiveParser.parseCurrentLine(); break;
+											case 2: LiveParser.parseCurrentBlock(); break;
+											default:
+										}
+									}
+							}
 						}
-					}					
-					+/
-				}
-				/*
-				if( GLOBAL.editorSetting01.USEFULLSCREEN == "ON" )
-				{
-					//IupMessage( "", toStringz( Integer.toString(c)));
-					if( c == 65307 )
-					{
-						GLOBAL.editorSetting01.USEFULLSCREEN = "OFF";
-						if( IupGetHandle( "Menu_fullScreenItem" ) != null ) IupSetAttribute( IupGetHandle( "Menu_fullScreenItem" ), "VALUE", "OFF" );
-						IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "NO" );
-						IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 					}
 				}
-				*/
 			}
 			catch( Exception e )
 			{

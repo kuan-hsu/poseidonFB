@@ -78,7 +78,7 @@ class CManualDialog : CBaseDialog
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
 
-
+	
 		Ihandle* vBoxLayout = IupVbox( frameList, hBox00, labelSEPARATOR, bottom, null );
 		
 		IupAppend( _dlg, vBoxLayout );
@@ -154,8 +154,11 @@ extern(C)
 				Ihandle* menuItemHandle = IupGetChild( optionsMenuHandle, i );
 				if( menuItemHandle != null )
 				{
-					if( IupGetAttribute( menuItemHandle, "TITLE" ) != null && IupGetAttribute( menuItemHandle, "TITLE" ) != IupGetAttribute( optionsMenuHandle, "TITLE" ) && IupGetAttribute( menuItemHandle, "IMAGE" ) == null )
-						IupDestroy( menuItemHandle );
+					char[] menuItenTitle = fromStringz( IupGetAttribute( menuItemHandle, "TITLE" ) ).dup;
+					if( menuItenTitle.length )
+					{
+						if( menuItenTitle[0] == '#' ) IupDestroy( menuItemHandle ); else break;
+					}
 					else
 						break;
 				}
@@ -169,7 +172,7 @@ extern(C)
 				char[][] splitWords = Util.split( GLOBAL.manuals[i], "," );
 				if( splitWords.length == 2 )
 				{
-					Ihandle* _new = IupItem( toStringz( Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
+					Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
 					IupSetCallback( _new, "ACTION", cast(Icallback) &manual_menu_click_cb );
 					IupAppend( optionsMenuHandle, _new );
 					IupMap( _new );
@@ -183,28 +186,32 @@ extern(C)
 
 	private int CManualDialog_btnManualDir_ACTION( Ihandle* ih ) 
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" );
-		char[] fileName = fileSecectDlg.getFileName();
-
-		if( fileName.length )
+		Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
+		
+		if( listHandle != null )
 		{
-			Ihandle* dirHandle = IupGetHandle( "textManualDir" );
-			if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", toStringz( fileName ) );
-			
-			Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
-			if( listHandle != null )
+			if( IupGetInt( listHandle, "COUNT" ) > 0 )
 			{
-				int id = IupGetInt( listHandle, "VALUE" );
-				if( id > 0 && id <= CManualDialog.tempManuals.length )
+				scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", "CHM Files|*.chm|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" );
+				char[] fileName = fileSecectDlg.getFileName();
+
+				if( fileName.length )
 				{
-					char[][] splitWord = Util.split( CManualDialog.tempManuals[id-1], "," );
-					if( splitWord.length == 2 )
+					Ihandle* dirHandle = IupGetHandle( "textManualDir" );
+					if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", toStringz( fileName ) );
+					
+					int id = IupGetInt( listHandle, "VALUE" );
+					if( id > 0 && id <= CManualDialog.tempManuals.length )
 					{
-						// Double Check
-						if( splitWord[0] == fromStringz( IupGetAttributeId( listHandle, "", id ) ).dup ) CManualDialog.tempManuals[id-1] = splitWord[0] ~ "," ~ fileName;
-					}				
+						char[][] splitWord = Util.split( CManualDialog.tempManuals[id-1], "," );
+						if( splitWord.length == 2 )
+						{
+							// Double Check
+							if( splitWord[0] == fromStringz( IupGetAttributeId( listHandle, "", id ) ).dup ) CManualDialog.tempManuals[id-1] = splitWord[0] ~ "," ~ fileName;
+						}				
+					}
 				}
-			}			
+			}
 		}
 		
 		return IUP_DEFAULT;

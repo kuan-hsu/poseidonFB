@@ -22,6 +22,7 @@ name=dialogs/fileDlg.d
 name=dialogs/findFilesDlg.d
 name=dialogs/helpDlg.d
 name=dialogs/idemessageDlg.d
+name=dialogs/manualDlg.d
 name=dialogs/preferenceDlg.d
 name=dialogs/prjPropertyDlg.d
 name=dialogs/searchDlg.d
@@ -58,7 +59,6 @@ name=parser/token.d
 name=project.d
 name=scintilla.d
 name=tools.d
-name=dialogs/manualDlg.d
 [Includes]
 [Others]
 name=poseidonFB.res

@@ -812,7 +812,7 @@ class CScintilla
 		if(GLOBAL.toggleCaseInsensitive == "ON" ) IupScintillaSendMessage( sci, 2634, 1, 0 ); else IupScintillaSendMessage( sci, 2634, 0, 0 );
 		
 		//IupScintillaSendMessage( sci, 2118, 0, 0 ); // SCI_AUTOCSETAUTOHIDE 2118
-		version(DIDE) IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+		IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 
 		IupSetAttribute( sci, "SIZE", "NULL" );
 		//IupSetAttribute( sci, "VISIBLELINES", "60" );

@@ -642,7 +642,7 @@ void createMenu()
 	{
 		if( GLOBAL.customTools[i].name.toDString.length )
 		{
-			Ihandle* _new = IupItem( toStringz( Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name.toDString ), null );
+			Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name.toDString ), null );
 			IupSetCallback( _new, "ACTION", cast(Icallback) &customtool_menu_click_cb );
 			IupAppend( toolsSubMenu, _new );
 			IupMap( _new );
@@ -680,7 +680,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.433)\nBy Kuan Hsu (Taiwan)\n2020.05.27" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.434)\nBy Kuan Hsu (Taiwan)\n2020.05.28" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.051)\nBy Kuan Hsu (Taiwan)\n2020.05.23" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
@@ -849,7 +849,7 @@ void createMenu()
 		char[][] splitWords = Util.split( GLOBAL.manuals[i], "," );
 		if( splitWords.length == 2 )
 		{
-			Ihandle* _new = IupItem( toStringz( Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
+			Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
 			IupSetCallback( _new, "ACTION", cast(Icallback) &manual_menu_click_cb );
 			IupAppend( option_menu, _new );
 			IupMap( _new );

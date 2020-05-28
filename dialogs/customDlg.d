@@ -226,9 +226,11 @@ extern(C) // Callback for CFindInFilesDialog
 				Ihandle* menuItemHandle = IupGetChild( toolsSubMenuHandle, i );
 				if( menuItemHandle != null )
 				{
-					//if( fromStringz( IupGetAttribute( menuItemHandle, "TITLE" ) ).length )
-					if( IupGetAttribute( menuItemHandle, "TITLE" ) != null && IupGetAttribute( menuItemHandle, "TITLE" ) != IupGetAttribute( toolsSubMenuHandle, "TITLE" ) && IupGetAttribute( menuItemHandle, "IMAGE" ) == null )
-						IupDestroy( menuItemHandle );
+					char[] menuItenTitle = fromStringz( IupGetAttribute( menuItemHandle, "TITLE" ) ).dup;
+					if( menuItenTitle.length )
+					{
+						if( menuItenTitle[0] == '#' ) IupDestroy( menuItemHandle ); else break;
+					}
 					else
 						break;
 				}
@@ -241,7 +243,7 @@ extern(C) // Callback for CFindInFilesDialog
 			{
 				if( GLOBAL.customTools[i].name.toDString.length )
 				{
-					Ihandle* _new = IupItem( toStringz( Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name.toDString ), null );
+					Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name.toDString ), null );
 					IupSetCallback( _new, "ACTION", cast(Icallback) &menu.customtool_menu_click_cb );
 					IupAppend( toolsSubMenuHandle, _new );
 					IupMap( _new );

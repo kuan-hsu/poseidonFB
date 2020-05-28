@@ -912,7 +912,7 @@ version(DIDE)
 		{
 			if( importName.length )
 			{
-				importName = Util.replace( importName, '.', '/' );
+				importName = Util.replace( importName.dup, '.', '/' );
 				char[] importFullPath = _cwd ~ importName;
 		
 			
@@ -2164,6 +2164,22 @@ version(DIDE)
 			
 			if( calltipContainer is null ) calltipContainer = new CStack!(char[]);
 		}
+		
+		static bool showListThreadIsRunning()
+		{
+			if( showListThread is null ) return false;
+			if( !showListThread.isRunning ) return false;
+			
+			return true;
+		}
+		
+		static bool showCallTipThreadIsRunning()
+		{
+			if( showCallTipThread is null ) return false;
+			if( !showCallTipThread.isRunning ) return false;
+		
+			return true;
+		}		
 		
 		static void cleanIncludeContainer( CASTnode afterCleanAddParserTree = null )
 		{

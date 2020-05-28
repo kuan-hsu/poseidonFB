@@ -204,9 +204,9 @@ class CPreferenceDialog : CBaseDialog
 		version(DIDE)
 		{
 			version(Windows)
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, manuFrame, null );
+				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, /*manuFrame,*/ null );
 			else
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox03, frameCompiler, manuFrame, null );
+				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox03, frameCompiler, /*manuFrame,*/ null );
 				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");

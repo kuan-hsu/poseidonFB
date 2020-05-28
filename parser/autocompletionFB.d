@@ -1830,6 +1830,22 @@ version(FBIDE)
 			}
 		}
 		
+		static bool showListThreadIsRunning()
+		{
+			if( showListThread is null ) return false;
+			if( !showListThread.isRunning ) return false;
+			
+			return true;
+		}
+		
+		static bool showCallTipThreadIsRunning()
+		{
+			if( showCallTipThread is null ) return false;
+			if( !showCallTipThread.isRunning ) return false;
+		
+			return true;
+		}
+		
 		static void cleanIncludeContainer()
 		{
 			foreach( char[] key; includesMarkContainer.keys )
@@ -3191,69 +3207,77 @@ version(FBIDE)
 										if( bExitFlag ) break;
 									}
 
-
-									version(Windows)
+									if( bExitFlag )
 									{
-										if( GLOBAL.htmlHelp != null )
+										bExitFlag = false;
+										
+										version(Windows)
 										{
-											wchar[] keyWord16 = UTF.toString16( keyWord );
-											
-											foreach( char[] s; GLOBAL.manuals )
+											if( GLOBAL.htmlHelp != null )
 											{
-												char[][] _splitWords = Util.split( s, "," );
-												if( _splitWords.length == 2 )
+												wchar[] keyWord16 = UTF.toString16( keyWord );
+												
+												foreach( char[] s; GLOBAL.manuals )
 												{
-													if( _splitWords[1].length )
+													char[][] _splitWords = Util.split( s, "," );
+													if( _splitWords.length == 2 )
 													{
-														wchar[]	_path =  UTF.toString16( _splitWords[1] );
+														if( _splitWords[1].length )
+														{
+															wchar[]	_path =  UTF.toString16( _splitWords[1] );
 
-														HH_AKLINK	akLink;
-														akLink.cbStruct = HH_AKLINK.sizeof;
-														akLink.fReserved = 0;
-														akLink.pszKeywords = toString16z( keyWord16 );
-														akLink.fIndexOnFail = 0;
-														//GLOBAL.htmlHelp( null, toString16z( _path ), 1, 0 ); // HH_DISPLAY_TOPIC = 1
-														if( GLOBAL.htmlHelp( null, toString16z( _path ), 0x000D, cast(uint) &akLink ) != null )	break; //#define HH_KEYWORD_LOOKUP       &h000D
+															HH_AKLINK	akLink;
+															akLink.cbStruct = HH_AKLINK.sizeof;
+															akLink.fReserved = 0;
+															akLink.pszKeywords = toString16z( keyWord16 );
+															akLink.fIndexOnFail = 0;
+															//GLOBAL.htmlHelp( null, toString16z( _path ), 1, 0 ); // HH_DISPLAY_TOPIC = 1
+															if( GLOBAL.htmlHelp( null, toString16z( _path ), 0x000D, cast(uint) &akLink ) != null ) //#define HH_KEYWORD_LOOKUP       &h000D
+															{
+																bExitFlag = true;
+																break;
+															}
+														}
+													}
+												}
+											}
+											else
+											{
+												char[]	keyPg;
+												
+												switch( lowerCase( keyWord ) )
+												{
+													case "select":			keyPg = "::KeyPgSelectcase.html";			break;
+													case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
+													default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
+												}											
+
+												//IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
+												if( GLOBAL.manuals.length > 0 )
+												{
+													char[][] _splitWords = Util.split( GLOBAL.manuals[0], "," );
+													if( _splitWords.length == 2 )
+													{
+														if( _splitWords[1].length )	IupExecute( "hh", toStringz( "\"" ~ _splitWords[1] ~ keyPg ~ "\"" ) );
 													}
 												}
 											}
 										}
 										else
 										{
-											char[]	keyPg;
-											
-											switch( lowerCase( keyWord ) )
-											{
-												case "select":			keyPg = "::KeyPgSelectcase.html";			break;
-												case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
-												default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
-											}											
-
-											//IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
 											if( GLOBAL.manuals.length > 0 )
 											{
 												char[][] _splitWords = Util.split( GLOBAL.manuals[0], "," );
 												if( _splitWords.length == 2 )
 												{
-													if( _splitWords[1].length )	IupExecute( "hh", toStringz( "\"" ~ _splitWords[1] ~ keyPg ~ "\"" ) );
+													if( _splitWords[1].length )
+														IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );	// "kchmviewer --sindex %s /chm-path
 												}
 											}
 										}
+										
+										if( bExitFlag ) return;
 									}
-									else
-									{
-										if( GLOBAL.manuals.length > 0 )
-										{
-											char[][] _splitWords = Util.split( GLOBAL.manuals[0], "," );
-											if( _splitWords.length == 2 )
-											{
-												if( _splitWords[1].length )
-													IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );	// "kchmviewer --sindex %s /chm-path
-											}
-										}
-									}
-									
-									return;
 								}
 							}
 							
