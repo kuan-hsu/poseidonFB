@@ -725,6 +725,13 @@ version(FBIDE)
 								parseToken( TOK.Tas );
 
 								if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+								
+								
+								if( parseFunctionPointer( _name, _lineNum ) )
+								{
+									if( token.tok != TOK.Tcomma ) break; else parseToken( TOK.Tcomma );
+									continue;
+								}
 
 								_type = getVariableType();
 								if( _type.length )

@@ -13,7 +13,8 @@ version(Windows)
 {	
 	// For chm help
 	import tango.sys.win32.Types;
-	typedef extern (C) HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
+	typedef extern(C) HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
+	typedef extern(C) int function( HWND, LPCSTR, LPSTR, DWORD ) _SevenZip;
 }
 
 struct EditorToggleUint
@@ -208,6 +209,7 @@ struct GLOBAL
 
 	static PROJECT[char[]]		projectManager;
 	static char[]				activeProjectPath;
+	static char[]				activeFilePath;
 	
 	static char[]				language;
 	static IupString[char[]]	languageItems;
@@ -933,6 +935,7 @@ struct GLOBAL
 		GLOBAL.languageItems["foundword"] = new IupString( cast(char[]) "Found Word." );
 		GLOBAL.languageItems["foundnothing"] = new IupString( cast(char[]) "Found Nothing!" );
 		GLOBAL.languageItems["pluginrunningunload"] = new IupString( cast(char[]) "Plugin Is Running, Unload The Plugin?" );
+		GLOBAL.languageItems["onlytools"] = new IupString( cast(char[]) "Only Support 12 Tools!" );
 
 		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
 		version(FBIDE)

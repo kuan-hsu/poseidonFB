@@ -326,7 +326,11 @@ extern(C) // Callback for CFindInFilesDialog
 		if( toolsHandle == null ) return IUP_DEFAULT;
 		
 		int index = IupGetInt( toolsHandle, "COUNT" );
-		if( index >= 5 ) return IUP_DEFAULT;
+		if( index >= 12 )
+		{
+			IupMessageError( toolsHandle, GLOBAL.languageItems["onlytools"].toCString );
+			return IUP_DEFAULT;
+		}
 		
 		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomtool"].toDString(), GLOBAL.languageItems["tools"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile" );
 		char[] fileName = description.show( IUP_MOUSEPOS, IUP_MOUSEPOS );

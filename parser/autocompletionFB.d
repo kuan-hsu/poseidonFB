@@ -47,7 +47,8 @@ version(FBIDE)
 		static char[][]						listContainer;
 		static CASTnode[char[]]				includesMarkContainer;
 		static bool[char[]]					noIncludeNodeContainer;
-		
+			
+		static int LEVEL;
 
 		class CShowListThread : Thread
 		{
@@ -609,6 +610,12 @@ version(FBIDE)
 			if( includeFullPath.length )
 			{
 				//if( fullPathByOS(includeFullPath) in includesMarkContainer ) return null;
+				
+				if( !ProjectAction.fileInProject( includeFullPath, GLOBAL.activeProjectPath ) )
+				{
+					if( AutoComplete.LEVEL >= GLOBAL.includeLevel ) return null; else AutoComplete.LEVEL ++;
+				}
+				
 
 				CASTnode includeAST;
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
@@ -811,7 +818,7 @@ version(FBIDE)
 			
 			// Parse Include
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			auto dummyASTs = getIncludes( originalNode, originalFullPath, true );
+			auto dummyASTs = getIncludes( originalNode, originalFullPath );
 
 			foreach( includeAST; includesMarkContainer )
 			{
@@ -911,7 +918,7 @@ version(FBIDE)
 				}
 			}			
 			
-			auto dummyASTs = getIncludes( originalNode, originalFullPath, true );
+			auto dummyASTs = getIncludes( originalNode, originalFullPath );
 
 			/*
 			foreach( CASTnode n; includesMarkContainer )
@@ -1896,24 +1903,27 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 			
-			static int	level;
 
-			CASTnode[] results;
+			CASTnode[]	results;
+			bool		bPrjFile;
 
-			if( !bRootCall )
+			CASTnode rootNode = ParserAction.getRoot( originalNode );
+			if( ProjectAction.fileInProject( rootNode.name, GLOBAL.activeProjectPath ) ) bPrjFile = true;
+			
+
+			if( bPrjFile || bRootCall )
 			{
-				level ++;
-				if( level >= GLOBAL.includeLevel )
-				{
-					//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
-					level--;
-					return null;
-				}
+				AutoComplete.LEVEL = 0;
 			}
 			else
 			{
-				level = 0;
+				if( AutoComplete.LEVEL >= GLOBAL.includeLevel )
+				{
+					if( AutoComplete.LEVEL > 0 ) AutoComplete.LEVEL --;
+					return null;
+				}
 			}
+
 
 			foreach( CASTnode _node; originalNode.getChildren )
 			{
@@ -1967,9 +1977,12 @@ version(FBIDE)
 				}
 			}
 
-			//Stdout( "Level:" ~ Integer.toString( level )  ~ "  " ~ originalNode.name ).newline;
+			if( !bPrjFile )
+			{
+				if( AutoComplete.LEVEL > 0 ) AutoComplete.LEVEL --;
+			}
 
-			if( level > 0 ) level--;
+			//Stdout( "Level:" ~ Integer.toString( AutoComplete.LEVEL )  ~ "  " ~ originalNode.name ).newline;
 
 			return results;
 		}
@@ -3271,7 +3284,7 @@ version(FBIDE)
 												if( _splitWords.length == 2 )
 												{
 													if( _splitWords[1].length )
-														IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ GLOBAL.manualPath.toDString ) );	// "kchmviewer --sindex %s /chm-path
+														IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ _splitWords[1] ) );	// "kchmviewer --sindex %s /chm-path
 												}
 											}
 										}
@@ -4106,7 +4119,7 @@ version(FBIDE)
 							}
 							catch( Exception e){}
 							
-							
+							AutoComplete.LEVEL = 0;
 							// If using IUP command in Thread, join() occur infinite loop, so......
 							bool		bDot, bCallTip;
 							CASTnode	AST_Head;
@@ -4322,7 +4335,8 @@ version(FBIDE)
 										//if( showListThread.isRunning ) showListThread.join();
 								}
 								catch( Exception e){}
-
+								
+								AutoComplete.LEVEL = 0;
 								// If using IUP command in Thread, join() occur infinite loop, so......
 								bool		bDot, bCallTip;
 								CASTnode	AST_Head;

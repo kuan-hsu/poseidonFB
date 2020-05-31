@@ -423,6 +423,7 @@ error=錯誤
 foundword=找到目標字
 foundnothing=找不到目標字!
 pluginrunningunload=插件執行中,繼續卸載嗎?
+onlytools=只支援12種外部工具
 
 exefile=執行檔
 basfile=程式源碼

@@ -147,6 +147,7 @@ class CFileList
 			if( _sci_node.getFullPath == fullPath )
 			{
 				version(Windows) IupSetAttributeId( tree, "MARKED", id, "YES" ); else IupSetInt( tree, "VALUE", id );
+				GLOBAL.activeFilePath = fullPath;
 				break;
 			}
 		}
