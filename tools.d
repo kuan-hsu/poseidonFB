@@ -477,7 +477,6 @@ class CPLUGIN
 	import											tango.sys.SharedLib;
 	import											tango.stdc.stringz;
 	
-	//extern(C) void function()						poseidon_Dll_Go;
 	extern(C) void function( char* _fullPath )		poseidon_Dll_Go;
 	extern(C) void function()						poseidon_Dll_Release;
 	
@@ -571,7 +570,7 @@ class CPLUGIN
 		if( sharedLib !is null )
 		{
 			//IupMessage( "DLL UNLOAD", toStringz( pluginName ) );
-			if( bReleaseSuccess) poseidon_Dll_Release();
+			if( bReleaseSuccess ) poseidon_Dll_Release();
 			sharedLib.unload();
 		}
 	}

@@ -173,7 +173,7 @@ extern(C)
 				if( splitWords.length == 2 )
 				{
 					Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
-					IupSetCallback( _new, "ACTION", cast(Icallback) &manual_menu_click_cb );
+					IupSetCallback( _new, "ACTION", cast(Icallback) &menu.manual_menu_click_cb );
 					IupAppend( optionsMenuHandle, _new );
 					IupMap( _new );
 				}

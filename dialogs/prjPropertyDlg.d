@@ -558,7 +558,10 @@ extern(C) // Callback for CProjectPropertiesDialog
 					version(FBIDE) CProjectPropertiesDialog.tempProject.passOneFile = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_ToggleOneFile" ), "VALUE" ) ) ).dup;
 					
 					// Change Project Tree Title
-					if( actionManager.ProjectAction.getActiveProjectTreeNodeTitle != CProjectPropertiesDialog.tempProject.name ) actionManager.ProjectAction.changeActiveProjectTreeNodeTitle( CProjectPropertiesDialog.tempProject.name );
+					if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "NO" ) // Created project
+					{
+						if( actionManager.ProjectAction.getActiveProjectTreeNodeTitle != CProjectPropertiesDialog.tempProject.name ) actionManager.ProjectAction.changeActiveProjectTreeNodeTitle( CProjectPropertiesDialog.tempProject.name );
+					}
 				}
 				else
 				{

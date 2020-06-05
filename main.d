@@ -79,9 +79,11 @@ void main( char[][] args )
 			void* ptr = sharedlib.getSymbol("HtmlHelpW");
 			if( ptr )
 			{
+			
+				GLOBAL.htmlHelp = cast(_htmlHelp) ptr;
 				//Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
-				void **point = cast(void **)&GLOBAL.htmlHelp; // binding function address from DLL to our function pointer
-				*point = ptr;
+				//void **point = cast(void **)&GLOBAL.htmlHelp; // binding function address from DLL to our function pointer
+				//*point = ptr;
 				
 				//Stdout("DONE").newline;
 			}

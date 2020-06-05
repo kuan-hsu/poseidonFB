@@ -132,10 +132,18 @@ class CCustomDialog : CBaseDialog
 					if( name in GLOBAL.pluginMnager )
 					{
 						auto p = GLOBAL.pluginMnager[name];
-						if( p.getPath() == path )
+						if( p !is null )
+						{
+							if( p.getPath() == path )
+							{
+								IupSetAttribute( ih, "DELNODE", "SELECTED" );
+								delete p;
+								GLOBAL.pluginMnager.remove( name );
+							}
+						}
+						else
 						{
 							IupSetAttribute( ih, "DELNODE", "SELECTED" );
-							delete p;
 							GLOBAL.pluginMnager.remove( name );
 						}
 					}
@@ -155,9 +163,12 @@ class CCustomDialog : CBaseDialog
 		IupMap( _dlg );
 		foreach( CPLUGIN p; GLOBAL.pluginMnager )
 		{
-			auto fp = new IupString( p.getPath );
-			IupSetAttributeId( treePluginStatus, "ADDLEAF", IupGetInt( treePluginStatus, "COUNT" ) - 1, toStringz( p.getName ) );
-			IupSetAttributeId( treePluginStatus, "USERDATA", IupGetInt( treePluginStatus, "COUNT" ) - 1, fp.toCString );
+			if( p !is null )
+			{
+				auto fp = new IupString( p.getPath );
+				IupSetAttributeId( treePluginStatus, "ADDLEAF", IupGetInt( treePluginStatus, "COUNT" ) - 1, toStringz( p.getName ) );
+				IupSetAttributeId( treePluginStatus, "USERDATA", IupGetInt( treePluginStatus, "COUNT" ) - 1, fp.toCString );
+			}
 		}
 		
 		for( int i = 1; i < 13; ++ i )

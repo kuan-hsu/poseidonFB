@@ -209,7 +209,7 @@ void createMenu()
 
 	// View
 	Ihandle* LineMargin = IupItem( GLOBAL.languageItems["lnmargin"].toCString, null);
-	IupSetAttribute( LineMargin, "VALUE", toStringz( GLOBAL.editorSetting00.LineMargin.dup ) );
+	if( GLOBAL.editorSetting00.LineMargin == "ON" ) IupSetAttribute( LineMargin, "VALUE", "ON" ); else IupSetAttribute( LineMargin, "VALUE", "OFF" );
 	IupSetAttribute( LineMargin, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuLineMargin", LineMargin );
 	IupSetCallback( LineMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -221,7 +221,7 @@ void createMenu()
 	});	
 
 	Ihandle* BookmarkMargin = IupItem( GLOBAL.languageItems["bkmargin"].toCString, null);
-	IupSetAttribute( BookmarkMargin, "VALUE", toStringz( GLOBAL.editorSetting00.BookmarkMargin.dup ) );
+	if( GLOBAL.editorSetting00.BookmarkMargin == "ON" ) IupSetAttribute( BookmarkMargin, "VALUE", "ON" ); else IupSetAttribute( BookmarkMargin, "VALUE", "OFF" );
 	IupSetAttribute( BookmarkMargin, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuBookmarkMargin", BookmarkMargin );
 	IupSetCallback( BookmarkMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -233,7 +233,7 @@ void createMenu()
 	});	
 	
 	Ihandle* FoldMargin = IupItem( GLOBAL.languageItems["fdmargin"].toCString, null);
-	IupSetAttribute( FoldMargin, "VALUE", toStringz( GLOBAL.editorSetting00.FoldMargin.dup ) );
+	if( GLOBAL.editorSetting00.FoldMargin == "ON" ) IupSetAttribute( FoldMargin, "VALUE", "ON" ); else IupSetAttribute( FoldMargin, "VALUE", "OFF" );
 	IupSetAttribute( FoldMargin, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuFoldMargin", FoldMargin );
 	IupSetCallback( FoldMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -245,7 +245,7 @@ void createMenu()
 	});	
 	
 	Ihandle* IndentGuide = IupItem( GLOBAL.languageItems["indentguide"].toCString, null);
-	IupSetAttribute( IndentGuide, "VALUE", toStringz( GLOBAL.editorSetting00.IndentGuide.dup ) );
+	if( GLOBAL.editorSetting00.IndentGuide == "ON" ) IupSetAttribute( IndentGuide, "VALUE", "ON" ); else IupSetAttribute( IndentGuide, "VALUE", "OFF" );
 	IupSetAttribute( IndentGuide, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuIndentGuide", IndentGuide );
 	IupSetCallback( IndentGuide, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -257,7 +257,7 @@ void createMenu()
 	});	
 
 	Ihandle* ShowEOL = IupItem( GLOBAL.languageItems["showeol"].toCString, null);
-	IupSetAttribute( ShowEOL, "VALUE", toStringz( GLOBAL.editorSetting00.ShowEOL.dup ) );
+	if( GLOBAL.editorSetting00.ShowEOL == "ON" ) IupSetAttribute( ShowEOL, "VALUE", "ON" ); else IupSetAttribute( ShowEOL, "VALUE", "OFF" );
 	IupSetAttribute( ShowEOL, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuShowEOL", ShowEOL );
 	IupSetCallback( ShowEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -269,7 +269,7 @@ void createMenu()
 	});
 	
 	Ihandle* ShowSpace = IupItem( GLOBAL.languageItems["showspacetab"].toCString, null);
-	IupSetAttribute( ShowSpace, "VALUE", toStringz( GLOBAL.editorSetting00.ShowSpace.dup ) );
+	if( GLOBAL.editorSetting00.ShowSpace == "ON" ) IupSetAttribute( ShowSpace, "VALUE", "ON" ); else IupSetAttribute( ShowSpace, "VALUE", "OFF" );
 	IupSetAttribute( ShowSpace, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuShowSpace", ShowSpace );
 	IupSetCallback( ShowSpace, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -281,7 +281,7 @@ void createMenu()
 	});		
 	
 	Ihandle* BraceMatch = IupItem( GLOBAL.languageItems["bracematchhighlight"].toCString, null);
-	IupSetAttribute( BraceMatch, "VALUE", toStringz( GLOBAL.editorSetting00.BraceMatchHighlight.dup ) );
+	if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" ) IupSetAttribute( BraceMatch, "VALUE", "ON" ); else IupSetAttribute( BraceMatch, "VALUE", "OFF" );
 	IupSetAttribute( BraceMatch, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuBraceMatch", BraceMatch );
 	IupSetCallback( BraceMatch, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -293,7 +293,7 @@ void createMenu()
 	});	
 	
 	Ihandle* BoldKeyword = IupItem( GLOBAL.languageItems["boldkeyword"].toCString, null);
-	IupSetAttribute( BoldKeyword, "VALUE", toStringz( GLOBAL.editorSetting00.BoldKeyword.dup ) );
+	if( GLOBAL.editorSetting00.BoldKeyword == "ON" ) IupSetAttribute( BoldKeyword, "VALUE", "ON" ); else IupSetAttribute( BoldKeyword, "VALUE", "OFF" );
 	IupSetAttribute( BoldKeyword, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuBoldKeyword", BoldKeyword );
 	IupSetCallback( BoldKeyword, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -305,7 +305,7 @@ void createMenu()
 	});	
 
 	Ihandle* CaretLine = IupItem( GLOBAL.languageItems["showcaretline"].toCString, null);
-	IupSetAttribute( CaretLine, "VALUE", toStringz( GLOBAL.editorSetting00.CaretLine.dup ) );
+	if( GLOBAL.editorSetting00.CaretLine == "ON" ) IupSetAttribute( CaretLine, "VALUE", "ON" ); else IupSetAttribute( CaretLine, "VALUE", "OFF" );
 	IupSetAttribute( CaretLine, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuCaretLine", CaretLine );
 	IupSetCallback( CaretLine, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -317,7 +317,7 @@ void createMenu()
 	});	
 
 	Ihandle* HighlightCurrentWord = IupItem( GLOBAL.languageItems["hlcurrentword"].toCString, null);
-	IupSetAttribute( HighlightCurrentWord, "VALUE", toStringz( GLOBAL.editorSetting00.HighlightCurrentWord.dup ) );
+	if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" ) IupSetAttribute( HighlightCurrentWord, "VALUE", "ON" ); else IupSetAttribute( HighlightCurrentWord, "VALUE", "OFF" );
 	IupSetAttribute( HighlightCurrentWord, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuHighlightCurrentWord", HighlightCurrentWord );
 	IupSetCallback( HighlightCurrentWord, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -329,9 +329,9 @@ void createMenu()
 	});
 	
 	Ihandle* FunctionTitle = IupItem( GLOBAL.languageItems["showtitle"].toCString, null );
-	IupSetAttribute( FunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
+	if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( FunctionTitle, "VALUE", "ON" ); else IupSetAttribute( FunctionTitle, "VALUE", "OFF" );
 	IupSetAttribute( FunctionTitle, "AUTOTOGGLE", "YES" );
-	IupSetAttribute( FunctionTitle, "NAME", "function_titlw" );
+	IupSetAttribute( FunctionTitle, "NAME", "function_title" );
 	IupSetHandle( "FunctionTitle", FunctionTitle );	
 	IupSetCallback( FunctionTitle, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
@@ -680,8 +680,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.435)\nBy Kuan Hsu (Taiwan)\n2020.05.31" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.051)\nBy Kuan Hsu (Taiwan)\n2020.05.23" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.436)\nBy Kuan Hsu (Taiwan)\n2020.06.05" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.052)\nBy Kuan Hsu (Taiwan)\n2020.06.05" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -690,7 +690,7 @@ void createMenu()
 	IupSetCallback( item_manual, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		scope dlg = new CManualDialog( 480, -1, GLOBAL.languageItems["manual"].toDString(), false );
-		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );		
+		dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );		
 		
 		return IUP_DEFAULT;
 	});	
@@ -1616,12 +1616,12 @@ extern(C)
 		version(Windows)
 		{
 			scope dlg = new CCustomDialog( 480, -1, GLOBAL.languageItems["setcustomtool"].toDString(), false );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+			dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 		}
 		else
 		{
 			scope dlg = new CCustomDialog( 492, -1, GLOBAL.languageItems["setcustomtool"].toDString(), false );
-			dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+			dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 		}
 		
 

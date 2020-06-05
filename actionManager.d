@@ -2699,7 +2699,8 @@ struct CustomToolAction
 					}
 					else
 					{
-						IupMessage("Is Null","");
+						IupMessageError( GLOBAL.mainDlg, toStringz( tool.name.toDString ~ " Is Null" ) );
+						GLOBAL.pluginMnager.remove( tool.name.toDString );
 						//GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
 						//GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
 					}
@@ -2713,6 +2714,7 @@ struct CustomToolAction
 			catch( Exception e )
 			{
 				IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );
+				if( tool.name.toDString in GLOBAL.pluginMnager ) GLOBAL.pluginMnager.remove( tool.name.toDString );
 			}
 		}
 		else

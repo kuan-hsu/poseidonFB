@@ -4149,7 +4149,7 @@ version(FBIDE)
 			else
 			{
 				//if( timer != null )	IupSetAttribute( timer, "RUN", "NO" );
-				
+				AutoComplete.LEVEL = 0;
 				char[] list = charAdd( ih, pos, text, bForce );
 
 				if( list.length )

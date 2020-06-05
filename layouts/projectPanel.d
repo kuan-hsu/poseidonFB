@@ -382,6 +382,7 @@ public:
 	void CreateNewProject( char[] prjName, char[] prjDir )
 	{
 		//GLOBAL.activeProjectDirName = prjDir;
+		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 
 		IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( prjName ) );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );

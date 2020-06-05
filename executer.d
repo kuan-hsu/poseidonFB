@@ -2321,7 +2321,13 @@ struct ExecuterAction
 						version(Windows)
 						{
 							if( _focus.Target.length )
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target ~ ".exe";
+							{
+								scope _focusPath = new FilePath( _focus.Target );
+								if( lowerCase( _focusPath.suffix ) == ".exe" ) 
+									command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target;
+								else
+									command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target ~ ".exe";
+							}
 							else
 								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
 						}
