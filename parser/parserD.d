@@ -747,6 +747,34 @@ version(DIDE)
 		}
 
 		// Modules -- import
+		/*
+		ImportDeclaration:
+			import ImportList ;
+			static import ImportList ;
+
+		ImportList:
+			Import
+			ImportBindings
+			Import , ImportList
+
+		Import:
+			ModuleFullyQualifiedName
+			ModuleAliasIdentifier = ModuleFullyQualifiedName
+
+		ImportBindings:
+			Import : ImportBindList
+
+		ImportBindList:
+			ImportBind
+			ImportBind , ImportBindList
+
+		ImportBind:
+			Identifier
+			Identifier = Identifier
+
+		ModuleAliasIdentifier:
+			Identifier		
+		*/
 		bool parseImport()
 		{
 			try
@@ -779,17 +807,19 @@ version(DIDE)
 					
 					if( importName.length )
 					{
-						if( token().tok == TOK.Tassign )
+						if( token().tok == TOK.Tassign )	// Renamed Imports
 						{
 							parseToken( TOK.Tassign );
 							bindName = getModuleName();
+							
+							if( token().tok == TOK.Tcolon ) activeASTnode.addChild( importName, D_IMPORT, getProt(), bindName, "", _ln );
 						}
 						
-						if( token().tok == TOK.Tcolon )
+						if( token().tok == TOK.Tcolon )		// Selective Imports
 						{
 							parseToken( TOK.Tcolon );
-							baseName = getModuleName();
-						}			
+							return parseImportBindList( importName, _ln );
+						}	
 						
 						if( token().tok == TOK.Tcomma )
 						{
@@ -813,6 +843,52 @@ version(DIDE)
 			return false;
 		}
 		
+		// For Selective Imports
+		bool parseImportBindList( char[] _importModuleName, int _ln )
+		{
+			try
+			{
+				char[]	baseName, funName;
+				
+				if( token().tok == TOK.Tidentifier )
+				{
+					baseName = token().identifier;
+					parseToken( TOK.Tidentifier );
+					
+					if( token().tok == TOK.Tassign )
+					{
+						if( next().tok == TOK.Tidentifier )
+						{
+							parseToken( TOK.Tassign );
+							
+							funName = token().identifier;
+							parseToken( TOK.Tidentifier );
+							//activeASTnode.addChild( funName, D_IMPORT, getProt(), "", baseName, _ln );
+							activeASTnode.addChild( baseName, D_IMPORT, getProt(), _importModuleName, funName, _ln );
+						}
+					}
+					else
+					{
+						activeASTnode.addChild( baseName, D_IMPORT, getProt(), _importModuleName, baseName, _ln );
+						//activeASTnode.addChild( _importModuleName ~ "." ~ baseName, D_IMPORT, getProt(), "", baseName, _ln );
+					}
+					
+					if( token().tok == TOK.Tcomma )
+					{
+						parseToken( TOK.Tcomma );
+						parseImportBindList( _importModuleName, _ln );
+					}
+				}
+				
+				
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}				
+		
+			return true;
+		}
 		
 
 
@@ -2402,6 +2478,42 @@ version(DIDE)
 								parseToken();
 								break;
 							
+							case TOK.Tbool:					_Instance = "bool"; break;
+							case TOK.Tbyte:					_Instance = "byte"; break;
+							case TOK.Tubyte:				_Instance = "ubyte"; break;
+							case TOK.Tshort:				_Instance = "short"; break;
+							case TOK.Tushort:				_Instance = "ushort"; break;
+							case TOK.Tint:					_Instance = "int"; break;
+							case TOK.Tuint:					_Instance = "uint"; break;
+							case TOK.Tlong:					_Instance = "long"; break;
+							case TOK.Tulong:				_Instance = "ulong"; break;
+							case TOK.Tchar:					_Instance = "char"; break;
+							case TOK.Tdchar:				_Instance = "dchar"; break;
+							case TOK.Twchar:				_Instance = "wchar"; break;
+							case TOK.Tfloat:				_Instance = "float"; break;
+							case TOK.Tdouble:				_Instance = "double"; break;
+							case TOK.Treal:					_Instance = "real"; break;
+							case TOK.Tifloat:				_Instance = "ifloat"; break;
+							case TOK.Tidouble:				_Instance = "idouble"; break;
+							case TOK.Tireal:				_Instance = "ireal"; break;
+							case TOK.Tcfloat:				_Instance = "cfloat"; break;
+							case TOK.Tcdouble:				_Instance = "cdouble"; break;
+							case TOK.Tcreal:				_Instance = "creal"; break;
+							case TOK.Tvoid:					_Instance = "void"; break;
+							
+							case TOK.Ttrue:					_Instance = "true"; break;
+							case TOK.Tfalse:				_Instance = "false"; break;
+							case TOK.Tnull:					_Instance = "null"; break;
+							case TOK.Tthis:					_Instance = "this"; break;
+							
+							case TOK.T__FILE__:				_Instance = "__FILE__"; break;
+							case TOK.T__FILE_FULL_PATH__:	_Instance = "__FILE_FULL_PATH__"; break;
+							case TOK.T__MODULE__:			_Instance = "__MODULE__"; break;
+							case TOK.T__LINE__:				_Instance = "__LINE__"; break;
+							case TOK.T__FUNCTION__:			_Instance = "__FUNCTION__"; break;
+							case TOK.T__PRETTY_FUNCTION__:	_Instance = "__PRETTY_FUNCTION__"; break;
+								
+							/*
 							case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
 								TOK.Tchar, TOK.Tdchar, TOK.Twchar,
 								TOK.Tfloat, TOK.Tdouble, TOK.Treal, TOK.Tifloat, TOK.Tidouble, TOK.Tireal, TOK.Tcfloat, TOK.Tcdouble, TOK.Tcreal,
@@ -2419,7 +2531,7 @@ version(DIDE)
 									}
 								}
 								break;
-
+							*/
 							case TOK.Tidentifier:
 								_Instance ~= getIdentifierList();
 								break;

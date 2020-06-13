@@ -371,8 +371,24 @@ version(DIDE)
 						{
 							if( _node.name == splitWord[0] )
 							{
-								// Get Module AST From Import AST
-								return searchMatchNode( AST_Head, _node.type, D_MODULE );
+								if( _node.base.length )
+								{
+									if( _node.name != _node.base )
+									{
+										char[] base = _node.base;
+										auto motherModule = searchMatchNode( AST_Head, _node.type, D_IMPORT ); // Check Renamed Imports
+										if( motherModule !is null )
+											if( motherModule.type.length ) _node = motherModule;
+										
+										motherModule = searchMatchNode( AST_Head, _node.type, D_MODULE );
+										if( motherModule !is null )	return searchMatchMemberNode( motherModule, base, D_FIND );
+									}
+								}
+								else
+								{
+									// Get Module AST From Import AST
+									return searchMatchNode( AST_Head, _node.type, D_MODULE );
+								}
 							}
 						}
 					}
@@ -411,8 +427,24 @@ version(DIDE)
 						{
 							if( _node.name == splitWord[0] )
 							{
-								// Get Module AST From Import AST
-								return searchMatchNode( AST_Head, _node.type, D_MODULE );
+								if( _node.base.length )
+								{
+									if( _node.name != _node.base )
+									{
+										char[] base = _node.base;
+										auto motherModule = searchMatchNode( AST_Head, _node.type, D_IMPORT ); // Check Renamed Imports
+										if( motherModule !is null )
+											if( motherModule.type.length ) _node = motherModule;
+									
+										motherModule = searchMatchNode( AST_Head, _node.type, D_MODULE );
+										if( motherModule !is null )	return searchMatchMemberNode( motherModule, base, D_FIND );
+									}
+								}
+								else
+								{
+									// Get Module AST From Import AST
+									return searchMatchNode( AST_Head, _node.type, D_MODULE );
+								}
 							}
 						}
 					}
@@ -1872,7 +1904,7 @@ version(DIDE)
 							CASTnode[] resultNodes;
 							if( bCallTip )
 							{
-								foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND, lineNum, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND )  ) // NOTE!!!! Using "searchMatchNode()"
+								foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND | D_IMPORT, lineNum, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND )  ) // NOTE!!!! Using "searchMatchNode()"
 								{
 									if( node !is null )
 									{
@@ -1890,6 +1922,19 @@ version(DIDE)
 											auto temp = getAggregateTemplate( node );
 											if( temp !is null ) resultNodes ~= temp;
 										}
+										else if( node.kind & D_IMPORT ) // Selective Imports
+										{
+											if( node.base.length )
+											{
+												char[] base = node.base;
+												auto motherModule = searchMatchNode( AST_Head, node.type, D_IMPORT ); // Check Renamed Imports
+												if( motherModule !is null )
+													if( motherModule.type.length ) node = motherModule;
+												
+												motherModule = searchMatchNode( AST_Head, node.type, D_MODULE );
+												if( motherModule !is null ) resultNodes ~= searchMatchMemberNode( motherModule, base, D_FIND );
+											}											
+										}
 									}
 								}
 
@@ -1904,7 +1949,7 @@ version(DIDE)
 
 							if( bPushContainer )
 							{
-								foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], D_ALL, lineNum, false, false )  ~ searchObjectModuleMembers( splitWord[i], D_FIND, false, false ) )
+								foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], D_ALL, lineNum, false, false ) ~ searchObjectModuleMembers( splitWord[i], D_FIND, false, false ) )
 								{
 									if( _node.kind & D_IMPORT )
 									{

@@ -1399,6 +1399,7 @@ public:
 
 		StatusBarAction.update();
 		DocumentTabAction.resetTip();
+		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", null );
 		
 		return IUP_DEFAULT;
 	}

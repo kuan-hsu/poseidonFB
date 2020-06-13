@@ -228,6 +228,7 @@ void main( char[][] args )
 	version(FBIDE) IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" ); else IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonD - D Programming Language IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
+	version(FBIDE) IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonFB" ); else IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonD" );
 	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
 
 	//IupSetGlobal( "IMAGEAUTOSCALE", "DPI" );

@@ -4178,12 +4178,7 @@ version(FBIDE)
 					{
 						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
 					}
-					//cSci.lastPos = -99;
 					return true;
-				}
-				else
-				{
-					//cSci.lastPos = pos;
 				}
 			}
 

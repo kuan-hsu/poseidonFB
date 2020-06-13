@@ -14,7 +14,7 @@ version(Windows)
 	// For chm help
 	import tango.sys.win32.Types;
 	typedef extern(C) HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
-	typedef extern(C) int function( HWND, LPCSTR, LPSTR, DWORD ) _SevenZip;
+	//typedef extern(C) int function( HWND, LPCSTR, LPSTR, DWORD ) _SevenZip;
 }
 
 struct EditorToggleUint

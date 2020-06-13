@@ -180,7 +180,6 @@ class CScintilla
 
 	public:
 	int				encoding;
-	//int				lastPos = -99;
 
 	this( void* _beCopiedDocument )
 	{
@@ -2633,10 +2632,6 @@ extern(C)
 									
 									if( alreadyInput.length )
 									{
-										/*
-										auto cSci = ScintillaAction.getCScintilla( ih );
-										if( cSci !is null ) cSci.lastPos = -99;
-										*/
 										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}
 								}
@@ -2696,10 +2691,6 @@ extern(C)
 								
 									if( alreadyInput.length )
 									{
-										/*
-										auto cSci = ScintillaAction.getCScintilla( ih );
-										if( cSci !is null ) cSci.lastPos = -99;
-										*/
 										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 										//AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 									}

@@ -260,11 +260,13 @@ public:
 							*/
 
 						case ',', '+', '*', '/', ':', '(', ')', '[', ']', '<', '=', '{', '}': // '>', 
-							if( lowerCase( identifier ) in identToTOK )
+							//if( lowerCase( identifier ) in identToTOK )
+							if( IdentToTok( identifier ) != TOK._INVALID_ )
 							{
 								if( identifier.length )
 								{
-									TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
+									//TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
+									TokenUnit t = { IdentToTok( identifier ), identifier, lineNum };
 									results ~= t;
 								}
 							}
@@ -295,7 +297,8 @@ public:
 
 							char[] s;
 							s ~= data[i];
-							TokenUnit t = {identToTOK[s], s, lineNum};
+							//TokenUnit t = {identToTOK[s], s, lineNum};
+							TokenUnit t = { IdentToTok( s ), s, lineNum };
 							results ~= t;
 							identifier = "";
 							break;
@@ -304,11 +307,13 @@ public:
 							break;
 						
 						case '\t', ' ', '\n':
-							if( lowerCase( identifier ) in identToTOK )
+							//if( lowerCase( identifier ) in identToTOK )
+							if( IdentToTok( identifier ) != TOK._INVALID_ )
 							{
 								if( identifier.length )
 								{
-									TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
+									//TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
+									TokenUnit t = { IdentToTok( identifier ), identifier, lineNum};
 									results ~= t;
 								}
 							}
@@ -367,9 +372,11 @@ public:
 							{
 								if( cast(int) identifier[0] < 48 || cast(int) identifier[0] > 57 )
 								{
-									if( lowerCase( identifier ) in identToTOK )
+									//if( lowerCase( identifier ) in identToTOK )
+									if( IdentToTok( identifier ) != TOK._INVALID_ )
 									{
-										TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
+										//TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
+										TokenUnit t = { IdentToTok( identifier ), identifier, lineNum };
 										results ~= t;
 									}
 									else
@@ -421,8 +428,8 @@ public:
 			TokenUnit		token_unit;
 			TokenUnit[]		results;
 
-			data = ";" ~ data;
-			data ~= "\n";
+			//data = ";" ~ data;
+			//data ~= "\n";
 
 			try
 			{
@@ -653,11 +660,13 @@ public:
 
 						case '&', '|', '^':
 						case ',', '+', '*', '/', ';', ':', '(', ')', '[', ']', '>', '<', '=', '{', '}', '!', '~': // '>', 
-							if( identifier in identToTOK )
+							//if( identifier in identToTOK )
+							if( IdentToTok(identifier) != TOK._INVALID_ )
 							{
 								if( identifier.length )
 								{
-									TokenUnit t = { identToTOK[identifier], identifier, lineNum };
+									//TokenUnit t = { identToTOK[identifier], identifier, lineNum };
+									TokenUnit t = { IdentToTok(identifier), identifier, lineNum };
 									results ~= t;
 								}
 							}
@@ -695,7 +704,8 @@ public:
 								{
 									if( data[i+1] == '=' )
 									{
-										TokenUnit t = {identToTOK["=="], "==", lineNum};
+										//TokenUnit t = {identToTOK["=="], "==", lineNum};
+										TokenUnit t = { TOK.Tequal, "==", lineNum };
 										results ~= t;
 										identifier = "";
 										i += 1;
@@ -704,7 +714,8 @@ public:
 								}
 							}
 							
-							TokenUnit t = {identToTOK[s], s, lineNum};
+							//TokenUnit t = {identToTOK[s], s, lineNum};
+							TokenUnit t = { IdentToTok( s ), s, lineNum };
 							results ~= t;
 							identifier = "";
 							break;
@@ -713,11 +724,13 @@ public:
 							break;
 						
 						case '\t', ' ', '\n':
-							if( identifier in identToTOK )
+							//if( identifier in identToTOK )
+							if( IdentToTok( identifier ) != TOK._INVALID_ )
 							{
 								if( identifier.length )
 								{
-									TokenUnit t = { identToTOK[identifier], identifier, lineNum };
+									//TokenUnit t = { identToTOK[identifier], identifier, lineNum };
+									TokenUnit t = { IdentToTok( identifier ), identifier, lineNum };
 									results ~= t;
 								}
 							}
@@ -756,9 +769,11 @@ public:
 							{
 								if( cast(int) identifier[0] < 48 || cast(int) identifier[0] > 57 )
 								{
-									if( identifier in identToTOK )
+									//if( identifier in identToTOK )
+									if( IdentToTok( identifier ) != TOK._INVALID_ )
 									{
-										TokenUnit t = { identToTOK[identifier], identifier, lineNum };
+										//TokenUnit t = { identToTOK[identifier], identifier, lineNum };
+										TokenUnit t = { IdentToTok( identifier ), identifier, lineNum };
 										results ~= t;
 									}
 									else
@@ -817,7 +832,7 @@ public:
 
 			return results;
 		}
-	}
+	}	
 
 	static void print( TokenUnit[] token_units )
 	{
