@@ -12,6 +12,8 @@ private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.c
 class CProjectTree
 {
 private:
+	import				dialogs.prjPropertyDlg;
+
 	import				project, tango.io.device.File, tango.io.stream.Lines;
 	import				tango.core.Thread, parser.autocompletion;
 	
@@ -419,7 +421,7 @@ public:
 		if( IupGetInt( tree, "COUNT" ) > 1 ) IupSetAttribute( projectButtonCollapse, "VISIBLE", "YES" );
 	}
 
-	bool openProject( char[] setupDir = null )
+	bool openProject( char[] setupDir = null, bool bAskCreateNew = false )
 	{
 		if( !setupDir.length )
 		{
@@ -468,11 +470,23 @@ public:
 		}
 		else
 		{
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString ) );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
+			IupMessageError( null, toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString ) );
+			
+			if( bAskCreateNew )
+			{
+				sFN.set( setupDir );
+				if( sFN.exists() )
+				{
+					int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["createnewone"].toCString, "YESNO" );
+					if( result == 1 )
+					{
+						scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), true, true, setupDir );
+						dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+						return true;
+					}
+				}
+			}
+
 			return false;
 		}
 

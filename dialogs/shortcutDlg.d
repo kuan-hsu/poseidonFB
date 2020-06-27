@@ -81,7 +81,7 @@ class CShortCutDialog : CBaseDialog
 
 		listOptions ~= ( "39=\"TAB\"," );
 
-		listOptions ~=  "DROPDOWN=YES,VALUESTRING=" ~ Util.trim( listText[25..30] );
+		listOptions ~= "DROPDOWN=YES,VALUESTRING=" ~ Util.trim( listText[25..30] );
 		IupSetAttributes( keyList, toStringz( listOptions ) );
 
 		Ihandle* HBox0 = IupHbox( toggleCtrl, toggleShift, toggleAlt, keyList, null );

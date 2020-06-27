@@ -366,9 +366,9 @@ class CProjectPropertiesDialog : CBaseDialog
 	}
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, bool bNew = true, char[] parent = null )
+	this( int w, int h, char[] title, bool bResize = true, bool bNew = true, char[] existedDir = "" )
 	{
-		super( w, h, title, bResize, parent );
+		super( w, h, title, bResize, "POSEIDON_MAIN_DIALOG" );
 		bCreateNew = bNew;
 		IupSetAttributes( _dlg, "MINBOX=NO,MAXBOX=NO,ICON=icon_properties" );
 		IupSetHandle( "PRJPROPERTY_DIALOG", _dlg );
@@ -446,9 +446,16 @@ class CProjectPropertiesDialog : CBaseDialog
 		}
 		else
 		{
-			IupSetAttribute( textProjectDir, "ACTIVE", "YES" );
-			IupSetAttribute( btnProjectDir, "ACTIVE", "YES" );
-			IupSetAttribute( textProjectDir, "BGCOLOR",  IupGetGlobal("TXTBGCOLOR") );
+			if( existedDir.length )
+			{
+				IupSetAttribute( textProjectDir, "VALUE", toStringz( existedDir ) );
+			}
+			else
+			{
+				IupSetAttribute( textProjectDir, "ACTIVE", "YES" );
+				IupSetAttribute( btnProjectDir, "ACTIVE", "YES" );
+				IupSetAttribute( textProjectDir, "BGCOLOR",  IupGetGlobal("TXTBGCOLOR") );
+			}
 		}
 		
 		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.projectDlg ) );

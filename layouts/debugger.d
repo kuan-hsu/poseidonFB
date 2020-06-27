@@ -7,10 +7,19 @@ private import global, scintilla, actionManager, menu;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 private import parser.ast, tools;
 
-private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.io.Stdout, Path = tango.io.Path; //, tango.core.Thread;
+private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.io.Stdout, Path = tango.io.Path, Util = tango.text.Util; //, tango.core.Thread;
+
 
 version(FBIDE)
 {
+	struct VarObject
+	{
+		char[]	type;
+		char[]	name;//, name64;
+		char[]	value;
+	}
+
+
 	class CDebugger
 	{
 		private:
@@ -21,11 +30,12 @@ version(FBIDE)
 		Ihandle*				watchTreeHandle, localTreeHandle, argTreeHandle, shareTreeHandle, varTabHandle;
 		DebugThread				DebugControl;
 		bool					bRunning;
+		char[]					localTreeFrame, argTreeFrame, shareTreeFrame;
 
 		void createLayout()
 		{
 			Ihandle* vBox_LEFT;
-			Ihandle* hBox_toolbar;
+			
 
 			Ihandle* btnClear	= IupButton( null, "Clear" );
 			Ihandle* btnResume	= IupButton( null, "Resume" );
@@ -36,8 +46,7 @@ version(FBIDE)
 			Ihandle* btnUntil	= IupButton( null, "Until" );
 
 			txtConsoleCommand = IupText( null );
-			//IupSetAttribute( txtConsoleCommand, "EXPAND", "YES" );
-			IupSetAttributes( txtConsoleCommand, "MULTILINE=YES,SCROLLBAR=NO,SIZE=96x12,FONTSIZE=9,READONLY=NO" );
+			IupSetAttributes( txtConsoleCommand, "EXPAND=HORIZONTAL,MULTILINE=YES,SCROLLBAR=NO,SIZE=x12,FONTSIZE=9,READONLY=NO" );
 			IupSetCallback( txtConsoleCommand, "ACTION", cast(Icallback) &consoleInput_cb );
 
 			Ihandle* btnTerminate = IupButton( null, "Terminate" );
@@ -76,16 +85,16 @@ version(FBIDE)
 			
 			
 			// IUP Container to put buttons on~
-			hBox_toolbar = IupHbox( btnClear, IupFill(), btnResume, btnStop, btnStep, btnNext, btnReturn, btnUntil, labelSEPARATOR[0], txtConsoleCommand, labelSEPARATOR[1], btnTerminate, null );
-			IupSetAttributes( hBox_toolbar, "ALIGNMENT=ACENTER,GAP=2" );
+			Ihandle* hBox_toolbar = IupHbox( labelSEPARATOR[0], btnResume, btnStop, btnStep, btnNext, btnReturn, btnUntil, labelSEPARATOR[1], IupFill(), btnClear, btnTerminate, null );
+			IupSetAttributes( hBox_toolbar, "ALIGNMENT=ALEFT,GAP=2" );
 
 
 			consoleHandle = IupText( null );
-			IupSetAttributes( consoleHandle, "MULTILINE=YES,SCROLLBAR=YES,EXPAND=YES,READONLY=YES" );
+			IupSetAttributes( consoleHandle, "MULTILINE=YES,SCROLLBAR=YES,EXPAND=YES,READONLY=YES,WORDWRAP=YES" );
 			IupSetAttribute( consoleHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[8].fontString ) );
 			IupSetCallback( consoleHandle, "VALUECHANGED_CB", cast(Icallback) &consoleOutputChange_cb );
 
-			vBox_LEFT = IupVbox( hBox_toolbar, consoleHandle, null );
+			vBox_LEFT = IupVbox( hBox_toolbar, txtConsoleCommand, consoleHandle, null );
 			IupSetAttributes( vBox_LEFT, "GAP=2,EXPAND=YES,ALIGNMENT=ACENTER" );
 
 			Ihandle* leftScrollBox = IupScrollBox( vBox_LEFT );
@@ -105,8 +114,6 @@ version(FBIDE)
 				});
 			}
 			IupSetCallback( backtraceHandle, "BUTTON_CB", cast(Icallback) &backtraceBUTTON_CB );
-			IupSetCallback( backtraceHandle, "NODEREMOVED_CB", cast(Icallback) &backtraceNODEREMOVED_CB );
-
 	
 
 			Ihandle* btnLeft		= IupButton( null, "Left" );
@@ -114,6 +121,7 @@ version(FBIDE)
 			
 			IupSetAttributes( btnLeft, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left" );	IupSetAttribute( btnLeft, "TIP", GLOBAL.languageItems["addtowatch"].toCString );
 			IupSetAttributes( btnRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );
+			
 			IupSetCallback( btnLeft, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
 				if( GLOBAL.debugPanel.isRunning )
@@ -123,8 +131,7 @@ version(FBIDE)
 					{
 						int id = IupGetInt( varsTabHandle, "VALUE" );
 						char[]	originTitle = fromStringz( IupGetAttributeId( varsTabHandle, "TITLE", id ) );
-						char[]	varName = GLOBAL.debugPanel.getFullVarNameInTree( varsTabHandle, true );
-						
+						char[]	varName = GLOBAL.debugPanel.getFullVarNameInTree( varsTabHandle, -99, true );
 						if( originTitle.length )
 						{
 							if( originTitle[0] == '*' ) varName = '*' ~ varName;
@@ -145,12 +152,15 @@ version(FBIDE)
 					switch( tabPos )
 					{
 						case 0:
+							IupSetAttribute( GLOBAL.debugPanel.localTreeHandle, "DELNODE", "ALL" );
 							GLOBAL.debugPanel.sendCommand( "info locals\n", false );
 							break;
 						case 1:
+							IupSetAttribute( GLOBAL.debugPanel.argTreeHandle, "DELNODE", "ALL" );
 							GLOBAL.debugPanel.sendCommand( "info args\n", false );
 							break;
 						case 2:
+							IupSetAttribute( GLOBAL.debugPanel.shareTreeHandle, "DELNODE", "ALL" );
 							GLOBAL.debugPanel.sendCommand( "info variables\n", false );
 							break;
 						default:
@@ -181,7 +191,7 @@ version(FBIDE)
 
 
 			varTabHandle = IupTabs( localTreeHandle, argTreeHandle, shareTreeHandle, null );
-			IupSetAttributes( varTabHandle, "TABTYPE=TOP,EXPAND=YES" );
+			version(linux) IupSetAttributes( varTabHandle, "TABTYPE=RIGHT,TABORIENTATION=VERTICAL,TABPADDING=0x10" ); else IupSetAttributes( varTabHandle, "TABTYPE=RIGHT" );
 			IupSetCallback( varTabHandle, "TABCHANGEPOS_CB", cast(Icallback) &varTabChange_cb );
 
 
@@ -200,15 +210,17 @@ version(FBIDE)
 
 
 			
-			Ihandle* btnAdd		= IupButton( null, "Add" );
-			Ihandle* btnDel		= IupButton( null, "Del" );
-			Ihandle* btnDelAll	= IupButton( null, "RemoveAll" );
+			Ihandle* btnAdd				= IupButton( null, "Add" );
+			Ihandle* btnDel				= IupButton( null, "Del" );
+			Ihandle* btnDelAll			= IupButton( null, "RemoveAll" );
+			Ihandle* btnWatchRefresh	= IupButton( null, "WatchRefresh" );
 			
-			IupSetAttributes( btnAdd, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_add" );		IupSetAttribute( btnAdd, "TIP", GLOBAL.languageItems["add"].toCString );
-			IupSetAttributes( btnDel, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );			IupSetAttribute( btnDel, "TIP", GLOBAL.languageItems["remove"].toCString );
-			IupSetAttributes( btnDelAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_deleteall" );	IupSetAttribute( btnDelAll, "TIP", GLOBAL.languageItems["removeall"].toCString );
+			IupSetAttributes( btnAdd, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_add" );			IupSetAttribute( btnAdd, "TIP", GLOBAL.languageItems["add"].toCString );
+			IupSetAttributes( btnDel, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnDel, "TIP", GLOBAL.languageItems["remove"].toCString );
+			IupSetAttributes( btnDelAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_deleteall" );		IupSetAttribute( btnDelAll, "TIP", GLOBAL.languageItems["removeall"].toCString );
+			IupSetAttributes( btnWatchRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnWatchRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );			
 
-			Ihandle* hBoxVar1_toolbar = IupHbox( IupFill(), btnAdd, btnDel, /*btnUp, btnDown, */btnDelAll, null );
+			Ihandle* hBoxVar1_toolbar = IupHbox( IupFill(), btnAdd, btnDel, /*btnUp, btnDown, */btnDelAll, btnWatchRefresh, null );
 			IupSetAttributes( hBoxVar1_toolbar, "ALIGNMENT=ACENTER,GAP=2" );
 
 			
@@ -229,15 +241,9 @@ version(FBIDE)
 			IupSetCallback( btnDel, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
 				int itemNumber = IupGetInt( GLOBAL.debugPanel.watchTreeHandle, "VALUE" );
-				if( itemNumber > -1 )
-				{	
-					char* idPointer = IupGetAttributeId( GLOBAL.debugPanel.watchTreeHandle, "USERDATA", itemNumber );
-					if( idPointer != null )
-					{
-						GLOBAL.debugPanel.sendCommand( "delete display " ~ Util.trim( fromStringz( idPointer ) ) ~ "\n", false );
-						
-					}
-				}
+				char[] numID = GLOBAL.debugPanel.getWatchItemID( itemNumber );
+				if( numID.length ) GLOBAL.debugPanel.sendCommand( "delete display " ~ Util.trim( numID ) ~ "\n", false );
+
 				return IUP_DEFAULT;
 			});
 
@@ -246,6 +252,16 @@ version(FBIDE)
 				GLOBAL.debugPanel.sendCommand( "delete display\n", false );
 				return IUP_DEFAULT;
 			});
+			
+			IupSetCallback( btnWatchRefresh, "ACTION", cast(Icallback) function( Ihandle* ih )
+			{
+				if( GLOBAL.debugPanel.isRunning )
+				{
+					IupSetAttribute( GLOBAL.debugPanel.watchTreeHandle, "DELNODE", "ALL" );
+					GLOBAL.debugPanel.sendCommand( "display\n", false ); // Check display result
+				}
+				return IUP_DEFAULT;
+			});			
 
 			
 			Ihandle* vbox_var1 = IupVbox( hBoxVar1_toolbar, watchTreeHandle, null );
@@ -279,7 +295,7 @@ version(FBIDE)
 				IupSetAttribute( localTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 				IupSetAttribute( argTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 				IupSetAttribute( shareTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-				IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
+				//IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 				
 				//IupSetAttribute( var0Frame, "FONT", "Courier New,10" );
 				//IupSetAttribute( var1Frame, "FONT", "Courier New,10" );
@@ -293,10 +309,10 @@ version(FBIDE)
 				IupSetAttribute( localTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 				IupSetAttribute( argTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 				IupSetAttribute( shareTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-				IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
+				//IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 
-				IupSetAttribute( var0Frame, "FONT", "Monospace, 10" );
-				IupSetAttribute( var1Frame, "FONT", "Monospace, 10" );
+				//IupSetAttribute( var0Frame, "FONT", "Monospace, 10" );
+				//IupSetAttribute( var1Frame, "FONT", "Monospace, 10" );
 				IupSetAttribute( bpListHandle, "FONT", "Monospace, 10" );
 				IupSetAttribute( bpFrame, "FONT", "Monospace, 10" );
 				IupSetAttribute( regListHandle, "FONT", "Monospace, 10" );
@@ -309,17 +325,16 @@ version(FBIDE)
 			IupSetAttribute( regListHandle, "TABTITLE", GLOBAL.languageItems["register"].toCString );
 
 			tabResultsHandle = IupTabs( bpFrame, varSplit, regListHandle, null );
-			IupSetAttribute( tabResultsHandle, "TABTYPE", "TOP" );
-			IupSetAttribute( tabResultsHandle, "EXPAND", "YES" );
+			IupSetAttributes( tabResultsHandle, "TABTYPE=BOTTOM,EXPAND=YES" );
 			IupSetCallback( tabResultsHandle, "TABCHANGEPOS_CB", cast(Icallback) &resultTabChange_cb );
 			
 
 			Ihandle* rightSplitHandle = IupSplit( backtraceHandle, tabResultsHandle  );
-			IupSetAttributes( rightSplitHandle, "ORIENTATION=HORIZONTAL,SHOWGRIP=LINES,VALUE=300,LAYOUTDRAG=NO" );
+			IupSetAttributes( rightSplitHandle, "ORIENTATION=HORIZONTAL,SHOWGRIP=LINES,VALUE=150,LAYOUTDRAG=NO" );
 			IupSetInt( rightSplitHandle, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 			
 			Ihandle* mainSplit = IupSplit( leftScrollBox, rightSplitHandle );
-			IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=260,LAYOUTDRAG=NO" );
+			IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=220,LAYOUTDRAG=NO" );
 			IupSetInt( mainSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 			
 
@@ -330,6 +345,9 @@ version(FBIDE)
 
 		char[] getWhatIs( char[] varName )
 		{
+			int colonspacePos = Util.index( varName, ": " );
+			if( colonspacePos < varName.length ) varName = varName[colonspacePos+2..$];
+		
 			char[] type = GLOBAL.debugPanel.sendCommand( "whatis " ~ varName ~ "\n", false );
 			if( type.length > 5 )
 			{
@@ -355,239 +373,128 @@ version(FBIDE)
 			return "?";
 		}
 		
-		char[][] getFrameFullPathandLineNumber()
+		
+		/*
+			BackTrace Function
+		*/
+		int getRealActiveFrameTreeID()
+		{
+			for( int i = IupGetInt( backtraceHandle, "COUNT" ) - 1; i > 0; -- i )
+			{
+				if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ) == "0 0 255" ) return i;
+			}
+			
+			return -1;
+		}
+		
+		
+		char[] getRealFrameIDFromTreeID( int treeID )
+		{
+			if( treeID > 0 )
+			{
+				char[] _title = fromStringz( IupGetAttributeId( backtraceHandle, "TITLE", treeID ) ).dup;
+				if( _title.length )
+				{
+					if( _title[0] == '#' )
+					{
+						int doublespacePos = Util.index( _title, "  " );
+						if( doublespacePos < _title.length ) return _title[1..doublespacePos];
+					}
+				}				
+			}
+			
+			return null;
+		}		
+		
+		
+		/*
+		0 = File Fullpath
+		1 = Line Number
+		2 = ID ( NO # )
+		3 = Function 
+		*/
+		char[][] getFrameInformation( char[] title = "" )
 		{
 			if( bRunning )
 			{
 				char[][] results;
 				
-				int childrenCount = IupGetInt( backtraceHandle, "COUNT" );
-				int id = childrenCount -1;
-				
-				for( int i = 1; i < IupGetInt( backtraceHandle, "COUNT" ); ++ i )
+				if( !title.length )
 				{
-					if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ).dup == "0 0 255" )
-					{
-						id = i;
-						break;
-					}
+					int treeID = getRealActiveFrameTreeID();
+					if( treeID > 0 ) title = fromStringz( IupGetAttributeId( backtraceHandle, "TITLE", treeID ) ).dup;
 				}
 				
-				char* fnln = cast(char*) IupGetAttributeId( backtraceHandle, "USERDATA", id );
-				
-				if( fnln != null )
+				int atPos = Util.rindex( title, " at " );
+				if( atPos < title.length )
 				{
-					char[] valueString = fromStringz( fnln );
-					int colonPos = Util.rindex( valueString, ":" );
-					if( colonPos < valueString.length )
+					int colonPos = Util.rindex( title, ":" );
+					if( colonPos < title.length && colonPos > atPos )
 					{
-						results ~= valueString[0..colonPos];
-						results ~= valueString[colonPos+1..$];
-						
-						return results;
-					}
-				}
-				
-				/+
-				char[] valueString = fromStringz( IupGetAttributeId( backtraceHandle, "TITLE", id ) ).dup;
-
-				if( valueString.length )
-				{
-					int fnHead = Util.rindex( valueString, " at " );
-					int lnHead = Util.rindex( valueString, ":" );
-
-					if( fnHead < valueString.length )
-					{
-						if( lnHead < valueString.length )
+						int doubleSpacePos = Util.index( title, "  " );
+						if( doubleSpacePos < title.length )
 						{
-							if( fnHead < lnHead )
-							{
-								results ~= valueString[fnHead+4..lnHead];
-								results ~= valueString[lnHead+1..$];
-
-								return results;
-							}
+							results ~= title[atPos+4..colonPos].dup;
+							results ~= title[colonPos+1..$].dup;
+							results ~= title[1..doubleSpacePos].dup;
+							results ~= title[doubleSpacePos+2..atPos].dup;
+							
+							return results;
 						}
 					}
 				}
-				+/
 			}
 
 			return null;
 		}
 
+
 		void updateSYMBOL()
 		{
-			char[][] results = getFrameFullPathandLineNumber();
+			char[][] results = getFrameInformation();
 
-			if( results.length ==  2 )
+			if( results.length == 4 )
 			{
 				int			lineNumber = Integer.atoi( results[1] );
-				char[]		fullPath = Path.normalize( results[0] );
+				scope		fp = new FilePath( results[0] );
+				
+				if( !fp.folder.length ) fp.set( DebugControl.cwd ~ fp.toString );
 
-				if( ScintillaAction.openFile( fullPath, lineNumber ) )
+				if( ScintillaAction.openFile( fp.toString, lineNumber ) )
 				{	
 					//#define SCI_MARKERDELETEALL 2045
-					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2045, 3, 0 );
-					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2045, 4, 0 );
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2045, 3, 0 );
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2045, 4, 0 );
 				
-					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2043, lineNumber - 1, 3 ); // #define SCI_MARKERADD 2043
-					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, 2043, lineNumber - 1, 4 ); // #define SCI_MARKERADD 2043
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2043, lineNumber - 1, 3 ); // #define SCI_MARKERADD 2043
+					IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2043, lineNumber - 1, 4 ); // #define SCI_MARKERADD 2043
 				}
 			}
 		}
-
-		void updateWatchList( char[] result, bool bClean )
+		
+		
+		// No parameter = get active node( Blue word )
+		char[] getFrameNodeTitle( bool bFull = false )
 		{
-			// Check display result
-			char[][] results = Util.splitLines( result );
-
-			results.length = results.length - 1; // remove (gdb)
-
-			if( results.length > 0 )
+			int treeID = getRealActiveFrameTreeID();
+			if( treeID > 0 )
 			{
-				char[][]	ids, vars, values, types;
-				char[]		trueLineData;
-
-				foreach_reverse( char[] s; results )
+				char[] _title = fromStringz( IupGetAttributeId( backtraceHandle, "TITLE", treeID ) ).dup;
+				if( !bFull )
 				{
-					trueLineData = s ~ trueLineData;
-					
-					if( s.length )
-					{
-						if( s[0] != ' ' )
-						{
-							int colonPos = Util.index( trueLineData, ": " );
-							if( colonPos > 0 && colonPos < trueLineData.length )
-							{
-								bool bIsNum = true;
-								foreach( char c; trueLineData[0..colonPos] )
-								{
-									if( c > 57 || c < 48 ) 
-									{
-										bIsNum = false;
-										break;
-									}
-								}
-
-								if( bIsNum )
-								{
-									char[] _id = trueLineData[0..colonPos];
-									trueLineData = trueLineData[colonPos+2..$];
-									int assignPos = Util.index( trueLineData, " = " );
-									if( assignPos < trueLineData.length )
-									{
-										ids ~= _id;
-										char[] tempVar = Util.trim( trueLineData[0..assignPos] );
-										vars ~= tempVar;
-										char[] tempValue = Util.trim( trueLineData[assignPos+3..$] );
-										values ~= tempValue;
-
-										if( tempValue[0] != '(' ) types ~= ( "(" ~ getWhatIs( tempVar ) ~") " );else types ~= "";
-									}
-								}
-							}
-							trueLineData = "";
-						}
-						else
-						{
-							trueLineData = " " ~ Util.trim( trueLineData );
-						}
-					}
-				}
-				
-				/+
-				if( !bClean )
-				{
-					for( int i = 0; i < vars.length; ++ i )
-					{
-						char[] string = vars[i] ~ " = " ~  types[i] ~ values[i];
-						if( values[i].length )
-						{
-							if( values[i][0] == '{' ) IupSetAttributeId( watchTreeHandle, "ADDBRANCH", -1, GLOBAL.cString.convert( string.dup ) ); else IupSetAttributeId( watchTreeHandle, "ADDLEAF", -1, GLOBAL.cString.convert( string.dup ) );
-						}
-						else
-							IupSetAttributeId( watchTreeHandle, "ADDLEAF", -1, GLOBAL.cString.convert( string.dup ) );
-							
-						IupSetAttributeId( watchTreeHandle, "USERDATA", 0, tools.getCString( ids[i] ) );
-					}
+					int colonPos = Util.rindex( _title, ":" );
+					if( colonPos < _title.length ) return _title[0..colonPos].dup;
 				}
 				else
 				{
-					int nodeID = 0;
-					for( int i = vars.length - 1; i >= 0; -- i )
-					{
-						char[] string = vars[i] ~ " = " ~  types[i] ~ values[i];
-						if( values[i].length )
-						{
-							if( values[i][0] == '{' )
-							{
-								bool bUpdateOK;
-								if( fromStringz( IupGetAttributeId( watchTreeHandle, "KIND", nodeID ) ) == "BRANCH" )
-								{
-									char[] tilte = fromStringz( IupGetAttributeId( watchTreeHandle, "TITLE", nodeID ) ).dup;
-									if( Util.index( tilte, vars[i] ~ " = " ~  types[i] ) == 0 )
-									{
-										IupSetAttributeId( watchTreeHandle, "TITLE", nodeID, GLOBAL.cString.convert( string.dup ) );
-										bUpdateOK = true;
-									}
-								}
-
-								if( !bUpdateOK )
-								{
-									IupSetAttributeId( watchTreeHandle, "DELNODE", nodeID, "SELECTED" );
-									IupSetAttributeId( watchTreeHandle, "ADDBRANCH", nodeID, GLOBAL.cString.convert( string.dup ) );
-									IupSetAttributeId( watchTreeHandle, "USERDATA", nodeID + 1, tools.getCString( ids[i] ) );
-								}
-							}
-							else
-							{
-								bool bUpdateOK;
-								if( fromStringz( IupGetAttributeId( watchTreeHandle, "KIND", nodeID ) ) == "LEAF" )
-								{
-									char[] tilte = fromStringz( IupGetAttributeId( watchTreeHandle, "TITLE", nodeID ) ).dup;
-									if( Util.index( tilte, vars[i] ~ " = " ~  types[i] ) == 0 )
-									{
-										IupSetAttributeId( watchTreeHandle, "TITLE", nodeID, GLOBAL.cString.convert( string.dup ) );
-										bUpdateOK = true;
-									}
-								}
-
-								if( !bUpdateOK )
-								{
-									IupSetAttributeId( watchTreeHandle, "DELNODE", nodeID, "SELECTED" );
-									IupSetAttributeId( watchTreeHandle, "ADDLEAF", nodeID, GLOBAL.cString.convert( string.dup ) );
-									IupSetAttributeId( watchTreeHandle, "USERDATA", nodeID + 1, tools.getCString( ids[i] ) );
-								}
-							}
-						}
-						
-						nodeID++;
-					}
-				}
-				+/
-				if( bClean ) IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
-				for( int i = 0; i < vars.length; ++ i )
-				{
-					char[] string = vars[i] ~ " = " ~  types[i] ~ values[i];
-					if( values[i].length )
-					{
-						if( values[i][0] == '{' ) IupSetAttributeId( watchTreeHandle, "ADDBRANCH", -1, GLOBAL.cString.convert( string.dup ) ); else IupSetAttributeId( watchTreeHandle, "ADDLEAF", -1, GLOBAL.cString.convert( string.dup ) );
-					}
-					else
-						IupSetAttributeId( watchTreeHandle, "ADDLEAF", -1, GLOBAL.cString.convert( string.dup ) );
-					
-					IupSetAttributeId( watchTreeHandle, "USERDATA", 0, tools.getCString( ids[i] ) );
-					char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Underline" );
-					IupSetAttributeId( watchTreeHandle, "TITLEFONT", 0, toStringz( fontString ) );
+					return _title;
 				}
 			}
-			else
-			{
-				if( bClean ) IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
-			}
+			
+			return null;
 		}
-
+		
+		
 		char[] fixGDBMessage( char[] _result )
 		{
 			char[][] results = Util.splitLines( _result );
@@ -620,35 +527,363 @@ version(FBIDE)
 
 			return  _result;
 		}
-
-		void getTypeVarValueByLines( char[] gdbMessage, ref char[][] types, ref char[][] vars, ref char[][] values )
+		
+		
+		VarObject transformNodeToVarObject( char[] title )
 		{
+			VarObject _vo;
+			
+			int assignPos = Util.index( title, " = " );
+			if( assignPos < title.length )
+			{
+				_vo.name = title[0..assignPos].dup;
+				if( _vo.name.length )
+				{
+					int colonspacePos = Util.index( _vo.name, ": " );
+					if( colonspacePos < assignPos ) _vo.name = _vo.name[colonspacePos+2..$].dup;
+				}
+				
+				int openPos = Util.index( title, " (" );
+				if( openPos < title.length )
+				{
+					int closePos = Util.rindex( title, ") " );
+					if( closePos < title.length )
+					{
+						_vo.type = title[openPos+2..closePos].dup;
+						_vo.value = title[closePos+2..$].dup;
+					}
+				}
+				else
+				{
+					_vo.value = Util.trim( title[assignPos+3..$].dup );
+				}
+			}
+			
+			return _vo;
+		}
+
+
+		VarObject getTypeVarValueByName( char[] name )
+		{
+			VarObject result;
+			
+			result.name = name;
+
+			char[] value = getPrint( name );
+			if( value != "?" )
+			{
+				result.value = value;
+				
+				if( value[0] == '(' )
+				{
+					int closePos = Util.rindex( value, ") " );
+					if( closePos < value.length )
+					{
+						result.value = value[closePos+2..$].dup;
+						result.type = value[1..closePos].dup;
+					}
+				}
+			}
+			
+			if( result.type.length )
+			{
+				char[] type = getWhatIs( name );
+				if( type != "?" ) result.type = type;	
+			}
+			
+			return result;
+		}
+		
+		
+		VarObject[] getTypeVarValueByLinesFromInfo( char[] gdbMessage )
+		{
+			if( !isRunning ) return null;
+			
+			VarObject[] results;
+			
 			foreach( char[] s; Util.splitLines( fixGDBMessage( gdbMessage ) ) )
 			{
+				int closePos = s.length;
 				int assignPos = Util.index( s, " = " );
 				if( assignPos < s.length )
 				{
-					char[] tempVar = Util.trim( s[0..assignPos] );
-					vars ~= tempVar;
-					values ~= Util.trim( s[assignPos+3..$] );
-					types ~= getWhatIs( tempVar );
+					VarObject _vo;
+					_vo.name = Util.trim( s[0..assignPos] );
+					
+					// <gdb>display, sometimes we got type of vars
+					if( Util.index( s, " = (" ) == assignPos ) closePos = Util.rindex( s, ") " );
+					
+					if( closePos < s.length )
+					{
+						_vo.value = Util.trim( s[closePos+2..$].dup );
+						_vo.type = s[assignPos+4..closePos].dup;
+					}
+					else
+					{
+						_vo.value = Util.trim( s[assignPos+3..$].dup );
+						_vo.type = getWhatIs( _vo.name );
+					}
+						
+					if( _vo.value.length)
+					{
+						if( _vo.value[0] == '{' ) _vo.value = "{...}";
+					}
+
+					results ~= _vo;
+				}
+			}			
+			
+			return results;
+		}
+		
+		
+		VarObject[] getTypeVarValueByLinesFromPrint( char[] gdbMessage, char[] motherName )
+		{
+			if( !isRunning )		return null;
+			if( gdbMessage == "?" )	return null;
+			
+			gdbMessage = fixGDBMessage( gdbMessage );
+
+			char[]			data;
+			VarObject[]		vos;
+			
+			/*
+			{SCI = 0x2ab2bb0, _P = {X = 100, Y = 200}, P = 0x1eaf584}						
+			*/
+			for( int i = 1; i < gdbMessage.length; ++ i )
+			{
+				char[] _type, _var, _value;
+				
+				if( i == gdbMessage.length - 1 )
+				{
+					if( data.length )
+					{
+						int assignPos = Util.index( data, " = " );
+						if( assignPos < data.length )
+						{
+							if( Util.index( data, "[" ) < data.length  )
+							{
+								_var = Util.trim( data[0..assignPos] );
+								_value = data[assignPos+3..$];
+								VarObject _vo = { "", _var, _value };
+								vos = _vo ~ vos;
+							}
+							else
+							{
+								_type = GLOBAL.debugPanel.getWhatIs( motherName ~ "." ~ data[0..assignPos] );
+								_var = Util.trim( data[0..assignPos] );
+								_value = data[assignPos+3..$];
+								VarObject _vo = { _type, _var, _value };
+								vos = _vo ~ vos;
+							}
+						}
+						else
+						{
+							VarObject _vo = { "", "", Util.trim( data ) };
+							vos = _vo ~ vos;
+						}
+					}
+				}
+				else if( gdbMessage[i] == ','  )
+				{
+					char[] type;
+					int assignPos = Util.index( data, " = " );
+					if( assignPos < data.length )
+					{
+						if( Util.index( data, "[" ) < data.length  )
+						{
+							//results ~= Util.trim( data );
+							_var = Util.trim( data[0..assignPos] );
+							_value = data[assignPos+3..$];
+							VarObject _vo = { "", _var, _value };
+							vos = _vo ~ vos;
+						}
+						else
+						{
+							_type = GLOBAL.debugPanel.getWhatIs( motherName ~ "." ~ data[0..assignPos] );
+							_var = Util.trim( data[0..assignPos] );
+							_value = data[assignPos+3..$];
+							VarObject _vo = { _type, _var, _value };
+							vos = _vo ~ vos;
+						}
+					}
+					else
+					{
+						VarObject _vo = { "", "", Util.trim( data ) };
+						vos = _vo ~ vos;
+					}
+					data = "";
+				}
+				else if( gdbMessage[i] == '{' )
+				{
+					int		open = 0;
+
+					for( int j = i; j < gdbMessage.length -1; ++ j )
+					{
+						if( gdbMessage[j] == '{' )
+						{
+							open ++;
+						}
+						else if( gdbMessage[j] == '}' )
+						{
+							open --;
+
+							if( open == 0 )
+							{
+								int assignPos = Util.index( data, " = " );
+								if( assignPos < data.length )
+								{
+									if( Util.index( data, "[" ) < data.length ) _type = ""; else _type = GLOBAL.debugPanel.getWhatIs( motherName ~ "." ~ data[0..assignPos] );
+									_var = Util.trim( data[0..assignPos] );
+								}
+								else
+								{
+									_var = data;
+								}
+
+								VarObject _vo = { _type, _var, "{...}" };
+								vos = _vo ~ vos;
+								i = j + 1;
+								data = "";
+								break;
+							}
+						}
+					}
+				}
+				else
+				{
+					data ~= gdbMessage[i];
 				}
 			}
+		
+			return vos;
 		}
+		
 		
 		void checkErrorOccur( char[] message, char[] errorMessage = null )
 		{
 			int head = Util.index( message, "Program received signal SIGSEGV, Segmentation fault." );
-			if( head < message.length )
-			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR,TITLE=GDB" );
-				if( message.length >5 ) message = message[head..length-5];
-				IupSetAttribute( messageDlg, "VALUE", toStringz( message ) );
-				IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
-			}			
+			if( head < message.length ) IupMessageError( GLOBAL.mainDlg, toStringz( message[head..length-5].dup ) );
 		}
 		
+		
+		char[] removeIDTitle( char[] s )
+		{
+			int assignPos = Util.index( s, " = " );
+			if( assignPos < s.length )
+			{
+				int colonspacePos = Util.index( s, ": " );
+				if( colonspacePos < assignPos ) return s[colonspacePos+2..$].dup;
+			}
+			
+			return s;
+		}
+		
+		
+		char[] getWatchItemID( char[] s )
+		{
+			if( s.length )
+			{
+				if( s[0] > 47 && s[0] < 58 )
+				{
+					int colonSpacePos = Util.index( s, ": " );
+					if( colonSpacePos < s.length ) return s[0..colonSpacePos];
+				}
+			}
+			
+			return null;
+		}
+		
+		
+		char[] getWatchItemID( int id )
+		{
+			if( id > -1 )
+			{
+				char[] title = fromStringz( IupGetAttributeId( watchTreeHandle, "TITLE", id ) ).dup;
+				return getWatchItemID( title);
+			}
+			
+			return null;
+		}
+		
+		
+		// Update locals tree
+		void updateInfoTree( VarObject[] variables, Ihandle* treeHandle, int motherID )
+		{
+			if( bRunning )
+			{
+				bool	bNoSameDeepNode = false;
+				
+				for( int i = variables.length - 1; i >= 0; -- i )
+				{
+					if( !bNoSameDeepNode )
+					{
+						char[]	numID;
+						int		colonspacePos = Util.index( variables[i].name, ": " );
+						if( colonspacePos < variables[i].name.length )
+						{
+							numID = variables[i].name[0..colonspacePos+2].dup;
+							variables[i].name = variables[i].name[colonspacePos+2..$].dup;
+						}
+						
+						auto _voFromNode = transformNodeToVarObject( fromStringz( IupGetAttributeId( treeHandle, "TITLE", motherID ) ).dup );
+						
+						if( variables[i].name == _voFromNode.name && variables[i].type == _voFromNode.type )//&& _vo.file = _voFromNode.file && _vo.frame == _voFromNode.frame )
+						{
+							char[] _title = numID ~ variables[i].name ~ " = " ~ ( variables[i].type.length ? "(" ~  variables[i].type ~ ") " : "" ) ~ variables[i].value;
+							IupSetAttributeId( treeHandle, "TITLE", motherID, toStringz( _title ) );
+							if( variables[i].value != _voFromNode.value ) IupSetAttributeId( treeHandle, "COLOR", motherID, "255 0 0" ); else IupSetAttributeId( treeHandle, "COLOR", motherID, "0 0 0" );
+							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[8].fontString ) );
+						}
+						else
+						{
+							// Insert same deep
+							char[] _title = numID ~ variables[i].name ~ " = " ~ ( variables[i].type.length ? "(" ~  variables[i].type ~ ") " : "" ) ~ variables[i].value;
+							if( variables[i].value == "{...}" ) IupSetAttributeId( treeHandle, "INSERTBRANCH", motherID, toStringz( _title.dup ) ); else IupSetAttributeId( treeHandle, "INSERTLEAF", motherID, toStringz( _title.dup ) );
+							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[8].fontString ) );
+							
+							// Remove old node 
+							IupSetAttributeId( treeHandle, "DELNODE", motherID, "SELECTED" );
+						}
+						
+						// No EXPANDED, No check
+						if( fromStringz( IupGetAttributeId( treeHandle, "KIND", motherID ) ) == "BRANCH" )
+						{
+							if( fromStringz( IupGetAttributeId( treeHandle, "STATE", motherID ) ) == "EXPANDED" )
+							{
+								char[] fullVarName = getFullVarNameInTree( treeHandle, motherID );
+								VarObject[] _vos = getTypeVarValueByLinesFromPrint( getPrint( fullVarName ), fullVarName );
+								if( _vos.length ) updateInfoTree( _vos, treeHandle, motherID + 1 );
+							}
+						}
+
+
+						if( IupGetAttributeId( treeHandle, "NEXT", motherID ) == null )
+							bNoSameDeepNode = true;
+						else
+						{
+							if( i > 0 ) motherID = IupGetIntId( treeHandle, "NEXT", motherID );
+						}
+					}
+					else
+					{
+						char[] _title = variables[i].name ~ " = " ~ ( variables[i].type.length ? "(" ~  variables[i].type ~ ") " : "" ) ~ variables[i].value;
+						if( variables[i].value == "{...}" ) IupSetAttributeId( treeHandle, "INSERTBRANCH", motherID, toStringz( _title ) ); else IupSetAttributeId( treeHandle, "INSERTLEAF", motherID, toStringz( _title ) );
+						IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[8].fontString ) );
+					}
+				}
+				
+				if( !bNoSameDeepNode )
+				{
+					// Remove Additive nodes...
+					while( IupGetAttributeId( treeHandle, "NEXT", motherID ) != null )
+					{
+						int beKillNodeId = IupGetIntId( treeHandle, "NEXT", motherID );
+						IupSetAttributeId( treeHandle, "DELNODE", beKillNodeId, "SELECTED" );
+					}
+				}
+			}
+		}
 
 		public:
 		this()
@@ -662,7 +897,7 @@ version(FBIDE)
 			IupSetAttribute( localTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 			IupSetAttribute( argTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 			IupSetAttribute( shareTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-			IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
+			//IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
 		}		
 
 		Ihandle* getMainHandle()
@@ -675,25 +910,30 @@ version(FBIDE)
 			return consoleHandle;
 		}
 
+
 		Ihandle* getBacktraceHandle()
 		{
 			return backtraceHandle;
 		}
+
 
 		Ihandle* getBPListHandle()
 		{
 			return bpListHandle;
 		}
 
+
 		Ihandle* getConsoleCommandInputHandle()
 		{
 			return txtConsoleCommand;
 		}
 
+
 		Ihandle* getVarsTabHandle()
 		{
 			return varTabHandle;
 		}
+
 		
 		char[] getTypeValueByName( char[] varName, char[] originTitle, ref char[] type, ref char[] value )
 		{
@@ -761,16 +1001,18 @@ version(FBIDE)
 			return null;
 		}
 		
-		char[] getFullVarNameInTree( Ihandle* _tree, bool bNoStar = false )
+		char[] getFullVarNameInTree( Ihandle* _tree, int id = -99, bool bNoStar = false )
 		{
 			if( GLOBAL.debugPanel.isRunning )
 			{
 				if( _tree != null )
 				{
-					int id = IupGetInt( _tree, "VALUE" );
+					if( id < 0 ) id = IupGetInt( _tree, "VALUE" );
 
 					if( id > -1 )
 					{
+						bNoStar = true;
+						
 						char[]	title;
 						char[]	varName;
 						int		parnetID = id, _depth = IupGetIntId( _tree, "DEPTH", id );
@@ -780,6 +1022,14 @@ version(FBIDE)
 							int assignPos = Util.index( title, " = " );
 							if( assignPos < title.length )
 							{
+								// Remove ID
+								int colonspacePos = Util.index( title, ": " );
+								if( colonspacePos < assignPos )
+								{
+									title = title[colonspacePos+2..$].dup;
+									assignPos = Util.index( title, " = " );
+								}
+							
 								varName = Util.trim( varName );
 								if( varName.length )
 								{
@@ -793,7 +1043,7 @@ version(FBIDE)
 								if( bNoStar )
 								{
 									varName = Util.stripl( varName, '*' );
-									varName = Util.stripl( varName, '@' );
+									varName = Util.stripl( varName, '&' );
 								}
 							}
 
@@ -805,6 +1055,13 @@ version(FBIDE)
 						if( varName.length )
 						{
 							if( varName[$-1] == '.' ) varName = varName[0..$-1];
+							
+							/*
+							if( bNoStar )
+								if( title.length )
+									if( title[0] == '*' || title[0] == '&' ) varName = title[0] ~ varName;
+							*/
+							
 							return varName;
 						}
 					}
@@ -814,202 +1071,12 @@ version(FBIDE)
 			return null;
 		}
 		
-		int expandVarTree( Ihandle* ih, int id )
-		{
-			if( !GLOBAL.debugPanel.isRunning ) return IUP_DEFAULT;
-			
-			if( IupGetIntId( ih, "TOTALCHILDCOUNT", id ) > 0 ) return IUP_DEFAULT;
-			
-			char[]	title;
-			char[]	originTitle = fromStringz( IupGetAttributeId( ih, "TITLE", id ) );
-			char[]	varName = getFullVarNameInTree( ih, true );
-			/*
-			while( _depth >= 0 )
-			{
-				title = fromStringz( IupGetAttributeId( ih, "TITLE", parnetID ) ).dup; // Get Tree Title
-					
-				int assignPos = Util.index( title, " = " );
-				{
-					if( assignPos < title.length )
-					{
-						if( varName.length )
-						{
-							if( varName[0] == '[' ) varName = title[0..assignPos] ~ varName; else varName = title[0..assignPos] ~ "." ~ varName;
-						}
-						else
-						{
-							varName = title[0..assignPos];
-						}
-						
-						varName = Util.stripl( varName, '*' );
-					}
-				}
-
-				if( _depth <= 0 ) break;
-				parnetID = IupGetIntId( ih, "PARENT", parnetID );
-				_depth = IupGetIntId( ih, "DEPTH", parnetID );
-			}
-			*/
-			if( varName.length )
-			{
-				char[] result;
-				if( originTitle.length )
-				{
-					if( originTitle[0] == '*' ) result = GLOBAL.debugPanel.getPrint( "*" ~ varName ); else result = GLOBAL.debugPanel.getPrint( varName );
-				}
-				else
-				{
-					result = GLOBAL.debugPanel.getPrint( varName );
-				}	
-				
-
-				if( GLOBAL.debugPanel.bRunning )
-				{
-					char[][] results = Util.splitLines( result );
-
-					results.length = results.length - 1; // remove (gdb)
-					if( results.length > 0 )
-					{
-						char[]		trueLineData;
-						result		= "";
-
-						foreach_reverse( char[] s; results )
-						{
-							trueLineData = s ~ trueLineData;
-							
-							if( s.length )
-							{
-								if( s[0] != ' ' )
-								{
-									result = trueLineData ~ result;
-									trueLineData = "";
-								}
-								else
-								{
-									trueLineData = " " ~ Util.trim( trueLineData );
-								}
-							}
-						}
-
-						char[] 	data;
-						results.length = 0;
-						
-						/*
-						{SCI = 0x2ab2bb0, _P = {X = 100, Y = 200}, P = 0x1eaf584}						
-						*/
-						for( int i = 1; i < result.length; ++ i )
-						{
-							if( i == result.length - 1 )
-							{
-								if( data.length )
-								{
-									char[] type;
-									int assignPos = Util.index( data, " = " );
-									if( assignPos < data.length )
-									{
-										if( Util.index( data, "[" ) < data.length  )
-										{
-											results ~= Util.trim( data );
-										}
-										else
-										{
-											type = " = (" ~ GLOBAL.debugPanel.getWhatIs( varName ~ "." ~ data[0..assignPos] ) ~ ")";
-											results ~= Util.trim( data[0..assignPos]  ~ type ~ " " ~ data[assignPos+3..$] );
-										}
-									}
-									else
-									{
-										results ~= Util.trim( data );
-									}
-								}
-							}
-							else if( result[i] == ','  )
-							{
-								//IupSetAttributeId( ih, "ADDLEAF", id + IupGetIntId( ih,"TOTALCHILDCOUNT", id ), toStringz( Util.trim( data ) ) );
-								//IupSetAttributeId( ih, "ADDLEAF", id, toStringz( Util.trim( data ) ) );
-								char[] type;
-								int assignPos = Util.index( data, " = " );
-								if( assignPos < data.length )
-								{
-									if( Util.index( data, "[" ) < data.length  )
-									{
-										results ~= Util.trim( data );
-									}
-									else
-									{
-										type = " = (" ~ GLOBAL.debugPanel.getWhatIs( varName ~ "." ~ data[0..assignPos] ) ~ ")";
-										results ~= Util.trim( data[0..assignPos]  ~ type ~ " " ~ data[assignPos+3..$] );
-									}
-								}
-								else
-								{
-									results ~= Util.trim( data );
-								}
-								data = "";
-							}
-							else if( result[i] == '{' )
-							{
-								int		open = 0;
-
-								for( int j = i; j < result.length-1; ++ j )
-								{
-									if( result[j] == '{' )
-									{
-									//	IupMessage("{",toStringz(Integer.toString( j ) ) );
-										open ++;
-									}
-									else if( result[j] == '}' )
-									{
-										//IupMessage("}",toStringz(Integer.toString( j ) ) );
-										open --;
-
-										if( open == 0 )
-										{
-											char[] type;
-											int assignPos = Util.index( data, " = " );
-											if( assignPos < data.length )
-											{
-												if( Util.index( data, "[" ) < data.length ) type = ""; else type = "(" ~ GLOBAL.debugPanel.getWhatIs( varName ~ "." ~ data[0..assignPos] ) ~ ")";
-											}
-
-											results ~= Util.trim( data ~ type ~ " {...}" );
-											i = j + 1;
-											//IupMessage("",toStringz(Integer.toString( i ) ) );
-											//IupMessage("length",toStringz(Integer.toString( result[$-1] ) ) );
-											data = "";
-											break;
-										}
-									}
-								}
-							}
-							else
-							{
-								data ~= result[i];
-							}
-						}
-
-						foreach_reverse( char[] s; results )
-						{
-							if( Util.index( s, "{...}" ) < s.length ) IupSetAttributeId( ih, "ADDBRANCH", id, toStringz( s.dup ) );else IupSetAttributeId( ih, "ADDLEAF", id, toStringz( s.dup ) );
-							/*
-							int lastID = IupGetInt( ih, "LASTADDNODE" );
-							if( IupGetIntId( ih, "DEPTH", lastID ) > 0 ) IupSetAttributeId( ih, "TOGGLEVISIBLE", lastID, "NO" );
-							*/
-						}
-						
-						return IUP_IGNORE;
-					}
-				}
-			}
-			
-			return IUP_DEFAULT;
-		}
 
 		char[] sendCommand( char[] command, bool bShow = true  )
 		{
 			if( DebugControl is null ) return null;
 
-			char[] result =  DebugControl.sendCommand( command, bShow );
+			char[] result = DebugControl.sendCommand( command, bShow );
 
 			// Check GDB reach end
 			int gdbEndStringPosTail = Util.rindex( result, "exited normally]" );
@@ -1018,17 +1085,12 @@ version(FBIDE)
 				int gdbEndStringPosHead = Util.rindex( result, "[Inferior" );
 				if( gdbEndStringPosHead < result.length )
 				{
-				
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=GDB,BUTTONS=OKCANCEL" );
-					IupSetAttribute( messageDlg, "VALUE", toStringz( result[gdbEndStringPosHead..gdbEndStringPosTail+16].dup ~ "\n" ~ GLOBAL.languageItems["exitdebug1"].toDString ) );
-
-					IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
-					if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 1 )
+					int _result = IupMessageAlarm( null, "GDB", toStringz( result[gdbEndStringPosHead..gdbEndStringPosTail+16].dup ~ "\n" ~ GLOBAL.languageItems["exitdebug1"].toDString ), "OKCANCEL" );
+					if( _result == 1 )
 					{
 						terminal();
 						return null;
-					}
+					}					
 				}
 			}
 			
@@ -1061,7 +1123,7 @@ version(FBIDE)
 							if( pos > -1 ) resultTabChange_cb( tabResultsHandle, pos, -1 );
 
 							// Check display result
-							updateWatchList( result, true );
+							sendCommand( "display\n", false );
 						}
 						checkErrorOccur( result );
 						break;				
@@ -1137,15 +1199,48 @@ version(FBIDE)
 
 										for( int i = IupGetInt( watchTreeHandle, "COUNT" ) - 1; i >= 0; -- i )
 										{
-											char* _itemID = cast(char*) IupGetAttributeId( watchTreeHandle, "USERDATA", i );
-											if( Util.trim( fromStringz(_itemID) ) == _id )
-											{
-												IupSetAttributeId( watchTreeHandle, "DELNODE", i, "SELECTED" );
-												if( _itemID != null ) delete _itemID;
-											}
+											if( _id == getWatchItemID( i ) ) IupSetAttributeId( watchTreeHandle, "DELNODE", i, "SELECTED" );
 										}
 									}
 								}
+							}
+						}
+						break;
+						
+					case "display":
+						VarObject[] variables;
+						
+						variables = getTypeVarValueByLinesFromInfo( result );
+						
+						if( splitCommand.length == 1 ) // just display
+						{
+							if( !variables.length )
+							{
+								IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
+							}
+							else if( IupGetInt( watchTreeHandle, "COUNT" ) == 0 )
+							{
+								char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
+								foreach( VarObject _vo; variables )
+								{
+									char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~  _vo.type ~ ") " : "" ) ~ _vo.value;
+									if( _vo.value == "{...}" ) IupSetAttributeId( watchTreeHandle, "INSERTBRANCH", -1, toStringz( _title ) ); else IupSetAttributeId( watchTreeHandle, "INSERTLEAF", -1, toStringz( _title ) );
+									IupSetAttributeId( watchTreeHandle, "TITLEFONT", 0, toStringz( fontString ) );
+								}
+							}
+							else
+							{
+								updateInfoTree( variables, watchTreeHandle, 0 );
+							}
+						}
+						else // Add
+						{
+							char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
+							foreach( VarObject _vo; variables )
+							{
+								char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~  _vo.type ~ ") " : "" ) ~ _vo.value;
+								if( _vo.value == "{...}" ) IupSetAttributeId( watchTreeHandle, "INSERTBRANCH", -1, toStringz( _title ) ); else IupSetAttributeId( watchTreeHandle, "INSERTLEAF", -1, toStringz( _title ) );
+								IupSetAttributeId( watchTreeHandle, "TITLEFONT", 0, toStringz( fontString ) );
 							}
 						}
 						break;
@@ -1162,48 +1257,89 @@ version(FBIDE)
 
 								for( int i = IupGetInt( watchTreeHandle, "COUNT" ) - 1; i >= 0; -- i )
 								{
-									char* _itemID = cast(char*) IupGetAttributeId( watchTreeHandle, "USERDATA", i );
-									if( Util.trim( fromStringz(_itemID) ) == _id )
-									{
-										IupSetAttributeId( watchTreeHandle, "DELNODE", i, "SELECTED" );
-										if( _itemID != null ) delete _itemID;
-									}
+									if( _id == getWatchItemID( i ) ) IupSetAttributeId( watchTreeHandle, "DELNODE", i, "SELECTED" );
 								}
 							}
 						}
 						break;
-
-					case "select-frame":
+					
+					case "frame", "select-frame":
 						if( bRunning && isExecuting )
 						{
 							if( splitCommand.length == 2 )
 							{
-								GLOBAL.debugPanel.updateBackTrace();
-								int pos = IupGetInt( tabResultsHandle, "VALUEPOS" );
-								if( pos > -1 ) resultTabChange_cb( tabResultsHandle, pos, -1 );
-
-								// Check display result
-								sendCommand( "display\n", false );
-
-								char[] selectedFrame = "#" ~ splitCommand[1];
-
+								bool bChange;
+								
 								for( int i = 1; i < IupGetInt( backtraceHandle, "COUNT" ); ++ i )
 								{
-									char[] title = fromStringz( IupGetAttributeId( backtraceHandle, "TITLE", i ) ).dup;
-									if( Util.index( title, selectedFrame ) < title.length )
+									char[][] _information = getFrameInformation( fromStringz( IupGetAttributeId( backtraceHandle, "TITLE", i ) ).dup );
+									if( _information.length == 4 )
 									{
-										IupSetAttributeId( backtraceHandle, "COLOR", i, GLOBAL.cString.convert( "0 0 255" ) );
+										if( _information[2] == splitCommand[1] )
+										{
+											if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ).dup != "0 0 255" )
+											{
+												IupSetAttributeId( backtraceHandle, "COLOR", i, "0 0 255" );
+												version(Windows) IupSetAttributeId( backtraceHandle, "MARKED", i, "YES" ); else IupSetInt( backtraceHandle, "VALUE", i );
+												bChange = true;
+												continue;
+											}
+											else
+											{
+												break;
+											}
+										}
 									}
-									else
-									{
-										IupSetAttributeId( backtraceHandle, "COLOR", i, GLOBAL.cString.convert( "0 0 0" ) );
-									}
+									
+									IupSetAttributeId( backtraceHandle, "COLOR", i, "0 0 0" );
+								}
+								
+								if( bChange )
+								{
+									int pos = IupGetInt( tabResultsHandle, "VALUEPOS" );
+									if( pos > -1 ) resultTabChange_cb( tabResultsHandle, pos, -1 );
+									sendCommand( "display\n", false ); // Check display result
+									updateSYMBOL();
 								}
 							}
 						}
 						break;
 						
-					case "bt", "backtrace":
+					case "up":
+						if( bRunning && isExecuting )
+						{
+							if( splitCommand.length == 1 ) splitCommand ~= "1";
+							if( splitCommand.length == 2 )
+							{
+								int treeID = getRealActiveFrameTreeID();
+								int TargetID = treeID - Integer.toInt( splitCommand[1] );
+								if( TargetID > 0 )
+								{
+									char[] frame = getRealFrameIDFromTreeID( TargetID );
+									sendCommand(  "select-frame " ~ frame ~ "\n", false );
+								}
+							}
+						}
+						break;
+						
+					case "down":
+						if( bRunning && isExecuting )
+						{
+							if( splitCommand.length == 1 ) splitCommand ~= "1";
+							if( splitCommand.length == 2 )
+							{
+								int treeID = getRealActiveFrameTreeID();
+								int TargetID = treeID + Integer.toInt( splitCommand[1] );
+								if( TargetID < IupGetInt( backtraceHandle, "COUNT" ) )
+								{
+									char[] frame = getRealFrameIDFromTreeID( TargetID );
+									sendCommand(  "select-frame " ~ frame ~ "\n", false );
+								}
+							}
+						}
+						break;
+						
+					case "bt", "backtrace", "where":
 						if( bRunning )
 						{
 							char[][] results = Util.splitLines( result );
@@ -1237,33 +1373,11 @@ version(FBIDE)
 
 											IupSetAttributeId( backtraceHandle, "ADDBRANCH", lastID, GLOBAL.cString.convert( branchString.dup ) );
 											lastID = IupGetInt( backtraceHandle, "LASTADDNODE" );
-											
-											// Save FileName & LineNumber
-											if( branchString.length )
-											{
-												int fnHead = Util.rindex( branchString, " at " );
-												int lnHead = Util.rindex( branchString, ":" );
-
-												if( fnHead < branchString.length )
-												{
-													if( lnHead < branchString.length )
-													{
-														if( fnHead < lnHead )
-														{
-															char[] _fn = branchString[fnHead+4..lnHead];
-															char[] _ln = branchString[lnHead+1..$];
-															
-															IupSetAttributeId( backtraceHandle, "USERDATA", lastID, tools.getCString( _fn ~ ":" ~ _ln ) );
-														}
-													}
-												}
-											}										
-											
 											IupSetAttributeId( backtraceHandle, "IMAGE", lastID, GLOBAL.cString.convert( "icon_debug_bt1" ) );
 											IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, GLOBAL.cString.convert( "icon_debug_bt1" ) );
 											if( i == 0 )
 											{
-												IupSetAttributeId( backtraceHandle, "COLOR", lastID, GLOBAL.cString.convert( "0 0 255" ) );
+												IupSetAttributeId( backtraceHandle, "COLOR", lastID, "0 0 255" );
 												version(Windows) IupSetAttributeId( backtraceHandle, "MARKED", lastID, "YES" ); else IupSetInt( backtraceHandle, "VALUE", lastID );
 											}
 												
@@ -1275,12 +1389,14 @@ version(FBIDE)
 						}
 						break;
 
-					case "kill":
+					case "k", "kill":
 						if( splitCommand.length == 1 )
 						{
+							if( result == "#_NO_#" ) break;
+							
 							bRunning = false;
 							
-							//IupSetAttribute( varList0Handle, "REMOVEITEM", "ALL" );
+							IupSetAttributeId( backtraceHandle, "DELNODE", 0, "CHILDREN" );
 							IupSetAttribute( localTreeHandle, "DELNODE", "ALL" );
 							IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
 							IupSetAttribute( regListHandle, "REMOVEITEM", "ALL" ); 
@@ -1302,7 +1418,7 @@ version(FBIDE)
 								if( pos > -1 ) resultTabChange_cb( tabResultsHandle, pos, -1 );
 
 								// Check display result
-								updateWatchList( result, true );
+								sendCommand( "display\n", false );
 							}
 						}
 						checkErrorOccur( result );
@@ -1311,45 +1427,41 @@ version(FBIDE)
 					case "info":
 						if( splitCommand.length > 1 )
 						{
+							Ihandle* _treeHandle = null;
+							
 							switch( splitCommand[1] )
 							{
 								case "locals":
+									_treeHandle = localTreeHandle;
+									
+								case "args": 
+									if( _treeHandle == null ) _treeHandle = argTreeHandle;
+									
 									if( bRunning )
 									{
-										char[][]	vars, values, types;
-										getTypeVarValueByLines( result, types, vars, values );
-										IupSetAttribute( localTreeHandle, "DELNODE", "ALL" );
-										for( int i = 0; i < vars.length; ++ i )
+										VarObject[] variables = getTypeVarValueByLinesFromInfo( result );
+										
+										if( !variables.length )
 										{
-											if( values[i].length )
+											IupSetAttribute( _treeHandle, "DELNODE", "ALL" );
+										}
+										else if( IupGetInt( _treeHandle, "COUNT" ) == 0 )
+										{
+											foreach( VarObject _vo; variables )
 											{
-												if( values[i][0] == '{' ) values[i] = "{...}";
+												char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~  _vo.type ~ ") " : "" ) ~ _vo.value;
+												if( _vo.value == "{...}" ) IupSetAttributeId( _treeHandle, "INSERTBRANCH", -1, toStringz( _title ) ); else IupSetAttributeId( _treeHandle, "INSERTLEAF", -1, toStringz( _title ) );
+												IupSetAttributeId( _treeHandle, "TITLEFONT", 0, toStringz( GLOBAL.fonts[8].fontString ) );
 											}
-											char[] string = vars[i] ~ " = (" ~  types[i] ~ ") " ~ values[i];
-											if( values[i] == "{...}" ) IupSetAttributeId( localTreeHandle, "INSERTBRANCH", -1, toStringz( string.dup ) );else IupSetAttributeId( localTreeHandle, "INSERTLEAF", -1, toStringz( string.dup ) );
-										}									
+										}
+										else
+										{
+											updateInfoTree( variables, _treeHandle, 0 );
+										}
 									}
 									break;
-
-								case "args":
-									if( bRunning )
-									{
-										char[][]	vars, values, types;
-										getTypeVarValueByLines( result, types, vars, values );
-										IupSetAttribute( argTreeHandle, "DELNODE", "ALL" );
-										for( int i = 0; i < vars.length; ++ i )
-										{
-											if( values[i].length )
-											{
-												if( values[i][0] == '{' ) values[i] = "{...}";
-											}
-											char[] string = vars[i] ~ " = (" ~  types[i] ~ ") " ~ values[i];
-											//char[] string = Stdout.layout.convert( "{,-" ~ Integer.toString( maxVarLength ) ~ "} = ", vars[i] ) ~ values[i];
-											if( values[i] == "{...}" ) IupSetAttributeId( argTreeHandle, "INSERTBRANCH", -1, toStringz( string.dup ) );else IupSetAttributeId( argTreeHandle, "INSERTLEAF", -1, toStringz( string.dup ) );
-										}										
-									}
-									break;
-
+									
+									
 								case "variables":
 									if( bRunning )
 									{
@@ -1444,83 +1556,6 @@ version(FBIDE)
 												}
 											}
 										}
-
-										/+
-										if( results.length > 0 )
-										{
-											char[][]	linesData;
-											char[]		trueLineData;
-											
-											foreach_reverse( char[] s; results )
-											{
-												trueLineData = s ~ trueLineData;
-												
-												if( s[0] != ' ' )
-												{
-													linesData ~= trueLineData;
-													trueLineData = "";
-												}
-												else
-												{
-													trueLineData = " " ~ Util.trim( trueLineData );
-												}
-											}
-
-											char[][] frameFullPathandLineNumber = getFrameFullPathandLineNumber();
-
-											if( frameFullPathandLineNumber.length == 2 )
-											{
-												char[] frameFullPath = frameFullPathandLineNumber[0];
-
-												bool		bBeginGetVar;
-												char[][]	varsName, typesName, values;
-												//int			maxVarLength;
-
-												foreach_reverse( char[] s; linesData )
-												{
-													if( !bBeginGetVar )
-													{
-														if( Util.index( fullPathByOS(s), fullPathByOS(frameFullPath) ) < s.length ) bBeginGetVar = true;
-													}
-													else
-													{
-														if( s.length )
-														{
-															if( s[$-1] == ';' )
-															{
-																char[][] splitData = Util.split( s[0..$-1], " " );
-																if( splitData.length == 2 )
-																{
-																	varsName ~= splitData[1];
-																	typesName ~= splitData[0];
-																	values ~= getPrint( splitData[1] );
-																}
-															}
-														}
-														else
-														{
-															break;
-														}
-													}
-												}
-
-												if( varsName.length )
-												{
-													IupSetAttribute( shareTreeHandle, "DELNODE", "ALL" );
-													for( int i = 0; i < varsName.length; ++ i )
-													{
-														if( values[i].length )
-														{
-															if( values[i][0] == '{' ) values[i] = "{...}";
-														}													
-														char[] string = varsName[i] ~ " = (" ~  typesName[i] ~ ") " ~ values[i];
-														//char[] string = Stdout.layout.convert( "{,-" ~ Integer.toString( maxVarLength ) ~ "} : ", varsName[i] ) ~ typesName[i];
-														if( values[i] == "{...}" ) IupSetAttributeId( shareTreeHandle, "INSERTBRANCH", -1, toStringz( string.dup ) );else IupSetAttributeId( shareTreeHandle, "INSERTLEAF", -1, toStringz( string.dup ) );
-													}										
-												}
-											}
-										}
-										+/
 									}
 									break;
 
@@ -1543,16 +1578,6 @@ version(FBIDE)
 						break;
 
 					default:
-						if( bRunning )
-						{
-							if( splitCommand[0].length >= 7 )
-							{
-								if( lowerCase( splitCommand[0][0..7] ) == "display" )
-								{
-									if( splitCommand.length == 1 ) updateWatchList( result, true );else updateWatchList( result, false );
-								}
-							}
-						}				
 				}
 			}
 
@@ -1589,6 +1614,8 @@ version(FBIDE)
 			if( DebugControl !is null ) delete DebugControl;
 			IupSetAttribute( consoleHandle, "VALUE", "" );
 			IupSetAttribute( GLOBAL.debugPanel.getConsoleCommandInputHandle, "VALUE", "" ); // Clear Input Text
+			
+			localTreeFrame = argTreeFrame = shareTreeFrame = "";
 			
 			IupSetAttribute( localTreeHandle, "DELNODE", "ALL" ); 
 			IupSetAttribute( argTreeHandle, "DELNODE", "ALL" ); 
@@ -1746,9 +1773,19 @@ version(FBIDE)
 		{
 			if( bRunning )
 			{
+				char[] oriBTName = getFrameNodeTitle();
+				
 				char[] result = sendCommand( "bt\n", false );
 
 				if( result.length > 5 ) updateSYMBOL();
+				
+				if( oriBTName != getFrameNodeTitle() )
+				{
+					// Clear variables trees
+					IupSetAttribute( GLOBAL.debugPanel.localTreeHandle, "DELNODE", "ALL" );
+					IupSetAttribute( GLOBAL.debugPanel.argTreeHandle, "DELNODE", "ALL" );
+					IupSetAttribute( GLOBAL.debugPanel.shareTreeHandle, "DELNODE", "ALL" );
+				}				
 			}
 		}
 
@@ -1909,22 +1946,6 @@ version(FBIDE)
 			proc.kill();
 			delete proc;
 
-			/+
-			IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "OFF" );
-			GLOBAL.messageSplit_value = 800;
-			IupSetInt( GLOBAL.messageSplit, "VALUE", 1000 );
-
-			IupSetAttribute( GLOBAL.messageSplit, "ACTIVE", "NO" );
-			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
-			Ihandle* SecondChild = IupGetChild( GLOBAL.messageSplit, 1 );
-			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
-
-			//IupSetAttribute( GLOBAL.outputPanel, "VISIBLE", "NO" );
-			IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "VISIBLE", "NO" );
-			//IupSetAttribute( GLOBAL.searchOutputPanel, "VISIBLE", "NO" );
-			IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "VISIBLE", "NO" );
-			+/
-
 			foreach( CScintilla cSci; GLOBAL.scintillaManager )
 			{
 				//#define SCI_MARKERDELETEALL 2045
@@ -1968,10 +1989,7 @@ version(FBIDE)
 
 				if( Util.index( result, "(no debugging symbols found)" ) < result.length )
 				{
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,TITLE=GDB" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["exitdebug2"].toCString() );
-					IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
+					IupMessageError( null, GLOBAL.languageItems["exitdebug2"].toCString() );
 					proc.close();
 					proc.kill();
 					delete proc;
@@ -1989,27 +2007,10 @@ version(FBIDE)
 				IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, GLOBAL.cString.convert( "icon_debug_bt0" ) );
 				IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, GLOBAL.cString.convert( "icon_debug_bt0" ) );
 				splitValue = IupGetInt( GLOBAL.messageSplit, "VALUE" );
-				IupSetInt( GLOBAL.messageSplit, "VALUE", 400 );
-				/+
-				int count = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" );
-				for( int i = count; i > 0; -- i )
-				{
-					char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
-					if( listValue.length > 12 )
-					{
-						char[] id = Util.trim( listValue[0..6] );
-						char[] ln = Util.trim( listValue[6..12] );
-						char[] fn = Util.trim( listValue[12..$] );
+				IupSetInt( GLOBAL.messageSplit, "VALUE", 500 );
 
-						if( id == "-1" )
-						{
-							GLOBAL.debugPanel.sendCommand( "b " ~ fn ~ ":" ~ ln ~ "\n", false );
-							IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
-						}
-					}
-				}
-				+/
-
+				
+				sendCommand( "set confirm off\n", false );
 				sendCommand( "set print array-indexes on\n", false );
 				//sendCommand( "set breakpoint pending on\n", false );
 				//sendCommand( "set print elements 1\n", false );
@@ -2020,11 +2021,13 @@ version(FBIDE)
 				}
 				else
 				{
+					/*
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,BUTTONS=OK");
 					IupSetAttribute( messageDlg, "TITLE", "GDB" );
 					IupSetAttribute( messageDlg, "VALUE", "Use \"tty\" Command To Specifies The Terminal Device." );
 					IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
+					*/
 					/+
 					//auto termProc = new Process( true, GLOBAL.linuxTermName);
 					auto termProc = new Process( true, GLOBAL.linuxTermName ~ " -e \"bash -c 'tty;$SHELL'\"" );
@@ -2055,6 +2058,18 @@ version(FBIDE)
 
 		char[] sendCommand( char[] command, bool bShow = true )
 		{
+			switch( command )
+			{
+				case "kill\n", "k\n":
+					int result = IupMessageAlarm( null, "GDB", "Kill the program being debugged?", "YESNO" );
+					break;
+					
+				default:
+				
+			
+			}
+		
+		
 			proc.stdin.write( command );
 			
 			if( bShow )
@@ -2145,7 +2160,7 @@ version(FBIDE)
 					{
 						if( !GLOBAL.debugPanel.isRunning() )
 						{
-							scope argDialog = new CSingleTextDialog( -1, -1, "Args To Debugger Run", "Args:", null, null, false );
+							scope argDialog = new CSingleTextDialog( 300, -1, "Args To Debugger Run", "Args:", null, null, false );
 							char[] args = argDialog.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 							
 							if( args.length ) GLOBAL.debugPanel.sendCommand( "r " ~ args ~ "\n" );
@@ -2191,14 +2206,6 @@ version(FBIDE)
 			GLOBAL.debugPanel.terminal();
 			return IUP_DEFAULT;
 		}
-		
-		private int backtraceNODEREMOVED_CB( Ihandle* ih, void* userdata )
-		{
-			char* userDataPTR = cast(char*) userdata;
-			if( userDataPTR != null ) tools.freeCString( userDataPTR );
-			
-			return IUP_DEFAULT;
-		}
 
 		private int backtraceBUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 		{
@@ -2211,37 +2218,8 @@ version(FBIDE)
 						int id = IupConvertXYToPos( ih, x, y );
 						if( id > 0 )
 						{
-							if( fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBacktraceHandle, "COLOR" ) ).dup != "0 0 255" )
-							{
-								char[] title = fromStringz( IupGetAttributeId( GLOBAL.debugPanel.getBacktraceHandle, "TITLE", id ) ).dup;
-								char[] selectedFrame;
-								for( int i = 0; i < title.length; ++ i )
-								{
-									if( title[i] != ' ' ) 
-									{
-										if( title[i] != '#' ) selectedFrame ~= title[i];
-									}
-									else
-									{
-										break;
-									}
-								}
-
-								if( selectedFrame.length )
-								{
-									GLOBAL.debugPanel.sendCommand( "select-frame " ~ selectedFrame ~ "\n", false );
-									version(Windows) IupSetAttributeId( GLOBAL.debugPanel.backtraceHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.debugPanel.backtraceHandle, "VALUE", id );
-
-									char[][]	frameFullPathandLineNumber = GLOBAL.debugPanel.getFrameFullPathandLineNumber();
-									if( frameFullPathandLineNumber.length == 2 )
-									{
-										char[]		fullPath = Path.normalize( frameFullPathandLineNumber[0] );
-										actionManager.ScintillaAction.openFile( fullPath );
-									}
-
-									return IUP_IGNORE;
-								}
-							}
+							char[][] _information = GLOBAL.debugPanel.getFrameInformation( fromStringz( IupGetAttributeId( ih, "TITLE", id ) ).dup );
+							if( _information.length == 4 ) GLOBAL.debugPanel.sendCommand( "select-frame " ~ _information[2] ~ "\n", false );
 						}
 						return IUP_IGNORE;
 					}
@@ -2259,32 +2237,63 @@ version(FBIDE)
 				{
 					if( GLOBAL.debugPanel.isRunning )
 					{
-						int id = IupConvertXYToPos( ih, x, y );
+						int			id = IupConvertXYToPos( ih, x, y );
+						char[]		fullVarName = GLOBAL.debugPanel.getFullVarNameInTree( ih, id, true );
 						
-						char[] kind = fromStringz( IupGetAttributeId( ih, "KIND", id ) ).dup; // Get Tree Kind
-						if( kind == "LEAF" )
+						if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ).dup == "LEAF" )
 						{
-							char[] title = fromStringz( IupGetAttributeId( ih, "TITLE", id ) ).dup; // Get Tree Title
-							char[] varName = GLOBAL.debugPanel.getFullVarNameInTree( ih, true );						
+							char[]		numID; // Remove ID
+							char[]		title = fromStringz( IupGetAttributeId( ih, "TITLE", id ) ).dup; // Get Tree Title
 							
-							if( title.length )
-								if( title[0] == '*' ) varName = "*" ~ varName;
+							if( title[0] > 47 && title[0] < 58 )
+							{
+								int	colonspacePos = Util.index( title, ": " );
+								if( colonspacePos < title.length )
+								{
+									numID = title[0..colonspacePos+2].dup;
+									title = title[colonspacePos+2..$].dup;
+								}
+							}
 							
-							scope varDlg = new CVarDlg( 360, -1, "Evaluate " ~ varName, "Value = " );
+							if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
+							
+							scope varDlg = new CVarDlg( 360, -1, "Evaluate " ~ fullVarName, "Value = " );
 							char[] value = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 							if( value == "#_close_#" ) return IUP_DEFAULT;
 							
 							int assignPos = Util.index( title, " = " );
-
-							GLOBAL.debugPanel.sendCommand( "set var " ~ varName ~ " = " ~  value ~ "\n", false );
+							GLOBAL.debugPanel.sendCommand( "set var " ~ fullVarName ~ " = " ~  value ~ "\n", false );
 
 							int posCloseParen = Util.index( title, ") " );
-							if( posCloseParen < title.length ) IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..posCloseParen+2] ~ value ) );else IupSetAttributeId( ih, "TITLE", id, GLOBAL.cString.convert( title[0..assignPos+3] ~ value ) );
+							if( posCloseParen < title.length ) IupSetAttributeId( ih, "TITLE", id, toStringz( numID ~ title[0..posCloseParen+2] ~ value ) );else IupSetAttributeId( ih, "TITLE", id, toStringz( numID ~ title[0..assignPos+3] ~ value ) );
+							return IUP_IGNORE;
 						}
 						else
 						{
-							return GLOBAL.debugPanel.expandVarTree( ih, id );
+							if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "BRANCH" )
+							{
+								if( IupGetIntId( ih, "TOTALCHILDCOUNT", id ) == 0 )
+								{
+									char[] title = fromStringz( IupGetAttributeId( ih, "TITLE",id ) ).dup;
+									title = GLOBAL.debugPanel.removeIDTitle( title );
+									if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
+								
+									VarObject[] variables = GLOBAL.debugPanel.getTypeVarValueByLinesFromPrint( GLOBAL.debugPanel.getPrint( fullVarName ), fullVarName );
+									
+									if( variables.length )
+									{
+										foreach( VarObject _vo; variables )
+										{
+											char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~ _vo.type ~ ") " : "" ) ~ _vo.value;
+											if( _vo.value == "{...}" ) IupSetAttributeId( ih, "ADDBRANCH", id, toStringz( _title ) ); else IupSetAttributeId( ih, "ADDLEAF", id, toStringz( _title ) );
+											IupSetAttributeId( ih, "TITLEFONT", id + 1, toStringz( GLOBAL.fonts[8].fontString ) );
+										}
+									}
+
+									return IUP_IGNORE;
+								}
+							}
 						}
 					}
 				}
@@ -2300,12 +2309,12 @@ version(FBIDE)
 					if( !Util.contains( title, '=' ) ) return IUP_DEFAULT;
 
 					Ihandle* itemVALUE = IupItem( GLOBAL.languageItems["showvalue"].toCString, null );//IupItem( GLOBAL.languageItems["none"].toCString, null );
-					IupSetAttributes( itemVALUE, "NAME=WATCHLIST,IMAGE=icon_debug_star" );
-					IupSetCallback( itemVALUE, "ACTION", cast(Icallback) &itemVALUE_ACTION );
+					IupSetAttributes( itemVALUE, "NAME=WATCHLIST_VALUE,IMAGE=icon_debug_star" );
+					IupSetCallback( itemVALUE, "ACTION", cast(Icallback) &itemRightClick_ACTION );
 
 					Ihandle* itemADDRESS = IupItem( GLOBAL.languageItems["showaddress"].toCString, null );//IupItem( GLOBAL.languageItems["none"].toCString, null );
-					IupSetAttributes( itemADDRESS, "NAME=WATCHLIST,IMAGE=icon_debug_at" );
-					IupSetCallback( itemADDRESS, "ACTION", cast(Icallback) &itemADDRESS_ACTION );
+					IupSetAttributes( itemADDRESS, "NAME=WATCHLIST_ADDRESS,IMAGE=icon_debug_at" );
+					IupSetCallback( itemADDRESS, "ACTION", cast(Icallback) &itemRightClick_ACTION );
 
 					Ihandle* itemADDLIST = IupItem( GLOBAL.languageItems["addtowatch"].toCString, null );//IupItem( GLOBAL.languageItems["none"].toCString, null );
 					IupSetAttribute( itemADDLIST, "IMAGE", "icon_debug_add" );
@@ -2313,8 +2322,8 @@ version(FBIDE)
 					{
 						int _id = IupGetInt( GLOBAL.debugPanel.watchTreeHandle, "VALUE" );
 						char[] title = fromStringz( IupGetAttributeId( GLOBAL.debugPanel.watchTreeHandle, "TITLE", _id ) );
-						char[] varName = GLOBAL.debugPanel.getFullVarNameInTree( GLOBAL.debugPanel.watchTreeHandle, true );						
-								
+						char[] varName = GLOBAL.debugPanel.getFullVarNameInTree( GLOBAL.debugPanel.watchTreeHandle, _id, true );						
+
 						if( title.length )
 							if( title[0] == '*' ) varName = "*" ~ varName;
 
@@ -2325,18 +2334,21 @@ version(FBIDE)
 					});
 
 
-					char* ids = IupGetAttributeId( GLOBAL.debugPanel.watchTreeHandle, "USERDATA", id );
-					if( ids != null ) IupSetAttribute( itemADDLIST, "ACTIVE", "NO" );
+					// Check with ID
+					if( title[0] > 47 && title[0] < 58 )
+					{
+						IupSetAttribute( itemADDLIST, "ACTIVE", "NO" );
+						int	colonspacePos = Util.index( title, ": " );
+						if( colonspacePos < title.length ) title = title[colonspacePos+2..$].dup;
+					}
+
+					if( title[0] == '&' ) IupSetAttribute( itemADDRESS, "ACTIVE", "NO" );
 					
 					int closeParenPos = Util.rindex( title, ")" );
 					if( closeParenPos < title.length && closeParenPos > 0 )
 					{
 						if( title[closeParenPos-1] != '*' ) IupSetAttribute( itemVALUE, "ACTIVE", "NO" ); else IupSetAttribute( itemADDRESS, "ACTIVE", "NO" );
 					}
-					
-					if( title.length )
-						if( title[0] == '@' ) IupSetAttribute( itemADDRESS, "ACTIVE", "NO" );					
-					
 					
 					
 					if( fromStringz( IupGetAttribute( itemADDLIST, "ACTIVE" ) ) == "NO" &&
@@ -2354,11 +2366,11 @@ version(FBIDE)
 					IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
 					IupDestroy( popupMenu );
 				}
-				
 			}
 
 			return IUP_DEFAULT;
 		}
+		
 
 		private int treeBUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 		{
@@ -2367,7 +2379,48 @@ version(FBIDE)
 				if( DocumentTabAction.isDoubleClick( status ) )
 				{
 					int id = IupConvertXYToPos( ih, x, y );
-					if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ).dup == "BRANCH" ) return GLOBAL.debugPanel.expandVarTree( ih, id );
+					if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "BRANCH" )
+					{
+						if( IupGetIntId( ih, "TOTALCHILDCOUNT", id ) == 0 )
+						{
+							char[] title = fromStringz( IupGetAttributeId( ih, "TITLE",id ) ).dup;
+							char[] fullVarName = GLOBAL.debugPanel.getFullVarNameInTree( ih, id );
+							if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
+							
+							VarObject[] variables = GLOBAL.debugPanel.getTypeVarValueByLinesFromPrint( GLOBAL.debugPanel.getPrint( fullVarName ), fullVarName );
+							
+							if( variables.length )
+							{
+								foreach( VarObject _vo; variables )
+								{
+									char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~ _vo.type ~ ") " : "" ) ~ _vo.value;
+									if( _vo.value == "{...}" ) IupSetAttributeId( ih, "ADDBRANCH", id, toStringz( _title ) ); else IupSetAttributeId( ih, "ADDLEAF", id, toStringz( _title ) );
+									IupSetAttributeId( ih, "TITLEFONT", id + 1, toStringz( GLOBAL.fonts[8].fontString ) );
+								}							
+							}
+
+							return IUP_IGNORE;
+						}
+					}
+					else // LEAF
+					{
+						char[]		title = fromStringz( IupGetAttributeId( ih, "TITLE", id ) ).dup; // Get Tree Title
+						char[]		fullVarName = GLOBAL.debugPanel.getFullVarNameInTree( ih, id, true );
+						
+						if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
+						
+						scope varDlg = new CVarDlg( 360, -1, "Evaluate " ~ fullVarName, "Value = " );
+						char[] value = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+
+						if( value == "#_close_#" ) return IUP_DEFAULT;
+						
+						int assignPos = Util.index( title, " = " );
+						GLOBAL.debugPanel.sendCommand( "set var " ~ fullVarName ~ " = " ~  value ~ "\n", false );
+
+						int posCloseParen = Util.index( title, ") " );
+						if( posCloseParen < title.length ) IupSetAttributeId( ih, "TITLE", id, toStringz( title[0..posCloseParen+2] ~ value ) );else IupSetAttributeId( ih, "TITLE", id, toStringz( title[0..assignPos+3] ~ value ) );
+						return IUP_IGNORE;
+					}					
 				}
 			}
 			else if( button == IUP_BUTTON3 )
@@ -2382,12 +2435,12 @@ version(FBIDE)
 					if( !Util.contains( title, '=' ) ) return IUP_DEFAULT;
 					
 					Ihandle* itemVALUE = IupItem( GLOBAL.languageItems["showvalue"].toCString, null );//IupItem( GLOBAL.languageItems["none"].toCString, null );
-					IupSetAttributes( itemVALUE, "NAME=VARIABLES,IMAGE=icon_debug_star" );
-					IupSetCallback( itemVALUE, "ACTION", cast(Icallback) &itemVALUE_ACTION );
+					IupSetAttributes( itemVALUE, "NAME=VARIABLES_VALUE,IMAGE=icon_debug_star" );
+					IupSetCallback( itemVALUE, "ACTION", cast(Icallback) &itemRightClick_ACTION );
 					
 					Ihandle* itemADDRESS = IupItem( GLOBAL.languageItems["showaddress"].toCString, null );//IupItem( GLOBAL.languageItems["none"].toCString, null );
-					IupSetAttributes( itemADDRESS, "NAME=VARIABLES,IMAGE=icon_debug_at" );
-					IupSetCallback( itemADDRESS, "ACTION", cast(Icallback) &itemADDRESS_ACTION );
+					IupSetAttributes( itemADDRESS, "NAME=VARIABLES_ADDRESS,IMAGE=icon_debug_at" );
+					IupSetCallback( itemADDRESS, "ACTION", cast(Icallback) &itemRightClick_ACTION );
 					
 					int closeParenPos = Util.rindex( title, ")" );
 					if( closeParenPos < title.length && closeParenPos > 0 )
@@ -2432,179 +2485,127 @@ version(FBIDE)
 
 		private int varTabChange_cb( Ihandle* ih, int new_pos, int old_pos )
 		{
+			char[] nowFrameFullTitle = GLOBAL.debugPanel.getFrameNodeTitle( true ); // -1 = Get Active; true = Get Full Title
+			
 			switch( new_pos )
 			{
 				case 0:
-					GLOBAL.debugPanel.sendCommand( "info locals\n", false );
+					if( nowFrameFullTitle != GLOBAL.debugPanel.localTreeFrame )
+					{
+						GLOBAL.debugPanel.localTreeFrame = nowFrameFullTitle;
+						GLOBAL.debugPanel.sendCommand( "info locals\n", false );
+					}
 					break;
+					
 				case 1:
-					GLOBAL.debugPanel.sendCommand( "info args\n", false );
+					if( nowFrameFullTitle != GLOBAL.debugPanel.argTreeFrame )
+					{
+						GLOBAL.debugPanel.argTreeFrame = nowFrameFullTitle;
+						GLOBAL.debugPanel.sendCommand( "info args\n", false );
+					}
 					break;
+					
 				case 2:
-					GLOBAL.debugPanel.sendCommand( "info variables\n", false );
+					if( nowFrameFullTitle != GLOBAL.debugPanel.shareTreeFrame )
+					{
+						GLOBAL.debugPanel.shareTreeFrame = nowFrameFullTitle;
+						GLOBAL.debugPanel.sendCommand( "info variables\n", false );
+					}
 					break;
+					
 				default:
 			}
 			return IUP_DEFAULT;
 		}
+
 		
-		private int itemVALUE_ACTION( Ihandle* ih )
+		private int itemRightClick_ACTION( Ihandle* ih )
 		{
-			Ihandle* _ih;
+			Ihandle*	_ih;
+			bool		bGetADDRESS;
+			char[]		name = fromStringz( IupGetAttribute( ih, "NAME" ) ).dup;
 			
-			//IupMessage( "", IupGetAttribute( ih, "NAME" ) );
+			if( Util.containsPattern( name, "VARIABLES" ) ) _ih = cast(Ihandle*) IupGetAttribute( GLOBAL.debugPanel.getVarsTabHandle, "VALUE_HANDLE" ); else _ih = GLOBAL.debugPanel.watchTreeHandle;
+			if( Util.containsPattern( name, "ADDRESS" ) ) bGetADDRESS = true;
 			
-			if( fromStringz( IupGetAttribute( ih, "NAME" ) ) == "VARIABLES" )
-				_ih = cast(Ihandle*) IupGetAttribute( GLOBAL.debugPanel.getVarsTabHandle, "VALUE_HANDLE" );
-			else
-				_ih = GLOBAL.debugPanel.watchTreeHandle;
-				
 
 			if( _ih != null )
 			{
-				int _id = IupGetInt( _ih, "VALUE" );
-				char[] title = fromStringz( IupGetAttributeId( _ih, "TITLE", _id ) );
-				char[] originTitle = title;
+				bool	bHasMember, bHasStar;
+				char[]	varFullName;
+				int		_id = IupGetInt( _ih, "VALUE" );
+				char[]	title = fromStringz( IupGetAttributeId( _ih, "TITLE", _id ) ).dup;
 				
-				int assignPos = Util.index( title, "=" );
-				if( assignPos < title.length )
+				
+				int closeParenPos = Util.rindex( title, ") " );
+				if( closeParenPos < title.length)
+					if( title[closeParenPos-1] == '*' ) bHasStar = true;
+				
+				
+				title = GLOBAL.debugPanel.removeIDTitle( title );
+				if( title.length )
 				{
-					char[] varName;
-					if( title.length )
+					if( bGetADDRESS )
 					{
-						if( title[0] == '*' || title[0] == '@' )
-							varName = GLOBAL.debugPanel.getFullVarNameInTree( _ih, true );
-						else
-							varName = "*" ~ GLOBAL.debugPanel.getFullVarNameInTree( _ih, true );
-					}					
-
-					char[] typeName, value;
-					title = GLOBAL.debugPanel.getTypeValueByName( varName, title, typeName, value );
-
-					if( title.length )
-					{
-						if( value.length )
-						{
-							if( title[0] != '*' && originTitle[0] != '@' )
-							{
-								title = "*" ~ title;
-							}
-							
-							if( value[0] == '{' )
-							{
-								IupSetAttributeId( _ih, "INSERTBRANCH", _id, toStringz( title.dup ) );
-								if( _ih != GLOBAL.debugPanel.watchTreeHandle )
-									IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
-								/*
-								else
-								{
-									if( IupGetIntId( _ih, "DEPTH", _id ) == 0 )
-									{
-										char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
-										IupSetAttributeId( _ih, "TITLEFONT", _id + 1, toStringz( fontString ) );
-									}
-								}
-								*/
-							}
-							else
-							{
-								IupSetAttributeId( _ih, "INSERTLEAF", _id, toStringz( title.dup ) );
-								if( _ih != GLOBAL.debugPanel.watchTreeHandle ) 
-									IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
-								/*
-								else
-								{
-									if( IupGetIntId( _ih, "DEPTH", _id ) == 0 )
-									{
-										char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
-										IupSetAttributeId( _ih, "TITLEFONT", _id + 1, toStringz( fontString ) );
-									}
-								}
-								*/
-							}
-						}
+						if( title[0] == '*' || title[0] == '&' || bHasStar ) varFullName = GLOBAL.debugPanel.getFullVarNameInTree( _ih, _id, true ); else varFullName = "&" ~ GLOBAL.debugPanel.getFullVarNameInTree( _ih, _id, true );
 					}
-				}
-			}
-
-			return IUP_DEFAULT;
-		}
-		
-		private int itemADDRESS_ACTION( Ihandle* ih )
-		{
-			Ihandle* _ih;
-			
-			if( fromStringz( IupGetAttribute( ih, "NAME" ) ) == "VARIABLES" )
-				_ih = cast(Ihandle*) IupGetAttribute( GLOBAL.debugPanel.getVarsTabHandle, "VALUE_HANDLE" );
-			else
-				_ih = GLOBAL.debugPanel.watchTreeHandle;
-				
-
-			if( _ih != null )
-			{
-				int _id = IupGetInt( _ih, "VALUE" );
-				char[] title = fromStringz( IupGetAttributeId( _ih, "TITLE", _id ) );
-				char[] originTitle = title;
-				
-				int assignPos = Util.index( title, "=" );
-				if( assignPos < title.length )
-				{
-					char[] varName;
-					if( title.length )
+					else
 					{
-						if( title[0] == '*' || title[0] == '@' )
-							varName = GLOBAL.debugPanel.getFullVarNameInTree( _ih, true );
-						else
-							varName = "&" ~ GLOBAL.debugPanel.getFullVarNameInTree( _ih, true );
+						if( title[0] == '*' || title[0] == '&' ) varFullName = GLOBAL.debugPanel.getFullVarNameInTree( _ih, _id, true ); else varFullName = "*" ~ GLOBAL.debugPanel.getFullVarNameInTree( _ih, _id, true );
+					}
+				
+					char[]	gdbMessage = GLOBAL.debugPanel.getPrint( varFullName );
+					if( gdbMessage == "?" ) return IUP_DEFAULT;
+					
+					
+					int		openPos = Util.index( gdbMessage, "{" );
+					if( openPos < gdbMessage.length )
+					{
+						bHasMember = true;
+						gdbMessage = ( gdbMessage[0..openPos] ~ "{...}" ).dup;
 					}
 					
-					char[] typeName, value;
-					title = GLOBAL.debugPanel.getTypeValueByName( varName, title, typeName, value );
-
-					if( title.length )
+					// Insert type if need....
+					int closePos = Util.rindex( gdbMessage, ") " );
+					if( closePos >= gdbMessage.length )
 					{
-						if( value.length && varName.length )
+						char[] type = GLOBAL.debugPanel.getWhatIs( varFullName );
+						if( type != "?" ) gdbMessage = "(" ~ type ~ ") " ~ gdbMessage;
+					
+					}
+					
+					title = varFullName ~ " = " ~ gdbMessage;
+					
+					if( bHasMember )
+					{
+						IupSetAttributeId( _ih, "INSERTBRANCH", _id, toStringz( title ) );
+						IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 0 255" );
+						IupSetAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[8].fontString ) );
+						//if( _ih != GLOBAL.debugPanel.watchTreeHandle ) IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
+					}
+					else
+					{
+						IupSetAttributeId( _ih, "INSERTLEAF", _id, toStringz( title ) );
+						IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 0 255" );
+						IupSetAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[8].fontString ) );
+						//if( _ih != GLOBAL.debugPanel.watchTreeHandle ) IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
+					}
+					
+					if( _ih == GLOBAL.debugPanel.watchTreeHandle )
+					{
+						Ihandle* messageDlg = IupMessageDlg();
+						IupSetAttribute( messageDlg, "BUTTONS", "YESNO");
+						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["addtowatch"].toDString ~ "?" ) );
+						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
+						if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 1 )
 						{
-							if( title[0] == '&' ) title[0] = '@';
-							if( originTitle[0] != '*' && title[0] != '@' ) title = "@" ~ title;
-							
-							if( value[0] == '{' )
-							{
-								IupSetAttributeId( _ih, "INSERTBRANCH", _id, toStringz( title.dup ) );
-								if( _ih != GLOBAL.debugPanel.watchTreeHandle )
-									IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
-								/*
-								else
-								{
-									if( IupGetIntId( _ih, "DEPTH", _id ) == 0 )
-									{
-										char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
-										IupSetAttributeId( _ih, "TITLEFONT", _id + 1, toStringz( fontString ) );
-									}
-								}
-								*/
-							}
-							else
-							{
-								IupSetAttributeId( _ih, "INSERTLEAF", _id, toStringz( title.dup ) );
-								if( _ih != GLOBAL.debugPanel.watchTreeHandle ) 
-									IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
-								/*
-								else
-								{
-									if( IupGetIntId( _ih, "DEPTH", _id ) == 0 )
-									{
-										char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
-										IupSetAttributeId( _ih, "TITLEFONT", _id + 1, toStringz( fontString ) );
-									}
-								}
-								*/
-							}
+							IupSetAttributeId( _ih, "DELNODE", IupGetIntId( _ih, "NEXT", _id ), "SELECTED" );
+							GLOBAL.debugPanel.sendCommand( "display " ~ varFullName ~ "\n", false );
 						}
 					}
 				}
 			}
-
+			
 			return IUP_DEFAULT;
 		}		
 	}

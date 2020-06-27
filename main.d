@@ -25,12 +25,7 @@ version(Windows)
 {
 	import tango.sys.win32.UserGdi;
 	
-	pragma(lib, "gdi32.lib");
-	pragma(lib, "user32.lib");
-	pragma(lib, "comdlg32.lib");
-	pragma(lib, "comctl32.lib");
-	pragma(lib, "winmm.lib");
-	pragma(lib, "ole32.lib");
+	pragma(lib, "winmm.lib"); // For PlaySound()
 	pragma(lib, "iup.lib");
 	pragma(lib, "iup_scintilla.lib"); 
 }

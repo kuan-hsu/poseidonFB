@@ -329,6 +329,62 @@ int getINILineData( char[] lineData, out char[] left, out char[] right )
 	return 0;
 }
 
+version(linux) char[] modifyLinuxDropFileName( char[] _fn )
+{
+	char[] result;
+	
+	for( int i = 0; i < _fn.length; ++ i )
+	{
+		if( _fn[i] != '%' )
+		{
+			result ~= _fn[i];
+		}
+		else
+		{
+			if( i + 2 < _fn.length )
+			{
+				char _a = _fn[i+1];
+				char _b = _fn[i+2];
+				
+				char computeValue;
+				
+				
+				if( _a >= '0' && _a <= '9' )
+				{
+					computeValue = ( _a - 48 ) * 16;
+				}
+				else if( _a >= 'A' && _a <= 'F' )
+				{
+					computeValue = ( _a - 55 ) * 16;
+				}
+				else
+				{
+					break;
+				}
+				
+				if( _b >= '0' && _b <= '9' )
+				{
+					computeValue += ( _b - 48 );
+				}
+				else if( _b >= 'A' && _b <= 'F' )
+				{
+					computeValue += ( _b - 55 );
+				}
+				else
+				{
+					break;
+				}
+		
+				result ~= cast(char)computeValue;
+				
+				i += 2;
+			}
+		}
+	}
+	
+	return result;
+}
+
 version(DIDE)
 {
 	char[] convertGoUPLevel( char[] oriPath )

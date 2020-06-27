@@ -918,8 +918,8 @@ struct GLOBAL
 		GLOBAL.languageItems["wrongext"] = new IupString( cast(char[]) "Wrong Ext Name!" );
 		GLOBAL.languageItems["filelost"] = new IupString( cast(char[]) "isn't existed!" );
 		GLOBAL.languageItems[".poseidonbroken"] = new IupString( cast(char[]) "Project setup file loading error!" );
-		GLOBAL.languageItems[".poseidonlost"] = new IupString( cast(char[]) "had lost setting xml file!" );
-		GLOBAL.languageItems["continueimport"] = new IupString( cast(char[]) "The Dir has poseidon Project File, Continue Import Anyway?" );
+		GLOBAL.languageItems[".poseidonlost"] = new IupString( cast(char[]) "The directory has lost / no project setup file!" );
+		GLOBAL.languageItems["continueimport"] = new IupString( cast(char[]) "The directory has poseidon project setup file, continue import anyway?" );
 		GLOBAL.languageItems["compilefailure"] = new IupString( cast(char[]) "Compile Failure!" );
 		GLOBAL.languageItems["compilewarning"] = new IupString( cast(char[]) "Compile Done, But Got Warnings!" );
 		GLOBAL.languageItems["compileok"] = new IupString( cast(char[]) "Compile Success!" );
@@ -936,6 +936,7 @@ struct GLOBAL
 		GLOBAL.languageItems["foundnothing"] = new IupString( cast(char[]) "Found Nothing!" );
 		GLOBAL.languageItems["pluginrunningunload"] = new IupString( cast(char[]) "Plugin Is Running, Unload The Plugin?" );
 		GLOBAL.languageItems["onlytools"] = new IupString( cast(char[]) "Only Support 12 Tools!" );
+		GLOBAL.languageItems["createnewone"] = new IupString( cast(char[]) "Create new one?" );
 
 		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
 		version(FBIDE)
