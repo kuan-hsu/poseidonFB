@@ -4,7 +4,7 @@
 private import iup.iup, iup.iup_scintilla;
 
 private import global, scintilla, actionManager, menu;
-private import dialogs.singleTextDlg, dialogs.fileDlg;
+private import dialogs.singleTextDlg;
 private import parser.ast, tools;
 
 private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.io.Stdout, Path = tango.io.Path, Util = tango.text.Util; //, tango.core.Thread;
@@ -646,7 +646,7 @@ version(FBIDE)
 
 			char[]			data;
 			VarObject[]		vos;
-			
+
 			/*
 			{SCI = 0x2ab2bb0, _P = {X = 100, Y = 200}, P = 0x1eaf584}						
 			*/
@@ -833,14 +833,30 @@ version(FBIDE)
 							char[] _title = numID ~ variables[i].name ~ " = " ~ ( variables[i].type.length ? "(" ~  variables[i].type ~ ") " : "" ) ~ variables[i].value;
 							IupSetAttributeId( treeHandle, "TITLE", motherID, toStringz( _title ) );
 							if( variables[i].value != _voFromNode.value ) IupSetAttributeId( treeHandle, "COLOR", motherID, "255 0 0" ); else IupSetAttributeId( treeHandle, "COLOR", motherID, "0 0 0" );
-							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[8].fontString ) );
+							if( treeHandle == watchTreeHandle && numID.length )
+							{
+								char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
+								IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( fontString ) );
+							}
+							else
+							{
+								IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[8].fontString ) );
+							}
 						}
 						else
 						{
 							// Insert same deep
 							char[] _title = numID ~ variables[i].name ~ " = " ~ ( variables[i].type.length ? "(" ~  variables[i].type ~ ") " : "" ) ~ variables[i].value;
 							if( variables[i].value == "{...}" ) IupSetAttributeId( treeHandle, "INSERTBRANCH", motherID, toStringz( _title.dup ) ); else IupSetAttributeId( treeHandle, "INSERTLEAF", motherID, toStringz( _title.dup ) );
-							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[8].fontString ) );
+							if( treeHandle == watchTreeHandle && numID.length )
+							{
+								char[] fontString = Util.substitute( GLOBAL.fonts[8].fontString.dup, ",", ",Bold " );
+								IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( fontString ) );
+							}
+							else
+							{
+								IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[8].fontString ) );
+							}
 							
 							// Remove old node 
 							IupSetAttributeId( treeHandle, "DELNODE", motherID, "SELECTED" );
@@ -852,7 +868,9 @@ version(FBIDE)
 							if( fromStringz( IupGetAttributeId( treeHandle, "STATE", motherID ) ) == "EXPANDED" )
 							{
 								char[] fullVarName = getFullVarNameInTree( treeHandle, motherID );
-								VarObject[] _vos = getTypeVarValueByLinesFromPrint( getPrint( fullVarName ), fullVarName );
+								//if( variables[i].name[0] == '*' ) fullVarName = "*" ~ fullVarName;
+								
+								VarObject[] _vos = getTypeVarValueByLinesFromPrint( getPrint( variables[i].name[0] == '*' ? "*" ~ fullVarName : fullVarName ), fullVarName );
 								if( _vos.length ) updateInfoTree( _vos, treeHandle, motherID + 1 );
 							}
 						}
@@ -1854,7 +1872,7 @@ version(FBIDE)
 			IupDestroy( _dlg );
 		}		
 	}
-
+	
 
 	class DebugThread //: Thread
 	{
@@ -1971,6 +1989,7 @@ version(FBIDE)
 				
 				version(Windows)
 				{
+					debuggerExe = GLOBAL.toolbar.checkBitButtonStatus() == 32 ? GLOBAL.debuggerFullPath.toDString : GLOBAL.x64debuggerFullPath.toDString;
 					foreach( char[] s; GLOBAL.EnvironmentVars.keys )
 					{
 						debuggerExe = Util.substitute( debuggerExe, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
@@ -2277,9 +2296,9 @@ version(FBIDE)
 								{
 									char[] title = fromStringz( IupGetAttributeId( ih, "TITLE",id ) ).dup;
 									title = GLOBAL.debugPanel.removeIDTitle( title );
-									if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
+									//if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
 								
-									VarObject[] variables = GLOBAL.debugPanel.getTypeVarValueByLinesFromPrint( GLOBAL.debugPanel.getPrint( fullVarName ), fullVarName );
+									VarObject[] variables = GLOBAL.debugPanel.getTypeVarValueByLinesFromPrint( GLOBAL.debugPanel.getPrint( title[0] == '*' ? "*" ~ fullVarName : fullVarName ), fullVarName );
 									
 									if( variables.length )
 									{
@@ -2385,9 +2404,9 @@ version(FBIDE)
 						{
 							char[] title = fromStringz( IupGetAttributeId( ih, "TITLE",id ) ).dup;
 							char[] fullVarName = GLOBAL.debugPanel.getFullVarNameInTree( ih, id );
-							if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
+							//if( title[0] == '*' ) fullVarName = "*" ~ fullVarName;
 							
-							VarObject[] variables = GLOBAL.debugPanel.getTypeVarValueByLinesFromPrint( GLOBAL.debugPanel.getPrint( fullVarName ), fullVarName );
+							VarObject[] variables = GLOBAL.debugPanel.getTypeVarValueByLinesFromPrint( GLOBAL.debugPanel.getPrint( title[0] == '*' ? "*" ~ fullVarName : fullVarName ), fullVarName );
 							
 							if( variables.length )
 							{
@@ -2593,11 +2612,8 @@ version(FBIDE)
 					
 					if( _ih == GLOBAL.debugPanel.watchTreeHandle )
 					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttribute( messageDlg, "BUTTONS", "YESNO");
-						IupSetAttribute( messageDlg, "VALUE", toStringz( GLOBAL.languageItems["addtowatch"].toDString ~ "?" ) );
-						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
-						if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 1 )
+						int _result = IupMessageAlarm( null, "GDB", toStringz( GLOBAL.languageItems["addtowatch"].toDString ~ "?" ), "YESNO" );
+						if( _result == 1 )
 						{
 							IupSetAttributeId( _ih, "DELNODE", IupGetIntId( _ih, "NEXT", _id ), "SELECTED" );
 							GLOBAL.debugPanel.sendCommand( "display " ~ varFullName ~ "\n", false );

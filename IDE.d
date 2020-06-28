@@ -350,6 +350,7 @@ public:
 			doc ~= setINILineData( "compilerpath", GLOBAL.compilerFullPath.toDString );
 			doc ~= setINILineData( "x64compilerpath", GLOBAL.x64compilerFullPath.toDString );
 			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath.toDString );
+			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath.toDString );
 			doc ~= setINILineData( "terminalpath", GLOBAL.linuxTermName.toDString );
 			//doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
@@ -761,6 +762,7 @@ public:
 								break;
 							case "x64compilerpath":			version(FBIDE) GLOBAL.x64compilerFullPath = right;		break;
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
+							case "x64debuggerpath":			GLOBAL.x64debuggerFullPath = right;						break;
 							case "terminalpath":			GLOBAL.linuxTermName = right;							break;
 							//case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;

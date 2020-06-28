@@ -41,6 +41,7 @@ name=layouts/outlinePanel.d
 name=layouts/projectPanel.d
 name=layouts/statusBar.d
 name=layouts/tabDocument.d
+name=layouts/table.d
 name=layouts/toolbar.d
 name=main.d
 name=menu.d

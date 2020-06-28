@@ -157,7 +157,7 @@ struct GLOBAL
 	static char[]				delExistExe = "ON";
 	static char[]				consoleExe = "OFF";
 	static char[]				toggleCompileAtBackThread = "OFF";
-	static IupString			debuggerFullPath;
+	static IupString			debuggerFullPath, x64debuggerFullPath;
 	static IupString			linuxTermName;	
 	static char[][]				manuals;
 	//static IupString			colorTemplate;
@@ -325,6 +325,7 @@ struct GLOBAL
 		GLOBAL.compilerFullPath = new IupString();
 		GLOBAL.x64compilerFullPath = new IupString();
 		GLOBAL.debuggerFullPath = new IupString();
+		GLOBAL.x64debuggerFullPath = new IupString();
 		GLOBAL.linuxTermName = new IupString();
 		//GLOBAL.colorTemplate = new IupString();
 		//GLOBAL.defaultOption = new IupString();
@@ -607,6 +608,7 @@ struct GLOBAL
 				GLOBAL.languageItems["compiler"] = new IupString( cast(char[]) "Compiler" );
 					GLOBAL.languageItems["compilerpath"] = new IupString( cast(char[]) "Compiler Path" );
 					GLOBAL.languageItems["debugpath"] = new IupString( cast(char[]) "Debugger Path" );
+					GLOBAL.languageItems["debugx64path"] = new IupString( cast(char[]) "Debugger x64 Path" );
 					GLOBAL.languageItems["terminalpath"] = new IupString( cast(char[]) "Terminal Path" );
 					GLOBAL.languageItems["x64path"] = new IupString( cast(char[]) "x64 Path" );
 					GLOBAL.languageItems["compileropts"] = new IupString( cast(char[]) "Compiler Opts" );
@@ -691,6 +693,10 @@ struct GLOBAL
 							//'debug=Debug
 							GLOBAL.languageItems["annotation"] = new IupString( cast(char[]) "Annotation" );
 							GLOBAL.languageItems["statusbar"] = new IupString( cast(char[]) "StatusBar" );
+							GLOBAL.languageItems["item"] = new IupString( cast(char[]) "Item" );
+							GLOBAL.languageItems["face"] = new IupString( cast(char[]) "Face" );
+							GLOBAL.languageItems["style"] = new IupString( cast(char[]) "Style" );
+							GLOBAL.languageItems["size"] = new IupString( cast(char[]) "Size" );
 						GLOBAL.languageItems["color"] = new IupString( cast(char[]) "Color" );
 							GLOBAL.languageItems["colorfile"] = new IupString( cast(char[]) "Color Template" );
 							GLOBAL.languageItems["caretline"] = new IupString( cast(char[]) "Caret Line" );
