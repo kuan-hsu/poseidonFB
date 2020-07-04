@@ -4,10 +4,10 @@
 private import iup.iup, iup.iup_scintilla;
 
 private import global, scintilla, actionManager, menu;
-private import dialogs.singleTextDlg;
+private import dialogs.singleTextDlg, layouts.table;
 private import parser.ast, tools;
 
-private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.io.Stdout, Path = tango.io.Path, Util = tango.text.Util; //, tango.core.Thread;
+private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.io.Stdout, Path = tango.io.Path, Util = tango.text.Util;
 
 
 version(FBIDE)
@@ -26,8 +26,9 @@ version(FBIDE)
 		import 					tango.io.FilePath;
 
 		Ihandle*				txtConsoleCommand;
-		Ihandle* 				mainHandle, consoleHandle, backtraceHandle, tabResultsHandle, bpListHandle, regListHandle;
+		Ihandle* 				mainHandle, consoleHandle, backtraceHandle, tabResultsHandle, disasHandle;
 		Ihandle*				watchTreeHandle, localTreeHandle, argTreeHandle, shareTreeHandle, varTabHandle;
+		CTable					bpTable, regTable;
 		DebugThread				DebugControl;
 		bool					bRunning;
 		char[]					localTreeFrame, argTreeFrame, shareTreeFrame;
@@ -60,11 +61,11 @@ version(FBIDE)
 			
 			
 			IupSetAttributes( btnClear, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_clear" );				IupSetAttribute( btnClear, "TIP", GLOBAL.languageItems["clear"].toCString );
-			IupSetAttributes( btnResume, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_resume" );				IupSetAttribute( btnResume, "TIP", GLOBAL.languageItems["runcontinue"].toCString );
-			IupSetAttributes( btnStop, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_stop" );					IupSetAttribute( btnStop, "TIP", GLOBAL.languageItems["stop"].toCString );
-			IupSetAttributes( btnStep, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_step" );					IupSetAttribute( btnStep, "TIP", GLOBAL.languageItems["step"].toCString );
-			IupSetAttributes( btnNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_next" );					IupSetAttribute( btnNext, "TIP", GLOBAL.languageItems["next"].toCString );
-			IupSetAttributes( btnReturn, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_return" );				IupSetAttribute( btnReturn, "TIP", GLOBAL.languageItems["return"].toCString );
+			IupSetAttributes( btnResume, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_resume" );			IupSetAttribute( btnResume, "TIP", GLOBAL.languageItems["runcontinue"].toCString );
+			IupSetAttributes( btnStop, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_stop" );				IupSetAttribute( btnStop, "TIP", GLOBAL.languageItems["stop"].toCString );
+			IupSetAttributes( btnStep, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_step" );				IupSetAttribute( btnStep, "TIP", GLOBAL.languageItems["step"].toCString );
+			IupSetAttributes( btnNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_next" );				IupSetAttribute( btnNext, "TIP", GLOBAL.languageItems["next"].toCString );
+			IupSetAttributes( btnReturn, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_return" );			IupSetAttribute( btnReturn, "TIP", GLOBAL.languageItems["return"].toCString );
 			IupSetAttributes( btnUntil, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_until" );				IupSetAttribute( btnUntil, "TIP", GLOBAL.languageItems["until"].toCString );
 			IupSetAttributes( btnTerminate, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnTerminate, "TIP", GLOBAL.languageItems["terminate"].toCString );
 			
@@ -228,12 +229,13 @@ version(FBIDE)
 			{
 				if( GLOBAL.debugPanel.isRunning )
 				{
-					scope varDlg = new CVarDlg( 260, 96, "Add Display Variable...", "Var Name:" );
+					scope varDlg = new CVarDlg( 260, -1, "Add Display Variable...", "Var Name:" );
 					char[] varName = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 					if( varName == "#_close_#" ) return IUP_DEFAULT;
 
 					GLOBAL.debugPanel.sendCommand( "display " ~ upperCase( Util.trim( varName ) ) ~ "\n", false );
+					return IUP_IGNORE;
 				}
 				return IUP_DEFAULT;
 			});
@@ -279,14 +281,42 @@ version(FBIDE)
 
 
 			// Breakpoint
-			bpListHandle = IupList( null );
-			IupSetAttributes( bpListHandle, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES,AUTOHIDE=YES" );
-			Ihandle* bpFrame = IupFrame( bpListHandle );
-			IupSetAttribute( bpFrame, "TITLE", " ID    Line   File");
-			IupSetAttribute( bpFrame, "EXPANDCHILDREN", "YES");
+			bpTable = new CTable();
+			bpTable.setAction( &CDebugger_memberSelect );
+			
+			bpTable.addColumn( GLOBAL.languageItems["id"].toDString );
+			bpTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
+			bpTable.addColumn( GLOBAL.languageItems["line"].toDString );
+			bpTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
+			bpTable.setSplitAttribute( "VALUE", "500" );
+			bpTable.addColumn( GLOBAL.languageItems["fullpath"].toDString );
+			bpTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
+			bpTable.setSplitAttribute( "VALUE", "100" );
+			bpTable.setItemAttribute( "BGCOLOR", "204 255 255", 0 );
+			bpTable.setItemAttribute( "BGCOLOR", "255 255 204", 1 );
+			
+			regTable = new CTable();
+			regTable.setAction( &CDebugger_memberSelect );
+			regTable.setDBLCLICK_CB( &CDebugger_doubleClick );
+			
+			regTable.addColumn( GLOBAL.languageItems["id"].toDString );
+			regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
+			regTable.addColumn( GLOBAL.languageItems["name"].toDString );
+			regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
+			regTable.setSplitAttribute( "VALUE", "500" );
+			regTable.addColumn( GLOBAL.languageItems["value"].toDString );
+			regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
+			regTable.setSplitAttribute( "VALUE", "300" );
+			regTable.addColumn( GLOBAL.languageItems["value"].toDString );
+			regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
+			regTable.setSplitAttribute( "VALUE", "300" );
+			regTable.setItemAttribute( "BGCOLOR", "204 255 255", 0 );
+			regTable.setItemAttribute( "BGCOLOR", "255 255 204", 1 );
+			
+			
+			disasHandle = IupText( null );
+			IupSetAttributes( disasHandle, "EXPAND=YES,MULTILINE=YES,READONLY=YES,FORMATTING=YES" );
 
-			regListHandle = IupList( null );
-			IupSetAttributes( regListHandle, "MULTIPLE=NO,MARGIN=10x10,VISIBLELINES=YES,EXPAND=YES,AUTOHIDE=YES" );
 			
 			version(Windows)
 			{
@@ -299,9 +329,9 @@ version(FBIDE)
 				
 				//IupSetAttribute( var0Frame, "FONT", "Courier New,10" );
 				//IupSetAttribute( var1Frame, "FONT", "Courier New,10" );
-				IupSetAttribute( bpListHandle, "FONT", "Courier New,10" );
-				IupSetAttribute( bpFrame, "FONT", "Courier New,10" );
-				IupSetAttribute( regListHandle, "FONT", "Courier New,10" );
+				//IupSetAttribute( bpListHandle, "FONT", "Courier New,10" );
+				//IupSetAttribute( bpFrame, "FONT", "Courier New,10" );
+				//IupSetAttribute( regListHandle, "FONT", "Courier New,10" );
 			}
 			else
 			{
@@ -313,18 +343,20 @@ version(FBIDE)
 
 				//IupSetAttribute( var0Frame, "FONT", "Monospace, 10" );
 				//IupSetAttribute( var1Frame, "FONT", "Monospace, 10" );
-				IupSetAttribute( bpListHandle, "FONT", "Monospace, 10" );
-				IupSetAttribute( bpFrame, "FONT", "Monospace, 10" );
-				IupSetAttribute( regListHandle, "FONT", "Monospace, 10" );
+				//IupSetAttribute( bpListHandle, "FONT", "Monospace, 10" );
+				//IupSetAttribute( bpFrame, "FONT", "Monospace, 10" );
+				//IupSetAttribute( regListHandle, "FONT", "Monospace, 10" );
 			}
 			
 			
 
 			IupSetAttribute( varSplit, "TABTITLE", GLOBAL.languageItems["variable"].toCString );
-			IupSetAttribute( bpFrame, "TABTITLE", GLOBAL.languageItems["bp"].toCString );
-			IupSetAttribute( regListHandle, "TABTITLE", GLOBAL.languageItems["register"].toCString );
+			IupSetAttribute( bpTable.getMainHandle, "TABTITLE", GLOBAL.languageItems["bp"].toCString );
+			IupSetAttribute( regTable.getMainHandle, "TABTITLE", GLOBAL.languageItems["register"].toCString );
+			IupSetAttribute( disasHandle, "TABTITLE", GLOBAL.languageItems["disassemble"].toCString );
+			
 
-			tabResultsHandle = IupTabs( bpFrame, varSplit, regListHandle, null );
+			tabResultsHandle = IupTabs( bpTable.getMainHandle, varSplit, regTable.getMainHandle, disasHandle, null );
 			IupSetAttributes( tabResultsHandle, "TABTYPE=BOTTOM,EXPAND=YES" );
 			IupSetCallback( tabResultsHandle, "TABCHANGEPOS_CB", cast(Icallback) &resultTabChange_cb );
 			
@@ -762,8 +794,37 @@ version(FBIDE)
 		
 		void checkErrorOccur( char[] message, char[] errorMessage = null )
 		{
-			int head = Util.index( message, "Program received signal SIGSEGV, Segmentation fault." );
-			if( head < message.length ) IupMessageError( GLOBAL.mainDlg, toStringz( message[head..length-5].dup ) );
+			//int head = Util.index( message, "Program received signal SIGSEGV, Segmentation fault." );
+			//int head = Util.index( message, "Segmentation fault." );
+			int head = Util.index( message, "signal SIGSEGV," );
+			if( head < message.length )
+			{
+				IupMessageError( GLOBAL.mainDlg, toStringz( message[head..length-5].dup ) );
+				return;
+			}
+
+			//int head = Util.index( message, "Floating point exception" );
+			head = Util.index( message, "signal SIGFPE," );
+			if( head < message.length )
+			{
+				IupMessageError( GLOBAL.mainDlg, toStringz( message[head..length-5].dup ) );
+				return;
+			}
+			
+			head = Util.index( message, "signal SIGABRT," );
+			if( head < message.length )
+			{
+				IupMessageError( GLOBAL.mainDlg, toStringz( message[head..length-5].dup ) );
+				return;
+			}
+			
+			
+			head = Util.index( message, "The program is not being run." );
+			if( head < message.length )
+			{
+				IupMessageError( GLOBAL.mainDlg, toStringz( message[head..length-5].dup ) );
+				return;
+			}
 		}
 		
 		
@@ -903,6 +964,61 @@ version(FBIDE)
 			}
 		}
 
+
+		void showDisassemble()
+		{
+			if( GLOBAL.debugPanel.isRunning && GLOBAL.debugPanel.isExecuting )
+			{
+				char[][] frameInformation = getFrameInformation();
+				if( frameInformation.length == 4 )
+				{
+					char[][] results = Util.splitLines( GLOBAL.debugPanel.fixGDBMessage( GLOBAL.debugPanel.sendCommand( "info line " ~ frameInformation[1] ~ "\n", false ) ) );
+
+					if( results.length == 1 ) // NO ERROR
+					{
+						char[] startAddress, endAddress;
+						
+						//IupSetAttribute( GLOBAL.debugPanel.disasHandle, "VALUE", toStringz( results[0] ~ "\n" ) );
+						
+						int startPos = Util.index( results[0], "starts at address " );
+						int endPos = Util.index( results[0], "ends at " );
+						if( endPos > startPos && startPos < results[0].length )
+						{
+							int startSpacePos = Util.index( results[0], " ", startPos + 18 );
+							if( startSpacePos < results[0].length ) startAddress = results[0][startPos+18..startSpacePos].dup;
+							
+							int endSpacePos = Util.index( results[0], " ", endPos + 8 );
+							if( endSpacePos < results[0].length ) endAddress = results[0][endPos+8..endSpacePos].dup;
+							
+							if( startAddress.length && endAddress.length )
+							{
+								char[] result = GLOBAL.debugPanel.sendCommand( "disassemble /m " ~ startAddress ~ "," ~ endAddress ~ "\n", false );
+								if( result.length > 5 )
+								{
+									IupSetAttribute( GLOBAL.debugPanel.disasHandle, "VALUE", toStringz( results[0] ~ "\n\n" ~ result[0..$-5] ) );
+									IupSetInt( GLOBAL.debugPanel.disasHandle, "SCROLLTOPOS", 0 );
+									
+									Ihandle* formattag;
+									formattag = IupUser();
+									IupSetAttribute( formattag, "FGCOLOR", "99 37 35" );
+									IupSetAttribute( formattag, "UNDERLINE", "SINGLE" );
+									IupSetAttribute( formattag, "SELECTION", "1,1:1,500" );
+									IupSetAttribute( GLOBAL.debugPanel.disasHandle, "ADDFORMATTAG_HANDLE", cast(char*)formattag);
+
+									Ihandle* formattag1;
+									formattag1 = IupUser();
+									IupSetAttribute( formattag1, "FGCOLOR", "0 0 255" );
+									IupSetAttribute( formattag1, "WEIGHT", "SEMIBOLD" );
+									IupSetAttribute( formattag1, "SELECTION", "4,1:4,500" );
+									IupSetAttribute( GLOBAL.debugPanel.disasHandle, "ADDFORMATTAG_HANDLE", cast(char*)formattag1);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		public:
 		this()
 		{
@@ -935,9 +1051,9 @@ version(FBIDE)
 		}
 
 
-		Ihandle* getBPListHandle()
+		CTable getBPTable()
 		{
-			return bpListHandle;
+			return bpTable;
 		}
 
 
@@ -979,10 +1095,14 @@ version(FBIDE)
 					{
 						//value = "{...}";
 						if( Util.contains( originTitle, '.' ) )
-							nodeTitle = originTitle ~ " = (" ~  type ~ ") {...}";
+						{
+							//nodeTitle = originTitle ~ " = (" ~  type ~ ") {...}";
+							nodeTitle = originTitle ~ " = (" ~  type ~ ") " ~ value;
+						}
 						else
 						{
-							if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") {...}"; else nodeTitle = varName ~ " = (" ~  type ~ ") {...}";
+							//if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") {...}"; else nodeTitle = varName ~ " = (" ~  type ~ ") {...}";
+							if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") " ~ value; else nodeTitle = varName ~ " = (" ~  type ~ ") " ~ value;
 						}
 						
 					}
@@ -1164,10 +1284,8 @@ version(FBIDE)
 								head = Util.rindex( result, ", line " );
 								tail = Util.rindex( result, "." );
 								if( tail > head + 7 ) _lineNumber = result[head+7..tail];
-
-								//bpManager[_fullPath][_lineNumber] = Integer.atoi( _id );
-								char[] string = Stdout.layout.convert( "{,-4} {,6} ", _id, _lineNumber ) ~ _fullPath;
-								IupSetAttribute( bpListHandle, "APPENDITEM", toStringz( string ) );
+								
+								bpTable.addItem( [ _id, _lineNumber, _fullPath ] );
 							}
 						}
 						break;
@@ -1181,23 +1299,16 @@ version(FBIDE)
 							}
 							else
 							{
-								char[] _id = splitCommand[1];
-
-								int count = IupGetInt( bpListHandle, "COUNT" );
-								
-								for( int i = count; i > 0; -- i )
+								for( int i = bpTable.getItemCount(); i > 0; -- i )
 								{
-									char[] listValue	= fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
-									char[] _listID		= Util.trim( listValue[0..6] );
-									char[] _lineNum		= Util.trim( listValue[6..12] );
-									char[] _fullPath	= Util.trim( listValue[12..$] );
-											
-
-									if( _listID == _id )
+									char[][] values = bpTable.getSelection( i );
+									if( values.length > 0 )
 									{
-										IupSetInt( bpListHandle, "REMOVEITEM", i );
-										//bpManager[_fullPath].remove( _lineNum );
-										//if( !bpManager[_fullPath].length ) bpManager.remove( _fullPath );
+										if( values[0] == splitCommand[1] )
+										{
+											bpTable.removeItem( i );
+											break;
+										}
 									}
 								}
 							}
@@ -1417,7 +1528,9 @@ version(FBIDE)
 							IupSetAttributeId( backtraceHandle, "DELNODE", 0, "CHILDREN" );
 							IupSetAttribute( localTreeHandle, "DELNODE", "ALL" );
 							IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
-							IupSetAttribute( regListHandle, "REMOVEITEM", "ALL" ); 
+							regTable.removeAllItem();
+							IupSetAttribute( disasHandle, "VALUE", "" );
+							localTreeFrame = argTreeFrame = shareTreeFrame = "";
 							foreach( CScintilla cSci; GLOBAL.scintillaManager )
 							{
 								IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 ); //#define SCI_MARKERDELETEALL 2045
@@ -1442,7 +1555,7 @@ version(FBIDE)
 						checkErrorOccur( result );
 						break;
 
-					case "info":
+					case "i", "info":
 						if( splitCommand.length > 1 )
 						{
 							Ihandle* _treeHandle = null;
@@ -1577,15 +1690,56 @@ version(FBIDE)
 									}
 									break;
 
-								case "reg":
+								case "r", "register", "registers", "reg":
 									if( bRunning )
 									{
 										char[][] results = Util.splitLines( result );
-										//results.length = results.length - 1; // remove (gdb)
-										IupSetAttribute( regListHandle, "REMOVEITEM", "ALL" ); 
-										for( int i = 0; i < results.length - 1; ++i )
+										if( results.length ) results.length = results.length - 1; // remove (gdb)
+										
+										if( splitCommand.length == 2 )
 										{
-											IupSetAttribute( regListHandle, "APPENDITEM", GLOBAL.cString.convert( results[i] ) );
+											regTable.removeAllItem();
+											for( int i = 0; i < results.length; ++i )
+											{
+												char[][] values;
+												int spacePos = Util.index( results[i], " " );
+												if( spacePos < results[i].length )
+												{
+													values ~= Integer.toString( i );
+													values ~= results[i][0..spacePos].dup;
+													values ~= ( Util.split( Util.trim( results[i][spacePos..$] ), "\t" ) );
+													
+													if( values.length == 4 ) regTable.addItem( values );
+												}
+											}
+										}
+										else if( splitCommand.length == 3 )
+										{
+											if( results.length == 1 )
+											{
+												result = results[0];
+												int spacePos = Util.index( result, " " );
+												if( spacePos < result.length )
+												{
+													char[]		name = result[0..spacePos].dup;
+													char[][]	values = ( Util.split( Util.trim( result[spacePos..$] ), "\t" ) );
+													if( values.length == 2 && name.length )
+													{
+														for( int i = regTable.getItemCount; i > 0; -- i )
+														{
+															char[][] _values = regTable.getSelection( i );
+															if( _values.length == 4 )
+															{
+																if( name == _values[1] )
+																{
+																	regTable.setItem( [ _values[0], name, values[0], values[1] ], i );
+																	break;
+																}
+															}
+														}
+													}
+												}
+											}
 										}
 									}
 									break;
@@ -1600,6 +1754,12 @@ version(FBIDE)
 			}
 
 			return result;
+		}
+		
+		bool is64Bit()
+		{
+			if( DebugControl !is null ) return DebugControl.b64Bit;
+			return false;
 		}
 
 		bool isExecuting()
@@ -1640,16 +1800,17 @@ version(FBIDE)
 			IupSetAttribute( shareTreeHandle, "DELNODE", "ALL" );
 			IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
 			IupSetAttributeId( backtraceHandle, "DELNODE", 0, "CHILDREN" );
-			IupSetAttribute( regListHandle, "REMOVEITEM", "ALL" ); 
-			//IupSetAttribute( bpListHandle, "REMOVEITEM", "ALL" ); // Remove All LIst Items
-
+			regTable.removeAllItem();
+			IupSetAttribute( disasHandle, "VALUE", "" );
+			bpTable.removeAllItem();
+			/+
 			// Set the breakpoint id to -1
-			for( int i = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" ); i > 0; -- i )
+			for( int i = bpTable.getItemCount(); i > 0; -- i )
 			{
-				char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
-				listValue[0..2] = "-1";
-				IupSetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ), toStringz( listValue.dup ) );
+				char[][] values = bpTable.getSelection( i );
+				if( values.length == 3 ) bpTable.setItem( [ "-1", values[1], values[2] ], i );
 			}
+			+/
 
 			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
 		}
@@ -1815,9 +1976,7 @@ version(FBIDE)
 			}
 			else
 			{
-				//bpManager[_fullPath][_lineNum] = -1;
-				char[] string = Stdout.layout.convert( "{,-4} {,6} ", "-1", _lineNum ) ~ _fullPath;
-				IupSetAttribute( bpListHandle, "APPENDITEM", toStringz( string ) );
+				bpTable.addItem( [ "-1", _lineNum, _fullPath ] );
 			}
 		}
 
@@ -1825,30 +1984,36 @@ version(FBIDE)
 		{
 			if( isExecuting || isRunning )
 			{
-				for( int i = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" ); i > 0; -- i )
+				for( int i = bpTable.getItemCount(); i > 0; -- i )
 				{
-					char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
-					char[] id = Util.trim( listValue[0..6] );
-					char[] ln = Util.trim( listValue[6..12] );
-					char[] fn = Util.trim( listValue[12..$] );
-
-					if( fn == _fullPath && ln == _lineNum )
+					char[][] values = bpTable.getSelection( i );
+					if( values.length == 3 )
 					{
-						int numberID = Integer.atoi( id );
-						if( numberID > 0 ) sendCommand( "delete " ~ id ~ "\n" );
+						if( values[1] == _lineNum && values[2] == _fullPath )
+						{
+							if( Integer.toInt( values[0] ) > 0 ) 
+							{
+								sendCommand( "delete " ~ values[0] ~ "\n" );
+								bpTable.removeItem( i );
+								break;
+							}
+						}
 					}
 				}
 			}
 			else
 			{
-				for( int i = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" ); i > 0; -- i )
+				for( int i = bpTable.getItemCount(); i > 0; -- i )
 				{
-					char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
-					char[] id = Util.trim( listValue[0..6] );
-					char[] ln = Util.trim( listValue[6..12] );
-					char[] fn = Util.trim( listValue[12..$] );
-
-					if( fn == _fullPath && ln == _lineNum ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
+					char[][] values = bpTable.getSelection( i );
+					if( values.length == 3 )
+					{
+						if( values[1] == _lineNum && values[2] == _fullPath )
+						{
+							bpTable.removeItem( i );
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -1881,6 +2046,7 @@ version(FBIDE)
 		import		tango.sys.win32.Types, tango.sys.win32.UserGdi;
 		
 		char[]		executeFullPath, cwd;
+		bool		b64Bit;
 		int			caretPos, splitValue;
 		Process		proc;
 
@@ -1971,8 +2137,6 @@ version(FBIDE)
 				IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 );
 				IupScintillaSendMessage( cSci.getIupScintilla, 2045, 4, 0 );
 			}
-			
-			IupSetAttribute( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", "ALL" );
 		}
 
 		void run()
@@ -1989,11 +2153,16 @@ version(FBIDE)
 				
 				version(Windows)
 				{
-					debuggerExe = GLOBAL.toolbar.checkBitButtonStatus() == 32 ? GLOBAL.debuggerFullPath.toDString : GLOBAL.x64debuggerFullPath.toDString;
+					b64Bit = GLOBAL.toolbar.checkBitButtonStatus() == 32 ? false : true;
+					debuggerExe = !b64Bit ? GLOBAL.debuggerFullPath.toDString : GLOBAL.x64debuggerFullPath.toDString;
 					foreach( char[] s; GLOBAL.EnvironmentVars.keys )
 					{
 						debuggerExe = Util.substitute( debuggerExe, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
 					}
+				}
+				else
+				{
+					b64Bit = true;
 				}
 
 				proc = new Process( true, "\"" ~ debuggerExe ~ "\" " ~ executeFullPath );
@@ -2031,6 +2200,7 @@ version(FBIDE)
 				
 				sendCommand( "set confirm off\n", false );
 				sendCommand( "set print array-indexes on\n", false );
+				sendCommand( "set width 0\n", false );
 				//sendCommand( "set breakpoint pending on\n", false );
 				//sendCommand( "set print elements 1\n", false );
 				
@@ -2081,11 +2251,10 @@ version(FBIDE)
 			{
 				case "kill\n", "k\n":
 					int result = IupMessageAlarm( null, "GDB", "Kill the program being debugged?", "YESNO" );
+					if( result == 2 ) return "#_NO_#";
 					break;
 					
 				default:
-				
-			
 			}
 		
 		
@@ -2497,6 +2666,14 @@ version(FBIDE)
 				case 2:
 					GLOBAL.debugPanel.sendCommand( "info reg\n", false );
 					break;
+				
+				case 3:
+					GLOBAL.debugPanel.showDisassemble();
+					break;
+					
+					
+					
+				
 				default:
 			}
 			return IUP_DEFAULT;
@@ -2623,6 +2800,36 @@ version(FBIDE)
 			}
 			
 			return IUP_DEFAULT;
-		}		
+		}
+
+		private int CDebugger_memberSelect( Ihandle* ih, int button, int pressed, int x, int y, char* status )//( Ihandle *ih, char *text, int item, int state )
+		{
+			int item = IupConvertXYToPos( ih, x, y );
+
+			switch( IupGetInt( GLOBAL.debugPanel.tabResultsHandle, "VALUEPOS" ) )
+			{
+				case 0:		GLOBAL.debugPanel.bpTable.setSelectionID( item );	break;
+				case 2:		GLOBAL.debugPanel.regTable.setSelectionID( item );	break;
+				default:
+			}
+			
+			return IUP_DEFAULT;
+		}
+		
+		private int CDebugger_doubleClick( Ihandle* ih, int item, char* text )
+		{
+			char[][] results = GLOBAL.debugPanel.regTable.getSelection( item );
+			if( results.length == 4 )
+			{
+				scope varDlg = new CVarDlg( 360, -1, "Evaluate " ~ results[1], "Value = " );
+				char[] value = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+				
+				if( value == "#_close_#" ) return IUP_DEFAULT;
+				GLOBAL.debugPanel.sendCommand( "set $" ~ results[1] ~ "=" ~ value ~ "\n", false );
+				GLOBAL.debugPanel.sendCommand( "info registers " ~ results[1] ~ "\n", false );
+				return IUP_IGNORE;
+			}
+			return IUP_DEFAULT;
+		}
 	}
 }

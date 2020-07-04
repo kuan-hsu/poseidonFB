@@ -298,6 +298,19 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleDWELL = IupToggle( GLOBAL.languageItems["enabledwell"].toCString, null );
 		IupSetAttribute( toggleDWELL, "VALUE", toStringz(GLOBAL.toggleEnableDwell.dup) );
 		IupSetHandle( "toggleDWELL", toggleDWELL );
+		
+		Ihandle* labelDWELL = IupLabel( GLOBAL.languageItems["dwelldelay"].toCString );
+		Ihandle* valDWELL = IupVal( null );
+		IupSetAttributes( valDWELL, "MIN=200,MAX=2200,RASTERSIZE=100x16,STEP=0.05,PAGESTEP=0.05" );
+		IupSetAttribute( valDWELL, "VALUE", toStringz( GLOBAL.dwellDelay.dup ) );
+		IupSetHandle( "valDWELL", valDWELL );
+		IupSetCallback( valDWELL, "VALUECHANGED_CB", cast(Icallback) &valDWELL_VALUECHANGED_CB );
+		IupSetCallback( valDWELL, "ENTERWINDOW_CB", cast(Icallback) &valDWELL_VALUECHANGED_CB );
+		
+		
+		Ihandle* hBoxDWELL = IupHbox( toggleDWELL, IupFill, labelDWELL, valDWELL, null );
+		IupSetAttributes( hBoxDWELL, "ALIGNMENT=ACENTER" );
+		
 
 		Ihandle* toggleOverWrite = IupToggle( GLOBAL.languageItems["enableoverwrite"].toCString, null );
 		IupSetAttribute( toggleOverWrite, "VALUE", toStringz(GLOBAL.toggleOverWrite.dup) );
@@ -362,7 +375,7 @@ class CPreferenceDialog : CBaseDialog
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
 		
-		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, toggleDWELL, toggleOverWrite, toggleBackThread, hBoxFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, toggleBackThread, hBoxFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
 	
@@ -2554,11 +2567,23 @@ extern(C) // Callback for CPreferenceDialog
 			}
 			else
 				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "NO" );
+				
+			
+			Ihandle* _valHandle = IupGetHandle( "valDWELL" );
+			if( _valHandle != null )
+			{
+				float valuef = IupGetFloat( _valHandle, "VALUE" );
+				int value = ( cast(int) valuef / 100 ) * 100;
+			
+				IupSetInt( _valHandle, "VALUE", value );
+				GLOBAL.dwellDelay = Integer.toString( value ).dup;
+			}				
 
 			foreach( CScintilla cSci; GLOBAL.scintillaManager )
 			{
 				if( cSci !is null ) cSci.setGlobalSetting();
 			}
+			
 			
 			
 			//=====================FONT=====================
@@ -2900,11 +2925,15 @@ extern(C) // Callback for CPreferenceDialog
 	}
 
 
-	private int memberSelect( Ihandle *ih, char *text, int item, int state )
+	private int memberSelect(Ihandle* ih, int button, int pressed, int x, int y, char* status)//( Ihandle *ih, char *text, int item, int state )
 	{
-		if( PreferenceDialogParameters.fontTable !is null )
+		if( button == IUP_BUTTON1 && pressed == 1 ) // IUP_BUTTON1 = '1' = 49
 		{
-			PreferenceDialogParameters.fontTable.setSelectionID( item );
+			if( PreferenceDialogParameters.fontTable !is null )
+			{
+				int item = IupConvertXYToPos( ih, x, y );
+				PreferenceDialogParameters.fontTable.setSelectionID( item );
+			}
 		}
 		
 		return IUP_DEFAULT;
@@ -2993,6 +3022,17 @@ extern(C) // Callback for CPreferenceDialog
 			debug IupMessage( "doubleClick", toStringz( e.toString() ) );
 		}
 	
+		return IUP_DEFAULT;
+	}
+	
+	private int valDWELL_VALUECHANGED_CB( Ihandle *ih )
+	{
+		float valuef = IupGetFloat( ih, "VALUE" );
+		int value = ( cast(int) valuef / 100 ) * 100;
+		
+		//IupSetInt( ih, "VALUE", value );
+		IupSetAttribute( ih, "TIP", toStringz( Integer.toString( value ) ) );
+		
 		return IUP_DEFAULT;
 	}
 }

@@ -257,7 +257,7 @@ class CScintilla
 			IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
 			
 			IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
-			IupSetInt( sci, "MOUSEDWELLTIME", 1500 );			
+			IupSetInt( sci, "MOUSEDWELLTIME", Integer.toInt( GLOBAL.dwellDelay ) );
 		}
 		catch( Exception e )
 		{
@@ -275,17 +275,15 @@ class CScintilla
 		{
 			if( !GLOBAL.debugPanel.isRunning && !GLOBAL.debugPanel.isExecuting )
 			{
-				int count = IupGetInt( GLOBAL.debugPanel.getBPListHandle, "COUNT" );
-				for( int i = count; i > 0; -- i )
+				for( int i = GLOBAL.debugPanel.getBPTable.getItemCount; i > 0; -- i )
 				{
-					char[] listValue = fromStringz( IupGetAttribute( GLOBAL.debugPanel.getBPListHandle, toStringz( Integer.toString( i ) ) ) ).dup;
-					char[] id = Util.trim( listValue[0..6] );
-					char[] ln = Util.trim( listValue[6..12] );
-					char[] fn = Util.trim( listValue[12..$] );
-
-					if( id == "-1" )
+					char[][] values = GLOBAL.debugPanel.getBPTable.getSelection( i );
+					if( values.length == 3 )
 					{
-						if( fn == fullPath.toDString ) IupSetInt( GLOBAL.debugPanel.getBPListHandle, "REMOVEITEM", i );
+						if( values[0] == "-1" )
+						{
+							if( values[3] == fullPath.toDString )  GLOBAL.debugPanel.getBPTable.removeItem( i );
+						}
 					}
 				}			
 			}
@@ -829,6 +827,7 @@ class CScintilla
 		}
 		
 		IupSetAttribute( sci, "USEPOPUP", "NO" );
+		IupSetInt( sci, "MOUSEDWELLTIME", Integer.toInt( GLOBAL.dwellDelay ) );
 		
 		if( GLOBAL.editorSetting00.BraceMatchHighlight == "OFF" ) IupScintillaSendMessage( sci, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
 		if( GLOBAL.editorSetting00.HighlightCurrentWord != "ON" ) IupScintillaSendMessage( sci, 2505, 0, IupGetInt( sci, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
@@ -1825,12 +1824,13 @@ extern(C)
 									char[] varName = Util.trim( fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTEDTEXT" ) ) );
 									//if( varName.length ) GLOBAL.debugPanel.sendCommand( "display " ~ upperCase( varName ) ~ "\n", false );
 
-									scope varDlg = new CVarDlg( 260, 96, "Add Display Variable...", "Var Name:", null, varName );
+									scope varDlg = new CVarDlg( 260, -1, "Add Display Variable...", "Var Name:", null, varName );
 									varName = varDlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 									if( varName == "#_close_#" ) return IUP_DEFAULT;
 
 									GLOBAL.debugPanel.sendCommand( "display " ~ upperCase( Util.trim( varName ) ) ~ "\n", false );
+									return IUP_IGNORE;
 								}
 								return IUP_DEFAULT;
 							});
@@ -2077,20 +2077,25 @@ extern(C)
 				{
 					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
 					{
-						/*
-						if( GLOBAL.debugPanel.isRunning )
+						if( GLOBAL.debugPanel.isRunning && GLOBAL.debugPanel.isExecuting )
 						{
-							version(FBIDE) AutoComplete.toDefintionAndType( -1, pos ); // SCI_CALLTIPACTIVE 2202
+							if( !GLOBAL.debugPanel.is64Bit )
+							{
+								version(Windows)
+								{
+									version(FBIDE) AutoComplete.toDefintionAndType( -1, pos ); // SCI_CALLTIPACTIVE 2202
+									return IUP_DEFAULT;
+								}
+							}
 						}
-						else
-						{
-							version(FBIDE) AutoComplete.toDefintionAndType( 0, pos ); // SCI_CALLTIPACTIVE 2202
-							version(DIDE) AutoComplete.toDefintionAndType( 0 ); // SCI_CALLTIPACTIVE 2202
-						}
-						*/
+
 						version(FBIDE) AutoComplete.toDefintionAndType( 0, pos ); // SCI_CALLTIPACTIVE 2202
 						version(DIDE) AutoComplete.toDefintionAndType( 0 ); // SCI_CALLTIPACTIVE 2202
 					}
+				}
+				else
+				{
+					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
 				}
 			}
 			else

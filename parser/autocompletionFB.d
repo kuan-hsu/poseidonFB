@@ -3149,8 +3149,7 @@ version(FBIDE)
 					word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
 					word = lowerCase( word.dup.reverse );
 					
-					/+
-					if( GLOBAL.debugPanel.isRunning )
+					if( GLOBAL.debugPanel.isRunning && GLOBAL.debugPanel.isExecuting )
 					{
 						if( TYPE == -1 )
 						{
@@ -3184,14 +3183,27 @@ version(FBIDE)
 								if( title0.length )
 								{
 									IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0x000000, 0 ); //SCI_CALLTIPSETFORE 2206
-									IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFD7FF, 0 ); //SCI_CALLTIPSETBACK 2205
+									IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFEEFF, 0 ); //SCI_CALLTIPSETBACK 2205
 									IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) toStringz( title0.dup ) ); // SCI_CALLTIPSHOW 2200
+									
+									int assignPos = Util.index( title0, " = " );
+									if( assignPos < title0.length )
+									{
+										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, assignPos ); // SCI_CALLTIPSETHLT 2204
+										IupScintillaSendMessage( cSci.getIupScintilla, 2207, 0xFF0000, 0 ); // SCI_CALLTIPSETFOREHLT 2207
+									}
+									else
+									{
+										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+									}
 								}
 							}
 							return;
 						}
 					}
-					+/
+					
+					
+					
 					char[][] splitWord = getDivideWord( word );
 					
 					// Manual

@@ -384,6 +384,7 @@ public:
 			doc ~= setINILineData( "livelevel", Integer.toString( GLOBAL.liveLevel ) );
 			doc ~= setINILineData( "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 			doc ~= setINILineData( "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
+			doc ~= setINILineData( "dwelldelay", GLOBAL.dwellDelay );
 			
 			// manual
 			doc ~= setINILineData( "[manual]");
@@ -800,6 +801,7 @@ public:
 							case "livelevel":				GLOBAL.liveLevel = Integer.atoi( right );						break;
 							case "updateoutlinelive":		GLOBAL.toggleUpdateOutlineLive = right;							break;
 							case "keywordcase":				GLOBAL.keywordCase = Integer.atoi( right );						break;
+							case "dwelldelay":				GLOBAL.dwellDelay = right;										break;
 							default:
 						}
 						break;

@@ -122,6 +122,7 @@ options=Options
 				showlisttype=Show Autocomplete List Type
 				showallmembers=Show All Members( public, protected, private )
 				enabledwell=Enable Mouse Dwell to Show Type
+					dwelldelay=Dwell Delay(ms):
 				enableoverwrite=Overwrite To Non Identifier Character
 				completeatbackthread=Enable Codecomplete At Back Thread
 				completedelay=  Display Delay(ms):
@@ -251,6 +252,8 @@ options=Options
 				keyword1=Keyword1
 				keyword2=Keyword2
 				keyword3=Keyword3
+				keyword4=Keyword4
+				keyword5=Keyword5
 			'manual=Manual
 				manualpath=Manual Path
 				manualusing=Search Help Manual
@@ -371,6 +374,9 @@ variable=Variables
 	showvalue=Show Value *
 	showaddress="Show Address @"
 register=Registers
+	disassemble=DisAssemble
+	id=ID
+	value=Value
 
 'caption
 caption_new=New

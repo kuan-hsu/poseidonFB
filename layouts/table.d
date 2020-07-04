@@ -7,9 +7,13 @@ class CTable
 private:
 	import tango.stdc.stringz;
 	
+	/*
 	typedef extern(C) int function( Ihandle*, char*, int, int ) _ACTION;
 	_ACTION ACTION;
+	*/
 	
+	typedef extern(C) int function( Ihandle*, int, int, int, int, char* ) _ACTION;
+	_ACTION ACTION;
 	
 	typedef extern(C) int function( Ihandle*, int, char* )		_DBLCLICK_CB;
 	_DBLCLICK_CB	DBLCLICK_CB;
@@ -24,7 +28,8 @@ private:
 		{
 			object = IupList( null );
 			IupSetAttributes( object, "EXPAND=YES,SCROLLBAR=NO" );
-			if( ACTION != null ) IupSetCallback( object, "ACTION", cast(Icallback) ACTION );
+			//if( ACTION != null ) IupSetCallback( object, "ACTION", cast(Icallback) ACTION );
+			if( ACTION != null ) IupSetCallback( object, "BUTTON_CB", cast(Icallback) ACTION );
 			if( DBLCLICK_CB != null ) IupSetCallback( object, "DBLCLICK_CB", cast(Icallback) DBLCLICK_CB );
 		}
 	}
@@ -53,21 +58,21 @@ private:
 		{
 			object = IupSplit( _member0, _member1 );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
-			IupSetAttributes( object, "BARSIZE=2" );
+			IupSetAttributes( object, "BARSIZE=1" );
 		}
 		
 		this( ColumnFrame _ColumnFrame0, ColumnFrame _ColumnFrame1 )
 		{
 			object = IupSplit( _ColumnFrame0.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
-			IupSetAttributes( object, "BARSIZE=2" );
+			IupSetAttributes( object, "BARSIZE=1" );
 		}
 		
 		this( ColumnSplit _ColumnSplit, ColumnFrame _ColumnFrame1 )
 		{
 			object = IupSplit( _ColumnSplit.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
-			IupSetAttributes( object, "BARSIZE=2" );
+			IupSetAttributes( object, "BARSIZE=1" );
 		}
 	}	
 	
@@ -122,6 +127,20 @@ public:
 	void setSplitAttribute( char[] _name, char[] _value )
 	{
 		if( split.length > 0 ) IupSetAttribute( split[$-1].object, toStringz( _name ), toStringz( _value ) );
+	}
+	
+	void setItemAttribute( char[] _name, char[] _value, int column = -99999 )
+	{
+		if( column >= 0 )
+		{
+			if( column < columnMember.length ) IupSetAttribute( columnMember[column].object, toStringz( _name ), toStringz( _value ) );
+			return;
+		}
+	
+		for( int i = 0; i < columnMember.length; ++ i )
+		{
+			IupSetAttribute( columnMember[$-1].object, toStringz( _name ), toStringz( _value ) );
+		}
 	}
 	
 	void addItem( char[][] _value )
@@ -187,6 +206,9 @@ public:
 		if( id < 1 ) id = getSelectionID();
 		if( id > 0 )
 		{
+			if( columnMember.length <= 0 ) return null;
+			if( id > IupGetInt( columnMember[0].object, "COUNT" ) ) return null;
+		
 			for( int i = 0; i < columnMember.length; ++ i )
 			{
 				results ~= fromStringz( IupGetAttributeId( columnMember[i].object, "", id ) ).dup;

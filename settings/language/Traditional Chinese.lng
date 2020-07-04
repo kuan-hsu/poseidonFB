@@ -122,6 +122,7 @@ options=選項
 				showlisttype=自動完成項目顯示種類
 				showallmembers=顯示所有成員
 				enabledwell=啟用滑鼠停留顯示種類
+					dwelldelay=停留延遲時間(ms):
 				enableoverwrite=覆蓋非識別字符
 				completeatbackthread=使用背景進程自動完成
 				completedelay=  背景進程延遲時間(ms):
@@ -251,6 +252,8 @@ options=選項
 				keyword1=關鍵字1
 				keyword2=關鍵字2
 				keyword3=關鍵字3
+				keyword4=關鍵字4
+				keyword5=關鍵字5
 			'manual=Manual
 				manualpath=手冊路徑
 				manualusing=搜尋使用手冊
@@ -371,6 +374,9 @@ variable=變數
 	showvalue=顯示值 *
 	showaddress=顯示位址 @	
 register=暫存器
+	disassemble=反組譯
+	id=序號
+	value=值
 
 'caption
 caption_new=新建
