@@ -7,7 +7,7 @@ struct XPM
 	
 	import tango.io.device.File, tango.io.stream.Lines, Util = tango.text.Util, Integer = tango.text.convert.Integer, tools;
 	import tango.stdc.stringz;
-	import tango.io.Stdout;
+	import tango.io.Stdout, tango.stdc.math;
 
 	static IupString[] colorStrings;
 
@@ -238,10 +238,10 @@ struct XPM
 		try
 		{
 			scope file = new File( filePath, File.ReadExisting );
-			int 		count, colorSN;
+			int 		count, colorSN, width, height;
 			bool 		bPixel, bColor;
 			
-			char[]		pixel;
+			char[]		prevLine, pixel;
 			ColorUnit[]	color;
 			
 			foreach( line; new Lines!(char)(file) )
@@ -261,6 +261,32 @@ struct XPM
 					}
 					else if( line == "/* colors */" )
 					{
+						// Get the spec
+						char[] temp;
+						char[][] imageSpec;
+						for( int i = 0; i < prevLine.length; ++ i )
+						{
+							if( prevLine[i] >= 48 && prevLine[i] <= 57 )
+							{
+								temp = temp ~ prevLine[i];
+							}
+							else
+							{
+								if( temp.length )
+								{
+									imageSpec ~= temp;
+									temp = "";
+								}
+							}
+						}
+						
+						if( imageSpec.length >= 2 )
+						{
+							width = Integer.toInt( imageSpec[0] );
+							height = Integer.toInt( imageSpec[1] );
+						}
+					
+					
 						bColor = true;
 						bPixel = false;
 						continue;
@@ -308,6 +334,8 @@ struct XPM
 						}
 					}
 				}
+				
+				prevLine = line;
 			}
 
 			ubyte[] data; 
@@ -322,8 +350,8 @@ struct XPM
 					}
 				}
 			}
-
-			Ihandle* image = IupImage( 16, 16, data.ptr );
+			
+			Ihandle* image = IupImage( width, height, data.ptr );
 
 			foreach( ColorUnit __color; color )
 			{

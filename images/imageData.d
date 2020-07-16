@@ -302,6 +302,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_debug_next", XPM.getIUPimage( "icons/xpm/debug/over.xpm" ) );//IupSetHandle("icon_debug_next", load_image_next());
 	IupSetHandle( "icon_debug_left", XPM.getIUPimage( "icons/xpm/debug/left.xpm" ) );//IupSetHandle("icon_debug_left", load_image_left_nav());
 	IupSetHandle( "icon_debug_right", XPM.getIUPimage( "icons/xpm/debug/right.xpm" ) );
+	IupSetHandle( "icon_debug_change", XPM.getIUPimage( "icons/xpm/debug/change.xpm" ) );
 	IupSetHandle( "icon_debug_return", XPM.getIUPimage( "icons/xpm/debug/return.xpm" ) );//IupSetHandle("icon_debug_return", load_image_return());
 	IupSetHandle( "icon_debug_clear", XPM.getIUPimage( "icons/xpm/debug/clear.xpm" ) );//IupSetHandle("icon_debug_clear", load_image_clear());
 	IupSetHandle( "icon_debug_at", XPM.getIUPimage( "icons/xpm/debug/at.xpm" ) );

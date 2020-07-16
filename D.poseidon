@@ -11,7 +11,7 @@ Comment=
 CompilerPath=
 [IncludeDirs]
 [LibDirs]
-name=K:/CodingPark/GameKYO/lib/iup/iup327DLL10
+name=K:/CodingPark/GameKYO/lib/iup/iup329DLL10
 [Sources]
 name=IDE.d
 name=actionManager.d

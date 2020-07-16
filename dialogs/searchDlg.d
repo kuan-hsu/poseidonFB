@@ -380,7 +380,8 @@ extern(C)
 				case 1:	GLOBAL.statusBar.setFindMessage( "Mark total = " ~ Integer.toString( counts ) ~ " words." ); break;
 				case 2: GLOBAL.statusBar.setFindMessage( "Replace total = " ~ Integer.toString( counts ) ~ " words." ); break;
 				default:
-			}			
+			}
+			IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 
 		return IUP_DEFAULT;
@@ -423,6 +424,7 @@ extern(C)
 			GLOBAL.navigation.addCache();
 			GLOBAL.statusBar.setFindMessage( GLOBAL.languageItems["foundword"].toDString );
 			actionManager.StatusBarAction.update();
+			IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		else
 		{
@@ -448,6 +450,8 @@ extern(C)
 				break;
 			default:
 		}
+		
+		IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		
 		return IUP_DEFAULT;
 	}

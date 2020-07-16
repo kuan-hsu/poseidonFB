@@ -404,7 +404,13 @@ void createMenu()
 	IupSetCallback( item_quickRun, "ACTION", cast(Icallback)&quickRun_cb );	
 
 	// Debug
-	version(FBIDE)
+	bool bWithoutDebug;
+	version(DIDE)
+	{
+		version(Windows) bWithoutDebug = true;
+	}
+	
+	if( !bWithoutDebug )
 	{
 		item_runDebug = IupItem( GLOBAL.languageItems["rundebug"].toCString, null);
 		IupSetAttribute(item_runDebug, "IMAGE", "icon_debugrun");
@@ -680,7 +686,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.440)\nBy Kuan Hsu (Taiwan)\n2020.07.04" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.441)\nBy Kuan Hsu (Taiwan)\n2020.07.16" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.054)\nBy Kuan Hsu (Taiwan)\n2020.06.13" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
@@ -797,7 +803,7 @@ void createMenu()
 							item_quickRun,
 							null );
 
-	version(FBIDE)
+	if( !bWithoutDebug )
 	{							
 	debug_menu= IupMenu( 	item_runDebug,
 							item_withDebug,
@@ -831,12 +837,12 @@ void createMenu()
 	mainMenu4_View = IupSubmenu( GLOBAL.languageItems["view"].toCString, view_menu );
 	mainMenu5_Project = IupSubmenu( GLOBAL.languageItems["prj"].toCString, project_menu );
 	mainMenu6_Build = IupSubmenu( GLOBAL.languageItems["build"].toCString, build_menu );
-	version(FBIDE) mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
+	if( !bWithoutDebug ) mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
 	mainMenu_Misc = IupSubmenu( GLOBAL.languageItems["windows"].toCString, misc_menu );
 	mainMenu8_Option = IupSubmenu( GLOBAL.languageItems["options"].toCString, option_menu );
 	IupSetHandle( "optionsMenu", option_menu );
 
-	version(FBIDE)
+	if( !bWithoutDebug )
 		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option, null );
 	else
 		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu_Misc, mainMenu8_Option, null );
@@ -1884,25 +1890,22 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 
-	version(FBIDE)
+	int runDebug_cb( Ihandle *ih )
 	{
-		int runDebug_cb( Ihandle *ih )
-		{
-			if( !GLOBAL.debugPanel.isExecuting && !GLOBAL.debugPanel.isRunning ) GLOBAL.debugPanel.runDebug();
-			return IUP_DEFAULT;
-		}
+		if( !GLOBAL.debugPanel.isExecuting && !GLOBAL.debugPanel.isRunning ) GLOBAL.debugPanel.runDebug();
+		return IUP_DEFAULT;
+	}
 
-		int compileWithDebug_cb( Ihandle *ih )
-		{
-			GLOBAL.debugPanel.compileWithDebug();
-			return IUP_DEFAULT;
-		}
+	int compileWithDebug_cb( Ihandle *ih )
+	{
+		GLOBAL.debugPanel.compileWithDebug();
+		return IUP_DEFAULT;
+	}
 
-		int buildAllWithDebug_cb( Ihandle *ih )
-		{
-			GLOBAL.debugPanel.buildAllWithDebug();
-			return IUP_DEFAULT;
-		}
+	int buildAllWithDebug_cb( Ihandle *ih )
+	{
+		GLOBAL.debugPanel.buildAllWithDebug();
+		return IUP_DEFAULT;
 	}
 
 	int encode_cb( Ihandle *ih )

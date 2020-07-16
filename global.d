@@ -125,7 +125,7 @@ struct GLOBAL
 	//static Ihandle* 			searchOutputPanel;
 	static CMessageAndSearch	messagePanel;
 	
-	version(FBIDE)		static CDebugger 			debugPanel;
+	static CDebugger 			debugPanel;
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
 	static int					messageSplit_value = 800;
 

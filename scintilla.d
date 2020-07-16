@@ -271,7 +271,7 @@ class CScintilla
 	{
 		IupSetHandle( fullPath.toCString, null );
 		
-		version(FBIDE)
+		if( GLOBAL.debugPanel !is null )
 		{
 			if( !GLOBAL.debugPanel.isRunning && !GLOBAL.debugPanel.isExecuting )
 			{
@@ -578,13 +578,17 @@ class CScintilla
 				IupSetAttribute(sci, "STYLEBOLD10", "YES");
 				IupSetAttribute(sci, "STYLEBOLD11", "YES");
 				IupSetAttribute(sci, "STYLEBOLD12", "YES");
+				IupSetAttribute(sci, "STYLEBOLD21", "YES");
+				IupSetAttribute(sci, "STYLEBOLD22", "YES");
 			}
 			version(DIDE)
 			{
 				IupSetAttribute(sci, "STYLEBOLD6", "YES");
 				IupSetAttribute(sci, "STYLEBOLD7", "YES");
+				IupSetAttribute(sci, "STYLEBOLD9", "YES");				
 				IupSetAttribute(sci, "STYLEBOLD20", "YES");
 				IupSetAttribute(sci, "STYLEBOLD21", "YES");
+				IupSetAttribute(sci, "STYLEBOLD22", "YES");
 			}
 		}
 		
@@ -1057,7 +1061,7 @@ extern(C)
 				// With control
 				if( statusString[1] == 'C' ) 
 				{
-					version(FBIDE)
+					if( GLOBAL.debugPanel !is null )
 					{
 						if( GLOBAL.debugPanel.isExecuting() )
 						{
@@ -1396,7 +1400,8 @@ extern(C)
 							return IUP_DEFAULT;
 						});
 
-						version(FBIDE)
+						Ihandle* popupMenu;
+						if( GLOBAL.debugPanel !is null )
 						{
 							Ihandle* _contract = IupItem( GLOBAL.languageItems["bp"].toCString, null );
 							IupSetAttribute( _contract, "IMAGE", "IUP_variable_private" );
@@ -1425,18 +1430,18 @@ extern(C)
 								return IUP_DEFAULT;
 							});
 							
-							Ihandle* popupMenu = IupMenu(
-															_expand,
-															_contract,
-															null
-														);
+							popupMenu = IupMenu(
+													_expand,
+													_contract,
+													null
+												);
 						}
 						else
 						{
-							Ihandle* popupMenu = IupMenu(
-															_expand,
-															null
-														);
+							popupMenu = IupMenu(
+													_expand,
+													null
+												);
 						}
 
 						IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
@@ -1810,7 +1815,7 @@ extern(C)
 					
 					Ihandle* popupMenu;
 					
-					version(FBIDE)
+					if( GLOBAL.debugPanel !is null )
 					{
 						if( GLOBAL.debugPanel.isRunning )
 						{
@@ -1930,7 +1935,7 @@ extern(C)
 												);
 						}
 					}
-					version(DIDE)
+					else
 					{
 						popupMenu = IupMenu(
 												_undo,
@@ -2077,20 +2082,30 @@ extern(C)
 				{
 					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
 					{
-						if( GLOBAL.debugPanel.isRunning && GLOBAL.debugPanel.isExecuting )
+						if( GLOBAL.debugPanel !is null )
 						{
-							if( !GLOBAL.debugPanel.is64Bit )
+							if( GLOBAL.debugPanel.isRunning && GLOBAL.debugPanel.isExecuting )
 							{
-								version(Windows)
+								if( !GLOBAL.debugPanel.is64Bit )
 								{
-									version(FBIDE) AutoComplete.toDefintionAndType( -1, pos ); // SCI_CALLTIPACTIVE 2202
-									return IUP_DEFAULT;
+									version(Windows)
+									{
+										version(FBIDE) AutoComplete.toDefintionAndType( -1, pos );
+										return IUP_DEFAULT;
+									}
 								}
 							}
-						}
 
-						version(FBIDE) AutoComplete.toDefintionAndType( 0, pos ); // SCI_CALLTIPACTIVE 2202
-						version(DIDE) AutoComplete.toDefintionAndType( 0 ); // SCI_CALLTIPACTIVE 2202
+							version(FBIDE) AutoComplete.toDefintionAndType( 0, pos ); else AutoComplete.toDefintionAndType( 0 );
+						}
+						else
+						{
+							AutoComplete.toDefintionAndType( 0 );
+						}
+					}
+					else
+					{
+						//IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
 					}
 				}
 				else
