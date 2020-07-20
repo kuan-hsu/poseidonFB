@@ -45,7 +45,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( hBox01, "TITLE", GLOBAL.languageItems["compilerpath"].toCString );
 		IupSetAttributes( hBox01, "EXPANDCHILDREN=YES,SIZE=346x");
 
-		version(FBIDE)
+		Ihandle* hBox02, hBox01x64, hBox02x64;
+		if( GLOBAL.debugPanel !is null )
 		{
 			version(Windows)
 			{
@@ -61,7 +62,7 @@ class CPreferenceDialog : CBaseDialog
 				Ihandle* _hBox01x64 = IupHbox( textx64CompilerPath, btnx64Open, null );
 				IupSetAttributes( _hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 				
-				Ihandle* hBox01x64 = IupFrame( _hBox01x64 );
+				hBox01x64 = IupFrame( _hBox01x64 );
 				IupSetAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
 				IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
 				
@@ -78,7 +79,7 @@ class CPreferenceDialog : CBaseDialog
 				Ihandle* _hBox02x64 = IupHbox( textx64DebuggerPath, btnOpenx64Debugger, null );
 				IupSetAttributes( _hBox02x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 				
-				Ihandle* hBox02x64 = IupFrame( _hBox02x64 );
+				hBox02x64 = IupFrame( _hBox02x64 );
 				IupSetAttribute( hBox02x64, "TITLE", GLOBAL.languageItems["debugx64path"].toCString );
 				IupSetAttributes( hBox02x64, "EXPANDCHILDREN=YES,SIZE=346x");
 			}
@@ -96,7 +97,7 @@ class CPreferenceDialog : CBaseDialog
 			Ihandle* _hBox02 = IupHbox( textDebuggerPath, btnOpenDebugger, null );
 			IupSetAttributes( _hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 			
-			Ihandle* hBox02 = IupFrame( _hBox02 );
+			hBox02 = IupFrame( _hBox02 );
 			IupSetAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
 			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");			
 		}
@@ -212,22 +213,20 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=346x");
 		
 		
-		version(FBIDE)
+		Ihandle* vBoxCompilerSettings;
+		if( GLOBAL.debugPanel !is null )
 		{
 			version(Windows)
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, frameCompiler, null );
+				vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, frameCompiler, null );
 			else
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, frameCompiler, null );
+				vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, frameCompiler, null );
 				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
 		}
-		version(DIDE)
+		else
 		{
-			version(Windows)
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, /*manuFrame,*/ null );
-			else
-				Ihandle* vBoxCompilerSettings = IupVbox( hBox01, hBox03, frameCompiler, /*manuFrame,*/ null );
+			vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, /*manuFrame,*/ null );
 				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
@@ -2337,7 +2336,7 @@ extern(C) // Callback for CPreferenceDialog
 
 			GLOBAL.compilerFullPath						= IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" );
 			version(Windows) GLOBAL.x64compilerFullPath	= IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" );
-			version(FBIDE) GLOBAL.debuggerFullPath		= IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" );
+			GLOBAL.debuggerFullPath						= IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" );
 			version(linux) GLOBAL.linuxTermName			= IupGetAttribute( IupGetHandle( "textTerminalPath" ), "VALUE" );
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;

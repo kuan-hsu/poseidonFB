@@ -30,7 +30,7 @@ class CDebugger
 	CTable					bpTable, regTable;
 	DebugThread				DebugControl;
 	bool					bRunning;
-	char[]					localTreeFrame, argTreeFrame, shareTreeFrame;
+	char[]					localTreeFrame, argTreeFrame, shareTreeFrame, regFrame, disasFrame;
 
 	void createLayout()
 	{
@@ -174,31 +174,30 @@ class CDebugger
 		IupSetAttributes( hBoxVar0_toolbar, "ALIGNMENT=ACENTER,GAP=2" );
 
 		watchTreeHandle = IupTree();
-		IupSetAttributes( watchTreeHandle, "EXPAND=YES,ADDROOT=NO" );//,RASTERSIZE=0x,TITLE=FileList" );
+		IupSetAttributes( watchTreeHandle, "EXPAND=YES,ADDROOT=NO" );
 		IupSetCallback( watchTreeHandle, "BUTTON_CB", cast(Icallback) &watchListBUTTON_CB );
 
 		localTreeHandle =IupTree();
-		IupSetAttributes( localTreeHandle, "EXPAND=YES,ADDROOT=NO" );//,RASTERSIZE=0x,TITLE=FileList" );
+		IupSetAttributes( localTreeHandle, "EXPAND=YES,ADDROOT=NO" );
 		IupSetCallback( localTreeHandle, "BUTTON_CB", cast(Icallback) &treeBUTTON_CB );
 
 		argTreeHandle =IupTree();
-		IupSetAttributes( argTreeHandle, "EXPAND=YES,ADDROOT=NO" );//,RASTERSIZE=0x,TITLE=FileList" );
+		IupSetAttributes( argTreeHandle, "EXPAND=YES,ADDROOT=NO" );
 		IupSetCallback( argTreeHandle, "BUTTON_CB", cast(Icallback) &treeBUTTON_CB );
 		
 		shareTreeHandle =IupTree();
-		IupSetAttributes( shareTreeHandle, "EXPAND=YES,ADDROOT=NO" );//,RASTERSIZE=0x,TITLE=FileList" );
+		IupSetAttributes( shareTreeHandle, "EXPAND=YES,ADDROOT=NO" );
 		IupSetCallback( shareTreeHandle, "BUTTON_CB", cast(Icallback) &treeBUTTON_CB );
 
 
-		varTabHandle = IupTabs( localTreeHandle, argTreeHandle, shareTreeHandle, null );
-		version(linux) IupSetAttributes( varTabHandle, "TABTYPE=RIGHT,TABORIENTATION=VERTICAL,TABPADDING=0x10" ); else IupSetAttributes( varTabHandle, "TABTYPE=RIGHT" );
+		varTabHandle = IupFlatTabs( localTreeHandle, argTreeHandle, shareTreeHandle, null );
+		IupSetAttributes( varTabHandle, "TABTYPE=RIGHT,TABORIENTATION=VERTICAL,TABSPADDING=2x6" );
+		IupSetAttribute( varTabHandle, "HIGHCOLOR", "0 0 255" );
+		IupSetAttribute( varTabHandle, "TABSHIGHCOLOR", "240 255 240" );
 		IupSetCallback( varTabHandle, "TABCHANGEPOS_CB", cast(Icallback) &varTabChange_cb );
-
-
-		IupSetAttribute( localTreeHandle, "TABTITLE", GLOBAL.languageItems["locals"].toCString() );
-		//IupSetAttribute( mainHandle, "TABIMAGE", "icon_debug" );
-		IupSetAttribute( argTreeHandle, "TABTITLE", GLOBAL.languageItems["args"].toCString() );
-		IupSetAttribute( shareTreeHandle, "TABTITLE", GLOBAL.languageItems["shared"].toCString() );
+		IupSetAttribute( varTabHandle, "TABTITLE0", GLOBAL.languageItems["locals"].toCString() );
+		IupSetAttribute( varTabHandle, "TABTITLE1", GLOBAL.languageItems["args"].toCString() );
+		IupSetAttribute( varTabHandle, "TABTITLE2", GLOBAL.languageItems["shared"].toCString() );
 
 
 
@@ -275,6 +274,8 @@ class CDebugger
 		Ihandle* varSplit = IupSplit( var1ScrollBox, var0ScrollBox );
 		IupSetAttributes( varSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=500,LAYOUTDRAG=NO" );
 		IupSetInt( varSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+		
+		Ihandle* WatchVarBackground = IupBackgroundBox( varSplit );
 
 		//Ihandle* HBoxVar = IupHbox( var1Frame, var0Frame, null );
 
@@ -310,7 +311,7 @@ class CDebugger
 		regTable.setSplitAttribute( "VALUE", "500" );
 		regTable.addColumn( GLOBAL.languageItems["value"].toDString );
 		regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
-		regTable.setSplitAttribute( "VALUE", "300" );
+		regTable.setSplitAttribute( "VALUE", "400" );
 		regTable.addColumn( GLOBAL.languageItems["value"].toDString );
 		regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
 		regTable.setSplitAttribute( "VALUE", "300" );
@@ -328,15 +329,16 @@ class CDebugger
 
 		setFont();
 
-		IupSetAttribute( varSplit, "TABTITLE", GLOBAL.languageItems["variable"].toCString );
-		IupSetAttribute( bpScrollBox, "TABTITLE", GLOBAL.languageItems["bp"].toCString );
-		IupSetAttribute( regScrollBox, "TABTITLE", GLOBAL.languageItems["register"].toCString );
-		IupSetAttribute( disasHandle, "TABTITLE", GLOBAL.languageItems["disassemble"].toCString );
-		
-
-		tabResultsHandle = IupTabs( bpScrollBox, varSplit, regScrollBox, disasHandle, null );
-		IupSetAttributes( tabResultsHandle, "TABTYPE=BOTTOM,EXPAND=YES" );
+		tabResultsHandle = IupFlatTabs( bpScrollBox, WatchVarBackground, regScrollBox, disasHandle, null );
+		IupSetAttributes( tabResultsHandle, "TABTYPE=BOTTOM,EXPAND=YES,TABSPADDING=6x2" );
+		IupSetAttribute( tabResultsHandle, "HIGHCOLOR", "0 0 255" );
+		IupSetAttribute( tabResultsHandle, "TABSHIGHCOLOR", "240 255 240" );
 		IupSetCallback( tabResultsHandle, "TABCHANGEPOS_CB", cast(Icallback) &resultTabChange_cb );
+		IupSetAttribute( tabResultsHandle, "TABTITLE0", GLOBAL.languageItems["bp"].toCString );
+		IupSetAttribute( tabResultsHandle, "TABTITLE1", GLOBAL.languageItems["variable"].toCString );
+		IupSetAttribute( tabResultsHandle, "TABTITLE2", GLOBAL.languageItems["register"].toCString );
+		IupSetAttribute( tabResultsHandle, "TABTITLE3", GLOBAL.languageItems["disassemble"].toCString );
+		
 		
 
 		Ihandle* rightSplitHandle = IupSplit( backtraceHandle, tabResultsHandle  );
@@ -1005,13 +1007,26 @@ class CDebugger
 
 	void setFont()
 	{
-		IupSetAttribute( consoleHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-		IupSetAttribute( watchTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-		IupSetAttribute( localTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-		IupSetAttribute( argTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-		IupSetAttribute( shareTreeHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-		//IupSetAttribute( varTabHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
-		IupSetAttribute( disasHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
+		char* _font = GLOBAL.cString.convert( GLOBAL.fonts[9].fontString );
+		IupSetAttribute( consoleHandle, "FONT", _font );
+		IupSetAttribute( watchTreeHandle, "FONT",  _font );
+		IupSetAttribute( localTreeHandle, "FONT",  _font );
+		IupSetAttribute( argTreeHandle, "FONT",  _font );
+		IupSetAttribute( shareTreeHandle, "FONT",  _font );
+		//IupSetAttribute( varTabHandle, "FONT",  _font );
+		IupSetAttribute( disasHandle, "FONT",  _font );
+		
+		for( int i = 0; i < IupGetInt( watchTreeHandle, "COUNT" ); ++ i )
+			IupSetAttributeId( watchTreeHandle, "TITLEFONT", i, _font );
+
+		for( int i = 0; i < IupGetInt( localTreeHandle, "COUNT" ); ++ i )
+			IupSetAttributeId( localTreeHandle, "TITLEFONT", i, _font );
+
+		for( int i = 0; i < IupGetInt( argTreeHandle, "COUNT" ); ++ i )
+			IupSetAttributeId( argTreeHandle, "TITLEFONT", i, _font );
+
+		for( int i = 0; i < IupGetInt( shareTreeHandle, "COUNT" ); ++ i )
+			IupSetAttributeId( shareTreeHandle, "TITLEFONT", i, _font );
 	}		
 
 	Ihandle* getMainHandle()
@@ -1051,7 +1066,7 @@ class CDebugger
 	
 	char[] getTypeValueByName( char[] varName, char[] originTitle, ref char[] type, ref char[] value )
 	{
-		char[] nodeTitle;
+		char[] nodeTitle, THIS;
 		
 		
 		int assignPos = Util.index( originTitle, "=" );
@@ -1065,54 +1080,56 @@ class CDebugger
 		(gdb)		
 		*/
 		value = GLOBAL.debugPanel.getPrint( varName ); // No result, return '?'
-		if( value.length )
+		if( value == "?" )
 		{
-			if( value[0] != '?' )
+			value = GLOBAL.debugPanel.getPrint( "THIS." ~ varName );
+			THIS = "THIS.";
+		}
+		
+		if( value != "?" )
+		{
+			type = GLOBAL.debugPanel.getWhatIs( THIS ~ varName );
+			int dotPos = Util.rindex( varName, "." );
+			if( value[0] == '{' )
 			{
-				type = GLOBAL.debugPanel.getWhatIs( varName );
-				int dotPos = Util.rindex( varName, "." );
-				if( value[0] == '{' )
+				//value = "{...}";
+				if( Util.contains( originTitle, '.' ) )
 				{
-					//value = "{...}";
-					if( Util.contains( originTitle, '.' ) )
-					{
-						//nodeTitle = originTitle ~ " = (" ~  type ~ ") {...}";
-						nodeTitle = originTitle ~ " = (" ~  type ~ ") " ~ value;
-					}
-					else
-					{
-						//if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") {...}"; else nodeTitle = varName ~ " = (" ~  type ~ ") {...}";
-						if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") " ~ value; else nodeTitle = varName ~ " = (" ~  type ~ ") " ~ value;
-					}
-					
+					//nodeTitle = originTitle ~ " = (" ~  type ~ ") {...}";
+					nodeTitle = originTitle ~ " = (" ~  type ~ ") " ~ value;
 				}
 				else
 				{
-					if( Util.contains( value, ')' ) )
-					{
-						if( Util.contains( originTitle, '.' ) )
-							nodeTitle = originTitle ~ " = " ~ value;
-						else
-						{
-							if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = " ~ value; else nodeTitle = varName ~ " = " ~ value;
-						}
-					}
+					//if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") {...}"; else nodeTitle = varName ~ " = (" ~  type ~ ") {...}";
+					if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") " ~ value; else nodeTitle = varName ~ " = (" ~  type ~ ") " ~ value;
+				}
+			}
+			else
+			{
+				if( Util.contains( value, ')' ) )
+				{
+					if( Util.contains( originTitle, '.' ) )
+						nodeTitle = originTitle ~ " = " ~ value;
 					else
 					{
-						if( Util.contains( originTitle, '.' ) )
-							nodeTitle = originTitle ~ " = (" ~  type ~ ") " ~ value;
-						else
-						{
-							if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") " ~ value; else nodeTitle = varName ~ " = (" ~  type ~ ") " ~ value;
-						}
+						if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = " ~ value; else nodeTitle = varName ~ " = " ~ value;
 					}
-					
-					int closeParenPos = Util.rindex( value, ")" );
-					if( closeParenPos < value.length ) value = Util.trim( value[closeParenPos+1..$] ).dup;
+				}
+				else
+				{
+					if( Util.contains( originTitle, '.' ) )
+						nodeTitle = originTitle ~ " = (" ~  type ~ ") " ~ value;
+					else
+					{
+						if( dotPos < varName.length ) nodeTitle = varName[dotPos+1..$] ~ " = (" ~  type ~ ") " ~ value; else nodeTitle = varName ~ " = (" ~  type ~ ") " ~ value;
+					}
 				}
 				
-				return Util.trim( nodeTitle );
+				int closeParenPos = Util.rindex( value, ")" );
+				if( closeParenPos < value.length ) value = Util.trim( value[closeParenPos+1..$] ).dup;
 			}
+			
+			return Util.trim( nodeTitle );
 		}
 		
 		value = type = "";
@@ -1512,7 +1529,7 @@ class CDebugger
 						IupSetAttribute( watchTreeHandle, "DELNODE", "ALL" );
 						regTable.removeAllItem();
 						IupSetAttribute( disasHandle, "VALUE", "" );
-						localTreeFrame = argTreeFrame = shareTreeFrame = "";
+						localTreeFrame = argTreeFrame = shareTreeFrame = regFrame = disasFrame = "";
 						foreach( CScintilla cSci; GLOBAL.scintillaManager )
 						{
 							IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 ); //#define SCI_MARKERDELETEALL 2045
@@ -1823,7 +1840,7 @@ class CDebugger
 		IupSetAttribute( consoleHandle, "VALUE", "" );
 		IupSetAttribute( GLOBAL.debugPanel.getConsoleCommandInputHandle, "VALUE", "" ); // Clear Input Text
 		
-		localTreeFrame = argTreeFrame = shareTreeFrame = "";
+		localTreeFrame = argTreeFrame = shareTreeFrame = regFrame = disasFrame = "";
 		
 		IupSetAttribute( localTreeHandle, "DELNODE", "ALL" ); 
 		IupSetAttribute( argTreeHandle, "DELNODE", "ALL" ); 
@@ -2100,8 +2117,6 @@ class DebugThread //: Thread
 			{
 				try
 				{
-					
-				
 					char[1] c;
 					//if( proc.stderr is null ) 
 					if( proc.stdout.read( c ) <= 0 ) break;
@@ -2209,7 +2224,7 @@ class DebugThread //: Thread
 			proc = new Process( true, "\"" ~ debuggerExe ~ "\" " ~ executeFullPath );
 			proc.gui( true );
 			if( cwd.length ) proc.workDir( cwd );
-			proc.redirect( Redirect.All );
+			//proc.redirect( Redirect.All );
 			proc.execute;
 			//auto proc_result = proc.wait;
 
@@ -2709,16 +2724,23 @@ extern( C )
 				return varTabChange_cb( GLOBAL.debugPanel.getVarsTabHandle, varsTabPos, -1 );
 
 			case 2:
-				GLOBAL.debugPanel.sendCommand( "info reg\n", false );
+				char[] nowFrameFullTitle = GLOBAL.debugPanel.getFrameNodeTitle( true ); // -1 = Get Active; true = Get Full Title
+				if( nowFrameFullTitle != GLOBAL.debugPanel.regFrame )
+				{
+					GLOBAL.debugPanel.regFrame = nowFrameFullTitle;
+					GLOBAL.debugPanel.sendCommand( "info reg\n", false );
+				}
 				break;
 			
 			case 3:
-				GLOBAL.debugPanel.showDisassemble();
+				char[] nowFrameFullTitle = GLOBAL.debugPanel.getFrameNodeTitle( true ); // -1 = Get Active; true = Get Full Title
+				if( nowFrameFullTitle != GLOBAL.debugPanel.disasFrame )
+				{
+					GLOBAL.debugPanel.disasFrame = nowFrameFullTitle;;
+					GLOBAL.debugPanel.showDisassemble();
+				}
 				break;
 				
-				
-				
-			
 			default:
 		}
 		return IUP_DEFAULT;
