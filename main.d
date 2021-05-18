@@ -117,6 +117,10 @@ void main( char[][] args )
 		}
 	}
 	
+	IupSetGlobal( "DEFAULTTHEME", "0 0 0" );
+	//IupSetGlobal( "MENUBGCOLOR", "0 0 0" );
+	
+	
 	//  Get poseidonFB exePath & set the new cwd
 	scope _poseidonPath = new FilePath( args[0] );
 	if( _poseidonPath.exists() )
@@ -235,10 +239,43 @@ void main( char[][] args )
 
 	// Set Split %
 	IupSetAttribute( GLOBAL.explorerSplit, "VALUE", toStringz( GLOBAL.editorSetting01.ExplorerSplit ) );
-
+	
+	/*
+	version(linux)
+	{
+		EditorToggleUint	_editorSetting00 = GLOBAL.editorSetting00;
+		EditorLayoutSize	_editorSetting01 = GLOBAL.editorSetting01;
+		EditorOpacity		_editorSetting02 = GLOBAL.editorSetting02;
+		EditorColorUint		_editColor = GLOBAL.editColor;
+		
+		// Shows dialog
+		IupShow( GLOBAL.mainDlg );
+	
+		GLOBAL.editorSetting00 = _editorSetting00;
+		GLOBAL.editorSetting01 = _editorSetting01;
+		GLOBAL.editorSetting02 = _editorSetting02;
+		GLOBAL.editColor = _editColor;
+	}
+	else
+	{
+		// Shows dialog
+		IupShow( GLOBAL.mainDlg );
+	}
+	*/
+	
+	EditorToggleUint	_editorSetting00 = GLOBAL.editorSetting00;
+	EditorLayoutSize	_editorSetting01 = GLOBAL.editorSetting01;
+	EditorOpacity		_editorSetting02 = GLOBAL.editorSetting02;
+	EditorColorUint		_editColor = GLOBAL.editColor;
+	
 	// Shows dialog
 	IupShow( GLOBAL.mainDlg );
-	
+
+	GLOBAL.editorSetting00 = _editorSetting00;
+	GLOBAL.editorSetting01 = _editorSetting01;
+	GLOBAL.editorSetting02 = _editorSetting02;
+	GLOBAL.editColor = _editColor;
+		
 	IupSetAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );	
 	IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
 	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );

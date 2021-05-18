@@ -561,50 +561,50 @@ class CPreferenceDialog : CBaseDialog
 			{
 				Ihandle* gbox = IupGridBox
 				(
-					IupSetAttributes( toggleLineMargin, "" ),
-					IupSetAttributes( toggleFixedLineMargin, "" ),
+					toggleLineMargin,
+					toggleFixedLineMargin,
 					
-					IupSetAttributes( toggleBookmarkMargin,"" ),
-					IupSetAttributes( toggleFoldMargin, "" ),
+					toggleBookmarkMargin,
+					toggleFoldMargin,
 					
-					IupSetAttributes( toggleIndentGuide, "" ),
-					IupSetAttributes( toggleCaretLine, "" ),
+					toggleIndentGuide,
+					toggleCaretLine,
 					
-					IupSetAttributes( toggleWordWrap, "" ),
-					IupSetAttributes( toggleTabUseingSpace, "" ),
+					toggleWordWrap,
+					toggleTabUseingSpace,
 					
-					IupSetAttributes( toggleShowEOL, "" ),
-					IupSetAttributes( toggleShowSpace, "" ),
+					toggleShowEOL,
+					toggleShowSpace,
 
-					IupSetAttributes( toggleAutoIndent, "" ),
-					IupSetAttributes( toggleAutoEnd, "" ),
+					toggleAutoIndent,
+					toggleAutoEnd,
 					
-					IupSetAttributes( toggleAutoClose, "" ),
-					IupSetAttributes( toggleColorOutline, "" ),
+					toggleAutoClose,
+					toggleColorOutline,
 					
-					IupSetAttributes( toggleMessage, "" ),
-					IupSetAttributes( toggleBoldKeyword, "" ),
+					toggleMessage,
+					toggleBoldKeyword,
 					
-					IupSetAttributes( toggleBraceMatch, "" ),
-					IupSetAttributes( toggleLoadprev, "" ),
+					toggleBraceMatch,
+					toggleLoadprev,
 
-					IupSetAttributes( toggleMultiSelection, "" ),
-					IupSetAttributes( toggleCurrentWord, "" ),
+					toggleMultiSelection,
+					toggleCurrentWord,
 
-					IupSetAttributes( toggleMiddleScroll, "" ),
-					IupSetAttributes( toggleDocStatus, "" ),
+					toggleMiddleScroll,
+					toggleDocStatus,
 					
 					//IupSetAttributes( toggleLoadAtBackThread, "" ),
-					IupSetAttributes( toggleAutoKBLayout, "" ),
-					IupSetAttributes( toggleQBCase, "" ),
+					toggleAutoKBLayout,
+					toggleQBCase,
 
-					IupSetAttributes( toggleNewDocBOM, "" ),
-					IupSetAttributes( toggleUseManual, "" ),
+					toggleNewDocBOM,
+					toggleUseManual,
 					
-					IupSetAttributes( hBoxTab, "" ),
-					IupSetAttributes( hBoxColumn, "" ),
+					hBoxTab,
+					hBoxColumn,
 
-					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxBarSize,
 					hBoxControlChar,
 					
 					null
@@ -614,47 +614,47 @@ class CPreferenceDialog : CBaseDialog
 			{
 				Ihandle* gbox = IupGridBox
 				(
-					IupSetAttributes( toggleLineMargin, "" ),
-					IupSetAttributes( toggleFixedLineMargin, "" ),
+					toggleLineMargin,
+					toggleFixedLineMargin,
 					
-					IupSetAttributes( toggleBookmarkMargin,"" ),
-					IupSetAttributes( toggleFoldMargin, "" ),
+					toggleBookmarkMargin,
+					toggleFoldMargin,
 					
-					IupSetAttributes( toggleIndentGuide, "" ),
-					IupSetAttributes( toggleCaretLine, "" ),
+					toggleIndentGuide,
+					toggleCaretLine,
 					
-					IupSetAttributes( toggleWordWrap, "" ),
-					IupSetAttributes( toggleTabUseingSpace, "" ),
+					toggleWordWrap,
+					toggleTabUseingSpace,
 					
-					IupSetAttributes( toggleShowEOL, "" ),
-					IupSetAttributes( toggleShowSpace, "" ),
+					toggleShowEOL,
+					toggleShowSpace,
 
-					IupSetAttributes( toggleAutoIndent, "" ),
-					IupSetAttributes( toggleAutoEnd, "" ),
+					toggleAutoIndent,
+					toggleAutoEnd,
 					
-					IupSetAttributes( toggleAutoClose, "" ),
-					IupSetAttributes( toggleColorOutline, "" ),
+					toggleAutoClose,
+					toggleColorOutline,
 					
-					IupSetAttributes( toggleMessage, "" ),
-					IupSetAttributes( toggleBoldKeyword, "" ),
+					toggleMessage,
+					toggleBoldKeyword,
 					
-					IupSetAttributes( toggleBraceMatch, "" ),
-					IupSetAttributes( toggleLoadprev, "" ),
+					toggleBraceMatch,
+					toggleLoadprev,
 
-					IupSetAttributes( toggleMultiSelection, "" ),
-					IupSetAttributes( toggleCurrentWord, "" ),
+					toggleMultiSelection,
+					toggleCurrentWord,
 
-					IupSetAttributes( toggleMiddleScroll, "" ),
-					IupSetAttributes( toggleDocStatus, "" ),
+					toggleMiddleScroll,
+					toggleDocStatus,
 					
-					//IupSetAttributes( toggleLoadAtBackThread, "" ),
-					IupSetAttributes( toggleQBCase, "" ),
-					IupSetAttributes( toggleUseManual, "" ),
+					//toggleLoadAtBackThread,
+					toggleQBCase,
+					toggleUseManual,
 					
-					IupSetAttributes( hBoxTab, "" ),
-					IupSetAttributes( hBoxColumn, "" ),
+					hBoxTab,
+					hBoxColumn,
 
-					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxBarSize,
 					hBoxControlChar,
 					
 					null
@@ -667,47 +667,47 @@ class CPreferenceDialog : CBaseDialog
 			{
 				Ihandle* gbox = IupGridBox
 				(
-					IupSetAttributes( toggleLineMargin, "" ),
-					IupSetAttributes( toggleFixedLineMargin, "" ),
+					toggleLineMargin,
+					toggleFixedLineMargin,
 					
-					IupSetAttributes( toggleBookmarkMargin,"" ),
-					IupSetAttributes( toggleFoldMargin, "" ),
+					toggleBookmarkMargin,
+					toggleFoldMargin,
 					
-					IupSetAttributes( toggleIndentGuide, "" ),
-					IupSetAttributes( toggleCaretLine, "" ),
+					toggleIndentGuide,
+					toggleCaretLine,
 					
-					IupSetAttributes( toggleWordWrap, "" ),
-					IupSetAttributes( toggleTabUseingSpace, "" ),
+					toggleWordWrap,
+					toggleTabUseingSpace,
 					
-					IupSetAttributes( toggleShowEOL, "" ),
-					IupSetAttributes( toggleShowSpace, "" ),
+					toggleShowEOL,
+					toggleShowSpace,
 
-					IupSetAttributes( toggleAutoIndent, "" ),
-					IupSetAttributes( toggleAutoClose, "" ),
+					toggleAutoIndent,
+					toggleAutoClose,
 					
-					IupSetAttributes( toggleColorOutline, "" ),
-					IupSetAttributes( toggleMessage, "" ),
+					toggleColorOutline,
+					toggleMessage,
 
-					IupSetAttributes( toggleBoldKeyword, "" ),
-					IupSetAttributes( toggleLoadprev, "" ),
+					toggleBoldKeyword,
+					toggleLoadprev,
 					
-					IupSetAttributes( toggleBraceMatch, "" ),
-					IupSetAttributes( toggleMultiSelection, "" ),
+					toggleBraceMatch,
+					toggleMultiSelection,
 
-					IupSetAttributes( toggleCurrentWord, "" ),
-					IupSetAttributes( toggleMiddleScroll, "" ),
+					toggleCurrentWord,
+					toggleMiddleScroll,
 					
-					IupSetAttributes( toggleDocStatus, "" ),
-					IupSetAttributes( toggleAutoKBLayout, "" ),
+					toggleDocStatus,
+					toggleAutoKBLayout,
 					
-					IupSetAttributes( toggleNewDocBOM, "" ),
-					IupFill(),
-					//IupSetAttributes( toggleLoadAtBackThread, "" ),
+					toggleNewDocBOM,
+					IupFill,
+					//toggleLoadAtBackThread,
 					
-					IupSetAttributes( hBoxTab, "" ),
-					IupSetAttributes( hBoxColumn, "" ),
+					hBoxTab,
+					hBoxColumn,
 
-					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxBarSize,
 					hBoxControlChar,
 					
 					null
@@ -717,45 +717,45 @@ class CPreferenceDialog : CBaseDialog
 			{
 				Ihandle* gbox = IupGridBox
 				(
-					IupSetAttributes( toggleLineMargin, "" ),
-					IupSetAttributes( toggleFixedLineMargin, "" ),
+					toggleLineMargin,
+					toggleFixedLineMargin,
 					
-					IupSetAttributes( toggleBookmarkMargin,"" ),
-					IupSetAttributes( toggleFoldMargin, "" ),
+					toggleBookmarkMargin,
+					toggleFoldMargin,
 					
-					IupSetAttributes( toggleIndentGuide, "" ),
-					IupSetAttributes( toggleCaretLine, "" ),
+					toggleIndentGuide,
+					toggleCaretLine,
 					
-					IupSetAttributes( toggleWordWrap, "" ),
-					IupSetAttributes( toggleTabUseingSpace, "" ),
+					toggleWordWrap,
+					toggleTabUseingSpace,
 					
-					IupSetAttributes( toggleShowEOL, "" ),
-					IupSetAttributes( toggleShowSpace, "" ),
+					toggleShowEOL,
+					toggleShowSpace,
 
-					IupSetAttributes( toggleAutoIndent, "" ),
-					IupSetAttributes( toggleAutoClose, "" ),
+					toggleAutoIndent,
+					toggleAutoClose,
 					
-					IupSetAttributes( toggleColorOutline, "" ),
-					IupSetAttributes( toggleMessage, "" ),
+					toggleColorOutline,
+					toggleMessage,
 
-					IupSetAttributes( toggleBoldKeyword, "" ),
-					IupSetAttributes( toggleLoadprev, "" ),
+					toggleBoldKeyword,
+					toggleLoadprev,
 					
-					IupSetAttributes( toggleBraceMatch, "" ),
-					IupSetAttributes( toggleMultiSelection, "" ),
+					toggleBraceMatch,
+					toggleMultiSelection,
 
-					IupSetAttributes( toggleCurrentWord, "" ),
-					IupSetAttributes( toggleMiddleScroll, "" ),
+					toggleCurrentWord,
+					toggleMiddleScroll,
 					
-					IupSetAttributes( toggleDocStatus, "" ),
-					IupFill(),
-					//IupSetAttributes( toggleAutoKBLayout, "" ),
-					//IupSetAttributes( toggleLoadAtBackThread, "" ),
+					toggleDocStatus,
+					IupFill,
+					//toggleAutoKBLayout,
+					//toggleLoadAtBackThread,
 					
-					IupSetAttributes( hBoxTab, "" ),
-					IupSetAttributes( hBoxColumn, "" ),
+					hBoxTab,
+					hBoxColumn,
 
-					IupSetAttributes( hBoxBarSize, "" ),
+					hBoxBarSize,
 					hBoxControlChar,
 					
 					null
@@ -767,52 +767,7 @@ class CPreferenceDialog : CBaseDialog
 		//IupSetAttribute(gbox, "SIZELIN", "4");
 		IupSetAttributes( gbox, "NUMDIV=2,ALIGNMENTLIN=ACENTER,GAPLIN=10,EXPANDCHILDREN=HORIZONTAL,MARGIN=0x0" );
 		
-		/+
-		// Mark High Light Line
-		Ihandle* labelMarker0 = IupLabel( toStringz( GLOBAL.languageItems["maker0"].toDString ~ ": " ) );
-		Ihandle* btnMarker0Color = IupFlatButton(  null );
-		IupSetAttribute( btnMarker0Color, "FGCOLOR",GLOBAL.editColor.maker[0].toCString );
-		version(Windows) IupSetAttribute( btnMarker0Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker0Color, "SIZE", "24x10" );
-		IupSetHandle( "btnMarker0Color", btnMarker0Color );
-		IupSetCallback( btnMarker0Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		
-		Ihandle* labelMarker1 = IupLabel( toStringz( GLOBAL.languageItems["maker1"].toDString ~ ": " ) );
-		Ihandle* btnMarker1Color = IupFlatButton( null );
-		IupSetAttribute( btnMarker1Color, "FGCOLOR",GLOBAL.editColor.maker[1].toCString );
-		version(Windows) IupSetAttribute( btnMarker1Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker1Color, "SIZE", "24x10" );
-		IupSetHandle( "btnMarker1Color", btnMarker1Color );
-		IupSetCallback( btnMarker1Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
-		Ihandle* labelMarker2 = IupLabel( toStringz( GLOBAL.languageItems["maker2"].toDString ~ ": " ) );
-		Ihandle* btnMarker2Color = IupFlatButton( null );
-		IupSetAttribute( btnMarker2Color, "FGCOLOR",GLOBAL.editColor.maker[2].toCString );
-		version(Windows) IupSetAttribute( btnMarker2Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker2Color, "SIZE", "24x10" );
-		IupSetHandle( "btnMarker2Color", btnMarker2Color );
-		IupSetCallback( btnMarker2Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-
-		Ihandle* labelMarker3 = IupLabel( toStringz( GLOBAL.languageItems["maker3"].toDString ~ ": " ) );
-		Ihandle* btnMarker3Color = IupFlatButton( null );
-		IupSetAttribute( btnMarker3Color, "FGCOLOR",GLOBAL.editColor.maker[3].toCString );
-		version(Windows) IupSetAttribute( btnMarker3Color, "SIZE", "24x8" ); else IupSetAttribute( btnMarker3Color, "SIZE", "24x10" );
-		IupSetHandle( "btnMarker3Color", btnMarker3Color );
-		IupSetCallback( btnMarker3Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		
-		Ihandle* gboxMarkerColor = IupGridBox
-		(
-			labelMarker0,
-			btnMarker0Color,
-			labelMarker1,
-			btnMarker1Color,
-
-			labelMarker2,
-			btnMarker2Color,
-			labelMarker3,
-			btnMarker3Color,
-
-			null
-		);
-		IupSetAttributes( gboxMarkerColor, "EXPAND=YES,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ACENTER,GAPLIN=0,GAPCOL=10,MARGIN=0x5,SIZELIN=0,HOMOGENEOUSCOL=YES,NAME=gridbox_Maker" );
-		+/
 		
 		version(FBIDE)
 		{
@@ -1090,25 +1045,25 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* gboxColor = IupGridBox
 		(
-			IupSetAttributes( labelCaretLine, "" ),
-			IupSetAttributes( btnCaretLine,"" ),
-			IupSetAttributes( labelCursor, "" ),
-			IupSetAttributes( btnCursor, "" ),
+			labelCaretLine,
+			btnCaretLine,
+			labelCursor,
+			btnCursor,
 
-			IupSetAttributes( labelFoldingColor, "" ),
-			IupSetAttributes( btnFoldingColor, "" ),
-			IupSetAttributes( labelSelAlpha, "" ),
-			IupSetAttributes( textAlpha, "" ),
+			labelFoldingColor,
+			btnFoldingColor,
+			labelSelAlpha,
+			textAlpha,
 			
-			IupSetAttributes( labelPrjTitle, "" ),
-			IupSetAttributes( btnPrjTitle, "" ),
-			IupSetAttributes( labelSourceTypeFolder, "" ),
-			IupSetAttributes( btnSourceTypeFolder, "" ),
+			labelPrjTitle,
+			btnPrjTitle,
+			labelSourceTypeFolder,
+			btnSourceTypeFolder,
 			
-			IupSetAttributes( labelIndicator, "" ),
-			IupSetAttributes( btnIndicator, "" ),
-			IupSetAttributes( labelIndicatorAlpha, "" ),
-			IupSetAttributes( textIndicatorAlpha, "" ),
+			labelIndicator,
+			btnIndicator,
+			labelIndicatorAlpha,
+			textIndicatorAlpha,
 
 			null
 		);
@@ -1317,86 +1272,78 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* gboxColor_1 = IupGridBox
 		(
-			IupSetAttributes( labelPrj, "" ),
-			IupSetAttributes( btnPrj_FG, "" ),
-			IupSetAttributes( btnPrj_BG, "" ),
+			labelPrj,
+			btnPrj_FG,
+			btnPrj_BG,
 			IupFill(),
-			IupSetAttributes( labelOutline, "" ),
-			IupSetAttributes( btnOutline_FG, "" ),
-			IupSetAttributes( btnOutline_BG, "" ),
+			labelOutline,
+			btnOutline_FG,
+			btnOutline_BG,
 
-			IupSetAttributes( labelFilelist, "" ),
-			IupSetAttributes( btnFilelist_FG, "" ),
-			IupSetAttributes( btnFilelist_BG, "" ),
+			labelFilelist,
+			btnFilelist_FG,
+			btnFilelist_BG,
 			IupFill(),
-			IupSetAttributes( labelOutput, "" ),
-			IupSetAttributes( btnOutput_FG, "" ),
-			IupSetAttributes( btnOutput_BG, "" ),
+			labelOutput,
+			btnOutput_FG,
+			btnOutput_BG,
 
-			IupSetAttributes( labelSearch, "" ),
-			IupSetAttributes( btnSearch_FG, "" ),
-			IupSetAttributes( btnSearch_BG, "" ),
+			labelSearch,
+			btnSearch_FG,
+			btnSearch_BG,
 			IupFill(),
-			IupSetAttributes( labelSelectFore, "" ),
-			IupSetAttributes( btnSelectFore, "" ),
-			IupSetAttributes( btnSelectBack, "" ),
+			labelSelectFore,
+			btnSelectFore,
+			btnSelectBack,
 
-			IupSetAttributes( labelLinenumFore, "" ),
-			IupSetAttributes( btnLinenumFore, "" ),
-			IupSetAttributes( btnLinenumBack, "" ),
+			labelLinenumFore,
+			btnLinenumFore,
+			btnLinenumBack,
 			IupFill(),
-			IupSetAttributes( labelBrace, "" ),
-			IupSetAttributes( btnBrace_FG, "" ),
-			IupSetAttributes( btnBrace_BG, "" ),
+			labelBrace,
+			btnBrace_FG,
+			btnBrace_BG,
 
-			IupSetAttributes( labelError, "" ),
-			IupSetAttributes( btnError_FG, "" ),
-			IupSetAttributes( btnError_BG, "" ),			
+			labelError,
+			btnError_FG,
+			btnError_BG,
 			IupFill(),
-			IupSetAttributes( labelWarning, "" ),
-			IupSetAttributes( btnWarning_FG, "" ),
-			IupSetAttributes( btnWarning_BG, "" ),			
+			labelWarning,
+			btnWarning_FG,
+			btnWarning_BG,
 			
 			
-			IupSetAttributes( label_Scintilla, "" ),
-			//IupFill(),
-			IupSetAttributes( btn_Scintilla_FG,"" ),
-			IupSetAttributes( btn_Scintilla_BG, "" ),
+			label_Scintilla,
+			btn_Scintilla_FG,
+			btn_Scintilla_BG,
 			IupFill(),
-			IupSetAttributes( labelSCE_B_COMMENT, "" ),
-			//IupFill(),
-			IupSetAttributes( btnSCE_B_COMMENT_FG,"" ),
-			IupSetAttributes( btnSCE_B_COMMENT_BG, "" ),
+			labelSCE_B_COMMENT,
+			btnSCE_B_COMMENT_FG,
+			btnSCE_B_COMMENT_BG,
 
-			IupSetAttributes( labelSCE_B_NUMBER, "" ),
-			//IupFill(),
-			IupSetAttributes( btnSCE_B_NUMBER_FG, "" ),
-			IupSetAttributes( btnSCE_B_NUMBER_BG, "" ),
+			labelSCE_B_NUMBER,
+			btnSCE_B_NUMBER_FG,
+			btnSCE_B_NUMBER_BG,
 			IupFill(),
-			IupSetAttributes( labelSCE_B_STRING, "" ),
-			//IupFill(),
-			IupSetAttributes( btnSCE_B_STRING_FG, "" ),
-			IupSetAttributes( btnSCE_B_STRING_BG, "" ),
+			labelSCE_B_STRING,
+			btnSCE_B_STRING_FG,
+			btnSCE_B_STRING_BG,
 
-			IupSetAttributes( labelSCE_B_PREPROCESSOR, "" ),
-			//IupFill(),
-			IupSetAttributes( btnSCE_B_PREPROCESSOR_FG, "" ),
-			IupSetAttributes( btnSCE_B_PREPROCESSOR_BG, "" ),
+			labelSCE_B_PREPROCESSOR,
+			btnSCE_B_PREPROCESSOR_FG,
+			btnSCE_B_PREPROCESSOR_BG,
 			IupFill(),
-			IupSetAttributes( labelSCE_B_OPERATOR, "" ),
-			//IupFill(),
-			IupSetAttributes( btnSCE_B_OPERATOR_FG, "" ),
-			IupSetAttributes( btnSCE_B_OPERATOR_BG, "" ),
+			labelSCE_B_OPERATOR,
+			btnSCE_B_OPERATOR_FG,
+			btnSCE_B_OPERATOR_BG,
 
-			IupSetAttributes( labelSCE_B_IDENTIFIER, "" ),
-			//IupFill(),
-			IupSetAttributes( btnSCE_B_IDENTIFIER_FG, "" ),
-			IupSetAttributes( btnSCE_B_IDENTIFIER_BG, "" ),
+			labelSCE_B_IDENTIFIER,
+			btnSCE_B_IDENTIFIER_FG,
+			btnSCE_B_IDENTIFIER_BG,
 			IupFill(),
-			IupSetAttributes( labelSCE_B_COMMENTBLOCK, "" ),
-			//IupFill(),
-			IupSetAttributes( btnSCE_B_COMMENTBLOCK_FG, "" ),
-			IupSetAttributes( btnSCE_B_COMMENTBLOCK_BG, "" ),
+			labelSCE_B_COMMENTBLOCK,
+			btnSCE_B_COMMENTBLOCK_FG,
+			btnSCE_B_COMMENTBLOCK_BG,
 
 			null
 		);
@@ -1462,87 +1409,6 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameColor_2 = IupFrame( gboxMarkerColor );
 		IupSetAttributes( frameColor_2, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		
-		/+
-		Ihandle* labelKeyWord0 = IupLabel( "#0:" );
-		IupSetAttribute( labelKeyWord0, "ALIGNMENT", "ARIGHT" );
-		Ihandle* btnKeyWord0Color = IupFlatButton( null );
-		IupSetAttribute( btnKeyWord0Color, "FGCOLOR", GLOBAL.editColor.keyWord[0].toCString );
-		version(Windows) IupSetAttribute( btnKeyWord0Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord0Color, "SIZE", "24x10" );
-		IupSetHandle( "btnKeyWord0Color", btnKeyWord0Color );
-		IupSetCallback( btnKeyWord0Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-
-		Ihandle* labelKeyWord1 = IupLabel( "#1:" );
-		IupSetAttribute( labelKeyWord1, "ALIGNMENT", "ARIGHT" );
-		Ihandle* btnKeyWord1Color = IupFlatButton( null );
-		IupSetAttribute( btnKeyWord1Color, "FGCOLOR", GLOBAL.editColor.keyWord[1].toCString );
-		version(Windows) IupSetAttribute( btnKeyWord1Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord1Color, "SIZE", "24x10" );
-		IupSetHandle( "btnKeyWord1Color", btnKeyWord1Color );
-		IupSetCallback( btnKeyWord1Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-
-		Ihandle* labelKeyWord2 = IupLabel( "#2:" );
-		IupSetAttribute( labelKeyWord2, "ALIGNMENT", "ARIGHT" );
-		Ihandle* btnKeyWord2Color = IupFlatButton( null );
-		IupSetAttribute( btnKeyWord2Color, "FGCOLOR", GLOBAL.editColor.keyWord[2].toCString );
-		version(Windows) IupSetAttribute( btnKeyWord2Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord2Color, "SIZE", "24x10" );
-		IupSetHandle( "btnKeyWord2Color", btnKeyWord2Color );
-		IupSetCallback( btnKeyWord2Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-
-		Ihandle* labelKeyWord3 = IupLabel( "#3:" );
-		IupSetAttribute( labelKeyWord3, "ALIGNMENT", "ARIGHT" );
-		Ihandle* btnKeyWord3Color = IupFlatButton( null );
-		IupSetAttribute( btnKeyWord3Color, "FGCOLOR",GLOBAL.editColor.keyWord[3].toCString );
-		version(Windows) IupSetAttribute( btnKeyWord3Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord3Color, "SIZE", "24x10" );
-		IupSetHandle( "btnKeyWord3Color", btnKeyWord3Color );
-		IupSetCallback( btnKeyWord3Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-
-		Ihandle* labelKeyWord4 = IupLabel( "#4:" );
-		IupSetAttribute( labelKeyWord4, "ALIGNMENT", "ARIGHT" );
-		Ihandle* btnKeyWord4Color = IupFlatButton( null );
-		IupSetAttribute( btnKeyWord4Color, "FGCOLOR",GLOBAL.editColor.keyWord[4].toCString );
-		version(Windows) IupSetAttribute( btnKeyWord4Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord4Color, "SIZE", "24x10" );
-		IupSetHandle( "btnKeyWord4Color", btnKeyWord4Color );
-		IupSetCallback( btnKeyWord4Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-
-		Ihandle* labelKeyWord5 = IupLabel( "#5:" );//GLOBAL.languageItems["keyword5"].toCString() );
-		IupSetAttribute( labelKeyWord5, "ALIGNMENT", "ARIGHT" );
-		Ihandle* btnKeyWord5Color = IupFlatButton( null );
-		IupSetAttribute( btnKeyWord5Color, "FGCOLOR",GLOBAL.editColor.keyWord[5].toCString );
-		version(Windows) IupSetAttribute( btnKeyWord5Color, "SIZE", "24x8" ); else IupSetAttribute( btnKeyWord5Color, "SIZE", "24x10" );
-		IupSetHandle( "btnKeyWord5Color", btnKeyWord5Color );
-		IupSetCallback( btnKeyWord5Color, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-
-
-
-		Ihandle* gboxKeyWordColor = IupGridBox
-		(
-			labelKeyWord0,
-			btnKeyWord0Color,
-			labelKeyWord1,
-			btnKeyWord1Color,
-
-			labelKeyWord2,
-			btnKeyWord2Color,
-			labelKeyWord3,
-			btnKeyWord3Color,
-			
-			labelKeyWord4,
-			btnKeyWord4Color,
-			labelKeyWord5,
-			btnKeyWord5Color,
-			
-
-			null
-		);
-		IupSetAttributes( gboxKeyWordColor, "SIZELIN=-1,NUMDIV=12,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=5,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
-		Ihandle* frameKeywordColor = IupFrame( gboxKeyWordColor );
-		IupSetAttributes( frameKeywordColor, "MARGIN=0x0" );
-		IupSetAttribute( frameKeywordColor, "TITLE", GLOBAL.languageItems["keywords"].toCString );		
-		+/
-		
-		/*
-		Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, frameFont, frameColor, null );
-		IupSetAttributes( vBoxPage02, "GAP=5,MARGIN=0x1,EXPANDCHILDREN=YES" );
-		*/
 		Ihandle* vColor = IupVbox( colorTemplateFrame, frameColor, frameColor_1, frameColor_2, /*frameKeywordColor,*/ null );
 		IupSetAttributes( vColor, "ALIGNMENT=ACENTER,EXPANDCHILDREN=YES,HOMOGENEOUS=NO,GAP=0" );		
 

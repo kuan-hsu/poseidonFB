@@ -115,8 +115,8 @@ class CSearchExpander
 		
 		Ihandle* _group2 = IupGridBox
 		(
-			IupSetAttributes( btnFindPrev, "" ),	IupSetAttributes( btnFindNext,"" ),		IupSetAttributes( btnMarkAll, "" ),
-			IupSetAttributes( btnReplace, "" ),		IupSetAttributes( btnReplaceFind, "" ),	IupSetAttributes( btnReplaceAll, "" ),
+			btnFindPrev,	btnFindNext,		btnMarkAll,
+			btnReplace,		btnReplaceFind,		btnReplaceAll,
 			null
 		);
 		IupSetAttributes( _group2, "EXPAND=YES,NUMDIV=3,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ARIGHT,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUSCOL=YES,GAPLIN=2,GAPCOL=1,MARGIN=0x0,SIZELIN=-1" );		

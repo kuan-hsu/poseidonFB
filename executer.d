@@ -655,7 +655,14 @@ struct ExecuterAction
 									}
 								}
 								
-								if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+								if( GLOBAL.toolbar.checkBitButtonStatus != 32 || Util.index( focus.Option, "-m64" ) < focus.Option.length )
+								{
+									txtLibDirs = txtLibDirs ~ " -L/LIBPATH:\"" ~ s ~ "\"";
+								}
+								else
+								{
+									if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+								}
 							}
 							else
 							{
@@ -737,7 +744,8 @@ struct ExecuterAction
 				}
 				
 				version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";// else txtCommand ~= " -s console";
-				version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:windows:4";
+				//version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:windows:4";
+				version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:WINDOWS";
 				
 				scope fp = new FilePath( activePrj.dir ~ "/" ~ activePrj.targetName );
 				fp.set( fp.path );
@@ -1339,7 +1347,8 @@ struct ExecuterAction
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
 			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";
-			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:windows:4";
+			//version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:windows:4";
+			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:WINDOWS";
 			
 			// Compiler Command
 			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
@@ -1885,7 +1894,15 @@ struct ExecuterAction
 								}
 							}
 							
-							if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+							//if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+							if( GLOBAL.toolbar.checkBitButtonStatus != 32 || Util.index( _focus.Option, "-m64" ) < _focus.Option.length )
+							{
+								txtLibDirs = txtLibDirs ~ " -L/LIBPATH:\"" ~ s ~ "\"";
+							}
+							else
+							{
+								if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+							}							
 						}
 						else
 						{
@@ -1951,7 +1968,8 @@ struct ExecuterAction
 			}
 			
 			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
-			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:windows:4";
+			//version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:windows:4";
+			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:WINDOWS";
 
 			
 			// Using Thread
@@ -2065,7 +2083,8 @@ struct ExecuterAction
 			version(DIDE)
 			{
 				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
-				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:windows:4";
+				//if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:windows:4";
+				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:WINDOWS";
 			}
 			
 			scope _filePath = new FilePath( cSci.getFullPath() );

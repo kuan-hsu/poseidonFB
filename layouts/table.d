@@ -104,6 +104,7 @@ private:
 			object = IupSplit( _member0, _member1 );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
 			IupSetAttributes( object, "BARSIZE=1,EXPAND=YES,NAME=TABLESPLIT" );
+			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 		
 		this( ColumnFrame _ColumnFrame0, ColumnFrame _ColumnFrame1 )
@@ -111,6 +112,7 @@ private:
 			object = IupSplit( _ColumnFrame0.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
 			IupSetAttributes( object, "BARSIZE=1,EXPAND=YES,NAME=TABLESPLIT" );
+			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 		
 		this( ColumnSplit _ColumnSplit, ColumnFrame _ColumnFrame1 )
@@ -118,6 +120,7 @@ private:
 			object = IupSplit( _ColumnSplit.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
 			IupSetAttributes( object, "BARSIZE=1,EXPAND=YES,NAME=TABLESPLIT" );
+			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 	}	
 	
