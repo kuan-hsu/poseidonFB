@@ -1329,6 +1329,19 @@ struct ExecuterAction
 				GLOBAL.messagePanel.printOutputPanel( "Compile Cancel By User.\n\nCompile Cancel!", true );
 				return false;
 			}
+			else
+			{
+				version(FBIDE)
+				{
+					if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
+					{
+						foreach( CScintilla _cSci; GLOBAL.scintillaManager )
+						{
+							if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
+						}
+					}
+				}
+			}
 
 			if( !options.length ) options = getCustomCompilerOption();
 			cSci = ScintillaAction.getActiveCScintilla();
@@ -1456,6 +1469,18 @@ struct ExecuterAction
 					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" ) return buildAll( options, optionDebug );
 				}
 			}
+			
+			
+			version(FBIDE)
+			{
+				if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
+				{
+					foreach( CScintilla _cSci; GLOBAL.scintillaManager )
+					{
+						if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
+					}
+				}
+			}				
 
 
 			char[] txtCommand, txtSources, txtIncludeDirs, txtLibDirs;
@@ -1749,6 +1774,18 @@ struct ExecuterAction
 			{
 				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
 				return false;
+			}
+			
+			
+			version(FBIDE)
+			{
+				if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
+				{
+					foreach( CScintilla _cSci; GLOBAL.scintillaManager )
+					{
+						if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
+					}
+				}
 			}			
 
 

@@ -172,6 +172,7 @@ options=Options
 				autoconvertkeyword=Keyword case conversion
 				qbcase=Use QB-IDE Convert Case
 				newdocbom=Create New Doc With BOM
+				saveallmodified=Save All Documents Before Compile
 				font=Font
 					default=Default
 					'document=Document

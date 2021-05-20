@@ -20,7 +20,7 @@ version(Windows)
 struct EditorToggleUint
 {
 	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", LoadAtBackThread = "OFF", AutoKBLayout = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF", NewDocBOM = "ON";
+	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", Message = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF", NewDocBOM = "ON", SaveAllModified = "OFF";
 }
 
 struct EditorLayoutSize
@@ -682,6 +682,7 @@ struct GLOBAL
 						GLOBAL.languageItems["autoconvertkeyword"] = new IupString( cast(char[]) "Auto Convert Keyword Case" );
 						GLOBAL.languageItems["qbcase"] = new IupString( cast(char[]) "Use QB-IDE Convert Case" );
 						GLOBAL.languageItems["newdocbom"] = new IupString( cast(char[]) "Create New Doc With BOM" );
+						GLOBAL.languageItems["saveallmodified"] = new IupString( cast(char[]) "Save All Documents Before Compile" );
 						GLOBAL.languageItems["font"] = new IupString( cast(char[]) "Font" );
 							GLOBAL.languageItems["default"] = new IupString( cast(char[]) "Default" );
 							//GLOBAL.languageItems["document"] = new IupString( cast(char[]) "Document" );

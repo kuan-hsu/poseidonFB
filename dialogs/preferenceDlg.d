@@ -510,6 +510,9 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
 			IupSetHandle( "toggleUseManual", toggleUseManual );
 			
+			Ihandle* toggleSaveAllModified = IupToggle( GLOBAL.languageItems["saveallmodified"].toCString(), null );
+			IupSetAttribute( toggleSaveAllModified, "VALUE", toStringz(GLOBAL.editorSetting00.SaveAllModified.dup) );
+			IupSetHandle( "toggleSaveAllModified", toggleSaveAllModified );
 		}
 
 		version(Windows)
@@ -601,6 +604,9 @@ class CPreferenceDialog : CBaseDialog
 					toggleNewDocBOM,
 					toggleUseManual,
 					
+					toggleSaveAllModified,
+					IupFill,
+					
 					hBoxTab,
 					hBoxColumn,
 
@@ -650,6 +656,9 @@ class CPreferenceDialog : CBaseDialog
 					//toggleLoadAtBackThread,
 					toggleQBCase,
 					toggleUseManual,
+					
+					toggleSaveAllModified,
+					IupFill,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -2041,8 +2050,10 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.DocStatus				= fromStringz(IupGetAttribute( IupGetHandle( "toggleDocStatus" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.LoadAtBackThread			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadAtBackThread" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.AutoKBLayout				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoKBLayout" ), "VALUE" )).dup;
-			GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
-			GLOBAL.editorSetting00.NewDocBOM				= fromStringz(IupGetAttribute( IupGetHandle( "toggleNewDocBOM" ), "VALUE" )).dup;
+			version(FBIDE) GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
+			version(Windows) GLOBAL.editorSetting00.NewDocBOM				= fromStringz(IupGetAttribute( IupGetHandle( "toggleNewDocBOM" ), "VALUE" )).dup;
+			version(FBIDE) GLOBAL.editorSetting00.SaveAllModified			= fromStringz(IupGetAttribute( IupGetHandle( "toggleSaveAllModified" ), "VALUE" )).dup;
+			
 			
 			
 
@@ -2374,7 +2385,7 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.debugPanel.setFont();
 			}
 			
-			GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;
+			version(FBIDE) GLOBAL.toggleUseManual						= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseManual" ), "VALUE" )).dup;
 			
 			// Save Setup to Xml
 			//IDECONFIG.save();
