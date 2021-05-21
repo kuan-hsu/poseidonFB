@@ -9,7 +9,7 @@
 dim as string	exeName, args
 
 /'
-command(2) = ID
+command(1) = ID
 command(2) = consoleX
 command(3) = consoleY
 command(4) = consoleW
@@ -22,7 +22,7 @@ cls
 if( __fb_argc__ >= 6 ) then
 	exeName = command(6)
 	for i as integer = 7 to __fb_argc__
-		args +=  ( " " + command(i-1) )
+		args +=  ( " " + command(i) )
 	next
 	
 	dim as string _id = command(1), _x = command(2), _y = command(3), _w = command(4), _h = command(5)

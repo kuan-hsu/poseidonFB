@@ -1186,15 +1186,21 @@ extern(C)
 					version( Windows )
 					{
 						fullPath = Util.substitute( fullPath, "/", "\\" );
+						IupExecute( "explorer", toStringz( "\"" ~ fullPath ~ "\"" ) );
+						/*
 						scope proc = new Process( true, "explorer " ~ "\"" ~ fullPath ~ "\"" );
 						proc.execute;
 						proc.wait;
+						*/
 					}
 					else
 					{
+						IupExecute( "xdg-open", toStringz( "\"" ~ fullPath ~ "\"" ) );
+						/*
 						scope proc = new Process( true, "xdg-open " ~ "\"" ~ fullPath ~ "\"" );
 						proc.execute;
 						proc.wait;
+						*/
 					}
 					return IUP_DEFAULT;
 				});

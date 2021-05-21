@@ -4,7 +4,7 @@ private import iup.iup;
 private import iup.iup_scintilla;
 private import global, actionManager, scintilla, menu, tools, parser.autocompletion;
 
-import tango.stdc.stringz, tango.io.Stdout;
+import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath;//, tango.sys.Process;
 
 void createTabs()
 {
@@ -118,6 +118,35 @@ extern(C)
 			if( cSci !is null )	actionManager.ScintillaAction.closeDocument( cSci.getFullPath() );
 			return IUP_DEFAULT;
 		});
+		
+		Ihandle* _explorer = IupItem( GLOBAL.languageItems["openinexplorer"].toCString, null );
+		IupSetAttribute( _explorer, "IMAGE", "icon_openfile" );
+		IupSetCallback( _explorer, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			if( cSci !is null )
+			{
+				scope fp = new FilePath( cSci.getFullPath() );
+
+				version( Windows )
+				{
+					IupExecute( "explorer", toStringz( "\"" ~ Util.substitute( fp.parent, "/", "\\" ) ~ "\"" ) );
+					//scope proc = new Process( true, "explorer " ~ "\"" ~ fp.parent ~ "\"" );
+					//proc.execute;
+					//proc.wait;
+				}
+				else
+				{
+					IupExecute( "xdg-open", toStringz( "\"" ~ fp.parent ~ "\"" ) );
+					/*
+					scope proc = new Process( true, "xdg-open " ~ "\"" ~ fullPath ~ "\"" );
+					proc.execute;
+					proc.wait;
+					*/
+				}
+			}
+			return IUP_DEFAULT;
+		});		
 		
 		Ihandle* _closeRight = IupItem( GLOBAL.languageItems["closeright"].toCString, null );
 		IupSetAttribute( _closeRight, "IMAGE", "icon_deleteright" );
@@ -265,6 +294,7 @@ extern(C)
 								_closeall,
 								IupSeparator(),
 								_save,
+								_explorer,
 								IupSeparator(),
 								_moveDocument,
 								null
@@ -278,6 +308,7 @@ extern(C)
 								_closeall,
 								IupSeparator(),
 								_save,
+								_explorer,
 								IupSeparator(),
 								_moveDocument,
 								null
@@ -292,6 +323,7 @@ extern(C)
 								_closeall,
 								IupSeparator(),
 								_save,
+								_explorer,
 								null
 								);
 		}

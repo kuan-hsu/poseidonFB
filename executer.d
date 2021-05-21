@@ -30,7 +30,7 @@ struct ExecuterAction
 
 	import tango.sys.Process, tango.core.Exception, tango.io.stream.Lines, tango.io.stream.Iterator;
 	import tango.io.Stdout, tango.stdc.stringz, Util = tango.text.Util, Integer = tango.text.convert.Integer;
-	import tango.io.FilePath, Path = tango.io.Path;
+	import tango.io.FilePath, Path = tango.io.Path, tango.io.FilePath;
 
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;
@@ -144,21 +144,21 @@ struct ExecuterAction
 					case Process.Result.Error, Process.Result.Signal, Process.Result.Exit, Process.Result.Stop:
 						if( command.length )
 						{
-							if( command[0] == '"' && command[$-1] == '"' )
-							{
-								scope _f = new FilePath( command[1..$-1] );
-								_f.remove();
+							char[] exePath;
+							if( command[0] == '"' && command[$-1] == '"' ) exePath = command[1..$-1]; else exePath = command;
+							
+							scope _f = new FilePath( exePath );
+							_f.remove();
 
-								version(Windows)
-								{
-									_f.set( _f.name ~ ".obj" );
-									if( _f.exists ) _f.remove();
-								}
-								else
-								{
-									_f.set( _f.name ~ ".o" );
-									if( _f.exists ) _f.remove();
-								}
+							version(Windows)
+							{
+								_f.set( _f.path ~ _f.name ~ ".obj" );
+								if( _f.exists ) _f.remove();
+							}
+							else
+							{
+								_f.set( _f.path ~ _f.name ~ ".o" );
+								if( _f.exists ) _f.remove();
 							}
 						}
 						break;
@@ -1296,7 +1296,8 @@ struct ExecuterAction
 		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
-		char[] command;
+		char[] command, runOption, _args;
+
 		auto cSci = ScintillaAction.getActiveCScintilla();
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
@@ -1331,14 +1332,11 @@ struct ExecuterAction
 			}
 			else
 			{
-				version(FBIDE)
+				if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
 				{
-					if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
+					foreach( CScintilla _cSci; GLOBAL.scintillaManager )
 					{
-						foreach( CScintilla _cSci; GLOBAL.scintillaManager )
-						{
-							if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
-						}
+						if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
 					}
 				}
 			}
@@ -1346,7 +1344,17 @@ struct ExecuterAction
 			if( !options.length ) options = getCustomCompilerOption();
 			cSci = ScintillaAction.getActiveCScintilla();
 			version(FBIDE) command = "\"" ~ compilePath.toString ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
-			version(DIDE) command = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+			version(DIDE)
+			{
+				if( Util.index( options, "-run" ) < options.length )
+				{
+					runOption = "-run ";
+					options = Util.substitute( options, "-run", "" );
+					_args = " " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ runOption ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+				}
+				
+				command = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ runOption ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+			}
 		}
 		else
 		{
@@ -1360,24 +1368,32 @@ struct ExecuterAction
 			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			
 			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";
-			//version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:windows:4";
 			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:WINDOWS";
 			
 			// Compiler Command
 			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 			scope _filePath = new FilePath( cSci.getFullPath() );
-
-			CompileThread _compileThread;
-			if( !bRun ) _compileThread = new CompileThread( _filePath.path.dup, command ); else _compileThread = new CompileThread( _filePath.path.dup, command, args );
-		
-			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
+			
+			if( runOption.length )
 			{
-				_compileThread.go();
-				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
+				scope _fp = new FilePath( GLOBAL.compilerFullPath.toDString );
+				ExecuterThread derived = new ExecuterThread( "\"" ~ GLOBAL.compilerFullPath.toDString ~ "\"", _args, _fp.path, false );
+				derived.start();
 			}
 			else
 			{
-				_compileThread.start();
+				CompileThread _compileThread;
+				if( !bRun ) _compileThread = new CompileThread( _filePath.path.dup, command ); else _compileThread = new CompileThread( _filePath.path.dup, command, args );
+			
+				if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
+				{
+					_compileThread.go();
+					IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
+				}
+				else
+				{
+					_compileThread.start();
+				}
 			}
 
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
@@ -1471,14 +1487,11 @@ struct ExecuterAction
 			}
 			
 			
-			version(FBIDE)
+			if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
 			{
-				if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
+				foreach( CScintilla _cSci; GLOBAL.scintillaManager )
 				{
-					foreach( CScintilla _cSci; GLOBAL.scintillaManager )
-					{
-						if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
-					}
+					if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
 				}
 			}				
 
@@ -1777,16 +1790,13 @@ struct ExecuterAction
 			}
 			
 			
-			version(FBIDE)
+			if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
 			{
-				if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
+				foreach( CScintilla _cSci; GLOBAL.scintillaManager )
 				{
-					foreach( CScintilla _cSci; GLOBAL.scintillaManager )
-					{
-						if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
-					}
+					if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
 				}
-			}			
+			}
 
 
 			char[] txtCommand, txtSources, txtIncludeDirs, txtLibDirs;

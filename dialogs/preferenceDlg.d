@@ -509,10 +509,6 @@ class CPreferenceDialog : CBaseDialog
 			Ihandle* toggleUseManual = IupToggle( GLOBAL.languageItems["manualusing"].toCString(), null );
 			IupSetAttribute( toggleUseManual, "VALUE", toStringz(GLOBAL.toggleUseManual.dup) );
 			IupSetHandle( "toggleUseManual", toggleUseManual );
-			
-			Ihandle* toggleSaveAllModified = IupToggle( GLOBAL.languageItems["saveallmodified"].toCString(), null );
-			IupSetAttribute( toggleSaveAllModified, "VALUE", toStringz(GLOBAL.editorSetting00.SaveAllModified.dup) );
-			IupSetHandle( "toggleSaveAllModified", toggleSaveAllModified );
 		}
 
 		version(Windows)
@@ -521,6 +517,10 @@ class CPreferenceDialog : CBaseDialog
 			IupSetAttribute( toggleNewDocBOM, "VALUE", toStringz(GLOBAL.editorSetting00.NewDocBOM.dup) );
 			IupSetHandle( "toggleNewDocBOM", toggleNewDocBOM );
 		}
+
+		Ihandle* toggleSaveAllModified = IupToggle( GLOBAL.languageItems["saveallmodified"].toCString(), null );
+		IupSetAttribute( toggleSaveAllModified, "VALUE", toStringz(GLOBAL.editorSetting00.SaveAllModified.dup) );
+		IupSetHandle( "toggleSaveAllModified", toggleSaveAllModified );
 		
 		
 		PreferenceDialogParameters.stringCharSymbol = new IupString( GLOBAL.editorSetting00.ControlCharSymbol );
@@ -710,7 +710,7 @@ class CPreferenceDialog : CBaseDialog
 					toggleAutoKBLayout,
 					
 					toggleNewDocBOM,
-					IupFill,
+					toggleSaveAllModified,
 					//toggleLoadAtBackThread,
 					
 					hBoxTab,
@@ -757,7 +757,7 @@ class CPreferenceDialog : CBaseDialog
 					toggleMiddleScroll,
 					
 					toggleDocStatus,
-					IupFill,
+					toggleSaveAllModified,
 					//toggleAutoKBLayout,
 					//toggleLoadAtBackThread,
 					
@@ -2052,7 +2052,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.AutoKBLayout				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoKBLayout" ), "VALUE" )).dup;
 			version(FBIDE) GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
 			version(Windows) GLOBAL.editorSetting00.NewDocBOM				= fromStringz(IupGetAttribute( IupGetHandle( "toggleNewDocBOM" ), "VALUE" )).dup;
-			version(FBIDE) GLOBAL.editorSetting00.SaveAllModified			= fromStringz(IupGetAttribute( IupGetHandle( "toggleSaveAllModified" ), "VALUE" )).dup;
+			GLOBAL.editorSetting00.SaveAllModified			= fromStringz(IupGetAttribute( IupGetHandle( "toggleSaveAllModified" ), "VALUE" )).dup;
 			
 			
 			
