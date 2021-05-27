@@ -686,8 +686,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.445)\nBy Kuan Hsu (Taiwan)\n2021.05.22" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.057)\nBy Kuan Hsu (Taiwan)\n2021.05.22" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.446)\nBy Kuan Hsu (Taiwan)\n2021.05.27" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.059)\nBy Kuan Hsu (Taiwan)\n2021.05.27" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -1636,13 +1636,13 @@ extern(C)
 
 	int preference_cb( Ihandle *ih )
 	{
-		if( GLOBAL.preferenceDlg is null ) GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), true, "POSEIDON_MAIN_DIALOG" );
+		if( GLOBAL.preferenceDlg is null ) GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
 		if( GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT ) != "OK" )
 		{
 			IupDestroy( GLOBAL.preferenceDlg.getIhandle );
 			delete GLOBAL.preferenceDlg;
 			
-			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), true, "POSEIDON_MAIN_DIALOG" );
+			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
 			auto dummy = GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
 
@@ -1651,7 +1651,7 @@ extern(C)
 
 	int newProject_cb( Ihandle *ih )
 	{
-		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), true, true );
+		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), false, true );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;
@@ -1711,7 +1711,7 @@ extern(C)
 		//if( !GLOBAL.activeProjectDirName.length ) return IUP_DEFAULT;
 		if( !actionManager.ProjectAction.getActiveProjectName.length ) return IUP_DEFAULT;
 
-		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), true, false );
+		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), false, false );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 
 		return IUP_DEFAULT;

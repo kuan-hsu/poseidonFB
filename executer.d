@@ -50,10 +50,12 @@ struct ExecuterAction
 		public:
 		this( char[] _command, char[] _args, char[] _cwd = null, bool _bQuickRun = false )
 		{
-			command		= _command;
-			args		= _args;
-			cwd 		= _cwd;
+			command		= Util.trim( _command );
+			args		= Util.trim( _args );
+			cwd 		= Util.trim( _cwd );
 			bQuickRun	= _bQuickRun;
+			
+			if( args.length ) args = " " ~ args;
 			
 			super( &go );
 		}
@@ -111,18 +113,18 @@ struct ExecuterAction
 				}
 				
 				//	p = new Process( true, GLOBAL.linuxTermName ~ geoString ~ " -e " ~ scommand );
-				if( GLOBAL.linuxTermName.toDString.length )
+				if( GLOBAL.linuxTermName.length )
 				{
-					switch( Util.trim( GLOBAL.linuxTermName.toDString ) )
+					switch( Util.trim( GLOBAL.linuxTermName ) )
 					{
 						case "xterm", "uxterm":
-							p = new Process( true, GLOBAL.linuxTermName.toDString ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
 						case "gnome-terminal", "mate-terminal" ,"xfce4-terminal" ,"lxterminal":
-							p = new Process( true, GLOBAL.linuxTermName.toDString ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
 						default:
-							p = new Process( true, GLOBAL.linuxTermName.toDString ~ " -e " ~ scommand );
+							p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand );
 					}
 				}
 				else
@@ -1305,7 +1307,7 @@ struct ExecuterAction
 		
 		if( cSci !is null )
 		{
-			char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
+			char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -1315,13 +1317,13 @@ struct ExecuterAction
 			}
 			else
 			{
-				fbcFullPath = GLOBAL.compilerFullPath.toDString;
+				fbcFullPath = GLOBAL.compilerFullPath;
 			}
 			
 			scope compilePath = new FilePath( fbcFullPath );
 			if( !compilePath.exists() )
 			{
-				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
+				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ compilePath.toString ~ " ?", true );
 				return false;
 			}
 
@@ -1350,7 +1352,25 @@ struct ExecuterAction
 				{
 					runOption = "-run ";
 					options = Util.substitute( options, "-run", "" );
-					_args = " " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ runOption ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+					
+					options = ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ Util.trim( options );
+					options = Util.trim( options ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+					if( GLOBAL.toolbar.checkGuiButtonStatus ) options = Util.trim( options ) ~ " -L/SUBSYSTEM:WINDOWS";
+					options = Util.trim( options ) ~ " -run";
+					
+					_args = Util.trim( options ) ~ " \"" ~ cSci.getFullPath() ~ "\"";
+					command = "\"" ~ compilePath.toString ~ "\" " ~ _args;
+					
+					
+					GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
+					
+					scope _fp = new FilePath( GLOBAL.compilerFullPath );
+					ExecuterThread derived = new ExecuterThread( "\"" ~ GLOBAL.compilerFullPath ~ "\"", _args, _fp.path, false );
+					derived.start();
+					
+					if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+					
+					return false;
 				}
 				
 				command = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ runOption ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
@@ -1374,26 +1394,17 @@ struct ExecuterAction
 			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 			scope _filePath = new FilePath( cSci.getFullPath() );
 			
-			if( runOption.length )
+			CompileThread _compileThread;
+			if( !bRun ) _compileThread = new CompileThread( _filePath.path.dup, command ); else _compileThread = new CompileThread( _filePath.path.dup, command, args );
+		
+			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
 			{
-				scope _fp = new FilePath( GLOBAL.compilerFullPath.toDString );
-				ExecuterThread derived = new ExecuterThread( "\"" ~ GLOBAL.compilerFullPath.toDString ~ "\"", _args, _fp.path, false );
-				derived.start();
+				_compileThread.go();
+				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
 			}
 			else
 			{
-				CompileThread _compileThread;
-				if( !bRun ) _compileThread = new CompileThread( _filePath.path.dup, command ); else _compileThread = new CompileThread( _filePath.path.dup, command, args );
-			
-				if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
-				{
-					_compileThread.go();
-					IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
-				}
-				else
-				{
-					_compileThread.start();
-				}
+				_compileThread.start();
 			}
 
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
@@ -1444,7 +1455,7 @@ struct ExecuterAction
 			}
 			
 			
-			char[] fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
+			char[] fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -1454,7 +1465,7 @@ struct ExecuterAction
 			}
 			else
 			{
-				fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath.toDString;//GLOBAL.compilerFullPath.toDString;
+				fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath;
 			}
 			
 			scope compilePath = new FilePath( fbcFullPath );
@@ -1768,7 +1779,7 @@ struct ExecuterAction
 			}			
 			
 			
-			char[] fbcFullPath = _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
+			char[] fbcFullPath = _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -1778,7 +1789,7 @@ struct ExecuterAction
 			}
 			else
 			{
-				fbcFullPath = fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath.toDString;//GLOBAL.compilerFullPath.toDString;
+				fbcFullPath = fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath;
 			}
 			
 			scope compilePath = new FilePath( fbcFullPath );
@@ -2062,7 +2073,7 @@ struct ExecuterAction
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 		
-		char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath.toDString : GLOBAL.x64compilerFullPath.toDString );
+		char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
 		version(Windows)
 		{
 			foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -2072,7 +2083,7 @@ struct ExecuterAction
 		}
 		else
 		{
-			fbcFullPath = GLOBAL.compilerFullPath.toDString;
+			fbcFullPath = GLOBAL.compilerFullPath;
 		}
 
 		scope compilePath = new FilePath( fbcFullPath );
@@ -2280,8 +2291,6 @@ struct ExecuterAction
 				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ "./" ~ _f.name;
 				_f.remove();
 				
-				if( args.length ) args = " " ~ args; else args = "";
-				
 				ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
 				derived.start();
 
@@ -2319,8 +2328,6 @@ struct ExecuterAction
 				_f.set( command );
 				if( _f.exists() )
 				{
-					if( args.length ) args = " " ~ args; else args = "";
-					
 					ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
 					derived.start();
 
@@ -2452,8 +2459,6 @@ struct ExecuterAction
 		scope f = new FilePath( command );
 		if( f.exists() )
 		{
-			if( args.length ) args = " " ~ args; else args = "";
-			
 			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ args ~ "......", true );
 
 			ExecuterThread derived;

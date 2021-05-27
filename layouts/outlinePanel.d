@@ -2032,7 +2032,7 @@ class COutline
 		
 		version(DIDE)
 		{
-			scope objectFilePath = new FilePath( GLOBAL.compilerFullPath.toDString );
+			scope objectFilePath = new FilePath( GLOBAL.compilerFullPath );
 			objectFilePath.set( objectFilePath.path );
 			char[] _path = objectFilePath.parent;
 			
@@ -2048,7 +2048,7 @@ class COutline
 			}
 			else
 			{	
-				objectFilePath.set( GLOBAL.compilerFullPath.toDString );
+				objectFilePath.set( GLOBAL.compilerFullPath );
 				objectFilePath.set( objectFilePath.path );
 				objectFilePath.set( objectFilePath.parent );
 				_path = objectFilePath.parent;

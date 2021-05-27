@@ -348,11 +348,11 @@ public:
 			
 			// buildtools
 			doc ~= setINILineData( "[buildtools]");
-			doc ~= setINILineData( "compilerpath", GLOBAL.compilerFullPath.toDString );
-			doc ~= setINILineData( "x64compilerpath", GLOBAL.x64compilerFullPath.toDString );
-			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath.toDString );
-			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath.toDString );
-			doc ~= setINILineData( "terminalpath", GLOBAL.linuxTermName.toDString );
+			doc ~= setINILineData( "compilerpath", GLOBAL.compilerFullPath );
+			doc ~= setINILineData( "x64compilerpath", GLOBAL.x64compilerFullPath );
+			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath );
+			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath );
+			doc ~= setINILineData( "terminalpath", GLOBAL.linuxTermName );
 			//doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "usesfx", GLOBAL.compilerSFX );
@@ -386,6 +386,7 @@ public:
 			doc ~= setINILineData( "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
 			doc ~= setINILineData( "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
 			doc ~= setINILineData( "dwelldelay", GLOBAL.dwellDelay );
+			doc ~= setINILineData( "triggerdelay", GLOBAL.triggerDelay );
 			
 			// manual
 			doc ~= setINILineData( "[manual]");
@@ -440,6 +441,10 @@ public:
 			doc ~= setINILineData( "projectdlg", GLOBAL.editorSetting02.preferenceDlg );
 			doc ~= setINILineData( "gotodlg", GLOBAL.editorSetting02.gotoDlg );
 			doc ~= setINILineData( "newfiledlg", GLOBAL.editorSetting02.newfileDlg );
+			
+			doc ~= setINILineData( "[property]");
+			foreach( char[] s; GLOBAL.properties )
+				doc ~= ( s ~ "\n" );
 			
 			actionManager.FileAction.saveFile( fullpath, doc );
 		}
@@ -804,6 +809,7 @@ public:
 							case "updateoutlinelive":		GLOBAL.toggleUpdateOutlineLive = right;							break;
 							case "keywordcase":				GLOBAL.keywordCase = Integer.atoi( right );						break;
 							case "dwelldelay":				GLOBAL.dwellDelay = right;										break;
+							case "triggerdelay":			GLOBAL.triggerDelay = right;									break;
 							default:
 						}
 						break;
@@ -868,6 +874,9 @@ public:
 							default:
 						}
 						break;
+					
+					case "[property]":
+						GLOBAL.properties ~= ( left ~ "=" ~ right );														break;
 						
 					default:
 				}
@@ -880,7 +889,7 @@ public:
 		}
 		
 		// Get and Set Default Import Path
-		version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath.toDString );		
+		version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath );		
 	}
 	
 	static void saveFileStatus()

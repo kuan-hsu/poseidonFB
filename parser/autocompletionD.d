@@ -2205,10 +2205,17 @@ version(DIDE)
 				timer = IupTimer();
 				IupSetAttributes( timer, "TIME=50,RUN=NO" );
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
+				setTimer( Integer.atoi( GLOBAL.triggerDelay ) );
 			}
 			
 			if( calltipContainer is null ) calltipContainer = new CStack!(char[]);
 		}
+
+		static void setTimer( uint milisecond )
+		{
+			if( milisecond > 1000 ) milisecond = 1000;
+			IupSetInt( timer, "TIME", milisecond );
+		}		
 		
 		static bool showListThreadIsRunning()
 		{

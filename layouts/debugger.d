@@ -1957,12 +1957,12 @@ class CDebugger
 			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ "......", true );
 			
-			scope debuggerEXE = new FilePath( GLOBAL.debuggerFullPath.toDString );
+			scope debuggerEXE = new FilePath( GLOBAL.debuggerFullPath );
 			if( debuggerEXE.exists() )
 			{
 				if( lowerCase( debuggerEXE.file() ) == "fbdebugger.exe" )
 				{
-					IupExecute( toStringz( "\"" ~ GLOBAL.debuggerFullPath.toDString ~ "\"" ), toStringz( command ) );
+					IupExecute( toStringz( "\"" ~ GLOBAL.debuggerFullPath ~ "\"" ), toStringz( command ) );
 				}
 				else
 				{
@@ -2203,12 +2203,12 @@ class DebugThread //: Thread
 			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "YES" );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 2 );
 			
-			char[] debuggerExe = GLOBAL.debuggerFullPath.toDString;
+			char[] debuggerExe = GLOBAL.debuggerFullPath;
 			
 			version(Windows)
 			{
 				b64Bit = GLOBAL.toolbar.checkBitButtonStatus() == 32 ? false : true;
-				debuggerExe = !b64Bit ? GLOBAL.debuggerFullPath.toDString : GLOBAL.x64debuggerFullPath.toDString;
+				debuggerExe = !b64Bit ? GLOBAL.debuggerFullPath : GLOBAL.x64debuggerFullPath;
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
 				{
 					debuggerExe = Util.substitute( debuggerExe, "%"~s~"%", GLOBAL.EnvironmentVars[s] );

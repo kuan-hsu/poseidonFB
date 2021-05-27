@@ -100,8 +100,8 @@ class CScintilla
 			}	
 			*/
 			IupSetAttribute( sci, "BORDER", "NO" );
-			IupSetHandle( fullPath.toCString, sci );
-			//IupSetAttribute( sci, "NAME", fullPath.toCString );
+			//IupSetHandle( fullPath.toCString, sci );
+			IupSetAttribute( sci, "NAME", fullPath.toCString );
 			//IupSetAttribute( sci, "TABTITLE", title.toCString );
 
 			if( insertPos == -1 )
@@ -682,10 +682,10 @@ class CScintilla
 
 		if( GLOBAL.editorSetting00.FoldMargin == "ON" )
 		{
+			
 			IupSetAttribute(sci, "PROPERTY", "fold=1");
 			IupSetAttribute(sci, "PROPERTY", "fold.compact=0");
 			IupSetAttribute(sci, "PROPERTY", "fold.comment=1");
-
 			/+
 			IupSetAttribute(sci, "PROPERTY", "fold=1");
 			IupSetAttribute(sci, "PROPERTY", "fold.basic.comment.explicit=0");
@@ -693,7 +693,6 @@ class CScintilla
 			IupSetAttribute(sci, "PROPERTY", "fold.basic.explicit.end=1");
 			IupSetAttribute(sci, "PROPERTY", "fold.basic.explicit.start=1");
 			IupSetAttribute(sci, "PROPERTY", "fold.basic.syntax.based=1");
-			IupSetAttribute(sci, "PROPERTY", "fold.compact=0");
 			IupSetAttribute(sci, "PROPERTY", "fold.compact=0");
 			IupSetAttribute(sci, "PROPERTY", "fold.comment=1");
 			IupSetAttribute(sci, "PROPERTY", "fold.preprocessor=1");
@@ -1019,6 +1018,10 @@ class CScintilla
 			// BOOKMARK
 			IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toCString ); // SCI_MARKERDEFINERGBAIMAGE 2626
 		}
+		
+		// Set Custom Properties( Scintilla )
+		foreach( char[] p; GLOBAL.properties )
+			IupSetAttribute(sci, "PROPERTY", toStringz( p ) );
 	}
 }
 
@@ -1547,6 +1550,76 @@ extern(C)
 					Ihandle* _selectall = IupItem( GLOBAL.languageItems["selectall"].toCString, null );
 					IupSetAttribute( _selectall, "IMAGE", "icon_selectall" );
 					IupSetCallback( _selectall, "ACTION", cast(Icallback) &menu.selectall_cb ); // from menu.d
+					
+					
+					
+					// Set KeyWord4/5
+					Ihandle* _setKeyWord4 = IupItem( GLOBAL.languageItems["keyword4"].toCString, null );
+					IupSetCallback( _setKeyWord4, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						Ihandle* iupSci = actionManager.ScintillaAction.getActiveIupScintilla();
+						if( iupSci != null )
+						{
+							char[] targetText = lowerCase( fromStringz( IupGetAttribute( iupSci, "SELECTEDTEXT" ) ) );
+							if( targetText.length )
+							{
+								foreach( char[] s; Util.split( GLOBAL.KEYWORDS[4].toDString, " " ) )
+								{
+									if( s == targetText ) return IUP_DEFAULT;
+								}
+								
+								char[] k4 = Util.trim( GLOBAL.KEYWORDS[4].toDString );
+								if( k4.length ) k4 = k4 ~ " " ~ targetText; else k4 = targetText;
+								GLOBAL.KEYWORDS[4] = k4.dup;
+								IupSetAttribute( IupGetHandle( "keyWordText4" ), "VALUE", GLOBAL.KEYWORDS[4].toCString );
+	
+								foreach( CScintilla cSci; GLOBAL.scintillaManager )
+									if( cSci !is null ) cSci.setGlobalSetting();
+							}
+						}
+						
+						return IUP_DEFAULT;
+					});
+					
+					Ihandle* _setKeyWord5 = IupItem( GLOBAL.languageItems["keyword5"].toCString, null );
+					IupSetCallback( _setKeyWord5, "ACTION", cast(Icallback) function( Ihandle* ih )
+					{
+						Ihandle* iupSci = actionManager.ScintillaAction.getActiveIupScintilla();
+						if( iupSci != null )
+						{
+							char[] targetText = lowerCase( fromStringz( IupGetAttribute( iupSci, "SELECTEDTEXT" ) ) );
+							if( targetText.length )
+							{
+								foreach( char[] s; Util.split( GLOBAL.KEYWORDS[5].toDString, " " ) )
+								{
+									if( s == targetText ) return IUP_DEFAULT;
+								}
+								
+								char[] k5 = Util.trim( GLOBAL.KEYWORDS[5].toDString );
+								if( k5.length ) k5 = k5 ~ " " ~ targetText; else k5 = targetText;
+								GLOBAL.KEYWORDS[5] = k5.dup;
+								IupSetAttribute( IupGetHandle( "keyWordText4" ), "VALUE", GLOBAL.KEYWORDS[5].toCString );
+								
+								foreach( CScintilla cSci; GLOBAL.scintillaManager )
+									if( cSci !is null ) cSci.setGlobalSetting();
+							}
+						}
+						
+						return IUP_DEFAULT;
+					});					
+					
+					
+					Ihandle* _setKeyWordMenu = IupMenu( _setKeyWord4, _setKeyWord5, null  );
+					Ihandle* _SetKeyWordSubMenu = IupSubmenu( GLOBAL.languageItems["setkeyword"].toCString,_setKeyWordMenu  );
+					IupSetAttribute( _SetKeyWordSubMenu, "IMAGE", "icon_wholeword" );
+					char[] targetText = lowerCase( fromStringz( IupGetAttribute( ih, "SELECTEDTEXT" ) ) );
+					if( !targetText.length )
+						IupSetAttribute( _SetKeyWordSubMenu, "ACTIVE", "NO" );
+					else
+					{
+						if( Util.containsPattern( targetText, " " ) || Util.containsPattern( targetText, "\t" ) || Util.containsPattern( targetText, "\n" ) ) IupSetAttribute( _SetKeyWordSubMenu, "ACTIVE", "NO" );
+					}
+					
 
 					// Annotation
 					Ihandle* _showAnnotation = IupItem( GLOBAL.languageItems["showannotation"].toCString, null );
@@ -1878,6 +1951,8 @@ extern(C)
 													_selectall,
 													IupSeparator(),
 													
+													_SetKeyWordSubMenu,
+													
 													itemMainHighlight,
 													IupSeparator(),
 													
@@ -1912,6 +1987,8 @@ extern(C)
 
 													_selectall,
 													IupSeparator(),
+													
+													_SetKeyWordSubMenu,
 													
 													itemMainHighlight,
 													IupSeparator(),
@@ -1951,6 +2028,8 @@ extern(C)
 
 												_selectall,
 												IupSeparator(),
+												
+												_SetKeyWordSubMenu,
 												
 												itemMainHighlight,
 												IupSeparator(),

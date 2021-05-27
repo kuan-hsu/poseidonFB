@@ -356,7 +356,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		*/
 		
 		Ihandle* vBox = IupVbox( projectTabs, bottom, null );
-		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x10,GAP=2,EXPAND=YES" );
+		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=2x2,GAP=2,EXPAND=YES" );
 
 		IupAppend( _dlg, vBox );
 

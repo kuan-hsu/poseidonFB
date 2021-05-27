@@ -150,15 +150,17 @@ struct GLOBAL
 	static char[]				linuxHome;
 	static IupString[6]			KEYWORDS;
 	static int					keywordCase = 0;	
-	static IupString			compilerFullPath, x64compilerFullPath;
+	static char[]				compilerFullPath, x64compilerFullPath;
+	static char[]				debuggerFullPath, x64debuggerFullPath;
+	static char[]				linuxTermName;	
 	static char[]				compilerAnootation = "ON";
 	static char[]				compilerWindow = "OFF";
 	static char[]				compilerSFX = "ON";
 	static char[]				delExistExe = "ON";
 	static char[]				consoleExe = "OFF";
 	static char[]				toggleCompileAtBackThread = "OFF";
-	static IupString			debuggerFullPath, x64debuggerFullPath;
-	static IupString			linuxTermName;	
+	//static IupString			debuggerFullPath, x64debuggerFullPath;
+	//static IupString			linuxTermName;	
 	static char[][]				manuals;
 	//static IupString			colorTemplate;
 	//static char[]				maxError = "30";
@@ -171,6 +173,7 @@ struct GLOBAL
 	static EditorLayoutSize		editorSetting01;
 	static EditorOpacity		editorSetting02;
 	static EditorColorUint		editColor;
+	static char[][]				properties;
 	//static Ihandle*			functionTitleHandle;
 	static char[]				enableKeywordComplete = "ON";
 	static char[]				enableIncludeComplete = "ON";
@@ -188,6 +191,7 @@ struct GLOBAL
 	static char[]				toggleUseManual = "OFF", toggleDummy = "ON";
 	
 	static char[]				dwellDelay = "1000";
+	static char[]				triggerDelay = "100";
 	static int					indicatorStyle = 16;
 	
 
@@ -322,12 +326,11 @@ struct GLOBAL
 		GLOBAL.editColor.project_HLT = new IupString;
 		GLOBAL.editColor.outline_HLT = new IupString;
 		
-		
-		GLOBAL.compilerFullPath = new IupString();
-		GLOBAL.x64compilerFullPath = new IupString();
+		/*
 		GLOBAL.debuggerFullPath = new IupString();
 		GLOBAL.x64debuggerFullPath = new IupString();
 		GLOBAL.linuxTermName = new IupString();
+		*/
 		//GLOBAL.colorTemplate = new IupString();
 		//GLOBAL.defaultOption = new IupString();
 		
@@ -633,9 +636,10 @@ struct GLOBAL
 						GLOBAL.languageItems["showlisttype"] = new IupString( cast(char[]) "Show Autocomplete List Type" );
 						GLOBAL.languageItems["showallmembers"] = new IupString( cast(char[]) "Show All Members( public, protected, private )" );
 						GLOBAL.languageItems["enabledwell"] = new IupString( cast(char[]) "Enable Mouse Dwell to Show Type" );
-							GLOBAL.languageItems["dwelldelay"] = new IupString( cast(char[]) "Dwell Delay:" );
+							GLOBAL.languageItems["dwelldelay"] = new IupString( cast(char[]) "Dwell Delay(ms):" );
 						GLOBAL.languageItems["enableoverwrite"] = new IupString( cast(char[]) "Overwrite To Non Identifier Character" );
 						GLOBAL.languageItems["completeatbackthread"] = new IupString( cast(char[]) "Enable Codecomplete At Back Thread" );
+							GLOBAL.languageItems["completedelay"] = new IupString( cast(char[]) "Trigger Delay(ms):" );
 						GLOBAL.languageItems["parserlive"] = new IupString( cast(char[]) "ParseLive! Level" );
 							GLOBAL.languageItems["none"] = new IupString( cast(char[]) "None" );
 							GLOBAL.languageItems["light"] = new IupString( cast(char[]) "Light" );
@@ -767,6 +771,7 @@ struct GLOBAL
 						GLOBAL.languageItems["keyword3"] = new IupString( cast(char[]) "Keyword3" );
 						GLOBAL.languageItems["keyword4"] = new IupString( cast(char[]) "Keyword4" );
 						GLOBAL.languageItems["keyword5"] = new IupString( cast(char[]) "Keyword5" );
+						GLOBAL.languageItems["setkeyword"] = new IupString( cast(char[]) "Selected Text To..." );
 					// GLOBAL.languageItems["manual"] = new IupString( cast(char[]) "Manual" );
 						GLOBAL.languageItems["manualpath"] = new IupString( cast(char[]) "Manual Path" );
 						GLOBAL.languageItems["manualusing"] = new IupString( cast(char[]) "Search Help Manual" );

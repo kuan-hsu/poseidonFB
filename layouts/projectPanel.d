@@ -95,7 +95,7 @@ private:
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
 		version(Windows) if( GLOBAL.editColor.project_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.project_HLT.toCString );
 		
-		toBoldTitle( tree, 0 );
+		
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
@@ -116,7 +116,7 @@ private:
 		if( commaPos < GLOBAL.fonts[4].fontString.length )
 		{
 			char[] fontString = Util.substitute( GLOBAL.fonts[4].fontString.dup, ",", ",Bold " );
-			IupSetAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
+			IupSetAttributeId( _tree, "TITLEFONT", id, toStringz( fontString.dup ) );
 		}
 	}
 

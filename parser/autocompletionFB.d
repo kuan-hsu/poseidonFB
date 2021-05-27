@@ -566,7 +566,7 @@ version(FBIDE)
 				}
 
 				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-				_path.set( Path.normalize( GLOBAL.compilerFullPath.toDString ) );
+				_path.set( Path.normalize( GLOBAL.compilerFullPath ) );
 				version( Windows )
 				{
 					testPath = _path.path() ~ "inc/" ~ include;
@@ -1834,7 +1834,14 @@ version(FBIDE)
 				timer = IupTimer();
 				IupSetAttributes( timer, "TIME=50,RUN=NO" );
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
+				setTimer( Integer.atoi( GLOBAL.triggerDelay ) );
 			}
+		}
+		
+		static void setTimer( uint milisecond )
+		{
+			if( milisecond > 1000 ) milisecond = 1000;
+			IupSetInt( timer, "TIME", milisecond );
 		}
 		
 		static bool showListThreadIsRunning()
@@ -2080,7 +2087,7 @@ version(FBIDE)
 				
 				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
 				char[] testPath;
-				FilePath _path4 = new FilePath( Path.normalize( GLOBAL.compilerFullPath.toDString ) );
+				FilePath _path4 = new FilePath( Path.normalize( GLOBAL.compilerFullPath ) );
 				version( Windows )
 				{
 					testPath = _path4.path() ~ "inc/";

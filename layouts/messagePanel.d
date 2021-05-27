@@ -127,12 +127,10 @@ public:
 			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR32", GLOBAL.editColor.searchBack.toCString );		// 32
 			
 			IupSetAttribute( searchOutputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
-			
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
-
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
 			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_B_NUMBER 2

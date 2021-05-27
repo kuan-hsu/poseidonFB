@@ -4,7 +4,7 @@ private import iup.iup, iup.iup_scintilla;
 
 private import layouts.table;
 
-private import global, IDE, project, tools, scintilla, actionManager;
+private import global, IDE, project, tools, scintilla, actionManager, parser.autocompletion;;
 private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg, dialogs.shortcutDlg;
 
 private import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath, Util = tango.text.Util;
@@ -31,7 +31,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* textCompilerPath = IupText( null );
 		IupSetAttribute( textCompilerPath, "SIZE", "320x" );
-		IupSetAttribute( textCompilerPath, "VALUE", GLOBAL.compilerFullPath.toCString );
+		IupSetAttribute( textCompilerPath, "VALUE", toStringz( GLOBAL.compilerFullPath.dup ) );
 		IupSetHandle( "compilerPath_Handle", textCompilerPath );
 		
 		Ihandle* btnOpen = IupButton( null, null );
@@ -52,7 +52,7 @@ class CPreferenceDialog : CBaseDialog
 			{
 				Ihandle* textx64CompilerPath = IupText( null );
 				IupSetAttribute( textx64CompilerPath, "SIZE", "320x" );
-				IupSetAttribute( textx64CompilerPath, "VALUE", GLOBAL.x64compilerFullPath.toCString );
+				IupSetAttribute( textx64CompilerPath, "VALUE", toStringz( GLOBAL.x64compilerFullPath.dup ) );
 				IupSetHandle( "x64compilerPath_Handle", textx64CompilerPath );
 				
 				Ihandle* btnx64Open = IupButton( null, null );
@@ -69,7 +69,7 @@ class CPreferenceDialog : CBaseDialog
 				
 				Ihandle* textx64DebuggerPath = IupText( null );
 				IupSetAttribute( textx64DebuggerPath, "SIZE", "320x" );
-				IupSetAttribute( textx64DebuggerPath, "VALUE", GLOBAL.x64debuggerFullPath.toCString );
+				IupSetAttribute( textx64DebuggerPath, "VALUE", toStringz( GLOBAL.x64debuggerFullPath.dup ) );
 				IupSetHandle( "x64DebuggerPath_Handle", textx64DebuggerPath );
 				
 				Ihandle* btnOpenx64Debugger = IupButton( null, null );
@@ -87,7 +87,7 @@ class CPreferenceDialog : CBaseDialog
 
 			Ihandle* textDebuggerPath = IupText( null );
 			IupSetAttribute( textDebuggerPath, "SIZE", "320x" );
-			IupSetAttribute( textDebuggerPath, "VALUE", GLOBAL.debuggerFullPath.toCString );
+			IupSetAttribute( textDebuggerPath, "VALUE", toStringz( GLOBAL.debuggerFullPath.dup ) );
 			IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
 			
 			Ihandle* btnOpenDebugger = IupButton( null, null );
@@ -106,7 +106,7 @@ class CPreferenceDialog : CBaseDialog
 		{
 			Ihandle* textTerminalPath = IupText( null );
 			IupSetAttribute( textTerminalPath, "SIZE", "320x" );
-			IupSetAttribute( textTerminalPath, "VALUE", GLOBAL.linuxTermName.toCString );
+			IupSetAttribute( textTerminalPath, "VALUE", toStringz( GLOBAL.linuxTermName.dup ) );
 			IupSetHandle( "textTerminalPath", textTerminalPath );
 		
 			Ihandle* btnOpenTerminal = IupButton( null, null );
@@ -319,6 +319,18 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleBackThread, "VALUE", toStringz(GLOBAL.toggleCompleteAtBackThread.dup) );
 		IupSetHandle( "toggleBackThread", toggleBackThread );
 		
+		Ihandle* labelTriggerDelay = IupLabel( GLOBAL.languageItems["completedelay"].toCString );
+		Ihandle* valTriggerDelay = IupVal( null );
+		IupSetAttributes( valTriggerDelay, "MIN=1,MAX=1000,RASTERSIZE=100x16,STEP=0.1,PAGESTEP=0.1" );
+		IupSetAttribute( valTriggerDelay, "VALUE", toStringz( GLOBAL.triggerDelay.dup ) );
+		IupSetHandle( "valTriggerDelay", valTriggerDelay );
+		IupSetCallback( valTriggerDelay, "VALUECHANGED_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );
+		IupSetCallback( valTriggerDelay, "ENTERWINDOW_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );	
+		
+		Ihandle* hBoxTriggerDelay = IupHbox( toggleBackThread, IupFill, labelTriggerDelay, valTriggerDelay, null );
+		IupSetAttributes( hBoxTriggerDelay, "ALIGNMENT=ACENTER" );
+		
+		
 		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
 		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
@@ -374,7 +386,7 @@ class CPreferenceDialog : CBaseDialog
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
 		
-		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, toggleBackThread, hBoxFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
 	
@@ -1641,7 +1653,8 @@ class CPreferenceDialog : CBaseDialog
 
 		
 		Ihandle* vBox = IupVbox( preferenceTabs, bottom, null );
-		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=10x10,GAP=5" );
+		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=2x2,GAP=5,EXPAND=YES" );
+		//IupSetAttributes( vBox, "ALIGNMENT=ACENTER,GAP=5" );
 
 		IupAppend( _dlg, vBox );
 	}
@@ -1740,8 +1753,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		createLayout();
 		
-		//scope size = new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
-		version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x310" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
+		//version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x310" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
 		
 		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
 		
@@ -1910,9 +1922,8 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			GLOBAL.compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "compilerPath_Handle" );
-			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.compilerFullPath.toCString );
+			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", toStringz( fileName ) );
 		}
 
 		return IUP_DEFAULT;
@@ -1925,9 +1936,8 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( fileName.length )
 		{
-			GLOBAL.x64compilerFullPath = fileName;
 			Ihandle* _compilePath_Handle = IupGetHandle( "x64compilerPath_Handle" );
-			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", GLOBAL.x64compilerFullPath.toCString );
+			if( _compilePath_Handle != null ) IupSetAttribute( _compilePath_Handle, "VALUE", toStringz( fileName ) );
 		}
 
 		return IUP_DEFAULT;
@@ -1942,15 +1952,15 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			if( fromStringz( IupGetAttribute( ih, "NAME" ) ).dup == "x64" )
 			{
-				GLOBAL.x64debuggerFullPath = fileName;
+				//GLOBAL.x64debuggerFullPath = fileName;
 				Ihandle* _debuggerPath_Handle = IupGetHandle( "x64DebuggerPath_Handle" );
-				if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", GLOBAL.x64debuggerFullPath.toCString );
+				if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", toStringz( fileName ) );
 			}
 			else
 			{
-				GLOBAL.debuggerFullPath = fileName;
+				//GLOBAL.debuggerFullPath = fileName;
 				Ihandle* _debuggerPath_Handle = IupGetHandle( "debuggerPath_Handle" );
-				if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", GLOBAL.debuggerFullPath.toCString );
+				if( _debuggerPath_Handle != null ) IupSetAttribute( _debuggerPath_Handle, "VALUE", toStringz( fileName ) );
 			}
 		}
 
@@ -1968,7 +1978,7 @@ extern(C) // Callback for CPreferenceDialog
 			{
 				GLOBAL.linuxTermName = fileName;
 				Ihandle* _terminalPath_Handle = IupGetHandle( "textTerminalPath" );
-				if( _terminalPath_Handle != null ) IupSetAttribute( _terminalPath_Handle, "VALUE", GLOBAL.linuxTermName.toCString );
+				if( _terminalPath_Handle != null ) IupSetAttribute( _terminalPath_Handle, "VALUE", toStringz( GLOBAL.linuxTermName.dup ) );
 			}
 
 			return IUP_DEFAULT;
@@ -2096,40 +2106,44 @@ extern(C) // Callback for CPreferenceDialog
 				}
 			}
 			
-
-			//GLOBAL.editColor.caretLine					= IupGetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR" );					IupSetAttribute( IupGetHandle( "btnCaretLine" ), "BGCOLOR", GLOBAL.editColor.caretLine.toCString );
+			/*
 			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR", GLOBAL.editColor.caretLine << IupGetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR" ) );
+			*/
+			GLOBAL.editColor.caretLine = IupGetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR" );
 			
-			//GLOBAL.editColor.cursor						= IupGetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR" );					IupSetAttribute( IupGetHandle( "btnCursor" ), "BGCOLOR", GLOBAL.editColor.cursor.toCString );
+			/*
 			IupSetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR", GLOBAL.editColor.cursor << IupGetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR" ) );
+			*/
+			GLOBAL.editColor.cursor = IupGetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR" );
 
 			/*
-			GLOBAL.editColor.selectionFore				= IupGetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR" );				IupSetAttribute( IupGetHandle( "btnSelectFore" ), "BGCOLOR", GLOBAL.editColor.selectionFore.toCString );
-			GLOBAL.editColor.selectionBack				= IupGetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR" );				IupSetAttribute( IupGetHandle( "btnSelectBack" ), "BGCOLOR", GLOBAL.editColor.selectionBack.toCString );
-			GLOBAL.editColor.linenumFore				= IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR" );				IupSetAttribute( IupGetHandle( "btnLinenumFore" ), "BGCOLOR", GLOBAL.editColor.linenumFore.toCString );
-			GLOBAL.editColor.linenumBack				= IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR" );				IupSetAttribute( IupGetHandle( "btnLinenumBack" ), "BGCOLOR", GLOBAL.editColor.linenumBack.toCString );
-			GLOBAL.editColor.fold						= IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR" );				IupSetAttribute( IupGetHandle( "btnFoldingColor" ), "BGCOLOR", GLOBAL.editColor.fold.toCString );
-			*/
 			IupSetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR", GLOBAL.editColor.selectionFore << IupGetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnSelectBack" ), "FGCOLOR", GLOBAL.editColor.selectionBack << IupGetAttribute( IupGetHandle( "btnSelectBack" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnLinenumFore" ), "FGCOLOR", GLOBAL.editColor.linenumFore << IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnLinenumBack" ), "FGCOLOR", GLOBAL.editColor.linenumBack << IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnFoldingColor" ), "FGCOLOR", GLOBAL.editColor.fold << IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "FGCOLOR" ) );
-			
+			*/
+			GLOBAL.editColor.selectionFore = IupGetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR" );
+			GLOBAL.editColor.selectionBack = IupGetAttribute( IupGetHandle( "btnSelectBack" ), "FGCOLOR" );
+			GLOBAL.editColor.linenumFore = IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "FGCOLOR" );
+			GLOBAL.editColor.linenumBack = IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "FGCOLOR" );
+			GLOBAL.editColor.fold = IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "FGCOLOR" );			
 			
 			version(Windows)
 				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" );
 			else
 				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" );
 			
-			//GLOBAL.editColor.currentWord				= IupGetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR" );				IupSetAttribute( IupGetHandle( "btnIndicator" ), "BGCOLOR", GLOBAL.editColor.currentWord.toCString );
+			/*
 			IupSetAttribute( IupGetHandle( "btnIndicator" ), "FGCOLOR", GLOBAL.editColor.currentWord << IupGetAttribute( IupGetHandle( "btnIndicator" ), "FGCOLOR" ) );
+			*/
+			GLOBAL.editColor.currentWord = IupGetAttribute( IupGetHandle( "btnIndicator" ), "FGCOLOR" );
+			
 			version(Windows)
 				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE" );
 			else
 				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE" );
-				
-
+			/*
 			IupSetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "FGCOLOR", GLOBAL.editColor.scintillaFore << IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "FGCOLOR", GLOBAL.editColor.scintillaBack << IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "FGCOLOR", GLOBAL.editColor.SCE_B_COMMENT_Fore << IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "FGCOLOR" ) );
@@ -2171,20 +2185,71 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( IupGetHandle( "btnMarker1Color" ), "FGCOLOR", GLOBAL.editColor.maker[1] << IupGetAttribute( IupGetHandle( "btnMarker1Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnMarker2Color" ), "FGCOLOR", GLOBAL.editColor.maker[2] << IupGetAttribute( IupGetHandle( "btnMarker2Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnMarker3Color" ), "FGCOLOR", GLOBAL.editColor.maker[3] << IupGetAttribute( IupGetHandle( "btnMarker3Color" ), "FGCOLOR" ) );
+			*/
+			GLOBAL.editColor.scintillaFore = IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.scintillaBack = IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENT_Fore = IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENT_Back = IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_NUMBER_Fore = IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_NUMBER_Back = IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_STRING_Fore = IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_STRING_Back = IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_OPERATOR_Fore = IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_OPERATOR_Back = IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_IDENTIFIER_Fore = IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_IDENTIFIER_Back = IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore = IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back = IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.prjTitle = IupGetAttribute( IupGetHandle( "btnPrjTitle" ), "FGCOLOR" );
+			GLOBAL.editColor.prjSourceType = IupGetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "FGCOLOR" );
+			
+			GLOBAL.editColor.projectFore = IupGetAttribute( IupGetHandle( "btnPrj_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.projectBack = IupGetAttribute( IupGetHandle( "btnPrj_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.outlineFore = IupGetAttribute( IupGetHandle( "btnOutline_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.outlineBack = IupGetAttribute( IupGetHandle( "btnOutline_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.filelistFore = IupGetAttribute( IupGetHandle( "btnFilelist_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.filelistBack = IupGetAttribute( IupGetHandle( "btnFilelist_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.outputFore = IupGetAttribute( IupGetHandle( "btnOutput_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.outputBack = IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.searchFore = IupGetAttribute( IupGetHandle( "btnSearch_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.searchBack = IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "FGCOLOR" );
 
+			GLOBAL.editColor.errorFore = IupGetAttribute( IupGetHandle( "btnError_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.errorBack = IupGetAttribute( IupGetHandle( "btnError_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.warningFore = IupGetAttribute( IupGetHandle( "btnWarning_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.warringBack = IupGetAttribute( IupGetHandle( "btnWarning_BG" ), "FGCOLOR" );
+			GLOBAL.editColor.braceFore = IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "FGCOLOR" );
+			GLOBAL.editColor.braceBack = IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "FGCOLOR" );
+
+			GLOBAL.editColor.maker[0] = IupGetAttribute( IupGetHandle( "btnMarker0Color" ), "FGCOLOR" );
+			GLOBAL.editColor.maker[1] = IupGetAttribute( IupGetHandle( "btnMarker1Color" ), "FGCOLOR" );
+			GLOBAL.editColor.maker[2] = IupGetAttribute( IupGetHandle( "btnMarker2Color" ), "FGCOLOR" );
+			GLOBAL.editColor.maker[3] = IupGetAttribute( IupGetHandle( "btnMarker3Color" ), "FGCOLOR" );
+			
+			
+			
 			GLOBAL.projectTree.changeColor();
 			GLOBAL.outlineTree.changeColor();
 			GLOBAL.fileListTree.changeColor();
 			
 			// GLOBAL.editColor.keyWord is IupString class
+			/*
 			IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[0] << IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[1] << IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[2] << IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[3] << IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[4] << IupGetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR" ) );
 			IupSetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[5] << IupGetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR" ) );
-
-
+			*/
+			GLOBAL.editColor.keyWord[0] = IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "FGCOLOR" );
+			GLOBAL.editColor.keyWord[1] = IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR" );
+			GLOBAL.editColor.keyWord[2] = IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR" );
+			GLOBAL.editColor.keyWord[3] = IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR" );
+			GLOBAL.editColor.keyWord[4] = IupGetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR" );
+			GLOBAL.editColor.keyWord[5] = IupGetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR" );
+			
 			
 			// Set GLOBAL.messagePanel Color
 			GLOBAL.messagePanel.applyColor();
@@ -2211,10 +2276,33 @@ extern(C) // Callback for CPreferenceDialog
 
 			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 
-			GLOBAL.compilerFullPath						= IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" );
-			version(Windows) GLOBAL.x64compilerFullPath	= IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" );
-			GLOBAL.debuggerFullPath						= IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" );
-			version(linux) GLOBAL.linuxTermName			= IupGetAttribute( IupGetHandle( "textTerminalPath" ), "VALUE" );
+
+			// Compiler & Debugger
+			char[] newCompilerFullPath = fromStringz( IupGetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE" ) ).dup;
+			version(DIDE) if( newCompilerFullPath != GLOBAL.compilerFullPath ) GLOBAL.defaultImportPaths = tools.getImportPath( newCompilerFullPath );
+			
+			GLOBAL.compilerFullPath	= newCompilerFullPath;
+			version(Windows)
+			{
+				version(FBIDE)
+				{
+					GLOBAL.debuggerFullPath		= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
+					GLOBAL.x64compilerFullPath	= fromStringz( IupGetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE" ) ).dup;
+					GLOBAL.x64debuggerFullPath	= fromStringz( IupGetAttribute( IupGetHandle( "x64DebuggerPath_Handle" ), "VALUE" ) ).dup;
+				}
+				else
+				{
+					GLOBAL.x64compilerFullPath	= GLOBAL.compilerFullPath;
+				}
+			}
+			else
+			{
+				GLOBAL.debuggerFullPath		= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
+				GLOBAL.x64debuggerFullPath	= GLOBAL.debuggerFullPath;
+				
+				GLOBAL.linuxTermName		= fromStringz( IupGetAttribute( IupGetHandle( "textTerminalPath" ), "VALUE" ) ).dup;
+			}
+			
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
 			GLOBAL.compilerSFX							= fromStringz( IupGetAttribute( IupGetHandle( "toggleSFX" ), "VALUE" ) ).dup;
@@ -2326,7 +2414,16 @@ extern(C) // Callback for CPreferenceDialog
 			
 				IupSetInt( _valHandle, "VALUE", value );
 				GLOBAL.dwellDelay = Integer.toString( value ).dup;
-			}				
+			}
+			
+			_valHandle = IupGetHandle( "valTriggerDelay" );
+			if( _valHandle != null )
+			{
+				int v = IupGetInt( _valHandle, "VALUE" );
+				if( v < 50 ) v = 50;
+				GLOBAL.triggerDelay = Integer.toString( v ).dup;
+				AutoComplete.setTimer( v );
+			}			
 
 			foreach( CScintilla cSci; GLOBAL.scintillaManager )
 			{
@@ -2417,7 +2514,8 @@ extern(C) // Callback for CPreferenceDialog
 		//if( IupGetInt( dlg, "STATUS" ) ) IupSetAttribute( ih, "BGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
 		if( IupGetInt( dlg, "STATUS" ) )
 		{
-			IupSetAttribute( ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) ); // For IupFlatButton
+			auto _color = new IupString( IupGetAttribute( dlg, "VALUE" ) );
+			IupSetAttribute( ih, "FGCOLOR", _color.toCString ); // For IupFlatButton
 			IupSetFocus( GLOBAL.preferenceDlg.getIhandle );
 		}
 
@@ -2801,4 +2899,14 @@ extern(C) // Callback for CPreferenceDialog
 		
 		return IUP_DEFAULT;
 	}
+
+	private int valTriggerDelay_VALUECHANGED_CB( Ihandle *ih )
+	{
+		int value = IupGetInt( ih, "VALUE" );
+		//IupSetInt( ih, "VALUE", value );
+		IupSetAttribute( ih, "TIP", toStringz( Integer.toString( value ) ) );
+		
+		return IUP_DEFAULT;
+	}
+	
 }

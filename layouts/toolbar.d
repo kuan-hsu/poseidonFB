@@ -625,14 +625,14 @@ extern( C )
 					{
 						case "FBCx32":
 							GLOBAL.compilerFullPath = Util.trim( splitCommand[1] ).dup;
-							if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE", GLOBAL.compilerFullPath.toCString );
+							if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE", toStringz( GLOBAL.compilerFullPath.dup ) );
 							break;
 
 						case "FBCx64":
 							version(Windows)
 							{
 								GLOBAL.x64compilerFullPath = Util.trim( splitCommand[1] ).dup;
-								if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE", GLOBAL.x64compilerFullPath.toCString );
+								if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE", toStringz( GLOBAL.x64compilerFullPath.dup ) );
 							}
 							break;
 						default:
