@@ -686,8 +686,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.446)\nBy Kuan Hsu (Taiwan)\n2021.05.27" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.059)\nBy Kuan Hsu (Taiwan)\n2021.05.27" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.447)\nBy Kuan Hsu (Taiwan)\n2021.05.30" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.060)\nBy Kuan Hsu (Taiwan)\n2021.05.30" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -1719,14 +1719,13 @@ extern(C)
 
 	int compile_cb( Ihandle *ih )
 	{
-		ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
+		ExecuterAction.compile();
 		return IUP_DEFAULT;
 	}
 
 	int buildrun_cb( Ihandle *ih )
 	{
-		ExecuterAction.compile( null, null, null, true );
-		//if( ExecuterAction.compile() ) ExecuterAction.run( null, true );
+		ExecuterAction.compile( null, null, null, null, true );
 		return IUP_DEFAULT;
 	}	
 

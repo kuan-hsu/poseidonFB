@@ -1886,6 +1886,9 @@ extern(C)
 
 		if( newFileName.length )
 		{
+			// Save Old File Changed
+			if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) GLOBAL.scintillaManager[fullPathByOS(fullPath)].saveFile();
+			
 			// ReName On Disk & Change fn
 			fp.rename( fp.path ~ newFileName ~ fp.suffix );
 

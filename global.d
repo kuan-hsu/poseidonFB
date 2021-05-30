@@ -166,8 +166,8 @@ struct GLOBAL
 	//static char[]				maxError = "30";
 	//static IupString			defaultOption;
 	static char[]				recentOpenDir;
-	static char[][]				recentOptions, recentArgs, prevPrj, prevDoc;
-	static int					maxRecentOptions = 15, maxRecentArgs = 15;
+	static char[][]				recentOptions, recentArgs, recentCompilers, prevPrj, prevDoc;
+	static int					maxRecentOptions = 15, maxRecentArgs = 15, maxRecentCompilers = 8;
 	static IupString[]			recentFiles, recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;

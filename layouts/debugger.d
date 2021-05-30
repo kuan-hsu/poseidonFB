@@ -1987,12 +1987,12 @@ class CDebugger
 
 	int compileWithDebug()
 	{
-		return ExecuterAction.compile( null, "-g" );
+		return ExecuterAction.compile( null, null, null, "-g" );
 	}
 
 	bool buildAllWithDebug()
 	{
-		return ExecuterAction.buildAll( null, "-g" );
+		return ExecuterAction.buildAll( null, null, "-g" );
 	}	
 
 	void updateBackTrace()

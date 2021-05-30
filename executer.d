@@ -1274,7 +1274,8 @@ struct ExecuterAction
 	
 	public:
 	static char[]		quickRunFile;
-
+	
+	/*
 	static char[] getCustomCompilerOption()
 	{
 		if( GLOBAL.currentCustomCompilerOption.toDString.length )
@@ -1291,8 +1292,38 @@ struct ExecuterAction
 		
 		return null;
 	}
+	*/
+	static bool getCustomCompilers( ref char[] _opt, ref char[] _compiler )
+	{
+		if( GLOBAL.currentCustomCompilerOption.toDString.length )
+		{
+			foreach( char[] s; GLOBAL.customCompilerOptions )
+			{
+				int bpos = Util.rindex( s, "%::% " );
+				int fpos = Util.index( s, "%::% " );
+				if( bpos < s.length )
+				{
+					if( s[bpos+5..$] == GLOBAL.currentCustomCompilerOption.toDString )
+					{
+						if( fpos < bpos )
+						{
+							_opt = s[fpos+5..bpos];
+							_compiler = s[0..fpos];
+						}
+						else
+						{
+							_opt = s[0..bpos];
+						}
+						return true;
+					}
+				}			
+			}
+		}
+		return false;
+	}
 	
-	static int compile( char[] options = null, char[] optionDebug = null, char[] args = null, bool bRun = false )
+	
+	static int compile( char[] options = null, char[] args = null, char[] compiler = null, char[] optionDebug = null, bool bRun = false )
 	{
 		quickRunFile ="";
 		
@@ -1307,7 +1338,15 @@ struct ExecuterAction
 		
 		if( cSci !is null )
 		{
-			char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
+			// Get Custom Compiler
+			char[] customOpt, customCompiler;
+			getCustomCompilers( customOpt, customCompiler );
+			
+			// Set The Using Compiler Path
+			char[] fbcFullPath = compiler;
+			
+			if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+			
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -1315,10 +1354,7 @@ struct ExecuterAction
 					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 				}
 			}
-			else
-			{
-				fbcFullPath = GLOBAL.compilerFullPath;
-			}
+			
 			
 			scope compilePath = new FilePath( fbcFullPath );
 			if( !compilePath.exists() )
@@ -1343,7 +1379,10 @@ struct ExecuterAction
 				}
 			}
 
-			if( !options.length ) options = getCustomCompilerOption();
+
+			// Set The Using Opts
+			if( !options.length ) options = customOpt;
+			
 			cSci = ScintillaAction.getActiveCScintilla();
 			version(FBIDE) command = "\"" ~ compilePath.toString ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 			version(DIDE)
@@ -1361,11 +1400,9 @@ struct ExecuterAction
 					_args = Util.trim( options ) ~ " \"" ~ cSci.getFullPath() ~ "\"";
 					command = "\"" ~ compilePath.toString ~ "\" " ~ _args;
 					
-					
 					GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 					
-					scope _fp = new FilePath( GLOBAL.compilerFullPath );
-					ExecuterThread derived = new ExecuterThread( "\"" ~ GLOBAL.compilerFullPath ~ "\"", _args, _fp.path, false );
+					ExecuterThread derived = new ExecuterThread( "\"" ~ compilePath.toString ~ "\"", _args, compilePath.path, false );
 					derived.start();
 					
 					if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
@@ -1418,7 +1455,7 @@ struct ExecuterAction
 		return false;
 	}
 	
-	static bool build( char[] options = null, char[] optionDebug = null )
+	static bool build( char[] options = null, char[] args = null, char[] compiler = null, char[] optionDebug = null )
 	{
 		quickRunFile ="";
 		
@@ -1442,6 +1479,11 @@ struct ExecuterAction
 				return false;
 			}
 			
+			// Get Custom Compiler
+			char[] customOpt, customCompiler;
+			getCustomCompilers( customOpt, customCompiler );			
+			
+			
 			// Set Multiple Focus Project
 			FocusUnit _focus;
 			_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
@@ -1454,8 +1496,13 @@ struct ExecuterAction
 				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
 			}
 			
+			char[] fbcFullPath = compiler;
+			if( !fbcFullPath.length ) fbcFullPath = customCompiler;
+			if( !fbcFullPath.length )
+			{
+				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+			}
 			
-			char[] fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -1463,10 +1510,13 @@ struct ExecuterAction
 					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 				}				
 			}
-			else
-			{
-				fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath;
-			}
+			
+			
+			// Set The Using Opts
+			if( !options.length ) options = customOpt;
+			if( !options.length ) options = _focus.Option;
+			
+			
 			
 			scope compilePath = new FilePath( fbcFullPath );
 			
@@ -1482,19 +1532,41 @@ struct ExecuterAction
 			
 			version(FBIDE)
 			{
+				if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
+				{
+					if( !GLOBAL.projectManager[activePrjName].mainFile.length )
+					{
+						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
+						if( GLOBAL.compilerSFX == "ON" )
+						{
+							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+						}
+						return false;
+					}
+					else
+					{
+						return buildAll( options, optionDebug );
+					}
+				}
+				
+				/*
 				if( !GLOBAL.projectManager[activePrjName].mainFile.length )
 				{
-					GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
-					if( GLOBAL.compilerSFX == "ON" )
+					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
 					{
-						version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
+						if( GLOBAL.compilerSFX == "ON" )
+						{
+							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+						}
+						return false;
 					}
-					return false;
 				}
 				else
 				{
 					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" ) return buildAll( options, optionDebug );
 				}
+				*/
 			}
 			
 			
@@ -1550,26 +1622,25 @@ struct ExecuterAction
 					scope fPath = new FilePath( s );
 					
 					char[]		objPath = GLOBAL.projectManager[activePrjName].dir ~ "/";
-					char[] 		_totalOptions = _focus.Option ~ " " ~ options;
 					FilePath	oPath;
 					
 					// Check -op
-					int optionPos = Util.index( _totalOptions, "-op" );
-					if( optionPos < _totalOptions.length )
+					int optionPos = Util.index( options, "-op" );
+					if( optionPos < options.length )
 					{
 						objPath = fPath.path ~ "/";
 					}
 					else
 					{
 						// Check -od
-						optionPos = Util.index( _totalOptions, "-od" );
-						if( optionPos < _totalOptions.length )
+						optionPos = Util.index( options, "-od" );
+						if( optionPos < options.length )
 						{
 							char[] outputName;
-							for( int i = optionPos + 3; i < _totalOptions.length; ++ i )
+							for( int i = optionPos + 3; i < options.length; ++ i )
 							{
-								if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
-								outputName ~= _totalOptions[i];
+								if( options[i] == '\t' || options[i] == ' ' ) break;
+								outputName ~= options[i];
 							}
 							
 							// Got Obj Path -od
@@ -1663,43 +1734,6 @@ struct ExecuterAction
 						
 				}
 			}
-			/+
-			version(Windows)
-			{
-				switch( GLOBAL.projectManager[activePrjName].type )
-				{
-					case "2":
-						executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						break;
-					case "3":
-						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
-						break;
-					default:
-						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? ".exe" : "" ) ~ "\"";
-				}
-			}
-			else
-			{
-				switch( GLOBAL.projectManager[activePrjName].type )
-				{
-					case "2":
-						executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						break;
-					case "3":
-						executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
-						break;
-					default:
-						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
-				}
-			}
-			+/
-
-			if( !options.length )
-			{
-				if( !_focus.Option.length ) options = getCustomCompilerOption();
-			}
 
 
 			// Compiler Command
@@ -1709,11 +1743,13 @@ struct ExecuterAction
 				
 				version(FBIDE)
 				{
-					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
+					//txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
+					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
 				}
 				version(DIDE)
 				{
-					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option: "" ) ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
+					//txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option: "" ) ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
+					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
 				}
 			}
 			
@@ -1745,7 +1781,7 @@ struct ExecuterAction
 		return true;
 	}	
 	
-	static bool buildAll( char[] options = null, char[] optionDebug = null )
+	static bool buildAll( char[] options = null, char[] compiler = null, char[] optionDebug = null )
 	{
 		quickRunFile ="";
 		
@@ -1765,6 +1801,9 @@ struct ExecuterAction
 				return false;
 			}
 			
+			// Get Custom Compiler
+			char[] customOpt, customCompiler;
+			getCustomCompilers( customOpt, customCompiler );	
 			
 			// Set Multiple Focus Project
 			FocusUnit _focus;
@@ -1778,8 +1817,13 @@ struct ExecuterAction
 				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
 			}			
 			
-			
-			char[] fbcFullPath = _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
+			char[] fbcFullPath = compiler;
+			if( !fbcFullPath.length ) fbcFullPath = customCompiler;
+			if( !fbcFullPath.length )
+			{
+				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+			}
+
 			version(Windows)
 			{
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -1787,13 +1831,9 @@ struct ExecuterAction
 					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 				}				
 			}
-			else
-			{
-				fbcFullPath = fbcFullPath = _focus.Compiler.length ?  _focus.Compiler : GLOBAL.compilerFullPath;
-			}
+			
 			
 			scope compilePath = new FilePath( fbcFullPath );
-			
 			if( !compilePath.exists() )
 			{
 				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
@@ -2009,29 +2049,35 @@ struct ExecuterAction
 				}
 			}
 
-			if( !options.length )
-			{
-				if( !_focus.Option.length ) options = getCustomCompilerOption();
-			}
+			// Set The Using Opts
+			if( !options.length ) options = customOpt;
+			if( !options.length ) options = _focus.Option;
 
 			version(FBIDE)
 			{
+				/*
 				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ) ~
 							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( _focus.Option.length ? " " ~ _focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				*/
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ) ~
+							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				
 			}
 			version(DIDE)
 			{
+				/*
 				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( _focus.Option.length ? " " ~
 							_focus.Option : "" ) ~ ( options.length ? " " ~ options : "" );
+				*/
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" );
 			}
 			
 			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
-			//version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:windows:4";
 			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:WINDOWS";
 
 			
 			// Using Thread
-			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
+			GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
 
 			// Create Dir for Target
 			scope fp = new FilePath( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName );
@@ -2064,26 +2110,28 @@ struct ExecuterAction
 		return true;
 	}
 
-	static bool quickRun( char[] options = null, char[] args = null )
+	static bool quickRun( char[] options = null, char[] args = null, char[] compiler = null )
 	{
 		quickRunFile = "";
-		
+		 
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 		
-		char[] fbcFullPath = ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath );
+		// Get Custom Compiler
+		char[] customOpt, customCompiler;
+		getCustomCompilers( customOpt, customCompiler );
+		
+		
+		char[] fbcFullPath = compiler;
+		if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
 		version(Windows)
 		{
 			foreach( char[] s; GLOBAL.EnvironmentVars.keys )
 			{
 				fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 			}
-		}
-		else
-		{
-			fbcFullPath = GLOBAL.compilerFullPath;
 		}
 
 		scope compilePath = new FilePath( fbcFullPath );
@@ -2132,7 +2180,10 @@ struct ExecuterAction
 		
 		try
 		{
-			if( !options.length ) options = getCustomCompilerOption();
+
+			// Set The Using Opts
+			if( !options.length ) options = customOpt;
+
 			version(FBIDE)
 			{
 				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
@@ -2141,7 +2192,6 @@ struct ExecuterAction
 			version(DIDE)
 			{
 				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
-				//if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:windows:4";
 				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:WINDOWS";
 			}
 			
@@ -2459,7 +2509,7 @@ struct ExecuterAction
 		scope f = new FilePath( command );
 		if( f.exists() )
 		{
-			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ args ~ "......", true );
+			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ " "  ~ args ~ "......", true );
 
 			ExecuterThread derived;
 			version(Windows) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );

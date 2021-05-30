@@ -101,7 +101,7 @@ class CTextOpenDialog : CBaseDialog
 
 extern(C) // Callback for CSingleTextDialog
 {
-	int CTextOpenDialog_btnCancel_cb( Ihandle* ih )
+	private int CTextOpenDialog_btnCancel_cb( Ihandle* ih )
 	{
 		Ihandle* textHandle = IupGetHandle( "CTextOpenDialog_text" );
 		if( textHandle != null )
@@ -112,12 +112,12 @@ extern(C) // Callback for CSingleTextDialog
 		return IUP_CLOSE;
 	}
 
-	int CTextOpenDialog_btnOK_cb( Ihandle* ih )
+	private int CTextOpenDialog_btnOK_cb( Ihandle* ih )
 	{
 		return IUP_CLOSE;
 	}
 	
-	int CTextOpenDialog_SHOW_CB( Ihandle* ih, int state )
+	private int CTextOpenDialog_SHOW_CB( Ihandle* ih, int state )
 	{
 		if( state == IUP_SHOW )
 		{

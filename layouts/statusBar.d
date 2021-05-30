@@ -194,12 +194,13 @@ class CStatusBar
 		{
 			foreach( char[] s; GLOBAL.customCompilerOptions )
 			{
-				int pos = Util.rindex( s, "%::% " );
-				if( pos < s.length )
+				int bpos = Util.rindex( s, "%::% " );
+				if( bpos < s.length )
 				{
-					if( s[pos+5..$] == name )
+					if( s[bpos+5..$] == name )
 					{
-						tipString = s[0..pos].dup;
+						int fpos = Util.index( s, "%::% " );
+						if( fpos < bpos ) tipString = ( s[0..fpos] ~ "\n" ~ s[fpos+5..bpos] ).dup; else tipString = s[0..bpos].dup;
 						IupSetAttribute( compileOptionSelection, "TIP", tipString.toCString );
 						IupRefresh( compileOptionSelection );
 						break;
@@ -323,7 +324,7 @@ extern(C) // Callback for CBaseDialog
 											
 				for( int i = GLOBAL.customCompilerOptions.length - 1; i >= 0; -- i )
 				{
-					int pos = Util.index( GLOBAL.customCompilerOptions[i], "%::% " );
+					int pos = Util.rindex( GLOBAL.customCompilerOptions[i], "%::% " );
 					if( pos < GLOBAL.customCompilerOptions[i].length )
 					{
 						char[] Name = GLOBAL.customCompilerOptions[i][pos+5..$];

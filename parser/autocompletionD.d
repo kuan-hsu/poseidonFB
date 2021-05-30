@@ -3219,7 +3219,8 @@ version(DIDE)
 					
 					AutoComplete.VersionCondition.length = 0;
 					
-					char[] options = ExecuterAction.getCustomCompilerOption();
+					char[] options, compilers;
+					ExecuterAction.getCustomCompilers( options, compilers );
 					char[] activePrjName = ProjectAction.getActiveProjectName;
 					if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
 					if( options.length )

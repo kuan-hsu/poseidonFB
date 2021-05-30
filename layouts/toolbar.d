@@ -379,6 +379,8 @@ class CToolBar
 	
 	int checkBitButtonStatus()
 	{
+		version(linux) return 32;
+		
 		if( fromStringz( IupGetAttribute( bitButton, "VALUE" ) ) == "ON" ) return 64;
 		return 32;
 	}
@@ -403,7 +405,7 @@ extern( C )
 		{
 			if( button == IUP_BUTTON1 ) // Left Click
 			{
-				ExecuterAction.compile( /*Util.trim( GLOBAL.defaultOption.toDString )*/ );
+				ExecuterAction.compile();
 			}
 			else if( button == IUP_BUTTON3 ) // Right Click
 			{
@@ -411,7 +413,7 @@ extern( C )
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
-					if( result.length == 1 ) ExecuterAction.compile( result[0] );
+					if( result.length == 3 ) ExecuterAction.compile( result[0], null, result[2] );
 					delete dlg;
 				}
 			}
@@ -433,7 +435,7 @@ extern( C )
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
-					if( result.length == 1 ) ExecuterAction.build( result[0] );
+					if( result.length == 3 ) ExecuterAction.build( result[0], null, result[2] );
 					delete dlg;
 				}
 			}
@@ -455,7 +457,7 @@ extern( C )
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
-					if( result.length == 1 ) ExecuterAction.buildAll( result[0] );
+					if( result.length == 3 ) ExecuterAction.buildAll( result[0], result[2], null );
 					delete dlg;
 				}
 			}
@@ -469,7 +471,7 @@ extern( C )
 		{
 			if( button == IUP_BUTTON1 ) // Left Click
 			{
-				ExecuterAction.compile( null, null, null, true );
+				ExecuterAction.compile( null, null, null, null, true );
 			}
 			else if( button == IUP_BUTTON3 ) // Right Click
 			{
@@ -477,11 +479,7 @@ extern( C )
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  ).dup;
-					if( result.length == 2 )
-					{
-						ExecuterAction.compile( result[0], null, result[1], true ); // 3rd parameter = " " is compile & run
-						//if( ExecuterAction.compile( result[0] ) ) ExecuterAction.run( result[1], true );
-					}
+					if( result.length == 3 ) ExecuterAction.compile( result[0], result[1], result[2], null, true ); // 3rd parameter = " " is compile & run
 					delete dlg;
 				}
 			}
@@ -503,7 +501,7 @@ extern( C )
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 2 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 2  );
-					if( result.length == 1 ) ExecuterAction.run( result[0] );
+					if( result.length == 3 ) ExecuterAction.run( result[1] );
 					delete dlg;
 				}
 			}
@@ -525,7 +523,7 @@ extern( C )
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
 					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
-					if( result.length == 2 ) ExecuterAction.quickRun( result[0], result[1] );
+					if( result.length == 3 ) ExecuterAction.quickRun( result[0], result[1], result[2] );
 					delete dlg;
 				}
 			}

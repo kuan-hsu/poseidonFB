@@ -404,17 +404,23 @@ public:
 			for( int i = 0; i < GLOBAL.recentProjects.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.recentProjects[i].toDString );
 
-			// recentProjects
+			// recentOptions
 			doc ~= setINILineData( "[recentOptions]" );
 			doc ~= setINILineData( "max", Integer.toString( GLOBAL.maxRecentOptions ) );
 			for( int i = 0; i < GLOBAL.recentOptions.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.recentOptions[i] );
 
-			// recentProjects
+			// recentArgss
 			doc ~= setINILineData( "[recentArgs]" );
 			doc ~= setINILineData( "max", Integer.toString( GLOBAL.maxRecentArgs ) );
 			for( int i = 0; i < GLOBAL.recentArgs.length; ++i )
 				doc ~= setINILineData( "name", GLOBAL.recentArgs[i] );
+
+			// recentCompilers
+			doc ~= setINILineData( "[recentCompilers]" );
+			doc ~= setINILineData( "max", Integer.toString( GLOBAL.maxRecentCompilers ) );
+			for( int i = 0; i < GLOBAL.recentCompilers.length; ++i )
+				doc ~= setINILineData( "name", GLOBAL.recentCompilers[i] );
 
 			// customCompilerOptions
 			doc ~= setINILineData( "[customCompilerOptions]" );
@@ -845,6 +851,15 @@ public:
 						{
 							case "max":							GLOBAL.maxRecentArgs = Integer.toInt( right );				break; // Hiddle Option
 							case "name":						GLOBAL.recentArgs ~= right;									break;
+							default:
+						}					
+						break;
+
+					case "[recentCompilers]":
+						switch( left )
+						{
+							case "max":							GLOBAL.maxRecentCompilers = Integer.toInt( right );			break; // Hiddle Option
+							case "name":						GLOBAL.recentCompilers ~= right;							break;
 							default:
 						}					
 						break;
