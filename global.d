@@ -186,7 +186,7 @@ struct GLOBAL
 	static char[]				toggleShowAllMember = "ON";
 	static char[]				toggleEnableDwell = "OFF";
 	static char[]				toggleOverWrite = "OFF";
-	static char[]				toggleCompleteAtBackThread = "OFF";
+	static char[]				toggleCompleteAtBackThread = "ON";
 	
 	static char[]				toggleUseManual = "OFF", toggleDummy = "ON";
 	

@@ -3,7 +3,7 @@
 private import iup.iup, iup.iup_scintilla;
 
 private import global, project, scintilla, actionManager, tools;
-private import dialogs.baseDlg, dialogs.fileDlg, dialogs.textOpenDlg;
+private import dialogs.baseDlg, dialogs.fileDlg, dialogs.singleTextDlg;
 
 private import tango.stdc.stringz, tango.io.FilePath, Util = tango.text.Util, Path = tango.io.Path;
 
@@ -261,6 +261,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		listIncludePath = IupList( null );
 		IupSetAttributes( listIncludePath, "MULTIPLE=NO,SIZE=326x64,NAME=PRJPROPERTY_IncludePaths" );
 		IupSetHandle( "listIncludePath_Handle", listIncludePath );
+		IupSetCallback( listIncludePath, "DBLCLICK_CB", cast(Icallback) &CProjectPropertiesDialog_DBLCLICK_CB );
 		
 		Ihandle* btnIncludePathAdd = IupButton( null, null );
 		IupSetAttributes( btnIncludePathAdd, "IMAGE=icon_debug_add,FLAT=YES" );
@@ -301,6 +302,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		listLibPath = IupList( null );
 		IupSetAttributes( listLibPath, "MULTIPLE=NO,SIZE=328x64,NAME=PRJPROPERTY_LibPaths" );
 		IupSetHandle( "listLibPath_Handle", listLibPath );
+		IupSetCallback( listLibPath, "DBLCLICK_CB", cast(Icallback) &CProjectPropertiesDialog_DBLCLICK_CB );
 
 		Ihandle* btnLibPathAdd = IupButton( null, null );
 		IupSetAttributes( btnLibPathAdd, "IMAGE=icon_debug_add,FLAT=YES" );
@@ -697,35 +699,33 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 		return IUP_DEFAULT;
 	}
+	
+	int CProjectPropertiesDialog_DBLCLICK_CB( Ihandle *ih, int item, char *text )
+	{
+		scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, fromStringz( IupGetAttributeId( ih, "", item ) ), false, "PRJPROPERTY_DIALOG" );
+		char[] fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		if( fileName.length ) IupSetAttributeId( ih, "", item, toStringz( fileName.dup ) );
+		IupSetInt( ih, "VALUE", item ); // Set Focus
+		
+		return IUP_DEFAULT;
+	}
 
 	int CProjectPropertiesDialog_Add_cb( Ihandle* ih ) 
 	{
 		Ihandle*	list;
 		if( ih == IupGetHandle( "btnIncludePathAdd_Handle" ) ) list = IupGetHandle( "listIncludePath_Handle" ); else list = IupGetHandle( "listLibPath_Handle" );
 
-		scope selectFileDlg = new CTextOpenDialog( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, "", false, "PRJPROPERTY_DIALOG" );
+		scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, "", false, "PRJPROPERTY_DIALOG" );
 
 		char[] fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		if( fileName.length ) IupSetAttribute( list, "APPENDITEM", toStringz(fileName) );
-		
-		/+
-		scope fileSecectDlg = new CFileDlg( null, null, "DIR" );
-		char[] fileName = fileSecectDlg.getFileName();
-		
-
 		if( fileName.length )
 		{
-			//Ihandle* list;
-			if( ih == IupGetHandle( "btnIncludePathAdd_Handle" ) ) list = IupGetHandle( "listIncludePath_Handle" ); else list = IupGetHandle( "listLibPath_Handle" );
-
 			IupSetAttribute( list, "APPENDITEM", toStringz(fileName) );
+			IupSetInt( list, "VALUE", IupGetInt( list, "COUNT" ) ); // Set Focus
 		}
-		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
-		}
-		+/
-
+		
+		IupSetFocus( list );
+		
 		return IUP_DEFAULT;
 	}
 
@@ -735,11 +735,21 @@ extern(C) // Callback for CProjectPropertiesDialog
 		if( ih == IupGetHandle( "btnIncludePathErase_Handle" ) ) list = IupGetHandle( "listIncludePath_Handle" ); else list = IupGetHandle( "listLibPath_Handle" );
 
 		// IupGetAttribute( list, "VALUE" ) = 0 Items has no selected, = 1,2,3.....n   #n item had be selected
-		char* itemNumber = IupGetAttribute( list, "VALUE" );
-		if( Integer.atoi( fromStringz( itemNumber ) ) > 0 )
+		int itemNumber = IupGetInt( list, "VALUE" );
+		if( itemNumber > 0 )
 		{
-			IupSetAttribute( list, "REMOVEITEM", itemNumber );
+			IupSetInt( list, "REMOVEITEM", itemNumber );
+			int count = IupGetInt( list, "COUNT" );
+			if( count > 0 )
+			{
+				if( count >= itemNumber )
+					IupSetInt( list, "VALUE", itemNumber ); // Set Focus
+				else
+					IupSetInt( list, "VALUE", itemNumber - 1 ); // Set Focus
+			}
 		}
+		
+		IupSetFocus( list );
 		
 		return IUP_DEFAULT;
 	}
@@ -753,19 +763,14 @@ extern(C) // Callback for CProjectPropertiesDialog
 		char* itemNumber = IupGetAttribute( list, "VALUE" );
 		if( Integer.atoi( fromStringz( itemNumber ) ) > 0 )
 		{
-			scope selectFileDlg = new CTextOpenDialog( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, fromStringz( IupGetAttribute( list, itemNumber ) ), false, "PRJPROPERTY_DIALOG" );
+			scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, fromStringz( IupGetAttribute( list, itemNumber ) ), false, "PRJPROPERTY_DIALOG" );
 			char[] fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			if( fileName.length ) IupSetAttribute( list, itemNumber, toStringz(fileName) );
-			/+
-			scope fileSecectDlg = new CFileDlg( null, null, "DIR" );
-			char[] fileName = fileSecectDlg.getFileName();
-
-			if( fileName.length )
-			{
-				IupSetAttribute( list, itemNumber, toStringz( fileName ) );
-			}
-			+/
+			
+			IupSetAttribute( list, "VALUE", itemNumber ); // Set Focus
 		}
+		
+		IupSetFocus( list );
 		
 		return IUP_DEFAULT;
 	}
@@ -785,8 +790,10 @@ extern(C) // Callback for CProjectPropertiesDialog
 			IupSetAttribute( list, toStringz( Integer.toString(itemNumber-1) ), nowItemText );
 			IupSetAttribute( list, toStringz( Integer.toString(itemNumber) ), prevItemText );
 
-			IupSetAttribute( list, "VALUE", toStringz( Integer.toString(itemNumber-1) ) );
+			IupSetAttribute( list, "VALUE", toStringz( Integer.toString(itemNumber-1) ) ); // Set Focus
 		}
+		
+		IupSetFocus( list );
 
 		return IUP_DEFAULT;
 	}
@@ -807,8 +814,10 @@ extern(C) // Callback for CProjectPropertiesDialog
 			IupSetAttribute( list, toStringz( Integer.toString(itemNumber+1) ), nowItemText );
 			IupSetAttribute( list, toStringz( Integer.toString(itemNumber) ), nextItemText );
 
-			IupSetAttribute( list, "VALUE", toStringz( Integer.toString(itemNumber+1) ) );
+			IupSetAttribute( list, "VALUE", toStringz( Integer.toString(itemNumber+1) ) ); // Set Focus
 		}
+		
+		IupSetFocus( list );
 
 		return IUP_DEFAULT;
 	}

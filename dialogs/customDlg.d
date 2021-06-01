@@ -28,7 +28,7 @@ class CCustomDialog : CBaseDialog
 		IupSetAttributes( listTools, "EXPAND=HORIZONTAL" );
 		IupSetHandle( "listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomDialog_ACTION );
-
+		IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomDialog_DBLCLICK_CB );
 		
 		Ihandle* btnToolsAdd = IupButton( null, null );
 		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
@@ -328,8 +328,25 @@ extern(C) // Callback for CFindInFilesDialog
 		}
 		
 		return IUP_DEFAULT;
-	}	
+	}
 	
+	private int CCustomDialog_DBLCLICK_CB( Ihandle *ih, int item, char *text )
+	{
+		char[] oldName = fromStringz( text ).dup;
+	
+		scope reNameDlg = new CSingleTextInput( 200, -1, oldName, "255 255 204", 220 );
+		
+		char[] newFileName = reNameDlg.show( IupGetInt( ih, "X" ) + 30, IUP_MOUSEPOS );
+		if( newFileName.length )
+		{
+			IupSetAttributeId( ih, "", item, toStringz( newFileName.dup ) );
+			IupSetInt( ih, "VALUE", item ); // Set Focus
+			
+			CCustomDialog.editCustomTools[item].name = newFileName;
+		}		
+		
+		return IUP_DEFAULT;
+	}
 
 	private int CCustomDialog_btnToolsAdd( Ihandle* ih ) 
 	{
@@ -358,6 +375,8 @@ extern(C) // Callback for CFindInFilesDialog
 			if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", "" );
 			if( argsHandle != null ) IupSetAttribute( argsHandle, "VALUE", "" );
 		}
+		
+		IupSetFocus( toolsHandle );
 		
 		return IUP_DEFAULT;
 	}
@@ -412,10 +431,11 @@ extern(C) // Callback for CFindInFilesDialog
 		
 		Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
 		Ihandle* argsHandle = IupGetHandle( "textToolsArgs" );		
-		
-		if( IupGetInt( toolsHandle, "COUNT" ) > 0 )
+
+		int count = IupGetInt( toolsHandle, "COUNT" );
+		if( count > 0 )
 		{
-			if( index > 1 ) IupSetInt( toolsHandle, "VALUE", index - 1 ); else IupSetInt( toolsHandle, "VALUE", 1 ); // Set Focus
+			if( count >= index ) IupSetInt( toolsHandle, "VALUE", index ); else	IupSetInt( toolsHandle, "VALUE", index - 1 ); // Set Focus
 		}
 		else
 		{
@@ -448,7 +468,9 @@ extern(C) // Callback for CFindInFilesDialog
 		{
 			if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", CCustomDialog.editCustomTools[id].dir.toCString );
 			if( argsHandle != null ) IupSetAttribute( argsHandle, "VALUE", CCustomDialog.editCustomTools[id].args.toCString );
-		}	
+		}
+		
+		IupSetFocus( toolsHandle );
 
 		return IUP_DEFAULT;
 	}	
@@ -483,6 +505,8 @@ extern(C) // Callback for CFindInFilesDialog
 			CCustomDialog.editCustomTools[itemNumber].dir = temp.dir;
 			CCustomDialog.editCustomTools[itemNumber].args = temp.args;
 		}
+		
+		IupSetFocus( toolsHandle );
 
 		return IUP_DEFAULT;
 	}
@@ -518,6 +542,8 @@ extern(C) // Callback for CFindInFilesDialog
 			CCustomDialog.editCustomTools[itemNumber].dir = temp.dir;
 			CCustomDialog.editCustomTools[itemNumber].args = temp.args;
 		}
+		
+		IupSetFocus( toolsHandle );
 
 		return IUP_DEFAULT;
 	}	

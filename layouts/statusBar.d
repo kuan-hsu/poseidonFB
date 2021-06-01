@@ -41,7 +41,7 @@ class CStatusBar
 		
 		compileOptionSelection = IupLabel( "" );
 		IupSetHandle( "compileOptionSelection", compileOptionSelection );
-		IupSetAttribute( compileOptionSelection, "SIZE", "150x" );
+		IupSetAttribute( compileOptionSelection, "SIZE", "200x" );
 		if( !GLOBAL.currentCustomCompilerOption.toDString.length )
 		{
 			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 0" );
@@ -263,7 +263,7 @@ extern(C) // Callback for CBaseDialog
 		
 		if( pressed == 0 ) //release
 		{
-			if( button == IUP_BUTTON3 ) // Right Click
+			if( button == IUP_BUTTON3 || button == IUP_BUTTON1 ) // Right Click
 			{
 				Ihandle* itemNULL = IupItem( GLOBAL.languageItems["none"].toCString, null );
 				IupSetAttribute( itemNULL, "IMAGE", "icon_clear" );
@@ -425,7 +425,7 @@ extern(C) // Callback for CBaseDialog
 					}						
 					
 					// Open Dialog Window
-					scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false );
+					scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false, "POSEIDON_MAIN_DIALOG", null, false );
 					IupSetAttributes( gotoLineDlg.getIhandle, "BORDER=NO,RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,OPACITY=198" );
 					//IupSetAttribute( gotoLineDlg.getIhandle, "BGCOLOR", "255 255 255" );
 					//IupSetAttribute( gotoLineDlg.getIhandle, "BACKGROUND", "0 255 0" );
