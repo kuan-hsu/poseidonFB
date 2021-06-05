@@ -62,7 +62,7 @@ public:
 			TokenUnit[]		results;
 
 			data = Util.trim( data );
-			//data ~= "\n";
+			data ~= "\n";
 
 			try
 			{

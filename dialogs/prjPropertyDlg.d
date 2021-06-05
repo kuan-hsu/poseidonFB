@@ -264,27 +264,27 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetCallback( listIncludePath, "DBLCLICK_CB", cast(Icallback) &CProjectPropertiesDialog_DBLCLICK_CB );
 		
 		Ihandle* btnIncludePathAdd = IupButton( null, null );
-		IupSetAttributes( btnIncludePathAdd, "IMAGE=icon_debug_add,FLAT=YES" );
+		IupSetAttributes( btnIncludePathAdd, "IMAGE=icon_debug_add,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnIncludePathAdd_Handle", btnIncludePathAdd );
 		IupSetCallback( btnIncludePathAdd, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Add_cb );
 
 		Ihandle* btnIncludePathErase = IupButton( null, null );
-		IupSetAttributes( btnIncludePathErase, "IMAGE=icon_delete,FLAT=YES" );
+		IupSetAttributes( btnIncludePathErase, "IMAGE=icon_delete,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnIncludePathErase_Handle", btnIncludePathErase );
 		IupSetCallback( btnIncludePathErase, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Erase_cb );
 		
 		Ihandle* btnIncludePathEdit = IupButton( null, null );
-		IupSetAttributes( btnIncludePathEdit, "IMAGE=icon_Write,FLAT=YES" );
+		IupSetAttributes( btnIncludePathEdit, "IMAGE=icon_Write,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnIncludePathEdit_Handle", btnIncludePathEdit );
 		IupSetCallback( btnIncludePathEdit, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Edit_cb );
 
 		Ihandle* btnIncludePathUp = IupButton( null, null );
-		IupSetAttributes( btnIncludePathUp, "IMAGE=icon_uparrow,FLAT=YES" );
+		IupSetAttributes( btnIncludePathUp, "IMAGE=icon_uparrow,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnIncludePathUp_Handle", btnIncludePathUp );
 		IupSetCallback( btnIncludePathUp, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Up_cb );
 		
 		Ihandle* btnIncludePathDown = IupButton( null, null );
-		IupSetAttributes( btnIncludePathDown, "IMAGE=icon_downarrow,FLAT=YES" );
+		IupSetAttributes( btnIncludePathDown, "IMAGE=icon_downarrow,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnIncludePathDown_Handle", btnIncludePathDown );
 		IupSetCallback( btnIncludePathDown, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Down_cb );
 		

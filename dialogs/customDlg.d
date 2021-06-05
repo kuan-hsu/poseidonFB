@@ -31,21 +31,21 @@ class CCustomDialog : CBaseDialog
 		IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomDialog_DBLCLICK_CB );
 		
 		Ihandle* btnToolsAdd = IupButton( null, null );
-		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
+		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES,CANFOCUS=NO" );
 		IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
 		IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CCustomDialog_btnToolsAdd );
 
 		Ihandle* btnToolsErase = IupButton( null, null );
-		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES" );
+		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES,CANFOCUS=NO" );
 		IupSetAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
 		IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CCustomDialog_btnToolsErase );
 		
 		Ihandle* btnToolsUp = IupButton( null, null );
-		IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES" );
+		IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES,CANFOCUS=NO" );
 		IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CCustomDialog_btnToolsUp );
 		
 		Ihandle* btnToolsDown = IupButton( null, null );
-		IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES" );
+		IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES,CANFOCUS=NO" );
 		IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CCustomDialog_btnToolsDown );
 		
 		Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, null );
@@ -361,7 +361,7 @@ extern(C) // Callback for CFindInFilesDialog
 		}
 		
 		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomtool"].toDString(), GLOBAL.languageItems["tools"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile" );
-		char[] fileName = description.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+		char[] fileName = description.show( IupGetInt( toolsHandle, "X" ), IUP_MOUSEPOS );
 		
 		if( fileName.length )
 		{

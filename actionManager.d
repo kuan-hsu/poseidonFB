@@ -721,10 +721,7 @@ public:
 		char[] _s = fromStringz( status ).dup;
 		if( _s.length > 5 )
 		{
-			if( _s[5] == 'D' ) // Double Click
-			{
-				return true;
-			}
+			if( _s[5] == 'D' ) return true; // Double Click
 		}
 		
 		return false;

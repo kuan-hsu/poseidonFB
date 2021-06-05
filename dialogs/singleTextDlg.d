@@ -192,7 +192,7 @@ class CSingleTextOpen : CBaseDialog
 		IupSetHandle( "CSingleTextOpen_text", textResult );
 		
 		openButton = IupButton( null, null );
-		IupSetAttributes( openButton, "IMAGE=icon_openfile,FLAT=YES" );
+		IupSetAttributes( openButton, "IMAGE=icon_openfile,FLAT=YES,CANFOCUS=NO" );
 
 		Ihandle* hBox = IupHbox( label, textResult, openButton, null );
 		IupSetAttribute( hBox, "ALIGNMENT", "ACENTER" );

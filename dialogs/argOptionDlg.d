@@ -91,12 +91,12 @@ class CArgOptionDialog : CBaseDialog
 			IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CArgOptionDialog_DBLCLICK_CB );
 			
 			Ihandle* btnToolsAdd = IupButton( null, null );
-			IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
+			IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES,CANFOCUS=NO" );
 			IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
 			IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsAdd );
 
 			Ihandle* btnToolsErase = IupButton( null, null );
-			IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES" );
+			IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES,CANFOCUS=NO" );
 			IupSetAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
 			IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsErase );
 			
@@ -108,11 +108,11 @@ class CArgOptionDialog : CBaseDialog
 			*/
 			
 			Ihandle* btnToolsUp = IupButton( null, null );
-			IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES" );
+			IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES,CANFOCUS=NO" );
 			IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsUp );
 			
 			Ihandle* btnToolsDown = IupButton( null, null );
-			IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES" );
+			IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES,CANFOCUS=NO" );
 			IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsDown );
 			
 			Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, /*btnToolsEdit,*/ btnToolsUp, btnToolsDown, null );
@@ -167,7 +167,7 @@ class CArgOptionDialog : CBaseDialog
 		}
 		
 		btnCompilerPath = IupButton( null, null );
-		IupSetAttributes( btnCompilerPath, "IMAGE=icon_openfile,FLAT=YES" );
+		IupSetAttributes( btnCompilerPath, "IMAGE=icon_openfile,FLAT=YES,CANFOCUS=NO" );
 		IupSetCallback( btnCompilerPath, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["exefile"].toDString() ~ "|*.exe" );

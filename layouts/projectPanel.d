@@ -954,14 +954,10 @@ extern(C)
 		{
 			if( button == IUP_BUTTON1 ) // Left Click
 			{
-				char[] _s = fromStringz( status ).dup;
-				if( _s.length > 5 )
+				if( DocumentTabAction.isDoubleClick( status ) )
 				{
-					if( _s[5] == 'D' ) // Double Click
-					{
-						CProjectTree_Open_cb( ih );
-						return IUP_IGNORE;
-					}
+					CProjectTree_Open_cb( ih );
+					return IUP_IGNORE;
 				}
 			}
 		}
