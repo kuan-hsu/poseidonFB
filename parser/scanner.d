@@ -59,10 +59,10 @@ public:
 			char[]			identifier;
 			int				lineNum = 1;
 			int				commentCount;
-			TokenUnit		token_unit;
 			TokenUnit[]		results;
 
-			data ~= "\n";
+			data = Util.trim( data );
+			//data ~= "\n";
 
 			try
 			{
@@ -393,7 +393,7 @@ public:
 							}
 
 							identifier = "";
-							TokenUnit t = {TOK.Tdot, ".", lineNum};
+							TokenUnit t = { TOK.Tdot, ".", lineNum };
 							results ~= t;
 							break;
 
@@ -425,10 +425,9 @@ public:
 			char[]			identifier;
 			int				lineNum = 1;
 			int				commentCount, nestCommentCount;
-			TokenUnit		token_unit;
 			TokenUnit[]		results;
 
-			//data = ";" ~ data;
+			data = Util.trim( data );
 			//data ~= "\n";
 
 			try

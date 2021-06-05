@@ -1697,6 +1697,19 @@ public:
 			if( cSci !is null ) cSci.setGlobalSetting();
 		}
 	}
+	/+
+	static void simulateLeftClick()
+	{
+		// Set FOCUS
+		int _x = IupGetInt( getActiveIupScintilla, "X" );
+		int _y = IupGetInt( getActiveIupScintilla, "Y" );
+		char[] xy = Integer.toString( _x ) ~ "x" ~ Integer.toString( _y ) ~ " 1 1";
+		
+		char* _pos = IupGetGlobal( "CURSORPOS" ); // Get Original Pos
+		IupSetGlobal( "MOUSEBUTTON", toStringz( xy ));
+		IupSetGlobal( "CURSORPOS", _pos ); // Update Original Pos	
+	}
+	+/
 }
 
 

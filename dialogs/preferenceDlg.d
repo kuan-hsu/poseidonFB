@@ -2867,7 +2867,7 @@ extern(C) // Callback for CPreferenceDialog
 										case "Underline":	style ~= "Underline "; break;
 										case "Strikeout":	style ~= "Strikeout "; break;
 										default:
-											fontName = fontName ~ s ~ " ";
+											fontName ~= ( s ~ " " );
 									}
 								}
 								

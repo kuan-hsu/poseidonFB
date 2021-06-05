@@ -614,14 +614,14 @@ struct ExecuterAction
 				
 				foreach( char[] s; activePrj.others )
 				{
-					txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+					txtSources ~= ( " \"" ~ s ~ "\"" );
 				}				
 
 				version(FBIDE)
 				{
 					foreach( char[] s; focus.LibDir )
 					{
-						txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
+						txtLibDirs ~= ( " -p \"" ~ s ~ "\"" );
 					}
 				}
 				version(DIDE)
@@ -659,7 +659,7 @@ struct ExecuterAction
 								
 								if( GLOBAL.toolbar.checkBitButtonStatus != 32 || Util.index( focus.Option, "-m64" ) < focus.Option.length )
 								{
-									txtLibDirs = txtLibDirs ~ " -L/LIBPATH:\"" ~ s ~ "\"";
+									txtLibDirs ~= ( " -L/LIBPATH:\"" ~ s ~ "\"" );
 								}
 								else
 								{

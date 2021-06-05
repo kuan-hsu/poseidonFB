@@ -258,7 +258,7 @@ version(FBIDE)
 				case B_DEFINE | B_FUNCTION:	return name ~ "?34";
 				
 				case B_SUB:					return bShowType ? name ~ "~void" ~ "?" ~ Integer.toString( 25 + protAdd ) : name ~ "?" ~ Integer.toString( 25 + protAdd );
-				case B_FUNCTION:			return bShowType ? name  ~ "~" ~ type ~ "?" ~ Integer.toString( 28 + protAdd ) : name ~ "?" ~ Integer.toString( 28 + protAdd );
+				case B_FUNCTION:			return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 28 + protAdd ) : name ~ "?" ~ Integer.toString( 28 + protAdd );
 				case B_VARIABLE:
 					if( node.name.length )
 					{

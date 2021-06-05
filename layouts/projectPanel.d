@@ -102,7 +102,7 @@ private:
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
 		IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-		IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_EXECUTELEAF_CB );
+		//IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_EXECUTELEAF_CB );
 		//IupSetCallback( tree, "BRANCHOPEN_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		//IupSetCallback( tree, "BRANCHCLOSE_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		
@@ -950,11 +950,6 @@ extern(C)
 
 	private int CProjectTree_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
-		return IUP_DEFAULT;
-	}
-	/*
-	private int CProjectTree_BUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
-	{
 		if( pressed == 1 )
 		{
 			if( button == IUP_BUTTON1 ) // Left Click
@@ -972,7 +967,6 @@ extern(C)
 		}
 		return IUP_DEFAULT;
 	}
-	*/
 	
 	/*
 	private int CProjectTree_BRANCH_CB( Ihandle* ih, int id )
@@ -989,12 +983,23 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	*/
-	
+	/*
 	private int CProjectTree_EXECUTELEAF_CB( Ihandle* ih, int id )
 	{
-		return CProjectTree_Open_cb( ih );
+		CProjectTree_Open_cb( ih );
+
+		// Set FOCUS
+		int _x = IupGetInt( ScintillaAction.getActiveIupScintilla, "X" );
+		int _y = IupGetInt( ScintillaAction.getActiveIupScintilla, "Y" );
+		char[] xy = Integer.toString( _x ) ~ "x" ~ Integer.toString( _y ) ~ " 1 1";
+		
+		char* _pos = IupGetGlobal( "CURSORPOS" ); // Get Original Pos
+		IupSetGlobal( "MOUSEBUTTON", toStringz( xy ));
+		IupSetGlobal( "CURSORPOS", _pos ); // Update Original Pos
+		
+		return IUP_DEFAULT;
 	}	
-	
+	*/
 	private int CProjectTree_NodeRemoved_cb( Ihandle *ih, void* userdata )
 	{
 		char* dataPointer = cast(char*) userdata;
@@ -1722,6 +1727,17 @@ extern(C)
 			// Erase Project Treeitems And Left Only One Item
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
+
+			/+
+			// Set FOCUS
+			int _x = IupGetInt( ScintillaAction.getActiveIupScintilla, "X" );
+			int _y = IupGetInt( ScintillaAction.getActiveIupScintilla, "Y" );
+			char[] xy = Integer.toString( _x ) ~ "x" ~ Integer.toString( _y ) ~ " 1 1";
+			
+			char* _pos = IupGetGlobal( "CURSORPOS" ); // Get Original Pos
+			IupSetGlobal( "MOUSEBUTTON", toStringz( xy ));
+			IupSetGlobal( "CURSORPOS", _pos ); // Update Original Pos
+			+/
 		}
 		
 		return IUP_DEFAULT;

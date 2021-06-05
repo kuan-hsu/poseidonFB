@@ -63,16 +63,16 @@ public:
 
 		if( keyValue == 0x9 ) // TAB
 		{
-			result = result ~ "TAB";
+			result ~= "TAB";
 		}
 		if( keyValue >= 0x41 && keyValue <= 90 ) // 'A' ~ 'Z'
 		{
 			char c = keyValue;
-			result = result ~ c;
+			result ~= c;
 		}
 		else if( keyValue >= 0xFFBE && keyValue <= 0xFFC9 ) // 'F1' ~ 'F12'
 		{
-			result = result ~ "F" ~ Integer.toString( keyValue - 0xFFBD );
+			result ~= ( "F" ~ Integer.toString( keyValue - 0xFFBD ) );
 		}
 		
 		return result;
@@ -1360,7 +1360,7 @@ public:
 			foreach( e; result ) results ~= e.value;
 
 			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Fore");
-			foreach( e; result )results ~= e.value;
+			foreach( e; result ) results ~= e.value;
 			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Back");
 			foreach( e; result ) results ~= e.value;
 

@@ -2201,6 +2201,7 @@ extern(C)
 									IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
 									Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
 									if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex] );
+									IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 								}
 							}
 						}
@@ -2254,6 +2255,7 @@ extern(C)
 							IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
 							Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
 							if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+							IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 						}
 					}
 				}
@@ -2305,10 +2307,11 @@ extern(C)
 									IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
 									Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
 									if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex] );
+									IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 								}
 							}
 						}
-					}				
+					}
 				}
 				else if( GLOBAL.KeyNumber == 65307 ) // ESC
 				{

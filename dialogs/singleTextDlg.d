@@ -122,6 +122,7 @@ class CSingleTextInput
 		
 		inputDlg = IupDialog( inputText );
 		IupSetAttributes( inputDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO" );
+		IupSetAttribute( inputDlg, "TITLE", null );
 		IupSetInt( inputDlg, "BORDER", border );
 		IupSetInt( inputDlg, "OPACITY", opacity );
 
