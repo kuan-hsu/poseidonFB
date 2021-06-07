@@ -443,8 +443,6 @@ public:
 			return true;
 		}
 
-		//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Load Project: [" ~ setupDir ~ "]", true ); //IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz( "Load Project: [" ~ setupDir ~ "]" ) );
-		
 		version(FBIDE)	char[] setupFileName = setupDir ~ "/.poseidon";
 		version(DIDE)	char[] setupFileName = setupDir ~ "/D.poseidon";
 
@@ -495,8 +493,6 @@ public:
 		ParseThread subThread = new ParseThread( GLOBAL.projectManager[setupDir] );
 		subThread.start();
 		+/
-
-		//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Done." );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Done."  ) );
 
 		return true;
 	}
@@ -694,7 +690,6 @@ public:
 			DocumentTabAction.updateTabsLayout();			
 
 			GLOBAL.projectManager[activePrjName].saveFile();
-			//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]"  ) );
 			GLOBAL.projectManager.remove( activePrjName );
 
 			int countChild = IupGetInt( tree, "COUNT" );
@@ -776,8 +771,6 @@ public:
 					}
 				}
 			}
-
-			//if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Close Project: [" ~ p.name ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "Close Project: [" ~ p.name ~ "]"  ) );
 		}
 
 		foreach( char[] s; prjsDir )
@@ -893,6 +886,7 @@ extern(C)
 						if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 						{
 							actionManager.ScintillaAction.openFile( fullPath );
+							return IUP_IGNORE;
 						}
 					}
 					
@@ -904,7 +898,7 @@ extern(C)
 							if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" ) IupSetAttributeId( ih, "MARKED", i, "NO" );
 						}
 					}
-					DocumentTabAction.setFocus( ScintillaAction.getActiveIupScintilla() ); 
+					//DocumentTabAction.setFocus( ScintillaAction.getActiveIupScintilla() ); 
 				}
 				else
 				{
@@ -936,7 +930,6 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "CProjectTree_Selection_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}

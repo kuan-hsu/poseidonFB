@@ -291,7 +291,7 @@ struct PROJECT
 		}
 		catch( Exception e )
 		{
-			//GLOBAL.IDEMessageDlg.print( "Project File " ~ settingFileName ~ " Load Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessageError( null, "loadFile() in project.d Error!" );
 		}
 		
 		return s;			

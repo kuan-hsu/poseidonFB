@@ -3601,8 +3601,7 @@ version(DIDE)
 			}
 			catch( Exception e )
 			{
-				//debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				//Stdout( e.toString ~"\n" ~ fullPath ~ ": " ~ Integer.toString( tokenIndex ) ).newline;
+				debug IupMessageError( null, toStringz( "parserD Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 
 			if( head !is null )

@@ -271,7 +271,6 @@ public:
 		}
 		catch( Exception e )
 		{
-			GLOBAL.IDEMessageDlg.print( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			throw e;
 		}
@@ -897,8 +896,6 @@ public:
 				auto pParseTree = GLOBAL.outlineTree.createParserByText( fullPath, _text );
 				if( pParseTree !is null ) 
 				{
-					if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Parse File: [" ~ fullPath ~ "]" );
-					
 					AutoComplete.cleanIncludeContainer();
 					
 					/*
@@ -1712,6 +1709,9 @@ public:
 
 struct ProjectAction
 {
+	private:
+		import project;
+		
 	public:
 	static int getTargetDepthID( int targetDepth )
 	{
@@ -1876,7 +1876,26 @@ struct ProjectAction
 		}
 
 		return null;
-	}	
+	}
+	
+	static PROJECT getActiveProject()
+	{
+		auto cSci = ScintillaAction.getActiveCScintilla();
+
+		if( cSci !is null )
+		{
+			foreach( p; GLOBAL.projectManager )
+			{
+				foreach( char[] prjFileFullPath; p.sources ~ p.includes )
+				{
+					if( cSci.getFullPath() == prjFileFullPath ) return p;
+				}
+			}
+		}
+
+		PROJECT nullProject;
+		return nullProject;
+	}		
 	
 	static int getSelectCount()
 	{
@@ -2804,4 +2823,33 @@ struct CustomToolAction
 			}
 		}
 	}
+	
+	static bool getCustomCompilers( ref char[] _opt, ref char[] _compiler )
+	{
+		if( GLOBAL.currentCustomCompilerOption.toDString.length )
+		{
+			foreach( char[] s; GLOBAL.customCompilerOptions )
+			{
+				int bpos = Util.rindex( s, "%::% " );
+				int fpos = Util.index( s, "%::% " );
+				if( bpos < s.length )
+				{
+					if( s[bpos+5..$] == GLOBAL.currentCustomCompilerOption.toDString )
+					{
+						if( fpos < bpos )
+						{
+							_opt = s[fpos+5..bpos];
+							_compiler = s[0..fpos];
+						}
+						else
+						{
+							_opt = s[0..bpos];
+						}
+						return true;
+					}
+				}			
+			}
+		}
+		return false;
+	}	
 }

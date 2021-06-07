@@ -261,7 +261,6 @@ class CScintilla
 		}
 		catch( Exception e )
 		{
-			//debug GLOBAL.IDEMessageDlg.print( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			IupMessage( "Bug", toStringz( "Scintilla.init() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			throw e;
 		}
@@ -2736,7 +2735,6 @@ extern(C)
 								}
 								catch( Exception e )
 								{
-									//debug GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 									debug IupMessage( "ShortCut Error", toStringz( "autocomplete\n" ~ e.toString ) );
 								}
 							}
@@ -2927,7 +2925,6 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			//GLOBAL.IDEMessageDlg.print( "CScintilla_keyany_cb() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 			debug IupMessage( "CScintilla_keyany_cb", toStringz( "CScintilla_keyany_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 		
@@ -3091,7 +3088,7 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "LiveParser lineNumberAdd() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				IupMessageError( null, toStringz( "LiveParser lineNumberAdd() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 
@@ -3108,8 +3105,6 @@ extern(C)
 		{
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 			//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
-			
-			//GLOBAL.IDEMessageDlg.print( "bSkipAutoComplete = true" );
 			return IUP_DEFAULT;
 		}
 		
@@ -3275,7 +3270,7 @@ extern(C)
 							AutoComplete.VersionCondition.length = 0;
 							
 							char[] options, compilers;
-							ExecuterAction.getCustomCompilers( options, compilers );
+							CustomToolAction.getCustomCompilers( options, compilers );
 							
 							char[] activePrjName = ProjectAction.getActiveProjectName;
 							if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
@@ -3293,7 +3288,6 @@ extern(C)
 									if( versionName.length )
 									{	
 										AutoComplete.VersionCondition ~= versionName;
-										//GLOBAL.IDEMessageDlg.print( "VersionName= " ~ versionName );
 									}
 									
 									_versionPos = Util.index( options, "-version=", _versionPos + 9 );
@@ -3312,7 +3306,7 @@ extern(C)
 					}
 					catch( Exception e )
 					{
-						//GLOBAL.IDEMessageDlg.print( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+						IupMessageError( null, toStringz( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 					}
 			}
 		}
@@ -3423,7 +3417,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			//GLOBAL.IDEMessageDlg.print( "CScintilla_caret_cb Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessageError( null, toStringz( "CScintilla_caret_cb Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 		return IUP_DEFAULT;
 	}
@@ -3541,7 +3535,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			//GLOBAL.IDEMessageDlg.print( "CScintilla_zoom_cb Error: " ~ e.toString );
+			IupMessageError( null, toStringz( "CScintilla_zoom_cb Error: " ~ e.toString ) );
 		}
 		
 		return IUP_DEFAULT;

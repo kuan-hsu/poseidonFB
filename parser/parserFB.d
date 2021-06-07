@@ -2260,13 +2260,7 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				/*
-				debug GLOBAL.IDEMessageDlg.print( e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				
-				Stdout( fullPath );
-				Stdout( "\t\t" );
-				Stdout( e.toString ).newline;
-				*/
+				debug IupMessageError( null, toStringz( "parserFB Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 
 			if( head !is null )

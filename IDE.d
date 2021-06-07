@@ -37,7 +37,6 @@ private:
 							}
 							catch( Exception e )
 							{
-								//GLOBAL.IDEMessageDlg.print( Util.trim( s[0..assignIndex] ) ~ "=Error" );
 								debug IupMessage( toStringz( "Language Error!" ), toStringz( Util.trim( s[0..assignIndex] ) ~ "=Error" ) );
 							}
 						}
@@ -160,7 +159,6 @@ public:
 			doc ~= setINILineData( "ColumnEdge", GLOBAL.editorSetting00.ColumnEdge );
 			doc ~= setINILineData( "EolType", GLOBAL.editorSetting00.EolType );
 			doc ~= setINILineData( "ColorOutline", GLOBAL.editorSetting00.ColorOutline );
-			doc ~= setINILineData( "Message", GLOBAL.editorSetting00.Message );
 			doc ~= setINILineData( "BoldKeyword", GLOBAL.editorSetting00.BoldKeyword );
 			doc ~= setINILineData( "BraceMatchHighlight", GLOBAL.editorSetting00.BraceMatchHighlight );
 			doc ~= setINILineData( "MultiSelection", GLOBAL.editorSetting00.MultiSelection );
@@ -574,7 +572,6 @@ public:
 							case "ColumnEdge":				GLOBAL.editorSetting00.ColumnEdge = right;				break;
 							case "EolType":					GLOBAL.editorSetting00.EolType = right;					break;
 							case "ColorOutline":			GLOBAL.editorSetting00.ColorOutline = right;			break;
-							case "Message":					GLOBAL.editorSetting00.Message = right;					break;
 							case "BoldKeyword":				GLOBAL.editorSetting00.BoldKeyword = right;				break;
 							case "BraceMatchHighlight":		GLOBAL.editorSetting00.BraceMatchHighlight = right;		break;
 							case "MultiSelection":			GLOBAL.editorSetting00.MultiSelection = right;			break;

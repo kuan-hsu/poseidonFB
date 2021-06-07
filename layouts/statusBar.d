@@ -200,13 +200,25 @@ class CStatusBar
 					if( s[bpos+5..$] == name )
 					{
 						int fpos = Util.index( s, "%::% " );
-						if( fpos < bpos ) tipString = ( s[0..fpos] ~ "\n" ~ s[fpos+5..bpos] ).dup; else tipString = s[0..bpos].dup;
+						if( fpos < bpos )
+						{
+							tipString = ( s[0..fpos] ~ "\n" ~ s[fpos+5..bpos] ).dup; // With Compiler Path
+							version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( s[0..fpos] );
+						}
+						else
+						{
+							tipString = s[0..bpos].dup;
+						}
 						IupSetAttribute( compileOptionSelection, "TIP", tipString.toCString );
 						IupRefresh( compileOptionSelection );
 						break;
 					}
 				}			
 			}			
+		}
+		else
+		{
+			version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath );
 		}
 	}
 	
@@ -391,7 +403,22 @@ extern(C) // Callback for CBaseDialog
 		char[] focusTitle = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
 		char[] activePrjDir = ProjectAction.getActiveProjectName();
 		
-		if( focusTitle != "<null>" ) GLOBAL.projectManager[activePrjDir].focusOn = focusTitle; else GLOBAL.projectManager[activePrjDir].focusOn = "";
+		if( focusTitle != "<null>" )
+		{
+			if( focusTitle in GLOBAL.projectManager[activePrjDir].focusUnit )
+			{
+				GLOBAL.projectManager[activePrjDir].focusOn = focusTitle;
+				version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.projectManager[activePrjDir].focusUnit[focusTitle].Compiler );
+			}
+			else
+			{
+				GLOBAL.projectManager[activePrjDir].focusOn = "";
+			}
+		}
+		else
+		{
+			GLOBAL.projectManager[activePrjDir].focusOn = "";
+		}
 		IupSetAttribute( ih, "VALUE", "ON" );
 		
 		GLOBAL.statusBar.setPrjName( null, true );
@@ -639,5 +666,5 @@ extern(C) // Callback for CBaseDialog
 		}
 
 		return IUP_DEFAULT;
-	}	
+	}
 }

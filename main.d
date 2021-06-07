@@ -412,7 +412,6 @@ void main( char[][] args )
 	
 	if( GLOBAL.compilerHelpDlg !is null ) delete GLOBAL.compilerHelpDlg;
 	if( GLOBAL.serachInFilesDlg !is null ) delete GLOBAL.serachInFilesDlg;
-	if( GLOBAL.IDEMessageDlg !is null ) delete GLOBAL.IDEMessageDlg;
 	
 	foreach( _plugin; GLOBAL.pluginMnager )
 	{

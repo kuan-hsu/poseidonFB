@@ -347,6 +347,50 @@ version(DIDE)
 		}
 		
 		
+		static char[] getMotherPath_D_MODULE( in CASTnode oriNode, bool bToRoot = false )
+		{
+			char[]		cwdPath;
+			CASTnode	astNode = oriNode;
+			
+			if( bToRoot )
+			{
+				while( astNode.getFather !is null )
+					astNode = astNode.getFather;			
+			}
+			
+			if( astNode.kind & D_MODULE )
+			{
+				int dotCount = Util.count( astNode.name, "." );
+				scope cwdFilePath = new FilePath( astNode.type );
+				
+				cwdPath = cwdFilePath.path();
+				
+				bool bPackageModule;
+				if( cwdFilePath.file == "package.d" )
+					if( astNode.name.length > 6 )
+						if( astNode.name[$-7..$] != "package" ) bPackageModule = true;
+				
+				
+				for( int i = 0; i < dotCount; ++ i )
+				{
+					cwdFilePath.set( cwdPath );
+					cwdPath = cwdFilePath.parent();
+				}
+				
+				if( bPackageModule )
+				{
+					cwdFilePath.set( cwdPath );
+					cwdPath = cwdFilePath.parent();
+				}
+
+				if( cwdPath.length )
+					if( cwdPath[$-1] != '/' ) cwdPath ~= '/';
+			}		
+			
+			return cwdPath;
+		}
+		
+		
 		static CASTnode importComplete( CASTnode AST_Head, int lineNum, int completeCase, char[][] splitWord, int wordIndex )
 		{
 			auto		cSci = actionManager.ScintillaAction.getActiveCScintilla();
@@ -946,7 +990,8 @@ version(DIDE)
 			{
 				importName = Util.replace( importName.dup, '.', '/' );
 				char[] importFullPath = _cwd ~ importName;
-		
+				
+				//IupMessage( "", toStringz( importName ~"\n" ~ importFullPath ) );
 			
 				// Step 1: Relative from the directory of the source file
 				scope  _path = new FilePath( importFullPath ~ ".d" ); // Tail include /
@@ -954,31 +999,50 @@ version(DIDE)
 				_path.suffix(".di" );
 				if( _path.exists() ) return  _path.toString();
 				
+				// Check Package Module
+				_path.set( importFullPath ~ "/package.d" );
+				if( _path.exists ) return _path.toString();
+				
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
 				char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
 				if( prjDir.length )
 				{
-					char[][] includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-					foreach( char[] s; includeDirs )
+					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+					if( GLOBAL.projectManager[prjDir].focusOn.length )
+						if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
+					
+					foreach( char[] s; _includeDirs )
 					{
 						if(s[$-1] != '/' || s[$-1] != '\\' ) s ~= '/';
-						_path.set( s ~ importName ~ ".d" ); // Reset
+						importFullPath = s ~ importName;
+						
+						_path.set( importFullPath ~ ".d" ); // Reset
 						if( _path.exists() ) return _path.toString();
 
 						_path.suffix(".di" );
 						if( _path.exists() ) return _path.toString();
+						
+						// Check Package Module
+						_path.set( importFullPath ~ "/package.d" );
+						if( _path.exists ) return _path.toString();
 					}
 					
 					if( GLOBAL.projectManager[prjDir].compilerPath.length )
 					{
 						foreach( char[] _p; GLOBAL.projectManager[prjDir].defaultImportPaths )
 						{
-							_path.set( _p ~ importName ~ ".d" );
+							importFullPath = _p ~ importName;
+							
+							_path.set( importFullPath ~ ".d" );
 							if( _path.exists() ) return _path.toString();
 
 							_path.suffix(".di" );
 							if( _path.exists() ) return _path.toString();
+
+							// Check Package Module
+							_path.set( importFullPath ~ "/package.d" );
+							if( _path.exists ) return _path.toString();
 						}
 					}
 					else
@@ -986,11 +1050,17 @@ version(DIDE)
 						// Step 2: Default *.ini DFLAGS
 						foreach( char[] _p; GLOBAL.defaultImportPaths )
 						{
-							_path.set( _p ~ importName ~ ".d" );
+							importFullPath = _p ~ importName;
+								
+							_path.set( importFullPath ~ ".d" );
 							if( _path.exists() ) return _path.toString();
 
 							_path.suffix(".di" );
 							if( _path.exists() ) return _path.toString();
+
+							// Check Package Module
+							_path.set( importFullPath ~ "/package.d" );
+							if( _path.exists ) return _path.toString();
 						}
 					}
 				}
@@ -999,12 +1069,17 @@ version(DIDE)
 					// Step 2: Default *.ini DFLAGS
 					foreach( char[] _p; GLOBAL.defaultImportPaths )
 					{
-						_path.set( _p ~ importName ~ ".d" );
+						importFullPath = _p ~ importName;
+						
+						_path.set( importFullPath ~ ".d" );
 						if( _path.exists() ) return _path.toString();
 
 						_path.suffix(".di" );
 						if( _path.exists() ) return _path.toString();
-						
+
+						// Check Package Module
+						_path.set( importFullPath ~ "/package.d" );
+						if( _path.exists ) return _path.toString();
 					}
 				}		
 			}
@@ -2280,8 +2355,7 @@ version(DIDE)
 			}
 			catch( Exception e )
 			{
-				GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-				//debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
+				debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
 			}
 
 			return false;
@@ -2361,12 +2435,14 @@ version(DIDE)
 					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager )
 					{
 						auto headNode = GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )];
+						
+						char[] _cwd = getMotherPath_D_MODULE( headNode );
+						_path1 = new FilePath( _cwd );
+						/*
 						if( headNode.kind & D_MODULE )
 						{
 							int dotCount = Util.count( headNode.name, "." );
 							scope cwdFilePath = new FilePath( headNode.type );
-
-							//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "D_MODULE Name: [" ~ originalNode.name ~ "]"  ) );
 
 							char[] _cwd = cwdFilePath.path();
 							for( int i = 0; i < dotCount; ++ i )
@@ -2380,6 +2456,7 @@ version(DIDE)
 
 							_path1 = new FilePath( _cwd );
 						}
+						*/
 					}
 				}
 
@@ -2390,7 +2467,11 @@ version(DIDE)
 				char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
 				if( prjDir.length )
 				{
-					foreach( char[] s; GLOBAL.projectManager[prjDir].includeDirs )
+					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+					if( GLOBAL.projectManager[prjDir].focusOn.length )
+						if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
+				
+					foreach( char[] s; _includeDirs )
 						_path3 ~= new FilePath( s );
 
 
@@ -2573,6 +2654,8 @@ version(DIDE)
 
 			if( !cwdPath.length )
 			{
+				cwdPath = getMotherPath_D_MODULE( originalNode, true );
+				/+
 				auto headNode = originalNode;
 				while( headNode.getFather !is null )
 					headNode = headNode.getFather;
@@ -2596,6 +2679,7 @@ version(DIDE)
 
 					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", toStringz( "cwdPath Name: [" ~ cwdPath ~ "]"  ) );
 				}
+				+/
 			}
 			else
 			{
@@ -3220,7 +3304,7 @@ version(DIDE)
 					AutoComplete.VersionCondition.length = 0;
 					
 					char[] options, compilers;
-					ExecuterAction.getCustomCompilers( options, compilers );
+					CustomToolAction.getCustomCompilers( options, compilers );
 					char[] activePrjName = ProjectAction.getActiveProjectName;
 					if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
 					if( options.length )
@@ -3248,8 +3332,9 @@ version(DIDE)
 						if( string.length )
 						{
 							// Get cwd
-							char[] cwdPath;
+							char[] cwdPath = getMotherPath_D_MODULE( AST_Head, true );;
 							
+							/+
 							auto headNode = AST_Head;
 							while( headNode.getFather !is null )
 								headNode = headNode.getFather;
@@ -3269,6 +3354,7 @@ version(DIDE)
 								if( cwdPath.length )
 									if( cwdPath[$-1] != '/' ) cwdPath ~= '/';
 							}
+							+/
 							
 							char[] fullPath = checkIncludeExist( string, cwdPath );
 							if( fullPath.length )
@@ -3451,6 +3537,12 @@ version(DIDE)
 							{
 								_list = ( "1st Layer = " ~ ( _type.length ? _type ~ " " : null ) );
 								_list ~= getShowTypeCTORList( firstASTNode );
+							}
+							else if( firstASTNode.kind & D_MODULE )
+							{
+								_list  = ( "1st Layer = " ~ ( _type.length ? _type ~ " " : null ) ~ firstASTNode.name ~ _param );
+								_list ~= "\n";
+								_list ~= ( "File Path = " ~ firstASTNode.type );
 							}
 							else
 							{
@@ -3671,8 +3763,6 @@ version(DIDE)
 		
 			if( calltipContainer !is null )
 			{
-				// debug GLOBAL.IDEMessageDlg.print( "calltipContainer Size: " ~ Integer.toString( calltipContainer.size ) );
-				
 				bool	bContinue;
 				int		commaCount, parenCount, firstOpenParenPosFromDocument;
 				char[]	procedureNameFromList, LineHeadText;
@@ -3921,8 +4011,6 @@ version(DIDE)
 						if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) // CallTip be Showed
 						{
 							int highlightStart, highlightEnd;
-							
-							//GLOBAL.IDEMessageDlg.print( "commaCount: " ~ Integer.toString( commaCount ) );
 							callTipSetHLT( list, commaCount, highlightStart, highlightEnd );
 
 							if( highlightEnd > -1 )
@@ -3948,11 +4036,7 @@ version(DIDE)
 		{
 			int		commaCount, parenCount, firstOpenParenPosFromDocument;
 			char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
-			/*
-			GLOBAL.IDEMessageDlg.print( "procedureName = " ~ procedureNameFromDocument );
-			GLOBAL.IDEMessageDlg.print( "Char = " ~ fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) );
-			GLOBAL.IDEMessageDlg.print( "commaCount = " ~ Integer.toString( commaCount ) );
-			*/
+
 			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
 			{
 				char[] list = calltipContainer.top();

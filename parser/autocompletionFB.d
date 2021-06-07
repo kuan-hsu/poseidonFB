@@ -553,8 +553,11 @@ version(FBIDE)
 					//Stdout( "Project Dir: " ~ prjDir ).newline;
 					if( prjDir in GLOBAL.projectManager )
 					{
-						char[][] includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-						foreach( char[] s; includeDirs )
+						char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
+							
+						foreach( char[] s; _includeDirs )
 						{
 							testPath = s ~ "/" ~ include;
 							
@@ -566,7 +569,39 @@ version(FBIDE)
 				}
 
 				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-				_path.set( Path.normalize( GLOBAL.compilerFullPath ) );
+				// Get Custom Compiler
+				char[] customOpt, customCompiler, fbcFullPath;
+				CustomToolAction.getCustomCompilers( customOpt, customCompiler );
+
+				if( customCompiler.length )
+					_path.set( Path.normalize( customCompiler ) );
+				else
+				{
+					char[] _compilerPath;
+					if( prjDir in GLOBAL.projectManager )
+					{
+						_compilerPath = GLOBAL.projectManager[prjDir].compilerPath;
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _compilerPath = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].Compiler;						
+					}
+					
+					if( _compilerPath.length )
+						_path.set( Path.normalize( _compilerPath ) );
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.toolbar.checkBitButtonStatus == 32 ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
+						}
+						else
+						{
+							_compilerPath = GLOBAL.compilerFullPath;
+						}
+					}
+					
+					_path.set( Path.normalize( _compilerPath ) );
+				}
+
 				version( Windows )
 				{
 					testPath = _path.path() ~ "inc/" ~ include;
@@ -594,7 +629,6 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 			
@@ -2081,13 +2115,50 @@ version(FBIDE)
 				prjDir = actionManager.ProjectAction.fileInProject( ScintillaAction.getActiveCScintilla.getFullPath );
 				if( prjDir.length )
 				{
-					foreach( char[] s; GLOBAL.projectManager[prjDir].includeDirs ) // without \
+					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs;
+					if( GLOBAL.projectManager[prjDir].focusOn.length )
+						if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
+					
+					foreach( char[] s; _includeDirs ) // without \
 						_path3 ~= new FilePath( s ); // Reset
 				}			
 				
 				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-				char[] testPath;
 				FilePath _path4 = new FilePath( Path.normalize( GLOBAL.compilerFullPath ) );
+				
+				// Get Custom Compiler
+				char[] customOpt, customCompiler, fbcFullPath, testPath;
+				CustomToolAction.getCustomCompilers( customOpt, customCompiler );
+
+				if( customCompiler.length )
+					_path4.set( Path.normalize( customCompiler ) );
+				else
+				{
+					char[] _compilerPath;
+					if( prjDir in GLOBAL.projectManager )
+					{
+						_compilerPath = GLOBAL.projectManager[prjDir].compilerPath;
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _compilerPath = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].Compiler;						
+					}
+					
+					if( _compilerPath.length )
+						_path4.set( Path.normalize( _compilerPath ) );
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.toolbar.checkBitButtonStatus == 32 ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
+						}
+						else
+						{
+							_compilerPath = GLOBAL.compilerFullPath;
+						}
+					}
+					
+					_path4.set( Path.normalize( _compilerPath ) );
+				}				
+				
 				version( Windows )
 				{
 					testPath = _path4.path() ~ "inc/";
@@ -2613,7 +2684,6 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "checkIscludeDeclare() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				debug IupMessage( "AutoComplete.checkIscludeDeclare() Error", toStringz( e.toString ) );
 			}
 
@@ -2750,7 +2820,6 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "getWholeWordReverse() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				debug IupMessage( "AutoComplete.getKeyWordReverse() Error", toStringz( e.toString ) );
 				return null;
 			}
@@ -2893,7 +2962,6 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "getWholeWordReverse() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				debug IupMessage( "AutoComplete.getWholeWordReverse() Error", toStringz( e.toString ) );
 				return null;
 			}
@@ -3690,7 +3758,6 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
 				IupMessage( "Bug", toStringz( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
@@ -4420,8 +4487,6 @@ version(FBIDE)
 					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
 					{
 						int highlightStart, highlightEnd;
-						
-						//GLOBAL.IDEMessageDlg.print( "commaCount: " ~ Integer.toString( commaCount ) );
 						callTipSetHLT( list, commaCount, highlightStart, highlightEnd );
 
 						if( highlightEnd > -1 )
@@ -4446,11 +4511,6 @@ version(FBIDE)
 		{
 			int		commaCount, parenCount, firstOpenParenPosFromDocument;
 			char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
-			/*
-			GLOBAL.IDEMessageDlg.print( "procedureName = " ~ procedureNameFromDocument );
-			GLOBAL.IDEMessageDlg.print( "Char = " ~ fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) );
-			GLOBAL.IDEMessageDlg.print( "commaCount = " ~ Integer.toString( commaCount ) );
-			*/
 			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
 			{
 				char[] list = calltipContainer.top();

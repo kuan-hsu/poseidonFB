@@ -21,7 +21,6 @@ name=dialogs/customDlg.d
 name=dialogs/fileDlg.d
 name=dialogs/findFilesDlg.d
 name=dialogs/helpDlg.d
-name=dialogs/idemessageDlg.d
 name=dialogs/manualDlg.d
 name=dialogs/preferenceDlg.d
 name=dialogs/prjPropertyDlg.d

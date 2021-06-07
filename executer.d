@@ -1293,35 +1293,6 @@ struct ExecuterAction
 		return null;
 	}
 	*/
-	static bool getCustomCompilers( ref char[] _opt, ref char[] _compiler )
-	{
-		if( GLOBAL.currentCustomCompilerOption.toDString.length )
-		{
-			foreach( char[] s; GLOBAL.customCompilerOptions )
-			{
-				int bpos = Util.rindex( s, "%::% " );
-				int fpos = Util.index( s, "%::% " );
-				if( bpos < s.length )
-				{
-					if( s[bpos+5..$] == GLOBAL.currentCustomCompilerOption.toDString )
-					{
-						if( fpos < bpos )
-						{
-							_opt = s[fpos+5..bpos];
-							_compiler = s[0..fpos];
-						}
-						else
-						{
-							_opt = s[0..bpos];
-						}
-						return true;
-					}
-				}			
-			}
-		}
-		return false;
-	}
-	
 	
 	static int compile( char[] options = null, char[] args = null, char[] compiler = null, char[] optionDebug = null, bool bRun = false )
 	{
@@ -1340,7 +1311,7 @@ struct ExecuterAction
 		{
 			// Get Custom Compiler
 			char[] customOpt, customCompiler;
-			getCustomCompilers( customOpt, customCompiler );
+			CustomToolAction.getCustomCompilers( customOpt, customCompiler );
 			
 			// Set The Using Compiler Path
 			char[] fbcFullPath = compiler;
@@ -1481,7 +1452,7 @@ struct ExecuterAction
 			
 			// Get Custom Compiler
 			char[] customOpt, customCompiler;
-			getCustomCompilers( customOpt, customCompiler );			
+			CustomToolAction.getCustomCompilers( customOpt, customCompiler );			
 			
 			
 			// Set Multiple Focus Project
@@ -1803,7 +1774,7 @@ struct ExecuterAction
 			
 			// Get Custom Compiler
 			char[] customOpt, customCompiler;
-			getCustomCompilers( customOpt, customCompiler );	
+			CustomToolAction.getCustomCompilers( customOpt, customCompiler );	
 			
 			// Set Multiple Focus Project
 			FocusUnit _focus;
@@ -2121,7 +2092,7 @@ struct ExecuterAction
 		
 		// Get Custom Compiler
 		char[] customOpt, customCompiler;
-		getCustomCompilers( customOpt, customCompiler );
+		CustomToolAction.getCustomCompilers( customOpt, customCompiler );
 		
 		
 		char[] fbcFullPath = compiler;

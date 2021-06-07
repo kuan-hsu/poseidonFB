@@ -502,14 +502,6 @@ void createMenu()
 	IupSetAttribute( fullScreenItem, "IMAGE", "icon_fullscreen" );
 	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
 	
-	Ihandle* ideMessage = IupItem( GLOBAL.languageItems["showidemessage"].toCString, null);
-	IupSetAttribute( ideMessage, "IMAGE", "icon_idemessage" );
-	IupSetCallback( ideMessage, "ACTION", cast(Icallback) function( Ihandle* ih )
-	{
-		if( GLOBAL.IDEMessageDlg !is null )	GLOBAL.IDEMessageDlg.show( IUP_RIGHT, 24 );
-		return IUP_DEFAULT;
-	});
-	
 
 	// Option
 	Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
@@ -686,8 +678,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.450)\nBy Kuan Hsu (Taiwan)\n2021.06.05" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.061)\nBy Kuan Hsu (Taiwan)\n2021.06.01" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.451)\nBy Kuan Hsu (Taiwan)\n2021.06.07" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.063)\nBy Kuan Hsu (Taiwan)\n2021.06.07" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -817,8 +809,6 @@ void createMenu()
 							GLOBAL.menuRotateTabs,
 							IupSeparator(),
 							fullScreenItem,
-							IupSeparator(),
-							ideMessage,
 							null );
 
 	option_menu= IupMenu( 	item_tool,

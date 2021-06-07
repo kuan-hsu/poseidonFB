@@ -74,7 +74,7 @@ struct LiveParser
 		}
 		catch( Exception e )
 		{
-			//GLOBAL.IDEMessageDlg.print( "delChildrenByLineNum() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessageError( null, toStringz( "delChildrenByLineNum() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return null;
@@ -310,7 +310,7 @@ struct LiveParser
 		}
 		catch( Exception e )
 		{
-			//GLOBAL.IDEMessageDlg.print( "parseCurrentLine() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessageError( null, toStringz( "parseCurrentLine() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 	}
 
@@ -511,7 +511,7 @@ struct LiveParser
 			}
 			catch( Exception e )
 			{
-				//GLOBAL.IDEMessageDlg.print( "parseCurrentBlock() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+				IupMessageError( null, toStringz( "parseCurrentBlock() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			}
 		}
 	}

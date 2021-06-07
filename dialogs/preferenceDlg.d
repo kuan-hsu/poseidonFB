@@ -463,10 +463,6 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleColorOutline, "VALUE", toStringz(GLOBAL.editorSetting00.ColorOutline.dup) );
 		IupSetHandle( "toggleColorOutline", toggleColorOutline );		
 
-		Ihandle* toggleMessage = IupToggle( GLOBAL.languageItems["showidemessage"].toCString, null );
-		IupSetAttribute( toggleMessage, "VALUE", toStringz(GLOBAL.editorSetting00.Message.dup) );
-		IupSetHandle( "toggleMessage", toggleMessage );		
-
 		Ihandle* toggleBoldKeyword = IupToggle( GLOBAL.languageItems["boldkeyword"].toCString, null );
 		IupSetAttribute( toggleBoldKeyword, "VALUE", toStringz(GLOBAL.editorSetting00.BoldKeyword.dup) );
 		IupSetHandle( "toggleBoldKeyword", toggleBoldKeyword );
@@ -597,27 +593,23 @@ class CPreferenceDialog : CBaseDialog
 					toggleAutoClose,
 					toggleColorOutline,
 					
-					toggleMessage,
 					toggleBoldKeyword,
-					
 					toggleBraceMatch,
+
 					toggleLoadprev,
-
 					toggleMultiSelection,
-					toggleCurrentWord,
 
+					toggleCurrentWord,
 					toggleMiddleScroll,
+
 					toggleDocStatus,
-					
-					//IupSetAttributes( toggleLoadAtBackThread, "" ),
+					toggleNewDocBOM,
+
 					toggleAutoKBLayout,
 					toggleQBCase,
 
-					toggleNewDocBOM,
 					toggleUseManual,
-					
 					toggleSaveAllModified,
-					IupFill,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -653,24 +645,20 @@ class CPreferenceDialog : CBaseDialog
 					toggleAutoClose,
 					toggleColorOutline,
 					
-					toggleMessage,
 					toggleBoldKeyword,
-					
 					toggleBraceMatch,
+
 					toggleLoadprev,
-
 					toggleMultiSelection,
-					toggleCurrentWord,
 
+					toggleCurrentWord,
 					toggleMiddleScroll,
+
 					toggleDocStatus,
-					
-					//toggleLoadAtBackThread,
 					toggleQBCase,
+
 					toggleUseManual,
-					
 					toggleSaveAllModified,
-					IupFill,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -707,23 +695,22 @@ class CPreferenceDialog : CBaseDialog
 					toggleAutoClose,
 					
 					toggleColorOutline,
-					toggleMessage,
-
 					toggleBoldKeyword,
-					toggleLoadprev,
-					
-					toggleBraceMatch,
-					toggleMultiSelection,
 
+					toggleLoadprev,
+					toggleBraceMatch,
+
+					toggleMultiSelection,
 					toggleCurrentWord,
+
 					toggleMiddleScroll,
-					
 					toggleDocStatus,
+
 					toggleAutoKBLayout,
-					
 					toggleNewDocBOM,
+
 					toggleSaveAllModified,
-					//toggleLoadAtBackThread,
+					IupFill,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -757,21 +744,19 @@ class CPreferenceDialog : CBaseDialog
 					toggleAutoClose,
 					
 					toggleColorOutline,
-					toggleMessage,
-
 					toggleBoldKeyword,
-					toggleLoadprev,
-					
-					toggleBraceMatch,
-					toggleMultiSelection,
 
+					toggleLoadprev,
+					toggleBraceMatch,
+
+					toggleMultiSelection,
 					toggleCurrentWord,
+
 					toggleMiddleScroll,
-					
 					toggleDocStatus,
+
 					toggleSaveAllModified,
-					//toggleAutoKBLayout,
-					//toggleLoadAtBackThread,
+					IupFill.
 					
 					hBoxTab,
 					hBoxColumn,
@@ -2046,7 +2031,6 @@ extern(C) // Callback for CPreferenceDialog
 			version(FBIDE)	GLOBAL.editorSetting00.AutoEnd					= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoEnd" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.AutoClose				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoClose" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.ColorOutline				= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorOutline" ), "VALUE" )).dup;
-			GLOBAL.editorSetting00.Message					= fromStringz(IupGetAttribute( IupGetHandle( "toggleMessage" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.BoldKeyword				= fromStringz(IupGetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE" )).dup;
 				if( IupGetHandle( "menuBoldKeyword" ) != null ) IupSetAttribute( IupGetHandle( "menuBoldKeyword" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE" ) );
 			GLOBAL.editorSetting00.BraceMatchHighlight		= fromStringz(IupGetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE" )).dup;
