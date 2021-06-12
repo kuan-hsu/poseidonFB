@@ -278,8 +278,8 @@ class CToolBar
 		{
 			guiButton = IupToggle( null, "GUI" );
 			IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,NAME=POSEIDON_TOOLBAR_Gui" );
-			IupSetAttribute( guiButton, "VALUE", toStringz( GLOBAL.editorSetting00.GUI ) );
 			IupSetAttribute( guiButton, "TIP", "Console / GUI" );
+			if( GLOBAL.editorSetting00.GUI == "OFF" ) IupSetAttribute( guiButton, "VALUE", "OFF" ); else IupSetAttribute( guiButton, "VALUE", "ON" );
 			IupSetCallback( guiButton, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
 				if( GLOBAL.editorSetting00.GUI == "ON" ) GLOBAL.editorSetting00.GUI = "OFF"; else GLOBAL.editorSetting00.GUI = "ON";
@@ -288,25 +288,11 @@ class CToolBar
 			
 			bitButton = IupToggle( null, "bit" );
 			IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,NAME=POSEIDON_TOOLBAR_Bit" );
-			IupSetAttribute( bitButton, "VALUE", toStringz( GLOBAL.editorSetting00.Bit64 ) );
-			/*
-			else
-			{
-				IupSetAttribute( bitButton, "ACTIVE", "NO" );
-				IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_64,IMPRESS=icon_64,NAME=POSEIDON_TOOLBAR_Bit" );
-				GLOBAL.editorSetting00.Bit64 = "ON";
-			}
-			*/
 			IupSetAttribute( bitButton, "TIP", "32 / 64 bit" );
+			if( GLOBAL.editorSetting00.Bit64 == "OFF" ) IupSetAttribute( bitButton, "VALUE", "OFF" ); else IupSetAttribute( bitButton, "VALUE", "ON" );
 			IupSetCallback( bitButton, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
 				if( GLOBAL.editorSetting00.Bit64 == "ON" ) GLOBAL.editorSetting00.Bit64 = "OFF"; else GLOBAL.editorSetting00.Bit64 = "ON";
-				/*
-				else
-				{
-					GLOBAL.editorSetting00.Bit64 = "ON";
-				}
-				*/
 				return IUP_DEFAULT;
 			});
 		}
@@ -377,14 +363,6 @@ class CToolBar
 		return false;
 	}
 	
-	int checkBitButtonStatus()
-	{
-		version(linux) return 32;
-		
-		if( fromStringz( IupGetAttribute( bitButton, "VALUE" ) ) == "ON" ) return 64;
-		return 32;
-	}
-
 	void showList( bool status )
 	{
 		if( status ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );

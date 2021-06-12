@@ -592,7 +592,7 @@ version(FBIDE)
 					{
 						version(Windows)
 						{
-							if( GLOBAL.toolbar.checkBitButtonStatus == 32 ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
+							if( GLOBAL.editorSetting00.Bit64 == "OFF" ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
 						}
 						else
 						{
@@ -2159,7 +2159,7 @@ version(FBIDE)
 					{
 						version(Windows)
 						{
-							if( GLOBAL.toolbar.checkBitButtonStatus == 32 ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
+							if( GLOBAL.editorSetting00.Bit64 == "OFF" ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
 						}
 						else
 						{

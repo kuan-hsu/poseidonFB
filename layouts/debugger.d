@@ -2207,7 +2207,7 @@ class DebugThread //: Thread
 			
 			version(Windows)
 			{
-				b64Bit = GLOBAL.toolbar.checkBitButtonStatus() == 32 ? false : true;
+				b64Bit = GLOBAL.editorSetting00.Bit64 == "OFF" ? false : true;
 				debuggerExe = !b64Bit ? GLOBAL.debuggerFullPath : GLOBAL.x64debuggerFullPath;
 				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
 				{

@@ -657,7 +657,7 @@ struct ExecuterAction
 									}
 								}
 								
-								if( GLOBAL.toolbar.checkBitButtonStatus != 32 || Util.index( focus.Option, "-m64" ) < focus.Option.length )
+								if( GLOBAL.editorSetting00.Bit64 == "ON" || Util.index( focus.Option, "-m64" ) < focus.Option.length )
 								{
 									txtLibDirs ~= ( " -L/LIBPATH:\"" ~ s ~ "\"" );
 								}
@@ -741,7 +741,7 @@ struct ExecuterAction
 				}
 				version(DIDE)
 				{
-					command = "\"" ~ compilePath ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtLibDirs ~ ( focus.Option.length ? " " ~
+					command = "\"" ~ compilePath ~ "\"" ~ executeName ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? " -m64" : "" ) ~ txtSources ~ txtLibDirs ~ ( focus.Option.length ? " " ~
 								focus.Option : "" ) ~ ( extraOptions.length ? " " ~ extraOptions : "" );
 				}
 				
@@ -1316,7 +1316,7 @@ struct ExecuterAction
 			// Set The Using Compiler Path
 			char[] fbcFullPath = compiler;
 			
-			if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+			if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
 			
 			version(Windows)
 			{
@@ -1363,7 +1363,7 @@ struct ExecuterAction
 					runOption = "-run ";
 					options = Util.substitute( options, "-run", "" );
 					
-					options = ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ Util.trim( options );
+					options = ( GLOBAL.editorSetting00.Bit64 == "ON" ? "-m64 " : "" ) ~ Util.trim( options );
 					options = Util.trim( options ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 					if( GLOBAL.toolbar.checkGuiButtonStatus ) options = Util.trim( options ) ~ " -L/SUBSYSTEM:WINDOWS";
 					options = Util.trim( options ) ~ " -run";
@@ -1381,7 +1381,7 @@ struct ExecuterAction
 					return false;
 				}
 				
-				command = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ runOption ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+				command = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? "-m64 " : "" ) ~ runOption ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 			}
 		}
 		else
@@ -1471,7 +1471,7 @@ struct ExecuterAction
 			if( !fbcFullPath.length ) fbcFullPath = customCompiler;
 			if( !fbcFullPath.length )
 			{
-				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
 			}
 			
 			version(Windows)
@@ -1684,7 +1684,7 @@ struct ExecuterAction
 						break;
 					default:
 						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? ".exe" : "" ) ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.editorSetting00.Bit64 == "OFF" ? ".exe" : "" ) ~ "\"";
 				}
 			}
 			else
@@ -1720,7 +1720,7 @@ struct ExecuterAction
 				version(DIDE)
 				{
 					//txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option: "" ) ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
-					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
+					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? " -m64" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
 				}
 			}
 			
@@ -1792,7 +1792,7 @@ struct ExecuterAction
 			if( !fbcFullPath.length ) fbcFullPath = customCompiler;
 			if( !fbcFullPath.length )
 			{
-				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
 			}
 
 			version(Windows)
@@ -1964,7 +1964,7 @@ struct ExecuterAction
 							}
 							
 							//if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
-							if( GLOBAL.toolbar.checkBitButtonStatus != 32 || Util.index( _focus.Option, "-m64" ) < _focus.Option.length )
+							if( GLOBAL.editorSetting00.Bit64 == "ON" || Util.index( _focus.Option, "-m64" ) < _focus.Option.length )
 							{
 								txtLibDirs = txtLibDirs ~ " -L/LIBPATH:\"" ~ s ~ "\"";
 							}
@@ -1998,7 +1998,7 @@ struct ExecuterAction
 						break;
 					default:
 						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? ".exe" : "" ) ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? ".exe" : "" ) ~ "\"";
 				}
 			}
 			else
@@ -2040,7 +2040,7 @@ struct ExecuterAction
 				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( _focus.Option.length ? " " ~
 							_focus.Option : "" ) ~ ( options.length ? " " ~ options : "" );
 				*/
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" );
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" );
 			}
 			
 			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
@@ -2096,7 +2096,7 @@ struct ExecuterAction
 		
 		
 		char[] fbcFullPath = compiler;
-		if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.toolbar.checkBitButtonStatus == 32 ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+		if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
 		version(Windows)
 		{
 			foreach( char[] s; GLOBAL.EnvironmentVars.keys )
@@ -2162,7 +2162,7 @@ struct ExecuterAction
 			}
 			version(DIDE)
 			{
-				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? "-m64 " : "" ) ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
+				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? "-m64 " : "" ) ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
 				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:WINDOWS";
 			}
 			
