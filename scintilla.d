@@ -2918,6 +2918,23 @@ extern(C)
 					
 					return IUP_IGNORE;
 				}
+				else if( c == 536936291 || c == 526870979 ) // Ctrl + Ins / Ctrl + C
+				{
+					char[] showtype = AutoComplete.getShowTypeContent();
+					if( showtype.length )
+					{
+						int lineNumber = ScintillaAction.getCurrentLine( ih ) - 2;
+						if( lineNumber > -1 )
+						{
+							IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
+							IupSetAttributeId( ih, "ANNOTATIONTEXT", lineNumber, toStringz( showtype ) );
+							IupSetIntId( ih, "ANNOTATIONSTYLE", lineNumber, 41 );
+							IupSetAttribute( ih, "ANNOTATIONVISIBLE", "BOXED" );
+							AutoComplete.clearShowTypeContent(); // Clear ShowType Clipboard
+							return IUP_IGNORE;
+						}
+					}
+				}
 			}
 			
 			// TAB || SHIFT+TAB
@@ -2992,6 +3009,8 @@ extern(C)
 	private int CScintilla_action_cb( Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
 		if( AutoComplete.showListThread !is null ) return IUP_DEFAULT;
+		
+		AutoComplete.clearShowTypeContent(); // Clear ShowType Clipboard
 		
 		// Modified LineNumber Margin Width
 		if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )

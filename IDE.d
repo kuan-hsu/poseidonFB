@@ -289,6 +289,10 @@ public:
 			doc ~= setINILineData( "calltipFore", GLOBAL.editColor.callTip_Fore.toDString );
 			doc ~= setINILineData( "calltipBack", GLOBAL.editColor.callTip_Back.toDString );
 			doc ~= setINILineData( "calltipHLT", GLOBAL.editColor.callTip_HLT.toDString );
+			doc ~= setINILineData( "showtypeFore", GLOBAL.editColor.showType_Fore.toDString );
+			doc ~= setINILineData( "showtypeBack", GLOBAL.editColor.showType_Back.toDString );
+			doc ~= setINILineData( "showtypeHLT", GLOBAL.editColor.showType_HLT.toDString );
+
 			doc ~= setINILineData( "functionTitle", GLOBAL.editColor.functionTitle.toDString );
 			doc ~= setINILineData( "projectHLT", GLOBAL.editColor.project_HLT.toDString );
 			doc ~= setINILineData( "outlineHLT", GLOBAL.editColor.outline_HLT.toDString );
@@ -697,6 +701,10 @@ public:
 							case "calltipFore":				GLOBAL.editColor.callTip_Fore = right;					break;
 							case "calltipBack":				GLOBAL.editColor.callTip_Back = right;					break;
 							case "calltipHLT":				GLOBAL.editColor.callTip_HLT = right;					break;
+
+							case "showtypepFore":			GLOBAL.editColor.showType_Fore = right;					break;
+							case "showtypeBack":			GLOBAL.editColor.showType_Back = right;					break;
+							case "showtypeHLT":				GLOBAL.editColor.showType_HLT = right;					break;
 							
 							case "functionTitle":			GLOBAL.editColor.functionTitle = right;					break;
 							

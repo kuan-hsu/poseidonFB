@@ -48,7 +48,8 @@ version(FBIDE)
 		static CASTnode[char[]]				includesMarkContainer;
 		static bool[char[]]					noIncludeNodeContainer;
 			
-		static int LEVEL;
+		static int 							LEVEL;
+		static char[]						showTypeContent;
 
 		class CShowListThread : Thread
 		{
@@ -1894,6 +1895,16 @@ version(FBIDE)
 			return true;
 		}
 		
+		static char[] getShowTypeContent()
+		{
+			return showTypeContent;
+		}
+
+		static void clearShowTypeContent()
+		{
+			showTypeContent = "";
+		}
+		
 		static void cleanIncludeContainer()
 		{
 			foreach( char[] key; includesMarkContainer.keys )
@@ -3169,6 +3180,7 @@ version(FBIDE)
 		static void toDefintionAndType( int TYPE, int currentPos = -1 )
 		{
 			if( GLOBAL.enableParser != "ON" ) return;
+			clearShowTypeContent();
 			
 			try
 			{
@@ -3535,7 +3547,8 @@ version(FBIDE)
 							
 							if( AST_Head is null ) return;
 						}
-
+						
+						/+
 						if( TYPE & 3 )
 						{
 							if( AST_Head.kind & ( B_VARIABLE | B_PARAM ) )// | B_FUNCTION ) )
@@ -3555,10 +3568,22 @@ version(FBIDE)
 								}
 							}
 						}
+						+/
+						if( i < splitWord.length - 1 )
+						{
+							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+							{
+								AST_Head = getType( AST_Head, lineNum );
+								if( AST_Head is null ) return;
+							}
+						}
+						
 					}
 					
 					if( TYPE == 0 )
 					{
+						if( AST_Head is null ) return;
+						
 						char[]	_param, _type;
 						getTypeAndParameter( AST_Head, _type, _param );
 						if( GLOBAL.showTypeWithParams != "ON" ) _param = "";
@@ -3577,18 +3602,56 @@ version(FBIDE)
 							default:
 						}
 						
-						IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
-						IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showType_Fore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showType_Back.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
 
-						char[] _list = ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
+						auto _rNode = ParserAction.getRoot( AST_Head );
+
+						char[] _list;
+						if( _rNode.name == cSci.getFullPath )
+							_list = ( "@ ThisFile ...[" ~ Integer.toString( AST_Head.lineNumber ) ~ "]\n" );
+						else
+							_list = ( "@ \"" ~ _rNode.name ~ "\"" ~ " ...[" ~ Integer.toString( AST_Head.lineNumber ) ~ "]\n" );
+
+						int filePathPos = _list.length;
+						
+						switch( AST_Head.kind )
+						{
+							case B_SUB:
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) ) _list ~= ( "MEMBER_SUBROUTINE: < " ~ AST_Head.getFather.name ~ " >\n" ); else _list ~= "SUBROUTINE:\n";
+								break;
+							case B_FUNCTION:
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) ) _list ~= ( "MEMBER_FUNCTION: < " ~ AST_Head.getFather.name ~ " >\n" ); else _list ~= "FUNCTION:\n";
+								break;
+							case B_VARIABLE:
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) ) _list ~= ( "MEMBER_VARIABLE: < " ~ AST_Head.getFather.name ~ " >\n" ); else _list ~= "VARIABLE:\n";
+								break;
+								
+							case B_PROPERTY: 	_list ~= ( "PROPERTY: < " ~ AST_Head.getFather.name ~ " >\n" );		break;
+							case B_OPERATOR: 	_list ~= ( "OPERATOR: < " ~ AST_Head.getFather.name ~ " >\n" );		break;
+							case B_PARAM:	 	_list ~= "PARAMETER:\n";	break;
+							case B_CTOR:	 	_list ~= "CTOR:\n";			break;
+							case B_DTOR:	 	_list ~= "DTOR:\n";			break;
+							default:
+						}						
+						
+						
+						_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
+						//char[] _list = ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
 						
 						if( AST_Head.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 						{
 							foreach( CASTnode _child; AST_Head.getChildren() )
 								if( _child.kind & B_CTOR ) _list ~= ( "\n" ~ _child.name ~ _child.type );
 						}
-						
+
+						showTypeContent = _list;
+						cleanCalltipContainer(); // Clear Call Tip Container
+						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 1, 0 ); // SCI_CALLTIPSETPOSITION 2213
 						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
+						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 0, 0 ); // SCI_CALLTIPSETPOSITION 2213
+						IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, filePathPos ); // SCI_CALLTIPSETHLT 2204
+						IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showType_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 					}
 					else
 					{
@@ -4492,6 +4555,7 @@ version(FBIDE)
 						if( highlightEnd > -1 )
 						{
 							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
@@ -4527,6 +4591,7 @@ version(FBIDE)
 						if( highlightEnd > -1 )
 						{
 							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
@@ -4613,7 +4678,11 @@ version(FBIDE)
 							
 							int highlightStart, highlightEnd;
 							AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
-							if( highlightEnd > -1 ) IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							if( highlightEnd > -1 ) 
+							{
+								IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+								IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							}
 							
 							AutoComplete.noneListProcedureName = "";
 							

@@ -240,11 +240,11 @@ int convertIupColor( char[] color )
 		if( color[0] == '#' )
 		{
 			color = "0x" ~ color[1..$];
-			result = Integer.atoi( color );
+			result = Integer.toInt( color );
 		}
 		else if( color[0..2] == "0x" )
 		{
-			result = Integer.atoi( color );
+			result = Integer.toInt( color );
 		}
 		else
 		{

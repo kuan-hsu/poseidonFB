@@ -38,7 +38,7 @@ struct EditorColorUint
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
 	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
 	IupString[4]	maker;
-	IupString		callTip_Fore, callTip_Back, callTip_HLT;
+	IupString		callTip_Fore, callTip_Back, callTip_HLT, showType_Fore, showType_Back, showType_HLT;
 	IupString		functionTitle;
 	IupString		project_HLT, outline_HLT;
 }
@@ -320,6 +320,10 @@ struct GLOBAL
 		GLOBAL.editColor.callTip_Fore = new IupString( cast(char[]) "0 0 255" );
 		GLOBAL.editColor.callTip_Back = new IupString( cast(char[]) "234 248 192" );
 		GLOBAL.editColor.callTip_HLT = new IupString( cast(char[]) "202 0 0" );
+
+		GLOBAL.editColor.showType_Fore = new IupString( cast(char[]) "0xff0000" );
+		GLOBAL.editColor.showType_Back = new IupString( cast(char[]) "0xaaffff" );
+		GLOBAL.editColor.showType_HLT = new IupString( cast(char[]) "0x008000" );
 		
 		GLOBAL.editColor.functionTitle = new IupString( cast(char[]) "0 0 0" );
 		

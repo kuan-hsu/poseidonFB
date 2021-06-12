@@ -26,7 +26,8 @@ version(DIDE)
 		static CASTnode[char[]]		includesMarkContainer;
 		static char[][]				VersionCondition;
 		
-
+		static char[]				showTypeContent;
+		
 		
 		class CShowListThread : Thread
 		{
@@ -2300,6 +2301,16 @@ version(DIDE)
 			return true;
 		}
 		
+		static char[] getShowTypeContent()
+		{
+			return showTypeContent;
+		}
+
+		static void clearShowTypeContent()
+		{
+			showTypeContent = "";
+		}		
+		
 		static bool showCallTipThreadIsRunning()
 		{
 			if( showCallTipThread is null ) return false;
@@ -2321,7 +2332,7 @@ version(DIDE)
 		
 		static void cleanCalltipContainer()
 		{
-			if( calltipContainer is null ) calltipContainer.clear();
+			calltipContainer.clear();
 		}		
 
 		static bool checkIsclmportDeclare( Ihandle* iupSci, int pos = -1 )
@@ -3509,6 +3520,7 @@ version(DIDE)
 					{
 						
 						char[]	_type, _param;
+						int		topLayerStartPos = -1;
 
 						if( firstASTNode !is null )
 						{
@@ -3542,6 +3554,7 @@ version(DIDE)
 							{
 								_list  = ( "1st Layer = " ~ ( _type.length ? _type ~ " " : null ) ~ firstASTNode.name ~ _param );
 								_list ~= "\n";
+								topLayerStartPos = _list.length;
 								_list ~= ( "File Path = " ~ firstASTNode.type );
 							}
 							else
@@ -3550,7 +3563,7 @@ version(DIDE)
 							}
 						}
 
-						int topLayerStartPos = -1;
+						
 						if( finalASTNode !is null )
 						{
 							ParserAction.getSplitDataFromNodeTypeString( finalASTNode.type, _type, _param );
@@ -3593,15 +3606,18 @@ version(DIDE)
 						
 						if( _list.length )
 						{
-							IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
-							IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x99FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+							showTypeContent = _list;
+							cleanCalltipContainer(); // Clear Call Tip Container						
+						
+							IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showType_Fore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showType_Back.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
 							IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
 
 							
 							if( topLayerStartPos > -1 )
 							{
 								IupScintillaSendMessage( cSci.getIupScintilla, 2204, topLayerStartPos, _list.length ); // SCI_CALLTIPSETHLT 2204
-								IupScintillaSendMessage( cSci.getIupScintilla, 2207, 0x845322, 0 ); // SCI_CALLTIPSETFOREHLT 2207
+								IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showType_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							}
 							else
 							{

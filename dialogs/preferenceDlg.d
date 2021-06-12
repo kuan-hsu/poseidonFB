@@ -756,7 +756,7 @@ class CPreferenceDialog : CBaseDialog
 					toggleDocStatus,
 
 					toggleSaveAllModified,
-					IupFill.
+					IupFill,
 					
 					hBoxTab,
 					hBoxColumn,
