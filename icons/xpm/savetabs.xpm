@@ -1,0 +1,31 @@
+/* XPM */
+static char *savetabs_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c None",
+". c #d4d8dd",
+"# c #849a9c",
+"a c #6482ac",
+"b c #b4bec4",
+"c c #fcfefc",
+"d c #54668c",
+"e c #84aef4",
+/* pixels */
+"````````````````",
+"``.##abbbba##.``",
+"``#cbccccccbc#``",
+"``#c#cccccc#c#``",
+"``#c#......#c#``",
+"``#.#......#.#``",
+"``#.b######b.#``",
+"``#..........#``",
+"``a...aaaa...a``",
+"``a..accc.a..a``",
+"``a..a...ba..a``",
+"``a..a..a.a..a``",
+"``baaaaaaaaaaa``",
+"`d````````````d`",
+"edded``ede`dedde",
+"`d````````````d`"
+};

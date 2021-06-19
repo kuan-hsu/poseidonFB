@@ -678,8 +678,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.453)\nBy Kuan Hsu (Taiwan)\n2021.06.13" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.064)\nBy Kuan Hsu (Taiwan)\n2021.06.12" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.454)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.065)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -1007,6 +1007,12 @@ extern(C)
 		actionManager.ScintillaAction.saveAs( actionManager.ScintillaAction.getActiveCScintilla(), true, true, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
 		return IUP_DEFAULT;
 	}		
+
+	int saveTabs_cb( Ihandle* ih )
+	{
+		actionManager.ScintillaAction.saveTabs();
+		return IUP_DEFAULT;
+	}
 
 	int saveAllFile_cb( Ihandle* ih )
 	{

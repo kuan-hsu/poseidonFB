@@ -517,6 +517,7 @@ struct GLOBAL
 			GLOBAL.languageItems["open"] = new IupString( cast(char[]) "Open" );
 			GLOBAL.languageItems["save"] = new IupString( cast(char[]) "Save" );
 			GLOBAL.languageItems["saveas"] = new IupString( cast(char[]) "Save As" );
+			GLOBAL.languageItems["savetabs"] = new IupString( cast(char[]) "Save Tab Files" );
 			GLOBAL.languageItems["saveall"] = new IupString( cast(char[]) "Save All" );
 			GLOBAL.languageItems["close"] = new IupString( cast(char[]) "Close" );
 			GLOBAL.languageItems["closeall"] = new IupString( cast(char[]) "Close All" );

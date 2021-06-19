@@ -371,7 +371,7 @@ version(FBIDE)
 				else
 				{
 					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
 
 					if( resultIncludeNodes.length ) resultNode = resultIncludeNodes[0];
 				}

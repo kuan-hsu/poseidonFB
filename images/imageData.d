@@ -121,6 +121,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_marknext", XPM.getIUPimage( "icons/xpm/mark_next.xpm" ) ); // IupSetHandle("icon_marknext", load_image_mark_next());
 	IupSetHandle( "icon_uparrow", XPM.getIUPimage( "icons/xpm/up.xpm" ) ); // IupSetHandle("icon_uparrow", load_image_prev_nav());
 	IupSetHandle( "icon_saveas", XPM.getIUPimage( "icons/xpm/saveas.xpm" ) ); // IupSetHandle("icon_saveas", load_image_saveas());
+	IupSetHandle( "icon_savetabs", XPM.getIUPimage( "icons/xpm/savetabs.xpm" ) ); // IupSetHandle("icon_saveas", load_image_saveas());
 	version(FBIDE) IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/bas.xpm" ) ); else IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/d.xpm" ) );
 	IupSetHandle( "icon_txt", XPM.getIUPimage( "icons/xpm/txt.xpm" ) ); // IupSetHandle("icon_txt", load_image_new_untitled_text_file());
 	IupSetHandle( "icon_build", XPM.getIUPimage( "icons/xpm/build.xpm" ) ); // IupSetHandle( "icon_rebuild", load_image_rebuild());

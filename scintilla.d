@@ -1107,11 +1107,17 @@ extern(C)
 
 	private int savePoint_cb( Ihandle *ih, int status )
 	{
-		char[]	_title;
-		int 	pos = IupGetChildPos( GLOBAL.activeDocumentTabs, ih );
+		char[]		_title;
+		Ihandle*	_documentTabs = GLOBAL.documentTabs;
+		int 		pos = IupGetChildPos( GLOBAL.documentTabs, ih );
 		
-		pos = IupGetChildPos( GLOBAL.activeDocumentTabs, ih );
-		if( pos > -1 ) _title = fromStringz( IupGetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos ) ).dup; else return IUP_CONTINUE;
+		if( pos < 0 )
+		{
+			pos = IupGetChildPos( GLOBAL.documentTabs_Sub, ih );
+			_documentTabs = GLOBAL.documentTabs_Sub;
+		}
+
+		if( pos > -1 ) _title = fromStringz( IupGetAttributeId( _documentTabs, "TABTITLE", pos ) ).dup; else return IUP_CONTINUE;
 		
 		if( status == 0 )
 		{
@@ -1125,7 +1131,7 @@ extern(C)
 					{
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;
-						IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos, titleHandle.toCString );
+						IupSetAttributeId( _documentTabs, "TABTITLE", pos, titleHandle.toCString );
 						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "NO" ) IupSetAttribute( ih, "SAVEDSTATE", "YES" );
 					}
 					else
@@ -1148,7 +1154,7 @@ extern(C)
 					{
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;							
-						IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos, titleHandle.toCString );
+						IupSetAttributeId( _documentTabs, "TABTITLE", pos, titleHandle.toCString );
 						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "YES" ) IupSetAttribute( ih, "SAVEDSTATE", "NO" );
 					}
 					else

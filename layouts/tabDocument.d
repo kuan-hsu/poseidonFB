@@ -109,7 +109,11 @@ extern(C)
 		Ihandle* _save = IupItem( GLOBAL.languageItems["save"].toCString, null );
 		IupSetAttribute( _save, "IMAGE", "icon_save" );
 		IupSetCallback( _save, "ACTION", cast(Icallback) &menu.saveFile_cb ); // from menu.d
-
+		
+		Ihandle* _savetabs = IupItem( GLOBAL.languageItems["savetabs"].toCString, null );
+		IupSetAttribute( _savetabs, "IMAGE", "icon_savetabs" );
+		IupSetCallback( _savetabs, "ACTION", cast(Icallback) &menu.saveTabs_cb ); // from menu.d
+		
 		Ihandle* _close = IupItem( GLOBAL.languageItems["close"].toCString, null );
 		IupSetAttribute( _close, "IMAGE", "icon_delete" );
 		IupSetCallback( _close, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -294,6 +298,7 @@ extern(C)
 								_closeall,
 								IupSeparator(),
 								_save,
+								_savetabs,
 								_explorer,
 								IupSeparator(),
 								_moveDocument,
@@ -308,6 +313,7 @@ extern(C)
 								_closeall,
 								IupSeparator(),
 								_save,
+								_savetabs,
 								_explorer,
 								IupSeparator(),
 								_moveDocument,
@@ -323,6 +329,7 @@ extern(C)
 								_closeall,
 								IupSeparator(),
 								_save,
+								_savetabs,
 								_explorer,
 								null
 								);

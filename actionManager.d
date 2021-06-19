@@ -1504,12 +1504,12 @@ public:
 		}
 
 		return true;
-	}	
-
-	static bool saveAllFile()
+	}
+	
+	static bool saveTabs()
 	{
 		CScintilla[] NoNameGroup;
-		
+
 		for( int i = 0; i < IupGetChildCount( GLOBAL.activeDocumentTabs ); i++ )
 		{
 			Ihandle* _child = IupGetChild( GLOBAL.activeDocumentTabs, i );
@@ -1534,7 +1534,74 @@ public:
 				}
 			}
 		}
+		
+		if( NoNameGroup.length )
+		{
+			foreach( CScintilla _sci; NoNameGroup )
+			{
+				IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) _sci.getIupScintilla );
+				int oldPos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
+				saveAs( _sci, true, true, oldPos );
+			}
+		}
 
+		return true;
+	}
+	
+
+	static bool saveAllFile()
+	{
+		CScintilla[] NoNameGroup;
+		
+		
+		foreach( CScintilla _cSci; GLOBAL.scintillaManager )
+		{
+			if( _cSci !is null )
+			{
+				if( ScintillaAction.getModifyByTitle( _cSci ) )
+				{
+					if( _cSci.getFullPath.length >= 7 )
+					{
+						if( _cSci.getFullPath[0..7] == "NONAME#" )
+						{
+							NoNameGroup ~= _cSci;
+							continue;
+						}
+					}
+					
+					_cSci.saveFile();
+					GLOBAL.outlineTree.refresh( _cSci );
+				}
+			}
+		}
+		
+		/*
+		for( int i = 0; i < IupGetChildCount( GLOBAL.activeDocumentTabs ); i++ )
+		{
+			Ihandle* _child = IupGetChild( GLOBAL.activeDocumentTabs, i );
+			
+			auto _cSci = ScintillaAction.getCScintilla( _child );
+			
+			if( _cSci !is null )
+			{
+				if( ScintillaAction.getModifyByTitle( _cSci ) )
+				{
+					if( _cSci.getFullPath.length >= 7 )
+					{
+						if( _cSci.getFullPath[0..7] == "NONAME#" )
+						{
+							NoNameGroup ~= _cSci;
+							continue;
+						}
+					}
+					
+					_cSci.saveFile();
+					GLOBAL.outlineTree.refresh( _cSci );
+				}
+			}
+		}
+		*/
+		
 		if( NoNameGroup.length )
 		{
 			foreach( CScintilla _sci; NoNameGroup )

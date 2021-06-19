@@ -3,6 +3,7 @@
 	open=Open
 	save=Save
 	saveas=Save As
+	savetabs=Save Tab Files
 	saveall=Save All
 	close=Close
 	closeall=Close All
