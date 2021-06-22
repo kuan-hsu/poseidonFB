@@ -163,9 +163,9 @@ extern(C) // Callback for CSingleTextDialog
 			case "nexttab":						pos = 4;	break;
 			case "prevtab":						pos = 5;	break;
 			
-			case "cut":							pos = 6;	break;
-			case "copy":						pos = 7;	break;
-			case "paste":						pos = 8;	break;
+			case "dupdown":						pos = 6;	break;
+			case "dupup":						pos = 7;	break;
+			case "delline":						pos = 8;	break;
 			case "find":						pos = 9;	break;
 			case "findinfile":					pos = 10;	break;
 			case "findnext":					pos = 11;	break;
@@ -259,9 +259,9 @@ extern(C) // Callback for CSingleTextDialog
 			case "nexttab":						pos = 4;	break;
 			case "prevtab":						pos = 5;	break;
 			
-			case "cut":							pos = 6;	break;
-			case "copy":						pos = 7;	break;
-			case "paste":						pos = 8;	break;
+			case "dupdown":						pos = 6;	break;
+			case "dupup":						pos = 7;	break;
+			case "delline":						pos = 8;	break;
 			case "find":						pos = 9;	break;
 			case "findinfile":					pos = 10;	break;
 			case "findnext":					pos = 11;	break;

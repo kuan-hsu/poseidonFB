@@ -86,7 +86,7 @@ public:
 		IupSetAttribute( outputPanel, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
 		IupSetAttribute( outputPanel, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
 		*/
-		
+		int dummy;
 		version(FBIDE)
 		{
 			IupSetAttribute( outputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
@@ -105,21 +105,21 @@ public:
 			*/
 			if( alpha == 255 )
 			{
-				IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-				IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+				dummy = IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+				dummy = IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+				dummy = IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 			}
 			else if( alpha == 0 )
 			{
-				IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-				IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+				dummy = IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+				dummy = IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+				dummy = IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 			}
 			else
 			{
-				IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-				IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-				IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
+				dummy = IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+				dummy = IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+				dummy = IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 			}
 			
 			// searchOutputPanel
@@ -161,21 +161,21 @@ public:
 			*/
 			if( alpha == 255 )
 			{
-				IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-				IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+				dummy = IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+				dummy = IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+				dummy = IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 			}
 			else if( alpha == 0 )
 			{
-				IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-				IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+				dummy = IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+				dummy = IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+				dummy = IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 			}
 			else
 			{
-				IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-				IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-				IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
+				dummy = IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+				dummy = IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+				dummy = IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 			}
 			
 			// searchOutputPanel
@@ -223,21 +223,21 @@ public:
 		*/
 		if( alpha == 255 )
 		{
-			IupScintillaSendMessage( searchOutputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-			IupScintillaSendMessage( searchOutputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else if( alpha == 0 )
 		{
-			IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-			IupScintillaSendMessage( searchOutputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else
 		{
-			IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-			IupScintillaSendMessage( searchOutputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			dummy = IupScintillaSendMessage( searchOutputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 
 		// Caret Line ( Current Line )
@@ -273,8 +273,8 @@ public:
 	
 	void applyOutputPanelINDICATOR()
 	{
-		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-		IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		int dummy = IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		dummy = IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
 		int LineNum;
 		foreach( char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
@@ -298,8 +298,8 @@ public:
 									if( colonPos > closePos )
 									{
 										int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
-										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
+										dummy = IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
+										dummy = IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
 									}
 								}
 							}
@@ -313,8 +313,8 @@ public:
 	
 	void applySearchOutputPanelINDICATOR()
 	{
-		IupScintillaSendMessage( searchOutputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-		IupScintillaSendMessage( searchOutputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		int dummy = IupScintillaSendMessage( searchOutputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		dummy = IupScintillaSendMessage( searchOutputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
 		int LineNum;
 		foreach( char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
@@ -330,8 +330,8 @@ public:
 						if( closePos > openPos + 1 )
 						{
 							int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
-							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
+							dummy = IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
+							dummy = IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
 						}
 					}
 				}
@@ -690,7 +690,7 @@ extern(C)
 									int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
 									int	lineHead = cast(int) IupScintillaSendMessage( ih, 2167, _line, 0 ); // SCI_POSITIONFROMLINE 2167
 									int	lineTail = cast(int) IupScintillaSendMessage( ih, 2136, _line, 0 ); // SCI_GETLINEENDPOSITION 2136
-									IupScintillaSendMessage( ih, 2160, lineHead, lineTail ); // SCI_SETSEL 2160
+									int dummy = IupScintillaSendMessage( ih, 2160, lineHead, lineTail ); // SCI_SETSEL 2160
 									
 									version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
 								}

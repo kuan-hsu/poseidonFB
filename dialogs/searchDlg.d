@@ -81,11 +81,12 @@ class CSearchExpander
 						Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Direction" );
 						if( direction_handle != null )
 						{
+							int dummy;
 							char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
 							if( targetText == findText )
 							{
 								if( !ReplaceText.length )
-									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+									dummy = IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
 									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
 								
@@ -334,7 +335,7 @@ extern(C)
 						return IUP_DEFAULT;
 					}
 
-					IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchExpander.searchRule, 0 );	// SCI_SETSEARCHFLAGS = 2198,
+					int dummy = IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchExpander.searchRule, 0 );	// SCI_SETSEARCHFLAGS = 2198,
 					
 					actionManager.SearchAction.addListItem( listFind_handle, findText, 15 );
 					if( flag == 2 && ReplaceText.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText, 15 );
@@ -350,7 +351,7 @@ extern(C)
 								break;
 							case 2:
 								if( !ReplaceText.length )
-									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+									dummy = IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
 									IupSetAttribute( iupSci, "REPLACETARGET", toStringz( ReplaceText ) );
 								break;
@@ -476,6 +477,7 @@ extern(C)
 					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Direction" );
 					if( direction_handle != null )
 					{
+						int dummy;
 						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
 						
 						if( targetText.length )
@@ -483,7 +485,7 @@ extern(C)
 							if( targetText == findText )
 							{
 								if( !ReplaceText.length )
-									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+									dummy = IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
 									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
 								

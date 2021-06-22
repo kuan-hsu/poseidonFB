@@ -306,9 +306,9 @@ public:
 			doc ~= setINILineData( "nexttab", convertShortKeyValue2String( GLOBAL.shortKeys[4].keyValue ) );
 			doc ~= setINILineData( "prevtab", convertShortKeyValue2String( GLOBAL.shortKeys[5].keyValue ) );
 
-			doc ~= setINILineData( "cut", convertShortKeyValue2String( GLOBAL.shortKeys[6].keyValue ) );
-			doc ~= setINILineData( "copy", convertShortKeyValue2String( GLOBAL.shortKeys[7].keyValue ) );
-			doc ~= setINILineData( "paste", convertShortKeyValue2String( GLOBAL.shortKeys[8].keyValue ) );
+			doc ~= setINILineData( "dupdown", convertShortKeyValue2String( GLOBAL.shortKeys[6].keyValue ) );
+			doc ~= setINILineData( "dupup", convertShortKeyValue2String( GLOBAL.shortKeys[7].keyValue ) );
+			doc ~= setINILineData( "delline", convertShortKeyValue2String( GLOBAL.shortKeys[8].keyValue ) );
 			doc ~= setINILineData( "find", convertShortKeyValue2String( GLOBAL.shortKeys[9].keyValue ) );
 			doc ~= setINILineData( "findinfile", convertShortKeyValue2String( GLOBAL.shortKeys[10].keyValue ) );
 			doc ~= setINILineData( "findnext", convertShortKeyValue2String( GLOBAL.shortKeys[11].keyValue ) );
@@ -728,9 +728,9 @@ public:
 							case "nexttab":					index = 4; title = GLOBAL.languageItems["sc_nexttab"].toDString();					break;
 							case "prevtab":					index = 5; title = GLOBAL.languageItems["sc_prevtab"].toDString();					break;
 
-							case "cut":						index = 6; title = GLOBAL.languageItems["caption_cut"].toDString();					break;
-							case "copy":					index = 7; title = GLOBAL.languageItems["caption_copy"].toDString();				break;
-							case "paste":					index = 8; title = GLOBAL.languageItems["caption_paste"].toDString();				break;
+							case "dupdown":					index = 6; title = GLOBAL.languageItems["sc_dupdown"].toDString();					break;
+							case "dupup":					index = 7; title = GLOBAL.languageItems["sc_dupup"].toDString();					break;
+							case "delline":					index = 8; title = GLOBAL.languageItems["sc_delline"].toDString();				break;
 							case "find":					index = 9; title = GLOBAL.languageItems["sc_findreplace"].toDString();				break;
 							case "findinfile":				index =10; title = GLOBAL.languageItems["sc_findreplacefiles"].toDString();			break;
 							case "findnext":				index =11; title = GLOBAL.languageItems["sc_findnext"].toDString();					break;
@@ -909,7 +909,9 @@ public:
 		}
 		
 		// Get and Set Default Import Path
-		version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath );		
+		version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath );
+		
+		version(linux) GLOBAL.x64compilerFullPath = GLOBAL.compilerFullPath;
 	}
 	
 	static void saveFileStatus()

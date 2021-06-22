@@ -521,13 +521,14 @@ extern(C) // Callback for CBaseDialog
 		{
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
+				int dummy;
 				//if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 0 ) return IUP_DEFAULT;
 				Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
 				IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					GLOBAL.editorSetting00.EolType = "0";
 					foreach( cSci; GLOBAL.scintillaManager )
-						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
+						if( cSci !is null )	int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
 
 					StatusBarAction.update();
 					return IUP_DEFAULT;
@@ -538,7 +539,7 @@ extern(C) // Callback for CBaseDialog
 				{
 					GLOBAL.editorSetting00.EolType = "1";
 					foreach( cSci; GLOBAL.scintillaManager )
-						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
+						if( cSci !is null )	int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
 					
 					StatusBarAction.update();
 					return IUP_DEFAULT;
@@ -549,7 +550,7 @@ extern(C) // Callback for CBaseDialog
 				{
 					GLOBAL.editorSetting00.EolType = "2";
 					foreach( cSci; GLOBAL.scintillaManager )
-						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
+						if( cSci !is null )	int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
 
 					StatusBarAction.update();
 					return IUP_DEFAULT;

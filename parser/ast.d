@@ -23,7 +23,7 @@ public:
 		type = _type;
 		base = _base;
 		lineNumber = _lineNumber;
-		endLineNum = _endLineNum = -1 ? _lineNumber : _endLineNum;
+		if( _endLineNum == -1 ) endLineNum = _lineNumber; else endLineNum = _endLineNum;
 	}
 
 	~this()

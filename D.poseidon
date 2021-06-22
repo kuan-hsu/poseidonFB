@@ -12,6 +12,7 @@ CompilerPath=
 [IncludeDirs]
 [LibDirs]
 name=K:/CodingPark/GameKYO/lib/iup/iup327DLL10
+name=K:/CodingPark/poseidonFB
 [Sources]
 name=IDE.d
 name=actionManager.d

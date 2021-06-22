@@ -85,7 +85,12 @@ struct GLOBAL
 	
 	public:
 	version(Windows) 	static _htmlHelp		htmlHelp;
-	
+	/*
+	version(DLL)
+	{
+		extern(C) static char[] function( char[] _document, char[] fullPath )		getParserJson;
+	}
+	*/
 	static CPLUGIN[char[]]		pluginMnager;
 	
 	static float				IUP_VERSION;
@@ -383,11 +388,11 @@ struct GLOBAL
 		ShortKey sk5 = { "prevtab","Previous Tab", 805306377 };
 		GLOBAL.shortKeys ~= sk5;
 
-		ShortKey sk6 = { "cut", "Cut", 0 };
+		ShortKey sk6 = { "dupdown", "Duplication Line Down", 0 };
 		GLOBAL.shortKeys ~= sk6;
-		ShortKey sk7 = { "copy", "Copy", 0 };
+		ShortKey sk7 = { "dupup", "Duplication Line Up", 0 };
 		GLOBAL.shortKeys ~= sk7;
-		ShortKey sk8 = { "paste", "Paste", 0 };
+		ShortKey sk8 = { "delline", "Delete Line", 0 };
 		GLOBAL.shortKeys ~= sk8;
 		ShortKey sk9 = { "find", "Find/Replace", 536870982 };
 		GLOBAL.shortKeys ~= sk9;
@@ -741,6 +746,9 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_findreplacefiles"] = new IupString( cast(char[]) "Find/Replace In Files" );
 						GLOBAL.languageItems["sc_findnext"] = new IupString( cast(char[]) "Find Next" );
 						GLOBAL.languageItems["sc_findprev"] = new IupString( cast(char[]) "Find Previous" );
+						GLOBAL.languageItems["sc_dupdown"] = new IupString( cast(char[]) "Duplication Line Down" );
+						GLOBAL.languageItems["sc_dupup"] = new IupString( cast(char[]) "Duplication Line Up" );
+						GLOBAL.languageItems["sc_delline"] = new IupString( cast(char[]) "Delete Line" );
 						GLOBAL.languageItems["sc_goto"] = new IupString( cast(char[]) "Goto Line" );
 						GLOBAL.languageItems["sc_undo"] = new IupString( cast(char[]) "Undo" );
 						GLOBAL.languageItems["sc_redo"] = new IupString( cast(char[]) "Redo" );

@@ -1320,7 +1320,8 @@ class CPreferenceDialog : CBaseDialog
 			
 			
 			label_Scintilla,
-			btn_Scintilla_FG,
+			//btn_Scintilla_FG,
+			IupFill(),
 			btn_Scintilla_BG,
 			IupFill(),
 			labelSCE_B_COMMENT,
@@ -2281,6 +2282,7 @@ extern(C) // Callback for CPreferenceDialog
 			}
 			else
 			{
+				GLOBAL.x64compilerFullPath	= GLOBAL.compilerFullPath;
 				GLOBAL.debuggerFullPath		= fromStringz( IupGetAttribute( IupGetHandle( "debuggerPath_Handle" ), "VALUE" ) ).dup;
 				GLOBAL.x64debuggerFullPath	= GLOBAL.debuggerFullPath;
 				
@@ -2519,7 +2521,9 @@ extern(C) // Callback for CPreferenceDialog
 
 		if( IupGetInt( dlg, "STATUS" ) )
 		{
-			IupSetAttribute( ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+			auto _color = new IupString( IupGetAttribute( dlg, "VALUE" ) );
+			
+			IupSetAttribute( ih, "FGCOLOR", _color.toCString ); IupSetFocus( ih );
 			
 			Ihandle* messageDlg = IupMessageDlg();
 			IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=2,BUTTONS=YESNO" );
@@ -2531,26 +2535,55 @@ extern(C) // Callback for CPreferenceDialog
 			if( button == 1 )
 			{
 				Ihandle* _ih = IupGetHandle( "btnSCE_B_COMMENT_BG" );
-				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				if( ih != null )
+				{
+					IupSetAttribute( _ih, "FGCOLOR", _color.toCString );
+					IupSetFocus( _ih );
+				}
 				
 				_ih = IupGetHandle( "btnSCE_B_NUMBER_BG" );
-				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				if( ih != null )
+				{
+					IupSetAttribute( _ih, "FGCOLOR", _color.toCString );
+					IupSetFocus( _ih );
+				}
 				
 				_ih = IupGetHandle( "btnSCE_B_STRING_BG" );
-				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				if( ih != null )
+				{
+					IupSetAttribute( _ih, "FGCOLOR", _color.toCString );
+					IupSetFocus( _ih );
+				}
 				
 				_ih = IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" );
-				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				if( ih != null )
+				{
+					IupSetAttribute( _ih, "FGCOLOR", _color.toCString );
+					IupSetFocus( _ih );
+				}
 				
 				_ih = IupGetHandle( "btnSCE_B_OPERATOR_BG" );
-				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				if( ih != null )
+				{
+					IupSetAttribute( _ih, "FGCOLOR", _color.toCString );
+					IupSetFocus( _ih );
+				}
 				
 				_ih = IupGetHandle( "btnSCE_B_IDENTIFIER_BG" );
-				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
+				if( ih != null )
+				{
+					IupSetAttribute( _ih, "FGCOLOR", _color.toCString );
+					IupSetFocus( _ih );
+				}
 				
 				_ih = IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" );
-				if( ih != null ) IupSetAttribute( _ih, "FGCOLOR", IupGetAttribute( dlg, "VALUE" ) );
-			}			
+				if( ih != null )
+				{
+					IupSetAttribute( _ih, "FGCOLOR", _color.toCString );
+					IupSetFocus( _ih );
+				}
+			}
+			
 			IupSetFocus( GLOBAL.preferenceDlg.getIhandle );
 		}
 

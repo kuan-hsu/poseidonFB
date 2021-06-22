@@ -526,7 +526,8 @@ version(FBIDE)
 				scope  _path = new FilePath( originalFullPath ); // Tail include /
 				char[] testPath = _path.path() ~ include;
 				_path.set( testPath ); // Reset
-				if( _path.exists() ) return testPath;
+				if( _path.exists() )
+					if( _path.isFile ) return testPath;
 
 
 				// Step 2: Relative from the current working directory
@@ -537,12 +538,14 @@ version(FBIDE)
 					testPath = dir ~ include;
 
 					_path.set( testPath ); // Reset
-					if( _path.exists() ) return testPath;
+					if( _path.exists() ) 
+						if( _path.isFile ) return testPath;
 				}
 
 				testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
 				_path.set( testPath ); // Reset
-				if( _path.exists() ) return testPath;
+				if( _path.exists() )
+					if( _path.isFile ) return testPath;
 
 
 				// Step 3: Relative from addition directories specified with the -i command line option
@@ -564,7 +567,8 @@ version(FBIDE)
 							
 							_path.set( testPath ); // Reset
 
-							if( _path.exists() ) return testPath;
+							if( _path.exists() )
+								if( _path.isFile ) return testPath;
 						}
 					}
 				}
@@ -620,13 +624,10 @@ version(FBIDE)
 						return null;
 					}
 				}
-						
+	
 				_path.set( testPath ); // Reset
 				if( _path.exists() )
-				{
-					//Stdout( "Bi fullpath :" ~ _path.toString ).newline; 
-					return testPath;
-				}
+					if( _path.isFile ) return testPath;
 			}
 			catch( Exception e )
 			{
@@ -2320,9 +2321,9 @@ version(FBIDE)
 			SCFIND_POSIX = 0x00400000,
 			*/		
 			int documentLength = cast(int) IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
-			IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
-			IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-			IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+			int dummy = IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+			dummy = IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+			dummy = IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
 
 			int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 
@@ -2331,8 +2332,8 @@ version(FBIDE)
 				int style = cast(int) IupScintillaSendMessage( iupSci, 2010, posHead, 0 ); // SCI_GETSTYLEAT 2010
 				if( style == 1 || style == 19 || style == 4 )
 				{
-					IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					dummy = IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
+					dummy = IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
 					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 				}
 				else
@@ -2437,8 +2438,8 @@ version(FBIDE)
 
 				if( bReSearch )
 				{
-					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
-					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					dummy = IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
+					dummy = IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
 					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
 				}
 				else
@@ -2491,7 +2492,7 @@ version(FBIDE)
 		// direct = 0 findprev, direct = 1 findnext
 		static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct )
 		{
-			IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+			int dummy = IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
 			int documentLength = cast(int) IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
 
 			if( direct == 0 )
@@ -3201,7 +3202,7 @@ version(FBIDE)
 			{
 				char[]	word;
 				bool	bDwell;
-				
+				int		dummy;
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
 				{
@@ -3223,9 +3224,9 @@ version(FBIDE)
 							}
 							else
 							{
-								IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
-								IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-								IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( includeFullPath.dup ) ); // SCI_CALLTIPSHOW 2200
+								dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
+								dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
+								dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( includeFullPath.dup ) ); // SCI_CALLTIPSHOW 2200
 							}
 							return;
 						}
@@ -3269,19 +3270,19 @@ version(FBIDE)
 								+/
 								if( title0.length )
 								{
-									IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0x000000, 0 ); //SCI_CALLTIPSETFORE 2206
-									IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFEEFF, 0 ); //SCI_CALLTIPSETBACK 2205
-									IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) toStringz( title0.dup ) ); // SCI_CALLTIPSHOW 2200
+									dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0x000000, 0 ); //SCI_CALLTIPSETFORE 2206
+									dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFEEFF, 0 ); //SCI_CALLTIPSETBACK 2205
+									dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) toStringz( title0.dup ) ); // SCI_CALLTIPSHOW 2200
 									
 									int assignPos = Util.index( title0, " = " );
 									if( assignPos < title0.length )
 									{
-										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, assignPos ); // SCI_CALLTIPSETHLT 2204
-										IupScintillaSendMessage( cSci.getIupScintilla, 2207, 0xFF0000, 0 ); // SCI_CALLTIPSETFOREHLT 2207
+										dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, assignPos ); // SCI_CALLTIPSETHLT 2204
+										dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2207, 0xFF0000, 0 ); // SCI_CALLTIPSETFOREHLT 2207
 									}
 									else
 									{
-										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+										dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
 									}
 								}
 							}
@@ -3602,8 +3603,8 @@ version(FBIDE)
 							default:
 						}
 						
-						IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showType_Fore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
-						IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showType_Back.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
+						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showType_Fore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
+						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showType_Back.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
 
 						auto _rNode = ParserAction.getRoot( AST_Head );
 
@@ -3647,11 +3648,11 @@ version(FBIDE)
 
 						showTypeContent = _list;
 						cleanCalltipContainer(); // Clear Call Tip Container
-						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 1, 0 ); // SCI_CALLTIPSETPOSITION 2213
-						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
-						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 0, 0 ); // SCI_CALLTIPSETPOSITION 2213
-						IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, filePathPos ); // SCI_CALLTIPSETHLT 2204
-						IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showType_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2213, 1, 0 ); // SCI_CALLTIPSETPOSITION 2213
+						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) GLOBAL.cString.convert( _list ) ); // SCI_CALLTIPSHOW 2200
+						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2213, 0, 0 ); // SCI_CALLTIPSETPOSITION 2213
+						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, filePathPos ); // SCI_CALLTIPSETHLT 2204
+						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showType_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 					}
 					else
 					{
@@ -4306,26 +4307,26 @@ version(FBIDE)
 					char[][] splitWord = getDivideWord( alreadyInput );
 
 					alreadyInput = splitWord[$-1];
-
+					int dummy;
 					if( text == "(" )
 					{
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 
-						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+						dummy = IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+						dummy = IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
 						//SCI_CALLTIPSETHLT 2204
-						IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
 						
 						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
 						int highlightStart, highlightEnd;
 						callTipSetHLT( list, 1, highlightStart, highlightEnd );
-						if( highlightEnd > -1 ) IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+						if( highlightEnd > -1 ) dummy = IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
 					}
 					else
 					{
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
+						if( !alreadyInput.length ) dummy = IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
 					}
 					return true;
 				}
@@ -4353,7 +4354,7 @@ version(FBIDE)
 		
 
 			bool	bContinue;
-			int		commaCount, parenCount, firstOpenParenPosFromDocument;
+			int		dummy, commaCount, parenCount, firstOpenParenPosFromDocument;
 			char[]	procedureNameFromList, LineHeadText;
 			int		lineNumber, currentLn = ScintillaAction.getCurrentLine( ih ) - 1;
 			int		lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
@@ -4538,10 +4539,10 @@ version(FBIDE)
 				{
 					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" && cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
 					{
-						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+						dummy = IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+						dummy = IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
-						IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
 						
 						//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
@@ -4554,14 +4555,14 @@ version(FBIDE)
 
 						if( highlightEnd > -1 )
 						{
-							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							dummy = IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							dummy = IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
 						{
 							// Clean the Hight-light
-							IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+							dummy = IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
 							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 						}
 					}
@@ -4585,18 +4586,18 @@ version(FBIDE)
 					{
 						list = list[semicolonPos+1..$].dup;
 				
-						int highlightStart, highlightEnd;
+						int highlightStart, highlightEnd, dummy;
 						callTipSetHLT( list, commaCount, highlightStart, highlightEnd );
 
 						if( highlightEnd > -1 )
 						{
-							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							dummy = IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							dummy = IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
 						{
-							IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+							dummy = IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
 						}
 					}
 				}
@@ -4620,7 +4621,7 @@ version(FBIDE)
 						if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
 						{
 							int		_pos = ScintillaAction.getCurrentPos( sci );
-							int		dummyHeadPos;
+							int		dummyHeadPos, dummy;
 							char[]	_alreadyInput;
 							char[]	lastChar = fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
 							
@@ -4636,12 +4637,12 @@ version(FBIDE)
 							char[][] splitWord = AutoComplete.getDivideWord( _alreadyInput );
 							_alreadyInput = splitWord[$-1];
 							
-							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) dummy = IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							
 							if( _alreadyInput.length )
-								IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
+								dummy = IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 							else
-								IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
+								dummy = IupScintillaSendMessage( sci, 2100, 0, cast(int) GLOBAL.cString.convert( AutoComplete.showListThread.getResult ) );
 								
 
 							auto cSci = ScintillaAction.getActiveCScintilla();
@@ -4666,13 +4667,13 @@ version(FBIDE)
 					{
 						if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
 						{
-							int		_pos = ScintillaAction.getCurrentPos( sci );
+							int		_pos = ScintillaAction.getCurrentPos( sci ), dummy;
 
-							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) dummy = IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 
-							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-							IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
+							dummy = IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+							dummy = IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+							dummy = IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
 							
 							AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 							
@@ -4680,8 +4681,8 @@ version(FBIDE)
 							AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
 							if( highlightEnd > -1 ) 
 							{
-								IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-								IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+								dummy = IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+								dummy = IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							}
 							
 							AutoComplete.noneListProcedureName = "";

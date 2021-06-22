@@ -509,8 +509,9 @@ void createMenu()
 	IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.EolType = "0";
+		int dummy;
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
+			if( cSci !is null )	dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
 
 		StatusBarAction.update();
 		return IUP_DEFAULT;
@@ -521,8 +522,9 @@ void createMenu()
 	IupSetCallback( _macEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.EolType = "1";
+		int dummy;
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
+			if( cSci !is null )	dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
 		
 		StatusBarAction.update();
 		return IUP_DEFAULT;
@@ -533,8 +535,9 @@ void createMenu()
 	IupSetCallback( _unixEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.EolType = "2";
+		int dummy;
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-			if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
+			if( cSci !is null )	dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
 
 		StatusBarAction.update();
 		return IUP_DEFAULT;
@@ -678,8 +681,15 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.454)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.065)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DLL)
+		{
+			version(FBIDE) IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.455)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ "\nDLL Parser Verersion" ) );
+		}
+		else
+		{
+			version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.455)\nBy Kuan Hsu (Taiwan)\n2021.06.22" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+			version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.065)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		}
 		return IUP_DEFAULT;
 	});
 	
@@ -881,7 +891,7 @@ version(FBIDE)
 		if( cSci !is null )
 		{
 			Ihandle* iupSci = cSci.getIupScintilla;
-			IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
+			int dummy = IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
 
 			foreach( IupString _s; GLOBAL.KEYWORDS )
 			{
@@ -1460,7 +1470,7 @@ extern(C)
 						
 						
 						char[] LineCol = Integer.toString( left - 1 )  ~ "," ~ Integer.toString( right - 1 );
-						IupScintillaSendMessage( cSci.getIupScintilla, 2234, left - 1, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+						int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2234, left - 1, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 						IupSetAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol.dup ) );
 						actionManager.StatusBarAction.update();
 						IupSetFocus( cSci.getIupScintilla );
@@ -1478,7 +1488,7 @@ extern(C)
 						{
 							int value = Integer.atoi( lineNum[1..$] );
 							value --;
-							IupScintillaSendMessage( cSci.getIupScintilla, 2234, ScintillaAction.getLinefromPos( cSci.getIupScintilla, value ), 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+							int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2234, ScintillaAction.getLinefromPos( cSci.getIupScintilla, value ), 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 							IupSetAttribute( cSci.getIupScintilla, "CARETPOS", toStringz( Integer.toString(value).dup ) );
 							actionManager.StatusBarAction.update();
 							IupSetFocus( cSci.getIupScintilla );
@@ -1955,7 +1965,7 @@ extern(C)
 				default:		return IUP_DEFAULT;
 			}
 				
-			IupScintillaSendMessage( cSci.getIupScintilla, 2029, type, 0 ); // SCI_CONVERTEOLS 2029
+			int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2029, type, 0 ); // SCI_CONVERTEOLS 2029
 			//IupScintillaSendMessage( cSci.getIupScintilla, 2031, type, 0 ); // SCI_SETEOLMODE 2031
 			//actionManager.StatusBarAction.update();
 		}

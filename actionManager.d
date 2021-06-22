@@ -173,6 +173,14 @@ public:
 				IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
 				return null;
 			}
+			else
+			{
+				if( !Path.isFile( fullPath ) )
+				{
+					IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+					return null;
+				}
+			}
 			
 			scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 
@@ -379,7 +387,7 @@ public:
 					StatusBarAction.update( _child );
 					//IupSetInt( ih, "VALUEPOS" , new_pos );
 					IupSetFocus( _child );
-					IupScintillaSendMessage( _child, 2380, 1, 0 ); // SCI_SETFOCUS 2380
+					int dummy = IupScintillaSendMessage( _child, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 
 					// Marked the trees( FileList & ProjectTree )
 
@@ -438,7 +446,7 @@ public:
 		if( pos >= 0 && pos <= IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" ) )
 		{
 			IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , pos );
-			IupScintillaSendMessage( IupGetChild( GLOBAL.activeDocumentTabs, pos ), 2380, 1, 0 ); // SCI_SETFOCUS 2380
+			int dummy = IupScintillaSendMessage( IupGetChild( GLOBAL.activeDocumentTabs, pos ), 2380, 1, 0 ); // SCI_SETFOCUS 2380
 			//IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.activeDocumentTabs, pos ) );
 			return IUP_CONTINUE;
 		}
@@ -839,8 +847,8 @@ public:
 			if( lineNumber > 0 )
 			{
 				--lineNumber;
-				IupScintillaSendMessage( ih, 2234, cast(ulong) lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				IupScintillaSendMessage( ih, 2024, cast(ulong) lineNumber, 0 );	// SCI_GOTOLINE 2024
+				int dummy = IupScintillaSendMessage( ih, 2234, cast(ulong) lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+				dummy = IupScintillaSendMessage( ih, 2024, cast(ulong) lineNumber, 0 );	// SCI_GOTOLINE 2024
 
 				// If debug window is on, don't scroll to top
 				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )
@@ -943,7 +951,7 @@ public:
 			// Set new tabitem to focus
 			if( DocumentTabAction.setFocus( _sci.getIupScintilla ) == IUP_DEFAULT ) return false;
 			
-			IupScintillaSendMessage( _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
+			int dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 			
 			
 			
@@ -972,11 +980,11 @@ public:
 			
 			if( fileStatusPos > -1 )
 			{
-				IupScintillaSendMessage( _sci.getIupScintilla, 2234, lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+				dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2234, lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 				if( !bDirectGotoLine )
-					IupScintillaSendMessage( _sci.getIupScintilla, 2025, fileStatusPos, 0 ); // SCI_GOTOPOS 2025
+					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2025, fileStatusPos, 0 ); // SCI_GOTOPOS 2025
 				else
-					IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
+					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
 
 				int visibleLINE = IupScintillaSendMessage( _sci.getIupScintilla, 2220, lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
 				if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
@@ -986,8 +994,8 @@ public:
 			{
 				if( lineNumber > -1 )
 				{
-					IupScintillaSendMessage( _sci.getIupScintilla, 2234, --lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-					IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
+					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2234, --lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
 					IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );				
 				}
 			}
@@ -1072,6 +1080,8 @@ public:
 	static Ihandle* getActiveIupScintilla()
 	{
 		int pos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
+		if( pos < 0 ) return null;
+		
 		return IupGetChild( GLOBAL.activeDocumentTabs, pos );
 	}
 
@@ -1122,13 +1132,13 @@ public:
 	
 	static int getModify( CScintilla cSci )
 	{
-		if( cSci !is null )	return IupScintillaSendMessage( cSci.getIupScintilla, 2159, 0, 0 ); // SCI_GETMODIFY = 2159
+		if( cSci !is null )	return cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2159, 0, 0 ); // SCI_GETMODIFY = 2159
 		return 0;
 	}
 
 	static int getModify( Ihandle* ih )
 	{
-		if( ih != null ) return IupScintillaSendMessage( ih, 2159, 0, 0 ); // SCI_GETMODIFY = 2159
+		if( ih != null ) return cast(int) IupScintillaSendMessage( ih, 2159, 0, 0 ); // SCI_GETMODIFY = 2159
 		return 0;
 	}
 
@@ -2453,12 +2463,12 @@ private:
 		
 		int currentPos = cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
 		int	documentLength = IupGetInt( ih, "COUNT" );
-		IupScintillaSendMessage( ih, 2198, type, 0 ); // SCI_SETSEARCHFLAGS = 2198,
+		int dummy = IupScintillaSendMessage( ih, 2198, type, 0 ); // SCI_SETSEARCHFLAGS = 2198,
 
 		if( targetText.length )
 		{
-			IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-			if( bNext )	IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
+			dummy = IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+			if( bNext )	dummy = IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
 
 			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
 			
@@ -2467,13 +2477,13 @@ private:
 			{
 				if( bNext )
 				{
-					IupScintillaSendMessage( ih, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
+					dummy = IupScintillaSendMessage( ih, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
+					dummy = IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 				else
 				{
-					IupScintillaSendMessage( ih, 2190, documentLength, 0 ); 		// SCI_SETTARGETSTART = 2190,
-					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
+					dummy = IupScintillaSendMessage( ih, 2190, documentLength, 0 ); 		// SCI_SETTARGETSTART = 2190,
+					dummy = IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 
 				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
@@ -2534,7 +2544,7 @@ public:
 		if( pos == -1 ) return -2;
 		
 		int ln = ScintillaAction.getLinefromPos( iupSci, pos );
-		IupScintillaSendMessage( iupSci, 2234, ln, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+		int dummy = IupScintillaSendMessage( iupSci, 2234, ln, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 		
 		return pos;
 	}	

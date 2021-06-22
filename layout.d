@@ -148,7 +148,7 @@ void createExplorerWindow()
 				{
 					char[] cursorString = fromStringz( IupGetGlobal( "CURSORPOS" ) );
 					
-					int		cursorX, cursorY, iconX, iconY;
+					int		dummy, cursorX, cursorY, iconX, iconY;
 					int 	crossSign = Util.index( cursorString, "x" );
 					if( crossSign < cursorString.length )
 					{
@@ -168,25 +168,25 @@ void createExplorerWindow()
 					if( cursorY > iconY + 16 )
 					{
 						int add = ( cursorY - iconY - 16 ) / 5 + 1;
-						IupScintillaSendMessage( _ih, 2168, 0, add ); // SCI_LINESCROLL 2168
+						dummy = IupScintillaSendMessage( _ih, 2168, 0, add ); // SCI_LINESCROLL 2168
 						
 					}
 					else if( cursorY < iconY + 16 )
 					{
 						int minus = ( cursorY - iconY - 16 ) / 5 - 1;
-						IupScintillaSendMessage( _ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
+						dummy = IupScintillaSendMessage( _ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
 					}
 					
 					if( cursorX > iconX + 16 )
 					{
 						int add = ( cursorX - iconX - 16 ) / 100;
-						IupScintillaSendMessage( _ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
+						dummy = IupScintillaSendMessage( _ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
 						
 					}
 					else if( cursorX < iconX + 16 )
 					{
 						int minus = ( cursorX - iconX - 16 ) / 100;
-						IupScintillaSendMessage( _ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
+						dummy = IupScintillaSendMessage( _ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
 					}
 				}
 			}
@@ -399,6 +399,7 @@ extern(C)
 		{
 			try
 			{
+				int dummy;
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
 				{
@@ -413,7 +414,7 @@ extern(C)
 									int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", --pos );
 									if( close > -1 )
 									{
-										IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close );
+										dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close );
 										version(DIDE)
 										{
 											if( GLOBAL.editorSetting00.AutoIndent == "ON" )
@@ -425,16 +426,16 @@ extern(C)
 													if( matchLine < currentLine )
 													{
 														int matchInd = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2127, matchLine, 0 ); // SCI_GETLINEINDENTATION = 2127
-														IupScintillaSendMessage( cSci.getIupScintilla, 2126, currentLine, matchInd ); // SCI_SETLINEINDENTATION = 2126
+														dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2126, currentLine, matchInd ); // SCI_SETLINEINDENTATION = 2126
 														int changeLinePos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2128, currentLine, 0 ); // SCI_GETLINEINDENTPOSITION 2128
-														IupScintillaSendMessage( cSci.getIupScintilla, 2025, ++changeLinePos , 0 );// SCI_GOTOPOS = 2025,
+														dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2025, ++changeLinePos , 0 );// SCI_GOTOPOS = 2025,
 													}
 												}
 											}
 										}
 									}
 									else
-										IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
+										dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
 								}
 								break;
 							case 8, 65535: // Back, Del
@@ -443,11 +444,11 @@ extern(C)
 								{
 									int close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", pos );
 									if( close > -1 )
-										IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); 
+										dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); 
 									else
 									{
 										close = IupGetIntId( cSci.getIupScintilla, "BRACEMATCH", --pos );
-										if( close > -1 ) IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); else IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
+										if( close > -1 ) dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2351, pos, close ); else dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
 									}
 								}
 								break;
@@ -474,9 +475,9 @@ extern(C)
 											if( matchLine < currentLine )
 											{
 												int matchInd = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2127, matchLine, 0 ); // SCI_GETLINEINDENTATION = 2127
-												IupScintillaSendMessage( cSci.getIupScintilla, 2126, currentLine, matchInd ); // SCI_SETLINEINDENTATION = 2126
+												dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2126, currentLine, matchInd ); // SCI_SETLINEINDENTATION = 2126
 												int changeLinePos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2128, currentLine, 0 ); // SCI_GETLINEINDENTPOSITION 2128
-												IupScintillaSendMessage( cSci.getIupScintilla, 2025, ++changeLinePos , 0 );// SCI_GOTOPOS = 2025,
+												dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2025, ++changeLinePos , 0 );// SCI_GOTOPOS = 2025,
 											}
 										}
 									}

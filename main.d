@@ -8,7 +8,7 @@ import menu, scintilla, actionManager;
 import parser.autocompletion;
 
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer, Float = tango.text.convert.Float;
-import tango.sys.Environment, tango.io.FilePath;//, tango.sys.win32.Types;
+import tango.sys.Environment, tango.io.FilePath;
 import tango.sys.Process, tango.io.stream.Lines;
 
 import tango.sys.SharedLib;
@@ -27,7 +27,9 @@ version(Windows)
 	
 	pragma(lib, "winmm.lib"); // For PlaySound()
 	pragma(lib, "iup.lib");
-	pragma(lib, "iup_scintilla.lib"); 
+	pragma(lib, "iup_scintilla.lib");
+	
+	version(DLL) pragma(lib, "FBparserDLL.lib");
 }
 else
 {
@@ -94,7 +96,6 @@ void main( char[][] args )
 			//Stdout(e.toString).newline;
 		}
 	}
-
 	
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
@@ -115,11 +116,42 @@ void main( char[][] args )
 			if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 			return;
 		}
+		/+
+		version(DLL)
+		{
+			SharedLib _sharedLib;
+			try
+			{
+				//extern(C) char[] getParserJson( char[] _document, char[] fullPath );
+				_sharedLib = SharedLib.load( "FBparserDLL.dll" );
+				if( _sharedLib !is null )
+				{
+					void* iupPtr = _sharedLib.getSymbol( "getParserJson" ); 
+					if( iupPtr )
+					{
+						void **point = cast(void **) & GLOBAL.getParserJson; // binding function address from DLL to our function pointer
+						*point = iupPtr;
+					}
+					else
+					{
+						throw new Exception( null );
+					}
+				}
+				else
+				{
+					throw new Exception( null );
+				}
+			}
+			catch( Exception e )
+			{
+				IupMessageError( null, toStringz( e.toString ) );
+				IupClose();
+				if( GLOBAL.htmlHelp != null ) sharedlib.unload();
+				return;
+			}
+		}
+		+/
 	}
-	
-	IupSetGlobal( "DEFAULTTHEME", "0 0 0" );
-	//IupSetGlobal( "MENUBGCOLOR", "0 0 0" );
-	
 	
 	//  Get poseidonFB exePath & set the new cwd
 	scope _poseidonPath = new FilePath( args[0] );
@@ -421,4 +453,5 @@ void main( char[][] args )
 	IupClose();
 	
 	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
+	//version(DLL) if( GLOBAL.getParserJson != null ) _sharedLib.unload();
 }

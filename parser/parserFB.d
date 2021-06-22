@@ -25,7 +25,7 @@ version(FBIDE)
 						if( token().tok == TOK.Tstrings )
 						{
 							TokenUnit t = getToken();
-							parseToken( TOK.Tstring );
+							parseToken( TOK.Tstrings );
 
 							activeASTnode.addChild( Path.normalize( t.identifier ) , B_INCLUDE, null, _type, null, t.lineNumber );
 						}
@@ -1267,6 +1267,16 @@ version(FBIDE)
 					default:
 				}
 				
+				/*
+				Think below.....
+				#define RAYGUIDEF Declare
+				....
+				RAYGUIDEF sub GuiEnable()
+				*/
+				if( tokenIndex > 0 )
+					if( prev().tok == TOK.Tidentifier && !bDeclare ) bDeclare = true;
+				
+				
 				if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub || token().tok == TOK.Tproperty || token().tok == TOK.Tconstructor || token().tok == TOK.Tdestructor )
 				{
 					if( bDeclare )
@@ -1715,7 +1725,7 @@ version(FBIDE)
 									if( token().tok == TOK.Tassign )
 									{
 										parseToken( TOK.Tassign );
-										if( token().tok == TOK.Tstring || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
+										if( token().tok == TOK.Tstrings || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
 									}
 								
 									activeASTnode.addChild( _name, B_VARIABLE, _protection, _type, null, _lineNum );

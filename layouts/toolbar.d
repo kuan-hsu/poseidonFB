@@ -85,7 +85,7 @@ class CToolBar
 			auto sci = ScintillaAction.getActiveIupScintilla;
 			if( sci != null )
 			{
-				IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
+				int dummy = IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
 			}
 			
 			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Undo" );
@@ -191,8 +191,8 @@ class CToolBar
 				IupSetFocus( ih );
 				if( markLineNumber > -1 )
 				{
-					IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-					IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
+					int dummy = IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+					dummy = IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
 				}
 				StatusBarAction.update();
 			}
@@ -222,8 +222,8 @@ class CToolBar
 				}
 
 				IupSetFocus( ih );
-				IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
+				int dummy = IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
+				dummy = IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
 				StatusBarAction.update();
 			}
 			
@@ -516,7 +516,7 @@ extern( C )
 	{
 		if( status == 0 )
 		{
-			IupScintillaSendMessage( ih, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
+			int dummy = IupScintillaSendMessage( ih, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 			
 			char[] command = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 			if( command.length )
