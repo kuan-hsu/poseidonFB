@@ -808,7 +808,7 @@ public:
 							case "parsertrigger":			GLOBAL.autoCompletionTriggerWordCount = Integer.atoi( right );	break;
 							case "showfunctiontitle":		GLOBAL.showFunctionTitle = right;								break;
 							case "showtypewithparams":		GLOBAL.showTypeWithParams = right;								break;
-							case "includelevel":			GLOBAL.includeLevel = Integer.atoi( right );					break;
+							case "includelevel":			GLOBAL.includeLevel = Integer.toInt( right );					break;
 							case "ignorecase":				GLOBAL.toggleIgnoreCase = right;								break;
 							case "caseinsensitive":			GLOBAL.toggleCaseInsensitive = right;							break;
 							case "showlisttype":			GLOBAL.toggleShowListType = right;								break;

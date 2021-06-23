@@ -136,6 +136,7 @@ options=Options
 					triggertip=Set The Value to 0 To Disable It
 					codecompletiononoff=Code Completion On/Off
 				includelevel=Include Levels
+					includeleveltip=Set -1 To Unlimited
 			editor=Editor
 				lnmargin=Show Linenumber Margin
 				fixedlnmargin=Fixed Linenumber Margin Size

@@ -4,7 +4,7 @@ class CNavCache
 {
 	private:
 	import iup.iup;
-	import global, actionManager;
+	import global, actionManager, tools;
 	
 	import tango.io.FilePath, tango.stdc.stringz;
 
@@ -87,7 +87,7 @@ class CNavCache
 	{
 		CacheUnit _element = { fullPath, line };
 		
-		if( fullPath in GLOBAL.scintillaManager )
+		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
 		{}
 		else
 		{

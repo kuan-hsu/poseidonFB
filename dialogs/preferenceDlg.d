@@ -269,6 +269,7 @@ class CPreferenceDialog : CBaseDialog
 			PreferenceDialogParameters.stringLevel = new IupString( Integer.toString( GLOBAL.includeLevel ) );
 			Ihandle* textIncludeLevel = IupText( null );
 			IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
+			IupSetAttribute( textIncludeLevel, "TIP", GLOBAL.languageItems["includeleveltip"].toCString );
 			IupSetAttribute( textIncludeLevel, "VALUE", PreferenceDialogParameters.stringLevel.toCString );
 			IupSetHandle( "textIncludeLevel", textIncludeLevel );
 		}
@@ -2253,13 +2254,13 @@ extern(C) // Callback for CPreferenceDialog
 			
 			version(FBIDE)
 			{
-				GLOBAL.includeLevel			= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) );
+				GLOBAL.includeLevel			= Integer.toInt( fromStringz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) );
 				IupSetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE", PreferenceDialogParameters.stringLevel << IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) );
 			}
 			
 			IupSetAttribute( IupGetHandle( "textTrigger" ), "VALUE", PreferenceDialogParameters.stringTrigger << IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) );
 
-			if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
+			//if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 
 
 			// Compiler & Debugger

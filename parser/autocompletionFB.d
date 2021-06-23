@@ -645,13 +645,17 @@ version(FBIDE)
 
 			if( includeFullPath.length )
 			{
-				//if( fullPathByOS(includeFullPath) in includesMarkContainer ) return null;
+				if( GLOBAL.includeLevel < 0 )
+				{
+					if( fullPathByOS(includeFullPath) in includesMarkContainer ) return null;
+				}
 				
 				if( !ProjectAction.fileInProject( includeFullPath, GLOBAL.activeProjectPath ) )
 				{
-					if( AutoComplete.LEVEL >= GLOBAL.includeLevel ) return null; else AutoComplete.LEVEL ++;
+					if( GLOBAL.includeLevel > -1 )
+						if( AutoComplete.LEVEL >= GLOBAL.includeLevel ) return null; else AutoComplete.LEVEL ++;
 				}
-				
+
 
 				CASTnode includeAST;
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
@@ -1970,11 +1974,12 @@ version(FBIDE)
 			}
 			else
 			{
-				if( AutoComplete.LEVEL >= GLOBAL.includeLevel )
-				{
-					if( AutoComplete.LEVEL > 0 ) AutoComplete.LEVEL --;
-					return null;
-				}
+				if( GLOBAL.includeLevel > -1 )
+					if( AutoComplete.LEVEL >= GLOBAL.includeLevel )
+					{
+						if( AutoComplete.LEVEL > 0 ) AutoComplete.LEVEL --;
+						return null;
+					}
 			}
 
 

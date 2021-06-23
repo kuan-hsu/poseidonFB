@@ -659,6 +659,7 @@ struct GLOBAL
 							GLOBAL.languageItems["triggertip"] = new IupString( cast(char[]) "Set 0 To Disable" );
 							GLOBAL.languageItems["codecompletiononoff"] = new IupString( cast(char[]) "Code Completion On/Off" );
 						GLOBAL.languageItems["includelevel"] = new IupString( cast(char[]) "Include Levels" );
+							GLOBAL.languageItems["includeleveltip"] = new IupString( cast(char[]) "Set -1 To Unlimited" );
 					GLOBAL.languageItems["editor"] = new IupString( cast(char[]) "Editor" );
 						GLOBAL.languageItems["lnmargin"] = new IupString( cast(char[]) "Show Linenumber Margin" );
 						GLOBAL.languageItems["fixedlnmargin"] = new IupString( cast(char[]) "Fixed Linenumber Margin Size" );

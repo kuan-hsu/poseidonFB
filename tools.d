@@ -82,7 +82,7 @@ version(DLL)
 		Member		member;
 		int			count;
 		
-		foreach( char[] s; Util.splitLines( document ) )
+		foreach( char[] s; Util.splitLines( document.dup ) ) // The document(Json Txt) is from DLL, so dup it
 		{
 			
 			char[]		left, right;
