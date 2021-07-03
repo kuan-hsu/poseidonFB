@@ -1541,7 +1541,7 @@ class COutline
 		
 		version(DLL)
 		{
-			GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( getParserJson( document, fullPath ) );
+			GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( GLOBAL.getParserJson( document, fullPath ) );
 		}
 		else
 		{
@@ -1579,7 +1579,7 @@ class COutline
 			{
 				char[] document = GLOBAL.scintillaManager[fullPathByOS(fullPath)].getText();
 				version(DLL)
-					GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( getParserJson( document, fullPath ) );
+					GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( GLOBAL.getParserJson( document, fullPath ) );
 				else
 				{
 					GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
@@ -1676,7 +1676,7 @@ class COutline
 				{
 					Encoding		_encoding;
 					char[] 	_text = FileAction.loadFile( fullPath, _encoding );
-					GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( getParserJson( _text, fullPath ) );
+					GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( GLOBAL.getParserJson( _text, fullPath ) );
 				}
 				else
 				{
@@ -1978,7 +1978,7 @@ class COutline
 						CASTnode astHeadNode;
 						version(DLL)
 						{
-							astHeadNode = createNodeFromJSON( getParserJson( document, cSci.getFullPath ) );
+							astHeadNode = createNodeFromJSON( GLOBAL.getParserJson( document, cSci.getFullPath ) );
 						}
 						else
 						{
@@ -2035,8 +2035,8 @@ class COutline
 		{
 			version(DLL)
 			{
-				version(FBIDE) return createNodeFromJSON( getParserJson( text, "_.bas" ) );
-				version(DIDE) return createNodeFromJSON( getParserJson( text, "_.d" ) );
+				version(FBIDE) return createNodeFromJSON( GLOBAL.getParserJson( text, "_.bas" ) );
+				version(DIDE) return createNodeFromJSON( GLOBAL.getParserJson( text, "_.d" ) );
 			}
 			else
 			{

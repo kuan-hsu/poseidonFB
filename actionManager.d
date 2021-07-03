@@ -16,7 +16,7 @@ struct FileAction
 {
 private:
 	import	tango.text.convert.Utf, tango.io.UnicodeFile, tango.io.device.File;
-	import	Path = tango.io.Path;
+	import	tango.io.FilePath;//, Path = tango.io.Path;
 	
 	version(Windows) import tango.sys.win32.CodePage;
 
@@ -168,27 +168,52 @@ public:
 
 		try
 		{
+			scope _fp = new FilePath( fullPath );
+			if( !_fp.exists )
+			{
+				debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+				return null;
+			}
+			else
+			{
+				if( _fp.isFolder ) 
+				{
+					debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+					return null;
+				}
+			}
+				
+			/*
 			if( !Path.exists( fullPath ) )
 			{
-				IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+				debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
 				return null;
 			}
 			else
 			{
 				if( !Path.isFile( fullPath ) )
 				{
-					IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+					debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
 					return null;
 				}
 			}
+			*/
 			
 			scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 
 			char[] text = file.read;
-
+			
+			_encoding = file.encoding;
+			if( _encoding == 2 )
+				if( !file.bom.encoded ) _encoding = Encoding.UTF_8N;
+				
+			//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) ); // Uncomment This Line, BEX error
+				
+			return text;
+			
 			if( !file.bom.encoded ) 
 			{
-				// IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
+				//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
 				if( isUTF8WithouBOM( text ) )
 				{
 					result = text;
@@ -279,7 +304,7 @@ public:
 		}
 		catch( Exception e )
 		{
-			IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			debug IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 			throw e;
 		}
 
@@ -847,9 +872,13 @@ public:
 			if( lineNumber > 0 )
 			{
 				--lineNumber;
+				IupSetAttributeId( ih, "ENSUREVISIBLE", lineNumber, "ENFORCEPOLICY" );
+				IupSetInt( ih, "CARET", lineNumber );
+				/+
 				int dummy = IupScintillaSendMessage( ih, 2234, cast(ulong) lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 				dummy = IupScintillaSendMessage( ih, 2024, cast(ulong) lineNumber, 0 );	// SCI_GOTOLINE 2024
-
+				
+				
 				// If debug window is on, don't scroll to top
 				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )
 				{
@@ -857,6 +886,7 @@ public:
 					if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
 					IupSetInt( ih, "FIRSTVISIBLELINE", lineNumber );
 				}
+				+/
 			}
 			StatusBarAction.update();
 
@@ -1666,19 +1696,32 @@ public:
 
 	static int iup_XkeyAlt( int _c ){ return _c | 0x40000000; }
 
-	static bool isComment( Ihandle* ih, int pos )
+	static bool isComment( Ihandle* ih, int pos, bool bString = true )
 	{
 		int style = cast(int) IupScintillaSendMessage( ih, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
 		
-		version(FBIDE)
+		if( bString )
 		{
-			if( style == 1 || style == 19 || style == 4 ) return true;
+			version(FBIDE)
+			{
+				if( style == 1 || style == 19 || style == 4 ) return true;
+			}
+			version(DIDE)
+			{
+				if( style == 1 || style == 2 || style == 3 || style == 4 || style == 10 ) return true;
+			}
 		}
-		version(DIDE)
+		else
 		{
-			if( style == 1 || style == 2 || style == 3 || style == 4 || style == 10 ) return true;
+			version(FBIDE)
+			{
+				if( style == 1 || style == 19 ) return true;
+			}
+			version(DIDE)
+			{
+				if( style == 1 || style == 2 || style == 3 || style == 4 ) return true;
+			}
 		}
-		
 		
 		int lineStartPos = cast(int) IupScintillaSendMessage( ih, 2167, IupScintillaSendMessage( ih, 2166, pos, 0 ), 0 ); // SCI_LINEFROMPOSITION = 2166, SCI_POSITIONFROMLINE=2167
 		//IupMessage("", toStringz( Integer.toString(pos) ~ " / " ~ Integer.toString(lineStartPos) ) );

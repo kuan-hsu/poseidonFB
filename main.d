@@ -29,7 +29,7 @@ version(Windows)
 	pragma(lib, "iup.lib");
 	pragma(lib, "iup_scintilla.lib");
 	
-	version(DLL) pragma(lib, "FBparserDLL.lib");
+	//version(DLL) pragma(lib, "FBparserDLL.lib");
 }
 else
 {
@@ -116,7 +116,7 @@ void main( char[][] args )
 			if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 			return;
 		}
-		/+
+		
 		version(DLL)
 		{
 			SharedLib _sharedLib;
@@ -150,7 +150,6 @@ void main( char[][] args )
 				return;
 			}
 		}
-		+/
 	}
 	
 	//  Get poseidonFB exePath & set the new cwd
@@ -453,5 +452,5 @@ void main( char[][] args )
 	IupClose();
 	
 	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
-	//version(DLL) if( GLOBAL.getParserJson != null ) _sharedLib.unload();
+	version(DLL) if( GLOBAL.getParserJson != null ) _sharedLib.unload();
 }

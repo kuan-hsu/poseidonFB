@@ -519,7 +519,12 @@ public:
 				}
 				else
 				{
-					if( !right.length ) continue;
+					switch( left )
+					{
+						case "keyword0", "keyword1", "keyword2", "keyword3", "keyword4", "keyword5": break;
+						default:
+							if( !right.length ) continue;
+					}
 				}
 				
 				switch( blockText )

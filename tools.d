@@ -61,10 +61,10 @@ version(DIDE)
 version(DLL)
 {
 	import parser.ast;
-	
+	/*
 	extern(C) char[]	getParserJson( char[] _document, char[] fullPath );
 	extern(C) char[][]	getTokensString( char[] _document );
-	
+	*/
 	CASTnode createNodeFromJSON( char[] document )
 	{
 		struct Member

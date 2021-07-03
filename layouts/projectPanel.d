@@ -1866,7 +1866,7 @@ extern(C)
 				if( CProjectTree_remove_cb( ih ) == IUP_IGNORE ) return IUP_IGNORE;
 
 				scope f = new FilePath( fullPath );
-				f.remove();
+				if( f.exists() ) f.remove();
 			}
 		}
 

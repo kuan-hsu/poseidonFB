@@ -64,69 +64,86 @@ struct XPM
 			//return null;
 
 			scope file = new File( filePath, File.ReadExisting );
-			int 		count;
-			bool 		bPixel, bColor;
+			int 		quoteLineCount;
+			int			width, height, num_colors, chars_per_pixel;
+			int			rPos;
+			bool 		bFormat, bPixel, bColor;
 			
 			char[]		pixel;
 			ColorUnit[]	color;
 			
-			foreach( line; new Lines!(char)(file) )
+			foreach( int count, char[] line; new Lines!(char)(file) )
 			{
-				if( count++ == 0 )
+				if( count == 0 )
 				{
 					if( line != "/* XPM */" ) return null;
 				}
 				
-				if( line.length )
+				if( line.length > 2 )
 				{
-					if( line == "/* pixels */" )
+					if( line[0..2] == "/*" || line[0] != '"' ) continue;
+					
+					if( line[0] == '"' ) quoteLineCount++;
+					
+					if( quoteLineCount == 1 )
 					{
-						bPixel = true;
-						bColor = false;
-						continue;
-					}
-					else if( line == "/* colors */" )
-					{
-						bColor = true;
-						bPixel = false;
-						continue;
-					}
-					else
-					{
-						int rPos;
-						if( line[0] == '"' )
+						char[]	formatString;
+						bool	bIsNumber;
+						foreach( char c; line[1..$-2] )
 						{
-							rPos = Util.rindex( line, "\"" );
-
-							if( bPixel )
+							if( c > 47 && c < 58 )
 							{
-								foreach( char c; line[1..rPos] )
-								{
-									pixel ~= c;
-								}
+								formatString ~= c;
+								bIsNumber = true;
 							}
-							else if( bColor )
+							else
 							{
-								char[][] splitData = Util.split( line[1..rPos], " " );
-								if( splitData.length == 3 )
+								if( bIsNumber )
 								{
-									ColorUnit _color;
-									_color.index = splitData[0].dup;
-									_color.c = splitData[1].dup;
-									if( splitData[2] == "None" )
-									{
-										_color.value = "00000000".dup;
-									}
-									else
-									{
-										_color.value = ( splitData[2][1..$] ~ "ff" ).dup;
-										
-									}
-
-									color ~= _color;
+									bIsNumber = false;
+									formatString ~= " ";
 								}
 							}
 						}
+						
+						char[][] splitWords = Util.split( formatString, " " );
+						if( splitWords.length > 3 )
+						{
+							width = Integer.atoi( splitWords[0] );
+							height = Integer.atoi( splitWords[1] );
+							num_colors = Integer.atoi( splitWords[2] );
+							chars_per_pixel = Integer.atoi( splitWords[3] );
+						}
+						continue;
+					}
+					else if( quoteLineCount <= num_colors + 1 )
+					{
+						rPos = Util.rindex( line, "\"" );
+						char[][] splitData = Util.split( line[1..rPos], " " );
+						if( splitData.length == 3 )
+						{
+							ColorUnit _color;
+							_color.index = splitData[0].dup;
+							_color.c = splitData[1].dup;
+							if( splitData[2] == "None" )
+							{
+								_color.value = "00000000".dup;
+							}
+							else
+							{
+								_color.value = ( splitData[2][1..$] ~ "ff" ).dup;
+								
+							}
+
+							color ~= _color;
+						}					
+					
+					}
+					else if( quoteLineCount <= num_colors + 1 + width )
+					{
+						rPos = Util.rindex( line, "\"" );
+						foreach( char c; line[1..rPos] )
+							pixel ~= c;
 					}
 				}
 			}
@@ -238,106 +255,94 @@ struct XPM
 		try
 		{
 			scope file = new File( filePath, File.ReadExisting );
-			int 		count, colorSN, width, height;
+			int 		count, colorSN, rPos;
 			bool 		bPixel, bColor;
-			
+			int			quoteLineCount, width, height, num_colors, chars_per_pixel;;
 			char[]		prevLine, pixel;
 			ColorUnit[]	color;
 			
-			foreach( line; new Lines!(char)(file) )
+			
+			
+			foreach( int count, char[] line; new Lines!(char)(file) )
 			{
-				if( count++ == 0 )
+				if( count == 0 )
 				{
 					if( line != "/* XPM */" ) return null;
 				}
 				
-				if( line.length )
+				if( line.length > 2 )
 				{
-					if( line == "/* pixels */" )
+					if( line[0..2] == "/*" || line[0] != '"' ) continue;
+					
+					if( line[0] == '"' ) quoteLineCount++;
+					
+					if( quoteLineCount == 1 )
 					{
-						bPixel = true;
-						bColor = false;
-						continue;
-					}
-					else if( line == "/* colors */" )
-					{
-						// Get the spec
-						char[] temp;
-						char[][] imageSpec;
-						for( int i = 0; i < prevLine.length; ++ i )
+						char[]	formatString;
+						bool	bIsNumber;
+						foreach( char c; line[1..$-2] )
 						{
-							if( prevLine[i] >= 48 && prevLine[i] <= 57 )
+							if( c > 47 && c < 58 )
 							{
-								temp = temp ~ prevLine[i];
+								formatString ~= c;
+								bIsNumber = true;
 							}
 							else
 							{
-								if( temp.length )
+								if( bIsNumber )
 								{
-									imageSpec ~= temp;
-									temp = "";
+									bIsNumber = false;
+									formatString ~= " ";
 								}
 							}
 						}
 						
-						if( imageSpec.length >= 2 )
+						char[][] splitWords = Util.split( formatString, " " );
+						if( splitWords.length > 3 )
 						{
-							width = Integer.toInt( imageSpec[0] );
-							height = Integer.toInt( imageSpec[1] );
+							width = Integer.atoi( splitWords[0] );
+							height = Integer.atoi( splitWords[1] );
+							num_colors = Integer.atoi( splitWords[2] );
+							chars_per_pixel = Integer.atoi( splitWords[3] );
 						}
-					
-					
-						bColor = true;
-						bPixel = false;
 						continue;
 					}
-					else
+					else if( quoteLineCount <= num_colors + 1 )
 					{
-						int rPos;
-						if( line[0] == '"' )
+						rPos = Util.rindex( line, "\"" );
+						char[][] splitData = Util.split( line[1..rPos], " " );
+						if( splitData.length == 3 )
 						{
-							rPos = Util.rindex( line, "\"" );
-
-							if( bPixel )
+							ColorUnit _color;
+							_color.index = splitData[0].dup;
+							_color.c = splitData[1].dup;
+							if( splitData[2] == "None" )
 							{
-								foreach( char c; line[1..rPos] )
-								{
-									pixel ~= c;
-								}
+								_color.value = "BGCOLOR";
 							}
-							else if( bColor )
+							else
 							{
-								char[][] splitData = Util.split( line[1..rPos], " " );
-								if( splitData.length == 3 )
-								{
-									ColorUnit _color;
-									_color.index = splitData[0];
-									_color.c = splitData[1];
-									if( splitData[2] == "None" )
-									{
-										_color.value = "BGCOLOR";
-									}
-									else
-									{
-										int r = hexStringToByte( splitData[2][1..3] );
-										int g = hexStringToByte( splitData[2][3..5] );
-										int b = hexStringToByte( splitData[2][5..7] );
+								int r = hexStringToByte( splitData[2][1..3] );
+								int g = hexStringToByte( splitData[2][3..5] );
+								int b = hexStringToByte( splitData[2][5..7] );
 
-										_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
-									}
-
-									_color.sn = colorSN++;
-
-									color ~= _color;
-								}
+								_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
 							}
-						}
+
+							_color.sn = colorSN++;
+							color ~= _color;
+						}					
+					
+					}
+					else if( quoteLineCount <= num_colors + 1 + width )
+					{
+						rPos = Util.rindex( line, "\"" );
+						foreach( char c; line[1..rPos] )
+							pixel ~= c;
 					}
 				}
-				
-				prevLine = line;
-			}
-
+			}			
+			
 			ubyte[] data; 
 			foreach( char c; pixel )
 			{

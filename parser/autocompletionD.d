@@ -2101,6 +2101,7 @@ version(DIDE)
 
 					CASTnode	_sub_ori_AST_Head = AST_Head;
 					AST_Head = searchMatchNode( AST_Head, wordWithoutSymbol, D_FIND ); // NOTE!!!! Using "searchMatchNode()"
+					if( ParserAction.getRoot( _sub_ori_AST_Head ) != ParserAction.getRoot( AST_Head ) ) lineNum = 2147483647; // Different Module
 					
 					if( AST_Head is null ) AST_Head = searchObjectModule( wordWithoutSymbol, D_FIND );
 

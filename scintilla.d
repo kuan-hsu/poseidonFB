@@ -3155,10 +3155,12 @@ extern(C)
 		
 		if( GLOBAL.enableIncludeComplete != "ON" && GLOBAL.enableKeywordComplete != "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) return IUP_DEFAULT;
 		
-		if( ScintillaAction.isComment( ih, pos ) )
-		{
-			if( ScintillaAction.isComment( ih, pos - 1 ) ) return IUP_DEFAULT;
-		}
+		bool bCheckString = true;
+		version(FBIDE) if( GLOBAL.enableIncludeComplete == "ON" ) bCheckString = false;
+
+		if( ScintillaAction.isComment( ih, pos, bCheckString ) )
+			if( ScintillaAction.isComment( ih, pos - 1, bCheckString ) ) return IUP_DEFAULT;
+
 		
 		if( length > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
 		int dummy;

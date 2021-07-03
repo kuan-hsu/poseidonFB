@@ -52,7 +52,7 @@ class CBaseDialog
 	
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, char[] parent = null )
+	this( int w, int h, char[] title, bool bResize = true, char[] parent = "" )
 	{
 		_dlg = IupDialog( null );
 		titleString = new IupString( title );
@@ -79,6 +79,35 @@ class CBaseDialog
 			parentName = new IupString( parent );
 			IupSetAttribute( _dlg, "PARENTDIALOG", parentName.toCString );
 		}
+		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
+		
+		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
+	}
+
+
+	this( int w, int h, char[] title, bool bResize = true, Ihandle* parent = null )
+	{
+		_dlg = IupDialog( null );
+		titleString = new IupString( title );
+		IupSetAttribute( _dlg, "TITLE", titleString.toCString );
+
+		size	= new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
+		onlyW	= new IupString( Integer.toString( w ) ~ "x" );
+		onlyH	= new IupString( "x" ~ Integer.toString( h ) );
+		if( w < 0 || h < 0 ) 
+		{
+			IupSetAttribute( _dlg, "RASTERSIZE", "NULL" );
+			if( w < 0 && h > 0)
+				IupSetAttribute( _dlg, "RASTERSIZE", onlyH.toCString );
+			else if( w > 0 && h < 0)
+				IupSetAttribute( _dlg, "RASTERSIZE", onlyW.toCString );
+		}
+		else
+		{
+			IupSetAttribute( _dlg, "RASTERSIZE", size.toCString );
+		}
+		
+		if( parent != null)	IupSetAttributeHandle( _dlg, "PARENTDIALOG", parent );
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
 		
 		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
