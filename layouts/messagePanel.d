@@ -50,13 +50,26 @@ public:
 		IupSetIntId( outputPanel, "INDICATORALPHA", 8, 128 );
 		
 		// scintilla
-		version(FBIDE) IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "freebasic");
-		version(DIDE) IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "d");
-		
-		IupSetAttribute( searchOutputPanel, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
-		IupSetAttribute( searchOutputPanel, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
-		IupSetAttribute( searchOutputPanel, "KEYWORDS2", GLOBAL.KEYWORDS[2].toCString );
-		IupSetAttribute( searchOutputPanel, "KEYWORDS3", GLOBAL.KEYWORDS[3].toCString );		
+		version(FBIDE)
+		{
+			IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "freebasic");
+			IupSetAttribute( searchOutputPanel, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS2", GLOBAL.KEYWORDS[2].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS3", GLOBAL.KEYWORDS[3].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS4", GLOBAL.KEYWORDS[4].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS5", GLOBAL.KEYWORDS[5].toCString );
+		}
+		version(DIDE)
+		{
+			IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "d");
+			IupSetAttribute( searchOutputPanel, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS3", GLOBAL.KEYWORDS[2].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS4", GLOBAL.KEYWORDS[3].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS5", GLOBAL.KEYWORDS[4].toCString );
+			IupSetAttribute( searchOutputPanel, "KEYWORDS6", GLOBAL.KEYWORDS[5].toCString );
+		}
 		
 		IupSetAttribute(searchOutputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
 		IupSetAttributeId( searchOutputPanel, "INDICATORSTYLE", 8, "DOTBOX" );
@@ -131,6 +144,9 @@ public:
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
+			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR23",  GLOBAL.editColor.keyWord[4].toCString );	// SCE_B_KEYWORD5 23
+			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR24",  GLOBAL.editColor.keyWord[5].toCString );	// SCE_B_KEYWORD6 24
+			
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
 			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_B_NUMBER 2
@@ -186,9 +202,10 @@ public:
 			
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR6", GLOBAL.editColor.keyWord[0].toCString );			// SCE_D_WORD 6	
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR7", GLOBAL.editColor.keyWord[1].toCString );			// SCE_D_WORD2 7
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR20",  GLOBAL.editColor.keyWord[2].toCString );			// SCE_D_WORD5 20
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR21",  GLOBAL.editColor.keyWord[3].toCString );			// SCE_D_WORD6 21
-			
+			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR9",  GLOBAL.editColor.keyWord[2].toCString );			// SCE_D_WORD5 9
+			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR20",  GLOBAL.editColor.keyWord[3].toCString );			// SCE_D_WORD6 20
+			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR21",  GLOBAL.editColor.keyWord[4].toCString );			// SCE_D_WORD6 21
+			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR22",  GLOBAL.editColor.keyWord[5].toCString );			// SCE_D_WORD7 22
 			/*
 			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENT 1
 			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENT 1

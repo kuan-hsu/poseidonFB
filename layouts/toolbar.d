@@ -191,8 +191,8 @@ class CToolBar
 				IupSetFocus( ih );
 				if( markLineNumber > -1 )
 				{
-					int dummy = IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-					dummy = IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
+					IupSetAttributeId( ih, "ENSUREVISIBLE", markLineNumber, "ENFORCEPOLICY" );
+					IupSetInt( ih, "CARET", markLineNumber );				
 				}
 				StatusBarAction.update();
 			}
@@ -222,8 +222,8 @@ class CToolBar
 				}
 
 				IupSetFocus( ih );
-				int dummy = IupScintillaSendMessage( ih, 2234, markLineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				dummy = IupScintillaSendMessage( ih, 2024, markLineNumber, 0 ); // SCI_GOTOLINE = 2024
+				IupSetAttributeId( ih, "ENSUREVISIBLE", markLineNumber, "ENFORCEPOLICY" );
+				IupSetInt( ih, "CARET", markLineNumber );
 				StatusBarAction.update();
 			}
 			

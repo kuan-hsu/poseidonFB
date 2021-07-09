@@ -34,10 +34,10 @@ class CStatusBar
 		EncodingType = IupLabel( "           " );
 		IupSetCallback( EncodingType, "BUTTON_CB", cast(Icallback) &CStatusBar_Encode_BUTTON_CB );
 		
-		Ihandle* image = IupLabel( "" );
-		IupSetAttribute( image, "IMAGE", "icon_customoption" );
+		Ihandle* image = IupFlatButton( "" );
+		IupSetAttributes( image, "IMAGE=icon_customoption,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
 		IupSetAttribute( image, "TIP", GLOBAL.languageItems["setcustomoption"].toCString );
-		IupSetCallback( image, "BUTTON_CB", cast(Icallback) &CStatusBar_CustomOption_BUTTON_CB );
+		IupSetCallback( image, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_CustomOption_BUTTON_CB );
 		
 		compileOptionSelection = IupLabel( "" );
 		IupSetHandle( "compileOptionSelection", compileOptionSelection );
@@ -55,11 +55,11 @@ class CStatusBar
 		}
 		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		
-		codecomplete = IupLabel( "" );
+		codecomplete = IupFlatButton( "" );
 		if( GLOBAL.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_on" ); else IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_off" );
-		IupSetAttribute( codecomplete, "NAME", "label_Codecomplete" );
+		IupSetAttributes( codecomplete, "NAME=label_Codecomplete,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
 		IupSetAttribute( codecomplete, "TIP", GLOBAL.languageItems["codecompletiononoff"].toCString );
-		IupSetCallback( codecomplete, "BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
+		IupSetCallback( codecomplete, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
 		
 		findMessage = IupLabel( "" );
 		IupSetAttribute( findMessage, "ELLIPSIS", "YES" );
@@ -600,10 +600,12 @@ extern(C) // Callback for CBaseDialog
 				Ihandle* encodeUTF16LEBOM = IupItem( toStringz( "UTF16LE.BOM" ), null );
 				IupSetCallback( encodeUTF16LEBOM, "ACTION", cast(Icallback) &menu.encode_cb );
 				Ihandle* encodeUTF32BE = IupItem( toStringz( "UTF32BE" ), null );
+				IupSetInt( encodeUTF32BE, "ACTIVE", 0 );
 				IupSetCallback( encodeUTF32BE, "ACTION", cast(Icallback) &menu.encode_cb );
 				Ihandle* encodeUTF32BEBOM = IupItem( toStringz( "UTF32BE.BOM" ), null );
 				IupSetCallback( encodeUTF32BEBOM, "ACTION", cast(Icallback) &menu.encode_cb );
 				Ihandle* encodeUTF32LE = IupItem( toStringz( "UTF32LE" ), null );
+				IupSetInt( encodeUTF32LE, "ACTIVE", 0 );
 				IupSetCallback( encodeUTF32LE, "ACTION", cast(Icallback) &menu.encode_cb );
 				Ihandle* encodeUTF32LEBOM = IupItem( toStringz( "UTF32LE.BOM" ), null );
 				IupSetCallback( encodeUTF32LEBOM, "ACTION", cast(Icallback) &menu.encode_cb );
@@ -614,9 +616,9 @@ extern(C) // Callback for CBaseDialog
 												encodeUTF8BOM,
 												encodeUTF16BEBOM,
 												encodeUTF16LEBOM,
-												encodeUTF32BE,
+												//encodeUTF32BE,
 												encodeUTF32BEBOM,
-												encodeUTF32LE,
+												//encodeUTF32LE,
 												encodeUTF32LEBOM,
 												null
 											);

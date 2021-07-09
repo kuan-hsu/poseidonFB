@@ -188,7 +188,7 @@ public:
 							bStringFlag = false;
 							bEscapeSequences = false;
 							identifier ~= data[i];
-							TokenUnit t = {TOK.Tstrings, identifier, lineNum};
+							TokenUnit t = {TOK.Tstrings, ( identifier.length > 2 ? identifier[1..$-1] : null ), lineNum};
 							results ~= t;
 							identifier = "";
 							continue;
@@ -625,7 +625,7 @@ public:
 						if( charSign == null )
 						{
 							identifier ~= data[i];
-							TokenUnit t = {TOK.Tstrings, identifier, lineNum};
+							TokenUnit t = {TOK.Tstrings, ( identifier.length > 2 ? identifier[1..$-1] : null ), lineNum};
 							results ~= t;
 							identifier = "";
 							bStringFlag = false;

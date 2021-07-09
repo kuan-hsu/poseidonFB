@@ -3548,7 +3548,7 @@ version(FBIDE)
 							}
 							else
 							{
-								AST_Head = searchMatchMemberNode( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_NAMESPACE | B_SUB );
+								AST_Head = searchMatchMemberNode( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_NAMESPACE | B_SUB | B_ENUMMEMBER );
 							}
 							
 							if( AST_Head is null ) return;

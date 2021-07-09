@@ -871,8 +871,7 @@ public:
 			
 			if( lineNumber > 0 )
 			{
-				--lineNumber;
-				IupSetAttributeId( ih, "ENSUREVISIBLE", lineNumber, "ENFORCEPOLICY" );
+				IupSetAttributeId( ih, "ENSUREVISIBLE", --lineNumber, "ENFORCEPOLICY" );
 				IupSetInt( ih, "CARET", lineNumber );
 				/+
 				int dummy = IupScintillaSendMessage( ih, 2234, cast(ulong) lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
@@ -1010,6 +1009,9 @@ public:
 			
 			if( fileStatusPos > -1 )
 			{
+				IupSetAttributeId( _sci.getIupScintilla, "ENSUREVISIBLE", lineNumber, "ENFORCEPOLICY" );
+				if( !bDirectGotoLine ) IupSetInt( _sci.getIupScintilla, "CARETPOS", fileStatusPos ); else IupSetInt( _sci.getIupScintilla, "CARET", lineNumber );
+				/*
 				dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2234, lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 				if( !bDirectGotoLine )
 					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2025, fileStatusPos, 0 ); // SCI_GOTOPOS 2025
@@ -1018,15 +1020,20 @@ public:
 
 				int visibleLINE = IupScintillaSendMessage( _sci.getIupScintilla, 2220, lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
 				if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
-				IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );				
+				IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );
+				*/
 			}
 			else
 			{
 				if( lineNumber > -1 )
 				{
+					IupSetAttributeId( _sci.getIupScintilla, "ENSUREVISIBLE", --lineNumber, "ENFORCEPOLICY" );
+					IupSetInt( _sci.getIupScintilla, "CARET", lineNumber );
+					/*
 					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2234, --lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
-					IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );				
+					IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );
+					*/
 				}
 			}
 			//StatusBarAction.update();

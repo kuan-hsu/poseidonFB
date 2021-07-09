@@ -581,15 +581,17 @@ void createMenu()
 	Ihandle* encodeUTF16LEBOM = IupItem( toStringz( "UTF16LE.BOM" ), null );
 	IupSetCallback( encodeUTF16LEBOM, "ACTION", cast(Icallback) &encode_cb );
 	Ihandle* encodeUTF32BE = IupItem( toStringz( "UTF32BE" ), null );
+	IupSetAttribute( encodeUTF32BE, "ACTIVE", "NO" );
 	IupSetCallback( encodeUTF32BE, "ACTION", cast(Icallback) &encode_cb );
 	Ihandle* encodeUTF32BEBOM = IupItem( toStringz( "UTF32BE.BOM" ), null );
 	IupSetCallback( encodeUTF32BEBOM, "ACTION", cast(Icallback) &encode_cb );
 	Ihandle* encodeUTF32LE = IupItem( toStringz( "UTF32LE" ), null );
+	IupSetAttribute( encodeUTF32LE, "ACTIVE", "NO" );
 	IupSetCallback( encodeUTF32LE, "ACTION", cast(Icallback) &encode_cb );
 	Ihandle* encodeUTF32LEBOM = IupItem( toStringz( "UTF32LE.BOM" ), null );
 	IupSetCallback( encodeUTF32LEBOM, "ACTION", cast(Icallback) &encode_cb );
 	
-	Ihandle* encodeSubMenu = IupMenu( encodeDefault, encodeUTF8, encodeUTF8BOM, encodeUTF16BEBOM, encodeUTF16LEBOM, encodeUTF32BE, encodeUTF32BEBOM, encodeUTF32LE, encodeUTF32LEBOM, null  );
+	Ihandle* encodeSubMenu = IupMenu( encodeDefault, encodeUTF8, encodeUTF8BOM, encodeUTF16BEBOM, encodeUTF16LEBOM, /*encodeUTF32BE,*/ encodeUTF32BEBOM, /*encodeUTF32LE,*/ encodeUTF32LEBOM, null  );
 	Ihandle* convertEncoding = IupSubmenu( GLOBAL.languageItems["convertencoding"].toCString, encodeSubMenu );
 
 	version(FBIDE)
@@ -683,11 +685,11 @@ void createMenu()
 	{
 		version(DLL)
 		{
-			version(FBIDE) IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.457)\nBy Kuan Hsu (Taiwan)\n2021.07.03" ~ "\nDLL Parser Verersion" ) );
+			version(FBIDE) IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.458)\nBy Kuan Hsu (Taiwan)\n2021.07.09" ~ "\nDLL Parser Verersion" ) );
 		}
 		else
 		{
-			version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.457)\nBy Kuan Hsu (Taiwan)\n2021.07.03" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+			version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.458)\nBy Kuan Hsu (Taiwan)\n2021.07.09" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 			version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.065)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		}
 		return IUP_DEFAULT;
