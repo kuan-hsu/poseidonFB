@@ -355,7 +355,6 @@ public:
 			doc ~= setINILineData( "debuggerpath", GLOBAL.debuggerFullPath );
 			doc ~= setINILineData( "x64debuggerpath", GLOBAL.x64debuggerFullPath );
 			doc ~= setINILineData( "terminalpath", GLOBAL.linuxTermName );
-			//doc ~= setINILineData( "defaultoption", GLOBAL.defaultOption.toDString );
 			doc ~= setINILineData( "resultwindow", GLOBAL.compilerWindow );
 			doc ~= setINILineData( "usesfx", GLOBAL.compilerSFX );
 			doc ~= setINILineData( "annotation", GLOBAL.compilerAnootation );
@@ -788,7 +787,6 @@ public:
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
 							case "x64debuggerpath":			GLOBAL.x64debuggerFullPath = right;						break;
 							case "terminalpath":			GLOBAL.linuxTermName = right;							break;
-							//case "defaultoption":			GLOBAL.defaultOption = right;							break;
 							case "resultwindow":			GLOBAL.compilerWindow = right;							break;
 							case "usesfx":					GLOBAL.compilerSFX = right;								break;
 							case "annotation":				GLOBAL.compilerAnootation = right;						break;

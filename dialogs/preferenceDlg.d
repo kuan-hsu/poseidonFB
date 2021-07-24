@@ -130,7 +130,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleAnnotation = IupToggle( GLOBAL.languageItems["errorannotation"].toCString, null );
 		IupSetAttribute( toggleAnnotation, "VALUE", toStringz(GLOBAL.compilerAnootation.dup) );
 		IupSetHandle( "toggleAnnotation", toggleAnnotation );
-		
+
 		Ihandle* toggleShowResultWindow = IupToggle( GLOBAL.languageItems["showresultwindow"].toCString, null );
 		IupSetAttribute( toggleShowResultWindow, "VALUE", toStringz(GLOBAL.compilerWindow.dup) );
 		IupSetHandle( "toggleShowResultWindow", toggleShowResultWindow );

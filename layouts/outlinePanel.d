@@ -2303,7 +2303,7 @@ extern(C)
 					if( IupGetInt( ih, "COUNT" ) > 0 && item > 0 )
 					{
 						Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-						if( tree != null ) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" );
+						if( tree != null ) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[--item], "YES" );
 					}
 				}
 			}

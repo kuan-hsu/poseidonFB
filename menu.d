@@ -685,12 +685,12 @@ void createMenu()
 	{
 		version(DLL)
 		{
-			version(FBIDE) IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.458)\nBy Kuan Hsu (Taiwan)\n2021.07.09" ~ "\nDLL Parser Verersion" ) );
+			version(FBIDE) IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.459)\nBy Kuan Hsu (Taiwan)\n2021.07.24" ~ "\nDLL Parser Verersion" ) );
 		}
 		else
 		{
-			version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.458)\nBy Kuan Hsu (Taiwan)\n2021.07.09" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-			version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.065)\nBy Kuan Hsu (Taiwan)\n2021.06.19" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+			version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.459)\nBy Kuan Hsu (Taiwan)\n2021.07.24" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+			version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.066)\nBy Kuan Hsu (Taiwan)\n2021.07.24" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		}
 		return IUP_DEFAULT;
 	});

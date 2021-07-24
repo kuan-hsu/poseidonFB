@@ -503,12 +503,14 @@ version(FBIDE)
 			return results;
 		}
 
-		static char[] checkIncludeExist( char[] _include, char[] originalFullPath )
+		static char[] checkIncludeExist( char[] include, char[] originalFullPath )
 		{
 			try
 			{
-				char[] include;
+				//char[] include;
 				
+				if( !include.length ) return null;
+				/*
 				if( _include.length > 2 )
 				{
 					if( _include[0] == '"' && _include[$-1] == '"' ) _include = _include[1..$-1];
@@ -518,7 +520,7 @@ version(FBIDE)
 				{
 					return null;
 				}
-				
+				*/
 				include = Util.substitute( include, "\\", "/" );
 				originalFullPath = Path.normalize( originalFullPath );
 				

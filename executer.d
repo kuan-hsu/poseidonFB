@@ -35,6 +35,7 @@ struct ExecuterAction
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;
 	
+	
 	version(DIDE)
 	{
 		import tango.sys.win32.UserGdi, UTF = tango.text.convert.Utf;
@@ -178,23 +179,38 @@ struct ExecuterAction
 		PROJECT		activePrj;
 		char[]		cwd, command, args;
 		FocusUnit	focus;
+		Ihandle*	processDlg;
 
 		public:
-		this( char[] _cwd, char[] _command )
-		{
-			cwd				= _cwd;
-			command			= _command;
-			
-			super( &go );
-		}
-		
-		this( char[] _cwd, char[] _command, char[] _args )
+		this( char[] _cwd, char[] _command, bool _bRun = false, char[] _args = null )
 		{
 			cwd				= _cwd;
 			command			= _command;
 			args			= _args;
 			
-			if( !args.length ) args = " ";
+			if( _bRun )
+			{
+				if( !args.length ) args = " ";
+			}
+			else
+			{
+				_args = null;
+			}
+			
+			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+			{
+				Ihandle* processLabel = IupLabel( "Compiling......" );
+				IupSetAttribute( processLabel, "SIZE", "96x12" );
+				version(Windows) IupSetAttribute( processLabel, "FONT", "Consolas Bold, 14" ); else IupSetAttribute( processLabel, "FONT", "Monospace Bold, 14" );
+				IupSetAttribute( processLabel, "ALIGNMENT", "ACENTER:ACENTER" );
+				processDlg = IupDialog( processLabel );
+				IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO,OPACITY=180,SHRINK=YES" );
+				IupSetAttribute( processDlg, "TITLE", null );
+				IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
+				IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
+				IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );
+			}
+			
 			super( &go );
 		}		
 
@@ -318,15 +334,11 @@ struct ExecuterAction
 						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
 					}
 				}
-				/*
-				if( GLOBAL.delExistExe == "ON" )
-				{
-					// Remove the execute file
-					scope targetFilePath = new FilePath( ScintillaAction.getActiveCScintilla.getFullPath() );
-					version(Windows) targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() ~ ".exe" ); else targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() );
-					if( targetFilePath.exists() ) targetFilePath.remove();
-				}
-				*/
+
+				if( GLOBAL.toggleCompileAtBackThread == "ON" )
+					if( processDlg != null )
+						if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
+
 				return;
 			}
 			else
@@ -414,6 +426,10 @@ struct ExecuterAction
 					GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" );
 				}
 			}
+			
+			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+				if( processDlg != null )
+					if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
 		}
 	}
 	
@@ -424,6 +440,7 @@ struct ExecuterAction
 		PROJECT		activePrj;
 		char[]		command, extraOptions, optionDebug, compilePath, executeName;
 		FocusUnit	focus;
+		Ihandle*	processDlg;
 
 		public:
 		this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
@@ -444,6 +461,19 @@ struct ExecuterAction
 			if( _prj.focusOn.length )
 				if( _prj.focusOn in _prj.focusUnit ) focus = _prj.focusUnit[_prj.focusOn];
 			
+			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+			{
+				Ihandle* processLabel = IupLabel( "Building......" );
+				IupSetAttribute( processLabel, "SIZE", "96x12" );
+				version(Windows) IupSetAttribute( processLabel, "FONT", "Consolas Bold, 14" ); else IupSetAttribute( processLabel, "FONT", "Monospace Bold, 14" );
+				IupSetAttribute( processLabel, "ALIGNMENT", "ACENTER:ACENTER" );
+				processDlg = IupDialog( processLabel );
+				IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO,OPACITY=180,SHRINK=YES" );
+				IupSetAttribute( processDlg, "TITLE", null );
+				IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
+				IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
+				IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );
+			}
 			
 			super( &go );
 		}
@@ -946,6 +976,10 @@ struct ExecuterAction
 					}
 				}
 			}
+			
+			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+				if( processDlg != null )
+					if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
 		}
 	}
 	
@@ -956,6 +990,7 @@ struct ExecuterAction
 		PROJECT		activePrj;
 		char[]		command, extraOptions;
 		FocusUnit	focus;
+		Ihandle*	processDlg;
 
 		public:
 		this( PROJECT _prj, char[] _command, char[] _extraOptions )
@@ -973,6 +1008,20 @@ struct ExecuterAction
 			if( _prj.focusOn.length )
 				if( _prj.focusOn in _prj.focusUnit ) focus = _prj.focusUnit[_prj.focusOn];
 			
+			
+			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+			{
+				Ihandle* processLabel = IupLabel( "ReBuilding......" );
+				IupSetAttribute( processLabel, "SIZE", "96x12" );
+				version(Windows) IupSetAttribute( processLabel, "FONT", "Consolas Bold, 14" ); else IupSetAttribute( processLabel, "FONT", "Monospace Bold, 14" );
+				IupSetAttribute( processLabel, "ALIGNMENT", "ACENTER:ACENTER" );
+				processDlg = IupDialog( processLabel );
+				IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,OPACITY=180,SHRINK=YES" );
+				IupSetAttribute( processDlg, "TITLE", null );
+				IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
+				IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
+				IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );
+			}
 			
 			super( &go );
 		}
@@ -1195,6 +1244,10 @@ struct ExecuterAction
 				scope oFilePath = new FilePath( objPath );
 				if( oFilePath.exists ) oFilePath.remove;
 			}
+			
+			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+				if( processDlg != null ) 
+					if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
 		}
 	}	
 	
@@ -1402,9 +1455,7 @@ struct ExecuterAction
 			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
 			scope _filePath = new FilePath( cSci.getFullPath() );
 			
-			CompileThread _compileThread;
-			if( !bRun ) _compileThread = new CompileThread( _filePath.path.dup, command ); else _compileThread = new CompileThread( _filePath.path.dup, command, args );
-		
+			auto _compileThread = new CompileThread( _filePath.path.dup, command, bRun, args );
 			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
 			{
 				_compileThread.go();
