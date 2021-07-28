@@ -142,7 +142,7 @@ struct PROJECT
 			if( joined.length ) doc ~= setINILineData( "libdir", joined );
 		}
 		
-		version(FBIDE) actionManager.FileAction.saveFile( dir ~ "/.poseidon", doc );
+		version(FBIDE) actionManager.FileAction.saveFile( dir ~ "/FB.poseidon", doc );
 		version(DIDE) actionManager.FileAction.saveFile( dir ~ "/D.poseidon", doc );
 		
 		return true;

@@ -62,29 +62,7 @@ public:
 
 			data = Util.trim( data );
 			data ~= "\n";
-			/+
-			version(DLL)
-			{
-				TokenUnit 	token;
-				int			count;
-				foreach( char[] s; getTokensString( data ) )
-				{
-					count ++;
-					if( count == 1 )
-						token.tok = cast(TOK) Integer.atoi( s );
-					else if( count == 2 )
-						token.identifier = s;
-					else
-					{
-						token.lineNumber = Integer.atoi( s );
-						count = 0;
-						results ~= token;
-					}
-				}
-				
-				return results;
-			}
-			+/
+
 			try
 			{
 				for( int i = 0; i < data.length; ++ i )

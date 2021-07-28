@@ -443,15 +443,14 @@ public:
 			return true;
 		}
 
-		version(FBIDE)	char[] setupFileName = setupDir ~ "/.poseidon";
-		version(DIDE)	char[] setupFileName = setupDir ~ "/D.poseidon";
-
-		scope sFN = new FilePath( setupFileName );
+		version(FBIDE)	scope sFN = new FilePath( setupDir ~ "/FB.poseidon" );
+		version(DIDE)	scope sFN = new FilePath( setupDir ~ "/D.poseidon" );
+		version(FBIDE)	if( !sFN.exists() ) sFN.set( setupDir ~ "/.poseidon" );
 
 		if( sFN.exists() )
 		{
 			PROJECT		p;
-			GLOBAL.projectManager[setupDir] = p.loadFile( setupFileName );
+			GLOBAL.projectManager[setupDir] = p.loadFile( sFN.toString );
 
 			if( !GLOBAL.projectManager[setupDir].dir.length )
 			{
@@ -522,7 +521,7 @@ public:
 				return false;
 			}
 
-			scope poseidonFN = new FilePath( sFN.path ~ ".poseidon" );
+			scope poseidonFN = new FilePath( sFN.path ~ "FB.poseidon" );
 
 			if( poseidonFN.exists() )
 			{

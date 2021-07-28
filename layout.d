@@ -238,8 +238,13 @@ extern(C)
 				scope argPath = new FilePath( args[1] );
 				if( argPath.exists() )
 				{
-					version(FBIDE)	char[] PRJFILE = ".poseidon";
-					version(DIDE)	char[] PRJFILE = "D.poseidon";
+					version(FBIDE)
+					{
+						char[] PRJFILE = "FB.poseidon";
+						if( argPath.file != PRJFILE ) PRJFILE = ".poseidon";
+					}
+					version(DIDE)	char[] PRJFILE = "D.poseidon"
+					;
 					if( argPath.file == PRJFILE )
 					{
 						char[] dir = argPath.path;
@@ -678,7 +683,11 @@ extern(C)
 		scope f = new FilePath( _fn );
 		if( f.isFolder )
 		{
-			version(FBIDE)	f.set( f.toString ~ "/" ~ ".poseidon" );
+			version(FBIDE)
+			{
+				f.set( f.toString ~ "/" ~ "FB.poseidon" );
+				if( !f.exists() ) f.set( f.path ~ ".poseidon" );
+			}
 			version(DIDE)	f.set( f.toString ~ "/" ~ "D.poseidon" );
 		}
 		
@@ -686,8 +695,8 @@ extern(C)
 		{
 			bool bIsPrj;
 			
-			version(FBIDE) if( f.name == ".poseidon" ) bIsPrj = true;
-			version(DIDE) if( f.file == "D.poseidon" ) bIsPrj = true;
+			version(FBIDE)	if( f.file == "FB.poseidon" || f.name == ".poseidon" ) bIsPrj = true;
+			version(DIDE)	if( f.file == "D.poseidon" ) bIsPrj = true;
 			if( bIsPrj )
 			{
 				char[] dir = f.path;

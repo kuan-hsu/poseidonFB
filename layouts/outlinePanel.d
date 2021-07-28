@@ -1539,15 +1539,8 @@ class COutline
 		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
 		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
 		
-		version(DLL)
-		{
-			GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( GLOBAL.getParserJson( document, fullPath ) );
-		}
-		else
-		{
-			GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-			GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
-		}
+		GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+		GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
 
 		Ihandle* _tree = getTree( fullPath );
 		if( _tree != null )	cleanTree( fullPath );
@@ -1578,13 +1571,8 @@ class COutline
 			else
 			{
 				char[] document = GLOBAL.scintillaManager[fullPathByOS(fullPath)].getText();
-				version(DLL)
-					GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( GLOBAL.getParserJson( document, fullPath ) );
-				else
-				{
-					GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-					GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
-				}
+				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+				GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
 				Ihandle* _tree = getTree( fullPath );
 				if( _tree != null )	cleanTree( fullPath );
 				createTree( GLOBAL.parserManager[fullPathByOS(fullPath)] );
@@ -1672,19 +1660,10 @@ class COutline
 			// Parser
 			if( f.exists() )
 			{
-				version(DLL)
+				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) ) )
 				{
-					Encoding		_encoding;
-					char[] 	_text = FileAction.loadFile( fullPath, _encoding );
-					GLOBAL.parserManager[fullPathByOS(fullPath)] = createNodeFromJSON( GLOBAL.getParserJson( _text, fullPath ) );
-				}
-				else
-				{
-					if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) ) )
-					{
-						GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
-						return GLOBAL.parserManager[fullPathByOS(fullPath)];
-					}
+					GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
+					return GLOBAL.parserManager[fullPathByOS(fullPath)];
 				}
 			}
 		}
@@ -1976,15 +1955,8 @@ class COutline
 					{
 						char[] document = cSci.getText();
 						CASTnode astHeadNode;
-						version(DLL)
-						{
-							astHeadNode = createNodeFromJSON( GLOBAL.getParserJson( document, cSci.getFullPath ) );
-						}
-						else
-						{
-							GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-							astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
-						}
+						GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+						astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
 						
 						CASTnode temp = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
 						GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)] = astHeadNode;
@@ -2033,19 +2005,11 @@ class COutline
 		// Don't Create Tree
 		try
 		{
-			version(DLL)
+			// Parser
+			if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) ) )
 			{
-				version(FBIDE) return createNodeFromJSON( GLOBAL.getParserJson( text, "_.bas" ) );
-				version(DIDE) return createNodeFromJSON( GLOBAL.getParserJson( text, "_.d" ) );
-			}
-			else
-			{
-				// Parser
-				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) ) )
-				{
-					version(FBIDE) return GLOBAL.Parser.parse( "_.bas" );
-					version(DIDE) return GLOBAL.Parser.parse( "_.d" );
-				}
+				version(FBIDE) return GLOBAL.Parser.parse( "_.bas" );
+				version(DIDE) return GLOBAL.Parser.parse( "_.d" );
 			}
 		}
 		catch( Exception e )

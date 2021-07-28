@@ -12,7 +12,7 @@ import tango.sys.Environment, tango.io.FilePath;
 import tango.sys.Process, tango.io.stream.Lines;
 
 import tango.sys.SharedLib;
-
+/*
 version(linux)
 {
 	import tango.stdc.posix.pwd;
@@ -20,7 +20,7 @@ version(linux)
 	extern(C) uid_t geteuid();
 	extern(C) uid_t getuid();
 }
-
+*/
 version(Windows)
 {
 	import tango.sys.win32.UserGdi;
@@ -28,11 +28,11 @@ version(Windows)
 	pragma(lib, "winmm.lib"); // For PlaySound()
 	pragma(lib, "iup.lib");
 	pragma(lib, "iup_scintilla.lib");
-	
-	//version(DLL) pragma(lib, "FBparserDLL.lib");
 }
 else
 {
+	import tango.sys.HomeFolder;
+	
 	// libgtk2.0-dev
 	//-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
 	
@@ -116,40 +116,6 @@ void main( char[][] args )
 			if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 			return;
 		}
-		
-		version(DLL)
-		{
-			SharedLib _sharedLib;
-			try
-			{
-				//extern(C) char[] getParserJson( char[] _document, char[] fullPath );
-				_sharedLib = SharedLib.load( "FBparserDLL.dll" );
-				if( _sharedLib !is null )
-				{
-					void* iupPtr = _sharedLib.getSymbol( "getParserJson" ); 
-					if( iupPtr )
-					{
-						void **point = cast(void **) & GLOBAL.getParserJson; // binding function address from DLL to our function pointer
-						*point = iupPtr;
-					}
-					else
-					{
-						throw new Exception( null );
-					}
-				}
-				else
-				{
-					throw new Exception( null );
-				}
-			}
-			catch( Exception e )
-			{
-				IupMessageError( null, toStringz( e.toString ) );
-				IupClose();
-				if( GLOBAL.htmlHelp != null ) sharedlib.unload();
-				return;
-			}
-		}
 	}
 	
 	//  Get poseidonFB exePath & set the new cwd
@@ -164,8 +130,11 @@ void main( char[][] args )
 		}
 		else
 		{
+			/*
 			auto user = getpwuid( getuid() );
 			char[] home = fromStringz( user.pw_dir );
+			*/
+			char[] home = expandTilde( "~" );
 			
 			if( Util.index( GLOBAL.poseidonPath, home ) != 0 )
 			{
@@ -338,7 +307,7 @@ void main( char[][] args )
 		{
 			version(FBIDE)
 			{
-				if( argPath.file == ".poseidon" )
+				if( argPath.file == "FB.poseidon" || argPath.file == ".poseidon" )
 				{
 					char[] dir = argPath.path;
 					if( dir.length ) dir = dir[0..$-1]; // Remove tail '/'
@@ -454,5 +423,4 @@ void main( char[][] args )
 	IupClose();
 	
 	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
-	version(DLL) if( GLOBAL.getParserJson != null ) _sharedLib.unload();
 }

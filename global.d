@@ -86,11 +86,6 @@ struct GLOBAL
 	public:
 	version(Windows) 	static _htmlHelp		htmlHelp;
 	
-	version(DLL)
-	{
-		extern(C) static char[] function( char[] _document, char[] fullPath )		getParserJson;
-	}
-	
 	static CPLUGIN[char[]]		pluginMnager;
 	
 	static float				IUP_VERSION;
