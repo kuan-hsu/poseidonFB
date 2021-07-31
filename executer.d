@@ -110,7 +110,10 @@ struct ExecuterAction
 				{
 					int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
 					int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
-					geoString = " --geometry=80x24+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
+					int w = GLOBAL.consoleWindow.w < 80 ? 80 : GLOBAL.consoleWindow.w;
+					int h = GLOBAL.consoleWindow.h < 24 ? 24 : GLOBAL.consoleWindow.h;
+					//geoString = " --geometry=80x24+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
+					geoString = " --geometry=" ~ Integer.toString( w ) ~ "x" ~ Integer.toString( h ) ~ "+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
 				}
 				
 				//	p = new Process( true, GLOBAL.linuxTermName ~ geoString ~ " -e " ~ scommand );
@@ -119,11 +122,17 @@ struct ExecuterAction
 					switch( Util.trim( GLOBAL.linuxTermName ) )
 					{
 						case "xterm", "uxterm":
+							geoString = Util.substitute( geoString, "--geometry=", "-geometry " );
 							p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
-						case "gnome-terminal", "mate-terminal" ,"xfce4-terminal" ,"lxterminal":
+						case "mate-terminal" ,"xfce4-terminal" ,"lxterminal", "gnome-terminal":
 							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
+						/*
+						case "gnome-terminal":
+							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -- " ~ scommand );
+							break;
+						*/
 						default:
 							p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand );
 					}
