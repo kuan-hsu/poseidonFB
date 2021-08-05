@@ -220,7 +220,7 @@ void main( char[][] args )
 	
 	IupSetAttributes( GLOBAL.mainDlg, "SHRINK=YES" );
 	
-	version(Windows) IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB );
+	version(Windows) IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB ); else IupSetGlobal( "GLOBALMENU", "NO" ); // for ubuntu menu & toolbar overlap issue
 
 	createLayout();
 	

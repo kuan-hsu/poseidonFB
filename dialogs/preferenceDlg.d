@@ -800,9 +800,8 @@ class CPreferenceDialog : CBaseDialog
 
 			Ihandle* hBoxKeywordCase = IupHbox( radioKeywordCase0, radioKeywordCase1, radioKeywordCase2, radioKeywordCase3, null );
 			IupSetAttributes( hBoxKeywordCase, "GAP=30,MARGIN=30x,ALIGNMENT=ACENTER" );
-			Ihandle* radioKeywordCase = IupRadio( hBoxKeywordCase );
 
-			Ihandle* frameKeywordCase = IupFrame( radioKeywordCase );
+			Ihandle* frameKeywordCase = IupFrame( IupRadio( hBoxKeywordCase ) );
 			IupSetAttributes( frameKeywordCase, "SIZE=346x,GAP=1" );
 			IupSetAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].toCString );
 		}

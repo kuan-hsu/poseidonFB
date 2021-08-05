@@ -24,7 +24,7 @@ void createTabs()
 	IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
-	version(Windows) IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
+	//version(Windows) IupSetCallback( GLOBAL.documentTabs, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
 }
 
 void createTabs2()
@@ -43,7 +43,7 @@ void createTabs2()
 	IupSetCallback( GLOBAL.documentTabs_Sub, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
-	version(Windows) IupSetCallback( GLOBAL.documentTabs_Sub, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
+	//version(Windows) IupSetCallback( GLOBAL.documentTabs_Sub, "RIGHTCLICK_CB", cast(Icallback) &tabRightClick_cb );
 }
 
 
