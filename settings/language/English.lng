@@ -137,6 +137,7 @@ options=Options
 					codecompletiononoff=Code Completion On/Off
 				includelevel=Include Levels
 					includeleveltip=Set -1 To Unlimited
+				autocmaxheight=Max Complete List Items
 			editor=Editor
 				lnmargin=Show Linenumber Margin
 				fixedlnmargin=Fixed Linenumber Margin Size

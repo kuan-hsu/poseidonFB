@@ -1416,7 +1416,8 @@ class COutline
 					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-					version(Windows) if( GLOBAL.editColor.outline_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.outline_HLT.toCString );
+					if( fromStringz( IupGetGlobal( "DRIVER" ) ) != "GTK" )
+						if( GLOBAL.editColor.project_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.project_HLT.toCString );
 				}
 			}
 			

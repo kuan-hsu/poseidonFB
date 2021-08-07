@@ -812,7 +812,7 @@ class CScintilla
 		IupSetAttribute( sci, "SIZE", "NULL" );
 		//IupSetAttribute( sci, "VISIBLELINES", "60" );
 
-		IupSetInt( sci, "AUTOCMAXHEIGHT", 15 );
+		IupSetInt( sci, "AUTOCMAXHEIGHT", GLOBAL.autoCMaxHeight );
 		int columnEdge = Integer.atoi( GLOBAL.editorSetting00.ColumnEdge );
 		if( columnEdge > 0 )
 		{

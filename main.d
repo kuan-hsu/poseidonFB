@@ -190,7 +190,8 @@ void main( char[][] args )
 
 	IupSetGlobal( "UTF8MODE", "YES" );
 	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
-	
+
+	/*
 	char[] iupVersion = fromStringz( IupGetGlobal( "VERSION" ) );
 	if( Util.count( iupVersion, "." ) == 2 )
 	{
@@ -204,12 +205,12 @@ void main( char[][] args )
 	
 	if( GLOBAL.IUP_VERSION > 3.24 )
 	{
-		//IupMessage( "", toStringz( Float.toString( GLOBAL.IUP_VERSION ) ) );
 		version(linux) if( fromStringz( IupGetGlobal( "TXTHLCOLOR" ) ) == "255 255 255" ) IupSetGlobal( "TXTHLCOLOR", "154 184 124" );
 	}
-	
+	*/
 
 	createMenu();
+	
 	// Creates a dialog containing the control
 	GLOBAL.mainDlg = IupDialog( null );
 	IupSetHandle( "POSEIDON_MAIN_DIALOG", GLOBAL.mainDlg );

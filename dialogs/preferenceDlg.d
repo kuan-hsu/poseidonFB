@@ -14,7 +14,7 @@ private struct PreferenceDialogParameters
 	static		IupString[15]		_stringOfLabel;
 	static		IupString[50]		kbg, stringSC;
 	static		IupString[5]		stringMonitor;
-	static		IupString			stringCharSymbol, stringTabWidth, stringColumnEdge, stringBarSize, stringTrigger, stringLevel;
+	static		IupString			stringCharSymbol, stringTabWidth, stringColumnEdge, stringBarSize, stringTrigger, stringLevel, stringMaxHeight;
 	
 	static		CTable				fontTable;
 }
@@ -245,10 +245,24 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleIncludeComplete, "VALUE", toStringz(GLOBAL.enableIncludeComplete.dup) );
 		IupSetHandle( "toggleIncludeComplete", toggleIncludeComplete );
 		
+		
+		//*******************
 		Ihandle* toggleUseParser = IupToggle( GLOBAL.languageItems["enableparser"].toCString, null );
 		IupSetAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.enableParser.dup) );
 		IupSetHandle( "toggleUseParser", toggleUseParser );
 		
+		Ihandle* labelMaxHeight = IupLabel( toStringz( GLOBAL.languageItems["autocmaxheight"].toDString ~ ":" ) );
+		IupSetAttributes( labelMaxHeight, "SIZE=120x12,ALIGNMENT=ARIGHT:ACENTER" );
+		
+		PreferenceDialogParameters.stringMaxHeight = new IupString( Integer.toString( GLOBAL.autoCMaxHeight ) );
+		Ihandle* textMaxHeight = IupText( null );
+		IupSetAttribute( textMaxHeight, "SIZE", "56x12" );
+		IupSetAttribute( textMaxHeight, "VALUE", PreferenceDialogParameters.stringMaxHeight.toCString );
+		IupSetHandle( "textMaxHeight", textMaxHeight );
+
+		Ihandle* hBoxUseParser = IupHbox( toggleUseParser, IupFill, labelMaxHeight, textMaxHeight, null );
+		IupSetAttribute( hBoxUseParser, "ALIGNMENT", "ACENTER" );
+		//********************
 		
 		
 		Ihandle* labelTrigger = IupLabel( toStringz( GLOBAL.languageItems["trigger"].toDString ~ ":" ) );
@@ -335,17 +349,6 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* toggleFunctionTitle = IupToggle( GLOBAL.languageItems["showtitle"].toCString, null );
 		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
-		
-		/*
-		Ihandle* labelFunctionTitle = IupLabel( GLOBAL.languageItems["width"].toCString );
-		IupSetAttributes( labelFunctionTitle, "SIZE=80x12,ALIGNMENT=ARIGHT:ACENTER" ); 
-		Ihandle* textFunctionTitle = IupText( null );
-		IupSetAttribute( textFunctionTitle, "SIZE", "30x12" );
-		IupSetAttribute( textFunctionTitle, "VALUE", GLOBAL.widthFunctionTitle.toCString );
-		IupSetHandle( "textFunctionTitle", textFunctionTitle );
-		*/
-		Ihandle* hBoxFunctionTitle = IupHbox( toggleFunctionTitle, null );
-		IupSetAttribute( hBoxFunctionTitle, "ALIGNMENT", "ACENTER" ); 		
 
 
 		Ihandle* toggleLiveNone = IupToggle( GLOBAL.languageItems["none"].toCString, null );
@@ -381,13 +384,12 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* frameLive = IupFrame( hBoxLive2 );
 		IupSetAttributes( frameLive, "SIZE=346x" );
 		IupSetAttribute( frameLive, "TITLE", GLOBAL.languageItems["parserlive"].toCString );
-
+		
 
 		version(FBIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
-		//Ihandle* hBox00_1 = IupHbox( labelIncludeLevel, textIncludeLevel, null );
 		
-		Ihandle* vBox00 = IupVbox( toggleUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, toggleFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
 	
@@ -2249,6 +2251,7 @@ extern(C) // Callback for CPreferenceDialog
 			*/
 
 			GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ) );
+			GLOBAL.autoCMaxHeight						= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE" ) ) );
 			GLOBAL.statusBar.setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
 			
 			version(FBIDE)
@@ -2258,6 +2261,7 @@ extern(C) // Callback for CPreferenceDialog
 			}
 			
 			IupSetAttribute( IupGetHandle( "textTrigger" ), "VALUE", PreferenceDialogParameters.stringTrigger << IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) );
+			IupSetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE", PreferenceDialogParameters.stringMaxHeight << IupGetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE" ) );
 
 			//if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 

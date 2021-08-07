@@ -97,7 +97,7 @@ void createExplorerWindow()
 
 	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
-	if( GLOBAL.IUP_VERSION > 3.24 ) IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x2" ); else IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "10x4" );
+	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x2" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDON_BOTTOM_TABS" );

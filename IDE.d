@@ -388,6 +388,7 @@ public:
 			doc ~= setINILineData( "keywordcase", Integer.toString( GLOBAL.keywordCase ) );
 			doc ~= setINILineData( "dwelldelay", GLOBAL.dwellDelay );
 			doc ~= setINILineData( "triggerdelay", GLOBAL.triggerDelay );
+			doc ~= setINILineData( "autocmaxheight", Integer.toString( GLOBAL.autoCMaxHeight ) );
 			
 			// manual
 			doc ~= setINILineData( "[manual]");
@@ -824,6 +825,7 @@ public:
 							case "keywordcase":				GLOBAL.keywordCase = Integer.atoi( right );						break;
 							case "dwelldelay":				GLOBAL.dwellDelay = right;										break;
 							case "triggerdelay":			GLOBAL.triggerDelay = right;									break;
+							case "autocmaxheight":			GLOBAL.autoCMaxHeight = Integer.atoi( right );					break;
 							default:
 						}
 						break;

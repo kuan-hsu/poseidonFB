@@ -88,7 +88,7 @@ struct GLOBAL
 	
 	static CPLUGIN[char[]]		pluginMnager;
 	
-	static float				IUP_VERSION;
+	//static float				IUP_VERSION;
 	
 	static Ihandle*				mainDlg;
 	static Ihandle*				documentTabs, documentTabs_Sub, projectViewTabs, messageWindowTabs;
@@ -192,6 +192,7 @@ struct GLOBAL
 	
 	static char[]				dwellDelay = "1000";
 	static char[]				triggerDelay = "100";
+	static int					autoCMaxHeight = 12;
 	static int					indicatorStyle = 16;
 	
 
@@ -655,6 +656,7 @@ struct GLOBAL
 							GLOBAL.languageItems["codecompletiononoff"] = new IupString( cast(char[]) "Code Completion On/Off" );
 						GLOBAL.languageItems["includelevel"] = new IupString( cast(char[]) "Include Levels" );
 							GLOBAL.languageItems["includeleveltip"] = new IupString( cast(char[]) "Set -1 To Unlimited" );
+						GLOBAL.languageItems["autocmaxheight"] = new IupString( cast(char[]) "Max Complete List Items" );
 					GLOBAL.languageItems["editor"] = new IupString( cast(char[]) "Editor" );
 						GLOBAL.languageItems["lnmargin"] = new IupString( cast(char[]) "Show Linenumber Margin" );
 						GLOBAL.languageItems["fixedlnmargin"] = new IupString( cast(char[]) "Fixed Linenumber Margin Size" );

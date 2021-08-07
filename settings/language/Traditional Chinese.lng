@@ -137,6 +137,7 @@ options=選項
 					codecompletiononoff開啟/關閉自動完成
 				includelevel=引含檔案的層數
 					includeleveltip=設定-1無層數限制
+				autocmaxheight=自動完成視窗最大項目
 			editor=編輯器
 				lnmargin=顯示行號欄位
 				fixedlnmargin=固定行號欄位寬度

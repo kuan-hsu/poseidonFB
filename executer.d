@@ -1925,9 +1925,10 @@ struct ExecuterAction
 							{
 								if( lowerCase( s[$-3..$] ) == "bas" )
 								{
+									char[] name = mainFilePath.name;
 									if( mainFilePath.isAbsolute() )
 									{
-										if( lowerCase( s[0..$-4] ) == lowerCase( mainFilePath.toString ) )
+										if( lowerCase( s[0..$-4] ) == lowerCase( name ) )
 										{
 											txtSources = " -b \"" ~ s ~ "\"";
 											bGotOneFileBuildSuccess = true;
@@ -1937,7 +1938,7 @@ struct ExecuterAction
 									else
 									{
 										char[] relativePath = Util.substitute( s[0..$-4], GLOBAL.projectManager[activePrjName].dir ~ "/", "" );
-										if( lowerCase( relativePath ) == lowerCase( mainFilePath.toString ) ) 
+										if( lowerCase( relativePath ) == lowerCase( name ) ) 
 										{
 											txtSources = " -b \"" ~ s ~ "\"";
 											bGotOneFileBuildSuccess = true;
@@ -2084,13 +2085,24 @@ struct ExecuterAction
 			if( !options.length ) options = customOpt;
 			if( !options.length ) options = _focus.Option;
 
+			
 			version(FBIDE)
 			{
-				/*
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ) ~
-							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( _focus.Option.length ? " " ~ _focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-				*/
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ) ~
+				bool 	bWithExt;
+				char[] mainFile;
+				if( GLOBAL.projectManager[activePrjName].mainFile.length )
+				{
+					scope mainFilePath = new FilePath( GLOBAL.projectManager[activePrjName].mainFile );
+					if( mainFilePath.ext.length )
+					{
+						mainFile = mainFilePath.path ~ mainFilePath.name;
+						bWithExt = true;
+					}
+					else
+						mainFile = mainFilePath.toString;
+				}
+			
+				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( mainFile.length ? ( " -m \"" ~ mainFile ) ~ "\"" : "" ) ) ~
 							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 				
 			}
@@ -2109,6 +2121,7 @@ struct ExecuterAction
 			
 			// Using Thread
 			GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
+			version(FBIDE) if( bWithExt ) GLOBAL.messagePanel.printOutputPanel( "****** Warnning! Main File Should Withould Extension! ******\n", false );
 
 			// Create Dir for Target
 			scope fp = new FilePath( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName );
