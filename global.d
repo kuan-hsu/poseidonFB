@@ -175,6 +175,7 @@ struct GLOBAL
 	static EditorColorUint		editColor;
 	static char[][]				properties;
 	//static Ihandle*			functionTitleHandle;
+	static char[]				extraParsableExt = "inc";
 	static char[]				enableKeywordComplete = "ON";
 	static char[]				enableIncludeComplete = "ON";
 	static char[]				enableParser = "ON";

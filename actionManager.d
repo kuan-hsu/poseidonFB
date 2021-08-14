@@ -204,24 +204,41 @@ public:
 			char[] text = file.read;
 			
 			_encoding = file.encoding;
-			if( _encoding == 2 )
-				if( !file.bom.encoded ) _encoding = Encoding.UTF_8N;
+			//if( _encoding == 2 )
+			//	if( !file.bom.encoded ) _encoding = Encoding.UTF_8N;
 				
 			//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) ); // Uncomment This Line, BEX error
 				
-			return text;
+			//return text;
 			
 			if( !file.bom.encoded ) 
 			{
-				//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) );
-				if( isUTF8WithouBOM( text ) )
+				int BELE = isUTF32WithouBOM( text );
+				if( BELE > 0 )
 				{
-					result = text;
-					_encoding = Encoding.UTF_8N;
+					ubyte[]	bomData;
+					scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
+					
+					if( BELE == 1 )
+					{
+						bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
+						_encoding = 9;
+					}
+					else
+					{
+						bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
+						_encoding = 10;
+					}
+
+					for( int i = 3; i > -1; -- i )
+						text = cast(char)bomData[i] ~ text;
+
+					result = _bom.decode( text );
 				}
 				else
-				{	
-					int BELE = isUTF32WithouBOM( text );
+				{
+					//IupMessage( "No Bom 16", toStringz( Integer.toString( BELE ) ) );
+					BELE = isUTF16WithouBOM( text );
 					if( BELE > 0 )
 					{
 						ubyte[]	bomData;
@@ -229,48 +246,30 @@ public:
 						
 						if( BELE == 1 )
 						{
-							bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
-							_encoding = 9;
+							bomData = [ 0xFE, 0xFF ];
+							_encoding = Encoding.UTF_16BE;
 						}
 						else
 						{
-							bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
-							_encoding = 10;
+							bomData = [ 0xFF, 0xFE ];
+							_encoding = Encoding.UTF_16LE;
 						}
+						
 
-						for( int i = 3; i > -1; -- i )
+						for( int i = 1; i >= 0; -- i )
 							text = cast(char)bomData[i] ~ text;
 
 						result = _bom.decode( text );
 					}
 					else
 					{
-						//IupMessage( "No Bom 16", toStringz( Integer.toString( BELE ) ) );
-						BELE = isUTF16WithouBOM( text );
-						if( BELE > 0 )
+						if( isUTF8WithouBOM( text ) )
 						{
-							ubyte[]	bomData;
-							scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
-							
-							if( BELE == 1 )
-							{
-								bomData = [ 0xFE, 0xFF ];
-								_encoding = Encoding.UTF_16BE;
-							}
-							else
-							{
-								bomData = [ 0xFF, 0xFE ];
-								_encoding = Encoding.UTF_16LE;
-							}
-							
-
-							for( int i = 1; i >= 0; -- i )
-								text = cast(char)bomData[i] ~ text;
-
-							result = _bom.decode( text );
+							result = text;
+							_encoding = Encoding.UTF_8N;
 						}
 						else
-						{
+						{						
 							version( Windows )
 							{
 								if( !CodePage.isAscii( text ) ) // MBCS
@@ -293,8 +292,8 @@ public:
 								_encoding = file.encoding();
 							}
 						}
-					}					
-				}
+					}
+				}					
 			}
 			else
 			{
@@ -831,7 +830,7 @@ public:
 
 		version(FBIDE)
 		{
-			if( lowerCase( f.ext() ) == "bas" || lowerCase( f.ext() ) == "bi" )
+			if( tools.isParsableExt( f.ext, 3 ) )
 			{
 				//Parser
 				GLOBAL.outlineTree.loadFile( fullPath );

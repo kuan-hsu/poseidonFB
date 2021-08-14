@@ -1682,24 +1682,37 @@ extern(C)
 						}
 						else
 						{
-							try
+							if( tools.isParsableExt( ext, 4 ) )
 							{
-								version(Windows)
+								if( selectedIDs.length == 1 )
 								{
-									Process p = new Process( true, "cmd", "/c", fullPath );
-									p.gui( true );
-									p.execute;
+									actionManager.ScintillaAction.openFile( fullPath );
+									break;
 								}
 								else
-								{
-									Process p = new Process( true, "xdg-open", fullPath );
-									p.gui( true );
-									p.execute;
-								}
+									actionManager.ScintillaAction.openFile( fullPath );
 							}
-							catch( Exception e )
+							else
 							{
-								break;
+								try
+								{
+									version(Windows)
+									{
+										Process p = new Process( true, "cmd", "/c", fullPath );
+										p.gui( true );
+										p.execute;
+									}
+									else
+									{
+										Process p = new Process( true, "xdg-open", fullPath );
+										p.gui( true );
+										p.execute;
+									}
+								}
+								catch( Exception e )
+								{
+									break;
+								}
 							}
 						}
 					}

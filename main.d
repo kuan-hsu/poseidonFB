@@ -316,7 +316,7 @@ void main( char[][] args )
 				}
 				else
 				{
-					if( lowerCase( argPath.ext ) == "bas" || lowerCase( argPath.ext ) == "bi" )	ScintillaAction.openFile( args[1] );
+					if( tools.isParsableExt( argPath.ext, 7 ) ) ScintillaAction.openFile( args[1] );
 				}
 			}
 			version(DIDE)

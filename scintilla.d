@@ -440,7 +440,7 @@ class CScintilla
 		
 		version(FBIDE)
 		{
-			if( lowerCase( mypath.ext ) == "bas" || lowerCase( mypath.ext ) == "bi" ) IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic" );
+			if( tools.isParsableExt( mypath.ext, 7 ) ) IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic" );
 			IupSetAttribute(sci, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
 			IupSetAttribute(sci, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
 			IupSetAttribute(sci, "KEYWORDS2", GLOBAL.KEYWORDS[2].toCString );
@@ -3591,21 +3591,16 @@ extern(C)
 	private void HighlightWord( Ihandle* ih, int pos )
 	{
 		IupSetFocus( ih );
-		char[] _char = Util.trim( fromStringz( IupGetAttributeId( ih, "CHAR", pos ) ) );
 		
-		if( _char.length )
-		{
-			char[] word = AutoComplete.getWholeWordDoubleSide( ih, pos );
-			word = word.reverse;
-			
-			char[][] splitWord = Util.split( word, "." );
-			if( splitWord.length > 1 ) word = splitWord[$-1];
-			
-			splitWord = Util.split( word, "->" );
-			if( splitWord.length > 1 ) word = splitWord[$-1];
-			
-			if( word.length ) _HighlightWord( ih, word );
-		}
+		int wordStart = IupScintillaSendMessage( ih, 2266, pos, 1 ); // SCI_WORDSTARTPOSITION 2266
+		int wordEnd = IupScintillaSendMessage( ih, 2267, pos, 1 );   // SCI_WORDENDPOSITION 2267
+		
+		struct TextRange{ int start; int end; char* text; }
+		TextRange tr = { wordStart, wordEnd, ( new char[wordEnd-wordStart+1] ).ptr };
+		IupScintillaSendMessage( ih, 2162, 0, cast(int) &tr ); // SCI_GETTEXTRANGE 2162
+		char[] word = fromStringz( tr.text ).dup;
+		delete tr.text;
+		if( word.length ) _HighlightWord( ih, word );
 	}
 	
 	private void _HighlightWord( Ihandle* ih, char[] targetText )
@@ -3615,7 +3610,7 @@ extern(C)
 		int dummy = IupScintillaSendMessage( ih, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
 		// Search Document
-		IupSetAttribute( ih, "SEARCHFLAGS", null );
+		IupSetAttribute( ih, "SEARCHFLAGS", "WHOLEWORD" );
 		IupSetInt( ih, "TARGETSTART", 0 );
 		IupSetInt( ih, "TARGETEND", -1 );
 		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); // SCI_SEARCHINTARGET = 2197,

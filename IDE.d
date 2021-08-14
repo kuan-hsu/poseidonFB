@@ -389,6 +389,7 @@ public:
 			doc ~= setINILineData( "dwelldelay", GLOBAL.dwellDelay );
 			doc ~= setINILineData( "triggerdelay", GLOBAL.triggerDelay );
 			doc ~= setINILineData( "autocmaxheight", Integer.toString( GLOBAL.autoCMaxHeight ) );
+			doc ~= setINILineData( "extraext", GLOBAL.extraParsableExt );
 			
 			// manual
 			doc ~= setINILineData( "[manual]");
@@ -826,6 +827,7 @@ public:
 							case "dwelldelay":				GLOBAL.dwellDelay = right;										break;
 							case "triggerdelay":			GLOBAL.triggerDelay = right;									break;
 							case "autocmaxheight":			GLOBAL.autoCMaxHeight = Integer.atoi( right );					break;
+							case "extraext":				GLOBAL.extraParsableExt = right;								break;
 							default:
 						}
 						break;

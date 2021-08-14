@@ -2053,7 +2053,7 @@ version(FBIDE)
 			bool dirFilter( FilePath _fp, bool _isFfolder )
 			{
 				if( _isFfolder ) return true;
-				if( lowerCase( _fp.ext ) == "bas" || lowerCase( _fp.ext ) == "bi" ) return true;
+				if( tools.isParsableExt( _fp.ext, 7 ) ) return true;
 			
 				return false;
 			}
@@ -3765,6 +3765,16 @@ version(FBIDE)
 									if( GLOBAL.navigation.addCache( exceptFiles[$-1], _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( exceptFiles[$-1], _resultNode.lineNumber );
 									return;
 								}
+								else
+								{
+									exceptFiles ~= ( _fp.path() ~ _fp.name ~ "." ~ GLOBAL.extraParsableExt );
+									_resultNode = getMatchNodeInFile( procedureName, exceptFiles[$-1], AST_Head.kind );
+									if( _resultNode !is null )
+									{
+										if( GLOBAL.navigation.addCache( exceptFiles[$-1], _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( exceptFiles[$-1], _resultNode.lineNumber );
+										return;
+									}
+								}
 							}
 							
 							// Check All Project
@@ -3777,51 +3787,6 @@ version(FBIDE)
 								return;
 							}
 						}
-						/+
-						else
-						{
-							if( oriNode.kind & ( B_SUB | B_FUNCTION ) )
-							{
-								/*
-								if( !memberFunctionMotherName.length )
-								{
-									IupMessage( "AST_Head",toStringz(AST_Head.name));
-									IupMessage( "oriNode",toStringz(oriNode.name));
-								}
-								*/
-								
-								if( memberFunctionMotherName.length )
-								{
-									if( oriNode.lineNumber < oriNode.endLineNum ) // Not Declare
-									{
-										IupMessage("","NOTDECLARE");
-										if( lowerCase( _fp.ext ) == "bas" )
-										{
-											fullPath = _fp.path() ~ _fp.name ~ ".bi";
-											AST_Head = GLOBAL.outlineTree.loadParser( fullPath );
-											
-											if( AST_Head !is null )
-											{
-												foreach( CASTnode son; getMembers( AST_Head ) )
-												{
-													if( son.kind & oriNode.kind )
-														if( son.name == oriNode.name )
-															if( son.lineNumber == son.endLineNum ) // Declare
-															{
-																if( GLOBAL.navigation.addCache( fullPath, son.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, son.lineNumber );
-																//if( actionManager.ScintillaAction.openFile( fullPath, son.lineNumber ) ) GLOBAL.stackGotoDefinition ~= ( cSci.getFullPath ~ "*" ~ Integer.toString( ScintillaAction.getLinefromPos( cSci.getIupScintilla, currentPos ) + 1 ) );
-																return;
-															}
-												}
-											}										
-										}
-									}
-								}
-								
-								//IupMessage( "!",toStringz("!!!!!"));
-							}
-						}
-						+/
 						
 						if( GLOBAL.navigation.addCache( fullPath, lineNum ) ) actionManager.ScintillaAction.openFile( fullPath, lineNum );
 					}

@@ -1537,7 +1537,7 @@ class COutline
 		scope f = new FilePath( fullPath );
 		char[] _ext = lowerCase( f.ext() );
 
-		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
+		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) )	return null;
 		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
 		
 		GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
@@ -1559,7 +1559,7 @@ class COutline
 
 		char[] _ext = lowerCase( f.ext() );
 
-		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
+		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) )	return null;
 		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
 		
 		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
@@ -1648,7 +1648,7 @@ class COutline
 
 		char[] _ext = lowerCase( f.ext() );
 
-		version(FBIDE)	if( _ext != "bas" && _ext != "bi" )	return null;
+		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) )	return null;
 		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;		
 
 		if( fullPathByOS(fullPath) in GLOBAL.parserManager )
@@ -1942,7 +1942,7 @@ class COutline
 		scope f = new FilePath( cSci.getFullPath );
 
 		char[] _ext = lowerCase( f.ext() );
-		version(FBIDE)	if( _ext != "bas" && _ext != "bi" ) return false;
+		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) ) return false;
 		version(DIDE)	if( _ext != "d" && _ext != "di" ) 	return false;
 		
 		if( cSci !is null )

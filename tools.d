@@ -2,7 +2,7 @@
 
 import tango.stdc.stdlib, tango.stdc.string, tango.stdc.stringz, tango.time.Clock;
 import Util = tango.text.Util, tango.io.device.File, tango.io.stream.Lines, tango.io.FilePath, Path = tango.io.Path, Integer = tango.text.convert.Integer;
-
+import global;
 import iup.iup;
 
 version(DIDE)
@@ -283,6 +283,30 @@ version(FBIDE)
 		}
 
 		return replaceText;
+	}
+	
+	
+	bool isParsableExt( char[] _ext, int flag = 7 )
+	{
+		if( !_ext.length ) return false;
+		
+		_ext = lowerCase( _ext );
+		
+		if( _ext == "bas" )
+		{
+			if( flag & 1 ) return true;
+		}
+		else if( _ext == "bi" )
+		{
+			if( flag & 2 ) return true;
+		}
+		else if( _ext == GLOBAL.extraParsableExt )
+		{
+			if( !GLOBAL.extraParsableExt.length ) return false;
+			if( flag & 4 ) return true;
+		}
+		
+		return false;
 	}
 }
 

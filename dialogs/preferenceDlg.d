@@ -1604,19 +1604,11 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( keywordTabs, "EXPAND", "YES" );
 		IupSetAttribute( keywordTabs, "CHILDOFFSET", "0x0" );
 		
-		 
-		
-		
-		
-		
 
-
-
-
-/*
+		/*
 		Ihandle* keyWordVbox = IupVbox( keyWordText0, keyWordText1, keyWordText2, keyWordText3, gboxKeyWordColor, null );
 		IupSetAttribute( keyWordVbox, "ALIGNMENT", toStringz( "ACENTER" ) );
-	*/	
+		*/	
 		/*
 		IupSetAttribute( vBoxPage01, "TABTITLE", GLOBAL.languageItems["compiler"].toCString() );
 		*/
@@ -1637,7 +1629,14 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( preferenceTabs, "TABTYPE", "TOP" );
 		IupSetAttribute( preferenceTabs, "EXPAND", "YES" );
 		IupSetAttribute( preferenceTabs, "CHILDOFFSET", "0x0" );
-		
+		version(Windows)
+		{
+			IupSetCallback( preferenceTabs, "TABCHANGEPOS_CB", cast(Icallback) function( Ihandle* ih )
+			{
+				IupSetAttribute( IupGetHandle( "colorTemplateList" ), "SHOWDROPDOWN", "NO" );
+				return IUP_DEFAULT;
+			});
+		}
 
 		
 		Ihandle* vBox = IupVbox( preferenceTabs, bottom, null );
