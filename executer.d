@@ -41,6 +41,50 @@ struct ExecuterAction
 		import tango.sys.win32.UserGdi, UTF = tango.text.convert.Utf;
 	}
 	
+	static bool isAppExists( char[] path )
+	{
+		if( Path.exists( path ) ) return true;
+		
+		version(linux)
+		{
+			try
+			{
+				Process p = new Process( true, "which " ~ path );
+				//Stdout.flush;
+				p.execute;
+				auto result = p.wait();
+				
+				char[512] buffer;
+				int length = p.stdout.read( buffer );
+				if( length > 0 ) return true;
+			}
+			catch(Exception e)
+			{
+				return false;
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	version(linux)
+	{
+		static bool checkTerminalExists()
+		{
+			if( !isAppExists( GLOBAL.linuxTermName ) )
+			{
+				if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+				GLOBAL.messagePanel.printOutputPanel( "Terminal path isn't existed!\nPlease set in 'Preference Dialog'.", true );
+				IupMessageError( null, "Terminal Path isn't Existed!" );
+				return false;
+			}
+			
+			return true;
+		}
+	}
+	
+	
 	// Inner Class
 	class ExecuterThread : Thread
 	{
@@ -66,6 +110,8 @@ struct ExecuterAction
 			Process	p;
 			char[]		scommand;
 			
+			version(linux) command = Util.substitute( command, " ", "\\ " ); // For space in path
+			
 			if( GLOBAL.consoleExe == "ON" )
 			{
 				version(Windows)
@@ -86,14 +132,14 @@ struct ExecuterAction
 				else
 				{
 					if( command[0] == '"' && command[$-1] == '"' )
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command[1..$-1] ~ args ~ "\"";
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command[1..$-1] ~ args ~ "\"";
 					else
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "./consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command ~ args ~ "\"";
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command ~ args ~ "\"";
 				}
 			}
 			else
 			{
-				version(Windows) scommand = command ~ args; else scommand = "\"" ~ command ~ args ~ "\"";
+				version(Windows) scommand = command ~ args; else scommand = command ~ args;//scommand = "\"" ~ command ~ args ~ "\"";
 			}
 			
 			version(Windows)
@@ -115,6 +161,8 @@ struct ExecuterAction
 					//geoString = " --geometry=80x24+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
 					geoString = " --geometry=" ~ Integer.toString( w ) ~ "x" ~ Integer.toString( h ) ~ "+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
 				}
+				
+				
 				
 				//	p = new Process( true, GLOBAL.linuxTermName ~ geoString ~ " -e " ~ scommand );
 				if( GLOBAL.linuxTermName.length )
@@ -1260,10 +1308,7 @@ struct ExecuterAction
 		}
 	}	
 	
-	
-	
-	
-	
+
 	static void showAnnotation( char[] message )
 	{
 		if( GLOBAL.compilerAnootation != "ON" ) return;
@@ -1358,6 +1403,8 @@ struct ExecuterAction
 	
 	static int compile( char[] options = null, char[] args = null, char[] compiler = null, char[] optionDebug = null, bool bRun = false )
 	{
+		version(linux) if( bRun && !checkTerminalExists() ) return false;
+
 		quickRunFile ="";
 		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
@@ -1388,11 +1435,10 @@ struct ExecuterAction
 				}
 			}
 			
-			
-			scope compilePath = new FilePath( fbcFullPath );
-			if( !compilePath.exists() )
+			if( !isAppExists( fbcFullPath ) )
 			{
-				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ compilePath.toString ~ " ?", true );
+				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
+				IupMessageError( null, "Compiler isn't Existed!" );
 				return false;
 			}
 
@@ -1417,7 +1463,7 @@ struct ExecuterAction
 			if( !options.length ) options = customOpt;
 			
 			cSci = ScintillaAction.getActiveCScintilla();
-			version(FBIDE) command = "\"" ~ compilePath.toString ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
+			version(FBIDE) command = "\"" ~ fbcFullPath ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 			version(DIDE)
 			{
 				if( Util.index( options, "-run" ) < options.length )
@@ -1547,17 +1593,10 @@ struct ExecuterAction
 			if( !options.length ) options = customOpt;
 			if( !options.length ) options = _focus.Option;
 			
-			
-			
-			scope compilePath = new FilePath( fbcFullPath );
-			
-			if( !compilePath.exists() )
+			if( !isAppExists( fbcFullPath ) )
 			{
-				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
-				if( GLOBAL.compilerSFX == "ON" )
-				{
-					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
-				}
+				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
+				IupMessageError( null, "Compiler isn't Existed!" );
 				return false;
 			}
 			
@@ -1775,7 +1814,7 @@ struct ExecuterAction
 				version(FBIDE)
 				{
 					//txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
-					txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
+					txtCommand = "\"" ~ fbcFullPath ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
 				}
 				version(DIDE)
 				{
@@ -1788,7 +1827,7 @@ struct ExecuterAction
 			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
 			
 			// Start Thread this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
-			auto _buildThread = new BuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options, optionDebug, compilePath.toString, executeName );
+			auto _buildThread = new BuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options, optionDebug, fbcFullPath, executeName );
 			
 			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
 			{
@@ -1863,11 +1902,11 @@ struct ExecuterAction
 				}				
 			}
 			
-			
-			scope compilePath = new FilePath( fbcFullPath );
-			if( !compilePath.exists() )
+
+			if( !isAppExists( fbcFullPath ) )
 			{
-				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
+				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
+				IupMessageError( null, "Compiler isn't Existed!" );
 				return false;
 			}
 			
@@ -2102,7 +2141,7 @@ struct ExecuterAction
 						mainFile = mainFilePath.toString;
 				}
 			
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( mainFile.length ? ( " -m \"" ~ mainFile ) ~ "\"" : "" ) ) ~
+				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( mainFile.length ? ( " -m \"" ~ mainFile ) ~ "\"" : "" ) ) ~
 							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 				
 			}
@@ -2156,8 +2195,10 @@ struct ExecuterAction
 
 	static bool quickRun( char[] options = null, char[] args = null, char[] compiler = null )
 	{
+		version(linux) if( !checkTerminalExists() ) return false;
+	
 		quickRunFile = "";
-		 
+		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
@@ -2178,11 +2219,11 @@ struct ExecuterAction
 			}
 		}
 
-		scope compilePath = new FilePath( fbcFullPath );
-		if( !compilePath.exists() )
+
+		if( !isAppExists( fbcFullPath ) )
 		{
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "FBC Compiler isn't existed......?\n\nCompiler Path Error!" ) );
-			GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path Error!", true );
+			GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
+			IupMessageError( null, "Compiler isn't Existed!" );
 			return false;
 		}
 		
@@ -2230,7 +2271,7 @@ struct ExecuterAction
 
 			version(FBIDE)
 			{
-				char[] commandString = "\"" ~ compilePath.toString ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
+				char[] commandString = "\"" ~ fbcFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
 				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -s gui";
 			}
 			version(DIDE)
@@ -2382,7 +2423,7 @@ struct ExecuterAction
 
 				char[] command;
 				scope _f = new FilePath( fileName );
-				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ "./" ~ _f.name;
+				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ _f.name;//command = _f.path ~ "./" ~ _f.name;
 				_f.remove();
 				
 				ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
@@ -2416,7 +2457,7 @@ struct ExecuterAction
 				
 				char[] command;
 				scope _f = new FilePath( fileName );
-				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ "./" ~ _f.name;
+				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ _f.name;//command = _f.path ~ "./" ~ _f.name;
 				_f.remove();
 
 				_f.set( command );
@@ -2443,6 +2484,8 @@ struct ExecuterAction
 
 	static bool run( char[] args = null, bool bForceCompileOne = false )
 	{
+		version(linux) if( !checkTerminalExists() ) return false;
+	
 		bool	bRunProject;
 		char[]	command;
 		char[]	activePrjName	= actionManager.ProjectAction.getActiveProjectName();
@@ -2501,9 +2544,9 @@ struct ExecuterAction
 						else
 						{
 							if( _focus.Target.length )
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ _focus.Target;
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target;
 							else
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/./" ~ GLOBAL.projectManager[activePrjName].name;
+								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
 						}
 						break;
 					}
@@ -2523,7 +2566,7 @@ struct ExecuterAction
 				}
 				else
 				{
-					command = _f.path ~ "./" ~ _f.name;
+					command = _f.path ~ _f.name;
 				}
 			}
 		}

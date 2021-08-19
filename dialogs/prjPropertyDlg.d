@@ -213,20 +213,31 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 		Ihandle* hBox05 = IupHbox( labelCompilerOpts, textCompilerOpts, btnCompilerOpts, null );
 		IupSetAttribute( hBox05, "ALIGNMENT", "ACENTER" );
-
+		
+		/*
 		// Line 7
 		Ihandle* labelComment = IupLabel( toStringz( GLOBAL.languageItems["prjcomment"].toDString ~ ":" ) );
-		IupSetAttributes( labelComment, "SIZE=60x20" );
 		
 		textComment = IupText( null );
-		IupSetAttributes( textComment, "SIZE=276x20,MULTILINE=YES,SCROLLBAR=VERTICAL,NAME=PRJPROPERTY_Comment" );
-		
-		Ihandle* hBox06 = IupHbox( labelComment, textComment, null );
-		IupSetAttribute( hBox06, "ALIGNMENT", "ACENTER" );
+		version(Windows)
+		{
+			IupSetAttributes( labelComment, "SIZE=60x20" );
+			IupSetAttributes( textComment, "SIZE=276x20,MULTILINE=YES,SCROLLBAR=VERTICAL,NAME=PRJPROPERTY_Comment" );
+			Ihandle* hBox06 = IupHbox( labelComment, textComment, null );
+			IupSetAttributes( hBox06, "ALIGNMENT=ACENTER,SIZE=x20" );
+		}
+		else
+		{
+			IupSetAttributes( labelComment, "SIZE=60x20" );
+			IupSetAttributes( textComment, "SIZE=276x12,NAME=PRJPROPERTY_Comment" );
+			Ihandle* hBox06 = IupHbox( labelComment, textComment, null );
+			IupSetAttributes( hBox06, "ALIGNMENT=ACENTER,SIZE=x12" );
+		}
+		*/
 
 		// Line 8
 		Ihandle* labelCompilerPath = IupLabel( toStringz( GLOBAL.languageItems["prjcompiler"].toDString ~ ":" ) );
-		IupSetAttributes( labelCompilerPath, "SIZE=60x20" );
+		IupSetAttributes( labelCompilerPath, "SIZE=60x12" );
 		
 		textCompilerPath = IupText( null );
 		IupSetAttributes( textCompilerPath, "SIZE=276x12,NAME=PRJPROPERTY_CompilerPath" );
@@ -250,8 +261,8 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetAttribute(framePage01, "TITLE", "File List");
 		+/
 
-		version(FBIDE)	Ihandle* vBoxPage01 = IupVbox( hBox00, hBox01, hBox02, hBox03, hBox04, hBox05, hBox06, hBox07, null );
-		version(DIDE)	Ihandle* vBoxPage01 = IupVbox( hBox00, hBox01, hBox03, hBox04, hBox05, hBox06, hBox07, null );
+		version(FBIDE)	Ihandle* vBoxPage01 = IupVbox( hBox00, hBox01, hBox02, hBox03, hBox04, hBox05, /*hBox06,*/ hBox07, null );
+		version(DIDE)	Ihandle* vBoxPage01 = IupVbox( hBox00, hBox01, hBox03, hBox04, hBox05, /*hBox06,*/ hBox07, null );
 		
 		IupSetAttributes( vBoxPage01, "ALIGNMENT=ALEFT,MARGIN=2x0,GAP=0" );
 
@@ -562,7 +573,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 					CProjectPropertiesDialog.tempProject.type = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TypeList" ), "VALUE" ) ) ).dup;
 					version(FBIDE) CProjectPropertiesDialog.tempProject.mainFile = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_ProjectMainFile" ), "VALUE" ) ) ).dup;
 					CProjectPropertiesDialog.tempProject.args = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Args" ), "VALUE" ) ) ).dup;
-					CProjectPropertiesDialog.tempProject.comment = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Comment" ), "VALUE" ) ) ).dup;
+					//CProjectPropertiesDialog.tempProject.comment = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Comment" ), "VALUE" ) ) ).dup;
 					CProjectPropertiesDialog.tempProject.focusOn = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_FocusList" ), "VALUE" ) ) ).dup;
 					version(FBIDE) CProjectPropertiesDialog.tempProject.passOneFile = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_ToggleOneFile" ), "VALUE" ) ) ).dup;
 					
