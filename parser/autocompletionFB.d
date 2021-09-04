@@ -94,7 +94,53 @@ version(FBIDE)
 					return;
 				}
 				
+				auto oriAST = AST_Head;
 				result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
+				char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+				if( usingNames.length )
+				{
+					char[][] noUsingListContainer;
+					if( splitWord.length == 1 )
+					{
+						if( !bDot && !bCallTip )
+						{
+							noUsingListContainer = listContainer.dup;
+							listContainer.length = 0;
+						}
+						else if( bCallTip )
+						{
+							if( !result.length ) listContainer.length = 0;
+						}
+					}
+					
+					if( !listContainer.length )
+					{
+						foreach( char[] s; usingNames )
+						{
+							char[][] splitWithDot = Util.split( s, "." );
+							char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+							char[] _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
+							
+							if( bCallTip )
+							{
+								if( _result.length )
+								{
+									result = _result;
+									break;
+								}
+							}
+							
+							if( listContainer.length )
+							{
+								listContainer = noUsingListContainer ~ listContainer;
+								result = _result;
+								break;
+							}
+						}
+					}
+					
+					if( !listContainer.length ) listContainer = noUsingListContainer;			
+				}				
 
 				if( listContainer.length )
 				{
@@ -344,42 +390,6 @@ version(FBIDE)
 		}
 		*/
 
-		static CASTnode _searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
-		{
-			if( originalNode is null ) return null;
-			
-			CASTnode resultNode;
-			
-			foreach( CASTnode _node; originalNode.getChildren() )
-			{
-				if( _node.kind & B_KIND )
-				{
-					if( lowerCase( ParserAction.removeArrayAndPointer( _node.name ) ) == lowerCase( word ) )
-					{
-						resultNode = _node;
-						break;
-					}
-				}
-			}
-
-			if( resultNode is null )
-			{
-				if( originalNode.getFather() !is null )
-				{
-					resultNode = _searchMatchNode( originalNode.getFather(), word, B_KIND );
-				}
-				else
-				{
-					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
-
-					if( resultIncludeNodes.length ) resultNode = resultIncludeNodes[0];
-				}
-			}
-
-			return resultNode;
-		}	
-
 		static CASTnode getBaseNode( CASTnode originalNode )
 		{
 			if( originalNode is null ) return null;
@@ -389,12 +399,32 @@ version(FBIDE)
 			{
 				if( originalNode.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 				{
-					return _searchMatchNode( originalNode, lowerCase( originalNode.base ), B_TYPE | B_CLASS | B_UNION  );
+					auto ret = getExtendClass( originalNode, lowerCase( originalNode.base ) );
+					if( ret is null )
+					{
+						ret = getExtendClass( originalNode, lowerCase( getNameSpaceWithDotTail( originalNode ) ~ originalNode.base ) );
+						if( ret is null )
+						{	
+							char[][] usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
+							if( usingNames.length )
+							{
+								foreach( char[] s; usingNames )
+								{
+									ret = getExtendClass( originalNode, lowerCase( s ~ originalNode.base ) );
+									if( ret !is null ) return ret;
+								}
+							}	
+						}
+					}
+					//return _searchMatchNode( originalNode, lowerCase( originalNode.base ), B_TYPE | B_CLASS | B_UNION  );
+
+					return ret;
 				}
 			}
 
 			return null;
 		}
+
 
 		static CASTnode[] getBaseNodeMembers( CASTnode originalNode )
 		{
@@ -615,16 +645,7 @@ version(FBIDE)
 				}
 				else
 				{
-					testPath = _path.path();
-					int pos = Util.rindex( testPath, "/bin/" );
-					if( pos > 0 && pos < testPath.length )
-					{
-						testPath = testPath[0..pos] ~ "/include/freebasic/" ~ include;
-					}
-					else
-					{
-						return null;
-					}
+					testPath = _path.path() ~ "../include/freebasic/" ~ include;
 				}
 	
 				_path.set( testPath ); // Reset
@@ -868,66 +889,15 @@ version(FBIDE)
 				{
 					foreach( child; includeAST.getChildren )
 					{
-						if( child.kind & B_NAMESPACE )
+						if( child.name.length )
 						{
-							if( child.name.length )
-							{
-								if( lowerCase( child.name ) == lowerCase( word ) )
-								{
-									results ~= child;
-								}
-								else
-								{
-									foreach( _child; child.getChildren )
-									{
-										if( _child.name.length )
-										{
-											if( lowerCase( _child.name ) == lowerCase( word ) )
-											{
-												results ~= _child;
-											}
-										}
-										else
-										{
-											CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
-											if( enumResult.length ) results ~= enumResult;
-										}
-									}
-								}
-							}
+							if( lowerCase( ParserAction.removeArrayAndPointer( child.name ) ) == lowerCase( word ) ) results ~= child;
 						}
 						else
 						{
-							if( child.name.length )
-							{
-								if( lowerCase( ParserAction.removeArrayAndPointer( child.name ) ) == lowerCase( word ) )
-								{
-									results ~= child;
-								}
-							}
-							else
-							{
-								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
-								if( enumResult.length ) results ~= enumResult;
-							}
+							CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+							if( enumResult.length ) results ~= enumResult;
 						}
-
-						/+
-						if( child.kind & B_KIND )
-						{
-							if( lowerCase( child.name ) == lowerCase( word ) )
-							{
-								results ~= child;
-							}
-							/*
-							else
-							{
-								CASTnode enumResult = getAnonymousEnumMemberFromWholeWord( child, word );
-								if( enumResult !is null ) results ~= enumResult;
-							}
-							*/
-						}
-						+/
 					}
 				}
 			}
@@ -983,6 +953,7 @@ version(FBIDE)
 								}
 								else
 								{
+									/*
 									foreach( _child; child.getChildren )
 									{
 										if( _child.name.length )
@@ -999,6 +970,7 @@ version(FBIDE)
 											if( enumResult.length ) results ~= enumResult;
 										}
 									}
+									*/
 								}
 							}
 						}
@@ -1034,6 +1006,7 @@ version(FBIDE)
 
 			return false;
 		}
+		
 
 		static CASTnode searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 		{
@@ -1131,33 +1104,135 @@ version(FBIDE)
 			return resultNode;
 		}
 		
+		
 		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 		{
 			if( originalNode is null ) return null;
 			
 			CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, B_KIND, true );
 
-			//if( !resultNodes.length )
-			//{
+			if( originalNode.getFather() !is null )
+			{
+				resultNodes ~= searchMatchNodes( originalNode.getFather(), word, B_KIND );
+			}
+			else
+			{
+				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+
+				//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
+				if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) 
+				{
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
+					if( resultIncludeNodes.length )	resultNodes ~= resultIncludeNodes;
+				}
+			}
+			
+			return resultNodes;
+		}
+
+
+
+		// No Check extends class series......
+		static CASTnode _searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
+		{
+			if( originalNode is null ) return null;
+			
+			foreach( CASTnode _node; originalNode.getChildren )
+			{
+				if( _node.kind & B_KIND )
+				{
+					char[] name = lowerCase( ParserAction.removeArrayAndPointer( _node.name ) );
+					
+					if( name.length )
+					{
+						if( name == lowerCase( word ) ) return _node;
+					}
+					else
+					{
+						foreach( CASTnode _enumMember; anonymousEnumMembers( _node ) )
+						{
+							if( lowerCase( _enumMember.name ) == lowerCase( word ) ) return _enumMember;
+						}
+					}
+				}
+			}
+
+			return null;
+		}
+		
+
+		static CASTnode _searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
+		{
+			if( originalNode is null ) return null;
+			
+			CASTnode resultNode;
+			
+			foreach( CASTnode _node; originalNode.getChildren() )
+			{
+				if( _node.kind & B_KIND )
+				{
+					if( lowerCase( ParserAction.removeArrayAndPointer( _node.name ) ) == lowerCase( word ) )
+					{
+						resultNode = _node;
+						break;
+					}
+				}
+			}
+
+			if( resultNode is null )
+			{
 				if( originalNode.getFather() !is null )
 				{
-					resultNodes = searchMatchNodes( originalNode.getFather(), word, B_KIND );
+					resultNode = _searchMatchNode( originalNode.getFather(), word, B_KIND );
 				}
 				else
 				{
 					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
 
-					//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) 
+					if( resultIncludeNodes.length ) resultNode = resultIncludeNodes[0];
+				}
+			}
+
+			return resultNode;
+		}
+		
+
+		static CASTnode[] _searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
+		{
+			if( originalNode is null ) return null;
+			
+			CASTnode[] resultNodes;
+			
+			foreach( CASTnode _node; originalNode.getChildren() )
+			{
+				if( _node.kind & B_KIND )
+				{
+					if( lowerCase( ParserAction.removeArrayAndPointer( _node.name ) ) == lowerCase( word ) )
 					{
-						CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
-						if( resultIncludeNodes.length )	resultNodes ~= resultIncludeNodes;
+						resultNodes ~= _node;
+						break;
 					}
 				}
-			//}
-			
+			}
+
+			if( originalNode.getFather() !is null )
+			{
+				resultNodes ~= _searchMatchNodes( originalNode.getFather(), word, B_KIND );
+			}
+			else
+			{
+				auto _root = ParserAction.getRoot( originalNode );
+				if( _root !is null )
+				{
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _root, _root.name, word );
+					if( resultIncludeNodes.length ) resultNodes ~= resultIncludeNodes;
+				}
+			}
+
 			return resultNodes;
 		}
+		
 
 		static CASTnode[] getMembers( CASTnode AST_Head )
 		{
@@ -1197,8 +1272,31 @@ version(FBIDE)
 				splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
-
+				
+				auto oriAST = originalNode;
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
+				
+				if( originalNode is null )
+				{
+					char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+					if( usingNames.length )
+					{
+						auto oriAST2 = oriAST;
+						foreach( char[] s; usingNames )
+						{
+							oriAST2 = oriAST;
+							char[][] splitWithDot = Util.split( s, "." );
+							char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+							analysisSplitWorld_ReturnCompleteList( oriAST2, namespaceSplitWord, lineNum, true, false, false );
+							if( oriAST2 !is null )
+							{
+								originalNode = oriAST2;
+								break;
+							}
+						}
+					}
+				}
+				
 				if( originalNode !is null ) resultNode = originalNode;
 			}			
 			
@@ -1581,6 +1679,83 @@ version(FBIDE)
 		}
 		
 		
+		static char[][] checkUsingNamespace( CASTnode AST_Head, int lineNum )
+		{
+			char[][] results;
+			
+			foreach( CASTnode _friends; AST_Head.getChildren )
+			{
+				if( _friends.kind & B_USING )
+					if( _friends.lineNumber < lineNum ) results ~= _friends.name;
+			}
+			
+			if( AST_Head.getFather !is null ) results ~= checkUsingNamespace( AST_Head.getFather, lineNum );
+		
+			return results;
+		}
+		
+
+		static char[] getNameSpaceWithDotTail( CASTnode AST_Head )
+		{
+			char[] result;
+			
+			if( AST_Head !is null )
+			{
+				if( AST_Head.getFather !is null )
+				{
+					while( AST_Head.getFather.kind & B_NAMESPACE )
+					{
+						AST_Head = AST_Head.getFather;
+						result = AST_Head.name ~ "." ~ result;
+						if( AST_Head.getFather is null ) break;
+					}
+				}
+			}
+		
+			return result;
+		}
+		
+		
+		static CASTnode getExtendClass( CASTnode _AST_Head, char[] baseName )
+		{
+			char[][]	_splitWord = Util.split( baseName, "." );
+			CASTnode[]	matchNodes;
+			
+			for( int i = 0; i < _splitWord.length; i++ )
+			{
+				//GLOBAL.messagePanel.printOutputPanel( "_splitWord" ~ Integer.toString(i) ~ " :" ~ _splitWord[i] );
+				if( i == 0 )
+				{
+					//GLOBAL.messagePanel.printOutputPanel( "_AST_Head[0]: " ~ _AST_Head.name );
+					matchNodes = _searchMatchNodes( _AST_Head, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION );
+					if( !matchNodes.length ) return null; 
+					if( _splitWord.length == 1 ) break;
+				}
+				else
+				{
+				
+					CASTnode[] tempMatchNodes = matchNodes.dup;
+					matchNodes.length = 0;
+					foreach( CASTnode a; tempMatchNodes )
+					{
+						auto matchNode = _searchMatchMemberNode( a, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION );
+						if( matchNode !is null )
+						{
+							//GLOBAL.messagePanel.printOutputPanel( matchNode.name ~ "   " ~ ParserAction.getRoot( matchNode ).name );
+							matchNodes ~= matchNode;
+						}
+					}
+					
+					if( !matchNodes.length ) return null;
+				}
+			}
+			
+			if( matchNodes.length ) return matchNodes[0];
+			
+			return null;
+		}		
+
+		
 		static char[] analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, char[][] splitWord, int lineNum, bool bDot, bool bCallTip, bool bPushContainer  )
 		{
 			if( AST_Head is null ) return null;
@@ -1626,24 +1801,28 @@ version(FBIDE)
 				while( _fatherNode.kind & ( B_WITH | B_SCOPE ) );
 			}
 			
-			if( _fatherNode.name.length )
+			if( _fatherNode.getFather !is null )
 			{
-				if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
+				if( _fatherNode.name.length )
 				{
-					memberFunctionMotherName = _fatherNode.name;
-				}
-				else
-				{
-					int dotPos = Util.index( _fatherNode.name, "." );
-					if( dotPos < _fatherNode.name.length )
+					if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
 					{
-						memberFunctionMotherName = _fatherNode.name[0..dotPos];
+						memberFunctionMotherName = _fatherNode.name;
+					}
+					else
+					{
+						int dotPos = Util.index( _fatherNode.name, "." );
+						if( dotPos < _fatherNode.name.length )
+						{
+							memberFunctionMotherName = _fatherNode.name[0..dotPos];
+						}
 					}
 				}
 			}
 			
 			cleanIncludesMarkContainer();
 			
+			CASTnode[] nameSpaceNodes;
 			for( int i = 0; i < splitWord.length; i++ )
 			{
 				listContainer.length = 0;
@@ -1722,7 +1901,6 @@ version(FBIDE)
 									{
 										char[] _list = getListImage( _node );
 										map.add( upperCase( _list ), _list );
-										//listContainer ~= getListImage( _node );
 									}
 								}
 							}
@@ -1730,7 +1908,44 @@ version(FBIDE)
 						else
 						{
 							// Get Members
-							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+							//AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+
+							CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], B_FIND );
+							if( !matchNodes.length )
+								AST_Head = null;
+							else if( matchNodes.length == 1 )
+							{
+								AST_Head = matchNodes[0];
+							}
+							else
+							{
+								foreach( CASTnode a; matchNodes )
+									if( a.kind & B_NAMESPACE ) nameSpaceNodes ~= a;
+							}
+							
+							if( !nameSpaceNodes.length )
+							{
+								if( matchNodes.length ) AST_Head = matchNodes[0]; else AST_Head = null;
+							}
+							else
+							{
+								//IupMessage("","MULTI Namespace declares!" );
+								if( bPushContainer )
+								{
+									foreach( CASTnode namespaceNode; nameSpaceNodes )
+									{
+										foreach( CASTnode _child; getMembers( namespaceNode ) ) // Get members( include nested unnamed union & type )
+										{
+											char[] _list = getListImage( _child );
+											map.add( upperCase( _list ), _list );
+										}
+									}
+								}
+								
+								break;
+							}
+							
+							
 							if( AST_Head is null )
 							{
 								// For Type Objects
@@ -1761,7 +1976,6 @@ version(FBIDE)
 									{
 										char[] _list = getListImage( _child );
 										map.add( upperCase( _list ), _list );
-										//listContainer ~= getListImage( _child );
 									}
 								}
 							}
@@ -1769,8 +1983,34 @@ version(FBIDE)
 
 						break;
 					}
+					
+					//AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
+					CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], B_FIND );
+					if( !matchNodes.length )
+						AST_Head = null;
+					else if( matchNodes.length == 1 )
+					{
+						AST_Head = matchNodes[0];
+					}
+					else
+					{
+						foreach( CASTnode a; matchNodes )
+							if( a.kind & B_NAMESPACE ) nameSpaceNodes ~= a;
+					}
+					
+					if( !nameSpaceNodes.length )
+					{
+						if( matchNodes.length ) AST_Head = matchNodes[0]; else AST_Head = null;
+					}
+					else
+					{
+						//IupMessage("","MULTI Namespace declares!" );
+						continue;
+					}
+					
+					
+					
 
-					AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
 					if( AST_Head is null )
 					{
 						// For Type Objects
@@ -1795,6 +2035,62 @@ version(FBIDE)
 				}
 				else if( i == splitWord.length -1 )
 				{
+
+					if( nameSpaceNodes.length )
+					{
+						if( !bDot )
+						{
+							if( bCallTip )
+							{
+								if( !bPushContainer ) return null;
+								
+								foreach( CASTnode a; nameSpaceNodes )
+									result ~= callTipList( a.getChildren() ~ getBaseNodeMembers( a ), splitWord[i] );
+
+								return Util.trim( result );
+							}
+							
+							if( bPushContainer )
+							{
+								foreach( CASTnode a; nameSpaceNodes )
+								{
+									foreach( CASTnode _child; getMembers( a ) ) // Get members( include nested unnamed union & type )
+									{
+										if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 )
+										{
+											char[] _list = getListImage( _child );
+											map.add( upperCase( _list ), _list );
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							CASTnode[] tempNameSpaceNodes = nameSpaceNodes.dup;
+							nameSpaceNodes.length = 0;
+							foreach( CASTnode _child; tempNameSpaceNodes )
+								if( stepByStep( _child, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION | B_NAMESPACE, lineNum ) ) nameSpaceNodes ~= _child;
+							
+							if( !nameSpaceNodes.length ) return null; else AST_Head = nameSpaceNodes[0];
+							
+							if( bPushContainer )
+							{
+								foreach( CASTnode a; nameSpaceNodes )
+								{
+									foreach( CASTnode _child; getMembers( a ) ) // Get members( include nested unnamed union & type )
+									{
+										char[] _list = getListImage( _child );
+										map.add( upperCase( _list ), _list );
+									}
+								}
+							}
+						}
+						
+						break;
+					}				
+				
+				
 					if( !bDot )
 					{
 						if( bCallTip )
@@ -1813,7 +2109,6 @@ version(FBIDE)
 								{
 									char[] _list = getListImage( _child );
 									map.add( upperCase( _list ), _list );
-									//listContainer ~= getListImage( _child );
 								}
 							}
 						}
@@ -1822,12 +2117,14 @@ version(FBIDE)
 					{
 						if( AST_Head.kind & B_NAMESPACE )
 						{
-							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION, lineNum ) ) return null;
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION | B_NAMESPACE, lineNum ) ) return null;
 						}
 						else
 						{
 							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
 						}
+						
+						
 						
 						if( bPushContainer )
 						{
@@ -1835,16 +2132,31 @@ version(FBIDE)
 							{
 								char[] _list = getListImage( _child );
 								map.add( upperCase( _list ), _list );
-								//listContainer ~= getListImage( _child );
 							}
 						}
 					}
 				}
 				else
 				{
+					if( nameSpaceNodes.length )
+					{
+						CASTnode[] tempNameSpaceNodes = nameSpaceNodes.dup;
+						nameSpaceNodes.length = 0;
+						foreach( CASTnode _child; tempNameSpaceNodes )
+							if( stepByStep( _child, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION | B_NAMESPACE, lineNum ) ) nameSpaceNodes ~= _child;
+
+						if( !nameSpaceNodes.length ) return null;
+						if( nameSpaceNodes.length == 1 )
+						{
+							AST_Head = nameSpaceNodes[0];
+							nameSpaceNodes.length = 0;
+						}
+						continue;
+					}
+					
 					if( AST_Head.kind & B_NAMESPACE )
 					{
-						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION, lineNum ) ) return null;
+						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_ENUM | B_UNION | B_NAMESPACE, lineNum ) ) return null;
 					}
 					else
 					{
@@ -2184,12 +2496,7 @@ version(FBIDE)
 				}
 				else
 				{
-					testPath = _path4.path();
-					int _pos = Util.rindex( testPath, "/bin/" );
-					if( _pos > 0 && _pos < testPath.length )
-					{
-						testPath = testPath[0.._pos] ~ "/include/freebasic/";
-					}
+					testPath = _path4.path() ~ "../include/freebasic/";
 				}
 				_path4.set( testPath ); // Reset			
 				
@@ -2998,6 +3305,9 @@ version(FBIDE)
 			
 			if( text == "(" )
 			{
+				//if( GLOBAL.toggleCompleteAtBackThread == "ON" )
+					if( calltipContainer.size > 0 ) return null;
+				
 				bCallTip = true;
 				IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" ); // Prevent autocomplete -> calltip issue
 			}
@@ -3065,7 +3375,6 @@ version(FBIDE)
 					int			lineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					CASTnode	AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
 
-
 					if( AST_Head is null )
 					{
 						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
@@ -3078,7 +3387,84 @@ version(FBIDE)
 						return null;
 					}
 					
-					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, pos, bDot, bCallTip, true );
+					auto oriAST = AST_Head;
+					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
+					
+					char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+					if( usingNames.length )
+					{
+						char[][] noUsingListContainer;
+						if( splitWord.length == 1 )
+						{
+							if( !bDot && !bCallTip )
+							{
+								noUsingListContainer = listContainer.dup;
+								listContainer.length = 0;
+							}
+							else if( bCallTip )
+							{
+								if( !result.length ) listContainer.length = 0; 
+							}
+						}
+						
+						if( !listContainer.length )
+						{
+							foreach( char[] s; usingNames )
+							{
+								char[][] splitWithDot = Util.split( s, "." );
+								char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+								char[] _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
+								
+								if( bCallTip )
+								{
+									if( _result.length )
+									{
+										result = _result;
+										break;
+									}
+								}
+								
+								if( listContainer.length )
+								{
+									listContainer = noUsingListContainer ~ listContainer;
+									result = _result;
+									break;
+								}
+							}
+						}
+						
+						if( !listContainer.length ) listContainer = noUsingListContainer;
+						/+
+						char[][] keyWordListContainer;
+						
+						if( listContainer.length )
+						{
+							if( listContainer[$-1][$-1] == '0' )
+							{
+								keyWordListContainer = listContainer.dup;
+								listContainer.length = 0;
+							}
+						}
+
+						if( !listContainer.length )
+						{
+							foreach( char[] s; usingNames )
+							{
+								char[][] splitWithDot = Util.split( s, "." );
+								char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+								char[] _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
+								if( listContainer.length )
+								{
+									listContainer = keyWordListContainer ~ listContainer;
+									result = _result;
+									break;
+								}
+							}
+						}
+						
+						if( !listContainer.length ) listContainer = keyWordListContainer;
+						+/
+					}
 
 					if( listContainer.length )
 					{
@@ -3408,6 +3794,7 @@ version(FBIDE)
 					// Divide word
 					int			lineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
+					auto		oriAST = AST_Head;
 					char[]		memberFunctionMotherName;
 
 					if( !splitWord[0].length )
@@ -3435,27 +3822,30 @@ version(FBIDE)
 						while( _fatherNode.kind & ( B_WITH | B_SCOPE ) );
 					}
 					
-					if( _fatherNode.name.length )
+					if( _fatherNode.getFather !is null )
 					{
-						if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
+						if( _fatherNode.name.length )
 						{
-							memberFunctionMotherName = _fatherNode.name;
-						}
-						else
-						{
-							if( _fatherNode.kind & ( B_BI | B_BAS ) )
+							if( _fatherNode.kind & ( B_CTOR | B_DTOR ) )
 							{
+								memberFunctionMotherName = _fatherNode.name;
 							}
 							else
 							{
-								int dotPos = Util.index( _fatherNode.name, "." );
-								if( dotPos < _fatherNode.name.length )
+								if( _fatherNode.kind & ( B_BI | B_BAS ) )
 								{
-									memberFunctionMotherName = _fatherNode.name[0..dotPos];
+								}
+								else
+								{
+									int dotPos = Util.index( _fatherNode.name, "." );
+									if( dotPos < _fatherNode.name.length )
+									{
+										memberFunctionMotherName = _fatherNode.name[0..dotPos];
+									}
 								}
 							}
 						}
-					}				
+					}
 					
 					if( !splitWord[0].length ) return;
 
@@ -3496,97 +3886,168 @@ version(FBIDE)
 					
 					cleanIncludesMarkContainer();
 					
-					for( int i = 0; i < splitWord.length; i++ )
+					
+					// Nested 2021.09.01, for Namespace
+					CASTnode analysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
 					{
-						if( keyword_Btype > 0 ) break;
-						
-						if( i == 0 )
+						CASTnode[] nameSpaceNodes;
+						CASTnode returnNode;
+						for( int i = 0; i < _splitWord.length; i++ )
 						{
-							AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND | B_SUB ); // NOTE!!!! Using "searchMatchNode()"
-
+							if( keyword_Btype > 0 ) break;
 							
-							if( AST_Head !is null )
+							if( i == 0 )
 							{
-								//IupMessage( "AST_Head", toStringz( Integer.toString( AST_Head.kind ) ~ "\n" ~ AST_Head.name ~ "\n" ~ Integer.toString( AST_Head.lineNumber ) ) );
-								if( AST_Head.kind & ( B_SUB | B_FUNCTION ) )
+								CASTnode[] matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], B_FIND | B_SUB );
+								if( !matchNodes.length )
 								{
-									if( TYPE == 1 )
+									// For Type Objects
+									if( memberFunctionMotherName.length )
 									{
-										if( AST_Head.lineNumber < AST_Head.endLineNum ) // Not Declare
+										CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+										if( memberFunctionMotherNode !is null )
 										{
-											foreach( CASTnode _node; searchMatchNodes( AST_Head, splitWord[i], B_FIND | B_SUB ) )
+											auto matchNode = searchMatchNode( memberFunctionMotherNode, _splitWord[i], B_FIND | B_CTOR | B_SUB );
+											if( matchNode !is null ) matchNodes ~= matchNode;
+										}
+									}
+									/*
+									if( !matchNodes.length )
+									{
+										if( _AST_Head.kind & ( B_CLASS | B_TYPE ) )
+										{
+											if( _AST_Head.base.length )
 											{
-												if( _node.lineNumber == _node.endLineNum ) // Is Declare
-												{
-													AST_Head = _node;
-													break;
-												}
+												matchNodes = searchMatchNodes( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], _splitWord[i], B_CLASS | B_TYPE | B_NAMESPACE );
 											}
 										}
 									}
+									*/
+									if( !matchNodes.length ) return null;
 								}
-							}
-							
-							if( AST_Head is null )
-							{
-								// For Type Objects
-								if( memberFunctionMotherName.length )
+								
+								foreach( CASTnode a; matchNodes )
 								{
-									//AST_Head = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
-									CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-									if( memberFunctionMotherNode !is null ) AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND | B_CTOR | B_SUB );
-								}					
-							}
-
-							if( AST_Head is null ) return;
-
-							if( splitWord.length == 1 ) break;
-						}
-						else
-						{
-							if( AST_Head.kind & B_NAMESPACE )
-							{
-								AST_Head = searchMatchMemberNode( AST_Head, splitWord[i], B_FIND | B_SUB );
+									if( a.kind & ( B_SUB | B_FUNCTION ) )
+									{
+										if( TYPE == 1 )
+										{
+											if( a.lineNumber < a.endLineNum ) // Not Declare
+											{
+												foreach( CASTnode _node; searchMatchNodes( a, _splitWord[i], B_FIND | B_SUB ) )
+												{
+													if( _node.lineNumber == _node.endLineNum ) // Is Declare
+													{
+														nameSpaceNodes ~= _node;
+														break;
+													}
+												}
+											}
+											else
+											{
+												nameSpaceNodes ~= a;
+											}
+										}
+										else
+										{
+											nameSpaceNodes ~= a;
+										}
+									}
+									else
+									{
+										nameSpaceNodes ~= a;
+									}
+								}
+							
+								if( _splitWord.length == 1 )
+								{
+									if( nameSpaceNodes.length ) returnNode = nameSpaceNodes[0];
+									break;
+								}
 							}
 							else
 							{
-								AST_Head = searchMatchMemberNode( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_NAMESPACE | B_SUB | B_ENUMMEMBER );
+								CASTnode[] tempNameSpaceNodes = nameSpaceNodes.dup;
+								nameSpaceNodes.length = 0;
+								foreach( CASTnode a; tempNameSpaceNodes )
+								{
+									if( a.kind & B_NAMESPACE )
+									{
+										auto matchNode = searchMatchMemberNode( a, _splitWord[i], B_FIND | B_SUB );
+										if( matchNode !is null ) nameSpaceNodes ~= matchNode;
+									}
+									else
+									{
+										auto matchNode = searchMatchMemberNode( a, _splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_NAMESPACE | B_SUB | B_ENUMMEMBER );
+										if( matchNode !is null ) nameSpaceNodes ~= matchNode;
+									}
+								}
+								
+								if( !nameSpaceNodes.length ) return null;
 							}
 							
-							if( AST_Head is null ) return;
-						}
-						
-						/+
-						if( TYPE & 3 )
-						{
-							if( AST_Head.kind & ( B_VARIABLE | B_PARAM ) )// | B_FUNCTION ) )
+
+							if( i < _splitWord.length - 1 )
 							{
-								AST_Head = getType( AST_Head, lineNum );
-								if( AST_Head is null ) return;
+								CASTnode[] tempNameSpaceNodes = nameSpaceNodes.dup;
+								nameSpaceNodes.length = 0;
+								foreach( CASTnode a; tempNameSpaceNodes )
+								{
+									if( a.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+									{
+										auto matchNode = getType( a, lineNum );
+										if( matchNode !is null ) nameSpaceNodes ~= matchNode;
+									}
+									else
+									{
+										nameSpaceNodes ~= a;
+									}
+								}
+								
+								if( !nameSpaceNodes.length ) return null;
+							}
+							else
+							{
+								if( nameSpaceNodes.length ) returnNode = nameSpaceNodes[0];
 							}
 						}
-						else
+						
+						return returnNode;
+					}
+					
+					
+					
+					AST_Head = analysisSplitWord( AST_Head, splitWord );
+					if( AST_Head is null )
+					{
+						char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+						if( usingNames.length )
 						{
-							if( i < splitWord.length - 1 )
+							foreach( char[] s; usingNames )
 							{
-								if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+								char[][] splitWithDot = Util.split( s, "." );
+								char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+								auto oriAST2 = analysisSplitWord( oriAST, namespaceSplitWord );
+								if( oriAST2 !is null )
 								{
-									AST_Head = getType( AST_Head, lineNum );
-									if( AST_Head is null ) return;
+									AST_Head = oriAST2;
+									break;
 								}
 							}
-						}
-						+/
-						if( i < splitWord.length - 1 )
+						}	
+						else
 						{
-							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+							char[] _namespace = getNameSpaceWithDotTail( oriAST );
+							if( _namespace.length )
 							{
-								AST_Head = getType( AST_Head, lineNum );
-								if( AST_Head is null ) return;
+								_namespace ~= Util.join( splitWord, "." );
+								auto oriAST2 = analysisSplitWord( oriAST, Util.split( _namespace, "." ) );
+								if( oriAST2 !is null ) AST_Head = oriAST2;
 							}
 						}
-						
 					}
+					
+					if( AST_Head is null ) return;
 					
 					if( TYPE == 0 )
 					{
@@ -3623,19 +4084,48 @@ version(FBIDE)
 
 						int filePathPos = _list.length;
 						
+						
+						char[] nameSpaceTitle;
 						switch( AST_Head.kind )
 						{
 							case B_SUB:
-								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) ) _list ~= ( "MEMBER_SUBROUTINE: < " ~ AST_Head.getFather.name ~ " >\n" ); else _list ~= "SUBROUTINE:\n";
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) )
+								{
+									nameSpaceTitle = getNameSpaceWithDotTail( AST_Head.getFather );
+									_list ~= ( "MEMBER_SUBROUTINE: < " ~ nameSpaceTitle ~ AST_Head.getFather.name ~ " >\n" );
+								}
+								else
+									 _list ~= "SUBROUTINE:\n";
 								break;
 							case B_FUNCTION:
-								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) ) _list ~= ( "MEMBER_FUNCTION: < " ~ AST_Head.getFather.name ~ " >\n" ); else _list ~= "FUNCTION:\n";
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) )
+								{
+									nameSpaceTitle = getNameSpaceWithDotTail( AST_Head.getFather );
+									_list ~= ( "MEMBER_FUNCTION: < " ~ nameSpaceTitle ~ AST_Head.getFather.name ~ " >\n" );
+								}
+								else
+									_list ~= "FUNCTION:\n";
 								break;
 							case B_VARIABLE:
-								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) ) _list ~= ( "MEMBER_VARIABLE: < " ~ AST_Head.getFather.name ~ " >\n" ); else _list ~= "VARIABLE:\n";
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) )
+								{
+									nameSpaceTitle = getNameSpaceWithDotTail( AST_Head.getFather );
+									_list ~= ( "MEMBER_VARIABLE: < " ~ nameSpaceTitle ~ AST_Head.getFather.name ~ " >\n" );
+								}
+								else 
+									_list ~= "VARIABLE:\n";
 								break;
 								
-							case B_PROPERTY: 	_list ~= ( "PROPERTY: < " ~ AST_Head.getFather.name ~ " >\n" );		break;
+							case B_PROPERTY:
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) )
+								{
+									nameSpaceTitle = getNameSpaceWithDotTail( AST_Head.getFather );
+									_list ~= ( "MEMBER_PROPERTY: < " ~ nameSpaceTitle ~ AST_Head.getFather.name ~ " >\n" );
+								}
+								else 
+									_list ~= "PROPERTY:\n";
+								break;
+								
 							case B_OPERATOR: 	_list ~= ( "OPERATOR: < " ~ AST_Head.getFather.name ~ " >\n" );		break;
 							case B_PARAM:	 	_list ~= "PARAMETER:\n";	break;
 							case B_CTOR:	 	_list ~= "CTOR:\n";			break;
@@ -3644,8 +4134,20 @@ version(FBIDE)
 						}						
 						
 						
-						_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
-						//char[] _list = ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
+						if( AST_Head.kind & B_NAMESPACE )
+						{
+							char[] _name = AST_Head.name;
+							
+							_name= getNameSpaceWithDotTail( AST_Head ) ~ _name;
+							_list ~= ( _type ~ " " ~ _name ).dup;
+						}
+						else if( AST_Head.kind & ( B_FUNCTION | B_SUB | B_PROPERTY | B_OPERATOR ) )
+						{
+							_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ ( _param.length ? _param : "()" ) ).dup;
+						}
+						else
+							_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
+						
 						
 						if( AST_Head.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 						{
@@ -4473,6 +4975,7 @@ version(FBIDE)
 				else
 				{
 					// commaCount != 0 and calltipContainer is empty, Re-get the list
+					//IupMessage("updateCallTip", "NULL" );
 					list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
 					if( list.length )
 					{

@@ -60,7 +60,7 @@ public:
 			int				commentCount;
 			TokenUnit[]		results;
 
-			data = Util.trim( data );
+			data = Util.trimr( data );
 			data ~= "\n";
 
 			try
@@ -426,8 +426,8 @@ public:
 			int				commentCount, nestCommentCount;
 			TokenUnit[]		results;
 
-			data = Util.trim( data );
-			//data ~= "\n";
+			data = Util.trimr( data );
+			data ~= "\n";
 
 			try
 			{

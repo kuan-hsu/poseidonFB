@@ -82,7 +82,42 @@ struct ExecuterAction
 			
 			return true;
 		}
+		
+		
+		static char[] getAppPath( char[] appName )
+		{
+			if( Path.exists( appName ) ) return appName;
+
+			Process p = new Process( true, "which " ~ appName );
+			//Stdout.flush;
+			p.execute;
+			auto result = p.wait();
+			
+			char[] buffer;
+			buffer.length = 512;
+			int length = p.stdout.read( buffer );
+			if( length > 0 )
+			{
+				buffer.length = length - 1; // delete tail \n
+				return buffer;
+			}
+			
+			return null;
+		}
 	}
+	
+	
+	static bool checkCompilerExists( char[] fbcFullPath )
+	{
+		if( !isAppExists( fbcFullPath ) )
+		{
+			GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
+			IupMessageError( null, "Compiler isn't Existed!" );
+			return false;
+		}
+		
+		return true;
+	}	
 	
 	
 	// Inner Class
@@ -173,7 +208,7 @@ struct ExecuterAction
 							geoString = Util.substitute( geoString, "--geometry=", "-geometry " );
 							p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
-						case "mate-terminal" ,"xfce4-terminal" ,"lxterminal", "gnome-terminal":
+						case "mate-terminal" ,"xfce4-terminal" ,"lxterminal", "gnome-terminal", "tilix":
 							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
 							break;
 						/*
@@ -1435,12 +1470,7 @@ struct ExecuterAction
 				}
 			}
 			
-			if( !isAppExists( fbcFullPath ) )
-			{
-				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
-				IupMessageError( null, "Compiler isn't Existed!" );
-				return false;
-			}
+			if( !checkCompilerExists( fbcFullPath ) ) return false;
 
 			if( !ScintillaAction.saveFile( cSci ) )
 			{
@@ -1593,12 +1623,7 @@ struct ExecuterAction
 			if( !options.length ) options = customOpt;
 			if( !options.length ) options = _focus.Option;
 			
-			if( !isAppExists( fbcFullPath ) )
-			{
-				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
-				IupMessageError( null, "Compiler isn't Existed!" );
-				return false;
-			}
+			if( !checkCompilerExists( fbcFullPath ) ) return false;
 			
 			version(FBIDE)
 			{
@@ -1902,13 +1927,7 @@ struct ExecuterAction
 				}				
 			}
 			
-
-			if( !isAppExists( fbcFullPath ) )
-			{
-				GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
-				IupMessageError( null, "Compiler isn't Existed!" );
-				return false;
-			}
+			if( !checkCompilerExists( fbcFullPath ) ) return false;
 			
 			
 			if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
@@ -2219,13 +2238,8 @@ struct ExecuterAction
 			}
 		}
 
+		if( !checkCompilerExists( fbcFullPath ) ) return false;
 
-		if( !isAppExists( fbcFullPath ) )
-		{
-			GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
-			IupMessageError( null, "Compiler isn't Existed!" );
-			return false;
-		}
 		
 		char[] fileName;
 		auto cSci = ScintillaAction.getActiveCScintilla();

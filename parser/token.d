@@ -164,6 +164,7 @@ version(FBIDE)
 		
 		//Tinclib,
 		Tnamespace,
+		Tusing,
 		
 		
 
@@ -340,7 +341,8 @@ version(FBIDE)
 			case "endmacro":	 return TOK.Tendmacro;
 			case "lib":		 		return TOK.Tlib;
 
-			case "namespace":	 return TOK.Tnamespace;
+			case "namespace":	return TOK.Tnamespace;
+			case "using":		return TOK.Tusing;
 			default:
 		}
 		

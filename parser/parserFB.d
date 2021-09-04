@@ -7,6 +7,21 @@ version(FBIDE)
 	class CParser : _PARSER
 	{
 		private:
+		
+		// Parse the continuous identifiers, include any words until the EOL / :
+		char[] parseIdentifier()
+		{
+			char[] ident;
+			
+			while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+			{
+				ident ~= token().identifier;
+				parseToken();
+			}
+			
+			return ident;
+		}
+		
 
 		bool parsePreprocessor()
 		{
@@ -858,8 +873,10 @@ version(FBIDE)
 				parseToken( TOK.Tnamespace );
 				if( token().tok == TOK.Tidentifier )
 				{
-					activeASTnode = activeASTnode.addChild( token().identifier, B_NAMESPACE, null, null, null, token().lineNumber );
-					parseToken( TOK.Tidentifier );
+					char[][] _names = Util.split( parseIdentifier(), "." );
+					for( int i = 0; i < _names.length; ++ i )
+						activeASTnode = activeASTnode.addChild( _names[i], B_NAMESPACE, null, Integer.toString( i ), null, token().lineNumber );
+					
 					return true;
 				}
 			}
@@ -871,6 +888,55 @@ version(FBIDE)
 
 			return false;
 		}
+
+		bool parseUsing()
+		{
+			try
+			{
+				parseToken( TOK.Tusing );
+				
+				char[] _name;
+				while( token().tok == TOK.Tidentifier )
+				{
+					int _lineNum	= token().lineNumber;
+					
+					_name ~= token().identifier;
+
+					parseToken( TOK.Tidentifier );
+
+					if( token().tok == TOK.Tdot )
+					{
+						_name ~= ".";
+						parseToken( TOK.Tdot );
+					}
+					else if( token().tok == TOK.Tcomma )
+					{
+						// .type = activeASTnode.name(name of Mother Scope), .endLineNum = activeASTnode.lineNumber
+						activeASTnode.addChild( _name, B_USING, null, null, null, _lineNum );
+						parseToken( TOK.Tcomma );
+						_name = "";
+					}
+					else if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+					{
+						activeASTnode.addChild( _name, B_USING, null, null, null, _lineNum );
+						parseToken();
+						break;
+					}
+					else
+					{
+						return false;
+					}
+				}				
+			}
+			catch( Exception e )
+			{
+				throw e;
+				//debug Stdout( e.toString ~ "  ::  parseUsing" ).newline;
+			}
+
+			return true;
+		}
+
 
 		/*
 		Syntax
@@ -1676,6 +1742,10 @@ version(FBIDE)
 									return false;
 								}
 							}
+							
+						case TOK.Tpound:
+							parsePreprocessor();
+							break;
 
 						//case TOK.Tidentifier:
 						default:
@@ -1903,8 +1973,11 @@ version(FBIDE)
 						if( token().tok == TOK.Textends )
 						{
 							parseToken( TOK.Textends );
+							if( token().tok == TOK.Tidentifier ) _base = parseIdentifier();
+							/*
 							_base = token().identifier;
 							parseToken( TOK.Tidentifier );
+							*/
 						}
 
 						if( token().tok == TOK.Tfield )
@@ -1961,12 +2034,12 @@ version(FBIDE)
 						}
 
 						// Pass the maybe complicated express
-						while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+						while( token().tok != TOK.Teol && token().tok != TOK.Tcolon && token().tok != TOK.Tcomma )
 						{
 							parseToken();
 						}
 
-						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+						if( token().tok == TOK.Tcomma || token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 						{
 							activeASTnode.addChild( _name, B_ENUMMEMBER, null, null, null, _lineNum );
 							parseToken();
@@ -2054,26 +2127,15 @@ version(FBIDE)
 			{
 				parseToken( TOK.Twith );
 				
-				if( token().tok == TOK.Tidentifier )
+				char[] user_defined_var;
+				do
 				{
-					char[] user_defined_var;
-					do
-					{
-						user_defined_var ~= token().identifier;
-						parseToken();
-					}
-					while( token().tok != TOK.Teol && token().tok != TOK.Tcolon );
-						
-					activeASTnode = activeASTnode.addChild( user_defined_var, B_WITH, null, null, null, token().lineNumber );
-					parseToken( TOK.Tidentifier );
-					return true;
+					user_defined_var ~= token().identifier;
+					parseToken();
 				}
-				else if( token().tok == TOK.Tthis )
-				{
-					activeASTnode = activeASTnode.addChild( "this", B_WITH, null, null, null, token().lineNumber );
-					parseToken( TOK.Tthis );
-					return true;
-				}
+				while( token().tok != TOK.Teol && token().tok != TOK.Tcolon );
+				
+				activeASTnode = activeASTnode.addChild( user_defined_var, B_WITH, null, null, null, token().lineNumber );
 			}
 			catch( Exception e )
 			{
@@ -2092,11 +2154,21 @@ version(FBIDE)
 
 				switch( token().tok )
 				{
-					case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tnamespace, TOK.Tscope, TOK.Twith, TOK.Tclass:
+					case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tscope, TOK.Twith, TOK.Tclass:
 						if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 						parseToken();
 
 						break;
+
+					case TOK.Tnamespace:
+						if( activeASTnode.kind & B_NAMESPACE )
+						{	
+							int loopUpperLimit = Integer.toInt( activeASTnode.type ) + 1;
+							for( int i = 0; i < loopUpperLimit; ++ i )
+								if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );else IupMessage("","NULL");
+						}
+						parseToken();
+					
 					default:
 						//parseToken();
 				}
@@ -2241,8 +2313,27 @@ version(FBIDE)
 							parseNamespace();
 							break;
 							
+						case TOK.Tusing:
+							if( next().tok != TOK.Tstrings && next().tok == TOK.Tidentifier ) parseUsing();
+							break;
+							
+							
 						case TOK.Tdeclare:
 							parseToken( TOK.Tdeclare );
+							
+							if( activeASTnode.kind & ( B_TYPE | B_CLASS ) )
+							{
+								if( token().tok == TOK.Tstatic )
+								{
+									parseToken( TOK.Tstatic );
+									if( token().tok == TOK.Tvirtual ) parseToken( TOK.Tvirtual );
+								}
+								else if( token().tok == TOK.Tvirtual )
+								{
+									parseToken( TOK.Tvirtual );
+									if( token().tok == TOK.Tstatic ) parseToken( TOK.Tstatic );
+								}
+							}
 							
 							if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub || token().tok == TOK.Tconstructor || token().tok == TOK.Tdestructor || token().tok == TOK.Tproperty )
 							{
