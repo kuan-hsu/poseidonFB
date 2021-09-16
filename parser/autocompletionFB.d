@@ -799,12 +799,35 @@ version(FBIDE)
 			return null;
 		}
 		
-		static CASTnode getMatchNodeInFile( char[] word, char[] fileName, int B_KIND, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
+		static CASTnode getMatchNodeInFile( CASTnode oriNode, char[][] nameSpaces, char[] word, char[] fileName, int B_KIND, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
 		{
 			CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( fileName );
 		
 			if( _createFileNode !is null )
 			{
+				for( int i = 0; i < nameSpaces.length; i ++ )
+				{
+					if( nameSpaces[i].length )
+					{
+						bool bMatch;
+						foreach( CASTnode _node; _createFileNode.getChildren )
+						{
+							if( _node.kind & B_NAMESPACE )
+							{
+								if( _node.name == nameSpaces[i] )
+								{
+									_createFileNode = _node;
+									bMatch = true;
+									break;
+								}
+							}
+						}
+						
+						if( !bMatch ) break;
+					}
+				}
+				
+				CASTnode[] matchASTs;
 				foreach( CASTnode _node; getMembers( _createFileNode ) )
 				{
 					if( _node.kind & B_KIND ) 
@@ -813,25 +836,30 @@ version(FBIDE)
 						{
 							if( bOnlyProcedureBody )
 							{
-								if( _node.lineNumber < _node.endLineNum ) return _node;
+								if( _node.lineNumber < _node.endLineNum ) matchASTs ~= _node;
 							}
 							else if( bOnlyDeclare )
 							{
-								if( _node.lineNumber == _node.endLineNum ) return _node;
+								if( _node.lineNumber == _node.endLineNum ) matchASTs ~= _node;
 							}
 							else
 							{
-								return _node;
+								matchASTs ~= _node;
 							}
 						}
 					}
 				}
+				
+				foreach( CASTnode a; matchASTs )
+					if( lowerCase( oriNode.type ) == lowerCase( a.type ) ) return a;
+				
+				if( matchASTs.length ) return matchASTs[0];
 			}
 			
 			return null;
 		}
 		
-		static CASTnode getMatchNodeInProject( char[] word, char[] prjName, int B_KIND, char[][] exceptFileNames, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
+		static CASTnode getMatchNodeInProject( CASTnode oriNode, char[][] nameSpaces, char[] word, char[] prjName, int B_KIND, char[][] exceptFileNames, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
 		{
 			if( prjName in GLOBAL.projectManager )
 			{
@@ -841,7 +869,7 @@ version(FBIDE)
 						if( s == e ) continue;
 					
 					
-					CASTnode _createFileNode = getMatchNodeInFile( word, s, B_KIND, bOnlyDeclare, bOnlyProcedureBody );
+					CASTnode _createFileNode = getMatchNodeInFile( oriNode, nameSpaces, word, s, B_KIND, bOnlyDeclare, bOnlyProcedureBody );
 					if( _createFileNode !is null ) return _createFileNode;
 				}
 			}
@@ -3858,12 +3886,23 @@ version(FBIDE)
 							keyword_Btype = B_CTOR;
 						case "destructor":
 							if( keyword_Btype == 0 ) keyword_Btype = B_DTOR;
+						/*
 						case "operator":
 							if( keyword_Btype == 0 ) keyword_Btype = B_OPERATOR;
 						case "property":
 							if( keyword_Btype == 0 ) keyword_Btype = B_PROPERTY;
-						
+						*/
 						default:
+							if( keyword_Btype > 0 )
+							{
+								if( AST_Head.kind & ( B_CTOR | B_DTOR ) )
+								{
+									if( TYPE < 2 )
+										if( AST_Head.lineNumber == AST_Head.endLineNum ) return; // Declare
+								}
+							}
+						
+							/+
 							if( keyword_Btype > 0 )
 							{
 								CASTnode _motherNode = AST_Head;
@@ -3882,10 +3921,10 @@ version(FBIDE)
 
 								if( AST_Head is null ) return;
 							}
+							+/
 					}
 					
 					cleanIncludesMarkContainer();
-					
 					
 					// Nested 2021.09.01, for Namespace
 					CASTnode analysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
@@ -3894,8 +3933,6 @@ version(FBIDE)
 						CASTnode returnNode;
 						for( int i = 0; i < _splitWord.length; i++ )
 						{
-							if( keyword_Btype > 0 ) break;
-							
 							if( i == 0 )
 							{
 								CASTnode[] matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], B_FIND | B_SUB );
@@ -3961,8 +3998,10 @@ version(FBIDE)
 							
 								if( _splitWord.length == 1 )
 								{
-									if( nameSpaceNodes.length ) returnNode = nameSpaceNodes[0];
-									break;
+									foreach( CASTnode a; nameSpaceNodes )
+										if( lowerCase( a.type ) == lowerCase( _AST_Head.type ) ) return a;
+									
+									return nameSpaceNodes[0];
 								}
 							}
 							else
@@ -3978,8 +4017,9 @@ version(FBIDE)
 									}
 									else
 									{
-										auto matchNode = searchMatchMemberNode( a, _splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_NAMESPACE | B_SUB | B_ENUMMEMBER );
-										if( matchNode !is null ) nameSpaceNodes ~= matchNode;
+										auto matchNodes = searchMatchMemberNodes( a, _splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_OPERATOR | B_NAMESPACE | B_SUB | B_ENUMMEMBER );
+										//if( matchNode !is null ) nameSpaceNodes ~= matchNode;
+										if( matchNodes.length > 0 ) nameSpaceNodes ~= matchNodes;
 									}
 								}
 								
@@ -4008,7 +4048,13 @@ version(FBIDE)
 							}
 							else
 							{
-								if( nameSpaceNodes.length ) returnNode = nameSpaceNodes[0];
+								if( nameSpaceNodes.length ) 
+								{
+									foreach( CASTnode a; nameSpaceNodes )
+										if( lowerCase( a.type ) == lowerCase( _AST_Head.type ) ) return a;
+									
+									returnNode = nameSpaceNodes[0];
+								}
 							}
 						}
 						
@@ -4017,36 +4063,84 @@ version(FBIDE)
 					
 					
 					
-					AST_Head = analysisSplitWord( AST_Head, splitWord );
-					if( AST_Head is null )
+					if( TYPE == 2 && keyword_Btype > 0 )
 					{
-						char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
-						if( usingNames.length )
+					}
+					else
+					{
+						if( keyword_Btype > 0 )
 						{
-							foreach( char[] s; usingNames )
-							{
-								char[][] splitWithDot = Util.split( s, "." );
-								char[][] namespaceSplitWord = splitWithDot ~ splitWord;
-								auto oriAST2 = analysisSplitWord( oriAST, namespaceSplitWord );
-								if( oriAST2 !is null )
-								{
-									AST_Head = oriAST2;
-									break;
-								}
-							}
-						}	
+							// Already skip if is Declare, must be member function( B_CTOR / B_DTOR )
+							splitWord.length = 0;
+							splitWord ~= AST_Head.name; // Get the TYPE | CLASS | UNION name
+							AST_Head = AST_Head.getFather;
+						}
+						/+
+						// Check if in NameSpace block?
+						char[] _namespace = getNameSpaceWithDotTail( oriAST );
+						if( _namespace.length )
+						{
+							_namespace ~= Util.join( splitWord, "." );
+							auto oriAST2 = analysisSplitWord( oriAST, Util.split( _namespace, "." ) );
+							if( oriAST2 !is null ) AST_Head = oriAST2;
+						}
 						else
 						{
-							char[] _namespace = getNameSpaceWithDotTail( oriAST );
-							if( _namespace.length )
+							// Check if use USING?
+							char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+							if( usingNames.length )
 							{
-								_namespace ~= Util.join( splitWord, "." );
-								auto oriAST2 = analysisSplitWord( oriAST, Util.split( _namespace, "." ) );
-								if( oriAST2 !is null ) AST_Head = oriAST2;
+								foreach( char[] s; usingNames )
+								{
+									char[][] splitWithDot = Util.split( s, "." );
+									char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+									auto oriAST2 = analysisSplitWord( oriAST, namespaceSplitWord );
+									if( oriAST2 !is null )
+									{
+										AST_Head = oriAST2;
+										break;
+									}
+								}
+							}
+							else
+							{
+								AST_Head = analysisSplitWord( AST_Head, splitWord );
+							}
+						}
+						+/
+						
+						AST_Head = analysisSplitWord( AST_Head, splitWord );
+						if( AST_Head is null )
+						{
+							char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+							if( usingNames.length )
+							{
+								foreach( char[] s; usingNames )
+								{
+									char[][] splitWithDot = Util.split( s, "." );
+									char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+									auto oriAST2 = analysisSplitWord( oriAST, namespaceSplitWord );
+									if( oriAST2 !is null )
+									{
+										AST_Head = oriAST2;
+										break;
+									}
+								}
+							}	
+							else
+							{
+								char[] _namespace = getNameSpaceWithDotTail( oriAST );
+								if( _namespace.length )
+								{
+									_namespace ~= Util.join( splitWord, "." );
+									auto oriAST2 = analysisSplitWord( oriAST, Util.split( _namespace, "." ) );
+									if( oriAST2 !is null ) AST_Head = oriAST2;
+								}
 							}
 						}
 					}
 					
+
 					if( AST_Head is null ) return;
 					
 					if( TYPE == 0 )
@@ -4125,8 +4219,17 @@ version(FBIDE)
 								else 
 									_list ~= "PROPERTY:\n";
 								break;
-								
-							case B_OPERATOR: 	_list ~= ( "OPERATOR: < " ~ AST_Head.getFather.name ~ " >\n" );		break;
+
+							case B_OPERATOR:
+								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) )
+								{
+									nameSpaceTitle = getNameSpaceWithDotTail( AST_Head.getFather );
+									_list ~= ( "MEMBER_OPERATOR: < " ~ nameSpaceTitle ~ AST_Head.getFather.name ~ " >\n" );
+								}
+								else 
+									_list ~= "OPERATOR:\n";
+								break;
+
 							case B_PARAM:	 	_list ~= "PARAMETER:\n";	break;
 							case B_CTOR:	 	_list ~= "CTOR:\n";			break;
 							case B_DTOR:	 	_list ~= "DTOR:\n";			break;
@@ -4198,29 +4301,16 @@ version(FBIDE)
 						{
 							if( keyword_Btype > 0 )
 							{
-								// Declare
-								if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS | B_UNION ) )
-								{}
-								else
+								// The AST_HEAD is already TYPE | CLASS | UNION struct
+								foreach( CASTnode _node; AST_Head.getChildren )
 								{
-									char[]	typeString = AST_Head.type;
-									CASTnode memberFunctionMotherNode = searchMatchNode( AST_Head.getFather, AST_Head.name, B_TYPE | B_CLASS | B_UNION );
-									if( memberFunctionMotherNode !is null )
+									if( _node.kind & keyword_Btype )
 									{
-										foreach_reverse( CASTnode _node; getMembers( memberFunctionMotherNode ) )
-										{
-											if( _node.kind & keyword_Btype )
-											{
-												if( _node.type == typeString )
-												{
-													AST_Head = _node;
-													break;
-												}
-												AST_Head = _node;
-											}
-										}
+										
+										AST_Head = _node;
+										break;
 									}
-								}
+								}				
 							}
 						}
 						
@@ -4247,9 +4337,10 @@ version(FBIDE)
 								}
 							}
 							
+							char[][] nameSpaces = Util.split( getNameSpaceWithDotTail( AST_Head.getFather ), "." );
 
 							// Declare & procedure body at same file
-							CASTnode _resultNode = getMatchNodeInFile( procedureName, fullPath, AST_Head.kind );
+							CASTnode _resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, fullPath, AST_Head.kind );
 							if( _resultNode !is null )
 							{
 								if( GLOBAL.navigation.addCache( fullPath, _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( fullPath, _resultNode.lineNumber );
@@ -4261,7 +4352,7 @@ version(FBIDE)
 							if( lowerCase( _fp.ext ) == "bi" )
 							{
 								exceptFiles ~= ( _fp.path() ~ _fp.name ~ ".bas" );
-								_resultNode = getMatchNodeInFile( procedureName, exceptFiles[$-1], AST_Head.kind );
+								_resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, exceptFiles[$-1], AST_Head.kind );
 								if( _resultNode !is null )
 								{
 									if( GLOBAL.navigation.addCache( exceptFiles[$-1], _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( exceptFiles[$-1], _resultNode.lineNumber );
@@ -4270,7 +4361,7 @@ version(FBIDE)
 								else
 								{
 									exceptFiles ~= ( _fp.path() ~ _fp.name ~ "." ~ GLOBAL.extraParsableExt );
-									_resultNode = getMatchNodeInFile( procedureName, exceptFiles[$-1], AST_Head.kind );
+									_resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, exceptFiles[$-1], AST_Head.kind );
 									if( _resultNode !is null )
 									{
 										if( GLOBAL.navigation.addCache( exceptFiles[$-1], _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( exceptFiles[$-1], _resultNode.lineNumber );
@@ -4280,7 +4371,7 @@ version(FBIDE)
 							}
 							
 							// Check All Project
-							_resultNode = getMatchNodeInProject( procedureName, ProjectAction.getActiveProjectName(), B_SUB | B_FUNCTION, exceptFiles );
+							_resultNode = getMatchNodeInProject( oriAST, nameSpaces, procedureName, ProjectAction.getActiveProjectName(), B_SUB | B_FUNCTION, exceptFiles );
 							_rootNode = ParserAction.getRoot( _resultNode );
 							if( _rootNode !is null )
 							{

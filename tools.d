@@ -159,7 +159,19 @@ char* getCString( char[] Dstring )
 
 void freeCString( char* cString )
 {
-	if( cString != null ) free( cString );
+	if( cString != null )
+	{
+		free( cString );
+		cString = null;
+	}
+}
+
+char* copyCString( char* oldString )
+{
+	int _len = strlen( oldString );
+	auto ret = cast(char*) calloc( 1, _len + 1 );
+	memcpy( ret, oldString, _len );
+	return ret;
 }
 
 char* toStringPtr( char[] DString )
@@ -284,14 +296,17 @@ version(FBIDE)
 
 		return replaceText;
 	}
+}
+
 	
+bool isParsableExt( char[] _ext, int flag = 7 )
+{
+	if( !_ext.length ) return false;
 	
-	bool isParsableExt( char[] _ext, int flag = 7 )
+	_ext = lowerCase( _ext );
+	
+	version(FBIDE)
 	{
-		if( !_ext.length ) return false;
-		
-		_ext = lowerCase( _ext );
-		
 		if( _ext == "bas" )
 		{
 			if( flag & 1 ) return true;
@@ -305,10 +320,23 @@ version(FBIDE)
 			if( !GLOBAL.extraParsableExt.length ) return false;
 			if( flag & 4 ) return true;
 		}
-		
-		return false;
 	}
+	
+	version(DIDE)
+	{
+		if( _ext == "d" )
+		{
+			if( flag & 1 ) return true;
+		}
+		else if( _ext == "di" )
+		{
+			if( flag & 2 ) return true;
+		}
+	}
+	
+	return false;
 }
+
 
 char[] setINILineData( char[] left, char[] right = "" )
 {

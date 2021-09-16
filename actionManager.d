@@ -233,7 +233,7 @@ public:
 					for( int i = 3; i > -1; -- i )
 						text = cast(char)bomData[i] ~ text;
 
-					result = _bom.decode( text );
+					result = _bom.decode( text ).dup;
 				}
 				else
 				{
@@ -259,13 +259,13 @@ public:
 						for( int i = 1; i >= 0; -- i )
 							text = cast(char)bomData[i] ~ text;
 
-						result = _bom.decode( text );
+						result = _bom.decode( text ).dup;
 					}
 					else
 					{
 						if( isUTF8WithouBOM( text ) )
 						{
-							result = text;
+							result = text.dup;
 							_encoding = Encoding.UTF_8N;
 						}
 						else
@@ -282,13 +282,13 @@ public:
 								}
 								else
 								{
-									result = text;
+									result = text.dup;
 									_encoding = file.encoding();
 								}
 							}
 							else
 							{
-								result = text;
+								result = text.dup;
 								_encoding = file.encoding();
 							}
 						}
@@ -298,7 +298,7 @@ public:
 			else
 			{
 				_encoding = file.encoding();
-				result = text;
+				result = text.dup;
 			}
 		}
 		catch( Exception e )
@@ -724,7 +724,7 @@ public:
 		IupSetAttribute( iupSci, "SEARCHFLAGS", "WHOLEWORD" );
 		IupSetInt( iupSci, "TARGETSTART", 0 );
 		IupSetInt( iupSci, "TARGETEND", -1 );
-		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) GLOBAL.cString.convert( target ) ); // SCI_SEARCHINTARGET = 2197,
+		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) toStringz( target ) ); // SCI_SEARCHINTARGET = 2197,
 		
 		while( findPos != -1 )
 		{
@@ -2175,7 +2175,7 @@ public:
 										while( AST_Head.kind & ( B_WITH | B_SCOPE ) );
 									}
 									
-									IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
 									switch( AST_Head.kind )
 									{
 										case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
@@ -2193,7 +2193,7 @@ public:
 								}
 								version(DIDE)
 								{
-									IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
 									
 									if( AST_Head.kind & D_MODULE )
 										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_module" );
@@ -2270,7 +2270,7 @@ public:
 	{
 		version(FBIDE)
 		{
-			if( _kind == -1 ) _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE | B_NAMESPACE;
+			if( _kind == -1 ) _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_OPERATOR | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE | B_NAMESPACE;
 		}
 		version(DIDE)
 		{
@@ -2286,7 +2286,7 @@ public:
 			
 			if( _fatherNode.kind & _kind )
 			{
-				if( line >= _fatherNode.lineNumber && line < _fatherNode.endLineNum )
+				if( line >= _fatherNode.lineNumber && line <= _fatherNode.endLineNum )
 				{
 					//IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
 					

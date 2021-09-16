@@ -176,15 +176,13 @@ class CSingleTextOpen : CBaseDialog
 	import		global;
 	import		dialogs.fileDlg;
 	
-	Ihandle*	label, textResult, openButton;
-	char[]		labelName;
+	Ihandle*	labelORframe, hBox, vBox, textResult, openButton;
+	IupString	labelName;
 
-	void createLayout( char[] textWH )
+	void createLayout( char[] textWH, bool bFrame )
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
 
-		label = IupLabel( GLOBAL.cString.convert( labelName ) );
-		
 		textResult = IupText( null );
 		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
 		IupSetAttribute( textResult, "EXPAND", "YES" );
@@ -194,54 +192,61 @@ class CSingleTextOpen : CBaseDialog
 		openButton = IupButton( null, null );
 		IupSetAttributes( openButton, "IMAGE=icon_openfile,FLAT=YES,CANFOCUS=NO" );
 
-		Ihandle* hBox = IupHbox( label, textResult, openButton, null );
+		if( !bFrame )
+		{
+			labelORframe = IupLabel( labelName.toCString );
+			hBox = IupHbox( labelORframe, textResult, openButton, null );
+			vBox = IupVbox( hBox, bottom, null );
+		}
+		else
+		{
+			hBox = IupHbox( textResult, openButton, null );
+			labelORframe = IupFrame( hBox );
+			IupSetAttribute( labelORframe, "TITLE", labelName.toCString );
+			vBox = IupVbox( labelORframe, bottom, null );
+		}
+
 		IupSetAttribute( hBox, "ALIGNMENT", "ACENTER" );
-
-		Ihandle* vBox = IupVbox( hBox, bottom, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ALEFT,MARGIN=5x5,GAP=2,EXPAND=YES" );
-
 		IupSetAttribute( btnOK, "SIZE", "40x12" );
 		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );
-		//version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "Ubuntu Mono, 10" );
 
 		IupAppend( _dlg, vBox );
 	}	
 
 	public:
-	this( int w, int h, char[] title, char[] _labelText = null, char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG", char[] iconName = null )
+	this( int w, int h, char[] title, char[] _labelText = null, char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG", char[] iconName = null, bool bFrame = true )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "ICON", toStringz( iconName.dup ) );
 
-		labelName = _labelText ;
+		labelName = new IupString( _labelText );
 
-		createLayout( textWH );
+		createLayout( textWH, bFrame );
 		
 		IupMap( _dlg );
 
-		IupSetAttribute( textResult, "VALUE", GLOBAL.cString.convert( text ) );
+		IupSetStrAttribute( textResult, "VALUE", toStringz( text ) );
 		IupSetAttribute( textResult, "SELECTION", "ALL" );
 		
 		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSingleTextOpen_btnCancel_cb );
 		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CSingleTextOpen_btnOK_cb );
 		IupSetCallback( openButton, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			scope fileSecectDlg = new CFileDlg( null, null, "DIR" );
-			char[] fileName = fileSecectDlg.getFileName();
-
-			if( fileName.length )
+			Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
+			if( textHandle != null )
 			{
-				Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
-				if( textHandle != null )
+				scope fileSelectDlg = new CFileDlg( null, null, "DIR", null, fromStringz( IupGetAttribute( textHandle, "VALUE" ) ) );
+				char[] fileName = fileSelectDlg.getFileName();
+
+				if( fileName.length )
 				{
 					IupSetAttribute( textHandle, "VALUE", toStringz(fileName) );
 					IupSetAttribute( textHandle, "SELECTIONPOS", "ALL" );
 				}
 			}
 		});
-		
-		//IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) &CSingleTextOpen_SHOW_CB );
 	}
 
 	~this()
@@ -264,7 +269,7 @@ class CSingleTextOpen : CBaseDialog
 	
 	Ihandle* getLabelHandle()
 	{
-		return label;
+		return labelORframe;
 	}	
 }
 
@@ -285,16 +290,4 @@ extern(C) // Callback for CSingleTextOpen
 	{
 		return IUP_CLOSE;
 	}
-	/*
-	private int CSingleTextOpen_SHOW_CB( Ihandle* ih, int state )
-	{
-		if( state == IUP_SHOW )
-		{
-			Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
-			if( textHandle != null ) IupSetAttribute( textHandle, "SELECTIONPOS", "ALL" );
-		}
-	
-		return IUP_DEFAULT;
-	}
-	*/
 }

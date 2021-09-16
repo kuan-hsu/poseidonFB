@@ -991,7 +991,6 @@ version(FBIDE)
 				parseToken( TOK.Toperator );
 
 				// Function Name
-				// Function Name
 				if( !bDeclare )
 				{
 					if( token().tok == TOK.Tidentifier && next().tok == TOK.Tdot  )
@@ -1003,7 +1002,7 @@ version(FBIDE)
 						parseToken( TOK.Tdot );
 					}
 				}
-
+				
 				switch( token().tok )
 				{
 					case TOK.Tcast, TOK.Tat:
@@ -1016,30 +1015,30 @@ version(FBIDE)
 						{
 							parseToken( TOK.Topenparen );
 							parseToken( TOK.Tcloseparen );
+						}
 
-							if( token().tok == TOK.Tbyref ) 
-								parseToken( TOK.Tbyref );
-							else if( token().tok == TOK.Tbyval ) 
-								parseToken( TOK.Tbyval );
+						if( token().tok == TOK.Tbyref ) 
+							parseToken( TOK.Tbyref );
+						else if( token().tok == TOK.Tbyval ) 
+							parseToken( TOK.Tbyval );
 
-							if( token().tok == TOK.Tas )
+						if( token().tok == TOK.Tas )
+						{
+							parseToken( TOK.Tas );
+							_returnType = getVariableType();
+							if( _returnType.length )
 							{
-								parseToken( TOK.Tas );
-								_returnType = getVariableType();
-								if( _returnType.length )
+								parseToken();
+								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
 								{
+									_returnType ~= "*";
 									parseToken();
-									while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
-									{
-										_returnType ~= "*";
-										parseToken();
-									}
 								}
-
-								activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, _returnType ~ "()", null, _lineNum );
-								if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
-								break;
 							}
+
+							activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, _returnType ~ "()", null, _lineNum );
+							if( bDeclare && activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( _lineNum );//token().lineNumber );
+							break;
 						}
 						return false;
 
@@ -1341,6 +1340,8 @@ version(FBIDE)
 				*/
 				if( tokenIndex > 0 )
 					if( prev().tok == TOK.Tidentifier && !bDeclare ) bDeclare = true;
+					
+				if( token().tok == B_OPERATOR ) return parseOperator( bDeclare, _protection );
 				
 				
 				if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub || token().tok == TOK.Tproperty || token().tok == TOK.Tconstructor || token().tok == TOK.Tdestructor )
@@ -2165,7 +2166,7 @@ version(FBIDE)
 						{	
 							int loopUpperLimit = Integer.toInt( activeASTnode.type ) + 1;
 							for( int i = 0; i < loopUpperLimit; ++ i )
-								if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );else IupMessage("","NULL");
+								if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 						}
 						parseToken();
 					

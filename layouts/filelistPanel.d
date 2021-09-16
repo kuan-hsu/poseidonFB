@@ -61,7 +61,7 @@ class CFileList
 		IupSetCallback( tree, "DRAGDROP_CB", cast(Icallback) &fileList_DRAGDROP_CB );
 
 		Ihandle* _v = IupVbox( filelistToolbarH, tree, null );
-		IupSetAttributes( _v, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT" ) );
+		IupSetAttributes( _v,"ALIGNMENT=ARIGHT" );
 		layoutHandle = IupBackgroundBox( _v );
 		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &fileList_Empty_BUTTON_CB );
 	}

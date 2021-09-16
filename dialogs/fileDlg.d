@@ -17,9 +17,10 @@ class CFileDlg
 	{
 		Ihandle *dlg = IupFileDlg(); 
 
-		IupSetAttribute( dlg, "DIALOGTYPE",  toStringz( DIALOGTYPE.dup ) );
-		IupSetAttribute( dlg, "TITLE", toStringz( title.dup ) );
-		if( GLOBAL.recentOpenDir.length ) IupSetAttribute( dlg, "DIRECTORY", toStringz( GLOBAL.recentOpenDir ) );
+		IupSetAttribute( dlg, "DIALOGTYPE",  toStringz( DIALOGTYPE ) );
+		IupSetAttribute( dlg, "TITLE", toStringz( title ) );
+		if( GLOBAL.recentOpenDir.length )
+			if( Path.isFolder( GLOBAL.recentOpenDir ) ) IupSetAttribute( dlg, "DIRECTORY", toStringz( GLOBAL.recentOpenDir ) );
 		
 
 		bool bMultiFiles;
@@ -28,9 +29,17 @@ class CFileDlg
 			bMultiFiles = true;
 			IupSetAttribute( dlg, "MULTIPLEFILES", toStringz( MULTIPLEFILES ) );
 		}
+		else if( DIALOGTYPE == "OPEN" || DIALOGTYPE == "DIR" )
+		{
+			if( Path.exists( _fileName ) )
+			{
+				if( Path.isFile( _fileName ) ) _fileName = Path.parent( _fileName );
+				if( Path.isFolder( _fileName ) ) IupSetAttribute( dlg, "DIRECTORY", toStringz( _fileName ) );
+			}
+		}		
 		else if( DIALOGTYPE == "SAVE" )
 		{
-			if( _fileName.length ) IupSetAttribute( dlg, "FILE", toStringz( _fileName.dup ) );
+			if( _fileName.length ) IupSetAttribute( dlg, "FILE", toStringz( _fileName ) );
 		}
 
 		//char[] txtIupFilterAttribute = "FILTER = \"" ~ filter ~ "\", FILTERINFO = \"" ~  fileInfo ~ "\"";
@@ -45,8 +54,8 @@ class CFileDlg
 		*/
 		if( IupGetInt( dlg, "STATUS") != -1 )
 		{
-			filterUsed = Util.trim( fromStringz( IupGetAttribute( dlg, "FILTERUSED" ) ).dup );
-			char[] fileString = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
+			filterUsed = Util.trim( fromStringz( IupGetAttribute( dlg, "FILTERUSED" ) ) );
+			char[] fileString = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ) );
 
 			if( fileString.length )
 			{

@@ -402,8 +402,8 @@ class COutline
 			{
 				switch( lowerCase( _node.protection ) )
 				{
-					case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
-					case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 127 39" ) ); break;
+					case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); break;
+					case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 127 39" ); break;
 					default:
 				}
 			}
@@ -412,16 +412,16 @@ class COutline
 				if( _node.kind & D_IMPORT )
 				{
 					if( _node.protection == "protected" )
-						IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 95 17" ) );
+						IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 95 17" );
 					else if( _node.protection == "" || _node.protection == "private" )
-						IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) );
+						IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" );
 				}
 				else
 				{
 					switch( _node.protection )
 					{
-						case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 0 0" ) ); break;
-						case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, GLOBAL.cString.convert( "255 95 17" ) ); break;
+						case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); break;
+						case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 95 17" ); break;
 						default:
 					}
 				}
@@ -1275,7 +1275,7 @@ class COutline
 		
 
 		layoutHandle = IupVbox( outlineToolbarH, outlineTreeNodeList, zBoxHandle, null );
-		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" ) );
+		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" );
 		
 		GLOBAL.objectDefaultParser = loadObjectParser();
 	}
@@ -1364,7 +1364,7 @@ class COutline
 					cleanTree( fullPath );
 
 					Ihandle* tree = IupTree();
-					IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
+					IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" );
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 					
 					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
@@ -1394,11 +1394,11 @@ class COutline
 					char[] fullPath = head.name;
 
 					Ihandle* tree = IupTree();
-					IupSetAttributes( tree, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" ) );
+					IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" );
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 					IupSetAttributeId( tree, "USERDATA", 0, cast(char*) head );
-					IupSetAttributeId( tree, "IMAGE", 0, GLOBAL.cString.convert( "IUP_module" ) );
-					IupSetAttributeId( tree, "IMAGEEXPANDED", 0, GLOBAL.cString.convert( "IUP_module" ) );				
+					IupSetAttributeId( tree, "IMAGE", 0, "IUP_module" );
+					IupSetAttributeId( tree, "IMAGEEXPANDED", 0, "IUP_module" );
 					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
 					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
 					

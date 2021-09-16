@@ -107,7 +107,7 @@ private:
 		//IupSetCallback( tree, "BRANCHCLOSE_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
-		IupSetAttributes( layoutHandle, GLOBAL.cString.convert( "ALIGNMENT=ARIGHT,GAP=2" ) );
+		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,GAP=2" );
 	}
 
 	void toBoldTitle( Ihandle* _tree, int id )
@@ -158,14 +158,14 @@ public:
 			if( IupGetIntId( tree, "DEPTH", i ) == 1 )
 			{
 				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.prjTitle.toCString );
-				IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_prj" ) );
-				IupSetAttributeId( tree, "IMAGEEXPANDED", i, GLOBAL.cString.convert( "icon_prj_open" ) );				
+				IupSetAttributeId( tree, "IMAGE", i, "icon_prj" );
+				IupSetAttributeId( tree, "IMAGEEXPANDED", i, "icon_prj_open" );
 			}
 			else if( IupGetIntId( tree, "DEPTH", i ) == 2 )
 			{
 				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.prjSourceType.toCString );
-				IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_door" ) );
-				IupSetAttributeId( tree, "IMAGEEXPANDED", i, GLOBAL.cString.convert( "icon_dooropen" ) );					
+				IupSetAttributeId( tree, "IMAGE", i, "icon_door" );
+				IupSetAttributeId( tree, "IMAGEEXPANDED", i, "icon_dooropen" );
 			}
 			else
 			{
@@ -177,11 +177,11 @@ public:
 					switch( tools.lowerCase( _fp.ext() ) )
 					{
 						case "bas":
-							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bas" ) );	break;
+							IupSetAttributeId( tree, "IMAGE", i, "icon_bas" );	break;
 						case "bi":
-							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bi" ) );		break;
+							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );		break;
 						default:
-							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_txt" ) );
+							IupSetAttributeId( tree, "IMAGE", i, "icon_txt" );
 					}
 				}
 				
@@ -190,11 +190,11 @@ public:
 					switch( tools.lowerCase( _fp.ext() ) )
 					{
 						case "d":
-							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bas" ) );	break;
+							IupSetAttributeId( tree, "IMAGE", i, "icon_bas" );	break;
 						case "di":
-							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_bi" ) );		break;
+							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );		break;
 						default:
-							IupSetAttributeId( tree, "IMAGE", i, GLOBAL.cString.convert( "icon_txt" ) );
+							IupSetAttributeId( tree, "IMAGE", i, "icon_txt" );
 					}
 				}
 			}
@@ -214,8 +214,8 @@ public:
 
 		// Add Project's Name to Tree
 		IupSetAttribute( tree, "ADDBRANCH0", GLOBAL.cString.convert( GLOBAL.projectManager[setupDir].name ) );
-		IupSetAttribute( tree, "IMAGE1", GLOBAL.cString.convert( "icon_prj" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED1", GLOBAL.cString.convert( "icon_prj_open" ) );
+		IupSetAttribute( tree, "IMAGE1", "icon_prj" );
+		IupSetAttribute( tree, "IMAGEEXPANDED1", "icon_prj_open" );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
 		IupSetAttributeId( tree, "COLOR", 1, GLOBAL.editColor.prjTitle.toCString );
@@ -224,8 +224,8 @@ public:
 		// Miscellaneous
 		IupSetAttribute( tree, "ADDBRANCH1", "Miscellaneous" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		// Create Sub Dir
@@ -243,14 +243,14 @@ public:
 				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
 				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "IMAGE", insertID, "icon_txt" );
 				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
 			else
 			{
 				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_txt" );
 				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 			}
 		}		
@@ -259,8 +259,8 @@ public:
 	
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 
 		// Create Sub Dir
@@ -278,14 +278,14 @@ public:
 				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
 				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "IMAGE", insertID, "icon_txt" );
 				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
 			else
 			{
 				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_txt" );
 				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 			}
 		}
@@ -294,8 +294,8 @@ public:
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		// Create Sub Dir
@@ -313,14 +313,14 @@ public:
 				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
 				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_bi" ) );
+				IupSetAttributeId( tree, "IMAGE", insertID, "icon_bi" );
 				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
 			else
 			{
 				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_bi" );
 				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 			}
 		}
@@ -330,8 +330,8 @@ public:
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
 		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
 		toBoldTitle( tree, 2 );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		
 		// Create Sub Dir
 		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].sources )
@@ -349,14 +349,14 @@ public:
 				IupSetAttributeId( tree, "INSERTLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
 				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", insertID, GLOBAL.cString.convert( "icon_bas" ) );
+				IupSetAttributeId( tree, "IMAGE", insertID, "icon_bas" );
 				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
 			else
 			{
 				IupSetAttributeId( tree, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( s ) );
 				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
-				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
+				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_bas" );
 				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 			}
 		}
@@ -393,27 +393,27 @@ public:
 		toBoldTitle( tree, 1 );
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Miscellaneous" );
-		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
-		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
-		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
-		IupSetAttributeId( tree, "COLOR", 2, toStringz( "0 0 255" ) );
-		IupSetAttribute( tree, "IMAGE2", GLOBAL.cString.convert( "icon_door" ) );
-		IupSetAttribute( tree, "IMAGEEXPANDED2", GLOBAL.cString.convert( "icon_dooropen" ) );
+		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetAttribute( tree, "IMAGE2", "icon_door" );
+		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		// Set Focus to Project Tree
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) tree );
@@ -1402,19 +1402,19 @@ extern(C)
 			{
 				case "Sources":
 					GLOBAL.projectManager[activeProjectDirName].sources ~= fullPath;
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, GLOBAL.cString.convert( "icon_bas" ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, "icon_bas" );
 					break;
 				case "Includes":
 					GLOBAL.projectManager[activeProjectDirName].includes ~= fullPath;
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, GLOBAL.cString.convert( "icon_bi" ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, "icon_bi" );
 					break;
 				case "Others":
 					GLOBAL.projectManager[activeProjectDirName].others ~= fullPath;
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, GLOBAL.cString.convert( "icon_txt" ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, "icon_txt" );
 					break;
 				default:
 					GLOBAL.projectManager[activeProjectDirName].misc ~= fullPath;
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, GLOBAL.cString.convert( "icon_txt" ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id + 1, "icon_txt" );
 					break;
 			}
 		}
@@ -1628,9 +1628,9 @@ extern(C)
 
 					switch( prjFilesFolderName )
 					{
-						case "Sources":		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) ); break;
-						case "Includes":	IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) ); break;
-						default:			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_txt" ) ); break;
+						case "Sources":		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_bas" ); break;
+						case "Includes":	IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_bi" ); break;
+						default:			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_txt" ); break;
 					}
 
 					//actionManager.ScintillaAction.openFile( fullPath.dup );
@@ -2120,7 +2120,7 @@ extern(C)
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 				
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bi" ) );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_bi" );
 			}
 			
 			GLOBAL.projectManager[prjDirName].sources.length = 0;
@@ -2138,7 +2138,7 @@ extern(C)
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 				
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, GLOBAL.cString.convert( "icon_bas" ) );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_bas" );
 			}			
 		}
 

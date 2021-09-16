@@ -691,29 +691,25 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 	int CProjectPropertiesDialog_btnCompilerPath_cb( Ihandle* ih ) 
 	{
-		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["exefile"].toDString() ~ "|*.exe" );
-		char[] fileName = fileSecectDlg.getFileName();
-
-		if( fileName.length )
-		{
-			Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
-			if( _dlg != null )
-			{
-				Ihandle* _compilerPath = IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" );
-				if( _compilerPath != null ) IupSetAttribute( _compilerPath, "VALUE", toStringz( fileName ) );
-			}
-		}
-		else
-		{
-			//Stdout( "NoThing!!!" ).newline;
-		}
+		auto mother = IupGetParent( ih );
+		if( !mother ) return IUP_DEFAULT;
+		
+		auto _textElement = IupGetChild( mother, 1 );
+		if( !_textElement ) return IUP_DEFAULT;
+		
+		char[] relatedPath = fromStringz( IupGetAttribute( _textElement, "VALUE" ) );
+		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["exefile"].toDString() ~ "|*.exe", "OPEN", "NO", relatedPath );
+		
+		char[] fileName = fileSelectDlg.getFileName();
+		if( fileName.length ) IupSetStrAttribute( _textElement, "VALUE", toStringz( fileName ) );
 
 		return IUP_DEFAULT;
 	}
 	
 	int CProjectPropertiesDialog_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
-		scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, fromStringz( IupGetAttributeId( ih, "", item ) ), false, "PRJPROPERTY_DIALOG" );
+		char[] label = fromStringz( IupGetAttribute( IupGetParent( IupGetParent( ih ) ), "TITLE" ) );
+		scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", label, null, fromStringz( IupGetAttributeId( ih, "", item ) ), false, "PRJPROPERTY_DIALOG" );
 		char[] fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		if( fileName.length ) IupSetAttributeId( ih, "", item, toStringz( fileName.dup ) );
 		IupSetInt( ih, "VALUE", item ); // Set Focus
@@ -726,7 +722,8 @@ extern(C) // Callback for CProjectPropertiesDialog
 		Ihandle*	list;
 		if( ih == IupGetHandle( "btnIncludePathAdd_Handle" ) ) list = IupGetHandle( "listIncludePath_Handle" ); else list = IupGetHandle( "listLibPath_Handle" );
 
-		scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, "", false, "PRJPROPERTY_DIALOG" );
+		char[] label = fromStringz( IupGetAttribute( IupGetParent( IupGetParent( list ) ), "TITLE" ) );
+		scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...",label, null, "", false, "PRJPROPERTY_DIALOG" );
 
 		char[] fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		if( fileName.length )
@@ -774,7 +771,8 @@ extern(C) // Callback for CProjectPropertiesDialog
 		char* itemNumber = IupGetAttribute( list, "VALUE" );
 		if( Integer.atoi( fromStringz( itemNumber ) ) > 0 )
 		{
-			scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", GLOBAL.languageItems["edit"].toDString() ~ ":", null, fromStringz( IupGetAttribute( list, itemNumber ) ), false, "PRJPROPERTY_DIALOG" );
+			char[] label = fromStringz( IupGetAttribute( IupGetParent( IupGetParent( list ) ), "TITLE" ) );
+			scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", label, null, fromStringz( IupGetAttribute( list, itemNumber ) ), false, "PRJPROPERTY_DIALOG" );
 			char[] fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			if( fileName.length ) IupSetAttribute( list, itemNumber, toStringz(fileName) );
 			

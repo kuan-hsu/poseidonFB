@@ -103,11 +103,11 @@ class CDebugger
 		backtraceHandle = IupTree();
 		version(Windows)
 		{
-			IupSetAttributes( backtraceHandle, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=YES" ) );
+			IupSetAttributes( backtraceHandle, "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=YES" );
 		}
 		else
 		{
-			IupSetAttributes( backtraceHandle, GLOBAL.cString.convert( "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=NO" ) );
+			IupSetAttributes( backtraceHandle, "ADDROOT=YES,EXPAND=YES,HIDEBUTTONS=NO" );
 			IupSetCallback( backtraceHandle, "BRANCHCLOSE_CB", cast(Icallback) function( Ihandle* __ih )
 			{
 				return IUP_IGNORE;
@@ -1501,8 +1501,8 @@ class CDebugger
 
 										IupSetAttributeId( backtraceHandle, "ADDBRANCH", lastID, GLOBAL.cString.convert( branchString.dup ) );
 										lastID = IupGetInt( backtraceHandle, "LASTADDNODE" );
-										IupSetAttributeId( backtraceHandle, "IMAGE", lastID, GLOBAL.cString.convert( "icon_debug_bt1" ) );
-										IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, GLOBAL.cString.convert( "icon_debug_bt1" ) );
+										IupSetAttributeId( backtraceHandle, "IMAGE", lastID, "icon_debug_bt1" );
+										IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, "icon_debug_bt1" );
 										if( i == 0 )
 										{
 											IupSetAttributeId( backtraceHandle, "COLOR", lastID, "0 0 255" );
@@ -1631,8 +1631,8 @@ class CDebugger
 													fileFullPath = lineData[4..$-1];
 													IupSetAttributeId( shareTreeHandle, "INSERTBRANCH", fileID, toStringz( fileFullPath.dup ) );
 													fileID = id = IupGetInt( shareTreeHandle, "LASTADDNODE" );
-													IupSetAttributeId( shareTreeHandle, "IMAGE", fileID, GLOBAL.cString.convert( "icon_txt" ) );
-													IupSetAttributeId( shareTreeHandle, "IMAGEEXPANDED", fileID, GLOBAL.cString.convert( "icon_txt" ) );				
+													IupSetAttributeId( shareTreeHandle, "IMAGE", fileID, "icon_txt" );
+													IupSetAttributeId( shareTreeHandle, "IMAGEEXPANDED", fileID, "icon_txt" );
 													continue;
 												}
 											}
@@ -2244,12 +2244,12 @@ class DebugThread //: Thread
 
 			
 			//IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "READONLY", "NO" );
-			caretPos = IupGetInt( GLOBAL.debugPanel.getConsoleHandle, GLOBAL.cString.convert( "CARETPOS" ) );
+			caretPos = IupGetInt( GLOBAL.debugPanel.getConsoleHandle, "CARETPOS" );
 
 			bExecuted = true;
 			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "TITLE", 0, GLOBAL.cString.convert( executeFullPath ) );
-			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, GLOBAL.cString.convert( "icon_debug_bt0" ) );
-			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, GLOBAL.cString.convert( "icon_debug_bt0" ) );
+			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, "icon_debug_bt0" );
+			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, "icon_debug_bt0" );
 			splitValue = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 500 );
 
@@ -2348,7 +2348,7 @@ extern( C )
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );
 		if( textHandle != null )
 		{
-			IupSetAttribute( textHandle, "VALUE", GLOBAL.cString.convert( "#_close_#" ) );
+			IupSetAttribute( textHandle, "VALUE", "#_close_#" );
 		}
 
 		return IUP_CLOSE;

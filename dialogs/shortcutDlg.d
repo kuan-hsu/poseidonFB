@@ -100,11 +100,11 @@ class CShortCutDialog : CBaseDialog
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Courier New,9" ) );
+			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "FONT", GLOBAL.cString.convert( "Monospace, 10" ) );
+			IupSetAttribute( _dlg, "FONT", "Monospace, 10" );
 		}		
 
 		createLayout( item, listText );
