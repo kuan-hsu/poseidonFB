@@ -39,7 +39,7 @@ version(FBIDE)
 			}
 		}
 		
-
+		static CASTnode[]					extendedClasses;
 		static SortedMap!(char[], char[])	map;
 		static Stack!(char[])				calltipContainer;
 		static char[]						noneListProcedureName;
@@ -245,17 +245,30 @@ version(FBIDE)
 				noIncludeNodeContainer.remove( key );
 		}
 		
+		static bool checkExtendedClassesExist( CASTnode _node )
+		{
+			foreach( CASTnode a; extendedClasses )
+			{
+				if( a == _node ) return true;
+			}
+			
+			return false;
+		}
+		
 		static void getTypeAndParameter( CASTnode node, ref char[] _type, ref char[] _param )
 		{
-			int openParenPos = Util.index( node.type, "(" );
-			if( openParenPos < node.type.length )
+			if( node !is null )
 			{
-				_type = node.type[0..openParenPos];
-				_param = node.type[openParenPos..$];
-			}
-			else
-			{
-				_type = node.type;
+				int openParenPos = Util.index( node.type, "(" );
+				if( openParenPos < node.type.length )
+				{
+					_type = node.type[0..openParenPos];
+					_param = node.type[openParenPos..$];
+				}
+				else
+				{
+					_type = node.type;
+				}
 			}
 		}
 		
@@ -309,6 +322,7 @@ version(FBIDE)
 				case B_VARIABLE:
 					if( node.name.length )
 					{
+						if( !type.length ) type = node.base; // VAR
 						if( node.name[$-1] == ')' ) return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 1 + protAdd ) : name ~ "?" ~ Integer.toString( 1 + protAdd ); else return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 4 + protAdd ) : name ~ "?" ~ Integer.toString( 4 + protAdd );
 					}
 					break;
@@ -436,15 +450,20 @@ version(FBIDE)
 			CASTnode mother = getBaseNode( originalNode );
 			if( mother !is null )
 			{
-				foreach( CASTnode _node; mother.getChildren() )
+				if( !checkExtendedClassesExist( mother ) ) // Check to prevent infinite loop, EX: A extends B, B extends A......... or object extends object..........
 				{
-					if( _node.protection != "private" )
+					extendedClasses ~= mother;
+					
+					foreach( CASTnode _node; mother.getChildren() )
 					{
-						results ~= _node;
+						if( _node.protection != "private" )
+						{
+							results ~= _node;
+						}
 					}
+					
+					results ~= getBaseNodeMembers( mother );
 				}
-
-				results ~= getBaseNodeMembers( mother );
 			}
 
 			return results;
@@ -1030,7 +1049,7 @@ version(FBIDE)
 			_type = lowerCase( _type );
 			
 			if( _type == "byte" || _type == "ubyte" || _type == "short" || _type == "ushort" || _type == "integer" || _type == "uinteger" || _type == "longint" || _type == "ulongint" ||
-				_type == "single" || _type == "double" || _type == "string" || _type == "zstring" || _type == "wstring" ) return true;
+				_type == "single" || _type == "double" || _type == "string" || _type == "zstring" || _type == "wstring" || _type == "boolean" ) return true;
 
 			return false;
 		}
@@ -1295,13 +1314,14 @@ version(FBIDE)
 				char[][]	splitWord;
 				char[]		_type;
 				
+				auto oriAST = originalNode;
+				
 				if( originalNode.type.length ) _type = originalNode.type; else _type = originalNode.base;
 				
 				splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
 				
-				auto oriAST = originalNode;
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
 				
 				if( originalNode is null )
@@ -1309,23 +1329,18 @@ version(FBIDE)
 					char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
 					if( usingNames.length )
 					{
-						auto oriAST2 = oriAST;
 						foreach( char[] s; usingNames )
 						{
-							oriAST2 = oriAST;
+							originalNode = oriAST;
 							char[][] splitWithDot = Util.split( s, "." );
 							char[][] namespaceSplitWord = splitWithDot ~ splitWord;
-							analysisSplitWorld_ReturnCompleteList( oriAST2, namespaceSplitWord, lineNum, true, false, false );
-							if( oriAST2 !is null )
-							{
-								originalNode = oriAST2;
-								break;
-							}
+							analysisSplitWorld_ReturnCompleteList( originalNode, namespaceSplitWord, lineNum, true, false, false );
+							if( originalNode !is null ) break;
 						}
 					}
 				}
 				
-				if( originalNode !is null ) resultNode = originalNode;
+				if( originalNode !is null ) resultNode = originalNode;// else resultNode = oriAST;
 			}			
 			
 			return resultNode;
@@ -1797,6 +1812,8 @@ version(FBIDE)
 			{
 				if( map is null ) map = new SortedMap!(char[], char[]); else map.reset();
 			}
+			
+			extendedClasses.length = 0;
 			
 			char[]		memberFunctionMotherName, result;
 
@@ -4035,8 +4052,11 @@ version(FBIDE)
 								{
 									if( a.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 									{
-										auto matchNode = getType( a, lineNum );
-										if( matchNode !is null ) nameSpaceNodes ~= matchNode;
+										if( !isDefaultType( ParserAction.getSeparateType( a.type, true ) ) )
+										{
+											auto matchNode = getType( a, lineNum );
+											if( matchNode !is null ) nameSpaceNodes ~= matchNode;
+										}
 									}
 									else
 									{
@@ -4075,39 +4095,6 @@ version(FBIDE)
 							splitWord ~= AST_Head.name; // Get the TYPE | CLASS | UNION name
 							AST_Head = AST_Head.getFather;
 						}
-						/+
-						// Check if in NameSpace block?
-						char[] _namespace = getNameSpaceWithDotTail( oriAST );
-						if( _namespace.length )
-						{
-							_namespace ~= Util.join( splitWord, "." );
-							auto oriAST2 = analysisSplitWord( oriAST, Util.split( _namespace, "." ) );
-							if( oriAST2 !is null ) AST_Head = oriAST2;
-						}
-						else
-						{
-							// Check if use USING?
-							char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
-							if( usingNames.length )
-							{
-								foreach( char[] s; usingNames )
-								{
-									char[][] splitWithDot = Util.split( s, "." );
-									char[][] namespaceSplitWord = splitWithDot ~ splitWord;
-									auto oriAST2 = analysisSplitWord( oriAST, namespaceSplitWord );
-									if( oriAST2 !is null )
-									{
-										AST_Head = oriAST2;
-										break;
-									}
-								}
-							}
-							else
-							{
-								AST_Head = analysisSplitWord( AST_Head, splitWord );
-							}
-						}
-						+/
 						
 						AST_Head = analysisSplitWord( AST_Head, splitWord );
 						if( AST_Head is null )
@@ -4234,9 +4221,10 @@ version(FBIDE)
 							case B_CTOR:	 	_list ~= "CTOR:\n";			break;
 							case B_DTOR:	 	_list ~= "DTOR:\n";			break;
 							default:
-						}						
+						}
 						
 						
+						//IupMessage( "AST_HEAD", toStringz( "TYPE :" ~ AST_Head.type ~ "\n" ~ "NAME :" ~ AST_Head.name ~ "\n" ) );
 						if( AST_Head.kind & B_NAMESPACE )
 						{
 							char[] _name = AST_Head.name;
@@ -4247,6 +4235,33 @@ version(FBIDE)
 						else if( AST_Head.kind & ( B_FUNCTION | B_SUB | B_PROPERTY | B_OPERATOR ) )
 						{
 							_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ ( _param.length ? _param : "()" ) ).dup;
+						}
+						else if( AST_Head.kind & ( B_VARIABLE ) )
+						{
+							if( !_type.length )	// VAR declare...
+							{
+								if( AST_Head.base.length )
+								{
+									auto typeNode = analysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) );
+									/*
+									while( typeNode !is null ) // Get Top
+									{
+										auto a = analysisSplitWord( typeNode, Util.split( typeNode.type, "." ) );
+										if( a is null ) break; else typeNode = a;
+									}
+									*/
+									if( typeNode !is null )
+									{
+										//IupMessage( "typeNode", toStringz( "TYPE :" ~ typeNode.type ~ "\n" ~ "NAME :" ~ typeNode.name ~ "\n" ) );
+										getTypeAndParameter( typeNode, _type, _param );
+										if( !_type.length ) _type = typeNode.name;			// The node without type, like TYPE XXX
+									}
+									else
+										_type = AST_Head.base;
+								}
+							}
+						
+							_list ~= ( _type ~ " " ~ AST_Head.name ).dup; // Without parameters
 						}
 						else
 							_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;

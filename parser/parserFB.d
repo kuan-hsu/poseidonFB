@@ -712,7 +712,7 @@ version(FBIDE)
 										{
 											if( Util.index( token().identifier, "." ) < token().identifier.length ) bSingle = true;
 										}
-										parseToken( );
+										parseToken();
 										
 										if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 										{
@@ -724,6 +724,21 @@ version(FBIDE)
 										{
 											return false;
 										}
+									}
+									else if( token().tok == TOK.Tstrings )
+									{
+										parseToken( TOK.Tstrings );
+										if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
+										{
+											activeASTnode.addChild( _name, B_VARIABLE, null, "string", null, _lineNum );
+											parseToken( );
+											return true;
+										}
+										else
+										{
+											return false;
+										}
+									
 									}
 									else
 									{
@@ -849,6 +864,9 @@ version(FBIDE)
 						_rightExpress ~= token().identifier;
 						parseToken();
 					}
+					
+					int indexOpenparen = Util.index( _rightExpress, "(" );
+					if( indexOpenparen < _rightExpress.length ) _rightExpress = _rightExpress[0..indexOpenparen];
 					
 					activeASTnode.addChild( _name, B_VARIABLE, null, _type, _rightExpress, _lineNum );
 				}
@@ -1974,7 +1992,7 @@ version(FBIDE)
 						if( token().tok == TOK.Textends )
 						{
 							parseToken( TOK.Textends );
-							if( token().tok == TOK.Tidentifier ) _base = parseIdentifier();
+							if( token().tok == TOK.Tidentifier || token().tok == TOK.Tobject ) _base = parseIdentifier();
 							/*
 							_base = token().identifier;
 							parseToken( TOK.Tidentifier );
