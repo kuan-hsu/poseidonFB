@@ -413,24 +413,51 @@ version(FBIDE)
 			{
 				if( originalNode.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 				{
-					auto ret = getExtendClass( originalNode, lowerCase( originalNode.base ) );
-					if( ret is null )
+					CASTnode	ret;
+					
+					// If the name of extends class with dot, it should be with namespace....
+					if( Util.containsPattern( originalNode.base, "." ) )
 					{
-						ret = getExtendClass( originalNode, lowerCase( getNameSpaceWithDotTail( originalNode ) ~ originalNode.base ) );
+						ret = getExtendClass( originalNode, lowerCase( originalNode.base ) );
 						if( ret is null )
-						{	
-							char[][] usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
-							if( usingNames.length )
-							{
-								foreach( char[] s; usingNames )
+						{
+							ret = getExtendClass( originalNode, lowerCase( getNameSpaceWithDotTail( originalNode ) ~ originalNode.base ) );
+							if( ret is null )
+							{	
+								char[][] usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
+								if( usingNames.length )
 								{
-									ret = getExtendClass( originalNode, lowerCase( s ~ originalNode.base ) );
-									if( ret !is null ) return ret;
-								}
-							}	
+									foreach( char[] s; usingNames )
+									{
+										ret = getExtendClass( originalNode, lowerCase( s ~ "." ~ originalNode.base ) );
+										if( ret !is null ) return ret;
+									}
+								}	
+							}
 						}
 					}
-					//return _searchMatchNode( originalNode, lowerCase( originalNode.base ), B_TYPE | B_CLASS | B_UNION  );
+					else
+					{
+						char[][]	usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
+						char[]		NameSpaceString = getNameSpaceWithDotTail( originalNode );
+						
+						if( usingNames.length )
+						{
+							foreach( char[] s; usingNames )
+							{
+								ret = getExtendClass( originalNode, lowerCase( s ~ "." ~ originalNode.base ) );
+								if( ret !is null ) return ret;
+							}
+						}
+						
+						
+						if( NameSpaceString.length )
+						{
+							ret = getExtendClass( originalNode, lowerCase( NameSpaceString ~ originalNode.base ) );
+						}
+						
+						if( ret is null ) ret = getExtendClass( originalNode, lowerCase( originalNode.base ) );
+					}
 
 					return ret;
 				}
@@ -1319,10 +1346,34 @@ version(FBIDE)
 				if( originalNode.type.length ) _type = originalNode.type; else _type = originalNode.base;
 				
 				splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
+				/*
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
+				*/
 				
+				char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+				if( usingNames.length )
+				{
+					foreach( char[] s; usingNames )
+					{
+						originalNode = oriAST;
+						char[][] splitWithDot = Util.split( s, "." );
+						char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+						analysisSplitWorld_ReturnCompleteList( originalNode, namespaceSplitWord, lineNum, true, false, false );
+						if( originalNode !is null ) return originalNode;
+					}
+				}
+				
+				// No Using or No results found...
+				originalNode = oriAST;
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
+				
+				if( originalNode == oriAST ) return oriAST; // Prevent infinite loop
+				
+				/*
+				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
+				
+				if( oriAST == originalNode ) return oriAST; // Prevent infinite loop
 				
 				if( originalNode is null )
 				{
@@ -1339,6 +1390,7 @@ version(FBIDE)
 						}
 					}
 				}
+				*/
 				
 				if( originalNode !is null ) resultNode = originalNode;// else resultNode = oriAST;
 			}			
@@ -1353,8 +1405,15 @@ version(FBIDE)
 
 			if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 			{
-				AST_Head = getType( AST_Head, lineNum );
-				if( AST_Head is null ) return false;
+				if( !isDefaultType( ParserAction.getSeparateType( AST_Head.type, true ) ) )
+				{
+					AST_Head = getType( AST_Head, lineNum );
+					if( AST_Head is null ) return false;
+				}
+				else
+				{
+					return false;
+				}
 			}	
 
 			return true;
@@ -2009,8 +2068,15 @@ version(FBIDE)
 
 							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 							{
-								AST_Head = getType( AST_Head, lineNum );
-								if( AST_Head is null ) return null;
+								if( !isDefaultType( ParserAction.getSeparateType( AST_Head.type, true ) ) )
+								{
+									AST_Head = getType( AST_Head, lineNum );
+									if( AST_Head is null ) return null;
+								}
+								else
+								{
+									return null;
+								}
 							}
 							
 							if( bPushContainer )
@@ -2074,8 +2140,15 @@ version(FBIDE)
 
 					if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
 					{
-						AST_Head = getType( AST_Head, lineNum );
-						if( AST_Head is null ) return null;
+						if( !isDefaultType( ParserAction.getSeparateType( AST_Head.type, true ) ) )
+						{
+							AST_Head = getType( AST_Head, lineNum );
+							if( AST_Head is null ) return null;
+						}
+						else
+						{
+							return null;
+						}
 					}
 				}
 				else if( i == splitWord.length -1 )
@@ -3944,7 +4017,7 @@ version(FBIDE)
 					cleanIncludesMarkContainer();
 					
 					// Nested 2021.09.01, for Namespace
-					CASTnode analysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
+					CASTnode _analysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
 					{
 						CASTnode[] nameSpaceNodes;
 						CASTnode returnNode;
@@ -4082,6 +4155,38 @@ version(FBIDE)
 					}
 					
 					
+					CASTnode _performAnalysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
+					{
+						auto _oriAST = _AST_Head;
+						_AST_Head = null;
+						
+						char[][] usingNames = checkUsingNamespace( _oriAST, lineNum );
+						if( usingNames.length )
+						{
+							foreach( char[] s; usingNames )
+							{
+								char[][] splitWithDot = Util.split( s, "." );
+								char[][] namespaceSplitWord = splitWithDot ~ _splitWord;
+								_AST_Head = _analysisSplitWord( _oriAST, namespaceSplitWord );
+								if( _AST_Head !is null ) break;
+							}
+						}
+						else
+						{
+							char[] _namespace = getNameSpaceWithDotTail( _oriAST );
+							if( _namespace.length )
+							{
+								_namespace ~= Util.join( _splitWord, "." );
+								_AST_Head = _analysisSplitWord( _oriAST, Util.split( _namespace, "." ) );
+							}
+						}
+						
+						if( _AST_Head is null )	_AST_Head = _analysisSplitWord( _oriAST, _splitWord );
+						
+						return _AST_Head;
+					}
+					
+					
 					
 					if( TYPE == 2 && keyword_Btype > 0 )
 					{
@@ -4096,6 +4201,9 @@ version(FBIDE)
 							AST_Head = AST_Head.getFather;
 						}
 						
+						AST_Head = _performAnalysisSplitWord( AST_Head, splitWord );
+						
+						/*
 						AST_Head = analysisSplitWord( AST_Head, splitWord );
 						if( AST_Head is null )
 						{
@@ -4125,6 +4233,7 @@ version(FBIDE)
 								}
 							}
 						}
+						*/
 					}
 					
 
@@ -4242,7 +4351,7 @@ version(FBIDE)
 							{
 								if( AST_Head.base.length )
 								{
-									auto typeNode = analysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) );
+									auto typeNode = _performAnalysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) ); //_analysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) );
 									/*
 									while( typeNode !is null ) // Get Top
 									{
