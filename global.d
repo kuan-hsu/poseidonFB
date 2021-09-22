@@ -86,6 +86,8 @@ struct GLOBAL
 	public:
 	version(Windows) 	static _htmlHelp		htmlHelp;
 	
+	extern(C) 			static bool function( char[], out char[] buffer, out int bom )		readFile = null;
+	
 	static CPLUGIN[char[]]		pluginMnager;
 	
 	//static float				IUP_VERSION;

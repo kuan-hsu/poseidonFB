@@ -19,7 +19,7 @@ private:
 	import	tango.io.FilePath;//, Path = tango.io.Path;
 	
 	version(Windows) import tango.sys.win32.CodePage;
-
+	
 	static bool isUTF8WithouBOM( char[] data )
 	{
 		int size = data.length;
@@ -162,6 +162,7 @@ public:
 		scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 	}
 
+
 	static char[] loadFile( char[] fullPath, ref int _encoding )
 	{
 		char[] result;
@@ -183,102 +184,109 @@ public:
 				}
 			}
 				
-			/*
-			if( !Path.exists( fullPath ) )
+			if( GLOBAL.readFile != null )
 			{
-				debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
-				return null;
-			}
-			else
-			{
-				if( !Path.isFile( fullPath ) )
+				int		bom;
+
+				if( GLOBAL.readFile( fullPath, result, bom ) )
 				{
-					debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
-					return null;
-				}
-			}
-			*/
-			
-			scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
-
-			char[] text = file.read;
-			
-			_encoding = file.encoding;
-			//if( _encoding == 2 )
-			//	if( !file.bom.encoded ) _encoding = Encoding.UTF_8N;
-				
-			//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) ); // Uncomment This Line, BEX error
-				
-			//return text;
-			
-			if( !file.bom.encoded ) 
-			{
-				int BELE = isUTF32WithouBOM( text );
-				if( BELE > 0 )
-				{
-					ubyte[]	bomData;
-					scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
-					
-					if( BELE == 1 )
+					switch( bom )
 					{
-						bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
-						_encoding = 9;
+						case -2:				_encoding = Encoding.UTF_8N; break;
+						case -1:				_encoding = Encoding.Unknown; break;
+						case 0:					_encoding = Encoding.UTF_8; break;
+						case 1:					_encoding = Encoding.UTF_16LE; break;
+						case 2:					_encoding = Encoding.UTF_16BE; break;
+						case 3:					_encoding = Encoding.UTF_32LE; break;
+						case 4:					_encoding = Encoding.UTF_32BE; break;
+						case 9, 10, 11, 12:		_encoding = bom; break;
+						default:				_encoding = Encoding.Unknown;
 					}
-					else
-					{
-						bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
-						_encoding = 10;
-					}
-
-					for( int i = 3; i > -1; -- i )
-						text = cast(char)bomData[i] ~ text;
-
-					result = _bom.decode( text ).dup;
+					return result;
 				}
 				else
 				{
-					//IupMessage( "No Bom 16", toStringz( Integer.toString( BELE ) ) );
-					BELE = isUTF16WithouBOM( text );
+					IupMessage("ERROR", "readFile Error!" );
+					return null;
+				}
+			}
+			else
+			{
+				auto file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
+				char[] text = file.read;
+				
+				_encoding = file.encoding;
+				//if( _encoding == 2 )
+				//	if( !file.bom.encoded ) _encoding = Encoding.UTF_8N;
+					
+				//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) ); // Uncomment This Line, BEX error
+					
+				//return text;
+				
+				if( !file.bom.encoded ) 
+				{
+					int BELE = isUTF32WithouBOM( text );
 					if( BELE > 0 )
 					{
-						ubyte[]	bomData;
-						scope _bom = new UnicodeBom!(char)( Encoding.Unknown );
-						
 						if( BELE == 1 )
 						{
-							bomData = [ 0xFE, 0xFF ];
-							_encoding = Encoding.UTF_16BE;
+							//bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
+							_encoding = 9;
+							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32BE );
+							result = _bom.decode( text ).dup;
 						}
 						else
 						{
-							bomData = [ 0xFF, 0xFE ];
-							_encoding = Encoding.UTF_16LE;
+							//bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
+							_encoding = 10;
+							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32LE );
+							result = _bom.decode( text ).dup;
 						}
-						
-
-						for( int i = 1; i >= 0; -- i )
-							text = cast(char)bomData[i] ~ text;
-
-						result = _bom.decode( text ).dup;
 					}
 					else
 					{
-						if( isUTF8WithouBOM( text ) )
+						BELE = isUTF16WithouBOM( text );
+						if( BELE > 0 )
 						{
-							result = text.dup;
-							_encoding = Encoding.UTF_8N;
+							if( BELE == 1 )
+							{
+								//bomData = [ 0xFE, 0xFF ];
+								_encoding = 11;
+								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16BE );
+								result = _bom.decode( text ).dup;							
+							}
+							else
+							{
+								//bomData = [ 0xFF, 0xFE ];
+								_encoding = 12;
+								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16LE );
+								result = _bom.decode( text ).dup;
+							}
 						}
 						else
-						{						
-							version( Windows )
+						{
+							if( isUTF8WithouBOM( text ) )
 							{
-								if( !CodePage.isAscii( text ) ) // MBCS
+								result = text.dup;
+								_encoding = Encoding.UTF_8N;
+							}
+							else
+							{						
+								version( Windows )
 								{
-									char[] _text;
-									_text.length = 2 * text.length;
-									result = CodePage.from( text, _text );
-									_text.length = result.length;
-									_encoding = Encoding.Unknown;
+									if( !CodePage.isAscii( text ) ) // MBCS
+									{
+										char[] _text;
+										_text.length = 2 * text.length;
+										result = CodePage.from( text, _text );
+										_text.length = result.length;
+										_encoding = Encoding.Unknown;
+									}
+									else
+									{
+										result = text.dup;
+										_encoding = file.encoding();
+									}
 								}
 								else
 								{
@@ -286,19 +294,14 @@ public:
 									_encoding = file.encoding();
 								}
 							}
-							else
-							{
-								result = text.dup;
-								_encoding = file.encoding();
-							}
 						}
-					}
-				}					
-			}
-			else
-			{
-				_encoding = file.encoding();
-				result = text.dup;
+					}					
+				}
+				else
+				{
+					_encoding = file.encoding();
+					result = text.dup;
+				}
 			}
 		}
 		catch( Exception e )
@@ -309,7 +312,7 @@ public:
 
 		return result;
 	}
-
+	
 
 	static bool saveFile( char[] fullPath, char[] data, int encoding = Encoding.UTF_8 )
 	{
@@ -373,6 +376,17 @@ public:
 					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32LE );
 					file.write( toString32( data ) , false );
 					break;
+
+				case 11:
+					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16BE );
+					file.write( toString16( data ) , false );
+					break;
+
+				case 12:
+					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16LE );
+					file.write( toString16( data ) , false );
+					break;
+
 
 				default:
 					scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
@@ -2150,6 +2164,10 @@ public:
 						GLOBAL.statusBar.setEncodingType( "UTF32BE    " ); break;
 					case 10: //
 						GLOBAL.statusBar.setEncodingType( "UTF32LE    " ); break;
+					case 11: //
+						GLOBAL.statusBar.setEncodingType( "UTF16BE    " ); break;
+					case 12: //
+						GLOBAL.statusBar.setEncodingType( "UTF16LE    " ); break;
 					default:
 						GLOBAL.statusBar.setEncodingType( "UNKNOWN?   " );
 				}

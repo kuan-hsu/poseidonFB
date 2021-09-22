@@ -95,6 +95,29 @@ void main( char[][] args )
 			
 			//Stdout(e.toString).newline;
 		}
+		
+		SharedLib sharedFileLoader;
+		try
+		{
+			sharedFileLoader = SharedLib.load( `FileLoader.dll` );
+			
+			//Stdout("Library successfully loaded").newline;
+			
+			void* funPtr = sharedFileLoader.getSymbol( "readFile" ); 
+			if( funPtr )
+			{
+				void **point = cast(void **) & GLOBAL.readFile; // binding function address from DLL to our function pointer
+				*point = funPtr;
+			}
+			else
+			{
+				throw new Exception( null );
+			}
+		}
+		catch( Exception e )
+		{
+			GLOBAL.readFile = null;
+		}
 	}
 	
 	if( IupOpen( null, null ) == IUP_ERROR )
@@ -423,5 +446,9 @@ void main( char[][] args )
 	
 	IupClose();
 	
-	version(Windows) if( GLOBAL.htmlHelp != null ) sharedlib.unload();
+	version(Windows)
+	{
+		if( GLOBAL.htmlHelp != null ) sharedlib.unload();
+		if( GLOBAL.readFile != null ) sharedFileLoader.unload();
+	}
 }
