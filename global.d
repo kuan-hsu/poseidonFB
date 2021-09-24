@@ -87,9 +87,9 @@ struct GLOBAL
 	version(Windows) 	static _htmlHelp		htmlHelp;
 	
 	//extern(C) 			static char[] function( char[], ref int bom )		readFile = null;
-	extern (C) static		void* function( char*, char* ) iconv_open;
-	extern (C) static		size_t function( void*, void**, size_t*, void**, size_t* ) iconv;
-	extern (C) static		int function(void*) iconv_close;	
+	extern (C) static		void* function( char*, char* ) iconv_open = null;
+	extern (C) static		size_t function( void*, void**, size_t*, void**, size_t* ) iconv = null;
+	extern (C) static		int function(void*) iconv_close = null;
 	
 	static CPLUGIN[char[]]		pluginMnager;
 	

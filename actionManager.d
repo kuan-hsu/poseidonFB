@@ -209,7 +209,8 @@ public:
 	static char[] loadFile( char[] fullPath, ref int _encoding )
 	{
 		//char[] result;
-
+		content = "";
+		
 		try
 		{
 			scope _fp = new FilePath( fullPath );
@@ -363,24 +364,39 @@ public:
 					size_t res = GLOBAL.iconv(cd,&inp,&in_len,&outp,&out_len);
 
 					//Stdout(out_len).newline;
-					char[] ret;
 					if( bBOM )
-						content = outBuffer[3..$-out_len].dup; // UTF-8 with BOM (3 bytes)
+						content = outBuffer[3..$-out_len]; // UTF-8 with BOM (3 bytes)
 					else
-						content = outBuffer[0..$-out_len].dup; // UTF-8 with BOM (3 bytes)
+						content = outBuffer[0..$-out_len]; // UTF-8 without BOM
 						
 					return content;
 				}
 				else
 				{
-					char[] ret;
 					if( _encoding == Encoding.UTF_8 )
 					{
-						content = cast(char[]) str[3..$].dup;
+						content = cast(char[]) str[3..$]; // UTF-8 with BOM (3 bytes)
 					}
 					else
 					{
-						content = cast(char[]) str.dup;
+						if( _encoding == Encoding.UTF_8N )
+							content = cast(char[]) str;
+						else
+						{
+							version(Windows)
+							{
+								if( !CodePage.isAscii(cast(char[]) str ) ) // MBCS
+								{
+									char[] _text;
+									_text.length = 2 * str.length;
+									content = CodePage.from( cast(char[]) str, _text, 0 );
+								}
+								else
+									content = cast(char[]) str;
+							}
+							else
+								content = cast(char[]) str;
+						}
 					}
 					
 					return content;
@@ -444,14 +460,14 @@ public:
 							//bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
 							_encoding = 9;
 							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32BE );
-							content = _bom.decode( text ).dup;
+							content = _bom.decode( text );
 						}
 						else
 						{
 							//bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
 							_encoding = 10;
 							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32LE );
-							content = _bom.decode( text ).dup;
+							content = _bom.decode( text );
 						}
 					}
 					else
@@ -464,21 +480,21 @@ public:
 								//bomData = [ 0xFE, 0xFF ];
 								_encoding = 11;
 								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16BE );
-								content = _bom.decode( text ).dup;							
+								content = _bom.decode( text );							
 							}
 							else
 							{
 								//bomData = [ 0xFF, 0xFE ];
 								_encoding = 12;
 								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16LE );
-								content = _bom.decode( text ).dup;
+								content = _bom.decode( text );
 							}
 						}
 						else
 						{
 							if( isUTF8WithouBOM( cast(ubyte[])text ) )
 							{
-								content = text.dup;
+								content = text;
 								_encoding = Encoding.UTF_8N;
 							}
 							else
@@ -495,13 +511,13 @@ public:
 									}
 									else
 									{
-										content = text.dup;
+										content = text;
 										_encoding = file.encoding();
 									}
 								}
 								else
 								{
-									content = text.dup;
+									content = text;
 									_encoding = file.encoding();
 								}
 							}
@@ -511,7 +527,7 @@ public:
 				else
 				{
 					_encoding = file.encoding();
-					content = text.dup;
+					content = text;
 				}
 			}
 		}
