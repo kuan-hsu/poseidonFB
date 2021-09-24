@@ -400,7 +400,8 @@ version(DIDE)
 			{
 				case 0:
 					CASTnode[]	resultNodes			= getMatchASTfromWholeWord( AST_Head, splitWord[0], lineNum, D_IMPORT );
-					CASTnode[]	resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, splitWord[0], D_IMPORT );
+					CASTnode[]	resultIncludeNodes;
+					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, splitWord[0], D_IMPORT );
 					
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{
@@ -443,7 +444,8 @@ version(DIDE)
 					
 				case 1: // wordIndex = 0; Using word full match
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, splitWord[0], lineNum, D_IMPORT );
-					CASTnode[]	resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, splitWord[0], false, D_IMPORT );
+					CASTnode[]	resultIncludeNodes;
+					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, splitWord[0], false, D_IMPORT );
 				
 					char[][]	results;
 					CASTnode	markNode;
@@ -510,7 +512,8 @@ version(DIDE)
 
 					CASTnode	returnNode;
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, combineWord, lineNum, D_IMPORT );
-					CASTnode[]	resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
+					CASTnode[]	resultIncludeNodes;
+					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
 						
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{
@@ -545,7 +548,8 @@ version(DIDE)
 					if( combineWord.length > 1 ) combineWord = combineWord[0..$-1];
 
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, combineWord, lineNum, D_IMPORT );
-					CASTnode[]	resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
+					CASTnode[]	resultIncludeNodes;
+					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
 					
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{
@@ -578,7 +582,8 @@ version(DIDE)
 					if( combineWord.length > 1 ) combineWord = combineWord[0..$-1];	
 					
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, combineWord, lineNum, D_IMPORT );
-					CASTnode[]	resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
+					CASTnode[]	resultIncludeNodes;
+					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
 
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{

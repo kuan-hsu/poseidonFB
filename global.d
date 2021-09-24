@@ -86,7 +86,10 @@ struct GLOBAL
 	public:
 	version(Windows) 	static _htmlHelp		htmlHelp;
 	
-	extern(C) 			static bool function( char[], out char[] buffer, out int bom )		readFile = null;
+	//extern(C) 			static char[] function( char[], ref int bom )		readFile = null;
+	extern (C) static		void* function( char*, char* ) iconv_open;
+	extern (C) static		size_t function( void*, void**, size_t*, void**, size_t* ) iconv;
+	extern (C) static		int function(void*) iconv_close;	
 	
 	static CPLUGIN[char[]]		pluginMnager;
 	

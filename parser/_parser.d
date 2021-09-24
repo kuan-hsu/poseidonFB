@@ -90,7 +90,10 @@ class _PARSER
 		{
 			tokenIndex = 0;
 			tokens.length = 0;
-			tokens = _tokens;
+			if( _tokens == null )
+				tokens.length = 0;
+			else
+				tokens = _tokens;
 			
 			if( !_tokens.length ) return false;
 			

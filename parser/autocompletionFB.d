@@ -1,4 +1,4 @@
-module parser.autocompletionFB;
+﻿module parser.autocompletionFB;
 
 version(FBIDE)
 {
@@ -254,6 +254,47 @@ version(FBIDE)
 			
 			return false;
 		}
+		
+		static char[] textWrap( char[] oriText, int textWidth = -1 )
+		{
+			if( textWidth == -1 )
+			{
+				char[] wh = fromStringz( IupGetAttribute( ScintillaAction.getActiveIupScintilla, "RASTERSIZE" ) );
+				int xPos = Util.index( wh, "x" );
+				if( xPos < wh.length ) textWidth = cast(int) ( cast(float) Integer.toInt( wh[0..xPos] ) / 10.0 * 0.85f );
+			}
+		
+			char[] result;
+			
+			char[]	tmp;
+			char	last = ' ';
+			int		count;
+			
+			
+			for( int i = 0; i < oriText.length; ++ i )
+			{
+				if( ++count == textWidth )
+				{
+					result = result ~ "\n" ~ Util.triml( tmp );
+					count = tmp.length;
+					tmp.length = 0;
+				}
+				else if( oriText[i] == ' ' &&  last != ' ' )
+				{
+					result ~= tmp;
+					tmp.length = 0;
+				}
+				
+				tmp ~= oriText[i];
+				last = oriText[i];
+				
+				if( i == oriText.length - 1 )
+					if( count + tmp.length < textWidth ) result ~= tmp; else result = result ~ "\n" ~ Util.triml( tmp );
+
+			}
+			
+			return result;
+		}		
 		
 		static void getTypeAndParameter( CASTnode node, ref char[] _type, ref char[] _param )
 		{
@@ -1262,7 +1303,8 @@ version(FBIDE)
 				else
 				{
 					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
+					CASTnode[] resultIncludeNodes;
+					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
 
 					if( resultIncludeNodes.length ) resultNode = resultIncludeNodes[0];
 				}
@@ -1948,7 +1990,7 @@ version(FBIDE)
 									resultNodes	= getMatchASTfromWholeWord( GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
 
 								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
-								resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
 
 								// For Type Objects
 								if( memberFunctionMotherName.length )
@@ -1989,7 +2031,8 @@ version(FBIDE)
 							if( AST_Head !is null )
 							{
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
-								resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i] );
+								
+								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i] );
 								
 								//cleanIncludesMarkContainer();
 								// For Type Objects
@@ -2055,11 +2098,13 @@ version(FBIDE)
 								// For Type Objects
 								if( memberFunctionMotherName.length )
 								{
-									//AST_Head = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
-									CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-									if( memberFunctionMotherNode !is null )
+									if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 									{
-										if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+										CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+										if( memberFunctionMotherNode !is null )
+										{
+											if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+										}
 									}
 								}					
 							}
@@ -2127,11 +2172,14 @@ version(FBIDE)
 						// For Type Objects
 						if( memberFunctionMotherName.length )
 						{
-							CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-							if( memberFunctionMotherNode !is null )
+							if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 							{
-								if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
-								//AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+								CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+								if( memberFunctionMotherNode !is null )
+								{
+									if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+									//AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+								}
 							}
 						}					
 					}
@@ -4339,11 +4387,11 @@ version(FBIDE)
 							char[] _name = AST_Head.name;
 							
 							_name= getNameSpaceWithDotTail( AST_Head ) ~ _name;
-							_list ~= ( _type ~ " " ~ _name ).dup;
+							_list ~= textWrap( ( _type ~ " " ~ _name ) ).dup;
 						}
 						else if( AST_Head.kind & ( B_FUNCTION | B_SUB | B_PROPERTY | B_OPERATOR ) )
 						{
-							_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ ( _param.length ? _param : "()" ) ).dup;
+							_list ~= textWrap( ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ ( _param.length ? _param : "()" ) ) ).dup;
 						}
 						else if( AST_Head.kind & ( B_VARIABLE ) )
 						{
@@ -4370,16 +4418,16 @@ version(FBIDE)
 								}
 							}
 						
-							_list ~= ( _type ~ " " ~ AST_Head.name ).dup; // Without parameters
+							_list ~= textWrap( ( _type ~ " " ~ AST_Head.name ) ).dup; // Without parameters
 						}
 						else
-							_list ~= ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ).dup;
+							_list ~= textWrap( ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ) ).dup;
 						
 						
 						if( AST_Head.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 						{
 							foreach( CASTnode _child; AST_Head.getChildren() )
-								if( _child.kind & B_CTOR ) _list ~= ( "\n" ~ _child.name ~ _child.type );
+								if( _child.kind & B_CTOR ) _list ~= textWrap( ( "\n" ~ _child.name ~ _child.type ) );
 						}
 
 						showTypeContent = _list;
@@ -5005,7 +5053,7 @@ version(FBIDE)
 						dummy = IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
 						//SCI_CALLTIPSETHLT 2204
-						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( textWrap( list ) ) );
 						
 						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
@@ -5232,7 +5280,7 @@ version(FBIDE)
 						dummy = IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 						dummy = IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
-						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( list ) );
+						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( textWrap( list ) ) );
 						
 						//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
@@ -5363,7 +5411,7 @@ version(FBIDE)
 
 							dummy = IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 							dummy = IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-							dummy = IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.showCallTipThread.getResult ) );
+							dummy = IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.textWrap( AutoComplete.showCallTipThread.getResult ) ) );
 							
 							AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 							

@@ -20,7 +20,9 @@ private:
 	
 	version(Windows) import tango.sys.win32.CodePage;
 	
-	static bool isUTF8WithouBOM( char[] data )
+	static char[] content;
+	
+	static bool isUTF8WithouBOM( ubyte[] data )
 	{
 		int size = data.length;
 		
@@ -66,8 +68,49 @@ private:
 
 		return true;
 	}
+	/+
+	static bool isUTF8WithouBOM( ubyte[] data )
+	{
+		for( int i = 0; i < data.length; ++ i )
+		{
+			if( !data[i] )
+			{
+				return false;
+			}
+			else if( data[i] < 0x80 )
+			{
+				i ++;
+			}
+			else if( data[i] < ( 0x80 + 0x40 ) )
+			{
+				return true;
+			}
+			else if( data[i] < (0x80 + 0x40 + 0x20) )
+			{
+				if( i >= data.length - 1 ) return true;
 
-	static int isUTF16WithouBOM( char[] data )
+				if( !( data[i] & 0x1F ) || ( data[i+1] & ( 0x80+0x40 ) ) != 0x80 ) break;
+
+				i += 2;
+			}
+			else if( data[i] < ( 0x80 + 0x40 + 0x20 + 0x10 ) )
+			{
+				if( i >= data.length - 2 ) return true;
+					
+				if( !( data[i] & 0xF) || ( data[i+1] & (0x80+0x40) ) != 0x80 || ( data[i+2] &( 0x80+0x40 ) ) != 0x80 ) break;
+				
+				i += 3;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		return false;
+	}	
+	+/
+	static int isUTF16WithouBOM( ubyte[] data )
 	{
 		if( data.length % 2 != 0 ) return 0;
 		
@@ -110,7 +153,7 @@ private:
 		return 0;
 	}
 
-	static int isUTF32WithouBOM( char[] data )
+	static int isUTF32WithouBOM( ubyte[] data )
 	{
 		int BELE;
 		
@@ -165,7 +208,7 @@ public:
 
 	static char[] loadFile( char[] fullPath, ref int _encoding )
 	{
-		char[] result;
+		//char[] result;
 
 		try
 		{
@@ -183,12 +226,174 @@ public:
 					return null;
 				}
 			}
+			
+			
+			if( GLOBAL.iconv != null )
+			{
+				// CHECK BOM
+				bool bBOM = true;
+				auto str = cast(ubyte[]) File.get( fullPath );
 				
-			if( GLOBAL.readFile != null )
+				void* cd = null;
+				
+				if( str.length > 3 )
+				{
+					//UTF32 with BOM
+					if( str[0] == 0xFF && str[1] == 0xFE && str[2] == 0x00 && str[3] == 0x00 )
+					{
+						// UTF32-LE
+						cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");
+						//stdout("UTF-32LE").newline;
+						_encoding = Encoding.UTF_32LE;
+					}
+					else if( str[0] == 0x00 && str[1] == 0x00 && str[2] == 0xFE && str[3] == 0xFF )
+					{
+						// UTF32-BE
+						cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
+						//stdout("UTF-32BE").newline;
+						_encoding = Encoding.UTF_32BE;
+					}
+				}
+				
+				if( cd == null )
+				{
+					if( str.length > 2 )
+					{
+						//UTF8 with BOM
+						if( str[0] == 0xEF && str[1] == 0xBB && str[2] == 0xBF )
+						{
+							// UTF-8
+							//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
+							//stdout("UTF-8").newline;
+							_encoding = Encoding.UTF_8;
+						}
+					}
+				}
+				
+				if( _encoding != Encoding.UTF_8 )
+				{
+					if( cd == null )
+					{
+						if( str.length > 1 )
+						{
+							//UTF16 with BOM
+							if( str[0] == 0xFF && str[1] == 0xFE)
+							{
+								// UTF16-LE
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");
+								//stdout("UTF-16LE").newline;
+								_encoding = Encoding.UTF_16LE;
+							}
+							else if( str[0] == 0xFE && str[1] == 0xFF)
+							{
+								// UTF16-BE
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
+								//stdout("UTF-16BE").newline;
+								_encoding = Encoding.UTF_16BE;
+							}
+						}
+					}			
+
+					// Check Without BOM
+					if( cd == null )
+					{
+						int BELE = isUTF32WithouBOM( str );
+						if( BELE == 1 )
+						{
+							cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
+							//stdout("UTF-32BE without BOM").newline;
+							_encoding = 9;
+							bBOM = false;
+						}
+						else if( BELE == 2 )
+						{
+							cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");	
+							//stdout("UTF-32LE without BOM").newline;
+							_encoding = 10;
+							bBOM = false;
+						}
+						
+						if( cd == null )
+						{
+							BELE = isUTF16WithouBOM( str );
+							if( BELE == 1 )
+							{
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
+								//stdout("UTF-16BE without BOM").newline;
+								_encoding = 11;
+								bBOM = false;
+							}
+							else if( BELE == 2 )
+							{
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");	
+								//stdout("UTF-16LE without BOM").newline;
+								_encoding = 12;
+								bBOM = false;
+							}
+						}
+						
+						if( cd == null )
+						{
+							if( isUTF8WithouBOM( str ) )
+							{
+								bBOM = false;
+								//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
+								//stdout("UTF-8 without BOM").newline;
+								_encoding = Encoding.UTF_8N;
+							}
+							else
+							{
+								_encoding = Encoding.Unknown;
+							}
+						}
+					}
+				}
+
+				
+				// Trans Data
+				if( cd != null )
+				{
+					void* inp = str.ptr;
+					size_t in_len = str.length;
+					
+					char[] outBuffer;
+					outBuffer.length = in_len;
+					size_t out_len = outBuffer.length;
+					void* outp = outBuffer.ptr;
+					size_t res = GLOBAL.iconv(cd,&inp,&in_len,&outp,&out_len);
+
+					//Stdout(out_len).newline;
+					char[] ret;
+					if( bBOM )
+						content = outBuffer[3..$-out_len].dup; // UTF-8 with BOM (3 bytes)
+					else
+						content = outBuffer[0..$-out_len].dup; // UTF-8 with BOM (3 bytes)
+						
+					return content;
+				}
+				else
+				{
+					char[] ret;
+					if( _encoding == Encoding.UTF_8 )
+					{
+						content = cast(char[]) str[3..$].dup;
+					}
+					else
+					{
+						content = cast(char[]) str.dup;
+					}
+					
+					return content;
+				}
+			}
+		
+			/+
+			if( GLOBAL.readFile != null && _encoding != 9 && _encoding != 11 )
 			{
 				int		bom;
 
-				if( GLOBAL.readFile( fullPath, result, bom ) )
+				result = GLOBAL.readFile( fullPath, bom );
+				if( bom != -99 )
 				{
 					switch( bom )
 					{
@@ -199,7 +404,12 @@ public:
 						case 2:					_encoding = Encoding.UTF_16BE; break;
 						case 3:					_encoding = Encoding.UTF_32LE; break;
 						case 4:					_encoding = Encoding.UTF_32BE; break;
-						case 9, 10, 11, 12:		_encoding = bom; break;
+						//case 9, 10, 11, 12:		_encoding = bom; break;
+						case 10, 12:			_encoding = bom; break;
+						case 9, 11:
+							_encoding = bom;
+							result = loadFile( fullPath, _encoding );
+							break;
 						default:				_encoding = Encoding.Unknown;
 					}
 					return result;
@@ -210,9 +420,10 @@ public:
 					return null;
 				}
 			}
+			+/
 			else
 			{
-				auto file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
+				scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 				char[] text = file.read;
 				
 				_encoding = file.encoding;
@@ -225,7 +436,7 @@ public:
 				
 				if( !file.bom.encoded ) 
 				{
-					int BELE = isUTF32WithouBOM( text );
+					int BELE = isUTF32WithouBOM( cast(ubyte[])text );
 					if( BELE > 0 )
 					{
 						if( BELE == 1 )
@@ -233,19 +444,19 @@ public:
 							//bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
 							_encoding = 9;
 							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32BE );
-							result = _bom.decode( text ).dup;
+							content = _bom.decode( text ).dup;
 						}
 						else
 						{
 							//bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
 							_encoding = 10;
 							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32LE );
-							result = _bom.decode( text ).dup;
+							content = _bom.decode( text ).dup;
 						}
 					}
 					else
 					{
-						BELE = isUTF16WithouBOM( text );
+						BELE = isUTF16WithouBOM( cast(ubyte[])text );
 						if( BELE > 0 )
 						{
 							if( BELE == 1 )
@@ -253,21 +464,21 @@ public:
 								//bomData = [ 0xFE, 0xFF ];
 								_encoding = 11;
 								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16BE );
-								result = _bom.decode( text ).dup;							
+								content = _bom.decode( text ).dup;							
 							}
 							else
 							{
 								//bomData = [ 0xFF, 0xFE ];
 								_encoding = 12;
 								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16LE );
-								result = _bom.decode( text ).dup;
+								content = _bom.decode( text ).dup;
 							}
 						}
 						else
 						{
-							if( isUTF8WithouBOM( text ) )
+							if( isUTF8WithouBOM( cast(ubyte[])text ) )
 							{
-								result = text.dup;
+								content = text.dup;
 								_encoding = Encoding.UTF_8N;
 							}
 							else
@@ -278,19 +489,19 @@ public:
 									{
 										char[] _text;
 										_text.length = 2 * text.length;
-										result = CodePage.from( text, _text );
-										_text.length = result.length;
+										content = CodePage.from( text, _text );
+										_text.length = content.length;
 										_encoding = Encoding.Unknown;
 									}
 									else
 									{
-										result = text.dup;
+										content = text.dup;
 										_encoding = file.encoding();
 									}
 								}
 								else
 								{
-									result = text.dup;
+									content = text.dup;
 									_encoding = file.encoding();
 								}
 							}
@@ -300,7 +511,7 @@ public:
 				else
 				{
 					_encoding = file.encoding();
-					result = text.dup;
+					content = text.dup;
 				}
 			}
 		}
@@ -310,7 +521,7 @@ public:
 			throw e;
 		}
 
-		return result;
+		return content;
 	}
 	
 

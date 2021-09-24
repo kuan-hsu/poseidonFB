@@ -96,6 +96,8 @@ void main( char[][] args )
 			//Stdout(e.toString).newline;
 		}
 		
+		
+		/*
 		SharedLib sharedFileLoader;
 		try
 		{
@@ -118,6 +120,61 @@ void main( char[][] args )
 		{
 			GLOBAL.readFile = null;
 		}
+		*/
+		
+		SharedLib loaderlib;
+		GLOBAL.iconv_open = null;
+		GLOBAL.iconv = null;
+		GLOBAL.iconv_close = null;		
+		try
+		{
+			loaderlib = SharedLib.load( `iconv.dll` );
+			if( loaderlib !is null )
+			{
+				void* ptr = loaderlib.getSymbol("libiconv_open");
+				if( ptr )
+				{
+					void **point = cast(void **)&GLOBAL.iconv_open; // binding function address from DLL to our function pointer
+					*point = ptr;
+				}
+				else
+					debug Stdout("Symbol 'iconv_open' not found").newline;
+				
+				
+				ptr = null;
+				ptr = loaderlib.getSymbol("libiconv");
+				if( ptr )
+				{
+					void **point = cast(void **)&GLOBAL.iconv; // binding function address from DLL to our function pointer
+					*point = ptr;
+				}
+				else
+					debug Stdout("Symbol 'iconv' not found").newline;
+
+				ptr = null;
+				ptr = loaderlib.getSymbol("libiconv_close");
+				if( ptr )
+				{
+					void **point = cast(void **)&GLOBAL.iconv_close; // binding function address from DLL to our function pointer
+					*point = ptr;
+				}
+				else
+					debug Stdout("Symbol 'iconv_close' not found").newline;
+					
+					
+				debug Stdout("SUCCESS!" ).newline;
+			}
+			else
+			{
+				debug Stdout("LOAD DLL ERROR!" ).newline;
+				GLOBAL.iconv_open = null;
+			}
+		}
+		catch( Exception e )
+		{
+			GLOBAL.iconv_open = null;
+			debug Stdout(e.toString).newline;
+		}		
 	}
 	
 	if( IupOpen( null, null ) == IUP_ERROR )
@@ -449,6 +506,7 @@ void main( char[][] args )
 	version(Windows)
 	{
 		if( GLOBAL.htmlHelp != null ) sharedlib.unload();
-		if( GLOBAL.readFile != null ) sharedFileLoader.unload();
+		//if( GLOBAL.readFile != null ) sharedFileLoader.unload();
+		if( GLOBAL.iconv != null ) loaderlib.unload();
 	}
 }
