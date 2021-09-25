@@ -3390,7 +3390,7 @@ version(DIDE)
 					{
 						if( i == 0 )
 						{
-							AST_Head = searchMatchNode( AST_Head, Util.stripl( ParserAction.removeArrayAndPointer( splitWord[i] ), '&' ), D_FIND ); // NOTE!!!! Using "searchMatchNode()"
+							AST_Head = searchMatchNode( AST_Head, Util.stripl( ParserAction.removeArrayAndPointer( splitWord[i] ), '&' ), D_FIND | D_ENUMMEMBER ); // NOTE!!!! Using "searchMatchNode()"
 							
 							if( AST_Head is null ) AST_Head = searchObjectModule( splitWord[i], D_FIND );
 							
@@ -3446,7 +3446,11 @@ version(DIDE)
 								{
 									finalASTNode = null;
 								}
-							}						
+							}
+							else if( AST_Head.kind & ( D_ENUMMEMBER ) )
+							{
+								finalASTNode = AST_Head.getFather;
+							}
 
 							if( splitWord.length == 1 ) break;
 						}
@@ -3493,7 +3497,7 @@ version(DIDE)
 									continue;
 								}
 							
-								AST_Head = searchMatchMemberNode( AST_Head, ParserAction.removeArrayAndPointer( splitWord[i] ), D_FIND );
+								AST_Head = searchMatchMemberNode( AST_Head, ParserAction.removeArrayAndPointer( splitWord[i] ), D_FIND | D_ENUMMEMBER );
 								
 								if( AST_Head is null ) return;
 
@@ -3518,6 +3522,10 @@ version(DIDE)
 										finalASTNode = null;
 									}
 								}
+								else if( AST_Head.kind & ( D_ENUMMEMBER ) )
+								{
+									finalASTNode = AST_Head.getFather;
+								}
 							}
 						}
 					}
@@ -3541,6 +3549,7 @@ version(DIDE)
 								case D_CLASS: _type = "\"CLASS\""; break;
 								case D_UNION: _type = "\"UNION\""; break;
 								case D_ENUM: _type = "\"ENUM\""; break;
+								case D_ENUMMEMBER: _type = "\"ENUMMEMBER\""; break;
 								case D_FUNCTION: _type = "\"FUNCTION\""; break;
 								case D_VARIABLE: if( !firstASTNode.type.length && firstASTNode.base.length ) _type = "\"AUTO\"";
 								default:

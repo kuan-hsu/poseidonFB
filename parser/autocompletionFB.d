@@ -87,7 +87,7 @@ version(FBIDE)
 					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
 					return;
 				}
-
+			
 				if( GLOBAL.autoCompletionTriggerWordCount < 1 ) 
 				{
 					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
@@ -255,46 +255,6 @@ version(FBIDE)
 			return false;
 		}
 		
-		static char[] textWrap( char[] oriText, int textWidth = -1 )
-		{
-			if( textWidth == -1 )
-			{
-				char[] wh = fromStringz( IupGetAttribute( ScintillaAction.getActiveIupScintilla, "RASTERSIZE" ) );
-				int xPos = Util.index( wh, "x" );
-				if( xPos < wh.length ) textWidth = cast(int) ( cast(float) Integer.toInt( wh[0..xPos] ) / 10.0 * 0.85f );
-			}
-		
-			char[] result;
-			
-			char[]	tmp;
-			char	last = ' ';
-			int		count;
-			
-			
-			for( int i = 0; i < oriText.length; ++ i )
-			{
-				if( ++count == textWidth )
-				{
-					result = result ~ "\n" ~ Util.triml( tmp );
-					count = tmp.length;
-					tmp.length = 0;
-				}
-				else if( oriText[i] == ' ' &&  last != ' ' )
-				{
-					result ~= tmp;
-					tmp.length = 0;
-				}
-				
-				tmp ~= oriText[i];
-				last = oriText[i];
-				
-				if( i == oriText.length - 1 )
-					if( count + tmp.length < textWidth ) result ~= tmp; else result = result ~ "\n" ~ Util.triml( tmp );
-
-			}
-			
-			return result;
-		}		
 		
 		static void getTypeAndParameter( CASTnode node, ref char[] _type, ref char[] _param )
 		{
@@ -4387,11 +4347,11 @@ version(FBIDE)
 							char[] _name = AST_Head.name;
 							
 							_name= getNameSpaceWithDotTail( AST_Head ) ~ _name;
-							_list ~= textWrap( ( _type ~ " " ~ _name ) ).dup;
+							_list ~= ScintillaAction.textWrap( ( _type ~ " " ~ _name ) ).dup;
 						}
 						else if( AST_Head.kind & ( B_FUNCTION | B_SUB | B_PROPERTY | B_OPERATOR ) )
 						{
-							_list ~= textWrap( ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ ( _param.length ? _param : "()" ) ) ).dup;
+							_list ~= ScintillaAction.textWrap( ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ ( _param.length ? _param : "()" ) ) ).dup;
 						}
 						else if( AST_Head.kind & ( B_VARIABLE ) )
 						{
@@ -4418,16 +4378,16 @@ version(FBIDE)
 								}
 							}
 						
-							_list ~= textWrap( ( _type ~ " " ~ AST_Head.name ) ).dup; // Without parameters
+							_list ~= ScintillaAction.textWrap( ( _type ~ " " ~ AST_Head.name ) ).dup; // Without parameters
 						}
 						else
-							_list ~= textWrap( ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ) ).dup;
+							_list ~= ScintillaAction.textWrap( ( ( _type.length ? _type ~ " " : null ) ~ AST_Head.name ~ _param ) ).dup;
 						
 						
 						if( AST_Head.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 						{
 							foreach( CASTnode _child; AST_Head.getChildren() )
-								if( _child.kind & B_CTOR ) _list ~= textWrap( ( "\n" ~ _child.name ~ _child.type ) );
+								if( _child.kind & B_CTOR ) _list ~= ScintillaAction.textWrap( ( "\n" ~ _child.name ~ _child.type ) );
 						}
 
 						showTypeContent = _list;
@@ -5053,7 +5013,7 @@ version(FBIDE)
 						dummy = IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
 						//SCI_CALLTIPSETHLT 2204
-						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( textWrap( list ) ) );
+						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( ScintillaAction.textWrap( list ) ) );
 						
 						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
@@ -5280,7 +5240,7 @@ version(FBIDE)
 						dummy = IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 						dummy = IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
-						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( textWrap( list ) ) );
+						dummy = IupScintillaSendMessage( ih, 2200, pos, cast(int) GLOBAL.cString.convert( ScintillaAction.textWrap( list ) ) );
 						
 						//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
@@ -5411,7 +5371,7 @@ version(FBIDE)
 
 							dummy = IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
 							dummy = IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-							dummy = IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( AutoComplete.textWrap( AutoComplete.showCallTipThread.getResult ) ) );
+							dummy = IupScintillaSendMessage( sci, 2200, _pos, cast(int) GLOBAL.cString.convert( ScintillaAction.textWrap( AutoComplete.showCallTipThread.getResult ) ) );
 							
 							AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 							

@@ -28,35 +28,34 @@ private:
 		
 		for( int i = 0; i < size; ++ i )
 		{
-			if( ( ( cast(int)data[i] ) & 0x80 ) == 0x00 )
+			if( data[i] & 0x80 == 0x00 )
 			{
 				continue;
 			}
-			else if( ( ( cast(int)data[i] ) & 0xE0 ) == 0xC0 )
+			else if( data[i] & 0xE0 == 0xC0 )
 			{
 				if( i + 1 >= size ) return false; // data tail
 	 
-				if( ( (cast(int)data[i + 1] ) & 0xC0 ) != 0x80 ) return false;
+				if( data[i + 1] & 0xC0 != 0x80 ) return false;
 	 
 				i += 1;
 			}
-			else if( ( ( cast(int)data[i] ) & 0xF0 ) == 0xE0 )
+			else if( data[i] & 0xF0 == 0xE0 )
 			{
-
 				if( i + 2 >= size ) return false;
 	 
-				if( ( ( cast(int)data[i + 1] ) & 0xC0 ) != 0x80 ) return false;
-				if( ( ( cast(int)data[i + 2] ) & 0xC0 ) != 0x80 ) return false;
+				if( data[i + 1] & 0xC0 != 0x80 ) return false;
+				if( data[i + 2] & 0xC0 != 0x80 ) return false;
 	 
 				i += 2;
 			}
-			else if( ( ( cast(int)data[i] ) & 0xF8 ) == 0xF0 )
+			else if( data[i] & 0xF8 == 0xF0 )
 			{
 				if( i + 3 >= size ) return false;
 				
-				if( ( ( cast(int)data[i + 1] ) & 0xC0 ) != 0x80 ) return false;
-				if( ( ( cast(int)data[i + 2] ) & 0xC0 ) != 0x80 ) return false;
-				if( ( ( cast(int)data[i + 3] ) & 0xC0 ) != 0x80 ) return false;
+				if( data[i + 1] & 0xC0 != 0x80 ) return false;
+				if( data[i + 2] & 0xC0 != 0x80 ) return false;
+				if( data[i + 3] & 0xC0 != 0x80 ) return false;
 	 
 				i += 3;
 			}
@@ -119,13 +118,13 @@ private:
 		
 		for( int i = 0; i < data.length; i += 2 )
 		{
-			if( (cast(int)data[i]) == 0 )
+			if( data[i] == 0 )
 			{
-				if( (cast(int)data[i+1]) == 0x0a || (cast(int)data[i+1]) == 0x0d ) countBE++;
+				if( data[i+1] == 0x0a || data[i+1] == 0x0d ) countBE++;
 			}
-			else if( (cast(int)data[i+1]) == 0 )
+			else if( data[i+1] == 0 )
 			{
-				if( (cast(int)data[i]) == 0x0a || (cast(int)data[i]) == 0x0d ) countLE++;
+				if( data[i] == 0x0a || data[i] == 0x0d ) countLE++;
 			}
 		}
 
@@ -137,14 +136,14 @@ private:
 		countBE = countLE = 0;
 		for( int i = 0; i < data.length; i += 2 )
 		{
-			if( (cast(int)data[i]) == 0 ) countBE++;
+			if( data[i] == 0 ) countBE++;
 		}
 
 		if( countBE > data.length / 3 ) return 1;
 
 		for( int i = 1; i < data.length; i += 2 )
 		{
-			if( (cast(int)data[i]) == 0 ) countLE++;
+			if( data[i] == 0 ) countLE++;
 		}
 
 		if( countLE > data.length / 3 ) return 2;
@@ -161,9 +160,9 @@ private:
 
 		for( int i = 0; i < data.length; i += 4 )
 		{
-			if( (cast(int)data[i]) == 0 ) // BE
+			if( data[i] == 0 ) // BE
 			{
-				if( (cast(int)data[i+1]) <= 0x10 )
+				if( data[i+1] <= 0x10 )
 				{
 					if( BELE == 2 ) return 0;
 					BELE = 1;
@@ -174,9 +173,9 @@ private:
 					return 0;
 				}
 			}
-			else if( (cast(int)data[i+3]) == 0 ) //LE
+			else if( data[i+3] == 0 ) //LE
 			{
-				if( (cast(int)data[i+2]) <= 0x10 )
+				if( data[i+2] <= 0x10 )
 				{
 					if( BELE == 1 ) return 0;
 					BELE = 2;
@@ -228,7 +227,7 @@ public:
 				}
 			}
 			
-			
+			// If the DLL be loaded, the function pointer is not null
 			if( GLOBAL.iconv != null )
 			{
 				// CHECK BOM
@@ -369,6 +368,8 @@ public:
 					else
 						content = outBuffer[0..$-out_len]; // UTF-8 without BOM
 						
+					GLOBAL.iconv_close( cd );
+						
 					return content;
 				}
 				else
@@ -402,54 +403,12 @@ public:
 					return content;
 				}
 			}
-		
-			/+
-			if( GLOBAL.readFile != null && _encoding != 9 && _encoding != 11 )
-			{
-				int		bom;
-
-				result = GLOBAL.readFile( fullPath, bom );
-				if( bom != -99 )
-				{
-					switch( bom )
-					{
-						case -2:				_encoding = Encoding.UTF_8N; break;
-						case -1:				_encoding = Encoding.Unknown; break;
-						case 0:					_encoding = Encoding.UTF_8; break;
-						case 1:					_encoding = Encoding.UTF_16LE; break;
-						case 2:					_encoding = Encoding.UTF_16BE; break;
-						case 3:					_encoding = Encoding.UTF_32LE; break;
-						case 4:					_encoding = Encoding.UTF_32BE; break;
-						//case 9, 10, 11, 12:		_encoding = bom; break;
-						case 10, 12:			_encoding = bom; break;
-						case 9, 11:
-							_encoding = bom;
-							result = loadFile( fullPath, _encoding );
-							break;
-						default:				_encoding = Encoding.Unknown;
-					}
-					return result;
-				}
-				else
-				{
-					IupMessage("ERROR", "readFile Error!" );
-					return null;
-				}
-			}
-			+/
 			else
 			{
 				scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 				char[] text = file.read;
 				
 				_encoding = file.encoding;
-				//if( _encoding == 2 )
-				//	if( !file.bom.encoded ) _encoding = Encoding.UTF_8N;
-					
-				//IupMessage( "No Bom", toStringz( Integer.toString( file.encoding() ) ) ); // Uncomment This Line, BEX error
-					
-				//return text;
-				
 				if( !file.bom.encoded ) 
 				{
 					int BELE = isUTF32WithouBOM( cast(ubyte[])text );
@@ -2058,19 +2017,47 @@ public:
 			if( cSci !is null ) cSci.setGlobalSetting();
 		}
 	}
-	/+
-	static void simulateLeftClick()
+
+	static char[] textWrap( char[] oriText, int textWidth = -1 )
 	{
-		// Set FOCUS
-		int _x = IupGetInt( getActiveIupScintilla, "X" );
-		int _y = IupGetInt( getActiveIupScintilla, "Y" );
-		char[] xy = Integer.toString( _x ) ~ "x" ~ Integer.toString( _y ) ~ " 1 1";
+		if( textWidth == -1 )
+		{
+			char[] wh = fromStringz( IupGetAttribute( getActiveIupScintilla, "RASTERSIZE" ) );
+			int xPos = Util.index( wh, "x" );
+			if( xPos < wh.length ) textWidth = cast(int) ( cast(float) Integer.toInt( wh[0..xPos] ) / 10.0 * 0.85f );
+		}
+	
+		char[] result;
 		
-		char* _pos = IupGetGlobal( "CURSORPOS" ); // Get Original Pos
-		IupSetGlobal( "MOUSEBUTTON", toStringz( xy ));
-		IupSetGlobal( "CURSORPOS", _pos ); // Update Original Pos	
+		char[]	tmp;
+		char	last = ' ';
+		int		count;
+		
+		
+		for( int i = 0; i < oriText.length; ++ i )
+		{
+			if( ++count == textWidth )
+			{
+				result = result ~ "\n" ~ Util.triml( tmp );
+				count = tmp.length;
+				tmp.length = 0;
+			}
+			else if( oriText[i] == ' ' &&  last != ' ' )
+			{
+				result ~= tmp;
+				tmp.length = 0;
+			}
+			
+			tmp ~= oriText[i];
+			last = oriText[i];
+			
+			if( i == oriText.length - 1 )
+				if( count + tmp.length < textWidth ) result ~= tmp; else result = result ~ "\n" ~ Util.triml( tmp );
+
+		}
+		
+		return result;
 	}
-	+/
 }
 
 
