@@ -93,8 +93,6 @@ struct GLOBAL
 	
 	static CPLUGIN[char[]]		pluginMnager;
 	
-	//static float				IUP_VERSION;
-	
 	static Ihandle*				mainDlg;
 	static Ihandle*				documentTabs, documentTabs_Sub, projectViewTabs, messageWindowTabs;
 	static Ihandle*				dndDocumentZBox;

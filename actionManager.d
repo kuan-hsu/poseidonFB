@@ -21,7 +21,7 @@ private:
 	version(Windows) import tango.sys.win32.CodePage;
 	
 	static char[] content;
-	
+	/+
 	static bool isUTF8WithouBOM( ubyte[] data )
 	{
 		int size = data.length;
@@ -67,7 +67,7 @@ private:
 
 		return true;
 	}
-	/+
+	+/
 	static bool isUTF8WithouBOM( ubyte[] data )
 	{
 		for( int i = 0; i < data.length; ++ i )
@@ -108,7 +108,7 @@ private:
 
 		return false;
 	}	
-	+/
+	
 	static int isUTF16WithouBOM( ubyte[] data )
 	{
 		if( data.length % 2 != 0 ) return 0;
@@ -193,7 +193,38 @@ private:
 		}
 
 		return BELE;
-	}		
+	}
+	
+	
+	static ubyte[] swapBytes( ubyte[] _data, int bytes )
+	{
+		if( _data.length % 2 != 0 || _data.length == 0 ) return null;
+		
+		ubyte[] ret;
+		ret.length = _data.length;
+
+		if( bytes == 2 )
+		{
+			for( int i = 0; i < _data.length; i = i + 2 )
+			{
+				ret[i] = _data[i+1];
+				ret[i+1] = _data[i];
+			}
+		}
+		else if( bytes == 4 )
+		{
+			for( int i = 0; i < _data.length; i = i + 4 )
+			{
+				ret[i] = _data[i+3];
+				ret[i+1] = _data[i+2];
+				ret[i+2] = _data[i+1];
+				ret[i+3] = _data[i];
+			}
+		}
+		
+		return ret;
+	}
+	
 
 public:
 	static void newFile( char[] fullPath )
@@ -227,12 +258,119 @@ public:
 				}
 			}
 			
+
+			auto str = cast(ubyte[]) File.get( fullPath );
 			// If the DLL be loaded, the function pointer is not null
-			if( GLOBAL.iconv != null )
+			if( GLOBAL.iconv == null )
+			{
+				if( str.length > 3 )
+				{
+					//UTF32 with BOM
+					if( str[0] == 0xFF && str[1] == 0xFE && str[2] == 0x00 && str[3] == 0x00 )
+					{
+						_encoding = Encoding.UTF_32LE;
+						content = toString( cast(dchar[]) str[4..$] );
+						return content;
+					}
+					else if( str[0] == 0x00 && str[1] == 0x00 && str[2] == 0xFE && str[3] == 0xFF )
+					{
+						_encoding = Encoding.UTF_32BE;
+						content = toString( cast(dchar[]) swapBytes( str[4..$], 4 ) );
+						return content;
+					}
+				}
+				
+				//UTF8 with BOM
+				if( str.length > 2 )
+				{
+					//UTF8 with BOM
+					if( str[0] == 0xEF && str[1] == 0xBB && str[2] == 0xBF )
+					{
+						_encoding = Encoding.UTF_8;
+						content = cast(char[]) str[3..$];
+						return content;
+					}
+				}				
+				
+				//UTF16 with BOM
+				if( str.length > 1 )
+				{
+					//UTF16 with BOM
+					if( str[0] == 0xFF && str[1] == 0xFE)
+					{
+						_encoding = Encoding.UTF_16LE;
+						content = toString( cast(wchar[]) str[2..$] );
+						return content;
+					}
+					else if( str[0] == 0xFE && str[1] == 0xFF)
+					{
+						_encoding = Encoding.UTF_16BE;
+						content = toString( cast(wchar[]) swapBytes( str[2..$], 2 ) );
+						return content;
+					}
+				}			
+				
+				
+				// Check Without BOM
+				int BELE = isUTF32WithouBOM( str );
+				if( BELE == 1 )
+				{
+					_encoding = 9; // UTF-32BE without BOM
+					content = toString( cast(dchar[]) swapBytes( str, 4 ) );
+					return content;
+				}
+				else if( BELE == 2 )
+				{
+					_encoding = 10; // UTF-32LE without BOM
+					content = toString( cast(dchar[]) str );
+					return content;
+				}			
+
+				BELE = isUTF16WithouBOM( str );
+				if( BELE == 1 )
+				{
+					_encoding = 11; // UTF-16BE without BOM
+					content = toString( cast(wchar[]) swapBytes( str, 2 ) );
+					return content;
+				}
+				else if( BELE == 2 )
+				{
+					_encoding = 12; // UTF-16LE without BOM
+					content = toString( cast(wchar[]) str );
+					return content;
+				}
+				
+				if( isUTF8WithouBOM( str ) )
+				{
+					_encoding = Encoding.UTF_8N;
+					content = cast(char[]) str;
+					return content;
+				}
+				else
+				{
+					_encoding = Encoding.Unknown;
+					version(Windows)
+					{
+						if( !CodePage.isAscii(cast(char[]) str ) ) // MBCS
+						{
+							char[] _text;
+							_text.length = 2 * str.length;
+							content = CodePage.from( cast(char[]) str, _text, 0 );
+						}
+						else
+							content = cast(char[]) str;
+					}
+					else
+						content = cast(char[]) str;
+						
+					//return content;
+				}
+			}
+			else
 			{
 				// CHECK BOM
 				bool bBOM = true;
-				auto str = cast(ubyte[]) File.get( fullPath );
+				//auto str = cast(ubyte[]) File.get( fullPath );
 				
 				void* cd = null;
 				
@@ -354,19 +492,197 @@ public:
 				if( cd != null )
 				{
 					void* inp = str.ptr;
-					size_t in_len = str.length;
+					size_t inbytesleft = str.length;
 					
 					char[] outBuffer;
-					outBuffer.length = in_len;
-					size_t out_len = outBuffer.length;
+					outBuffer.length = inbytesleft;
+					size_t outbytesleft = outBuffer.length;
 					void* outp = outBuffer.ptr;
-					size_t res = GLOBAL.iconv(cd,&inp,&in_len,&outp,&out_len);
+					size_t res = GLOBAL.iconv(cd,&inp,&inbytesleft,&outp,&outbytesleft);
 
-					//Stdout(out_len).newline;
+					//Stdout(outbytesleft).newline;
 					if( bBOM )
-						content = outBuffer[3..$-out_len]; // UTF-8 with BOM (3 bytes)
+						content = outBuffer[3..$-outbytesleft]; // UTF-8 with BOM (3 bytes)
 					else
-						content = outBuffer[0..$-out_len]; // UTF-8 without BOM
+						content = outBuffer[0..$-outbytesleft]; // UTF-8 without BOM
+						
+					GLOBAL.iconv_close( cd );
+						
+					//return content;
+				}
+				else
+				{
+					if( _encoding == Encoding.UTF_8 )
+					{
+						content = cast(char[]) str[3..$]; // UTF-8 with BOM (3 bytes)
+					}
+					else
+					{
+						if( _encoding == Encoding.UTF_8N )
+							content = cast(char[]) str;
+						else
+						{
+							version(Windows)
+							{
+								if( !CodePage.isAscii(cast(char[]) str ) ) // MBCS
+								{
+									char[] _text;
+									_text.length = 2 * str.length;
+									content = CodePage.from( cast(char[]) str, _text, 0 );
+								}
+								else
+									content = cast(char[]) str;
+							}
+							else
+								content = cast(char[]) str;
+						}
+					}
+					
+					//return content;
+				}
+			
+			}
+			/+
+			// If the DLL be loaded, the function pointer is not null
+			if( GLOBAL.iconv != null )
+			{
+				// CHECK BOM
+				bool bBOM = true;
+				//auto str = cast(ubyte[]) File.get( fullPath );
+				
+				void* cd = null;
+				
+				if( str.length > 3 )
+				{
+					//UTF32 with BOM
+					if( str[0] == 0xFF && str[1] == 0xFE && str[2] == 0x00 && str[3] == 0x00 )
+					{
+						// UTF32-LE
+						cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");
+						//stdout("UTF-32LE").newline;
+						_encoding = Encoding.UTF_32LE;
+					}
+					else if( str[0] == 0x00 && str[1] == 0x00 && str[2] == 0xFE && str[3] == 0xFF )
+					{
+						// UTF32-BE
+						cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
+						//stdout("UTF-32BE").newline;
+						_encoding = Encoding.UTF_32BE;
+					}
+				}
+				
+				if( cd == null )
+				{
+					if( str.length > 2 )
+					{
+						//UTF8 with BOM
+						if( str[0] == 0xEF && str[1] == 0xBB && str[2] == 0xBF )
+						{
+							// UTF-8
+							//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
+							//stdout("UTF-8").newline;
+							_encoding = Encoding.UTF_8;
+						}
+					}
+				}
+				
+				if( _encoding != Encoding.UTF_8 )
+				{
+					if( cd == null )
+					{
+						if( str.length > 1 )
+						{
+							//UTF16 with BOM
+							if( str[0] == 0xFF && str[1] == 0xFE)
+							{
+								// UTF16-LE
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");
+								//stdout("UTF-16LE").newline;
+								_encoding = Encoding.UTF_16LE;
+							}
+							else if( str[0] == 0xFE && str[1] == 0xFF)
+							{
+								// UTF16-BE
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
+								//stdout("UTF-16BE").newline;
+								_encoding = Encoding.UTF_16BE;
+							}
+						}
+					}			
+
+					// Check Without BOM
+					if( cd == null )
+					{
+						BELE = isUTF32WithouBOM( str );
+						if( BELE == 1 )
+						{
+							cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
+							//stdout("UTF-32BE without BOM").newline;
+							_encoding = 9;
+							bBOM = false;
+						}
+						else if( BELE == 2 )
+						{
+							cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");	
+							//stdout("UTF-32LE without BOM").newline;
+							_encoding = 10;
+							bBOM = false;
+						}
+						
+						if( cd == null )
+						{
+							BELE = isUTF16WithouBOM( str );
+							if( BELE == 1 )
+							{
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
+								//stdout("UTF-16BE without BOM").newline;
+								_encoding = 11;
+								bBOM = false;
+							}
+							else if( BELE == 2 )
+							{
+								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");	
+								//stdout("UTF-16LE without BOM").newline;
+								_encoding = 12;
+								bBOM = false;
+							}
+						}
+						
+						if( cd == null )
+						{
+							if( isUTF8WithouBOM( str ) )
+							{
+								bBOM = false;
+								//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
+								//stdout("UTF-8 without BOM").newline;
+								_encoding = Encoding.UTF_8N;
+							}
+							else
+							{
+								_encoding = Encoding.Unknown;
+							}
+						}
+					}
+				}
+
+				
+				// Trans Data
+				if( cd != null )
+				{
+					void* inp = str.ptr;
+					size_t inbytesleft = str.length;
+					
+					char[] outBuffer;
+					outBuffer.length = inbytesleft;
+					size_t outbytesleft = outBuffer.length;
+					void* outp = outBuffer.ptr;
+					size_t res = GLOBAL.iconv(cd,&inp,&inbytesleft,&outp,&outbytesleft);
+
+					//Stdout(outbytesleft).newline;
+					if( bBOM )
+						content = outBuffer[3..$-outbytesleft]; // UTF-8 with BOM (3 bytes)
+					else
+						content = outBuffer[0..$-outbytesleft]; // UTF-8 without BOM
 						
 					GLOBAL.iconv_close( cd );
 						
@@ -411,7 +727,7 @@ public:
 				_encoding = file.encoding;
 				if( !file.bom.encoded ) 
 				{
-					int BELE = isUTF32WithouBOM( cast(ubyte[])text );
+					BELE = isUTF32WithouBOM( cast(ubyte[])text );
 					if( BELE > 0 )
 					{
 						if( BELE == 1 )
@@ -489,6 +805,7 @@ public:
 					content = text;
 				}
 			}
+			+/
 		}
 		catch( Exception e )
 		{
@@ -1122,48 +1439,11 @@ public:
 			}
 			else
 			{
-				version(SPEED)
-				{
-					if( parseIncludeThread !is null )
-						if( parseIncludeThread.isRunning ) parseIncludeThread.join();
-				}
-					
-					
 				auto pParseTree = GLOBAL.outlineTree.createParserByText( fullPath, _text );
 				if( pParseTree !is null ) 
 				{
 					AutoComplete.cleanIncludeContainer();
-					
-					/*
-					if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
-					{
-						ParseThread subThread = new ParseThread( pParseTree, fullPath );
-						subThread.start();
-					}
-					else
-					{
-						AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-					}
-					*/
-					version(SPEED)
-					{
-						if( parseIncludeThread !is null )
-						{
-							if( parseIncludeThread.isRunning )
-							{
-								parseIncludeThread.join();
-								if( GLOBAL.editorSetting00.Message == "ON" ) GLOBAL.IDEMessageDlg.print( "Wait......" );
-							}
-							delete parseIncludeThread;
-						}
-						
-						parseIncludeThread = new ParseThread( pParseTree, fullPath );
-						parseIncludeThread.start();
-					}
-					else
-					{
-						AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-					}
+					AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 				}
 			}
 			

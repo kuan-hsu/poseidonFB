@@ -1423,16 +1423,45 @@ class COutline
 			
 			if( IupGetChildCount( zBoxHandle ) > 0 )
 			{
+				showTreeAndButtons( true );
+				/*
 				IupSetAttribute( outlineTreeNodeList, "VISIBLE", "YES" );
 				IupSetAttribute( outlineButtonCollapse, "VISIBLE", "YES" );
 				IupSetAttribute( outlineButtonPR, "VISIBLE", "YES" );
 				IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "YES" );
 				IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "YES" );
 				IupSetAttribute( outlineButtonFresh, "VISIBLE", "YES" );
+				*/
 			}
 		}
 	}
-
+	
+	
+	void showTreeAndButtons( bool bShow )
+	{
+		if( !bShow )
+		{
+			IupSetAttribute( zBoxHandle, "VISIBLE", "NO" );
+			IupSetAttribute( outlineTreeNodeList, "VISIBLE", "NO" );
+			IupSetAttribute( outlineButtonCollapse, "VISIBLE", "NO" );
+			IupSetAttribute( outlineButtonPR, "VISIBLE", "NO" );
+			IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "NO" );
+			IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "NO" );
+			IupSetAttribute( outlineButtonFresh, "VISIBLE", "NO" );
+		}
+		else
+		{
+			IupSetAttribute( zBoxHandle, "VISIBLE", "YES" );
+			IupSetAttribute( outlineTreeNodeList, "VISIBLE", "YES" );
+			IupSetAttribute( outlineButtonCollapse, "VISIBLE", "YES" );
+			IupSetAttribute( outlineButtonPR, "VISIBLE", "YES" );
+			IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "YES" );
+			IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "YES" );
+			IupSetAttribute( outlineButtonFresh, "VISIBLE", "YES" );
+		}
+	}
+	
+	
 	void changeTree( char[] fullPath )
 	{
 		for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
@@ -1450,10 +1479,14 @@ class COutline
 				if( fullPath == _fullPath )
 				{
 					IupSetInt( zBoxHandle, "VALUEPOS", i );
-					break;
+					showTreeAndButtons( true );
+					return;
 				}
 			}
 		}
+		
+		// Not in zBox( no tree created ), hide the zBox
+		showTreeAndButtons( false );
 	}
 
 	void cleanTree( char[] fullPath, bool bDestroy = true )
@@ -1495,6 +1528,9 @@ class COutline
 		
 		if( IupGetChildCount( zBoxHandle ) == 0 )
 		{
+			IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
+			showTreeAndButtons( false );
+			/*
 			IupSetAttribute( outlineTreeNodeList, "VISIBLE", "NO" );
 			IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
 			IupSetAttribute( outlineButtonCollapse, "VISIBLE", "NO" );
@@ -1502,6 +1538,7 @@ class COutline
 			IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "NO" );
 			IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "NO" );
 			IupSetAttribute( outlineButtonFresh, "VISIBLE", "NO" );
+			*/
 		}
 	}
 

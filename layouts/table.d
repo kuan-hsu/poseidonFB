@@ -1,4 +1,4 @@
-module layouts.table;
+﻿module layouts.table;
 
 private import iup.iup;
 private import tools;

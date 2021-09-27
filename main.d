@@ -76,7 +76,6 @@ void main( char[][] args )
 			void* ptr = sharedlib.getSymbol("HtmlHelpW");
 			if( ptr )
 			{
-			
 				GLOBAL.htmlHelp = cast(_htmlHelp) ptr;
 				//Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
 				//void **point = cast(void **)&GLOBAL.htmlHelp; // binding function address from DLL to our function pointer
@@ -100,7 +99,7 @@ void main( char[][] args )
 		SharedLib loaderlib;
 		GLOBAL.iconv_open = null;
 		GLOBAL.iconv = null;
-		GLOBAL.iconv_close = null;		
+		GLOBAL.iconv_close = null;
 		try
 		{
 			loaderlib = SharedLib.load( `iconv.dll` );
@@ -113,7 +112,7 @@ void main( char[][] args )
 					*point = ptr;
 				}
 				else
-					debug Stdout("Symbol 'iconv_open' not found").newline;
+					throw new Exception( "Symbol 'iconv_open' not found" );
 				
 				
 				ptr = null;
@@ -124,7 +123,7 @@ void main( char[][] args )
 					*point = ptr;
 				}
 				else
-					debug Stdout("Symbol 'iconv' not found").newline;
+					throw new Exception( "Symbol 'iconv' not found" );
 
 				ptr = null;
 				ptr = loaderlib.getSymbol("libiconv_close");
@@ -134,22 +133,22 @@ void main( char[][] args )
 					*point = ptr;
 				}
 				else
-					debug Stdout("Symbol 'iconv_close' not found").newline;
+					throw new Exception( "Symbol 'iconv_close' not found" );
 					
 					
 				debug Stdout("SUCCESS!" ).newline;
 			}
 			else
 			{
-				debug Stdout("LOAD DLL ERROR!" ).newline;
 				GLOBAL.iconv = null;
+				throw new Exception( "LOAD DLL ERROR!" );
 			}
 		}
 		catch( Exception e )
 		{
 			GLOBAL.iconv = null;
 			debug Stdout(e.toString).newline;
-		}		
+		}
 	}
 	
 	if( IupOpen( null, null ) == IUP_ERROR )
@@ -245,24 +244,6 @@ void main( char[][] args )
 
 	IupSetGlobal( "UTF8MODE", "YES" );
 	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
-
-	/*
-	char[] iupVersion = fromStringz( IupGetGlobal( "VERSION" ) );
-	if( Util.count( iupVersion, "." ) == 2 )
-	{
-		int tailDotPos = Util.rindex( iupVersion, "." );
-		if( tailDotPos < iupVersion.length ) GLOBAL.IUP_VERSION = Float.toFloat( iupVersion[0..tailDotPos] );
-	}
-	else
-	{
-		GLOBAL.IUP_VERSION = Float.toFloat( iupVersion );
-	}
-	
-	if( GLOBAL.IUP_VERSION > 3.24 )
-	{
-		version(linux) if( fromStringz( IupGetGlobal( "TXTHLCOLOR" ) ) == "255 255 255" ) IupSetGlobal( "TXTHLCOLOR", "154 184 124" );
-	}
-	*/
 
 	createMenu();
 	
@@ -481,7 +462,6 @@ void main( char[][] args )
 	version(Windows)
 	{
 		if( GLOBAL.htmlHelp != null ) sharedlib.unload();
-		//if( GLOBAL.readFile != null ) sharedFileLoader.unload();
 		if( GLOBAL.iconv != null ) loaderlib.unload();
 	}
 }
