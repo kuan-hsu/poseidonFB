@@ -351,6 +351,28 @@ void createMenu()
 		return IUP_DEFAULT;
 	});
 
+	Ihandle* UseAnnotation = IupItem( GLOBAL.languageItems["errorannotation"].toCString, null);
+	if( GLOBAL.compilerAnootation == "ON" ) IupSetInt( UseAnnotation, "VALUE", 1 ); else IupSetInt( UseAnnotation, "VALUE", 0 );
+	IupSetAttribute( UseAnnotation, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuUseAnnotation", UseAnnotation );
+	IupSetCallback( UseAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.compilerAnootation == "ON" ) GLOBAL.compilerAnootation = "OFF"; else GLOBAL.compilerAnootation = "ON";
+		if( IupGetHandle( "toggleAnnotation" ) != null ) IupSetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE", toStringz( GLOBAL.compilerAnootation ) );
+		return IUP_DEFAULT;
+	});
+	
+	Ihandle* UseConsoleApp = IupItem( GLOBAL.languageItems["consoleexe"].toCString, null);
+	if( GLOBAL.consoleExe == "ON" ) IupSetInt( UseConsoleApp, "VALUE", 1 ); else IupSetInt( UseConsoleApp, "VALUE", 0 );
+	IupSetAttribute( UseConsoleApp, "AUTOTOGGLE", "YES" );
+	IupSetHandle( "menuUseConsoleApp", UseConsoleApp );
+	IupSetCallback( UseConsoleApp, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		if( GLOBAL.consoleExe == "ON" ) GLOBAL.consoleExe = "OFF"; else GLOBAL.consoleExe = "ON";
+		if( IupGetHandle( "toggleConsoleExe" ) != null ) IupSetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE", toStringz( GLOBAL.consoleExe ) );
+		return IUP_DEFAULT;
+	});
+
 	
 	// Project
 	item_newProject= IupItem( GLOBAL.languageItems["newprj"].toCString, null);
@@ -683,7 +705,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.474)\nBy Kuan Hsu (Taiwan)\n2021.09.27" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.475)\nBy Kuan Hsu (Taiwan)\n2021.10.02" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.066)\nBy Kuan Hsu (Taiwan)\n2021.07.24" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});
@@ -753,6 +775,9 @@ void createMenu()
 							HighlightCurrentWord,
 							IupSeparator(),
 							FunctionTitle,
+							IupSeparator(),
+							UseAnnotation,
+							UseConsoleApp,
 							null );
 	
 	version(FBIDE)

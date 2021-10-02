@@ -1874,7 +1874,7 @@ version(DIDE)
 							if( isVisibilityAttribute() ) parseToken();
 							
 							_baseName = getBasicType();
-							if( token().tok == TOK.Tcomma )
+							while( token().tok == TOK.Tcomma )
 							{
 								parseToken( TOK.Tcomma );
 								_baseName ~= ( "," ~ getBasicType() );

@@ -238,8 +238,8 @@ public:
 
 	static char[] loadFile( char[] fullPath, ref int _encoding )
 	{
-		//char[] result;
-		content = "";
+		//content = "";
+		//char[] content;
 		
 		try
 		{
@@ -813,7 +813,7 @@ public:
 			throw e;
 		}
 
-		return content;
+		return content.dup;
 	}
 	
 
@@ -1284,36 +1284,7 @@ private:
 	import scintilla, menu;
 	import parser.scanner,  parser.token, parser.parser, parser.autocompletion;
 
-
 	import tango.core.Thread, Path = tango.io.Path;
-	// Inner Class
-	class ParseThread : Thread
-	{
-		private:
-		import			parser.ast;
-		
-		char[]			pFullPath;
-		CASTnode		pParseTree;
-
-		public:
-		this( CASTnode _pParseTree, char[] _pFullPath )
-		{
-			pFullPath = _pFullPath;
-			pParseTree = _pParseTree;
-	
-			super( &run );
-		}
-
-		void run()
-		{
-			if( pParseTree !is null )
-			{
-				version(FBIDE) AutoComplete.getIncludes( pParseTree, pFullPath, true ); else AutoComplete.getIncludes( pParseTree, pFullPath, true, true );
-			}
-		}
-	}
-	
-	version(SPEED) static ParseThread parseIncludeThread;
 
 public:
 	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8N, char[] existData = null, bool bCreateActualFile = true, int insertPos = -1 )
@@ -2302,9 +2273,34 @@ public:
 	{
 		if( textWidth == -1 )
 		{
-			char[] wh = fromStringz( IupGetAttribute( getActiveIupScintilla, "RASTERSIZE" ) );
-			int xPos = Util.index( wh, "x" );
-			if( xPos < wh.length ) textWidth = cast(int) ( cast(float) Integer.toInt( wh[0..xPos] ) / 10.0 * 0.85f );
+			try
+			{
+				Ihandle* actIupSci = getActiveIupScintilla;
+				if( actIupSci != null )
+				{
+					char[] wh = fromStringz( IupGetAttribute( actIupSci, "RASTERSIZE" ) );
+					int xPos = Util.index( wh, "x" );
+					if( xPos < wh.length )
+					{
+						int spacePos = Util.rindex( GLOBAL.fonts[1].fontString, " " );
+						if( spacePos < GLOBAL.fonts[1].fontString.length )
+						{
+							int size = Integer.toInt( GLOBAL.fonts[1].fontString[spacePos+1..$] );
+							if( size > 6 )
+							{
+								size -= 2;
+								int caretX = cast(int) IupScintillaSendMessage( actIupSci, 2164, 0, getCurrentPos( actIupSci ) ); // SCI_POINTXFROMPOSITION 2164
+								textWidth =  cast(int) ( ( cast(float) Integer.toInt( wh[0..xPos] ) - cast(float) caretX ) / cast(float) size );
+							}
+						}
+					}
+				}
+			}
+			catch( Exception e )
+			{
+			}
+			
+			if( textWidth == -1 ) return oriText;
 		}
 	
 		char[] result;

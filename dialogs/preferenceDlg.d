@@ -346,6 +346,18 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle.dup) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
 
+		Ihandle* labelPreParseLevel = IupLabel( GLOBAL.languageItems["preparselevel"].toCString );
+		Ihandle* valPreParseLevel = IupVal( null );
+		IupSetAttributes( valPreParseLevel, "MIN=0,MAX=5,RASTERSIZE=50x16,STEP=0.1,PAGESTEP=0.1" );
+		IupSetAttribute( valPreParseLevel, "VALUE", toStringz( Integer.toString( GLOBAL.preParseLevel ).dup ) );
+		IupSetHandle( "valPreParseLevel", valPreParseLevel );
+		IupSetCallback( valPreParseLevel, "VALUECHANGED_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );
+		IupSetCallback( valPreParseLevel, "ENTERWINDOW_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );	
+
+		Ihandle* hBoxPreParseLevel = IupHbox( toggleFunctionTitle, IupFill, labelPreParseLevel, valPreParseLevel, null );
+		IupSetAttributes( hBoxPreParseLevel, "ALIGNMENT=ACENTER" );
+
+
 
 		Ihandle* toggleLiveNone = IupToggle( GLOBAL.languageItems["none"].toCString, null );
 		IupSetHandle( "toggleLiveNone", toggleLiveNone );
@@ -385,7 +397,7 @@ class CPreferenceDialog : CBaseDialog
 		version(FBIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel,null );
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		
-		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, toggleFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWLISTTYPE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
 	
@@ -2312,7 +2324,16 @@ extern(C) // Callback for CPreferenceDialog
 				if( v < 50 ) v = 50;
 				GLOBAL.triggerDelay = Integer.toString( v ).dup;
 				AutoComplete.setTimer( v );
-			}			
+			}
+			
+			_valHandle = IupGetHandle( "valPreParseLevel" );
+			if( _valHandle != null )
+			{
+				int v = IupGetInt( _valHandle, "VALUE" );
+				GLOBAL.preParseLevel = v;
+			}
+			
+			
 
 			foreach( CScintilla cSci; GLOBAL.scintillaManager )
 			{

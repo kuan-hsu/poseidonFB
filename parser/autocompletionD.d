@@ -990,7 +990,7 @@ version(DIDE)
 			return results;
 		}
 
-		static char[] checkIncludeExist( char[] importName, char[] _cwd )
+		static public char[] checkIncludeExist( char[] importName, char[] _cwd )
 		{
 			if( importName.length )
 			{

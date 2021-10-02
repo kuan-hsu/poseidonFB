@@ -12,12 +12,54 @@ private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.c
 class CProjectTree
 {
 private:
-	import				dialogs.prjPropertyDlg;
+	import				parser.ast, dialogs.prjPropertyDlg;
 
-	import				project, tango.io.device.File, tango.io.stream.Lines;
+	import				project, tango.io.device.File, tango.io.stream.Lines;//, tango.io.Stdout;
 	import				tango.core.Thread, parser.autocompletion;
 	
 	Ihandle*			layoutHandle, tree, projectButtonCollapse;
+	
+	// Inner Class
+	class ParseThread : Thread
+	{
+		private:
+		import			parser.scanner, parser.parser;
+		
+		char[]			pFullPath, document;
+		CASTnode		pParseTree;
+
+		public:
+		this( char[] _pFullPath, char[] _document = null )
+		{
+			pFullPath = _pFullPath;
+			document = _document;
+	
+			super( &run );
+		}
+
+		void run()
+		{
+			// Don't Create Tree
+			// Parser
+			if( !document.length )
+			{
+				int bom;
+				document = FileAction.loadFile( pFullPath, bom );
+			}
+
+			scope parser = new CParser( Scanner.scan( document ) );
+			if( parser !is null )
+			{
+				auto p = parser.parse( pFullPath );
+				if( p !is null ) pParseTree = p;
+			}
+		}
+		
+		CASTnode getResult()
+		{
+			return pParseTree;
+		}
+	}
 
 	void createLayout()
 	{
@@ -463,6 +505,64 @@ public:
 				return false;
 			}
 
+			
+			
+			// PreLoad, Load all files in project parser
+			if( GLOBAL.enableParser == "ON" && GLOBAL.preParseLevel > 0 )
+			{
+				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
+				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
+			
+				char[][]		parsedFiles, secondParsedFiles;
+				//ParseThread[]	pths;
+				//scope 			f = new FilePath;
+				
+				foreach( char[] source; GLOBAL.projectManager[setupDir].sources ~ GLOBAL.projectManager[setupDir].includes ~ GLOBAL.projectManager[setupDir].misc ~ GLOBAL.projectManager[setupDir].others )
+				{
+					/*
+					f.set( source );
+					char[] _ext = lowerCase( f.ext() );
+
+					version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) ) continue;
+					version(DIDE)	if( _ext != "d" && _ext != "di" ) continue;	
+					*/
+					if( fullPathByOS(source) in GLOBAL.parserManager ){}
+					else
+					{
+						if( GLOBAL.outlineTree.loadParser( source ) !is null )
+						{
+							parsedFiles ~= source;
+							//Stdout( "1: " ~ source ).newline;
+						}
+						/*
+						int bom;
+						char[] _document = FileAction.loadFile( source, bom );
+						auto pth = new ParseThread( source, _document );
+						pths ~= pth;
+						pth.start;
+						*/
+					}
+				}
+				
+				/+
+				foreach( pth; pths )
+					pth.join();
+					
+				foreach( pth; pths )
+				{
+					Stdout( "1: " ~ pth.pFullPath ).newline;
+					GLOBAL.parserManager[fullPathByOS(pth.pFullPath)] = pth.getResult;
+					delete pth;
+				}
+				pths.length = 0;
+				+/
+				//Stdout( "1.5: " ).newline;
+				
+				
+				for( int i = 1; i < GLOBAL.preParseLevel; ++i )
+					parsedFiles = preParseFiles( parsedFiles );
+			}
+			
 			createProjectTree( setupDir );
 		}
 		else
@@ -494,6 +594,110 @@ public:
 		+/
 
 		return true;
+	}
+	
+	
+	char[][] preParseFiles( char[][] inFiles )
+	{
+		char[][] beParsedFiles, outFiles;
+		
+		foreach( char[] s; inFiles )
+		{
+			if( fullPathByOS(s) in GLOBAL.parserManager )
+			{
+				auto Root = GLOBAL.parserManager[fullPathByOS(s)];
+				if( Root !is null )
+				{
+					char[] includeFullPath;
+					
+					version(FBIDE)
+					{
+						foreach( CASTnode _node; Root.getChildren )
+						{
+							if( _node.kind & B_INCLUDE )
+							{
+								if( _node.lineNumber < 2147483647 )
+								{
+									if( _node.type == "__FB_WIN32__" )
+									{
+										version(Windows)
+										{
+											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
+										}
+									}
+									else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
+									{
+										version(linux)
+										{
+											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
+										}
+									}
+									else if( _node.type == "!__FB_WIN32__" )
+									{
+										version(Windows){}
+										else
+										{
+											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
+										}
+									}
+									else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
+									{
+										version(linux){}
+										else
+										{
+											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
+										}
+									}
+									else
+									{
+										includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+										if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
+									}
+								}
+							}
+						}
+					}
+					version(DIDE)
+					{
+						foreach( CASTnode _node; Root.getChildren )
+						{
+							if( _node.kind & D_IMPORT )
+							{
+								if( _node.type.length )
+								{
+									//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
+									includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.name );
+									if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+								}
+								else
+								{
+									//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
+									includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+									if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+								}
+							}
+						}					
+					}
+				}
+			}
+		}
+		
+		foreach( char[] source; beParsedFiles )
+		{
+			if( fullPathByOS(source) in GLOBAL.parserManager ){}
+			else
+			{
+				outFiles ~= source;
+				GLOBAL.outlineTree.loadParser( source );
+				//Stdout( Integer.toString( i + 1 ) ~ " " ~ source ).newline;
+			}
+		}				
+	
+		return outFiles;
 	}
 
 	version(FBIDE)

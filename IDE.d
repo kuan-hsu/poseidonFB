@@ -376,6 +376,7 @@ public:
 			doc ~= setINILineData( "showfunctiontitle", GLOBAL.showFunctionTitle );
 			doc ~= setINILineData( "showtypewithparams", GLOBAL.showTypeWithParams );
 			doc ~= setINILineData( "includelevel", Integer.toString( GLOBAL.includeLevel ) );
+			doc ~= setINILineData( "preparselevel", Integer.toString( GLOBAL.preParseLevel ) );
 			doc ~= setINILineData( "ignorecase", GLOBAL.toggleIgnoreCase );
 			doc ~= setINILineData( "caseinsensitive", GLOBAL.toggleCaseInsensitive );
 			doc ~= setINILineData( "showlisttype", GLOBAL.toggleShowListType );
@@ -814,6 +815,7 @@ public:
 							case "showfunctiontitle":		GLOBAL.showFunctionTitle = right;								break;
 							case "showtypewithparams":		GLOBAL.showTypeWithParams = right;								break;
 							case "includelevel":			GLOBAL.includeLevel = Integer.toInt( right );					break;
+							case "preparselevel":			GLOBAL.preParseLevel = Integer.toInt( right );					break;
 							case "ignorecase":				GLOBAL.toggleIgnoreCase = right;								break;
 							case "caseinsensitive":			GLOBAL.toggleCaseInsensitive = right;							break;
 							case "showlisttype":			GLOBAL.toggleShowListType = right;								break;

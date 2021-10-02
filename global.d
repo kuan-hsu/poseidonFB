@@ -207,7 +207,7 @@ struct GLOBAL
 	
 
 	static int					autoCompletionTriggerWordCount = 3;
-	static int					includeLevel = 2;
+	static int					includeLevel = 2, preParseLevel = 3;
 	static int					liveLevel = 0;
 	static char[]				toggleUpdateOutlineLive = "OFF";
 
@@ -650,6 +650,7 @@ struct GLOBAL
 						GLOBAL.languageItems["enableoverwrite"] = new IupString( cast(char[]) "Overwrite To Non Identifier Character" );
 						GLOBAL.languageItems["completeatbackthread"] = new IupString( cast(char[]) "Enable Codecomplete At Back Thread" );
 							GLOBAL.languageItems["completedelay"] = new IupString( cast(char[]) "Trigger Delay(ms):" );
+							GLOBAL.languageItems["preparselevel"] = new IupString( cast(char[]) "Project Pre-Parse Level:" );
 						GLOBAL.languageItems["parserlive"] = new IupString( cast(char[]) "ParseLive! Level" );
 							GLOBAL.languageItems["none"] = new IupString( cast(char[]) "None" );
 							GLOBAL.languageItems["light"] = new IupString( cast(char[]) "Light" );

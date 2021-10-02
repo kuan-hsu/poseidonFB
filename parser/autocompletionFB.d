@@ -468,9 +468,14 @@ version(FBIDE)
 		}
 
 
-		static CASTnode[] getBaseNodeMembers( CASTnode originalNode )
+		static CASTnode[] getBaseNodeMembers( CASTnode originalNode, int level = 0 )
 		{
 			if( originalNode is null ) return null;
+		
+			if( GLOBAL.includeLevel > 0 )
+				if( level > 1 ) return null;
+			else
+				if( level > 2 ) return null;
 			
 			CASTnode[] results;
 			
@@ -490,7 +495,7 @@ version(FBIDE)
 						}
 					}
 					
-					results ~= getBaseNodeMembers( mother );
+					results ~= getBaseNodeMembers( mother, ++level );
 				}
 			}
 
@@ -580,7 +585,7 @@ version(FBIDE)
 			return results;
 		}
 
-		static char[] checkIncludeExist( char[] include, char[] originalFullPath )
+		static public char[] checkIncludeExist( char[] include, char[] originalFullPath )
 		{
 			try
 			{
@@ -1370,7 +1375,7 @@ version(FBIDE)
 				originalNode = oriAST;
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
 				
-				if( originalNode == oriAST ) return oriAST; // Prevent infinite loop
+				if( originalNode is oriAST ) return oriAST; // Prevent infinite loop
 				
 				/*
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
@@ -4208,8 +4213,10 @@ version(FBIDE)
 							splitWord ~= AST_Head.name; // Get the TYPE | CLASS | UNION name
 							AST_Head = AST_Head.getFather;
 						}
-						
+						// #define SCI_SETCURSOR 2386
+						IupScintillaSendMessage( cSci.getIupScintilla, 2386, 4, 0 );
 						AST_Head = _performAnalysisSplitWord( AST_Head, splitWord );
+						IupScintillaSendMessage( cSci.getIupScintilla, 2386, -1, 0 );
 						
 						/*
 						AST_Head = analysisSplitWord( AST_Head, splitWord );
