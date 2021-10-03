@@ -517,6 +517,7 @@ public:
 				//ParseThread[]	pths;
 				//scope 			f = new FilePath;
 				
+				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Files Pre-Loding...", true );
 				foreach( char[] source; GLOBAL.projectManager[setupDir].sources ~ GLOBAL.projectManager[setupDir].includes ~ GLOBAL.projectManager[setupDir].misc ~ GLOBAL.projectManager[setupDir].others )
 				{
 					/*
@@ -532,6 +533,7 @@ public:
 						if( GLOBAL.outlineTree.loadParser( source ) !is null )
 						{
 							parsedFiles ~= source;
+							GLOBAL.messagePanel.printOutputPanel( "  [ " ~ source ~ " ]...Parsed" );
 							//Stdout( "1: " ~ source ).newline;
 						}
 						/*
@@ -556,11 +558,12 @@ public:
 				}
 				pths.length = 0;
 				+/
-				//Stdout( "1.5: " ).newline;
-				
 				
 				for( int i = 1; i < GLOBAL.preParseLevel; ++i )
-					parsedFiles = preParseFiles( parsedFiles );
+					parsedFiles = preParseFiles( parsedFiles, i );
+				
+				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loding Finished." );
+				GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
 			}
 			
 			createProjectTree( setupDir );
@@ -597,7 +600,7 @@ public:
 	}
 	
 	
-	char[][] preParseFiles( char[][] inFiles )
+	char[][] preParseFiles( char[][] inFiles, int level )
 	{
 		char[][] beParsedFiles, outFiles;
 		
@@ -605,7 +608,7 @@ public:
 		{
 			if( fullPathByOS(s) in GLOBAL.parserManager )
 			{
-				auto Root = GLOBAL.parserManager[fullPathByOS(s)];
+				CASTnode Root = GLOBAL.parserManager[fullPathByOS(s)];
 				if( Root !is null )
 				{
 					char[] includeFullPath;
@@ -686,6 +689,10 @@ public:
 			}
 		}
 		
+		char[] plusSign;
+		for( int i = 0; i < level; ++ i)
+			plusSign ~= "+";
+		
 		foreach( char[] source; beParsedFiles )
 		{
 			if( fullPathByOS(source) in GLOBAL.parserManager ){}
@@ -693,6 +700,7 @@ public:
 			{
 				outFiles ~= source;
 				GLOBAL.outlineTree.loadParser( source );
+				GLOBAL.messagePanel.printOutputPanel( "  " ~ plusSign ~ "[ " ~ source ~ " ]...Parsed" );
 				//Stdout( Integer.toString( i + 1 ) ~ " " ~ source ).newline;
 			}
 		}				

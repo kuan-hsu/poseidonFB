@@ -730,7 +730,17 @@ version(DIDE)
 				case D_CLASS:					return name ~ "?" ~ Integer.toString( 6 + protAdd );
 				case D_STRUCT: 					return name ~ "?" ~ Integer.toString( 9 + protAdd );
 				case D_ENUM: 					return name ~ "?" ~ Integer.toString( 12 + protAdd );
-				case D_PARAM:					return bShowType ? name ~ "#" ~ type ~ "?18" : name ~ "?18";
+				case D_PARAM:
+						if( Util.index( type, "in " ) == 0 )
+							type = type[3..$].dup;
+						else if( Util.index( type, "out " ) == 0 )
+							type = type[4..$].dup;
+						else if( Util.index( type, "ref " ) == 0 )
+							type = type[4..$].dup;
+						else if( Util.index( type, "inout " ) == 0 )
+							type = type[6..$].dup;
+				
+						return bShowType ? name ~ "#" ~ type ~ "?18" : name ~ "?18";
 				case D_ENUMMEMBER:				return name ~ "?19";
 				case D_ALIAS:					return name ~ "?31";
 				case D_INTERFACE:				return name ~ "?32";
@@ -1508,6 +1518,18 @@ version(DIDE)
 				if( originalNode.type.length )
 				{
 					char[] _type = originalNode.type;
+					
+					if( originalNode.kind & D_PARAM )
+					{
+						if( Util.index( _type, "in " ) == 0 )
+							_type = _type[3..$].dup;
+						else if( Util.index( _type, "out " ) == 0 )
+							_type = _type[4..$].dup;
+						else if( Util.index( _type, "ref " ) == 0 )
+							_type = _type[4..$].dup;
+						else if( Util.index( _type, "inout " ) == 0 )
+							_type = _type[6..$].dup;
+					}
 					
 					// Check and get D_FUNCTIONPTR type
 					if( originalNode.kind & D_FUNCTIONPTR )

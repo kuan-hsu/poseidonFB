@@ -3908,7 +3908,8 @@ version(FBIDE)
 												if( _splitWords.length == 2 )
 												{
 													if( _splitWords[1].length )
-														IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ _splitWords[1] ) );	// "kchmviewer --sindex %s /chm-path
+														IupExecute( "./CHMVIEW", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );	// "kchmviewer --sindex %s /chm-path
+														//IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ _splitWords[1] ) );	// "kchmviewer --sindex %s /chm-path
 												}
 											}
 										}
@@ -4074,14 +4075,18 @@ version(FBIDE)
 										{
 											if( a.lineNumber < a.endLineNum ) // Not Declare
 											{
+												bool bGetDeclare;
 												foreach( CASTnode _node; searchMatchNodes( a, _splitWord[i], B_FIND | B_SUB ) )
 												{
 													if( _node.lineNumber == _node.endLineNum ) // Is Declare
 													{
 														nameSpaceNodes ~= _node;
+														bGetDeclare = true;
 														break;
 													}
 												}
+												
+												if( !bGetDeclare ) nameSpaceNodes ~= a;
 											}
 											else
 											{
@@ -4101,6 +4106,8 @@ version(FBIDE)
 							
 								if( _splitWord.length == 1 )
 								{
+									if( !nameSpaceNodes.length ) return null;
+									
 									foreach( CASTnode a; nameSpaceNodes )
 										if( lowerCase( a.type ) == lowerCase( _AST_Head.type ) ) return a;
 									

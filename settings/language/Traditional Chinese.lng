@@ -127,6 +127,7 @@ options=選項
 				enableoverwrite=覆蓋非識別字符
 				completeatbackthread=使用背景進程自動完成
 				completedelay=觸發延遲時間(ms):
+				preparselevel=專案載入預分析層級:
 				parserlive=自動更新等級
 					none=無
 					light=輕量

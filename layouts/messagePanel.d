@@ -290,11 +290,14 @@ public:
 	
 	void applyOutputPanelINDICATOR()
 	{
-		int dummy = IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-		dummy = IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		//IupSetAttributeId( outputPanel, "INDICATORSTYLE", 8, "DOTBOX" );
+		IupSetAttributeId( outputPanel, "INDICATORFGCOLOR", 8, "255 0 0" );
+		IupSetIntId( outputPanel, "INDICATORALPHA", 8, 128 );
+	
+		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		int LineNum;
-		foreach( char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
@@ -315,8 +318,8 @@ public:
 									if( colonPos > closePos )
 									{
 										int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-										dummy = IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
-										dummy = IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
+										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
+										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
 									}
 								}
 							}
@@ -324,17 +327,36 @@ public:
 					}
 				}
 			}
-			LineNum ++;
 		}
 	}
 	
+	void applyOutputPanelINDICATOR2()
+	{
+		//IupSetAttributeId( outputPanel, "INDICATORSTYLE", 8, "BOX" );
+		IupSetAttributeId( outputPanel, "INDICATORFGCOLOR", 8, "0 128 0" );
+		IupSetIntId( outputPanel, "INDICATORALPHA", 8, 200 );
+		
+		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		
+		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+		{
+			if( lineText.length )
+			{
+				int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+				char[] triml_lineText = Util.triml( lineText );
+				lineHeadPos += ( lineText.length - triml_lineText.length );
+				IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
+			}
+		}
+	}	
+	
 	void applySearchOutputPanelINDICATOR()
 	{
-		int dummy = IupScintillaSendMessage( searchOutputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-		dummy = IupScintillaSendMessage( searchOutputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		IupScintillaSendMessage( searchOutputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		IupScintillaSendMessage( searchOutputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		int LineNum;
-		foreach( char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
+		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
@@ -347,13 +369,12 @@ public:
 						if( closePos > openPos + 1 )
 						{
 							int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-							dummy = IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
-							dummy = IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
 						}
 					}
 				}
 			}
-			LineNum ++;
 		}
 	}
 	
