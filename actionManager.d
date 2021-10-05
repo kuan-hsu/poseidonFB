@@ -10,7 +10,6 @@ private import Integer = tango.text.convert.Integer;
 private import Util = tango.text.Util;
 private import tango.stdc.stringz;
 
-
 // Action for FILE operate
 struct FileAction
 {
@@ -21,94 +20,78 @@ private:
 	version(Windows) import tango.sys.win32.CodePage;
 	
 	static char[] content;
-	/+
+	
 	static bool isUTF8WithouBOM( ubyte[] data )
 	{
 		int size = data.length;
-		
 		for( int i = 0; i < size; ++ i )
 		{
-			if( data[i] & 0x80 == 0x00 )
+			if( ( data[i] & 0x80 ) == 0x00 )
 			{
 				continue;
 			}
-			else if( data[i] & 0xE0 == 0xC0 )
+			else if( ( data[i] & 0xE0 ) == 0xC0 )
 			{
 				if( i + 1 >= size ) return false; // data tail
 	 
-				if( data[i + 1] & 0xC0 != 0x80 ) return false;
+				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
 	 
 				i += 1;
 			}
-			else if( data[i] & 0xF0 == 0xE0 )
+			else if( ( data[i] & 0xF0 ) == 0xE0 )
 			{
 				if( i + 2 >= size ) return false;
 	 
-				if( data[i + 1] & 0xC0 != 0x80 ) return false;
-				if( data[i + 2] & 0xC0 != 0x80 ) return false;
+				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
 	 
 				i += 2;
 			}
-			else if( data[i] & 0xF8 == 0xF0 )
+			else if( ( data[i] & 0xF8 ) == 0xF0 )
 			{
 				if( i + 3 >= size ) return false;
 				
-				if( data[i + 1] & 0xC0 != 0x80 ) return false;
-				if( data[i + 2] & 0xC0 != 0x80 ) return false;
-				if( data[i + 3] & 0xC0 != 0x80 ) return false;
+				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 3] & 0xC0 ) != 0x80 ) return false;
 	 
 				i += 3;
 			}
+			/*
+			else if( ( data[i] & 0xFC ) == 0xF8 )
+			{
+				if( i + 4 >= size ) return false;
+				
+				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 3] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 4] & 0xC0 ) != 0x80 ) return false;
+	 
+				i += 4;
+			}
+			else if( ( data[i] & 0xFE ) == 0xFC )
+			{
+				if( i + 5 >= size ) return false;
+				
+				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 3] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 4] & 0xC0 ) != 0x80 ) return false;
+				if( ( data[i + 5] & 0xC0 ) != 0x80 ) return false;
+	 
+				i += 5;
+			}
+			*/
 			else
 			{ 
 				return false;
 			}
+			
 		}
 
 		return true;
 	}
-	+/
-	static bool isUTF8WithouBOM( ubyte[] data )
-	{
-		for( int i = 0; i < data.length; ++ i )
-		{
-			if( !data[i] )
-			{
-				return false;
-			}
-			else if( data[i] < 0x80 )
-			{
-				i ++;
-			}
-			else if( data[i] < ( 0x80 + 0x40 ) )
-			{
-				return true;
-			}
-			else if( data[i] < (0x80 + 0x40 + 0x20) )
-			{
-				if( i >= data.length - 1 ) return true;
 
-				if( !( data[i] & 0x1F ) || ( data[i+1] & ( 0x80+0x40 ) ) != 0x80 ) break;
-
-				i += 2;
-			}
-			else if( data[i] < ( 0x80 + 0x40 + 0x20 + 0x10 ) )
-			{
-				if( i >= data.length - 2 ) return true;
-					
-				if( !( data[i] & 0xF) || ( data[i+1] & (0x80+0x40) ) != 0x80 || ( data[i+2] &( 0x80+0x40 ) ) != 0x80 ) break;
-				
-				i += 3;
-			}
-			else
-			{
-				break;
-			}
-		}
-
-		return false;
-	}	
-	
 	static int isUTF16WithouBOM( ubyte[] data )
 	{
 		if( data.length % 2 != 0 ) return 0;
@@ -1411,6 +1394,8 @@ public:
 			else
 			{
 				auto pParseTree = GLOBAL.outlineTree.createParserByText( fullPath, _text );
+				
+				// Preload
 				if( pParseTree !is null ) 
 				{
 					AutoComplete.cleanIncludeContainer();

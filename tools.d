@@ -111,24 +111,6 @@ public:
 		_CstringPointer = rhs;
 		*/
 	}
-	
-	char* opShl( char* rhs )
-	{
-		if( rhs != null )
-		{
-			char* _tempPointer = _CstringPointer;
-			copy( fromStringz( rhs ).dup );
-			if( _tempPointer != null ) free( _tempPointer );
-		}
-		else
-		{
-			if( _CstringPointer != null ) free( _CstringPointer );
-			_DString.length = 0;
-			return null;
-		}
-		
-		return _CstringPointer;
-	}
 
 	char* convert( char[] Dstring )
 	{

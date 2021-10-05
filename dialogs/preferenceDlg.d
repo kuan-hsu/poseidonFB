@@ -11,11 +11,7 @@ private import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath, Util = ta
 
 private struct PreferenceDialogParameters
 {
-	static		IupString[15]		_stringOfLabel;
 	static		IupString[50]		kbg, stringSC;
-	static		IupString[5]		stringMonitor;
-	static		IupString			stringCharSymbol, stringTabWidth, stringColumnEdge, stringBarSize, stringTrigger, stringLevel, stringMaxHeight;
-	
 	static		CTable				fontTable;
 }
 
@@ -158,19 +154,19 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* textConsoleW = IupText( null );
 		Ihandle* textConsoleH = IupText( null );
 		
-		
+		/*
 		PreferenceDialogParameters.stringMonitor[0] = new IupString( Integer.toString( GLOBAL.consoleWindow.id + 1 ) );
 		PreferenceDialogParameters.stringMonitor[1] = new IupString( Integer.toString( GLOBAL.consoleWindow.x ) );
 		PreferenceDialogParameters.stringMonitor[2] = new IupString( Integer.toString( GLOBAL.consoleWindow.y ) );
 		PreferenceDialogParameters.stringMonitor[3] = new IupString( Integer.toString( GLOBAL.consoleWindow.w ) );
 		PreferenceDialogParameters.stringMonitor[4] = new IupString( Integer.toString( GLOBAL.consoleWindow.h ) );
+		*/
+		IupSetStrAttribute( textMonitorID, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.id + 1 ) ) );
+		IupSetStrAttribute( textConsoleX, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.x ) ) );
+		IupSetStrAttribute( textConsoleY, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.y ) ) );
+		IupSetStrAttribute( textConsoleW, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.w ) ) );
+		IupSetStrAttribute( textConsoleH, "VALUE", toStringz( Integer.toString( GLOBAL.consoleWindow.h ) ) );
 		
-		IupSetAttribute( textMonitorID, "VALUE", PreferenceDialogParameters.stringMonitor[0].toCString );
-		IupSetAttribute( textConsoleX, "VALUE", PreferenceDialogParameters.stringMonitor[1].toCString );
-		IupSetAttribute( textConsoleY, "VALUE", PreferenceDialogParameters.stringMonitor[2].toCString );
-		IupSetAttribute( textConsoleW, "VALUE", PreferenceDialogParameters.stringMonitor[3].toCString );
-		IupSetAttribute( textConsoleH, "VALUE", PreferenceDialogParameters.stringMonitor[4].toCString );
-
 		IupSetAttribute( textMonitorID, "SIZE", "20x" );
 		IupSetAttribute( textConsoleX, "SIZE", "20x" );
 		IupSetAttribute( textConsoleY, "SIZE", "20x" );
@@ -250,10 +246,9 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* labelMaxHeight = IupLabel( toStringz( GLOBAL.languageItems["autocmaxheight"].toDString ~ ":" ) );
 		IupSetAttributes( labelMaxHeight, "SIZE=120x12,ALIGNMENT=ARIGHT:ACENTER" );
 		
-		PreferenceDialogParameters.stringMaxHeight = new IupString( Integer.toString( GLOBAL.autoCMaxHeight ) );
 		Ihandle* textMaxHeight = IupText( null );
 		IupSetAttribute( textMaxHeight, "SIZE", "56x12" );
-		IupSetAttribute( textMaxHeight, "VALUE", PreferenceDialogParameters.stringMaxHeight.toCString );
+		IupSetStrAttribute( textMaxHeight, "VALUE", toStringz( Integer.toString( GLOBAL.autoCMaxHeight ) ) );
 		IupSetHandle( "textMaxHeight", textMaxHeight );
 
 		Ihandle* hBoxUseParser = IupHbox( toggleUseParser, IupFill, labelMaxHeight, textMaxHeight, null );
@@ -264,11 +259,10 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* labelTrigger = IupLabel( toStringz( GLOBAL.languageItems["trigger"].toDString ~ ":" ) );
 		IupSetAttributes( labelTrigger, "SIZE=120x12" );
 		
-		PreferenceDialogParameters.stringTrigger = new IupString( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) );
 		Ihandle* textTrigger = IupText( null );
 		IupSetAttribute( textTrigger, "SIZE", "30x12" );
 		IupSetAttribute( textTrigger, "TIP", GLOBAL.languageItems["triggertip"].toCString );
-		IupSetAttribute( textTrigger, "VALUE", PreferenceDialogParameters.stringTrigger.toCString );
+		IupSetStrAttribute( textTrigger, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
 		IupSetHandle( "textTrigger", textTrigger );
 		
 		version(FBIDE)
@@ -276,11 +270,10 @@ class CPreferenceDialog : CBaseDialog
 			Ihandle* labelIncludeLevel = IupLabel( toStringz( GLOBAL.languageItems["includelevel"].toDString ~ ":" ) );
 			IupSetAttributes( labelIncludeLevel, "SIZE=120x12,GAP=0" );
 
-			PreferenceDialogParameters.stringLevel = new IupString( Integer.toString( GLOBAL.includeLevel ) );
 			Ihandle* textIncludeLevel = IupText( null );
 			IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
 			IupSetAttribute( textIncludeLevel, "TIP", GLOBAL.languageItems["includeleveltip"].toCString );
-			IupSetAttribute( textIncludeLevel, "VALUE", PreferenceDialogParameters.stringLevel.toCString );
+			IupSetStrAttribute( textIncludeLevel, "VALUE", toStringz( Integer.toString( GLOBAL.includeLevel ) ) );
 			IupSetHandle( "textIncludeLevel", textIncludeLevel );
 		}
 
@@ -542,35 +535,31 @@ class CPreferenceDialog : CBaseDialog
 		IupSetHandle( "toggleSaveAllModified", toggleSaveAllModified );
 		
 		
-		PreferenceDialogParameters.stringCharSymbol = new IupString( GLOBAL.editorSetting00.ControlCharSymbol );
 		Ihandle* labelSetControlCharSymbol = IupLabel( toStringz( GLOBAL.languageItems["controlcharsymbol"].toDString ~ ":" ) );
 		Ihandle* textSetControlCharSymbol = IupText( null );
-		IupSetAttribute( textSetControlCharSymbol, "VALUE", PreferenceDialogParameters.stringCharSymbol.toCString );
+		IupSetStrAttribute( textSetControlCharSymbol, "VALUE", toStringz( GLOBAL.editorSetting00.ControlCharSymbol ) );
 		IupSetHandle( "textSetControlCharSymbol", textSetControlCharSymbol );
 		Ihandle* hBoxControlChar = IupHbox( labelSetControlCharSymbol, textSetControlCharSymbol, null );
 		IupSetAttribute( hBoxControlChar, "ALIGNMENT", "ACENTER" );
 		
-		PreferenceDialogParameters.stringTabWidth = new IupString( GLOBAL.editorSetting00.TabWidth );
 		Ihandle* labelTabWidth = IupLabel( toStringz( GLOBAL.languageItems["tabwidth"].toDString ~ ":" ) );
 		Ihandle* textTabWidth = IupText( null );
-		IupSetAttribute( textTabWidth, "VALUE", PreferenceDialogParameters.stringTabWidth.toCString );
+		IupSetStrAttribute( textTabWidth, "VALUE", toStringz( GLOBAL.editorSetting00.TabWidth ) );
 		IupSetHandle( "textTabWidth", textTabWidth );
 		Ihandle* hBoxTab = IupHbox( labelTabWidth, textTabWidth, null );
 		IupSetAttribute( hBoxTab, "ALIGNMENT", "ACENTER" );
 		
-		PreferenceDialogParameters.stringColumnEdge = new IupString( GLOBAL.editorSetting00.ColumnEdge );
 		Ihandle* labelColumnEdge = IupLabel( toStringz( GLOBAL.languageItems["columnedge"].toDString ~ ":" ) );
 		Ihandle* textColumnEdge = IupText( null );
-		IupSetAttribute( textColumnEdge, "VALUE", PreferenceDialogParameters.stringColumnEdge.toCString );
+		IupSetStrAttribute( textColumnEdge, "VALUE", toStringz( GLOBAL.editorSetting00.ColumnEdge ) );
 		IupSetAttribute( textColumnEdge, "TIP", GLOBAL.languageItems["triggertip"].toCString );
 		IupSetHandle( "textColumnEdge", textColumnEdge );
 		Ihandle* hBoxColumn = IupHbox( labelColumnEdge, textColumnEdge, null );
 		IupSetAttribute( hBoxColumn, "ALIGNMENT", "ACENTER" );
 
-		PreferenceDialogParameters.stringBarSize = new IupString( GLOBAL.editorSetting01.BarSize );
 		Ihandle* labelBarsize = IupLabel( toStringz( GLOBAL.languageItems["barsize"].toDString ~ ":" ) );
 		Ihandle* textBarSize = IupText( null );
-		IupSetAttribute( textBarSize, "VALUE", PreferenceDialogParameters.stringBarSize.toCString );
+		IupSetStrAttribute( textBarSize, "VALUE", toStringz( GLOBAL.editorSetting01.BarSize ) );
 		IupSetAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
 		IupSetHandle( "textBarSize", textBarSize );
 		Ihandle* hBoxBarSize = IupHbox( labelBarsize, textBarSize, null );
@@ -1006,12 +995,12 @@ class CPreferenceDialog : CBaseDialog
 		version(Windows)
 		{
 			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0" );
-			IupSetAttribute( textAlpha, "SPINVALUE", GLOBAL.editColor.selAlpha.toCString );
+			IupSetStrAttribute( textAlpha, "SPINVALUE", GLOBAL.editColor.selAlpha.toCString );
 		}
 		else
 		{
 			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0" );
-			IupSetAttribute( textAlpha, "VALUE", GLOBAL.editColor.selAlpha.toCString );
+			IupSetStrAttribute( textAlpha, "VALUE", GLOBAL.editColor.selAlpha.toCString );
 		}
 		IupSetAttribute( textAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
 		IupSetHandle( "textAlpha", textAlpha );
@@ -1046,12 +1035,12 @@ class CPreferenceDialog : CBaseDialog
 		version(Windows)
 		{
 			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0" );
-			IupSetAttribute( textIndicatorAlpha, "SPINVALUE", GLOBAL.editColor.currentWordAlpha.toCString );
+			IupSetStrAttribute( textIndicatorAlpha, "SPINVALUE", GLOBAL.editColor.currentWordAlpha.toCString );
 		}
 		else
 		{
 			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0" );
-			IupSetAttribute( textIndicatorAlpha, "VALUE", GLOBAL.editColor.currentWordAlpha.toCString );
+			IupSetStrAttribute( textIndicatorAlpha, "VALUE", GLOBAL.editColor.currentWordAlpha.toCString );
 		}
 		//IupSetAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
 		IupSetHandle( "textIndicatorAlpha", textIndicatorAlpha );
@@ -1889,9 +1878,6 @@ class CPreferenceDialog : CBaseDialog
 		
 		IupSetHandle( "shortCutList", null );
 		+/
-		
-		for( int i = 0; i < 15; ++ i )
-			if( PreferenceDialogParameters._stringOfLabel[i] !is null ) delete PreferenceDialogParameters._stringOfLabel[i];
 	}
 	
 	char[] show( int x, int y )
@@ -2010,7 +1996,7 @@ extern(C) // Callback for CPreferenceDialog
 			
 			
 
-			
+			/*
 			IupSetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE", PreferenceDialogParameters.stringCharSymbol << IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) );
 			GLOBAL.editorSetting00.ControlCharSymbol		= PreferenceDialogParameters.stringCharSymbol.toDString;
 			
@@ -2022,18 +2008,22 @@ extern(C) // Callback for CPreferenceDialog
 			
 			IupSetAttribute( IupGetHandle( "textBarSize" ), "VALUE", PreferenceDialogParameters.stringBarSize << IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) );
 			GLOBAL.editorSetting01.BarSize				= PreferenceDialogParameters.stringBarSize.toDString;
+			*/
+			GLOBAL.editorSetting00.ControlCharSymbol	= fromStringz( IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) ).dup;
+			GLOBAL.editorSetting00.TabWidth				= fromStringz( IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" ) ).dup;
+			GLOBAL.editorSetting00.ColumnEdge			= fromStringz( IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" ) ).dup;
+			GLOBAL.editorSetting01.BarSize				= fromStringz( IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) ).dup;
+			
 			int _barSize = Integer.atoi( GLOBAL.editorSetting01.BarSize );
 			if( _barSize < 2 )
 			{
 				GLOBAL.editorSetting01.BarSize = "2";
-				IupSetAttribute( IupGetHandle( "textBarSize" ), "VALUE", "2" );
-				IupSetAttribute( IupGetHandle( "textBarSize" ), "VALUE", PreferenceDialogParameters.stringBarSize << IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) );
+				IupSetStrAttribute( IupGetHandle( "textBarSize" ), "VALUE", "2" );
 			}
 			if( _barSize > 5 )
 			{
 				GLOBAL.editorSetting01.BarSize = "5";
-				IupSetAttribute( IupGetHandle( "textBarSize" ), "VALUE", "5" );
-				IupSetAttribute( IupGetHandle( "textBarSize" ), "VALUE", PreferenceDialogParameters.stringBarSize << IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) );
+				IupSetStrAttribute( IupGetHandle( "textBarSize" ), "VALUE", "5" );
 			}
 
 			
@@ -2164,16 +2154,8 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.autoCompletionTriggerWordCount		= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ) );
 			GLOBAL.autoCMaxHeight						= Integer.atoi( fromStringz( IupGetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE" ) ) );
 			GLOBAL.statusBar.setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
+			version(FBIDE) GLOBAL.includeLevel			= Integer.toInt( fromStringz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) );
 			
-			version(FBIDE)
-			{
-				GLOBAL.includeLevel			= Integer.toInt( fromStringz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) );
-				IupSetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE", PreferenceDialogParameters.stringLevel << IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) );
-			}
-			
-			IupSetAttribute( IupGetHandle( "textTrigger" ), "VALUE", PreferenceDialogParameters.stringTrigger << IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) );
-			IupSetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE", PreferenceDialogParameters.stringMaxHeight << IupGetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE" ) );
-
 			//if( GLOBAL.includeLevel < 0 ) GLOBAL.includeLevel = 0;
 
 
@@ -2205,11 +2187,13 @@ extern(C) // Callback for CPreferenceDialog
 			}
 			
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;
+				if( IupGetHandle( "menuUseAnnotation" ) != null ) IupSetAttribute( IupGetHandle( "menuUseAnnotation" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) );
 			GLOBAL.compilerWindow						= fromStringz( IupGetAttribute( IupGetHandle( "toggleShowResultWindow" ), "VALUE" ) ).dup;
 			GLOBAL.compilerSFX							= fromStringz( IupGetAttribute( IupGetHandle( "toggleSFX" ), "VALUE" ) ).dup;
 			
 			GLOBAL.delExistExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleDelPrevEXE" ), "VALUE" ) ).dup;
 			GLOBAL.consoleExe							= fromStringz( IupGetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE" ) ).dup;
+				if( IupGetHandle( "menuUseConsoleApp" ) != null ) IupSetAttribute( IupGetHandle( "menuUseConsoleApp" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE" ) );
 			GLOBAL.toggleCompileAtBackThread			= fromStringz( IupGetAttribute( IupGetHandle( "toggleCompileAtBackThread" ), "VALUE" ) ).dup;
 			
 			
@@ -2222,34 +2206,34 @@ extern(C) // Callback for CPreferenceDialog
 					if( GLOBAL.consoleWindow.id < 0 || GLOBAL.consoleWindow.id >= GLOBAL.monitors.length )
 					{
 						GLOBAL.consoleWindow.id = 0;
-						IupSetAttribute( _mHandle, "VALUE", "1" );
+						IupSetStrAttribute( _mHandle, "VALUE", "1" );
 					}
 					
-					IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[0] << IupGetAttribute( _mHandle, "VALUE" ) );
+					//IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[0] << IupGetAttribute( _mHandle, "VALUE" ) );
 				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleX" );
 				if( _mHandle != null )
 				{
 					GLOBAL.consoleWindow.x = Integer.atoi( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
-					IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[1] << IupGetAttribute( _mHandle, "VALUE" ) );
+					//IupSetStrAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[1] );
 				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleY" );
 				if( _mHandle != null )
 				{
 					GLOBAL.consoleWindow.y = Integer.atoi( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
-					IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[2] << IupGetAttribute( _mHandle, "VALUE" ) );
+					//IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[2] << IupGetAttribute( _mHandle, "VALUE" ) );
 				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleW" );
 				if( _mHandle != null )
 				{
 					GLOBAL.consoleWindow.w = Integer.atoi( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
-					IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[3] << IupGetAttribute( _mHandle, "VALUE" ) );
-					}
+					//IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[3] << IupGetAttribute( _mHandle, "VALUE" ) );
+				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleH" );
 				if( _mHandle != null )
 				{
 					GLOBAL.consoleWindow.h = Integer.atoi( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
-					IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[4] << IupGetAttribute( _mHandle, "VALUE" ) );
+					//IupSetAttribute( _mHandle, "VALUE", PreferenceDialogParameters.stringMonitor[4] << IupGetAttribute( _mHandle, "VALUE" ) );
 				}
 			}
 			catch( Exception e )
@@ -2265,7 +2249,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
 			
 			GLOBAL.showFunctionTitle					= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
-			//GLOBAL.widthFunctionTitle					= IupGetAttribute( IupGetHandle( "textFunctionTitle" ), "VALUE" );
+				if( IupGetHandle( "menuFunctionTitle" ) != null ) IupSetAttribute( IupGetHandle( "menuFunctionTitle" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) );
 			
 			
 			GLOBAL.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;

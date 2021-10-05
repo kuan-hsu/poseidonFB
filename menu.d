@@ -332,11 +332,11 @@ void createMenu()
 	if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( FunctionTitle, "VALUE", "ON" ); else IupSetAttribute( FunctionTitle, "VALUE", "OFF" );
 	IupSetAttribute( FunctionTitle, "AUTOTOGGLE", "YES" );
 	IupSetAttribute( FunctionTitle, "NAME", "function_title" );
-	IupSetHandle( "FunctionTitle", FunctionTitle );	
+	IupSetHandle( "menuFunctionTitle", FunctionTitle );	
 	IupSetCallback( FunctionTitle, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.showFunctionTitle == "ON" ) GLOBAL.showFunctionTitle = "OFF"; else GLOBAL.showFunctionTitle = "ON";
-		if( IupGetHandle( "FunctionTitle" ) != null ) IupSetAttribute( IupGetHandle( "FunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
+		if( IupGetHandle( "toggleFunctionTitle" ) != null ) IupSetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
 
 		if( GLOBAL.showFunctionTitle == "ON" )
 		{
@@ -705,7 +705,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.476)\nBy Kuan Hsu (Taiwan)\n2021.10.03" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.477)\nBy Kuan Hsu (Taiwan)\n2021.10.05" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.066)\nBy Kuan Hsu (Taiwan)\n2021.07.24" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});
@@ -2038,7 +2038,7 @@ extern(C)
 					{
 						if( tools.lowerCase( manualPath.ext ) == "chm" )
 						{
-							version(Windows) IupExecute( toStringz( splitWords[1] ), "" ); else IupExecute( "kchmviewer", toStringz( splitWords[1] ) );
+							version(Windows) IupExecute( toStringz( splitWords[1] ), "" ); else IupExecute( "./CHMVIEW", toStringz( splitWords[1] ) );
 						}
 					}
 					break;

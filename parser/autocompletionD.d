@@ -14,7 +14,7 @@ version(DIDE)
 		import parser.ast;
 		import actionManager;
 
-		import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf;
+		import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf, Path = tango.io.Path;
 		import tango.io.FilePath, tango.sys.Environment;
 		import tango.io.Stdout;
 		import tango.core.Thread;
@@ -1005,6 +1005,11 @@ version(DIDE)
 			if( importName.length )
 			{
 				importName = Util.replace( importName.dup, '.', '/' );
+				
+				if( Path.isFile( _cwd ) ) _cwd = Path.parent( _cwd );
+				if( _cwd.length )
+					if( _cwd[$-1] != '/' ) _cwd ~= "/";
+					
 				char[] importFullPath = _cwd ~ importName;
 				
 				//IupMessage( "", toStringz( importName ~"\n" ~ importFullPath ) );
@@ -1021,7 +1026,8 @@ version(DIDE)
 				
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
-				char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
+				//char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
+				char[] prjDir = GLOBAL.activeProjectPath;
 				if( prjDir.length )
 				{
 					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \

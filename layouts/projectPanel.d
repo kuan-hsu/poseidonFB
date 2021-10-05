@@ -510,6 +510,7 @@ public:
 			// PreLoad, Load all files in project parser
 			if( GLOBAL.enableParser == "ON" && GLOBAL.preParseLevel > 0 )
 			{
+				GLOBAL.activeProjectPath = setupDir;
 				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 			
@@ -533,7 +534,7 @@ public:
 						if( GLOBAL.outlineTree.loadParser( source ) !is null )
 						{
 							parsedFiles ~= source;
-							GLOBAL.messagePanel.printOutputPanel( "  [ " ~ source ~ " ]...Parsed" );
+							GLOBAL.messagePanel.printOutputPanel( "  +[ " ~ source ~ " ]...Parsed" );
 							//Stdout( "1: " ~ source ).newline;
 						}
 						/*
@@ -673,13 +674,13 @@ public:
 								if( _node.type.length )
 								{
 									//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
-									includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.name );
+									includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.type );
 									if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
 								}
 								else
 								{
 									//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
-									includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+									includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
 									if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
 								}
 							}
@@ -690,7 +691,7 @@ public:
 		}
 		
 		char[] plusSign;
-		for( int i = 0; i < level; ++ i)
+		for( int i = 0; i <= level; ++ i)
 			plusSign ~= "+";
 		
 		foreach( char[] source; beParsedFiles )

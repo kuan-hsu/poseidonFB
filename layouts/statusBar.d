@@ -9,7 +9,7 @@ class CStatusBar
 {
 	private:
 
-	import		Integer = tango.text.convert.Integer;
+	import		Integer = tango.text.convert.Integer, Util = tango.text.Util;
 	
 	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection, codecomplete, findMessage;
 	IupString	_name, _lc, _ins, _eol, _en, tipString, findString;
@@ -135,6 +135,7 @@ class CStatusBar
 	{
 		if( !bFull )
 		{
+			if( Util.trim( name ).length == 0 ) GLOBAL.activeProjectPath = "";
 			_name = name;
 			IupSetAttribute( prjName, "TITLE", _name.toCString );
 		}
@@ -158,6 +159,7 @@ class CStatusBar
 			
 			_name = GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString ~ ( focusName.length ? " [" ~ focusName ~ "]" : ""  );
 			IupSetAttribute( prjName, "TITLE", _name.toCString );
+			if( Util.trim( _name.toDString ).length == 0 ) GLOBAL.activeProjectPath = "";
 		}
 	}
 	

@@ -634,8 +634,8 @@ version(FBIDE)
 
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
-				char[] prjDir = actionManager.ProjectAction.fileInProject( originalFullPath );
-
+				//char[] prjDir = actionManager.ProjectAction.fileInProject( originalFullPath );
+				char[] prjDir = GLOBAL.activeProjectPath;
 				if( prjDir.length )
 				{
 					//Stdout( "Project Dir: " ~ prjDir ).newline;
