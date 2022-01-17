@@ -843,7 +843,11 @@ version(FBIDE)
 							parseToken( TOK.Topenparen );
 							while( token().tok != TOK.Tcomma && token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 							{
-								_type ~= token().identifier;								
+								if( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+									_type ~= "*";
+								else
+									_type ~= token().identifier;
+									
 								parseToken();
 							}
 						}
@@ -1438,6 +1442,21 @@ version(FBIDE)
 						activeASTnode = activeASTnode.addChild( _name, _kind, _protection, null, null, _lineNum );
 
 						if( token().tok == TOK.Topenparen ) _param = parseParam( bDeclare );
+						
+						// Constructor (Module) 
+						if( _kind == B_SUB )
+						{
+							if( token().tok == TOK.Tconstructor )
+							{
+								activeASTnode.base = "ctor";
+								parseToken( TOK.Tconstructor );
+							}
+							else if( token().tok == TOK.Tdestructor )
+							{
+								activeASTnode.base = "dtor";
+								parseToken( TOK.Tdestructor );
+							}
+						}
 
 						// New
 						if( token().tok == TOK.Tbyref ) 

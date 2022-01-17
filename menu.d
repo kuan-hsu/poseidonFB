@@ -705,7 +705,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.477)\nBy Kuan Hsu (Taiwan)\n2021.10.05" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.478)\nBy Kuan Hsu (Taiwan)\n2022.01.17" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.066)\nBy Kuan Hsu (Taiwan)\n2021.07.24" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});

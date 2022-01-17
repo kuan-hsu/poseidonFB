@@ -117,10 +117,20 @@ class COutline
 					break;
 
 				case B_SUB:
-					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
-					if( _node.getChildrenCount > 0 )
+					if( _node.base == "ctor" )
 					{
-						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+						if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_ctor" ) );
+					}
+					else if( _node.base == "dtor" )
+					{
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+						if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_dtor" ) );
+					}
+					else
+					{
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
+						if( _node.getChildrenCount > 0 ) IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, GLOBAL.cString.convert( "IUP_sub" ~ prot ) );
 					}
 					break;
 

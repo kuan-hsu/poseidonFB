@@ -518,7 +518,7 @@ public:
 				//ParseThread[]	pths;
 				//scope 			f = new FilePath;
 				
-				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Files Pre-Loding...", true );
+				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Files Pre-Loading...", true );
 				foreach( char[] source; GLOBAL.projectManager[setupDir].sources ~ GLOBAL.projectManager[setupDir].includes ~ GLOBAL.projectManager[setupDir].misc ~ GLOBAL.projectManager[setupDir].others )
 				{
 					/*
@@ -563,7 +563,7 @@ public:
 				for( int i = 1; i < GLOBAL.preParseLevel; ++i )
 					parsedFiles = preParseFiles( parsedFiles, i );
 				
-				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loding Finished." );
+				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
 				GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
 			}
 			

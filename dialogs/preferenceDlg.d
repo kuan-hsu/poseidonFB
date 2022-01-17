@@ -947,63 +947,55 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* btnCaretLine = IupFlatButton( null );
 		IupSetStrAttribute( btnCaretLine, "FGCOLOR", GLOBAL.editColor.caretLine.toCString );
 		IupSetAttributes( btnCaretLine, "SIZE=16x8,NAME=Color-btnCaretLine" );
-		//IupSetHandle( "btnCaretLine", btnCaretLine );
 		IupSetCallback( btnCaretLine, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelCursor = IupLabel( toStringz( GLOBAL.languageItems["cursor"].toDString ~ ":" ) );
 		Ihandle* btnCursor = IupFlatButton( null );
 		IupSetStrAttribute( btnCursor, "FGCOLOR", GLOBAL.editColor.cursor.toCString );
 		IupSetAttributes( btnCursor, "SIZE=16x8,NAME=Color-btnCursor" );
-		//IupSetHandle( "btnCursor", btnCursor );
 		IupSetCallback( btnCursor, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelSelectFore = IupLabel( toStringz( GLOBAL.languageItems["sel"].toDString ~ ":" ) );
 		Ihandle* btnSelectFore = IupFlatButton( null );
 		IupSetStrAttribute( btnSelectFore, "FGCOLOR", GLOBAL.editColor.selectionFore.toCString );
 		IupSetAttributes( btnSelectFore, "SIZE=16x8,NAME=Color-btnSelectFore" );
-		//IupSetHandle( "btnSelectFore", btnSelectFore );
 		IupSetCallback( btnSelectFore, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* btnSelectBack = IupFlatButton( null );
 		IupSetStrAttribute( btnSelectBack, "FGCOLOR", GLOBAL.editColor.selectionBack.toCString );
 		IupSetAttributes( btnSelectBack, "SIZE=16x8,NAME=Color-btnSelectBack" );
-		//IupSetHandle( "btnSelectBack", btnSelectBack );
 		IupSetCallback( btnSelectBack, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelLinenumFore = IupLabel( toStringz( GLOBAL.languageItems["ln"].toDString ~ ":" ) );
 		Ihandle* btnLinenumFore = IupFlatButton( null );
 		IupSetStrAttribute( btnLinenumFore, "FGCOLOR", GLOBAL.editColor.linenumFore.toCString );
 		IupSetAttributes( btnLinenumFore, "SIZE=16x8,NAME=Color-btnLinenumFore" );
-		//IupSetHandle( "btnLinenumFore", btnLinenumFore );
 		IupSetCallback( btnLinenumFore, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* btnLinenumBack = IupFlatButton( null );
 		IupSetStrAttribute( btnLinenumBack, "FGCOLOR", GLOBAL.editColor.linenumBack.toCString );
 		IupSetAttributes( btnLinenumBack, "SIZE=16x8,NAME=Color-btnLinenumBack" );
-		//IupSetHandle( "btnLinenumBack", btnLinenumBack );
 		IupSetCallback( btnLinenumBack, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelFoldingColor = IupLabel( toStringz( GLOBAL.languageItems["foldcolor"].toDString ~ ":" ) );
 		Ihandle* btnFoldingColor = IupFlatButton( null );
 		IupSetStrAttribute( btnFoldingColor, "FGCOLOR", GLOBAL.editColor.fold.toCString );
 		IupSetAttributes( btnFoldingColor, "SIZE=16x8,NAME=Color-btnFoldingColor" );
-		//IupSetHandle( "btnFoldingColor", btnFoldingColor );
 		IupSetCallback( btnFoldingColor, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelSelAlpha = IupLabel( toStringz( GLOBAL.languageItems["selalpha"].toDString ~ ":" ) );
 		Ihandle* textAlpha = IupText( null );
 		version(Windows)
 		{
-			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0" );
+			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0,NAME=textAlpha" );
 			IupSetStrAttribute( textAlpha, "SPINVALUE", GLOBAL.editColor.selAlpha.toCString );
 		}
 		else
 		{
-			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0" );
+			IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0,NAME=textAlpha" );
 			IupSetStrAttribute( textAlpha, "VALUE", GLOBAL.editColor.selAlpha.toCString );
 		}
 		IupSetAttribute( textAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
-		IupSetHandle( "textAlpha", textAlpha );
 		
 		
 		// 2017.1.14
@@ -1011,14 +1003,12 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* btnPrjTitle = IupFlatButton( null );
 		IupSetStrAttribute( btnPrjTitle, "FGCOLOR", GLOBAL.editColor.prjTitle.toCString );
 		IupSetAttributes( btnPrjTitle, "SIZE=16x8,NAME=Color-btnPrjTitle" );
-		//IupSetHandle( "btnPrjTitle", btnPrjTitle );
 		IupSetCallback( btnPrjTitle, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );		
 
 		Ihandle* labelSourceTypeFolder = IupLabel( toStringz( GLOBAL.languageItems["sourcefolder"].toDString ~ ":" ) );
 		Ihandle* btnSourceTypeFolder = IupFlatButton( null );
 		IupSetStrAttribute( btnSourceTypeFolder, "FGCOLOR", GLOBAL.editColor.prjSourceType.toCString );
 		IupSetAttributes( btnSourceTypeFolder, "SIZE=16x8,NAME=Color-btnSourceTypeFolder" );
-		//IupSetHandle( "btnSourceTypeFolder", btnSourceTypeFolder );
 		IupSetCallback( btnSourceTypeFolder, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );		
 
 
@@ -1027,23 +1017,21 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* btnIndicator = IupFlatButton( null );
 		IupSetStrAttribute( btnIndicator, "FGCOLOR", GLOBAL.editColor.currentWord.toCString );
 		IupSetAttributes( btnIndicator, "SIZE=16x8,NAME=Color-btnIndicator" );
-		//IupSetHandle( "btnIndicator", btnIndicator );
 		IupSetCallback( btnIndicator, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		Ihandle* labelIndicatorAlpha = IupLabel( toStringz( GLOBAL.languageItems["hlcurrentwordalpha"].toDString ~ ":" ) );
 		Ihandle* textIndicatorAlpha = IupText( null );
 		version(Windows)
 		{
-			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0" );
+			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=0,NAME=textIndicatorAlpha" );
 			IupSetStrAttribute( textIndicatorAlpha, "SPINVALUE", GLOBAL.editColor.currentWordAlpha.toCString );
 		}
 		else
 		{
-			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0" );
+			IupSetAttributes( textIndicatorAlpha, "SIZE=24x10,MARGIN=0x0,NAME=textIndicatorAlpha" );
 			IupSetStrAttribute( textIndicatorAlpha, "VALUE", GLOBAL.editColor.currentWordAlpha.toCString );
 		}
-		//IupSetAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
-		IupSetHandle( "textIndicatorAlpha", textIndicatorAlpha );
+		IupSetAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
 
 
 
@@ -1654,64 +1642,62 @@ class CPreferenceDialog : CBaseDialog
 		
 
 		char[] doc = "[color]\n";
-			
-		// Editor
-		doc ~= setINILineData( "caretLine", fromStringz( IupGetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "cursor", fromStringz( IupGetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "selectionFore", fromStringz( IupGetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "selectionBack", fromStringz( IupGetAttribute( IupGetHandle( "btnSelectBack" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "linenumFore", fromStringz( IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "linenumBack", fromStringz( IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "fold", fromStringz( IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "FGCOLOR" ) ).dup );
 		
-		doc ~= setINILineData( "selAlpha", fromStringz( IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" ) ).dup );
-		doc ~= setINILineData( "braceFore", fromStringz( IupGetAttribute( IupGetHandle( "btnBrace_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "braceBack", fromStringz( IupGetAttribute( IupGetHandle( "btnBrace_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "errorFore", fromStringz( IupGetAttribute( IupGetHandle( "btnError_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "errorBack", fromStringz( IupGetAttribute( IupGetHandle( "btnError_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "warningFore", fromStringz( IupGetAttribute( IupGetHandle( "btnWarning_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "warningBack", fromStringz( IupGetAttribute( IupGetHandle( "btnWarning_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "caretLine", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCaretLine" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "cursor", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCursor" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "selectionFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectFore" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "selectionBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectBack" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "linenumFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLinenumFore" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "linenumBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLinenumBack" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "fold", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "selAlpha", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "VALUE" ) ) );
+		doc ~= setINILineData( "braceFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "braceBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "errorFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnError_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "errorBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnError_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "warningFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "warningBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_BG" ), "FGCOLOR" ) ) );
 		
-		doc ~= setINILineData( "scintillaFore", fromStringz( IupGetAttribute( IupGetHandle( "btn_Scintilla_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "scintillaBack", fromStringz( IupGetAttribute( IupGetHandle( "btn_Scintilla_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "scintillaFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "scintillaBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_BG" ), "FGCOLOR" ) ) );
+
+		doc ~= setINILineData( "SCE_B_COMMENT_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENT_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_COMMENT_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENT_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_NUMBER_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_NUMBER_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_NUMBER_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_NUMBER_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_STRING_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_STRING_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_STRING_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_STRING_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_PREPROCESSOR_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_PREPROCESSOR_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_OPERATOR_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_OPERATOR_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_IDENTIFIER_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_IDENTIFIER_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENTBLOCK_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENTBLOCK_BG" ), "FGCOLOR" ) ) );
 		
-		doc ~= setINILineData( "SCE_B_COMMENT_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_COMMENT_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENT_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_NUMBER_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_NUMBER_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_NUMBER_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_STRING_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_STRING_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_STRING_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_PREPROCESSOR_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_OPERATOR_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_OPERATOR_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_OPERATOR_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_IDENTIFIER_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_IDENTIFIER_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_IDENTIFIER_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Fore", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Back", fromStringz( IupGetAttribute( IupGetHandle( "btnSCE_B_COMMENTBLOCK_BG" ), "FGCOLOR" ) ).dup );
+		doc ~= setINILineData( "projectFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrj_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "projectBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrj_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outlineFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutline_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outlineBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutline_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "filelistFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFilelist_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "filelistBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFilelist_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outputFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutput_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outputBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutput_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "searchFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSearch_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "searchBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSearch_BG" ), "FGCOLOR" ) ) );
 		
-		doc ~= setINILineData( "projectFore", fromStringz( IupGetAttribute( IupGetHandle( "btnPrj_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "projectBack", fromStringz( IupGetAttribute( IupGetHandle( "btnPrj_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "outlineFore", fromStringz( IupGetAttribute( IupGetHandle( "btnOutline_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "outlineBack", fromStringz( IupGetAttribute( IupGetHandle( "btnOutline_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "filelistFore", fromStringz( IupGetAttribute( IupGetHandle( "btnFilelist_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "filelistBack", fromStringz( IupGetAttribute( IupGetHandle( "btnFilelist_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "outputFore", fromStringz( IupGetAttribute( IupGetHandle( "btnOutput_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "outputBack", fromStringz( IupGetAttribute( IupGetHandle( "btnOutput_BG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "searchFore", fromStringz( IupGetAttribute( IupGetHandle( "btnSearch_FG" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "searchBack", fromStringz( IupGetAttribute( IupGetHandle( "btnSearch_BG" ), "FGCOLOR" ) ).dup );
-		
-		doc ~= setINILineData( "prjTitle", fromStringz( IupGetAttribute( IupGetHandle( "btnPrjTitle" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "prjSourceType", fromStringz( IupGetAttribute( IupGetHandle( "btnSourceTypeFolder" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "keyword0", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "keyword1", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "keyword2", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "keyword3", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "currentword", fromStringz( IupGetAttribute( IupGetHandle( "btnIndicator" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "currentwordAlpha", fromStringz( IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE" ) ).dup );
-		doc ~= setINILineData( "keyword4", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR" ) ).dup );
-		doc ~= setINILineData( "keyword5", fromStringz( IupGetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR" ) ).dup );
-		
+		doc ~= setINILineData( "prjTitle", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrjTitle" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "prjSourceType", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSourceTypeFolder" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword0", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord0Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword1", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord1Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword2", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord2Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword3", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord3Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "currentword", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "currentwordAlpha", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "VALUE" ) ) );
+		doc ~= setINILineData( "keyword4", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword5", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR" ) ) );
+	
 		
 		if( !actionManager.FileAction.saveFile( templatePath ~ "/" ~ templateName ~ ".ini", doc ) ) throw new Exception( "Save File Error" );
 	}	
@@ -1754,130 +1740,6 @@ class CPreferenceDialog : CBaseDialog
 
 	~this()
 	{
-		/+
-		IupSetHandle( "compilerPath_Handle", null );
-		IupSetHandle( "debuggerPath_Handle", null );
-		IupSetHandle( "textTerminalPath", null );
-		IupSetHandle( "defaultOption_Handle", null );
-		IupSetHandle( "textTrigger", null );
-		IupSetHandle( "textIncludeLevel", null );
-		IupSetHandle( "toggleFunctionTitle", null );
-		IupSetHandle( "toggleKeywordComplete", null );
-		IupSetHandle( "toggleIncludeComplete", null );
-		IupSetHandle( "toggleUseParser", null );
-		IupSetHandle( "toggleWithParams", null );
-		IupSetHandle( "toggleIGNORECASE", null );
-		IupSetHandle( "toggleCASEINSENSITIVE", null );
-		IupSetHandle( "toggleSHOWLISTTYPE", null );
-		IupSetHandle( "toggleSHOWALLMEMBER", null );
-		IupSetHandle( "toggleDWELL", null );
-		IupSetHandle( "toggleOverWrite", null );
-		IupSetHandle( "toggleBackThread", null );
-		IupSetHandle( "textCompleteDalay", null );
-		IupSetHandle( "toggleLiveNone", null );
-		IupSetHandle( "toggleLiveLight", null );
-		IupSetHandle( "toggleLiveFull", null );		
-		IupSetHandle( "toggleUpdateOutline", null );
-	
-		IupSetHandle( "toggleAnnotation", null );
-		IupSetHandle( "toggleShowResultWindow", null );
-		IupSetHandle( "toggleSFX", null );
-		IupSetHandle( "toggleDelPrevEXE", null );
-		IupSetHandle( "toggleConsoleExe", null );
-		IupSetHandle( "toggleCompileAtBackThread", null );
-		
-		IupSetHandle( "toggleDummy", null );
-		
-		
-
-		IupSetHandle( "toggleLineMargin", null );
-		IupSetHandle( "toggleFixedLineMargin", null );
-		IupSetHandle( "toggleBookmarkMargin", null );
-		IupSetHandle( "toggleFoldMargin", null );
-		IupSetHandle( "toggleIndentGuide", null );
-		IupSetHandle( "toggleCaretLine", null );
-		IupSetHandle( "toggleWordWarp", null );
-		IupSetHandle( "toggleTabUseingSpace", null );
-		IupSetHandle( "toggleAutoIndent", null );
-		IupSetHandle( "toggleShowEOL", null );
-		IupSetHandle( "toggleShowSpace", null );
-		version(FBIDE)	IupSetHandle( "toggleAutoEnd", null );
-		IupSetHandle( "toggleAutoClose", null );
-		IupSetHandle( "toggleColorOutline", null );
-		IupSetHandle( "toggleMessage", null );
-		IupSetHandle( "toggleBoldKeyword", null );
-		IupSetHandle( "toggleBraceMatch", null );
-		IupSetHandle( "toggleMultiSelection", null );
-		IupSetHandle( "toggleLoadprev", null );
-		IupSetHandle( "toggleCurrentWord", null );
-		IupSetHandle( "toggleMiddleScroll", null );
-		IupSetHandle( "toggleDocStatus", null );
-		IupSetHandle( "toggleLoadAtBackThread", null );
-		IupSetHandle( "toggleAutoKBLayout", null );
-		IupSetHandle( "toggleQBCase", null );
-		IupSetHandle( "toggleNewDocBOM", null );
-		IupSetHandle( "textSetControlCharSymbol", null );
-		
-		
-		IupSetHandle( "textTabWidth", null );
-		IupSetHandle( "textColumnEdge", null );
-		IupSetHandle( "textBarSize", null );
-
-		IupSetHandle( "radioKeywordCase0", null );
-		IupSetHandle( "radioKeywordCase1", null );
-		IupSetHandle( "radioKeywordCase2", null );
-		IupSetHandle( "radioKeywordCase3", null );
-
-		IupSetHandle( "customFont_0", null );
-		IupSetHandle( "customFont_1", null );
-		IupSetHandle( "customFont_2", null );
-		IupSetHandle( "customFont_3", null );
-		IupSetHandle( "customFont_4", null );
-		IupSetHandle( "customFont_5", null );
-		IupSetHandle( "customFont_6", null );
-		IupSetHandle( "customFont_7", null );
-		IupSetHandle( "customFont_8", null );
-		IupSetHandle( "customFont_9", null );
-		IupSetHandle( "customFont_10", null );
-		IupSetHandle( "customFont_11", null );
-		IupSetHandle( "customFont_12", null );
-
-		IupSetHandle( "btnCaretLine", null );
-		IupSetHandle( "btnCursor", null );
-		IupSetHandle( "btnSelectFore", null );
-		IupSetHandle( "btnSelectBack", null );
-		IupSetHandle( "btnLinenumFore", null );
-		IupSetHandle( "btnLinenumBack", null );
-		IupSetHandle( "btnFoldingColor", null );
-		IupSetHandle( "btnBookmarkColor", null );
-		IupSetHandle( "textAlpha", null );
-		IupSetHandle( "btnIndicator", null );
-		IupSetHandle( "textIndicatorAlpha", null );		
-		
-		IupSetHandle( "btn_Scintilla_FG", null );
-		IupSetHandle( "btn_Scintilla_BG", null );
-		IupSetHandle( "btnSCE_B_COMMENT_FG", null );
-		IupSetHandle( "btnSCE_B_COMMENT_BG", null );
-		IupSetHandle( "btnSCE_B_NUMBER_FG", null );
-		IupSetHandle( "btnSCE_B_NUMBER_BG", null );
-		IupSetHandle( "btnSCE_B_STRING_FG", null );
-		IupSetHandle( "btnSCE_B_STRING_BG", null );
-		IupSetHandle( "btnSCE_B_PREPROCESSOR_FG", null );
-		IupSetHandle( "btnSCE_B_PREPROCESSOR_BG", null );
-		IupSetHandle( "btnSCE_B_OPERATOR_FG", null );
-		IupSetHandle( "btnSCE_B_OPERATOR_BG", null );
-		IupSetHandle( "btnSCE_B_IDENTIFIER_FG", null );
-		IupSetHandle( "btnSCE_B_IDENTIFIER_BG", null );
-		IupSetHandle( "btnSCE_B_COMMENTBLOCK_FG", null );
-		IupSetHandle( "btnSCE_B_COMMENTBLOCK_BG", null );		
-
-		IupSetHandle( "keyWordText0", null );
-		IupSetHandle( "keyWordText1", null );
-		IupSetHandle( "keyWordText2", null );
-		IupSetHandle( "keyWordText3", null );
-		
-		IupSetHandle( "shortCutList", null );
-		+/
 	}
 	
 	char[] show( int x, int y )
@@ -2039,23 +1901,8 @@ extern(C) // Callback for CPreferenceDialog
 				}
 			}
 			
-			/*
-			IupSetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR", GLOBAL.editColor.caretLine << IupGetAttribute( IupGetHandle( "btnCaretLine" ), "FGCOLOR" ) );
-			*/
 			GLOBAL.editColor.caretLine = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCaretLine" ), "FGCOLOR" );
-			
-			/*
-			IupSetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR", GLOBAL.editColor.cursor << IupGetAttribute( IupGetHandle( "btnCursor" ), "FGCOLOR" ) );
-			*/
 			GLOBAL.editColor.cursor = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCursor" ), "FGCOLOR" );
-
-			/*
-			IupSetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR", GLOBAL.editColor.selectionFore << IupGetAttribute( IupGetHandle( "btnSelectFore" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnSelectBack" ), "FGCOLOR", GLOBAL.editColor.selectionBack << IupGetAttribute( IupGetHandle( "btnSelectBack" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnLinenumFore" ), "FGCOLOR", GLOBAL.editColor.linenumFore << IupGetAttribute( IupGetHandle( "btnLinenumFore" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnLinenumBack" ), "FGCOLOR", GLOBAL.editColor.linenumBack << IupGetAttribute( IupGetHandle( "btnLinenumBack" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnFoldingColor" ), "FGCOLOR", GLOBAL.editColor.fold << IupGetAttribute( IupGetHandle( "btnFoldingColor" ), "FGCOLOR" ) );
-			*/
 			GLOBAL.editColor.selectionFore = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectFore" ), "FGCOLOR" );
 			GLOBAL.editColor.selectionBack = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectBack" ), "FGCOLOR" );
 			GLOBAL.editColor.linenumFore = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLinenumFore" ), "FGCOLOR" );
@@ -2063,16 +1910,16 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.fold = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ), "FGCOLOR" );			
 			
 			version(Windows)
-				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE" );
+				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "SPINVALUE" );			
 			else
-				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetHandle( "textAlpha" ), "VALUE" );
+				GLOBAL.editColor.selAlpha				= IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "VALUE" );			
 			
 			GLOBAL.editColor.currentWord = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ), "FGCOLOR" );
 			
 			version(Windows)
-				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE" );
+				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "SPINVALUE" );
 			else
-				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE" );
+				GLOBAL.editColor.currentWordAlpha		= IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "VALUE" );
 
 			GLOBAL.editColor.scintillaFore = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_FG" ), "FGCOLOR" );
 			GLOBAL.editColor.scintillaBack = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_BG" ), "FGCOLOR" );
@@ -2122,15 +1969,6 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.outlineTree.changeColor();
 			GLOBAL.fileListTree.changeColor();
 			
-			// GLOBAL.editColor.keyWord is IupString class
-			/*
-			IupSetAttribute( IupGetHandle( "btnKeyWord0Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[0] << IupGetAttribute( IupGetHandle( "btnKeyWord0Color" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[1] << IupGetAttribute( IupGetHandle( "btnKeyWord1Color" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[2] << IupGetAttribute( IupGetHandle( "btnKeyWord2Color" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[3] << IupGetAttribute( IupGetHandle( "btnKeyWord3Color" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[4] << IupGetAttribute( IupGetHandle( "btnKeyWord4Color" ), "FGCOLOR" ) );
-			IupSetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR", GLOBAL.editColor.keyWord[5] << IupGetAttribute( IupGetHandle( "btnKeyWord5Color" ), "FGCOLOR" ) );
-			*/
 			GLOBAL.editColor.keyWord[0] = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord0Color" ), "FGCOLOR" );
 			GLOBAL.editColor.keyWord[1] = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord1Color" ), "FGCOLOR" );
 			GLOBAL.editColor.keyWord[2] = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord2Color" ), "FGCOLOR" );
@@ -2544,14 +2382,14 @@ extern(C) // Callback for CPreferenceDialog
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ), "FGCOLOR", PreferenceDialogParameters.kbg[6].toCString );				//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ) );
 
 				version(Windows)
-					IupSetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE", PreferenceDialogParameters.kbg[7].toCString );
+					IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "SPINVALUE", PreferenceDialogParameters.kbg[7].toCString );
 				else
-					IupSetAttribute( IupGetHandle( "textAlpha" ), "VALUE", PreferenceDialogParameters.kbg[7].toCString );
+					IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "VALUE", PreferenceDialogParameters.kbg[7].toCString );
 
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_FG" ), "FGCOLOR", PreferenceDialogParameters.kbg[8].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_FG" ) );
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ), "FGCOLOR", PreferenceDialogParameters.kbg[9].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ) );
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnError_FG" ), "FGCOLOR", PreferenceDialogParameters.kbg[10].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnError_FG" ) );
-				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectBack" ), "FGCOLOR", PreferenceDialogParameters.kbg[11].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectBack" ) );
+				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnError_BG" ), "FGCOLOR", PreferenceDialogParameters.kbg[11].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectBack" ) );
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_FG" ), "FGCOLOR", PreferenceDialogParameters.kbg[12].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_FG" ) );
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_BG" ), "FGCOLOR", PreferenceDialogParameters.kbg[13].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_BG" ) );
 
@@ -2595,9 +2433,9 @@ extern(C) // Callback for CPreferenceDialog
 				
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ), "FGCOLOR", PreferenceDialogParameters.kbg[46].toCString );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ) );
 				version(Windows)
-					IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", PreferenceDialogParameters.kbg[47].toCString );
+					IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "SPINVALUE", PreferenceDialogParameters.kbg[47].toCString );
 				else
-					IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", PreferenceDialogParameters.kbg[47].toCString );			
+					IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "VALUE", PreferenceDialogParameters.kbg[47].toCString );
 					
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR", PreferenceDialogParameters.kbg[48].toCString );				//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ) );
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR", PreferenceDialogParameters.kbg[49].toCString );				//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ) );
@@ -2620,9 +2458,9 @@ extern(C) // Callback for CPreferenceDialog
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ), "FGCOLOR", "241 243 243" );		//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ) );
 
 		version(Windows)
-			IupSetAttribute( IupGetHandle( "textAlpha" ), "SPINVALUE", "64" );
+			IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "SPINVALUE", "64" );
 		else
-			IupSetAttribute( IupGetHandle( "textAlpha" ), "VALUE", "64" );
+			IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "VALUE", "64" );
 
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_FG" ), "FGCOLOR", "255 0 0" );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_FG" ) );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ), "FGCOLOR", "0 255 0" );					//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ) );
@@ -2681,9 +2519,9 @@ extern(C) // Callback for CPreferenceDialog
 		
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ), "FGCOLOR", "0 128 0" );				//IupSetFocus( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ) );
 		version(Windows)
-			IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "SPINVALUE", "80" );
+			IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "SPINVALUE", "80" );
 		else
-			IupSetAttribute( IupGetHandle( "textIndicatorAlpha" ), "VALUE", "80" );			
+			IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "VALUE", "80" );
 
 
 		for( int i = 48; i < 50; i ++ )
@@ -2837,5 +2675,4 @@ extern(C) // Callback for CPreferenceDialog
 		
 		return IUP_DEFAULT;
 	}
-	
 }
