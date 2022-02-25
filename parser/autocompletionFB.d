@@ -1350,7 +1350,7 @@ version(FBIDE)
 				
 				auto oriAST = originalNode;
 				
-				if( originalNode.type.length ) _type = originalNode.type; else _type = originalNode.base;
+				if( originalNode.type.length ) _type = originalNode.type; else _type = Util.stripl( originalNode.base, '*' ); // remove leftside *
 				
 				splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
 				/*
@@ -4373,7 +4373,12 @@ version(FBIDE)
 							{
 								if( AST_Head.base.length )
 								{
-									auto typeNode = _performAnalysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) ); //_analysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) );
+									int starIndex;
+									for( starIndex = 0; starIndex < AST_Head.base.length; ++ starIndex )
+										if( AST_Head.base[starIndex] != '*' ) break;
+								
+								
+									auto typeNode = _performAnalysisSplitWord( AST_Head, Util.split( AST_Head.base[starIndex..$], "." ) ); //_analysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) );
 									/*
 									while( typeNode !is null ) // Get Top
 									{
@@ -4389,6 +4394,17 @@ version(FBIDE)
 									}
 									else
 										_type = AST_Head.base;
+									
+									// var text = *IupGetAttribute(textbox, IUP_VALUE)
+									for( int i = 0; i < starIndex; ++ i )
+									{
+										if( _type.length > 0 )
+										{
+											if( _type[$-1] == '*' ) _type = _type[0..$-1].dup; else break;
+										}
+										else
+											break;
+									}
 								}
 							}
 						

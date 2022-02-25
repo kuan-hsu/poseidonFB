@@ -959,6 +959,7 @@ struct GLOBAL
 		GLOBAL.languageItems["cantundo"] = new IupString( cast(char[]) "This action can't be undo! Continue anyway?" );
 		GLOBAL.languageItems["exitdebug1"] = new IupString( cast(char[]) "Exit debug right now?" );
 		GLOBAL.languageItems["exitdebug2"] = new IupString( cast(char[]) "No debugging symbols found!! Exit debug!" );
+		GLOBAL.languageItems["applyfgcolor"] = new IupString( cast(char[]) "Apply to other scintilla foreground color settings?" );
 		GLOBAL.languageItems["applycolor"] = new IupString( cast(char[]) "Apply to other scintilla background color settings?" );
 		GLOBAL.languageItems["noselect"] = new IupString( cast(char[]) "No Selected!!" );
 		GLOBAL.languageItems["nodirandcreate"] = new IupString( cast(char[]) "No This Dir!! Create New One?" );

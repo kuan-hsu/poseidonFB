@@ -433,6 +433,7 @@ compileok=編譯成功!
 cantundo=此動作無法復原,確定繼續?
 exitdebug1=現在離開偵錯模式?
 exitdebug2=未發現偵錯資料,離開偵錯模式!
+applyfgcolor=套用前景色彩到其它Scintilla控件
 applycolor=套用背景色彩到其它Scintilla控件
 noselect=無選用項目
 nodirandcreate=無此目錄!! 新建?

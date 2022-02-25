@@ -2816,7 +2816,13 @@ public:
 	static char[] removeArrayAndPointer( char[] word )
 	{
 		char[] result;
-
+		
+		int starIndex;
+		for( starIndex = 0; starIndex < word.length; ++starIndex )
+			if( word[starIndex] != '*' ) break;
+			
+		if( starIndex > 0 ) word = word[starIndex..$].dup;
+			
 		version(FBIDE)
 		{
 			foreach( char c; word )
@@ -2830,6 +2836,12 @@ public:
 			{
 				if( c == '[' || c == '*' || c == '!' ) break; else result ~= c;
 			}
+		}
+		
+		if( starIndex > 0 )
+		{
+			for( int i = 0; i < starIndex; ++ i )
+				result = "*" ~ result;
 		}
 
 		return result;

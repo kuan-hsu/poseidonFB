@@ -1074,9 +1074,7 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* btn_Scintilla_BG = IupFlatButton( null );
 		IupSetStrAttribute( btn_Scintilla_FG, "FGCOLOR", GLOBAL.editColor.scintillaFore.toCString );
 		IupSetStrAttribute( btn_Scintilla_BG, "FGCOLOR", GLOBAL.editColor.scintillaBack.toCString );
-		//IupSetHandle( "btn_Scintilla_FG", btn_Scintilla_FG );
-		//IupSetHandle( "btn_Scintilla_BG", btn_Scintilla_BG );
-		IupSetCallback( btn_Scintilla_FG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		IupSetCallback( btn_Scintilla_FG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_FGcolorChooseScintilla_cb );
 		IupSetCallback( btn_Scintilla_BG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChooseScintilla_cb );
 		IupSetAttributes( btn_Scintilla_FG, "SIZE=16x8,NAME=Color-btn_Scintilla_FG" );
 		IupSetAttributes( btn_Scintilla_BG, "SIZE=16x8,NAME=Color-btn_Scintilla_BG" );
@@ -1086,8 +1084,6 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* btnSCE_B_COMMENT_BG = IupFlatButton( null );
 		IupSetStrAttribute( btnSCE_B_COMMENT_FG, "FGCOLOR", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );
 		IupSetStrAttribute( btnSCE_B_COMMENT_BG, "FGCOLOR", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );
-		//IupSetHandle( "btnSCE_B_COMMENT_FG", btnSCE_B_COMMENT_FG );
-		//IupSetHandle( "btnSCE_B_COMMENT_BG", btnSCE_B_COMMENT_BG );
 		IupSetCallback( btnSCE_B_COMMENT_FG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		IupSetCallback( btnSCE_B_COMMENT_BG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		IupSetAttributes( btnSCE_B_COMMENT_FG, "SIZE=16x8,NAME=Color-btnSCE_B_COMMENT_FG" );
@@ -1098,8 +1094,6 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* btnSCE_B_NUMBER_BG = IupFlatButton( null );
 		IupSetStrAttribute( btnSCE_B_NUMBER_FG, "FGCOLOR", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );
 		IupSetStrAttribute( btnSCE_B_NUMBER_BG, "FGCOLOR", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );
-		//IupSetHandle( "btnSCE_B_NUMBER_FG", btnSCE_B_NUMBER_FG );
-		//IupSetHandle( "btnSCE_B_NUMBER_BG", btnSCE_B_NUMBER_BG );
 		IupSetCallback( btnSCE_B_NUMBER_FG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		IupSetCallback( btnSCE_B_NUMBER_BG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		IupSetAttributes( btnSCE_B_NUMBER_FG, "SIZE=16x8,NAME=Color-btnSCE_B_NUMBER_FG" );
@@ -1307,8 +1301,8 @@ class CPreferenceDialog : CBaseDialog
 			
 			
 			label_Scintilla,
-			//btn_Scintilla_FG,
-			IupFill(),
+			btn_Scintilla_FG,
+			//IupFill(),
 			btn_Scintilla_BG,
 			IupFill(),
 			labelSCE_B_COMMENT,
@@ -2250,6 +2244,88 @@ extern(C) // Callback for CPreferenceDialog
 			//IupSetFocus( GLOBAL.preferenceDlg.getIhandle );
 			//IupSetFocus( ih );
 			IupUpdateChildren( GLOBAL.preferenceDlg.getIhandle );
+		}
+
+		return IUP_DEFAULT;
+	}
+
+	private int CPreferenceDialog_FGcolorChooseScintilla_cb( Ihandle* ih )
+	{
+		Ihandle* dlg = IupColorDlg();
+
+		IupSetAttribute( dlg, "VALUE", IupGetAttribute( ih, "FGCOLOR" ) );
+		IupSetAttribute( dlg, "SHOWHEX", "YES" );
+		IupSetAttribute( dlg, "SHOWCOLORTABLE", "YES" );
+		IupSetAttribute( dlg, "TITLE", GLOBAL.languageItems["color"].toCString() );
+
+		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
+
+		if( IupGetInt( dlg, "STATUS" ) )
+		{
+			auto _color = IupGetAttribute( dlg, "VALUE" );
+			
+			IupSetStrAttribute( ih, "FGCOLOR", _color ); IupSetFocus( ih );
+			
+			Ihandle* messageDlg = IupMessageDlg();
+			IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=2,BUTTONS=YESNO" );
+			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["applyfgcolor"].toCString );
+			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString() );
+			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
+			int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
+			
+			if( button == 1 )
+			{
+				Ihandle* _ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENT_FG" );
+				if( ih != null )
+				{
+					IupSetStrAttribute( _ih, "FGCOLOR", _color );
+					IupSetFocus( _ih );
+				}
+				
+				_ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_NUMBER_FG" );
+				if( ih != null )
+				{
+					IupSetStrAttribute( _ih, "FGCOLOR", _color );
+					IupSetFocus( _ih );
+				}
+				
+				_ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_STRING_FG" );
+				if( ih != null )
+				{
+					IupSetStrAttribute( _ih, "FGCOLOR", _color );
+					IupSetFocus( _ih );
+				}
+				
+				_ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_PREPROCESSOR_FG" );
+				if( ih != null )
+				{
+					IupSetStrAttribute( _ih, "FGCOLOR", _color );
+					IupSetFocus( _ih );
+				}
+				
+				_ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_OPERATOR_FG" );
+				if( ih != null )
+				{
+					IupSetStrAttribute( _ih, "FGCOLOR", _color );
+					IupSetFocus( _ih );
+				}
+				
+				_ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_IDENTIFIER_FG" );
+				if( ih != null )
+				{
+					IupSetStrAttribute( _ih, "FGCOLOR", _color );
+					IupSetFocus( _ih );
+				}
+				
+				_ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENTBLOCK_FG" );
+				if( ih != null )
+				{
+					IupSetStrAttribute( _ih, "FGCOLOR", _color );
+					IupSetFocus( _ih );
+				}
+			}
+			
+			IupSetFocus( GLOBAL.preferenceDlg.getIhandle );
 		}
 
 		return IUP_DEFAULT;

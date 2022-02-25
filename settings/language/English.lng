@@ -437,6 +437,7 @@ compileok=Compilation success!
 cantundo=This action can't be undone! Continue anyway?
 exitdebug1=Exit debug right now?
 exitdebug2=No debugging symbols found!! Exiting debug!
+applyfgcolor=Apply to other scintilla foreground color settings?
 applycolor=Apply to other scintilla background color settings?
 noselect=Nothing selected!
 nodirandcreate=No This Dir!! Create New One?
