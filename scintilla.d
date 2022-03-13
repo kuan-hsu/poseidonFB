@@ -3153,14 +3153,17 @@ extern(C)
 				bool bCheckDeclare;
 				version(FBIDE) bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos ); else bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos );
 
-				char[] alreadyInput = fromStringz( _text );
-				char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
-				if( list.length )
+				if( bCheckDeclare )
 				{
-					//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
-					scope _result = new IupString( list );
-					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, _result.toCString );
-					return IUP_DEFAULT;
+					char[] alreadyInput = fromStringz( _text );
+					char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
+					if( list.length )
+					{
+						//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+						scope _result = new IupString( list );
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, _result.toCString );
+						return IUP_DEFAULT;
+					}
 				}
 			}
 			
