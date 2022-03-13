@@ -91,7 +91,7 @@ class CDebugger
 
 		consoleHandle = IupText( null );
 		IupSetAttributes( consoleHandle, "MULTILINE=YES,SCROLLBAR=YES,EXPAND=YES,READONLY=YES,WORDWRAP=YES" );
-		IupSetAttribute( consoleHandle, "FONT", GLOBAL.cString.convert( GLOBAL.fonts[9].fontString ) );
+		IupSetStrAttribute( consoleHandle, "FONT", toStringz( GLOBAL.fonts[9].fontString ) );
 		IupSetCallback( consoleHandle, "VALUECHANGED_CB", cast(Icallback) &consoleOutputChange_cb );
 
 		vBox_LEFT = IupVbox( hBox_toolbar, txtConsoleCommand, consoleHandle, null );
@@ -1007,26 +1007,26 @@ class CDebugger
 
 	void setFont()
 	{
-		char* _font = GLOBAL.cString.convert( GLOBAL.fonts[9].fontString );
-		IupSetAttribute( consoleHandle, "FONT", _font );
-		IupSetAttribute( watchTreeHandle, "FONT",  _font );
-		IupSetAttribute( localTreeHandle, "FONT",  _font );
-		IupSetAttribute( argTreeHandle, "FONT",  _font );
-		IupSetAttribute( shareTreeHandle, "FONT",  _font );
+		char* _font = toStringz( GLOBAL.fonts[9].fontString );
+		IupSetStrAttribute( consoleHandle, "FONT", _font );
+		IupSetStrAttribute( watchTreeHandle, "FONT",  _font );
+		IupSetStrAttribute( localTreeHandle, "FONT",  _font );
+		IupSetStrAttribute( argTreeHandle, "FONT",  _font );
+		IupSetStrAttribute( shareTreeHandle, "FONT",  _font );
 		//IupSetAttribute( varTabHandle, "FONT",  _font );
-		IupSetAttribute( disasHandle, "FONT",  _font );
+		IupSetStrAttribute( disasHandle, "FONT",  _font );
 		
 		for( int i = 0; i < IupGetInt( watchTreeHandle, "COUNT" ); ++ i )
-			IupSetAttributeId( watchTreeHandle, "TITLEFONT", i, _font );
+			IupSetStrAttributeId( watchTreeHandle, "TITLEFONT", i, _font );
 
 		for( int i = 0; i < IupGetInt( localTreeHandle, "COUNT" ); ++ i )
-			IupSetAttributeId( localTreeHandle, "TITLEFONT", i, _font );
+			IupSetStrAttributeId( localTreeHandle, "TITLEFONT", i, _font );
 
 		for( int i = 0; i < IupGetInt( argTreeHandle, "COUNT" ); ++ i )
-			IupSetAttributeId( argTreeHandle, "TITLEFONT", i, _font );
+			IupSetStrAttributeId( argTreeHandle, "TITLEFONT", i, _font );
 
 		for( int i = 0; i < IupGetInt( shareTreeHandle, "COUNT" ); ++ i )
-			IupSetAttributeId( shareTreeHandle, "TITLEFONT", i, _font );
+			IupSetStrAttributeId( shareTreeHandle, "TITLEFONT", i, _font );
 	}		
 
 	Ihandle* getMainHandle()
@@ -1499,7 +1499,7 @@ class CDebugger
 											bFirstInsert = false;
 										}
 
-										IupSetAttributeId( backtraceHandle, "ADDBRANCH", lastID, GLOBAL.cString.convert( branchString.dup ) );
+										IupSetStrAttributeId( backtraceHandle, "ADDBRANCH", lastID, toStringz( branchString ) );
 										lastID = IupGetInt( backtraceHandle, "LASTADDNODE" );
 										IupSetAttributeId( backtraceHandle, "IMAGE", lastID, "icon_debug_bt1" );
 										IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, "icon_debug_bt1" );
@@ -2229,7 +2229,7 @@ class DebugThread //: Thread
 			//auto proc_result = proc.wait;
 
 			char[] result = getGDBmessage();
-			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "APPEND", GLOBAL.cString.convert( result ) );
+			IupSetStrAttribute( GLOBAL.debugPanel.getConsoleHandle, "APPEND", toStringz( result ) );
 
 			if( Util.index( result, "(no debugging symbols found)" ) < result.length )
 			{
@@ -2237,7 +2237,7 @@ class DebugThread //: Thread
 				proc.close();
 				proc.kill();
 				delete proc;
-				IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "VALUE", GLOBAL.cString.convert( "" ) );
+				IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "VALUE", "" );
 				IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
 				return;
 			}
@@ -2247,7 +2247,7 @@ class DebugThread //: Thread
 			caretPos = IupGetInt( GLOBAL.debugPanel.getConsoleHandle, "CARETPOS" );
 
 			bExecuted = true;
-			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "TITLE", 0, GLOBAL.cString.convert( executeFullPath ) );
+			IupSetStrAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "TITLE", 0, toStringz( executeFullPath ) );
 			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, "icon_debug_bt0" );
 			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, "icon_debug_bt0" );
 			splitValue = IupGetInt( GLOBAL.messageSplit, "VALUE" );
@@ -2323,13 +2323,13 @@ class DebugThread //: Thread
 		if( bShow )
 		{
 			IupSetInt( GLOBAL.debugPanel.getConsoleHandle, "CARETPOS", caretPos );
-			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "INSERT", GLOBAL.cString.convert( command ) );
+			IupSetStrAttribute( GLOBAL.debugPanel.getConsoleHandle, "INSERT", toStringz( command ) );
 		}
 		
 		char[] result = getGDBmessage();
 		if( bShow )
 		{
-			IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "INSERT", GLOBAL.cString.convert( result.dup ) );
+			IupSetStrAttribute( GLOBAL.debugPanel.getConsoleHandle, "INSERT", toStringz( result.dup ) );
 			caretPos = IupGetInt( GLOBAL.debugPanel.getConsoleHandle, "CARETPOS" );
 		}
 

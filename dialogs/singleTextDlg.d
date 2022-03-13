@@ -16,7 +16,8 @@ class CSingleTextDialog : CBaseDialog
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
 
-		label = IupLabel( GLOBAL.cString.convert( labelName ) );
+		label = IupLabel( null );
+		IupSetStrAttribute( label, "TITLE", toStringz( labelName ) );
 		
 		textResult = IupText( null );
 		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );

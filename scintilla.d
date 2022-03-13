@@ -301,7 +301,6 @@ class CScintilla
 			}
 		}
 
-		GLOBAL.fileListTree.removeItem( this );
 		GLOBAL.outlineTree.cleanTree( fullPath.toDString );
 		if( fullPathByOS(fullPath.toDString) in GLOBAL.scintillaManager ) GLOBAL.scintillaManager.remove( fullPathByOS(fullPath.toDString) );
 		
@@ -394,20 +393,6 @@ class CScintilla
 		{
 			GLOBAL.outlineTree.loadFile( newFullPath );
 		}
-
-
-		// Change the fileListTree's node
-		int nodeCount = IupGetInt( GLOBAL.fileListTree.getTreeHandle, toStringz( "COUNT" ) );
-	
-		for( int id = 0; id < nodeCount; id++ ) // include Parent "FileList" node
-		{
-			CScintilla _sci_node = cast(CScintilla) IupGetAttributeId( GLOBAL.fileListTree.getTreeHandle, "USERDATA", id );
-			if( _sci_node == this )
-			{
-				IupSetAttributeId( GLOBAL.fileListTree.getTreeHandle, "TITLE", id, fullPath.toCString );
-				break;
-			}
-		}					
 	}
 
 	bool saveFile()
@@ -475,9 +460,9 @@ class CScintilla
 		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
 		IupSetAttribute( sci, "STYLEFGCOLOR32", GLOBAL.editColor.scintillaFore.toCString );		// 32
 		IupSetAttribute( sci, "STYLEBGCOLOR32", GLOBAL.editColor.scintillaBack.toCString );		// 32
-		IupSetAttribute( sci, "STYLEBOLD32", GLOBAL.cString.convert( Bold ) );
-		IupSetAttribute( sci, "STYLEITALIC32", GLOBAL.cString.convert( Italic ) );
-		IupSetAttribute( sci, "STYLEUNDERLINE32", GLOBAL.cString.convert( Underline ) );
+		IupSetStrAttribute( sci, "STYLEBOLD32", toStringz( Bold ) );
+		IupSetStrAttribute( sci, "STYLEITALIC32", toStringz( Italic ) );
+		IupSetStrAttribute( sci, "STYLEUNDERLINE32", toStringz( Underline ) );
 
 		IupSetAttribute(sci, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		
@@ -610,7 +595,7 @@ class CScintilla
 
 		int tabSize = Integer.atoi( GLOBAL.editorSetting00.TabWidth );
 		GLOBAL.editorSetting00.TabWidth = Integer.toString( tabSize );
-		IupSetAttribute( sci, "TABSIZE", GLOBAL.cString.convert( GLOBAL.editorSetting00.TabWidth ) );
+		IupSetStrAttribute( sci, "TABSIZE", toStringz( GLOBAL.editorSetting00.TabWidth ) );
 
 		if( !bFirstTime )
 		{
@@ -2130,7 +2115,7 @@ extern(C)
 							IupSetInt( ih, "TARGETEND", -1 );
 							
 							int count;
-							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
+							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) toStringz( word ) ); //SCI_SEARCHINTARGET = 2197,
 							
 							while( findPos > -1 )
 							{
@@ -2141,7 +2126,7 @@ extern(C)
 
 								IupSetInt( ih, "TARGETSTART", findPos + word.length );
 								IupSetInt( ih, "TARGETEND", -1 );
-								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) GLOBAL.cString.convert( word ) ); //SCI_SEARCHINTARGET = 2197,
+								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) toStringz( word ) ); //SCI_SEARCHINTARGET = 2197,
 							}
 						}
 					}
@@ -2264,13 +2249,12 @@ extern(C)
 			//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
 			AutoComplete.bAutocompletionPressEnter = false;
 			AutoComplete.bSkipAutoComplete = false;
-			int dummy;
 			if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
 
 			if( c == 65307 ) // ESC
 			{
 				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) dummy = IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
+				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
 			}
 			
 			if( GLOBAL.editorSetting00.AutoClose == "ON" )
@@ -2388,8 +2372,7 @@ extern(C)
 													IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
 													word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
 													IupSetAttribute( ih, "SELECTEDTEXT", toStringz( word ) );
-													dummy = IupScintillaSendMessage( ih, 2025, currentPos, 0 ); // sci_gotopos = 2025,
-
+													IupScintillaSendMessage( ih, 2025, currentPos, 0 ); // sci_gotopos = 2025,
 													bExitFlag = true;
 													break;
 												}
@@ -2421,7 +2404,7 @@ extern(C)
 								
 								if( lineTail > lineHead )
 								{
-									dummy = IupScintillaSendMessage( ih, 2198, 2, 0 );		// SCFIND_WHOLEWORD = 2,				// SCI_SETSEARCHFLAGS = 2198
+									IupScintillaSendMessage( ih, 2198, 2, 0 );		// SCFIND_WHOLEWORD = 2,				// SCI_SETSEARCHFLAGS = 2198
 									foreach( IupString _s; GLOBAL.KEYWORDS )
 									{
 										foreach( char[] targetText; Util.split( _s.toDString, " " ) )
@@ -2432,21 +2415,21 @@ extern(C)
 
 												IupSetInt( ih, "TARGETSTART", lineTail );
 												IupSetInt( ih, "TARGETEND", lineHead );
-												int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+												int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int)toStringz( targetText ) );
 												
 												while( posHead >= 0 )
 												{
-													IupSetAttribute( ih, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
+													IupSetAttribute( ih, "REPLACETARGET", toStringz( replaceText ) );
 													bGetMatch = true;
 													IupSetInt( ih, "TARGETSTART", posHead );
 													IupSetInt( ih, "TARGETEND", lineHead );
-													posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+													posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) );
 												}					
 											}
 										}
 									}
 									
-									if( bGetMatch ) dummy = IupScintillaSendMessage( ih, 2025, lineTail, 0 );
+									if( bGetMatch ) IupScintillaSendMessage( ih, 2025, lineTail, 0 );
 								}
 							}
 						}
@@ -2476,7 +2459,7 @@ extern(C)
 								if( iupSci != null )
 								{
 									int line = ScintillaAction.getCurrentLine( iupSci ) - 1;
-									dummy = IupScintillaSendMessage( iupSci, 2404, line, 0 ); // SCI_LINEDUPLICATE 2404
+									IupScintillaSendMessage( iupSci, 2404, line, 0 ); // SCI_LINEDUPLICATE 2404
 								}								
 								return IUP_IGNORE;
 							}
@@ -2493,8 +2476,8 @@ extern(C)
 								{
 									char[] lineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) );
 									int line = ScintillaAction.getCurrentLine( iupSci ) - 1;
-									dummy = IupScintillaSendMessage( iupSci, 2404, line, 0 ); // SCI_LINEDUPLICATE 2404
-									dummy = IupScintillaSendMessage( iupSci, 2025, ScintillaAction.getCurrentPos( iupSci ) + lineText.length, 0 ); // SCI_GOTOPOS 2025
+									IupScintillaSendMessage( iupSci, 2404, line, 0 ); // SCI_LINEDUPLICATE 2404
+									IupScintillaSendMessage( iupSci, 2025, ScintillaAction.getCurrentPos( iupSci ) + lineText.length, 0 ); // SCI_GOTOPOS 2025
 								}								
 								return IUP_IGNORE;
 							}
@@ -2509,7 +2492,7 @@ extern(C)
 								if( iupSci != null )
 								{
 									int line = ScintillaAction.getCurrentLine( iupSci ) - 1;
-									dummy = IupScintillaSendMessage( iupSci, 2338, line, 0 ); // SCI_LINEDELETE 2338
+									IupScintillaSendMessage( iupSci, 2338, line, 0 ); // SCI_LINEDELETE 2338
 								}
 								return IUP_IGNORE;
 							}
@@ -2713,7 +2696,8 @@ extern(C)
 										if( list.length )
 										{
 											//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
-											if( !alreadyInput.length ) dummy = IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, GLOBAL.cString.convert( list ) );
+											scope _result = new IupString( list );
+											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
 											return IUP_IGNORE;
 										}
 									}
@@ -2740,8 +2724,8 @@ extern(C)
 											{
 												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" )
 												{
-													char[] list = AutoComplete.getKeywordContainerList( alreadyInput );
-													if( list.length ) dummy = IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
+													scope _result = new IupString( AutoComplete.getKeywordContainerList( alreadyInput ) );
+													if( _result.toDString.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString );
 												}
 											}
 										}
@@ -2770,7 +2754,8 @@ extern(C)
 										if( list.length )
 										{
 											//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
-											if( !alreadyInput.length ) dummy = IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, GLOBAL.cString.convert( list ) );
+											scope _result = new IupString( list );
+											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
 											return IUP_IGNORE;
 										}
 									}
@@ -2798,7 +2783,8 @@ extern(C)
 												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" )
 												{
 													char[] list = AutoComplete.getKeywordContainerList( alreadyInput );
-													if( list.length ) dummy = IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) GLOBAL.cString.convert( list ) );
+													scope _result = new IupString( list );
+													if( list.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString );
 												}
 											}
 										}
@@ -2902,7 +2888,7 @@ extern(C)
 						char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
 						if( s == "\n" || s == "\r" )
 						{
-							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) dummy = IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							AutoComplete.noneListProcedureName = "";
 						}
 						else
@@ -2917,7 +2903,7 @@ extern(C)
 						char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", pos ) );
 						if( s == "\n" || s == "\r" )
 						{
-							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) dummy = IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							AutoComplete.noneListProcedureName = "";
 						}
 						else
@@ -2933,7 +2919,7 @@ extern(C)
 				{
 					// For Reduce The CallTip window close automatically
 					pos = ScintillaAction.getCurrentPos( ih );
-					dummy = IupScintillaSendMessage( ih, 2160, pos, pos-1 ); // SCI_SETSEL = 2160
+					IupScintillaSendMessage( ih, 2160, pos, pos-1 ); // SCI_SETSEL = 2160
 					IupSetAttribute( ih , "SELECTEDTEXT", "" );
 					AutoComplete.noneListProcedureName = "";
 					
@@ -2947,7 +2933,7 @@ extern(C)
 						int lineNumber = ScintillaAction.getCurrentLine( ih ) - 2;
 						if( lineNumber > -1 )
 						{
-							dummy = IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
+							IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
 							IupSetAttributeId( ih, "ANNOTATIONTEXT", lineNumber, toStringz( showtype ) );
 							IupSetIntId( ih, "ANNOTATIONSTYLE", lineNumber, 41 );
 							IupSetAttribute( ih, "ANNOTATIONVISIBLE", "BOXED" );
@@ -3159,44 +3145,24 @@ extern(C)
 
 		
 		if( length > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
-		int dummy;
 		// Include Autocomplete
 		if( AutoComplete.showListThread is null )
 		{
-			version(FBIDE)
+			if( GLOBAL.enableIncludeComplete == "ON" )
 			{
-				if( GLOBAL.enableIncludeComplete == "ON" )
+				bool bCheckDeclare;
+				version(FBIDE) bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos ); else bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos );
+
+				char[] alreadyInput = fromStringz( _text );
+				char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
+				if( list.length )
 				{
-					if( AutoComplete.checkIscludeDeclare( ih, pos ) )
-					{
-						char[] alreadyInput = fromStringz( _text );
-						char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
-						if( list.length )
-						{
-							//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
-							if( !alreadyInput.length ) dummy = IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
-							return IUP_DEFAULT;
-						}
-					}
+					//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
+					scope _result = new IupString( list );
+					if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, _result.toCString );
+					return IUP_DEFAULT;
 				}
 			}
-			version(DIDE)
-			{
-				if( GLOBAL.enableIncludeComplete == "ON" )
-				{
-					if( AutoComplete.checkIsclmportDeclare( ih, pos ) )
-					{
-						char[] alreadyInput = fromStringz( _text );
-						char[] list = AutoComplete.includeComplete( ih, pos, alreadyInput );
-						if( list.length )
-						{
-							//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
-							if( !alreadyInput.length ) dummy = IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, GLOBAL.cString.convert( list ) );
-							return IUP_DEFAULT;
-						}
-					}
-				}
-			}		
 			
 			// Check Keyword Autocomplete
 			if( GLOBAL.enableParser != "ON" || ( GLOBAL.enableParser == "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) )
@@ -3231,7 +3197,10 @@ extern(C)
 								char[] list;
 								if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" ) list = AutoComplete.getKeywordContainerList( word );
 								if( list.length )
-									if( !word.length ) dummy = IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) GLOBAL.cString.convert( list ) ); else IupSetAttributeId( ih, "AUTOCSHOW", word.length - 1, GLOBAL.cString.convert( list ) );
+								{
+									scope _result = new IupString( list );
+									if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", word.length - 1, _result.toCString );
+								}
 							}
 					}
 				}
@@ -3613,7 +3582,7 @@ extern(C)
 		IupSetAttribute( ih, "SEARCHFLAGS", "WHOLEWORD" );
 		IupSetInt( ih, "TARGETSTART", 0 );
 		IupSetInt( ih, "TARGETEND", -1 );
-		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); // SCI_SEARCHINTARGET = 2197,
+		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); // SCI_SEARCHINTARGET = 2197,
 		
 		while( findPos != -1 )
 		{
@@ -3622,7 +3591,7 @@ extern(C)
 			dummy = IupScintillaSendMessage( ih, 2504, targetStart, TargetEnd - targetStart ); // SCI_INDICATORFILLRANGE =  2504
 			IupSetInt( ih, "TARGETSTART", TargetEnd );
 			IupSetInt( ih, "TARGETEND", -1 );
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); // SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); // SCI_SEARCHINTARGET = 2197,
 		}
 	}
 }

@@ -186,17 +186,11 @@ public:
 			else
 				GLOBAL.editorSetting01.MessageSplit = IupGetInt( GLOBAL.messageSplit, "VALUE" ) >= 1000 ? "850" : fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) ).dup;
 
-			if( fromStringz( IupGetAttribute( GLOBAL.menuFistlistWindow, "VALUE" ) ) == "OFF" )
-				GLOBAL.editorSetting01.FileListSplit = Integer.toString( GLOBAL.fileListSplit_value ).dup;
-			else
-				GLOBAL.editorSetting01.FileListSplit = IupGetInt( GLOBAL.fileListSplit, "VALUE" ) >= 1000 ? "900" : fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) ).dup;
 				
 			//GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) ).dup;
 			
 			GLOBAL.editorSetting01.OutlineWindow = fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ).dup;
 			GLOBAL.editorSetting01.MessageWindow = fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ).dup;
-			GLOBAL.editorSetting01.FilelistWindow = fromStringz( IupGetAttribute( GLOBAL.menuFistlistWindow, "VALUE" ) ).dup;
-			//FilelistWindow
 
 			// size
 			doc ~= setINILineData( "[size]");

@@ -44,7 +44,7 @@ class CFileDlg
 
 		//char[] txtIupFilterAttribute = "FILTER = \"" ~ filter ~ "\", FILTERINFO = \"" ~  fileInfo ~ "\"";
 		//IupSetAttributes(dlg, txtIupFilterAttribute.ptr );
-		IupSetAttribute( dlg, "EXTFILTER", GLOBAL.cString.convert( filter ) );
+		IupSetStrAttribute( dlg, "EXTFILTER", toStringz( filter ) );
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT ); 
 
 		/*

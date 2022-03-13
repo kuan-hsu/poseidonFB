@@ -821,22 +821,25 @@ class CPreferenceDialog : CBaseDialog
 		
 		for( int i = 0; i < GLOBAL.fonts.length; ++ i )
 		{
-			char[][] strings = Util.split( GLOBAL.fonts[i].fontString, "," );
-			if( strings.length == 2 )
-			{
-				char[] size, style = " ";
-				
-				strings[0] = Util.trim( strings[0] );
-				int spacePos = Util.rindex( strings[1], " " );
-				if( spacePos < strings[1].length )
+			//if( i != 3 ) // Skip abandoned fileList
+			//{
+				char[][] strings = Util.split( GLOBAL.fonts[i].fontString, "," );
+				if( strings.length == 2 )
 				{
-					size = strings[1][spacePos+1..$].dup;
-					style = Util.trim( strings[1][0..spacePos] ).dup;
-					if( !style.length ) style = " "; else style = " " ~ style ~ " ";
-				}				
+					char[] size, style = " ";
+					
+					strings[0] = Util.trim( strings[0] );
+					int spacePos = Util.rindex( strings[1], " " );
+					if( spacePos < strings[1].length )
+					{
+						size = strings[1][spacePos+1..$].dup;
+						style = Util.trim( strings[1][0..spacePos] ).dup;
+						if( !style.length ) style = " "; else style = " " ~ style ~ " ";
+					}				
 
-				PreferenceDialogParameters.fontTable.addItem( [ GLOBAL.languageItems[GLOBAL.fonts[i].name].toDString, strings[0], style, size ] );
-			}
+					PreferenceDialogParameters.fontTable.addItem( [ GLOBAL.languageItems[GLOBAL.fonts[i].name].toDString, strings[0], style, size ] );
+				}
+			//}
 		}
 		Ihandle* sb = IupScrollBox( PreferenceDialogParameters.fontTable.getMainHandle );
 		IupSetAttributes( sb, "ALIGNMENT=ACENTER" );
@@ -1194,8 +1197,8 @@ class CPreferenceDialog : CBaseDialog
 		//IupSetHandle( "btnFilelist_BG", btnFilelist_BG );
 		IupSetCallback( btnFilelist_FG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		IupSetCallback( btnFilelist_BG, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
-		IupSetAttributes( btnFilelist_FG, "SIZE=16x8,NAME=Color-btnFilelist_FG" );
-		IupSetAttributes( btnFilelist_BG, "SIZE=16x8,NAME=Color-btnFilelist_BG" );
+		IupSetAttributes( btnFilelist_FG, "SIZE=16x8,NAME=Color-btnFilelist_FG,ACTIVE=NO" );
+		IupSetAttributes( btnFilelist_BG, "SIZE=16x8,NAME=Color-btnFilelist_BG,ACTIVE=NO" );
 		
 		Ihandle* labelOutput= IupLabel( toStringz( GLOBAL.languageItems["output"].toDString ~ ":" ) );
 		Ihandle* btnOutput_FG = IupFlatButton( null );
@@ -1961,7 +1964,6 @@ extern(C) // Callback for CPreferenceDialog
 			
 			GLOBAL.projectTree.changeColor();
 			GLOBAL.outlineTree.changeColor();
-			GLOBAL.fileListTree.changeColor();
 			
 			GLOBAL.editColor.keyWord[0] = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord0Color" ), "FGCOLOR" );
 			GLOBAL.editColor.keyWord[1] = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord1Color" ), "FGCOLOR" );
@@ -2189,9 +2191,8 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetAttribute( GLOBAL.documentTabs, "TABFONT", docTabString.toCString );
 			IupRefresh( GLOBAL.documentTabs );
 			
-			GLOBAL.fileListTree.setTitleFont(); // Change Filelist Title Font
 			scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
-			scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
+			//scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 			scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
 			scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString ); //IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
 			scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search

@@ -12,8 +12,6 @@ class CStatusBar
 	import		Integer = tango.text.convert.Integer, Util = tango.text.Util;
 	
 	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection, codecomplete, findMessage;
-	IupString	_name, _lc, _ins, _eol, _en, tipString, findString;
-	
 	int			originalTrigger;
 	
 	void createLayout()
@@ -94,22 +92,11 @@ class CStatusBar
 	public:
 	this()
 	{
-		_name = new IupString();
-		_lc = new IupString();
-		_ins = new IupString();
-		_eol = new IupString();
-		_en = new IupString();
-		
-		tipString = new IupString();
-		
 		createLayout();
 		setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
 	}
 	
-	~this()
-	{
-		//delete _name, _lc, _ins, _eol, _en;
-	}
+	~this(){}
 	
 	Ihandle* getLayoutHandle()
 	{
@@ -136,8 +123,7 @@ class CStatusBar
 		if( !bFull )
 		{
 			if( Util.trim( name ).length == 0 ) GLOBAL.activeProjectPath = "";
-			_name = name;
-			IupSetAttribute( prjName, "TITLE", _name.toCString );
+			IupSetStrAttribute( prjName, "TITLE", toStringz( name ) );
 		}
 		else
 		{
@@ -157,40 +143,36 @@ class CStatusBar
 			char[] focusName;
 			if( _prjDir.toDString in GLOBAL.projectManager ) focusName = GLOBAL.projectManager[_prjDir.toDString].focusOn;
 			
-			_name = GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString ~ ( focusName.length ? " [" ~ focusName ~ "]" : ""  );
-			IupSetAttribute( prjName, "TITLE", _name.toCString );
-			if( Util.trim( _name.toDString ).length == 0 ) GLOBAL.activeProjectPath = "";
+			name = GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString ~ ( focusName.length ? " [" ~ focusName ~ "]" : ""  );
+			IupSetStrAttribute( prjName, "TITLE", toStringz( name ) );
+			if( Util.trim( name ).length == 0 ) GLOBAL.activeProjectPath = "";
 		}
 	}
 	
 	void setLINExCOL( char[] lc )
 	{
-		_lc = lc;
-		IupSetAttribute( LINExCOL, "TITLE", _lc.toCString );
+		IupSetStrAttribute( LINExCOL, "TITLE", toStringz( lc ) );
 	}
 
 	void setIns( char[] ins )
 	{
-		_ins = ins;
-		IupSetAttribute( Ins, "TITLE", _ins.toCString );
+		IupSetStrAttribute( Ins, "TITLE", toStringz( ins ) );
 	}
 
 	void setEOLType( char[] eol )
 	{
-		_eol = eol;
-		IupSetAttribute( EOLType, "TITLE", _eol.toCString );
+		IupSetStrAttribute( EOLType, "TITLE", toStringz( eol ) );
 	}
 
 	void setEncodingType( char[] en )
 	{
-		_en = en;
-		IupSetAttribute( EncodingType, "TITLE", _en.toCString );
+		IupSetStrAttribute( EncodingType, "TITLE", toStringz( en ) );
 	}
 	
 	void setTip( char[] name )
 	{
-		tipString = cast(char[])"";
-		IupSetAttribute( compileOptionSelection, "TIP", tipString.toCString );
+		char[] tipString;
+		IupSetStrAttribute( compileOptionSelection, "TIP", "" );
 		
 		if( name.length )
 		{
@@ -211,7 +193,7 @@ class CStatusBar
 						{
 							tipString = s[0..bpos].dup;
 						}
-						IupSetAttribute( compileOptionSelection, "TIP", tipString.toCString );
+						IupSetStrAttribute( compileOptionSelection, "TIP", toStringz( tipString ) );
 						IupRefresh( compileOptionSelection );
 						break;
 					}
@@ -231,23 +213,9 @@ class CStatusBar
 	
 	void setFindMessage( char[] message )
 	{
-		if( findString is null ) findString = new IupString( message ); else findString = message;
 		IupSetAttribute( findMessage, "TITLE", "" );
-
-		if( message.length ) IupSetAttribute( findMessage, "TITLE", findString.toCString );
+		if( message.length ) IupSetStrAttribute( findMessage, "TITLE", toStringz( message ) );
 	}
-	
-	/+
-	void setCompileOptionSelection( char[] os )
-	{
-		if( compileOptionSelection != null )
-		{
-			GLOBAL.currentCustomCompilerOption = os;
-			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 255" );
-			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
-		}
-	}
-	+/
 }
 
 extern(C) // Callback for CBaseDialog
@@ -259,7 +227,7 @@ extern(C) // Callback for CBaseDialog
 		// On/OFF Message Window
 		if( button == IUP_BUTTON1 ) // Left Click
 		{
-			if( pressed == 0 ) oriH = GLOBAL.fileListTree.getTreeH();
+			//if( pressed == 0 ) oriH = GLOBAL.fileListTree.getTreeH();
 			
 			if( DocumentTabAction.isDoubleClick( status ) )
 			{

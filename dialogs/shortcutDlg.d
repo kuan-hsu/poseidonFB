@@ -339,8 +339,7 @@ extern(C) // Callback for CSingleTextDialog
 			else if( pos < 43 )
 				pos += 6;
 
-			scope _cString = new IupString ;
-			IupSetAttributeId( shortCutList, "", pos + 1, GLOBAL.cString.convert( string ) );
+			IupSetStrAttributeId( shortCutList, "", pos + 1, toStringz( string ) );
 			IupSetInt( shortCutList, "VALUE", pos+1 ); // Set focus node identifier
 		}
 

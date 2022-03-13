@@ -79,7 +79,7 @@ struct GLOBAL
 	import tango.stdc.stringz;
 
 	import navcache;
-	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.filelistPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger;
+	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.preferenceDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
@@ -110,8 +110,8 @@ struct GLOBAL
 	static int					documentSplit2_value = 500;
 	
 
-	static Ihandle* 			fileListSplit;
-	static int					fileListSplit_value = 700;
+	//static Ihandle* 			fileListSplit;
+	//static int					fileListSplit_value = 700;
 	
 	static Ihandle* 			explorerWindow;
 	static Ihandle* 			explorerSplit; // which split explorerWindow & editWindow
@@ -121,7 +121,6 @@ struct GLOBAL
 
 	static CProjectTree			projectTree;
 	static COutline 			outlineTree;
-	static CFileList 			fileListTree;
 	
 	
 	//static Ihandle* 			outputPanel;
@@ -142,7 +141,7 @@ struct GLOBAL
 
 	static CStatusBar			statusBar;
 
-	static Ihandle*				menuOutlineWindow, menuMessageWindow, menuFistlistWindow,menuRotateTabs;
+	static Ihandle*				menuOutlineWindow, menuMessageWindow, menuRotateTabs;
 	
 	
 
@@ -225,8 +224,6 @@ struct GLOBAL
 	static IupString[char[]]	languageItems;
 
 
-	static IupString			cString;
-	
 	static ShortKey[]			shortKeys;
 
 	static fontUint[]			fonts;
@@ -346,7 +343,6 @@ struct GLOBAL
 		GLOBAL.currentCustomCompilerOption = new IupString( cast(char*) "" );
 		GLOBAL.noneCustomCompilerOption = new IupString( cast(char*) "None Custom Compile Option" );
 		
-		GLOBAL.cString = new IupString;
 		GLOBAL.Parser = new CParser;
 		
 		version(FBIDE)

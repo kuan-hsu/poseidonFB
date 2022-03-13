@@ -3,7 +3,7 @@
 import iup.iup, iup.iup_scintilla;
 
 import global, IDE, scintilla, project, tools, dialogs.preferenceDlg;
-import layouts.tabDocument, layouts.toolbar, layouts.filelistPanel, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
+import layouts.tabDocument, layouts.toolbar, layouts.projectPanel, layouts.messagePanel, layouts.statusBar, layouts.outlinePanel, layouts.debugger, actionManager, menu;
 import layouts.statusBar;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
@@ -15,7 +15,6 @@ void createExplorerWindow()
 {
 	GLOBAL.toolbar = new CToolBar();
 
-	GLOBAL.fileListTree = new CFileList;
 	GLOBAL.projectTree = new CProjectTree;
 	GLOBAL.outlineTree = new COutline;
 
@@ -29,11 +28,6 @@ void createExplorerWindow()
 	GLOBAL.projectViewTabs = IupTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
 	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL,BORDER=NO,NAME=POSEIDON_LEFT_TABS" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
-
-	GLOBAL.fileListSplit = IupSplit( GLOBAL.projectViewTabs, GLOBAL.fileListTree.getLayoutHandle );
-	IupSetAttributes( GLOBAL.fileListSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES" );
-	IupSetInt( GLOBAL.fileListSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
-	//version(Windows) IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 2 );
 
 	createTabs();
 	createTabs2();
@@ -66,9 +60,8 @@ void createExplorerWindow()
 	GLOBAL.searchExpander = new CSearchExpander;
 	GLOBAL.activeDocumentTabs = GLOBAL.documentTabs;
 
-	Ihandle* projectViewBackground = IupBackgroundBox( GLOBAL.fileListSplit );
 	
-	GLOBAL.explorerSplit = IupSplit( projectViewBackground, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
+	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT");
 	//version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
 	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );

@@ -470,10 +470,6 @@ void createMenu()
 	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
 	
-	GLOBAL.menuFistlistWindow = IupItem( GLOBAL.languageItems["filelist"].toCString, null);
-	IupSetAttribute( GLOBAL.menuFistlistWindow, "VALUE", "ON");
-	IupSetCallback( GLOBAL.menuFistlistWindow, "ACTION", cast(Icallback) &fileListMenuItem_cb );
-	
 	GLOBAL.menuRotateTabs = IupItem( GLOBAL.languageItems["rotatetabs"].toCString, null);
 	IupSetAttribute( GLOBAL.menuRotateTabs, "VALUE", toStringz( GLOBAL.editorSetting01.RotateTabs ) );
 	IupSetCallback( GLOBAL.menuRotateTabs, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -705,7 +701,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.479)\nBy Kuan Hsu (Taiwan)\n2022.02.25" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.480)\nBy Kuan Hsu (Taiwan)\n2022.03.13" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD (V0.067)\nBy Kuan Hsu (Taiwan)\n2022.02.25" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});
@@ -835,7 +831,6 @@ void createMenu()
 	
 	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
-							GLOBAL.menuFistlistWindow,
 							GLOBAL.menuRotateTabs,
 							IupSeparator(),
 							fullScreenItem,
@@ -925,13 +920,13 @@ version(FBIDE)
 						IupSetInt( iupSci, "TARGETSTART", 0 );
 						IupSetInt( iupSci, "TARGETEND", -1 );
 
-						int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+						int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
 						while( posHead >= 0 )
 						{
-							IupSetAttribute( iupSci, "REPLACETARGET", GLOBAL.cString.convert( replaceText ) );
+							IupSetAttribute( iupSci, "REPLACETARGET", toStringz( replaceText ) );
 							IupSetInt( iupSci, "TARGETSTART", posHead + replaceTextLength );
 							IupSetInt( iupSci, "TARGETEND", -1 );
-							posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) );
+							posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
 						}					
 					}
 				}
@@ -1614,35 +1609,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	int fileListMenuItem_cb( Ihandle *ih )
-	{
-		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
-		{
-			IupSetAttribute( ih, "VALUE", "OFF" );
-			
-			GLOBAL.fileListSplit_value = IupGetInt( GLOBAL.fileListSplit, "VALUE" );
-			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 0 );
-			IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );
 
-			IupSetAttribute( GLOBAL.fileListSplit, "ACTIVE", "NO" );
-			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
-			Ihandle* SecondChild = IupGetChild( GLOBAL.fileListSplit, 1 );
-			IupSetAttribute( SecondChild, "ACTIVE", "YES" );
-			Ihandle* thirdChild = IupGetChild( GLOBAL.fileListSplit, 2 );
-			IupSetAttribute( thirdChild, "ACTIVE", "YES" );
-		}
-		else
-		{
-			IupSetAttribute( ih, "VALUE", "ON" );
-			IupSetInt( GLOBAL.fileListSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
-			//IupSetInt( GLOBAL.fileListSplit, "BARSIZE", 3 );
-			IupSetInt( GLOBAL.fileListSplit, "VALUE", GLOBAL.fileListSplit_value );
-			IupSetAttribute( GLOBAL.fileListSplit, "ACTIVE", "YES" );
-		}
-		
-		return IUP_DEFAULT;
-	}	
-	
 	int coustomTooledit_cb( Ihandle *ih )
 	{
 		version(Windows)

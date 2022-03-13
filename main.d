@@ -314,17 +314,15 @@ void main( char[][] args )
 	GLOBAL.editColor = _editColor;
 		
 	IupSetAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );	
-	IupSetAttribute( GLOBAL.fileListSplit, "VALUE", toStringz( GLOBAL.editorSetting01.FileListSplit ) );
 	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 	if( GLOBAL.editorSetting01.MessageWindow == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-	if( GLOBAL.editorSetting01.FilelistWindow == "OFF" ) menu.fileListMenuItem_cb( GLOBAL.menuFistlistWindow );
 	
 
 	createDialog();
 
 	scope docTabString = new IupString( GLOBAL.fonts[0].fontString );	IupSetAttribute( GLOBAL.documentTabs, "TABFONT", docTabString.toCString );
 	scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
-	scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
+	//scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
 	scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
 	scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString );//IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
 	scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
@@ -334,7 +332,6 @@ void main( char[][] args )
 	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
 	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TITLEFONT0", prjString.toCString ); IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TITLEFONTSTYLE0", "Bold" );// Project
 	
-	GLOBAL.fileListTree.setTitleFont(); // Change Filelist Title Font
 	GLOBAL.messagePanel.setScintillaColor(); // Set MessagePanel Color
 	
 	if( args.length > 1 )

@@ -173,7 +173,7 @@ class CFindInFilesDialog : CBaseDialog
 
 	void setStatusBar( char[] text )
 	{
-		IupSetAttribute( labelStatus, "TITLE", GLOBAL.cString.convert( text ) );
+		IupSetStrAttribute( labelStatus, "TITLE", toStringz( text ) );
 	}
 }
 

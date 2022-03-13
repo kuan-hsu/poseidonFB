@@ -1240,7 +1240,7 @@ public:
 			
 			IupSetInt( iupSci, "TARGETSTART", findPos + target.length );
 			IupSetInt( iupSci, "TARGETEND", -1 );
-			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) GLOBAL.cString.convert( target ) ); // SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) toStringz( target ) ); // SCI_SEARCHINTARGET = 2197,
 		}		
 		
 		return count;
@@ -1275,7 +1275,7 @@ public:
 		// FullPath had already opened
 		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 		{
-			IupMessage( "Waring!!", GLOBAL.cString.convert( fullPath ~ "\n has already exist!" ) );
+			IupMessage( "Waring!!", toStringz( fullPath ~ "\n has already exist!" ) );
 			return false;
 		}
 
@@ -1292,8 +1292,6 @@ public:
 		IupSetFocus( _sci.getIupScintilla );
 
 		//StatusBarAction.update();
-
-		GLOBAL.fileListTree.addItem( _sci );
 
 		if( existData.length) _sci.setText( existData );
 
@@ -1473,7 +1471,6 @@ public:
 			}
 			//StatusBarAction.update();
 
-			GLOBAL.fileListTree.addItem( _sci );
 			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
@@ -1514,11 +1511,13 @@ public:
 			CScintilla cSci = GLOBAL.scintillaManager[fullPathByOS(fullPath)];
 			if( cSci !is null )
 			{
+				/*
 				if( _switch & 1 ) // Mark the FileList
 				{
 					GLOBAL.fileListTree.markItem( cSci.getFullPath );
 					result = result | 1;
 				}
+				*/
 				
 				if( _switch & 4 ) // Mark the OutlineTree
 				{
@@ -2418,14 +2417,14 @@ struct ProjectAction
 				}
 				if( !bFolerExist )
 				{
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
+					IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
 					if( pos != 0 )
 					{
 						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId, tools.getCString( "FIXED" ) );
 					}
 					else
 					{
-						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, tools.getCString( splitText[counterSplitText] ) );
+						IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
 					}
 					/*
 					// Shadow
@@ -3024,7 +3023,7 @@ private:
 			dummy = IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
 			if( bNext )	dummy = IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
 
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); //SCI_SEARCHINTARGET = 2197,
 			
 			// reSearch form file's head
 			if( findPos < 0 )
@@ -3040,7 +3039,7 @@ private:
 					dummy = IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 
-				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) GLOBAL.cString.convert( targetText ) ); //SCI_SEARCHINTARGET = 2197,
+				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); //SCI_SEARCHINTARGET = 2197,
 			}
 	
 			if( findPos < 0 )
@@ -3058,7 +3057,7 @@ private:
 				{
 					pos = Integer.toString( findPos+targetText.length ) ~ ":" ~ Integer.toString( findPos );
 				}
-				IupSetAttribute( ih, "SELECTIONPOS", GLOBAL.cString.convert( pos ) );
+				IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
 				//DocumentTabAction.setFocus( ih );
 			}
 		}

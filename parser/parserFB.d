@@ -2304,7 +2304,7 @@ version(FBIDE)
 							break;
 							
 						case TOK.Tsub:
-							if( next().tok == TOK.Tidentifier && next2().tok == TOK.Tcomma )
+							if( next().tok != TOK.Tidentifier || ( next().tok == TOK.Tidentifier && next2().tok == TOK.Tcomma ) || ( next().tok == TOK.Tidentifier && next2().tok == TOK.Tptr ) )
 							{
 								// ASM Command
 								parseToken( TOK.Tsub );

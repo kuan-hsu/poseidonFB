@@ -340,7 +340,7 @@ extern(C)
 					actionManager.SearchAction.addListItem( listFind_handle, findText, 15 );
 					if( flag == 2 && ReplaceText.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText, 15 );
 
-					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
+					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) toStringz( findText ) ); //SCI_SEARCHINTARGET = 2197,
 					while( findPos > -1 )
 					{
 						switch( flag )
@@ -363,7 +363,7 @@ extern(C)
 						if( !bScopeSelection ) IupSetInt( iupSci, "TARGETEND", -1 ); else IupSetAttribute( iupSci, "TARGETFROMSELECTION", "YES" );
 						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + ReplaceText.length );
 						
-						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) GLOBAL.cString.convert( findText ) ); //SCI_SEARCHINTARGET = 2197,
+						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) toStringz( findText ) ); //SCI_SEARCHINTARGET = 2197,
 					}
 				}
 			}

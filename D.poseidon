@@ -33,7 +33,6 @@ name=images/imageData.d
 name=images/xpm.d
 name=layout.d
 name=layouts/debugger.d
-name=layouts/filelistPanel.d
 name=layouts/messagePanel.d
 name=layouts/outlinePanel.d
 name=layouts/projectPanel.d
