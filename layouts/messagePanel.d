@@ -92,6 +92,12 @@ public:
 	
 	void applyColor()
 	{
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSFORECOLOR", GLOBAL.editColor.outlineFore.toCString );
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSBACKCOLOR", GLOBAL.editColor.outlineBack.toCString );		
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
+		
 		uint alpha = Integer.atoi( GLOBAL.editColor.selAlpha.toDString );
 		if( alpha > 255 )
 			alpha = 255;

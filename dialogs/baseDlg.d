@@ -10,37 +10,44 @@ class CBaseDialog
 	import tango.stdc.stringz, Integer = tango.text.convert.Integer;
 	
 	Ihandle*			_dlg;
-	Ihandle*			btnAPPLY, btnOK, btnCANCEL;
-	IupString			_buttonSize, size, onlyW, onlyH, titleString, parentName;
+	Ihandle*			btnAPPLY, btnOK, btnCANCEL, btnHiddenOK, btnHiddenCANCEL;
+	IupString			size, onlyW, onlyH, titleString, parentName;
 	
 	Ihandle* createDlgButton( char[] buttonSize = "40x20", char[] buttons = "oc" )
 	{
-		_buttonSize = new IupString( buttonSize );
-		
-		btnAPPLY = IupButton( GLOBAL.languageItems["apply"].toCString, null );
+		btnAPPLY = IupFlatButton( GLOBAL.languageItems["apply"].toCString );
+		version(DARKTHEME) IupSetStrAttribute( btnAPPLY, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetHandle( "btnAPPLY", btnAPPLY );
-		IupSetAttribute( btnAPPLY, "SIZE", _buttonSize.toCString );
+		IupSetStrAttribute( btnAPPLY, "SIZE", toStringz( buttonSize ) );
 		
-		btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
+		btnOK = IupFlatButton( GLOBAL.languageItems["ok"].toCString );
+		version(DARKTHEME) IupSetStrAttribute( btnOK, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetHandle( "btnOK", btnOK );
-		IupSetAttribute( btnOK, "SIZE", _buttonSize.toCString );
+		IupSetStrAttribute( btnOK, "SIZE", toStringz( buttonSize ) );
 		
-		btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
+		btnCANCEL = IupFlatButton( GLOBAL.languageItems["cancel"].toCString );
+		version(DARKTHEME) IupSetStrAttribute( btnCANCEL, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
-		IupSetAttribute( btnCANCEL, "SIZE", _buttonSize.toCString );
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
+		IupSetStrAttribute( btnCANCEL, "SIZE", toStringz( buttonSize ) );
+		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
 		
-		/+
-		Ihandle* btnAPPLY = IupButton( "Apply", null );
-		IupSetAttribute( btnAPPLY, "SIZE", "40x20" );
-		IupSetAttribute( btnAPPLY, "IMAGE", "IUP_NavigateRefresh" );
-		+/
+		// IupFlatButton won't support DEFAULTENTER / DEFAULTESC, so we create non-visible IupButton
+		btnHiddenOK = IupButton( null, null );
+		IupSetAttribute( btnHiddenOK, "VISIBLE", "NO" );
+		IupSetHandle( "btnHiddenOK", btnHiddenOK );
 		
-		Ihandle* hBox_DlgButton = IupHbox( IupFill(), btnAPPLY, btnOK, btnCANCEL, null );
+		btnHiddenCANCEL = IupButton( null, null );
+		IupSetAttribute( btnHiddenCANCEL, "VISIBLE", "NO" );
+		IupSetHandle( "btnHiddenCANCEL", btnHiddenCANCEL );
+		IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
+		
+		
+		
+		Ihandle* hBox_DlgButton = IupHbox( btnHiddenOK, btnHiddenCANCEL, IupFill(), btnAPPLY, btnOK, btnCANCEL, null );
 		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ABOTTOM,GAP=5,MARGIN=1x0" );
 
-		IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK" );
-		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL" );
+		IupSetAttribute( _dlg, "DEFAULTENTER", "btnHiddenOK" );
+		IupSetAttribute( _dlg, "DEFAULTESC", "btnHiddenCANCEL" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CBaseDialog_btnCancel_cb );
 
 		if( Util.count( buttons, "a" ) == 0 ) IupDestroy( btnAPPLY );
@@ -57,7 +64,12 @@ class CBaseDialog
 		_dlg = IupDialog( null );
 		titleString = new IupString( title );
 		IupSetAttribute( _dlg, "TITLE", titleString.toCString );
-
+		version(DARKTHEME) 
+		{
+			IupSetStrAttribute( _dlg, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+			IupSetStrAttribute( _dlg, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		}
+		
 		size	= new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
 		onlyW	= new IupString( Integer.toString( w ) ~ "x" );
 		onlyH	= new IupString( "x" ~ Integer.toString( h ) );
@@ -118,8 +130,7 @@ class CBaseDialog
 		IupSetHandle( "btnCANCEL", null );
 		IupSetHandle( "btnOK", null );
 		//IupDestroy( _dlg );
-		
-		delete _buttonSize;
+
 		delete size;
 		delete onlyW;
 		delete onlyH;

@@ -67,38 +67,6 @@ class CScintilla
 		
 		if( GLOBAL.documentTabs != null )
 		{
-			/*
-			version(FBIDE)
-			{
-				if( lowerCase( mypath.ext )== "bas" )
-				{
-					IupSetAttribute( sci, "TABIMAGE", "icon_bas" );
-				}
-				else if( lowerCase( mypath.ext )== "bi" )
-				{
-					IupSetAttribute( sci, "TABIMAGE", "icon_bi" );
-				}
-				else
-				{
-					IupSetAttribute( sci, "TABIMAGE", "icon_txt" );
-				}
-			}
-			version(DIDE)
-			{
-				if( lowerCase( mypath.ext )== "d" )
-				{
-					IupSetAttribute( sci, "TABIMAGE", "icon_bas" );
-				}
-				else if( lowerCase( mypath.ext )== "di" )
-				{
-					IupSetAttribute( sci, "TABIMAGE", "icon_bi" );
-				}
-				else
-				{
-					IupSetAttribute( sci, "TABIMAGE", "icon_txt" );
-				}
-			}	
-			*/
 			IupSetAttribute( sci, "BORDER", "NO" );
 			//IupSetHandle( fullPath.toCString, sci );
 			IupSetAttribute( sci, "NAME", fullPath.toCString );
@@ -130,36 +98,7 @@ class CScintilla
 			
 			int newDocumentPos = IupGetChildPos( GLOBAL.activeDocumentTabs, sci );
 			IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", newDocumentPos, title.toCString );
-			version(FBIDE)
-			{
-				if( lowerCase( mypath.ext )== "bas" )
-				{
-					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bas" );
-				}
-				else if( lowerCase( mypath.ext )== "bi" )
-				{
-					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bi" );
-				}
-				else
-				{
-					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_txt" );
-				}
-			}
-			version(DIDE)
-			{
-				if( lowerCase( mypath.ext )== "d" )
-				{
-					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bas" );
-				}
-				else if( lowerCase( mypath.ext )== "di" )
-				{
-					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_bi" );
-				}
-				else
-				{
-					IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABIMAGE", newDocumentPos, "icon_txt" );
-				}
-			}				
+			DocumentTabAction.setTabItemDocumentImage( GLOBAL.activeDocumentTabs, newDocumentPos, title.toDString );
 			
 			// For IupFlatTabs
 			IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
@@ -1656,16 +1595,6 @@ extern(C)
 						return IUP_DEFAULT;
 					});
 					
-					/*
-					Ihandle* _back = IupItem( GLOBAL.languageItems["sc_backdefinition"].toCString, null );
-					IupSetAttribute( _back, "IMAGE", "icon_back" );
-					IupSetCallback( _back, "ACTION", cast(Icallback) function( Ihandle* ih )
-					{
-						//AutoComplete.backDefinition();
-						return IUP_DEFAULT;
-					});
-					*/
-					
 					Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
 					IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" );
 					IupSetCallback( _gotoProcedure, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -1905,7 +1834,7 @@ extern(C)
 								Ihandle* _ih = actionManager.ScintillaAction.getActiveIupScintilla();
 								if( _ih != null )
 								{
-									int dummy, line = ScintillaAction.getCurrentLine( _ih ) - 1;
+									int line = ScintillaAction.getCurrentLine( _ih ) - 1;
 									uint state = IupGetIntId( _ih, "MARKERGET", line );
 									if( state & ( 1 << 2 ) )
 									{
@@ -2114,7 +2043,8 @@ extern(C)
 							IupSetInt( ih, "TARGETEND", -1 );
 							
 							int count;
-							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) toStringz( word ) ); //SCI_SEARCHINTARGET = 2197,
+							scope _t = new IupString( word );
+							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 							
 							while( findPos > -1 )
 							{
@@ -2125,7 +2055,7 @@ extern(C)
 
 								IupSetInt( ih, "TARGETSTART", findPos + word.length );
 								IupSetInt( ih, "TARGETEND", -1 );
-								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) toStringz( word ) ); //SCI_SEARCHINTARGET = 2197,
+								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 							}
 						}
 					}
@@ -2210,7 +2140,6 @@ extern(C)
 					iconX = Integer.atoi( iconString[0..crossSign] );
 					iconY = Integer.atoi( iconString[crossSign+1..$] );
 				}
-				int dummy;
 				if( cursorY > iconY + 16 )
 				{
 					int add = ( cursorY - iconY - 16 ) / 50 + 1;
@@ -2414,7 +2343,9 @@ extern(C)
 
 												IupSetInt( ih, "TARGETSTART", lineTail );
 												IupSetInt( ih, "TARGETEND", lineHead );
-												int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int)toStringz( targetText ) );
+												
+												scope _t = new IupString( targetText );
+												int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString );
 												
 												while( posHead >= 0 )
 												{
@@ -2422,7 +2353,7 @@ extern(C)
 													bGetMatch = true;
 													IupSetInt( ih, "TARGETSTART", posHead );
 													IupSetInt( ih, "TARGETEND", lineHead );
-													posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) );
+													posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString );
 												}					
 											}
 										}
@@ -2981,7 +2912,6 @@ extern(C)
 			}
 			
 			scope textCovert = new IupString( _text.dup );
-			int dummy;
 			if( GLOBAL.toggleOverWrite == "ON" )
 			{
 				int tail = AutoComplete.getWholeWordTailPos( ih, pos );
@@ -2992,7 +2922,7 @@ extern(C)
 				}
 				else if( tail == pos )
 				{
-					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int)textCovert.toCString ); // SCI_ADDTEXT 2001
+					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int) textCovert.toCString ); // SCI_ADDTEXT 2001
 				}				
 			}
 			else
@@ -3002,7 +2932,7 @@ extern(C)
 				textCovert = _text;
 				if( IupGetAttribute( ih, "SELECTEDTEXT" ) == null )
 				{	
-					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int)textCovert.toCString ); // SCI_ADDTEXT 2001
+					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int) textCovert.toCString ); // SCI_ADDTEXT 2001
 				}
 				else
 					IupSetAttribute( ih, "SELECTEDTEXT", textCovert.toCString );			
@@ -3333,7 +3263,6 @@ extern(C)
 	{
 		try
 		{
-			int dummy;
 			// BRACEMATCH
 			if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" )
 			{
@@ -3580,11 +3509,13 @@ extern(C)
 
 		IupScintillaSendMessage( ih, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
+		scope _t = new IupString( targetText );
+		
 		// Search Document
 		IupSetAttribute( ih, "SEARCHFLAGS", "WHOLEWORD" );
 		IupSetInt( ih, "TARGETSTART", 0 );
 		IupSetInt( ih, "TARGETEND", -1 );
-		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); // SCI_SEARCHINTARGET = 2197,
+		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		
 		while( findPos != -1 )
 		{
@@ -3593,7 +3524,7 @@ extern(C)
 			IupScintillaSendMessage( ih, 2504, targetStart, TargetEnd - targetStart ); // SCI_INDICATORFILLRANGE =  2504
 			IupSetInt( ih, "TARGETSTART", TargetEnd );
 			IupSetInt( ih, "TARGETEND", -1 );
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); // SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		}
 	}
 }

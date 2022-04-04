@@ -107,7 +107,7 @@ class CManualDialog : CBaseDialog
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
 		
 		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["ok"].toCString );
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CManualDialog_btnApply_ACTION );
+		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CManualDialog_btnApply_ACTION );
 	}
 
 	~this()

@@ -8,7 +8,7 @@ import menu, scintilla, actionManager;
 import parser.autocompletion;
 
 import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer, Float = tango.text.convert.Float;
-import tango.sys.Environment, tango.io.FilePath;
+import tango.sys.Environment, tango.io.FilePath, Path = tango.io.Path;
 import tango.sys.Process, tango.io.stream.Lines;
 
 import tango.sys.SharedLib;
@@ -189,21 +189,38 @@ void main( char[][] args )
 			char[] home = fromStringz( user.pw_dir );
 			*/
 			char[] home = expandTilde( "~" );
-			
+
 			if( Util.index( GLOBAL.poseidonPath, home ) != 0 )
 			{
 				GLOBAL.linuxHome = home.dup;
 				version(FBIDE)	GLOBAL.linuxHome ~= "/.poseidonFB";
 				version(DIDE)	GLOBAL.linuxHome ~= "/.poseidonD";
-				
+
 				scope dotPath = new FilePath( GLOBAL.linuxHome );
 				if( !dotPath.exists() )	dotPath.create();
-				
+
 				dotPath.set( GLOBAL.linuxHome ~ "/settings" );
 				if( !dotPath.exists() )	dotPath.create();
-				
-				dotPath.set( GLOBAL.linuxHome ~ "/colorTemplates" );
-				if( !dotPath.exists() )	dotPath.create();
+
+				dotPath.set( GLOBAL.linuxHome ~ "/settings/colorTemplates" );
+				if( !dotPath.exists() )
+				{
+					dotPath.create();
+
+					// Copy all /settings/colorTemplates/*.ini to ~/.poseidonFB or ~/.poseidonD
+					bool dirFilter( FilePath _fp, bool _isFolder )
+					{
+						if( lowerCase( _fp.ext ) == "ini" ) return true;
+						return false;
+					}
+					bool delegate( FilePath, bool ) _dirFilter;
+					_dirFilter = &dirFilter;
+					
+
+					scope srcPath = new FilePath( GLOBAL.poseidonPath ~ "settings/colorTemplates" );
+					foreach( FilePath _fp; srcPath.toList( _dirFilter ) )
+						Path.copy( _fp.toString, dotPath.toString ~ "/" ~ _fp.file );
+				}
 			}
 		}
 	}
@@ -243,7 +260,23 @@ void main( char[][] args )
 	}
 
 	IupSetGlobal( "UTF8MODE", "YES" );
-	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
+	version(Windows)
+	{
+		IupSetGlobal( "UTF8MODE_FILE", "YES" );
+		/*
+		IupSetGlobal( "MENUFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetGlobal( "MENUBGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		*/
+	}
+	
+	version(DARKTHEME)
+	{
+		IupSetGlobal( "DLGFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetGlobal( "DLGBGCOLOR", GLOBAL.editColor.dlgBack.toCString );	
+		IupSetGlobal( "TXTFGCOLOR", GLOBAL.editColor.txtFore.toCString );
+		IupSetGlobal( "TXTBGCOLOR", GLOBAL.editColor.txtBack.toCString );
+	}
+	
 
 	createMenu();
 	
@@ -319,18 +352,18 @@ void main( char[][] args )
 	
 
 	createDialog();
-
-	scope docTabString = new IupString( GLOBAL.fonts[0].fontString );	IupSetAttribute( GLOBAL.documentTabs, "TABFONT", docTabString.toCString );
-	scope leftsideString = new IupString( GLOBAL.fonts[2].fontString );	IupSetAttribute( GLOBAL.projectViewTabs, "FONT", leftsideString.toCString );// Leftside
-	//scope fileListString = new IupString( GLOBAL.fonts[3].fontString );	IupSetAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", fileListString.toCString );// Filelist
-	scope messageString = new IupString( GLOBAL.fonts[6].fontString );	IupSetAttribute( GLOBAL.messageWindowTabs, "TABFONT", messageString.toCString );// Bottom
-	scope outputString = new IupString( GLOBAL.fonts[7].fontString );	IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", outputString.toCString );//IupSetAttribute( GLOBAL.outputPanel, "FONT", outputString.toCString );// Output
-	scope searchString = new IupString( GLOBAL.fonts[8].fontString );	IupSetAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", searchString.toCString ); //IupSetAttribute( GLOBAL.searchOutputPanel, "FONT", searchString.toCString );// Search
-	scope statusString = new IupString( GLOBAL.fonts[11].fontString );	IupSetAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", statusString.toCString );// StatusBar
-	scope outlineString = new IupString( GLOBAL.fonts[5].fontString );	IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", outlineString.toCString );// Outline
-	scope prjString = new IupString( GLOBAL.fonts[4].fontString );
-	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", prjString.toCString );// Project
-	IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TITLEFONT0", prjString.toCString ); IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "TITLEFONTSTYLE0", "Bold" );// Project
+	
+	IupSetStrAttribute( GLOBAL.documentTabs, "TABFONT", toStringz( GLOBAL.fonts[0].fontString ) );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) );// Leftside
+	//IupSetStrAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[3].fontString ) );// Filelist
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABFONT", toStringz( GLOBAL.fonts[6].fontString ) );// Bottom
+	IupSetStrAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", toStringz( GLOBAL.fonts[7].fontString ) );// Output
+	IupSetStrAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Search
+	IupSetStrAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[11].fontString ) );// StatusBar
+	IupSetStrAttribute( GLOBAL.outlineTree.getZBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) );// Outline	
+	IupSetStrAttribute( GLOBAL.projectTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[4].fontString ) );// Project
+	IupSetStrAttribute( GLOBAL.projectTree.getTreeHandle, "TITLEFONT0", toStringz( GLOBAL.fonts[4].fontString ) );
+	IupSetStrAttribute( GLOBAL.projectTree.getTreeHandle, "TITLEFONTSTYLE0", "Bold" );// Project	
 	
 	GLOBAL.messagePanel.setScintillaColor(); // Set MessagePanel Color
 	

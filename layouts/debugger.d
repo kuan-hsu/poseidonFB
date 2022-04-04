@@ -27,6 +27,7 @@ class CDebugger
 	Ihandle* 				mainHandle, consoleHandle, backtraceHandle, tabResultsHandle, disasHandle;
 	Ihandle*				watchTreeHandle, localTreeHandle, argTreeHandle, shareTreeHandle, varTabHandle;
 	Ihandle*				bpScrollBox, regScrollBox;
+	Ihandle*				varSplit, rightSplitHandle, mainSplit;
 	CTable					bpTable, regTable;
 	DebugThread				DebugControl;
 	bool					bRunning;
@@ -54,8 +55,8 @@ class CDebugger
 		Ihandle*[6] labelSEPARATOR;
 		for( int i = 0; i < 6; i++ )
 		{
-			labelSEPARATOR[i] = IupLabel( null ); 
-			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
+			labelSEPARATOR[i] = IupFlatSeparator();
+			IupSetAttributes( labelSEPARATOR[i], "STYLE=EMPTY" );
 		}
 		
 		
@@ -175,29 +176,46 @@ class CDebugger
 
 		watchTreeHandle = IupTree();
 		IupSetAttributes( watchTreeHandle, "EXPAND=YES,ADDROOT=NO" );
+		IupSetStrAttribute( watchTreeHandle, "COLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( watchTreeHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( watchTreeHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( watchTreeHandle, "BUTTON_CB", cast(Icallback) &watchListBUTTON_CB );
 
 		localTreeHandle =IupTree();
 		IupSetAttributes( localTreeHandle, "EXPAND=YES,ADDROOT=NO" );
+		IupSetStrAttribute( localTreeHandle, "COLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( localTreeHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( localTreeHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( localTreeHandle, "BUTTON_CB", cast(Icallback) &treeBUTTON_CB );
 
 		argTreeHandle =IupTree();
 		IupSetAttributes( argTreeHandle, "EXPAND=YES,ADDROOT=NO" );
+		IupSetStrAttribute( argTreeHandle, "COLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( argTreeHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( argTreeHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( argTreeHandle, "BUTTON_CB", cast(Icallback) &treeBUTTON_CB );
 		
 		shareTreeHandle =IupTree();
 		IupSetAttributes( shareTreeHandle, "EXPAND=YES,ADDROOT=NO" );
+		IupSetStrAttribute( shareTreeHandle, "COLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( shareTreeHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( shareTreeHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( shareTreeHandle, "BUTTON_CB", cast(Icallback) &treeBUTTON_CB );
 
 
 		varTabHandle = IupFlatTabs( localTreeHandle, argTreeHandle, shareTreeHandle, null );
 		IupSetAttributes( varTabHandle, "TABTYPE=RIGHT,TABORIENTATION=VERTICAL,TABSPADDING=2x6" );
-		IupSetAttribute( varTabHandle, "HIGHCOLOR", "0 0 255" );
-		IupSetAttribute( varTabHandle, "TABSHIGHCOLOR", "240 255 240" );
+		//IupSetAttribute( varTabHandle, "HIGHCOLOR", "0 0 255" );
+		//IupSetAttribute( varTabHandle, "TABSHIGHCOLOR", "240 255 240" );
 		IupSetCallback( varTabHandle, "TABCHANGEPOS_CB", cast(Icallback) &varTabChange_cb );
 		IupSetAttribute( varTabHandle, "TABTITLE0", GLOBAL.languageItems["locals"].toCString() );
 		IupSetAttribute( varTabHandle, "TABTITLE1", GLOBAL.languageItems["args"].toCString() );
 		IupSetAttribute( varTabHandle, "TABTITLE2", GLOBAL.languageItems["shared"].toCString() );
+		IupSetAttribute( varTabHandle, "HIGHCOLOR", "255 0 0" );
+		IupSetStrAttribute( varTabHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( varTabHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetAttribute( varTabHandle, "SHOWLINES", "NO" );
+		
 
 
 
@@ -271,8 +289,9 @@ class CDebugger
 		Ihandle* var1ScrollBox = IupFlatScrollBox( var1Frame );
 	
 
-		Ihandle* varSplit = IupSplit( var1ScrollBox, var0ScrollBox );
-		IupSetAttributes( varSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=500,LAYOUTDRAG=NO" );
+		varSplit = IupSplit( var1ScrollBox, var0ScrollBox );
+		IupSetAttributes( varSplit, "ORIENTATION=VERTICAL,VALUE=500,LAYOUTDRAG=NO" );
+		IupSetAttribute( varSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 		IupSetInt( varSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 		
 		Ihandle* WatchVarBackground = IupBackgroundBox( varSplit );
@@ -315,38 +334,43 @@ class CDebugger
 		regTable.addColumn( GLOBAL.languageItems["value"].toDString );
 		regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
 		regTable.setSplitAttribute( "VALUE", "300" );
-		//regTable.setItemAttribute( "BGCOLOR", "204 255 255", 0 );
-		//regTable.setItemAttribute( "BGCOLOR", "255 255 204", 1 );
+		/*
 		regTable.setItemAttribute( "FGCOLOR", "0 102 0", 1 );
 		regTable.setItemAttribute( "FGCOLOR", "0 0 255", 2 );
 		regTable.setItemAttribute( "FGCOLOR", "90 90 90", 3 );
-		
+		*/
 		regScrollBox = IupFlatScrollBox( regTable.getMainHandle );
 		
 		
 		disasHandle = IupText( null );
+		IupSetStrAttribute( disasHandle, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+		IupSetStrAttribute( disasHandle, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
 		IupSetAttributes( disasHandle, "EXPAND=YES,MULTILINE=YES,READONLY=YES,FORMATTING=YES" );
 
 		setFont();
 
 		tabResultsHandle = IupFlatTabs( bpScrollBox, WatchVarBackground, regScrollBox, disasHandle, null );
 		IupSetAttributes( tabResultsHandle, "TABTYPE=BOTTOM,EXPAND=YES,TABSPADDING=6x2" );
-		IupSetAttribute( tabResultsHandle, "HIGHCOLOR", "0 0 255" );
-		IupSetAttribute( tabResultsHandle, "TABSHIGHCOLOR", "240 255 240" );
 		IupSetCallback( tabResultsHandle, "TABCHANGEPOS_CB", cast(Icallback) &resultTabChange_cb );
 		IupSetAttribute( tabResultsHandle, "TABTITLE0", GLOBAL.languageItems["bp"].toCString );
 		IupSetAttribute( tabResultsHandle, "TABTITLE1", GLOBAL.languageItems["variable"].toCString );
 		IupSetAttribute( tabResultsHandle, "TABTITLE2", GLOBAL.languageItems["register"].toCString );
 		IupSetAttribute( tabResultsHandle, "TABTITLE3", GLOBAL.languageItems["disassemble"].toCString );
+		IupSetAttribute( tabResultsHandle, "HIGHCOLOR", "255 0 0" );
+		IupSetStrAttribute( tabResultsHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( tabResultsHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetAttribute( tabResultsHandle, "SHOWLINES", "NO" );
 		
 		
 
-		Ihandle* rightSplitHandle = IupSplit( backtraceHandle, tabResultsHandle  );
-		IupSetAttributes( rightSplitHandle, "ORIENTATION=HORIZONTAL,SHOWGRIP=LINES,VALUE=150,LAYOUTDRAG=NO" );
+		rightSplitHandle = IupSplit( backtraceHandle, tabResultsHandle  );
+		IupSetAttributes( rightSplitHandle, "ORIENTATION=HORIZONTAL,VALUE=150,LAYOUTDRAG=NO" );
+		IupSetAttribute( rightSplitHandle, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 		IupSetInt( rightSplitHandle, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 		
-		Ihandle* mainSplit = IupSplit( leftScrollBox, rightSplitHandle );
-		IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,SHOWGRIP=LINES,VALUE=220,LAYOUTDRAG=NO" );
+		mainSplit = IupSplit( leftScrollBox, rightSplitHandle );
+		IupSetAttributes( mainSplit, "ORIENTATION=VERTICAL,VALUE=220,LAYOUTDRAG=NO" );
+		IupSetAttribute( mainSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 		IupSetInt( mainSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 		
 
@@ -873,15 +897,15 @@ class CDebugger
 					{
 						char[] _title = numID ~ variables[i].name ~ " = " ~ ( variables[i].type.length ? "(" ~  variables[i].type ~ ") " : "" ) ~ variables[i].value;
 						IupSetAttributeId( treeHandle, "TITLE", motherID, toStringz( _title ) );
-						if( variables[i].value != _voFromNode.value ) IupSetAttributeId( treeHandle, "COLOR", motherID, "255 0 0" ); else IupSetAttributeId( treeHandle, "COLOR", motherID, "0 0 0" );
+						if( variables[i].value != _voFromNode.value ) IupSetAttributeId( treeHandle, "COLOR", motherID, "255 0 0" ); else IupSetStrAttributeId( treeHandle, "COLOR", motherID, GLOBAL.editColor.dlgFore.toCString );
 						if( treeHandle == watchTreeHandle && numID.length )
 						{
 							char[] fontString = Util.substitute( GLOBAL.fonts[9].fontString.dup, ",", ",Bold " );
-							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( fontString ) );
+							IupSetStrAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( fontString ) );
 						}
 						else
 						{
-							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[9].fontString ) );
+							IupSetStrAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[9].fontString ) );
 						}
 					}
 					else
@@ -892,11 +916,11 @@ class CDebugger
 						if( treeHandle == watchTreeHandle && numID.length )
 						{
 							char[] fontString = Util.substitute( GLOBAL.fonts[9].fontString.dup, ",", ",Bold " );
-							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( fontString ) );
+							IupSetStrAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( fontString ) );
 						}
 						else
 						{
-							IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[9].fontString ) );
+							IupSetStrAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[9].fontString ) );
 						}
 						
 						// Remove old node 
@@ -928,7 +952,7 @@ class CDebugger
 				{
 					char[] _title = variables[i].name ~ " = " ~ ( variables[i].type.length ? "(" ~  variables[i].type ~ ") " : "" ) ~ variables[i].value;
 					if( variables[i].value == "{...}" ) IupSetAttributeId( treeHandle, "INSERTBRANCH", motherID, toStringz( _title ) ); else IupSetAttributeId( treeHandle, "INSERTLEAF", motherID, toStringz( _title ) );
-					IupSetAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[9].fontString ) );
+					IupSetStrAttributeId( treeHandle, "TITLEFONT", motherID, toStringz( GLOBAL.fonts[9].fontString ) );
 				}
 			}
 			
@@ -977,17 +1001,24 @@ class CDebugger
 							{
 								IupSetAttribute( GLOBAL.debugPanel.disasHandle, "VALUE", toStringz( results[0] ~ "\n\n" ~ result[0..$-5] ) );
 								IupSetInt( GLOBAL.debugPanel.disasHandle, "SCROLLTOPOS", 0 );
+
+								Ihandle* formattag0;
+								formattag0 = IupUser();
+								IupSetStrAttribute( formattag0, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+								IupSetAttribute( formattag0, "SELECTION", "ALL" );
+								IupSetAttribute( GLOBAL.debugPanel.disasHandle, "ADDFORMATTAG_HANDLE", cast(char*)formattag0);
 								
 								Ihandle* formattag;
 								formattag = IupUser();
 								IupSetAttribute( formattag, "FGCOLOR", "99 37 35" );
 								IupSetAttribute( formattag, "UNDERLINE", "SINGLE" );
+								IupSetAttribute( formattag, "WEIGHT", "SEMIBOLD" );
 								IupSetAttribute( formattag, "SELECTION", "1,1:1,500" );
 								IupSetAttribute( GLOBAL.debugPanel.disasHandle, "ADDFORMATTAG_HANDLE", cast(char*)formattag);
 
 								Ihandle* formattag1;
 								formattag1 = IupUser();
-								IupSetAttribute( formattag1, "FGCOLOR", "0 0 255" );
+								IupSetAttribute( formattag1, "FGCOLOR", "45 117 27" );
 								IupSetAttribute( formattag1, "WEIGHT", "SEMIBOLD" );
 								IupSetAttribute( formattag1, "SELECTION", "4,1:4,500" );
 								IupSetAttribute( GLOBAL.debugPanel.disasHandle, "ADDFORMATTAG_HANDLE", cast(char*)formattag1);
@@ -998,11 +1029,38 @@ class CDebugger
 			}
 		}
 	}
+	
+	void changeTreeNodeColor( Ihandle* TREE )
+	{
+		for( int i = 0; i < IupGetInt( TREE, "COUNT" ); ++ i )	
+			if( fromStringz( IupGetAttributeId( TREE, "COLOR", i ) ) != "255 0 0" ) IupSetStrAttributeId( TREE, "COLOR", i, GLOBAL.editColor.dlgFore.toCString );
+	}
 
 	public:
 	this()
 	{
 		createLayout();
+	}
+	
+	void changeColor()
+	{
+		IupSetStrAttribute( varTabHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( varTabHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( tabResultsHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( tabResultsHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		
+		IupSetAttribute( varSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
+		IupSetAttribute( rightSplitHandle, "COLOR", GLOBAL.editColor.linenumBack.toCString );
+		IupSetAttribute( mainSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
+		
+		changeTreeNodeColor( watchTreeHandle );
+		changeTreeNodeColor( localTreeHandle );
+		changeTreeNodeColor( argTreeHandle );
+		changeTreeNodeColor( shareTreeHandle );
+		
+		for( int i = 0; i < IupGetInt( backtraceHandle, "COUNT" ); ++ i )	
+			if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ) != "0 0 255" ) IupSetStrAttributeId( backtraceHandle, "COLOR", i, GLOBAL.editColor.dlgFore.toCString );
+		
 	}
 
 	void setFont()
@@ -1014,7 +1072,7 @@ class CDebugger
 		IupSetStrAttribute( argTreeHandle, "FONT",  _font );
 		IupSetStrAttribute( shareTreeHandle, "FONT",  _font );
 		//IupSetAttribute( varTabHandle, "FONT",  _font );
-		IupSetStrAttribute( disasHandle, "FONT",  _font );
+		//IupSetStrAttribute( disasHandle, "FONT",  _font );
 		
 		for( int i = 0; i < IupGetInt( watchTreeHandle, "COUNT" ); ++ i )
 			IupSetStrAttributeId( watchTreeHandle, "TITLEFONT", i, _font );
@@ -1353,7 +1411,7 @@ class CDebugger
 							{
 								char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~  _vo.type ~ ") " : "" ) ~ _vo.value;
 								if( _vo.value == "{...}" ) IupSetAttributeId( watchTreeHandle, "INSERTBRANCH", -1, toStringz( _title ) ); else IupSetAttributeId( watchTreeHandle, "INSERTLEAF", -1, toStringz( _title ) );
-								IupSetAttributeId( watchTreeHandle, "TITLEFONT", 0, toStringz( fontString ) );
+								IupSetStrAttributeId( watchTreeHandle, "TITLEFONT", 0, toStringz( fontString ) );
 							}
 						}
 						else
@@ -1368,7 +1426,7 @@ class CDebugger
 						{
 							char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~  _vo.type ~ ") " : "" ) ~ _vo.value;
 							if( _vo.value == "{...}" ) IupSetAttributeId( watchTreeHandle, "INSERTBRANCH", -1, toStringz( _title ) ); else IupSetAttributeId( watchTreeHandle, "INSERTLEAF", -1, toStringz( _title ) );
-							IupSetAttributeId( watchTreeHandle, "TITLEFONT", 0, toStringz( fontString ) );
+							IupSetStrAttributeId( watchTreeHandle, "TITLEFONT", 0, toStringz( fontString ) );
 						}
 					}
 					break;
@@ -1581,7 +1639,7 @@ class CDebugger
 										{
 											char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~  _vo.type ~ ") " : "" ) ~ _vo.value;
 											if( _vo.value == "{...}" ) IupSetAttributeId( _treeHandle, "INSERTBRANCH", -1, toStringz( _title ) ); else IupSetAttributeId( _treeHandle, "INSERTLEAF", -1, toStringz( _title ) );
-											IupSetAttributeId( _treeHandle, "TITLEFONT", 0, toStringz( GLOBAL.fonts[9].fontString ) );
+											IupSetStrAttributeId( _treeHandle, "TITLEFONT", 0, toStringz( GLOBAL.fonts[9].fontString ) );
 										}
 									}
 									else
@@ -2187,9 +2245,9 @@ class DebugThread //: Thread
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
 			//#define SCI_MARKERDELETEALL 2045
-			int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2045, 2, 0 );
-			dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 );
-			dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2045, 4, 0 );
+			IupScintillaSendMessage( cSci.getIupScintilla, 2045, 2, 0 );
+			IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 );
+			IupScintillaSendMessage( cSci.getIupScintilla, 2045, 4, 0 );
 		}
 	}
 
@@ -2535,7 +2593,7 @@ extern( C )
 									{
 										char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~ _vo.type ~ ") " : "" ) ~ _vo.value;
 										if( _vo.value == "{...}" ) IupSetAttributeId( ih, "ADDBRANCH", id, toStringz( _title ) ); else IupSetAttributeId( ih, "ADDLEAF", id, toStringz( _title ) );
-										IupSetAttributeId( ih, "TITLEFONT", id + 1, toStringz( GLOBAL.fonts[9].fontString ) );
+										IupSetStrAttributeId( ih, "TITLEFONT", id + 1, toStringz( GLOBAL.fonts[9].fontString ) );
 									}
 								}
 
@@ -2643,7 +2701,7 @@ extern( C )
 							{
 								char[] _title = _vo.name ~ " = " ~ ( _vo.type.length ? "(" ~ _vo.type ~ ") " : "" ) ~ _vo.value;
 								if( _vo.value == "{...}" ) IupSetAttributeId( ih, "ADDBRANCH", id, toStringz( _title ) ); else IupSetAttributeId( ih, "ADDLEAF", id, toStringz( _title ) );
-								IupSetAttributeId( ih, "TITLEFONT", id + 1, toStringz( GLOBAL.fonts[9].fontString ) );
+								IupSetStrAttributeId( ih, "TITLEFONT", id + 1, toStringz( GLOBAL.fonts[9].fontString ) );
 							}							
 						}
 
@@ -2843,14 +2901,14 @@ extern( C )
 				{
 					IupSetAttributeId( _ih, "INSERTBRANCH", _id, toStringz( title ) );
 					IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 0 255" );
-					IupSetAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[9].fontString ) );
+					IupSetStrAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[9].fontString ) );
 					//if( _ih != GLOBAL.debugPanel.watchTreeHandle ) IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
 				}
 				else
 				{
 					IupSetAttributeId( _ih, "INSERTLEAF", _id, toStringz( title ) );
 					IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 0 255" );
-					IupSetAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[9].fontString ) );
+					IupSetStrAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[9].fontString ) );
 					//if( _ih != GLOBAL.debugPanel.watchTreeHandle ) IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
 				}
 				

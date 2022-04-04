@@ -1150,7 +1150,7 @@ class COutline
 	{
 		// Outline Toolbar
 		outlineButtonCollapse = IupButton( null, null );
-		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,VISIBLE=NO" );
+		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse2,VISIBLE=NO" );
 		IupSetAttribute( outlineButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( outlineButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1273,8 +1273,8 @@ class COutline
 
 		outlineTreeNodeList = IupList( null );
 		IupSetAttributes( outlineTreeNodeList, "ACTIVE=YES,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8,VISIBLE=NO,NAME=list_Outline" );
-		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+		IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+		IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
 		IupSetCallback( outlineTreeNodeList, "ACTION",cast(Icallback) &COutline_List_ACTION );
 		IupSetCallback( outlineTreeNodeList, "K_ANY",cast(Icallback) &COutline_List_K_ANY );
@@ -1295,7 +1295,7 @@ class COutline
 		if( commaPos < GLOBAL.fonts[4].fontString.length )
 		{
 			char[] fontString = Util.substitute( GLOBAL.fonts[5].fontString.dup, ",", ",Bold " );
-			IupSetAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
+			IupSetStrAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
 		}
 	}	
 
@@ -1313,6 +1313,10 @@ class COutline
 
 	void changeColor()
 	{
+		IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+		IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );	
+		IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
+		
 		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 		
@@ -1379,6 +1383,9 @@ class COutline
 					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
 					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
 					
+					IupSetAttribute( tree, "IMAGE0", "icon_folder" );
+					IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_folder_open" );
+
 					toBoldTitle( tree, 0 );
 					//IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &COutline_SELECTION_CB );
 					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
@@ -1391,7 +1398,7 @@ class COutline
 						append( tree, t, 0 );
 					}
 					
-					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+					IupSetStrAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 				}
@@ -1422,7 +1429,7 @@ class COutline
 						append( tree, t, 0 );
 					}
 					
-					IupSetAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+					IupSetStrAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 					if( fromStringz( IupGetGlobal( "DRIVER" ) ) != "GTK" )
@@ -2022,8 +2029,7 @@ class COutline
 						}
 						
 						// Reparse Lexer
-						int dummy;
-						version(FBIDE) dummy = IupScintillaSendMessage( cSci.getIupScintilla, 4003, 0, -1 ); // SCI_COLOURISE 4003
+						version(FBIDE) IupScintillaSendMessage( cSci.getIupScintilla, 4003, 0, -1 ); // SCI_COLOURISE 4003
 
 						return true;
 					}

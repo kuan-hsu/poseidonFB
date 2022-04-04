@@ -268,8 +268,11 @@ public:
 			doc ~= setINILineData( "projectBack", GLOBAL.editColor.projectBack.toDString );
 			doc ~= setINILineData( "outlineFore", GLOBAL.editColor.outlineFore.toDString );
 			doc ~= setINILineData( "outlineBack", GLOBAL.editColor.outlineBack.toDString );	
-			doc ~= setINILineData( "filelistFore", GLOBAL.editColor.filelistFore.toDString );
-			doc ~= setINILineData( "filelistBack", GLOBAL.editColor.filelistBack.toDString );
+			doc ~= setINILineData( "dlgFore", GLOBAL.editColor.dlgFore.toDString );
+			doc ~= setINILineData( "dlgBack", GLOBAL.editColor.dlgBack.toDString );
+			doc ~= setINILineData( "txtFore", GLOBAL.editColor.txtFore.toDString );
+			doc ~= setINILineData( "txtBack", GLOBAL.editColor.txtBack.toDString );
+			
 			doc ~= setINILineData( "outputFore", GLOBAL.editColor.outputFore.toDString );
 			doc ~= setINILineData( "outputBack", GLOBAL.editColor.outputBack.toDString );
 			doc ~= setINILineData( "searchFore", GLOBAL.editColor.searchFore.toDString );
@@ -686,8 +689,10 @@ public:
 							case "projectBack":				GLOBAL.editColor.projectBack = right;					break;
 							case "outlineFore":				GLOBAL.editColor.outlineFore = right;					break;
 							case "outlineBack":				GLOBAL.editColor.outlineBack = right;					break;
-							case "filelistFore":			GLOBAL.editColor.filelistFore = right;					break;
-							case "filelistBack":			GLOBAL.editColor.filelistBack = right;					break;
+							case "dlgFore":					GLOBAL.editColor.dlgFore = right;						break;
+							case "dlgBack":					GLOBAL.editColor.dlgBack = right;						break;
+							case "txtFore":					GLOBAL.editColor.txtFore = right;						break;
+							case "txtBack":					GLOBAL.editColor.txtBack = right;						break;
 							case "outputFore":				GLOBAL.editColor.outputFore = right;					break;
 							case "outputBack":				GLOBAL.editColor.outputBack = right;					break;
 							case "searchFore":				GLOBAL.editColor.searchFore = right;					break;
@@ -1016,72 +1021,6 @@ public:
 		}
 	}
 	
-	/*
-	static void saveColorTemplateINI( char[] templateName )
-	{
-		char[] templatePath = "settings/colorTemplates";
-
-		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
-		
-		scope _fp = new FilePath( templatePath );
-		if( !_fp.exists() )	_fp.create();
-		
-
-		char[] doc = "[color]\n";
-			
-		// Editor
-		doc ~= setINILineData( "caretLine", GLOBAL.editColor.caretLine.toDString );
-		doc ~= setINILineData( "cursor", GLOBAL.editColor.cursor.toDString );
-		doc ~= setINILineData( "selectionFore", GLOBAL.editColor.selectionFore.toDString );
-		doc ~= setINILineData( "selectionBack", GLOBAL.editColor.selectionBack.toDString );
-		doc ~= setINILineData( "linenumFore", GLOBAL.editColor.linenumFore.toDString );
-		doc ~= setINILineData( "linenumBack", GLOBAL.editColor.linenumBack.toDString );
-		doc ~= setINILineData( "fold", GLOBAL.editColor.fold.toDString );
-		doc ~= setINILineData( "selAlpha", GLOBAL.editColor.selAlpha.toDString );
-		doc ~= setINILineData( "braceFore", GLOBAL.editColor.braceFore.toDString );
-		doc ~= setINILineData( "braceBack", GLOBAL.editColor.braceBack.toDString );
-		doc ~= setINILineData( "errorFore", GLOBAL.editColor.errorFore.toDString );
-		doc ~= setINILineData( "errorBack", GLOBAL.editColor.errorBack.toDString );
-		doc ~= setINILineData( "warningFore", GLOBAL.editColor.warningFore.toDString );
-		doc ~= setINILineData( "warningBack", GLOBAL.editColor.warringBack.toDString );
-		doc ~= setINILineData( "scintillaFore", GLOBAL.editColor.scintillaFore.toDString );
-		doc ~= setINILineData( "scintillaBack", GLOBAL.editColor.scintillaBack.toDString );
-		doc ~= setINILineData( "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore.toDString );
-		doc ~= setINILineData( "SCE_B_COMMENT_Back", GLOBAL.editColor.SCE_B_COMMENT_Back.toDString );
-		doc ~= setINILineData( "SCE_B_NUMBER_Fore", GLOBAL.editColor.SCE_B_NUMBER_Fore.toDString );
-		doc ~= setINILineData( "SCE_B_NUMBER_Back", GLOBAL.editColor.SCE_B_NUMBER_Back.toDString );
-		doc ~= setINILineData( "SCE_B_STRING_Fore", GLOBAL.editColor.SCE_B_STRING_Fore.toDString );
-		doc ~= setINILineData( "SCE_B_STRING_Back", GLOBAL.editColor.SCE_B_STRING_Back.toDString );
-		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Fore", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toDString );
-		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Back", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toDString );
-		doc ~= setINILineData( "SCE_B_OPERATOR_Fore", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toDString );
-		doc ~= setINILineData( "SCE_B_OPERATOR_Back", GLOBAL.editColor.SCE_B_OPERATOR_Back.toDString );
-		doc ~= setINILineData( "SCE_B_IDENTIFIER_Fore", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toDString );
-		doc ~= setINILineData( "SCE_B_IDENTIFIER_Back", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toDString );
-		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Fore", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toDString );
-		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Back", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toDString );
-		doc ~= setINILineData( "projectFore", GLOBAL.editColor.projectFore.toDString );
-		doc ~= setINILineData( "projectBack", GLOBAL.editColor.projectBack.toDString );
-		doc ~= setINILineData( "outlineFore", GLOBAL.editColor.outlineFore.toDString );
-		doc ~= setINILineData( "outlineBack", GLOBAL.editColor.outlineBack.toDString );		
-		doc ~= setINILineData( "filelistFore", GLOBAL.editColor.filelistFore.toDString );
-		doc ~= setINILineData( "filelistBack", GLOBAL.editColor.filelistBack.toDString );
-		doc ~= setINILineData( "outputFore", GLOBAL.editColor.outputFore.toDString );
-		doc ~= setINILineData( "outputBack", GLOBAL.editColor.outputBack.toDString );
-		doc ~= setINILineData( "searchFore", GLOBAL.editColor.searchFore.toDString );
-		doc ~= setINILineData( "searchBack", GLOBAL.editColor.searchBack.toDString );
-		doc ~= setINILineData( "prjTitle", GLOBAL.editColor.prjTitle.toDString );
-		doc ~= setINILineData( "prjSourceType", GLOBAL.editColor.prjSourceType.toDString );
-		doc ~= setINILineData( "keyword0", GLOBAL.editColor.keyWord[0].toDString );
-		doc ~= setINILineData( "keyword1", GLOBAL.editColor.keyWord[1].toDString );
-		doc ~= setINILineData( "keyword2", GLOBAL.editColor.keyWord[2].toDString );
-		doc ~= setINILineData( "keyword3", GLOBAL.editColor.keyWord[3].toDString );
-		doc ~= setINILineData( "currentword", GLOBAL.editColor.currentWord.toDString );
-		doc ~= setINILineData( "currentwordAlpha", GLOBAL.editColor.currentWordAlpha.toDString );
-		
-		if( !actionManager.FileAction.saveFile( templatePath ~ "/" ~ templateName ~ ".ini", doc ) ) throw new Exception( "Save File Error" );
-	}
-	*/
 	
 	static char[][] loadColorTemplateINI( char[] templateName )
 	{
@@ -1104,7 +1043,7 @@ public:
 			scope file = new UnicodeFile!(char)( iniPath, Encoding.Unknown );
 			char[] doc = file.read();
 			
-			results.length = 50;
+			results.length = 52;
 			
 			char[]	blockText;
 			foreach( char[] lineData; Util.splitLines( doc ) )
@@ -1172,8 +1111,8 @@ public:
 							case	"projectBack":				results[31] = right;	break;
 							case	"outlineFore":				results[32] = right;	break;
 							case	"outlineBack":				results[33] = right;	break;
-							case	"filelistFore":				results[34] = right;	break;
-							case	"filelistBack":				results[35] = right;	break;
+							case	"dlgFore":					results[34] = right;	break;
+							case	"dlgBack":					results[35] = right;	break;
 							case	"outputFore":				results[36] = right;	break;
 							case	"outputBack":				results[37] = right;	break;
 							case	"searchFore":				results[38] = right;	break;
@@ -1189,17 +1128,9 @@ public:
 							case	"currentwordAlpha":			results[47] = right;	break;
 							case	"keyword4":					results[48] = right;	break;
 							case	"keyword5":					results[49] = right;	break;
-
-							/*
-							case	"caretLine", "cursor", "selectionFore", "selectionBack", "linenumFore", "linenumBack", "fold", "selAlpha",
-									"braceFore", "braceBack", "errorFore", "errorBack", "warningFore", "warningBack", "scintillaFore", "scintillaBack",
-									"SCE_B_COMMENT_Fore", "SCE_B_COMMENT_Back", "SCE_B_NUMBER_Fore", "SCE_B_NUMBER_Back", "SCE_B_STRING_Fore", "SCE_B_STRING_Back", "SCE_B_PREPROCESSOR_Fore", "SCE_B_PREPROCESSOR_Back",
-									"SCE_B_OPERATOR_Fore", "SCE_B_OPERATOR_Back", "SCE_B_IDENTIFIER_Fore", "SCE_B_IDENTIFIER_Back", "SCE_B_COMMENTBLOCK_Fore", "SCE_B_COMMENTBLOCK_Back", "projectFore", "projectBack",
-									"outlineFore", "outlineBack", "filelistFore", "filelistBack", "outputFore", "outputBack", "searchFore", "searchBack",
-									"prjTitle", "prjSourceType", "keyword0", "keyword1", "keyword2", "keyword3", "keyword4", "keyword5", "currentword", "currentwordAlpha":
-									results ~= right;
-									break;
-							*/
+							
+							case	"txtFore":					results[50] = right;	break;
+							case	"txtBack":					results[51] = right;	break;
 							default:
 						}
 						break;
@@ -1214,75 +1145,6 @@ public:
 		
 		return results;
 	}	
-	
-	/+
-	static void saveColorTemplate( char[] templateName )
-	{
-		// Write Setting File...
-		auto doc = new Document!(char);
-
-		// attach an xml header
-		doc.header;
-
-		auto configNode = doc.tree.element( null, "config" );
-
-		configNode.element( null, "color" )
-		.attribute( null, "keyword0", GLOBAL.editColor.keyWord[0].toDString )
-		.attribute( null, "keyword1", GLOBAL.editColor.keyWord[1].toDString )
-		.attribute( null, "keyword2", GLOBAL.editColor.keyWord[2].toDString )
-		.attribute( null, "keyword3", GLOBAL.editColor.keyWord[3].toDString )
-		.attribute( null, "caretLine", GLOBAL.editColor.caretLine.toDString )
-		.attribute( null, "cursor", GLOBAL.editColor.cursor.toDString )
-		.attribute( null, "selectionFore", GLOBAL.editColor.selectionFore.toDString )
-		.attribute( null, "selectionBack", GLOBAL.editColor.selectionBack.toDString )
-		.attribute( null, "linenumFore", GLOBAL.editColor.linenumFore.toDString )
-		.attribute( null, "linenumBack", GLOBAL.editColor.linenumBack.toDString )
-		.attribute( null, "fold", GLOBAL.editColor.fold.toDString )
-		.attribute( null, "selAlpha", GLOBAL.editColor.selAlpha.toDString )
-		.attribute( null, "braceFore", GLOBAL.editColor.braceFore.toDString )
-		.attribute( null, "braceBack", GLOBAL.editColor.braceBack.toDString )
-		.attribute( null, "errorFore", GLOBAL.editColor.errorFore.toDString )
-		.attribute( null, "errorBack", GLOBAL.editColor.errorBack.toDString )
-		.attribute( null, "warningFore", GLOBAL.editColor.warningFore.toDString )
-		.attribute( null, "warningBack", GLOBAL.editColor.warringBack.toDString )
-		.attribute( null, "scintillaFore", GLOBAL.editColor.scintillaFore.toDString )
-		.attribute( null, "scintillaBack", GLOBAL.editColor.scintillaBack.toDString )
-		.attribute( null, "SCE_B_COMMENT_Fore", GLOBAL.editColor.SCE_B_COMMENT_Fore.toDString )
-		.attribute( null, "SCE_B_COMMENT_Back", GLOBAL.editColor.SCE_B_COMMENT_Back.toDString )
-		.attribute( null, "SCE_B_NUMBER_Fore", GLOBAL.editColor.SCE_B_NUMBER_Fore.toDString )
-		.attribute( null, "SCE_B_NUMBER_Back", GLOBAL.editColor.SCE_B_NUMBER_Back.toDString )
-		.attribute( null, "SCE_B_STRING_Fore", GLOBAL.editColor.SCE_B_STRING_Fore.toDString )
-		.attribute( null, "SCE_B_STRING_Back", GLOBAL.editColor.SCE_B_STRING_Back.toDString )
-		.attribute( null, "SCE_B_PREPROCESSOR_Fore", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toDString )
-		.attribute( null, "SCE_B_PREPROCESSOR_Back", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toDString )
-		.attribute( null, "SCE_B_OPERATOR_Fore", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toDString )
-		.attribute( null, "SCE_B_OPERATOR_Back", GLOBAL.editColor.SCE_B_OPERATOR_Back.toDString )
-		.attribute( null, "SCE_B_IDENTIFIER_Fore", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toDString )
-		.attribute( null, "SCE_B_IDENTIFIER_Back", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toDString )
-		.attribute( null, "SCE_B_COMMENTBLOCK_Fore", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toDString )
-		.attribute( null, "SCE_B_COMMENTBLOCK_Back", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toDString )
-		.attribute( null, "projectFore", GLOBAL.editColor.projectFore.toDString )
-		.attribute( null, "projectBack", GLOBAL.editColor.projectBack.toDString )
-		.attribute( null, "outlineFore", GLOBAL.editColor.outlineFore.toDString )
-		.attribute( null, "outlineBack", GLOBAL.editColor.outlineBack.toDString )		
-		.attribute( null, "filelistFore", GLOBAL.editColor.filelistFore.toDString )
-		.attribute( null, "filelistBack", GLOBAL.editColor.filelistBack.toDString )
-		.attribute( null, "outputFore", GLOBAL.editColor.outputFore.toDString )
-		.attribute( null, "outputBack", GLOBAL.editColor.outputBack.toDString )
-		.attribute( null, "searchFore", GLOBAL.editColor.searchFore.toDString )
-		.attribute( null, "searchBack", GLOBAL.editColor.searchBack.toDString )
-		.attribute( null, "prjTitle", GLOBAL.editColor.prjTitle.toDString )
-		.attribute( null, "prjSourceType", GLOBAL.editColor.prjSourceType.toDString )
-		.attribute( null, "currentword", GLOBAL.editColor.currentWord.toDString )
-		.attribute( null, "currentwordAlpha", GLOBAL.editColor.currentWordAlpha.toDString );		
-		
-		auto print = new DocPrinter!(char);
-		scope _fp = new FilePath( "settings/colorTemplates" );
-		if( !_fp.exists() )	_fp.createFolder();
-		
-		actionManager.FileAction.saveFile( "settings/colorTemplates/" ~ templateName ~ ".xml", print.print( doc ) );
-	}
-	+/
 	
 	static char[][] loadColorTemplate( char[] templateName )
 	{

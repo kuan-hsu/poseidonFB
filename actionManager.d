@@ -895,6 +895,7 @@ struct DocumentTabAction
 {
 private:
 	import scintilla;
+	import tango.io.FilePath;
 	
 public:
 	static int tabChangePOS( Ihandle* ih, int new_pos )
@@ -911,10 +912,9 @@ public:
 					StatusBarAction.update( _child );
 					//IupSetInt( ih, "VALUEPOS" , new_pos );
 					IupSetFocus( _child );
-					int dummy = IupScintillaSendMessage( _child, 2380, 1, 0 ); // SCI_SETFOCUS 2380
+					IupScintillaSendMessage( _child, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 
 					// Marked the trees( FileList & ProjectTree )
-
 					IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 					
 					if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
@@ -970,12 +970,49 @@ public:
 		if( pos >= 0 && pos <= IupGetInt( GLOBAL.activeDocumentTabs, "COUNT" ) )
 		{
 			IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , pos );
-			int dummy = IupScintillaSendMessage( IupGetChild( GLOBAL.activeDocumentTabs, pos ), 2380, 1, 0 ); // SCI_SETFOCUS 2380
+			IupScintillaSendMessage( IupGetChild( GLOBAL.activeDocumentTabs, pos ), 2380, 1, 0 ); // SCI_SETFOCUS 2380
 			//IupSetFocus( cast(Ihandle*) IupGetChild( GLOBAL.activeDocumentTabs, pos ) );
 			return IUP_CONTINUE;
 		}
 		
 		return IUP_DEFAULT;
+	}
+	
+	
+	static void setTabItemDocumentImage( Ihandle* workDocumentTab, int newDocumentPos, char[] _fullPath )
+	{
+		scope mypath = new FilePath( _fullPath );
+		
+		version(FBIDE)
+		{
+			if( lowerCase( mypath.ext )== "bas" )
+			{
+				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bas" );
+			}
+			else if( lowerCase( mypath.ext )== "bi" )
+			{
+				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bi" );
+			}
+			else
+			{
+				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_txt" );
+			}
+		}
+		version(DIDE)
+		{
+			if( lowerCase( mypath.ext )== "d" )
+			{
+				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bas" );
+			}
+			else if( lowerCase( mypath.ext )== "di" )
+			{
+				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bi" );
+			}
+			else
+			{
+				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_txt" );
+			}
+		}	
 	}
 	
 	static Ihandle* getDocumentTabs( Ihandle* sci )
@@ -1224,7 +1261,10 @@ public:
 		IupSetAttribute( iupSci, "SEARCHFLAGS", "WHOLEWORD" );
 		IupSetInt( iupSci, "TARGETSTART", 0 );
 		IupSetInt( iupSci, "TARGETEND", -1 );
-		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) toStringz( target ) ); // SCI_SEARCHINTARGET = 2197,
+		
+		scope _t = new IupString( target );
+		
+		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		
 		while( findPos != -1 )
 		{
@@ -1240,7 +1280,7 @@ public:
 			
 			IupSetInt( iupSci, "TARGETSTART", findPos + target.length );
 			IupSetInt( iupSci, "TARGETEND", -1 );
-			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) toStringz( target ) ); // SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		}		
 		
 		return count;
@@ -1412,10 +1452,7 @@ public:
 			
 			// Set new tabitem to focus
 			if( DocumentTabAction.setFocus( _sci.getIupScintilla ) == IUP_DEFAULT ) return false;
-			
-			int dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
-			
-			
+			IupScintillaSendMessage( _sci.getIupScintilla, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 			
 			int		fileStatusPos = -1;
 			bool	bDirectGotoLine = lineNumber < 0 ? false : true;
@@ -2680,6 +2717,7 @@ public:
 										case B_PROPERTY:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );		break;
 										case B_OPERATOR:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );		break;
 										default:
+											IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1", null );
 											IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
 									}
 								}
@@ -3016,30 +3054,31 @@ private:
 		
 		int currentPos = cast(int) IupScintillaSendMessage( ih, 2008, 0, 0 ); // SCI_GETCURRENTPOS = 2008
 		int	documentLength = IupGetInt( ih, "COUNT" );
-		int dummy = IupScintillaSendMessage( ih, 2198, type, 0 ); // SCI_SETSEARCHFLAGS = 2198,
+		IupScintillaSendMessage( ih, 2198, type, 0 ); // SCI_SETSEARCHFLAGS = 2198,
 
 		if( targetText.length )
 		{
-			dummy = IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-			if( bNext )	dummy = IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
+			scope _t = new IupString( targetText );
+			IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+			if( bNext )	IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
 
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); //SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 			
 			// reSearch form file's head
 			if( findPos < 0 )
 			{
 				if( bNext )
 				{
-					dummy = IupScintillaSendMessage( ih, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
-					dummy = IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
+					IupScintillaSendMessage( ih, 2190, 0, 0 ); 						// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 				else
 				{
-					dummy = IupScintillaSendMessage( ih, 2190, documentLength, 0 ); 		// SCI_SETTARGETSTART = 2190,
-					dummy = IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
+					IupScintillaSendMessage( ih, 2190, documentLength, 0 ); 		// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 
-				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) toStringz( targetText ) ); //SCI_SEARCHINTARGET = 2197,
+				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 			}
 	
 			if( findPos < 0 )
@@ -3057,7 +3096,7 @@ private:
 				{
 					pos = Integer.toString( findPos+targetText.length ) ~ ":" ~ Integer.toString( findPos );
 				}
-				IupSetAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
+				IupSetStrAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
 				//DocumentTabAction.setFocus( ih );
 			}
 		}

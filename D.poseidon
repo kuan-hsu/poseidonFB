@@ -6,12 +6,12 @@ PassOneFile=
 TargetName=
 FocusOn=
 CompilerArgs=
-CompilerOption=-odobjs -version=FBIDE -L/SUBSYSTEM:WINDOWS
+CompilerOption=-odobjs -version=FBIDE -version=DARKTHEME -L/SUBSYSTEM:WINDOWS
 Comment=
 CompilerPath=
 [IncludeDirs]
 [LibDirs]
-name=K:/CodingPark/GameKYO/lib/iup/iup327DLL10
+name=K:/CodingPark/GameKYO/lib/iup/iup330DLL10
 [Sources]
 name=IDE.d
 name=actionManager.d

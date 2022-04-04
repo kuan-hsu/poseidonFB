@@ -11,7 +11,7 @@ class CStatusBar
 
 	import		Integer = tango.text.convert.Integer, Util = tango.text.Util;
 	
-	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, compileOptionSelection, codecomplete, findMessage;
+	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, image, compileOptionSelection, codecomplete, findMessage;
 	int			originalTrigger;
 	
 	void createLayout()
@@ -32,8 +32,10 @@ class CStatusBar
 		EncodingType = IupLabel( "           " );
 		IupSetCallback( EncodingType, "BUTTON_CB", cast(Icallback) &CStatusBar_Encode_BUTTON_CB );
 		
-		Ihandle* image = IupFlatButton( "" );
-		IupSetAttributes( image, "IMAGE=icon_customoption,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
+		image = IupFlatButton( "" );
+		IupSetAttributes( image, "IMAGE=icon_customoption,HASFOCUS=NO,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
+		//IupSetStrAttribute( image, "BGCOLOR", IupGetGlobal( "DLGBGCOLOR" ) );
+		IupSetStrAttribute( image, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString  );
 		IupSetAttribute( image, "TIP", GLOBAL.languageItems["setcustomoption"].toCString );
 		IupSetCallback( image, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_CustomOption_BUTTON_CB );
 		
@@ -42,19 +44,19 @@ class CStatusBar
 		IupSetAttribute( compileOptionSelection, "SIZE", "200x" );
 		if( !GLOBAL.currentCustomCompilerOption.toDString.length )
 		{
-			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 0" );
+			//IupSetAttribute( compileOptionSelection, "FGCOLOR", IupGetGlobal( "DLGFGCOLOR" ) );
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 		}
 		else
 		{
-			IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 0 255" );
+			//IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 102 255" );
 			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 			setTip( GLOBAL.currentCustomCompilerOption.toDString );
 		}
 		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		
 		codecomplete = IupFlatButton( "" );
-		if( GLOBAL.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_on" ); else IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_off" );
+		if( GLOBAL.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "icon_run" ); else IupSetAttribute( codecomplete, "IMAGE", "icon_debug_stop" );
 		IupSetAttributes( codecomplete, "NAME=label_Codecomplete,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
 		IupSetAttribute( codecomplete, "TIP", GLOBAL.languageItems["codecompletiononoff"].toCString );
 		IupSetCallback( codecomplete, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
@@ -68,15 +70,19 @@ class CStatusBar
 		Ihandle*[5] labelSEPARATOR;
 		for( int i = 0; i < 5; i++ )
 		{
-			labelSEPARATOR[i] = IupLabel( null ); 
-			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
+			labelSEPARATOR[i] = IupFlatSeparator(); 
+			IupSetAttributes( labelSEPARATOR[i], "STYLE=EMPTY" );
 		}
-		// Ihandle* StatusBar = IupHbox( GLOBAL.statusBar_PrjName, IupFill(), labelSEPARATOR[0], GLOBAL.statusBar_Line_Col, labelSEPARATOR[1], GLOBAL.statusBar_Ins, labelSEPARATOR[2], GLOBAL.statusBar_EOLType, labelSEPARATOR[3], GLOBAL.statusBar_encodingType, null );
 		Ihandle* _hbox = IupHbox( image, compileOptionSelection, labelSEPARATOR[4], prjName, findMessage, IupFill(), codecomplete, labelSEPARATOR[0], LINExCOL, labelSEPARATOR[1], Ins, labelSEPARATOR[2], EOLType, labelSEPARATOR[3], EncodingType, null );
 		IupSetAttributes( _hbox, "GAP=5,MARGIN=5,ALIGNMENT=ACENTER" );
 		
 		layoutHandle = IupBackgroundBox( _hbox );
 		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
+		version(Windows) // linux get IupFlatSeparator wrong color
+		{
+			IupSetStrAttribute( layoutHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+			IupSetStrAttribute( layoutHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		}
 		
 		version(Windows)
 		{
@@ -208,13 +214,25 @@ class CStatusBar
 	
 	void setCompleteIcon( bool bStatus )
 	{
-		if( bStatus ) IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_on" ); else IupSetAttribute( codecomplete, "IMAGE", "IUP_codecomplete_off" );
+		if( bStatus ) IupSetAttribute( codecomplete, "IMAGE", "icon_run" ); else IupSetAttribute( codecomplete, "IMAGE", "icon_debug_stop" );
 	}
 	
 	void setFindMessage( char[] message )
 	{
 		IupSetAttribute( findMessage, "TITLE", "" );
 		if( message.length ) IupSetStrAttribute( findMessage, "TITLE", toStringz( message ) );
+	}
+	
+	void changeColor()
+	{
+		version(Windows)
+		{
+			IupSetStrAttribute( layoutHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+			IupSetStrAttribute( layoutHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		}
+	
+		//IupSetStrAttribute( image, "BGCOLOR", IupGetGlobal( "DLGBGCOLOR" ) );
+		IupSetStrAttribute( image, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString  );	
 	}
 }
 
@@ -254,7 +272,7 @@ extern(C) // Callback for CBaseDialog
 					Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" );
 					if( selectionHandle != null )
 					{
-						IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 0" );
+						//IupSetAttribute( selectionHandle, "FGCOLOR", IupGetGlobal( "DLGFGCOLOR" ) );
 						IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 						GLOBAL.currentCustomCompilerOption = cast(char[])"";
 						GLOBAL.statusBar.setTip( "" );
@@ -491,14 +509,13 @@ extern(C) // Callback for CBaseDialog
 		{
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
-				int dummy;
 				//if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 0 ) return IUP_DEFAULT;
 				Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
 				IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					GLOBAL.editorSetting00.EolType = "0";
 					foreach( cSci; GLOBAL.scintillaManager )
-						if( cSci !is null )	int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
+						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 0, 0 ); // SCI_SETEOLMODE	= 2031
 
 					StatusBarAction.update();
 					return IUP_DEFAULT;
@@ -509,7 +526,7 @@ extern(C) // Callback for CBaseDialog
 				{
 					GLOBAL.editorSetting00.EolType = "1";
 					foreach( cSci; GLOBAL.scintillaManager )
-						if( cSci !is null )	int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
+						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 1, 0 ); // SCI_SETEOLMODE	= 2031
 					
 					StatusBarAction.update();
 					return IUP_DEFAULT;
@@ -520,7 +537,7 @@ extern(C) // Callback for CBaseDialog
 				{
 					GLOBAL.editorSetting00.EolType = "2";
 					foreach( cSci; GLOBAL.scintillaManager )
-						if( cSci !is null )	int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
+						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
 
 					StatusBarAction.update();
 					return IUP_DEFAULT;
@@ -608,7 +625,7 @@ extern(C) // Callback for CBaseDialog
 		if( selectionHandle != null )
 		{
 			GLOBAL.currentCustomCompilerOption = IupGetAttribute( ih, "TITLE" );
-			IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 255" );
+			//IupSetAttribute( selectionHandle, "FGCOLOR", "0 102 255" );
 			IupSetAttribute( selectionHandle, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
 			GLOBAL.statusBar.setTip( GLOBAL.currentCustomCompilerOption.toDString );
 		}
@@ -624,7 +641,7 @@ extern(C) // Callback for CBaseDialog
 			if( codecompleteHandle != null )
 			{
 				Ihandle* preferenceTriggerHandle = IupGetHandle( "textTrigger" );
-				if( fromStringz( IupGetAttribute( codecompleteHandle, "IMAGE" ) ) == "IUP_codecomplete_on" )
+				if( fromStringz( IupGetAttribute( codecompleteHandle, "IMAGE" ) ) == "icon_run" )
 				{
 					GLOBAL.statusBar.setCompleteIcon( false );
 					GLOBAL.autoCompletionTriggerWordCount = 0;

@@ -65,7 +65,7 @@ private:
 	{
 		// Outline Toolbar
 		projectButtonCollapse = IupButton( null, null );
-		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse,VISIBLE=NO" );
+		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse2,VISIBLE=NO" );
 		IupSetAttribute( projectButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -144,12 +144,16 @@ private:
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
 		IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		
+		IupSetAttribute( tree, "IMAGE0", "icon_prj" );
+		IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_prj" );
 		//IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_EXECUTELEAF_CB );
 		//IupSetCallback( tree, "BRANCHOPEN_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		//IupSetCallback( tree, "BRANCHCLOSE_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,GAP=2" );
+		layoutHandle = IupBackgroundBox( layoutHandle );
 	}
 
 	void toBoldTitle( Ihandle* _tree, int id )
@@ -158,7 +162,7 @@ private:
 		if( commaPos < GLOBAL.fonts[4].fontString.length )
 		{
 			char[] fontString = Util.substitute( GLOBAL.fonts[4].fontString.dup, ",", ",Bold " );
-			IupSetAttributeId( _tree, "TITLEFONT", id, toStringz( fontString.dup ) );
+			IupSetStrAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
 		}
 	}
 
@@ -256,7 +260,7 @@ public:
 
 		// Add Project's Name to Tree
 		IupSetStrAttribute( tree, "ADDBRANCH0", toStringz( GLOBAL.projectManager[setupDir].name ) );
-		IupSetAttribute( tree, "IMAGE1", "icon_prj" );
+		IupSetAttribute( tree, "IMAGE1", "icon_packageexplorer" );
 		IupSetAttribute( tree, "IMAGEEXPANDED1", "icon_prj_open" );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
@@ -1051,7 +1055,7 @@ public:
 			}
 
 			Ihandle* _clearRecentPrjs = IupItem( GLOBAL.languageItems["clearall"].toCString, null );
-			IupSetAttribute(_clearRecentPrjs, "IMAGE", "icon_clearall");
+			IupSetAttribute(_clearRecentPrjs, "IMAGE", "icon_deleteall");
 			IupSetCallback( _clearRecentPrjs, "ACTION", cast(Icallback) &menu.submenuRecentPrjsClear_click_cb );
 			IupInsert( recentPrj_ih, null, _clearRecentPrjs );
 			IupMap( IupGetChild( recentPrj_ih, 0 ) );
@@ -1348,7 +1352,7 @@ extern(C)
 		{
 			case 0:
 				Ihandle* itemNewProject = IupItem( GLOBAL.languageItems["newprj"].toCString, null );
-				IupSetAttribute(itemNewProject, "IMAGE", "icon_newprj");
+				IupSetAttribute(itemNewProject, "IMAGE", "icon_packageexplorer");
 				IupSetCallback( itemNewProject, "ACTION", cast(Icallback) &menu.newProject_cb ); // From menu.d
 				
 				Ihandle* itemOpenProject = IupItem( GLOBAL.languageItems["openprj"].toCString, null );
@@ -1356,7 +1360,7 @@ extern(C)
 				IupSetCallback( itemOpenProject, "ACTION", cast(Icallback) &menu.openProject_cb ); // From menu.d
 
 				Ihandle* itemCloseAllProject = IupItem( GLOBAL.languageItems["closeallprj"].toCString, null );
-				IupSetAttribute(itemCloseAllProject, "IMAGE", "icon_clearall");
+				IupSetAttribute(itemCloseAllProject, "IMAGE", "icon_deleteall");
 				IupSetCallback( itemCloseAllProject, "ACTION", cast(Icallback) &menu.closeAllProject_cb ); // From menu.d
 				
 
@@ -2401,6 +2405,8 @@ extern(C)
 				if( !bFolerExist )
 				{
 					IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_folder" );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGEEXPANDED", folderLocateId + 1, "icon_folder_open" );
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
 					if( pos != 0 )
 						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );

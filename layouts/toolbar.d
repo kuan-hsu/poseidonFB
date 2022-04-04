@@ -83,10 +83,7 @@ class CToolBar
 		IupSetCallback( btnClearUndoBuffer, "ACTION", cast(Icallback) function()
 		{
 			auto sci = ScintillaAction.getActiveIupScintilla;
-			if( sci != null )
-			{
-				int dummy = IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
-			}
+			if( sci != null ) IupScintillaSendMessage( sci, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER 2175
 			
 			Ihandle* _undo = IupGetDialogChild( GLOBAL.toolbar.getHandle, "POSEIDON_TOOLBAR_Undo" );
 			if( _undo != null ) IupSetAttribute( _undo, "ACTIVE", "NO" ); // SCI_CANUNDO 2174
@@ -270,8 +267,8 @@ class CToolBar
 		
 		for( int i = 0; i < 7; i++ )
 		{
-			labelSEPARATOR[i] = IupLabel( null ); 
-			IupSetAttribute( labelSEPARATOR[i], "SEPARATOR", "VERTICAL");
+			labelSEPARATOR[i] = IupFlatSeparator(); 
+			IupSetAttributes( labelSEPARATOR[i], "STYLE=EMPTY" );
 		}
 
 		version(Windows)
@@ -297,12 +294,13 @@ class CToolBar
 			});
 		}
 		
-		scope fontStr = new IupString( GLOBAL.fonts[0].fontString );
-		listHandle = IupList( null );
-		IupSetAttributes( listHandle, "ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDON_TOOLBAR_FunctionList" );
-		version(Windows) IupSetAttribute( listHandle, "FONT", fontStr.toCString ); else IupSetAttribute( listHandle, "FONTFACE", fontStr.toCString );
+		listHandle = IupFlatList();
+		IupSetAttributes( listHandle, "SIZE=x12,ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDON_TOOLBAR_FunctionList" );
+		version(Windows) IupSetStrAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) ); else IupSetStrAttribute( listHandle, "FONTFACE", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetAttribute( listHandle, "EXPAND", "HORIZONTAL" );
-		IupSetAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.functionTitle.toCString );
+		IupSetStrAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+		IupSetStrAttribute( listHandle, "HLCOLORALPHA", "0" );
+		IupSetStrAttribute( listHandle, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		
 		Ihandle* commandText = IupScintilla();
@@ -321,6 +319,9 @@ class CToolBar
 			handle = IupHbox( btnNew, btnOpen, labelSEPARATOR[0], btnSave, btnSaveAll, labelSEPARATOR[3], btnUndo, btnRedo, btnClearUndoBuffer, labelSEPARATOR[1], btnCut, btnCopy, btnPaste, labelSEPARATOR[6], btnBackNav, btnForwardNav, btnClearNav, labelSEPARATOR[2], btnMark, btnMarkPrev,
 					btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun, listHandle, commandText, null );
 		}
+
+		handle = IupBackgroundBox( handle );
+		version(Windows) IupSetStrAttribute( handle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString ); // linux get IupFlatSeparator wrong color
 
 		IupSetAttributes( handle, "GAP=2,ALIGNMENT=ACENTER,NAME=POSEIDON_TOOLBAR" );
 		version(linux) IupSetAttributes( handle, "MARGIN=0x2" );
@@ -368,9 +369,13 @@ class CToolBar
 		if( status ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 	}
 
-	void appendItem( CASTnode rootAST )
+	void changeColor()
 	{
-
+		version(Windows) IupSetStrAttribute( handle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		
+		IupSetStrAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+		IupSetStrAttribute( listHandle, "HLCOLORALPHA", "0" );
+		IupSetStrAttribute( listHandle, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
 	}
 }
 
@@ -516,7 +521,7 @@ extern( C )
 	{
 		if( status == 0 )
 		{
-			int dummy = IupScintillaSendMessage( ih, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
+			IupScintillaSendMessage( ih, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 			
 			char[] command = fromStringz( IupGetAttribute( ih, "VALUE" ) );
 			if( command.length )

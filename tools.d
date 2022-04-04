@@ -666,6 +666,28 @@ class CPLUGIN
 	}
 }
 
+/*
+void setGlobalTHEME()
+{
+	Ihandle* myButtonTheme = IupUser();
+
+	Ihandle* myFlatButtonTheme = IupUser();
+	IupSetStrAttribute( myFlatButtonTheme, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+	IupSetHandle( "myFlatButtonTheme", myFlatButtonTheme );
+	
+	Ihandle* myTxtTheme = IupUser();
+	IupSetStrAttribute( myTxtTheme, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+	IupSetStrAttribute( myTxtTheme, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+	IupSetHandle( "myTxtTheme", myTxtTheme );
+
+	Ihandle* myTheme = IupUser();
+	IupSetAttribute( myTheme, "IUPFLATBUTTON", "myFlatButtonTheme" );
+	IupSetAttribute( myTheme, "IUPTEXT", "myTxtTheme" );
+	IupSetHandle( "myTheme", myTheme );
+	
+	IupSetGlobal( "DEFAULTTHEME", "myTheme" );
+}
+*/
 /+
 private import  tango.sys.Common;
 

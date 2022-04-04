@@ -16,6 +16,7 @@ class CFindInFilesDialog : CBaseDialog
 	import				tools;
 	Ihandle*			listFind, listReplace;
 	Ihandle*			labelStatus;
+	Ihandle* 			btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll;
 	
 	IupString[2]		labelTitle;
 	IupString			FINDWHAT;
@@ -45,14 +46,14 @@ class CFindInFilesDialog : CBaseDialog
 
 
 		// Options
-		Ihandle* toggleCaseSensitive = IupToggle( GLOBAL.languageItems["casesensitive"].toCString, null );
-		IupSetAttributes( toggleCaseSensitive, "EXPAND=YES,NAME=toggle_CaseSensitive" );
+		Ihandle* toggleCaseSensitive = IupFlatToggle( GLOBAL.languageItems["casesensitive"].toCString );
+		IupSetAttributes( toggleCaseSensitive, "EXPAND=YES,NAME=toggle_CaseSensitive,ALIGNMENT=ALEFT:ACENTER" );
 		version(DIDE) IupSetAttribute( toggleCaseSensitive, "VALUE", "ON" );
-		IupSetCallback( toggleCaseSensitive, "ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
+		IupSetCallback( toggleCaseSensitive, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
 
-		Ihandle* toggleWholeWord = IupToggle( GLOBAL.languageItems["wholeword"].toCString, null );
-		IupSetAttributes( toggleWholeWord, "VALUE=ON,EXPAND=YES,NAME=toggle_WholeWord" );
-		IupSetCallback( toggleWholeWord, "ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
+		Ihandle* toggleWholeWord = IupFlatToggle( GLOBAL.languageItems["wholeword"].toCString );
+		IupSetAttributes( toggleWholeWord, "VALUE=ON,EXPAND=YES,NAME=toggle_WholeWord,ALIGNMENT=ALEFT:ACENTER" );
+		IupSetCallback( toggleWholeWord, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.toggle_ACTION_CB );
 
 		Ihandle* hBoxOption = IupHbox( toggleCaseSensitive, toggleWholeWord, null );
 		IupSetAttributes( hBoxOption, "ALIGNMENT=ACENTER,EXPAND=YES,MARGIN=0x0,GAP=0,HOMOGENEOUS=YES" );
@@ -62,21 +63,21 @@ class CFindInFilesDialog : CBaseDialog
 
 
 		// Scope
-		Ihandle* toggleDocument = IupToggle( GLOBAL.languageItems["document"].toCString, null );
-		IupSetAttribute( toggleDocument, "NAME", "toggle_Document" );
-		IupSetCallback( toggleDocument, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
+		Ihandle* toggleDocument = IupFlatToggle( GLOBAL.languageItems["document"].toCString );
+		IupSetAttributes( toggleDocument, "NAME=toggle_Document,ALIGNMENT=ALEFT:ACENTER" );
+		IupSetCallback( toggleDocument, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 		
-		Ihandle* toggleAllDocument = IupToggle( GLOBAL.languageItems["alldocument"].toCString, null );
-		IupSetAttribute( toggleAllDocument, "NAME", "toggle_AllDocuments" );
-		IupSetCallback( toggleAllDocument, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
+		Ihandle* toggleAllDocument = IupFlatToggle( GLOBAL.languageItems["alldocument"].toCString );
+		IupSetAttributes( toggleAllDocument, "NAME=toggle_AllDocuments,ALIGNMENT=ALEFT:ACENTER" );
+		IupSetCallback( toggleAllDocument, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 		
-		Ihandle* togglePrj = IupToggle( GLOBAL.languageItems["prj"].toCString, null );
-		IupSetAttributes( togglePrj, "VALUE=ON,NAME=toggle_Project");
-		IupSetCallback( togglePrj, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
+		Ihandle* togglePrj = IupFlatToggle( GLOBAL.languageItems["prj"].toCString );
+		IupSetAttributes( togglePrj, "NAME=toggle_Project,ALIGNMENT=ALEFT:ACENTER");
+		IupSetCallback( togglePrj, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 
-		Ihandle* toggleAllPrj = IupToggle( GLOBAL.languageItems["allproject"].toCString, null );
-		IupSetAttribute( toggleAllPrj, "NAME", "toggle_AllProjects" );
-		IupSetCallback( toggleAllPrj, "ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
+		Ihandle* toggleAllPrj = IupFlatToggle( GLOBAL.languageItems["allproject"].toCString );
+		IupSetAttributes( toggleAllPrj, "NAME=toggle_AllProjects,ALIGNMENT=ALEFT:ACENTER" );
+		IupSetCallback( toggleAllPrj, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.radioTarget_ACTION_CB );
 
 
 		Ihandle* vBoxScope = IupVbox( toggleDocument, toggleAllDocument, togglePrj, toggleAllPrj, null );
@@ -84,33 +85,45 @@ class CFindInFilesDialog : CBaseDialog
 		Ihandle* radioScope = IupRadio( vBoxScope );
 		Ihandle* frameScope = IupFrame( radioScope );
 		//IupSetAttributes( frameScope, "MARGIN=0x0,GAP=0");
-		IupSetAttribute( frameScope, "TITLE", GLOBAL.languageItems["scope"].toCString );		
+		IupSetAttribute( frameScope, "TITLE", GLOBAL.languageItems["scope"].toCString );
+		
+		IupSetAttribute( togglePrj, "VALUE", "ON");
 
 
 		// Buttons
-		Ihandle* btnFindAll = IupButton( GLOBAL.languageItems["findall"].toCString, null );
+		btnFindAll = IupFlatButton( GLOBAL.languageItems["findall"].toCString );
 		IupSetAttributes( btnFindAll, "EXPAND=YES,NAME=btn_Find" );
-		IupSetCallback( btnFindAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
+		IupSetStrAttribute( btnFindAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetCallback( btnFindAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
-		Ihandle* btnReplaceAll = IupButton( GLOBAL.languageItems["replaceall"].toCString, null );
+		btnReplaceAll = IupFlatButton( GLOBAL.languageItems["replaceall"].toCString );
 		IupSetAttributes( btnReplaceAll, "EXPAND=YES,NAME=btn_Replace" );
-		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
+		IupSetStrAttribute( btnReplaceAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetCallback( btnReplaceAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
-		Ihandle* btnCountAll = IupButton( GLOBAL.languageItems["countall"].toCString, null );
+		btnCountAll = IupFlatButton( GLOBAL.languageItems["countall"].toCString );
 		IupSetAttributes( btnCountAll, "EXPAND=YES,NAME=btn_Count" );
-		IupSetCallback( btnCountAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
+		IupSetStrAttribute( btnCountAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetCallback( btnCountAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
-		Ihandle* btnMarkAll = IupButton( GLOBAL.languageItems["bookmarkall"].toCString, null );
+		btnMarkAll = IupFlatButton( GLOBAL.languageItems["bookmarkall"].toCString );
 		IupSetAttributes( btnMarkAll, "EXPAND=YES,NAME=btn_Mark" );
-		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
+		IupSetStrAttribute( btnMarkAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetCallback( btnMarkAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 
 		Ihandle* vBoxButton = IupVbox( btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll, null );
 		Ihandle* hBoxButton = IupHbox( frameScope, vBoxButton, null );
 		IupSetAttributes( hBoxButton, "EXPAND=YES,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
+		
+		
+		Ihandle* FindFiles_btnHiddenCANCEL = IupButton( null, null );
+		IupSetAttribute( FindFiles_btnHiddenCANCEL, "VISIBLE", "NO" );
+		IupSetHandle( "FindFiles_btnHiddenCANCEL", FindFiles_btnHiddenCANCEL );
+		IupSetCallback( FindFiles_btnHiddenCANCEL, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 
 
 	
-		Ihandle* vBox = IupVbox( hBox00, hBox01, frameOption, hBoxButton, bottom, null );
+		Ihandle* vBox = IupVbox( hBox00, hBox01, frameOption, hBoxButton, IupHbox( FindFiles_btnHiddenCANCEL, bottom, null ), null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=0,EXPANDCHILDREN=YES" );
 		//version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONT", "Ubuntu Mono, 10" );
 
@@ -132,9 +145,8 @@ class CFindInFilesDialog : CBaseDialog
 		createLayout();
 
 		IupSetAttribute( listFind, "VALUE", FINDWHAT.toCString );
-		IupSetHandle( "btnCANCEL_findinfiles", btnCANCEL );
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
-		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_findinfiles" );
+		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
+		IupSetAttribute( _dlg, "DEFAULTESC", "FindFiles_btnHiddenCANCEL" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 		
 		IupSetAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
@@ -174,6 +186,18 @@ class CFindInFilesDialog : CBaseDialog
 	void setStatusBar( char[] text )
 	{
 		IupSetStrAttribute( labelStatus, "TITLE", toStringz( text ) );
+	}
+	
+	void changeColor()
+	{
+		IupSetStrAttribute( _dlg, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrAttribute( _dlg, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		
+		IupSetStrAttribute( btnCANCEL, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnFindAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnReplaceAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnCountAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnMarkAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 	}
 }
 

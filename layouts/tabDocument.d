@@ -20,6 +20,11 @@ void createTabs()
 	//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
+	IupSetStrAttribute( GLOBAL.documentTabs, "FGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );
+	IupSetStrAttribute( GLOBAL.documentTabs, "BGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );
+	IupSetStrAttribute( GLOBAL.documentTabs, "TABSFORECOLOR", GLOBAL.editColor.dlgFore.toCString );
+	IupSetStrAttribute( GLOBAL.documentTabs, "TABSBACKCOLOR", GLOBAL.editColor.dlgBack.toCString );	
+	IupSetAttribute( GLOBAL.documentTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
 	//IupSetCallback( GLOBAL.documentTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
 	IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
@@ -39,7 +44,12 @@ void createTabs2()
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "SIZE", "NULL" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "NAME", "POSEIDON_SUB_TABS" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "HIGHCOLOR", "0 0 255" );
-	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSHIGHCOLOR", "240 255 240" );
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSHIGHCOLOR", "240 255 240" );	
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "FGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "BGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );	
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABSFORECOLOR", GLOBAL.editColor.dlgFore.toCString );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABSBACKCOLOR", GLOBAL.editColor.dlgBack.toCString );	
+	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
@@ -54,9 +64,8 @@ extern(C)
 		Ihandle* _oldChild = IupGetChild( ih, old_pos );
 		if( _oldChild != null )
 		{
-			int dummy;
 			if( fromStringz( IupGetAttribute( _oldChild, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( _oldChild, "AUTOCCANCEL", "YES" );
-			if( cast(int) IupScintillaSendMessage( _oldChild, 2202, 0, 0 ) == 1 ) dummy = IupScintillaSendMessage( _oldChild, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+			if( cast(int) IupScintillaSendMessage( _oldChild, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( _oldChild, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 			AutoComplete.cleanCalltipContainer();
 		}
 		
@@ -213,6 +222,7 @@ extern(C)
 						int newDocumentPos = IupGetChildCount( GLOBAL.documentTabs_Sub ) - 1;
 						IupSetAttributeId( GLOBAL.documentTabs_Sub , "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
 						IupSetAttributeId( GLOBAL.documentTabs_Sub , "TABTIP", newDocumentPos,  beMoveDocumentCSci.getFullPath_IupString.toCString );
+						DocumentTabAction.setTabItemDocumentImage( GLOBAL.documentTabs_Sub, newDocumentPos, beMoveDocumentCSci.getFullPath_IupString.toDString );
 						DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs_Sub );
 						
 						IupSetAttribute( GLOBAL.documentTabs_Sub , "VALUE_HANDLE", cast(char*) beMoveDocumentCSci.getIupScintilla );
@@ -262,6 +272,7 @@ extern(C)
 						int newDocumentPos = IupGetChildCount( GLOBAL.documentTabs ) - 1;
 						IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
 						IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos,  beMoveDocumentCSci.getFullPath_IupString.toCString );
+						DocumentTabAction.setTabItemDocumentImage( GLOBAL.documentTabs, newDocumentPos, beMoveDocumentCSci.getFullPath_IupString.toDString );
 						DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
 						
 						IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) beMoveDocumentCSci.getIupScintilla );

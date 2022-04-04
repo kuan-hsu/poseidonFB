@@ -109,8 +109,8 @@ class CShortCutDialog : CBaseDialog
 
 		createLayout( item, listText );
 
-		IupSetCallback( btnAPPLY, "ACTION", cast(Icallback) &CShortCutDialog_btnClear_cb );
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CShortCutDialog_btnOK_cb );
+		IupSetCallback( btnAPPLY, "FLAT_ACTION", cast(Icallback) &CShortCutDialog_btnClear_cb );
+		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CShortCutDialog_btnOK_cb );
 	}
 
 	~this()

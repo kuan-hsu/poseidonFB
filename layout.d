@@ -25,9 +25,15 @@ void createExplorerWindow()
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
 
 
-	GLOBAL.projectViewTabs = IupTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
-	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,SIZE=NULL,BORDER=NO,NAME=POSEIDON_LEFT_TABS" );
-	//IupSetAttribute( GLOBAL.projectViewTabs, "FONT", "Consolas, 18" );
+	GLOBAL.projectViewTabs = IupFlatTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
+	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,TABSPADDING=3x2,NAME=POSEIDON_LEFT_TABS" );
+	//IupSetAttribute( GLOBAL.projectViewTabs, "FORECOLOR", "0 0 255" );
+	IupSetAttribute( GLOBAL.projectViewTabs, "HIGHCOLOR", "255 0 0" );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSFORECOLOR", GLOBAL.editColor.outlineFore.toCString );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSBACKCOLOR", GLOBAL.editColor.outlineBack.toCString );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
 
 	createTabs();
 	createTabs2();
@@ -36,7 +42,9 @@ void createExplorerWindow()
 	IupSetAttribute( dndEmptylabel, "EXPAND", "YES" );
 	IupSetCallback( dndEmptylabel, "DROPFILES_CB",cast(Icallback) &label_dropfiles_cb );
 	IupSetCallback( dndEmptylabel, "BUTTON_CB",cast(Icallback) &emptyLabel_button_cb );
-	GLOBAL.dndDocumentZBox = IupZbox( dndEmptylabel, GLOBAL.documentTabs, null  );
+	Ihandle *dndEmptyBackGroundBox = IupBackgroundBox( dndEmptylabel ); // For colorize
+	IupSetStrAttribute( dndEmptyBackGroundBox, "BGCOLOR" , GLOBAL.editColor.dlgBack.toCString );
+	GLOBAL.dndDocumentZBox = IupZbox( dndEmptyBackGroundBox, GLOBAL.documentTabs, null  );
 	
 	// RIGHT
 	if( GLOBAL.editorSetting01.RotateTabs == "ON" )
@@ -62,8 +70,8 @@ void createExplorerWindow()
 
 	
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
-	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT");
-	//version(Windows) IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 3 ); else IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 2 );
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,NAME=POSEIDON_LEFT_SPLIT");
+	IupSetAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 
 	//createMessagePanel();
@@ -91,8 +99,12 @@ void createExplorerWindow()
 	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x2" );
-	IupSetAttribute( GLOBAL.messageWindowTabs, "FORECOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSFORECOLOR", GLOBAL.editColor.outlineFore.toCString );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSBACKCOLOR", GLOBAL.editColor.outlineBack.toCString );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDON_BOTTOM_TABS" );
 	IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 	
@@ -104,8 +116,8 @@ void createExplorerWindow()
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
-	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_BOTTOM_SPLIT");
-	//IupSetInt( GLOBAL.messageSplit, "BARSIZE", 2 );
+	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
+	IupSetAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 	/*
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* ih ){

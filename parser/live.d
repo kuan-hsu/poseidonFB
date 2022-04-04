@@ -380,24 +380,24 @@ struct LiveParser
 						*/
 						return;
 					}
-					int dummy;
+					
 					//IupSetInt( cSci.getIupScintilla, "TARGETSTART", posHead );
-					dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2190, posHead, 0 ); 	// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( cSci.getIupScintilla, 2190, posHead, 0 ); 	// SCI_SETTARGETSTART = 2190,
 					//IupSetInt( cSci.getIupScintilla, "TARGETEND", posTail );
-					dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2192, posTail, 0 );	// SCI_SETTARGETEND = 2192,
+					IupScintillaSendMessage( cSci.getIupScintilla, 2192, posTail, 0 );	// SCI_SETTARGETEND = 2192,
 					
 					CASTnode newHead;
 					version(Windows)
 					{
 						auto blockText = new char[posTail-posHead];
-						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
+						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
 						newHead = GLOBAL.outlineTree.parserText( blockText );
 						delete blockText;
 					}
 					else
 					{
 						char* blockText = cast(char*)calloc( 1, posTail-posHead );
-						dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
+						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
 						newHead = GLOBAL.outlineTree.parserText( fromStringz( blockText ) );
 						free( blockText );
 					}
@@ -569,18 +569,18 @@ struct LiveParser
 
 						IupSetInt( cSci.getIupScintilla, "TARGETSTART", posHead + 1 );
 						IupSetInt( cSci.getIupScintilla, "TARGETEND", posTail + 1 );					
-						int dummy;
+
 						version(Windows)
 						{
 							scope blockText = new char[posTail-posHead];
-							dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
+							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
 							//IupMessage( "", toStringz( blockText ) );
 							newHead = GLOBAL.outlineTree.parserText( Util.trim( blockText ) );
 						}
 						else
 						{
 							char* blockText = cast(char*)calloc( 1, posTail-posHead );
-							dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
+							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
 							newHead = GLOBAL.outlineTree.parserText( Util.trim( fromStringz( blockText ) ) );
 							free( blockText );
 						}

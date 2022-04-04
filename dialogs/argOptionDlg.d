@@ -24,52 +24,27 @@ class CArgOptionDialog : CBaseDialog
 	
 	static char[][]		tempCustomCompilerOptions;
 
-	Ihandle* createDlgButton( char[] buttonSize = "40x20" )
-	{
-		btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
-		IupSetHandle( "btnCANCEL_Args", btnCANCEL );
-		IupSetAttributes( btnCANCEL, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
-		
-		Ihandle* hBox_DlgButton;
-		if( !QuickMode )
-		{
-			btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
-			IupSetHandle( "btnOK_Args", btnOK );
-			IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );// ,IMAGE=IUP_ActionCancel
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
-			
-			IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK_Args" );
-			
-			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
-			hBox_DlgButton = IupHbox( IupFill(), btnCANCEL, btnOK, null );
-		}
-		else
-		{
-			btnOK = IupButton( GLOBAL.languageItems["go"].toCString, null );
-			IupSetHandle( "btnOK_Args", btnOK );
-			IupSetAttributes( btnOK, toStringz( "SIZE=" ~ buttonSize ) );//,IMAGE=IUP_ActionOk" );
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
-			
-			IupSetAttribute( _dlg, "DEFAULTENTER", "btnOK_Args" );
-			
-			hBox_DlgButton = IupHbox( IupFill(), btnCANCEL, btnOK, null );
-			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
-		}
-		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ABOTTOM,GAP=5,MARGIN=1x0" );
-		
-		IupSetAttribute( _dlg, "DEFAULTESC", "btnCANCEL_Args" );
-		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
-
-		return hBox_DlgButton;
-	}
-
-
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
+		if( QuickMode )
+		{
+			IupSetStrAttribute( btnOK, "TITLE", GLOBAL.languageItems["go"].toCString );
+			IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
+			IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
+			IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOK_cb );
+			IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
+			IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
+		}
+		
 		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( listTools, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listTools, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}
 		IupSetHandle( "CArgOptionDialog_listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CArgOptionDialog_ACTION );
 		
@@ -262,7 +237,6 @@ class CArgOptionDialog : CBaseDialog
 				}			
 			}			
 			
-			IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 0" );
 			IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
 			GLOBAL.currentCustomCompilerOption = cast(char[])"";
 		}
@@ -646,55 +620,6 @@ extern(C) // Callback for CFindInFilesDialog
 		return IUP_DEFAULT;
 	}
 	
-	/+
-	private int CArgOptionDialog_btnToolsEdit( Ihandle* ih ) 
-	{
-		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
-		if( toolsHandle == null ) return IUP_DEFAULT;
-		
-		int index = IupGetInt( toolsHandle, "VALUE" ); // Get current item #no
-		if( index < 1 ) return IUP_DEFAULT;
-		
-		char[] oldName = fromStringz( IupGetAttributeId( toolsHandle, "", index ) ).dup;
-		
-		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomoption"].toDString(), GLOBAL.languageItems["prjtarget"].toDString() ~":", "120x", oldName );
-		char[] newFileName = Util.trim( test.show( IUP_MOUSEPOS, IUP_MOUSEPOS ) );
-
-		if( newFileName.length )
-		{
-			IupSetAttributeId( toolsHandle, "", index, toStringz( newFileName.dup ) );
-			IupSetInt( toolsHandle, "VALUE", index );
-			
-			int bpos = Util.rindex( CArgOptionDialog.tempCustomCompilerOptions[index-1], "%::% " );
-			if( bpos < CArgOptionDialog.tempCustomCompilerOptions[index-1].length )
-			{
-				CArgOptionDialog.tempCustomCompilerOptions[index-1] = CArgOptionDialog.tempCustomCompilerOptions[index-1][0..bpos] ~ "%::% " ~ newFileName;
-				/*
-				Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" );
-				if( selectionHandle != null )
-				{
-					char[] name = fromStringz( IupGetAttribute( selectionHandle, "TITLE" ) ).dup;
-					if( name.length )
-					{
-						if( name == oldName )
-						{
-							GLOBAL.currentCustomCompilerOption = newFileName;
-							IupSetAttribute( selectionHandle, "FGCOLOR", "0 0 255" );
-							IupSetAttribute( selectionHandle, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
-							GLOBAL.statusBar.setTip( GLOBAL.currentCustomCompilerOption.toDString );
-						}
-					}			
-				}
-				*/
-			}
-		}
-		
-		IupSetFocus( IupGetParent( toolsHandle ) );
-		
-		return IUP_DEFAULT;
-	}
-	+/
-
 	private int CArgOptionDialog_btnToolsUp( Ihandle* ih ) 
 	{
 		Ihandle* toolsHandle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );

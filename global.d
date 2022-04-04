@@ -36,7 +36,7 @@ struct EditorColorUint
 	IupString		scintillaFore, scintillaBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
-	IupString		projectFore, projectBack, outlineFore, outlineBack, filelistFore, filelistBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType;
+	IupString		projectFore, projectBack, outlineFore, outlineBack, /*filelistFore, filelistBack,*/ outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType, dlgFore, dlgBack, txtFore, txtBack;
 	IupString[4]	maker;
 	IupString		callTip_Fore, callTip_Back, callTip_HLT, showType_Fore, showType_Back, showType_HLT;
 	IupString		functionTitle;
@@ -309,12 +309,15 @@ struct GLOBAL
 		GLOBAL.editColor.projectBack = new IupString( cast(char[]) "255 255 255" );
 		GLOBAL.editColor.outlineFore = new IupString( cast(char[]) "0 0 0" );
 		GLOBAL.editColor.outlineBack = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.filelistFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.filelistBack = new IupString( cast(char[]) "255 255 255" );
 		GLOBAL.editColor.outputFore = new IupString( cast(char[]) "0 0 0" );
 		GLOBAL.editColor.outputBack = new IupString( cast(char[]) "255 255 255" );
 		GLOBAL.editColor.searchFore = new IupString( cast(char[]) "0 0 0" );
 		GLOBAL.editColor.searchBack = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.dlgFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.dlgBack = new IupString( cast(char[]) "240 240 240" );
+		GLOBAL.editColor.txtFore = new IupString( cast(char[]) "0 0 0" );
+		GLOBAL.editColor.txtBack = new IupString( cast(char[]) "255 255 255" );
+
 
 		GLOBAL.editColor.prjTitle = new IupString( cast(char[]) "128 0 0" );
 		GLOBAL.editColor.prjSourceType = new IupString( cast(char[]) "0 0 255" );
@@ -810,6 +813,8 @@ struct GLOBAL
 			GLOBAL.languageItems["hide"] = new IupString( cast(char[]) "Hide" );
 
 		GLOBAL.languageItems["filelist"] = new IupString( cast(char[]) "FileList" );
+		GLOBAL.languageItems["dlgcolor"] = new IupString( cast(char[]) "DLGCOLOR" );
+		GLOBAL.languageItems["txtcolor"] = new IupString( cast(char[]) "TXTCOLOR" );		
 			GLOBAL.languageItems["fullpath"] = new IupString( cast(char[]) "FullPath" );
 
 		GLOBAL.languageItems["output"] = new IupString( cast(char[]) "Output" );

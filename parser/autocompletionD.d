@@ -868,36 +868,6 @@ version(DIDE)
 			int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
 			int currentPos = ScintillaAction.getCurrentPos( iupSci );
 
-			/*
-			foreach_reverse( CASTnode child; head.getChildren() )
-			{
-				if( child.kind == B_SCOPE )
-				{
-					if( child.lineNumber < line )
-					{
-						int startPos;
-						if( nextNode is null ) startPos = documentLength - 1;else startPos = IupScintillaSendMessage( iupSci, 2167, nextNode.lineNumber, 0 ); // SCI_POSITIONFROMLINE = 2167,
-						
-						int endPos = IupScintillaSendMessage( iupSci, 2167, child.lineNumber, 0 ); // SCI_POSITIONFROMLINE = 2167,
-
-						IupScintillaSendMessage( iupSci, 2190, startPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-						IupScintillaSendMessage( iupSci, 2192, endPos, 0 );							// SCI_SETTARGETEND = 2192,
-
-						int posEndScope = cast(int) IupScintillaSendMessage( iupSci, 2197, 9, cast(int) GLOBAL.cString.convert( "end scope" ) ); // SCI_SEARCHINTARGET = 2197,
-
-						if( posEndScope > endPos )
-						{
-							if( currentPos < posEndScope && currentPos > endPos )
-							{
-								if( child.getChildrenCount > 0 ) return checkScopeNode( iupSci, child, line ); else return child;
-							}
-						}
-					}
-				}
-
-				nextNode = child;
-			}
-			*/
 			return head;
 		}		
 
@@ -2775,7 +2745,10 @@ version(DIDE)
 				IupScintillaSendMessage( iupSci, 2190, pos, 0 );
 				IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );			// SCI_SETTARGETEND = 2192,
 			}
-			pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+			
+			scope _t = new IupString( targetText );
+			
+			pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 			
 			while( pos > -1 )
 			{
@@ -2786,13 +2759,13 @@ version(DIDE)
 					{
 						IupScintillaSendMessage( iupSci, 2190, pos - 1, 0 );
 						IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-						pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+						pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 					}
 					else
 					{
 						IupScintillaSendMessage( iupSci, 2190, pos + targetText.length, 0 );
 						IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );							// SCI_SETTARGETEND = 2192,
-						pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+						pos = IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 					}
 				}
 				else

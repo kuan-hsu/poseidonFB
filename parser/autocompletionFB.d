@@ -2766,20 +2766,22 @@ version(FBIDE)
 			SCFIND_POSIX = 0x00400000,
 			*/		
 			int documentLength = cast(int) IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
-			int dummy = IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
-			dummy = IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
-			dummy = IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+			IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+			IupScintillaSendMessage( iupSci, 2190, pos, 0 ); 						// SCI_SETTARGETSTART = 2190,
+			IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
 
-			int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+			scope _t = new IupString( targetText );
+
+			int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 
 			while( posHead >= 0 )
 			{
 				int style = cast(int) IupScintillaSendMessage( iupSci, 2010, posHead, 0 ); // SCI_GETSTYLEAT 2010
 				if( style == 1 || style == 19 || style == 4 )
 				{
-					dummy = IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
-					dummy = IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+					IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
+					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 				}
 				else
 				{
@@ -2883,9 +2885,9 @@ version(FBIDE)
 
 				if( bReSearch )
 				{
-					dummy = IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
-					dummy = IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
+					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 				}
 				else
 				{
@@ -2937,7 +2939,7 @@ version(FBIDE)
 		// direct = 0 findprev, direct = 1 findnext
 		static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct )
 		{
-			int dummy = IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
+			IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
 			int documentLength = cast(int) IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
 
 			if( direct == 0 )
@@ -2950,7 +2952,10 @@ version(FBIDE)
 				IupSetInt( iupSci, "TARGETSTART", pos );
 				IupSetInt( iupSci, "TARGETEND", -1 );
 			}
-			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+
+			scope _t = new IupString( targetText );
+			
+			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 			
 			while( pos > -1 )
 			{
@@ -2961,13 +2966,13 @@ version(FBIDE)
 					{
 						IupSetInt( iupSci, "TARGETSTART", pos - 1 );
 						IupSetInt( iupSci, "TARGETEND", 0 );
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 					}
 					else
 					{
 						IupSetInt( iupSci, "TARGETSTART", pos + targetText.length );
 						IupSetInt( iupSci, "TARGETEND", -1 );
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) toStringz( targetText ) );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
 					}
 				}
 				else
@@ -5084,7 +5089,7 @@ version(FBIDE)
 		
 
 			bool	bContinue;
-			int		dummy, commaCount, parenCount, firstOpenParenPosFromDocument;
+			int		commaCount, parenCount, firstOpenParenPosFromDocument;
 			char[]	procedureNameFromList, LineHeadText;
 			int		lineNumber, currentLn = ScintillaAction.getCurrentLine( ih ) - 1;
 			int		lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
@@ -5286,14 +5291,14 @@ version(FBIDE)
 
 						if( highlightEnd > -1 )
 						{
-							dummy = IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							dummy = IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
 						{
 							// Clean the Hight-light
-							dummy = IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+							IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
 							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 						}
 					}
@@ -5317,18 +5322,18 @@ version(FBIDE)
 					{
 						list = list[semicolonPos+1..$].dup;
 				
-						int highlightStart, highlightEnd, dummy;
+						int highlightStart, highlightEnd;
 						callTipSetHLT( list, commaCount, highlightStart, highlightEnd );
 
 						if( highlightEnd > -1 )
 						{
-							dummy = IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							dummy = IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
 						{
-							dummy = IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+							IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
 						}
 					}
 				}

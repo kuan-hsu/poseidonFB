@@ -1,5 +1,5 @@
 /* XPM */
-static char *openfile_xpm[] = {
+static char *folder_open_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    16    16        8            1",
 /* colors */
@@ -13,14 +13,14 @@ static char *openfile_xpm[] = {
 "e c #000000",
 /* pixels */
 "````````````````",
-"````aaaaaaa#````",
-"````aaaaaaaaa```",
-"````aa````aaaa``",
-"````aa````aaaa#`",
-"aaa`aa````aaaaa`",
-"aaa`aa```````aa`",
-"aaa`aa```````aa`",
-"aa.`aa```````aa`",
+"````````````````",
+"````aaaaaaaaaaa`",
+"````a`````````a`",
+"````a`aaaa`aa`a`",
+"aaa`a`aaaa`aa`a`",
+"aaa`a`````````a`",
+"aaa`a`aaaa`aa`a`",
+"aa.`a`aaaa`aa`a`",
 "aa``````````````",
 "aa`aaaaaaaaaaaaa",
 "aa`#aaaaaaaaaaaa",

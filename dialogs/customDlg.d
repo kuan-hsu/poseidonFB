@@ -26,6 +26,11 @@ class CCustomDialog : CBaseDialog
 		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "EXPAND=HORIZONTAL" );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( listTools, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listTools, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}
 		IupSetHandle( "listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomDialog_ACTION );
 		IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomDialog_DBLCLICK_CB );
@@ -65,6 +70,11 @@ class CCustomDialog : CBaseDialog
 		
 		Ihandle* textToolsDir = IupText( null );
 		IupSetAttribute( textToolsDir, "EXPAND", "HORIZONTAL" );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( textToolsDir, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textToolsDir, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}
 		IupSetHandle( "textToolsDir", textToolsDir );
 		IupSetCallback( textToolsDir, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 		
@@ -84,8 +94,12 @@ class CCustomDialog : CBaseDialog
 		IupSetAttribute( labelToolsArgs, "TIP", toStringz( paramTip ) );
 		
 		Ihandle* textToolsArgs = IupText( null );
-		//IupSetAttribute( textToolsArgs, "SIZE", "-1x12" );
 		IupSetAttribute( textToolsArgs, "EXPAND", "HORIZONTAL" );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( textToolsArgs, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textToolsArgs, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}
 		IupSetHandle( "textToolsArgs", textToolsArgs );
 		IupSetCallback( textToolsArgs, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 
@@ -112,12 +126,19 @@ class CCustomDialog : CBaseDialog
 		// Plugin manager
 		treePluginStatus = IupTree();
 		IupSetAttributes( treePluginStatus, "ADDROOT=NO" );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( treePluginStatus, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( treePluginStatus, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}
+		
 		IupSetHandle( "treePluginStatus_Handle", treePluginStatus );
 
 		
-		Ihandle* unloadButton = IupButton( GLOBAL.languageItems["unload"].toCString, null );
+		Ihandle* unloadButton = IupFlatButton( GLOBAL.languageItems["unload"].toCString );
 		IupSetAttribute( unloadButton, "SIZE", "40x12" );
-		IupSetCallback( unloadButton, "ACTION", cast(Icallback) function( Ihandle* _ih )
+		version(DARKTHEME) IupSetStrAttribute( unloadButton, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );		
+		IupSetCallback( unloadButton, "FLAT_ACTION", cast(Icallback) function( Ihandle* _ih )
 		{
 			Ihandle* ih = IupGetHandle( "treePluginStatus_Handle" );
 			if( ih != null )
@@ -198,7 +219,7 @@ class CCustomDialog : CBaseDialog
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
 		
 		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["ok"].toCString );
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomDialog_btnApply );
+		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CCustomDialog_btnApply );
 	}
 
 	~this()
@@ -218,7 +239,7 @@ class CCustomDialog : CBaseDialog
 	}	
 }
 
-extern(C) // Callback for CFindInFilesDialog
+extern(C)
 {
 	private int CCustomDialog_btnApply( Ihandle* ih )
 	{

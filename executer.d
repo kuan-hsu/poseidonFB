@@ -30,7 +30,7 @@ struct ExecuterAction
 
 	import tango.sys.Process, tango.core.Exception, tango.io.stream.Lines, tango.io.stream.Iterator;
 	import tango.io.Stdout, tango.stdc.stringz, Util = tango.text.Util, Integer = tango.text.convert.Integer;
-	import tango.io.FilePath, Path = tango.io.Path, tango.io.FilePath;
+	import tango.io.FilePath, Path = tango.io.Path;
 
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;

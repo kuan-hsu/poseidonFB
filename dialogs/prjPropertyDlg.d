@@ -374,8 +374,8 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupAppend( _dlg, vBox );
 
 		// Set btnOK Action
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CProjectPropertiesDialog_btnOK_cb );
-		IupSetCallback( btnAPPLY, "ACTION", cast(Icallback) &CProjectPropertiesDialog_btnApply_cb );
+		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CProjectPropertiesDialog_btnOK_cb );
+		IupSetCallback( btnAPPLY, "FLAT_ACTION", cast(Icallback) &CProjectPropertiesDialog_btnApply_cb );
 	}
 
 	public:

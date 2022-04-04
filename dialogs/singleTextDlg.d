@@ -22,7 +22,7 @@ class CSingleTextDialog : CBaseDialog
 		textResult = IupText( null );
 		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
 		IupSetAttribute( textResult, "EXPAND", "YES" );
-		IupSetAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
+		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextDialog_text", textResult );
 
 		Ihandle* hBox = IupHbox( label, textResult, null );
@@ -30,10 +30,6 @@ class CSingleTextDialog : CBaseDialog
 
 		Ihandle* vBox = IupVbox( hBox, bottom, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ALEFT,MARGIN=5x5,GAP=2,EXPAND=YES" );
-
-		IupSetAttribute( btnOK, "SIZE", "40x12" );
-		IupSetAttribute( btnCANCEL, "SIZE", "40x12" );
-		//version( Windows ) IupSetAttribute( vBox, "FONTFACE", "Courier New" ); else IupSetAttribute( vBox, "FONTFACE", "Ubuntu Mono, 10" );
 
 		IupAppend( _dlg, vBox );
 	}	
@@ -55,8 +51,10 @@ class CSingleTextDialog : CBaseDialog
 		if( text.length) IupSetAttribute( textResult, "SELECTION", "ALL" );
 		
 		
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSingleTextDialog_btnCancel_cb );
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CSingleTextDialog_btnOK_cb );
+		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CSingleTextDialog_btnOK_cb );
+		IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CSingleTextDialog_btnOK_cb );
+		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CSingleTextDialog_btnCancel_cb );
+		IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CSingleTextDialog_btnCancel_cb );
 	}
 
 	~this()
@@ -88,10 +86,7 @@ extern(C) // Callback for CSingleTextDialog
 	private int CSingleTextDialog_btnCancel_cb( Ihandle* ih )
 	{
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );
-		if( textHandle != null )
-		{
-			IupSetAttribute( textHandle, "VALUE", null );
-		}
+		if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", null );
 
 		return IUP_CLOSE;
 	}
@@ -186,7 +181,7 @@ class CSingleTextOpen : CBaseDialog
 		textResult = IupText( null );
 		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
 		IupSetAttribute( textResult, "EXPAND", "YES" );
-		IupSetAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
+		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextOpen_text", textResult );
 		
 		openButton = IupButton( null, null );
@@ -230,9 +225,13 @@ class CSingleTextOpen : CBaseDialog
 		IupSetStrAttribute( textResult, "VALUE", toStringz( text ) );
 		IupSetAttribute( textResult, "SELECTION", "ALL" );
 		
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CSingleTextOpen_btnCancel_cb );
-		IupSetCallback( btnOK, "ACTION", cast(Icallback) &CSingleTextOpen_btnOK_cb );
-		IupSetCallback( openButton, "ACTION", cast(Icallback) function( Ihandle* ih )
+		
+		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CSingleTextOpen_btnOK_cb );
+		IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CSingleTextOpen_btnOK_cb );
+		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CSingleTextOpen_btnCancel_cb );
+		IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CSingleTextOpen_btnCancel_cb );
+		
+		IupSetCallback( openButton, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
 			if( textHandle != null )
@@ -278,10 +277,7 @@ extern(C) // Callback for CSingleTextOpen
 	private int CSingleTextOpen_btnCancel_cb( Ihandle* ih )
 	{
 		Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
-		if( textHandle != null )
-		{
-			IupSetAttribute( textHandle, "VALUE", null );
-		}
+		if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", null );
 
 		return IUP_CLOSE;
 	}

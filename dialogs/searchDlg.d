@@ -2,7 +2,7 @@
 
 private import iup.iup, iup.iup_scintilla;
 
-private import global, scintilla, actionManager;
+private import global, tools, scintilla, actionManager;
 private import dialogs.baseDlg;
 
 private import tango.stdc.stringz;
@@ -335,12 +335,14 @@ extern(C)
 						return IUP_DEFAULT;
 					}
 
-					int dummy = IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchExpander.searchRule, 0 );	// SCI_SETSEARCHFLAGS = 2198,
+					IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchExpander.searchRule, 0 );	// SCI_SETSEARCHFLAGS = 2198,
 					
 					actionManager.SearchAction.addListItem( listFind_handle, findText, 15 );
 					if( flag == 2 && ReplaceText.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText, 15 );
+					
+					scope _t = new IupString( findText );
 
-					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) toStringz( findText ) ); //SCI_SEARCHINTARGET = 2197,
+					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 					while( findPos > -1 )
 					{
 						switch( flag )
@@ -351,9 +353,9 @@ extern(C)
 								break;
 							case 2:
 								if( !ReplaceText.length )
-									dummy = IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
-									IupSetAttribute( iupSci, "REPLACETARGET", toStringz( ReplaceText ) );
+									IupSetStrAttribute( iupSci, "REPLACETARGET", toStringz( ReplaceText ) );
 								break;
 							default:
 						}
@@ -363,7 +365,7 @@ extern(C)
 						if( !bScopeSelection ) IupSetInt( iupSci, "TARGETEND", -1 ); else IupSetAttribute( iupSci, "TARGETFROMSELECTION", "YES" );
 						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + ReplaceText.length );
 						
-						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) toStringz( findText ) ); //SCI_SEARCHINTARGET = 2197,
+						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 					}
 				}
 			}
