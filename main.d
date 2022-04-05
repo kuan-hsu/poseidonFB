@@ -235,28 +235,29 @@ void main( char[][] args )
 	// Set Default Font
 	if(  GLOBAL.fonts[0].fontString.length )
 	{
-		IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
-
+		IupSetStrGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
+		/*
 		if( GLOBAL.fonts[0].fontString.length )
 		{
 			int comma = Util.index( GLOBAL.fonts[0].fontString, "," );
 			if( comma < GLOBAL.fonts[0].fontString.length )
 			{
-				IupSetGlobal( "DEFAULTFONTFACE", toStringz( ( GLOBAL.fonts[0].fontString[0..comma] ).dup ) );
+				IupSetStrGlobal( "DEFAULTFONTFACE", toStringz( ( GLOBAL.fonts[0].fontString[0..comma] ).dup ) );
 
 				for( int i = GLOBAL.fonts[0].fontString.length - 1; i > comma; -- i )
 				{
 					if( GLOBAL.fonts[0].fontString[i] < 48 || GLOBAL.fonts[0].fontString[i] > 57 )
 					{
-						IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..$] ).dup ) );
+						IupSetStrGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..$] ).dup ) );
 
-						if( ++comma  < i ) IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
+						if( ++comma  < i ) IupSetStrGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
 						
 						break;
 					}
 				}
 			}
 		}
+		*/
 	}
 
 	IupSetGlobal( "UTF8MODE", "YES" );
@@ -264,17 +265,17 @@ void main( char[][] args )
 	{
 		IupSetGlobal( "UTF8MODE_FILE", "YES" );
 		/*
-		IupSetGlobal( "MENUFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
-		IupSetGlobal( "MENUBGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrGlobal( "MENUFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrGlobal( "MENUBGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		*/
 	}
 	
 	version(DARKTHEME)
 	{
-		IupSetGlobal( "DLGFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
-		IupSetGlobal( "DLGBGCOLOR", GLOBAL.editColor.dlgBack.toCString );	
-		IupSetGlobal( "TXTFGCOLOR", GLOBAL.editColor.txtFore.toCString );
-		IupSetGlobal( "TXTBGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		IupSetStrGlobal( "DLGFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+		IupSetStrGlobal( "DLGBGCOLOR", GLOBAL.editColor.dlgBack.toCString );	
+		IupSetStrGlobal( "TXTFGCOLOR", GLOBAL.editColor.txtFore.toCString );
+		IupSetStrGlobal( "TXTBGCOLOR", GLOBAL.editColor.txtBack.toCString );
 	}
 	
 
@@ -354,9 +355,10 @@ void main( char[][] args )
 	createDialog();
 	
 	IupSetStrAttribute( GLOBAL.documentTabs, "TABFONT", toStringz( GLOBAL.fonts[0].fontString ) );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABFONT", toStringz( GLOBAL.fonts[0].fontString ) );
 	IupSetStrAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) );// Leftside
 	//IupSetStrAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[3].fontString ) );// Filelist
-	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABFONT", toStringz( GLOBAL.fonts[6].fontString ) );// Bottom
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) );// Bottom
 	IupSetStrAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", toStringz( GLOBAL.fonts[7].fontString ) );// Output
 	IupSetStrAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Search
 	IupSetStrAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[11].fontString ) );// StatusBar

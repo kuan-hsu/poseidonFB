@@ -499,11 +499,11 @@ class CDebugger
 			if( ScintillaAction.openFile( fp.toString, lineNumber ) )
 			{	
 				//#define SCI_MARKERDELETEALL 2045
-				int dummy = IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2045, 3, 0 );
-				dummy = IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2045, 4, 0 );
+				IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2045, 3, 0 );
+				IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2045, 4, 0 );
 			
-				dummy = IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2043, lineNumber - 1, 3 ); // #define SCI_MARKERADD 2043
-				dummy = IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2043, lineNumber - 1, 4 ); // #define SCI_MARKERADD 2043
+				IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2043, lineNumber - 1, 3 ); // #define SCI_MARKERADD 2043
+				IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(fp.toString)].getIupScintilla, 2043, lineNumber - 1, 4 ); // #define SCI_MARKERADD 2043
 			}
 		}
 	}
@@ -1590,8 +1590,8 @@ class CDebugger
 						localTreeFrame = argTreeFrame = shareTreeFrame = regFrame = disasFrame = "";
 						foreach( CScintilla cSci; GLOBAL.scintillaManager )
 						{
-							int dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 ); //#define SCI_MARKERDELETEALL 2045
-							dummy = IupScintillaSendMessage( cSci.getIupScintilla, 2045, 4, 0 ); //#define SCI_MARKERDELETEALL 2045
+							IupScintillaSendMessage( cSci.getIupScintilla, 2045, 3, 0 ); //#define SCI_MARKERDELETEALL 2045
+							IupScintillaSendMessage( cSci.getIupScintilla, 2045, 4, 0 ); //#define SCI_MARKERDELETEALL 2045
 						}
 					}					
 					break;

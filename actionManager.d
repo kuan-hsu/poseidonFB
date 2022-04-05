@@ -1381,19 +1381,6 @@ public:
 			{
 				IupSetAttributeId( ih, "ENSUREVISIBLE", --lineNumber, "ENFORCEPOLICY" );
 				IupSetInt( ih, "CARET", lineNumber );
-				/+
-				int dummy = IupScintillaSendMessage( ih, 2234, cast(ulong) lineNumber, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				dummy = IupScintillaSendMessage( ih, 2024, cast(ulong) lineNumber, 0 );	// SCI_GOTOLINE 2024
-				
-				
-				// If debug window is on, don't scroll to top
-				if( fromStringz( IupGetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2 ) ) == "NO" )
-				{
-					int visibleLINE = IupScintillaSendMessage( ih, 2220, cast(ulong) lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
-					if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
-					IupSetInt( ih, "FIRSTVISIBLELINE", lineNumber );
-				}
-				+/
 			}
 			StatusBarAction.update();
 
@@ -1481,17 +1468,6 @@ public:
 			{
 				IupSetAttributeId( _sci.getIupScintilla, "ENSUREVISIBLE", lineNumber, "ENFORCEPOLICY" );
 				if( !bDirectGotoLine ) IupSetInt( _sci.getIupScintilla, "CARETPOS", fileStatusPos ); else IupSetInt( _sci.getIupScintilla, "CARET", lineNumber );
-				/*
-				dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2234, lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-				if( !bDirectGotoLine )
-					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2025, fileStatusPos, 0 ); // SCI_GOTOPOS 2025
-				else
-					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
-
-				int visibleLINE = IupScintillaSendMessage( _sci.getIupScintilla, 2220, lineNumber, 0 ); // SCI_VISIBLEFROMDOCLINE 2220
-				if( visibleLINE < lineNumber ) lineNumber -= ( lineNumber - visibleLINE );
-				IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );
-				*/
 			}
 			else
 			{
@@ -1499,11 +1475,6 @@ public:
 				{
 					IupSetAttributeId( _sci.getIupScintilla, "ENSUREVISIBLE", --lineNumber, "ENFORCEPOLICY" );
 					IupSetInt( _sci.getIupScintilla, "CARET", lineNumber );
-					/*
-					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2234, --lineNumber, 0 ); // SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-					dummy = IupScintillaSendMessage( _sci.getIupScintilla, 2024, lineNumber, 0 ); // SCI_GOTOLINE = 2024
-					IupSetInt( _sci.getIupScintilla, "FIRSTVISIBLELINE", lineNumber );
-					*/
 				}
 			}
 			//StatusBarAction.update();

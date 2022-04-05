@@ -24,6 +24,11 @@ class CSingleTextDialog : CBaseDialog
 		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextDialog_text", textResult );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( textResult, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textResult, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );			
+		}
 
 		Ihandle* hBox = IupHbox( label, textResult, null );
 		IupSetAttribute( hBox, "ALIGNMENT", "ACENTER" );
@@ -114,6 +119,11 @@ class CSingleTextInput
 		IupSetAttributes( inputText, toStringz( "SIZE=" ~ Integer.toString( w ) ~ "x" ~ Integer.toString( h ) ) );
 		IupSetAttribute( inputText, "BGCOLOR", toStringz( color) );
 		IupSetCallback( inputText, "K_ANY", cast(Icallback) &CSingleTextInput_K_ANY );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( inputText, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( inputText, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );			
+		}		
 		
 		inputDlg = IupDialog( inputText );
 		IupSetAttributes( inputDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO" );
@@ -183,6 +193,11 @@ class CSingleTextOpen : CBaseDialog
 		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextOpen_text", textResult );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( textResult, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textResult, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );			
+		}		
 		
 		openButton = IupButton( null, null );
 		IupSetAttributes( openButton, "IMAGE=icon_openfile,FLAT=YES,CANFOCUS=NO" );
@@ -231,7 +246,7 @@ class CSingleTextOpen : CBaseDialog
 		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CSingleTextOpen_btnCancel_cb );
 		IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CSingleTextOpen_btnCancel_cb );
 		
-		IupSetCallback( openButton, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( openButton, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
 			if( textHandle != null )

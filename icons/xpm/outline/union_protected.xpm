@@ -1,0 +1,31 @@
+/* XPM */
+static char *union_protected_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16        8            1",
+/* colors */
+"` c #4d6804",
+". c #6f8931",
+"# c #f8e9af",
+"a c #99ad6f",
+"b c None",
+"c c #a47e1c",
+"d c #b4922c",
+"e c #fbfdfa",
+/* pixels */
+"bbbbbbbbbbbbbbbb",
+"bbbbb`````bbbbbb",
+"bbbb```````bbbbb",
+"bbb`````````bbbb",
+"bb``.#``.#```bbb",
+"b```.e``.e````bb",
+"b```.e``.e````bb",
+"b```.e``.e````bb",
+"b```.e``.e`dd`bb",
+"b```.e``.ed##dbb",
+"b````#a`ad####db",
+"bb```aeed######d",
+"bbb````.c######c",
+"bbbb`````c####cb",
+"bbbbb`````c##cbb",
+"bbbbbbbbbbbccbbb"
+};

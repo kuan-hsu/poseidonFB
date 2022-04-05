@@ -2404,7 +2404,7 @@ extern(C)
 					screenY = screenY + Integer.toInt( WH[crossPos+1..$] );
 					
 					screenXY = Integer.toString( screenX + 8 ) ~ "x" ~ Integer.toString( screenY + 8 );
-					IupSetGlobal( "CURSORPOS", toStringz( screenXY ) );
+					IupSetStrGlobal( "CURSORPOS", toStringz( screenXY ) );
 				}
 			}
 		

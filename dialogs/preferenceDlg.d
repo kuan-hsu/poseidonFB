@@ -1660,13 +1660,21 @@ class CPreferenceDialog : CBaseDialog
 			});
 		}
 		
+		
+		
+		
+		Ihandle* Preference_btnHiddenOK = IupButton( null, null );
+		IupSetAttribute( Preference_btnHiddenOK, "VISIBLE", "NO" );
+		IupSetHandle( "Preference_btnHiddenOK", Preference_btnHiddenOK );
+		IupSetCallback( Preference_btnHiddenOK, "ACTION", cast(Icallback) &CPreferenceDialog_btnOK_cb );		
+
 		Ihandle* Preference_btnHiddenCANCEL = IupButton( null, null );
 		IupSetAttribute( Preference_btnHiddenCANCEL, "VISIBLE", "NO" );
 		IupSetHandle( "Preference_btnHiddenCANCEL", Preference_btnHiddenCANCEL );
 		IupSetCallback( Preference_btnHiddenCANCEL, "ACTION", cast(Icallback) &CPreferenceDialog_btnCancel_cb );		
 
 		
-		Ihandle* vBox = IupVbox( preferenceTabs, IupHbox( Preference_btnHiddenCANCEL, bottom, null ), null );
+		Ihandle* vBox = IupVbox( preferenceTabs, IupHbox( Preference_btnHiddenOK, Preference_btnHiddenCANCEL, bottom, null ), null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=2x2,GAP=5,EXPAND=YES" );
 		//IupSetAttributes( vBox, "ALIGNMENT=ACENTER,GAP=5" );
 
@@ -1777,6 +1785,7 @@ class CPreferenceDialog : CBaseDialog
 		IupSetCallback( btnAPPLY, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_btnApply_cb );
 		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_btnOK_cb );
 		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_btnCancel_cb );
+		IupSetAttribute( _dlg, "DEFAULTENTER", "Preference_btnHiddenOK" );
 		IupSetAttribute( _dlg, "DEFAULTESC", "Preference_btnHiddenCANCEL" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CPreferenceDialog_btnCancel_cb );		
 		
@@ -1923,7 +1932,9 @@ extern(C) // Callback for CPreferenceDialog
 
 	private int CPreferenceDialog_btnCancel_cb( Ihandle* ih )
 	{
-		IupHide( GLOBAL.preferenceDlg.getIhandle );
+		//IupHide( GLOBAL.preferenceDlg.getIhandle );
+		IupDestroy( GLOBAL.preferenceDlg.getIhandle );
+		delete GLOBAL.preferenceDlg;		
 		return IUP_DEFAULT;
 	}
 
@@ -1931,7 +1942,9 @@ extern(C) // Callback for CPreferenceDialog
 	private int CPreferenceDialog_btnOK_cb( Ihandle* ih )
 	{
 		CPreferenceDialog_btnApply_cb( ih );
-		IupHide( GLOBAL.preferenceDlg.getIhandle );
+		//IupHide( GLOBAL.preferenceDlg.getIhandle );
+		IupDestroy( GLOBAL.preferenceDlg.getIhandle );
+		delete GLOBAL.preferenceDlg;		
 		return IUP_DEFAULT;
 	}
 
@@ -2100,10 +2113,10 @@ extern(C) // Callback for CPreferenceDialog
 			// Add for color
 			version(DARKTHEME)
 			{
-				IupSetGlobal( "DLGFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
-				IupSetGlobal( "DLGBGCOLOR", GLOBAL.editColor.dlgBack.toCString );
-				IupSetGlobal( "TXTFGCOLOR", GLOBAL.editColor.txtFore.toCString );
-				IupSetGlobal( "TXTBGCOLOR", GLOBAL.editColor.txtBack.toCString );				
+				IupSetStrGlobal( "DLGFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+				IupSetStrGlobal( "DLGBGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+				IupSetStrGlobal( "TXTFGCOLOR", GLOBAL.editColor.txtFore.toCString );
+				IupSetStrGlobal( "TXTBGCOLOR", GLOBAL.editColor.txtBack.toCString );				
 				IupSetStrAttribute( GLOBAL.mainDlg, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
 				IupSetStrAttribute( GLOBAL.mainDlg, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 			}
@@ -2347,35 +2360,35 @@ extern(C) // Callback for CPreferenceDialog
 			// Set Default Font
 			if(  GLOBAL.fonts[0].fontString.length )
 			{
-				IupSetGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString.dup ) );
-
+				IupSetStrGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
+				/*
 				if( GLOBAL.fonts[0].fontString.length )
 				{
 					int comma = Util.index( GLOBAL.fonts[0].fontString, "," );
 					if( comma < GLOBAL.fonts[0].fontString.length )
 					{
-						IupSetGlobal( "DEFAULTFONTFACE", toStringz( ( GLOBAL.fonts[0].fontString[0..comma] ).dup ) );
+						IupSetStrGlobal( "DEFAULTFONTFACE", toStringz( ( GLOBAL.fonts[0].fontString[0..comma] ).dup ) );
 
 						for( int i = GLOBAL.fonts[0].fontString.length - 1; i > comma; -- i )
 						{
 							if( GLOBAL.fonts[0].fontString[i] < 48 || GLOBAL.fonts[0].fontString[i] > 57 )
 							{
-								IupSetGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..$] ).dup ) );
+								IupSetStrGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..$] ).dup ) );
 
-								if( ++comma  < i ) IupSetGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
+								if( ++comma  < i ) IupSetStrGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
 								
 								break;
 							}
 						}
 					}
 				}
+				*/
 			}			
 			IupSetStrAttribute( GLOBAL.documentTabs, "TABFONT", toStringz( GLOBAL.fonts[0].fontString ) );
-			IupRefresh( GLOBAL.documentTabs );
-			
+			IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABFONT", toStringz( GLOBAL.fonts[0].fontString ) );
 			IupSetStrAttribute( GLOBAL.projectViewTabs, "FONT", toStringz( GLOBAL.fonts[2].fontString ) );// Leftside
 			//IupSetStrAttribute( GLOBAL.fileListTree.getTreeHandle, "FONT", toStringz( GLOBAL.fonts[3].fontString ) );// Filelist
-			IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABFONT", toStringz( GLOBAL.fonts[6].fontString ) );// Bottom
+			IupSetStrAttribute( GLOBAL.messageWindowTabs, "FONT", toStringz( GLOBAL.fonts[6].fontString ) );// Bottom
 			IupSetStrAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "FONT", toStringz( GLOBAL.fonts[7].fontString ) );// Output
 			IupSetStrAttribute( GLOBAL.messagePanel.getSearchOutputPanelHandle, "FONT", toStringz( GLOBAL.fonts[8].fontString ) );// Search
 			IupSetStrAttribute( GLOBAL.statusBar.getLayoutHandle, "FONT", toStringz( GLOBAL.fonts[11].fontString ) );// StatusBar
@@ -2412,8 +2425,6 @@ extern(C) // Callback for CPreferenceDialog
 
 	private int CPreferenceDialog_colorChoose_cb( Ihandle* ih )
 	{
-		IupSetGlobal( "DEFAULTTHEME", null );
-		
 		Ihandle* dlg = IupColorDlg();
 
 		IupSetAttribute( dlg, "VALUE", IupGetAttribute( ih, "FGCOLOR" ) ); // For IupFlatButton
@@ -2431,8 +2442,6 @@ extern(C) // Callback for CPreferenceDialog
 			IupUpdateChildren( GLOBAL.preferenceDlg.getIhandle );
 		}
 		
-		//setGlobalTHEME();
-
 		return IUP_DEFAULT;
 	}
 

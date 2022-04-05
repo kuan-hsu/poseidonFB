@@ -1544,7 +1544,7 @@ struct ExecuterAction
 			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
 			{
 				_compileThread.go();
-				int dummy = IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
+				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
 			}
 			else
 			{
@@ -1857,7 +1857,7 @@ struct ExecuterAction
 			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
 			{
 				_buildThread.go();
-				int dummy = IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
+				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
 			}
 			else
 			{

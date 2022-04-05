@@ -399,7 +399,7 @@ struct GLOBAL
 		GLOBAL.shortKeys ~= sk10;
 		ShortKey sk11 = { "findnext", "Find Next", 65472 };
 		GLOBAL.shortKeys ~= sk11;
-		ShortKey sk12 = { "findprev", "Find Previous", 536936419 };
+		ShortKey sk12 = { "findprev", "Find Previous", 536936384 };
 		GLOBAL.shortKeys ~= sk12;
 		ShortKey sk13 = { "gotoline", "Goto Line", 536870983 };
 		GLOBAL.shortKeys ~= sk13;

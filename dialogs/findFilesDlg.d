@@ -93,22 +93,22 @@ class CFindInFilesDialog : CBaseDialog
 		// Buttons
 		btnFindAll = IupFlatButton( GLOBAL.languageItems["findall"].toCString );
 		IupSetAttributes( btnFindAll, "EXPAND=YES,NAME=btn_Find" );
-		IupSetStrAttribute( btnFindAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		version(DARKTHEME) IupSetStrAttribute( btnFindAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( btnFindAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		btnReplaceAll = IupFlatButton( GLOBAL.languageItems["replaceall"].toCString );
 		IupSetAttributes( btnReplaceAll, "EXPAND=YES,NAME=btn_Replace" );
-		IupSetStrAttribute( btnReplaceAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		version(DARKTHEME) IupSetStrAttribute( btnReplaceAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( btnReplaceAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		btnCountAll = IupFlatButton( GLOBAL.languageItems["countall"].toCString );
 		IupSetAttributes( btnCountAll, "EXPAND=YES,NAME=btn_Count" );
-		IupSetStrAttribute( btnCountAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		version(DARKTHEME) IupSetStrAttribute( btnCountAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( btnCountAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		btnMarkAll = IupFlatButton( GLOBAL.languageItems["bookmarkall"].toCString );
 		IupSetAttributes( btnMarkAll, "EXPAND=YES,NAME=btn_Mark" );
-		IupSetStrAttribute( btnMarkAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		version(DARKTHEME) IupSetStrAttribute( btnMarkAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetCallback( btnMarkAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 
 		Ihandle* vBoxButton = IupVbox( btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll, null );

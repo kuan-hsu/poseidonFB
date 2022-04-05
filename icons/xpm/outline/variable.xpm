@@ -1,13 +1,13 @@
 /* XPM */
-static char *normal_xpm[] = {
+static char *variable_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    16    16        8            1",
 /* colors */
 "` c None",
-". c #4d3f7f",
-"# c #5f89bf",
-"a c #463f5f",
-"b c #5f709f",
+". c #3f7f3f",
+"# c #9fbf5f",
+"a c #3f5f3f",
+"b c #7f9f5f",
 "c c #000000",
 "d c #000000",
 "e c #000000",

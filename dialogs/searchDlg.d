@@ -81,12 +81,11 @@ class CSearchExpander
 						Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Direction" );
 						if( direction_handle != null )
 						{
-							int dummy;
 							char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
 							if( targetText == findText )
 							{
 								if( !ReplaceText.length )
-									dummy = IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
 									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
 								
@@ -479,7 +478,6 @@ extern(C)
 					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Direction" );
 					if( direction_handle != null )
 					{
-						int dummy;
 						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
 						
 						if( targetText.length )
@@ -487,7 +485,7 @@ extern(C)
 							if( targetText == findText )
 							{
 								if( !ReplaceText.length )
-									dummy = IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
+									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
 									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
 								

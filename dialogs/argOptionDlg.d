@@ -40,11 +40,6 @@ class CArgOptionDialog : CBaseDialog
 		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( listTools, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( listTools, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
-		}
 		IupSetHandle( "CArgOptionDialog_listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CArgOptionDialog_ACTION );
 		
@@ -213,6 +208,18 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 
 		createLayout();
+		
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( listTools, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listTools, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );		
+			IupSetStrAttribute( listCompiler, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listCompiler, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( listOptions, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listOptions, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( listArgs, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listArgs, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}			
 	}
 
 	~this()

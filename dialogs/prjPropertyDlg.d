@@ -11,7 +11,7 @@ class CProjectPropertiesDialog : CBaseDialog
 {
 	private:
 	
-	Ihandle*	textProjectName, listType, textProjectDir, textMainFile, toggleOneFile, textTargetName, textArgs, textCompilerOpts, textComment, textCompilerPath;
+	Ihandle*	textProjectName, listType, textProjectDir, textMainFile, toggleOneFile, textTargetName, textArgs, textCompilerOpts, textCompilerPath;
 	Ihandle*	listFocus;
 	Ihandle*	btnProjectDir;
 	Ihandle*	listIncludePath, listLibPath;
@@ -52,6 +52,11 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 		textProjectDir = IupText( null );
 		IupSetAttributes( textProjectDir, "SIZE=276x12,NAME=PRJPROPERTY_ProjectDir" );
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( textProjectDir, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textProjectDir, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}
 
 		btnProjectDir = IupButton( null, null );
 		IupSetAttributes( btnProjectDir, "IMAGE=icon_openfile,FLAT=YES" );
@@ -401,6 +406,29 @@ class CProjectPropertiesDialog : CBaseDialog
 		*/
 		createLayout();
 		
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( textProjectName, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textProjectName, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );		
+			IupSetStrAttribute( textProjectDir, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textProjectDir, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( textMainFile, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textMainFile, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( textTargetName, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textTargetName, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( textArgs, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textArgs, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( textCompilerOpts, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textCompilerOpts, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( textCompilerPath, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( textCompilerPath, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( listIncludePath, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listIncludePath, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			IupSetStrAttribute( listLibPath, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( listLibPath, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		}			
+		
+		
 		if( !bCreateNew )
 		{
 			IupSetAttribute( textProjectDir, "ACTIVE", "NO" );
@@ -415,7 +443,7 @@ class CProjectPropertiesDialog : CBaseDialog
 			IupSetAttribute( textProjectDir, "VALUE", toStringz( tempProject.dir ) );
 			version(FBIDE) if( tempProject.passOneFile == "ON" ) IupSetAttribute( toggleOneFile, "VALUE", "ON" );
 			IupSetAttribute( textArgs, "VALUE", toStringz( tempProject.args ) );
-			IupSetAttribute( textComment, "VALUE", toStringz( tempProject.comment ) );
+			//IupSetAttribute( textComment, "VALUE", toStringz( tempProject.comment ) );
 			version(FBIDE) IupSetAttribute( textMainFile, "VALUE", toStringz( tempProject.mainFile ) );
 			
 			int _item;

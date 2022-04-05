@@ -635,7 +635,7 @@ public:
 							case "Outline":					GLOBAL.fonts[5].fontString = right;						break;
 							case "Bottom":					GLOBAL.fonts[6].fontString = right;						break;
 							case "Output":					GLOBAL.fonts[7].fontString = right;						break;
-							case "Search":					GLOBAL.fonts[8].fontString = right; 					break;		break;
+							case "Search":					GLOBAL.fonts[8].fontString = right; 					break;
 							case "Debugger":				GLOBAL.fonts[9].fontString  = right;					break;
 							case "Annotation":				GLOBAL.fonts[10].fontString = right;					break;
 							case "StatusBar":				GLOBAL.fonts[11].fontString = right;					break;

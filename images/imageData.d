@@ -134,7 +134,7 @@ void load_all_images_icons()
 	IupSetHandle( "icon_save", XPM.getIUPimage( "icons/xpm/save.xpm" ) );
 	IupSetHandle( "icon_goto", XPM.getIUPimage( "icons/xpm/goto.xpm" ) );
 	IupSetHandle( "icon_gotomember", XPM.getIUPimage( "icons/xpm/goto_member.xpm" ) );
-	version(FBIDE) IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/bi.xpm" ) ); else IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/di.xpm" ) );
+	IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/bi.xpm" ) );
 	IupSetHandle( "icon_markprev", XPM.getIUPimage( "icons/xpm/mark_prev.xpm" ) );
 	IupSetHandle( "icon_run", XPM.getIUPimage( "icons/xpm/run.xpm" ) );
 	IupSetHandle( "icon_delete", XPM.getIUPimage( "icons/xpm/remove.xpm" ) );
@@ -144,20 +144,20 @@ void load_all_images_icons()
 	IupSetHandle( "icon_saveall", XPM.getIUPimage( "icons/xpm/saveall.xpm" ) );
 	IupSetHandle( "icon_redo", XPM.getIUPimage( "icons/xpm/redo.xpm" ) );
 	IupSetHandle( "icon_Write", XPM.getIUPimage( "icons/xpm/write.xpm" ) );
-	IupSetHandle( "icon_search", XPM.getIUPimage( "icons/xpm/search.xpm" ) ); // IupSetHandle("icon_find", load_image_find_obj());
-	IupSetHandle( "icon_message", XPM.getIUPimage( "icons/xpm/message.xpm" ) ); // IupSetHandle("icon_message", load_image_details_view());
-	IupSetHandle( "icon_help", XPM.getIUPimage( "icons/xpm/help.xpm" ) ); // IupSetHandle("icon_help", load_image_help());
+	IupSetHandle( "icon_search", XPM.getIUPimage( "icons/xpm/search.xpm" ) );
+	IupSetHandle( "icon_message", XPM.getIUPimage( "icons/xpm/message.xpm" ) );
+	IupSetHandle( "icon_help", XPM.getIUPimage( "icons/xpm/help.xpm" ) );
 	IupSetHandle( "icon_deleteothers", XPM.getIUPimage( "icons/xpm/removeothers.xpm" ) );
 	IupSetHandle( "icon_deleteright", XPM.getIUPimage( "icons/xpm/removeright.xpm" ) );
-	IupSetHandle( "icon_deleteall", XPM.getIUPimage( "icons/xpm/removeall.xpm" ) ); // IupSetHandle("icon_deleteall", load_image_removeall());
-	IupSetHandle( "icon_refresh", XPM.getIUPimage( "icons/xpm/refresh.xpm" ) ); // IupSetHandle("icon_refresh", load_image_refresh());
-	IupSetHandle( "icon_annotation", XPM.getIUPimage( "icons/xpm/annotate.xpm" ) ); // IupSetHandle("icon_annotation", load_image_annotation());
-	IupSetHandle( "icon_annotation_hide", XPM.getIUPimage( "icons/xpm/annotatehide.xpm" ) ); // IupSetHandle("icon_annotation_hide", load_image_annotation_hide());
-	IupSetHandle( "icon_annotation_remove", XPM.getIUPimage( "icons/xpm/annotate_removeall.xpm" ) ); //IupSetHandle("icon_annotation_remove", load_image_annotation_remove());
+	IupSetHandle( "icon_deleteall", XPM.getIUPimage( "icons/xpm/removeall.xpm" ) );
+	IupSetHandle( "icon_refresh", XPM.getIUPimage( "icons/xpm/refresh.xpm" ) );
+	IupSetHandle( "icon_annotation", XPM.getIUPimage( "icons/xpm/annotate.xpm" ) );
+	IupSetHandle( "icon_annotation_hide", XPM.getIUPimage( "icons/xpm/annotatehide.xpm" ) );
+	IupSetHandle( "icon_annotation_remove", XPM.getIUPimage( "icons/xpm/annotate_removeall.xpm" ) );
 	IupSetHandle( "icon_colormark", XPM.getIUPimage( "icons/xpm/colormark.xpm" ) );
-	IupSetHandle( "icon_windows", XPM.getIUPimage( "icons/xpm/windows.xpm" ) ); // IupSetHandle("icon_windows", load_image_windows());
-	IupSetHandle( "icon_mac", XPM.getIUPimage( "icons/xpm/mac.xpm" ) ); // IupSetHandle("icon_mac", load_image_mac());
-	IupSetHandle( "icon_linux", XPM.getIUPimage( "icons/xpm/linux.xpm" ) ); // IupSetHandle("icon_linux", load_image_linux());
+	IupSetHandle( "icon_windows", XPM.getIUPimage( "icons/xpm/windows.xpm" ) );
+	IupSetHandle( "icon_mac", XPM.getIUPimage( "icons/xpm/mac.xpm" ) );
+	IupSetHandle( "icon_linux", XPM.getIUPimage( "icons/xpm/linux.xpm" ) );
 	IupSetHandle( "icon_tools", XPM.getIUPimage( "icons/xpm/tools.xpm" ) );
 	IupSetHandle( "icon_toolitem", XPM.getIUPimage( "icons/xpm/toolitem.xpm" ) );
 	IupSetHandle( "icon_properties", XPM.getIUPimage( "icons/xpm/properties.xpm" ) );
@@ -176,19 +176,19 @@ void load_all_images_icons()
 	IupSetHandle( "icon_customoption", XPM.getIUPimage( "icons/xpm/custom_option.xpm" ) );
 	IupSetHandle( "icon_fullscreen", XPM.getIUPimage( "icons/xpm/fullscreen.xpm" ) );
 
-	IupSetHandle( "icon_folder", XPM.getIUPimage( "icons/xpm/folder.xpm" ) ); // IupSetHandle("icon_prj_open", load_image_prj_open());
-	IupSetHandle( "icon_folder_open", XPM.getIUPimage( "icons/xpm/folder_open.xpm" ) ); // IupSetHandle("icon_prj", load_image_prj()); 
-	IupSetHandle( "icon_prj_open", XPM.getIUPimage( "icons/xpm/prjfolderopen.xpm" ) ); // IupSetHandle("icon_prj_open", load_image_prj_open());
-	IupSetHandle( "icon_prj", XPM.getIUPimage( "icons/xpm/prjfolder.xpm" ) ); // IupSetHandle("icon_prj", load_image_prj()); 
-	IupSetHandle( "icon_collapse", XPM.getIUPimage( "icons/xpm/collapse.xpm" ) ); // IupSetHandle("icon_collapse", load_image_collapse());
-	IupSetHandle( "icon_collapse1", XPM.getIUPimage( "icons/xpm/collapse1.xpm" ) ); // IupSetHandle("icon_collapse", load_image_collapse());
-	IupSetHandle( "icon_collapse2", XPM.getIUPimage( "icons/xpm/collapse2.xpm" ) ); // IupSetHandle("icon_collapse", load_image_collapse());
-	IupSetHandle( "icon_show_pr", XPM.getIUPimage( "icons/xpm/show_pr.xpm" ) ); // IupSetHandle("icon_show_pr", load_image_show_pr());
-	IupSetHandle( "icon_show_p", XPM.getIUPimage( "icons/xpm/show_p.xpm" ) ); // IupSetHandle("icon_show_p", load_image_show_p());
-	IupSetHandle( "icon_show_r", XPM.getIUPimage( "icons/xpm/show_r.xpm" ) ); // IupSetHandle("icon_show_r", load_image_show_r()); 
-	IupSetHandle( "icon_show_nopr", XPM.getIUPimage( "icons/xpm/show_nopr.xpm" ) ); // IupSetHandle("icon_show_nopr", load_image_show_nopr());
+	IupSetHandle( "icon_folder", XPM.getIUPimage( "icons/xpm/folder.xpm" ) );
+	IupSetHandle( "icon_folder_open", XPM.getIUPimage( "icons/xpm/folder_open.xpm" ) );
+	IupSetHandle( "icon_prj_open", XPM.getIUPimage( "icons/xpm/prjfolderopen.xpm" ) );
+	IupSetHandle( "icon_prj", XPM.getIUPimage( "icons/xpm/prjfolder.xpm" ) );
+	IupSetHandle( "icon_collapse", XPM.getIUPimage( "icons/xpm/collapse.xpm" ) );
+	IupSetHandle( "icon_collapse1", XPM.getIUPimage( "icons/xpm/collapse1.xpm" ) );
+	IupSetHandle( "icon_collapse2", XPM.getIUPimage( "icons/xpm/collapse2.xpm" ) );
+	IupSetHandle( "icon_show_pr", XPM.getIUPimage( "icons/xpm/show_pr.xpm" ) );
+	IupSetHandle( "icon_show_p", XPM.getIUPimage( "icons/xpm/show_p.xpm" ) );
+	IupSetHandle( "icon_show_r", XPM.getIUPimage( "icons/xpm/show_r.xpm" ) );
+	IupSetHandle( "icon_show_nopr", XPM.getIUPimage( "icons/xpm/show_nopr.xpm" ) );
 	IupSetHandle( "icon_show_linenum", XPM.getIUPimage( "icons/xpm/show_linenum.xpm" ) );
-	IupSetHandle( "icon_importall", XPM.getIUPimage( "icons/xpm/importall.xpm" ) ); // IupSetHandle("icon_prj_open", load_image_prj_open());
+	IupSetHandle( "icon_importall", XPM.getIUPimage( "icons/xpm/importall.xpm" ) );
 
 	IupSetHandle( "icon_manual", XPM.getIUPimage( "icons/xpm/manual.xpm" ) );
 	
@@ -199,8 +199,8 @@ void load_all_images_icons()
 	IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );
 	IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
 	IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
-	IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_obj.xpm" ) );
-	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );
+	IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array.xpm" ) );
+	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable.xpm" ) );
 	
 	//TEST
 	IupSetHandle( "icon_wholeword", XPM.getIUPimage( "icons/xpm/wholeword.xpm" ) );
@@ -210,64 +210,66 @@ void load_all_images_icons()
 
 	version(FBIDE)
 	{
-		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );//IupSetHandle("IUP_ctor", load_image_ctor_obj());
-		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );//IupSetHandle("IUP_dtor", load_image_dtor_obj());
-		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class_obj.xpm" ) );//IupSetHandle("IUP_class", load_image_class_obj());
-		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/struct_obj.xpm" ) );//IupSetHandle("IUP_struct", load_image_struct_obj());
-		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property_obj.xpm" ) );//IupSetHandle("IUP_property", load_image_property_obj());
-		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );//IupSetHandle("IUP_property_var", load_image_property_var());
-		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );//IupSetHandle("IUP_operator", load_image_operator());
-		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_protected", load_image_variable_protected_obj());
-		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
-		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_obj.xpm" ) ); //IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
-		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private_obj.xpm" ) );  //IupSetHandle("IUP_variable_private", load_image_variable_private_obj());  
-		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member_obj.xpm" ) );//IupSetHandle("IUP_enummember", load_image_enum_member_obj());
-		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum_obj.xpm" ) );//IupSetHandle("IUP_enum", load_image_enum_obj());
-		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias_obj.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
-		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union_obj.xpm" ) );//IupSetHandle("IUP_union", load_image_union_obj());
-		IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace_obj.xpm" ) );//IupSetHandle("IUP_namespace", load_image_namespace_obj());
-		IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );//IupSetHandle("IUP_macro", load_image_macro());
-		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
-		IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );// IupSetHandle("IUP_define_fun", load_image_define_fun());
-		IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_var.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
-		IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );//IupSetHandle("IUP_define_var", load_image_define_var());
+		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );
+		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );
+
+		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class.xpm" ) );
+		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/type.xpm" ) );
+		
+		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property.xpm" ) );
+		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );
+		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );
+		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected.xpm" ) );
+		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected.xpm" ) );
+		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private.xpm" ) );
+		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private.xpm" ) );
+		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member.xpm" ) );
+		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum.xpm" ) );
+		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias.xpm" ) );
+		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union.xpm" ) );
+		IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace.xpm" ) );
+		IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );
+		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );
+		IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );
+		IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_var.xpm" ) );
+		IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );
 	}
 	version(DIDE)
 	{
-		IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) ); //IupSetHandle("IUP_function", load_image_function_public_obj());
+		IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) );
 		//IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) );
-		IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) ); //IupSetHandle("IUP_function_protected", load_image_function_protected_obj());
-		IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );// IupSetHandle("IUP_function_private", load_image_function_private_obj());
+		IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) );
+		IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );
 		//IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
 		//IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
-		IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_D.xpm" ) );//IupSetHandle("IUP_variable_array", load_image_variable_array_public_obj());
-		IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable_obj.xpm" ) );//IupSetHandle("IUP_variable", load_image_variable_obj());
+		IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_D.xpm" ) );
+		IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable.xpm" ) );
 
-		IupSetHandle( "IUP_debugspec", XPM.getIUPimage( "icons/xpm/outline/debug_spec_obj.xpm" ) );
-		IupSetHandle( "IUP_debug", XPM.getIUPimage( "icons/xpm/outline/debug_obj.xpm" ) );
-		IupSetHandle( "IUP_versionspec", XPM.getIUPimage( "icons/xpm/outline/version_spec_obj.xpm" ) );
-		IupSetHandle( "IUP_version", XPM.getIUPimage( "icons/xpm/outline/version_obj.xpm" ) );
-		IupSetHandle( "IUP_module", XPM.getIUPimage( "icons/xpm/outline/module_obj.xpm" ) );
-		IupSetHandle( "IUP_template", XPM.getIUPimage( "icons/xpm/outline/template_obj.xpm" ) );
-		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );//IupSetHandle("IUP_ctor", load_image_ctor_obj());
-		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );//IupSetHandle("IUP_dtor", load_image_dtor_obj());
-		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class_obj.xpm" ) );//IupSetHandle("IUP_class", load_image_class_obj());
-		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/struct_obj.xpm" ) );//IupSetHandle("IUP_struct", load_image_struct_obj());
-		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property_obj.xpm" ) );//IupSetHandle("IUP_property", load_image_property_obj());
-		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );//IupSetHandle("IUP_property_var", load_image_property_var());
-		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );//IupSetHandle("IUP_operator", load_image_operator());
-		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected_obj.xpm" ) );//IupSetHandle("IUP_variable_protected", load_image_variable_protected_obj());
-		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_D.xpm" ) );//IupSetHandle("IUP_variable_array_protected", load_image_variable_array_protected_obj());
-		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_D.xpm" ) ); //IupSetHandle("IUP_variable_array_private", load_image_variable_array_private_obj());
-		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private_obj.xpm" ) );  //IupSetHandle("IUP_variable_private", load_image_variable_private_obj());  
-		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member_obj.xpm" ) );//IupSetHandle("IUP_enummember", load_image_enum_member_obj());
-		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum_obj.xpm" ) );//IupSetHandle("IUP_enum", load_image_enum_obj());
-		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias_obj.xpm" ) );//IupSetHandle("IUP_alias", load_image_alias_obj());
-		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union_obj.xpm" ) );//IupSetHandle("IUP_union", load_image_union_obj());
-		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );//IupSetHandle("IUP_scope", load_image_scope());
-		IupSetHandle( "IUP_import", XPM.getIUPimage( "icons/xpm/outline/import_obj.xpm" ) );
-		IupSetHandle( "IUP_import_private", XPM.getIUPimage( "icons/xpm/outline/import_private_obj.xpm" ) );
-		IupSetHandle( "IUP_interface", XPM.getIUPimage( "icons/xpm/outline/interface_obj.xpm" ) );
+		IupSetHandle( "IUP_debugspec", XPM.getIUPimage( "icons/xpm/outline/debug_spec.xpm" ) );
+		IupSetHandle( "IUP_debug", XPM.getIUPimage( "icons/xpm/outline/debug.xpm" ) );
+		IupSetHandle( "IUP_versionspec", XPM.getIUPimage( "icons/xpm/outline/version_spec.xpm" ) );
+		IupSetHandle( "IUP_version", XPM.getIUPimage( "icons/xpm/outline/version.xpm" ) );
+		IupSetHandle( "IUP_module", XPM.getIUPimage( "icons/xpm/outline/module.xpm" ) );
+		IupSetHandle( "IUP_template", XPM.getIUPimage( "icons/xpm/outline/template.xpm" ) );
+		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );
+		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );
+		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class.xpm" ) );
+		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/struct.xpm" ) );
+		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property.xpm" ) );
+		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );
+		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );
+		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected.xpm" ) );
+		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_D.xpm" ) );
+		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_D.xpm" ) );
+		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private.xpm" ) );
+		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member.xpm" ) );
+		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum.xpm" ) );
+		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias.xpm" ) );
+		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union.xpm" ) );
+		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );
+		IupSetHandle( "IUP_import", XPM.getIUPimage( "icons/xpm/outline/import.xpm" ) );
+		IupSetHandle( "IUP_import_private", XPM.getIUPimage( "icons/xpm/outline/import_private.xpm" ) );
+		IupSetHandle( "IUP_interface", XPM.getIUPimage( "icons/xpm/outline/interface.xpm" ) );
 		IupSetHandle( "IUP_anonymous", XPM.getIUPimage( "icons/xpm/outline/anonymous.xpm" ) );
 		IupSetHandle( "IUP_funptr_private", XPM.getIUPimage( "icons/xpm/outline/funptr_private.xpm" ) );
 		IupSetHandle( "IUP_funptr_protected", XPM.getIUPimage( "icons/xpm/outline/funptr_protected.xpm" ) );
@@ -275,22 +277,22 @@ void load_all_images_icons()
 	}
 
 
-	IupSetHandle( "icon_debug_until", XPM.getIUPimage( "icons/xpm/debug/until.xpm" ) );//IupSetHandle("icon_debug_until", load_image_until());
-	IupSetHandle( "icon_debug_step", XPM.getIUPimage( "icons/xpm/debug/step.xpm" ) );//IupSetHandle("icon_debug_step", load_image_step());
-	IupSetHandle( "icon_debug_bt0",  XPM.getIUPimage( "icons/xpm/debug/bt0.xpm" ) );//IupSetHandle("icon_debug_bt0", load_image_backtrace0());
-	IupSetHandle( "icon_debug_bt1", XPM.getIUPimage( "icons/xpm/debug/bt1.xpm" ) );//IupSetHandle("icon_debug_bt1", load_image_backtrace1());
-	IupSetHandle( "icon_debug_stop", XPM.getIUPimage( "icons/xpm/debug/stop.xpm" ) );//IupSetHandle("icon_debug_stop", load_image_stop());
-	IupSetHandle( "icon_debug_resume", XPM.getIUPimage( "icons/xpm/debug/resume.xpm" ) );//IupSetHandle("icon_debug_resume", load_image_resume());
-	IupSetHandle( "icon_debug", XPM.getIUPimage( "icons/xpm/debug/debug.xpm" ) );//IupSetHandle("icon_debug", load_image_debug());
+	IupSetHandle( "icon_debug_until", XPM.getIUPimage( "icons/xpm/debug/until.xpm" ) );
+	IupSetHandle( "icon_debug_step", XPM.getIUPimage( "icons/xpm/debug/step.xpm" ) );
+	IupSetHandle( "icon_debug_bt0",  XPM.getIUPimage( "icons/xpm/debug/bt0.xpm" ) );
+	IupSetHandle( "icon_debug_bt1", XPM.getIUPimage( "icons/xpm/debug/bt1.xpm" ) );
+	IupSetHandle( "icon_debug_stop", XPM.getIUPimage( "icons/xpm/debug/stop.xpm" ) );
+	IupSetHandle( "icon_debug_resume", XPM.getIUPimage( "icons/xpm/debug/resume.xpm" ) );
+	IupSetHandle( "icon_debug", XPM.getIUPimage( "icons/xpm/debug/debug.xpm" ) );
 	IupSetHandle( "icon_debugrun", XPM.getIUPimage( "icons/xpm/debug/debug_run.xpm" ) );
 	IupSetHandle( "icon_debugbuild", XPM.getIUPimage( "icons/xpm/debug/debug_build.xpm" ) );
-	IupSetHandle( "icon_debug_add", XPM.getIUPimage( "icons/xpm/debug/add.xpm" ) );//IupSetHandle("icon_debug_add", load_image_add());
-	IupSetHandle( "icon_debug_next", XPM.getIUPimage( "icons/xpm/debug/over.xpm" ) );//IupSetHandle("icon_debug_next", load_image_next());
-	IupSetHandle( "icon_debug_left", XPM.getIUPimage( "icons/xpm/debug/left.xpm" ) );//IupSetHandle("icon_debug_left", load_image_left_nav());
+	IupSetHandle( "icon_debug_add", XPM.getIUPimage( "icons/xpm/debug/add.xpm" ) );
+	IupSetHandle( "icon_debug_next", XPM.getIUPimage( "icons/xpm/debug/over.xpm" ) );
+	IupSetHandle( "icon_debug_left", XPM.getIUPimage( "icons/xpm/debug/left.xpm" ) );
 	IupSetHandle( "icon_debug_right", XPM.getIUPimage( "icons/xpm/debug/right.xpm" ) );
 	IupSetHandle( "icon_debug_change", XPM.getIUPimage( "icons/xpm/debug/change.xpm" ) );
-	IupSetHandle( "icon_debug_return", XPM.getIUPimage( "icons/xpm/debug/return.xpm" ) );//IupSetHandle("icon_debug_return", load_image_return());
-	IupSetHandle( "icon_debug_clear", XPM.getIUPimage( "icons/xpm/debug/clear.xpm" ) );//IupSetHandle("icon_debug_clear", load_image_clear());
+	IupSetHandle( "icon_debug_return", XPM.getIUPimage( "icons/xpm/debug/return.xpm" ) );
+	IupSetHandle( "icon_debug_clear", XPM.getIUPimage( "icons/xpm/debug/clear.xpm" ) );
 	IupSetHandle( "icon_debug_at", XPM.getIUPimage( "icons/xpm/debug/at.xpm" ) );
 	IupSetHandle( "icon_debug_star", XPM.getIUPimage( "icons/xpm/debug/star.xpm" ) );
 
