@@ -130,7 +130,8 @@ private:
 
 		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, /*projectToolbarTitle,*/ IupFill, projectButtonCollapse, projectButtonHide, null );
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
-
+		
+		/+
 		version(Windows)
 		{
 			tree = IupFlatTree();
@@ -142,10 +143,11 @@ private:
 		}
 		else
 		{
-			tree = IupFlatTree();
+		+/
+			tree = IupTree();
 			IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
 			IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-		}
+		//}
 		
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
@@ -208,12 +210,13 @@ public:
 		IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
+		/+
 		version(Windows)
 		{
 			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
 			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
 		}
-		
+		+/
 		/*
 		scope icon_prj = CstringConvert( "icon_prj" );
 		scope icon_prj_open = CstringConvert( "icon_prj_open" );

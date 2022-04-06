@@ -1365,12 +1365,13 @@ class COutline
 			if( ih != null )
 			{
 				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+				/+
 				version(Windows)
 				{
 					IupSetStrAttribute( ih, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
 					IupSetStrAttribute( ih, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
 				}
-				
+				+/
 				for( int j = 0; j < IupGetInt( ih, "COUNT" ); ++ j )
 				{
 					if( j == 0 )
@@ -1422,6 +1423,7 @@ class COutline
 					cleanTree( fullPath );
 
 					Ihandle* tree;
+					/+
 					version(Windows)
 					{
 						tree = IupFlatTree();
@@ -1433,11 +1435,12 @@ class COutline
 					}
 					else
 					{
+					+/
 						tree = IupTree();
 						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
 						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
 						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-					}
+					//}
 						
 					
 					IupSetStrAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
@@ -1467,18 +1470,35 @@ class COutline
 				if( head.kind == D_MODULE )
 				{
 					char[] fullPath = head.name;
+					
+					Ihandle* tree;
+					/+
+					version(Windows)
+					{
+						tree = IupFlatTree();
+						IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
+						IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+						IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+						IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
+						IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					}
+					else
+					{
+					+/
+						tree = IupTree();
+						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
+						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
+						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					//}
 
-					Ihandle* tree = IupTree();
-					IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" );
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-					IupSetAttributeId( tree, "USERDATA", 0, cast(char*) head );
-					IupSetAttributeId( tree, "IMAGE", 0, "IUP_module" );
-					IupSetAttributeId( tree, "IMAGEEXPANDED", 0, "IUP_module" );
-					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
 					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
 					
 					IupSetAttributeId( tree, "FONTSTYLE", 0, "BOLD" ); // Bold
-					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					IupSetAttributeId( tree, "IMAGE", 0, "IUP_module" );
+					IupSetAttributeId( tree, "IMAGEEXPANDED", 0, "IUP_module" );
+					IupSetAttributeId( tree, "USERDATA", 0, cast(char*) head );
+
 
 					IupAppend( zBoxHandle, tree );
 					IupMap( tree );
