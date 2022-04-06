@@ -1588,7 +1588,7 @@ extern(C)
 					});
 
 					Ihandle* _goto = IupItem( GLOBAL.languageItems["sc_gotodef"].toCString, null );
-					IupSetAttribute( _goto, "IMAGE", "icon_goto" );
+					version(FBIDE) IupSetAttribute( _goto, "IMAGE", "icon_goto" ); else IupSetAttribute( _goto, "IMAGE", "icon_uparrow" );
 					IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
 					{
 						AutoComplete.toDefintionAndType( 1 );
@@ -1596,7 +1596,7 @@ extern(C)
 					});
 					
 					Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
-					IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" );
+					version(FBIDE) IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" ); else IupSetAttribute( _gotoProcedure, "IMAGE", "icon_goto" );
 					IupSetCallback( _gotoProcedure, "ACTION", cast(Icallback) function( Ihandle* ih )
 					{
 						AutoComplete.toDefintionAndType( 2 );

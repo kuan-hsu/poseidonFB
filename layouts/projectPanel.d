@@ -131,19 +131,35 @@ private:
 		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, /*projectToolbarTitle,*/ IupFill, projectButtonCollapse, projectButtonHide, null );
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
-		tree = IupTree();
-		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
+		version(Windows)
+		{
+			tree = IupFlatTree();
+			IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
+			IupSetAttribute( tree, "ADDBRANCH-1", "Projects" );
+			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+			IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		}
+		else
+		{
+			tree = IupFlatTree();
+			IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
+			IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		}
+		
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
+		/*
 		if( fromStringz( IupGetGlobal( "DRIVER" ) ) != "GTK" )
 			if( GLOBAL.editColor.project_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.project_HLT.toCString );
+		*/
 		
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
 		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
-		IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		
 		
 		IupSetAttribute( tree, "IMAGE0", "icon_prj" );
 		IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_prj" );
@@ -192,6 +208,11 @@ public:
 		IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
+		version(Windows)
+		{
+			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+		}
 		
 		/*
 		scope icon_prj = CstringConvert( "icon_prj" );
@@ -509,7 +530,7 @@ public:
 				return false;
 			}
 
-			
+			createProjectTree( setupDir );
 			
 			// PreLoad, Load all files in project parser
 			if( GLOBAL.enableParser == "ON" && GLOBAL.preParseLevel > 0 )
@@ -571,7 +592,7 @@ public:
 				version(linux) GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
 			}
 			
-			createProjectTree( setupDir );
+			//createProjectTree( setupDir );
 		}
 		else
 		{

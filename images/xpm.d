@@ -9,7 +9,7 @@ struct XPM
 	import tango.stdc.stringz;
 	import tango.io.Stdout, tango.stdc.math;
 
-	static IupString[] colorStrings;
+	//static IupString[] colorStrings;
 
 	struct ColorUnit
 	{
@@ -173,7 +173,7 @@ struct XPM
 
 		return null;
 	}	
-
+	/+
 	static char*[] getXpm( char[] filePath )
 	{
 		try
@@ -207,7 +207,7 @@ struct XPM
 			return null;
 		}
 	}
-
+	+/
 	static IupString getRGBA( char[] filePath )
 	{
 		try
@@ -359,11 +359,7 @@ struct XPM
 			Ihandle* image = IupImage( width, height, data.ptr );
 
 			foreach( ColorUnit __color; color )
-			{
-				auto VALUE = new IupString( __color.value );
-				colorStrings ~= VALUE;
-				IupSetAttribute( image, toStringz( Integer.toString( __color.sn ) ) , VALUE.toCString );
-			}
+				IupSetStrAttribute( image, toStringz( Integer.toString( __color.sn ) ) , toStringz( __color.value ) );
 
 			return image;
 

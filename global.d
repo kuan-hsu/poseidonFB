@@ -811,6 +811,7 @@ struct GLOBAL
 			GLOBAL.languageItems["refresh"] = new IupString( cast(char[]) "Refresh" );
 			GLOBAL.languageItems["searchanyword"] = new IupString( cast(char[]) "Search Word From Head" );
 			GLOBAL.languageItems["hide"] = new IupString( cast(char[]) "Hide" );
+			GLOBAL.languageItems["hidesearch"] = new IupString( cast(char[]) "Click To Show/Hide Search List" );
 
 		GLOBAL.languageItems["filelist"] = new IupString( cast(char[]) "FileList" );
 		GLOBAL.languageItems["dlgcolor"] = new IupString( cast(char[]) "DLGCOLOR" );

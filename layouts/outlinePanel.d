@@ -1150,7 +1150,7 @@ class COutline
 	{
 		// Outline Toolbar
 		outlineButtonCollapse = IupButton( null, null );
-		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse2,VISIBLE=NO" );
+		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_collapse2,VISIBLE=NO" );
 		IupSetAttribute( outlineButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( outlineButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1199,7 +1199,7 @@ class COutline
 		});
 		
 		outlineButtonPR = IupButton( null, "PR" );
-		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_pr,VISIBLE=NO,NAME=button_OutlinePR" );
+		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_pr,VISIBLE=NO,NAME=button_OutlinePR" );
 		IupSetAttribute( outlineButtonPR, "TIP", GLOBAL.languageItems["showpr"].toCString );
 		IupSetCallback( outlineButtonPR, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1227,12 +1227,12 @@ class COutline
 		
 
 		outlineToggleAnyWord = IupToggle( null, null );
-		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_wholeword,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineWholeWord" );
+		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_wholeword,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineWholeWord" );
 		IupSetAttribute( outlineToggleAnyWord, "TIP", GLOBAL.languageItems["searchanyword"].toCString );
 		
 
 		outlineButtonShowLinenum = IupToggle( null, null );
-		IupSetAttributes( outlineButtonShowLinenum, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_show_linenum,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineShowLinenum" );
+		IupSetAttributes( outlineButtonShowLinenum, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_linenum,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineShowLinenum" );
 		IupSetAttribute( outlineButtonShowLinenum, "TIP", GLOBAL.languageItems["showln"].toCString );
 		IupSetCallback( outlineButtonShowLinenum, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1246,7 +1246,7 @@ class COutline
 
 
 		outlineButtonFresh = IupButton( null, null );
-		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_refresh,VISIBLE=NO,NAME=button_OutlineRefresh" );
+		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_refresh,VISIBLE=NO,NAME=button_OutlineRefresh" );
 		IupSetAttribute( outlineButtonFresh, "TIP", GLOBAL.languageItems["sc_reparse"].toCString );
 		IupSetCallback( outlineButtonFresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1256,7 +1256,7 @@ class COutline
 		});
 
 		Ihandle* outlineButtonHide = IupButton( null, null );
-		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,IMAGE=icon_shift_l" );
+		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,CANFOCUS=NO,IMAGE=icon_shift_l" );
 		IupSetAttribute( outlineButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1264,15 +1264,49 @@ class COutline
 			return IUP_DEFAULT;
 		});
 
+		/*
 		Ihandle* outlineToolbarTitleImage = IupLabel( null );
 		IupSetAttributes( outlineToolbarTitleImage, "IMAGE=icon_outline,ALIGNMENT=ALEFT:ACENTER" );
+		*/
+		Ihandle* outlineToolbarTitleImage = IupButton( null, null );
+		IupSetAttributes( outlineToolbarTitleImage, "IMAGE=icon_outline,ALIGNMENT=ALEFT,FLAT=YES,CANFOCUS=NO" );
+		IupSetAttribute( outlineToolbarTitleImage, "TIP", GLOBAL.languageItems["hidesearch"].toCString );
+		IupSetCallback( outlineToolbarTitleImage, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			Ihandle* _expandHandle = IupGetDialogChild( GLOBAL.outlineTree.getLayoutHandle, "Outline_Expander" );
+			if( _expandHandle != null )
+			{
+				if( fromStringz( IupGetAttribute( _expandHandle, "STATE" ) ) == "OPEN" )
+				{
+					IupSetAttribute( _expandHandle, "STATE", "CLOSE" );
+					Ihandle* _backgroundbox = IupGetChild( _expandHandle, 1 ); // Get outlineTreeNodeList Ihandle
+					if( _backgroundbox != null ) IupSetAttributes( _backgroundbox, "VISIBLE=NO,ACTIVE=NO" ); // Make outlineTreeNodeList to hide
+				}
+				else
+				{
+					IupSetAttribute( _expandHandle, "STATE", "OPEN" );
+					Ihandle* _backgroundbox = IupGetChild( _expandHandle, 1 );
+					if( _backgroundbox != null ) IupSetAttributes( _backgroundbox, "VISIBLE=YES,ACTIVE=YES" ); // Make outlineTreeNodeList to show
+				}
+				/*
+				if( fromStringz( IupGetAttribute( _listHandle, "VISIBLE" ) ) == "NO" )
+					IupSetAttributes( _listHandle, "VISIBLE=YES,ACTIVE=YES,SIZE=x12" );
+				else
+					IupSetAttributes( _listHandle, "VISIBLE=NO,ACTIVE=NO,SIZE=x1" );
+					
+				IupRefresh( GLOBAL.outlineTree.getLayoutHandle );
+				*/
+			}
+			return IUP_DEFAULT;
+		});
+		
+		
 
 		Ihandle* outlineToolbarH = IupHbox( outlineToolbarTitleImage, IupFill, outlineButtonCollapse, outlineButtonPR, outlineButtonShowLinenum, outlineToggleAnyWord, outlineButtonFresh, outlineButtonHide, null );
 		IupSetAttributes( outlineToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 
-
 		outlineTreeNodeList = IupList( null );
-		IupSetAttributes( outlineTreeNodeList, "ACTIVE=YES,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8,VISIBLE=NO,NAME=list_Outline" );
+		IupSetAttributes( outlineTreeNodeList, "ACTIVE=NO,VISIBLE=NO,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8,VISIBLE=NO,NAME=list_Outline" );
 		IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 		IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
@@ -1281,8 +1315,13 @@ class COutline
 		version(Windows) IupSetCallback( outlineTreeNodeList, "EDIT_CB",cast(Icallback) &COutline_List_EDIT_CB );
 		
 		
+		Ihandle* expander = IupExpander( outlineTreeNodeList );
+		IupSetAttributes( expander, "BARSIZE=0,STATE=CLOSE,EXPAND=HORIZONTAL,NAME=Outline_Expander" );
+		Ihandle* _backgroundbox = IupGetChild( expander, 0 );
+		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image 		
+		
 
-		layoutHandle = IupVbox( outlineToolbarH, outlineTreeNodeList, zBoxHandle, null );
+		layoutHandle = IupVbox( outlineToolbarH, expander, zBoxHandle, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" );
 		layoutHandle = IupBackgroundBox( layoutHandle );
 		
@@ -1319,13 +1358,19 @@ class COutline
 		
 		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-		
+
 		for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
 		{
 			Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
 			if( ih != null )
 			{
 				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+				version(Windows)
+				{
+					IupSetStrAttribute( ih, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+					IupSetStrAttribute( ih, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+				}
+				
 				for( int j = 0; j < IupGetInt( ih, "COUNT" ); ++ j )
 				{
 					if( j == 0 )
@@ -1376,19 +1421,33 @@ class COutline
 					
 					cleanTree( fullPath );
 
-					Ihandle* tree = IupTree();
-					IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,RASTERSIZE=0x" );
-					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+					Ihandle* tree;
+					version(Windows)
+					{
+						tree = IupFlatTree();
+						IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
+						IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+						IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+						IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
+						IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					}
+					else
+					{
+						tree = IupTree();
+						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
+						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
+						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					}
+						
 					
-					IupSetAttribute( tree, "TITLE", toStringz( fullPath ) );
+					IupSetStrAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
 					
 					IupSetAttribute( tree, "IMAGE0", "icon_folder" );
 					IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_folder_open" );
 
 					toBoldTitle( tree, 0 );
-					//IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &COutline_SELECTION_CB );
-					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					
 
 					IupAppend( zBoxHandle, tree );
 					IupMap( tree );
@@ -1468,7 +1527,7 @@ class COutline
 		else
 		{
 			IupSetAttribute( zBoxHandle, "VISIBLE", "YES" );
-			IupSetAttribute( outlineTreeNodeList, "VISIBLE", "YES" );
+			if( IupGetInt( outlineTreeNodeList, "ACTIVE" ) ) IupSetAttribute( outlineTreeNodeList, "VISIBLE", "YES" );
 			IupSetAttribute( outlineButtonCollapse, "VISIBLE", "YES" );
 			IupSetAttribute( outlineButtonPR, "VISIBLE", "YES" );
 			IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "YES" );
@@ -2253,7 +2312,11 @@ extern(C)
 									IupSetFocus( ih );
 									IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
 									Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-									if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex] );
+									if( tree != null )
+									{
+										version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1], "YES" );
+										IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1] );
+									}
 									IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 								}
 							}
@@ -2307,7 +2370,11 @@ extern(C)
 							IupSetFocus( ih );
 							IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
 							Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-							if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+							if( tree != null )
+							{
+								version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[item], "YES" );
+								IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+							}
 							IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 						}
 					}
@@ -2320,7 +2387,11 @@ extern(C)
 					if( IupGetInt( ih, "COUNT" ) > 0 && item > 0 )
 					{
 						Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-						if( tree != null ) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[--item], "YES" );
+						if( tree != null )
+						{
+							IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[--item], "YES" );
+							IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+						}
 					}
 				}
 			}
@@ -2370,7 +2441,11 @@ extern(C)
 									IupSetFocus( ih );
 									IupSetAttribute( ih, "SELECTIONPOS", "ALL" );
 									Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-									if( tree != null ) version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1], "YES" ); else IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex] );
+									if( tree != null )
+									{
+										version(Windows) IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1], "YES" );
+										IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1] );
+									}
 									IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 								}
 							}

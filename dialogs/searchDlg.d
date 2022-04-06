@@ -12,6 +12,7 @@ class CSearchExpander
 	private:
 	import				tools;
 	
+	Ihandle*			btnFindPrev, btnFindNext, btnReplaceFind, btnReplace, btnReplaceAll, btnMarkAll;
 	Ihandle*			expander;
 	IupString[2] 		labelTitle, findButton;
 
@@ -27,7 +28,7 @@ class CSearchExpander
 		IupSetAttribute( label0, "SIZE", "x12" );	
 		
 		Ihandle* label1 = IupLabel( labelTitle[1].toCString );
-		IupSetAttribute( label1, "SIZE", "x12" );	
+		IupSetAttribute( label1, "SIZE", "x12" );
 		
 		Ihandle* _group0 = IupVbox( label0, label1, null );
 		
@@ -45,21 +46,21 @@ class CSearchExpander
 		Ihandle* _group1 = IupVbox( listFind, listReplace, null );
 		
 		// Group 2
-		Ihandle* btnFindPrev = IupButton( findButton[0].toCString, null ); // GLOBAL.languageItems["find"]
+		btnFindPrev = IupFlatButton( findButton[0].toCString ); // GLOBAL.languageItems["find"]
 		IupSetAttributes( btnFindPrev, "SIZE=x12,NAME=btn_FindPrev,FLAT=YES,FONTSTYLE=Underline" );
-		IupSetCallback( btnFindPrev, "ACTION", cast(Icallback) &CSearchExpander_Find_ACTION );
+		IupSetCallback( btnFindPrev, "FLAT_ACTION", cast(Icallback) &CSearchExpander_Find_ACTION );
 
-		Ihandle* btnFindNext = IupButton( findButton[1].toCString, null );
+		btnFindNext = IupFlatButton( findButton[1].toCString );
 		IupSetAttributes( btnFindNext, "SIZE=x12,NAME=btn_FindNext,FLAT=YES,FONTSTYLE=Underline" );
-		IupSetCallback( btnFindNext, "ACTION", cast(Icallback) &CSearchExpander_Find_ACTION );
+		IupSetCallback( btnFindNext, "FLAT_ACTION", cast(Icallback) &CSearchExpander_Find_ACTION );
 
-		Ihandle* btnReplaceFind = IupButton( GLOBAL.languageItems["replacefind"].toCString, null );
+		btnReplaceFind = IupFlatButton( GLOBAL.languageItems["replacefind"].toCString );
 		IupSetAttributes( btnReplaceFind, "SIZE=x12,NAME=btn_ReplaceFind,FLAT=YES,FONTSTYLE=Underline" );
-		IupSetCallback( btnReplaceFind, "ACTION", cast(Icallback) &CSearchExpander_btnReplaceFind_ACTION );
+		IupSetCallback( btnReplaceFind, "FLAT_ACTION", cast(Icallback) &CSearchExpander_btnReplaceFind_ACTION );
 		
-		Ihandle* btnReplace = IupButton( GLOBAL.languageItems["replace"].toCString, null );
+		btnReplace = IupFlatButton( GLOBAL.languageItems["replace"].toCString );
 		IupSetAttributes( btnReplace, "SIZE=x12,NAME=btn_Replace,FLAT=YES,FONTSTYLE=Underline" );
-		IupSetCallback( btnReplace, "ACTION", cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( btnReplace, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			//GLOBAL.searchDlg.setStatusBar( "" );
 			GLOBAL.statusBar.setFindMessage( "" );
@@ -99,16 +100,16 @@ class CSearchExpander
 			return IUP_DEFAULT;
 		});		
 		
-		Ihandle* btnReplaceAll = IupButton( GLOBAL.languageItems["replaceall"].toCString, null );
+		btnReplaceAll = IupFlatButton( GLOBAL.languageItems["replaceall"].toCString );
 		IupSetAttributes( btnReplaceAll, "SIZE=x12,NAME=btn_ReplaceAll,FLAT=YES,FONTSTYLE=Underline" );
-		IupSetCallback( btnReplaceAll, "ACTION", cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( btnReplaceAll, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CSearchExpanderAction( 2 );
 		});
 		
-		Ihandle* btnMarkAll = IupButton( GLOBAL.languageItems["bookmarkall"].toCString, null );
+		btnMarkAll = IupFlatButton( GLOBAL.languageItems["bookmarkall"].toCString );
 		IupSetAttributes( btnMarkAll,"SIZE=x12,NAME=btn_MarkAll,FLAT=YES,FONTSTYLE=Underline" );
-		IupSetCallback( btnMarkAll, "ACTION", cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( btnMarkAll, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CSearchExpanderAction( 1 );
 		});
@@ -179,6 +180,20 @@ class CSearchExpander
 	this()
 	{
 		createLayout();
+		changeColor();
+	}
+	
+	void changeColor()
+	{
+		version(DARKTHEME)
+		{
+			IupSetStrAttribute( btnFindPrev, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+			IupSetStrAttribute( btnFindNext, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+			IupSetStrAttribute( btnReplaceFind, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+			IupSetStrAttribute( btnReplace, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+			IupSetStrAttribute( btnReplaceAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+			IupSetStrAttribute( btnMarkAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		}	
 	}
 	
 	~this(){}
