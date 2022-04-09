@@ -1111,6 +1111,7 @@ struct ExecuterAction
 				IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,OPACITY=180,SHRINK=YES" );
 				IupSetAttribute( processDlg, "TITLE", null );
 				IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
+				IupSetAttribute( processDlg, "FGCOLOR", "0 0 255" );
 				IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
 				IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );
 			}

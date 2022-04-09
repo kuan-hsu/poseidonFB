@@ -131,8 +131,8 @@ private:
 		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, /*projectToolbarTitle,*/ IupFill, projectButtonCollapse, projectButtonHide, null );
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 		
-		/+
-		version(Windows)
+		
+		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 		{
 			tree = IupFlatTree();
 			IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
@@ -143,11 +143,11 @@ private:
 		}
 		else
 		{
-		+/
+		
 			tree = IupTree();
 			IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
 			IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-		//}
+		}
 		
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
@@ -160,7 +160,7 @@ private:
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
-		IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
+		//IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
 		
 		
 		IupSetAttribute( tree, "IMAGE0", "icon_prj" );
@@ -210,13 +210,13 @@ public:
 		IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
-		/+
-		version(Windows)
+		
+		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 		{
 			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
 			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
 		}
-		+/
+		
 		/*
 		scope icon_prj = CstringConvert( "icon_prj" );
 		scope icon_prj_open = CstringConvert( "icon_prj_open" );
@@ -281,6 +281,8 @@ public:
 	void createProjectTree( char[] setupDir )
 	{
 		char[] prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
+		
+		if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( tree, "VISIBLE", 0 ); // For speed up
 
 		// Add Project's Name to Tree
 		IupSetStrAttribute( tree, "ADDBRANCH0", toStringz( GLOBAL.projectManager[setupDir].name ) );
@@ -431,7 +433,7 @@ public:
 			}
 		}
 		
-		
+		if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( tree, "VISIBLE", 1 ); // For speed up
 
 		// Switch to project tree tab
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );

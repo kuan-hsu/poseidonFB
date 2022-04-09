@@ -52,7 +52,7 @@ void createExplorerWindow()
 	else
 		GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, GLOBAL.documentTabs_Sub );
 		
-	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=YES,SHOWGRIP=NO" );
+	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=NO,BARSIZE=0,ACTIVE=YES" );
 	IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
 	//IupSetAttribute( GLOBAL.documentTabs_Sub, "ACTIVE","YES" );
 
@@ -62,7 +62,7 @@ void createExplorerWindow()
 	else
 		GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, null );
 		
-	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,BARSIZE=0,ACTIVE=YES,SHOWGRIP=LINES" );
+	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=NO,BARSIZE=0,ACTIVE=YES" );
 	IupSetAttribute( GLOBAL.documentSplit2, "ACTIVE","YES" );
 	
 	GLOBAL.searchExpander = new CSearchExpander;
@@ -70,8 +70,8 @@ void createExplorerWindow()
 
 	
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
-	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,NAME=POSEIDON_LEFT_SPLIT");
-	IupSetAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=NO,NAME=POSEIDON_LEFT_SPLIT");
+	IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 
 	//createMessagePanel();
@@ -116,9 +116,12 @@ void createExplorerWindow()
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
-	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
+	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,SHOWGRIP=NO,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
 	IupSetAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* _ih ){
+		return IUP_DEFAULT;
+	});
 	/*
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* ih ){
 		if( GLOBAL.fileListTree.getTreeH <= 6 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );		

@@ -1176,6 +1176,9 @@ class COutline
 					
 					if( nowState != null )
 					{
+						if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetAttribute( tree, "VISIBLE", "NO" );
+						//IupSetAttributeId( tree, "STATE", 0, "COLLAPSED" );
+						
 						for( int i = IupGetInt( tree, "COUNT" ) - 1; i > 0; --i )
 						{
 							if( IupGetIntId( tree, "DEPTH", i ) == nowDepth )
@@ -1192,6 +1195,9 @@ class COutline
 								}
 							}
 						}
+						
+						//IupSetAttributeId( tree, "STATE", 0, "EXPANDED" );
+						if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetAttribute( tree, "VISIBLE", "YES" );
 					}
 				}
 			}
@@ -1217,10 +1223,25 @@ class COutline
 				}
 			}
 			
-			// Change All Documents
-			for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++ i )
-				GLOBAL.outlineTree.changePR( IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ) );
-			//GLOBAL.outlineTree.changePR();
+			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
+			{
+				int activeID = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" );
+				
+				// IupFlatTree, draw in active tree( which display on monitor ) is very slow......
+				// At first, process others document tree
+				for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++ i )
+					if( i != activeID ) GLOBAL.outlineTree.changePR( IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ) );
+				
+				// At last, process active tree
+				IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "VISIBLE", "NO" );
+				GLOBAL.outlineTree.changePR( GLOBAL.outlineTree.getActiveTree );
+				IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "VISIBLE", "YES" );
+			}			
+			else
+			{
+				for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++ i )
+					GLOBAL.outlineTree.changePR( IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ) );
+			}
 			
 			return IUP_DEFAULT;
 		});
@@ -1236,11 +1257,26 @@ class COutline
 		IupSetAttribute( outlineButtonShowLinenum, "TIP", GLOBAL.languageItems["showln"].toCString );
 		IupSetCallback( outlineButtonShowLinenum, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			// Change All Documents
-			for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++ i )
-				GLOBAL.outlineTree.changePR( IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ) );
+			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
+			{
+				int activeID = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" );
 				
-			//GLOBAL.outlineTree.changePR();
+				// At first, process others document tree
+				for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++ i )
+					if( i != activeID ) GLOBAL.outlineTree.changePR( IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ) );
+				
+				// At last, process active tree
+				IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "VISIBLE", "NO" );
+				GLOBAL.outlineTree.changePR( GLOBAL.outlineTree.getActiveTree );
+				IupSetAttribute( GLOBAL.outlineTree.getZBoxHandle, "VISIBLE", "YES" );
+			}
+			else
+			{
+				// Change All Documents
+				for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++ i )
+					GLOBAL.outlineTree.changePR( IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ) );
+			}
+				
 			return IUP_DEFAULT;
 		});		
 
@@ -1365,13 +1401,13 @@ class COutline
 			if( ih != null )
 			{
 				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-				/+
-				version(Windows)
+				
+				if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 				{
 					IupSetStrAttribute( ih, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
 					IupSetStrAttribute( ih, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
 				}
-				+/
+				
 				for( int j = 0; j < IupGetInt( ih, "COUNT" ); ++ j )
 				{
 					if( j == 0 )
@@ -1410,21 +1446,18 @@ class COutline
 		return null;
 	}
 
-	void createTree( CASTnode head )
+	Ihandle* createTree( CASTnode head )
 	{
 		if( head !is null )
 		{
+			Ihandle* tree;
 			version(FBIDE)
 			{
 				if( head.kind == B_BAS || head.kind == B_BI )
 				{
 					char[] fullPath = head.name;
 					
-					cleanTree( fullPath );
-
-					Ihandle* tree;
-					/+
-					version(Windows)
+					if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 					{
 						tree = IupFlatTree();
 						IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
@@ -1435,12 +1468,12 @@ class COutline
 					}
 					else
 					{
-					+/
+					
 						tree = IupTree();
 						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
 						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
 						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-					//}
+					}
 						
 					
 					IupSetStrAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
@@ -1471,9 +1504,7 @@ class COutline
 				{
 					char[] fullPath = head.name;
 					
-					Ihandle* tree;
-					/+
-					version(Windows)
+					if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 					{
 						tree = IupFlatTree();
 						IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
@@ -1484,12 +1515,12 @@ class COutline
 					}
 					else
 					{
-					+/
+					
 						tree = IupTree();
 						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
 						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
 						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-					//}
+					}
 
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
@@ -1511,8 +1542,10 @@ class COutline
 					IupSetStrAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
 					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
 					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+					/*
 					if( fromStringz( IupGetGlobal( "DRIVER" ) ) != "GTK" )
 						if( GLOBAL.editColor.project_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.project_HLT.toCString );
+					*/
 				}
 			}
 			
@@ -1528,7 +1561,11 @@ class COutline
 				IupSetAttribute( outlineButtonFresh, "VISIBLE", "YES" );
 				*/
 			}
+			
+			return tree;
 		}
+		
+		return null;
 	}
 	
 	
@@ -2094,22 +2131,31 @@ class COutline
 						CASTnode temp = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
 						GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)] = astHeadNode;
 						delete temp;
-
-						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
-						version(DIDE)
+						
+						if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 						{
-							IupSetAttributeId( actTree, "USERDATA", 0, cast(char*) astHeadNode );
-							IupSetAttribute( actTree, "TITLE", toStringz( astHeadNode.name ) );						
+							// Flip
+							Ihandle* newTree = createTree( astHeadNode );
+							IupSetAttribute( zBoxHandle, "VALUE_HANDLE", cast(char*) newTree );
+							IupDestroy( actTree );
 						}
-						IupSetAttributeId( actTree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
-						foreach_reverse( CASTnode t; astHeadNode.getChildren() )
+						else
 						{
-							append( actTree, t, 0 );
+							IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
+							version(DIDE)
+							{
+								IupSetAttributeId( actTree, "USERDATA", 0, cast(char*) astHeadNode );
+								IupSetAttribute( actTree, "TITLE", toStringz( astHeadNode.name ) );						
+							}
+							IupSetAttributeId( actTree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
+							foreach_reverse( CASTnode t; astHeadNode.getChildren() )
+							{
+								append( actTree, t, 0 );
+							}
 						}
 						
 						// Reparse Lexer
 						version(FBIDE) IupScintillaSendMessage( cSci.getIupScintilla, 4003, 0, -1 ); // SCI_COLOURISE 4003
-
 						return true;
 					}
 					catch( Exception e ){}

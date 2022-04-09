@@ -187,8 +187,6 @@ public:
 				GLOBAL.editorSetting01.MessageSplit = IupGetInt( GLOBAL.messageSplit, "VALUE" ) >= 1000 ? "850" : fromStringz( IupGetAttribute( GLOBAL.messageSplit, "VALUE" ) ).dup;
 
 				
-			//GLOBAL.editorSetting01.FileListSplit = fromStringz( IupGetAttribute( GLOBAL.fileListSplit, "VALUE" ) ).dup;
-			
 			GLOBAL.editorSetting01.OutlineWindow = fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ).dup;
 			GLOBAL.editorSetting01.MessageWindow = fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ).dup;
 
@@ -199,10 +197,9 @@ public:
 			doc ~= setINILineData( "RASTERSIZE", GLOBAL.editorSetting01.RASTERSIZE );
 			doc ~= setINILineData( "ExplorerSplit", GLOBAL.editorSetting01.ExplorerSplit );
 			doc ~= setINILineData( "MessageSplit", GLOBAL.editorSetting01.MessageSplit );
-			doc ~= setINILineData( "FileListSplit", GLOBAL.editorSetting01.FileListSplit );
 			doc ~= setINILineData( "OutlineWindow", GLOBAL.editorSetting01.OutlineWindow );
 			doc ~= setINILineData( "MessageWindow", GLOBAL.editorSetting01.MessageWindow );
-			doc ~= setINILineData( "FilelistWindow", GLOBAL.editorSetting01.FilelistWindow );
+			doc ~= setINILineData( "OutlineFlat", GLOBAL.editorSetting01.OutlineFlat );
 			doc ~= setINILineData( "RotateTabs", GLOBAL.editorSetting01.RotateTabs );
 			doc ~= setINILineData( "BarSize", GLOBAL.editorSetting01.BarSize );
 			doc ~= setINILineData( "EXTRAASCENT", GLOBAL.editorSetting01.EXTRAASCENT );
@@ -607,10 +604,9 @@ public:
 							case "RASTERSIZE":				GLOBAL.editorSetting01.RASTERSIZE = right;				break;
 							case "ExplorerSplit":			GLOBAL.editorSetting01.ExplorerSplit = right;			break;
 							case "MessageSplit":			GLOBAL.editorSetting01.MessageSplit = right;			break;
-							case "FileListSplit":			GLOBAL.editorSetting01.FileListSplit = right;			break;
 							case "OutlineWindow":			GLOBAL.editorSetting01.OutlineWindow = right;			break;
 							case "MessageWindow":			GLOBAL.editorSetting01.MessageWindow = right;			break;
-							case "FilelistWindow":			GLOBAL.editorSetting01.FilelistWindow = right;			break;
+							case "OutlineFlat":				version(Windows) GLOBAL.editorSetting01.OutlineFlat = right; else GLOBAL.editorSetting01.OutlineFlat = "OFF"; break;
 							case "RotateTabs":				GLOBAL.editorSetting01.RotateTabs = right;				break;
 							case "BarSize":
 								GLOBAL.editorSetting01.BarSize = right;
