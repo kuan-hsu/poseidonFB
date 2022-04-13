@@ -18,7 +18,7 @@ class COutline
 	import				tango.core.Thread;
 
 	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList;
-	Ihandle*			outlineButtonCollapse, outlineButtonPR, outlineButtonShowLinenum, outlineToggleAnyWord, outlineButtonFresh;
+	Ihandle*			outlineButtonCollapse, outlineButtonPR, outlineButtonShowLinenum, outlineToggleAnyWord, outlineButtonFresh, outlineButtonHide;
 	CASTnode[]			listItemASTs;
 	int[]				listItemTreeID;
 	int					listItemIndex;
@@ -1214,12 +1214,25 @@ class COutline
 			Ihandle* _ih = IupGetDialogChild( GLOBAL.mainDlg, "button_OutlinePR" );
 			if( _ih != null )
 			{
-				switch( GLOBAL.outlineTree.showIndex )
+				if( GLOBAL.editorSetting00.IconInvert == "ON" )
 				{
-					case 0:		IupSetAttribute( _ih, "IMAGE", "icon_show_pr" ); break;
-					case 1:		IupSetAttribute( _ih, "IMAGE", "icon_show_p" ); break;
-					case 2:		IupSetAttribute( _ih, "IMAGE", "icon_show_r" ); break;
-					default:	IupSetAttribute( _ih, "IMAGE", "icon_show_nopr" ); break;
+					switch( GLOBAL.outlineTree.showIndex )
+					{
+						case 0:		IupSetAttribute( _ih, "IMAGE", "icon_show_pr_invert" ); break;
+						case 1:		IupSetAttribute( _ih, "IMAGE", "icon_show_p_invert" ); break;
+						case 2:		IupSetAttribute( _ih, "IMAGE", "icon_show_r_invert" ); break;
+						default:	IupSetAttribute( _ih, "IMAGE", "icon_show_nopr_invert" ); break;
+					}
+				}
+				else
+				{
+					switch( GLOBAL.outlineTree.showIndex )
+					{
+						case 0:		IupSetAttribute( _ih, "IMAGE", "icon_show_pr" ); break;
+						case 1:		IupSetAttribute( _ih, "IMAGE", "icon_show_p" ); break;
+						case 2:		IupSetAttribute( _ih, "IMAGE", "icon_show_r" ); break;
+						default:	IupSetAttribute( _ih, "IMAGE", "icon_show_nopr" ); break;
+					}
 				}
 			}
 			
@@ -1291,7 +1304,7 @@ class COutline
 			return IUP_DEFAULT;
 		});
 
-		Ihandle* outlineButtonHide = IupButton( null, null );
+		outlineButtonHide = IupButton( null, null );
 		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,CANFOCUS=NO,IMAGE=icon_shift_l" );
 		IupSetAttribute( outlineButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -1362,6 +1375,8 @@ class COutline
 		layoutHandle = IupBackgroundBox( layoutHandle );
 		
 		GLOBAL.objectDefaultParser = loadObjectParser();
+		
+		changaIcons();
 	}
 
 	void toBoldTitle( Ihandle* _tree, int id )
@@ -1373,6 +1388,26 @@ class COutline
 			IupSetStrAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
 		}
 	}	
+
+	void changaIcons()
+	{
+		char[] tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
+
+		IupSetStrAttribute( outlineButtonCollapse, "IMAGE", toStringz( "icon_collapse2" ~ tail ) );
+		switch( showIndex )
+		{
+			case 0:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_pr" ~ tail ) ); break;
+			case 1:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_p" ~ tail ) ); break;
+			case 2:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_r" ~ tail ) ); break;
+			default:	IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_nopr" ~ tail ) ); break;
+		}
+		IupSetStrAttribute( outlineToggleAnyWord, "IMAGE", toStringz( "icon_wholeword" ~ tail ));
+		IupSetStrAttribute( outlineButtonShowLinenum, "IMAGE", toStringz( "icon_show_linenum" ~ tail ) );
+		IupSetStrAttribute( outlineButtonFresh, "IMAGE", toStringz( "icon_refresh" ~ tail ) );
+		IupSetStrAttribute( outlineButtonHide, "IMAGE", toStringz( "icon_shift_l" ~ tail ) );
+	}
+
 
 	public:
 	this()
@@ -1402,10 +1437,12 @@ class COutline
 			{
 				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
 				
+				if( GLOBAL.editColor.prjViewHLT.toDString.length ) IupSetStrAttribute( ih, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
 				if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 				{
 					IupSetStrAttribute( ih, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
 					IupSetStrAttribute( ih, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+					IupSetStrAttribute( ih, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
 				}
 				
 				for( int j = 0; j < IupGetInt( ih, "COUNT" ); ++ j )
@@ -1465,6 +1502,11 @@ class COutline
 						IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
 						IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
 						IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+						if( GLOBAL.editColor.prjViewHLT.toDString.length )
+						{
+							IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+							IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+						}
 					}
 					else
 					{
@@ -1473,6 +1515,10 @@ class COutline
 						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
 						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
 						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+						if( GLOBAL.editColor.prjViewHLT.toDString.length )
+						{
+							IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+						}
 					}
 						
 					
@@ -1976,6 +2022,7 @@ class COutline
 						}
 						else if( _node.lineNumber == _ln  )
 						{
+							if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( actTree, "VISIBLE", 0 );
 							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
 						}
 					}
@@ -1999,15 +2046,23 @@ class COutline
 		{
 			Ihandle* actTree = getActiveTree();
 			if( actTree != null )
-			{			
-				foreach_reverse( CASTnode _node; newASTNodes )
+			{
+				if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 				{
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( " InsertID= " ~ Integer.toString(insertID) ) );
-					if( insertID <= 0 ) append( actTree, _node, -insertID ); else append( actTree, _node, insertID, true );
+					version(Windows) IupSetAttributeId( actTree, "MARKED", insertID, "YES" );
+					IupSetInt( actTree, "VALUE", insertID );			
+					//IupSetInt( actTree, "VISIBLE", 0 ); // removeNodeAndGetInsertIndexByLineNumber() already set VISIBLE=NO
 				}
+				
+				foreach_reverse( CASTnode _node; newASTNodes )
+					if( insertID <= 0 ) append( actTree, _node, -insertID ); else append( actTree, _node, insertID, true );
 
 				int markID = IupGetInt( actTree, "LASTADDNODE" ) + newASTNodes.length - 1;
-				version(Windows) IupSetAttributeId( actTree, "MARKED", markID, "YES" ); else IupSetInt( actTree, "VALUE", markID );
+				version(Windows) IupSetAttributeId( actTree, "MARKED", markID, "YES" );
+				IupSetInt( actTree, "VALUE", markID );
+				
+				
+				if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( actTree, "VISIBLE", 1 );
 			}
 		}
 		catch( Exception e ){}		
@@ -2047,12 +2102,14 @@ class COutline
 				+/
 				if( insertID <= 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
 				int markID = IupGetInt( actTree, "LASTADDNODE" );
-				version(Windows) IupSetAttributeId( actTree, "MARKED", markID, "YES" ); else IupSetInt( actTree, "VALUE", markID );
+				version(Windows) IupSetAttributeId( actTree, "MARKED", markID, "YES" );
+				IupSetInt( actTree, "VALUE", markID );
 			}
 		}
 		catch( Exception e ){}
 	}	
-
+	
+	/*
 	void markTreeNode( int _ln = -1, char[] _name = "-NULL", int _kind = -1, char[] _type = "-NULL" )
 	{
 		Ihandle* actTree = getActiveTree();
@@ -2097,13 +2154,15 @@ class COutline
 				if( bMatch )
 				{
 					//IupSetAttributeId( actTree, "MARKED", i, "YES" );
-					version(Windows) IupSetAttributeId( actTree, "MARKED", i, "YES" ); else IupSetInt( actTree, "VALUE", i );
+					version(Windows) IupSetAttributeId( actTree, "MARKED", i, "YES" );
+					IupSetInt( actTree, "VALUE", i );
 					return;
 				}
 			}
 		}			
 	}
-
+	*/
+	
 	bool refresh( CScintilla cSci )
 	{
 		if( GLOBAL.enableParser != "ON" ) return false;

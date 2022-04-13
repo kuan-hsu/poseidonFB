@@ -371,6 +371,146 @@ struct XPM
 		return null;
 	}
 
+
+	static void createIUPimageHandle( char[] filePath, char[] handleName, bool bCreateInvert )
+	{
+		try
+		{
+			scope file = new File( filePath, File.ReadExisting );
+			int 		count, colorSN, rPos;
+			bool 		bPixel, bColor;
+			int			quoteLineCount, width, height, num_colors, chars_per_pixel;;
+			char[]		prevLine, pixel;
+			ColorUnit[]	color;
+			
+			foreach( int count, char[] line; new Lines!(char)(file) )
+			{
+				if( count == 0 )
+					if( line != "/* XPM */" ) return;
+				
+				if( line.length > 2 )
+				{
+					if( line[0..2] == "/*" || line[0] != '"' ) continue;
+					
+					if( line[0] == '"' ) quoteLineCount++;
+					
+					if( quoteLineCount == 1 )
+					{
+						char[]	formatString;
+						bool	bIsNumber;
+						foreach( char c; line[1..$-2] )
+						{
+							if( c > 47 && c < 58 )
+							{
+								formatString ~= c;
+								bIsNumber = true;
+							}
+							else
+							{
+								if( bIsNumber )
+								{
+									bIsNumber = false;
+									formatString ~= " ";
+								}
+							}
+						}
+						
+						char[][] splitWords = Util.split( formatString, " " );
+						if( splitWords.length > 3 )
+						{
+							width = Integer.atoi( splitWords[0] );
+							height = Integer.atoi( splitWords[1] );
+							num_colors = Integer.atoi( splitWords[2] );
+							chars_per_pixel = Integer.atoi( splitWords[3] );
+						}
+						continue;
+					}
+					else if( quoteLineCount <= num_colors + 1 )
+					{
+						rPos = Util.rindex( line, "\"" );
+						char[][] splitData = Util.split( line[1..rPos], " " );
+						if( splitData.length == 3 )
+						{
+							ColorUnit _color;
+							_color.index = splitData[0].dup;
+							_color.c = splitData[1].dup;
+							if( splitData[2] == "None" )
+							{
+								_color.value = "BGCOLOR";
+							}
+							else
+							{
+								int r = hexStringToByte( splitData[2][1..3] );
+								int g = hexStringToByte( splitData[2][3..5] );
+								int b = hexStringToByte( splitData[2][5..7] );
+
+								_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
+							}
+
+							_color.sn = colorSN++;
+							color ~= _color;
+						}					
+					
+					}
+					else if( quoteLineCount <= num_colors + 1 + width )
+					{
+						rPos = Util.rindex( line, "\"" );
+						foreach( char c; line[1..rPos] )
+							pixel ~= c;
+					}
+				}
+			}			
+			
+			ubyte[] data; 
+			foreach( char c; pixel )
+			{
+				foreach( ColorUnit __color; color )
+				{
+					if( c == __color.index[0] )
+					{
+						data ~= __color.sn;
+						break;
+					}
+				}
+			}
+			
+			Ihandle* image = IupImage( width, height, data.ptr );
+
+			foreach( ColorUnit __color; color )
+				IupSetStrAttribute( image, toStringz( Integer.toString( __color.sn ) ) , toStringz( __color.value ) );
+			
+			auto _handleName = new IupString( handleName );
+			IupSetHandle( _handleName.toCString, image );
+			
+			
+			
+			
+			if( bCreateInvert )
+			{
+				Ihandle* imageInvert = IupImage( width, height, data.ptr );
+				
+				foreach( ColorUnit __color; color )
+				{
+					if( __color.value != "BGCOLOR" )
+					{
+						char[][] _colorValues = Util.split( __color.value, " " );
+						if( _colorValues.length == 3 )
+							__color.value = Integer.toString( 255 - Integer.atoi( _colorValues[0] ) ) ~ " " ~ Integer.toString( 255 - Integer.atoi( _colorValues[1] ) ) ~ " " ~ Integer.toString( 255 - Integer.atoi( _colorValues[2] ) );
+					}
+					IupSetStrAttribute( imageInvert, toStringz( Integer.toString( __color.sn ) ) , toStringz( __color.value ) );
+					
+					auto __handleName = new IupString( handleName ~ "_invert" );
+					
+					IupSetHandle( __handleName.toCString, imageInvert );
+				}
+			}
+
+		}
+		catch( Exception e )
+		{
+		}
+	}
+
 	static void init()
 	{
 		version(FBIDE)

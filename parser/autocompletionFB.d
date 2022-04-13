@@ -4289,8 +4289,8 @@ version(FBIDE)
 							default:
 						}
 						
-						IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showType_Fore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
-						IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showType_Back.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showTypeFore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showTypeBack.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
 
 						auto _rNode = ParserAction.getRoot( AST_Head );
 
@@ -4433,7 +4433,7 @@ version(FBIDE)
 						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
 						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 0, 0 ); // SCI_CALLTIPSETPOSITION 2213
 						IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, filePathPos ); // SCI_CALLTIPSETHLT 2204
-						IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showType_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+						IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showTypeHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 					}
 					else
 					{
@@ -5045,8 +5045,8 @@ version(FBIDE)
 					{
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 
-						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
 						//SCI_CALLTIPSETHLT 2204
 						scope _result = new IupString( ScintillaAction.textWrap( list ) );
@@ -5275,8 +5275,8 @@ version(FBIDE)
 				{
 					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" && cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
 					{
-						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 						scope _result = new IupString( ScintillaAction.textWrap( list ) );
 						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
 						
@@ -5292,7 +5292,7 @@ version(FBIDE)
 						if( highlightEnd > -1 )
 						{
 							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
@@ -5328,7 +5328,7 @@ version(FBIDE)
 						if( highlightEnd > -1 )
 						{
 							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
@@ -5408,8 +5408,8 @@ version(FBIDE)
 
 							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 
-							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTip_Back.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTip_Fore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
 							scope _result = new IupString( ScintillaAction.textWrap( AutoComplete.showCallTipThread.getResult ) );
 							IupScintillaSendMessage( sci, 2200, _pos, cast(int) _result.toCString );
 							
@@ -5420,7 +5420,7 @@ version(FBIDE)
 							if( highlightEnd > -1 ) 
 							{
 								IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-								IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+								IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							}
 							
 							AutoComplete.noneListProcedureName = "";

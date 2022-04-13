@@ -290,8 +290,13 @@ outline=Outline
 	searchanyword=Search Word From Head
 	showln=Show Line Number
 	hide=Hide
+	hidesearch=Click To Show/Hide Search List
 
-filelist=FileList
+dlgcolor=DLGCOLOR
+txtcolor=TXTCOLOR
+leftview=Left-View
+showtype=ShowType
+calltip=CallTip	
 	fullpath=FullPath
 
 output=Output

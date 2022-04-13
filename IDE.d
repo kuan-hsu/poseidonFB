@@ -174,7 +174,7 @@ public:
 			doc ~= setINILineData( "QBCase", GLOBAL.editorSetting00.QBCase );
 			doc ~= setINILineData( "NewDocBOM", GLOBAL.editorSetting00.NewDocBOM );
 			doc ~= setINILineData( "SaveAllModified", GLOBAL.editorSetting00.SaveAllModified );
-			
+			doc ~= setINILineData( "IconInvert", GLOBAL.editorSetting00.IconInvert );
 			
 			if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
 				GLOBAL.editorSetting01.ExplorerSplit = Integer.toString( GLOBAL.explorerSplit_value );
@@ -280,16 +280,17 @@ public:
 			doc ~= setINILineData( "maker1", GLOBAL.editColor.maker[1].toDString );
 			doc ~= setINILineData( "maker2", GLOBAL.editColor.maker[2].toDString );
 			doc ~= setINILineData( "maker3", GLOBAL.editColor.maker[3].toDString );
-			doc ~= setINILineData( "calltipFore", GLOBAL.editColor.callTip_Fore.toDString );
-			doc ~= setINILineData( "calltipBack", GLOBAL.editColor.callTip_Back.toDString );
-			doc ~= setINILineData( "calltipHLT", GLOBAL.editColor.callTip_HLT.toDString );
-			doc ~= setINILineData( "showtypeFore", GLOBAL.editColor.showType_Fore.toDString );
-			doc ~= setINILineData( "showtypeBack", GLOBAL.editColor.showType_Back.toDString );
-			doc ~= setINILineData( "showtypeHLT", GLOBAL.editColor.showType_HLT.toDString );
+			doc ~= setINILineData( "calltipFore", GLOBAL.editColor.callTipFore.toDString );
+			doc ~= setINILineData( "calltipBack", GLOBAL.editColor.callTipBack.toDString );
+			doc ~= setINILineData( "calltipHLT", GLOBAL.editColor.callTipHLT.toDString );
+			doc ~= setINILineData( "showtypeFore", GLOBAL.editColor.showTypeFore.toDString );
+			doc ~= setINILineData( "showtypeBack", GLOBAL.editColor.showTypeBack.toDString );
+			doc ~= setINILineData( "showtypeHLT", GLOBAL.editColor.showTypeHLT.toDString );
 
-			doc ~= setINILineData( "functionTitle", GLOBAL.editColor.functionTitle.toDString );
-			doc ~= setINILineData( "projectHLT", GLOBAL.editColor.project_HLT.toDString );
-			doc ~= setINILineData( "outlineHLT", GLOBAL.editColor.outline_HLT.toDString );
+			doc ~= setINILineData( "searchIndicator", GLOBAL.editColor.searchIndicator.toDString );
+			doc ~= setINILineData( "searchIndicatorAlpha", GLOBAL.editColor.searchIndicatorAlpha.toDString );
+			doc ~= setINILineData( "prjViewHLT", GLOBAL.editColor.prjViewHLT.toDString );
+			doc ~= setINILineData( "prjViewHLTAlpha", GLOBAL.editColor.prjViewHLTAlpha.toDString );
 			
 			// shortkeys
 			doc ~= setINILineData( "[shortkeys]");
@@ -592,6 +593,7 @@ public:
 							case "QBCase":					GLOBAL.editorSetting00.QBCase = right;					break;
 							case "NewDocBOM":				GLOBAL.editorSetting00.NewDocBOM = right;				break;
 							case "SaveAllModified":			GLOBAL.editorSetting00.SaveAllModified = right;			break;
+							case "IconInvert":				version(Windows) GLOBAL.editorSetting00.IconInvert = right; else GLOBAL.editorSetting00.IconInvert = "OFF"; break;
 							default:
 						}
 						break;
@@ -700,18 +702,18 @@ public:
 							case "maker2":					GLOBAL.editColor.maker[2] = right;						break;
 							case "maker3":					GLOBAL.editColor.maker[3] = right;						break;
 							
-							case "calltipFore":				GLOBAL.editColor.callTip_Fore = right;					break;
-							case "calltipBack":				GLOBAL.editColor.callTip_Back = right;					break;
-							case "calltipHLT":				GLOBAL.editColor.callTip_HLT = right;					break;
+							case "calltipFore":				GLOBAL.editColor.callTipFore = right;					break;
+							case "calltipBack":				GLOBAL.editColor.callTipBack = right;					break;
+							case "calltipHLT":				GLOBAL.editColor.callTipHLT = right;					break;
 
-							case "showtypepFore":			GLOBAL.editColor.showType_Fore = right;					break;
-							case "showtypeBack":			GLOBAL.editColor.showType_Back = right;					break;
-							case "showtypeHLT":				GLOBAL.editColor.showType_HLT = right;					break;
+							case "showtypeFore":			GLOBAL.editColor.showTypeFore = right;					break;
+							case "showtypeBack":			GLOBAL.editColor.showTypeBack = right;					break;
+							case "showtypeHLT":				GLOBAL.editColor.showTypeHLT = right;					break;
 							
-							case "functionTitle":			GLOBAL.editColor.functionTitle = right;					break;
-							
-							case "projectHLT":				GLOBAL.editColor.project_HLT = right;					break;
-							case "outlineHLT":				GLOBAL.editColor.outline_HLT = right;					break;
+							case "searchIndicator":			if( right.length ) GLOBAL.editColor.searchIndicator = right;				break;
+							case "searchIndicatorAlpha":	if( right.length ) GLOBAL.editColor.searchIndicatorAlpha = right;			break;
+							case "prjViewHLT":				GLOBAL.editColor.prjViewHLT = right;					break;
+							case "prjViewHLTAlpha":			GLOBAL.editColor.prjViewHLTAlpha = right;				break;
 							
 							default:
 						}
@@ -1039,7 +1041,7 @@ public:
 			scope file = new UnicodeFile!(char)( iniPath, Encoding.Unknown );
 			char[] doc = file.read();
 			
-			results.length = 52;
+			results.length = 60;
 			
 			char[]	blockText;
 			foreach( char[] lineData; Util.splitLines( doc ) )
@@ -1127,6 +1129,17 @@ public:
 							
 							case	"txtFore":					results[50] = right;	break;
 							case	"txtBack":					results[51] = right;	break;
+							
+							case	"prjViewHLT":				results[52] = right;	break;
+							case	"prjViewHLTAlpha":			results[53] = right;	break;
+
+							case	"showTypeFore":				results[54] = right;	break;
+							case	"showTypeBack":				results[55] = right;	break;
+							case	"showTypeHLT":				results[56] = right;	break;
+							case	"callTipFore":				results[57] = right;	break;
+							case	"callTipBack":				results[58] = right;	break;
+							case	"callTipHLT":				results[59] = right;	break;
+
 							default:
 						}
 						break;

@@ -518,7 +518,7 @@ class CScintilla
 		IupSetAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
 		IupSetAttribute(sci, "STYLEFONTSIZE40",  toStringz( size.dup ) );
 
-		IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTip_HLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+		IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 		/*
 		IupSetAttribute(sci, "STYLEFONTSIZE38",  "10" );
 		IupScintillaSendMessage( sci, 2205, tools.convertIupColor( "210 255 255" ), 0 ); // SCI_CALLTIPSETBACK 2205
@@ -766,7 +766,7 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2563, 0, 0 );
 			IupScintillaSendMessage( sci, 2565, 0, 0 ); 
 		}
-		
+		//IupSetAttributeId( sci, "INDICATORSTYLE", 8, "STRAIGHTBOX" );
 		IupScintillaSendMessage( sci, 2080, 8, GLOBAL.indicatorStyle ); //SCI_INDICSETSTYLE = 2080
 		//IupScintillaSendMessage( sci, 2284, 1, 0 ); //SCI_SETTWOPHASEDRAW = 2284		
 		//IupScintillaSendMessage( sci, 2510, 8, 1 ); //SCI_INDICSETUNDER = 2510
@@ -3494,12 +3494,17 @@ extern(C)
 		
 		int wordStart = IupScintillaSendMessage( ih, 2266, pos, 1 ); // SCI_WORDSTARTPOSITION 2266
 		int wordEnd = IupScintillaSendMessage( ih, 2267, pos, 1 );   // SCI_WORDENDPOSITION 2267
-		
+		/*
 		struct TextRange{ int start; int end; char* text; }
 		TextRange tr = { wordStart, wordEnd, ( new char[wordEnd-wordStart+1] ).ptr };
 		IupScintillaSendMessage( ih, 2162, 0, cast(int) &tr ); // SCI_GETTEXTRANGE 2162
 		char[] word = fromStringz( tr.text ).dup;
 		delete tr.text;
+		*/
+		char[] word;
+		for( int i = wordStart; i < wordEnd; ++ i )
+			word ~= fromStringz( IupGetAttributeId( ih, "CHAR", i ) );
+
 		if( word.length ) _HighlightWord( ih, word );
 	}
 	

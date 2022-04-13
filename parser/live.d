@@ -263,7 +263,12 @@ struct LiveParser
 					if( newHead.getChildrenCount == 0 )
 					{
 						delete newHead;
-						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
+						if( GLOBAL.toggleUpdateOutlineLive == "ON" )
+						{
+							Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
+							GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
+							if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( actTree, "VISIBLE", 1 );
+						}
 						return;
 					}
 

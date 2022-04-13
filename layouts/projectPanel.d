@@ -17,7 +17,8 @@ private:
 	import				project, tango.io.device.File, tango.io.stream.Lines;//, tango.io.Stdout;
 	import				tango.core.Thread, parser.autocompletion;
 	
-	Ihandle*			layoutHandle, tree, projectButtonCollapse;
+	Ihandle*			projectButtonCollapse, projectButtonHide;
+	Ihandle*			layoutHandle, tree;
 	
 	// Inner Class
 	class ParseThread : Thread
@@ -113,7 +114,7 @@ private:
 			return IUP_DEFAULT;
 		});
 
-		Ihandle* projectButtonHide = IupButton( null, null );
+		projectButtonHide = IupButton( null, null );
 		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l" );
 		IupSetAttribute( projectButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -140,6 +141,11 @@ private:
 			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
 			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
 			IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+			if( GLOBAL.editColor.prjViewHLT.toDString.length )
+			{
+				IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+				IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+			}
 		}
 		else
 		{
@@ -147,6 +153,10 @@ private:
 			tree = IupTree();
 			IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
 			IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+			if( GLOBAL.editColor.prjViewHLT.toDString.length )
+			{
+				IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+			}
 		}
 		
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
@@ -172,6 +182,8 @@ private:
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,GAP=2" );
 		layoutHandle = IupBackgroundBox( layoutHandle );
+		
+		changeIcons();
 	}
 
 	void toBoldTitle( Ihandle* _tree, int id )
@@ -182,6 +194,15 @@ private:
 			char[] fontString = Util.substitute( GLOBAL.fonts[4].fontString.dup, ",", ",Bold " );
 			IupSetStrAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
 		}
+	}
+	
+	void changeIcons()
+	{
+		char[] tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
+		
+		IupSetStrAttribute( projectButtonCollapse, "IMAGE", toStringz( "icon_collapse2" ~ tail ) );
+		IupSetStrAttribute( projectButtonHide, "IMAGE", toStringz( "icon_shift_l" ~ tail ) );
 	}
 
 
@@ -210,11 +231,13 @@ public:
 		IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
 		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
+		IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
 		
 		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 		{
 			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
 			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+			IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
 		}
 		
 		/*
@@ -1193,6 +1216,10 @@ extern(C)
 				{
 					CProjectTree_Open_cb( ih );
 					return IUP_IGNORE;
+				}
+				else
+				{
+					IupSetAttribute( ih, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 				}
 			}
 		}

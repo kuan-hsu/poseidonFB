@@ -19,8 +19,9 @@ version(Windows)
 
 struct EditorToggleUint
 {
-	char[] LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", LoadAtBackThread = "OFF", AutoKBLayout = "OFF";
-	char[] TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF", NewDocBOM = "ON", SaveAllModified = "OFF";
+	char[]	LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", LoadAtBackThread = "OFF", AutoKBLayout = "OFF";
+	char[]	TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF", NewDocBOM = "ON", SaveAllModified = "OFF";
+	char[]	IconInvert = "OFF";
 }
 
 struct EditorLayoutSize
@@ -36,11 +37,10 @@ struct EditorColorUint
 	IupString		scintillaFore, scintillaBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
 	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
 	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
-	IupString		projectFore, projectBack, outlineFore, outlineBack, /*filelistFore, filelistBack,*/ outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType, dlgFore, dlgBack, txtFore, txtBack;
+	IupString		projectFore, projectBack, outlineFore, outlineBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType, dlgFore, dlgBack, txtFore, txtBack;
 	IupString[4]	maker;
-	IupString		callTip_Fore, callTip_Back, callTip_HLT, showType_Fore, showType_Back, showType_HLT;
-	IupString		functionTitle;
-	IupString		project_HLT, outline_HLT;
+	IupString		callTipFore, callTipBack, callTipHLT, showTypeFore, showTypeBack, showTypeHLT;
+	IupString		searchIndicator, searchIndicatorAlpha, prjViewHLT, prjViewHLTAlpha;
 }
 
 struct ShortKey
@@ -322,18 +322,18 @@ struct GLOBAL
 		GLOBAL.editColor.prjTitle = new IupString( cast(char[]) "128 0 0" );
 		GLOBAL.editColor.prjSourceType = new IupString( cast(char[]) "0 0 255" );
 		
-		GLOBAL.editColor.callTip_Fore = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.callTip_Back = new IupString( cast(char[]) "234 248 192" );
-		GLOBAL.editColor.callTip_HLT = new IupString( cast(char[]) "202 0 0" );
+		GLOBAL.editColor.callTipFore = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.callTipBack = new IupString( cast(char[]) "234 248 192" );
+		GLOBAL.editColor.callTipHLT = new IupString( cast(char[]) "202 0 0" );
 
-		GLOBAL.editColor.showType_Fore = new IupString( cast(char[]) "0xff0000" );
-		GLOBAL.editColor.showType_Back = new IupString( cast(char[]) "0xaaffff" );
-		GLOBAL.editColor.showType_HLT = new IupString( cast(char[]) "0x008000" );
+		GLOBAL.editColor.showTypeFore = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.showTypeBack = new IupString( cast(char[]) "255 255 170" );
+		GLOBAL.editColor.showTypeHLT = new IupString( cast(char[]) "0 128 0" );
 		
-		GLOBAL.editColor.functionTitle = new IupString( cast(char[]) "0 0 0" );
-		
-		GLOBAL.editColor.project_HLT = new IupString;
-		GLOBAL.editColor.outline_HLT = new IupString;
+		GLOBAL.editColor.searchIndicator = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.searchIndicatorAlpha = new IupString( cast(char[]) "128" );
+		GLOBAL.editColor.prjViewHLT = new IupString( cast(char[]) "0 0 128" );
+		GLOBAL.editColor.prjViewHLTAlpha = new IupString( cast(char[]) "128" );
 		
 		/*
 		GLOBAL.debuggerFullPath = new IupString();
@@ -655,12 +655,12 @@ struct GLOBAL
 							GLOBAL.languageItems["light"] = new IupString( cast(char[]) "Light" );
 							GLOBAL.languageItems["full"] = new IupString( cast(char[]) "Full" );
 							GLOBAL.languageItems["update"] = new IupString( cast(char[]) "Update Outline" );
-						GLOBAL.languageItems["trigger"] = new IupString( cast(char[]) "Autocompletion Trigger" );
+						GLOBAL.languageItems["trigger"] = new IupString( cast(char[]) "Autocompletion Trigger:" );
 							GLOBAL.languageItems["triggertip"] = new IupString( cast(char[]) "Set 0 To Disable" );
 							GLOBAL.languageItems["codecompletiononoff"] = new IupString( cast(char[]) "Code Completion On/Off" );
-						GLOBAL.languageItems["includelevel"] = new IupString( cast(char[]) "Include Levels" );
+						GLOBAL.languageItems["includelevel"] = new IupString( cast(char[]) "Include Levels:" );
 							GLOBAL.languageItems["includeleveltip"] = new IupString( cast(char[]) "Set -1 To Unlimited" );
-						GLOBAL.languageItems["autocmaxheight"] = new IupString( cast(char[]) "Max Complete List Items" );
+						GLOBAL.languageItems["autocmaxheight"] = new IupString( cast(char[]) "Max Complete List Items:" );
 					GLOBAL.languageItems["editor"] = new IupString( cast(char[]) "Editor" );
 						GLOBAL.languageItems["lnmargin"] = new IupString( cast(char[]) "Show Linenumber Margin" );
 						GLOBAL.languageItems["fixedlnmargin"] = new IupString( cast(char[]) "Fixed Linenumber Margin Size" );
@@ -813,9 +813,11 @@ struct GLOBAL
 			GLOBAL.languageItems["hide"] = new IupString( cast(char[]) "Hide" );
 			GLOBAL.languageItems["hidesearch"] = new IupString( cast(char[]) "Click To Show/Hide Search List" );
 
-		GLOBAL.languageItems["filelist"] = new IupString( cast(char[]) "FileList" );
 		GLOBAL.languageItems["dlgcolor"] = new IupString( cast(char[]) "DLGCOLOR" );
-		GLOBAL.languageItems["txtcolor"] = new IupString( cast(char[]) "TXTCOLOR" );		
+		GLOBAL.languageItems["txtcolor"] = new IupString( cast(char[]) "TXTCOLOR" );
+		GLOBAL.languageItems["leftview"] = new IupString( cast(char[]) "Left-View" );
+		GLOBAL.languageItems["showtype"] = new IupString( cast(char[]) "ShowType" );
+		GLOBAL.languageItems["calltip"] = new IupString( cast(char[]) "CallTip" );		
 			GLOBAL.languageItems["fullpath"] = new IupString( cast(char[]) "FullPath" );
 
 		GLOBAL.languageItems["output"] = new IupString( cast(char[]) "Output" );

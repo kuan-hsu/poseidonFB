@@ -55,9 +55,9 @@ public:
 		{
 			// outputPanel		
 			IupSetAttribute( outputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
-			IupSetAttributeId( outputPanel, "INDICATORSTYLE", 8, "DOTBOX" );
-			IupSetAttributeId( outputPanel, "INDICATORFGCOLOR", 8, "255 0 0" );
-			IupSetIntId( outputPanel, "INDICATORALPHA", 8, 128 );
+			IupSetAttributeId( outputPanel, "INDICATORSTYLE", 4, "DOTBOX" );
+			IupSetStrAttributeId( outputPanel, "INDICATORFGCOLOR", 4, GLOBAL.editColor.searchIndicator.toCString );
+			IupSetIntId( outputPanel, "INDICATORALPHA", 4, Integer.atoi( GLOBAL.editColor.searchIndicatorAlpha.toDString ) );
 		}
 		
 		// scintilla
@@ -82,10 +82,10 @@ public:
 			IupSetAttribute( searchOutputPanel, "KEYWORDS6", GLOBAL.KEYWORDS[5].toCString );
 		}
 		
-		IupSetAttribute(searchOutputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
-		IupSetAttributeId( searchOutputPanel, "INDICATORSTYLE", 8, "DOTBOX" );
-		IupSetAttributeId( searchOutputPanel, "INDICATORFGCOLOR", 8, "0 0 255" );
-		IupSetIntId( searchOutputPanel, "INDICATORALPHA", 8, 128 );
+		IupSetAttribute( searchOutputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
+		IupSetAttributeId( searchOutputPanel, "INDICATORSTYLE", 4, "DOTBOX" );
+		IupSetStrAttributeId( searchOutputPanel, "INDICATORFGCOLOR", 4, GLOBAL.editColor.searchIndicator.toCString );
+		IupSetIntId( searchOutputPanel, "INDICATORALPHA", 4, Integer.atoi( GLOBAL.editColor.searchIndicatorAlpha.toDString ) );
 		
 		applyColor();
 	}
@@ -322,12 +322,8 @@ public:
 	{
 		void applyOutputPanelINDICATOR()
 		{
-			//IupSetAttributeId( outputPanel, "INDICATORSTYLE", 8, "DOTBOX" );
-			IupSetAttributeId( outputPanel, "INDICATORFGCOLOR", 8, "255 0 0" );
-			IupSetIntId( outputPanel, "INDICATORALPHA", 8, 128 );
-		
 			IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-			IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+			IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 			
 			foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 			{
@@ -364,12 +360,8 @@ public:
 		
 		void applyOutputPanelINDICATOR2()
 		{
-			//IupSetAttributeId( outputPanel, "INDICATORSTYLE", 8, "BOX" );
-			IupSetAttributeId( outputPanel, "INDICATORFGCOLOR", 8, "0 128 0" );
-			IupSetIntId( outputPanel, "INDICATORALPHA", 8, 200 );
-			
 			IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-			IupScintillaSendMessage( outputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+			IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 			
 			foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 			{
@@ -387,7 +379,7 @@ public:
 	void applySearchOutputPanelINDICATOR()
 	{
 		IupScintillaSendMessage( searchOutputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-		IupScintillaSendMessage( searchOutputPanel, 2500, 8, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		IupScintillaSendMessage( searchOutputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
 		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
 		{

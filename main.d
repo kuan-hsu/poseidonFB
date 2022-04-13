@@ -226,9 +226,9 @@ void main( char[][] args )
 	}
 	
 	// Init IDE
-	load_all_images_icons();
-	
 	createEditorSetting();
+	
+	load_all_images_icons();
 	
 	IupScintillaOpen();
 

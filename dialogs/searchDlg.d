@@ -13,6 +13,7 @@ class CSearchExpander
 	import				tools;
 	
 	Ihandle*			btnFindPrev, btnFindNext, btnReplaceFind, btnReplace, btnReplaceAll, btnMarkAll;
+	Ihandle*			btnCase, btnScope, btnClose, btnWhole, btnDirection;
 	Ihandle*			expander;
 	IupString[2] 		labelTitle, findButton;
 
@@ -124,29 +125,29 @@ class CSearchExpander
 		
 		
 		// Group 3
-		Ihandle* btnCase = IupToggle( null, null );
+		btnCase = IupToggle( null, null );
 		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,NAME=toggle_Case,SIZE=x12" );
 		version(DIDE) IupSetAttribute( btnCase, "VALUE", "ON" );
 		version(FBIDE) IupSetAttribute( btnCase, "VALUE", "OFF" );
 		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
 		IupSetCallback( btnCase, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
-		Ihandle* btnWhole = IupToggle( null, null );
+		btnWhole = IupToggle( null, null );
 		IupSetAttributes( btnWhole, "IMAGE=icon_wholeword,FLAT=YES,VALUE=ON,NAME=toggle_Whole,SIZE=x12" );
 		IupSetAttribute( btnWhole, "TIP", GLOBAL.languageItems["wholeword"].toCString );
 		IupSetCallback( btnWhole, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
-		Ihandle* btnScope = IupToggle( null, null );
+		btnScope = IupToggle( null, null );
 		IupSetAttributes( btnScope, "IMAGE=icon_selectall,FLAT=YES,VALUE=ON,NAME=toggle_Scope,SIZE=x12" );
 		IupSetAttribute( btnScope, "TIP", GLOBAL.languageItems["scope"].toCString );
 		//IupSetCallback( btnScope, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
-		Ihandle* btnDirection = IupToggle( null, null );
+		btnDirection = IupToggle( null, null );
 		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,FLAT=YES,VALUE=ON,NAME=toggle_Direction,SIZE=x12" );
 		IupSetAttribute( btnDirection, "TIP", GLOBAL.languageItems["direction"].toCString );
 		//IupSetCallback( btnDirection, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 		
-		Ihandle* btnClose = IupButton( null, null );
+		btnClose = IupButton( null, null );
 		IupSetAttributes( btnClose, "IMAGE=icon_close,FLAT=YES,NAME=btn_Close,SIZE=x12" );
 		IupSetCallback( btnClose, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -166,9 +167,9 @@ class CSearchExpander
 		expander = IupExpander( IupHbox( _group0, _group1, _group2, _group3, null ) );
 		IupSetAttributes( expander, "BARSIZE=0,STATE=CLOSE,BARPOSITION=BOTTOM" );
 		Ihandle* _backgroundbox = IupGetChild( expander, 0 );
-		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image 
-	}	
-
+		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image
+	}
+	
 	public:
 	
 	// SCFIND_WHOLEWORD = 2, SCFIND_MATCHCASE = 4

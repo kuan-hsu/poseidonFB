@@ -52,9 +52,8 @@ void createExplorerWindow()
 	else
 		GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, GLOBAL.documentTabs_Sub );
 		
-	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=NO,BARSIZE=0,ACTIVE=YES" );
+	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=LINES,BARSIZE=0,ACTIVE=YES" );
 	IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
-	//IupSetAttribute( GLOBAL.documentTabs_Sub, "ACTIVE","YES" );
 
 	// BOTTOM
 	if( GLOBAL.editorSetting01.RotateTabs == "ON" )
@@ -62,7 +61,7 @@ void createExplorerWindow()
 	else
 		GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, null );
 		
-	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=NO,BARSIZE=0,ACTIVE=YES" );
+	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=LINES,BARSIZE=0,ACTIVE=YES" );
 	IupSetAttribute( GLOBAL.documentSplit2, "ACTIVE","YES" );
 	
 	GLOBAL.searchExpander = new CSearchExpander;
@@ -70,7 +69,7 @@ void createExplorerWindow()
 
 	
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
-	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=NO,NAME=POSEIDON_LEFT_SPLIT");
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT");
 	IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 
@@ -116,7 +115,7 @@ void createExplorerWindow()
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
-	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,SHOWGRIP=NO,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
+	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,SHOWGRIP=LINES,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
 	IupSetAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* _ih ){
