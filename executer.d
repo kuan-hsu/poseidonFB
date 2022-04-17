@@ -401,7 +401,7 @@ struct ExecuterAction
 				else
 					showAnnotation( null );
 			}
-			version(linux) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+			if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 			
 			if( bError )
 			{
@@ -676,7 +676,7 @@ struct ExecuterAction
 					else
 						showAnnotation( null );
 				}
-				version(linux) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 				if( bError )
 				{
@@ -978,7 +978,7 @@ struct ExecuterAction
 					else
 						showAnnotation( null );
 				}
-				version(linux) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 				if( bError )
 				{
@@ -1223,7 +1223,7 @@ struct ExecuterAction
 				else
 					showAnnotation( null );
 			}
-			version(linux) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+			if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 			if( bError )
 			{
@@ -2385,7 +2385,7 @@ struct ExecuterAction
 				else
 					showAnnotation( null );
 			}
-			version(linux) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+			if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
 
 			if( !bError )
 			{

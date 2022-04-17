@@ -617,7 +617,7 @@ public:
 					parsedFiles = preParseFiles( parsedFiles, i );
 				
 				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
-				version(linux) GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
+				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
 			}
 			
 			//createProjectTree( setupDir );

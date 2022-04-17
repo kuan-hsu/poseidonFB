@@ -219,27 +219,6 @@ class CProjectPropertiesDialog : CBaseDialog
 		Ihandle* hBox05 = IupHbox( labelCompilerOpts, textCompilerOpts, btnCompilerOpts, null );
 		IupSetAttribute( hBox05, "ALIGNMENT", "ACENTER" );
 		
-		/*
-		// Line 7
-		Ihandle* labelComment = IupLabel( toStringz( GLOBAL.languageItems["prjcomment"].toDString ~ ":" ) );
-		
-		textComment = IupText( null );
-		version(Windows)
-		{
-			IupSetAttributes( labelComment, "SIZE=60x20" );
-			IupSetAttributes( textComment, "SIZE=276x20,MULTILINE=YES,SCROLLBAR=VERTICAL,NAME=PRJPROPERTY_Comment" );
-			Ihandle* hBox06 = IupHbox( labelComment, textComment, null );
-			IupSetAttributes( hBox06, "ALIGNMENT=ACENTER,SIZE=x20" );
-		}
-		else
-		{
-			IupSetAttributes( labelComment, "SIZE=60x20" );
-			IupSetAttributes( textComment, "SIZE=276x12,NAME=PRJPROPERTY_Comment" );
-			Ihandle* hBox06 = IupHbox( labelComment, textComment, null );
-			IupSetAttributes( hBox06, "ALIGNMENT=ACENTER,SIZE=x12" );
-		}
-		*/
-
 		// Line 8
 		Ihandle* labelCompilerPath = IupLabel( toStringz( GLOBAL.languageItems["prjcompiler"].toDString ~ ":" ) );
 		IupSetAttributes( labelCompilerPath, "SIZE=60x12" );

@@ -200,6 +200,7 @@ public:
 			doc ~= setINILineData( "OutlineWindow", GLOBAL.editorSetting01.OutlineWindow );
 			doc ~= setINILineData( "MessageWindow", GLOBAL.editorSetting01.MessageWindow );
 			doc ~= setINILineData( "OutlineFlat", GLOBAL.editorSetting01.OutlineFlat );
+			doc ~= setINILineData( "OutputSci", GLOBAL.editorSetting01.OutputSci );
 			doc ~= setINILineData( "RotateTabs", GLOBAL.editorSetting01.RotateTabs );
 			doc ~= setINILineData( "BarSize", GLOBAL.editorSetting01.BarSize );
 			doc ~= setINILineData( "EXTRAASCENT", GLOBAL.editorSetting01.EXTRAASCENT );
@@ -593,7 +594,7 @@ public:
 							case "QBCase":					GLOBAL.editorSetting00.QBCase = right;					break;
 							case "NewDocBOM":				GLOBAL.editorSetting00.NewDocBOM = right;				break;
 							case "SaveAllModified":			GLOBAL.editorSetting00.SaveAllModified = right;			break;
-							case "IconInvert":				version(Windows) GLOBAL.editorSetting00.IconInvert = right; else GLOBAL.editorSetting00.IconInvert = "OFF"; break;
+							case "IconInvert":				GLOBAL.editorSetting00.IconInvert = right;				break;
 							default:
 						}
 						break;
@@ -609,6 +610,7 @@ public:
 							case "OutlineWindow":			GLOBAL.editorSetting01.OutlineWindow = right;			break;
 							case "MessageWindow":			GLOBAL.editorSetting01.MessageWindow = right;			break;
 							case "OutlineFlat":				version(Windows) GLOBAL.editorSetting01.OutlineFlat = right; else GLOBAL.editorSetting01.OutlineFlat = "OFF"; break;
+							case "OutputSci":				version(Windows) GLOBAL.editorSetting01.OutputSci = right; else GLOBAL.editorSetting01.OutputSci = "ON"; break;
 							case "RotateTabs":				GLOBAL.editorSetting01.RotateTabs = right;				break;
 							case "BarSize":
 								GLOBAL.editorSetting01.BarSize = right;
@@ -702,18 +704,18 @@ public:
 							case "maker2":					GLOBAL.editColor.maker[2] = right;						break;
 							case "maker3":					GLOBAL.editColor.maker[3] = right;						break;
 							
-							case "calltipFore":				GLOBAL.editColor.callTipFore = right;					break;
-							case "calltipBack":				GLOBAL.editColor.callTipBack = right;					break;
-							case "calltipHLT":				GLOBAL.editColor.callTipHLT = right;					break;
+							case "calltipFore":				if( right.length ) GLOBAL.editColor.callTipFore = right;					break;
+							case "calltipBack":				if( right.length ) GLOBAL.editColor.callTipBack = right;					break;
+							case "calltipHLT":				if( right.length ) GLOBAL.editColor.callTipHLT = right;					break;
 
-							case "showtypeFore":			GLOBAL.editColor.showTypeFore = right;					break;
-							case "showtypeBack":			GLOBAL.editColor.showTypeBack = right;					break;
-							case "showtypeHLT":				GLOBAL.editColor.showTypeHLT = right;					break;
+							case "showtypeFore":			if( right.length ) GLOBAL.editColor.showTypeFore = right;					break;
+							case "showtypeBack":			if( right.length ) GLOBAL.editColor.showTypeBack = right;					break;
+							case "showtypeHLT":				if( right.length ) GLOBAL.editColor.showTypeHLT = right;					break;
 							
 							case "searchIndicator":			if( right.length ) GLOBAL.editColor.searchIndicator = right;				break;
 							case "searchIndicatorAlpha":	if( right.length ) GLOBAL.editColor.searchIndicatorAlpha = right;			break;
-							case "prjViewHLT":				GLOBAL.editColor.prjViewHLT = right;					break;
-							case "prjViewHLTAlpha":			GLOBAL.editColor.prjViewHLTAlpha = right;				break;
+							case "prjViewHLT":				if( right.length ) GLOBAL.editColor.prjViewHLT = right;					break;
+							case "prjViewHLTAlpha":			if( right.length ) GLOBAL.editColor.prjViewHLTAlpha = right;				break;
 							
 							default:
 						}
@@ -1031,17 +1033,12 @@ public:
 			if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ templateName ~ ".ini";
 			
 			scope _fp = new FilePath( iniPath );
-			if( !_fp.exists() )
-			{
-				//return null;
-				return loadColorTemplate( templateName );
-			}
-			
+			if( !_fp.exists() ) return null;
 			
 			scope file = new UnicodeFile!(char)( iniPath, Encoding.Unknown );
 			char[] doc = file.read();
 			
-			results.length = 60;
+			results.length = 62;
 			
 			char[]	blockText;
 			foreach( char[] lineData; Util.splitLines( doc ) )
@@ -1140,6 +1137,9 @@ public:
 							case	"callTipBack":				results[58] = right;	break;
 							case	"callTipHLT":				results[59] = right;	break;
 
+							case	"messageIndicator":			results[60] = right;	break;
+							case	"messageIndicatorAlpha":	results[61] = right;	break;
+
 							default:
 						}
 						break;
@@ -1153,165 +1153,94 @@ public:
 		}
 		
 		return results;
-	}	
-	
-	static char[][] loadColorTemplate( char[] templateName )
-	{
-		char[][] results;
-		
-		try
-		{
-			char[] xmlPath = "settings/colorTemplates/" ~ templateName ~ ".xml";
-			
-			if( GLOBAL.linuxHome.length ) xmlPath = GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ templateName ~ ".xml";
-		
-			// Loading Key Word...
-			scope _fp = new FilePath( xmlPath );
-			if( !_fp.exists() ) return null;
-			
-			scope file = new UnicodeFile!(char)( _fp.toString, Encoding.Unknown );
-
-			scope doc = new Document!( char );
-			doc.parse( file.read );
-
-			auto root = doc.elements;
-			
-			auto result = root.query.descendant("color").attribute("caretLine");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("cursor");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("selectionFore");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("selectionBack");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("linenumFore");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("linenumBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("fold");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("selAlpha");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("braceFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("braceBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("errorFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("errorBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("warningFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("warningBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("scintillaFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("scintillaBack");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("SCE_B_COMMENT_Fore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("SCE_B_COMMENT_Back");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("SCE_B_NUMBER_Fore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("SCE_B_NUMBER_Back");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("SCE_B_STRING_Fore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("SCE_B_STRING_Back");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Fore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("SCE_B_PREPROCESSOR_Back");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Fore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("SCE_B_OPERATOR_Back");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("SCE_B_IDENTIFIER_Fore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("SCE_B_IDENTIFIER_Back");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("SCE_B_COMMENTBLOCK_Fore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("SCE_B_COMMENTBLOCK_Back");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("projectFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("projectBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("outlineFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("outlineBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("filelistFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("filelistBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("outputFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("outputBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("searchFore");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("searchBack");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("prjTitle");
-			foreach( e; result ) results ~= e.value;
-			result = root.query.descendant("color").attribute("prjSourceType");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("keyword0");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("keyword1");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("keyword2");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("keyword3");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("keyword4");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("keyword5");
-			foreach( e; result ) results ~= e.value;
-			
-			result = root.query.descendant("color").attribute("currentword");
-			foreach( e; result ) results ~= e.value;
-
-			result = root.query.descendant("color").attribute("currentwordAlpha");
-			foreach( e; result ) results ~= e.value;			
-			
-		}
-		catch( Exception e ){}
-		
-		return results;
 	}
+	
+
+	static void saveColorTemplateINI( char[] templateName )
+	{
+		if( GLOBAL.preferenceDlg is null ) return;
+		if( !GLOBAL.preferenceDlg.getIhandle ) return;
+		
+		
+		char[] templatePath = "settings/colorTemplates";
+
+		if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/" ~ templatePath; // version(Windows) GLOBAL.linuxHome = null
+		
+		scope _fp = new FilePath( templatePath );
+		if( !_fp.exists() )	_fp.create();
+		
+
+		char[] doc = "[color]\n";
+		
+		doc ~= setINILineData( "caretLine", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCaretLine" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "cursor", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCursor" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "selectionFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectFore" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "selectionBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectBack" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "linenumFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLinenumFore" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "linenumBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLinenumBack" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "fold", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "selAlpha", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textAlpha" ), "VALUE" ) ) );
+		doc ~= setINILineData( "braceFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "braceBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "errorFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnError_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "errorBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnError_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "warningFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "warningBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_BG" ), "FGCOLOR" ) ) );
+		
+		doc ~= setINILineData( "scintillaFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "scintillaBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_BG" ), "FGCOLOR" ) ) );
+
+		doc ~= setINILineData( "SCE_B_COMMENT_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENT_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_COMMENT_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENT_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_NUMBER_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_NUMBER_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_NUMBER_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_NUMBER_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_STRING_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_STRING_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_STRING_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_STRING_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_PREPROCESSOR_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_PREPROCESSOR_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_PREPROCESSOR_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_OPERATOR_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_OPERATOR_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_OPERATOR_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_IDENTIFIER_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_IDENTIFIER_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_IDENTIFIER_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Fore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENTBLOCK_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "SCE_B_COMMENTBLOCK_Back", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENTBLOCK_BG" ), "FGCOLOR" ) ) );
+		
+		doc ~= setINILineData( "projectFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrj_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "projectBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrj_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outlineFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutline_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outlineBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutline_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "dlgFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnDlg_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "dlgBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnDlg_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "txtFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnTxt_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "txtBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnTxt_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outputFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutput_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "outputBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnOutput_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "searchFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSearch_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "searchBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSearch_BG" ), "FGCOLOR" ) ) );
+		
+		doc ~= setINILineData( "prjTitle", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrjTitle" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "prjSourceType", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSourceTypeFolder" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword0", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord0Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword1", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord1Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword2", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord2Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword3", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord3Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "currentword", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "currentwordAlpha", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textIndicatorAlpha" ), "VALUE" ) ) );
+		doc ~= setINILineData( "keyword4", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "keyword5", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR" ) ) );
+
+		doc ~= setINILineData( "prjViewHLT", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLeftViewHLT" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "prjViewHLTAlpha", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textLeftViewHLTAplha" ), "VALUE" ) ) );
+		doc ~= setINILineData( "messageIndicator", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnMessageIndicator" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "messageIndicatorAlpha", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textMessageIndicatorAlpha" ), "VALUE" ) ) );
+		
+		doc ~= setINILineData( "showTypeFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "showTypeBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "showTypeHLT", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowTypeHLT" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "callTipFore", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCallTip_FG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "callTipBack", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCallTip_BG" ), "FGCOLOR" ) ) );
+		doc ~= setINILineData( "callTipHLT", fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCallTipHLT" ), "FGCOLOR" ) ) );
+
+		if( !actionManager.FileAction.saveFile( templatePath ~ "/" ~ templateName ~ ".ini", doc ) ) throw new Exception( "Save File Error" );
+	}	
 }

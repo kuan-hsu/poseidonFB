@@ -1488,125 +1488,60 @@ class COutline
 		if( head !is null )
 		{
 			Ihandle* tree;
-			version(FBIDE)
+			
+			version(FBIDE) if( head.kind != B_BAS && head.kind != B_BI ) return null;
+			version(DIDE) if( head.kind != D_MODULE ) return null;
+			
+			char[] fullPath = head.name;
+			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 			{
-				if( head.kind == B_BAS || head.kind == B_BI )
+				tree = IupFlatTree();
+				IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
+				IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+				IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+				IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
+				IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+				if( GLOBAL.editColor.prjViewHLT.toDString.length )
 				{
-					char[] fullPath = head.name;
-					
-					if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
-					{
-						tree = IupFlatTree();
-						IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
-						IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-						IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
-						IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
-						IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-						if( GLOBAL.editColor.prjViewHLT.toDString.length )
-						{
-							IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
-							IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
-						}
-					}
-					else
-					{
-					
-						tree = IupTree();
-						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
-						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
-						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-						if( GLOBAL.editColor.prjViewHLT.toDString.length )
-						{
-							IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
-						}
-					}
-						
-					
-					IupSetStrAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
-					
-					IupSetAttribute( tree, "IMAGE0", "icon_folder" );
-					IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_folder_open" );
-
-					toBoldTitle( tree, 0 );
-					
-
-					IupAppend( zBoxHandle, tree );
-					IupMap( tree );
-					IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
-					foreach_reverse( CASTnode t; head.getChildren() )
-					{
-						append( tree, t, 0 );
-					}
-					
-					IupSetStrAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
-					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+					IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+					IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
 				}
 			}
-			version(DIDE)
+			else
 			{
-				if( head.kind == D_MODULE )
-				{
-					char[] fullPath = head.name;
-					
-					if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
-					{
-						tree = IupFlatTree();
-						IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
-						IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-						IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
-						IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
-						IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-					}
-					else
-					{
-					
-						tree = IupTree();
-						IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
-						IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
-						IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-					}
-
-					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-					IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
-					
-					IupSetAttributeId( tree, "FONTSTYLE", 0, "BOLD" ); // Bold
-					IupSetAttributeId( tree, "IMAGE", 0, "IUP_module" );
-					IupSetAttributeId( tree, "IMAGEEXPANDED", 0, "IUP_module" );
-					IupSetAttributeId( tree, "USERDATA", 0, cast(char*) head );
-
-
-					IupAppend( zBoxHandle, tree );
-					IupMap( tree );
-					IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
-					foreach_reverse( CASTnode t; head.getChildren() )
-					{
-						append( tree, t, 0 );
-					}
-					
-					IupSetStrAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
-					IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-					IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-					/*
-					if( fromStringz( IupGetGlobal( "DRIVER" ) ) != "GTK" )
-						if( GLOBAL.editColor.project_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.project_HLT.toCString );
-					*/
-				}
+				tree = IupTree();
+				IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
+				IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
+				IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+				if( GLOBAL.editColor.prjViewHLT.toDString.length ) IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
 			}
 			
-			if( IupGetChildCount( zBoxHandle ) > 0 )
+			IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
+			//IupSetAttributeId( tree, "FONTSTYLE", 0, "BOLD" ); // Bold
+			toBoldTitle( tree, 0 );
+			version(FBIDE)
 			{
-				showTreeAndButtons( true );
-				/*
-				IupSetAttribute( outlineTreeNodeList, "VISIBLE", "YES" );
-				IupSetAttribute( outlineButtonCollapse, "VISIBLE", "YES" );
-				IupSetAttribute( outlineButtonPR, "VISIBLE", "YES" );
-				IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "YES" );
-				IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "YES" );
-				IupSetAttribute( outlineButtonFresh, "VISIBLE", "YES" );
-				*/
+				IupSetAttribute( tree, "IMAGE0", "icon_folder" );
+				IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_folder_open" );
 			}
+			else
+			{
+				IupSetAttributeId( tree, "IMAGE", 0, "IUP_module" );
+				IupSetAttributeId( tree, "IMAGEEXPANDED", 0, "IUP_module" );
+				IupSetAttributeId( tree, "USERDATA", 0, cast(char*) head );
+			}
+
+			IupAppend( zBoxHandle, tree );
+			IupMap( tree );
+			IupRefresh( GLOBAL.outlineTree.getZBoxHandle );	
+			foreach_reverse( CASTnode t; head.getChildren() )
+				append( tree, t, 0 );
+			
+			IupSetStrAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+			IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
+			IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );			
+			
+			if( IupGetChildCount( zBoxHandle ) > 0 ) showTreeAndButtons( true );
 			
 			return tree;
 		}

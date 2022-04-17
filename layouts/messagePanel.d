@@ -20,15 +20,15 @@ private:
 
 	void createMessagePanel()
 	{
-		version(Windows)
-		{
-			outputPanel = IupText( null );
-			IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO,WORDWRAP=YES,READONLY=YES" );
-		}
-		else
+		if( GLOBAL.editorSetting01.OutputSci == "ON" )
 		{
 			outputPanel = IupScintilla();
 			IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO" );
+		}
+		else
+		{
+			outputPanel = IupText( null );
+			IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO,WORDWRAP=YES,READONLY=YES" );
 		}
 		IupSetCallback( outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
 		
@@ -51,7 +51,7 @@ public:
 	
 	void setScintillaColor()
 	{
-		version(linux)
+		if( GLOBAL.editorSetting01.OutputSci == "ON" )
 		{
 			// outputPanel		
 			IupSetAttribute( outputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
@@ -105,17 +105,17 @@ public:
 			alpha = 0;
 			
 		// outputPanel
-		version(Windows)
-		{
-			IupSetStrAttribute( outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
-			IupSetStrAttribute( outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
-		}
-		else
+		if( GLOBAL.editorSetting01.OutputSci == "ON" )
 		{
 			IupSetAttribute( outputPanel, "STYLEFGCOLOR32", GLOBAL.editColor.outputFore.toCString );		// 32
 			IupSetAttribute( outputPanel, "STYLEBGCOLOR32", GLOBAL.editColor.outputBack.toCString );		// 32
 		
 			IupSetAttribute( outputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
+		}
+		else
+		{
+			IupSetStrAttribute( outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
+			IupSetStrAttribute( outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
 		}
 		/*
 		IupSetAttribute( outputPanel, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
@@ -126,7 +126,7 @@ public:
 		
 		version(FBIDE)
 		{
-			version(linux)
+			if( GLOBAL.editorSetting01.OutputSci == "ON" )
 			{
 				IupSetAttribute( outputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
 				IupSetAttribute( outputPanel, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
@@ -186,7 +186,7 @@ public:
 		}
 		version(DIDE)
 		{
-			version(linux)
+			if( GLOBAL.editorSetting01.OutputSci == "ON" )
 			{
 				IupSetAttribute( outputPanel, "STYLEFGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_D_CHARACTER 12
 				IupSetAttribute( outputPanel, "STYLEBGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_D_CHARACTER 12
@@ -255,7 +255,7 @@ public:
 			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13	
 		}
 		
-		version(linux)
+		if( GLOBAL.editorSetting01.OutputSci == "ON" )
 		{
 			// Caret Line ( Current Line )
 			IupSetAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
@@ -318,37 +318,34 @@ public:
 		}
 	}
 	
-	version(linux)
+	void applyOutputPanelINDICATOR()
 	{
-		void applyOutputPanelINDICATOR()
+		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
+		
+		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 		{
-			IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-			IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
-			
-			foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+			if( lineText.length )
 			{
-				if( lineText.length )
+				int openPos = Util.index( lineText, "(" );
+				if( openPos < lineText.length )
 				{
-					int openPos = Util.index( lineText, "(" );
-					if( openPos < lineText.length )
+					int closePos = Util.index( lineText, ")", openPos );
+					if( closePos < lineText.length )
 					{
-						int closePos = Util.index( lineText, ")", openPos );
 						if( closePos < lineText.length )
 						{
-							if( closePos < lineText.length )
+							if( closePos > openPos )
 							{
-								if( closePos > openPos )
+								int colonPos = Util.index( lineText, ": ", closePos );
+								
+								if( colonPos < lineText.length )
 								{
-									int colonPos = Util.index( lineText, ": ", closePos );
-									
-									if( colonPos < lineText.length )
+									if( colonPos > closePos )
 									{
-										if( colonPos > closePos )
-										{
-											int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-											IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
-											IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
-										}
+										int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
+										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
 									}
 								}
 							}
@@ -357,21 +354,21 @@ public:
 				}
 			}
 		}
+	}
+	
+	void applyOutputPanelINDICATOR2()
+	{
+		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
+		IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		void applyOutputPanelINDICATOR2()
+		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 		{
-			IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
-			IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
-			
-			foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+			if( lineText.length )
 			{
-				if( lineText.length )
-				{
-					int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-					char[] triml_lineText = Util.triml( lineText );
-					lineHeadPos += ( lineText.length - triml_lineText.length );
-					IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
-				}
+				int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+				char[] triml_lineText = Util.triml( lineText );
+				lineHeadPos += ( lineText.length - triml_lineText.length );
+				IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
 			}
 		}
 	}
@@ -608,7 +605,7 @@ extern(C)
 											}
 
 											// Make all line be selected
-											version(linux)
+											if( GLOBAL.editorSetting01.OutputSci == "ON" )
 											{
 												int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
 												IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",0:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length - 1 ) ) );										
@@ -718,7 +715,7 @@ extern(C)
 								}
 
 								// Make all line be selected
-								version(linux)
+								if( GLOBAL.editorSetting01.OutputSci == "ON" )
 								{
 									int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
 									IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",0:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length - 1 ) ) );
