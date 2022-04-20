@@ -137,7 +137,7 @@ class CCustomDialog : CBaseDialog
 		
 		Ihandle* unloadButton = IupFlatButton( GLOBAL.languageItems["unload"].toCString );
 		IupSetAttribute( unloadButton, "SIZE", "40x12" );
-		version(DARKTHEME) IupSetStrAttribute( unloadButton, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );		
+		IupSetStrAttribute( unloadButton, "HLCOLOR", null );		
 		IupSetCallback( unloadButton, "FLAT_ACTION", cast(Icallback) function( Ihandle* _ih )
 		{
 			Ihandle* ih = IupGetHandle( "treePluginStatus_Handle" );

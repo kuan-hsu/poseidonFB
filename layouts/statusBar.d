@@ -35,7 +35,7 @@ class CStatusBar
 		image = IupFlatButton( "" );
 		IupSetAttributes( image, "IMAGE=icon_customoption,HASFOCUS=NO,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
 		//IupSetStrAttribute( image, "BGCOLOR", IupGetGlobal( "DLGBGCOLOR" ) );
-		IupSetStrAttribute( image, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString  );
+		IupSetStrAttribute( image, "HLCOLOR", null  );
 		IupSetAttribute( image, "TIP", GLOBAL.languageItems["setcustomoption"].toCString );
 		IupSetCallback( image, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_CustomOption_BUTTON_CB );
 		
@@ -232,7 +232,7 @@ class CStatusBar
 		}
 	
 		//IupSetStrAttribute( image, "BGCOLOR", IupGetGlobal( "DLGBGCOLOR" ) );
-		IupSetStrAttribute( image, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString  );	
+		IupSetStrAttribute( image, "HLCOLOR", null  );	
 	}
 }
 

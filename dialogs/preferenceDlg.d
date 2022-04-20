@@ -1842,9 +1842,9 @@ class CPreferenceDialog : CBaseDialog
 		IupSetStrAttribute( GLOBAL.preferenceDlg.getIhandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
 		IupSetStrAttribute( GLOBAL.preferenceDlg.getIhandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 
-		IupSetStrAttribute( btnOK, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-		IupSetStrAttribute( btnAPPLY, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-		IupSetStrAttribute( btnCANCEL, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnOK, "HLCOLOR", null );
+		IupSetStrAttribute( btnAPPLY, "HLCOLOR", null );
+		IupSetStrAttribute( btnCANCEL, "HLCOLOR", null );
 		
 		
 		

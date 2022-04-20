@@ -9,7 +9,7 @@ struct XPM
 	import tango.stdc.stringz;
 	import tango.io.Stdout, tango.stdc.math;
 
-	//static IupString[] colorStrings;
+	import global;
 
 	struct ColorUnit
 	{
@@ -372,7 +372,7 @@ struct XPM
 	}
 
 
-	static void createIUPimageHandle( char[] filePath, char[] handleName, bool bCreateInvert )
+	static void createIUPimageHandle( char[] filePath, char[] handleName, bool bCreateInvert = false )
 	{
 		try
 		{
@@ -443,8 +443,11 @@ struct XPM
 								int r = hexStringToByte( splitData[2][1..3] );
 								int g = hexStringToByte( splitData[2][3..5] );
 								int b = hexStringToByte( splitData[2][5..7] );
-
-								_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
+			
+								if( GLOBAL.editorSetting00.IconInvert == "ALL" )
+									_color.value = Integer.toString( 255 - r ) ~ " " ~ Integer.toString( 255 - g ) ~ " " ~ Integer.toString( 255 - b );
+								else
+									_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
 							}
 
 							_color.sn = colorSN++;

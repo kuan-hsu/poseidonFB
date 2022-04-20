@@ -53,7 +53,7 @@ void createExplorerWindow()
 		GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, GLOBAL.documentTabs_Sub );
 		
 	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=LINES,BARSIZE=0,ACTIVE=YES" );
-	IupSetAttribute( GLOBAL.documentTabs, "ACTIVE","YES" );
+	version(linux) IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
 
 	// BOTTOM
 	if( GLOBAL.editorSetting01.RotateTabs == "ON" )
@@ -62,7 +62,7 @@ void createExplorerWindow()
 		GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, null );
 		
 	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=LINES,BARSIZE=0,ACTIVE=YES" );
-	IupSetAttribute( GLOBAL.documentSplit2, "ACTIVE","YES" );
+	version(linux) IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
 	
 	GLOBAL.searchExpander = new CSearchExpander;
 	GLOBAL.activeDocumentTabs = GLOBAL.documentTabs;
@@ -70,6 +70,7 @@ void createExplorerWindow()
 	
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
 	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT");
+	version(linux) IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
 	IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 
@@ -116,6 +117,7 @@ void createExplorerWindow()
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,SHOWGRIP=LINES,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
+	version(linux) IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
 	IupSetAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* _ih ){

@@ -29,6 +29,7 @@ class CDebugger
 	Ihandle*				bpScrollBox, regScrollBox;
 	Ihandle*				varSplit, rightSplitHandle, mainSplit;
 	CTable					bpTable, regTable;
+	Ihandle*				btnClear, btnResume, btnStop, btnStep, btnNext, btnReturn, btnUntil, btnTerminate, btnLeft, btnRefresh, btnAdd, btnDel, btnDelAll, btnWatchRefresh;
 	DebugThread				DebugControl;
 	bool					bRunning;
 	char[]					localTreeFrame, argTreeFrame, shareTreeFrame, regFrame, disasFrame;
@@ -38,19 +39,19 @@ class CDebugger
 		Ihandle* vBox_LEFT;
 		
 
-		Ihandle* btnClear	= IupButton( null, "Clear" );
-		Ihandle* btnResume	= IupButton( null, "Resume" );
-		Ihandle* btnStop	= IupButton( null, "Stop" );
-		Ihandle* btnStep	= IupButton( null, "Step" );
-		Ihandle* btnNext	= IupButton( null, "Next" );
-		Ihandle* btnReturn	= IupButton( null, "Return" );
-		Ihandle* btnUntil	= IupButton( null, "Until" );
+		btnClear	= IupButton( null, "Clear" );
+		btnResume	= IupButton( null, "Resume" );
+		btnStop		= IupButton( null, "Stop" );
+		btnStep		= IupButton( null, "Step" );
+		btnNext		= IupButton( null, "Next" );
+		btnReturn	= IupButton( null, "Return" );
+		btnUntil	= IupButton( null, "Until" );
 
 		txtConsoleCommand = IupText( null );
 		IupSetAttributes( txtConsoleCommand, "EXPAND=HORIZONTAL,MULTILINE=YES,SCROLLBAR=NO,SIZE=x12,FONTSIZE=9,READONLY=NO" );
 		IupSetCallback( txtConsoleCommand, "ACTION", cast(Icallback) &consoleInput_cb );
 
-		Ihandle* btnTerminate = IupButton( null, "Terminate" );
+		btnTerminate = IupButton( null, "Terminate" );
 
 		Ihandle*[6] labelSEPARATOR;
 		for( int i = 0; i < 6; i++ )
@@ -67,7 +68,7 @@ class CDebugger
 		IupSetAttributes( btnNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_next" );				IupSetAttribute( btnNext, "TIP", GLOBAL.languageItems["next"].toCString );
 		IupSetAttributes( btnReturn, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_return" );			IupSetAttribute( btnReturn, "TIP", GLOBAL.languageItems["return"].toCString );
 		IupSetAttributes( btnUntil, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_until" );				IupSetAttribute( btnUntil, "TIP", GLOBAL.languageItems["until"].toCString );
-		IupSetAttributes( btnTerminate, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnTerminate, "TIP", GLOBAL.languageItems["terminate"].toCString );
+		IupSetAttributes( btnTerminate, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear" );				IupSetAttribute( btnTerminate, "TIP", GLOBAL.languageItems["terminate"].toCString );
 		
 
 		IupSetCallback( btnClear, "ACTION", cast(Icallback) function( Ihandle* ih )
@@ -117,8 +118,8 @@ class CDebugger
 		IupSetCallback( backtraceHandle, "BUTTON_CB", cast(Icallback) &backtraceBUTTON_CB );
 
 
-		Ihandle* btnLeft		= IupButton( null, "Left" );
-		Ihandle* btnRefresh		= IupButton( null, "Refresh" );
+		btnLeft		= IupButton( null, "Left" );
+		btnRefresh	= IupButton( null, "Refresh" );
 		
 		IupSetAttributes( btnLeft, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left" );	IupSetAttribute( btnLeft, "TIP", GLOBAL.languageItems["addtowatch"].toCString );
 		IupSetAttributes( btnRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );
@@ -205,7 +206,7 @@ class CDebugger
 
 		varTabHandle = IupFlatTabs( localTreeHandle, argTreeHandle, shareTreeHandle, null );
 		IupSetAttributes( varTabHandle, "TABTYPE=RIGHT,TABORIENTATION=VERTICAL,TABSPADDING=2x6" );
-		//IupSetAttribute( varTabHandle, "HIGHCOLOR", "0 0 255" );
+		//IupSetAttribute( varTabHandle, "HIGHCOLOR", "0 128 0" );
 		//IupSetAttribute( varTabHandle, "TABSHIGHCOLOR", "240 255 240" );
 		IupSetCallback( varTabHandle, "TABCHANGEPOS_CB", cast(Icallback) &varTabChange_cb );
 		IupSetAttribute( varTabHandle, "TABTITLE0", GLOBAL.languageItems["locals"].toCString() );
@@ -227,10 +228,10 @@ class CDebugger
 
 
 		
-		Ihandle* btnAdd				= IupButton( null, "Add" );
-		Ihandle* btnDel				= IupButton( null, "Del" );
-		Ihandle* btnDelAll			= IupButton( null, "RemoveAll" );
-		Ihandle* btnWatchRefresh	= IupButton( null, "WatchRefresh" );
+		btnAdd				= IupButton( null, "Add" );
+		btnDel				= IupButton( null, "Del" );
+		btnDelAll			= IupButton( null, "RemoveAll" );
+		btnWatchRefresh		= IupButton( null, "WatchRefresh" );
 		
 		IupSetAttributes( btnAdd, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_add" );			IupSetAttribute( btnAdd, "TIP", GLOBAL.languageItems["add"].toCString );
 		IupSetAttributes( btnDel, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnDel, "TIP", GLOBAL.languageItems["remove"].toCString );
@@ -336,7 +337,7 @@ class CDebugger
 		regTable.setSplitAttribute( "VALUE", "300" );
 		/*
 		regTable.setItemAttribute( "FGCOLOR", "0 102 0", 1 );
-		regTable.setItemAttribute( "FGCOLOR", "0 0 255", 2 );
+		regTable.setItemAttribute( "FGCOLOR", "0 128 0", 2 );
 		regTable.setItemAttribute( "FGCOLOR", "90 90 90", 3 );
 		*/
 		regScrollBox = IupFlatScrollBox( regTable.getMainHandle );
@@ -377,6 +378,9 @@ class CDebugger
 		mainHandle = IupFlatScrollBox( mainSplit );
 		IupSetAttribute( mainHandle, "TABTITLE", GLOBAL.languageItems["caption_debug"].toCString );
 		IupSetAttribute( mainHandle, "TABIMAGE", "icon_debug" );
+		
+		
+		changeIcons();
 	}
 
 	char[] getWhatIs( char[] varName )
@@ -417,7 +421,7 @@ class CDebugger
 	{
 		for( int i = IupGetInt( backtraceHandle, "COUNT" ) - 1; i > 0; -- i )
 		{
-			if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ) == "0 0 255" ) return i;
+			if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ) == "0 128 0" ) return i;
 		}
 		
 		return -1;
@@ -1035,6 +1039,27 @@ class CDebugger
 		for( int i = 0; i < IupGetInt( TREE, "COUNT" ); ++ i )	
 			if( fromStringz( IupGetAttributeId( TREE, "COLOR", i ) ) != "255 0 0" ) IupSetStrAttributeId( TREE, "COLOR", i, GLOBAL.editColor.dlgFore.toCString );
 	}
+	
+	void changeIcons()
+	{
+		char[] tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
+
+		IupSetStrAttribute( btnClear, "IMAGE", toStringz( "icon_debug_clear" ~ tail ) );
+		IupSetStrAttribute( btnResume, "IMAGE", toStringz( "icon_debug_resume" ~ tail ) );
+		IupSetStrAttribute( btnStop, "IMAGE", toStringz( "icon_debug_stop" ~ tail ) );
+		IupSetStrAttribute( btnStep, "IMAGE", toStringz( "icon_debug_step" ~ tail ) );
+		IupSetStrAttribute( btnNext, "IMAGE", toStringz( "icon_debug_next" ~ tail ) );
+		IupSetStrAttribute( btnReturn, "IMAGE", toStringz( "icon_debug_return" ~ tail ) );
+		IupSetStrAttribute( btnUntil, "IMAGE", toStringz( "icon_debug_until" ~ tail ) );
+		IupSetStrAttribute( btnTerminate, "IMAGE", toStringz( "icon_clear" ~ tail ) );
+		
+		IupSetStrAttribute( btnLeft, "IMAGE", toStringz( "icon_debug_left" ~ tail ) );
+		IupSetStrAttribute( btnRefresh, "IMAGE", toStringz( "icon_refresh" ~ tail ) );
+
+		IupSetStrAttribute( btnAdd, "IMAGE", toStringz( "icon_debug_add" ~ tail ) );
+		IupSetStrAttribute( btnWatchRefresh, "IMAGE", toStringz( "icon_refresh" ~ tail ) );
+	}	
 
 	public:
 	this()
@@ -1059,7 +1084,7 @@ class CDebugger
 		changeTreeNodeColor( shareTreeHandle );
 		
 		for( int i = 0; i < IupGetInt( backtraceHandle, "COUNT" ); ++ i )	
-			if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ) != "0 0 255" ) IupSetStrAttributeId( backtraceHandle, "COLOR", i, GLOBAL.editColor.dlgFore.toCString );
+			if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ) != "0 128 0" ) IupSetStrAttributeId( backtraceHandle, "COLOR", i, GLOBAL.editColor.dlgFore.toCString );
 		
 	}
 
@@ -1463,9 +1488,9 @@ class CDebugger
 								{
 									if( _information[2] == splitCommand[1] )
 									{
-										if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ).dup != "0 0 255" )
+										if( fromStringz( IupGetAttributeId( backtraceHandle, "COLOR", i ) ).dup != "0 128 0" )
 										{
-											IupSetAttributeId( backtraceHandle, "COLOR", i, "0 0 255" );
+											IupSetAttributeId( backtraceHandle, "COLOR", i, "0 128 0" );
 											version(Windows) IupSetAttributeId( backtraceHandle, "MARKED", i, "YES" ); else IupSetInt( backtraceHandle, "VALUE", i );
 											bChange = true;
 											continue;
@@ -1559,11 +1584,19 @@ class CDebugger
 
 										IupSetStrAttributeId( backtraceHandle, "ADDBRANCH", lastID, toStringz( branchString ) );
 										lastID = IupGetInt( backtraceHandle, "LASTADDNODE" );
-										IupSetAttributeId( backtraceHandle, "IMAGE", lastID, "icon_debug_bt1" );
-										IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, "icon_debug_bt1" );
+										if( GLOBAL.editorSetting00.IconInvert == "ON" )
+										{
+											IupSetAttributeId( backtraceHandle, "IMAGE", lastID, "icon_debug_bt1_invert" );
+											IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, "icon_debug_bt1_invert" );
+										}
+										else
+										{
+											IupSetAttributeId( backtraceHandle, "IMAGE", lastID, "icon_debug_bt1" );
+											IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, "icon_debug_bt1" );
+										}
 										if( i == 0 )
 										{
-											IupSetAttributeId( backtraceHandle, "COLOR", lastID, "0 0 255" );
+											IupSetAttributeId( backtraceHandle, "COLOR", lastID, "0 128 0" );
 											version(Windows) IupSetAttributeId( backtraceHandle, "MARKED", lastID, "YES" ); else IupSetInt( backtraceHandle, "VALUE", lastID );
 										}
 											
@@ -2306,8 +2339,16 @@ class DebugThread //: Thread
 
 			bExecuted = true;
 			IupSetStrAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "TITLE", 0, toStringz( executeFullPath ) );
-			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, "icon_debug_bt0" );
-			IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, "icon_debug_bt0" );
+			if( GLOBAL.editorSetting00.IconInvert == "ON" )
+			{
+				IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, "icon_debug_bt0_invert" );
+				IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, "icon_debug_bt0_invert" );
+			}
+			else
+			{
+				IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGE", 0, "icon_debug_bt0" );
+				IupSetAttributeId( GLOBAL.debugPanel.getBacktraceHandle(), "IMAGEEXPANDED", 0, "icon_debug_bt0" );
+			}
 			splitValue = IupGetInt( GLOBAL.messageSplit, "VALUE" );
 			IupSetInt( GLOBAL.messageSplit, "VALUE", 500 );
 
@@ -2900,14 +2941,14 @@ extern( C )
 				if( bHasMember )
 				{
 					IupSetAttributeId( _ih, "INSERTBRANCH", _id, toStringz( title ) );
-					IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 0 255" );
+					IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 128 0" );
 					IupSetStrAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[9].fontString ) );
 					//if( _ih != GLOBAL.debugPanel.watchTreeHandle ) IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
 				}
 				else
 				{
 					IupSetAttributeId( _ih, "INSERTLEAF", _id, toStringz( title ) );
-					IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 0 255" );
+					IupSetAttributeId( _ih, "COLOR", IupGetIntId( _ih, "NEXT", _id ), "0 128 0" );
 					IupSetStrAttributeId( _ih, "TITLEFONT", IupGetIntId( _ih, "NEXT", _id ), toStringz( GLOBAL.fonts[9].fontString ) );
 					//if( _ih != GLOBAL.debugPanel.watchTreeHandle ) IupSetAttributeId( _ih, "DELNODE", _id, "SELECTED" );
 				}

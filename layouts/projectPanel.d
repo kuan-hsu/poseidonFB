@@ -1219,7 +1219,7 @@ extern(C)
 				}
 				else
 				{
-					IupSetAttribute( ih, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
+					if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetAttribute( ih, "MARK", "CLEARALL" ); // For projectTree(IupFlatTree) MULTIPLE Selection
 				}
 			}
 		}

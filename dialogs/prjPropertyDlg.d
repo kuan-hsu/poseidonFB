@@ -74,8 +74,8 @@ class CProjectPropertiesDialog : CBaseDialog
 			textMainFile = IupText( null );
 			IupSetAttributes( textMainFile, "SIZE=130x12,NAME=PRJPROPERTY_ProjectMainFile" );
 			
-			toggleOneFile = IupToggle( GLOBAL.languageItems["prjonefile"].toCString, null );
-			IupSetAttributes( toggleOneFile, "SIZE=140x12,NAME=PRJPROPERTY_ToggleOneFile" );
+			toggleOneFile = IupFlatToggle( GLOBAL.languageItems["prjonefile"].toCString );
+			IupSetAttributes( toggleOneFile, "SIZE=140x12,ALIGNMENT=ALEFT:ACENTER,NAME=PRJPROPERTY_ToggleOneFile" );
 			
 			Ihandle* hBox02 = IupHbox( labelMainFile, textMainFile, IupFill, toggleOneFile, IupFill, null );
 			IupSetAttribute( hBox02, "ALIGNMENT", "ACENTER" );

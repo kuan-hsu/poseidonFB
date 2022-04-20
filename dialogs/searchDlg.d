@@ -186,15 +186,12 @@ class CSearchExpander
 	
 	void changeColor()
 	{
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( btnFindPrev, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-			IupSetStrAttribute( btnFindNext, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-			IupSetStrAttribute( btnReplaceFind, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-			IupSetStrAttribute( btnReplace, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-			IupSetStrAttribute( btnReplaceAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-			IupSetStrAttribute( btnMarkAll, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
-		}	
+		IupSetStrAttribute( btnFindPrev, "HLCOLOR", null );
+		IupSetStrAttribute( btnFindNext, "HLCOLOR", null );
+		IupSetStrAttribute( btnReplaceFind, "HLCOLOR", null );
+		IupSetStrAttribute( btnReplace, "HLCOLOR", null );
+		IupSetStrAttribute( btnReplaceAll, "HLCOLOR", null );
+		IupSetStrAttribute( btnMarkAll, "HLCOLOR", null );
 	}
 	
 	~this(){}

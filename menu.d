@@ -215,7 +215,9 @@ void createMenu()
 	IupSetCallback( LineMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.LineMargin == "ON" ) GLOBAL.editorSetting00.LineMargin = "OFF"; else GLOBAL.editorSetting00.LineMargin = "ON";
-		if( IupGetHandle( "toggleLineMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.LineMargin ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleLineMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.LineMargin ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});	
@@ -227,7 +229,9 @@ void createMenu()
 	IupSetCallback( BookmarkMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.BookmarkMargin == "ON" ) GLOBAL.editorSetting00.BookmarkMargin = "OFF"; else GLOBAL.editorSetting00.BookmarkMargin = "ON";
-		if( IupGetHandle( "toggleBookmarkMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.BookmarkMargin ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleBookmarkMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.BookmarkMargin ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});	
@@ -239,7 +243,9 @@ void createMenu()
 	IupSetCallback( FoldMargin, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.FoldMargin == "ON" ) GLOBAL.editorSetting00.FoldMargin = "OFF"; else GLOBAL.editorSetting00.FoldMargin = "ON";
-		if( IupGetHandle( "toggleFoldMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.FoldMargin ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleFoldMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.FoldMargin ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});	
@@ -251,7 +257,9 @@ void createMenu()
 	IupSetCallback( IndentGuide, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.IndentGuide == "ON" ) GLOBAL.editorSetting00.IndentGuide = "OFF"; else GLOBAL.editorSetting00.IndentGuide = "ON";
-		if( IupGetHandle( "toggleIndentGuide" ) != null ) IupSetAttribute( IupGetHandle( "toggleIndentGuide" ), "VALUE", toStringz( GLOBAL.editorSetting00.IndentGuide ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleIndentGuide" ) != null ) IupSetAttribute( IupGetHandle( "toggleIndentGuide" ), "VALUE", toStringz( GLOBAL.editorSetting00.IndentGuide ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});	
@@ -263,7 +271,9 @@ void createMenu()
 	IupSetCallback( ShowEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.ShowEOL == "ON" ) GLOBAL.editorSetting00.ShowEOL = "OFF"; else GLOBAL.editorSetting00.ShowEOL = "ON";
-		if( IupGetHandle( "toggleShowEOL" ) != null ) IupSetAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowEOL ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleShowEOL" ) != null ) IupSetAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowEOL ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});
@@ -275,7 +285,9 @@ void createMenu()
 	IupSetCallback( ShowSpace, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.ShowSpace == "ON" ) GLOBAL.editorSetting00.ShowSpace = "OFF"; else GLOBAL.editorSetting00.ShowSpace = "ON";
-		if( IupGetHandle( "toggleShowSpace" ) != null ) IupSetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowSpace ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleShowSpace" ) != null ) IupSetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowSpace ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});		
@@ -287,7 +299,9 @@ void createMenu()
 	IupSetCallback( BraceMatch, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" ) GLOBAL.editorSetting00.BraceMatchHighlight = "OFF"; else GLOBAL.editorSetting00.BraceMatchHighlight = "ON";
-		if( IupGetHandle( "toggleBraceMatch" ) != null ) IupSetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE", toStringz( GLOBAL.editorSetting00.BraceMatchHighlight ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleBraceMatch" ) != null ) IupSetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE", toStringz( GLOBAL.editorSetting00.BraceMatchHighlight ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});	
@@ -299,7 +313,9 @@ void createMenu()
 	IupSetCallback( BoldKeyword, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.BoldKeyword == "ON" ) GLOBAL.editorSetting00.BoldKeyword = "OFF"; else GLOBAL.editorSetting00.BoldKeyword = "ON";
-		if( IupGetHandle( "toggleBoldKeyword" ) != null ) IupSetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE", toStringz( GLOBAL.editorSetting00.BoldKeyword ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleBoldKeyword" ) != null ) IupSetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE", toStringz( GLOBAL.editorSetting00.BoldKeyword ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});	
@@ -311,7 +327,9 @@ void createMenu()
 	IupSetCallback( CaretLine, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.CaretLine == "ON" ) GLOBAL.editorSetting00.CaretLine = "OFF"; else GLOBAL.editorSetting00.CaretLine = "ON";
-		if( IupGetHandle( "toggleCaretLine" ) != null ) IupSetAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleCaretLine" ) != null ) IupSetAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});	
@@ -323,7 +341,9 @@ void createMenu()
 	IupSetCallback( HighlightCurrentWord, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" ) GLOBAL.editorSetting00.HighlightCurrentWord = "OFF"; else GLOBAL.editorSetting00.HighlightCurrentWord = "ON";
-		if( IupGetHandle( "toggleCurrentWord" ) != null ) IupSetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE", toStringz( GLOBAL.editorSetting00.HighlightCurrentWord ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleCurrentWord" ) != null ) IupSetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE", toStringz( GLOBAL.editorSetting00.HighlightCurrentWord ) );
+			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
 	});
@@ -336,7 +356,8 @@ void createMenu()
 	IupSetCallback( FunctionTitle, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.showFunctionTitle == "ON" ) GLOBAL.showFunctionTitle = "OFF"; else GLOBAL.showFunctionTitle = "ON";
-		if( IupGetHandle( "toggleFunctionTitle" ) != null ) IupSetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleFunctionTitle" ) != null ) IupSetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
 
 		if( GLOBAL.showFunctionTitle == "ON" )
 		{
@@ -358,7 +379,9 @@ void createMenu()
 	IupSetCallback( UseAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.compilerAnootation == "ON" ) GLOBAL.compilerAnootation = "OFF"; else GLOBAL.compilerAnootation = "ON";
-		if( IupGetHandle( "toggleAnnotation" ) != null ) IupSetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE", toStringz( GLOBAL.compilerAnootation ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleAnnotation" ) != null ) IupSetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE", toStringz( GLOBAL.compilerAnootation ) );
+			
 		return IUP_DEFAULT;
 	});
 	
@@ -369,7 +392,9 @@ void createMenu()
 	IupSetCallback( UseConsoleApp, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		if( GLOBAL.consoleExe == "ON" ) GLOBAL.consoleExe = "OFF"; else GLOBAL.consoleExe = "ON";
-		if( IupGetHandle( "toggleConsoleExe" ) != null ) IupSetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE", toStringz( GLOBAL.consoleExe ) );
+		if( GLOBAL.preferenceDlg !is null )
+			if( IupGetHandle( "toggleConsoleExe" ) != null ) IupSetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE", toStringz( GLOBAL.consoleExe ) );
+			
 		return IUP_DEFAULT;
 	});
 
@@ -570,15 +595,15 @@ void createMenu()
 	Ihandle* setEOL = IupSubmenu( GLOBAL.languageItems["seteol"].toCString, _eolSubMenu );
 
 	Ihandle* windowsEOL = IupItem( toStringz( "Windows" ), null );
-	IupSetAttribute(windowsEOL, "IMAGE", "icon_windows");
+	//IupSetAttribute(windowsEOL, "IMAGE", "icon_windows");
 	IupSetCallback( windowsEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 	
 	Ihandle* macEOL = IupItem( toStringz( "Mac" ), null );
-	IupSetAttribute(macEOL, "IMAGE", "icon_mac");
+	//IupSetAttribute(macEOL, "IMAGE", "icon_mac");
 	IupSetCallback( macEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 	
 	Ihandle* unixEOL = IupItem( toStringz( "Unix" ), null );
-	IupSetAttribute(unixEOL, "IMAGE", "icon_linux");
+	//IupSetAttribute(unixEOL, "IMAGE", "icon_linux");
 	IupSetCallback( unixEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 
 	Ihandle* eolSubMenu = IupMenu( windowsEOL, macEOL, unixEOL, null  );
@@ -698,8 +723,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.488)  2022.04.17\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.071)  2022.04.13\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.489)  2022.04.20\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.072)  2022.04.20\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});
 	

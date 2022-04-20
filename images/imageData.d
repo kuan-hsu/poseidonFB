@@ -103,6 +103,7 @@ void load_all_images_icons()
 {
 	XPM.init();
 	
+	/+
 	//IupSetHandle( "icon_markclear", XPM.getIUPimage( "icons/xpm/mark_clear.xpm" ) );
 	//IupSetHandle( "icon_cut", XPM.getIUPimage( "icons/xpm/cut.xpm" ) );
 	//IupSetHandle( "icon_quickrun", XPM.getIUPimage( "icons/xpm/quickrun.xpm" ) );
@@ -206,9 +207,72 @@ void load_all_images_icons()
 	IupSetHandle( "icon_wholeword", XPM.getIUPimage( "icons/xpm/wholeword.xpm" ) );
 	IupSetHandle( "icon_casesensitive", XPM.getIUPimage( "icons/xpm/casesensitive.xpm" ) );
 	IupSetHandle( "icon_close", XPM.getIUPimage( "icons/xpm/close.xpm" ) );
-	
-	
+	+/
 
+
+
+	version(FBIDE) IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/bas.xpm" ) ); else IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/d.xpm" ) );
+	IupSetHandle( "icon_txt", XPM.getIUPimage( "icons/xpm/txt.xpm" ) );
+	IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/bi.xpm" ) );
+	IupSetHandle( "icon_importprj", XPM.getIUPimage( "icons/xpm/fbedit.xpm" ) );
+	IupSetHandle( "icon_colormark", XPM.getIUPimage( "icons/xpm/colormark.xpm" ) );
+	/*
+	IupSetHandle( "icon_windows", XPM.getIUPimage( "icons/xpm/windows.xpm" ) );
+	IupSetHandle( "icon_mac", XPM.getIUPimage( "icons/xpm/mac.xpm" ) );
+	IupSetHandle( "icon_linux", XPM.getIUPimage( "icons/xpm/linux.xpm" ) );
+	*/
+
+
+	XPM.createIUPimageHandle( "icons/xpm/prjexplorer.xpm", "icon_packageexplorer" );
+	XPM.createIUPimageHandle( "icons/xpm/down.xpm", "icon_downarrow" );
+	XPM.createIUPimageHandle( "icons/xpm/outline.xpm", "icon_outline" );
+	XPM.createIUPimageHandle( "icons/xpm/openprj.xpm", "icon_openprj" );
+	XPM.createIUPimageHandle( "icons/xpm/up.xpm", "icon_uparrow" );
+	XPM.createIUPimageHandle( "icons/xpm/saveas.xpm", "icon_saveas" );
+	XPM.createIUPimageHandle( "icons/xpm/savetabs.xpm", "icon_savetabs" );
+	XPM.createIUPimageHandle( "icons/xpm/manual.xpm", "icon_fbmanual" );
+	XPM.createIUPimageHandle( "icons/xpm/goto.xpm", "icon_goto" );
+	XPM.createIUPimageHandle( "icons/xpm/goto_member.xpm", "icon_gotomember" );
+	XPM.createIUPimageHandle( "icons/xpm/remove.xpm", "icon_delete" );
+	XPM.createIUPimageHandle( "icons/xpm/write.xpm", "icon_Write" );
+	XPM.createIUPimageHandle( "icons/xpm/search.xpm", "icon_search" );
+	XPM.createIUPimageHandle( "icons/xpm/message.xpm", "icon_message" );
+	XPM.createIUPimageHandle( "icons/xpm/help.xpm", "icon_help" );
+	XPM.createIUPimageHandle( "icons/xpm/removeothers.xpm", "icon_deleteothers" );
+	XPM.createIUPimageHandle( "icons/xpm/removeright.xpm", "icon_deleteright" );
+	XPM.createIUPimageHandle( "icons/xpm/removeall.xpm", "icon_deleteall" );
+	XPM.createIUPimageHandle( "icons/xpm/annotate.xpm", "icon_annotation" );
+	XPM.createIUPimageHandle( "icons/xpm/annotatehide.xpm", "icon_annotation_hide" );
+	XPM.createIUPimageHandle( "icons/xpm/annotate_removeall.xpm", "icon_annotation_remove" );
+	XPM.createIUPimageHandle( "icons/xpm/tools.xpm", "icon_tools" );
+	XPM.createIUPimageHandle( "icons/xpm/toolitem.xpm", "icon_toolitem" );
+	XPM.createIUPimageHandle( "icons/xpm/properties.xpm", "icon_properties" );
+	XPM.createIUPimageHandle( "icons/xpm/preference.xpm", "icon_preference" );
+	XPM.createIUPimageHandle( "icons/xpm/information.xpm", "icon_information" );
+	XPM.createIUPimageHandle( "icons/xpm/findnext.xpm", "icon_findnext" );
+	XPM.createIUPimageHandle( "icons/xpm/findprev.xpm", "icon_findprev" );
+	XPM.createIUPimageHandle( "icons/xpm/findfiles.xpm", "icon_findfiles" );
+	XPM.createIUPimageHandle( "icons/xpm/door.xpm", "icon_door" );
+	XPM.createIUPimageHandle( "icons/xpm/door_open.xpm", "icon_dooropen" );
+	XPM.createIUPimageHandle( "icons/xpm/type.xpm", "icon_type" );
+	XPM.createIUPimageHandle( "icons/xpm/comment.xpm", "icon_comment" );
+	XPM.createIUPimageHandle( "icons/xpm/uncomment.xpm", "icon_uncomment" );
+	XPM.createIUPimageHandle( "icons/xpm/custom_option.xpm", "icon_customoption" );
+	XPM.createIUPimageHandle( "icons/xpm/fullscreen.xpm", "icon_fullscreen" );
+	XPM.createIUPimageHandle( "icons/xpm/folder.xpm", "icon_folder" );
+	XPM.createIUPimageHandle( "icons/xpm/folder_open.xpm", "icon_folder_open" );
+	XPM.createIUPimageHandle( "icons/xpm/prjfolderopen.xpm", "icon_prj_open" );
+	XPM.createIUPimageHandle( "icons/xpm/prjfolder.xpm", "icon_prj" );
+	XPM.createIUPimageHandle( "icons/xpm/collapse.xpm", "icon_collapse" );
+	XPM.createIUPimageHandle( "icons/xpm/collapse1.xpm", "icon_collapse1" );
+	XPM.createIUPimageHandle( "icons/xpm/importall.xpm", "icon_importall" );
+	XPM.createIUPimageHandle( "icons/xpm/manual.xpm", "icon_manual" );
+	XPM.createIUPimageHandle( "icons/xpm/wholeword.xpm", "icon_wholeword" );
+	XPM.createIUPimageHandle( "icons/xpm/casesensitive.xpm", "icon_casesensitive" );
+	XPM.createIUPimageHandle( "icons/xpm/close.xpm", "icon_close" );
+	XPM.createIUPimageHandle( "icons/xpm/selectall.xpm", "icon_selectall" );
+
+	
 	XPM.createIUPimageHandle( "icons/xpm/newfile.xpm", "icon_newfile", true );
 	XPM.createIUPimageHandle( "icons/xpm/openfile.xpm", "icon_openfile", true );
 	XPM.createIUPimageHandle( "icons/xpm/save.xpm", "icon_save", true );
@@ -255,6 +319,16 @@ void load_all_images_icons()
 	XPM.createIUPimageHandle( "icons/xpm/show_linenum.xpm", "icon_show_linenum", true );
 	XPM.createIUPimageHandle( "icons/xpm/refresh.xpm", "icon_refresh", true );
 
+	
+	// Color icon 
+	IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) );
+	IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) );
+	IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) );
+	IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );
+	IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
+	IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
+	IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array.xpm" ) );
+	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable.xpm" ) );
 
 	version(FBIDE)
 	{
@@ -324,25 +398,24 @@ void load_all_images_icons()
 		IupSetHandle( "IUP_funptr", XPM.getIUPimage( "icons/xpm/outline/funptr_public.xpm" ) );
 	}
 
-
-	IupSetHandle( "icon_debug_until", XPM.getIUPimage( "icons/xpm/debug/until.xpm" ) );
-	IupSetHandle( "icon_debug_step", XPM.getIUPimage( "icons/xpm/debug/step.xpm" ) );
-	IupSetHandle( "icon_debug_bt0",  XPM.getIUPimage( "icons/xpm/debug/bt0.xpm" ) );
-	IupSetHandle( "icon_debug_bt1", XPM.getIUPimage( "icons/xpm/debug/bt1.xpm" ) );
-	IupSetHandle( "icon_debug_stop", XPM.getIUPimage( "icons/xpm/debug/stop.xpm" ) );
-	IupSetHandle( "icon_debug_resume", XPM.getIUPimage( "icons/xpm/debug/resume.xpm" ) );
-	IupSetHandle( "icon_debug", XPM.getIUPimage( "icons/xpm/debug/debug.xpm" ) );
-	IupSetHandle( "icon_debugrun", XPM.getIUPimage( "icons/xpm/debug/debug_run.xpm" ) );
-	IupSetHandle( "icon_debugbuild", XPM.getIUPimage( "icons/xpm/debug/debug_build.xpm" ) );
-	IupSetHandle( "icon_debug_add", XPM.getIUPimage( "icons/xpm/debug/add.xpm" ) );
-	IupSetHandle( "icon_debug_next", XPM.getIUPimage( "icons/xpm/debug/over.xpm" ) );
-	IupSetHandle( "icon_debug_left", XPM.getIUPimage( "icons/xpm/debug/left.xpm" ) );
-	IupSetHandle( "icon_debug_right", XPM.getIUPimage( "icons/xpm/debug/right.xpm" ) );
+	XPM.createIUPimageHandle( "icons/xpm/debug/until.xpm", "icon_debug_until", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/step.xpm", "icon_debug_step", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/bt0.xpm", "icon_debug_bt0", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/bt1.xpm", "icon_debug_bt1", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/stop.xpm", "icon_debug_stop", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/resume.xpm", "icon_debug_resume", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/add.xpm", "icon_debug_add", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/over.xpm", "icon_debug_next", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/left.xpm", "icon_debug_left", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/right.xpm", "icon_debug_right", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/return.xpm", "icon_debug_return", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/clear.xpm", "icon_debug_clear", true );
+	XPM.createIUPimageHandle( "icons/xpm/debug/debug.xpm", "icon_debug" );
+	XPM.createIUPimageHandle( "icons/xpm/debug/debug_run.xpm", "icon_debugrun" );
+	XPM.createIUPimageHandle( "icons/xpm/debug/debug_build.xpm", "icon_debugbuild" );
+	XPM.createIUPimageHandle( "icons/xpm/debug/at.xpm", "icon_debug_at" );
+	XPM.createIUPimageHandle( "icons/xpm/debug/star.xpm", "icon_debug_star" );
 	IupSetHandle( "icon_debug_change", XPM.getIUPimage( "icons/xpm/debug/change.xpm" ) );
-	IupSetHandle( "icon_debug_return", XPM.getIUPimage( "icons/xpm/debug/return.xpm" ) );
-	IupSetHandle( "icon_debug_clear", XPM.getIUPimage( "icons/xpm/debug/clear.xpm" ) );
-	IupSetHandle( "icon_debug_at", XPM.getIUPimage( "icons/xpm/debug/at.xpm" ) );
-	IupSetHandle( "icon_debug_star", XPM.getIUPimage( "icons/xpm/debug/star.xpm" ) );
 
 	version(FBIDE) IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() ); else IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
 	IupSetHandle( "icon_scroll", load_image_scroll() );

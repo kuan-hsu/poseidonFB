@@ -16,17 +16,17 @@ class CBaseDialog
 	Ihandle* createDlgButton( char[] buttonSize = "40x20", char[] buttons = "oc" )
 	{
 		btnAPPLY = IupFlatButton( GLOBAL.languageItems["apply"].toCString );
-		version(DARKTHEME) IupSetStrAttribute( btnAPPLY, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnAPPLY, "HLCOLOR", null );
 		IupSetHandle( "btnAPPLY", btnAPPLY );
 		IupSetStrAttribute( btnAPPLY, "SIZE", toStringz( buttonSize ) );
 		
 		btnOK = IupFlatButton( GLOBAL.languageItems["ok"].toCString );
-		version(DARKTHEME) IupSetStrAttribute( btnOK, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnOK, "HLCOLOR", null );
 		IupSetHandle( "btnOK", btnOK );
 		IupSetStrAttribute( btnOK, "SIZE", toStringz( buttonSize ) );
 		
 		btnCANCEL = IupFlatButton( GLOBAL.languageItems["cancel"].toCString );
-		version(DARKTHEME) IupSetStrAttribute( btnCANCEL, "HLCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( btnCANCEL, "HLCOLOR", null );
 		IupSetHandle( "btnCANCEL", btnCANCEL );
 		IupSetStrAttribute( btnCANCEL, "SIZE", toStringz( buttonSize ) );
 		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
