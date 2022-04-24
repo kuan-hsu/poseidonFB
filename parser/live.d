@@ -272,12 +272,15 @@ struct LiveParser
 						return;
 					}
 
-					// 
+					// Check ParsedTree HEAD, like B_BAS / B_BI
 					if( oldHead.getChildrenCount == 0 )
 					{
-						delete newHead;
-						GLOBAL.outlineTree.refresh( cSci );
-						return;
+						if( oldHead.getFather is null ) 
+						{
+							delete newHead;
+							GLOBAL.outlineTree.refresh( cSci );
+							return;
+						}
 					}
 
 					CASTnode[] newChildren;

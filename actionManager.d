@@ -2767,7 +2767,7 @@ public:
 		return null;
 	}
 	
-	static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line, int _kind = -1 )
+		 static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line, int _kind = -1 )
 	{
 		version(FBIDE)
 		{
@@ -2783,27 +2783,20 @@ public:
 		{
 			//if( _fatherNode.kind & (D_CTOR | D_DTOR ) )
 			//	IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
-
-			
 			if( _fatherNode.kind & _kind )
 			{
-				if( line >= _fatherNode.lineNumber && line <= _fatherNode.endLineNum )
+				if(  _fatherNode.lineNumber < _fatherNode.endLineNum ) // If equal, not BLOCK
 				{
-					//IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
-					
-					foreach_reverse( CASTnode _node; _fatherNode.getChildren() )
+					if( line >= _fatherNode.lineNumber && line <= _fatherNode.endLineNum )
 					{
-						//IupMessage("_node",toStringz( _node.name ~ " " ~ Integer.toString( _node.lineNumber ) ~ "~" ~ Integer.toString( _node.endLineNum )  ) );
-						
-						auto _result = getActiveASTFromLine( _node, line, _kind );
-						if( _result !is null ) 
+						foreach_reverse( CASTnode _node; _fatherNode.getChildren() )
 						{
-							//IupMessage("",toStringz( Integer.toString( _result.lineNumber ) ~ "~" ~ Integer.toString( _result.endLineNum )  ) );
-							return _result;
+							auto _result = getActiveASTFromLine( _node, line, _kind );
+							if( _result !is null ) return _result;
 						}
-					}
 
-					return _fatherNode;
+						return _fatherNode;
+					}
 				}
 			}
 		}

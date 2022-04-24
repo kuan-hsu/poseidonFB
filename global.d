@@ -441,35 +441,39 @@ struct GLOBAL
 		ShortKey sk28 = { "build", "Build", 65475 };
 		GLOBAL.shortKeys ~= sk28;
 		
-		ShortKey sk29 = { "outlinewindow", "On/Off Left-side Window", 65480 };
+		ShortKey sk29 = { "leftwindow", "Switch Left-side Window", 65477 };
 		GLOBAL.shortKeys ~= sk29;
-		ShortKey sk30 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
+		ShortKey sk30 = { "bottomwindow", "Switch Bottom-side Window", 65478 };
 		GLOBAL.shortKeys ~= sk30;
-
-		ShortKey sk31 = { "customtool1", "Custom Tool(1)", 805371838 };
+		ShortKey sk31 = { "outlinewindow", "On/Off Left-side Window", 65480 };
 		GLOBAL.shortKeys ~= sk31;
-		ShortKey sk32 = { "customtool2", "Custom Tool(2)", 805371839 };
-		GLOBAL.shortKeys ~= sk32;
-		ShortKey sk33 = { "customtool3", "Custom Tool(3)", 805371840 };
+		ShortKey sk32 = { "messagewindow", "On/Off Bottom-side Window", 65481 };
+		GLOBAL.shortKeys ~= sk32;		
+
+		ShortKey sk33 = { "customtool1", "Custom Tool(1)", 805371838 };
 		GLOBAL.shortKeys ~= sk33;
-		ShortKey sk34 = { "customtool4", "Custom Tool(4)", 805371841 };
+		ShortKey sk34 = { "customtool2", "Custom Tool(2)", 805371839 };
 		GLOBAL.shortKeys ~= sk34;
-		ShortKey sk35 = { "customtool5", "Custom Tool(5)", 805371842 };
+		ShortKey sk35 = { "customtool3", "Custom Tool(3)", 805371840 };
 		GLOBAL.shortKeys ~= sk35;
-		ShortKey sk36 = { "customtool6", "Custom Tool(6)", 805371843 };
+		ShortKey sk36 = { "customtool4", "Custom Tool(4)", 805371841 };
 		GLOBAL.shortKeys ~= sk36;
-		ShortKey sk37 = { "customtool7", "Custom Tool(7)", 805371844 };
+		ShortKey sk37 = { "customtool5", "Custom Tool(5)", 805371842 };
 		GLOBAL.shortKeys ~= sk37;
-		ShortKey sk38 = { "customtool8", "Custom Tool(8)", 805371845 };
+		ShortKey sk38 = { "customtool6", "Custom Tool(6)", 805371843 };
 		GLOBAL.shortKeys ~= sk38;
-		ShortKey sk39 = { "customtool9", "Custom Tool(9)", 805371846 };		
+		ShortKey sk39 = { "customtool7", "Custom Tool(7)", 805371844 };
 		GLOBAL.shortKeys ~= sk39;
-		ShortKey sk40 = { "customtool10", "Custom Tool(10)", 805371847 };		
+		ShortKey sk40 = { "customtool8", "Custom Tool(8)", 805371845 };
 		GLOBAL.shortKeys ~= sk40;
-		ShortKey sk41 = { "customtool11", "Custom Tool(11)", 805371848 };		
+		ShortKey sk41 = { "customtool9", "Custom Tool(9)", 805371846 };		
 		GLOBAL.shortKeys ~= sk41;
-		ShortKey sk42 = { "customtool12", "Custom Tool(12)", 805371849 };		
+		ShortKey sk42 = { "customtool10", "Custom Tool(10)", 805371847 };		
 		GLOBAL.shortKeys ~= sk42;
+		ShortKey sk43 = { "customtool11", "Custom Tool(11)", 805371848 };		
+		GLOBAL.shortKeys ~= sk43;
+		ShortKey sk44 = { "customtool12", "Custom Tool(12)", 805371849 };		
+		GLOBAL.shortKeys ~= sk44;
 
 
 		fontUint fu;
@@ -775,6 +779,8 @@ struct GLOBAL
 						GLOBAL.languageItems["sc_run"] = new IupString( cast(char[]) "Run" );
 						GLOBAL.languageItems["sc_compile"] = new IupString( cast(char[]) "Compile" );
 						GLOBAL.languageItems["sc_build"] = new IupString( cast(char[]) "Build Project" );
+						GLOBAL.languageItems["sc_leftwindowswitch"] = new IupString( cast(char[]) "Switch Left Window" );
+						GLOBAL.languageItems["sc_bottomwindowswitch"] = new IupString( cast(char[]) "Sswitch Bottom Window" );						
 						GLOBAL.languageItems["sc_leftwindow"] = new IupString( cast(char[]) "On/Off Left Window" );
 						GLOBAL.languageItems["sc_bottomwindow"] = new IupString( cast(char[]) "On/Off Bottom Window" );
 						GLOBAL.languageItems["sc_showtype"] = new IupString( cast(char[]) "Show Type" );

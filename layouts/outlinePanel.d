@@ -459,184 +459,191 @@ class COutline
 				if( fromStringz( IupGetAttribute( showLineHandle, "VALUE" ) ) == "ON" ) bShowLinenum = true;
 			}
 
-			for( int i = 1; i < IupGetInt( actTree, "COUNT" ); ++ i )
+			try
 			{
-				CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-				
-				if( bShowLinenum ) lineNumString = " .... [" ~ Integer.toString( _node.lineNumber ) ~ "]"; else lineNumString = "";
-				
-				if( _node !is null )
+				for( int i = 1; i < IupGetInt( actTree, "COUNT" ); ++ i )
 				{
-					version(FBIDE)
-					{
-						switch( _node.kind )
-						{
-							case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-								char[] _type;
-								char[] _paramString;
-								
-								ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-								switch( showIndex )
-								{
-									case 0:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-										break;
-									case 1:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-										break;
-									case 2:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-										break;
-									default:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-										break;
-								}
-								break;
-
-							case B_SUB, B_CTOR, B_DTOR, B_MACRO:
-								switch( showIndex )
-								{
-									case 0, 1:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _node.type ~ lineNumString ) );
-										break;
-									default:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-										break;
-								}
-								break;
-							
-							case B_DEFINE | B_FUNCTION:
-								char[] _paramString = ParserAction.getSeparateParam( _node.type ~ lineNumString );
-								switch( showIndex )
-								{
-									case 0, 1:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-										break;
-									default:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-										break;
-								}
-								break;
-								
-							case B_DEFINE | B_VARIABLE, B_DEFINE | B_ALIAS:
-								if( showIndex == 0 || showIndex == 2 )
-									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-								else
-									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-								
-								break;
-
-							case B_VARIABLE, B_ALIAS:
-								if( showIndex == 0 || showIndex == 2 )
-									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-								else
-									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-								
-								break;						
-
-							default:
-								IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-								break;
-						}
-					}
+					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
 					
-					version(DIDE)
+					if( bShowLinenum ) lineNumString = " .... [" ~ Integer.toString( _node.lineNumber ) ~ "]"; else lineNumString = "";
+					
+					if( _node !is null )
 					{
-						switch( _node.kind )
+						version(FBIDE)
 						{
-							case D_IMPORT:
-								IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-								break;						
-						
-							case D_FUNCTION, D_FUNCTIONLITERALS:
-								char[] _type = _node.type;
-								char[] _paramString;
+							switch( _node.kind )
+							{
+								case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+									char[] _type;
+									char[] _paramString;
+									
+									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+									switch( showIndex )
+									{
+										case 0:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+											break;
+										case 1:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+											break;
+										case 2:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+											break;
+										default:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+											break;
+									}
+									break;
+
+								case B_SUB, B_CTOR, B_DTOR, B_MACRO:
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _node.type ~ lineNumString ) );
+											break;
+										default:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+											break;
+									}
+									break;
 								
-								ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-								switch( showIndex )
-								{
-									case 0:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-										break;
-									case 1:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-										break;
-									case 2:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-										break;
-									default:
+								case B_DEFINE | B_FUNCTION:
+									char[] _paramString = ParserAction.getSeparateParam( _node.type ~ lineNumString );
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+											break;
+										default:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+											break;
+									}
+									break;
+									
+								case B_DEFINE | B_VARIABLE, B_DEFINE | B_ALIAS:
+									if( showIndex == 0 || showIndex == 2 )
+										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
+									else
 										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-										break;
-								}
-								break;
+									
+									break;
 
-							case D_CTOR:
-								switch( showIndex )
-								{
-									case 0, 1:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "this" ~ _node.type ~ lineNumString ) );
-										break;
-									default:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "this" ~ lineNumString ) );
-										break;
-								}
-								break;
+								case B_VARIABLE, B_ALIAS:
+									if( showIndex == 0 || showIndex == 2 )
+										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
+									else
+										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+									
+									break;						
 
-							case D_DTOR:
-								switch( showIndex )
-								{
-									case 0, 1:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "~this()" ~ lineNumString ) );
-										break;
-									default:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "~this" ~ lineNumString ) );
-										break;
-								}
-								break;
-
-							case D_CLASS, D_INTERFACE:
-								if( showIndex == 0 || showIndex == 2 )
-									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : "" ) ~ lineNumString ) );
-								else
+								default:
 									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-								
-								break;	
-								
-							case D_FUNCTIONPTR:
-								char[] _type;
-								char[] _paramString;
-								ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-								switch( showIndex )
-								{
-									case 0:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-										break;
-									case 1:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-										break;
-									case 2:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-										break;
-									default:
-										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-										break;
-								}				
-								break;	
+									break;
+							}
+						}
 						
-							case D_VARIABLE:
-								if( showIndex == 0 || showIndex == 2 )
+						version(DIDE)
+						{
+							switch( _node.kind )
+							{
+								case D_IMPORT:
 									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-								else
-									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-								
-								break;						
+									break;						
+							
+								case D_FUNCTION, D_FUNCTIONLITERALS:
+									char[] _type = _node.type;
+									char[] _paramString;
+									
+									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+									switch( showIndex )
+									{
+										case 0:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+											break;
+										case 1:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+											break;
+										case 2:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+											break;
+										default:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+											break;
+									}
+									break;
 
-							default:
-								IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
-								break;						
+								case D_CTOR:
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "this" ~ _node.type ~ lineNumString ) );
+											break;
+										default:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "this" ~ lineNumString ) );
+											break;
+									}
+									break;
+
+								case D_DTOR:
+									switch( showIndex )
+									{
+										case 0, 1:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "~this()" ~ lineNumString ) );
+											break;
+										default:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( "~this" ~ lineNumString ) );
+											break;
+									}
+									break;
+
+								case D_CLASS, D_INTERFACE:
+									if( showIndex == 0 || showIndex == 2 )
+										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : "" ) ~ lineNumString ) );
+									else
+										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+									
+									break;	
+									
+								case D_FUNCTIONPTR:
+									char[] _type;
+									char[] _paramString;
+									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+									switch( showIndex )
+									{
+										case 0:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+											break;
+										case 1:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+											break;
+										case 2:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+											break;
+										default:
+											IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+											break;
+									}				
+									break;	
+							
+								case D_VARIABLE:
+									if( showIndex == 0 || showIndex == 2 )
+										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
+									else
+										IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+									
+									break;						
+
+								default:
+									IupSetStrAttributeId( actTree, "TITLE", i, toStringz( _node.name ~ lineNumString ) );
+									break;						
+							}
 						}
 					}
 				}
+			}
+			catch( Exception e )
+			{
+				IupMessage( "changePR() Error", toStringz( e.toString ) );
 			}
 		}		
 	}
@@ -1111,33 +1118,40 @@ class COutline
 
 			if( actTree != null )
 			{
-				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
+				try
 				{
-					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					if( _node !is null )
-					{
-						if( _node.lineNumber == _ln  )
-						{
-							insertID = i;
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-						}
-					}
-				}
-
-				if( insertID == -1 )
-				{
-					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
+					for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
 					{
 						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
 						if( _node !is null )
 						{
-							if( _node.lineNumber < _ln )
+							if( _node.lineNumber == _ln  )
 							{
-								insertID = i + 1;
-								break;
+								insertID = i;
+								IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
 							}
 						}
 					}
+
+					if( insertID == -1 )
+					{
+						for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0 ; --i )
+						{
+							CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
+							if( _node !is null )
+							{
+								if( _node.lineNumber < _ln )
+								{
+									insertID = i + 1;
+									break;
+								}
+							}
+						}
+					}
+				}
+				catch( Exception e )
+				{
+					throw e;
 				}
 
 				if( insertID > 0 ) insertID --;
@@ -1445,24 +1459,31 @@ class COutline
 					IupSetStrAttribute( ih, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
 				}
 				
-				for( int j = 0; j < IupGetInt( ih, "COUNT" ); ++ j )
+				try
 				{
-					if( j == 0 )
+					for( int j = 0; j < IupGetInt( ih, "COUNT" ); ++ j )
 					{
-						IupSetAttributeId( ih, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
-					}
-					else
-					{
-						auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", j );
-						if( _node !is null )
+						if( j == 0 )
 						{
-							switch( lowerCase( _node.protection ) )
+							IupSetAttributeId( ih, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
+						}
+						else
+						{
+							auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", j );
+							if( _node !is null )
 							{
-								case "private", "protected":	break;
-								default:						IupSetAttributeId( ih, "COLOR", j, GLOBAL.editColor.outlineFore.toCString );
+								switch( lowerCase( _node.protection ) )
+								{
+									case "private", "protected":	break;
+									default:						IupSetAttributeId( ih, "COLOR", j, GLOBAL.editColor.outlineFore.toCString );
+								}
 							}
 						}
 					}
+				}
+				catch( Exception e )
+				{
+					IupMessage( "changeColor() Error", toStringz( e.toString ) );
 				}
 			}
 		}
@@ -1577,25 +1598,32 @@ class COutline
 	
 	void changeTree( char[] fullPath )
 	{
-		for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
+		try
 		{
-			Ihandle* ih = IupGetChild( zBoxHandle, i );
-			if( ih != null )
+			for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
 			{
-				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
-				version(DIDE)
+				Ihandle* ih = IupGetChild( zBoxHandle, i );
+				if( ih != null )
 				{
-					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
-					if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
-				}
+					char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+					version(DIDE)
+					{
+						auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
+						if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
+					}
 
-				if( fullPath == _fullPath )
-				{
-					IupSetInt( zBoxHandle, "VALUEPOS", i );
-					showTreeAndButtons( true );
-					return;
+					if( fullPath == _fullPath )
+					{
+						IupSetInt( zBoxHandle, "VALUEPOS", i );
+						showTreeAndButtons( true );
+						return;
+					}
 				}
 			}
+		}
+		catch( Exception e )
+		{
+			IupMessage( "ChangeTree() Error", toStringz( e.toString ) );
 		}
 		
 		// Not in zBox( no tree created ), hide the zBox
@@ -1604,54 +1632,61 @@ class COutline
 
 	void cleanTree( char[] fullPath, bool bDestroy = true )
 	{
-		for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++i )
+		try
 		{
-			Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ); 
-			if( ih != null )
+			for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++i )
 			{
-				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
-				version(DIDE)
+				Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ); 
+				if( ih != null )
 				{
-					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
-					if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
-				}
-
-				if( fullPath == _fullPath )
-				{
-					IupSetAttribute( ih, "DELNODE", "ALL" );
-					if( bDestroy ) IupDestroy( ih );
-
-					if( fullPath.length >= 7 )
+					char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+					version(DIDE)
 					{
-						if( fullPath[0..7] == "NONAME#" )
+						auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
+						if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
+					}
+
+					if( fullPath == _fullPath )
+					{
+						IupSetAttribute( ih, "DELNODE", "ALL" );
+						if( bDestroy ) IupDestroy( ih );
+
+						if( fullPath.length >= 7 )
 						{
-							if( fullPathByOS( fullPath ) in GLOBAL.parserManager )
+							if( fullPath[0..7] == "NONAME#" )
 							{
-								auto pParser = GLOBAL.parserManager[fullPathByOS(fullPath)];
-								if( pParser !is null ) delete pParser;
-								GLOBAL.parserManager.remove( fullPathByOS(fullPath) );
+								if( fullPathByOS( fullPath ) in GLOBAL.parserManager )
+								{
+									auto pParser = GLOBAL.parserManager[fullPathByOS(fullPath)];
+									if( pParser !is null ) delete pParser;
+									GLOBAL.parserManager.remove( fullPathByOS(fullPath) );
+								}
 							}
 						}
+						
+						break;
 					}
-					
-					break;
 				}
 			}
+			
+			if( IupGetChildCount( zBoxHandle ) == 0 )
+			{
+				IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
+				showTreeAndButtons( false );
+				/*
+				IupSetAttribute( outlineTreeNodeList, "VISIBLE", "NO" );
+				IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
+				IupSetAttribute( outlineButtonCollapse, "VISIBLE", "NO" );
+				IupSetAttribute( outlineButtonPR, "VISIBLE", "NO" );
+				IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "NO" );
+				IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "NO" );
+				IupSetAttribute( outlineButtonFresh, "VISIBLE", "NO" );
+				*/
+			}
 		}
-		
-		if( IupGetChildCount( zBoxHandle ) == 0 )
+		catch( Exception e )
 		{
-			IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
-			showTreeAndButtons( false );
-			/*
-			IupSetAttribute( outlineTreeNodeList, "VISIBLE", "NO" );
-			IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
-			IupSetAttribute( outlineButtonCollapse, "VISIBLE", "NO" );
-			IupSetAttribute( outlineButtonPR, "VISIBLE", "NO" );
-			IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "NO" );
-			IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "NO" );
-			IupSetAttribute( outlineButtonFresh, "VISIBLE", "NO" );
-			*/
+			IupMessage( "cleanTree() Error", toStringz( e.toString ) );
 		}
 	}
 
@@ -1665,8 +1700,15 @@ class COutline
 				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
 				version(DIDE)
 				{
-					auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
-					if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
+					try
+					{
+						auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
+						if( _node !is null ) _fullPath = _node.type; else _fullPath = "";
+					}
+					catch( Exception e )
+					{
+						IupMessage( "getTree() Error", toStringz( e.toString ) );
+					}
 				}				
 
 				if( fullPath == _fullPath ) return ih;
@@ -2313,32 +2355,39 @@ extern(C)
 					if( fromStringz( IupGetAttribute( _wholeWordHandle, "VALUE" ) ) == "OFF" ) bAnyWord = true; else bAnyWord = false;
 				}
 				
-				for( int i = 1; i < IupGetInt( actTree, "COUNT" ); ++ i )
+				try
 				{
-					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					
-					if( _node !is null )
+					for( int i = 1; i < IupGetInt( actTree, "COUNT" ); ++ i )
 					{
-						if( bAnyWord )
-						{
-							if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) < _node.name.length ) bGo = true; else bGo = false;
-						}
-						else
-						{
-							if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) == 0 ) bGo = true; else bGo = false;
-						}
+						CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
 						
-						if( bGo )
+						if( _node !is null )
 						{
-							IupSetAttribute( ih, "APPENDITEM", toStringz( _node.name ) );
+							if( bAnyWord )
+							{
+								if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) < _node.name.length ) bGo = true; else bGo = false;
+							}
+							else
+							{
+								if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) == 0 ) bGo = true; else bGo = false;
+							}
 							
-							GLOBAL.outlineTree.listItemASTs ~= _node;
-							GLOBAL.outlineTree.listItemTreeID ~= i;
-							
-							imageName = GLOBAL.outlineTree.getImageName( _node );
-							if( imageName.length ) IupSetAttributeId( ih, "IMAGE", IupGetInt( ih, "COUNT" ), toStringz( imageName ) );
+							if( bGo )
+							{
+								IupSetAttribute( ih, "APPENDITEM", toStringz( _node.name ) );
+								
+								GLOBAL.outlineTree.listItemASTs ~= _node;
+								GLOBAL.outlineTree.listItemTreeID ~= i;
+								
+								imageName = GLOBAL.outlineTree.getImageName( _node );
+								if( imageName.length ) IupSetAttributeId( ih, "IMAGE", IupGetInt( ih, "COUNT" ), toStringz( imageName ) );
+							}
 						}
 					}
+				}
+				catch( Exception e )
+				{
+					IupMessage( "COutline_List_DROPDOWN_CB() Error", toStringz( e.toString ) );
 				}
 				
 				if( IupGetInt( actTree, "COUNT" ) > 0 )

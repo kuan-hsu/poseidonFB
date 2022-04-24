@@ -2512,6 +2512,36 @@ extern(C)
 							return IUP_IGNORE;
 						}
 						break;
+					case "leftwindow":
+						if( sk.keyValue == c ) 
+						{
+							if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
+							{
+								IupSetAttribute( GLOBAL.menuOutlineWindow, "VALUE", "ON" );
+								IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+								IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
+								IupSetInt( GLOBAL.explorerSplit, "ACTIVE", 1 );
+							}
+							if( IupGetInt( GLOBAL.projectViewTabs, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.projectViewTabs, "VALUEPOS", 1 ); else IupSetInt( GLOBAL.projectViewTabs, "VALUEPOS", 0 );
+							IupSetFocus( ih );
+							return IUP_IGNORE;
+						}
+						break;
+					case "bottomwindow":
+						if( sk.keyValue == c ) 
+						{
+							if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
+							{
+								IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
+								IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+								IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
+								IupSetInt( GLOBAL.messageSplit, "ACTIVE", 1 );
+							}
+							if( IupGetInt( GLOBAL.messageWindowTabs, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 1 ); else IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
+							IupSetFocus( ih );
+							return IUP_IGNORE;
+						}
+						break;
 					case "outlinewindow":
 						if( sk.keyValue == c ) 
 						{

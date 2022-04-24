@@ -1589,7 +1589,7 @@ class CPreferenceDialog : CBaseDialog
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_gui" );
 					ID++;
 					break;
-				case 31:
+				case 33:
 					if( PreferenceDialogParameters.stringSC[ID-1] is null ) PreferenceDialogParameters.stringSC[ID-1] = new IupString( "[" ~ GLOBAL.languageItems["setcustomtool"].toDString ~ "]" );
 					IupSetAttributeId( shortCutList, "", ID, PreferenceDialogParameters.stringSC[ID-1].toCString );
 					IupSetAttributeId( shortCutList, "IMAGE", ID, "icon_toolitem" );
@@ -1610,7 +1610,6 @@ class CPreferenceDialog : CBaseDialog
 			
 			if( PreferenceDialogParameters.stringSC[ID-1] is null ) PreferenceDialogParameters.stringSC[ID-1] = new IupString( Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[i].title ) );
 			IupSetAttributeId( shortCutList, "",  ID, PreferenceDialogParameters.stringSC[ID-1].toCString );
-			
 		}
 
 

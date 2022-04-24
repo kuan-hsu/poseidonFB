@@ -327,22 +327,24 @@ public:
 			doc ~= setINILineData( "quickrun", convertShortKeyValue2String( GLOBAL.shortKeys[26].keyValue ) );
 			doc ~= setINILineData( "run", convertShortKeyValue2String( GLOBAL.shortKeys[27].keyValue ) );
 			doc ~= setINILineData( "build", convertShortKeyValue2String( GLOBAL.shortKeys[28].keyValue ) );
+
+			doc ~= setINILineData( "leftwindow", convertShortKeyValue2String( GLOBAL.shortKeys[29].keyValue ) );
+			doc ~= setINILineData( "bottomwindow", convertShortKeyValue2String( GLOBAL.shortKeys[30].keyValue ) );			
+			doc ~= setINILineData( "outlinewindow", convertShortKeyValue2String( GLOBAL.shortKeys[31].keyValue ) );
+			doc ~= setINILineData( "messagewindow", convertShortKeyValue2String( GLOBAL.shortKeys[32].keyValue ) );
 			
-			doc ~= setINILineData( "outlinewindow", convertShortKeyValue2String( GLOBAL.shortKeys[29].keyValue ) );
-			doc ~= setINILineData( "messagewindow", convertShortKeyValue2String( GLOBAL.shortKeys[30].keyValue ) );
-			
-			doc ~= setINILineData( "customtool1", convertShortKeyValue2String( GLOBAL.shortKeys[31].keyValue ) );
-			doc ~= setINILineData( "customtool2", convertShortKeyValue2String( GLOBAL.shortKeys[32].keyValue ) );
-			doc ~= setINILineData( "customtool3", convertShortKeyValue2String( GLOBAL.shortKeys[33].keyValue ) );
-			doc ~= setINILineData( "customtool4", convertShortKeyValue2String( GLOBAL.shortKeys[34].keyValue ) );
-			doc ~= setINILineData( "customtool5", convertShortKeyValue2String( GLOBAL.shortKeys[35].keyValue ) );
-			doc ~= setINILineData( "customtool6", convertShortKeyValue2String( GLOBAL.shortKeys[36].keyValue ) );
-			doc ~= setINILineData( "customtool7", convertShortKeyValue2String( GLOBAL.shortKeys[37].keyValue ) );
-			doc ~= setINILineData( "customtool8", convertShortKeyValue2String( GLOBAL.shortKeys[38].keyValue ) );
-			doc ~= setINILineData( "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[39].keyValue ) );
-			doc ~= setINILineData( "customtool10", convertShortKeyValue2String( GLOBAL.shortKeys[40].keyValue ) );
-			doc ~= setINILineData( "customtool11", convertShortKeyValue2String( GLOBAL.shortKeys[41].keyValue ) );
-			doc ~= setINILineData( "customtool12", convertShortKeyValue2String( GLOBAL.shortKeys[42].keyValue ) );
+			doc ~= setINILineData( "customtool1", convertShortKeyValue2String( GLOBAL.shortKeys[33].keyValue ) );
+			doc ~= setINILineData( "customtool2", convertShortKeyValue2String( GLOBAL.shortKeys[34].keyValue ) );
+			doc ~= setINILineData( "customtool3", convertShortKeyValue2String( GLOBAL.shortKeys[35].keyValue ) );
+			doc ~= setINILineData( "customtool4", convertShortKeyValue2String( GLOBAL.shortKeys[36].keyValue ) );
+			doc ~= setINILineData( "customtool5", convertShortKeyValue2String( GLOBAL.shortKeys[37].keyValue ) );
+			doc ~= setINILineData( "customtool6", convertShortKeyValue2String( GLOBAL.shortKeys[38].keyValue ) );
+			doc ~= setINILineData( "customtool7", convertShortKeyValue2String( GLOBAL.shortKeys[39].keyValue ) );
+			doc ~= setINILineData( "customtool8", convertShortKeyValue2String( GLOBAL.shortKeys[40].keyValue ) );
+			doc ~= setINILineData( "customtool9", convertShortKeyValue2String( GLOBAL.shortKeys[41].keyValue ) );
+			doc ~= setINILineData( "customtool10", convertShortKeyValue2String( GLOBAL.shortKeys[42].keyValue ) );
+			doc ~= setINILineData( "customtool11", convertShortKeyValue2String( GLOBAL.shortKeys[43].keyValue ) );
+			doc ~= setINILineData( "customtool12", convertShortKeyValue2String( GLOBAL.shortKeys[44].keyValue ) );
 			
 			// buildtools
 			doc ~= setINILineData( "[buildtools]");
@@ -736,7 +738,7 @@ public:
 
 							case "dupdown":					index = 6; title = GLOBAL.languageItems["sc_dupdown"].toDString();					break;
 							case "dupup":					index = 7; title = GLOBAL.languageItems["sc_dupup"].toDString();					break;
-							case "delline":					index = 8; title = GLOBAL.languageItems["sc_delline"].toDString();				break;
+							case "delline":					index = 8; title = GLOBAL.languageItems["sc_delline"].toDString();					break;
 							case "find":					index = 9; title = GLOBAL.languageItems["sc_findreplace"].toDString();				break;
 							case "findinfile":				index =10; title = GLOBAL.languageItems["sc_findreplacefiles"].toDString();			break;
 							case "findnext":				index =11; title = GLOBAL.languageItems["sc_findnext"].toDString();					break;
@@ -760,11 +762,13 @@ public:
 							case "run":						index =27; title = GLOBAL.languageItems["sc_run"].toDString();						break;
 							case "build":					index =28; title = GLOBAL.languageItems["sc_build"].toDString();					break;
 
-							case "outlinewindow":			index =29; title = GLOBAL.languageItems["sc_leftwindow"].toDString();				break;
-							case "messagewindow":			index =30; title = GLOBAL.languageItems["sc_bottomwindow"].toDString();				break;
+							case "leftwindow":				index =29; title = GLOBAL.languageItems["sc_leftwindowswitch"].toDString();			break;
+							case "bottomwindow":			index =30; title = GLOBAL.languageItems["sc_bottomwindowswitch"].toDString();		break;
+							case "outlinewindow":			index =31; title = GLOBAL.languageItems["sc_leftwindow"].toDString();				break;
+							case "messagewindow":			index =32; title = GLOBAL.languageItems["sc_bottomwindow"].toDString();				break;
 							
 							case "customtool1", "customtool2", "customtool3", "customtool4", "customtool5", "customtool6", "customtool7", "customtool8", "customtool9", "customtool10", "customtool11", "customtool12":
-								index = Integer.atoi( left[10..$] ) + 30;
+								index = Integer.atoi( left[10..$] ) + 32;
 								title = GLOBAL.languageItems[left].toDString();
 								break;
 							default:
