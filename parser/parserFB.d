@@ -2011,7 +2011,8 @@ version(FBIDE)
 						if( token().tok == TOK.Textends )
 						{
 							parseToken( TOK.Textends );
-							if( token().tok == TOK.Tidentifier || token().tok == TOK.Tobject ) _base = parseIdentifier();
+							//if( token().tok == TOK.Tidentifier || token().tok == TOK.Tobject ) _base = parseIdentifier();
+							if( token().tok == TOK.Tidentifier ) _base = parseIdentifier();
 							/*
 							_base = token().identifier;
 							parseToken( TOK.Tidentifier );

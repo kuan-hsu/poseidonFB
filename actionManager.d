@@ -1424,7 +1424,8 @@ public:
 				if( pParseTree !is null ) 
 				{
 					AutoComplete.cleanIncludeContainer();
-					AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+					version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, 0 );
+					version(DIDE) AutoComplete.getIncludes( pParseTree, fullPath, true, true );
 				}
 			}
 			

@@ -564,6 +564,16 @@ public:
 			if( GLOBAL.enableParser == "ON" && GLOBAL.preParseLevel > 0 )
 			{
 				GLOBAL.activeProjectPath = setupDir;
+
+				if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
+				{
+					IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
+					IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+					IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
+					IupSetInt( GLOBAL.messageSplit, "ACTIVE", 1 );
+				}
+				IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );					
+				
 				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 			
@@ -615,7 +625,7 @@ public:
 				
 				for( int i = 1; i < GLOBAL.preParseLevel; ++i )
 					parsedFiles = preParseFiles( parsedFiles, i );
-				
+					
 				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
 				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
 			}

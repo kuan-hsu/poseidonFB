@@ -47,8 +47,7 @@ version(FBIDE)
 		static char[][]						listContainer;
 		static CASTnode[char[]]				includesMarkContainer;
 		static bool[char[]]					noIncludeNodeContainer;
-			
-		static int 							LEVEL;
+
 		static char[]						showTypeContent;
 
 		class CShowListThread : Thread
@@ -412,6 +411,8 @@ version(FBIDE)
 			// Extends
 			if( originalNode.base.length )
 			{
+				if( lowerCase( originalNode.base ) == "object" ) return null;
+				
 				if( originalNode.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 				{
 					CASTnode	ret;
@@ -712,7 +713,7 @@ version(FBIDE)
 			return null;
 		}
 
-		static CASTnode[] check( char[] name, char[] originalFullPath, bool bCheckOnlyOnce = false )
+		static CASTnode[] check( char[] name, char[] originalFullPath, int _LEVEL )
 		{
 			CASTnode[] results;
 			
@@ -724,21 +725,14 @@ version(FBIDE)
 				{
 					if( fullPathByOS(includeFullPath) in includesMarkContainer ) return null;
 				}
-				
-				if( !ProjectAction.fileInProject( includeFullPath, GLOBAL.activeProjectPath ) )
-				{
-					if( GLOBAL.includeLevel > -1 )
-						if( AutoComplete.LEVEL >= GLOBAL.includeLevel ) return null; else AutoComplete.LEVEL ++;
-				}
-
 
 				CASTnode includeAST;
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
 				{
 					includesMarkContainer[fullPathByOS(includeFullPath)] = GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-						
+	
 					results ~= GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-					if( !bCheckOnlyOnce ) results ~= getIncludes( GLOBAL.parserManager[fullPathByOS(includeFullPath)], includeFullPath );
+					results ~= getIncludes( GLOBAL.parserManager[fullPathByOS(includeFullPath)], includeFullPath, _LEVEL );
 				}
 				else
 				{
@@ -764,7 +758,7 @@ version(FBIDE)
 						includesMarkContainer[fullPathByOS(includeFullPath)] = _createFileNode;
 						
 						results ~= _createFileNode;
-						if( !bCheckOnlyOnce ) results ~= getIncludes( _createFileNode, includeFullPath );
+						results ~= getIncludes( _createFileNode, includeFullPath, _LEVEL );
 					}
 					else
 					{
@@ -961,7 +955,7 @@ version(FBIDE)
 			
 			// Parse Include
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			auto dummyASTs = getIncludes( originalNode, originalFullPath );
+			auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
 
 			foreach( includeAST; includesMarkContainer )
 			{
@@ -1010,7 +1004,7 @@ version(FBIDE)
 				}
 			}			
 			
-			auto dummyASTs = getIncludes( originalNode, originalFullPath );
+			auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
 
 			/*
 			foreach( CASTnode n; includesMarkContainer )
@@ -2401,9 +2395,10 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, bool bRootCall = false, bool bCheckOnlyOnce = false )
+		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, int _LEVEL )
 		{
 			if( originalNode is null ) return null;
+			if( _LEVEL >= GLOBAL.includeLevel && GLOBAL.includeLevel > 0 ) return null;
 			
 
 			CASTnode[]	results;
@@ -2412,22 +2407,6 @@ version(FBIDE)
 			CASTnode rootNode = ParserAction.getRoot( originalNode );
 			if( ProjectAction.fileInProject( rootNode.name, GLOBAL.activeProjectPath ) ) bPrjFile = true;
 			
-
-			if( bPrjFile || bRootCall )
-			{
-				AutoComplete.LEVEL = 0;
-			}
-			else
-			{
-				if( GLOBAL.includeLevel > -1 )
-					if( AutoComplete.LEVEL >= GLOBAL.includeLevel )
-					{
-						if( AutoComplete.LEVEL > 0 ) AutoComplete.LEVEL --;
-						return null;
-					}
-			}
-
-
 			foreach( CASTnode _node; originalNode.getChildren )
 			{
 				if( _node.kind & B_INCLUDE )
@@ -2441,7 +2420,7 @@ version(FBIDE)
 							version(Windows)
 							{
 								//Stdout( "Include(Win32): " ~ _node.name ).newline;
-								CASTnode[] _results = check( _node.name, originalFullPath );
+								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -2449,7 +2428,7 @@ version(FBIDE)
 						{
 							version(linux)
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, bCheckOnlyOnce );
+								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -2458,7 +2437,7 @@ version(FBIDE)
 							version(Windows){}
 							else
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, bCheckOnlyOnce );
+								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -2467,25 +2446,18 @@ version(FBIDE)
 							version(linux){}
 							else
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, bCheckOnlyOnce );
+								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
 						else
 						{
-							CASTnode[] _result = check( _node.name, originalFullPath, bCheckOnlyOnce );
+							CASTnode[] _result = check( _node.name, originalFullPath, ++_LEVEL );
 							if( _result.length ) results ~= _result;
 						}
 					}
 				}
 			}
-
-			if( !bPrjFile )
-			{
-				if( AutoComplete.LEVEL > 0 ) AutoComplete.LEVEL --;
-			}
-
-			//Stdout( "Level:" ~ Integer.toString( AutoComplete.LEVEL )  ~ "  " ~ originalNode.name ).newline;
 
 			return results;
 		}
@@ -5003,7 +4975,6 @@ version(FBIDE)
 							}
 							catch( Exception e){}
 							
-							AutoComplete.LEVEL = 0;
 							// If using IUP command in Thread, join() occur infinite loop, so......
 							bool		bDot, bCallTip;
 							CASTnode	AST_Head;
@@ -5033,7 +5004,6 @@ version(FBIDE)
 			else
 			{
 				//if( timer != null )	IupSetAttribute( timer, "RUN", "NO" );
-				AutoComplete.LEVEL = 0;
 				char[] list = charAdd( ih, pos, text, bForce );
 
 				if( list.length )
@@ -5216,7 +5186,6 @@ version(FBIDE)
 								}
 								catch( Exception e){}
 								
-								AutoComplete.LEVEL = 0;
 								// If using IUP command in Thread, join() occur infinite loop, so......
 								bool		bDot, bCallTip;
 								CASTnode	AST_Head;

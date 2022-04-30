@@ -137,7 +137,7 @@ version(FBIDE)
 		Tprotected,
 		Tpublic,
 		Textends,
-		Tobject,
+		/*Tobject,*/
 		Tvirtual,
 		Tabstract,
 		Tconstructor,
@@ -317,7 +317,7 @@ version(FBIDE)
 			case "protected":	 return TOK.Tprotected;
 			case "public":	 return TOK.Tpublic;
 			case "extends":	 return TOK.Textends;
-			case "object":	 return TOK.Tobject;
+			/*case "object":	 return TOK.Tobject;*/
 			case "virtual":	 return TOK.Tvirtual;
 			case "abstract":	 return TOK.Tabstract;
 			case "constructor": return TOK.Tconstructor;
