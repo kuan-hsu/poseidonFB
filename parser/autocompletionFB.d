@@ -1314,8 +1314,10 @@ version(FBIDE)
 			if( AST_Head is null ) return null;
 			
 			CASTnode[] result;
+			CASTnode[] childrenNodes = AST_Head.getChildren();
+			if( AST_Head.kind & ( B_TYPE | B_CLASS ) ) childrenNodes ~= getBaseNodeMembers( AST_Head );
 
-			foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
+			foreach( CASTnode _child; childrenNodes )
 			{
 				if( _child.kind & ( B_UNION | B_TYPE | B_CLASS ) )
 				{
@@ -2398,7 +2400,9 @@ version(FBIDE)
 		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, int _LEVEL )
 		{
 			if( originalNode is null ) return null;
+			if( GLOBAL.includeLevel == 0 ) return null;
 			if( _LEVEL >= GLOBAL.includeLevel && GLOBAL.includeLevel > 0 ) return null;
+			if( GLOBAL.includeLevel > -1 ) _LEVEL++;
 			
 
 			CASTnode[]	results;
@@ -2420,7 +2424,7 @@ version(FBIDE)
 							version(Windows)
 							{
 								//Stdout( "Include(Win32): " ~ _node.name ).newline;
-								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
+								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -2428,7 +2432,7 @@ version(FBIDE)
 						{
 							version(linux)
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
+								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -2437,7 +2441,7 @@ version(FBIDE)
 							version(Windows){}
 							else
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
+								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
@@ -2446,13 +2450,13 @@ version(FBIDE)
 							version(linux){}
 							else
 							{
-								CASTnode[] _results = check( _node.name, originalFullPath, ++_LEVEL );
+								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
 								if( _results.length ) results ~= _results;
 							}
 						}
 						else
 						{
-							CASTnode[] _result = check( _node.name, originalFullPath, ++_LEVEL );
+							CASTnode[] _result = check( _node.name, originalFullPath, _LEVEL );
 							if( _result.length ) results ~= _result;
 						}
 					}

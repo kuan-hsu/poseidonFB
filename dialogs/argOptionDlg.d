@@ -36,7 +36,11 @@ class CArgOptionDialog : CBaseDialog
 			IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
 			IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CArgOptionDialog_btnCancel_cb );
 		}
-		
+		else
+		{
+			IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
+			IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
+		}		
 		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );

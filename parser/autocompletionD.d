@@ -1378,10 +1378,7 @@ version(DIDE)
 			if( AST_Head is null ) return null;
 			
 			CASTnode[] result;
-
 			CASTnode[] childrenNodes = AST_Head.getChildren();
-			
-			//IupMessage("MemberMother", toStringz( Integer.toString( AST_Head.kind ) ~ " " ~ ( AST_Head.name ) ~ " : " ~ AST_Head.type ) );
 			childrenNodes ~= getBaseNodeMembers( AST_Head );
 
 			//foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
