@@ -40,7 +40,8 @@ class CArgOptionDialog : CBaseDialog
 		{
 			IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
 			IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
-		}		
+		}
+		
 		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );

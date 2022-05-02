@@ -53,63 +53,6 @@ version(DIDE)
 			return _tempTokenIndex;
 		}		
 		
-		char[] getDelimitedString( int _tokOpen, int _tokClose )
-		{
-			try
-			{
-				int		_countDemlimit;
-				char[]	_params;		// include open Delimit and close Delimit
-
-				if( token().tok == _tokOpen )
-				{
-					do
-					{
-						if( token().tok == _tokOpen )
-						{
-							if( _countDemlimit > 0 ) _params ~= token().identifier;
-							_countDemlimit ++;
-						}
-						else if( token().tok == _tokClose )
-						{
-							_countDemlimit --;
-							if( _countDemlimit > 0 ) _params ~= token().identifier;
-						}
-						else if( token().tok == TOK.Tidentifier || token().tok == TOK.Tfunction || token().tok == TOK.Tdelegate )
-						{
-							_params ~= ( " " ~ token().identifier );
-						}
-						else
-							_params ~= token().identifier;
-						
-						parseToken();
-					}
-					while( _countDemlimit > 0 && tokenIndex < tokens.length );
-				}
-				else
-				{
-					parseToken();
-				}
-
-				_params = Util.trim( _params );
-				
-				switch( _tokOpen )
-				{
-					case TOK.Topenparen:		_params = "(" ~ _params ~ ")"; break;
-					case TOK.Topenbracket:		_params = "[" ~ _params ~ "]"; break;
-					case TOK.Topencurly:		_params = "{" ~ _params ~ "}"; break;
-					default:					break;
-				}
-				
-				return _params;
-			}
-			catch( Exception e )
-			{
-				throw e;
-			}
-			
-			return null;
-		}
-
 		char[] getProt()
 		{
 			char[] result;

@@ -204,6 +204,204 @@ private:
 		IupSetStrAttribute( projectButtonCollapse, "IMAGE", toStringz( "icon_collapse2" ~ tail ) );
 		IupSetStrAttribute( projectButtonHide, "IMAGE", toStringz( "icon_shift_l" ~ tail ) );
 	}
+	
+
+	CASTnode[] getVersionIncludes( CASTnode _node )
+	{
+		CASTnode[] result;
+		
+		foreach( CASTnode _child; _node.getChildren )
+		{
+			version(FBIDE)
+			{
+				if( _child.kind & B_VERSION )
+				{
+					char[] symbol = upperCase( _child.name );
+					char[] noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
+					if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
+					{
+						version(Windows)
+						{
+							if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
+							{
+								result ~= getVersionIncludes( _child );
+								continue;
+							}
+						}
+						
+						version(linux)
+						{
+							if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
+							{
+								result ~= getVersionIncludes( _child );
+								continue;
+							}
+						}
+						
+						version(FreeBSD)
+						{
+							if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
+							{
+								result ~= getVersionIncludes( _child );
+								continue;
+							}
+						}
+						
+						version(OpenBSD)
+						{
+							if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
+							{
+								result ~= getVersionIncludes( _child );
+								continue;
+							}
+						}
+						
+						version(Posix)
+						{
+							if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
+							{
+								result ~= getVersionIncludes( _child );
+								continue;
+							}
+						}
+					}
+					else
+					{
+						if( !_child.type.length )
+						{
+							foreach( char[] v; AutoComplete.VersionCondition )
+								if( symbol == upperCase( v ) ) result ~= getVersionIncludes( _child );
+						}
+						else
+						{
+							if( AutoComplete.VersionCondition.length )
+							{
+								foreach( char[] v; AutoComplete.VersionCondition )
+									if( symbol[1..$] != upperCase( v ) ) result ~= getVersionIncludes( _child );
+							}
+							else
+							{
+								result ~= getVersionIncludes( _child );
+							}
+						}
+					}
+				}
+				else if( _child.kind & B_INCLUDE )
+				{
+					result ~= _child;
+				}
+			}
+			version(DIDE)
+			{
+				if( _child.kind & D_VERSION )
+				{
+					version(Windows)
+					{
+						if( _child.name == "Windows" || _child.name == "Win32" || ( _child.name == "-else-" && _child.base == "linux" ) )
+						{
+							result ~= getVersionIncludes( _child );
+							continue;
+						}
+					}
+
+					version(linux)
+					{
+						if( _child.name == "linux" || ( _child.name == "-else-" && _child.base != "linux" ) )
+						{
+							result ~= getVersionIncludes( _child );
+							continue;
+						}
+					}				
+				
+					if( _child.name != "-else-" )
+					{
+						foreach( char[] v; AutoComplete.VersionCondition )
+						{
+							if( _child.name == v ) result ~= getVersionIncludes( _child );
+						}
+					}
+					else
+					{
+						foreach( char[] v; AutoComplete.VersionCondition )
+						{
+							if( _child.base != v ) result ~= getVersionIncludes( _child );
+						}
+					}
+				}
+				else if( _child.kind & D_IMPORT )
+				{
+					result ~= _child;
+				}					
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	char[][] preParseFiles( char[][] inFiles, int level )
+	{
+		char[][] beParsedFiles, outFiles;
+		
+		foreach( char[] s; inFiles )
+		{
+			if( fullPathByOS(s) in GLOBAL.parserManager )
+			{
+				CASTnode Root = GLOBAL.parserManager[fullPathByOS(s)];
+				if( Root !is null )
+				{
+					char[] includeFullPath;
+					
+					version(FBIDE)
+					{
+						CASTnode[] includeNodes = getVersionIncludes( Root );
+						foreach( CASTnode _node; includeNodes )
+						{
+							includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
+							if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+						}
+					}
+					version(DIDE)
+					{
+						CASTnode[] includeNodes = getVersionIncludes( Root );
+						foreach( CASTnode _node; includeNodes )
+						{
+							if( _node.type.length )
+							{
+								//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
+								includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.type );
+								if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+							}
+							else
+							{
+								//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
+								includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
+								if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+							}
+						}					
+					}
+				}
+			}
+		}
+		
+		char[] plusSign;
+		for( int i = 0; i <= level; ++ i)
+			plusSign ~= "+";
+		
+		foreach( char[] source; beParsedFiles )
+		{
+			if( fullPathByOS(source) in GLOBAL.parserManager ){}
+			else
+			{
+				outFiles ~= source;
+				GLOBAL.outlineTree.loadParser( source );
+				GLOBAL.messagePanel.printOutputPanel( "  " ~ plusSign ~ "[ " ~ source ~ " ]...Parsed" );
+				//Stdout( Integer.toString( i + 1 ) ~ " " ~ source ).newline;
+			}
+		}				
+	
+		return outFiles;
+	}	
 
 
 public:
@@ -272,7 +470,7 @@ public:
 						case "bas":
 							IupSetAttributeId( tree, "IMAGE", i, "icon_bas" );	break;
 						case "bi":
-							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );		break;
+							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );	break;
 						default:
 							IupSetAttributeId( tree, "IMAGE", i, "icon_txt" );
 					}
@@ -285,7 +483,7 @@ public:
 						case "d":
 							IupSetAttributeId( tree, "IMAGE", i, "icon_bas" );	break;
 						case "di":
-							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );		break;
+							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );	break;
 						default:
 							IupSetAttributeId( tree, "IMAGE", i, "icon_txt" );
 					}
@@ -663,114 +861,6 @@ public:
 		return true;
 	}
 	
-	
-	char[][] preParseFiles( char[][] inFiles, int level )
-	{
-		char[][] beParsedFiles, outFiles;
-		
-		foreach( char[] s; inFiles )
-		{
-			if( fullPathByOS(s) in GLOBAL.parserManager )
-			{
-				CASTnode Root = GLOBAL.parserManager[fullPathByOS(s)];
-				if( Root !is null )
-				{
-					char[] includeFullPath;
-					
-					version(FBIDE)
-					{
-						foreach( CASTnode _node; Root.getChildren )
-						{
-							if( _node.kind & B_INCLUDE )
-							{
-								if( _node.lineNumber < 2147483647 )
-								{
-									if( _node.type == "__FB_WIN32__" )
-									{
-										version(Windows)
-										{
-											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
-										}
-									}
-									else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
-									{
-										version(linux)
-										{
-											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
-										}
-									}
-									else if( _node.type == "!__FB_WIN32__" )
-									{
-										version(Windows){}
-										else
-										{
-											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
-										}
-									}
-									else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
-									{
-										version(linux){}
-										else
-										{
-											includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-											if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
-										}
-									}
-									else
-									{
-										includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-										if( includeFullPath.length ) beParsedFiles ~= includeFullPath;
-									}
-								}
-							}
-						}
-					}
-					version(DIDE)
-					{
-						foreach( CASTnode _node; Root.getChildren )
-						{
-							if( _node.kind & D_IMPORT )
-							{
-								if( _node.type.length )
-								{
-									//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
-									includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.type );
-									if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
-								}
-								else
-								{
-									//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
-									includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
-									if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
-								}
-							}
-						}					
-					}
-				}
-			}
-		}
-		
-		char[] plusSign;
-		for( int i = 0; i <= level; ++ i)
-			plusSign ~= "+";
-		
-		foreach( char[] source; beParsedFiles )
-		{
-			if( fullPathByOS(source) in GLOBAL.parserManager ){}
-			else
-			{
-				outFiles ~= source;
-				GLOBAL.outlineTree.loadParser( source );
-				GLOBAL.messagePanel.printOutputPanel( "  " ~ plusSign ~ "[ " ~ source ~ " ]...Parsed" );
-				//Stdout( Integer.toString( i + 1 ) ~ " " ~ source ).newline;
-			}
-		}				
-	
-		return outFiles;
-	}
 
 	version(FBIDE)
 	{

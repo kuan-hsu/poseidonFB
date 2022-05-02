@@ -1378,6 +1378,7 @@ version(DIDE)
 			if( AST_Head is null ) return null;
 			
 			CASTnode[] result;
+
 			CASTnode[] childrenNodes = AST_Head.getChildren();
 			childrenNodes ~= getBaseNodeMembers( AST_Head );
 

@@ -94,6 +94,11 @@ class COutline
 					IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_import" );
 					break;
 					
+				case B_VERSION:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_version" );
+					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, "IUP_version" );
+					break;
+					
 				case B_DEFINE | B_VARIABLE:
 					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_define_var" );
 					break;
@@ -344,6 +349,11 @@ class COutline
 					case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); break;
 					case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 127 39" ); break;
 					default:
+				}
+				
+				if( _node.kind & B_VERSION )
+				{
+					if( _node.type == "!" ) IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); else IupSetAttributeId( rootTree, "COLOR", lastAddNode, "0 180 0" );
 				}
 			}
 			version(DIDE)
@@ -613,487 +623,317 @@ class COutline
 			if( fromStringz( IupGetAttribute( showLineHandle, "VALUE" ) ) == "ON" ) lineNumString = " .... [" ~ Integer.toString( _node.lineNumber ) ~ "]";
 		}
 		
-		/+
-		if( _node.getChildrenCount > 0 )
+		bool bNoImage;
+		version(FBIDE)
 		{
-			version(FBIDE)
+			switch( _node.kind & 16777215 )
 			{
-				switch( _node.kind )
-				{
-					case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-						char[] _type = _node.type;
-						char[] _paramString;
-						
-						ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-						switch( showIndex )
-						{
-							case 0:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" )  ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 2:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}					
-						break;
-
-					case B_SUB, B_CTOR, B_DTOR, B_MACRO:
-						switch( showIndex )
-						{
-							case 0, 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.type ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;
-
-					case B_SCOPE:
-						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						break;
-						
-					case B_TYPE, B_CLASS:
-						if( _node.base.length )
-						{
-							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ " : " ~ _node.base ~ lineNumString ) );
+				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
+					char[] _type = _node.type;
+					char[] _paramString;
+					
+					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+					switch( showIndex )
+					{
+						case 0:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
 							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
-						}
-
-					default:
-						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-				}
-			}
-			version(DIDE)
-			{
-				switch( _node.kind )
-				{
-					case D_FUNCTION, D_FUNCTIONLITERALS:
-						char[] _type = _node.type;
-						char[] _paramString;
-						
-						ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-						switch( showIndex )
-						{
-							case 0:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 2:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}					
-						break;
-
-					case D_CTOR:
-						switch( showIndex )
-						{
-							case 0, 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ _node.type ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;
-
-					case D_DTOR:
-						switch( showIndex )
-						{
-							case 0, 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this()" ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this" ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;
-
-					case D_CLASS, D_INTERFACE:
-						switch( showIndex )
-						{
-							case 0, 2:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : _node.base ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-								
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;					
-
-					case D_ENUM:	
-						if( !_node.name.length )
-						{
-							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "-Anonymous-" ~ lineNumString ) );
+						case 1:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
 							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						else
-						{
+							break;
+						case 2:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
 							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						break;	
-						
-					default:
+							break;
+					}
+					break;
+
+				case B_SUB, B_CTOR, B_DTOR:
+					switch( showIndex )
+					{
+						case 0, 1:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.type ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						default:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+					}				
+					break;
+					
+				case B_DEFINE | B_FUNCTION:
+					char[] _paramString = ParserAction.getSeparateParam( _node.type );
+					switch( showIndex )
+					{
+						case 0, 1:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						default:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+					}
+					break;
+					
+				case B_DEFINE | B_VARIABLE, B_DEFINE | B_ALIAS:
+					if( showIndex == 0 || showIndex == 2 )
+					{
+						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
+						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					}
+					else
+					{
 						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
 						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-				}
+					}
+					break;
+
+				case B_VARIABLE:
+					if( !_node.type.length )
+						if( _node.base.length )
+						{
+							char[][] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
+							
+							char[] autoType = Util.join( types, "." );
+							if( showIndex == 0 || showIndex == 2 )
+							{
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( autoType.length ? " : " ~ autoType : "" ) ~ lineNumString ) );
+								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							}
+							else
+							{
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							}
+							break;
+						}				
+				
+				case  B_ALIAS:
+					if( showIndex == 0 || showIndex == 2 )
+					{
+						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
+						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					}
+					else
+					{
+						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					}
+					break;
+					
+				case B_WITH, B_NAMESPACE, B_VERSION:
+					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					break;
+					
+				case B_SCOPE:
+					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "-SCOPE-" ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					break;
+
+				case B_INCLUDE:
+					IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "TITLEFONTSTYLE", bracchID + 1, "Underline" );
+					break;
+				
+				case B_ENUMMEMBER:
+					IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					break;
+					
+				case B_TYPE, B_CLASS, B_UNION, B_ENUM:
+					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : "" ) ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					break;
+
+				default:
+					bNoImage = true;
 			}
-			
+		}
+		version(DIDE)
+		{
+			switch( _node.kind & 8388607 )
+			{
+				case D_IMPORT:
+					IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "TITLEFONTSTYLE", bracchID + 1, "Underline" );
+					break;
+					
+				case D_FUNCTION, D_FUNCTIONLITERALS:
+					char[] _type = _node.type;
+					char[] _paramString;
+					
+					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+					switch( showIndex )
+					{
+						case 0:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						case 1:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						case 2:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						default:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+					}
+					break;
+
+				case D_CTOR:
+					switch( showIndex )
+					{
+						case 0, 1:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ _node.type ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						default:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+					}				
+					break;
+
+				case D_DTOR:
+					switch( showIndex )
+					{
+						case 0, 1:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this()" ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						default:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this" ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+					}				
+					break;
+					
+				case D_FUNCTIONPTR:
+					char[] _type;
+					char[] _paramString;
+					
+					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+					switch( showIndex )
+					{
+						case 0:
+							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						case 1:
+							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						case 2:
+							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+						default:
+							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+					}					
+					break;
+					
+				case D_VARIABLE:
+					if( !_node.type.length )
+						if( _node.base.length )
+						{
+							char[][] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
+							
+							char[] autoType = Util.join( types, "." );
+							if( showIndex == 0 || showIndex == 2 )
+							{
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( autoType.length ? " : " ~ autoType : "" ) ~ lineNumString ) );
+								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							}
+							else
+							{
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							}
+							break;
+						}
+					
+				case D_ALIAS:
+					if( showIndex == 0 || showIndex == 2 )
+					{
+						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
+						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					}
+					else
+					{
+						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					}
+					break;
+
+				case D_ENUMMEMBER:
+					IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					break;
+					
+				case D_CLASS, D_INTERFACE, D_TEMPLATE:
+					switch( showIndex )
+					{
+						case 0, 2:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : _node.base ) ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+							
+						default:
+							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+							break;
+					}
+					break;
+					
+				case D_STRUCT, D_UNION, D_VERSION, D_DEBUG, D_SCOPE:
+					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					break;
+
+				case D_ENUM:	
+					if( !_node.name.length )
+					{
+						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "-Anonymous-" ~ lineNumString ) );
+						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					}
+					else
+					{
+						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					}
+					break;	
+
+				default:
+					bNoImage = true;
+			}
+		}
+
+		if( !bNoImage )
+		{
 			lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
 			setImage( rootTree, _node );
 			IupSetAttributeId( rootTree, "USERDATA", lastAddNode, cast(char*) _node );
-
+			
 			foreach_reverse( CASTnode t; _node.getChildren() )
 			{
 				append( rootTree, t, lastAddNode );
-			}
+			}				
 		}
-		else
-		{
-		+/
-			bool bNoImage;
-			version(FBIDE)
-			{
-				switch( _node.kind & 4194303 )
-				{
-					case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-						char[] _type = _node.type;
-						char[] _paramString;
-						
-						ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-						switch( showIndex )
-						{
-							case 0:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 2:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;
-
-					case B_SUB, B_CTOR, B_DTOR:
-						switch( showIndex )
-						{
-							case 0, 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.type ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}				
-						break;
-						
-					case B_DEFINE | B_FUNCTION:
-						char[] _paramString = ParserAction.getSeparateParam( _node.type );
-						switch( showIndex )
-						{
-							case 0, 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;
-						
-					case B_DEFINE | B_VARIABLE, B_DEFINE | B_ALIAS:
-						if( showIndex == 0 || showIndex == 2 )
-						{
-							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						else
-						{
-							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						break;
-
-					case B_VARIABLE:
-						if( !_node.type.length )
-							if( _node.base.length )
-							{
-								char[][] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
-								
-								char[] autoType = Util.join( types, "." );
-								if( showIndex == 0 || showIndex == 2 )
-								{
-									IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( autoType.length ? " : " ~ autoType : "" ) ~ lineNumString ) );
-									IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								}
-								else
-								{
-									IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-									IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								}
-								break;
-							}				
-					
-					case  B_ALIAS:
-						if( showIndex == 0 || showIndex == 2 )
-						{
-							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						else
-						{
-							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						break;
-						
-					case B_WITH, B_NAMESPACE:
-						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						break;
-						
-					case B_SCOPE:
-						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "-SCOPE-" ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						break;
-
-					case B_INCLUDE:
-						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "TITLEFONTSTYLE", bracchID + 1, "Underline" );
-						break;
-					
-					case B_ENUMMEMBER:
-						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						break;
-						
-					case B_TYPE, B_CLASS, B_UNION, B_ENUM:
-						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : "" ) ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						break;
-
-					default:
-						bNoImage = true;
-				}
-			}
-			version(DIDE)
-			{
-				switch( _node.kind & 8388607 )
-				{
-					case D_IMPORT:
-						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "TITLEFONTSTYLE", bracchID + 1, "Underline" );
-						break;
-						
-					case D_FUNCTION, D_FUNCTIONLITERALS:
-						char[] _type = _node.type;
-						char[] _paramString;
-						
-						ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-						switch( showIndex )
-						{
-							case 0:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 2:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;
-
-					case D_CTOR:
-						switch( showIndex )
-						{
-							case 0, 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ _node.type ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}				
-						break;
-
-					case D_DTOR:
-						switch( showIndex )
-						{
-							case 0, 1:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this()" ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this" ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}				
-						break;
-						
-					case D_FUNCTIONPTR:
-						char[] _type;
-						char[] _paramString;
-						
-						ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
-						switch( showIndex )
-						{
-							case 0:
-								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 1:
-								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							case 2:
-								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}					
-						break;
-						
-					case D_VARIABLE:
-						if( !_node.type.length )
-							if( _node.base.length )
-							{
-								char[][] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
-								
-								char[] autoType = Util.join( types, "." );
-								if( showIndex == 0 || showIndex == 2 )
-								{
-									IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( autoType.length ? " : " ~ autoType : "" ) ~ lineNumString ) );
-									IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								}
-								else
-								{
-									IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-									IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								}
-								break;
-							}
-						
-					case D_ALIAS:
-						if( showIndex == 0 || showIndex == 2 )
-						{
-							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						else
-						{
-							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						break;
-
-					case D_ENUMMEMBER:
-						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						break;
-						
-					case D_CLASS, D_INTERFACE, D_TEMPLATE:
-						switch( showIndex )
-						{
-							case 0, 2:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : _node.base ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-								
-							default:
-								IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-								break;
-						}
-						break;
-						
-					case D_STRUCT, D_UNION, D_VERSION, D_DEBUG, D_SCOPE:
-						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						break;
-
-					case D_ENUM:	
-						if( !_node.name.length )
-						{
-							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "-Anonymous-" ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						else
-						{
-							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-						}
-						break;	
-
-					default:
-						bNoImage = true;
-				}
-			}
-
-			if( !bNoImage )
-			{
-				lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
-				setImage( rootTree, _node );
-				IupSetAttributeId( rootTree, "USERDATA", lastAddNode, cast(char*) _node );
-				
-				foreach_reverse( CASTnode t; _node.getChildren() )
-				{
-					append( rootTree, t, lastAddNode );
-				}				
-			}
-		//}
 	}
 	
 	
@@ -1480,6 +1320,10 @@ class COutline
 										IupSetStrAttributeId( ih, "TITLEFONT", j, toStringz( GLOBAL.fonts[5].fontString ) );// Outline	
 										IupSetAttributeId( ih, "TITLEFONTSTYLE", j, "Underline" );// Outline	
 									}
+									else if( _node.kind & B_VERSION )
+									{
+										if( _node.type == "!" ) IupSetAttributeId( ih, "COLOR", j, "255 0 0" ); else IupSetAttributeId( ih, "COLOR", j, "0 160 0" );
+									}									
 								}
 								version(DIDE)
 								{

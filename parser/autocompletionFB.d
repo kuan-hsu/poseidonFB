@@ -47,6 +47,7 @@ version(FBIDE)
 		static char[][]						listContainer;
 		static CASTnode[char[]]				includesMarkContainer;
 		static bool[char[]]					noIncludeNodeContainer;
+		static char[][]						VersionCondition;
 
 		static char[]						showTypeContent;
 
@@ -510,7 +511,7 @@ version(FBIDE)
 			
 			CASTnode[] results;
 			
-			foreach( child; node.getChildren() )
+			foreach( child; getMembers( node ) )
 			{
 				if( child.kind & B_KIND )
 				{
@@ -552,7 +553,7 @@ version(FBIDE)
 			
 			CASTnode[] results;
 			
-			foreach( child; node.getChildren() )
+			foreach( child; getMembers( node ) )
 			{
 				if( child.name.length )
 				{
@@ -586,132 +587,6 @@ version(FBIDE)
 			return results;
 		}
 
-		static public char[] checkIncludeExist( char[] include, char[] originalFullPath )
-		{
-			try
-			{
-				//char[] include;
-				
-				if( !include.length ) return null;
-				/*
-				if( _include.length > 2 )
-				{
-					if( _include[0] == '"' && _include[$-1] == '"' ) _include = _include[1..$-1];
-					include = _include.dup;
-				}
-				else
-				{
-					return null;
-				}
-				*/
-				include = Util.substitute( include, "\\", "/" );
-				originalFullPath = Path.normalize( originalFullPath );
-				
-				// Step 1: Relative from the directory of the source file
-				scope  _path = new FilePath( originalFullPath ); // Tail include /
-				char[] testPath = _path.path() ~ include;
-				_path.set( testPath ); // Reset
-				if( _path.exists() )
-					if( _path.isFile ) return testPath;
-
-
-				// Step 2: Relative from the current working directory
-				char[] dir = actionManager.ProjectAction.fileInProject( originalFullPath );
-				if( dir.length )
-				{
-					if( dir[$-1] != '/' ) dir ~= "/";
-					testPath = dir ~ include;
-
-					_path.set( testPath ); // Reset
-					if( _path.exists() ) 
-						if( _path.isFile ) return testPath;
-				}
-
-				testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
-				_path.set( testPath ); // Reset
-				if( _path.exists() )
-					if( _path.isFile ) return testPath;
-
-
-				// Step 3: Relative from addition directories specified with the -i command line option
-				// Work on Project
-				//char[] prjDir = actionManager.ProjectAction.fileInProject( originalFullPath );
-				char[] prjDir = GLOBAL.activeProjectPath;
-				if( prjDir.length )
-				{
-					//Stdout( "Project Dir: " ~ prjDir ).newline;
-					if( prjDir in GLOBAL.projectManager )
-					{
-						char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
-							
-						foreach( char[] s; _includeDirs )
-						{
-							testPath = s ~ "/" ~ include;
-							
-							_path.set( testPath ); // Reset
-
-							if( _path.exists() )
-								if( _path.isFile ) return testPath;
-						}
-					}
-				}
-
-				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-				// Get Custom Compiler
-				char[] customOpt, customCompiler, fbcFullPath;
-				CustomToolAction.getCustomCompilers( customOpt, customCompiler );
-
-				if( customCompiler.length )
-					_path.set( Path.normalize( customCompiler ) );
-				else
-				{
-					char[] _compilerPath;
-					if( prjDir in GLOBAL.projectManager )
-					{
-						_compilerPath = GLOBAL.projectManager[prjDir].compilerPath;
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _compilerPath = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].Compiler;						
-					}
-					
-					if( _compilerPath.length )
-						_path.set( Path.normalize( _compilerPath ) );
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.editorSetting00.Bit64 == "OFF" ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
-						}
-						else
-						{
-							_compilerPath = GLOBAL.compilerFullPath;
-						}
-					}
-					
-					_path.set( Path.normalize( _compilerPath ) );
-				}
-
-				version( Windows )
-				{
-					testPath = _path.path() ~ "inc/" ~ include;
-				}
-				else
-				{
-					testPath = _path.path() ~ "../include/freebasic/" ~ include;
-				}
-	
-				_path.set( testPath ); // Reset
-				if( _path.exists() )
-					if( _path.isFile ) return testPath;
-			}
-			catch( Exception e )
-			{
-				IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
-			}
-			
-			return null;
-		}
 
 		static CASTnode[] check( char[] name, char[] originalFullPath, int _LEVEL )
 		{
@@ -1314,14 +1189,87 @@ version(FBIDE)
 			if( AST_Head is null ) return null;
 			
 			CASTnode[] result;
+			
 			CASTnode[] childrenNodes = AST_Head.getChildren();
-			if( AST_Head.kind & ( B_TYPE | B_CLASS ) ) childrenNodes ~= getBaseNodeMembers( AST_Head );
+			if( AST_Head.kind & ( B_TYPE | B_CLASS ) ) childrenNodes ~= getBaseNodeMembers( AST_Head ); 
 
 			foreach( CASTnode _child; childrenNodes )
 			{
-				if( _child.kind & ( B_UNION | B_TYPE | B_CLASS ) )
+				if( _child.kind & B_VERSION )
 				{
-					if( !_child.name.length ) result ~= getMembers( _child );else result ~= _child;
+					char[] symbol = upperCase( _child.name );
+					char[] noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
+					if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
+					{
+						version(Windows)
+						{
+							if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
+							{
+								result ~= getMembers( _child );
+								continue;
+							}
+						}
+						
+						version(linux)
+						{
+							if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
+							{
+								result ~= getMembers( _child );
+								continue;
+							}
+						}
+						
+						version(FreeBSD)
+						{
+							if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
+							{
+								result ~= getMembers( _child );
+								continue;
+							}
+						}
+						
+						version(OpenBSD)
+						{
+							if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
+							{
+								result ~= getMembers( _child );
+								continue;
+							}
+						}
+						
+						version(Posix)
+						{
+							if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
+							{
+								result ~= getMembers( _child );
+								continue;
+							}
+						}
+					}
+					else
+					{
+						if( !_child.type.length )
+						{
+							foreach( char[] v; VersionCondition )
+								if( symbol == upperCase( v ) ) result ~= getMembers( _child );
+						}
+						else
+						{
+							if( VersionCondition.length )
+							{
+								foreach( char[] v; VersionCondition )
+									if( symbol[1..$] != upperCase( v ) ) result ~= getMembers( _child );
+							}
+							else
+							{
+								result ~= getMembers( _child );
+							}
+						}
+					}
+				}
+				else if( _child.kind & ( B_UNION | B_TYPE | B_CLASS ) )
+				{
+					if( !_child.name.length ) result ~= getMembers( _child ); else result ~= _child;
 				}
 				else
 				{
@@ -2395,6 +2343,134 @@ version(FBIDE)
 			
 			return null;
 		}
+
+
+		static char[] checkIncludeExist( char[] include, char[] originalFullPath )
+		{
+			try
+			{
+				//char[] include;
+				
+				if( !include.length ) return null;
+				/*
+				if( _include.length > 2 )
+				{
+					if( _include[0] == '"' && _include[$-1] == '"' ) _include = _include[1..$-1];
+					include = _include.dup;
+				}
+				else
+				{
+					return null;
+				}
+				*/
+				include = Util.substitute( include, "\\", "/" );
+				originalFullPath = Path.normalize( originalFullPath );
+				
+				// Step 1: Relative from the directory of the source file
+				scope  _path = new FilePath( originalFullPath ); // Tail include /
+				char[] testPath = _path.path() ~ include;
+				_path.set( testPath ); // Reset
+				if( _path.exists() )
+					if( _path.isFile ) return testPath;
+
+
+				// Step 2: Relative from the current working directory
+				char[] dir = actionManager.ProjectAction.fileInProject( originalFullPath );
+				if( dir.length )
+				{
+					if( dir[$-1] != '/' ) dir ~= "/";
+					testPath = dir ~ include;
+
+					_path.set( testPath ); // Reset
+					if( _path.exists() ) 
+						if( _path.isFile ) return testPath;
+				}
+
+				testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
+				_path.set( testPath ); // Reset
+				if( _path.exists() )
+					if( _path.isFile ) return testPath;
+
+
+				// Step 3: Relative from addition directories specified with the -i command line option
+				// Work on Project
+				//char[] prjDir = actionManager.ProjectAction.fileInProject( originalFullPath );
+				char[] prjDir = GLOBAL.activeProjectPath;
+				if( prjDir.length )
+				{
+					//Stdout( "Project Dir: " ~ prjDir ).newline;
+					if( prjDir in GLOBAL.projectManager )
+					{
+						char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
+							
+						foreach( char[] s; _includeDirs )
+						{
+							testPath = s ~ "/" ~ include;
+							
+							_path.set( testPath ); // Reset
+
+							if( _path.exists() )
+								if( _path.isFile ) return testPath;
+						}
+					}
+				}
+
+				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
+				// Get Custom Compiler
+				char[] customOpt, customCompiler, fbcFullPath;
+				CustomToolAction.getCustomCompilers( customOpt, customCompiler );
+
+				if( customCompiler.length )
+					_path.set( Path.normalize( customCompiler ) );
+				else
+				{
+					char[] _compilerPath;
+					if( prjDir in GLOBAL.projectManager )
+					{
+						_compilerPath = GLOBAL.projectManager[prjDir].compilerPath;
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _compilerPath = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].Compiler;						
+					}
+					
+					if( _compilerPath.length )
+						_path.set( Path.normalize( _compilerPath ) );
+					else
+					{
+						version(Windows)
+						{
+							if( GLOBAL.editorSetting00.Bit64 == "OFF" ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
+						}
+						else
+						{
+							_compilerPath = GLOBAL.compilerFullPath;
+						}
+					}
+					
+					_path.set( Path.normalize( _compilerPath ) );
+				}
+
+				version( Windows )
+				{
+					testPath = _path.path() ~ "inc/" ~ include;
+				}
+				else
+				{
+					testPath = _path.path() ~ "../include/freebasic/" ~ include;
+				}
+	
+				_path.set( testPath ); // Reset
+				if( _path.exists() )
+					if( _path.isFile ) return testPath;
+			}
+			catch( Exception e )
+			{
+				IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			}
+			
+			return null;
+		}
 		
 
 		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, int _LEVEL )
@@ -2406,59 +2482,20 @@ version(FBIDE)
 			
 
 			CASTnode[]	results;
-			bool		bPrjFile;
+			//bool		bPrjFile;
 
 			CASTnode rootNode = ParserAction.getRoot( originalNode );
-			if( ProjectAction.fileInProject( rootNode.name, GLOBAL.activeProjectPath ) ) bPrjFile = true;
+			//if( ProjectAction.fileInProject( rootNode.name, GLOBAL.activeProjectPath ) ) bPrjFile = true;
 			
-			foreach( CASTnode _node; originalNode.getChildren )
+			foreach( CASTnode _node; getMembers( originalNode ) )
 			{
 				if( _node.kind & B_INCLUDE )
 				{
 					if( _node.lineNumber < 2147483647 )
 					{
-						//if( !checkBackThreadGoing ) return null;
-						
-						if( _node.type == "__FB_WIN32__" )
-						{
-							version(Windows)
-							{
-								//Stdout( "Include(Win32): " ~ _node.name ).newline;
-								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
-								if( _results.length ) results ~= _results;
-							}
-						}
-						else if( _node.type == "__FB_LINUX__" || _node.type == "__FB_UNIX__" )
-						{
-							version(linux)
-							{
-								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
-								if( _results.length ) results ~= _results;
-							}
-						}
-						else if( _node.type == "!__FB_WIN32__" )
-						{
-							version(Windows){}
-							else
-							{
-								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
-								if( _results.length ) results ~= _results;
-							}
-						}
-						else if( _node.type == "!__FB_LINUX__" || _node.type == "!__FB_UNIX__" )
-						{
-							version(linux){}
-							else
-							{
-								CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
-								if( _results.length ) results ~= _results;
-							}
-						}
-						else
-						{
-							CASTnode[] _result = check( _node.name, originalFullPath, _LEVEL );
-							if( _result.length ) results ~= _result;
-						}
+						//Stdout( _node.name ~ " " ~ Integer.toString( _LEVEL ) ).newline;
+						CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
+						if( _results.length ) results ~= _results;
 					}
 				}
 			}
@@ -3910,6 +3947,44 @@ version(FBIDE)
 					auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
 					auto		oriAST = AST_Head;
 					char[]		memberFunctionMotherName;
+					
+					// Get VersionCondition names
+					if( AST_Head is null ) return;
+					
+					AutoComplete.VersionCondition.length = 0;
+					
+					char[] options, compilers;
+					CustomToolAction.getCustomCompilers( options, compilers );
+					
+					char[] activePrjName = ProjectAction.getActiveProjectName;
+					if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+					if( options.length )
+					{	
+						int _versionPos = Util.index( options, "-d" );
+						while( _versionPos < options.length )
+						{
+							char[]	versionName;
+							bool	bBeforeSymbol = true;
+							for( int i = _versionPos + 2; i < options.length; ++ i )
+							{
+								if( options[i] == '\t' || options[i] == ' ' )
+								{
+									if( !bBeforeSymbol ) break; else continue;
+								}
+								else if( options[i] == '=' )
+								{
+									break;
+								}
+
+								versionName ~= options[i];
+							}								
+
+							if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
+							_versionPos = Util.index( options, "-d", _versionPos + 2 );
+						}								
+					}
+
+
 
 					if( !splitWord[0].length )
 					{

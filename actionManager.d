@@ -2768,11 +2768,11 @@ public:
 		return null;
 	}
 	
-		 static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line, int _kind = -1 )
+	static CASTnode getActiveASTFromLine( CASTnode _fatherNode, int line, int _kind = -1 )
 	{
 		version(FBIDE)
 		{
-			if( _kind == -1 ) _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_OPERATOR | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE | B_NAMESPACE;
+			if( _kind == -1 ) _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_OPERATOR | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE | B_NAMESPACE | B_VERSION;
 		}
 		version(DIDE)
 		{

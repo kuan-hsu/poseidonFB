@@ -158,6 +158,7 @@ version(FBIDE)
 		Tifdef,
 		Tifndef,
 		Tdefine,
+		Tdefined,
 		Tmacro,
 		Tendmacro,
 		Tlib,
@@ -337,6 +338,7 @@ version(FBIDE)
 			case "ifdef":		 return TOK.Tifdef;
 			case "ifndef":	 return TOK.Tifndef;
 			case "define":	 return TOK.Tdefine;
+			case "defined":	 return TOK.Tdefined;
 			case "macro":		 return TOK.Tmacro;
 			case "endmacro":	 return TOK.Tendmacro;
 			case "lib":		 		return TOK.Tlib;
