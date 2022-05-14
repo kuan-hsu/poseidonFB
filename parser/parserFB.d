@@ -167,11 +167,12 @@ version(FBIDE)
 							parseToken( TOK.Tdefined );
 							if( token().tok == TOK.Topenparen )
 							{
-								char[] symbolName = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-								if( symbolName.length > 2 )
+								parseToken( TOK.Topenparen );
+								if( token().tok == TOK.Tidentifier && next().tok == TOK.Tcloseparen )
 								{
-									symbolName = ( bNot ? "!" ~ symbolName[1..$-1] : symbolName[1..$-1] );
-									activeASTnode = activeASTnode.addChild( symbolName, B_VERSION, null, ( bNot ? "!" : "" ), null, token().lineNumber );
+									activeASTnode = activeASTnode.addChild( ( bNot ? "!" ~ token().identifier : token().identifier ), B_VERSION, null, ( bNot ? "!" : "" ), null, token().lineNumber );
+									parseToken( TOK.Tidentifier );
+									parseToken( TOK.Tcloseparen );
 								}
 							}
 						}
@@ -205,35 +206,28 @@ version(FBIDE)
 
 					case TOK.Tifdef:
 						parseToken( TOK.Tifdef );
-						activeASTnode = activeASTnode.addChild( token().identifier, B_VERSION, null, null, null, token().lineNumber );
+						if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( token().identifier, B_VERSION, null, null, null, token().lineNumber );
 						parseToken();
 						break;
 						
 					case TOK.Tifndef:
 						parseToken( TOK.Tifndef );
-						activeASTnode = activeASTnode.addChild( "!" ~ token().identifier, B_VERSION, null, "!", null, token().lineNumber );
+						if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( "!" ~ token().identifier, B_VERSION, null, "!", null, token().lineNumber );
 						parseToken();
 						break;
 						
 					case TOK.Telse:
 						if( activeASTnode.kind & B_VERSION )
 						{
-							char[] name, notSign;
+							char[] _name = activeASTnode.name;
+							activeASTnode = activeASTnode.getFather( token().lineNumber );
 							if( activeASTnode.name.length )
 							{
-								if( activeASTnode.name[0] == '!' )
-								{
-									name = activeASTnode.name[1..$];
-								}
+								if( _name[0] == '!' )
+									activeASTnode = activeASTnode.addChild( _name[1..$], B_VERSION, null, null, null, token().lineNumber );
 								else
-								{
-									name = "!" ~ activeASTnode.name;
-									notSign = "!";
-								}
+									activeASTnode = activeASTnode.addChild( "!" ~ _name, B_VERSION, null, "!", null, token().lineNumber );
 							}
-								
-							activeASTnode = activeASTnode.getFather( token().lineNumber );
-							activeASTnode = activeASTnode.addChild( name, B_VERSION, null, notSign, null, token().lineNumber );
 						}
 						parseToken( TOK.Telse );
 						break;

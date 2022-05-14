@@ -84,6 +84,7 @@ options=選項
 			uppercase=全大寫
 			lowercase=全小寫
 			mixercase=混合
+			usercase=自定義
 		setcustomtool=設定自訂工具...
 			customtool1=自訂工具(1)
 			customtool2=自訂工具(2)

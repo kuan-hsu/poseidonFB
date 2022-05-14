@@ -819,8 +819,11 @@ class CPreferenceDialog : CBaseDialog
 			Ihandle* radioKeywordCase3 = IupFlatToggle( GLOBAL.languageItems["mixercase"].toCString );
 			IupSetHandle( "radioKeywordCase3", radioKeywordCase3 );
 
-			Ihandle* hBoxKeywordCase = IupHbox( radioKeywordCase0, radioKeywordCase1, radioKeywordCase2, radioKeywordCase3, null );
-			IupSetAttributes( hBoxKeywordCase, "GAP=30,MARGIN=30x,ALIGNMENT=ACENTER" );
+			Ihandle* radioKeywordCase4 = IupFlatToggle( GLOBAL.languageItems["usercase"].toCString );
+			IupSetHandle( "radioKeywordCase4", radioKeywordCase4 );
+
+			Ihandle* hBoxKeywordCase = IupHbox( radioKeywordCase0, radioKeywordCase1, radioKeywordCase2, radioKeywordCase3, radioKeywordCase4, null );
+			IupSetAttributes( hBoxKeywordCase, "HOMOGENEOUS=YES,MARGIN=10x,ALIGNMENT=ACENTER" );
 
 			Ihandle* frameKeywordCase = IupFrame( IupRadio( hBoxKeywordCase ) );
 			IupSetAttributes( frameKeywordCase, "SIZE=346x,GAP=1" );
@@ -831,7 +834,8 @@ class CPreferenceDialog : CBaseDialog
 				case 0:		IupSetAttribute( radioKeywordCase0, "VALUE", "ON" ); break;
 				case 1:		IupSetAttribute( radioKeywordCase1, "VALUE", "ON" ); break;
 				case 2:		IupSetAttribute( radioKeywordCase2, "VALUE", "ON" ); break;
-				default:	IupSetAttribute( radioKeywordCase3, "VALUE", "ON" ); break;
+				case 3:		IupSetAttribute( radioKeywordCase3, "VALUE", "ON" ); break;
+				default:	IupSetAttribute( radioKeywordCase4, "VALUE", "ON" ); break;
 			}			
 		}
 		
@@ -2379,8 +2383,10 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.keywordCase = 1;
 			else if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase2" ), "VALUE" ) ) == "ON" )
 				GLOBAL.keywordCase = 2;
-			else
+			else if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase3" ), "VALUE" ) ) == "ON" )
 				GLOBAL.keywordCase = 3;
+			else
+				GLOBAL.keywordCase = 4;
 
 			if( GLOBAL.showFunctionTitle == "ON" )
 			{

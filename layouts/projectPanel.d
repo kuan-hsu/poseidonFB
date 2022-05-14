@@ -66,7 +66,7 @@ private:
 	{
 		// Outline Toolbar
 		projectButtonCollapse = IupButton( null, null );
-		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_collapse2,VISIBLE=NO" );
+		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_collapse2,VISIBLE=NO" );
 		IupSetAttribute( projectButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -115,7 +115,7 @@ private:
 		});
 
 		projectButtonHide = IupButton( null, null );
-		IupSetAttributes( projectButtonHide, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,IMAGE=icon_shift_l" );
+		IupSetAttributes( projectButtonHide, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_shift_l" );
 		IupSetAttribute( projectButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{

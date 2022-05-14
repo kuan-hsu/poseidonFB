@@ -995,7 +995,7 @@ class COutline
 	{
 		// Outline Toolbar
 		outlineButtonCollapse = IupButton( null, null );
-		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_collapse2,VISIBLE=NO" );
+		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_collapse2,VISIBLE=NO" );
 		IupSetAttribute( outlineButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( outlineButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1050,7 +1050,7 @@ class COutline
 		});
 		
 		outlineButtonPR = IupButton( null, "PR" );
-		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_pr,VISIBLE=NO,NAME=button_OutlinePR" );
+		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_pr,VISIBLE=NO,NAME=button_OutlinePR" );
 		IupSetAttribute( outlineButtonPR, "TIP", GLOBAL.languageItems["showpr"].toCString );
 		IupSetCallback( outlineButtonPR, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1106,12 +1106,12 @@ class COutline
 		
 
 		outlineToggleAnyWord = IupToggle( null, null );
-		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_wholeword,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineWholeWord" );
+		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_notwholeword,IMPRESS=icon_wholeword,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineWholeWord" );
 		IupSetAttribute( outlineToggleAnyWord, "TIP", GLOBAL.languageItems["searchanyword"].toCString );
 		
 
 		outlineButtonShowLinenum = IupToggle( null, null );
-		IupSetAttributes( outlineButtonShowLinenum, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_linenum,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineShowLinenum" );
+		IupSetAttributes( outlineButtonShowLinenum, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_linenum,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineShowLinenum" );
 		IupSetAttribute( outlineButtonShowLinenum, "TIP", GLOBAL.languageItems["showln"].toCString );
 		IupSetCallback( outlineButtonShowLinenum, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1140,7 +1140,7 @@ class COutline
 
 
 		outlineButtonFresh = IupButton( null, null );
-		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ARIGHT:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_refresh,VISIBLE=NO,NAME=button_OutlineRefresh" );
+		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_refresh,VISIBLE=NO,NAME=button_OutlineRefresh" );
 		IupSetAttribute( outlineButtonFresh, "TIP", GLOBAL.languageItems["sc_reparse"].toCString );
 		IupSetCallback( outlineButtonFresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1249,7 +1249,8 @@ class COutline
 			case 2:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_r" ~ tail ) ); break;
 			default:	IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_nopr" ~ tail ) ); break;
 		}
-		IupSetStrAttribute( outlineToggleAnyWord, "IMAGE", toStringz( "icon_wholeword" ~ tail ));
+		IupSetStrAttribute( outlineToggleAnyWord, "IMPRESS", toStringz( "icon_wholeword" ~ tail )); 
+		IupSetStrAttribute( outlineToggleAnyWord, "IMAGE", toStringz( "icon_notwholeword" ~ tail ));
 		IupSetStrAttribute( outlineButtonShowLinenum, "IMAGE", toStringz( "icon_show_linenum" ~ tail ) );
 		IupSetStrAttribute( outlineButtonFresh, "IMAGE", toStringz( "icon_refresh" ~ tail ) );
 		IupSetStrAttribute( outlineButtonHide, "IMAGE", toStringz( "icon_shift_l" ~ tail ) );

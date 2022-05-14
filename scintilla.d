@@ -365,12 +365,11 @@ class CScintilla
 		version(FBIDE)
 		{
 			if( tools.isParsableExt( mypath.ext, 7 ) ) IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic" );
-			IupSetAttribute(sci, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
-			IupSetAttribute(sci, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
-			IupSetAttribute(sci, "KEYWORDS2", GLOBAL.KEYWORDS[2].toCString );
-			IupSetAttribute(sci, "KEYWORDS3", GLOBAL.KEYWORDS[3].toCString );
-			IupSetAttribute(sci, "KEYWORDS4", GLOBAL.KEYWORDS[4].toCString );
-			IupSetAttribute(sci, "KEYWORDS5", GLOBAL.KEYWORDS[5].toCString );
+			for( int i = 0; i < 6; ++ i )
+			{
+				char[] _key = Util.trim( GLOBAL.KEYWORDS[i].toDString );
+				if( _key.length ) IupSetStrAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), toStringz( lowerCase( _key ) ) ); else IupSetAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), "" );
+			}
 		}
 		version(DIDE)
 		{
@@ -2174,7 +2173,6 @@ extern(C)
 	{
 		try
 		{
-			//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
 			AutoComplete.bAutocompletionPressEnter = false;
 			AutoComplete.bSkipAutoComplete = false;
 			if( c == 13 ) AutoComplete.bEnter = true; else AutoComplete.bEnter = false;
@@ -2183,6 +2181,10 @@ extern(C)
 			{
 				if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
+			}
+			else if( c == 65379 ) // INS
+			{
+				if( cast(int) IupScintillaSendMessage( ih, 2187, 0, 0 ) ) GLOBAL.statusBar.setIns( "INS" ); else GLOBAL.statusBar.setIns( "OVR" );
 			}
 			
 			if( GLOBAL.editorSetting00.AutoClose == "ON" )
@@ -2298,7 +2300,7 @@ extern(C)
 												if( lowerCase( _k ) == word )
 												{
 													IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
-													word = tools.convertKeyWordCase( GLOBAL.keywordCase, word );
+													word = tools.convertKeyWordCase( GLOBAL.keywordCase, _k );
 													IupSetAttribute( ih, "SELECTEDTEXT", toStringz( word ) );
 													IupScintillaSendMessage( ih, 2025, currentPos, 0 ); // sci_gotopos = 2025,
 													bExitFlag = true;

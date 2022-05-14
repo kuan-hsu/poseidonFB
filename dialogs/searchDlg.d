@@ -126,29 +126,29 @@ class CSearchExpander
 		
 		// Group 3
 		btnCase = IupToggle( null, null );
-		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,NAME=toggle_Case,SIZE=x12" );
+		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,NAME=toggle_Case,SIZE=x12,CANFOCUS=NO" );
 		version(DIDE) IupSetAttribute( btnCase, "VALUE", "ON" );
 		version(FBIDE) IupSetAttribute( btnCase, "VALUE", "OFF" );
 		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
 		IupSetCallback( btnCase, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnWhole = IupToggle( null, null );
-		IupSetAttributes( btnWhole, "IMAGE=icon_wholeword,FLAT=YES,VALUE=ON,NAME=toggle_Whole,SIZE=x12" );
+		IupSetAttributes( btnWhole, "IMAGE=icon_notwholeword,IMPRESS=icon_wholeword,FLAT=YES,VALUE=ON,NAME=toggle_Whole,SIZE=x12,CANFOCUS=NO" );
 		IupSetAttribute( btnWhole, "TIP", GLOBAL.languageItems["wholeword"].toCString );
 		IupSetCallback( btnWhole, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnScope = IupToggle( null, null );
-		IupSetAttributes( btnScope, "IMAGE=icon_selectall,FLAT=YES,VALUE=ON,NAME=toggle_Scope,SIZE=x12" );
+		IupSetAttributes( btnScope, "IMAGE=icon_selectall,FLAT=YES,VALUE=ON,NAME=toggle_Scope,SIZE=x12,CANFOCUS=NO" );
 		IupSetAttribute( btnScope, "TIP", GLOBAL.languageItems["scope"].toCString );
 		//IupSetCallback( btnScope, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnDirection = IupToggle( null, null );
-		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,FLAT=YES,VALUE=ON,NAME=toggle_Direction,SIZE=x12" );
+		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,FLAT=YES,VALUE=ON,NAME=toggle_Direction,SIZE=x12,CANFOCUS=NO" );
 		IupSetAttribute( btnDirection, "TIP", GLOBAL.languageItems["direction"].toCString );
 		//IupSetCallback( btnDirection, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 		
 		btnClose = IupButton( null, null );
-		IupSetAttributes( btnClose, "IMAGE=icon_close,FLAT=YES,NAME=btn_Close,SIZE=x12" );
+		IupSetAttributes( btnClose, "IMAGE=icon_close,FLAT=YES,NAME=btn_Close,SIZE=x12,CANFOCUS=NO" );
 		IupSetCallback( btnClose, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			GLOBAL.searchExpander.contract();
@@ -168,7 +168,23 @@ class CSearchExpander
 		IupSetAttributes( expander, "BARSIZE=0,STATE=CLOSE,BARPOSITION=BOTTOM" );
 		Ihandle* _backgroundbox = IupGetChild( expander, 0 );
 		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image
+		
+		//changeIcons();
 	}
+	
+	void changeIcons()
+	{
+		char[] tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
+
+		IupSetStrAttribute( btnCase, "IMAGE", toStringz( "icon_casesensitive" ~ tail ) );
+		IupSetStrAttribute( btnScope, "IMAGE", toStringz( "icon_selectall" ~ tail ) );
+		IupSetStrAttribute( btnClose, "IMAGE", toStringz( "icon_close" ~ tail ) );
+		IupSetStrAttribute( btnWhole, "IMAGE", toStringz( "icon_notwholeword" ~ tail ) );
+		IupSetStrAttribute( btnWhole, "IMPRESS", toStringz( "icon_wholeword" ~ tail ) );
+		IupSetStrAttribute( btnDirection, "IMAGE", toStringz( "icon_uparrow" ~ tail ) );
+		IupSetStrAttribute( btnDirection, "IMPRESS", toStringz( "icon_downarrow" ~ tail ) );
+	}	
 	
 	public:
 	
@@ -491,7 +507,8 @@ extern(C)
 					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Direction" );
 					if( direction_handle != null )
 					{
-						char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
+						char[]	targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
+						bool	bNext = fromStringz( IupGetAttribute( direction_handle, "VALUE" )) == "ON" ? true : false;
 						
 						if( targetText.length )
 						{
@@ -500,13 +517,17 @@ extern(C)
 								if( !ReplaceText.length )
 									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
+								{
+									int nowPos = ScintillaAction.getCurrentPos( iupSci );
 									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+									if( !bNext ) IupScintillaSendMessage( iupSci, 2025, nowPos , 0 );// SCI_GOTOPOS = 2025,
+								}
 								
 								DocumentTabAction.setFocus( iupSci );
 							}
 						}
 						
-						if( fromStringz( IupGetAttribute( direction_handle, "VALUE" )) == "ON" )
+						if( bNext )
 						{
 							actionManager.SearchAction.search( iupSci, findText, GLOBAL.searchExpander.searchRule, true );
 							actionManager.StatusBarAction.update();

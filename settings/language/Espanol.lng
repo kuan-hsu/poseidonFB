@@ -84,6 +84,7 @@ options=Opciones
 			uppercase=MAYÚSCULAS
 			lowercase=minúsculas
 			mixercase=Caso Mixto
+			usercase=Definir usuario
 		setcustomtool=Utilidades Personales
 			customtool1=Utiles (1)
 			customtool2=Utiles (2)

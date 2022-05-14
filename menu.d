@@ -661,7 +661,15 @@ void createMenu()
 			return IUP_DEFAULT;
 		});	
 
-		Ihandle* caseSubMenu = IupMenu( upperCaseHandle, lowerCaseHandle, mixedCase, null  );
+		Ihandle* userCase = IupItem( GLOBAL.languageItems["usercase"].toCString, null );
+		//IupSetAttribute(mixedCase, "IMAGE", "icon_linux");
+		IupSetCallback( userCase, "ACTION", cast(Icallback) function( Ihandle* ih )
+		{
+			_convertKeyWordCase( 4 );
+			return IUP_DEFAULT;
+		});
+		
+		Ihandle* caseSubMenu = IupMenu( upperCaseHandle, lowerCaseHandle, mixedCase, userCase, null  );
 		Ihandle* convertCase = IupSubmenu( GLOBAL.languageItems["convertcase"].toCString, caseSubMenu );
 	}
 	
@@ -723,7 +731,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.493)  2022.05.02\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.494)  2022.05.14\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.074)  2022.05.02\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});

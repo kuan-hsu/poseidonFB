@@ -267,7 +267,7 @@ void load_all_images_icons()
 	XPM.createIUPimageHandle( "icons/xpm/collapse1.xpm", "icon_collapse1" );
 	XPM.createIUPimageHandle( "icons/xpm/importall.xpm", "icon_importall" );
 	XPM.createIUPimageHandle( "icons/xpm/manual.xpm", "icon_manual" );
-	XPM.createIUPimageHandle( "icons/xpm/wholeword.xpm", "icon_wholeword" );
+	//XPM.createIUPimageHandle( "icons/xpm/wholeword.xpm", "icon_wholeword" );
 	XPM.createIUPimageHandle( "icons/xpm/casesensitive.xpm", "icon_casesensitive" );
 	XPM.createIUPimageHandle( "icons/xpm/close.xpm", "icon_close" );
 	XPM.createIUPimageHandle( "icons/xpm/selectall.xpm", "icon_selectall" );
@@ -316,6 +316,7 @@ void load_all_images_icons()
 	XPM.createIUPimageHandle( "icons/xpm/show_r.xpm", "icon_show_r", true );
 	XPM.createIUPimageHandle( "icons/xpm/show_nopr.xpm", "icon_show_nopr", true );
 	XPM.createIUPimageHandle( "icons/xpm/wholeword.xpm", "icon_wholeword", true );
+	XPM.createIUPimageHandle( "icons/xpm/notwholeword.xpm", "icon_notwholeword", true );
 	XPM.createIUPimageHandle( "icons/xpm/show_linenum.xpm", "icon_show_linenum", true );
 	XPM.createIUPimageHandle( "icons/xpm/refresh.xpm", "icon_refresh", true );
 

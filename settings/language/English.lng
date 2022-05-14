@@ -84,6 +84,7 @@ options=Options
 			uppercase=UPPERCASE
 			lowercase=lowercase
 			mixercase=Mixedcase
+			usercase=User Define
 		setcustomtool=Set Custom Tools...
 			customtool1=Custom Tool(1)
 			customtool2=Custom Tool(2)

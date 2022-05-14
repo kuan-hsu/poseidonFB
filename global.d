@@ -610,6 +610,7 @@ struct GLOBAL
 					GLOBAL.languageItems["uppercase"] = new IupString( cast(char[]) "UPPERCASE" );
 					GLOBAL.languageItems["lowercase"] = new IupString( cast(char[]) "lowercase" );
 					GLOBAL.languageItems["mixercase"] = new IupString( cast(char[]) "Mixedcase" );
+					GLOBAL.languageItems["usercase"] = new IupString( cast(char[]) "User Define" );
 				GLOBAL.languageItems["setcustomtool"] = new IupString( cast(char[]) "Set Custom Tools..." );
 					GLOBAL.languageItems["customtool1"] = new IupString( cast(char[]) "Custom Tool(1)" );
 					GLOBAL.languageItems["customtool2"] = new IupString( cast(char[]) "Custom Tool(2)" );

@@ -2595,7 +2595,7 @@ public:
 				int pos = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2008, 0, 0 );
 				int line = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, pos, 0 ) + 1; // 0 based
 				int col = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2129, pos, 0 ) + 1;  // 0 based
-				int bOverType = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2187, pos, 0 );
+				int bOverType = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2187, 0, 0 );
 				int eolType = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2030, 0, 0 );
 
 				scope Layouter = new Layout!(char)();

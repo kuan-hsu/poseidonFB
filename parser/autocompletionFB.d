@@ -4096,7 +4096,7 @@ version(FBIDE)
 						{
 							if( i == 0 )
 							{
-								CASTnode[] matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], B_FIND | B_SUB );
+								CASTnode[] matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], B_FIND | B_SUB | B_ENUMMEMBER );
 								if( !matchNodes.length )
 								{
 									// For Type Objects

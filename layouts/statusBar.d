@@ -537,6 +537,7 @@ extern(C) // Callback for CBaseDialog
 				{
 					GLOBAL.editorSetting00.EolType = "2";
 					foreach( cSci; GLOBAL.scintillaManager )
+					
 						if( cSci !is null )	IupScintillaSendMessage( cSci.getIupScintilla, 2031, 2, 0 ); // SCI_SETEOLMODE	= 2031
 
 					StatusBarAction.update();
