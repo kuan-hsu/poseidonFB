@@ -8,7 +8,7 @@ import layouts.statusBar;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
 
-import tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
+import tango.io.Stdout, tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
 import tango.sys.win32.UserGdi;
 
 void createExplorerWindow()
@@ -515,13 +515,14 @@ extern(C)
 					{
 						if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
 						{
+							/*
 							char[] s = ScintillaAction.getCurrentChar( -1, cSci.getIupScintilla );
 							if( s.length ) c = cast(int) s[$-1];
-							//GLOBAL.messagePanel.printOutputPanel( "Keycode:" ~ Integer.toString( c ) );
-							
+							Stdout( "Keycode:" , Integer.toString( GLOBAL.KeyNumber ) ~ " " ~ Integer.toString( c ) ).newline;
+							*/
 							switch( c )
 							{
-								case 10, 13: // Eneter
+								case 10, 13: // DEL, Eneter
 									switch( GLOBAL.liveLevel )
 									{
 										case 1:
@@ -544,7 +545,7 @@ extern(C)
 									}
 									break;
 
-								case 8, 9, 65535:
+								case 8, 9, 65535: // BACKSPACE, TAB, DEL
 									switch( GLOBAL.liveLevel )
 									{
 										case 1: LiveParser.parseCurrentLine(); break;
@@ -552,15 +553,18 @@ extern(C)
 										default:
 									}
 									break;
-									
+										
 								default:
-									if( c > 31 && c < 127 )
+									if( GLOBAL.liveLevel == 2 )
 									{
-										switch( GLOBAL.liveLevel )
+										if( c > 31 && c < 127 )
 										{
-											case 1: LiveParser.parseCurrentLine(); break;
-											case 2: LiveParser.parseCurrentBlock(); break;
-											default:
+											switch( GLOBAL.liveLevel )
+											{
+												case 1: LiveParser.parseCurrentLine(); break;
+												case 2: LiveParser.parseCurrentBlock(); break;
+												default:
+											}
 										}
 									}
 							}
@@ -575,6 +579,7 @@ extern(C)
 		
 			GLOBAL.bKeyUp = true; // Release
 			GLOBAL.KeyNumber = -1;
+			//Stdout( "KEYUP = " ~ Integer.toString( c ) ).newline;
 		}
 		else
 		{

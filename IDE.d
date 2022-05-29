@@ -133,7 +133,7 @@ public:
 			doc ~= setINILineData( "language", GLOBAL.language );
 			
 			for( int i = 0; i < 6; ++ i )
-				doc ~= setINILineData( "keyword" ~ Integer.toString( i ), Util.trim( GLOBAL.KEYWORDS[i].toDString ) );
+				doc ~= setINILineData( "keyword" ~ Integer.toString( i ), Util.trim( GLOBAL.KEYWORDS[i] ) );
 
 			for( int i = 1; i < 10; ++ i )
 				doc ~= setINILineData( "customtools" ~ Integer.toString( i ), Util.trim( GLOBAL.customTools[i].name.toDString ) ~ "," ~ Util.trim( GLOBAL.customTools[i].dir.toDString ) ~ "," ~ Util.trim( GLOBAL.customTools[i].args.toDString ) );

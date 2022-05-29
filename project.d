@@ -41,7 +41,7 @@ struct PROJECT
 	char[][]	others;
 	char[][]	misc;
 	
-	version(DIDE) char[][]	defaultImportPaths;
+	//version(DIDE) char[][]	defaultImportPaths;
 	
 	// Focus
 	char[]					focusOn;
@@ -222,7 +222,7 @@ struct PROJECT
 							case "Comment":			s.comment = right;						break;
 							case "CompilerPath":
 								s.compilerPath = right;					
-								version(DIDE) if( right.length ) s.defaultImportPaths = tools.getImportPath( right );
+								//version(DIDE) if( right.length ) s.defaultImportPaths = tools.getImportPath( right );
 								break;
 							default:
 						}

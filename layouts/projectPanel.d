@@ -270,14 +270,29 @@ private:
 						if( !_child.type.length )
 						{
 							foreach( char[] v; AutoComplete.VersionCondition )
-								if( symbol == upperCase( v ) ) result ~= getVersionIncludes( _child );
+							{
+								if( symbol == upperCase( v ) )
+								{
+									result ~= getVersionIncludes( _child );
+									break;
+								}
+							}
 						}
 						else
 						{
 							if( AutoComplete.VersionCondition.length )
 							{
+								bool bMatchTrue;
 								foreach( char[] v; AutoComplete.VersionCondition )
-									if( symbol[1..$] != upperCase( v ) ) result ~= getVersionIncludes( _child );
+								{
+									if( symbol[1..$] == upperCase( v ) )
+									{
+										bMatchTrue = true;
+										break;
+									}
+								}
+							
+								if( !bMatchTrue ) result ~= getVersionIncludes( _child );							
 							}
 							else
 							{

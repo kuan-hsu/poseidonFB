@@ -731,7 +731,7 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.494)  2022.05.14\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.495)  2022.05.29\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.074)  2022.05.02\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});
@@ -938,9 +938,9 @@ version(FBIDE)
 			Ihandle* iupSci = cSci.getIupScintilla;
 			IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
 			
-			foreach( IupString _s; GLOBAL.KEYWORDS )
+			foreach( char[] _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] targetText; Util.split( _s.toDString, " " ) )
+				foreach( char[] targetText; Util.split( _s, " " ) )
 				{
 					if( targetText.length )
 					{

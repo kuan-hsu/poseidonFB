@@ -5,6 +5,15 @@ import Util = tango.text.Util, tango.io.device.File, tango.io.stream.Lines, tang
 import global;
 import iup.iup;
 
+version( D_Version2 )
+{
+}
+else
+{	
+	alias char[] string;
+}
+
+
 version(DIDE)
 {
 	class CContainer( T )

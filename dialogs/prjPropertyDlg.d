@@ -632,9 +632,6 @@ extern(C) // Callback for CProjectPropertiesDialog
 					CProjectPropertiesDialog.tempProject.compilerOption	= Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE" ) ) ).dup;
 					CProjectPropertiesDialog.tempProject.compilerPath = Util.trim( fromStringz( IupGetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE" ) ) ).dup;
 					
-					// Uppdate Project Default Import Path
-					version(DIDE) if( CProjectPropertiesDialog.tempProject.compilerPath.length ) CProjectPropertiesDialog.tempProject.defaultImportPaths = tools.getImportPath( CProjectPropertiesDialog.tempProject.compilerPath );
-					
 					CProjectPropertiesDialog.tempProject.includeDirs.length = 0;
 					int		includeCount = IupGetInt( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "COUNT" );
 					for( int i = 1; i <= includeCount; i++ )

@@ -199,57 +199,35 @@ struct LiveParser
 		}
 	}
 
-	static void parseCurrentLine( int _ln = -1 )
+	static void parseCurrentLine( int _ln = -1, char[] _text = "" )
 	{
 		try
 		{
 			auto cSci = ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
 			{
-				int currentPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+				char[]	currentLineText;
+				int		currentLineNum;
 
-				if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
-				
-				int	currentLineNum; // = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-				char[] currentLineText; // = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
-				
-				if( _ln != -1 )
+				if( _text.length )
 				{
+					currentLineText = _text;
 					currentLineNum = _ln;
-					currentLineText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", _ln - 1 ) ).dup; // 0 BASE
 				}
 				else
 				{
-					currentLineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-					currentLineText = fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
+					int currentPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
+					currentLineNum = ( _ln != -1 ) ? _ln : cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
+					currentLineText = ( _ln != -1 ) ? fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", _ln - 1 ) ).dup : fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ).dup;
 				}
 				
-				if( !Util.trim( currentLineText).length ) return;
+				int	lineHeadPostion = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2167, currentLineNum - 1, 0 );
+				int currentLineTextLength = Util.trim( currentLineText).length;
 			
-				
 				CASTnode 	oldHead = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), currentLineNum );
-
 				if( oldHead is null ) return;
-
-				/*
-				version(DIDE)
-				{
-					int			D_KIND;
-
-					if( D_KIND & ( D_STRUCT | D_CLASS | D_UNION | D_ENUM ) )
-					{
-						if( oldHead.lineNumber == oldHead.endLineNum ) return; // Not Complete Block
-						newHead = GLOBAL.outlineTree.parserText( currentLineText );
-					}
-					else
-					{
-						newHead = GLOBAL.outlineTree.parserText( currentLineText );
-					}
-				}
-				*/
-				
+					
 				CASTnode	newHead = GLOBAL.outlineTree.parserText( currentLineText );
-
 				if( newHead !is null )
 				{
 					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr
@@ -271,7 +249,8 @@ struct LiveParser
 						}
 						return;
 					}
-
+					
+					/+
 					// Check ParsedTree HEAD, like B_BAS / B_BI
 					if( oldHead.getChildrenCount == 0 )
 					{
@@ -282,6 +261,7 @@ struct LiveParser
 							return;
 						}
 					}
+					+/
 
 					CASTnode[] newChildren;
 					foreach( CASTnode node; newHead.getChildren() )
@@ -311,8 +291,23 @@ struct LiveParser
 					
 					delete newHead;
 				}
-				else
+				else // If No any tokens, parser will return null
 				{
+					GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
+					oldHead = delChildrenByLineNum( oldHead, currentLineNum );
+					/+
+					Stdout( "newHead is null").newline;
+					if( ScintillaAction.isComment( cSci.getIupScintilla, lineHeadPostion ) || currentLineTextLength == 0 ) // If No any tokens, parser will return null
+					{
+						GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
+						oldHead = delChildrenByLineNum( oldHead, currentLineNum );					
+					}
+					else if( currentLineText[0] == '\'' )
+					{
+						GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
+						oldHead = delChildrenByLineNum( oldHead, currentLineNum );
+					}
+					+/
 				}
 			}
 		}

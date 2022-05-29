@@ -66,7 +66,7 @@ public:
 			IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "freebasic");
 			for( int i = 0; i < 6; ++i )
 			{
-				char[] _key = Util.trim( GLOBAL.KEYWORDS[i].toDString );
+				char[] _key = Util.trim( GLOBAL.KEYWORDS[i] );
 				if( _key.length ) IupSetStrAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), toStringz( lowerCase( _key ) ) ); else IupSetAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), "" );
 			}			
 			/*
@@ -80,13 +80,13 @@ public:
 		}
 		version(DIDE)
 		{
-			IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "d");
-			IupSetAttribute( searchOutputPanel, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS3", GLOBAL.KEYWORDS[2].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS4", GLOBAL.KEYWORDS[3].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS5", GLOBAL.KEYWORDS[4].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS6", GLOBAL.KEYWORDS[5].toCString );
+			IupSetStrAttribute( searchOutputPanel, "LEXERLANGUAGE", "d");
+			if( GLOBAL.KEYWORDS[0].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS0", toStringz( GLOBAL.KEYWORDS[0] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS0", "" );
+			if( GLOBAL.KEYWORDS[1].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS1", toStringz( GLOBAL.KEYWORDS[1] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS1", "" );
+			if( GLOBAL.KEYWORDS[2].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS3", toStringz( GLOBAL.KEYWORDS[2] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS3", "" );
+			if( GLOBAL.KEYWORDS[3].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS4", toStringz( GLOBAL.KEYWORDS[3] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS4", "" );
+			if( GLOBAL.KEYWORDS[4].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS5", toStringz( GLOBAL.KEYWORDS[4] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS5", "" );
+			if( GLOBAL.KEYWORDS[5].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS6", toStringz( GLOBAL.KEYWORDS[5] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS6", "" );
 		}
 		
 		IupSetAttribute( searchOutputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12

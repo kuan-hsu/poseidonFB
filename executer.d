@@ -67,6 +67,31 @@ struct ExecuterAction
 		return false;
 	}
 	
+	version(DIDE)
+	{
+		static int DMDversion( char[] path )
+		{
+			try
+			{
+				Process p = new Process( true, path ~ " --version" );
+				p.execute;
+				auto result = p.wait();
+				
+				char[512] buffer; 
+				int _length = p.stdout.read( buffer );
+				
+				if( _length > 0 )
+					if( Util.index( buffer, "v2" ) < buffer.length ) return 2;
+			}
+			catch(Exception e)
+			{
+				return 1;
+			}
+			
+			return 1;
+		}
+	}
+	
 	
 	version(linux)
 	{
@@ -1929,6 +1954,7 @@ struct ExecuterAction
 			}
 			
 			if( !checkCompilerExists( fbcFullPath ) ) return false;
+			//version(DIDE) if( DMDversion( fbcFullPath ) == 2 ) IupMessage( "2", "2" ); else IupMessage( "1", "1" );
 			
 			
 			if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
@@ -2176,6 +2202,7 @@ struct ExecuterAction
 			
 			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
 			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:WINDOWS";
+			
 
 			
 			// Using Thread

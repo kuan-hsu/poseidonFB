@@ -997,7 +997,50 @@ version(DIDE)
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
 				//char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
-				char[] prjDir = GLOBAL.activeProjectPath;
+				char[]		prjDir = GLOBAL.activeProjectPath;
+				char[][]	_includeDirs;
+				char[]		actCompilerFullPath = CustomToolAction.getActiveCompilerPath( _includeDirs );
+				if( prjDir.length )
+				{
+					foreach( char[] s; _includeDirs )
+					{
+						if(s[$-1] != '/' || s[$-1] != '\\' ) s ~= '/';
+						importFullPath = s ~ importName;
+						
+						_path.set( importFullPath ~ ".d" ); // Reset
+						if( _path.exists() ) return _path.toString();
+
+						_path.suffix(".di" );
+						if( _path.exists() ) return _path.toString();
+						
+						// Check Package Module
+						_path.set( importFullPath ~ "/package.d" );
+						if( _path.exists ) return _path.toString();
+					}
+				}
+				
+				if( actCompilerFullPath != GLOBAL.defaultCompilerPath )
+				{
+					GLOBAL.defaultCompilerPath = actCompilerFullPath;
+					GLOBAL.defaultImportPaths = tools.getImportPath( actCompilerFullPath );
+				}
+				
+				foreach( char[] _p; GLOBAL.defaultImportPaths )
+				{
+					importFullPath = _p ~ importName;
+					
+					_path.set( importFullPath ~ ".d" );
+					if( _path.exists() ) return _path.toString();
+
+					_path.suffix(".di" );
+					if( _path.exists() ) return _path.toString();
+
+					// Check Package Module
+					_path.set( importFullPath ~ "/package.d" );
+					if( _path.exists ) return _path.toString();
+				}					
+				
+				/+
 				if( prjDir.length )
 				{
 					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
@@ -1073,7 +1116,8 @@ version(DIDE)
 						_path.set( importFullPath ~ "/package.d" );
 						if( _path.exists ) return _path.toString();
 					}
-				}		
+				}
+				+/
 			}
 
 			return null;
@@ -1803,9 +1847,9 @@ version(DIDE)
 
 		static void keyWordlist( char[] word )
 		{
-			foreach( IupString _s; GLOBAL.KEYWORDS )
+			foreach( char[] _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] s; Util.split( _s.toDString, " " ) )
+				foreach( char[] s; Util.split( _s, " " ) )
 				{
 					if( s.length )
 					{
@@ -2477,16 +2521,31 @@ version(DIDE)
 				// Work on Project
 				FilePath[]  _path2, _path3;
 				
-				char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
+				char[]		prjDir = actionManager.ProjectAction.getActiveProjectDir();
+				char[][]	_includeDirs;
+				char[]		actCompilerFullPath = CustomToolAction.getActiveCompilerPath( _includeDirs );
+				
 				if( prjDir.length )
 				{
-					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-					if( GLOBAL.projectManager[prjDir].focusOn.length )
-						if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
-				
 					foreach( char[] s; _includeDirs )
 						_path3 ~= new FilePath( s );
+				}
+				
+				if( actCompilerFullPath != GLOBAL.defaultCompilerPath )
+				{
+					GLOBAL.defaultCompilerPath = actCompilerFullPath;
+					GLOBAL.defaultImportPaths = tools.getImportPath( actCompilerFullPath );
+				}
 
+				foreach( char[] _p; GLOBAL.defaultImportPaths )
+					_path2 ~= new FilePath( _p );				
+				
+				/+
+				if( prjDir.length )
+				{
+					foreach( char[] s; _includeDirs )
+						_path3 ~= new FilePath( s );
+						
 
 					if( GLOBAL.projectManager[prjDir].compilerPath.length )
 					{
@@ -2506,7 +2565,7 @@ version(DIDE)
 					foreach( char[] _p; GLOBAL.defaultImportPaths )
 						_path2 ~= new FilePath( _p );
 				}
-				
+				+/
 
 				int index;
 				for( int i = 0; i < words.length; ++ i )
@@ -3348,7 +3407,7 @@ version(DIDE)
 						if( string.length )
 						{
 							// Get cwd
-							char[] cwdPath = getMotherPath_D_MODULE( AST_Head, true );;
+							char[] cwdPath = getMotherPath_D_MODULE( AST_Head, true );
 							
 							/+
 							auto headNode = AST_Head;

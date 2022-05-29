@@ -257,7 +257,7 @@ struct XPM
 			scope file = new File( filePath, File.ReadExisting );
 			int 		count, colorSN, rPos;
 			bool 		bPixel, bColor;
-			int			quoteLineCount, width, height, num_colors, chars_per_pixel;;
+			int			quoteLineCount, width, height, num_colors, chars_per_pixel;
 			char[]		prevLine, pixel;
 			ColorUnit[]	color;
 			
@@ -379,7 +379,7 @@ struct XPM
 			scope file = new File( filePath, File.ReadExisting );
 			int 		count, colorSN, rPos;
 			bool 		bPixel, bColor;
-			int			quoteLineCount, width, height, num_colors, chars_per_pixel;;
+			int			quoteLineCount, width, height, num_colors, chars_per_pixel;
 			char[]		prevLine, pixel;
 			ColorUnit[]	color;
 			

@@ -39,6 +39,7 @@ version(FBIDE)
 			}
 		}
 		
+		
 		static CASTnode[]					extendedClasses;
 		static SortedMap!(char[], char[])	map;
 		static Stack!(char[])				calltipContainer;
@@ -50,6 +51,7 @@ version(FBIDE)
 		static char[][]						VersionCondition;
 
 		static char[]						showTypeContent;
+		static char[]						includesFromPath;
 
 		class CShowListThread : Thread
 		{
@@ -95,6 +97,9 @@ version(FBIDE)
 				}
 				
 				auto oriAST = AST_Head;
+				
+				checkVersionSpec( AST_Head, lineNum );
+				
 				result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
 				char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
 				if( usingNames.length )
@@ -236,7 +241,7 @@ version(FBIDE)
 		static CShowListThread showCallTipThread;
 		static Ihandle* timer = null;
 		
-		static void cleanIncludesMarkContainer()
+		static void cleanIncludesMarkContainer( int level = -1)
 		{
 			foreach( char[] key; includesMarkContainer.keys )
 				includesMarkContainer.remove( key );
@@ -596,17 +601,21 @@ version(FBIDE)
 
 			if( includeFullPath.length )
 			{
+				bool bAlreadyExisted = ( fullPathByOS(includeFullPath) in includesMarkContainer ) ? true : false;
+				
 				if( GLOBAL.includeLevel < 0 )
-				{
-					if( fullPathByOS(includeFullPath) in includesMarkContainer ) return null;
-				}
+					if( bAlreadyExisted ) return null;
+
 
 				CASTnode includeAST;
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
 				{
-					includesMarkContainer[fullPathByOS(includeFullPath)] = GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-	
-					results ~= GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+					if( !bAlreadyExisted )
+					{
+						includesMarkContainer[fullPathByOS(includeFullPath)] = GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+						results ~= GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+					}
+					
 					results ~= getIncludes( GLOBAL.parserManager[fullPathByOS(includeFullPath)], includeFullPath, _LEVEL );
 				}
 				else
@@ -615,23 +624,7 @@ version(FBIDE)
 					
 					if( _createFileNode !is null )
 					{
-						// Comment for thread call, prevents infinite loop / crash
-						/*
-						if( GLOBAL.editorSetting00.Message == "ON" ) 
-						{
-							if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
-							{
-								version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );
-							}
-							else
-							{
-								GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );
-							}
-						}
-						*/
-						
 						includesMarkContainer[fullPathByOS(includeFullPath)] = _createFileNode;
-						
 						results ~= _createFileNode;
 						results ~= getIncludes( _createFileNode, includeFullPath, _LEVEL );
 					}
@@ -836,7 +829,7 @@ version(FBIDE)
 			{
 				if( includeAST !is null )
 				{
-					foreach( child; includeAST.getChildren )
+					foreach( child; getMembers( includeAST ) )
 					{
 						if( child.name.length )
 						{
@@ -890,7 +883,7 @@ version(FBIDE)
 			{
 				if( includeAST !is null )
 				{
-					foreach( child; includeAST.getChildren )
+					foreach( child; getMembers( includeAST ) )
 					{
 						if( child.kind & B_NAMESPACE )
 						{
@@ -1195,7 +1188,7 @@ version(FBIDE)
 
 			foreach( CASTnode _child; childrenNodes )
 			{
-				if( _child.kind & B_VERSION )
+				if( _child.kind == B_VERSION )
 				{
 					char[] symbol = upperCase( _child.name );
 					char[] noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
@@ -1251,14 +1244,29 @@ version(FBIDE)
 						if( !_child.type.length )
 						{
 							foreach( char[] v; VersionCondition )
-								if( symbol == upperCase( v ) ) result ~= getMembers( _child );
+							{
+								if( symbol == upperCase( v ) )
+								{
+									result ~= getMembers( _child );
+									break;
+								}
+							}
 						}
 						else
 						{
 							if( VersionCondition.length )
 							{
+								bool bMatchTrue;
 								foreach( char[] v; VersionCondition )
-									if( symbol[1..$] != upperCase( v ) ) result ~= getMembers( _child );
+								{
+									if( symbol[1..$] == upperCase( v ) )
+									{
+										bMatchTrue = true;
+										break;
+									}
+								}
+							
+								if( !bMatchTrue ) result ~= getMembers( _child );
 							}
 							else
 							{
@@ -1592,9 +1600,9 @@ version(FBIDE)
 
 		static void keyWordlist( char[] word )
 		{
-			foreach( IupString _s; GLOBAL.KEYWORDS )
+			foreach( char[] _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] s; Util.split( _s.toDString, " " ) )
+				foreach( char[] s; Util.split( _s, " " ) )
 				{
 					if( s.length )
 					{
@@ -1729,6 +1737,55 @@ version(FBIDE)
 			}
 			
 			return null;
+		}
+		
+
+		static void checkVersionSpec( CASTnode AST_Head, int lineNum )
+		{
+			if( AST_Head is null ) return;
+			
+			foreach( CASTnode _friends; getMembers( AST_Head ) )
+			{
+				if( _friends.kind == ( B_DEFINE | B_VERSION ) )
+					if( _friends.lineNumber < lineNum ) VersionCondition ~= _friends.name;
+			}
+			
+			if( AST_Head.getFather !is null )
+				checkVersionSpec( AST_Head.getFather, lineNum );
+			else
+			{
+				if( includesFromPath != AST_Head.name ) includesFromPath = AST_Head.name;
+				cleanIncludesMarkContainer();
+				
+				if( GLOBAL.includeLevel != 0 )
+				{
+					int oriIncludeLevel = GLOBAL.includeLevel;
+					
+					// Heavy slow down the spped, only check only 2-steps
+					// if( GLOBAL.includeLevel > 2 ) GLOBAL.includeLevel = 2; // Comment this line to get full-check
+					auto dummy = getIncludes( AST_Head, AST_Head.name, 0 );
+					foreach( _includeNode; includesMarkContainer )
+					{
+						foreach( CASTnode _friends; getMembers( _includeNode ) )
+						{
+							if( _friends.kind == ( B_DEFINE | B_VERSION ) ) 
+							{
+								if( _friends.getFather.kind == B_VERSION )
+									if( _friends.getFather.type.length )
+										if( upperCase( _friends.name ) == upperCase( _friends.getFather.name[1..$] ) ) continue; // Skip the C-style include once
+								
+								VersionCondition ~= _friends.name;
+							}
+						}
+					}
+					
+					GLOBAL.includeLevel = oriIncludeLevel;
+				}
+				/*
+				foreach( char[] s; VersionCondition )
+					Stdout( s ).newline;
+				*/
+			}
 		}
 		
 		
@@ -1875,7 +1932,11 @@ version(FBIDE)
 				}
 			}
 			
-			cleanIncludesMarkContainer();
+			if( includesFromPath != fullPath )
+			{
+				includesFromPath = fullPath;
+				cleanIncludesMarkContainer();
+			}
 			
 			CASTnode[] nameSpaceNodes;
 			for( int i = 0; i < splitWord.length; i++ )
@@ -1918,9 +1979,9 @@ version(FBIDE)
 							{
 								if( bPushContainer )
 								{
-									foreach( IupString _s; GLOBAL.KEYWORDS )
+									foreach( char[] _s; GLOBAL.KEYWORDS )
 									{
-										foreach( char[] s; Util.split( _s.toDString, " " ) )
+										foreach( char[] s; Util.split( _s, " " ) )
 										{
 											if( s.length )
 											{
@@ -1943,7 +2004,6 @@ version(FBIDE)
 								
 								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i] );
 								
-								//cleanIncludesMarkContainer();
 								// For Type Objects
 								if( memberFunctionMotherName.length )
 								{
@@ -3537,8 +3597,9 @@ version(FBIDE)
 					}
 					
 					auto oriAST = AST_Head;
-					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
 					
+					checkVersionSpec( AST_Head, lineNum );
+					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
 					char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
 					if( usingNames.length )
 					{
@@ -3849,9 +3910,9 @@ version(FBIDE)
 
 								if( splitWord[0].length )
 								{
-									foreach( IupString _s; GLOBAL.KEYWORDS )
+									foreach( char[] _s; GLOBAL.KEYWORDS )
 									{
-										foreach( char[] targetText; Util.split( _s.toDString, " " ) )
+										foreach( char[] targetText; Util.split( _s, " " ) )
 										{
 											if( targetText == splitWord[0] )
 											{
@@ -3951,7 +4012,7 @@ version(FBIDE)
 					// Get VersionCondition names
 					if( AST_Head is null ) return;
 					
-					AutoComplete.VersionCondition.length = 0;
+					VersionCondition.length = 0;
 					
 					char[] options, compilers;
 					CustomToolAction.getCustomCompilers( options, compilers );
@@ -3984,8 +4045,8 @@ version(FBIDE)
 						}								
 					}
 
-
-
+					checkVersionSpec( AST_Head, lineNum );
+					
 					if( !splitWord[0].length )
 					{
 						if( AST_Head.kind & B_WITH )
@@ -4085,7 +4146,8 @@ version(FBIDE)
 							+/
 					}
 					
-					cleanIncludesMarkContainer();
+					// Comment at 2022/05/28
+					//cleanIncludesMarkContainer();
 					
 					// Nested 2021.09.01, for Namespace
 					CASTnode _analysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
@@ -5059,6 +5121,8 @@ version(FBIDE)
 							CASTnode	AST_Head;
 							int			lineNum;
 							char[][] 	splitWord = getNeedDataForThread( ih, text, pos, lineNum, bDot, bCallTip, AST_Head );
+							
+							//checkVersionSpec( AST_Head, lineNum );
 							
 							showListThread = new CShowListThread( AST_Head, pos, lineNum, bDot, bCallTip, splitWord, text );
 							showListThread.start();

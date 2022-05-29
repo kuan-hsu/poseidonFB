@@ -4,7 +4,7 @@ private import iup.iup, iup.iup_scintilla;
 
 private import layouts.table;
 
-private import global, menu, IDE, project, tools, scintilla, actionManager, parser.autocompletion;;
+private import global, menu, IDE, project, tools, scintilla, actionManager, parser.autocompletion;
 private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg, dialogs.shortcutDlg;
 
 private import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath, Util = tango.text.Util;
@@ -1623,27 +1623,27 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* keyWordText0 = IupText( null );
 		IupSetAttributes( keyWordText0, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetAttribute( keyWordText0, "VALUE", GLOBAL.KEYWORDS[0].toCString );
+		IupSetStrAttribute( keyWordText0, "VALUE", toStringz( GLOBAL.KEYWORDS[0] ) );
 		IupSetHandle( "keyWordText0", keyWordText0 );
 		Ihandle* keyWordText1 = IupText( null );
 		IupSetAttributes( keyWordText1, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetAttribute( keyWordText1, "VALUE", GLOBAL.KEYWORDS[1].toCString );
+		IupSetStrAttribute( keyWordText1, "VALUE", toStringz( GLOBAL.KEYWORDS[1] ) );
 		IupSetHandle( "keyWordText1", keyWordText1 );
 		Ihandle* keyWordText2 = IupText( null );
 		IupSetAttributes( keyWordText2, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetAttribute( keyWordText2, "VALUE", GLOBAL.KEYWORDS[2].toCString );
+		IupSetStrAttribute( keyWordText2, "VALUE", toStringz( GLOBAL.KEYWORDS[2] ) );
 		IupSetHandle( "keyWordText2", keyWordText2 );
 		Ihandle* keyWordText3 = IupText( null );
 		IupSetAttributes( keyWordText3, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetAttribute( keyWordText3, "VALUE", GLOBAL.KEYWORDS[3].toCString );
+		IupSetStrAttribute( keyWordText3, "VALUE", toStringz( GLOBAL.KEYWORDS[3] ) );
 		IupSetHandle( "keyWordText3", keyWordText3 );
 		Ihandle* keyWordText4 = IupText( null );
 		IupSetAttributes( keyWordText4, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetAttribute( keyWordText4, "VALUE", GLOBAL.KEYWORDS[4].toCString );
+		IupSetStrAttribute( keyWordText4, "VALUE", toStringz( GLOBAL.KEYWORDS[4] ) );
 		IupSetHandle( "keyWordText4", keyWordText4 );
 		Ihandle* keyWordText5 = IupText( null );
 		IupSetAttributes( keyWordText5, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetAttribute( keyWordText5, "VALUE", GLOBAL.KEYWORDS[5].toCString );
+		IupSetStrAttribute( keyWordText5, "VALUE", toStringz( GLOBAL.KEYWORDS[5] ) );
 		IupSetHandle( "keyWordText5", keyWordText5 );
 		
 		

@@ -222,8 +222,6 @@ public:
 	static char[] loadFile( char[] fullPath, ref int _encoding )
 	{
 		//content = "";
-		//char[] content;
-		
 		try
 		{
 			scope _fp = new FilePath( fullPath );
@@ -525,270 +523,6 @@ public:
 				}
 			
 			}
-			/+
-			// If the DLL be loaded, the function pointer is not null
-			if( GLOBAL.iconv != null )
-			{
-				// CHECK BOM
-				bool bBOM = true;
-				//auto str = cast(ubyte[]) File.get( fullPath );
-				
-				void* cd = null;
-				
-				if( str.length > 3 )
-				{
-					//UTF32 with BOM
-					if( str[0] == 0xFF && str[1] == 0xFE && str[2] == 0x00 && str[3] == 0x00 )
-					{
-						// UTF32-LE
-						cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");
-						//stdout("UTF-32LE").newline;
-						_encoding = Encoding.UTF_32LE;
-					}
-					else if( str[0] == 0x00 && str[1] == 0x00 && str[2] == 0xFE && str[3] == 0xFF )
-					{
-						// UTF32-BE
-						cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
-						//stdout("UTF-32BE").newline;
-						_encoding = Encoding.UTF_32BE;
-					}
-				}
-				
-				if( cd == null )
-				{
-					if( str.length > 2 )
-					{
-						//UTF8 with BOM
-						if( str[0] == 0xEF && str[1] == 0xBB && str[2] == 0xBF )
-						{
-							// UTF-8
-							//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
-							//stdout("UTF-8").newline;
-							_encoding = Encoding.UTF_8;
-						}
-					}
-				}
-				
-				if( _encoding != Encoding.UTF_8 )
-				{
-					if( cd == null )
-					{
-						if( str.length > 1 )
-						{
-							//UTF16 with BOM
-							if( str[0] == 0xFF && str[1] == 0xFE)
-							{
-								// UTF16-LE
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");
-								//stdout("UTF-16LE").newline;
-								_encoding = Encoding.UTF_16LE;
-							}
-							else if( str[0] == 0xFE && str[1] == 0xFF)
-							{
-								// UTF16-BE
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
-								//stdout("UTF-16BE").newline;
-								_encoding = Encoding.UTF_16BE;
-							}
-						}
-					}			
-
-					// Check Without BOM
-					if( cd == null )
-					{
-						BELE = isUTF32WithouBOM( str );
-						if( BELE == 1 )
-						{
-							cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
-							//stdout("UTF-32BE without BOM").newline;
-							_encoding = 9;
-							bBOM = false;
-						}
-						else if( BELE == 2 )
-						{
-							cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");	
-							//stdout("UTF-32LE without BOM").newline;
-							_encoding = 10;
-							bBOM = false;
-						}
-						
-						if( cd == null )
-						{
-							BELE = isUTF16WithouBOM( str );
-							if( BELE == 1 )
-							{
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
-								//stdout("UTF-16BE without BOM").newline;
-								_encoding = 11;
-								bBOM = false;
-							}
-							else if( BELE == 2 )
-							{
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");	
-								//stdout("UTF-16LE without BOM").newline;
-								_encoding = 12;
-								bBOM = false;
-							}
-						}
-						
-						if( cd == null )
-						{
-							if( isUTF8WithouBOM( str ) )
-							{
-								bBOM = false;
-								//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
-								//stdout("UTF-8 without BOM").newline;
-								_encoding = Encoding.UTF_8N;
-							}
-							else
-							{
-								_encoding = Encoding.Unknown;
-							}
-						}
-					}
-				}
-
-				
-				// Trans Data
-				if( cd != null )
-				{
-					void* inp = str.ptr;
-					size_t inbytesleft = str.length;
-					
-					char[] outBuffer;
-					outBuffer.length = inbytesleft;
-					size_t outbytesleft = outBuffer.length;
-					void* outp = outBuffer.ptr;
-					size_t res = GLOBAL.iconv(cd,&inp,&inbytesleft,&outp,&outbytesleft);
-
-					//Stdout(outbytesleft).newline;
-					if( bBOM )
-						content = outBuffer[3..$-outbytesleft]; // UTF-8 with BOM (3 bytes)
-					else
-						content = outBuffer[0..$-outbytesleft]; // UTF-8 without BOM
-						
-					GLOBAL.iconv_close( cd );
-						
-					return content;
-				}
-				else
-				{
-					if( _encoding == Encoding.UTF_8 )
-					{
-						content = cast(char[]) str[3..$]; // UTF-8 with BOM (3 bytes)
-					}
-					else
-					{
-						if( _encoding == Encoding.UTF_8N )
-							content = cast(char[]) str;
-						else
-						{
-							version(Windows)
-							{
-								if( !CodePage.isAscii(cast(char[]) str ) ) // MBCS
-								{
-									char[] _text;
-									_text.length = 2 * str.length;
-									content = CodePage.from( cast(char[]) str, _text, 0 );
-								}
-								else
-									content = cast(char[]) str;
-							}
-							else
-								content = cast(char[]) str;
-						}
-					}
-					
-					return content;
-				}
-			}
-			else
-			{
-				scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
-				char[] text = file.read;
-				
-				_encoding = file.encoding;
-				if( !file.bom.encoded ) 
-				{
-					BELE = isUTF32WithouBOM( cast(ubyte[])text );
-					if( BELE > 0 )
-					{
-						if( BELE == 1 )
-						{
-							//bomData = [ 0x00, 0x00 , 0xFE, 0xFF ];
-							_encoding = 9;
-							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32BE );
-							content = _bom.decode( text );
-						}
-						else
-						{
-							//bomData = [ 0xFF, 0xFE , 0x00, 0x00 ];
-							_encoding = 10;
-							scope _bom = new UnicodeBom!(char)( Encoding.UTF_32LE );
-							content = _bom.decode( text );
-						}
-					}
-					else
-					{
-						BELE = isUTF16WithouBOM( cast(ubyte[])text );
-						if( BELE > 0 )
-						{
-							if( BELE == 1 )
-							{
-								//bomData = [ 0xFE, 0xFF ];
-								_encoding = 11;
-								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16BE );
-								content = _bom.decode( text );							
-							}
-							else
-							{
-								//bomData = [ 0xFF, 0xFE ];
-								_encoding = 12;
-								scope _bom = new UnicodeBom!(char)( Encoding.UTF_16LE );
-								content = _bom.decode( text );
-							}
-						}
-						else
-						{
-							if( isUTF8WithouBOM( cast(ubyte[])text ) )
-							{
-								content = text;
-								_encoding = Encoding.UTF_8N;
-							}
-							else
-							{						
-								version( Windows )
-								{
-									if( !CodePage.isAscii( text ) ) // MBCS
-									{
-										char[] _text;
-										_text.length = 2 * text.length;
-										content = CodePage.from( text, _text );
-										_text.length = content.length;
-										_encoding = Encoding.Unknown;
-									}
-									else
-									{
-										content = text;
-										_encoding = file.encoding();
-									}
-								}
-								else
-								{
-									content = text;
-									_encoding = file.encoding();
-								}
-							}
-						}
-					}					
-				}
-				else
-				{
-					_encoding = file.encoding();
-					content = text;
-				}
-			}
-			+/
 		}
 		catch( Exception e )
 		{
@@ -796,7 +530,7 @@ public:
 			throw e;
 		}
 
-		return content.dup;
+		return content;
 	}
 	
 
@@ -3327,7 +3061,8 @@ public:
 struct CustomToolAction
 {
 	version(linux)	import tango.sys.Process;
-	import tango.io.FilePath;
+	import	tango.io.FilePath;
+	import	project;
 	
 	static void run( CustomTool tool )
 	{
@@ -3485,5 +3220,49 @@ struct CustomToolAction
 			}
 		}
 		return false;
-	}	
+	}
+	
+	
+	static char[] getActiveCompilerPath( ref char[][] _includeDirs )
+	{
+		// Get Custom Compiler
+		char[] customOpt, customCompiler;
+		getCustomCompilers( customOpt, customCompiler );	
+		
+		// Set Multiple Focus Project
+		char[] activePrjName = GLOBAL.activeProjectPath.length ? GLOBAL.activeProjectPath : actionManager.ProjectAction.getActiveProjectName();
+		FocusUnit _focus;
+		
+		if( activePrjName.length )
+		{
+			if( activePrjName in GLOBAL.projectManager )
+			{
+				_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
+				_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
+				_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+				_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
+				_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
+				if( GLOBAL.projectManager[activePrjName].focusOn.length )
+				{
+					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit )
+					{
+						_focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+						_includeDirs = _focus.IncDir;
+					}
+				}
+			}
+		}
+		
+		char[] compilerFullPath;
+		if( !compilerFullPath.length ) compilerFullPath = customCompiler;
+		if( !compilerFullPath.length )
+		{
+			version(FBIDE)
+				compilerFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+			else
+				compilerFullPath = ( _focus.Compiler.length ? _focus.Compiler : GLOBAL.compilerFullPath );
+		}	
+	
+		return compilerFullPath;
+	}
 }

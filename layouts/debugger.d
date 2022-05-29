@@ -2835,7 +2835,7 @@ extern( C )
 				char[] nowFrameFullTitle = GLOBAL.debugPanel.getFrameNodeTitle( true ); // -1 = Get Active; true = Get Full Title
 				if( nowFrameFullTitle != GLOBAL.debugPanel.disasFrame )
 				{
-					GLOBAL.debugPanel.disasFrame = nowFrameFullTitle;;
+					GLOBAL.debugPanel.disasFrame = nowFrameFullTitle;
 					GLOBAL.debugPanel.showDisassemble();
 				}
 				break;

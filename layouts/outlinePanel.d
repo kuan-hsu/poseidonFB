@@ -107,6 +107,10 @@ class COutline
 					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_define_fun" );
 					break;
 					
+				case B_DEFINE | B_VERSION:
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_versionspec" );
+					break;
+					
 				case B_VARIABLE:
 					if( _node.type.length )
 					{
@@ -695,6 +699,10 @@ class COutline
 						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					break;
+					
+				case B_DEFINE | B_VERSION:
+					IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+					break;					
 
 				case B_VARIABLE:
 					if( !_node.type.length )

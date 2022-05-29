@@ -11,7 +11,7 @@ private
 	import layouts.debugger;
 
 	import Integer = tango.text.convert.Integer;
-	import tango.stdc.stringz;
+	import tango.io.Stdout, tango.stdc.stringz;
 	import tango.io.FilePath;
 	import tango.text.convert.Utf;
 }
@@ -367,19 +367,19 @@ class CScintilla
 			if( tools.isParsableExt( mypath.ext, 7 ) ) IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic" );
 			for( int i = 0; i < 6; ++ i )
 			{
-				char[] _key = Util.trim( GLOBAL.KEYWORDS[i].toDString );
+				char[] _key = Util.trim( GLOBAL.KEYWORDS[i] );
 				if( _key.length ) IupSetStrAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), toStringz( lowerCase( _key ) ) ); else IupSetAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), "" );
 			}
 		}
 		version(DIDE)
 		{
 			if( lowerCase( mypath.ext ) == "d" || lowerCase( mypath.ext ) == "di" ) IupSetAttribute(sci, "LEXERLANGUAGE", "d" );
-			IupSetAttribute(sci, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
-			IupSetAttribute(sci, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
-			IupSetAttribute(sci, "KEYWORDS3", GLOBAL.KEYWORDS[2].toCString );
-			IupSetAttribute(sci, "KEYWORDS4", GLOBAL.KEYWORDS[3].toCString );
-			IupSetAttribute(sci, "KEYWORDS5", GLOBAL.KEYWORDS[4].toCString );
-			IupSetAttribute(sci, "KEYWORDS6", GLOBAL.KEYWORDS[5].toCString );
+			if( GLOBAL.KEYWORDS[0].length ) IupSetStrAttribute(sci, "KEYWORDS0", toStringz( GLOBAL.KEYWORDS[0] ) ); else IupSetAttribute( sci, "KEYWORDS0", "" );
+			if( GLOBAL.KEYWORDS[1].length ) IupSetStrAttribute(sci, "KEYWORDS1", toStringz( GLOBAL.KEYWORDS[1] ) ); else IupSetAttribute( sci, "KEYWORDS1", "" );
+			if( GLOBAL.KEYWORDS[2].length ) IupSetStrAttribute(sci, "KEYWORDS3", toStringz( GLOBAL.KEYWORDS[2] ) ); else IupSetAttribute( sci, "KEYWORDS3", "" );
+			if( GLOBAL.KEYWORDS[3].length ) IupSetStrAttribute(sci, "KEYWORDS4", toStringz( GLOBAL.KEYWORDS[3] ) ); else IupSetAttribute( sci, "KEYWORDS4", "" );
+			if( GLOBAL.KEYWORDS[4].length ) IupSetStrAttribute(sci, "KEYWORDS5", toStringz( GLOBAL.KEYWORDS[4] ) ); else IupSetAttribute( sci, "KEYWORDS5", "" );
+			if( GLOBAL.KEYWORDS[5].length ) IupSetStrAttribute(sci, "KEYWORDS6", toStringz( GLOBAL.KEYWORDS[5] ) ); else IupSetAttribute( sci, "KEYWORDS6", "" );
 		}
 
 		char[] font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
@@ -1486,15 +1486,15 @@ extern(C)
 							char[] targetText = lowerCase( fromStringz( IupGetAttribute( iupSci, "SELECTEDTEXT" ) ) );
 							if( targetText.length )
 							{
-								foreach( char[] s; Util.split( GLOBAL.KEYWORDS[4].toDString, " " ) )
+								foreach( char[] s; Util.split( GLOBAL.KEYWORDS[4], " " ) )
 								{
 									if( s == targetText ) return IUP_DEFAULT;
 								}
 								
-								char[] k4 = Util.trim( GLOBAL.KEYWORDS[4].toDString );
+								char[] k4 = Util.trim( GLOBAL.KEYWORDS[4] );
 								if( k4.length ) k4 = k4 ~ " " ~ targetText; else k4 = targetText;
 								GLOBAL.KEYWORDS[4] = k4.dup;
-								IupSetAttribute( IupGetHandle( "keyWordText4" ), "VALUE", GLOBAL.KEYWORDS[4].toCString );
+								IupSetStrAttribute( IupGetHandle( "keyWordText4" ), "VALUE", toStringz( GLOBAL.KEYWORDS[4] ) );
 	
 								foreach( CScintilla cSci; GLOBAL.scintillaManager )
 									if( cSci !is null ) cSci.setGlobalSetting();
@@ -1513,15 +1513,15 @@ extern(C)
 							char[] targetText = lowerCase( fromStringz( IupGetAttribute( iupSci, "SELECTEDTEXT" ) ) );
 							if( targetText.length )
 							{
-								foreach( char[] s; Util.split( GLOBAL.KEYWORDS[5].toDString, " " ) )
+								foreach( char[] s; Util.split( GLOBAL.KEYWORDS[5], " " ) )
 								{
 									if( s == targetText ) return IUP_DEFAULT;
 								}
 								
-								char[] k5 = Util.trim( GLOBAL.KEYWORDS[5].toDString );
+								char[] k5 = Util.trim( GLOBAL.KEYWORDS[5] );
 								if( k5.length ) k5 = k5 ~ " " ~ targetText; else k5 = targetText;
 								GLOBAL.KEYWORDS[5] = k5.dup;
-								IupSetAttribute( IupGetHandle( "keyWordText4" ), "VALUE", GLOBAL.KEYWORDS[5].toCString );
+								IupSetStrAttribute( IupGetHandle( "keyWordText4" ), "VALUE", toStringz( GLOBAL.KEYWORDS[5] ) );
 								
 								foreach( CScintilla cSci; GLOBAL.scintillaManager )
 									if( cSci !is null ) cSci.setGlobalSetting();
@@ -2291,9 +2291,9 @@ extern(C)
 									word = lowerCase( word.reverse );
 
 									bool bExitFlag;
-									foreach( IupString _keyword; GLOBAL.KEYWORDS )
+									foreach( char[] _keyword; GLOBAL.KEYWORDS )
 									{
-										foreach( char[] _k; Util.split( _keyword.toDString, " " ) )
+										foreach( char[] _k; Util.split( _keyword, " " ) )
 										{	
 											if( _k.length )
 											{
@@ -2335,9 +2335,9 @@ extern(C)
 								if( lineTail > lineHead )
 								{
 									IupScintillaSendMessage( ih, 2198, 2, 0 );		// SCFIND_WHOLEWORD = 2,				// SCI_SETSEARCHFLAGS = 2198
-									foreach( IupString _s; GLOBAL.KEYWORDS )
+									foreach( char[] _s; GLOBAL.KEYWORDS )
 									{
-										foreach( char[] targetText; Util.split( _s.toDString, " " ) )
+										foreach( char[] targetText; Util.split( _s, " " ) )
 										{
 											if( targetText.length )
 											{
@@ -3104,8 +3104,27 @@ extern(C)
 		if( ScintillaAction.isComment( ih, pos, bCheckString ) )
 			if( ScintillaAction.isComment( ih, pos - 1, bCheckString ) ) return IUP_DEFAULT;
 
+		// Avoid keypress release reaction slow issue
+		if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel == 1 )
+		{
+			if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
+			{
+				if( insert == 1 )
+				{
+					int currentLineNum = cast(int) IupScintillaSendMessage( ih, 2166, pos, 0 );
+					int lineHeadPostion = cast(int) IupScintillaSendMessage( ih, 2167, currentLineNum, 0 );
+					int insertPos = pos - lineHeadPostion;
+					
+					char[] t = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) );
+					t = t[0..insertPos] ~ fromStringz( _text ) ~ t[insertPos..$];
+					//Stdout( t ).newline;
+					LiveParser.parseCurrentLine( currentLineNum + 1, t );
+				}
+			}
+		}		
 		
 		if( length > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
+		
 		// Include Autocomplete
 		if( AutoComplete.showListThread is null )
 		{

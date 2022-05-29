@@ -148,6 +148,10 @@ version(FBIDE)
 									parseToken();
 								}
 							}
+							else
+							{
+								activeASTnode.addChild( name, B_VERSION | B_DEFINE, null, null, null, lineNumber );
+							}
 						}
 						break;
 					

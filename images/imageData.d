@@ -358,6 +358,7 @@ void load_all_images_icons()
 		IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );
 		IupSetHandle( "IUP_import", XPM.getIUPimage( "icons/xpm/outline/import.xpm" ) );
 		IupSetHandle( "IUP_version", XPM.getIUPimage( "icons/xpm/outline/version.xpm" ) );
+		IupSetHandle( "IUP_versionspec", XPM.getIUPimage( "icons/xpm/outline/version_spec.xpm" ) );
 	}
 	version(DIDE)
 	{
