@@ -6,7 +6,31 @@ version(FBIDE)
 	
 	class CParser : _PARSER
 	{
-		private:
+	private:
+
+		bool skipToEOL()
+		{
+			try
+			{
+				while( tokenIndex < tokens.length )
+				{
+					if( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+						parseToken();
+					else
+					{
+						parseToken();
+						break;
+					}
+				}
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}
+			
+			return false;
+		}		
+		
 		
 		// Parse the continuous identifiers, include any words until the EOL / :
 		char[] parseIdentifier()
@@ -140,7 +164,10 @@ version(FBIDE)
 										parseToken();
 									}
 									activeASTnode.addChild( name, B_FUNCTION | B_DEFINE, null, param, null, lineNumber );
-									parseToken();
+									
+									// Continue until EOL
+									while( token().tok != TOK.Teol && tokenIndex < tokens.length )
+										parseToken();
 								}
 								else if( token().tok == TOK.Tidentifier )
 								{
@@ -2004,7 +2031,54 @@ version(FBIDE)
 
 			return false;
 		}
-
+		
+		/+
+		bool parseTemporaryTypes()
+		{
+			try
+			{
+				bool bGotMatch;
+				if( token().tok == TOK.Tless )
+				{
+					parseToken( TOK.Tless );
+					while( prev().tok != TOK.Tcolon && prev().tok != TOK.Teol )
+					{
+						if( token().tok == TOK.Tgreater )
+						{
+							parseToken();
+							bGotMatch = true;
+						}
+						parseToken();
+					}
+					
+					if( !bGotMatch ) return false;
+				}
+			
+			
+				if( token().tok == TOK.Topenparen )
+				{
+					parseToken( TOK.Topenparen );
+					while( prev().tok != TOK.Tcolon && prev().tok != TOK.Teol )
+					{
+						if( token().tok == TOK.Tcloseparen )
+						{
+							parseToken();
+							return true;
+						}
+						parseToken();
+					}
+				}
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}
+			
+			return false;
+		}
+		+/
+		
+		
 		bool parseType( bool bClass = false )
 		{
 			try
@@ -2043,6 +2117,12 @@ version(FBIDE)
 					}
 					
 					parseToken();
+					
+					if( token().tok != TOK.Tidentifier )
+					{
+						skipToEOL();
+						return false;
+					}
 
 					_name = token().identifier;
 					_lineNum = token().lineNumber;
@@ -2299,6 +2379,24 @@ version(FBIDE)
 		{
 			updateTokens( _tokens );
 		}
+		
+		CASTnode parseTypeBodySingleLine( char[] fullPath )
+		{
+			CASTnode head = null;
+			
+			try
+			{
+				head = new CASTnode( fullPath, B_BAS, null, null, null, 0, 2147483647 );
+				activeASTnode = head;
+				parseTypeBody( B_TYPE );
+			}
+			catch( Exception e )
+			{
+				debug IupMessageError( null, toStringz( "parseTypeBodySingleLine Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			}
+
+			return head;
+		}
 
 		CASTnode parse( char[] fullPath )
 		{
@@ -2394,6 +2492,14 @@ version(FBIDE)
 							break;
 
 						case TOK.Ttype:
+							/+
+							if( next().tok == TOK.Topenparen || next().tok == TOK.Tless )
+							{
+								parseToken( TOK.Ttype );
+								parseTemporaryTypes();
+							}
+							else
+							+/
 							parseType();
 							break;
 

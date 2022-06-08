@@ -452,6 +452,7 @@ foundnothing=¡Nada encontrado!
 pluginrunningunload=Utilidad en ejecución,¿Descartar?
 onlytools=¡Solo soporta 12 utilidades!
 createnewone=¿crear nuevo?
+applythisone=¿Aplicar este?
 
 exefile=Ficheros ejecutables
 basfile=Codigo fuente de freeBASIC

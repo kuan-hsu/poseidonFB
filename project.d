@@ -75,7 +75,7 @@ struct PROJECT
 			if( prjPropertyDialog == null ) prjPropertyDialog = GLOBAL.mainDlg;
 			try
 			{
-				int result = IupMessageAlarm( prjPropertyDialog, GLOBAL.languageItems["alarm"].toCString(), toStringz( destPath.toString ~ "\n" ~ GLOBAL.languageItems["nodirandcreate"].toDString() ), "YESNO" );
+				int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, destPath.toString ~ "\n" ~ GLOBAL.languageItems["nodirandcreate"].toDString, "WARNING", IUP_CENTER, IUP_CENTER );
 				if( result == 1 ) destPath.create(); else return false;
 			}
 			catch( Exception e )

@@ -227,7 +227,29 @@ struct LiveParser
 				CASTnode 	oldHead = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), currentLineNum );
 				if( oldHead is null ) return;
 					
-				CASTnode	newHead = GLOBAL.outlineTree.parserText( currentLineText );
+				
+				bool		bInTypeBody;
+				CASTnode	newHead, _oldHead = oldHead;
+				
+				version(FBIDE)
+				{
+					if( _oldHead.lineNumber < currentLineNum )
+					{
+						while( _oldHead !is null )
+						{
+							if( _oldHead.kind & ( B_TYPE | B_CLASS | B_UNION ) )
+							{
+								bInTypeBody = true;
+								newHead = GLOBAL.outlineTree.parserTextUnderTypeBody( currentLineText );
+								break;
+							}
+							_oldHead = _oldHead.getFather();
+						}
+					}
+				}
+
+				if( !bInTypeBody ) newHead = GLOBAL.outlineTree.parserText( currentLineText );
+
 				if( newHead !is null )
 				{
 					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr
@@ -291,23 +313,10 @@ struct LiveParser
 					
 					delete newHead;
 				}
-				else // If No any tokens, parser will return null
+				else // If No any tokens, parser will return null ( GLOBAL.Parser.updateTokens() return false)
 				{
 					GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
 					oldHead = delChildrenByLineNum( oldHead, currentLineNum );
-					/+
-					Stdout( "newHead is null").newline;
-					if( ScintillaAction.isComment( cSci.getIupScintilla, lineHeadPostion ) || currentLineTextLength == 0 ) // If No any tokens, parser will return null
-					{
-						GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
-						oldHead = delChildrenByLineNum( oldHead, currentLineNum );					
-					}
-					else if( currentLineText[0] == '\'' )
-					{
-						GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
-						oldHead = delChildrenByLineNum( oldHead, currentLineNum );
-					}
-					+/
 				}
 			}
 		}

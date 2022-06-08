@@ -1,4 +1,4 @@
-#if defined(__fb_win32__) 
+#ifdef __FB_WIN32__
 	#include once "crt/stdlib.bi"
 	'#include once "win/shellapi.bi"
 	#include once "windows.bi"
@@ -33,7 +33,7 @@ if( __fb_argc__ >= 6 ) then
 	dim as integer W = valint( _w )
 	dim as integer H = valint( _h )
 	
-	#if defined(__fb_win32__)
+	#ifdef __FB_WIN32__
 	
 		if( W <= 0 OR H <=0 ) then
 			SetWindowPos( GetConsoleWindow, HWND_TOP, X, Y, 0, 0, SWP_NOSIZE )
@@ -66,7 +66,7 @@ else
 end if
 
 
-#if defined(__fb_win32__) 
+#ifdef __FB_WIN32__
 	system_( "pause" )
 #else
 	print( "Press any Key to continue...")

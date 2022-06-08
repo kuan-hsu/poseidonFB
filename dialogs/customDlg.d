@@ -422,7 +422,7 @@ extern(C)
 			// Double Confirm......
 			if( p.getPath == dir )
 			{
-				int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["pluginrunningunload"].toCString, "YESNO" );
+				int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["pluginrunningunload"].toDString, "QUESTION", IUP_MOUSEPOS, IUP_MOUSEPOS );
 				if( result == 1 )
 				{
 					Ihandle* treeHandle = IupGetHandle( "treePluginStatus_Handle" );

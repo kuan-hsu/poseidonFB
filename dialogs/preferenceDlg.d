@@ -327,7 +327,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* labelTriggerDelay = IupLabel( GLOBAL.languageItems["completedelay"].toCString );
 		Ihandle* valTriggerDelay = IupVal( null );
-		IupSetAttributes( valTriggerDelay, "MIN=1,MAX=1000,RASTERSIZE=100x16,STEP=0.1,PAGESTEP=0.1" );
+		IupSetAttributes( valTriggerDelay, "MIN=50,MAX=1000,RASTERSIZE=100x16,STEP=0.05265,PAGESTEP=0.1" );
 		IupSetStrAttribute( valTriggerDelay, "VALUE", toStringz( GLOBAL.triggerDelay ) );
 		IupSetHandle( "valTriggerDelay", valTriggerDelay );
 		IupSetCallback( valTriggerDelay, "VALUECHANGED_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );
@@ -917,7 +917,7 @@ class CPreferenceDialog : CBaseDialog
 							scope templateFP = new FilePath( templatePath ~ "/" ~templateName ~ ".ini" );
 							if( templateFP.exists() )
 							{
-								int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["suredelete"].toCString, "YESNO" );
+								int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["suredelete"].toDString, "QUESTION", IUP_MOUSEPOS, IUP_MOUSEPOS );
 								if( result == 1 )
 								{
 									templateFP.remove;
@@ -934,7 +934,7 @@ class CPreferenceDialog : CBaseDialog
 				}
 				else
 				{
-					int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString,"No Items be Selected!", "OK" );
+					IupMessage( GLOBAL.languageItems["alarm"].toCString, "No Items be Selected!" );
 				}
 			}
 			
@@ -961,7 +961,7 @@ class CPreferenceDialog : CBaseDialog
 			}
 			else
 			{
-				int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, "Color Template Name Is Empty!", "OK" );
+				IupMessage( GLOBAL.languageItems["alarm"].toCString, "Color Template Name Is Empty!" );
 			}
 			
 			return IUP_DEFAULT;
@@ -2265,7 +2265,11 @@ extern(C) // Callback for CPreferenceDialog
 
 			// Compiler & Debugger
 			char[] newCompilerFullPath = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-compilerPath" ), "VALUE" ) ).dup;
-			version(DIDE) if( newCompilerFullPath != GLOBAL.compilerFullPath ) GLOBAL.defaultImportPaths = tools.getImportPath( newCompilerFullPath );
+			version(DIDE)
+			{
+				if( newCompilerFullPath != GLOBAL.compilerFullPath ) CustomToolAction.setActiveDefaultCompilerAndIncludePaths();
+				//GLOBAL.defaultImportPaths = tools.getImportPath( newCompilerFullPath );
+			}
 			
 			GLOBAL.compilerFullPath	= newCompilerFullPath;
 			version(Windows)
@@ -2491,8 +2495,6 @@ extern(C) // Callback for CPreferenceDialog
 
 			IupRefreshChildren( IupGetHandle( "PreferenceHandle" ) );
 			
-
-
 			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 			{
 				//IupSetInt( GLOBAL.projectViewTabs, "VISIBLE", 1 );

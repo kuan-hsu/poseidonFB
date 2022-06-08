@@ -848,13 +848,12 @@ public:
 		else
 		{
 			IupMessageError( null, toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString ) );
-			
 			if( bAskCreateNew )
 			{
 				sFN.set( setupDir );
 				if( sFN.exists() )
 				{
-					int result = IupMessageAlarm( null, GLOBAL.languageItems["alarm"].toCString, GLOBAL.languageItems["createnewone"].toCString, "YESNO" );
+					int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["createnewone"].toDString );
 					if( result == 1 )
 					{
 						scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), true, true, setupDir );

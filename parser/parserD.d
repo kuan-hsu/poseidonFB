@@ -19,6 +19,30 @@ version(DIDE)
 		CStack!(char[])	conditionStack;
 		
 		
+		bool skipToEOL()
+		{
+			try
+			{
+				while( tokenIndex < tokens.length )
+				{
+					if( token().tok != TOK.Tsemicolon )
+						parseToken();
+					else
+					{
+						parseToken();
+						break;
+					}
+				}
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}
+			
+			return false;
+		}
+		
+		
 		int getDelimitedTailIndex( int _tokOpen, int _tokClose, int _startIndex = -1, bool bSemiColonBreak = true )
 		{
 			int _countDemlimit;
@@ -51,8 +75,9 @@ version(DIDE)
 			}
 
 			return _tempTokenIndex;
-		}		
+		}
 		
+
 		char[] getProt()
 		{
 			char[] result;

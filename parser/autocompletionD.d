@@ -997,55 +997,17 @@ version(DIDE)
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
 				//char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
+
 				char[]		prjDir = GLOBAL.activeProjectPath;
-				char[][]	_includeDirs;
-				char[]		actCompilerFullPath = CustomToolAction.getActiveCompilerPath( _includeDirs );
+				char[][] 	_includeDirs;
 				if( prjDir.length )
 				{
-					foreach( char[] s; _includeDirs )
+					if( prjDir in GLOBAL.projectManager )
 					{
-						if(s[$-1] != '/' || s[$-1] != '\\' ) s ~= '/';
-						importFullPath = s ~ importName;
-						
-						_path.set( importFullPath ~ ".d" ); // Reset
-						if( _path.exists() ) return _path.toString();
-
-						_path.suffix(".di" );
-						if( _path.exists() ) return _path.toString();
-						
-						// Check Package Module
-						_path.set( importFullPath ~ "/package.d" );
-						if( _path.exists ) return _path.toString();
+						_includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
 					}
-				}
-				
-				if( actCompilerFullPath != GLOBAL.defaultCompilerPath )
-				{
-					GLOBAL.defaultCompilerPath = actCompilerFullPath;
-					GLOBAL.defaultImportPaths = tools.getImportPath( actCompilerFullPath );
-				}
-				
-				foreach( char[] _p; GLOBAL.defaultImportPaths )
-				{
-					importFullPath = _p ~ importName;
-					
-					_path.set( importFullPath ~ ".d" );
-					if( _path.exists() ) return _path.toString();
-
-					_path.suffix(".di" );
-					if( _path.exists() ) return _path.toString();
-
-					// Check Package Module
-					_path.set( importFullPath ~ "/package.d" );
-					if( _path.exists ) return _path.toString();
-				}					
-				
-				/+
-				if( prjDir.length )
-				{
-					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-					if( GLOBAL.projectManager[prjDir].focusOn.length )
-						if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
 					
 					foreach( char[] s; _includeDirs )
 					{
@@ -1063,41 +1025,20 @@ version(DIDE)
 						if( _path.exists ) return _path.toString();
 					}
 					
-					if( GLOBAL.projectManager[prjDir].compilerPath.length )
+					foreach( char[] _p; GLOBAL.defaultImportPaths )
 					{
-						foreach( char[] _p; GLOBAL.projectManager[prjDir].defaultImportPaths )
-						{
-							importFullPath = _p ~ importName;
-							
-							_path.set( importFullPath ~ ".d" );
-							if( _path.exists() ) return _path.toString();
+						importFullPath = _p ~ importName;
+						
+						_path.set( importFullPath ~ ".d" );
+						if( _path.exists() ) return _path.toString();
 
-							_path.suffix(".di" );
-							if( _path.exists() ) return _path.toString();
+						_path.suffix(".di" );
+						if( _path.exists() ) return _path.toString();
 
-							// Check Package Module
-							_path.set( importFullPath ~ "/package.d" );
-							if( _path.exists ) return _path.toString();
-						}
-					}
-					else
-					{
-						// Step 2: Default *.ini DFLAGS
-						foreach( char[] _p; GLOBAL.defaultImportPaths )
-						{
-							importFullPath = _p ~ importName;
-								
-							_path.set( importFullPath ~ ".d" );
-							if( _path.exists() ) return _path.toString();
-
-							_path.suffix(".di" );
-							if( _path.exists() ) return _path.toString();
-
-							// Check Package Module
-							_path.set( importFullPath ~ "/package.d" );
-							if( _path.exists ) return _path.toString();
-						}
-					}
+						// Check Package Module
+						_path.set( importFullPath ~ "/package.d" );
+						if( _path.exists ) return _path.toString();
+					}						
 				}
 				else
 				{
@@ -1117,7 +1058,7 @@ version(DIDE)
 						if( _path.exists ) return _path.toString();
 					}
 				}
-				+/
+				
 			}
 
 			return null;
@@ -2181,7 +2122,8 @@ version(DIDE)
 							CASTnode[] childrenNodes;// =  AST_Head.getChildren();
 							//getBaseNodeMembers( AST_Head, childrenNodes );
 
-							foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND, lineNum, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND ) ) // NOTE!!!! Using "searchMatchNode()"
+							//foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND, lineNum, true ) ~ searchObjectModuleMembers( splitWord[i], D_FIND ) ) // NOTE!!!! Using "searchMatchNode()"
+							foreach( node; searchMatchNodes( AST_Head, splitWord[i], D_FIND ) ~ searchObjectModuleMembers( splitWord[i], D_FIND ) ) // NOTE!!!! Using "searchMatchNode()"
 							{
 								if( node !is null )
 								{
@@ -2521,51 +2463,25 @@ version(DIDE)
 				// Work on Project
 				FilePath[]  _path2, _path3;
 				
-				char[]		prjDir = actionManager.ProjectAction.getActiveProjectDir();
-				char[][]	_includeDirs;
-				char[]		actCompilerFullPath = CustomToolAction.getActiveCompilerPath( _includeDirs );
+				char[]		prjDir = GLOBAL.activeProjectPath;//actionManager.ProjectAction.getActiveProjectDir();
+				char[][] 	_includeDirs;
 				
 				if( prjDir.length )
 				{
-					foreach( char[] s; _includeDirs )
-						_path3 ~= new FilePath( s );
-				}
+					if( prjDir in GLOBAL.projectManager )
+					{
+						_includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
 				
-				if( actCompilerFullPath != GLOBAL.defaultCompilerPath )
-				{
-					GLOBAL.defaultCompilerPath = actCompilerFullPath;
-					GLOBAL.defaultImportPaths = tools.getImportPath( actCompilerFullPath );
+						foreach( char[] s; _includeDirs )
+							_path3 ~= new FilePath( s );
+					}
 				}
 
 				foreach( char[] _p; GLOBAL.defaultImportPaths )
 					_path2 ~= new FilePath( _p );				
 				
-				/+
-				if( prjDir.length )
-				{
-					foreach( char[] s; _includeDirs )
-						_path3 ~= new FilePath( s );
-						
-
-					if( GLOBAL.projectManager[prjDir].compilerPath.length )
-					{
-						foreach( char[] _p; GLOBAL.projectManager[prjDir].defaultImportPaths )
-							_path3 ~= new FilePath( _p );
-					}
-					else
-					{
-						// Step 2: Default *.ini DFLAGS
-						foreach( char[] _p; GLOBAL.defaultImportPaths )
-							_path2 ~= new FilePath( _p );
-					}
-				}
-				else
-				{
-					// Step 2: Default *.ini DFLAGS
-					foreach( char[] _p; GLOBAL.defaultImportPaths )
-						_path2 ~= new FilePath( _p );
-				}
-				+/
 
 				int index;
 				for( int i = 0; i < words.length; ++ i )

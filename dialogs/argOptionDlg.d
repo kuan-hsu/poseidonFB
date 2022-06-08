@@ -2,7 +2,7 @@
 
 private import iup.iup;
 
-private import global, project, actionManager;
+private import global, project, actionManager, tools;
 private import dialogs.baseDlg, dialogs.singleTextDlg, dialogs.fileDlg;
 
 private import tango.stdc.stringz, Util = tango.text.Util;
@@ -23,7 +23,7 @@ class CArgOptionDialog : CBaseDialog
 	IupString[]			_recentOptions, _recentArgs, _recentCompilers;
 	
 	static char[][]		tempCustomCompilerOptions;
-
+	
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
@@ -56,7 +56,7 @@ class CArgOptionDialog : CBaseDialog
 			if( pos < GLOBAL.customCompilerOptions[i].length )
 			{
 				char[] Name = GLOBAL.customCompilerOptions[i][pos+5..$];
-				IupSetAttributeId( listTools, "", i+1, toStringz( Name ) );
+				IupSetStrAttributeId( listTools, "", i+1, toStringz( Name ) );
 			}
 		}
 		
@@ -423,6 +423,28 @@ extern(C) // Callback for CFindInFilesDialog
 		foreach( char[] s; CArgOptionDialog.tempCustomCompilerOptions )
 			GLOBAL.customCompilerOptions ~= s.dup;
 		
+		// Ask if apply
+		Ihandle* toolHabdle = IupGetHandle( "CArgOptionDialog_listTools_Handle" );
+		if( toolHabdle != null )
+		{
+			int itemID = IupGetInt( toolHabdle, "VALUE" );
+			if( itemID > 0 )
+			{
+				Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" ); // From status panel
+				if( selectionHandle != null )
+				{
+					char[] itemTitle = fromStringz( IupGetAttributeId( toolHabdle, "", itemID ) ).dup;
+					int result = tools.questMessage( "Quest", GLOBAL.languageItems["applythisone"].toDString ~ "\n" ~ itemTitle, "QUESTION", IUP_MOUSEPOS, IUP_MOUSEPOS );
+					if( result == 1 )
+					{
+						GLOBAL.currentCustomCompilerOption = itemTitle;
+						IupSetAttribute( selectionHandle, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
+						GLOBAL.statusBar.setTip( GLOBAL.currentCustomCompilerOption.toDString );			
+					}
+				}
+			}
+		}
+		
 		return IUP_CLOSE;
 	}		
 	
@@ -446,7 +468,7 @@ extern(C) // Callback for CFindInFilesDialog
 					{
 						GLOBAL.recentOptions ~= fromStringz( IupGetAttribute( _listOptions, toStringz( Integer.toString( i ) ) ) ).dup;
 					}
-					if( GLOBAL.recentOptions.length ) IupSetAttribute( _listOptions, "VALUE", toStringz( GLOBAL.recentOptions[0] ) );
+					if( GLOBAL.recentOptions.length ) IupSetStrAttribute( _listOptions, "VALUE", toStringz( GLOBAL.recentOptions[0] ) );
 				}
 				/+
 				else
@@ -475,7 +497,7 @@ extern(C) // Callback for CFindInFilesDialog
 					{
 						GLOBAL.recentArgs ~= fromStringz( IupGetAttribute( _listArgs, toStringz( Integer.toString( i ) ) ) ).dup;
 					}
-					if( GLOBAL.recentArgs.length ) IupSetAttribute( _listArgs, "VALUE", toStringz( GLOBAL.recentArgs[0] ) );
+					if( GLOBAL.recentArgs.length ) IupSetStrAttribute( _listArgs, "VALUE", toStringz( GLOBAL.recentArgs[0] ) );
 				}
 				/+
 				else
@@ -504,7 +526,7 @@ extern(C) // Callback for CFindInFilesDialog
 					{
 						GLOBAL.recentCompilers ~= fromStringz( IupGetAttribute( _listCompilers, toStringz( Integer.toString( i ) ) ) ).dup;
 					}
-					if( GLOBAL.recentCompilers.length ) IupSetAttribute( _listCompilers, "VALUE", toStringz( GLOBAL.recentCompilers[0] ) );
+					if( GLOBAL.recentCompilers.length ) IupSetStrAttribute( _listCompilers, "VALUE", toStringz( GLOBAL.recentCompilers[0] ) );
 				}
 			}
 		}
@@ -521,8 +543,8 @@ extern(C) // Callback for CFindInFilesDialog
 		{
 			char[]	Name, Option, Compiler;
 			getCustomCompilerOptionValue( item-1, Name, Option, Compiler );
-			if( Name.length )		IupSetAttribute( optionTextHandle, "VALUE", toStringz( Option ) ); else IupSetAttribute( optionTextHandle, "VALUE", "" );
-			if( Compiler.length )	IupSetAttribute( compilerTextHandle, "VALUE", toStringz( Compiler ) ); else IupSetAttribute( compilerTextHandle, "VALUE", "" );
+			if( Name.length )		IupSetStrAttribute( optionTextHandle, "VALUE", toStringz( Option ) ); else IupSetAttribute( optionTextHandle, "VALUE", "" );
+			if( Compiler.length )	IupSetStrAttribute( compilerTextHandle, "VALUE", toStringz( Compiler ) ); else IupSetAttribute( compilerTextHandle, "VALUE", "" );
 		}
 		
 		return IUP_DEFAULT;
@@ -621,8 +643,8 @@ extern(C) // Callback for CFindInFilesDialog
 				getCustomCompilerOptionValue( id - 1, Name, Option, Compiler );
 				if( Name.length )
 				{
-					IupSetAttribute( optionTextHandle, "VALUE", toStringz( Option ) );
-					IupSetAttribute( compilerTextHandle, "VALUE", toStringz( Compiler ) );
+					IupSetStrAttribute( optionTextHandle, "VALUE", toStringz( Option ) );
+					IupSetStrAttribute( compilerTextHandle, "VALUE", toStringz( Compiler ) );
 				}
 			}
 		}
@@ -644,8 +666,8 @@ extern(C) // Callback for CFindInFilesDialog
 			char* prevItemText = IupGetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber-1) ) );
 			char* nowItemText = IupGetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber) ) );
 
-			IupSetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber-1) ), nowItemText );
-			IupSetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber) ), prevItemText );
+			IupSetStrAttribute( toolsHandle, toStringz( Integer.toString(itemNumber-1) ), nowItemText );
+			IupSetStrAttribute( toolsHandle, toStringz( Integer.toString(itemNumber) ), prevItemText );
 
 			IupSetAttribute( toolsHandle, "VALUE", toStringz( Integer.toString(itemNumber-1) ) ); // Set Foucs
 			

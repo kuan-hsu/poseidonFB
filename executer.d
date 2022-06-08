@@ -1602,7 +1602,7 @@ struct ExecuterAction
 			// Clean outputPanel
 			GLOBAL.messagePanel.printOutputPanel( "", true );
 			
-			if( !activePrjName.length )
+			if( !activePrjName.length || !( activePrjName in GLOBAL.projectManager ) )
 			{
 				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
 				if( GLOBAL.compilerSFX == "ON" )
@@ -1917,6 +1917,12 @@ struct ExecuterAction
 			GLOBAL.messagePanel.printOutputPanel( "", true );
 			
 			if( !activePrjName.length )
+			{
+				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
+				return false;
+			}
+			
+			if( !( activePrjName in GLOBAL.projectManager ) )
 			{
 				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
 				return false;
@@ -2537,10 +2543,13 @@ struct ExecuterAction
 		
 		if( activePrjName.length )
 		{
-			_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
-			if( GLOBAL.projectManager[activePrjName].focusOn.length )
+			if( activePrjName in GLOBAL.projectManager )
 			{
-				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+				_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+				if( GLOBAL.projectManager[activePrjName].focusOn.length )
+				{
+					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+				}
 			}
 		}
 

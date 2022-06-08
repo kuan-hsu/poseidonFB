@@ -480,9 +480,9 @@ version(FBIDE)
 			if( originalNode is null ) return null;
 		
 			if( GLOBAL.includeLevel > 0 )
-				if( level > 1 ) return null;
-			else
-				if( level > 2 ) return null;
+				if( level > GLOBAL.includeLevel - 1 ) return null;
+
+			if( level > 2 ) return null; // MAX 3 STEP (0,1,2)
 			
 			CASTnode[] results;
 			
@@ -950,11 +950,11 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
+		static CASTnode searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bSkipExtend = false )
 		{
 			if( originalNode is null ) return null;
 			
-			foreach( CASTnode _node; getMembers( originalNode ) )
+			foreach( CASTnode _node; getMembers( originalNode, bSkipExtend ) )
 			{
 				if( _node.kind & B_KIND )
 				{
@@ -977,7 +977,7 @@ version(FBIDE)
 			return null;
 		}
 
-		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bWholeWord = true )
+		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bWholeWord = true, bool bSkipExtend = false )
 		{
 			if( originalNode is null ) return null;
 			
@@ -985,7 +985,7 @@ version(FBIDE)
 			
 			word = lowerCase( word );
 			
-			foreach( CASTnode _node; getMembers( originalNode ) )
+			foreach( CASTnode _node; getMembers( originalNode, bSkipExtend ) )
 			{
 				if( _node.kind & B_KIND )
 				{
@@ -1018,17 +1018,17 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
+		static CASTnode searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bSkipExtend = true )
 		{
 			if( originalNode is null ) return null;
 			
-			CASTnode resultNode = searchMatchMemberNode( originalNode, word, B_KIND );
+			CASTnode resultNode = searchMatchMemberNode( originalNode, word, B_KIND, bSkipExtend );
 
 			if( resultNode is null )
 			{
 				if( originalNode.getFather() !is null )
 				{
-					resultNode = searchMatchNode( originalNode.getFather(), word, B_KIND );
+					resultNode = searchMatchNode( originalNode.getFather(), word, B_KIND, bSkipExtend );
 				}
 				else
 				{
@@ -1047,15 +1047,15 @@ version(FBIDE)
 		}
 		
 		
-		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
+		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bSkipExtend = false )
 		{
 			if( originalNode is null ) return null;
 			
-			CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, B_KIND, true );
+			CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, B_KIND, true, bSkipExtend );
 
 			if( originalNode.getFather() !is null )
 			{
-				resultNodes ~= searchMatchNodes( originalNode.getFather(), word, B_KIND );
+				resultNodes ~= searchMatchNodes( originalNode.getFather(), word, B_KIND, bSkipExtend );
 			}
 			else
 			{
@@ -1075,6 +1075,7 @@ version(FBIDE)
 
 
 		// No Check extends class series......
+		/+
 		static CASTnode _searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 		{
 			if( originalNode is null ) return null;
@@ -1101,7 +1102,7 @@ version(FBIDE)
 
 			return null;
 		}
-		
+
 
 		static CASTnode _searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 		{
@@ -1139,7 +1140,7 @@ version(FBIDE)
 
 			return resultNode;
 		}
-		
+
 
 		static CASTnode[] _searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
 		{
@@ -1175,16 +1176,17 @@ version(FBIDE)
 
 			return resultNodes;
 		}
-		
+		+/
 
-		static CASTnode[] getMembers( CASTnode AST_Head )
+		static CASTnode[] getMembers( CASTnode AST_Head, bool bSkipExtend = false )
 		{
 			if( AST_Head is null ) return null;
 			
 			CASTnode[] result;
 			
 			CASTnode[] childrenNodes = AST_Head.getChildren();
-			if( AST_Head.kind & ( B_TYPE | B_CLASS ) ) childrenNodes ~= getBaseNodeMembers( AST_Head ); 
+			if( AST_Head.kind & ( B_TYPE | B_CLASS ) )
+				if( !bSkipExtend ) childrenNodes ~= getBaseNodeMembers( AST_Head ); 
 
 			foreach( CASTnode _child; childrenNodes )
 			{
@@ -1198,7 +1200,7 @@ version(FBIDE)
 						{
 							if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
 							{
-								result ~= getMembers( _child );
+								result ~= getMembers( _child, bSkipExtend );
 								continue;
 							}
 						}
@@ -1207,7 +1209,7 @@ version(FBIDE)
 						{
 							if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
 							{
-								result ~= getMembers( _child );
+								result ~= getMembers( _child, bSkipExtend );
 								continue;
 							}
 						}
@@ -1216,7 +1218,7 @@ version(FBIDE)
 						{
 							if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
 							{
-								result ~= getMembers( _child );
+								result ~= getMembers( _child, bSkipExtend );
 								continue;
 							}
 						}
@@ -1225,7 +1227,7 @@ version(FBIDE)
 						{
 							if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
 							{
-								result ~= getMembers( _child );
+								result ~= getMembers( _child, bSkipExtend );
 								continue;
 							}
 						}
@@ -1234,7 +1236,7 @@ version(FBIDE)
 						{
 							if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
 							{
-								result ~= getMembers( _child );
+								result ~= getMembers( _child, bSkipExtend );
 								continue;
 							}
 						}
@@ -1247,7 +1249,7 @@ version(FBIDE)
 							{
 								if( symbol == upperCase( v ) )
 								{
-									result ~= getMembers( _child );
+									result ~= getMembers( _child, bSkipExtend );
 									break;
 								}
 							}
@@ -1266,18 +1268,18 @@ version(FBIDE)
 									}
 								}
 							
-								if( !bMatchTrue ) result ~= getMembers( _child );
+								if( !bMatchTrue ) result ~= getMembers( _child, bSkipExtend );
 							}
 							else
 							{
-								result ~= getMembers( _child );
+								result ~= getMembers( _child, bSkipExtend );
 							}
 						}
 					}
 				}
 				else if( _child.kind & ( B_UNION | B_TYPE | B_CLASS ) )
 				{
-					if( !_child.name.length ) result ~= getMembers( _child ); else result ~= _child;
+					if( !_child.name.length ) result ~= getMembers( _child, bSkipExtend ); else result ~= _child;
 				}
 				else
 				{
@@ -1766,7 +1768,7 @@ version(FBIDE)
 					auto dummy = getIncludes( AST_Head, AST_Head.name, 0 );
 					foreach( _includeNode; includesMarkContainer )
 					{
-						foreach( CASTnode _friends; getMembers( _includeNode ) )
+						foreach( CASTnode _friends; getMembers( _includeNode, true ) )
 						{
 							if( _friends.kind == ( B_DEFINE | B_VERSION ) ) 
 							{
@@ -1833,25 +1835,23 @@ version(FBIDE)
 			
 			for( int i = 0; i < _splitWord.length; i++ )
 			{
-				//GLOBAL.messagePanel.printOutputPanel( "_splitWord" ~ Integer.toString(i) ~ " :" ~ _splitWord[i] );
 				if( i == 0 )
 				{
-					//GLOBAL.messagePanel.printOutputPanel( "_AST_Head[0]: " ~ _AST_Head.name );
-					matchNodes = _searchMatchNodes( _AST_Head, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION );
+					//matchNodes = _searchMatchNodes( _AST_Head, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION );
+					matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION, true );
 					if( !matchNodes.length ) return null; 
 					if( _splitWord.length == 1 ) break;
 				}
 				else
 				{
-				
 					CASTnode[] tempMatchNodes = matchNodes.dup;
 					matchNodes.length = 0;
 					foreach( CASTnode a; tempMatchNodes )
 					{
-						auto matchNode = _searchMatchMemberNode( a, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION );
+						auto matchNode = searchMatchMemberNode( a, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION, true );
 						if( matchNode !is null )
 						{
-							//GLOBAL.messagePanel.printOutputPanel( matchNode.name ~ "   " ~ ParserAction.getRoot( matchNode ).name );
+							if( i == _splitWord.length - 1 ) return matchNode;
 							matchNodes ~= matchNode;
 						}
 					}
@@ -1966,7 +1966,8 @@ version(FBIDE)
 								if( memberFunctionMotherName.length )
 								{
 									// "_searchMatchNode" also search includes
-									CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+									//CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+									CASTnode classNode = searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS, true );
 									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode, splitWord[i], B_ALL );
 								}
 
@@ -2007,7 +2008,8 @@ version(FBIDE)
 								// For Type Objects
 								if( memberFunctionMotherName.length )
 								{
-									CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+									//CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
+									CASTnode classNode = searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS, true );
 									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode,  splitWord[i] , B_ALL, false );
 								}
 								
@@ -2069,7 +2071,8 @@ version(FBIDE)
 								{
 									if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 									{
-										CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+										//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+										CASTnode memberFunctionMotherNode = searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 										if( memberFunctionMotherNode !is null )
 										{
 											if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
@@ -2143,7 +2146,8 @@ version(FBIDE)
 						{
 							if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 							{
-								CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+								//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+								CASTnode memberFunctionMotherNode = searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 								if( memberFunctionMotherNode !is null )
 								{
 									if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
@@ -2547,7 +2551,7 @@ version(FBIDE)
 			CASTnode rootNode = ParserAction.getRoot( originalNode );
 			//if( ProjectAction.fileInProject( rootNode.name, GLOBAL.activeProjectPath ) ) bPrjFile = true;
 			
-			foreach( CASTnode _node; getMembers( originalNode ) )
+			foreach( CASTnode _node; getMembers( originalNode, true ) )
 			{
 				if( _node.kind & B_INCLUDE )
 				{
@@ -2650,12 +2654,15 @@ version(FBIDE)
 				prjDir = actionManager.ProjectAction.fileInProject( ScintillaAction.getActiveCScintilla.getFullPath );
 				if( prjDir.length )
 				{
-					char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs;
-					if( GLOBAL.projectManager[prjDir].focusOn.length )
-						if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
-					
-					foreach( char[] s; _includeDirs ) // without \
-						_path3 ~= new FilePath( s ); // Reset
+					if( prjDir in GLOBAL.projectManager )
+					{
+						char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs;
+						if( GLOBAL.projectManager[prjDir].focusOn.length )
+							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
+						
+						foreach( char[] s; _includeDirs ) // without \
+							_path3 ~= new FilePath( s ); // Reset
+					}
 				}			
 				
 				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
@@ -4164,7 +4171,8 @@ version(FBIDE)
 									// For Type Objects
 									if( memberFunctionMotherName.length )
 									{
-										CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+										//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
+										CASTnode memberFunctionMotherNode = searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 										if( memberFunctionMotherNode !is null )
 										{
 											auto matchNode = searchMatchNode( memberFunctionMotherNode, _splitWord[i], B_FIND | B_CTOR | B_SUB );

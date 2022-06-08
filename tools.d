@@ -456,45 +456,11 @@ version(DIDE)
 
 	char[][] getImportPath( char[] compilerFullPath )
 	{
-		char[][] _split( char[] txt )
-		{
-			char[][]	_results;
-			char[]		_tempTxt;
-			bool		bString;
-			
-			foreach( char c; txt )
-			{
-				switch( c )
-				{
-					case '"':
-						if( !bString ) bString = true; else bString = false;
-						_tempTxt ~= c;
-						break;
-					
-					case ' ':
-						if( !bString )
-						{
-							if( _tempTxt.length ) _results ~= _tempTxt;
-							_tempTxt = "";
-						}
-						else
-						{
-							_tempTxt ~= c;
-						}
-						break;
-						
-					default:
-						_tempTxt ~= c;
-				}
-			}
-			
-			if( _tempTxt.length && !bString ) _results ~= _tempTxt;
-			
-			return _results;
-		}
-
 		// Get and Set Default Import Path
 		scope filePath = new FilePath( compilerFullPath );
+		char[] compilerPath = filePath.path();
+		if( compilerPath.length )
+			if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
 
 		FilePath sc;
 		version(Windows) sc = new FilePath( filePath.path() ~ "sc.ini" ); else sc = new FilePath( filePath.path() ~ "dmd.conf" );
@@ -511,54 +477,42 @@ version(DIDE)
 				{
 					if( line[0..7] == "DFLAGS=" )
 					{
-						line = line[7..$];
+						line = Util.replace( line[7..$], '\t', ' ' ); // Convert TAB -> SPACE
 						if( line.length )
 						{
-							foreach( char[] _section; _split( Util.replace( line, '\t', ' ' ) ) )
+							int endPos;
+							int iPos = Util.index( line, "-I" );
+							
+							while( iPos < line.length )
 							{
-								if( _section.length > 2 )
+								bool bWithQuote;
+								if( iPos > endPos )
+									if( line[iPos-1] == '"' ) bWithQuote = true;
+									
+								if( bWithQuote )
+									endPos = Util.index( line, "\"", iPos + 2 );
+								else
+									endPos = Util.index( line, " ", iPos + 2 );
+									
+								if( endPos < line.length )
 								{
-									if( _section[0..3] == "\"-I" )
+									char[] _section = line[iPos+2..endPos].dup;
+									foreach( char[] s; Util.split( _section, ";" ) )
 									{
-										int endPos = Util.index( _section, "\"", 3 );
-										if( endPos < _section.length )
+										if( s.length )
 										{
-											_section = _section[3..endPos];
-											foreach( char[] s; Util.split( _section, ";" ) )
-											{
-												if( s.length )
-												{
-													char[] compilerPath = filePath.path();
-													if( compilerPath.length )
-														if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
-
-													s = Util.substitute( s, "%@P%", compilerPath );
-													s = Path.normalize( s );
-													if(s[$-1] != '/' ) s ~= '/';
-													results ~= convertGoUPLevel( s );
-												}
-											}
+											s = Util.substitute( s, "%@P%", compilerPath );
+											s = Path.normalize( s );
+											if(s[$-1] != '/' ) s ~= '/';
+											results ~= convertGoUPLevel( s );
+											//IupMessage("", toStringz( convertGoUPLevel( s ) ));
 										}
 									}
-									else if( _section[0..2] == "-I" )
-									{
-										_section = _section[2..$];
-										foreach( char[] s; Util.split( _section, ";" ) )
-										{
-											if( s.length )
-											{
-												char[] compilerPath = filePath.path();
-												if( compilerPath.length )
-													if( compilerPath[$-1] == '/' ) compilerPath = compilerPath[0..$-1];
-
-												s = Util.substitute( s, "%@P%", compilerPath );
-												s = Path.normalize( s );
-												if(s[$-1] != '/' ) s ~= '/';
-												results ~= convertGoUPLevel( s );
-											}
-										}								
-									}
+									
+									iPos = Util.index( line, "-I", endPos );
 								}
+								else
+									break;
 							}
 						}
 					}
@@ -752,3 +706,19 @@ char[] getEnvironmentVariable(char[] name)
 	//}
 }
 +/
+
+int questMessage( char[] title, char[] message, char[] DIALOGTYPE = "QUESTION", int _x = IUP_CENTERPARENT, int _y = IUP_CENTERPARENT )
+{
+	Ihandle* dlg = IupMessageDlg();
+	IupSetStrAttribute( dlg, "DIALOGTYPE", toStringz( DIALOGTYPE ) );
+	IupSetStrAttribute( dlg, "TITLE", toStringz( title ) );
+	IupSetAttribute( dlg, "BUTTONS", "YESNO");
+	IupSetStrAttribute( dlg, "VALUE", toStringz( message ) );
+
+	IupPopup( dlg, _x, _y );
+
+	int result = IupGetInt(dlg, "BUTTONRESPONSE" );
+	IupDestroy( dlg );
+	
+	return result;
+}

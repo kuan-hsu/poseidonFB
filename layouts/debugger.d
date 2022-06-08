@@ -1303,7 +1303,7 @@ class CDebugger
 			int gdbEndStringPosHead = Util.rindex( result, "[Inferior" );
 			if( gdbEndStringPosHead < result.length )
 			{
-				int _result = IupMessageAlarm( null, "GDB", toStringz( result[gdbEndStringPosHead..gdbEndStringPosTail+16].dup ~ "\n" ~ GLOBAL.languageItems["exitdebug1"].toDString ), "OKCANCEL" );
+				int _result = tools.questMessage( "GDB", result[gdbEndStringPosHead..gdbEndStringPosTail+16].dup ~ "\n" ~ GLOBAL.languageItems["exitdebug1"].toDString );
 				if( _result == 1 )
 				{
 					terminal();
@@ -2409,7 +2409,7 @@ class DebugThread //: Thread
 		switch( command )
 		{
 			case "kill\n", "k\n":
-				int result = IupMessageAlarm( null, "GDB", "Kill the program being debugged?", "YESNO" );
+				int result = tools.questMessage( "GDB", "Kill the program being debugged?" );
 				if( result == 2 ) return "#_NO_#";
 				break;
 				
@@ -2955,7 +2955,7 @@ extern( C )
 				
 				if( _ih == GLOBAL.debugPanel.watchTreeHandle )
 				{
-					int _result = IupMessageAlarm( null, "GDB", toStringz( GLOBAL.languageItems["addtowatch"].toDString ~ "?" ), "YESNO" );
+					int _result = tools.questMessage( "GDB", GLOBAL.languageItems["addtowatch"].toDString ~ "?", "QUESTION", IUP_MOUSEPOS, IUP_MOUSEPOS );
 					if( _result == 1 )
 					{
 						IupSetAttributeId( _ih, "DELNODE", IupGetIntId( _ih, "NEXT", _id ), "SELECTED" );

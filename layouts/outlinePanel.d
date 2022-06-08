@@ -2010,6 +2010,7 @@ class COutline
 	bool refresh( CScintilla cSci )
 	{
 		if( GLOBAL.enableParser != "ON" ) return false;
+		if( cSci is null ) return false;
 
 		scope f = new FilePath( cSci.getFullPath );
 
@@ -2095,10 +2096,29 @@ class COutline
 		}
 		catch( Exception e )
 		{
+			IupMessage( "ERROR", toStringz( "parserText() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
 		}
 
 		return null;
 	}
+	
+	version(FBIDE)
+	{
+		CASTnode parserTextUnderTypeBody( char[] text )
+		{
+			try
+			{
+				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( text ) ) ) return GLOBAL.Parser.parseTypeBodySingleLine( "_.bas" );
+			}
+			catch( Exception e )
+			{
+				IupMessage( "ERROR", toStringz( "parserTextUnderTypeBody() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			}
+
+			return null;
+		}
+	}
+	
 	
 	CASTnode loadObjectParser()
 	{

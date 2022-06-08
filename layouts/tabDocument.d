@@ -370,10 +370,12 @@ extern(C)
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
 			}
+			/*
 			else
 			{
 				GLOBAL.statusBar.setPrjName( null, true );
-			}				
+			}
+			*/
 		}
 
 		

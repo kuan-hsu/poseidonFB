@@ -992,6 +992,7 @@ struct GLOBAL
 		GLOBAL.languageItems["pluginrunningunload"] = new IupString( cast(char[]) "Plugin Is Running, Unload The Plugin?" );
 		GLOBAL.languageItems["onlytools"] = new IupString( cast(char[]) "Only Support 12 Tools!" );
 		GLOBAL.languageItems["createnewone"] = new IupString( cast(char[]) "Create new one?" );
+		GLOBAL.languageItems["applythisone"] = new IupString( cast(char[]) "Apply This One?" );
 
 		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
 		version(FBIDE)

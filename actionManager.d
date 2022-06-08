@@ -654,12 +654,12 @@ public:
 					if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
 					{
 						GLOBAL.statusBar.setPrjName( "                                            " );
-					}
+					}/*
 					else
 					{
 						GLOBAL.statusBar.setPrjName( null, true );
 					}
-					
+					*/
 					return IUP_DEFAULT;
 				}
 			}
@@ -1092,6 +1092,15 @@ public:
 
 		StatusBarAction.update();
 
+		if( !( toTreeMarked( fullPath ) & 2 ) )
+		{
+			GLOBAL.statusBar.setPrjName( "                                            " );
+		}
+		else
+		{
+			GLOBAL.statusBar.setPrjName( null, true );
+		}
+			
 		return true;
 	}
 	
@@ -1121,11 +1130,11 @@ public:
 			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
-			}
+			}/*
 			else
 			{
 				GLOBAL.statusBar.setPrjName( null, true );
-			}
+			}*/
 			
 			return true;
 		}
@@ -1160,6 +1169,13 @@ public:
 					AutoComplete.cleanIncludeContainer();
 					version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, 0 );
 					version(DIDE) AutoComplete.getIncludes( pParseTree, fullPath, true, true );
+					/*
+					GLOBAL.messagePanel.printOutputPanel( "File { " ~ fullPath ~ " } Pre-Loading...", true );
+					foreach( f; AutoComplete.includesMarkContainer )
+						GLOBAL.messagePanel.printOutputPanel( "  " ~ "[ " ~ f.name ~ " ]...Parsed" );
+
+					GLOBAL.messagePanel.printOutputPanel( "File { " ~ fullPath ~ " } Pre-Loading Finished." );
+					*/
 				}
 			}
 			
@@ -1217,11 +1233,11 @@ public:
 			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
-			}
+			}/*
 			else
 			{
 				GLOBAL.statusBar.setPrjName( null, true );
-			}			
+			}*/		
 
 
 			StatusBarAction.update();
@@ -2944,7 +2960,7 @@ public:
 					}
 				}
 
-				if( fullPathByOS( fullPath ) in GLOBAL.scintillaManager )
+				if( bInDocument )
 				{
 					FileAction.saveFile( fullPath, document, GLOBAL.scintillaManager[fullPathByOS( fullPath )].encoding );
 					GLOBAL.scintillaManager[fullPathByOS( fullPath )].setText( document );
@@ -2989,6 +3005,7 @@ public:
 								}
 								else
 								{
+									if( pos + findText.length >= line.length ) break;
 									pos = Util.index( line, findText, pos + findText.length );
 								}
 							}
@@ -3006,7 +3023,7 @@ public:
 						}
 						else if( buttonIndex == 3 )
 						{
-							if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
+							if( bInDocument )
 							{
 								//int linNum = IupScintillaSendMessage( GLOBAL.scintillaManager[fullPath].getIupScintilla, 2166, totalLength + pos, 0 );// SCI_LINEFROMPOSITION = 2166
 								if( !( IupGetIntId( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "MARKERGET", lineNum-1 ) & 2 ) ) IupSetIntId( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "MARKERADD", lineNum-1, 1 );
@@ -3222,47 +3239,69 @@ struct CustomToolAction
 		return false;
 	}
 	
-	
-	static char[] getActiveCompilerPath( ref char[][] _includeDirs )
+	version(DIDE)
 	{
-		// Get Custom Compiler
-		char[] customOpt, customCompiler;
-		getCustomCompilers( customOpt, customCompiler );	
-		
-		// Set Multiple Focus Project
-		char[] activePrjName = GLOBAL.activeProjectPath.length ? GLOBAL.activeProjectPath : actionManager.ProjectAction.getActiveProjectName();
-		FocusUnit _focus;
-		
-		if( activePrjName.length )
+		static bool setActiveDefaultCompilerAndIncludePaths()
 		{
-			if( activePrjName in GLOBAL.projectManager )
+			// Get Custom Compiler
+			char[] customOpt, customCompiler;
+			getCustomCompilers( customOpt, customCompiler );
+			if( customCompiler.length )
 			{
-				_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
-				_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
-				_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
-				_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
-				_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
-				if( GLOBAL.projectManager[activePrjName].focusOn.length )
+				if( customCompiler != GLOBAL.defaultCompilerPath )
 				{
-					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit )
+					if( customCompiler != GLOBAL.defaultCompilerPath ) GLOBAL.defaultImportPaths = tools.getImportPath( customCompiler );
+					GLOBAL.defaultCompilerPath = customCompiler;
+				}
+				return true;
+			}
+			
+			// Set Multiple Focus Project
+			char[] _finalCompilerPath;
+			char[] activePrjDir = GLOBAL.activeProjectPath;//.length ? GLOBAL.activeProjectPath : actionManager.ProjectAction.getActiveProjectName();
+			if( activePrjDir.length )
+			{
+				if( activePrjDir in GLOBAL.projectManager )
+				{
+					if( !GLOBAL.projectManager[activePrjDir].focusOn.length )
 					{
-						_focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
-						_includeDirs = _focus.IncDir;
+						_finalCompilerPath = GLOBAL.projectManager[activePrjDir].compilerPath.length ? GLOBAL.projectManager[activePrjDir].compilerPath : GLOBAL.compilerFullPath;
+					}
+					else
+					{
+						if( GLOBAL.projectManager[activePrjDir].focusOn in GLOBAL.projectManager[activePrjDir].focusUnit )
+						{
+							if( GLOBAL.projectManager[activePrjDir].focusUnit[GLOBAL.projectManager[activePrjDir].focusOn].Compiler.length )
+								_finalCompilerPath = GLOBAL.projectManager[activePrjDir].focusUnit[GLOBAL.projectManager[activePrjDir].focusOn].Compiler;
+							else
+							{
+								if( GLOBAL.projectManager[activePrjDir].compilerPath.length )
+									_finalCompilerPath = GLOBAL.projectManager[activePrjDir].compilerPath;
+								else
+									_finalCompilerPath = GLOBAL.compilerFullPath;
+							}
+						}
 					}
 				}
 			}
-		}
-		
-		char[] compilerFullPath;
-		if( !compilerFullPath.length ) compilerFullPath = customCompiler;
-		if( !compilerFullPath.length )
-		{
-			version(FBIDE)
-				compilerFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
 			else
-				compilerFullPath = ( _focus.Compiler.length ? _focus.Compiler : GLOBAL.compilerFullPath );
-		}	
-	
-		return compilerFullPath;
+			{
+				_finalCompilerPath = GLOBAL.compilerFullPath;
+			}
+			
+			if( _finalCompilerPath != GLOBAL.defaultCompilerPath )
+			{
+				GLOBAL.defaultCompilerPath = _finalCompilerPath;
+				if( _finalCompilerPath.length )
+					GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.defaultCompilerPath );
+				else
+				{
+					GLOBAL.defaultImportPaths.length = 0;
+					return false;
+				}
+			}
+		
+			return true;
+		}
 	}
 }

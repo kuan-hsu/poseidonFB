@@ -153,6 +153,8 @@ class CStatusBar
 			IupSetStrAttribute( prjName, "TITLE", toStringz( name ) );
 			if( Util.trim( name ).length == 0 ) GLOBAL.activeProjectPath = "";
 		}
+		
+		version(DIDE) CustomToolAction.setActiveDefaultCompilerAndIncludePaths();
 	}
 	
 	void setLINExCOL( char[] lc )
@@ -193,7 +195,11 @@ class CStatusBar
 						if( fpos < bpos )
 						{
 							tipString = ( s[0..fpos] ~ "\n" ~ s[fpos+5..bpos] ).dup; // With Compiler Path
-							version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( s[0..fpos] );
+							version(DIDE)
+							{
+								GLOBAL.defaultCompilerPath = s[0..fpos];
+								GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.defaultCompilerPath );
+							}
 						}
 						else
 						{
@@ -206,10 +212,8 @@ class CStatusBar
 				}			
 			}			
 		}
-		else
-		{
-			version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.compilerFullPath );
-		}
+		
+		version(DIDE) CustomToolAction.setActiveDefaultCompilerAndIncludePaths();
 	}
 	
 	void setCompleteIcon( bool bStatus )
@@ -393,22 +397,14 @@ extern(C) // Callback for CBaseDialog
 		
 		if( focusTitle != "<null>" )
 		{
-			if( focusTitle in GLOBAL.projectManager[activePrjDir].focusUnit )
-			{
-				GLOBAL.projectManager[activePrjDir].focusOn = focusTitle;
-				version(DIDE) GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.projectManager[activePrjDir].focusUnit[focusTitle].Compiler );
-			}
-			else
-			{
-				GLOBAL.projectManager[activePrjDir].focusOn = "";
-			}
+			if( focusTitle in GLOBAL.projectManager[activePrjDir].focusUnit ) GLOBAL.projectManager[activePrjDir].focusOn = focusTitle;	else GLOBAL.projectManager[activePrjDir].focusOn = "";
 		}
 		else
 		{
-			GLOBAL.projectManager[activePrjDir].focusOn = "";
+			if( activePrjDir in GLOBAL.projectManager ) GLOBAL.projectManager[activePrjDir].focusOn = "";
 		}
-		IupSetAttribute( ih, "VALUE", "ON" );
 		
+		IupSetAttribute( ih, "VALUE", "ON" );
 		GLOBAL.statusBar.setPrjName( null, true );
 		
 		return IUP_DEFAULT;

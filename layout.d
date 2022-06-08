@@ -522,7 +522,7 @@ extern(C)
 							*/
 							switch( c )
 							{
-								case 10, 13: // DEL, Eneter
+								case 10, 13: // Eneter
 									switch( GLOBAL.liveLevel )
 									{
 										case 1:
