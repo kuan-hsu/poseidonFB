@@ -182,106 +182,246 @@ version(FBIDE)
 						}
 						break;
 					
+
 					case TOK.Tif:
 						parseToken( TOK.Tif );
-						
-						bool bNot;
-						if( token().tok == TOK.Tnot )
+						version(VERSION_NONE)
 						{
-							bNot = true;
-							parseToken( TOK.Tnot );
-						}
-						
-						// defined (symbol_name)
-						if( token().tok == TOK.Tdefined )
+							skipToEOL();
+						}						
+						else
 						{
-							parseToken( TOK.Tdefined );
-							if( token().tok == TOK.Topenparen )
+							bool bNot;
+							if( token().tok == TOK.Tnot )
 							{
-								parseToken( TOK.Topenparen );
-								if( token().tok == TOK.Tidentifier && next().tok == TOK.Tcloseparen )
+								bNot = true;
+								parseToken( TOK.Tnot );
+							}
+							
+							// defined (symbol_name)
+							if( token().tok == TOK.Tdefined )
+							{
+								parseToken( TOK.Tdefined );
+								if( token().tok == TOK.Topenparen )
 								{
-									activeASTnode = activeASTnode.addChild( ( bNot ? "!" ~ token().identifier : token().identifier ), B_VERSION, null, ( bNot ? "!" : "" ), null, token().lineNumber );
-									parseToken( TOK.Tidentifier );
-									parseToken( TOK.Tcloseparen );
+									parseToken( TOK.Topenparen );
+									if( token().tok == TOK.Tidentifier && next().tok == TOK.Tcloseparen )
+									{
+										activeASTnode = activeASTnode.addChild( ( bNot ? "!" ~ token().identifier : token().identifier ), B_VERSION, null, ( bNot ? "!" : "" ), null, token().lineNumber );
+										parseToken( TOK.Tidentifier );
+										parseToken( TOK.Tcloseparen );
+									}
+								}
+							}
+							else // #if (expression)
+							{
+								if( token().tok == TOK.Topenparen )
+								{
+									char[] expression = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+									if( expression.length > 2 )
+									{
+										expression = expression[1..$-1].dup;
+
+										char[]	_identifier, _sign, _body;
+										for( int i = 0; i < expression.length; ++ i )
+										{
+											if( expression[i] >= 60 && expression[i] <= 62 )
+											{
+												_sign ~= expression[i];
+												continue;
+											}
+
+											if( _sign.length ) _identifier ~= expression[i]; else _body ~= expression[i];
+										}
+										if( _sign.length && _identifier.length && _body.length ) activeASTnode = activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#if", token().lineNumber );
+									}
+								}
+								else // #if expression
+								{
+									char[]	_identifier, _sign, _body;
+									if( token().tok == TOK.Tidentifier )
+									{
+										_identifier = token().identifier;
+										parseToken( TOK.Tidentifier );
+										
+										while( token().tok == TOK.Tassign || token().tok == TOK.Tgreater || token().tok == TOK.Tless )
+										{
+											_sign ~= token().identifier;
+											parseToken();
+										}
+										
+										while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+										{
+											_body ~= token().identifier;
+											parseToken();
+										}
+										
+										activeASTnode = activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#if", token().lineNumber );
+									}
 								}
 							}
 						}
-						/+
-						else // #if (expression)
-						{
-							if( token().tok == TOK.Topenparen )
-							{
-								char[] expression = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-								if( expression.length > 2 )
-								{
-									expression = expression[1..$-1].dup;
-
-									char[]	_identifier, _sign, _body;
-									for( int i = 0; i < expression.length; ++ i )
-									{
-										if( expression[i] >= 60 && expression[i] <= 62 )
-										{
-											_sign ~= expression[i];
-											continue;
-										}
-
-										if( _sign.length ) _identifier ~= expression[i]; else _body ~= expression[i];
-									}
-									if( _sign.length && _identifier.length && _body.length ) activeASTnode = activeASTnode.addChild( _identifier, B_VERSION, _sign, null, _body, token().lineNumber );
-								}
-							}						
-						}
-						+/
 						break;
 
 					case TOK.Tifdef:
 						parseToken( TOK.Tifdef );
-						if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( token().identifier, B_VERSION, null, null, null, token().lineNumber );
-						parseToken();
+						version(VERSION_NONE)
+						{
+							skipToEOL();
+						}						
+						else
+						{
+							if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( token().identifier, B_VERSION, null, null, null, token().lineNumber );
+							parseToken();
+						}
 						break;
 						
 					case TOK.Tifndef:
 						parseToken( TOK.Tifndef );
-						if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( "!" ~ token().identifier, B_VERSION, null, "!", null, token().lineNumber );
-						parseToken();
+						version(VERSION_NONE)
+						{
+							skipToEOL();
+						}						
+						else
+						{
+							if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( "!" ~ token().identifier, B_VERSION, null, "!", null, token().lineNumber );
+							parseToken();
+						}
 						break;
 						
 					case TOK.Telse:
-						if( activeASTnode.kind & B_VERSION )
+						version(VERSION_NONE)
 						{
-							char[] _name = activeASTnode.name;
-							activeASTnode = activeASTnode.getFather( token().lineNumber );
-							if( activeASTnode.name.length )
+							skipToEOL();
+						}					
+						else
+						{
+							if( activeASTnode.kind == ( B_VERSION | B_PARAM ) )
 							{
-								if( _name[0] == '!' )
-									activeASTnode = activeASTnode.addChild( _name[1..$], B_VERSION, null, null, null, token().lineNumber );
-								else
-									activeASTnode = activeASTnode.addChild( "!" ~ _name, B_VERSION, null, "!", null, token().lineNumber );
+								
+								CASTnode[] _children = activeASTnode.getChildren();
+								activeASTnode.zeroChildCount(); // set children length = 0, make killChild() not release the memory
+								activeASTnode = activeASTnode.getFather( token().lineNumber );
+								activeASTnode.killChild( activeASTnode.getChildrenCount - 1 );
+								
+								foreach( CASTnode _child; _children ) // Paste _children Back
+									activeASTnode.addChild( _child );
+								
+								//activeASTnode = activeASTnode.getFather( token().lineNumber );
+								activeASTnode = activeASTnode.addChild( "#else", B_VERSION | B_PARAM, null, null, "#else", token().lineNumber );
 							}
+							else if( activeASTnode.kind == B_VERSION )
+							{
+								char[] _name = activeASTnode.name;
+								activeASTnode = activeASTnode.getFather( token().lineNumber );
+								if( activeASTnode.name.length )
+								{
+									if( _name[0] == '!' )
+										activeASTnode = activeASTnode.addChild( _name[1..$], B_VERSION, null, null, null, token().lineNumber );
+									else
+										activeASTnode = activeASTnode.addChild( "!" ~ _name, B_VERSION, null, "!", null, token().lineNumber );
+								}
+							}
+							parseToken( TOK.Telse );
 						}
-						parseToken( TOK.Telse );
 						break;
-					/*
-					case TOK.Telseif, TOK.Telse:
+					
+					case TOK.Telseif:
 						parseToken();
-
-						if( _type.length )
+						
+						version(VERSION_NONE)
 						{
-							if( _type[0] == '!' )
+							skipToEOL();
+						}
+						else
+						{
+							if( activeASTnode.kind == ( B_VERSION | B_PARAM ) )
 							{
-								_type = upperCase( _type[1..$] );
-							}
-							else
-							{
-								_type = upperCase( "!" ~ _type );
+								
+								CASTnode[] _children = activeASTnode.getChildren();
+								activeASTnode.zeroChildCount(); // set children length = 0, make killChild() not release the memory
+								activeASTnode = activeASTnode.getFather( token().lineNumber );
+								activeASTnode.killChild( activeASTnode.getChildrenCount - 1 );
+
+								foreach( CASTnode _child; _children ) // Paste _children Back
+									activeASTnode.addChild( _child );
+								/+
+								activeASTnode = activeASTnode.getFather( token().lineNumber );
+								
+								if( token().tok == TOK.Topenparen )
+								{
+									char[] expression = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+									if( expression.length > 2 )
+									{
+										expression = expression[1..$-1].dup;
+
+										char[]	_identifier, _sign, _body;
+										for( int i = 0; i < expression.length; ++ i )
+										{
+											if( expression[i] >= 60 && expression[i] <= 62 )
+											{
+												_sign ~= expression[i];
+												continue;
+											}
+
+											if( _sign.length ) _identifier ~= expression[i]; else _body ~= expression[i];
+										}
+										if( _sign.length && _identifier.length && _body.length ) activeASTnode = activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#elseif", token().lineNumber );
+									}
+								}
+								else // #if expression
+								{
+									char[]	_identifier, _sign, _body;
+									if( token().tok == TOK.Tidentifier )
+									{
+										_identifier = token().identifier;
+										parseToken( TOK.Tidentifier );
+										
+										while( token().tok == TOK.Tassign || token().tok == TOK.Tgreater || token().tok == TOK.Tless )
+										{
+											_sign ~= token().identifier;
+											parseToken();
+										}
+										
+										while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
+										{
+											_body ~= token().identifier;
+											parseToken();
+										}
+										
+										activeASTnode = activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#elseif", token().lineNumber );
+									}
+								}
+								+/
+								activeASTnode = activeASTnode.addChild( "elseif", B_VERSION | B_PARAM, null, null, "#elseif", token().lineNumber );
 							}
 						}
 						break;
-					*/
+						
 					case TOK.Tendif:
-						if( activeASTnode.kind & B_VERSION ) activeASTnode = activeASTnode.getFather( token().lineNumber );
-						parseToken( TOK.Tendif );
+						version(VERSION_NONE)
+						{
+							skipToEOL();
+						}
+						else
+						{
+							if( activeASTnode.kind == ( B_VERSION | B_PARAM ) )
+							{
+								CASTnode[] _children = activeASTnode.getChildren();
+								activeASTnode.zeroChildCount(); // set children length = 0, make killChild() not release the memory
+								activeASTnode = activeASTnode.getFather( token().lineNumber );
+								activeASTnode.killChild( activeASTnode.getChildrenCount - 1 );
+
+								foreach( CASTnode _child; _children ) // Paste _children Back
+									activeASTnode.addChild( _child );
+								
+								//activeASTnode = activeASTnode.getFather( token().lineNumber );
+							}
+							else if( activeASTnode.kind & B_VERSION )
+								activeASTnode = activeASTnode.getFather( token().lineNumber );
+								
+							parseToken( TOK.Tendif );
+						}
 						break;
 
 					default:

@@ -94,7 +94,7 @@ class COutline
 					IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_import" );
 					break;
 					
-				case B_VERSION:
+				case B_VERSION: //, B_VERSION | B_PARAM:
 					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_version" );
 					IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, "IUP_version" );
 					break;
@@ -736,7 +736,12 @@ class COutline
 						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					break;
-					
+				/*
+				case B_VERSION | B_PARAM:
+					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.protection ~ _node.type ~ lineNumString ) );
+					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
+					break;
+				*/
 				case B_WITH, B_NAMESPACE, B_VERSION:
 					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
 					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );

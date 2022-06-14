@@ -19,7 +19,7 @@ private:
 	
 	version(Windows) import tango.sys.win32.CodePage;
 	
-	static char[] content;
+	//static char[] content;
 	
 	static bool isUTF8WithouBOM( ubyte[] data )
 	{
@@ -221,7 +221,8 @@ public:
 
 	static char[] loadFile( char[] fullPath, ref int _encoding )
 	{
-		//content = "";
+		char[] content;
+		
 		try
 		{
 			scope _fp = new FilePath( fullPath );
@@ -1042,6 +1043,8 @@ private:
 	import parser.scanner,  parser.token, parser.parser, parser.autocompletion;
 
 	import tango.core.Thread, Path = tango.io.Path;
+	
+	static bool[char[]] preParsedIncludes;
 
 public:
 	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8N, char[] existData = null, bool bCreateActualFile = true, int insertPos = -1 )
@@ -1158,6 +1161,14 @@ public:
 				if( _tree == null )	GLOBAL.outlineTree.createTree( GLOBAL.parserManager[fullPathByOS(fullPath)] );
 				
 				GLOBAL.outlineTree.changeTree( fullPath );
+				
+				// Load and parse to fill up includesMarkContainer, for speed-up
+				if( !( fullPathByOS(fullPath) in preParsedIncludes ) )
+				{
+					preParsedIncludes[fullPathByOS(fullPath)] = true;
+					AutoComplete.cleanIncludeContainer();
+					AutoComplete.setPreLoadContainer( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+				}
 			}
 			else
 			{
@@ -1166,16 +1177,13 @@ public:
 				// Preload
 				if( pParseTree !is null ) 
 				{
-					AutoComplete.cleanIncludeContainer();
-					version(FBIDE) AutoComplete.getIncludes( pParseTree, fullPath, 0 );
-					version(DIDE) AutoComplete.getIncludes( pParseTree, fullPath, true, true );
-					/*
-					GLOBAL.messagePanel.printOutputPanel( "File { " ~ fullPath ~ " } Pre-Loading...", true );
-					foreach( f; AutoComplete.includesMarkContainer )
-						GLOBAL.messagePanel.printOutputPanel( "  " ~ "[ " ~ f.name ~ " ]...Parsed" );
-
-					GLOBAL.messagePanel.printOutputPanel( "File { " ~ fullPath ~ " } Pre-Loading Finished." );
-					*/
+					// Load and parse to fill up includesMarkContainer, for speed-up
+					//if( !( fullPathByOS(fullPath) in preParsedIncludes ) )
+					//{
+						preParsedIncludes[fullPathByOS(fullPath)] = true;
+						AutoComplete.cleanIncludeContainer();
+						AutoComplete.setPreLoadContainer( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+					//}
 				}
 			}
 			

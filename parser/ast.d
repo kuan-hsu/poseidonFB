@@ -130,6 +130,21 @@ public:
 	CASTnode[] getChildren(){ return children; }
 
 	int getChildrenCount(){ return children.length; }
+	
+	
+	void killChild( int index )
+	{	
+		if( index >= children.length ) return;
+
+		CASTnode[] tempChildren;
+		for( int i = 0; i < children.length; ++ i )
+		{
+			if( i != index ) tempChildren ~= children[i]; else delete children[i];
+		}
+		
+		zeroChildCount();
+		children = tempChildren;
+	}
 
 	void zeroChildCount(){ children.length = 0; }// Warning, very dangerous! 
 }

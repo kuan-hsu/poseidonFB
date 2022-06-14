@@ -3259,43 +3259,19 @@ extern(C)
 
 					try
 					{
-						AutoComplete.VersionCondition.length = 0;
-						
-						char[] options, compilers;
-						CustomToolAction.getCustomCompilers( options, compilers );
-						
-						char[] activePrjName = ProjectAction.getActiveProjectName;
-						if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
-						if( options.length )
-						{	
-							version(FBIDE)
-							{
-								int _versionPos = Util.index( options, "-d" );
-								while( _versionPos < options.length )
-								{
-									char[]	versionName;
-									bool	bBeforeSymbol = true;
-									for( int i = _versionPos + 2; i < options.length; ++ i )
-									{
-										if( options[i] == '\t' || options[i] == ' ' )
-										{
-											if( !bBeforeSymbol ) break; else continue;
-										}
-										else if( options[i] == '=' )
-										{
-											break;
-										}
-
-										versionName ~= options[i];
-									}								
-
-									if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
-									_versionPos = Util.index( options, "-d", _versionPos + 2 );
-								}								
+						version(DIDE)
+						{
+							// Reset VersionCondition Container
+							foreach( char[] key; AutoComplete.VersionCondition.keys )
+								AutoComplete.VersionCondition.remove( key );
 							
-							}
-							version(DIDE)
-							{
+							char[] options, compilers;
+							CustomToolAction.getCustomCompilers( options, compilers );
+							
+							char[] activePrjName = ProjectAction.getActiveProjectName;
+							if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+							if( options.length )
+							{	
 								int _versionPos = Util.index( options, "-version=" );
 								while( _versionPos < options.length )
 								{
@@ -3305,13 +3281,54 @@ extern(C)
 										if( options[i] == '\t' || options[i] == ' ' ) break;
 										versionName ~= options[i];
 									}								
-									if( versionName.length )
-									{	
-										AutoComplete.VersionCondition ~= versionName;
-									}
+									
+									if( versionName.length ) AutoComplete.VersionCondition[versionName] = 1;
 									
 									_versionPos = Util.index( options, "-version=", _versionPos + 9 );
 								}
+							}
+						}
+						else
+						{
+							version(VERSION_NONE)
+							{
+							}
+							else
+							{
+								// Reset VersionCondition Container
+								foreach( char[] key; AutoComplete.VersionCondition.keys )
+									AutoComplete.VersionCondition.remove( key );
+								
+								char[] options, compilers;
+								CustomToolAction.getCustomCompilers( options, compilers );
+								
+								char[] activePrjName = ProjectAction.getActiveProjectName;
+								if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+								if( options.length )
+								{	
+									int _versionPos = Util.index( options, "-d" );
+									while( _versionPos < options.length )
+									{
+										char[]	versionName;
+										bool	bBeforeSymbol = true;
+										for( int i = _versionPos + 2; i < options.length; ++ i )
+										{
+											if( options[i] == '\t' || options[i] == ' ' )
+											{
+												if( !bBeforeSymbol ) break; else continue;
+											}
+											else if( options[i] == '=' )
+											{
+												break;
+											}
+
+											versionName ~= options[i];
+										}								
+
+										if( versionName.length ) AutoComplete.VersionCondition[upperCase(versionName)] = 1;
+										_versionPos = Util.index( options, "-d", _versionPos + 2 );
+									}								
+								}							
 							}
 						}
 						

@@ -216,87 +216,76 @@ private:
 			{
 				if( _child.kind & B_VERSION )
 				{
-					char[] symbol = upperCase( _child.name );
-					char[] noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
-					if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
+					version(VERSION_NONE)
 					{
-						version(Windows)
-						{
-							if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
-							{
-								result ~= getVersionIncludes( _child );
-								continue;
-							}
-						}
-						
-						version(linux)
-						{
-							if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
-							{
-								result ~= getVersionIncludes( _child );
-								continue;
-							}
-						}
-						
-						version(FreeBSD)
-						{
-							if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
-							{
-								result ~= getVersionIncludes( _child );
-								continue;
-							}
-						}
-						
-						version(OpenBSD)
-						{
-							if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
-							{
-								result ~= getVersionIncludes( _child );
-								continue;
-							}
-						}
-						
-						version(Posix)
-						{
-							if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
-							{
-								result ~= getVersionIncludes( _child );
-								continue;
-							}
-						}
 					}
 					else
 					{
-						if( !_child.type.length )
+						char[] symbol = upperCase( _child.name );
+						char[] noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
+						if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
 						{
-							foreach( char[] v; AutoComplete.VersionCondition )
+							version(Windows)
 							{
-								if( symbol == upperCase( v ) )
+								if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
 								{
 									result ~= getVersionIncludes( _child );
-									break;
+									continue;
+								}
+							}
+							
+							version(linux)
+							{
+								if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
+								{
+									result ~= getVersionIncludes( _child );
+									continue;
+								}
+							}
+							
+							version(FreeBSD)
+							{
+								if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
+								{
+									result ~= getVersionIncludes( _child );
+									continue;
+								}
+							}
+							
+							version(OpenBSD)
+							{
+								if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
+								{
+									result ~= getVersionIncludes( _child );
+									continue;
+								}
+							}
+							
+							version(Posix)
+							{
+								if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
+								{
+									result ~= getVersionIncludes( _child );
+									continue;
 								}
 							}
 						}
 						else
 						{
-							if( AutoComplete.VersionCondition.length )
+							if( !_child.type.length )
 							{
-								bool bMatchTrue;
-								foreach( char[] v; AutoComplete.VersionCondition )
-								{
-									if( symbol[1..$] == upperCase( v ) )
-									{
-										bMatchTrue = true;
-										break;
-									}
-								}
-							
-								if( !bMatchTrue ) result ~= getVersionIncludes( _child );							
+								if( symbol in AutoComplete.VersionCondition ) result ~= getVersionIncludes( _child );
 							}
 							else
 							{
-								result ~= getVersionIncludes( _child );
+								if( AutoComplete.VersionCondition.length )
+								{
+									if( !( symbol[1..$] in AutoComplete.VersionCondition ) ) result ~= getVersionIncludes( _child );
+								}
+								else
+								{
+									result ~= getVersionIncludes( _child );
+								}
 							}
 						}
 					}
@@ -330,17 +319,11 @@ private:
 				
 					if( _child.name != "-else-" )
 					{
-						foreach( char[] v; AutoComplete.VersionCondition )
-						{
-							if( _child.name == v ) result ~= getVersionIncludes( _child );
-						}
+							if( _child.name in AutoComplete.VersionCondition ) result ~= getVersionIncludes( _child );
 					}
 					else
 					{
-						foreach( char[] v; AutoComplete.VersionCondition )
-						{
-							if( _child.base != v ) result ~= getVersionIncludes( _child );
-						}
+						if( !( _child.base in AutoComplete.VersionCondition ) ) result ~= getVersionIncludes( _child );
 					}
 				}
 				else if( _child.kind & D_IMPORT )
@@ -356,66 +339,55 @@ private:
 	
 	char[][] preParseFiles( char[][] inFiles, int level )
 	{
-		char[][] beParsedFiles, outFiles;
+		char[][] beParsedFiles;
+		
+		char[] plusSign;
+		for( int i = 0; i < level; ++ i)
+			plusSign ~= "+";		
 		
 		foreach( char[] s; inFiles )
 		{
-			if( fullPathByOS(s) in GLOBAL.parserManager )
+			bool bInParserManager = ( fullPathByOS(s) in GLOBAL.parserManager ) ? true : false;
+
+			CASTnode Root = GLOBAL.outlineTree.loadParser( s );
+			if( Root !is null )
 			{
-				CASTnode Root = GLOBAL.parserManager[fullPathByOS(s)];
-				if( Root !is null )
+				if( !bInParserManager ) GLOBAL.messagePanel.printOutputPanel( "  " ~ plusSign ~ "[ " ~ s ~ " ]...Parsed" );
+
+				char[] includeFullPath;
+				version(FBIDE)
 				{
-					char[] includeFullPath;
-					
-					version(FBIDE)
+					CASTnode[] includeNodes = getVersionIncludes( Root );
+					foreach( CASTnode _node; includeNodes )
 					{
-						CASTnode[] includeNodes = getVersionIncludes( Root );
-						foreach( CASTnode _node; includeNodes )
+						includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+						if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+					}
+				}
+				version(DIDE)
+				{
+					CASTnode[] includeNodes = getVersionIncludes( Root );
+					foreach( CASTnode _node; includeNodes )
+					{
+						if( _node.type.length )
 						{
+							//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
+							includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.type );
+							if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+						}
+						else
+						{
+							//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
 							includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
 							if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
 						}
-					}
-					version(DIDE)
-					{
-						CASTnode[] includeNodes = getVersionIncludes( Root );
-						foreach( CASTnode _node; includeNodes )
-						{
-							if( _node.type.length )
-							{
-								//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
-								includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.type );
-								if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
-							}
-							else
-							{
-								//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
-								includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
-								if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
-							}
-						}					
-					}
+					}					
 				}
 			}
+
 		}
 		
-		char[] plusSign;
-		for( int i = 0; i <= level; ++ i)
-			plusSign ~= "+";
-		
-		foreach( char[] source; beParsedFiles )
-		{
-			if( fullPathByOS(source) in GLOBAL.parserManager ){}
-			else
-			{
-				outFiles ~= source;
-				GLOBAL.outlineTree.loadParser( source );
-				GLOBAL.messagePanel.printOutputPanel( "  " ~ plusSign ~ "[ " ~ source ~ " ]...Parsed" );
-				//Stdout( Integer.toString( i + 1 ) ~ " " ~ source ).newline;
-			}
-		}				
-	
-		return outFiles;
+		return beParsedFiles;
 	}	
 
 
@@ -790,55 +762,16 @@ public:
 				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 			
-				char[][]		parsedFiles, secondParsedFiles;
-				//ParseThread[]	pths;
-				//scope 			f = new FilePath;
-				
+				char[][]		parsedFiles;
 				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Files Pre-Loading...", true );
 				foreach( char[] source; GLOBAL.projectManager[setupDir].sources ~ GLOBAL.projectManager[setupDir].includes ~ GLOBAL.projectManager[setupDir].misc ~ GLOBAL.projectManager[setupDir].others )
 				{
-					/*
-					f.set( source );
-					char[] _ext = lowerCase( f.ext() );
-
-					version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) ) continue;
-					version(DIDE)	if( _ext != "d" && _ext != "di" ) continue;	
-					*/
-					if( fullPathByOS(source) in GLOBAL.parserManager ){}
-					else
-					{
-						if( GLOBAL.outlineTree.loadParser( source ) !is null )
-						{
-							parsedFiles ~= source;
-							GLOBAL.messagePanel.printOutputPanel( "  +[ " ~ source ~ " ]...Parsed" );
-							//Stdout( "1: " ~ source ).newline;
-						}
-						/*
-						int bom;
-						char[] _document = FileAction.loadFile( source, bom );
-						auto pth = new ParseThread( source, _document );
-						pths ~= pth;
-						pth.start;
-						*/
-					}
+					if( Path.exists( source ) ) parsedFiles ~= source;
 				}
 				
-				/+
-				foreach( pth; pths )
-					pth.join();
-					
-				foreach( pth; pths )
-				{
-					Stdout( "1: " ~ pth.pFullPath ).newline;
-					GLOBAL.parserManager[fullPathByOS(pth.pFullPath)] = pth.getResult;
-					delete pth;
-				}
-				pths.length = 0;
-				+/
-				
-				for( int i = 1; i < GLOBAL.preParseLevel; ++i )
+				for( int i = 0; i <= GLOBAL.preParseLevel; ++i )
 					parsedFiles = preParseFiles( parsedFiles, i );
-					
+				
 				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
 				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
 			}

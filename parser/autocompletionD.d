@@ -24,10 +24,28 @@ version(DIDE)
 		
 		static char[][]				listContainer;
 		static CASTnode[char[]]		includesMarkContainer;
-		static char[][]				VersionCondition;
+		static int[char[]]			VersionCondition;
 		
 		static char[]				showTypeContent;
 		
+		
+		class CGetIncludes : Thread
+		{
+		private:
+			CASTnode	AST_Head;
+		
+		public:
+			this( CASTnode _AST_Head )
+			{
+				AST_Head = _AST_Head;
+				super( &run );
+			}
+
+			void run()
+			{
+				AutoComplete.getIncludes( AST_Head, AST_Head.name, true, true );
+			}
+		}		
 		
 		class CShowListThread : Thread
 		{
@@ -151,10 +169,10 @@ version(DIDE)
 		}
 		
 		
-		
-		static CShowListThread showListThread;
-		static CShowListThread showCallTipThread;
-		static Ihandle* timer = null;
+		static CGetIncludes		preLoadContainerThread;
+		static CShowListThread	showListThread;
+		static CShowListThread	showCallTipThread;
+		static Ihandle*			timer = null;
 		
 		/*
 		static char[] getDefaultList( char[] s )
@@ -1393,17 +1411,11 @@ version(DIDE)
 				
 					if( _child.name != "-else-" )
 					{
-						foreach( char[] v; VersionCondition )
-						{
-							if( _child.name == v ) result ~= getMembers( _child );
-						}
+						if( _child.name in VersionCondition ) result ~= getMembers( _child );
 					}
 					else
 					{
-						foreach( char[] v; VersionCondition )
-						{
-							if( _child.base != v ) result ~= getMembers( _child );
-						}
+						if( !( _child.name in VersionCondition ) ) result ~= getMembers( _child );
 					}
 				}
 				else if( _child.kind & D_ENUM )
@@ -2321,6 +2333,28 @@ version(DIDE)
 		static void cleanCalltipContainer()
 		{
 			calltipContainer.clear();
+		}
+		
+		static void setPreLoadContainer( CASTnode astHead )
+		{
+			if( preLoadContainerThread is null )
+			{
+				preLoadContainerThread = new CGetIncludes( astHead );
+				preLoadContainerThread.start();
+			}
+			else
+			{
+				if( !preLoadContainerThread.isRunning )
+				{
+					delete preLoadContainerThread;
+					preLoadContainerThread = new CGetIncludes( astHead );
+					preLoadContainerThread.start();
+				}
+				else
+				{
+					preLoadContainerThread.join();
+				}
+			}
 		}		
 
 		static bool checkIsclmportDeclare( Ihandle* iupSci, int pos = -1 )
@@ -3292,7 +3326,9 @@ version(DIDE)
 
 					if( AST_Head is null ) return;
 					
-					AutoComplete.VersionCondition.length = 0;
+					// Reset VersionCondition Container
+					foreach( char[] key; VersionCondition.keys )
+						VersionCondition.remove( key );
 					
 					char[] options, compilers;
 					CustomToolAction.getCustomCompilers( options, compilers );
@@ -3309,7 +3345,7 @@ version(DIDE)
 								if( options[i] == '\t' || options[i] == ' ' ) break;
 								versionName ~= options[i];
 							}							
-							if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
+							if( versionName.length ) AutoComplete.VersionCondition[versionName] = 1;
 							
 							_versionPos = Util.index( options, "-version=", _versionPos + 9 );
 						}
@@ -3643,6 +3679,17 @@ version(DIDE)
 		
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{
+			if( preLoadContainerThread !is null )
+			{
+				if( preLoadContainerThread.isRunning )
+					preLoadContainerThread.join();
+				else
+				{
+					delete preLoadContainerThread;
+					preLoadContainerThread = null;
+				}
+			}
+			
 			
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;

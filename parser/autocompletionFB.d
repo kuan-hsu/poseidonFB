@@ -16,7 +16,7 @@ version(FBIDE)
 		import parser.ast;
 		import scintilla;
 
-		import Integer = tango.text.convert.Integer, UTF = tango.text.convert.Utf;
+		import Integer = tango.text.convert.Integer, UTF = tango.text.convert.Utf, Float = tango.text.convert.Float;
 		import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
 		import tango.io.Stdout, tango.util.container.more.Stack;
 		import tango.core.Thread;
@@ -48,10 +48,29 @@ version(FBIDE)
 		static char[][]						listContainer;
 		static CASTnode[char[]]				includesMarkContainer;
 		static bool[char[]]					noIncludeNodeContainer;
-		static char[][]						VersionCondition;
+		static float[char[]]					VersionCondition;
 
 		static char[]						showTypeContent;
 		static char[]						includesFromPath;
+
+
+		class CGetIncludes : Thread
+		{
+		private:
+			CASTnode	AST_Head;
+		
+		public:
+			this( CASTnode _AST_Head )
+			{
+				AST_Head = _AST_Head;
+				super( &run );
+			}
+
+			void run()
+			{
+				AutoComplete.getIncludes( AST_Head, AST_Head.name, 0 );
+			}
+		}
 
 		class CShowListThread : Thread
 		{
@@ -98,7 +117,7 @@ version(FBIDE)
 				
 				auto oriAST = AST_Head;
 				
-				checkVersionSpec( AST_Head, lineNum );
+				version(VERSION_NONE) initIncludesMarkContainer( AST_Head, lineNum ); else checkVersionSpec( AST_Head, lineNum );
 				
 				result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
 				char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
@@ -237,8 +256,9 @@ version(FBIDE)
 			}			
 		}
 		
-		static CShowListThread showListThread;
-		static CShowListThread showCallTipThread;
+		static CGetIncludes		preLoadContainerThread;
+		static CShowListThread	showListThread;
+		static CShowListThread	showCallTipThread;
 		static Ihandle* timer = null;
 		
 		static void cleanIncludesMarkContainer( int level = -1)
@@ -1073,111 +1093,6 @@ version(FBIDE)
 		}
 
 
-
-		// No Check extends class series......
-		/+
-		static CASTnode _searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
-		{
-			if( originalNode is null ) return null;
-			
-			foreach( CASTnode _node; originalNode.getChildren )
-			{
-				if( _node.kind & B_KIND )
-				{
-					char[] name = lowerCase( ParserAction.removeArrayAndPointer( _node.name ) );
-					
-					if( name.length )
-					{
-						if( name == lowerCase( word ) ) return _node;
-					}
-					else
-					{
-						foreach( CASTnode _enumMember; anonymousEnumMembers( _node ) )
-						{
-							if( lowerCase( _enumMember.name ) == lowerCase( word ) ) return _enumMember;
-						}
-					}
-				}
-			}
-
-			return null;
-		}
-
-
-		static CASTnode _searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
-		{
-			if( originalNode is null ) return null;
-			
-			CASTnode resultNode;
-			
-			foreach( CASTnode _node; originalNode.getChildren() )
-			{
-				if( _node.kind & B_KIND )
-				{
-					if( lowerCase( ParserAction.removeArrayAndPointer( _node.name ) ) == lowerCase( word ) )
-					{
-						resultNode = _node;
-						break;
-					}
-				}
-			}
-
-			if( resultNode is null )
-			{
-				if( originalNode.getFather() !is null )
-				{
-					resultNode = _searchMatchNode( originalNode.getFather(), word, B_KIND );
-				}
-				else
-				{
-					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					CASTnode[] resultIncludeNodes;
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
-
-					if( resultIncludeNodes.length ) resultNode = resultIncludeNodes[0];
-				}
-			}
-
-			return resultNode;
-		}
-
-
-		static CASTnode[] _searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL )
-		{
-			if( originalNode is null ) return null;
-			
-			CASTnode[] resultNodes;
-			
-			foreach( CASTnode _node; originalNode.getChildren() )
-			{
-				if( _node.kind & B_KIND )
-				{
-					if( lowerCase( ParserAction.removeArrayAndPointer( _node.name ) ) == lowerCase( word ) )
-					{
-						resultNodes ~= _node;
-						break;
-					}
-				}
-			}
-
-			if( originalNode.getFather() !is null )
-			{
-				resultNodes ~= _searchMatchNodes( originalNode.getFather(), word, B_KIND );
-			}
-			else
-			{
-				auto _root = ParserAction.getRoot( originalNode );
-				if( _root !is null )
-				{
-					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _root, _root.name, word );
-					if( resultIncludeNodes.length ) resultNodes ~= resultIncludeNodes;
-				}
-			}
-
-			return resultNodes;
-		}
-		+/
-
 		static CASTnode[] getMembers( CASTnode AST_Head, bool bSkipExtend = false )
 		{
 			if( AST_Head is null ) return null;
@@ -1187,107 +1102,192 @@ version(FBIDE)
 			CASTnode[] childrenNodes = AST_Head.getChildren();
 			if( AST_Head.kind & ( B_TYPE | B_CLASS ) )
 				if( !bSkipExtend ) childrenNodes ~= getBaseNodeMembers( AST_Head ); 
+			
 
-			foreach( CASTnode _child; childrenNodes )
+			for( int i = 0; i < childrenNodes.length; ++ i )
 			{
-				if( _child.kind == B_VERSION )
+				if( childrenNodes[i].kind == B_VERSION )
 				{
-					char[] symbol = upperCase( _child.name );
-					char[] noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
-					if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
+					version(VERSION_NONE)
 					{
-						version(Windows)
-						{
-							if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
-							{
-								result ~= getMembers( _child, bSkipExtend );
-								continue;
-							}
-						}
-						
-						version(linux)
-						{
-							if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
-							{
-								result ~= getMembers( _child, bSkipExtend );
-								continue;
-							}
-						}
-						
-						version(FreeBSD)
-						{
-							if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
-							{
-								result ~= getMembers( _child, bSkipExtend );
-								continue;
-							}
-						}
-						
-						version(OpenBSD)
-						{
-							if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
-							{
-								result ~= getMembers( _child, bSkipExtend );
-								continue;
-							}
-						}
-						
-						version(Posix)
-						{
-							if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
-							{
-								result ~= getMembers( _child, bSkipExtend );
-								continue;
-							}
-						}
 					}
 					else
 					{
-						if( !_child.type.length )
+						char[] symbol = upperCase( childrenNodes[i].name );
+						char[] noSignSymbolName = childrenNodes[i].type.length ? symbol[1..$] : symbol;
+						if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
 						{
-							foreach( char[] v; VersionCondition )
+							version(Windows)
 							{
-								if( symbol == upperCase( v ) )
+								if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
 								{
-									result ~= getMembers( _child, bSkipExtend );
-									break;
+									result ~= getMembers( childrenNodes[i], bSkipExtend );
+									continue;
+								}
+							}
+							
+							version(linux)
+							{
+								if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
+								{
+									result ~= getMembers( childrenNodes[i], bSkipExtend );
+									continue;
+								}
+							}
+							
+							version(FreeBSD)
+							{
+								if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
+								{
+									result ~= getMembers( childrenNodes[i], bSkipExtend );
+									continue;
+								}
+							}
+							
+							version(OpenBSD)
+							{
+								if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
+								{
+									result ~= getMembers( childrenNodes[i], bSkipExtend );
+									continue;
+								}
+							}
+							
+							version(Posix)
+							{
+								if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
+								{
+									result ~= getMembers( childrenNodes[i], bSkipExtend );
+									continue;
 								}
 							}
 						}
 						else
 						{
-							if( VersionCondition.length )
+							if( !childrenNodes[i].type.length )
 							{
-								bool bMatchTrue;
-								foreach( char[] v; VersionCondition )
-								{
-									if( symbol[1..$] == upperCase( v ) )
-									{
-										bMatchTrue = true;
-										break;
-									}
-								}
-							
-								if( !bMatchTrue ) result ~= getMembers( _child, bSkipExtend );
+								if( symbol in AutoComplete.VersionCondition ) result ~= getMembers( childrenNodes[i], bSkipExtend );
 							}
 							else
 							{
-								result ~= getMembers( _child, bSkipExtend );
+								if( VersionCondition.length )
+								{
+									if( !( symbol[1..$] in AutoComplete.VersionCondition ) ) result ~= getMembers( childrenNodes[i], bSkipExtend );
+								}
+								else
+								{
+									result ~= getMembers( childrenNodes[i], bSkipExtend );
+								}
 							}
 						}
 					}
 				}
-				else if( _child.kind & ( B_UNION | B_TYPE | B_CLASS ) )
+				/+
+				else if( childrenNodes[i].kind == ( B_VERSION | B_PARAM ) )
 				{
-					if( !_child.name.length ) result ~= getMembers( _child, bSkipExtend ); else result ~= _child;
+					// activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#if", token().lineNumber );
+					char[] _ident, _sign, _body;
+					char[] symbol = upperCase( childrenNodes[i].name );
+					if( symbol in VersionCondition )
+					{
+						_body = childrenNodes[i].type;
+						_sign = childrenNodes[i].protection;
+						
+						try
+						{
+							if( childrenNodes[i].base == "#if" || childrenNodes[i].base == "#elseif" )
+							{
+								switch( _sign )
+								{
+									case ">":
+										if( VersionCondition[symbol] > Float.toFloat( _body ) ) 
+										{
+											result ~= getMembers( childrenNodes[i], bSkipExtend );
+											i = skipPreprocessorCondition( childrenNodes, i );
+										}
+										break;
+										
+									case ">=":
+										if( VersionCondition[symbol] >= Float.toFloat( _body ) )
+										{
+											result ~= getMembers( childrenNodes[i], bSkipExtend );
+											i = skipPreprocessorCondition( childrenNodes, i );
+										}
+										break;
+										
+									case "<":
+										if( VersionCondition[symbol] < Float.toFloat( _body ) )
+										{
+											result ~= getMembers( childrenNodes[i], bSkipExtend );
+											i = skipPreprocessorCondition( childrenNodes, i );
+										}
+										break;
+										
+									case "<=":
+										if( VersionCondition[symbol] <= Float.toFloat( _body ) )
+										{
+											result ~= getMembers( childrenNodes[i], bSkipExtend );
+											i = skipPreprocessorCondition( childrenNodes, i );
+										}
+										break;
+
+									case "<>":
+										if( VersionCondition[symbol] != Float.toFloat( _body ) )
+										{
+											result ~= getMembers( childrenNodes[i], bSkipExtend );
+											i = skipPreprocessorCondition( childrenNodes, i );
+										}
+										break;
+
+									case "=":
+										if( VersionCondition[symbol] == Float.toFloat( _body ) )
+										{
+											result ~= getMembers( childrenNodes[i], bSkipExtend );
+											i = skipPreprocessorCondition( childrenNodes, i );
+										}
+										break;
+
+									default:
+								}
+							}
+							else if( childrenNodes[i].base == "#else" )
+							{
+								result ~= getMembers( childrenNodes[i], bSkipExtend );
+							}
+						}
+						catch( Exception e )
+						{}
+					}
+				}
+				+/
+				else if( childrenNodes[i].kind & ( B_UNION | B_TYPE | B_CLASS ) )
+				{
+					if( !childrenNodes[i].name.length ) result ~= getMembers( childrenNodes[i], bSkipExtend ); else result ~= childrenNodes[i];
 				}
 				else
 				{
-					result ~= _child;
+					result ~= childrenNodes[i];
 				}
 			}
 
 			return result;
+		}
+		
+		
+		static int skipPreprocessorCondition( CASTnode[] nodeGroup, int oriIndex )
+		{
+			int ret = oriIndex;
+			
+			if( oriIndex + 1 < nodeGroup.length )
+			{
+				while( nodeGroup[++oriIndex].kind == ( B_VERSION | B_PARAM ) )
+				{
+					if( nodeGroup[oriIndex].base != "#if" ) ret = oriIndex; else break;
+					if( oriIndex + 1 >= nodeGroup.length ) break;
+				}
+			}
+			
+			return ret;
 		}
 		
 
@@ -1749,13 +1749,15 @@ version(FBIDE)
 			foreach( CASTnode _friends; getMembers( AST_Head ) )
 			{
 				if( _friends.kind == ( B_DEFINE | B_VERSION ) )
-					if( _friends.lineNumber < lineNum ) VersionCondition ~= _friends.name;
+					if( _friends.lineNumber < lineNum ) VersionCondition[upperCase(_friends.name)] = 1;
 			}
 			
 			if( AST_Head.getFather !is null )
 				checkVersionSpec( AST_Head.getFather, lineNum );
 			else
 			{
+				//initIncludesMarkContainer( AST_Head, lineNum );
+				
 				if( includesFromPath != AST_Head.name ) includesFromPath = AST_Head.name;
 				cleanIncludesMarkContainer();
 				
@@ -1766,6 +1768,7 @@ version(FBIDE)
 					// Heavy slow down the spped, only check only 2-steps
 					// if( GLOBAL.includeLevel > 2 ) GLOBAL.includeLevel = 2; // Comment this line to get full-check
 					auto dummy = getIncludes( AST_Head, AST_Head.name, 0 );
+					
 					foreach( _includeNode; includesMarkContainer )
 					{
 						foreach( CASTnode _friends; getMembers( _includeNode, true ) )
@@ -1776,18 +1779,31 @@ version(FBIDE)
 									if( _friends.getFather.type.length )
 										if( upperCase( _friends.name ) == upperCase( _friends.getFather.name[1..$] ) ) continue; // Skip the C-style include once
 								
-								VersionCondition ~= _friends.name;
+								VersionCondition[upperCase(_friends.name)] = 1; // Much VersionCondition, performance loss
 							}
 						}
 					}
 					
 					GLOBAL.includeLevel = oriIncludeLevel;
 				}
-				/*
-				foreach( char[] s; VersionCondition )
-					Stdout( s ).newline;
-				*/
 			}
+		}
+		
+		
+		static void initIncludesMarkContainer( CASTnode AST_Head, int lineNum )
+		{
+			if( includesFromPath != AST_Head.name ) includesFromPath = AST_Head.name;
+			cleanIncludesMarkContainer();
+			
+			if( GLOBAL.includeLevel != 0 )
+			{
+				//int oriIncludeLevel = GLOBAL.includeLevel;
+				
+				// Heavy slow down the spped, only check only 2-steps
+				// if( GLOBAL.includeLevel > 2 ) GLOBAL.includeLevel = 2; // Comment this line to get full-check
+				auto dummy = getIncludes( AST_Head, AST_Head.name, 0 );
+				//GLOBAL.includeLevel = oriIncludeLevel;
+			}			
 		}
 		
 		
@@ -2406,6 +2422,28 @@ version(FBIDE)
 			}
 			
 			return null;
+		}
+		
+		static void setPreLoadContainer( CASTnode astHead )
+		{
+			if( preLoadContainerThread is null )
+			{
+				preLoadContainerThread = new CGetIncludes( astHead );
+				preLoadContainerThread.start();
+			}
+			else
+			{
+				if( !preLoadContainerThread.isRunning )
+				{
+					delete preLoadContainerThread;
+					preLoadContainerThread = new CGetIncludes( astHead );
+					preLoadContainerThread.start();
+				}
+				else
+				{
+					preLoadContainerThread.join();
+				}
+			}
 		}
 
 
@@ -3070,69 +3108,7 @@ version(FBIDE)
 			int		oriPos = pos;
 			bool	bBackEnd;
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
-			/+
-			do
-			{
-				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
-				{
-					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 
-					switch( s )
-					{
-						case "(":
-							if( countBracket == 0 ) countParen ++;
-							break;
-
-						case ")":
-							if( countBracket == 0 ) countParen --;
-							if( countParen < 0 ) bBackEnd = true;
-							break;
-
-						case "[":
-							if( countParen == 0 ) countBracket ++;
-							break;
-
-						case "]":
-							if( countParen == 0 ) countBracket --;
-							if( countBracket < 0 ) bBackEnd = true;
-							break;
-
-						case ".":
-							if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
-							break;
-						
-						case "-":
-							if( pos < documentLength )
-							{
-								if( fromStringz( IupGetAttributeId( iupSci, "CHAR", pos + 1 ) ) == ">" )
-								{
-									if( countParen == 0 && countBracket == 0 )
-									{
-										bBackEnd = true;
-									}
-									else
-									{
-										pos++;
-									}
-									break;
-								}
-							}
-							
-						case " ", "\t", ":", "\n", "\r", "+", "*", "/", "\\", ">", "<", "=", ",", "@":
-							if( countParen == 0 && countBracket == 0 ) bBackEnd = true;
-							break;
-
-						default:
-					}
-				}
-				
-				if( pos >= documentLength ) break;
-				if( bBackEnd ) break;
-			}
-			while( ++pos < documentLength )
-
-			//if( oriPos == pos ) return null;
-			+/
 			do
 			{
 				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
@@ -3171,39 +3147,6 @@ version(FBIDE)
 
 			try
 			{
-				/+
-				version(Winodws)
-				{
-					while( --pos >= 0 )
-					{
-						dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
-						if( _dcharString == ":" || _dcharString == "\n" ) break;
-						resultd ~= _dcharString;
-					}
-
-					resultd = Util.trim!(dchar)( resultd.reverse ).dup;
-					if( resultd.length > 7 )
-					{
-						result = lowerCase( UTF.toString( resultd ) );
-						if( result[0..8] == "#include" ) return true;
-					}
-				}
-				else
-				{
-					while( --pos >= 0 )
-					{
-						char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
-						if( s == ":" || s == "\n" ) break;
-						result ~= s;
-					}
-					
-					result = lowerCase( Util.trim( result.reverse ) ).dup;
-					if( result.length > 7 )
-					{
-						if( result[0..8] == "#include" ) return true;
-					}
-				}
-				+/
 				while( --pos >= 0 )
 				{
 					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
@@ -3605,7 +3548,8 @@ version(FBIDE)
 					
 					auto oriAST = AST_Head;
 					
-					checkVersionSpec( AST_Head, lineNum );
+					version(VERSION_NONE) initIncludesMarkContainer( AST_Head, lineNum ); else checkVersionSpec( AST_Head, lineNum );
+					
 					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
 					char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
 					if( usingNames.length )
@@ -4019,40 +3963,49 @@ version(FBIDE)
 					// Get VersionCondition names
 					if( AST_Head is null ) return;
 					
-					VersionCondition.length = 0;
-					
-					char[] options, compilers;
-					CustomToolAction.getCustomCompilers( options, compilers );
-					
-					char[] activePrjName = ProjectAction.getActiveProjectName;
-					if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
-					if( options.length )
-					{	
-						int _versionPos = Util.index( options, "-d" );
-						while( _versionPos < options.length )
-						{
-							char[]	versionName;
-							bool	bBeforeSymbol = true;
-							for( int i = _versionPos + 2; i < options.length; ++ i )
-							{
-								if( options[i] == '\t' || options[i] == ' ' )
-								{
-									if( !bBeforeSymbol ) break; else continue;
-								}
-								else if( options[i] == '=' )
-								{
-									break;
-								}
-
-								versionName ~= options[i];
-							}								
-
-							if( versionName.length ) AutoComplete.VersionCondition ~= versionName;
-							_versionPos = Util.index( options, "-d", _versionPos + 2 );
-						}								
+					version(VERSION_NONE)
+					{
+						initIncludesMarkContainer( AST_Head, lineNum );
 					}
+					else
+					{
+						// Reset VersionCondition Container
+						foreach( char[] key; VersionCondition.keys )
+							VersionCondition.remove( key );						
+						
+						char[] options, compilers;
+						CustomToolAction.getCustomCompilers( options, compilers );
+						
+						char[] activePrjName = ProjectAction.getActiveProjectName;
+						if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+						if( options.length )
+						{	
+							int _versionPos = Util.index( options, "-d" );
+							while( _versionPos < options.length )
+							{
+								char[]	versionName;
+								bool	bBeforeSymbol = true;
+								for( int i = _versionPos + 2; i < options.length; ++ i )
+								{
+									if( options[i] == '\t' || options[i] == ' ' )
+									{
+										if( !bBeforeSymbol ) break; else continue;
+									}
+									else if( options[i] == '=' )
+									{
+										break;
+									}
 
-					checkVersionSpec( AST_Head, lineNum );
+									versionName ~= options[i];
+								}								
+
+								if( versionName.length ) AutoComplete.VersionCondition[upperCase(versionName)] = 1;
+								_versionPos = Util.index( options, "-d", _versionPos + 2 );
+							}								
+						}
+						
+						checkVersionSpec( AST_Head, lineNum );
+					}
 					
 					if( !splitWord[0].length )
 					{
@@ -5095,6 +5048,17 @@ version(FBIDE)
 		
 		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
 		{
+			if( preLoadContainerThread !is null )
+			{
+				if( preLoadContainerThread.isRunning )
+					preLoadContainerThread.join();
+				else
+				{
+					delete preLoadContainerThread;
+					preLoadContainerThread = null;
+				}
+			}
+
 			
 			auto cSci = ScintillaAction.getCScintilla( ih );
 			if( cSci is null ) return false;
@@ -5129,8 +5093,6 @@ version(FBIDE)
 							CASTnode	AST_Head;
 							int			lineNum;
 							char[][] 	splitWord = getNeedDataForThread( ih, text, pos, lineNum, bDot, bCallTip, AST_Head );
-							
-							//checkVersionSpec( AST_Head, lineNum );
 							
 							showListThread = new CShowListThread( AST_Head, pos, lineNum, bDot, bCallTip, splitWord, text );
 							showListThread.start();

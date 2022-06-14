@@ -167,5 +167,10 @@ class _PARSER
 			if( !_tokens.length ) return false;
 			
 			return true;
-		}		
+		}
+		
+		void setNull()
+		{
+			activeASTnode = null;
+		}
 }

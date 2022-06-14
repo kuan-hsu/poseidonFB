@@ -343,7 +343,7 @@ class CPreferenceDialog : CBaseDialog
 
 		Ihandle* labelPreParseLevel = IupLabel( GLOBAL.languageItems["preparselevel"].toCString );
 		Ihandle* valPreParseLevel = IupVal( null );
-		IupSetAttributes( valPreParseLevel, "MIN=0,MAX=5,RASTERSIZE=50x16,STEP=0.1,PAGESTEP=0.1" );
+		IupSetAttributes( valPreParseLevel, "MIN=0,MAX=5,RASTERSIZE=50x16,STEP=0.205,PAGESTEP=0.1" );
 		IupSetStrAttribute( valPreParseLevel, "VALUE", toStringz( Integer.toString( GLOBAL.preParseLevel ) ) );
 		IupSetHandle( "valPreParseLevel", valPreParseLevel );
 		IupSetCallback( valPreParseLevel, "VALUECHANGED_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );
