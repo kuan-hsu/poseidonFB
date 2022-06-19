@@ -873,7 +873,7 @@ class CScintilla
 			// BOOKMARK
 			IupScintillaSendMessage( sci, 2626, 1, cast(int) XPM.bookmark_rgba.toCString ); // SCI_MARKERDEFINERGBAIMAGE 2626
 		}
-		else
+		version(DIDE)
 		{
 			// Autocompletion XPM Image
 			IupScintillaSendMessage( sci, 2624, 16, 0 ); // SCI_RGBAIMAGESETWIDTH 2624
@@ -1587,7 +1587,8 @@ extern(C)
 					});
 
 					Ihandle* _goto = IupItem( GLOBAL.languageItems["sc_gotodef"].toCString, null );
-					version(FBIDE) IupSetAttribute( _goto, "IMAGE", "icon_goto" ); else IupSetAttribute( _goto, "IMAGE", "icon_uparrow" );
+					version(FBIDE)	IupSetAttribute( _goto, "IMAGE", "icon_goto" );
+					version(DIDE)	IupSetAttribute( _goto, "IMAGE", "icon_uparrow" );
 					IupSetCallback( _goto, "ACTION", cast(Icallback) function( Ihandle* ih )
 					{
 						AutoComplete.toDefintionAndType( 1 );
@@ -1595,7 +1596,8 @@ extern(C)
 					});
 					
 					Ihandle* _gotoProcedure = IupItem( GLOBAL.languageItems["sc_procedure"].toCString, null );
-					version(FBIDE) IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" ); else IupSetAttribute( _gotoProcedure, "IMAGE", "icon_goto" );
+					version(FBIDE)	IupSetAttribute( _gotoProcedure, "IMAGE", "icon_gotomember" );
+					version(DIDE)	IupSetAttribute( _gotoProcedure, "IMAGE", "icon_goto" );
 					IupSetCallback( _gotoProcedure, "ACTION", cast(Icallback) function( Ihandle* ih )
 					{
 						AutoComplete.toDefintionAndType( 2 );
@@ -2821,9 +2823,9 @@ extern(C)
 							int		tailNum = Integer.atoi( tailChar );
 							if( tailNum > 0 && tailNum < 13 )
 							{
-								if( GLOBAL.customTools[tailNum].name.toDString.length )
+								if( GLOBAL.customTools[tailNum].name.length )
 								{
-									if( GLOBAL.customTools[tailNum].dir.toDString.length )
+									if( GLOBAL.customTools[tailNum].dir.length )
 									{
 										CustomToolAction.run( GLOBAL.customTools[tailNum] );
 									}
@@ -3131,7 +3133,8 @@ extern(C)
 			if( GLOBAL.enableIncludeComplete == "ON" )
 			{
 				bool bCheckDeclare;
-				version(FBIDE) bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos ); else bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos );
+				version(FBIDE)	bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos );
+				version(DIDE)	bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos );
 
 				if( bCheckDeclare )
 				{
@@ -3288,7 +3291,7 @@ extern(C)
 								}
 							}
 						}
-						else
+						version(FBIDE)
 						{
 							version(VERSION_NONE)
 							{

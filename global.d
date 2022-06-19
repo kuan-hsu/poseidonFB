@@ -62,7 +62,7 @@ struct fontUint
 
 struct CustomTool
 {
-	IupString	name, dir, args;
+	char[]	name, dir, args, toggleShowConsole = "OFF";
 }
 
 struct EditorOpacity
@@ -371,13 +371,6 @@ struct GLOBAL
 			GLOBAL.KEYWORDS[5] = "";
 		}
 
-		for( int i = 0; i < 13; ++i )
-		{
-			GLOBAL.customTools[i].name = new IupString();
-			GLOBAL.customTools[i].dir = new IupString();
-			GLOBAL.customTools[i].args = new IupString();
-		}
-		
 		ShortKey sk0 = { "save", "Save File", 536870995 };
 		GLOBAL.shortKeys ~= sk0;
 		ShortKey sk1 = { "saveall", "Save All", 805306451 };

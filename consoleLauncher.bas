@@ -14,18 +14,20 @@ command(2) = consoleX
 command(3) = consoleY
 command(4) = consoleW
 command(5) = consoleH
-command(6) = exeName
+command(6) = show message
+command(7) = exeName
+command(8..__fb_argc__) = exeName args
 '/
 
 cls
 
-if( __fb_argc__ >= 6 ) then
-	exeName = command(6)
-	for i as integer = 7 to __fb_argc__
+if( __fb_argc__ >= 7 ) then
+	exeName = command(7)
+	for i as integer = 8 to __fb_argc__
 		args +=  ( " " + command(i) )
 	next
 	
-	dim as string _id = command(1), _x = command(2), _y = command(3), _w = command(4), _h = command(5)
+	dim as string _id = command(1), _x = command(2), _y = command(3), _w = command(4), _h = command(5), _showCommand =  command(6)
 	
 	dim as integer ID = valint( _id )
 	dim as integer X = valint( _x )
@@ -41,6 +43,8 @@ if( __fb_argc__ >= 6 ) then
 			SetWindowPos( GetConsoleWindow, HWND_TOP, X, Y, W, H, SWP_SHOWWINDOW )
 		end if
 		
+		if( _showCommand = "1" ) then print command(7) + args
+		
 	#else
 	
 		if( X < 0 ) then _x = "-1"
@@ -54,6 +58,8 @@ if( __fb_argc__ >= 6 ) then
 			_h = "-1"
 		end if
 
+		if( _showCommand = "1" ) then print command(7) + args
+		
 		'if( id > 0 ) then exec( "wmctrl", "-r poseidonFB_terminal -t " + _id )
 		exec( "wmctrl", "-r poseidon_terminal -e 0," + _x + "," + _y + "," + _w + "," + _h )
 		

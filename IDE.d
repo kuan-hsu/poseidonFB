@@ -135,8 +135,8 @@ public:
 			for( int i = 0; i < 6; ++ i )
 				doc ~= setINILineData( "keyword" ~ Integer.toString( i ), Util.trim( GLOBAL.KEYWORDS[i] ) );
 
-			for( int i = 1; i < 10; ++ i )
-				doc ~= setINILineData( "customtools" ~ Integer.toString( i ), Util.trim( GLOBAL.customTools[i].name.toDString ) ~ "," ~ Util.trim( GLOBAL.customTools[i].dir.toDString ) ~ "," ~ Util.trim( GLOBAL.customTools[i].args.toDString ) );
+			for( int i = 1; i < 13; ++ i )
+				doc ~= setINILineData( "customtools" ~ Integer.toString( i ), Util.trim( GLOBAL.customTools[i].name ) ~ "," ~ Util.trim( GLOBAL.customTools[i].dir ) ~ "," ~ Util.trim( GLOBAL.customTools[i].args ) ~ "," ~ Util.trim( GLOBAL.customTools[i].toggleShowConsole ));
 				
 			doc ~= setINILineData( "indicatorStyle", Integer.toString( GLOBAL.indicatorStyle ) );
 
@@ -543,16 +543,17 @@ public:
 								GLOBAL.language = right;
 								loadLocalization(); // Load Language lng
 								break;
-							case "customtools1", "customtools2", "customtools3", "customtools4", "customtools5", "customtools6", "customtools7", "customtools8", "customtools9":
-								int index = Integer.atoi( left[$-1..$] );
+							case "customtools1", "customtools2", "customtools3", "customtools4", "customtools5", "customtools6", "customtools7", "customtools8", "customtools9", "customtools10", "customtools11", "customtools12":
+								int index = Integer.atoi( left[11..$] );
 								char[][] values = Util.split( right, "," );
-								if( values.length == 3 )
+								if( values.length > 2 && values.length < 5 )
 								{
 									if( values[0].length )
 									{
 										GLOBAL.customTools[index].name = values[0];
 										if( values[1].length ) GLOBAL.customTools[index].dir = values[1];
 										if( values[2].length ) GLOBAL.customTools[index].args = values[2];
+										if( values.length == 4 ) GLOBAL.customTools[index].toggleShowConsole = values[3];
 									}
 								}
 								break;

@@ -1415,7 +1415,7 @@ class COutline
 				IupSetAttribute( tree, "IMAGE0", "icon_folder" );
 				IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_folder_open" );
 			}
-			else
+			version(DIDE)
 			{
 				IupSetAttributeId( tree, "IMAGE", 0, "IUP_module" );
 				IupSetAttributeId( tree, "IMAGEEXPANDED", 0, "IUP_module" );
@@ -1779,7 +1779,6 @@ class COutline
 				default:					return "IUP_variable";
 			}
 		}
-		
 		version(DIDE)
 		{
 			switch( _node.kind )
@@ -2135,7 +2134,6 @@ class COutline
 				return loadParser( fullPathByOS( objectFilePath.toString() ) );
 			}
 		}
-		
 		version(DIDE)
 		{
 			scope objectFilePath = new FilePath( GLOBAL.compilerFullPath );

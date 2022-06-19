@@ -69,14 +69,6 @@ public:
 				char[] _key = Util.trim( GLOBAL.KEYWORDS[i] );
 				if( _key.length ) IupSetStrAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), toStringz( lowerCase( _key ) ) ); else IupSetAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), "" );
 			}			
-			/*
-			IupSetAttribute( searchOutputPanel, "KEYWORDS0", GLOBAL.KEYWORDS[0].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS1", GLOBAL.KEYWORDS[1].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS2", GLOBAL.KEYWORDS[2].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS3", GLOBAL.KEYWORDS[3].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS4", GLOBAL.KEYWORDS[4].toCString );
-			IupSetAttribute( searchOutputPanel, "KEYWORDS5", GLOBAL.KEYWORDS[5].toCString );
-			*/
 		}
 		version(DIDE)
 		{

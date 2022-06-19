@@ -220,8 +220,7 @@ struct PROJECT
 							case "CompilerArgs":	s.args = right;							break;
 							case "CompilerOption":	s.compilerOption = right;				break;
 							case "Comment":			s.comment = right;						break;
-							case "CompilerPath":
-								s.compilerPath = right;					
+							case "CompilerPath":	s.compilerPath = right;					
 								//version(DIDE) if( right.length ) s.defaultImportPaths = tools.getImportPath( right );
 								break;
 							default:

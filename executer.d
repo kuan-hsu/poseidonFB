@@ -35,11 +35,7 @@ struct ExecuterAction
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;
 	
-	
-	version(DIDE)
-	{
-		import tango.sys.win32.UserGdi, UTF = tango.text.convert.Utf;
-	}
+	version(DIDE) import tango.sys.win32.UserGdi, UTF = tango.text.convert.Utf;
 	
 	static bool isAppExists( char[] path )
 	{
@@ -182,19 +178,19 @@ struct ExecuterAction
 						int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
 						int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
 						
-						scommand = "consoleLauncher 0 " ~ Integer.toString( x ) ~ " " ~ Integer.toString( y ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command ~ args;
+						scommand = "consoleLauncher 0 " ~ Integer.toString( x ) ~ " " ~ Integer.toString( y ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 0 " ~ command ~ args;
 					}
 					else
 					{
-						scommand = "consoleLauncher 0 0 0 0 0 " ~ command ~ args;
+						scommand = "consoleLauncher 0 0 0 0 0 0 " ~ command ~ args;
 					}
 				}
 				else
 				{
 					if( command[0] == '"' && command[$-1] == '"' )
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command[1..$-1] ~ args ~ "\"";
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 0 " ~ command[1..$-1] ~ args ~ "\"";
 					else
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ command ~ args ~ "\"";
+						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 0 " ~ command ~ args ~ "\"";
 				}
 			}
 			else
@@ -893,7 +889,6 @@ struct ExecuterAction
 				}
 				
 				version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";// else txtCommand ~= " -s console";
-				//version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:windows:4";
 				version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:WINDOWS";
 				
 				scope fp = new FilePath( activePrj.dir ~ "/" ~ activePrj.targetName );

@@ -159,10 +159,8 @@ void main( char[][] args )
 	
 	version(Windows)
 	{
-		version(FBIDE)
-			IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
-		else
-			IupSetGlobal("SINGLEINSTANCE", "poseidonD - D Programming Language IDE");
+		version(FBIDE)	IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
+		version(DIDE)	IupSetGlobal("SINGLEINSTANCE", "poseidonD - D Programming Language IDE");
 			
 		if( IupGetGlobal( toStringz( "SINGLEINSTANCE" ) ) == null  )
 		{
@@ -295,11 +293,12 @@ void main( char[][] args )
 
 	createLayout();
 	
-	version(FBIDE) IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" ); else IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonD - D Programming Language IDE" );
+	version(FBIDE)	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+	version(DIDE)	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonD - D Programming Language IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
 	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
-	version(FBIDE) IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonFB" ); else IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonD" );
-	//IupSetAttribute( GLOBAL.mainDlg, "BACKGROUND", "100 100 100" );
+	version(FBIDE)	IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonFB" );
+	version(DIDE)	IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonD" );
 
 	//IupSetGlobal( "IMAGEAUTOSCALE", "DPI" );
 	IupSetGlobal( "INPUTCALLBACKS", "YES" );

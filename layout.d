@@ -263,8 +263,7 @@ extern(C)
 						char[] PRJFILE = "FB.poseidon";
 						if( argPath.file != PRJFILE ) PRJFILE = ".poseidon";
 					}
-					version(DIDE)	char[] PRJFILE = "D.poseidon"
-					;
+					version(DIDE)	char[] PRJFILE = "D.poseidon";
 					if( argPath.file == PRJFILE )
 					{
 						char[] dir = argPath.path;

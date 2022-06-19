@@ -30,7 +30,7 @@ version(FBIDE)
 		return image;
 	}
 }
-else
+version(DIDE)
 {
 	Ihandle* load_image_poseidonFBico()
 	{
@@ -421,6 +421,6 @@ void load_all_images_icons()
 	XPM.createIUPimageHandle( "icons/xpm/debug/star.xpm", "icon_debug_star" );
 	IupSetHandle( "icon_debug_change", XPM.getIUPimage( "icons/xpm/debug/change.xpm" ) );
 
-	version(FBIDE) IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() ); else IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
+	IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
 	IupSetHandle( "icon_scroll", load_image_scroll() );
 }

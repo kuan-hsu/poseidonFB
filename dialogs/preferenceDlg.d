@@ -2280,7 +2280,7 @@ extern(C) // Callback for CPreferenceDialog
 					GLOBAL.x64compilerFullPath	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64compilerPath" ), "VALUE" ) ).dup;
 					GLOBAL.x64debuggerFullPath	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64DebuggerPath" ), "VALUE" ) ).dup;
 				}
-				else
+				version(DIDE)
 				{
 					GLOBAL.x64compilerFullPath	= GLOBAL.compilerFullPath;
 				}

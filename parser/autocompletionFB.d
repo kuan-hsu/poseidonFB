@@ -48,7 +48,7 @@ version(FBIDE)
 		static char[][]						listContainer;
 		static CASTnode[char[]]				includesMarkContainer;
 		static bool[char[]]					noIncludeNodeContainer;
-		static float[char[]]					VersionCondition;
+		static float[char[]]				VersionCondition;
 
 		static char[]						showTypeContent;
 		static char[]						includesFromPath;

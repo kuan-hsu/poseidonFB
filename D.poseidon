@@ -6,7 +6,7 @@ PassOneFile=
 TargetName=
 FocusOn=
 CompilerArgs=
-CompilerOption=-odobjs -version=FBIDE -version=DARKTHEME  -L/SUBSYSTEM:WINDOWS
+CompilerOption=-odobjs -version=FBIDE -version=DARKTHEME -L/SUBSYSTEM:WINDOWS
 Comment=
 CompilerPath=
 [IncludeDirs]

@@ -3091,7 +3091,12 @@ struct CustomToolAction
 	
 	static void run( CustomTool tool )
 	{
-		scope toolPath = new FilePath( tool.dir.toDString );
+		scope toolPath = new FilePath( tool.dir );
+		if( !toolPath.exists )
+		{
+			IupMessageError( null, toStringz( tool.dir ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
+			return;
+		}
 		
 		bool bGoPlugin;
 		version(Windows)
@@ -3107,38 +3112,38 @@ struct CustomToolAction
 		{
 			try
 			{
-				if( tool.name.toDString in GLOBAL.pluginMnager )
+				if( tool.name in GLOBAL.pluginMnager )
 				{
-					if( GLOBAL.pluginMnager[tool.name.toDString] !is null )
+					if( GLOBAL.pluginMnager[tool.name] !is null )
 					{
-						if( GLOBAL.pluginMnager[tool.name.toDString].getPath == tool.dir.toDString )
-							GLOBAL.pluginMnager[tool.name.toDString].go();
+						if( GLOBAL.pluginMnager[tool.name].getPath == tool.dir )
+							GLOBAL.pluginMnager[tool.name].go();
 						else
 						{
-							auto temp = GLOBAL.pluginMnager[tool.name.toDString];
+							auto temp = GLOBAL.pluginMnager[tool.name];
 							delete temp;
-							GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
-							GLOBAL.pluginMnager[tool.name.toDString].go();
+							GLOBAL.pluginMnager[tool.name] = new CPLUGIN( tool.name, tool.dir );
+							GLOBAL.pluginMnager[tool.name].go();
 						}
 					}
 					else
 					{
-						IupMessageError( GLOBAL.mainDlg, toStringz( tool.name.toDString ~ " Is Null" ) );
-						GLOBAL.pluginMnager.remove( tool.name.toDString );
+						IupMessageError( GLOBAL.mainDlg, toStringz( tool.name ~ " Is Null" ) );
+						GLOBAL.pluginMnager.remove( tool.name );
 						//GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
 						//GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
 					}
 				}
 				else
 				{
-					GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
-					GLOBAL.pluginMnager[tool.name.toDString].go();
+					GLOBAL.pluginMnager[tool.name] = new CPLUGIN( tool.name, tool.dir );
+					GLOBAL.pluginMnager[tool.name].go();
 				}
 			}
 			catch( Exception e )
 			{
 				IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );
-				if( tool.name.toDString in GLOBAL.pluginMnager ) GLOBAL.pluginMnager.remove( tool.name.toDString );
+				if( tool.name in GLOBAL.pluginMnager ) GLOBAL.pluginMnager.remove( tool.name );
 			}
 		}
 		else
@@ -3151,7 +3156,7 @@ struct CustomToolAction
 				char[] s = fromStringz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
 				
 				// %s% Selected Word
-				args = Util.substitute( tool.args.toDString, "%s%", s );
+				args = Util.substitute( tool.args, "%s%", s );
 				args = Util.substitute( args, "\"%s%\"", "\"" ~ s ~ "\"" );
 				
 				// %f% Active File
@@ -3204,16 +3209,83 @@ struct CustomToolAction
 				args = Util.substitute( args, "\"%pdir%\"", "" );
 			}		
 
+			char[] useConsole = tool.toggleShowConsole == "ON" ? "1 " : "0 ";
 			version(Windows)
 			{
-				args = Util.substitute( args, "/", "\\" );
-				IupExecute( tool.dir.toCString, toStringz( args ) );
+				if( useConsole == "1 " )
+				{
+					if( GLOBAL.consoleWindow.id < GLOBAL.monitors.length )
+					{
+						int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
+						int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
+						
+						args = "0 " ~ Integer.toString( x ) ~ " " ~ Integer.toString( y ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ useConsole ~ tool.dir ~ " " ~ args;
+					}
+					else
+					{
+						args = "0 0 0 0 0 " ~ useConsole ~ tool.dir ~ " " ~ args;
+					}
+					
+					args = Util.substitute( args, "/", "\\" );
+				
+					IupExecute( "consoleLauncher", toStringz( args ) );
+				}
+				else
+				{
+					IupExecute( toStringz( tool.dir ), toStringz( args ) );
+				}
 			}
 			else
 			{
-				Process p = new Process( true, tool.dir.toDString ~ " " ~ args );
-				//p.gui( true );
-				p.execute;
+				char[] command = Util.substitute( tool.dir, " ", "\\ " ); // For space in path;
+				if( useConsole == "1 " )
+				{
+					if( command[0] == '"' && command[$-1] == '"' )
+						args = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 1 " ~ command[1..$-1] ~ " " ~ args ~ "\"";
+					else
+						args = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 1 " ~ command ~ " " ~ args ~ "\"";
+						
+						
+					char[] geoString;
+					if( GLOBAL.consoleWindow.id < GLOBAL.monitors.length )
+					{
+						int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
+						int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
+						int w = GLOBAL.consoleWindow.w < 80 ? 80 : GLOBAL.consoleWindow.w;
+						int h = GLOBAL.consoleWindow.h < 24 ? 24 : GLOBAL.consoleWindow.h;
+						//geoString = " --geometry=80x24+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
+						geoString = " --geometry=" ~ Integer.toString( w ) ~ "x" ~ Integer.toString( h ) ~ "+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
+					}
+					
+					if( GLOBAL.linuxTermName.length )
+					{
+						Process p;
+						switch( Util.trim( GLOBAL.linuxTermName ) )
+						{
+							case "xterm", "uxterm":
+								geoString = Util.substitute( geoString, "--geometry=", "-geometry " );
+								args = "-T poseidon_terminal" ~ geoString ~ " -e " ~ args;
+								//p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ args );
+								break;
+							case "mate-terminal" ,"xfce4-terminal" ,"lxterminal", "gnome-terminal", "tilix":
+								args = "--title poseidon_terminal" ~ geoString ~ " -e " ~ args;
+								//p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ args );
+								break;
+
+							default:
+								args = "-e " ~ args;
+								//p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ args );
+						}
+						
+						//p.execute;
+						IupExecute( toStringz( GLOBAL.linuxTermName ), toStringz( args ) );
+					}						
+				}
+				else
+				{
+					Process p = new Process( true, tool.dir ~ " " ~ args );
+					p.execute;
+				}
 			}
 		}
 	}

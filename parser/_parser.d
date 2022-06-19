@@ -168,9 +168,4 @@ class _PARSER
 			
 			return true;
 		}
-		
-		void setNull()
-		{
-			activeASTnode = null;
-		}
 }

@@ -189,10 +189,8 @@ class CSearchExpander
 	public:
 	
 	// SCFIND_WHOLEWORD = 2, SCFIND_MATCHCASE = 4
-	version(FBIDE)
-		int			searchRule = 2;
-	else
-		int			searchRule = 6;
+	version(FBIDE)	int searchRule = 2;
+	version(DIDE)	int	searchRule = 6;
 		
 	this()
 	{

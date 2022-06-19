@@ -12,10 +12,10 @@ private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.c
 class CProjectTree
 {
 private:
-	import				parser.ast, dialogs.prjPropertyDlg;
+	import				parser.ast, dialogs.prjPropertyDlg, parser.parserFB;
 
-	import				project, tango.io.device.File, tango.io.stream.Lines;//, tango.io.Stdout;
-	import				tango.core.Thread, parser.autocompletion;
+	import				project, tango.io.device.File, tango.io.stream.Lines;
+	import				tango.core.Thread, parser.autocompletion/*, tango.core.sync.Mutex, tango.io.Stdout*/;
 	
 	Ihandle*			projectButtonCollapse, projectButtonHide;
 	Ihandle*			layoutHandle, tree;
@@ -343,7 +343,96 @@ private:
 		
 		char[] plusSign;
 		for( int i = 0; i < level; ++ i)
-			plusSign ~= "+";		
+			plusSign ~= "+";
+		
+		/+
+		auto mutex = new Mutex;
+		auto group = new ThreadGroup;
+		
+		void testFn()
+		{
+			Thread thisThread = Thread.getThis;
+			if( thisThread is null ) return;
+			
+			char[] s = thisThread.name;
+			if( !s.length ) return;
+			
+			bool bInParserManager;
+			synchronized( mutex )
+			{
+				bInParserManager = ( fullPathByOS(s) in GLOBAL.parserManager ) ? true : false;
+			}
+			
+			if( !bInParserManager )
+			{
+				int _encoding;
+				char[] document;
+				synchronized( mutex )
+				{
+					document = FileAction.loadFile( s, _encoding );
+				}
+				auto tokens = GLOBAL.scanner.scan( document );
+				if( tokens.length )
+				{
+					auto _parser = new CParser( tokens );
+					CASTnode Root;
+					synchronized( mutex )
+					{
+						GLOBAL.parserManager[fullPathByOS(s)] = _parser.parse( s );
+						Root = GLOBAL.parserManager[fullPathByOS(s)];
+						Stdout( s ~ " be Parsed" ).newline;
+					}
+
+					char[] includeFullPath;
+					synchronized( mutex )
+					{
+						CASTnode[] includeNodes = getVersionIncludes( Root );
+						foreach( CASTnode _node; includeNodes )
+						{
+							//synchronized( mutex )
+							//{
+								includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+								if( includeFullPath.length )
+								{
+									beParsedFiles ~= includeFullPath;
+								}
+							//}
+						}
+					}
+				}
+			}
+			else
+			{/+
+				CASTnode Root;
+				synchronized( mutex )
+				{
+					Root = GLOBAL.parserManager[fullPathByOS(s)];
+				}
+				char[] includeFullPath;
+				CASTnode[] includeNodes = getVersionIncludes( Root );
+				foreach( CASTnode _node; includeNodes )
+				{
+					includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
+					if( includeFullPath.length )
+					{
+						synchronized( mutex )
+						{
+							beParsedFiles ~= includeFullPath;
+						}
+					}
+				}+/
+			}
+		}
+		
+		
+		
+		foreach( char[] s; inFiles )
+		{
+			Thread t = group.create( &testFn );
+			t.name = s;
+		}
+		group.joinAll();	
+		+/
 		
 		foreach( char[] s; inFiles )
 		{

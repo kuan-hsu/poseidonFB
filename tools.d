@@ -314,7 +314,6 @@ bool isParsableExt( char[] _ext, int flag = 7 )
 			if( flag & 4 ) return true;
 		}
 	}
-	
 	version(DIDE)
 	{
 		if( _ext == "d" )
