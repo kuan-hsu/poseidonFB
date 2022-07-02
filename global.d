@@ -552,6 +552,7 @@ struct GLOBAL
 
 		GLOBAL.languageItems["windows"] = new IupString( cast(char[]) "Windows" );
 		GLOBAL.languageItems["view"] = new IupString( cast(char[]) "View" );
+			GLOBAL.languageItems["toolbar"]= new IupString( cast(char[]) "Toolbar" );
 			GLOBAL.languageItems["message"]= new IupString( cast(char[]) "Message" );
 			GLOBAL.languageItems["manual"]= new IupString( cast(char[]) "Manual" );
 			GLOBAL.languageItems["fullscreen"]= new IupString( cast(char[]) "Fullscreen" );

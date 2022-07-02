@@ -33,7 +33,7 @@ search=尋找
 
 windows=視窗
 view=檢視
-	'outline=大綱
+	toolbar=工具列
 	message=訊息
 	manual=手冊
 	fullscreen=全螢幕

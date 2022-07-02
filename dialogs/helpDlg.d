@@ -6,11 +6,9 @@ class CCompilerHelpDialog : CBaseDialog
 {
 	private:
 	import iup.iup;	
-	import actionManager, global, tools;
+	import global;
 	import tango.stdc.stringz;
 	import tango.io.UnicodeFile;
-
-	char* helpDocument;
 
 	void createLayout()
 	{
@@ -20,8 +18,7 @@ class CCompilerHelpDialog : CBaseDialog
 		try
 		{
 			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
-			helpDocument = getCString( fileCompilerOptions.read );
-			IupSetAttribute( text, "VALUE", helpDocument );
+			IupSetStrAttribute( text, "VALUE", toStringz( fileCompilerOptions.read ) );
 		}
 		catch( Exception e )
 		{
@@ -43,18 +40,11 @@ class CCompilerHelpDialog : CBaseDialog
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "TOPMOST", "YES" );
-		/+
-		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) function( Ihandle* ih )
-		{
-			if( GLOBAL.compilerHelpDlg !is null ) IupHide( GLOBAL.compilerHelpDlg._dlg );
-		});+/
-
 		createLayout();
 	}
 
 	~this()
 	{
-		if( helpDocument != null ) freeCString( helpDocument );
 		IupDestroy( _dlg );
 	}
 

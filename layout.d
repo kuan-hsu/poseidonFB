@@ -142,8 +142,13 @@ void createExplorerWindow()
 	*/
 
 	GLOBAL.statusBar = new CStatusBar();
-
-	Ihandle* VBox = IupVbox( GLOBAL.toolbar.getHandle, GLOBAL.messageSplit, GLOBAL.statusBar.getLayoutHandle, null );
+	
+	Ihandle* expander = IupExpander( GLOBAL.toolbar.getHandle );
+	IupSetAttributes( expander, "BARSIZE=0,STATE=OPEN,EXPAND=HORIZONTAL,NAME=POSEIDON_TOOLBAR_EXPANDER" );
+	Ihandle* _backgroundbox = IupGetChild( expander, 0 );
+	if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image 	
+	
+	Ihandle* VBox = IupVbox( expander, GLOBAL.messageSplit, GLOBAL.statusBar.getLayoutHandle, null );
 	IupAppend( GLOBAL.mainDlg, VBox );
 	//IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
 	
@@ -554,8 +559,8 @@ extern(C)
 									break;
 										
 								default:
-									if( GLOBAL.liveLevel == 2 )
-									{
+									//if( GLOBAL.liveLevel == 2 )
+									//{
 										if( c > 31 && c < 127 )
 										{
 											switch( GLOBAL.liveLevel )
@@ -565,7 +570,7 @@ extern(C)
 												default:
 											}
 										}
-									}
+									//}
 							}
 						}
 					}

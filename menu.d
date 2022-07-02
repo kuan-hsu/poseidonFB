@@ -477,7 +477,11 @@ void createMenu()
 	IupSetAttribute( item_clearBuild, "IMAGE", "icon_clear" );
 	IupSetCallback( item_clearBuild, "ACTION", cast(Icallback)&clearBuild_cb );
 
-	// Miscelaneous 
+	// Miscelaneous
+	Ihandle* toolBarItem = IupItem( GLOBAL.languageItems["toolbar"].toCString, null);
+	IupSetAttribute( toolBarItem, "VALUE", "ON" );
+	IupSetCallback( toolBarItem, "ACTION",  cast(Icallback)&toolbarMenuItem_cb);
+	
 	GLOBAL.menuOutlineWindow = IupItem( GLOBAL.languageItems["outline"].toCString, null);
 	IupSetAttribute(GLOBAL.menuOutlineWindow, "VALUE", "ON");
 	//IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
@@ -724,8 +728,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.498)  2022.06.19\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.076)  2022.06.19\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.499)  2022.07.03\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.077)  2022.07.03\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -852,7 +856,8 @@ void createMenu()
 							null );
 	}
 	
-	misc_menu= IupMenu( 	GLOBAL.menuOutlineWindow,
+	misc_menu= IupMenu( 	toolBarItem,
+							GLOBAL.menuOutlineWindow,
 							GLOBAL.menuMessageWindow,
 							GLOBAL.menuRotateTabs,
 							IupSeparator(),
@@ -1549,6 +1554,30 @@ extern(C)
 			}
 		}
 		return IUP_DEFAULT;
+	}
+
+	int toolbarMenuItem_cb( Ihandle *ih )
+	{
+		Ihandle* _expandHandle = IupGetDialogChild( GLOBAL.mainDlg, "POSEIDON_TOOLBAR_EXPANDER" );
+		if( _expandHandle != null )
+		{
+			if( fromStringz( IupGetAttribute( _expandHandle, "STATE" ) ) == "OPEN" )
+			{
+				IupSetAttribute( _expandHandle, "STATE", "CLOSE" );
+				Ihandle* _backgroundbox = IupGetChild( _expandHandle, 1 ); // Get toolbar Ihandle
+				if( _backgroundbox != null ) IupSetAttributes( _backgroundbox, "VISIBLE=NO,ACTIVE=NO" ); // Make toolbar to hide
+				IupSetInt( ih, "VALUE", 0 );
+			}
+			else
+			{
+				IupSetAttribute( _expandHandle, "STATE", "OPEN" );
+				Ihandle* _backgroundbox = IupGetChild( _expandHandle, 1 );
+				if( _backgroundbox != null ) IupSetAttributes( _backgroundbox, "VISIBLE=YES,ACTIVE=YES" ); // Make toolbar to show
+				IupSetInt( ih, "VALUE", 1 );
+			}
+		}
+		return IUP_DEFAULT;
+	
 	}
 	
 	int outlineMenuItem_cb( Ihandle *ih )

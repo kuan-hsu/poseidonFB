@@ -33,7 +33,7 @@ search=Search
 
 windows=Windows
 view=View
-	'outline=Outline
+	toolbar=Toolbar
 	message=Message
 	manual=Manual
 	fullscreen=Fullscreen

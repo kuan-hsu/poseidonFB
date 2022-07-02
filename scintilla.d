@@ -3106,6 +3106,7 @@ extern(C)
 		if( ScintillaAction.isComment( ih, pos, bCheckString ) )
 			if( ScintillaAction.isComment( ih, pos - 1, bCheckString ) ) return IUP_DEFAULT;
 
+		/+
 		// Avoid keypress release reaction slow issue
 		if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel == 1 )
 		{
@@ -3124,7 +3125,7 @@ extern(C)
 				}
 			}
 		}		
-		
+		+/
 		if( length > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
 		
 		// Include Autocomplete

@@ -337,10 +337,10 @@ extern(C)
 			
 			if( listFind_handle != null && listReplace_handle != null )
 			{
-				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
-				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup;
+				scope findText		= new IupString( fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup );
+				scope ReplaceText	= new IupString( fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup );
 				
-				if( findText.length )
+				if( findText.toDString.length )
 				{
 					bool	bScopeSelection;
 					Ihandle* _ih = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Scope" );
@@ -363,12 +363,10 @@ extern(C)
 
 					IupScintillaSendMessage( iupSci, 2198, GLOBAL.searchExpander.searchRule, 0 );	// SCI_SETSEARCHFLAGS = 2198,
 					
-					actionManager.SearchAction.addListItem( listFind_handle, findText, 15 );
-					if( flag == 2 && ReplaceText.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText, 15 );
+					actionManager.SearchAction.addListItem( listFind_handle, findText.toDString, 15 );
+					if( flag == 2 && ReplaceText.toDString.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText.toDString, 15 );
 					
-					scope _t = new IupString( findText );
-
-					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
 					while( findPos > -1 )
 					{
 						switch( flag )
@@ -378,10 +376,10 @@ extern(C)
 								if( !( IupGetIntId( iupSci, "MARKERGET", linNum ) & 2 ) ) IupSetIntId( iupSci, "MARKERADD", linNum, 1 );
 								break;
 							case 2:
-								if( !ReplaceText.length )
+								if( !ReplaceText.toDString.length )
 									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
-									IupSetStrAttribute( iupSci, "REPLACETARGET", toStringz( ReplaceText ) );
+									IupSetStrAttribute( iupSci, "REPLACETARGET", ReplaceText.toCString );
 								break;
 							default:
 						}
@@ -389,9 +387,9 @@ extern(C)
 						counts ++;
 						
 						if( !bScopeSelection ) IupSetInt( iupSci, "TARGETEND", -1 ); else IupSetAttribute( iupSci, "TARGETFROMSELECTION", "YES" );
-						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + ReplaceText.length );
+						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.toDString.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + ReplaceText.toDString.length );
 						
-						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
 					}
 				}
 			}

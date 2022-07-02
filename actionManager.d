@@ -2871,18 +2871,29 @@ public:
 		if( pos == 0 )
 		{
 			targetMinus1 = 32; // Ascii 32 = space
-			if( lineData.length == target.length ) targetPLUS1 = 32;else targetPLUS1 = cast(int)lineData[target.length];
+			if( lineData.length == target.length )
+				targetPLUS1 = 32;
+			else if( lineData.length > target.length )
+				targetPLUS1 = cast(int)lineData[target.length];
+			else
+				targetPLUS1 = 48; // Not Match
 		}
 		else if( pos + target.length == lineData.length )
 		{
 			targetMinus1 = cast(int)lineData[pos-1];
 			targetPLUS1 = 32; // Ascii 32 = space
 		}
-		else
+		else if( pos + target.length < lineData.length )
 		{
 			targetMinus1 = cast(int)lineData[pos-1];
 			targetPLUS1 = cast(int)lineData[pos+target.length];
 		}
+		else
+		{
+			targetMinus1 = cast(int)lineData[pos-1];
+			targetPLUS1 = 48; // Not Match
+		}
+		
 
 		//IupMessage( "Minus:Plus", toStringz( Integer.toString( targetMinus1 ) ~ ":" ~ Integer.toString( targetPLUS1 ) ) );
 
@@ -2921,12 +2932,12 @@ public:
 			//char[]	splitLineDocument;
 			if( bInDocument )
 			{
-				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "VALUE" ) );
+				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "VALUE" ) ).dup;
 			}
 			else
 			{
 				if( buttonIndex == 3 ) return 0;
-				document = FileAction.loadFile( fullPath, _encoding );
+				document = FileAction.loadFile( fullPath, _encoding ).dup;
 			}			
 			//scope file = new File( fullPath, File.ReadExisting );
 
@@ -2970,9 +2981,12 @@ public:
 
 				if( bInDocument )
 				{
+					/+
 					FileAction.saveFile( fullPath, document, GLOBAL.scintillaManager[fullPathByOS( fullPath )].encoding );
 					GLOBAL.scintillaManager[fullPathByOS( fullPath )].setText( document );
 					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS( fullPath )] );
+					+/
+					IupSetStrAttribute( GLOBAL.scintillaManager[fullPathByOS( fullPath )].getIupScintilla, "VALUE", toStringz( document ) );
 				}
 				else
 				{
@@ -3006,6 +3020,7 @@ public:
 							bool bGetWholeWord;
 							while( pos < line.length )
 							{
+								if( ( pos < 0 ) || ( pos + findText.length > line.length ) ) break;
 								if( IsWholeWord( line, findText, pos ) )
 								{
 									bGetWholeWord = true;
@@ -3013,7 +3028,7 @@ public:
 								}
 								else
 								{
-									if( pos + findText.length >= line.length ) break;
+									//if( pos + findText.length >= line.length ) break;
 									pos = Util.index( line, findText, pos + findText.length );
 								}
 							}

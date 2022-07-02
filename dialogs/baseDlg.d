@@ -11,7 +11,6 @@ class CBaseDialog
 	
 	Ihandle*			_dlg;
 	Ihandle*			btnAPPLY, btnOK, btnCANCEL, btnHiddenOK, btnHiddenCANCEL;
-	IupString			size, onlyW, onlyH, titleString, parentName;
 	
 	Ihandle* createDlgButton( char[] buttonSize = "40x20", char[] buttons = "oc" )
 	{
@@ -62,34 +61,32 @@ class CBaseDialog
 	this( int w, int h, char[] title, bool bResize = true, char[] parent = "" )
 	{
 		_dlg = IupDialog( null );
-		titleString = new IupString( title );
-		IupSetAttribute( _dlg, "TITLE", titleString.toCString );
+		IupSetStrAttribute( _dlg, "TITLE", toStringz( title ) );
 		version(DARKTHEME) 
 		{
 			IupSetStrAttribute( _dlg, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
 			IupSetStrAttribute( _dlg, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		}
 		
-		size	= new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
-		onlyW	= new IupString( Integer.toString( w ) ~ "x" );
-		onlyH	= new IupString( "x" ~ Integer.toString( h ) );
+		char[] size	= Integer.toString( w ) ~ "x" ~ Integer.toString( h );
+		char[] onlyW = Integer.toString( w ) ~ "x";
+		char[] onlyH = "x" ~ Integer.toString( h );
 		if( w < 0 || h < 0 ) 
 		{
 			IupSetAttribute( _dlg, "RASTERSIZE", "NULL" );
 			if( w < 0 && h > 0)
-				IupSetAttribute( _dlg, "RASTERSIZE", onlyH.toCString );
+				IupSetStrAttribute( _dlg, "RASTERSIZE", toStringz( onlyH ) );
 			else if( w > 0 && h < 0)
-				IupSetAttribute( _dlg, "RASTERSIZE", onlyW.toCString );
+				IupSetStrAttribute( _dlg, "RASTERSIZE", toStringz( onlyW ) );
 		}
 		else
 		{
-			IupSetAttribute( _dlg, "RASTERSIZE", size.toCString );
+			IupSetStrAttribute( _dlg, "RASTERSIZE", toStringz( size ) );
 		}
 		
 		if( parent.length)
 		{
-			parentName = new IupString( parent );
-			IupSetAttribute( _dlg, "PARENTDIALOG", parentName.toCString );
+			IupSetStrAttribute( _dlg, "PARENTDIALOG", toStringz( parent ) );
 		}
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
 		
@@ -99,30 +96,8 @@ class CBaseDialog
 
 	this( int w, int h, char[] title, bool bResize = true, Ihandle* parent = null )
 	{
-		_dlg = IupDialog( null );
-		titleString = new IupString( title );
-		IupSetAttribute( _dlg, "TITLE", titleString.toCString );
-
-		size	= new IupString( Integer.toString( w ) ~ "x" ~ Integer.toString( h ) );
-		onlyW	= new IupString( Integer.toString( w ) ~ "x" );
-		onlyH	= new IupString( "x" ~ Integer.toString( h ) );
-		if( w < 0 || h < 0 ) 
-		{
-			IupSetAttribute( _dlg, "RASTERSIZE", "NULL" );
-			if( w < 0 && h > 0)
-				IupSetAttribute( _dlg, "RASTERSIZE", onlyH.toCString );
-			else if( w > 0 && h < 0)
-				IupSetAttribute( _dlg, "RASTERSIZE", onlyW.toCString );
-		}
-		else
-		{
-			IupSetAttribute( _dlg, "RASTERSIZE", size.toCString );
-		}
-		
+		this( w, h, title, bResize, "" );
 		if( parent != null)	IupSetAttributeHandle( _dlg, "PARENTDIALOG", parent );
-		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
-		
-		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
 	}
 
 	~this()
@@ -130,12 +105,6 @@ class CBaseDialog
 		IupSetHandle( "btnCANCEL", null );
 		IupSetHandle( "btnOK", null );
 		//IupDestroy( _dlg );
-
-		delete size;
-		delete onlyW;
-		delete onlyH;
-		delete titleString;
-		delete parentName;
 	}
 
 	char[] show( int x, int y )
