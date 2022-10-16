@@ -2169,7 +2169,8 @@ class CVarDlg : CSingleTextDialog
 	this( int w, int h, char[] title, char[] _labelText = null,  char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, _labelText, textWH, text, bResize, parent );
-		IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CConsoleDlg_btnCancel_cb );
+		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CConsoleDlg_btnCancel_cb );
+		IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CConsoleDlg_btnCancel_cb );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CConsoleDlg_btnCancel_cb );
 	}
 
@@ -2186,6 +2187,8 @@ class DebugThread //: Thread
 	private :
 	import		tango.io.stream.Data, tango.sys.Process;
 	import		tango.sys.win32.Types, tango.sys.win32.UserGdi;
+	
+	version(Windows) import tango.sys.win32.UserGdi;
 
 	
 	char[]		executeFullPath, cwd;
@@ -2204,10 +2207,14 @@ class DebugThread //: Thread
 		
 		try
 		{
+			char[1024] temp;
+			uint nBytesToRead, lpBytesRead, lpTotalBytesAvail, lpNumberOfBytesRead;
+			
 			while( 1 )
 			{
 				try
 				{
+					
 					char[1] c;
 					//if( proc.stderr is null ) 
 					if( proc.stdout.read( c ) <= 0 ) break;
@@ -2221,6 +2228,31 @@ class DebugThread //: Thread
 							if( result[$-5..$] == "(gdb)" ) break;
 						}
 					}
+					
+					/+
+					version(Windows)
+					{
+						if( !PeekNamedPipe( proc.stdout.fileHandle, &temp[0], 1024, &lpBytesRead, &lpTotalBytesAvail, null ) ) break;;
+						// IupMessage( "", toStringz( "YES\nlpBytesRead = " ~ Integer.toString( lpBytesRead ) ~ "\nlpTotalBytesAvail = " ~ Integer.toString( lpTotalBytesAvail ) ) );
+						
+						
+						if( lpTotalBytesAvail )
+						{
+							if( !ReadFile( proc.stdout.fileHandle, &temp[0], lpBytesRead, &lpNumberOfBytesRead, null ) ) break;
+							/*
+							lpNumberOfBytesRead = proc.stdout.read( temp );
+							if( !lpNumberOfBytesRead ) break;
+							*/
+		
+							result ~= temp[0..lpNumberOfBytesRead];
+							if( lpBytesRead == lpTotalBytesAvail ) break;
+						}
+						else
+						{
+							Sleep( 100 );
+						}
+					}
+					+/
 				}
 				catch( Exception e )
 				{
@@ -2320,6 +2352,7 @@ class DebugThread //: Thread
 			//auto proc_result = proc.wait;
 
 			char[] result = getGDBmessage();
+			
 			IupSetStrAttribute( GLOBAL.debugPanel.getConsoleHandle, "APPEND", toStringz( result ) );
 
 			if( Util.index( result, "(no debugging symbols found)" ) < result.length )

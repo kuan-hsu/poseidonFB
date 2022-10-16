@@ -54,7 +54,7 @@ class CFileDlg
 		*/
 		if( IupGetInt( dlg, "STATUS") != -1 )
 		{
-			filterUsed = Util.trim( fromStringz( IupGetAttribute( dlg, "FILTERUSED" ) ) );
+			filterUsed = Util.trim( fromStringz( IupGetAttribute( dlg, "FILTERUSED" ) ).dup );
 			char[] fileString = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ) );
 
 			if( fileString.length )

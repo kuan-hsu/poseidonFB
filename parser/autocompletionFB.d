@@ -4128,8 +4128,15 @@ version(FBIDE)
 										CASTnode memberFunctionMotherNode = searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 										if( memberFunctionMotherNode !is null )
 										{
-											auto matchNode = searchMatchNode( memberFunctionMotherNode, _splitWord[i], B_FIND | B_CTOR | B_SUB );
-											if( matchNode !is null ) matchNodes ~= matchNode;
+											if( lowerCase( _splitWord[i] ) == "this" )
+											{
+												matchNodes ~= memberFunctionMotherNode;
+											}
+											else
+											{
+												auto matchNode = searchMatchNode( memberFunctionMotherNode, _splitWord[i], B_FIND | B_CTOR | B_SUB );
+												if( matchNode !is null ) matchNodes ~= matchNode;
+											}
 										}
 									}
 									/*
@@ -5051,7 +5058,10 @@ version(FBIDE)
 			if( preLoadContainerThread !is null )
 			{
 				if( preLoadContainerThread.isRunning )
+				{
+					IupMessage("","");
 					preLoadContainerThread.join();
+				}
 				else
 				{
 					delete preLoadContainerThread;
