@@ -1988,6 +1988,13 @@ version(FBIDE)
 								TOK nestUnnameTOK = token().tok;
 								_lineNum = token().lineNumber;
 								
+								// For nested TYPE
+								if( ( next().tok == TOK.Tidentifier && next2().tok == TOK.Teol ) || ( next().tok == TOK.Tidentifier && next2().tok == TOK.Textends ) )
+								{
+									parseType();
+									break;
+								}
+								
 								parseToken();
 								
 								if( token().tok == TOK.Tfield )
@@ -2002,7 +2009,7 @@ version(FBIDE)
 									{
 										return false;
 									}
-								}						
+								}
 
 								if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 								{

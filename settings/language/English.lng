@@ -105,6 +105,7 @@ options=Options
 			debugpath=Debugger Path
 			debugx64path=Debugger x64 Path
 			terminalpath=Terminal Path
+			htmlapppath=Html App Path
 			x64path=x64 Compiler Path
 			compileropts=Compiler Options
 			compilersetting=Compiler Settings

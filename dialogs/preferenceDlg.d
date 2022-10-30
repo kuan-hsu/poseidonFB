@@ -110,7 +110,23 @@ class CPreferenceDialog : CBaseDialog
 			
 			Ihandle* hBox03 = IupFrame( _hBox03 );
 			IupSetAttribute( hBox03, "TITLE", GLOBAL.languageItems["terminalpath"].toCString );
-			IupSetAttributes( hBox03, "EXPANDCHILDREN=YES,SIZE=346x");			
+			IupSetAttributes( hBox03, "EXPANDCHILDREN=YES,SIZE=346x");
+			
+			
+			Ihandle* textHtmlAppPath = IupText( null );
+			IupSetAttributes( textHtmlAppPath, "SIZE=320x,NAME=Compiler-htmlappPath" );
+			IupSetStrAttribute( textHtmlAppPath, "VALUE", toStringz( GLOBAL.linuxHtmlAppName ) );
+		
+			Ihandle* btnOpenHtmlApp = IupButton( null, null );
+			IupSetAttribute( btnOpenHtmlApp, "IMAGE", "icon_openfile" );
+			IupSetCallback( btnOpenHtmlApp, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
+			
+			Ihandle* _hBox04 = IupHbox( textHtmlAppPath, btnOpenHtmlApp, null );
+			IupSetAttributes( _hBox04, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+			
+			Ihandle* hBox04 = IupFrame( _hBox04 );
+			IupSetAttribute( hBox04, "TITLE", GLOBAL.languageItems["htmlapppath"].toCString );
+			IupSetAttributes( hBox04, "EXPANDCHILDREN=YES,SIZE=346x");			
 		}		
 		
 		/+
@@ -213,7 +229,7 @@ class CPreferenceDialog : CBaseDialog
 			version(Windows)
 				vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, frameCompiler, null );
 			else
-				vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, frameCompiler, null );
+				vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, hBox04, frameCompiler, null );
 				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
@@ -1869,6 +1885,9 @@ class CPreferenceDialog : CBaseDialog
 		{
 			IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-textTerminalPath" ), "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
 			IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-textTerminalPath" ), "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			
+			IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-htmlappPath" ), "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+			IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-htmlappPath" ), "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
 		}
 		
 		version(FBIDE)
@@ -2292,6 +2311,7 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.x64debuggerFullPath	= GLOBAL.debuggerFullPath;
 				
 				GLOBAL.linuxTermName		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-textTerminalPath" ), "VALUE" ) ).dup;
+				GLOBAL.linuxHtmlAppName		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-htmlappPath" ), "VALUE" ) ).dup;
 			}
 			
 			GLOBAL.compilerAnootation					= fromStringz( IupGetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE" ) ).dup;

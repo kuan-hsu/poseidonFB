@@ -159,7 +159,8 @@ struct GLOBAL
 	static int					keywordCase = 0;	
 	static char[]				compilerFullPath, x64compilerFullPath;
 	static char[]				debuggerFullPath, x64debuggerFullPath;
-	static char[]				linuxTermName;	
+	static char[]				linuxTermName;
+	static char[]				linuxHtmlAppName;
 	static char[]				compilerAnootation = "ON";
 	static char[]				compilerWindow = "OFF";
 	static char[]				compilerSFX = "ON";
@@ -624,6 +625,7 @@ struct GLOBAL
 					GLOBAL.languageItems["debugpath"] = new IupString( cast(char[]) "Debugger Path" );
 					GLOBAL.languageItems["debugx64path"] = new IupString( cast(char[]) "Debugger x64 Path" );
 					GLOBAL.languageItems["terminalpath"] = new IupString( cast(char[]) "Terminal Path" );
+					GLOBAL.languageItems["htmlapppath"] = new IupString( cast(char[]) "Html App Path" );
 					GLOBAL.languageItems["x64path"] = new IupString( cast(char[]) "x64 Path" );
 					GLOBAL.languageItems["compileropts"] = new IupString( cast(char[]) "Compiler Opts" );
 					GLOBAL.languageItems["compilersetting"] = new IupString( cast(char[]) "Compiler Setting" );

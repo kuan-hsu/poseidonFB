@@ -2292,8 +2292,16 @@ struct ExecuterAction
 				}
 				else
 				{
-					version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
-					version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
+					if( !_f.path.length )
+					{
+						version(FBIDE) fileName = GLOBAL.poseidonPath ~ Integer.toString( time.seconds ) ~ ".bas";
+						version(DIDE) fileName = GLOBAL.poseidonPath ~ Integer.toString( time.seconds ) ~ ".d";
+					}
+					else
+					{
+						version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
+						version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
+					}
 				}
 			}
 			

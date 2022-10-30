@@ -3939,8 +3939,23 @@ version(FBIDE)
 												if( _splitWords.length == 2 )
 												{
 													if( _splitWords[1].length )
-														IupExecute( "./CHMVIEW", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );	// "kchmviewer --sindex %s /chm-path
-														//IupExecute( "kchmviewer", toStringz( "--stoc " ~ keyWord ~ " /" ~ _splitWords[1] ) );	// "kchmviewer --sindex %s /chm-path
+													{
+														scope htmlappPath = new FilePath( GLOBAL.linuxHtmlAppName );
+														switch( Util.trim( htmlappPath.file ) )
+														{
+															case "xchm":
+																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "\"file:" ~ _splitWords[1] ~ "#xchm:/KeyPg" ~ keyWord ~ ".html\"" ) );	// xchm "file:/home/username/freebasic/FB-manual-1.05.0.chm#xchm:/KeyPg%s.html"
+																break;
+															case "kchmviewer":
+																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "--stoc " ~ keyWord ~ " /" ~ _splitWords[1] ) );	// "kchmviewer --sindex %s /chm-path
+																break;
+															case "CHMVIEW":
+																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+																break;
+															default:
+																IupExecute( "./CHMVIEW", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+														}
+													}
 												}
 											}
 										}
