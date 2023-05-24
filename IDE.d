@@ -613,7 +613,10 @@ public:
 							case "MessageSplit":			GLOBAL.editorSetting01.MessageSplit = right;			break;
 							case "OutlineWindow":			GLOBAL.editorSetting01.OutlineWindow = right;			break;
 							case "MessageWindow":			GLOBAL.editorSetting01.MessageWindow = right;			break;
-							case "OutlineFlat":				version(Windows) GLOBAL.editorSetting01.OutlineFlat = right; else GLOBAL.editorSetting01.OutlineFlat = "OFF"; break;
+							case "OutlineFlat":				
+								version(Windows) GLOBAL.editorSetting01.OutlineFlat = right; else GLOBAL.editorSetting01.OutlineFlat = "OFF";
+								version(IUP327) GLOBAL.editorSetting01.OutlineFlat = "OFF";
+								break;
 							case "OutputSci":				version(Windows) GLOBAL.editorSetting01.OutputSci = right; else GLOBAL.editorSetting01.OutputSci = "ON"; break;
 							case "RotateTabs":				GLOBAL.editorSetting01.RotateTabs = right;				break;
 							case "BarSize":

@@ -2276,9 +2276,9 @@ version(FBIDE)
 						}
 						else
 						{
-							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
+							//if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
+							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_UNION, lineNum ) ) return null; // for nested TYPE / UNION
 						}
-						
 						
 						
 						if( bPushContainer )
@@ -2315,7 +2315,8 @@ version(FBIDE)
 					}
 					else
 					{
-						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
+						//if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
+						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_UNION, lineNum ) ) return null; // for nested TYPE / UNION
 					}
 				}
 			}		
@@ -4229,7 +4230,7 @@ version(FBIDE)
 									}
 									else
 									{
-										auto matchNodes = searchMatchMemberNodes( a, _splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_OPERATOR | B_NAMESPACE | B_SUB | B_ENUMMEMBER );
+										auto matchNodes = searchMatchMemberNodes( a, _splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_OPERATOR | B_NAMESPACE | B_SUB | B_ENUMMEMBER | B_TYPE | B_UNION );
 										//if( matchNode !is null ) nameSpaceNodes ~= matchNode;
 										if( matchNodes.length > 0 ) nameSpaceNodes ~= matchNodes;
 									}
@@ -5074,7 +5075,6 @@ version(FBIDE)
 			{
 				if( preLoadContainerThread.isRunning )
 				{
-					IupMessage("","");
 					preLoadContainerThread.join();
 				}
 				else

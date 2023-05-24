@@ -9,7 +9,7 @@ struct XPM
 	import tango.stdc.stringz;
 	import tango.io.Stdout, tango.stdc.math;
 
-	import global;
+	import global, tools;
 
 	struct ColorUnit
 	{
@@ -119,6 +119,25 @@ struct XPM
 					else if( quoteLineCount <= num_colors + 1 )
 					{
 						rPos = Util.rindex( line, "\"" );
+						char[][] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						if( splitData.length == 2 )
+						{
+							ColorUnit _color;
+							_color.index = line[1..2].dup;
+							_color.c = splitData[0].dup;
+							if( splitData[1] == "None" )
+							{
+								_color.value = "00000000".dup;
+							}
+							else
+							{
+								_color.value = ( splitData[1][1..$] ~ "ff" ).dup;
+								
+							}
+
+							color ~= _color;
+						}
+						/*
 						char[][] splitData = Util.split( line[1..rPos], " " );
 						if( splitData.length == 3 )
 						{
@@ -137,7 +156,7 @@ struct XPM
 
 							color ~= _color;
 						}					
-					
+						*/
 					}
 					else if( quoteLineCount <= num_colors + 1 + width )
 					{
@@ -310,6 +329,29 @@ struct XPM
 					else if( quoteLineCount <= num_colors + 1 )
 					{
 						rPos = Util.rindex( line, "\"" );
+						char[][] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						if( splitData.length == 2 )
+						{
+							ColorUnit _color;
+							_color.index = line[1..2].dup;
+							_color.c = splitData[0].dup;
+							if( splitData[1] == "None" )
+							{
+								_color.value = "BGCOLOR";
+							}
+							else
+							{
+								int r = hexStringToByte( splitData[1][1..3] );
+								int g = hexStringToByte( splitData[1][3..5] );
+								int b = hexStringToByte( splitData[1][5..7] );
+
+								_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
+							}
+
+							_color.sn = colorSN++;
+							color ~= _color;
+						}						
+						/*
 						char[][] splitData = Util.split( line[1..rPos], " " );
 						if( splitData.length == 3 )
 						{
@@ -332,7 +374,7 @@ struct XPM
 							_color.sn = colorSN++;
 							color ~= _color;
 						}					
-					
+						*/
 					}
 					else if( quoteLineCount <= num_colors + 1 + width )
 					{
@@ -428,6 +470,32 @@ struct XPM
 					else if( quoteLineCount <= num_colors + 1 )
 					{
 						rPos = Util.rindex( line, "\"" );
+						char[][] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						if( splitData.length == 2 )
+						{
+							ColorUnit _color;
+							_color.index = line[1..2].dup;
+							_color.c = splitData[0].dup;
+							if( splitData[1] == "None" )
+							{
+								_color.value = "BGCOLOR";
+							}
+							else
+							{
+								int r = hexStringToByte( splitData[1][1..3] );
+								int g = hexStringToByte( splitData[1][3..5] );
+								int b = hexStringToByte( splitData[1][5..7] );
+			
+								if( GLOBAL.editorSetting00.IconInvert == "ALL" )
+									_color.value = Integer.toString( 255 - r ) ~ " " ~ Integer.toString( 255 - g ) ~ " " ~ Integer.toString( 255 - b );
+								else
+									_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
+							}
+
+							_color.sn = colorSN++;
+							color ~= _color;
+						}
+						/*
 						char[][] splitData = Util.split( line[1..rPos], " " );
 						if( splitData.length == 3 )
 						{
@@ -453,7 +521,7 @@ struct XPM
 							_color.sn = colorSN++;
 							color ~= _color;
 						}					
-					
+						*/
 					}
 					else if( quoteLineCount <= num_colors + 1 + width )
 					{
@@ -484,8 +552,6 @@ struct XPM
 			
 			auto _handleName = new IupString( handleName );
 			IupSetHandle( _handleName.toCString, image );
-			
-			
 			
 			
 			if( bCreateInvert )

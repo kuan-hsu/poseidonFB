@@ -1386,16 +1386,27 @@ class COutline
 			char[] fullPath = head.name;
 			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 			{
-				tree = IupFlatTree();
-				IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
-				IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-				IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
-				IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
-				IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-				if( GLOBAL.editColor.prjViewHLT.toDString.length )
+				version(IUP327)
 				{
-					IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
-					IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+					tree = IupTree();
+					IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
+					IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
+					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					if( GLOBAL.editColor.prjViewHLT.toDString.length ) IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+				}
+				else
+				{
+					tree = IupFlatTree();
+					IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
+					IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+					IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+					IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
+					IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
+					if( GLOBAL.editColor.prjViewHLT.toDString.length )
+					{
+						IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+						IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+					}
 				}
 			}
 			else

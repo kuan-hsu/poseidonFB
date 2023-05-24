@@ -135,16 +135,23 @@ private:
 		
 		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 		{
-			tree = IupFlatTree();
-			IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
-			IupSetAttribute( tree, "ADDBRANCH-1", "Projects" );
-			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
-			IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-			if( GLOBAL.editColor.prjViewHLT.toDString.length )
+			version(IUP327)
 			{
-				IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
-				IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+			
+			}
+			else
+			{
+				tree = IupFlatTree();
+				IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
+				IupSetAttribute( tree, "ADDBRANCH-1", "Projects" );
+				IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
+				IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+				IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+				if( GLOBAL.editColor.prjViewHLT.toDString.length )
+				{
+					IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+					IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+				}
 			}
 		}
 		else

@@ -12,6 +12,7 @@ CompilerPath=
 [IncludeDirs]
 [LibDirs]
 name=K:/CodingPark/GameKYO/lib/iup/iup5924DLL10_32bit
+name=K:/CodingPark/GameKYO/lib/iup/iup327DLL10
 [Sources]
 name=IDE.d
 name=actionManager.d

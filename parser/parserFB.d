@@ -1626,8 +1626,8 @@ version(FBIDE)
 						_name = token().identifier;
 						_lineNum = token().lineNumber;
 						parseToken();
-
-						if( token().tok == TOK.Tdot && next().tok == TOK.Tidentifier ) // method
+						
+						while( token().tok == TOK.Tdot && next().tok == TOK.Tidentifier ) // method
 						{
 							_name ~= token().identifier;
 							parseToken( TOK.Tdot );

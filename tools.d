@@ -721,3 +721,41 @@ int questMessage( char[] title, char[] message, char[] DIALOGTYPE = "QUESTION", 
 	
 	return result;
 }
+
+
+char[][] splitSign( char[] s, char[] sign ... )
+{
+	char[][]	result;
+	char[]		word;
+	
+	for( int i = 0; i < s.length; ++i )
+	{
+		bool bMatchSign;
+		foreach( char c; sign )
+		{
+			if( s[i] == c )
+			{
+				bMatchSign = true;
+				break;
+			}
+		}
+		
+		
+		if( bMatchSign )
+		{
+			if( word.length )
+			{
+				result ~= word;
+				word.length = 0;
+			}
+		}
+		else
+		{
+			word ~= s[i];
+		}
+	}
+	
+	if( word.length ) result ~= word;
+	
+	return result;
+}

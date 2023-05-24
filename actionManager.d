@@ -1408,7 +1408,7 @@ public:
 			//GLOBAL.scintillaManager.remove( fullPathByOS( cSci.getFullPath ) );
 			//GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
 			delete cSci;
-			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", null );
+			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
 			IupRefresh( GLOBAL.activeDocumentTabs );
 			
 			DocumentTabAction.updateTabsLayout();
@@ -1641,7 +1641,7 @@ public:
 
 		StatusBarAction.update();
 		DocumentTabAction.resetTip();
-		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", null );
+		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
 		
 		return IUP_DEFAULT;
 	}
