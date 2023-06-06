@@ -166,7 +166,7 @@ public:
 			doc ~= setINILineData( "HighlightCurrentWord", GLOBAL.editorSetting00.HighlightCurrentWord );
 			doc ~= setINILineData( "MiddleScroll", GLOBAL.editorSetting00.MiddleScroll );
 			doc ~= setINILineData( "SaveDocStatus", GLOBAL.editorSetting00.DocStatus );
-			doc ~= setINILineData( "LoadAtBackThread", GLOBAL.editorSetting00.LoadAtBackThread );
+			doc ~= setINILineData( "ColorBarLine", GLOBAL.editorSetting00.ColorBarLine );
 			doc ~= setINILineData( "AutoKBLayout", GLOBAL.editorSetting00.AutoKBLayout );
 			doc ~= setINILineData( "ControlCharSymbol", GLOBAL.editorSetting00.ControlCharSymbol );
 			doc ~= setINILineData( "GUI", GLOBAL.editorSetting00.GUI );
@@ -590,7 +590,7 @@ public:
 							case "HighlightCurrentWord":	GLOBAL.editorSetting00.HighlightCurrentWord = right;	break;
 							case "MiddleScroll":			GLOBAL.editorSetting00.MiddleScroll = right;			break;
 							case "SaveDocStatus":			GLOBAL.editorSetting00.DocStatus = right;				break;
-							case "LoadAtBackThread":		version(BACKTHREAD) GLOBAL.editorSetting00.LoadAtBackThread = right; else GLOBAL.editorSetting00.LoadAtBackThread = "OFF"; break;
+							case "ColorBarLine":			GLOBAL.editorSetting00.ColorBarLine = right;			break;
 							case "AutoKBLayout":			GLOBAL.editorSetting00.AutoKBLayout = right;			break;
 							case "ControlCharSymbol":		GLOBAL.editorSetting00.ControlCharSymbol = right;		break;
 							case "GUI":						GLOBAL.editorSetting00.GUI = right;						break;
@@ -792,9 +792,11 @@ public:
 						{
 							case "compilerpath":			
 								GLOBAL.compilerFullPath = right;
-								version(DIDE) GLOBAL.x64compilerFullPath = right;
+								version(linux) GLOBAL.x64compilerFullPath = right;
 								break;
-							case "x64compilerpath":			version(FBIDE) GLOBAL.x64compilerFullPath = right;		break;
+							case "x64compilerpath":
+								version(Windows) GLOBAL.x64compilerFullPath = right;
+								break;
 							case "debuggerpath":			GLOBAL.debuggerFullPath = right;						break;
 							case "x64debuggerpath":			GLOBAL.x64debuggerFullPath = right;						break;
 							case "terminalpath":			GLOBAL.linuxTermName = right;							break;

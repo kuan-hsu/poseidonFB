@@ -81,14 +81,14 @@ private:
 	{
 	private:
 		Ihandle*	object;
-		IupString	title;
 		
 	public:
-		this( char[] _title, ColumnMember _member  )
+		this( char[] _title, ColumnMember _member, char[] TITLECOLOR = "", char[] TITLELINECOLOR = "" )
 		{
 			object = IupFlatFrame( _member.object );
-			title = new IupString( _title );
-			IupSetAttribute( object, "TITLE", title.toCString );
+			IupSetStrAttribute( object, "TITLE", toStringz( _title ) );
+			if( TITLECOLOR.length ) IupSetStrAttribute( object, "TITLECOLOR", toStringz( TITLECOLOR ) );
+			if( TITLELINECOLOR.length ) IupSetStrAttribute( object, "TITLELINECOLOR", toStringz( TITLELINECOLOR ) );
 			IupSetAttributes( object, "FRAME=NO,FRAMESPACE=0,FRAMEWIDTH=0,TITLELINE=NO" );
 		}
 	}
@@ -99,27 +99,54 @@ private:
 		Ihandle* object;
 		
 	public:
-		this( Ihandle* _member0, Ihandle* _member1 )
+		this( Ihandle* _member0, Ihandle* _member1, char[] BARLINECOLOR = "" )
 		{
 			object = IupSplit( _member0, _member1 );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
-			IupSetAttributes( object, "BARSIZE=1,EXPAND=YES,NAME=TABLESPLIT" );
+			IupSetAttributes( object, "BARSIZE=2,EXPAND=YES,NAME=TABLESPLIT" );
+			if( BARLINECOLOR.length )
+			{
+				IupSetAttribute( object, "SHOWGRIP", "NO" );
+				IupSetStrAttribute( object, "COLOR", toStringz( BARLINECOLOR ) );
+			}
+			else
+			{
+				IupSetAttribute( object, "SHOWGRIP", "LINES" );
+			}
 			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 		
-		this( ColumnFrame _ColumnFrame0, ColumnFrame _ColumnFrame1 )
+		this( ColumnFrame _ColumnFrame0, ColumnFrame _ColumnFrame1, char[] BARLINECOLOR = "" )
 		{
 			object = IupSplit( _ColumnFrame0.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
-			IupSetAttributes( object, "BARSIZE=1,EXPAND=YES,NAME=TABLESPLIT" );
+			IupSetAttributes( object, "BARSIZE=2,EXPAND=YES,NAME=TABLESPLIT" );
+			if( BARLINECOLOR.length )
+			{
+				IupSetAttribute( object, "SHOWGRIP", "NO" );
+				IupSetStrAttribute( object, "COLOR", toStringz( BARLINECOLOR ) );
+			}
+			else
+			{
+				IupSetAttribute( object, "SHOWGRIP", "LINES" );
+			}			
 			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 		
-		this( ColumnSplit _ColumnSplit, ColumnFrame _ColumnFrame1 )
+		this( ColumnSplit _ColumnSplit, ColumnFrame _ColumnFrame1, char[] BARLINECOLOR = "" )
 		{
 			object = IupSplit( _ColumnSplit.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
-			IupSetAttributes( object, "BARSIZE=1,EXPAND=YES,NAME=TABLESPLIT" );
+			IupSetAttributes( object, "BARSIZE=2, EXPAND=YES,NAME=TABLESPLIT" );
+			if( BARLINECOLOR.length )
+			{
+				IupSetAttribute( object, "SHOWGRIP", "NO" );
+				IupSetStrAttribute( object, "COLOR", toStringz( BARLINECOLOR ) );
+			}
+			else
+			{
+				IupSetAttribute( object, "SHOWGRIP", "LINES" );
+			}
 			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 	}	
@@ -154,67 +181,48 @@ public:
 		return split[$-1].object;
 	}
 
-	void addColumn( char[] _title )
+	void addColumn( char[] _title, char[] TITLECOLOR = "", char[] TITLELINECOLOR = "", char[] BARLINECOLOR = "" )
 	{
 		auto newMember = new ColumnMember;
 		columnMember ~= newMember;
 		
-		auto newColumnFrame = new ColumnFrame( _title, newMember );
+		auto newColumnFrame = new ColumnFrame( _title, newMember, TITLECOLOR, TITLELINECOLOR );
 		columnFrame ~= newColumnFrame;
 		
 		if( columnFrame.length > 2 )
 		{
-			auto newSplit = new ColumnSplit( split[$-1], columnFrame[$-1] );
+			auto newSplit = new ColumnSplit( split[$-1], columnFrame[$-1], BARLINECOLOR );
 			split ~= newSplit;
 			
 		}
 		else if( columnFrame.length > 1 )
 		{
-			auto newSplit = new ColumnSplit( columnFrame[$-2], columnFrame[$-1] );
+			auto newSplit = new ColumnSplit( columnFrame[$-2], columnFrame[$-1], BARLINECOLOR );
 			split ~= newSplit;
 		}
 	}
 	
 	void setColumnAttribute( char[] _name, char[] _value )
 	{
-		if( columnFrame.length > 0 ) IupSetAttribute( columnFrame[$-1].object, toStringz( _name ), toStringz( _value ) );
-	}
-	
-	void setColumnAttribute( char[] _value )
-	{
-		if( columnFrame.length > 0 ) IupSetAttributes( columnFrame[$-1].object, toStringz( _value ) );
+		if( columnFrame.length > 0 ) IupSetStrAttribute( columnFrame[$-1].object, toStringz( _name ), toStringz( _value ) );
 	}
 	
 	void setSplitAttribute( char[] _name, char[] _value )
 	{
-		if( split.length > 0 ) IupSetAttribute( split[$-1].object, toStringz( _name ), toStringz( _value ) );
+		if( split.length > 0 ) IupSetStrAttribute( split[$-1].object, toStringz( _name ), toStringz( _value ) );
 	}
 	
 	void setItemAttribute( char[] _name, char[] _value, int column = -99999 )
 	{
 		if( column >= 0 )
 		{
-			if( column < columnMember.length ) IupSetAttribute( columnMember[column].object, toStringz( _name ), toStringz( _value ) );
+			if( column < columnMember.length ) IupSetStrAttribute( columnMember[column].object, toStringz( _name ), toStringz( _value ) );
 			return;
 		}
 	
 		for( int i = 0; i < columnMember.length; ++ i )
 		{
-			IupSetAttribute( columnMember[$-1].object, toStringz( _name ), toStringz( _value ) );
-		}
-	}
-	
-	void setItemAttribute( char[] _value, int column = -99999 )
-	{
-		if( column >= 0 )
-		{
-			if( column < columnMember.length ) IupSetAttributes( columnMember[column].object, toStringz( _value ) );
-			return;
-		}
-	
-		for( int i = 0; i < columnMember.length; ++ i )
-		{
-			IupSetAttributes( columnMember[$-1].object, toStringz( _value ) );
+			IupSetStrAttribute( columnMember[$-1].object, toStringz( _name ), toStringz( _value ) );
 		}
 	}
 	
@@ -223,13 +231,8 @@ public:
 		if( _value.length <= columnFrame.length )
 		{
 			for( int i = 0; i < columnMember.length; ++ i )
-			{
-				//if( i < _value.length )	IupSetAttribute( columnMember[i].object, "APPENDITEM", toStringz( _value[i] ) ); else break;
-				if( i < _value.length )	IupSetAttributeId( columnMember[i].object, "", IupGetInt( columnMember[i].object, "COUNT" ) + 1, toStringz( _value[i] ) ); else break;
-			}
+				if( i < _value.length )	IupSetStrAttributeId( columnMember[i].object, "", IupGetInt( columnMember[i].object, "COUNT" ) + 1, toStringz( _value[i] ) ); else break;
 		}
-		
-		//IupRefresh( IupGetParent( getMainHandle() ) );
 	}
 	
 	void setItem( char[][] _value, int id, bool bFocus = true )
@@ -240,7 +243,7 @@ public:
 				{
 					for( int i = 0; i < columnMember.length; ++ i )
 					{
-						if( i < _value.length )	IupSetAttributeId( columnMember[i].object, "", id, toStringz( _value[i] ) ); else break;
+						if( i < _value.length )	IupSetStrAttributeId( columnMember[i].object, "", id, toStringz( _value[i] ) ); else break;
 					}
 					if( bFocus ) setSelectionID( id );
 				}
@@ -314,9 +317,32 @@ public:
 			{
 				if( location & ( 1 << i ) )
 				{
-					if( imageName.length ) IupSetAttributeId( columnMember[i].object, "IMAGE", id, toStringz( imageName ) ); else IupSetAttributeId( columnMember[i].object, "IMAGE", id, null );
+					if( imageName.length ) IupSetStrAttributeId( columnMember[i].object, "IMAGE", id, toStringz( imageName ) ); else IupSetStrAttributeId( columnMember[i].object, "IMAGE", id, null );
 				}
 			}
 		}
+	}
+	
+	void setGlobalColor( char[] TITLECOLOR = "", char[] TITLELINECOLOR = "", char[] BARLINECOLOR = "" )
+	{
+		foreach( ColumnFrame f; columnFrame )
+		{
+			if( TITLECOLOR.length ) IupSetStrAttribute( f.object, "TITLECOLOR", toStringz( TITLECOLOR ) );
+			if( TITLELINECOLOR.length ) IupSetStrAttribute( f.object, "TITLELINECOLOR", toStringz( TITLELINECOLOR ) );		
+		}
+		
+		foreach( ColumnSplit s; split )
+		{
+			if( BARLINECOLOR.length )
+			{
+				if( BARLINECOLOR == "-1" )
+					IupSetAttribute( s.object, "SHOWGRIP", "LINES" );
+				else
+				{
+					IupSetAttribute( s.object, "SHOWGRIP", "NO" );
+					IupSetStrAttribute( s.object, "COLOR", toStringz( BARLINECOLOR ) );
+				}
+			}
+		}		
 	}
 }

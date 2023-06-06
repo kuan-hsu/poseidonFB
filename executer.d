@@ -34,6 +34,7 @@ struct ExecuterAction
 
 	import tango.core.Thread;
 	import tango.time.Time, tango.time.Clock;
+	version(Windows) import tango.sys.win32.CodePage;
 	
 	version(DIDE) import tango.sys.win32.UserGdi, UTF = tango.text.convert.Utf;
 	
@@ -65,8 +66,9 @@ struct ExecuterAction
 	
 	version(DIDE)
 	{
-		static int DMDversion( char[] path )
+		static int DMDversion( char[] dmdFullPath )
 		{
+			/+
 			try
 			{
 				Process p = new Process( true, path ~ " --version" );
@@ -83,6 +85,12 @@ struct ExecuterAction
 			{
 				return 1;
 			}
+			+/
+			scope _dmdPath = new FilePath( dmdFullPath );
+			if( lowerCase( _dmdPath.name ) == "ldc2" ) return 4;
+			_dmdPath.set( _dmdPath.path ~ "dub.exe" );
+			if( _dmdPath.exists ) return 2;
+			
 			
 			return 1;
 		}
@@ -385,9 +393,15 @@ struct ExecuterAction
 			}
 			version(DIDE)
 			{
+				version(Windows) char[] dst;
 				foreach( line; new Lines!(char)(p.stderr) )  
 				{
 					if( Util.trim( line ).length ) bError = true;
+					version(Windows)
+					{
+						dst.length = 2 * line.length + 2;
+						line = CodePage.from( line, dst );
+					}						
 					stderrMessage ~= ( line ~ "\n" );
 					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 				}
@@ -401,7 +415,12 @@ struct ExecuterAction
 						else if( Util.index( line, "Error " ) < line.length )
 							bError = true;
 					}				
-					
+
+					version(Windows)
+					{
+						dst.length = 2 * line.length + 2;
+						line = CodePage.from( line, dst );
+					}						
 					stdoutMessage ~= ( line ~ "\n" );
 					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 				}
@@ -658,10 +677,16 @@ struct ExecuterAction
 					}
 				}
 				version(DIDE)
-				{
+				{	
+					version(Windows) char[] dst;
 					foreach (line; new Lines!(char)(p.stderr))  
 					{
 						if( Util.trim( line ).length ) bError = true;
+						version(Windows)
+						{
+							dst.length = 2 * line.length + 2;
+							line = CodePage.from( line, dst );
+						}						
 						stderrMessage ~= ( line ~ "\n" );
 						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 					}
@@ -677,6 +702,11 @@ struct ExecuterAction
 							
 						}				
 						
+						version(Windows)
+						{
+							dst.length = 2 * line.length + 2;
+							line = CodePage.from( line, dst );
+						}						
 						stdoutMessage ~= ( line ~ "\n" );
 						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 					}
@@ -769,6 +799,12 @@ struct ExecuterAction
 				}
 				version(DIDE)
 				{
+					version(Windows)
+					{
+						int _COMPILERVER = DMDversion( compilePath );
+						if( Util.index( focus.Option, "-m32omf" ) < focus.Option.length ) _COMPILERVER = 1;
+					}
+
 					foreach( char[] s; focus.LibDir )
 					{
 						if( s.length )
@@ -800,7 +836,7 @@ struct ExecuterAction
 									}
 								}
 								
-								if( GLOBAL.editorSetting00.Bit64 == "ON" || Util.index( focus.Option, "-m64" ) < focus.Option.length )
+								if( _COMPILERVER > 1 )
 								{
 									txtLibDirs ~= ( " -L/LIBPATH:\"" ~ s ~ "\"" );
 								}
@@ -1205,9 +1241,17 @@ struct ExecuterAction
 			}
 			version(DIDE)
 			{
+				version(Windows) char[] dst;
+				
 				foreach (line; new Lines!(char)(p.stderr))  
 				{
 					if( Util.trim( line ).length ) bError = true;
+
+					version(Windows)
+					{
+						dst.length = 2 * line.length + 2;
+						line = CodePage.from( line, dst );
+					}
 					stderrMessage ~= ( line ~ "\n" );
 					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 				}
@@ -1221,8 +1265,13 @@ struct ExecuterAction
 						else if( Util.index( line, "Error " ) < line.length )
 							bError = true;
 						
-					}				
+					}
 					
+					version(Windows)
+					{
+						dst.length = 2 * line.length + 2;
+						line = CodePage.from( line, dst );
+					}
 					stdoutMessage ~= ( line ~ "\n" );
 					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 				}
@@ -2074,6 +2123,12 @@ struct ExecuterAction
 			}
 			version(DIDE)
 			{
+				version(Windows)
+				{
+					int _COMPILERVER = DMDversion( fbcFullPath );
+					if( Util.index( _focus.Option, "-m32omf" ) < _focus.Option.length ) _COMPILERVER = 1;
+				}
+				
 				foreach( char[] s; _focus.IncDir )
 				{
 					txtIncludeDirs = txtIncludeDirs ~ " -I\"" ~ s ~ "\"";
@@ -2110,15 +2165,12 @@ struct ExecuterAction
 								}
 							}
 							
-							//if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
-							if( GLOBAL.editorSetting00.Bit64 == "ON" || Util.index( _focus.Option, "-m64" ) < _focus.Option.length )
-							{
+							if( _COMPILERVER > 1 )
 								txtLibDirs = txtLibDirs ~ " -L/LIBPATH:\"" ~ s ~ "\"";
-							}
 							else
 							{
 								if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
-							}							
+							}
 						}
 						else
 						{

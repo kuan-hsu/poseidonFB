@@ -69,8 +69,8 @@ class CScintilla
 		{
 			IupSetAttribute( sci, "BORDER", "NO" );
 			//IupSetHandle( fullPath.toCString, sci );
-			IupSetAttribute( sci, "NAME", fullPath.toCString );
-			//IupSetAttribute( sci, "TABTITLE", title.toCString );
+			IupSetStrAttribute( sci, "NAME", fullPath.toCString );
+			//IupSetStrAttribute( sci, "TABTITLE", title.toCString );
 
 			if( insertPos == -1 )
 			{
@@ -97,11 +97,11 @@ class CScintilla
 			IupRefresh( GLOBAL.activeDocumentTabs );
 			
 			int newDocumentPos = IupGetChildPos( GLOBAL.activeDocumentTabs, sci );
-			IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", newDocumentPos, title.toCString );
+			IupSetStrAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", newDocumentPos, title.toCString );
 			DocumentTabAction.setTabItemDocumentImage( GLOBAL.activeDocumentTabs, newDocumentPos, title.toDString );
 			
 			// For IupFlatTabs
-			IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
+			IupSetStrAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", newDocumentPos, fullPath.toCString );
 		}		
 	
 		//IupSetAttribute( sci, "CLEARALL", "" );
@@ -150,7 +150,7 @@ class CScintilla
 			{
 				char[] _size = fromStringz( IupGetAttribute( sci, "SIZE" ) );
 				int crossPos = Util.index( _size, "x" );
-				if( crossPos < _size.length ) IupSetAttribute( sci, "SCROLLWIDTH", toStringz( _size[0..crossPos] ) );
+				if( crossPos < _size.length ) IupSetStrAttribute( sci, "SCROLLWIDTH", toStringz( _size[0..crossPos] ) );
 			}		
 			IupScintillaSendMessage( sci, 2516, 1, 0 ); // SCI_SETSCROLLWIDTHTRACKING 2516
 			//IupScintillaSendMessage( sci, 2277, 1, 0 ); // SCI_SETENDATLASTLINE 2277
@@ -313,7 +313,7 @@ class CScintilla
 		int pos = IupGetChildPos( GLOBAL.activeDocumentTabs, sci );
 		if( pos > -1 )
 		{
-			IupSetAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos, title.toCString );
+			IupSetStrAttributeId( GLOBAL.activeDocumentTabs, "TABTITLE", pos, title.toCString );
 		}		
 		IupSetHandle( fullPath.toCString, sci );
 
@@ -368,7 +368,7 @@ class CScintilla
 			for( int i = 0; i < 6; ++ i )
 			{
 				char[] _key = Util.trim( GLOBAL.KEYWORDS[i] );
-				if( _key.length ) IupSetStrAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), toStringz( lowerCase( _key ) ) ); else IupSetAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), "" );
+				if( _key.length ) IupSetStrAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), toStringz( lowerCase( _key ) ) ); else IupSetStrAttribute( sci, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), "" );
 			}
 		}
 		version(DIDE)
@@ -394,10 +394,10 @@ class CScintilla
 
 		getFontAndSize( 1, font, Bold, Italic, Underline, Strikeout, size );
 
-		IupSetAttribute( sci, "STYLEFONT32", toStringz( font.dup ) );
-		IupSetAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
-		IupSetAttribute( sci, "STYLEFGCOLOR32", GLOBAL.editColor.scintillaFore.toCString );		// 32
-		IupSetAttribute( sci, "STYLEBGCOLOR32", GLOBAL.editColor.scintillaBack.toCString );		// 32
+		IupSetStrAttribute( sci, "STYLEFONT32", toStringz( font.dup ) );
+		IupSetStrAttribute( sci, "STYLEFONTSIZE32", toStringz( size.dup ) );
+		IupSetStrAttribute( sci, "STYLEFGCOLOR32", GLOBAL.editColor.scintillaFore.toCString );		// 32
+		IupSetStrAttribute( sci, "STYLEBGCOLOR32", GLOBAL.editColor.scintillaBack.toCString );		// 32
 		IupSetStrAttribute( sci, "STYLEBOLD32", toStringz( Bold ) );
 		IupSetStrAttribute( sci, "STYLEITALIC32", toStringz( Italic ) );
 		IupSetStrAttribute( sci, "STYLEUNDERLINE32", toStringz( Underline ) );
@@ -410,69 +410,69 @@ class CScintilla
 		*/
 		version(FBIDE)
 		{
-			IupSetAttribute( sci, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
-			IupSetAttribute( sci, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
-			IupSetAttribute( sci, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_B_NUMBER 2
-			IupSetAttribute( sci, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_B_NUMBER 2
-			IupSetAttribute( sci, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_B_STRING 4
-			IupSetAttribute( sci, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_B_STRING 4
-			IupSetAttribute( sci, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_B_PREPROCESSOR 5
-			IupSetAttribute( sci, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_B_PREPROCESSOR 5
-			IupSetAttribute( sci, "STYLEFGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_B_OPERATOR 6
-			IupSetAttribute( sci, "STYLEBGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_B_OPERATOR 6
-			IupSetAttribute( sci, "STYLEFGCOLOR7", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );	// SCE_B_IDENTIFIER 7
-			IupSetAttribute( sci, "STYLEBGCOLOR7", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );	// SCE_B_IDENTIFIER 7
-			IupSetAttribute( sci, "STYLEFGCOLOR19", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toCString );// SCE_B_COMMENTBLOCK 19
-			IupSetAttribute( sci, "STYLEBGCOLOR19", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toCString );// SCE_B_COMMENTBLOCK 19
+			IupSetStrAttribute( sci, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
+			IupSetStrAttribute( sci, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
+			IupSetStrAttribute( sci, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_B_NUMBER 2
+			IupSetStrAttribute( sci, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_B_NUMBER 2
+			IupSetStrAttribute( sci, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_B_STRING 4
+			IupSetStrAttribute( sci, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_B_STRING 4
+			IupSetStrAttribute( sci, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_B_PREPROCESSOR 5
+			IupSetStrAttribute( sci, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_B_PREPROCESSOR 5
+			IupSetStrAttribute( sci, "STYLEFGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_B_OPERATOR 6
+			IupSetStrAttribute( sci, "STYLEBGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_B_OPERATOR 6
+			IupSetStrAttribute( sci, "STYLEFGCOLOR7", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );	// SCE_B_IDENTIFIER 7
+			IupSetStrAttribute( sci, "STYLEBGCOLOR7", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );	// SCE_B_IDENTIFIER 7
+			IupSetStrAttribute( sci, "STYLEFGCOLOR19", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toCString );// SCE_B_COMMENTBLOCK 19
+			IupSetStrAttribute( sci, "STYLEBGCOLOR19", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toCString );// SCE_B_COMMENTBLOCK 19
 			
-			IupSetAttribute(sci, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
-			IupSetAttribute(sci, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
-			IupSetAttribute(sci, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
-			IupSetAttribute(sci, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
-			IupSetAttribute(sci, "STYLEFGCOLOR23",  GLOBAL.editColor.keyWord[4].toCString );	// SCE_B_KEYWORD5 23
-			IupSetAttribute(sci, "STYLEFGCOLOR24",  GLOBAL.editColor.keyWord[5].toCString );	// SCE_B_KEYWORD6 24
+			IupSetStrAttribute(sci, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
+			IupSetStrAttribute(sci, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
+			IupSetStrAttribute(sci, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
+			IupSetStrAttribute(sci, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
+			IupSetStrAttribute(sci, "STYLEFGCOLOR23",  GLOBAL.editColor.keyWord[4].toCString );	// SCE_B_KEYWORD5 23
+			IupSetStrAttribute(sci, "STYLEFGCOLOR24",  GLOBAL.editColor.keyWord[5].toCString );	// SCE_B_KEYWORD6 24
 		}
 		version(DIDE)
 		{
-			IupSetAttribute( sci, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENT 1
-			IupSetAttribute( sci, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENT 1
-			IupSetAttribute( sci, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENTLINE 2
-			IupSetAttribute( sci, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENTLINE 2
-			IupSetAttribute( sci, "STYLEFGCOLOR3", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENTDOC 3
-			IupSetAttribute( sci, "STYLEBGCOLOR3", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENTDOC 3
+			IupSetStrAttribute( sci, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENT 1
+			IupSetStrAttribute( sci, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENT 1
+			IupSetStrAttribute( sci, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENTLINE 2
+			IupSetStrAttribute( sci, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENTLINE 2
+			IupSetStrAttribute( sci, "STYLEFGCOLOR3", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENTDOC 3
+			IupSetStrAttribute( sci, "STYLEBGCOLOR3", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENTDOC 3
 			
-			IupSetAttribute( sci, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toCString );		// SCE_D_COMMENTNESTED 4
-			IupSetAttribute( sci, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toCString );		// SCE_D_COMMENTNESTED 4
+			IupSetStrAttribute( sci, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore.toCString );		// SCE_D_COMMENTNESTED 4
+			IupSetStrAttribute( sci, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back.toCString );		// SCE_D_COMMENTNESTED 4
 			
-			IupSetAttribute( sci, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_D_NUMBER 5
-			IupSetAttribute( sci, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_D_NUMBER 5
-			
-			
-			IupSetAttribute( sci, "STYLEFGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_D_STRING 10
-			IupSetAttribute( sci, "STYLEBGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_D_STRING 10
-			
-			IupSetAttribute( sci, "STYLEFGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_D_CHARACTER 12
-			IupSetAttribute( sci, "STYLEBGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_D_CHARACTER 12
-			
-			IupSetAttribute( sci, "STYLEFGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
-			IupSetAttribute( sci, "STYLEBGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13
-			
-			IupSetAttribute( sci, "STYLEFGCOLOR14", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );	// SCE_D_IDENTIFIER 14
-			IupSetAttribute( sci, "STYLEBGCOLOR14", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );	// SCE_D_IDENTIFIER 14
+			IupSetStrAttribute( sci, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_D_NUMBER 5
+			IupSetStrAttribute( sci, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_D_NUMBER 5
 			
 			
-			IupSetAttribute(sci, "STYLEFGCOLOR6", GLOBAL.editColor.keyWord[0].toCString );			// SCE_D_WORD 6	
-			IupSetAttribute(sci, "STYLEFGCOLOR7", GLOBAL.editColor.keyWord[1].toCString );			// SCE_D_WORD2 7
-			IupSetAttribute(sci, "STYLEFGCOLOR9", GLOBAL.editColor.keyWord[2].toCString );			// SCE_D_TYPEDEF 9
-			IupSetAttribute(sci, "STYLEFGCOLOR20",  GLOBAL.editColor.keyWord[3].toCString );		// SCE_D_WORD5 20
-			IupSetAttribute(sci, "STYLEFGCOLOR21",  GLOBAL.editColor.keyWord[4].toCString );		// SCE_D_WORD6 21
-			IupSetAttribute(sci, "STYLEFGCOLOR22",  GLOBAL.editColor.keyWord[5].toCString );		// SCE_D_WORD7 22
+			IupSetStrAttribute( sci, "STYLEFGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_D_STRING 10
+			IupSetStrAttribute( sci, "STYLEBGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_D_STRING 10
+			
+			IupSetStrAttribute( sci, "STYLEFGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_D_CHARACTER 12
+			IupSetStrAttribute( sci, "STYLEBGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_D_CHARACTER 12
+			
+			IupSetStrAttribute( sci, "STYLEFGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
+			IupSetStrAttribute( sci, "STYLEBGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13
+			
+			IupSetStrAttribute( sci, "STYLEFGCOLOR14", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );	// SCE_D_IDENTIFIER 14
+			IupSetStrAttribute( sci, "STYLEBGCOLOR14", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );	// SCE_D_IDENTIFIER 14
+			
+			
+			IupSetStrAttribute(sci, "STYLEFGCOLOR6", GLOBAL.editColor.keyWord[0].toCString );			// SCE_D_WORD 6	
+			IupSetStrAttribute(sci, "STYLEFGCOLOR7", GLOBAL.editColor.keyWord[1].toCString );			// SCE_D_WORD2 7
+			IupSetStrAttribute(sci, "STYLEFGCOLOR9", GLOBAL.editColor.keyWord[2].toCString );			// SCE_D_TYPEDEF 9
+			IupSetStrAttribute(sci, "STYLEFGCOLOR20",  GLOBAL.editColor.keyWord[3].toCString );		// SCE_D_WORD5 20
+			IupSetStrAttribute(sci, "STYLEFGCOLOR21",  GLOBAL.editColor.keyWord[4].toCString );		// SCE_D_WORD6 21
+			IupSetStrAttribute(sci, "STYLEFGCOLOR22",  GLOBAL.editColor.keyWord[5].toCString );		// SCE_D_WORD7 22
 		}
 		
 
 		// Brace Hightlight
-		IupSetAttribute(sci, "STYLEFGCOLOR34", GLOBAL.editColor.braceFore.toCString);	
-		IupSetAttribute(sci, "STYLEBGCOLOR34", GLOBAL.editColor.braceBack.toCString);
+		IupSetStrAttribute(sci, "STYLEFGCOLOR34", GLOBAL.editColor.braceFore.toCString);	
+		IupSetStrAttribute(sci, "STYLEBGCOLOR34", GLOBAL.editColor.braceBack.toCString);
 		IupSetAttribute(sci, "STYLEFGCOLOR35", "255 255 0");
 		IupSetAttribute(sci, "STYLEBGCOLOR35", "255 0 255");
 		
@@ -512,10 +512,10 @@ class CScintilla
 		
 
 		getFontAndSize( 10, font, Bold, Italic, Underline, Strikeout, size );
-		IupSetAttribute(sci, "STYLEFGCOLOR40", GLOBAL.editColor.errorFore.toCString);	
-		IupSetAttribute(sci, "STYLEBGCOLOR40", GLOBAL.editColor.errorBack.toCString);
-		IupSetAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
-		IupSetAttribute(sci, "STYLEFONTSIZE40",  toStringz( size.dup ) );
+		IupSetStrAttribute(sci, "STYLEFGCOLOR40", GLOBAL.editColor.errorFore.toCString);	
+		IupSetStrAttribute(sci, "STYLEBGCOLOR40", GLOBAL.editColor.errorBack.toCString);
+		IupSetStrAttribute(sci, "STYLEFONT40",  toStringz( font.dup ) );
+		IupSetStrAttribute(sci, "STYLEFONTSIZE40",  toStringz( size.dup ) );
 
 		IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 		/*
@@ -526,10 +526,21 @@ class CScintilla
 		//IupSetAttribute(sci, "STYLEBOLD38", "YES");
 		*/
 		
-		IupSetAttribute(sci, "STYLEFGCOLOR41", GLOBAL.editColor.warningFore.toCString);
-		IupSetAttribute(sci, "STYLEBGCOLOR41", GLOBAL.editColor.warringBack.toCString);
-		IupSetAttribute(sci, "STYLEFONT41",  toStringz( font.dup ) );
-		IupSetAttribute(sci, "STYLEFONTSIZE41",  toStringz( size.dup ) );
+		IupSetStrAttribute(sci, "STYLEFGCOLOR41", GLOBAL.editColor.warningFore.toCString);
+		IupSetStrAttribute(sci, "STYLEBGCOLOR41", GLOBAL.editColor.warringBack.toCString);
+		IupSetStrAttribute(sci, "STYLEFONT41",  toStringz( font.dup ) );
+		IupSetStrAttribute(sci, "STYLEFONTSIZE41",  toStringz( size.dup ) );
+		
+		// Use Stefan Küng's patch, modified iup_scintilla
+		// https://groups.google.com/g/scintilla-interest/c/Iov-C9-BUfM
+		version(Windows)
+		{
+			IupSetStrAttribute(sci, "STYLEFGCOLOR99", GLOBAL.editColor.txtFore.toCString);
+			IupSetStrAttribute(sci, "STYLEBGCOLOR99", GLOBAL.editColor.dlgBack.toCString);
+			IupSetStrAttribute(sci, "STYLEFGCOLOR100", GLOBAL.editColor.selectionFore.toCString);
+			IupSetStrAttribute(sci, "STYLEBGCOLOR100", GLOBAL.editColor.selectionBack.toCString);
+			IupScintillaSendMessage( sci, 2719, 1, 0 ); // SCI_AUTOCSETUSESTYLE 2719 (Stefan Küng's patch)
+		}
 
 		int tabSize = Integer.atoi( GLOBAL.editorSetting00.TabWidth );
 		GLOBAL.editorSetting00.TabWidth = Integer.toString( tabSize );
@@ -637,8 +648,8 @@ class CScintilla
 			+/
 			IupSetAttribute( sci, "FOLDFLAGS", "LINEAFTER_CONTRACTED" );
 			IupSetAttribute( sci, "MARGINSENSITIVE2", "YES" );
-			IupSetAttribute( sci, "FOLDMARGINCOLOR", GLOBAL.editColor.fold.toCString );
-			IupSetAttribute( sci, "FOLDMARGINHICOLOR", GLOBAL.editColor.fold.toCString );
+			IupSetStrAttribute( sci, "FOLDMARGINCOLOR", GLOBAL.editColor.fold.toCString );
+			IupSetStrAttribute( sci, "FOLDMARGINHICOLOR", GLOBAL.editColor.fold.toCString );
 		}
 		else
 		{
@@ -711,8 +722,8 @@ class CScintilla
 			IupScintillaSendMessage( sci, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 		
-		IupSetAttribute( sci, "STYLEFGCOLOR33", GLOBAL.editColor.linenumFore.toCString );
-		IupSetAttribute( sci, "STYLEBGCOLOR33", GLOBAL.editColor.linenumBack.toCString );
+		IupSetStrAttribute( sci, "STYLEFGCOLOR33", GLOBAL.editColor.linenumFore.toCString );
+		IupSetStrAttribute( sci, "STYLEBGCOLOR33", GLOBAL.editColor.linenumBack.toCString );
 		// Error, Couldn't change......
 		/*
 		IupScintillaSendMessage( sci, 2290, 0, 0xffffff ); // SCI_SETFOLDMARGINCOLOUR = 2290,
@@ -939,7 +950,7 @@ class CScintilla
 		
 		// Set Custom Properties( Scintilla )
 		foreach( char[] p; GLOBAL.properties )
-			IupSetAttribute(sci, "PROPERTY", toStringz( p ) );
+			IupSetStrAttribute(sci, "PROPERTY", toStringz( p ) );
 	}
 }
 
@@ -1049,13 +1060,13 @@ extern(C)
 					{
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;
-						IupSetAttributeId( _documentTabs, "TABTITLE", pos, titleHandle.toCString );
+						IupSetStrAttributeId( _documentTabs, "TABTITLE", pos, titleHandle.toCString );
 						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "NO" ) IupSetAttribute( ih, "SAVEDSTATE", "YES" );
 					}
 					else
 					{
 						// First time trigger, don't change title
-						//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+						//IupSetStrAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
 					}
 				}
 			}
@@ -1072,12 +1083,12 @@ extern(C)
 					{
 						auto titleHandle = cSci.getTitleHandle();
 						titleHandle = _title;							
-						IupSetAttributeId( _documentTabs, "TABTITLE", pos, titleHandle.toCString );
+						IupSetStrAttributeId( _documentTabs, "TABTITLE", pos, titleHandle.toCString );
 						//if( fromStringz( IupGetAttribute( ih, "SAVEDSTATE" ) ) == "YES" ) IupSetAttribute( ih, "SAVEDSTATE", "NO" );
 					}
 					else
 					{
-						//IupSetAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
+						//IupSetStrAttributeId( GLOBAL.documentTabs, "TABTITLE", pos, GLOBAL.cString.convert( _title ) );
 					}						
 				}
 			}
@@ -1199,7 +1210,7 @@ extern(C)
 							{
 								if( close > _pos )
 								{
-									IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( ++i ) ~ ":" ~ Integer.toString( close ) ) );
+									IupSetStrAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( ++i ) ~ ":" ~ Integer.toString( close ) ) );
 									break;
 								}
 							}
@@ -1651,19 +1662,19 @@ extern(C)
 					{
 						case 0:
 							IupSetAttribute( _maker0, "VALUE", "ON");
-							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[0].toCString );
+							IupSetStrAttribute( pixelImage, "0", GLOBAL.editColor.maker[0].toCString );
 							break;
 						case 1:
 							IupSetAttribute( _maker1, "VALUE", "ON");
-							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[1].toCString );
+							IupSetStrAttribute( pixelImage, "0", GLOBAL.editColor.maker[1].toCString );
 							break;
 						case 2:
 							IupSetAttribute( _maker2, "VALUE", "ON");
-							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[2].toCString );
+							IupSetStrAttribute( pixelImage, "0", GLOBAL.editColor.maker[2].toCString );
 							break;
 						case 3:
 							IupSetAttribute( _maker3, "VALUE", "ON");
-							IupSetAttribute( pixelImage, "0", GLOBAL.editColor.maker[3].toCString );
+							IupSetStrAttribute( pixelImage, "0", GLOBAL.editColor.maker[3].toCString );
 							break;
 						default: 
 					}				
@@ -1680,7 +1691,7 @@ extern(C)
 					for( int i = 0; i < 4; ++ i )
 					{
 						pixelsImage[i]	= IupImage( 16, 16, pixels[i].ptr );
-						IupSetAttribute( pixelsImage[i], "0", GLOBAL.editColor.maker[i].toCString );
+						IupSetStrAttribute( pixelsImage[i], "0", GLOBAL.editColor.maker[i].toCString );
 					}
 					IupSetHandle( "icon_color0", pixelsImage[0] );
 					IupSetHandle( "icon_color1", pixelsImage[1] );
@@ -1704,10 +1715,10 @@ extern(C)
 							
 							switch( actSci.selectedMarkerIndex )
 							{
-								case 0:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR5",  GLOBAL.editColor.maker[0].toCString ); break;
-								case 1:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR6",  GLOBAL.editColor.maker[1].toCString ); break;
-								case 2:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR7",  GLOBAL.editColor.maker[2].toCString ); break;
-								case 3:		IupSetAttribute( actSci.getIupScintilla, "MARKERBGCOLOR8",  GLOBAL.editColor.maker[3].toCString ); break;
+								case 0:		IupSetStrAttribute( actSci.getIupScintilla, "MARKERBGCOLOR5",  GLOBAL.editColor.maker[0].toCString ); break;
+								case 1:		IupSetStrAttribute( actSci.getIupScintilla, "MARKERBGCOLOR6",  GLOBAL.editColor.maker[1].toCString ); break;
+								case 2:		IupSetStrAttribute( actSci.getIupScintilla, "MARKERBGCOLOR7",  GLOBAL.editColor.maker[2].toCString ); break;
+								case 3:		IupSetStrAttribute( actSci.getIupScintilla, "MARKERBGCOLOR8",  GLOBAL.editColor.maker[3].toCString ); break;
 								default: 
 							}							
 							
@@ -2194,13 +2205,13 @@ extern(C)
 				switch( c )
 				{
 					case 34: // "
-						IupSetAttributeId( ih, "INSERT", -1, toStringz( "\"" ) ); break;
+						IupSetStrAttributeId( ih, "INSERT", -1, toStringz( "\"" ) ); break;
 					case 40: // (
-						IupSetAttributeId( ih, "INSERT", -1, toStringz( ")" ) ); break;
+						IupSetStrAttributeId( ih, "INSERT", -1, toStringz( ")" ) ); break;
 					case 91: // [
-						IupSetAttributeId( ih, "INSERT", -1, toStringz( "]" ) ); break;
+						IupSetStrAttributeId( ih, "INSERT", -1, toStringz( "]" ) ); break;
 					case 123: // {
-						IupSetAttributeId( ih, "INSERT", -1, toStringz( "}" ) ); break;
+						IupSetStrAttributeId( ih, "INSERT", -1, toStringz( "}" ) ); break;
 
 					case 8:		// BS
 					case 65535:	// DEL
@@ -2224,7 +2235,7 @@ extern(C)
 							case "(":
 								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == ")" )
 								{
-									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									IupSetStrAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
 									//IupScintillaSendMessage( ih, 2160, pos, pos + 2 ); // SCI_SETSEL = 2160
 									//IupSetAttribute( ih, "SELECTEDTEXT", "" );
 									return IUP_IGNORE;
@@ -2234,7 +2245,7 @@ extern(C)
 							case "[":
 								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == "]" )
 								{
-									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									IupSetStrAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
 									return IUP_IGNORE;
 								}
 								break;
@@ -2242,7 +2253,7 @@ extern(C)
 							case "{":
 								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == "}" )
 								{
-									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									IupSetStrAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
 									return IUP_IGNORE;
 								}
 								break;
@@ -2250,7 +2261,7 @@ extern(C)
 							case "\"":
 								if( fromStringz( IupGetAttributeId( ih, "CHAR", currentPos ) ) == "\"" )
 								{
-									IupSetAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
+									IupSetStrAttribute( ih, "DELETERANGE", toStringz( Integer.toString( pos ) ~ ",2" ) );
 									return IUP_IGNORE;
 								}
 								break;
@@ -2301,9 +2312,9 @@ extern(C)
 											{
 												if( lowerCase( _k ) == word )
 												{
-													IupSetAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
+													IupSetStrAttribute( ih, "SELECTIONPOS", toStringz( Integer.toString( headPos ) ~ ":" ~ Integer.toString( headPos + word.length ) ) );
 													word = tools.convertKeyWordCase( GLOBAL.keywordCase, _k );
-													IupSetAttribute( ih, "SELECTEDTEXT", toStringz( word ) );
+													IupSetStrAttribute( ih, "SELECTEDTEXT", toStringz( word ) );
 													IupScintillaSendMessage( ih, 2025, currentPos, 0 ); // sci_gotopos = 2025,
 													bExitFlag = true;
 													break;
@@ -2353,7 +2364,7 @@ extern(C)
 												
 												while( posHead >= 0 )
 												{
-													IupSetAttribute( ih, "REPLACETARGET", toStringz( replaceText ) );
+													IupSetStrAttribute( ih, "REPLACETARGET", toStringz( replaceText ) );
 													bGetMatch = true;
 													IupSetInt( ih, "TARGETSTART", posHead );
 													IupSetInt( ih, "TARGETEND", lineHead );
@@ -2661,7 +2672,7 @@ extern(C)
 										{
 											//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 											scope _result = new IupString( list );
-											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
+											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
 											return IUP_IGNORE;
 										}
 									}
@@ -2719,7 +2730,7 @@ extern(C)
 										{
 											//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 											scope _result = new IupString( list );
-											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
+											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
 											return IUP_IGNORE;
 										}
 									}
@@ -2898,7 +2909,7 @@ extern(C)
 						if( lineNumber > -1 )
 						{
 							IupScintillaSendMessage( ih, 2201, 0, 0 ); // SCI_CALLTIPCANCEL  2201
-							IupSetAttributeId( ih, "ANNOTATIONTEXT", lineNumber, toStringz( showtype ) );
+							IupSetStrAttributeId( ih, "ANNOTATIONTEXT", lineNumber, toStringz( showtype ) );
 							IupSetIntId( ih, "ANNOTATIONSTYLE", lineNumber, 41 );
 							IupSetAttribute( ih, "ANNOTATIONVISIBLE", "BOXED" );
 							AutoComplete.clearShowTypeContent(); // Clear ShowType Clipboard
@@ -2952,7 +2963,7 @@ extern(C)
 				if( tail > pos )
 				{
 					IupScintillaSendMessage( ih, 2160, pos, tail ); // SCI_SETSEL = 2160
-					IupSetAttribute( ih, "SELECTEDTEXT", textCovert.toCString );
+					IupSetStrAttribute( ih, "SELECTEDTEXT", textCovert.toCString );
 				}
 				else if( tail == pos )
 				{
@@ -2969,7 +2980,7 @@ extern(C)
 					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int) textCovert.toCString ); // SCI_ADDTEXT 2001
 				}
 				else
-					IupSetAttribute( ih, "SELECTEDTEXT", textCovert.toCString );			
+					IupSetStrAttribute( ih, "SELECTEDTEXT", textCovert.toCString );			
 			}
 		}
 
@@ -3145,7 +3156,7 @@ extern(C)
 					{
 						//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, _result.toCString );
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, _result.toCString );
 						return IUP_DEFAULT;
 					}
 				}
@@ -3186,7 +3197,7 @@ extern(C)
 								if( list.length )
 								{
 									scope _result = new IupString( list );
-									if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", word.length - 1, _result.toCString );
+									if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", word.length - 1, _result.toCString );
 								}
 							}
 					}
@@ -3437,8 +3448,8 @@ extern(C)
 									if( s.length ) word ~= ( tools.convertKeyWordCase( GLOBAL.keywordCase, s ) ~ " " );
 								}
 								
-								IupSetAttributeId( ih, "INSERT", -1, toStringz( Util.trim( word ).dup ) );
-								IupSetAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
+								IupSetStrAttributeId( ih, "INSERT", -1, toStringz( Util.trim( word ).dup ) );
+								IupSetStrAttributeId( ih, "INSERT", -1, toStringz( "\n" ) );
 								IupScintillaSendMessage( ih, 2126, lin + 1, lineInd ); // SCI_SETLINEINDENTATION = 2126
 								IupScintillaSendMessage( ih, 2126, lin, lineInd + Integer.atoi( GLOBAL.editorSetting00.TabWidth ) ); // SCI_SETLINEINDENTATION = 2126
 								IupScintillaSendMessage( ih, 2025, cast(int) IupScintillaSendMessage( ih, 2136, lin, 0 ), 0 );// SCI_GOTOPOS = 2025,  SCI_GETLINEENDPOSITION 2136

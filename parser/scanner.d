@@ -427,7 +427,7 @@ public:
 			TokenUnit[]		results;
 
 			data = Util.trimr( data );
-			data ~= "\n";
+			data ~= ";";
 
 			try
 			{

@@ -77,75 +77,6 @@ class _PARSER
 
 			if( space.length > 1 ) space.length = space.length - 2;
 		}
-		
-		char[] getDelimitedString( int _tokOpen, int _tokClose )
-		{
-			try
-			{
-				int		_countDemlimit;
-				char[]	_params;		// include open Delimit and close Delimit
-
-				if( token().tok == _tokOpen )
-				{
-					do
-					{
-						if( token().tok == _tokOpen )
-						{
-							if( _countDemlimit > 0 ) _params ~= token().identifier;
-							_countDemlimit ++;
-						}
-						else if( token().tok == _tokClose )
-						{
-							_countDemlimit --;
-							if( _countDemlimit > 0 ) _params ~= token().identifier;
-						}
-						else
-						{
-							version(FBIDE)
-							{
-								if( token().tok == TOK.Tidentifier )
-									_params ~= ( " " ~ token().identifier );
-								else
-									_params ~= token().identifier;
-							}
-							version(DIDE)
-							{
-								if( token().tok == TOK.Tidentifier || token().tok == TOK.Tfunction || token().tok == TOK.Tdelegate )
-									_params ~= ( " " ~ token().identifier );
-								else
-									_params ~= token().identifier;
-							}
-						}
-						
-						parseToken();
-					}
-					while( _countDemlimit > 0 && tokenIndex < tokens.length );
-				}
-				else
-				{
-					parseToken();
-				}
-
-				_params = Util.trim( _params );
-				
-				switch( _tokOpen )
-				{
-					case TOK.Topenparen:		_params = "(" ~ _params ~ ")"; break;
-					case TOK.Topenbracket:		_params = "[" ~ _params ~ "]"; break;
-					case TOK.Topencurly:		_params = "{" ~ _params ~ "}"; break;
-					default:					break;
-				}
-				
-				return _params;
-			}
-			catch( Exception e )
-			{
-				throw e;
-			}
-			
-			return null;
-		}
-	
 	
 	public:
 		this(){}
@@ -168,4 +99,95 @@ class _PARSER
 			
 			return true;
 		}
+		
+		CASTnode json2Ast( char[] jsonTXT )
+		{
+			// Nested function
+			void splitColon( char[] _line, ref char[] _left, ref char[] _right )
+			{
+				char[][] _lineData = Util.split( _line, ": " );
+				if( _lineData.length )
+				{
+					_left = Util.strip( _lineData[0], '"' );
+					_right = Util.stripr( _lineData[1], ',' );
+					_right = Util.strip( Util.trim( _right ), '"' );
+				}
+			}		
+		
+			CASTnode NODE;
+			
+			foreach( char[] line; Util.splitLines( jsonTXT ) )
+			{
+				line = Util.trim( line );
+				if( line.length )
+				{
+					if( line == "{" )
+					{
+						CASTnode _node = new CASTnode( null, 0, null, null, null, 0 ); 
+						if( NODE is null )
+							NODE =_node;
+						else
+						{
+							int childIndex = NODE.addChild( _node );
+							NODE = NODE[childIndex];
+						}
+					}
+					else if( line == "}" || line == "}," || line == "}]" )
+					{
+						if( NODE.getFather !is null ) NODE = NODE.getFather;
+					}
+					else
+					{
+						char[] right, left;
+						splitColon( line, left, right );
+
+						switch( left )
+						{
+							case "line":		NODE.lineNumber = Integer.toInt( right );	break;
+							case "tail":		NODE.endLineNum = Integer.toInt( right );	break;
+							case "name":		NODE.name = right;							break;
+							case "kind":		NODE.kind = Integer.toInt( right );			break;
+							case "prot":		NODE.protection = right;					break;
+							case "type":		NODE.type = right;							break;
+							case "base":		NODE.base = right;							break;
+							default:
+						}
+					}
+				}			
+			}
+			
+			return NODE;
+		}
+		
+		
+		char[] ast2Json( CASTnode _node )
+		{
+			char[] jsonTXT;
+			
+			jsonTXT ~= "{\n";
+			jsonTXT ~=	( "\"line\": \"" ~ Integer.toString( _node.lineNumber ) ~ "\",\n" );
+			jsonTXT ~=	( "\"tail\": \"" ~ Integer.toString( _node.endLineNum )	~ "\",\n" );	
+			jsonTXT ~=	( "\"name\": \"" ~ _node.name ~ "\",\n" );
+			jsonTXT ~=	( "\"kind\": \"" ~ Integer.toString( _node.kind ) ~ "\",\n" );
+			jsonTXT ~=	( "\"prot\": \"" ~ _node.protection ~ "\",\n" );
+			jsonTXT ~=	( "\"type\": \"" ~ _node.type	~ "\",\n" );
+			jsonTXT ~=	( "\"base\": \"" ~ _node.base ~ "\",\n" );
+			
+			if( _node.getChildrenCount == 0 )
+				jsonTXT ~=	"\"sons\": []\n";
+			else
+			{
+				jsonTXT ~=	"\"sons\": [\n";
+				for( int i = 0; i < _node.getChildrenCount; ++ i )
+				{
+					jsonTXT ~= ast2Json( _node[i] );
+					if( i < _node.getChildrenCount - 1 ) jsonTXT ~= ",\n";
+				}
+				jsonTXT ~=	"]\n";
+			}
+			
+			jsonTXT ~= "}";
+			
+			return jsonTXT;
+		}		
 }

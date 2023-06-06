@@ -32,6 +32,64 @@ version(FBIDE)
 		}		
 		
 		
+		char[] getDelimitedString( int _tokOpen, int _tokClose )
+		{
+			try
+			{
+				int		_countDemlimit;
+				char[]	_params;		// include open Delimit and close Delimit
+
+				if( token().tok == _tokOpen )
+				{
+					do
+					{
+						if( token().tok == _tokOpen )
+						{
+							if( _countDemlimit > 0 ) _params ~= token().identifier;
+							_countDemlimit ++;
+						}
+						else if( token().tok == _tokClose )
+						{
+							_countDemlimit --;
+							if( _countDemlimit > 0 ) _params ~= token().identifier;
+						}
+						else
+						{
+							if( token().tok == TOK.Tidentifier )
+								_params ~= ( " " ~ token().identifier );
+							else
+								_params ~= token().identifier;
+						}
+						
+						parseToken();
+					}
+					while( _countDemlimit > 0 && tokenIndex < tokens.length );
+				}
+				else
+				{
+					parseToken();
+				}
+
+				_params = Util.trim( _params );
+				
+				switch( _tokOpen )
+				{
+					case TOK.Topenparen:		_params = "(" ~ _params ~ ")"; break;
+					case TOK.Topenbracket:		_params = "[" ~ _params ~ "]"; break;
+					case TOK.Topencurly:		_params = "{" ~ _params ~ "}"; break;
+					default:					break;
+				}
+				
+				return _params;
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}
+			
+			return null;
+		}		
+		
 		// Parse the continuous identifiers, include any words until the EOL / :
 		char[] parseIdentifier()
 		{
@@ -2330,7 +2388,7 @@ version(FBIDE)
 							}
 						}
 
-						if( token().tok == TOK.Teol )
+						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 						{
 							if( bClass ) activeASTnode = activeASTnode.addChild( _name, B_CLASS, null, null, _base, _lineNum ); else activeASTnode = activeASTnode.addChild( _name, _kind, null, null, _base, _lineNum );
 							parseToken( TOK.Teol );

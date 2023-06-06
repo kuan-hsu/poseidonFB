@@ -131,7 +131,6 @@ public:
 
 	int getChildrenCount(){ return children.length; }
 	
-	
 	void killChild( int index )
 	{	
 		if( index >= children.length ) return;

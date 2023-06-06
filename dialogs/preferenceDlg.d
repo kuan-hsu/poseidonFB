@@ -41,7 +41,8 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttributes( hBox01, "EXPANDCHILDREN=YES,SIZE=346x");
 
 		Ihandle* hBox02, hBox01x64, hBox02x64;
-		if( GLOBAL.debugPanel !is null )
+		
+		version(FBIDE)
 		{
 			version(Windows)
 			{
@@ -93,6 +94,26 @@ class CPreferenceDialog : CBaseDialog
 			hBox02 = IupFrame( _hBox02 );
 			IupSetAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
 			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");			
+		}
+		else
+		{
+			version(Windows)
+			{
+				Ihandle* textx64CompilerPath = IupText( null );
+				IupSetAttributes( textx64CompilerPath, "SIZE=320x,NAME=Compiler-x64compilerPath" );
+				IupSetStrAttribute( textx64CompilerPath, "VALUE", toStringz( GLOBAL.x64compilerFullPath ) );
+				
+				Ihandle* btnx64Open = IupButton( null, null );
+				IupSetAttribute( btnx64Open, "IMAGE", "icon_openfile" );
+				IupSetCallback( btnx64Open, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
+				
+				Ihandle* _hBox01x64 = IupHbox( textx64CompilerPath, btnx64Open, null );
+				IupSetAttributes( _hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+				
+				hBox01x64 = IupFrame( _hBox01x64 );
+				IupSetAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
+				IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
+			}
 		}
 		
 		version(linux)
@@ -224,7 +245,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		
 		Ihandle* vBoxCompilerSettings;
-		if( GLOBAL.debugPanel !is null )
+		version(FBIDE)
 		{
 			version(Windows)
 				vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, frameCompiler, null );
@@ -236,14 +257,14 @@ class CPreferenceDialog : CBaseDialog
 		}
 		else
 		{
-			vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, /*manuFrame,*/ null );
+			version(Windows)
+				vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, frameCompiler, /*manuFrame,*/ null );
+			else
+				vBoxCompilerSettings = IupVbox( hBox01, frameCompiler, /*manuFrame,*/ null );
 				
 			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
 		}
-		
-		
-		
 
 
 		// Parser Setting
@@ -535,19 +556,10 @@ class CPreferenceDialog : CBaseDialog
 		IupSetAttribute( toggleDocStatus, "ALIGNMENT", "ALEFT:ACENTER" );
 		IupSetHandle( "toggleDocStatus", toggleDocStatus );
 
-		Ihandle* toggleLoadAtBackThread = IupFlatToggle( GLOBAL.languageItems["loadfileatbackthread"].toCString );
-		IupSetAttribute( toggleLoadAtBackThread, "ALIGNMENT", "ALEFT:ACENTER" );
-		version(BACKTHREAD)
-		{
-			IupSetStrAttribute( toggleLoadAtBackThread, "VALUE", toStringz(GLOBAL.editorSetting00.LoadAtBackThread) );
-		}
-		else
-		{
-			IupSetAttribute( toggleLoadAtBackThread, "VALUE", "OFF" );
-			IupSetAttribute( toggleLoadAtBackThread, "ACTIVE", "NO" );
-		}
-
-		IupSetHandle( "toggleLoadAtBackThread", toggleLoadAtBackThread );
+		Ihandle* toggleColorBarLine = IupFlatToggle( GLOBAL.languageItems["colorbarline"].toCString );
+		IupSetStrAttribute( toggleColorBarLine, "VALUE", toStringz(GLOBAL.editorSetting00.ColorBarLine ) );
+		IupSetAttribute( toggleColorBarLine, "ALIGNMENT", "ALEFT:ACENTER" );
+		IupSetHandle( "toggleColorBarLine", toggleColorBarLine );
 		
 		Ihandle* toggleAutoKBLayout = IupFlatToggle( GLOBAL.languageItems["autokblayout"].toCString );
 		IupSetStrAttribute( toggleAutoKBLayout, "VALUE", toStringz(GLOBAL.editorSetting00.AutoKBLayout) );
@@ -657,6 +669,9 @@ class CPreferenceDialog : CBaseDialog
 					toggleUseManual,
 					toggleSaveAllModified,
 					
+					toggleColorBarLine,
+					IupFill(),
+					
 					hBoxTab,
 					hBoxColumn,
 
@@ -705,6 +720,9 @@ class CPreferenceDialog : CBaseDialog
 
 					toggleUseManual,
 					toggleSaveAllModified,
+					
+					toggleColorBarLine,
+					IupFill(),
 					
 					hBoxTab,
 					hBoxColumn,
@@ -756,7 +774,7 @@ class CPreferenceDialog : CBaseDialog
 					toggleNewDocBOM,
 
 					toggleSaveAllModified,
-					IupFill,
+					toggleColorBarLine,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -802,7 +820,7 @@ class CPreferenceDialog : CBaseDialog
 					toggleDocStatus,
 
 					toggleSaveAllModified,
-					IupFill,
+					toggleColorBarLine,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -902,6 +920,10 @@ class CPreferenceDialog : CBaseDialog
 		Ihandle* colorTemplateList = IupList( null );
 		IupSetHandle( "colorTemplateList", colorTemplateList );
 		IupSetAttributes( colorTemplateList, "ACTIVE=YES,EDITBOX=YES,EXPAND=HORIZONTAL,DROPDOWN=YES,VISIBLEITEMS=5" );
+		/* Not Working!
+		IupSetAttribute( colorTemplateList, "FGCOLOR", GLOBAL.editColor.scintillaFore.toCString );
+		IupSetAttribute( colorTemplateList, "BGCOLOR", GLOBAL.editColor.scintillaBack.toCString );
+		*/
 		version(linux)IupSetAttributeId( colorTemplateList, "", 1, toStringz( " " ) );
 		//IupSetAttribute( colorTemplateList, "VALUE", GLOBAL.colorTemplate.toCString );
 		IupSetCallback( colorTemplateList, "DROPDOWN_CB",cast(Icallback) &colorTemplateList_DROPDOWN_CB );
@@ -959,7 +981,7 @@ class CPreferenceDialog : CBaseDialog
 		
 		Ihandle* colorTemplateSave = IupButton( null, null );
 		IupSetAttributes( colorTemplateSave, "FLAT=NO,IMAGE=icon_save" );
-		IupSetAttribute( colorTemplateSave, "TIP", GLOBAL.languageItems["save"].toCString );
+		IupSetStrAttribute( colorTemplateSave, "TIP", GLOBAL.languageItems["save"].toCString );
 		IupSetCallback( colorTemplateSave, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			char[] templateName = Util.trim( fromStringz( IupGetAttribute( IupGetHandle( "colorTemplateList" ), "VALUE" ) ) ).dup;
@@ -1880,6 +1902,11 @@ class CPreferenceDialog : CBaseDialog
 				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64DebuggerPath" ), "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
 				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64DebuggerPath" ), "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
 			}
+			else
+			{
+				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64compilerPath" ), "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64compilerPath" ), "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+			}
 		}
 		else
 		{
@@ -2054,7 +2081,7 @@ extern(C) // Callback for CPreferenceDialog
 				
 			GLOBAL.editorSetting00.MiddleScroll				= fromStringz(IupGetAttribute( IupGetHandle( "toggleMiddleScroll" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.DocStatus				= fromStringz(IupGetAttribute( IupGetHandle( "toggleDocStatus" ), "VALUE" )).dup;
-			GLOBAL.editorSetting00.LoadAtBackThread			= fromStringz(IupGetAttribute( IupGetHandle( "toggleLoadAtBackThread" ), "VALUE" )).dup;
+			GLOBAL.editorSetting00.ColorBarLine				= fromStringz(IupGetAttribute( IupGetHandle( "toggleColorBarLine" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.AutoKBLayout				= fromStringz(IupGetAttribute( IupGetHandle( "toggleAutoKBLayout" ), "VALUE" )).dup;
 			version(FBIDE) GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
 			version(Windows) GLOBAL.editorSetting00.NewDocBOM				= fromStringz(IupGetAttribute( IupGetHandle( "toggleNewDocBOM" ), "VALUE" )).dup;
@@ -2077,7 +2104,6 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.editorSetting01.BarSize = "5";
 				IupSetStrAttribute( IupGetHandle( "textBarSize" ), "VALUE", "5" );
 			}
-
 
 			// Save Font Style
 			GLOBAL.fonts.length = 12;
@@ -2198,7 +2224,25 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.showTypeBack = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_BG" ), "FGCOLOR" );
 			GLOBAL.editColor.showTypeHLT = IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowTypeHLT" ), "FGCOLOR" );
 			
-			
+
+			if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
+			{
+				IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
+				IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
+				IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
+				IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
+				IupSetStrAttribute( GLOBAL.documentSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+				IupSetStrAttribute( GLOBAL.documentSplit2, "COLOR", GLOBAL.editColor.fold.toCString );
+				IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+				IupSetStrAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+			}
+			else
+			{
+				IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=LINES" );
+				IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=LINES" );
+				IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=LINES" );
+				IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=LINES" );
+			}		
 			
 			// Add for color
 			version(DARKTHEME)
@@ -2299,9 +2343,9 @@ extern(C) // Callback for CPreferenceDialog
 					GLOBAL.x64compilerFullPath	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64compilerPath" ), "VALUE" ) ).dup;
 					GLOBAL.x64debuggerFullPath	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64DebuggerPath" ), "VALUE" ) ).dup;
 				}
-				version(DIDE)
+				else
 				{
-					GLOBAL.x64compilerFullPath	= GLOBAL.compilerFullPath;
+					GLOBAL.x64compilerFullPath	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-x64compilerPath" ), "VALUE" ) ).dup;
 				}
 			}
 			else

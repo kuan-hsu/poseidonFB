@@ -8,7 +8,7 @@ private import dialogs.singleTextDlg, layouts.table;
 private import parser.ast, tools;
 
 private import tango.stdc.stringz, Integer = tango.text.convert.Integer, tango.io.Stdout, Path = tango.io.Path, Util = tango.text.Util;
-
+private import tango.core.Thread;
 
 struct VarObject
 {
@@ -213,6 +213,7 @@ class CDebugger
 		IupSetAttribute( varTabHandle, "TABTITLE1", GLOBAL.languageItems["args"].toCString() );
 		IupSetAttribute( varTabHandle, "TABTITLE2", GLOBAL.languageItems["shared"].toCString() );
 		IupSetAttribute( varTabHandle, "HIGHCOLOR", "255 0 0" );
+		IupSetAttribute( varTabHandle, "TABSFORECOLOR", GLOBAL.editColor.txtFore.toCString );
 		IupSetStrAttribute( varTabHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
 		IupSetStrAttribute( varTabHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
 		IupSetAttribute( varTabHandle, "SHOWLINES", "NO" );
@@ -306,13 +307,16 @@ class CDebugger
 		//bpTable.setAction( &CDebugger_memberSelect );
 		//version(Windows) bpTable.setBUTTON_CB( &CDebugger_memberButton );
 		
+		char[] BARLINECOLOR;
+		if( GLOBAL.editorSetting00.ColorBarLine == "ON" ) BARLINECOLOR = GLOBAL.editColor.fold.toDString;
 		
-		bpTable.addColumn( GLOBAL.languageItems["id"].toDString );
+		
+		bpTable.addColumn( GLOBAL.languageItems["id"].toDString, GLOBAL.editColor.txtFore.toDString, "", BARLINECOLOR );
 		bpTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
-		bpTable.addColumn( GLOBAL.languageItems["line"].toDString );
+		bpTable.addColumn( GLOBAL.languageItems["line"].toDString, GLOBAL.editColor.txtFore.toDString, "", BARLINECOLOR );
 		bpTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
 		bpTable.setSplitAttribute( "VALUE", "500" );
-		bpTable.addColumn( GLOBAL.languageItems["fullpath"].toDString );
+		bpTable.addColumn( GLOBAL.languageItems["fullpath"].toDString, GLOBAL.editColor.txtFore.toDString, "", BARLINECOLOR );
 		bpTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
 		bpTable.setSplitAttribute( "VALUE", "100" );
 		//bpTable.setItemAttribute( "BGCOLOR", "204 255 255", 0 );
@@ -324,15 +328,15 @@ class CDebugger
 		//version(Windows) regTable.setBUTTON_CB( &CDebugger_memberButton );
 		regTable.setDBLCLICK_CB( &CDebugger_register_doubleClick );
 		
-		regTable.addColumn( GLOBAL.languageItems["id"].toDString );
+		regTable.addColumn( GLOBAL.languageItems["id"].toDString, GLOBAL.editColor.txtFore.toDString, "", BARLINECOLOR );
 		regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
-		regTable.addColumn( GLOBAL.languageItems["name"].toDString );
+		regTable.addColumn( GLOBAL.languageItems["name"].toDString, GLOBAL.editColor.txtFore.toDString, "", BARLINECOLOR );
 		regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
 		regTable.setSplitAttribute( "VALUE", "500" );
-		regTable.addColumn( GLOBAL.languageItems["value"].toDString );
+		regTable.addColumn( GLOBAL.languageItems["value"].toDString,GLOBAL.editColor.txtFore.toDString, "", BARLINECOLOR );
 		regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
 		regTable.setSplitAttribute( "VALUE", "400" );
-		regTable.addColumn( GLOBAL.languageItems["value"].toDString );
+		regTable.addColumn( GLOBAL.languageItems["value"].toDString, GLOBAL.editColor.txtFore.toDString, "", BARLINECOLOR );
 		regTable.setColumnAttribute( "TITLEALIGNMENT", "ALEFT" );
 		regTable.setSplitAttribute( "VALUE", "300" );
 		/*
@@ -360,6 +364,7 @@ class CDebugger
 		IupSetAttribute( tabResultsHandle, "HIGHCOLOR", "255 0 0" );
 		IupSetStrAttribute( tabResultsHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
 		IupSetStrAttribute( tabResultsHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( tabResultsHandle, "TABSFORECOLOR", GLOBAL.editColor.txtFore.toCString );
 		IupSetAttribute( tabResultsHandle, "SHOWLINES", "NO" );
 		
 		
@@ -1071,13 +1076,29 @@ class CDebugger
 	{
 		IupSetStrAttribute( varTabHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
 		IupSetStrAttribute( varTabHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetAttribute( varTabHandle, "TABSFORECOLOR", GLOBAL.editColor.txtFore.toCString );
 		IupSetStrAttribute( tabResultsHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
 		IupSetStrAttribute( tabResultsHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		IupSetStrAttribute( tabResultsHandle, "TABSFORECOLOR", GLOBAL.editColor.txtFore.toCString );
 		
-		IupSetAttribute( varSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
-		IupSetAttribute( rightSplitHandle, "COLOR", GLOBAL.editColor.linenumBack.toCString );
-		IupSetAttribute( mainSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
+		if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
+		{
+			bpTable.setGlobalColor( GLOBAL.editColor.txtFore.toDString, GLOBAL.editColor.fold.toDString, GLOBAL.editColor.fold.toDString );
+			regTable.setGlobalColor( GLOBAL.editColor.txtFore.toDString, GLOBAL.editColor.fold.toDString, GLOBAL.editColor.fold.toDString );
+			IupSetAttribute( varSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+			IupSetAttribute( rightSplitHandle, "COLOR", GLOBAL.editColor.fold.toCString );
+			IupSetAttribute( mainSplit, "COLOR", GLOBAL.editColor.fold.toCString );			
+		}
+		else
+		{
+			bpTable.setGlobalColor( GLOBAL.editColor.txtFore.toDString, "", "-1" );
+			regTable.setGlobalColor( GLOBAL.editColor.txtFore.toDString, "", "-1" );
+			IupSetAttribute( varSplit, "SHOWGRIP", "LINES" );
+			IupSetAttribute( rightSplitHandle, "SHOWGRIP", "LINES" );
+			IupSetAttribute( mainSplit, "SHOWGRIP", "LINES" );
+		}
 		
+
 		changeTreeNodeColor( watchTreeHandle );
 		changeTreeNodeColor( localTreeHandle );
 		changeTreeNodeColor( argTreeHandle );
@@ -2207,9 +2228,28 @@ class DebugThread //: Thread
 		
 		try
 		{
-			char[1024] temp;
-			uint nBytesToRead, lpBytesRead, lpTotalBytesAvail, lpNumberOfBytesRead;
-			
+			/*
+			version(Windows)
+			{
+				uint iTotalBytesAvail, iNumberOfBytesWritten;
+				char[4096] sBuf;
+
+				Thread.sleep(0.01);
+				PeekNamedPipe( proc.stdout.fileHandle, null, 0, null, &iTotalBytesAvail, null);
+				if( iTotalBytesAvail > 0 )
+				{
+					while( iTotalBytesAvail > 0  )
+					{
+						if( iTotalBytesAvail > 4096 ) iTotalBytesAvail = 4096;
+						ReadFile( proc.stdout.fileHandle, sBuf.ptr, iTotalBytesAvail, &iNumberOfBytesWritten, null );
+						result ~= sBuf[0..iNumberOfBytesWritten];
+						PeekNamedPipe( proc.stdout.fileHandle, null, 0, null, &iTotalBytesAvail, null);
+					}
+					
+					return Util.trim( result );
+				}
+			}			
+			*/
 			while( 1 )
 			{
 				try
@@ -2228,38 +2268,13 @@ class DebugThread //: Thread
 							if( result[$-5..$] == "(gdb)" ) break;
 						}
 					}
-					
-					/+
-					version(Windows)
-					{
-						if( !PeekNamedPipe( proc.stdout.fileHandle, &temp[0], 1024, &lpBytesRead, &lpTotalBytesAvail, null ) ) break;;
-						// IupMessage( "", toStringz( "YES\nlpBytesRead = " ~ Integer.toString( lpBytesRead ) ~ "\nlpTotalBytesAvail = " ~ Integer.toString( lpTotalBytesAvail ) ) );
-						
-						
-						if( lpTotalBytesAvail )
-						{
-							if( !ReadFile( proc.stdout.fileHandle, &temp[0], lpBytesRead, &lpNumberOfBytesRead, null ) ) break;
-							/*
-							lpNumberOfBytesRead = proc.stdout.read( temp );
-							if( !lpNumberOfBytesRead ) break;
-							*/
-		
-							result ~= temp[0..lpNumberOfBytesRead];
-							if( lpBytesRead == lpTotalBytesAvail ) break;
-						}
-						else
-						{
-							Sleep( 100 );
-						}
-					}
-					+/
 				}
 				catch( Exception e )
 				{
 					throw( e );
 				}
 			}
-
+			
 			return Util.trim( result );
 		}
 		catch( Exception e )
@@ -2389,10 +2404,10 @@ class DebugThread //: Thread
 			sendCommand( "set confirm off\n", false );
 			sendCommand( "set print array-indexes on\n", false );
 			sendCommand( "set width 0\n", false );
-			
+			/*
 			sendCommand( "set logging overwrite on\n", false );
 			sendCommand( "set logging on\n", false );
-			
+			*/
 			//sendCommand( "set breakpoint pending on\n", false );
 			//sendCommand( "set print elements 1\n", false );
 			

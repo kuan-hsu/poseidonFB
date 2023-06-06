@@ -64,6 +64,11 @@ void createExplorerWindow()
 		GLOBAL.documentSplit = IupSplit( GLOBAL.dndDocumentZBox, GLOBAL.documentTabs_Sub );
 		
 	IupSetAttributes( GLOBAL.documentSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=LINES,BARSIZE=0,ACTIVE=YES" );
+	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
+	{
+		IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
+		IupSetStrAttribute( GLOBAL.documentSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+	}		
 	version(linux) IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
 
 	// BOTTOM
@@ -73,6 +78,11 @@ void createExplorerWindow()
 		GLOBAL.documentSplit2 = IupSplit( GLOBAL.documentSplit, null );
 		
 	IupSetAttributes( GLOBAL.documentSplit2, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,LAYOUTDRAG=NO,VALUE=1000,SHOWGRIP=LINES,BARSIZE=0,ACTIVE=YES" );
+	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
+	{
+		IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
+		IupSetStrAttribute( GLOBAL.documentSplit2, "COLOR", GLOBAL.editColor.fold.toCString );
+	}	
 	version(linux) IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
 	
 	GLOBAL.searchExpander = new CSearchExpander;
@@ -80,11 +90,14 @@ void createExplorerWindow()
 
 	
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
-	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT");
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT,BARSIZE=2");
+	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
+	{
+		IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
+		IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+	}
 	version(linux) IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
-	IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
-	IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
-
+	
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
 	
@@ -128,6 +141,12 @@ void createExplorerWindow()
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,SHOWGRIP=LINES,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
+	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
+	{
+		IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
+		IupSetStrAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+		IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+	}	
 	version(linux) IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
 	IupSetAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );

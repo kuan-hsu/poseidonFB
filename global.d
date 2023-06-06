@@ -19,7 +19,7 @@ version(Windows)
 
 struct EditorToggleUint
 {
-	char[]	LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", LoadAtBackThread = "OFF", AutoKBLayout = "OFF";
+	char[]	LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", ColorBarLine = "OFF", AutoKBLayout = "OFF";
 	char[]	TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF", NewDocBOM = "ON", SaveAllModified = "OFF";
 	char[]	IconInvert = "OFF";
 }
@@ -686,7 +686,7 @@ struct GLOBAL
 						GLOBAL.languageItems["loadprevdoc"] = new IupString( cast(char[]) "Load Previous Documents" );
 						GLOBAL.languageItems["middlescroll"] = new IupString( cast(char[]) "Middle Button Scroll" );
 						GLOBAL.languageItems["savedocstatus"] = new IupString( cast(char[]) "Save Document Status" );
-						GLOBAL.languageItems["loadfileatbackthread"] = new IupString( cast(char[]) "Load File(s) AT Back Thread" );
+						GLOBAL.languageItems["colorbarline"] = new IupString( cast(char[]) "Colorize Splitter BarLine" );
 						GLOBAL.languageItems["autokblayout"] = new IupString( cast(char[]) "Auto en-Keyboard Layout" );
 						GLOBAL.languageItems["controlcharsymbol"] = new IupString( cast(char[]) "Set Control Char Symbol" );
 						GLOBAL.languageItems["tabwidth"] = new IupString( cast(char[]) "Tab Width" );

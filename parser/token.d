@@ -447,6 +447,7 @@ version(DIDE)
 		TatSystem,
 		TatDisable,
 		TatNogc,
+		TatLive,
 
 		Treal,
 		Tref,
@@ -651,6 +652,7 @@ version(DIDE)
 			case "@system":			return TOK.TatSystem;
 			case "@disable":		return TOK.TatDisable;
 			case "@nogc":			return TOK.TatNogc;
+			case "@live":			return TOK.TatLive;
 			
 			case "real":			return TOK.Treal;
 			case "ref":				return TOK.Tref;

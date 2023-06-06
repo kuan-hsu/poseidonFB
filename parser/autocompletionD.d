@@ -1106,21 +1106,6 @@ version(DIDE)
 					
 					if( _createFileNode !is null )
 					{
-						// Comment for thread call, prevents infinite loop / crash
-						/*
-						if( GLOBAL.editorSetting00.Message == "ON" ) 
-						{
-							if( GLOBAL.editorSetting00.LoadAtBackThread == "ON" )
-							{
-								version(Windows) GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );//IupSetAttribute( GLOBAL.outputPanel, "APPEND\0", toStringz( "  Pre-Parse file: [" ~ includeFullPath ~ "]" ) );
-							}
-							else
-							{
-								GLOBAL.IDEMessageDlg.print( "  Pre-Parse file: [" ~ includeFullPath ~ "]" );
-							}
-						}
-						*/
-						
 						includesMarkContainer[fullPathByOS(includeFullPath)] = _createFileNode;
 						
 						results ~= _createFileNode;

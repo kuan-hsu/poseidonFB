@@ -1,0 +1,409 @@
+﻿DMD Compiler Arguments and Switches
+dmd files... -switches... 
+
+files... 
+        File Extensions
+        Extension      File Type
+        none           D source files
+        .c             C source files
+        .d             D source files
+        .dd            Ddoc source files
+        .di            D interface files
+        .i             preprocessed C source files
+        .obj           Object files to link in
+        .lib           Object code libraries to search
+        .exe           Output executable file
+        .def           module definition file
+        .res           resource file
+        
+@cmdfile
+If cmdfile is an environment variable, read the compiler arguments and switches from the value of that variable. Otherwise, read compiler arguments and switches from the text file cmdfile. The file may contain single-line comments starting with the hash symbol (#). 
+
+-allinst
+Generate code for all template instantiations 
+
+-betterC
+Adjusts the compiler to implement D as a better C: 
+· Predefines D_BetterC version.
+· Assert Expressions, when they fail, call the C runtime library assert failure function rather than a function in the D runtime.
+· Array overflows call the C runtime library assert failure function rather than a function in the D runtime.
+· Final switch errors call the C runtime library assert failure function rather than a function in the D runtime.
+· Does not automatically link with phobos runtime library.
+· Module constructors and destructors are not generated meaning that static and shared static constructors and destructors will not get called.
+· ModuleInfo is not generated.
+· TypeInfo instances will not be generated for structs.
+
+-boundscheck=[on|safeonly|off ]
+Controls if bounds checking is enabled. 
+· on: Bounds checks are enabled for all code. This is the default.
+· safeonly: Bounds checks are enabled only in @safe code. This is the default for -release builds.
+· off: Bounds checks are disabled completely (even in @safe code). This option should be used with caution and as a last resort to improve performance. Confirm turning off @safe bounds checks is worthwhile by benchmarking.
+
+-c
+Compile only, do not link 
+
+-check=[assert|bounds|in|invariant|out|switch ][=[on|off]]
+Overrides default, -boundscheck, -release and -unittest options to enable or disable specific checks. 
+· assert: assertion checking
+· bounds: array bounds
+· in: in contracts
+· invariant: class/struct invariants
+· out: out contracts
+· switch: finalswitch failure checking
+· on or not specified: specified check is enabled.
+· off: specified check is disabled.
+
+-check=[h|help|? ]
+List information on all available checks 
+
+-checkaction=[D|C|halt|context ]
+Sets behavior when an assert fails, and array boundscheck fails, or a final switch errors. 
+· D: Default behavior, which throws an unrecoverable AssertError.
+· C: Calls the C runtime library assert failure function.
+· halt: Executes a halt instruction, terminating the program.
+· context: Prints the error context as part of the unrecoverable AssertError.
+
+-checkaction=[h|help|? ]
+List information on all available check actions 
+
+-color
+Turn colored console output on 
+
+-color=[on|off|auto ]
+Show colored console output. The default depends on terminal capabilities. 
+· auto: use colored output if a tty is detected (default)
+· on: always use colored output.
+· off: never use colored output.
+
+-conf=filename 
+Use config file at filename 
+-cov
+
+Do code coverage analysis 
+
+-cov=ctfe
+Include code executed during CTFE in coverage report 
+
+-cov=nnn 
+Perform code coverage analysis and generate .lst file with report.
+dmd -cov -unittest myprog.d
+
+-cpp=filename 
+Normally the C preprocessor used by the associated C compiler is used to preprocess ImportC files, this is overridden by the -cpp switch. 
+
+-D
+Generate documentation from source.
+Note: mind the security considerations.
+
+-Dddirectory 
+Write documentation file to directory . -op can be used if the original package hierarchy should be retained 
+
+-Dffilename 
+Write documentation file to filename 
+
+-d
+Silently allow deprecated features and use of symbols with deprecated attributes. 
+
+-de
+Issue an error when deprecated features or symbols are used (halt compilation) 
+
+-dw
+Issue a message when deprecated features or symbols are used (default) 
+
+-debug
+Compile in debug code 
+
+-debug=level 
+Compile in debug level <= level
+
+-debug=ident 
+Compile in debug identifier ident
+
+-debuglib=name 
+Link in libname as the default library when compiling for symbolic debugging instead of phobos.lib. If libname is not supplied, then no default library is linked in. 
+
+-defaultlib=name 
+Link in libname as the default library when not compiling for symbolic debugging instead of phobos.lib. If libname is not supplied, then no default library is linked in. 
+
+-deps
+Print module dependencies (imports/file/version/debug/lib) 
+
+-deps=filename 
+Without filename, print module dependencies (imports/file/version/debug/lib). With filename, write module dependencies as text to filename (only imports). 
+
+-extern-std=standard 
+Standards supported are: 
+· c++98: Use C++98 name mangling, Sets __traits(getTargetInfo, "cppStd") to 199711
+· c++11 (default): Use C++11 name mangling, Sets __traits(getTargetInfo, "cppStd") to 201103
+· c++14: Use C++14 name mangling, Sets __traits(getTargetInfo, "cppStd") to 201402
+· c++17: Use C++17 name mangling, Sets __traits(getTargetInfo, "cppStd") to 201703
+· c++20: Use C++20 name mangling, Sets __traits(getTargetInfo, "cppStd") to 202002
+
+-extern-std=[h|help|? ]
+List all supported standards 
+
+-fPIC
+Generate position independent code 
+
+-fPIE
+Generate position independent executables 
+
+-g
+Add CodeView symbolic debug info. See Debugging on Windows. 
+
+-gdwarf=version 
+The value of version may be 3, 4 or 5, defaulting to 3. 
+
+-gf
+Symbolic debug info is emitted for all types referenced by the compiled code, even if the definition is in an imported file not currently being compiled. 
+
+-gs
+Always emit stack frame 
+
+-gx
+Adds stack stomp code, which overwrites the stack frame memory upon function exit. 
+
+-H
+Generate D interface file
+
+-Hd=directory 
+Write D interface file to dir directory. -op can be used if the original package hierarchy should be retained. 
+
+-Hf=filename 
+Write 'header' file to filename 
+
+-HC[=[silent|verbose ]]
+Generate C++ 'header' files using the given configuration:", 
+silent
+    only list extern(C[++]) declarations (default)
+verbose
+    also add comments for ignored declarations (e.g. extern(D))
+    
+-HC=[?|h|help ]
+List available modes for C++ 'header' file generation 
+
+-HCd=directory 
+Write C++ 'header' file to directory 
+
+-HCf=filename 
+Write C++ 'header' file to filename 
+
+--help
+Print help and exit 
+
+-I=directory 
+Look for imports also in directory 
+
+-i[=pattern ]
+Enables "include imports" mode, where the compiler will include imported modules in the compilation, as if they were given on the command line. By default, when this option is enabled, all imported modules are included except those in druntime/phobos. This behavior can be overriden by providing patterns via -i=<pattern>. A pattern of the form -i=<package> is an "inclusive pattern", whereas a pattern of the form -i=-<package> is an "exclusive pattern". Inclusive patterns will include all module's whose names match the pattern, whereas exclusive patterns will exclude them. For example. all modules in the package foo.bar can be included using -i=foo.bar or excluded using -i=-foo.bar. Note that each component of the fully qualified name must match the pattern completely, so the pattern foo.bar would not match a module named foo.barx.
+The default behavior of excluding druntime/phobos is accomplished by internally adding a set of standard exclusions, namely, -i=-std -i=-core -i=-etc -i=-object. Note that these can be overriden with 
+-i=std -i=core -i=etc -i=object.
+When a module matches multiple patterns, matches are prioritized by their component length, where a match with more components takes priority (i.e. pattern foo.bar.baz has priority over foo.bar).
+By default modules that don't match any pattern will be included. However, if at least one inclusive pattern is given, then modules not matching any pattern will be excluded. This behavior can be overriden by usig -i=. to include by default or -i=-. to exclude by default.
+Note that multiple -i=... options are allowed, each one adds a pattern.
+
+-ignore
+Ignore unsupported pragmas 
+
+-inline
+Inline functions at the discretion of the compiler. This can improve performance, at the expense of making it more difficult to use a debugger on it. 
+
+-J=directory 
+Where to look for files for ImportExpressions. This switch is required in order to use ImportExpressions. path is a ; separated list of paths. Multiple -J's can be used, and the paths are searched in the same order. 
+
+-L=linkerflag 
+Pass linkerflag to the linker optlink.exe , for example, ld 
+-lib
+
+Generate library file as output instead of object file(s). All compiled source files, as well as object files and library files specified on the command line, are inserted into the output library. Compiled source modules may be partitioned into several object modules to improve granularity. The name of the library is taken from the name of the first source module to be compiled. This name can be overridden with the -of switch. 
+
+-lowmem
+Enable the garbage collector for the compiler, reducing the compiler memory requirements but increasing compile times. 
+
+-m32
+-m32mscoff
+Generate 32 bit code and write MS-COFF object files (deprecated use -m32) 
+
+-m32omf
+Compile a 32 bit executable. The generated object code is in OMF and is meant to be used with the Digital Mars C/C++ compiler. 
+
+-m64
+The generated object code is in MS-COFF and is meant to be used with the Microsoft Visual Studio 10 or later compiler. 
+
+-main
+Add a default main() function when compiling. This is useful when unittesting a library, as it enables running the unittests in a library without having to manually define an entry-point function. 
+
+-makedeps[=filename ]
+Print dependencies in Makefile compatible format. If filename is omitted, it prints to stdout. The emitted targets are the compiled artifacts (executable, object files, libraries). The emitted dependencies are imported modules and imported string files (via -J switch). Special characters in a dependency or target filename are escaped in the GNU Make manner. 
+
+-man
+Open default browser on this page 
+
+-map
+Generate a .map file 
+
+-mcpu=id 
+Set the target architecture for code generation, where: 
+help
+    list alternatives
+baseline
+    the minimum architecture for the target platform (default)
+avx
+    generate AVX instructions instead of SSE instructions for vector and floating point operations. Not available for 32 bit memory models other than OSX32. 
+native
+    use the architecture the compiler is running on
+
+    -mcpu=[h|help|? ]
+List all architecture options 
+
+-mixin=filename 
+Expand and save mixins to file specified by filename 
+
+-mscrtlib=libname 
+If building MS-COFF object files when targeting Windows, embed a reference to the given C runtime library libname into the object file containing main, DllMain or WinMain for automatic linking. The default is libcmt (release version with static linkage), the other usual alternatives are libcmtd, msvcrt and msvcrtd. If no Visual C installation is detected, a wrapper for the redistributable VC2010 dynamic runtime library and mingw based platform import libraries will be linked instead using the LLD linker provided by the LLVM project. The detection can be skipped explicitly if msvcrt120 is specified as libname. If libname is empty, no C runtime library is automatically linked in. 
+
+-mv=package.module =
+Use path/filename as the source file for package.module. This is used when the source file path and names are not the same as the package and module hierarchy. The rightmost components of the path/filename and package.module can be omitted if they are the same. 
+
+-noboundscheck
+Turns off all array bounds checking, even for safe functions. Deprecated (use -boundscheck=off instead).
+
+-O
+Optimize generated code. For fastest executables, compile with the -O -release -inline -boundscheck=off switches together. 
+
+-o-
+Suppress generation of object file. Useful in conjuction with -D or -H flags. 
+
+-od=directory 
+Write object files relative to directory objdir instead of to the current directory. -op can be used if the original package hierarchy should be retained 
+
+-of=filename 
+Set output file name to filename in the output directory. The output file can be an object file, executable file, or library file depending on the other switches. 
+
+-op
+Normally the path for .d source files is stripped off when generating an object, interface, or Ddoc file name. -op will leave it on. 
+
+-os=os 
+Set the target operating system as other than the host. 
+· host: Target the host operating system (default).
+· dragonflybsd: DragonFlyBSD
+· freebsd: FreeBSD
+· linux: Linux
+· openbsd: OpenBSD
+· osx: OSX
+· solaris: Solaris
+· windows: Windows
+
+-P=preprocessorflag 
+Pass preprocessorflag to sppn.exe or cl.exe 
+
+-preview=name 
+Preview an upcoming language change identified by id
+
+-preview=[h|help|? ]
+List all upcoming language changes 
+
+-profile
+Instrument the generated code so that runtime performance data is collected when the generated program is run. Upon completion of the generated program, the files trace.log and trace.def are generated. trace.log has two sections, 
+1. Fan in and fan out for each profiled function. The name of the function is left-justified, the functions immediately preceding it are the other functions that call it (fan in) and how many times it is called. The functions immediately following are the functions that are called (fan out) and how many times it calls that function. The function itself has 3 numbers appended: the aggregate of the fan in counts, the tree time used by the function which is the function time plus the tree times of all the functions it calls, and the time used excluding the time used by fan out. 
+2. Timing data for each function, sorted from most used to least.
+The trace.def file contains linker commands to associate functions which are strongly coupled so they appear adjacent in the resulting executable file. For more information see profile
+
+-profile=gc
+· gc: Instrument calls to GC memory allocation and write a report to the file profilegc.log upon program termination. Note: Only instrumented calls will be logged. These include: 
+o Language constructs that allocate memory
+o Phobos functions that allocate GC memory
+o GC allocations via core.memory.GC
+Allocations made by other means will not be logged, including direct calls to the GC's C API.
+
+-release
+Compile release version, which means not emitting run-time checks for contracts and asserts. Array bounds checking is not done for system and trusted functions, and assertion failures are undefined behaviour. 
+
+-revert=name 
+Revert language change identified by id
+
+-revert=[h|help|? ]
+List all revertable language changes 
+
+-run srcfile 
+Compile, link, and run the program srcfile with the rest of the command line, args..., as the arguments to the program. No .obj or executable file is left behind. 
+
+-shared
+Generate DLL library 
+
+-target=triple 
+arch is the architecture: either x86, x64, x86_64 or x32, vendor is always ignored, but supported for easier interoperability, os is the operating system, this may have a trailing version number: freestanding for no operating system, darwin or osx for MacOS, dragonfly or dragonflybsd for DragonflyBSD, freebsd, openbsd, linux, solaris or windows for their respective operating systems. cenv is the C runtime environment and is optional: musl for musl-libc, msvc for the MSVC runtime (the default for windows with this option), bionic for the Andriod libc, digital_mars for the Digital Mars runtime for Windows gnu or glibc for the GCC C runtime, newlib or uclibc for their respective C runtimes. ($ I cppenv) is the C++ runtime environment: clang for the LLVM C++ runtime gcc for GCC's C++ runtime, msvc for microsoft's MSVC C++ runtime (the default for windows with this switch), sun for Sun's C++ runtime and digital_mars for the Digital Mars C++ runtime for windows. 
+
+-transition=name 
+Show additional info about language change identified by id
+
+-transition=[h|help|? ]
+List all language changes 
+
+-unittest
+Compile in unittest code, turns on asserts, and sets the unittest version identifier
+
+-v
+Enable verbose output for each compiler pass 
+
+-vasm
+List generated assembler for each function 
+
+-vcolumns
+Print character (column) numbers in diagnostics 
+
+-verror-style=[digitalmars|gnu ]
+Set the style for file/line number annotations on compiler messages, where: 
+digitalmars
+    'file(line[,column]): message'. This is the default.
+gnu
+    'file:line[:column]: message', conforming to the GNU standard used by gcc and clang.
+
+-verror-supplements=num 
+Limit the number of supplemental messages for each error (0 means unlimited) 
+
+-verrors=num 
+Limit the number of error messages (0 means unlimited) 
+
+-verrors=context
+Show error messages with the context of the erroring source line 
+
+-verrors=spec
+Show errors from speculative compiles such as __traits(compiles,...) 
+
+--version
+Print compiler version and exit 
+
+-version=level 
+Compile in version level >= level
+
+-version=ident 
+Compile in version identifier ident
+
+-vgc
+List all gc allocations including hidden ones 
+
+-vtls
+List all variables going into thread local storage 
+
+-vtemplates=[list-instances ]
+An optional argument determines extra diagnostics, where: 
+list-instances
+    Also shows all instantiation contexts for each template.
+    
+-w
+Enable warnings
+
+-wi
+Enable informational warnings (i.e. compilation still proceeds normally)
+
+-X
+Generate JSON file 
+
+-Xf=filename 
+Write JSON file to filename 
+
+-Xcc=driverflag 
+Pass driverflag to the linker driver ($CC or cc) 
+
+Empty switches, i.e. "", are ignored.

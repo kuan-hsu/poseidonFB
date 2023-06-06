@@ -336,7 +336,7 @@ public:
 						if( !CodePage.isAscii(cast(char[]) str ) ) // MBCS
 						{
 							char[] _text;
-							_text.length = 2 * str.length;
+							_text.length = 2 + 2 * str.length;
 							content = CodePage.from( cast(char[]) str, _text, 0 );
 						}
 						else
@@ -3086,11 +3086,11 @@ public:
 			if( itemCount == limit )
 			{
 				IupSetInt( ih, "REMOVEITEM", limit );
-				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text.dup ) );
+				IupSetStrAttributeId( ih, "INSERTITEM", 1, toStringz( text ) );
 			}
 			else
 			{
-				IupSetAttributeId( ih, "INSERTITEM", 1, toStringz( text.dup ) );
+				IupSetStrAttributeId( ih, "INSERTITEM", 1, toStringz( text ) );
 			}
 		}
 	}

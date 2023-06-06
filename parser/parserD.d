@@ -12,7 +12,6 @@ version(DIDE)
 		import			Util = tango.text.Util;
 		
 		char[]			activeProt;
-		bool			bAssignExpress;
 
 		CStack!(char[]) curlyStack;
 		CStack!(char[])	protStack;
@@ -41,6 +40,81 @@ version(DIDE)
 			
 			return false;
 		}
+		
+		
+		char[] getDelimitedString( int _tokOpen, int _tokClose )
+		{
+			try
+			{
+				int		_countDemlimit;
+				char[]	_params;		// include open Delimit and close Delimit
+
+				if( token().tok == _tokOpen )
+				{
+					do
+					{
+						if( token().tok == _tokOpen )
+						{
+							if( _countDemlimit > 0 ) _params ~= token().identifier;
+							_countDemlimit ++;
+						}
+						else if( token().tok == _tokClose )
+						{
+							_countDemlimit --;
+							if( _countDemlimit > 0 ) _params ~= token().identifier;
+						}
+						else
+						{
+							switch( token().tok )
+							{
+								case TOK.Topenbracket, TOK.Topencurly, TOK.Topenparen, TOK.Tclosebracket, TOK.Tclosecurly, TOK.Tcloseparen, TOK.Tcomma, TOK.Tassign,
+									TOK.Tdot, TOK.Tdotdot, TOK.Tdotdotdot:
+										_params ~= token().identifier;
+										break;
+										
+								default:
+									if( isInOut() )
+										_params ~= ( token().identifier ~ " " );
+									else
+									{
+										if( _params.length )
+										{
+											if( _params[$-1] == ' ' ) _params ~= token().identifier; else _params ~= ( " " ~ token().identifier );
+										}
+										else
+											_params ~= ( " " ~ token().identifier );
+									}
+							}
+						}
+						
+						parseToken();
+					}
+					while( _countDemlimit > 0 && tokenIndex < tokens.length );
+				}
+				else
+				{
+					parseToken();
+				}
+
+				_params = Util.trim( _params );
+				
+				switch( _tokOpen )
+				{
+					case TOK.Topenparen:		_params = "(" ~ _params ~ ")"; break;
+					case TOK.Topenbracket:		_params = "[" ~ _params ~ "]"; break;
+					case TOK.Topencurly:		_params = "{" ~ _params ~ "}"; break;
+					default:					break;
+				}
+				
+				return _params;
+			}
+			catch( Exception e )
+			{
+				throw e;
+			}
+			
+			return null;
+		}		
 		
 		
 		int getDelimitedTailIndex( int _tokOpen, int _tokClose, int _startIndex = -1, bool bSemiColonBreak = true )
@@ -227,6 +301,16 @@ version(DIDE)
 						if( token().tok == TOK.Tcloseparen ) parseToken( TOK.Tcloseparen ); else throw new Exception( "BasicType Parse Error!" );
 					}
 				}
+				else if( token().tok == TOK.T__traits )
+				{
+					parseToken( TOK.T__traits );
+					if( token().tok == TOK.Topenparen ) _type = "__traits" ~ getDelimitedString( TOK.Topenparen, TOK.Tcloseparen ); else throw new Exception( "BasicType Parse Error!" );
+				}
+				else if( token().tok == TOK.Tmixin )
+				{
+					parseToken( TOK.Tmixin );
+					if( token().tok == TOK.Topenparen ) _type = "mixin" ~ getDelimitedString( TOK.Topenparen, TOK.Tcloseparen ); else throw new Exception( "BasicType Parse Error!" );
+				}				
 				else
 				{
 					throw new Exception( "BasicType Parse Error!" );
@@ -283,7 +367,19 @@ version(DIDE)
 					{
 						// Variable
 						int funTailIndex = getFunctionDeclareTailIndex();
-						if( tokens[funTailIndex].tok == TOK.Tidentifier ) _type ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+						if( funTailIndex < tokens.length )
+						{
+							_type ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+							tokenIndex = funTailIndex;
+						}						
+						/*
+						if( funTailIndex >= tokens.length ) throw new Exception( "getBasicType2(), Over Token Tail!" );
+						if( tokens[funTailIndex].tok == TOK.Tidentifier )
+						{
+							_type ~= getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+							tokenIndex = funTailIndex;
+						}
+						*/
 					}
 				}
 			}
@@ -472,7 +568,7 @@ version(DIDE)
 		{
 			switch( token().tok )
 			{
-				case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
+				case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong, TOK.Tcent, TOK.Tucent,
 					TOK.Tchar, TOK.Tdchar, TOK.Twchar,
 					TOK.Tfloat, TOK.Tdouble, TOK.Treal, TOK.Tifloat, TOK.Tidouble, TOK.Tireal, TOK.Tcfloat, TOK.Tcdouble, TOK.Tcreal,
 					TOK.Tvoid:
@@ -505,25 +601,12 @@ version(DIDE)
 		}
 
 
-
-
-
-
-
-
-		
-
 		/*
-		FunctionAttributes:
-			FunctionAttribute
-			FunctionAttribute FunctionAttributes
-
 		FunctionAttribute:
-			nothrow
-			pure
-			Property		
-
-
+			FunctionAttributeKwd
+			Property
+			AtAttribute
+			
 		MemberFunctionAttributes:
 			MemberFunctionAttribute
 			MemberFunctionAttribute MemberFunctionAttributes
@@ -533,9 +616,27 @@ version(DIDE)
 			immutable
 			inout
 			return
+			scope
 			shared
 			FunctionAttribute
-		*/
+		
+		FunctionAttributeKwd:
+			nothrow
+			pure
+
+		AtAttribute:
+			@ disable
+			@ nogc
+			@ live
+			Property
+			@ safe
+			@ system
+			@ trusted
+			UserDefinedAttribute
+
+		Property:
+			@ property				
+		*/	
 		bool isMemberFunctionAttribute( int _tempTokenIndex = -1 )
 		{
 			if( _tempTokenIndex < 0 ) _tempTokenIndex = tokenIndex;
@@ -543,13 +644,13 @@ version(DIDE)
 			
 			switch( tokens[_tempTokenIndex].tok )
 			{
-				case TOK.Tnothrow, TOK.Tpure:
+				case TOK.Tnothrow, TOK.Tpure: // FunctionAttributeKwd
 					return true;
 				
-				case TOK.TatProperty, TOK.TatSafe, TOK.TatTrusted, TOK.TatSystem, TOK.TatDisable, TOK.TatNogc:
+				case TOK.TatDisable, TOK.TatNogc, TOK.TatLive, TOK.TatProperty, TOK.TatSafe, TOK.TatSystem, TOK.TatTrusted:
 					return true;
 				
-				case TOK.Tconst, TOK.Timmutable, TOK.Tinout, TOK.Treturn, TOK.Tshared:
+				case TOK.Tconst, TOK.Timmutable, TOK.Tinout, TOK.Treturn, TOK.Tscope, TOK.Tshared: // MemberFunctionAttribute
 					return true;
 					
 				default:
@@ -847,8 +948,6 @@ version(DIDE)
 						parseImportBindList( _importModuleName, _ln );
 					}
 				}
-				
-				
 			}
 			catch( Exception e )
 			{
@@ -1301,8 +1400,7 @@ version(DIDE)
 
 					int funTailIndex = getFunctionDeclareTailIndex();
 					if( funTailIndex >= tokens.length ) return false;
-					
-					
+
 					if( tokens[funTailIndex].tok == TOK.Topenparen ) // Template Function
 					{
 						_params = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
@@ -1349,6 +1447,7 @@ version(DIDE)
 						else if( tokens[funTailIndex+1].tok == TOK.Topenparen  )
 						{
 							int tailPos = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, funTailIndex+1 );
+							if( tailPos >= tokens.length ) return false;
 							if( tokens[tailPos].tok == TOK.Topencurly ) bContract = true;
 						}
 					
@@ -1895,6 +1994,7 @@ version(DIDE)
 						// TemplateParameters
 						getDelimitedString( TOK.Topenparen, TOK.Tcloseparen ); // Skip TemplateParameters
 						funTailIndex = getFunctionDeclareTailIndex();
+						if( funTailIndex >= tokens.length ) return false;
 					}
 					
 					if( tokens[funTailIndex].tok == TOK.Tsemicolon )
@@ -1964,6 +2064,8 @@ version(DIDE)
 					parseToken( TOK.Tthis );
 
 					int funTailIndex = getFunctionDeclareTailIndex();
+					if( funTailIndex >= tokens.length ) return false;
+					
 					if( tokens[funTailIndex].tok == TOK.Tsemicolon )
 					{
 						getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
@@ -2182,10 +2284,18 @@ version(DIDE)
 										activeASTnode.endLineNum = prev().lineNumber;
 										activeASTnode = activeASTnode.getFather();
 									}
-									/*
-									else
-										throw new Exception( "parseEnum() over top error!" );
-									*/
+									
+									if( activeASTnode.kind == D_VERSION && ( conditionStack.top() == "version" || conditionStack.top() == "version else" ) )
+									{
+										conditionStack.pop();
+										if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+									}
+									else if( activeASTnode.kind == D_DEBUG && ( conditionStack.top() == "debug" || conditionStack.top() == "debug else" ) )
+									{
+										conditionStack.pop();
+										if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+									}
+									
 									return true;
 								}
 							}
@@ -2231,10 +2341,18 @@ version(DIDE)
 										activeASTnode.endLineNum = prev().lineNumber;
 										activeASTnode = activeASTnode.getFather();
 									}
-									/*
-									else
-										throw new Exception( "parseEnum() over top error!" );
-									*/
+
+									if( activeASTnode.kind == D_VERSION && ( conditionStack.top() == "version" || conditionStack.top() == "version else" ) )
+									{
+										conditionStack.pop();
+										if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+									}
+									else if( activeASTnode.kind == D_DEBUG && ( conditionStack.top() == "debug" || conditionStack.top() == "debug else" ) )
+									{
+										conditionStack.pop();
+										if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather();
+									}
+									
 									return true;
 								}
 							}
@@ -2446,40 +2564,42 @@ version(DIDE)
 								parseToken();
 								break;
 							
-							case TOK.Tbool:					_Instance = "bool"; break;
-							case TOK.Tbyte:					_Instance = "byte"; break;
-							case TOK.Tubyte:				_Instance = "ubyte"; break;
-							case TOK.Tshort:				_Instance = "short"; break;
-							case TOK.Tushort:				_Instance = "ushort"; break;
-							case TOK.Tint:					_Instance = "int"; break;
-							case TOK.Tuint:					_Instance = "uint"; break;
-							case TOK.Tlong:					_Instance = "long"; break;
-							case TOK.Tulong:				_Instance = "ulong"; break;
-							case TOK.Tchar:					_Instance = "char"; break;
-							case TOK.Tdchar:				_Instance = "dchar"; break;
-							case TOK.Twchar:				_Instance = "wchar"; break;
-							case TOK.Tfloat:				_Instance = "float"; break;
-							case TOK.Tdouble:				_Instance = "double"; break;
-							case TOK.Treal:					_Instance = "real"; break;
-							case TOK.Tifloat:				_Instance = "ifloat"; break;
-							case TOK.Tidouble:				_Instance = "idouble"; break;
-							case TOK.Tireal:				_Instance = "ireal"; break;
-							case TOK.Tcfloat:				_Instance = "cfloat"; break;
-							case TOK.Tcdouble:				_Instance = "cdouble"; break;
-							case TOK.Tcreal:				_Instance = "creal"; break;
-							case TOK.Tvoid:					_Instance = "void"; break;
+							case TOK.Tbool:					_Instance = "bool"; parseToken(); break;
+							case TOK.Tbyte:					_Instance = "byte"; parseToken(); break;
+							case TOK.Tubyte:				_Instance = "ubyte"; parseToken(); break;
+							case TOK.Tshort:				_Instance = "short"; parseToken(); break;
+							case TOK.Tushort:				_Instance = "ushort"; parseToken(); break;
+							case TOK.Tint:					_Instance = "int"; parseToken(); break;
+							case TOK.Tuint:					_Instance = "uint"; parseToken(); break;
+							case TOK.Tlong:					_Instance = "long"; parseToken(); break;
+							case TOK.Tulong:				_Instance = "ulong"; parseToken(); break;
+							case TOK.Tcent:					_Instance = "cent"; parseToken(); break;
+							case TOK.Tucent:				_Instance = "ucent"; parseToken(); break;
+							case TOK.Tchar:					_Instance = "char"; parseToken(); break;
+							case TOK.Tdchar:				_Instance = "dchar"; parseToken(); break;
+							case TOK.Twchar:				_Instance = "wchar"; parseToken(); break;
+							case TOK.Tfloat:				_Instance = "float"; parseToken(); break;
+							case TOK.Tdouble:				_Instance = "double"; parseToken(); break;
+							case TOK.Treal:					_Instance = "real"; parseToken(); break;
+							case TOK.Tifloat:				_Instance = "ifloat"; parseToken(); break;
+							case TOK.Tidouble:				_Instance = "idouble"; parseToken(); break;
+							case TOK.Tireal:				_Instance = "ireal"; parseToken(); break;
+							case TOK.Tcfloat:				_Instance = "cfloat"; parseToken(); break;
+							case TOK.Tcdouble:				_Instance = "cdouble"; parseToken(); break;
+							case TOK.Tcreal:				_Instance = "creal"; parseToken(); break;
+							case TOK.Tvoid:					_Instance = "void"; parseToken(); break;
 							
-							case TOK.Ttrue:					_Instance = "true"; break;
-							case TOK.Tfalse:				_Instance = "false"; break;
-							case TOK.Tnull:					_Instance = "null"; break;
-							case TOK.Tthis:					_Instance = "this"; break;
+							case TOK.Ttrue:					_Instance = "true"; parseToken(); break;
+							case TOK.Tfalse:				_Instance = "false"; parseToken(); break;
+							case TOK.Tnull:					_Instance = "null"; parseToken(); break;
+							case TOK.Tthis:					_Instance = "this"; parseToken(); break;
 							
-							case TOK.T__FILE__:				_Instance = "__FILE__"; break;
-							case TOK.T__FILE_FULL_PATH__:	_Instance = "__FILE_FULL_PATH__"; break;
-							case TOK.T__MODULE__:			_Instance = "__MODULE__"; break;
-							case TOK.T__LINE__:				_Instance = "__LINE__"; break;
-							case TOK.T__FUNCTION__:			_Instance = "__FUNCTION__"; break;
-							case TOK.T__PRETTY_FUNCTION__:	_Instance = "__PRETTY_FUNCTION__"; break;
+							case TOK.T__FILE__:				_Instance = "__FILE__"; parseToken(); break;
+							case TOK.T__FILE_FULL_PATH__:	_Instance = "__FILE_FULL_PATH__"; parseToken(); break;
+							case TOK.T__MODULE__:			_Instance = "__MODULE__"; parseToken(); break;
+							case TOK.T__LINE__:				_Instance = "__LINE__"; parseToken(); break;
+							case TOK.T__FUNCTION__:			_Instance = "__FUNCTION__"; parseToken(); break;
+							case TOK.T__PRETTY_FUNCTION__:	_Instance = "__PRETTY_FUNCTION__"; parseToken(); break;
 								
 							/*
 							case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
@@ -2903,7 +3023,6 @@ version(DIDE)
 			tokens = _tokens;
 			
 			activeProt = "";
-			bAssignExpress = false;
 			
 			if( curlyStack !is null ) delete curlyStack;
 			if( protStack !is null ) delete protStack;
@@ -2920,7 +3039,8 @@ version(DIDE)
 		
 		CASTnode parse( char[] fullPath )
 		{
-			CASTnode	head = null;
+			bool			bAssignExpress;
+			CASTnode		head = null;
 			
 			try
 			{
@@ -3004,7 +3124,7 @@ version(DIDE)
 							break;
 
 						// Basic Type
-						case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong,
+						case TOK.Tbool, TOK.Tbyte, TOK.Tubyte, TOK.Tshort, TOK.Tushort, TOK.Tint, TOK.Tuint, TOK.Tlong, TOK.Tulong, TOK.Tcent, TOK.Tucent,
 							TOK.Tchar, TOK.Tdchar, TOK.Twchar,
 							TOK.Tfloat, TOK.Tdouble, TOK.Treal, TOK.Tifloat, TOK.Tidouble, TOK.Tireal, TOK.Tcfloat, TOK.Tcdouble, TOK.Tcreal,
 							TOK.Tvoid:
@@ -3035,6 +3155,14 @@ version(DIDE)
 								
 							}
 							break;
+							
+						/*
+						MixinType:
+							mixin ( ArgumentList )					
+						*/
+						case TOK.Tmixin:
+							if( next().tok == TOK.Topenparen ) parseType(); else parseToken( TOK.Tmixin );
+							break;							
 
 						/+
 						case TOK.Tauto, TOK.Tscope:
@@ -3082,6 +3210,11 @@ version(DIDE)
 							if( next().tok == TOK.Topenparen )
 							{
 								int tailIndex = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, tokenIndex + 1, false );
+								if( tailIndex >= tokens.length )
+								{
+									parseToken();
+									break;
+								}
 								if( tokens[tailIndex].tok == TOK.Topencurly )
 								{
 									parseToken(); // TOK.Tfunction, TOK.Tdelegate
@@ -3182,6 +3315,7 @@ version(DIDE)
 								break;
 								+/
 								int tailIndex = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, tokenIndex + 1, false );
+								if( tailIndex >= tokens.length ) break;
 								if( tokens[tailIndex].tok == TOK.Topencurly )
 								{
 									//curlyStack.push( token().identifier );
@@ -3196,6 +3330,11 @@ version(DIDE)
 								if( prev().tok == TOK.Tclosecurly )
 								{
 									int tailIndex = getDelimitedTailIndex( TOK.Topencurly, TOK.Tclosecurly, tokenIndex + 1, false );
+									if( tailIndex >= tokens.length )
+									{
+										parseToken( TOK.Tdo );
+										break;
+									}
 									if( tokens[tailIndex].tok != TOK.Twhile )
 									{
 										//curlyStack.push( "do" );
@@ -3232,6 +3371,26 @@ version(DIDE)
 								//{
 									parseToken( TOK.Tunittest );
 									getDelimitedString( TOK.Topencurly, TOK.Tclosecurly );
+									if( activeASTnode.kind == D_VERSION && ( conditionStack.top() == "version" || conditionStack.top() == "version else" ) )
+									{
+										CASTnode _fatherNode = activeASTnode.getFather;
+										if( _fatherNode !is null )
+										{
+											if( _fatherNode.getChildrenCount > 1 ) _fatherNode.killChild( _fatherNode.getChildrenCount - 1 ); else _fatherNode.killChild( 0 );
+											activeASTnode = _fatherNode;
+											conditionStack.pop();
+										}
+									}
+									else if( activeASTnode.kind == D_DEBUG && ( conditionStack.top() == "debug" || conditionStack.top() == "debug else" ) )
+									{
+										CASTnode _fatherNode = activeASTnode.getFather;
+										if( _fatherNode !is null )
+										{
+											if( _fatherNode.getChildrenCount > 1 ) _fatherNode.killChild( _fatherNode.getChildrenCount - 1 ); else _fatherNode.killChild( 0 );
+											activeASTnode = _fatherNode;
+											conditionStack.pop();
+										}									
+									}
 									break;
 								//}
 								/*
@@ -3552,6 +3711,8 @@ version(DIDE)
 									else if( next().tok == TOK.Topenparen )
 									{
 										int funTailIndex = getFunctionDeclareTailIndex( tokenIndex + 1 );
+										if( funTailIndex >= tokens.length ) throw new Exception( "Over Token Tail!" );
+										
 										if( tokens[funTailIndex].tok == TOK.Tassign )
 										{
 											parseAutoDeclaration();

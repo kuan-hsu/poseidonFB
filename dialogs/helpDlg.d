@@ -17,8 +17,16 @@ class CCompilerHelpDialog : CBaseDialog
 
 		try
 		{
-			scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptions.txt", Encoding.Unknown );
-			IupSetStrAttribute( text, "VALUE", toStringz( fileCompilerOptions.read ) );
+			version(FBIDE)
+			{
+				scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptionsFB.txt", Encoding.Unknown );
+				IupSetStrAttribute( text, "VALUE", toStringz( fileCompilerOptions.read ) );
+			}
+			else
+			{
+				scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptionsD.txt", Encoding.Unknown );
+				IupSetStrAttribute( text, "VALUE", toStringz( fileCompilerOptions.read ) );
+			}
 		}
 		catch( Exception e )
 		{
