@@ -6,17 +6,17 @@ private import tools;
 class CTable
 {
 private:
-	import tango.stdc.stringz;
+	import std.string;
 	
 	/*
-	typedef extern(C) int function( Ihandle*, char*, int, int ) _ACTION;
+	extern(C) int function( Ihandle*, char*, int, int ) _ACTION;
 	_ACTION ACTION;
 	
-	typedef extern(C) int function( Ihandle*, int, int, int, int, char* ) _BUTTON_CB;
+	extern(C) int function( Ihandle*, int, int, int, int, char* ) _BUTTON_CB;
 	_BUTTON_CB BUTTON_CB;
 	*/
-	
-	typedef extern(C) int function( Ihandle*, int, char* )		_DBLCLICK_CB;
+
+	alias extern(C) int function( Ihandle*, int, char* ) _DBLCLICK_CB;
 	_DBLCLICK_CB	DBLCLICK_CB;
 	
 	class ColumnMember
@@ -83,7 +83,7 @@ private:
 		Ihandle*	object;
 		
 	public:
-		this( char[] _title, ColumnMember _member, char[] TITLECOLOR = "", char[] TITLELINECOLOR = "" )
+		this( string _title, ColumnMember _member, string TITLECOLOR = "", string TITLELINECOLOR = "" )
 		{
 			object = IupFlatFrame( _member.object );
 			IupSetStrAttribute( object, "TITLE", toStringz( _title ) );
@@ -99,7 +99,7 @@ private:
 		Ihandle* object;
 		
 	public:
-		this( Ihandle* _member0, Ihandle* _member1, char[] BARLINECOLOR = "" )
+		this( Ihandle* _member0, Ihandle* _member1, string BARLINECOLOR = "" )
 		{
 			object = IupSplit( _member0, _member1 );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
@@ -116,7 +116,7 @@ private:
 			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 		
-		this( ColumnFrame _ColumnFrame0, ColumnFrame _ColumnFrame1, char[] BARLINECOLOR = "" )
+		this( ColumnFrame _ColumnFrame0, ColumnFrame _ColumnFrame1, string BARLINECOLOR = "" )
 		{
 			object = IupSplit( _ColumnFrame0.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
@@ -133,7 +133,7 @@ private:
 			IupSetAttribute( IupGetChild( object, 0 ), "STYLE", "FILL" ); // IupFlatSeparator
 		}
 		
-		this( ColumnSplit _ColumnSplit, ColumnFrame _ColumnFrame1, char[] BARLINECOLOR = "" )
+		this( ColumnSplit _ColumnSplit, ColumnFrame _ColumnFrame1, string BARLINECOLOR = "" )
 		{
 			object = IupSplit( _ColumnSplit.object, _ColumnFrame1.object );
 			IupSetAttribute( object, "COLOR", "255 255 255" );
@@ -181,7 +181,7 @@ public:
 		return split[$-1].object;
 	}
 
-	void addColumn( char[] _title, char[] TITLECOLOR = "", char[] TITLELINECOLOR = "", char[] BARLINECOLOR = "" )
+	void addColumn( string _title, string TITLECOLOR = "", string TITLELINECOLOR = "", string BARLINECOLOR = "" )
 	{
 		auto newMember = new ColumnMember;
 		columnMember ~= newMember;
@@ -202,17 +202,17 @@ public:
 		}
 	}
 	
-	void setColumnAttribute( char[] _name, char[] _value )
+	void setColumnAttribute( string _name, string _value )
 	{
 		if( columnFrame.length > 0 ) IupSetStrAttribute( columnFrame[$-1].object, toStringz( _name ), toStringz( _value ) );
 	}
 	
-	void setSplitAttribute( char[] _name, char[] _value )
+	void setSplitAttribute( string _name, string _value )
 	{
 		if( split.length > 0 ) IupSetStrAttribute( split[$-1].object, toStringz( _name ), toStringz( _value ) );
 	}
 	
-	void setItemAttribute( char[] _name, char[] _value, int column = -99999 )
+	void setItemAttribute( string _name, string _value, int column = -99999 )
 	{
 		if( column >= 0 )
 		{
@@ -226,7 +226,7 @@ public:
 		}
 	}
 	
-	void addItem( char[][] _value )
+	void addItem( string[] _value )
 	{
 		if( _value.length <= columnFrame.length )
 		{
@@ -235,7 +235,7 @@ public:
 		}
 	}
 	
-	void setItem( char[][] _value, int id, bool bFocus = true )
+	void setItem( string[] _value, int id, bool bFocus = true )
 	{
 		if( columnMember.length )
 			if( id <= IupGetInt( columnMember[0].object, "COUNT" ) )
@@ -279,9 +279,9 @@ public:
 		return -1;
 	}
 	
-	char[][] getSelection( int id = 0 )
+	string[] getSelection( int id = 0 )
 	{
-		char[][] results;
+		string[] results;
 		
 		if( id < 1 ) id = getSelectionID();
 		if( id > 0 )
@@ -309,7 +309,7 @@ public:
 		return columnFrame.length;
 	}
 	
-	void setImageId( char[] imageName, int id, int location )
+	void setImageId( string imageName, int id, int location )
 	{
 		if( id > 0 )
 		{
@@ -323,7 +323,7 @@ public:
 		}
 	}
 	
-	void setGlobalColor( char[] TITLECOLOR = "", char[] TITLELINECOLOR = "", char[] BARLINECOLOR = "" )
+	void setGlobalColor( string TITLECOLOR = "", string TITLELINECOLOR = "", string BARLINECOLOR = "" )
 	{
 		foreach( ColumnFrame f; columnFrame )
 		{

@@ -5,20 +5,17 @@ private import iup.iup;
 private import global, scintilla, actionManager, menu, tools;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
 private import parser.ast;
-
-
-private import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util;
-private import tango.io.FilePath, tango.io.UnicodeFile, tango.text.Ascii;
+private import std.string, std.conv, std.file, Array = std.array, Path = std.path, Uni = std.uni;
 
 class COutline
 {
-	private:
+private:
 	import 				iup.iup_scintilla;
-	import				parser.scanner, parser.token, parser.parser;
-	import				tango.core.Thread;
+	import				parser.scanner, parser.token, parser.parser, std.conv;
+	import				core.thread;
 
 	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList;
-	Ihandle*			outlineButtonCollapse, outlineButtonPR, outlineButtonShowLinenum, outlineToggleAnyWord, outlineButtonFresh, outlineButtonHide;
+	Ihandle*			outlineToolbarTitleImage, outlineButtonCollapse, outlineButtonPR, outlineButtonShowLinenum, outlineToggleAnyWord, outlineButtonFresh, outlineButtonHide;
 	CASTnode[]			listItemASTs;
 	int[]				listItemTreeID;
 	int					listItemIndex;
@@ -80,7 +77,7 @@ class COutline
 	{
 		int lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
 
-		char[] prot;
+		string prot;
 		if( _node.protection.length )
 		{
 			if( _node.protection != "public" && _node.protection != "shared" ) prot = "_" ~ _node.protection;
@@ -91,7 +88,7 @@ class COutline
 			switch( _node.kind )
 			{
 				case B_INCLUDE:
-					IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_import" );
+					IupSetAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_import" );
 					break;
 					
 				case B_VERSION: //, B_VERSION | B_PARAM:
@@ -130,11 +127,11 @@ class COutline
 					if( _node.base == "ctor" )
 					{
 						IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, toStringz( "IUP_ctor" ) );
-						IupSetStrAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, toStringz( "IUP_ctor" ) );
+						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, "IUP_ctor" );
 					}
 					else if( _node.base == "dtor" )
 					{
-						IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_dtor" );
+						IupSetAttributeId( rootTree, "IMAGE", lastAddNode, "IUP_dtor" );
 						IupSetAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode, "IUP_dtor" );
 					}
 					else
@@ -348,7 +345,7 @@ class COutline
 		{
 			version(FBIDE)
 			{
-				switch( lowerCase( _node.protection ) )
+				switch( Uni.toLower( _node.protection ) )
 				{
 					case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); break;
 					case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 127 39" ); break;
@@ -395,7 +392,7 @@ class COutline
 			
 			if( actTree == null ) return;
 			
-			char[]	lineNumString;
+			string	lineNumString;
 			bool	bShowLinenum;
 			Ihandle* showLineHandle = IupGetDialogChild( GLOBAL.mainDlg, "button_OutlineShowLinenum" );
 			if( showLineHandle != null )
@@ -409,7 +406,7 @@ class COutline
 				{
 					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
 					
-					if( bShowLinenum ) lineNumString = " .... [" ~ Integer.toString( _node.lineNumber ) ~ "]"; else lineNumString = "";
+					if( bShowLinenum ) lineNumString = " .... [" ~ to!(string)( _node.lineNumber ) ~ "]"; else lineNumString = "";
 					
 					if( _node !is null )
 					{
@@ -418,8 +415,8 @@ class COutline
 							switch( _node.kind )
 							{
 								case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-									char[] _type;
-									char[] _paramString;
+									string _type;
+									string _paramString;
 									
 									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 									switch( showIndex )
@@ -452,7 +449,7 @@ class COutline
 									break;
 								
 								case B_DEFINE | B_FUNCTION:
-									char[] _paramString = ParserAction.getSeparateParam( _node.type ~ lineNumString );
+									string _paramString = ParserAction.getSeparateParam( _node.type ~ lineNumString );
 									switch( showIndex )
 									{
 										case 0, 1:
@@ -503,8 +500,8 @@ class COutline
 									break;						
 							
 								case D_FUNCTION, D_FUNCTIONLITERALS:
-									char[] _type = _node.type;
-									char[] _paramString;
+									string _type = _node.type;
+									string _paramString;
 									
 									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 									switch( showIndex )
@@ -569,8 +566,8 @@ class COutline
 									break;										
 									
 								case D_FUNCTIONPTR:
-									char[] _type;
-									char[] _paramString;
+									string _type;
+									string _paramString;
 									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 									switch( showIndex )
 									{
@@ -620,7 +617,7 @@ class COutline
 
 		//if( _node.kind & B_SCOPE ) return;
 
-		char[]	BRANCH, LEAF;
+		string	BRANCH, LEAF;
 		if( bInsertMode )
 		{
 			BRANCH	= "INSERTBRANCH";
@@ -632,11 +629,11 @@ class COutline
 			LEAF	= "ADDLEAF";
 		}
 		
-		char[]	lineNumString;
+		string lineNumString;
 		Ihandle* showLineHandle = IupGetDialogChild( GLOBAL.mainDlg, "button_OutlineShowLinenum" );
 		if( showLineHandle != null )
 		{
-			if( fromStringz( IupGetAttribute( showLineHandle, "VALUE" ) ) == "ON" ) lineNumString = " .... [" ~ Integer.toString( _node.lineNumber ) ~ "]";
+			if( fromStringz( IupGetAttribute( showLineHandle, "VALUE" ) ) == "ON" ) lineNumString = " .... [" ~ to!(string)( _node.lineNumber ) ~ "]";
 		}
 		
 		bool bNoImage;
@@ -645,28 +642,23 @@ class COutline
 			switch( _node.kind & 16777215 )
 			{
 				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
-					char[] _type = _node.type;
-					char[] _paramString;
-					
+					string _type = _node.type;
+					string _paramString;
 					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 					switch( showIndex )
 					{
 						case 0:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 1:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 2:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
+
 					}
 					break;
 
@@ -675,27 +667,21 @@ class COutline
 					{
 						case 0, 1:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.type ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
 					}				
 					break;
 					
 				case B_DEFINE | B_FUNCTION:
-					char[] _paramString = ParserAction.getSeparateParam( _node.type );
+					string _paramString = ParserAction.getSeparateParam( _node.type );
 					switch( showIndex )
 					{
 						case 0, 1:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
 					}
 					break;
 					
@@ -703,12 +689,10 @@ class COutline
 					if( showIndex == 0 || showIndex == 2 )
 					{
 						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					else
 					{
 						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					break;
 					
@@ -718,34 +702,32 @@ class COutline
 
 				case B_VARIABLE:
 					if( !_node.type.length )
+					{
 						if( _node.base.length )
 						{
-							char[][] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
-							
-							char[] autoType = Util.join( types, "." );
+							string[] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
+							string autoType = Array.join( types, "." );
 							if( showIndex == 0 || showIndex == 2 )
 							{
 								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( autoType.length ? " : " ~ autoType : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							}
 							else
 							{
 								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							}
 							break;
-						}				
+						}
+					}
+					goto case;
 				
 				case  B_ALIAS:
 					if( showIndex == 0 || showIndex == 2 )
 					{
 						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					else
 					{
 						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					break;
 				/*
@@ -756,12 +738,10 @@ class COutline
 				*/
 				case B_WITH, B_NAMESPACE, B_VERSION:
 					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
 					
 				case B_SCOPE:
 					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "-SCOPE-" ~ lineNumString ) );
-					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
 
 				case B_INCLUDE:
@@ -771,12 +751,10 @@ class COutline
 				
 				case B_ENUMMEMBER:
 					IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
 					
 				case B_TYPE, B_CLASS, B_UNION, B_ENUM:
 					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : "" ) ~ lineNumString ) );
-					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
 
 				default:
@@ -793,28 +771,22 @@ class COutline
 					break;
 					
 				case D_FUNCTION, D_FUNCTIONLITERALS:
-					char[] _type = _node.type;
-					char[] _paramString;
-					
+					string _type = _node.type;
+					string _paramString;
 					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 					switch( showIndex )
 					{
 						case 0:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 1:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 2:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
 					}
 					break;
 
@@ -823,13 +795,10 @@ class COutline
 					{
 						case 0, 1:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ _node.type ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "this" ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
-					}				
+					}
 					break;
 
 				case D_DTOR:
@@ -837,77 +806,65 @@ class COutline
 					{
 						case 0, 1:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this()" ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "~this" ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
 					}				
 					break;
 					
 				case D_FUNCTIONPTR:
-					char[] _type;
-					char[] _paramString;
-					
+					string _type;
+					string _paramString;
 					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 					switch( showIndex )
 					{
 						case 0:
 							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 1:
 							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 2:
 							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
 					}					
 					break;
 					
 				case D_VARIABLE:
 					if( !_node.type.length )
+					{
 						if( _node.base.length )
 						{
-							char[][] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
-							
-							char[] autoType = Util.join( types, "." );
+							string[] types = ParserAction.getDivideWordWithoutSymbol( _node.base );
+							string autoType = Array.join( types, "." );
 							if( showIndex == 0 || showIndex == 2 )
 							{
 								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( autoType.length ? " : " ~ autoType : "" ) ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							}
 							else
 							{
 								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-								IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							}
 							break;
 						}
+					}
+					goto case;
 					
 				case D_ALIAS:
 					if( showIndex == 0 || showIndex == 2 )
 					{
 						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					else
 					{
 						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					break;
 
 				case D_ENUMMEMBER:
 					IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
-					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
 					
 				case D_CLASS, D_INTERFACE:
@@ -915,13 +872,9 @@ class COutline
 					{
 						case 0, 2:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : _node.base ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
-							
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
 					}
 					break;
 
@@ -930,38 +883,30 @@ class COutline
 					{
 						case 0:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.type ~ ( _node.base.length ? " : " ~ _node.base : _node.base ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 1:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.type ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						case 2:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ ( _node.base.length ? " : " ~ _node.base : _node.base ) ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 							break;
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-							IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
-							break;
 					}
 					break;					
 					
 				case D_STRUCT, D_UNION, D_VERSION, D_DEBUG, D_SCOPE:
 					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-					IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					break;
 
 				case D_ENUM:	
 					if( !_node.name.length )
 					{
 						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( "-Anonymous-" ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					else
 					{
 						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
-						IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, GLOBAL.editColor.outlineFore.toCString );
 					}
 					break;	
 
@@ -969,9 +914,11 @@ class COutline
 					bNoImage = true;
 			}
 		}
+		
 
 		if( !bNoImage )
 		{
+			IupSetStrAttributeId( rootTree, "COLOR", bracchID + 1, toStringz( GLOBAL.editColor.outlineFore ) );
 			lastAddNode = IupGetInt( rootTree, "LASTADDNODE" );
 			setImage( rootTree, _node );
 			IupSetAttributeId( rootTree, "USERDATA", lastAddNode, cast(char*) _node );
@@ -993,7 +940,6 @@ class COutline
 		{
 			int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
 			Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
-
 			if( actTree != null )
 			{
 				try
@@ -1043,7 +989,7 @@ class COutline
 		// Outline Toolbar
 		outlineButtonCollapse = IupButton( null, null );
 		IupSetAttributes( outlineButtonCollapse, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_collapse2,VISIBLE=NO" );
-		IupSetAttribute( outlineButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
+		IupSetStrAttribute( outlineButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( outlineButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
@@ -1069,7 +1015,6 @@ class COutline
 					if( nowState != null )
 					{
 						if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetAttribute( tree, "VISIBLE", "NO" );
-						//IupSetAttributeId( tree, "STATE", 0, "COLLAPSED" );
 						
 						for( int i = IupGetInt( tree, "COUNT" ) - 1; i > 0; --i )
 						{
@@ -1088,7 +1033,6 @@ class COutline
 							}
 						}
 						
-						//IupSetAttributeId( tree, "STATE", 0, "EXPANDED" );
 						if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetAttribute( tree, "VISIBLE", "YES" );
 					}
 				}
@@ -1098,7 +1042,7 @@ class COutline
 		
 		outlineButtonPR = IupButton( null, "PR" );
 		IupSetAttributes( outlineButtonPR, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_pr,VISIBLE=NO,NAME=button_OutlinePR" );
-		IupSetAttribute( outlineButtonPR, "TIP", GLOBAL.languageItems["showpr"].toCString );
+		IupSetStrAttribute( outlineButtonPR, "TIP", GLOBAL.languageItems["showpr"].toCString );
 		IupSetCallback( outlineButtonPR, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			if( GLOBAL.outlineTree.showIndex == 3 ) GLOBAL.outlineTree.showIndex = 0; else GLOBAL.outlineTree.showIndex ++;
@@ -1154,12 +1098,12 @@ class COutline
 
 		outlineToggleAnyWord = IupToggle( null, null );
 		IupSetAttributes( outlineToggleAnyWord, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_notwholeword,IMPRESS=icon_wholeword,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineWholeWord" );
-		IupSetAttribute( outlineToggleAnyWord, "TIP", GLOBAL.languageItems["searchanyword"].toCString );
+		IupSetStrAttribute( outlineToggleAnyWord, "TIP", GLOBAL.languageItems["searchanyword"].toCString );
 		
 
 		outlineButtonShowLinenum = IupToggle( null, null );
 		IupSetAttributes( outlineButtonShowLinenum, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_show_linenum,VALUE=OFF,VISIBLE=NO,NAME=button_OutlineShowLinenum" );
-		IupSetAttribute( outlineButtonShowLinenum, "TIP", GLOBAL.languageItems["showln"].toCString );
+		IupSetStrAttribute( outlineButtonShowLinenum, "TIP", GLOBAL.languageItems["showln"].toCString );
 		IupSetCallback( outlineButtonShowLinenum, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
@@ -1188,7 +1132,7 @@ class COutline
 
 		outlineButtonFresh = IupButton( null, null );
 		IupSetAttributes( outlineButtonFresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,CANFOCUS=NO,IMAGE=icon_refresh,VISIBLE=NO,NAME=button_OutlineRefresh" );
-		IupSetAttribute( outlineButtonFresh, "TIP", GLOBAL.languageItems["sc_reparse"].toCString );
+		IupSetStrAttribute( outlineButtonFresh, "TIP", GLOBAL.languageItems["sc_reparse"].toCString );
 		IupSetCallback( outlineButtonFresh, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
@@ -1198,20 +1142,16 @@ class COutline
 
 		outlineButtonHide = IupButton( null, null );
 		IupSetAttributes( outlineButtonHide, "ALIGNMENT=ALEFT,FLAT=YES,CANFOCUS=NO,IMAGE=icon_shift_l" );
-		IupSetAttribute( outlineButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
+		IupSetStrAttribute( outlineButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( outlineButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 			return IUP_DEFAULT;
 		});
 
-		/*
-		Ihandle* outlineToolbarTitleImage = IupLabel( null );
-		IupSetAttributes( outlineToolbarTitleImage, "IMAGE=icon_outline,ALIGNMENT=ALEFT:ACENTER" );
-		*/
-		Ihandle* outlineToolbarTitleImage = IupButton( null, null );
-		IupSetAttributes( outlineToolbarTitleImage, "IMAGE=icon_outline,ALIGNMENT=ALEFT,FLAT=YES,CANFOCUS=NO" );
-		IupSetAttribute( outlineToolbarTitleImage, "TIP", GLOBAL.languageItems["hidesearch"].toCString );
+		outlineToolbarTitleImage = IupButton( null, null );
+		IupSetAttributes( outlineToolbarTitleImage, "ALIGNMENT=ALEFT,FLAT=YES,CANFOCUS=NO,IMAGE=icon_outline" );
+		IupSetStrAttribute( outlineToolbarTitleImage, "TIP", GLOBAL.languageItems["hidesearch"].toCString );
 		IupSetCallback( outlineToolbarTitleImage, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* _expandHandle = IupGetDialogChild( GLOBAL.outlineTree.getLayoutHandle, "Outline_Expander" );
@@ -1229,14 +1169,6 @@ class COutline
 					Ihandle* _backgroundbox = IupGetChild( _expandHandle, 1 );
 					if( _backgroundbox != null ) IupSetAttributes( _backgroundbox, "VISIBLE=YES,ACTIVE=YES" ); // Make outlineTreeNodeList to show
 				}
-				/*
-				if( fromStringz( IupGetAttribute( _listHandle, "VISIBLE" ) ) == "NO" )
-					IupSetAttributes( _listHandle, "VISIBLE=YES,ACTIVE=YES,SIZE=x12" );
-				else
-					IupSetAttributes( _listHandle, "VISIBLE=NO,ACTIVE=NO,SIZE=x1" );
-					
-				IupRefresh( GLOBAL.outlineTree.getLayoutHandle );
-				*/
 			}
 			return IUP_DEFAULT;
 		});
@@ -1248,46 +1180,42 @@ class COutline
 
 		outlineTreeNodeList = IupList( null );
 		IupSetAttributes( outlineTreeNodeList, "ACTIVE=NO,VISIBLE=NO,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8,VISIBLE=NO,NAME=list_Outline" );
-		IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-		IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
+		//IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+		//IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
 		IupSetCallback( outlineTreeNodeList, "ACTION",cast(Icallback) &COutline_List_ACTION );
 		IupSetCallback( outlineTreeNodeList, "K_ANY",cast(Icallback) &COutline_List_K_ANY );
 		version(Windows) IupSetCallback( outlineTreeNodeList, "EDIT_CB",cast(Icallback) &COutline_List_EDIT_CB );
-		
 		
 		Ihandle* expander = IupExpander( outlineTreeNodeList );
 		IupSetAttributes( expander, "BARSIZE=0,STATE=CLOSE,EXPAND=HORIZONTAL,NAME=Outline_Expander" );
 		Ihandle* _backgroundbox = IupGetChild( expander, 0 );
 		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image 		
 		
-
 		layoutHandle = IupVbox( outlineToolbarH, expander, zBoxHandle, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" );
 		layoutHandle = IupBackgroundBox( layoutHandle );
-		
-		GLOBAL.objectDefaultParser = loadObjectParser();
-		
-		changaIcons();
+
+		changeIcons();
 	}
 	
-	/*
-	void toBoldTitle( Ihandle* _tree, int id )
-	{
-		int commaPos = Util.index( GLOBAL.fonts[4].fontString, "," );
-		if( commaPos < GLOBAL.fonts[4].fontString.length )
-		{
-			char[] fontString = Util.substitute( GLOBAL.fonts[5].fontString.dup, ",", ",Bold " );
-			IupSetStrAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
-		}
-	}	
-	*/
 	
-	void changaIcons()
+public:
+	this()
 	{
-		char[] tail;
-		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
+		zBoxHandle = IupZbox( null );
+		IupSetAttributes( zBoxHandle, "NAME=zbox_Outline" );
+		createLayout();
+	}
 
+	~this(){}
+
+	void changeIcons()
+	{
+		string tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
+
+		IupSetStrAttribute( outlineToolbarTitleImage, "IMAGE", toStringz( "icon_outline" ~ tail ) );
 		IupSetStrAttribute( outlineButtonCollapse, "IMAGE", toStringz( "icon_collapse2" ~ tail ) );
 		switch( showIndex )
 		{
@@ -1303,41 +1231,38 @@ class COutline
 		IupSetStrAttribute( outlineButtonHide, "IMAGE", toStringz( "icon_shift_l" ~ tail ) );
 	}
 
-
-	public:
-	this()
-	{
-		zBoxHandle = IupZbox( null );
-		IupSetAttributes( zBoxHandle, "NAME=zbox_Outline" );
-		createLayout();
-	}
-
-	~this()
-	{
-	}
-
 	void changeColor()
 	{
-		IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-		IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );	
-		IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
+		if( GLOBAL.bDarkMode && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+		{
+			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "DarkMode_CFD", null );
+		}
+		else
+		{
+			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "CFD", null );
+		}
 		
-		IupSetAttribute( outlineTreeNodeList, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-		IupSetAttribute( outlineTreeNodeList, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-
+		IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		
+		IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+		IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );	
+		IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );	
+		
 		for( int i = 0; i < IupGetChildCount( zBoxHandle ); ++i )
 		{
 			Ihandle* ih = IupGetChild( zBoxHandle, i ); // tree
 			if( ih != null )
 			{
-				IupSetAttribute( ih, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-				
-				if( GLOBAL.editColor.prjViewHLT.toDString.length ) IupSetStrAttribute( ih, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+				IupSetAttribute( ih, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+				IupSetAttribute( ih, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );					
+
+				if( GLOBAL.editColor.prjViewHLT.length ) IupSetStrAttribute( ih, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 				if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 				{
-					IupSetStrAttribute( ih, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-					IupSetStrAttribute( ih, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
-					IupSetStrAttribute( ih, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+					IupSetStrAttribute( ih, "SB_FORECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+					IupSetStrAttribute( ih, "BORDERCOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+					IupSetStrAttribute( ih, "HLCOLORALPHA", toStringz( GLOBAL.editColor.prjViewHLTAlpha ) );
 				}
 				
 				try
@@ -1346,7 +1271,7 @@ class COutline
 					{
 						if( j == 0 )
 						{
-							IupSetAttributeId( ih, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
+							IupSetStrAttributeId( ih, "COLOR", 0, toStringz( GLOBAL.editColor.prjTitle ) );
 							IupSetStrAttributeId( ih, "TITLEFONT", 0, toStringz( GLOBAL.fonts[5].fontString ) );// Outline	
 							IupSetAttributeId( ih, "TITLEFONTSTYLE", 0, "Bold" );// Outline	
 						}
@@ -1355,10 +1280,10 @@ class COutline
 							auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", j );
 							if( _node !is null )
 							{
-								switch( lowerCase( _node.protection ) )
+								switch( Uni.toLower( _node.protection ) )
 								{
 									case "private", "protected":	break;
-									default:						IupSetAttributeId( ih, "COLOR", j, GLOBAL.editColor.outlineFore.toCString );
+									default:						IupSetStrAttributeId( ih, "COLOR", j, toStringz( GLOBAL.editColor.outlineFore ) );
 								}
 								
 								version(FBIDE)
@@ -1390,7 +1315,7 @@ class COutline
 					IupMessage( "changeColor() Error", toStringz( e.toString ) );
 				}
 			}
-		}
+		}			
 	}
 
 
@@ -1417,7 +1342,7 @@ class COutline
 			version(FBIDE) if( head.kind != B_BAS && head.kind != B_BI ) return null;
 			version(DIDE) if( head.kind != D_MODULE ) return null;
 			
-			char[] fullPath = head.name;
+			string fullPath = head.name;
 			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 			{
 				version(IUP327)
@@ -1426,20 +1351,20 @@ class COutline
 					IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
 					IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
 					IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-					if( GLOBAL.editColor.prjViewHLT.toDString.length ) IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+					if( GLOBAL.editColor.prjViewHLT.length ) IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 				}
 				else
 				{
 					tree = IupFlatTree();
 					IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1" );
-					IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-					IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
+					IupSetStrAttribute( tree, "SB_FORECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+					IupSetStrAttribute( tree, "BORDERCOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 					IupSetStrAttribute( tree, "ADDBRANCH-1", toStringz( fullPath ) );
 					IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-					if( GLOBAL.editColor.prjViewHLT.toDString.length )
+					if( GLOBAL.editColor.prjViewHLT.length )
 					{
-						IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
-						IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+						IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
+						IupSetStrAttribute( tree, "HLCOLORALPHA", toStringz( GLOBAL.editColor.prjViewHLTAlpha ) );
 					}
 				}
 			}
@@ -1449,16 +1374,18 @@ class COutline
 				IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,BORDER=NO" );
 				IupSetStrAttribute( tree, "TITLE", toStringz( fullPath ) );
 				IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &COutline_BUTTON_CB );
-				if( GLOBAL.editColor.prjViewHLT.toDString.length ) IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+				if( GLOBAL.editColor.prjViewHLT.length ) IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 			}
 			
-			IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.prjTitle.toCString );
+			IupSetStrAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.prjTitle ) );
 			IupSetAttributeId( tree, "TITLEFONTSTYLE", 0, "Bold" ); // Bold
 			//toBoldTitle( tree, 0 );
+			
 			version(FBIDE)
 			{
-				IupSetAttribute( tree, "IMAGE0", "icon_folder" );
-				IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_folder_open" );
+				string tail = GLOBAL.editorSetting00.IconInvert == "ON" ? "_invert" : "";
+				IupSetStrAttribute( tree, "IMAGE0", toStringz( "icon_folder" ~ tail ) );
+				IupSetStrAttribute( tree, "IMAGEEXPANDED0", toStringz( "icon_folder_open" ~ tail ) );
 			}
 			version(DIDE)
 			{
@@ -1473,11 +1400,20 @@ class COutline
 			foreach_reverse( CASTnode t; head.getChildren() )
 				append( tree, t, 0 );
 			
-			IupSetStrAttribute( zBoxHandle, "FONT",  toStringz( GLOBAL.fonts[5].fontString ) );// Outline
-			IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-			IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );			
+			IupSetStrAttribute( zBoxHandle, "FONT", toStringz( GLOBAL.fonts[5].fontString ) );// Outline
+			IupSetAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+			IupSetAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );			
 			
 			if( IupGetChildCount( zBoxHandle ) > 0 ) showTreeAndButtons( true );
+			
+			if( GLOBAL.bDarkMode &&  GLOBAL.editorSetting00.UseDarkMode == "ON" )
+			{
+				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "DarkMode_CFD", null );
+			}
+			else
+			{
+				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "CFD", null );
+			}				
 			
 			return tree;
 		}
@@ -1511,7 +1447,7 @@ class COutline
 	}
 	
 	
-	void changeTree( char[] fullPath )
+	void changeTree( string fullPath )
 	{
 		try
 		{
@@ -1520,7 +1456,7 @@ class COutline
 				Ihandle* ih = IupGetChild( zBoxHandle, i );
 				if( ih != null )
 				{
-					char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+					string _fullPath = fSTRz( IupGetAttributeId( ih, "TITLE", 0 ) );
 					version(DIDE)
 					{
 						auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
@@ -1545,7 +1481,7 @@ class COutline
 		showTreeAndButtons( false );
 	}
 
-	void cleanTree( char[] fullPath, bool bDestroy = true )
+	void cleanTree( string fullPath, bool bDestroy = true )
 	{
 		try
 		{
@@ -1554,7 +1490,7 @@ class COutline
 				Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ); 
 				if( ih != null )
 				{
-					char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+					string _fullPath = fSTRz( IupGetAttributeId( ih, "TITLE", 0 ) );
 					version(DIDE)
 					{
 						auto _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
@@ -1573,7 +1509,7 @@ class COutline
 								if( fullPathByOS( fullPath ) in GLOBAL.parserManager )
 								{
 									auto pParser = GLOBAL.parserManager[fullPathByOS(fullPath)];
-									if( pParser !is null ) delete pParser;
+									if( pParser !is null ) destroy( pParser );
 									GLOBAL.parserManager.remove( fullPathByOS(fullPath) );
 								}
 							}
@@ -1588,15 +1524,6 @@ class COutline
 			{
 				IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
 				showTreeAndButtons( false );
-				/*
-				IupSetAttribute( outlineTreeNodeList, "VISIBLE", "NO" );
-				IupSetAttribute( outlineTreeNodeList, "VALUE", "" );
-				IupSetAttribute( outlineButtonCollapse, "VISIBLE", "NO" );
-				IupSetAttribute( outlineButtonPR, "VISIBLE", "NO" );
-				IupSetAttribute( outlineToggleAnyWord, "VISIBLE", "NO" );
-				IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "NO" );
-				IupSetAttribute( outlineButtonFresh, "VISIBLE", "NO" );
-				*/
 			}
 		}
 		catch( Exception e )
@@ -1605,14 +1532,14 @@ class COutline
 		}
 	}
 
-	Ihandle* getTree( char[] fullPath )
+	Ihandle* getTree( string fullPath )
 	{
 		for( int i = 0; i < IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ); ++i )
 		{
 			Ihandle* ih = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, i ); 
 			if( ih != null )
 			{
-				char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) );
+				string _fullPath = fSTRz( IupGetAttributeId( ih, "TITLE", 0 ) );
 				version(DIDE)
 				{
 					try
@@ -1637,53 +1564,49 @@ class COutline
 	Ihandle* getZBoxHandle(){ return zBoxHandle; }
 
 
-	CASTnode createParserByText( char[] fullPath, char[] document )
+	CASTnode createParserByText( string fullPath, string document )
 	{
 		if( GLOBAL.enableParser != "ON" ) return null;
 		
-		scope f = new FilePath( fullPath );
-		char[] _ext = lowerCase( f.ext() );
-
-		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) )	return null;
-		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
+		string _ext = Path.extension( Uni.toLower( fullPath ) );
+		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
+		version(DIDE)	if( _ext != ".d" && _ext != ".di" )	return null;
 		
 		GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-		GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
+		auto _ast = GLOBAL.Parser.parse( fullPath );
+		GLOBAL.parserManager[fullPathByOS(fullPath)] = cast(shared CASTnode) _ast;
 
 		Ihandle* _tree = getTree( fullPath );
 		if( _tree != null )	cleanTree( fullPath );
-		createTree( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+		createTree( _ast );
 		
-		return GLOBAL.parserManager[fullPathByOS(fullPath)];
+		return _ast;
 	}
 
 
-	CASTnode loadFile( char[] fullPath )
+	CASTnode loadFile( string fullPath )
 	{
 		if( GLOBAL.enableParser != "ON" ) return null;
-		
-		scope f = new FilePath( fullPath );
 
-		char[] _ext = lowerCase( f.ext() );
-
-		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) )	return null;
-		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;
+		string _ext = Path.extension( Uni.toLower( fullPath ) );
+		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
+		version(DIDE)	if( _ext != ".d" && _ext != ".di" )	return null;
 		
 		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
 		{
 			if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 			{
 				Ihandle* _tree = getTree( fullPath );
-				if( _tree == null ) createTree( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+				if( _tree == null ) createTree( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)] );
 			}
 			else
 			{
-				char[] document = GLOBAL.scintillaManager[fullPathByOS(fullPath)].getText();
+				string document = GLOBAL.scintillaManager[fullPathByOS(fullPath)].getText();
 				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-				GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
+				GLOBAL.parserManager[fullPathByOS(fullPath)] = cast(shared CASTnode)GLOBAL.Parser.parse( fullPath );
 				Ihandle* _tree = getTree( fullPath );
 				if( _tree != null )	cleanTree( fullPath );
-				createTree( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+				createTree( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)] );
 			}
 			changeTree( fullPath );
 		}
@@ -1692,86 +1615,32 @@ class COutline
 			return null;
 		}
 
-		/+
-		CScintilla actCSci;
-		
-		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-		{
-			if( fullPathByOS(fullPath) == fullPathByOS(cSci.getFullPath()) )
-			{
-				actCSci = cSci;
-				break;
-			}
-		}
-
-
-		if( actCSci !is null )
-		{
-			if( fullPathByOS(fullPath) in GLOBAL.parserManager )
-			{
-				cleanTree( fullPath );
-			}
-			else
-			{
-				char[] document = actCSci.getText();
-				GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
-				GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
-				//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "\t"~fullPath ) );
-			}
-
-			if( GLOBAL.parserManager[fullPathByOS(fullPath)] !is null ) createTree( GLOBAL.parserManager[fullPathByOS(fullPath)] );
-			CScintilla nowCsci = ScintillaAction.getActiveCScintilla();
-			if( nowCsci == actCSci ) changeTree( fullPath );
-		}
-		else
-		{
-			if( fullPathByOS(fullPath) in GLOBAL.parserManager )
-			{
-			}
-			else
-			{
-				// Don't Create Tree
-				// Parser
-				if( f.exists() )
-				{
-					GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) );
-					GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
-					//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( fullPath ) );
-				}
-			}
-		}
-		+/
-
-		return GLOBAL.parserManager[fullPathByOS(fullPath)];
-
-		//hardRefresh( fullPath );
+		return cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)];
 	}
 	
-	CASTnode loadParser( char[] fullPath )
+	CASTnode loadParser( string fullPath )
 	{
 		if( GLOBAL.enableParser != "ON" ) return null;
 		
-		scope f = new FilePath( fullPath );
-
-		char[] _ext = lowerCase( f.ext() );
-
-		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) )	return null;
-		version(DIDE)	if( _ext != "d" && _ext != "di" )	return null;		
+		string _ext = Path.extension( Uni.toLower( fullPath ) );
+		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
+		version(DIDE)	if( _ext != ".d" && _ext != ".di" )	return null;		
 
 		if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 		{
-			return GLOBAL.parserManager[fullPathByOS(fullPath)];
+			return cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)];
 		}
 		else
 		{
 			// Don't Create Tree
 			// Parser
-			if( f.exists() )
+			if( exists( fullPath ) )
 			{
 				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) ) )
 				{
-					GLOBAL.parserManager[fullPathByOS(fullPath)] = GLOBAL.Parser.parse( fullPath );
-					return GLOBAL.parserManager[fullPathByOS(fullPath)];
+					auto _ast = GLOBAL.Parser.parse( fullPath );
+					GLOBAL.parserManager[fullPathByOS(fullPath)] = cast(shared CASTnode) _ast;
+					return _ast;
 				}
 			}
 		}
@@ -1779,9 +1648,9 @@ class COutline
 		return null;
 	}
 
-	char[] getImageName( CASTnode _node )
+	string getImageName( CASTnode _node )
 	{
-		char[] prot;
+		string prot;
 		if( _node.protection.length )
 		{
 			if( _node.protection != "public" && _node.protection != "shared" ) prot = "_" ~ _node.protection;
@@ -1931,8 +1800,6 @@ class COutline
 
 	void insertNodeByLineNumber( CASTnode[] newASTNodes, int insertID )
 	{
-		//if( insertID < 0 ) return;
-
 		try
 		{
 			Ihandle* actTree = getActiveTree();
@@ -1963,36 +1830,11 @@ class COutline
 
 	void insertBlockNodeByLineNumber( CASTnode newASTNode, int insertID )
 	{
-		//if( insertID < 0 ) return;
-		
 		try
 		{
 			Ihandle* actTree = getActiveTree();
 			if( actTree != null )
 			{
-				/+
-				int insertID;
-				for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-				{
-					CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-					if( _node !is null )
-					{
-						if( _node.lineNumber == _ln  )
-						{
-							insertID = i;
-							IupSetAttributeId( actTree, "DELNODE", i, "SELECTED" );
-							break;
-						}
-						else if( _node.lineNumber < _ln )
-						{
-							insertID = i + 1;
-							break;
-						}
-					}
-				}
-
-				if( insertID > 0 ) insertID --;
-				+/
 				if( insertID <= 0 ) append( actTree, newASTNode, insertID ); else append( actTree, newASTNode, insertID, true );
 				int markID = IupGetInt( actTree, "LASTADDNODE" );
 				IupSetAttributeId( actTree, "MARKED", markID, "YES" );
@@ -2002,70 +1844,16 @@ class COutline
 		catch( Exception e ){}
 	}	
 	
-	/*
-	void markTreeNode( int _ln = -1, char[] _name = "-NULL", int _kind = -1, char[] _type = "-NULL" )
-	{
-		Ihandle* actTree = getActiveTree();
-		if( actTree != null )
-		{
-			for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-			{
-				CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-				bool bMatch;
-				
-				if( _node !is null )
-				{
-					if( _ln != -1 )
-					{
-						if( _node.lineNumber == _ln  )
-						{
-							bMatch = true; 
-						}
-						else if( _node.lineNumber < _ln  )
-						{
-							return;
-						}
-						else
-						{
-							continue;
-						}
-					}
-					if( _name != "-NULL" )
-					{
-						if( _node.name == _name  ) bMatch = true; else continue;
-					}
-					if( _kind != -1 )
-					{
-						if( _node.kind == _kind  ) bMatch = true; else continue;
-					}
-					if( _type != "-NULL" )
-					{
-						if( _node.type == _type  ) bMatch = true; else continue;
-					}
-				}
-
-				if( bMatch )
-				{
-					//IupSetAttributeId( actTree, "MARKED", i, "YES" );
-					version(Windows) IupSetAttributeId( actTree, "MARKED", i, "YES" );
-					IupSetInt( actTree, "VALUE", i );
-					return;
-				}
-			}
-		}			
-	}
-	*/
 	
 	bool refresh( CScintilla cSci )
 	{
 		if( GLOBAL.enableParser != "ON" ) return false;
 		if( cSci is null ) return false;
 
-		scope f = new FilePath( cSci.getFullPath );
+		string _ext = Uni.toLower( Path.extension( cSci.getFullPath ) );
 
-		char[] _ext = lowerCase( f.ext() );
-		version(FBIDE)	if( !tools.isParsableExt( f.ext, 7 ) ) return false;
-		version(DIDE)	if( _ext != "d" && _ext != "di" ) 	return false;
+		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) ) return false;
+		version(DIDE)	if( _ext != ".d" && _ext != ".di" )	return false;
 		
 		if( cSci !is null )
 		{
@@ -2076,14 +1864,14 @@ class COutline
 				{
 					try
 					{
-						char[] document = cSci.getText();
+						string document = cSci.getText();
 						CASTnode astHeadNode;
 						GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
 						astHeadNode = GLOBAL.Parser.parse( cSci.getFullPath );
 						
-						CASTnode temp = GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
-						GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)] = astHeadNode;
-						delete temp;
+						CASTnode temp = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
+						GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)] = cast(shared CASTnode) astHeadNode;
+						destroy( temp );
 						
 						if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 						{
@@ -2100,7 +1888,7 @@ class COutline
 								IupSetAttributeId( actTree, "USERDATA", 0, cast(char*) astHeadNode );
 								IupSetAttribute( actTree, "TITLE", toStringz( astHeadNode.name ) );						
 							}
-							IupSetAttributeId( actTree, "COLOR", 0, GLOBAL.editColor.outlineFore.toCString );
+							IupSetAttributeId( actTree, "COLOR", 0, toStringz( GLOBAL.editColor.outlineFore ) );
 							foreach_reverse( CASTnode t; astHeadNode.getChildren() )
 							{
 								append( actTree, t, 0 );
@@ -2115,23 +1903,10 @@ class COutline
 				}
 			}
 		}
-
-		/+
-		try
-		{
-			ReparseThread p = new ReparseThread( cSci.getFullPath, cSci.getText(), getTree( cSci.getFullPath ) );
-			p.start();
-		}
-		catch( Exception e )
-		{
-			return false;
-		}
-		+/
-
 		return true;
 	}
 
-	CASTnode parserText( char[] text )
+	CASTnode parserText( string text )
 	{
 		// Don't Create Tree
 		try
@@ -2145,7 +1920,7 @@ class COutline
 		}
 		catch( Exception e )
 		{
-			IupMessage( "ERROR", toStringz( "parserText() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			IupMessage( "ERROR", toStringz( "parserText() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 		}
 
 		return null;
@@ -2153,7 +1928,7 @@ class COutline
 	
 	version(FBIDE)
 	{
-		CASTnode parserTextUnderTypeBody( char[] text )
+		CASTnode parserTextUnderTypeBody( string text )
 		{
 			try
 			{
@@ -2161,58 +1936,11 @@ class COutline
 			}
 			catch( Exception e )
 			{
-				IupMessage( "ERROR", toStringz( "parserTextUnderTypeBody() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				IupMessage( "ERROR", toStringz( "parserTextUnderTypeBody() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 			}
 
 			return null;
 		}
-	}
-	
-	
-	CASTnode loadObjectParser()
-	{
-		version(FBIDE)
-		{
-			scope objectFilePath = new FilePath( "settings/FB_BuiltinFunctions.bi" );
-			if( objectFilePath.exists )
-			{
-				return loadParser( fullPathByOS( objectFilePath.toString() ) );
-			}
-		}
-		version(DIDE)
-		{
-			scope objectFilePath = new FilePath( GLOBAL.compilerFullPath );
-			objectFilePath.set( objectFilePath.path );
-			char[] _path = objectFilePath.parent;
-			
-			if( _path.length )
-				if( _path[$-1] != '/' ) _path ~= '/';
-			
-			
-			objectFilePath.set( _path ~ "import/object.di" );
-			
-			if( objectFilePath.exists )
-			{
-				return loadParser( _path ~ "import/object.di" );
-			}
-			else
-			{	
-				objectFilePath.set( GLOBAL.compilerFullPath );
-				objectFilePath.set( objectFilePath.path );
-				objectFilePath.set( objectFilePath.parent );
-				_path = objectFilePath.parent;
-				if( _path.length )
-					if( _path[$-1] != '/' ) _path ~= '/';
-				
-				objectFilePath.set( _path ~ "src/druntime/import/object.d" );
-				if( objectFilePath.exists )
-				{
-					return loadParser( fullPathByOS( objectFilePath.toString() ) );
-				}
-			}
-		}
-		
-		return null;
 	}
 	
 	
@@ -2243,7 +1971,7 @@ extern(C)
 						
 						if( _node !is null )
 						{
-							char[] _fullPath = fromStringz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
+							string _fullPath = fSTRz( IupGetAttributeId( ih, "TITLE", 0 ) ); // Get Tree-Head Title
 							version(DIDE)
 							{
 								CASTnode _headnode = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", 0 );
@@ -2262,8 +1990,8 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			IupMessage( "ERROR", toStringz( "COutline_BUTTON_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
-			//GLOBAL.IDEMessageDlg.print( "COutline_BUTTON_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
+			IupMessage( "ERROR", toStringz( "COutline_BUTTON_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
+			//GLOBAL.IDEMessageDlg.print( "COutline_BUTTON_CB() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) );
 		}
 
 		return IUP_DEFAULT;
@@ -2280,7 +2008,7 @@ extern(C)
 				int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
 				Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
 
-				char[] imageName, editText = Util.trim( fromStringz( IupGetAttribute( ih, "VALUE" ) ) );
+				string imageName, editText = strip( fSTRz( IupGetAttribute( ih, "VALUE" ) ) );
 				GLOBAL.outlineTree.cleanListItems();
 
 				bool bAnyWord, bGo;
@@ -2300,22 +2028,20 @@ extern(C)
 						{
 							if( bAnyWord )
 							{
-								if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) < _node.name.length ) bGo = true; else bGo = false;
+								if( indexOf( tools.fullPathByOS( _node.name ), tools.fullPathByOS( editText ) ) > -1 ) bGo = true; else bGo = false;
 							}
 							else
 							{
-								if( Util.index( lowerCase( _node.name ), lowerCase( editText ) ) == 0 ) bGo = true; else bGo = false;
+								if( indexOf( tools.fullPathByOS( _node.name ), tools.fullPathByOS( editText ) ) == 0 ) bGo = true; else bGo = false;
 							}
 							
 							if( bGo )
 							{
-								IupSetAttribute( ih, "APPENDITEM", toStringz( _node.name ) );
-								
+								IupSetStrAttribute( ih, "APPENDITEM", toStringz( _node.name ) );
 								GLOBAL.outlineTree.listItemASTs ~= _node;
 								GLOBAL.outlineTree.listItemTreeID ~= i;
-								
 								imageName = GLOBAL.outlineTree.getImageName( _node );
-								if( imageName.length ) IupSetAttributeId( ih, "IMAGE", IupGetInt( ih, "COUNT" ), toStringz( imageName ) );
+								if( imageName.length ) IupSetStrAttributeId( ih, "IMAGE", IupGetInt( ih, "COUNT" ), toStringz( imageName ) );
 							}
 						}
 					}
@@ -2349,7 +2075,7 @@ extern(C)
 						{
 							if( GLOBAL.outlineTree.listItemIndex <= GLOBAL.outlineTree.listItemASTs.length )
 							{
-								char[] text = Util.trim( fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup );
+								string text = strip( fSTRz( IupGetAttribute( ih, "VALUE" ) ) );
 								if( text.length )
 								{
 									ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[GLOBAL.outlineTree.listItemIndex-1].lineNumber );
@@ -2375,7 +2101,7 @@ extern(C)
 			}
 			else
 			{
-				//IupMessage( "",toStringz( Integer.toString( GLOBAL.KeyNumber ) ) );
+				//IupMessage( "",toStringz( to!(string)( GLOBAL.KeyNumber ) ) );
 			}
 
 		}
@@ -2391,7 +2117,6 @@ extern(C)
 			GLOBAL.outlineTree.listItemIndex = item;
 			
 			bool bGo;
-			
 			version(Windows)
 			{
 				if( GLOBAL.KeyNumber == -1 ) bGo = true;								// Mouse Click item
@@ -2478,7 +2203,7 @@ extern(C)
 						{
 							if( GLOBAL.outlineTree.listItemIndex <= GLOBAL.outlineTree.listItemASTs.length )
 							{
-								char[] text = Util.trim( fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup );
+								string text = strip( fSTRz( IupGetAttribute( ih, "VALUE" ) ) );
 								if( text.length )
 								{
 									ScintillaAction.openFile( ScintillaAction.getActiveCScintilla.getFullPath, GLOBAL.outlineTree.listItemASTs[GLOBAL.outlineTree.listItemIndex-1].lineNumber );
@@ -2509,20 +2234,20 @@ extern(C)
 		private int COutline_List_EDIT_CB( Ihandle *ih, int c, char *new_value )
 		{
 			// Avoid mouuse cursor disappear
-			char[] screenXY = fromStringz( IupGetAttribute( ih, "SCREENPOSITION" ) ).dup;
-			int commaPos = Util.index( screenXY, "," );
-			if( commaPos < screenXY.length )
+			string screenXY = fromStringz( IupGetAttribute( ih, "SCREENPOSITION" ) ).dup;
+			int commaPos = indexOf( screenXY, "," );
+			if( commaPos > 0 )
 			{
-				int screenX = Integer.toInt( screenXY[0..commaPos] );
-				int screenY = Integer.toInt( screenXY[commaPos+1..$] );
+				int screenX = to!(int)( screenXY[0..commaPos] );
+				int screenY = to!(int)( screenXY[commaPos+1..$] );
 				
-				char[] WH = fromStringz( IupGetAttribute( ih, "RASTERSIZE" ) ).dup;
-				int crossPos = Util.index( WH, "x" );
-				if( crossPos < WH.length )
+				string WH = fSTRz( IupGetAttribute( ih, "RASTERSIZE" ) );
+				int crossPos = indexOf( WH, "x" );
+				if( crossPos > 0 )
 				{
-					screenY = screenY + Integer.toInt( WH[crossPos+1..$] );
+					screenY = screenY + to!(int)( WH[crossPos+1..$] );
 					
-					screenXY = Integer.toString( screenX + 8 ) ~ "x" ~ Integer.toString( screenY + 8 );
+					screenXY = to!(string)( screenX + 8 ) ~ "x" ~ to!(string)( screenY + 8 );
 					IupSetStrGlobal( "CURSORPOS", toStringz( screenXY ) );
 				}
 			}

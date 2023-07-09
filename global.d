@@ -1,73 +1,78 @@
 ﻿module global;
 
-import tools;
-
-import iup.iup;
-
-/*
-typedef extern (C) void function( Ihandle* iih ) _HandleClipboardText;
-_HandleClipboardText dllHandleClipboardText;
-*/
-
-version(Windows)
-{	
-	// For chm help
-	import tango.sys.win32.Types;
-	typedef extern(C) HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
-	//typedef extern(C) int function( HWND, LPCSTR, LPSTR, DWORD ) _SevenZip;
-}
+private import project;
 
 struct EditorToggleUint
 {
-	char[]	LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", ColorBarLine = "OFF", AutoKBLayout = "OFF";
-	char[]	TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", Bit64 = "OFF", QBCase = "OFF", NewDocBOM = "ON", SaveAllModified = "OFF";
-	char[]	IconInvert = "OFF";
+	string	LineMargin = "ON", FixedLineMargin = "ON", BookmarkMargin = "ON", FoldMargin = "ON", IndentGuide = "ON", CaretLine = "ON", WordWrap = "OFF", TabUseingSpace = "OFF", AutoIndent = "ON", ShowEOL = "OFF", ShowSpace = "OFF", AutoEnd = "OFF", AutoClose = "OFF", DocStatus = "OFF", ColorBarLine = "OFF", AutoKBLayout = "OFF";
+	string	TabWidth = "4", ColumnEdge = "0", EolType = "0", ControlCharSymbol = "32", ColorOutline = "OFF", BoldKeyword = "OFF", BraceMatchHighlight = "ON", MultiSelection = "OFF", LoadPrevDoc = "OFF", HighlightCurrentWord = "OFF", MiddleScroll = "OFF", GUI = "OFF", QBCase = "OFF", NewDocBOM = "ON", SaveAllModified = "OFF";
+	string	IconInvert = "OFF", UseDarkMode = "OFF";
 }
 
 struct EditorLayoutSize
 {
-	char[] USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", OutlineWindow = "ON", MessageWindow = "ON", OutlineFlat = "OFF", RotateTabs = "OFF", BarSize = "2";
+	string USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", OutlineWindow = "ON", MessageWindow = "ON", OutlineFlat = "OFF", RotateTabs = "OFF", BarSize = "2";
 	version(linux) 
-		char[] OutputSci = "ON";
+		string OutputSci = "ON";
 	else
-		char[] OutputSci = "OFF";
+		string OutputSci = "OFF";
 		
-	char[] EXTRAASCENT = "0", EXTRADESCENT = "0";
+	string EXTRAASCENT = "0", EXTRADESCENT = "0";
 }
 
 struct EditorColorUint
 {
-	IupString[6]	keyWord;
-	IupString		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, bookmark, selAlpha, errorFore, errorBack, warningFore, warringBack, currentWord, currentWordAlpha;
-	IupString		scintillaFore, scintillaBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
-	IupString		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
-	IupString		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
-	IupString		projectFore, projectBack, outlineFore, outlineBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType, dlgFore, dlgBack, txtFore, txtBack;
-	IupString[4]	maker;
-	IupString		callTipFore, callTipBack, callTipHLT, showTypeFore, showTypeBack, showTypeHLT;
-	IupString		searchIndicator, searchIndicatorAlpha, prjViewHLT, prjViewHLTAlpha;
+	string[6]	keyWord;
+	string		caretLine, cursor, selectionFore, selectionBack, linenumFore, linenumBack, fold, bookmark, selAlpha, errorFore, errorBack, warningFore, warningBack, currentWord, currentWordAlpha;
+	string		scintillaFore, scintillaBack, braceFore, braceBack, SCE_B_COMMENT_Fore, SCE_B_COMMENT_Back, SCE_B_NUMBER_Fore, SCE_B_NUMBER_Back, SCE_B_STRING_Fore, SCE_B_STRING_Back;
+	string		SCE_B_PREPROCESSOR_Fore, SCE_B_PREPROCESSOR_Back, SCE_B_OPERATOR_Fore, SCE_B_OPERATOR_Back;
+	string		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
+	string		projectFore, projectBack, outlineFore, outlineBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType, dlgFore, dlgBack, txtFore, txtBack;
+	string		callTipFore, callTipBack, callTipHLT, showTypeFore, showTypeBack, showTypeHLT, autoCompleteFore, autoCompleteBack, autoCompleteHLTFore, autoCompleteHLTBack;
+	string		searchIndicator, searchIndicatorAlpha, prjViewHLT, prjViewHLTAlpha;
+}
+
+struct CompilerSettingUint
+{
+	string		compilerFullPath, x64compilerFullPath;
+	string		debuggerFullPath, x64debuggerFullPath;
+	string		useAnootation = "ON";
+	string		useResultDlg = "OFF";
+	string		useSFX = "ON";
+	string		useDelExistExe = "ON";
+	string		useConsoleLaunch = "OFF";
+	string		useThread = "OFF";
+	string		Bit64 = "OFF";
+	string		currentCustomCompilerOption, noneCustomCompilerOption;
+	string		enableKeywordComplete = "ON";
+	string		enableIncludeComplete = "ON";
+	string		toggleShowAllMember = "ON";
+	string[]	customCompilerOptions;
+	int			includeLevel = 3;
+	FocusUnit	activeCompiler;
+	
 }
 
 struct ShortKey
 {
-	char[] 	name, title;
-	int		keyValue;
+	string 	name, title;
+	uint	keyValue;
 }
 
 struct fontUint
 {
-	char[] 	name;
-	char[]	fontString;
+	string 	name;
+	string	fontString;
 }
 
 struct CustomTool
 {
-	char[]	name, dir, args, toggleShowConsole = "OFF";
+	string	name, dir, args, toggleShowConsole = "OFF";
 }
 
 struct EditorOpacity
 {
-	char[]	searchDlg = "255", findfilesDlg = "255", preferenceDlg = "255", projectDlg = "255", gotoDlg = "255", newfileDlg = "255";
+	string	findfilesDlg = "255", preferenceDlg = "255", projectDlg = "255", gotoDlg = "255", newfileDlg = "255", autocompleteDlg = "220";
 }
 
 struct Monitor
@@ -75,28 +80,46 @@ struct Monitor
 	int x, y, w, h, id;
 }
 
+
+
 struct GLOBAL
 {
-	private:
+private:
 	import iup.iup;
 	import iup.iup_scintilla;
+	
+	import core.sys.windows.wtypes, core.sys.windows.winnt, core.sys.windows.windef;
 
-	import tango.stdc.stringz;
-
-	import navcache;
-	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger;
+	import navcache, tools;
+	import scintilla, project, layouts.toolbar, layouts.projectPanel, layouts.outlinePanel, layouts.messagePanel, layouts.statusBar, layouts.debugger, layouts.customMenu;
 	import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg, dialogs.preferenceDlg;
 	import parser.ast, parser.scanner, parser.parser;
 	
-	public:
-	version(Windows) 	static _htmlHelp		htmlHelp;
+public:
+	version(Windows)
+	{
+		extern(C)
+		{
+			// CHM viewer
+			alias static	HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
+			
+			// DarkMode
+			static		BOOL function( HWND, BOOL ) AllowDarkModeForWindow = null;
+			static		BOOL function() InitDarkMode = null;
+			static		HRESULT function( HWND, LPCWSTR, LPCWSTR ) SetWindowTheme = null;
+		}
+	}
+	extern(C) static			void function( bool, bool ) SetDarkMode = null;
 	
-	//extern(C) 			static char[] function( char[], ref int bom )		readFile = null;
-	extern (C) static		void* function( char*, char* ) iconv_open = null;
-	extern (C) static		size_t function( void*, void**, size_t*, void**, size_t* ) iconv = null;
-	extern (C) static		int function(void*) iconv_close = null;
+	static shared CASTnode[string]			parserManager;
+	static __gshared IupString[string]		languageItems;
+	static __gshared PROJECT[string]		projectManager;
+	static shared string[6]					KEYWORDS;
 	
-	static CPLUGIN[char[]]		pluginMnager;
+	
+	static bool					bDarkMode = false;
+	
+	static CPLUGIN[string]		pluginMnager;
 	
 	static Ihandle*				mainDlg;
 	static Ihandle*				documentTabs, documentTabs_Sub, projectViewTabs, messageWindowTabs;
@@ -104,7 +127,6 @@ struct GLOBAL
 	
 	static Ihandle*				activeDocumentTabs;
 	static Ihandle*				dragDocumentTabs;
-	//static char[]				activeSubTabsDirection = "VERTICAL"; // HORIZONTAL, VERTICAL
 	
 	static int					tabDocumentPos = -1;	
 
@@ -114,142 +136,126 @@ struct GLOBAL
 	static Ihandle* 			documentSplit2;
 	static int					documentSplit2_value = 500;
 	
-
-	//static Ihandle* 			fileListSplit;
-	//static int					fileListSplit_value = 700;
-	
 	static Ihandle* 			explorerWindow;
 	static Ihandle* 			explorerSplit; // which split explorerWindow & editWindow
 	static int					explorerSplit_value = 300;
 
+	static CCustomMenubar		menubar;
 	static CToolBar	 			toolbar;
 
 	static CProjectTree			projectTree;
 	static COutline 			outlineTree;
-	
-	
-	//static Ihandle* 			outputPanel;
-	//static Ihandle* 			searchOutputPanel;
 	static CMessageAndSearch	messagePanel;
-	
 	static CDebugger 			debugPanel;
+
 	static Ihandle* 			messageSplit; // which split (explorerWindow + editWindow ) & messageWindow
 	static int					messageSplit_value = 800;
 
 	static CPreferenceDialog	preferenceDlg;
-	//static CSearchDialog		searchDlg;
 	static CSearchExpander		searchExpander;
 	static CFindInFilesDialog	serachInFilesDlg;
 	static CCompilerHelpDialog	compilerHelpDlg;
-
-	static Ihandle*				scrollICONHandle, scrollTimer;
-
 	static CStatusBar			statusBar;
 
+	static Ihandle*				scrollICONHandle, scrollTimer;
 	static Ihandle*				menuOutlineWindow, menuMessageWindow, menuRotateTabs;
 	
 	
-
 	// Setting
-	version(Windows)	static char[][char[]]	EnvironmentVars;
-	
-	static char[]				poseidonPath;			// Include Tail /
-	static char[]				linuxHome;
-	static char[][6]			KEYWORDS;
-	static int					keywordCase = 0;	
-	static char[]				compilerFullPath, x64compilerFullPath;
-	static char[]				debuggerFullPath, x64debuggerFullPath;
-	static char[]				linuxTermName;
-	static char[]				linuxHtmlAppName;
-	static char[]				compilerAnootation = "ON";
-	static char[]				compilerWindow = "OFF";
-	static char[]				compilerSFX = "ON";
-	static char[]				delExistExe = "ON";
-	static char[]				consoleExe = "OFF";
-	static char[]				toggleCompileAtBackThread = "OFF";
-	static char[][]				manuals;
-	//static IupString			colorTemplate;
-	//static char[]				maxError = "30";
-	//static IupString			defaultOption;
-	static char[]				recentOpenDir;
-	static char[][]				recentOptions, recentArgs, recentCompilers, prevPrj, prevDoc;
+	version(Windows)
+	{
+		static string[string]	EnvironmentVars;
+		static _htmlHelp		htmlHelp;
+	}
+	static string				poseidonPath;			// Include Tail /
+	static string				linuxHome = "";
+	static string				linuxTermName;
+	static string				linuxHtmlAppName;
+	static int					keywordCase = 0;
+	/+
+	static string				compilerFullPath, x64compilerFullPath;
+	static string				debuggerFullPath, x64debuggerFullPath;
+	static string				compilerAnootation = "ON";
+	static string				compilerWindow = "OFF";
+	static string				compilerSFX = "ON";
+	static string				delExistExe = "ON";
+	static string				consoleExe = "OFF";
+	static string				toggleCompileAtBackThread = "OFF";
+	+/
+	static string[]				manuals;
+	static string				recentOpenDir;
+	static string[]				recentOptions, recentArgs, recentCompilers, prevPrj, prevDoc;
 	static int					maxRecentOptions = 15, maxRecentArgs = 15, maxRecentCompilers = 8;
 	static IupString[]			recentFiles, recentProjects;
 	static EditorToggleUint		editorSetting00;
 	static EditorLayoutSize		editorSetting01;
 	static EditorOpacity		editorSetting02;
 	static EditorColorUint		editColor;
-	static char[][]				properties;
-	//static Ihandle*			functionTitleHandle;
-	static char[]				extraParsableExt = "inc";
-	static char[]				enableKeywordComplete = "ON";
-	static char[]				enableIncludeComplete = "ON";
-	static char[]				enableParser = "ON";
-	static char[]				showFunctionTitle = "OFF";
-	static char[]				showTypeWithParams = "OFF";
-	static char[]				toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
-	static char[]				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
-	static char[]				toggleShowListType = "OFF";
-	static char[]				toggleShowAllMember = "ON";
-	static char[]				toggleEnableDwell = "OFF";
-	static char[]				toggleOverWrite = "OFF";
-	static char[]				toggleCompleteAtBackThread = "ON";
+	static CompilerSettingUint	compilerSettings;
+
+	static string				extraParsableExt = "inc";
+	static string				enableParser = "ON";
+	static string				showFunctionTitle = "OFF";
+	static string				togglePreLoadPrj = "OFF";
+	static string				showTypeWithParams = "OFF";
+	static string				toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
+	static string				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
+	//static string				toggleShowListType = "OFF";
+	static string				toggleEnableDwell = "OFF";
+	static string				toggleOverWrite = "OFF";
+	static string				toggleCompleteAtBackThread = "ON";
 	
-	static char[]				toggleUseManual = "OFF", toggleDummy = "ON";
+	static string				toggleUseManual = "OFF";
 	
-	static char[]				dwellDelay = "1000";
-	static char[]				triggerDelay = "100";
+	static string				dwellDelay = "1000";
+	static string				triggerDelay = "100";
 	static int					autoCMaxHeight = 12;
 	static int					indicatorStyle = 16;
 	
 
-	static CScintilla[char[]]	scintillaManager;
-	static int[][char[]]		fileStatusManager;
-
-	static CASTnode[char[]]		parserManager;
+	static CScintilla[string]	scintillaManager;
+	static int[][string]		fileStatusManager;
+	
 	
 
 	static int					autoCompletionTriggerWordCount = 3;
-	static int					includeLevel = 2, preParseLevel = 3;
+	static int 					preParseLevel = 3;
 	static int					liveLevel = 1;
-	static char[]				toggleUpdateOutlineLive = "ON";
+	static string				toggleUpdateOutlineLive = "ON";
 
 	//Parser
 	static Scanner				scanner;
 	static CParser				Parser;
 
 
-
-	static PROJECT[char[]]		projectManager;
-	static char[]				activeProjectPath;
-	static char[]				activeFilePath;
+	static string				activeProjectPath;
+	static string				activeFilePath;
 	
-	static char[]				language;
-	static IupString[char[]]	languageItems;
+	static string				language;
+	
 
 
 	static ShortKey[]			shortKeys;
 
 	static fontUint[]			fonts;
 	
-	//static char[][]				stackGotoDefinition;
-
 	static bool					bKeyUp = true;
 	static int					KeyNumber;
 	
 	static CustomTool[13]		customTools;
-	
-	static char[][]				customCompilerOptions;
-	static IupString			currentCustomCompilerOption, noneCustomCompilerOption;
-
-	static CASTnode				objectDefaultParser;
+	/*
+	static string[]				customCompilerOptions;
+	static string				currentCustomCompilerOption, noneCustomCompilerOption;
+	*/
+	static shared CASTnode		objectDefaultParser;
+	/+
 	version(DIDE)
 	{
-		static	char[]			defaultCompilerPath;
-		static	char[][]		defaultImportPaths;
-		static	char[]			toggleSkipUnittest = "ON";
+		static	string			defaultCompilerPath;
+		static	string[]		defaultImportPaths;
+		static	string			toggleSkipUnittest = "ON";
 	}
-	
+	+/
 	static CNavCache			navigation;
 	
 	static Monitor[]			monitors;
@@ -258,87 +264,86 @@ struct GLOBAL
 	static this()
 	{
 		// Init EditorColorUint
-		GLOBAL.editColor.keyWord[0] = new IupString( cast(char[]) "5 91 35" );
-		GLOBAL.editColor.keyWord[1] = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.keyWord[2] = new IupString( cast(char[]) "231 144 0" );
-		GLOBAL.editColor.keyWord[3] = new IupString( cast(char[]) "16 108 232" );
-		GLOBAL.editColor.keyWord[4] = new IupString( cast(char[]) "255 0 0" );
-		GLOBAL.editColor.keyWord[5] = new IupString( cast(char[]) "0 255 0" );
+		GLOBAL.editColor.keyWord[0] = "5 91 35";
+		GLOBAL.editColor.keyWord[1] = "0 0 255";
+		GLOBAL.editColor.keyWord[2] = "231 144 0";
+		GLOBAL.editColor.keyWord[3] = "16 108 232";
+		GLOBAL.editColor.keyWord[4] = "255 0 0";
+		GLOBAL.editColor.keyWord[5] = "0 255 0";
 		
+		GLOBAL.editColor.caretLine = "255 255 128";
+		GLOBAL.editColor.cursor = "0 0 0";
+		GLOBAL.editColor.selectionFore = "255 255 255";
+		GLOBAL.editColor.selectionBack = "0 0 255";
+		GLOBAL.editColor.linenumFore = "0 0 0";
+		GLOBAL.editColor.linenumBack = "200 200 200";
+		GLOBAL.editColor.fold = "238 238 238";
+		GLOBAL.editColor.bookmark = "238 238 238";
+		GLOBAL.editColor.selAlpha = "80";
+		GLOBAL.editColor.errorFore = "102 69 3";
+		GLOBAL.editColor.errorBack = "255 200 227";
+		GLOBAL.editColor.warningFore = "0 0 255";
+		GLOBAL.editColor.warningBack = "255 255 157";
+		GLOBAL.editColor.currentWord = "0 128 0";
+		GLOBAL.editColor.currentWordAlpha = "80";
 		
-		GLOBAL.editColor.maker[0] = new IupString( cast(char[]) "200 255 200" );
-		GLOBAL.editColor.maker[1] = new IupString( cast(char[]) "255 200 255" );
-		GLOBAL.editColor.maker[2] = new IupString( cast(char[]) "200 255 255" );
-		GLOBAL.editColor.maker[3] = new IupString( cast(char[]) "255 200 200" );		
+		GLOBAL.editColor.braceFore = "255 0 0";
+		GLOBAL.editColor.braceBack = "0 255 0";
 		
-		GLOBAL.editColor.caretLine = new IupString( cast(char[]) "255 255 128" );
-		GLOBAL.editColor.cursor = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.selectionFore = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.selectionBack = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.linenumFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.linenumBack = new IupString( cast(char[]) "200 200 200" );
-		GLOBAL.editColor.fold = new IupString( cast(char[]) "238 238 238" );
-		GLOBAL.editColor.bookmark = new IupString( cast(char[]) "238 238 238" );
-		GLOBAL.editColor.selAlpha = new IupString( cast(char[]) "80" );
-		GLOBAL.editColor.errorFore = new IupString( cast(char[]) "102 69 3" );
-		GLOBAL.editColor.errorBack = new IupString( cast(char[]) "255 200 227" );
-		GLOBAL.editColor.warningFore = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.warringBack = new IupString( cast(char[]) "255 255 157" );
-		GLOBAL.editColor.currentWord = new IupString( cast(char[]) "0 128 0" );
-		GLOBAL.editColor.currentWordAlpha = new IupString( cast(char[]) "80" );
-		
-		GLOBAL.editColor.braceFore = new IupString( cast(char[]) "255 0 0" );
-		GLOBAL.editColor.braceBack = new IupString( cast(char[]) "0 255 0" );
-		
-		GLOBAL.editColor.scintillaFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.scintillaBack = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.SCE_B_COMMENT_Fore = new IupString( cast(char[]) "0 128 0" );
-		GLOBAL.editColor.SCE_B_COMMENT_Back = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.scintillaFore = "0 0 0";
+		GLOBAL.editColor.scintillaBack = "255 255 255";
+		GLOBAL.editColor.SCE_B_COMMENT_Fore = "0 128 0";
+		GLOBAL.editColor.SCE_B_COMMENT_Back = "255 255 255";
 
-		GLOBAL.editColor.SCE_B_NUMBER_Fore = new IupString( cast(char[]) "128 128 64" );
-		GLOBAL.editColor.SCE_B_NUMBER_Back = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.SCE_B_STRING_Fore = new IupString( cast(char[]) "128 0 0" );
-		GLOBAL.editColor.SCE_B_STRING_Back = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.SCE_B_NUMBER_Fore = "128 128 64";
+		GLOBAL.editColor.SCE_B_NUMBER_Back = "255 255 255";
+		GLOBAL.editColor.SCE_B_STRING_Fore = "128 0 0";
+		GLOBAL.editColor.SCE_B_STRING_Back = "255 255 255";
 
-		GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.SCE_B_OPERATOR_Fore = new IupString( cast(char[]) "160 20 20" );
-		GLOBAL.editColor.SCE_B_OPERATOR_Back = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore = "0 0 255";
+		GLOBAL.editColor.SCE_B_PREPROCESSOR_Back = "255 255 255";
+		GLOBAL.editColor.SCE_B_OPERATOR_Fore = "160 20 20";
+		GLOBAL.editColor.SCE_B_OPERATOR_Back = "255 255 255";
 
-		GLOBAL.editColor.SCE_B_IDENTIFIER_Fore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.SCE_B_IDENTIFIER_Back = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore = new IupString( cast(char[]) "0 128 0" );
-		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Fore = "0 0 0";
+		GLOBAL.editColor.SCE_B_IDENTIFIER_Back = "255 255 255";
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Fore = "0 128 0";
+		GLOBAL.editColor.SCE_B_COMMENTBLOCK_Back = "255 255 255";
 
-		GLOBAL.editColor.projectFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.projectBack = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.outlineFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.outlineBack = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.outputFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.outputBack = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.searchFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.searchBack = new IupString( cast(char[]) "255 255 255" );
-		GLOBAL.editColor.dlgFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.dlgBack = new IupString( cast(char[]) "240 240 240" );
-		GLOBAL.editColor.txtFore = new IupString( cast(char[]) "0 0 0" );
-		GLOBAL.editColor.txtBack = new IupString( cast(char[]) "255 255 255" );
+		GLOBAL.editColor.projectFore = "0 0 0";
+		GLOBAL.editColor.projectBack = "255 255 255";
+		GLOBAL.editColor.outlineFore = "0 0 0";
+		GLOBAL.editColor.outlineBack = "255 255 255";
+		GLOBAL.editColor.outputFore = "0 0 0";
+		GLOBAL.editColor.outputBack = "255 255 255";
+		GLOBAL.editColor.searchFore = "0 0 0";
+		GLOBAL.editColor.searchBack = "255 255 255";
+		GLOBAL.editColor.dlgFore = "0 0 0";
+		GLOBAL.editColor.dlgBack = "240 240 240";
+		GLOBAL.editColor.txtFore = "0 0 0";
+		GLOBAL.editColor.txtBack = "255 255 255";
 
 
-		GLOBAL.editColor.prjTitle = new IupString( cast(char[]) "128 0 0" );
-		GLOBAL.editColor.prjSourceType = new IupString( cast(char[]) "0 0 255" );
+		GLOBAL.editColor.prjTitle = "128 0 0";
+		GLOBAL.editColor.prjSourceType = "0 0 255";
 		
-		GLOBAL.editColor.callTipFore = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.callTipBack = new IupString( cast(char[]) "234 248 192" );
-		GLOBAL.editColor.callTipHLT = new IupString( cast(char[]) "202 0 0" );
+		GLOBAL.editColor.callTipFore = "0 0 255";
+		GLOBAL.editColor.callTipBack = "234 248 192";
+		GLOBAL.editColor.callTipHLT = "202 0 0";
 
-		GLOBAL.editColor.showTypeFore = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.showTypeBack = new IupString( cast(char[]) "255 255 170" );
-		GLOBAL.editColor.showTypeHLT = new IupString( cast(char[]) "0 128 0" );
+		GLOBAL.editColor.showTypeFore = "0 0 255";
+		GLOBAL.editColor.showTypeBack = "255 255 170";
+		GLOBAL.editColor.showTypeHLT = "0 128 0";
+
+		GLOBAL.editColor.autoCompleteFore = "0 0 0";
+		GLOBAL.editColor.autoCompleteBack = "255 255 255";
+		GLOBAL.editColor.autoCompleteHLTFore = "0 0 0";
+		GLOBAL.editColor.autoCompleteHLTBack = "0 188 0";
 		
-		GLOBAL.editColor.searchIndicator = new IupString( cast(char[]) "0 0 255" );
-		GLOBAL.editColor.searchIndicatorAlpha = new IupString( cast(char[]) "128" );
-		GLOBAL.editColor.prjViewHLT = new IupString( cast(char[]) "0 0 128" );
-		GLOBAL.editColor.prjViewHLTAlpha = new IupString( cast(char[]) "128" );
+		GLOBAL.editColor.searchIndicator = "0 0 255";
+		GLOBAL.editColor.searchIndicatorAlpha = "128";
+		GLOBAL.editColor.prjViewHLT = "0 0 128";
+		GLOBAL.editColor.prjViewHLTAlpha = "128";
 		
 		/*
 		GLOBAL.debuggerFullPath = new IupString();
@@ -348,8 +353,8 @@ struct GLOBAL
 		//GLOBAL.colorTemplate = new IupString();
 		//GLOBAL.defaultOption = new IupString();
 		
-		GLOBAL.currentCustomCompilerOption = new IupString( cast(char*) "" );
-		GLOBAL.noneCustomCompilerOption = new IupString( cast(char*) "None Custom Compile Option" );
+		GLOBAL.compilerSettings.currentCustomCompilerOption = "";
+		GLOBAL.compilerSettings.noneCustomCompilerOption = "None Custom Compile Option";
 		
 		GLOBAL.Parser = new CParser;
 		
@@ -518,493 +523,499 @@ struct GLOBAL
 		
 		
 		
-		GLOBAL.languageItems["file"] = new IupString( cast(char[]) "File" );
-			GLOBAL.languageItems["new"] = new IupString( cast(char[]) "New" );
-			GLOBAL.languageItems["open"] = new IupString( cast(char[]) "Open" );
-			GLOBAL.languageItems["save"] = new IupString( cast(char[]) "Save" );
-			GLOBAL.languageItems["saveas"] = new IupString( cast(char[]) "Save As" );
-			GLOBAL.languageItems["savetabs"] = new IupString( cast(char[]) "Save Tab Files" );
-			GLOBAL.languageItems["saveall"] = new IupString( cast(char[]) "Save All" );
-			GLOBAL.languageItems["close"] = new IupString( cast(char[]) "Close" );
-			GLOBAL.languageItems["closeall"] = new IupString( cast(char[]) "Close All" );
-			GLOBAL.languageItems["closealltabs"] = new IupString( cast(char[]) "Close All Tabs" );
-			GLOBAL.languageItems["recentfiles"] = new IupString( cast(char[]) "Recent Files" );
-			GLOBAL.languageItems["recentprjs"] = new IupString( cast(char[]) "Recent Projects" );
-			GLOBAL.languageItems["clearall"] = new IupString( cast(char[]) "Clear All" );
-			GLOBAL.languageItems["exit"] = new IupString( cast(char[]) "Exit" );
+		GLOBAL.languageItems["file"] = new IupString( "File" );
+			GLOBAL.languageItems["new"] = new IupString( "New" );
+			GLOBAL.languageItems["open"] = new IupString( "Open" );
+			GLOBAL.languageItems["save"] = new IupString( "Save" );
+			GLOBAL.languageItems["saveas"] = new IupString( "Save As" );
+			GLOBAL.languageItems["savetabs"] = new IupString( "Save Tab Files" );
+			GLOBAL.languageItems["saveall"] = new IupString( "Save All" );
+			GLOBAL.languageItems["close"] = new IupString( "Close" );
+			GLOBAL.languageItems["closeall"] = new IupString( "Close All" );
+			GLOBAL.languageItems["closealltabs"] = new IupString( "Close All Tabs" );
+			GLOBAL.languageItems["recentfiles"] = new IupString( "Recent Files" );
+			GLOBAL.languageItems["recentprjs"] = new IupString( "Recent Projects" );
+			GLOBAL.languageItems["clearall"] = new IupString( "Clear All" );
+			GLOBAL.languageItems["exit"] = new IupString( "Exit" );
 			
-		GLOBAL.languageItems["edit"] = new IupString( cast(char[]) "Edit" );
-			GLOBAL.languageItems["redo"] = new IupString( cast(char[]) "Redo" );
-			GLOBAL.languageItems["undo"] = new IupString( cast(char[]) "Undo" );
-			GLOBAL.languageItems["cut"] = new IupString( cast(char[]) "Cut" );
-			GLOBAL.languageItems["copy"] = new IupString( cast(char[]) "Copy" );
-			GLOBAL.languageItems["paste"] = new IupString( cast(char[]) "Paste" );
-			GLOBAL.languageItems["commentline"] = new IupString( cast(char[]) "Comment Line" );
-			GLOBAL.languageItems["uncommentline"] = new IupString( cast(char[]) "UnComment Line" );
-			GLOBAL.languageItems["selectall"] = new IupString( cast(char[]) "Select All" );
+		GLOBAL.languageItems["edit"] = new IupString( "Edit" );
+			GLOBAL.languageItems["redo"] = new IupString( "Redo" );
+			GLOBAL.languageItems["undo"] = new IupString( "Undo" );
+			GLOBAL.languageItems["cut"] = new IupString( "Cut" );
+			GLOBAL.languageItems["copy"] = new IupString( "Copy" );
+			GLOBAL.languageItems["paste"] = new IupString( "Paste" );
+			GLOBAL.languageItems["commentline"] = new IupString( "Comment Line" );
+			GLOBAL.languageItems["uncommentline"] = new IupString( "UnComment Line" );
+			GLOBAL.languageItems["selectall"] = new IupString( "Select All" );
 			
-		GLOBAL.languageItems["search"] = new IupString( cast(char[]) "Search" );
-			GLOBAL.languageItems["findreplace"] = new IupString( cast(char[]) "Find/Replace" );
-			GLOBAL.languageItems["findnext"] = new IupString( cast(char[]) "Find Next" );
-			GLOBAL.languageItems["findprev"] = new IupString( cast(char[]) "Find Previous" );
-			GLOBAL.languageItems["findreplacefiles"] = new IupString( cast(char[]) "Find/Replace In Files" );
-			GLOBAL.languageItems["goto"] = new IupString( cast(char[]) "Goto Line" );
-				GLOBAL.languageItems["line"] = new IupString( cast(char[]) "Line" );
+		GLOBAL.languageItems["search"] = new IupString( "Search" );
+			GLOBAL.languageItems["findreplace"] = new IupString( "Find/Replace" );
+			GLOBAL.languageItems["findnext"] = new IupString( "Find Next" );
+			GLOBAL.languageItems["findprev"] = new IupString( "Find Previous" );
+			GLOBAL.languageItems["findreplacefiles"] = new IupString( "Find/Replace In Files" );
+			GLOBAL.languageItems["goto"] = new IupString( "Goto Line" );
+				GLOBAL.languageItems["line"] = new IupString( "Line" );
 
-		GLOBAL.languageItems["windows"] = new IupString( cast(char[]) "Windows" );
-		GLOBAL.languageItems["view"] = new IupString( cast(char[]) "View" );
-			GLOBAL.languageItems["toolbar"]= new IupString( cast(char[]) "Toolbar" );
-			GLOBAL.languageItems["message"]= new IupString( cast(char[]) "Message" );
-			GLOBAL.languageItems["manual"]= new IupString( cast(char[]) "Manual" );
-			GLOBAL.languageItems["fullscreen"]= new IupString( cast(char[]) "Fullscreen" );
+		GLOBAL.languageItems["windows"] = new IupString( "Windows" );
+		GLOBAL.languageItems["view"] = new IupString( "View" );
+			GLOBAL.languageItems["toolbar"]= new IupString( "Toolbar" );
+			GLOBAL.languageItems["message"]= new IupString( "Message" );
+			GLOBAL.languageItems["manual"]= new IupString( "Manual" );
+			GLOBAL.languageItems["fullscreen"]= new IupString( "Fullscreen" );
 			
-		GLOBAL.languageItems["prj"] = new IupString( cast(char[]) "Project" );
-			GLOBAL.languageItems["newprj"] = new IupString( cast(char[]) "New Project" );
-			GLOBAL.languageItems["openprj"] = new IupString( cast(char[]) "Open Project" );
-			GLOBAL.languageItems["importprj"] = new IupString( cast(char[]) "Import Fbedit Project" );
-			GLOBAL.languageItems["saveprj"] = new IupString( cast(char[]) "Save Project" );
-			GLOBAL.languageItems["saveallprj"] = new IupString( cast(char[]) "Save All Projects" );
-			GLOBAL.languageItems["closeprj"] = new IupString( cast(char[]) "Close Project" );
-			GLOBAL.languageItems["closeallprj"] = new IupString( cast(char[]) "Close All Projects" );
-			GLOBAL.languageItems["properties"] = new IupString( cast(char[]) "Properties..." );
+		GLOBAL.languageItems["prj"] = new IupString( "Project" );
+			GLOBAL.languageItems["newprj"] = new IupString( "New Project" );
+			GLOBAL.languageItems["openprj"] = new IupString( "Open Project" );
+			GLOBAL.languageItems["importprj"] = new IupString( "Import Fbedit Project" );
+			GLOBAL.languageItems["saveprj"] = new IupString( "Save Project" );
+			GLOBAL.languageItems["saveallprj"] = new IupString( "Save All Projects" );
+			GLOBAL.languageItems["closeprj"] = new IupString( "Close Project" );
+			GLOBAL.languageItems["closeallprj"] = new IupString( "Close All Projects" );
+			GLOBAL.languageItems["properties"] = new IupString( "Properties..." );
 			
-			GLOBAL.languageItems["importall"] = new IupString( cast(char[]) "Import All Files" );
-			GLOBAL.languageItems["openinexplorer"] = new IupString( cast(char[]) "Open In Explorer" );
-			GLOBAL.languageItems["removefromprj"] = new IupString( cast(char[]) "Remove From Project" );
-			GLOBAL.languageItems["openinposeidon"] = new IupString( cast(char[]) "Open In Poseidon" );
-			GLOBAL.languageItems["rename"] = new IupString( cast(char[]) "Rename File" );
-			GLOBAL.languageItems["setmainmodule"] = new IupString( cast(char[]) "Set As Main Module" );
-			GLOBAL.languageItems["newfile"] = new IupString( cast(char[]) "New File" );
-				GLOBAL.languageItems["filename"] = new IupString( cast(char[]) "File Name" );
-			GLOBAL.languageItems["newfolder"] = new IupString( cast(char[]) "New Folder" );
-				GLOBAL.languageItems["foldername"] = new IupString( cast(char[]) "Folder Name" );
-			GLOBAL.languageItems["addfile"] = new IupString( cast(char[]) "Add file(s)" );
+			GLOBAL.languageItems["importall"] = new IupString( "Import All Files" );
+			GLOBAL.languageItems["openinexplorer"] = new IupString( "Open In Explorer" );
+			GLOBAL.languageItems["removefromprj"] = new IupString( "Remove From Project" );
+			GLOBAL.languageItems["openinposeidon"] = new IupString( "Open In Poseidon" );
+			GLOBAL.languageItems["rename"] = new IupString( "Rename File" );
+			GLOBAL.languageItems["setmainmodule"] = new IupString( "Set As Main Module" );
+			GLOBAL.languageItems["newfile"] = new IupString( "New File" );
+				GLOBAL.languageItems["filename"] = new IupString( "File Name" );
+			GLOBAL.languageItems["newfolder"] = new IupString( "New Folder" );
+				GLOBAL.languageItems["foldername"] = new IupString( "Folder Name" );
+			GLOBAL.languageItems["addfile"] = new IupString( "Add file(s)" );
 		
-		GLOBAL.languageItems["build"] = new IupString( cast(char[]) "Build" );
-			GLOBAL.languageItems["compile"] = new IupString( cast(char[]) "Compile File" );
-			GLOBAL.languageItems["compilerun"]= new IupString( cast(char[]) "Compile File And Run" );
-			GLOBAL.languageItems["run"] = new IupString( cast(char[]) "Run" );
-			GLOBAL.languageItems["buildprj"] = new IupString( cast(char[]) "Build Project" );
-			GLOBAL.languageItems["rebuildprj"] = new IupString( cast(char[]) "ReBuild Project" );
-			GLOBAL.languageItems["quickrun"] = new IupString( cast(char[]) "Quick Run" );
+		GLOBAL.languageItems["build"] = new IupString( "Build" );
+			GLOBAL.languageItems["compile"] = new IupString( "Compile File" );
+			GLOBAL.languageItems["compilerun"]= new IupString( "Compile File And Run" );
+			GLOBAL.languageItems["run"] = new IupString( "Run" );
+			GLOBAL.languageItems["buildprj"] = new IupString( "Build Project" );
+			GLOBAL.languageItems["rebuildprj"] = new IupString( "ReBuild Project" );
+			GLOBAL.languageItems["quickrun"] = new IupString( "Quick Run" );
 			
-		GLOBAL.languageItems["debug"] = new IupString( cast(char[]) "Debug" );
-			GLOBAL.languageItems["rundebug"] = new IupString( cast(char[]) "Run Debug" );
-			GLOBAL.languageItems["compiledebug"] = new IupString( cast(char[]) "Compile With Debug" );
-			GLOBAL.languageItems["builddebug"] = new IupString( cast(char[]) "Build Project With Debug" );
+		GLOBAL.languageItems["debug"] = new IupString( "Debug" );
+			GLOBAL.languageItems["rundebug"] = new IupString( "Run Debug" );
+			GLOBAL.languageItems["compiledebug"] = new IupString( "Compile With Debug" );
+			GLOBAL.languageItems["builddebug"] = new IupString( "Build Project With Debug" );
 			
-		GLOBAL.languageItems["options"] = new IupString( cast(char[]) "Options" );
-			GLOBAL.languageItems["tools"] = new IupString( cast(char[]) "Tools" );
-				GLOBAL.languageItems["unload"] = new IupString( cast(char[]) "Unload" );
-				GLOBAL.languageItems["pluginstatus"] = new IupString( cast(char[]) "Plugin Status" );
-				GLOBAL.languageItems["seteol"] = new IupString( cast(char[]) "Set Eol Character" );
-				GLOBAL.languageItems["converteol"] = new IupString( cast(char[]) "Convert Eol Character" );
-				GLOBAL.languageItems["convertencoding"] = new IupString( cast(char[]) "Convert Encoding" );
-				GLOBAL.languageItems["convertcase"] = new IupString( cast(char[]) "Convert Keyword Case" );
-					GLOBAL.languageItems["uppercase"] = new IupString( cast(char[]) "UPPERCASE" );
-					GLOBAL.languageItems["lowercase"] = new IupString( cast(char[]) "lowercase" );
-					GLOBAL.languageItems["mixercase"] = new IupString( cast(char[]) "Mixedcase" );
-					GLOBAL.languageItems["usercase"] = new IupString( cast(char[]) "User Define" );
-				GLOBAL.languageItems["setcustomtool"] = new IupString( cast(char[]) "Set Custom Tools..." );
-					GLOBAL.languageItems["customtool1"] = new IupString( cast(char[]) "Custom Tool(1)" );
-					GLOBAL.languageItems["customtool2"] = new IupString( cast(char[]) "Custom Tool(2)" );
-					GLOBAL.languageItems["customtool3"] = new IupString( cast(char[]) "Custom Tool(3)" );
-					GLOBAL.languageItems["customtool4"] = new IupString( cast(char[]) "Custom Tool(4)" );
-					GLOBAL.languageItems["customtool5"] = new IupString( cast(char[]) "Custom Tool(5)" );
-					GLOBAL.languageItems["customtool6"] = new IupString( cast(char[]) "Custom Tool(6)" );
-					GLOBAL.languageItems["customtool7"] = new IupString( cast(char[]) "Custom Tool(7)" );
-					GLOBAL.languageItems["customtool8"] = new IupString( cast(char[]) "Custom Tool(8)" );
-					GLOBAL.languageItems["customtool9"] = new IupString( cast(char[]) "Custom Tool(9)" );
-					GLOBAL.languageItems["customtool10"] = new IupString( cast(char[]) "Custom Tool(10)" );
-					GLOBAL.languageItems["customtool11"] = new IupString( cast(char[]) "Custom Tool(11)" );
-					GLOBAL.languageItems["customtool12"] = new IupString( cast(char[]) "Custom Tool(12)" );
+		GLOBAL.languageItems["options"] = new IupString( "Options" );
+			GLOBAL.languageItems["tools"] = new IupString( "Tools" );
+				GLOBAL.languageItems["unload"] = new IupString( "Unload" );
+				GLOBAL.languageItems["pluginstatus"] = new IupString( "Plugin Status" );
+				GLOBAL.languageItems["seteol"] = new IupString( "Set Eol Character" );
+				GLOBAL.languageItems["converteol"] = new IupString( "Convert Eol Character" );
+				GLOBAL.languageItems["convertencoding"] = new IupString( "Convert Encoding" );
+				GLOBAL.languageItems["convertcase"] = new IupString( "Convert Keyword Case" );
+					GLOBAL.languageItems["uppercase"] = new IupString( "UPPERCASE" );
+					GLOBAL.languageItems["lowercase"] = new IupString( "lowercase" );
+					GLOBAL.languageItems["mixercase"] = new IupString( "Mixedcase" );
+					GLOBAL.languageItems["usercase"] = new IupString( "User Define" );
+				GLOBAL.languageItems["setcustomtool"] = new IupString( "Set Custom Tools..." );
+					GLOBAL.languageItems["customtool1"] = new IupString( "Custom Tool(1)" );
+					GLOBAL.languageItems["customtool2"] = new IupString( "Custom Tool(2)" );
+					GLOBAL.languageItems["customtool3"] = new IupString( "Custom Tool(3)" );
+					GLOBAL.languageItems["customtool4"] = new IupString( "Custom Tool(4)" );
+					GLOBAL.languageItems["customtool5"] = new IupString( "Custom Tool(5)" );
+					GLOBAL.languageItems["customtool6"] = new IupString( "Custom Tool(6)" );
+					GLOBAL.languageItems["customtool7"] = new IupString( "Custom Tool(7)" );
+					GLOBAL.languageItems["customtool8"] = new IupString( "Custom Tool(8)" );
+					GLOBAL.languageItems["customtool9"] = new IupString( "Custom Tool(9)" );
+					GLOBAL.languageItems["customtool10"] = new IupString( "Custom Tool(10)" );
+					GLOBAL.languageItems["customtool11"] = new IupString( "Custom Tool(11)" );
+					GLOBAL.languageItems["customtool12"] = new IupString( "Custom Tool(12)" );
 				
-			GLOBAL.languageItems["preference"] = new IupString( cast(char[]) "Preference" );
-				GLOBAL.languageItems["compiler"] = new IupString( cast(char[]) "Compiler" );
-					GLOBAL.languageItems["compilerpath"] = new IupString( cast(char[]) "Compiler Path" );
-					GLOBAL.languageItems["debugpath"] = new IupString( cast(char[]) "Debugger Path" );
-					GLOBAL.languageItems["debugx64path"] = new IupString( cast(char[]) "Debugger x64 Path" );
-					GLOBAL.languageItems["terminalpath"] = new IupString( cast(char[]) "Terminal Path" );
-					GLOBAL.languageItems["htmlapppath"] = new IupString( cast(char[]) "Html App Path" );
-					GLOBAL.languageItems["x64path"] = new IupString( cast(char[]) "x64 Path" );
-					GLOBAL.languageItems["compileropts"] = new IupString( cast(char[]) "Compiler Opts" );
-					GLOBAL.languageItems["compilersetting"] = new IupString( cast(char[]) "Compiler Setting" );
-						GLOBAL.languageItems["errorannotation"] = new IupString( cast(char[]) "Show Compiler Errors/Warnings Using Annotation" );
-						GLOBAL.languageItems["showresultwindow"] = new IupString( cast(char[]) "Show Compiled Result Window" );
-						GLOBAL.languageItems["usesfx"] = new IupString( cast(char[]) "Play Result SFX( When Result Window is OFF )" );
-						GLOBAL.languageItems["delexistexe"] = new IupString( cast(char[]) "Before Compile, Delete Existed Execute File" );
-						GLOBAL.languageItems["consoleexe"] = new IupString( cast(char[]) "Use Console Launcher To Run Program" );
-						GLOBAL.languageItems["compileatbackthread"] = new IupString( cast(char[]) "Enable Compile At Back Thread" );
-				GLOBAL.languageItems["parser"] = new IupString( cast(char[]) "Parser" );
-					GLOBAL.languageItems["parsersetting"] = new IupString( cast(char[]) "Parser Settings" );
-						GLOBAL.languageItems["enablekeyword"] = new IupString( cast(char[]) "Enable Keyword Autocomplete" );
-						GLOBAL.languageItems["enableinclude"] = new IupString( cast(char[]) "Enable Include Autocomplete" );
-						GLOBAL.languageItems["enableparser"] = new IupString( cast(char[]) "Enable Parser" );
-						GLOBAL.languageItems["showtitle"] = new IupString( cast(char[]) "Show Function Title" );
-						GLOBAL.languageItems["width"] = new IupString( cast(char[]) "Width" );
-						GLOBAL.languageItems["showtypeparam"] = new IupString( cast(char[]) "Show Type With Function Parameters" );
-						GLOBAL.languageItems["sortignorecase"] = new IupString( cast(char[]) "Autocomplete List Is Ignore Case" );
-						GLOBAL.languageItems["selectcase"] = new IupString( cast(char[]) "Selection Of Autocomplete List Is Case Insensitive" );
-						GLOBAL.languageItems["showlisttype"] = new IupString( cast(char[]) "Show Autocomplete List Type" );
-						GLOBAL.languageItems["showallmembers"] = new IupString( cast(char[]) "Show All Members( public, protected, private )" );
-						GLOBAL.languageItems["enabledwell"] = new IupString( cast(char[]) "Enable Mouse Dwell to Show Type" );
-							GLOBAL.languageItems["dwelldelay"] = new IupString( cast(char[]) "Dwell Delay(ms):" );
-						GLOBAL.languageItems["enableoverwrite"] = new IupString( cast(char[]) "Overwrite To Non Identifier Character" );
-						GLOBAL.languageItems["completeatbackthread"] = new IupString( cast(char[]) "Enable Codecomplete At Back Thread" );
-							GLOBAL.languageItems["completedelay"] = new IupString( cast(char[]) "Trigger Delay(ms):" );
-							GLOBAL.languageItems["preparselevel"] = new IupString( cast(char[]) "Project Pre-Parse Level:" );
-						GLOBAL.languageItems["parserlive"] = new IupString( cast(char[]) "ParseLive! Level" );
-							GLOBAL.languageItems["none"] = new IupString( cast(char[]) "None" );
-							GLOBAL.languageItems["light"] = new IupString( cast(char[]) "Light" );
-							GLOBAL.languageItems["full"] = new IupString( cast(char[]) "Full" );
-							GLOBAL.languageItems["update"] = new IupString( cast(char[]) "Update Outline" );
-						GLOBAL.languageItems["trigger"] = new IupString( cast(char[]) "Autocompletion Trigger:" );
-							GLOBAL.languageItems["triggertip"] = new IupString( cast(char[]) "Set 0 To Disable" );
-							GLOBAL.languageItems["codecompletiononoff"] = new IupString( cast(char[]) "Code Completion On/Off" );
-						GLOBAL.languageItems["includelevel"] = new IupString( cast(char[]) "Include Levels:" );
-							GLOBAL.languageItems["includeleveltip"] = new IupString( cast(char[]) "Set -1 To Unlimited" );
-						GLOBAL.languageItems["autocmaxheight"] = new IupString( cast(char[]) "Max Complete List Items:" );
-					GLOBAL.languageItems["editor"] = new IupString( cast(char[]) "Editor" );
-						GLOBAL.languageItems["lnmargin"] = new IupString( cast(char[]) "Show Linenumber Margin" );
-						GLOBAL.languageItems["fixedlnmargin"] = new IupString( cast(char[]) "Fixed Linenumber Margin Size" );
-						GLOBAL.languageItems["bkmargin"] = new IupString( cast(char[]) "Show Bookmark Margin" );
-						GLOBAL.languageItems["fdmargin"] = new IupString( cast(char[]) "Show Folding Margin" );
-						GLOBAL.languageItems["indentguide"] = new IupString( cast(char[]) "Show Indentation Guide" );
-						GLOBAL.languageItems["showcaretline"] = new IupString( cast(char[]) "Highlight Caret Line" );
-						GLOBAL.languageItems["wordwarp"] = new IupString( cast(char[]) "Word Wrap" );
-						GLOBAL.languageItems["tabtospace"] = new IupString( cast(char[]) "Replace Tab With Space" );
-						GLOBAL.languageItems["autoindent"] = new IupString( cast(char[]) "Automatic Indent" );
-						GLOBAL.languageItems["showeol"] = new IupString( cast(char[]) "Show EOL Sign" );
-						GLOBAL.languageItems["showspacetab"] = new IupString( cast(char[]) "Show Space/Tab" );
-						GLOBAL.languageItems["autoinsertend"] = new IupString( cast(char[]) "Auto Insert Block End" );
-						GLOBAL.languageItems["autoclose"] = new IupString( cast(char[]) "Auto Close( quotes... )" );
-						GLOBAL.languageItems["coloroutline"] = new IupString( cast(char[]) "Colorize Outline Item" );
-						GLOBAL.languageItems["boldkeyword"] = new IupString( cast(char[]) "Bold Keywords" );
-						GLOBAL.languageItems["bracematchhighlight"] = new IupString( cast(char[]) "Show Brace Match Highlight" );
-						GLOBAL.languageItems["bracematchdoubleside"] = new IupString( cast(char[]) "Use Double-Side Brace Match" );
-						GLOBAL.languageItems["multiselection"] = new IupString( cast(char[]) "Enable Document Multi Selection" );
-						GLOBAL.languageItems["loadprevdoc"] = new IupString( cast(char[]) "Load Previous Documents" );
-						GLOBAL.languageItems["middlescroll"] = new IupString( cast(char[]) "Middle Button Scroll" );
-						GLOBAL.languageItems["savedocstatus"] = new IupString( cast(char[]) "Save Document Status" );
-						GLOBAL.languageItems["colorbarline"] = new IupString( cast(char[]) "Colorize Splitter BarLine" );
-						GLOBAL.languageItems["autokblayout"] = new IupString( cast(char[]) "Auto en-Keyboard Layout" );
-						GLOBAL.languageItems["controlcharsymbol"] = new IupString( cast(char[]) "Set Control Char Symbol" );
-						GLOBAL.languageItems["tabwidth"] = new IupString( cast(char[]) "Tab Width" );
-						GLOBAL.languageItems["columnedge"] = new IupString( cast(char[]) "Column Edge" );
-						GLOBAL.languageItems["barsize"] = new IupString( cast(char[]) "Bar Size" );
-							GLOBAL.languageItems["barsizetip"] = new IupString( cast(char[]) "Need Restart Poseidon (2~5)" );
-						GLOBAL.languageItems["maker0"] = new IupString( cast(char[]) "Maker0" );
-						GLOBAL.languageItems["maker1"] = new IupString( cast(char[]) "Maker1" );
-						GLOBAL.languageItems["maker2"] = new IupString( cast(char[]) "Maker2" );
-						GLOBAL.languageItems["maker3"] = new IupString( cast(char[]) "Maker3" );
-						GLOBAL.languageItems["autoconvertkeyword"] = new IupString( cast(char[]) "Auto Convert Keyword Case" );
-						GLOBAL.languageItems["qbcase"] = new IupString( cast(char[]) "Use QB-IDE Convert Case" );
-						GLOBAL.languageItems["newdocbom"] = new IupString( cast(char[]) "Create New Doc With BOM" );
-						GLOBAL.languageItems["saveallmodified"] = new IupString( cast(char[]) "Save All Documents Before Compile" );
-						GLOBAL.languageItems["font"] = new IupString( cast(char[]) "Font" );
-							GLOBAL.languageItems["default"] = new IupString( cast(char[]) "Default" );
-							//GLOBAL.languageItems["document"] = new IupString( cast(char[]) "Document" );
-							GLOBAL.languageItems["leftside"] = new IupString( cast(char[]) "Leftside" );
+			GLOBAL.languageItems["preference"] = new IupString( "Preference" );
+				GLOBAL.languageItems["compiler"] = new IupString( "Compiler" );
+					GLOBAL.languageItems["compilerpath"] = new IupString( "Compiler Path" );
+					GLOBAL.languageItems["debugpath"] = new IupString( "Debugger Path" );
+					GLOBAL.languageItems["debugx64path"] = new IupString( "Debugger x64 Path" );
+					GLOBAL.languageItems["terminalpath"] = new IupString( "Terminal Path" );
+					GLOBAL.languageItems["htmlapppath"] = new IupString( "Html App Path" );
+					GLOBAL.languageItems["x64path"] = new IupString( "x64 Path" );
+					GLOBAL.languageItems["compileropts"] = new IupString( "Compiler Opts" );
+					GLOBAL.languageItems["compilersetting"] = new IupString( "Compiler Setting" );
+						GLOBAL.languageItems["errorannotation"] = new IupString( "Show Compiler Errors/Warnings Using Annotation" );
+						GLOBAL.languageItems["showresultwindow"] = new IupString( "Show Compiled Result Window" );
+						GLOBAL.languageItems["usesfx"] = new IupString( "Play Result SFX( When Result Window is OFF )" );
+						GLOBAL.languageItems["delexistexe"] = new IupString( "Before Compile, Delete Existed Execute File" );
+						GLOBAL.languageItems["consoleexe"] = new IupString( "Use Console Launcher To Run Program" );
+						GLOBAL.languageItems["compileatbackthread"] = new IupString( "Enable Compile At Back Thread" );
+				GLOBAL.languageItems["parser"] = new IupString( "Parser" );
+					GLOBAL.languageItems["parsersetting"] = new IupString( "Parser Settings" );
+						GLOBAL.languageItems["enablekeyword"] = new IupString( "Enable Keyword Autocomplete" );
+						GLOBAL.languageItems["enableinclude"] = new IupString( "Enable Include Autocomplete" );
+						GLOBAL.languageItems["enableparser"] = new IupString( "Enable Parser" );
+						GLOBAL.languageItems["showtitle"] = new IupString( "Show Function Title" );
+						GLOBAL.languageItems["preloadprj"] = new IupString( "Project Pre-Parse While Loading" );
+						GLOBAL.languageItems["width"] = new IupString( "Width" );
+						GLOBAL.languageItems["showtypeparam"] = new IupString( "Show Type With Function Parameters" );
+						GLOBAL.languageItems["sortignorecase"] = new IupString( "Autocomplete List Is Ignore Case" );
+						GLOBAL.languageItems["selectcase"] = new IupString( "Selection Of Autocomplete List Is Case Insensitive" );
+						GLOBAL.languageItems["showlisttype"] = new IupString( "Show Autocomplete List Type" );
+						GLOBAL.languageItems["showallmembers"] = new IupString( "Show All Members( public, protected, private )" );
+						GLOBAL.languageItems["enabledwell"] = new IupString( "Enable Mouse Dwell to Show Type" );
+							GLOBAL.languageItems["dwelldelay"] = new IupString( "Dwell Delay(ms):" );
+						GLOBAL.languageItems["enableoverwrite"] = new IupString( "Overwrite To Non Identifier Character" );
+						GLOBAL.languageItems["completeatbackthread"] = new IupString( "Enable Codecomplete At Back Thread" );
+							GLOBAL.languageItems["completedelay"] = new IupString( "Trigger Delay(ms):" );
+							GLOBAL.languageItems["preparselevel"] = new IupString( "Project Pre-Parse Level:" );
+						GLOBAL.languageItems["parserlive"] = new IupString( "ParseLive! Level" );
+							GLOBAL.languageItems["none"] = new IupString( "None" );
+							GLOBAL.languageItems["light"] = new IupString( "Light" );
+							GLOBAL.languageItems["full"] = new IupString( "Full" );
+							GLOBAL.languageItems["update"] = new IupString( "Update Outline" );
+						GLOBAL.languageItems["trigger"] = new IupString( "Autocompletion Trigger:" );
+							GLOBAL.languageItems["triggertip"] = new IupString( "Set 0 To Disable" );
+							GLOBAL.languageItems["codecompletiononoff"] = new IupString( "Code Completion On/Off" );
+						GLOBAL.languageItems["includelevel"] = new IupString( "Include Levels:" );
+							GLOBAL.languageItems["includeleveltip"] = new IupString( "Set -1 To Unlimited" );
+						GLOBAL.languageItems["autocmaxheight"] = new IupString( "Max Complete List Items:" );
+					GLOBAL.languageItems["editor"] = new IupString( "Editor" );
+						GLOBAL.languageItems["lnmargin"] = new IupString( "Show Linenumber Margin" );
+						GLOBAL.languageItems["fixedlnmargin"] = new IupString( "Fixed Linenumber Margin Size" );
+						GLOBAL.languageItems["bkmargin"] = new IupString( "Show Bookmark Margin" );
+						GLOBAL.languageItems["fdmargin"] = new IupString( "Show Folding Margin" );
+						GLOBAL.languageItems["indentguide"] = new IupString( "Show Indentation Guide" );
+						GLOBAL.languageItems["showcaretline"] = new IupString( "Highlight Caret Line" );
+						GLOBAL.languageItems["wordwarp"] = new IupString( "Word Wrap" );
+						GLOBAL.languageItems["tabtospace"] = new IupString( "Replace Tab With Space" );
+						GLOBAL.languageItems["autoindent"] = new IupString( "Automatic Indent" );
+						GLOBAL.languageItems["showeol"] = new IupString( "Show EOL Sign" );
+						GLOBAL.languageItems["showspacetab"] = new IupString( "Show Space/Tab" );
+						GLOBAL.languageItems["autoinsertend"] = new IupString( "Auto Insert Block End" );
+						GLOBAL.languageItems["autoclose"] = new IupString( "Auto Close( quotes... )" );
+						GLOBAL.languageItems["coloroutline"] = new IupString( "Colorize Outline Item" );
+						GLOBAL.languageItems["boldkeyword"] = new IupString( "Bold Keywords" );
+						GLOBAL.languageItems["bracematchhighlight"] = new IupString( "Show Brace Match Highlight" );
+						GLOBAL.languageItems["bracematchdoubleside"] = new IupString( "Use Double-Side Brace Match" );
+						GLOBAL.languageItems["multiselection"] = new IupString( "Enable Document Multi Selection" );
+						GLOBAL.languageItems["loadprevdoc"] = new IupString( "Load Previous Documents" );
+						GLOBAL.languageItems["middlescroll"] = new IupString( "Middle Button Scroll" );
+						GLOBAL.languageItems["savedocstatus"] = new IupString( "Save Document Status" );
+						GLOBAL.languageItems["colorbarline"] = new IupString( "Colorize Splitter BarLine" );
+						GLOBAL.languageItems["autokblayout"] = new IupString( "Auto en-Keyboard Layout" );
+						GLOBAL.languageItems["controlcharsymbol"] = new IupString( "Set Control Char Symbol" );
+						GLOBAL.languageItems["tabwidth"] = new IupString( "Tab Width" );
+						GLOBAL.languageItems["columnedge"] = new IupString( "Column Edge" );
+						GLOBAL.languageItems["barsize"] = new IupString( "Bar Size" );
+							GLOBAL.languageItems["barsizetip"] = new IupString( "Need Restart Poseidon (2~5)" );
+						GLOBAL.languageItems["maker0"] = new IupString( "Maker0" );
+						GLOBAL.languageItems["maker1"] = new IupString( "Maker1" );
+						GLOBAL.languageItems["maker2"] = new IupString( "Maker2" );
+						GLOBAL.languageItems["maker3"] = new IupString( "Maker3" );
+						GLOBAL.languageItems["autoconvertkeyword"] = new IupString( "Auto Convert Keyword Case" );
+						GLOBAL.languageItems["qbcase"] = new IupString( "Use QB-IDE Convert Case" );
+						GLOBAL.languageItems["newdocbom"] = new IupString( "Create New Doc With BOM" );
+						GLOBAL.languageItems["saveallmodified"] = new IupString( "Save All Documents Before Compile" );
+						GLOBAL.languageItems["font"] = new IupString( "Font" );
+							GLOBAL.languageItems["default"] = new IupString( "Default" );
+							//GLOBAL.languageItems["document"] = new IupString( "Document" );
+							GLOBAL.languageItems["leftside"] = new IupString( "Leftside" );
 							//'fistlist=FileList
 							//'project=Project
 							//'outline=Outline
-							GLOBAL.languageItems["bottom"] = new IupString( cast(char[]) "Bottom" );
+							GLOBAL.languageItems["bottom"] = new IupString( "Bottom" );
 							//'output=Output
 							//'search=Search
 							//'debug=Debug
-							GLOBAL.languageItems["annotation"] = new IupString( cast(char[]) "Annotation" );
-							GLOBAL.languageItems["statusbar"] = new IupString( cast(char[]) "StatusBar" );
-							GLOBAL.languageItems["item"] = new IupString( cast(char[]) "Item" );
-							GLOBAL.languageItems["face"] = new IupString( cast(char[]) "Face" );
-							GLOBAL.languageItems["style"] = new IupString( cast(char[]) "Style" );
-							GLOBAL.languageItems["size"] = new IupString( cast(char[]) "Size" );
-						GLOBAL.languageItems["color"] = new IupString( cast(char[]) "Color" );
-							GLOBAL.languageItems["colorfile"] = new IupString( cast(char[]) "Color Template" );
-							GLOBAL.languageItems["caretline"] = new IupString( cast(char[]) "Caret Line" );
-							GLOBAL.languageItems["cursor"] = new IupString( cast(char[]) "Cursor" );
-							GLOBAL.languageItems["prjtitle"] = new IupString( cast(char[]) "Project Title" );
-							GLOBAL.languageItems["sourcefolder"] = new IupString( cast(char[]) "Source Folder" );
-							GLOBAL.languageItems["sel"] = new IupString( cast(char[]) "Selection" );
-							GLOBAL.languageItems["ln"] = new IupString( cast(char[]) "Linenumber" );
-							GLOBAL.languageItems["foldcolor"] = new IupString( cast(char[]) "FoldingMargin Color" );
-							GLOBAL.languageItems["selalpha"] = new IupString( cast(char[]) "Selection Alpha" );
-								GLOBAL.languageItems["alphatip"] = new IupString( cast(char[]) "Set 255 To Use Fore/BackColor\nSet 0 To Keep ForeColor" );
-							GLOBAL.languageItems["hlcurrentword"] = new IupString( cast(char[]) "Current Word Indicator" );
+							GLOBAL.languageItems["annotation"] = new IupString( "Annotation" );
+							GLOBAL.languageItems["statusbar"] = new IupString( "StatusBar" );
+							GLOBAL.languageItems["item"] = new IupString( "Item" );
+							GLOBAL.languageItems["face"] = new IupString( "Face" );
+							GLOBAL.languageItems["style"] = new IupString( "Style" );
+							GLOBAL.languageItems["size"] = new IupString( "Size" );
+						GLOBAL.languageItems["color"] = new IupString( "Color" );
+							GLOBAL.languageItems["colorfile"] = new IupString( "Color Template" );
+							GLOBAL.languageItems["caretline"] = new IupString( "Caret Line" );
+							GLOBAL.languageItems["cursor"] = new IupString( "Cursor" );
+							GLOBAL.languageItems["prjtitle"] = new IupString( "Project Title" );
+							GLOBAL.languageItems["sourcefolder"] = new IupString( "Source Folder" );
+							GLOBAL.languageItems["sel"] = new IupString( "Selection" );
+							GLOBAL.languageItems["ln"] = new IupString( "Linenumber" );
+							GLOBAL.languageItems["foldcolor"] = new IupString( "FoldingMargin Color" );
+							GLOBAL.languageItems["selalpha"] = new IupString( "Selection Alpha" );
+								GLOBAL.languageItems["alphatip"] = new IupString( "Set 255 To Use Fore/BackColor\nSet 0 To Keep ForeColor" );
+							GLOBAL.languageItems["hlcurrentword"] = new IupString( "Current Word Indicator" );
 							
-						GLOBAL.languageItems["colorfgbg"] = new IupString( cast(char[]) "Color/Foreground/Background or Alpha" );
-							GLOBAL.languageItems["bracehighlight"] = new IupString( cast(char[]) "Brace Highlight" );
-							GLOBAL.languageItems["manualerrorannotation"] = new IupString( cast(char[]) "Error Annotation" );
-							GLOBAL.languageItems["manualwarningannotation"] = new IupString( cast(char[]) "Warning Annotation" );
-							GLOBAL.languageItems["scintilla"] = new IupString( cast(char[]) "Scintilla" );
+						GLOBAL.languageItems["colorfgbg"] = new IupString( "Color/Foreground/Background or Alpha" );
+							GLOBAL.languageItems["bracehighlight"] = new IupString( "Brace Highlight" );
+							GLOBAL.languageItems["manualerrorannotation"] = new IupString( "Error Annotation" );
+							GLOBAL.languageItems["manualwarningannotation"] = new IupString( "Warning Annotation" );
+							GLOBAL.languageItems["scintilla"] = new IupString( "Scintilla" );
 							version(FBIDE)
 							{
-								GLOBAL.languageItems["SCE_B_COMMENT"] = new IupString( cast(char[]) "SCE_B_COMMENT" );
-								GLOBAL.languageItems["SCE_B_NUMBER"] = new IupString( cast(char[]) "SCE_B_NUMBER" );
-								GLOBAL.languageItems["SCE_B_STRING"] = new IupString( cast(char[]) "SCE_B_STRING" );
-								GLOBAL.languageItems["SCE_B_PREPROCESSOR"] = new IupString( cast(char[]) "SCE_B_PREPROCESSOR" );
-								GLOBAL.languageItems["SCE_B_OPERATOR"] = new IupString( cast(char[]) "SCE_B_OPERATOR" );
-								GLOBAL.languageItems["SCE_B_IDENTIFIER"] = new IupString( cast(char[]) "SCE_B_IDENTIFIER" );
-								GLOBAL.languageItems["SCE_B_COMMENTBLOCK"] = new IupString( cast(char[]) "SCE_B_COMMENTBLOCK" );
+								GLOBAL.languageItems["SCE_B_COMMENT"] = new IupString( "SCE_B_COMMENT" );
+								GLOBAL.languageItems["SCE_B_NUMBER"] = new IupString( "SCE_B_NUMBER" );
+								GLOBAL.languageItems["SCE_B_STRING"] = new IupString( "SCE_B_STRING" );
+								GLOBAL.languageItems["SCE_B_PREPROCESSOR"] = new IupString( "SCE_B_PREPROCESSOR" );
+								GLOBAL.languageItems["SCE_B_OPERATOR"] = new IupString( "SCE_B_OPERATOR" );
+								GLOBAL.languageItems["SCE_B_IDENTIFIER"] = new IupString( "SCE_B_IDENTIFIER" );
+								GLOBAL.languageItems["SCE_B_COMMENTBLOCK"] = new IupString( "SCE_B_COMMENTBLOCK" );
 							}
 							version(DIDE)
 							{
-								GLOBAL.languageItems["SCE_B_COMMENT"] = new IupString( cast(char[]) "SCE_D_COMMENT" );
-								GLOBAL.languageItems["SCE_B_NUMBER"] = new IupString( cast(char[]) "SCE_D_NUMBER" );
-								GLOBAL.languageItems["SCE_B_STRING"] = new IupString( cast(char[]) "SCE_D_STRING" );
-								GLOBAL.languageItems["SCE_B_PREPROCESSOR"] = new IupString( cast(char[]) "SCE_D_PREPROCESSOR" );
-								GLOBAL.languageItems["SCE_B_OPERATOR"] = new IupString( cast(char[]) "SCE_D_OPERATOR" );
-								GLOBAL.languageItems["SCE_B_IDENTIFIER"] = new IupString( cast(char[]) "SCE_D_IDENTIFIER" );
-								GLOBAL.languageItems["SCE_B_COMMENTBLOCK"] = new IupString( cast(char[]) "SCE_D_COMMENTBLOCK" );
+								GLOBAL.languageItems["SCE_B_COMMENT"] = new IupString( "SCE_D_COMMENT" );
+								GLOBAL.languageItems["SCE_B_NUMBER"] = new IupString( "SCE_D_NUMBER" );
+								GLOBAL.languageItems["SCE_B_STRING"] = new IupString( "SCE_D_STRING" );
+								GLOBAL.languageItems["SCE_B_PREPROCESSOR"] = new IupString( "SCE_D_PREPROCESSOR" );
+								GLOBAL.languageItems["SCE_B_OPERATOR"] = new IupString( "SCE_D_OPERATOR" );
+								GLOBAL.languageItems["SCE_B_IDENTIFIER"] = new IupString( "SCE_D_IDENTIFIER" );
+								GLOBAL.languageItems["SCE_B_COMMENTBLOCK"] = new IupString( "SCE_D_COMMENTBLOCK" );
 							}
 
-					GLOBAL.languageItems["shortcut"] = new IupString( cast(char[]) "Short Cut" );
-						GLOBAL.languageItems["sc_findreplace"] = new IupString( cast(char[]) "Find/Replace" );
-						GLOBAL.languageItems["sc_findreplacefiles"] = new IupString( cast(char[]) "Find/Replace In Files" );
-						GLOBAL.languageItems["sc_findnext"] = new IupString( cast(char[]) "Find Next" );
-						GLOBAL.languageItems["sc_findprev"] = new IupString( cast(char[]) "Find Previous" );
-						GLOBAL.languageItems["sc_dupdown"] = new IupString( cast(char[]) "Duplication Line Down" );
-						GLOBAL.languageItems["sc_dupup"] = new IupString( cast(char[]) "Duplication Line Up" );
-						GLOBAL.languageItems["sc_delline"] = new IupString( cast(char[]) "Delete Line" );
-						GLOBAL.languageItems["sc_goto"] = new IupString( cast(char[]) "Goto Line" );
-						GLOBAL.languageItems["sc_undo"] = new IupString( cast(char[]) "Undo" );
-						GLOBAL.languageItems["sc_redo"] = new IupString( cast(char[]) "Redo" );
-						GLOBAL.languageItems["sc_gotodef"] = new IupString( cast(char[]) "Goto Definition" );
-						version(FBIDE)	GLOBAL.languageItems["sc_procedure"] = new IupString( cast(char[]) "Goto Member Procedure" );
-						version(DIDE)	GLOBAL.languageItems["sc_procedure"] = new IupString( cast(char[]) "Goto Top Definition" );
-						GLOBAL.languageItems["sc_quickrun"] = new IupString( cast(char[]) "Quick Run" );
-						GLOBAL.languageItems["sc_run"] = new IupString( cast(char[]) "Run" );
-						GLOBAL.languageItems["sc_compile"] = new IupString( cast(char[]) "Compile" );
-						GLOBAL.languageItems["sc_build"] = new IupString( cast(char[]) "Build Project" );
-						GLOBAL.languageItems["sc_leftwindowswitch"] = new IupString( cast(char[]) "Switch Left Window" );
-						GLOBAL.languageItems["sc_bottomwindowswitch"] = new IupString( cast(char[]) "Sswitch Bottom Window" );						
-						GLOBAL.languageItems["sc_leftwindow"] = new IupString( cast(char[]) "On/Off Left Window" );
-						GLOBAL.languageItems["sc_bottomwindow"] = new IupString( cast(char[]) "On/Off Bottom Window" );
-						GLOBAL.languageItems["sc_showtype"] = new IupString( cast(char[]) "Show Type" );
-						GLOBAL.languageItems["sc_reparse"] = new IupString( cast(char[]) "Reparse" );
-						GLOBAL.languageItems["sc_save"] = new IupString( cast(char[]) "Save File" );
-						GLOBAL.languageItems["sc_saveall"] = new IupString( cast(char[]) "Save All" );
-						GLOBAL.languageItems["sc_close"] = new IupString( cast(char[]) "Close File" );
-						GLOBAL.languageItems["sc_nexttab"] = new IupString( cast(char[]) "Next Tab" );
-						GLOBAL.languageItems["sc_prevtab"] = new IupString( cast(char[]) "Previous Tab" );
-						GLOBAL.languageItems["sc_newtab"] = new IupString( cast(char[]) "New Tab" );
-						GLOBAL.languageItems["sc_autocomplete"] = new IupString( cast(char[]) "Auto Complete" );
-						GLOBAL.languageItems["sc_compilerun"] = new IupString( cast(char[]) "Compile File And Run" );
-						GLOBAL.languageItems["sc_comment"] = new IupString( cast(char[]) "Comment" );
-						GLOBAL.languageItems["sc_uncomment"] = new IupString( cast(char[]) "UnComment" );
-						GLOBAL.languageItems["sc_backnav"] = new IupString( cast(char[]) "Backward Navigation" );
-						GLOBAL.languageItems["sc_forwardnav"] = new IupString( cast(char[]) "Forward Navigation" );
-						GLOBAL.languageItems["sc_backdefinition"] = new IupString( cast(char[]) "Back Definition" );
+					GLOBAL.languageItems["shortcut"] = new IupString( "Short Cut" );
+						GLOBAL.languageItems["sc_findreplace"] = new IupString( "Find/Replace" );
+						GLOBAL.languageItems["sc_findreplacefiles"] = new IupString( "Find/Replace In Files" );
+						GLOBAL.languageItems["sc_findnext"] = new IupString( "Find Next" );
+						GLOBAL.languageItems["sc_findprev"] = new IupString( "Find Previous" );
+						GLOBAL.languageItems["sc_dupdown"] = new IupString( "Duplication Line Down" );
+						GLOBAL.languageItems["sc_dupup"] = new IupString( "Duplication Line Up" );
+						GLOBAL.languageItems["sc_delline"] = new IupString( "Delete Line" );
+						GLOBAL.languageItems["sc_goto"] = new IupString( "Goto Line" );
+						GLOBAL.languageItems["sc_undo"] = new IupString( "Undo" );
+						GLOBAL.languageItems["sc_redo"] = new IupString( "Redo" );
+						GLOBAL.languageItems["sc_gotodef"] = new IupString( "Goto Definition" );
+						version(FBIDE)	GLOBAL.languageItems["sc_procedure"] = new IupString( "Goto Member Procedure" );
+						version(DIDE)	GLOBAL.languageItems["sc_procedure"] = new IupString( "Goto Top Definition" );
+						GLOBAL.languageItems["sc_quickrun"] = new IupString( "Quick Run" );
+						GLOBAL.languageItems["sc_run"] = new IupString( "Run" );
+						GLOBAL.languageItems["sc_compile"] = new IupString( "Compile" );
+						GLOBAL.languageItems["sc_build"] = new IupString( "Build Project" );
+						GLOBAL.languageItems["sc_leftwindowswitch"] = new IupString( "Switch Left Window" );
+						GLOBAL.languageItems["sc_bottomwindowswitch"] = new IupString( "Sswitch Bottom Window" );						
+						GLOBAL.languageItems["sc_leftwindow"] = new IupString( "On/Off Left Window" );
+						GLOBAL.languageItems["sc_bottomwindow"] = new IupString( "On/Off Bottom Window" );
+						GLOBAL.languageItems["sc_showtype"] = new IupString( "Show Type" );
+						GLOBAL.languageItems["sc_reparse"] = new IupString( "Reparse" );
+						GLOBAL.languageItems["sc_save"] = new IupString( "Save File" );
+						GLOBAL.languageItems["sc_saveall"] = new IupString( "Save All" );
+						GLOBAL.languageItems["sc_close"] = new IupString( "Close File" );
+						GLOBAL.languageItems["sc_nexttab"] = new IupString( "Next Tab" );
+						GLOBAL.languageItems["sc_prevtab"] = new IupString( "Previous Tab" );
+						GLOBAL.languageItems["sc_newtab"] = new IupString( "New Tab" );
+						GLOBAL.languageItems["sc_autocomplete"] = new IupString( "Auto Complete" );
+						GLOBAL.languageItems["sc_compilerun"] = new IupString( "Compile File And Run" );
+						GLOBAL.languageItems["sc_comment"] = new IupString( "Comment" );
+						GLOBAL.languageItems["sc_uncomment"] = new IupString( "UnComment" );
+						GLOBAL.languageItems["sc_backnav"] = new IupString( "Backward Navigation" );
+						GLOBAL.languageItems["sc_forwardnav"] = new IupString( "Forward Navigation" );
+						GLOBAL.languageItems["sc_backdefinition"] = new IupString( "Back Definition" );
 						
-					GLOBAL.languageItems["keywords"] = new IupString( cast(char[]) "Keywords" );
-						GLOBAL.languageItems["keyword0"] = new IupString( cast(char[]) "Keyword0" );
-						GLOBAL.languageItems["keyword1"] = new IupString( cast(char[]) "Keyword1" );
-						GLOBAL.languageItems["keyword2"] = new IupString( cast(char[]) "Keyword2" );
-						GLOBAL.languageItems["keyword3"] = new IupString( cast(char[]) "Keyword3" );
-						GLOBAL.languageItems["keyword4"] = new IupString( cast(char[]) "Keyword4" );
-						GLOBAL.languageItems["keyword5"] = new IupString( cast(char[]) "Keyword5" );
-						GLOBAL.languageItems["setkeyword"] = new IupString( cast(char[]) "Selected Text To..." );
-					// GLOBAL.languageItems["manual"] = new IupString( cast(char[]) "Manual" );
-						GLOBAL.languageItems["manualpath"] = new IupString( cast(char[]) "Manual Path" );
-						GLOBAL.languageItems["manualusing"] = new IupString( cast(char[]) "Search Help Manual" );
-						GLOBAL.languageItems["name"] = new IupString( cast(char[]) "Name" );
+					GLOBAL.languageItems["keywords"] = new IupString( "Keywords" );
+						GLOBAL.languageItems["keyword0"] = new IupString( "Keyword0" );
+						GLOBAL.languageItems["keyword1"] = new IupString( "Keyword1" );
+						GLOBAL.languageItems["keyword2"] = new IupString( "Keyword2" );
+						GLOBAL.languageItems["keyword3"] = new IupString( "Keyword3" );
+						GLOBAL.languageItems["keyword4"] = new IupString( "Keyword4" );
+						GLOBAL.languageItems["keyword5"] = new IupString( "Keyword5" );
+						GLOBAL.languageItems["setkeyword"] = new IupString( "Selected Text To..." );
+					// GLOBAL.languageItems["manual"] = new IupString( "Manual" );
+						GLOBAL.languageItems["manualpath"] = new IupString( "Manual Path" );
+						GLOBAL.languageItems["manualusing"] = new IupString( "Search Help Manual" );
+						GLOBAL.languageItems["name"] = new IupString( "Name" );
 					
-			GLOBAL.languageItems["language"] = new IupString( cast(char[]) "Language" );
-				GLOBAL.languageItems["openlanguage"] = new IupString( cast(char[]) "Choose Language..." );
-			GLOBAL.languageItems["about"] = new IupString( cast(char[]) "About" );
+			GLOBAL.languageItems["language"] = new IupString( "Language" );
+				GLOBAL.languageItems["openlanguage"] = new IupString( "Choose Language..." );
+			GLOBAL.languageItems["about"] = new IupString( "About" );
 			
-			GLOBAL.languageItems["configuration"] = new IupString( cast(char[]) "Configuration..." );
-			GLOBAL.languageItems["setcustomoption"] = new IupString( cast(char[]) "Set Custom Compiler Options..." );
+			GLOBAL.languageItems["configuration"] = new IupString( "Configuration..." );
+			GLOBAL.languageItems["setcustomoption"] = new IupString( "Set Custom Compiler Options..." );
 			
-		GLOBAL.languageItems["bookmark"] = new IupString( cast(char[]) "Bookmark" );
-		GLOBAL.languageItems["bookmarkprev"] = new IupString( cast(char[]) "Previous Bookmark" );
-		GLOBAL.languageItems["bookmarknext"] = new IupString( cast(char[]) "Next Bookmark" );
-		GLOBAL.languageItems["bookmarkclear"] = new IupString( cast(char[]) "Clear Bookmark" );
+		GLOBAL.languageItems["bookmark"] = new IupString( "Bookmark" );
+		GLOBAL.languageItems["bookmarkprev"] = new IupString( "Previous Bookmark" );
+		GLOBAL.languageItems["bookmarknext"] = new IupString( "Next Bookmark" );
+		GLOBAL.languageItems["bookmarkclear"] = new IupString( "Clear Bookmark" );
 
-		GLOBAL.languageItems["outline"] = new IupString( cast(char[]) "Outline" );
-			GLOBAL.languageItems["collapse"] = new IupString( cast(char[]) "Collapse" );
-			GLOBAL.languageItems["showpr"] = new IupString( cast(char[]) "Change Outline Node Title" );
-			GLOBAL.languageItems["showln"] = new IupString( cast(char[]) "Show Line Number" );
-			GLOBAL.languageItems["refresh"] = new IupString( cast(char[]) "Refresh" );
-			GLOBAL.languageItems["searchanyword"] = new IupString( cast(char[]) "Search Word From Head" );
-			GLOBAL.languageItems["hide"] = new IupString( cast(char[]) "Hide" );
-			GLOBAL.languageItems["hidesearch"] = new IupString( cast(char[]) "Click To Show/Hide Search List" );
+		GLOBAL.languageItems["outline"] = new IupString( "Outline" );
+			GLOBAL.languageItems["collapse"] = new IupString( "Collapse" );
+			GLOBAL.languageItems["showpr"] = new IupString( "Change Outline Node Title" );
+			GLOBAL.languageItems["showln"] = new IupString( "Show Line Number" );
+			GLOBAL.languageItems["refresh"] = new IupString( "Refresh" );
+			GLOBAL.languageItems["searchanyword"] = new IupString( "Search Word From Head" );
+			GLOBAL.languageItems["hide"] = new IupString( "Hide" );
+			GLOBAL.languageItems["hidesearch"] = new IupString( "Click To Show/Hide Search List" );
 
-		GLOBAL.languageItems["dlgcolor"] = new IupString( cast(char[]) "DLGCOLOR" );
-		GLOBAL.languageItems["txtcolor"] = new IupString( cast(char[]) "TXTCOLOR" );
-		GLOBAL.languageItems["leftview"] = new IupString( cast(char[]) "Left-View" );
-		GLOBAL.languageItems["messageindicator"] = new IupString( cast(char[]) "Message Indicator" );
-		GLOBAL.languageItems["showtype"] = new IupString( cast(char[]) "ShowType" );
-		GLOBAL.languageItems["calltip"] = new IupString( cast(char[]) "CallTip" );		
-			GLOBAL.languageItems["fullpath"] = new IupString( cast(char[]) "FullPath" );
+		GLOBAL.languageItems["dlgcolor"] = new IupString( "DLGCOLOR" );
+		GLOBAL.languageItems["txtcolor"] = new IupString( "TXTCOLOR" );
+		GLOBAL.languageItems["leftview"] = new IupString( "Left-View" );
+		GLOBAL.languageItems["messageindicator"] = new IupString( "Message Indicator" );
+		GLOBAL.languageItems["showtype"] = new IupString( "ShowType" );
+		GLOBAL.languageItems["calltip"] = new IupString( "CallTip" );
+		GLOBAL.languageItems["autocomplete"] = new IupString( "Autocomplete" );
+		GLOBAL.languageItems["darkmode"] = new IupString( "DarkMode" );
+		GLOBAL.languageItems["usedarkmode"] = new IupString( "Use DarkMode(if available)" );
+		GLOBAL.languageItems["iconinvert"] = new IupString( "Icons Color Invert(Need Restart Poseidon)" );
+		GLOBAL.languageItems["dialogopacity"] = new IupString( "Set Dialog Opacity" );
+			GLOBAL.languageItems["fullpath"] = new IupString( "FullPath" );
 
-		GLOBAL.languageItems["output"] = new IupString( cast(char[]) "Output" );
-			GLOBAL.languageItems["clear"] = new IupString( cast(char[]) "Clear" );
+		GLOBAL.languageItems["output"] = new IupString( "Output" );
+			GLOBAL.languageItems["clear"] = new IupString( "Clear" );
 
 		//'tab
-		GLOBAL.languageItems["closeothers"] = new IupString( cast(char[]) "Close Others" );
-		GLOBAL.languageItems["closeright"] = new IupString( cast(char[]) "Close Right" );
-		GLOBAL.languageItems["torighttabs"] = new IupString( cast(char[]) "Send To Secondary View" );
-		GLOBAL.languageItems["tolefttabs"] = new IupString( cast(char[]) "Send to Main View" );
-		GLOBAL.languageItems["rotatetabs"] = new IupString( cast(char[]) "Split Views Horizontally" );
+		GLOBAL.languageItems["closeothers"] = new IupString( "Close Others" );
+		GLOBAL.languageItems["closeright"] = new IupString( "Close Right" );
+		GLOBAL.languageItems["torighttabs"] = new IupString( "Send To Secondary View" );
+		GLOBAL.languageItems["tolefttabs"] = new IupString( "Send to Main View" );
+		GLOBAL.languageItems["rotatetabs"] = new IupString( "Split Views Horizontally" );
 
 		//'popup window
-		GLOBAL.languageItems["highlightmaker"] = new IupString( cast(char[]) "Highlight Maker..." );
-		GLOBAL.languageItems["highlghtlines"] = new IupString( cast(char[]) "Highlight Line(s)" );
-		GLOBAL.languageItems["delhighlghtlines"] = new IupString( cast(char[]) "Delete Highlight Line(s)" );
-		GLOBAL.languageItems["colorhighlght"] = new IupString( cast(char[]) "Select Color..." );
-		GLOBAL.languageItems["delete"] = new IupString( cast(char[]) "Delete" );
-		GLOBAL.languageItems["showannotation"] = new IupString( cast(char[]) "Show Annotation" );
-		GLOBAL.languageItems["hideannotation"] = new IupString( cast(char[]) "Hide Annotation" );
-		GLOBAL.languageItems["removeannotation"] = new IupString( cast(char[]) "Remove All Annotation" );
-		GLOBAL.languageItems["expandall"] = new IupString( cast(char[]) "Expand All" );
-		GLOBAL.languageItems["contractall"] = new IupString( cast(char[]) "Contract All" );
+		GLOBAL.languageItems["highlightmaker"] = new IupString( "Highlight Maker..." );
+		GLOBAL.languageItems["highlghtlines"] = new IupString( "Highlight Line(s)" );
+		GLOBAL.languageItems["delhighlghtlines"] = new IupString( "Delete Highlight Line(s)" );
+		GLOBAL.languageItems["colorhighlght"] = new IupString( "Select Color..." );
+		GLOBAL.languageItems["delete"] = new IupString( "Delete" );
+		GLOBAL.languageItems["showannotation"] = new IupString( "Show Annotation" );
+		GLOBAL.languageItems["hideannotation"] = new IupString( "Hide Annotation" );
+		GLOBAL.languageItems["removeannotation"] = new IupString( "Remove All Annotation" );
+		GLOBAL.languageItems["expandall"] = new IupString( "Expand All" );
+		GLOBAL.languageItems["contractall"] = new IupString( "Contract All" );
 
 		//'properties
-		GLOBAL.languageItems["prjproperties"] = new IupString( cast(char[]) "Project Properties" );
-		GLOBAL.languageItems["general"] = new IupString( cast(char[]) "General" );
-			GLOBAL.languageItems["prjname"] = new IupString( cast(char[]) "Project Name" );
-			GLOBAL.languageItems["prjtype"] = new IupString( cast(char[]) "Type" );
-				GLOBAL.languageItems["console"] = new IupString( cast(char[]) "Console Application" );
-				GLOBAL.languageItems["static"] = new IupString( cast(char[]) "Static Library" );
-				GLOBAL.languageItems["dynamic"] = new IupString( cast(char[]) "Dynamic Link Library" );
-			GLOBAL.languageItems["prjdir"] = new IupString( cast(char[]) "Project Dir" );
-			GLOBAL.languageItems["prjmainfile"] = new IupString( cast(char[]) "Main file" );
-			GLOBAL.languageItems["prjonefile"] = new IupString( cast(char[]) "Pass One File To Compiler" );
-			GLOBAL.languageItems["prjtarget"] = new IupString( cast(char[]) "Target Name" );
-			GLOBAL.languageItems["prjfocus"] = new IupString( cast(char[]) "Focus" );
-			GLOBAL.languageItems["prjargs"] = new IupString( cast(char[]) "Execute Args:" );
-			GLOBAL.languageItems["prjopts"] = new IupString( cast(char[]) "Compile Opts:" );
-			GLOBAL.languageItems["prjcompiler"] = new IupString( cast(char[]) "Compiler Path" );
-			GLOBAL.languageItems["nodirmessage"] = new IupString( cast(char[]) "Without Project Dir!!" );
-		GLOBAL.languageItems["include"] = new IupString( cast(char[]) "Include..." );
-			GLOBAL.languageItems["includepath"] = new IupString( cast(char[]) "Include Paths" );
-			GLOBAL.languageItems["librarypath"] = new IupString( cast(char[]) "Libraries Paths" );
+		GLOBAL.languageItems["prjproperties"] = new IupString( "Project Properties" );
+		GLOBAL.languageItems["general"] = new IupString( "General" );
+			GLOBAL.languageItems["prjname"] = new IupString( "Project Name" );
+			GLOBAL.languageItems["prjtype"] = new IupString( "Type" );
+				GLOBAL.languageItems["console"] = new IupString( "Console Application" );
+				GLOBAL.languageItems["static"] = new IupString( "Static Library" );
+				GLOBAL.languageItems["dynamic"] = new IupString( "Dynamic Link Library" );
+			GLOBAL.languageItems["prjdir"] = new IupString( "Project Dir" );
+			GLOBAL.languageItems["prjmainfile"] = new IupString( "Main file" );
+			GLOBAL.languageItems["prjonefile"] = new IupString( "Pass One File To Compiler" );
+			GLOBAL.languageItems["prjtarget"] = new IupString( "Target Name" );
+			GLOBAL.languageItems["prjfocus"] = new IupString( "Focus" );
+			GLOBAL.languageItems["prjargs"] = new IupString( "Execute Args:" );
+			GLOBAL.languageItems["prjopts"] = new IupString( "Compile Opts:" );
+			GLOBAL.languageItems["prjcompiler"] = new IupString( "Compiler Path" );
+			GLOBAL.languageItems["nodirmessage"] = new IupString( "Without Project Dir!!" );
+		GLOBAL.languageItems["include"] = new IupString( "Include..." );
+			GLOBAL.languageItems["includepath"] = new IupString( "Include Paths" );
+			GLOBAL.languageItems["librarypath"] = new IupString( "Libraries Paths" );
 		
 		// Search Window
-		GLOBAL.languageItems["findwhat"] = new IupString( cast(char[]) "Find What" );
-		GLOBAL.languageItems["replacewith"] = new IupString( cast(char[]) "Replace With" );
-		GLOBAL.languageItems["direction"] = new IupString( cast(char[]) "Direction" );
-			GLOBAL.languageItems["forward"] = new IupString( cast(char[]) "Forward" );
-			GLOBAL.languageItems["backward"] = new IupString( cast(char[]) "Backward" );
-		GLOBAL.languageItems["scope"] = new IupString( cast(char[]) "Scope" );
-			GLOBAL.languageItems["all"] = new IupString( cast(char[]) "All" );
-			GLOBAL.languageItems["selection"] = new IupString( cast(char[]) "Selection" );
-		GLOBAL.languageItems["casesensitive"] = new IupString( cast(char[]) "Case Sensitive" );
-		GLOBAL.languageItems["wholeword"] = new IupString( cast(char[]) "Whole Word" );
-		GLOBAL.languageItems["find"] = new IupString( cast(char[]) "Find" );
-		GLOBAL.languageItems["findall"] = new IupString( cast(char[]) "Find All" );
-		GLOBAL.languageItems["replacefind"] = new IupString( cast(char[]) "Find/Replace" );
-		GLOBAL.languageItems["replace"] = new IupString( cast(char[]) "Replace" );
-		GLOBAL.languageItems["replaceall"] = new IupString( cast(char[]) "Replace All" );
-		GLOBAL.languageItems["countall"] = new IupString( cast(char[]) "Count All" );
-		GLOBAL.languageItems["bookmarkall"] = new IupString( cast(char[]) "Mark All" );
-		GLOBAL.languageItems["document"] = new IupString( cast(char[]) "Document" );
-		GLOBAL.languageItems["alldocument"] = new IupString( cast(char[]) "All Document" );
-		GLOBAL.languageItems["allproject"] = new IupString( cast(char[]) "All Project" );
-		GLOBAL.languageItems["status"] = new IupString( cast(char[]) "Status Bar" );
+		GLOBAL.languageItems["findwhat"] = new IupString( "Find What" );
+		GLOBAL.languageItems["replacewith"] = new IupString( "Replace With" );
+		GLOBAL.languageItems["direction"] = new IupString( "Direction" );
+			GLOBAL.languageItems["forward"] = new IupString( "Forward" );
+			GLOBAL.languageItems["backward"] = new IupString( "Backward" );
+		GLOBAL.languageItems["scope"] = new IupString( "Scope" );
+			GLOBAL.languageItems["all"] = new IupString( "All" );
+			GLOBAL.languageItems["selection"] = new IupString( "Selection" );
+		GLOBAL.languageItems["casesensitive"] = new IupString( "Case Sensitive" );
+		GLOBAL.languageItems["wholeword"] = new IupString( "Whole Word" );
+		GLOBAL.languageItems["find"] = new IupString( "Find" );
+		GLOBAL.languageItems["findall"] = new IupString( "Find All" );
+		GLOBAL.languageItems["replacefind"] = new IupString( "Find/Replace" );
+		GLOBAL.languageItems["replace"] = new IupString( "Replace" );
+		GLOBAL.languageItems["replaceall"] = new IupString( "Replace All" );
+		GLOBAL.languageItems["countall"] = new IupString( "Count All" );
+		GLOBAL.languageItems["bookmarkall"] = new IupString( "Mark All" );
+		GLOBAL.languageItems["document"] = new IupString( "Document" );
+		GLOBAL.languageItems["alldocument"] = new IupString( "All Document" );
+		GLOBAL.languageItems["allproject"] = new IupString( "All Project" );
+		GLOBAL.languageItems["status"] = new IupString( "Status Bar" );
 		
 		// shortcut
-		GLOBAL.languageItems["shortcutname"] = new IupString( cast(char[]) "ShortCut Name" );
-		GLOBAL.languageItems["shortcutkey"] = new IupString( cast(char[]) "Current ShortCut Keys" );
+		GLOBAL.languageItems["shortcutname"] = new IupString( "ShortCut Name" );
+		GLOBAL.languageItems["shortcutkey"] = new IupString( "Current ShortCut Keys" );
 		
 		// debug
-		GLOBAL.languageItems["runcontinue"] = new IupString( cast(char[]) "Run/Continue" );
-		GLOBAL.languageItems["stop"] = new IupString( cast(char[]) "Stop" );
-		GLOBAL.languageItems["step"] = new IupString( cast(char[]) "Step" );
-		GLOBAL.languageItems["next"] = new IupString( cast(char[]) "Next" );
-		GLOBAL.languageItems["return"] = new IupString( cast(char[]) "Return" );
-		GLOBAL.languageItems["until"] = new IupString( cast(char[]) "Until" );
-		GLOBAL.languageItems["terminate"] = new IupString( cast(char[]) "Terminate" );
-		GLOBAL.languageItems["bp"] = new IupString( cast(char[]) "Breakpoints" );
-		GLOBAL.languageItems["variable"] = new IupString( cast(char[]) "Variables" );
-			GLOBAL.languageItems["watchlist"] = new IupString( cast(char[]) "Watch List" );
-				GLOBAL.languageItems["add"] = new IupString( cast(char[]) "Add" );
-				GLOBAL.languageItems["remove"] = new IupString( cast(char[]) "Remove" );
-				GLOBAL.languageItems["removeall"] = new IupString( cast(char[]) "Remove All" );
-			GLOBAL.languageItems["addtowatch"] = new IupString( cast(char[]) "Add To Watchlist" );
-			GLOBAL.languageItems["locals"] = new IupString( cast(char[]) "Locals" );
-			GLOBAL.languageItems["args"] = new IupString( cast(char[]) "Arguments" );
-			GLOBAL.languageItems["shared"] = new IupString( cast(char[]) "Shared" );
-			GLOBAL.languageItems["showvalue"] = new IupString( cast(char[]) "Show Value *" );
-			GLOBAL.languageItems["showaddress"] = new IupString( cast(char[]) "Show Address @" );
-		GLOBAL.languageItems["register"] = new IupString( cast(char[]) "Registers" );
-		GLOBAL.languageItems["disassemble"] = new IupString( cast(char[]) "DisAssemble" );
-		GLOBAL.languageItems["id"] = new IupString( cast(char[]) "ID" );
-		GLOBAL.languageItems["value"] = new IupString( cast(char[]) "Value" );
+		GLOBAL.languageItems["runcontinue"] = new IupString( "Run/Continue" );
+		GLOBAL.languageItems["stop"] = new IupString( "Stop" );
+		GLOBAL.languageItems["step"] = new IupString( "Step" );
+		GLOBAL.languageItems["next"] = new IupString( "Next" );
+		GLOBAL.languageItems["return"] = new IupString( "Return" );
+		GLOBAL.languageItems["until"] = new IupString( "Until" );
+		GLOBAL.languageItems["terminate"] = new IupString( "Terminate" );
+		GLOBAL.languageItems["bp"] = new IupString( "Breakpoints" );
+		GLOBAL.languageItems["variable"] = new IupString( "Variables" );
+			GLOBAL.languageItems["watchlist"] = new IupString( "Watch List" );
+				GLOBAL.languageItems["add"] = new IupString( "Add" );
+				GLOBAL.languageItems["remove"] = new IupString( "Remove" );
+				GLOBAL.languageItems["removeall"] = new IupString( "Remove All" );
+			GLOBAL.languageItems["addtowatch"] = new IupString( "Add To Watchlist" );
+			GLOBAL.languageItems["locals"] = new IupString( "Locals" );
+			GLOBAL.languageItems["args"] = new IupString( "Arguments" );
+			GLOBAL.languageItems["shared"] = new IupString( "Shared" );
+			GLOBAL.languageItems["showvalue"] = new IupString( "Show Value *" );
+			GLOBAL.languageItems["showaddress"] = new IupString( "Show Address @" );
+		GLOBAL.languageItems["register"] = new IupString( "Registers" );
+		GLOBAL.languageItems["disassemble"] = new IupString( "DisAssemble" );
+		GLOBAL.languageItems["id"] = new IupString( "ID" );
+		GLOBAL.languageItems["value"] = new IupString( "Value" );
 
 		// caption
-		GLOBAL.languageItems["caption_new"] = new IupString( cast(char[]) "New" );
-		GLOBAL.languageItems["caption_open"] = new IupString( cast(char[]) "Open" );
-		GLOBAL.languageItems["caption_saveas"] = new IupString( cast(char[]) "Save As" );
-		GLOBAL.languageItems["caption_cut"] = new IupString( cast(char[]) "Cut" );
-		GLOBAL.languageItems["caption_copy"] = new IupString( cast(char[]) "Copy" );
-		GLOBAL.languageItems["caption_paste"] = new IupString( cast(char[]) "Paste" );
-		GLOBAL.languageItems["caption_selectall"] = new IupString( cast(char[]) "Select All" );
-		GLOBAL.languageItems["caption_about"] = new IupString( cast(char[]) "About" );
-		GLOBAL.languageItems["caption_search"] = new IupString( cast(char[]) "Search" );
-		GLOBAL.languageItems["caption_prj"] = new IupString( cast(char[]) "Project" );
-		GLOBAL.languageItems["caption_openprj"] = new IupString( cast(char[]) "Open Project" );
-		GLOBAL.languageItems["caption_importprj"] = new IupString( cast(char[]) "Import Fbedit Project" );
-		GLOBAL.languageItems["caption_prjproperties"] = new IupString( cast(char[]) "Project Properties" );
-		GLOBAL.languageItems["caption_preference"] = new IupString( cast(char[]) "Preference" );
-		GLOBAL.languageItems["caption_argtitle"] = new IupString( cast(char[]) "Compiler Options / EXE Arguments" );
-		GLOBAL.languageItems["caption_debug"] = new IupString( cast(char[]) "Debug" );
-		GLOBAL.languageItems["caption_optionhelp"] = new IupString( cast(char[]) "Compiler Options" );
+		GLOBAL.languageItems["caption_new"] = new IupString( "New" );
+		GLOBAL.languageItems["caption_open"] = new IupString( "Open" );
+		GLOBAL.languageItems["caption_saveas"] = new IupString( "Save As" );
+		GLOBAL.languageItems["caption_cut"] = new IupString( "Cut" );
+		GLOBAL.languageItems["caption_copy"] = new IupString( "Copy" );
+		GLOBAL.languageItems["caption_paste"] = new IupString( "Paste" );
+		GLOBAL.languageItems["caption_selectall"] = new IupString( "Select All" );
+		GLOBAL.languageItems["caption_about"] = new IupString( "About" );
+		GLOBAL.languageItems["caption_search"] = new IupString( "Search" );
+		GLOBAL.languageItems["caption_prj"] = new IupString( "Project" );
+		GLOBAL.languageItems["caption_openprj"] = new IupString( "Open Project" );
+		GLOBAL.languageItems["caption_importprj"] = new IupString( "Import Fbedit Project" );
+		GLOBAL.languageItems["caption_prjproperties"] = new IupString( "Project Properties" );
+		GLOBAL.languageItems["caption_preference"] = new IupString( "Preference" );
+		GLOBAL.languageItems["caption_argtitle"] = new IupString( "Compiler Options / EXE Arguments" );
+		GLOBAL.languageItems["caption_debug"] = new IupString( "Debug" );
+		GLOBAL.languageItems["caption_optionhelp"] = new IupString( "Compiler Options" );
 		
 		// message
-		GLOBAL.languageItems["ok"] = new IupString( cast(char[]) "OK" );
-		GLOBAL.languageItems["yes"] = new IupString( cast(char[]) "Yes" );
-		GLOBAL.languageItems["no"] = new IupString( cast(char[]) "No" );
-		GLOBAL.languageItems["cancel"] = new IupString( cast(char[]) "Cancel" );
-		GLOBAL.languageItems["apply"] = new IupString( cast(char[]) "Apply" );
-		GLOBAL.languageItems["go"] = new IupString( cast(char[]) "Go" );
-		GLOBAL.languageItems["bechange"] = new IupString( cast(char[]) "has been changed, save it now?" );
-		GLOBAL.languageItems["samekey"] = new IupString( cast(char[]) "The same key value with" );
-		GLOBAL.languageItems["needrestart"] = new IupString( cast(char[]) "Need Restart To Change Language" );
-		GLOBAL.languageItems["suredelete"] = new IupString( cast(char[]) "Are you sure to delete file?" );
-		GLOBAL.languageItems["sureexit"] = new IupString( cast(char[]) "Are you sure exit poseidon?" );
-		GLOBAL.languageItems["opened"] = new IupString( cast(char[]) "had already opened!" );
-		GLOBAL.languageItems["existed"] = new IupString( cast(char[]) "had already existed!" );
-		GLOBAL.languageItems["wrongext"] = new IupString( cast(char[]) "Wrong Ext Name!" );
-		GLOBAL.languageItems["filelost"] = new IupString( cast(char[]) "isn't existed!" );
-		GLOBAL.languageItems[".poseidonbroken"] = new IupString( cast(char[]) "Project setup file loading error!" );
-		GLOBAL.languageItems[".poseidonlost"] = new IupString( cast(char[]) "The directory has lost / no project setup file!" );
-		GLOBAL.languageItems["continueimport"] = new IupString( cast(char[]) "The directory has poseidon project setup file, continue import anyway?" );
-		GLOBAL.languageItems["compilefailure"] = new IupString( cast(char[]) "Compile Failure!" );
-		GLOBAL.languageItems["compilewarning"] = new IupString( cast(char[]) "Compile Done, But Got Warnings!" );
-		GLOBAL.languageItems["compileok"] = new IupString( cast(char[]) "Compile Success!" );
-		GLOBAL.languageItems["cantundo"] = new IupString( cast(char[]) "This action can't be undo! Continue anyway?" );
-		GLOBAL.languageItems["exitdebug1"] = new IupString( cast(char[]) "Exit debug right now?" );
-		GLOBAL.languageItems["exitdebug2"] = new IupString( cast(char[]) "No debugging symbols found!! Exit debug!" );
-		GLOBAL.languageItems["applyfgcolor"] = new IupString( cast(char[]) "Apply to other scintilla foreground color settings?" );
-		GLOBAL.languageItems["applycolor"] = new IupString( cast(char[]) "Apply to other scintilla background color settings?" );
-		GLOBAL.languageItems["noselect"] = new IupString( cast(char[]) "No Selected!!" );
-		GLOBAL.languageItems["nodirandcreate"] = new IupString( cast(char[]) "No This Dir!! Create New One?" );
-		GLOBAL.languageItems["quest"] = new IupString( cast(char[]) "Quest" );
-		GLOBAL.languageItems["alarm"] = new IupString( cast(char[]) "Alarm" );
-		GLOBAL.languageItems["error"] = new IupString( cast(char[]) "Error" );
-		GLOBAL.languageItems["foundword"] = new IupString( cast(char[]) "Found Word." );
-		GLOBAL.languageItems["foundnothing"] = new IupString( cast(char[]) "Found Nothing!" );
-		GLOBAL.languageItems["pluginrunningunload"] = new IupString( cast(char[]) "Plugin Is Running, Unload The Plugin?" );
-		GLOBAL.languageItems["onlytools"] = new IupString( cast(char[]) "Only Support 12 Tools!" );
-		GLOBAL.languageItems["createnewone"] = new IupString( cast(char[]) "Create new one?" );
-		GLOBAL.languageItems["applythisone"] = new IupString( cast(char[]) "Apply This One?" );
+		GLOBAL.languageItems["ok"] = new IupString( "OK" );
+		GLOBAL.languageItems["yes"] = new IupString( "Yes" );
+		GLOBAL.languageItems["no"] = new IupString( "No" );
+		GLOBAL.languageItems["cancel"] = new IupString( "Cancel" );
+		GLOBAL.languageItems["apply"] = new IupString( "Apply" );
+		GLOBAL.languageItems["go"] = new IupString( "Go" );
+		GLOBAL.languageItems["bechange"] = new IupString( "has been changed, save it now?" );
+		GLOBAL.languageItems["samekey"] = new IupString( "The same key value with" );
+		GLOBAL.languageItems["needrestart"] = new IupString( "Need Restart To Change Language" );
+		GLOBAL.languageItems["suredelete"] = new IupString( "Are you sure to delete file?" );
+		GLOBAL.languageItems["sureexit"] = new IupString( "Are you sure exit poseidon?" );
+		GLOBAL.languageItems["opened"] = new IupString( "had already opened!" );
+		GLOBAL.languageItems["existed"] = new IupString( "had already existed!" );
+		GLOBAL.languageItems["wrongext"] = new IupString( "Wrong Ext Name!" );
+		GLOBAL.languageItems["filelost"] = new IupString( "isn't existed!" );
+		GLOBAL.languageItems[".poseidonbroken"] = new IupString( "Project setup file loading error!" );
+		GLOBAL.languageItems[".poseidonlost"] = new IupString( "The directory has lost / no project setup file!" );
+		GLOBAL.languageItems["continueimport"] = new IupString( "The directory has poseidon project setup file, continue import anyway?" );
+		GLOBAL.languageItems["compilefailure"] = new IupString( "Compile Failure!" );
+		GLOBAL.languageItems["compilewarning"] = new IupString( "Compile Done, But Got Warnings!" );
+		GLOBAL.languageItems["compileok"] = new IupString( "Compile Success!" );
+		GLOBAL.languageItems["cantundo"] = new IupString( "This action can't be undo! Continue anyway?" );
+		GLOBAL.languageItems["exitdebug1"] = new IupString( "Exit debug right now?" );
+		GLOBAL.languageItems["exitdebug2"] = new IupString( "No debugging symbols found!! Exit debug!" );
+		GLOBAL.languageItems["applyfgcolor"] = new IupString( "Apply to other scintilla foreground color settings?" );
+		GLOBAL.languageItems["applycolor"] = new IupString( "Apply to other scintilla background color settings?" );
+		GLOBAL.languageItems["noselect"] = new IupString( "No Selected!!" );
+		GLOBAL.languageItems["nodirandcreate"] = new IupString( "No This Dir!! Create New One?" );
+		GLOBAL.languageItems["quest"] = new IupString( "Quest" );
+		GLOBAL.languageItems["alarm"] = new IupString( "Alarm" );
+		GLOBAL.languageItems["error"] = new IupString( "Error" );
+		GLOBAL.languageItems["foundword"] = new IupString( "Found Word." );
+		GLOBAL.languageItems["foundnothing"] = new IupString( "Found Nothing!" );
+		GLOBAL.languageItems["pluginrunningunload"] = new IupString( "Plugin Is Running, Unload The Plugin?" );
+		GLOBAL.languageItems["onlytools"] = new IupString( "Only Support 12 Tools!" );
+		GLOBAL.languageItems["createnewone"] = new IupString( "Create new one?" );
+		GLOBAL.languageItems["applythisone"] = new IupString( "Apply This One?" );
 
-		GLOBAL.languageItems["exefile"] = new IupString( cast(char[]) "Execute Files" );
+		GLOBAL.languageItems["exefile"] = new IupString( "Execute Files" );
 		version(FBIDE)
 		{
-			GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "freeBASIC Sources" );
-			GLOBAL.languageItems["bifile"] = new IupString( cast(char[]) "freeBASIC Includes" );
+			GLOBAL.languageItems["basfile"] = new IupString( "freeBASIC Sources" );
+			GLOBAL.languageItems["bifile"] = new IupString( "freeBASIC Includes" );
 		}
 		version(DIDE)
 		{
-			GLOBAL.languageItems["basfile"] = new IupString( cast(char[]) "D Sources" );
-			GLOBAL.languageItems["bifile"] = new IupString( cast(char[]) "D Includes" );
+			GLOBAL.languageItems["basfile"] = new IupString( "D Sources" );
+			GLOBAL.languageItems["bifile"] = new IupString( "D Includes" );
 		}
-		GLOBAL.languageItems["supportfile"] = new IupString( cast(char[]) "All Supported Files" );
-		GLOBAL.languageItems["lngfile"] = new IupString( cast(char[]) "Language Files" );
-		GLOBAL.languageItems["chmfile"] = new IupString( cast(char[]) "Microsoft Compiled HTML Help" );
-		GLOBAL.languageItems["allfile"] = new IupString( cast(char[]) "All Files" );
-		GLOBAL.languageItems["fbeditfile"] = new IupString( cast(char[]) "FbEdit Projects" );
+		GLOBAL.languageItems["supportfile"] = new IupString( "All Supported Files" );
+		GLOBAL.languageItems["lngfile"] = new IupString( "Language Files" );
+		GLOBAL.languageItems["chmfile"] = new IupString( "Microsoft Compiled HTML Help" );
+		GLOBAL.languageItems["allfile"] = new IupString( "All Files" );
+		GLOBAL.languageItems["fbeditfile"] = new IupString( "FbEdit Projects" );
 	}	
 }

@@ -1,0 +1,9290 @@
+﻿{
+"line": "60",
+"tail": "2147483647",
+"name": "object",
+"kind": "131072",
+"prot": "",
+"type": "K:/CodingPark/dmd2/src/druntime/import/object.d",
+"base": "",
+"sons": [
+{
+"line": "62",
+"tail": "62",
+"name": "size_t",
+"kind": "2048",
+"prot": "",
+"type": "(int. sizeof)",
+"base": "",
+"sons": []
+},
+{
+"line": "63",
+"tail": "63",
+"name": "ptrdiff_t",
+"kind": "2048",
+"prot": "",
+"type": "(cast( void *) 0 - cast( void *) 0)",
+"base": "",
+"sons": []
+},
+{
+"line": "65",
+"tail": "65",
+"name": "sizediff_t",
+"kind": "2048",
+"prot": "",
+"type": "ptrdiff_t",
+"base": "",
+"sons": []
+},
+{
+"line": "70",
+"tail": "70",
+"name": "noreturn",
+"kind": "2048",
+"prot": "",
+"type": "(* null)",
+"base": "",
+"sons": []
+},
+{
+"line": "72",
+"tail": "72",
+"name": "hash_t",
+"kind": "2048",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "73",
+"tail": "73",
+"name": "equals_t",
+"kind": "2048",
+"prot": "",
+"type": "bool",
+"base": "",
+"sons": []
+},
+{
+"line": "75",
+"tail": "75",
+"name": "string",
+"kind": "2048",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "76",
+"tail": "76",
+"name": "wstring",
+"kind": "2048",
+"prot": "",
+"type": "wchar[]",
+"base": "",
+"sons": []
+},
+{
+"line": "77",
+"tail": "77",
+"name": "dstring",
+"kind": "2048",
+"prot": "",
+"type": "dchar[]",
+"base": "",
+"sons": []
+},
+{
+"line": "79",
+"tail": "83",
+"name": "D_ObjectiveC",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "82",
+"tail": "82",
+"name": "selector",
+"kind": "32768",
+"prot": "public",
+"type": "core.attribute",
+"base": "selector",
+"sons": []
+}]
+},
+{
+"line": "84",
+"tail": "84",
+"name": "Posix",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "84",
+"tail": "84",
+"name": "gnuAbiTag",
+"kind": "32768",
+"prot": "public",
+"type": "core.attribute",
+"base": "gnuAbiTag",
+"sons": []
+}]
+},
+{
+"line": "87",
+"tail": "90",
+"name": "GNU",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "91",
+"tail": "96",
+"name": "X86_64",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "93",
+"tail": "93",
+"name": "DigitalMars",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "93",
+"tail": "93",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "WithArgTypes",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "94",
+"tail": "94",
+"name": "Windows",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "95",
+"tail": "95",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "WithArgTypes",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "97",
+"tail": "105",
+"name": "AArch64",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "100",
+"tail": "100",
+"name": "OSX",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "101",
+"tail": "101",
+"name": "iOS",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "102",
+"tail": "102",
+"name": "TVOS",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "103",
+"tail": "103",
+"name": "WatchOS",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "104",
+"tail": "104",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "WithArgTypes",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "110",
+"tail": "267",
+"name": "Object",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "115",
+"tail": "118",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "137",
+"tail": "149",
+"name": "toHash",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": [
+{
+"line": "140",
+"tail": "140",
+"name": "addr",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "160",
+"tail": "167",
+"name": "opCmp",
+"kind": "2",
+"prot": "",
+"type": "int(Object o)",
+"base": "",
+"sons": [
+{
+"line": "160",
+"tail": "160",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "214",
+"tail": "217",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "214",
+"tail": "214",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "219",
+"tail": "223",
+"name": "Monitor",
+"kind": "1024",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "221",
+"tail": "221",
+"name": "lock",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "222",
+"tail": "222",
+"name": "unlock",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "249",
+"tail": "257",
+"name": "factory",
+"kind": "2",
+"prot": "",
+"type": "Object(string classname)",
+"base": "",
+"sons": [
+{
+"line": "249",
+"tail": "249",
+"name": "classname",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "251",
+"tail": "251",
+"name": "ci",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "TypeInfo_Class.find(classname)",
+"sons": []
+}]
+}]
+},
+{
+"line": "275",
+"tail": "311",
+"name": "opEquals",
+"kind": "512",
+"prot": "",
+"type": "(LHS, RHS)",
+"base": "",
+"sons": [
+{
+"line": "275",
+"tail": "311",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(LHS lhs,RHS rhs)",
+"base": "",
+"sons": [
+{
+"line": "275",
+"tail": "275",
+"name": "lhs",
+"kind": "262144",
+"prot": "",
+"type": "LHS",
+"base": "",
+"sons": []
+},
+{
+"line": "275",
+"tail": "275",
+"name": "rhs",
+"kind": "262144",
+"prot": "",
+"type": "RHS",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "526",
+"tail": "526",
+"name": "_d_setSameMutex",
+"kind": "2",
+"prot": "private",
+"type": "void(shared Object ownee,shared Object owner)",
+"base": "",
+"sons": []
+},
+{
+"line": "528",
+"tail": "531",
+"name": "setSameMutex",
+"kind": "2",
+"prot": "",
+"type": "void(shared Object ownee,shared Object owner)",
+"base": "",
+"sons": [
+{
+"line": "528",
+"tail": "528",
+"name": "ownee",
+"kind": "262144",
+"prot": "",
+"type": "shared Object",
+"base": "",
+"sons": []
+},
+{
+"line": "528",
+"tail": "528",
+"name": "owner",
+"kind": "262144",
+"prot": "",
+"type": "shared Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "556",
+"tail": "562",
+"name": "Interface",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "559",
+"tail": "559",
+"name": "classinfo",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo_Class",
+"base": "",
+"sons": []
+},
+{
+"line": "560",
+"tail": "560",
+"name": "vtbl",
+"kind": "1",
+"prot": "",
+"type": "void*[]",
+"base": "",
+"sons": []
+},
+{
+"line": "561",
+"tail": "561",
+"name": "offset",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "568",
+"tail": "572",
+"name": "OffsetTypeInfo",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "570",
+"tail": "570",
+"name": "offset",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "571",
+"tail": "571",
+"name": "ti",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "579",
+"tail": "750",
+"name": "TypeInfo",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "581",
+"tail": "584",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "586",
+"tail": "589",
+"name": "toHash",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "591",
+"tail": "599",
+"name": "opCmp",
+"kind": "2",
+"prot": "",
+"type": "int(Object rhs)",
+"base": "",
+"sons": [
+{
+"line": "591",
+"tail": "591",
+"name": "rhs",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "595",
+"tail": "595",
+"name": "ti",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "rhs",
+"sons": []
+}]
+},
+{
+"line": "608",
+"tail": "611",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "608",
+"tail": "608",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "613",
+"tail": "622",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(const TypeInfo ti)",
+"base": "",
+"sons": [
+{
+"line": "613",
+"tail": "613",
+"name": "ti",
+"kind": "262144",
+"prot": "",
+"type": "const TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "641",
+"tail": "644",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "641",
+"tail": "641",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "647",
+"tail": "647",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "647",
+"tail": "647",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "647",
+"tail": "647",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "650",
+"tail": "650",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "650",
+"tail": "650",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "650",
+"tail": "650",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "653",
+"tail": "653",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "656",
+"tail": "679",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "656",
+"tail": "656",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "656",
+"tail": "656",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "658",
+"tail": "658",
+"name": "remaining",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "665",
+"tail": "665",
+"name": "tmp",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "673",
+"tail": "673",
+"name": "i",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "675",
+"tail": "675",
+"name": "t",
+"kind": "1",
+"prot": "",
+"type": "byte",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "713",
+"tail": "713",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "721",
+"tail": "721",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "725",
+"tail": "725",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "728",
+"tail": "728",
+"name": "offTi",
+"kind": "2",
+"prot": "",
+"type": "OffsetTypeInfo[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "730",
+"tail": "730",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "730",
+"tail": "730",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "732",
+"tail": "732",
+"name": "postblit",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "732",
+"tail": "732",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "736",
+"tail": "736",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "741",
+"tail": "745",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "741",
+"tail": "743",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "741",
+"tail": "741",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "741",
+"tail": "741",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "749",
+"tail": "749",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "830",
+"tail": "971",
+"name": "TypeInfo_Enum",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "832",
+"tail": "832",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "834",
+"tail": "841",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "834",
+"tail": "834",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "838",
+"tail": "838",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Enum",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "852",
+"tail": "852",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "852",
+"tail": "852",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "871",
+"tail": "871",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "871",
+"tail": "871",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "871",
+"tail": "871",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "884",
+"tail": "884",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "884",
+"tail": "884",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "884",
+"tail": "884",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "898",
+"tail": "898",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "910",
+"tail": "910",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "910",
+"tail": "910",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "910",
+"tail": "910",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "924",
+"tail": "924",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "933",
+"tail": "933",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "942",
+"tail": "942",
+"name": "offTi",
+"kind": "2",
+"prot": "",
+"type": "OffsetTypeInfo[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "951",
+"tail": "951",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "951",
+"tail": "951",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "952",
+"tail": "952",
+"name": "postblit",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "952",
+"tail": "952",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "954",
+"tail": "957",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "959",
+"tail": "959",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "961",
+"tail": "964",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "961",
+"tail": "963",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "961",
+"tail": "961",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "961",
+"tail": "961",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "966",
+"tail": "966",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+},
+{
+"line": "968",
+"tail": "968",
+"name": "base",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "969",
+"tail": "969",
+"name": "name",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "970",
+"tail": "970",
+"name": "m_init",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "993",
+"tail": "1043",
+"name": "TypeInfo_Pointer",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "995",
+"tail": "995",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "997",
+"tail": "1003",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "997",
+"tail": "997",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1001",
+"tail": "1001",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Pointer",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1005",
+"tail": "1009",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1005",
+"tail": "1005",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1007",
+"tail": "1007",
+"name": "addr",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1011",
+"tail": "1014",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1011",
+"tail": "1011",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1011",
+"tail": "1011",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1016",
+"tail": "1020",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1016",
+"tail": "1016",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1016",
+"tail": "1016",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1018",
+"tail": "1018",
+"name": "v1",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "*cast(void * *)p1",
+"sons": []
+}]
+},
+{
+"line": "1022",
+"tail": "1025",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1027",
+"tail": "1030",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1032",
+"tail": "1037",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1032",
+"tail": "1032",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1032",
+"tail": "1032",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1034",
+"tail": "1034",
+"name": "tmp",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1039",
+"tail": "1039",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "1040",
+"tail": "1040",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1042",
+"tail": "1042",
+"name": "m_next",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1045",
+"tail": "1135",
+"name": "TypeInfo_Array",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1047",
+"tail": "1047",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "1049",
+"tail": "1055",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1049",
+"tail": "1049",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1053",
+"tail": "1053",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Array",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1057",
+"tail": "1061",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1057",
+"tail": "1057",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1059",
+"tail": "1059",
+"name": "a",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1063",
+"tail": "1076",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1063",
+"tail": "1063",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1063",
+"tail": "1063",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1065",
+"tail": "1065",
+"name": "a1",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1066",
+"tail": "1066",
+"name": "a2",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1069",
+"tail": "1069",
+"name": "sz",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1070",
+"tail": "1070",
+"name": "i",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1078",
+"tail": "1094",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1078",
+"tail": "1078",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1078",
+"tail": "1078",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1080",
+"tail": "1080",
+"name": "a1",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1081",
+"tail": "1081",
+"name": "a2",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1082",
+"tail": "1082",
+"name": "sz",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1083",
+"tail": "1083",
+"name": "len",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1087",
+"tail": "1087",
+"name": "u",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1089",
+"tail": "1089",
+"name": "result",
+"kind": "1",
+"prot": "",
+"type": "int",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1096",
+"tail": "1099",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1101",
+"tail": "1104",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1106",
+"tail": "1111",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1106",
+"tail": "1106",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1106",
+"tail": "1106",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1108",
+"tail": "1108",
+"name": "tmp",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1113",
+"tail": "1113",
+"name": "value",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1115",
+"tail": "1118",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "1120",
+"tail": "1120",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1122",
+"tail": "1125",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1127",
+"tail": "1132",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "1127",
+"tail": "1129",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "1127",
+"tail": "1127",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1127",
+"tail": "1127",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "1134",
+"tail": "1134",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1137",
+"tail": "1258",
+"name": "TypeInfo_StaticArray",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1139",
+"tail": "1147",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": [
+{
+"line": "1141",
+"tail": "1141",
+"name": "unsignedToTempString",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.string",
+"base": "unsignedToTempString",
+"sons": []
+},
+{
+"line": "1143",
+"tail": "1143",
+"name": "tmpBuff",
+"kind": "1",
+"prot": "",
+"type": "char[20]",
+"base": "",
+"sons": []
+},
+{
+"line": "1144",
+"tail": "1144",
+"name": "lenString",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "unsignedToTempString(len, tmpBuff)",
+"sons": []
+}]
+},
+{
+"line": "1149",
+"tail": "1156",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1149",
+"tail": "1149",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1153",
+"tail": "1153",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_StaticArray",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1158",
+"tail": "1161",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1158",
+"tail": "1158",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1163",
+"tail": "1173",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1163",
+"tail": "1163",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1163",
+"tail": "1163",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1165",
+"tail": "1165",
+"name": "sz",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1167",
+"tail": "1167",
+"name": "u",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1175",
+"tail": "1186",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1175",
+"tail": "1175",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1175",
+"tail": "1175",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1177",
+"tail": "1177",
+"name": "sz",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1179",
+"tail": "1179",
+"name": "u",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1181",
+"tail": "1181",
+"name": "result",
+"kind": "1",
+"prot": "",
+"type": "int",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1188",
+"tail": "1191",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": [
+{
+"line": "1190",
+"tail": "1190",
+"name": "value",
+"kind": "1",
+"prot": "",
+"type": "len*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1193",
+"tail": "1211",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1193",
+"tail": "1193",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1193",
+"tail": "1193",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1195",
+"tail": "1195",
+"name": "memcpy",
+"kind": "32768",
+"prot": "",
+"type": "core.stdc.string",
+"base": "memcpy",
+"sons": []
+},
+{
+"line": "1197",
+"tail": "1197",
+"name": "remaining",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1198",
+"tail": "1198",
+"name": "buffer",
+"kind": "1",
+"prot": "",
+"type": "void[size_t. sizeof * 4]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1213",
+"tail": "1216",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1218",
+"tail": "1218",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "1219",
+"tail": "1219",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1221",
+"tail": "1230",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "1221",
+"tail": "1221",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1223",
+"tail": "1223",
+"name": "sz",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "value.tsize",
+"sons": []
+}]
+},
+{
+"line": "1232",
+"tail": "1240",
+"name": "postblit",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "1232",
+"tail": "1232",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1234",
+"tail": "1234",
+"name": "sz",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "value.tsize",
+"sons": []
+}]
+},
+{
+"line": "1242",
+"tail": "1242",
+"name": "value",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1243",
+"tail": "1243",
+"name": "len",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "1245",
+"tail": "1248",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1250",
+"tail": "1254",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "1250",
+"tail": "1252",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "1250",
+"tail": "1250",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1250",
+"tail": "1250",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "1257",
+"tail": "1257",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1277",
+"tail": "1331",
+"name": "TypeInfo_AssociativeArray",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1279",
+"tail": "1282",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "1284",
+"tail": "1291",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1284",
+"tail": "1284",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1288",
+"tail": "1288",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_AssociativeArray",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1293",
+"tail": "1296",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1293",
+"tail": "1293",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1293",
+"tail": "1293",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1298",
+"tail": "1301",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "hash_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1298",
+"tail": "1298",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1305",
+"tail": "1308",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1310",
+"tail": "1313",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1315",
+"tail": "1315",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "1316",
+"tail": "1316",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1318",
+"tail": "1318",
+"name": "value",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1319",
+"tail": "1319",
+"name": "key",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1321",
+"tail": "1324",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1326",
+"tail": "1330",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "1326",
+"tail": "1328",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "1326",
+"tail": "1326",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1326",
+"tail": "1326",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "1333",
+"tail": "1367",
+"name": "TypeInfo_Vector",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1335",
+"tail": "1335",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "1337",
+"tail": "1343",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1337",
+"tail": "1337",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1341",
+"tail": "1341",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Vector",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1345",
+"tail": "1345",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1345",
+"tail": "1345",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1346",
+"tail": "1346",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1346",
+"tail": "1346",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1346",
+"tail": "1346",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1347",
+"tail": "1347",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1347",
+"tail": "1347",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1347",
+"tail": "1347",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1348",
+"tail": "1348",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1349",
+"tail": "1349",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1349",
+"tail": "1349",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1349",
+"tail": "1349",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1351",
+"tail": "1351",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "1352",
+"tail": "1352",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1354",
+"tail": "1357",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1359",
+"tail": "1359",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1361",
+"tail": "1364",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "1361",
+"tail": "1363",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "1361",
+"tail": "1361",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1361",
+"tail": "1361",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "1366",
+"tail": "1366",
+"name": "base",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1369",
+"tail": "1409",
+"name": "TypeInfo_Function",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1371",
+"tail": "1379",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": [
+{
+"line": "1373",
+"tail": "1373",
+"name": "demangleType",
+"kind": "32768",
+"prot": "",
+"type": "core.demangle",
+"base": "demangleType",
+"sons": []
+},
+{
+"line": "1375",
+"tail": "1375",
+"name": "SafeDemangleFunctionType",
+"kind": "2048",
+"prot": "",
+"type": "char[] function(const ( char)[] buf, char[] dst= null)",
+"base": "",
+"sons": []
+},
+{
+"line": "1376",
+"tail": "1376",
+"name": "demangle",
+"kind": "1",
+"prot": "",
+"type": "SafeDemangleFunctionType",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1381",
+"tail": "1387",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1381",
+"tail": "1381",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1385",
+"tail": "1385",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Function",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1391",
+"tail": "1394",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1396",
+"tail": "1399",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1401",
+"tail": "1401",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+},
+{
+"line": "1403",
+"tail": "1403",
+"name": "next",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1408",
+"tail": "1408",
+"name": "deco",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1446",
+"tail": "1555",
+"name": "TypeInfo_Delegate",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1448",
+"tail": "1456",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": [
+{
+"line": "1450",
+"tail": "1450",
+"name": "demangleType",
+"kind": "32768",
+"prot": "",
+"type": "core.demangle",
+"base": "demangleType",
+"sons": []
+},
+{
+"line": "1452",
+"tail": "1452",
+"name": "SafeDemangleFunctionType",
+"kind": "2048",
+"prot": "",
+"type": "char[] function(const ( char)[] buf, char[] dst= null)",
+"base": "",
+"sons": []
+},
+{
+"line": "1453",
+"tail": "1453",
+"name": "demangle",
+"kind": "1",
+"prot": "",
+"type": "SafeDemangleFunctionType",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1479",
+"tail": "1485",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1479",
+"tail": "1479",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1483",
+"tail": "1483",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Delegate",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1500",
+"tail": "1503",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1500",
+"tail": "1500",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1505",
+"tail": "1510",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1505",
+"tail": "1505",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1505",
+"tail": "1505",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1507",
+"tail": "1507",
+"name": "dg1",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "*cast(void delegate() *)p1",
+"sons": []
+},
+{
+"line": "1508",
+"tail": "1508",
+"name": "dg2",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "*cast(void delegate() *)p2",
+"sons": []
+}]
+},
+{
+"line": "1512",
+"tail": "1523",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1512",
+"tail": "1512",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1512",
+"tail": "1512",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1514",
+"tail": "1514",
+"name": "dg1",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "*cast(void delegate() *)p1",
+"sons": []
+},
+{
+"line": "1515",
+"tail": "1515",
+"name": "dg2",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "*cast(void delegate() *)p2",
+"sons": []
+}]
+},
+{
+"line": "1525",
+"tail": "1529",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": [
+{
+"line": "1527",
+"tail": "1527",
+"name": "dg",
+"kind": "2048",
+"prot": "",
+"type": "int delegate()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1531",
+"tail": "1534",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1536",
+"tail": "1536",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1538",
+"tail": "1538",
+"name": "next",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1539",
+"tail": "1539",
+"name": "deco",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "1541",
+"tail": "1545",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": [
+{
+"line": "1543",
+"tail": "1543",
+"name": "dg",
+"kind": "2048",
+"prot": "",
+"type": "int delegate()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1547",
+"tail": "1552",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "1547",
+"tail": "1549",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "1547",
+"tail": "1547",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1547",
+"tail": "1547",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "1554",
+"tail": "1554",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1557",
+"tail": "1557",
+"name": "_d_newclass",
+"kind": "2",
+"prot": "private",
+"type": "Object(const TypeInfo_Class ci)",
+"base": "",
+"sons": []
+},
+{
+"line": "1558",
+"tail": "1558",
+"name": "_d_isbaseof",
+"kind": "2",
+"prot": "private",
+"type": "int(scope TypeInfo_Class child,scope const TypeInfo_Class parent)",
+"base": "",
+"sons": []
+},
+{
+"line": "1566",
+"tail": "1733",
+"name": "TypeInfo_Class",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1568",
+"tail": "1568",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "1570",
+"tail": "1576",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(const TypeInfo o)",
+"base": "",
+"sons": [
+{
+"line": "1570",
+"tail": "1570",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "const TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "1574",
+"tail": "1574",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Class",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1578",
+"tail": "1582",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1578",
+"tail": "1578",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1580",
+"tail": "1580",
+"name": "o",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "*cast(Object *)p",
+"sons": []
+}]
+},
+{
+"line": "1584",
+"tail": "1590",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1584",
+"tail": "1584",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1584",
+"tail": "1584",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1586",
+"tail": "1586",
+"name": "o1",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1587",
+"tail": "1587",
+"name": "o2",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1592",
+"tail": "1612",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1592",
+"tail": "1592",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1592",
+"tail": "1592",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1594",
+"tail": "1594",
+"name": "o1",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1595",
+"tail": "1595",
+"name": "o2",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1596",
+"tail": "1596",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "int",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1614",
+"tail": "1617",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1619",
+"tail": "1622",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1624",
+"tail": "1624",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1626",
+"tail": "1629",
+"name": "offTi",
+"kind": "2",
+"prot": "",
+"type": "OffsetTypeInfo[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1631",
+"tail": "1631",
+"name": "info",
+"kind": "2",
+"prot": "",
+"type": "AUTO()",
+"base": "",
+"sons": []
+},
+{
+"line": "1632",
+"tail": "1632",
+"name": "typeinfo",
+"kind": "2",
+"prot": "",
+"type": "AUTO()",
+"base": "",
+"sons": []
+},
+{
+"line": "1634",
+"tail": "1634",
+"name": "m_init",
+"kind": "1",
+"prot": "",
+"type": "byte[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1637",
+"tail": "1637",
+"name": "name",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "1638",
+"tail": "1638",
+"name": "vtbl",
+"kind": "1",
+"prot": "",
+"type": "void*[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1639",
+"tail": "1639",
+"name": "interfaces",
+"kind": "1",
+"prot": "",
+"type": "Interface[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1640",
+"tail": "1640",
+"name": "base",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo_Class",
+"base": "",
+"sons": []
+},
+{
+"line": "1641",
+"tail": "1641",
+"name": "destructor",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1642",
+"tail": "1642",
+"name": "classInvariant",
+"kind": "4194304",
+"prot": "",
+"type": "void(Object)",
+"base": "",
+"sons": []
+},
+{
+"line": "1643",
+"tail": "1654",
+"name": "ClassFlags",
+"kind": "128",
+"prot": "",
+"type": "",
+"base": "uint",
+"sons": [
+{
+"line": "1645",
+"tail": "1645",
+"name": "isCOMclass",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1646",
+"tail": "1646",
+"name": "noPointers",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1647",
+"tail": "1647",
+"name": "hasOffTi",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1648",
+"tail": "1648",
+"name": "hasCtor",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1649",
+"tail": "1649",
+"name": "hasGetMembers",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1650",
+"tail": "1650",
+"name": "hasTypeInfo",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1651",
+"tail": "1651",
+"name": "isAbstract",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1652",
+"tail": "1652",
+"name": "isCPPclass",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "1653",
+"tail": "1653",
+"name": "hasDtor",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1655",
+"tail": "1655",
+"name": "m_flags",
+"kind": "1",
+"prot": "",
+"type": "ClassFlags",
+"base": "",
+"sons": []
+},
+{
+"line": "1656",
+"tail": "1656",
+"name": "deallocator",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1657",
+"tail": "1657",
+"name": "m_offTi",
+"kind": "1",
+"prot": "",
+"type": "OffsetTypeInfo[]",
+"base": "",
+"sons": []
+},
+{
+"line": "1658",
+"tail": "1658",
+"name": "defaultConstructor",
+"kind": "4194304",
+"prot": "",
+"type": "void(Object)",
+"base": "",
+"sons": []
+},
+{
+"line": "1660",
+"tail": "1660",
+"name": "m_RTInfo",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1661",
+"tail": "1661",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+},
+{
+"line": "1667",
+"tail": "1685",
+"name": "find",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo_Class(const scope char[] classname)",
+"base": "",
+"sons": [
+{
+"line": "1667",
+"tail": "1667",
+"name": "classname",
+"kind": "262144",
+"prot": "",
+"type": "const scope char[]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1690",
+"tail": "1702",
+"name": "create",
+"kind": "2",
+"prot": "",
+"type": "Object()",
+"base": "",
+"sons": [
+{
+"line": "1696",
+"tail": "1696",
+"name": "o",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1715",
+"tail": "1732",
+"name": "isBaseOf",
+"kind": "2",
+"prot": "",
+"type": "bool(scope const TypeInfo_Class child)",
+"base": "",
+"sons": [
+{
+"line": "1715",
+"tail": "1715",
+"name": "child",
+"kind": "262144",
+"prot": "",
+"type": "scope const TypeInfo_Class",
+"base": "",
+"sons": []
+},
+{
+"line": "1721",
+"tail": "1721",
+"name": "ti",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "child",
+"sons": []
+}]
+}]
+},
+{
+"line": "1735",
+"tail": "1735",
+"name": "ClassInfo",
+"kind": "2048",
+"prot": "",
+"type": "TypeInfo_Class",
+"base": "",
+"sons": []
+},
+{
+"line": "1751",
+"tail": "1854",
+"name": "TypeInfo_Interface",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1753",
+"tail": "1753",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "1755",
+"tail": "1761",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1755",
+"tail": "1755",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1759",
+"tail": "1759",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Interface",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1763",
+"tail": "1773",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1763",
+"tail": "1763",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1769",
+"tail": "1769",
+"name": "pi",
+"kind": "1",
+"prot": "",
+"type": "Interface*",
+"base": "",
+"sons": []
+},
+{
+"line": "1770",
+"tail": "1770",
+"name": "o",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1775",
+"tail": "1783",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1775",
+"tail": "1775",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1775",
+"tail": "1775",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1777",
+"tail": "1777",
+"name": "pi",
+"kind": "1",
+"prot": "",
+"type": "Interface*",
+"base": "",
+"sons": []
+},
+{
+"line": "1778",
+"tail": "1778",
+"name": "o1",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1780",
+"tail": "1780",
+"name": "o2",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1785",
+"tail": "1807",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1785",
+"tail": "1785",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1785",
+"tail": "1785",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1787",
+"tail": "1787",
+"name": "pi",
+"kind": "1",
+"prot": "",
+"type": "Interface*",
+"base": "",
+"sons": []
+},
+{
+"line": "1788",
+"tail": "1788",
+"name": "o1",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1790",
+"tail": "1790",
+"name": "o2",
+"kind": "1",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1791",
+"tail": "1791",
+"name": "c",
+"kind": "1",
+"prot": "",
+"type": "int",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1809",
+"tail": "1812",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1814",
+"tail": "1817",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1819",
+"tail": "1819",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1821",
+"tail": "1821",
+"name": "info",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo_Class",
+"base": "",
+"sons": []
+},
+{
+"line": "1834",
+"tail": "1837",
+"name": "isBaseOf",
+"kind": "2",
+"prot": "",
+"type": "bool(scope const TypeInfo_Class child)",
+"base": "",
+"sons": [
+{
+"line": "1834",
+"tail": "1834",
+"name": "child",
+"kind": "262144",
+"prot": "",
+"type": "scope const TypeInfo_Class",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1850",
+"tail": "1853",
+"name": "isBaseOf",
+"kind": "2",
+"prot": "",
+"type": "bool(scope const TypeInfo_Interface child)",
+"base": "",
+"sons": [
+{
+"line": "1850",
+"tail": "1850",
+"name": "child",
+"kind": "262144",
+"prot": "",
+"type": "scope const TypeInfo_Interface",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "1868",
+"tail": "2057",
+"name": "TypeInfo_Struct",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "1870",
+"tail": "1870",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "1872",
+"tail": "1875",
+"name": "toHash",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1877",
+"tail": "1883",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "1877",
+"tail": "1877",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "1881",
+"tail": "1881",
+"name": "s",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Struct",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "1885",
+"tail": "1896",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "1885",
+"tail": "1885",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1898",
+"tail": "1914",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1898",
+"tail": "1898",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1898",
+"tail": "1898",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1900",
+"tail": "1900",
+"name": "memcmp",
+"kind": "32768",
+"prot": "",
+"type": "core.stdc.string",
+"base": "memcmp",
+"sons": []
+},
+{
+"line": "1906",
+"tail": "1906",
+"name": "dg",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "_memberFunc(p1, xopEquals)",
+"sons": []
+}]
+},
+{
+"line": "1916",
+"tail": "1940",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "1916",
+"tail": "1916",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1916",
+"tail": "1916",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "1918",
+"tail": "1918",
+"name": "memcmp",
+"kind": "32768",
+"prot": "",
+"type": "core.stdc.string",
+"base": "memcmp",
+"sons": []
+},
+{
+"line": "1929",
+"tail": "1929",
+"name": "dg",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "_memberFunc(p1, xopCmp)",
+"sons": []
+}]
+},
+{
+"line": "1942",
+"tail": "1945",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1947",
+"tail": "1950",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "1952",
+"tail": "1952",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "1954",
+"tail": "1954",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "1956",
+"tail": "1965",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "1956",
+"tail": "1956",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1967",
+"tail": "1971",
+"name": "postblit",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "1967",
+"tail": "1967",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "1973",
+"tail": "1973",
+"name": "mangledName",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "1975",
+"tail": "1994",
+"name": "name",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": [
+{
+"line": "1977",
+"tail": "1977",
+"name": "demangleType",
+"kind": "32768",
+"prot": "",
+"type": "core.demangle",
+"base": "demangleType",
+"sons": []
+},
+{
+"line": "1982",
+"tail": "1982",
+"name": "key",
+"kind": "1",
+"prot": "",
+"type": "const void *",
+"base": "this",
+"sons": []
+},
+{
+"line": "1983",
+"tail": "1983",
+"name": "demangledNamesCache",
+"kind": "1",
+"prot": "",
+"type": "string[typeof( key)]",
+"base": "",
+"sons": []
+},
+{
+"line": "1991",
+"tail": "1991",
+"name": "demangled",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "demangleType(mangledName)",
+"sons": []
+}]
+},
+{
+"line": "1996",
+"tail": "1996",
+"name": "m_init",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+},
+{
+"line": "2000",
+"tail": "2000",
+"name": "xtoHash",
+"kind": "4194304",
+"prot": "",
+"type": "size_t(in void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2001",
+"tail": "2001",
+"name": "xopEquals",
+"kind": "4194304",
+"prot": "",
+"type": "bool(in void *,in void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2002",
+"tail": "2002",
+"name": "xopCmp",
+"kind": "4194304",
+"prot": "",
+"type": "int(in void *,in void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2003",
+"tail": "2003",
+"name": "xtoString",
+"kind": "4194304",
+"prot": "",
+"type": "string(in void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2005",
+"tail": "2009",
+"name": "StructFlags",
+"kind": "128",
+"prot": "",
+"type": "",
+"base": "uint",
+"sons": [
+{
+"line": "2007",
+"tail": "2007",
+"name": "hasPointers",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "2008",
+"tail": "2008",
+"name": "isDynamicType",
+"kind": "256",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2010",
+"tail": "2010",
+"name": "m_flags",
+"kind": "1",
+"prot": "",
+"type": "StructFlags",
+"base": "",
+"sons": []
+},
+{
+"line": "2012",
+"tail": "2016",
+"name": "-Anonymous-",
+"kind": "64",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2014",
+"tail": "2014",
+"name": "xdtor",
+"kind": "4194304",
+"prot": "",
+"type": "void(void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2015",
+"tail": "2015",
+"name": "xdtorti",
+"kind": "4194304",
+"prot": "",
+"type": "void(void *,const TypeInfo_Struct ti)",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2017",
+"tail": "2017",
+"name": "xpostblit",
+"kind": "4194304",
+"prot": "",
+"type": "void(void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2019",
+"tail": "2019",
+"name": "m_align",
+"kind": "1",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "2021",
+"tail": "2021",
+"name": "rtInfo",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+},
+{
+"line": "2023",
+"tail": "2033",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2025",
+"tail": "2030",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "2025",
+"tail": "2025",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "2025",
+"tail": "2025",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2031",
+"tail": "2031",
+"name": "m_arg1",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "2032",
+"tail": "2032",
+"name": "m_arg2",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2034",
+"tail": "2034",
+"name": "m_RTInfo",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2041",
+"tail": "2056",
+"name": "_memberFunc",
+"kind": "4",
+"prot": "private",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2043",
+"tail": "2055",
+"name": "-Anonymous-",
+"kind": "64",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2045",
+"tail": "2049",
+"name": "-Anonymous-",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2047",
+"tail": "2047",
+"name": "ptr",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2048",
+"tail": "2048",
+"name": "funcptr",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2052",
+"tail": "2052",
+"name": "xopEquals",
+"kind": "4194304",
+"prot": "",
+"type": "bool(in void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2053",
+"tail": "2053",
+"name": "xopCmp",
+"kind": "4194304",
+"prot": "",
+"type": "int(in void *)",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "2072",
+"tail": "2156",
+"name": "TypeInfo_Tuple",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "2074",
+"tail": "2074",
+"name": "elements",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo[]",
+"base": "",
+"sons": []
+},
+{
+"line": "2076",
+"tail": "2087",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": [
+{
+"line": "2078",
+"tail": "2078",
+"name": "s",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2089",
+"tail": "2105",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "2089",
+"tail": "2089",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "2094",
+"tail": "2094",
+"name": "t",
+"kind": "1",
+"prot": "",
+"type": "const TypeInfo_Tuple",
+"base": "o",
+"sons": []
+},
+{
+"line": "2097",
+"tail": "2097",
+"name": "i",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2107",
+"tail": "2110",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "2107",
+"tail": "2107",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2112",
+"tail": "2115",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "2112",
+"tail": "2112",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2112",
+"tail": "2112",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2117",
+"tail": "2120",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "2117",
+"tail": "2117",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2117",
+"tail": "2117",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2122",
+"tail": "2125",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "2127",
+"tail": "2130",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "2132",
+"tail": "2135",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "2132",
+"tail": "2132",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2132",
+"tail": "2132",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2137",
+"tail": "2140",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "2137",
+"tail": "2137",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2142",
+"tail": "2145",
+"name": "postblit",
+"kind": "2",
+"prot": "",
+"type": "void(void* p)",
+"base": "",
+"sons": [
+{
+"line": "2142",
+"tail": "2142",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2147",
+"tail": "2150",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "2152",
+"tail": "2155",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2152",
+"tail": "2154",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "2152",
+"tail": "2152",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "2152",
+"tail": "2152",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "2158",
+"tail": "2200",
+"name": "TypeInfo_Const",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "2160",
+"tail": "2163",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "2166",
+"tail": "2176",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(Object o)",
+"base": "",
+"sons": [
+{
+"line": "2166",
+"tail": "2166",
+"name": "o",
+"kind": "262144",
+"prot": "",
+"type": "Object",
+"base": "",
+"sons": []
+},
+{
+"line": "2174",
+"tail": "2174",
+"name": "t",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo_Const",
+"base": "o",
+"sons": []
+}]
+},
+{
+"line": "2178",
+"tail": "2178",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "size_t(scope const void* p)",
+"base": "",
+"sons": [
+{
+"line": "2178",
+"tail": "2178",
+"name": "p",
+"kind": "262144",
+"prot": "",
+"type": "scope const void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2179",
+"tail": "2179",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "2179",
+"tail": "2179",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2179",
+"tail": "2179",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2180",
+"tail": "2180",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(in void* p1,in void* p2)",
+"base": "",
+"sons": [
+{
+"line": "2180",
+"tail": "2180",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2180",
+"tail": "2180",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2181",
+"tail": "2181",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "2182",
+"tail": "2182",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void* p1,void* p2)",
+"base": "",
+"sons": [
+{
+"line": "2182",
+"tail": "2182",
+"name": "p1",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2182",
+"tail": "2182",
+"name": "p2",
+"kind": "262144",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2184",
+"tail": "2184",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "2185",
+"tail": "2185",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "2187",
+"tail": "2190",
+"name": "initializer",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "2192",
+"tail": "2192",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "2194",
+"tail": "2197",
+"name": "WithArgTypes",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2194",
+"tail": "2196",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": [
+{
+"line": "2194",
+"tail": "2194",
+"name": "arg1",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "2194",
+"tail": "2194",
+"name": "arg2",
+"kind": "262144",
+"prot": "",
+"type": "out TypeInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2199",
+"tail": "2199",
+"name": "base",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2202",
+"tail": "2208",
+"name": "TypeInfo_Invariant",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo_Const",
+"sons": [
+{
+"line": "2204",
+"tail": "2207",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2210",
+"tail": "2216",
+"name": "TypeInfo_Shared",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo_Const",
+"sons": [
+{
+"line": "2212",
+"tail": "2215",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2218",
+"tail": "2224",
+"name": "TypeInfo_Inout",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo_Const",
+"sons": [
+{
+"line": "2220",
+"tail": "2223",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2228",
+"tail": "2243",
+"name": "",
+"kind": "128",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2229",
+"tail": "2229",
+"name": "MIctorstart",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2230",
+"tail": "2230",
+"name": "MIctordone",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2231",
+"tail": "2231",
+"name": "MIstandalone",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2233",
+"tail": "2233",
+"name": "MItlsctor",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2234",
+"tail": "2234",
+"name": "MItlsdtor",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2235",
+"tail": "2235",
+"name": "MIctor",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2236",
+"tail": "2236",
+"name": "MIdtor",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2237",
+"tail": "2237",
+"name": "MIxgetMembers",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2238",
+"tail": "2238",
+"name": "MIictor",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2239",
+"tail": "2239",
+"name": "MIunitTest",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2240",
+"tail": "2240",
+"name": "MIimportedModules",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2241",
+"tail": "2241",
+"name": "MIlocalClasses",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2242",
+"tail": "2242",
+"name": "MIname",
+"kind": "256",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2251",
+"tail": "2448",
+"name": "ModuleInfo",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2253",
+"tail": "2253",
+"name": "_flags",
+"kind": "1",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "2254",
+"tail": "2254",
+"name": "_index",
+"kind": "1",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "2256",
+"tail": "2260",
+"name": "all",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2259",
+"tail": "2259",
+"name": "opAssign",
+"kind": "2",
+"prot": "",
+"type": "void(const scope ModuleInfo m)",
+"base": "",
+"sons": [
+{
+"line": "2259",
+"tail": "2259",
+"name": "m",
+"kind": "262144",
+"prot": "",
+"type": "const scope ModuleInfo",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2261",
+"tail": "2264",
+"name": "-else-",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "all",
+"sons": [
+{
+"line": "2263",
+"tail": "2263",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2267",
+"tail": "2272",
+"name": "addrOf",
+"kind": "2",
+"prot": "private",
+"type": "void*(int flag)",
+"base": "",
+"sons": [
+{
+"line": "2267",
+"tail": "2267",
+"name": "flag",
+"kind": "262144",
+"prot": "",
+"type": "int",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2275",
+"tail": "2275",
+"name": "strlen",
+"kind": "32768",
+"prot": "",
+"type": "core.stdc.string",
+"base": "strlen",
+"sons": []
+},
+{
+"line": "2277",
+"tail": "2277",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "2332",
+"tail": "2332",
+"name": "index",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "2334",
+"tail": "2334",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "2340",
+"tail": "2343",
+"name": "tlsctor",
+"kind": "2",
+"prot": "",
+"type": "void function()()",
+"base": "",
+"sons": []
+},
+{
+"line": "2349",
+"tail": "2352",
+"name": "tlsdtor",
+"kind": "2",
+"prot": "",
+"type": "void function()()",
+"base": "",
+"sons": []
+},
+{
+"line": "2358",
+"tail": "2361",
+"name": "xgetMembers",
+"kind": "2",
+"prot": "",
+"type": "void*()",
+"base": "",
+"sons": []
+},
+{
+"line": "2367",
+"tail": "2370",
+"name": "ctor",
+"kind": "2",
+"prot": "",
+"type": "void function()()",
+"base": "",
+"sons": []
+},
+{
+"line": "2376",
+"tail": "2379",
+"name": "dtor",
+"kind": "2",
+"prot": "",
+"type": "void function()()",
+"base": "",
+"sons": []
+},
+{
+"line": "2385",
+"tail": "2388",
+"name": "ictor",
+"kind": "2",
+"prot": "",
+"type": "void function()()",
+"base": "",
+"sons": []
+},
+{
+"line": "2394",
+"tail": "2397",
+"name": "unitTest",
+"kind": "2",
+"prot": "",
+"type": "void function()()",
+"base": "",
+"sons": []
+},
+{
+"line": "2403",
+"tail": "2411",
+"name": "importedModules",
+"kind": "2",
+"prot": "",
+"type": "ModuleInfo*[]()",
+"base": "",
+"sons": [
+{
+"line": "2407",
+"tail": "2407",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "size_t *",
+"base": "addrOf(MIimportedModules)",
+"sons": []
+}]
+},
+{
+"line": "2417",
+"tail": "2425",
+"name": "localClasses",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo_Class[]()",
+"base": "",
+"sons": [
+{
+"line": "2421",
+"tail": "2421",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "size_t *",
+"base": "addrOf(MIlocalClasses)",
+"sons": []
+}]
+},
+{
+"line": "2431",
+"tail": "2437",
+"name": "name",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": [
+{
+"line": "2433",
+"tail": "2433",
+"name": "strlen",
+"kind": "32768",
+"prot": "",
+"type": "core.stdc.string",
+"base": "strlen",
+"sons": []
+},
+{
+"line": "2435",
+"tail": "2435",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "immutable char *",
+"base": "addrOf(MIname)",
+"sons": []
+}]
+},
+{
+"line": "2439",
+"tail": "2447",
+"name": "opApply",
+"kind": "2",
+"prot": "",
+"type": "int(scope int delegate(ModuleInfo *) dg)",
+"base": "",
+"sons": [
+{
+"line": "2439",
+"tail": "2439",
+"name": "dg",
+"kind": "262144",
+"prot": "",
+"type": "scope int delegate(ModuleInfo *)",
+"base": "",
+"sons": []
+},
+{
+"line": "2441",
+"tail": "2441",
+"name": "externDFunc",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.traits",
+"base": "externDFunc",
+"sons": []
+},
+{
+"line": "2442",
+"tail": "2442",
+"name": "moduleinfos_apply",
+"kind": "2048",
+"prot": "",
+"type": "externDFunc!(rt.minfo.moduleinfos_apply, int function(scope int delegate(immutable ( ModuleInfo *))))",
+"base": "",
+"sons": []
+},
+{
+"line": "2446",
+"tail": "2446",
+"name": "m",
+"kind": "1",
+"prot": "",
+"type": "ModuleInfo*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2475",
+"tail": "2700",
+"name": "Throwable",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "Object",
+"sons": [
+{
+"line": "2477",
+"tail": "2482",
+"name": "TraceInfo",
+"kind": "1024",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2479",
+"tail": "2479",
+"name": "opApply",
+"kind": "2",
+"prot": "",
+"type": "int(scope int delegate(ref const ( char[])))",
+"base": "",
+"sons": []
+},
+{
+"line": "2480",
+"tail": "2480",
+"name": "opApply",
+"kind": "2",
+"prot": "",
+"type": "int(scope int delegate(ref size_t,ref const ( char[])))",
+"base": "",
+"sons": []
+},
+{
+"line": "2481",
+"tail": "2481",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2484",
+"tail": "2484",
+"name": "TraceDeallocator",
+"kind": "2048",
+"prot": "",
+"type": "void function(TraceInfo)",
+"base": "",
+"sons": []
+},
+{
+"line": "2486",
+"tail": "2486",
+"name": "msg",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2492",
+"tail": "2492",
+"name": "file",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2497",
+"tail": "2497",
+"name": "line",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "2504",
+"tail": "2504",
+"name": "info",
+"kind": "1",
+"prot": "",
+"type": "TraceInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "2509",
+"tail": "2509",
+"name": "infoDeallocator",
+"kind": "1",
+"prot": "",
+"type": "TraceDeallocator",
+"base": "",
+"sons": []
+},
+{
+"line": "2518",
+"tail": "2518",
+"name": "nextInChain",
+"kind": "1",
+"prot": "private",
+"type": "Throwable",
+"base": "",
+"sons": []
+},
+{
+"line": "2520",
+"tail": "2520",
+"name": "_refcount",
+"kind": "1",
+"prot": "private",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "2531",
+"tail": "2531",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "Throwable()",
+"base": "",
+"sons": []
+},
+{
+"line": "2537",
+"tail": "2549",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "void(Throwable tail)",
+"base": "",
+"sons": [
+{
+"line": "2537",
+"tail": "2537",
+"name": "tail",
+"kind": "262144",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+},
+{
+"line": "2542",
+"tail": "2542",
+"name": "n",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "nextInChain",
+"sons": []
+}]
+},
+{
+"line": "2559",
+"tail": "2559",
+"name": "refcount",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "2564",
+"tail": "2574",
+"name": "opApply",
+"kind": "2",
+"prot": "",
+"type": "int(scope int delegate(Throwable) dg)",
+"base": "",
+"sons": [
+{
+"line": "2564",
+"tail": "2564",
+"name": "dg",
+"kind": "262144",
+"prot": "",
+"type": "scope int delegate(Throwable)",
+"base": "",
+"sons": []
+},
+{
+"line": "2566",
+"tail": "2566",
+"name": "result",
+"kind": "1",
+"prot": "",
+"type": "int",
+"base": "",
+"sons": []
+},
+{
+"line": "2567",
+"tail": "2567",
+"name": "t",
+"kind": "1",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2584",
+"tail": "2602",
+"name": "chainTogether",
+"kind": "2",
+"prot": "",
+"type": "Throwable(scope Throwable e1,scope Throwable e2)",
+"base": "",
+"sons": [
+{
+"line": "2584",
+"tail": "2584",
+"name": "e1",
+"kind": "262144",
+"prot": "",
+"type": "scope Throwable",
+"base": "",
+"sons": []
+},
+{
+"line": "2584",
+"tail": "2584",
+"name": "e2",
+"kind": "262144",
+"prot": "",
+"type": "scope Throwable",
+"base": "",
+"sons": []
+},
+{
+"line": "2593",
+"tail": "2593",
+"name": "e",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "e1",
+"sons": []
+}]
+},
+{
+"line": "2604",
+"tail": "2611",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(string msg,Throwable nextInChain)",
+"base": "",
+"sons": [
+{
+"line": "2604",
+"tail": "2604",
+"name": "msg",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2604",
+"tail": "2604",
+"name": "nextInChain",
+"kind": "262144",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2613",
+"tail": "2619",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(string msg,string file,size_t line,Throwable nextInChain)",
+"base": "",
+"sons": [
+{
+"line": "2613",
+"tail": "2613",
+"name": "msg",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2613",
+"tail": "2613",
+"name": "file",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2613",
+"tail": "2613",
+"name": "line",
+"kind": "262144",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "2613",
+"tail": "2613",
+"name": "nextInChain",
+"kind": "262144",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+},
+{
+"line": "2615",
+"tail": "2615",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(msg, nextInChain)",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2621",
+"tail": "2632",
+"name": "",
+"kind": "32",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "2639",
+"tail": "2644",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": [
+{
+"line": "2641",
+"tail": "2641",
+"name": "s",
+"kind": "1",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2652",
+"tail": "2681",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "void(scope void delegate(in char[]) sink)",
+"base": "",
+"sons": [
+{
+"line": "2652",
+"tail": "2652",
+"name": "sink",
+"kind": "262144",
+"prot": "",
+"type": "scope void delegate(in char[])",
+"base": "",
+"sons": []
+},
+{
+"line": "2654",
+"tail": "2654",
+"name": "unsignedToTempString",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.string",
+"base": "unsignedToTempString",
+"sons": []
+},
+{
+"line": "2656",
+"tail": "2656",
+"name": "tmpBuff",
+"kind": "1",
+"prot": "",
+"type": "char[20]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2696",
+"tail": "2699",
+"name": "message",
+"kind": "2",
+"prot": "",
+"type": "char[]()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2711",
+"tail": "2729",
+"name": "Exception",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "Throwable",
+"sons": [
+{
+"line": "2720",
+"tail": "2723",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(string msg,string file,size_t line,Throwable nextInChain)",
+"base": "",
+"sons": [
+{
+"line": "2720",
+"tail": "2720",
+"name": "msg",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2720",
+"tail": "2720",
+"name": "file",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2720",
+"tail": "2720",
+"name": "line",
+"kind": "262144",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "2720",
+"tail": "2720",
+"name": "nextInChain",
+"kind": "262144",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2725",
+"tail": "2728",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(string msg,Throwable nextInChain,string file,size_t line)",
+"base": "",
+"sons": [
+{
+"line": "2725",
+"tail": "2725",
+"name": "msg",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2725",
+"tail": "2725",
+"name": "nextInChain",
+"kind": "262144",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+},
+{
+"line": "2725",
+"tail": "2725",
+"name": "file",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2725",
+"tail": "2725",
+"name": "line",
+"kind": "262144",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2789",
+"tail": "2812",
+"name": "Error",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "Throwable",
+"sons": [
+{
+"line": "2797",
+"tail": "2801",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(string msg,Throwable nextInChain)",
+"base": "",
+"sons": [
+{
+"line": "2797",
+"tail": "2797",
+"name": "msg",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2797",
+"tail": "2797",
+"name": "nextInChain",
+"kind": "262144",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2803",
+"tail": "2807",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(string msg,string file,size_t line,Throwable nextInChain)",
+"base": "",
+"sons": [
+{
+"line": "2803",
+"tail": "2803",
+"name": "msg",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2803",
+"tail": "2803",
+"name": "file",
+"kind": "262144",
+"prot": "",
+"type": "string",
+"base": "",
+"sons": []
+},
+{
+"line": "2803",
+"tail": "2803",
+"name": "line",
+"kind": "262144",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "2803",
+"tail": "2803",
+"name": "nextInChain",
+"kind": "262144",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2811",
+"tail": "2811",
+"name": "bypassedException",
+"kind": "1",
+"prot": "",
+"type": "Throwable",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2864",
+"tail": "2864",
+"name": "AA",
+"kind": "4",
+"prot": "private",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2864",
+"tail": "2864",
+"name": "impl",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2866",
+"tail": "2866",
+"name": "_aaGetY",
+"kind": "2",
+"prot": "private",
+"type": "void*(scope AA * paa,const TypeInfo_AssociativeArray ti,const size_t valsz,const scope void * pkey)",
+"base": "",
+"sons": []
+},
+{
+"line": "2867",
+"tail": "2867",
+"name": "_aaGetX",
+"kind": "2",
+"prot": "private",
+"type": "void*(scope AA * paa,const TypeInfo_AssociativeArray ti,const size_t valsz,const scope void * pkey,out bool found)",
+"base": "",
+"sons": []
+},
+{
+"line": "2869",
+"tail": "2869",
+"name": "_aaValues",
+"kind": "2",
+"prot": "",
+"type": "void[](inout AA aa,const size_t keysz,const size_t valsz,const TypeInfo tiValueArray)",
+"base": "",
+"sons": []
+},
+{
+"line": "2870",
+"tail": "2870",
+"name": "_aaKeys",
+"kind": "2",
+"prot": "",
+"type": "void[](inout AA aa,const size_t keysz,const TypeInfo tiKeyArray)",
+"base": "",
+"sons": []
+},
+{
+"line": "2871",
+"tail": "2871",
+"name": "_aaRehash",
+"kind": "2",
+"prot": "",
+"type": "void*(AA * paa,const scope TypeInfo keyti)",
+"base": "",
+"sons": []
+},
+{
+"line": "2872",
+"tail": "2872",
+"name": "_aaClear",
+"kind": "2",
+"prot": "",
+"type": "void(AA aa)",
+"base": "",
+"sons": []
+},
+{
+"line": "2880",
+"tail": "2880",
+"name": "AARange",
+"kind": "4",
+"prot": "private",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2880",
+"tail": "2880",
+"name": "impl",
+"kind": "1",
+"prot": "",
+"type": "AA",
+"base": "",
+"sons": []
+},
+{
+"line": "2880",
+"tail": "2880",
+"name": "idx",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "2881",
+"tail": "2881",
+"name": "_aaRange",
+"kind": "2",
+"prot": "",
+"type": "AARange(AA aa)",
+"base": "",
+"sons": []
+},
+{
+"line": "2882",
+"tail": "2882",
+"name": "_aaRangeEmpty",
+"kind": "2",
+"prot": "",
+"type": "bool(AARange r)",
+"base": "",
+"sons": []
+},
+{
+"line": "2883",
+"tail": "2883",
+"name": "_aaRangeFrontKey",
+"kind": "2",
+"prot": "",
+"type": "void*(AARange r)",
+"base": "",
+"sons": []
+},
+{
+"line": "2884",
+"tail": "2884",
+"name": "_aaRangeFrontValue",
+"kind": "2",
+"prot": "",
+"type": "void*(AARange r)",
+"base": "",
+"sons": []
+},
+{
+"line": "2885",
+"tail": "2885",
+"name": "_aaRangePopFront",
+"kind": "2",
+"prot": "",
+"type": "void(ref AARange r)",
+"base": "",
+"sons": []
+},
+{
+"line": "2887",
+"tail": "2887",
+"name": "_aaEqual",
+"kind": "2",
+"prot": "",
+"type": "int(scope const TypeInfo tiRaw,scope const AA aa1,scope const AA aa2)",
+"base": "",
+"sons": []
+},
+{
+"line": "2888",
+"tail": "2888",
+"name": "_aaGetHash",
+"kind": "2",
+"prot": "",
+"type": "hash_t(scope const AA * aa,scope const TypeInfo tiRaw)",
+"base": "",
+"sons": []
+},
+{
+"line": "2896",
+"tail": "2896",
+"name": "_d_assocarrayliteralTX",
+"kind": "2",
+"prot": "",
+"type": "void*(const TypeInfo_AssociativeArray ti, void[] keys, void[] values)",
+"base": "",
+"sons": []
+},
+{
+"line": "2899",
+"tail": "2902",
+"name": "aaLiteral",
+"kind": "512",
+"prot": "",
+"type": "(Key, Value)",
+"base": "",
+"sons": [
+{
+"line": "2899",
+"tail": "2902",
+"name": "aaLiteral",
+"kind": "2",
+"prot": "",
+"type": "void*(Key[] keys,Value[] values)",
+"base": "",
+"sons": [
+{
+"line": "2899",
+"tail": "2899",
+"name": "keys",
+"kind": "262144",
+"prot": "",
+"type": "Key[]",
+"base": "",
+"sons": []
+},
+{
+"line": "2899",
+"tail": "2899",
+"name": "values",
+"kind": "262144",
+"prot": "",
+"type": "Value[]",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2904",
+"tail": "2904",
+"name": "AssociativeArray(Key, Value)",
+"kind": "2048",
+"prot": "",
+"type": "Value[Key]",
+"base": "",
+"sons": []
+},
+{
+"line": "2911",
+"tail": "2914",
+"name": "clear",
+"kind": "512",
+"prot": "",
+"type": "(Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "2911",
+"tail": "2914",
+"name": "clear",
+"kind": "2",
+"prot": "",
+"type": "void(Value[Key] aa)",
+"base": "",
+"sons": [
+{
+"line": "2911",
+"tail": "2911",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "Value[Key]",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2917",
+"tail": "2920",
+"name": "clear",
+"kind": "512",
+"prot": "",
+"type": "(Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "2917",
+"tail": "2920",
+"name": "clear",
+"kind": "2",
+"prot": "",
+"type": "void(Value[Key]* aa)",
+"base": "",
+"sons": [
+{
+"line": "2917",
+"tail": "2917",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "Value[Key]*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2938",
+"tail": "2942",
+"name": "rehash",
+"kind": "512",
+"prot": "",
+"type": "(T : Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "2938",
+"tail": "2942",
+"name": "rehash",
+"kind": "2",
+"prot": "",
+"type": "T(T aa)",
+"base": "",
+"sons": [
+{
+"line": "2938",
+"tail": "2938",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2945",
+"tail": "2949",
+"name": "rehash",
+"kind": "512",
+"prot": "",
+"type": "(T : Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "2945",
+"tail": "2949",
+"name": "rehash",
+"kind": "2",
+"prot": "",
+"type": "T(T* aa)",
+"base": "",
+"sons": [
+{
+"line": "2945",
+"tail": "2945",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2952",
+"tail": "2956",
+"name": "rehash",
+"kind": "512",
+"prot": "",
+"type": "(T :shared Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "2952",
+"tail": "2956",
+"name": "rehash",
+"kind": "2",
+"prot": "",
+"type": "T(T aa)",
+"base": "",
+"sons": [
+{
+"line": "2952",
+"tail": "2952",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2959",
+"tail": "2963",
+"name": "rehash",
+"kind": "512",
+"prot": "",
+"type": "(T :shared Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "2959",
+"tail": "2963",
+"name": "rehash",
+"kind": "2",
+"prot": "",
+"type": "T(T* aa)",
+"base": "",
+"sons": [
+{
+"line": "2959",
+"tail": "2959",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "2971",
+"tail": "3006",
+"name": "dup",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "2971",
+"tail": "3006",
+"name": "dup",
+"kind": "2",
+"prot": "",
+"type": "V[K](T aa)",
+"base": "",
+"sons": [
+{
+"line": "2971",
+"tail": "2971",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+},
+{
+"line": "2976",
+"tail": "2976",
+"name": "v",
+"kind": "1",
+"prot": "",
+"type": "V",
+"base": "",
+"sons": []
+},
+{
+"line": "2979",
+"tail": "2979",
+"name": "result",
+"kind": "1",
+"prot": "",
+"type": "V[K]",
+"base": "",
+"sons": []
+},
+{
+"line": "2984",
+"tail": "2991",
+"name": "duplicateElem",
+"kind": "2",
+"prot": "",
+"type": "V(ref K k,ref const V v)",
+"base": "",
+"sons": [
+{
+"line": "2984",
+"tail": "2984",
+"name": "k",
+"kind": "262144",
+"prot": "",
+"type": "ref K",
+"base": "",
+"sons": []
+},
+{
+"line": "2984",
+"tail": "2984",
+"name": "v",
+"kind": "262144",
+"prot": "",
+"type": "ref const V",
+"base": "",
+"sons": []
+},
+{
+"line": "2986",
+"tail": "2986",
+"name": "memcpy",
+"kind": "32768",
+"prot": "",
+"type": "core.stdc.string",
+"base": "memcpy",
+"sons": []
+},
+{
+"line": "2988",
+"tail": "2988",
+"name": "pv",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "3009",
+"tail": "3012",
+"name": "dup",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3009",
+"tail": "3012",
+"name": "dup",
+"kind": "2",
+"prot": "",
+"type": "V[K](T* aa)",
+"base": "",
+"sons": [
+{
+"line": "3009",
+"tail": "3009",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3024",
+"tail": "3032",
+"name": "_aaToRange",
+"kind": "512",
+"prot": "private",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3024",
+"tail": "3032",
+"name": "_aaToRange",
+"kind": "2",
+"prot": "private",
+"type": "AARange(ref T aa)",
+"base": "",
+"sons": [
+{
+"line": "3024",
+"tail": "3024",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "ref T",
+"base": "",
+"sons": []
+},
+{
+"line": "3028",
+"tail": "3028",
+"name": "realAA",
+"kind": "2048",
+"prot": "",
+"type": "aa",
+"base": "",
+"sons": []
+},
+{
+"line": "3030",
+"tail": "3030",
+"name": "realAA",
+"kind": "1",
+"prot": "",
+"type": "V[K]",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3057",
+"tail": "3076",
+"name": "byKey",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3057",
+"tail": "3076",
+"name": "byKey",
+"kind": "2",
+"prot": "",
+"type": "AUTO(T aa)",
+"base": "",
+"sons": [
+{
+"line": "3057",
+"tail": "3057",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+},
+{
+"line": "3059",
+"tail": "3059",
+"name": "substInout",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.traits",
+"base": "substInout",
+"sons": []
+},
+{
+"line": "3061",
+"tail": "3073",
+"name": "Result",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "3063",
+"tail": "3063",
+"name": "r",
+"kind": "1",
+"prot": "",
+"type": "AARange",
+"base": "",
+"sons": []
+},
+{
+"line": "3066",
+"tail": "3066",
+"name": "empty",
+"kind": "2",
+"prot": "",
+"type": "bool()",
+"base": "",
+"sons": []
+},
+{
+"line": "3071",
+"tail": "3071",
+"name": "popFront",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "3072",
+"tail": "3072",
+"name": "save",
+"kind": "2",
+"prot": "",
+"type": "Result()",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "3079",
+"tail": "3082",
+"name": "byKey",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3079",
+"tail": "3082",
+"name": "byKey",
+"kind": "2",
+"prot": "",
+"type": "AUTO(T* aa)",
+"base": "",
+"sons": [
+{
+"line": "3079",
+"tail": "3079",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3118",
+"tail": "3137",
+"name": "byValue",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3118",
+"tail": "3137",
+"name": "byValue",
+"kind": "2",
+"prot": "",
+"type": "AUTO(T aa)",
+"base": "",
+"sons": [
+{
+"line": "3118",
+"tail": "3118",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+},
+{
+"line": "3120",
+"tail": "3120",
+"name": "substInout",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.traits",
+"base": "substInout",
+"sons": []
+},
+{
+"line": "3122",
+"tail": "3134",
+"name": "Result",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "3124",
+"tail": "3124",
+"name": "r",
+"kind": "1",
+"prot": "",
+"type": "AARange",
+"base": "",
+"sons": []
+},
+{
+"line": "3127",
+"tail": "3127",
+"name": "empty",
+"kind": "2",
+"prot": "",
+"type": "bool()",
+"base": "",
+"sons": []
+},
+{
+"line": "3132",
+"tail": "3132",
+"name": "popFront",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "3133",
+"tail": "3133",
+"name": "save",
+"kind": "2",
+"prot": "",
+"type": "Result()",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "3140",
+"tail": "3143",
+"name": "byValue",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3140",
+"tail": "3143",
+"name": "byValue",
+"kind": "2",
+"prot": "",
+"type": "AUTO(T* aa)",
+"base": "",
+"sons": [
+{
+"line": "3140",
+"tail": "3140",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3187",
+"tail": "3223",
+"name": "byKeyValue",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3187",
+"tail": "3223",
+"name": "byKeyValue",
+"kind": "2",
+"prot": "",
+"type": "AUTO(T aa)",
+"base": "",
+"sons": [
+{
+"line": "3187",
+"tail": "3187",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+},
+{
+"line": "3189",
+"tail": "3189",
+"name": "substInout",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.traits",
+"base": "substInout",
+"sons": []
+},
+{
+"line": "3191",
+"tail": "3220",
+"name": "Result",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "3193",
+"tail": "3193",
+"name": "r",
+"kind": "1",
+"prot": "",
+"type": "AARange",
+"base": "",
+"sons": []
+},
+{
+"line": "3196",
+"tail": "3196",
+"name": "empty",
+"kind": "2",
+"prot": "",
+"type": "bool()",
+"base": "",
+"sons": []
+},
+{
+"line": "3197",
+"tail": "3217",
+"name": "front",
+"kind": "2",
+"prot": "",
+"type": "AUTO()",
+"base": "",
+"sons": [
+{
+"line": "3199",
+"tail": "3214",
+"name": "Pair",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "3203",
+"tail": "3203",
+"name": "keyp",
+"kind": "1",
+"prot": "private",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "3204",
+"tail": "3204",
+"name": "valp",
+"kind": "1",
+"prot": "private",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3218",
+"tail": "3218",
+"name": "popFront",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "3219",
+"tail": "3219",
+"name": "save",
+"kind": "2",
+"prot": "",
+"type": "Result()",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "3226",
+"tail": "3229",
+"name": "byKeyValue",
+"kind": "512",
+"prot": "",
+"type": "(T : V[ K], K, V)",
+"base": "",
+"sons": [
+{
+"line": "3226",
+"tail": "3229",
+"name": "byKeyValue",
+"kind": "2",
+"prot": "",
+"type": "AUTO(T* aa)",
+"base": "",
+"sons": [
+{
+"line": "3226",
+"tail": "3226",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3253",
+"tail": "3267",
+"name": "keys",
+"kind": "512",
+"prot": "",
+"type": "(T : Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "3253",
+"tail": "3267",
+"name": "keys",
+"kind": "2",
+"prot": "",
+"type": "Key[](T aa)",
+"base": "",
+"sons": [
+{
+"line": "3253",
+"tail": "3253",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+},
+{
+"line": "3257",
+"tail": "3257",
+"name": "realAA",
+"kind": "2048",
+"prot": "",
+"type": "aa",
+"base": "",
+"sons": []
+},
+{
+"line": "3259",
+"tail": "3259",
+"name": "realAA",
+"kind": "1",
+"prot": "",
+"type": "Value[Key]",
+"base": "",
+"sons": []
+},
+{
+"line": "3260",
+"tail": "3260",
+"name": "res",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "()@trusted{auto a= cast( void[]) _aaKeys( * cast(inout ( AA) *) & realAA, Key. sizeof, typeid( Key[])) ; return * cast( Key[] *) & a ;}()",
+"sons": []
+}]
+}]
+},
+{
+"line": "3270",
+"tail": "3273",
+"name": "keys",
+"kind": "512",
+"prot": "",
+"type": "(T : Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "3270",
+"tail": "3273",
+"name": "keys",
+"kind": "2",
+"prot": "",
+"type": "Key[](T* aa)",
+"base": "",
+"sons": [
+{
+"line": "3270",
+"tail": "3270",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3337",
+"tail": "3351",
+"name": "values",
+"kind": "512",
+"prot": "",
+"type": "(T : Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "3337",
+"tail": "3351",
+"name": "values",
+"kind": "2",
+"prot": "",
+"type": "Value[](T aa)",
+"base": "",
+"sons": [
+{
+"line": "3337",
+"tail": "3337",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+},
+{
+"line": "3341",
+"tail": "3341",
+"name": "realAA",
+"kind": "2048",
+"prot": "",
+"type": "aa",
+"base": "",
+"sons": []
+},
+{
+"line": "3343",
+"tail": "3343",
+"name": "realAA",
+"kind": "1",
+"prot": "",
+"type": "Value[Key]",
+"base": "",
+"sons": []
+},
+{
+"line": "3344",
+"tail": "3344",
+"name": "res",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "()@trusted{auto a= cast( void[]) _aaValues( * cast(inout ( AA) *) & realAA, Key. sizeof, Value. sizeof, typeid( Value[])) ; return * cast( Value[] *) & a ;}()",
+"sons": []
+}]
+}]
+},
+{
+"line": "3354",
+"tail": "3357",
+"name": "values",
+"kind": "512",
+"prot": "",
+"type": "(T : Value[ Key], Value, Key)",
+"base": "",
+"sons": [
+{
+"line": "3354",
+"tail": "3357",
+"name": "values",
+"kind": "2",
+"prot": "",
+"type": "Value[](T* aa)",
+"base": "",
+"sons": [
+{
+"line": "3354",
+"tail": "3354",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "T*",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3423",
+"tail": "3427",
+"name": "get",
+"kind": "512",
+"prot": "",
+"type": "(K, V)",
+"base": "",
+"sons": [
+{
+"line": "3423",
+"tail": "3427",
+"name": "get",
+"kind": "2",
+"prot": "",
+"type": "V(V[K] aa,K key,lazy V defaultValue)",
+"base": "",
+"sons": [
+{
+"line": "3423",
+"tail": "3423",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "V[K]",
+"base": "",
+"sons": []
+},
+{
+"line": "3423",
+"tail": "3423",
+"name": "key",
+"kind": "262144",
+"prot": "",
+"type": "K",
+"base": "",
+"sons": []
+},
+{
+"line": "3423",
+"tail": "3423",
+"name": "defaultValue",
+"kind": "262144",
+"prot": "",
+"type": "lazy V",
+"base": "",
+"sons": []
+},
+{
+"line": "3425",
+"tail": "3425",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "keyinaa",
+"sons": []
+}]
+}]
+},
+{
+"line": "3430",
+"tail": "3433",
+"name": "get",
+"kind": "512",
+"prot": "",
+"type": "(K, V)",
+"base": "",
+"sons": [
+{
+"line": "3430",
+"tail": "3433",
+"name": "get",
+"kind": "2",
+"prot": "",
+"type": "V(V[K]* aa,K key,lazy V defaultValue)",
+"base": "",
+"sons": [
+{
+"line": "3430",
+"tail": "3430",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "V[K]*",
+"base": "",
+"sons": []
+},
+{
+"line": "3430",
+"tail": "3430",
+"name": "key",
+"kind": "262144",
+"prot": "",
+"type": "K",
+"base": "",
+"sons": []
+},
+{
+"line": "3430",
+"tail": "3430",
+"name": "defaultValue",
+"kind": "262144",
+"prot": "",
+"type": "lazy V",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3453",
+"tail": "3475",
+"name": "require",
+"kind": "512",
+"prot": "",
+"type": "(K, V)",
+"base": "",
+"sons": [
+{
+"line": "3453",
+"tail": "3475",
+"name": "require",
+"kind": "2",
+"prot": "",
+"type": "V(ref V[K] aa,K key,lazy V value)",
+"base": "",
+"sons": [
+{
+"line": "3453",
+"tail": "3453",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "ref V[K]",
+"base": "",
+"sons": []
+},
+{
+"line": "3453",
+"tail": "3453",
+"name": "key",
+"kind": "262144",
+"prot": "",
+"type": "K",
+"base": "",
+"sons": []
+},
+{
+"line": "3453",
+"tail": "3453",
+"name": "value",
+"kind": "262144",
+"prot": "",
+"type": "lazy V",
+"base": "",
+"sons": []
+},
+{
+"line": "3455",
+"tail": "3455",
+"name": "found",
+"kind": "1",
+"prot": "",
+"type": "bool",
+"base": "",
+"sons": []
+},
+{
+"line": "3459",
+"tail": "3459",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "()@trusted{return cast( V *) _aaGetX( cast( AA *) & aa, typeid( V[ K]), V. sizeof, & key, found) ;}()",
+"sons": []
+},
+{
+"line": "3466",
+"tail": "3466",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "V *",
+"base": "_aaGetX(cast( AA *) & aa, typeid( V[ K]), V. sizeof, & key, found)",
+"sons": []
+}]
+}]
+},
+{
+"line": "3503",
+"tail": "3528",
+"name": "update",
+"kind": "512",
+"prot": "",
+"type": "(K, V, C, U)",
+"base": "",
+"sons": [
+{
+"line": "3503",
+"tail": "3528",
+"name": "update",
+"kind": "2",
+"prot": "",
+"type": "void(ref V[K] aa,K key,scope C create,scope U update)",
+"base": "",
+"sons": [
+{
+"line": "3503",
+"tail": "3503",
+"name": "aa",
+"kind": "262144",
+"prot": "",
+"type": "ref V[K]",
+"base": "",
+"sons": []
+},
+{
+"line": "3503",
+"tail": "3503",
+"name": "key",
+"kind": "262144",
+"prot": "",
+"type": "K",
+"base": "",
+"sons": []
+},
+{
+"line": "3503",
+"tail": "3503",
+"name": "create",
+"kind": "262144",
+"prot": "",
+"type": "scope C",
+"base": "",
+"sons": []
+},
+{
+"line": "3503",
+"tail": "3503",
+"name": "update",
+"kind": "262144",
+"prot": "",
+"type": "scope U",
+"base": "",
+"sons": []
+},
+{
+"line": "3506",
+"tail": "3506",
+"name": "found",
+"kind": "1",
+"prot": "",
+"type": "bool",
+"base": "",
+"sons": []
+},
+{
+"line": "3510",
+"tail": "3510",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "()@trusted{return cast( V *) _aaGetX( cast( AA *) & aa, typeid( V[ K]), V. sizeof, & key, found) ;}()",
+"sons": []
+},
+{
+"line": "3517",
+"tail": "3517",
+"name": "p",
+"kind": "1",
+"prot": "",
+"type": "V *",
+"base": "_aaGetX(cast( AA *) & aa, typeid( V[ K]), V. sizeof, & key, found)",
+"sons": []
+}]
+}]
+},
+{
+"line": "3643",
+"tail": "3674",
+"name": "CoreDdoc",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "3657",
+"tail": "3661",
+"name": "hashOf",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3657",
+"tail": "3661",
+"name": "hashOf",
+"kind": "2",
+"prot": "",
+"type": "size_t(auto ref T arg,size_t seed)",
+"base": "",
+"sons": [
+{
+"line": "3657",
+"tail": "3657",
+"name": "arg",
+"kind": "262144",
+"prot": "",
+"type": "auto ref T",
+"base": "",
+"sons": []
+},
+{
+"line": "3657",
+"tail": "3657",
+"name": "seed",
+"kind": "262144",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "3659",
+"tail": "3659",
+"name": "core.internal.hash",
+"kind": "32768",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3663",
+"tail": "3667",
+"name": "hashOf",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3663",
+"tail": "3667",
+"name": "hashOf",
+"kind": "2",
+"prot": "",
+"type": "size_t(auto ref T arg)",
+"base": "",
+"sons": [
+{
+"line": "3663",
+"tail": "3663",
+"name": "arg",
+"kind": "262144",
+"prot": "",
+"type": "auto ref T",
+"base": "",
+"sons": []
+},
+{
+"line": "3665",
+"tail": "3665",
+"name": "core.internal.hash",
+"kind": "32768",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+}]
+}]
+}]
+},
+{
+"line": "3675",
+"tail": "3678",
+"name": "-else-",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "CoreDdoc",
+"sons": [
+{
+"line": "3677",
+"tail": "3677",
+"name": "hashOf",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.hash",
+"base": "hashOf",
+"sons": []
+}]
+},
+{
+"line": "3706",
+"tail": "3709",
+"name": "_xopEquals",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* ,in void* )",
+"base": "",
+"sons": [
+{
+"line": "0",
+"tail": "0",
+"name": "",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "0",
+"tail": "0",
+"name": "",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "3711",
+"tail": "3714",
+"name": "_xopCmp",
+"kind": "2",
+"prot": "",
+"type": "bool(in void* ,in void* )",
+"base": "",
+"sons": [
+{
+"line": "0",
+"tail": "0",
+"name": "",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+},
+{
+"line": "0",
+"tail": "0",
+"name": "",
+"kind": "262144",
+"prot": "",
+"type": "in void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "3720",
+"tail": "3723",
+"name": "RTInfoImpl",
+"kind": "512",
+"prot": "",
+"type": "(size_t[] pointerBitmap)",
+"base": "",
+"sons": [
+{
+"line": "3722",
+"tail": "3722",
+"name": "RTInfoImpl",
+"kind": "1",
+"prot": "",
+"type": "size_t[pointerBitmap. length]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "3725",
+"tail": "3728",
+"name": "NoPointersBitmapPayload",
+"kind": "512",
+"prot": "",
+"type": "(size_t N)",
+"base": "",
+"sons": [
+{
+"line": "3727",
+"tail": "3727",
+"name": "NoPointersBitmapPayload",
+"kind": "1",
+"prot": "",
+"type": "size_t[N]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "3730",
+"tail": "3737",
+"name": "RTInfo",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3732",
+"tail": "3732",
+"name": "pointerBitmap",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "__traits(getPointerBitmap, T)",
+"sons": []
+},
+{
+"line": "3734",
+"tail": "3734",
+"name": "RTInfo",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "rtinfoNoPointers",
+"sons": []
+},
+{
+"line": "3736",
+"tail": "3736",
+"name": "RTInfo",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "RTInfoImpl!(pointerBitmap).ptr",
+"sons": []
+}]
+},
+{
+"line": "3743",
+"tail": "3743",
+"name": "rtinfoNoPointers",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "3744",
+"tail": "3744",
+"name": "rtinfoHasPointers",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "3748",
+"tail": "3765",
+"name": "getElement",
+"kind": "2",
+"prot": "private",
+"type": "TypeInfo(scope inout TypeInfo value)",
+"base": "",
+"sons": [
+{
+"line": "3748",
+"tail": "3748",
+"name": "value",
+"kind": "262144",
+"prot": "",
+"type": "scope inout TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "3750",
+"tail": "3750",
+"name": "element",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "3767",
+"tail": "3796",
+"name": "getArrayHash",
+"kind": "2",
+"prot": "private",
+"type": "size_t(const scope TypeInfo element,const scope void* ptr,const size_t count)",
+"base": "",
+"sons": [
+{
+"line": "3767",
+"tail": "3767",
+"name": "element",
+"kind": "262144",
+"prot": "",
+"type": "const scope TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "3767",
+"tail": "3767",
+"name": "ptr",
+"kind": "262144",
+"prot": "",
+"type": "const scope void*",
+"base": "",
+"sons": []
+},
+{
+"line": "3767",
+"tail": "3767",
+"name": "count",
+"kind": "262144",
+"prot": "",
+"type": "const size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "3772",
+"tail": "3772",
+"name": "elementSize",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "3776",
+"tail": "3787",
+"name": "hasCustomToHash",
+"kind": "2",
+"prot": "",
+"type": "bool(const scope TypeInfo value)",
+"base": "",
+"sons": [
+{
+"line": "3776",
+"tail": "3776",
+"name": "value",
+"kind": "262144",
+"prot": "",
+"type": "const scope TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "3778",
+"tail": "3778",
+"name": "element",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "getElement(value)",
+"sons": []
+}]
+},
+{
+"line": "3792",
+"tail": "3792",
+"name": "hash",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "3793",
+"tail": "3793",
+"name": "i",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "3799",
+"tail": "3808",
+"name": "dup",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3799",
+"tail": "3808",
+"name": "dup",
+"kind": "2",
+"prot": "",
+"type": "AUTO(T[] a)",
+"base": "",
+"sons": [
+{
+"line": "3799",
+"tail": "3799",
+"name": "a",
+"kind": "262144",
+"prot": "",
+"type": "T[]",
+"base": "",
+"sons": []
+},
+{
+"line": "3802",
+"tail": "3802",
+"name": "Unconst",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.traits",
+"base": "Unconst",
+"sons": []
+},
+{
+"line": "3803",
+"tail": "3803",
+"name": "_dup",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.array.duplication",
+"base": "_dup",
+"sons": []
+}]
+}]
+},
+{
+"line": "3822",
+"tail": "3827",
+"name": "dup",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3822",
+"tail": "3827",
+"name": "dup",
+"kind": "2",
+"prot": "",
+"type": "T[](T[] a)",
+"base": "",
+"sons": [
+{
+"line": "3822",
+"tail": "3822",
+"name": "a",
+"kind": "262144",
+"prot": "",
+"type": "T[]",
+"base": "",
+"sons": []
+},
+{
+"line": "3825",
+"tail": "3825",
+"name": "_dup",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.array.duplication",
+"base": "_dup",
+"sons": []
+}]
+}]
+},
+{
+"line": "3831",
+"tail": "3837",
+"name": "idup",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3831",
+"tail": "3837",
+"name": "idup",
+"kind": "2",
+"prot": "",
+"type": "T[](T[] a)",
+"base": "",
+"sons": [
+{
+"line": "3831",
+"tail": "3831",
+"name": "a",
+"kind": "262144",
+"prot": "",
+"type": "T[]",
+"base": "",
+"sons": []
+},
+{
+"line": "3833",
+"tail": "3833",
+"name": "_dup",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.array.duplication",
+"base": "_dup",
+"sons": []
+}]
+}]
+},
+{
+"line": "3840",
+"tail": "3843",
+"name": "idup",
+"kind": "512",
+"prot": "",
+"type": "(T : void)",
+"base": "",
+"sons": [
+{
+"line": "3840",
+"tail": "3843",
+"name": "idup",
+"kind": "2",
+"prot": "",
+"type": "T[](T[] a)",
+"base": "",
+"sons": [
+{
+"line": "3840",
+"tail": "3840",
+"name": "a",
+"kind": "262144",
+"prot": "",
+"type": "T[]",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3856",
+"tail": "3856",
+"name": "_d_arraysetcapacity",
+"kind": "2",
+"prot": "private",
+"type": "size_t(const TypeInfo ti, size_t newcapacity, void[] * arrptr)",
+"base": "",
+"sons": []
+},
+{
+"line": "3869",
+"tail": "3872",
+"name": "capacity",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3869",
+"tail": "3872",
+"name": "capacity",
+"kind": "2",
+"prot": "",
+"type": "size_t(T[] arr)",
+"base": "",
+"sons": [
+{
+"line": "3869",
+"tail": "3869",
+"name": "arr",
+"kind": "262144",
+"prot": "",
+"type": "T[]",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3905",
+"tail": "3911",
+"name": "reserve",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3905",
+"tail": "3911",
+"name": "reserve",
+"kind": "2",
+"prot": "",
+"type": "size_t(ref T[] arr,size_t newcapacity)",
+"base": "",
+"sons": [
+{
+"line": "3905",
+"tail": "3905",
+"name": "arr",
+"kind": "262144",
+"prot": "",
+"type": "ref T[]",
+"base": "",
+"sons": []
+},
+{
+"line": "3905",
+"tail": "3905",
+"name": "newcapacity",
+"kind": "262144",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "3955",
+"tail": "3955",
+"name": "_d_arrayshrinkfit",
+"kind": "2",
+"prot": "private",
+"type": "void(const TypeInfo ti, void[] arr)",
+"base": "",
+"sons": []
+},
+{
+"line": "3972",
+"tail": "3976",
+"name": "assumeSafeAppend",
+"kind": "512",
+"prot": "",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "3972",
+"tail": "3976",
+"name": "assumeSafeAppend",
+"kind": "2",
+"prot": "",
+"type": "T[](auto ref T[] arr)",
+"base": "",
+"sons": [
+{
+"line": "3972",
+"tail": "3972",
+"name": "arr",
+"kind": "262144",
+"prot": "",
+"type": "auto ref T[]",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "4041",
+"tail": "4055",
+"name": "_doPostblit",
+"kind": "512",
+"prot": "private",
+"type": "(T)",
+"base": "",
+"sons": [
+{
+"line": "4041",
+"tail": "4055",
+"name": "_doPostblit",
+"kind": "2",
+"prot": "private",
+"type": "void(T[] arr)",
+"base": "",
+"sons": [
+{
+"line": "4041",
+"tail": "4041",
+"name": "arr",
+"kind": "262144",
+"prot": "",
+"type": "T[]",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "4065",
+"tail": "4076",
+"name": "destroy",
+"kind": "512",
+"prot": "",
+"type": "(bool initialize= true, T)",
+"base": "",
+"sons": [
+{
+"line": "4065",
+"tail": "4076",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(ref T obj)",
+"base": "",
+"sons": [
+{
+"line": "4065",
+"tail": "4065",
+"name": "obj",
+"kind": "262144",
+"prot": "",
+"type": "ref T",
+"base": "",
+"sons": []
+},
+{
+"line": "4067",
+"tail": "4067",
+"name": "destructRecurse",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.destruction",
+"base": "destructRecurse",
+"sons": []
+},
+{
+"line": "4073",
+"tail": "4073",
+"name": "emplaceInitializer",
+"kind": "32768",
+"prot": "",
+"type": "core.internal.lifetime",
+"base": "emplaceInitializer",
+"sons": []
+}]
+}]
+},
+{
+"line": "4132",
+"tail": "4132",
+"name": "rt_finalize2",
+"kind": "2",
+"prot": "private",
+"type": "void(void * p, bool det= true, bool resetMemory= true)",
+"base": "",
+"sons": []
+},
+{
+"line": "4135",
+"tail": "4154",
+"name": "destroy",
+"kind": "512",
+"prot": "",
+"type": "(bool initialize= true, T)",
+"base": "",
+"sons": [
+{
+"line": "4135",
+"tail": "4154",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(T obj)",
+"base": "",
+"sons": [
+{
+"line": "4135",
+"tail": "4135",
+"name": "obj",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+},
+{
+"line": "4144",
+"tail": "4144",
+"name": "initializer",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "__traits(initSymbol, T)",
+"sons": []
+},
+{
+"line": "4151",
+"tail": "4151",
+"name": "ptr",
+"kind": "1",
+"prot": "",
+"type": "",
+"base": "(() @trusted= > * cast( void * *) & obj)()",
+"sons": []
+}]
+}]
+},
+{
+"line": "4157",
+"tail": "4162",
+"name": "destroy",
+"kind": "512",
+"prot": "",
+"type": "(bool initialize= true, T)",
+"base": "",
+"sons": [
+{
+"line": "4157",
+"tail": "4162",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(T obj)",
+"base": "",
+"sons": [
+{
+"line": "4157",
+"tail": "4157",
+"name": "obj",
+"kind": "262144",
+"prot": "",
+"type": "T",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "4409",
+"tail": "4414",
+"name": "destroy",
+"kind": "512",
+"prot": "",
+"type": "(bool initialize= true, T)",
+"base": "",
+"sons": [
+{
+"line": "4409",
+"tail": "4414",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(ref T obj)",
+"base": "",
+"sons": [
+{
+"line": "4409",
+"tail": "4409",
+"name": "obj",
+"kind": "262144",
+"prot": "",
+"type": "ref T",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "4476",
+"tail": "4481",
+"name": "destroy",
+"kind": "512",
+"prot": "",
+"type": "(bool initialize= true, T)",
+"base": "",
+"sons": [
+{
+"line": "4476",
+"tail": "4481",
+"name": "destroy",
+"kind": "2",
+"prot": "",
+"type": "void(ref T obj)",
+"base": "",
+"sons": [
+{
+"line": "4476",
+"tail": "4476",
+"name": "obj",
+"kind": "262144",
+"prot": "",
+"type": "ref T",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "4528",
+"tail": "4528",
+"name": "_d_cmain",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.entrypoint",
+"base": "_d_cmain",
+"sons": []
+},
+{
+"line": "4530",
+"tail": "4530",
+"name": "_d_arrayappendT",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.appending",
+"base": "_d_arrayappendT",
+"sons": []
+},
+{
+"line": "4531",
+"tail": "4535",
+"name": "D_ProfileGC",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "4533",
+"tail": "4533",
+"name": "_d_arrayappendTTrace",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.appending",
+"base": "_d_arrayappendTTrace",
+"sons": []
+},
+{
+"line": "4534",
+"tail": "4534",
+"name": "_d_arraycatnTXTrace",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.concatenation",
+"base": "_d_arraycatnTXTrace",
+"sons": []
+}]
+},
+{
+"line": "4536",
+"tail": "4536",
+"name": "_d_arrayappendcTXImpl",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.appending",
+"base": "_d_arrayappendcTXImpl",
+"sons": []
+},
+{
+"line": "4537",
+"tail": "4537",
+"name": "__cmp",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.comparison",
+"base": "__cmp",
+"sons": []
+},
+{
+"line": "4538",
+"tail": "4538",
+"name": "__equals",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.equality",
+"base": "__equals",
+"sons": []
+},
+{
+"line": "4539",
+"tail": "4539",
+"name": "__ArrayCast",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.casting",
+"base": "__ArrayCast",
+"sons": []
+},
+{
+"line": "4540",
+"tail": "4540",
+"name": "_d_arraycatnTX",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.concatenation",
+"base": "_d_arraycatnTX",
+"sons": []
+},
+{
+"line": "4541",
+"tail": "4541",
+"name": "_d_arrayctor",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.construction",
+"base": "_d_arrayctor",
+"sons": []
+},
+{
+"line": "4542",
+"tail": "4542",
+"name": "_d_arraysetctor",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.construction",
+"base": "_d_arraysetctor",
+"sons": []
+},
+{
+"line": "4543",
+"tail": "4543",
+"name": "_d_arrayassign_l",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.arrayassign",
+"base": "_d_arrayassign_l",
+"sons": []
+},
+{
+"line": "4544",
+"tail": "4544",
+"name": "_d_arrayassign_r",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.arrayassign",
+"base": "_d_arrayassign_r",
+"sons": []
+},
+{
+"line": "4545",
+"tail": "4545",
+"name": "_d_arraysetassign",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.arrayassign",
+"base": "_d_arraysetassign",
+"sons": []
+},
+{
+"line": "4546",
+"tail": "4546",
+"name": "_d_arraysetlengthTImpl",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.array.capacity",
+"base": "_d_arraysetlengthTImpl",
+"sons": []
+},
+{
+"line": "4548",
+"tail": "4548",
+"name": "_d_assert_fail",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.dassert",
+"base": "_d_assert_fail",
+"sons": []
+},
+{
+"line": "4550",
+"tail": "4550",
+"name": "__ArrayDtor",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.destruction",
+"base": "__ArrayDtor",
+"sons": []
+},
+{
+"line": "4552",
+"tail": "4552",
+"name": "__move_post_blt",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.moving",
+"base": "__move_post_blt",
+"sons": []
+},
+{
+"line": "4554",
+"tail": "4554",
+"name": "__ArrayPostblit",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.postblit",
+"base": "__ArrayPostblit",
+"sons": []
+},
+{
+"line": "4556",
+"tail": "4556",
+"name": "__switch",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.switch_",
+"base": "__switch",
+"sons": []
+},
+{
+"line": "4557",
+"tail": "4557",
+"name": "__switch_error",
+"kind": "32768",
+"prot": "public",
+"type": "core.internal.switch_",
+"base": "__switch_error",
+"sons": []
+},
+{
+"line": "4559",
+"tail": "4559",
+"name": "_d_delstructImpl",
+"kind": "32768",
+"prot": "public",
+"type": "core.lifetime",
+"base": "_d_delstructImpl",
+"sons": []
+},
+{
+"line": "4560",
+"tail": "4560",
+"name": "_d_newThrowable",
+"kind": "32768",
+"prot": "public",
+"type": "core.lifetime",
+"base": "_d_newThrowable",
+"sons": []
+},
+{
+"line": "4561",
+"tail": "4561",
+"name": "_d_newclassT",
+"kind": "32768",
+"prot": "public",
+"type": "core.lifetime",
+"base": "_d_newclassT",
+"sons": []
+},
+{
+"line": "4562",
+"tail": "4562",
+"name": "_d_newclassTTrace",
+"kind": "32768",
+"prot": "public",
+"type": "core.lifetime",
+"base": "_d_newclassTTrace",
+"sons": []
+},
+{
+"line": "4564",
+"tail": "4564",
+"name": "_d_delThrowable",
+"kind": "2",
+"prot": "public",
+"type": "void(scope Throwable)",
+"base": "",
+"sons": []
+},
+{
+"line": "4567",
+"tail": "4594",
+"name": "__cmp",
+"kind": "512",
+"prot": "",
+"type": "(C1, C2)",
+"base": "",
+"sons": [
+{
+"line": "4567",
+"tail": "4594",
+"name": "__cmp",
+"kind": "2",
+"prot": "",
+"type": "int(C1 lhs,C2 rhs)",
+"base": "",
+"sons": [
+{
+"line": "4567",
+"tail": "4567",
+"name": "lhs",
+"kind": "262144",
+"prot": "",
+"type": "C1",
+"base": "",
+"sons": []
+},
+{
+"line": "4567",
+"tail": "4567",
+"name": "rhs",
+"kind": "262144",
+"prot": "",
+"type": "C2",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "4657",
+"tail": "4660",
+"name": "__cpp_type_info_ptr",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "4659",
+"tail": "4659",
+"name": "ptr",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "4663",
+"tail": "4667",
+"name": "_arrayOp",
+"kind": "512",
+"prot": "",
+"type": "(Args...)",
+"base": "",
+"sons": [
+{
+"line": "4665",
+"tail": "4665",
+"name": "core.internal.array.operations",
+"kind": "32768",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "4666",
+"tail": "4666",
+"name": "_arrayOp",
+"kind": "2048",
+"prot": "",
+"type": "arrayOp!Args",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "4669",
+"tail": "4669",
+"name": "__ctfeWrite",
+"kind": "32768",
+"prot": "public",
+"type": "core.builtins",
+"base": "__ctfeWrite",
+"sons": []
+},
+{
+"line": "4742",
+"tail": "4745",
+"name": "imported",
+"kind": "512",
+"prot": "",
+"type": "(string moduleName)",
+"base": "",
+"sons": []
+}]
+}

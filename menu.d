@@ -1,26 +1,19 @@
 ﻿module menu;
 
-import iup.iup;
-import iup.iup_scintilla;
+private import iup.iup, iup.iup_scintilla;
 
-import global, actionManager, scintilla, project, tools, layout;
-import parser.autocompletion;
-import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg, dialogs.manualDlg;
+private import global, actionManager, scintilla, project, tools, layout;
+private import parser.autocompletion;
+private import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg, dialogs.manualDlg, layouts.customMenu;
+private import parser.scanner,  parser.token, parser.parser, parser.ast;
+private import std.string, std.conv, std.file, std.encoding, Path = std.path, Array = std.array, Uni = std.uni, std.algorithm;
+private import core.memory;
 
-import tango.io.Stdout;
-import tango.stdc.stringz;
-import Integer = tango.text.convert.Integer;
-import Util = tango.text.Util, tango.io.UnicodeFile, tango.io.FilePath;
-
-import parser.scanner,  parser.token, parser.parser;
-
-
-
-void createMenu()
+Ihandle* createMenu()
 {
 	// For Menu
 	Ihandle* menu;
-	Ihandle* item_new, item_save, item_saveAll, item_open, item_exit, file_menu;
+	Ihandle* item_new, item_save, item_saveAll, item_exportJson, item_open, item_exit, file_menu;
 	Ihandle* item_redo, item_undo, item_cut, item_copy, item_paste, item_selectAll, edit_menu;
 	Ihandle* item_findReplace, item_findNext, item_findPrevious, item_findReplaceInFiles, item_goto, search_menu;
 	Ihandle* view_menu;
@@ -46,15 +39,40 @@ void createMenu()
 	IupSetAttribute( item_save, "IMAGE", "icon_save" );
 	IupSetCallback( item_save, "ACTION", cast(Icallback)&saveFile_cb );
 
-	
 	Ihandle* item_saveAs = IupItem( GLOBAL.languageItems["saveas"].toCString, null );
 	IupSetAttribute( item_saveAs, "IMAGE", "icon_saveas" );
 	IupSetCallback( item_saveAs, "ACTION", cast(Icallback)&saveAsFile_cb );
 	
-
 	item_saveAll = IupItem( GLOBAL.languageItems["saveall"].toCString, null );
 	IupSetAttribute( item_saveAll, "IMAGE", "icon_saveall" );
 	IupSetCallback( item_saveAll, "ACTION", cast(Icallback)&saveAllFile_cb );
+	
+	item_exportJson = IupItem( "Export Json...", null );
+	IupSetCallback( item_exportJson, "ACTION", cast(Icallback) function( Ihandle* ih )
+	{
+		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
+		if( cSci !is null )
+		{
+			string _fullPath = cSci.getFullPath();
+			if( fullPathByOS( _fullPath ) in GLOBAL.parserManager )
+			{
+				auto _ast = GLOBAL.parserManager[fullPathByOS( _fullPath )];
+				scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", "JSON" ~ "|*.json|" ~  GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "SAVE", "NO", Path.stripExtension( cSci.getFullPath ) );//"Source File|*.bas|Include File|*.bi" );
+				_fullPath = tools.normalizeSlash( dlg.getFileName() );
+				
+				if( _fullPath.length )
+				{
+					if( _fullPath.length > 5 )
+						if( _fullPath[$-5..$] == ".json" ) _fullPath = _fullPath[0..$-5].dup;
+
+					_fullPath ~= ".json";
+					FileAction.saveFile( _fullPath, GLOBAL.Parser.ast2Json( cast(CASTnode) _ast ), BOM.utf8, true );
+				}
+			}
+		}
+		return IUP_DEFAULT;
+	});
+	
  
 	Ihandle* item_close = IupItem( GLOBAL.languageItems["close"].toCString, null );
 	IupSetAttribute( item_close, "IMAGE", "icon_delete" );
@@ -80,7 +98,6 @@ void createMenu()
 		if( ScintillaAction.closeAllDocument( GLOBAL.documentTabs_Sub ) == IUP_DEFAULT ) ScintillaAction.closeAllDocument( GLOBAL.documentTabs );
 		return IUP_DEFAULT;
 	});
-
 
 	Ihandle* recentFilesSubMenu;
 	recentFilesSubMenu = IupMenu( null );
@@ -134,13 +151,7 @@ void createMenu()
 	item_exit = IupItem( GLOBAL.languageItems["exit"].toCString, null);
 	IupSetCallback(item_exit, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["sureexit"].toDString );
-		if( result == 1 )
-			return layout.mainDialog_CLOSE_cb( null );
-		else
-			return IUP_IGNORE;
-			
-		return IUP_DEFAULT;
+		return layout.mainDialog_CLOSE_cb( null );
 	});
 
 	// Edit
@@ -155,7 +166,6 @@ void createMenu()
 	item_cut = IupItem( GLOBAL.languageItems["cut"].toCString, null);
 	IupSetAttribute(item_cut, "IMAGE", "icon_cut");
 	IupSetCallback( item_cut, "ACTION", cast(Icallback) &cut_cb );
-
 
 	item_copy = IupItem( GLOBAL.languageItems["copy"].toCString, null);
 	IupSetAttribute(item_copy, "IMAGE", "icon_copy");
@@ -209,7 +219,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.LineMargin == "ON" ) GLOBAL.editorSetting00.LineMargin = "OFF"; else GLOBAL.editorSetting00.LineMargin = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleLineMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.LineMargin ) );
+			if( IupGetHandle( "toggleLineMargin" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.LineMargin ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -223,7 +233,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.BookmarkMargin == "ON" ) GLOBAL.editorSetting00.BookmarkMargin = "OFF"; else GLOBAL.editorSetting00.BookmarkMargin = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleBookmarkMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.BookmarkMargin ) );
+			if( IupGetHandle( "toggleBookmarkMargin" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleBookmarkMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.BookmarkMargin ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -237,7 +247,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.FoldMargin == "ON" ) GLOBAL.editorSetting00.FoldMargin = "OFF"; else GLOBAL.editorSetting00.FoldMargin = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleFoldMargin" ) != null ) IupSetAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.FoldMargin ) );
+			if( IupGetHandle( "toggleFoldMargin" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleFoldMargin" ), "VALUE", toStringz( GLOBAL.editorSetting00.FoldMargin ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -251,7 +261,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.IndentGuide == "ON" ) GLOBAL.editorSetting00.IndentGuide = "OFF"; else GLOBAL.editorSetting00.IndentGuide = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleIndentGuide" ) != null ) IupSetAttribute( IupGetHandle( "toggleIndentGuide" ), "VALUE", toStringz( GLOBAL.editorSetting00.IndentGuide ) );
+			if( IupGetHandle( "toggleIndentGuide" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleIndentGuide" ), "VALUE", toStringz( GLOBAL.editorSetting00.IndentGuide ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -265,7 +275,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.ShowEOL == "ON" ) GLOBAL.editorSetting00.ShowEOL = "OFF"; else GLOBAL.editorSetting00.ShowEOL = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleShowEOL" ) != null ) IupSetAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowEOL ) );
+			if( IupGetHandle( "toggleShowEOL" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleShowEOL" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowEOL ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -279,7 +289,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.ShowSpace == "ON" ) GLOBAL.editorSetting00.ShowSpace = "OFF"; else GLOBAL.editorSetting00.ShowSpace = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleShowSpace" ) != null ) IupSetAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowSpace ) );
+			if( IupGetHandle( "toggleShowSpace" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleShowSpace" ), "VALUE", toStringz( GLOBAL.editorSetting00.ShowSpace ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -293,7 +303,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.BraceMatchHighlight == "ON" ) GLOBAL.editorSetting00.BraceMatchHighlight = "OFF"; else GLOBAL.editorSetting00.BraceMatchHighlight = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleBraceMatch" ) != null ) IupSetAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE", toStringz( GLOBAL.editorSetting00.BraceMatchHighlight ) );
+			if( IupGetHandle( "toggleBraceMatch" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleBraceMatch" ), "VALUE", toStringz( GLOBAL.editorSetting00.BraceMatchHighlight ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -307,7 +317,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.BoldKeyword == "ON" ) GLOBAL.editorSetting00.BoldKeyword = "OFF"; else GLOBAL.editorSetting00.BoldKeyword = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleBoldKeyword" ) != null ) IupSetAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE", toStringz( GLOBAL.editorSetting00.BoldKeyword ) );
+			if( IupGetHandle( "toggleBoldKeyword" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleBoldKeyword" ), "VALUE", toStringz( GLOBAL.editorSetting00.BoldKeyword ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -321,7 +331,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.CaretLine == "ON" ) GLOBAL.editorSetting00.CaretLine = "OFF"; else GLOBAL.editorSetting00.CaretLine = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleCaretLine" ) != null ) IupSetAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
+			if( IupGetHandle( "toggleCaretLine" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleCaretLine" ), "VALUE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -335,7 +345,7 @@ void createMenu()
 	{
 		if( GLOBAL.editorSetting00.HighlightCurrentWord == "ON" ) GLOBAL.editorSetting00.HighlightCurrentWord = "OFF"; else GLOBAL.editorSetting00.HighlightCurrentWord = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleCurrentWord" ) != null ) IupSetAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE", toStringz( GLOBAL.editorSetting00.HighlightCurrentWord ) );
+			if( IupGetHandle( "toggleCurrentWord" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleCurrentWord" ), "VALUE", toStringz( GLOBAL.editorSetting00.HighlightCurrentWord ) );
 			
 		ScintillaAction.applyAllSetting();
 		return IUP_DEFAULT;
@@ -350,7 +360,7 @@ void createMenu()
 	{
 		if( GLOBAL.showFunctionTitle == "ON" ) GLOBAL.showFunctionTitle = "OFF"; else GLOBAL.showFunctionTitle = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleFunctionTitle" ) != null ) IupSetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
+			if( IupGetHandle( "toggleFunctionTitle" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
 
 		if( GLOBAL.showFunctionTitle == "ON" )
 		{
@@ -366,27 +376,27 @@ void createMenu()
 	});
 
 	Ihandle* UseAnnotation = IupItem( GLOBAL.languageItems["errorannotation"].toCString, null);
-	if( GLOBAL.compilerAnootation == "ON" ) IupSetInt( UseAnnotation, "VALUE", 1 ); else IupSetInt( UseAnnotation, "VALUE", 0 );
+	if( GLOBAL.compilerSettings.useAnootation == "ON" ) IupSetInt( UseAnnotation, "VALUE", 1 ); else IupSetInt( UseAnnotation, "VALUE", 0 );
 	IupSetAttribute( UseAnnotation, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuUseAnnotation", UseAnnotation );
 	IupSetCallback( UseAnnotation, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		if( GLOBAL.compilerAnootation == "ON" ) GLOBAL.compilerAnootation = "OFF"; else GLOBAL.compilerAnootation = "ON";
+		if( GLOBAL.compilerSettings.useAnootation == "ON" ) GLOBAL.compilerSettings.useAnootation = "OFF"; else GLOBAL.compilerSettings.useAnootation = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleAnnotation" ) != null ) IupSetAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE", toStringz( GLOBAL.compilerAnootation ) );
+			if( IupGetHandle( "toggleAnnotation" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleAnnotation" ), "VALUE", toStringz( GLOBAL.compilerSettings.useAnootation ) );
 			
 		return IUP_DEFAULT;
 	});
 	
 	Ihandle* UseConsoleApp = IupItem( GLOBAL.languageItems["consoleexe"].toCString, null);
-	if( GLOBAL.consoleExe == "ON" ) IupSetInt( UseConsoleApp, "VALUE", 1 ); else IupSetInt( UseConsoleApp, "VALUE", 0 );
+	if( GLOBAL.compilerSettings.useConsoleLaunch == "ON" ) IupSetInt( UseConsoleApp, "VALUE", 1 ); else IupSetInt( UseConsoleApp, "VALUE", 0 );
 	IupSetAttribute( UseConsoleApp, "AUTOTOGGLE", "YES" );
 	IupSetHandle( "menuUseConsoleApp", UseConsoleApp );
 	IupSetCallback( UseConsoleApp, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		if( GLOBAL.consoleExe == "ON" ) GLOBAL.consoleExe = "OFF"; else GLOBAL.consoleExe = "ON";
+		if( GLOBAL.compilerSettings.useConsoleLaunch == "ON" ) GLOBAL.compilerSettings.useConsoleLaunch = "OFF"; else GLOBAL.compilerSettings.useConsoleLaunch = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleConsoleExe" ) != null ) IupSetAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE", toStringz( GLOBAL.consoleExe ) );
+			if( IupGetHandle( "toggleConsoleExe" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleConsoleExe" ), "VALUE", toStringz( GLOBAL.compilerSettings.useConsoleLaunch ) );
 			
 		return IUP_DEFAULT;
 	});
@@ -401,13 +411,15 @@ void createMenu()
 	IupSetAttribute(item_openProject, "IMAGE", "icon_openprj");
 	IupSetCallback(item_openProject, "ACTION", cast(Icallback)&openProject_cb);
 
+	/*
 	version(FBIDE)
 	{
 		Ihandle* item_import = IupItem( GLOBAL.languageItems["importprj"].toCString, null);
 		IupSetAttribute(item_import, "IMAGE", "icon_importprj");
 		IupSetCallback(item_import, "ACTION", cast(Icallback)&importProject_cb);
 	}
-
+	*/
+	
 	item_closeProject = IupItem( GLOBAL.languageItems["closeprj"].toCString, null);
 	IupSetAttribute(item_closeProject, "IMAGE", "icon_delete");
 	IupSetCallback(item_closeProject, "ACTION", cast(Icallback)&closeProject_cb);
@@ -484,12 +496,10 @@ void createMenu()
 	
 	GLOBAL.menuOutlineWindow = IupItem( GLOBAL.languageItems["outline"].toCString, null);
 	IupSetAttribute(GLOBAL.menuOutlineWindow, "VALUE", "ON");
-	//IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outline_cb);
 	IupSetCallback(GLOBAL.menuOutlineWindow, "ACTION", cast(Icallback)&outlineMenuItem_cb);
 	
 	GLOBAL.menuMessageWindow = IupItem( GLOBAL.languageItems["message"].toCString, null);
 	IupSetAttribute(GLOBAL.menuMessageWindow, "VALUE", "ON");
-	//IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&message_cb);
 	IupSetCallback(GLOBAL.menuMessageWindow, "ACTION", cast(Icallback)&messageMenuItem_cb);
 	
 	GLOBAL.menuRotateTabs = IupItem( GLOBAL.languageItems["rotatetabs"].toCString, null);
@@ -505,8 +515,7 @@ void createMenu()
 				IupRefresh( GLOBAL.documentSplit2 );
 				if( IupGetChildCount( child ) > 0 )
 				{
-					//IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=2" );
-					IupSetInt( GLOBAL.documentSplit2, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+					IupSetInt( GLOBAL.documentSplit2, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 					IupSetInt( GLOBAL.documentSplit2, "VALUE", GLOBAL.documentSplit2_value );
 					IupSetAttributes( GLOBAL.documentSplit, "VALUE=1000,BARSIZE=0" );
 				}
@@ -523,8 +532,7 @@ void createMenu()
 				IupRefresh( GLOBAL.documentSplit );
 				if( IupGetChildCount( child ) > 0 )
 				{
-					//IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
-					IupSetInt( GLOBAL.documentSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+					IupSetInt( GLOBAL.documentSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 					IupSetInt( GLOBAL.documentSplit, "VALUE", GLOBAL.documentSplit_value );
 					IupSetAttributes( GLOBAL.documentSplit2, "VALUE=1000,BARSIZE=0" );
 				}
@@ -533,19 +541,17 @@ void createMenu()
 			IupSetAttribute( GLOBAL.menuRotateTabs, "VALUE", "OFF" );
 		}
 		
-
 		return IUP_DEFAULT;
 	});
 	
 	Ihandle* fullScreenItem = IupItem( GLOBAL.languageItems["fullscreen"].toCString, null);
-	IupSetAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN.dup ) );
+	IupSetStrAttribute( fullScreenItem, "VALUE", toStringz( GLOBAL.editorSetting01.USEFULLSCREEN ) );
 	IupSetAttribute( fullScreenItem, "IMAGE", "icon_fullscreen" );
 	IupSetCallback( fullScreenItem, "ACTION", cast(Icallback) &fullscreenMenuItem_cb);
 	
 
 	// Option
-	Ihandle* _windowsEOL = IupItem( toStringz( "Windows" ), null );
-	//IupSetAttribute(_windowsEOL, "IMAGE", "icon_windows");
+	Ihandle* _windowsEOL = IupItem( "Windows", null );
 	IupSetCallback( _windowsEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.EolType = "0";
@@ -556,8 +562,7 @@ void createMenu()
 		return IUP_DEFAULT;
 	});	
 	
-	Ihandle* _macEOL = IupItem( toStringz( "Mac" ), null );
-	//IupSetAttribute(_macEOL, "IMAGE", "icon_mac");
+	Ihandle* _macEOL = IupItem( "Mac", null );
 	IupSetCallback( _macEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.EolType = "1";
@@ -568,8 +573,7 @@ void createMenu()
 		return IUP_DEFAULT;
 	});	
 	
-	Ihandle* _unixEOL = IupItem( toStringz( "Unix" ), null );
-	//IupSetAttribute(_unixEOL, "IMAGE", "icon_linux");
+	Ihandle* _unixEOL = IupItem( "Unix", null );
 	IupSetCallback( _unixEOL, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		GLOBAL.editorSetting00.EolType = "2";
@@ -591,51 +595,47 @@ void createMenu()
 	}
 	Ihandle* setEOL = IupSubmenu( GLOBAL.languageItems["seteol"].toCString, _eolSubMenu );
 
-	Ihandle* windowsEOL = IupItem( toStringz( "Windows" ), null );
-	//IupSetAttribute(windowsEOL, "IMAGE", "icon_windows");
+	Ihandle* windowsEOL = IupItem( "Windows", null );
 	IupSetCallback( windowsEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 	
-	Ihandle* macEOL = IupItem( toStringz( "Mac" ), null );
-	//IupSetAttribute(macEOL, "IMAGE", "icon_mac");
+	Ihandle* macEOL = IupItem( "Mac", null );
 	IupSetCallback( macEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 	
-	Ihandle* unixEOL = IupItem( toStringz( "Unix" ), null );
-	//IupSetAttribute(unixEOL, "IMAGE", "icon_linux");
+	Ihandle* unixEOL = IupItem( "Unix", null );
 	IupSetCallback( unixEOL, "ACTION", cast(Icallback) &SetAndConvertEOL_CB );
 
 	Ihandle* eolSubMenu = IupMenu( windowsEOL, macEOL, unixEOL, null  );
 	Ihandle* convertEOL = IupSubmenu( GLOBAL.languageItems["converteol"].toCString, eolSubMenu );
 	
 
-	Ihandle* encodeDefault = IupItem( toStringz( "Default" ), null );
+	Ihandle* encodeDefault = IupItem( "Default", null );
 	IupSetCallback( encodeDefault, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF8 = IupItem( toStringz( "UTF8" ), null );
+	
+	Ihandle* encodeUTF8 = IupItem( "UTF8", null );
 	IupSetCallback( encodeUTF8, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF8BOM = IupItem( toStringz( "UTF8.BOM" ), null );
+	
+	Ihandle* encodeUTF8BOM = IupItem( "UTF8.BOM", null );
 	IupSetCallback( encodeUTF8BOM, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF16BEBOM = IupItem( toStringz( "UTF16BE.BOM" ), null );
+	
+	Ihandle* encodeUTF16BEBOM = IupItem( "UTF16BE.BOM", null );
 	IupSetCallback( encodeUTF16BEBOM, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF16LEBOM = IupItem( toStringz( "UTF16LE.BOM" ), null );
+	
+	Ihandle* encodeUTF16LEBOM = IupItem( "UTF16LE.BOM", null );
 	IupSetCallback( encodeUTF16LEBOM, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF32BE = IupItem( toStringz( "UTF32BE" ), null );
-	IupSetAttribute( encodeUTF32BE, "ACTIVE", "NO" );
-	IupSetCallback( encodeUTF32BE, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF32BEBOM = IupItem( toStringz( "UTF32BE.BOM" ), null );
-	IupSetCallback( encodeUTF32BEBOM, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF32LE = IupItem( toStringz( "UTF32LE" ), null );
-	IupSetAttribute( encodeUTF32LE, "ACTIVE", "NO" );
-	IupSetCallback( encodeUTF32LE, "ACTION", cast(Icallback) &encode_cb );
-	Ihandle* encodeUTF32LEBOM = IupItem( toStringz( "UTF32LE.BOM" ), null );
+	
+	Ihandle* encodeUTF32LEBOM = IupItem( "UTF32LE.BOM", null );
 	IupSetCallback( encodeUTF32LEBOM, "ACTION", cast(Icallback) &encode_cb );
 	
-	Ihandle* encodeSubMenu = IupMenu( encodeDefault, encodeUTF8, encodeUTF8BOM, encodeUTF16BEBOM, encodeUTF16LEBOM, /*encodeUTF32BE,*/ encodeUTF32BEBOM, /*encodeUTF32LE,*/ encodeUTF32LEBOM, null  );
+	Ihandle* encodeUTF32BEBOM = IupItem( "UTF32BE.BOM", null );
+	IupSetCallback( encodeUTF32BEBOM, "ACTION", cast(Icallback) &encode_cb );
+	
+	Ihandle* encodeSubMenu = IupMenu( encodeDefault, encodeUTF8, encodeUTF8BOM, encodeUTF16LEBOM, encodeUTF16BEBOM, encodeUTF32LEBOM, encodeUTF32BEBOM, null  );
 	Ihandle* convertEncoding = IupSubmenu( GLOBAL.languageItems["convertencoding"].toCString, encodeSubMenu );
 
 	version(FBIDE)
 	{
 		// Convert Keyword
 		Ihandle* upperCaseHandle = IupItem( GLOBAL.languageItems["uppercase"].toCString, null );
-		//IupSetAttribute(upperCaseHandle, "IMAGE", "icon_windows");
 		IupSetCallback( upperCaseHandle, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			_convertKeyWordCase( 2 );
@@ -643,7 +643,6 @@ void createMenu()
 		});	
 		
 		Ihandle* lowerCaseHandle = IupItem( GLOBAL.languageItems["lowercase"].toCString, null );
-		//IupSetAttribute(lowerCaseHandle, "IMAGE", "icon_mac");
 		IupSetCallback( lowerCaseHandle, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			_convertKeyWordCase( 1 );
@@ -651,7 +650,6 @@ void createMenu()
 		});	
 		
 		Ihandle* mixedCase = IupItem( GLOBAL.languageItems["mixercase"].toCString, null );
-		//IupSetAttribute(mixedCase, "IMAGE", "icon_linux");
 		IupSetCallback( mixedCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			_convertKeyWordCase( 3 );
@@ -659,7 +657,6 @@ void createMenu()
 		});	
 
 		Ihandle* userCase = IupItem( GLOBAL.languageItems["usercase"].toCString, null );
-		//IupSetAttribute(mixedCase, "IMAGE", "icon_linux");
 		IupSetCallback( userCase, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			_convertKeyWordCase( 4 );
@@ -672,7 +669,6 @@ void createMenu()
 	
 	Ihandle* customTooledit = IupItem( GLOBAL.languageItems["setcustomtool"].toCString, null );
 	IupSetAttribute( customTooledit, "IMAGE", "icon_toolitem" );
-	//IupSetAttribute( customTooledit, "ACTIVE", "NO" );
 	IupSetCallback( customTooledit, "ACTION", cast(Icallback)&coustomTooledit_cb );
 	
 	Ihandle* markIupSeparator = IupSeparator();
@@ -690,7 +686,7 @@ void createMenu()
 	{
 		if( GLOBAL.customTools[i].name.length )
 		{
-			Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name ), null );
+			Ihandle* _new = IupItem( toStringz( "#" ~ to!(string)( i ) ~ ". " ~ GLOBAL.customTools[i].name ), null );
 			IupSetCallback( _new, "ACTION", cast(Icallback) &customtool_menu_click_cb );
 			IupAppend( toolsSubMenu, _new );
 			IupMap( _new );
@@ -715,7 +711,8 @@ void createMenu()
 	IupMap( _loadLngFiles );
 	
 	Ihandle* _lng;
-	if( GLOBAL.language.length ) _lng = IupItem( toStringz( GLOBAL.language ), null ); else  _lng = IupItem( GLOBAL.languageItems["default"].toCString, null );
+	auto _language = new IupString( GLOBAL.language );
+	if( GLOBAL.language.length ) _lng = IupItem( _language.toCString, null ); else  _lng = IupItem( GLOBAL.languageItems["default"].toCString, null );
 	IupInsert( languageSubMenu, null, _lng );
 	IupMap( _lng );
 	IupSetHandle( "_lng", _lng );
@@ -728,8 +725,8 @@ void createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.504)  2023.06.07\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.079)  2023.06.07\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : ""  ~ ( GLOBAL.iconv != null ? "\n*Using iconv Library" : "" ) ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.506)  2023.07.09\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.080)  2023.06.12\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -752,8 +749,9 @@ void createMenu()
 							item_saveAs,
 							item_saveAll,
 							IupSeparator(),
+							item_exportJson,
+							IupSeparator(),
 							item_close,
-							//item_closeAll,
 							item_closeAllTabs,
 							IupSeparator(),
 							item_recentFiles,
@@ -808,8 +806,8 @@ void createMenu()
 	project_menu = IupMenu( item_newProject,
 							item_openProject,
 							IupSeparator(),
-							item_import,
-							IupSeparator(),
+							/*item_import,*/
+							/*IupSeparator(),*/
 							item_saveProject,
 							item_saveAllProject,
 							IupSeparator(),
@@ -871,42 +869,66 @@ void createMenu()
 							item_about,
 							IupSeparator(),
 							item_manual,
-							IupSeparator(),
+							/*IupSeparator(),*/
 							null );
 
-	mainMenu1_File = IupSubmenu( GLOBAL.languageItems["file"].toCString, file_menu );
-	mainMenu2_Edit = IupSubmenu( GLOBAL.languageItems["edit"].toCString, edit_menu );
-	mainMenu3_Search = IupSubmenu( GLOBAL.languageItems["search"].toCString, search_menu );
-	mainMenu4_View = IupSubmenu( GLOBAL.languageItems["view"].toCString, view_menu );
-	mainMenu5_Project = IupSubmenu( GLOBAL.languageItems["prj"].toCString, project_menu );
-	mainMenu6_Build = IupSubmenu( GLOBAL.languageItems["build"].toCString, build_menu );
-	if( !bWithoutDebug ) mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
-	mainMenu_Misc = IupSubmenu( GLOBAL.languageItems["windows"].toCString, misc_menu );
-	mainMenu8_Option = IupSubmenu( GLOBAL.languageItems["options"].toCString, option_menu );
+
 	IupSetHandle( "optionsMenu", option_menu );
-
-	if( !bWithoutDebug )
-		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option, null );
-	else
-		menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu_Misc, mainMenu8_Option, null );
-		
-	IupSetAttribute( menu, "GAP", "30" );
-
 
 	for( int i = 0; i < GLOBAL.manuals.length; ++ i )
 	{
-		char[][] splitWords = Util.split( GLOBAL.manuals[i], "," );
+		string[] splitWords = Array.split( GLOBAL.manuals[i], "," );
 		if( splitWords.length == 2 )
 		{
-			Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
+			auto _name = new IupString( "#" ~ to!(string)( i + 1 ) ~ ". " ~ splitWords[0] );
+			Ihandle* _new = IupItem( _name.toCString, null );
 			IupSetCallback( _new, "ACTION", cast(Icallback) &manual_menu_click_cb );
 			IupAppend( option_menu, _new );
 			IupMap( _new );
 		}
+	}	
+
+	version(Windows)
+	{
+		GLOBAL.menubar = new CCustomMenubar( 120 );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["file"].toDString, file_menu );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["edit"].toDString, edit_menu );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["search"].toDString, search_menu );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["view"].toDString, view_menu );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["prj"].toDString, project_menu );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["build"].toDString, build_menu );
+		if( !bWithoutDebug ) GLOBAL.menubar.addItem( GLOBAL.languageItems["debug"].toDString, debug_menu );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["windows"].toDString, misc_menu );
+		GLOBAL.menubar.addItem( GLOBAL.languageItems["options"].toDString, option_menu );
+		
+		GLOBAL.menubar.setFont( GLOBAL.fonts[0].fontString );
+		
+		
+		return GLOBAL.menubar.getLayoutHandle;	
+	}
+	else
+	{
+		mainMenu1_File = IupSubmenu( GLOBAL.languageItems["file"].toCString, file_menu );
+		mainMenu2_Edit = IupSubmenu( GLOBAL.languageItems["edit"].toCString, edit_menu );
+		mainMenu3_Search = IupSubmenu( GLOBAL.languageItems["search"].toCString, search_menu );
+		mainMenu4_View = IupSubmenu( GLOBAL.languageItems["view"].toCString, view_menu );
+		mainMenu5_Project = IupSubmenu( GLOBAL.languageItems["prj"].toCString, project_menu );
+		mainMenu6_Build = IupSubmenu( GLOBAL.languageItems["build"].toCString, build_menu );
+		if( !bWithoutDebug ) mainMenu7_Debug = IupSubmenu( GLOBAL.languageItems["debug"].toCString, debug_menu );
+		mainMenu_Misc = IupSubmenu( GLOBAL.languageItems["windows"].toCString, misc_menu );
+		mainMenu8_Option = IupSubmenu( GLOBAL.languageItems["options"].toCString, option_menu );	
+	
+		if( !bWithoutDebug )
+			menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu7_Debug, mainMenu_Misc, mainMenu8_Option, null );
+		else
+			menu = IupMenu( mainMenu1_File, mainMenu2_Edit, mainMenu3_Search, mainMenu4_View, mainMenu5_Project, mainMenu6_Build, mainMenu_Misc, mainMenu8_Option, null );
+			
+		IupSetAttribute( menu, "GAP", "30" );
+		IupSetHandle("mymenu", menu);
 	}
 
-	
-	IupSetHandle("mymenu", menu);
+
+	return null;
 }
 
 version(FBIDE)
@@ -936,14 +958,14 @@ version(FBIDE)
 			Ihandle* iupSci = cSci.getIupScintilla;
 			IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
 			
-			foreach( char[] _s; GLOBAL.KEYWORDS )
+			foreach(  _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] targetText; Util.split( _s, " " ) )
+				foreach( targetText; Array.split( _s, " " ) )
 				{
 					if( targetText.length )
 					{
 						int		replaceTextLength = targetText.length;
-						char[]	replaceText = tools.convertKeyWordCase( type, targetText );
+						string	replaceText = tools.convertKeyWordCase( type, targetText );
 
 						IupSetInt( iupSci, "TARGETSTART", 0 );
 						IupSetInt( iupSci, "TARGETEND", -1 );
@@ -972,23 +994,22 @@ extern(C)
 	{
 		int[] existedID;
 		
-		foreach( char[] s; GLOBAL.scintillaManager.keys )
+		foreach( s; GLOBAL.scintillaManager.keys )
 		{
 			// NONAME#....bas
 			if( s.length >= 7 )
 			{
-				if( s[0..7] == "NONAME#" )
+				if( s[0..7] == fullPathByOS( "NONAME#" ) )
 				{
-					version(FBIDE)	existedID ~= Integer.atoi( s[7..$-4] );
-					version(DIDE)	existedID ~= Integer.atoi( s[7..$-2] );
+					version(FBIDE)	existedID ~= to!(int)( s[7..$-4] );
+					version(DIDE)	existedID ~= to!(int)( s[7..$-2] );
 				}
 			}
 		}
 
 		existedID.sort;
 
-		char[] noname;
-		
+		string noname;
 		if( !existedID.length )
 		{
 			version(FBIDE)	noname = "NONAME#0.bas";
@@ -1000,8 +1021,8 @@ extern(C)
 			{
 				if( i < existedID[i] )
 				{
-					version(FBIDE)	noname = "NONAME#" ~ Integer.toString( i ) ~ ".bas";
-					version(DIDE)	noname = "NONAME#" ~ Integer.toString( i ) ~ ".d";
+					version(FBIDE)	noname = "NONAME#" ~ to!(string)( i ) ~ ".bas";
+					version(DIDE)	noname = "NONAME#" ~ to!(string)( i ) ~ ".d";
 					break;
 				}
 			}
@@ -1009,16 +1030,16 @@ extern(C)
 
 		if( !noname.length )
 		{
-			version(FBIDE)	noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".bas";
-			version(DIDE)	noname = "NONAME#" ~ Integer.toString( existedID.length ) ~ ".d";
+			version(FBIDE)	noname = "NONAME#" ~ to!(string)( existedID.length ) ~ ".bas";
+			version(DIDE)	noname = "NONAME#" ~ to!(string)( existedID.length ) ~ ".d";
 		}
 
 		version(Windows)
 		{
-			if( GLOBAL.editorSetting00.NewDocBOM == "ON" ) actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8, null, false ); else actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
+			if( GLOBAL.editorSetting00.NewDocBOM == "ON" ) actionManager.ScintillaAction.newFile( noname, BOM.utf8, true, null, false ); else actionManager.ScintillaAction.newFile( noname, BOM.utf8, false, null, false );
 		}
 		else
-			actionManager.ScintillaAction.newFile( noname, Encoding.UTF_8N, null, false );
+			actionManager.ScintillaAction.newFile( noname, BOM.utf8, false, null, false );
 
 		return IUP_DEFAULT;
 	}
@@ -1029,7 +1050,7 @@ extern(C)
 		version(FBIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.bas;*.bi|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "OPEN", "YES" );
 		version(DIDE)	scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["caption_open"].toDString() ~ "...", GLOBAL.languageItems["supportfile"].toDString() ~ "|*.d;*.di|" ~ GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "OPEN", "YES" );
 		
-		char[][] files = fileSecectDlg.getFilesName();
+		string[] files = fileSecectDlg.getFilesName();
 		if( files.length == 1 )
 		{
 			if( files[0].length )
@@ -1039,7 +1060,7 @@ extern(C)
 		}
 		else
 		{
-			foreach( char[] s; files )
+			foreach( s; files )
 			{
 				if( s.length )
 				{
@@ -1093,15 +1114,14 @@ extern(C)
 		
 		if( IupGetInt( dlg, "STATUS") == 0 )
 		{
-			char[] fileString = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
-			scope _fp = new FilePath( fileString );
-			if( _fp.exists() )
+			string fileString = strip( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
+			if( exists( fileString ) )
 			{
 				Ihandle* _ih = IupGetHandle( "_lng" );
 				if( _ih != null )
 				{
-					IupSetAttribute( _ih, "TITLE", toStringz( _fp.name ) );
-					GLOBAL.language = _fp.name;
+					IupSetStrAttribute( _ih, "TITLE", toStringz( Path.stripExtension( Path.baseName( fileString ) ) ) );
+					GLOBAL.language = Path.stripExtension( Path.baseName( fileString ) );
 					
 					Ihandle* messageDlg = IupMessageDlg();
 					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
@@ -1117,27 +1137,25 @@ extern(C)
 
 	int submenuRecentFiles_click_cb( Ihandle* ih )
 	{
-		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
+		string title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
 		if( title.length )
 		{
 			if( !ScintillaAction.openFile( title, -1 ) )
 			{
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ title ~ "\"\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
+				IupSetStrAttribute( messageDlg, "VALUE", toStringz( "\"" ~ title ~ "\"\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
 				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
 				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
 				
 				IupDestroy( ih );
 				
 				IupString[] _recentFiles;
-				foreach( IupString s; GLOBAL.recentFiles )
-				{
-					if( s.toDString != title ) _recentFiles ~= new IupString( s.toDString );
-				}
-				
 				foreach( s; GLOBAL.recentFiles )
-					delete s;
+					if( s.toDString != title ) _recentFiles ~= new IupString( s.toDString );
+					
+				foreach( s; GLOBAL.recentFiles )
+					destroy( s );					
 				
 				GLOBAL.recentFiles.length = 0;
 				GLOBAL.recentFiles = _recentFiles;
@@ -1157,23 +1175,23 @@ extern(C)
 	
 	int submenuRecentProject_click_cb( Ihandle* ih )
 	{
-		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
-		int pos = Util.index( title, " : " );
-		if( pos < title.length )
+		string title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
+		int pos = indexOf( title, " : " );
+		if( pos > 0 )
 		{
-			if( !GLOBAL.projectTree.openProject( Util.trim( title[0..pos].dup ) ) )
+			if( !GLOBAL.projectTree.openProject( strip( title[0..pos].dup ) ) )
 			{
 				IupDestroy( ih );
 				IupString[] _recentProjects;
 				
-				foreach( IupString s; GLOBAL.recentProjects )
+				foreach( s; GLOBAL.recentProjects )
 				{
 					if( s.toDString != title ) _recentProjects ~= new IupString( s.toDString );
 				}
 				
 				foreach( s; GLOBAL.recentProjects )
-					delete s;
-					
+					destroy( s );
+				
 				GLOBAL.recentProjects.length = 0;
 				GLOBAL.recentProjects = _recentProjects;
 			}
@@ -1252,7 +1270,7 @@ extern(C)
 			char* _selectText = IupGetAttribute( iupSci, "SELECTION" );
 			if( _selectText == null ) // Non Selection
 			{
-				char[] currentLineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) ).dup;
+				string currentLineText = fSTRz( IupGetAttribute( iupSci, "LINEVALUE" ) );
 				if( currentLineText.length )
 				{
 					version(FBIDE)
@@ -1269,14 +1287,14 @@ extern(C)
 			}
 			else
 			{
-				char[] selectText = fromStringz( _selectText );
-				int headCommaPos = Util.index( selectText, "," );
-				int headColonPos = Util.index( selectText, ":" );
-				int tailCommaPos = Util.rindex( selectText, "," );
+				string selectText = fSTRz( _selectText );
+				int headCommaPos = indexOf( selectText, "," );
+				int headColonPos = indexOf( selectText, ":" );
+				int tailCommaPos = lastIndexOf( selectText, "," );
 				if( tailCommaPos > headCommaPos )
 				{
-					int line1 = Integer.atoi( selectText[0..headCommaPos] );
-					int line2 = Integer.atoi( selectText[headColonPos+1..tailCommaPos] );
+					int line1 = to!(int)( selectText[0..headCommaPos] );
+					int line2 = to!(int)( selectText[headColonPos+1..tailCommaPos] );
 					
 					if( line1 > line2 )
 					{
@@ -1287,7 +1305,7 @@ extern(C)
 					
 					for( int i = line1; i <= line2; ++ i )
 					{
-						char[] currentLineText = Util.trim( fromStringz( IupGetAttributeId( iupSci, "LINE", i ) ) ).dup;
+						string currentLineText = strip( fromStringz( IupGetAttributeId( iupSci, "LINE", i ) ) ).dup;
 						if( currentLineText.length )
 						{
 							version(FBIDE)
@@ -1321,7 +1339,7 @@ extern(C)
 			char* _selectText = IupGetAttribute( iupSci, "SELECTION" );
 			if( _selectText == null ) // Non Selection
 			{
-				char[] currentLineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) ).dup;
+				string currentLineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) ).dup;
 				if( currentLineText.length )
 				{
 					version(FBIDE)
@@ -1330,7 +1348,7 @@ extern(C)
 						if( currentLineText[0] == '\'' )
 						{
 							lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
-							IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
+							IupSetStrAttribute( iupSci, "DELETERANGE", toStringz( to!(string)( lineheadPos ) ~ "," ~ "1" ) );
 						}
 					}
 					version(DIDE)
@@ -1340,7 +1358,7 @@ extern(C)
 							if( currentLineText[0..2] == "//" )
 							{
 								lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, currentLine - 1, 0 );
-								IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "2" ) );
+								IupSetStrAttribute( iupSci, "DELETERANGE", toStringz( to!(string)( lineheadPos ) ~ "," ~ "2" ) );
 							}
 						}
 					}
@@ -1348,14 +1366,14 @@ extern(C)
 			}
 			else
 			{
-				char[] selectText = fromStringz( _selectText );
-				int headCommaPos = Util.index( selectText, "," );
-				int headColonPos = Util.index( selectText, ":" );
-				int tailCommaPos = Util.rindex( selectText, "," );
+				string selectText = fSTRz( _selectText );
+				int headCommaPos = indexOf( selectText, "," );
+				int headColonPos = indexOf( selectText, ":" );
+				int tailCommaPos = lastIndexOf( selectText, "," );
 				if( tailCommaPos > headCommaPos )
 				{
-					int line1 = Integer.atoi( selectText[0..headCommaPos] );
-					int line2 = Integer.atoi( selectText[headColonPos+1..tailCommaPos] );
+					int line1 = to!(int)( selectText[0..headCommaPos] );
+					int line2 = to!(int)( selectText[headColonPos+1..tailCommaPos] );
 					
 					if( line1 > line2 )
 					{
@@ -1366,7 +1384,7 @@ extern(C)
 					
 					for( int i = line1; i <= line2; ++ i )
 					{
-						char[] currentLineText = fromStringz( IupGetAttributeId( iupSci, "LINE", i ) ).dup;
+						string currentLineText = fromStringz( IupGetAttributeId( iupSci, "LINE", i ) ).dup;
 						if( currentLineText.length )
 						{
 							version(FBIDE)
@@ -1375,7 +1393,7 @@ extern(C)
 								if( currentLineText[0] == '\'' )
 								{
 									lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
-									IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "1" ) );
+									IupSetStrAttribute( iupSci, "DELETERANGE", toStringz( to!(string)( lineheadPos ) ~ "," ~ "1" ) );
 								}
 							}						
 							version(DIDE)
@@ -1385,7 +1403,7 @@ extern(C)
 									if( currentLineText[0..2] == "//" )
 									{
 										lineheadPos = cast(int) IupScintillaSendMessage( iupSci, 2167, i, 0 );
-										IupSetAttribute( iupSci, "DELETERANGE", toStringz( Integer.toString( lineheadPos ) ~ "," ~ "2" ) );
+										IupSetStrAttribute( iupSci, "DELETERANGE", toStringz( to!(string)( lineheadPos ) ~ "," ~ "2" ) );
 									}
 								}
 							}						
@@ -1403,34 +1421,21 @@ extern(C)
 		Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null )
 		{
-			char[] targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );		
+			string targetText = fSTRz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );		
 			if( targetText.length ) GLOBAL.searchExpander.show( targetText.dup ); else GLOBAL.searchExpander.show( null );
 		}
 		
 		return IUP_DEFAULT;
-		/+
-		if( GLOBAL.searchDlg !is null )
-		{
-			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
-			if( ih != null )
-			{
-				char[] targetText;
-				targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );
-				if( targetText.length ) GLOBAL.searchDlg.show( targetText.dup ); else GLOBAL.searchDlg.show( null );
-			}
-		}
-		+/
 	}
 
 	int findReplaceInFiles( Ihandle* _iHandle )
 	{
 		if( GLOBAL.serachInFilesDlg !is null )
 		{
-			char[] targetText;
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
 			if( ih !is null ) 
 			{
-				targetText = fromStringz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );
+				string targetText = fSTRz( IupGetAttribute( ih, toStringz( "SELECTEDTEXT" ) ) );
 				if( targetText.length) GLOBAL.serachInFilesDlg.show( targetText.dup ); else GLOBAL.serachInFilesDlg.show( null );
 			}
 			else
@@ -1454,7 +1459,7 @@ extern(C)
 		Ihandle* ih	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null )
 		{
-			char[] targetText = fromStringz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
+			string targetText = fSTRz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
 			if( targetText.length )
 			{
 				IupSetAttribute( ih, "SELECTIONPOS", IupGetAttribute( ih, "SELECTIONPOS" ) );
@@ -1469,23 +1474,21 @@ extern(C)
 		Ihandle* ih	= actionManager.ScintillaAction.getActiveIupScintilla();
 		if( ih != null )
 		{
-			char[] targetText = fromStringz(IupGetAttribute( ih, "SELECTEDTEXT" ));
+			string targetText = fSTRz(IupGetAttribute( ih, "SELECTEDTEXT" ));
 			if( targetText.length )
 			{
 				char[] beginEndPos = fromStringz( IupGetAttribute( ih, "SELECTIONPOS" ) );
 				if( beginEndPos.length )
 				{
-					int colonPos = Util.index( beginEndPos, ":" );
-					if( colonPos < beginEndPos.length )
+					int colonPos = indexOf( beginEndPos, ":" );
+					if( colonPos > -1 )
 					{
-						char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
-						IupSetAttribute( ih, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
+						string newBeginEndPos = ( beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos] ).dup;
+						IupSetStrAttribute( ih, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 						actionManager.SearchAction.search( ih, targetText, GLOBAL.searchExpander.searchRule, false );
 					}
 				}
 			}
-			//actionManager.SearchAction.findPrev( ih, targetText, GLOBAL.searchDlg.searchRule );
-			//actionManager.SearchAction.search( ih, targetText, GLOBAL.searchDlg.searchRule, false );
 		}
 		return IUP_DEFAULT;
 	}
@@ -1496,27 +1499,26 @@ extern(C)
 		if( cSci !is null )
 		{
 			// Open Dialog Window
-			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false, "POSEIDON_MAIN_DIALOG", "icon_shift_l" );
-			IupSetAttribute( gotoLineDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.gotoDlg ) );
+			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false, "POSEIDON_MAIN_DIALOG", "icon_shift_l", false );
+			IupSetStrAttribute( gotoLineDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.gotoDlg ) );
+			string lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
-			char[] lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-			
-			lineNum = Util.trim( lineNum );
+			lineNum = strip( lineNum );
 			if( lineNum.length)
 			{
-				int pos = Util.rindex( lineNum, "x" );
-				if( pos >= lineNum.length )	pos = Util.rindex( lineNum, ":" );
-				if( pos < lineNum.length )
+				int pos = lastIndexOf( lineNum, "x" );
+				if( pos == -1 )	pos = lastIndexOf( lineNum, ":" );
+				if( pos > 0 )
 				{
 					try
 					{
-						int left = Integer.atoi( Util.trim( lineNum[0..pos] ) );
-						int right = Integer.atoi( Util.trim( lineNum[pos+1..$] ) );
+						int left = to!(int)( strip( lineNum[0..pos] ) );
+						int right = to!(int)( strip( lineNum[pos+1..$] ) );
 						
 						
-						char[] LineCol = Integer.toString( left - 1 )  ~ "," ~ Integer.toString( right - 1 );
+						string LineCol = to!(string)( left - 1 )  ~ "," ~ to!(string)( right - 1 );
 						IupScintillaSendMessage( cSci.getIupScintilla, 2234, left - 1, 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-						IupSetAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol.dup ) );
+						IupSetStrAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol ) );
 						actionManager.StatusBarAction.update();
 						IupSetFocus( cSci.getIupScintilla );
 					}
@@ -1531,10 +1533,10 @@ extern(C)
 					{
 						if( lineNum[0] == '-' )
 						{
-							int value = Integer.atoi( lineNum[1..$] );
+							int value = to!(int)( lineNum[1..$] );
 							value --;
 							IupScintillaSendMessage( cSci.getIupScintilla, 2234, ScintillaAction.getLinefromPos( cSci.getIupScintilla, value ), 0 );	// SCI_ENSUREVISIBLEENFORCEPOLICY 2234
-							IupSetAttribute( cSci.getIupScintilla, "CARETPOS", toStringz( Integer.toString(value).dup ) );
+							IupSetInt( cSci.getIupScintilla, "CARETPOS", value );
 							actionManager.StatusBarAction.update();
 							IupSetFocus( cSci.getIupScintilla );
 							return IUP_DEFAULT;
@@ -1546,8 +1548,8 @@ extern(C)
 					}
 				}
 				
-				GLOBAL.navigation.addCache( cSci.getFullPath, Integer.atoi( lineNum ) );
-				actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
+				GLOBAL.navigation.addCache( cSci.getFullPath, to!(int)( lineNum ) );
+				actionManager.ScintillaAction.gotoLine( cSci.getFullPath, to!(int)( lineNum ) );
 				actionManager.StatusBarAction.update();
 				
 				return IUP_DEFAULT;
@@ -1587,7 +1589,7 @@ extern(C)
 
 	int outline_cb( Ihandle *ih )
 	{
-		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
+		if( IupGetInt( ih, "VALUE" ) == 1 )
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
 			GLOBAL.explorerSplit_value = IupGetInt( GLOBAL.explorerSplit, "VALUE" );
@@ -1604,7 +1606,7 @@ extern(C)
 		else
 		{
 			IupSetAttribute( ih, "VALUE", "ON" );
-			IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+			IupSetInt( GLOBAL.explorerSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "YES" );
 		}
@@ -1621,7 +1623,10 @@ extern(C)
 		{
 			GLOBAL.editorSetting01.USEFULLSCREEN = "OFF";
 			IupSetAttribute( GLOBAL.mainDlg, "FULLSCREEN", "NO" );
-			IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+			version(FBIDE)
+				IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+			else
+				IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonD - D Programming Language IDE" );
 		}
 		else
 		{
@@ -1639,7 +1644,7 @@ extern(C)
 	
 	int message_cb( Ihandle *ih )
 	{
-		if( fromStringz( IupGetAttribute( ih, "VALUE" ) ) == "ON" )
+		if( IupGetInt( ih, "VALUE" ) == 1 )
 		{
 			IupSetAttribute( ih, "VALUE", "OFF" );
 			
@@ -1686,18 +1691,16 @@ extern(C)
 		if( GLOBAL.preferenceDlg is null )
 		{
 			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
-			version(DARKTHEME) GLOBAL.preferenceDlg.changeColor();
 		}
-		
-		if( GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT ) != "OK" )
+		else
 		{
-			if( GLOBAL.preferenceDlg.getIhandle != null ) IupDestroy( GLOBAL.preferenceDlg.getIhandle );
-			delete GLOBAL.preferenceDlg;
-			
+			//IupDestroy( GLOBAL.preferenceDlg.getIhandle );
+			destroy( GLOBAL.preferenceDlg );
+			//GC.free( cast(void*) GLOBAL.preferenceDlg );
+			GLOBAL.preferenceDlg = null;
 			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
-			version(DARKTHEME) GLOBAL.preferenceDlg.changeColor();
-			GLOBAL.preferenceDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		}
+		GLOBAL.preferenceDlg.show( IUP_RIGHTPARENT, IUP_TOPPARENT );
 
 		return IUP_DEFAULT;
 	}
@@ -1712,10 +1715,11 @@ extern(C)
 
 	int openProject_cb( Ihandle *ih )
 	{
-		GLOBAL.projectTree.openProject( null, true);
+		GLOBAL.projectTree.openProject( null, true );
 		return IUP_DEFAULT;
 	}
 
+	/*
 	version(FBIDE)
 	{
 		int importProject_cb( Ihandle *ih )
@@ -1724,7 +1728,8 @@ extern(C)
 			return IUP_DEFAULT;
 		}
 	}
-
+	*/
+	
 	int closeProject_cb( Ihandle* ih )
 	{
 		GLOBAL.projectTree.closeProject();
@@ -1739,7 +1744,7 @@ extern(C)
 
 	int saveProject_cb( Ihandle *ih )
 	{
-		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
+		string activePrjName = actionManager.ProjectAction.getActiveProjectName();
 
 		if( activePrjName.length )
 		{
@@ -1752,16 +1757,13 @@ extern(C)
 	int saveAllProject_cb( Ihandle *ih )
 	{
 		foreach( PROJECT p; GLOBAL.projectManager )
-		{
 			p.saveFile();
-		}
 		
 		return IUP_DEFAULT;
 	}
 
 	int projectProperties_cb( Ihandle *ih )
 	{
-		//if( !GLOBAL.activeProjectDirName.length ) return IUP_DEFAULT;
 		if( !actionManager.ProjectAction.getActiveProjectName.length ) return IUP_DEFAULT;
 
 		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), false, false );
@@ -1784,14 +1786,12 @@ extern(C)
 
 	int buildAll_cb( Ihandle *ih )
 	{
-		//saveAllFile_cb( ih );
 		ExecuterAction.build();
 		return IUP_DEFAULT;
 	}
 	
 	int reBuild_cb( Ihandle *ih )
 	{
-		//saveAllFile_cb( ih );
 		ExecuterAction.buildAll();
 		return IUP_DEFAULT;
 	}
@@ -1800,90 +1800,79 @@ extern(C)
 	{
 		GLOBAL.messagePanel.printOutputPanel( "Clean All Objs & Target In Project......", true );
 		
-		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
+		string activePrjName = actionManager.ProjectAction.getActiveProjectName();
 		if( activePrjName.length )
 		{
 			if( activePrjName in GLOBAL.projectManager )
 			{
-				foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
+				foreach( s; GLOBAL.projectManager[activePrjName].sources )
 				{
 					version(FBIDE)
 					{
-						scope fPath = new FilePath( s );
-						scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-						if( oPath.exists() ) oPath.remove();
+						auto oPath = Path.stripExtension( s ) ~ ".o";
+						if( exists( oPath ) ) std.file.remove( oPath );
 					}
-					version(DIDE)
+					else
 					{
-						scope fPath = new FilePath( s );
 						version(Windows)
 						{
-							scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".obj" );
-							if( oPath.exists() ) oPath.remove();
-
-							oPath.set( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ fPath.name ~ ".obj" );
-							if( oPath.exists() ) oPath.remove();
+							auto oPath = Path.stripExtension( s ) ~ ".obj";
+							if( exists( oPath ) ) std.file.remove( oPath );
+							
+							oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".obj";
+							if( exists( oPath ) ) std.file.remove( oPath );
 						}
 						else
 						{
-							scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-							if( oPath.exists() ) oPath.remove();
-
-							oPath.set( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ fPath.name ~ ".o" );
-							if( oPath.exists() ) oPath.remove();
+							auto oPath = Path.stripExtension( s ) ~ ".o";
+							if( exists( oPath ) ) std.file.remove( oPath );
+							
+							oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".o";
+							if( exists( oPath ) ) std.file.remove( oPath );
 						}
 					}
 				}
 				
 				version(DIDE)
 				{
-					int ofPos = Util.index( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
-					if( ofPos < GLOBAL.projectManager[activePrjName].compilerOption.length )
+					version(Windows)
 					{
-						char[] outputName;
-						for( int i = ofPos + 3; i < GLOBAL.projectManager[activePrjName].compilerOption.length; ++ i )
+						auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".obj";
+						if( exists( oPath ) ) std.file.remove( oPath );
+					}
+					else
+					{
+						auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".o";
+						if( exists( oPath ) ) std.file.remove( oPath );
+					}
+
+					string activeCompilerOption;
+					if( GLOBAL.projectManager[activePrjName].focusOn.length )
+					{
+						if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit )
 						{
-							if( GLOBAL.projectManager[activePrjName].compilerOption[i] == '\t' || GLOBAL.projectManager[activePrjName].compilerOption[i] == ' ' ) break;
-							outputName ~= GLOBAL.projectManager[activePrjName].compilerOption[i];
+							activeCompilerOption = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Option;
 						}
-						
-						// Got Obj Path -od
-						if( outputName.length )
+					}
+					
+					if( !activeCompilerOption.length ) activeCompilerOption =  GLOBAL.projectManager[activePrjName].compilerOption;
+
+					int odPos = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
+					if( odPos > -1 )
+					{
+						int odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, " ", odPos + 3 );
+						if( odTail == -1 ) odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "\t", odPos + 3 );
+						if( odTail > odPos + 3 )
 						{
-							scope oPath = new FilePath( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ outputName );
-							if( oPath.exists() )
-							{
-								if( oPath.isFolder )
-								{
-									// Nested Delegate Filter Function
-									bool dirFilter( FilePath _fp, bool _isFfolder )
-									{
-										if( _isFfolder ) return true;
-										if( _fp.isFile )
-										{
-											if( lowerCase( _fp.ext ) == "obj" || lowerCase( _fp.ext ) == "o" ) return true;
-										}
-									
-										return false;
-									}
-									
-									bool delegate( FilePath, bool ) _dirFilter;
-									_dirFilter = &dirFilter;
-									// End of Nested Function
-									
-
-									foreach( FilePath _fp; oPath.toList( _dirFilter ) )
-										_fp.remove();
-
-									oPath.remove();
-								}
-							}
+							string pathName = GLOBAL.projectManager[activePrjName].compilerOption[odPos+3..odTail].dup;
+							if( exists( pathName ) )
+								if( std.file.isDir( pathName ) ) std.file.rmdirRecurse( pathName ); 
 						}
 					}
 				}
 				
-				char[] executeName, _targetName;
-				if( GLOBAL.projectManager[activePrjName].targetName.length ) _targetName = GLOBAL.projectManager[activePrjName].targetName; else _targetName = GLOBAL.projectManager[activePrjName].name;
+				string executeName, _targetName;
+				if( GLOBAL.projectManager[activePrjName].targetName.length ) _targetName = Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ); else _targetName = Path.stripExtension( GLOBAL.projectManager[activePrjName].name );
 				version(Windows)
 				{
 					switch( GLOBAL.projectManager[activePrjName].type )
@@ -1913,12 +1902,8 @@ extern(C)
 					}
 				}				
 				
-				if( executeName.length )
-				{
-					scope fPath = new FilePath( executeName );
-					if( fPath.exists ) fPath.remove();
-				}
-				
+				if( exists( executeName ) ) std.file.remove( executeName );
+
 				GLOBAL.messagePanel.printOutputPanel( "Done." );
 			}
 		}
@@ -1965,27 +1950,22 @@ extern(C)
 		CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 		if( cSci !is null )
 		{
-			//if( !ScintillaAction.saveFile( cSci ) ) return IUP_DEFAULT;
-			
 			switch( fromStringz( IupGetAttribute( ih, "TITLE" ) ) )
 			{
-				case "Default"		: cSci.setEncoding( Encoding.Unknown ); break;
-				case "UTF8"			: cSci.setEncoding( Encoding.UTF_8N ); break;
-				case "UTF8.BOM"		: cSci.setEncoding( Encoding.UTF_8 ); break;
-				case "UTF16BE.BOM"	: cSci.setEncoding( Encoding.UTF_16BE ); break;
-				case "UTF16LE.BOM"	: cSci.setEncoding( Encoding.UTF_16LE ); break;
-				case "UTF32BE"		: cSci.setEncoding( 9 ); break;
-				case "UTF32BE.BOM"	: cSci.setEncoding( Encoding.UTF_32BE ); break;
-				case "UTF32LE"		: cSci.setEncoding( 10 ); break;
-				case "UTF32LE.BOM"	: cSci.setEncoding( Encoding.UTF_32LE ); break;
+				case "Default"		: cSci.setEncoding( BOM.none ); 								break;
+				case "UTF8"			: cSci.setEncoding( BOM.utf8 ); 		cSci.withBOM = false;	break;
+				case "UTF8.BOM"		: cSci.setEncoding( BOM.utf8 );			cSci.withBOM = true;	break;
+				case "UTF16LE.BOM"	: cSci.setEncoding( BOM.utf16le );		cSci.withBOM = true;	break;
+				case "UTF16BE.BOM"	: cSci.setEncoding( BOM.utf16be ); 		cSci.withBOM = true;	break;
+				case "UTF32LE.BOM"	: cSci.setEncoding( BOM.utf32le ); 		cSci.withBOM = true;	break;
+				case "UTF32BE.BOM"	: cSci.setEncoding( BOM.utf32be ); 		cSci.withBOM = true;	break;
 				default: return IUP_DEFAULT;
 			}
 			
-			scope 	_fp = new FilePath( cSci.getFullPath );
-			char[]	fp = _fp.name();
-			if( fp.length >= 7 )
+			string _baseName = Path.baseName( cSci.getFullPath );
+			if( _baseName.length >= 7 )
 			{
-				if( fp[0..7] == "NONAME#" )
+				if( _baseName[0..7] == "NONAME#" )
 				{
 					actionManager.StatusBarAction.update();
 					return IUP_DEFAULT;
@@ -2023,10 +2003,9 @@ extern(C)
 	// Also import by customDlg.d
 	int customtool_menu_click_cb( Ihandle* ih )
 	{
-		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) );
-		
-		int dotPos = Util.index( title, ". " );
-		if( dotPos < title.length ) title = title[dotPos+2..$];
+		string title = fSTRz( IupGetAttribute( ih, "TITLE" ) );
+		int dotPos = indexOf( title, ". " );
+		if( dotPos > -1 && dotPos < title.length ) title = title[dotPos+2..$].dup;
 
 		for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
 		{
@@ -2048,29 +2027,27 @@ extern(C)
 	
 	int manual_menu_click_cb( Ihandle* ih )
 	{
-		char[] title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
-		
-		int dotPos = Util.index( title, ". " );
-		if( dotPos < title.length ) title = title[dotPos+2..$];
+		string title = fSTRz( IupGetAttribute( ih, "TITLE" ) );
+		int dotPos = indexOf( title, ". " );
+		if( dotPos > -1 && dotPos < title.length - 2 ) title = title[dotPos+2..$].dup;
 
 		for( int i = 0; i < GLOBAL.manuals.length; ++ i )
 		{
-			char[][] splitWords = Util.split( GLOBAL.manuals[i], "," );
+			string[] splitWords = Array.split( GLOBAL.manuals[i], "," );
 			if( splitWords.length == 2 )
 			{
 				if( title == splitWords[0] )
 				{
-					scope manualPath = new FilePath( splitWords[1] );
-					if( manualPath.exists )
+					if( exists( splitWords[1] ) )
 					{
-						if( tools.lowerCase( manualPath.ext ) == "chm" )
+						if( Uni.toLower( Path.extension( splitWords[1] ) ) == ".chm" )
 						{
 							version(Windows) 
 								IupExecute( toStringz( splitWords[1] ), "" );
 							else
 							{
-								scope htmlappPath = new FilePath( GLOBAL.linuxHtmlAppName );
-								switch( Util.trim( htmlappPath.file ) )
+								string htmlappPath = Path.baseName( GLOBAL.linuxHtmlAppName );
+								switch( htmlappPath )
 								{
 									case "xchm":
 										IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "\"" ~ splitWords[1] ~ "\"" ) );	// xchm "file:/home/username/freebasic/FB-manual-1.05.0.chm#xchm:/KeyPg%s.html"

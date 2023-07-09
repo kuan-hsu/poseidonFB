@@ -1,8 +1,8 @@
 ﻿module layouts.toolbar;
 
 private import iup.iup, iup.iup_scintilla;
-private import global, actionManager, menu, executer, dialogs.argOptionDlg;
-private import Util = tango.text.Util, tango.stdc.stringz;
+private import global, actionManager, menu, executer, dialogs.argOptionDlg, tools;
+private import std.string, Array = std.array;
 
 
 class CToolBar
@@ -54,32 +54,32 @@ class CToolBar
 		btnQuickRun			= IupButton( null, "QuickRun" );
 
 
-		IupSetAttributes( btnNew, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_newfile,NAME=POSEIDON_TOOLBAR_New" );
-		IupSetAttribute( btnNew, "TIP", GLOBAL.languageItems["caption_new"].toCString );
+		IupSetAttributes( btnNew, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_newfile,NAME=POSEIDON_TOOLBAR_New" );
+		IupSetStrAttribute( btnNew, "TIP", GLOBAL.languageItems["caption_new"].toCString );
 		IupSetCallback( btnNew, "ACTION", cast(Icallback) &menu.newFile_cb ); // From menu.d
 		
-		IupSetAttributes( btnOpen, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_openfile,NAME=POSEIDON_TOOLBAR_Open" );
-		IupSetAttribute( btnOpen, "TIP", GLOBAL.languageItems["caption_open"].toCString );
+		IupSetAttributes( btnOpen, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_openfile,NAME=POSEIDON_TOOLBAR_Open" );
+		IupSetStrAttribute( btnOpen, "TIP", GLOBAL.languageItems["caption_open"].toCString );
 		IupSetCallback( btnOpen, "ACTION", cast(Icallback) &menu.openFile_cb ); // From menu.d
 
-		IupSetAttributes( btnSave, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_save,NAME=POSEIDON_TOOLBAR_Save" );
-		IupSetAttribute( btnSave, "TIP", GLOBAL.languageItems["sc_save"].toCString );
+		IupSetAttributes( btnSave, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_save,NAME=POSEIDON_TOOLBAR_Save" );
+		IupSetStrAttribute( btnSave, "TIP", GLOBAL.languageItems["sc_save"].toCString );
 		IupSetCallback( btnSave, "ACTION", cast(Icallback) &menu.saveFile_cb ); // From menu.d
 
-		IupSetAttributes( btnSaveAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_saveall,NAME=POSEIDON_TOOLBAR_SaveAll" );
-		IupSetAttribute( btnSaveAll, "TIP", GLOBAL.languageItems["sc_saveall"].toCString );
+		IupSetAttributes( btnSaveAll, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_saveall,NAME=POSEIDON_TOOLBAR_SaveAll" );
+		IupSetStrAttribute( btnSaveAll, "TIP", GLOBAL.languageItems["sc_saveall"].toCString );
 		IupSetCallback( btnSaveAll, "ACTION", cast(Icallback) &menu.saveAllFile_cb ); // From menu.d
 
-		IupSetAttributes( btnUndo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_undo,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_Undo" );
-		IupSetAttribute( btnUndo, "TIP", GLOBAL.languageItems["sc_undo"].toCString );
+		IupSetAttributes( btnUndo, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_undo,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_Undo" );
+		IupSetStrAttribute( btnUndo, "TIP", GLOBAL.languageItems["sc_undo"].toCString );
 		IupSetCallback( btnUndo, "ACTION", cast(Icallback) &menu.undo_cb ); // From menu.d
 		
-		IupSetAttributes( btnRedo, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_redo,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_Redo" );
-		IupSetAttribute( btnRedo, "TIP", GLOBAL.languageItems["sc_redo"].toCString );
+		IupSetAttributes( btnRedo, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_redo,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_Redo" );
+		IupSetStrAttribute( btnRedo, "TIP", GLOBAL.languageItems["sc_redo"].toCString );
 		IupSetCallback( btnRedo, "ACTION", cast(Icallback) &menu.redo_cb ); // From menu.d
 		
-		IupSetAttributes( btnClearUndoBuffer, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDON_TOOLBAR_ClearUndoBuffer" );
-		IupSetAttribute( btnClearUndoBuffer, "TIP", GLOBAL.languageItems["clear"].toCString );
+		IupSetAttributes( btnClearUndoBuffer, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDON_TOOLBAR_ClearUndoBuffer" );
+		IupSetStrAttribute( btnClearUndoBuffer, "TIP", GLOBAL.languageItems["clear"].toCString );
 		IupSetCallback( btnClearUndoBuffer, "ACTION", cast(Icallback) function()
 		{
 			auto sci = ScintillaAction.getActiveIupScintilla;
@@ -96,23 +96,23 @@ class CToolBar
 		});		
 		
 
-		IupSetAttributes( btnCut, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_cut,NAME=POSEIDON_TOOLBAR_Cut" );
-		IupSetAttribute( btnCut, "TIP", GLOBAL.languageItems["caption_cut"].toCString );
+		IupSetAttributes( btnCut, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_cut,NAME=POSEIDON_TOOLBAR_Cut" );
+		IupSetStrAttribute( btnCut, "TIP", GLOBAL.languageItems["caption_cut"].toCString );
 		IupSetCallback( btnCut, "ACTION", cast(Icallback) &menu.cut_cb ); // From menu.d
 		
-		IupSetAttributes( btnCopy, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_copy,NAME=POSEIDON_TOOLBAR_Copy" );
-		IupSetAttribute( btnCopy, "TIP", GLOBAL.languageItems["caption_copy"].toCString );
+		IupSetAttributes( btnCopy, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_copy,NAME=POSEIDON_TOOLBAR_Copy" );
+		IupSetStrAttribute( btnCopy, "TIP", GLOBAL.languageItems["caption_copy"].toCString );
 		IupSetCallback( btnCopy, "ACTION", cast(Icallback) &menu.copy_cb ); // From menu.d
 		
-		IupSetAttributes( btnPaste, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_paste,NAME=POSEIDON_TOOLBAR_Paste" );
-		IupSetAttribute( btnPaste, "TIP", GLOBAL.languageItems["caption_paste"].toCString );
+		IupSetAttributes( btnPaste, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_paste,NAME=POSEIDON_TOOLBAR_Paste" );
+		IupSetStrAttribute( btnPaste, "TIP", GLOBAL.languageItems["caption_paste"].toCString );
 		IupSetCallback( btnPaste, "ACTION", cast(Icallback) &menu.paste_cb ); // From menu.d
 
 
 
 		// Nav
-		IupSetAttributes( btnBackNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_BackwardNav" );
-		IupSetAttribute( btnBackNav, "TIP", GLOBAL.languageItems["sc_backnav"].toCString );
+		IupSetAttributes( btnBackNav, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_BackwardNav" );
+		IupSetStrAttribute( btnBackNav, "TIP", GLOBAL.languageItems["sc_backnav"].toCString );
 		IupSetHandle( "toolbar_BackNav", btnBackNav );
 		IupSetCallback( btnBackNav, "ACTION", cast(Icallback) function()
 		{
@@ -121,8 +121,8 @@ class CToolBar
 			return IUP_DEFAULT;
 		});		
 		
-		IupSetAttributes( btnForwardNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_right,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_ForwardNav" );
-		IupSetAttribute( btnForwardNav, "TIP", GLOBAL.languageItems["sc_forwardnav"].toCString );
+		IupSetAttributes( btnForwardNav, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_right,ACTIVE=NO,NAME=POSEIDON_TOOLBAR_ForwardNav" );
+		IupSetStrAttribute( btnForwardNav, "TIP", GLOBAL.languageItems["sc_forwardnav"].toCString );
 		IupSetHandle( "toolbar_ForwardNav", btnForwardNav );
 		IupSetCallback( btnForwardNav, "ACTION", cast(Icallback) function()
 		{
@@ -131,8 +131,8 @@ class CToolBar
 			return IUP_DEFAULT;
 		});			
 		
-		IupSetAttributes( btnClearNav, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDON_TOOLBAR_ClearNav" );
-		IupSetAttribute( btnClearNav, "TIP", GLOBAL.languageItems["clear"].toCString );
+		IupSetAttributes( btnClearNav, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear,NAME=POSEIDON_TOOLBAR_ClearNav" );
+		IupSetStrAttribute( btnClearNav, "TIP", GLOBAL.languageItems["clear"].toCString );
 		IupSetHandle( "toolbar_ClearNav", btnClearNav );
 		IupSetCallback( btnClearNav, "ACTION", cast(Icallback) function()
 		{
@@ -141,8 +141,8 @@ class CToolBar
 		});
 
 
-		IupSetAttributes( btnMark, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_mark,NAME=POSEIDON_TOOLBAR_Mark" );
-		IupSetAttribute( btnMark, "TIP", GLOBAL.languageItems["bookmark"].toCString );
+		IupSetAttributes( btnMark, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_mark,NAME=POSEIDON_TOOLBAR_Mark" );
+		IupSetStrAttribute( btnMark, "TIP", GLOBAL.languageItems["bookmark"].toCString );
 		IupSetCallback( btnMark, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -163,8 +163,8 @@ class CToolBar
 			return IUP_DEFAULT;
 		});
 		
-		IupSetAttributes( btnMarkPrev, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markprev,NAME=POSEIDON_TOOLBAR_MarkPrev" );
-		IupSetAttribute( btnMarkPrev, "TIP", GLOBAL.languageItems["bookmarkprev"].toCString );
+		IupSetAttributes( btnMarkPrev, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markprev,NAME=POSEIDON_TOOLBAR_MarkPrev" );
+		IupSetStrAttribute( btnMarkPrev, "TIP", GLOBAL.languageItems["bookmarkprev"].toCString );
 		IupSetCallback( btnMarkPrev, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -197,8 +197,8 @@ class CToolBar
 			return IUP_DEFAULT;
 		});
 		
-		IupSetAttributes( btnMarkNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_marknext,NAME=POSEIDON_TOOLBAR_MarkNext" );
-		IupSetAttribute( btnMarkNext, "TIP", GLOBAL.languageItems["bookmarknext"].toCString );
+		IupSetAttributes( btnMarkNext, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_marknext,NAME=POSEIDON_TOOLBAR_MarkNext" );
+		IupSetStrAttribute( btnMarkNext, "TIP", GLOBAL.languageItems["bookmarknext"].toCString );
 		IupSetCallback( btnMarkNext, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -227,8 +227,8 @@ class CToolBar
 			return IUP_DEFAULT;
 		});
 		
-		IupSetAttributes( btnMarkClean, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markclear,NAME=POSEIDON_TOOLBAR_MarkClear" );
-		IupSetAttribute( btnMarkClean, "TIP", GLOBAL.languageItems["bookmarkclear"].toCString );
+		IupSetAttributes( btnMarkClean, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_markclear,NAME=POSEIDON_TOOLBAR_MarkClear" );
+		IupSetStrAttribute( btnMarkClean, "TIP", GLOBAL.languageItems["bookmarkclear"].toCString );
 		IupSetCallback( btnMarkClean, "ACTION", cast(Icallback) function()
 		{
 			Ihandle* ih = actionManager.ScintillaAction.getActiveIupScintilla();
@@ -237,30 +237,30 @@ class CToolBar
 		});
 
 
-		IupSetAttributes( btnCompile, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_compile,NAME=POSEIDON_TOOLBAR_Compile" );
-		IupSetAttribute( btnCompile, "TIP", GLOBAL.languageItems["sc_compile"].toCString );
+		IupSetAttributes( btnCompile, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_compile,NAME=POSEIDON_TOOLBAR_Compile" );
+		IupSetStrAttribute( btnCompile, "TIP", GLOBAL.languageItems["sc_compile"].toCString );
 		IupSetCallback( btnCompile, "BUTTON_CB", cast(Icallback) &compile_button_cb );
 
-		IupSetAttributes( btnBuildRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_buildrun,NAME=POSEIDON_TOOLBAR_CompileRun" );
-		IupSetAttribute( btnBuildRun, "TIP", GLOBAL.languageItems["sc_compilerun"].toCString );
+		IupSetAttributes( btnBuildRun, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_buildrun,NAME=POSEIDON_TOOLBAR_CompileRun" );
+		IupSetStrAttribute( btnBuildRun, "TIP", GLOBAL.languageItems["sc_compilerun"].toCString );
 		IupSetCallback( btnBuildRun, "BUTTON_CB", cast(Icallback) &buildrun_button_cb );
 
-		IupSetAttributes( btnRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_run,NAME=POSEIDON_TOOLBAR_Run" );
-		IupSetAttribute( btnRun, "TIP", GLOBAL.languageItems["sc_run"].toCString );
+		IupSetAttributes( btnRun, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_run,NAME=POSEIDON_TOOLBAR_Run" );
+		IupSetStrAttribute( btnRun, "TIP", GLOBAL.languageItems["sc_run"].toCString );
 		IupSetCallback( btnRun, "BUTTON_CB", cast(Icallback) &run_button_cb );
 
-		IupSetAttributes( btnBuildAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_build,NAME=POSEIDON_TOOLBAR_Build" );
-		IupSetAttribute( btnBuildAll, "TIP", GLOBAL.languageItems["sc_build"].toCString );
+		IupSetAttributes( btnBuildAll, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_build,NAME=POSEIDON_TOOLBAR_Build" );
+		IupSetStrAttribute( btnBuildAll, "TIP", GLOBAL.languageItems["sc_build"].toCString );
 		IupSetCallback( btnBuildAll, "BUTTON_CB", cast(Icallback) &build_button_cb );
 		IupSetHandle( "toolbar_BuildAll", btnBuildAll );
 		
-		IupSetAttributes( btnReBuild, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild,NAME=POSEIDON_TOOLBAR_ReBuild" );
-		IupSetAttribute( btnReBuild, "TIP", GLOBAL.languageItems["rebuildprj"].toCString );
+		IupSetAttributes( btnReBuild, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_rebuild,NAME=POSEIDON_TOOLBAR_ReBuild" );
+		IupSetStrAttribute( btnReBuild, "TIP", GLOBAL.languageItems["rebuildprj"].toCString );
 		IupSetCallback( btnReBuild, "BUTTON_CB", cast(Icallback) &buildall_button_cb );
 		IupSetHandle( "toolbar_ReBuild", btnReBuild );
 
-		IupSetAttributes( btnQuickRun, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun,NAME=POSEIDON_TOOLBAR_QuickRun" );
-		IupSetAttribute( btnQuickRun, "TIP", GLOBAL.languageItems["sc_quickrun"].toCString );
+		IupSetAttributes( btnQuickRun, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_quickrun,NAME=POSEIDON_TOOLBAR_QuickRun" );
+		IupSetStrAttribute( btnQuickRun, "TIP", GLOBAL.languageItems["sc_quickrun"].toCString );
 		IupSetCallback( btnQuickRun, "BUTTON_CB", cast(Icallback) &quickRun_button_cb );
 
 
@@ -274,8 +274,8 @@ class CToolBar
 		version(Windows)
 		{
 			guiButton = IupToggle( null, "GUI" );
-			IupSetAttributes( guiButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,NAME=POSEIDON_TOOLBAR_Gui" );
-			IupSetAttribute( guiButton, "TIP", "Console / GUI" );
+			IupSetAttributes( guiButton, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_console,IMPRESS=icon_gui,NAME=POSEIDON_TOOLBAR_Gui" );
+			IupSetStrAttribute( guiButton, "TIP", "Console / GUI" );
 			if( GLOBAL.editorSetting00.GUI == "OFF" ) IupSetAttribute( guiButton, "VALUE", "OFF" ); else IupSetAttribute( guiButton, "VALUE", "ON" );
 			IupSetCallback( guiButton, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
@@ -284,12 +284,12 @@ class CToolBar
 			});			
 			
 			bitButton = IupToggle( null, "bit" );
-			IupSetAttributes( bitButton, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,NAME=POSEIDON_TOOLBAR_Bit" );
-			IupSetAttribute( bitButton, "TIP", "32 / 64 bit" );
-			if( GLOBAL.editorSetting00.Bit64 == "OFF" ) IupSetAttribute( bitButton, "VALUE", "OFF" ); else IupSetAttribute( bitButton, "VALUE", "ON" );
+			IupSetAttributes( bitButton, "CANFOCUS=NO,ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_32,IMPRESS=icon_64,NAME=POSEIDON_TOOLBAR_Bit" );
+			IupSetStrAttribute( bitButton, "TIP", "32 / 64 bit" );
+			if( GLOBAL.compilerSettings.Bit64 == "OFF" ) IupSetAttribute( bitButton, "VALUE", "OFF" ); else IupSetAttribute( bitButton, "VALUE", "ON" );
 			IupSetCallback( bitButton, "ACTION", cast(Icallback) function( Ihandle* ih )
 			{
-				if( GLOBAL.editorSetting00.Bit64 == "ON" ) GLOBAL.editorSetting00.Bit64 = "OFF"; else GLOBAL.editorSetting00.Bit64 = "ON";
+				if( GLOBAL.compilerSettings.Bit64 == "ON" ) GLOBAL.compilerSettings.Bit64 = "OFF"; else GLOBAL.compilerSettings.Bit64 = "ON";
 				return IUP_DEFAULT;
 			});
 		}
@@ -298,9 +298,9 @@ class CToolBar
 		IupSetAttributes( listHandle, "SIZE=x12,ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDON_TOOLBAR_FunctionList" );
 		version(Windows) IupSetStrAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) ); else IupSetStrAttribute( listHandle, "FONTFACE", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetAttribute( listHandle, "EXPAND", "HORIZONTAL" );
-		IupSetStrAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-		IupSetStrAttribute( listHandle, "HLCOLORALPHA", "0" );
-		IupSetStrAttribute( listHandle, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		IupSetStrAttribute( listHandle, "FGCOLOR", toStringz ( GLOBAL.editColor.txtFore ) );
+		IupSetAttribute( listHandle, "HLCOLORALPHA", "0" );
+		IupSetStrAttribute( listHandle, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		
 		Ihandle* commandText = IupScintilla();
@@ -321,9 +321,10 @@ class CToolBar
 		}
 
 		handle = IupBackgroundBox( handle );
-		version(Windows) IupSetStrAttribute( handle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString ); // linux get IupFlatSeparator wrong color
+		version(Windows) IupSetStrAttribute( handle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) ); // linux get IupFlatSeparator wrong color
 
 		IupSetAttributes( handle, "GAP=2,ALIGNMENT=ACENTER,NAME=POSEIDON_TOOLBAR" );
+		IupSetHandle( "POSEIDON_MAIN_TOOLBAR", handle );
 		version(linux) IupSetAttributes( handle, "MARGIN=0x2" );
 		
 		changeIcons();
@@ -331,8 +332,8 @@ class CToolBar
 	
 	void changeIcons()
 	{
-		char[] tail;
-		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
+		string tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
 
 		IupSetStrAttribute( btnNew, "IMAGE", toStringz( "icon_newfile" ~ tail ) );
 		IupSetStrAttribute( btnOpen, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
@@ -412,11 +413,11 @@ class CToolBar
 
 	void changeColor()
 	{
-		version(Windows) IupSetStrAttribute( handle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+		version(Windows) IupSetStrAttribute( handle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
 		
-		IupSetStrAttribute( listHandle, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
+		IupSetStrAttribute( listHandle, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( listHandle, "HLCOLORALPHA", "0" );
-		IupSetStrAttribute( listHandle, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
+		IupSetStrAttribute( listHandle, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 	}
 }
 
@@ -436,9 +437,9 @@ extern( C )
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
-					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
+					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 3 ) ExecuterAction.compile( result[0], null, result[2] );
-					delete dlg;
+					destroy( dlg );
 				}
 			}
 		}
@@ -458,9 +459,9 @@ extern( C )
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
-					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
+					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 3 ) ExecuterAction.build( result[0], null, result[2] );
-					delete dlg;
+					destroy( dlg );
 				}
 			}
 		}
@@ -480,10 +481,10 @@ extern( C )
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
-					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
+					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 3 ) ExecuterAction.buildAll( result[0], result[2], null );
-					delete dlg;
-				}
+					destroy( dlg );
+				} 
 			}
 		}
 		return IUP_DEFAULT;
@@ -502,9 +503,9 @@ extern( C )
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
-					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  ).dup;
+					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  ).dup;
 					if( result.length == 3 ) ExecuterAction.compile( result[0], result[1], result[2], null, true ); // 3rd parameter = " " is compile & run
-					delete dlg;
+					destroy( dlg );
 				}
 			}
 		}
@@ -524,9 +525,9 @@ extern( C )
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 2 );
-					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 2  );
+					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 2  );
 					if( result.length == 3 ) ExecuterAction.run( result[1] );
-					delete dlg;
+					destroy( dlg );
 				}
 			}
 		}
@@ -546,9 +547,9 @@ extern( C )
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
 					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
-					char[][] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
+					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
 					if( result.length == 3 ) ExecuterAction.quickRun( result[0], result[1], result[2] );
-					delete dlg;
+					destroy( dlg );
 				}
 			}
 		}
@@ -564,10 +565,10 @@ extern( C )
 		{
 			IupScintillaSendMessage( ih, 2175, 0, 0 ); // SCI_EMPTYUNDOBUFFER = 2175
 			
-			char[] command = fromStringz( IupGetAttribute( ih, "VALUE" ) );
+			string command = fSTRz( IupGetAttribute( ih, "VALUE" ) );
 			if( command.length )
 			{
-				char[][] splitCommand = Util.split( command, "," );
+				string[] splitCommand = Array.split( command, "," );
 				
 				if( splitCommand.length == 1 )
 				{
@@ -643,18 +644,18 @@ extern( C )
 				}
 				else if( splitCommand.length == 2 )
 				{
-					switch( Util.trim( splitCommand[0] ) )
+					switch( strip( splitCommand[0] ) )
 					{
 						case "FBCx32":
-							GLOBAL.compilerFullPath = Util.trim( splitCommand[1] ).dup;
-							if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE", toStringz( GLOBAL.compilerFullPath.dup ) );
+							GLOBAL.compilerSettings.compilerFullPath = strip( splitCommand[1] );
+							if( GLOBAL.preferenceDlg !is null ) IupSetStrAttribute( IupGetHandle( "compilerPath_Handle" ), "VALUE", toStringz( GLOBAL.compilerSettings.compilerFullPath ) );
 							break;
 
 						case "FBCx64":
 							version(Windows)
 							{
-								GLOBAL.x64compilerFullPath = Util.trim( splitCommand[1] ).dup;
-								if( GLOBAL.preferenceDlg !is null ) IupSetAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE", toStringz( GLOBAL.x64compilerFullPath.dup ) );
+								GLOBAL.compilerSettings.x64compilerFullPath = strip( splitCommand[1] );
+								if( GLOBAL.preferenceDlg !is null ) IupSetStrAttribute( IupGetHandle( "x64compilerPath_Handle" ), "VALUE", toStringz( GLOBAL.compilerSettings.x64compilerFullPath ) );
 							}
 							break;
 						default:

@@ -1,0 +1,1500 @@
+﻿{
+"line": "3",
+"tail": "2147483647",
+"name": "object",
+"kind": "131072",
+"prot": "",
+"type": "K:/CodingPark/DMD1076Tango/import/object.di",
+"base": "",
+"sons": [
+{
+"line": "5",
+"tail": "5",
+"name": "size_t",
+"kind": "2048",
+"prot": "",
+"type": "(int. sizeof)",
+"base": "",
+"sons": []
+},
+{
+"line": "7",
+"tail": "7",
+"name": "ptrdiff_t",
+"kind": "2048",
+"prot": "",
+"type": "(cast( void *) 0 - cast( void *) 0)",
+"base": "",
+"sons": []
+},
+{
+"line": "10",
+"tail": "10",
+"name": "hash_t",
+"kind": "2048",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "12",
+"tail": "12",
+"name": "equals_t",
+"kind": "2048",
+"prot": "",
+"type": "int",
+"base": "",
+"sons": []
+},
+{
+"line": "14",
+"tail": "19",
+"name": "PhobosCompatibility",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "16",
+"tail": "16",
+"name": "string",
+"kind": "2048",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "17",
+"tail": "17",
+"name": "wstring",
+"kind": "2048",
+"prot": "",
+"type": "wchar[]",
+"base": "",
+"sons": []
+},
+{
+"line": "18",
+"tail": "18",
+"name": "dstring",
+"kind": "2048",
+"prot": "",
+"type": "dchar[]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "22",
+"tail": "40",
+"name": "Object",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "24",
+"tail": "24",
+"name": "dispose",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "26",
+"tail": "26",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "char[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "28",
+"tail": "28",
+"name": "toHash",
+"kind": "2",
+"prot": "",
+"type": "hash_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "31",
+"tail": "31",
+"name": "opCmp",
+"kind": "2",
+"prot": "",
+"type": "int(Object o)",
+"base": "",
+"sons": []
+},
+{
+"line": "33",
+"tail": "33",
+"name": "opEquals",
+"kind": "2",
+"prot": "",
+"type": "equals_t(Object o)",
+"base": "",
+"sons": []
+},
+{
+"line": "35",
+"tail": "39",
+"name": "Monitor",
+"kind": "1024",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "37",
+"tail": "37",
+"name": "lock",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "38",
+"tail": "38",
+"name": "unlock",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "43",
+"tail": "50",
+"name": "Interface",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "46",
+"tail": "46",
+"name": "classinfo",
+"kind": "1",
+"prot": "",
+"type": "ClassInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "47",
+"tail": "47",
+"name": "vtbl",
+"kind": "1",
+"prot": "",
+"type": "void*[]",
+"base": "",
+"sons": []
+},
+{
+"line": "49",
+"tail": "49",
+"name": "offset",
+"kind": "1",
+"prot": "",
+"type": "ptrdiff_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "52",
+"tail": "62",
+"name": "PointerMap",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "56",
+"tail": "56",
+"name": "bits",
+"kind": "1",
+"prot": "",
+"type": "size_t[]",
+"base": "",
+"sons": []
+},
+{
+"line": "58",
+"tail": "58",
+"name": "size",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "59",
+"tail": "59",
+"name": "mustScanWordAt",
+"kind": "2",
+"prot": "",
+"type": "bool(size_t offset)",
+"base": "",
+"sons": []
+},
+{
+"line": "60",
+"tail": "60",
+"name": "isPointerAt",
+"kind": "2",
+"prot": "",
+"type": "bool(size_t offset)",
+"base": "",
+"sons": []
+},
+{
+"line": "61",
+"tail": "61",
+"name": "canUpdatePointers",
+"kind": "2",
+"prot": "",
+"type": "bool()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "64",
+"tail": "73",
+"name": "PointerMapBuilder",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "66",
+"tail": "66",
+"name": "m_bits",
+"kind": "1",
+"prot": "private",
+"type": "size_t[]",
+"base": "",
+"sons": []
+},
+{
+"line": "67",
+"tail": "67",
+"name": "m_size",
+"kind": "1",
+"prot": "private",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "69",
+"tail": "69",
+"name": "size",
+"kind": "2",
+"prot": "",
+"type": "void(size_t bytes)",
+"base": "",
+"sons": []
+},
+{
+"line": "70",
+"tail": "70",
+"name": "mustScanWordAt",
+"kind": "2",
+"prot": "",
+"type": "void(size_t offset)",
+"base": "",
+"sons": []
+},
+{
+"line": "71",
+"tail": "71",
+"name": "inlineAt",
+"kind": "2",
+"prot": "",
+"type": "void(size_t offset, PointerMap pm)",
+"base": "",
+"sons": []
+},
+{
+"line": "72",
+"tail": "72",
+"name": "convertToPointerMap",
+"kind": "2",
+"prot": "",
+"type": "PointerMap()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "76",
+"tail": "104",
+"name": "ClassInfo",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "Object",
+"sons": [
+{
+"line": "78",
+"tail": "78",
+"name": "init",
+"kind": "1",
+"prot": "",
+"type": "byte[]",
+"base": "",
+"sons": []
+},
+{
+"line": "79",
+"tail": "79",
+"name": "name",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "80",
+"tail": "80",
+"name": "vtbl",
+"kind": "1",
+"prot": "",
+"type": "void*[]",
+"base": "",
+"sons": []
+},
+{
+"line": "81",
+"tail": "81",
+"name": "interfaces",
+"kind": "1",
+"prot": "",
+"type": "Interface[]",
+"base": "",
+"sons": []
+},
+{
+"line": "82",
+"tail": "82",
+"name": "base",
+"kind": "1",
+"prot": "",
+"type": "ClassInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "83",
+"tail": "83",
+"name": "destructor",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "84",
+"tail": "84",
+"name": "classInvariant",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "91",
+"tail": "91",
+"name": "flags",
+"kind": "1",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "92",
+"tail": "92",
+"name": "deallocator",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "93",
+"tail": "93",
+"name": "offTi",
+"kind": "1",
+"prot": "",
+"type": "OffsetTypeInfo[]",
+"base": "",
+"sons": []
+},
+{
+"line": "94",
+"tail": "94",
+"name": "defaultConstructor",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "96",
+"tail": "96",
+"name": "typeinfo",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "97",
+"tail": "99",
+"name": "D_HavePointerMap",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "98",
+"tail": "98",
+"name": "pointermap",
+"kind": "1",
+"prot": "",
+"type": "PointerMap",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "101",
+"tail": "101",
+"name": "find",
+"kind": "2",
+"prot": "",
+"type": "ClassInfo(char[] classname)",
+"base": "",
+"sons": []
+},
+{
+"line": "103",
+"tail": "103",
+"name": "create",
+"kind": "2",
+"prot": "",
+"type": "Object()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "107",
+"tail": "111",
+"name": "OffsetTypeInfo",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "109",
+"tail": "109",
+"name": "offset",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "110",
+"tail": "110",
+"name": "ti",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "114",
+"tail": "141",
+"name": "TypeInfo",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "117",
+"tail": "117",
+"name": "getHash",
+"kind": "2",
+"prot": "",
+"type": "hash_t(void * p)",
+"base": "",
+"sons": []
+},
+{
+"line": "119",
+"tail": "119",
+"name": "equals",
+"kind": "2",
+"prot": "",
+"type": "equals_t(void * p1, void * p2)",
+"base": "",
+"sons": []
+},
+{
+"line": "121",
+"tail": "121",
+"name": "compare",
+"kind": "2",
+"prot": "",
+"type": "int(void * p1, void * p2)",
+"base": "",
+"sons": []
+},
+{
+"line": "123",
+"tail": "123",
+"name": "talign",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "125",
+"tail": "125",
+"name": "tsize",
+"kind": "2",
+"prot": "",
+"type": "size_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "127",
+"tail": "127",
+"name": "swap",
+"kind": "2",
+"prot": "",
+"type": "void(void * p1, void * p2)",
+"base": "",
+"sons": []
+},
+{
+"line": "129",
+"tail": "129",
+"name": "next",
+"kind": "2",
+"prot": "",
+"type": "TypeInfo()",
+"base": "",
+"sons": []
+},
+{
+"line": "130",
+"tail": "130",
+"name": "init",
+"kind": "2",
+"prot": "",
+"type": "void[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "132",
+"tail": "132",
+"name": "flags",
+"kind": "2",
+"prot": "",
+"type": "uint()",
+"base": "",
+"sons": []
+},
+{
+"line": "133",
+"tail": "133",
+"name": "pointermap",
+"kind": "2",
+"prot": "",
+"type": "PointerMap()",
+"base": "",
+"sons": []
+},
+{
+"line": "135",
+"tail": "135",
+"name": "offTi",
+"kind": "2",
+"prot": "",
+"type": "OffsetTypeInfo[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "140",
+"tail": "140",
+"name": "X86_64",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "140",
+"tail": "140",
+"name": "argTypes",
+"kind": "2",
+"prot": "",
+"type": "int(out TypeInfo arg1,out TypeInfo arg2)",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "143",
+"tail": "148",
+"name": "TypeInfo_Typedef",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "145",
+"tail": "145",
+"name": "base",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "146",
+"tail": "146",
+"name": "name",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "147",
+"tail": "147",
+"name": "m_init",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "150",
+"tail": "152",
+"name": "TypeInfo_Enum",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo_Typedef",
+"sons": []
+},
+{
+"line": "154",
+"tail": "157",
+"name": "TypeInfo_Pointer",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "156",
+"tail": "156",
+"name": "m_next",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "159",
+"tail": "167",
+"name": "TypeInfo_Array",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "162",
+"tail": "162",
+"name": "value",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "166",
+"tail": "166",
+"name": "pointermap",
+"kind": "2",
+"prot": "",
+"type": "PointerMap()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "169",
+"tail": "173",
+"name": "TypeInfo_StaticArray",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "171",
+"tail": "171",
+"name": "value",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "172",
+"tail": "172",
+"name": "len",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "175",
+"tail": "179",
+"name": "TypeInfo_AssociativeArray",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "177",
+"tail": "177",
+"name": "value",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "178",
+"tail": "178",
+"name": "key",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "181",
+"tail": "184",
+"name": "TypeInfo_Function",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "183",
+"tail": "183",
+"name": "next",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "186",
+"tail": "189",
+"name": "TypeInfo_Delegate",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "188",
+"tail": "188",
+"name": "next",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "191",
+"tail": "194",
+"name": "TypeInfo_Class",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "193",
+"tail": "193",
+"name": "info",
+"kind": "1",
+"prot": "",
+"type": "ClassInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "196",
+"tail": "199",
+"name": "TypeInfo_Interface",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "198",
+"tail": "198",
+"name": "info",
+"kind": "1",
+"prot": "",
+"type": "ClassInfo",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "201",
+"tail": "216",
+"name": "TypeInfo_Struct",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "203",
+"tail": "203",
+"name": "name",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "204",
+"tail": "204",
+"name": "m_init",
+"kind": "1",
+"prot": "",
+"type": "void[]",
+"base": "",
+"sons": []
+},
+{
+"line": "206",
+"tail": "206",
+"name": "xtoHash",
+"kind": "4194304",
+"prot": "",
+"type": "hash_t()",
+"base": "",
+"sons": []
+},
+{
+"line": "207",
+"tail": "207",
+"name": "xopEquals",
+"kind": "4194304",
+"prot": "",
+"type": "int(void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "208",
+"tail": "208",
+"name": "xopCmp",
+"kind": "4194304",
+"prot": "",
+"type": "int(void *)",
+"base": "",
+"sons": []
+},
+{
+"line": "209",
+"tail": "209",
+"name": "xtoString",
+"kind": "4194304",
+"prot": "",
+"type": "char[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "211",
+"tail": "211",
+"name": "m_flags",
+"kind": "1",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "213",
+"tail": "215",
+"name": "D_HavePointerMap",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "214",
+"tail": "214",
+"name": "m_pointermap",
+"kind": "1",
+"prot": "",
+"type": "PointerMap",
+"base": "",
+"sons": []
+}]
+}]
+},
+{
+"line": "218",
+"tail": "221",
+"name": "TypeInfo_Tuple",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "TypeInfo",
+"sons": [
+{
+"line": "220",
+"tail": "220",
+"name": "elements",
+"kind": "1",
+"prot": "",
+"type": "TypeInfo[]",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "224",
+"tail": "247",
+"name": "ModuleInfo",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "227",
+"tail": "227",
+"name": "name",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "229",
+"tail": "229",
+"name": "importedModules",
+"kind": "1",
+"prot": "",
+"type": "ModuleInfo[]",
+"base": "",
+"sons": []
+},
+{
+"line": "231",
+"tail": "231",
+"name": "localClasses",
+"kind": "1",
+"prot": "",
+"type": "ClassInfo[]",
+"base": "",
+"sons": []
+},
+{
+"line": "232",
+"tail": "232",
+"name": "flags",
+"kind": "1",
+"prot": "",
+"type": "uint",
+"base": "",
+"sons": []
+},
+{
+"line": "234",
+"tail": "234",
+"name": "ctor",
+"kind": "4194304",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "235",
+"tail": "235",
+"name": "dtor",
+"kind": "4194304",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "237",
+"tail": "237",
+"name": "unitTest",
+"kind": "4194304",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+},
+{
+"line": "239",
+"tail": "239",
+"name": "GNU",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "",
+"sons": []
+},
+{
+"line": "240",
+"tail": "243",
+"name": "-else-",
+"kind": "4096",
+"prot": "",
+"type": "",
+"base": "GNU",
+"sons": [
+{
+"line": "241",
+"tail": "241",
+"name": "xgetMembers",
+"kind": "1",
+"prot": "",
+"type": "void*",
+"base": "",
+"sons": []
+},
+{
+"line": "242",
+"tail": "242",
+"name": "ictor",
+"kind": "4194304",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "246",
+"tail": "246",
+"name": "opApply",
+"kind": "2",
+"prot": "",
+"type": "int(int delegate(ref ModuleInfo))",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "252",
+"tail": "323",
+"name": "Exception",
+"kind": "8",
+"prot": "",
+"type": "",
+"base": "Object",
+"sons": [
+{
+"line": "255",
+"tail": "291",
+"name": "FrameInfo",
+"kind": "4",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "257",
+"tail": "257",
+"name": "line",
+"kind": "1",
+"prot": "",
+"type": "long",
+"base": "",
+"sons": []
+},
+{
+"line": "259",
+"tail": "259",
+"name": "iframe",
+"kind": "1",
+"prot": "",
+"type": "ptrdiff_t",
+"base": "",
+"sons": []
+},
+{
+"line": "261",
+"tail": "261",
+"name": "offsetSymb",
+"kind": "1",
+"prot": "",
+"type": "ptrdiff_t",
+"base": "",
+"sons": []
+},
+{
+"line": "263",
+"tail": "263",
+"name": "baseSymb",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "266",
+"tail": "266",
+"name": "offsetImg",
+"kind": "1",
+"prot": "",
+"type": "ptrdiff_t",
+"base": "",
+"sons": []
+},
+{
+"line": "268",
+"tail": "268",
+"name": "baseImg",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "272",
+"tail": "272",
+"name": "address",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "274",
+"tail": "274",
+"name": "file",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "276",
+"tail": "276",
+"name": "func",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "278",
+"tail": "278",
+"name": "extra",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "280",
+"tail": "280",
+"name": "exactAddress",
+"kind": "1",
+"prot": "",
+"type": "bool",
+"base": "",
+"sons": []
+},
+{
+"line": "283",
+"tail": "283",
+"name": "internalFunction",
+"kind": "1",
+"prot": "",
+"type": "bool",
+"base": "",
+"sons": []
+},
+{
+"line": "284",
+"tail": "284",
+"name": "FramePrintHandler",
+"kind": "2048",
+"prot": "",
+"type": "void(FrameInfo *, void delegate( char[]))",
+"base": "",
+"sons": []
+},
+{
+"line": "286",
+"tail": "286",
+"name": "defaultFramePrintingFunction",
+"kind": "1",
+"prot": "",
+"type": "FramePrintHandler",
+"base": "",
+"sons": []
+},
+{
+"line": "288",
+"tail": "288",
+"name": "writeOut",
+"kind": "2",
+"prot": "",
+"type": "void(void delegate( char[]) sink)",
+"base": "",
+"sons": []
+},
+{
+"line": "290",
+"tail": "290",
+"name": "clear",
+"kind": "2",
+"prot": "",
+"type": "void()",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "293",
+"tail": "297",
+"name": "TraceInfo",
+"kind": "1024",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "295",
+"tail": "295",
+"name": "opApply",
+"kind": "2",
+"prot": "",
+"type": "int(int delegate(ref FrameInfo fInfo))",
+"base": "",
+"sons": []
+},
+{
+"line": "296",
+"tail": "296",
+"name": "writeOut",
+"kind": "2",
+"prot": "",
+"type": "void(void delegate( char[]) sink)",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "299",
+"tail": "299",
+"name": "msg",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "301",
+"tail": "301",
+"name": "file",
+"kind": "1",
+"prot": "",
+"type": "char[]",
+"base": "",
+"sons": []
+},
+{
+"line": "303",
+"tail": "303",
+"name": "line",
+"kind": "1",
+"prot": "",
+"type": "size_t",
+"base": "",
+"sons": []
+},
+{
+"line": "305",
+"tail": "305",
+"name": "info",
+"kind": "1",
+"prot": "",
+"type": "TraceInfo",
+"base": "",
+"sons": []
+},
+{
+"line": "307",
+"tail": "307",
+"name": "next",
+"kind": "1",
+"prot": "",
+"type": "Exception",
+"base": "",
+"sons": []
+},
+{
+"line": "311",
+"tail": "311",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(char[] msg, char[] file, long line, Exception next, TraceInfo info)",
+"base": "",
+"sons": []
+},
+{
+"line": "312",
+"tail": "312",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(char[] msg, Exception next= null)",
+"base": "",
+"sons": []
+},
+{
+"line": "313",
+"tail": "313",
+"name": "",
+"kind": "16",
+"prot": "",
+"type": "(char[] msg, char[] file, long line, Exception next= null)",
+"base": "",
+"sons": []
+},
+{
+"line": "316",
+"tail": "316",
+"name": "toString",
+"kind": "2",
+"prot": "",
+"type": "char[]()",
+"base": "",
+"sons": []
+},
+{
+"line": "319",
+"tail": "319",
+"name": "writeOutMsg",
+"kind": "2",
+"prot": "",
+"type": "void(void delegate( char[]) sink)",
+"base": "",
+"sons": []
+},
+{
+"line": "322",
+"tail": "322",
+"name": "writeOut",
+"kind": "2",
+"prot": "",
+"type": "void(void delegate( char[]) sink)",
+"base": "",
+"sons": []
+}]
+}]
+}

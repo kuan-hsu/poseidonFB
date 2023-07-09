@@ -4,28 +4,21 @@ version(FBIDE)
 {
 	import iup.iup;
 	import iup.iup_scintilla;
-
 	import global, actionManager, menu, tools;
-	import tango.stdc.stringz, Util = tango.text.Util;
-
+	import std.stdio, std.string, std.conv, Algorithm = std.algorithm;
 
 	struct AutoComplete
 	{
-		private:
+	private:
 		import tools;
 		import parser.ast;
-		import scintilla;
+		import scintilla, project;
+		import std.string, std.file, std.process, std.utf, std.format, Array = std.array, Uni = std.uni, Path = std.path, Algorithm = std.algorithm, std.algorithm.mutation : SwapStrategy;
+		import core.thread, core.sys.windows.winnt, core.sys.windows.windef;
 
-		import Integer = tango.text.convert.Integer, UTF = tango.text.convert.Utf, Float = tango.text.convert.Float;
-		import tango.io.FilePath, tango.sys.Environment, Path = tango.io.Path;
-		import tango.io.Stdout, tango.util.container.more.Stack;
-		import tango.core.Thread;
-		import tango.util.container.SortedMap;
 
 		version(Windows)
 		{
-			import tango.sys.win32.Types;
-			
 			struct HH_AKLINK
 			{
 				int       cbStruct;     // sizeof this structure
@@ -39,35 +32,37 @@ version(FBIDE)
 			}
 		}
 		
+		static shared CASTnode[string]		includesMarkContainer;
+		static shared bool[string]			noIncludeNodeContainer;
 		
 		static CASTnode[]					extendedClasses;
-		static SortedMap!(char[], char[])	map;
-		static Stack!(char[])				calltipContainer;
-		static char[]						noneListProcedureName;
+		//static SortedMap!(char[], char[])	map;
+		static Stack!(string)				calltipContainer;
+		public static string				noneListProcedureName;
+		static string[]						listContainer;
 
-		static char[][]						listContainer;
-		static CASTnode[char[]]				includesMarkContainer;
-		static bool[char[]]					noIncludeNodeContainer;
-		static float[char[]]				VersionCondition;
-
-		static char[]						showTypeContent;
-		static char[]						includesFromPath;
+		static string						showTypeContent;
+		static string						includesFromPath;
 
 
 		class CGetIncludes : Thread
 		{
 		private:
-			CASTnode	AST_Head;
+			CASTnode			AST_Head;
+			CompilerSettingUint	compilerSettings; // For TLS
 		
 		public:
 			this( CASTnode _AST_Head )
 			{
 				AST_Head = _AST_Head;
+				compilerSettings = GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
+				
 				super( &run );
 			}
 
 			void run()
 			{
+				GLOBAL.compilerSettings = compilerSettings; // To TLS GLOBAL.compilerSettings
 				AutoComplete.getIncludes( AST_Head, AST_Head.name, 0 );
 			}
 		}
@@ -75,55 +70,58 @@ version(FBIDE)
 		class CShowListThread : Thread
 		{
 		private:
-			int			ext;
-			char[]		text, extString;
-			char[]		result;
+			int					ext;
+			string				text, extString;
+			string				result;
 			
-			CASTnode	AST_Head;
-			int			pos, lineNum;
-			bool		bDot, bCallTip;
-			char[][]	splitWord;
+			CASTnode			AST_Head;
+			int					pos, lineNum;
+			bool				bDot, bCallTip;
+			string[]			splitWord;
+			CompilerSettingUint compilerSettings;
 			
 		public:
-			this( CASTnode _AST_Head, int _pos, int _lineNum, bool _bDot, bool _bCallTip, char[][] _splitWord, char[] _text, int _ext = -1, char[] _extString = ""  )
+			this( CASTnode _AST_Head, int _pos, int _lineNum, bool _bDot, bool _bCallTip, string[] _splitWord, string _text, int _ext = -1, string _extString = ""  )
 			{
-				AST_Head		= _AST_Head;
-				pos				= _pos;
-				lineNum			= _lineNum;
-				bDot			= _bDot;
-				bCallTip		= _bCallTip;
-				splitWord		= _splitWord;
-				text			= _text;
-				ext				= _ext;
-				_extString		= _extString;
-				
+				AST_Head			= _AST_Head;
+				pos					= _pos;
+				lineNum				= _lineNum;
+				bDot				= _bDot;
+				bCallTip			= _bCallTip;
+				splitWord			= _splitWord;
+				text				= _text;
+				ext					= _ext;
+				_extString			= _extString;
+				compilerSettings	= GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
+			
 				super( &run );
 			}
 
 			// If using IUP command in Thread, join() occur infinite loop, so......
 			void run()
 			{
+				GLOBAL.compilerSettings = compilerSettings; // To TLS GLOBAL.compilerSettings
+
 				if( AST_Head is null )
 				{
-					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
+					if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
 					return;
 				}
 			
 				if( GLOBAL.autoCompletionTriggerWordCount < 1 ) 
 				{
-					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
+					if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
 					return;
 				}
 				
 				auto oriAST = AST_Head;
 				
 				version(VERSION_NONE) initIncludesMarkContainer( AST_Head, lineNum ); else checkVersionSpec( AST_Head, lineNum );
-				
 				result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
-				char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
 				if( usingNames.length )
 				{
-					char[][] noUsingListContainer;
+					string[] noUsingListContainer;
 					if( splitWord.length == 1 )
 					{
 						if( !bDot && !bCallTip )
@@ -139,11 +137,11 @@ version(FBIDE)
 					
 					if( !listContainer.length )
 					{
-						foreach( char[] s; usingNames )
+						foreach( s; usingNames )
 						{
-							char[][] splitWithDot = Util.split( s, "." );
-							char[][] namespaceSplitWord = splitWithDot ~ splitWord;
-							char[] _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
+							string[] splitWithDot = Array.split( s, "." );
+							string[] namespaceSplitWord = splitWithDot ~ splitWord;
+							string _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
 							
 							if( bCallTip )
 							{
@@ -168,80 +166,69 @@ version(FBIDE)
 
 				if( listContainer.length )
 				{
-					char[]	_type, _list;
+					string	_type, _list;
 					int		maxLeft, maxRight;
 
-					if( GLOBAL.toggleShowListType == "ON" )
+					for( int i = 0; i < listContainer.length; ++ i )
 					{
-						for( int i = 0; i < listContainer.length; ++ i )
+						if( listContainer[i].length )
 						{
-							if( listContainer[i].length )
+							int dollarPos = lastIndexOf( listContainer[i], "~" );
+							if( dollarPos > -1 )
 							{
-								int dollarPos = Util.rindex( listContainer[i], "~" );
-								if( dollarPos < listContainer[i].length )
-								{
-									_type = listContainer[i][dollarPos+1..$];
-									if( _type.length > maxRight ) maxRight = _type.length;
-									_list = listContainer[i][0..dollarPos];
-									if( _list.length > maxLeft ) maxLeft = _list.length;
-								}
-								else
-								{
-									if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
-								}
+								_type = listContainer[i][dollarPos+1..$];
+								if( _type.length > maxRight ) maxRight = _type.length;
+								_list = listContainer[i][0..dollarPos];
+								if( _list.length > maxLeft ) maxLeft = _list.length;
+							}
+							else
+							{
+								if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
 							}
 						}
 					}
 
-					char[] formatString = "{,-" ~ Integer.toString( maxLeft ) ~ "} :: {,-" ~ Integer.toString( maxRight ) ~ "}";
-					
+					//string formatString = "{,-" ~ to!(string)( maxLeft ) ~ "} :: {,-" ~ to!(string)( maxRight ) ~ "}";
 					for( int i = 0; i < listContainer.length; ++ i )
 					{
 						if( i < listContainer.length - 1 )
 						{
-							int questPos = Util.rindex( listContainer[i], "?0" );
-							if( questPos < listContainer[i].length )
+							int questPos = lastIndexOf( listContainer[i], "?0" );
+							if( questPos > -1 )
 							{
-								char[]	_keyWord = listContainer[i][0..questPos];
-								char[]	compareWord;
+								string	_keyWord = listContainer[i][0..questPos];
+								string	compareWord;
 								
-								int tildePos = Util.rindex( listContainer[i+1], "~" );
-								if( tildePos < listContainer[i+1].length )
+								int tildePos = lastIndexOf( listContainer[i+1], "~" );
+								if( tildePos > -1 )
 									compareWord = listContainer[i+1][0..tildePos];
 								else
 								{
-									questPos = Util.rindex( listContainer[i+1], "?" );
-									if( questPos < listContainer[i+1].length ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
+									questPos = lastIndexOf( listContainer[i+1], "?" );
+									if( questPos > -1 ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
 								}
 								
-								if( lowerCase( _keyWord ) == lowerCase( compareWord ) ) continue;
+								if( Uni.toLower( _keyWord ) == Uni.toLower( compareWord ) ) continue;
 							}
 						}
 
 						if( listContainer[i].length )
 						{
-							if( GLOBAL.toggleShowListType == "ON" )
+							string _string;
+							
+							int dollarPos = lastIndexOf( listContainer[i], "~" );
+							if( dollarPos > 0 )
 							{
-								char[] _string;
-								
-								int dollarPos = Util.rindex( listContainer[i], "~" );
-								if( dollarPos < listContainer[i].length )
-								{
-									_type = listContainer[i][dollarPos+1..$];
-									_list = listContainer[i][0..dollarPos];
-									_string = Util.trim( Stdout.layout.convert( formatString, _list, _type ) );
-								}
-								else
-								{
-									_string = listContainer[i];
-								}
-
-								result ~= ( _string ~ "^" );
+								_type = listContainer[i][dollarPos+1..$];
+								_list = listContainer[i][0..dollarPos];
+								_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
 							}
 							else
 							{
-								result ~= ( listContainer[i] ~ "^" );
+								_string = listContainer[i];
 							}
+
+							result ~= ( _string ~ "^" );
 						}
 					}
 				}
@@ -250,23 +237,23 @@ version(FBIDE)
 					if( result[$-1] == '^' ) result = result[0..$-1];
 			}
 			
-			char[] getResult()
+			string getResult()
 			{
 				return result;
 			}			
 		}
 		
-		static CGetIncludes		preLoadContainerThread;
-		static CShowListThread	showListThread;
-		static CShowListThread	showCallTipThread;
+		static CGetIncludes				preLoadContainerThread;
+		public static CShowListThread	showListThread;
+		public static CShowListThread	showCallTipThread;
 		static Ihandle* timer = null;
 		
 		static void cleanIncludesMarkContainer( int level = -1)
 		{
-			foreach( char[] key; includesMarkContainer.keys )
+			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				includesMarkContainer.remove( key );
 			
-			foreach( char[] key; noIncludeNodeContainer.keys )
+			foreach( key; ( cast(bool[string]) noIncludeNodeContainer ).keys )
 				noIncludeNodeContainer.remove( key );
 		}
 		
@@ -281,12 +268,12 @@ version(FBIDE)
 		}
 		
 		
-		static void getTypeAndParameter( CASTnode node, ref char[] _type, ref char[] _param )
+		static void getTypeAndParameter( CASTnode node, ref string _type, ref string _param )
 		{
 			if( node !is null )
 			{
-				int openParenPos = Util.index( node.type, "(" );
-				if( openParenPos < node.type.length )
+				int openParenPos = indexOf( node.type, "(" );
+				if( openParenPos > -1 )
 				{
 					_type = node.type[0..openParenPos];
 					_param = node.type[openParenPos..$];
@@ -298,12 +285,12 @@ version(FBIDE)
 			}
 		}
 		
-		static char[] getListImage( CASTnode node )
+		static string getListImage( CASTnode node )
 		{
-			if( GLOBAL.toggleShowAllMember == "OFF" )
+			if( GLOBAL.compilerSettings.toggleShowAllMember == "OFF" )
 				if( node.protection == "private" ) return null;
 				
-			if( Util.count( node.name, "." ) > 0 ) return null;
+			if( Algorithm.count( node.name, "." ) > 0 ) return null;
 			
 			int protAdd;
 			switch( node.protection )
@@ -314,27 +301,27 @@ version(FBIDE)
 				default:			protAdd = 2;
 			}
 
-			char[] name = node.name;
+			string name = node.name;
 			if( node.name.length )
 			{
 				if( node.name[$-1] == ')' )
 				{
-					int posOpenParen = Util.index( node.name, "(" );
-					if( posOpenParen < node.name.length ) name = node.name[0..posOpenParen];
+					int posOpenParen = indexOf( node.name, "(" );
+					if( posOpenParen > -1 ) name = node.name[0..posOpenParen];
 				}
 			}
 			else
 				return null;
 
-			bool bShowType = GLOBAL.toggleShowListType == "ON" ? true : false;
-			char[] type = node.type;
+			bool bShowType = true;//GLOBAL.toggleShowListType == "ON" ? true : false;
+			string type = node.type;
 
 			if( bShowType )
 			{
 				if( node.type.length )
 				{
-					int posOpenParen = Util.index( node.type, "(" );
-					if( posOpenParen < node.type.length ) type = node.type[0..posOpenParen]; else type = node.type;
+					int posOpenParen = indexOf( node.type, "(" );
+					if( posOpenParen > -1 ) type = node.type[0..posOpenParen]; else type = node.type;
 				}
 			}
 			
@@ -343,13 +330,13 @@ version(FBIDE)
 				case B_DEFINE | B_VARIABLE:	return name ~ "?33";
 				case B_DEFINE | B_FUNCTION:	return name ~ "?34";
 				
-				case B_SUB:					return bShowType ? name ~ "~void" ~ "?" ~ Integer.toString( 25 + protAdd ) : name ~ "?" ~ Integer.toString( 25 + protAdd );
-				case B_FUNCTION:			return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 28 + protAdd ) : name ~ "?" ~ Integer.toString( 28 + protAdd );
+				case B_SUB:					return bShowType ? name ~ "~void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
+				case B_FUNCTION:			return bShowType ? name ~ "~" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
 				case B_VARIABLE:
 					if( node.name.length )
 					{
 						if( !type.length ) type = node.base; // VAR
-						if( node.name[$-1] == ')' ) return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 1 + protAdd ) : name ~ "?" ~ Integer.toString( 1 + protAdd ); else return bShowType ? name ~ "~" ~ type ~ "?" ~ Integer.toString( 4 + protAdd ) : name ~ "?" ~ Integer.toString( 4 + protAdd );
+						if( node.name[$-1] == ')' ) return bShowType ? name ~ "~" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return bShowType ? name ~ "~" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
 					}
 					break;
 
@@ -360,9 +347,9 @@ version(FBIDE)
 					}
 					break;
 					
-				case B_CLASS:					return name ~ "?" ~ Integer.toString( 7 + protAdd );
-				case B_TYPE: 					return name ~ "?" ~ Integer.toString( 10 + protAdd );
-				case B_ENUM: 					return name ~ "?" ~ Integer.toString( 12 + protAdd );
+				case B_CLASS:					return name ~ "?" ~ std.conv.to!(string)( 7 + protAdd );
+				case B_TYPE: 					return name ~ "?" ~ std.conv.to!(string)( 10 + protAdd );
+				case B_ENUM: 					return name ~ "?" ~ std.conv.to!(string)( 12 + protAdd );
 				case B_PARAM:					return bShowType ? name ~ "~" ~ type ~ "?18" : name ~ "?18";
 				case B_ENUMMEMBER:				return name ~ "?19";
 				case B_ALIAS:					return bShowType ? name ~ "~" ~ type ~ "?20" : name ~ "?20";//name ~ "?20";
@@ -392,7 +379,7 @@ version(FBIDE)
 			return results;
 		}
 
-		static CASTnode[] getAnonymousEnumMemberFromWord( CASTnode originalNode, char[] word )
+		static CASTnode[] getAnonymousEnumMemberFromWord( CASTnode originalNode, string word )
 		{
 			if( originalNode is null ) return null;
 			
@@ -404,7 +391,7 @@ version(FBIDE)
 				{
 					foreach( CASTnode _node; anonymousEnumMembers( originalNode ) )
 					{
-						if( Util.index( lowerCase( _node.name ), word ) == 0 ) results ~= _node;
+						if( indexOf( Uni.toLower( _node.name ), word ) == 0 ) results ~= _node;
 					}
 				}
 			}
@@ -437,27 +424,27 @@ version(FBIDE)
 			// Extends
 			if( originalNode.base.length )
 			{
-				if( lowerCase( originalNode.base ) == "object" ) return null;
+				if( Uni.toLower( originalNode.base ) == "object" ) return null;
 				
 				if( originalNode.kind & ( B_TYPE | B_CLASS | B_UNION ) )
 				{
 					CASTnode	ret;
 					
 					// If the name of extends class with dot, it should be with namespace....
-					if( Util.containsPattern( originalNode.base, "." ) )
+					if( Algorithm.count( originalNode.base, "." ) )
 					{
-						ret = getExtendClass( originalNode, lowerCase( originalNode.base ) );
+						ret = getExtendClass( originalNode, Uni.toLower( originalNode.base ) );
 						if( ret is null )
 						{
-							ret = getExtendClass( originalNode, lowerCase( getNameSpaceWithDotTail( originalNode ) ~ originalNode.base ) );
+							ret = getExtendClass( originalNode, Uni.toLower( getNameSpaceWithDotTail( originalNode ) ~ originalNode.base ) );
 							if( ret is null )
 							{	
-								char[][] usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
+								string[] usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
 								if( usingNames.length )
 								{
-									foreach( char[] s; usingNames )
+									foreach( s; usingNames )
 									{
-										ret = getExtendClass( originalNode, lowerCase( s ~ "." ~ originalNode.base ) );
+										ret = getExtendClass( originalNode, Uni.toLower( s ~ "." ~ originalNode.base ) );
 										if( ret !is null ) return ret;
 									}
 								}	
@@ -466,14 +453,14 @@ version(FBIDE)
 					}
 					else
 					{
-						char[][]	usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
-						char[]		NameSpaceString = getNameSpaceWithDotTail( originalNode );
+						string[]	usingNames = checkUsingNamespace( originalNode, originalNode.lineNumber );
+						string		NameSpaceString = getNameSpaceWithDotTail( originalNode );
 						
 						if( usingNames.length )
 						{
-							foreach( char[] s; usingNames )
+							foreach( s; usingNames )
 							{
-								ret = getExtendClass( originalNode, lowerCase( s ~ "." ~ originalNode.base ) );
+								ret = getExtendClass( originalNode, Uni.toLower( s ~ "." ~ originalNode.base ) );
 								if( ret !is null ) return ret;
 							}
 						}
@@ -481,10 +468,10 @@ version(FBIDE)
 						
 						if( NameSpaceString.length )
 						{
-							ret = getExtendClass( originalNode, lowerCase( NameSpaceString ~ originalNode.base ) );
+							ret = getExtendClass( originalNode, Uni.toLower( NameSpaceString ~ originalNode.base ) );
 						}
 						
-						if( ret is null ) ret = getExtendClass( originalNode, lowerCase( originalNode.base ) );
+						if( ret is null ) ret = getExtendClass( originalNode, Uni.toLower( originalNode.base ) );
 					}
 
 					return ret;
@@ -499,8 +486,8 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 		
-			if( GLOBAL.includeLevel > 0 )
-				if( level > GLOBAL.includeLevel - 1 ) return null;
+			if( GLOBAL.compilerSettings.includeLevel > 0 )
+				if( level > GLOBAL.compilerSettings.includeLevel - 1 ) return null;
 
 			if( level > 2 ) return null; // MAX 3 STEP (0,1,2)
 			
@@ -530,7 +517,7 @@ version(FBIDE)
 		}
 
 
-		static CASTnode[] getMatchASTfromWholeWord( CASTnode node, char[] word, int line, int B_KIND )
+		static CASTnode[] getMatchASTfromWholeWord( CASTnode node, string word, int line, int B_KIND )
 		{
 			if( node is null ) return null;
 			
@@ -540,7 +527,7 @@ version(FBIDE)
 			{
 				if( child.kind & B_KIND )
 				{
-					if( lowerCase( ParserAction.removeArrayAndPointer( child.name ) ) == lowerCase( word ) )
+					if( Uni.toLower( ParserAction.removeArrayAndPointer( child.name ) ) == Uni.toLower( word ) )
 					{
 						if( line < 0 )
 						{
@@ -572,7 +559,7 @@ version(FBIDE)
 			return results;
 		}	
 
-		static CASTnode[] getMatchASTfromWord( CASTnode node, char[] word, int line )
+		static CASTnode[] getMatchASTfromWord( CASTnode node, string word, int line )
 		{
 			if( node is null ) return null;
 			
@@ -582,7 +569,7 @@ version(FBIDE)
 			{
 				if( child.name.length )
 				{
-					if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+					if( indexOf( Uni.toLower( child.name ), Uni.toLower( word ) ) == 0 )
 					{
 						if( line >= child.lineNumber ) results ~= child;
 					}
@@ -613,17 +600,17 @@ version(FBIDE)
 		}
 
 
-		static CASTnode[] check( char[] name, char[] originalFullPath, int _LEVEL )
+		static CASTnode[] check( string name, string originalFullPath, int _LEVEL )
 		{
 			CASTnode[] results;
 			
-			char[] includeFullPath = checkIncludeExist( name, originalFullPath );
+			string includeFullPath = checkIncludeExist( name, originalFullPath );
 
 			if( includeFullPath.length )
 			{
 				bool bAlreadyExisted = ( fullPathByOS(includeFullPath) in includesMarkContainer ) ? true : false;
 				
-				if( GLOBAL.includeLevel < 0 )
+				if( GLOBAL.compilerSettings.includeLevel < 0 )
 					if( bAlreadyExisted ) return null;
 
 
@@ -632,19 +619,22 @@ version(FBIDE)
 				{
 					if( !bAlreadyExisted )
 					{
-						includesMarkContainer[fullPathByOS(includeFullPath)] = GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-						results ~= GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+						auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+						
+						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+						results ~= cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
 					}
 					
-					results ~= getIncludes( GLOBAL.parserManager[fullPathByOS(includeFullPath)], includeFullPath, _LEVEL );
+					results ~= getIncludes( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)], includeFullPath, _LEVEL );
 				}
 				else
 				{
-					CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
-					
+					//CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
+					CASTnode _createFileNode = ParserAction.createParser( includeFullPath, true );
 					if( _createFileNode !is null )
 					{
-						includesMarkContainer[fullPathByOS(includeFullPath)] = _createFileNode;
+						debug writefln( "Loaded Done: " ~ includeFullPath );
+						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) _createFileNode;
 						results ~= _createFileNode;
 						results ~= getIncludes( _createFileNode, includeFullPath, _LEVEL );
 					}
@@ -658,7 +648,7 @@ version(FBIDE)
 			return results;
 		}
 		
-		static CASTnode[] getInsertCodeBI( CASTnode originalNode, char[] originalFullPath, char[] word, bool bWholeWord, int ln = 2147483647 )
+		static CASTnode[] getInsertCodeBI( CASTnode originalNode, string originalFullPath, string word, bool bWholeWord, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
 			
@@ -699,20 +689,19 @@ version(FBIDE)
 				{
 					if( GLOBAL.activeProjectPath in GLOBAL.projectManager )
 					{
-						foreach( char[] s; GLOBAL.projectManager[GLOBAL.activeProjectPath].sources ~ GLOBAL.projectManager[GLOBAL.activeProjectPath].includes )
+						foreach( s; GLOBAL.projectManager[GLOBAL.activeProjectPath].sources ~ GLOBAL.projectManager[GLOBAL.activeProjectPath].includes )
 						{
 							if( s != originalFullPath )
 							{
-								CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( s );
+								CASTnode _createFileNode = ParserAction.loadParser( s, true );
 								if( _createFileNode !is null )
 								{
-									includesMarkContainer[fullPathByOS(s)] = _createFileNode;
-									
+									includesMarkContainer[fullPathByOS(s)] = cast(shared CASTnode) _createFileNode;
 									foreach( CASTnode _node; _createFileNode.getChildren )
 									{
 										if( _node.kind & B_INCLUDE ) 
 										{
-											char[] name = checkIncludeExist( _node.name, s );
+											string name = checkIncludeExist( _node.name, s );
 											if( name == originalFullPath )
 											{
 												noIncludeNodeContainer[originalFullPath] = true;
@@ -733,10 +722,9 @@ version(FBIDE)
 			return null;
 		}
 		
-		static CASTnode getMatchNodeInFile( CASTnode oriNode, char[][] nameSpaces, char[] word, char[] fileName, int B_KIND, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
+		static CASTnode getMatchNodeInFile( CASTnode oriNode, string[] nameSpaces, string word, string fileName, int B_KIND, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
 		{
-			CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( fileName );
-		
+			CASTnode _createFileNode = ParserAction.loadParser( fileName, true );
 			if( _createFileNode !is null )
 			{
 				for( int i = 0; i < nameSpaces.length; i ++ )
@@ -766,7 +754,7 @@ version(FBIDE)
 				{
 					if( _node.kind & B_KIND ) 
 					{
-						if( lowerCase( word ) == lowerCase( _node.name ) )
+						if( Uni.toLower( word ) == Uni.toLower( _node.name ) )
 						{
 							if( bOnlyProcedureBody )
 							{
@@ -785,7 +773,7 @@ version(FBIDE)
 				}
 				
 				foreach( CASTnode a; matchASTs )
-					if( lowerCase( oriNode.type ) == lowerCase( a.type ) ) return a;
+					if( Uni.toLower( oriNode.type ) == Uni.toLower( a.type ) ) return a;
 				
 				if( matchASTs.length ) return matchASTs[0];
 			}
@@ -793,13 +781,13 @@ version(FBIDE)
 			return null;
 		}
 		
-		static CASTnode getMatchNodeInProject( CASTnode oriNode, char[][] nameSpaces, char[] word, char[] prjName, int B_KIND, char[][] exceptFileNames, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
+		static CASTnode getMatchNodeInProject( CASTnode oriNode, string[] nameSpaces, string word, string prjName, int B_KIND, string[] exceptFileNames, bool bOnlyDeclare = false, bool bOnlyProcedureBody = true )
 		{
 			if( prjName in GLOBAL.projectManager )
 			{
-				foreach( char[] s; GLOBAL.projectManager[prjName].sources ~ GLOBAL.projectManager[prjName].includes )
+				foreach( s; GLOBAL.projectManager[prjName].sources ~ GLOBAL.projectManager[prjName].includes )
 				{
-					foreach( char[] e; exceptFileNames )
+					foreach( e; exceptFileNames )
 						if( s == e ) continue;
 					
 					
@@ -811,20 +799,20 @@ version(FBIDE)
 			return null;
 		}
 
-		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int ln = 2147483647 )
+		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, string originalFullPath, string word, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
 
-			char[][] prevKeys = includesMarkContainer.keys;
+			string[] prevKeys = ( cast(CASTnode[string]) includesMarkContainer ).keys;
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, true, ln );
 			if( results.length )
 				return results;
 			else
 			{
-				foreach( char[] key; includesMarkContainer.keys )
+				foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				{
 					bool bRemove = true;
-					foreach( char[] pKey; prevKeys )
+					foreach( pKey; prevKeys )
 					{
 						if( pKey == key )
 						{
@@ -845,7 +833,7 @@ version(FBIDE)
 			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
 			auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
 
-			foreach( includeAST; includesMarkContainer )
+			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{
 				if( includeAST !is null )
 				{
@@ -853,11 +841,11 @@ version(FBIDE)
 					{
 						if( child.name.length )
 						{
-							if( lowerCase( ParserAction.removeArrayAndPointer( child.name ) ) == lowerCase( word ) ) results ~= child;
+							if( Uni.toLower( ParserAction.removeArrayAndPointer( child.name ) ) == Uni.toLower( word ) ) results ~= child;
 						}
 						else
 						{
-							CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+							CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, Uni.toLower( word ) );
 							if( enumResult.length ) results ~= enumResult;
 						}
 					}
@@ -867,20 +855,20 @@ version(FBIDE)
 			return results;
 		}	
 
-		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, char[] originalFullPath, char[] word, int ln = 2147483647 )
+		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, string originalFullPath, string word, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
 			
-			char[][] prevKeys = includesMarkContainer.keys;
+			string[] prevKeys = ( cast(CASTnode[string]) includesMarkContainer ).keys;
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, false, ln );
 			if( results.length )
 				return results;
 			else
 			{
-				foreach( char[] key; includesMarkContainer.keys )
+				foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				{
 					bool bRemove = true;
-					foreach( char[] pKey; prevKeys )
+					foreach( pKey; prevKeys )
 					{
 						if( pKey == key )
 						{
@@ -899,7 +887,7 @@ version(FBIDE)
 				Stdout( n.name ).newline;
 			*/
 			
-			foreach( includeAST; includesMarkContainer )
+			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{
 				if( includeAST !is null )
 				{
@@ -909,30 +897,9 @@ version(FBIDE)
 						{
 							if( child.name.length )
 							{
-								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+								if( indexOf( Uni.toLower( child.name ), Uni.toLower( word ) ) == 0 )
 								{
 									results ~= child;
-								}
-								else
-								{
-									/*
-									foreach( _child; child.getChildren )
-									{
-										if( _child.name.length )
-										{
-											// Bug
-											if( Util.index( lowerCase( _child.name ), lowerCase( word ) ) == 0 )
-											{
-												results ~= _child;
-											}
-										}
-										else
-										{
-											CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _child, lowerCase( word ) );
-											if( enumResult.length ) results ~= enumResult;
-										}
-									}
-									*/
 								}
 							}
 						}
@@ -940,14 +907,14 @@ version(FBIDE)
 						{
 							if( child.name.length )
 							{
-								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 )
+								if( indexOf( Uni.toLower( child.name ), Uni.toLower( word ) ) == 0 )
 								{
 									results ~= child;
 								}
 							}
 							else
 							{
-								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, lowerCase( word ) );
+								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, Uni.toLower( word ) );
 								if( enumResult.length ) results ~= enumResult;
 							}
 						}
@@ -959,9 +926,9 @@ version(FBIDE)
 			return results;
 		}
 
-		static bool isDefaultType( char[] _type )
+		static bool isDefaultType( string _type )
 		{
-			_type = lowerCase( _type );
+			_type = Uni.toLower( _type );
 			
 			if( _type == "byte" || _type == "ubyte" || _type == "short" || _type == "ushort" || _type == "integer" || _type == "uinteger" || _type == "longint" || _type == "ulongint" ||
 				_type == "single" || _type == "double" || _type == "string" || _type == "zstring" || _type == "wstring" || _type == "boolean" ) return true;
@@ -970,7 +937,7 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode searchMatchMemberNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bSkipExtend = false )
+		static CASTnode searchMatchMemberNode( CASTnode originalNode, string word, int B_KIND = B_ALL, bool bSkipExtend = false )
 		{
 			if( originalNode is null ) return null;
 			
@@ -978,17 +945,17 @@ version(FBIDE)
 			{
 				if( _node.kind & B_KIND )
 				{
-					char[] name = lowerCase( ParserAction.removeArrayAndPointer( _node.name ) );
+					string name = Uni.toLower( ParserAction.removeArrayAndPointer( _node.name ) );
 					
 					if( name.length )
 					{
-						if( name == lowerCase( word ) ) return _node;
+						if( name == Uni.toLower( word ) ) return _node;
 					}
 					else
 					{
 						foreach( CASTnode _enumMember; anonymousEnumMembers( _node ) )
 						{
-							if( lowerCase( _enumMember.name ) == lowerCase( word ) ) return _enumMember;
+							if( Uni.toLower( _enumMember.name ) == Uni.toLower( word ) ) return _enumMember;
 						}
 					}
 				}
@@ -997,19 +964,19 @@ version(FBIDE)
 			return null;
 		}
 
-		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bWholeWord = true, bool bSkipExtend = false )
+		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, string word, int B_KIND = B_ALL, bool bWholeWord = true, bool bSkipExtend = false )
 		{
 			if( originalNode is null ) return null;
 			
 			CASTnode[] results;
 			
-			word = lowerCase( word );
+			word = Uni.toLower( word );
 			
 			foreach( CASTnode _node; getMembers( originalNode, bSkipExtend ) )
 			{
 				if( _node.kind & B_KIND )
 				{
-					char[] name = lowerCase( ParserAction.removeArrayAndPointer( _node.name ) );
+					string name = Uni.toLower( ParserAction.removeArrayAndPointer( _node.name ) );
 
 					if( bWholeWord )
 					{
@@ -1020,7 +987,7 @@ version(FBIDE)
 						//if( Util.index( name, lowerCase( word ) ) == 0 ) results ~= _node;
 						if( name.length )
 						{
-							if( Util.index( name, word ) == 0 ) results ~= _node;
+							if( indexOf( name, word ) == 0 ) results ~= _node;
 						}
 						else
 						{
@@ -1038,7 +1005,7 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode searchMatchNode( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bSkipExtend = true )
+		static CASTnode searchMatchNode( CASTnode originalNode, string word, int B_KIND = B_ALL, bool bSkipExtend = true )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1052,12 +1019,13 @@ version(FBIDE)
 				}
 				else
 				{
-					auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-
-					//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) 
+					//auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+					string rootFilePath = originalNode.name;
+					//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );					
+					if( fullPathByOS(rootFilePath) in GLOBAL.parserManager ) 
 					{
-						CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
+						auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(rootFilePath)];
+						CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _ast, rootFilePath, word, B_KIND );
 						if( resultIncludeNodes.length )	resultNode = resultIncludeNodes[0];
 					}
 				}
@@ -1067,7 +1035,7 @@ version(FBIDE)
 		}
 		
 		
-		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int B_KIND = B_ALL, bool bSkipExtend = false )
+		static CASTnode[] searchMatchNodes( CASTnode originalNode, string word, int B_KIND = B_ALL, bool bSkipExtend = false )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1079,12 +1047,14 @@ version(FBIDE)
 			}
 			else
 			{
-				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+				//auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+				string rootFilePath = originalNode.name;
 
 				//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
-				if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) 
+				if( fullPathByOS(rootFilePath) in GLOBAL.parserManager ) 
 				{
-					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word, B_KIND );
+					auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(rootFilePath)];
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _ast, rootFilePath, word );
 					if( resultIncludeNodes.length )	resultNodes ~= resultIncludeNodes;
 				}
 			}
@@ -1113,8 +1083,8 @@ version(FBIDE)
 					}
 					else
 					{
-						char[] symbol = upperCase( childrenNodes[i].name );
-						char[] noSignSymbolName = childrenNodes[i].type.length ? symbol[1..$] : symbol;
+						string symbol = Uni.toUpper( childrenNodes[i].name );
+						string noSignSymbolName = childrenNodes[i].type.length ? symbol[1..$] : symbol;
 						if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
 						{
 							version(Windows)
@@ -1170,7 +1140,7 @@ version(FBIDE)
 							}
 							else
 							{
-								if( VersionCondition.length )
+								if( AutoComplete.VersionCondition.length )
 								{
 									if( !( symbol[1..$] in AutoComplete.VersionCondition ) ) result ~= getMembers( childrenNodes[i], bSkipExtend );
 								}
@@ -1182,84 +1152,6 @@ version(FBIDE)
 						}
 					}
 				}
-				/+
-				else if( childrenNodes[i].kind == ( B_VERSION | B_PARAM ) )
-				{
-					// activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#if", token().lineNumber );
-					char[] _ident, _sign, _body;
-					char[] symbol = upperCase( childrenNodes[i].name );
-					if( symbol in VersionCondition )
-					{
-						_body = childrenNodes[i].type;
-						_sign = childrenNodes[i].protection;
-						
-						try
-						{
-							if( childrenNodes[i].base == "#if" || childrenNodes[i].base == "#elseif" )
-							{
-								switch( _sign )
-								{
-									case ">":
-										if( VersionCondition[symbol] > Float.toFloat( _body ) ) 
-										{
-											result ~= getMembers( childrenNodes[i], bSkipExtend );
-											i = skipPreprocessorCondition( childrenNodes, i );
-										}
-										break;
-										
-									case ">=":
-										if( VersionCondition[symbol] >= Float.toFloat( _body ) )
-										{
-											result ~= getMembers( childrenNodes[i], bSkipExtend );
-											i = skipPreprocessorCondition( childrenNodes, i );
-										}
-										break;
-										
-									case "<":
-										if( VersionCondition[symbol] < Float.toFloat( _body ) )
-										{
-											result ~= getMembers( childrenNodes[i], bSkipExtend );
-											i = skipPreprocessorCondition( childrenNodes, i );
-										}
-										break;
-										
-									case "<=":
-										if( VersionCondition[symbol] <= Float.toFloat( _body ) )
-										{
-											result ~= getMembers( childrenNodes[i], bSkipExtend );
-											i = skipPreprocessorCondition( childrenNodes, i );
-										}
-										break;
-
-									case "<>":
-										if( VersionCondition[symbol] != Float.toFloat( _body ) )
-										{
-											result ~= getMembers( childrenNodes[i], bSkipExtend );
-											i = skipPreprocessorCondition( childrenNodes, i );
-										}
-										break;
-
-									case "=":
-										if( VersionCondition[symbol] == Float.toFloat( _body ) )
-										{
-											result ~= getMembers( childrenNodes[i], bSkipExtend );
-											i = skipPreprocessorCondition( childrenNodes, i );
-										}
-										break;
-
-									default:
-								}
-							}
-							else if( childrenNodes[i].base == "#else" )
-							{
-								result ~= getMembers( childrenNodes[i], bSkipExtend );
-							}
-						}
-						catch( Exception e )
-						{}
-					}
-				}
-				+/
 				else if( childrenNodes[i].kind & ( B_UNION | B_TYPE | B_CLASS ) )
 				{
 					if( !childrenNodes[i].name.length ) result ~= getMembers( childrenNodes[i], bSkipExtend ); else result ~= childrenNodes[i];
@@ -1299,12 +1191,12 @@ version(FBIDE)
 
 			if( originalNode.kind & ( B_ALIAS | B_VARIABLE | B_PARAM | B_FUNCTION ) )
 			{
-				char[][]	splitWord;
-				char[]		_type;
+				string[]	splitWord;
+				string		_type;
 				
 				auto oriAST = originalNode;
 				
-				if( originalNode.type.length ) _type = originalNode.type; else _type = Util.stripl( originalNode.base, '*' ); // remove leftside *
+				if( originalNode.type.length ) _type = originalNode.type; else _type = stripLeft( originalNode.base, "*" ); // remove leftside *
 				
 				splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
 				/*
@@ -1312,14 +1204,14 @@ version(FBIDE)
 					if( s == originalNode.name ) return null;
 				*/
 				
-				char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
 				if( usingNames.length )
 				{
-					foreach( char[] s; usingNames )
+					foreach( s; usingNames )
 					{
 						originalNode = oriAST;
-						char[][] splitWithDot = Util.split( s, "." );
-						char[][] namespaceSplitWord = splitWithDot ~ splitWord;
+						string[] splitWithDot = Array.split( s, "." );
+						string[] namespaceSplitWord = splitWithDot ~ splitWord;
 						analysisSplitWorld_ReturnCompleteList( originalNode, namespaceSplitWord, lineNum, true, false, false );
 						if( originalNode !is null ) return originalNode;
 					}
@@ -1331,35 +1223,13 @@ version(FBIDE)
 				
 				if( originalNode is oriAST ) return oriAST; // Prevent infinite loop
 				
-				/*
-				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
-				
-				if( oriAST == originalNode ) return oriAST; // Prevent infinite loop
-				
-				if( originalNode is null )
-				{
-					char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
-					if( usingNames.length )
-					{
-						foreach( char[] s; usingNames )
-						{
-							originalNode = oriAST;
-							char[][] splitWithDot = Util.split( s, "." );
-							char[][] namespaceSplitWord = splitWithDot ~ splitWord;
-							analysisSplitWorld_ReturnCompleteList( originalNode, namespaceSplitWord, lineNum, true, false, false );
-							if( originalNode !is null ) break;
-						}
-					}
-				}
-				*/
-				
 				if( originalNode !is null ) resultNode = originalNode;// else resultNode = oriAST;
 			}			
 			
 			return resultNode;
 		}
 
-		static bool stepByStep( ref CASTnode AST_Head, char[] word, int B_KIND, int lineNum )
+		static bool stepByStep( ref CASTnode AST_Head, string word, int B_KIND, int lineNum )
 		{
 			AST_Head = searchMatchMemberNode( AST_Head, word, B_KIND );
 			if( AST_Head is null ) return false;
@@ -1380,9 +1250,9 @@ version(FBIDE)
 			return true;
 		}
 		
-		static char[] callTipList( CASTnode[] groupAST, char[] word = null )
+		static string callTipList( CASTnode[] groupAST, string word = null )
 		{
-			char[][] results;
+			string[] results;
 			
 			for( int i = 0; i < groupAST.length; ++ i )
 			{
@@ -1393,9 +1263,9 @@ version(FBIDE)
 				
 				if( groupAST[i].kind & ( B_FUNCTION | B_SUB | B_PROPERTY ) )
 				{
-					if( ( !word.length ) || lowerCase( groupAST[i].name ) == lowerCase( word ) )
+					if( ( !word.length ) || Uni.toLower( groupAST[i].name ) == Uni.toLower( word ) )
 					{
-						char[] _type, _paramString	= "()";
+						string _type, _paramString	= "()";
 						getTypeAndParameter( groupAST[i], _type, _paramString );
 
 						if( _type.length )
@@ -1406,7 +1276,7 @@ version(FBIDE)
 				}
 				else if( groupAST[i].kind & ( B_TYPE | B_CLASS| B_UNION ) )
 				{
-					if( ( !word.length ) || lowerCase( groupAST[i].name ) == lowerCase( word ) )
+					if( ( !word.length ) || Uni.toLower( groupAST[i].name ) == Uni.toLower( word ) )
 					{
 						foreach( CASTnode _child; groupAST[i].getChildren() )
 						{
@@ -1419,9 +1289,9 @@ version(FBIDE)
 				}
 			}
 
-			results.sort;
+			Algorithm.sort( results );
 			
-			char[] result;
+			string result;
 			for( int i = 0; i < results.length; i ++ )
 			{
 				if( i > 0 )
@@ -1436,13 +1306,13 @@ version(FBIDE)
 			return result;
 		}
 		
-		static void callTipSetHLT( char[] list, int itemNO, ref int highlightStart, ref int highlightEnd )
+		static void callTipSetHLT( string list, int itemNO, ref int highlightStart, ref int highlightEnd )
 		{
 			int listHead;
-			foreach( char[] lineText; Util.splitLines( list ) )
+			foreach( lineText; splitLines( list ) )
 			{
-				int openParenPos = Util.index( lineText, "(" );
-				int closeParenPos = Util.rindex( lineText, ")" );
+				int openParenPos = indexOf( lineText, "(" );
+				int closeParenPos = lastIndexOf( lineText, ")" );
 				if( closeParenPos > openParenPos + 1 && openParenPos > 0 )
 				{
 					openParenPos += listHead;
@@ -1503,12 +1373,12 @@ version(FBIDE)
 			highlightEnd = -1;
 		}
 		
-		static char[] parseProcedureForCalltip( Ihandle* ih, int lineHeadPos, char[] lineHeadText, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
+		static string parseProcedureForCalltip( Ihandle* ih, int lineHeadPos, string lineHeadText, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
 		{
 			if( ih == null ) return null;
 			
 			bool	bGetName;
-			char[]	procedureName;
+			string	procedureName;
 			
 			if( lineHeadPos == -1 )	lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
 			
@@ -1551,18 +1421,18 @@ version(FBIDE)
 			return procedureName;
 		}		
 		
-		static char[] parseProcedureForCalltip( Ihandle* ih, int pos, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
+		static string parseProcedureForCalltip( Ihandle* ih, int pos, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
 		{
 			if( ih == null ) return null;
 			
 			//int pos = ScintillaAction.getCurrentPos( ih );
 			
 			bool	bGetName;
-			char[]	procedureName;
+			string	procedureName;
 			
 			for( int i = pos; i >= cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 ); --i ) //SCI_POSITIONFROMLINE 2167
 			{
-				char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", i ) );
+				string s = fSTRz( IupGetAttributeId( ih, "CHAR", i ) );
 				if( !bGetName )
 				{
 					switch( s )
@@ -1600,15 +1470,15 @@ version(FBIDE)
 			return procedureName;
 		}
 
-		static void keyWordlist( char[] word )
+		static void keyWordlist( string word )
 		{
-			foreach( char[] _s; GLOBAL.KEYWORDS )
+			foreach( _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] s; Util.split( _s, " " ) )
+				foreach( s; Array.split( _s, " " ) )
 				{
 					if( s.length )
 					{
-						if( Util.index( lowerCase( s ), lowerCase( word ) ) == 0 )
+						if( indexOf( Uni.toLower( s ), Uni.toLower( word ) ) == 0 )
 						{
 							s = tools.convertKeyWordCase( GLOBAL.keywordCase, s );
 							listContainer ~= ( s ~ "?0" );
@@ -1619,10 +1489,10 @@ version(FBIDE)
 		}
 		
 		
-		static char[][] getDivideWord( char[] word )
+		static string[] getDivideWord( string word )
 		{
-			char[][]	splitWord;
-			char[]		tempWord;
+			string[]	splitWord;
+			string		tempWord;
 
 			//IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( word ) );
 			for( int i = 0; i < word.length ; ++ i )
@@ -1672,10 +1542,10 @@ version(FBIDE)
 		}
 
 
-		static char[][] getNeedDataForThread( Ihandle* iupSci, char[] text, int pos, ref int lineNum, ref bool bDot, ref bool bCallTip, ref CASTnode AST_Head )
+		static string[] getNeedDataForThread( Ihandle* iupSci, string text, int pos, ref int lineNum, ref bool bDot, ref bool bCallTip, ref CASTnode AST_Head )
 		{
 			int		dummyHeadPos;
-			char[] 	word, result;
+			string 	word, result;
 
 			if( text == "(" )
 			{
@@ -1718,7 +1588,7 @@ version(FBIDE)
 				word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 			}
 			
-			word = lowerCase( word.dup.reverse );
+			word = Uni.toLower( Algorithm.reverse( word.dup ) );
 
 			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
@@ -1749,7 +1619,7 @@ version(FBIDE)
 			foreach( CASTnode _friends; getMembers( AST_Head ) )
 			{
 				if( _friends.kind == ( B_DEFINE | B_VERSION ) )
-					if( _friends.lineNumber < lineNum ) VersionCondition[upperCase(_friends.name)] = 1;
+					if( _friends.lineNumber < lineNum ) AutoComplete.VersionCondition[Uni.toUpper(_friends.name)] = 1;
 			}
 			
 			if( AST_Head.getFather !is null )
@@ -1761,15 +1631,15 @@ version(FBIDE)
 				if( includesFromPath != AST_Head.name ) includesFromPath = AST_Head.name;
 				cleanIncludesMarkContainer();
 				
-				if( GLOBAL.includeLevel != 0 )
+				if( GLOBAL.compilerSettings.includeLevel != 0 )
 				{
-					int oriIncludeLevel = GLOBAL.includeLevel;
+					int oriIncludeLevel = GLOBAL.compilerSettings.includeLevel;
 					
 					// Heavy slow down the spped, only check only 2-steps
 					// if( GLOBAL.includeLevel > 2 ) GLOBAL.includeLevel = 2; // Comment this line to get full-check
 					auto dummy = getIncludes( AST_Head, AST_Head.name, 0 );
 					
-					foreach( _includeNode; includesMarkContainer )
+					foreach( _includeNode; cast(CASTnode[string]) includesMarkContainer )
 					{
 						foreach( CASTnode _friends; getMembers( _includeNode, true ) )
 						{
@@ -1777,14 +1647,14 @@ version(FBIDE)
 							{
 								if( _friends.getFather.kind == B_VERSION )
 									if( _friends.getFather.type.length )
-										if( upperCase( _friends.name ) == upperCase( _friends.getFather.name[1..$] ) ) continue; // Skip the C-style include once
+										if( Uni.toUpper( _friends.name ) == Uni.toUpper( _friends.getFather.name[1..$] ) ) continue; // Skip the C-style include once
 								
-								VersionCondition[upperCase(_friends.name)] = 1; // Much VersionCondition, performance loss
+								AutoComplete.VersionCondition[Uni.toUpper(_friends.name)] = 1; // Much VersionCondition, performance loss
 							}
 						}
 					}
 					
-					GLOBAL.includeLevel = oriIncludeLevel;
+					GLOBAL.compilerSettings.includeLevel = oriIncludeLevel;
 				}
 			}
 		}
@@ -1795,7 +1665,7 @@ version(FBIDE)
 			if( includesFromPath != AST_Head.name ) includesFromPath = AST_Head.name;
 			cleanIncludesMarkContainer();
 			
-			if( GLOBAL.includeLevel != 0 )
+			if( GLOBAL.compilerSettings.includeLevel != 0 )
 			{
 				//int oriIncludeLevel = GLOBAL.includeLevel;
 				
@@ -1807,9 +1677,9 @@ version(FBIDE)
 		}
 		
 		
-		static char[][] checkUsingNamespace( CASTnode AST_Head, int lineNum )
+		static string[] checkUsingNamespace( CASTnode AST_Head, int lineNum )
 		{
-			char[][] results;
+			string[] results;
 			
 			foreach( CASTnode _friends; AST_Head.getChildren )
 			{
@@ -1823,9 +1693,9 @@ version(FBIDE)
 		}
 		
 
-		static char[] getNameSpaceWithDotTail( CASTnode AST_Head )
+		static string getNameSpaceWithDotTail( CASTnode AST_Head )
 		{
-			char[] result;
+			string result;
 			
 			if( AST_Head !is null )
 			{
@@ -1844,9 +1714,9 @@ version(FBIDE)
 		}
 		
 		
-		static CASTnode getExtendClass( CASTnode _AST_Head, char[] baseName )
+		static CASTnode getExtendClass( CASTnode _AST_Head, string baseName )
 		{
-			char[][]	_splitWord = Util.split( baseName, "." );
+			string[]	_splitWord = Array.split( baseName, "." );
 			CASTnode[]	matchNodes;
 			
 			for( int i = 0; i < _splitWord.length; i++ )
@@ -1882,32 +1752,32 @@ version(FBIDE)
 		}		
 
 		
-		static char[] analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, char[][] splitWord, int lineNum, bool bDot, bool bCallTip, bool bPushContainer  )
+		static string analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, string[] splitWord, int lineNum, bool bDot, bool bCallTip, bool bPushContainer  )
 		{
 			if( AST_Head is null ) return null;
 			
 			auto		function_originalAST_Head = AST_Head;
 			auto		_rootNode = ParserAction.getRoot( function_originalAST_Head );
-			char[]		fullPath = _rootNode !is null ? _rootNode.name : "";
+			string		fullPath = _rootNode !is null ? _rootNode.name : "";
 			
 			
 			if( bPushContainer )
 			{
-				if( map is null ) map = new SortedMap!(char[], char[]); else map.reset();
+				//if( map is null ) map = new SortedMap!(char[], char[]); else map.reset();
 			}
 			
 			extendedClasses.length = 0;
 			
-			char[]		memberFunctionMotherName, result;
+			string		memberFunctionMotherName, result;
 
 			if( !splitWord[0].length )
 			{
 				if( AST_Head.kind & B_WITH )
 				{
-					char[][] splitWithTile = getDivideWord( AST_Head.name );
-					char[][] tempSplitWord = splitWord;
+					string[] splitWithTile = getDivideWord( AST_Head.name );
+					string[] tempSplitWord = splitWord;
 					splitWord.length = 0;						
-					foreach( char[] s; splitWithTile ~ tempSplitWord )
+					foreach( s; splitWithTile ~ tempSplitWord )
 					{
 						if( s != "" ) splitWord ~= ParserAction.removeArrayAndPointer( s );
 					}						
@@ -1939,8 +1809,8 @@ version(FBIDE)
 					}
 					else
 					{
-						int dotPos = Util.index( _fatherNode.name, "." );
-						if( dotPos < _fatherNode.name.length )
+						int dotPos = indexOf( _fatherNode.name, "." );
+						if( dotPos > -1 )
 						{
 							memberFunctionMotherName = _fatherNode.name[0..dotPos];
 						}
@@ -1973,10 +1843,11 @@ version(FBIDE)
 								if( !bPushContainer ) return null;
 								
 								if( GLOBAL.objectDefaultParser !is null )
-									resultNodes	= getMatchASTfromWholeWord( GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
+									resultNodes	= getMatchASTfromWholeWord( cast(CASTnode) GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
 
 								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
-								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes	= getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+								auto _parserManaper = cast(CASTnode[string]) GLOBAL.parserManager;
+								if( fullPathByOS(fullPath) in _parserManaper ) resultIncludeNodes	= getMatchIncludesFromWholeWord( _parserManaper[fullPathByOS(fullPath)], fullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
 
 								// For Type Objects
 								if( memberFunctionMotherName.length )
@@ -1988,25 +1859,25 @@ version(FBIDE)
 								}
 
 								result = callTipList( resultNodes ~ resultIncludeNodes, splitWord[i] );
-								return Util.trim( result );
+								return strip( result );
 							}
 
 
-							if( GLOBAL.enableKeywordComplete == "ON" )
+							if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" )
 							{
 								if( bPushContainer )
 								{
-									foreach( char[] _s; GLOBAL.KEYWORDS )
+									foreach( _s; GLOBAL.KEYWORDS )
 									{
-										foreach( char[] s; Util.split( _s, " " ) )
+										foreach( s; Array.split( _s, " " ) )
 										{
 											if( s.length )
 											{
-												if( Util.index( lowerCase( s ), lowerCase( splitWord[i] ) ) == 0 )
+												if( indexOf( Uni.toLower( s ), Uni.toLower( splitWord[i] ) ) == 0 )
 												{
 													s = tools.convertKeyWordCase( GLOBAL.keywordCase, s );
-													map.add( upperCase( s ~ "?0" ), s ~ "?0" );
-													//listContainer ~= ( s ~ "?0" );
+													//map.add( Uni.toUpper( s ~ "?0" ), s ~ "?0" );
+													listContainer ~= ( s ~ "?0" );
 												}
 											}
 										}
@@ -2019,8 +1890,7 @@ version(FBIDE)
 							{
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
 								
-								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes	= getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i] );
-								
+								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i] );
 								// For Type Objects
 								if( memberFunctionMotherName.length )
 								{
@@ -2033,8 +1903,9 @@ version(FBIDE)
 								{
 									foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 									{
-										char[] _list = getListImage( _node );
-										map.add( upperCase( _list ), _list );
+										string _list = getListImage( _node );
+										//map.add( Uni.toUpper( _list ), _list );
+										listContainer ~= _list;
 									}
 								}
 							}
@@ -2070,8 +1941,9 @@ version(FBIDE)
 									{
 										foreach( CASTnode _child; getMembers( namespaceNode ) ) // Get members( include nested unnamed union & type )
 										{
-											char[] _list = getListImage( _child );
-											map.add( upperCase( _list ), _list );
+											string _list = getListImage( _child );
+											//map.add( upperCase( _list ), _list );
+											listContainer ~= _list;
 										}
 									}
 								}
@@ -2088,10 +1960,10 @@ version(FBIDE)
 									if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 									{
 										//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-										CASTnode memberFunctionMotherNode = searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
+										CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 										if( memberFunctionMotherNode !is null )
 										{
-											if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+											if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
 										}
 									}
 								}					
@@ -2118,8 +1990,9 @@ version(FBIDE)
 								{
 									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 									{
-										char[] _list = getListImage( _child );
-										map.add( upperCase( _list ), _list );
+										string _list = getListImage( _child );
+										//map.add( Uni.toUpper( _list ), _list );
+										listContainer ~= _list;
 									}
 								}
 							}
@@ -2163,10 +2036,10 @@ version(FBIDE)
 							if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 							{
 								//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-								CASTnode memberFunctionMotherNode = searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
+								CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 								if( memberFunctionMotherNode !is null )
 								{
-									if( lowerCase( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+									if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
 									//AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
 								}
 							}
@@ -2202,7 +2075,7 @@ version(FBIDE)
 								foreach( CASTnode a; nameSpaceNodes )
 									result ~= callTipList( a.getChildren() ~ getBaseNodeMembers( a ), splitWord[i] );
 
-								return Util.trim( result );
+								return strip( result );
 							}
 							
 							if( bPushContainer )
@@ -2211,10 +2084,11 @@ version(FBIDE)
 								{
 									foreach( CASTnode _child; getMembers( a ) ) // Get members( include nested unnamed union & type )
 									{
-										if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 )
+										if( indexOf( Uni.toLower( _child.name ), splitWord[i] ) == 0 )
 										{
-											char[] _list = getListImage( _child );
-											map.add( upperCase( _list ), _list );
+											string _list = getListImage( _child );
+											//map.add( upperCase( _list ), _list );
+											listContainer ~= _list;
 										}
 									}
 								}
@@ -2235,8 +2109,9 @@ version(FBIDE)
 								{
 									foreach( CASTnode _child; getMembers( a ) ) // Get members( include nested unnamed union & type )
 									{
-										char[] _list = getListImage( _child );
-										map.add( upperCase( _list ), _list );
+										string _list = getListImage( _child );
+										//map.add( upperCase( _list ), _list );
+										listContainer ~= _list;
 									}
 								}
 							}
@@ -2253,17 +2128,18 @@ version(FBIDE)
 							if( !bPushContainer ) return null;
 							
 							result = callTipList( AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ), splitWord[i] );
-							return Util.trim( result );
+							return strip( result );
 						}
 						
 						if( bPushContainer )
 						{
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
-								if( Util.index( lowerCase( _child.name ), splitWord[i] ) == 0 )
+								if( indexOf( Uni.toLower( _child.name ), splitWord[i] ) == 0 )
 								{
-									char[] _list = getListImage( _child );
-									map.add( upperCase( _list ), _list );
+									string _list = getListImage( _child );
+									//map.add( upperCase( _list ), _list );
+									listContainer ~= _list;
 								}
 							}
 						}
@@ -2285,8 +2161,9 @@ version(FBIDE)
 						{
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
-								char[] _list = getListImage( _child );
-								map.add( upperCase( _list ), _list );
+								string _list = getListImage( _child );
+								//map.add( upperCase( _list ), _list );
+								listContainer ~= _list;
 							}
 						}
 					}
@@ -2322,19 +2199,20 @@ version(FBIDE)
 			}		
 		
 			if( bPushContainer )
-			{
+			{	/*
 				foreach( key, value; map )
-					listContainer ~= value;
+					listContainer ~= value;*/
 			}
 		
 			return result;
 		}
 		
 
-		public:
-		static bool bEnter;
-		static bool bAutocompletionPressEnter;
-		static bool	bSkipAutoComplete;
+	public:
+		static shared float[string]		VersionCondition;	
+		static bool 					bEnter;
+		static bool 					bAutocompletionPressEnter;
+		static bool						bSkipAutoComplete;
 		
 		static void init()
 		{
@@ -2344,8 +2222,10 @@ version(FBIDE)
 				timer = IupTimer();
 				IupSetAttributes( timer, "TIME=50,RUN=NO" );
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
-				setTimer( Integer.atoi( GLOBAL.triggerDelay ) );
+				setTimer( std.conv.to!(int)( GLOBAL.triggerDelay ) );
 			}
+			
+			//if( calltipContainer is null ) calltipContainer = new CStack!(string);
 		}
 		
 		static void setTimer( uint milisecond )
@@ -2370,7 +2250,7 @@ version(FBIDE)
 			return true;
 		}
 		
-		static char[] getShowTypeContent()
+		static string getShowTypeContent()
 		{
 			return showTypeContent;
 		}
@@ -2382,7 +2262,7 @@ version(FBIDE)
 		
 		static void cleanIncludeContainer()
 		{
-			foreach( char[] key; includesMarkContainer.keys )
+			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				includesMarkContainer.remove( key );
 		}		
 		
@@ -2391,9 +2271,9 @@ version(FBIDE)
 			calltipContainer.clear();
 		}
 		
-		static char[] getKeywordContainerList( char[] word, bool bCleanContainer = true )
+		static string getKeywordContainerList( string word, bool bCleanContainer = true )
 		{
-			char[] result;
+			string result;
 			
 			if( bCleanContainer ) listContainer.length = 0;
 			
@@ -2419,7 +2299,7 @@ version(FBIDE)
 				if( result.length )
 					if( result[$-1] == '^' ) result = result[0..$-1];
 
-				return Util.trim( result );
+				return strip( result );
 			}
 			
 			return null;
@@ -2436,7 +2316,7 @@ version(FBIDE)
 			{
 				if( !preLoadContainerThread.isRunning )
 				{
-					delete preLoadContainerThread;
+					destroy( preLoadContainerThread );
 					preLoadContainerThread = new CGetIncludes( astHead );
 					preLoadContainerThread.start();
 				}
@@ -2448,140 +2328,36 @@ version(FBIDE)
 		}
 
 
-		static char[] checkIncludeExist( char[] include, char[] originalFullPath )
+		static string checkIncludeExist( string include, string originalFullPath )
 		{
 			try
 			{
-				//char[] include;
-				
 				if( !include.length ) return null;
-				/*
-				if( _include.length > 2 )
-				{
-					if( _include[0] == '"' && _include[$-1] == '"' ) _include = _include[1..$-1];
-					include = _include.dup;
-				}
-				else
-				{
-					return null;
-				}
-				*/
-				include = Util.substitute( include, "\\", "/" );
-				originalFullPath = Path.normalize( originalFullPath );
 				
-				// Step 1: Relative from the directory of the source file
-				scope  _path = new FilePath( originalFullPath ); // Tail include /
-				char[] testPath = _path.path() ~ include;
-				_path.set( testPath ); // Reset
-				if( _path.exists() )
-					if( _path.isFile ) return testPath;
-
-
-				// Step 2: Relative from the current working directory
-				char[] dir = actionManager.ProjectAction.fileInProject( originalFullPath );
-				if( dir.length )
+				FocusUnit _focusUnit = GLOBAL.compilerSettings.activeCompiler;
+				string testPath;
+				// The originalFullPath is often change by file, we need get the original file dir
+				foreach( _importPath; _focusUnit.IncDir ~ Path.dirName( originalFullPath ) )
 				{
-					if( dir[$-1] != '/' ) dir ~= "/";
-					testPath = dir ~ include;
-
-					_path.set( testPath ); // Reset
-					if( _path.exists() ) 
-						if( _path.isFile ) return testPath;
+					testPath = _importPath ~ "/" ~ include;
+					if( exists( testPath ) )
+						if( isFile( testPath ) ) return testPath;
 				}
-
-				testPath = Environment.cwd() ~ include; // Environment.cwd(), Tail include /
-				_path.set( testPath ); // Reset
-				if( _path.exists() )
-					if( _path.isFile ) return testPath;
-
-
-				// Step 3: Relative from addition directories specified with the -i command line option
-				// Work on Project
-				//char[] prjDir = actionManager.ProjectAction.fileInProject( originalFullPath );
-				char[] prjDir = GLOBAL.activeProjectPath;
-				if( prjDir.length )
-				{
-					//Stdout( "Project Dir: " ~ prjDir ).newline;
-					if( prjDir in GLOBAL.projectManager )
-					{
-						char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
-							
-						foreach( char[] s; _includeDirs )
-						{
-							testPath = s ~ "/" ~ include;
-							
-							_path.set( testPath ); // Reset
-
-							if( _path.exists() )
-								if( _path.isFile ) return testPath;
-						}
-					}
-				}
-
-				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-				// Get Custom Compiler
-				char[] customOpt, customCompiler, fbcFullPath;
-				CustomToolAction.getCustomCompilers( customOpt, customCompiler );
-
-				if( customCompiler.length )
-					_path.set( Path.normalize( customCompiler ) );
-				else
-				{
-					char[] _compilerPath;
-					if( prjDir in GLOBAL.projectManager )
-					{
-						_compilerPath = GLOBAL.projectManager[prjDir].compilerPath;
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _compilerPath = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].Compiler;						
-					}
-					
-					if( _compilerPath.length )
-						_path.set( Path.normalize( _compilerPath ) );
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.editorSetting00.Bit64 == "OFF" ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
-						}
-						else
-						{
-							_compilerPath = GLOBAL.compilerFullPath;
-						}
-					}
-					
-					_path.set( Path.normalize( _compilerPath ) );
-				}
-
-				version( Windows )
-				{
-					testPath = _path.path() ~ "inc/" ~ include;
-				}
-				else
-				{
-					testPath = _path.path() ~ "../include/freebasic/" ~ include;
-				}
-	
-				_path.set( testPath ); // Reset
-				if( _path.exists() )
-					if( _path.isFile ) return testPath;
 			}
 			catch( Exception e )
 			{
-				IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ std.conv.to!(string)( e.line ) ) );
 			}
-			
 			return null;
 		}
 		
 
-		static CASTnode[] getIncludes( CASTnode originalNode, char[] originalFullPath, int _LEVEL )
+		static CASTnode[] getIncludes( CASTnode originalNode, string originalFullPath, int _LEVEL )
 		{
 			if( originalNode is null ) return null;
-			if( GLOBAL.includeLevel == 0 ) return null;
-			if( _LEVEL >= GLOBAL.includeLevel && GLOBAL.includeLevel > 0 ) return null;
-			if( GLOBAL.includeLevel > -1 ) _LEVEL++;
+			if( GLOBAL.compilerSettings.includeLevel == 0 ) return null;
+			if( _LEVEL >= GLOBAL.compilerSettings.includeLevel && GLOBAL.compilerSettings.includeLevel > 0 ) return null;
+			if( GLOBAL.compilerSettings.includeLevel > -1 ) _LEVEL++;
 			
 
 			CASTnode[]	results;
@@ -2596,7 +2372,6 @@ version(FBIDE)
 				{
 					if( _node.lineNumber < 2147483647 )
 					{
-						//Stdout( _node.name ~ " " ~ Integer.toString( _LEVEL ) ).newline;
 						CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
 						if( _results.length ) results ~= _results;
 					}
@@ -2606,28 +2381,15 @@ version(FBIDE)
 			return results;
 		}
 		
-		static char[] includeComplete( Ihandle* iupSci, int pos, ref char[] text )
+		static string includeComplete( Ihandle* iupSci, int pos, ref string text )
 		{
-			// Nested Delegate Filter Function
-			bool dirFilter( FilePath _fp, bool _isFfolder )
-			{
-				if( _isFfolder ) return true;
-				if( tools.isParsableExt( _fp.ext, 7 ) ) return true;
-			
-				return false;
-			}
-			
-			bool delegate( FilePath, bool ) _dirFilter;
-			_dirFilter = &dirFilter;
-			// End of Nested Function
-			
 			if( !text.length )  return null;
 			
-			dchar[] word32;
-			char[]	word = text;
+			dstring word32;
+			string	word = text;
 			bool	bExitLoopFlag;		
 			
-			if( text != "\\" && text != "/" && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) ) return null;
+			if( text != "\\" && text != "/" && ( fSTRz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) ) return null;
 
 			listContainer.length = 0;
 			if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
@@ -2639,24 +2401,24 @@ version(FBIDE)
 					--pos;
 					if( pos < 0 ) break;
 					
-					char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					string _s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 					if( _s.length )
 					{
 						int key = cast(int) _s[0];
 						if( key >= 0 && key <= 127 )
 						{
-							dchar[] sd = UTF.toString32( _s );
+							dstring sd = toUTF32( _s );
 							dchar s = sd[0];
 							switch( s )
 							{
 								case '"':								bExitLoopFlag = true; break;
 								case ' ', '\t', ':', '\n', '\r':		bExitLoopFlag = true; break;
 								default: 
-									if( UTF.isValid( s ) )
+									if( std.utf.isValidDchar( s ) )
 									{
 										word32 = "";
 										word32 ~= s;
-										word ~= Util.trim( UTF.toString( word32 ) );
+										word ~= strip( toUTF8( word32 ) );
 									}
 							}
 						}
@@ -2665,154 +2427,120 @@ version(FBIDE)
 					if( bExitLoopFlag ) break;
 				}
 				
-				if( !word.length ) return null; else word = word.dup.reverse;
-				
-				//version(Windows) word = word.dup.reverse; else word = lowerCase( word.dup.reverse );
-				//if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return null;
-				
-				char[][]	words = Util.split( Path.normalize( word ), "/" );
-				char[][]	tempList;
+				if( !word.length ) return null; else word = Algorithm.reverse( word.dup );
+
+				string[] words = Array.split( tools.normalizeSlash( word ), "/" );
+				string[] tempList;
 
 				if( !words.length ) return null;
+				
+				if( words.length == 1 && (text == "\\" || text == "/" ) ) words ~= "";
 
 				// Step 1: Relative from the directory of the source file
-				FilePath  _path1 = new FilePath( ScintillaAction.getActiveCScintilla.getFullPath ); // Tail include /
-				_path1.set( _path1.path );
+				string _path1 = Path.dirName( ScintillaAction.getActiveCScintilla.getFullPath );
 				
 				// Step 2: Relative from the current working directory
-				FilePath  _path2;
-				char[] prjDir = actionManager.ProjectAction.fileInProject( ScintillaAction.getActiveCScintilla.getFullPath );
+				/*
+				string  _path2;
+				string prjDir = actionManager.ProjectAction.fileInProject( ScintillaAction.getActiveCScintilla.getFullPath );
 				if( prjDir.length )
-					_path2 = new FilePath( prjDir ~ "/" );
+					_path2 = prjDir;
 				else
-					_path2 = new FilePath( Environment.cwd() ); // Tail include /
-
+				
+					_path2 = std.file.getcwd(); //new FilePath( Environment.cwd() ); // Tail include /
+				*/
+				/*
+				But I think no one will want to cwd on poseidon( because cwd = poseidon's Path ). so Igorne it!
+				*/
+				
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
-				FilePath[]  _path3;
-				prjDir = actionManager.ProjectAction.fileInProject( ScintillaAction.getActiveCScintilla.getFullPath );
-				if( prjDir.length )
-				{
-					if( prjDir in GLOBAL.projectManager )
-					{
-						char[][] _includeDirs = GLOBAL.projectManager[prjDir].includeDirs;
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
-						
-						foreach( char[] s; _includeDirs ) // without \
-							_path3 ~= new FilePath( s ); // Reset
-					}
-				}			
-				
 				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-				FilePath _path4 = new FilePath( Path.normalize( GLOBAL.compilerFullPath ) );
+				FocusUnit _focus = GLOBAL.compilerSettings.activeCompiler;
+				string[] _path3 = _focus.IncDir;
 				
-				// Get Custom Compiler
-				char[] customOpt, customCompiler, fbcFullPath, testPath;
-				CustomToolAction.getCustomCompilers( customOpt, customCompiler );
-
-				if( customCompiler.length )
-					_path4.set( Path.normalize( customCompiler ) );
-				else
-				{
-					char[] _compilerPath;
-					if( prjDir in GLOBAL.projectManager )
-					{
-						_compilerPath = GLOBAL.projectManager[prjDir].compilerPath;
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _compilerPath = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].Compiler;						
-					}
-					
-					if( _compilerPath.length )
-						_path4.set( Path.normalize( _compilerPath ) );
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.editorSetting00.Bit64 == "OFF" ) _compilerPath = GLOBAL.compilerFullPath; else _compilerPath = GLOBAL.x64compilerFullPath;
-						}
-						else
-						{
-							_compilerPath = GLOBAL.compilerFullPath;
-						}
-					}
-					
-					_path4.set( Path.normalize( _compilerPath ) );
-				}				
-				
-				version( Windows )
-				{
-					testPath = _path4.path() ~ "inc/";
-				}
-				else
-				{
-					testPath = _path4.path() ~ "../include/freebasic/";
-				}
-				_path4.set( testPath ); // Reset			
-				
-				int index;
 				for( int i = 0; i < words.length; ++ i )
 				{
 					if( i == words.length - 1 )
 					{
 						// Step 1: Relative from the directory of the source file
-						if( _path1.exists )
+						if( exists( _path1 ) )
 						{
-							foreach( FilePath _fp; _path1.toList( _dirFilter ) )
-								tempList ~= _fp.file;
-						}
-						
-						// Step 2: Relative from the current working directory
-						if( _path2.exists )
-						{
-							foreach( FilePath _fp; _path2.toList( _dirFilter ) )
-								tempList ~= _fp.file;
-						}
-						
-						// Step 3: Relative from addition directories specified with the -i command line option
-						// Work on Project
-						foreach( FilePath _fp3; _path3 )
-						{
-							if( _fp3.exists )
+							foreach( string s; dirEntries( _path1, SpanMode.shallow ) )
 							{
-								foreach( FilePath _fp; _fp3.toList( _dirFilter ) )
-									tempList ~= _fp.file;
+								if( std.file.isDir( s ) )
+									tempList ~= Path.baseName( s );
+								else
+								{
+									if( tools.isParsableExt( Path.extension( s ), 7 ) ) tempList ~= Path.baseName( s );
+								}
 							}
 						}
 						
-						// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
-						if( _path4.exists )
+						/*
+						// Step 2: Relative from the current working directory
+						if( exists( _path2 ) )
 						{
-							foreach( FilePath _fp; _path4.toList( _dirFilter ) )
-								tempList ~= _fp.file;
+							foreach( string s; dirEntries( _path2, SpanMode.shallow ) )
+							{
+								if( isDir( s ) )
+									tempList ~= Path.baseName( s );
+								else
+								{
+									if( tools.isParsableExt( Path.extension( s ), 7 ) ) tempList ~= Path.baseName( s );
+								}
+							}
+						}
+						*/
+						
+						// Step 3: Relative from addition directories specified with the -i command line option
+						// Work on Project
+						// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
+						foreach( _fp3; _path3 )
+						{
+							if( exists( _fp3 ) )
+							{
+								foreach( string s; dirEntries( _fp3, SpanMode.shallow ) )
+								{
+									if( isDir( s ) )
+									{
+										tempList ~= Path.baseName( s );
+									}
+									else
+									{
+										if( tools.isParsableExt( Path.extension( s ), 7 ) )
+										{
+											tempList ~= Path.baseName( s );
+										}
+									}
+								}
+							}
 						}
 					}
 					else
 					{
-						_path1 = _path1.set( _path1.toString ~ words[i] ~ "/" );
-						_path2 = _path2.set( _path2.toString ~ words[i] ~ "/" );
+						_path1 = _path1 ~ "/" ~ word[i];
+						/*_path2 = _path2 ~ "/" ~ word[i];*/
 						for( int j = 0; j < _path3.length; ++ j )
-							_path3[j] = _path3[j].set( _path3[j].toString ~ words[i] ~ "/" );
-						_path4 = _path4.set( _path4.toString ~ words[i] ~ "/" );
+							_path3[j] = _path3[j] ~ "/" ~ words[i];
 					}
 				}
 				
-				
 				if( word == "\"" ) words[$-1] = "";
-				foreach( char[] s; tempList )
+				foreach( s; tempList )
 				{
 					if( s.length )
 					{
-						char[] iconNum = "37";
+						string iconNum = "37";
 						
 						if( s.length > 4 )
 						{
-							if( lowerCase( s[$-4..$] ) == ".bas" ) iconNum = "35";
+							if( Uni.toLower( s[$-4..$] ) == ".bas" ) iconNum = "35";
 						}
 						
 						if( s.length > 3 )
 						{
-							if( lowerCase( s[$-3..$] ) == ".bi" ) iconNum = "36";
+							if( Uni.toLower( s[$-3..$] ) == ".bi" ) iconNum = "36";
 						}
 						
 						if( !words[$-1].length )
@@ -2821,15 +2549,15 @@ version(FBIDE)
 						}
 						else
 						{
-							if( Util.index( lowerCase( s ), lowerCase( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
+							if( indexOf( Uni.toLower( s ), Uni.toLower( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
 						}
 					}
 				}
 				
 				text = words[$-1];
-				listContainer.sort;
+				Algorithm.sort( listContainer );
 				
-				char[] list;
+				string list;
 				for( int i = 0; i < listContainer.length; ++ i )
 				{
 					if( listContainer[i].length )
@@ -2848,15 +2576,7 @@ version(FBIDE)
 				if( list.length )
 					if( list[$-1] == '^' ) list = list[0..$-1];
 					
-				// Release FilePath Class Objects
-				delete _path1;
-				delete _path2;
-				delete _path4;
-				foreach( FilePath _p; _path3 )
-					delete _p;
-				
 				return list;
-				
 			}
 			catch( Exception e )
 			{
@@ -2866,7 +2586,7 @@ version(FBIDE)
 			return null;
 		}
 		
-		static int getProcedurePos( Ihandle* iupSci, int pos, char[] targetText )
+		static int getProcedurePos( Ihandle* iupSci, int pos, string targetText )
 		{
 			/*
 			SCI_SETTARGETSTART = 2190,
@@ -2907,15 +2627,15 @@ version(FBIDE)
 					bool bReSearch;
 					
 					// check if Type (Alias) or Temporary Types
-					if( lowerCase( targetText ) == "type" )
+					if( Uni.toLower( targetText ) == "type" )
 					{
-						char[]	afterWord;
+						string	afterWord;
 						bool	bFirstChar = true;
 						int		count;
 						
 						for( int i = posHead + targetText.length; i < documentLength; ++ i )
 						{
-							char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+							string _s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
 
 							if( cast(int) _s[0] == 13 || _s == ":" || _s == "\n" )
 							{
@@ -2927,7 +2647,7 @@ version(FBIDE)
 								{
 									count ++;
 									
-									if( count == 2 && lowerCase( afterWord ) == "as" )
+									if( count == 2 && Uni.toLower( afterWord ) == "as" )
 									{
 										bReSearch = true;
 										break;	
@@ -2967,7 +2687,7 @@ version(FBIDE)
 					// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
 					for( int i = posHead + targetText.length; i < documentLength; ++ i )
 					{
-						char[] s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
+						string s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
 
 						if( s[0] == 13 || s == ":" || s == "\n" || s == "=" )
 						{
@@ -2980,7 +2700,7 @@ version(FBIDE)
 							char[]	beforeWord;
 							for( int j = posHead - 1; j >= 0; --j )
 							{
-								char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+								string _s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
 								
 								if( _s[0] == 13 || _s == ":" || _s == "\n" )
 								{
@@ -3019,7 +2739,7 @@ version(FBIDE)
 		}
 
 		// direct = 0 findprev, direct = 1 findnext
-		static int getProcedureTailPos( Ihandle* iupSci, int pos, char[] targetText, int direct )
+		static int getProcedureTailPos( Ihandle* iupSci, int pos, string targetText, int direct )
 		{
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
 			int		posEnd = skipCommentAndString( iupSci, pos, "end", direct );
@@ -3037,9 +2757,9 @@ version(FBIDE)
 					posEnd ++;
 					if( posEnd >= documentLength ) break; else _char = fromStringz( IupGetAttributeId( iupSci, "CHAR", posEnd ) );
 				}
-				endText = Util.trim( endText );
+				endText = strip( endText );
 
-				if( lowerCase( endText ) == lowerCase( targetText ) )
+				if( Uni.toLower( endText ) == Uni.toLower( targetText ) )
 				{
 					return posEnd;
 				}
@@ -3056,7 +2776,7 @@ version(FBIDE)
 		}	
 
 		// direct = 0 findprev, direct = 1 findnext
-		static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct )
+		static int skipCommentAndString(  Ihandle* iupSci, int pos, string targetText, int direct )
 		{
 			IupScintillaSendMessage( iupSci, 2198, 2, 0 );							// SCI_SETSEARCHFLAGS = 2198,
 			int documentLength = cast(int) IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
@@ -3103,7 +2823,7 @@ version(FBIDE)
 			return pos;
 		}
 
-		static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
+		static string getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 		{			
 			int		countParen, countBracket;
 			int		oriPos = pos;
@@ -3141,8 +2861,8 @@ version(FBIDE)
 
 		static bool checkIscludeDeclare( Ihandle* iupSci, int pos = -1 )
 		{
-			char[]	result;
-			dchar[]	resultd;
+			string	result;
+			dstring	resultd;
 			
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
 
@@ -3162,7 +2882,7 @@ version(FBIDE)
 					}
 				}
 				
-				result = lowerCase( Util.trim( result.reverse ) ).dup;
+				result = Uni.toLower( strip( Algorithm.reverse( result.dup ) ) ).dup;
 				if( result.length > 7 )
 				{
 					if( result[0..8] == "#include" ) return true;
@@ -3176,16 +2896,16 @@ version(FBIDE)
 			return false;
 		}
 
-		static char[] getIncludeString( Ihandle* iupSci, int pos = -1 )
+		static string getIncludeString( Ihandle* iupSci, int pos = -1 )
 		{
 			if( !checkIscludeDeclare( iupSci, pos ) ) return null;
 			
-			char[]	result;
+			string	result;
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
 			
 			do
 			{
-				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+				string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 				if( s == "\"" || s == "\n" ) break;
 			}
 			while( ++pos < documentLength );
@@ -3200,7 +2920,7 @@ version(FBIDE)
 			}
 			while( --pos >= 0 );
 			 
-			return result.dup.reverse;
+			return Algorithm.reverse( result.dup );
 		}
 		
 		static int getWholeWordTailPos( Ihandle* iupSci, int startPos )
@@ -3209,7 +2929,7 @@ version(FBIDE)
 			{
 				while( startPos < IupGetInt( iupSci, "COUNT" ) )
 				{
-					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", startPos ) );
+					string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", startPos ) );
 					int key = cast(int) s[0];
 					if( key >= 0 && key <= 127 )
 					{
@@ -3238,10 +2958,10 @@ version(FBIDE)
 			return startPos;
 		}
 
-		static char[] getKeyWordReverse( Ihandle* iupSci, int pos, out int headPos )
+		static string getKeyWordReverse( Ihandle* iupSci, int pos, out int headPos )
 		{
-			dchar[] word32;
-			char[]	word;
+			dstring word32;
+			string	word;
 			int		countParen, countBracket;
 
 			try
@@ -3258,12 +2978,12 @@ version(FBIDE)
 					{
 						version(Windows)
 						{
-							dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+							dstring _dcharString = toUTF32( fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) ) );
 							if( _dcharString.length )
 							{
 								if( actionManager.ScintillaAction.isComment( iupSci, pos ) )
 								{
-									return UTF.toString( word32 );
+									return toUTF8( word32 );
 								}
 								else
 								{
@@ -3271,7 +2991,7 @@ version(FBIDE)
 									{
 										case ")", "(", "[", "]", "<", ">", "{", "}":
 										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "=", ",", "@":
-											return UTF.toString( word32 );
+											return toUTF8( word32 );
 											
 										default: 
 											word32 ~= _dcharString;
@@ -3310,15 +3030,15 @@ version(FBIDE)
 				return null;
 			}
 			
-			version(Windows) word = UTF.toString( word32 );
+			version(Windows) word = toUTF8( word32 );
 
 			return word;
 		}
 
-		static char[] getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
+		static string getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
 		{
-			dchar[] word32;
-			char[]	word;
+			dstring word32;
+			string	word;
 			int		countParen, countBracket;
 
 			try
@@ -3329,20 +3049,20 @@ version(FBIDE)
 					--pos;
 					if( pos < 0 ) break;
 					
-					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 					int key = cast(int) s[0];
 					if( key >= 0 && key <= 127 )
 					{
 						version(Windows)
 						{
-							dchar[] _dcharString = fromString32z( cast(dchar*) IupGetAttributeId( iupSci, "CHAR", pos ) );
+							dstring _dcharString = toUTF32( fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) ) );
 							if( _dcharString.length )
 							{
 								if( actionManager.ScintillaAction.isComment( iupSci, pos ) )
 								{
 									if( _dcharString == "\r" || _dcharString == "\n" )
 									{
-										if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 ); else continue;
+										if( countParen == 0 && countBracket == 0 ) return toUTF8( word32 ); else continue;
 									}
 									else
 									{
@@ -3358,7 +3078,7 @@ version(FBIDE)
 
 									case "(":
 										if( countBracket == 0 ) countParen--;
-										if( countParen < 0 ) return UTF.toString( word32 );
+										if( countParen < 0 ) return toUTF8( word32 );
 										break;
 										
 									case "]":
@@ -3367,7 +3087,7 @@ version(FBIDE)
 
 									case "[":
 										if( countParen == 0 ) countBracket--;
-										if( countBracket < 0 ) return UTF.toString( word32 );
+										if( countBracket < 0 ) return toUTF8( word32 );
 										break;
 										
 									case ">":
@@ -3380,9 +3100,10 @@ version(FBIDE)
 												break;
 											}
 										}
+										goto case;
 									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
-										if( countParen == 0 && countBracket == 0 ) return UTF.toString( word32 );
-										
+										if( countParen == 0 && countBracket == 0 ) return toUTF8( word32 );
+										goto default;
 									default: 
 										if( countParen == 0 && countBracket == 0 ) word32 ~= _dcharString;
 								}
@@ -3452,15 +3173,15 @@ version(FBIDE)
 				return null;
 			}
 			
-			version(Windows) word = UTF.toString( word32 );
+			version(Windows) word = toUTF8( word32 );
 
 			return word;
 		}
 		
-		static char[] charAdd( Ihandle* iupSci, int pos, char[] text, bool bForce = false )
+		static string charAdd( Ihandle* iupSci, int pos, string text, bool bForce = false )
 		{
 			int		dummyHeadPos;
-			char[] 	word, result;
+			string 	word, result;
 			bool	bDot, bCallTip;
 			
 			if( text == "(" )
@@ -3507,7 +3228,7 @@ version(FBIDE)
 				word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 			}
 			
-			word = lowerCase( word.dup.reverse );
+			word = Uni.toLower( Algorithm.reverse( word.dup ) );
 
 			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
@@ -3531,19 +3252,19 @@ version(FBIDE)
 					if( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
 
 					// Divide word
-					char[][]	splitWord = getDivideWord( word );
+					string[]	splitWord = getDivideWord( word );
 					int			lineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-					CASTnode	AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
+					CASTnode	AST_Head = actionManager.ParserAction.getActiveASTFromLine( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
 
 					if( AST_Head is null )
 					{
-						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
+						if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
 					}
 
 					if( GLOBAL.autoCompletionTriggerWordCount < 1 && !bForce ) 
 					{
-						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
+						if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
 					}
 					
@@ -3552,15 +3273,15 @@ version(FBIDE)
 					version(VERSION_NONE) initIncludesMarkContainer( AST_Head, lineNum ); else checkVersionSpec( AST_Head, lineNum );
 					
 					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
-					char[][] usingNames = checkUsingNamespace( oriAST, lineNum );
+					string[] usingNames = checkUsingNamespace( oriAST, lineNum );
 					if( usingNames.length )
 					{
-						char[][] noUsingListContainer;
+						string[] noUsingListContainer;
 						if( splitWord.length == 1 )
 						{
 							if( !bDot && !bCallTip )
 							{
-								noUsingListContainer = listContainer.dup;
+								noUsingListContainer = listContainer;
 								listContainer.length = 0;
 							}
 							else if( bCallTip )
@@ -3571,11 +3292,11 @@ version(FBIDE)
 						
 						if( !listContainer.length )
 						{
-							foreach( char[] s; usingNames )
+							foreach( s; usingNames )
 							{
-								char[][] splitWithDot = Util.split( s, "." );
-								char[][] namespaceSplitWord = splitWithDot ~ splitWord;
-								char[] _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
+								string[] splitWithDot = Array.split( s, "." );
+								string[] namespaceSplitWord = splitWithDot ~ splitWord;
+								string _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
 								
 								if( bCallTip )
 								{
@@ -3632,17 +3353,17 @@ version(FBIDE)
 					{
 						//listContainer.sort;
 
-						char[]	_type, _list;
+						string	_type, _list;
 						int		maxLeft, maxRight;
 
-						if( GLOBAL.toggleShowListType == "ON" )
-						{
+						//if( GLOBAL.toggleShowListType == "ON" )
+						//{
 							for( int i = 0; i < listContainer.length; ++ i )
 							{
 								if( listContainer[i].length )
 								{
-									int dollarPos = Util.rindex( listContainer[i], "~" );
-									if( dollarPos < listContainer[i].length )
+									int dollarPos = lastIndexOf( listContainer[i], "~" );
+									if( dollarPos > -1 )
 									{
 										_type = listContainer[i][dollarPos+1..$];
 										if( _type.length > maxRight ) maxRight = _type.length;
@@ -3655,10 +3376,9 @@ version(FBIDE)
 									}
 								}
 							}
-						}
+						//}
 
-						char[] formatString = "{,-" ~ Integer.toString( maxLeft ) ~ "} :: {,-" ~ Integer.toString( maxRight ) ~ "}";
-						
+						//string formatString = "{,-" ~ to!(string)( maxLeft ) ~ "} :: {,-" ~ to!(string)( maxRight ) ~ "}";
 						for( int i = 0; i < listContainer.length; ++ i )
 						{
 							/*
@@ -3670,38 +3390,38 @@ version(FBIDE)
 							
 							if( i < listContainer.length - 1 )
 							{
-								int questPos = Util.rindex( listContainer[i], "?0" );
-								if( questPos < listContainer[i].length )
+								int questPos = lastIndexOf( listContainer[i], "?0" );
+								if( questPos > -1 )
 								{
-									char[]	_keyWord = listContainer[i][0..questPos];
-									char[]	compareWord;
+									string	_keyWord = listContainer[i][0..questPos];
+									string 	compareWord;
 									
-									int tildePos = Util.rindex( listContainer[i+1], "~" );
-									if( tildePos < listContainer[i+1].length )
+									int tildePos = lastIndexOf( listContainer[i+1], "~" );
+									if( tildePos > -1 )
 										compareWord = listContainer[i+1][0..tildePos];
 									else
 									{
-										questPos = Util.rindex( listContainer[i+1], "?" );
-										if( questPos < listContainer[i+1].length ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
+										questPos = lastIndexOf( listContainer[i+1], "?" );
+										if( questPos > -1 ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
 									}
 									
-									if( lowerCase( _keyWord ) == lowerCase( compareWord ) ) continue;
+									if( Uni.toLower( _keyWord ) == Uni.toLower( compareWord ) ) continue;
 								}
 							}
 
 
 							if( listContainer[i].length )
 							{
-								if( GLOBAL.toggleShowListType == "ON" )
-								{
-									char[] _string;
+								//if( GLOBAL.toggleShowListType == "ON" )
+								//{
+									string _string;
 									
-									int dollarPos = Util.rindex( listContainer[i], "~" );
-									if( dollarPos < listContainer[i].length )
+									int dollarPos = lastIndexOf( listContainer[i], "~" );
+									if( dollarPos > -1 )
 									{
 										_type = listContainer[i][dollarPos+1..$];
 										_list = listContainer[i][0..dollarPos];
-										_string = Util.trim( Stdout.layout.convert( formatString, _list, _type ) );
+										_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
 									}
 									else
 									{
@@ -3709,11 +3429,11 @@ version(FBIDE)
 									}
 
 									result ~= ( _string ~ "^" );
-								}
+								/*}
 								else
 								{
 									result ~= ( listContainer[i] ~ "^" );
-								}
+								}*/
 							}
 						}
 					}
@@ -3755,7 +3475,7 @@ version(FBIDE)
 			
 			try
 			{
-				char[]	word;
+				string	word;
 				bool	bDwell;
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
@@ -3766,10 +3486,10 @@ version(FBIDE)
 					if( currentPos < 1 ) return;
 				
 					// Goto Includes
-					char[] includeString = getIncludeString( cSci.getIupScintilla, currentPos );
+					string includeString = getIncludeString( cSci.getIupScintilla, currentPos );
 					if( includeString.length )
 					{
-						char[] includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
+						string includeFullPath = checkIncludeExist( includeString, cSci.getFullPath );
 						if( includeFullPath.length )
 						{
 							if( TYPE & 1 )
@@ -3790,7 +3510,7 @@ version(FBIDE)
 					if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
 					
 					word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
-					word = lowerCase( word.dup.reverse );
+					word = Uni.toLower( Algorithm.reverse( word.dup ) );
 					
 					if( GLOBAL.debugPanel.isRunning && GLOBAL.debugPanel.isExecuting )
 					{
@@ -3798,9 +3518,9 @@ version(FBIDE)
 						{
 							if( word.length )
 							{
-								word = fullPathByOS( Util.substitute( word, "->", "." ).dup );
-								char[] typeName, value, title, title1;
-								char[] title0 = GLOBAL.debugPanel.getTypeValueByName( word, word, typeName, value ).dup;
+								word = fullPathByOS( Array.replace( word, "->", "." ).dup );
+								string typeName, value, title, title1;
+								string title0 = GLOBAL.debugPanel.getTypeValueByName( word, word, typeName, value ).dup;
 								/+
 								if( typeName.length )
 								{
@@ -3830,8 +3550,8 @@ version(FBIDE)
 									scope _result = new IupString( title0 );
 									IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
 									
-									int assignPos = Util.index( title0, " = " );
-									if( assignPos < title0.length )
+									int assignPos = indexOf( title0, " = " );
+									if( assignPos > -1 )
 									{
 										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, assignPos ); // SCI_CALLTIPSETHLT 2204
 										IupScintillaSendMessage( cSci.getIupScintilla, 2207, 0xFF0000, 0 ); // SCI_CALLTIPSETFOREHLT 2207
@@ -3848,133 +3568,133 @@ version(FBIDE)
 					
 					
 					
-					char[][] splitWord = getDivideWord( word );
+					string[] splitWord = getDivideWord( word );
 					
 					// Manual
-					if( splitWord.length == 1 )
+					version(FBIDE)
 					{
-						if( GLOBAL.toggleUseManual == "ON" )
+						if( splitWord.length == 1 )
 						{
-							if( TYPE == 0 && !bDwell )
+							if( GLOBAL.toggleUseManual == "ON" )
 							{
-								char[]	keyWord;
-								bool	bExitFlag;
-
-								if( splitWord[0].length )
+								if( TYPE == 0 && !bDwell )
 								{
-									foreach( char[] _s; GLOBAL.KEYWORDS )
-									{
-										foreach( char[] targetText; Util.split( _s, " " ) )
-										{
-											if( targetText == splitWord[0] )
-											{
-												keyWord = targetText;
-												bExitFlag = true;
-												break;
-											}
-										}
-										if( bExitFlag ) break;
-									}
+									string	keyWord;
+									bool	bExitFlag;
 
-									if( bExitFlag )
+									if( splitWord[0].length )
 									{
-										bExitFlag = false;
-										
-										version(Windows)
+										foreach( _s; GLOBAL.KEYWORDS )
 										{
-											if( GLOBAL.htmlHelp != null )
+											foreach( targetText; Array.split( _s, " " ) )
 											{
-												wchar[] keyWord16 = UTF.toString16( keyWord );
-												
-												foreach( char[] s; GLOBAL.manuals )
+												if( targetText == splitWord[0] )
 												{
-													char[][] _splitWords = Util.split( s, "," );
-													if( _splitWords.length == 2 )
-													{
-														if( _splitWords[1].length )
-														{
-															wchar[]	_path =  UTF.toString16( _splitWords[1] );
+													keyWord = targetText;
+													bExitFlag = true;
+													break;
+												}
+											}
+											if( bExitFlag ) break;
+										}
 
-															HH_AKLINK	akLink;
-															akLink.cbStruct = HH_AKLINK.sizeof;
-															akLink.fReserved = 0;
-															akLink.pszKeywords = toString16z( keyWord16 );
-															akLink.fIndexOnFail = 0;
-															//GLOBAL.htmlHelp( null, toString16z( _path ), 1, 0 ); // HH_DISPLAY_TOPIC = 1
-															if( GLOBAL.htmlHelp( null, toString16z( _path ), 0x000D, cast(uint) &akLink ) != null ) //#define HH_KEYWORD_LOOKUP       &h000D
+										if( bExitFlag )
+										{
+											bExitFlag = false;
+											
+											version(Windows)
+											{
+												if( GLOBAL.htmlHelp != null )
+												{
+													wstring keyWord16 = toUTF16( keyWord );
+													
+													foreach( s; GLOBAL.manuals )
+													{
+														string[] _splitWords = Array.split( s, "," );
+														if( _splitWords.length == 2 )
+														{
+															if( _splitWords[1].length )
 															{
-																bExitFlag = true;
-																break;
+																wstring	_path = toUTF16( _splitWords[1] );
+
+																HH_AKLINK	akLink;
+																akLink.cbStruct = HH_AKLINK.sizeof;
+																akLink.fReserved = 0;
+																akLink.pszKeywords = toUTF16z( keyWord16 );
+																akLink.fIndexOnFail = 0;
+																//GLOBAL.htmlHelp( null, toString16z( _path ), 1, 0 ); // HH_DISPLAY_TOPIC = 1
+																if( GLOBAL.htmlHelp( null, toUTF16z( _path ), 0x000D, cast(uint) &akLink ) != null ) //#define HH_KEYWORD_LOOKUP       &h000D
+																{
+																	bExitFlag = true;
+																	break;
+																}
 															}
+														}
+													}
+												}
+												else
+												{
+													string	keyPg;
+													
+													switch( Uni.toLower( keyWord ) )
+													{
+														case "select":			keyPg = "::KeyPgSelectcase.html";			break;
+														case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
+														default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
+													}											
+
+													if( GLOBAL.manuals.length > 0 )
+													{
+														string[] _splitWords = Array.split( GLOBAL.manuals[0], "," );
+														if( _splitWords.length == 2 )
+														{
+															if( _splitWords[1].length )	IupExecute( "hh", toStringz( "\"" ~ _splitWords[1] ~ keyPg ~ "\"" ) );
 														}
 													}
 												}
 											}
 											else
 											{
-												char[]	keyPg;
-												
-												switch( lowerCase( keyWord ) )
-												{
-													case "select":			keyPg = "::KeyPgSelectcase.html";			break;
-													case "if", "then":		keyPg = "::KeyPgIfthen.html";				break;
-													default:				keyPg = "::KeyPg" ~ keyWord ~ ".html";
-												}											
-
-												//IupExecute( "hh", toStringz( "\"mk:@MSITStore:" ~ GLOBAL.manualPath.toDString ~ keyPg ~ "\"" ) );
 												if( GLOBAL.manuals.length > 0 )
 												{
-													char[][] _splitWords = Util.split( GLOBAL.manuals[0], "," );
+													string[] _splitWords = Array.split( GLOBAL.manuals[0], "," );
 													if( _splitWords.length == 2 )
 													{
-														if( _splitWords[1].length )	IupExecute( "hh", toStringz( "\"" ~ _splitWords[1] ~ keyPg ~ "\"" ) );
-													}
-												}
-											}
-										}
-										else
-										{
-											if( GLOBAL.manuals.length > 0 )
-											{
-												char[][] _splitWords = Util.split( GLOBAL.manuals[0], "," );
-												if( _splitWords.length == 2 )
-												{
-													if( _splitWords[1].length )
-													{
-														scope htmlappPath = new FilePath( GLOBAL.linuxHtmlAppName );
-														switch( Util.trim( htmlappPath.file ) )
+														if( _splitWords[1].length )
 														{
-															case "xchm":
-																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "\"file:" ~ _splitWords[1] ~ "#xchm:/KeyPg" ~ keyWord ~ ".html\"" ) );	// xchm "file:/home/username/freebasic/FB-manual-1.05.0.chm#xchm:/KeyPg%s.html"
-																break;
-															case "kchmviewer":
-																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "--stoc " ~ keyWord ~ " /" ~ _splitWords[1] ) );	// "kchmviewer --sindex %s /chm-path
-																break;
-															case "CHMVIEW":
-																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
-																break;
-															default:
-																IupExecute( "./CHMVIEW", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+															scope htmlappPath = new FilePath( GLOBAL.linuxHtmlAppName );
+															switch( Path.stripExtension( Path.baseName( GLOBAL.linuxHtmlAppName ) ) )
+															{
+																case "xchm":
+																	IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "\"file:" ~ _splitWords[1] ~ "#xchm:/KeyPg" ~ keyWord ~ ".html\"" ) );	// xchm "file:/home/username/freebasic/FB-manual-1.05.0.chm#xchm:/KeyPg%s.html"
+																	break;
+																case "kchmviewer":
+																	IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "--stoc " ~ keyWord ~ " /" ~ _splitWords[1] ) );	// "kchmviewer --sindex %s /chm-path
+																	break;
+																case "CHMVIEW":
+																	IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+																	break;
+																default:
+																	IupExecute( "./CHMVIEW", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+															}
 														}
 													}
 												}
 											}
+											
+											if( bExitFlag ) return;
 										}
-										
-										if( bExitFlag ) return;
 									}
 								}
 							}
-							
-							//if( splitWord[0] == "constructor" || splitWord[0] == "destructor" ) return;
 						}
 					}
 
 					// Divide word
 					int			lineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
-					auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
+					auto 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], lineNum );
 					auto		oriAST = AST_Head;
-					char[]		memberFunctionMotherName;
+					string		memberFunctionMotherName;
 					
 					// Get VersionCondition names
 					if( AST_Head is null ) return;
@@ -3986,20 +3706,16 @@ version(FBIDE)
 					else
 					{
 						// Reset VersionCondition Container
-						foreach( char[] key; VersionCondition.keys )
-							VersionCondition.remove( key );						
+						foreach( key; ( cast(float[string]) AutoComplete.VersionCondition ).keys )
+							AutoComplete.VersionCondition.remove( key );						
 						
-						char[] options, compilers;
-						CustomToolAction.getCustomCompilers( options, compilers );
-						
-						char[] activePrjName = ProjectAction.getActiveProjectName;
-						if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+						string options = GLOBAL.compilerSettings.activeCompiler.Option;
 						if( options.length )
 						{	
-							int _versionPos = Util.index( options, "-d" );
-							while( _versionPos < options.length )
+							int _versionPos = indexOf( options, "-d" );
+							while( _versionPos > -1  )
 							{
-								char[]	versionName;
+								string	versionName;
 								bool	bBeforeSymbol = true;
 								for( int i = _versionPos + 2; i < options.length; ++ i )
 								{
@@ -4015,8 +3731,8 @@ version(FBIDE)
 									versionName ~= options[i];
 								}								
 
-								if( versionName.length ) AutoComplete.VersionCondition[upperCase(versionName)] = 1;
-								_versionPos = Util.index( options, "-d", _versionPos + 2 );
+								if( versionName.length ) AutoComplete.VersionCondition[Uni.toUpper(versionName)] = 1;
+								_versionPos = indexOf( options, "-d", _versionPos + 2 );
 							}								
 						}
 						
@@ -4027,10 +3743,10 @@ version(FBIDE)
 					{
 						if( AST_Head.kind & B_WITH )
 						{
-							char[][] splitWithTile = getDivideWord( AST_Head.name );
-							char[][] tempSplitWord = splitWord;
+							string[] splitWithTile = getDivideWord( AST_Head.name );
+							string[] tempSplitWord = splitWord;
 							splitWord.length = 0;						
-							foreach( char[] s; splitWithTile ~ tempSplitWord )
+							foreach( s; splitWithTile ~ tempSplitWord )
 							{
 								if( s != "" ) splitWord ~= ParserAction.removeArrayAndPointer( s );
 							}						
@@ -4063,8 +3779,8 @@ version(FBIDE)
 								}
 								else
 								{
-									int dotPos = Util.index( _fatherNode.name, "." );
-									if( dotPos < _fatherNode.name.length )
+									int dotPos = indexOf( _fatherNode.name, "." );
+									if( dotPos > -1 )
 									{
 										memberFunctionMotherName = _fatherNode.name[0..dotPos];
 									}
@@ -4078,12 +3794,14 @@ version(FBIDE)
 					if( AST_Head is null ) return;
 					
 					uint keyword_Btype;
-					switch( lowerCase( word ) )
+					switch( Uni.toLower( word ) )
 					{
 						case "constructor":
 							keyword_Btype = B_CTOR;
+							goto case;
 						case "destructor":
 							if( keyword_Btype == 0 ) keyword_Btype = B_DTOR;
+							goto default;
 						/*
 						case "operator":
 							if( keyword_Btype == 0 ) keyword_Btype = B_OPERATOR;
@@ -4126,7 +3844,7 @@ version(FBIDE)
 					//cleanIncludesMarkContainer();
 					
 					// Nested 2021.09.01, for Namespace
-					CASTnode _analysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
+					CASTnode _analysisSplitWord( CASTnode _AST_Head, string[] _splitWord )
 					{
 						CASTnode[] nameSpaceNodes;
 						CASTnode returnNode;
@@ -4141,10 +3859,10 @@ version(FBIDE)
 									if( memberFunctionMotherName.length )
 									{
 										//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-										CASTnode memberFunctionMotherNode = searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
+										CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 										if( memberFunctionMotherNode !is null )
 										{
-											if( lowerCase( _splitWord[i] ) == "this" )
+											if( Uni.toLower( _splitWord[i] ) == "this" )
 											{
 												matchNodes ~= memberFunctionMotherNode;
 											}
@@ -4212,7 +3930,7 @@ version(FBIDE)
 									if( !nameSpaceNodes.length ) return null;
 									
 									foreach( CASTnode a; nameSpaceNodes )
-										if( lowerCase( a.type ) == lowerCase( _AST_Head.type ) ) return a;
+										if( Uni.toLower( a.type ) == Uni.toLower( _AST_Head.type ) ) return a;
 									
 									return nameSpaceNodes[0];
 								}
@@ -4267,7 +3985,7 @@ version(FBIDE)
 								if( nameSpaceNodes.length ) 
 								{
 									foreach( CASTnode a; nameSpaceNodes )
-										if( lowerCase( a.type ) == lowerCase( _AST_Head.type ) ) return a;
+										if( Uni.toLower( a.type ) == Uni.toLower( _AST_Head.type ) ) return a;
 									
 									returnNode = nameSpaceNodes[0];
 								}
@@ -4278,29 +3996,29 @@ version(FBIDE)
 					}
 					
 					
-					CASTnode _performAnalysisSplitWord( CASTnode _AST_Head, char[][] _splitWord )
+					CASTnode _performAnalysisSplitWord( CASTnode _AST_Head, string[] _splitWord )
 					{
 						auto _oriAST = _AST_Head;
 						_AST_Head = null;
 						
-						char[][] usingNames = checkUsingNamespace( _oriAST, lineNum );
+						string[] usingNames = checkUsingNamespace( _oriAST, lineNum );
 						if( usingNames.length )
 						{
-							foreach( char[] s; usingNames )
+							foreach( s; usingNames )
 							{
-								char[][] splitWithDot = Util.split( s, "." );
-								char[][] namespaceSplitWord = splitWithDot ~ _splitWord;
+								string[] splitWithDot = Array.split( s, "." );
+								string[] namespaceSplitWord = splitWithDot ~ _splitWord;
 								_AST_Head = _analysisSplitWord( _oriAST, namespaceSplitWord );
 								if( _AST_Head !is null ) break;
 							}
 						}
 						else
 						{
-							char[] _namespace = getNameSpaceWithDotTail( _oriAST );
+							string _namespace = getNameSpaceWithDotTail( _oriAST );
 							if( _namespace.length )
 							{
-								_namespace ~= Util.join( _splitWord, "." );
-								_AST_Head = _analysisSplitWord( _oriAST, Util.split( _namespace, "." ) );
+								_namespace ~= Array.join( _splitWord, "." );
+								_AST_Head = _analysisSplitWord( _oriAST, Array.split( _namespace, "." ) );
 							}
 						}
 						
@@ -4368,7 +4086,7 @@ version(FBIDE)
 					{
 						if( AST_Head is null ) return;
 						
-						char[]	_param, _type;
+						string	_param, _type;
 						getTypeAndParameter( AST_Head, _type, _param );
 						if( GLOBAL.showTypeWithParams != "ON" ) _param = "";
 						
@@ -4386,21 +4104,21 @@ version(FBIDE)
 							default:
 						}
 						
-						IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showTypeFore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
-						IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showTypeBack.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showTypeFore ), 0 ); //SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showTypeBack ), 0 ); //SCI_CALLTIPSETBACK 2205
 
 						auto _rNode = ParserAction.getRoot( AST_Head );
 
-						char[] _list;
+						string _list;
 						if( _rNode.name == cSci.getFullPath )
-							_list = ( "@ ThisFile ...[" ~ Integer.toString( AST_Head.lineNumber ) ~ "]\n" );
+							_list = ( "@ ThisFile ...[" ~ std.conv.to!(string)( AST_Head.lineNumber ) ~ "]\n" );
 						else
-							_list = ( "@ \"" ~ _rNode.name ~ "\"" ~ " ...[" ~ Integer.toString( AST_Head.lineNumber ) ~ "]\n" );
+							_list = ( "@ \"" ~ _rNode.name ~ "\"" ~ " ...[" ~ std.conv.to!(string)( AST_Head.lineNumber ) ~ "]\n" );
 
 						int filePathPos = _list.length;
 						
 						
-						char[] nameSpaceTitle;
+						string nameSpaceTitle;
 						switch( AST_Head.kind )
 						{
 							case B_SUB:
@@ -4461,7 +4179,7 @@ version(FBIDE)
 						//IupMessage( "AST_HEAD", toStringz( "TYPE :" ~ AST_Head.type ~ "\n" ~ "NAME :" ~ AST_Head.name ~ "\n" ) );
 						if( AST_Head.kind & B_NAMESPACE )
 						{
-							char[] _name = AST_Head.name;
+							string _name = AST_Head.name;
 							
 							_name= getNameSpaceWithDotTail( AST_Head ) ~ _name;
 							_list ~= ScintillaAction.textWrap( ( _type ~ " " ~ _name ) ).dup;
@@ -4481,7 +4199,7 @@ version(FBIDE)
 										if( AST_Head.base[starIndex] != '*' ) break;
 								
 								
-									auto typeNode = _performAnalysisSplitWord( AST_Head, Util.split( AST_Head.base[starIndex..$], "." ) ); //_analysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) );
+									auto typeNode = _performAnalysisSplitWord( AST_Head, Array.split( AST_Head.base[starIndex..$], "." ) ); //_analysisSplitWord( AST_Head, Util.split( AST_Head.base, "." ) );
 									/*
 									while( typeNode !is null ) // Get Top
 									{
@@ -4530,12 +4248,12 @@ version(FBIDE)
 						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
 						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 0, 0 ); // SCI_CALLTIPSETPOSITION 2213
 						IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, filePathPos ); // SCI_CALLTIPSETHLT 2204
-						IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showTypeHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+						IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showTypeHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 					}
 					else
 					{
 						bool		bGotoMemberProcedure;
-						char[]		className, procedureName;
+						string		className, procedureName;
 						CASTnode	sonProcedureNode, oriNode = AST_Head;
 						
 						if( TYPE & 2 )
@@ -4584,13 +4302,12 @@ version(FBIDE)
 						lineNum = AST_Head.lineNumber;
 						
 						CASTnode	_rootNode = ParserAction.getRoot( AST_Head );
-						char[]		fullPath = _rootNode.name;
-						scope _fp = new FilePath( fullPath );
+						string		fullPath = _rootNode.name;
 						
 						if( bGotoMemberProcedure ) // Mean Goto Function with code( Type = 2 )
 						{
-							//IupMessage( "AST_Head", toStringz( Integer.toString( AST_Head.kind ) ~ "\n" ~ AST_Head.name ~ "\n" ~ Integer.toString( AST_Head.lineNumber ) ) );
-							char[][] exceptFiles;
+							//IupMessage( "AST_Head", toStringz( to!(string)( AST_Head.kind ) ~ "\n" ~ AST_Head.name ~ "\n" ~ to!(string)( AST_Head.lineNumber ) ) );
+							string[] exceptFiles;
 							exceptFiles ~= fullPath;
 							
 							if( className.length )
@@ -4603,7 +4320,7 @@ version(FBIDE)
 								}
 							}
 							
-							char[][] nameSpaces = Util.split( getNameSpaceWithDotTail( AST_Head.getFather ), "." );
+							string[] nameSpaces = Array.split( getNameSpaceWithDotTail( AST_Head.getFather ), "." );
 
 							// Declare & procedure body at same file
 							CASTnode _resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, fullPath, AST_Head.kind );
@@ -4614,10 +4331,11 @@ version(FBIDE)
 							}
 							
 							// Not Same File, Continue search
-							// Check BAS file first								
-							if( lowerCase( _fp.ext ) == "bi" )
+							// Check BAS file first
+							string _ext = Path.extension( fullPath );
+							if( Uni.toLower( _ext ) == ".bi" )
 							{
-								exceptFiles ~= ( _fp.path() ~ _fp.name ~ ".bas" );
+								exceptFiles ~= ( Path.stripExtension( fullPath ) ~ ".bas" );
 								_resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, exceptFiles[$-1], AST_Head.kind );
 								if( _resultNode !is null )
 								{
@@ -4626,7 +4344,7 @@ version(FBIDE)
 								}
 								else
 								{
-									exceptFiles ~= ( _fp.path() ~ _fp.name ~ "." ~ GLOBAL.extraParsableExt );
+									exceptFiles ~= ( Path.stripExtension( fullPath ) ~ "." ~ GLOBAL.extraParsableExt );
 									_resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, exceptFiles[$-1], AST_Head.kind );
 									if( _resultNode !is null )
 									{
@@ -4641,7 +4359,7 @@ version(FBIDE)
 							_rootNode = ParserAction.getRoot( _resultNode );
 							if( _rootNode !is null )
 							{
-								//IupMessage( "KIND", toStringz( Integer.toString( _resultNode.kind ) ~ "\n" ~ _resultNode.name ~ "\n" ~ Integer.toString( _resultNode.lineNumber ) ) );
+								//IupMessage( "KIND", toStringz( to!(string)( _resultNode.kind ) ~ "\n" ~ _resultNode.name ~ "\n" ~ to!(string)( _resultNode.lineNumber ) ) );
 								if( GLOBAL.navigation.addCache( _rootNode.name, _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( _rootNode.name, _resultNode.lineNumber );
 								return;
 							}
@@ -4653,18 +4371,18 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				IupMessage( "Bug", toStringz( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				IupMessage( "Bug", toStringz( "toDefintionAndType() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ std.conv.to!(string)( e.line ) ) );
 			}
 		}
 		
 		
-		static CASTnode getFunctionAST( CASTnode head, int _kind, char[] functionTitle, int line )
+		static CASTnode getFunctionAST( CASTnode head, int _kind, string functionTitle, int line )
 		{
 			foreach_reverse( CASTnode node; head.getChildren() )
 			{
 				if( node.kind & _kind )
 				{
-					if( lowerCase( node.name ) == functionTitle )
+					if( Uni.toLower( node.name ) == functionTitle )
 					{
 						if( line >= node.lineNumber ) return node;
 					}
@@ -4680,14 +4398,14 @@ version(FBIDE)
 			return null;
 		}
 
-		static char[] InsertEnd( Ihandle* iupSci, int lin, int pos )
+		static string InsertEnd( Ihandle* iupSci, int lin, int pos )
 		{
 			// #define SCI_LINEFROMPOSITION 2166
 			lin--; // ScintillaAction.getLinefromPos( iupSci, POS ) ) begin from 0
 			
 			bool _isHead( int _pos )
 			{
-				char[] _word;
+				string _word;
 				
 				while( --_pos >= 0 )
 				{
@@ -4701,18 +4419,18 @@ version(FBIDE)
 					}
 				}
 				
-				if( Util.trim( _word ).length ) return false;
+				if( strip( _word ).length ) return false;
 				
 				return true;
 			}
 			
 			bool _isTail( int _pos )
 			{
-				char[] _word;
+				string _word;
 				
 				while( _pos < cast(int) IupScintillaSendMessage( iupSci, 2136, lin, 0 ) ) // SCI_GETLINEENDPOSITION 2136 )
 				{
-					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", ++_pos ) );
+					string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", ++_pos ) );
 					int key = cast(int) s[0];
 					if( key >= 0 && key <= 127 )
 					{
@@ -4721,7 +4439,7 @@ version(FBIDE)
 					}
 				}
 				
-				if( Util.trim( _word ).length ) return false;
+				if( strip( _word ).length ) return false;
 				
 				return true;
 			}
@@ -4733,7 +4451,7 @@ version(FBIDE)
 			....target		= 2 ( _checkType )
 			....target....	= 3 ( _checkType )
 			*/
-			int _check( char[] target, int _checkType )
+			int _check( string target, int _checkType )
 			{
 				int POS = skipCommentAndString( iupSci, pos, target, 0 );
 				if( POS > -1 )
@@ -4771,7 +4489,7 @@ version(FBIDE)
 				return -1;
 			}
 			
-			char[] _checkProcedures( char[] keyword )
+			string _checkProcedures( string keyword )
 			{
 				int _pos = _check( keyword, 1 );
 				if( _pos > -1 )
@@ -4788,7 +4506,7 @@ version(FBIDE)
 					_pos = _check( keyword, 3 );
 					if( _pos > -1 )
 					{
-						char[] beforeWord = DocumentTabAction.getBeforeWord( iupSci, _pos - 1 );
+						string beforeWord = DocumentTabAction.getBeforeWord( iupSci, _pos - 1 );
 						switch( beforeWord )
 						{
 							case "private", "protected", "public":
@@ -4798,6 +4516,7 @@ version(FBIDE)
 								c0 += DocumentTabAction.getKeyWordCount( iupSci, keyword, "public" );							
 								int c1 = DocumentTabAction.getKeyWordCount( iupSci, keyword, "end" );
 								if( c0 > c1 ) return "end " ~ keyword;
+								break;
 							default:
 						}
 					}
@@ -4809,7 +4528,7 @@ version(FBIDE)
 			
 			
 			int		POS;
-			char[]	resultProcedures = _checkProcedures( "sub" );
+			string	resultProcedures = _checkProcedures( "sub" );
 			if( resultProcedures.length ) return resultProcedures;
 
 			resultProcedures = _checkProcedures( "property" );
@@ -4828,7 +4547,7 @@ version(FBIDE)
 			POS = _check( "function", 1 );
 			if( POS > -1 )
 			{
-				char[] afterWord = DocumentTabAction.getAfterWord( iupSci, POS + 8 );
+				string afterWord = DocumentTabAction.getAfterWord( iupSci, POS + 8 );
 				if( afterWord.length )
 				{
 					if( afterWord[0] != '=' )
@@ -4847,7 +4566,7 @@ version(FBIDE)
 				POS = _check( "function", 3 );
 				if( POS > -1 )
 				{
-					char[] beforeWord = DocumentTabAction.getBeforeWord( iupSci, POS - 1 );
+					string beforeWord = DocumentTabAction.getBeforeWord( iupSci, POS - 1 );
 					switch( beforeWord )
 					{
 						case "private", "protected", "public":
@@ -4857,6 +4576,7 @@ version(FBIDE)
 							c0 += DocumentTabAction.getKeyWordCount( iupSci, "function", "public" );							
 							int c1 = DocumentTabAction.getKeyWordCount( iupSci, "function", "end" );
 							if( c0 > c1 ) return "end function";
+							break;
 						default:
 					}
 				}
@@ -4868,7 +4588,7 @@ version(FBIDE)
 			POS= _check( "extern", 1 );
 			if( POS > -1 )
 			{
-				char[] afterWord = DocumentTabAction.getAfterWord( iupSci, POS + 6 );
+				string afterWord = DocumentTabAction.getAfterWord( iupSci, POS + 6 );
 				if( afterWord.length )
 				{
 					if( afterWord[0] == '"' )
@@ -5069,7 +4789,7 @@ version(FBIDE)
 		}
 		
 		
-		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
+		static bool callAutocomplete( Ihandle *ih, int pos, string text, string alreadyInput, bool bForce = false )
 		{
 			if( preLoadContainerThread !is null )
 			{
@@ -5079,7 +4799,7 @@ version(FBIDE)
 				}
 				else
 				{
-					delete preLoadContainerThread;
+					destroy( preLoadContainerThread );
 					preLoadContainerThread = null;
 				}
 			}
@@ -5117,7 +4837,7 @@ version(FBIDE)
 							bool		bDot, bCallTip;
 							CASTnode	AST_Head;
 							int			lineNum;
-							char[][] 	splitWord = getNeedDataForThread( ih, text, pos, lineNum, bDot, bCallTip, AST_Head );
+							string[] 	splitWord = getNeedDataForThread( ih, text, pos, lineNum, bDot, bCallTip, AST_Head );
 							
 							showListThread = new CShowListThread( AST_Head, pos, lineNum, bDot, bCallTip, splitWord, text );
 							showListThread.start();
@@ -5129,7 +4849,7 @@ version(FBIDE)
 					{
 						if( showListThread !is null )
 						{
-							delete showListThread;
+							destroy( showListThread );
 							showListThread = null;
 						}
 					}
@@ -5142,25 +4862,25 @@ version(FBIDE)
 			else
 			{
 				//if( timer != null )	IupSetAttribute( timer, "RUN", "NO" );
-				char[] list = charAdd( ih, pos, text, bForce );
+				string list = charAdd( ih, pos, text, bForce );
 
 				if( list.length )
 				{
-					char[][] splitWord = getDivideWord( alreadyInput );
+					string[] splitWord = getDivideWord( alreadyInput );
 
 					alreadyInput = splitWord[$-1];
 					if( text == "(" )
 					{
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 
-						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
 						//SCI_CALLTIPSETHLT 2204
 						scope _result = new IupString( ScintillaAction.textWrap( list ) );
 						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
 						
-						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						calltipContainer.push( std.conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
 						int highlightStart, highlightEnd;
 						callTipSetHLT( list, 1, highlightStart, highlightEnd );
@@ -5186,7 +4906,7 @@ version(FBIDE)
 			{
 				if( singleWord != null )
 				{
-					char[] s = fromStringz( singleWord );
+					string s = fSTRz( singleWord );
 					if( s == "(" || s == ")" || s == "," ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
 				}
 				else
@@ -5195,18 +4915,17 @@ version(FBIDE)
 				}
 			}
 		
-
 			bool	bContinue;
 			int		commaCount, parenCount, firstOpenParenPosFromDocument;
-			char[]	procedureNameFromList, LineHeadText;
+			string	procedureNameFromList, LineHeadText;
 			int		lineNumber, currentLn = ScintillaAction.getCurrentLine( ih ) - 1;
 			int		lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
 			
 			
-			char[] _getLineHeadText( int _pos, char[] _result = "" )
+			string _getLineHeadText( int _pos, string _result = "" )
 			{
 				while( _pos >= lineHeadPos )
-					_result = fromStringz( IupGetAttributeId( ih, "CHAR", _pos-- ) ) ~ _result;
+					_result = fSTRz( IupGetAttributeId( ih, "CHAR", _pos-- ) ) ~ _result;
 					
 				return _result;
 			}
@@ -5234,7 +4953,7 @@ version(FBIDE)
 			}
 			else
 			{
-				char[] s = fromStringz( singleWord );
+				string s = fSTRz( singleWord );
 				
 				// Press Enter, leave...
 				if( s == "\n" )
@@ -5248,7 +4967,7 @@ version(FBIDE)
 				LineHeadText = _getLineHeadText( pos - 1, s );
 			}
 
-			char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, lineHeadPos, LineHeadText, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+			string	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, lineHeadPos, LineHeadText, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
 			//char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
 
 			if( commaCount == 0 )
@@ -5258,26 +4977,21 @@ version(FBIDE)
 				return false;
 			}
 
-
-
 			// Last time we get null "List" at same line and same procedureNameFromDocument, leave!!!!!
-			if( noneListProcedureName == Integer.toString( firstOpenParenPosFromDocument ) ~ ";" ~ procedureNameFromDocument ) return false;
-	
-	
-	
-	
-			char[]	list;
-			char[]	listInContainer = calltipContainer.size > 0 ? calltipContainer.top() : "";
+			if( noneListProcedureName == std.conv.to!(string)( firstOpenParenPosFromDocument ) ~ ";" ~ procedureNameFromDocument ) return false;
+
+			string	list;
+			string	listInContainer = calltipContainer.size > 0 ? calltipContainer.top() : "";
 			
 			if( listInContainer.length )
 			{
-				int semicolonPos = Util.index( listInContainer, ";" );
-				if( semicolonPos < listInContainer.length )
+				int semicolonPos = indexOf( listInContainer, ";" );
+				if( semicolonPos > -1 )
 				{
-					lineNumber = Integer.toInt( listInContainer[0..semicolonPos] );
+					lineNumber = std.conv.to!(int)( listInContainer[0..semicolonPos] );
 					if( currentLn == lineNumber )
 					{
-						int openParenPos = Util.index( listInContainer, "(" );
+						int openParenPos = indexOf( listInContainer, "(" );
 						if( openParenPos > semicolonPos )
 						{
 							//char[] procedureNameFromList;
@@ -5289,7 +5003,7 @@ version(FBIDE)
 							
 							if( procedureNameFromList != "Constructor" )
 							{
-								if( lowerCase(procedureNameFromList) == lowerCase(procedureNameFromDocument) )
+								if( Uni.toLower(procedureNameFromList) == Uni.toLower(procedureNameFromDocument) )
 								{
 									bContinue = true;
 									list = listInContainer[semicolonPos+1..$].dup;
@@ -5328,7 +5042,7 @@ version(FBIDE)
 								bool		bDot, bCallTip;
 								CASTnode	AST_Head;
 								int			lineNum;
-								char[][] 	splitWord = getNeedDataForThread( ih, "(", firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, AST_Head );
+								string[] 	splitWord = getNeedDataForThread( ih, "(", firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, AST_Head );
 								
 								showCallTipThread = new CShowListThread( AST_Head, firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, splitWord, "(", commaCount, procedureNameFromDocument );									
 								showCallTipThread.start();									
@@ -5348,7 +5062,7 @@ version(FBIDE)
 					if( list.length )
 					{
 						bContinue = true;
-						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						calltipContainer.push( std.conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 					}
 				}
 			}
@@ -5359,8 +5073,8 @@ version(FBIDE)
 				{
 					calltipContainer.pop();
 					list = calltipContainer.top;
-					int semicolonPos = Util.index( list, ";" );
-					if( semicolonPos < list.length )
+					int semicolonPos = indexOf( list, ";" );
+					if( semicolonPos > -1 )
 					{
 						list = list[semicolonPos+1..$].dup;
 						bContinue = true;
@@ -5382,13 +5096,13 @@ version(FBIDE)
 				{
 					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" && cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
 					{
-						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 						scope _result = new IupString( ScintillaAction.textWrap( list ) );
 						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
 						
-						//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
-						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						//if( calltipContainer !is null )	calltipContainer.push( to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						calltipContainer.push( std.conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 					}
 				
 					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
@@ -5399,7 +5113,7 @@ version(FBIDE)
 						if( highlightEnd > -1 )
 						{
 							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
@@ -5418,14 +5132,14 @@ version(FBIDE)
 		static bool updateCallTipByDirectKey( Ihandle* ih, int pos )
 		{
 			int		commaCount, parenCount, firstOpenParenPosFromDocument;
-			char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+			string	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
 			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
 			{
-				char[] list = calltipContainer.top();
+				string list = calltipContainer.top();
 				if( list.length )
 				{
-					int semicolonPos = Util.index( list, ";" );
-					if( semicolonPos < list.length )
+					int semicolonPos = indexOf( list, ";" );
+					if( semicolonPos > -1 )
 					{
 						list = list[semicolonPos+1..$].dup;
 				
@@ -5435,7 +5149,7 @@ version(FBIDE)
 						if( highlightEnd > -1 )
 						{
 							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							return true;
 						}
 						else
@@ -5461,23 +5175,27 @@ version(FBIDE)
 					auto sci = ScintillaAction.getActiveIupScintilla();
 					if( sci != null )
 					{
-						if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
+						if( fSTRz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
 						{
 							int		_pos = ScintillaAction.getCurrentPos( sci );
 							int		dummyHeadPos;
-							char[]	_alreadyInput;
-							char[]	lastChar = fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
+							string	_alreadyInput;
+							string	lastChar = fSTRz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
 							
 							if( _pos > 1 )
 							{
 								if( lastChar == ">" )
 								{
-									if( fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 2 ) ) == "-" ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos - 2, dummyHeadPos ).reverse ~ "->";
+									if( fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 2 ) ) == "-" )
+									{
+										_alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( sci, _pos - 2, dummyHeadPos ).dup );
+										_alreadyInput ~= "->";
+									}
 								}
 							}
 
-							if( !_alreadyInput.length ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).reverse;
-							char[][] splitWord = AutoComplete.getDivideWord( _alreadyInput );
+							if( !_alreadyInput.length ) _alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).dup );
+							string[] splitWord = AutoComplete.getDivideWord( _alreadyInput );
 							_alreadyInput = splitWord[$-1];
 							
 							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
@@ -5494,7 +5212,7 @@ version(FBIDE)
 					}
 				}
 				
-				delete AutoComplete.showListThread;
+				destroy( AutoComplete.showListThread );
 				AutoComplete.showListThread = null;
 			}
 		}
@@ -5515,19 +5233,19 @@ version(FBIDE)
 
 							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 
-							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 							scope _result = new IupString( ScintillaAction.textWrap( AutoComplete.showCallTipThread.getResult ) );
 							IupScintillaSendMessage( sci, 2200, _pos, cast(int) _result.toCString );
 							
-							AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+							AutoComplete.calltipContainer.push( to!(string)( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 							
 							int highlightStart, highlightEnd;
 							AutoComplete.callTipSetHLT( AutoComplete.showCallTipThread.getResult, AutoComplete.showCallTipThread.ext, highlightStart, highlightEnd );
 							if( highlightEnd > -1 ) 
 							{
 								IupScintillaSendMessage( sci, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-								IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+								IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							}
 							
 							AutoComplete.noneListProcedureName = "";
@@ -5538,10 +5256,10 @@ version(FBIDE)
 				}
 				else
 				{
-					AutoComplete.noneListProcedureName = Integer.toString( AutoComplete.showCallTipThread.pos ) ~ ";" ~ AutoComplete.showCallTipThread.extString;
+					AutoComplete.noneListProcedureName = to!(string)( AutoComplete.showCallTipThread.pos ) ~ ";" ~ AutoComplete.showCallTipThread.extString;
 				}
 
-				delete AutoComplete.showCallTipThread;
+				destroy( AutoComplete.showCallTipThread );
 				AutoComplete.showCallTipThread = null;
 			}
 		}		

@@ -7,15 +7,15 @@ private:
 	CASTnode[]			children;
 	
 public:
-	char[]				name;
+	string				name;
 	uint				kind;
-	char[]				protection;
-	char[]				type;
-	char[]				base;
+	string				protection;
+	string				type;
+	string				base;
 	int					lineNumber;
 	int					endLineNum;
 
-	this( char[] _name, int _kind, char[] _protection, char[] _type, char[] _base, int _lineNumber, int _endLineNum = -1 )
+	this( string _name, int _kind, string _protection, string _type, string _base, int _lineNumber, int _endLineNum = -1 )
 	{
 		name = _name;
 		kind = _kind;
@@ -30,7 +30,8 @@ public:
 	{
 		foreach( CASTnode _ast; children )
 		{
-			delete _ast;
+			destroy( _ast );
+			_ast = null;
 		}
 	}
 
@@ -48,7 +49,7 @@ public:
 		return children.length - 1;
 	}
 
-	CASTnode addChild( char[] _name, int _kind, char[] _protection, char[] _type, char[] _base, int _lineNumber, int _endLineNum = -1  )
+	CASTnode addChild( string _name, int _kind, string _protection, string _type, string _base, int _lineNumber, int _endLineNum = -1  )
 	{
 		CASTnode _child = new CASTnode( _name, _kind, _protection, _type, _base, _lineNumber, _endLineNum );
 		_child.father = this;
@@ -138,7 +139,7 @@ public:
 		CASTnode[] tempChildren;
 		for( int i = 0; i < children.length; ++ i )
 		{
-			if( i != index ) tempChildren ~= children[i]; else delete children[i];
+			if( i != index ) tempChildren ~= children[i]; else destroy( children[i] );
 		}
 		
 		zeroChildCount();

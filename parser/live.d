@@ -3,18 +3,12 @@
 struct LiveParser
 {
 	private:
-	import iup.iup;
-	import iup.iup_scintilla;
-
+	import iup.iup, iup.iup_scintilla;
 	import global, actionManager, menu;
 	import tools;
 	import parser.ast, parser.autocompletion;
-
-	import Integer = tango.text.convert.Integer, Util = tango.text.Util;
-	import tango.stdc.stringz, tango.io.Stdout;
-	import tango.io.FilePath;
-	
-	import tango.stdc.stdlib, tango.stdc.string;
+	import std.string, Conv = std.conv, Uni = std.uni;
+	version(Posix) import core.sys.posix.stdlib;
 
 	static CASTnode delChildrenByLineNum( CASTnode head, int fixedLn )
 	{
@@ -45,8 +39,6 @@ struct LiveParser
 					else if( fixedLn > child.endLineNum )
 					{
 						if( !bMatched ) return head;
-						/*
-						if( !bMatched ) bMatched = true;*/
 						beAliveNodes ~= child;
 					}
 					else
@@ -58,7 +50,7 @@ struct LiveParser
 				if( bMatched )
 				{
 					foreach( CASTnode _node; beKillNodes )
-						delete _node;
+						destroy( _node );
 
 					head.zeroChildCount();
 					foreach_reverse( CASTnode _node; beAliveNodes )
@@ -74,7 +66,7 @@ struct LiveParser
 		}
 		catch( Exception e )
 		{
-			IupMessageError( null, toStringz( "delChildrenByLineNum() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			IupMessageError( null, toStringz( "delChildrenByLineNum() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 		}
 
 		return null;
@@ -82,7 +74,7 @@ struct LiveParser
 
 	version(FBIDE)
 	{
-		static bool getBlockPosition( Ihandle* iupSci, int pos, char[] targetText, out int posHead, out int posEnd )
+		static bool getBlockPosition( Ihandle* iupSci, int pos, string targetText, out int posHead, out int posEnd )
 		{
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
 			posHead = AutoComplete.getProcedurePos( iupSci, pos, targetText );
@@ -122,11 +114,11 @@ struct LiveParser
 			if( posHead >= 0 && posEnd >= 0 && posEnd > posHead )
 			{
 				int		functionPos = posHead - 1;
-				char[]	functionWord = fromStringz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
+				string	functionWord = fSTRz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
 				while( functionWord == " " || functionWord == "\t" || functionWord == "\n" )
 				{
 					functionPos --;
-					functionWord = fromStringz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
+					functionWord = fSTRz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
 				}
 				
 				int lineHead = IupScintillaSendMessage( iupSci, 2166, functionPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
@@ -140,11 +132,11 @@ struct LiveParser
 						if( posEnd > -1 )
 						{
 							functionPos = posHead - 1;
-							functionWord = fromStringz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
+							functionWord = fSTRz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
 							while( functionWord == " " || functionWord == "\t" || functionWord == "\n" )
 							{
 								functionPos --;
-								functionWord = fromStringz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
+								functionWord = fSTRz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
 							}
 							
 							lineHead = IupScintillaSendMessage( iupSci, 2166, functionPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
@@ -199,14 +191,14 @@ struct LiveParser
 		}
 	}
 
-	static void parseCurrentLine( int _ln = -1, char[] _text = "" )
+	static void parseCurrentLine( int _ln = -1, string _text = "" )
 	{
 		try
 		{
 			auto cSci = ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
 			{
-				char[]	currentLineText;
+				string	currentLineText;
 				int		currentLineNum;
 
 				if( _text.length )
@@ -222,7 +214,7 @@ struct LiveParser
 				}
 				
 				int	lineHeadPostion = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2167, currentLineNum - 1, 0 );
-				int currentLineTextLength = Util.trim( currentLineText).length;
+				int currentLineTextLength = strip( currentLineText).length;
 			
 				CASTnode 	oldHead = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), currentLineNum );
 				if( oldHead is null ) return;
@@ -255,14 +247,14 @@ struct LiveParser
 					// Parse one line is not complete, EX: one line is function head: function DynamicArray.init( _size as integer ) as TokenUnit ptr
 					if( newHead.endLineNum < 2147483647 )
 					{
-						delete newHead;
+						destroy( newHead );
 						return;
 					}
 
 					// Parse complete, but no any result
 					if( newHead.getChildrenCount == 0 )
 					{
-						delete newHead;
+						destroy( newHead );
 						if( GLOBAL.toggleUpdateOutlineLive == "ON" )
 						{
 							Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
@@ -311,7 +303,7 @@ struct LiveParser
 						}
 					}
 					
-					delete newHead;
+					destroy( newHead );
 				}
 				else // If No any tokens, parser will return null ( GLOBAL.Parser.updateTokens() return false)
 				{
@@ -322,7 +314,7 @@ struct LiveParser
 		}
 		catch( Exception e )
 		{
-			IupMessageError( null, toStringz( "parseCurrentLine() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			IupMessageError( null, toStringz( "parseCurrentLine() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 		}
 	}
 
@@ -353,10 +345,10 @@ struct LiveParser
 														posHead = 0;
 														posTail = IupGetInt( cSci.getIupScintilla, "COUNT" ) - 1;
 													}
-					char[] _char;
+					string _char;
 					while( posHead > 0 )
 					{
-						_char = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", --posHead ) );
+						_char = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", --posHead ) );
 						if( _char == "\n" || _char == ":" )
 						{
 							posHead ++;
@@ -382,20 +374,10 @@ struct LiveParser
 								break;
 							}
 						}			
-						/*				
-						int	id = IupGetInt( GLOBAL.outlineTree.getActiveTree, "VALUE" ); // Get Focus TreeNode
-						
-						if( !GLOBAL.outlineTree.softRefresh( cSci ) ) actionManager.OutlineAction.refresh( cSci.getFullPath() );
-
-						IupSetAttributeId( GLOBAL.outlineTree.getActiveTree, "MARKED", id, "YES" );
-						GLOBAL.outlineTree.markTreeNode( IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1 );
-						*/
 						return;
 					}
 					
-					//IupSetInt( cSci.getIupScintilla, "TARGETSTART", posHead );
 					IupScintillaSendMessage( cSci.getIupScintilla, 2190, posHead, 0 ); 	// SCI_SETTARGETSTART = 2190,
-					//IupSetInt( cSci.getIupScintilla, "TARGETEND", posTail );
 					IupScintillaSendMessage( cSci.getIupScintilla, 2192, posTail, 0 );	// SCI_SETTARGETEND = 2192,
 					
 					CASTnode newHead;
@@ -403,8 +385,8 @@ struct LiveParser
 					{
 						auto blockText = new char[posTail-posHead];
 						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
-						newHead = GLOBAL.outlineTree.parserText( blockText );
-						delete blockText;
+						newHead = GLOBAL.outlineTree.parserText( blockText.dup );
+						destroy( blockText );
 					}
 					else
 					{
@@ -413,16 +395,14 @@ struct LiveParser
 						newHead = GLOBAL.outlineTree.parserText( fromStringz( blockText ) );
 						free( blockText );
 					}
-					//IupMessage( "", toStringz( blockText ) );
 				
 					if( newHead !is null )
 					{
 						CASTnode[]	beAliveNodes;
 
-
 						if( newHead.getChildrenCount == 0 )
 						{
-							delete newHead;
+							destroy( newHead );
 							return;
 						}
 						else
@@ -430,36 +410,9 @@ struct LiveParser
 							// Parser not complete
 							if( newHead.endLineNum < 2147483647 )
 							{
-								delete newHead;
+								destroy( newHead );
 								return;
 							}
-							/+
-							// DelNode
-							if( !newHead[0].getChildrenCount )
-							{
-								if( GLOBAL.toggleUpdateOutlineLive == "ON" )
-								{
-									if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
-									{
-										int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
-										Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
-										int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1;
-
-										for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-										{
-											CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-											if( _node.lineNumber == _ln && lowerCase( _node.name ) == lowerCase( newHead[0].name ) )
-											{
-												IupSetAttributeId( actTree, "DELNODE", i, "CHILDREN" );
-												break;
-											}
-										}
-									}
-								}
-								delete newHead;
-								return;
-							}
-							+/
 						}
 
 						int headLine = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, posHead, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
@@ -469,20 +422,20 @@ struct LiveParser
 						// Get oringnal head
 						if( fullPathByOS( cSci.getFullPath ) in GLOBAL.parserManager )
 						{
-							CASTnode oldHead = AutoComplete.getFunctionAST( GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], newHead[0].kind, lowerCase( newHead[0].name ), newHead[0].lineNumber );
+							CASTnode oldHead = AutoComplete.getFunctionAST( cast(CASTnode) GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], newHead[0].kind, Uni.toLower( newHead[0].name ), newHead[0].lineNumber );
 							//if( oldHead !is null ) IupMessage( "oldHead", toStringz( oldHead.name ~ " " ~oldHead.type ~ " (" ~ Integer.toString( oldHead.lineNumber ) ~ ")" ) ); else IupMessage("","NULL");
 							if( oldHead !is null )
 							{
 								int insertID;
 								if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( headLine );
 
-								CASTnode	father = oldHead.getFather;
+								CASTnode father = oldHead.getFather;
 
 								foreach_reverse( CASTnode child; father.getChildren() )
 								{
 									if( headLine == child.lineNumber )
 									{
-										delete child; // Equal delete oldHead
+										destroy( child ); // Equal delete oldHead
 									}
 									else
 									{
@@ -503,7 +456,7 @@ struct LiveParser
 								if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], insertID );
 								
 								newHead.zeroChildCount();
-								delete newHead;
+								destroy( newHead );
 
 								return;
 							}
@@ -513,7 +466,7 @@ struct LiveParser
 							return;
 						}
 
-						delete newHead;
+						destroy( newHead );
 					}
 					else
 					{
@@ -523,7 +476,7 @@ struct LiveParser
 			}
 			catch( Exception e )
 			{
-				IupMessageError( null, toStringz( "parseCurrentBlock() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				IupMessageError( null, toStringz( "parseCurrentBlock() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 			}
 		}
 	}
@@ -573,27 +526,26 @@ struct LiveParser
 
 						posHead -= 1;
 
-						char[]	functionWord = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", posHead ) );
+						string	functionWord = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", posHead ) );
 						while( functionWord != ";" && functionWord != "{" && functionWord != "}" )
 						{
-							functionWord = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", --posHead ) );
+							functionWord = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "CHAR", --posHead ) );
 						}					
 
 						IupSetInt( cSci.getIupScintilla, "TARGETSTART", posHead + 1 );
 						IupSetInt( cSci.getIupScintilla, "TARGETEND", posTail + 1 );					
-
 						version(Windows)
 						{
-							scope blockText = new char[posTail-posHead];
+							auto blockText = new char[posTail-posHead];
 							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
-							//IupMessage( "", toStringz( blockText ) );
-							newHead = GLOBAL.outlineTree.parserText( Util.trim( blockText ) );
+							newHead = GLOBAL.outlineTree.parserText( blockText.dup );
+							destroy( blockText );
 						}
 						else
 						{
 							char* blockText = cast(char*)calloc( 1, posTail-posHead );
 							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
-							newHead = GLOBAL.outlineTree.parserText( Util.trim( fromStringz( blockText ) ) );
+							newHead = GLOBAL.outlineTree.parserText( fromStringz( blockText ) );
 							free( blockText );
 						}
 					}
@@ -604,10 +556,9 @@ struct LiveParser
 					{
 						CASTnode[]	beAliveNodes;
 
-
 						if( newHead.getChildrenCount == 0 )
 						{
-							delete newHead;
+							destroy( newHead );
 							return;
 						}
 						else
@@ -615,7 +566,7 @@ struct LiveParser
 							// Parser not complete
 							if( newHead.endLineNum < 2147483647 )
 							{
-								delete newHead;
+								destroy( newHead );
 								return;
 							}
 						}
@@ -630,13 +581,13 @@ struct LiveParser
 							int insertID;
 							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( headLine );
 
-							CASTnode	father = oldHead.getFather;
+							CASTnode father = oldHead.getFather;
 
 							foreach_reverse( CASTnode child; father.getChildren() )
 							{
 								if( headLine == child.lineNumber )
 								{
-									delete child; // Equal delete oldHead
+									destroy( child ); // Equal delete oldHead
 								}
 								else
 								{
@@ -657,32 +608,12 @@ struct LiveParser
 							if( GLOBAL.toggleUpdateOutlineLive == "ON" )
 							{
 								GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], insertID );
-								/+
-								GLOBAL.outlineTree.refresh( cSci );
-								
-								int _ln = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
-							
-								int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
-								Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
-
-								for( int i = IupGetInt( actTree, "COUNT" ) - 1; i > 0; --i )
-								{
-									CASTnode _node = cast(CASTnode) IupGetAttributeId( actTree, "USERDATA", i );
-									if( _node.lineNumber <= _ln  )
-									{
-										version(Windows) IupSetAttributeId( actTree, "MARKED", i, "YES" ); else IupSetInt( actTree, "VALUE", i );
-										break;
-									}
-								}
-								+/
 							}						
 							
 							newHead.zeroChildCount();
-							//delete newHead;
-							//return;
 						}
 
-						delete newHead;
+						destroy( newHead );
 					}
 					else
 					{

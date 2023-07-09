@@ -2,14 +2,8 @@
 
 private import iup.iup;
 private import iup.iup_scintilla;
-
 private import global, scintilla, actionManager, tools;
-
-private import Integer = tango.text.convert.Integer;
-private import tango.stdc.stringz;
-private import tango.io.FilePath, Path = tango.io.Path;
-private import Util = tango.text.Util;
-
+private import std.string, std.conv, std.file, Array = std.array, Path = std.path, Uni = std.uni;
 
 class CMessageAndSearch
 {
@@ -39,8 +33,7 @@ private:
 		IupSetAttribute( outputPanel, "TABTITLE", GLOBAL.languageItems["output"].toCString );
 		IupSetAttribute( searchOutputPanel, "TABTITLE", GLOBAL.languageItems["search"].toCString );
 		
-		IupSetAttribute( outputPanel, "TABIMAGE", "icon_message" );
-		IupSetAttribute( searchOutputPanel, "TABIMAGE", "icon_search" );
+		changeIcon();
 	}
 
 public:
@@ -56,48 +49,50 @@ public:
 			// outputPanel		
 			IupSetAttribute( outputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
 			IupSetAttributeId( outputPanel, "INDICATORSTYLE", 4, "DOTBOX" );
-			IupSetStrAttributeId( outputPanel, "INDICATORFGCOLOR", 4, GLOBAL.editColor.searchIndicator.toCString );
-			IupSetIntId( outputPanel, "INDICATORALPHA", 4, Integer.atoi( GLOBAL.editColor.searchIndicatorAlpha.toDString ) );
+			IupSetStrAttributeId( outputPanel, "INDICATORFGCOLOR", 4, toStringz( GLOBAL.editColor.searchIndicator ) );
+			IupSetIntId( outputPanel, "INDICATORALPHA", 4, to!(int)( GLOBAL.editColor.searchIndicatorAlpha ) );
 		}
 		
 		// scintilla
-		version(FBIDE)
+		version(FBIDE) IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "freebasic"); else IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "d" );
+		for( int i = 0; i < 6; ++i )
 		{
-			IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "freebasic");
-			for( int i = 0; i < 6; ++i )
-			{
-				char[] _key = Util.trim( GLOBAL.KEYWORDS[i] );
-				if( _key.length ) IupSetStrAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), toStringz( lowerCase( _key ) ) ); else IupSetAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ Integer.toString( i ) ), "" );
-			}			
-		}
-		version(DIDE)
-		{
-			IupSetStrAttribute( searchOutputPanel, "LEXERLANGUAGE", "d");
-			if( GLOBAL.KEYWORDS[0].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS0", toStringz( GLOBAL.KEYWORDS[0] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS0", "" );
-			if( GLOBAL.KEYWORDS[1].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS1", toStringz( GLOBAL.KEYWORDS[1] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS1", "" );
-			if( GLOBAL.KEYWORDS[2].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS3", toStringz( GLOBAL.KEYWORDS[2] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS3", "" );
-			if( GLOBAL.KEYWORDS[3].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS4", toStringz( GLOBAL.KEYWORDS[3] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS4", "" );
-			if( GLOBAL.KEYWORDS[4].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS5", toStringz( GLOBAL.KEYWORDS[4] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS5", "" );
-			if( GLOBAL.KEYWORDS[5].length ) IupSetStrAttribute(searchOutputPanel, "KEYWORDS6", toStringz( GLOBAL.KEYWORDS[5] ) ); else IupSetAttribute( searchOutputPanel, "KEYWORDS6", "" );
-		}
+			string _key = strip( GLOBAL.KEYWORDS[i] );
+			if( _key.length ) IupSetStrAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ to!(string)( i ) ), toStringz( Uni.toLower( _key ) ) ); else IupSetStrAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ to!(string)( i ) ), "" );
+		}			
 		
 		IupSetAttribute( searchOutputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
 		IupSetAttributeId( searchOutputPanel, "INDICATORSTYLE", 4, "DOTBOX" );
-		IupSetStrAttributeId( searchOutputPanel, "INDICATORFGCOLOR", 4, GLOBAL.editColor.searchIndicator.toCString );
-		IupSetIntId( searchOutputPanel, "INDICATORALPHA", 4, Integer.atoi( GLOBAL.editColor.searchIndicatorAlpha.toDString ) );
+		IupSetStrAttributeId( searchOutputPanel, "INDICATORFGCOLOR", 4, toStringz( GLOBAL.editColor.searchIndicator ) );
+		IupSetIntId( searchOutputPanel, "INDICATORALPHA", 4, to!(int)( GLOBAL.editColor.searchIndicatorAlpha ) );
 		
 		applyColor();
+		changeIcon();
+	}
+	
+	void changeIcon()
+	{
+		if( GLOBAL.editorSetting00.IconInvert == "ON" )
+		{
+			IupSetAttribute( outputPanel, "TABIMAGE", "icon_message_invert" );
+			IupSetAttribute( searchOutputPanel, "TABIMAGE", "icon_search_invert" );
+		}
+		else
+		{
+			IupSetAttribute( outputPanel, "TABIMAGE", "icon_message" );
+			IupSetAttribute( searchOutputPanel, "TABIMAGE", "icon_search" );
+		}
 	}
 	
 	void applyColor()
 	{
-		IupSetStrAttribute( GLOBAL.messageWindowTabs, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
-		IupSetStrAttribute( GLOBAL.messageWindowTabs, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
-		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSFORECOLOR", GLOBAL.editColor.outlineFore.toCString );
-		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSBACKCOLOR", GLOBAL.editColor.outlineBack.toCString );		
-		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore ) );
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "BGCOLOR", toStringz( GLOBAL.editColor.outputBack ) );
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSFORECOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSBACKCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );		
+		IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 		
-		uint alpha = Integer.atoi( GLOBAL.editColor.selAlpha.toDString );
+		uint alpha = to!(int)( GLOBAL.editColor.selAlpha );
 		if( alpha > 255 )
 			alpha = 255;
 		else if( alpha < 0 )
@@ -106,15 +101,14 @@ public:
 		// outputPanel
 		if( GLOBAL.editorSetting01.OutputSci == "ON" )
 		{
-			IupSetAttribute( outputPanel, "STYLEFGCOLOR32", GLOBAL.editColor.outputFore.toCString );		// 32
-			IupSetAttribute( outputPanel, "STYLEBGCOLOR32", GLOBAL.editColor.outputBack.toCString );		// 32
-		
+			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.outputFore ) );		// 32
+			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.outputBack ) );		// 32
 			IupSetAttribute( outputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		}
 		else
 		{
-			IupSetStrAttribute( outputPanel, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
-			IupSetStrAttribute( outputPanel, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
+			IupSetStrAttribute( outputPanel, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore ) );
+			IupSetStrAttribute( outputPanel, "BGCOLOR", toStringz( GLOBAL.editColor.outputBack ) );
 		}
 		/*
 		IupSetAttribute( outputPanel, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
@@ -127,15 +121,15 @@ public:
 		{
 			if( GLOBAL.editorSetting01.OutputSci == "ON" )
 			{
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
+				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore ) );		// SCE_B_COMMENT 1
+				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back ) );		// SCE_B_COMMENT 1
 				
 				/*
 				IupSetAttribute( outputPanel, "STYLEFGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_B_OPERATOR 6
 				IupSetAttribute( outputPanel, "STYLEBGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_B_OPERATOR 6
 				*/
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_B_NUMBER 2
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_B_NUMBER 2
+				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_B_NUMBER 2
+				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_B_NUMBER 2
 
 				/*
 				IupSetAttribute( outputPanel, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_B_STRING 4
@@ -143,122 +137,122 @@ public:
 				*/
 				if( alpha == 255 )
 				{
-					IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+					IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 				}
 				else if( alpha == 0 )
 				{
-					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 				}
 				else
 				{
-					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
-					IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
+					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+					IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   
 				}
 			}
 			// searchOutputPanel
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR32", GLOBAL.editColor.searchFore.toCString );		// 32
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR32", GLOBAL.editColor.searchBack.toCString );		// 32
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.searchFore ) );		// 32
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.searchBack ) );		// 32
 			
 			IupSetAttribute( searchOutputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR11",  GLOBAL.editColor.keyWord[2].toCString );	// SCE_B_KEYWORD3 11
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR12",  GLOBAL.editColor.keyWord[3].toCString );	// SCE_B_KEYWORD4 12
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR23",  GLOBAL.editColor.keyWord[4].toCString );	// SCE_B_KEYWORD5 23
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR24",  GLOBAL.editColor.keyWord[5].toCString );	// SCE_B_KEYWORD6 24
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR3", toStringz( GLOBAL.editColor.keyWord[0] ) );	// SCE_B_KEYWORD 3
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.keyWord[1] ) );	// SCE_B_KEYWORD2 10
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR11",  toStringz( GLOBAL.editColor.keyWord[2] ) );	// SCE_B_KEYWORD3 11
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR12",  toStringz( GLOBAL.editColor.keyWord[3] ) );	// SCE_B_KEYWORD4 12
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR23",  toStringz( GLOBAL.editColor.keyWord[4] ) );	// SCE_B_KEYWORD5 23
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR24",  toStringz( GLOBAL.editColor.keyWord[5] ) );	// SCE_B_KEYWORD6 24
 			
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_B_COMMENT 1
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_B_COMMENT 1
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_B_NUMBER 2
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_B_NUMBER 2
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_B_STRING 4
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_B_STRING 4
-			//IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_B_PREPROCESSOR 5
-			//IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_B_PREPROCESSOR 5
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_B_OPERATOR 6
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_B_OPERATOR 6
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore ) );		// SCE_B_COMMENT 1
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back ) );		// SCE_B_COMMENT 1
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_B_NUMBER 2
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_B_NUMBER 2
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR4", toStringz( GLOBAL.editColor.SCE_B_STRING_Fore ) );		// SCE_B_STRING 4
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR4", toStringz( GLOBAL.editColor.SCE_B_STRING_Back ) );		// SCE_B_STRING 4
+			//IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_B_PREPROCESSOR 5
+			//IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_B_PREPROCESSOR 5
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR6", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Fore ) );		// SCE_B_OPERATOR 6
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR6", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back ) );		// SCE_B_OPERATOR 6
 		}
 		version(DIDE)
 		{
 			if( GLOBAL.editorSetting01.OutputSci == "ON" )
 			{
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_D_CHARACTER 12
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_D_CHARACTER 12
+				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore ) );	// SCE_D_CHARACTER 12
+				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Back ) );	// SCE_D_CHARACTER 12
 				
 				/*
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13
+				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
+				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13
 				*/
 				
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_D_NUMBER 5
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_D_NUMBER 5
+				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_D_NUMBER 5
+				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_D_NUMBER 5
 
 				/*
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_D_STRING 10
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_D_STRING 10
+				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_D_STRING 10
+				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_D_STRING 10
 				*/
 				if( alpha == 255 )
 				{
-					IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+					IupScintillaSendMessage( outputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 				}
 				else if( alpha == 0 )
 				{
-					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 				}
 				else
 				{
-					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+					IupScintillaSendMessage( outputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+					IupScintillaSendMessage( outputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 					IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 				}
 			}
 			// searchOutputPanel
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR32", GLOBAL.editColor.searchFore.toCString );		// 32
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR32", GLOBAL.editColor.searchBack.toCString );		// 32
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.searchFore ) );		// 32
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.searchBack ) );		// 32
 			
-			IupSetAttribute( searchOutputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
+			IupSetStrAttribute( searchOutputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 			
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR6", GLOBAL.editColor.keyWord[0].toCString );			// SCE_D_WORD 6	
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR7", GLOBAL.editColor.keyWord[1].toCString );			// SCE_D_WORD2 7
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR9",  GLOBAL.editColor.keyWord[2].toCString );			// SCE_D_WORD5 9
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR20",  GLOBAL.editColor.keyWord[3].toCString );			// SCE_D_WORD6 20
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR21",  GLOBAL.editColor.keyWord[4].toCString );			// SCE_D_WORD6 21
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR22",  GLOBAL.editColor.keyWord[5].toCString );			// SCE_D_WORD7 22
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR6", toStringz( GLOBAL.editColor.keyWord[0] ) );			// SCE_D_WORD 6	
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR7", toStringz( GLOBAL.editColor.keyWord[1] ) );			// SCE_D_WORD2 7
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR9",  toStringz( GLOBAL.editColor.keyWord[2] ) );			// SCE_D_WORD5 9
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR20",  toStringz( GLOBAL.editColor.keyWord[3] ) );			// SCE_D_WORD6 20
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR21",  toStringz( GLOBAL.editColor.keyWord[4] ) );			// SCE_D_WORD6 21
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR22",  toStringz( GLOBAL.editColor.keyWord[5] ) );			// SCE_D_WORD7 22
 			/*
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENT 1
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR1", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENT 1
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENT 1
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENT 1
 			*/
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR2", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENTLINE 2
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR2", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENTLINE 2
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore ) );		// SCE_D_COMMENTLINE 2
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back ) );		// SCE_D_COMMENTLINE 2
 			/*
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR3", GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENTDOC 3
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR3", GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENTDOC 3
+			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR3", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore.toCString );		// SCE_D_COMMENTDOC 3
+			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR3", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back.toCString );		// SCE_D_COMMENTDOC 3
 			*/
 
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Fore.toCString );		// SCE_D_NUMBER 5
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR5", GLOBAL.editColor.SCE_B_NUMBER_Back.toCString );		// SCE_D_NUMBER 5
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_D_STRING 10
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR10", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_D_STRING 10
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore.toCString );	// SCE_D_CHARACTER 12
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR12", GLOBAL.editColor.SCE_B_PREPROCESSOR_Back.toCString );	// SCE_D_CHARACTER 12
-			IupSetAttribute( searchOutputPanel, "STYLEFGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
-			IupSetAttribute( searchOutputPanel, "STYLEBGCOLOR13", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13	
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_D_NUMBER 5
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_D_NUMBER 5
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Fore ) );		// SCE_D_STRING 10
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Back ) );		// SCE_D_STRING 10
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore ) );	// SCE_D_CHARACTER 12
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Back ) );	// SCE_D_CHARACTER 12
+			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Fore ) );		// SCE_D_OPERATOR 13
+			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back ) );		// SCE_D_OPERATOR 13	
 		}
 		
 		if( GLOBAL.editorSetting01.OutputSci == "ON" )
 		{
 			// Caret Line ( Current Line )
-			IupSetAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
-			IupSetAttribute( outputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
+			IupSetStrAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
+			IupSetStrAttribute( outputPanel, "CARETLINEBACKCOLOR", toStringz( GLOBAL.editColor.caretLine ) );
 		}
 		
 		/*
@@ -269,29 +263,29 @@ public:
 		*/
 		if( alpha == 255 )
 		{
-			IupScintillaSendMessage( searchOutputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( searchOutputPanel, 2067, true, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( searchOutputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else if( alpha == 0 )
 		{
-			IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( searchOutputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else
 		{
-			IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore.toDString ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack.toDString ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( searchOutputPanel, 2067, false, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( searchOutputPanel, 2068, true, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( searchOutputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 
 		// Caret Line ( Current Line )
-		IupSetAttribute( searchOutputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
-		IupSetAttribute( searchOutputPanel, "CARETLINEBACKCOLOR", GLOBAL.editColor.caretLine.toCString );
+		IupSetStrAttribute( searchOutputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
+		IupSetStrAttribute( searchOutputPanel, "CARETLINEBACKCOLOR", toStringz( GLOBAL.editColor.caretLine ) );
 	}
 	
-	void printOutputPanel( char[] txt, bool bClear = false, bool bScrolltoBottom = true )
+	void printOutputPanel( string txt, bool bClear = false, bool bScrolltoBottom = true )
 	{
 		if( txt.length )
 		{
@@ -304,7 +298,7 @@ public:
 		}
 	}
 	
-	void printSearchOutputPanel( char[] txt, bool bClear = false, bool bScrolltoBottom = true )
+	void printSearchOutputPanel( string txt, bool bClear = false, bool bScrolltoBottom = true )
 	{
 		if( txt.length )
 		{
@@ -322,32 +316,22 @@ public:
 		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+		foreach( int LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
-				int openPos = Util.index( lineText, "(" );
-				if( openPos < lineText.length )
+				int openPos = indexOf( lineText, "(" );
+				if( openPos > 0 )
 				{
-					int closePos = Util.index( lineText, ")", openPos );
-					if( closePos < lineText.length )
+					int closePos = indexOf( lineText, ")", openPos );
+					if( closePos > openPos + 1 )
 					{
-						if( closePos < lineText.length )
+						int colonPos = indexOf( lineText, ": ", closePos );
+						if( colonPos > closePos )
 						{
-							if( closePos > openPos )
-							{
-								int colonPos = Util.index( lineText, ": ", closePos );
-								
-								if( colonPos < lineText.length )
-								{
-									if( colonPos > closePos )
-									{
-										int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
-										IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
-									}
-								}
-							}
+							int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+							IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
 						}
 					}
 				}
@@ -360,12 +344,12 @@ public:
 		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+		foreach( int LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
 				int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-				char[] triml_lineText = Util.triml( lineText );
+				string triml_lineText = strip( lineText );
 				lineHeadPos += ( lineText.length - triml_lineText.length );
 				IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
 			}
@@ -377,22 +361,19 @@ public:
 		IupScintillaSendMessage( searchOutputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		IupScintillaSendMessage( searchOutputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		foreach( int LineNum, char[] lineText; Util.splitLines( fromStringz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
+		foreach( int LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
-				int openPos = Util.index( lineText, "(" );
-				if( openPos < lineText.length )
+				int openPos = indexOf( lineText, "(" );
+				if( openPos > 0 )
 				{
-					int closePos = Util.index( lineText, "): ", openPos );
-					if( closePos < lineText.length - 2 )
+					int closePos = indexOf( lineText, "): ", openPos );
+					if( closePos > openPos + 1 )
 					{
-						if( closePos > openPos + 1 )
-						{
-							int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
-							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
-						}
+						int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+						IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
+						IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
 					}
 				}
 			}
@@ -498,133 +479,126 @@ extern(C)
 	{
 		if( button == IUP_BUTTON1 )
 		{
-			char[] statusUTF8 = fromStringz( status ).dup;
+			string statusUTF8 = fSTRz( status );
 			if( statusUTF8.length > 5 )
 			{
 				if( statusUTF8[5] == 'D' )
 				{
 					int		lineNumber;
 					bool	bGetFileName = true;
-					char[]	fileName;
-					char[]	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) ).dup;
+					string	fileName;
+					string	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) ).dup;
 
 					version(FBIDE)
 					{
-						int openPos = Util.index( lineText, "(" );
-						if( openPos < lineText.length )
+						int openPos = indexOf( lineText, "(" );
+						if( openPos > 0 )
 						{
-							int closePos = Util.index( lineText, ")" );
-							if( closePos < lineText.length )
+							int closePos = indexOf( lineText, ")", openPos );
+							if( closePos > openPos + 1 )
 							{
-								if( closePos > openPos+1 )
+								if( closePos < lineText.length - 1 )
 								{
-									if( closePos < lineText.length - 1 )
+									if( lineText[closePos+1] == ' ' )
 									{
-										if( lineText[closePos+1] == ' ' )
+										string lineNumber_char = lineText[openPos+1..closePos].dup;
+										lineNumber = to!(int)( lineNumber_char );
+										fileName = tools.normalizeSlash( lineText[0..openPos] );
+										
+										if( ExecuterAction.quickRunFile.length )
 										{
-											char[] lineNumber_char = lineText[openPos+1..closePos];
-											lineNumber = Integer.atoi( lineNumber_char );
-											fileName = Path.normalize( lineText[0..openPos] );
-											
-											if( ExecuterAction.quickRunFile.length )
+											string _baseName = Path.stripExtension( fileName );
+											if( _baseName.length == 16 )
+												if( _baseName[0..12] == "poseidonTemp" && isNumeric( _baseName[12..14] ) )
+													fileName = ExecuterAction.quickRunFile;
+										}
+										
+										if( fullPathByOS(fileName) in GLOBAL.scintillaManager )
+										{
+											if( GLOBAL.navigation.addCache( fileName, lineNumber ) ) ScintillaAction.openFile( fileName, lineNumber );
+										}
+										else
+										{
+											GLOBAL.navigation.addCache( fileName, lineNumber );
+											if( ScintillaAction.openFile( fileName, lineNumber ) )
 											{
-												if( !Path.parent( fileName ).length ) fileName = ExecuterAction.quickRunFile;
-											}
-											
-											if( fullPathByOS(fileName) in GLOBAL.scintillaManager )
-											{
-												if( GLOBAL.navigation.addCache( fileName, lineNumber ) ) ScintillaAction.openFile( fileName, lineNumber );
-											}
-											else
-											{
-												GLOBAL.navigation.addCache( fileName, lineNumber );
-												if( ScintillaAction.openFile( fileName, lineNumber ) )
+												if( GLOBAL.compilerSettings.useAnootation == "ON" )
 												{
-													if( GLOBAL.compilerAnootation == "ON" )
+													string allMessage = fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup;
+													int prevLineNumber, prevLineNumberCount;
+													foreach( s; splitLines( allMessage ) )
 													{
-														char[] allMessage = fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup;
-														
-														int prevLineNumber, prevLineNumberCount;
-
-														foreach( char[] s; Util.splitLines( allMessage ) )
+														if( s.length )
 														{
-															if( s.length )
+															bool bWarning;
+															int lineNumberTail = indexOf( s, ") error" );
+															if( lineNumberTail == -1 )
 															{
-																bool bWarning;
-																int lineNumberTail = Util.index( s, ") error" );
-																if( lineNumberTail >= s.length )
-																{
-																	lineNumberTail = Util.index( s, ") warning" );
-																	bWarning = true;
-																}
+																lineNumberTail = indexOf( s, ") warning" );
+																bWarning = true;
+															}
 
-																if( lineNumberTail < s.length )
+															if( lineNumberTail > 0 )
+															{
+																int lineNumberHead = indexOf( s, "(" );
+																if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > -1 )
 																{
-																	int lineNumberHead = Util.index( s, "(" );
-																	if( lineNumberHead < lineNumberTail - 1 )
+																	string filePath = tools.normalizeSlash( s[0..lineNumberHead++] );
+																	if( fileName == filePath )
 																	{
-																		char[]	filePath = Path.normalize( s[0..lineNumberHead++] );
-																		if( fileName == filePath )
+																		if( fullPathByOS(filePath) in GLOBAL.scintillaManager )
 																		{
-																			if( fullPathByOS(filePath) in GLOBAL.scintillaManager )
+																			CScintilla cSci = GLOBAL.scintillaManager[fullPathByOS(filePath)];
+
+																			int		ln = to!(int)( s[lineNumberHead..lineNumberTail] ) - 1;
+																			string	annotationText = s[lineNumberTail+2..$];
+																			if( ln != prevLineNumber )
 																			{
-																				CScintilla cSci = GLOBAL.scintillaManager[fullPathByOS(filePath)];
-
-																				int		ln = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
-																				char[]	annotationText = s[lineNumberTail+2..$];
-																				
-																				if( ln != prevLineNumber )
-																				{
-																					prevLineNumber = ln;
-																					prevLineNumberCount = 1;
-																					annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
-																					prevLineNumberCount ++;
-																				}
-																				else
-																				{
-																					annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
-																					prevLineNumberCount ++;
-																				}
-																		
-																				char[]	getText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln ) ).dup;
-																				if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
-
-																				IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( annotationText ) );
-																				if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 40 );
-																				IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+																				prevLineNumber = ln;
+																				prevLineNumberCount = 1;
+																				annotationText = "[" ~ to!(string)( prevLineNumberCount ) ~ "]" ~ annotationText;
+																				prevLineNumberCount ++;
 																			}
+																			else
+																			{
+																				annotationText = "[" ~ to!(string)( prevLineNumberCount ) ~ "]" ~ annotationText;
+																				prevLineNumberCount ++;
+																			}
+																	
+																			string getText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln ) );
+																			if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
+
+																			IupSetStrAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( annotationText ) );
+																			if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 40 );
+																			IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 																		}
 																	}
 																}
 															}
 														}
-														//IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 													}
+													//IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 												}
 											}
-
-											// Make all line be selected
-											if( GLOBAL.editorSetting01.OutputSci == "ON" )
-											{
-												int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
-												IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",0:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length - 1 ) ) );										
-											}
-											else
-											{
-												int pos = IupConvertXYToPos( ih, x, y );
-												int _line, col;
-												IupTextConvertPosToLinCol( ih, pos, &_line, &col );
-												IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",1:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length + 1 ) ) );										
-											}
-											
-											return IUP_IGNORE;
 										}
+
+										// Make all line be selected
+										if( GLOBAL.editorSetting01.OutputSci == "ON" )
+										{
+											int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
+											IupSetAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",0:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length - 1 ) ) );										
+										}
+										else
+										{
+											int pos = IupConvertXYToPos( ih, x, y );
+											int _line, col;
+											IupTextConvertPosToLinCol( ih, pos, &_line, &col );
+											IupSetAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",1:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length + 1 ) ) );										
+										}
+										
+										return IUP_IGNORE;
 									}
 								}
-							}
-							else
-							{
-								version(Windows) return IUP_DEFAULT; else return IUP_IGNORE;
 							}
 						}
 						else
@@ -634,16 +608,16 @@ extern(C)
 					}
 					version(DIDE)
 					{
-						int closePos = Util.index( lineText, "): " );
-						if( closePos < lineText.length )
+						int closePos = indexOf( lineText, "): " );
+						if( closePos > 0 )
 						{
-							int openPos = Util.rindex( lineText, "(", closePos );
-							if( openPos < lineText.length )
+							int openPos = lastIndexOf( lineText, "(", closePos );
+							if( openPos < closePos && closePos > 0 )
 							{
-								char[] lineNumber_char = lineText[openPos+1..closePos];
-								lineNumber = Integer.atoi( lineNumber_char );
+								string lineNumber_char = lineText[openPos+1..closePos];
+								lineNumber = to!(int)( lineNumber_char );
 								
-								if( Util.index( lineText, "warning - " ) == 0 )	fileName = Path.normalize( lineText[10..openPos] ); else fileName =  Path.normalize( lineText[0..openPos] );
+								if( indexOf( lineText, "warning - " ) == 0 ) fileName = tools.normalizeSlash( lineText[10..openPos] ); else fileName =  tools.normalizeSlash( lineText[0..openPos] );
 								if( fullPathByOS(fileName) in GLOBAL.scintillaManager )
 								{
 									if( GLOBAL.navigation.addCache( fileName, lineNumber ) ) ScintillaAction.openFile( fileName, lineNumber );
@@ -653,53 +627,50 @@ extern(C)
 									GLOBAL.navigation.addCache( fileName, lineNumber );
 									if( ScintillaAction.openFile( fileName, lineNumber ) )
 									{
-										if( GLOBAL.compilerAnootation == "ON" )
+										if( GLOBAL.compilerSettings.useAnootation == "ON" )
 										{
-											char[] allMessage = fromStringz( IupGetAttribute( ih, "VALUE" ) ).dup;
+											string allMessage = fSTRz( IupGetAttribute( ih, "VALUE" ) );
 											
 											int prevLineNumber, prevLineNumberCount;
-
-											foreach( char[] s; Util.splitLines( allMessage ) )
+											foreach( s; splitLines( allMessage ) )
 											{
 												if( s.length )
 												{
 													bool bWarning;
 
-													if( Util.index( s, "warning - " ) == 0 ) bWarning = true;
-													int lineNumberTail = Util.index( s, "): " );
-													if( lineNumberTail < s.length )
+													if( indexOf( s, "warning - " ) == 0 ) bWarning = true;
+													int lineNumberTail = indexOf( s, "): " );
+													if( lineNumberTail > 0 )
 													{
-														int lineNumberHead = Util.rindex( s, "(", lineNumberTail );
-														if( lineNumberHead < lineNumberTail - 1 )
+														int lineNumberHead = lastIndexOf( s, "(", lineNumberTail );
+														if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > 0 )
 														{
-															char[]	filePath = bWarning ? Util.replace( s[10..lineNumberHead++], '\\', '/' ) : Util.replace( s[0..lineNumberHead++], '\\', '/' );
+															string filePath = bWarning ? Array.replace( s[10..lineNumberHead++], "\\", "/" ) : Array.replace( s[0..lineNumberHead++], '\\', '/' );
 															if( fileName == filePath )
 															{
 																if( fullPathByOS(filePath) in GLOBAL.scintillaManager )
 																{
 																	CScintilla cSci = GLOBAL.scintillaManager[fullPathByOS(filePath)];
-
-																	int		ln = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
-																	char[]	annotationText = s[lineNumberTail+2..$];
+																	int		ln = to!(int)( s[lineNumberHead..lineNumberTail] ) - 1;
+																	string	annotationText = s[lineNumberTail+2..$];
 																	
 																	if( ln != prevLineNumber )
 																	{
 																		prevLineNumber = ln;
 																		prevLineNumberCount = 1;
-																		annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
+																		annotationText = "[" ~ to!(string)( prevLineNumberCount ) ~ "]" ~ annotationText;
 																		prevLineNumberCount ++;
 																	}
 																	else
 																	{
-																		annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
+																		annotationText = "[" ~ to!(string)( prevLineNumberCount ) ~ "]" ~ annotationText;
 																		prevLineNumberCount ++;
 																	}																
 																	
-																	char[]	getText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln ) ).dup;
+																	string getText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln ) );
 																	if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
 																	
-
-																	IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( annotationText ) );
+																	IupSetStrAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", ln, toStringz( annotationText ) );
 																	if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", ln, 40 );
 																	IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 																}
@@ -708,7 +679,6 @@ extern(C)
 													}
 												}
 											}
-											//IupSetAttribute( GLOBAL.scintillaManager[fullPathByOS(fileName.dup)].getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
 										}
 									}
 								}
@@ -717,14 +687,14 @@ extern(C)
 								if( GLOBAL.editorSetting01.OutputSci == "ON" )
 								{
 									int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
-									IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",0:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length - 1 ) ) );
+									IupSetStrAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",0:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length - 1 ) ) );
 								}
 								else
 								{
 									int pos = IupConvertXYToPos( ih, x, y );
 									int _line, col;
 									IupTextConvertPosToLinCol( ih, pos, &_line, &col );
-									IupSetAttribute( ih, "SELECTION", toStringz( Integer.toString( _line ) ~ ",1:" ~ Integer.toString( _line ) ~ "," ~ Integer.toString( lineText.length + 1 ) ) );										
+									IupSetStrAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",1:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length + 1 ) ) );										
 								}
 								
 								return IUP_IGNORE;
@@ -755,7 +725,7 @@ extern(C)
 	{
 		if( button == IUP_BUTTON1 )
 		{
-			char[] statusUTF8 = fromStringz( status ).dup;
+			string statusUTF8 = fSTRz( status );
 			if( statusUTF8.length > 5 )
 			{
 				if( pressed == 1 )
@@ -764,18 +734,18 @@ extern(C)
 					{
 						int		lineNumber;
 						bool	bGetFileName = true;
-						char[]	fileName;
-						char[]	lineText = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) ).dup;
+						string	fileName;
+						string	lineText = fSTRz( IupGetAttribute( ih, "LINEVALUE" ) );
 						
-						int closePos = Util.index( lineText, "):" );
-						if( closePos < lineText.length )
+						int closePos = indexOf( lineText, "):" );
+						if( closePos > 0 )
 						{
-							lineText = lineText[0..closePos];
-							int openPos = Util.rindex( lineText[], "(" );
-							if( openPos < lineText.length )
+							lineText = lineText[0..closePos].dup;
+							int openPos = lastIndexOf( lineText, "(" );
+							if( openPos > 0 )
 							{
-								char[] lineNumber_char = lineText[openPos+1..$];
-								lineNumber = Integer.toInt( lineNumber_char );
+								string lineNumber_char = lineText[openPos+1..$];
+								lineNumber = to!(int)( lineNumber_char );
 								fileName = lineText[0..openPos];
 								GLOBAL.navigation.addCache( fileName, lineNumber );
 								if( ScintillaAction.openFile( fileName, lineNumber ) )

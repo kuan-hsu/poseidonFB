@@ -2,81 +2,61 @@
 
 struct FocusUnit
 {
-	char[]		Target, Option, Compiler;
-	char[][]	IncDir, LibDir;
+	string		Target, Option, Compiler;
+	string[]	IncDir, LibDir;
 }
 	
 struct PROJECT
 {
-	private:
+private:
+	import iup.iup, iup.iup_config;
 	import global, actionManager, tools;
-	
-	import tango.text.xml.Document;
-	import tango.text.xml.DocPrinter;
-	import tango.io.UnicodeFile;
-	import tango.io.FilePath;//tango.io.Stdout;
-	import tango.stdc.stringz;
-	
-	import iup.iup;
+	import std.string, std.file, std.encoding, Path = std.path, Uni = std.uni, Array = std.array, Algorithm = std.algorithm;
 
-
-	public:
+public:
 	// General
-	char[]		name;
-	char[]		type;
-	char[]		dir;
-	char[]		mainFile;
-	char[]		passOneFile;
-	char[]		targetName;
-	char[]		args;
-	char[]		compilerOption;
-	char[]		comment;
-	char[]		compilerPath;
+	string		name;
+	string		type;
+	string		dir;
+	string		mainFile;
+	string		passOneFile;
+	string		targetName;
+	string		args;
+	string		compilerOption;
+	string		comment;
+	string		compilerPath;
 
 	// Extra
-	char[][]	includeDirs;
-	char[][]	libDirs;
-	char[][]	sources;
-	char[][]	includes;
-	char[][]	others;
-	char[][]	misc;
-	
-	//version(DIDE) char[][]	defaultImportPaths;
+	string[]	includeDirs;
+	string[]	libDirs;
+	string[]	sources;
+	string[]	includes;
+	string[]	others;
+	string[]	misc;
 	
 	// Focus
-	char[]					focusOn;
-	FocusUnit[char[]]		focusUnit;
+	string					focusOn;
+	FocusUnit[string]		focusUnit;
 	
 
 	bool saveFile()
 	{
-		char[] _replaceDir( char[] _fullPath, char[] _dir )
+		string _replaceDir( string _fullPath, string _dir )
 		{
-			int pos;
-			
-			version(Windows)
-			{
-				pos = Util.index( tools.lowerCase( _fullPath ), tools.lowerCase( _dir ) );
-				if( pos == 0 ) return _fullPath[_dir.length..$].dup;
-			}
-			else
-			{
-				pos = Util.index( _fullPath, _dir );
-				if( pos == 0 ) return _fullPath[_dir.length..$].dup;
-			}
+			int pos = indexOf( tools.fullPathByOS( _fullPath ), tools.fullPathByOS( _dir ) );
+			if( pos == 0 ) return _fullPath[_dir.length..$].dup;
 
 			return _fullPath;
 		}
 		
-		scope destPath = new FilePath( dir );
-		if( !destPath.exists() )
+		if( !std.file.exists( dir ) )
 		{	
 			Ihandle* prjPropertyDialog = IupGetHandle( "PRJPROPERTY_DIALOG" );
 			if( prjPropertyDialog == null ) prjPropertyDialog = GLOBAL.mainDlg;
 			try
 			{
-				int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, destPath.toString ~ "\n" ~ GLOBAL.languageItems["nodirandcreate"].toDString, "WARNING", IUP_CENTER, IUP_CENTER );
-				if( result == 1 ) destPath.create(); else return false;
+				int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, dir ~ "\n" ~ GLOBAL.languageItems["nodirandcreate"].toDString, "WARNING" );
+				if( result == 1 ) std.file.mkdir( dir ); else return false;
 			}
 			catch( Exception e )
 			{
@@ -85,12 +65,11 @@ struct PROJECT
 			}
 		}
 		
-		char[]	PATH = dir ~ "/";
-		char[]	doc;
+		string	PATH = dir ~ "/";
+		string	doc;
 		
 		// Editor
 		doc ~= setINILineData( "[Project]");
-		
 		doc ~= setINILineData( "ProjectName", name );
 		doc ~= setINILineData( "Type", type );
 		doc ~= setINILineData( "MainFile", mainFile );
@@ -103,102 +82,89 @@ struct PROJECT
 		doc ~= setINILineData( "CompilerPath", compilerPath );
 		
 		doc ~= setINILineData( "[IncludeDirs]");
-		foreach( char[] s; includeDirs )
+		foreach( s; includeDirs )
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
 
 		doc ~= setINILineData( "[LibDirs]");
-		foreach( char[] s; libDirs ) 
+		foreach( s; libDirs ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
 
 		doc ~= setINILineData( "[Sources]");
-		foreach( char[] s; sources ) 
+		foreach( s; sources ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
 
 		doc ~= setINILineData( "[Includes]");
-		foreach( char[] s; includes ) 
+		foreach( s; includes ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
 
 		doc ~= setINILineData( "[Others]");
-		foreach( char[] s; others ) 
+		foreach( s; others ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
 
 		doc ~= setINILineData( "[Misc]");
-		foreach( char[] s; misc ) 
+		foreach( s; misc ) 
 			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
 			
 			
 		doc ~= setINILineData( "[Focus]");
-		foreach( char[] key; focusUnit.keys )
+		foreach( key; focusUnit.keys )
 		{
 			doc ~= setINILineData( "title",  key );
 			doc ~= setINILineData( "target",  focusUnit[key].Target );
 			doc ~= setINILineData( "option",  focusUnit[key].Option );
 			doc ~= setINILineData( "compiler",  focusUnit[key].Compiler );
 
-			char[] joined = Util.join( focusUnit[key].IncDir, ";" );
+			string joined = Array.join( focusUnit[key].IncDir, ";" );
 			if( joined.length ) doc ~= setINILineData( "incdir", joined );
 
-			joined = Util.join( focusUnit[key].LibDir, ";" );
+			joined = Array.join( focusUnit[key].LibDir, ";" );
 			if( joined.length ) doc ~= setINILineData( "libdir", joined );
 		}
 		
-		version(FBIDE) actionManager.FileAction.saveFile( dir ~ "/FB.poseidon", doc );
-		version(DIDE) actionManager.FileAction.saveFile( dir ~ "/D.poseidon", doc );
+		version(FBIDE) actionManager.FileAction.saveFile( dir ~ "/FB.poseidon", doc, BOM.utf8, true );
+		version(DIDE) actionManager.FileAction.saveFile( dir ~ "/D.poseidon", doc, BOM.utf8, true );
 		
 		return true;
 	}
 	
 	
-	PROJECT loadFile( char[] settingFileName )
+	PROJECT loadFile( string settingFileFullPath )
 	{
-		char[] _replaceDir( char[] _fullPath, char[] _dir )
+		string _replaceDir( string _fullPath, string _dir )
 		{
-			scope _fp = new FilePath( _fullPath  );
-			if( !_fp.isAbsolute() ) return _dir ~ "/" ~ _fullPath;			
-			
+			if( !Path.isAbsolute( _fullPath ) ) return _dir ~ "/" ~ _fullPath;
 			return _fullPath;
 		}
 		
 		PROJECT s;
-		char[]	left, right;
-		
 		try
 		{
-			scope file = new UnicodeFile!(char)( settingFileName, Encoding.Unknown );
-			char[] doc = file.read();
+			int _encoding, _withBom;
+			auto doc = FileAction.loadFile( settingFileFullPath, _encoding, _withBom );
+			string _dir = Path.dirName( settingFileFullPath );
+			s.dir = _dir;
 			
-			scope _dir = new FilePath( settingFileName );
-			s.dir = _dir.path[0..$-1];			
-			
-			char[]	blockText, focusName;
-			foreach( char[] lineData; Util.splitLines( doc ) )
+			string	blockText, focusName, left, right;
+			foreach( lineData; splitLines( doc ) )
 			{
-				lineData = Util.trim( lineData );
+				lineData = strip( lineData );
 				if( lineData.length )
 				{
-					// If .poseidon is xml format......
-					if( lineData[0] == '<' )
+					// Get Line Data
+					int _result = getINILineData( lineData, left, right );
+					
+					if( _result == 1 )
 					{
-						return loadXMLFile( settingFileName );
+						blockText = left;
+						continue;
+					}
+					else if( _result == 0 )
+					{
+						continue;
 					}
 					else
 					{
-						// Get Line Data
-						int _result = getINILineData( lineData, left, right );
-						
-						if( _result == 1 )
-						{
-							blockText = left;
-							continue;
-						}
-						else if( _result == 0 )
-						{
-							continue;
-						}
-						else
-						{
-							if( !right.length ) continue;
-						}
+						if( !right.length ) continue;
 					}
 				}
 				else
@@ -228,22 +194,22 @@ struct PROJECT
 						break;
 					
 					case "[IncludeDirs]":
-						if( left == "name" ) s.includeDirs ~= _replaceDir( right, s.dir );	break;
+						if( left == "name" ) s.includeDirs ~= _replaceDir( right, _dir );	break;
 
 					case "[LibDirs]":	
-						if( left == "name" ) s.libDirs ~= _replaceDir( right, s.dir );		break;
+						if( left == "name" ) s.libDirs ~= _replaceDir( right, _dir );		break;
 					
 					case "[Sources]":
-						if( left == "name" ) s.sources ~= _replaceDir( right, s.dir );		break;
+						if( left == "name" ) s.sources ~= _replaceDir( right, _dir );		break;
 
 					case "[Includes]":
-						if( left == "name" ) s.includes ~= _replaceDir( right, s.dir );		break;
+						if( left == "name" ) s.includes ~= _replaceDir( right, _dir );		break;
 						
 					case "[Others]":
-						if( left == "name" ) s.others ~= _replaceDir( right, s.dir );		break;
+						if( left == "name" ) s.others ~= _replaceDir( right, _dir );		break;
 
 					case "[Misc]":
-						if( left == "name" ) s.misc ~= _replaceDir( right, s.dir );		break;
+						if( left == "name" ) s.misc ~= _replaceDir( right, _dir );		break;
 
 					case "[Focus]":
 						switch( left )
@@ -265,133 +231,34 @@ struct PROJECT
 							case "incdir":
 								if( focusName.length )
 								{
-									foreach( char[] dir; Util.split( right, ";" ) )
-										s.focusUnit[focusName].IncDir ~= _replaceDir( dir, s.dir );
+									foreach( dir; Array.split( right, ";" ) )
+										s.focusUnit[focusName].IncDir ~= _replaceDir( dir, _dir );
 								}
 								break;
 							case "libdir":
 								if( focusName.length )
 								{
-									foreach( char[] dir; Util.split( right, ";" ) )
-										s.focusUnit[focusName].LibDir ~= _replaceDir( dir, s.dir );
+									foreach( dir; Array.split( right, ";" ) )
+										s.focusUnit[focusName].LibDir ~= _replaceDir( dir, _dir );
 								}
 								break;
 							default:
 						}
-					
+						break;
 					default:
 				}
 			}
 			
-			s.sources.sort;
-			s.includes.sort;
-			s.others.sort;
-			s.misc.sort;
+			Algorithm.sort( s.sources );
+			Algorithm.sort( s.includes );
+			Algorithm.sort( s.others );
+			Algorithm.sort( s.misc );
 		}
 		catch( Exception e )
 		{
 			IupMessageError( null, "loadFile() in project.d Error!" );
 		}
-		
+
 		return s;			
-	}
-
-	PROJECT loadXMLFile( char[] settingFileName )
-	{
-		PROJECT s;
-		
-		try
-		{
-			// Read xml
-			// Loading Key Word...
-			scope file = new UnicodeFile!(char)( settingFileName, Encoding.Unknown );
-
-			scope xmlDoc = new Document!( char );
-			xmlDoc.parse( file.read );
-
-			auto root = xmlDoc.elements;
-			auto result = root.query.descendant( "ProjectName" );
-			foreach( e; result ){ s.name = e.value; }
-
-			result = root.query.descendant( "Type" );
-			foreach( e; result ){ s.type = e.value;	}
-
-			/*
-			result = root.query.descendant( "Dir" );
-			foreach( e; result ){ s.dir = e.value; }
-			*/
-			
-			scope _dir = new FilePath( settingFileName );
-			s.dir = _dir.path[0..$-1];
-			
-			result = root.query.descendant( "MainFile" );
-			foreach( e; result ){ s.mainFile = e.value;	}
-
-			result = root.query.descendant( "TargetName" );
-			foreach( e; result ){ s.targetName = e.value; }
-
-			result = root.query.descendant( "CompilerArgs" );
-			foreach( e; result ){ s.args = e.value.dup;	}
-
-			result = root.query.descendant( "CompilerOption" );
-			foreach( e; result ){ s.compilerOption = e.value; }
-
-			result = root.query.descendant( "Comment" );
-			foreach( e; result ){ s.comment = e.value;	}
-
-			result = root.query.descendant( "CompilerPath" );
-			foreach( e; result ){ s.compilerPath = e.value; }
-
-			result = root.query["IncludeDirs"]["Name"];
-			foreach( e; result )
-			{ 
-				s.includeDirs ~= e.value;
-				scope _fp = new FilePath( s.includeDirs[$-1]  );
-				if( !_fp.isAbsolute() ) s.includeDirs[$-1] = s.dir ~ "/" ~ s.includeDirs[$-1];
-			}
-			
-			result = root.query["LibDirs"]["Name"];
-			foreach( e; result )
-			{
-				s.libDirs ~= e.value;
-				scope _fp = new FilePath( s.libDirs[$-1]  );
-				if( !_fp.isAbsolute() ) s.libDirs[$-1] = s.dir ~ "/" ~ s.libDirs[$-1];
-			}
-
-			result = root.query["Sources"]["Name"];
-			foreach( e; result )
-			{
-				s.sources ~= e.value;
-				scope _fp = new FilePath( s.sources[$-1]  );
-				if( !_fp.isAbsolute() ) s.sources[$-1] = s.dir ~ "/" ~ s.sources[$-1];
-			}
-		
-			result = root.query["Includes"]["Name"];
-			foreach( e; result )
-			{
-				s.includes ~= e.value;
-				scope _fp = new FilePath( s.includes[$-1]  );
-				if( !_fp.isAbsolute() ) s.includes[$-1] = s.dir ~ "/" ~ s.includes[$-1];
-			}
-
-			result = root.query["Others"]["Name"];
-			foreach( e; result )
-			{
-				s.others ~= e.value;
-				scope _fp = new FilePath( s.others[$-1]  );
-				if( !_fp.isAbsolute() ) s.others[$-1] = s.dir ~ "/" ~ s.others[$-1];
-			}
-
-			s.sources.sort;
-			s.includes.sort;
-			s.others.sort;
-			
-			return s;
-		}
-		catch( Exception e )
-		{
-		}
-
-		return s;
 	}
 }

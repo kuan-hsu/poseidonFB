@@ -2,24 +2,20 @@
 
 struct XPM
 {
-	private:
+private:
 	import iup.iup;
-	
-	import tango.io.device.File, tango.io.stream.Lines, Util = tango.text.Util, Integer = tango.text.convert.Integer, tools;
-	import tango.stdc.stringz;
-	import tango.io.Stdout, tango.stdc.math;
-
-	import global, tools;
+	import global, tools, actionManager;
+	import std.string, std.conv, std.file, Array = std.array;
 
 	struct ColorUnit
 	{
-		char[] 	index, c, value;
+		string 	index, c, value;
 		int		sn;
 	}
 
-	static ubyte hexStringToByte( char[] hex )
+	static ubyte hexStringToByte( string hex )
 	{
-		hex = lowerCase( hex );
+		hex = toLower( hex );
 	
 		if( hex.length == 2 )
 		{
@@ -57,22 +53,21 @@ struct XPM
 		return 0;
 	}
 
-	static IupString convert( char[] filePath )
+	static IupString convert( string filePath )
 	{
 		try
 		{
-			//return null;
-
-			scope file = new File( filePath, File.ReadExisting );
 			int 		quoteLineCount;
 			int			width, height, num_colors, chars_per_pixel;
 			int			rPos;
 			bool 		bFormat, bPixel, bColor;
 			
-			char[]		pixel;
+			string		pixel;
 			ColorUnit[]	color;
+			int			_bom, _withbom;
 			
-			foreach( int count, char[] line; new Lines!(char)(file) )
+			auto doc = FileAction.loadFile( filePath, _bom, _withbom );
+			foreach( int count, line; std.string.splitLines( doc ) )
 			{
 				if( count == 0 )
 				{
@@ -87,7 +82,7 @@ struct XPM
 					
 					if( quoteLineCount == 1 )
 					{
-						char[]	formatString;
+						string	formatString;
 						bool	bIsNumber;
 						foreach( char c; line[1..$-2] )
 						{
@@ -106,20 +101,20 @@ struct XPM
 							}
 						}
 						
-						char[][] splitWords = Util.split( formatString, " " );
+						string[] splitWords = Array.split( formatString, " " );
 						if( splitWords.length > 3 )
 						{
-							width = Integer.atoi( splitWords[0] );
-							height = Integer.atoi( splitWords[1] );
-							num_colors = Integer.atoi( splitWords[2] );
-							chars_per_pixel = Integer.atoi( splitWords[3] );
+							width = to!(int)( splitWords[0] );
+							height = to!(int)( splitWords[1] );
+							num_colors = to!(int)( splitWords[2] );
+							chars_per_pixel = to!(int)( splitWords[3] );
 						}
 						continue;
 					}
 					else if( quoteLineCount <= num_colors + 1 )
 					{
-						rPos = Util.rindex( line, "\"" );
-						char[][] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						rPos = lastIndexOf( line, "\"" );
+						string[] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
 						if( splitData.length == 2 )
 						{
 							ColorUnit _color;
@@ -137,30 +132,10 @@ struct XPM
 
 							color ~= _color;
 						}
-						/*
-						char[][] splitData = Util.split( line[1..rPos], " " );
-						if( splitData.length == 3 )
-						{
-							ColorUnit _color;
-							_color.index = splitData[0].dup;
-							_color.c = splitData[1].dup;
-							if( splitData[2] == "None" )
-							{
-								_color.value = "00000000".dup;
-							}
-							else
-							{
-								_color.value = ( splitData[2][1..$] ~ "ff" ).dup;
-								
-							}
-
-							color ~= _color;
-						}					
-						*/
 					}
 					else if( quoteLineCount <= num_colors + 1 + width )
 					{
-						rPos = Util.rindex( line, "\"" );
+						rPos = lastIndexOf( line, "\"" );
 						foreach( char c; line[1..rPos] )
 							pixel ~= c;
 					}
@@ -182,8 +157,10 @@ struct XPM
 					}
 				}
 			}
+			
+			auto ret = new IupString( cast(string) result );
 
-			return new IupString( cast(char[]) result.dup );
+			return ret;
 		}
 		catch( Exception e )
 		{
@@ -227,7 +204,7 @@ struct XPM
 		}
 	}
 	+/
-	static IupString getRGBA( char[] filePath )
+	static IupString getRGBA( string filePath )
 	{
 		try
 		{
@@ -269,20 +246,19 @@ struct XPM
 			bookmark_rgba;
 	}
 
-	static Ihandle* getIUPimage( char[] filePath )
+	static Ihandle* getIUPimage( string filePath )
 	{
 		try
 		{
-			scope file = new File( filePath, File.ReadExisting );
-			int 		count, colorSN, rPos;
+			int 		colorSN, rPos;
 			bool 		bPixel, bColor;
 			int			quoteLineCount, width, height, num_colors, chars_per_pixel;
-			char[]		prevLine, pixel;
+			string		prevLine, pixel;
 			ColorUnit[]	color;
 			
 			
-			
-			foreach( int count, char[] line; new Lines!(char)(file) )
+			auto doc = cast(string) std.file.read( filePath );
+			foreach( int count, line; std.string.splitLines( doc ) )
 			{
 				if( count == 0 )
 				{
@@ -297,7 +273,7 @@ struct XPM
 					
 					if( quoteLineCount == 1 )
 					{
-						char[]	formatString;
+						string	formatString;
 						bool	bIsNumber;
 						foreach( char c; line[1..$-2] )
 						{
@@ -316,20 +292,20 @@ struct XPM
 							}
 						}
 						
-						char[][] splitWords = Util.split( formatString, " " );
+						string[] splitWords = Array.split( formatString, " " );
 						if( splitWords.length > 3 )
 						{
-							width = Integer.atoi( splitWords[0] );
-							height = Integer.atoi( splitWords[1] );
-							num_colors = Integer.atoi( splitWords[2] );
-							chars_per_pixel = Integer.atoi( splitWords[3] );
+							width = to!(int)( splitWords[0] );
+							height = to!(int)( splitWords[1] );
+							num_colors = to!(int)( splitWords[2] );
+							chars_per_pixel = to!(int)( splitWords[3] );
 						}
 						continue;
 					}
 					else if( quoteLineCount <= num_colors + 1 )
 					{
-						rPos = Util.rindex( line, "\"" );
-						char[][] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						rPos = lastIndexOf( line, "\"" );
+						string[] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
 						if( splitData.length == 2 )
 						{
 							ColorUnit _color;
@@ -345,40 +321,16 @@ struct XPM
 								int g = hexStringToByte( splitData[1][3..5] );
 								int b = hexStringToByte( splitData[1][5..7] );
 
-								_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
+								_color.value = to!(string)( r ) ~ " " ~ to!(string)( g ) ~ " " ~ to!(string)( b );
 							}
 
 							_color.sn = colorSN++;
 							color ~= _color;
-						}						
-						/*
-						char[][] splitData = Util.split( line[1..rPos], " " );
-						if( splitData.length == 3 )
-						{
-							ColorUnit _color;
-							_color.index = splitData[0].dup;
-							_color.c = splitData[1].dup;
-							if( splitData[2] == "None" )
-							{
-								_color.value = "BGCOLOR";
-							}
-							else
-							{
-								int r = hexStringToByte( splitData[2][1..3] );
-								int g = hexStringToByte( splitData[2][3..5] );
-								int b = hexStringToByte( splitData[2][5..7] );
-
-								_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
-							}
-
-							_color.sn = colorSN++;
-							color ~= _color;
-						}					
-						*/
+						}
 					}
 					else if( quoteLineCount <= num_colors + 1 + width )
 					{
-						rPos = Util.rindex( line, "\"" );
+						rPos = lastIndexOf( line, "\"" );
 						foreach( char c; line[1..rPos] )
 							pixel ~= c;
 					}
@@ -392,7 +344,7 @@ struct XPM
 				{
 					if( c == __color.index[0] )
 					{
-						data ~= __color.sn;
+						data ~= cast(ubyte) __color.sn;
 						break;
 					}
 				}
@@ -401,7 +353,7 @@ struct XPM
 			Ihandle* image = IupImage( width, height, data.ptr );
 
 			foreach( ColorUnit __color; color )
-				IupSetStrAttribute( image, toStringz( Integer.toString( __color.sn ) ) , toStringz( __color.value ) );
+				IupSetStrAttribute( image, toStringz( to!(string)( __color.sn ) ) , toStringz( __color.value ) );
 
 			return image;
 
@@ -414,18 +366,18 @@ struct XPM
 	}
 
 
-	static void createIUPimageHandle( char[] filePath, char[] handleName, bool bCreateInvert = false )
+	static void createIUPimageHandle( string filePath, string handleName, bool bCreateInvert = false )
 	{
 		try
 		{
-			scope file = new File( filePath, File.ReadExisting );
-			int 		count, colorSN, rPos;
+			int 		colorSN, rPos;
 			bool 		bPixel, bColor;
 			int			quoteLineCount, width, height, num_colors, chars_per_pixel;
-			char[]		prevLine, pixel;
+			string		prevLine, pixel;
 			ColorUnit[]	color;
-			
-			foreach( int count, char[] line; new Lines!(char)(file) )
+
+			auto doc = cast(string) std.file.read( filePath );
+			foreach( int count, line; std.string.splitLines( doc ) )
 			{
 				if( count == 0 )
 					if( line != "/* XPM */" ) return;
@@ -438,7 +390,7 @@ struct XPM
 					
 					if( quoteLineCount == 1 )
 					{
-						char[]	formatString;
+						string	formatString;
 						bool	bIsNumber;
 						foreach( char c; line[1..$-2] )
 						{
@@ -457,20 +409,20 @@ struct XPM
 							}
 						}
 						
-						char[][] splitWords = Util.split( formatString, " " );
+						string[] splitWords = Array.split( formatString, " " );
 						if( splitWords.length > 3 )
 						{
-							width = Integer.atoi( splitWords[0] );
-							height = Integer.atoi( splitWords[1] );
-							num_colors = Integer.atoi( splitWords[2] );
-							chars_per_pixel = Integer.atoi( splitWords[3] );
+							width = to!(int)( splitWords[0] );
+							height = to!(int)( splitWords[1] );
+							num_colors = to!(int)( splitWords[2] );
+							chars_per_pixel = to!(int)( splitWords[3] );
 						}
 						continue;
 					}
 					else if( quoteLineCount <= num_colors + 1 )
 					{
-						rPos = Util.rindex( line, "\"" );
-						char[][] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						rPos = lastIndexOf( line, "\"" );
+						string[] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
 						if( splitData.length == 2 )
 						{
 							ColorUnit _color;
@@ -487,45 +439,18 @@ struct XPM
 								int b = hexStringToByte( splitData[1][5..7] );
 			
 								if( GLOBAL.editorSetting00.IconInvert == "ALL" )
-									_color.value = Integer.toString( 255 - r ) ~ " " ~ Integer.toString( 255 - g ) ~ " " ~ Integer.toString( 255 - b );
+									_color.value = to!(string)( 255 - r ) ~ " " ~ to!(string)( 255 - g ) ~ " " ~ to!(string)( 255 - b );
 								else
-									_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
+									_color.value = to!(string)( r ) ~ " " ~ to!(string)( g ) ~ " " ~ to!(string)( b );
 							}
 
 							_color.sn = colorSN++;
 							color ~= _color;
 						}
-						/*
-						char[][] splitData = Util.split( line[1..rPos], " " );
-						if( splitData.length == 3 )
-						{
-							ColorUnit _color;
-							_color.index = splitData[0].dup;
-							_color.c = splitData[1].dup;
-							if( splitData[2] == "None" )
-							{
-								_color.value = "BGCOLOR";
-							}
-							else
-							{
-								int r = hexStringToByte( splitData[2][1..3] );
-								int g = hexStringToByte( splitData[2][3..5] );
-								int b = hexStringToByte( splitData[2][5..7] );
-			
-								if( GLOBAL.editorSetting00.IconInvert == "ALL" )
-									_color.value = Integer.toString( 255 - r ) ~ " " ~ Integer.toString( 255 - g ) ~ " " ~ Integer.toString( 255 - b );
-								else
-									_color.value = Integer.toString( r ) ~ " " ~ Integer.toString( g ) ~ " " ~ Integer.toString( b );
-							}
-
-							_color.sn = colorSN++;
-							color ~= _color;
-						}					
-						*/
 					}
 					else if( quoteLineCount <= num_colors + 1 + width )
 					{
-						rPos = Util.rindex( line, "\"" );
+						rPos = lastIndexOf( line, "\"" );
 						foreach( char c; line[1..rPos] )
 							pixel ~= c;
 					}
@@ -539,7 +464,7 @@ struct XPM
 				{
 					if( c == __color.index[0] )
 					{
-						data ~= __color.sn;
+						data ~= cast(ubyte) __color.sn;	
 						break;
 					}
 				}
@@ -548,7 +473,7 @@ struct XPM
 			Ihandle* image = IupImage( width, height, data.ptr );
 
 			foreach( ColorUnit __color; color )
-				IupSetStrAttribute( image, toStringz( Integer.toString( __color.sn ) ) , toStringz( __color.value ) );
+				IupSetStrAttribute( image, toStringz( to!(string)( __color.sn ) ) , toStringz( __color.value ) );
 			
 			auto _handleName = new IupString( handleName );
 			IupSetHandle( _handleName.toCString, image );
@@ -562,11 +487,11 @@ struct XPM
 				{
 					if( __color.value != "BGCOLOR" )
 					{
-						char[][] _colorValues = Util.split( __color.value, " " );
+						string[] _colorValues = Array.split( __color.value, " " );
 						if( _colorValues.length == 3 )
-							__color.value = Integer.toString( 255 - Integer.atoi( _colorValues[0] ) ) ~ " " ~ Integer.toString( 255 - Integer.atoi( _colorValues[1] ) ) ~ " " ~ Integer.toString( 255 - Integer.atoi( _colorValues[2] ) );
+							__color.value = to!(string)( 255 - to!(int)( _colorValues[0] ) ) ~ " " ~ to!(string)( 255 - to!(int)( _colorValues[1] ) ) ~ " " ~ to!(string)( 255 - to!(int)( _colorValues[2] ) );
 					}
-					IupSetStrAttribute( imageInvert, toStringz( Integer.toString( __color.sn ) ) , toStringz( __color.value ) );
+					IupSetStrAttribute( imageInvert, toStringz( to!(string)( __color.sn ) ) , toStringz( __color.value ) );
 					
 					auto __handleName = new IupString( handleName ~ "_invert" );
 					
@@ -661,7 +586,7 @@ struct XPM
 			union_private_obj_rgba			= getRGBA( "icons/xpm/outline/union_private.xpm" );
 			union_protected_obj_rgba		= getRGBA( "icons/xpm/outline/union_protected.xpm" );
 			union_obj_rgba					= getRGBA( "icons/xpm/outline/union.xpm" );
-			enum_private_obj_rgba 			= getRGBA( "icons/xpmoutline//enum_private.xpm" );
+			enum_private_obj_rgba 			= getRGBA( "icons/xpm/outline/enum_private.xpm" );
 			enum_protected_obj_rgba			= getRGBA( "icons/xpm/outline/enum_protected.xpm" );
 			enum_obj_rgba					= getRGBA( "icons/xpm/outline/enum.xpm" );
 			

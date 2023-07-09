@@ -7,9 +7,26 @@ import layouts.tabDocument, layouts.toolbar, layouts.projectPanel, layouts.messa
 import layouts.statusBar;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
-
+/*
 import tango.io.Stdout, tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
 import tango.sys.win32.UserGdi;
+*/
+import std.string, std.conv, std.file, Array = std.array, Path = std.path;
+import core.sys.windows.winuser;
+
+void changeIconLeftTABIMAGE()
+{
+	if( GLOBAL.editorSetting00.IconInvert == "ON" )
+	{
+		IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer_invert" );
+		IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline_invert" );
+	}
+	else
+	{
+		IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer" );
+		IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
+	}
+}
 
 void createExplorerWindow()
 {
@@ -20,32 +37,23 @@ void createExplorerWindow()
 
 	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABTITLE", GLOBAL.languageItems["prj"].toCString );
 	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABTITLE", GLOBAL.languageItems["outline"].toCString );
-	
-	IupSetAttribute( GLOBAL.projectTree.getLayoutHandle, "TABIMAGE", "icon_packageexplorer" );
-	IupSetAttribute( GLOBAL.outlineTree.getLayoutHandle, "TABIMAGE", "icon_outline" );
+	changeIconLeftTABIMAGE();
 
 
 	GLOBAL.projectViewTabs = IupFlatTabs( GLOBAL.projectTree.getLayoutHandle, GLOBAL.outlineTree.getLayoutHandle, null );
 	IupSetAttributes( GLOBAL.projectViewTabs, "TABTYPE=BOTTOM,TABSPADDING=3x2,NAME=POSEIDON_LEFT_TABS" );
 	//IupSetAttribute( GLOBAL.projectViewTabs, "FORECOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.projectViewTabs, "HIGHCOLOR", "255 0 0" );
-	IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", GLOBAL.editColor.outlineFore.toCString );
-	IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", GLOBAL.editColor.outlineBack.toCString );
-	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSFORECOLOR", GLOBAL.editColor.outlineFore.toCString );
-	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSBACKCOLOR", GLOBAL.editColor.outlineBack.toCString );
-	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
-	/*
-	IupSetCallback( GLOBAL.projectViewTabs, "TABCHANGE_CB", cast(Icallback) function( Ihandle* _ih ){
-		DocumentTabAction.setFocus( ScintillaAction.getActiveIupScintilla() );
-		return IUP_DEFAULT;
-	});
-	*/
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSFORECOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSBACKCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
+	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 	IupSetCallback( GLOBAL.projectViewTabs, "FLAT_BUTTON_CB", cast(Icallback) function( Ihandle* _ih ){
 		DocumentTabAction.setFocus( ScintillaAction.getActiveIupScintilla() );
 		return IUP_DEFAULT;
 	});
 	
-
 	createTabs();
 	createTabs2();
 
@@ -54,7 +62,7 @@ void createExplorerWindow()
 	IupSetCallback( dndEmptylabel, "DROPFILES_CB",cast(Icallback) &label_dropfiles_cb );
 	IupSetCallback( dndEmptylabel, "BUTTON_CB",cast(Icallback) &emptyLabel_button_cb );
 	Ihandle *dndEmptyBackGroundBox = IupBackgroundBox( dndEmptylabel ); // For colorize
-	IupSetStrAttribute( dndEmptyBackGroundBox, "BGCOLOR" , GLOBAL.editColor.dlgBack.toCString );
+	IupSetStrAttribute( dndEmptyBackGroundBox, "BGCOLOR" , toStringz( GLOBAL.editColor.dlgBack ) );
 	GLOBAL.dndDocumentZBox = IupZbox( dndEmptyBackGroundBox, GLOBAL.documentTabs, null  );
 	
 	// RIGHT
@@ -67,7 +75,7 @@ void createExplorerWindow()
 	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
 	{
 		IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
-		IupSetStrAttribute( GLOBAL.documentSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+		IupSetStrAttribute( GLOBAL.documentSplit, "COLOR", toStringz( GLOBAL.editColor.fold ) );
 	}		
 	version(linux) IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
 
@@ -81,7 +89,7 @@ void createExplorerWindow()
 	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
 	{
 		IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
-		IupSetStrAttribute( GLOBAL.documentSplit2, "COLOR", GLOBAL.editColor.fold.toCString );
+		IupSetStrAttribute( GLOBAL.documentSplit2, "COLOR", toStringz( GLOBAL.editColor.fold ) );
 	}	
 	version(linux) IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
 	
@@ -90,11 +98,12 @@ void createExplorerWindow()
 
 	
 	GLOBAL.explorerSplit = IupSplit( GLOBAL.projectViewTabs, IupVbox( GLOBAL.documentSplit2, GLOBAL.searchExpander.getHandle, null ) );
-	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT,BARSIZE=2");
+	IupSetAttributes(GLOBAL.explorerSplit, "ORIENTATION=VERTICAL,AUTOHIDE=YES,LAYOUTDRAG=NO,SHOWGRIP=LINES,NAME=POSEIDON_LEFT_SPLIT");
+	IupSetStrAttribute(GLOBAL.explorerSplit, "BARSIZE", toStringz( GLOBAL.editorSetting01.BarSize ) );
 	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
 	{
 		IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
-		IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", GLOBAL.editColor.fold.toCString );
+		IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", toStringz( GLOBAL.editColor.fold ) );
 	}
 	version(linux) IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
 	
@@ -124,58 +133,57 @@ void createExplorerWindow()
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSIMAGESPACING", "3" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABSPADDING", "6x2" );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "HIGHCOLOR", "255 0 0" );
-	IupSetStrAttribute( GLOBAL.messageWindowTabs, "FGCOLOR", GLOBAL.editColor.outputFore.toCString );
-	IupSetStrAttribute( GLOBAL.messageWindowTabs, "BGCOLOR", GLOBAL.editColor.outputBack.toCString );
-	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSFORECOLOR", GLOBAL.editColor.outlineFore.toCString );
-	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSBACKCOLOR", GLOBAL.editColor.outlineBack.toCString );
-	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore ) );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "BGCOLOR", toStringz( GLOBAL.editColor.outputBack ) );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSFORECOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSBACKCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
+	IupSetStrAttribute( GLOBAL.messageWindowTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "NAME", "POSEIDON_BOTTOM_TABS" );
 	IupSetCallback( GLOBAL.messageWindowTabs, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
-	
 	IupSetCallback( GLOBAL.messageWindowTabs, "RIGHTCLICK_CB", cast(Icallback) &messageTabRightClick_cb );
 	IupSetAttribute( GLOBAL.messageWindowTabs, "TABTYPE", "TOP" );
 	IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
-
-	
 	Ihandle* messageScrollBox = IupScrollBox( GLOBAL.messageWindowTabs );
+	
 
 	GLOBAL.messageSplit = IupSplit(GLOBAL.explorerSplit, messageScrollBox );
 	IupSetAttributes(GLOBAL.messageSplit, "ORIENTATION=HORIZONTAL,AUTOHIDE=YES,SHOWGRIP=LINES,LAYOUTDRAG=NO,NAME=POSEIDON_BOTTOM_SPLIT");
 	if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
 	{
 		IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
-		IupSetStrAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.fold.toCString );
-		IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+		IupSetStrAttribute( GLOBAL.messageSplit, "COLOR", toStringz( GLOBAL.editColor.fold ) );
+		IupSetInt( GLOBAL.messageSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 	}	
 	version(linux) IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
-	IupSetAttribute( GLOBAL.messageSplit, "COLOR", GLOBAL.editColor.linenumBack.toCString );
-	IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+	IupSetAttribute( GLOBAL.messageSplit, "COLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+	IupSetInt( GLOBAL.messageSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* _ih ){
 		return IUP_DEFAULT;
 	});
-	/*
-	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* ih ){
-		if( GLOBAL.fileListTree.getTreeH <= 6 ) IupSetInt( GLOBAL.fileListSplit, "VALUE", 1000 );		
-		return IUP_IGNORE;
-	});
-	*/
+
 
 	GLOBAL.statusBar = new CStatusBar();
-	
 	Ihandle* expander = IupExpander( GLOBAL.toolbar.getHandle );
 	IupSetAttributes( expander, "BARSIZE=0,STATE=OPEN,EXPAND=HORIZONTAL,NAME=POSEIDON_TOOLBAR_EXPANDER" );
 	Ihandle* _backgroundbox = IupGetChild( expander, 0 );
 	if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image 	
 	
-	Ihandle* VBox = IupVbox( expander, GLOBAL.messageSplit, GLOBAL.statusBar.getLayoutHandle, null );
-	IupAppend( GLOBAL.mainDlg, VBox );
-	//IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "NO" );
+	version(Windows)
+	{
+		Ihandle* VBox = IupVbox( createMenu, expander, GLOBAL.messageSplit, GLOBAL.statusBar.getLayoutHandle, null );
+		IupAppend( GLOBAL.mainDlg, VBox );
+	}
+	else
+	{
+		Ihandle* VBox = IupVbox( expander, GLOBAL.messageSplit, GLOBAL.statusBar.getLayoutHandle, null );
+		IupAppend( GLOBAL.mainDlg, VBox );
+	}
 	
 	Ihandle* _scrolllabel = IupLabel( null );
 	IupSetStrAttribute( _scrolllabel, "IMAGE", "icon_scroll" );
 	
 	GLOBAL.scrollICONHandle = IupDialog( _scrolllabel );
-	IupSetStrAttribute( GLOBAL.scrollICONHandle, "OPACITYIMAGE", "icon_scroll" );
+	IupSetAttribute( GLOBAL.scrollICONHandle, "OPACITYIMAGE", "icon_scroll" );
 	IupSetAttributes( GLOBAL.scrollICONHandle, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO" );
 	IupSetAttribute( GLOBAL.scrollICONHandle, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
 	GLOBAL.scrollTimer = IupTimer();
@@ -190,23 +198,22 @@ void createExplorerWindow()
 				
 				if( _ih != null )
 				{
-					char[] cursorString = fromStringz( IupGetGlobal( "CURSORPOS" ) );
+					string cursorString = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
 					int		cursorX, cursorY, iconX, iconY;
-					int 	crossSign = Util.index( cursorString, "x" );
-					if( crossSign < cursorString.length )
+					int 	crossSign = indexOf( cursorString, "x" );
+					if( crossSign > 0 )
 					{
-						cursorX = Integer.atoi( cursorString[0..crossSign] );
-						cursorY = Integer.atoi( cursorString[crossSign+1..$] );
+						cursorX = to!(int)( cursorString[0..crossSign] );
+						cursorY = to!(int)( cursorString[crossSign+1..$] );
 					}
 					
-					char[] iconString = fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
-					crossSign = Util.index( iconString, "," );
-					
-					if( crossSign < iconString.length )
+					string iconString = fSTRz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
+					crossSign = indexOf( iconString, "," );
+					if( crossSign > 0 )
 					{
-						iconX = Integer.atoi( iconString[0..crossSign] );
-						iconY = Integer.atoi( iconString[crossSign+1..$] );
+						iconX = to!(int)( iconString[0..crossSign] );
+						iconY = to!(int)( iconString[crossSign+1..$] );
 					}
 					
 					if( cursorY > iconY + 16 )
@@ -242,9 +249,7 @@ void createExplorerWindow()
 
 void createEditorSetting()
 {
-	//IDECONFIG.load();
 	IDECONFIG.loadINI();
-	
 	if( GLOBAL.editorSetting00.DocStatus == "ON" ) IDECONFIG.loadFileStatus();
 }
 
@@ -256,8 +261,6 @@ void createLayout()
 void createDialog()
 {
 	GLOBAL.compilerHelpDlg	= new CCompilerHelpDialog( 500, 400, GLOBAL.languageItems["caption_optionhelp"].toDString );
-	//GLOBAL.argsDlg			= new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString );
-	//GLOBAL.searchDlg		= new CSearchDialog( -1, -1, GLOBAL.languageItems["sc_findreplace"].toDString, null, false, "POSEIDON_MAIN_DIALOG" );
 	GLOBAL.serachInFilesDlg	= new CFindInFilesDialog( -1, -1, GLOBAL.languageItems["sc_findreplacefiles"].toDString, null, false, "POSEIDON_MAIN_DIALOG" );
 }
 
@@ -268,41 +271,32 @@ extern(C)
 	{
 		int mainDialog_COPYDATA_CB(Ihandle *ih, char* cmdLine, int size)
 		{
-			char[][]	args;
-			char[][]	_args = Util.split( fromStringz( cmdLine ), "\"" );
+			string[]	args;
+			string[]	_args = Array.split( fSTRz( cmdLine ), "\"" );
 			
-			foreach( char[] s; _args )
+			foreach( s; _args )
 			{
-				s = Util.trim( s );
+				s = strip( s );
 				if( s.length ) args ~= s;
 			}
 			
 			if( args.length > 1 )
 			{
-				scope argPath = new FilePath( args[1] );
-				if( argPath.exists() )
+				string argPath = args[1];
+				if( exists( argPath ) )
 				{
-					version(FBIDE)
-					{
-						char[] PRJFILE = "FB.poseidon";
-						if( argPath.file != PRJFILE ) PRJFILE = ".poseidon";
-					}
-					version(DIDE)	char[] PRJFILE = "D.poseidon";
-					if( argPath.file == PRJFILE )
-					{
-						char[] dir = argPath.path;
-						if( dir.length ) dir = dir[0..$-1]; // Remove tail '/'
-						GLOBAL.projectTree.openProject( dir );				
-					}
+					string PRJFILE;
+					version(FBIDE) PRJFILE = "FB.poseidon"; else PRJFILE = "D.poseidon";
+					if( Path.baseName( argPath ) == PRJFILE )
+						GLOBAL.projectTree.openProject( Path.dirName( argPath ) );				
 					else
-					{
-						ScintillaAction.openFile( args[1] );
-					}
+						ScintillaAction.openFile( argPath );
 				}				
 				
 			}
 
 			//IupShow( ih );
+			// BOOL IsIconic( [in] HWND hWnd );  Check the window is min
 			if( IsIconic( IupGetAttribute( GLOBAL.mainDlg, "HWND" ) ) )
 			{
 				ShowWindow( IupGetAttribute( GLOBAL.mainDlg, "HWND" ), SW_RESTORE);  
@@ -316,11 +310,16 @@ extern(C)
 		}
 	}
 
+
+	// While Leave poseidon.......
 	int mainDialog_CLOSE_cb(Ihandle *ih)
 	{
+		int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["sureexit"].toDString );
+		if( result != 1 ) return IUP_IGNORE;
+	
 		try
 		{
-			char[][] tempPrevDocs;
+			string[] tempPrevDocs;
 			if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
 			{
 				Ihandle* activeHandle = cast(Ihandle*) IupGetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE" );
@@ -333,7 +332,7 @@ extern(C)
 						auto cSci = ScintillaAction.getCScintilla( documentHandle );
 						if( cSci !is null )
 						{
-							if( activeHandle == documentHandle ) tempPrevDocs ~= ( "*" ~ cSci.getFullPath ); else	tempPrevDocs ~= cSci.getFullPath;
+							if( activeHandle == documentHandle ) tempPrevDocs ~= ( "*" ~ cSci.getFullPath ); else tempPrevDocs ~= cSci.getFullPath;
 						}
 					}
 				}
@@ -373,32 +372,30 @@ extern(C)
 			}
 
 			GLOBAL.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger();
-			//IDECONFIG.save();
 			IDECONFIG.saveINI();
 
 			foreach( parser; GLOBAL.parserManager )
 			{
-				if( parser !is null ) delete parser;
+				if( parser !is null ) destroy( parser );
 			}
 
-			//if( GLOBAL.objectDefaultParser !is null ) delete GLOBAL.objectDefaultParser;
-			
 			if( GLOBAL.editorSetting00.DocStatus == "ON" ) IDECONFIG.saveFileStatus();
 			
 			if( GLOBAL.scrollTimer != null ) IupDestroy( GLOBAL.scrollTimer );
 			
 			foreach( _plugin; GLOBAL.pluginMnager )
 			{
-				if( _plugin !is null ) delete _plugin;
+				if( _plugin !is null ) destroy( _plugin );
 			}
 		}
 		catch( Exception e )
 		{
-			debug IupMessage("",toStringz(e.toString()));
+			debug IupMessage( "",toStringz( e.toString ) );
 		}
 
 		return IUP_CLOSE;
 	}
+
 
 	int mainDialog_SHOW_cb( Ihandle *ih,int state )
 	{
@@ -412,6 +409,7 @@ extern(C)
 
 		return IUP_DEFAULT;
 	}
+
 	
 	int mainDialog_RESIZE_cb( Ihandle *ih, int width, int height )
 	{
@@ -419,15 +417,14 @@ extern(C)
 		
 		if( GLOBAL.editorSetting01.PLACEMENT != "MAXIMIZED" )
 		{
-			scope rasterSize = new IupString;
-			rasterSize = IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE");
-			GLOBAL.editorSetting01.RASTERSIZE = rasterSize.toDString.dup;
+			GLOBAL.editorSetting01.RASTERSIZE = fSTRz( IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE" ) );
 		}
-		//IupMessage("",toStringz(GLOBAL.editorSetting01.PLACEMENT));
+
 		if( GLOBAL.editorSetting01.PLACEMENT != "MINIMIZED" ) GLOBAL.statusBar.setPrjNameSize( width );
 		
 		return IUP_DEFAULT;
 	}
+	
 	
 	int GlobalWHEEL_CB( Ihandle *ih, float delta, int x, int y, char *status )
 	{
@@ -550,12 +547,12 @@ extern(C)
 									{
 										case 1:
 											int prevLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 1;
-											char[] prevLineText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
+											string prevLineText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
 											//GLOBAL.messagePanel.printOutputPanel( "prevLine(" ~ Integer.toString(prevLine) ~ "): " ~ prevLineText );
 											
-											if( Util.trim( prevLineText ).length )
+											if( strip( prevLineText ).length )
 											{
-												if( Util.trim( fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ) ).length )
+												if( strip( fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ) ).length )
 												{
 													LiveParser.parseCurrentLine( prevLine );
 													LiveParser.parseCurrentLine();
@@ -578,18 +575,15 @@ extern(C)
 									break;
 										
 								default:
-									//if( GLOBAL.liveLevel == 2 )
-									//{
-										if( c > 31 && c < 127 )
+									if( c > 31 && c < 127 )
+									{
+										switch( GLOBAL.liveLevel )
 										{
-											switch( GLOBAL.liveLevel )
-											{
-												case 1: LiveParser.parseCurrentLine(); break;
-												case 2: LiveParser.parseCurrentBlock(); break;
-												default:
-											}
+											case 1: LiveParser.parseCurrentLine(); break;
+											case 2: LiveParser.parseCurrentBlock(); break;
+											default:
 										}
-									//}
+									}
 							}
 						}
 					}
@@ -597,7 +591,7 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				debug IupMessage( "GlobalKeyPress_CB Error", toStringz( "GlobalKeyPress_CB()\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				debug IupMessage( "GlobalKeyPress_CB Error", toStringz( "GlobalKeyPress_CB()\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 			}
 		
 			GLOBAL.bKeyUp = true; // Release
@@ -651,10 +645,10 @@ extern(C)
 				case "leftwindow":
 					if( sk.keyValue == c ) 
 					{
-						if( fromStringz( IupGetAttribute( GLOBAL.menuOutlineWindow, "VALUE" ) ) == "OFF" )
+						if( IupGetInt( GLOBAL.menuOutlineWindow, "VALUE" ) == 0 )
 						{
 							IupSetAttribute( GLOBAL.menuOutlineWindow, "VALUE", "ON" );
-							IupSetInt( GLOBAL.explorerSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+							IupSetInt( GLOBAL.explorerSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 							IupSetInt( GLOBAL.explorerSplit, "VALUE", GLOBAL.explorerSplit_value );
 							IupSetInt( GLOBAL.explorerSplit, "ACTIVE", 1 );
 						}
@@ -666,10 +660,10 @@ extern(C)
 				case "bottomwindow":
 					if( sk.keyValue == c ) 
 					{
-						if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
+						if( IupGetInt( GLOBAL.menuMessageWindow, "VALUE" ) == 0 )
 						{
 							IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
-							IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+							IupSetInt( GLOBAL.messageSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 							IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
 							IupSetInt( GLOBAL.messageSplit, "ACTIVE", 1 );
 						}
@@ -702,14 +696,12 @@ extern(C)
 						{
 							int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 							if( id < count - 1 ) ++id; else id = 0;
-							//IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
 							DocumentTabAction.setFocus( IupGetChild( GLOBAL.activeDocumentTabs, id ) );
 							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 						}
 						return IUP_IGNORE;
 					}
 					break;
-
 				case "prevtab":
 					if( sk.keyValue == c )
 					{
@@ -718,14 +710,12 @@ extern(C)
 						{
 							int id = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 							if( id > 0 ) --id; else id = --count;
-							//IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS", id );
 							DocumentTabAction.setFocus( IupGetChild( GLOBAL.activeDocumentTabs, id ) );
 							actionManager.DocumentTabAction.tabChangePOS( GLOBAL.activeDocumentTabs, id );
 						}
 						return IUP_IGNORE;
 					}
 					break;					
-
 				case "newtab":
 					if( sk.keyValue == c )
 					{
@@ -754,37 +744,35 @@ extern(C)
 	
 	private int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
 	{
-		char[] _fn = fromStringz( filename ).dup;
+		string _fn = fSTRz( filename );
 		version(linux) _fn = tools.modifyLinuxDropFileName( _fn );
 
-		scope f = new FilePath( _fn );
-		if( f.isFolder )
+		string prjSettingFile = _fn;
+		if( isDir( _fn ) )
 		{
 			version(FBIDE)
-			{
-				f.set( f.toString ~ "/" ~ "FB.poseidon" );
-				if( !f.exists() ) f.set( f.path ~ ".poseidon" );
-			}
-			version(DIDE)	f.set( f.toString ~ "/" ~ "D.poseidon" );
+				prjSettingFile = _fn ~ "/" ~ "FB.poseidon";
+			else
+				prjSettingFile = _fn ~ "/" ~ "D.poseidon";
 		}
 		
-		if( f.exists() )
+		if( exists( prjSettingFile ) )
 		{
 			bool bIsPrj;
 			
-			version(FBIDE)	if( f.file == "FB.poseidon" || f.name == ".poseidon" ) bIsPrj = true;
-			version(DIDE)	if( f.file == "D.poseidon" ) bIsPrj = true;
+			version(FBIDE)
+				if( Path.baseName( prjSettingFile ) == "FB.poseidon" ) bIsPrj = true;
+			else
+				if( Path.baseName( prjSettingFile ) == "D.poseidon" ) bIsPrj = true;
+				
 			if( bIsPrj )
 			{
-				char[] dir = f.path;
-				if( dir.length ) dir = dir[0..$-1]; else return IUP_DEFAULT; // Remove tail '/'
-				GLOBAL.projectTree.openProject( dir );
+				GLOBAL.projectTree.openProject( Path.dirName( prjSettingFile ) );
 			}
 			else
 			{
-				actionManager.ScintillaAction.openFile( f.toString, true );
-				actionManager.ScintillaAction.updateRecentFiles( f.toString );
-				
+				actionManager.ScintillaAction.openFile( prjSettingFile, true );
+				actionManager.ScintillaAction.updateRecentFiles( prjSettingFile );
 				if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 			}
 		}

@@ -7,8 +7,7 @@ class CCompilerHelpDialog : CBaseDialog
 	private:
 	import iup.iup;	
 	import global;
-	import tango.stdc.stringz;
-	import tango.io.UnicodeFile;
+	import std.string, std.file;
 
 	void createLayout()
 	{
@@ -19,23 +18,21 @@ class CCompilerHelpDialog : CBaseDialog
 		{
 			version(FBIDE)
 			{
-				scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptionsFB.txt", Encoding.Unknown );
-				IupSetStrAttribute( text, "VALUE", toStringz( fileCompilerOptions.read ) );
+				auto d = cast(string) std.file.read( "settings/compilerOptionsFB.txt" );
+				IupSetStrAttribute( text, "VALUE", toStringz( d ) );
 			}
 			else
 			{
-				scope fileCompilerOptions = new UnicodeFile!(char)( "settings/compilerOptionsD.txt", Encoding.Unknown );
-				IupSetStrAttribute( text, "VALUE", toStringz( fileCompilerOptions.read ) );
+				auto d = cast(string) std.file.read( "settings/compilerOptionsD.txt" );
+				IupSetStrAttribute( text, "VALUE", toStringz( d ) );
 			}
 		}
 		catch( Exception e )
 		{
 			IupMessage( "Error", toStringz( e.toString ) ); 
 		}
-		
 
 		Ihandle* scrollBox = IupScrollBox( text );
-		
 		Ihandle* vBox = IupVbox( scrollBox, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ARIGHT,MARGIN=5x5,GAP=2,EXPAND=YES" );
 
@@ -43,7 +40,7 @@ class CCompilerHelpDialog : CBaseDialog
 	}	
 
 	public:
-	this( int w, int h, char[] title, bool bResize = true, char[] parent = "POSEIDON_MAIN_DIALOG" )
+	this( int w, int h, string title, bool bResize = true, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
@@ -56,7 +53,7 @@ class CCompilerHelpDialog : CBaseDialog
 		IupDestroy( _dlg );
 	}
 
-	char[] show( int x, int y )
+	override string show( int x, int y )
 	{
 		IupShowXY( _dlg, x, y );
 		return null;

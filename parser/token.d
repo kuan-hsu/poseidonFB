@@ -3,13 +3,13 @@
 struct TokenUnit
 {
 	TOK		tok;
-	char[]	identifier;
+	string	identifier;
 	int		lineNumber;
 }
 	
 version(FBIDE)
 {
-	private import tools;
+	private import Uni = std.uni;
 	
 	enum TOK
 	{
@@ -187,9 +187,9 @@ version(FBIDE)
 		_INVALID_,
 	}
 
-	TOK	IdentToTok( char[] s )
+	TOK	IdentToTok( string s )
 	{
-		s = lowerCase( s );
+		s = Uni.toLower( s );
 		switch( s )
 		{
 			case "=":			return TOK.Tassign;
@@ -559,7 +559,7 @@ version(DIDE)
 		_INVALID_,
 	}
 
-	TOK	IdentToTok( char[] s )
+	TOK	IdentToTok( string s )
 	{
 		switch( s )
 		{

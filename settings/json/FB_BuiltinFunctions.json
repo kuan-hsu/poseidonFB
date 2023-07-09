@@ -1,0 +1,3380 @@
+﻿{
+"line": "0",
+"tail": "2147483647",
+"name": "K:/CodingPark/poseidonFB/settings/FB_BuiltinFunctions.bi",
+"kind": "32768",
+"prot": "",
+"type": "",
+"base": "",
+"sons": [
+{
+"line": "2",
+"tail": "2",
+"name": "Erase",
+"kind": "4",
+"prot": "",
+"type": "(array as any,. . .)",
+"base": "",
+"sons": []
+},
+{
+"line": "3",
+"tail": "3",
+"name": "Lbound",
+"kind": "2",
+"prot": "",
+"type": "integer(array() as any,dimension as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "4",
+"tail": "4",
+"name": "Ubound",
+"kind": "2",
+"prot": "",
+"type": "integer(array() as any,dimension as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "7",
+"tail": "7",
+"name": "Bit",
+"kind": "524290",
+"prot": "",
+"type": "(value,bit_number)",
+"base": "",
+"sons": []
+},
+{
+"line": "8",
+"tail": "8",
+"name": "Bitreset",
+"kind": "524290",
+"prot": "",
+"type": "(value,bit_number)",
+"base": "",
+"sons": []
+},
+{
+"line": "9",
+"tail": "9",
+"name": "Bitset",
+"kind": "524290",
+"prot": "",
+"type": "(value,bit_number)",
+"base": "",
+"sons": []
+},
+{
+"line": "10",
+"tail": "10",
+"name": "Hibyte",
+"kind": "524290",
+"prot": "",
+"type": "(expr)",
+"base": "",
+"sons": []
+},
+{
+"line": "11",
+"tail": "11",
+"name": "Hiword",
+"kind": "524290",
+"prot": "",
+"type": "(expr)",
+"base": "",
+"sons": []
+},
+{
+"line": "12",
+"tail": "12",
+"name": "Lobyte",
+"kind": "524290",
+"prot": "",
+"type": "(expr)",
+"base": "",
+"sons": []
+},
+{
+"line": "13",
+"tail": "13",
+"name": "Loword",
+"kind": "524290",
+"prot": "",
+"type": "(expr)",
+"base": "",
+"sons": []
+},
+{
+"line": "16",
+"tail": "16",
+"name": "Beep",
+"kind": "4",
+"prot": "",
+"type": "()",
+"base": "",
+"sons": []
+},
+{
+"line": "17",
+"tail": "17",
+"name": "Cls",
+"kind": "4",
+"prot": "",
+"type": "(mode as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "18",
+"tail": "18",
+"name": "Color",
+"kind": "2",
+"prot": "",
+"type": "ulong(foreground as ulong,background as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "19",
+"tail": "19",
+"name": "Csrlin",
+"kind": "2",
+"prot": "",
+"type": "integer()",
+"base": "",
+"sons": []
+},
+{
+"line": "20",
+"tail": "20",
+"name": "Locate",
+"kind": "2",
+"prot": "",
+"type": "long(row as long,column as long,state as long,start as long,stop as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "21",
+"tail": "21",
+"name": "Pos",
+"kind": "2",
+"prot": "",
+"type": "long()",
+"base": "",
+"sons": []
+},
+{
+"line": "22",
+"tail": "22",
+"name": "Pos",
+"kind": "2",
+"prot": "",
+"type": "long(dummy as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "23",
+"tail": "23",
+"name": "Screen",
+"kind": "2",
+"prot": "",
+"type": "long(row as long,column as long,colorflag as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "26",
+"tail": "26",
+"name": "Date",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "27",
+"tail": "27",
+"name": "Setdate",
+"kind": "2",
+"prot": "",
+"type": "long(newdate as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "28",
+"tail": "28",
+"name": "Settime",
+"kind": "2",
+"prot": "",
+"type": "long(newtime as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "29",
+"tail": "29",
+"name": "Time",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "30",
+"tail": "30",
+"name": "Timer",
+"kind": "2",
+"prot": "",
+"type": "double()",
+"base": "",
+"sons": []
+},
+{
+"line": "33",
+"tail": "33",
+"name": "ASSERT",
+"kind": "524290",
+"prot": "",
+"type": "(expression)",
+"base": "",
+"sons": []
+},
+{
+"line": "34",
+"tail": "34",
+"name": "ASSERTWARN",
+"kind": "524290",
+"prot": "",
+"type": "(expression)",
+"base": "",
+"sons": []
+},
+{
+"line": "35",
+"tail": "35",
+"name": "Stop",
+"kind": "4",
+"prot": "",
+"type": "(retval as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "38",
+"tail": "38",
+"name": "Erfn",
+"kind": "2",
+"prot": "",
+"type": "zstring*()",
+"base": "",
+"sons": []
+},
+{
+"line": "39",
+"tail": "39",
+"name": "Erl",
+"kind": "2",
+"prot": "",
+"type": "integer()",
+"base": "",
+"sons": []
+},
+{
+"line": "40",
+"tail": "40",
+"name": "Ermn",
+"kind": "2",
+"prot": "",
+"type": "zstring*()",
+"base": "",
+"sons": []
+},
+{
+"line": "41",
+"tail": "41",
+"name": "Error",
+"kind": "4",
+"prot": "",
+"type": "(errno as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "44",
+"tail": "44",
+"name": "Bload",
+"kind": "2",
+"prot": "",
+"type": "long(filename as const string,dest as any*,pal as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "45",
+"tail": "45",
+"name": "Bsave",
+"kind": "2",
+"prot": "",
+"type": "long(filename as const string,source as any*,size as ulong,pal as any*,bitsperpixel as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "46",
+"tail": "46",
+"name": "Eof",
+"kind": "2",
+"prot": "",
+"type": "long(filenum as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "47",
+"tail": "47",
+"name": "Freefile",
+"kind": "2",
+"prot": "",
+"type": "long()",
+"base": "",
+"sons": []
+},
+{
+"line": "48",
+"tail": "48",
+"name": "Loc",
+"kind": "2",
+"prot": "",
+"type": "longint(filenum as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "49",
+"tail": "49",
+"name": "Lof",
+"kind": "2",
+"prot": "",
+"type": "longint(filenum as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "50",
+"tail": "50",
+"name": "Reset",
+"kind": "4",
+"prot": "",
+"type": "()",
+"base": "",
+"sons": []
+},
+{
+"line": "51",
+"tail": "51",
+"name": "Reset",
+"kind": "4",
+"prot": "",
+"type": "(streamno as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "52",
+"tail": "52",
+"name": "Seek",
+"kind": "2",
+"prot": "",
+"type": "longint(filenum as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "55",
+"tail": "55",
+"name": "Flip",
+"kind": "2",
+"prot": "",
+"type": "long(frompage as long,topage as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "56",
+"tail": "56",
+"name": "ImageConvertRow",
+"kind": "4",
+"prot": "",
+"type": "(src as any*,src_bpp as long,dst as any*,dst_bpp as long,width as long,isrgb as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "57",
+"tail": "57",
+"name": "ImageCreate",
+"kind": "2",
+"prot": "",
+"type": "any*(width as long,height as long,color as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "58",
+"tail": "58",
+"name": "ImageCreate",
+"kind": "2",
+"prot": "",
+"type": "any*(width as long,height as long,color as ulong,depth as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "59",
+"tail": "59",
+"name": "ImageDestroy",
+"kind": "4",
+"prot": "",
+"type": "(image as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "60",
+"tail": "60",
+"name": "Imageinfo",
+"kind": "2",
+"prot": "",
+"type": "long(image as any*,width as integer,height as integer,bypp as integer,pitch as integer,pixdata as any*,size as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "61",
+"tail": "61",
+"name": "Pcopy",
+"kind": "2",
+"prot": "",
+"type": "long(source as long,destination as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "62",
+"tail": "62",
+"name": "PMap",
+"kind": "2",
+"prot": "",
+"type": "single(coord as single,func as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "63",
+"tail": "63",
+"name": "PointCoord",
+"kind": "2",
+"prot": "",
+"type": "single(func As Long)",
+"base": "",
+"sons": []
+},
+{
+"line": "64",
+"tail": "64",
+"name": "RGB",
+"kind": "524290",
+"prot": "",
+"type": "(r,g,b)",
+"base": "",
+"sons": []
+},
+{
+"line": "65",
+"tail": "65",
+"name": "RGBA",
+"kind": "524290",
+"prot": "",
+"type": "(r,g,b,a)",
+"base": "",
+"sons": []
+},
+{
+"line": "66",
+"tail": "66",
+"name": "ScreenControl",
+"kind": "4",
+"prot": "",
+"type": "(what as long,param1 as integer,param2 as integer,param3 as integer,param4 as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "67",
+"tail": "67",
+"name": "ScreenControl",
+"kind": "4",
+"prot": "",
+"type": "(what as long,param as string)",
+"base": "",
+"sons": []
+},
+{
+"line": "68",
+"tail": "68",
+"name": "Screencopy",
+"kind": "2",
+"prot": "",
+"type": "long(from_page as long,to_page as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "69",
+"tail": "69",
+"name": "ScreenEvent",
+"kind": "2",
+"prot": "",
+"type": "long(event as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "70",
+"tail": "70",
+"name": "Screeninfo",
+"kind": "4",
+"prot": "",
+"type": "(w as integer,h as integer,depth as integer,bpp as integer,pitch as integer,rate as integer,driver as string)",
+"base": "",
+"sons": []
+},
+{
+"line": "71",
+"tail": "71",
+"name": "ScreenGLProc",
+"kind": "2",
+"prot": "",
+"type": "any*(procname as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "72",
+"tail": "72",
+"name": "Screenlist",
+"kind": "2",
+"prot": "",
+"type": "long(depth as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "73",
+"tail": "73",
+"name": "Screenlock",
+"kind": "4",
+"prot": "",
+"type": "()",
+"base": "",
+"sons": []
+},
+{
+"line": "74",
+"tail": "74",
+"name": "Screenptr",
+"kind": "2",
+"prot": "",
+"type": "any*()",
+"base": "",
+"sons": []
+},
+{
+"line": "75",
+"tail": "75",
+"name": "Screenres",
+"kind": "2",
+"prot": "",
+"type": "long(width as long,height as long,depth as long,num_pages as long,flags as long,refresh_rate as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "76",
+"tail": "76",
+"name": "Screenset",
+"kind": "4",
+"prot": "",
+"type": "(work_page as long,visible_page as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "77",
+"tail": "77",
+"name": "Screensync",
+"kind": "2",
+"prot": "",
+"type": "long()",
+"base": "",
+"sons": []
+},
+{
+"line": "78",
+"tail": "78",
+"name": "Screenunlock",
+"kind": "4",
+"prot": "",
+"type": "(startline as long,endline as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "81",
+"tail": "81",
+"name": "Inp",
+"kind": "2",
+"prot": "",
+"type": "integer(port as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "82",
+"tail": "82",
+"name": "Out",
+"kind": "2",
+"prot": "",
+"type": "long(port as ushort,data as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "83",
+"tail": "83",
+"name": "Wait",
+"kind": "2",
+"prot": "",
+"type": "long(port as ushort,and_mask as long,xor_mask as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "84",
+"tail": "84",
+"name": "Lpos",
+"kind": "2",
+"prot": "",
+"type": "long(printer as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "87",
+"tail": "87",
+"name": "Abs",
+"kind": "2",
+"prot": "",
+"type": "integer(number as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "88",
+"tail": "88",
+"name": "Abs",
+"kind": "2",
+"prot": "",
+"type": "uinteger(number as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "89",
+"tail": "89",
+"name": "Abs",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "90",
+"tail": "90",
+"name": "Acos",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "91",
+"tail": "91",
+"name": "Asin",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "92",
+"tail": "92",
+"name": "ATan2",
+"kind": "2",
+"prot": "",
+"type": "double(y as double,x as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "93",
+"tail": "93",
+"name": "Atn",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "94",
+"tail": "94",
+"name": "Cos",
+"kind": "2",
+"prot": "",
+"type": "double(angle as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "95",
+"tail": "95",
+"name": "Exp",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "96",
+"tail": "96",
+"name": "Fix",
+"kind": "2",
+"prot": "",
+"type": "single(number as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "97",
+"tail": "97",
+"name": "Fix",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "98",
+"tail": "98",
+"name": "Fix",
+"kind": "2",
+"prot": "",
+"type": "integer(number as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "99",
+"tail": "99",
+"name": "Fix",
+"kind": "2",
+"prot": "",
+"type": "uinteger(number as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "100",
+"tail": "100",
+"name": "Frac",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "101",
+"tail": "101",
+"name": "Frac",
+"kind": "2",
+"prot": "",
+"type": "integer(number as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "102",
+"tail": "102",
+"name": "Frac",
+"kind": "2",
+"prot": "",
+"type": "uinteger(number as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "103",
+"tail": "103",
+"name": "Int",
+"kind": "2",
+"prot": "",
+"type": "single(number as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "104",
+"tail": "104",
+"name": "Int",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "105",
+"tail": "105",
+"name": "Int",
+"kind": "2",
+"prot": "",
+"type": "integer(number as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "106",
+"tail": "106",
+"name": "Int",
+"kind": "2",
+"prot": "",
+"type": "uinteger(number as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "107",
+"tail": "107",
+"name": "Log",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "108",
+"tail": "108",
+"name": "Randomize",
+"kind": "4",
+"prot": "",
+"type": "(seed as double,algorithm as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "109",
+"tail": "109",
+"name": "Rnd",
+"kind": "2",
+"prot": "",
+"type": "double(seed as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "110",
+"tail": "110",
+"name": "Sgn",
+"kind": "2",
+"prot": "",
+"type": "integer(number as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "111",
+"tail": "111",
+"name": "Sgn",
+"kind": "2",
+"prot": "",
+"type": "longint(number as longint)",
+"base": "",
+"sons": []
+},
+{
+"line": "112",
+"tail": "112",
+"name": "Sgn",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "113",
+"tail": "113",
+"name": "Sin",
+"kind": "2",
+"prot": "",
+"type": "double(angle as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "114",
+"tail": "114",
+"name": "Sqr",
+"kind": "2",
+"prot": "",
+"type": "double(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "115",
+"tail": "115",
+"name": "Tan",
+"kind": "2",
+"prot": "",
+"type": "double(angle as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "118",
+"tail": "118",
+"name": "Allocate",
+"kind": "2",
+"prot": "",
+"type": "any*(count as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "119",
+"tail": "119",
+"name": "Callocate",
+"kind": "2",
+"prot": "",
+"type": "any*(num_elements as uinteger,size as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "120",
+"tail": "120",
+"name": "Clear",
+"kind": "4",
+"prot": "",
+"type": "(dst as any,value as long,bytes as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "121",
+"tail": "121",
+"name": "Deallocate",
+"kind": "4",
+"prot": "",
+"type": "(pointer as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "122",
+"tail": "122",
+"name": "fb_memcopy",
+"kind": "2",
+"prot": "",
+"type": "any*(dst as any,src as any,bytes as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "123",
+"tail": "123",
+"name": "fb_memmove",
+"kind": "2",
+"prot": "",
+"type": "any*(dst as any,src as any,bytes as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "124",
+"tail": "124",
+"name": "Fre",
+"kind": "2",
+"prot": "",
+"type": "uinteger(value as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "125",
+"tail": "125",
+"name": "Peek",
+"kind": "2",
+"prot": "",
+"type": "ubyte(address as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "126",
+"tail": "126",
+"name": "Peek",
+"kind": "2",
+"prot": "",
+"type": "datatype(datatype , address as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "127",
+"tail": "127",
+"name": "Poke",
+"kind": "4",
+"prot": "",
+"type": "(address as any*,value as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "128",
+"tail": "128",
+"name": "Poke",
+"kind": "4",
+"prot": "",
+"type": "(datatype , address as any*,value as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "129",
+"tail": "129",
+"name": "Reallocate",
+"kind": "2",
+"prot": "",
+"type": "any*(pointer as any*,count as uinteger)",
+"base": "",
+"sons": []
+},
+{
+"line": "132",
+"tail": "132",
+"name": "Offsetof",
+"kind": "524290",
+"prot": "",
+"type": "(typename,fieldname)",
+"base": "",
+"sons": []
+},
+{
+"line": "133",
+"tail": "133",
+"name": "Swap",
+"kind": "4",
+"prot": "",
+"type": "(a as any,b as any)",
+"base": "",
+"sons": []
+},
+{
+"line": "136",
+"tail": "136",
+"name": "Dylibfree",
+"kind": "4",
+"prot": "",
+"type": "(library as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "137",
+"tail": "137",
+"name": "Dylibload",
+"kind": "2",
+"prot": "",
+"type": "any*(filename as string)",
+"base": "",
+"sons": []
+},
+{
+"line": "138",
+"tail": "138",
+"name": "Dylibsymbol",
+"kind": "2",
+"prot": "",
+"type": "any*(library as any*,symbol as string)",
+"base": "",
+"sons": []
+},
+{
+"line": "139",
+"tail": "139",
+"name": "Dylibsymbol",
+"kind": "2",
+"prot": "",
+"type": "any*(library as any*,symbol as short)",
+"base": "",
+"sons": []
+},
+{
+"line": "142",
+"tail": "142",
+"name": "Condbroadcast",
+"kind": "4",
+"prot": "",
+"type": "(handle as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "143",
+"tail": "143",
+"name": "Condcreate",
+"kind": "2",
+"prot": "",
+"type": "any*()",
+"base": "",
+"sons": []
+},
+{
+"line": "144",
+"tail": "144",
+"name": "Conddestroy",
+"kind": "4",
+"prot": "",
+"type": "(handle as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "145",
+"tail": "145",
+"name": "Condsignal",
+"kind": "4",
+"prot": "",
+"type": "(handle as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "146",
+"tail": "146",
+"name": "Condwait",
+"kind": "4",
+"prot": "",
+"type": "(handle as any*,mutex as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "147",
+"tail": "147",
+"name": "Mutexcreate",
+"kind": "2",
+"prot": "",
+"type": "any*()",
+"base": "",
+"sons": []
+},
+{
+"line": "148",
+"tail": "148",
+"name": "Mutexdestroy",
+"kind": "4",
+"prot": "",
+"type": "(id as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "149",
+"tail": "149",
+"name": "Mutexlock",
+"kind": "4",
+"prot": "",
+"type": "(id as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "150",
+"tail": "150",
+"name": "Mutexunlock",
+"kind": "4",
+"prot": "",
+"type": "(id as any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "151",
+"tail": "151",
+"name": "Threadcreate",
+"kind": "2",
+"prot": "",
+"type": "any*(procptr As Sub(userdata As any*),param As any*,stack_size As integer)",
+"base": "",
+"sons": [
+{
+"line": "151",
+"tail": "151",
+"name": "userdata",
+"kind": "64",
+"prot": "",
+"type": "any*",
+"base": "",
+"sons": []
+},
+{
+"line": "151",
+"tail": "151",
+"name": "procptr",
+"kind": "4",
+"prot": "",
+"type": "(userdata As any*)",
+"base": "",
+"sons": []
+}]
+},
+{
+"line": "152",
+"tail": "152",
+"name": "ThreadWait",
+"kind": "4",
+"prot": "",
+"type": "(id As any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "155",
+"tail": "155",
+"name": "Chain",
+"kind": "2",
+"prot": "",
+"type": "long(program as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "156",
+"tail": "156",
+"name": "Chdir",
+"kind": "2",
+"prot": "",
+"type": "long(path as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "157",
+"tail": "157",
+"name": "Command",
+"kind": "2",
+"prot": "",
+"type": "string(index as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "158",
+"tail": "158",
+"name": "Curdir",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "159",
+"tail": "159",
+"name": "Dir",
+"kind": "2",
+"prot": "",
+"type": "string(item_spec as const string,attrib_mask as integer,out_attrib as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "160",
+"tail": "160",
+"name": "Dir",
+"kind": "2",
+"prot": "",
+"type": "string(item_spec as const string,attrib_mask as integer,p_out_attrib as integer*)",
+"base": "",
+"sons": []
+},
+{
+"line": "161",
+"tail": "161",
+"name": "Dir",
+"kind": "2",
+"prot": "",
+"type": "string(attrib_mask as integer,out_attrib as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "162",
+"tail": "162",
+"name": "Dir",
+"kind": "2",
+"prot": "",
+"type": "string(attrib_mask as integer,p_out_attrib as integer*)",
+"base": "",
+"sons": []
+},
+{
+"line": "164",
+"tail": "164",
+"name": "Environ",
+"kind": "2",
+"prot": "",
+"type": "string(varname as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "165",
+"tail": "165",
+"name": "Exec",
+"kind": "2",
+"prot": "",
+"type": "long(program as const string,arguments as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "166",
+"tail": "166",
+"name": "Exepath",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "167",
+"tail": "167",
+"name": "Kill",
+"kind": "2",
+"prot": "",
+"type": "long(filename as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "168",
+"tail": "168",
+"name": "Mkdir",
+"kind": "2",
+"prot": "",
+"type": "long(folder as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "169",
+"tail": "169",
+"name": "Name",
+"kind": "2",
+"prot": "",
+"type": "long(oldname as const string,newname as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "170",
+"tail": "170",
+"name": "Rmdir",
+"kind": "2",
+"prot": "",
+"type": "long(folder as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "171",
+"tail": "171",
+"name": "Run",
+"kind": "2",
+"prot": "",
+"type": "long(program as const string,arguments as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "172",
+"tail": "172",
+"name": "Setenviron",
+"kind": "2",
+"prot": "",
+"type": "long(varexpression as string)",
+"base": "",
+"sons": []
+},
+{
+"line": "173",
+"tail": "173",
+"name": "Shell",
+"kind": "2",
+"prot": "",
+"type": "long(command as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "174",
+"tail": "174",
+"name": "System",
+"kind": "4",
+"prot": "",
+"type": "(retval as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "175",
+"tail": "175",
+"name": "Windowtitle",
+"kind": "4",
+"prot": "",
+"type": "(title as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "178",
+"tail": "178",
+"name": "Sadd",
+"kind": "2",
+"prot": "",
+"type": "zstring*(str as string)",
+"base": "",
+"sons": []
+},
+{
+"line": "179",
+"tail": "179",
+"name": "Sadd",
+"kind": "2",
+"prot": "",
+"type": "wstring*(str as wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "180",
+"tail": "180",
+"name": "Sadd",
+"kind": "2",
+"prot": "",
+"type": "zstring*(str as zstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "183",
+"tail": "183",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(str as const string,[ Any ] substring as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "184",
+"tail": "184",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(str as const wstring,[ Any ] substring as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "185",
+"tail": "185",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(start as integer,str as const string,[ Any ] substring as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "186",
+"tail": "186",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(start as integer,str as const wstring,[ Any ] substring as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "189",
+"tail": "189",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(str as const string,[ Any ] substring as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "190",
+"tail": "190",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(str as const wstring,[ Any ] substring as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "191",
+"tail": "191",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(start as integer,str as const string,[ Any ] substring as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "192",
+"tail": "192",
+"name": "Instr",
+"kind": "2",
+"prot": "",
+"type": "integer(start as integer,str as const wstring,[ Any ] substring as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "193",
+"tail": "193",
+"name": "Instrrev",
+"kind": "2",
+"prot": "",
+"type": "integer(str as const string,[ Any ] substring as const string,start as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "194",
+"tail": "194",
+"name": "Instrrev",
+"kind": "2",
+"prot": "",
+"type": "integer(str as const wstring,[ Any ] substring as const wstring,start as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "195",
+"tail": "195",
+"name": "Lcase",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,mode as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "196",
+"tail": "196",
+"name": "Lcase",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring,mode as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "197",
+"tail": "197",
+"name": "Left",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,n as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "198",
+"tail": "198",
+"name": "Left",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring,n as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "199",
+"tail": "199",
+"name": "Len",
+"kind": "2",
+"prot": "",
+"type": "integer(expression as string)",
+"base": "",
+"sons": []
+},
+{
+"line": "200",
+"tail": "200",
+"name": "Len",
+"kind": "2",
+"prot": "",
+"type": "integer(expression as zstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "201",
+"tail": "201",
+"name": "Len",
+"kind": "2",
+"prot": "",
+"type": "integer(expression as wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "202",
+"tail": "202",
+"name": "Len",
+"kind": "2",
+"prot": "",
+"type": "integer(datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "203",
+"tail": "203",
+"name": "Lset",
+"kind": "4",
+"prot": "",
+"type": "(dst as string,src as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "204",
+"tail": "204",
+"name": "Lset",
+"kind": "4",
+"prot": "",
+"type": "(dst as wstring*,src as const wstring*)",
+"base": "",
+"sons": []
+},
+{
+"line": "205",
+"tail": "205",
+"name": "Lset",
+"kind": "4",
+"prot": "",
+"type": "(dst as string,src as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "206",
+"tail": "206",
+"name": "Lset",
+"kind": "4",
+"prot": "",
+"type": "(dst as wstring*,src as const wstring*)",
+"base": "",
+"sons": []
+},
+{
+"line": "207",
+"tail": "207",
+"name": "Mid",
+"kind": "4",
+"prot": "",
+"type": "(text as string,start as integer,length as integer,expression as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "208",
+"tail": "208",
+"name": "Mid",
+"kind": "4",
+"prot": "",
+"type": "(text as wstring*,start as integer,length as integer,expression as const wstring*)",
+"base": "",
+"sons": []
+},
+{
+"line": "209",
+"tail": "209",
+"name": "Mid",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,start as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "210",
+"tail": "210",
+"name": "Mid",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring*,start as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "211",
+"tail": "211",
+"name": "Mid",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,start as integer,n as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "212",
+"tail": "212",
+"name": "Mid",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring*,start as integer,n as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "213",
+"tail": "213",
+"name": "Right",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,n as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "214",
+"tail": "214",
+"name": "Right",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring,n as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "215",
+"tail": "215",
+"name": "Rset",
+"kind": "4",
+"prot": "",
+"type": "(dst as string,src as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "216",
+"tail": "216",
+"name": "Rset",
+"kind": "4",
+"prot": "",
+"type": "(dst as wstring*,src as const wstring*)",
+"base": "",
+"sons": []
+},
+{
+"line": "217",
+"tail": "217",
+"name": "Rtrim",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,[ Any ] trimset as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "218",
+"tail": "218",
+"name": "Rtrim",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring,[ Any ] trimset as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "219",
+"tail": "219",
+"name": "Space",
+"kind": "2",
+"prot": "",
+"type": "string(count as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "222",
+"tail": "222",
+"name": "Trim",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,[ Any ] trimset as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "223",
+"tail": "223",
+"name": "Trim",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring,[ Any ] trimset as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "224",
+"tail": "224",
+"name": "Ucase",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string,mode as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "225",
+"tail": "225",
+"name": "Ucase",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring,mode as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "226",
+"tail": "226",
+"name": "Wspace",
+"kind": "2",
+"prot": "",
+"type": "wstring(count as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "231",
+"tail": "231",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "232",
+"tail": "232",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "233",
+"tail": "233",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "234",
+"tail": "234",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "235",
+"tail": "235",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "236",
+"tail": "236",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "237",
+"tail": "237",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "238",
+"tail": "238",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "239",
+"tail": "239",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "240",
+"tail": "240",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "241",
+"tail": "241",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "242",
+"tail": "242",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "243",
+"tail": "243",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "244",
+"tail": "244",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "245",
+"tail": "245",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "246",
+"tail": "246",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "247",
+"tail": "247",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "248",
+"tail": "248",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "249",
+"tail": "249",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "250",
+"tail": "250",
+"name": "Bin",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "251",
+"tail": "251",
+"name": "Chr",
+"kind": "2",
+"prot": "",
+"type": "string(ch as integer,. . .)",
+"base": "",
+"sons": []
+},
+{
+"line": "252",
+"tail": "252",
+"name": "Cvd",
+"kind": "2",
+"prot": "",
+"type": "double(l as longint)",
+"base": "",
+"sons": []
+},
+{
+"line": "253",
+"tail": "253",
+"name": "Cvd",
+"kind": "2",
+"prot": "",
+"type": "double(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "254",
+"tail": "254",
+"name": "Cvl",
+"kind": "2",
+"prot": "",
+"type": "long(sng as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "255",
+"tail": "255",
+"name": "Cvl",
+"kind": "2",
+"prot": "",
+"type": "long(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "256",
+"tail": "256",
+"name": "Cvlongint",
+"kind": "2",
+"prot": "",
+"type": "longint(dbl as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "257",
+"tail": "257",
+"name": "Cvlongint",
+"kind": "2",
+"prot": "",
+"type": "longint(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "258",
+"tail": "258",
+"name": "Cvs",
+"kind": "2",
+"prot": "",
+"type": "single(i as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "259",
+"tail": "259",
+"name": "Cvs",
+"kind": "2",
+"prot": "",
+"type": "single(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "260",
+"tail": "260",
+"name": "Cvshort",
+"kind": "2",
+"prot": "",
+"type": "short(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "261",
+"tail": "261",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "262",
+"tail": "262",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "263",
+"tail": "263",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "264",
+"tail": "264",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "265",
+"tail": "265",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "266",
+"tail": "266",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "267",
+"tail": "267",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "268",
+"tail": "268",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "269",
+"tail": "269",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "270",
+"tail": "270",
+"name": "Hex",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "271",
+"tail": "271",
+"name": "Mkd",
+"kind": "2",
+"prot": "",
+"type": "string(number as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "272",
+"tail": "272",
+"name": "Mki",
+"kind": "2",
+"prot": "",
+"type": "string(number as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "273",
+"tail": "273",
+"name": "Mkl",
+"kind": "2",
+"prot": "",
+"type": "string(number as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "274",
+"tail": "274",
+"name": "Mklongint",
+"kind": "2",
+"prot": "",
+"type": "string(number as longint)",
+"base": "",
+"sons": []
+},
+{
+"line": "275",
+"tail": "275",
+"name": "Mks",
+"kind": "2",
+"prot": "",
+"type": "string(number as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "276",
+"tail": "276",
+"name": "Mkshort",
+"kind": "2",
+"prot": "",
+"type": "string(number as short)",
+"base": "",
+"sons": []
+},
+{
+"line": "277",
+"tail": "277",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "278",
+"tail": "278",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "279",
+"tail": "279",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "280",
+"tail": "280",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "281",
+"tail": "281",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "282",
+"tail": "282",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ubyte,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "283",
+"tail": "283",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ushort,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "284",
+"tail": "284",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulong,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "285",
+"tail": "285",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as ulongint,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "286",
+"tail": "286",
+"name": "Oct",
+"kind": "2",
+"prot": "",
+"type": "string(number as const any*,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "287",
+"tail": "287",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as byte)",
+"base": "",
+"sons": []
+},
+{
+"line": "288",
+"tail": "288",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "289",
+"tail": "289",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as short)",
+"base": "",
+"sons": []
+},
+{
+"line": "290",
+"tail": "290",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "291",
+"tail": "291",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "292",
+"tail": "292",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "293",
+"tail": "293",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as longint)",
+"base": "",
+"sons": []
+},
+{
+"line": "294",
+"tail": "294",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "295",
+"tail": "295",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "296",
+"tail": "296",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(n as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "297",
+"tail": "297",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(b as boolean)",
+"base": "",
+"sons": []
+},
+{
+"line": "298",
+"tail": "298",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "299",
+"tail": "299",
+"name": "Str",
+"kind": "2",
+"prot": "",
+"type": "string(str as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "300",
+"tail": "300",
+"name": "Val",
+"kind": "2",
+"prot": "",
+"type": "double(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "301",
+"tail": "301",
+"name": "Val",
+"kind": "2",
+"prot": "",
+"type": "double(str as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "302",
+"tail": "302",
+"name": "Vallng",
+"kind": "2",
+"prot": "",
+"type": "longint(strnum as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "303",
+"tail": "303",
+"name": "Vallng",
+"kind": "2",
+"prot": "",
+"type": "longint(strnum as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "304",
+"tail": "304",
+"name": "Valint",
+"kind": "2",
+"prot": "",
+"type": "long(strnum as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "305",
+"tail": "305",
+"name": "Valint",
+"kind": "2",
+"prot": "",
+"type": "long(strnum as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "306",
+"tail": "306",
+"name": "Valuint",
+"kind": "2",
+"prot": "",
+"type": "ulong(strnum as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "307",
+"tail": "307",
+"name": "Valuint",
+"kind": "2",
+"prot": "",
+"type": "ulong(strnum as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "308",
+"tail": "308",
+"name": "Valulng",
+"kind": "2",
+"prot": "",
+"type": "ulongint(strnum as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "309",
+"tail": "309",
+"name": "Valulng",
+"kind": "2",
+"prot": "",
+"type": "ulongint(strnum as const wstring)",
+"base": "",
+"sons": []
+},
+{
+"line": "310",
+"tail": "310",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "311",
+"tail": "311",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "312",
+"tail": "312",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "313",
+"tail": "313",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "314",
+"tail": "314",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as const any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "315",
+"tail": "315",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ubyte,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "316",
+"tail": "316",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ushort,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "317",
+"tail": "317",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulong,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "318",
+"tail": "318",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulongint,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "319",
+"tail": "319",
+"name": "Wbin",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as const any*,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "320",
+"tail": "320",
+"name": "Wchr",
+"kind": "2",
+"prot": "",
+"type": "wstring(ch as integer [ , . . . ])",
+"base": "",
+"sons": []
+},
+{
+"line": "321",
+"tail": "321",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "322",
+"tail": "322",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "323",
+"tail": "323",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "324",
+"tail": "324",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "325",
+"tail": "325",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as const any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "326",
+"tail": "326",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ubyte,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "327",
+"tail": "327",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ushort,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "328",
+"tail": "328",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulong,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "329",
+"tail": "329",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulongint,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "330",
+"tail": "330",
+"name": "Whex",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as const any*,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "331",
+"tail": "331",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "332",
+"tail": "332",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "333",
+"tail": "333",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "334",
+"tail": "334",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "335",
+"tail": "335",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as const any*)",
+"base": "",
+"sons": []
+},
+{
+"line": "336",
+"tail": "336",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ubyte,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "337",
+"tail": "337",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ushort,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "338",
+"tail": "338",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulong,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "339",
+"tail": "339",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as ulongint,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "340",
+"tail": "340",
+"name": "Woct",
+"kind": "2",
+"prot": "",
+"type": "wstring(number as const any*,digits as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "341",
+"tail": "341",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as byte)",
+"base": "",
+"sons": []
+},
+{
+"line": "342",
+"tail": "342",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as ubyte)",
+"base": "",
+"sons": []
+},
+{
+"line": "343",
+"tail": "343",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as short)",
+"base": "",
+"sons": []
+},
+{
+"line": "344",
+"tail": "344",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as ushort)",
+"base": "",
+"sons": []
+},
+{
+"line": "345",
+"tail": "345",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "346",
+"tail": "346",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as ulong)",
+"base": "",
+"sons": []
+},
+{
+"line": "347",
+"tail": "347",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as longint)",
+"base": "",
+"sons": []
+},
+{
+"line": "348",
+"tail": "348",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as ulongint)",
+"base": "",
+"sons": []
+},
+{
+"line": "349",
+"tail": "349",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "350",
+"tail": "350",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(n as double)",
+"base": "",
+"sons": []
+},
+{
+"line": "351",
+"tail": "351",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const string)",
+"base": "",
+"sons": []
+},
+{
+"line": "352",
+"tail": "352",
+"name": "Wstr",
+"kind": "2",
+"prot": "",
+"type": "wstring(str as const wstring*)",
+"base": "",
+"sons": []
+},
+{
+"line": "353",
+"tail": "353",
+"name": "Cbool",
+"kind": "2",
+"prot": "",
+"type": "boolean(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "354",
+"tail": "354",
+"name": "Cbyte",
+"kind": "2",
+"prot": "",
+"type": "byte(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "355",
+"tail": "355",
+"name": "Cdbl",
+"kind": "2",
+"prot": "",
+"type": "double(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "356",
+"tail": "356",
+"name": "Cint",
+"kind": "2",
+"prot": "",
+"type": "integer(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "357",
+"tail": "357",
+"name": "Clng",
+"kind": "2",
+"prot": "",
+"type": "long(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "358",
+"tail": "358",
+"name": "Clngint",
+"kind": "2",
+"prot": "",
+"type": "longint(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "359",
+"tail": "359",
+"name": "Cshort",
+"kind": "2",
+"prot": "",
+"type": "short(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "360",
+"tail": "360",
+"name": "Csng",
+"kind": "2",
+"prot": "",
+"type": "single(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "361",
+"tail": "361",
+"name": "Cubyte",
+"kind": "2",
+"prot": "",
+"type": "ubyte(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "362",
+"tail": "362",
+"name": "Cuint",
+"kind": "2",
+"prot": "",
+"type": "uinteger(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "363",
+"tail": "363",
+"name": "Culng",
+"kind": "2",
+"prot": "",
+"type": "ulong(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "364",
+"tail": "364",
+"name": "Culngint",
+"kind": "2",
+"prot": "",
+"type": "ulongint(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "365",
+"tail": "365",
+"name": "Cushort",
+"kind": "2",
+"prot": "",
+"type": "ushort(expression as datatype)",
+"base": "",
+"sons": []
+},
+{
+"line": "368",
+"tail": "368",
+"name": "Getjoystick",
+"kind": "2",
+"prot": "",
+"type": "integer(id as long,buttons as integer,a1 as single,a2 as single,a3 as single,a4 as single,a5 as single,a6 as single,a7 as single,a8 as single)",
+"base": "",
+"sons": []
+},
+{
+"line": "369",
+"tail": "369",
+"name": "Getkey",
+"kind": "2",
+"prot": "",
+"type": "long()",
+"base": "",
+"sons": []
+},
+{
+"line": "370",
+"tail": "370",
+"name": "Getmouse",
+"kind": "2",
+"prot": "",
+"type": "long(x as integer,y as integer,wheel as integer,buttons as integer,clip as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "371",
+"tail": "371",
+"name": "Inkey",
+"kind": "2",
+"prot": "",
+"type": "string()",
+"base": "",
+"sons": []
+},
+{
+"line": "372",
+"tail": "372",
+"name": "Input",
+"kind": "2",
+"prot": "",
+"type": "string(n as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "373",
+"tail": "373",
+"name": "Input",
+"kind": "2",
+"prot": "",
+"type": "string(n as integer,filenum as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "374",
+"tail": "374",
+"name": "Multikey",
+"kind": "2",
+"prot": "",
+"type": "long(scancode as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "375",
+"tail": "375",
+"name": "Setmouse",
+"kind": "2",
+"prot": "",
+"type": "long(x as long,y as long,visibility as long,clip as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "376",
+"tail": "376",
+"name": "Stick",
+"kind": "2",
+"prot": "",
+"type": "long(axis as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "377",
+"tail": "377",
+"name": "Strig",
+"kind": "2",
+"prot": "",
+"type": "long(button as long)",
+"base": "",
+"sons": []
+},
+{
+"line": "378",
+"tail": "378",
+"name": "Winput",
+"kind": "2",
+"prot": "",
+"type": "wstring(num as integer)",
+"base": "",
+"sons": []
+},
+{
+"line": "379",
+"tail": "379",
+"name": "Winput",
+"kind": "2",
+"prot": "",
+"type": "wstring(num as integer,filenum as long)",
+"base": "",
+"sons": []
+}]
+}

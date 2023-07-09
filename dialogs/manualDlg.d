@@ -4,19 +4,16 @@ private import iup.iup;
 
 private import global, project, actionManager, menu, tools;
 private import dialogs.baseDlg, dialogs.singleTextDlg, dialogs.fileDlg;
-
-private import tango.stdc.stringz, Util = tango.text.Util, tango.io.FilePath;
-private import Integer = tango.text.convert.Integer;
-
+private import std.string, std.conv, Array = std.array;
 
 class CManualDialog : CBaseDialog
 {
-	private:
+private:
 	Ihandle*			listManuals;
 	Ihandle*			labelStatus;
 	IupString			manualpathString;
 	
-	static	char[][]	tempManuals;
+	static	string[]	tempManuals;
 	
 	void createLayout()
 	{
@@ -27,7 +24,6 @@ class CManualDialog : CBaseDialog
 		IupSetHandle( "listManuals_Handle", listManuals );
 		IupSetCallback( listManuals, "ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
 
-		
 		Ihandle* btnToolsAdd = IupButton( null, null );
 		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
 		IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
@@ -54,7 +50,6 @@ class CManualDialog : CBaseDialog
 		Ihandle* frameList = IupFrame( listHbox );
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		
-
 		manualpathString = new IupString( " " ~ GLOBAL.languageItems["manualpath"].toDString ~ ":" );
 		Ihandle* labelManualDir = IupLabel( manualpathString.toCString );
 		IupSetAttributes( labelManualDir, "ALIGNMENT=ARIGHT" );
@@ -63,8 +58,6 @@ class CManualDialog : CBaseDialog
 		IupSetAttribute( textManualDir, "EXPAND", "HORIZONTAL" );
 		IupSetHandle( "textManualDir", textManualDir );
 		IupSetCallback( textManualDir, "ACTION", cast(Icallback) &CManualDialog_textManualDir_ACTION );
-		
-		
 		
 		Ihandle* btnManualDir = IupButton( null, null );
 		IupSetAttributes( btnManualDir, "IMAGE=icon_openfile,FLAT=YES" );
@@ -83,20 +76,17 @@ class CManualDialog : CBaseDialog
 		
 		IupAppend( _dlg, vBoxLayout );
 		IupMap( _dlg );
-		foreach( char[] s; GLOBAL.manuals )
+		foreach( s; GLOBAL.manuals )
 		{
-			char[][] splitWord = Util.split( s, "," );
-			if( splitWord.length == 2 )
-			{
-				IupSetAttribute( listManuals, "APPENDITEM", toStringz( splitWord[0] ) );
-			}
+			string[] splitWord = Array.split( s, "," );
+			if( splitWord.length == 2 ) IupSetStrAttribute( listManuals, "APPENDITEM", toStringz( splitWord[0] ) );
 		}
 		CManualDialog.tempManuals = GLOBAL.manuals;
 	}	
 
-	public:
+public:
 	
-	this( int w, int h, char[] title, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG" )
+	this( int w, int h, string title, bool bResize = false, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_fbmanual" );
@@ -105,7 +95,6 @@ class CManualDialog : CBaseDialog
 		createLayout();
 		
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
-		
 		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["ok"].toCString );
 		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CManualDialog_btnApply_ACTION );
 	}
@@ -116,10 +105,10 @@ class CManualDialog : CBaseDialog
 		IupSetHandle( "textManualDir", null );
 		
 		CManualDialog.tempManuals.length = 0;
-		delete manualpathString;
+		destroy( manualpathString );
 	}
 	
-	char[] show( int x, int y )
+	override string show( int x, int y )
 	{
 		IupPopup( _dlg, x, y );
 		return null;
@@ -131,19 +120,6 @@ extern(C)
 {
 	private int CManualDialog_btnApply_ACTION( Ihandle* ih )
 	{
-		/*
-		Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
-		Ihandle* dirHandle = IupGetHandle( "textManualDir" );
-		
-		if( listHandle != null && dirHandle != null )
-		{
-			int id = IupGetInt( listHandle, "VALUE" );
-			if( id > 0 && id <= GLOBAL.manuals.length )
-			{
-				GLOBAL.manuals[id-1] = fromStringz( IupGetAttributeId( listHandle, "", id ) ).dup ~ "," ~ fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup;
-			}
-		}
-		*/
 		GLOBAL.manuals = CManualDialog.tempManuals;
 		
 		Ihandle* optionsMenuHandle = IupGetHandle( "optionsMenu" );
@@ -154,7 +130,7 @@ extern(C)
 				Ihandle* menuItemHandle = IupGetChild( optionsMenuHandle, i );
 				if( menuItemHandle != null )
 				{
-					char[] menuItenTitle = fromStringz( IupGetAttribute( menuItemHandle, "TITLE" ) ).dup;
+					string menuItenTitle = fSTRz( IupGetAttribute( menuItemHandle, "TITLE" ) );
 					if( menuItenTitle.length )
 					{
 						if( menuItenTitle[0] == '#' ) IupDestroy( menuItemHandle ); else break;
@@ -164,15 +140,13 @@ extern(C)
 				}
 			}
 
-			//Ihandle* _tail = IupAppend( optionsMenuHandle, IupSeparator );
-			//IupMap( _tail );
-			
 			for( int i = 0; i < GLOBAL.manuals.length; ++ i )
 			{
-				char[][] splitWords = Util.split( GLOBAL.manuals[i], "," );
+				string[] splitWords = Array.split( GLOBAL.manuals[i], "," );
 				if( splitWords.length == 2 )
 				{
-					Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i + 1 ) ~ ". " ~ splitWords[0] ), null );
+					auto itemTitle = new IupString( "#" ~ to!(string)( i + 1 ) ~ ". " ~ splitWords[0] );
+					Ihandle* _new = IupItem( itemTitle.toCString, null );
 					IupSetCallback( _new, "ACTION", cast(Icallback) &menu.manual_menu_click_cb );
 					IupAppend( optionsMenuHandle, _new );
 					IupMap( _new );
@@ -193,7 +167,7 @@ extern(C)
 			if( IupGetInt( listHandle, "COUNT" ) > 0 )
 			{
 				scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", "CHM Files|*.chm|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" );
-				char[] fileName = fileSecectDlg.getFileName();
+				string fileName = fileSecectDlg.getFileName();
 
 				if( fileName.length )
 				{
@@ -203,11 +177,11 @@ extern(C)
 					int id = IupGetInt( listHandle, "VALUE" );
 					if( id > 0 && id <= CManualDialog.tempManuals.length )
 					{
-						char[][] splitWord = Util.split( CManualDialog.tempManuals[id-1], "," );
+						string[] splitWord = Array.split( CManualDialog.tempManuals[id-1], "," );
 						if( splitWord.length == 2 )
 						{
 							// Double Check
-							if( splitWord[0] == fromStringz( IupGetAttributeId( listHandle, "", id ) ).dup ) CManualDialog.tempManuals[id-1] = splitWord[0] ~ "," ~ fileName;
+							if( splitWord[0] == fromStringz( IupGetAttributeId( listHandle, "", id ) ) ) CManualDialog.tempManuals[id-1] = splitWord[0] ~ "," ~ fileName;
 						}				
 					}
 				}
@@ -226,14 +200,11 @@ extern(C)
 		{
 			if( item <= CManualDialog.tempManuals.length )
 			{
-				char[][] splitWord = Util.split( CManualDialog.tempManuals[item-1], "," );
+				string[] splitWord = Array.split( CManualDialog.tempManuals[item-1], "," );
 				if( splitWord.length == 2 )
 				{
 					// Double Check
-					if( splitWord[0] == fromStringz( text ).dup )
-					{
-						IupSetAttribute( dirHandle, "VALUE", toStringz( splitWord[1] ) );
-					}
+					if( splitWord[0] == fromStringz( text ) ) IupSetStrAttribute( dirHandle, "VALUE", toStringz( splitWord[1] ) );
 				}
 			}
 		}
@@ -250,13 +221,10 @@ extern(C)
 			int id = IupGetInt( listHandle, "VALUE" );
 			if( id > 0 )
 			{
-				char[] dirText = Util.trim( fromStringz( new_value ) ).dup;
+				string dirText = strip( fromStringz( new_value ) ).dup;
 				
-				char[][] splitWord = Util.split( CManualDialog.tempManuals[id-1], "," );
-				if( splitWord.length == 2 )
-				{
-					CManualDialog.tempManuals[id-1] = splitWord[0] ~ "," ~ dirText;
-				}
+				string[] splitWord = Array.split( CManualDialog.tempManuals[id-1], "," );
+				if( splitWord.length == 2 )	CManualDialog.tempManuals[id-1] = splitWord[0] ~ "," ~ dirText;
 			}
 		}
 		
@@ -267,7 +235,7 @@ extern(C)
 	private int CManualDialog_btnToolsAdd_ACTION( Ihandle* ih ) 
 	{
 		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["manual"].toDString(), GLOBAL.languageItems["name"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile" );
-		char[] fileName = description.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+		string fileName = description.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 		
 		if( fileName.length )
 		{
@@ -295,10 +263,10 @@ extern(C)
 			int id = IupGetInt( listHandle, "VALUE" );
 			if( id < 1 || id > CManualDialog.tempManuals.length ) return IUP_DEFAULT;
 		
-			char[] name = fromStringz( IupGetAttributeId( listHandle, "", id ) ).dup;
+			string name = fromStringz( IupGetAttributeId( listHandle, "", id ) ).dup;
 			
 			// Double Check
-			char[][] splitWord = Util.split( CManualDialog.tempManuals[id-1], "," );
+			string[] splitWord = Array.split( CManualDialog.tempManuals[id-1], "," );
 			if( splitWord.length == 2 )
 			{
 				// Double Check
@@ -307,7 +275,7 @@ extern(C)
 					IupSetInt( listHandle, "REMOVEITEM", id );
 					id --;
 				
-					char[][] _tempManuals;
+					string[] _tempManuals;
 					for( int i = 0; i < CManualDialog.tempManuals.length; ++ i )
 					{
 						if( i != id ) _tempManuals ~= CManualDialog.tempManuals[i];
@@ -337,12 +305,12 @@ extern(C)
 				char* prevItemText = IupGetAttributeId( listHandle, "", itemNumber -1 );
 				char* nowItemText = IupGetAttributeId( listHandle, "", itemNumber );
 
-				IupSetAttributeId( listHandle, "", itemNumber - 1, nowItemText );
-				IupSetAttributeId( listHandle, "", itemNumber, prevItemText );
+				IupSetStrAttributeId( listHandle, "", itemNumber - 1, nowItemText );
+				IupSetStrAttributeId( listHandle, "", itemNumber, prevItemText );
 
 				IupSetInt( listHandle, "VALUE", itemNumber - 1 ); // Set Foucs
 				
-				char[] temp = CManualDialog.tempManuals[itemNumber-2];
+				string temp = CManualDialog.tempManuals[itemNumber-2];
 				CManualDialog.tempManuals[itemNumber-2] = CManualDialog.tempManuals[itemNumber-1];
 				CManualDialog.tempManuals[itemNumber-1] = temp;
 			}
@@ -365,13 +333,13 @@ extern(C)
 				char* nextItemText = IupGetAttributeId( listHandle, "", itemNumber + 1 );
 				char* nowItemText = IupGetAttributeId( listHandle, "", itemNumber );
 
-				IupSetAttributeId( listHandle, "", itemNumber + 1, nowItemText );
-				IupSetAttributeId( listHandle, "", itemNumber, nextItemText );
+				IupSetStrAttributeId( listHandle, "", itemNumber + 1, nowItemText );
+				IupSetStrAttributeId( listHandle, "", itemNumber, nextItemText );
 
 				IupSetInt( listHandle, "VALUE", itemNumber + 1 );  // Set Foucs
 				
 
-				char[] temp = CManualDialog.tempManuals[itemNumber];
+				string temp = CManualDialog.tempManuals[itemNumber];
 				CManualDialog.tempManuals[itemNumber] = CManualDialog.tempManuals[itemNumber-1];
 				CManualDialog.tempManuals[itemNumber-1] = temp;
 			}

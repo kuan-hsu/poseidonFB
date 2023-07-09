@@ -3,16 +3,10 @@
 class _PARSER
 {
 	protected:
-		import			iup.iup;
-		
 		import			parser.ast;
 		import			parser.token, parser.autocompletion;
-
-		import			tango.io.FilePath, tango.text.Ascii, Path = tango.io.Path;
-		import			Util = tango.text.Util, tango.stdc.stringz;
-		import 			tango.io.Stdout, Integer = tango.text.convert.Integer;
-
 		import			global, tools;
+		import			std.string, std.conv, Array = std.array;
 
 		TokenUnit[]		tokens;
 		int				tokenIndex;
@@ -59,25 +53,6 @@ class _PARSER
 			throw new Exception( "Method getToken(), out of range!" );
 		}	
 
-		void printAST( CASTnode _node, char[] space = "" )
-		{
-			Stdout( space );
-			Stdout( _node.kind );
-			Stdout( "  " ~ _node.protection ~ "  " ~ _node.name ~ "  " ~ _node.type );
-
-			if( _node.type.length ) Stdout( "  #" ); else Stdout( "#" );
-			
-			Stdout( _node.lineNumber ).newline;
-
-			if( _node.getChildrenCount > 0 ) space ~= "--";
-			foreach( CASTnode t; _node.getChildren() )
-			{
-				printAST( t, space );
-			}
-
-			if( space.length > 1 ) space.length = space.length - 2;
-		}
-	
 	public:
 		this(){}
 		
@@ -85,7 +60,30 @@ class _PARSER
 		{
 			updateTokens( _tokens );
 		}
+		
+		/+
+		void printAST( CASTnode _node, string space = "" )
+		{
+			import std.stdio;
+			
+			writef( space );
+			writef( _node.kind );
+			writef( "  " ~ _node.protection ~ "  " ~ _node.name ~ "  " ~ _node.type );
 
+			if( _node.type.length ) Stdout( "  #" ); else Stdout( "#" );
+			
+			writeln( _node.lineNumber );
+
+			if( _node.getChildrenCount > 0 ) space ~= "--";
+			foreach( CASTnode t; _node.getChildren )
+			{
+				printAST( t, space );
+			}
+
+			if( space.length > 1 ) space.length = space.length - 2;
+		}		
+		+/
+		
 		bool updateTokens( TokenUnit[] _tokens )
 		{
 			tokenIndex = 0;
@@ -100,25 +98,25 @@ class _PARSER
 			return true;
 		}
 		
-		CASTnode json2Ast( char[] jsonTXT )
+		CASTnode json2Ast( string jsonTXT )
 		{
 			// Nested function
-			void splitColon( char[] _line, ref char[] _left, ref char[] _right )
+			void splitColon( string _line, ref string _left, ref string _right )
 			{
-				char[][] _lineData = Util.split( _line, ": " );
+				string[] _lineData = Array.split( _line, ": " );
 				if( _lineData.length )
 				{
-					_left = Util.strip( _lineData[0], '"' );
-					_right = Util.stripr( _lineData[1], ',' );
-					_right = Util.strip( Util.trim( _right ), '"' );
+					_left = strip( _lineData[0], "\"" );
+					_right = stripRight( _lineData[1], "," );
+					_right = strip( strip( _right ), "\"" );
 				}
 			}		
 		
 			CASTnode NODE;
 			
-			foreach( char[] line; Util.splitLines( jsonTXT ) )
+			foreach( string line; splitLines( jsonTXT ) )
 			{
-				line = Util.trim( line );
+				line = strip( line );
 				if( line.length )
 				{
 					if( line == "{" )
@@ -138,18 +136,18 @@ class _PARSER
 					}
 					else
 					{
-						char[] right, left;
+						string right, left;
 						splitColon( line, left, right );
 
 						switch( left )
 						{
-							case "line":		NODE.lineNumber = Integer.toInt( right );	break;
-							case "tail":		NODE.endLineNum = Integer.toInt( right );	break;
-							case "name":		NODE.name = right;							break;
-							case "kind":		NODE.kind = Integer.toInt( right );			break;
-							case "prot":		NODE.protection = right;					break;
-							case "type":		NODE.type = right;							break;
-							case "base":		NODE.base = right;							break;
+							case "line":		NODE.lineNumber = to!(int)( right );	break;
+							case "tail":		NODE.endLineNum = to!(int)( right );	break;
+							case "name":		NODE.name = right;						break;
+							case "kind":		NODE.kind = to!(int)( right );			break;
+							case "prot":		NODE.protection = right;				break;
+							case "type":		NODE.type = right;						break;
+							case "base":		NODE.base = right;						break;
 							default:
 						}
 					}
@@ -160,15 +158,15 @@ class _PARSER
 		}
 		
 		
-		char[] ast2Json( CASTnode _node )
+		string ast2Json( CASTnode _node )
 		{
-			char[] jsonTXT;
+			string jsonTXT;
 			
 			jsonTXT ~= "{\n";
-			jsonTXT ~=	( "\"line\": \"" ~ Integer.toString( _node.lineNumber ) ~ "\",\n" );
-			jsonTXT ~=	( "\"tail\": \"" ~ Integer.toString( _node.endLineNum )	~ "\",\n" );	
+			jsonTXT ~=	( "\"line\": \"" ~ to!(string)( _node.lineNumber ) ~ "\",\n" );
+			jsonTXT ~=	( "\"tail\": \"" ~ to!(string)( _node.endLineNum )	~ "\",\n" );	
 			jsonTXT ~=	( "\"name\": \"" ~ _node.name ~ "\",\n" );
-			jsonTXT ~=	( "\"kind\": \"" ~ Integer.toString( _node.kind ) ~ "\",\n" );
+			jsonTXT ~=	( "\"kind\": \"" ~ to!(string)( _node.kind ) ~ "\",\n" );
 			jsonTXT ~=	( "\"prot\": \"" ~ _node.protection ~ "\",\n" );
 			jsonTXT ~=	( "\"type\": \"" ~ _node.type	~ "\",\n" );
 			jsonTXT ~=	( "\"base\": \"" ~ _node.base ~ "\",\n" );
@@ -177,7 +175,7 @@ class _PARSER
 				jsonTXT ~=	"\"sons\": []\n";
 			else
 			{
-				jsonTXT ~=	"\"sons\": [\n";
+				jsonTXT ~= "\"sons\": [\n";
 				for( int i = 0; i < _node.getChildrenCount; ++ i )
 				{
 					jsonTXT ~= ast2Json( _node[i] );

@@ -9,13 +9,13 @@ version(DIDE)
 	private :
 		import			tools;
 		import			parser.ast, parser.token;
-		import			Util = tango.text.Util;
-		
-		char[]			activeProt;
+		import			std.string, Algorithm = std.algorithm;
+		debug import	iup.iup, Conv = std.conv;
+		string			activeProt;
 
-		CStack!(char[]) curlyStack;
-		CStack!(char[])	protStack;
-		CStack!(char[])	conditionStack;
+		Stack!(string)	curlyStack;
+		Stack!(string)	protStack;
+		Stack!(string)	conditionStack;
 		
 		
 		bool skipToEOL()
@@ -42,12 +42,12 @@ version(DIDE)
 		}
 		
 		
-		char[] getDelimitedString( int _tokOpen, int _tokClose )
+		string getDelimitedString( int _tokOpen, int _tokClose )
 		{
 			try
 			{
 				int		_countDemlimit;
-				char[]	_params;		// include open Delimit and close Delimit
+				string	_params;		// include open Delimit and close Delimit
 
 				if( token().tok == _tokOpen )
 				{
@@ -96,7 +96,7 @@ version(DIDE)
 					parseToken();
 				}
 
-				_params = Util.trim( _params );
+				_params = strip( _params );
 				
 				switch( _tokOpen )
 				{
@@ -152,13 +152,13 @@ version(DIDE)
 		}
 		
 
-		char[] getProt()
+		string getProt()
 		{
-			char[] result;
+			string result;
 			
 			if( !activeProt.length )
 			{
-				char[] _stackValue = protStack.top();
+				string _stackValue = protStack.top();
 				
 				if( _stackValue.length > 1 )
 				{
@@ -170,9 +170,9 @@ version(DIDE)
 		}
 		
 
-		char[] getTokenIdentifierUntil( int[] _tokens ... )
+		string getTokenIdentifierUntil( int[] _tokens ... )
 		{
-			char[]	_result;
+			string	_result;
 			int		_countParen, _countCurly, _countBracket;
 
 			try
@@ -219,9 +219,9 @@ version(DIDE)
 		Type:
 			TypeCtors<opt> BasicType BasicType2<opt>
 		*/	
-		char[] getType()
+		string getType()
 		{
-			char[]	_type;
+			string	_type;
 
 			try
 			{
@@ -253,9 +253,9 @@ version(DIDE)
 			TypeCtor ( Type )
 			TypeVector	
 		*/
-		char[] getBasicType()
+		string getBasicType()
 		{
-			char[] _type;
+			string _type;
 
 			try
 			{
@@ -337,9 +337,9 @@ version(DIDE)
 			delegate Parameters MemberFunctionAttributes<opt>
 			function Parameters FunctionAttributes<opt>
 		*/
-		char[] getBasicType2()
+		string getBasicType2()
 		{
-			char[] _type;
+			string _type;
 
 			try
 			{
@@ -400,9 +400,9 @@ version(DIDE)
 			TemplateInstance . IdentifierList
 			Identifier [ AssignExpression ]. IdentifierList
 		*/
-		char[] getIdentifierList()
+		string getIdentifierList()
 		{
-			char[] _result;
+			string _result;
 
 			try
 			{
@@ -446,9 +446,9 @@ version(DIDE)
 		TypeVector:
 			__vector ( Type )
 		*/
-		char[] getTypeof()
+		string getTypeof()
 		{
-			char[]	_type;
+			string	_type;
 			
 			try
 			{
@@ -489,9 +489,9 @@ version(DIDE)
 			return _type;
 		}
 
-		char[] get__Vector()
+		string get__Vector()
 		{
-			char[]	_type;
+			string	_type;
 			
 			try
 			{
@@ -746,9 +746,9 @@ version(DIDE)
 		ModuleAliasIdentifier:
 			Identifier
 		*/
-		char[] getModuleName()
+		string getModuleName()
 		{
-			char[] _result;
+			string _result;
 
 			try
 			{
@@ -789,7 +789,7 @@ version(DIDE)
 				
 				if( token().tok == TOK.Tidentifier )
 				{
-					char[] moduleName = getModuleName();
+					string moduleName = getModuleName();
 					if( moduleName.length )
 					{
 						CASTnode _head = activeASTnode;
@@ -865,7 +865,7 @@ version(DIDE)
 
 		bool parseImportList()
 		{
-			char[]	importName, bindName, baseName;
+			string	importName, bindName, baseName;
 			int		_ln = token().lineNumber;
 			
 			try
@@ -913,11 +913,11 @@ version(DIDE)
 		}
 		
 		// For Selective Imports
-		bool parseImportBindList( char[] _importModuleName, int _ln )
+		bool parseImportBindList( string _importModuleName, int _ln )
 		{
 			try
 			{
-				char[]	baseName, funName;
+				string	baseName, funName;
 				
 				if( token().tok == TOK.Tidentifier )
 				{
@@ -1071,7 +1071,7 @@ version(DIDE)
 		{
 			try
 			{
-				char[]	_name, _type, _rightExpress;
+				string	_name, _type, _rightExpress;
 				int		_ln = token().lineNumber;
 
 				if( token().tok == TOK.Tidentifier )
@@ -1128,10 +1128,10 @@ version(DIDE)
 						{
 							if( token().identifier.length )
 							{
-								char[] tail2;
+								string tail2;
 								if( token().identifier.length > 1 ) tail2 = token().identifier[$-2..$];
 								
-								if( Util.count( token().identifier, "." ) <= 0 )
+								if( Algorithm.count( token().identifier, "." ) <= 0 )
 								{
 									_type = "int";
 									switch( token().identifier[$-1] )
@@ -1253,7 +1253,7 @@ version(DIDE)
 		{
 			try
 			{
-				char[] _type = getType();
+				string _type = getType();
 				/*
 				getBasicType();
 				_type ~= getBasicType2();
@@ -1272,7 +1272,7 @@ version(DIDE)
 			return false;
 		}
 
-		bool parseVariableOrFunction( char[] _type )
+		bool parseVariableOrFunction( string _type )
 		{
 			try
 			{
@@ -1293,9 +1293,9 @@ version(DIDE)
 			return false;
 		}
 		
-		bool parseVariable( char[] _type )
+		bool parseVariable( string _type )
 		{
-			char[]	_name, _rightName;
+			string	_name, _rightName;
 			int		_ln;
 			
 			void _addChild()
@@ -1308,9 +1308,9 @@ version(DIDE)
 				else
 					activeASTnode.addChild( _name, D_VARIABLE, getProt(), _type, _rightName, _ln );
 				*/
-				int keyPos = Util.index( _type, " function(" );
-				if( keyPos >= _type.length ) keyPos = Util.index( _type, " delegate(" );
-				if( keyPos < _type.length )
+				int keyPos = indexOf( _type, " function(" );
+				if( keyPos == -1 ) keyPos = indexOf( _type, " delegate(" );
+				if( keyPos > -1 )
 				{
 					activeASTnode.addChild( _name, D_FUNCTIONPTR, getProt(), _type[0..keyPos] ~ _type[keyPos+9..$], _rightName, _ln );
 				}
@@ -1385,9 +1385,9 @@ version(DIDE)
 			Parameters MemberFunctionAttributesopt
 			TemplateParameters Parameters MemberFunctionAttributes<opt> Constraint<opt>
 		*/
-		bool parseFunction( char[] _type )
+		bool parseFunction( string _type )
 		{
-			char[]	_name = token().identifier;
+			string	_name = token().identifier;
 			int		_ln = token().lineNumber;
 			
 			try
@@ -1396,7 +1396,7 @@ version(DIDE)
 
 				if( token().tok == TOK.Topenparen )
 				{
-					char[] _params;
+					string _params;
 
 					int funTailIndex = getFunctionDeclareTailIndex();
 					if( funTailIndex >= tokens.length ) return false;
@@ -1482,19 +1482,19 @@ version(DIDE)
 		}
 
 
-		bool parseTempleFunction( char[] _type )
+		bool parseTempleFunction( string _type )
 		{
 			//writeln( _type );
 			return true;
 			/+
-			char[]	_name = getSeparateParam( _type )token().identifier;
+			string	_name = getSeparateParam( _type )token().identifier;
 			int		_ln = token().lineNumber;
 
 			parseToken( TOK.Tidentifier );
 
 			if( token().tok == TOK.Topenparen )
 			{
-				char[] _params;
+				string _params;
 
 				try
 				{
@@ -1619,9 +1619,9 @@ version(DIDE)
 		AltFuncDeclaratorSuffix:
 			Parameters MemberFunctionAttributes<opt>			
 		*/
-		char[] getParameters()
+		string getParameters()
 		{
-			char[]	_result;
+			string	_result;
 
 			try
 			{
@@ -1668,9 +1668,9 @@ version(DIDE)
 			Parameter , ParameterList
 			...
 		*/
-		char[] parseParameterList()
+		string parseParameterList()
 		{
-			char[]	_result, _type, _name;
+			string	_result, _type, _name;
 			int		_ln;
 			
 			try
@@ -1912,7 +1912,7 @@ version(DIDE)
 				
 				if( token().tok == TOK.Tidentifier )
 				{
-					char[]	_baseName, _name = token().identifier;
+					string	_baseName, _name = token().identifier;
 					int		_ln = token().lineNumber;
 
 					parseToken( TOK.Tidentifier );
@@ -1980,7 +1980,7 @@ version(DIDE)
 			{
 				if( token().tok == TOK.Tthis && next().tok == TOK.Topenparen )
 				{
-					char[]	_params;
+					string	_params;
 					int		_ln = token().lineNumber;
 
 					parseToken( TOK.Tthis );
@@ -2137,7 +2137,7 @@ version(DIDE)
 
 				if( token().tok == TOK.Tidentifier )
 				{
-					char[]	_baseName, _name = token().identifier;
+					string	_baseName, _name = token().identifier;
 
 					parseToken( TOK.Tidentifier );
 
@@ -2235,11 +2235,11 @@ version(DIDE)
 					parseToken( TOK.Tenum );
 
 					int		_ln =  token().lineNumber;
-					char[]	_EnumBaseType;
+					string	_EnumBaseType;
 					
 					if( token().tok == TOK.Tidentifier )
 					{
-						char[]	_name = token().identifier;
+						string	_name = token().identifier;
 						
 						parseToken( TOK.Tidentifier );
 						/*
@@ -2368,9 +2368,9 @@ version(DIDE)
 			return false;
 		}
 
-		bool parseEnumMembers( bool bAnonymous, char[] _EnumBaseType )
+		bool parseEnumMembers( bool bAnonymous, string _EnumBaseType )
 		{
-			char[]	_name, _type;
+			string	_name, _type;
 			
 			try
 			{
@@ -2456,7 +2456,7 @@ version(DIDE)
 
 					if( token().tok == TOK.Tidentifier )
 					{
-						char[]	_params, _name = token().identifier;
+						string	_params, _name = token().identifier;
 						int		_ln =  token().lineNumber;
 						
 						parseToken( TOK.Tidentifier );
@@ -2526,9 +2526,9 @@ version(DIDE)
 			this
 			SpecialKeyword	
 		*/
-		char[] getTemplateInstance()
+		string getTemplateInstance()
 		{
-			char[] _Instance;
+			string _Instance;
 			
 			try
 			{
@@ -2652,9 +2652,9 @@ version(DIDE)
 		UnionTemplateDeclaration:
 			union Identifier TemplateParameters Constraint<opt> AggregateBody
 		*/
-		bool parseAggregateTemplates( int D_KIND, char[] _name, ref char[] _baseName )
+		bool parseAggregateTemplates( int D_KIND, string _name, ref string _baseName )
 		{
-			char[]	templateParam;
+			string	templateParam;
 			int		_ln = token().lineNumber;
 
 			try
@@ -2791,7 +2791,7 @@ version(DIDE)
 		*/
 		bool parseAlias()
 		{
-			char[] _name, _type;
+			string _name, _type;
 			//alias AsciiString = immutable(AsciiChar)[];
 			try
 			{
@@ -2842,7 +2842,7 @@ version(DIDE)
 			{
 				if( token().tok == TOK.Tidentifier )
 				{
-					char[]	_type, _name = token().identifier;
+					string	_type, _name = token().identifier;
 					int		_ln = token().lineNumber;
 
 					parseToken( TOK.Tidentifier );
@@ -2920,7 +2920,7 @@ version(DIDE)
 		*/
 		bool parseCondition()
 		{
-			char[]	_name;
+			string	_name;
 			int		_ln = token().lineNumber;
 
 			int		D_KIND;
@@ -2974,7 +2974,7 @@ version(DIDE)
 						else if( token().tok == TOK.Tassign )
 						{
 							parseToken( TOK.Tassign );
-							char[] _type = getTokenIdentifierUntil( TOK.Tsemicolon );
+							string _type = getTokenIdentifierUntil( TOK.Tsemicolon );
 							activeASTnode.addChild( _type, D_KIND, getProt(), _type, null, _ln );
 						}
 						else
@@ -2996,25 +2996,12 @@ version(DIDE)
 		}
 
 	public:
-		this()
-		{
-			curlyStack		= new CStack!(char[]);
-			protStack		= new CStack!(char[]);
-			conditionStack	= new CStack!(char[]);
-		}
+		this(){}
 		
 		this( TokenUnit[] _tokens )
 		{
 			updateTokens( _tokens );
-		}
-		
-		~this()
-		{
-			if( curlyStack !is null )		delete curlyStack;
-			if( protStack !is null )		delete protStack;
-			if( conditionStack !is null )	delete conditionStack;
-		}
-		
+		}		
 
 		override bool updateTokens( TokenUnit[] _tokens )
 		{
@@ -3024,20 +3011,16 @@ version(DIDE)
 			
 			activeProt = "";
 			
-			if( curlyStack !is null ) delete curlyStack;
-			if( protStack !is null ) delete protStack;
-			if( conditionStack !is null ) delete conditionStack;
-			
-			curlyStack		= new CStack!(char[]);
-			protStack		= new CStack!(char[]);
-			conditionStack	= new CStack!(char[]);
+			curlyStack.clear;
+			protStack.clear;
+			conditionStack.clear;
 			
 			if( !_tokens.length ) return false;
 			
 			return true;
 		}
 		
-		CASTnode parse( char[] fullPath )
+		CASTnode parse( string fullPath )
 		{
 			bool			bAssignExpress;
 			CASTnode		head = null;
@@ -3060,7 +3043,7 @@ version(DIDE)
 					{
 						if( ++repeatCount > 10 )
 						{
-							IupMessageError( GLOBAL.mainDlg, "Infinite Loop of parse() function" );
+							tools.questMessage( "Error", "Infinite Loop of parse() function", "ERROR", "OK" );
 							//Stdout( "Infinite Loop of parse() function" ).newline;
 							break;
 						}
@@ -3087,7 +3070,7 @@ version(DIDE)
 							activeProt = "private";
 							if( token().tok == TOK.Tcolon )
 							{
-								char[] protValue = protStack.top();
+								string protValue = protStack.top();
 								if( protValue.length )
 									if( protValue[$-1] == ':' ) protStack.pop();
 
@@ -3101,7 +3084,7 @@ version(DIDE)
 							activeProt = "public";
 							if( token().tok == TOK.Tcolon )
 							{
-								char[] protValue = protStack.top();
+								string protValue = protStack.top();
 								if( protValue.length )
 									if( protValue[$-1] == ':' ) protStack.pop();
 
@@ -3115,7 +3098,7 @@ version(DIDE)
 							activeProt = "protected";
 							if( token().tok == TOK.Tcolon )
 							{
-								char[] protValue = protStack.top();
+								string protValue = protStack.top();
 								if( protValue.length )
 									if( protValue[$-1] == ':' ) protStack.pop();
 								
@@ -3323,6 +3306,7 @@ version(DIDE)
 									break;
 								}
 							}
+							goto case;
 							
 						case TOK.Tdo:
 							if( next().tok == TOK.Topencurly )
@@ -3437,18 +3421,18 @@ version(DIDE)
 
 									case "debug":
 										if( D_KIND < 0 ) D_KIND = D_DEBUG;
-										// goto case; // D2 compiler
+										goto case; // D2 compiler
 
 									case "staticif":
 										if( D_KIND < 0 ) D_KIND = D_STATICIF;
-										// goto case; // D2 compiler
+										goto case; // D2 compiler
 										
 									case "version":
 										if( D_KIND < 0 ) D_KIND = D_VERSION;
 										
 										curlyStack.pop();
 
-										char[] _name;
+										string _name;
 										if( activeASTnode.getFather !is null )
 										{
 											activeASTnode.endLineNum = token().lineNumber;
@@ -3518,7 +3502,7 @@ version(DIDE)
 									// Contract Programming
 									case "in", "out", "do":
 										curlyStack.pop();
-										//goto default;  		// D2 compiler
+										goto default;  		// D2 compiler
 										
 									default:
 										curlyStack.pop();
@@ -3730,7 +3714,7 @@ version(DIDE)
 			}
 			catch( Exception e )
 			{
-				debug IupMessageError( null, toStringz( "parserD Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				debug IupMessage( null, toStringz( "parserD Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 			}
 
 			if( head !is null )

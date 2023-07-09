@@ -2,22 +2,18 @@
 
 
 private import iup.iup;
-
 private import global, scintilla, actionManager, menu, tools;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
-
-private import tango.stdc.stringz, tango.sys.Process;
-private import tango.io.FilePath, Util = tango.text.Util, Integer = tango.text.convert.Integer, Path = tango.io.Path;
+private import std.string, std.conv, std.file, std.encoding, Array = std.array, Path = std.path;
 
 class CProjectTree
 {
 private:
-	import				parser.ast, dialogs.prjPropertyDlg, parser.parserFB;
-
-	import				project, tango.io.device.File, tango.io.stream.Lines;
-	import				tango.core.Thread, parser.autocompletion/*, tango.core.sync.Mutex, tango.io.Stdout*/;
+	import				project, parser.autocompletion, parser.ast, dialogs.prjPropertyDlg, parser.parserFB;
+	import				core.thread;
 	
-	Ihandle*			projectButtonCollapse, projectButtonHide;
+	
+	Ihandle*			projectToolbarTitleImage, projectButtonCollapse, projectButtonHide;
 	Ihandle*			layoutHandle, tree;
 	
 	// Inner Class
@@ -26,11 +22,11 @@ private:
 		private:
 		import			parser.scanner, parser.parser;
 		
-		char[]			pFullPath, document;
+		string			pFullPath, document;
 		CASTnode		pParseTree;
 
 		public:
-		this( char[] _pFullPath, char[] _document = null )
+		this( string _pFullPath, string _document = null )
 		{
 			pFullPath = _pFullPath;
 			document = _document;
@@ -44,8 +40,8 @@ private:
 			// Parser
 			if( !document.length )
 			{
-				int bom;
-				document = FileAction.loadFile( pFullPath, bom );
+				int bom, withbom;
+				document = FileAction.loadFile( pFullPath, bom, withbom );
 			}
 
 			scope parser = new CParser( Scanner.scan( document ) );
@@ -67,7 +63,7 @@ private:
 		// Outline Toolbar
 		projectButtonCollapse = IupButton( null, null );
 		IupSetAttributes( projectButtonCollapse, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_collapse2,VISIBLE=NO" );
-		IupSetAttribute( projectButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
+		IupSetStrAttribute( projectButtonCollapse, "TIP", GLOBAL.languageItems["collapse"].toCString );
 		IupSetCallback( projectButtonCollapse, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* _tree = GLOBAL.projectTree.getTreeHandle();
@@ -116,75 +112,55 @@ private:
 
 		projectButtonHide = IupButton( null, null );
 		IupSetAttributes( projectButtonHide, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_shift_l" );
-		IupSetAttribute( projectButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
+		IupSetStrAttribute( projectButtonHide, "TIP", GLOBAL.languageItems["hide"].toCString );
 		IupSetCallback( projectButtonHide, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 			return IUP_DEFAULT;
 		});
 
-		Ihandle* projectToolbarTitleImage = IupLabel( null );
-		IupSetAttributes( projectToolbarTitleImage, "IMAGE=icon_packageexplorer,ALIGNMENT=ACENTER:ALEFT" );
+		projectToolbarTitleImage = IupLabel( null );
+		IupSetAttributes( projectToolbarTitleImage, "ALIGNMENT=ACENTER:ALEFT" );
 
-		/*Ihandle* projectToolbarTitle = IupLabel( " Project" );
-		IupSetAttribute( projectToolbarTitle, "ALIGNMENT", "ACENTER:ALEFT" );*/
-
-		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, /*projectToolbarTitle,*/ IupFill, projectButtonCollapse, projectButtonHide, null );
+		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, IupFill, projectButtonCollapse, projectButtonHide, null );
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 		
-		
+		version(IUP327) GLOBAL.editorSetting01.OutlineFlat = "OFF";
 		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 		{
-			version(IUP327)
+			tree = IupFlatTree();
+			IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
+			IupSetAttribute( tree, "ADDBRANCH-1", "Projects" );
+			IupSetStrAttribute( tree, "SB_FORECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+			IupSetStrAttribute( tree, "BORDERCOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+			IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+			if( GLOBAL.editColor.prjViewHLT.length )
 			{
-			
-			}
-			else
-			{
-				tree = IupFlatTree();
-				IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
-				IupSetAttribute( tree, "ADDBRANCH-1", "Projects" );
-				IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-				IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
-				IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-				if( GLOBAL.editColor.prjViewHLT.toDString.length )
-				{
-					IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
-					IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
-				}
+				IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
+				IupSetStrAttribute( tree, "HLCOLORALPHA", toStringz( GLOBAL.editColor.prjViewHLTAlpha ) );
 			}
 		}
 		else
 		{
-		
 			tree = IupTree();
 			IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
 			IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-			if( GLOBAL.editColor.prjViewHLT.toDString.length )
+			if( GLOBAL.editColor.prjViewHLT.length )
 			{
-				IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+				IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 			}
 		}
 		
-		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
-		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
-		/*
-		if( fromStringz( IupGetGlobal( "DRIVER" ) ) != "GTK" )
-			if( GLOBAL.editColor.project_HLT.toDString.length ) IupSetAttribute( tree, "HLCOLOR", GLOBAL.editColor.project_HLT.toCString );
-		*/
+		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
+		IupSetStrAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
 		
 		IupSetCallback( tree, "RIGHTCLICK_CB", cast(Icallback) &CProjectTree_RightClick_cb );
 		IupSetCallback( tree, "SELECTION_CB", cast(Icallback) &CProjectTree_Selection_cb );
 		IupSetCallback( tree, "NODEREMOVED_CB", cast(Icallback) &CProjectTree_NodeRemoved_cb );
 		IupSetCallback( tree, "MULTISELECTION_CB", cast(Icallback) &CProjectTree_MULTISELECTION_CB );
-		//IupSetCallback( tree, "MULTIUNSELECTION_CB", cast(Icallback) &CProjectTree_MULTIUNSELECTION_CB );
-		
-		
+
 		IupSetAttribute( tree, "IMAGE0", "icon_prj" );
 		IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_prj" );
-		//IupSetCallback( tree, "EXECUTELEAF_CB", cast(Icallback) &CProjectTree_EXECUTELEAF_CB );
-		//IupSetCallback( tree, "BRANCHOPEN_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
-		//IupSetCallback( tree, "BRANCHCLOSE_CB", cast(Icallback) &CProjectTree_BRANCH_CB );
 		
 		layoutHandle = IupVbox( projectToolbarH, tree, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,GAP=2" );
@@ -195,19 +171,19 @@ private:
 
 	void toBoldTitle( Ihandle* _tree, int id )
 	{
-		int commaPos = Util.index( GLOBAL.fonts[4].fontString, "," );
-		if( commaPos < GLOBAL.fonts[4].fontString.length )
+		int commaPos = indexOf( GLOBAL.fonts[4].fontString, "," );
+		if( commaPos > 0 )
 		{
-			char[] fontString = Util.substitute( GLOBAL.fonts[4].fontString.dup, ",", ",Bold " );
+			string fontString = Array.replace( GLOBAL.fonts[4].fontString.dup, ",", ",Bold " );
 			IupSetStrAttributeId( _tree, "TITLEFONT", id, toStringz( fontString ) );
 		}
 	}
 	
 	void changeIcons()
 	{
-		char[] tail;
-		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
-		
+		string tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
+		IupSetStrAttribute( projectToolbarTitleImage, "IMAGE", toStringz( "icon_packageexplorer" ~ tail ) );
 		IupSetStrAttribute( projectButtonCollapse, "IMAGE", toStringz( "icon_collapse2" ~ tail ) );
 		IupSetStrAttribute( projectButtonHide, "IMAGE", toStringz( "icon_shift_l" ~ tail ) );
 	}
@@ -228,8 +204,8 @@ private:
 					}
 					else
 					{
-						char[] symbol = upperCase( _child.name );
-						char[] noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
+						string symbol = toUpper( _child.name );
+						string noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
 						if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
 						{
 							version(Windows)
@@ -326,7 +302,7 @@ private:
 				
 					if( _child.name != "-else-" )
 					{
-							if( _child.name in AutoComplete.VersionCondition ) result ~= getVersionIncludes( _child );
+						if( _child.name in AutoComplete.VersionCondition ) result ~= getVersionIncludes( _child );
 					}
 					else
 					{
@@ -344,140 +320,54 @@ private:
 	}
 	
 	
-	char[][] preParseFiles( char[][] inFiles, int level )
+	string[] preParseFiles( string[] inFiles, int level )
 	{
-		char[][] beParsedFiles;
+		string[] beParsedFiles;
 		
-		char[] plusSign;
+		string plusSign;
 		for( int i = 0; i < level; ++ i)
 			plusSign ~= "+";
 		
-		/+
-		auto mutex = new Mutex;
-		auto group = new ThreadGroup;
-		
-		void testFn()
+		foreach( s; inFiles )
 		{
-			Thread thisThread = Thread.getThis;
-			if( thisThread is null ) return;
-			
-			char[] s = thisThread.name;
-			if( !s.length ) return;
-			
-			bool bInParserManager;
-			synchronized( mutex )
-			{
-				bInParserManager = ( fullPathByOS(s) in GLOBAL.parserManager ) ? true : false;
-			}
-			
-			if( !bInParserManager )
-			{
-				int _encoding;
-				char[] document;
-				synchronized( mutex )
-				{
-					document = FileAction.loadFile( s, _encoding );
-				}
-				auto tokens = GLOBAL.scanner.scan( document );
-				if( tokens.length )
-				{
-					auto _parser = new CParser( tokens );
-					CASTnode Root;
-					synchronized( mutex )
-					{
-						GLOBAL.parserManager[fullPathByOS(s)] = _parser.parse( s );
-						Root = GLOBAL.parserManager[fullPathByOS(s)];
-						Stdout( s ~ " be Parsed" ).newline;
-					}
+			bool bInParserManager = ( fullPathByOS(s) in GLOBAL.parserManager ) ? true : false;
 
-					char[] includeFullPath;
-					synchronized( mutex )
+			CASTnode Root = ParserAction.loadParser( s, true );
+			if( Root !is null )
+			{
+				if( !bInParserManager )
+				{
+					GLOBAL.messagePanel.printOutputPanel( "  " ~ plusSign ~ "[ " ~ s ~ " ]...Parsed" );
+
+					string includeFullPath;
+					version(FBIDE)
 					{
 						CASTnode[] includeNodes = getVersionIncludes( Root );
 						foreach( CASTnode _node; includeNodes )
 						{
-							//synchronized( mutex )
-							//{
-								includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-								if( includeFullPath.length )
-								{
-									beParsedFiles ~= includeFullPath;
-								}
-							//}
-						}
-					}
-				}
-			}
-			else
-			{/+
-				CASTnode Root;
-				synchronized( mutex )
-				{
-					Root = GLOBAL.parserManager[fullPathByOS(s)];
-				}
-				char[] includeFullPath;
-				CASTnode[] includeNodes = getVersionIncludes( Root );
-				foreach( CASTnode _node; includeNodes )
-				{
-					includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-					if( includeFullPath.length )
-					{
-						synchronized( mutex )
-						{
-							beParsedFiles ~= includeFullPath;
-						}
-					}
-				}+/
-			}
-		}
-		
-		
-		
-		foreach( char[] s; inFiles )
-		{
-			Thread t = group.create( &testFn );
-			t.name = s;
-		}
-		group.joinAll();	
-		+/
-		
-		foreach( char[] s; inFiles )
-		{
-			bool bInParserManager = ( fullPathByOS(s) in GLOBAL.parserManager ) ? true : false;
-
-			CASTnode Root = GLOBAL.outlineTree.loadParser( s );
-			if( Root !is null )
-			{
-				if( !bInParserManager ) GLOBAL.messagePanel.printOutputPanel( "  " ~ plusSign ~ "[ " ~ s ~ " ]...Parsed" );
-
-				char[] includeFullPath;
-				version(FBIDE)
-				{
-					CASTnode[] includeNodes = getVersionIncludes( Root );
-					foreach( CASTnode _node; includeNodes )
-					{
-						includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
-						if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
-					}
-				}
-				version(DIDE)
-				{
-					CASTnode[] includeNodes = getVersionIncludes( Root );
-					foreach( CASTnode _node; includeNodes )
-					{
-						if( _node.type.length )
-						{
-							//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
-							includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.type );
+							includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.name );
 							if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
 						}
-						else
+					}
+					version(DIDE)
+					{
+						CASTnode[] includeNodes = getVersionIncludes( Root );
+						foreach( CASTnode _node; includeNodes )
 						{
-							//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
-							includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
-							if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
-						}
-					}					
+							if( _node.type.length )
+							{
+								//results ~= check( _node.type, cwdPath, bCheckOnlyOnce );
+								includeFullPath = AutoComplete.checkIncludeExist( _node.type, Root.type );
+								if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+							}
+							else
+							{
+								//results ~= check( _node.name, cwdPath, bCheckOnlyOnce );
+								includeFullPath = AutoComplete.checkIncludeExist( _node.name, Root.type );
+								if( includeFullPath.length ) beParsedFiles ~= includeFullPath;									
+							}
+						}					
+					}
 				}
 			}
 
@@ -509,50 +399,43 @@ public:
 	
 	void changeColor()
 	{
-		IupSetAttributeId( tree, "COLOR", 0, GLOBAL.editColor.projectFore.toCString );
-		IupSetAttribute( tree, "FGCOLOR", GLOBAL.editColor.projectFore.toCString );
-		IupSetAttribute( tree, "BGCOLOR", GLOBAL.editColor.projectBack.toCString );
-		IupSetStrAttribute( tree, "HLCOLOR", GLOBAL.editColor.prjViewHLT.toCString );
+		IupSetStrAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.projectFore ) );
+		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
+		IupSetStrAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
+		IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 		
 		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
 		{
-			IupSetStrAttribute( tree, "SB_FORECOLOR", GLOBAL.editColor.linenumBack.toCString );
-			IupSetStrAttribute( tree, "BORDERCOLOR", GLOBAL.editColor.linenumBack.toCString );
-			IupSetStrAttribute( tree, "HLCOLORALPHA", GLOBAL.editColor.prjViewHLTAlpha.toCString );
+			IupSetStrAttribute( tree, "SB_FORECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+			IupSetStrAttribute( tree, "BORDERCOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
+			IupSetStrAttribute( tree, "HLCOLORALPHA", toStringz( GLOBAL.editColor.prjViewHLTAlpha ) );
 		}
 		
-		/*
-		scope icon_prj = CstringConvert( "icon_prj" );
-		scope icon_prj_open = CstringConvert( "icon_prj_open" );
-		scope icon_door = CstringConvert( "icon_door" );
-		scope icon_prj_open = CstringConvert( "icon_prj_open" );
-		*/
 		for( int i = 1; i < IupGetInt( tree, "COUNT" ); ++ i )
 		{
 			if( IupGetIntId( tree, "DEPTH", i ) == 1 )
 			{
-				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.prjTitle.toCString );
+				IupSetStrAttributeId( tree, "COLOR", i, toStringz( GLOBAL.editColor.prjTitle ) );
 				IupSetAttributeId( tree, "IMAGE", i, "icon_prj" );
 				IupSetAttributeId( tree, "IMAGEEXPANDED", i, "icon_prj_open" );
 			}
 			else if( IupGetIntId( tree, "DEPTH", i ) == 2 )
 			{
-				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.prjSourceType.toCString );
+				IupSetStrAttributeId( tree, "COLOR", i, toStringz( GLOBAL.editColor.prjSourceType ) );
 				IupSetAttributeId( tree, "IMAGE", i, "icon_door" );
 				IupSetAttributeId( tree, "IMAGEEXPANDED", i, "icon_dooropen" );
 			}
 			else
 			{
-				IupSetAttributeId( tree, "COLOR", i, GLOBAL.editColor.projectFore.toCString );
-				scope _fp = new FilePath( fromStringz( IupGetAttributeId( tree, "TITLE", i ) ) );
-
+				IupSetStrAttributeId( tree, "COLOR", i, toStringz( GLOBAL.editColor.projectFore ) );
+				string _fp = fSTRz( IupGetAttributeId( tree, "TITLE", i ) );
 				version(FBIDE)
 				{
-					switch( tools.lowerCase( _fp.ext() ) )
+					switch( toLower( Path.extension( _fp ) ) )
 					{
-						case "bas":
+						case ".bas":
 							IupSetAttributeId( tree, "IMAGE", i, "icon_bas" );	break;
-						case "bi":
+						case ".bi":
 							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );	break;
 						default:
 							IupSetAttributeId( tree, "IMAGE", i, "icon_txt" );
@@ -561,11 +444,11 @@ public:
 				
 				version(DIDE)
 				{
-					switch( tools.lowerCase( _fp.ext() ) )
+					switch( toLower( Path.extension( _fp ) ) )
 					{
-						case "d":
+						case ".d":
 							IupSetAttributeId( tree, "IMAGE", i, "icon_bas" );	break;
-						case "di":
+						case ".di":
 							IupSetAttributeId( tree, "IMAGE", i, "icon_bi" );	break;
 						default:
 							IupSetAttributeId( tree, "IMAGE", i, "icon_txt" );
@@ -575,16 +458,10 @@ public:
 		}
 	}
 
-	/*
-	Ihandle* getShadowTreeHandle()
-	{
-		return shadowTree;
-	}
-	*/
 
-	void createProjectTree( char[] setupDir )
+	void createProjectTree( string setupDir )
 	{
-		char[] prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
+		string prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
 		
 		if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( tree, "VISIBLE", 0 ); // For speed up
 
@@ -594,23 +471,23 @@ public:
 		IupSetAttribute( tree, "IMAGEEXPANDED1", "icon_prj_open" );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttributeId( tree, "USERDATA", 1, tools.getCString( setupDir ) );
-		IupSetAttributeId( tree, "COLOR", 1, GLOBAL.editColor.prjTitle.toCString );
+		IupSetStrAttributeId( tree, "COLOR", 1, toStringz( GLOBAL.editColor.prjTitle ) );
 		toBoldTitle( tree, 1 );
 		
 		// Miscellaneous
 		IupSetAttribute( tree, "ADDBRANCH1", "Miscellaneous" );
-		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		// Create Sub Dir
-		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].misc )
+		foreach_reverse( s; GLOBAL.projectManager[setupDir].misc )
 			_createTree( prjDirName, s );
 			
-		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].misc )
+		foreach_reverse( s; GLOBAL.projectManager[setupDir].misc )
 		{
-			char[]		userData = s;
+			string		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
 			
 			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
@@ -618,34 +495,32 @@ public:
 				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
 				IupSetStrAttributeId( tree, "INSERTLEAF", folderLocateId, toStringz( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
-				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", insertID, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", insertID, "icon_txt" );
-				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
+				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) ); // Allocate memory to save files's fullpath 
 			}
 			else
 			{
 				IupSetStrAttributeId( tree, "ADDLEAF", folderLocateId, toStringz( s ) );
-				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_txt" );
-				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) ); // Allocate memory to save files's fullpath 
 			}
 		}		
 		
-
-	
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
-		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 
 		// Create Sub Dir
-		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].others )
+		foreach_reverse( s; GLOBAL.projectManager[setupDir].others )
 			_createTree( prjDirName, s );
 			
-		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].others )
+		foreach_reverse( s; GLOBAL.projectManager[setupDir].others )
 		{
-			char[]		userData = s;
+			string		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
 			
 			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
@@ -653,34 +528,34 @@ public:
 				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
 				IupSetStrAttributeId( tree, "INSERTLEAF", folderLocateId, toStringz( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
-				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", insertID, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", insertID, "icon_txt" );
-				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
+				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) ); // Allocate memory to save files's fullpath 
 			}
 			else
 			{
 				IupSetStrAttributeId( tree, "ADDLEAF", folderLocateId, toStringz( s ) );
-				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_txt" );
-				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
+				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) ); // Allocate memory to save files's fullpath 
 			}
 		}
 
 
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
-		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		// Create Sub Dir
-		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].includes )
+		foreach_reverse( s; GLOBAL.projectManager[setupDir].includes )
 			_createTree( prjDirName, s );
 			
-		foreach( char[] s; GLOBAL.projectManager[setupDir].includes )
+		foreach( s; GLOBAL.projectManager[setupDir].includes )
 		{
-			char[]		userData = s;
+			string		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
 			
 			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
@@ -688,14 +563,14 @@ public:
 				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
 				IupSetStrAttributeId( tree, "INSERTLEAF", folderLocateId, toStringz( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
-				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", insertID, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", insertID, "icon_bi" );
 				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
 			else
 			{
 				IupSetStrAttributeId( tree, "ADDLEAF", folderLocateId, toStringz( s ) );
-				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_bi" );
 				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 			}
@@ -704,19 +579,18 @@ public:
 
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
-		IupSetAttributeId( tree, "COLOR", 2, GLOBAL.editColor.prjSourceType.toCString );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		toBoldTitle( tree, 2 );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		
 		// Create Sub Dir
-		foreach_reverse( char[] s; GLOBAL.projectManager[setupDir].sources )
+		foreach_reverse( s; GLOBAL.projectManager[setupDir].sources )
 			_createTree( prjDirName, s );
 		
-		
-		foreach( char[] s; GLOBAL.projectManager[setupDir].sources )
+		foreach( s; GLOBAL.projectManager[setupDir].sources )
 		{
-			char[]		userData = s;
+			string		userData = s;
 			int			folderLocateId = _createTree( prjDirName, s );
 			
 			if( IupGetIntId( tree, "CHILDCOUNT", folderLocateId ) > 0 )
@@ -724,14 +598,14 @@ public:
 				folderLocateId = IupGetIntId( tree, "LAST", folderLocateId + 1 );
 				IupSetStrAttributeId( tree, "INSERTLEAF", folderLocateId, toStringz( s ) );
 				int insertID = IupGetInt( tree, "LASTADDNODE" );
-				IupSetAttributeId( tree, "COLOR", insertID, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", insertID, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", insertID, "icon_bas" );
 				IupSetAttributeId( tree, "USERDATA", insertID, tools.getCString( userData ) );
 			}
 			else
 			{
 				IupSetStrAttributeId( tree, "ADDLEAF", folderLocateId, toStringz( s ) );
-				IupSetAttributeId( tree, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( tree, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( tree, "IMAGE", folderLocateId + 1, "icon_bas" );
 				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 			}
@@ -741,7 +615,6 @@ public:
 
 		// Switch to project tree tab
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
-		//IupSetAttribute( GLOBAL.projectViewTabs, "VALUE_HANDLE", cast(char*) GLOBAL.projectTree.getTreeHandle );
 
 		IupSetAttribute( tree, "MARK", "CLEARALL" );
 		
@@ -752,12 +625,11 @@ public:
 		// Recent Projects
 		GLOBAL.projectTree.updateRecentProjects( setupDir, GLOBAL.projectManager[setupDir].name );
 		GLOBAL.statusBar.setPrjName( null, true );
-		//GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[setupDir].name );
 		
 		if( IupGetInt( tree, "COUNT" ) > 1 ) IupSetAttribute( projectButtonCollapse, "VISIBLE", "YES" );
 	}
 
-	void CreateNewProject( char[] prjName, char[] prjDir )
+	void CreateNewProject( string prjName, string prjDir )
 	{
 		//GLOBAL.activeProjectDirName = prjDir;
 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
@@ -765,7 +637,7 @@ public:
 		IupSetStrAttribute( tree, "ADDBRANCH0", toStringz( prjName ) );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttribute( tree, "USERDATA1", tools.getCString( prjDir ) );
-		IupSetAttributeId( tree, "COLOR", 1, toStringz( "128 0 0" ) );
+		IupSetAttributeId( tree, "COLOR", 1, "128 0 0" );
 		toBoldTitle( tree, 1 );
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Miscellaneous" );
@@ -797,7 +669,7 @@ public:
 		if( IupGetInt( tree, "COUNT" ) > 1 ) IupSetAttribute( projectButtonCollapse, "VISIBLE", "YES" );
 	}
 
-	bool openProject( char[] setupDir = null, bool bAskCreateNew = false )
+	bool openProject( string setupDir = null, bool bAskCreateNew = false )
 	{
 		if( !setupDir.length )
 		{
@@ -807,26 +679,26 @@ public:
 
 		if( !setupDir.length ) return false;
 
-		setupDir = Path.normalize( setupDir );
+		setupDir = tools.normalizeSlash( setupDir );
 		
 		if( setupDir in GLOBAL.projectManager )
 		{
 			Ihandle* messageDlg = IupMessageDlg();
 			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-			IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString ) );
+			IupSetStrAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString ) );
 			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
 			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
 			return true;
 		}
 
-		version(FBIDE)	scope sFN = new FilePath( setupDir ~ "/FB.poseidon" );
-		version(DIDE)	scope sFN = new FilePath( setupDir ~ "/D.poseidon" );
-		version(FBIDE)	if( !sFN.exists() ) sFN.set( setupDir ~ "/.poseidon" );
+		
+		version(FBIDE)	string sFN = setupDir ~ "/FB.poseidon";
+		version(DIDE)	string sFN = setupDir ~ "/D.poseidon";
 
-		if( sFN.exists() )
+		if( exists( sFN ) )
 		{
 			PROJECT		p;
-			GLOBAL.projectManager[setupDir] = p.loadFile( sFN.toString );
+			GLOBAL.projectManager[setupDir] = p.loadFile( sFN );
 
 			if( !GLOBAL.projectManager[setupDir].dir.length )
 			{
@@ -849,38 +721,40 @@ public:
 				if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
 				{
 					IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
-					IupSetInt( GLOBAL.messageSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+					IupSetInt( GLOBAL.messageSplit, "BARSIZE", std.conv.to!(int)( GLOBAL.editorSetting01.BarSize ) );
 					IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
 					IupSetInt( GLOBAL.messageSplit, "ACTIVE", 1 );
 				}
-				IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );					
+				IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
 				
-				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
-				GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
-			
-				char[][]		parsedFiles;
-				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Files Pre-Loading...", true );
-				foreach( char[] source; GLOBAL.projectManager[setupDir].sources ~ GLOBAL.projectManager[setupDir].includes ~ GLOBAL.projectManager[setupDir].misc ~ GLOBAL.projectManager[setupDir].others )
+				GLOBAL.compilerSettings.activeCompiler = getActiveCompilerInformation( GLOBAL.projectManager[setupDir].dir );
+
+				if( GLOBAL.togglePreLoadPrj == "ON" )
 				{
-					if( Path.exists( source ) ) parsedFiles ~= source;
+					GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
+					GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
+					
+					string[]		parsedFiles;
+					GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Files Pre-Loading...", true );
+					foreach( source; GLOBAL.projectManager[setupDir].sources ~ GLOBAL.projectManager[setupDir].includes ~ GLOBAL.projectManager[setupDir].misc ~ GLOBAL.projectManager[setupDir].others )
+					{
+						if( exists( source ) ) parsedFiles ~= source;
+					}
+
+					for( int i = 0; i <= GLOBAL.preParseLevel; ++i )
+						parsedFiles = preParseFiles( parsedFiles, i );
+				
+					GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
 				}
-				
-				for( int i = 0; i <= GLOBAL.preParseLevel; ++i )
-					parsedFiles = preParseFiles( parsedFiles, i );
-				
-				GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
 				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
 			}
-			
-			//createProjectTree( setupDir );
 		}
 		else
 		{
 			IupMessageError( null, toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString ) );
 			if( bAskCreateNew )
 			{
-				sFN.set( setupDir );
-				if( sFN.exists() )
+				if( exists( setupDir ) )
 				{
 					int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["createnewone"].toDString );
 					if( result == 1 )
@@ -895,202 +769,16 @@ public:
 			return false;
 		}
 
-		/+
-		// Pre-Load Parser
-		ParseThread subThread = new ParseThread( GLOBAL.projectManager[setupDir] );
-		subThread.start();
-		+/
-
 		return true;
-	}
-	
-
-	version(FBIDE)
-	{
-		bool importFbEditProject()
-		{
-			scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["caption_importprj"].toDString() ~ "...",  GLOBAL.languageItems["fbeditfile"].toDString() ~ "|*.fbp|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" );
-			char[] fbpFullPath = fileSelectDlg.getFileName();
-
-			if( !fbpFullPath.length ) return false;
-
-			scope sFN = new FilePath( fbpFullPath );
-			char[] _dir = sFN.path(); // include tail /
-
-			if( _dir.length )
-				if( _dir[$-1] == '/' ) _dir = _dir[0..$-1].dup;
-
-			if( _dir in GLOBAL.projectManager )
-			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ _dir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString() ) );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
-				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );				
-				return false;
-			}
-
-			scope poseidonFN = new FilePath( sFN.path ~ "FB.poseidon" );
-
-			if( poseidonFN.exists() )
-			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONDEFAULT=2,BUTTONS=YESNO" );
-				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["continueimport"].toCString );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
-				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-
-				if( IupGetInt( messageDlg, "BUTTONRESPONSE") == 2 ) return false;
-			}
-
-			scope file = new File( fbpFullPath, File.ReadExisting );
-
-			PROJECT			prj;
-			int				blockType; // blockType = 1 [Project], 2 [Make], 3 [TabOrder], 4 [File], 5 [BreakPoint], 6 [FileInfo], 7 [NoDebug]
-			char[][char[]]	fileArrays, optionArrays;
-			char[]			currentOption;
-
-			prj.dir = _dir;
-			prj.name = sFN.name;
-
-			foreach( line; new Lines!(char)(file) )
-			{
-				if( line.length )
-				{
-					char[] _lineData = Util.trim( line );
-					bool bContinue;
-
-					switch( _lineData )
-					{
-						case "[Project]":		blockType = 1; bContinue = true; break;
-						case "[Make]":			blockType = 2; bContinue = true; break;
-						case "[TabOrder]":		blockType = 3; bContinue = true; break;
-						case "[File]":			blockType = 4; bContinue = true; break;
-						case "[BreakPoint]":	blockType = 5; bContinue = true; break;
-						case "[FileInfo]":		blockType = 6; bContinue = true; break;
-						case "[NoDebug]":		blockType = 7; bContinue = true; break;
-						default:
-					}
-
-					if( !bContinue )
-					{
-						switch( blockType )
-						{
-							case 1:
-								int assignPos = Util.index( _lineData, "=" );
-								if( assignPos < _lineData.length - 1 )
-								{
-									char[] 	_keyWord = _lineData[0..assignPos];
-									char[]	_value = _lineData[assignPos+1..$];
-									if( _keyWord == "Description" )
-									{
-										prj.comment = _value;
-									}
-								}
-
-							case 2:
-								int assignPos = Util.index( _lineData, "=" );
-								if( assignPos < _lineData.length - 1 )
-								{
-									char[] 	_keyWord = _lineData[0..assignPos];
-									char[]	_value = _lineData[assignPos+1..$];
-
-									if( _keyWord == "Output" )
-									{
-										scope _fp = new FilePath( _value );
-										prj.targetName = _fp.name;
-									}
-									else if( _keyWord == "Run" )
-									{
-										prj.args = _value;
-									}
-									else  if( _keyWord == "Current" )
-									{
-										currentOption = _value;
-									}
-									else
-									{
-										if( _keyWord[0] > 48 && _keyWord[0] < 58 )
-											if( Integer.atoi( _keyWord ) < 1000 ) optionArrays[_keyWord] = _value;
-									}
-								}
-								break;
-
-							case 4:
-								int assignPos = Util.index( _lineData, "=" );
-								if( assignPos < _lineData.length - 1 )
-								{
-									char[] 	_keyWord = _lineData[0..assignPos];
-									char[]	_value = _lineData[assignPos+1..$];
-
-									if( _keyWord == "Main" )
-									{
-										if( fileArrays.length )	prj.mainFile = fileArrays[_value];
-										break;
-									}
-					
-									fileArrays[_keyWord] = _value;
-
-									scope _fp = new FilePath( Path.normalize( _value ) );
-									version(FBIDE)
-									{
-										switch( lowerCase( _fp.ext ) )
-										{
-											case "bas":		if( !_fp.isAbsolute ) prj.sources ~= ( prj.dir ~ "/" ~ _value ); else prj.sources ~= _value;	break;
-											case "bi":		if( !_fp.isAbsolute ) prj.includes ~= ( prj.dir ~ "/" ~ _value ); else prj.includes ~= _value;	break;
-											default:		if( !_fp.isAbsolute ) prj.others ~= ( prj.dir ~ "/" ~ _value ); else prj.others ~= _value;		break;
-											
-										}
-									}
-									version(DIDE)
-									{
-										switch( lowerCase( _fp.ext ) )
-										{
-											case "d":		if( !_fp.isAbsolute ) prj.sources ~= ( prj.dir ~ "/" ~ _value ); else prj.sources ~= _value;	break;
-											case "di":		if( !_fp.isAbsolute ) prj.includes ~= ( prj.dir ~ "/" ~ _value ); else prj.includes ~= _value;	break;
-											default:		if( !_fp.isAbsolute ) prj.others ~= ( prj.dir ~ "/" ~ _value ); else prj.others ~= _value;		break;
-											
-										}
-									}
-								}
-								break;
-
-							default:
-						}
-					}
-				}
-			}
-
-			if( currentOption.length )
-			{
-				if( currentOption in optionArrays )
-				{
-					char[] option = optionArrays[currentOption];
-					int posComma = Util.index( option, "," );
-					if( posComma < option.length )
-					{
-						option = option[posComma+1..$];
-						option = Util.substitute( option, "fbc ", "" );
-						prj.compilerOption = Util.trim( option );
-					}
-				}
-			}
-
-			prj.type = "1";
-
-			GLOBAL.projectManager[prj.dir] = prj;
-			createProjectTree( prj.dir );
-			return true;
-		}
 	}
 	
 	void closeProject()
 	{
-		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
+		string activePrjName = actionManager.ProjectAction.getActiveProjectName();
 
 		if( activePrjName.length )
 		{
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes ~ GLOBAL.projectManager[activePrjName].others ~ GLOBAL.projectManager[activePrjName].misc )
+			foreach( s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes ~ GLOBAL.projectManager[activePrjName].others ~ GLOBAL.projectManager[activePrjName].misc )
 			{
 				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE ) return;
 			}
@@ -1106,13 +794,23 @@ public:
 				int depth = IupGetIntId( tree, "DEPTH", i );
 				if( depth == 1 )
 				{
-					if( fromStringz( IupGetAttributeId( tree, "USERDATA", i )) == activePrjName )
+					try
 					{
-						char* user = IupGetAttributeId( tree, "USERDATA", i );
-						if( user != null ) delete user;
-						IupSetAttributeId( tree, "DELNODE", i, "SELECTED" );
-						break;
+						if( fromStringz( IupGetAttributeId( tree, "USERDATA", i )) == activePrjName )
+						{
+							/*
+							char* user = IupGetAttributeId( tree, "USERDATA", i );
+							if( user != null )
+							{
+								delete user;
+								user = null;
+							}
+							*/
+							IupSetAttributeId( tree, "DELNODE", i, "SELECTED" );
+							break;
+						}
 					}
+					catch( Exception e ){}
 				}
 			}
 
@@ -1130,21 +828,18 @@ public:
 	
 	void closeAllProjects()
 	{
-		char[][] prjsDir;
+		string[] prjsDir;
 		
-		foreach( PROJECT p; GLOBAL.projectManager )
+		foreach( p; GLOBAL.projectManager )
 		{
-			//IupMessage("",toStringz(p.dir) );
-			foreach( char[] s; p.sources ~ p.includes ~ p.others ~ p.misc )
+			foreach( s; p.sources ~ p.includes ~ p.others ~ p.misc )
 			{
 				if( actionManager.ScintillaAction.closeDocument( s ) == IUP_IGNORE )
 				{
-					foreach( char[] _s; prjsDir )
-					{
+					foreach( _s; prjsDir )
 						GLOBAL.projectManager.remove( _s );
-					}
 
-					//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
+					
 					GLOBAL.statusBar.setPrjName( "" );
 					return; 
 				}
@@ -1163,28 +858,29 @@ public:
 				{
 					try
 					{
-						char[] _cstring = fromStringz( IupGetAttributeId( tree, "USERDATA", i ) );
+						string _cstring = fSTRz( IupGetAttributeId( tree, "USERDATA", i ) );
 						if( _cstring == p.dir )
 						{
 							char* user = IupGetAttributeId( tree, "USERDATA", i );
-							if( user != null ) delete user;
+							/*
+							if( user != null )
+							{
+								delete user;
+								user = null;
+							}
+							*/
 							IupSetAttributeId( tree, "DELNODE", i, "SELECTED" );
-
 							break;
 						}
 					}
-					catch( Exception e )
-					{
-						//IupMessage( "", toStringz( e.toString ) );
-					}
+					catch( Exception e ){}
 				}
 			}
 		}
 
-		foreach( char[] s; prjsDir )
+		foreach( s; prjsDir )
 		{
 			GLOBAL.projectManager.remove( s );
-			//IupMessage("Remove",toStringz(s) );
 		}
 
 		if( IupGetInt( tree, "COUNT" ) == 1 )
@@ -1194,9 +890,9 @@ public:
 		}
 	}
 
-	void updateRecentProjects( char[] prjDir, char[] prjName )
+	void updateRecentProjects( string prjDir, string prjName )
 	{
-		char[] title;
+		string title;
 		
 		if( prjDir.length )
 		{
@@ -1212,7 +908,7 @@ public:
 			temps ~= new IupString( title );
 			
 			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
-				delete GLOBAL.recentProjects[i];
+				destroy( GLOBAL.recentProjects[i] );
 				
 			int count, index;
 			if( temps.length > 8 )
@@ -1231,7 +927,7 @@ public:
 		else
 		{
 			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
-				delete GLOBAL.recentProjects[i];
+				destroy( GLOBAL.recentProjects[i] );
 				
 			GLOBAL.recentProjects.length = 0;
 		}
@@ -1289,7 +985,7 @@ extern(C)
 					
 					if( _fullpath != null )
 					{
-						char[] fullPath = fromStringz( _fullpath ).dup;
+						string fullPath = fSTRz( _fullpath );
 
 						if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 						{
@@ -1297,8 +993,12 @@ extern(C)
 							return IUP_IGNORE;
 						}
 					}
+					else
+					{
+						return IUP_IGNORE;
+					}
 					
-					char[] 	_selectedStatus = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
+					string _selectedStatus = fSTRz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
 					for( int i = 0; i < _selectedStatus.length; ++ i )
 					{
 						if( _selectedStatus[i] == '+' )
@@ -1306,7 +1006,6 @@ extern(C)
 							if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" ) IupSetAttributeId( ih, "MARKED", i, "NO" );
 						}
 					}
-					//DocumentTabAction.setFocus( ScintillaAction.getActiveIupScintilla() ); 
 				}
 				else
 				{
@@ -1328,17 +1027,16 @@ extern(C)
 						depth = IupGetIntId( ih, "DEPTH", id );
 					}				
 
-					GLOBAL.statusBar.setPrjName( Integer.toString( id ), true );
+					GLOBAL.statusBar.setPrjName( to!(string)( id ), true );
 				}
 				else
 				{
 					GLOBAL.statusBar.setPrjName( "                                            " );
-					//IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 				}
 			}
 			catch( Exception e )
 			{
-				IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				IupMessage( "CProjectTree_Selection_cb", toStringz( "CProjectTree_Selection_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 			}
 		}
 		else
@@ -1369,61 +1067,25 @@ extern(C)
 		return IUP_DEFAULT;
 	}
 	
-	/*
-	private int CProjectTree_BRANCH_CB( Ihandle* ih, int id )
-	{
-		/+
-		if( IupGetInt( ih, "VALUE" ) != id )
-		{
-			IupSetAttribute( ih, "MARK", "CLEARALL" );
-			IupSetAttributeId( ih, "MARKED", id, "YES" );
-			IupSetInt( ih, "VALUE", id );
-		}
-		//IupMessage("TOGGLLE","");
-		+/
-		return IUP_DEFAULT;
-	}
-	*/
-	/*
-	private int CProjectTree_EXECUTELEAF_CB( Ihandle* ih, int id )
-	{
-		CProjectTree_Open_cb( ih );
-
-		// Set FOCUS
-		int _x = IupGetInt( ScintillaAction.getActiveIupScintilla, "X" );
-		int _y = IupGetInt( ScintillaAction.getActiveIupScintilla, "Y" );
-		char[] xy = Integer.toString( _x ) ~ "x" ~ Integer.toString( _y ) ~ " 1 1";
-		
-		char* _pos = IupGetGlobal( "CURSORPOS" ); // Get Original Pos
-		IupSetGlobal( "MOUSEBUTTON", toStringz( xy ));
-		IupSetGlobal( "CURSORPOS", _pos ); // Update Original Pos
-		
-		return IUP_DEFAULT;
-	}	
-	*/
 	private int CProjectTree_NodeRemoved_cb( Ihandle *ih, void* userdata )
 	{
 		char* dataPointer = cast(char*) userdata;
-		tools.freeCString( dataPointer );
+		if( dataPointer != null ) tools.freeCString( dataPointer );
 
 		return IUP_DEFAULT;
 	}
 	
 	private int CProjectTree_MULTISELECTION_CB( Ihandle *ih, int* ids, int n )
 	{
-		char[] status = fromStringz( IupGetAttribute(ih,"MARKEDNODES") );
+		string status = fSTRz( IupGetAttribute(ih,"MARKEDNODES") );
 		for( int i = 0; i < status.length; ++ i )
 		{
 			if( status[i] == '+' )
 			{
-				if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" )
-				{
-					IupSetAttributeId( ih, "MARKED", i, "NO" );
-				}
+				if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" )	IupSetAttributeId( ih, "MARKED", i, "NO" );
 			}
 		}
 		
-		//IupMessage("MultiSelect",IupGetAttribute(ih,"MARKEDNODES"));
 		return IUP_DEFAULT;
 	}
 	
@@ -1435,6 +1097,7 @@ extern(C)
 		{
 			for( int i = 0; i < n; ++ i )
 			{
+				
 				status[ids[i]] = '-';
 			}
 			
@@ -1444,7 +1107,7 @@ extern(C)
 				{
 					if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "LEAF" )
 					{
-						char[]	fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i ) );
+						string fullPath = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", i ) );
 						if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
 						{
 							ScintillaAction.openFile( fullPath );
@@ -1459,7 +1122,6 @@ extern(C)
 	}
 
 
-	// 
 	private int CProjectTree_RightClick_cb( Ihandle *ih, int id )
 	{
 		if( fromStringz( IupGetAttributeId( ih, "MARKED", id ) ) == "NO" )
@@ -1469,16 +1131,15 @@ extern(C)
 		}
 		IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
 
-		char[] nodeKind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) );
+		string nodeKind = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) );
 
 		if( nodeKind == "LEAF" ) // On File(*.bas, *.bi) Node
 		{
 			Ihandle* popupMenu;
 			
-			scope titleFP = new FilePath( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ) );
-			
+			string 	titleFP				= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) );
 			int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
-			char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others or Miscellaneous
+			string	prjFilesFolderName	= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ); // = Sources or Includes or Others or Miscellaneous
 			
 			switch( prjFilesFolderName )
 			{
@@ -1491,17 +1152,13 @@ extern(C)
 											IupSeparator(),
 											IupItem( GLOBAL.languageItems["delete"].toCString, "CProjectTree_delete" ),
 											IupItem( GLOBAL.languageItems["rename"].toCString, "CProjectTree_rename" ),
-											/*
-											IupSeparator(),
-											IupItem( GLOBAL.languageItems["setmainmodule"].toCString, "CProjectTree_setmainmodule" ),
-											*/
 											null
 										);
 					IupSetFunction( "CProjectTree_openin", cast(Icallback) &CProjectTree_Openin_cb );
 					break;
 					
 				default:
-					if( lowerCase( titleFP.ext ) == "bas" )
+					if( toLower( Path.baseName( titleFP ) ) == ".bas" )
 					{
 						popupMenu = IupMenu( 
 												IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),
@@ -1540,10 +1197,7 @@ extern(C)
 			return IUP_DEFAULT;
 		}
 
-
-
 		int depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", id );
-
 		switch( depth )
 		{
 			case 0:
@@ -1587,26 +1241,15 @@ extern(C)
 				Ihandle* itemExplorer = IupItem( GLOBAL.languageItems["openinexplorer"].toCString, null );
 				IupSetCallback( itemExplorer, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
-					char[]	fullPath = actionManager.ProjectAction.getActiveProjectName();
-
+					string fullPath = actionManager.ProjectAction.getActiveProjectName();
 					version( Windows )
 					{
-						fullPath = Util.substitute( fullPath, "/", "\\" );
+						fullPath = Array.replace( fullPath, "/", "\\" );
 						IupExecute( "explorer", toStringz( "\"" ~ fullPath ~ "\"" ) );
-						/*
-						scope proc = new Process( true, "explorer " ~ "\"" ~ fullPath ~ "\"" );
-						proc.execute;
-						proc.wait;
-						*/
 					}
 					else
 					{
 						IupExecute( "xdg-open", toStringz( "\"" ~ fullPath ~ "\"" ) );
-						/*
-						scope proc = new Process( true, "xdg-open " ~ "\"" ~ fullPath ~ "\"" );
-						proc.execute;
-						proc.wait;
-						*/
 					}
 					return IUP_DEFAULT;
 				});
@@ -1624,10 +1267,9 @@ extern(C)
 				IupDestroy( popupMenu );
 				break;
 
-			case 2:		// On Source or Include Node
+			//case 2:		// On Source or Include Node
 			default:
-				//char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
-				char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
+				string s = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 				if( s.length )
 				{
 					if( s == "FIXED" ) return IUP_DEFAULT;
@@ -1639,11 +1281,10 @@ extern(C)
 				IupSetCallback( itemNewFolder, "ACTION", cast(Icallback) &CProjectTree_NewFolder_cb );
 				
 				Ihandle* itemCreateNew = IupMenu( itemNewFile, itemNewFolder, null );
-		
+	
 				Ihandle* itemNew = IupSubmenu( GLOBAL.languageItems["new"].toCString, itemCreateNew );
-				
 				Ihandle* itemAdd = IupItem( GLOBAL.languageItems["addfile"].toCString, null );
-				IupSetCallback( itemAdd, "ACTION", &CProjectTree_AddFile_cb );
+				IupSetCallback( itemAdd, "ACTION", cast(Icallback) &CProjectTree_AddFile_cb );
 
 				Ihandle* popupMenu;
 				if( depth == 2 )
@@ -1662,7 +1303,6 @@ extern(C)
 				IupDestroy( popupMenu );
 
 				break;
-			//default:
 		}
 
 		return IUP_DEFAULT;
@@ -1671,15 +1311,15 @@ extern(C)
 	private int CProjectTree_NewFile_cb( Ihandle* ih )
 	{
 		// Open Dialog Window
-		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfile"].toDString(), GLOBAL.languageItems["filename"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile" );
-		IupSetAttribute( test.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.newfileDlg ) );
-		char[] fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfile"].toDString(), GLOBAL.languageItems["filename"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile", false );
+		IupSetStrAttribute( test.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.newfileDlg ) );
+		string fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )
 		{
 			// Get Depth
-			char[]		prjFilesFolderName;
-			char[][] 	stepFolder;
+			string		prjFilesFolderName;
+			string[] 	stepFolder;
 			
 			int 		id		= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Get Focus TreeNode
 			int 		depth	= IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", id );
@@ -1688,32 +1328,28 @@ extern(C)
 			{
 				while( depth > 2 )
 				{
-					stepFolder ~= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup;
+					stepFolder ~= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) );
 					
 					id = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", id );
 					depth = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "DEPTH", id );
 				}
-
-				prjFilesFolderName = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup; // = Sources or Includes or Others
+				prjFilesFolderName = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ); // = Sources or Includes or Others
 			}
 
-			char[] activeProjectDirName = actionManager.ProjectAction.getActiveProjectName();
-			char[] fullPath = activeProjectDirName ~ "/";
-			//char[] fullPath = GLOBAL.activeProjectDirName ~ "\\";
+			string activeProjectDirName = actionManager.ProjectAction.getActiveProjectName();
+			string fullPath = activeProjectDirName ~ "/";
 			
-			foreach_reverse( char[] s; stepFolder )
+			foreach_reverse( s; stepFolder )
 			{
 				fullPath = fullPath ~ s ~ "/";
 			}
-			fullPath = fullPath ~ fileName;
 
-			scope fn = new FilePath( fullPath );
-
-			if( fn.exists() )
+			fullPath ~= fileName;
+			if( exists( fullPath ) )
 			{
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-				IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fileName ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString() ) );
+				IupSetStrAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fileName ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString() ) );
 				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
 				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
 				return IUP_DEFAULT;
@@ -1722,9 +1358,9 @@ extern(C)
 			// Wrong Ext, exit!
 			version(FBIDE)
 			{
-				switch( lowerCase( fn.ext ) )
+				switch( toLower( Path.extension( fullPath ) ) )
 				{
-					case "bas":
+					case ".bas":
 						if( prjFilesFolderName != "Sources" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
@@ -1735,7 +1371,7 @@ extern(C)
 							return IUP_DEFAULT;
 						}
 						break;
-					case "bi":
+					case ".bi":
 						if( prjFilesFolderName != "Includes" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
@@ -1760,9 +1396,9 @@ extern(C)
 			}
 			version(DIDE)
 			{
-				switch( lowerCase( fn.ext ) )
+				switch( toLower( Path.extension( fullPath ) ) )
 				{
-					case "d":
+					case ".d":
 						if( prjFilesFolderName != "Sources" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
@@ -1773,7 +1409,7 @@ extern(C)
 							return IUP_DEFAULT;
 						}
 						break;
-					case "di":
+					case ".di":
 						if( prjFilesFolderName != "Includes" )
 						{
 							Ihandle* messageDlg = IupMessageDlg();
@@ -1797,19 +1433,23 @@ extern(C)
 				}
 			}
 
-			// Reset FilePath Object
-			fn.set( fn.path );
-			if( !fn.exists() ) fn.create(); // Create Folder On Disk
+			// Get the parent folder name
+			string dir = Path.dirName( fullPath );
+			if( !exists( dir ) ) mkdir( dir ); // Create Folder On Disk
 
-			actionManager.ScintillaAction.newFile( fullPath );
-			//GLOBAL.outlineTree.loadFile( fullPath );
+			version(Windows)
+			{
+				if( GLOBAL.editorSetting00.NewDocBOM == "ON" ) actionManager.ScintillaAction.newFile( fullPath, BOM.utf8, true ); else actionManager.ScintillaAction.newFile( fullPath, BOM.utf8, false );
+			}
+			else
+			{
+				actionManager.ScintillaAction.newFile( fullPath, BOM.utf8, false );
+			}
 
 			id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Re-Get Active Focus Node ID
 			IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", id, toStringz( fileName ) );
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, GLOBAL.editColor.projectFore.toCString );
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id+1, tools.getCString( fullPath ) );
-			// shadow
-			//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
+			IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, toStringz( GLOBAL.editColor.projectFore ) );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id + 1, tools.getCString( fullPath ) );
 
 			switch( prjFilesFolderName )
 			{
@@ -1838,7 +1478,7 @@ extern(C)
 	private int CProjectTree_NewFolder_cb( Ihandle* ih )
 	{
 		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfolder"].toDString(), GLOBAL.languageItems["foldername"].toDString() ~ ":", "120x", null, false );
-		char[] folderName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+		string folderName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( folderName.length )
 		{
@@ -1846,14 +1486,12 @@ extern(C)
 			int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 
 			// Get Focus Tree Node 
-			char[] kind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) );
+			string kind = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) );
 
 			if( kind == "BRANCH" )
 			{
 				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", id, toStringz( folderName ) );
-				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, GLOBAL.editColor.projectFore.toCString );
-				// shadow
-				//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", id, GLOBAL.cString.convert( folderName ) );
+				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, toStringz( GLOBAL.editColor.projectFore ) );
 			}
 		}
 		
@@ -1865,9 +1503,9 @@ extern(C)
 		try
 		{
 			int		id					= actionManager.ProjectAction.getTargetDepthID( 2 );
-			char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup; // = Sources or Includes or Others
-			char[]	prjDirName 			= actionManager.ProjectAction.getActiveProjectName();
-			char[]	filter;
+			string	prjFilesFolderName	= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ); // = Sources or Includes or Others
+			string	prjDirName 			= actionManager.ProjectAction.getActiveProjectName();
+			string	filter;
 
 			version(FBIDE)
 			{
@@ -1890,14 +1528,11 @@ extern(C)
 			
 			
 			scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["addfile"].toDString() ~ "...", filter, "OPEN", "YES" );
-			//char[] fullPath = fileSecectDlg.getFileName();
-			
-			foreach_reverse( char[] fullPath; fileSecectDlg.getFilesName() )
+			foreach_reverse( fullPath; fileSecectDlg.getFilesName() )
 			{
 				if( fullPath.length )
 				{
-					scope fn = new FilePath( fullPath.dup );
-					if( !fn.exists() )
+					if( !exists( fullPath ) )
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
@@ -1910,7 +1545,7 @@ extern(C)
 					{
 						//Util.substitute( fullPath, "/", "\\" );
 						bool bExitChildLoop;
-						foreach( char[] s; GLOBAL.projectManager[prjDirName].sources ~ GLOBAL.projectManager[prjDirName].includes ~ GLOBAL.projectManager[prjDirName].others ~ GLOBAL.projectManager[prjDirName].misc )
+						foreach( s; GLOBAL.projectManager[prjDirName].sources ~ GLOBAL.projectManager[prjDirName].includes ~ GLOBAL.projectManager[prjDirName].others ~ GLOBAL.projectManager[prjDirName].misc )
 						{
 							if( s == fullPath )
 							{
@@ -1926,9 +1561,9 @@ extern(C)
 					// Version Condition
 					version(FBIDE)
 					{
-						switch( lowerCase( fn.ext ) )
+						switch( toLower( Path.extension( fullPath ) ) )
 						{
-							case "bas":
+							case ".bas":
 								if( prjFilesFolderName != "Sources" )
 								{
 									Ihandle* messageDlg = IupMessageDlg();
@@ -1940,10 +1575,10 @@ extern(C)
 								}
 								else
 								{
-									GLOBAL.projectManager[prjDirName].sources ~= fullPath;
+									GLOBAL.projectManager[prjDirName].sources ~= tools.normalizeSlash( fullPath );
 								}
 								break;
-							case "bi":
+							case ".bi":
 								if( prjFilesFolderName != "Includes" )
 								{
 									Ihandle* messageDlg = IupMessageDlg();
@@ -1955,14 +1590,14 @@ extern(C)
 								}
 								else
 								{
-									GLOBAL.projectManager[prjDirName].includes ~= fullPath;
+									GLOBAL.projectManager[prjDirName].includes ~= tools.normalizeSlash( fullPath );
 								}
 								break;
 							default:
 								if( prjFilesFolderName == "Others" )
-									GLOBAL.projectManager[prjDirName].others ~= fullPath;
+									GLOBAL.projectManager[prjDirName].others ~= tools.normalizeSlash( fullPath );
 								else if( prjFilesFolderName == "Miscellaneous" )
-									GLOBAL.projectManager[prjDirName].misc ~= fullPath;
+									GLOBAL.projectManager[prjDirName].misc ~= tools.normalizeSlash( fullPath );
 								else
 								{
 									Ihandle* messageDlg = IupMessageDlg();
@@ -1976,9 +1611,9 @@ extern(C)
 					}
 					version(DIDE)
 					{
-						switch( lowerCase( fn.ext ) )
+						switch( toLower( Path.extension( fullPath ) ) )
 						{
-							case "d":
+							case ".d":
 								if( prjFilesFolderName != "Sources" )
 								{
 									Ihandle* messageDlg = IupMessageDlg();
@@ -1990,10 +1625,10 @@ extern(C)
 								}
 								else
 								{
-									GLOBAL.projectManager[prjDirName].sources ~= fullPath;
+									GLOBAL.projectManager[prjDirName].sources ~= tools.normalizeSlash( fullPath );
 								}
 								break;
-							case "di":
+							case ".di":
 								if( prjFilesFolderName != "Includes" )
 								{
 									Ihandle* messageDlg = IupMessageDlg();
@@ -2005,14 +1640,14 @@ extern(C)
 								}
 								else
 								{
-									GLOBAL.projectManager[prjDirName].includes ~= fullPath;
+									GLOBAL.projectManager[prjDirName].includes ~= tools.normalizeSlash( fullPath );
 								}
 								break;
 							default:
 								if( prjFilesFolderName == "Others" )
-									GLOBAL.projectManager[prjDirName].others ~= fullPath; 
+									GLOBAL.projectManager[prjDirName].others ~= tools.normalizeSlash( fullPath );
 								else if( prjFilesFolderName == "Miscellaneous" )
-									GLOBAL.projectManager[prjDirName].misc ~= fullPath;
+									GLOBAL.projectManager[prjDirName].misc ~= tools.normalizeSlash( fullPath );
 								else
 								{
 									Ihandle* messageDlg = IupMessageDlg();
@@ -2025,18 +1660,11 @@ extern(C)
 						}
 					}
 
-					/*
-					int	folderLocateId = actionManager.ProjectAction.addTreeNode( prjDirName ~ "/", fullPath, id );
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, GLOBAL.cString.convert( fn.file ) );
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( fullPath ) );
-					// shadow
-					//IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDLEAF", id, GLOBAL.cString.convert( fullPath ) );
-					*/
-					char[]		titleName = Path.normalize( fullPath );
+					string		titleName = tools.normalizeSlash( fullPath );
 					int			folderLocateId = _createTree( prjDirName ~ "/", titleName, id );
-					char[]		userData = fullPath;
+					string		userData = fullPath;
 					IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, toStringz( titleName ) );
-					IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+					IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 
 					switch( prjFilesFolderName )
@@ -2045,8 +1673,6 @@ extern(C)
 						case "Includes":	IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_bi" ); break;
 						default:			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_txt" ); break;
 					}
-
-					//actionManager.ScintillaAction.openFile( fullPath.dup );
 				}
 			}
 		}
@@ -2068,19 +1694,17 @@ extern(C)
 			{
 				if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" )
 				{
-					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) ).dup;
-					scope fp = new FilePath( fullPath );
-					
-					if( fp.exists )
+					string fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) ).dup;
+					if( exists( fullPath ) )
 					{
-						char[] ext = lowerCase( fp.ext );
+						string ext = toLower( Path.extension( fullPath ) );
 						
 						// Version Condition
-						char[] _source_ = "bas", _include_ = "bi";
+						string _source_ = ".bas", _include_ = ".bi";
 						version(DIDE)
 						{
-							_source_	= "d";
-							_include_	= "di";
+							_source_	= ".d";
+							_include_	= ".di";
 						}					
 
 						if( ext == _include_ || ext == _source_ )
@@ -2095,7 +1719,7 @@ extern(C)
 						}
 						else
 						{
-							if( tools.isParsableExt( ext, 4 ) )
+							if( tools.isParsableExt( ext, 3 ) )
 							{
 								if( selectedIDs.length == 1 )
 								{
@@ -2107,25 +1731,15 @@ extern(C)
 							}
 							else
 							{
-								try
+								version( Windows )
 								{
-									version(Windows)
-									{
-										Process p = new Process( true, "cmd", "/c", fullPath );
-										p.gui( true );
-										p.execute;
-									}
-									else
-									{
-										Process p = new Process( true, "xdg-open", fullPath );
-										p.gui( true );
-										p.execute;
-									}
+									fullPath = Array.replace( fullPath, "/", "\\" );
+									IupExecute( "cmd", toStringz( "/c \"" ~ fullPath ~ "\"" ) );
 								}
-								catch( Exception e )
+								else
 								{
-									break;
-								}
+									IupExecute( "xdg-open", toStringz( "\"" ~ fullPath ~ "\"" ) );
+								}							
 							}
 						}
 					}
@@ -2141,17 +1755,6 @@ extern(C)
 			// Erase Project Treeitems And Left Only One Item
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
-
-			/+
-			// Set FOCUS
-			int _x = IupGetInt( ScintillaAction.getActiveIupScintilla, "X" );
-			int _y = IupGetInt( ScintillaAction.getActiveIupScintilla, "Y" );
-			char[] xy = Integer.toString( _x ) ~ "x" ~ Integer.toString( _y ) ~ " 1 1";
-			
-			char* _pos = IupGetGlobal( "CURSORPOS" ); // Get Original Pos
-			IupSetGlobal( "MOUSEBUTTON", toStringz( xy ));
-			IupSetGlobal( "CURSORPOS", _pos ); // Update Original Pos
-			+/
 		}
 		
 		return IUP_DEFAULT;
@@ -2167,15 +1770,13 @@ extern(C)
 			{
 				if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" )
 				{
-					char[] fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) ).dup;
-					scope fp = new FilePath( fullPath );
-					
-					if( fp.exists )
+					string fullPath = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) );
+					if( exists( fullPath ) )
 					{
 						if( selectedIDs.length == 1 )
-							actionManager.ScintillaAction.openFile( fullPath.dup, -1 );
+							actionManager.ScintillaAction.openFile( fullPath, -1 );
 						else
-							actionManager.ScintillaAction.openFile( fullPath.dup );
+							actionManager.ScintillaAction.openFile( fullPath );
 					}
 					else
 					{
@@ -2206,45 +1807,52 @@ extern(C)
 				//int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
 				IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
 				
-				char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+				string	fullPath			= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 				int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
-				char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others or Miscellaneous
+				string	prjFilesFolderName	= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ); // = Sources or Includes or Others or Miscellaneous
 
 				if( actionManager.ScintillaAction.closeDocument( fullPath ) == IUP_IGNORE ) return IUP_IGNORE;
 
 				switch( prjFilesFolderName )
 				{
 					case "Sources":
-						char[][] temp;
-						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].sources )
+						string[] temp;
+						foreach( s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].sources )
 							if( s != fullPath ) temp ~= s;
 						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].sources = temp;
 						break;
 						
 					case "Includes":
-						char[][] temp;
-						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes )
+						string[] temp;
+						foreach( s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes )
 							if( s != fullPath ) temp ~= s;
 						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].includes = temp;
 						break;
 						
 					case "Others":
-						char[][] temp;
-						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others )
+						string[] temp;
+						foreach( s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others )
 							if( s != fullPath ) temp ~= s;
 						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].others = temp;
 						break;
 
 					case "Miscellaneous":
-						char[][] temp;
-						foreach( char[] s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].misc )
+						string[] temp;
+						foreach( s; GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].misc )
 							if( s != fullPath ) temp ~= s;
 						GLOBAL.projectManager[actionManager.ProjectAction.getActiveProjectName].misc = temp;
 						break;
+					default:
 				}		
 
 				char* user = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
-				if( user != null ) delete user;
+				/*
+				if( user != null ) 
+				{
+					delete user;
+					user = null;
+				}
+				*/
 				int parentID = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "PARENT", id );
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", id, "SELECTED" );
 
@@ -2271,7 +1879,7 @@ extern(C)
 	private int CProjectTree_delete_cb( Ihandle* ih )
 	{
 		int		id					= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-		char[]	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+		string	fullPath			= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
 
 		// Erase Project Treeitems And Left Only One Item
 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
@@ -2289,9 +1897,14 @@ extern(C)
 			if( fullPath.length )
 			{
 				if( CProjectTree_remove_cb( ih ) == IUP_IGNORE ) return IUP_IGNORE;
-
-				scope f = new FilePath( fullPath );
-				if( f.exists() ) f.remove();
+				try
+				{
+					std.file.remove( fullPath );
+				}
+				catch( Exception e )
+				{
+					IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );
+				}
 			}
 		}
 
@@ -2301,147 +1914,78 @@ extern(C)
 	private int CProjectTree_rename_cb( Ihandle* ih )
 	{
 		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-		char[]	fullPath	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+		string	fullPath	= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 		
 		// Erase Project Treeitems And Left Only One Item
 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
 		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );		
 
-		scope fp = new FilePath( fullPath );
+		string oldExt = Path.extension( fullPath );
+		string _dirName = Path.dirName( fullPath );
 
-		char[] oldExt = fp.ext().dup;
-
-		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["rename"].toDString(), GLOBAL.languageItems["filename"].toDString() ~":", "120x", fp.name(), false );
-		char[] newFileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
+		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["rename"].toDString(), GLOBAL.languageItems["filename"].toDString() ~":", "120x", null, false );
+		string newFileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( newFileName.length )
 		{
 			// Save Old File Changed
 			if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) GLOBAL.scintillaManager[fullPathByOS(fullPath)].saveFile();
-			
+
 			// ReName On Disk & Change fn
-			fp.rename( fp.path ~ newFileName ~ fp.suffix );
+			string newFullPath = _dirName ~ "/" ~ newFileName ~ oldExt;
+			std.file.rename( fullPath, newFullPath );
 
 			if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 			{
-				GLOBAL.scintillaManager[fullPathByOS(fullPath)].rename( fp.toString );
+				GLOBAL.scintillaManager[fullPathByOS(fullPath)].rename( newFullPath );
 			}
 
 			
 			char* pointer = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
-			if( pointer != null ) freeCString( pointer );
+			if( pointer != null )
+			{
+				freeCString( pointer );
+				pointer = null;
+			}
 			
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id, tools.getCString( fp.toString ) );
-			IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, toStringz( fp.file ) );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id, tools.getCString( newFullPath ) );
+			IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, toStringz( Path.baseName( newFullPath ) ) );
 
-			char[]	activeProjectDirName = actionManager.ProjectAction.getActiveProjectName;
+			string	activeProjectDirName = actionManager.ProjectAction.getActiveProjectName;
 			int		typeID				= actionManager.ProjectAction.getTargetDepthID( 2 );
-			char[]	prjFilesFolderName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ).dup; // = Sources or Includes or Others or Miscellaneous
+			string	prjFilesFolderName	= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", typeID ) ); // = Sources or Includes or Others or Miscellaneous
 			
 			switch( prjFilesFolderName )
 			{
 				case "Sources":
-					char[][] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
+					string[] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
 					GLOBAL.projectManager[activeProjectDirName].sources.length = 0;
-					foreach( char[] s; tempSources )
-					{
-						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= fp.toString;
-					}
+					foreach( s; tempSources )
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= newFullPath;
 					break;
 					
 				case "Includes":
-					char[][] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
+					string[] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
 					GLOBAL.projectManager[activeProjectDirName].includes.length = 0;
-					foreach( char[] s; tempIncludes )
-					{
-						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= fp.toString;
-					}
+					foreach( s; tempIncludes )
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= newFullPath;
 					break;
 					
 				case "Others":
-					char[][] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
+					string[] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
 					GLOBAL.projectManager[activeProjectDirName].others.length = 0;
-					foreach( char[] s; tempOthers )
-					{
-						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
-					}
+					foreach( s; tempOthers )
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= newFullPath;
 					break;
 
 				case "Miscellaneous":
-					char[][] tempMisc = GLOBAL.projectManager[activeProjectDirName].misc;
+					string[] tempMisc = GLOBAL.projectManager[activeProjectDirName].misc;
 					GLOBAL.projectManager[activeProjectDirName].misc.length = 0;
-					foreach( char[] s; tempMisc )
-					{
-						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].misc ~= s;else GLOBAL.projectManager[activeProjectDirName].misc ~= fp.toString;
-					}
+					foreach( s; tempMisc )
+						if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].misc ~= s;else GLOBAL.projectManager[activeProjectDirName].misc ~= newFullPath;
 					break;
 				default:
 			}				
-			
-			/+
-			version(FBIDE)
-			{
-				switch( lowerCase( oldExt ) )
-				{
-					case "bas":
-						char[][] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
-						GLOBAL.projectManager[activeProjectDirName].sources.length = 0;
-						foreach( char[] s; tempSources )
-						{
-							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= fp.toString;
-						}
-						
-						break;
-
-					case "bi":
-						char[][] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
-						GLOBAL.projectManager[activeProjectDirName].includes.length = 0;
-						foreach( char[] s; tempIncludes )
-						{
-							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= fp.toString;
-						}
-						break;
-					default:
-						char[][] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
-						GLOBAL.projectManager[activeProjectDirName].others.length = 0;
-						foreach( char[] s; tempOthers )
-						{
-							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
-						}
-				}
-			}
-			version(DIDE)
-			{
-				switch( lowerCase( oldExt ) )
-				{
-					case "d":
-						char[][] tempSources = GLOBAL.projectManager[activeProjectDirName].sources;
-						GLOBAL.projectManager[activeProjectDirName].sources.length = 0;
-						foreach( char[] s; tempSources )
-						{
-							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].sources ~= s;else GLOBAL.projectManager[activeProjectDirName].sources ~= fp.toString;
-						}
-						
-						break;
-
-					case "di":
-						char[][] tempIncludes = GLOBAL.projectManager[activeProjectDirName].includes;
-						GLOBAL.projectManager[activeProjectDirName].includes.length = 0;
-						foreach( char[] s; tempIncludes )
-						{
-							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].includes ~= s;else GLOBAL.projectManager[activeProjectDirName].includes ~= fp.toString;
-						}
-						break;
-					default:
-						char[][] tempOthers = GLOBAL.projectManager[activeProjectDirName].others;
-						GLOBAL.projectManager[activeProjectDirName].others.length = 0;
-						foreach( char[] s; tempOthers )
-						{
-							if( s != fullPath ) GLOBAL.projectManager[activeProjectDirName].others ~= s;else GLOBAL.projectManager[activeProjectDirName].others ~= fp.toString;
-						}
-				}
-			}
-			+/
 		}
 		
 		return IUP_DEFAULT;
@@ -2450,18 +1994,17 @@ extern(C)
 	private int CProjectTree_setmainmodule_cb( Ihandle* ih )
 	{
 		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-		char[]	fullPath	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;
+		string	fullPath	= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 		
 		// Erase Project Treeitems And Left Only One Item
 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
 		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 		
-		scope fp = new FilePath( fullPath );
-		char[] _prjName = ProjectAction.getActiveProjectName;
+		string _prjName = ProjectAction.getActiveProjectName;
 		if( _prjName in GLOBAL.projectManager )
 		{
-			char[] _mainModule = fp.path ~ fp.name;
-			GLOBAL.projectManager[_prjName].mainFile = Util.substitute( _mainModule, GLOBAL.projectManager[_prjName].dir ~ "/", "" );
+			string _mainModule = Path.stripExtension( fullPath );
+			GLOBAL.projectManager[_prjName].mainFile = Array.replace( _mainModule, GLOBAL.projectManager[_prjName].dir ~ "/", "" );
 		}
 
 		return IUP_DEFAULT;
@@ -2469,86 +2012,51 @@ extern(C)
 	
 	private int CProjectTree_importall_cb( Ihandle* ih )
 	{
-		// Nested Delegate Filter Function
-		bool dirFilter( FilePath _fp, bool _isFfolder )
-		{
-			if( _isFfolder ) return true;
-			version(FBIDE)	if( lowerCase( _fp.ext ) == "bas" || lowerCase( _fp.ext ) == "bi" ) return true;
-			version(DIDE)	if( lowerCase( _fp.ext ) == "d" || lowerCase( _fp.ext ) == "di" ) return true;
-			return false;
-		}
-		
-		bool delegate( FilePath, bool ) _dirFilter;
-		_dirFilter = &dirFilter;
-		// End of Nested Function
-		
-		char[][] _getFiles( FilePath _fatherPath, char[] ext )
-		{
-			char[][]	results;
-			FilePath[]	files;
-			
-			foreach( FilePath _fp; _fatherPath.toList( _dirFilter ) )
-			{
-				if( _fp.isFolder )
-				{
-					results ~= _getFiles( _fp, ext );
-				}
-				else
-				{
-					if( lowerCase( _fp.ext ) == ext ) files ~= _fp;
-				}
-			}
-			
-			foreach( _fp; files )
-				results ~= _fp.toString;
-				
-			return results;
-		}
-		
-		
-	
-	
 		int		id			= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
-		char[]	prjDirName	= fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
+		string	prjDirName	= fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );
 		int		sourceID	= id + 1;
 		int		includesID	= IupGetIntId( GLOBAL.projectTree.getTreeHandle, "NEXT", sourceID );
 		
-		scope prjPath = new FilePath( prjDirName );
-		if( prjPath.isFolder )
+		if( prjDirName !in GLOBAL.projectManager ) return IUP_IGNORE;
+		
+		if( std.file.isDir( prjDirName ) )
 		{
+			string _ext;
+			
 			GLOBAL.projectManager[prjDirName].includes.length = 0;
-			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", includesID, "CHILDREN" );
+			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", includesID, "CHILDREN" ); // Delete All tree children
 			
-			char[] _ext;
 			version(FBIDE) _ext = "bi";	version(DIDE) _ext = "di";
-			
-			foreach_reverse( char[] s; _getFiles( prjPath, _ext ) )
+			foreach( string s; dirEntries( prjDirName, "*.{" ~ _ext ~ "}", SpanMode.depth ) ) // or SpanMode.breadth
 			{
-				GLOBAL.projectManager[prjDirName].includes ~= s;
-			
-				char[]		titleName = Path.normalize( s );
-				int			folderLocateId = _createTree( prjDirName ~ "/", titleName, includesID );
-				char[]		userData = s;
+				string 		titleName = tools.normalizeSlash( s );
+				string		userData = titleName;
+				int			folderLocateId = _createTree( prjDirName ~ "/", titleName, includesID ); // titleName will be changed
+
+				GLOBAL.projectManager[prjDirName].includes ~= userData;
+				
 				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, toStringz( titleName ) );
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 				
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_bi" );
 			}
 			
+			
 			GLOBAL.projectManager[prjDirName].sources.length = 0;
 			IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "DELNODE", sourceID, "CHILDREN" );
+
 			version(FBIDE) _ext = "bas"; version(DIDE) _ext = "d";
-			
-			foreach_reverse( char[] s; _getFiles( prjPath, _ext ) )
+			foreach( string s; dirEntries( prjDirName, "*.{" ~ _ext ~ "}", SpanMode.depth ) ) // or SpanMode.breadth
 			{
-				GLOBAL.projectManager[prjDirName].sources ~= s;
-			
-				char[]		titleName = Path.normalize( s );
+				string 		titleName = tools.normalizeSlash( s );
+				string		userData = titleName;
 				int			folderLocateId = _createTree( prjDirName ~ "/", titleName, sourceID );
-				char[]		userData = s;
+				
+				GLOBAL.projectManager[prjDirName].sources ~= userData;
+
 				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDLEAF", folderLocateId, toStringz( titleName ) );
-				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 				
 				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_bas" );
@@ -2558,25 +2066,17 @@ extern(C)
 		return IUP_DEFAULT;
 	}	
 
-	private int _createTree( char[] _prjDirName, ref char[] _titleName, int startID = 2 )
+	private int _createTree( string _prjDirName, ref string _titleName, int startID = 2 )
 	{
 		int		pos;
 		int		folderLocateId = startID;
-		char[]	fullPath = Path.normalize( _titleName );
+		string	fullPath = tools.normalizeSlash( _titleName );
 
-		version(Windows)
-		{
-			pos = Util.index( lowerCase( fullPath ), lowerCase( _prjDirName ) );
-			if( pos == 0 ) _titleName = fullPath[_prjDirName.length..$].dup;
-		}
-		else
-		{
-			pos = Util.index( fullPath, _prjDirName );
-			if( pos == 0 )  _titleName = fullPath[_prjDirName.length..$].dup; //_titleName = Util.substitute( fullPath, _prjDirName, "" );
-		}
+		pos = indexOf( fullPathByOS( fullPath ), fullPathByOS( _prjDirName ) );
+		if( pos == 0 ) _titleName = fullPath[_prjDirName.length..$].dup;
 
 		// Check the child Folder
-		char[][]	splitText = Util.split( _titleName, "/" );
+		string[] splitText = Array.split( _titleName, "/" );
 	
 		int counterSplitText;
 		for( counterSplitText = 0; counterSplitText < splitText.length - 1; ++counterSplitText )
@@ -2587,7 +2087,7 @@ extern(C)
 				bool	bFolerExist = false;
 				for( int i = 1; i <= countChild; ++ i )
 				{
-					char[]	kind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );
+					string	kind = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );
 					if( kind == "BRANCH" )
 					{
 						if( splitText[counterSplitText] == fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", folderLocateId + i ) ) )
@@ -2603,7 +2103,7 @@ extern(C)
 					IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", folderLocateId + 1, "icon_folder" );
 					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGEEXPANDED", folderLocateId + 1, "icon_folder_open" );
-					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, GLOBAL.editColor.projectFore.toCString );
+					IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", folderLocateId + 1, toStringz( GLOBAL.editColor.projectFore ) );
 					if( pos != 0 )
 						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId+1, tools.getCString( "FIXED" ) );
 					else

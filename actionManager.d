@@ -1,25 +1,22 @@
 ﻿module actionManager;
 
 public import executer;
-
 private import iup.iup, iup.iup_scintilla;
-
 private import global, tools;
-
-private import Integer = tango.text.convert.Integer;
-private import Util = tango.text.Util;
-private import tango.stdc.stringz;
+private import std.string, std.file, std.conv, std.algorithm.mutation, Path = std.path, Uni = std.uni, Array = std.array;
 
 // Action for FILE operate
 struct FileAction
 {
 private:
-	import	tango.text.convert.Utf, tango.io.UnicodeFile, tango.io.device.File;
-	import	tango.io.FilePath;//, Path = tango.io.Path;
+	import std.stdio, std.encoding, std.utf, std.windows.charset;
 	
-	version(Windows) import tango.sys.win32.CodePage;
-	
-	//static char[] content;
+	static bool isAscii( string src )
+	{
+		foreach( c; src )
+			if( c & 0x80 ) return false;
+		return true;
+	}
 	
 	static bool isUTF8WithouBOM( ubyte[] data )
 	{
@@ -33,62 +30,28 @@ private:
 			else if( ( data[i] & 0xE0 ) == 0xC0 )
 			{
 				if( i + 1 >= size ) return false; // data tail
-	 
-				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
-	 
-				i += 1;
+	 			if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
+	 			i += 1;
 			}
 			else if( ( data[i] & 0xF0 ) == 0xE0 )
 			{
 				if( i + 2 >= size ) return false;
-	 
-				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
+	 			if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
 				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
-	 
-				i += 2;
+	 			i += 2;
 			}
 			else if( ( data[i] & 0xF8 ) == 0xF0 )
 			{
 				if( i + 3 >= size ) return false;
-				
 				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
 				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
 				if( ( data[i + 3] & 0xC0 ) != 0x80 ) return false;
 	 
 				i += 3;
 			}
-			/*
-			else if( ( data[i] & 0xFC ) == 0xF8 )
-			{
-				if( i + 4 >= size ) return false;
-				
-				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
-				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
-				if( ( data[i + 3] & 0xC0 ) != 0x80 ) return false;
-				if( ( data[i + 4] & 0xC0 ) != 0x80 ) return false;
-	 
-				i += 4;
-			}
-			else if( ( data[i] & 0xFE ) == 0xFC )
-			{
-				if( i + 5 >= size ) return false;
-				
-				if( ( data[i + 1] & 0xC0 ) != 0x80 ) return false;
-				if( ( data[i + 2] & 0xC0 ) != 0x80 ) return false;
-				if( ( data[i + 3] & 0xC0 ) != 0x80 ) return false;
-				if( ( data[i + 4] & 0xC0 ) != 0x80 ) return false;
-				if( ( data[i + 5] & 0xC0 ) != 0x80 ) return false;
-	 
-				i += 5;
-			}
-			*/
 			else
-			{ 
 				return false;
-			}
-			
 		}
-
 		return true;
 	}
 
@@ -114,7 +77,6 @@ private:
 		if( countBE && !countLE ) return 1;
 		if( !countBE && countLE ) return 2;
 		
-		
 		// ASCII
 		countBE = countLE = 0;
 		for( int i = 0; i < data.length; i += 2 )
@@ -131,7 +93,6 @@ private:
 
 		if( countLE > data.length / 3 ) return 2;
 		
-		
 		return 0;
 	}
 
@@ -140,7 +101,6 @@ private:
 		int BELE;
 		
 		if( data.length % 4 != 0 || data.length < 4 ) return 0;
-
 		for( int i = 0; i < data.length; i += 4 )
 		{
 			if( data[i] == 0 ) // BE
@@ -209,420 +169,135 @@ private:
 	}
 	
 
+
 public:
-	static void newFile( char[] fullPath )
+	static void newFile( string fullPath )
 	{
-		auto _file = new File( fullPath, File.ReadWriteCreate );
+		auto _file = File( fullPath, "w" );
 		_file.close;
-		
-		scope file = new UnicodeFile!(char)( fullPath, Encoding.Unknown );
 	}
 
 
-	static char[] loadFile( char[] fullPath, ref int _encoding )
+	static string loadFile( string fullPath, ref int encoding, ref int withBOM )
 	{
-		char[] content;
-		
 		try
 		{
-			scope _fp = new FilePath( fullPath );
-			if( !_fp.exists )
+			if( !exists( fullPath ) )
 			{
-				debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+				IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
 				return null;
 			}
 			else
 			{
-				if( _fp.isFolder ) 
+				if( std.file.isDir( fullPath ) ) 
 				{
-					debug IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+					IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
 					return null;
 				}
 			}
 			
-
-			auto str = cast(ubyte[]) File.get( fullPath );
-			// If the DLL be loaded, the function pointer is not null
-			if( GLOBAL.iconv == null )
+			auto str = cast(ubyte[]) std.file.read( fullPath );
+			if( str.length )
 			{
-				if( str.length > 3 )
+				auto _BOMSeq = getBOM( str );
+				switch( _BOMSeq.schema )
 				{
-					//UTF32 with BOM
-					if( str[0] == 0xFF && str[1] == 0xFE && str[2] == 0x00 && str[3] == 0x00 )
-					{
-						_encoding = Encoding.UTF_32LE;
-						content = toString( cast(dchar[]) str[4..$] );
-						return content;
-					}
-					else if( str[0] == 0x00 && str[1] == 0x00 && str[2] == 0xFE && str[3] == 0xFF )
-					{
-						_encoding = Encoding.UTF_32BE;
-						content = toString( cast(dchar[]) swapBytes( str[4..$], 4 ) );
-						return content;
-					}
+					case BOM.utf32le:		encoding = BOM.utf32le;		withBOM = true;		return toUTF8( cast(dchar[]) str[4..$] );
+					case BOM.utf32be:		encoding = BOM.utf32be;		withBOM = true;		return toUTF8( cast(dchar[]) swapBytes( str[4..$], 4 ) );
+					case BOM.utf16le:		encoding = BOM.utf16le;		withBOM = true;		return toUTF8( cast(wchar[]) str[2..$] );
+					case BOM.utf16be:		encoding = BOM.utf16be;		withBOM = true;		return toUTF8( cast(wchar[]) swapBytes( str[2..$], 2 ) );
+					case BOM.utf8:			encoding = BOM.utf8;		withBOM = true;		return cast(string) str[3..$];
+					default:
 				}
-				
-				//UTF8 with BOM
-				if( str.length > 2 )
-				{
-					//UTF8 with BOM
-					if( str[0] == 0xEF && str[1] == 0xBB && str[2] == 0xBF )
-					{
-						_encoding = Encoding.UTF_8;
-						content = cast(char[]) str[3..$];
-						return content;
-					}
-				}				
-				
-				//UTF16 with BOM
-				if( str.length > 1 )
-				{
-					//UTF16 with BOM
-					if( str[0] == 0xFF && str[1] == 0xFE)
-					{
-						_encoding = Encoding.UTF_16LE;
-						content = toString( cast(wchar[]) str[2..$] );
-						return content;
-					}
-					else if( str[0] == 0xFE && str[1] == 0xFF)
-					{
-						_encoding = Encoding.UTF_16BE;
-						content = toString( cast(wchar[]) swapBytes( str[2..$], 2 ) );
-						return content;
-					}
-				}			
-				
-				
 				// Check Without BOM
+				withBOM = false;
 				int BELE = isUTF32WithouBOM( str );
 				if( BELE == 1 )
 				{
-					_encoding = 9; // UTF-32BE without BOM
-					content = toString( cast(dchar[]) swapBytes( str, 4 ) );
-					return content;
+					encoding = BOM.utf32be;		return toUTF8( cast(dchar[]) swapBytes( str, 4 ) );
 				}
 				else if( BELE == 2 )
 				{
-					_encoding = 10; // UTF-32LE without BOM
-					content = toString( cast(dchar[]) str );
-					return content;
-				}			
-
+					encoding = BOM.utf32le;		return toUTF8( cast(dchar[]) str );
+				}
 				BELE = isUTF16WithouBOM( str );
 				if( BELE == 1 )
 				{
-					_encoding = 11; // UTF-16BE without BOM
-					content = toString( cast(wchar[]) swapBytes( str, 2 ) );
-					return content;
+					encoding = BOM.utf16be;		return toUTF8( cast(wchar[]) swapBytes( str, 2 ) );
 				}
 				else if( BELE == 2 )
 				{
-					_encoding = 12; // UTF-16LE without BOM
-					content = toString( cast(wchar[]) str );
-					return content;
+					encoding = BOM.utf16le;		return toUTF8( cast(wchar[]) str );
 				}
 				
 				if( isUTF8WithouBOM( str ) )
 				{
-					_encoding = Encoding.UTF_8N;
-					content = cast(char[]) str;
-					return content;
+					encoding = BOM.utf8;		return cast(string) str;
 				}
 				else
 				{
-					_encoding = Encoding.Unknown;
-					version(Windows)
-					{
-						if( !CodePage.isAscii(cast(char[]) str ) ) // MBCS
-						{
-							char[] _text;
-							_text.length = 2 + 2 * str.length;
-							content = CodePage.from( cast(char[]) str, _text, 0 );
-						}
-						else
-							content = cast(char[]) str;
-					}
-					else
-						content = cast(char[]) str;
-						
-					//return content;
-				}
-			}
-			else
-			{
-				// CHECK BOM
-				bool bBOM = true;
-				//auto str = cast(ubyte[]) File.get( fullPath );
+					encoding = BOM.none;
+					version(Windows) if( !isAscii( cast(string) str ) ) return fromMBSz( cast(immutable char*) (str~'\0') );
+					return cast(string) str;
+				}				
 				
-				void* cd = null;
-				
-				if( str.length > 3 )
-				{
-					//UTF32 with BOM
-					if( str[0] == 0xFF && str[1] == 0xFE && str[2] == 0x00 && str[3] == 0x00 )
-					{
-						// UTF32-LE
-						cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");
-						//stdout("UTF-32LE").newline;
-						_encoding = Encoding.UTF_32LE;
-					}
-					else if( str[0] == 0x00 && str[1] == 0x00 && str[2] == 0xFE && str[3] == 0xFF )
-					{
-						// UTF32-BE
-						cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
-						//stdout("UTF-32BE").newline;
-						_encoding = Encoding.UTF_32BE;
-					}
-				}
-				
-				if( cd == null )
-				{
-					if( str.length > 2 )
-					{
-						//UTF8 with BOM
-						if( str[0] == 0xEF && str[1] == 0xBB && str[2] == 0xBF )
-						{
-							// UTF-8
-							//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
-							//stdout("UTF-8").newline;
-							_encoding = Encoding.UTF_8;
-						}
-					}
-				}
-				
-				if( _encoding != Encoding.UTF_8 )
-				{
-					if( cd == null )
-					{
-						if( str.length > 1 )
-						{
-							//UTF16 with BOM
-							if( str[0] == 0xFF && str[1] == 0xFE)
-							{
-								// UTF16-LE
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");
-								//stdout("UTF-16LE").newline;
-								_encoding = Encoding.UTF_16LE;
-							}
-							else if( str[0] == 0xFE && str[1] == 0xFF)
-							{
-								// UTF16-BE
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
-								//stdout("UTF-16BE").newline;
-								_encoding = Encoding.UTF_16BE;
-							}
-						}
-					}			
-
-					// Check Without BOM
-					if( cd == null )
-					{
-						int BELE = isUTF32WithouBOM( str );
-						if( BELE == 1 )
-						{
-							cd = GLOBAL.iconv_open("UTF-8","UTF-32BE");	
-							//stdout("UTF-32BE without BOM").newline;
-							_encoding = 9;
-							bBOM = false;
-						}
-						else if( BELE == 2 )
-						{
-							cd = GLOBAL.iconv_open("UTF-8","UTF-32LE");	
-							//stdout("UTF-32LE without BOM").newline;
-							_encoding = 10;
-							bBOM = false;
-						}
-						
-						if( cd == null )
-						{
-							BELE = isUTF16WithouBOM( str );
-							if( BELE == 1 )
-							{
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16BE");	
-								//stdout("UTF-16BE without BOM").newline;
-								_encoding = 11;
-								bBOM = false;
-							}
-							else if( BELE == 2 )
-							{
-								cd = GLOBAL.iconv_open("UTF-8","UTF-16LE");	
-								//stdout("UTF-16LE without BOM").newline;
-								_encoding = 12;
-								bBOM = false;
-							}
-						}
-						
-						if( cd == null )
-						{
-							if( isUTF8WithouBOM( str ) )
-							{
-								bBOM = false;
-								//cd = GLOBAL.iconv_open("UTF-8","UTF-8");
-								//stdout("UTF-8 without BOM").newline;
-								_encoding = Encoding.UTF_8N;
-							}
-							else
-							{
-								_encoding = Encoding.Unknown;
-							}
-						}
-					}
-				}
-
-				
-				// Trans Data
-				if( cd != null )
-				{
-					void* inp = str.ptr;
-					size_t inbytesleft = str.length;
-					
-					char[] outBuffer;
-					outBuffer.length = inbytesleft;
-					size_t outbytesleft = outBuffer.length;
-					void* outp = outBuffer.ptr;
-					size_t res = GLOBAL.iconv(cd,&inp,&inbytesleft,&outp,&outbytesleft);
-
-					//Stdout(outbytesleft).newline;
-					if( bBOM )
-						content = outBuffer[3..$-outbytesleft]; // UTF-8 with BOM (3 bytes)
-					else
-						content = outBuffer[0..$-outbytesleft]; // UTF-8 without BOM
-						
-					GLOBAL.iconv_close( cd );
-						
-					//return content;
-				}
-				else
-				{
-					if( _encoding == Encoding.UTF_8 )
-					{
-						content = cast(char[]) str[3..$]; // UTF-8 with BOM (3 bytes)
-					}
-					else
-					{
-						if( _encoding == Encoding.UTF_8N )
-							content = cast(char[]) str;
-						else
-						{
-							version(Windows)
-							{
-								if( !CodePage.isAscii(cast(char[]) str ) ) // MBCS
-								{
-									char[] _text;
-									_text.length = 2 * str.length;
-									content = CodePage.from( cast(char[]) str, _text, 0 );
-								}
-								else
-									content = cast(char[]) str;
-							}
-							else
-								content = cast(char[]) str;
-						}
-					}
-					
-					//return content;
-				}
-			
 			}
 		}
 		catch( Exception e )
 		{
-			debug IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			debug IupMessage( "Bug", toStringz( "FileAction.loadFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 			throw e;
 		}
 
-		return content;
+		return null;
 	}
 	
 
-	static bool saveFile( char[] fullPath, char[] data, int encoding = Encoding.UTF_8 )
+	static bool saveFile( string fullPath, string data, int _bom, int withBOM )
 	{
+		File _fp;
 		try
 		{
-			switch( encoding )
+			_fp = File( fullPath, "w" );
+			if( withBOM )
 			{
-				case Encoding.Unknown:
-					version( Windows )
-					{
-						char[] _text;
-						_text.length = 2 * data.length;
-						char[] result = CodePage.into( data, _text );
-						File.set( fullPath, result );
-					}
-					else
-					{
-						scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
-						file.write( data , false );
-					}
-					break;
+				switch( cast(BOM) _bom )
+				{
+					case BOM.utf32le:	_fp.rawWrite( cast(ubyte[])[0xFF, 0xFE, 0x00, 0x00] );		_fp.rawWrite( toUTF32( data ) );									break;
+					case BOM.utf32be:	_fp.rawWrite( cast(ubyte[])[0x00, 0x00, 0xFE, 0xFF] );		_fp.rawWrite( swapBytes( cast(ubyte[]) toUTF32( data ), 4 ) );		break;
+					case BOM.utf16le:	_fp.rawWrite( cast(ubyte[])[0xFF, 0xFE] );					_fp.rawWrite( toUTF16( data ) );									break;
+					case BOM.utf16be:	_fp.rawWrite( cast(ubyte[])[0xFE, 0xFF]);					_fp.rawWrite( swapBytes( cast(ubyte[]) toUTF16( data ), 2 ) );		break;
+					case BOM.utf8:		_fp.rawWrite( cast(ubyte[])[0xEF, 0xBB, 0xBF]);				_fp.rawWrite( data );												break;
+					default:			_fp.write( data );											_fp.close;														return false;	
+				}
 				
-				case Encoding.UTF_8N:
-					scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
-					file.write( data , false );
-					break;
+				_fp.close;
+				return true;
+			}
+			else
+			{
+				switch( _bom )
+				{
+					case BOM.utf32le:	_fp.rawWrite( toUTF32( data ) );									break;
+					case BOM.utf32be:	_fp.rawWrite( swapBytes( cast(ubyte[]) toUTF32( data ), 4 ) );		break;
+					case BOM.utf16le:	_fp.rawWrite( toUTF16( data ) );									break;
+					case BOM.utf16be:	_fp.rawWrite( swapBytes( cast(ubyte[]) toUTF16( data ), 2 ) );		break;
+					case BOM.utf8:		_fp.rawWrite( data );												break;
+					default:
+						version( Windows ) _fp.rawWrite( fromStringz( toMBSz( data, 0 ) ) ); else _fp.rawWrite( data );
+				}
 
-				case Encoding.UTF_8:
-					scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
-					file.write( data , true );
-					break;
-
-				case Encoding.UTF_16:
-				case Encoding.UTF_16BE:
-					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16BE );
-					file.write( toString16( data ), true );
-					break;
-
-				case Encoding.UTF_16LE:
-					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16LE );
-					file.write( toString16( data ) , true );
-					break;
-
-				
-				case Encoding.UTF_32BE:
-					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32BE );
-					file.write( toString32( data ) , true );
-					break;
-
-				case Encoding.UTF_32LE:
-					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32LE );
-					file.write( toString32( data ) , true );
-					break;
-
-				case 9:
-					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32BE );
-					file.write( toString32( data ) , false );
-					break;
-
-				case 10:
-					scope file = new UnicodeFile!(dchar)( fullPath, Encoding.UTF_32LE );
-					file.write( toString32( data ) , false );
-					break;
-
-				case 11:
-					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16BE );
-					file.write( toString16( data ) , false );
-					break;
-
-				case 12:
-					scope file = new UnicodeFile!(wchar)( fullPath, Encoding.UTF_16LE );
-					file.write( toString16( data ) , false );
-					break;
-
-
-				default:
-					scope file = new UnicodeFile!(char)( fullPath, Encoding.UTF_8 );
-					file.write( data, true );
+				_fp.close;
+				return true;
 			}
 		}
 		catch( Exception e )
 		{
-			IupMessage( "FileAction.saveFile Error", toStringz( e.toString ) );
-			return false;
+			if( _fp.isOpen ) _fp.close;
 		}
-
-		return true;
+		
+		return false;
 	}
-	
 }
 
 
@@ -630,7 +305,7 @@ struct DocumentTabAction
 {
 private:
 	import scintilla;
-	import tango.io.FilePath;
+	import std.file, Path = std.path, Uni = std.uni;
 	
 public:
 	static int tabChangePOS( Ihandle* ih, int new_pos )
@@ -655,12 +330,8 @@ public:
 					if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
 					{
 						GLOBAL.statusBar.setPrjName( "                                            " );
-					}/*
-					else
-					{
-						GLOBAL.statusBar.setPrjName( null, true );
 					}
-					*/
+					
 					return IUP_DEFAULT;
 				}
 			}
@@ -682,7 +353,7 @@ public:
 			if( _ih != null )
 			{
 				auto _cSci = ScintillaAction.getCScintilla( _ih );
-				if( _cSci !is null ) IupSetAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", i, _cSci.getFullPath_IupString.toCString );
+				if( _cSci !is null ) IupSetStrAttributeId( GLOBAL.activeDocumentTabs , "TABTIP", i, toStringz( _cSci.getFullPath ) );
 			}
 		}
 	}
@@ -714,17 +385,17 @@ public:
 	}
 	
 	
-	static void setTabItemDocumentImage( Ihandle* workDocumentTab, int newDocumentPos, char[] _fullPath )
+	static void setTabItemDocumentImage( Ihandle* workDocumentTab, int newDocumentPos, string _fullPath )
 	{
-		scope mypath = new FilePath( _fullPath );
+		string _ext = Uni.toLower( Path.extension( _fullPath ) );
 		
 		version(FBIDE)
 		{
-			if( lowerCase( mypath.ext )== "bas" )
+			if( _ext == ".bas" )
 			{
 				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bas" );
 			}
-			else if( lowerCase( mypath.ext )== "bi" )
+			else if( _ext == ".bi" )
 			{
 				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bi" );
 			}
@@ -733,13 +404,13 @@ public:
 				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_txt" );
 			}
 		}
-		version(DIDE)
+		else //version(DIDE)
 		{
-			if( lowerCase( mypath.ext )== "d" )
+			if( _ext == ".d" )
 			{
 				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bas" );
 			}
-			else if( lowerCase( mypath.ext )== "di" )
+			else if( _ext == ".di" )
 			{
 				IupSetAttributeId( workDocumentTab, "TABIMAGE", newDocumentPos, "icon_bi" );
 			}
@@ -784,7 +455,7 @@ public:
 		return -1;
 	}
 	
-	static Ihandle* getDocumentAndPos( Ihandle* sci, out int documentPos = -1 )
+	static Ihandle* getDocumentAndPos( Ihandle* sci, out int documentPos )
 	{
 		documentPos = IupGetChildPos( GLOBAL.documentTabs, sci );
 		
@@ -798,6 +469,7 @@ public:
 			if( documentPos > -1 ) return GLOBAL.documentTabs;
 		}
 		
+		documentPos = -1;
 		return null;
 	}
 	
@@ -810,7 +482,6 @@ public:
 
 			if( beMoveDocumentCSci !is null )
 			{
-				//Ihandle* dragHandle = IupGetChild( GLOBAL.documentTabs, IupGetInt( GLOBAL.documentTabs, "VALUEPOS" ) );
 				Ihandle* dropHandle = IupGetChild( DestTabs, 0 );
 				
 				if( dragHandle != null )
@@ -825,8 +496,8 @@ public:
 					{
 						IupReparent( dragHandle, DestTabs, IupGetChild( DestTabs, 0 ) );
 					}
-					IupSetAttributeId( DestTabs, "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
-					IupSetAttributeId( DestTabs, "TABTIP", newDocumentPos, beMoveDocumentCSci.getFullPath_IupString.toCString );
+					IupSetStrAttributeId( DestTabs, "TABTITLE", newDocumentPos, toStringz( beMoveDocumentCSci.getTitle ) );
+					IupSetStrAttributeId( DestTabs, "TABTIP", newDocumentPos, toStringz( beMoveDocumentCSci.getFullPath ) );
 				}				
 			}		
 		}
@@ -896,13 +567,13 @@ public:
 		}		
 	}
 	
-	static char[] getBeforeWord( Ihandle* iupSci, int pos )
+	static string getBeforeWord( Ihandle* iupSci, int pos )
 	{
 		// Check before targetText word.......
-		char[]	beforeWord;
+		string	beforeWord;
 		for( int j = pos; j >= 0; --j )
 		{
-			char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+			string _s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
 			int key = cast(int) _s[0];
 			
 			if( key >= 0 && key <= 127 )
@@ -922,16 +593,16 @@ public:
 			}
 		}
 		
-		return beforeWord.reverse;
+		return reverse( beforeWord.dup );
 	}
 	
-	static char[] getAfterWord( Ihandle* iupSci, int pos )
+	static string getAfterWord( Ihandle* iupSci, int pos )
 	{
 		// Check after targetText word.......
-		char[]	afterWord;
+		string	afterWord;
 		for( int j = pos; j < IupGetInt( iupSci, "COUNT" ); ++j )
 		{
-			char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+			string _s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
 			int key = cast(int) _s[0];
 			
 			if( key >= 0 && key <= 127 )
@@ -954,16 +625,16 @@ public:
 		return afterWord;
 	}
 	
-	static char[] getTailWord( Ihandle* iupSci, int pos )
+	static string getTailWord( Ihandle* iupSci, int pos )
 	{
 		// Check after targetText word.......
-		char[]	tailWord;
+		string tailWord;
 		int line = ScintillaAction.getLinefromPos( iupSci, pos );
 		int lineEndPos = cast(int) IupScintillaSendMessage( iupSci, 2136, line, 0 ); // SCI_GETLINEENDPOSITION 2136
 		
 		for( int j = --lineEndPos; j >= 0; --j )
 		{
-			char[] _s = lowerCase( fromStringz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
+			string _s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", j ) ) );
 			int key = cast(int) _s[0];
 			
 			if( key >= 0 && key <= 127 )
@@ -983,12 +654,11 @@ public:
 			}
 		}
 		
-		return tailWord.reverse;
+		return reverse( tailWord.dup );
 	}	
 	
 	// hasTail = -1  Whatever, hasTail = 0  No Tail, hasTail = 1  Tail
-	
-	static int getKeyWordCount( Ihandle* iupSci, char[] target, char[] beforeWord, char[] tailWord = "" )
+	static int getKeyWordCount( Ihandle* iupSci, string target, string beforeWord, string tailWord = "" )
 	{
 		int count;
 		
@@ -1000,14 +670,13 @@ public:
 		scope _t = new IupString( target );
 		
 		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
-		
 		while( findPos != -1 )
 		{
-			if( getBeforeWord( iupSci, findPos - 1 ) == lowerCase( beforeWord ) )
+			if( getBeforeWord( iupSci, findPos - 1 ) == Uni.toLower( beforeWord ) )
 			{
 				if( tailWord.length )
 				{
-					if( getTailWord( iupSci, findPos ) == lowerCase(tailWord) ) count++;
+					if( getTailWord( iupSci, findPos ) == Uni.toLower( tailWord ) ) count++;
 				}
 				else
 					count++;
@@ -1024,7 +693,7 @@ public:
 	
 	static bool isDoubleClick( char* status )
 	{
-		char[] _s = fromStringz( status ).dup;
+		string _s = fSTRz( status );
 		if( _s.length > 5 )
 		{
 			if( _s[5] == 'D' ) return true; // Double Click
@@ -1038,16 +707,15 @@ public:
 struct ScintillaAction
 {
 private:
-	import tango.io.UnicodeFile, tango.io.FilePath, dialogs.fileDlg, parser.ast;
+	import dialogs.fileDlg, parser.ast;
 	import scintilla, menu;
 	import parser.scanner,  parser.token, parser.parser, parser.autocompletion;
-
-	import tango.core.Thread, Path = tango.io.Path;
+	import std.encoding;
 	
-	static bool[char[]] preParsedIncludes;
+	static bool[string] preParsedIncludes;
 
 public:
-	static bool newFile( char[] fullPath, Encoding _encoding = Encoding.UTF_8N, char[] existData = null, bool bCreateActualFile = true, int insertPos = -1 )
+	static bool newFile( string fullPath, int _encoding, int _withBom, string existData = null, bool bCreateActualFile = true, int insertPos = -1 )
 	{
 		// FullPath had already opened
 		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
@@ -1056,7 +724,8 @@ public:
 			return false;
 		}
 
-		auto 	_sci = new CScintilla( fullPath, null, _encoding, insertPos );
+		auto _sci = new CScintilla( fullPath, null, _encoding, _withBom, insertPos );
+		_sci.withBOM = cast(bool) _withBom;
 		if( bCreateActualFile ) FileAction.newFile( fullPath );
 		//_sci.setEncoding( _encoding );
 		GLOBAL.scintillaManager[fullPathByOS(fullPath)] = _sci;
@@ -1072,11 +741,11 @@ public:
 
 		if( existData.length) _sci.setText( existData );
 
-		scope f = new FilePath( fullPath );
+		string _ext = Uni.toLower( Path.extension( fullPath ) );
 
 		version(FBIDE)
 		{
-			if( tools.isParsableExt( f.ext, 3 ) )
+			if( tools.isParsableExt( _ext, 3 ) )
 			{
 				//Parser
 				GLOBAL.outlineTree.loadFile( fullPath );
@@ -1084,7 +753,7 @@ public:
 		}
 		version(DIDE)
 		{
-			if( lowerCase( f.ext() ) == "d" || lowerCase( f.ext() ) == "di" )
+			if( _ext == ".d" || _ext == ".di" )
 			{
 				//Parser
 				GLOBAL.outlineTree.loadFile( fullPath );
@@ -1103,13 +772,15 @@ public:
 		{
 			GLOBAL.statusBar.setPrjName( null, true );
 		}
-			
+
+		if( GLOBAL.enableParser == "ON" ) GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
+
 		return true;
 	}
 	
-	static bool openFile( char[] fullPath, int lineNumber = -1 )
-	{
-		fullPath =  Path.normalize( fullPath );
+	static bool openFile( string fullPath, int lineNumber = -1 )
+	{	import std.stdio;
+		fullPath = tools.normalizeSlash( fullPath );
 		
 		// FullPath had already opened
 		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
@@ -1133,11 +804,7 @@ public:
 			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
-			}/*
-			else
-			{
-				GLOBAL.statusBar.setPrjName( null, true );
-			}*/
+			}
 			
 			return true;
 		}
@@ -1146,19 +813,16 @@ public:
 		{
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 			
-			scope filePath = new FilePath( fullPath );
-			if( !filePath.exists ) return false;
+			if( !exists( fullPath ) ) return false;
 
-			Encoding		_encoding;
-			char[] 	_text = FileAction.loadFile( fullPath, _encoding );
-			
-			
+			int		_bom, _withBom;
+			string 	_text = FileAction.loadFile( fullPath, _bom, _withBom );
 			
 			// Parser
 			if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 			{
 				Ihandle* _tree = GLOBAL.outlineTree.getTree( fullPath );
-				if( _tree == null )	GLOBAL.outlineTree.createTree( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+				if( _tree == null )	GLOBAL.outlineTree.createTree( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)] );
 				
 				GLOBAL.outlineTree.changeTree( fullPath );
 				
@@ -1167,7 +831,7 @@ public:
 				{
 					preParsedIncludes[fullPathByOS(fullPath)] = true;
 					AutoComplete.cleanIncludeContainer();
-					AutoComplete.setPreLoadContainer( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+					AutoComplete.setPreLoadContainer( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)] );
 				}
 			}
 			else
@@ -1182,14 +846,12 @@ public:
 					//{
 						preParsedIncludes[fullPathByOS(fullPath)] = true;
 						AutoComplete.cleanIncludeContainer();
-						AutoComplete.setPreLoadContainer( GLOBAL.parserManager[fullPathByOS(fullPath)] );
+						AutoComplete.setPreLoadContainer( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)] );
 					//}
 				}
 			}
 			
-			
-			
-			auto 	_sci = new CScintilla( fullPath, _text, _encoding );
+			auto 	_sci = new CScintilla( fullPath, _text, _bom, _withBom, -1 );
 			GLOBAL.scintillaManager[fullPathByOS(fullPath)] = _sci;
 
 			// Set documentTabs to visible
@@ -1216,7 +878,6 @@ public:
 						}
 						else
 						{
-							//IupScintillaSendMessage( _sci.getIupScintilla, 2229, value, 0 ); //  SCI_SETFOLDEXPANDED 2229
 							IupSetInt( _sci.getIupScintilla, "FOLDTOGGLE", value );
 						}
 					}
@@ -1241,26 +902,21 @@ public:
 			if( !( toTreeMarked( fullPath ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );
-			}/*
-			else
-			{
-				GLOBAL.statusBar.setPrjName( null, true );
-			}*/		
-
+			}
 
 			StatusBarAction.update();
-			
+
 			return true;
 		}
 		catch( Exception e )
 		{
-			//GLOBAL.IDEMessageDlg.print( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) );
-			IupMessage( "Bug", toStringz( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+			//GLOBAL.IDEMessageDlg.print( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) );
+			IupMessage( "Bug", toStringz( "openFile() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 
 			if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) 
 			{
 				auto _sci = GLOBAL.scintillaManager[fullPathByOS(fullPath)];
-				if( _sci !is null ) delete _sci;
+				if( _sci !is null ) destroy( _sci );
 					
 				GLOBAL.scintillaManager.remove( fullPathByOS(fullPath) );
 			}
@@ -1269,7 +925,7 @@ public:
 		return false;
 	}
 
-	static int toTreeMarked( char[] fullPath, int _switch = 7 )
+	static int toTreeMarked( string fullPath, int _switch = 7 )
 	{
 		int result;
 		
@@ -1278,14 +934,6 @@ public:
 			CScintilla cSci = GLOBAL.scintillaManager[fullPathByOS(fullPath)];
 			if( cSci !is null )
 			{
-				/*
-				if( _switch & 1 ) // Mark the FileList
-				{
-					GLOBAL.fileListTree.markItem( cSci.getFullPath );
-					result = result | 1;
-				}
-				*/
-				
 				if( _switch & 4 ) // Mark the OutlineTree
 				{
 					GLOBAL.outlineTree.changeTree( cSci.getFullPath );
@@ -1298,7 +946,7 @@ public:
 					int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
 					for( int id = 1; id <= nodeCount; id++ )
 					{
-						char[] s = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
+						string s = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) );
 						if( fullPathByOS(s) == fullPathByOS(fullPath) )
 						{
 							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
@@ -1349,8 +997,15 @@ public:
 
 		return null;
 	}
+	
+	static string getFullPath()
+	{
+		auto _sci = getActiveCScintilla();
+		if( _sci !is null ) return _sci.getFullPath;
+		return null;
+	}
 
-	static void gotoLine( char[] fileName, int lineNum )
+	static void gotoLine( string fileName, int lineNum )
 	{
 		openFile( fileName, lineNum );
 	}
@@ -1359,7 +1014,7 @@ public:
 	{
 		if( cSci !is null )
 		{
-			char[] _title = cSci.getTitle();
+			string _title = cSci.getTitle();
 			if( _title.length )
 			{
 				if( _title[0] == '*' ) return true;
@@ -1407,7 +1062,7 @@ public:
 			//GLOBAL.fileListTree.removeItem( cSci );
 			//GLOBAL.scintillaManager.remove( fullPathByOS( cSci.getFullPath ) );
 			//GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
-			delete cSci;
+			destroy( cSci) ;
 			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
 			IupRefresh( GLOBAL.activeDocumentTabs );
 			
@@ -1415,12 +1070,11 @@ public:
 		}
 	}
 
-	static int closeDocument( char[] fullPath, int pos = -1 )
+	static int closeDocument( string fullPath, int pos = -1 )
 	{
 		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
 		{
-			CScintilla	cSci		= GLOBAL.scintillaManager[fullPathByOS(fullPath)];
-			
+			CScintilla cSci = GLOBAL.scintillaManager[fullPathByOS(fullPath)];
 			if( cSci !is null )
 			{
 				//if( ScintillaAction.getModify( iupSci ) != 0 )
@@ -1466,10 +1120,9 @@ public:
 		return IUP_DEFAULT;
 	}
 
-	static int closeOthersDocument( char[] fullPath )
+	static int closeOthersDocument( string fullPath )
 	{
-		char[][] KEYS;
-		
+		string[] KEYS;
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
 			if( cSci !is null )
@@ -1531,7 +1184,7 @@ public:
 			}
 		}
 
-		foreach( char[] s; KEYS )
+		foreach( s; KEYS )
 		{
 			if( fullPathByOS(s) in GLOBAL.scintillaManager )
 			{
@@ -1541,7 +1194,7 @@ public:
 					//GLOBAL.fileListTree.removeItem( cSci );
 					//GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
 					//IupDestroy( cSci );				
-					delete cSci;
+					destroy( cSci );
 				}
 
 				//GLOBAL.scintillaManager.remove( fullPathByOS(s) );
@@ -1561,7 +1214,7 @@ public:
 		if( _activeTabs == null ) return -1;
 		
 		
-		char[][] 	KEYS;
+		string[] 	KEYS;
 		bool 		bCancel;		
 		
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
@@ -1620,7 +1273,7 @@ public:
 			}
 		}
 
-		foreach( char[] s; KEYS )
+		foreach( s; KEYS )
 		{
 			if( fullPathByOS(s) in GLOBAL.scintillaManager )
 			{
@@ -1630,7 +1283,7 @@ public:
 					//GLOBAL.fileListTree.removeItem( cSci );
 					//GLOBAL.outlineTree.cleanTree( cSci.getFullPath );
 					//IupDestroy( cSci );				
-					delete cSci;
+					destroy( cSci );
 				}
 
 				//GLOBAL.scintillaManager.remove( fullPathByOS(s) );
@@ -1652,7 +1305,7 @@ public:
 		
 		try
 		{
-			char[] fullPath = cSci.getFullPath();
+			string fullPath = cSci.getFullPath();
 			//if( ScintillaAction.getModify( cSci.getIupScintilla ) != 0 || bForce )
 			
 			if( fullPath.length >= 7 )
@@ -1690,7 +1343,7 @@ public:
 			version(FBIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.bas|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.bi|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
 			version(DIDE)	scope dlg = new CFileDlg( GLOBAL.languageItems["saveas"].toDString() ~ "...", GLOBAL.languageItems["basfile"].toDString() ~ "|*.d|" ~  GLOBAL.languageItems["bifile"].toDString() ~ "|*.di|" ~ GLOBAL.languageItems["allfile"].toDString() ~ "|*.*", "SAVE", "NO", cSci.getFullPath );//"Source File|*.bas|Include File|*.bi" );
 
-			char[] fullPath = dlg.getFileName();
+			string fullPath = tools.normalizeSlash( dlg.getFileName() );
 			switch( dlg.getFilterUsed )
 			{
 				case "1":
@@ -1698,7 +1351,7 @@ public:
 					{
 						if( fullPath.length > 4 )
 						{
-							if( fullPath[$-4..$] == ".bas" ) fullPath = fullPath[0..$-4];
+							if( fullPath[$-4..$] == ".bas" ) fullPath = fullPath[0..$-4].dup;
 						}
 						fullPath ~= ".bas";
 					}
@@ -1706,7 +1359,7 @@ public:
 					{
 						if( fullPath.length > 2 )
 						{
-							if( fullPath[$-2..$] == ".d" ) fullPath = fullPath[0..$-2];
+							if( fullPath[$-2..$] == ".d" ) fullPath = fullPath[0..$-2].dup;
 						}
 						fullPath ~= ".d";
 					}
@@ -1716,7 +1369,7 @@ public:
 					{
 						if( fullPath.length > 3 )
 						{
-							if( fullPath[$-3..$] == ".bi" ) fullPath = fullPath[0..$-3];
+							if( fullPath[$-3..$] == ".bi" ) fullPath = fullPath[0..$-3].dup;
 						}
 						fullPath ~= ".bi";
 					}
@@ -1724,7 +1377,7 @@ public:
 					{
 						if( fullPath.length > 3 )
 						{
-							if( fullPath[$-3..$] == ".di" ) fullPath = fullPath[0..$-3];
+							if( fullPath[$-3..$] == ".di" ) fullPath = fullPath[0..$-3].dup;
 						}
 						fullPath ~= ".di";
 					}					
@@ -1736,9 +1389,9 @@ public:
 			{
 				if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) return saveFile( cSci );
 				
-				char[] newDocument = fromStringz( IupGetAttribute( cSci.getIupScintilla, "VALUE" ) ).dup;
-				if( bShowNew ) ScintillaAction.newFile( fullPath, cast(Encoding) cSci.encoding, newDocument, true, insertPos );
-				FileAction.saveFile( fullPath, newDocument, cast(Encoding) cSci.encoding );
+				string newDocument = fSTRz( IupGetAttribute( cSci.getIupScintilla, "VALUE" ) );
+				if( bShowNew ) ScintillaAction.newFile( fullPath, cSci.encoding, cSci.withBOM, newDocument, true, insertPos );
+				FileAction.saveFile( fullPath, newDocument, cSci.encoding, cSci.withBOM );
 				if( bCloseOld )	closeAndMoveDocument( cSci, bShowNew );
 			}
 			else
@@ -1823,33 +1476,6 @@ public:
 			}
 		}
 		
-		/*
-		for( int i = 0; i < IupGetChildCount( GLOBAL.activeDocumentTabs ); i++ )
-		{
-			Ihandle* _child = IupGetChild( GLOBAL.activeDocumentTabs, i );
-			
-			auto _cSci = ScintillaAction.getCScintilla( _child );
-			
-			if( _cSci !is null )
-			{
-				if( ScintillaAction.getModifyByTitle( _cSci ) )
-				{
-					if( _cSci.getFullPath.length >= 7 )
-					{
-						if( _cSci.getFullPath[0..7] == "NONAME#" )
-						{
-							NoNameGroup ~= _cSci;
-							continue;
-						}
-					}
-					
-					_cSci.saveFile();
-					GLOBAL.outlineTree.refresh( _cSci );
-				}
-			}
-		}
-		*/
-		
 		if( NoNameGroup.length )
 		{
 			foreach( CScintilla _sci; NoNameGroup )
@@ -1885,14 +1511,14 @@ public:
 	}
 	
 
-	static char[] getCurrentChar( int bias, Ihandle* ih = null )
+	static string getCurrentChar( int bias, Ihandle* ih = null )
 	{
 		if( ih == null ) ih = getActiveIupScintilla();
 
 		if( ih != null )
 		{
 			int pos = getCurrentPos( ih );
-			return fromStringz( IupGetAttributeId( ih, "CHAR", pos + bias ) );
+			return fSTRz( IupGetAttributeId( ih, "CHAR", pos + bias ) );
 		}
 
 		return null;
@@ -1932,7 +1558,7 @@ public:
 		}
 		
 		int lineStartPos = cast(int) IupScintillaSendMessage( ih, 2167, IupScintillaSendMessage( ih, 2166, pos, 0 ), 0 ); // SCI_LINEFROMPOSITION = 2166, SCI_POSITIONFROMLINE=2167
-		//IupMessage("", toStringz( Integer.toString(pos) ~ " / " ~ Integer.toString(lineStartPos) ) );
+		//IupMessage("", toStringz( to!(string)(pos) ~ " / " ~ to!(string)(lineStartPos) ) );
 
 		if( pos == 0 ) return false;
 			
@@ -1943,8 +1569,9 @@ public:
 		return false;
 	}
 	
-	static void updateRecentFiles( char[] fullPath )
+	static void updateRecentFiles( string fullPath )
 	{
+		fullPath = tools.normalizeSlash( fullPath );
 		if( fullPath.length )
 		{
 			IupString[]	temps;
@@ -1957,7 +1584,7 @@ public:
 			temps ~= new IupString( fullPath );
 			
 			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
-				delete GLOBAL.recentFiles[i];
+				destroy( GLOBAL.recentFiles[i]);
 			
 			int count, index;
 			if( temps.length > 8 )
@@ -1976,7 +1603,7 @@ public:
 		else
 		{
 			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
-				delete GLOBAL.recentFiles[i];
+				destroy( GLOBAL.recentFiles[i] );
 				
 			GLOBAL.recentFiles.length = 0;
 		}
@@ -2020,7 +1647,7 @@ public:
 		}
 	}
 
-	static char[] textWrap( char[] oriText, int textWidth = -1 )
+	static string textWrap( string oriText, int textWidth = -1 )
 	{
 		if( textWidth == -1 )
 		{
@@ -2029,19 +1656,19 @@ public:
 				Ihandle* actIupSci = getActiveIupScintilla;
 				if( actIupSci != null )
 				{
-					char[] wh = fromStringz( IupGetAttribute( actIupSci, "RASTERSIZE" ) );
-					int xPos = Util.index( wh, "x" );
-					if( xPos < wh.length )
+					string wh = fSTRz( IupGetAttribute( actIupSci, "RASTERSIZE" ) );
+					int xPos = indexOf( wh, "x" );
+					if( xPos > -1 )
 					{
-						int spacePos = Util.rindex( GLOBAL.fonts[1].fontString, " " );
-						if( spacePos < GLOBAL.fonts[1].fontString.length )
+						int spacePos = lastIndexOf( GLOBAL.fonts[1].fontString, " " );
+						if( spacePos > -1 )
 						{
-							int size = Integer.toInt( GLOBAL.fonts[1].fontString[spacePos+1..$] );
+							int size = to!(int)( GLOBAL.fonts[1].fontString[spacePos+1..$] );
 							if( size > 6 )
 							{
 								size -= 2;
 								int caretX = cast(int) IupScintillaSendMessage( actIupSci, 2164, 0, getCurrentPos( actIupSci ) ); // SCI_POINTXFROMPOSITION 2164
-								textWidth =  cast(int) ( ( cast(float) Integer.toInt( wh[0..xPos] ) - cast(float) caretX ) / cast(float) size );
+								textWidth =  cast(int) ( ( to!(float)( wh[0..xPos] ) - cast(float) caretX ) / cast(float) size );
 							}
 						}
 					}
@@ -2054,9 +1681,8 @@ public:
 			if( textWidth == -1 ) return oriText;
 		}
 	
-		char[] result;
-		
-		char[]	tmp;
+		string result;
+		string	tmp;
 		char	last = ' ';
 		int		count;
 		
@@ -2065,7 +1691,7 @@ public:
 		{
 			if( ++count == textWidth )
 			{
-				result = result ~ "\n" ~ Util.triml( tmp );
+				result = result ~ "\n" ~ stripLeft( tmp );
 				count = tmp.length;
 				tmp.length = 0;
 			}
@@ -2079,7 +1705,7 @@ public:
 			last = oriText[i];
 			
 			if( i == oriText.length - 1 )
-				if( count + tmp.length < textWidth ) result ~= tmp; else result = result ~ "\n" ~ Util.triml( tmp );
+				if( count + tmp.length < textWidth ) result ~= tmp; else result = result ~ "\n" ~ stripLeft( tmp );
 
 		}
 		
@@ -2120,57 +1746,56 @@ struct ProjectAction
 		return getTargetDepthID( 1 );
 	}
 
-	static char[] getActiveProjectName()
+	static string getActiveProjectName()
 	{
 		int id = getActiveProjectID();
 
 		if( id < 1 ) return null;
 
-		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ).dup;//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+		return fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 	}
 
-	static char[] getActiveProjectTreeNodeTitle()
+	static string getActiveProjectTreeNodeTitle()
 	{
 		int id = getActiveProjectID();
 
 		if( id < 1 ) return null;
 		
-		return fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) ).dup;//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
+		return fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id ) );//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
 	}
 	
-	static bool changeActiveProjectTreeNodeTitle( char[] newName )
+	static bool changeActiveProjectTreeNodeTitle( string newName )
 	{
 		int id = getActiveProjectID();
 
 		if( id < 1 ) return false;
 		
-		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, toStringz( newName.dup ) );
+		IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", id, toStringz( newName ) );
 
 		return true;
 	}
 
-	static int addTreeNode( char[] _prjDirName, char[] fullPath, int folderLocateId )
+	static int addTreeNode( string _prjDirName, string fullPath, int folderLocateId )
 	{
-		char[] _titleName;
+		string _titleName;
 
-		int pos = Util.index( fullPath, _prjDirName );
-		if( pos == 0 ) 	_titleName = Util.substitute( fullPath, _prjDirName, "" );
+		int pos = indexOf( fullPath, _prjDirName );
+		if( pos == 0 ) 	_titleName = Array.replace( fullPath, _prjDirName, "" );
 
 		if( _titleName.length )
 		{
 			// Check the child Folder
-			char[][]	splitText = Util.split( _titleName, "/" );
+			string[] splitText = Array.split( _titleName, "/" );
 		
 			int counterSplitText;
 			for( counterSplitText = 0; counterSplitText < splitText.length - 1; ++counterSplitText )
 			{
-				//int 	countChild = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "TOTALCHILDCOUNT", folderLocateId );
 				int 	countChild = IupGetIntId( GLOBAL.projectTree.getTreeHandle, "COUNT", folderLocateId );
 
 				bool bFolerExist = false;
 				for( int i = 1; i <= countChild; ++ i )
 				{
-					char[]	kind = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );
+					string	kind = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", folderLocateId + i ) );
 					if( kind == "BRANCH" )
 					{
 						if( splitText[counterSplitText] == fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", folderLocateId + i ) ) )
@@ -2187,23 +1812,13 @@ struct ProjectAction
 					IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
 					if( pos != 0 )
 					{
-						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId, tools.getCString( "FIXED" ) );
+						IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", folderLocateId, "FIXED" );
 					}
 					else
 					{
 						IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", folderLocateId, toStringz( splitText[counterSplitText] ) );
 					}
-					/*
-					// Shadow
-					if( pos != 0 )
-					{
-						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( "FIXED" ) );
-					}
-					else
-					{
-						IupSetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "ADDBRANCH", folderLocateId, GLOBAL.cString.convert( splitText[counterSplitText] ) );
-					}
-					*/
+					
 					folderLocateId ++;
 				}
 			}
@@ -2212,7 +1827,7 @@ struct ProjectAction
 		return folderLocateId;
 	}
 
-	static char[] fileInProject( char[] fullPath, char[] projectName = null )
+	static string fileInProject( string fullPath, string projectName = null )
 	{
 		if( fullPath.length )
 		{
@@ -2220,7 +1835,7 @@ struct ProjectAction
 			{
 				if( projectName in GLOBAL.projectManager )
 				{
-					foreach( char[] prjFileFullPath; GLOBAL.projectManager[projectName].sources ~ GLOBAL.projectManager[projectName].includes )
+					foreach( prjFileFullPath; GLOBAL.projectManager[projectName].sources ~ GLOBAL.projectManager[projectName].includes )
 					{
 						if( fullPath == prjFileFullPath ) return projectName;
 					}
@@ -2230,7 +1845,7 @@ struct ProjectAction
 			{
 				foreach( p; GLOBAL.projectManager )
 				{
-					foreach( char[] prjFileFullPath; p.sources ~ p.includes )
+					foreach( prjFileFullPath; p.sources ~ p.includes )
 					{
 						if( fullPath == prjFileFullPath ) return p.dir;
 					}
@@ -2241,7 +1856,7 @@ struct ProjectAction
 		return null;
 	}
 	
-	static char[] getActiveProjectDir()
+	static string getActiveProjectDir()
 	{
 		auto cSci = ScintillaAction.getActiveCScintilla();
 
@@ -2249,7 +1864,7 @@ struct ProjectAction
 		{
 			foreach( p; GLOBAL.projectManager )
 			{
-				foreach( char[] prjFileFullPath; p.sources ~ p.includes )
+				foreach( prjFileFullPath; p.sources ~ p.includes )
 				{
 					if( cSci.getFullPath() == prjFileFullPath ) return p.dir;
 				}
@@ -2267,7 +1882,7 @@ struct ProjectAction
 		{
 			foreach( p; GLOBAL.projectManager )
 			{
-				foreach( char[] prjFileFullPath; p.sources ~ p.includes )
+				foreach( prjFileFullPath; p.sources ~ p.includes )
 				{
 					if( cSci.getFullPath() == prjFileFullPath ) return p;
 				}
@@ -2281,7 +1896,7 @@ struct ProjectAction
 	static int getSelectCount()
 	{
 		int		result;
-		char[] 	status = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
+		string 	status = fSTRz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
 		
 		for( int i = 0; i < status.length; ++ i )
 		{
@@ -2294,7 +1909,7 @@ struct ProjectAction
 	static int[] getSelectIDs()
 	{
 		int[]	result;
-		char[] 	status = fromStringz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
+		string 	status = fSTRz( IupGetAttribute( GLOBAL.projectTree.getTreeHandle,"MARKEDNODES" ) );
 		
 		for( int i = 0; i < status.length; ++ i )
 		{
@@ -2310,7 +1925,7 @@ struct StatusBarAction
 {
 private:
 	import parser.autocompletion, parser.ast, scintilla;
-	import tango.text.convert.Layout;
+	import std.format, std.encoding;
 	
 public:
 	static void update( Ihandle* _handle = null )
@@ -2355,10 +1970,7 @@ public:
 				int col = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2129, pos, 0 ) + 1;  // 0 based
 				int bOverType = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2187, 0, 0 );
 				int eolType = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2030, 0, 0 );
-
-				scope Layouter = new Layout!(char)();
-				char[] output = Layouter( "{,7}x{,5}", line, col );
-				GLOBAL.statusBar.setLINExCOL( output );
+				GLOBAL.statusBar.setLINExCOL( format( "%-7sx%-5s", line, col ) );
 
 				if( bOverType )
 				{
@@ -2381,34 +1993,20 @@ public:
 						GLOBAL.statusBar.setEOLType( " UNKNOW" );
 				}
 
-				switch( cSci.encoding )
+				switch( cast(BOM) cSci.encoding )
 				{
-					case 0: // Encoding.Unknown
+					case BOM.none:
 						GLOBAL.statusBar.setEncodingType( "DEFAULT    " ); break;
-					case 1: // Encoding.UTF_8N
-						GLOBAL.statusBar.setEncodingType( "UTF8       " ); break;
-					case 2: // Encoding.UTF_8
-						GLOBAL.statusBar.setEncodingType( "UTF8.BOM   " ); break;
-					case 3: // Encoding.UTF_16
-						GLOBAL.statusBar.setEncodingType( "UTF16      " ); break;
-					case 4: // Encoding.UTF_16BE
-						GLOBAL.statusBar.setEncodingType( "UTF16BE.BOM" ); break;
-					case 5: // Encoding.UTF_16LE
-						GLOBAL.statusBar.setEncodingType( "UTF16LE.BOM" ); break;
-					case 6: // Encoding.UTF_32
-						GLOBAL.statusBar.setEncodingType( "UTF32      " ); break;
-					case 7: // Encoding.UTF_32BE
-						GLOBAL.statusBar.setEncodingType( "UTF32BE.BOM" ); break;
-					case 8: // Encoding.UTF_32LE
-						GLOBAL.statusBar.setEncodingType( "UTF32LE.BOM" ); break;
-					case 9: //
-						GLOBAL.statusBar.setEncodingType( "UTF32BE    " ); break;
-					case 10: //
-						GLOBAL.statusBar.setEncodingType( "UTF32LE    " ); break;
-					case 11: //
-						GLOBAL.statusBar.setEncodingType( "UTF16BE    " ); break;
-					case 12: //
-						GLOBAL.statusBar.setEncodingType( "UTF16LE    " ); break;
+					case BOM.utf8:
+						if( cSci.withBOM ) GLOBAL.statusBar.setEncodingType( "UTF8.BOM   " ); else GLOBAL.statusBar.setEncodingType( "UTF8       " ); break;
+					case BOM.utf16le:
+						if( cSci.withBOM ) GLOBAL.statusBar.setEncodingType( "UTF16LE.BOM" ); else GLOBAL.statusBar.setEncodingType( "UTF16LE    " ); break;
+					case BOM.utf16be:
+						if( cSci.withBOM ) GLOBAL.statusBar.setEncodingType( "UTF16BE.BOM" ); else GLOBAL.statusBar.setEncodingType( "UTF16BE    " ); break;
+					case BOM.utf32le:
+						if( cSci.withBOM ) GLOBAL.statusBar.setEncodingType( "UTF32LE.BOM" ); else GLOBAL.statusBar.setEncodingType( "UTF32LE    " ); break;
+					case BOM.utf32be:
+						if( cSci.withBOM ) GLOBAL.statusBar.setEncodingType( "UTF32BE.BOM" ); else GLOBAL.statusBar.setEncodingType( "UTF32BE    " ); break;
 					default:
 						GLOBAL.statusBar.setEncodingType( "UNKNOWN?   " );
 				}
@@ -2419,7 +2017,7 @@ public:
 					{
 						if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager )
 						{
-							CASTnode 		AST_Head = actionManager.ParserAction.getActiveASTFromLine( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], line );
+							CASTnode AST_Head = actionManager.ParserAction.getActiveASTFromLine( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], line );
 							
 							if( AST_Head !is null )
 							{
@@ -2475,12 +2073,12 @@ public:
 										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_anonymous" );
 									else if( AST_Head.kind & D_CTOR )
 									{
-										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( "this" ) );
+										IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( "this" ) );
 										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_ctor" );
 									}
 									else if( AST_Head.kind & D_DTOR )
 									{
-										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( "~this") );
+										IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( "~this") );
 										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );
 									}
 								}
@@ -2511,7 +2109,7 @@ struct ParserAction
 {
 private:
 	import scintilla;
-	import parser.ast;
+	import parser.ast, parser.scanner, parser.parser;
 
 public:
 	static CASTnode getActiveParseAST()
@@ -2520,7 +2118,8 @@ public:
 		
 		if( cSci !is null )
 		{
-			if( fullPathByOS( cSci.getFullPath ) in GLOBAL.parserManager ) return GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )];
+			auto _parserManager = cast(CASTnode[string]) GLOBAL.parserManager;
+			if( fullPathByOS( cSci.getFullPath ) in _parserManager ) return _parserManager[fullPathByOS( cSci.getFullPath )];
 		}
 
 		return null;
@@ -2541,7 +2140,7 @@ public:
 		if( _fatherNode !is null )
 		{
 			//if( _fatherNode.kind & (D_CTOR | D_DTOR ) )
-			//	IupMessage("_fatherNode",toStringz( Integer.toString( _fatherNode.lineNumber ) ~ "~" ~ Integer.toString( _fatherNode.endLineNum )  ) );
+			//	IupMessage("_fatherNode",toStringz( to!(string)( _fatherNode.lineNumber ) ~ "~" ~ to!(string)( _fatherNode.endLineNum )  ) );
 			if( _fatherNode.kind & _kind )
 			{
 				if(  _fatherNode.lineNumber < _fatherNode.endLineNum ) // If equal, not BLOCK
@@ -2573,9 +2172,9 @@ public:
 		return node;
 	}
 	
-	static char[] removeArrayAndPointer( char[] word )
+	static string removeArrayAndPointer( string word )
 	{
-		char[] result;
+		string result;
 		
 		int starIndex;
 		for( starIndex = 0; starIndex < word.length; ++starIndex )
@@ -2607,41 +2206,41 @@ public:
 		return result;
 	}
 
-	static char[] getSeparateType( char[] _string, bool bemoveArrayAndPoint = false )
+	static string getSeparateType( string _string, bool bemoveArrayAndPoint = false )
 	{
-		int openParenPos = Util.index( _string, "(" );
+		int openParenPos = indexOf( _string, "(" );
 
-		if( openParenPos > 0 && openParenPos < _string.length )
+		if( openParenPos > 0 ) // should be >= 1
 		{
-			version(DIDE) if( _string[openParenPos-1] == '!' ) openParenPos = Util.index( _string, "(", openParenPos + 1 );
+			version(DIDE) if( _string[openParenPos-1] == '!' ) openParenPos = indexOf( _string, "(", openParenPos + 1 );
 		}
 		
-		if( openParenPos < _string.length )
+		if( openParenPos > -1 )
 		{
-			if( bemoveArrayAndPoint ) return removeArrayAndPointer( _string[0..openParenPos] ); else return _string[0..openParenPos];
+			if( bemoveArrayAndPoint ) return removeArrayAndPointer( _string[0..openParenPos] ); else return _string[0..openParenPos].dup;
 		}
 
 		return !bemoveArrayAndPoint ? _string : removeArrayAndPointer( _string );
 	}
 
-	static char[] getSeparateParam( char[] _string )
+	static string getSeparateParam( string _string )
 	{
-		int openParenPos = Util.index( _string, "(" );
+		int openParenPos = indexOf( _string, "(" );
 
-		if( openParenPos > 0 && openParenPos < _string.length )
+		if( openParenPos > 0 ) // should be >= 1
 		{
-			version(DIDE) if( _string[openParenPos-1] == '!' ) openParenPos = Util.index( _string, "(", openParenPos + 1 );
+			version(DIDE) if( _string[openParenPos-1] == '!' ) openParenPos = indexOf( _string, "(", openParenPos + 1 );
 		}
 		
-		if( openParenPos < _string.length )
+		if( openParenPos > -1 )
 		{
-			return _string[openParenPos..$];
+			return _string[openParenPos..$].dup;
 		}
 
 		return null;
 	}	
 	
-	static void getSplitDataFromNodeTypeString( char[] s, ref char[] _type, ref char[] _paramString, bool bemoveArrayAndPoint = false  )
+	static void getSplitDataFromNodeTypeString( string s, ref string _type, ref string _paramString, bool bemoveArrayAndPoint = false  )
 	{
 		_type			= getSeparateType( s, bemoveArrayAndPoint );
 		_paramString	= getSeparateParam( s );
@@ -2658,7 +2257,7 @@ public:
 				node = node.getFather();
 				if( node is null ) return null;
 			}
-			while( !node.kind & ( D_CLASS | D_STRUCT | D_INTERFACE ) )
+			while( !node.kind & ( D_CLASS | D_STRUCT | D_INTERFACE ) );
 		}
 		else
 		{
@@ -2668,7 +2267,7 @@ public:
 		return node;
 	}
 	
-	static char[][] getDivideWordWithoutSymbol( char[] word )
+	static string[] getDivideWordWithoutSymbol( string word )
 	{
 		int _getDelimitedString( int _index, char _delimitedOpen, char _delimitedClose )
 		{
@@ -2681,27 +2280,13 @@ public:
 			
 				if( _countDemlimit <= 0 ) break;
 			}
-			/*
-			do
-			{
-				if( word[_index] == _delimitedOpen ) _countDemlimit ++;
-				if( word[_index] == _delimitedClose ) _countDemlimit --;
 
-				if( _countDemlimit == 0 ) break;
-				if( ++_index >= word.length ) break;
-			}
-			while( _countDemlimit > 0 );
-
-			return _index;
-			*/
 			return _i;
 		}
 
-		char[][]	splitWord;
-		char[]		tempWord;
-
+		string[]	splitWord;
+		string		tempWord;
 		int			returnIndex;
-
 		for( int i = 0; i < word.length ; ++ i )
 		{
 			if( word[i] == '.' )
@@ -2717,7 +2302,6 @@ public:
 					if( returnIndex < word.length )
 					{
 						i = returnIndex;
-						//tempWord ~= ")";
 					}
 				}
 				else if( word[i] == '[' )
@@ -2726,7 +2310,6 @@ public:
 					if( returnIndex < word.length )
 					{
 						i = returnIndex;
-						//tempWord ~= "]";
 					}				
 				}
 				else
@@ -2756,6 +2339,89 @@ public:
 
 		return splitWord;
 	}
+	
+	
+	// No GLOBAL depend function
+	static CASTnode createParser( string fullPath, bool bSaveInManager = false )
+	{
+		string _ext = Path.extension( fullPath );
+		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
+		version(DIDE)	if( !tools.isParsableExt( _ext, 3 ) )	return null;		
+
+		if( exists( fullPath ) )
+		{
+			scope _parser = new CParser( Scanner.scanFile( fullPath ) );
+			auto _ast = _parser.parse( fullPath );
+			if( _ast !is null && bSaveInManager ) GLOBAL.parserManager[fullPathByOS(fullPath)] = cast(shared CASTnode) _ast;
+			return _ast;
+		}
+		return null;
+	}	
+	
+	// No GLOBAL depend function
+	static CASTnode loadParser( string fullPath, bool bSaveInManager = false )
+	{
+		string _ext = Path.extension( fullPath );
+		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
+		version(DIDE)	if( !tools.isParsableExt( _ext, 3 ) )	return null;		
+
+		if( fullPathByOS(fullPath) in GLOBAL.parserManager )
+		{
+			return cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)];
+		}
+		else
+		{
+			// Don't Create Tree
+			// Parser
+			if( exists( fullPath ) )
+			{
+				scope _parser = new CParser( Scanner.scanFile( fullPath ) );
+				auto _ast = _parser.parse( fullPath );
+				if( _ast !is null && bSaveInManager ) GLOBAL.parserManager[fullPathByOS(fullPath)] = cast(shared CASTnode) _ast;
+				return _ast;
+			}
+		}
+		return null;
+	}
+	
+	// No GLOBAL depend function
+	static CASTnode createParserByText( string fullPath, string document, bool bSaveInManager = false )
+	{
+		string _ext = Path.extension( fullPath );
+		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
+		version(DIDE)	if( !tools.isParsableExt( _ext, 3 ) )	return null;
+
+		scope _parser = new CParser( Scanner.scan( document ) );
+		auto _ast = _parser.parse( fullPath );
+		if( _ast !is null && bSaveInManager ) GLOBAL.parserManager[fullPathByOS(fullPath)] = cast(shared CASTnode) _ast;
+		return _ast;
+	}
+	
+	static CASTnode loadObjectParser()
+	{
+		int bom, withBom;
+		
+		try
+		{
+			version(FBIDE)
+			{
+				string objectFilePath = GLOBAL.poseidonPath ~ "/settings/json/FB_BuiltinFunctions.json";
+				if( exists( objectFilePath ) ) return GLOBAL.Parser.json2Ast( FileAction.loadFile( objectFilePath, bom, withBom ) );
+			}
+			else //version(DIDE)
+			{
+				string objectFilePath = GLOBAL.poseidonPath ~ "/settings/json/ObjectD2.json";
+				if( tools.DMDversion( GLOBAL.compilerSettings.compilerFullPath ) == 1 ) objectFilePath = GLOBAL.poseidonPath ~ "/settings/json/ObjectD1.json";
+				if( exists( objectFilePath ) ) return GLOBAL.Parser.json2Ast( FileAction.loadFile( objectFilePath, bom, withBom ) );
+			}
+		}
+		catch( Exception e)
+		{
+			IupMessage("",toStringz( e.toString ) );
+		}
+		
+		return null;
+	}	
 }
 
 
@@ -2764,14 +2430,12 @@ struct SearchAction
 {
 private:
 	import scintilla, project, menu;
-	import tango.io.FilePath, tango.text.Ascii;
-	import tango.io.device.File;//, tango.io.stream.Lines;
 
-	static int _find( Ihandle* ih, char[] targetText, int type = 2, bool bNext = true )
+	static int _find( Ihandle* ih, string targetText, int type = 2, bool bNext = true )
 	{
 		int			findPos = -1;
 
-		if( !( type & MATCHCASE ) ) targetText = lowerCase( targetText );
+		if( !( type & MATCHCASE ) ) targetText = Uni.toLower( targetText );
 
 		//IupMessage( "Text:", toStringz(targetText) );
 		
@@ -2810,14 +2474,14 @@ private:
 			}
 			else
 			{
-				char[] pos;
+				string pos;
 				if( bNext )
 				{
-					pos = Integer.toString( findPos ) ~ ":" ~ Integer.toString( findPos+targetText.length );
+					pos = to!(string)( findPos ) ~ ":" ~ to!(string)( findPos+targetText.length );
 				}
 				else
 				{
-					pos = Integer.toString( findPos+targetText.length ) ~ ":" ~ Integer.toString( findPos );
+					pos = to!(string)( findPos+targetText.length ) ~ ":" ~ to!(string)( findPos );
 				}
 				IupSetStrAttribute( ih, "SELECTIONPOS", toStringz( pos ) );
 				//DocumentTabAction.setFocus( ih );
@@ -2836,10 +2500,10 @@ private:
 	*/	
 
 public:
-	const int WHOLEWORD = 2;
-	const int MATCHCASE = 4;
+	static const int WHOLEWORD = 2;
+	static const int MATCHCASE = 4;
 	
-	static int search( Ihandle* iupSci, char[] findText, int searchRule, bool bForward = true )
+	static int search( Ihandle* iupSci, string findText, int searchRule, bool bForward = true )
 	{
 		int pos = -1;
 
@@ -2864,7 +2528,7 @@ public:
 		return pos;
 	}	
 
-	static bool IsWholeWord( char[] lineData, char[] target, int pos )
+	static bool IsWholeWord( string lineData, string target, int pos )
 	{
 		int targetPLUS1, targetMinus1;
 		
@@ -2890,12 +2554,12 @@ public:
 		}
 		else
 		{
-			targetMinus1 = cast(int)lineData[pos-1];
+			targetMinus1 = 48;//cast(int)lineData[pos-1];
 			targetPLUS1 = 48; // Not Match
 		}
 		
 
-		//IupMessage( "Minus:Plus", toStringz( Integer.toString( targetMinus1 ) ~ ":" ~ Integer.toString( targetPLUS1 ) ) );
+		//IupMessage( "Minus:Plus", toStringz( to!(string)( targetMinus1 ) ~ ":" ~ to!(string)( targetPLUS1 ) ) );
 
 		if( targetPLUS1 >= 48 && targetPLUS1 <= 57 ) return false;
 		if( targetPLUS1 >= 65 && targetPLUS1 <= 90 ) return false;
@@ -2915,152 +2579,148 @@ public:
 	buttonIndex = 2 Count
 	buttonIndex = 3 Mark
 	*/
-	static int findInOneFile( char[] fullPath, char[] findText, char[] replaceText, int searchRule = 6, int buttonIndex = 0 )
+	static int findInOneFile( string fullPath, string findText, string replaceText, int searchRule = 6, int buttonIndex = 0 )
 	{
-		int		count, _encoding;
+		int		count, _encoding, _withbom;
 		bool	bInDocument;
 
-		if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) bInDocument = true;
-		scope f = new FilePath( fullPath );
-		
-		if( f.exists() || bInDocument )
+		try
 		{
-			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 1 );
+			if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) bInDocument = true;
+			if( exists( fullPath ) || bInDocument )
+			{
+				if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+				IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 1 );
 
-			char[] 	document;
-			//char[]	splitLineDocument;
-			if( bInDocument )
-			{
-				document = fromStringz( IupGetAttribute( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "VALUE" ) ).dup;
-			}
-			else
-			{
-				if( buttonIndex == 3 ) return 0;
-				document = FileAction.loadFile( fullPath, _encoding ).dup;
-			}			
-			//scope file = new File( fullPath, File.ReadExisting );
-
-			if( buttonIndex == 1 )
-			{
-				int findIndex = 0;
-				while( findIndex < document.length )
+				string 	document;
+				//string	splitLineDocument;
+				if( bInDocument )
 				{
-					if( searchRule & MATCHCASE )
+					document = fSTRz( IupGetAttribute( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "VALUE" ) );
+				}
+				else
+				{
+					if( buttonIndex == 3 ) return 0;
+					document = FileAction.loadFile( fullPath, _encoding, _withbom );
+				}			
+
+				if( buttonIndex == 1 )
+				{
+					int findIndex = 0;
+					while( findIndex > -1 )
 					{
-						findIndex = Util.index( document, findText, findIndex );
-					}
-					else
-					{
-						findIndex = Util.index( lowerCase( document ), lowerCase( findText ), findIndex );
-					}
-					
-					if( findIndex < document.length )
-					{
-						if( searchRule & WHOLEWORD )
+						if( searchRule & MATCHCASE )
 						{
-							if( IsWholeWord( document, findText, findIndex ) )
+							findIndex = indexOf( document, findText, findIndex );
+						}
+						else
+						{
+							findIndex = indexOf( Uni.toLower( document ), Uni.toLower( findText ), findIndex );
+						}
+						
+						if( findIndex > -1 )
+						{
+							if( searchRule & WHOLEWORD )
+							{
+								if( IsWholeWord( document, findText, findIndex ) )
+								{
+									count ++;
+									document = document[0..findIndex] ~ replaceText ~ document[findIndex+findText.length..$];
+									findIndex += replaceText.length;
+								}
+								else
+								{
+									findIndex += findText.length;
+								}
+							}
+							else
 							{
 								count ++;
 								document = document[0..findIndex] ~ replaceText ~ document[findIndex+findText.length..$];
 								findIndex += replaceText.length;
 							}
-							else
-							{
-								findIndex += findText.length;
-							}
-						}
-						else
-						{
-							count ++;
-							document = document[0..findIndex] ~ replaceText ~ document[findIndex+findText.length..$];
-							findIndex += replaceText.length;
 						}
 					}
-				}
 
-				if( bInDocument )
-				{
-					/+
-					FileAction.saveFile( fullPath, document, GLOBAL.scintillaManager[fullPathByOS( fullPath )].encoding );
-					GLOBAL.scintillaManager[fullPathByOS( fullPath )].setText( document );
-					GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS( fullPath )] );
-					+/
-					IupSetStrAttribute( GLOBAL.scintillaManager[fullPathByOS( fullPath )].getIupScintilla, "VALUE", toStringz( document ) );
-				}
-				else
-				{
-					FileAction.saveFile( fullPath, document, _encoding );
-				}
-				
-				return count;
-			}
-
-			int lineNum;
-			foreach( line; Util.splitLines( document ) )
-			{
-				lineNum++;
-
-				if( line.length )
-				{
-					int pos;
-					if( !( searchRule & MATCHCASE ) )
+					if( bInDocument )
 					{
-						pos = Util.index( lowerCase( line ) , lowerCase( findText ) );
+						IupSetStrAttribute( GLOBAL.scintillaManager[fullPathByOS( fullPath )].getIupScintilla, "VALUE", toStringz( document ) );
 					}
 					else
 					{
-						pos = Util.index( line , findText );
+						FileAction.saveFile( fullPath, document, _encoding, _withbom );
 					}
 					
-					if( pos < line.length )
+					return count;
+				}
+
+				int lineNum;
+				foreach( line; splitLines( document ) )
+				{
+					lineNum++;
+
+					if( line.length )
 					{
-						if( searchRule & WHOLEWORD )
+						int pos;
+						if( !( searchRule & MATCHCASE ) )
 						{
-							bool bGetWholeWord;
-							while( pos < line.length )
+							pos = indexOf( Uni.toLower( line ), Uni.toLower( findText ) );
+						}
+						else
+						{
+							pos = indexOf( line , findText );
+						}
+						
+						if( pos > -1 )
+						{
+							if( searchRule & WHOLEWORD )
 							{
-								if( ( pos < 0 ) || ( pos + findText.length > line.length ) ) break;
-								if( IsWholeWord( line, findText, pos ) )
+								bool bGetWholeWord;
+								while( pos > -1 )
 								{
-									bGetWholeWord = true;
-									break;
+									if( ( pos < 0 ) || ( pos + findText.length > line.length ) ) break;
+									if( IsWholeWord( line, findText, pos ) )
+									{
+										bGetWholeWord = true;
+										break;
+									}
+									else
+									{
+										pos = indexOf( line, findText, pos + findText.length );
+									}
 								}
-								else
-								{
-									//if( pos + findText.length >= line.length ) break;
-									pos = Util.index( line, findText, pos + findText.length );
-								}
+								
+								if( !bGetWholeWord ) continue;
 							}
 							
-							if( !bGetWholeWord ) continue;
-						}
-						
-						count++;
-						
-						if( buttonIndex == 0 )
-						{
-							char[] outputWords = fullPath ~ "(" ~ Integer.toString( lineNum ) ~ "): " ~ line;
-							//IupSetAttribute( GLOBAL.searchOutputPanel, "APPEND", GLOBAL.cString.convert( outputWords ) );
-							GLOBAL.messagePanel.printSearchOutputPanel( outputWords );
-						}
-						else if( buttonIndex == 3 )
-						{
-							if( bInDocument )
+							count++;
+							
+							if( buttonIndex == 0 )
 							{
-								//int linNum = IupScintillaSendMessage( GLOBAL.scintillaManager[fullPath].getIupScintilla, 2166, totalLength + pos, 0 );// SCI_LINEFROMPOSITION = 2166
-								if( !( IupGetIntId( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "MARKERGET", lineNum-1 ) & 2 ) ) IupSetIntId( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "MARKERADD", lineNum-1, 1 );
+								string outputWords = fullPath ~ "(" ~ to!(string)( lineNum ) ~ "): " ~ strip( line );
+								GLOBAL.messagePanel.printSearchOutputPanel( outputWords );
+							}
+							else if( buttonIndex == 3 )
+							{
+								if( bInDocument )
+								{
+									if( !( IupGetIntId( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "MARKERGET", lineNum-1 ) & 2 ) ) IupSetIntId( GLOBAL.scintillaManager[fullPathByOS(fullPath)].getIupScintilla, "MARKERADD", lineNum-1, 1 );
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+		catch( Exception e )
+		{
+			throw e;
+		}
 
 		return count;
 	}
 	
-	static void addListItem( Ihandle* ih, char[] text, int limit = 15 )
+	static void addListItem( Ihandle* ih, string text, int limit = 15 )
 	{
 		if( ih != null )
 		{
@@ -3068,7 +2728,7 @@ public:
 			
 			for( int i = itemCount; i > 0; --i )
 			{
-				char[] itemText = fromStringz( IupGetAttributeId( ih, "", i ) ).dup;
+				string itemText = fSTRz( IupGetAttributeId( ih, "", i ) );
 				if( itemText.length )
 				{
 					if( itemText == text )
@@ -3100,14 +2760,13 @@ public:
 // Action for FILE operate
 struct CustomToolAction
 {
-	version(linux)	import tango.sys.Process;
-	import	tango.io.FilePath;
-	import	project;
+private:
+	import project;
 	
+public:	
 	static void run( CustomTool tool )
 	{
-		scope toolPath = new FilePath( tool.dir );
-		if( !toolPath.exists )
+		if( !exists( tool.dir ) )
 		{
 			IupMessageError( null, toStringz( tool.dir ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
 			return;
@@ -3116,11 +2775,11 @@ struct CustomToolAction
 		bool bGoPlugin;
 		version(Windows)
 		{
-			if( lowerCase( toolPath.suffix ) == ".dll" ) bGoPlugin = true;
+			if( Uni.toLower( Path.extension( tool.dir ) ) == ".dll" ) bGoPlugin = true;
 		}
 		version(linux)
 		{
-			if( lowerCase( toolPath.suffix ) == ".so" ) bGoPlugin = true;
+			if( Uni.toLower( Path.extension( tool.dir ) ) == ".so" ) bGoPlugin = true;
 		}
 		
 		if( bGoPlugin )
@@ -3136,7 +2795,7 @@ struct CustomToolAction
 						else
 						{
 							auto temp = GLOBAL.pluginMnager[tool.name];
-							delete temp;
+							destroy( temp );
 							GLOBAL.pluginMnager[tool.name] = new CPLUGIN( tool.name, tool.dir );
 							GLOBAL.pluginMnager[tool.name].go();
 						}
@@ -3145,8 +2804,6 @@ struct CustomToolAction
 					{
 						IupMessageError( GLOBAL.mainDlg, toStringz( tool.name ~ " Is Null" ) );
 						GLOBAL.pluginMnager.remove( tool.name );
-						//GLOBAL.pluginMnager[tool.name.toDString] = new CPLUGIN( tool.name.toDString, tool.dir.toDString );
-						//GLOBAL.pluginMnager[tool.name.toDString].go( GLOBAL.mainDlg );
 					}
 				}
 				else
@@ -3164,67 +2821,67 @@ struct CustomToolAction
 		else
 		{
 			auto cSci = ScintillaAction.getActiveCScintilla();
-			char[] args;
+			string args;
 			if( cSci !is null )
 			{
 				// %s Selected Text
-				char[] s = fromStringz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
+				string s = fSTRz( IupGetAttribute( cSci.getIupScintilla, toStringz("SELECTEDTEXT") ) );
 				
 				// %s% Selected Word
-				args = Util.substitute( tool.args, "%s%", s );
-				args = Util.substitute( args, "\"%s%\"", "\"" ~ s ~ "\"" );
+				args = Array.replace( tool.args, "%s%", s );
+				args = Array.replace( args, "\"%s%\"", "\"" ~ s ~ "\"" );
 				
 				// %f% Active File
-				scope fPath = new FilePath( cSci.getFullPath() );
-				args = Util.substitute( args, "%f%", fPath.toString );
-				args = Util.substitute( args, "\"%f%\"", "\"" ~ fPath.toString ~ "\"" );
+				string fPath = cSci.getFullPath;
+				args = Array.replace( args, "%f%", fPath );
+				args = Array.replace( args, "\"%f%\"", "\"" ~ fPath ~ "\"" );
 				
-				args = Util.substitute( args, "%fn%", fPath.path ~ "/" ~ fPath.name );
-				args = Util.substitute( args, "\"%fn%\"", "\"" ~ fPath.path ~ "/" ~ fPath.name ~ "\"" );
+				args = Array.replace( args, "%fn%", Path.dirName( fPath ) ~ "/" ~ Path.stripExtension( Path.baseName( fPath ) ) );
+				args = Array.replace( args, "\"%fn%\"", "\"" ~ Path.dirName( fPath ) ~ "/" ~ Path.stripExtension( Path.baseName( fPath ) ) ~ "\"" );
 				
-				args = Util.substitute( args, "%fdir%", fPath.path );
-				args = Util.substitute( args, "\"%fdir%\"", "\"" ~ fPath.path ~ "\"" );
+				args = Array.replace( args, "%fdir%", Path.dirName( fPath ) );
+				args = Array.replace( args, "\"%fdir%\"", "\"" ~ Path.dirName( fPath ) ~ "\"" );
 			}
 			
-			char[] pDir = ProjectAction.getActiveProjectDir;
+			string pDir = ProjectAction.getActiveProjectDir;
 			if( pDir.length )
 			{
-				char[] pName = GLOBAL.projectManager[pDir].name;
-				char[] pTargetName = GLOBAL.projectManager[pDir].targetName;
-				char[] pTotal;
+				string pName = GLOBAL.projectManager[pDir].name;
+				string pTargetName = GLOBAL.projectManager[pDir].targetName;
+				string pTotal;
 				
 				if( !pTargetName.length ) pTotal = pDir ~ "/" ~ pName; else	pTotal = pDir ~ "/" ~ pTargetName;
 				
-				args = Util.substitute( args, "%pn%", pTotal );
-				args = Util.substitute( args, "\"%pn%\"", "\"" ~ pTotal ~ "\"" );
+				args = Array.replace( args, "%pn%", pTotal );
+				args = Array.replace( args, "\"%pn%\"", "\"" ~ pTotal ~ "\"" );
 				
-				char[] pAllFiles;
-				foreach( char[] s; GLOBAL.projectManager[pDir].sources )
+				string pAllFiles;
+				foreach( s; GLOBAL.projectManager[pDir].sources )
 					pAllFiles ~= ( s ~ " " );
 
-				foreach( char[] s; GLOBAL.projectManager[pDir].includes )
+				foreach( s; GLOBAL.projectManager[pDir].includes )
 					pAllFiles ~= ( s ~ " " );
 				
-				pAllFiles = Util.trim( pAllFiles );
-				args = Util.substitute( args, "%p%", pAllFiles );
-				args = Util.substitute( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );
+				pAllFiles = strip( pAllFiles );
+				args = Array.replace( args, "%p%", pAllFiles );
+				args = Array.replace( args, "\"%p%\"", "\"" ~ pAllFiles ~ "\"" );
 				
-				args = Util.substitute( args, "%pdir%", pDir );
-				args = Util.substitute( args, "\"%pdir%\"", "\"" ~ pDir ~ "\"" );			
+				args = Array.replace( args, "%pdir%", pDir );
+				args = Array.replace( args, "\"%pdir%\"", "\"" ~ pDir ~ "\"" );			
 			}
 			else
 			{
-				args = Util.substitute( args, "%pn%", "" );
-				args = Util.substitute( args, "\"%pn%\"", "" );
+				args = Array.replace( args, "%pn%", "" );
+				args = Array.replace( args, "\"%pn%\"", "" );
 				
-				args = Util.substitute( args, "%p%", "" );
-				args = Util.substitute( args, "\"%p%\"", "" );
+				args = Array.replace( args, "%p%", "" );
+				args = Array.replace( args, "\"%p%\"", "" );
 				
-				args = Util.substitute( args, "%pdir%", "" );
-				args = Util.substitute( args, "\"%pdir%\"", "" );
+				args = Array.replace( args, "%pdir%", "" );
+				args = Array.replace( args, "\"%pdir%\"", "" );
 			}		
 
-			char[] useConsole = tool.toggleShowConsole == "ON" ? "1 " : "0 ";
+			string useConsole = tool.toggleShowConsole == "ON" ? "1 " : "0 ";
 			version(Windows)
 			{
 				if( useConsole == "1 " )
@@ -3234,14 +2891,14 @@ struct CustomToolAction
 						int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
 						int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
 						
-						args = "0 " ~ Integer.toString( x ) ~ " " ~ Integer.toString( y ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " " ~ useConsole ~ tool.dir ~ " " ~ args;
+						args = "0 " ~ to!(string)( x ) ~ " " ~ to!(string)( y ) ~ " " ~ to!(string)( GLOBAL.consoleWindow.w ) ~ " " ~ to!(string)( GLOBAL.consoleWindow.h ) ~ " " ~ useConsole ~ tool.dir ~ " " ~ args;
 					}
 					else
 					{
 						args = "0 0 0 0 0 " ~ useConsole ~ tool.dir ~ " " ~ args;
 					}
 					
-					args = Util.substitute( args, "/", "\\" );
+					args = Array.replace( args, "/", "\\" );
 				
 					IupExecute( "consoleLauncher", toStringz( args ) );
 				}
@@ -3252,70 +2909,64 @@ struct CustomToolAction
 			}
 			else
 			{
-				char[] command = Util.substitute( tool.dir, " ", "\\ " ); // For space in path;
+				string command = Array.replace( tool.dir, " ", "\\ " ); // For space in path;
 				if( useConsole == "1 " )
 				{
 					if( command[0] == '"' && command[$-1] == '"' )
-						args = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 1 " ~ command[1..$-1] ~ " " ~ args ~ "\"";
+						args = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ to!(string)( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ to!(string)( GLOBAL.consoleWindow.w ) ~ " " ~ to!(string)( GLOBAL.consoleWindow.h ) ~ " 1 " ~ command[1..$-1] ~ " " ~ args ~ "\"";
 					else
-						args = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 1 " ~ command ~ " " ~ args ~ "\"";
+						args = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ to!(string)( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ to!(string)( GLOBAL.consoleWindow.w ) ~ " " ~ to!(string)( GLOBAL.consoleWindow.h ) ~ " 1 " ~ command ~ " " ~ args ~ "\"";
 						
 						
-					char[] geoString;
+					string geoString;
 					if( GLOBAL.consoleWindow.id < GLOBAL.monitors.length )
 					{
 						int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
 						int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
 						int w = GLOBAL.consoleWindow.w < 80 ? 80 : GLOBAL.consoleWindow.w;
 						int h = GLOBAL.consoleWindow.h < 24 ? 24 : GLOBAL.consoleWindow.h;
-						//geoString = " --geometry=80x24+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
-						geoString = " --geometry=" ~ Integer.toString( w ) ~ "x" ~ Integer.toString( h ) ~ "+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
+						//geoString = " --geometry=80x24+" ~ to!(string)( x ) ~ "+" ~ to!(string)( y );
+						geoString = " --geometry=" ~ to!(string)( w ) ~ "x" ~ to!(string)( h ) ~ "+" ~ to!(string)( x ) ~ "+" ~ to!(string)( y );
 					}
 					
 					if( GLOBAL.linuxTermName.length )
 					{
-						Process p;
 						switch( Util.trim( GLOBAL.linuxTermName ) )
 						{
 							case "xterm", "uxterm":
-								geoString = Util.substitute( geoString, "--geometry=", "-geometry " );
+								geoString = Array.replace( geoString, "--geometry=", "-geometry " );
 								args = "-T poseidon_terminal" ~ geoString ~ " -e " ~ args;
-								//p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ args );
 								break;
 							case "mate-terminal" ,"xfce4-terminal" ,"lxterminal", "gnome-terminal", "tilix":
 								args = "--title poseidon_terminal" ~ geoString ~ " -e " ~ args;
-								//p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ args );
 								break;
 
 							default:
 								args = "-e " ~ args;
-								//p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ args );
 						}
 						
-						//p.execute;
 						IupExecute( toStringz( GLOBAL.linuxTermName ), toStringz( args ) );
 					}						
 				}
 				else
 				{
-					Process p = new Process( true, tool.dir ~ " " ~ args );
-					p.execute;
+					IupExecute( toStringz( tool.dir ), toStringz( args ) );
 				}
 			}
 		}
 	}
 	
-	static bool getCustomCompilers( ref char[] _opt, ref char[] _compiler )
+	static bool getCustomCompilers( ref string _opt, ref string _compiler )
 	{
-		if( GLOBAL.currentCustomCompilerOption.toDString.length )
+		if( GLOBAL.compilerSettings.currentCustomCompilerOption.length )
 		{
-			foreach( char[] s; GLOBAL.customCompilerOptions )
+			foreach( s; GLOBAL.compilerSettings.customCompilerOptions )
 			{
-				int bpos = Util.rindex( s, "%::% " );
-				int fpos = Util.index( s, "%::% " );
-				if( bpos < s.length )
+				int bpos = lastIndexOf( s, "%::% " );
+				int fpos = indexOf( s, "%::% " );
+				if( bpos > -1 )
 				{
-					if( s[bpos+5..$] == GLOBAL.currentCustomCompilerOption.toDString )
+					if( s[bpos+5..$] == GLOBAL.compilerSettings.currentCustomCompilerOption )
 					{
 						if( fpos < bpos )
 						{
@@ -3332,71 +2983,5 @@ struct CustomToolAction
 			}
 		}
 		return false;
-	}
-	
-	version(DIDE)
-	{
-		static bool setActiveDefaultCompilerAndIncludePaths()
-		{
-			// Get Custom Compiler
-			char[] customOpt, customCompiler;
-			getCustomCompilers( customOpt, customCompiler );
-			if( customCompiler.length )
-			{
-				if( customCompiler != GLOBAL.defaultCompilerPath )
-				{
-					if( customCompiler != GLOBAL.defaultCompilerPath ) GLOBAL.defaultImportPaths = tools.getImportPath( customCompiler );
-					GLOBAL.defaultCompilerPath = customCompiler;
-				}
-				return true;
-			}
-			
-			// Set Multiple Focus Project
-			char[] _finalCompilerPath;
-			char[] activePrjDir = GLOBAL.activeProjectPath;//.length ? GLOBAL.activeProjectPath : actionManager.ProjectAction.getActiveProjectName();
-			if( activePrjDir.length )
-			{
-				if( activePrjDir in GLOBAL.projectManager )
-				{
-					if( !GLOBAL.projectManager[activePrjDir].focusOn.length )
-					{
-						_finalCompilerPath = GLOBAL.projectManager[activePrjDir].compilerPath.length ? GLOBAL.projectManager[activePrjDir].compilerPath : GLOBAL.compilerFullPath;
-					}
-					else
-					{
-						if( GLOBAL.projectManager[activePrjDir].focusOn in GLOBAL.projectManager[activePrjDir].focusUnit )
-						{
-							if( GLOBAL.projectManager[activePrjDir].focusUnit[GLOBAL.projectManager[activePrjDir].focusOn].Compiler.length )
-								_finalCompilerPath = GLOBAL.projectManager[activePrjDir].focusUnit[GLOBAL.projectManager[activePrjDir].focusOn].Compiler;
-							else
-							{
-								if( GLOBAL.projectManager[activePrjDir].compilerPath.length )
-									_finalCompilerPath = GLOBAL.projectManager[activePrjDir].compilerPath;
-								else
-									_finalCompilerPath = GLOBAL.compilerFullPath;
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				_finalCompilerPath = GLOBAL.compilerFullPath;
-			}
-			
-			if( _finalCompilerPath != GLOBAL.defaultCompilerPath )
-			{
-				GLOBAL.defaultCompilerPath = _finalCompilerPath;
-				if( _finalCompilerPath.length )
-					GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.defaultCompilerPath );
-				else
-				{
-					GLOBAL.defaultImportPaths.length = 0;
-					return false;
-				}
-			}
-		
-			return true;
-		}
 	}
 }

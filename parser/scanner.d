@@ -5,23 +5,18 @@ struct Scanner
 {
 private:
 	import iup.iup;
-
 	import global, tools, actionManager;
 	import parser.token;
-
-	import tango.io.FilePath, tango.stdc.stringz;
-	import tango.io.Stdout, Util = tango.text.Util, Integer = tango.text.convert.Integer;
-
+	import std.string, std.file, Uni = std.uni;
+	
 public:
-	static TokenUnit[] scanFile( char[] fullPath )
+	static TokenUnit[] scanFile( string fullPath )
 	{
-		scope f = new FilePath( fullPath );
-		if( f.exists() )
+		if( exists( fullPath ) )
 		{
 			try
 			{
-				char[] 	document;
-				//char[]	splitLineDocument;
+				string 	document;
 				if( fullPathByOS(fullPath) in GLOBAL.scintillaManager )
 				{
 					auto cSci = GLOBAL.scintillaManager[fullPathByOS(fullPath)];
@@ -32,9 +27,8 @@ public:
 				}
 				else
 				{
-					//document = cast(char[]) File.get( fullPath );
-					int _encoding;
-					document = FileAction.loadFile( fullPath, _encoding );
+					int _encoding, _withBom;
+					document = FileAction.loadFile( fullPath, _encoding, _withBom );
 				}
 
 				return scan( document );
@@ -50,17 +44,17 @@ public:
 	
 	version(FBIDE)
 	{
-		static TokenUnit[] scan( char[] data )
+		static TokenUnit[] scan( string data )
 		{
 			if( !data.length ) return null;
 			
 			bool			bStringFlag, bEscapeSequences, bCommentFlag, bCommentBlockFlag;
-			char[]			identifier;
+			string			identifier;
 			int				lineNum = 1;
 			int				commentCount;
 			TokenUnit[]		results;
 
-			data = Util.trimr( data );
+			data = stripRight( data );
 			data ~= "\n";
 
 			try
@@ -106,7 +100,7 @@ public:
 
 							++i;
 						}
-						while( i < data.length )
+						while( i < data.length );
 
 						// Continue the main for-loop
 						continue;
@@ -221,16 +215,8 @@ public:
 									break;
 								}
 							}
-							/*
-							if( i < data.length - 1 )
-							{
-								if( data[i+1] >=48 && data[i+1] <= 57 )
-								{
-									identifier ~= data[i];
-									break;
-								}
-							}
-							*/
+							goto case;
+							
 						case '>':
 							if( results.length > 0 )
 							{
@@ -245,26 +231,13 @@ public:
 									break;
 								}
 							}
-							/*
-							if( identifier == "-" )
-							{
-								TokenUnit t;
-								t.tok = TOK.Tptraccess;
-								t.identifier = "->";
-								t.lineNumber = lineNum;
-								results ~= t;
-								identifier = "";
-								break;
-							}
-							*/
+							goto case;
 
 						case ',', '+', '*', '/', ':', '(', ')', '[', ']', '<', '=', '{', '}': // '>', 
-							//if( lowerCase( identifier ) in identToTOK )
 							if( IdentToTok( identifier ) != TOK._INVALID_ )
 							{
 								if( identifier.length )
 								{
-									//TokenUnit t = {identToTOK[lowerCase( identifier )], identifier, lineNum};
 									TokenUnit t = { IdentToTok( identifier ), identifier, lineNum };
 									results ~= t;
 								}
@@ -283,8 +256,8 @@ public:
 
 										if( identifier.length > 2 )
 										{
-											if( lowerCase( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
-											if( lowerCase( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
+											if( Uni.toLower( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
+											if( Uni.toLower( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
 										}									
 									}
 
@@ -294,7 +267,7 @@ public:
 								}
 							}
 
-							char[] s;
+							string s;
 							s ~= data[i];
 							//TokenUnit t = {identToTOK[s], s, lineNum};
 							TokenUnit t = { IdentToTok( s ), s, lineNum };
@@ -329,8 +302,8 @@ public:
 
 										if( identifier.length > 2 )
 										{
-											if( lowerCase( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
-											if( lowerCase( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
+											if( Uni.toLower( identifier[0..2] ) == "&h" ) t.tok = TOK.Tnumbers;
+											if( Uni.toLower( identifier[0..3] ) == "-&h" ) t.tok = TOK.Tnumbers;
 										}
 									}
 
@@ -414,19 +387,19 @@ public:
 	
 	version(DIDE)
 	{
-		static TokenUnit[]	scan( char[] data )
+		static TokenUnit[]	scan( string data )
 		{
 			if( !data.length ) return null;
 			
 			bool			bStringFlag, bCommentFlag, bCommentBlockFlag, bNestCommentBlockFlag;
-			char[]			charSign;
+			string			charSign;
 			
-			char[]			identifier;
+			string			identifier;
 			int				lineNum = 1;
 			int				commentCount, nestCommentCount;
 			TokenUnit[]		results;
 
-			data = Util.trimr( data );
+			data = stripRight( data );
 			data ~= ";";
 
 			try
@@ -472,7 +445,7 @@ public:
 
 							++i;
 						}
-						while( i < data.length )
+						while( i < data.length );
 
 						// Continue the main for-loop
 						continue;
@@ -514,7 +487,7 @@ public:
 
 							++i;
 						}
-						while( i < data.length )
+						while( i < data.length );
 
 						// Continue the main for-loop
 						continue;
@@ -594,7 +567,7 @@ public:
 								break;
 							case '\n':
 								lineNum ++;
-								
+								break;								
 							default:
 						}
 						
@@ -655,15 +628,14 @@ public:
 									break;
 								}
 							}
-
+							goto case;
+							
 						case '&', '|', '^':
 						case ',', '+', '*', '/', ';', ':', '(', ')', '[', ']', '>', '<', '=', '{', '}', '!', '~': // '>', 
-							//if( identifier in identToTOK )
 							if( IdentToTok(identifier) != TOK._INVALID_ )
 							{
 								if( identifier.length )
 								{
-									//TokenUnit t = { identToTOK[identifier], identifier, lineNum };
 									TokenUnit t = { IdentToTok(identifier), identifier, lineNum };
 									results ~= t;
 								}
@@ -693,7 +665,7 @@ public:
 								}
 							}
 
-							char[] s;
+							string s;
 							s ~= data[i];
 
 							if( s == "=" )
@@ -722,12 +694,10 @@ public:
 							break;
 						
 						case '\t', ' ', '\n':
-							//if( identifier in identToTOK )
 							if( IdentToTok( identifier ) != TOK._INVALID_ )
 							{
 								if( identifier.length )
 								{
-									//TokenUnit t = { identToTOK[identifier], identifier, lineNum };
 									TokenUnit t = { IdentToTok( identifier ), identifier, lineNum };
 									results ~= t;
 								}
@@ -770,7 +740,6 @@ public:
 									//if( identifier in identToTOK )
 									if( IdentToTok( identifier ) != TOK._INVALID_ )
 									{
-										//TokenUnit t = { identToTOK[identifier], identifier, lineNum };
 										TokenUnit t = { IdentToTok( identifier ), identifier, lineNum };
 										results ~= t;
 									}
@@ -826,27 +795,31 @@ public:
 				IupMessage( "Token Scanner Error", toStringz( e.toString ) );
 			}
 
-			//print( results );
-
+			//debug print( results );
 			return results;
 		}
 	}	
-
-	static void print( TokenUnit[] token_units )
+	
+	debug
 	{
-		foreach( TokenUnit t; token_units )
+		static void print( TokenUnit[] token_units )
 		{
-			if( t.identifier != "\n" )
+			import std.stdio;
+			
+			foreach( TokenUnit t; token_units )
 			{
-				Stdout( t.identifier );
-				Stdout( " #");
-				Stdout( t.lineNumber ).newline;
-			}
-			else
-			{
-				Stdout( "Teol");
-				Stdout( " #");
-				Stdout( t.lineNumber ).newline;
+				if( t.identifier != "\n" )
+				{
+					write( t.identifier );
+					write( " #");
+					writeln( t.lineNumber );
+				}
+				else
+				{
+					write( "Teol");
+					write( " #");
+					writeln( t.lineNumber );
+				}
 			}
 		}
 	}

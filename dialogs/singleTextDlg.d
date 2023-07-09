@@ -1,18 +1,18 @@
 ﻿module dialogs.singleTextDlg;
 
 import iup.iup;
-
 import dialogs.baseDlg;
+import std.conv, std.string;
 
 class CSingleTextDialog : CBaseDialog
 {
-	private:
+private:
 	import		global;
 	
 	Ihandle*	label, textResult;
-	char[]		labelName;
+	string		labelName;
 
-	void createLayout( char[] textWH )
+	void createLayout( string textWH )
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
 
@@ -20,15 +20,12 @@ class CSingleTextDialog : CBaseDialog
 		IupSetStrAttribute( label, "TITLE", toStringz( labelName ) );
 		
 		textResult = IupText( null );
-		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
+		if( textWH.length ) IupSetStrAttribute( textResult, "SIZE", toStringz( textWH ) );
 		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextDialog_text", textResult );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( textResult, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( textResult, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );			
-		}
+		IupSetStrAttribute( textResult, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( textResult, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 
 		Ihandle* hBox = IupHbox( label, textResult, null );
 		IupSetAttribute( hBox, "ALIGNMENT", "ACENTER" );
@@ -39,8 +36,8 @@ class CSingleTextDialog : CBaseDialog
 		IupAppend( _dlg, vBox );
 	}	
 
-	public:
-	this( int w, int h, char[] title, char[] _labelText = null, char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG", char[] iconName = null, bool bMap = true )
+public:
+	this( int w, int h, string title, string _labelText = null, string textWH = null, string text = null, bool bResize = false, string parent = "POSEIDON_MAIN_DIALOG", string iconName = null, bool bMap = true )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
@@ -55,7 +52,6 @@ class CSingleTextDialog : CBaseDialog
 		IupSetStrAttribute( textResult, "VALUE", toStringz( text ) );
 		if( text.length) IupSetAttribute( textResult, "SELECTION", "ALL" );
 		
-		
 		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CSingleTextDialog_btnOK_cb );
 		IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CSingleTextDialog_btnOK_cb );
 		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CSingleTextDialog_btnCancel_cb );
@@ -67,8 +63,9 @@ class CSingleTextDialog : CBaseDialog
 		IupSetHandle( "textResult", null );
 	}
 
-	char[] show( int x, int y ) // Overload form CBaseDialog
+	override string show( int x, int y ) // Overload form CBaseDialog
 	{
+		IupMap( _dlg );
 		IupPopup( _dlg, x, y );
 
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );
@@ -91,7 +88,7 @@ extern(C) // Callback for CSingleTextDialog
 	private int CSingleTextDialog_btnCancel_cb( Ihandle* ih )
 	{
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );
-		if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", null );
+		if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", "" );
 
 		return IUP_CLOSE;
 	}
@@ -106,38 +103,30 @@ extern(C) // Callback for CSingleTextDialog
 
 class CSingleTextInput
 {
-	private:
-	import		global;
-	import		tango.stdc.stringz, Integer = tango.text.convert.Integer;
-	
+private:
+	import		global;	
 	Ihandle*	inputText, inputDlg;
 
-	public:
-	this( int w, int h, char[] text = null, char[] color = "255 255 255", int opacity = 198, bool border = true )
+public:
+	this( int w, int h, string text = null, string color = "255 255 255", int opacity = 198, bool border = true )
 	{
 		inputText = IupText( null );
-		IupSetAttributes( inputText, toStringz( "SIZE=" ~ Integer.toString( w ) ~ "x" ~ Integer.toString( h ) ) );
-		IupSetAttribute( inputText, "BGCOLOR", toStringz( color) );
+		IupSetStrAttribute( inputText, "SIZE", toStringz( to!(string)(w) ~ "x" ~ to!(string)(h) ) );
+		IupSetStrAttribute( inputText, "BGCOLOR", toStringz( color ) );
 		IupSetCallback( inputText, "K_ANY", cast(Icallback) &CSingleTextInput_K_ANY );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( inputText, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( inputText, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );			
-		}		
+		IupSetStrAttribute( inputText, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( inputText, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );			
 		
 		inputDlg = IupDialog( inputText );
 		IupSetAttributes( inputDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO" );
-		IupSetAttribute( inputDlg, "TITLE", null );
+		IupSetAttribute( inputDlg, "TITLE", "" );
 		IupSetInt( inputDlg, "BORDER", border );
 		IupSetInt( inputDlg, "OPACITY", opacity );
 
-		IupMap( inputDlg );
-		
-		IupSetAttribute( inputText, "VALUE", toStringz( text ) );
+		IupSetStrAttribute( inputText, "VALUE", toStringz( text ) );
 		IupSetAttribute( inputText, "SELECTION", "ALL" );
 		
 		IupSetHandle( "CSingleTextInput_dlg", inputDlg );
-		//IupSetFocus( inputText );
 	}
 
 	~this()
@@ -145,8 +134,9 @@ class CSingleTextInput
 		IupSetHandle( "CSingleTextInput_dlg", null );
 	}
 
-	char[] show( int x, int y )
+	string show( int x, int y )
 	{
+		IupMap( inputDlg );
 		IupPopup( inputDlg, x, y );
 		
 		if( IupGetInt( inputDlg, "ACTIVE" ) == 0 ) return null;
@@ -177,27 +167,24 @@ extern(C) // Callback for CSingleTextDialogWithoutButton
 
 class CSingleTextOpen : CBaseDialog
 {
-	private:
-	import		global;
+private:
+	import		global, tools;
 	import		dialogs.fileDlg;
 	
 	Ihandle*	labelORframe, hBox, vBox, textResult, openButton;
 	IupString	labelName;
 
-	void createLayout( char[] textWH, bool bFrame )
+	void createLayout( string textWH, bool bFrame )
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
 
 		textResult = IupText( null );
-		if( textWH.length ) IupSetAttribute( textResult, "SIZE", toStringz( textWH ) );
+		if( textWH.length ) IupSetStrAttribute( textResult, "SIZE", toStringz( textWH ) );
 		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextOpen_text", textResult );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( textResult, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( textResult, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );			
-		}		
+		IupSetStrAttribute( textResult, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( textResult, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );			
 		
 		openButton = IupButton( null, null );
 		IupSetAttributes( openButton, "IMAGE=icon_openfile,FLAT=YES,CANFOCUS=NO" );
@@ -224,22 +211,19 @@ class CSingleTextOpen : CBaseDialog
 		IupAppend( _dlg, vBox );
 	}	
 
-	public:
-	this( int w, int h, char[] title, char[] _labelText = null, char[] textWH = null, char[] text = null, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG", char[] iconName = null, bool bFrame = true )
+public:
+	this( int w, int h, string title, string _labelText = null, string textWH = null, string text = null, bool bResize = false, string parent = "POSEIDON_MAIN_DIALOG", string iconName = null, bool bFrame = true )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		IupSetAttribute( _dlg, "ICON", toStringz( iconName.dup ) );
+		IupSetStrAttribute( _dlg, "ICON", toStringz( iconName ) );
 
 		labelName = new IupString( _labelText );
 
 		createLayout( textWH, bFrame );
-		
-		IupMap( _dlg );
 
 		IupSetStrAttribute( textResult, "VALUE", toStringz( text ) );
 		IupSetAttribute( textResult, "SELECTION", "ALL" );
-		
 		
 		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CSingleTextOpen_btnOK_cb );
 		IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CSingleTextOpen_btnOK_cb );
@@ -251,29 +235,32 @@ class CSingleTextOpen : CBaseDialog
 			Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
 			if( textHandle != null )
 			{
-				scope fileSelectDlg = new CFileDlg( null, null, "DIR", null, fromStringz( IupGetAttribute( textHandle, "VALUE" ) ) );
-				char[] fileName = fileSelectDlg.getFileName();
+				scope fileSelectDlg = new CFileDlg( null, null, "DIR", null, fSTRz( IupGetAttribute( textHandle, "VALUE" ) ) );
+				string fileName = fileSelectDlg.getFileName();
 
 				if( fileName.length )
 				{
-					IupSetAttribute( textHandle, "VALUE", toStringz(fileName) );
+					IupSetStrAttribute( textHandle, "VALUE", toStringz( fileName ) );
 					IupSetAttribute( textHandle, "SELECTIONPOS", "ALL" );
 				}
 			}
+			return IUP_DEFAULT;
 		});
 	}
 
 	~this()
 	{
 		IupSetHandle( "textResult", null );
+		if( labelName !is null ) destroy( labelName );
 	}
 
-	char[] show( int x, int y ) // Overload form CBaseDialog
+	override string show( int x, int y ) // Overload form CBaseDialog
 	{
+		IupMap( _dlg );
 		IupPopup( _dlg, x, y );
 
 		Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
-		return fromStringz(IupGetAttribute( textHandle, "VALUE" ) ).dup;
+		return fromStringz( IupGetAttribute( textHandle, "VALUE" ) ).dup;
 	}
 	
 	Ihandle* getTextHandle()
@@ -292,7 +279,7 @@ extern(C) // Callback for CSingleTextOpen
 	private int CSingleTextOpen_btnCancel_cb( Ihandle* ih )
 	{
 		Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
-		if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", null );
+		if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", "" );
 
 		return IUP_CLOSE;
 	}

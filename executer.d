@@ -1,9 +1,6 @@
 ﻿module executer;
 
-version(Windows)
-{
-	extern(Windows) bool PlaySound( char*, void*, uint );
-}
+version(Windows) import core.sys.windows.mmsystem;
 /*
 const SND_SYNC = &h0000
 const SND_ASYNC = &h0001
@@ -23,79 +20,77 @@ const SND_ALIAS_START = 0
 
 struct ExecuterAction
 {
-	private:
+private:
 	import iup.iup, iup.iup_scintilla;
-
-	import global, actionManager, menu, tools, scintilla, project;
-
-	import tango.sys.Process, tango.core.Exception, tango.io.stream.Lines, tango.io.stream.Iterator;
-	import tango.io.Stdout, tango.stdc.stringz, Util = tango.text.Util, Integer = tango.text.convert.Integer;
-	import tango.io.FilePath, Path = tango.io.Path;
-
-	import tango.core.Thread;
-	import tango.time.Time, tango.time.Clock;
-	version(Windows) import tango.sys.win32.CodePage;
+	import global, actionManager, menu, tools, scintilla, project, layouts.messagePanel;
+	import std.stdio, std.string, std.file, std.process, std.encoding, std.windows.charset, std.datetime;
+	import Algorithm = std.algorithm, UTF = std.utf, Uni = std.uni, Path = std.path, Array = std.array, Conv = std.conv;
+	import core.thread, core.time;
+	version(Windows) import core.sys.windows.winbase, core.sys.windows.windef;
 	
-	version(DIDE) import tango.sys.win32.UserGdi, UTF = tango.text.convert.Utf;
-	
-	static bool isAppExists( char[] path )
+	struct BuildDataToTLS
 	{
-		if( Path.exists( path ) ) return true;
+		CMessageAndSearch		messagePanel;
+		CScintilla[string]		scintillaManager;
+		CompilerSettingUint		compilerSettings;
+		string					OutputSci;
+		string					poseidonPath, linuxTermName;
+		Monitor					consoleWindow;
+		Monitor[]				monitors;
+	}
+	
+	static BuildDataToTLS getBuildNeedDataToTLS()
+	{
+		BuildDataToTLS buildTools = { GLOBAL.messagePanel,
+									GLOBAL.scintillaManager,
+									GLOBAL.compilerSettings,
+									GLOBAL.editorSetting01.OutputSci,
+									GLOBAL.poseidonPath, GLOBAL.linuxTermName,
+									GLOBAL.consoleWindow,
+									GLOBAL.monitors
+									};
+		return buildTools;
+	}
+	
+	
+	static Ihandle* createProcessDlg( string title )
+	{
+		Ihandle* processLabel = IupLabel( toStringz( title ) );
+		IupSetAttribute( processLabel, "SIZE", "96x12" );
+		version(Windows) IupSetAttribute( processLabel, "FONT", "Consolas Bold, 14" ); else IupSetAttribute( processLabel, "FONT", "Monospace Bold, 14" );
+		IupSetAttribute( processLabel, "ALIGNMENT", "ACENTER:ACENTER" );
+		version(DIDE) IupSetAttribute( processLabel, "FGCOLOR", "255 0 0" ); else IupSetAttribute( processLabel, "FGCOLOR", "0 0 255" );
+		Ihandle* processDlg = IupDialog( processLabel );
+		IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO,OPACITY=180,SHRINK=YES" );
+		IupSetAttribute( processDlg, "TITLE", null );
+		IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
+		IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
+		IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );	
+		return processDlg;
+	}
+	
+	
+	static bool isAppExists( string path )
+	{
+		if( exists( path ) ) return true;
 		
 		version(linux)
 		{
 			try
 			{
-				Process p = new Process( true, "which " ~ path );
-				//Stdout.flush;
-				p.execute;
-				auto result = p.wait();
-				
-				char[512] buffer;
-				int length = p.stdout.read( buffer );
-				if( length > 0 ) return true;
+				auto which = executeShell( "which " ~ path );
+				if( which.status != 0 ) 
+					return false;
+				else
+				{
+					auto ret = which.output;
+					if( ret.length > 0 ) return false;
+				}
 			}
-			catch(Exception e)
-			{
-				return false;
-			}
+			catch( Exception e ){}
 		}
-		
 		return false;
 	}
-	
-	version(DIDE)
-	{
-		static int DMDversion( char[] dmdFullPath )
-		{
-			/+
-			try
-			{
-				Process p = new Process( true, path ~ " --version" );
-				p.execute;
-				auto result = p.wait();
-				
-				char[512] buffer; 
-				int _length = p.stdout.read( buffer );
-				
-				if( _length > 0 )
-					if( Util.index( buffer, "v2" ) < buffer.length ) return 2;
-			}
-			catch(Exception e)
-			{
-				return 1;
-			}
-			+/
-			scope _dmdPath = new FilePath( dmdFullPath );
-			if( lowerCase( _dmdPath.name ) == "ldc2" ) return 4;
-			_dmdPath.set( _dmdPath.path ~ "dub.exe" );
-			if( _dmdPath.exists ) return 2;
-			
-			
-			return 1;
-		}
-	}
-	
 	
 	version(linux)
 	{
@@ -108,35 +103,31 @@ struct ExecuterAction
 				IupMessageError( null, "Terminal Path isn't Existed!" );
 				return false;
 			}
-			
 			return true;
 		}
 		
 		
-		static char[] getAppPath( char[] appName )
+		static string getAppPath( string appName )
 		{
-			if( Path.exists( appName ) ) return appName;
+			if( exists( appName ) ) return appName;
 
-			Process p = new Process( true, "which " ~ appName );
-			//Stdout.flush;
-			p.execute;
-			auto result = p.wait();
-			
-			char[] buffer;
-			buffer.length = 512;
-			int length = p.stdout.read( buffer );
-			if( length > 0 )
+			try
 			{
-				buffer.length = length - 1; // delete tail \n
-				return buffer;
+				auto which = executeShell( "which " ~ path );
+				if( which.status != 0 ) 
+					return null;
+				else
+				{
+					return strip( which.output ).dup;
+				}
 			}
-			
+			catch( Exception e ){}
 			return null;
 		}
 	}
 	
 	
-	static bool checkCompilerExists( char[] fbcFullPath )
+	static bool checkCompilerExists( string fbcFullPath )
 	{
 		if( !isAppExists( fbcFullPath ) )
 		{
@@ -146,148 +137,142 @@ struct ExecuterAction
 		}
 		
 		return true;
-	}	
+	}
 	
 	
 	// Inner Class
 	class ExecuterThread : Thread
 	{
-		private:
-		char[]	command, args, cwd;
-		bool	bQuickRun;
+	private:
+		string			command, args, cwd;
+		string			x, y, w, h;
+		bool			bQuickRun;
+		BuildDataToTLS	buildTools;
 
-		public:
-		this( char[] _command, char[] _args, char[] _cwd = null, bool _bQuickRun = false )
+	public:
+		this( string _command, string _args, BuildDataToTLS _buildTools, string _cwd = null, bool _bQuickRun = false )
 		{
-			command		= Util.trim( _command );
-			args		= Util.trim( _args );
-			cwd 		= Util.trim( _cwd );
-			bQuickRun	= _bQuickRun;
+			command			= strip( _command );
+			args			= strip( _args );
+			cwd 			= strip( _cwd );
+			bQuickRun		= _bQuickRun;
+			buildTools		= _buildTools;
 			
-			if( args.length ) args = " " ~ args;
+			if( !cwd.length ) cwd = Path.dirName( _command );
 			
+			// Becasuse of D2 TLS, copy need Data to Thread
+			int _x = buildTools.consoleWindow.x + buildTools.monitors[buildTools.consoleWindow.id].x;
+			int _y = buildTools.consoleWindow.y + buildTools.monitors[buildTools.consoleWindow.id].y;
+			version(Windows)
+			{
+				x = Conv.to!(string)( _x );
+				y = Conv.to!(string)( _y );
+				w = Conv.to!(string)( buildTools.consoleWindow.w );
+				h = Conv.to!(string)( buildTools.consoleWindow.h );
+			}
+			else
+			{
+				x = Conv.to!(string)(buildTools.consoleWindow.x + buildTools.monitors[buildTools.consoleWindow.id].x);
+				y = Conv.to!(string)(buildTools.consoleWindow.y + buildTools.monitors[buildTools.consoleWindow.id].y);
+				w = Conv.to!(string)(buildTools.consoleWindow.w < 80 ? 80 : buildTools.consoleWindow.w);
+				h = Conv.to!(string)(buildTools.consoleWindow.h < 24 ? 24 : buildTools.consoleWindow.h);
+			}
+		 	
 			super( &go );
 		}
 
 		void go()
 		{
-			Process	p;
-			char[]		scommand;
+			Pid				pid;
+			string			consoleArgs;
+			string			oriCommand = command;
+
+			version(Posix)
+			{
+				command = Array.replace( command, " ", "\\ " ); // For space in path
+			}
 			
-			version(linux) command = Util.substitute( command, " ", "\\ " ); // For space in path
-			
-			if( GLOBAL.consoleExe == "ON" )
+			if( buildTools.compilerSettings.useConsoleLaunch == "ON" )
 			{
 				version(Windows)
 				{
-					//scommand = "consoleLauncher " ~ command ~ args;
-					if( GLOBAL.consoleWindow.id < GLOBAL.monitors.length )
+					if( buildTools.consoleWindow.id < buildTools.monitors.length )
 					{
-						int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
-						int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
-						
-						scommand = "consoleLauncher 0 " ~ Integer.toString( x ) ~ " " ~ Integer.toString( y ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 0 " ~ command ~ args;
+						consoleArgs = "0 " ~ x ~ " " ~ y ~ " " ~ w ~ " " ~ h ~ " 0 " ~ command ~ " " ~ args;
 					}
 					else
 					{
-						scommand = "consoleLauncher 0 0 0 0 0 0 " ~ command ~ args;
+						consoleArgs = "0 0 0 0 0 0 " ~ command ~ " " ~ args;
 					}
 				}
 				else
 				{
-					if( command[0] == '"' && command[$-1] == '"' )
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 0 " ~ command[1..$-1] ~ args ~ "\"";
-					else
-						scommand = "\"" ~ GLOBAL.poseidonPath ~ "consoleLauncher " ~ Integer.toString( GLOBAL.consoleWindow.id ) ~ " -1 -1 " ~ Integer.toString( GLOBAL.consoleWindow.w ) ~ " " ~ Integer.toString( GLOBAL.consoleWindow.h ) ~ " 0 " ~ command ~ args ~ "\"";
+					consoleArgs = to!(string)( buildTools.consoleWindow.id ) ~ " -1 -1 " ~ w ~ " " ~ h ~ " 0 " ~ command ~ " " ~ args;
 				}
-			}
-			else
-			{
-				version(Windows) scommand = command ~ args; else scommand = command ~ args;//scommand = "\"" ~ command ~ args ~ "\"";
+				
+				args = consoleArgs;
+				command = buildTools.poseidonPath ~ "/consoleLauncher";
 			}
 			
 			version(Windows)
 			{
-				p = new Process( true, scommand );
+				tools.ExecuteWait( command, args, cwd );
 			}
 			else
 			{
 				// --hide-menubar
 				// --geometry
 				// -t poseidonFB_terminal
-				char[] geoString;
-				if( GLOBAL.consoleWindow.id < GLOBAL.monitors.length )
+				string geoString;
+				if( GLOBAL.bIDlessMonitors )
 				{
-					int x = GLOBAL.consoleWindow.x + GLOBAL.monitors[GLOBAL.consoleWindow.id].x;
-					int y = GLOBAL.consoleWindow.y + GLOBAL.monitors[GLOBAL.consoleWindow.id].y;
-					int w = GLOBAL.consoleWindow.w < 80 ? 80 : GLOBAL.consoleWindow.w;
-					int h = GLOBAL.consoleWindow.h < 24 ? 24 : GLOBAL.consoleWindow.h;
-					//geoString = " --geometry=80x24+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
-					geoString = " --geometry=" ~ Integer.toString( w ) ~ "x" ~ Integer.toString( h ) ~ "+" ~ Integer.toString( x ) ~ "+" ~ Integer.toString( y );
+					geoString = " --geometry=" ~ w ~ "x" ~ h ~ "+" ~ x ~ "+" ~ y;
 				}
-				
-				
-				
-				//	p = new Process( true, GLOBAL.linuxTermName ~ geoString ~ " -e " ~ scommand );
-				if( GLOBAL.linuxTermName.length )
+
+				if( buildTools.linuxTermName )
 				{
-					switch( Util.trim( GLOBAL.linuxTermName ) )
+					switch( strip( buildTools.linuxTermName ) )
 					{
 						case "xterm", "uxterm":
-							geoString = Util.substitute( geoString, "--geometry=", "-geometry " );
-							p = new Process( true, GLOBAL.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							geoString = Array.replace( geoString, "--geometry=", "-geometry " );
+							pid = spawnShell( buildTools.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
 							break;
 						case "mate-terminal" ,"xfce4-terminal" ,"lxterminal", "gnome-terminal", "tilix":
-							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ scommand );
+							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
 							break;
-						/*
-						case "gnome-terminal":
-							p = new Process( true, GLOBAL.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -- " ~ scommand );
-							break;
-						*/
 						default:
-							p = new Process( true, GLOBAL.linuxTermName ~ " -e " ~ scommand );
+							pid = spawnShell( linuxTermName, " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
 					}
 				}
 				else
 				{
-					return;
+					pid = spawnShell( command ~ " " ~ args, null, Config.none, cwd );
 				}
 			}
 			
-			if( cwd.length ) p.workDir( cwd );
-			p.redirect( Redirect.None );
-			p.execute;
-			
-			auto result = p.wait;
+			version(Posix) auto ret = wait( pid );
 			
 			if( bQuickRun )
 			{
-				switch( result.reason )
+				if( exists( oriCommand ) )
 				{
-					case Process.Result.Error, Process.Result.Signal, Process.Result.Exit, Process.Result.Stop:
-						if( command.length )
-						{
-							char[] exePath;
-							if( command[0] == '"' && command[$-1] == '"' ) exePath = command[1..$-1]; else exePath = command;
-							
-							scope _f = new FilePath( exePath );
-							_f.remove();
-
-							version(Windows)
-							{
-								_f.set( _f.path ~ _f.name ~ ".obj" );
-								if( _f.exists ) _f.remove();
-							}
-							else
-							{
-								_f.set( _f.path ~ _f.name ~ ".o" );
-								if( _f.exists ) _f.remove();
-							}
-						}
-						break;
-						
-					default:
+					string objFullPath = oriCommand;
+					if( oriCommand[0] == '"' && oriCommand[$-1] == '"' ) objFullPath = oriCommand[1..$-1].dup;
+					std.file.remove( objFullPath );
+					version(Windows)
+					{
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".obj";
+						if( exists( objFullPath ) ) std.file.remove( objFullPath );
+					}
+					else
+					{
+						string objFullPath = Path.stripExtension( oriCommand ) ~ ".o";
+						if( exists( objFullPath ) ) std.file.remove( objFullPath );
+						objFullPath = Path.stripExtension( oriCommand );
+						if( exists( objFullPath ) ) std.file.remove( objFullPath );
+					}
+					objFullPath = Path.stripExtension( oriCommand ) ~ ".bas";
+					if( exists( objFullPath ) ) std.file.remove( objFullPath );
 				}
 			}
 		}
@@ -296,535 +281,736 @@ struct ExecuterAction
 	
 	class CompileThread : Thread
 	{
-		private:
-		PROJECT		activePrj;
-		char[]		cwd, command, args;
-		FocusUnit	focus;
-		Ihandle*	processDlg;
-
-		public:
-		this( char[] _cwd, char[] _command, bool _bRun = false, char[] _args = null )
+	private:
+		string			cwd, fileFullPath, command, options, args;
+		string 			_beCompiledFile, _beRunFile;
+		Ihandle*		processDlg;
+		BuildDataToTLS	buildTools;
+		bool			bRun, bQuickRun;
+		bool			bCompileSuccess;
+		string			quickFileTemp;
+		
+	public:
+		this( string _command, string _fileFullPath, string _options, string _cwd = null, bool _bRun = false, string _args = "", bool _bQuickRun = false )
 		{
-			cwd				= _cwd;
-			command			= _command;
-			args			= _args;
+			cwd						= _cwd;
+			command					= strip( _command );
+			fileFullPath			= strip( _fileFullPath );
+			options					= _options;
+			bRun					= _bRun;
+			bQuickRun				= _bQuickRun;
+			args					= _args;
+			buildTools				= getBuildNeedDataToTLS();
+			quickFileTemp			= quickRunFile;
 			
-			if( _bRun )
+			if( fileFullPath.length )
 			{
-				if( !args.length ) args = " ";
-			}
-			else
-			{
-				_args = null;
-			}
+				version(FBIDE)
+				{
+					// the fileFullPath include the extension, the legth must > 2
+					if( fileFullPath[0..2] == "-b" )
+					{
+						_beCompiledFile = fileFullPath;
+						fileFullPath = strip( fileFullPath[2..$] );
+						_beRunFile = strip( Path.stripExtension( strip( fileFullPath, "\"" ) ) );
+					}
+					else
+					{
+						if( fileFullPath[0] == '"' && fileFullPath[$-1] == '"' )
+						{
+							_beRunFile = strip( Path.stripExtension( fileFullPath[1..$-1] ) );
+							_beCompiledFile = "-b " ~ fileFullPath;
+						}
+						else
+						{
+							_beRunFile = strip( Path.stripExtension( fileFullPath ) );
+							_beCompiledFile = "-b \"" ~ fileFullPath ~ "\"";
+						}
+					}
+				}
+				else
+				{
+					fileFullPath = strip( fileFullPath, "\"" );
+					_beRunFile = Path.stripExtension( strip( fileFullPath ) );
+					_beCompiledFile = "\"" ~ fileFullPath ~ "\"";
+					if( bRun ) _beCompiledFile = "-run " ~ _beCompiledFile;
+				}
+			}			
+
 			
-			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+			if( GLOBAL.compilerSettings.useDelExistExe == "ON" )
 			{
-				Ihandle* processLabel = IupLabel( "Compiling......" );
-				IupSetAttribute( processLabel, "SIZE", "96x12" );
-				version(Windows) IupSetAttribute( processLabel, "FONT", "Consolas Bold, 14" ); else IupSetAttribute( processLabel, "FONT", "Monospace Bold, 14" );
-				IupSetAttribute( processLabel, "ALIGNMENT", "ACENTER:ACENTER" );
-				processDlg = IupDialog( processLabel );
-				IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO,OPACITY=180,SHRINK=YES" );
-				IupSetAttribute( processDlg, "TITLE", null );
-				IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
-				IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
-				IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );
-			}
+				// Remove the execute file
+				string singleExistedExecute = _beRunFile ~ ".exe";
+				if( exists( singleExistedExecute ) ) std.file.remove( singleExistedExecute );
+			}	
+		
+			if( GLOBAL.compilerSettings.useThread == "ON" ) processDlg = createProcessDlg( "Compiling......" );
 			
 			super( &go );
 		}		
-
+		
 		void go()
 		{
-			if( GLOBAL.delExistExe == "ON" )
-			{
-				// Remove the execute file
-				scope targetFilePath = new FilePath( ScintillaAction.getActiveCScintilla.getFullPath() );
-				version(Windows) targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() ~ ".exe" ); else targetFilePath.set( targetFilePath.path() ~ targetFilePath.name() );
-				if( targetFilePath.exists() ) targetFilePath.remove();
-			}		
-		
-			Process p = new Process( true, command );
-			p.gui( true );
-			p.workDir( cwd );
-			p.execute;
-
-			bool	bError, bWarning;
-			char[]	stdoutMessage, stderrMessage;
-			version(FBIDE)
-			{
-				foreach (line; new Lines!(char)(p.stderr))  
-				{
-					if( !bWarning )
-					{
-						if( Util.index( line, "warning:" ) < line.length )
-						{
-							bWarning = true;
-							stderrMessage ~= ( line ~ "\n" );
-							version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-							continue;
-						}
-					}
-					
-					if( !bError )
-					{
-						if( line.length ) bError = true;
-					}				
-
-					stderrMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-				}
-
-				foreach( line; new Lines!(char)(p.stdout) )
-				{
-					if( !bWarning )
-					{
-						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-					}
-					if( !bError )
-					{
-						if( Util.index( line, "error " ) < line.length ) bError = true;
-					}				
-					
-					stdoutMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-				}
-			}
-			version(DIDE)
-			{
-				version(Windows) char[] dst;
-				foreach( line; new Lines!(char)(p.stderr) )  
-				{
-					if( Util.trim( line ).length ) bError = true;
-					version(Windows)
-					{
-						dst.length = 2 * line.length + 2;
-						line = CodePage.from( line, dst );
-					}						
-					stderrMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-				}
-
-				foreach( line; new Lines!(char)(p.stdout) )
-				{
-					if( !bError )
-					{
-						if( Util.index( line, "): " ) < line.length )
-							bError = true;
-						else if( Util.index( line, "Error " ) < line.length )
-							bError = true;
-					}				
-
-					version(Windows)
-					{
-						dst.length = 2 * line.length + 2;
-						line = CodePage.from( line, dst );
-					}						
-					stdoutMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-				}
-			}
-
-			auto result = p.wait;
-
-			version(FBIDE)
-			{
-				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			}
-			version(DIDE)
-			{
-				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-				{
-					showAnnotation( stdoutMessage ~ stderrMessage );
-				}
-				else
-					showAnnotation( null );
-			}
-			if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+			quickRunFile = quickFileTemp;
+			options = _beCompiledFile ~ ( options.length ? " " ~ options : "" );
+			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options ), buildTools, cwd, true, true );
+			if( processDlg != null )
+				if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
 			
-			if( bError )
+			if( bCompileSuccess )
 			{
-				version(Windows) GLOBAL.messagePanel.printOutputPanel( "Compile Error!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Compile Error!" );
-
-				if( GLOBAL.compilerWindow == "ON" )
+				version(FBIDE)
 				{
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-				}
-				else
-				{
-					version(Windows) 
+					debug writefln( "COMPILE OK!!" );
+					if( bRun )
 					{
-						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-					}
-					else
-					{
-						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+						version(Windows) _beRunFile ~= ".exe";
+						auto _thread = new ExecuterThread( _beRunFile, args, buildTools, cwd, bQuickRun );						
+						_thread.start;
+						//_thread.join;
 					}
 				}
-
-				if( GLOBAL.toggleCompileAtBackThread == "ON" )
-					if( processDlg != null )
-						if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
-
-				return;
 			}
 			else
 			{
-				if( !bWarning )
+				version(FBIDE)
 				{
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( "Compile Success!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!" );
-
-					if( GLOBAL.compilerWindow == "ON" )
+					if( bQuickRun )
 					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
+						if( exists( fileFullPath ) )
 						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+							string objFullPath = fileFullPath;
+							if( objFullPath[0] == '"' && objFullPath[$-1] == '"' ) objFullPath = fileFullPath[1..$-1].dup;
+							if( exists( objFullPath ) ) std.file.remove( objFullPath );
+							objFullPath = Path.stripExtension( objFullPath ) ~ ".o";
+							if( exists( objFullPath ) ) std.file.remove( objFullPath );
+							objFullPath = Path.stripExtension( objFullPath ) ~ ".bas";
+							if( exists( objFullPath ) ) std.file.remove( objFullPath );
 						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-						}							
-					}
-				}
-				else
-				{
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( "Compile Success! But got warning..." ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success! But got warning..." );
-
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-						}							
 					}
 				}
 			}
-			
-			
-			if( args.length )
-			{
-				auto activeCScintilla = actionManager.ScintillaAction.getActiveCScintilla();
-				if( activeCScintilla !is null )
-				{
-					scope _f = new FilePath( activeCScintilla.getFullPath() );
-					version(Windows)
-					{
-						command = _f.path ~ _f.name ~ ".exe";
-					}
-					else
-					{
-						command = _f.path ~ "./" ~ _f.name;
-					}
-				}
-
-				scope f = new FilePath( command );
-				if( f.exists() )
-				{
-					if( args.length ) args = " " ~ args; else args = "";
-					
-					GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ args ~ "......" );
-
-					ExecuterThread derived;
-					version(Windows) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );
-					derived.start();
-				}
-				else
-				{
-					GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!" );
-				}
-			}
-			
-			if( GLOBAL.toggleCompileAtBackThread == "ON" )
-				if( processDlg != null )
-					if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
+		}
+		
+		bool getCompileResult()
+		{
+			return bCompileSuccess;
 		}
 	}
 	
 	
-	class BuildThread : Thread
+	static void showAnnotation( string message, BuildDataToTLS buildTools )
 	{
-		private:
-		PROJECT		activePrj;
-		char[]		command, extraOptions, optionDebug, compilePath, executeName;
-		FocusUnit	focus;
-		Ihandle*	processDlg;
-
-		public:
-		this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
+		if( buildTools.compilerSettings.useAnootation != "ON" ) return;
+		
+		foreach( CScintilla cSci; buildTools.scintillaManager )
 		{
-			activePrj		= _prj;
-			command			= _command;
-			extraOptions	= _extraOptions;
-			optionDebug		= _optionDebug;
-			compilePath		= _compilePath;
-			executeName		= _executeName;
+			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			
-			// Set Multiple Focus Project
-			focus.Compiler	= _prj.compilerPath;
-			focus.Option	= _prj.compilerOption;
-			focus.Target	= _prj.targetName;
-			focus.IncDir	= _prj.includeDirs;
-			focus.LibDir	= _prj.libDirs;
-			if( _prj.focusOn.length )
-				if( _prj.focusOn in _prj.focusUnit ) focus = _prj.focusUnit[_prj.focusOn];
+			int prevLineNumber, prevLineNumberCount;
 			
-			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+			foreach( s; splitLines( message ) )
 			{
-				Ihandle* processLabel = IupLabel( "Building......" );
-				IupSetAttribute( processLabel, "SIZE", "96x12" );
-				version(Windows) IupSetAttribute( processLabel, "FONT", "Consolas Bold, 14" ); else IupSetAttribute( processLabel, "FONT", "Monospace Bold, 14" );
-				IupSetAttribute( processLabel, "ALIGNMENT", "ACENTER:ACENTER" );
-				processDlg = IupDialog( processLabel );
-				IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,BORDER=NO,OPACITY=180,SHRINK=YES" );
-				IupSetAttribute( processDlg, "TITLE", null );
-				IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
-				IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
-				IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );
+				bool bWarning;
+				
+				version(FBIDE)
+				{
+					int lineNumberTail = indexOf( s, ") error" );
+					if( lineNumberTail == -1 )
+					{
+						lineNumberTail = indexOf( s, ") warning" );
+						bWarning = true;
+					}
+				}
+				else //version(DIDE)
+				{
+					if( indexOf( s, "warning - " ) == 0 ) bWarning = true;
+					int lineNumberTail = indexOf( s, "): " );
+				}
+
+				if( lineNumberTail > -1 )
+				{
+					int lineNumberHead = indexOf( s, "(" );
+					if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > -1 )
+					{
+						string filePath = tools.normalizeSlash( s[0..lineNumberHead++] );
+
+						if( quickRunFile.length ) filePath = quickRunFile;
+						if( filePath == cSci.getFullPath )
+						{
+							int	lineNumber = Conv.to!(int)( s[lineNumberHead..lineNumberTail] ) - 1;
+							string	annotationText = s[lineNumberTail+2..$];
+							if( lineNumber != prevLineNumber )
+							{
+								prevLineNumber = lineNumber;
+								prevLineNumberCount = 1;
+								annotationText = "[" ~ Conv.to!(string)( prevLineNumberCount ) ~ "]" ~ annotationText;
+								prevLineNumberCount ++;
+							}
+							else
+							{
+								annotationText = "[" ~ Conv.to!(string)( prevLineNumberCount ) ~ "]" ~ annotationText;
+								prevLineNumberCount ++;
+							}
+							
+							string getText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber ) );
+							if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
+							IupSetStrAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber, toStringz( annotationText ) );
+							if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 40 );
+							IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	static bool CompilerProcess( string command, string args, BuildDataToTLS buildTools, string workDir = "", bool bGUI = true, bool bShowMessage = true )
+	{
+		/+
+		ProcessPipes pipes;
+		if( bGUI )
+			pipes = pipeShell( command ~ " " ~ args, Redirect.stdout | Redirect.stderr, null, Config.suppressConsole, workDir );
+		else
+			pipes = pipeShell( command ~ " " ~ args, Redirect.stdout | Redirect.stderr, null, Config.none, workDir );
+		+/
+		scope DaNodeProcess = new tools.Process( command ~ " " ~ args, workDir );
+		DaNodeProcess.start();
+		while(!DaNodeProcess.finished){ Thread.sleep( msecs( 5 ) ); }
+		
+		string theMessage = DaNodeProcess.output( 0 ).dup;
+		int		_state = DaNodeProcess.getMessageState();
+		bool	bWarning;
+		version(FBIDE)
+		{
+			foreach( line; splitLines( theMessage ) )
+			{
+				line = strip( line );
+				if( !bWarning )
+				{
+					if( indexOf( line, "warning:" ) > -1 ) bWarning = true;
+				}
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
+			}
+		}
+		else //version(DIDE)
+		{
+			foreach( line; splitLines( theMessage ) )  
+			{
+				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
+			}
+		}
+		
+		bool bBuildSuccess;
+		if( _state == 0 ) bBuildSuccess = true; 
+		/+
+		bool	bError, bWarning;
+		string	stdoutMessage, stderrMessage;
+		version(FBIDE)
+		{
+			foreach( line; pipes.stdout.byLine )
+			{
+				if( !bWarning )
+				{
+					if( indexOf( line, "warning " ) > -1 ) bWarning = true;
+				}
+				if( !bError )
+				{
+					if( indexOf( line, "error " ) > -1 ) bError = true;
+				}
+				
+				line = strip( line );
+				stdoutMessage ~= ( line ~ "\n" );
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 			}
 			
-			super( &go );
+			foreach( line; pipes.stderr.byLine )  
+			{
+				if( !bWarning )
+				{
+					if( indexOf( line, "warning:" ) > -1 )
+					{
+						bWarning = true;
+						stderrMessage ~= ( line ~ "\n" );
+						if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
+						continue;
+					}
+				}
+				
+				if( !bError )
+					if( line.length ) bError = true;
+
+				line = strip( line );
+				stderrMessage ~= ( line ~ "\n" );
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
+			}
+		}
+		else //version(DIDE)
+		{
+			foreach( line; pipes.stderr.byLine )  
+			{
+				if( strip( line ).length ) bError = true;
+				version(Windows) line = fromMBSz( line );
+
+				line = strip( line );
+				stderrMessage ~= ( line ~ "\n" );
+				if( bShowMessage && buildTools.MessageHanDle != null ) IupSetStrAttribute( buildTools.MessageHanDle, "APPEND", toStringz( line ) );
+			}
+
+			foreach( line; pipes.stdout.byLine )
+			{
+				if( !bError )
+				{
+					if( indexOf( line, "): " ) > -1 )
+						bError = true;
+					else if( indexOf( line, "Error " ) > -1 )
+						bError = true;
+				}				
+				version(Windows) line = fromMBSz( line );
+				
+				line = strip( line );
+				stdoutMessage ~= ( line ~ "\n" );
+				if( bShowMessage && buildTools.MessageHanDle != null ) IupSetStrAttribute( buildTools.MessageHanDle, "APPEND", toStringz( line ) );
+			}
+		}
+		
+		
+		bool bBuildSuccess;
+		if( wait( pipes.pid ) == 0 ) bBuildSuccess = true;
+		+/
+
+		version(FBIDE)
+		{
+			if( _state == 1 ) showAnnotation( theMessage, buildTools ); else showAnnotation( null, buildTools );
+		}
+		else //version(DIDE)
+		{
+			if( _state > 0 )
+			{
+				showAnnotation( theMessage, buildTools );
+			}
+			else
+				showAnnotation( null, buildTools );
 		}
 
-		void go()
+		if( !bBuildSuccess )
 		{
-			bool	bError, bWarning;
-			char[]	stdoutMessage, stderrMessage;			
-			
-			if( command.length )
+			if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Error!!" );
+
+			if( buildTools.compilerSettings.useResultDlg == "ON" )
 			{
-				if( GLOBAL.delExistExe == "ON" )
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
+				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+			}
+			else
+			{
+				version(Windows) 
 				{
-					// Remove the execute file
-					char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
-					
-					version(Windows) _targetName ~= ".exe";
-
-					scope targetFilePath = new FilePath( _targetName );
-					if( targetFilePath.exists() ) targetFilePath.remove();
-				}
-			
-				Process p = new Process( true, command );
-				p.workDir( activePrj.dir );
-				p.gui( true );
-				p.execute;
-
-
-				version(FBIDE)
-				{
-					foreach (line; new Lines!(char)(p.stderr))  
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning:" ) < line.length )
-							{
-								bWarning = true;
-								stderrMessage ~= ( line ~ "\n" );
-								version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-								continue;
-							}
-						}
-						
-						if( !bError )
-						{
-							if( line.length ) bError = true;
-						}				
-
-						stderrMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-
-					foreach (line; new Lines!(char)(p.stdout))  
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-						}
-						if( !bError )
-						{
-							if( Util.index( line, "error " ) < line.length )
-								bError = true;
-							else if( Util.index( line, "Error!" ) < line.length )
-								bError = true;
-						}				
-						
-						stdoutMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-				}
-				version(DIDE)
-				{	
-					version(Windows) char[] dst;
-					foreach (line; new Lines!(char)(p.stderr))  
-					{
-						if( Util.trim( line ).length ) bError = true;
-						version(Windows)
-						{
-							dst.length = 2 * line.length + 2;
-							line = CodePage.from( line, dst );
-						}						
-						stderrMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-
-					foreach (line; new Lines!(char)(p.stdout))  
-					{
-						if( !bError )
-						{
-							if( Util.index( line, "): " ) < line.length )
-								bError = true;
-							else if( Util.index( line, "Error " ) < line.length )
-								bError = true;
-							
-						}				
-						
-						version(Windows)
-						{
-							dst.length = 2 * line.length + 2;
-							line = CodePage.from( line, dst );
-						}						
-						stdoutMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-				}
-		
-				auto result = p.wait;
-
-				version(FBIDE)
-				{
-					if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-				}
-				version(DIDE)
-				{
-					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-					{
-						showAnnotation( stdoutMessage ~ stderrMessage );
-					}
-					else
-						showAnnotation( null );
-				}
-				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-
-				if( bError )
-				{
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( "Build Error!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Build Error!" );
-
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-						}							
-					}
-					/*
-					if( GLOBAL.delExistExe == "ON" )
-					{
-						// Remove the execute file
-						char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
-						
-						version(Windows) _targetName ~= ".exe";
-
-						scope targetFilePath = new FilePath( _targetName );
-						if( targetFilePath.exists() ) targetFilePath.remove();
-					}
-					*/
+					if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
 				}
 				else
 				{
-					if( !bWarning )
+					if( buildTools.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+				}
+			}
+		}
+		else
+		{
+			if( !bWarning )
+			{
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!!" );
+				if( buildTools.compilerSettings.useResultDlg == "ON" )
+				{
+					Ihandle* messageDlg = IupMessageDlg();
+					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
+					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
+					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				}
+				else
+				{
+					version(Windows)
 					{
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Compile Objs Success!" );
+						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
 					}
 					else
 					{
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( "Compile Objs Success! But got warning..." ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Compile Objs Success! But got warning..." );
+						if( buildTools.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
+					}							
+				}
+			}
+			else
+			{
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success! But got warning..." );
+				if( buildTools.compilerSettings.useResultDlg == "ON" )
+				{
+					Ihandle* messageDlg = IupMessageDlg();
+					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
+					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
+					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
+					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				}
+				else
+				{
+					version(Windows)
+					{
+						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
+					}
+					else
+					{
+						if( buildTools.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+					}							
+				}
+			}
+		}
+
+		if( buildTools.OutputSci == "ON" ) 
+		{
+			buildTools.messagePanel.applyOutputPanelINDICATOR();
+			IupSetInt( buildTools.messagePanel.getOutputPanelHandle, "CARETPOS", 99999999 );
+		}
+		
+		return bBuildSuccess;
+	}
+
+
+	/*
+	SourceType = 0	return all *.bas / *.d
+	SourceType = 1	return need compile *.bas / *.d after check *.obj / *.o
+	SourceType = 2	return all *.obj / *.o
+	*/
+	static bool getBuildNeedData( ref string compiler, ref string filesANDargs, string options, string optionDebug, int SourceType = 0 )
+	{
+		version(linux)
+		{
+			if( !checkTerminalExists() ) 
+			{
+				int dummy = tools.questMessage( "Error", "The linux terminal path isn't set.", "ERROR", "OK" );
+				return false;
+			}
+		}
+	
+		string activePrjName = ProjectAction.getActiveProjectName();
+		try
+		{
+			if( !activePrjName.length )
+			{
+				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
+				return false;
+			}
+			if( !( activePrjName in GLOBAL.projectManager ) )
+			{
+				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
+				return false;
+			}
+			
+			// Get Custom Compiler
+			string customOpt, customCompiler;
+			CustomToolAction.getCustomCompilers( customOpt, customCompiler );	
+			
+			// Set Multiple Focus Project
+			FocusUnit _focus;
+			_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
+			_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
+			_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+			_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
+			_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
+			if( GLOBAL.projectManager[activePrjName].focusOn.length )
+			{
+				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+			}			
+			
+			string fbcFullPath = compiler;
+			if( !fbcFullPath.length ) fbcFullPath = _focus.Compiler;
+			if( !fbcFullPath.length ) fbcFullPath = customCompiler;
+			if( !fbcFullPath.length )
+			{
+				fbcFullPath = GLOBAL.compilerSettings.Bit64 == "OFF" ? GLOBAL.compilerSettings.compilerFullPath : GLOBAL.compilerSettings.x64compilerFullPath;
+			}
+			compiler = fbcFullPath;
+			
+			version(Windows)
+			{
+				foreach( s; GLOBAL.EnvironmentVars.keys )
+				{
+					compiler = Array.replace( Uni.toLower( fbcFullPath ), Uni.toLower( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
+				}				
+			}
+			
+			if( !checkCompilerExists( fbcFullPath ) )
+			{
+				int dummy = tools.questMessage( "Error", "The Compiler Path isn't set!", "ERROR", "OK" );
+				return false;
+			}
+			
+
+			
+			if( !options.length ) options = _focus.Option; // Notice: Do not use custom options
+
+			string txtCommand, txtSources, txtIncludeDirs, txtLibDirs;
+
+			// Save All Scintilla Tabs Files
+			if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
+			{
+				foreach( CScintilla _cSci; GLOBAL.scintillaManager )
+					if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
+			}
+			else
+			{
+				foreach( s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes ~ GLOBAL.projectManager[activePrjName].others )
+				{
+					if( fullPathByOS(s) in GLOBAL.scintillaManager )
+					{
+						if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) ) GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
 					}
 				}
 			}
 
-			if( !bError )
+			bool bGotOneFileToBuild, bNoSourceNeedBeCompiled;
+			foreach( s; GLOBAL.projectManager[activePrjName].sources )
 			{
-				char[] txtSources, txtLibDirs; 
-				
-				bWarning = bError = false;
-				stdoutMessage = stderrMessage = "";
-				
-				foreach( char[] s; activePrj.others )
+				switch( SourceType )
 				{
-					txtSources ~= ( " \"" ~ s ~ "\"" );
-				}				
-
-				version(FBIDE)
+					case 0:
+						version(FBIDE)	txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+						version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+						break;
+						
+					case 1:
+						SysTime _accessTimeF, _modifiedTimeF, _accessTimeO, _modifiedTimeO;
+						bool	bObjIsNew;
+						
+						version(FBIDE)
+						{
+							auto objFullPath = Path.stripExtension( s ) ~ ".o";
+							if( exists( objFullPath ) )
+							{
+								std.file.getTimes( objFullPath, _accessTimeO, _modifiedTimeO );
+								std.file.getTimes( s, _accessTimeF, _modifiedTimeF );
+								if( _modifiedTimeF < _modifiedTimeO ) bObjIsNew = true;
+							}
+							if( !bObjIsNew ) txtSources = txtSources ~ " -b \"" ~ s ~ "\"";
+						}
+						else //version(DIDE)
+						{
+							string objFullPathWithoutExt;
+							if( indexOf( options, "-op" ) > -1 )
+							{
+								objFullPathWithoutExt = Path.stripExtension( s );
+							}
+							else
+							{
+								int optionPos = indexOf( options, "-od=" );
+								if( optionPos > -1 )
+								{
+									string _pathname;
+									for( int i = optionPos + 4; i < options.length; ++ i )
+									{
+										if( options[i] == '\t' || options[i] == ' ' ) break;
+										_pathname ~= options[i];
+									}
+									objFullPathWithoutExt = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _pathname ~ "/" ~ Path.stripExtension( Path.baseName( s ) );
+								}
+								else
+								{
+									optionPos = indexOf( options, "-od" );
+									if( optionPos > -1 )
+									{
+										string _pathname;
+										for( int i = optionPos + 3; i < options.length; ++ i )
+										{
+											if( options[i] == '\t' || options[i] == ' ' ) break;
+											_pathname ~= options[i];
+										}
+										objFullPathWithoutExt = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _pathname ~ "/" ~ Path.stripExtension( Path.baseName( s ) );
+									}
+									else
+									{
+										objFullPathWithoutExt = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) );
+									}
+								}
+							}
+							
+							version(Windows) objFullPathWithoutExt ~= ".obj"; else objFullPathWithoutExt ~= ".o";
+							if( exists( objFullPathWithoutExt ) )
+							{
+								std.file.getTimes( objFullPathWithoutExt, _accessTimeO, _modifiedTimeO );
+								std.file.getTimes( s, _accessTimeF, _modifiedTimeF );
+								if( _modifiedTimeF < _modifiedTimeO ) bObjIsNew = true;
+							}
+							
+							if( !bObjIsNew ) txtSources = txtSources ~ " \"" ~ s ~ "\"";
+						}
+						break;
+						
+					case 2:
+						version(FBIDE)
+						{
+							txtSources = txtSources ~ " -a \"" ~ Path.stripExtension( s ) ~ ".o\"" ;
+						}
+						else //version(DIDE)
+						{
+							string objFullPathWithoutExt;
+							if( indexOf( options, "-op" ) > -1 )
+							{
+								objFullPathWithoutExt = Path.stripExtension( s );
+							}
+							else
+							{
+								string objPath;
+								int optionPos = indexOf( options, "-od=" );
+								if( optionPos > -1 )
+								{
+									string _pathname;
+									for( int i = optionPos + 4; i < options.length; ++ i )
+									{
+										if( options[i] == '\t' || options[i] == ' ' ) break;
+										_pathname ~= options[i];
+									}
+									objFullPathWithoutExt = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _pathname ~ "/" ~ Path.stripExtension( Path.baseName( s ) );
+								}
+								else
+								{
+									optionPos = indexOf( options, "-od" );
+									if( optionPos > -1 )
+									{
+										string _pathname;
+										for( int i = optionPos + 3; i < options.length; ++ i )
+										{
+											if( options[i] == '\t' || options[i] == ' ' ) break;
+											_pathname ~= options[i];
+										}
+										objFullPathWithoutExt = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _pathname ~ "/" ~ Path.stripExtension( Path.baseName( s ) );
+									}
+									else
+									{
+										objFullPathWithoutExt = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) );
+									}
+								}
+							}						
+						
+							version(Windows) objFullPathWithoutExt ~= ".obj"; else objFullPathWithoutExt ~= ".o";
+							if( exists( objFullPathWithoutExt ) ) txtSources = txtSources ~ " \"" ~ objFullPathWithoutExt ~ "\"" ;			
+						}
+						break;
+						
+					default:
+				}
+			}
+			
+			if( SourceType == 1 && !txtSources.length ) bNoSourceNeedBeCompiled = true;
+			
+			version(FBIDE)
+			{
+				if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
 				{
-					foreach( char[] s; focus.LibDir )
+					if( GLOBAL.projectManager[activePrjName].mainFile.length )
 					{
-						txtLibDirs ~= ( " -p \"" ~ s ~ "\"" );
+						string mainFilePath = GLOBAL.projectManager[activePrjName].mainFile;
+						foreach( s; GLOBAL.projectManager[activePrjName].sources )
+						{
+							if( s.length > 4 )
+							{
+								if( Uni.toLower( s[$-3..$] ) == "bas" )
+								{
+									string name = Path.stripExtension( Path.baseName( mainFilePath ) );
+									if( Path.isAbsolute( mainFilePath ) )
+									{
+										if( Uni.toLower( s[0..$-4] ) == Uni.toLower( name ) )
+										{
+											txtSources = " -b \"" ~ s ~ "\"";
+											bGotOneFileToBuild = true;
+											break;
+										}
+									}
+									else
+									{
+										string relativePath = Array.replace( s[0..$-4], GLOBAL.projectManager[activePrjName].dir ~ "/", "" );
+										if( Uni.toLower( relativePath ) == Uni.toLower( name ) ) 
+										{
+											txtSources = " -b \"" ~ s ~ "\"";
+											bGotOneFileToBuild = true;
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Project is set One File Mode.", true );
+						if( GLOBAL.compilerSettings.useSFX == "ON" )
+						{
+							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
+						}
+						return false;
 					}
 				}
-				version(DIDE)
-				{
-					version(Windows)
-					{
-						int _COMPILERVER = DMDversion( compilePath );
-						if( Util.index( focus.Option, "-m32omf" ) < focus.Option.length ) _COMPILERVER = 1;
-					}
+			}
+			
+			if( !txtSources.length && SourceType != 1 )
+			{
+				GLOBAL.messagePanel.printOutputPanel( "Without source files......?\n\nBuild Error!", true );
+				return false;
+			}
 
-					foreach( char[] s; focus.LibDir )
+			foreach( s; GLOBAL.projectManager[activePrjName].others )
+			{
+				txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
+			}				
+
+			version(FBIDE)
+			{
+				foreach( s; _focus.IncDir )
+				{
+					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
+				}
+
+				foreach( s; _focus.LibDir )
+				{
+					txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
+				}
+			}
+			version(DIDE)
+			{
+				version(Windows)
+				{
+					int _COMPILERVER = DMDversion( compiler );
+					if( indexOf( _focus.Option, "-m32omf" ) > -1 ) _COMPILERVER = 1;
+				}
+				
+				foreach( s; _focus.IncDir )
+				{
+					txtIncludeDirs = txtIncludeDirs ~ " -I\"" ~ s ~ "\"";
+				}
+				
+				// SourceType = 1 mean compile all sources to object, no need pass the libraries
+				if( SourceType != 1 )
+				{
+					foreach( s; _focus.LibDir )
 					{
 						if( s.length )
 						{
 							version(Windows)
 							{
-								if( s[$-1] != '/' ) s ~= '/';
-								s = Util.replace( s.dup, '/', '\\' );
+								s = Array.replace( s.dup, '/', '\\' );
 
-								if( Util.contains( s, ' ' ) )
+								if( indexOf( s, " " ) > -1 )
 								{
-									wchar[] ws = ( UTF.toString16( s ) ).dup;
-									wchar[] shortName;
+									wstring ws = ( UTF.toUTF16( s ) );
+									wstring shortName;
 									shortName.length = ws.length + 1;
-									shortName[] = ' ';
 
-									DWORD len = GetShortPathNameW( toString16z( ws ), shortName.ptr, ws.length + 1  );
+									DWORD len = GetShortPathNameW( UTF.toUTF16z( ws ), cast(wchar*) shortName.ptr, ws.length + 1  );
 									if( len > 0 && len <= ws.length )
 									{
-										s = Util.trim( UTF.toString( shortName[0..len] ) );
+										s = strip( UTF.toUTF8( shortName[0..len] ) );
 									}
 									else
 									{
@@ -832,17 +1018,15 @@ struct ExecuterAction
 										IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
 										IupSetAttribute( messageDlg, "VALUE", toStringz( "Libraries Path Error!" ) );
 										IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );	
-										return;
+										return false;
 									}
 								}
 								
 								if( _COMPILERVER > 1 )
-								{
-									txtLibDirs ~= ( " -L/LIBPATH:\"" ~ s ~ "\"" );
-								}
+									txtLibDirs = txtLibDirs ~ " -L/LIBPATH:\"" ~ s ~ "\"";
 								else
 								{
-									if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
+									if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s ~ "\\"; else txtLibDirs = txtLibDirs ~ "+" ~ s ~ "\\";
 								}
 							}
 							else
@@ -852,695 +1036,148 @@ struct ExecuterAction
 						}
 					}
 				}
-				
-				foreach( char[] s; activePrj.sources )
-				{
-					scope fPath = new FilePath( s );
-					if( fPath.exists() )
-					{
-						version(FBIDE)
-						{
-							scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-							if( oPath.exists() ) txtSources = txtSources ~ " -a \"" ~ oPath.toString ~ "\"" ; 
-						}
-						version(DIDE)
-						{
-							char[]		objPath = activePrj.dir ~ "/";
-							char[] 		_totalOptions = focus.Option ~ " " ~ extraOptions;
-							FilePath	oPath;
-							
-							int optionPos = Util.index( _totalOptions, "-op" );
-							if( optionPos < _totalOptions.length )
-							{
-								objPath = fPath.path ~ "/";
-							}
-							else
-							{
-								optionPos = Util.index( _totalOptions, "-od" );
-								if( optionPos < _totalOptions.length )
-								{
-									char[] outputName;
-									for( int i = optionPos + 3; i < _totalOptions.length; ++ i )
-									{
-										if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
-										outputName ~= _totalOptions[i];
-									}
-									
-									// Got Obj Path -od
-									if( outputName.length ) objPath ~= ( outputName ~ "/" );
-								}
-							}
-							/*
-							int ofPos = Util.index( _totalOptions, "-od" );
-							if( ofPos < _totalOptions.length )
-							{
-								char[] outputName;
-								for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
-								{
-									if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
-									outputName ~= _totalOptions[i];
-								}
-								
-								// Got Obj Path -od
-								if( outputName.length ) objPath ~= ( outputName ~ "/" );
-							}
-							*/
-							version(Windows) oPath = new FilePath( objPath ~ fPath.name ~ ".obj" ); else oPath = new FilePath( objPath ~ fPath.name ~ ".o" );
-							if( oPath.exists() ) txtSources = txtSources ~ " \"" ~ oPath.toString ~ "\"" ;
-							
-							delete oPath;
-						}
-					}
-				}
+
+				string bits;
+				if( _COMPILERVER == 4 )
+					if( GLOBAL.compilerSettings.Bit64 == "ON" ) bits = "--m64 "; else bits = "--m32 ";
+			}
+			
+
+			if( SourceType == 1 )
+			{
+				if( bNoSourceNeedBeCompiled ) return true;
 				
 				version(FBIDE)
 				{
-					command = "\"" ~ compilePath ~ "\"" ~ executeName ~ txtSources ~ txtLibDirs ~ ( focus.Option.length ? " " ~	focus.Option : "" ) ~ 
-					( extraOptions.length ? " " ~ extraOptions : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+					string _m = Path.stripExtension( Path.baseName ( GLOBAL.projectManager[activePrjName].mainFile ) );
+					filesANDargs = "-c" ~ ( _m.length ? ( " -m \"" ~ _m ) ~ "\"" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+					
 				}
 				version(DIDE)
 				{
-					command = "\"" ~ compilePath ~ "\"" ~ executeName ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? " -m64" : "" ) ~ txtSources ~ txtLibDirs ~ ( focus.Option.length ? " " ~
-								focus.Option : "" ) ~ ( extraOptions.length ? " " ~ extraOptions : "" );
-				}
-				
-				version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";// else txtCommand ~= " -s console";
-				version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:WINDOWS";
-				
-				scope fp = new FilePath( activePrj.dir ~ "/" ~ activePrj.targetName );
-				fp.set( fp.path );
-				if( !fp.exists ) fp.create;
-
-				if( GLOBAL.delExistExe == "ON" )
-				{
-					// Remove the execute file
-					char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
-					
-					version(Windows) _targetName ~= ".exe";
-
-					scope targetFilePath = new FilePath( _targetName );
-					if( targetFilePath.exists() ) targetFilePath.remove();
+					filesANDargs = bits ~ "-c " ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" );
 				}
 
-				
-				Process p2 = new Process( true, command );
-				p2.workDir( activePrj.dir );
-				p2.gui( true );
-				p2.execute;
-
-				// Compiler Command
-				version(Windows)
-					GLOBAL.messagePanel.printOutputPanel( "\n\nContinue Link Project: " ~ activePrj.name ~ "......\n\n" ~ command ~ "\n" );
-				else
-					IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( "\n\nContinue Link Project: " ~ activePrj.name ~ "......\n\n" ~ command ~ "\n" ) );
-					
-				version(FBIDE)
-				{
-					foreach (line; new Lines!(char)(p2.stderr))  
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning:" ) < line.length )
-							{
-								bWarning = true;
-								stderrMessage ~= ( line ~ "\n" );
-								version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-								continue;
-							}
-						}
-						
-						if( !bError )
-						{
-							if( line.length ) bError = true;
-						}				
-
-						stderrMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-
-					foreach (line; new Lines!(char)(p2.stdout))  
-					{
-						if( !bWarning )
-						{
-							if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-						}
-						if( !bError )
-						{
-							if( Util.index( line, "error " ) < line.length )
-								bError = true;
-							else if( Util.index( line, "Error!" ) < line.length )
-								bError = true;
-						}				
-						
-						stdoutMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-				}
-				version(DIDE)
-				{
-					foreach (line; new Lines!(char)(p2.stderr))  
-					{
-						if( Util.trim( line ).length ) bError = true;
-						stderrMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-
-					foreach (line; new Lines!(char)(p2.stdout))  
-					{
-						if( !bError )
-						{
-							if( Util.index( line, "): " ) < line.length )
-								bError = true;
-							else if( Util.index( line, "Error " ) < line.length )
-								bError = true;
-							
-						}				
-						
-						stdoutMessage ~= ( line ~ "\n" );
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-					}
-				}
-		
-				auto result2 = p2.wait;
-
-				version(FBIDE)
-				{
-					if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-				}
-				version(DIDE)
-				{
-					if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-						showAnnotation( stdoutMessage ~ stderrMessage );
-					else
-						showAnnotation( null );
-				}
-				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-
-				if( bError )
-				{
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( "Build Error!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Build Error!" );
-
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-						}							
-					}
-					/*
-					if( GLOBAL.delExistExe == "ON" )
-					{
-						// Remove the execute file
-						char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
-						
-						version(Windows) _targetName ~= ".exe";
-
-						scope targetFilePath = new FilePath( _targetName );
-						if( targetFilePath.exists() ) targetFilePath.remove();
-					}
-					*/
-				}
-				else
-				{
-					if( !bWarning )
-					{
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( "Build Success!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Build Success!" );
-
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-							}							
-						}
-					}
-					else
-					{
-						version(Windows) GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Build Success! But got warning..." );
-
-						if( GLOBAL.compilerWindow == "ON" )
-						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-							IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-						}
-						else
-						{
-							version(Windows)
-							{
-								if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-							}
-							else
-							{
-								if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-							}							
-						}				
-					}
-				}
+				return true;
 			}
-			
-			if( GLOBAL.toggleCompileAtBackThread == "ON" )
-				if( processDlg != null )
-					if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
-		}
-	}
-	
-	
-	class ReBuildThread : Thread
-	{
-		private:
-		PROJECT		activePrj;
-		char[]		command, extraOptions;
-		FocusUnit	focus;
-		Ihandle*	processDlg;
 
-		public:
-		this( PROJECT _prj, char[] _command, char[] _extraOptions )
-		{
-			activePrj		= _prj;
-			command			= _command;
-			extraOptions	= _extraOptions;
-			
-			// Set Multiple Focus Project
-			focus.Compiler	= _prj.compilerPath;
-			focus.Option	= _prj.compilerOption;
-			focus.Target	= _prj.targetName;
-			focus.IncDir	= _prj.includeDirs;
-			focus.LibDir	= _prj.libDirs;
-			if( _prj.focusOn.length )
-				if( _prj.focusOn in _prj.focusUnit ) focus = _prj.focusUnit[_prj.focusOn];
-			
-			
-			if( GLOBAL.toggleCompileAtBackThread == "ON" )
+
+			string executeName, _targetName;
+			if( _focus.Target.length ) _targetName = Path.stripExtension( _focus.Target ); else _targetName = GLOBAL.projectManager[activePrjName].name;
+			_targetName = strip( _targetName );
+			version(Windows)
 			{
-				Ihandle* processLabel = IupLabel( "ReBuilding......" );
-				IupSetAttribute( processLabel, "SIZE", "96x12" );
-				version(Windows) IupSetAttribute( processLabel, "FONT", "Consolas Bold, 14" ); else IupSetAttribute( processLabel, "FONT", "Monospace Bold, 14" );
-				IupSetAttribute( processLabel, "ALIGNMENT", "ACENTER:ACENTER" );
-				processDlg = IupDialog( processLabel );
-				IupSetAttributes( processDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,OPACITY=180,SHRINK=YES" );
-				IupSetAttribute( processDlg, "TITLE", null );
-				IupSetAttribute( processDlg, "BGCOLOR", "219 238 243" );
-				IupSetAttribute( processDlg, "FGCOLOR", "0 0 255" );
-				IupSetAttribute( processDlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
-				IupShowXY( processDlg, IUP_RIGHT, IUP_BOTTOM );
-			}
-			
-			super( &go );
-		}
-
-		void go()
-		{
-			if( GLOBAL.delExistExe == "ON" )
-			{
-				// Remove the execute file
-				char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
-				
-				version(Windows) _targetName ~= ".exe";
-
-				scope targetFilePath = new FilePath( _targetName );
-				if( targetFilePath.exists() ) targetFilePath.remove();
-			}
-	
-			Process p = new Process( true, command );
-			p.workDir( activePrj.dir );
-			p.redirect( Redirect.All );
-			p.gui( true );
-			p.execute;
-			
-			
-			bool	bError, bWarning;
-			char[]	stdoutMessage, stderrMessage;
-			version(FBIDE)
-			{
-				foreach (line; new Lines!(char)(p.stderr))  
+				switch( GLOBAL.projectManager[activePrjName].type )
 				{
-					if( !bWarning )
-					{
-						if( Util.index( line, "warning:" ) < line.length )
-						{
-							bWarning = true;
-							stderrMessage ~= ( line ~ "\n" );
-							continue;
-						}
-					}
-					
-					if( !bError )
-					{
-						if( line.length ) bError = true;
-					}				
-
-					stderrMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
+					case "2":
+						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib\"";
+						break;
+					case "3":
+						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
+						break;
+					default:
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
+						version(DIDE)	if( _COMPILERVER > 1 ) executeName = " -of\"" ~ _targetName ~ ".exe\""; else executeName = " -of\"" ~ _targetName ~ "\"";
 				}
-
-				foreach (line; new Lines!(char)(p.stdout))  
-				{
-					if( !bWarning )
-					{
-						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-					}
-					if( !bError )
-					{
-						if( Util.index( line, "error " ) < line.length )
-							bError = true;
-						else if( Util.index( line, "Error!" ) < line.length )
-							bError = true;
-					}				
-					
-					stdoutMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-				}
-				
-			}
-			version(DIDE)
-			{
-				version(Windows) char[] dst;
-				
-				foreach (line; new Lines!(char)(p.stderr))  
-				{
-					if( Util.trim( line ).length ) bError = true;
-
-					version(Windows)
-					{
-						dst.length = 2 * line.length + 2;
-						line = CodePage.from( line, dst );
-					}
-					stderrMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-				}
-
-				foreach (line; new Lines!(char)(p.stdout))  
-				{
-					if( !bError )
-					{
-						if( Util.index( line, "): " ) < line.length )
-							bError = true;
-						else if( Util.index( line, "Error " ) < line.length )
-							bError = true;
-						
-					}
-					
-					version(Windows)
-					{
-						dst.length = 2 * line.length + 2;
-						line = CodePage.from( line, dst );
-					}
-					stdoutMessage ~= ( line ~ "\n" );
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( line ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-				}
-			}				
-	
-			auto result = p.wait;
-
-			version(FBIDE)
-			{
-				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-			}
-			version(DIDE)
-			{
-				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-				{
-					showAnnotation( stdoutMessage ~ stderrMessage );
-				}
-				else
-					showAnnotation( null );
-			}
-			if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-
-			if( bError )
-			{
-				version(Windows) GLOBAL.messagePanel.printOutputPanel( "Build Error!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Build Error!" );
-
-				if( GLOBAL.compilerWindow == "ON" )
-				{
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-				}
-				else
-				{
-					version(Windows)
-					{
-						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-					}
-					else
-					{
-						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-					}							
-				}
-				/*
-				if( GLOBAL.delExistExe == "ON" )
-				{
-					// Remove the execute file
-					char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
-					
-					version(Windows) _targetName ~= ".exe";
-
-					scope targetFilePath = new FilePath( _targetName );
-					if( targetFilePath.exists() ) targetFilePath.remove();
-				}
-				*/
 			}
 			else
 			{
-				if( !bWarning )
+				switch( GLOBAL.projectManager[activePrjName].type )
 				{
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( "Build Success!" ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Build Success!" );
+					case "2":
+						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
+						break;
+					case "3":
+						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
+						break;
+					default:
+						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
+						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
+				}
+			}
 
-					if( GLOBAL.compilerWindow == "ON" )
+	
+			version(FBIDE)
+			{
+				bool 	bWithExt;
+				string	mainFile;
+				if( GLOBAL.projectManager[activePrjName].mainFile.length )
+				{
+					string mainFilePath = GLOBAL.projectManager[activePrjName].mainFile;
+					if( Path.extension( mainFilePath ).length )
 					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+						mainFile = Path.dirName( mainFilePath ) ~ "/ " ~ Path.stripExtension( Path.baseName( mainFilePath ) );
+						bWithExt = true;
 					}
 					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-						}						
-					}
+						mainFile = mainFilePath;
 				}
-				else
-				{
-					version(Windows) GLOBAL.messagePanel.printOutputPanel( "Build Success! But got warning..." ); else IupSetAttribute( GLOBAL.messagePanel.getOutputPanelHandle, "APPEND", "Build Success! But got warning..." );
-
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-						}							
-					}				
-				}
-				
-				
-				char[]		objPath = activePrj.dir ~ "/";
-				char[] 		_totalOptions = focus.Option ~ " " ~ extraOptions;
 			
-				int ofPos = Util.index( _totalOptions, "-od" );
-				if( ofPos < _totalOptions.length )
-				{
-					char[] outputName;
-					for( int i = ofPos + 3; i < _totalOptions.length; ++ i )
-					{
-						if( _totalOptions[i] == '\t' || _totalOptions[i] == ' ' ) break;
-						outputName ~= _totalOptions[i];
-					}
-					
-					// Got Obj Path -od
-					if( outputName.length ) objPath ~= ( outputName ~ "/" );
-				}
+				filesANDargs = executeName ~ ( bGotOneFileToBuild ? "" : ( mainFile.length ? ( " -m \"" ~ mainFile ) ~ "\"" : "" ) ) ~
+							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 				
-				char[] _targetName = activePrj.dir ~ "/" ~ focus.Target;
-
-				version(Windows) objPath ~= ( _targetName ~ ".obj" ); else objPath ~= ( _targetName ~ ".o" );
-				
-				scope oFilePath = new FilePath( objPath );
-				if( oFilePath.exists ) oFilePath.remove;
 			}
-			
-			if( GLOBAL.toggleCompileAtBackThread == "ON" )
-				if( processDlg != null ) 
-					if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
-		}
-	}	
-	
-
-	static void showAnnotation( char[] message )
-	{
-		if( GLOBAL.compilerAnootation != "ON" ) return;
-		
-		foreach( CScintilla cSci; GLOBAL.scintillaManager )
-		{
-			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
-			
-			int prevLineNumber, prevLineNumberCount;
-			
-			foreach( char[] s; Util.splitLines( message ) )
+			version(DIDE)
 			{
-				bool bWarning;
-				
-				version(FBIDE)
-				{
-					int lineNumberTail = Util.index( s, ") error" );
-					if( lineNumberTail >= s.length )
-					{
-						lineNumberTail = Util.index( s, ") warning" );
-						bWarning = true;
-					}
-				}
-				version(DIDE)
-				{
-					if( Util.index( s, "warning - " ) == 0 ) bWarning = true;
-					int lineNumberTail = Util.index( s, "): " );
-				}
-
-				if( lineNumberTail < s.length )
-				{
-					int lineNumberHead = Util.index( s, "(" );
-					if( lineNumberHead < lineNumberTail - 1 )
-					{
-						char[]	filePath = Path.normalize( s[0..lineNumberHead++] );
-
-						if( quickRunFile.length ) filePath = quickRunFile;
-						
-						if( filePath == cSci.getFullPath )
-						{
-							int		lineNumber = Integer.atoi( s[lineNumberHead..lineNumberTail] ) - 1;
-
-							char[]	annotationText = s[lineNumberTail+2..$];
-							
-							if( lineNumber != prevLineNumber )
-							{
-								prevLineNumber = lineNumber;
-								prevLineNumberCount = 1;
-								annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
-								prevLineNumberCount ++;
-							}
-							else
-							{
-								annotationText = "[" ~ Integer.toString( prevLineNumberCount ) ~ "]" ~ annotationText;
-								prevLineNumberCount ++;
-							}
-							
-							char[]	getText = fromStringz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber ) );
-							if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
-							IupSetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber, toStringz( annotationText ) );
-							if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 40 );
-							IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
-							//IupScintillaSendMessage( cSci.getIupScintilla, 2548, 3, 0 );
-						}
-					}
-				}
+				filesANDargs = executeName ~ " " ~ bits ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" );
 			}
+			
+			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) filesANDargs ~= " -s gui";
+			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) filesANDargs ~= " -L/SUBSYSTEM:WINDOWS";
+			
+			version(FBIDE) if( bWithExt ) GLOBAL.messagePanel.printOutputPanel( "****** Warnning! Main File Should Withould Extension! ******\n", false );
+
+			// Create Dir for Target
+			string _targetPath = Path.dirName( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName );
+			if( !exists( _targetPath ) ) std.file.mkdir( _targetPath );			
 		}
-	}
-	
-	public:
-	static char[]		quickRunFile;
-	
-	/*
-	static char[] getCustomCompilerOption()
-	{
-		if( GLOBAL.currentCustomCompilerOption.toDString.length )
+		catch( Exception e )
 		{
-			foreach( char[] s; GLOBAL.customCompilerOptions )
-			{
-				int pos = Util.rindex( s, "%::% " );
-				if( pos < s.length )
-				{
-					if( s[pos+5..$] == GLOBAL.currentCustomCompilerOption.toDString ) return s[0..pos];
-				}			
-			}
-		}
+			return false;
+		}	
 		
-		return null;
+		return true;
 	}
-	*/
+
+public:
+	static string		quickRunFile;
 	
-	static int compile( char[] options = null, char[] args = null, char[] compiler = null, char[] optionDebug = null, bool bRun = false )
+	static int compile( string options = null, string args = null, string compiler = null, string optionDebug = null, bool bRun = false )
 	{
 		version(linux) if( bRun && !checkTerminalExists() ) return false;
 
-		quickRunFile ="";
-		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
-		char[] command, runOption, _args;
-
+		string files;
 		auto cSci = ScintillaAction.getActiveCScintilla();
 
+		// Show the message panel
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 		
 		if( cSci !is null )
 		{
 			// Get Custom Compiler
-			char[] customOpt, customCompiler;
+			string customOpt, customCompiler;
 			CustomToolAction.getCustomCompilers( customOpt, customCompiler );
 			
 			// Set The Using Compiler Path
-			char[] fbcFullPath = compiler;
-			
-			if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
+			if( !compiler.length ) compiler = ( customCompiler.length ? customCompiler : ( GLOBAL.compilerSettings.Bit64 == "OFF" ? GLOBAL.compilerSettings.compilerFullPath : GLOBAL.compilerSettings.x64compilerFullPath ) );
 			
 			version(Windows)
 			{
-				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
+				foreach( s; GLOBAL.EnvironmentVars.keys )
 				{
-					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
+					compiler = Array.replace( Uni.toLower( compiler ), Uni.toLower( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
 				}
 			}
 			
-			if( !checkCompilerExists( fbcFullPath ) ) return false;
+			// Check the compiler existed?
+			if( !checkCompilerExists( compiler ) ) return false;
 
 			if( !ScintillaAction.saveFile( cSci ) )
 			{
@@ -1557,40 +1194,35 @@ struct ExecuterAction
 					}
 				}
 			}
-
-
-			// Set The Using Opts
-			if( !options.length ) options = customOpt;
 			
-			cSci = ScintillaAction.getActiveCScintilla();
-			version(FBIDE) command = "\"" ~ fbcFullPath ~ "\" -b \"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 			version(DIDE)
 			{
-				if( Util.index( options, "-run" ) < options.length )
+				string bits;
+				if( tools.DMDversion( compiler ) == 4 )
+					if( GLOBAL.compilerSettings.Bit64 == "ON" ) bits = "--m64 "; else bits = "--m32 ";
+			}			
+
+			// Set The Using Opts
+			options = strip( options );
+			if( !options.length ) options = strip( customOpt );
+			options = options ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+			version(Windows)
+			{
+				version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) options ~= " -s gui";
+				version(DIDE)
 				{
-					runOption = "-run ";
-					options = Util.substitute( options, "-run", "" );
-					
-					options = ( GLOBAL.editorSetting00.Bit64 == "ON" ? "-m64 " : "" ) ~ Util.trim( options );
-					options = Util.trim( options ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-					if( GLOBAL.toolbar.checkGuiButtonStatus ) options = Util.trim( options ) ~ " -L/SUBSYSTEM:WINDOWS";
-					options = Util.trim( options ) ~ " -run";
-					scope compilePath = new FilePath( fbcFullPath );
-					_args = Util.trim( options ) ~ " \"" ~ cSci.getFullPath() ~ "\"";
-					command = "\"" ~ compilePath.toString ~ "\" " ~ _args;
-					
-					GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
-					
-					ExecuterThread derived = new ExecuterThread( "\"" ~ compilePath.toString ~ "\"", _args, compilePath.path, false );
-					derived.start();
-					
-					if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
-					
-					return false;
+					if( GLOBAL.toolbar.checkGuiButtonStatus ) options ~= " -L/SUBSYSTEM:WINDOWS";
+					options = bits ~ options;
 				}
-				
-				command = "\"" ~ fbcFullPath ~ "\" " ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? "-m64 " : "" ) ~ runOption ~ "\"" ~ cSci.getFullPath() ~ "\"" ~ ( options.length ? " " ~ options : null );
 			}
+
+			string _beCompiledFile = "\"" ~ cSci.getFullPath ~ "\"";
+			GLOBAL.messagePanel.printOutputPanel( "Compile " ~ _beCompiledFile ~ "......" , true );
+			GLOBAL.messagePanel.printOutputPanel( compiler ~ " " ~ _beCompiledFile ~ " " ~ options ~ "\n", false );
+			// Pass compiler, files, options to Thread
+			
+			auto _thread = new CompileThread( compiler, cSci.getFullPath, options, Path.dirName( cSci.getFullPath ), bRun, args );
+			_thread.start;
 		}
 		else
 		{
@@ -1601,26 +1233,6 @@ struct ExecuterAction
 		
 		try
 		{
-			command = command ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-			
-			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -s gui";
-			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) command ~= " -L/SUBSYSTEM:WINDOWS";
-			
-			// Compiler Command
-			GLOBAL.messagePanel.printOutputPanel( "Compile File: " ~ cSci.getFullPath() ~ "......\n\n" ~ command ~ "\n", true );
-			scope _filePath = new FilePath( cSci.getFullPath() );
-			
-			auto _compileThread = new CompileThread( _filePath.path.dup, command, bRun, args );
-			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
-			{
-				_compileThread.go();
-				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
-			}
-			else
-			{
-				_compileThread.start();
-			}
-
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 		}
 		catch( ProcessException e )
@@ -1632,1088 +1244,240 @@ struct ExecuterAction
 		return false;
 	}
 	
-	static bool build( char[] options = null, char[] args = null, char[] compiler = null, char[] optionDebug = null )
+	static bool build( string options = null, string args = null, string compiler = null, string optionDebug = null )
 	{
-		quickRunFile ="";
-		
-		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
-
-		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-		IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
-
 		try
 		{
-			// Clean outputPanel
-			GLOBAL.messagePanel.printOutputPanel( "", true );
-			
-			if( !activePrjName.length || !( activePrjName in GLOBAL.projectManager ) )
+			// Keep Message panel open
+			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
+			GLOBAL.messagePanel.printOutputPanel( "", true ); // Clean outputPanel
+		
+			string finalArgsString;
+			string activePrjName = ProjectAction.getActiveProjectName();
+			if( getBuildNeedData( compiler, finalArgsString, options, optionDebug, 1 ) )
 			{
-				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
-				if( GLOBAL.compilerSFX == "ON" )
+				// Start Thread
+				if( finalArgsString.length )
 				{
-					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
-				}				
-				return false;
-			}
-			
-			// Get Custom Compiler
-			char[] customOpt, customCompiler;
-			CustomToolAction.getCustomCompilers( customOpt, customCompiler );			
-			
-			
-			// Set Multiple Focus Project
-			FocusUnit _focus;
-			_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
-			_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
-			_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
-			_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
-			_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
-			if( GLOBAL.projectManager[activePrjName].focusOn.length )
-			{
-				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
-			}
-			
-			char[] fbcFullPath = compiler;
-			if( !fbcFullPath.length ) fbcFullPath = customCompiler;
-			if( !fbcFullPath.length )
-			{
-				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
-			}
-			
-			version(Windows)
-			{
-				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
-				{
-					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
-				}				
-			}
-			
-			
-			// Set The Using Opts
-			if( !options.length ) options = customOpt;
-			if( !options.length ) options = _focus.Option;
-			
-			if( !checkCompilerExists( fbcFullPath ) ) return false;
-			
-			version(FBIDE)
-			{
-				if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
-				{
-					if( !GLOBAL.projectManager[activePrjName].mainFile.length )
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
-						if( GLOBAL.compilerSFX == "ON" )
-						{
-							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
-						}
-						return false;
-					}
-					else
-					{
-						return buildAll( options, optionDebug );
-					}
+					GLOBAL.messagePanel.printOutputPanel( "Buinding Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]......\n\n" ~ compiler ~ " " ~ finalArgsString ~ "\n\n", true );
+					auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
+					_thread.go;
+					if( !_thread.getCompileResult ) return false;
 				}
 				
-				/*
-				if( !GLOBAL.projectManager[activePrjName].mainFile.length )
+				if( finalArgsString.length ) GLOBAL.messagePanel.printOutputPanel( "\n************************************\n", false );
+				
+				auto bLinkResult = getBuildNeedData( compiler, finalArgsString, options, optionDebug, 2 );
+				GLOBAL.messagePanel.printOutputPanel( "Continue Link Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]......\n\n" ~ compiler ~ finalArgsString ~ "\n", false );
+				if( bLinkResult )
 				{
-					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Entry Point.( -m option )", true );
-						if( GLOBAL.compilerSFX == "ON" )
-						{
-							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
-						}
-						return false;
-					}
+					auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
+					_thread.start;
 				}
 				else
 				{
-					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" ) return buildAll( options, optionDebug );
-				}
-				*/
-			}
-			
-			
-			if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
-			{
-				foreach( CScintilla _cSci; GLOBAL.scintillaManager )
-				{
-					if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
-				}
-			}				
-
-
-			char[] txtCommand, txtSources, txtIncludeDirs, txtLibDirs;
-			
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].includes )
-			{
-				if( fullPathByOS(s) in GLOBAL.scintillaManager )
-				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
-					{
-						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
-						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
-					}
-				}
-			}
-
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
-			{
-				if( fullPathByOS(s) in GLOBAL.scintillaManager )
-				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
-					{
-						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
-						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
-					}
-				}
-				
-				version(FBIDE)
-				{
-					scope fPath = new FilePath( s );
-					scope oPath = new FilePath( fPath.path ~ fPath.name ~ ".o" );
-					if( oPath.exists() )
-					{
-						if( fPath.modified > oPath.modified ) txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
-					}
-					else
-					{
-						txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
-					}
-				}
-				version(DIDE)
-				{
-					scope fPath = new FilePath( s );
-					
-					char[]		objPath = GLOBAL.projectManager[activePrjName].dir ~ "/";
-					FilePath	oPath;
-					
-					// Check -op
-					int optionPos = Util.index( options, "-op" );
-					if( optionPos < options.length )
-					{
-						objPath = fPath.path ~ "/";
-					}
-					else
-					{
-						// Check -od
-						optionPos = Util.index( options, "-od" );
-						if( optionPos < options.length )
-						{
-							char[] outputName;
-							for( int i = optionPos + 3; i < options.length; ++ i )
-							{
-								if( options[i] == '\t' || options[i] == ' ' ) break;
-								outputName ~= options[i];
-							}
-							
-							// Got Obj Path -od
-							if( outputName.length ) objPath ~= ( outputName ~ "/" );
-						}
-					}
-
-					version(Windows) oPath = new FilePath( objPath ~ fPath.name ~ ".obj" ); else oPath = new FilePath( objPath ~ fPath.name ~ ".o" );
-					if( oPath.exists() )
-					{
-						if( fPath.modified > oPath.modified ) txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
-					}
-					else
-					{
-						txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
-					}
-					
-					delete oPath;
-				}
-			}
-
-			// Set Include( Import ) Path......
-			version(FBIDE)
-			{
-				foreach( char[] s; _focus.IncDir )
-				{
-					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
-				}
-			}			
-			version(DIDE)
-			{
-				foreach( char[] s; _focus.IncDir )
-				{
-					txtIncludeDirs = txtIncludeDirs ~ " -I\"" ~ s ~ "\"";
-				}
-			}
-
-
-			if( !txtSources.length )
-			{
-				if( !GLOBAL.projectManager[activePrjName].sources.length )
-				{
-					GLOBAL.messagePanel.printOutputPanel( "Without source files......?\n\nBuild Error!", true );
-					if( GLOBAL.compilerSFX == "ON" )
-					{
-						version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
-					}					
 					return false;
 				}
-				else
-				{
-					GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\nDirectly Link Objs......", true );
-				}
-			}
-
-			char[] executeName, _targetName;
-
-			if( _focus.Target.length ) _targetName = _focus.Target; else _targetName = GLOBAL.projectManager[activePrjName].name;
-			version(Windows)
-			{
-				switch( GLOBAL.projectManager[activePrjName].type )
-				{
-					case "2":
-						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib\"";
-						break;
-					case "3":
-						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
-						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
-						break;
-					default:
-						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.editorSetting00.Bit64 == "OFF" ? ".exe" : "" ) ~ "\"";
-				}
-			}
-			else
-			{
-				switch( GLOBAL.projectManager[activePrjName].type )
-				{
-					case "2":
-						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						break;
-					case "3":
-						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
-						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
-						break;
-					default:
-						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
-						
-				}
-			}
-
-
-			// Compiler Command
-			if( txtSources.length )
-			{
-				GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
 				
-				version(FBIDE)
-				{
-					//txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option : "" ) ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
-					txtCommand = "\"" ~ fbcFullPath ~ "\" -c" ~ ( GLOBAL.projectManager[activePrjName].mainFile.length ? ( " -m \"" ~ GLOBAL.projectManager[activePrjName].mainFile ) ~ "\"" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" ) ~ txtIncludeDirs;
-				}
-				version(DIDE)
-				{
-					//txtCommand = "\"" ~ compilePath.toString ~ "\" -c" ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ ( _focus.Option.length ? " " ~ _focus.Option: "" ) ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
-					txtCommand = "\"" ~ fbcFullPath ~ "\" -c" ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? " -m64" : "" ) ~ txtSources ~ ( options.length ? " " ~ options : "" ) ~ txtIncludeDirs;
-				}
+				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+				return true;
 			}
-			
-			// Compiler Command
-			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
-			
-			// Start Thread this( PROJECT _prj, char[] _command, char[] _extraOptions, char[] _optionDebug, char[] _compilePath, char[] _executeName )
-			auto _buildThread = new BuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options, optionDebug, fbcFullPath, executeName );
-			
-			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
-			{
-				_buildThread.go();
-				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
-			}
-			else
-			{
-				_buildThread.start();
-			}			
-			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
-			
-			return true;
 		}
 		catch( Exception e )
 		{
 			IupMessage( "",toStringz( e.toString ) );
-			return false;
 		}
 
-		return true;
+		return false;
 	}	
 	
-	static bool buildAll( char[] options = null, char[] compiler = null, char[] optionDebug = null )
+	static bool buildAll( string options = null, string compiler = null, string optionDebug = null )
 	{
-		quickRunFile ="";
-		
-		char[] activePrjName = actionManager.ProjectAction.getActiveProjectName();
-
-		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-		IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
-
 		try
 		{
-			// Clean outputPanel
-			GLOBAL.messagePanel.printOutputPanel( "", true );
-			
-			if( !activePrjName.length )
+			// Keep Message panel open
+			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
+			GLOBAL.messagePanel.printOutputPanel( "", true ); // Clean outputPanel
+		
+			string activePrjName = ProjectAction.getActiveProjectName();
+			string finalArgsString;
+			if( getBuildNeedData( compiler, finalArgsString, options, optionDebug, 0 ) )
 			{
-				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
-				return false;
-			}
-			
-			if( !( activePrjName in GLOBAL.projectManager ) )
-			{
-				GLOBAL.messagePanel.printOutputPanel( "No Project has been selected......?\n\nBuild Error!", true );
-				return false;
-			}
-			
-			// Get Custom Compiler
-			char[] customOpt, customCompiler;
-			CustomToolAction.getCustomCompilers( customOpt, customCompiler );	
-			
-			// Set Multiple Focus Project
-			FocusUnit _focus;
-			_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
-			_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
-			_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
-			_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
-			_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
-			if( GLOBAL.projectManager[activePrjName].focusOn.length )
-			{
-				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
-			}			
-			
-			char[] fbcFullPath = compiler;
-			if( !fbcFullPath.length ) fbcFullPath = customCompiler;
-			if( !fbcFullPath.length )
-			{
-				fbcFullPath = ( _focus.Compiler.length ? _focus.Compiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
-			}
+				GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ compiler ~ finalArgsString ~ "\n", true );
 
-			version(Windows)
-			{
-				foreach( char[] s; GLOBAL.EnvironmentVars.keys )
-				{
-					fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
-				}				
-			}
-			
-			if( !checkCompilerExists( fbcFullPath ) ) return false;
-			//version(DIDE) if( DMDversion( fbcFullPath ) == 2 ) IupMessage( "2", "2" ); else IupMessage( "1", "1" );
-			
-			
-			if( GLOBAL.editorSetting00.SaveAllModified == "ON" )
-			{
-				foreach( CScintilla _cSci; GLOBAL.scintillaManager )
-				{
-					if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
-				}
-			}
-
-
-			char[] txtCommand, txtSources, txtIncludeDirs, txtLibDirs;
-			
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].includes )
-			{
-				if( fullPathByOS(s) in GLOBAL.scintillaManager )
-				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
-					{
-						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
-						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
-					}
-				}
-			}
-
-			bool bGotOneFileBuildSuccess;
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
-			{
-				version(FBIDE)	txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
-				version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
-				if( fullPathByOS(s) in GLOBAL.scintillaManager )
-				{
-					if( ScintillaAction.getModifyByTitle( GLOBAL.scintillaManager[fullPathByOS(s)] ) )
-					{
-						GLOBAL.scintillaManager[fullPathByOS(s)].saveFile();
-						GLOBAL.outlineTree.refresh( GLOBAL.scintillaManager[fullPathByOS(s)] ); //Update Parser
-					}
-				}
-			}
-			
-			version(FBIDE)
-			{
-				if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
-				{
-					if( GLOBAL.projectManager[activePrjName].mainFile.length )
-					{
-						scope mainFilePath = new FilePath( GLOBAL.projectManager[activePrjName].mainFile );
-						mainFilePath.standard();
-					
-						foreach( char[] s; GLOBAL.projectManager[activePrjName].sources )
-						{
-							if( s.length > 4 )
-							{
-								if( lowerCase( s[$-3..$] ) == "bas" )
-								{
-									char[] name = mainFilePath.name;
-									if( mainFilePath.isAbsolute() )
-									{
-										if( lowerCase( s[0..$-4] ) == lowerCase( name ) )
-										{
-											txtSources = " -b \"" ~ s ~ "\"";
-											bGotOneFileBuildSuccess = true;
-											break;
-										}
-									}
-									else
-									{
-										char[] relativePath = Util.substitute( s[0..$-4], GLOBAL.projectManager[activePrjName].dir ~ "/", "" );
-										if( lowerCase( relativePath ) == lowerCase( name ) ) 
-										{
-											txtSources = " -b \"" ~ s ~ "\"";
-											bGotOneFileBuildSuccess = true;
-											break;
-										}
-									}
-								}
-							}
-						}
-					}
-					else
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Project is set One File Mode.", true );
-						if( GLOBAL.compilerSFX == "ON" )
-						{
-							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
-						}
-						return false;
-					}
-				}
-			}
-			
-			
-
-			if( !txtSources.length )
-			{
-				GLOBAL.messagePanel.printOutputPanel( "Without source files......?\n\nBuild Error!", true );
-				return false;
-			}
-
-			foreach( char[] s; GLOBAL.projectManager[activePrjName].others )
-			{
-				txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
-			}				
-
-			version(FBIDE)
-			{
-				foreach( char[] s; _focus.IncDir )
-				{
-					txtIncludeDirs = txtIncludeDirs ~ " -i \"" ~ s ~ "\"";
-				}
-
-				foreach( char[] s; _focus.LibDir )
-				{
-					txtLibDirs = txtLibDirs ~ " -p \"" ~ s ~ "\"";
-				}
-			}
-			version(DIDE)
-			{
-				version(Windows)
-				{
-					int _COMPILERVER = DMDversion( fbcFullPath );
-					if( Util.index( _focus.Option, "-m32omf" ) < _focus.Option.length ) _COMPILERVER = 1;
-				}
+				// Start Thread
+				auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
+				_thread.start;
 				
-				foreach( char[] s; _focus.IncDir )
-				{
-					txtIncludeDirs = txtIncludeDirs ~ " -I\"" ~ s ~ "\"";
-				}
-				
-				foreach( char[] s; _focus.LibDir )
-				{
-					if( s.length )
-					{
-						version(Windows)
-						{
-							if( s[$-1] != '/' ) s ~= '/';
-							s = Util.replace( s.dup, '/', '\\' );
-
-							if( Util.contains( s, ' ' ) )
-							{
-								wchar[] ws = ( UTF.toString16( s ) ).dup;
-								wchar[] shortName;
-								shortName.length = ws.length + 1;
-								shortName[] = ' ';
-
-								DWORD len = GetShortPathNameW( toString16z( ws ), shortName.ptr, ws.length + 1  );
-								if( len > 0 && len <= ws.length )
-								{
-									s = Util.trim( UTF.toString( shortName[0..len] ) );
-								}
-								else
-								{
-									Ihandle* messageDlg = IupMessageDlg();
-									IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
-									IupSetAttribute( messageDlg, "VALUE", toStringz( "Libraries Path Error!" ) );
-									IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );	
-									return false;
-								}
-							}
-							
-							if( _COMPILERVER > 1 )
-								txtLibDirs = txtLibDirs ~ " -L/LIBPATH:\"" ~ s ~ "\"";
-							else
-							{
-								if( !txtLibDirs.length ) txtLibDirs = " -L-L+" ~ s; else txtLibDirs = txtLibDirs ~ "+" ~ s;
-							}
-						}
-						else
-						{
-							txtLibDirs = " -L-L\"" ~ s ~ "\"";
-						}
-					}
-				}
+				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+				return true;
 			}
-
-			char[] executeName, _targetName;
-			
-			if( _focus.Target.length ) _targetName = _focus.Target; else _targetName = GLOBAL.projectManager[activePrjName].name;
-			version(Windows)
-			{
-				switch( GLOBAL.projectManager[activePrjName].type )
-				{
-					case "2":
-						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib\"";
-						break;
-					case "3":
-						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
-						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll\"";
-						break;
-					default:
-						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? ".exe" : "" ) ~ "\"";
-				}
-			}
-			else
-			{
-				switch( GLOBAL.projectManager[activePrjName].type )
-				{
-					case "2":
-						version(FBIDE)	executeName = " -lib -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						version(DIDE)	executeName = " -lib -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a\"";
-						break;
-					case "3":
-						version(FBIDE)	executeName = " -dll -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
-						version(DIDE)	executeName = " -shared -of\"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so\"";
-						break;
-					default:
-						version(FBIDE)	executeName = " -x \"" ~ GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ "\"";
-						version(DIDE)	executeName = " -of\"" ~ _targetName ~ "\"";
-						
-				}
-			}
-
-			// Set The Using Opts
-			if( !options.length ) options = customOpt;
-			if( !options.length ) options = _focus.Option;
-
-			
-			version(FBIDE)
-			{
-				bool 	bWithExt;
-				char[] mainFile;
-				if( GLOBAL.projectManager[activePrjName].mainFile.length )
-				{
-					scope mainFilePath = new FilePath( GLOBAL.projectManager[activePrjName].mainFile );
-					if( mainFilePath.ext.length )
-					{
-						mainFile = mainFilePath.path ~ mainFilePath.name;
-						bWithExt = true;
-					}
-					else
-						mainFile = mainFilePath.toString;
-				}
-			
-				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~ executeName ~ ( bGotOneFileBuildSuccess ? "" : ( mainFile.length ? ( " -m \"" ~ mainFile ) ~ "\"" : "" ) ) ~
-							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-				
-			}
-			version(DIDE)
-			{
-				/*
-				txtCommand = "\"" ~ compilePath.toString ~ "\"" ~ executeName ~ ( GLOBAL.toolbar.checkBitButtonStatus != 32 ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( _focus.Option.length ? " " ~
-							_focus.Option : "" ) ~ ( options.length ? " " ~ options : "" );
-				*/
-				txtCommand = "\"" ~ fbcFullPath ~ "\"" ~ executeName ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? " -m64" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" );
-			}
-			
-			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -s gui";
-			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) txtCommand ~= " -L/SUBSYSTEM:WINDOWS";
-			
-
-			
-			// Using Thread
-			GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ txtCommand ~ "\n", true );
-			version(FBIDE) if( bWithExt ) GLOBAL.messagePanel.printOutputPanel( "****** Warnning! Main File Should Withould Extension! ******\n", false );
-
-			// Create Dir for Target
-			scope fp = new FilePath( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName );
-			fp.set( fp.path );
-			if( !fp.exists ) fp.create;
-			
-			// Start Thread
-			auto _reBuildThread = new ReBuildThread( GLOBAL.projectManager[activePrjName], txtCommand, options );
-			
-			if( GLOBAL.toggleCompileAtBackThread != "ON" ) 
-			{
-				_reBuildThread.go();
-				IupScintillaSendMessage( GLOBAL.messagePanel.getOutputPanelHandle, 2024, IupGetInt( GLOBAL.messagePanel.getOutputPanelHandle, "LINECOUNT" ) , 0 );	// SCI_GOTOLINE 2024
-			}
-			else
-			{
-				_reBuildThread.start();
-			}			
-			
-			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
-
-			return true;
 		}
 		catch( Exception e )
 		{
 			IupMessage( "",toStringz( e.toString ) );
-			return false;
 		}
 
-		return true;
+		return false;
 	}
 
-	static bool quickRun( char[] options = null, char[] args = null, char[] compiler = null )
-	{
-		version(linux) if( !checkTerminalExists() ) return false;
 	
-		quickRunFile = "";
+	static bool quickRun( string options = null, string args = null, string compiler = null )
+	{
+		version(linux)
+		{
+			if( !checkTerminalExists() ) 
+			{
+				int dummy = tools.questMessage( "Error", "The linux terminal path isn't set.", "ERROR", "OK" );
+				return false;
+			}
+		}
 		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
+		
+		quickRunFile = "";
+		
+		string files;
+		auto cSci = ScintillaAction.getActiveCScintilla();
 
+		// Show the message panel
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 		
-		// Get Custom Compiler
-		char[] customOpt, customCompiler;
-		CustomToolAction.getCustomCompilers( customOpt, customCompiler );
-		
-		
-		char[] fbcFullPath = compiler;
-		if( !fbcFullPath.length ) fbcFullPath = ( customCompiler.length ? customCompiler : ( GLOBAL.editorSetting00.Bit64 == "OFF" ? GLOBAL.compilerFullPath : GLOBAL.x64compilerFullPath ) );
-		version(Windows)
-		{
-			foreach( char[] s; GLOBAL.EnvironmentVars.keys )
-			{
-				fbcFullPath = Util.substitute( lowerCase( fbcFullPath ), lowerCase( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
-			}
-		}
-
-		if( !checkCompilerExists( fbcFullPath ) ) return false;
-
-		
-		char[] fileName;
-		auto cSci = ScintillaAction.getActiveCScintilla();
-		
 		if( cSci !is null )
 		{
-			scope _f = new FilePath( cSci.getFullPath() );
-			scope time = Clock.now.unix;
+			// Get Custom Compiler
+			string customOpt, customCompiler;
+			CustomToolAction.getCustomCompilers( customOpt, customCompiler );
+			
+			// Set The Using Compiler Path
+			if( !compiler.length ) compiler = ( customCompiler.length ? customCompiler : ( GLOBAL.compilerSettings.Bit64 == "OFF" ? GLOBAL.compilerSettings.compilerFullPath : GLOBAL.compilerSettings.x64compilerFullPath ) );
 			
 			version(Windows)
 			{
-				version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
-				version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
+				foreach( s; GLOBAL.EnvironmentVars.keys )
+				{
+					compiler = Array.replace( Uni.toLower( compiler ), Uni.toLower( "%"~s~"%" ), GLOBAL.EnvironmentVars[s] );
+				}
+			}
+
+			// Set The Using Opts
+			options = strip( options );
+			if( !options.length ) options = strip( customOpt );
+			version(Windows)
+			{
+				version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) options ~= " -s gui";
+				version(DIDE)
+				{
+					if( GLOBAL.toolbar.checkGuiButtonStatus ) options ~= " -L/SUBSYSTEM:WINDOWS";
+					if( tools.DMDversion( compiler ) == 4 )
+						if( GLOBAL.compilerSettings.Bit64 == "ON" ) options = "--m64 " ~ options; else options = "--m32 " ~ options;
+				}
+			}
+		
+			string fileName = "poseidonTemp" ~ Conv.to!(string)(MonoTime.currTime.ticks)[$-4..$];
+			
+			if( GLOBAL.linuxHome.length )
+			{
+				version(FBIDE) fileName = GLOBAL.linuxHome ~ "/" ~ fileName ~ ".bas"; else fileName =GLOBAL.linuxHome ~ "/" ~ fileName ~ ".d";
 			}
 			else
 			{
-				if( GLOBAL.linuxHome.length )
-				{
-					version(FBIDE) fileName = GLOBAL.linuxHome ~ "/" ~ Integer.toString( time.seconds ) ~ ".bas";
-					version(DIDE) fileName = GLOBAL.linuxHome ~ "/" ~ Integer.toString( time.seconds ) ~ ".d";
-				}
-				else
-				{
-					if( !_f.path.length )
-					{
-						version(FBIDE) fileName = GLOBAL.poseidonPath ~ Integer.toString( time.seconds ) ~ ".bas";
-						version(DIDE) fileName = GLOBAL.poseidonPath ~ Integer.toString( time.seconds ) ~ ".d";
-					}
-					else
-					{
-						version(FBIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".bas";
-						version(DIDE) fileName = _f.path() ~ Integer.toString( time.seconds ) ~ ".d";
-					}
-				}
+				version(FBIDE) fileName = Path.dirName( cSci.getFullPath ) ~ "/" ~ fileName ~ ".bas"; else fileName = Path.dirName( cSci.getFullPath ) ~ "/" ~ fileName ~ ".d";
 			}
+			FileAction.saveFile( fileName, cSci.getText, BOM.utf8, true );
+			quickRunFile = cSci.getFullPath;
+		
+			GLOBAL.messagePanel.printOutputPanel( "Quick Run " ~ cSci.getFullPath ~ "......\n", true );
+			// Pass compiler, files, options to Thread
+			auto _thread = new CompileThread( compiler, fileName, options, Path.dirName( fileName ), true, args, true );
+			_thread.start;
 			
-			FileAction.saveFile( fileName, cSci.getText(), cSci.encoding ); // Create a file with UTF8 With Bom
+			return true;
 		}
 		else
 		{
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Without any source file has been selected......?\n\nBuild Error!" ) );
-			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nBuild Error!", true );
-			return false;
+			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nQuick Run Error!", true );
 		}
-		
-		try
-		{
-
-			// Set The Using Opts
-			if( !options.length ) options = customOpt;
-
-			version(FBIDE)
-			{
-				char[] commandString = "\"" ~ fbcFullPath ~ "\" " ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
-				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -s gui";
-			}
-			version(DIDE)
-			{
-				char[] commandString = "\"" ~ fbcFullPath ~ "\" " ~ ( GLOBAL.editorSetting00.Bit64 == "ON" ? "-m64 " : "" ) ~ "\"" ~ fileName ~ "\"" ~ ( options.length ? " " ~ options : null );
-				if( GLOBAL.toolbar.checkGuiButtonStatus ) commandString ~= " -L/SUBSYSTEM:WINDOWS";
-			}
-			
-			scope _filePath = new FilePath( cSci.getFullPath() );
-			
-			Process p = new Process( true, commandString );
-			p.gui( true );
-			p.workDir( _filePath.path() );
-			p.execute;
-
-			char[]	stdoutMessage, stderrMessage;
-			bool	bError, bWarning;
-			// Compiler Command
-			GLOBAL.messagePanel.printOutputPanel( "Quick Run......\n\n" ~ commandString ~ "\n", true );
-
-			version(FBIDE)
-			{
-				foreach (line; new Lines!(char)(p.stderr))  
-				{
-					if( !bWarning )
-					{
-						if( Util.index( line, "warning:" ) < line.length )
-						{
-							bWarning = true;
-							stderrMessage ~= ( line ~ "\n" );
-							continue;
-						}
-					}
-					
-					if( !bError )
-					{
-						if( line.length ) bError = true;
-					}				
-
-					stderrMessage ~= ( line ~ "\n" );
-				}
-				
-				foreach( line; new Lines!(char)(p.stdout) )
-				{
-					if( !bWarning )
-					{
-						if( Util.index( line, "warning " ) < line.length ) bWarning = true;
-					}
-					if( !bError )
-					{
-						if( Util.index( line, "error " ) < line.length ) bError = true;
-					}				
-					
-					stdoutMessage ~= ( line ~ "\n" );
-				}
-			}
-			version(DIDE)
-			{
-				foreach (line; new Lines!(char)(p.stderr))  
-				{
-					if( Util.trim( line ).length ) bError = true;
-					stderrMessage ~= ( line ~ "\n" );
-				}
-				
-				foreach (line; new Lines!(char)(p.stdout))  
-				{
-					if( !bError )
-					{
-						if( Util.index( line, "): " ) < line.length )
-							bError = true;
-						else if( Util.index( line, "Error " ) < line.length )
-							bError = true;						
-					}
-
-					stdoutMessage ~= ( line ~ "\n" );
-				}
-			}
-
-			auto result = p.wait;
-
-			// Set quickRunFile to active document fullpath
-			quickRunFile = cSci.getFullPath;
-			
-			version(FBIDE)
-			{
-				if( Util.trim( stdoutMessage ).length ) showAnnotation( stdoutMessage ); else showAnnotation( null );
-				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length ) GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage ); //IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( stdoutMessage ~ stderrMessage ) );
-			}
-			version(DIDE)
-			{
-				if( Util.trim( stdoutMessage ).length || Util.trim( stderrMessage ).length )
-				{
-					GLOBAL.messagePanel.printOutputPanel( stdoutMessage ~ stderrMessage );
-					showAnnotation( stdoutMessage ~ stderrMessage );
-				}
-				else
-					showAnnotation( null );
-			}
-			if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR();
-
-			if( !bError )
-			{
-				if( !bWarning )
-				{
-					GLOBAL.messagePanel.printOutputPanel( "Compile Success!" );
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-						}							
-					}					
-				}
-				else
-				{
-					GLOBAL.messagePanel.printOutputPanel( "Compile Success! But got warning..." );
-					if( GLOBAL.compilerWindow == "ON" )
-					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-						IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					}
-					else
-					{
-						version(Windows)
-						{
-							if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
-						}
-						else
-						{
-							if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-						}							
-					}					
-				}
-
-				char[] command;
-				scope _f = new FilePath( fileName );
-				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ _f.name;//command = _f.path ~ "./" ~ _f.name;
-				_f.remove();
-				
-				ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
-				derived.start();
-
-				GLOBAL.messagePanel.printOutputPanel( "\nRunning " ~ command ~ args ~ "......" );
-			}
-			else
-			{
-				GLOBAL.messagePanel.printOutputPanel( "Compile Error!" );
-
-				if( GLOBAL.compilerWindow == "ON" )
-				{
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-				}
-				else
-				{
-					version(Windows)
-					{
-						if( GLOBAL.compilerSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-					}
-					else
-					{
-						if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-					}							
-				}
-				
-				char[] command;
-				scope _f = new FilePath( fileName );
-				version( Windows ) command = _f.path ~ _f.name ~ ".exe"; else command = _f.path ~ _f.name;//command = _f.path ~ "./" ~ _f.name;
-				_f.remove();
-
-				_f.set( command );
-				if( _f.exists() )
-				{
-					ExecuterThread derived = new ExecuterThread( "\"" ~ command ~ "\"", args, _f.path, true );
-					derived.start();
-
-					GLOBAL.messagePanel.printOutputPanel( "\nBut Got Execute, Running " ~ command ~ args ~ "......" );
-				}
-			}
-
-			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
-
-			return true;
-		}
-		catch( ProcessException e )
-		{
-		  // Stdout.formatln ("Process execution failed: {}", e);
-
-		   return false;
-		}
+		return false;
 	}
 
-	static bool run( char[] args = null, bool bForceCompileOne = false )
+	static bool run( string args = null, bool bForceCompileOne = false )
 	{
-		version(linux) if( !checkTerminalExists() ) return false;
-	
+		version(linux)
+		{
+			if( !checkTerminalExists() ) 
+			{
+				int dummy = tools.questMessage( "Error", "The linux terminal path isn't set.", "ERROR", "OK" );
+				return false;
+			}
+		}
+		// Keep Message panel open
+		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
+		IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
+
+		
 		bool	bRunProject;
-		char[]	command;
-		char[]	activePrjName	= actionManager.ProjectAction.getActiveProjectName();
+		string	activePrjName	= actionManager.ProjectAction.getActiveProjectName();
 		
 		// Set Multiple Focus Project
-		FocusUnit _focus;
+		FocusUnit	_beRunfocus;
+		string		_beRunFile;
+		string		_bePassArgs;
 		
 		if( activePrjName.length )
 		{
 			if( activePrjName in GLOBAL.projectManager )
 			{
-				_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+				bRunProject = true;
 				if( GLOBAL.projectManager[activePrjName].focusOn.length )
 				{
-					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _beRunfocus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
 				}
 			}
-		}
-
-		auto activeCScintilla = actionManager.ScintillaAction.getActiveCScintilla();
-		if( activeCScintilla !is null )
-		{
-			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
-			IupSetAttribute( GLOBAL.messageWindowTabs, "VALUEPOS", "0" );
 			
-			if( !bForceCompileOne )
+			if( _beRunfocus.Target.length ) _beRunFile = Path.stripExtension( _beRunfocus.Target );
+			if( !_beRunFile.length ) _beRunFile = Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName );
+			if( !_beRunFile.length ) _beRunFile = Path.stripExtension( GLOBAL.projectManager[activePrjName].name );
+			if( _beRunFile.length )
 			{
-				int nodeCount = IupGetInt( GLOBAL.projectTree.getTreeHandle, "COUNT" );
-				for( int id = 1; id <= nodeCount; id++ )
-				{
-					char[] _cstring = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) ); //fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ); // shadow
-					if( _cstring == activeCScintilla.getFullPath() )
-					{
-						version(Windows) IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" ); else IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
-						bRunProject = true;
-
-						if( GLOBAL.projectManager[activePrjName].type.length )
-						{
-							if( GLOBAL.projectManager[activePrjName].type != "1" )
-							{
-								GLOBAL.messagePanel.printOutputPanel( "Can't Run Static / Dynamic Library............Run Error!", true );
-								return false;
-							}
-						}
-						
-						version(Windows)
-						{
-							if( _focus.Target.length )
-							{
-								scope _focusPath = new FilePath( _focus.Target );
-								if( lowerCase( _focusPath.suffix ) == ".exe" ) 
-									command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target;
-								else
-									command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target ~ ".exe";
-							}
-							else
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
-						}
-						else
-						{
-							if( _focus.Target.length )
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target;
-							else
-								command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
-						}
-						break;
-					}
-				}
+				_beRunFile = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _beRunFile;
+				_bePassArgs = strip( GLOBAL.projectManager[activePrjName].args );
 			}
-			else
+			
+			if( GLOBAL.projectManager[activePrjName].type != "1" )
 			{
-				bRunProject = false;
-			}
-
-			if( !bRunProject ) 
-			{
-				scope _f = new FilePath( activeCScintilla.getFullPath() );
-				version(Windows)
-				{
-					command = _f.path ~ _f.name ~ ".exe";
-				}
-				else
-				{
-					command = _f.path ~ _f.name;
-				}
-			}
+				GLOBAL.messagePanel.printOutputPanel( "Can't Run Static / Dynamic Library............Run Error!", true );
+				return false;
+			}			
 		}
-		else
+		// Not in project! try single exe
+		if( !bRunProject )
 		{
-			if( activePrjName.length )
-			{
-				version(Windows)
-				{
-					if( _focus.Target.length )
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target ~ ".exe";
-					else
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name ~ ".exe";
-				}
-				else
-				{
-					if( _focus.Target.length )
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _focus.Target;
-					else
-						command = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].name;
-				}
-			}
+			auto cSci = ScintillaAction.getActiveCScintilla();
+			if( cSci !is null ) _beRunFile = Path.stripExtension( cSci.getFullPath() );
 		}
-
-		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
-		scope f = new FilePath( command );
-		if( f.exists() )
+		if( args.length ) _bePassArgs = args;
+		version(Windows) if( _beRunFile.length ) _beRunFile = _beRunFile ~ ".exe";
+		GLOBAL.messagePanel.printOutputPanel( "Run " ~ _beRunFile ~ "......\n", true );
+		if( exists( _beRunFile ) )
 		{
-			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ " "  ~ args ~ "......", true );
-
-			ExecuterThread derived;
-			version(Windows) derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path ); else derived = new ExecuterThread( "\"" ~ command ~ "\"", args, f.path );
-			derived.start();
+			auto _thread = new ExecuterThread( _beRunFile, _bePassArgs, getBuildNeedDataToTLS, Path.dirName( _beRunFile ) );
+			_thread.start;
+			/+
+			auto pid = spawnShell( _beRunFile ~ " " ~ _bePassArgs, null, Config.none, Path.dirName( _beRunFile ) );
+			tryWait(pid);
+			+/
 		}
 		else
 		{
-			GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ command ~ "\nisn't exist......?\n\nRun Error!", true );
+			GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ _beRunFile ~ "\nisn't exist......?\n\nRun Error!", true );
 			return false;
 		}
-
+	
 		return true;
 	}
 }

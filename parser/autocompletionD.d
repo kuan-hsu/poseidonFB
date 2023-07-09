@@ -6,7 +6,7 @@ version(DIDE)
 	import iup.iup_scintilla;
 
 	import global, actionManager, menu, tools;
-	import tango.stdc.stringz;
+	import std.string, Conv = std.conv, Algorithm = std.algorithm, std.algorithm.mutation : SwapStrategy;
 	
 	struct AutoComplete
 	{
@@ -14,35 +14,38 @@ version(DIDE)
 		import parser.ast;
 		import actionManager;
 
-		import Integer = tango.text.convert.Integer, Util = tango.text.Util, UTF = tango.text.convert.Utf, Path = tango.io.Path;
-		import tango.io.FilePath, tango.sys.Environment;
-		import tango.io.Stdout;
-		import tango.core.Thread;
+		import std.stdio, std.file, std.format, UTF = std.utf;
+		import Path = std.path, Array = std.array, Uni = std.uni;
+		import core.thread;
 
-		static CStack!(char[])		calltipContainer;
-		static char[]				noneListProcedureName;
+		static Stack!(string)				calltipContainer;
+		public static string				noneListProcedureName;
 		
-		static char[][]				listContainer;
-		static CASTnode[char[]]		includesMarkContainer;
-		static int[char[]]			VersionCondition;
+		static string[]						listContainer;
+		static shared CASTnode[string]		includesMarkContainer;
+		public static shared int[string]	VersionCondition;
 		
-		static char[]				showTypeContent;
+		static string						showTypeContent;
 		
 		
 		class CGetIncludes : Thread
 		{
 		private:
-			CASTnode	AST_Head;
+			CASTnode			AST_Head;
+			CompilerSettingUint	compilerSettings; // For TLS
 		
 		public:
 			this( CASTnode _AST_Head )
 			{
 				AST_Head = _AST_Head;
+				compilerSettings = GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
+				
 				super( &run );
 			}
 
 			void run()
 			{
+				GLOBAL.compilerSettings = compilerSettings; // To TLS GLOBAL.compilerSettings
 				AutoComplete.getIncludes( AST_Head, AST_Head.name, true, true );
 			}
 		}		
@@ -52,27 +55,29 @@ version(DIDE)
 		private:
 			import scintilla;
 			
-			int			ext;
-			char[]		text, extString;
-			char[]		result;
+			int					ext;
+			string				text, extString;
+			string				result;
 			
-			CASTnode	AST_Head;
-			int			pos, lineNum;
-			bool		bDot, bCallTip;
-			char[][]	splitWord;
+			CASTnode			AST_Head;
+			int					pos, lineNum;
+			bool				bDot, bCallTip;
+			string[]			splitWord;
+			CompilerSettingUint compilerSettings;
 			
 		public:
-			this( CASTnode _AST_Head, int _pos, int _lineNum, bool _bDot, bool _bCallTip, char[][] _splitWord, char[] _text, int _ext = -1, char[] _extString = ""  )
+			this( CASTnode _AST_Head, int _pos, int _lineNum, bool _bDot, bool _bCallTip, string[] _splitWord, string _text, int _ext = -1, string _extString = ""  )
 			{
-				AST_Head		= _AST_Head;
-				pos				= _pos;
-				lineNum			= _lineNum;
-				bDot			= _bDot;
-				bCallTip		= _bCallTip;
-				splitWord		= _splitWord;
-				text			= _text;
-				ext				= _ext;
-				_extString		= _extString;
+				AST_Head			= _AST_Head;
+				pos					= _pos;
+				lineNum				= _lineNum;
+				bDot				= _bDot;
+				bCallTip			= _bCallTip;
+				splitWord			= _splitWord;
+				text				= _text;
+				ext					= _ext;
+				_extString			= _extString;
+				compilerSettings	= GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
 				
 				super( &run );
 			}
@@ -80,15 +85,17 @@ version(DIDE)
 			// If using IUP command in Thread, join() occur infinite loop, so......
 			void run()
 			{
+				GLOBAL.compilerSettings = compilerSettings; // To TLS GLOBAL.compilerSettings
+
 				if( AST_Head is null )
 				{
-					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
+					if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
 					return;
 				}
 
 				if( GLOBAL.autoCompletionTriggerWordCount < 1 ) 
 				{
-					if( GLOBAL.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
+					if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
 					return;
 				}
 				
@@ -96,35 +103,31 @@ version(DIDE)
 
 				if( listContainer.length )
 				{
-					listContainer.sort;
+					Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 
-					char[]	_type, _list;
+					string	_type, _list;
 					int		maxLeft, maxRight;
 
-					if( GLOBAL.toggleShowListType == "ON" )
+					for( int i = 0; i < listContainer.length; ++ i )
 					{
-						for( int i = 0; i < listContainer.length; ++ i )
+						if( listContainer[i].length )
 						{
-							if( listContainer[i].length )
+							int dollarPos = lastIndexOf( listContainer[i], "#" );
+							if( dollarPos > -1 )
 							{
-								int dollarPos = Util.rindex( listContainer[i], "#" );
-								if( dollarPos < listContainer[i].length )
-								{
-									_type = listContainer[i][dollarPos+1..$];
-									if( _type.length > maxRight ) maxRight = _type.length;
-									_list = listContainer[i][0..dollarPos];
-									if( _list.length > maxLeft ) maxLeft = _list.length;
-								}
-								else
-								{
-									if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
-								}
+								_type = listContainer[i][dollarPos+1..$];
+								if( _type.length > maxRight ) maxRight = _type.length;
+								_list = listContainer[i][0..dollarPos];
+								if( _list.length > maxLeft ) maxLeft = _list.length;
+							}
+							else
+							{
+								if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
 							}
 						}
 					}
 
-					char[] formatString = "{,-" ~ Integer.toString( maxLeft ) ~ "} :: {,-" ~ Integer.toString( maxRight ) ~ "}";
-					
+					//string formatString = "{,-" ~ Conv.to!(string)( maxLeft ) ~ "} :: {,-" ~ Conv.to!(string)( maxRight ) ~ "}";					
 					for( int i = 0; i < listContainer.length; ++ i )
 					{
 						if( i > 0 )
@@ -132,28 +135,21 @@ version(DIDE)
 
 						if( listContainer[i].length )
 						{
-							if( GLOBAL.toggleShowListType == "ON" )
+							string _string;
+							
+							int dollarPos = lastIndexOf( listContainer[i], "#" );
+							if( dollarPos > -1 )
 							{
-								char[] _string;
-								
-								int dollarPos = Util.rindex( listContainer[i], "#" );
-								if( dollarPos < listContainer[i].length )
-								{
-									_type = listContainer[i][dollarPos+1..$];
-									_list = listContainer[i][0..dollarPos];
-									_string = Util.trim( Stdout.layout.convert( formatString, _list, _type ) );
-								}
-								else
-								{
-									_string = listContainer[i];
-								}
-
-								result ~= ( _string ~ "^" );
+								_type = listContainer[i][dollarPos+1..$];
+								_list = listContainer[i][0..dollarPos];
+								_string = stripRight( format( "%-" ~ Conv.to!(string)(maxLeft) ~ "s :: %-" ~ Conv.to!(string)(maxRight) ~ "s", _list, _type ) );
 							}
 							else
 							{
-								result ~= ( listContainer[i] ~ "^" );
+								_string = listContainer[i];
 							}
+
+							result ~= ( _string ~ "^" );
 						}
 					}
 				}
@@ -162,47 +158,19 @@ version(DIDE)
 					if( result[$-1] == '^' ) result = result[0..$-1];
 			}
 			
-			char[] getResult()
+			string getResult()
 			{
 				return result;
 			}			
 		}
 		
 		
-		static CGetIncludes		preLoadContainerThread;
-		static CShowListThread	showListThread;
-		static CShowListThread	showCallTipThread;
-		static Ihandle*			timer = null;
-		
-		/*
-		static char[] getDefaultList( char[] s )
-		{
-			if( s.length )
-			{
-				if( s[$-1] == ']' || s == "string" || s == "wstring" || s == "dstring" )
-				{
-					Ihandle*	_iupSci = ScintillaAction.getActiveIupScintilla;
-					
-					if( _iupSci != null )
-					{
-						int	pos = ScintillaAction.getCurrentPos( _iupSci );
-						if( pos > 0 )
-						{
-							char[] beforeDot = fromStringz( IupGetAttributeId( _iupSci, "CHAR", pos - 1 ) );
-							if( beforeDot != "]" )
-							{
-								listContainer.length = 0;
-								return "init?21^sizeof?21^length?21^ptr?21^dup?21^idup?21^reverse?21^sort?21";
-							}
-						}
-					}
-				}
-			}
-			return null;
-		}
-		*/
-		
-		static char[] getDefaultList( char[] s, bool bBracket )
+		static CGetIncludes				preLoadContainerThread;
+		public static CShowListThread	showListThread;
+		public static CShowListThread	showCallTipThread;
+		static Ihandle*					timer = null;
+
+		static string getDefaultList( string s, bool bBracket )
 		{
 			if( s.length )
 			{
@@ -211,7 +179,7 @@ version(DIDE)
 					if( !bBracket )
 					{
 						listContainer.length = 0;
-						return "init?21^sizeof?21^length?21^ptr?21^dup?21^idup?21^reverse?21^sort?21";
+						return "dup?21^idup?21^init?21^length?21^ptr?21^reverse?21^sizeof?21^sort?21";
 
 					}
 				}
@@ -253,11 +221,11 @@ version(DIDE)
 			return false;
 		}
 		
-		static char[] getShowTypeCTORList( CASTnode node, bool bAnalysisClass = true, int layerLimit = 3 )
+		static string getShowTypeCTORList( CASTnode node, bool bAnalysisClass = true, int layerLimit = 3 )
 		{
 			if( node is null ) return null;
 			
-			char[]	result, _space;
+			string	result, _space;
 			int		layer;
 			
 			void _getList( CASTnode _node )
@@ -315,7 +283,7 @@ version(DIDE)
 						if( _child.kind & D_CTOR )
 						{
 							result ~= "\n";
-							_space[] = ' ';
+							//_space[] = ' ';
 							if( GLOBAL.showTypeWithParams != "ON" )
 								result ~= ( _space ~ "this" );
 							else
@@ -336,7 +304,7 @@ version(DIDE)
 
 									if( mother !is null )
 									{
-										char[] _type;
+										string _type;
 										switch( mother.kind )
 										{
 											case D_INTERFACE: _type = "\"INTERFACE\""; break;
@@ -366,9 +334,9 @@ version(DIDE)
 		}
 		
 		
-		static char[] getMotherPath_D_MODULE( in CASTnode oriNode, bool bToRoot = false )
+		static string getMotherPath_D_MODULE( ref CASTnode oriNode, bool bToRoot = false )
 		{
-			char[]		cwdPath;
+			string		cwdPath;
 			CASTnode	astNode = oriNode;
 			
 			if( bToRoot )
@@ -379,47 +347,42 @@ version(DIDE)
 			
 			if( astNode.kind & D_MODULE )
 			{
-				int dotCount = Util.count( astNode.name, "." );
-				scope cwdFilePath = new FilePath( astNode.type );
-				
-				cwdPath = cwdFilePath.path();
+				int dotCount = Algorithm.count( astNode.name, "." );
+				cwdPath = Path.dirName( astNode.type );
 				
 				bool bPackageModule;
-				if( cwdFilePath.file == "package.d" )
+				if( Path.baseName( astNode.type ) == "package.d" )
 					if( astNode.name.length > 6 )
 						if( astNode.name[$-7..$] != "package" ) bPackageModule = true;
 				
 				
 				for( int i = 0; i < dotCount; ++ i )
 				{
-					cwdFilePath.set( cwdPath );
-					cwdPath = cwdFilePath.parent();
+					cwdPath = Path.dirName( cwdPath );
 				}
 				
 				if( bPackageModule )
 				{
-					cwdFilePath.set( cwdPath );
-					cwdPath = cwdFilePath.parent();
+					cwdPath = Path.dirName( cwdPath );
 				}
-
-				if( cwdPath.length )
-					if( cwdPath[$-1] != '/' ) cwdPath ~= '/';
 			}		
 			
 			return cwdPath;
 		}
 		
 		
-		static CASTnode importComplete( CASTnode AST_Head, int lineNum, int completeCase, char[][] splitWord, int wordIndex )
+		static CASTnode importComplete( CASTnode AST_Head, int lineNum, int completeCase, string[] splitWord, int wordIndex )
 		{
-			auto		cSci = actionManager.ScintillaAction.getActiveCScintilla();
+			string RootFullPath;
+			auto _root = ParserAction.getRoot( AST_Head );
+			if( _root !is null ) RootFullPath = _root.type; else return null;
 			
 			switch( completeCase )
 			{
 				case 0:
 					CASTnode[]	resultNodes			= getMatchASTfromWholeWord( AST_Head, splitWord[0], lineNum, D_IMPORT );
 					CASTnode[]	resultIncludeNodes;
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWholeWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, splitWord[0], D_IMPORT );
+					if( fullPathByOS(RootFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWholeWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(RootFullPath)], null, splitWord[0], D_IMPORT );
 					
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{
@@ -439,7 +402,7 @@ version(DIDE)
 								{
 									if( _node.name != _node.base )
 									{
-										char[] base = _node.base;
+										string base = _node.base;
 										auto motherModule = searchMatchNode( AST_Head, _node.type, D_IMPORT ); // Check Renamed Imports
 										if( motherModule !is null )
 											if( motherModule.type.length ) _node = motherModule;
@@ -463,9 +426,10 @@ version(DIDE)
 				case 1: // wordIndex = 0; Using word full match
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, splitWord[0], lineNum, D_IMPORT );
 					CASTnode[]	resultIncludeNodes;
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, splitWord[0], false, D_IMPORT );
+					
+					if( fullPathByOS(RootFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(RootFullPath)], null, splitWord[0], false, D_IMPORT );
 				
-					char[][]	results;
+					string[]	results;
 					CASTnode	markNode;
 					
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
@@ -478,9 +442,9 @@ version(DIDE)
 								return searchMatchNode( AST_Head, _node.name, D_MODULE );
 							}
 							
-							if( Util.index( _node.name, splitWord[0] ~ "." ) == 0 )
+							if( indexOf( _node.name, splitWord[0] ~ "." ) == 0 )
 							{
-								char[][] _nodeNames = Util.split( _node.name, "." );
+								string[] _nodeNames = Array.split( _node.name, "." );
 								if( _nodeNames.length > 1 )
 								{
 									markNode = _node;
@@ -496,7 +460,7 @@ version(DIDE)
 								{
 									if( _node.name != _node.base )
 									{
-										char[] base = _node.base;
+										string base = _node.base;
 										auto motherModule = searchMatchNode( AST_Head, _node.type, D_IMPORT ); // Check Renamed Imports
 										if( motherModule !is null )
 											if( motherModule.type.length ) _node = motherModule;
@@ -514,15 +478,15 @@ version(DIDE)
 						}
 					}
 
-					results.sort;
+					Algorithm.sort( results );
 
-					foreach( char[] s; results )
+					foreach( string s; results )
 						listContainer ~= s;
 
 					return markNode;
 
 				case 2: // StepByStep
-					char[] combineWord;
+					string combineWord;
 					for( int i = 0; i <= wordIndex; ++ i )
 						combineWord ~= ( splitWord[i] ~ "." );
 
@@ -531,13 +495,14 @@ version(DIDE)
 					CASTnode	returnNode;
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, combineWord, lineNum, D_IMPORT );
 					CASTnode[]	resultIncludeNodes;
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
+					
+					if( fullPathByOS(RootFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(RootFullPath)], null, combineWord, false, D_IMPORT );
 						
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{
 						if( !_node.type.length )
 						{
-							char[][] _nodeNames = Util.split( _node.name, "." );
+							string[] _nodeNames = Array.split( _node.name, "." );
 							
 							if( _nodeNames.length == wordIndex + 1 )
 							{
@@ -545,7 +510,7 @@ version(DIDE)
 							}
 							else if( _nodeNames.length > wordIndex + 1 )
 							{
-								if( Util.index( _node.name, combineWord ~ "." ) == 0 )
+								if( indexOf( _node.name, combineWord ~ "." ) == 0 )
 								{
 									//results ~= ( _nodeNames[wordIndex+1] ~ "?22" );
 									returnNode = _node;
@@ -557,8 +522,8 @@ version(DIDE)
 					return returnNode;				
 
 				case 3: // Tail
-					char[] combineWord;
-					char[][] results;
+					string combineWord;
+					string[] results;
 
 					for( int i = 0; i <= wordIndex; ++ i )
 						combineWord ~= ( splitWord[i] ~ "." );
@@ -567,13 +532,14 @@ version(DIDE)
 
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, combineWord, lineNum, D_IMPORT );
 					CASTnode[]	resultIncludeNodes;
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
+					
+					if( fullPathByOS(RootFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(RootFullPath)], null, combineWord, false, D_IMPORT );
 					
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{
 						if( !_node.type.length )
 						{
-							char[][] _nodeNames = Util.split( _node.name, "." );
+							string[] _nodeNames = Array.split( _node.name, "." );
 
 							if( _nodeNames.length == wordIndex + 1 )
 							{
@@ -581,7 +547,7 @@ version(DIDE)
 							}
 							else if( _nodeNames.length > wordIndex + 1 )
 							{
-								if( Util.index( _node.name, combineWord ~ "." ) == 0 )
+								if( indexOf( _node.name, combineWord ~ "." ) == 0 )
 								{
 									listContainer ~= ( _nodeNames[wordIndex+1] ~ "?22" );
 								}
@@ -593,7 +559,7 @@ version(DIDE)
 
 				case 4:
 
-					char[] combineWord;
+					string combineWord;
 					for( int j = 0; j <= wordIndex; ++ j )
 						combineWord ~= ( splitWord[j] ~ "." );
 
@@ -601,13 +567,14 @@ version(DIDE)
 					
 					CASTnode[]	resultNodes			= getMatchASTfromWord( AST_Head, combineWord, lineNum, D_IMPORT );
 					CASTnode[]	resultIncludeNodes;
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], null, combineWord, false, D_IMPORT );
+					
+					if( fullPathByOS(RootFullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(RootFullPath)], null, combineWord, false, D_IMPORT );
 
 					foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 					{
 						if( !_node.type.length )
 						{
-							char[][] nodeNames = Util.split( _node.name, "." );
+							string[] nodeNames = Array.split( _node.name, "." );
 							if( wordIndex < nodeNames.length )
 							{
 								listContainer ~= ( nodeNames[wordIndex] ~ "?22" );
@@ -635,7 +602,7 @@ version(DIDE)
 		}
 		
 		/+
-		static char[] searchHead( Ihandle* iupSci, int pos, char[] targetText )
+		static string searchHead( Ihandle* iupSci, int pos, string targetText )
 		{
 			int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
 			
@@ -646,11 +613,11 @@ version(DIDE)
 			if( posEnd > posHead ) return null;
 
 
-			char[]	result;
+			string	result;
 			bool	bSPACE, bReturnNextWord;
 			for( int i = posHead + targetText.length; i < documentLength; ++i )
 			{
-				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) );
+				string s = fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) );
 
 				//stdout( s ).newline;
 				
@@ -681,9 +648,9 @@ version(DIDE)
 			int posDtor		= skipCommentAndString( iupSci, pos, "destructor", 0 );
 
 			/*
-			IupMessage( "With", toStringz( Integer.toString( posWith ) ) );
-			IupMessage( "Sub", toStringz( Integer.toString( posSub ) ) );
-			IupMessage( "Function", toStringz( Integer.toString( posFunction ) ) );
+			IupMessage( "With", toStringz( Conv.to!(string)( posWith ) ) );
+			IupMessage( "Sub", toStringz( Conv.to!(string)( posSub ) ) );
+			IupMessage( "Function", toStringz( Conv.to!(string)( posFunction ) ) );
 			*/
 
 			if( posWith < 0 ) return false;
@@ -694,11 +661,11 @@ version(DIDE)
 		}
 		+/
 
-		static char[] getListImage( CASTnode node )
+		static string getListImage( CASTnode node )
 		{
 			if( node is null ) return null;
 			
-			if( GLOBAL.toggleShowAllMember == "OFF" )
+			if( GLOBAL.compilerSettings.toggleShowAllMember == "OFF" )
 			{
 				if( node.protection == "private" )
 					if( !checkIsFriendAndMother( node ) ) return null;
@@ -714,51 +681,45 @@ version(DIDE)
 				default:			protAdd = 2;
 			}
 
-			char[] name = node.name;
+			string name = node.name;
 			if( node.name.length )
 			{
 				if( node.name[$-1] == ')' )
 				{
-					int posOpenParen = Util.index( node.name, "(" );
-					if( posOpenParen < node.name.length ) name = node.name[0..posOpenParen];
+					int posOpenParen = indexOf( node.name, "(" );
+					if( posOpenParen > -1 ) name = node.name[0..posOpenParen];
 				}
 			}
 			else
 				return null;
 
-			bool bShowType = GLOBAL.toggleShowListType == "ON" ? true : false;
-			char[] type = node.type;
-
-			if( bShowType )
-			{
-				type = ParserAction.getSeparateType( node.type );
-			}
-			
+			string type = node.type;
+			type = ParserAction.getSeparateType( node.type );
 			switch( node.kind )
 			{
-				case D_FUNCTION:				return bShowType ? name  ~ "#" ~ type ~ "?" ~ Integer.toString( 28 + protAdd ) : name ~ "?" ~ Integer.toString( 28 + protAdd );
+				case D_FUNCTION:				return name  ~ "#" ~ type ~ "?" ~ Conv.to!(string)( 28 + protAdd );
 				case D_VARIABLE:
 					if( node.name.length )
 					{
-						if( node.name[$-1] == ')' ) return bShowType ? name ~ "#" ~ type ~ "?" ~ Integer.toString( 0 + protAdd ) : name ~ "?" ~ Integer.toString( 0 + protAdd ); else return bShowType ? name ~ "#" ~ type ~ "?" ~ Integer.toString( 3 + protAdd ) : name ~ "?" ~ Integer.toString( 3 + protAdd );
+						if( node.name[$-1] == ')' ) return name ~ "#" ~ type ~ "?" ~  Conv.to!(string)( 0 + protAdd ); else return name ~ "#" ~ type ~ "?" ~ Conv.to!(string)( 3 + protAdd );
 					}
 					break;
 					
 				case D_TEMPLATE:				return name ~ "?23";
-				case D_CLASS:					return name ~ "?" ~ Integer.toString( 6 + protAdd );
-				case D_STRUCT: 					return name ~ "?" ~ Integer.toString( 9 + protAdd );
-				case D_ENUM: 					return name ~ "?" ~ Integer.toString( 12 + protAdd );
+				case D_CLASS:					return name ~ "?" ~ Conv.to!(string)( 6 + protAdd );
+				case D_STRUCT: 					return name ~ "?" ~ Conv.to!(string)( 9 + protAdd );
+				case D_ENUM: 					return name ~ "?" ~ Conv.to!(string)( 12 + protAdd );
 				case D_PARAM:
-						if( Util.index( type, "in " ) == 0 )
+						if( indexOf( type, "in " ) == 0 )
 							type = type[3..$].dup;
-						else if( Util.index( type, "out " ) == 0 )
+						else if( indexOf( type, "out " ) == 0 )
 							type = type[4..$].dup;
-						else if( Util.index( type, "ref " ) == 0 )
+						else if( indexOf( type, "ref " ) == 0 )
 							type = type[4..$].dup;
-						else if( Util.index( type, "inout " ) == 0 )
+						else if( indexOf( type, "inout " ) == 0 )
 							type = type[6..$].dup;
 				
-						return bShowType ? name ~ "#" ~ type ~ "?18" : name ~ "?18";
+						return name ~ "#" ~ type ~ "?18";
 				case D_ENUMMEMBER:				return name ~ "?19";
 				case D_ALIAS:					return name ~ "?31";
 				case D_INTERFACE:				return name ~ "?32";
@@ -796,7 +757,7 @@ version(DIDE)
 			return results;
 		}
 
-		static CASTnode[] getAnonymousEnumMemberFromWord( CASTnode originalNode, char[] word, bool bCaseSensitive )
+		static CASTnode[] getAnonymousEnumMemberFromWord( CASTnode originalNode, string word, bool bCaseSensitive )
 		{
 			if( originalNode is null ) return null;
 			
@@ -810,11 +771,11 @@ version(DIDE)
 					{
 						if( bCaseSensitive )
 						{
-							if( Util.index( _node.name, word ) == 0 ) results ~= _node;
+							if( indexOf( _node.name, word ) == 0 ) results ~= _node;
 						}
 						else
 						{
-							if( Util.index( lowerCase( _node.name ), lowerCase( word ) ) == 0 ) results ~= _node;
+							if( indexOf( Uni.toLower( _node.name ), Uni.toLower( word ) ) == 0 ) results ~= _node;
 						}
 					}
 				}
@@ -824,7 +785,7 @@ version(DIDE)
 		}
 
 		/*
-		static CASTnode getAnonymousEnumMemberFromWholeWord( CASTnode originalNode, char[] word )
+		static CASTnode getAnonymousEnumMemberFromWholeWord( CASTnode originalNode, string word )
 		{
 			if( originalNode.kind & B_ENUM )
 			{
@@ -889,7 +850,7 @@ version(DIDE)
 			return head;
 		}		
 
-		static CASTnode[] getMatchASTfromWholeWord( CASTnode node, char[] word, int line, int B_KIND )
+		static CASTnode[] getMatchASTfromWholeWord( CASTnode node, string word, int line, int B_KIND )
 		{
 			if( node is null ) return null;
 			
@@ -932,7 +893,7 @@ version(DIDE)
 			return results;
 		}	
 
-		static CASTnode[] getMatchASTfromWord( CASTnode node, char[] word, int line, int D_KIND )
+		static CASTnode[] getMatchASTfromWord( CASTnode node, string word, int line, int D_KIND )
 		{
 			if( node is null ) return null;
 			
@@ -945,7 +906,7 @@ version(DIDE)
 				{
 					if( child.name.length )
 					{
-						if( Util.index( child.name, word ) == 0 )
+						if( indexOf( child.name, word ) == 0 )
 						{
 							if( child.kind & ( D_VARIABLE | D_PARAM ) )
 							{
@@ -988,105 +949,42 @@ version(DIDE)
 			return results;
 		}
 
-		static public char[] checkIncludeExist( char[] importName, char[] _cwd )
+		static public string checkIncludeExist( string importName, string _cwd )
 		{
-			if( importName.length )
+			try
 			{
-				importName = Util.replace( importName.dup, '.', '/' );
+				if( !importName.length ) return null;
 				
-				if( Path.isFile( _cwd ) ) _cwd = Path.parent( _cwd );
-				if( _cwd.length )
-					if( _cwd[$-1] != '/' ) _cwd ~= "/";
-					
-				char[] importFullPath = _cwd ~ importName;
+				importName = Array.replace( importName, '.', '/' );
+				if( Path.extension( _cwd ).length ) _cwd = Path.dirName( _cwd );
 				
-				//IupMessage( "", toStringz( importName ~"\n" ~ importFullPath ) );
-			
-				// Step 1: Relative from the directory of the source file
-				scope  _path = new FilePath( importFullPath ~ ".d" ); // Tail include /
-				if( _path.exists() ) return  _path.toString();
-				_path.suffix(".di" );
-				if( _path.exists() ) return  _path.toString();
-				
-				// Check Package Module
-				_path.set( importFullPath ~ "/package.d" );
-				if( _path.exists ) return _path.toString();
-				
-				// Step 3: Relative from addition directories specified with the -i command line option
-				// Work on Project
-				//char[] prjDir = actionManager.ProjectAction.getActiveProjectDir();
-
-				char[]		prjDir = GLOBAL.activeProjectPath;
-				char[][] 	_includeDirs;
-				if( prjDir.length )
+				auto _focusUnit = GLOBAL.compilerSettings.activeCompiler;
+				string testPath;
+				// The originalFullPath is often change by file, we need get the original file dir
+				foreach( _importPath; _focusUnit.IncDir ~ _cwd )
 				{
-					if( prjDir in GLOBAL.projectManager )
-					{
-						_includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
-					}
+					testPath = _importPath ~ "/" ~ importName ~ ".d";
+					if( exists( testPath ) ) return testPath;
 					
-					foreach( char[] s; _includeDirs )
-					{
-						if(s[$-1] != '/' || s[$-1] != '\\' ) s ~= '/';
-						importFullPath = s ~ importName;
-						
-						_path.set( importFullPath ~ ".d" ); // Reset
-						if( _path.exists() ) return _path.toString();
+					testPath = _importPath ~ "/" ~ importName ~ ".di";
+					if( exists( testPath ) ) return testPath;
 
-						_path.suffix(".di" );
-						if( _path.exists() ) return _path.toString();
-						
-						// Check Package Module
-						_path.set( importFullPath ~ "/package.d" );
-						if( _path.exists ) return _path.toString();
-					}
-					
-					foreach( char[] _p; GLOBAL.defaultImportPaths )
-					{
-						importFullPath = _p ~ importName;
-						
-						_path.set( importFullPath ~ ".d" );
-						if( _path.exists() ) return _path.toString();
-
-						_path.suffix(".di" );
-						if( _path.exists() ) return _path.toString();
-
-						// Check Package Module
-						_path.set( importFullPath ~ "/package.d" );
-						if( _path.exists ) return _path.toString();
-					}						
+					testPath = _importPath ~ "/" ~ importName ~ "/package.d";
+					if( exists( testPath ) ) return testPath;
 				}
-				else
-				{
-					// Step 2: Default *.ini DFLAGS
-					foreach( char[] _p; GLOBAL.defaultImportPaths )
-					{
-						importFullPath = _p ~ importName;
-						
-						_path.set( importFullPath ~ ".d" );
-						if( _path.exists() ) return _path.toString();
-
-						_path.suffix(".di" );
-						if( _path.exists() ) return _path.toString();
-
-						// Check Package Module
-						_path.set( importFullPath ~ "/package.d" );
-						if( _path.exists ) return _path.toString();
-					}
-				}
-				
 			}
-
-			return null;
+			catch( Exception e )
+			{
+				debug IupMessage( "Bug", toStringz( "checkIncludeExist() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
+			}
+			return null;		
 		}
 
-		static CASTnode[] check( char[] name, char[] originalFullPath, bool bCheckOnlyOnce = false )
+		static CASTnode[] check( string name, string originalFullPath, bool bCheckOnlyOnce = false )
 		{
 			CASTnode[] results;
 			
-			char[] includeFullPath = checkIncludeExist( name, originalFullPath );
+			string includeFullPath = checkIncludeExist( name, originalFullPath );
 
 			if( includeFullPath.length )
 			{
@@ -1096,17 +994,18 @@ version(DIDE)
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
 				{
 					includesMarkContainer[fullPathByOS(includeFullPath)] = GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-
-					results ~= GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-					if( !bCheckOnlyOnce ) results ~= getIncludes( GLOBAL.parserManager[fullPathByOS(includeFullPath)], "" );
+					
+					auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+					results ~= _ast;
+					if( !bCheckOnlyOnce ) results ~= getIncludes( _ast, "" );
 				}
 				else
 				{
-					CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
+					CASTnode _createFileNode = ParserAction.createParser( includeFullPath, true );
 					
 					if( _createFileNode !is null )
 					{
-						includesMarkContainer[fullPathByOS(includeFullPath)] = _createFileNode;
+						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) _createFileNode;
 						
 						results ~= _createFileNode;
 						if( !bCheckOnlyOnce ) results ~= getIncludes( _createFileNode, "" );
@@ -1121,13 +1020,13 @@ version(DIDE)
 			return results;
 		}
 
-		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, char[] originalFullPath, char[] word, int D_KIND )
+		static CASTnode[] getMatchIncludesFromWholeWord( CASTnode originalNode, string originalFullPath, string word, int D_KIND )
 		{
 			if( originalNode is null ) return null;
 			
 			CASTnode[] results;
 
-			foreach( char[] key; includesMarkContainer.keys )
+			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				includesMarkContainer.remove( key );		
 			
 			// Parse Include
@@ -1142,7 +1041,7 @@ version(DIDE)
 			auto dummyASTs = getIncludes( originalNode, "", true );
 			
 
-			foreach( includeAST; includesMarkContainer )
+			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{
 				if( D_KIND & D_MODULE )
 				{
@@ -1153,7 +1052,7 @@ version(DIDE)
 				}
 				
 				// Skip "private"
-				if( GLOBAL.toggleShowAllMember == "OFF" )
+				if( GLOBAL.compilerSettings.toggleShowAllMember == "OFF" )
 					if( includeAST.protection == "private" ) continue;
 				
 				
@@ -1177,13 +1076,13 @@ version(DIDE)
 			return results;
 		}	
 
-		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, char[] originalFullPath, char[] word, bool bCaseSensitive, int D_KIND )
+		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, string originalFullPath, string word, bool bCaseSensitive, int D_KIND )
 		{
 			if( originalNode is null ) return null;
 			
 			CASTnode[] results;
 			
-			foreach( char[] key; includesMarkContainer.keys )
+			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				includesMarkContainer.remove( key );
 
 			// Parse Include
@@ -1208,16 +1107,16 @@ version(DIDE)
 					if( includeAST.kind & D_KIND )
 					{
 						int _pos;
-						if( bCaseSensitive ) _pos = Util.index( includeAST.name, word ); else _pos = Util.index( lowerCase( includeAST.name ), lowerCase( word ) );
-						if( _pos == 0 ) results ~= includeAST;
+						if( bCaseSensitive ) _pos = indexOf( includeAST.name, word ); else _pos = indexOf( Uni.toLower( includeAST.name ), Uni.toLower( word ) );
+						if( _pos == 0 ) results ~= cast(CASTnode) includeAST;
 					}
 				}
 				
 				// Skip "private"
-				if( GLOBAL.toggleShowAllMember == "OFF" )
-					if( includeAST.protection == "private" ) continue;				
+				if( GLOBAL.compilerSettings.toggleShowAllMember == "OFF" )
+					if( includeAST.protection == "private" ) continue;		
 			
-				foreach( child; getMembers( includeAST ) )//includeAST.getChildren )
+				foreach( child; getMembers( cast(CASTnode) includeAST ) )//includeAST.getChildren )
 				{
 					//if( !checkBackThreadGoing ) return null;
 					if( child.kind & D_KIND )
@@ -1225,7 +1124,7 @@ version(DIDE)
 						if( child.name.length )
 						{
 							int _pos;
-							if( bCaseSensitive ) _pos = Util.index( child.name, word ); else _pos = Util.index( lowerCase( child.name ), lowerCase( word ) );
+							if( bCaseSensitive ) _pos = indexOf( child.name, word ); else _pos = indexOf( Uni.toLower( child.name ), Uni.toLower( word ) );
 							if( _pos == 0 ) results ~= child;
 						}
 						else
@@ -1240,7 +1139,7 @@ version(DIDE)
 			return results;
 		}
 
-		static bool isDefaultType( char[] _type )
+		static bool isDefaultType( string _type )
 		{
 			if( _type == "bool" || _type == "byte" || _type == "ubyte" || _type == "short" || _type == "ushort" || _type == "int" || _type == "uint" || _type == "long" || _type == "ulong" ||
 				_type == "char" || _type == "wchar" || _type == "dchar" || _type == "float" || _type == "double" || _type == "real" || _type == "ifloat" || _type == "idouble" || _type == "ireal" ||
@@ -1251,7 +1150,7 @@ version(DIDE)
 			return false;
 		}
 
-		static CASTnode searchMatchMemberNode( CASTnode originalNode, char[] word, int D_KIND = D_ALL )
+		static CASTnode searchMatchMemberNode( CASTnode originalNode, string word, int D_KIND = D_ALL )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1266,7 +1165,7 @@ version(DIDE)
 			return null;
 		}
 
-		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, int lineNum = 2147483647, bool bWholeWord = true, bool bCaseSensitive = true )
+		static CASTnode[] searchMatchMemberNodes( CASTnode originalNode, string word, int D_KIND = D_ALL, int lineNum = 2147483647, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1276,12 +1175,12 @@ version(DIDE)
 			{
 				if( _node.kind & D_KIND )
 				{
-					char[] name = ParserAction.removeArrayAndPointer( _node.name );
+					string name = ParserAction.removeArrayAndPointer( _node.name );
 
 					if( !bCaseSensitive )
 					{
-						name = lowerCase( name );
-						word = lowerCase( word );
+						name = Uni.toLower( name );
+						word = Uni.toLower( word );
 					}
 
 					if( bWholeWord )
@@ -1291,7 +1190,7 @@ version(DIDE)
 					}
 					else
 					{
-						if( Util.index( name, word ) == 0 )
+						if( indexOf( name, word ) == 0 )
 							if( lineNum >= _node.lineNumber ) results ~= _node;
 					}
 				}
@@ -1300,7 +1199,7 @@ version(DIDE)
 			return results;
 		}
 
-		static CASTnode searchMatchNode( CASTnode originalNode, char[] word, int D_KIND = D_ALL )
+		static CASTnode searchMatchNode( CASTnode originalNode, string word, int D_KIND = D_ALL )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1327,7 +1226,7 @@ version(DIDE)
 			return resultNode;
 		}
 
-		static CASTnode[] searchMatchNodes( CASTnode originalNode, char[] word, int D_KIND = D_ALL, int lineNum = 2147483647, bool bWholeWord = true, bool bCaseSensitive = true )
+		static CASTnode[] searchMatchNodes( CASTnode originalNode, string word, int D_KIND = D_ALL, int lineNum = 2147483647, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
 			if( originalNode is null ) return null;
 			
@@ -1353,7 +1252,7 @@ version(DIDE)
 					}
 					else
 					{
-						if( Util.index( originalNode.name, word ) == 0 ) resultNodes ~= originalNode;
+						if( indexOf( originalNode.name, word ) == 0 ) resultNodes ~= originalNode;
 					}
 				}
 			}
@@ -1423,10 +1322,10 @@ version(DIDE)
 			return result;
 		}
 
-		static int skipDelimitedString( char tokOpen, char tokClose, char[] word, int pos )
+		static int skipDelimitedString( char tokOpen, char tokClose, string word, int pos )
 		{
 			int		_countDemlimit, index;
-			char[]	_params;		// include open Delimit and close Delimit
+			string	_params;		// include open Delimit and close Delimit
 
 
 			for( index = pos; index < word.length; ++ index )
@@ -1442,9 +1341,9 @@ version(DIDE)
 			return index;
 		}	
 
-		static char[] convertRightExpressWord( char[] word )
+		static string convertRightExpressWord( string word )
 		{
-			char[]	result;
+			string	result;
 
 			for( int i = 0; i < word.length; ++ i )
 			{
@@ -1469,30 +1368,30 @@ version(DIDE)
 
 			if( originalNode.kind & ( D_ALIAS | D_VARIABLE | D_PARAM | D_FUNCTION | D_FUNCTIONPTR ) )
 			{
-				char[][]	splitWord;
+				string[]	splitWord;
 
 				if( originalNode.type.length )
 				{
-					char[] _type = originalNode.type;
+					string _type = originalNode.type;
 					
 					if( originalNode.kind & D_PARAM )
 					{
-						if( Util.index( _type, "in " ) == 0 )
+						if( indexOf( _type, "in " ) == 0 )
 							_type = _type[3..$].dup;
-						else if( Util.index( _type, "out " ) == 0 )
+						else if( indexOf( _type, "out " ) == 0 )
 							_type = _type[4..$].dup;
-						else if( Util.index( _type, "ref " ) == 0 )
+						else if( indexOf( _type, "ref " ) == 0 )
 							_type = _type[4..$].dup;
-						else if( Util.index( _type, "inout " ) == 0 )
+						else if( indexOf( _type, "inout " ) == 0 )
 							_type = _type[6..$].dup;
 					}
 					
 					// Check and get D_FUNCTIONPTR type
 					if( originalNode.kind & D_FUNCTIONPTR )
 					{
-						int _pos = Util.index( _type, " function(" );
-						if( _pos >= _type.length ) _pos = Util.index( _type, " delegate(" );
-						if( _pos < _type.length ) _type = _type[0.._pos];
+						int _pos = indexOf( _type, " function(" );
+						if( _pos == -1 ) _pos = indexOf( _type, " delegate(" );
+						if( _pos > -1 ) _type = _type[0.._pos].dup;
 					}
 					
 					splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
@@ -1503,7 +1402,7 @@ version(DIDE)
 					if( originalNode.base.length ) splitWord = getDivideWord( convertRightExpressWord( originalNode.base ) ); else return null;
 				}
 				
-				foreach( char[] s; splitWord )
+				foreach( string s; splitWord )
 					if( s == originalNode.name ) return null;
 
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
@@ -1522,7 +1421,7 @@ version(DIDE)
 			return resultNode;
 		}
 
-		static bool stepByStep( ref CASTnode AST_Head, char[] word, int D_KIND, int lineNum )
+		static bool stepByStep( ref CASTnode AST_Head, string word, int D_KIND, int lineNum )
 		{
 			AST_Head = searchMatchMemberNode( AST_Head, word, D_KIND );
 			if( AST_Head is null ) return false;
@@ -1536,9 +1435,9 @@ version(DIDE)
 			return true;
 		}
 
-		static char[] callTipList( CASTnode[] groupAST, char[] word = null )
+		static string callTipList( CASTnode[] groupAST, string word = null )
 		{
-			char[][] results;
+			string[] results;
 			
 			for( int i = 0; i < groupAST.length; ++ i )
 			{
@@ -1551,8 +1450,8 @@ version(DIDE)
 				{
 					if( ( !word.length ) || groupAST[i].name == word )
 					{
-						char[] _type = ParserAction.getSeparateType( groupAST[i].type );
-						char[] _paramString = ParserAction.getSeparateParam( groupAST[i].type );
+						string _type = ParserAction.getSeparateType( groupAST[i].type );
+						string _paramString = ParserAction.getSeparateParam( groupAST[i].type );
 						
 						results ~= ( _type ~ " " ~ groupAST[i].name ~ _paramString ~ "\n" );
 					}
@@ -1580,8 +1479,8 @@ version(DIDE)
 							{
 								if( _child.name == groupAST[i].name )
 								{
-									char[] _type = ParserAction.getSeparateType( groupAST[i].type );
-									char[] _paramString = ParserAction.getSeparateParam( groupAST[i].type );
+									string _type = ParserAction.getSeparateType( groupAST[i].type );
+									string _paramString = ParserAction.getSeparateParam( groupAST[i].type );
 									
 									results ~= ( _type ~ " " ~ groupAST[i].name ~ _paramString ~ "\n" );
 								}
@@ -1602,9 +1501,9 @@ version(DIDE)
 				}
 			}
 
-			results.sort;
+			Algorithm.sort( results );
 			
-			char[] result;
+			string result;
 			for( int i = 0; i < results.length; i ++ )
 			{
 				if( i > 0 )
@@ -1619,13 +1518,13 @@ version(DIDE)
 			return result;
 		}
 		
-		static void callTipSetHLT( char[] list, int itemNO, ref int highlightStart, ref int highlightEnd )
+		static void callTipSetHLT( string list, int itemNO, ref int highlightStart, ref int highlightEnd )
 		{
 			int listHead;
-			foreach( char[] lineText; Util.splitLines( list ) )
+			foreach( string lineText; splitLines( list ) )
 			{
-				int openParenPos = Util.index( lineText, "(" );
-				int closeParenPos = Util.rindex( lineText, ")" );
+				int openParenPos = indexOf( lineText, "(" );
+				int closeParenPos = lastIndexOf( lineText, ")" );
 				if( closeParenPos > openParenPos + 1 && openParenPos > 0 )
 				{
 					openParenPos += listHead;
@@ -1686,12 +1585,12 @@ version(DIDE)
 			highlightEnd = -1;
 		}
 		
-		static char[] parseProcedureForCalltip( Ihandle* ih, int lineHeadPos, char[] lineHeadText, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
+		static string parseProcedureForCalltip( Ihandle* ih, int lineHeadPos, string lineHeadText, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
 		{
 			if( ih == null ) return null;
 			
 			bool	bGetName;
-			char[]	procedureName;
+			string	procedureName;
 			
 			if( lineHeadPos == -1 )	lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 ); //SCI_POSITIONFROMLINE 2167
 			
@@ -1734,18 +1633,18 @@ version(DIDE)
 			return procedureName;
 		}		
 		
-		static char[] parseProcedureForCalltip( Ihandle* ih, int pos, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
+		static string parseProcedureForCalltip( Ihandle* ih, int pos, ref int commaCount, ref int parenCount, ref int firstOpenParenPos )
 		{
 			if( ih == null ) return null;
 			
 			//int pos = ScintillaAction.getCurrentPos( ih );
 			
 			bool	bGetName;
-			char[]	procedureName;
+			string	procedureName;
 			
 			for( int i = pos; i >= cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 ); --i ) //SCI_POSITIONFROMLINE 2167
 			{
-				char[] s = fromStringz( IupGetAttributeId( ih, "CHAR", i ) );
+				string s = fSTRz( IupGetAttributeId( ih, "CHAR", i ) );
 				if( !bGetName )
 				{
 					switch( s )
@@ -1783,24 +1682,24 @@ version(DIDE)
 			return procedureName;
 		}
 
-		static void keyWordlist( char[] word )
+		static void keyWordlist( string word )
 		{
-			foreach( char[] _s; GLOBAL.KEYWORDS )
+			foreach( string _s; GLOBAL.KEYWORDS )
 			{
-				foreach( char[] s; Util.split( _s, " " ) )
+				foreach( string s; Array.split( _s, " " ) )
 				{
 					if( s.length )
 					{
-						if( Util.index( s, word ) == 0 ) listContainer ~= ( s ~ "?21" );
+						if( indexOf( s, word ) == 0 ) listContainer ~= ( s ~ "?21" );
 					}
 				}
 			}
 		}
 
-		static char[][] getDivideWord( char[] word )
+		static string[] getDivideWord( string word )
 		{
-			char[][]	splitWord;
-			char[]		tempWord;
+			string[]	splitWord;
+			string		tempWord;
 			for( int i = 0; i < word.length ; ++ i )
 			{
 				if( word[i] == '.' )
@@ -1843,14 +1742,14 @@ version(DIDE)
 			return null;
 		}
 
-		static CASTnode[] searchObjectModuleMembers( char[] word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
+		static CASTnode[] searchObjectModuleMembers( string word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
 			CASTnode[] resultNodes;
 			
 			// object.di
 			if( GLOBAL.objectDefaultParser !is null )
 			{
-				foreach( CASTnode child; GLOBAL.objectDefaultParser.getChildren )
+				foreach( CASTnode child; ( cast(CASTnode) GLOBAL.objectDefaultParser ).getChildren )
 				{
 					if( child.kind & D_KIND )
 					{
@@ -1862,21 +1761,24 @@ version(DIDE)
 						{
 							if( bCaseSensitive )
 							{
-								if( Util.index( child.name, word ) == 0 ) resultNodes ~= child;
+								if( indexOf( child.name, word ) == 0 ) resultNodes ~= child;
 							}
 							else
 							{
-								if( Util.index( lowerCase( child.name ), lowerCase( word ) ) == 0 ) resultNodes ~= child;
+								if( indexOf( Uni.toLower( child.name ), Uni.toLower( word ) ) == 0 ) resultNodes ~= child;
 							}
 						}
 					}	
 				}
 			}
-
+			/*
+			else  
+				IupMessage("searchObjectModuleMembers","NULL");
+			*/
 			return resultNodes;
 		}
 		
-		static CASTnode searchObjectModule( char[] word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
+		static CASTnode searchObjectModule( string word, int D_KIND = D_ALL, bool bWholeWord = true, bool bCaseSensitive = true )
 		{
 			CASTnode[] resultNodes = searchObjectModuleMembers( word, D_KIND, bWholeWord, bCaseSensitive );
 			if( resultNodes.length ) return resultNodes[0];
@@ -1885,10 +1787,10 @@ version(DIDE)
 		}
 		
 		
-		static char[][] getNeedDataForThread( Ihandle* iupSci, char[] text, int pos, ref int lineNum, ref bool bDot, ref bool bCallTip, ref CASTnode AST_Head )
+		static string[] getNeedDataForThread( Ihandle* iupSci, string text, int pos, ref int lineNum, ref bool bDot, ref bool bCallTip, ref CASTnode AST_Head )
 		{
 			int		dummyHeadPos;
-			char[] 	word, result;
+			string 	word, result;
 			
 
 			if( text == "(" )
@@ -1907,7 +1809,7 @@ version(DIDE)
 
 			//word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 			word = word ~ getWholeWordReverseWithBracket( iupSci, pos, dummyHeadPos ); // Keep With []
-			word = word.reverse;
+			word = Algorithm.reverse( word.dup );
 
 			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
@@ -1931,17 +1833,17 @@ version(DIDE)
 		}
 		
 
-		static char[] analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, char[][] splitWord, int lineNum, bool bDot, bool bCallTip, bool bPushContainer  )
+		static string analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, string[] splitWord, int lineNum, bool bDot, bool bCallTip, bool bPushContainer  )
 		{
 			if( AST_Head is null ) return null;
 			
 			auto		function_originalAST_Head = AST_Head;
 			auto		_rootNode = ParserAction.getRoot( function_originalAST_Head );
-			char[]		fullPath = _rootNode !is null ? _rootNode.name : "";
+			string		fullPath = _rootNode !is null ? _rootNode.name : "";
 			
 
-			char[]		result;
-			char[]		wordWithoutSymbol;
+			string		result;
+			string		wordWithoutSymbol;
 			CASTnode	tempReturnNode;
 			bool		bBracket;
 			
@@ -1985,7 +1887,7 @@ version(DIDE)
 										{
 											if( node.base.length )
 											{
-												char[] base = node.base;
+												string base = node.base;
 												auto motherModule = searchMatchNode( AST_Head, node.type, D_IMPORT ); // Check Renamed Imports
 												if( motherModule !is null )
 													if( motherModule.type.length ) node = motherModule;
@@ -2000,11 +1902,11 @@ version(DIDE)
 								if( !bPushContainer ) return null;
 
 								result = callTipList( resultNodes, null );
-								return Util.trim( result );
+								return strip( result );
 							}
 
 
-							if( GLOBAL.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
+							if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) keyWordlist( splitWord[i] );
 
 							if( bPushContainer )
 							{
@@ -2012,7 +1914,7 @@ version(DIDE)
 								{
 									if( _node.kind & D_IMPORT )
 									{
-										char[][] nodeNames = Util.split( _node.name, "." );
+										string[] nodeNames = Array.split( _node.name, "." );
 										listContainer ~= ( nodeNames[0] ~ "?22");
 									}
 									else
@@ -2040,14 +1942,14 @@ version(DIDE)
 							/*
 							if( AST_Head.kind & ( D_VARIABLE | D_PARAM ) )
 							{
-								char[] defaultList = getDefaultList( ParserAction.getSeparateType( AST_Head.type ) );
+								string defaultList = getDefaultList( ParserAction.getSeparateType( AST_Head.type ) );
 								if( defaultList.length ) return defaultList;
 							}
 							*/
 
 							if( AST_Head.kind & ( D_VARIABLE | D_PARAM | D_FUNCTION | D_ALIAS | D_FUNCTIONPTR ) )
 							{
-								char[] defaultList = getDefaultList( ParserAction.getSeparateType( AST_Head.type ), bBracket );
+								string defaultList = getDefaultList( ParserAction.getSeparateType( AST_Head.type ), bBracket );
 								if( defaultList.length ) return defaultList;
 								
 								tempReturnNode = getType( AST_Head, lineNum );
@@ -2114,7 +2016,7 @@ version(DIDE)
 						{
 							if( !bPushContainer ) return null;
 
-							//if( AST_Head is null ) IupMessage("",""); else IupMessage("",toStringz(Integer.toString(AST_Head.kind) ~ " " ~ AST_Head.name));
+							//if( AST_Head is null ) IupMessage("",""); else IupMessage("",toStringz(Conv.to!(string)(AST_Head.kind) ~ " " ~ AST_Head.name));
 
 							CASTnode[] childrenNodes;// =  AST_Head.getChildren();
 							//getBaseNodeMembers( AST_Head, childrenNodes );
@@ -2145,7 +2047,7 @@ version(DIDE)
 
 							// result = callTipList( childrenNodes, splitWord[i] );
 							result = callTipList( childrenNodes, null );
-							return Util.trim( result );
+							return strip( result );
 						}
 
 						if( bPushContainer )
@@ -2156,10 +2058,10 @@ version(DIDE)
 							}
 							else
 							{
-								//IupMessage("originalNode", toStringz( Integer.toString( AST_Head.kind ) ~ " " ~ ( AST_Head.name ) ~ " : " ~ AST_Head.type ) );
+								//IupMessage("originalNode", toStringz( Conv.to!(string)( AST_Head.kind ) ~ " " ~ ( AST_Head.name ) ~ " : " ~ AST_Head.type ) );
 								foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 								{
-									if( Util.index( lowerCase( _child.name ), lowerCase( splitWord[i] ) ) == 0 ) listContainer ~= getListImage( _child );
+									if( indexOf( Uni.toLower( _child.name ), Uni.toLower( splitWord[i] ) ) == 0 ) listContainer ~= getListImage( _child );
 								}
 							}
 						}
@@ -2189,7 +2091,7 @@ version(DIDE)
 						{
 							if( AST_Head.kind & ( D_VARIABLE | D_PARAM | D_FUNCTION | D_FUNCTIONPTR ) )
 							{	
-								char[] defaultList = getDefaultList( ParserAction.getSeparateType( AST_Head.type ), bBracket );
+								string defaultList = getDefaultList( ParserAction.getSeparateType( AST_Head.type ), bBracket );
 								if( defaultList.length ) return defaultList;
 								
 								tempReturnNode = getType( AST_Head, lineNum );
@@ -2266,10 +2168,10 @@ version(DIDE)
 				timer = IupTimer();
 				IupSetAttributes( timer, "TIME=50,RUN=NO" );
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
-				setTimer( Integer.atoi( GLOBAL.triggerDelay ) );
+				setTimer( Conv.to!(int)( GLOBAL.triggerDelay ) );
 			}
 			
-			if( calltipContainer is null ) calltipContainer = new CStack!(char[]);
+			calltipContainer.clear();
 		}
 
 		static void setTimer( uint milisecond )
@@ -2286,7 +2188,7 @@ version(DIDE)
 			return true;
 		}
 		
-		static char[] getShowTypeContent()
+		static string getShowTypeContent()
 		{
 			return showTypeContent;
 		}
@@ -2306,12 +2208,12 @@ version(DIDE)
 		
 		static void cleanIncludeContainer( CASTnode afterCleanAddParserTree = null )
 		{
-			foreach( char[] key; includesMarkContainer.keys )
+			foreach( string key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				includesMarkContainer.remove( key );
 				
 			if( afterCleanAddParserTree !is null )
 			{
-				if( afterCleanAddParserTree.kind & D_MODULE ) includesMarkContainer[fullPathByOS(afterCleanAddParserTree.type)] = afterCleanAddParserTree;
+				if( afterCleanAddParserTree.kind & D_MODULE ) includesMarkContainer[fullPathByOS(afterCleanAddParserTree.type)] = cast(shared CASTnode) afterCleanAddParserTree;
 			}
 		}
 		
@@ -2331,7 +2233,7 @@ version(DIDE)
 			{
 				if( !preLoadContainerThread.isRunning )
 				{
-					delete preLoadContainerThread;
+					destroy( preLoadContainerThread );
 					preLoadContainerThread = new CGetIncludes( astHead );
 					preLoadContainerThread.start();
 				}
@@ -2344,8 +2246,8 @@ version(DIDE)
 
 		static bool checkIsclmportDeclare( Ihandle* iupSci, int pos = -1 )
 		{
-			char[]	result;
-			dchar[]	resultd;
+			string	result;
+			dstring	resultd;
 			
 			int		documentLength = IupGetInt( iupSci, "COUNT" );
 			try
@@ -2354,7 +2256,7 @@ version(DIDE)
 				{
 					if( !ScintillaAction.isComment( iupSci, pos ) )
 					{
-						char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+						string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 						if( s.length )
 						{
 							int key = cast(int) s[0];
@@ -2367,9 +2269,9 @@ version(DIDE)
 					}	
 				}
 				
-				result = lowerCase( Util.trim( result.reverse ) ).dup;
-				if( Util.count( result, "import " ) > 0 ) return true;
-				if( Util.count( result, "import\t" ) > 0 ) return true;
+				result = Uni.toLower( strip( Algorithm.reverse( result.dup ) ) );
+				if( Algorithm.count( result, "import " ) > 0 ) return true;
+				if( Algorithm.count( result, "import\t" ) > 0 ) return true;
 			}
 			catch( Exception e )
 			{
@@ -2379,25 +2281,12 @@ version(DIDE)
 			return false;
 		}
 		
-		static char[] includeComplete( Ihandle* iupSci, int pos, ref char[] text )
+		static string includeComplete( Ihandle* iupSci, int pos, ref string text )
 		{
-			// Nested Delegate Filter Function
-			bool dirFilter( FilePath _fp, bool _isFfolder )
-			{
-				if( _isFfolder ) return true;
-				if( lowerCase( _fp.ext ) == "d" || lowerCase( _fp.ext ) == "di" ) return true;
-			
-				return false;
-			}
-			
-			bool delegate( FilePath, bool ) _dirFilter;
-			_dirFilter = &dirFilter;
-			// End of Nested Function
-			
 			if( !text.length )  return null;
 			
-			dchar[] word32;
-			char[]	word = text;
+			dstring word32;
+			string	word = text;
 			bool	bExitLoopFlag;		
 			
 			if( text != "." && ( fromStringz( IupGetAttribute( iupSci, "AUTOCACTIVE\0" ) ) == "YES" ) ) return null;
@@ -2412,23 +2301,23 @@ version(DIDE)
 					--pos;
 					if( pos < 0 ) break;
 					
-					char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					string _s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 					if( _s.length )
 					{
 						int key = cast(int) _s[0];
 						if( key >= 0 && key <= 127 )
 						{
-							dchar[] sd = UTF.toString32( _s );
+							dstring sd = UTF.toUTF32( _s );
 							dchar s = sd[0];
 							switch( s )
 							{
 								case ' ', '\t', ';', '\n', '\r':		bExitLoopFlag = true; break;
 								default: 
-									if( UTF.isValid( s ) )
+									if( UTF.isValidDchar( s ) )
 									{
 										word32 = "";
 										word32 ~= s;
-										word ~= Util.trim( UTF.toString( word32 ) );
+										word ~= strip( UTF.toUTF8( word32 ) );
 									}
 							}
 						}
@@ -2436,72 +2325,29 @@ version(DIDE)
 					
 					if( bExitLoopFlag ) break;
 				}
-				if( !word.length ) return null; else word = word.dup.reverse;
+				if( !word.length ) return null; else word = Algorithm.reverse( word.dup );
 				
-				char[][]	words = Util.split( word, "." );
-				char[][]	tempList;
+				string[]	words = Array.split( word, "." );
+				string[]	tempList;
 
 				if( !words.length ) return null;
 				
-				// Step 1: Relative from the directory of the source file
-				FilePath  _path1;
+				if( words.length == 1 && (text == "." ) ) words ~= "";
 				
-				// Get cwd
-				auto cSci = ScintillaAction.getCScintilla( iupSci );
-				if( cSci !is null )
-				{
-					if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager )
-					{
-						auto headNode = GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )];
-						
-						char[] _cwd = getMotherPath_D_MODULE( headNode );
-						_path1 = new FilePath( _cwd );
-						/*
-						if( headNode.kind & D_MODULE )
-						{
-							int dotCount = Util.count( headNode.name, "." );
-							scope cwdFilePath = new FilePath( headNode.type );
+				// Step 1: Relative from the directory of the source file
+				string		_path1;
+				string[] 	_path2, _path3;
+				/+
+				this is includeComplete, so base on document fullpath
+				+/
+				auto cSci = ScintillaAction.getCScintilla( iupSci ); 
+				if( cSci !is null ) _path1 = Path.dirName( cSci.getFullPath );
 
-							char[] _cwd = cwdFilePath.path();
-							for( int i = 0; i < dotCount; ++ i )
-							{
-								cwdFilePath.set( _cwd );
-								_cwd = cwdFilePath.parent();
-							}
-
-							if( _cwd.length )
-								if( _cwd[$-1] != '/' ) _cwd ~= '/';
-
-							_path1 = new FilePath( _cwd );
-						}
-						*/
-					}
-				}
-
+				// Step 2:  Default *.ini DFLAGS
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
-				FilePath[]  _path2, _path3;
+				_path2 = GLOBAL.compilerSettings.activeCompiler.IncDir.dup;
 				
-				char[]		prjDir = GLOBAL.activeProjectPath;//actionManager.ProjectAction.getActiveProjectDir();
-				char[][] 	_includeDirs;
-				
-				if( prjDir.length )
-				{
-					if( prjDir in GLOBAL.projectManager )
-					{
-						_includeDirs = GLOBAL.projectManager[prjDir].includeDirs; // without \
-						if( GLOBAL.projectManager[prjDir].focusOn.length )
-							if( GLOBAL.projectManager[prjDir].focusOn in GLOBAL.projectManager[prjDir].focusUnit ) _includeDirs = GLOBAL.projectManager[prjDir].focusUnit[GLOBAL.projectManager[prjDir].focusOn].IncDir;						
-				
-						foreach( char[] s; _includeDirs )
-							_path3 ~= new FilePath( s );
-					}
-				}
-
-				foreach( char[] _p; GLOBAL.defaultImportPaths )
-					_path2 ~= new FilePath( _p );				
-				
-
 				int index;
 				for( int i = 0; i < words.length; ++ i )
 				{
@@ -2510,50 +2356,52 @@ version(DIDE)
 						// Step 1: Relative from the directory of the source file
 						if( _path1.exists )
 						{
-							foreach( FilePath _fp; _path1.toList( _dirFilter ) )
-								tempList ~= _fp.file;
-						}
-						
-						// Step 2:  Default *.ini DFLAGS
-						foreach( FilePath _fp2; _path2 )
-						{
-							if( _fp2.exists )
+							foreach( string _fp; dirEntries( _path1, SpanMode.shallow ) )
 							{
-								foreach( FilePath _fp; _fp2.toList( _dirFilter ) )
-									tempList ~= _fp.file;
+								if( std.file.isDir( _fp ) )
+									tempList ~= Path.baseName( _fp );
+								else
+								{
+									if( tools.isParsableExt( Path.extension( _fp ), 3 ) ) tempList ~= Path.baseName( _fp );
+								}
 							}
 						}
 						
+						// Step 2:  Default *.ini DFLAGS
 						// Step 3: Relative from addition directories specified with the -i command line option
-						// Work on Project
-						foreach( FilePath _fp3; _path3 )
+						foreach( _fp2; _path2 )
 						{
-							if( _fp3.exists )
+							if( _fp2.exists )
 							{
-								foreach( FilePath _fp; _fp3.toList( _dirFilter ) )
-									tempList ~= _fp.file;
+								foreach( string _fp; dirEntries( _fp2, SpanMode.shallow ) )
+								{
+									if( std.file.isDir( _fp ) )
+										tempList ~= Path.baseName( _fp );
+									else
+									{
+										if( tools.isParsableExt( Path.extension( _fp ), 3 ) ) tempList ~= Path.baseName( _fp );
+									}
+								}
 							}
 						}
 					}
 					else
 					{
-						_path1 = _path1.set( _path1.toString ~ words[i] ~ "/" );
+						_path1 = _path1 ~ "/" ~ words[i];
 						for( int j = 0; j < _path2.length; ++ j )
-							_path2[j] = _path2[j].set( _path2[j].toString ~ words[i] ~ "/" );
-						for( int j = 0; j < _path3.length; ++ j )
-							_path3[j] = _path3[j].set( _path3[j].toString ~ words[i] ~ "/" );
+							_path2[j] = _path2[j] ~ "/" ~ words[i];
 					}
 				}
 
-				foreach( char[] s; tempList )
+				foreach( string s; tempList )
 				{
 					if( s.length )
 					{
-						char[] iconNum = "37";
+						string iconNum = "37";
 						
 						if( s.length > 2 )
 						{
-							if( lowerCase( s[$-2..$] ) == ".d" )
+							if( Uni.toLower( s[$-2..$] ) == ".d" )
 							{
 								iconNum = "35";
 								s = s[0..$-2];
@@ -2562,7 +2410,7 @@ version(DIDE)
 						
 						if( s.length > 3 )
 						{
-							if( lowerCase( s[$-3..$] ) == ".di" )
+							if( Uni.toLower( s[$-3..$] ) == ".di" )
 							{
 								iconNum = "36";
 								s = s[0..$-3];
@@ -2575,15 +2423,15 @@ version(DIDE)
 						}
 						else
 						{
-							if( Util.index( lowerCase( s ), lowerCase( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
+							if( indexOf( Uni.toLower( s ), Uni.toLower( words[$-1] ) ) == 0 ) listContainer ~= ( s ~ "?" ~ iconNum );
 						}
 					}
 				}
 				
 				text = words[$-1];
-				listContainer.sort;
+				Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 				
-				char[] list;
+				string list;
 				for( int i = 0; i < listContainer.length; ++ i )
 				{
 					if( listContainer[i].length )
@@ -2602,12 +2450,6 @@ version(DIDE)
 				if( list.length )
 					if( list[$-1] == '^' ) list = list[0..$-1];
 
-				// Release FilePath Class Objects
-				delete _path1;
-				foreach( FilePath _p; _path2 )
-					delete _p;
-				foreach( FilePath _p; _path3 )
-					delete _p;
 				
 				return list;				
 			}
@@ -2618,9 +2460,9 @@ version(DIDE)
 			return null;
 		}		
 
-		static char[] getKeywordContainerList( char[] word, bool bCleanContainer = true )
+		static string getKeywordContainerList( string word, bool bCleanContainer = true )
 		{
-			char[] result;
+			string result;
 			
 			if( bCleanContainer ) listContainer.length = 0;
 			
@@ -2646,14 +2488,14 @@ version(DIDE)
 				if( result.length )
 					if( result[$-1] == '^' ) result = result[0..$-1];
 
-				return Util.trim( result );
+				return strip( result );
 			}
 			
 			return null;
 		}
 		
 
-		static CASTnode[] getIncludes( CASTnode originalNode, char[] cwdPath = null, bool bRootCall = false, bool bCheckOnlyOnce = false )
+		static CASTnode[] getIncludes( CASTnode originalNode, string cwdPath = null, bool bRootCall = false, bool bCheckOnlyOnce = false )
 		{
 			CASTnode[] results;
 			
@@ -2690,8 +2532,7 @@ version(DIDE)
 			}
 			else
 			{
-				scope cwdFilePath = new FilePath( cwdPath );
-				cwdPath = cwdFilePath.path();
+				cwdPath = Path.dirName( cwdPath );
 			}
 
 			foreach( CASTnode _node; getMembers( originalNode ) )
@@ -2722,7 +2563,7 @@ version(DIDE)
 			SCFIND_WHOLEWORD = 2,
 			SCFIND_MATCHCASE = 4,
 		*/
-		static int skipCommentAndString(  Ihandle* iupSci, int pos, char[] targetText, int direct,int flag = 2 )
+		static int skipCommentAndString(  Ihandle* iupSci, int pos, string targetText, int direct,int flag = 2 )
 		{
 			IupScintillaSendMessage( iupSci, 2198, flag, 0 );						// SCI_SETSEARCHFLAGS = 2198,
 			int documentLength = IupScintillaSendMessage( iupSci, 2006, 0, 0 );		// SCI_GETLENGTH = 2006,
@@ -2770,7 +2611,7 @@ version(DIDE)
 		}	
 
 
-		static char[] getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
+		static string getWholeWordDoubleSide( Ihandle* iupSci, int pos = -1 )
 		{
 			int		countParen, countBracket;
 			int		oriPos = pos;
@@ -2781,7 +2622,7 @@ version(DIDE)
 			{
 				if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 				{
-					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+					string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 
 					switch( s )
 					{
@@ -2807,8 +2648,8 @@ version(DIDE)
 			countBracket = 0;
 			
 
-			dchar[] word32;
-			char[]	word;
+			dstring word32;
+			string	word;
 			try
 			{
 				while( pos > -1 )
@@ -2818,10 +2659,10 @@ version(DIDE)
 					
 					if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 					{
-						char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ).dup;
+						string _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ).dup;
 						if( _s.length )
 						{
-							dchar[] sd = UTF.toString32( _s );
+							dstring sd = UTF.toUTF32( _s );
 							dchar s = sd[0];
 							switch( s )
 							{
@@ -2832,7 +2673,7 @@ version(DIDE)
 										{
 											if( pos < IupGetInt( iupSci, "COUNT" ) - 1 )
 											{
-												char[] prevs = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos + 1 ) ).dup;
+												string prevs = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos + 1 ) ).dup;
 												if( prevs.length )
 												{
 													if( prevs[0] == '_' || prevs[0] == '*' || ( prevs[0] >= 'A' && prevs[0] <= 'Z' ) || ( prevs[0] >= 'a' && prevs[0] <= 'z' ) ) return word;
@@ -2863,18 +2704,20 @@ version(DIDE)
 
 								case '\n', '\r':
 									if( !actionManager.ScintillaAction.isComment( iupSci, pos ) ) return word;
-
+									goto case;
+									
 								case ' ', '\t', ':', ';', '+', '-', '*', '/', '<', '>', ',', '=', '&':
 									if( countParen == 0 && countBracket == 0 ) return word;
-
+									goto default;
+									
 								default: 
 									if( countParen == 0 && countBracket == 0 )
 									{
-										if( UTF.isValid( s ) )
+										if( UTF.isValidDchar( s ) )
 										{
 											word32 = "";
 											word32 ~= s;
-											word ~= Util.trim( UTF.toString( word32 ) );
+											word ~= strip( UTF.toUTF8( word32 ) );
 										}
 									}
 							}
@@ -2896,14 +2739,14 @@ version(DIDE)
 		}
 
 		// For Goto Defintion Using
-		static char[] checkIsInclude( Ihandle* iupSci, int pos = -1 )
+		static string checkIsInclude( Ihandle* iupSci, int pos = -1 )
 		{
-			char[]	result;
+			string	result;
 			int		documentLength = IupGetInt( iupSci, "COUNT" ), fullStringPos, fullStringEndPos, moduleStartPos, oriPos = pos;
 			
 			do
 			{
-				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+				string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 				if( s == ";" || s == "," ) break;
 			}
 			while( ++pos < documentLength );
@@ -2913,7 +2756,7 @@ version(DIDE)
 
 			do
 			{
-				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) );
+				string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", pos ) );
 				if( s == ";" || s == "{" || s == "{" || s == "," || s =="=" ) break;
 			}
 			while( --pos >= 0 );
@@ -2922,7 +2765,7 @@ version(DIDE)
 
 			do
 			{
-				char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", fullStringPos ) );
+				string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", fullStringPos ) );
 				if( s == ";" || s == "{" || s == "{" ) break;
 			}
 			while( --fullStringPos >= 0 );
@@ -2938,10 +2781,10 @@ version(DIDE)
 				if ( moduleStartPos < importPos ) moduleStartPos = importPos + 6;
 				do
 				{
-					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", importPos ) );
+					string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", importPos ) );
 					if( s != " " && s != "\t" ) break;
 				}
-				while( ++moduleStartPos < documentLength )			
+				while( ++moduleStartPos < documentLength );		
 				
 				if( oriPos > moduleStartPos && oriPos < fullStringEndPos )
 				{
@@ -2949,7 +2792,7 @@ version(DIDE)
 					{
 						result ~= fromStringz( IupGetAttributeId( iupSci, "CHAR", i ) );
 					}
-					return Util.trim( result );
+					return strip( result );
 				}
 			}
 			
@@ -2962,7 +2805,7 @@ version(DIDE)
 			{
 				while( startPos < IupGetInt( iupSci, "COUNT" ) )
 				{
-					char[] s = fromStringz( IupGetAttributeId( iupSci, "CHAR", startPos ) );
+					string s = fSTRz( IupGetAttributeId( iupSci, "CHAR", startPos ) );
 					int key = cast(int) s[0];
 					if( key >= 0 && key <= 127 )
 					{
@@ -2989,10 +2832,10 @@ version(DIDE)
 			return startPos;
 		}
 		
-		static char[] getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
+		static string getWholeWordReverse( Ihandle* iupSci, int pos, out int headPos )
 		{
-			dchar[] word32;
-			char[]	word;
+			dstring word32;
+			string	word;
 			int		countParen, countBracket;
 
 			try
@@ -3006,10 +2849,10 @@ version(DIDE)
 					if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 					{
 						//dchar s = IupScintillaSendMessage( iupSci, 2007, pos, 0 );//SCI_GETCHARAT = 2007,
-						char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ).dup;
+						string _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ).dup;
 						if( _s.length )
 						{
-							dchar[] sd = UTF.toString32( _s );
+							dstring sd = UTF.toUTF32( _s );
 							dchar s = sd[0];
 							switch( s )
 							{
@@ -3033,18 +2876,20 @@ version(DIDE)
 
 								case '\n', '\r':
 									if( !actionManager.ScintillaAction.isComment( iupSci, pos ) ) return word;
-
+									goto case;
+									
 								case ' ', '\t', ':', ';', '+', '-', '*', '/', '<', '>', ',', '=', '&':
 									if( countParen == 0 && countBracket == 0 ) return word;
-
+									goto default;
+									
 								default: 
 									if( countParen == 0 && countBracket == 0 )
 									{
-										if( UTF.isValid( s ) )
+										if( UTF.isValidDchar( s ) )
 										{
 											word32 = "";
 											word32 ~= s;
-											word ~= Util.trim( UTF.toString( word32 ) );
+											word ~= strip( UTF.toUTF8( word32 ) );
 											//word ~= s;
 										}
 									}
@@ -3063,10 +2908,10 @@ version(DIDE)
 			return word;
 		}
 
-		static char[] getWholeWordReverseWithBracket( Ihandle* iupSci, int pos, out int headPos )
+		static string getWholeWordReverseWithBracket( Ihandle* iupSci, int pos, out int headPos )
 		{
-			dchar[] word32;
-			char[]	word;
+			dstring word32;
+			string	word;
 			int		countParen, countBracket;
 
 			try
@@ -3079,10 +2924,10 @@ version(DIDE)
 					
 					if( !actionManager.ScintillaAction.isComment( iupSci, pos ) )
 					{
-						char[] _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ).dup;
+						string _s = fromStringz( IupGetAttributeId( iupSci, "CHAR", pos ) ).dup;
 						if( _s.length )
 						{
-							dchar[] sd = UTF.toString32( _s );
+							dstring sd = UTF.toUTF32( _s );
 							dchar s = sd[0];
 							switch( s )
 							{
@@ -3114,18 +2959,20 @@ version(DIDE)
 
 								case '\n', '\r':
 									if( !actionManager.ScintillaAction.isComment( iupSci, pos ) ) return word;
-
+									goto case;
+									
 								case ' ', '\t', ':', ';', '+', '-', '*', '/', '<', '>', ',', '=', '&':
 									if( countParen == 0 && countBracket == 0 ) return word;
-
+									goto default;
+									
 								default: 
 									if( countParen == 0 && countBracket == 0 )
 									{
-										if( UTF.isValid( s ) )
+										if( UTF.isValidDchar( s ) )
 										{
 											word32 = "";
 											word32 ~= s;
-											word ~= Util.trim( UTF.toString( word32 ) );
+											word ~= strip( UTF.toUTF8( word32 ) );
 											//word ~= s;
 										}
 									}
@@ -3144,10 +2991,10 @@ version(DIDE)
 		}
 		
 
-		static char[] charAdd( Ihandle* iupSci, int pos = -1, char[] text = "", bool bForce = false )
+		static string charAdd( Ihandle* iupSci, int pos = -1, string text = "", bool bForce = false )
 		{
 			int		dummyHeadPos;
-			char[] 	word, result;
+			string 	word, result;
 			bool	bDot, bCallTip;
 
 			if( text == "(" )
@@ -3166,7 +3013,7 @@ version(DIDE)
 
 			//word = word ~ getWholeWordReverse( iupSci, pos, dummyHeadPos );
 			word = word ~ getWholeWordReverseWithBracket( iupSci, pos, dummyHeadPos ); // Keep With []
-			word = word.reverse;
+			word = Algorithm.reverse( word.dup );
 
 			auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
@@ -3179,20 +3026,20 @@ version(DIDE)
 					listContainer.length = 0;
 					IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
 
-					char[][]		splitWord = getDivideWord( word );
+					string[]		splitWord = getDivideWord( word );
 					int				lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					CASTnode		AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
-					char[]			memberFunctionMotherName;
+					string			memberFunctionMotherName;
 
 					if( AST_Head is null )
 					{
-						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
+						if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
 					}
 
 					if( GLOBAL.autoCompletionTriggerWordCount < 1 && !bForce ) 
 					{
-						if( GLOBAL.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
+						if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
 					}
 					
@@ -3200,34 +3047,31 @@ version(DIDE)
 
 					if( listContainer.length )
 					{
-						listContainer.sort;
+						Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 
-						char[]	_type, _list;
+						string	_type, _list;
 						int		maxLeft, maxRight;
 
-						if( GLOBAL.toggleShowListType == "ON" )
+						for( int i = 0; i < listContainer.length; ++ i )
 						{
-							for( int i = 0; i < listContainer.length; ++ i )
+							if( listContainer[i].length )
 							{
-								if( listContainer[i].length )
+								int dollarPos = lastIndexOf( listContainer[i], "#" );
+								if( dollarPos < -1 )
 								{
-									int dollarPos = Util.rindex( listContainer[i], "#" );
-									if( dollarPos < listContainer[i].length )
-									{
-										_type = listContainer[i][dollarPos+1..$];
-										if( _type.length > maxRight ) maxRight = _type.length;
-										_list = listContainer[i][0..dollarPos];
-										if( _list.length > maxLeft ) maxLeft = _list.length;
-									}
-									else
-									{
-										if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
-									}
+									_type = listContainer[i][dollarPos+1..$];
+									if( _type.length > maxRight ) maxRight = _type.length;
+									_list = listContainer[i][0..dollarPos];
+									if( _list.length > maxLeft ) maxLeft = _list.length;
+								}
+								else
+								{
+									if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
 								}
 							}
 						}
 
-						char[] formatString = "{,-" ~ Integer.toString( maxLeft ) ~ "} :: {,-" ~ Integer.toString( maxRight ) ~ "}";
+						string formatString = "{,-" ~ Conv.to!(string)( maxLeft ) ~ "} :: {,-" ~ Conv.to!(string)( maxRight ) ~ "}";
 						
 						for( int i = 0; i < listContainer.length; ++ i )
 						{
@@ -3236,28 +3080,21 @@ version(DIDE)
 
 							if( listContainer[i].length )
 							{
-								if( GLOBAL.toggleShowListType == "ON" )
+								string _string;
+								
+								int dollarPos = lastIndexOf( listContainer[i], "#" );
+								if( dollarPos > -1 )
 								{
-									char[] _string;
-									
-									int dollarPos = Util.rindex( listContainer[i], "#" );
-									if( dollarPos < listContainer[i].length )
-									{
-										_type = listContainer[i][dollarPos+1..$];
-										_list = listContainer[i][0..dollarPos];
-										_string = Util.trim( Stdout.layout.convert( formatString, _list, _type ) );
-									}
-									else
-									{
-										_string = listContainer[i];
-									}
-
-									result ~= ( _string ~ "^" );
+									_type = listContainer[i][dollarPos+1..$];
+									_list = listContainer[i][0..dollarPos];
+									_string = stripRight( format( "%-" ~ Conv.to!(string)(maxLeft) ~ "s :: %-" ~ Conv.to!(string)(maxRight) ~ "s", _list, _type ) );
 								}
 								else
 								{
-									result ~= ( listContainer[i] ~ "^" );
+									_string = listContainer[i];
 								}
+
+								result ~= ( _string ~ "^" );
 							}
 						}
 					}
@@ -3293,7 +3130,7 @@ version(DIDE)
 			
 			try
 			{
-				char[] word;
+				string word;
 				
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
@@ -3302,9 +3139,9 @@ version(DIDE)
 					if( currentPos < 1 ) return;
 					
 					word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
-					word = word.reverse;
+					word = Algorithm.reverse( word.dup );
 
-					char[][] splitWord = getDivideWord( word );
+					string[] splitWord = getDivideWord( word );
 
 					int				lineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					CASTnode		AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
@@ -3312,19 +3149,16 @@ version(DIDE)
 					if( AST_Head is null ) return;
 					
 					// Reset VersionCondition Container
-					foreach( char[] key; VersionCondition.keys )
+					foreach( string key; ( cast(int[string]) VersionCondition ).keys )
 						VersionCondition.remove( key );
 					
-					char[] options, compilers;
-					CustomToolAction.getCustomCompilers( options, compilers );
-					char[] activePrjName = ProjectAction.getActiveProjectName;
-					if( activePrjName.length ) options = Util.trim( options ~ " " ~ GLOBAL.projectManager[activePrjName].compilerOption );
+					string options = GLOBAL.compilerSettings.activeCompiler.Option.dup;
 					if( options.length )
 					{
-						int _versionPos = Util.index( options, "-version=" );
-						while( _versionPos < options.length )
+						int _versionPos =indexOf( options, "-version=" );
+						while( _versionPos > -1 )
 						{
-							char[] versionName;
+							string versionName;
 							for( int i = _versionPos + 9; i < options.length; ++ i )
 							{
 								if( options[i] == '\t' || options[i] == ' ' ) break;
@@ -3332,7 +3166,7 @@ version(DIDE)
 							}							
 							if( versionName.length ) AutoComplete.VersionCondition[versionName] = 1;
 							
-							_versionPos = Util.index( options, "-version=", _versionPos + 9 );
+							_versionPos = indexOf( options, "-version=", _versionPos + 9 );
 						}
 					}
 					
@@ -3340,11 +3174,11 @@ version(DIDE)
 					// Goto Import Modules
 					if( runType > 0 )
 					{
-						char[] string = checkIsInclude( cSci.getIupScintilla, currentPos );
-						if( string.length )
+						string _string = checkIsInclude( cSci.getIupScintilla, currentPos );
+						if( _string.length )
 						{
 							// Get cwd
-							char[] cwdPath = getMotherPath_D_MODULE( AST_Head, true );
+							string cwdPath = getMotherPath_D_MODULE( AST_Head, true );
 							
 							/+
 							auto headNode = AST_Head;
@@ -3368,7 +3202,7 @@ version(DIDE)
 							}
 							+/
 							
-							char[] fullPath = checkIncludeExist( string, cwdPath );
+							string fullPath = checkIncludeExist( _string, cwdPath );
 							if( fullPath.length )
 							{
 								if( GLOBAL.navigation.addCache( fullPath, 1 ) ) actionManager.ScintillaAction.openFile( fullPath );
@@ -3378,14 +3212,14 @@ version(DIDE)
 					}
 
 					CASTnode	firstASTNode, finalASTNode, _sub_ori_AST_Head = AST_Head;
-					char[]		_list;
+					string		_list;
 					bool		bIsModuleCheck;
 				
 					for( int i = 0; i < splitWord.length; i++ )
 					{
 						if( i == 0 )
 						{
-							AST_Head = searchMatchNode( AST_Head, Util.stripl( ParserAction.removeArrayAndPointer( splitWord[i] ), '&' ), D_FIND | D_ENUMMEMBER ); // NOTE!!!! Using "searchMatchNode()"
+							AST_Head = searchMatchNode( AST_Head, stripLeft( ParserAction.removeArrayAndPointer( splitWord[i] ), "&" ), D_FIND | D_ENUMMEMBER ); // NOTE!!!! Using "searchMatchNode()"
 							
 							if( AST_Head is null ) AST_Head = searchObjectModule( splitWord[i], D_FIND );
 							
@@ -3455,7 +3289,7 @@ version(DIDE)
 							{
 								if( bIsModuleCheck )
 								{
-									char[] _moduleName = splitWord[0];
+									string _moduleName = splitWord[0];
 
 									// Combine splitWord[0..i]	
 									for( int j = 1; j <= i; j++ )
@@ -3528,7 +3362,7 @@ version(DIDE)
 					if( runType == 0 )
 					{
 						
-						char[]	_type, _param;
+						string	_type, _param;
 						int		topLayerStartPos = -1;
 
 						if( firstASTNode !is null )
@@ -3546,7 +3380,7 @@ version(DIDE)
 								case D_ENUM: _type = "\"ENUM\""; break;
 								case D_ENUMMEMBER: _type = "\"ENUMMEMBER\""; break;
 								case D_FUNCTION: _type = "\"FUNCTION\""; break;
-								case D_VARIABLE: if( !firstASTNode.type.length && firstASTNode.base.length ) _type = "\"AUTO\"";
+								case D_VARIABLE: if( !firstASTNode.type.length && firstASTNode.base.length ) _type = "\"AUTO\""; break;
 								default:
 							}
 
@@ -3588,7 +3422,7 @@ version(DIDE)
 								case D_UNION: _type = "\"UNION\""; break;
 								case D_ENUM: _type = "\"ENUM\""; break;
 								case D_FUNCTION: _type = "\"FUNCTION\""; break;
-								case D_VARIABLE: if( !finalASTNode.type.length && finalASTNode.base.length ) _type = "\"AUTO\"";
+								case D_VARIABLE: if( !finalASTNode.type.length && finalASTNode.base.length ) _type = "\"AUTO\""; break;
 								default:
 							}
 
@@ -3619,15 +3453,15 @@ version(DIDE)
 							showTypeContent = _list;
 							scope _result = new IupString( showTypeContent );
 							cleanCalltipContainer(); // Clear Call Tip Container						
-							IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showTypeFore.toDString ), 0 ); //SCI_CALLTIPSETFORE 2206
-							IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showTypeBack.toDString ), 0 ); //SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showTypeFore ), 0 ); //SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showTypeBack ), 0 ); //SCI_CALLTIPSETBACK 2205
 							IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
 
 							
 							if( topLayerStartPos > -1 )
 							{
 								IupScintillaSendMessage( cSci.getIupScintilla, 2204, topLayerStartPos, _list.length ); // SCI_CALLTIPSETHLT 2204
-								IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showTypeHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+								IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showTypeHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							}
 							else
 							{
@@ -3662,7 +3496,7 @@ version(DIDE)
 		}
 		
 		
-		static bool callAutocomplete( Ihandle *ih, int pos, char[] text, char[] alreadyInput, bool bForce = false )
+		static bool callAutocomplete( Ihandle *ih, int pos, string text, string alreadyInput, bool bForce = false )
 		{
 			if( preLoadContainerThread !is null )
 			{
@@ -3670,7 +3504,7 @@ version(DIDE)
 					preLoadContainerThread.join();
 				else
 				{
-					delete preLoadContainerThread;
+					destroy( preLoadContainerThread );
 					preLoadContainerThread = null;
 				}
 			}
@@ -3707,7 +3541,7 @@ version(DIDE)
 							bool		bDot, bCallTip;
 							CASTnode	AST_Head;
 							int			lineNum;
-							char[][] 	splitWord = getNeedDataForThread( ih, text, pos, lineNum, bDot, bCallTip, AST_Head );
+							string[] 	splitWord = getNeedDataForThread( ih, text, pos, lineNum, bDot, bCallTip, AST_Head );
 							
 							showListThread = new CShowListThread( AST_Head, pos, lineNum, bDot, bCallTip, splitWord, text );
 							showListThread.start();
@@ -3719,7 +3553,7 @@ version(DIDE)
 					{
 						if( showListThread !is null )
 						{
-							delete showListThread;
+							destroy( showListThread );
 							showListThread = null;
 						}
 					}
@@ -3731,27 +3565,27 @@ version(DIDE)
 			}
 			else
 			{
-				char[] list = charAdd( ih, pos, text, bForce );
+				string list = charAdd( ih, pos, text, bForce );
 
 				if( list.length )
 				{
-					char[][] splitWord = getDivideWord( alreadyInput );
+					string[] splitWord = getDivideWord( alreadyInput );
 
 					alreadyInput = splitWord[$-1];
 					if( text == "(" )
 					{
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 						
-						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
+						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 						
 						//SCI_CALLTIPSETHLT 2204
 						scope _result = new IupString( list );
 						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
-						IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+						IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 						
-						//if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
-						calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						//if( calltipContainer !is null )	calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+						calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
 						int highlightStart, highlightEnd;
 						callTipSetHLT( list, 1, highlightStart, highlightEnd );
@@ -3777,7 +3611,7 @@ version(DIDE)
 			{
 				if( singleWord != null )
 				{
-					char[] s = fromStringz( singleWord );
+					string s = fSTRz( singleWord );
 					if( s == "(" || s == ")" || s == "," ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
 				}
 				else
@@ -3791,297 +3625,291 @@ version(DIDE)
 				{
 					if( singleWord != null )
 					{
-						char[] s = fromStringz( singleWord );
+						string s = fSTRz( singleWord );
 						if( s == ")" ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 					}
 				}
 			}
 
 			
-		
-			if( calltipContainer !is null )
+			bool	bContinue;
+			int		commaCount, parenCount, firstOpenParenPosFromDocument;
+			string	procedureNameFromList, LineHeadText;
+			int		lineNumber, currentLn = ScintillaAction.getCurrentLine( ih ) - 1;
+			int		lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
+			
+			
+			string _getLineHeadText( int _pos, string _result = "" )
 			{
-				bool	bContinue;
-				int		commaCount, parenCount, firstOpenParenPosFromDocument;
-				char[]	procedureNameFromList, LineHeadText;
-				int		lineNumber, currentLn = ScintillaAction.getCurrentLine( ih ) - 1;
-				int		lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
-				
-				
-				char[] _getLineHeadText( int _pos, char[] _result = "" )
-				{
-					while( _pos >= lineHeadPos )
-						_result = fromStringz( IupGetAttributeId( ih, "CHAR", _pos-- ) ) ~ _result;
-						
-					return _result;
-				}
-				
-				
-				if( singleWord == null )
-				{
-					int currentPos = ScintillaAction.getCurrentPos( ih );
-					LineHeadText = _getLineHeadText( pos - 1 );
-					/+
-					if( currentPos > pos ) // BS
-					{
-						/*
-						01234567
-						KUAN,
-						Before pos at 5, after press BS, the current pos = 4
-						*/
-						LineHeadText = _getLineHeadText( pos - 2 );
-					}
-					else // DEL
-					{
-						LineHeadText = _getLineHeadText( pos - 1 );
-					}
-					+/
-				}
-				else
-				{
-					char[] s = fromStringz( singleWord );
+				while( _pos >= lineHeadPos )
+					_result = fSTRz( IupGetAttributeId( ih, "CHAR", _pos-- ) ) ~ _result;
 					
-					// Press Enter, leave...
-					if( s == "\n" )
-					{
-						if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
-						noneListProcedureName = "";
-						cleanCalltipContainer();
-						return false;
-					}
-					/*
-					char[]	listInContainer = calltipContainer.top();
-					if( listInContainer.length )
-					{
-						int semicolonPos = Util.index( listInContainer, ";" );
-						if( semicolonPos < listInContainer.length )
-						{
-							lineNumber = Integer.toInt( listInContainer[0..semicolonPos] );
-							if( ScintillaAction.getCurrentLine( ih ) != lineNumber + 1 ) cleanCalltipContainer();
-						}
-					}
-					*/
-					LineHeadText = _getLineHeadText( pos - 1, s );
-				}
-
-				char[]	procedureNameFromDocument = parseProcedureForCalltip( ih, lineHeadPos, LineHeadText, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
-				//char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
-
-				if( commaCount == 0 )
+				return _result;
+			}
+			
+			
+			if( singleWord == null )
+			{
+				int currentPos = ScintillaAction.getCurrentPos( ih );
+				LineHeadText = _getLineHeadText( pos - 1 );
+				/+
+				if( currentPos > pos ) // BS
 				{
-					calltipContainer.pop();
+					/*
+					01234567
+					KUAN,
+					Before pos at 5, after press BS, the current pos = 4
+					*/
+					LineHeadText = _getLineHeadText( pos - 2 );
+				}
+				else // DEL
+				{
+					LineHeadText = _getLineHeadText( pos - 1 );
+				}
+				+/
+			}
+			else
+			{
+				string s = fSTRz( singleWord );
+				
+				// Press Enter, leave...
+				if( s == "\n" )
+				{
 					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+					noneListProcedureName = "";
+					cleanCalltipContainer();
 					return false;
 				}
-
-
-
-				// Last time we get null "List" at same line and same procedureNameFromDocument, leave!!!!!
-				if( noneListProcedureName == Integer.toString( firstOpenParenPosFromDocument ) ~ ";" ~ procedureNameFromDocument ) return false;
-		
-		
-		
-				char[]	list;
-				char[]	listInContainer = calltipContainer.top();
-				
+				/*
+				string	listInContainer = calltipContainer.top();
 				if( listInContainer.length )
 				{
 					int semicolonPos = Util.index( listInContainer, ";" );
 					if( semicolonPos < listInContainer.length )
 					{
 						lineNumber = Integer.toInt( listInContainer[0..semicolonPos] );
-						if( currentLn == lineNumber )
+						if( ScintillaAction.getCurrentLine( ih ) != lineNumber + 1 ) cleanCalltipContainer();
+					}
+				}
+				*/
+				LineHeadText = _getLineHeadText( pos - 1, s );
+			}
+
+			string	procedureNameFromDocument = parseProcedureForCalltip( ih, lineHeadPos, LineHeadText, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+			//string	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+
+			if( commaCount == 0 )
+			{
+				calltipContainer.pop();
+				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+				return false;
+			}
+
+
+
+			// Last time we get null "List" at same line and same procedureNameFromDocument, leave!!!!!
+			if( noneListProcedureName == Conv.to!(string)( firstOpenParenPosFromDocument ) ~ ";" ~ procedureNameFromDocument ) return false;
+	
+	
+	
+			string	list;
+			string	listInContainer = calltipContainer.top();
+			
+			if( listInContainer.length )
+			{
+				int semicolonPos = indexOf( listInContainer, ";" );
+				if( semicolonPos > -1 )
+				{
+					lineNumber = Conv.to!(int)( listInContainer[0..semicolonPos] );
+					if( currentLn == lineNumber )
+					{
+						int openParenPos = indexOf( listInContainer, "(" );
+						if( openParenPos > semicolonPos )
 						{
-							int openParenPos = Util.index( listInContainer, "(" );
-							if( openParenPos > semicolonPos )
+							//string procedureNameFromList;
+							for( int i = openParenPos - 1; i > semicolonPos; -- i )
 							{
-								//char[] procedureNameFromList;
-								for( int i = openParenPos - 1; i > semicolonPos; -- i )
+								if( listInContainer[i] == ' ' ) break;
+								procedureNameFromList = listInContainer[i] ~ procedureNameFromList;
+							}
+							
+							version(FBIDE)
+							{
+								if( procedureNameFromList != "Constructor" )
 								{
-									if( listInContainer[i] == ' ' ) break;
-									procedureNameFromList = listInContainer[i] ~ procedureNameFromList;
-								}
-								
-								version(FBIDE)
-								{
-									if( procedureNameFromList != "Constructor" )
+									if( lowerCase(procedureNameFromList) == lowerCase(procedureNameFromDocument) )
 									{
-										if( lowerCase(procedureNameFromList) == lowerCase(procedureNameFromDocument) )
+										bContinue = true;
+										list = listInContainer[semicolonPos+1..$].dup;
+									}
+								}
+								else
+								{
+									bContinue = true;
+									list = listInContainer[semicolonPos+1..$].dup;
+								}
+							}
+							version(DIDE)
+							{
+								int doubleColonPos = lastIndexOf( procedureNameFromList, "::this" );
+								if( doubleColonPos > -1 )
+								{
+									if( procedureNameFromDocument != "this" )
+									{
+										if( doubleColonPos > 0 )
 										{
-											bContinue = true;
-											list = listInContainer[semicolonPos+1..$].dup;
+											if( procedureNameFromList[0..doubleColonPos] == procedureNameFromDocument )
+											{
+												bContinue = true;
+												list = listInContainer[semicolonPos+1..$].dup;
+											}
 										}
 									}
 									else
 									{
 										bContinue = true;
 										list = listInContainer[semicolonPos+1..$].dup;
-									}
+									}									
 								}
-								version(DIDE)
+								else
 								{
-									int doubleColonPos = Util.rindex( procedureNameFromList, "::this" );
-									if( doubleColonPos < procedureNameFromList.length )
+									if( procedureNameFromList == procedureNameFromDocument )
 									{
-										if( procedureNameFromDocument != "this" )
-										{
-											if( doubleColonPos > 0 )
-											{
-												if( procedureNameFromList[0..doubleColonPos] == procedureNameFromDocument )
-												{
-													bContinue = true;
-													list = listInContainer[semicolonPos+1..$].dup;
-												}
-											}
-										}
-										else
-										{
-											bContinue = true;
-											list = listInContainer[semicolonPos+1..$].dup;
-										}									
+										bContinue = true;
+										list = listInContainer[semicolonPos+1..$].dup;
 									}
-									else
-									{
-										if( procedureNameFromList == procedureNameFromDocument )
-										{
-											bContinue = true;
-											list = listInContainer[semicolonPos+1..$].dup;
-										}
-									}
-								}
-							}	
-						}
-					}
-				}
-
-				if( !list.length )
-				{
-					if( GLOBAL.toggleCompleteAtBackThread == "ON" )
-					{
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" )
-						{
-							if( procedureNameFromDocument.length )
-							{
-								if( showCallTipThread is null )
-								{
-									if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
-									
-									try
-									{
-										if( showListThread !is null ) return false;
-											//if( showListThread.isRunning ) showListThread.join();
-									}
-									catch( Exception e ){}
-
-									// If using IUP command in Thread, join() occur infinite loop, so......
-									bool		bDot, bCallTip;
-									CASTnode	AST_Head;
-									int			lineNum;
-									char[][] 	splitWord = getNeedDataForThread( ih, "(", firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, AST_Head );
-									
-									showCallTipThread = new CShowListThread( AST_Head, firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, splitWord, "(", commaCount, procedureNameFromDocument );									
-									showCallTipThread.start();
-									
-									if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
 								}
 							}
-						}
-						
-						return false;
-					}
-					else
-					{
-						// commaCount != 0 and calltipContainer is empty, Re-get the list
-						list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
-						if( list.length )
-						{
-							bContinue = true;
-							if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
-						}
+						}	
 					}
 				}
-				
-				if( !bContinue )
+			}
+
+			if( !list.length )
+			{
+				if( GLOBAL.toggleCompleteAtBackThread == "ON" )
 				{
-					if( calltipContainer !is null )	
+					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" )
 					{
-						if( calltipContainer.size > 1 )
+						if( procedureNameFromDocument.length )
 						{
-							calltipContainer.pop();
-							list = calltipContainer.top;
-							int semicolonPos = Util.index( list, ";" );
-							if( semicolonPos < list.length )
+							if( showCallTipThread is null )
 							{
-								list = list[semicolonPos+1..$].dup;
-								bContinue = true;
+								if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+								
+								try
+								{
+									if( showListThread !is null ) return false;
+										//if( showListThread.isRunning ) showListThread.join();
+								}
+								catch( Exception e ){}
+
+								// If using IUP command in Thread, join() occur infinite loop, so......
+								bool		bDot, bCallTip;
+								CASTnode	AST_Head;
+								int			lineNum;
+								string[] 	splitWord = getNeedDataForThread( ih, "(", firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, AST_Head );
+								
+								showCallTipThread = new CShowListThread( AST_Head, firstOpenParenPosFromDocument, lineNum, bDot, bCallTip, splitWord, "(", commaCount, procedureNameFromDocument );									
+								showCallTipThread.start();
+								
+								if( fromStringz( IupGetAttribute( timer, "RUN" ) ) != "YES" ) IupSetAttribute( timer, "RUN", "YES" );
 							}
 						}
 					}
-				}
-				
-				
-				if( !bContinue )
-				{
-					if( calltipContainer !is null )
-						if( calltipContainer.size > 0 )
-						{
-							calltipContainer.clear();
-							//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
-						}
-						
+					
 					return false;
 				}
 				else
 				{
+					// commaCount != 0 and calltipContainer is empty, Re-get the list
+					list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
 					if( list.length )
 					{
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" && cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
+						bContinue = true;
+						calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+					}
+				}
+			}
+			
+			if( !bContinue )
+			{
+				if( calltipContainer.size > 1 )
+				{
+					calltipContainer.pop();
+					list = calltipContainer.top;
+					if( list.length )
+					{
+						int semicolonPos = indexOf( list, ";" );
+						if( semicolonPos > -1 )
 						{
-							IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-							IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-							scope _result = new IupString( list );
-							IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
-							IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
-							
-							if( calltipContainer !is null )	calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
-						}
-					
-						if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) // CallTip be Showed
-						{
-							int highlightStart, highlightEnd;
-							callTipSetHLT( list, commaCount, highlightStart, highlightEnd );
-
-							if( highlightEnd > -1 )
-							{
-								IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-								return true;
-							}
-							else
-							{
-								// Clean the Hight-light
-								IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
-								if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
-							}
+							list = list[semicolonPos+1..$].dup;
+							bContinue = true;
 						}
 					}
 				}
 			}
 			
+			
+			if( !bContinue )
+			{
+				if( calltipContainer.size > 0 )
+				{
+					calltipContainer.clear();
+					//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+				}
+					
+				return false;
+			}
+			else
+			{
+				if( list.length )
+				{
+					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" && cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 0 )
+					{
+						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
+						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
+						scope _result = new IupString( list );
+						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
+						IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+						
+						calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
+					}
+				
+					if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) // CallTip be Showed
+					{
+						int highlightStart, highlightEnd;
+						callTipSetHLT( list, commaCount, highlightStart, highlightEnd );
+
+						if( highlightEnd > -1 )
+						{
+							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+							return true;
+						}
+						else
+						{
+							// Clean the Hight-light
+							IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+							if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+						}
+					}
+				}
+			}			
 			return false;
 		}
 		
 		static bool updateCallTipByDirectKey( Ihandle* ih, int pos )
 		{
 			int		commaCount, parenCount, firstOpenParenPosFromDocument;
-			char[]	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+			string	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
 
 			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
 			{
-				char[] list = calltipContainer.top();
+				string list = calltipContainer.top();
 				if( list.length )
 				{
-					int semicolonPos = Util.index( list, ";" );
-					if( semicolonPos < list.length )
+					int semicolonPos = indexOf( list, ";" );
+					if( semicolonPos > -1 )
 					{
 						list = list[semicolonPos+1..$].dup;
 				
@@ -4105,7 +3933,6 @@ version(DIDE)
 		}
 	}
 	
-	import tango.io.Stdout;
 	
 	extern(C) private int CompleteTimer_ACTION( Ihandle* _ih )
 	{
@@ -4124,11 +3951,11 @@ version(DIDE)
 						{
 							int		_pos = ScintillaAction.getCurrentPos( sci );
 							int		dummyHeadPos;
-							char[]	_alreadyInput;
-							char[]	lastChar = fromStringz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
+							string	_alreadyInput;
+							string	lastChar = fSTRz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
 
-							if( !_alreadyInput.length ) _alreadyInput = AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).reverse;
-							char[][] splitWord = AutoComplete.getDivideWord( _alreadyInput );
+							if( !_alreadyInput.length ) _alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).dup );
+							string[] splitWord = AutoComplete.getDivideWord( _alreadyInput );
 							_alreadyInput = splitWord[$-1];
 
 							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
@@ -4144,7 +3971,7 @@ version(DIDE)
 					}
 				}
 
-				delete AutoComplete.showListThread;
+				destroy( AutoComplete.showListThread );
 				AutoComplete.showListThread = null;
 			}
 		}
@@ -4165,13 +3992,13 @@ version(DIDE)
 							
 							//if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 
-							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack.toDString ), 0 ); // SCI_CALLTIPSETBACK 2205
-							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore.toDString ), 0 ); // SCI_CALLTIPSETFORE 2206
-							IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT.toDString ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
+							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
+							IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							scope _result = new IupString( ScintillaAction.textWrap( AutoComplete.showCallTipThread.getResult ) );
 							if( !bShowListTrigger ) IupScintillaSendMessage( sci, 2200, _pos, cast(int) _result.toCString );
 							
-							if( AutoComplete.calltipContainer !is null ) AutoComplete.calltipContainer.push( Integer.toString( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
+							AutoComplete.calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 							
 							if( !bShowListTrigger )
 							{
@@ -4186,11 +4013,11 @@ version(DIDE)
 				}
 				else
 				{
-					AutoComplete.noneListProcedureName = Integer.toString( AutoComplete.showCallTipThread.pos ) ~ ";" ~ AutoComplete.showCallTipThread.extString;
+					AutoComplete.noneListProcedureName = Conv.to!(string)( AutoComplete.showCallTipThread.pos ) ~ ";" ~ AutoComplete.showCallTipThread.extString;
 					//AutoComplete.cleanCalltipContainer();
 				}
 
-				delete AutoComplete.showCallTipThread;
+				destroy( AutoComplete.showCallTipThread );
 				AutoComplete.showCallTipThread = null;
 			}
 		}		

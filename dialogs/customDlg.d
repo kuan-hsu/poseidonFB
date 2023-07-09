@@ -4,18 +4,16 @@ private import iup.iup;
 
 private import global, project, actionManager, menu, tools;
 private import dialogs.baseDlg, dialogs.singleTextDlg, dialogs.fileDlg;
-
-private import tango.stdc.stringz, Util = tango.text.Util, tango.io.FilePath;
-private import Integer = tango.text.convert.Integer;
-
+private import std.string, std.conv;
 
 class CCustomDialog : CBaseDialog
 {
-	private:
+private:
 	Ihandle*				listTools, treePluginStatus;
 	Ihandle*				labelStatus;
-	char[]					paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n%p% = Active Prj Files\n%pdir% = Active Prj Dir";
+	string					paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n%p% = Active Prj Files\n%pdir% = Active Prj Dir";
 	IupString				_tools, _args;
+	IupString[13]			IupItemTitle;
 	
 	
 	static	CustomTool[13]	editCustomTools;
@@ -26,11 +24,8 @@ class CCustomDialog : CBaseDialog
 		
 		listTools = IupList( null );
 		IupSetAttributes( listTools, "EXPAND=HORIZONTAL" );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( listTools, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( listTools, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
-		}
+		IupSetStrAttribute( listTools, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( listTools, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		IupSetHandle( "listTools_Handle", listTools );
 		IupSetCallback( listTools, "ACTION", cast(Icallback) &CCustomDialog_ACTION );
 		IupSetCallback( listTools, "DBLCLICK_CB", cast(Icallback) &CCustomDialog_DBLCLICK_CB );
@@ -62,19 +57,14 @@ class CCustomDialog : CBaseDialog
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		
 		
-		
-		
 		_tools = new IupString( " " ~ GLOBAL.languageItems["tools"].toDString ~ ":" );
 		Ihandle* labelToolsDir = IupLabel( _tools.toCString );
 		IupSetAttributes( labelToolsDir, "SIZE=54x16" );
 		
 		Ihandle* textToolsDir = IupText( null );
 		IupSetAttribute( textToolsDir, "EXPAND", "HORIZONTAL" );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( textToolsDir, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( textToolsDir, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
-		}
+		IupSetStrAttribute( textToolsDir, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( textToolsDir, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		IupSetHandle( "textToolsDir", textToolsDir );
 		IupSetCallback( textToolsDir, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 		
@@ -83,22 +73,19 @@ class CCustomDialog : CBaseDialog
 		IupSetAttribute( btnToolsDir, "TIP", GLOBAL.languageItems["open"].toCString );
 		IupSetCallback( btnToolsDir, "ACTION", cast(Icallback) &CCustomDialog_OPENDIR );			
 
-		//IupSetAttribute( textToolsDir, "EXPAND", "YES" );
 		Ihandle* hBox00 = IupHbox( labelToolsDir, textToolsDir, btnToolsDir, null );
 		IupSetAttribute( hBox00, "ALIGNMENT", "ACENTER" );
 		
 		_args = new IupString( " " ~ GLOBAL.languageItems["args"].toDString ~ ":" );
 		Ihandle* labelToolsArgs = IupLabel( _args.toCString );
 		IupSetAttributes( labelToolsArgs, "SIZE=54x16" );
-		IupSetAttribute( labelToolsArgs, "TIP", toStringz( paramTip ) );
+		IupSetStrAttribute( labelToolsArgs, "TIP", toStringz( paramTip ) );
 		
 		Ihandle* textToolsArgs = IupText( null );
 		IupSetAttribute( textToolsArgs, "EXPAND", "HORIZONTAL" );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( textToolsArgs, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( textToolsArgs, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
-		}
+		IupSetStrAttribute( textToolsArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( textToolsArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+
 		IupSetHandle( "textToolsArgs", textToolsArgs );
 		IupSetCallback( textToolsArgs, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 
@@ -122,7 +109,7 @@ class CCustomDialog : CBaseDialog
 						Ihandle* useConsoleHandle = IupGetHandle( "toggleUseConsole" );
 						if( useConsoleHandle != null )
 						{
-							CCustomDialog.editCustomTools[id].toggleShowConsole = fromStringz( IupGetAttribute( useConsoleHandle, "VALUE" ) );
+							CCustomDialog.editCustomTools[id].toggleShowConsole = fSTRz( IupGetAttribute( useConsoleHandle, "VALUE" ) );
 						
 						}
 					}
@@ -153,11 +140,8 @@ class CCustomDialog : CBaseDialog
 		// Plugin manager
 		treePluginStatus = IupTree();
 		IupSetAttributes( treePluginStatus, "ADDROOT=NO" );
-		version(DARKTHEME)
-		{
-			IupSetStrAttribute( treePluginStatus, "FGCOLOR", GLOBAL.editColor.txtFore.toCString );
-			IupSetStrAttribute( treePluginStatus, "BGCOLOR", GLOBAL.editColor.txtBack.toCString );
-		}
+		IupSetStrAttribute( treePluginStatus, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( treePluginStatus, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		
 		IupSetHandle( "treePluginStatus_Handle", treePluginStatus );
 
@@ -174,8 +158,8 @@ class CCustomDialog : CBaseDialog
 
 				if( id > -1 )
 				{
-					char[] name = fromStringz( IupGetAttributeId( ih, "TITLE", id ) );
-					char[] path = fromStringz( IupGetAttributeId( ih, "USERDATA", id ) );
+					string name = fSTRz( IupGetAttributeId( ih, "TITLE", id ) );
+					string path = fSTRz( IupGetAttributeId( ih, "USERDATA", id ) );
 					
 					if( name in GLOBAL.pluginMnager )
 					{
@@ -185,7 +169,7 @@ class CCustomDialog : CBaseDialog
 							if( p.getPath() == path )
 							{
 								IupSetAttribute( ih, "DELNODE", "SELECTED" );
-								delete p;
+								destroy( p );
 								GLOBAL.pluginMnager.remove( name );
 							}
 						}
@@ -197,6 +181,8 @@ class CCustomDialog : CBaseDialog
 					}
 				}
 			}
+			
+			return IUP_DEFAULT;
 		});
 		
 		Ihandle* vBoxStatus = IupVbox( treePluginStatus, IupHbox( IupFill, unloadButton, null ), null );
@@ -213,9 +199,8 @@ class CCustomDialog : CBaseDialog
 		{
 			if( p !is null )
 			{
-				auto fp = new IupString( p.getPath );
-				IupSetAttributeId( treePluginStatus, "ADDLEAF", IupGetInt( treePluginStatus, "COUNT" ) - 1, toStringz( p.getName ) );
-				IupSetAttributeId( treePluginStatus, "USERDATA", IupGetInt( treePluginStatus, "COUNT" ) - 1, fp.toCString );
+				IupSetStrAttributeId( treePluginStatus, "ADDLEAF", IupGetInt( treePluginStatus, "COUNT" ) - 1, toStringz( p.getName ) );
+				IupSetStrAttributeId( treePluginStatus, "USERDATA", IupGetInt( treePluginStatus, "COUNT" ) - 1, toStringz( p.getPath ) );
 			}
 		}
 		
@@ -228,7 +213,7 @@ class CCustomDialog : CBaseDialog
 
 	public:
 	
-	this( int w, int h, char[] title, bool bResize = false, char[] parent = "POSEIDON_MAIN_DIALOG" )
+	this( int w, int h, string title, bool bResize = false, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_tools" );
@@ -257,11 +242,13 @@ class CCustomDialog : CBaseDialog
 		IupSetHandle( "textToolsArgs", null );
 		IupSetHandle( "toggleUseConsole", null );
 		
-		delete _tools;
-		delete _args;
+		destroy( _tools );
+		destroy( _args );
+		for( int i = 0; i < 13; ++ i )
+			if( IupItemTitle[i] !is null ) destroy( IupItemTitle[i] );
 	}
 	
-	char[] show( int x, int y )
+	override string show( int x, int y )
 	{
 		IupPopup( _dlg, x, y );
 		return null;
@@ -288,7 +275,7 @@ extern(C)
 				Ihandle* menuItemHandle = IupGetChild( toolsSubMenuHandle, i );
 				if( menuItemHandle != null )
 				{
-					char[] menuItenTitle = fromStringz( IupGetAttribute( menuItemHandle, "TITLE" ) ).dup;
+					string menuItenTitle = fSTRz( IupGetAttribute( menuItemHandle, "TITLE" ) );
 					if( menuItenTitle.length )
 					{
 						if( menuItenTitle[0] == '#' ) IupDestroy( menuItemHandle ); else break;
@@ -305,7 +292,8 @@ extern(C)
 			{
 				if( GLOBAL.customTools[i].name.length )
 				{
-					Ihandle* _new = IupItem( toStringz( "#" ~ Integer.toString( i ) ~ ". " ~ GLOBAL.customTools[i].name ), null );
+					auto IupItemTitle = new IupString( "#" ~ to!(string)( i ) ~ ". " ~ GLOBAL.customTools[i].name );
+					Ihandle* _new = IupItem( IupItemTitle.toCString, null );
 					IupSetCallback( _new, "ACTION", cast(Icallback) &menu.customtool_menu_click_cb );
 					IupAppend( toolsSubMenuHandle, _new );
 					IupMap( _new );
@@ -319,12 +307,12 @@ extern(C)
 	private int CCustomDialog_OPENDIR( Ihandle* ih ) 
 	{
 		scope fileSecectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["allfile"].toDString() ~ "|*.*" );
-		char[] fileName = fileSecectDlg.getFileName();
+		string fileName = fileSecectDlg.getFileName();
 
 		if( fileName.length )
 		{
 			Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
-			if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", toStringz( fileName ) );
+			if( dirHandle != null ) IupSetStrAttribute( dirHandle, "VALUE", toStringz( fileName ) );
 			
 			Ihandle* toolsHandle = IupGetHandle( "listTools_Handle" );
 			if( toolsHandle != null )
@@ -369,7 +357,7 @@ extern(C)
 			
 			if( IupGetInt( toolsHandle, "VALUE" ) > 0 )
 			{
-				char[] optionText = Util.trim( fromStringz( new_value ) ).dup;
+				string optionText = strip( fSTRz( new_value ) );
 				if(id > 0 )
 				{
 					if( ih == dirHandle )
@@ -385,14 +373,14 @@ extern(C)
 	
 	private int CCustomDialog_DBLCLICK_CB( Ihandle *ih, int item, char *text )
 	{
-		char[] oldName = fromStringz( text ).dup;
+		string oldName = fromStringz( text ).dup;
 	
 		scope reNameDlg = new CSingleTextInput( 200, -1, oldName, "255 255 204", 220 );
 		
-		char[] newFileName = reNameDlg.show( IupGetInt( ih, "X" ) + 30, IUP_MOUSEPOS );
+		string newFileName = reNameDlg.show( IupGetInt( ih, "X" ) + 30, IUP_MOUSEPOS );
 		if( newFileName.length )
 		{
-			IupSetAttributeId( ih, "", item, toStringz( newFileName.dup ) );
+			IupSetStrAttributeId( ih, "", item, toStringz( newFileName ) );
 			IupSetInt( ih, "VALUE", item ); // Set Focus
 			
 			CCustomDialog.editCustomTools[item].name = newFileName;
@@ -414,13 +402,13 @@ extern(C)
 		}
 		
 		scope description = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["setcustomtool"].toDString(), GLOBAL.languageItems["tools"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile" );
-		char[] fileName = description.show( IupGetInt( toolsHandle, "X" ), IUP_MOUSEPOS );
+		string fileName = description.show( IupGetInt( toolsHandle, "X" ), IUP_MOUSEPOS );
 		
 		if( fileName.length )
 		{
-			IupSetAttribute( toolsHandle, "APPENDITEM", toStringz( fileName ) );
+			IupSetStrAttribute( toolsHandle, "APPENDITEM", toStringz( fileName ) );
 			CCustomDialog.editCustomTools[++index].name = fileName;
-			IupSetAttribute( toolsHandle, "VALUE", toStringz( Integer.toString( index ) ) ); // Set Focus
+			IupSetInt( toolsHandle, "VALUE", index ); // Set Focus
 			
 			Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
 			Ihandle* argsHandle = IupGetHandle( "textToolsArgs" );
@@ -445,18 +433,18 @@ extern(C)
 		if( index < 1 ) return IUP_DEFAULT;
 		
 		
-		char[] name = fromStringz( IupGetAttribute( toolsHandle, IupGetAttribute( toolsHandle, "VALUE" ) ) ).dup;
+		string name = fSTRz( IupGetAttribute( toolsHandle, IupGetAttribute( toolsHandle, "VALUE" ) ) );
 		if( name in GLOBAL.pluginMnager )
 		{
 			auto p = GLOBAL.pluginMnager[name];
 	
 			Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
-			char[] dir = fromStringz( IupGetAttribute( dirHandle, "VALUE" ) ).dup;
+			string dir = fSTRz( IupGetAttribute( dirHandle, "VALUE" ) );
 					
 			// Double Confirm......
 			if( p.getPath == dir )
 			{
-				int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["pluginrunningunload"].toDString, "QUESTION", IUP_MOUSEPOS, IUP_MOUSEPOS );
+				int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["pluginrunningunload"].toDString, "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
 				if( result == 1 )
 				{
 					Ihandle* treeHandle = IupGetHandle( "treePluginStatus_Handle" );
@@ -464,14 +452,13 @@ extern(C)
 					{
 						for( int i = 0; i < IupGetInt( treeHandle, "COUNT" ); ++ i )
 						{
-							char[] _name = fromStringz( IupGetAttributeId( treeHandle, "TITLE", i ) );
-							char[] _path = fromStringz( IupGetAttributeId( treeHandle, "USERDATA", i ) );
-							
+							string _name = fSTRz( IupGetAttributeId( treeHandle, "TITLE", i ) );
+							string _path = fSTRz( IupGetAttributeId( treeHandle, "USERDATA", i ) );
 							if( name == _name && dir == _path )
 							{
 								IupSetInt( treeHandle, "VALUE", i );
 								IupSetAttributeId( treeHandle, "DELNODE", i, "SELECTED" );
-								delete p;
+								destroy( p );
 								GLOBAL.pluginMnager.remove( name );
 								break;
 							}
@@ -483,7 +470,7 @@ extern(C)
 		
 		
 		IupSetAttribute( toolsHandle, "REMOVEITEM", IupGetAttribute( toolsHandle, "VALUE" ) );
-		
+
 		Ihandle* dirHandle = IupGetHandle( "textToolsDir" );
 		Ihandle* argsHandle = IupGetHandle( "textToolsArgs" );		
 		Ihandle* useConsoleHandle = IupGetHandle( "toggleUseConsole" );
@@ -527,8 +514,8 @@ extern(C)
 		if( id > 0 && id < 13 )
 		{
 			if( dirHandle != null ) IupSetStrAttribute( dirHandle, "VALUE", toStringz( CCustomDialog.editCustomTools[id].dir ) );
-			if( argsHandle != null ) IupSetAttribute( argsHandle, "VALUE", toStringz( CCustomDialog.editCustomTools[id].args ) );
-			if( useConsoleHandle != null ) IupSetAttribute( useConsoleHandle, "VALUE", toStringz( CCustomDialog.editCustomTools[id].toggleShowConsole ) );
+			if( argsHandle != null ) IupSetStrAttribute( argsHandle, "VALUE", toStringz( CCustomDialog.editCustomTools[id].args ) );
+			if( useConsoleHandle != null ) IupSetStrAttribute( useConsoleHandle, "VALUE", toStringz( CCustomDialog.editCustomTools[id].toggleShowConsole ) );
 		}
 		
 		IupSetFocus( toolsHandle );
@@ -545,13 +532,13 @@ extern(C)
 
 		if( itemNumber > 1 )
 		{
-			char* prevItemText = IupGetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber-1) ) );
-			char* nowItemText = IupGetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber) ) );
+			char* prevItemText = IupGetAttribute( toolsHandle, toStringz( to!(string)(itemNumber-1) ) );
+			char* nowItemText = IupGetAttribute( toolsHandle, toStringz( to!(string)(itemNumber) ) );
 
-			IupSetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber-1) ), nowItemText );
-			IupSetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber) ), prevItemText );
+			IupSetStrAttribute( toolsHandle, toStringz( to!(string)(itemNumber-1) ), nowItemText );
+			IupSetStrAttribute( toolsHandle, toStringz( to!(string)(itemNumber) ), prevItemText );
 
-			IupSetAttribute( toolsHandle, "VALUE", toStringz( Integer.toString(itemNumber-1) ) ); // Set Foucs
+			IupSetInt( toolsHandle, "VALUE", itemNumber - 1 ); // Set Foucs
 			
 			CustomTool temp;
 			temp.name = CCustomDialog.editCustomTools[itemNumber-1].name;
@@ -585,13 +572,13 @@ extern(C)
 
 		if( itemNumber < itemCount )
 		{
-			char* nextItemText = IupGetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber+1) ) );
-			char* nowItemText = IupGetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber) ) );
+			char* nextItemText = IupGetAttribute( toolsHandle, toStringz( to!(string)(itemNumber+1) ) );
+			char* nowItemText = IupGetAttribute( toolsHandle, toStringz( to!(string)(itemNumber) ) );
 
-			IupSetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber+1) ), nowItemText );
-			IupSetAttribute( toolsHandle, toStringz( Integer.toString(itemNumber) ), nextItemText );
+			IupSetStrAttribute( toolsHandle, toStringz( to!(string)(itemNumber+1) ), nowItemText );
+			IupSetStrAttribute( toolsHandle, toStringz( to!(string)(itemNumber) ), nextItemText );
 
-			IupSetAttribute( toolsHandle, "VALUE", toStringz( Integer.toString(itemNumber+1) ) );  // Set Foucs
+			IupSetInt( toolsHandle, "VALUE", itemNumber + 1 );  // Set Foucs
 			
 			CustomTool temp;
 			temp.name = CCustomDialog.editCustomTools[itemNumber+1].name;

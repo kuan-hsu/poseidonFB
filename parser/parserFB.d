@@ -7,7 +7,11 @@ version(FBIDE)
 	class CParser : _PARSER
 	{
 	private:
-
+		debug import std.stdio;
+		import global, parser.token, parser.ast;
+		import iup.iup;
+		import std.string, Uni = std.uni, Array = std.array, Path = std.path, Conv = std.conv;
+		
 		bool skipToEOL()
 		{
 			try
@@ -31,13 +35,12 @@ version(FBIDE)
 			return false;
 		}		
 		
-		
-		char[] getDelimitedString( int _tokOpen, int _tokClose )
+		string getDelimitedString( int _tokOpen, int _tokClose )
 		{
 			try
 			{
 				int		_countDemlimit;
-				char[]	_params;		// include open Delimit and close Delimit
+				string	_params;		// include open Delimit and close Delimit
 
 				if( token().tok == _tokOpen )
 				{
@@ -70,7 +73,7 @@ version(FBIDE)
 					parseToken();
 				}
 
-				_params = Util.trim( _params );
+				_params = strip( _params );
 				
 				switch( _tokOpen )
 				{
@@ -91,9 +94,9 @@ version(FBIDE)
 		}		
 		
 		// Parse the continuous identifiers, include any words until the EOL / :
-		char[] parseIdentifier()
+		string parseIdentifier()
 		{
-			char[] ident;
+			string ident;
 			
 			while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 			{
@@ -122,7 +125,7 @@ version(FBIDE)
 							TokenUnit t = getToken();
 							parseToken( TOK.Tstrings );
 
-							activeASTnode.addChild( Path.normalize( t.identifier ) , B_INCLUDE, null, null, null, t.lineNumber );
+							activeASTnode.addChild( tools.normalizeSlash( t.identifier ) , B_INCLUDE, null, null, null, t.lineNumber );
 						}
 						break;
 
@@ -139,11 +142,11 @@ version(FBIDE)
 						parseToken( TOK.Tmacro );
 						if( token().tok == TOK.Tidentifier )
 						{
-							char[] 	name = token().identifier;
+							string 	name = token().identifier;
 							int		lineNumber = token().lineNumber;
 							parseToken( TOK.Tidentifier );
 
-							char[] paramName, paramString;
+							string paramName, paramString;
 
 							activeASTnode = activeASTnode.addChild( name, B_MACRO, null, paramString, null, lineNumber );	
 							
@@ -182,7 +185,7 @@ version(FBIDE)
 
 						if( token().tok == TOK.Tidentifier )
 						{
-							char[] 	name = token().identifier;
+							string 	name = token().identifier;
 							int		lineNumber = token().lineNumber;
 							parseToken( TOK.Tidentifier );
 
@@ -190,8 +193,8 @@ version(FBIDE)
 							{
 								if( token().tok == TOK.Tnumbers  )
 								{
-									char[] type;
-									if( Util.index( token().identifier, "." ) < token().identifier.length )
+									string type;
+									if( indexOf( token().identifier, "." ) > 0 )
 									{
 										type = "single";
 									}
@@ -210,7 +213,7 @@ version(FBIDE)
 								else if( token().tok == TOK.Topenparen )
 								{
 									// #define GTK_VSCALE(obj) G_TYPE_CHECK_INSTANCE_CAST((obj), GTK_TYPE_VSCALE, GtkVScale)
-									char[] param;
+									string param;
 									while( token().tok != TOK.Teol )
 									{
 										param ~= token().identifier;
@@ -275,12 +278,12 @@ version(FBIDE)
 							{
 								if( token().tok == TOK.Topenparen )
 								{
-									char[] expression = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+									string expression = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
 									if( expression.length > 2 )
 									{
 										expression = expression[1..$-1].dup;
 
-										char[]	_identifier, _sign, _body;
+										string	_identifier, _sign, _body;
 										for( int i = 0; i < expression.length; ++ i )
 										{
 											if( expression[i] >= 60 && expression[i] <= 62 )
@@ -296,7 +299,7 @@ version(FBIDE)
 								}
 								else // #if expression
 								{
-									char[]	_identifier, _sign, _body;
+									string	_identifier, _sign, _body;
 									if( token().tok == TOK.Tidentifier )
 									{
 										_identifier = token().identifier;
@@ -365,12 +368,11 @@ version(FBIDE)
 								foreach( CASTnode _child; _children ) // Paste _children Back
 									activeASTnode.addChild( _child );
 								
-								//activeASTnode = activeASTnode.getFather( token().lineNumber );
 								activeASTnode = activeASTnode.addChild( "#else", B_VERSION | B_PARAM, null, null, "#else", token().lineNumber );
 							}
 							else if( activeASTnode.kind == B_VERSION )
 							{
-								char[] _name = activeASTnode.name;
+								string _name = activeASTnode.name;
 								activeASTnode = activeASTnode.getFather( token().lineNumber );
 								if( activeASTnode.name.length )
 								{
@@ -403,54 +405,7 @@ version(FBIDE)
 
 								foreach( CASTnode _child; _children ) // Paste _children Back
 									activeASTnode.addChild( _child );
-								/+
-								activeASTnode = activeASTnode.getFather( token().lineNumber );
-								
-								if( token().tok == TOK.Topenparen )
-								{
-									char[] expression = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-									if( expression.length > 2 )
-									{
-										expression = expression[1..$-1].dup;
 
-										char[]	_identifier, _sign, _body;
-										for( int i = 0; i < expression.length; ++ i )
-										{
-											if( expression[i] >= 60 && expression[i] <= 62 )
-											{
-												_sign ~= expression[i];
-												continue;
-											}
-
-											if( _sign.length ) _identifier ~= expression[i]; else _body ~= expression[i];
-										}
-										if( _sign.length && _identifier.length && _body.length ) activeASTnode = activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#elseif", token().lineNumber );
-									}
-								}
-								else // #if expression
-								{
-									char[]	_identifier, _sign, _body;
-									if( token().tok == TOK.Tidentifier )
-									{
-										_identifier = token().identifier;
-										parseToken( TOK.Tidentifier );
-										
-										while( token().tok == TOK.Tassign || token().tok == TOK.Tgreater || token().tok == TOK.Tless )
-										{
-											_sign ~= token().identifier;
-											parseToken();
-										}
-										
-										while( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
-										{
-											_body ~= token().identifier;
-											parseToken();
-										}
-										
-										activeASTnode = activeASTnode.addChild( _identifier, B_VERSION | B_PARAM, _sign, _body, "#elseif", token().lineNumber );
-									}
-								}
-								+/
 								activeASTnode = activeASTnode.addChild( "elseif", B_VERSION | B_PARAM, null, null, "#elseif", token().lineNumber );
 							}
 						}
@@ -472,8 +427,6 @@ version(FBIDE)
 
 								foreach( CASTnode _child; _children ) // Paste _children Back
 									activeASTnode.addChild( _child );
-								
-								//activeASTnode = activeASTnode.getFather( token().lineNumber );
 							}
 							else if( activeASTnode.kind & B_VERSION )
 								activeASTnode = activeASTnode.getFather( token().lineNumber );
@@ -487,14 +440,14 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parsePreprocessor" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parsePreprocessor" ).newline;
 			}
 
 			return true;
 		}
 
-		char[] getVariableType()
+		string getVariableType()
 		{
 			try
 			{
@@ -534,10 +487,10 @@ version(FBIDE)
 					case TOK.Tsingle, TOK.Tdouble:
 					case TOK.Tstring, TOK.Tzstring, TOK.Twstring:
 					case TOK.Tany:
-						return lowerCase( token.identifier );
+						return Uni.toLower( token.identifier );
 					
 					case TOK.Tidentifier:
-						char[] _type;
+						string _type;
 						while( next().tok == TOK.Tdot )
 						{
 							_type ~= token.identifier;
@@ -555,8 +508,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  getVariableType" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  getVariableType" ).newline;
 			}
 			
 			return null;
@@ -571,9 +524,9 @@ version(FBIDE)
 		type: the type of variable
 		default_value: the value of the argument if none is specified in the call
 		*/	
-		char[] parseParam( bool bDeclare )
+		string parseParam( bool bDeclare )
 		{
-			char[] _param = "(";
+			string _param = "(";
 
 			try
 			{
@@ -589,17 +542,14 @@ version(FBIDE)
 
 					while( token().tok != TOK.Tcloseparen )
 					{
-						char[] 	_name, _type;
+						string 	_name, _type;
 						int		_lineNum;
 
 						if( token().tok == TOK.Tbyref || token().tok == TOK.Tbyval ) parseToken();
 
-						//if( token().tok == TOK.Tidentifier )
-						//{
 						_name = token().identifier;
 						_lineNum = token().lineNumber;
 
-						//parseToken( TOK.Tidentifier );
 						parseToken();
 
 						// Array
@@ -617,7 +567,7 @@ version(FBIDE)
 							if( token().tok == TOK.Tfunction || token().tok == TOK.Tsub )
 							{
 								int _kind;
-								char[] __param;
+								string __param;
 								
 								if( token().tok == TOK.Tfunction ) _kind = B_FUNCTION; else _kind = B_SUB;
 								
@@ -645,7 +595,7 @@ version(FBIDE)
 									if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return null;
 								}
 
-								char[]  _returnType;
+								string  _returnType;
 
 								if( token().tok == TOK.Topenparen ) __param = parseParam( false );
 
@@ -677,8 +627,6 @@ version(FBIDE)
 
 										_type = _returnType ~ __param;
 										if( _kind == B_FUNCTION ) activeASTnode.addChild( _name, _kind, null, _type, null, _lineNum ); else return null;
-										
-										//return true;
 									}
 								}
 								else
@@ -751,7 +699,7 @@ version(FBIDE)
 							
 								if( token().tok == TOK.Tcomma || token().tok == TOK.Tcloseparen )
 								{
-									_param = Util.trim( _param );
+									_param = strip( _param );
 									
 									if( !bDeclare ) activeASTnode.addChild( _name, B_PARAM, null, _type, null, _lineNum );
 									
@@ -767,11 +715,6 @@ version(FBIDE)
 								break;
 							}
 						}
-						//}
-						//else
-						//{
-						//	break;
-						//}
 					}
 				}
 
@@ -784,16 +727,16 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseParam" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseParam" ).newline;
 			}
 
 			return _param;
 		}
 
-		char[] parseArray()
+		string parseArray()
 		{
-			char[] result;
+			string result;
 			
 			try
 			{
@@ -846,8 +789,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseArray" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseArray" ).newline;
 			}
 			
 			return result;
@@ -887,7 +830,7 @@ version(FBIDE)
 
 					parseToken();
 
-					char[]	_type, _name, _protection;
+					string	_type, _name, _protection;
 					int		_lineNum;
 
 					if( token().tok == TOK.Tshared )
@@ -1004,7 +947,7 @@ version(FBIDE)
 										bool bSingle;
 										if( token().tok == TOK.Tnumbers )
 										{
-											if( Util.index( token().identifier, "." ) < token().identifier.length ) bSingle = true;
+											if( indexOf( token().identifier, "." ) > -1 ) bSingle = true;
 										}
 										parseToken();
 										
@@ -1077,6 +1020,13 @@ version(FBIDE)
 										parseToken();
 									}
 									
+									if( token().tok == TOK.Tassign )
+									{
+										parseToken( TOK.Tassign );
+										while( token.tok != TOK.Teol && token.tok != TOK.Tcolon )
+											parseToken();
+									}
+									
 									activeASTnode.addChild( _name, B_VARIABLE, null, _type, null, _lineNum );
 
 									if( token.tok != TOK.Tcomma ) break; else parseToken( TOK.Tcomma );
@@ -1094,8 +1044,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseVariable" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseVariable" ).newline;
 			}
 
 			return false;
@@ -1106,7 +1056,7 @@ version(FBIDE)
 		{
 			try
 			{
-				char[]	_name, _type, _rightExpress;
+				string	_name, _type, _rightExpress;
 				int 	_lineNum = token().lineNumber;
 				
 				parseToken( TOK.Tvar );
@@ -1153,7 +1103,7 @@ version(FBIDE)
 					}
 					else if( token().tok == TOK.Tnumbers )
 					{
-						if( Util.count( token().identifier, "." ) > 0 ) _type = "double"; else _type = "integer";
+						if( indexOf( token().identifier, "." ) > -1 ) _type = "double"; else _type = "integer";
 						parseToken( TOK.Tnumbers );
 					}
 					
@@ -1163,8 +1113,8 @@ version(FBIDE)
 						parseToken();
 					}
 					
-					int indexOpenparen = Util.index( _rightExpress, "(" );
-					if( indexOpenparen < _rightExpress.length ) _rightExpress = _rightExpress[0..indexOpenparen];
+					int indexOpenparen = indexOf( _rightExpress, "(" );
+					if( indexOpenparen > -1 ) _rightExpress = _rightExpress[0..indexOpenparen];
 					
 					activeASTnode.addChild( _name, B_VARIABLE, null, _type, _rightExpress, _lineNum );
 				}
@@ -1189,17 +1139,17 @@ version(FBIDE)
 				parseToken( TOK.Tnamespace );
 				if( token().tok == TOK.Tidentifier )
 				{
-					char[][] _names = Util.split( parseIdentifier(), "." );
+					string[] _names = Array.split( parseIdentifier(), "." );
 					for( int i = 0; i < _names.length; ++ i )
-						activeASTnode = activeASTnode.addChild( _names[i], B_NAMESPACE, null, Integer.toString( i ), null, token().lineNumber );
+						activeASTnode = activeASTnode.addChild( _names[i], B_NAMESPACE, null, Conv.to!(string)( i ), null, token().lineNumber );
 					
 					return true;
 				}
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseNamespace" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseNamespace" ).newline;
 			}
 
 			return false;
@@ -1211,7 +1161,7 @@ version(FBIDE)
 			{
 				parseToken( TOK.Tusing );
 				
-				char[] _name;
+				string _name;
 				while( token().tok == TOK.Tidentifier )
 				{
 					int _lineNum	= token().lineNumber;
@@ -1227,7 +1177,6 @@ version(FBIDE)
 					}
 					else if( token().tok == TOK.Tcomma )
 					{
-						// .type = activeASTnode.name(name of Mother Scope), .endLineNum = activeASTnode.lineNumber
 						activeASTnode.addChild( _name, B_USING, null, null, null, _lineNum );
 						parseToken( TOK.Tcomma );
 						_name = "";
@@ -1246,8 +1195,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseUsing" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseUsing" ).newline;
 			}
 
 			return true;
@@ -1295,13 +1244,11 @@ version(FBIDE)
 		Operator typename.Delete ( buf As Any Ptr ) [ Export ]
 		Operator typename.Delete[] ( buf As Any Ptr ) [ Export ]
 		*/
-		bool parseOperator( bool bDeclare, char[] _protection )
+		bool parseOperator( bool bDeclare, string _protection )
 		{
-			//if( bDeclare ) return true;
-			
 			try
 			{
-				char[]	_returnType, _name, _kind, _param;
+				string	_returnType, _name, _kind, _param;
 				int		_lineNum, opType;
 				
 				parseToken( TOK.Toperator );
@@ -1417,7 +1364,7 @@ version(FBIDE)
 							activeASTnode = activeASTnode.addChild( _name, B_OPERATOR, _protection, null, null, _lineNum );
 							_param = parseParam( bDeclare );
 
-							if( Util.index( lowerCase( _name ), "new" ) < _name.length )
+							if( indexOf( Uni.toLower( _name ), "new" ) > -1 )
 							{
 								if( token().tok == TOK.Tas )
 								{
@@ -1448,6 +1395,7 @@ version(FBIDE)
 
 					case TOK.Tlet:
 						if( next().tok == TOK.Topenparen ) opType = 1; else return false; // Check if assignment_op, p.s. opType = 1
+						goto case;
 
 					case TOK.Tplus, TOK.Tminus, TOK.Ttimes, TOK.Tandsign, TOK.Tdiv, TOK.Tintegerdiv, TOK.Tmod, TOK.Tshl, TOK.Tshr, TOK.Tand, TOK.Tor, TOK.Txor, TOK.Timp, TOK.Teqv, TOK.Tcaret:
 						if( opType == 0 )
@@ -1467,10 +1415,12 @@ version(FBIDE)
 								opType = 2;							
 							}						
 						}
+						goto case;
 						
 					case TOK.Tassign:
 						if( opType == 0 )
 							if( next().tok == TOK.Topenparen ) opType = 3; else return false;
+						goto case;
 
 					case TOK.Tless:
 						if( opType == 0 )
@@ -1490,6 +1440,7 @@ version(FBIDE)
 								return false;
 							}
 						}
+						goto case;
 
 					case TOK.Tgreater:
 						if( opType == 0 )
@@ -1509,15 +1460,17 @@ version(FBIDE)
 								return false;
 							}
 						}
+						goto case;
 
 					case TOK.Tnot:
 						if( opType == 0 )
 							if( next().tok == TOK.Topenparen ) opType = 2; else return false;
+						goto case;
 				
 					case TOK.Tidentifier:
 						if( opType == 0 )
 						{
-							switch( lowerCase( token().identifier ) )
+							switch( Uni.toLower( token().identifier ) )
 							{
 								case "abs", "sgn", "fix", "frac", "int", "exp", "log", "sin", "asin", "cos", "acos", "tan", "atn", "len":
 									if( next().tok == TOK.Topenparen )
@@ -1525,7 +1478,8 @@ version(FBIDE)
 										opType = 2;
 										break;
 									}
-
+									return false;
+									
 								default:
 									return false;
 							}
@@ -1591,6 +1545,7 @@ version(FBIDE)
 										break;
 									}
 								}
+								goto default;
 
 							default:
 								return false;
@@ -1603,8 +1558,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseOperator" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseOperator" ).newline;
 			}
 
 			return true;
@@ -1626,7 +1581,7 @@ version(FBIDE)
 		return_value: the value returned from the function
 		*/
 		
-		bool parseProcedure( bool bDeclare, char[] _protection )
+		bool parseProcedure( bool bDeclare, string _protection )
 		{
 			int _kind;
 			
@@ -1678,7 +1633,7 @@ version(FBIDE)
 					// Function Name
 					if( token().tok == TOK.Tidentifier || ( bDeclare & ( token().tok == TOK.Tconstructor || token().tok == TOK.Tdestructor ) ) )
 					{
-						char[] 	_name, _param, _returnType;
+						string 	_name, _param, _returnType;
 						int		_lineNum;
 
 						_name = token().identifier;
@@ -1796,8 +1751,8 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseProcedure" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseProcedure" ).newline;
 			}
 
 			return false;
@@ -1847,7 +1802,7 @@ version(FBIDE)
 		{
 			try
 			{
-				char[] _protection;
+				string _protection;
 
 				switch( B_KIND )
 				{
@@ -1860,7 +1815,7 @@ version(FBIDE)
 				
 				while( token().tok != TOK.Tend && next().tok != B_KIND )
 				{
-					char[]	_type, _name;
+					string	_type, _name;
 					int		_lineNum;
 					
 					switch( token().tok )
@@ -1992,7 +1947,6 @@ version(FBIDE)
 							{
 								parseToken();
 							}
-							
 							break;
 
 						case TOK.Tstatic:
@@ -2024,7 +1978,6 @@ version(FBIDE)
 
 						case TOK.Teol, TOK.Tcolon:
 							parseToken();
-							//tokenIndex ++;
 							break;
 
 						case TOK.Tenum:
@@ -2081,6 +2034,7 @@ version(FBIDE)
 									return false;
 								}
 							}
+							goto case;
 							
 						case TOK.Tpound:
 							parsePreprocessor();
@@ -2157,18 +2111,18 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseTypeBody" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
 			}
 
 			return false;
 		}
 
-		bool parseFunctionPointer( char[] _name, int _lineNumber )
+		bool parseFunctionPointer( string _name, int _lineNumber )
 		{
 			try
 			{
-				char[] 	_param, _type;
+				string 	_param, _type;
 				int		_kind;
 				
 				// Function pointer
@@ -2192,7 +2146,7 @@ version(FBIDE)
 						if( token.tok == TOK.Tstrings ) parseToken( TOK.Tstrings ); else return false;
 					}
 
-					char[]  _returnType;
+					string  _returnType;
 
 					if( token().tok == TOK.Topenparen ) _param = parseParam( true );
 
@@ -2230,59 +2184,12 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseFunctionPointer" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseFunctionPointer" ).newline;
 			}
 
 			return false;
 		}
-		
-		/+
-		bool parseTemporaryTypes()
-		{
-			try
-			{
-				bool bGotMatch;
-				if( token().tok == TOK.Tless )
-				{
-					parseToken( TOK.Tless );
-					while( prev().tok != TOK.Tcolon && prev().tok != TOK.Teol )
-					{
-						if( token().tok == TOK.Tgreater )
-						{
-							parseToken();
-							bGotMatch = true;
-						}
-						parseToken();
-					}
-					
-					if( !bGotMatch ) return false;
-				}
-			
-			
-				if( token().tok == TOK.Topenparen )
-				{
-					parseToken( TOK.Topenparen );
-					while( prev().tok != TOK.Tcolon && prev().tok != TOK.Teol )
-					{
-						if( token().tok == TOK.Tcloseparen )
-						{
-							parseToken();
-							return true;
-						}
-						parseToken();
-					}
-				}
-			}
-			catch( Exception e )
-			{
-				throw e;
-			}
-			
-			return false;
-		}
-		+/
-		
 		
 		bool parseType( bool bClass = false )
 		{
@@ -2297,20 +2204,8 @@ version(FBIDE)
 					}
 				}
 			
-				char[] 	_name, _param, _type, _base;
+				string 	_name, _param, _type, _base;
 				int		_lineNum, _kind;
-
-				/+
-				if( tokenIndex != 0 )
-				{
-					if( prev().tok != TOK.Tcolon && prev().tok != TOK.Teol )
-					{
-						parseToken();
-						return false;
-					}
-				}
-				+/
-
 				if( token().tok == TOK.Ttype || token().tok == TOK.Tunion || ( bClass && token().tok == TOK.Tclass ) )
 				{
 					switch( token().tok )
@@ -2365,17 +2260,11 @@ version(FBIDE)
 						if( token().tok == TOK.Textends )
 						{
 							parseToken( TOK.Textends );
-							//if( token().tok == TOK.Tidentifier || token().tok == TOK.Tobject ) _base = parseIdentifier();
 							if( token().tok == TOK.Tidentifier ) _base = parseIdentifier();
-							/*
-							_base = token().identifier;
-							parseToken( TOK.Tidentifier );
-							*/
 						}
 
 						if( token().tok == TOK.Tfield )
 						{
-							
 							if( next().tok == TOK.Tassign )
 							{
 								parseToken( TOK.Tfield );
@@ -2409,7 +2298,7 @@ version(FBIDE)
 		{
 			try
 			{
-				char[] 	_name, _param, _type, _base;
+				string 	_name, _param, _type, _base;
 				int		_lineNum;
 				
 				while( token().tok != TOK.Tend && next().tok !=TOK.Tenum )
@@ -2423,7 +2312,6 @@ version(FBIDE)
 						if( token().tok == TOK.Tassign )
 						{
 							parseToken( TOK.Tassign );
-							//if( token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken(); else break;
 						}
 
 						// Pass the maybe complicated express
@@ -2447,9 +2335,7 @@ version(FBIDE)
 			catch( Exception e )
 			{
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseTypeBody" ).newline;
-			}
-			
+			}			
 
 			return false;
 		}
@@ -2458,7 +2344,7 @@ version(FBIDE)
 		{
 			try
 			{
-				char[] 	_name, _param, _type, _base;
+				string 	_name, _param, _type, _base;
 				int		_lineNum;
 
 				if( token().tok == TOK.Tenum )
@@ -2485,7 +2371,6 @@ version(FBIDE)
 			catch( Exception e )
 			{
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseEnum" ).newline;
 			}
 
 			return false;
@@ -2508,7 +2393,6 @@ version(FBIDE)
 			catch( Exception e )
 			{
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseScope" ).newline;
 			}
 
 			return true;
@@ -2520,7 +2404,7 @@ version(FBIDE)
 			{
 				parseToken( TOK.Twith );
 				
-				char[] user_defined_var;
+				string user_defined_var;
 				do
 				{
 					user_defined_var ~= token().identifier;
@@ -2533,7 +2417,6 @@ version(FBIDE)
 			catch( Exception e )
 			{
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseWith" ).newline;
 			}
 			
 			return false;
@@ -2550,26 +2433,25 @@ version(FBIDE)
 					case TOK.Tsub, TOK.Tfunction, TOK.Tproperty, TOK.Toperator, TOK.Tconstructor, TOK.Tdestructor, TOK.Ttype, TOK.Tenum, TOK.Tunion, TOK.Tscope, TOK.Twith, TOK.Tclass:
 						if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 						parseToken();
-
 						break;
 
 					case TOK.Tnamespace:
 						if( activeASTnode.kind & B_NAMESPACE )
 						{	
-							int loopUpperLimit = Integer.toInt( activeASTnode.type ) + 1;
+							int loopUpperLimit = Conv.to!(int)( activeASTnode.type ) + 1;
 							for( int i = 0; i < loopUpperLimit; ++ i )
 								if( activeASTnode.getFather() !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
 						}
 						parseToken();
+						break;
 					
 					default:
-						//parseToken();
 				}
 			}
 			catch( Exception e )
 			{
+				debug writefln( e.toString ~ "  ::  parseEnd" );
 				throw e;
-				//debug Stdout( e.toString ~ "  ::  parseEnd" ).newline;
 			}
 
 			return true;
@@ -2577,7 +2459,7 @@ version(FBIDE)
 
 
 
-		public:
+	public:
 		this(){}
 		
 		this( TokenUnit[] _tokens )
@@ -2585,7 +2467,7 @@ version(FBIDE)
 			updateTokens( _tokens );
 		}
 		
-		CASTnode parseTypeBodySingleLine( char[] fullPath )
+		CASTnode parseTypeBodySingleLine( string fullPath )
 		{
 			CASTnode head = null;
 			
@@ -2597,22 +2479,19 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				debug IupMessageError( null, toStringz( "parseTypeBodySingleLine Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				//debug IupMessageError( null, toStringz( "parseTypeBodySingleLine Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 			}
 
 			return head;
 		}
 
-		CASTnode parse( char[] fullPath )
+		CASTnode parse( string fullPath )
 		{
 			CASTnode head = null;
 			
 			try
 			{
-				scope f = new FilePath( fullPath );
-				
-				char[]		_ext;
-				if( lowerCase( f.ext() ) == "bas" ) 
+				if( Uni.toLower( Path.extension( fullPath ) ) == ".bas" ) 
 				{
 					head = new CASTnode( fullPath, B_BAS, null, null, null, 0, 2147483647 );
 				}
@@ -2683,6 +2562,7 @@ version(FBIDE)
 								parseToken( TOK.Tsub );
 								break;
 							}
+							goto case;
 							
 						case TOK.Tfunction, /*TOK.Tsub,*/ TOK.Tproperty, TOK.Tconstructor, TOK.Tdestructor:
 							parseProcedure( false, null );
@@ -2735,8 +2615,7 @@ version(FBIDE)
 						case TOK.Tusing:
 							if( next().tok != TOK.Tstrings && next().tok == TOK.Tidentifier ) parseUsing();
 							break;
-							
-							
+								
 						case TOK.Tdeclare:
 							parseToken( TOK.Tdeclare );
 							
@@ -2780,14 +2659,13 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				debug IupMessageError( null, toStringz( "parserFB Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Integer.toString( e.line ) ) );
+				debug IupMessageError( null, toStringz( "parserFB Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 			}
 
 			if( head !is null )
 			{
 				if( activeASTnode != head ) head.endLineNum = 2147483646; else head.endLineNum = 2147483647;
 			}
-			//printAST( head );
 
 			return head;
 		}

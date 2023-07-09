@@ -5,155 +5,41 @@ import iup.iup_scintilla;
 
 import global, layout, images.imageData, tools, navcache;
 import menu, scintilla, actionManager;
-import parser.autocompletion;
+import parser.autocompletion, parser.ast;
 
-import tango.io.Stdout, tango.stdc.stringz, Integer = tango.text.convert.Integer, Float = tango.text.convert.Float;
-import tango.sys.Environment, tango.io.FilePath, Path = tango.io.Path;
-import tango.sys.Process, tango.io.stream.Lines;
+debug import std.stdio;
+import std.file, std.string, std.conv, std.process, Path = std.path, Array = std.array;
 
-import tango.sys.SharedLib;
-/*
-version(linux)
-{
-	import tango.stdc.posix.pwd;
-	
-	extern(C) uid_t geteuid();
-	extern(C) uid_t getuid();
-}
-*/
 version(Windows)
 {
-	import tango.sys.win32.UserGdi;
+	import core.sys.windows.winuser, core.sys.windows.windef;
+	
+	version(GUI)
+	{
+		version(D_Version2)
+		{
+			pragma(linkerDirective, "/entry:mainCRTStartup");
+			pragma(linkerDirective, "/SUBSYSTEM:WINDOWS");
+		}
+	}
 	
 	pragma(lib, "winmm.lib"); // For PlaySound()
+	pragma(lib, "user32.lib");
 	pragma(lib, "iup.lib");
 	pragma(lib, "iup_scintilla.lib");
 }
 else
 {
-	import tango.sys.HomeFolder;
-	
-	// libgtk2.0-dev
-	//-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangox-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -liup -liup_scintilla
-	
-	// -lgtk-3 gdk-3 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo   -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lXext -lX11 -lm  (for GTK 3)
-	//pragma(lib, "gtk-x11-2.0");
-	//pragma(lib, "gdk-x11-2.0");
-	//pragma(lib, "pangox-1.0");
-	/*
-	pragma(lib, "gdk_pixbuf-2.0");
-	pragma(lib, "pango-1.0");
-	pragma(lib, "gobject-2.0");
-	pragma(lib, "gmodule-2.0");
-	pragma(lib, "glib-2.0");
-	*/
-	/*
-	pragma(lib, "gtk-3");
-	pragma(lib, "gdk-3");
-	pragma(lib, "gdk_pixbuf-2.0");
-	pragma(lib, "pangocairo-1.0");
-	pragma(lib, "pango-1.0");
-	pragma(lib, "cairo");
-	*/
-
 	pragma(lib, "iup");
 	pragma(lib, "iup_scintilla");
 }
 
-void main( char[][] args )
+
+void main( string[] args )
 {
-	version(Windows)
-	{
-		SharedLib sharedlib;
-		GLOBAL.htmlHelp = null;
-		
-		try
-		{
-			sharedlib = SharedLib.load( `hhctrl.ocx` );
-			
-			//Stdout("Library successfully loaded").newline;
-			
-			void* ptr = sharedlib.getSymbol("HtmlHelpW");
-			if( ptr )
-			{
-				GLOBAL.htmlHelp = cast(_htmlHelp) ptr;
-				//Trace.formatln("Symbol dllprint found. Address = 0x{:x}", ptr);
-				//void **point = cast(void **)&GLOBAL.htmlHelp; // binding function address from DLL to our function pointer
-				//*point = ptr;
-				
-				//Stdout("DONE").newline;
-			}
-			else
-			{
-				//Stdout("Symbol not found").newline;
-			}
-		}
-		catch( Exception e )
-		{
-			GLOBAL.htmlHelp = null;
-			
-			//Stdout(e.toString).newline;
-		}
-		
-
-		SharedLib loaderlib;
-		GLOBAL.iconv_open = null;
-		GLOBAL.iconv = null;
-		GLOBAL.iconv_close = null;
-		try
-		{
-			loaderlib = SharedLib.load( `iconv.dll` );
-			if( loaderlib !is null )
-			{
-				void* ptr = loaderlib.getSymbol("libiconv_open");
-				if( ptr )
-				{
-					void **point = cast(void **)&GLOBAL.iconv_open; // binding function address from DLL to our function pointer
-					*point = ptr;
-				}
-				else
-					throw new Exception( "Symbol 'iconv_open' not found" );
-				
-				
-				ptr = null;
-				ptr = loaderlib.getSymbol("libiconv");
-				if( ptr )
-				{
-					void **point = cast(void **)&GLOBAL.iconv; // binding function address from DLL to our function pointer
-					*point = ptr;
-				}
-				else
-					throw new Exception( "Symbol 'iconv' not found" );
-
-				ptr = null;
-				ptr = loaderlib.getSymbol("libiconv_close");
-				if( ptr )
-				{
-					void **point = cast(void **)&GLOBAL.iconv_close; // binding function address from DLL to our function pointer
-					*point = ptr;
-				}
-				else
-					throw new Exception( "Symbol 'iconv_close' not found" );
-					
-					
-				debug Stdout("SUCCESS!" ).newline;
-			}
-			else
-			{
-				GLOBAL.iconv = null;
-				throw new Exception( "LOAD DLL ERROR!" );
-			}
-		}
-		catch( Exception e )
-		{
-			GLOBAL.iconv = null;
-			debug Stdout(e.toString).newline;
-		}
-	}
-	
 	if( IupOpen( null, null ) == IUP_ERROR )
 	{
-		Stdout( "IUP open error!!!" ).newline;
+		debug writefln( "IUP open error!!!" );
 		return;
 	}
 	
@@ -165,61 +51,135 @@ void main( char[][] args )
 		if( IupGetGlobal( toStringz( "SINGLEINSTANCE" ) ) == null  )
 		{
 			IupClose();
-			if( GLOBAL.htmlHelp != null ) sharedlib.unload();
 			return;
 		}
 	}
 	
-	//  Get poseidonFB exePath & set the new cwd
-	scope _poseidonPath = new FilePath( args[0] );
-	if( _poseidonPath.exists() )
+	// Dynamic Libraries Load...
+	version(Windows)
 	{
-		GLOBAL.poseidonPath = _poseidonPath.path;
-		Environment.cwd( GLOBAL.poseidonPath );
-		version(Windows)
+		SharedLib sharedlib;
+		GLOBAL.htmlHelp = null;
+		
+		try
 		{
-			GLOBAL.EnvironmentVars = Environment.get();
+			sharedlib = SharedLib.load( `hhctrl.ocx` );
+			void* ptr = sharedlib.getSymbol("HtmlHelpW");
+			if( ptr )
+			{
+				GLOBAL.htmlHelp = cast(GLOBAL._htmlHelp) ptr;
+			}
+			else
+			{
+				debug writefln("HtmlHelpW Symbol not found");
+			}
+		}
+		catch( Exception e )
+		{
+			GLOBAL.htmlHelp = null;
+			
+			debug writefln(e.toString);
+		}
+	}
+	
+
+	// Dark Mode
+	SharedLib DarkModeLoader;
+	version(Windows)
+	{
+		GLOBAL.AllowDarkModeForWindow = null;
+		GLOBAL.InitDarkMode = null;
+		GLOBAL.SetWindowTheme = null;
+	}
+	GLOBAL.SetDarkMode = null;
+	try
+	{
+		version(Windows) DarkModeLoader = SharedLib.load( `DarkMode.dll` );// else DarkModeLoader = SharedLib.load( `./DarkMode.so` );
+		if( DarkModeLoader !is null )
+		{
+			void* ptr = null;
+			version(Windows)
+			{
+				ptr = DarkModeLoader.getSymbol("AllowDarkModeForWindow_FB");
+				if( ptr )
+				{
+					void **point = cast(void **)&GLOBAL.AllowDarkModeForWindow; // binding function address from DLL to our function pointer
+					*point = ptr;
+				}
+				else
+					throw new Exception( "Symbol 'AllowDarkModeForWindow_FB' not found" );
+				
+				
+				ptr = null;
+				ptr = DarkModeLoader.getSymbol("InitDarkMode_FB");
+				if( ptr )
+				{
+					void **point = cast(void **)&GLOBAL.InitDarkMode; // binding function address from DLL to our function pointer
+					*point = ptr;
+				}
+				else
+					throw new Exception( "Symbol 'InitDarkMode_FB' not found" );
+
+				ptr = null;
+				ptr = DarkModeLoader.getSymbol("SetWindowTheme_FB");
+				if( ptr )
+				{
+					void **point = cast(void **)&GLOBAL.SetWindowTheme; // binding function address from DLL to our function pointer
+					*point = ptr;
+				}
+				else
+					throw new Exception( "Symbol 'SetWindowTheme_FB' not found" );
+			}
+			
+			ptr = null;
+			ptr = DarkModeLoader.getSymbol("SetDarkMode_FB");
+			if( ptr )
+			{
+				void **point = cast(void **)&GLOBAL.SetDarkMode; // binding function address from DLL to our function pointer
+				*point = ptr;
+			}
+			else
+				throw new Exception( "Symbol 'SetDarkMode_FB' not found" );					
+				
+				
+			debug writefln( "DarkMode.dll and Symbols loaded success!" );
 		}
 		else
 		{
-			/*
-			auto user = getpwuid( getuid() );
-			char[] home = fromStringz( user.pw_dir );
-			*/
-			char[] home = expandTilde( "~" );
+			GLOBAL.SetDarkMode = null;
+			throw new Exception( "LOAD DLL ERROR!" );
+		}
+	}
+	catch( Exception e )
+	{
+		GLOBAL.SetDarkMode = null;
+		debug writefln(e.toString);
+	}	
+	
+	
+	//  Get poseidonFB exePath & set the new cwd
+	GLOBAL.poseidonPath = Path.dirName( args[0] ); // without tail /
+	GLOBAL.EnvironmentVars = environment.toAA();
+	version(Posix)
+	{
+		/*
+		auto user = getpwuid( getuid() );
+		char[] home = fromStringz( user.pw_dir );
+		*/
+		string home = Path.expandTilde( "~" );
 
-			if( Util.index( GLOBAL.poseidonPath, home ) != 0 )
-			{
-				GLOBAL.linuxHome = home.dup;
-				version(FBIDE)	GLOBAL.linuxHome ~= "/.poseidonFB";
-				version(DIDE)	GLOBAL.linuxHome ~= "/.poseidonD";
+		if( indexOf( GLOBAL.poseidonPath, home ) != 0 )
+		{
+			GLOBAL.linuxHome = home;
+			version(FBIDE)	GLOBAL.linuxHome ~= "/.poseidonFB";
+			version(DIDE)	GLOBAL.linuxHome ~= "/.poseidonD";
+			
+			if( !exists( GLOBAL.linuxHome ) ) std.file.mkdir( GLOBAL.linuxHome );
+			if( !exists( GLOBAL.linuxHome ~ "/settings" ) ) std.file.mkdir( GLOBAL.linuxHome ~ "/settings" );
+			if( !exists( GLOBAL.linuxHome ~ "/settings/colorTemplates" ) ) std.file.mkdir( GLOBAL.linuxHome ~ "/settings/colorTemplates" );
 
-				scope dotPath = new FilePath( GLOBAL.linuxHome );
-				if( !dotPath.exists() )	dotPath.create();
-
-				dotPath.set( GLOBAL.linuxHome ~ "/settings" );
-				if( !dotPath.exists() )	dotPath.create();
-
-				dotPath.set( GLOBAL.linuxHome ~ "/settings/colorTemplates" );
-				if( !dotPath.exists() )
-				{
-					dotPath.create();
-
-					// Copy all /settings/colorTemplates/*.ini to ~/.poseidonFB or ~/.poseidonD
-					bool dirFilter( FilePath _fp, bool _isFolder )
-					{
-						if( lowerCase( _fp.ext ) == "ini" ) return true;
-						return false;
-					}
-					bool delegate( FilePath, bool ) _dirFilter;
-					_dirFilter = &dirFilter;
-					
-
-					scope srcPath = new FilePath( GLOBAL.poseidonPath ~ "settings/colorTemplates" );
-					foreach( FilePath _fp; srcPath.toList( _dirFilter ) )
-						Path.copy( _fp.toString, dotPath.toString ~ "/" ~ _fp.file );
-				}
-			}
+			foreach( string filename; dirEntries( GLOBAL.poseidonPath ~ "/settings/colorTemplates", "*.ini", SpanMode.shallow) )
+				std.file.copy( filename, GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ Path.baseName( filename ) );
 		}
 	}
 	
@@ -231,53 +191,16 @@ void main( char[][] args )
 	IupScintillaOpen();
 
 	// Set Default Font
-	if(  GLOBAL.fonts[0].fontString.length )
-	{
-		IupSetStrGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
-		/*
-		if( GLOBAL.fonts[0].fontString.length )
-		{
-			int comma = Util.index( GLOBAL.fonts[0].fontString, "," );
-			if( comma < GLOBAL.fonts[0].fontString.length )
-			{
-				IupSetStrGlobal( "DEFAULTFONTFACE", toStringz( ( GLOBAL.fonts[0].fontString[0..comma] ).dup ) );
-
-				for( int i = GLOBAL.fonts[0].fontString.length - 1; i > comma; -- i )
-				{
-					if( GLOBAL.fonts[0].fontString[i] < 48 || GLOBAL.fonts[0].fontString[i] > 57 )
-					{
-						IupSetStrGlobal( "DEFAULTFONTSIZE", toStringz( ( GLOBAL.fonts[0].fontString[i+1..$] ).dup ) );
-
-						if( ++comma  < i ) IupSetStrGlobal( "DEFAULTFONTSTYLE", toStringz( ( GLOBAL.fonts[0].fontString[comma..i] ).dup ) );
-						
-						break;
-					}
-				}
-			}
-		}
-		*/
-	}
-
+	if(  GLOBAL.fonts[0].fontString.length ) IupSetStrGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
 	IupSetGlobal( "UTF8MODE", "YES" );
-	version(Windows)
-	{
-		IupSetGlobal( "UTF8MODE_FILE", "YES" );
-		/*
-		IupSetStrGlobal( "MENUFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
-		IupSetStrGlobal( "MENUBGCOLOR", GLOBAL.editColor.dlgBack.toCString );
-		*/
-	}
+	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
 	
-	version(DARKTHEME)
-	{
-		IupSetStrGlobal( "DLGFGCOLOR", GLOBAL.editColor.dlgFore.toCString );
-		IupSetStrGlobal( "DLGBGCOLOR", GLOBAL.editColor.dlgBack.toCString );	
-		IupSetStrGlobal( "TXTFGCOLOR", GLOBAL.editColor.txtFore.toCString );
-		IupSetStrGlobal( "TXTBGCOLOR", GLOBAL.editColor.txtBack.toCString );
-	}
+	IupSetStrGlobal( "DLGFGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+	IupSetStrGlobal( "DLGBGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
+	IupSetStrGlobal( "TXTFGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+	IupSetStrGlobal( "TXTBGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 	
-
-	createMenu();
+	version(Posix) createMenu();
 	
 	// Creates a dialog containing the control
 	GLOBAL.mainDlg = IupDialog( null );
@@ -288,7 +211,6 @@ void main( char[][] args )
 	IupSetCallback( GLOBAL.mainDlg, "RESIZE_CB", cast(Icallback) &mainDialog_RESIZE_cb );
 	
 	IupSetAttributes( GLOBAL.mainDlg, "SHRINK=YES" );
-	
 	version(Windows) IupSetCallback( GLOBAL.mainDlg, "COPYDATA_CB", cast(Icallback) &mainDialog_COPYDATA_CB ); else IupSetGlobal( "GLOBALMENU", "NO" ); // for ubuntu menu & toolbar overlap issue
 
 	createLayout();
@@ -305,52 +227,45 @@ void main( char[][] args )
 	IupSetFunction( "GLOBALKEYPRESS_CB", cast(Icallback) &GlobalKeyPress_CB );
 	version(Windows) IupSetFunction( "GLOBALWHEEL_CB", cast(Icallback) &GlobalWHEEL_CB );
 	
-	if( GLOBAL.editorSetting01.PLACEMENT == "MAXIMIZED" ) IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" ); else IupSetAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
+	if( GLOBAL.editorSetting01.PLACEMENT == "MAXIMIZED" ) IupSetAttribute( GLOBAL.mainDlg, "PLACEMENT", "MAXIMIZED" ); else IupSetStrAttribute( GLOBAL.mainDlg, "RASTERSIZE", toStringz( GLOBAL.editorSetting01.RASTERSIZE ) );
 
 	// Set Split %
-	IupSetAttribute( GLOBAL.explorerSplit, "VALUE", toStringz( GLOBAL.editorSetting01.ExplorerSplit ) );
+	IupSetStrAttribute( GLOBAL.explorerSplit, "VALUE", toStringz( GLOBAL.editorSetting01.ExplorerSplit ) );
 	
-	/*
-	version(linux)
-	{
-		EditorToggleUint	_editorSetting00 = GLOBAL.editorSetting00;
-		EditorLayoutSize	_editorSetting01 = GLOBAL.editorSetting01;
-		EditorOpacity		_editorSetting02 = GLOBAL.editorSetting02;
-		EditorColorUint		_editColor = GLOBAL.editColor;
-		
-		// Shows dialog
-		IupShow( GLOBAL.mainDlg );
-	
-		GLOBAL.editorSetting00 = _editorSetting00;
-		GLOBAL.editorSetting01 = _editorSetting01;
-		GLOBAL.editorSetting02 = _editorSetting02;
-		GLOBAL.editColor = _editColor;
-	}
-	else
-	{
-		// Shows dialog
-		IupShow( GLOBAL.mainDlg );
-	}
-	*/
-	
+
+	// For Linux mod
 	EditorToggleUint	_editorSetting00 = GLOBAL.editorSetting00;
 	EditorLayoutSize	_editorSetting01 = GLOBAL.editorSetting01;
 	EditorOpacity		_editorSetting02 = GLOBAL.editorSetting02;
 	EditorColorUint		_editColor = GLOBAL.editColor;
 	
+	if( GLOBAL.SetDarkMode != null && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+	{
+		version(Windows)
+		{
+			GLOBAL.bDarkMode = cast(bool) GLOBAL.InitDarkMode();
+			if( GLOBAL.bDarkMode )
+				GLOBAL.SetDarkMode( true, true );
+			else
+			{
+				debug writefln( "Couldn't fit DarkMode API needs!" );
+			}
+		}
+	}
+	
 	// Shows dialog
 	IupShow( GLOBAL.mainDlg );
 
+	// Restore settings
 	GLOBAL.editorSetting00 = _editorSetting00;
 	GLOBAL.editorSetting01 = _editorSetting01;
 	GLOBAL.editorSetting02 = _editorSetting02;
 	GLOBAL.editColor = _editColor;
 		
-	IupSetAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );	
+	IupSetStrAttribute( GLOBAL.messageSplit, "VALUE", toStringz( GLOBAL.editorSetting01.MessageSplit ) );	
 	if( GLOBAL.editorSetting01.OutlineWindow == "OFF" ) menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
 	if( GLOBAL.editorSetting01.MessageWindow == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 	
-
 	createDialog();
 	
 	IupSetStrAttribute( GLOBAL.documentTabs, "TABFONT", toStringz( GLOBAL.fonts[0].fontString ) );
@@ -368,35 +283,40 @@ void main( char[][] args )
 	
 	GLOBAL.messagePanel.setScintillaColor(); // Set MessagePanel Color
 	
+	if( GLOBAL.bDarkMode && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+	{
+		GLOBAL.searchExpander.changeColor();
+		GLOBAL.outlineTree.changeColor();
+	}
+	
+	// Load Default Parser
+	GLOBAL.objectDefaultParser = cast(shared CASTnode) ParserAction.loadObjectParser();
+	
 	if( args.length > 1 )
 	{
-		scope argPath = new FilePath( args[1] );
-		if( argPath.exists() )
+		auto argPath = args[1];
+		if( exists( argPath ) )
 		{
 			version(FBIDE)
 			{
-				if( argPath.file == "FB.poseidon" || argPath.file == ".poseidon" )
+				if( Path.baseName( argPath ) == "FB.poseidon" )
 				{
-					char[] dir = argPath.path;
-					if( dir.length ) dir = dir[0..$-1]; // Remove tail '/'
-					GLOBAL.projectTree.openProject( dir );				
+					GLOBAL.projectTree.openProject( Path.dirName( argPath ) );				
 				}
 				else
 				{
-					if( tools.isParsableExt( argPath.ext, 7 ) ) ScintillaAction.openFile( args[1] );
+					if( tools.isParsableExt( Path.extension( argPath ), 7 ) ) ScintillaAction.openFile( argPath );
 				}
 			}
-			version(DIDE)
+			else // version(DIDE)
 			{
-				if( argPath.file == "D.poseidon" )
+				if( Path.baseName( argPath ) == "D.poseidon" )
 				{
-					char[] dir = argPath.path;
-					if( dir.length ) dir = dir[0..$-1]; // Remove tail '/'
-					GLOBAL.projectTree.openProject( dir );				
+					GLOBAL.projectTree.openProject( Path.dirName( argPath ) );				
 				}
 				else
 				{
-					if( lowerCase( argPath.ext ) == "d" || lowerCase( argPath.ext ) == "di" )	ScintillaAction.openFile( args[1] );
+					if( tools.isParsableExt( Path.extension( argPath ), 3 ) )	ScintillaAction.openFile( argPath );
 				}
 			}
 		}
@@ -404,17 +324,17 @@ void main( char[][] args )
 
 	if( GLOBAL.editorSetting00.LoadPrevDoc == "ON" )
 	{
-		foreach( char[] s; GLOBAL.prevPrj )
+		foreach( s; GLOBAL.prevPrj )
 			GLOBAL.projectTree.openProject( s );
 		
 		int activePos = -1;
-		foreach( char[] s; GLOBAL.prevDoc )
+		foreach( s; GLOBAL.prevDoc )
 		{
 			if( s.length )
 			{
 				if( s[0] == '*' )
 				{
-					ScintillaAction.openFile( s[1..$] );
+					ScintillaAction.openFile( s[1..$].dup );
 					activePos = IupGetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" );
 				}
 				else
@@ -448,26 +368,19 @@ void main( char[][] args )
 	*/
 	
 	int monitorID;
-	foreach( char[] s; Util.splitLines( fromStringz( IupGetGlobal( "MONITORSINFO" ) ) ) )
+	foreach( string s; std.string.splitLines( fSTRz( IupGetGlobal( "MONITORSINFO" ) ) ) )
 	{
 		if( s.length )
 		{
-			char[][] information = Util.split( s, " " );
+			string[] information = Array.split( s, " " );
 			if( information.length == 4 )
 			{
-				Monitor m = { Integer.atoi( information[0] ), Integer.atoi( information[1] ), Integer.atoi( information[2] ), Integer.atoi( information[3] ), monitorID++ };
+				Monitor m = { to!(int)( information[0] ), to!(int)( information[1] ), to!(int)( information[2] ), to!(int)( information[3] ), monitorID++ };
 				GLOBAL.monitors ~= m;
 			}
 		}
 	}
-	/*
-	if( GLOBAL.monitors.length )
-	{
-		for( int i = 0; i < GLOBAL.monitors.length; ++i )
-			IupMessage( "", toStringz( Integer.toString( GLOBAL.monitors[i].id ) ~ ", " ~ Integer.toString( GLOBAL.monitors[i].x ) ~ ", " ~ Integer.toString( GLOBAL.monitors[i].y ) ~ ", " ~
-			Integer.toString( GLOBAL.monitors[i].w ) ~ "x" ~ Integer.toString( GLOBAL.monitors[i].h ) ) );
-	}
-	*/
+	
 
 	// Init Nav Cache
 	GLOBAL.navigation = new CNavCache();
@@ -480,19 +393,15 @@ void main( char[][] args )
 	//IUP main Loop
 	IupMainLoop();
 	
-	if( GLOBAL.compilerHelpDlg !is null ) delete GLOBAL.compilerHelpDlg;
-	if( GLOBAL.serachInFilesDlg !is null ) delete GLOBAL.serachInFilesDlg;
+	if( GLOBAL.compilerHelpDlg !is null ) destroy( GLOBAL.compilerHelpDlg );
+	if( GLOBAL.serachInFilesDlg !is null ) destroy( GLOBAL.serachInFilesDlg );
+	if( GLOBAL.debugPanel !is null ) GLOBAL.debugPanel.terminal();
 	
 	foreach( _plugin; GLOBAL.pluginMnager )
-	{
-		if( _plugin !is null ) delete _plugin;
-	}	
+		if( _plugin !is null ) destroy( _plugin );
 	
 	IupClose();
 	
-	version(Windows)
-	{
-		if( GLOBAL.htmlHelp != null ) sharedlib.unload();
-		if( GLOBAL.iconv != null ) loaderlib.unload();
-	}
+	version(Windows) if( sharedlib !is null ) sharedlib.unload();
+	if( DarkModeLoader !is null ) DarkModeLoader.unload();
 }

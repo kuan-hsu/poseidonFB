@@ -1,18 +1,16 @@
 ﻿module dialogs.searchDlg;
 
 private import iup.iup, iup.iup_scintilla;
-
 private import global, tools, scintilla, actionManager;
 private import dialogs.baseDlg;
-
-private import tango.stdc.stringz;
+private import std.string, std.file, Path = std.path, std.conv;
 
 class CSearchExpander
 {
 	private:
 	import				tools;
 	
-	Ihandle*			btnFindPrev, btnFindNext, btnReplaceFind, btnReplace, btnReplaceAll, btnMarkAll;
+	Ihandle*			listFind, listReplace, btnFindPrev, btnFindNext, btnReplaceFind, btnReplace, btnReplaceAll, btnMarkAll;
 	Ihandle*			btnCase, btnScope, btnClose, btnWhole, btnDirection;
 	Ihandle*			expander;
 	IupString[2] 		labelTitle, findButton;
@@ -34,14 +32,14 @@ class CSearchExpander
 		Ihandle* _group0 = IupVbox( label0, label1, null );
 		
 		// Group 1
-		Ihandle* listFind = IupList( "" );
+		listFind = IupList( null );
 		IupSetAttribute( listFind, "EXPAND","HORIZONTAL" );
-		IupSetAttributes( listFind, "DROPDOWN=YES,EDITBOX=YES,NAME=list_Find" );
+		IupSetAttributes( listFind, "DROPDOWN=YES,EDITBOX=YES,BORDER=NO,NAME=list_Find" );
 		IupSetCallback( listFind, "K_ANY", cast(Icallback) &CSearchExpander_listFind_K_ANY );
 		
-		Ihandle* listReplace = IupList( "" );
+		listReplace = IupList( null );
 		IupSetAttribute( listReplace, "EXPAND","HORIZONTAL" );
-		IupSetAttributes( listReplace, "DROPDOWN=YES,EDITBOX=YES,NAME=list_Replace" );
+		IupSetAttributes( listReplace, "DROPDOWN=YES,EDITBOX=YES,BORDER=NO,NAME=list_Replace" );
 		IupSetCallback( listReplace, "K_ANY", cast(Icallback) &CSearchDialog_listReplace_K_ANY );
 		
 		Ihandle* _group1 = IupVbox( listFind, listReplace, null );
@@ -63,7 +61,6 @@ class CSearchExpander
 		IupSetAttributes( btnReplace, "SIZE=x12,NAME=btn_Replace,FLAT=YES,FONTSTYLE=Underline" );
 		IupSetCallback( btnReplace, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			//GLOBAL.searchDlg.setStatusBar( "" );
 			GLOBAL.statusBar.setFindMessage( "" );
 		
 			Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
@@ -73,8 +70,8 @@ class CSearchExpander
 				Ihandle* listReplace_handle	= IupGetDialogChild( GLOBAL.searchExpander.getHandle, "list_Replace" );
 				if( listFind_handle != null && listReplace_handle != null )
 				{
-					char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
-					char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup;
+					string findText		= fSTRz( IupGetAttribute( listFind_handle, "VALUE" ) );
+					string ReplaceText	= fSTRz( IupGetAttribute( listReplace_handle, "VALUE" ) );
 
 					if( findText.length )
 					{
@@ -83,13 +80,13 @@ class CSearchExpander
 						Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Direction" );
 						if( direction_handle != null )
 						{
-							char[] targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
+							string targetText = fSTRz(IupGetAttribute( iupSci, "SELECTEDTEXT" ) );
 							if( targetText == findText )
 							{
 								if( !ReplaceText.length )
 									IupScintillaSendMessage( iupSci, 2194, -1, 0  ); // SCI_REPLACETARGET 2194
 								else
-									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+									IupSetStrAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
 								
 								DocumentTabAction.setFocus( iupSci );
 							}
@@ -106,6 +103,7 @@ class CSearchExpander
 		IupSetCallback( btnReplaceAll, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CSearchExpanderAction( 2 );
+			return IUP_DEFAULT;
 		});
 		
 		btnMarkAll = IupFlatButton( GLOBAL.languageItems["bookmarkall"].toCString );
@@ -113,6 +111,7 @@ class CSearchExpander
 		IupSetCallback( btnMarkAll, "FLAT_ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			CSearchExpanderAction( 1 );
+			return IUP_DEFAULT;
 		});
 		
 		Ihandle* _group2 = IupGridBox
@@ -129,23 +128,25 @@ class CSearchExpander
 		IupSetAttributes( btnCase, "IMAGE=icon_casesensitive,FLAT=YES,NAME=toggle_Case,SIZE=x12,CANFOCUS=NO" );
 		version(DIDE) IupSetAttribute( btnCase, "VALUE", "ON" );
 		version(FBIDE) IupSetAttribute( btnCase, "VALUE", "OFF" );
+		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnCase, "IMPRESS=icon_casesensitive_invert" );
 		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
 		IupSetCallback( btnCase, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnWhole = IupToggle( null, null );
 		IupSetAttributes( btnWhole, "IMAGE=icon_notwholeword,IMPRESS=icon_wholeword,FLAT=YES,VALUE=ON,NAME=toggle_Whole,SIZE=x12,CANFOCUS=NO" );
+		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnWhole, "IMPRESS=icon_notwholeword_invert" );
 		IupSetAttribute( btnWhole, "TIP", GLOBAL.languageItems["wholeword"].toCString );
 		IupSetCallback( btnWhole, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnScope = IupToggle( null, null );
 		IupSetAttributes( btnScope, "IMAGE=icon_selectall,FLAT=YES,VALUE=ON,NAME=toggle_Scope,SIZE=x12,CANFOCUS=NO" );
+		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnScope, "IMPRESS=icon_selectall_invert" );
 		IupSetAttribute( btnScope, "TIP", GLOBAL.languageItems["scope"].toCString );
-		//IupSetCallback( btnScope, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnDirection = IupToggle( null, null );
 		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,FLAT=YES,VALUE=ON,NAME=toggle_Direction,SIZE=x12,CANFOCUS=NO" );
+		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow_invert" );
 		IupSetAttribute( btnDirection, "TIP", GLOBAL.languageItems["direction"].toCString );
-		//IupSetCallback( btnDirection, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 		
 		btnClose = IupButton( null, null );
 		IupSetAttributes( btnClose, "IMAGE=icon_close,FLAT=YES,NAME=btn_Close,SIZE=x12,CANFOCUS=NO" );
@@ -154,6 +155,7 @@ class CSearchExpander
 			GLOBAL.searchExpander.contract();
 			Ihandle* iupSci	= actionManager.ScintillaAction.getActiveIupScintilla();
 			if( iupSci != null ) IupSetFocus( iupSci );
+			return IUP_DEFAULT;
 		});
 		
 		Ihandle* _group3 = IupGridBox
@@ -174,8 +176,8 @@ class CSearchExpander
 	
 	void changeIcons()
 	{
-		char[] tail;
-		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert"; else return;
+		string tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
 
 		IupSetStrAttribute( btnCase, "IMAGE", toStringz( "icon_casesensitive" ~ tail ) );
 		IupSetStrAttribute( btnScope, "IMAGE", toStringz( "icon_selectall" ~ tail ) );
@@ -200,6 +202,25 @@ class CSearchExpander
 	
 	void changeColor()
 	{
+		/*
+		
+		*/
+		if( GLOBAL.bDarkMode &&  GLOBAL.editorSetting00.UseDarkMode == "ON" )
+		{
+			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "DarkMode_CFD", null );
+			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "DarkMode_CFD", null );
+		}
+		else
+		{
+			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "CFD", null );
+			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "CFD", null );
+		}
+
+		IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrAttribute( listReplace, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			
 		IupSetStrAttribute( btnFindPrev, "HLCOLOR", null );
 		IupSetStrAttribute( btnFindNext, "HLCOLOR", null );
 		IupSetStrAttribute( btnReplaceFind, "HLCOLOR", null );
@@ -233,12 +254,12 @@ class CSearchExpander
 		return false;
 	}
 	
-	void show( char[] selectedWord )
+	void show( string selectedWord )
 	{
 		Ihandle* _find = IupGetDialogChild( expander, "list_Find" );
 		if( _find != null )
 		{
-			if( selectedWord.length ) IupSetAttribute( _find, "VALUE",toStringz( selectedWord.dup ) );// else IupSetAttribute( _find, "VALUE", "" );
+			if( selectedWord.length ) IupSetStrAttribute( _find, "VALUE", toStringz( selectedWord ) );// else IupSetAttribute( _find, "VALUE", "" );
 			
 			Ihandle* _scope = IupGetDialogChild( expander, "toggle_Scope" );
 			if( _scope != null )
@@ -268,7 +289,7 @@ extern(C)
 			Ihandle* listFind_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "list_Find" );
 			if( listFind_handle != null )
 			{
-				char[] findText = fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
+				string findText = fSTRz( IupGetAttribute( listFind_handle, "VALUE" ) );
 
 				if( findText.length )
 				{
@@ -285,14 +306,14 @@ extern(C)
 							}
 							else
 							{
-								char[] beginEndPos = fromStringz( IupGetAttribute( iupSci, "SELECTIONPOS" ) );
+								string beginEndPos = fSTRz( IupGetAttribute( iupSci, "SELECTIONPOS" ) );
 								if( beginEndPos.length )
 								{
-									int colonPos = Util.index( beginEndPos, ":" );
-									if( colonPos < beginEndPos.length )
+									int colonPos = indexOf( beginEndPos, ":" );
+									if( colonPos > -1 )
 									{
-										char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
-										IupSetAttribute( iupSci, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
+										string newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
+										IupSetStrAttribute( iupSci, "SELECTIONPOS", toStringz( newBeginEndPos ) );
 									}
 								}
 							}
@@ -404,8 +425,8 @@ extern(C)
 			switch( flag )
 			{
 				//case 0:	GLOBAL.searchDlg.setStatusBar( "Count total = " ~ Integer.toString( counts ) ~ " words." ); break;
-				case 1:	GLOBAL.statusBar.setFindMessage( "Mark total = " ~ Integer.toString( counts ) ~ " words." ); break;
-				case 2: GLOBAL.statusBar.setFindMessage( "Replace total = " ~ Integer.toString( counts ) ~ " words." ); break;
+				case 1:	GLOBAL.statusBar.setFindMessage( "Mark total = " ~ to!(string)( counts ) ~ " words." ); break;
+				case 2: GLOBAL.statusBar.setFindMessage( "Replace total = " ~ to!(string)( counts ) ~ " words." ); break;
 				default:
 			}
 			IupSetFocus( ScintillaAction.getActiveIupScintilla );
@@ -423,17 +444,17 @@ extern(C)
 			return IUP_DEFAULT;
 		
 		int		pos;
-		char[]	beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+		string	beginEndPos = fSTRz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
 		
 		if( fromStringz( IupGetAttribute( ih, "NAME" ) ) == "btn_FindPrev" )
 		{
 			if( beginEndPos.length )
 			{
-				int colonPos = Util.index( beginEndPos, ":" );
-				if( colonPos < beginEndPos.length )
+				int colonPos = indexOf( beginEndPos, ":" );
+				if( colonPos > -1 )
 				{
-					char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
-					IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
+					string newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
+					IupSetStrAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 				}
 			}
 		
@@ -441,7 +462,7 @@ extern(C)
 		}
 		else
 		{
-			if( beginEndPos.length ) IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( beginEndPos.dup ) );
+			if( beginEndPos.length ) IupSetStrAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( beginEndPos ) );
 			
 			pos = CSearchExpander_search( 2 );
 		}
@@ -463,8 +484,8 @@ extern(C)
 	
 	private int CSearchExpander_Toggle_ACTION( Ihandle* ih )
 	{
-		char[]	name = fromStringz( IupGetAttribute( ih, "NAME" ) );
-		char[]	value = fromStringz( IupGetAttribute( ih, "VALUE" ) );
+		string	name = fSTRz( IupGetAttribute( ih, "NAME" ) );
+		string	value = fSTRz( IupGetAttribute( ih, "VALUE" ) );
 		
 		//IupMessage("",IupGetAttribute( ih, "VALUE" ) );
 		switch( name )
@@ -492,8 +513,8 @@ extern(C)
 			Ihandle* listReplace_handle	= IupGetDialogChild( GLOBAL.searchExpander.getHandle, "list_Replace" );
 			if( listFind_handle != null && listReplace_handle != null )
 			{
-				char[] findText		= fromStringz( IupGetAttribute( listFind_handle, "VALUE" ) ).dup;
-				char[] ReplaceText	= fromStringz( IupGetAttribute( listReplace_handle, "VALUE" ) ).dup;
+				string findText		= fSTRz( IupGetAttribute( listFind_handle, "VALUE" ) );
+				string ReplaceText	= fSTRz( IupGetAttribute( listReplace_handle, "VALUE" ) );
 
 				if( findText.length )
 				{
@@ -503,8 +524,8 @@ extern(C)
 					Ihandle* direction_handle = IupGetDialogChild( GLOBAL.searchExpander.getHandle, "toggle_Direction" );
 					if( direction_handle != null )
 					{
-						char[]	targetText = fromStringz(IupGetAttribute( iupSci, "SELECTEDTEXT" )).dup;
-						bool	bNext = fromStringz( IupGetAttribute( direction_handle, "VALUE" )) == "ON" ? true : false;
+						string	targetText = fSTRz(IupGetAttribute( iupSci, "SELECTEDTEXT" ) );
+						bool	bNext = fSTRz( IupGetAttribute( direction_handle, "VALUE" ) ) == "ON" ? true : false;
 						
 						if( targetText.length )
 						{
@@ -515,7 +536,7 @@ extern(C)
 								else
 								{
 									int nowPos = ScintillaAction.getCurrentPos( iupSci );
-									IupSetAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
+									IupSetStrAttribute( iupSci, "SELECTEDTEXT", toStringz( ReplaceText ) );
 									if( !bNext ) IupScintillaSendMessage( iupSci, 2025, nowPos , 0 );// SCI_GOTOPOS = 2025,
 								}
 								
@@ -575,8 +596,8 @@ extern(C)
 					{
 						if( c == sk.keyValue )
 						{
-							char[]	beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
-							if( beginEndPos.length ) IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( beginEndPos.dup ) );
+							string	beginEndPos = fSTRz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+							if( beginEndPos.length ) IupSetStrAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( beginEndPos ) );
 							
 							CSearchExpander_search( 2 );
 							actionManager.StatusBarAction.update();
@@ -587,14 +608,14 @@ extern(C)
 					{
 						if( c == sk.keyValue )
 						{
-							char[]	beginEndPos = fromStringz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
+							string	beginEndPos = fSTRz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
 							if( beginEndPos.length )
 							{
-								int colonPos = Util.index( beginEndPos, ":" );
-								if( colonPos < beginEndPos.length )
+								int colonPos = indexOf( beginEndPos, ":" );
+								if( colonPos > -1 )
 								{
-									char[] newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
-									IupSetAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
+									string newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
+									IupSetStrAttribute( cSci.getIupScintilla, "SELECTIONPOS", toStringz( newBeginEndPos.dup ) );
 								}
 							}						
 							

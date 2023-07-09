@@ -2,16 +2,15 @@ module navcache;
 
 class CNavCache
 {
-	private:
+private:
 	import iup.iup;
 	import global, actionManager, tools;
+	import std.file;
 	
-	import tango.io.FilePath, tango.stdc.stringz;
-
 	// Nested Struct
 	struct CacheUnit
 	{
-		char[]		_fullPath;
+		string		_fullPath;
 		int			_line;
 	}
 	
@@ -19,20 +18,19 @@ class CNavCache
 	CacheUnit		nullElement = { null, -1 };
 	CacheUnit[2000]	cache;
 
-	public:
+public:
 	this()
 	{
 		index			= 0;
 		cache[]			= nullElement;
 	}
 	
-	
 	bool addCache()
 	{
 		auto cSci = ScintillaAction.getActiveCScintilla;
 		if( cSci !is null )
 		{
-			char[] nowFullPath	= cSci.getFullPath;
+			string nowFullPath	= cSci.getFullPath;
 			int nowLine			= ScintillaAction.getCurrentLine( cSci.getIupScintilla );
 			
 			
@@ -82,8 +80,7 @@ class CNavCache
 		return true;
 	}	
 	
-	
-	bool addCache( char[] fullPath, int line )
+	bool addCache( string fullPath, int line )
 	{
 		CacheUnit _element = { fullPath, line };
 		
@@ -91,8 +88,7 @@ class CNavCache
 		{}
 		else
 		{
-			scope fp = new FilePath( fullPath );
-			if( !fp.exists() ) return false;
+			if( !exists( fullPath ) ) return false;
 		}
 		
 		
@@ -120,7 +116,7 @@ class CNavCache
 		auto cSci = ScintillaAction.getActiveCScintilla;
 		if( cSci !is null )
 		{
-			char[] nowFullPath	= cSci.getFullPath;
+			string nowFullPath	= cSci.getFullPath;
 			int nowLine			= ScintillaAction.getCurrentLine( cSci.getIupScintilla );
 			
 			if( index > 0 )
@@ -156,7 +152,6 @@ class CNavCache
 			cache[index++] = _element;
 			IupSetAttribute( IupGetHandle( "toolbar_BackNav" ), "ACTIVE", "NO" );
 		}
-		
 		
 		return true;
 	}
@@ -200,8 +195,6 @@ class CNavCache
 				}
 			}
 		}	
-	
-	
 	
 		if( index < 1999 )
 		{

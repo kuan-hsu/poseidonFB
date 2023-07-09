@@ -2,48 +2,41 @@
 
 class CFileDlg
 {
-	private:
-	import global, tools;
-	
+private:
 	import iup.iup;
-
-	import tango.io.FilePath, Path = tango.io.Path;
-	import Util = tango.text.Util, tango.stdc.stringz;
-
-	char[][]	filesName;
-	char[]		filterUsed;
+	import global, tools;
+	import std.string, std.file, Array = std.array, Path = std.path;
 	
-	void callIupFileDlg( char[] title, char[] filter, char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO", char[] _fileName = "" )
+	string[]	filesName;
+	string		filterUsed;
+	
+	void callIupFileDlg( string title, string filter, string DIALOGTYPE = "OPEN", string MULTIPLEFILES = "NO", string _fileName = "" )
 	{
 		Ihandle *dlg = IupFileDlg(); 
-
-		IupSetAttribute( dlg, "DIALOGTYPE",  toStringz( DIALOGTYPE ) );
-		IupSetAttribute( dlg, "TITLE", toStringz( title ) );
+		IupSetStrAttribute( dlg, "DIALOGTYPE",  toStringz( DIALOGTYPE ) );
+		IupSetStrAttribute( dlg, "TITLE", toStringz( title ) );
 		if( GLOBAL.recentOpenDir.length )
-			if( Path.isFolder( GLOBAL.recentOpenDir ) ) IupSetAttribute( dlg, "DIRECTORY", toStringz( GLOBAL.recentOpenDir ) );
+			if( std.file.isDir( GLOBAL.recentOpenDir ) ) IupSetStrAttribute( dlg, "DIRECTORY", toStringz( GLOBAL.recentOpenDir ) );
 		
-
 		bool bMultiFiles;
 		if( DIALOGTYPE == "OPEN" && MULTIPLEFILES == "YES" )
 		{
 			bMultiFiles = true;
-			IupSetAttribute( dlg, "MULTIPLEFILES", toStringz( MULTIPLEFILES ) );
+			IupSetStrAttribute( dlg, "MULTIPLEFILES", toStringz( MULTIPLEFILES ) );
 		}
 		else if( DIALOGTYPE == "OPEN" || DIALOGTYPE == "DIR" )
 		{
-			if( Path.exists( _fileName ) )
+			if( exists( _fileName ) )
 			{
-				if( Path.isFile( _fileName ) ) _fileName = Path.parent( _fileName );
-				if( Path.isFolder( _fileName ) ) IupSetAttribute( dlg, "DIRECTORY", toStringz( _fileName ) );
+				if( std.file.isFile( _fileName ) ) _fileName = Path.dirName( _fileName );
+				if( std.file.isDir( _fileName ) ) IupSetStrAttribute( dlg, "DIRECTORY", toStringz( _fileName ) );
 			}
 		}		
 		else if( DIALOGTYPE == "SAVE" )
 		{
-			if( _fileName.length ) IupSetAttribute( dlg, "FILE", toStringz( _fileName ) );
+			if( _fileName.length ) IupSetStrAttribute( dlg, "FILE", toStringz( _fileName ) );
 		}
 
-		//char[] txtIupFilterAttribute = "FILTER = \"" ~ filter ~ "\", FILTERINFO = \"" ~  fileInfo ~ "\"";
-		//IupSetAttributes(dlg, txtIupFilterAttribute.ptr );
 		IupSetStrAttribute( dlg, "EXTFILTER", toStringz( filter ) );
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT ); 
 
@@ -54,24 +47,24 @@ class CFileDlg
 		*/
 		if( IupGetInt( dlg, "STATUS") != -1 )
 		{
-			filterUsed = Util.trim( fromStringz( IupGetAttribute( dlg, "FILTERUSED" ) ).dup );
-			char[] fileString = Util.trim( fromStringz( IupGetAttribute( dlg, "VALUE" ) ) );
+			filterUsed = strip( fSTRz( IupGetAttribute( dlg, "FILTERUSED" ) ) );
+			string fileString = strip( fSTRz( IupGetAttribute( dlg, "VALUE" ) ) );
 
 			if( fileString.length )
 			{
 				if( !bMultiFiles )
 				{
-					fileString = Path.normalize( fileString );
+					fileString = tools.normalizeSlash( fileString );
 					filesName ~= fileString;
 				}
 				else
 				{
 					if( fileString[$-1] == '|' ) // > 1 files
 					{
-						char[][] _files = Util.split( fileString, "|" );
+						string[] _files = Array.split( fileString, "|" );
 						if( _files.length )
 						{
-							char[] _path = Path.normalize( _files[0] ) ~ "/";
+							string _path = tools.normalizeSlash( _files[0] ) ~ "/";
 							for( int i = 1; i < _files.length; ++ i )
 							{
 								if( _files[i].length ) filesName ~= ( _path ~ _files[i] );
@@ -80,17 +73,16 @@ class CFileDlg
 					}
 					else
 					{
-						fileString = Path.normalize( fileString );
+						fileString = tools.normalizeSlash( fileString );
 						filesName ~= fileString;
 					}
 				}
 					
 				if( filesName.length )
 				{
-					scope _fp = new FilePath( filesName[0] );
-					if( _fp.exists() )
+					if( exists( filesName[0] ) )
 					{
-						if( _fp.isFolder() ) GLOBAL.recentOpenDir = _fp.toString; else GLOBAL.recentOpenDir = _fp.path;
+						if( std.file.isDir( filesName[0] ) ) GLOBAL.recentOpenDir = filesName[0]; else GLOBAL.recentOpenDir = Path.dirName( filesName[0] );
 					}
 				}
 			}
@@ -104,26 +96,26 @@ class CFileDlg
 	}
 
 	public:
-	this( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO", char[] _fn = "" )
+	this( string title, string filefilter = "All Files|*.*", string DIALOGTYPE = "OPEN", string MULTIPLEFILES = "NO", string _fn = "" )
 	{
 		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES, _fn );
 	}
 
-	char[][] open( char[] title, char[] filefilter = "All Files|*.*", char[] DIALOGTYPE = "OPEN", char[] MULTIPLEFILES = "NO", char[] _fn = "" )
+	string[] open( string title, string filefilter = "All Files|*.*", string DIALOGTYPE = "OPEN", string MULTIPLEFILES = "NO", string _fn = "" )
 	{
 		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES, _fn );
 
 		return filesName;
 	}
 
-	char[][] getFilesName(){ return filesName; }
+	string[] getFilesName(){ return filesName; }
 
-	char[] getFileName()
+	string getFileName()
 	{
 		if( filesName.length ) return filesName[0];
 
 		return null;
 	}
 
-	char[] getFilterUsed(){ return filterUsed; }
+	string getFilterUsed(){ return filterUsed; }
 }

@@ -3,14 +3,11 @@
 import		iup.iup, iup.iup_scintilla;
 import		global, tools, menu, actionManager;
 import		dialogs.singleTextDlg, dialogs.argOptionDlg;
-import		tango.stdc.stringz;
+import		std.string, std.conv;
 
 class CStatusBar
 {
-	private:
-
-	import		Integer = tango.text.convert.Integer, Util = tango.text.Util;
-	
+private:
 	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, image, compileOptionSelection, codecomplete, findMessage;
 	int			originalTrigger;
 	
@@ -34,31 +31,28 @@ class CStatusBar
 		
 		image = IupFlatButton( "" );
 		IupSetAttributes( image, "IMAGE=icon_customoption,HASFOCUS=NO,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
-		//IupSetStrAttribute( image, "BGCOLOR", IupGetGlobal( "DLGBGCOLOR" ) );
 		IupSetStrAttribute( image, "HLCOLOR", null  );
-		IupSetAttribute( image, "TIP", GLOBAL.languageItems["setcustomoption"].toCString );
+		IupSetStrAttribute( image, "TIP", GLOBAL.languageItems["setcustomoption"].toCString );
 		IupSetCallback( image, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_CustomOption_BUTTON_CB );
 		
 		compileOptionSelection = IupLabel( "" );
 		IupSetHandle( "compileOptionSelection", compileOptionSelection );
 		IupSetAttribute( compileOptionSelection, "SIZE", "200x" );
-		if( !GLOBAL.currentCustomCompilerOption.toDString.length )
+		if( !GLOBAL.compilerSettings.currentCustomCompilerOption.length )
 		{
-			//IupSetAttribute( compileOptionSelection, "FGCOLOR", IupGetGlobal( "DLGFGCOLOR" ) );
-			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
+			IupSetStrAttribute( compileOptionSelection, "TITLE", toStringz( GLOBAL.compilerSettings.noneCustomCompilerOption ) );
 		}
 		else
 		{
-			//IupSetAttribute( compileOptionSelection, "FGCOLOR", "0 102 255" );
-			IupSetAttribute( compileOptionSelection, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
-			setTip( GLOBAL.currentCustomCompilerOption.toDString );
+			IupSetAttribute( compileOptionSelection, "TITLE", toStringz( GLOBAL.compilerSettings.currentCustomCompilerOption ) );
+			setTip( GLOBAL.compilerSettings.currentCustomCompilerOption );
 		}
 		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		
 		codecomplete = IupFlatButton( "" );
 		if( GLOBAL.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "icon_run" ); else IupSetAttribute( codecomplete, "IMAGE", "icon_debug_stop" );
 		IupSetAttributes( codecomplete, "NAME=label_Codecomplete,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
-		IupSetAttribute( codecomplete, "TIP", GLOBAL.languageItems["codecompletiononoff"].toCString );
+		IupSetStrAttribute( codecomplete, "TIP", GLOBAL.languageItems["codecompletiononoff"].toCString );
 		IupSetCallback( codecomplete, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
 		
 		findMessage = IupLabel( "" );
@@ -80,8 +74,8 @@ class CStatusBar
 		IupSetCallback( layoutHandle, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		version(Windows) // linux get IupFlatSeparator wrong color
 		{
-			IupSetStrAttribute( layoutHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
-			IupSetStrAttribute( layoutHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
+			IupSetStrAttribute( layoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetStrAttribute( layoutHandle, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
 		}
 		
 		version(Windows)
@@ -121,14 +115,14 @@ class CStatusBar
 	
 	void setPrjNameSize( int width )
 	{
-		IupSetAttribute( prjName, "SIZE", toStringz( Integer.toString( width / 5 ) ~ "x" ) );
+		IupSetStrAttribute( prjName, "SIZE", toStringz( to!(string)( width / 5 ) ~ "x" ) );
 	}
 	
-	void setPrjName( char[] name, bool bFull = false )
+	void setPrjName( string name, bool bFull = false )
 	{
 		if( !bFull )
 		{
-			if( Util.trim( name ).length == 0 ) GLOBAL.activeProjectPath = "";
+			if( strip( name ).length == 0 ) GLOBAL.activeProjectPath = "";
 			IupSetStrAttribute( prjName, "TITLE", toStringz( name ) );
 		}
 		else
@@ -136,70 +130,63 @@ class CStatusBar
 			int prjID;
 			
 			if( name.length )
-				prjID = Integer.toInt( name );
+				prjID = to!(int)( name );
 			else
 				prjID = actionManager.ProjectAction.getActiveProjectID();
 			
 			
-			scope	_prjName = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
-			scope	_prjDir = new IupString( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", prjID ) );
+			string _prjName = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "TITLE", prjID ) );
+			string _prjDir = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", prjID ) );
 			
-			GLOBAL.activeProjectPath = _prjDir.toDString;
+			GLOBAL.activeProjectPath = _prjDir;
 			
-			char[] focusName;
-			if( _prjDir.toDString in GLOBAL.projectManager ) focusName = GLOBAL.projectManager[_prjDir.toDString].focusOn;
+			string focusName;
+			if( _prjDir in GLOBAL.projectManager ) focusName = GLOBAL.projectManager[_prjDir].focusOn;
 			
-			name = GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName.toDString ~ ( focusName.length ? " [" ~ focusName ~ "]" : ""  );
-			IupSetStrAttribute( prjName, "TITLE", toStringz( name ) );
-			if( Util.trim( name ).length == 0 ) GLOBAL.activeProjectPath = "";
+			string _name = GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName ~ ( focusName.length ? " [" ~ focusName ~ "]" : ""  );
+			IupSetStrAttribute( prjName, "TITLE", toStringz( _name ) );
+			if( strip( _name ).length == 0 ) GLOBAL.activeProjectPath = "";
 		}
-		
-		version(DIDE) CustomToolAction.setActiveDefaultCompilerAndIncludePaths();
 	}
 	
-	void setLINExCOL( char[] lc )
+	void setLINExCOL( string lc )
 	{
 		IupSetStrAttribute( LINExCOL, "TITLE", toStringz( lc ) );
 	}
 
-	void setIns( char[] ins )
+	void setIns( string ins )
 	{
 		IupSetStrAttribute( Ins, "TITLE", toStringz( ins ) );
 	}
 
-	void setEOLType( char[] eol )
+	void setEOLType( string eol )
 	{
 		IupSetStrAttribute( EOLType, "TITLE", toStringz( eol ) );
 	}
 
-	void setEncodingType( char[] en )
+	void setEncodingType( string en )
 	{
 		IupSetStrAttribute( EncodingType, "TITLE", toStringz( en ) );
 	}
 	
-	void setTip( char[] name )
+	void setTip( string name )
 	{
-		char[] tipString;
+		string tipString;
 		IupSetStrAttribute( compileOptionSelection, "TIP", "" );
 		
 		if( name.length )
 		{
-			foreach( char[] s; GLOBAL.customCompilerOptions )
+			foreach( s; GLOBAL.compilerSettings.customCompilerOptions )
 			{
-				int bpos = Util.rindex( s, "%::% " );
-				if( bpos < s.length )
+				int bpos = lastIndexOf( s, "%::% " );
+				if( bpos > 0 )
 				{
 					if( s[bpos+5..$] == name )
 					{
-						int fpos = Util.index( s, "%::% " );
-						if( fpos < bpos )
+						int fpos = indexOf( s, "%::% " );
+						if( fpos < bpos && fpos > -1 )
 						{
 							tipString = ( s[0..fpos] ~ "\n" ~ s[fpos+5..bpos] ).dup; // With Compiler Path
-							version(DIDE)
-							{
-								GLOBAL.defaultCompilerPath = s[0..fpos];
-								GLOBAL.defaultImportPaths = tools.getImportPath( GLOBAL.defaultCompilerPath );
-							}
 						}
 						else
 						{
@@ -212,8 +199,6 @@ class CStatusBar
 				}			
 			}			
 		}
-		
-		version(DIDE) CustomToolAction.setActiveDefaultCompilerAndIncludePaths();
 	}
 	
 	void setCompleteIcon( bool bStatus )
@@ -221,7 +206,7 @@ class CStatusBar
 		if( bStatus ) IupSetAttribute( codecomplete, "IMAGE", "icon_run" ); else IupSetAttribute( codecomplete, "IMAGE", "icon_debug_stop" );
 	}
 	
-	void setFindMessage( char[] message )
+	void setFindMessage( string message )
 	{
 		IupSetAttribute( findMessage, "TITLE", "" );
 		if( message.length ) IupSetStrAttribute( findMessage, "TITLE", toStringz( message ) );
@@ -231,12 +216,29 @@ class CStatusBar
 	{
 		version(Windows)
 		{
-			IupSetStrAttribute( layoutHandle, "FGCOLOR", GLOBAL.editColor.dlgFore.toCString );
-			IupSetStrAttribute( layoutHandle, "BGCOLOR", GLOBAL.editColor.dlgBack.toCString );
+			IupSetStrAttribute( layoutHandle, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( layoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
 		}
-	
-		//IupSetStrAttribute( image, "BGCOLOR", IupGetGlobal( "DLGBGCOLOR" ) );
-		IupSetStrAttribute( image, "HLCOLOR", null  );	
+		IupSetStrAttribute( image, "HLCOLOR", "" );
+		
+		IupSetStrAttribute( prjName, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( prjName, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		IupSetStrAttribute( LINExCOL, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( LINExCOL, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		IupSetStrAttribute( Ins, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( Ins, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		IupSetStrAttribute( EOLType, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( EOLType, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
+		IupSetStrAttribute( compileOptionSelection, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( compileOptionSelection, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		IupSetStrAttribute( findMessage, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( findMessage, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		IupSetStrAttribute( image, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( image, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		IupSetStrAttribute( codecomplete, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( codecomplete, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
+		IupSetStrAttribute( EncodingType, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrAttribute( EncodingType, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
 	}
 }
 
@@ -276,9 +278,8 @@ extern(C) // Callback for CBaseDialog
 					Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" );
 					if( selectionHandle != null )
 					{
-						//IupSetAttribute( selectionHandle, "FGCOLOR", IupGetGlobal( "DLGFGCOLOR" ) );
-						IupSetAttribute( selectionHandle, "TITLE", GLOBAL.noneCustomCompilerOption.toCString );
-						GLOBAL.currentCustomCompilerOption = cast(char[])"";
+						IupSetStrAttribute( selectionHandle, "TITLE", toStringz( GLOBAL.compilerSettings.noneCustomCompilerOption ) );
+						GLOBAL.compilerSettings.currentCustomCompilerOption = "";
 						GLOBAL.statusBar.setTip( "" );
 					}
 					return IUP_DEFAULT;
@@ -289,13 +290,13 @@ extern(C) // Callback for CBaseDialog
 				IupSetCallback( itemConfig, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
 					int		x, y;
-					char[]	mousePos = fromStringz( IupGetGlobal( "CURSORPOS" ) );
+					string	mousePos = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
-					int crossSign = Util.index( mousePos, "x" );
-					if( crossSign < mousePos.length )
+					int crossSign = indexOf( mousePos, "x" );
+					if( crossSign > 0 )
 					{
-						x = Integer.atoi( mousePos[0..crossSign] );
-						y = Integer.atoi( mousePos[crossSign+1..$] );
+						x = to!(int)( mousePos[0..crossSign] );
+						y = to!(int)( mousePos[crossSign+1..$] );
 					}
 					else
 					{
@@ -306,12 +307,12 @@ extern(C) // Callback for CBaseDialog
 					version(Windows)
 					{
 						scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
-						dlg.show( x, y - 210, -1 );
+						dlg.show( x, y - 220, -1 );
 					}
 					else
 					{
 						scope dlg = new CArgOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
-						dlg.show( x, y - 210,-1 );
+						dlg.show( x, y - 220,-1 );
 					}
 					
 					return IUP_DEFAULT;
@@ -326,12 +327,12 @@ extern(C) // Callback for CBaseDialog
 												null
 											);
 											
-				for( int i = GLOBAL.customCompilerOptions.length - 1; i >= 0; -- i )
+				for( int i = GLOBAL.compilerSettings.customCompilerOptions.length - 1; i >= 0; -- i )
 				{
-					int pos = Util.rindex( GLOBAL.customCompilerOptions[i], "%::% " );
-					if( pos < GLOBAL.customCompilerOptions[i].length )
+					int pos = lastIndexOf( GLOBAL.compilerSettings.customCompilerOptions[i], "%::% " );
+					if( pos > 0 )
 					{
-						char[] Name = GLOBAL.customCompilerOptions[i][pos+5..$];
+						string Name = GLOBAL.compilerSettings.customCompilerOptions[i][pos+5..$].dup;
 						Ihandle* _new = IupItem( toStringz( Name ), null );
 						IupSetCallback( _new, "ACTION", cast(Icallback) &customCompilerOptions_click_cb );
 						IupInsert( popupMenu, null, _new );
@@ -356,7 +357,7 @@ extern(C) // Callback for CBaseDialog
 		{
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
-				char[] activePrjDir = ProjectAction.getActiveProjectName();
+				string activePrjDir = ProjectAction.getActiveProjectName();
 				if( activePrjDir.length )
 				{
 					if( activePrjDir in GLOBAL.projectManager )
@@ -368,16 +369,16 @@ extern(C) // Callback for CBaseDialog
 							Ihandle* _emptyItem = IupItem( toStringz( "<null>" ), null );
 							IupSetCallback( _emptyItem, "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
 							IupAppend( popupMenu, _emptyItem );
-							if( !GLOBAL.projectManager[activePrjDir].focusOn.length ) IupSetAttribute( _emptyItem, "VALUE", "ON");
+							if( !GLOBAL.projectManager[activePrjDir].focusOn.length ) IupSetAttribute( _emptyItem, "VALUE", "ON" );
 							
 							
 							Ihandle*[100] _item;
-							foreach( int i, char[] key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
+							foreach( int i, key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
 							{
 								_item[i] = IupItem( toStringz( key ), null );
 								IupSetCallback( _item[i], "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
 								IupAppend( popupMenu, _item[i] );
-								if( key == GLOBAL.projectManager[activePrjDir].focusOn ) IupSetAttribute( _item[i], "VALUE", "ON");
+								if( key == GLOBAL.projectManager[activePrjDir].focusOn ) IupSetAttribute( _item[i], "VALUE", "ON" );
 							}
 							
 							IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
@@ -392,8 +393,8 @@ extern(C) // Callback for CBaseDialog
 	
 	private int CStatusBar_PROJECTFOCUS_popupMenu_Action( Ihandle* ih )
 	{
-		char[] focusTitle = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
-		char[] activePrjDir = ProjectAction.getActiveProjectName();
+		string focusTitle = fSTRz( IupGetAttribute( ih, "TITLE" ) );
+		string activePrjDir = ProjectAction.getActiveProjectName();
 		
 		if( focusTitle != "<null>" )
 		{
@@ -405,7 +406,7 @@ extern(C) // Callback for CBaseDialog
 		}
 		
 		IupSetAttribute( ih, "VALUE", "ON" );
-		GLOBAL.statusBar.setPrjName( null, true );
+		GLOBAL.statusBar.setPrjName( "", true );
 		
 		return IUP_DEFAULT;
 	}
@@ -421,13 +422,13 @@ extern(C) // Callback for CBaseDialog
 				auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
 				if( cSci !is null )
 				{
-					char[]	mousePos = fromStringz( IupGetGlobal( "CURSORPOS" ) );
+					string mousePos = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
-					int crossSign = Util.index( mousePos, "x" );
-					if( crossSign < mousePos.length )
+					int crossSign = indexOf( mousePos, "x" );
+					if( crossSign > 0 )
 					{
-						x = Integer.atoi( mousePos[0..crossSign] );
-						y = Integer.atoi( mousePos[crossSign+1..$] );
+						x = to!(int)( mousePos[0..crossSign] );
+						y = to!(int)( mousePos[crossSign+1..$] );
 					}
 					else
 					{
@@ -438,27 +439,25 @@ extern(C) // Callback for CBaseDialog
 					// Open Dialog Window
 					scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false, "POSEIDON_MAIN_DIALOG", null, false );
 					IupSetAttributes( gotoLineDlg.getIhandle, "BORDER=NO,RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,OPACITY=198" );
-					//IupSetAttribute( gotoLineDlg.getIhandle, "BGCOLOR", "255 255 255" );
-					//IupSetAttribute( gotoLineDlg.getIhandle, "BACKGROUND", "0 255 0" );
-					IupSetAttribute( gotoLineDlg.getIhandle, "TITLE", null );
+					IupSetAttribute( gotoLineDlg.getIhandle, "TITLE", "" );
 					
-					char[] lineNum = gotoLineDlg.show( x, y - 60 );
+					string lineNum = gotoLineDlg.show( x, y - 60 );
 					
-					lineNum = Util.trim( lineNum );
+					lineNum = strip( lineNum );
 					if( lineNum.length)
 					{
-						int pos = Util.rindex( lineNum, "x" );
-						if( pos >= lineNum.length )	pos = Util.rindex( lineNum, ":" );
-						if( pos < lineNum.length )
+						int pos = lastIndexOf( lineNum, "x" );
+						if( pos == -1 )	pos = lastIndexOf( lineNum, ":" );
+						if( pos > 0 )
 						{
 							try
 							{
-								int left = Integer.atoi( Util.trim( lineNum[0..pos] ) );
-								int right = Integer.atoi( Util.trim( lineNum[pos+1..$] ) );
+								int left = to!(int)( strip( lineNum[0..pos].dup ) );
+								int right = to!(int)( strip( lineNum[pos+1..$].dup ) );
 								
 								
-								char[] LineCol = Integer.toString( left - 1 )  ~ "," ~ Integer.toString( right - 1 );
-								IupSetAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol.dup ) );
+								string LineCol = to!(string)( left - 1 )  ~ "," ~ to!(string)( right - 1 );
+								IupSetStrAttribute( cSci.getIupScintilla, "CARET", toStringz( LineCol ) );
 								actionManager.StatusBarAction.update();
 								IupSetFocus( cSci.getIupScintilla );
 							}
@@ -473,10 +472,10 @@ extern(C) // Callback for CBaseDialog
 							{
 								if( lineNum[0] == '-' )
 								{
-									int value = Integer.atoi( lineNum[1..$] );
+									int value = to!(int)( lineNum[1..$].dup );
 									value --;
 									
-									IupSetAttribute( cSci.getIupScintilla, "CARETPOS", toStringz( Integer.toString( value).dup ) );
+									IupSetInt( cSci.getIupScintilla, "CARETPOS", value );
 									actionManager.StatusBarAction.update();
 									IupSetFocus( cSci.getIupScintilla );
 									return IUP_DEFAULT;
@@ -488,7 +487,7 @@ extern(C) // Callback for CBaseDialog
 							}
 						}
 						
-						actionManager.ScintillaAction.gotoLine( cSci.getFullPath, Integer.atoi( lineNum ) );
+						actionManager.ScintillaAction.gotoLine( cSci.getFullPath, to!(int)( lineNum ) );
 						actionManager.StatusBarAction.update();
 					}
 				}					
@@ -571,7 +570,7 @@ extern(C) // Callback for CBaseDialog
 		{
 			if( button == IUP_BUTTON3 ) // Right Click
 			{
-				if( !Util.trim( fromStringz( IupGetAttribute( ih, "TITLE" ) ) ).length ) return IUP_DEFAULT;
+				if( !strip( fromStringz( IupGetAttribute( ih, "TITLE" ) ) ).length ) return IUP_DEFAULT;
 				
 				Ihandle* encodeDefault = IupItem( toStringz( "Default" ), null );
 				IupSetCallback( encodeDefault, "ACTION", cast(Icallback) &menu.encode_cb );
@@ -621,10 +620,9 @@ extern(C) // Callback for CBaseDialog
 		Ihandle* selectionHandle = IupGetHandle( "compileOptionSelection" );
 		if( selectionHandle != null )
 		{
-			GLOBAL.currentCustomCompilerOption = IupGetAttribute( ih, "TITLE" );
-			//IupSetAttribute( selectionHandle, "FGCOLOR", "0 102 255" );
-			IupSetAttribute( selectionHandle, "TITLE", GLOBAL.currentCustomCompilerOption.toCString );
-			GLOBAL.statusBar.setTip( GLOBAL.currentCustomCompilerOption.toDString );
+			GLOBAL.compilerSettings.currentCustomCompilerOption = fSTRz( IupGetAttribute( ih, "TITLE" ) );
+			IupSetStrAttribute( selectionHandle, "TITLE", toStringz( GLOBAL.compilerSettings.currentCustomCompilerOption ) );
+			GLOBAL.statusBar.setTip( GLOBAL.compilerSettings.currentCustomCompilerOption );
 		}
 
 		return IUP_DEFAULT;
@@ -648,7 +646,7 @@ extern(C) // Callback for CBaseDialog
 					GLOBAL.statusBar.setCompleteIcon( true );
 					GLOBAL.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger;
 				}
-				if( preferenceTriggerHandle != null ) IupSetAttribute( preferenceTriggerHandle, "VALUE", toStringz( Integer.toString( GLOBAL.autoCompletionTriggerWordCount ) ) );
+				if( preferenceTriggerHandle != null ) IupSetStrAttribute( preferenceTriggerHandle, "VALUE", toStringz( to!(string)( GLOBAL.autoCompletionTriggerWordCount ) ) );
 			}
 		}
 

@@ -1,10 +1,9 @@
 ﻿module layouts.tabDocument;
 
-private import iup.iup;
-private import iup.iup_scintilla;
+private import iup.iup, iup.iup_scintilla;
 private import global, actionManager, scintilla, menu, tools, parser.autocompletion;
+private import std.string, std.conv, Path = std.path, Array = std.array;
 
-import tango.stdc.stringz, tango.io.Stdout, tango.io.FilePath;//, tango.sys.Process;
 
 void createTabs()
 {
@@ -20,12 +19,11 @@ void createTabs()
 	//IupSetAttribute( GLOBAL.documentTabs, "FORECOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs, "TABSHIGHCOLOR", "240 255 240" );
-	IupSetStrAttribute( GLOBAL.documentTabs, "FGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );
-	IupSetStrAttribute( GLOBAL.documentTabs, "BGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );
-	IupSetStrAttribute( GLOBAL.documentTabs, "TABSFORECOLOR", GLOBAL.editColor.dlgFore.toCString );
-	IupSetStrAttribute( GLOBAL.documentTabs, "TABSBACKCOLOR", GLOBAL.editColor.dlgBack.toCString );	
-	IupSetAttribute( GLOBAL.documentTabs, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
-	//IupSetCallback( GLOBAL.documentTabs, "WHEEL_CB", cast(Icallback) function( Ihandle* ih ){ return IUP_DEFAULT; });
+	IupSetStrAttribute( GLOBAL.documentTabs, "FGCOLOR", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Fore ) );
+	IupSetStrAttribute( GLOBAL.documentTabs, "BGCOLOR", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Back ) );
+	IupSetStrAttribute( GLOBAL.documentTabs, "TABSFORECOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+	IupSetStrAttribute( GLOBAL.documentTabs, "TABSBACKCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+	IupSetStrAttribute( GLOBAL.documentTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 	IupSetCallback( GLOBAL.documentTabs, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
@@ -45,11 +43,11 @@ void createTabs2()
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "NAME", "POSEIDON_SUB_TABS" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "HIGHCOLOR", "0 0 255" );
 	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSHIGHCOLOR", "240 255 240" );	
-	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "FGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Fore.toCString );
-	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "BGCOLOR", GLOBAL.editColor.SCE_B_IDENTIFIER_Back.toCString );	
-	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABSFORECOLOR", GLOBAL.editColor.dlgFore.toCString );
-	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABSBACKCOLOR", GLOBAL.editColor.dlgBack.toCString );	
-	IupSetAttribute( GLOBAL.documentTabs_Sub, "TABSLINECOLOR", GLOBAL.editColor.linenumBack.toCString );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "FGCOLOR", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Fore ) );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "BGCOLOR", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Back ) );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABSFORECOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABSBACKCOLOR",  toStringz( GLOBAL.editColor.dlgBack ) );
+	IupSetStrAttribute( GLOBAL.documentTabs_Sub, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "FLAT_BUTTON_CB", cast(Icallback) &tabbutton_cb );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCLOSE_CB", cast(Icallback) &tabClose_cb );
 	IupSetCallback( GLOBAL.documentTabs_Sub, "TABCHANGEPOS_CB", cast(Icallback) &tabchangePos_cb );
@@ -140,23 +138,13 @@ extern(C)
 			CScintilla cSci = actionManager.ScintillaAction.getActiveCScintilla();
 			if( cSci !is null )
 			{
-				scope fp = new FilePath( cSci.getFullPath() );
-
 				version( Windows )
 				{
-					IupExecute( "explorer", toStringz( "\"" ~ Util.substitute( fp.parent, "/", "\\" ) ~ "\"" ) );
-					//scope proc = new Process( true, "explorer " ~ "\"" ~ fp.parent ~ "\"" );
-					//proc.execute;
-					//proc.wait;
+					IupExecute( "explorer", toStringz( "\"" ~ Array.replace( Path.dirName( cSci.getFullPath ), "/", "\\" ) ~ "\"" ) );
 				}
 				else
 				{
-					IupExecute( "xdg-open", toStringz( "\"" ~ fp.parent ~ "\"" ) );
-					/*
-					scope proc = new Process( true, "xdg-open " ~ "\"" ~ fullPath ~ "\"" );
-					proc.execute;
-					proc.wait;
-					*/
+					IupExecute( "xdg-open", toStringz( "\"" ~ Path.dirName( cSci.getFullPath ) ~ "\"" ) );
 				}
 			}
 			return IUP_DEFAULT;
@@ -220,9 +208,9 @@ extern(C)
 						DocumentTabAction.resetTip();
 
 						int newDocumentPos = IupGetChildCount( GLOBAL.documentTabs_Sub ) - 1;
-						IupSetAttributeId( GLOBAL.documentTabs_Sub , "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
-						IupSetAttributeId( GLOBAL.documentTabs_Sub , "TABTIP", newDocumentPos,  beMoveDocumentCSci.getFullPath_IupString.toCString );
-						DocumentTabAction.setTabItemDocumentImage( GLOBAL.documentTabs_Sub, newDocumentPos, beMoveDocumentCSci.getFullPath_IupString.toDString );
+						IupSetStrAttributeId( GLOBAL.documentTabs_Sub , "TABTITLE", newDocumentPos, toStringz( beMoveDocumentCSci.getTitle ) );
+						IupSetStrAttributeId( GLOBAL.documentTabs_Sub , "TABTIP", newDocumentPos,  toStringz( beMoveDocumentCSci.getFullPath ) );
+						DocumentTabAction.setTabItemDocumentImage( GLOBAL.documentTabs_Sub, newDocumentPos, beMoveDocumentCSci.getFullPath );
 						DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs_Sub );
 						
 						IupSetAttribute( GLOBAL.documentTabs_Sub , "VALUE_HANDLE", cast(char*) beMoveDocumentCSci.getIupScintilla );
@@ -230,14 +218,12 @@ extern(C)
 						{
 							if( GLOBAL.editorSetting01.RotateTabs == "OFF" )
 							{
-								//IupSetAttributes( GLOBAL.documentSplit, "BARSIZE=2" );
-								IupSetInt( GLOBAL.documentSplit, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+								IupSetInt( GLOBAL.documentSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 								IupSetInt( GLOBAL.documentSplit, "VALUE", GLOBAL.documentSplit_value );
 							}
 							else
 							{
-								//IupSetAttributes( GLOBAL.documentSplit2, "BARSIZE=3" );
-								IupSetInt( GLOBAL.documentSplit2, "BARSIZE", Integer.atoi( GLOBAL.editorSetting01.BarSize ) );
+								IupSetInt( GLOBAL.documentSplit2, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 								IupSetInt( GLOBAL.documentSplit2, "VALUE", GLOBAL.documentSplit2_value );
 							}
 						}
@@ -270,9 +256,9 @@ extern(C)
 						DocumentTabAction.resetTip();
 
 						int newDocumentPos = IupGetChildCount( GLOBAL.documentTabs ) - 1;
-						IupSetAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, beMoveDocumentCSci.getTitleHandle.toCString );
-						IupSetAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos,  beMoveDocumentCSci.getFullPath_IupString.toCString );
-						DocumentTabAction.setTabItemDocumentImage( GLOBAL.documentTabs, newDocumentPos, beMoveDocumentCSci.getFullPath_IupString.toDString );
+						IupSetStrAttributeId( GLOBAL.documentTabs , "TABTITLE", newDocumentPos, toStringz( beMoveDocumentCSci.getTitle ) );
+						IupSetStrAttributeId( GLOBAL.documentTabs , "TABTIP", newDocumentPos,  toStringz( beMoveDocumentCSci.getFullPath ) );
+						DocumentTabAction.setTabItemDocumentImage( GLOBAL.documentTabs, newDocumentPos, beMoveDocumentCSci.getFullPath );
 						DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
 						
 						IupSetAttribute( GLOBAL.documentTabs, "VALUE_HANDLE", cast(char*) beMoveDocumentCSci.getIupScintilla );
@@ -398,12 +384,12 @@ extern(C)
 				else
 				{
 					int		RASTER_W = -1;
-					char[]	documentTabs_RASTERSIZE = fromStringz( IupGetAttribute(ih, "RASTERSIZE" ) );
-					int		crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
+					string	documentTabs_RASTERSIZE = fSTRz( IupGetAttribute(ih, "RASTERSIZE" ) );
+					int		crossPos = indexOf( documentTabs_RASTERSIZE, "x" );
 					
-					if( crossPos < documentTabs_RASTERSIZE.length )
+					if( crossPos > 0 )
 					{
-						RASTER_W = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
+						RASTER_W = to!(int)( documentTabs_RASTERSIZE[0..crossPos] );
 
 						if( ( x > 12 && x < RASTER_W - 12 ) )
 						{
@@ -440,17 +426,17 @@ extern(C)
 						
 						int		screenX, screenY;
 						int		tabs1X, tabs1Y, tabs2X, tabs2Y;
-						char[]	screenPos	= fromStringz( IupGetGlobal( "CURSORPOS" ) );
-						char[]	tabs1Pos	= fromStringz( IupGetAttribute( GLOBAL.documentTabs, "SCREENPOSITION" ) );
-						char[]	tabs2Pos	= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "SCREENPOSITION" ) );
+						string	screenPos	= fSTRz( IupGetGlobal( "CURSORPOS" ) );
+						string	tabs1Pos	= fSTRz( IupGetAttribute( GLOBAL.documentTabs, "SCREENPOSITION" ) );
+						string	tabs2Pos	= fSTRz( IupGetAttribute( GLOBAL.documentTabs_Sub, "SCREENPOSITION" ) );
 
 						if( screenPos.length )
 						{
-							int crossPos = Util.index( screenPos, "x" );
-							if( crossPos < screenPos.length )
+							int crossPos = indexOf( screenPos, "x" );
+							if( crossPos > 0 )
 							{
-								screenX = Integer.atoi( screenPos[0..crossPos] );
-								screenY = Integer.atoi( screenPos[crossPos+1..$] );
+								screenX = to!(int)( screenPos[0..crossPos] );
+								screenY = to!(int)( screenPos[crossPos+1..$] );
 							}
 							else
 							{
@@ -466,11 +452,11 @@ extern(C)
 						
 						if( tabs1Pos.length )
 						{
-							int commaPos = Util.index( tabs1Pos, "," );
-							if( commaPos < tabs1Pos.length )
+							int commaPos = indexOf( tabs1Pos, "," );
+							if( commaPos > 0 )
 							{
-								tabs1X = Integer.atoi( tabs1Pos[0..commaPos] );
-								tabs1Y = Integer.atoi( tabs1Pos[commaPos+1..$] );
+								tabs1X = to!(int)( tabs1Pos[0..commaPos] );
+								tabs1Y = to!(int)( tabs1Pos[commaPos+1..$] );
 							}
 							else
 							{
@@ -486,11 +472,11 @@ extern(C)
 						
 						if( tabs2Pos.length )
 						{
-							int commaPos = Util.index( tabs2Pos, "," );
-							if( commaPos < tabs2Pos.length )
+							int commaPos = indexOf( tabs2Pos, "," );
+							if( commaPos > 0 )
 							{
-								tabs2X = Integer.atoi( tabs2Pos[0..commaPos] );
-								tabs2Y = Integer.atoi( tabs2Pos[commaPos+1..$] );
+								tabs2X = to!(int)( tabs2Pos[0..commaPos] );
+								tabs2Y = to!(int)( tabs2Pos[commaPos+1..$] );
 							}
 							else
 							{
@@ -510,19 +496,19 @@ extern(C)
 						{
 							dropHandle = null;
 							
-							char[] documentTabs_CLIENTSIZE = fromStringz( IupGetAttribute( GLOBAL.documentTabs, "CLIENTSIZE" ) );
-							char[] documentTabs_RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.documentTabs, "RASTERSIZE" ) );
+							string documentTabs_CLIENTSIZE = fSTRz( IupGetAttribute( GLOBAL.documentTabs, "CLIENTSIZE" ) );
+							string documentTabs_RASTERSIZE = fSTRz( IupGetAttribute( GLOBAL.documentTabs, "RASTERSIZE" ) );
 							
 							int titleH = -1, CLIENT_H = -1, RASTER_H = -1, RASTER_W = -1;
 							
-							int crossPos = Util.index( documentTabs_CLIENTSIZE, "x" );
-							if( crossPos < documentTabs_CLIENTSIZE.length )	CLIENT_H = Integer.atoi( documentTabs_CLIENTSIZE[crossPos+1..$] );
+							int crossPos = indexOf( documentTabs_CLIENTSIZE, "x" );
+							if( crossPos > 0 )	CLIENT_H = to!(int)( documentTabs_CLIENTSIZE[crossPos+1..$] );
 							
-							crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
-							if( crossPos < documentTabs_RASTERSIZE.length )
+							crossPos = indexOf( documentTabs_RASTERSIZE, "x" );
+							if( crossPos > 0 )
 							{
-								RASTER_H = Integer.atoi( documentTabs_RASTERSIZE[crossPos+1..$] );
-								RASTER_W = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
+								RASTER_H = to!(int)( documentTabs_RASTERSIZE[crossPos+1..$] );
+								RASTER_W = to!(int)( documentTabs_RASTERSIZE[0..crossPos] );
 								titleH = RASTER_H - CLIENT_H; 
 							}
 							
@@ -550,13 +536,13 @@ extern(C)
 								dropPos = IupConvertXYToPos( GLOBAL.documentTabs_Sub, screenX - tabs2X, screenY - tabs2Y );								
 								if( dropPos < 0 )
 								{
-									documentTabs_RASTERSIZE = fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );
+									documentTabs_RASTERSIZE = fSTRz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );
 									if( documentTabs_RASTERSIZE.length )
 									{
-										crossPos = Util.index( documentTabs_RASTERSIZE, "x" );
-										if( crossPos < documentTabs_RASTERSIZE.length )
+										crossPos = indexOf( documentTabs_RASTERSIZE, "x" );
+										if( crossPos > 0 )
 										{
-											RASTER_W = Integer.atoi( documentTabs_RASTERSIZE[0..crossPos] );
+											RASTER_W = to!(int)( documentTabs_RASTERSIZE[0..crossPos] );
 											
 											if( screenX > tabs2X && screenX < tabs2X + RASTER_W )
 											{
@@ -617,8 +603,8 @@ extern(C)
 								auto dragSci = ScintillaAction.getCScintilla( dragHandle );
 								if( dragSci !is null )
 								{
-									IupSetAttributeId( dropTabs, "TABTITLE", newDocumentPos, dragSci.getTitleHandle.toCString );
-									IupSetAttributeId( dropTabs, "TABTIP", newDocumentPos,  dragSci.getFullPath_IupString.toCString );
+									IupSetStrAttributeId( dropTabs, "TABTITLE", newDocumentPos, toStringz( dragSci.getTitle ) );
+									IupSetStrAttributeId( dropTabs, "TABTIP", newDocumentPos,  toStringz( dragSci.getFullPath ) );
 									DocumentTabAction.setActiveDocumentTabs( dropTabs );
 									
 									IupSetAttribute( GLOBAL.activeDocumentTabs, "VALUE_HANDLE", cast(char*) dragSci.getIupScintilla );

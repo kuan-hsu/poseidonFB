@@ -2,23 +2,24 @@
 
 import iup.iup;
 import global, IDE, tools, dialogs.baseDlg;
-import tango.stdc.stringz, Integer = tango.text.convert.Integer, Util = tango.text.Util, tango.io.Stdout;
+import std.string, std.conv, Array = std.array;
+
 
 class CShortCutDialog : CBaseDialog
 {
-	private:
-	Ihandle*	textResult;
-	char[]		labelName;
+private:
+	Ihandle*		textResult;
+	IupString[3]	labelTitle;
 
-	void createLayout( int item, char[] listText )
+	void createLayout( int item, string listText )
 	{
 		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
 		IupSetAttribute( btnAPPLY, "TITLE", GLOBAL.languageItems["clear"].toCString );
 
-		char[]		shortKeyValue;
-		foreach( char[] s; Util.split( listText[0..30], "+" ) )
+		string		shortKeyValue;
+		foreach( s; Array.split( listText[0..30].dup, "+" ) )
 		{
-			s = Util.trim( s );
+			s = strip( s );
 			if( s.length )
 			{
 				if( shortKeyValue.length ) shortKeyValue ~= ( " + " ~ s ); else shortKeyValue ~= s;
@@ -38,14 +39,16 @@ class CShortCutDialog : CBaseDialog
 		else if( item < 52 )
 			item -= 6;
 
-
-		Ihandle* label0 = IupLabel( toStringz( GLOBAL.languageItems["shortcutname"].toDString() ~ ": " ~ GLOBAL.shortKeys[item-1].title ) );
+		if( labelTitle[0] is null ) labelTitle[0] = new IupString( GLOBAL.languageItems["shortcutname"].toDString() ~ ": " ~ GLOBAL.shortKeys[item-1].title );
+		Ihandle* label0 = IupLabel( labelTitle[0].toCString );
 		IupSetHandle( "labelKeyName", label0 );
 		
-		Ihandle* label1 = IupLabel( toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ": " ~ shortKeyValue ) );
+		if( labelTitle[1] is null ) labelTitle[1] = new IupString( GLOBAL.languageItems["shortcutkey"].toDString() ~ ": " ~ shortKeyValue );
+		Ihandle* label1 = IupLabel( labelTitle[1].toCString );
 		IupSetHandle( "labelKeyValue", label1 );
 		
-		Ihandle* label2 = IupLabel( toStringz( GLOBAL.shortKeys[item-1].name ) );
+		if( labelTitle[2] is null ) labelTitle[2] = new IupString( GLOBAL.shortKeys[item-1].name );
+		Ihandle* label2 = IupLabel( labelTitle[2].toCString );
 		IupSetHandle( "labelName", label2 );
 		IupSetAttribute( label2, "VISIBLE", "NO" );
 
@@ -68,20 +71,20 @@ class CShortCutDialog : CBaseDialog
 		Ihandle* keyList = IupList( null );
 		IupSetHandle( "keyList", keyList );
 
-		char[] listOptions;
+		string listOptions;
 		for( int i = 1; i < 27; ++ i )
 		{
-			listOptions ~= ( Integer.toString( i ) ~ "=\"" ~ cast(char)( 64 + i ) ~ "\"," );
+			listOptions ~= ( to!(string)( i ) ~ "=\"" ~ cast(char)( 64 + i ) ~ "\"," );
 		}
 
 		for( int i = 27; i < 39; ++ i )
 		{
-			listOptions ~= ( Integer.toString( i ) ~ "=\"F" ~ Integer.toString( i - 26 ) ~ "\"," );
+			listOptions ~= ( to!(string)( i ) ~ "=\"F" ~ to!(string)( i - 26 ) ~ "\"," );
 		}
 
 		listOptions ~= ( "39=\"TAB\"," );
 
-		listOptions ~= "DROPDOWN=YES,VALUESTRING=" ~ Util.trim( listText[25..30] );
+		listOptions ~= "DROPDOWN=YES,VALUESTRING=" ~ strip( listText[25..30].dup );
 		IupSetAttributes( keyList, toStringz( listOptions ) );
 
 		Ihandle* HBox0 = IupHbox( toggleCtrl, toggleShift, toggleAlt, keyList, null );
@@ -93,8 +96,8 @@ class CShortCutDialog : CBaseDialog
 		IupAppend( _dlg, VBox0 );
 	}	
 
-	public:
-	this( int w, int h, int item, char[] listText, bool bResize = false, char[] parent = null )
+public:
+	this( int w, int h, int item, string listText, bool bResize = false, string parent = null )
 	{
 		super( w, h, GLOBAL.languageItems["shortcut"].toDString(), bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
@@ -121,9 +124,12 @@ class CShortCutDialog : CBaseDialog
 		IupSetHandle( "toggleShift", null );
 		IupSetHandle( "toggleAlt", null );
 		IupSetHandle( "keyList", null );
+		
+		for( int i = 0; i < labelTitle.length; ++ i )
+			if( labelTitle[i] !is null ) destroy( labelTitle[i] );
 	}
 
-	char[] show( int x, int y ) // Overload form CBaseDialog
+	override string show( int x, int y ) // Overload form CBaseDialog
 	{
 		IupPopup( _dlg, x, y );
 
@@ -138,7 +144,7 @@ extern(C) // Callback for CSingleTextDialog
 	{
 	
 		Ihandle* label1_handle = IupGetHandle( "labelKeyValue" );
-		if( label1_handle != null ) IupSetAttribute( label1_handle, "TITLE", toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ":" ) );
+		if( label1_handle != null ) IupSetStrAttribute( label1_handle, "TITLE", toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ":" ) );
 		
 		Ihandle* _ctrl = IupGetHandle( "toggleCtrl" );
 		Ihandle* _shift = IupGetHandle( "toggleShift" );
@@ -151,7 +157,7 @@ extern(C) // Callback for CSingleTextDialog
 		IupSetAttribute( _list, "VALUE", "" );
 		
 		Ihandle* label = IupGetHandle( "labelName" );
-		char[] name = fromStringz( IupGetAttribute( label, "TITLE" ) ).dup;
+		string name = fSTRz( IupGetAttribute( label, "TITLE" ) );
 		int pos = -1;
 		
 		switch( name )
@@ -224,7 +230,7 @@ extern(C) // Callback for CSingleTextDialog
 	
 	private int CShortCutDialog_btnOK_cb( Ihandle* ih )
 	{
-		char[] keyValue;
+		string keyValue;
 		
 		Ihandle* _ctrl = IupGetHandle( "toggleCtrl" );
 		Ihandle* _shift = IupGetHandle( "toggleShift" );
@@ -233,7 +239,7 @@ extern(C) // Callback for CSingleTextDialog
 		if( fromStringz( IupGetAttribute( _ctrl, "VALUE" ) ) == "ON" ) keyValue = "C+";else keyValue = "+";
 		if( fromStringz( IupGetAttribute( _shift, "VALUE" ) ) == "ON" ) keyValue ~= "S+";else keyValue ~= "+";
 		if( fromStringz( IupGetAttribute( _alt, "VALUE" ) ) == "ON" ) keyValue ~= "A+";else keyValue ~= "+";
-		keyValue ~= fromStringz( IupGetAttribute( _list, "VALUESTRING" ) ).dup;
+		keyValue ~= fromStringz( IupGetAttribute( _list, "VALUESTRING" ) );
 
 		int value = IDECONFIG.convertShortKeyValue2Integer( keyValue );
 		foreach( ShortKey sk; GLOBAL.shortKeys )
@@ -249,7 +255,7 @@ extern(C) // Callback for CSingleTextDialog
 		}
 		
 		Ihandle* label = IupGetHandle( "labelName" );
-		char[] name = fromStringz( IupGetAttribute( label, "TITLE" ) ).dup;
+		string name = fSTRz( IupGetAttribute( label, "TITLE" ) );
 		int pos = -1;
 		
 		switch( name )
@@ -320,7 +326,7 @@ extern(C) // Callback for CSingleTextDialog
 		if( shortCutList != null )
 		{
 			keyValue = IDECONFIG.convertShortKeyValue2String( GLOBAL.shortKeys[pos].keyValue );
-			char[][] splitWord = Util.split( keyValue, "+" );
+			string[] splitWord = Array.split( keyValue, "+" );
 
 			if(  splitWord.length == 4 ) 
 			{
@@ -329,7 +335,8 @@ extern(C) // Callback for CSingleTextDialog
 				if( splitWord[2] == "A" )  splitWord[2] = "Alt";
 			}
 			
-			char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
+			auto string = format( " %-5s + %-5s + %-5s + %-5s %-40s", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
+			//char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
 			if( pos < 6 )
 				pos ++;
 			else if( pos < 20 )
