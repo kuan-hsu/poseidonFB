@@ -20,7 +20,7 @@ private:
 	
 	static bool isUTF8WithouBOM( ubyte[] data )
 	{
-		int size = data.length;
+		int size = cast(int) data.length;
 		for( int i = 0; i < size; ++ i )
 		{
 			if( ( data[i] & 0x80 ) == 0x00 )
@@ -669,7 +669,7 @@ public:
 		
 		scope _t = new IupString( target );
 		
-		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
+		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		while( findPos != -1 )
 		{
 			if( getBeforeWord( iupSci, findPos - 1 ) == Uni.toLower( beforeWord ) )
@@ -682,9 +682,9 @@ public:
 					count++;
 			}
 			
-			IupSetInt( iupSci, "TARGETSTART", findPos + target.length );
+			IupSetInt( iupSci, "TARGETSTART", findPos + cast(int) target.length );
 			IupSetInt( iupSci, "TARGETEND", -1 );
-			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		}		
 		
 		return count;
@@ -869,7 +869,7 @@ public:
 			{
 				if( fullPath in GLOBAL.fileStatusManager )
 				{
-					foreach( int _pos, int value; GLOBAL.fileStatusManager[fullPath] )
+					foreach( size_t _pos, int value; GLOBAL.fileStatusManager[fullPath] )
 					{
 						if( _pos == 0 )
 						{
@@ -1590,7 +1590,7 @@ public:
 			if( temps.length > 8 )
 			{
 				GLOBAL.recentFiles.length = 8;
-				for( count = temps.length - 8; count < temps.length; ++count )
+				for( count = cast(int) temps.length - 8; count < cast(int) temps.length; ++count )
 					GLOBAL.recentFiles[index++] = temps[count];
 			}
 			else
@@ -1656,11 +1656,11 @@ public:
 				Ihandle* actIupSci = getActiveIupScintilla;
 				if( actIupSci != null )
 				{
-					string wh = fSTRz( IupGetAttribute( actIupSci, "RASTERSIZE" ) );
-					int xPos = indexOf( wh, "x" );
+					string wh = fSTRz( IupGetAttribute( GLOBAL.mainDlg, "RASTERSIZE" ) );
+					auto xPos = indexOf( wh, "x" );
 					if( xPos > -1 )
 					{
-						int spacePos = lastIndexOf( GLOBAL.fonts[1].fontString, " " );
+						auto spacePos = lastIndexOf( GLOBAL.fonts[1].fontString, " " );
 						if( spacePos > -1 )
 						{
 							int size = to!(int)( GLOBAL.fonts[1].fontString[spacePos+1..$] );
@@ -1692,7 +1692,7 @@ public:
 			if( ++count == textWidth )
 			{
 				result = result ~ "\n" ~ stripLeft( tmp );
-				count = tmp.length;
+				count = cast(int) tmp.length;
 				tmp.length = 0;
 			}
 			else if( oriText[i] == ' ' &&  last != ' ' )
@@ -1779,7 +1779,7 @@ struct ProjectAction
 	{
 		string _titleName;
 
-		int pos = indexOf( fullPath, _prjDirName );
+		auto pos = indexOf( fullPath, _prjDirName );
 		if( pos == 0 ) 	_titleName = Array.replace( fullPath, _prjDirName, "" );
 
 		if( _titleName.length )
@@ -2208,7 +2208,7 @@ public:
 
 	static string getSeparateType( string _string, bool bemoveArrayAndPoint = false )
 	{
-		int openParenPos = indexOf( _string, "(" );
+		auto openParenPos = indexOf( _string, "(" );
 
 		if( openParenPos > 0 ) // should be >= 1
 		{
@@ -2225,7 +2225,7 @@ public:
 
 	static string getSeparateParam( string _string )
 	{
-		int openParenPos = indexOf( _string, "(" );
+		auto openParenPos = indexOf( _string, "(" );
 
 		if( openParenPos > 0 ) // should be >= 1
 		{
@@ -2449,7 +2449,7 @@ private:
 			IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
 			if( bNext )	IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
 
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 			
 			// reSearch form file's head
 			if( findPos < 0 )
@@ -2465,7 +2465,7 @@ private:
 					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 
-				findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+				findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 			}
 	
 			if( findPos < 0 )
@@ -2528,7 +2528,7 @@ public:
 		return pos;
 	}	
 
-	static bool IsWholeWord( string lineData, string target, int pos )
+	static bool IsWholeWord( string lineData, string target, ptrdiff_t pos )
 	{
 		int targetPLUS1, targetMinus1;
 		
@@ -2606,7 +2606,7 @@ public:
 
 				if( buttonIndex == 1 )
 				{
-					int findIndex = 0;
+					ptrdiff_t findIndex = 0;
 					while( findIndex > -1 )
 					{
 						if( searchRule & MATCHCASE )
@@ -2661,7 +2661,7 @@ public:
 
 					if( line.length )
 					{
-						int pos;
+						ptrdiff_t pos;
 						if( !( searchRule & MATCHCASE ) )
 						{
 							pos = indexOf( Uni.toLower( line ), Uni.toLower( findText ) );
@@ -2931,7 +2931,7 @@ public:
 					
 					if( GLOBAL.linuxTermName.length )
 					{
-						switch( Util.trim( GLOBAL.linuxTermName ) )
+						switch( strip( GLOBAL.linuxTermName ) )
 						{
 							case "xterm", "uxterm":
 								geoString = Array.replace( geoString, "--geometry=", "-geometry " );
@@ -2962,8 +2962,8 @@ public:
 		{
 			foreach( s; GLOBAL.compilerSettings.customCompilerOptions )
 			{
-				int bpos = lastIndexOf( s, "%::% " );
-				int fpos = indexOf( s, "%::% " );
+				auto bpos = lastIndexOf( s, "%::% " );
+				auto fpos = indexOf( s, "%::% " );
 				if( bpos > -1 )
 				{
 					if( s[bpos+5..$] == GLOBAL.compilerSettings.currentCustomCompilerOption )

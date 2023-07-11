@@ -1308,7 +1308,7 @@ version(DIDE)
 				else
 					activeASTnode.addChild( _name, D_VARIABLE, getProt(), _type, _rightName, _ln );
 				*/
-				int keyPos = indexOf( _type, " function(" );
+				auto keyPos = indexOf( _type, " function(" );
 				if( keyPos == -1 ) keyPos = indexOf( _type, " delegate(" );
 				if( keyPos > -1 )
 				{

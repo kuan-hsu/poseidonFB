@@ -140,7 +140,7 @@ public:
 			if( sci != null )
 			{
 				string _size = fSTRz( IupGetAttribute( sci, "SIZE" ) );
-				int crossPos = indexOf( _size, "x" );
+				auto crossPos = indexOf( _size, "x" );
 				if( crossPos > -1 ) IupSetStrAttribute( sci, "SCROLLWIDTH", toStringz( _size[0..crossPos] ) );
 			}		
 			IupScintillaSendMessage( sci, 2516, 1, 0 ); // SCI_SETSCROLLWIDTHTRACKING 2516
@@ -148,18 +148,18 @@ public:
 			
 
 			// Set margin size
-			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = 8;//cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
 				string lc = to!(string)( lineCount );
 				if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 				{
-					IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+					IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
 				}
 				else
 				{
-					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 )* textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 )* textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
 				}
 			}
 			else
@@ -523,18 +523,18 @@ public:
 
 		if( !bFirstTime )
 		{
-			int textWidth = cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = 8;//cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
 				string lc = to!(string)( lineCount );
 				if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 				{
-					IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+					IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
 				}
 				else
 				{
-					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
 				}
 			}
 			else
@@ -1760,7 +1760,7 @@ extern(C)
 						int _x, _y;
 						string mousePos = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
-						int crossSign = indexOf( mousePos, "x" );
+						auto crossSign = indexOf( mousePos, "x" );
 						if( crossSign > 0 )
 						{
 							_x = to!(int)( mousePos[0..crossSign] );
@@ -1816,7 +1816,7 @@ extern(C)
 							
 							int count;
 							scope _t = new IupString( word );
-							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+							int findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) word.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 							
 							while( findPos > -1 )
 							{
@@ -1825,9 +1825,9 @@ extern(C)
 								else
 									IupScintillaSendMessage( ih, 2573, cast(int) findPos, cast(int) ( findPos + word.length ) ); // SCI_ADDSELECTION 2573
 
-								IupSetInt( ih, "TARGETSTART", findPos + word.length );
+								IupSetInt( ih, "TARGETSTART", findPos + cast(int) word.length );
 								IupSetInt( ih, "TARGETEND", -1 );
-								findPos = cast(int) IupScintillaSendMessage( ih, 2197, word.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+								findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) word.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 							}
 						}
 					}
@@ -1898,7 +1898,7 @@ extern(C)
 				string cursorString = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 				
 				int		cursorX, cursorY, iconX, iconY;
-				int 	crossSign = indexOf( cursorString, "x" );
+				auto 	crossSign = indexOf( cursorString, "x" );
 				if( crossSign > 0 )
 				{
 					cursorX = to!(int)( cursorString[0..crossSign] );
@@ -2120,7 +2120,7 @@ extern(C)
 												IupSetInt( ih, "TARGETEND", lineHead );
 												
 												scope _t = new IupString( targetText );
-												int posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString );
+												int posHead = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 												
 												while( posHead >= 0 )
 												{
@@ -2128,7 +2128,7 @@ extern(C)
 													bGetMatch = true;
 													IupSetInt( ih, "TARGETSTART", posHead );
 													IupSetInt( ih, "TARGETEND", lineHead );
-													posHead = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString );
+													posHead = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 												}					
 											}
 										}
@@ -2182,7 +2182,7 @@ extern(C)
 									char[] lineText = fromStringz( IupGetAttribute( iupSci, "LINEVALUE" ) );
 									int line = ScintillaAction.getCurrentLine( iupSci ) - 1;
 									IupScintillaSendMessage( iupSci, 2404, line, 0 ); // SCI_LINEDUPLICATE 2404
-									IupScintillaSendMessage( iupSci, 2025, ScintillaAction.getCurrentPos( iupSci ) + lineText.length, 0 ); // SCI_GOTOPOS 2025
+									IupScintillaSendMessage( iupSci, 2025, ScintillaAction.getCurrentPos( iupSci ) + cast(int) lineText.length, 0 ); // SCI_GOTOPOS 2025
 								}								
 								return IUP_IGNORE;
 							}
@@ -2432,7 +2432,7 @@ extern(C)
 										{
 											//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 											scope _result = new IupString( list );
-											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
+											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length, _result.toCString );
 											return IUP_IGNORE;
 										}
 									}
@@ -2464,7 +2464,7 @@ extern(C)
 												if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" )
 												{
 													scope _result = new IupString( AutoComplete.getKeywordContainerList( alreadyInput ) );
-													if( _result.toDString.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString );
+													if( _result.toDString.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length, cast(int) _result.toCString );
 												}
 											}
 										}
@@ -2494,7 +2494,7 @@ extern(C)
 										{
 											//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 											scope _result = new IupString( list );
-											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", alreadyInput.length, _result.toCString );
+											if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length, _result.toCString );
 											return IUP_IGNORE;
 										}
 									}
@@ -2523,7 +2523,7 @@ extern(C)
 												{
 													string list = AutoComplete.getKeywordContainerList( alreadyInput );
 													scope _result = new IupString( list );
-													if( list.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length, cast(int) _result.toCString );
+													if( list.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length, cast(int) _result.toCString );
 												}
 											}
 										}
@@ -2705,18 +2705,15 @@ extern(C)
 	
 		string _text = fSTRz( text );
 		
-		//if( GLOBAL.toggleShowListType == "ON" )
-		//{
-			int colonPos = lastIndexOf( _text, "::" );
-			if( colonPos > -1 ) _text = _text[0..colonPos].dup;
-			_text = strip( _text );
-		//}
+		auto colonPos = lastIndexOf( _text, "::" );
+		if( colonPos > -1 ) _text = _text[0..colonPos].dup;
+		_text = strip( _text );
 		
 		if( _text.length )
 		{
 			if( _text[$-1] == ')' )
 			{
-				int _pos = indexOf( _text, "(" );
+				auto _pos = indexOf( _text, "(" );
 				if( _pos > -1 ) _text = _text[0.._pos].dup;
 			}
 			
@@ -2731,7 +2728,7 @@ extern(C)
 				}
 				else if( tail == pos )
 				{
-					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int) textCovert.toCString ); // SCI_ADDTEXT 2001
+					IupScintillaSendMessage( ih, 2001, cast(int) textCovert.toDString.length, cast(int) textCovert.toCString ); // SCI_ADDTEXT 2001
 				}				
 			}
 			else
@@ -2741,7 +2738,7 @@ extern(C)
 				textCovert = _text;
 				if( IupGetAttribute( ih, "SELECTEDTEXT" ) == null )
 				{	
-					IupScintillaSendMessage( ih, 2001, textCovert.toDString.length, cast(int) textCovert.toCString ); // SCI_ADDTEXT 2001
+					IupScintillaSendMessage( ih, 2001, cast(int) textCovert.toDString.length, cast(int) textCovert.toCString ); // SCI_ADDTEXT 2001
 				}
 				else
 					IupSetStrAttribute( ih, "SELECTEDTEXT", textCovert.toCString );			
@@ -2797,13 +2794,13 @@ extern(C)
 					*/
 					if( dText.length > 2 )
 					{
-						int count =  indexOf( dText, "\n" );
+						auto count =  indexOf( dText, "\n" );
 						if( count > -1 )
 						{
 							int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 							int lineCount = IupGetInt( ih, "LINECOUNT" );
 							string lc = to!(string)( lineCount + 1 + count );
-							IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+							IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
 						}
 					}
 					else
@@ -2816,7 +2813,7 @@ extern(C)
 								int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
 								int lineCount = IupGetInt( ih, "LINECOUNT" );
 								string lc = to!(string)( lineCount + 1 );
-								IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+								IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
 							}						
 						}
 					}
@@ -2826,8 +2823,8 @@ extern(C)
 					if( GLOBAL.editorSetting00.LineMargin == "ON" )
 					{
 						// Set margin size
-						int textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
-						int count;
+						int			textWidth = cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+						ptrdiff_t	count;
 						
 						string selText = fSTRz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
 						
@@ -2845,7 +2842,7 @@ extern(C)
 						{
 							int lineCount = IupGetInt( ih, "LINECOUNT" );
 							string lc = to!(string)( lineCount - count );
-							IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * textWidth );
+							IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
 						}
 					}
 				}
@@ -2919,7 +2916,7 @@ extern(C)
 					{
 						//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, _result.toCString );
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
 						return IUP_DEFAULT;
 					}
 				}
@@ -2960,7 +2957,7 @@ extern(C)
 								if( list.length )
 								{
 									scope _result = new IupString( list );
-									if( !word.length ) IupScintillaSendMessage( ih, 2100, word.length - 1, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", word.length - 1, _result.toCString );
+									if( !word.length ) IupScintillaSendMessage( ih, 2100, cast(int) word.length - 1, cast(int) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", cast(int) word.length - 1, _result.toCString );
 								}
 							}
 					}
@@ -3051,11 +3048,11 @@ extern(C)
 							string options = GLOBAL.compilerSettings.activeCompiler.Option;
 							if( options.length )
 							{	
-								int _versionPos = indexOf( options, "-version=" );
+								auto _versionPos = indexOf( options, "-version=" );
 								while( _versionPos > -1 )
 								{
 									string versionName;
-									for( int i = _versionPos + 9; i < options.length; ++ i )
+									for( int i = cast(int) _versionPos + 9; i < options.length; ++ i )
 									{
 										if( options[i] == '\t' || options[i] == ' ' ) break;
 										versionName ~= options[i];
@@ -3081,12 +3078,12 @@ extern(C)
 								string options = GLOBAL.compilerSettings.activeCompiler.Option;
 								if( options.length )
 								{	
-									int _versionPos = indexOf( options, "-d" );
+									auto _versionPos = indexOf( options, "-d" );
 									while( _versionPos > -1 )
 									{
 										string	versionName;
 										bool	bBeforeSymbol = true;
-										for( int i = _versionPos + 2; i < options.length; ++ i )
+										for( int i = cast(int) _versionPos + 2; i < options.length; ++ i )
 										{
 											if( options[i] == '\t' || options[i] == ' ' )
 											{
@@ -3267,7 +3264,7 @@ extern(C)
 				string	screenPos					= fSTRz( IupGetGlobal( "CURSORPOS" ) );
 				if( screenPos.length )
 				{
-					int crossPos = indexOf( screenPos, "x" );
+					auto crossPos = indexOf( screenPos, "x" );
 					if( crossPos > -1 )
 					{
 						int		screenX = to!(int)( screenPos[0..crossPos] );
@@ -3276,7 +3273,7 @@ extern(C)
 						
 						if( tabs1Pos.length )
 						{
-							int commaPos = indexOf( tabs1Pos, "," );
+							auto commaPos = indexOf( tabs1Pos, "," );
 							if( commaPos > -1 )
 							{
 								tabs1X = to!(int)( tabs1Pos[0..commaPos] );
@@ -3334,13 +3331,13 @@ extern(C)
 		try
 		{
 			int	fontWidth;
-			int commaPos = lastIndexOf( GLOBAL.fonts[1].fontString, "," );
+			auto commaPos = lastIndexOf( GLOBAL.fonts[1].fontString, "," );
 			if( commaPos > -1 ) fontWidth = to!(int)( strip( GLOBAL.fonts[1].fontString[commaPos+1..$] ) ) - 2;
 			
 			int lineCount = IupGetInt( ih, "LINECOUNT" );
 			string lc = to!(string)( lineCount );
 
-			IupSetInt( ih, "MARGINWIDTH0", ( lc.length + 1 ) * ( fontWidth + zoomInPoints )  );
+			IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * ( fontWidth + zoomInPoints )  );
 		}
 		catch( Exception e )
 		{
@@ -3354,8 +3351,8 @@ extern(C)
 	{
 		IupSetFocus( ih );
 		
-		int wordStart = IupScintillaSendMessage( ih, 2266, pos, 1 ); // SCI_WORDSTARTPOSITION 2266
-		int wordEnd = IupScintillaSendMessage( ih, 2267, pos, 1 );   // SCI_WORDENDPOSITION 2267
+		int wordStart = cast(int) IupScintillaSendMessage( ih, 2266, pos, 1 ); // SCI_WORDSTARTPOSITION 2266
+		int wordEnd = cast(int) IupScintillaSendMessage( ih, 2267, pos, 1 );   // SCI_WORDENDPOSITION 2267
 		/*
 		struct TextRange{ int start; int end; char* text; }
 		TextRange tr = { wordStart, wordEnd, ( new char[wordEnd-wordStart+1] ).ptr };
@@ -3382,7 +3379,7 @@ extern(C)
 		IupSetAttribute( ih, "SEARCHFLAGS", "WHOLEWORD" );
 		IupSetInt( ih, "TARGETSTART", 0 );
 		IupSetInt( ih, "TARGETEND", -1 );
-		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
+		int findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		
 		while( findPos != -1 )
 		{
@@ -3391,7 +3388,7 @@ extern(C)
 			IupScintillaSendMessage( ih, 2504, targetStart, TargetEnd - targetStart ); // SCI_INDICATORFILLRANGE =  2504
 			IupSetInt( ih, "TARGETSTART", TargetEnd );
 			IupSetInt( ih, "TARGETEND", -1 );
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, targetText.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		}
 	}
 }

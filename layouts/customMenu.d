@@ -21,7 +21,7 @@ private:
 	
 	static void splitCross( ref string _source, ref int w, ref int h )
 	{
-		int crossPosition = indexOf( _source, "x" );
+		auto crossPosition = indexOf( _source, "x" );
 		if( crossPosition > 0 )
 		{
 			w = Conv.to!(int)( _source[0..crossPosition] );

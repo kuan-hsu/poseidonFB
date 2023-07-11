@@ -725,8 +725,8 @@ Ihandle* createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.506)  2023.07.09\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.080)  2023.06.12\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.506)  2023.07.11\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.081)  2023.07.11\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -900,10 +900,8 @@ Ihandle* createMenu()
 		if( !bWithoutDebug ) GLOBAL.menubar.addItem( GLOBAL.languageItems["debug"].toDString, debug_menu );
 		GLOBAL.menubar.addItem( GLOBAL.languageItems["windows"].toDString, misc_menu );
 		GLOBAL.menubar.addItem( GLOBAL.languageItems["options"].toDString, option_menu );
-		
 		GLOBAL.menubar.setFont( GLOBAL.fonts[0].fontString );
-		
-		
+
 		return GLOBAL.menubar.getLayoutHandle;	
 	}
 	else
@@ -926,7 +924,6 @@ Ihandle* createMenu()
 		IupSetAttribute( menu, "GAP", "30" );
 		IupSetHandle("mymenu", menu);
 	}
-
 
 	return null;
 }
@@ -964,7 +961,7 @@ version(FBIDE)
 				{
 					if( targetText.length )
 					{
-						int		replaceTextLength = targetText.length;
+						int		replaceTextLength = cast(int) targetText.length;
 						string	replaceText = tools.convertKeyWordCase( type, targetText );
 
 						IupSetInt( iupSci, "TARGETSTART", 0 );
@@ -972,13 +969,13 @@ version(FBIDE)
 						
 						scope _t = new IupString( targetText );
 
-						int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+						int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 						while( posHead >= 0 )
 						{
 							IupSetAttribute( iupSci, "REPLACETARGET", toStringz( replaceText ) );
 							IupSetInt( iupSci, "TARGETSTART", posHead + replaceTextLength );
 							IupSetInt( iupSci, "TARGETEND", -1 );
-							posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+							posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 						}					
 					}
 				}
@@ -1176,7 +1173,7 @@ extern(C)
 	int submenuRecentProject_click_cb( Ihandle* ih )
 	{
 		string title = fromStringz( IupGetAttribute( ih, "TITLE" ) ).dup;
-		int pos = indexOf( title, " : " );
+		auto pos = indexOf( title, " : " );
 		if( pos > 0 )
 		{
 			if( !GLOBAL.projectTree.openProject( strip( title[0..pos].dup ) ) )
@@ -1288,9 +1285,9 @@ extern(C)
 			else
 			{
 				string selectText = fSTRz( _selectText );
-				int headCommaPos = indexOf( selectText, "," );
-				int headColonPos = indexOf( selectText, ":" );
-				int tailCommaPos = lastIndexOf( selectText, "," );
+				auto headCommaPos = indexOf( selectText, "," );
+				auto headColonPos = indexOf( selectText, ":" );
+				auto tailCommaPos = lastIndexOf( selectText, "," );
 				if( tailCommaPos > headCommaPos )
 				{
 					int line1 = to!(int)( selectText[0..headCommaPos] );
@@ -1367,9 +1364,9 @@ extern(C)
 			else
 			{
 				string selectText = fSTRz( _selectText );
-				int headCommaPos = indexOf( selectText, "," );
-				int headColonPos = indexOf( selectText, ":" );
-				int tailCommaPos = lastIndexOf( selectText, "," );
+				auto headCommaPos = indexOf( selectText, "," );
+				auto headColonPos = indexOf( selectText, ":" );
+				auto tailCommaPos = lastIndexOf( selectText, "," );
 				if( tailCommaPos > headCommaPos )
 				{
 					int line1 = to!(int)( selectText[0..headCommaPos] );
@@ -1480,7 +1477,7 @@ extern(C)
 				char[] beginEndPos = fromStringz( IupGetAttribute( ih, "SELECTIONPOS" ) );
 				if( beginEndPos.length )
 				{
-					int colonPos = indexOf( beginEndPos, ":" );
+					auto colonPos = indexOf( beginEndPos, ":" );
 					if( colonPos > -1 )
 					{
 						string newBeginEndPos = ( beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos] ).dup;
@@ -1506,7 +1503,7 @@ extern(C)
 			lineNum = strip( lineNum );
 			if( lineNum.length)
 			{
-				int pos = lastIndexOf( lineNum, "x" );
+				auto pos = lastIndexOf( lineNum, "x" );
 				if( pos == -1 )	pos = lastIndexOf( lineNum, ":" );
 				if( pos > 0 )
 				{
@@ -1594,7 +1591,7 @@ extern(C)
 			IupSetAttribute( ih, "VALUE", "OFF" );
 			GLOBAL.explorerSplit_value = IupGetInt( GLOBAL.explorerSplit, "VALUE" );
 			IupSetInt( GLOBAL.explorerSplit, "VALUE", 0 );
-			IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 0 );
+			//IupSetInt( GLOBAL.explorerSplit, "BARSIZE", 0 );
 
 			IupSetAttribute( GLOBAL.explorerSplit, "ACTIVE", "NO" );
 			// Since set Split's "ACTIVE" to "NO" will set all Children's "ACTIVE" to "NO", we need correct it......
@@ -1691,16 +1688,19 @@ extern(C)
 		if( GLOBAL.preferenceDlg is null )
 		{
 			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
+			GLOBAL.preferenceDlg.show( IUP_RIGHTPARENT, IUP_TOPPARENT );
 		}
 		else
 		{
-			//IupDestroy( GLOBAL.preferenceDlg.getIhandle );
+			IupShow( GLOBAL.preferenceDlg.getIhandle );
+			/+
 			destroy( GLOBAL.preferenceDlg );
-			//GC.free( cast(void*) GLOBAL.preferenceDlg );
+			GC.free( cast(void*) GLOBAL.preferenceDlg );
 			GLOBAL.preferenceDlg = null;
 			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
+			+/
 		}
-		GLOBAL.preferenceDlg.show( IUP_RIGHTPARENT, IUP_TOPPARENT );
+		
 
 		return IUP_DEFAULT;
 	}
@@ -1857,10 +1857,10 @@ extern(C)
 					
 					if( !activeCompilerOption.length ) activeCompilerOption =  GLOBAL.projectManager[activePrjName].compilerOption;
 
-					int odPos = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
+					auto odPos = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
 					if( odPos > -1 )
 					{
-						int odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, " ", odPos + 3 );
+						auto odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, " ", odPos + 3 );
 						if( odTail == -1 ) odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "\t", odPos + 3 );
 						if( odTail > odPos + 3 )
 						{
@@ -2004,7 +2004,7 @@ extern(C)
 	int customtool_menu_click_cb( Ihandle* ih )
 	{
 		string title = fSTRz( IupGetAttribute( ih, "TITLE" ) );
-		int dotPos = indexOf( title, ". " );
+		auto dotPos = indexOf( title, ". " );
 		if( dotPos > -1 && dotPos < title.length ) title = title[dotPos+2..$].dup;
 
 		for( int i = 0; i < GLOBAL.customTools.length - 1; ++ i )
@@ -2028,7 +2028,7 @@ extern(C)
 	int manual_menu_click_cb( Ihandle* ih )
 	{
 		string title = fSTRz( IupGetAttribute( ih, "TITLE" ) );
-		int dotPos = indexOf( title, ". " );
+		auto dotPos = indexOf( title, ". " );
 		if( dotPos > -1 && dotPos < title.length - 2 ) title = title[dotPos+2..$].dup;
 
 		for( int i = 0; i < GLOBAL.manuals.length; ++ i )

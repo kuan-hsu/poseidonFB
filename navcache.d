@@ -44,7 +44,7 @@ public:
 				cache[] = nullElement;
 				cache[0..temp.length] = temp;
 				
-				index = temp.length;
+				index = cast(int) temp.length;
 			}
 			else
 			{
@@ -102,7 +102,7 @@ public:
 			cache[] = nullElement;
 			cache[0..temp.length] = temp;
 			
-			index = temp.length;
+			index = cast(int) temp.length;
 		}
 		else
 		{

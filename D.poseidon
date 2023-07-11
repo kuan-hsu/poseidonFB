@@ -6,7 +6,7 @@ PassOneFile=
 TargetName=poseidonFB.exe
 FocusOn=
 CompilerArgs=
-CompilerOption=-odobjs -version=FBIDE -version=GUI -mscrtlib=msvcrt100
+CompilerOption=-odobjs -version=FBIDE -version=GUI -mscrtlib=msvcrt100 poseidonFB.res
 Comment=
 CompilerPath=K:/CodingPark/dmd2/windows/bin/dmd.exe
 [IncludeDirs]
@@ -61,7 +61,6 @@ name=scintilla.d
 name=tools.d
 [Includes]
 [Others]
-name=poseidonFB.res
 [Misc]
 [Focus]
 title=LDC32
@@ -70,14 +69,9 @@ option=-odobjs -d-version=FBIDE -d-version=GUI --mscrtlib=msvcrt100
 compiler=K:/CodingPark/ldc2-1.32.1-windows-multilib/bin/ldc2.exe
 incdir=K:/CodingPark/dmd2/import
 libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14
-title=console
-target=poseidonFB2
-option=-odobjs -version=FBIDE -version=DARKTHEME
-compiler=K:/CodingPark/dmd21040/windows/bin/dmd.exe
-incdir=K:/CodingPark/dmd21040/import
-libdir=K:/CodingPark/GameKYO/lib/iup/iup5924/dll10
-title=debugprint
-target=
-option=-odobjs -version=FBIDE -version=DARKTHEME -debug
-compiler=
-libdir=K:/CodingPark/GameKYO/lib/iup/iup5924DLL10_32bit
+title=x64
+target=poseidonFB.exe
+option=-odobjs -version=FBIDE -version=GUI -mscrtlib=msvcrt100 poseidonFB64.res
+compiler=K:/CodingPark/dmd2/windows/bin64/dmd.exe
+incdir=K:/CodingPark/dmd2/import
+libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll10_64

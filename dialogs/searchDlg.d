@@ -202,18 +202,21 @@ class CSearchExpander
 	
 	void changeColor()
 	{
-		/*
-		
-		*/
-		if( GLOBAL.bDarkMode &&  GLOBAL.editorSetting00.UseDarkMode == "ON" )
+		version(Windows)
 		{
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "DarkMode_CFD", null );
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "DarkMode_CFD", null );
-		}
-		else
-		{
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "CFD", null );
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "CFD", null );
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "DarkMode_CFD", null );
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "DarkMode_CFD", null );
+				}
+				else
+				{
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "CFD", null );
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "CFD", null );
+				}
+			}
 		}
 
 		IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
@@ -309,7 +312,7 @@ extern(C)
 								string beginEndPos = fSTRz( IupGetAttribute( iupSci, "SELECTIONPOS" ) );
 								if( beginEndPos.length )
 								{
-									int colonPos = indexOf( beginEndPos, ":" );
+									auto colonPos = indexOf( beginEndPos, ":" );
 									if( colonPos > -1 )
 									{
 										string newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
@@ -387,7 +390,7 @@ extern(C)
 					actionManager.SearchAction.addListItem( listFind_handle, findText.toDString, 15 );
 					if( flag == 2 && ReplaceText.toDString.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText.toDString, 15 );
 					
-					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
+					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
 					while( findPos > -1 )
 					{
 						switch( flag )
@@ -408,9 +411,9 @@ extern(C)
 						counts ++;
 						
 						if( !bScopeSelection ) IupSetInt( iupSci, "TARGETEND", -1 ); else IupSetAttribute( iupSci, "TARGETFROMSELECTION", "YES" );
-						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + findText.toDString.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + ReplaceText.toDString.length );
+						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + cast(int) findText.toDString.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + cast(int) ReplaceText.toDString.length );
 						
-						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
+						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
 					}
 				}
 			}
@@ -450,7 +453,7 @@ extern(C)
 		{
 			if( beginEndPos.length )
 			{
-				int colonPos = indexOf( beginEndPos, ":" );
+				auto colonPos = indexOf( beginEndPos, ":" );
 				if( colonPos > -1 )
 				{
 					string newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];
@@ -611,7 +614,7 @@ extern(C)
 							string	beginEndPos = fSTRz( IupGetAttribute( cSci.getIupScintilla, "SELECTIONPOS" ) );
 							if( beginEndPos.length )
 							{
-								int colonPos = indexOf( beginEndPos, ":" );
+								auto colonPos = indexOf( beginEndPos, ":" );
 								if( colonPos > -1 )
 								{
 									string newBeginEndPos = beginEndPos[colonPos+1..$] ~ ":" ~ beginEndPos[0..colonPos];

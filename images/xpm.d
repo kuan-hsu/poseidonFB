@@ -59,7 +59,7 @@ private:
 		{
 			int 		quoteLineCount;
 			int			width, height, num_colors, chars_per_pixel;
-			int			rPos;
+			ptrdiff_t	rPos;
 			bool 		bFormat, bPixel, bColor;
 			
 			string		pixel;
@@ -67,7 +67,7 @@ private:
 			int			_bom, _withbom;
 			
 			auto doc = FileAction.loadFile( filePath, _bom, _withbom );
-			foreach( int count, line; std.string.splitLines( doc ) )
+			foreach( size_t count, line; std.string.splitLines( doc ) )
 			{
 				if( count == 0 )
 				{
@@ -250,7 +250,8 @@ private:
 	{
 		try
 		{
-			int 		colorSN, rPos;
+			int 		colorSN;
+			ptrdiff_t	rPos;
 			bool 		bPixel, bColor;
 			int			quoteLineCount, width, height, num_colors, chars_per_pixel;
 			string		prevLine, pixel;
@@ -258,7 +259,7 @@ private:
 			
 			
 			auto doc = cast(string) std.file.read( filePath );
-			foreach( int count, line; std.string.splitLines( doc ) )
+			foreach( size_t count, line; std.string.splitLines( doc ) )
 			{
 				if( count == 0 )
 				{
@@ -370,14 +371,15 @@ private:
 	{
 		try
 		{
-			int 		colorSN, rPos;
+			int 		colorSN;
+			ptrdiff_t	rPos;
 			bool 		bPixel, bColor;
 			int			quoteLineCount, width, height, num_colors, chars_per_pixel;
 			string		prevLine, pixel;
 			ColorUnit[]	color;
 
 			auto doc = cast(string) std.file.read( filePath );
-			foreach( int count, line; std.string.splitLines( doc ) )
+			foreach( size_t count, line; std.string.splitLines( doc ) )
 			{
 				if( count == 0 )
 					if( line != "/* XPM */" ) return;

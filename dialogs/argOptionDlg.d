@@ -50,7 +50,7 @@ class CArgOptionDialog : CBaseDialog
 		for( int i = 0; i < GLOBAL.compilerSettings.customCompilerOptions.length; ++ i )
 		{
 			CArgOptionDialog.tempCustomCompilerOptions ~= GLOBAL.compilerSettings.customCompilerOptions[i];
-			int pos = lastIndexOf( GLOBAL.compilerSettings.customCompilerOptions[i], "%::% " );
+			auto pos = lastIndexOf( GLOBAL.compilerSettings.customCompilerOptions[i], "%::% " );
 			if( pos > 0 )
 			{
 				string Name = GLOBAL.compilerSettings.customCompilerOptions[i][pos+5..$];
@@ -229,7 +229,7 @@ class CArgOptionDialog : CBaseDialog
 			{
 				foreach( string s; GLOBAL.compilerSettings.customCompilerOptions )
 				{
-					int pos = lastIndexOf( s, "%::% " );
+					auto pos = lastIndexOf( s, "%::% " );
 					if( pos > 0 )
 					{
 						if( s[pos+5..$] == name ) return;
@@ -330,8 +330,8 @@ extern(C) // Callback for CFindInFilesDialog
 		if( index < CArgOptionDialog.tempCustomCompilerOptions.length )
 		{
 			string s = CArgOptionDialog.tempCustomCompilerOptions[index];
-			int bpos = lastIndexOf( s, "%::% " );
-			int fpos = indexOf( s, "%::% " );
+			auto bpos = lastIndexOf( s, "%::% " );
+			auto fpos = indexOf( s, "%::% " );
 			
 			if( bpos > 0 )
 			{
@@ -534,7 +534,7 @@ extern(C) // Callback for CFindInFilesDialog
 			IupSetStrAttributeId( ih, "", item, toStringz( newFileName ) );
 			IupSetInt( ih, "VALUE", item ); // Set Focus
 			
-			int bpos = lastIndexOf( CArgOptionDialog.tempCustomCompilerOptions[item-1], "%::% " );
+			auto bpos = lastIndexOf( CArgOptionDialog.tempCustomCompilerOptions[item-1], "%::% " );
 			if( bpos > 0 ) CArgOptionDialog.tempCustomCompilerOptions[item-1] = CArgOptionDialog.tempCustomCompilerOptions[item-1][0..bpos] ~ "%::% " ~ newFileName;
 		}		
 		

@@ -102,14 +102,12 @@ public:
 		{
 			// CHM viewer
 			alias static	HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
-			
+
 			// DarkMode
-			static		BOOL function( HWND, BOOL ) AllowDarkModeForWindow = null;
 			static		BOOL function() InitDarkMode = null;
 			static		HRESULT function( HWND, LPCWSTR, LPCWSTR ) SetWindowTheme = null;
 		}
 	}
-	extern(C) static			void function( bool, bool ) SetDarkMode = null;
 	
 	static shared CASTnode[string]			parserManager;
 	static __gshared IupString[string]		languageItems;
@@ -117,7 +115,7 @@ public:
 	static shared string[6]					KEYWORDS;
 	
 	
-	static bool					bDarkMode = false;
+	static bool					bCanUseDarkMode = false;
 	
 	static CPLUGIN[string]		pluginMnager;
 	
@@ -162,9 +160,9 @@ public:
 	
 	
 	// Setting
-	version(Windows)
+	static string[string]		EnvironmentVars;
+	version(Windows) 
 	{
-		static string[string]	EnvironmentVars;
 		static _htmlHelp		htmlHelp;
 	}
 	static string				poseidonPath;			// Include Tail /

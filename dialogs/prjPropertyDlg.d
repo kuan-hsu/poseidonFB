@@ -405,7 +405,7 @@ class CProjectPropertiesDialog : CBaseDialog
 			
 			int _item;
 			if( tempProject.focusUnit.length > 0 ) IupSetAttributeId( listFocus, "", ++_item, "" );
-			foreach( int i, string key; tempProject.focusUnit.keys )
+			foreach( size_t i, string key; tempProject.focusUnit.keys )
 				IupSetStrAttributeId( listFocus, "", ++_item, toStringz( key ) );
 				
 			if( tempProject.focusOn.length ) IupSetStrAttribute( listFocus, "VALUE", toStringz( tempProject.focusOn ) );
@@ -452,7 +452,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		}
 		
 		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.projectDlg ) );
-		IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) &CProjectPropertiesDialog_SHOW_CB );
+		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) &CProjectPropertiesDialog_SHOW_CB );
 		
 		
 		IupMap( _dlg );
@@ -807,7 +807,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		return IUP_DEFAULT;
 	}
 	
-	int CProjectPropertiesDialog_SHOW_CB( Ihandle *ih ) 
+	version(Windows) int CProjectPropertiesDialog_SHOW_CB( Ihandle *ih ) 
 	{
 		//IupSetStrAttribute( ih, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
 		//IupSetStrAttribute( ih, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
@@ -816,16 +816,19 @@ extern(C) // Callback for CProjectPropertiesDialog
 		Ihandle* _focusHandle = IupGetDialogChild( ih, "PRJPROPERTY_FocusList" );
 		if( _typeHandle != null && _focusHandle != null )
 		{
-			if( GLOBAL.bDarkMode && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+			if( GLOBAL.bCanUseDarkMode )
 			{
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "DarkMode_CFD", null );
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "DarkMode_CFD", null );
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "DarkMode_CFD", null );
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "DarkMode_CFD", null );
+				}
+				else
+				{
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "CFD", null );
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "CFD", null );
+				}
 			}
-			else
-			{
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "CFD", null );
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "CFD", null );
-			}	
 		}
 		
 		return IUP_DEFAULT;

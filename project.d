@@ -43,7 +43,7 @@ public:
 	{
 		string _replaceDir( string _fullPath, string _dir )
 		{
-			int pos = indexOf( tools.fullPathByOS( _fullPath ), tools.fullPathByOS( _dir ) );
+			auto pos = indexOf( tools.fullPathByOS( _fullPath ), tools.fullPathByOS( _dir ) );
 			if( pos == 0 ) return _fullPath[_dir.length..$].dup;
 
 			return _fullPath;

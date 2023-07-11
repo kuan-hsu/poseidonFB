@@ -84,7 +84,7 @@ private:
 				else
 				{
 					auto ret = which.output;
-					if( ret.length > 0 ) return false;
+					if( ret.length > 0 ) return true;
 				}
 			}
 			catch( Exception e ){}
@@ -98,7 +98,7 @@ private:
 		{
 			if( !isAppExists( GLOBAL.linuxTermName ) )
 			{
-				if( GLOBAL.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+				if( GLOBAL.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
 				GLOBAL.messagePanel.printOutputPanel( "Terminal path isn't existed!\nPlease set in 'Preference Dialog'.", true );
 				IupMessageError( null, "Terminal Path isn't Existed!" );
 				return false;
@@ -113,7 +113,7 @@ private:
 
 			try
 			{
-				auto which = executeShell( "which " ~ path );
+				auto which = executeShell( "which " ~ appName );
 				if( which.status != 0 ) 
 					return null;
 				else
@@ -207,7 +207,7 @@ private:
 				}
 				else
 				{
-					consoleArgs = to!(string)( buildTools.consoleWindow.id ) ~ " -1 -1 " ~ w ~ " " ~ h ~ " 0 " ~ command ~ " " ~ args;
+					consoleArgs = Conv.to!(string)( buildTools.consoleWindow.id ) ~ " -1 -1 " ~ w ~ " " ~ h ~ " 0 " ~ command ~ " " ~ args;
 				}
 				
 				args = consoleArgs;
@@ -224,7 +224,7 @@ private:
 				// --geometry
 				// -t poseidonFB_terminal
 				string geoString;
-				if( GLOBAL.bIDlessMonitors )
+				if( buildTools.consoleWindow.id < buildTools.monitors.length )
 				{
 					geoString = " --geometry=" ~ w ~ "x" ~ h ~ "+" ~ x ~ "+" ~ y;
 				}
@@ -241,7 +241,7 @@ private:
 							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
 							break;
 						default:
-							pid = spawnShell( linuxTermName, " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
+							pid = spawnShell( buildTools.linuxTermName ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
 					}
 				}
 				else
@@ -266,7 +266,7 @@ private:
 					}
 					else
 					{
-						string objFullPath = Path.stripExtension( oriCommand ) ~ ".o";
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".o";
 						if( exists( objFullPath ) ) std.file.remove( objFullPath );
 						objFullPath = Path.stripExtension( oriCommand );
 						if( exists( objFullPath ) ) std.file.remove( objFullPath );
@@ -416,7 +416,7 @@ private:
 				
 				version(FBIDE)
 				{
-					int lineNumberTail = indexOf( s, ") error" );
+					auto lineNumberTail = indexOf( s, ") error" );
 					if( lineNumberTail == -1 )
 					{
 						lineNumberTail = indexOf( s, ") warning" );
@@ -426,12 +426,12 @@ private:
 				else //version(DIDE)
 				{
 					if( indexOf( s, "warning - " ) == 0 ) bWarning = true;
-					int lineNumberTail = indexOf( s, "): " );
+					auto lineNumberTail = indexOf( s, "): " );
 				}
 
 				if( lineNumberTail > -1 )
 				{
-					int lineNumberHead = indexOf( s, "(" );
+					auto lineNumberHead = indexOf( s, "(" );
 					if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > -1 )
 					{
 						string filePath = tools.normalizeSlash( s[0..lineNumberHead++] );
@@ -481,7 +481,7 @@ private:
 		
 		string theMessage = DaNodeProcess.output( 0 ).dup;
 		int		_state = DaNodeProcess.getMessageState();
-		bool	bWarning;
+		bool	bError, bWarning;
 		version(FBIDE)
 		{
 			foreach( line; splitLines( theMessage ) )
@@ -489,7 +489,11 @@ private:
 				line = strip( line );
 				if( !bWarning )
 				{
-					if( indexOf( line, "warning:" ) > -1 ) bWarning = true;
+					if( indexOf( line, "warning " ) > -1 ) bWarning = true;
+				}
+				if( !bError )
+				{
+					if( indexOf( line, "error " ) > -1 ) bError = true;
 				}
 				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 			}
@@ -583,7 +587,7 @@ private:
 
 		version(FBIDE)
 		{
-			if( _state == 1 ) showAnnotation( theMessage, buildTools ); else showAnnotation( null, buildTools );
+			if( _state > 0 ) showAnnotation( theMessage, buildTools ); else showAnnotation( null, buildTools );
 		}
 		else //version(DIDE)
 		{
@@ -597,56 +601,33 @@ private:
 
 		if( !bBuildSuccess )
 		{
-			if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Error!!" );
+			if( !bWarning || _state > 1 || bError )
+			{
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\nCompile Error!!" );
 
-			if( buildTools.compilerSettings.useResultDlg == "ON" )
-			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-			}
-			else
-			{
-				version(Windows) 
-				{
-					if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-				}
-				else
-				{
-					if( buildTools.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-				}
-			}
-		}
-		else
-		{
-			if( !bWarning )
-			{
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!!" );
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
 					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
+					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
+					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
+					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
 					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
 				}
 				else
 				{
-					version(Windows)
+					version(Windows) 
 					{
-						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
 					}
 					else
 					{
-						if( buildTools.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-					}							
+						if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
+					}
 				}
 			}
 			else
 			{
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success! But got warning..." );
+				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\nCompile Success! But got warning..." );
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
 					Ihandle* messageDlg = IupMessageDlg();
@@ -663,9 +644,32 @@ private:
 					}
 					else
 					{
-						if( buildTools.compilerSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
+						if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
 					}							
 				}
+			}
+		}
+		else
+		{
+			if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!!" );
+			if( buildTools.compilerSettings.useResultDlg == "ON" )
+			{
+				Ihandle* messageDlg = IupMessageDlg();
+				IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
+				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
+				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
+				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+			}
+			else
+			{
+				version(Windows)
+				{
+					if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+				}
+				else
+				{
+					if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
+				}							
 			}
 		}
 
@@ -805,11 +809,11 @@ private:
 							}
 							else
 							{
-								int optionPos = indexOf( options, "-od=" );
+								auto optionPos = indexOf( options, "-od=" );
 								if( optionPos > -1 )
 								{
 									string _pathname;
-									for( int i = optionPos + 4; i < options.length; ++ i )
+									for( int i = cast(int) optionPos + 4; i < options.length; ++ i )
 									{
 										if( options[i] == '\t' || options[i] == ' ' ) break;
 										_pathname ~= options[i];
@@ -822,7 +826,7 @@ private:
 									if( optionPos > -1 )
 									{
 										string _pathname;
-										for( int i = optionPos + 3; i < options.length; ++ i )
+										for( int i = cast(int) optionPos + 3; i < options.length; ++ i )
 										{
 											if( options[i] == '\t' || options[i] == ' ' ) break;
 											_pathname ~= options[i];
@@ -863,11 +867,11 @@ private:
 							else
 							{
 								string objPath;
-								int optionPos = indexOf( options, "-od=" );
+								auto optionPos = indexOf( options, "-od=" );
 								if( optionPos > -1 )
 								{
 									string _pathname;
-									for( int i = optionPos + 4; i < options.length; ++ i )
+									for( int i = cast(int) optionPos + 4; i < options.length; ++ i )
 									{
 										if( options[i] == '\t' || options[i] == ' ' ) break;
 										_pathname ~= options[i];
@@ -880,7 +884,7 @@ private:
 									if( optionPos > -1 )
 									{
 										string _pathname;
-										for( int i = optionPos + 3; i < options.length; ++ i )
+										for( int i = cast(int) optionPos + 3; i < options.length; ++ i )
 										{
 											if( options[i] == '\t' || options[i] == ' ' ) break;
 											_pathname ~= options[i];
@@ -1007,7 +1011,7 @@ private:
 									wstring shortName;
 									shortName.length = ws.length + 1;
 
-									DWORD len = GetShortPathNameW( UTF.toUTF16z( ws ), cast(wchar*) shortName.ptr, ws.length + 1  );
+									DWORD len = GetShortPathNameW( UTF.toUTF16z( ws ), cast(wchar*) shortName.ptr, cast(int) ws.length + 1  );
 									if( len > 0 && len <= ws.length )
 									{
 										s = strip( UTF.toUTF8( shortName[0..len] ) );
@@ -1223,6 +1227,10 @@ public:
 			
 			auto _thread = new CompileThread( compiler, cSci.getFullPath, options, Path.dirName( cSci.getFullPath ), bRun, args );
 			_thread.start;
+			if( GLOBAL.compilerSettings.useThread != "ON" )
+				_thread.join;
+			else
+				version(Posix) _thread.join;
 		}
 		else
 		{
@@ -1274,6 +1282,10 @@ public:
 				{
 					auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
 					_thread.start;
+					if( GLOBAL.compilerSettings.useThread != "ON" )
+						_thread.join;
+					else
+						version(Posix) _thread.join;					
 				}
 				else
 				{
@@ -1310,6 +1322,10 @@ public:
 				// Start Thread
 				auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
 				_thread.start;
+				if( GLOBAL.compilerSettings.useThread != "ON" )
+					_thread.join;
+				else
+					version(Posix) _thread.join;				
 				
 				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 				return true;
@@ -1394,6 +1410,10 @@ public:
 			// Pass compiler, files, options to Thread
 			auto _thread = new CompileThread( compiler, fileName, options, Path.dirName( fileName ), true, args, true );
 			_thread.start;
+			if( GLOBAL.compilerSettings.useThread != "ON" )
+				_thread.join;
+			else
+				version(Posix) _thread.join;			
 			
 			return true;
 		}

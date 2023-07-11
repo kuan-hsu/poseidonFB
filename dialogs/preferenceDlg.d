@@ -22,6 +22,9 @@ class CPreferenceDialog : CBaseDialog
 private:
 	import Array = std.array;
 	
+	Ihandle* btnOpen, btnx64Open, btnOpenx64Debugger, btnOpenDebugger, colorDefaultRefresh, colorTemplateRemove, colorTemplateSave;
+	version(linux) Ihandle* btnOpenTerminal, btnOpenHtmlApp;
+	
 	void createLayout()
 	{
 		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
@@ -30,8 +33,8 @@ private:
 		IupSetAttributes( textCompilerPath, "SIZE=320x,NAME=Compiler-compilerPath,BORDER=NO" );
 		IupSetStrAttribute( textCompilerPath, "VALUE", toStringz( GLOBAL.compilerSettings.compilerFullPath ) );
 		
-		Ihandle* btnOpen = IupButton( null, null );
-		IupSetAttribute( btnOpen, "IMAGE", "icon_openfile" );
+		btnOpen = IupButton( null, null );
+		IupSetAttributes( btnOpen, "IMAGE=icon_openfile,FLAT=YES" );
 		IupSetCallback( btnOpen, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
 		
 		Ihandle* _hBox01 = IupHbox( textCompilerPath, btnOpen, null );
@@ -51,8 +54,8 @@ private:
 				IupSetAttributes( textx64CompilerPath, "SIZE=320x,NAME=Compiler-x64compilerPath,BORDER=NO" );
 				IupSetStrAttribute( textx64CompilerPath, "VALUE", toStringz( GLOBAL.compilerSettings.x64compilerFullPath ) );
 				
-				Ihandle* btnx64Open = IupButton( null, null );
-				IupSetAttribute( btnx64Open, "IMAGE", "icon_openfile" );
+				btnx64Open = IupButton( null, null );
+				IupSetAttributes( btnx64Open, "IMAGE=icon_openfile,FLAT=YES" );
 				IupSetCallback( btnx64Open, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
 				
 				Ihandle* _hBox01x64 = IupHbox( textx64CompilerPath, btnx64Open, null );
@@ -66,8 +69,8 @@ private:
 				IupSetAttributes( textx64DebuggerPath, "SIZE=320x,NAME=Compiler-x64DebuggerPath,BORDER=NO" );
 				IupSetStrAttribute( textx64DebuggerPath, "VALUE", toStringz( GLOBAL.compilerSettings.x64debuggerFullPath ) );
 				
-				Ihandle* btnOpenx64Debugger = IupButton( null, null );
-				IupSetAttributes( btnOpenx64Debugger, "IMAGE=icon_openfile,NAME=x64" );
+				btnOpenx64Debugger = IupButton( null, null );
+				IupSetAttributes( btnOpenx64Debugger, "IMAGE=icon_openfile,NAME=x64,FLAT=YES" );
 				IupSetCallback( btnOpenx64Debugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
 				
 				Ihandle* _hBox02x64 = IupHbox( textx64DebuggerPath, btnOpenx64Debugger, null );
@@ -84,8 +87,8 @@ private:
 			IupSetStrAttribute( textDebuggerPath, "VALUE", toStringz( GLOBAL.compilerSettings.debuggerFullPath ) );
 			IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
 			
-			Ihandle* btnOpenDebugger = IupButton( null, null );
-			IupSetAttributes( btnOpenDebugger, "IMAGE=icon_openfile,NAME=x86" );
+			btnOpenDebugger = IupButton( null, null );
+			IupSetAttributes( btnOpenDebugger, "IMAGE=icon_openfile,NAME=x86,FLAT=YES" );
 			IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
 			
 			Ihandle* _hBox02 = IupHbox( textDebuggerPath, btnOpenDebugger, null );
@@ -103,8 +106,8 @@ private:
 				IupSetAttributes( textx64CompilerPath, "SIZE=320x,NAME=Compiler-x64compilerPath,BORDER=NO" );
 				IupSetStrAttribute( textx64CompilerPath, "VALUE", toStringz( GLOBAL.compilerSettings.x64compilerFullPath ) );
 				
-				Ihandle* btnx64Open = IupButton( null, null );
-				IupSetAttribute( btnx64Open, "IMAGE", "icon_openfile" );
+				btnx64Open = IupButton( null, null );
+				IupSetAttributes( btnx64Open, "IMAGE=icon_openfile,FLAT=YES" );
 				IupSetCallback( btnx64Open, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
 				
 				Ihandle* _hBox01x64 = IupHbox( textx64CompilerPath, btnx64Open, null );
@@ -122,8 +125,8 @@ private:
 			IupSetAttributes( textTerminalPath, "SIZE=320x,NAME=Compiler-textTerminalPath" );
 			IupSetStrAttribute( textTerminalPath, "VALUE", toStringz( GLOBAL.linuxTermName ) );
 		
-			Ihandle* btnOpenTerminal = IupButton( null, null );
-			IupSetAttribute( btnOpenTerminal, "IMAGE", "icon_openfile" );
+			btnOpenTerminal = IupButton( null, null );
+			IupSetAttributes( btnOpenTerminal, "IMAGE=icon_openfile,FLAT=YES" );
 			IupSetCallback( btnOpenTerminal, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
 			
 			Ihandle* _hBox03 = IupHbox( textTerminalPath, btnOpenTerminal, null );
@@ -138,8 +141,8 @@ private:
 			IupSetAttributes( textHtmlAppPath, "SIZE=320x,NAME=Compiler-htmlappPath" );
 			IupSetStrAttribute( textHtmlAppPath, "VALUE", toStringz( GLOBAL.linuxHtmlAppName ) );
 		
-			Ihandle* btnOpenHtmlApp = IupButton( null, null );
-			IupSetAttribute( btnOpenHtmlApp, "IMAGE", "icon_openfile" );
+			btnOpenHtmlApp = IupButton( null, null );
+			IupSetAttributes( btnOpenHtmlApp, "IMAGE=icon_openfile,FLAT=YES" );
 			IupSetCallback( btnOpenHtmlApp, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
 			
 			Ihandle* _hBox04 = IupHbox( textHtmlAppPath, btnOpenHtmlApp, null );
@@ -220,8 +223,11 @@ private:
 		Ihandle* hBoxConsole = IupHbox( labelMonitorID, textMonitorID, labelConsoleX, textConsoleX, labelConsoleY, textConsoleY, labelConsoleW, textConsoleW, labelConsoleH, textConsoleH, null );
 		IupSetAttributes( hBoxConsole, "ALIGNMENT=ACENTER" );
 		
-
-		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, toggleCompileAtBackThread, hBoxConsole, null );
+		version(Windows )
+			Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, toggleCompileAtBackThread, hBoxConsole, null );
+		else
+			Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, hBoxConsole, null );
+			
 		version(FBIDE)	IupSetAttributes( vBoxCompiler, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		version(DIDE)	IupSetAttributes( vBoxCompiler, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
 
@@ -874,7 +880,7 @@ private:
 					string size, style = " ";
 					
 					strings[0] = strip( strings[0] );
-					int spacePos = lastIndexOf( strings[1], " " );
+					auto spacePos = lastIndexOf( strings[1], " " );
 					if( spacePos > -1 )
 					{
 						size = strings[1][spacePos+1..$].dup;
@@ -905,13 +911,13 @@ private:
 		IupSetCallback( colorTemplateList, "DROPDOWN_CB",cast(Icallback) &colorTemplateList_DROPDOWN_CB );
 		IupSetCallback( colorTemplateList, "ACTION",cast(Icallback) &colorTemplateList_ACTION_CB );
 
-		Ihandle* colorDefaultRefresh = IupButton( null, null );
-		IupSetAttributes( colorDefaultRefresh, "FLAT=NO,IMAGE=icon_refresh" );
+		colorDefaultRefresh = IupButton( null, null );
+		IupSetAttributes( colorDefaultRefresh, "FLAT=NO,IMAGE=icon_refresh,FLAT=YES" );
 		IupSetAttribute( colorDefaultRefresh, "TIP", GLOBAL.languageItems["default"].toCString() );
 		IupSetCallback( colorDefaultRefresh, "ACTION", cast(Icallback) &colorTemplateList_reset_ACTION );
 
-		Ihandle* colorTemplateRemove = IupButton( null, null );
-		IupSetAttributes( colorTemplateRemove, "FLAT=NO,IMAGE=icon_debug_clear" );
+		colorTemplateRemove = IupButton( null, null );
+		IupSetAttributes( colorTemplateRemove, "FLAT=NO,IMAGE=icon_debug_clear,FLAT=YES" );
 		IupSetAttribute( colorTemplateRemove, "TIP", GLOBAL.languageItems["remove"].toCString() );
 		IupSetCallback( colorTemplateRemove, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -955,8 +961,8 @@ private:
 			return IUP_DEFAULT;
 		});
 		
-		Ihandle* colorTemplateSave = IupButton( null, null );
-		IupSetAttributes( colorTemplateSave, "FLAT=NO,IMAGE=icon_save" );
+		colorTemplateSave = IupButton( null, null );
+		IupSetAttributes( colorTemplateSave, "FLAT=NO,IMAGE=icon_save,FLAT=YES" );
 		IupSetStrAttribute( colorTemplateSave, "TIP", GLOBAL.languageItems["save"].toCString );
 		IupSetCallback( colorTemplateSave, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -1691,51 +1697,46 @@ private:
 		IupSetAttribute( frameOPACITY, "TITLE", GLOBAL.languageItems["dialogopacity"].toCString );
 		
 		
+		// Bottom
+		Ihandle* toggleIcon = IupFlatToggle( GLOBAL.languageItems["no"].toCString );
+		IupSetAttributes( toggleIcon, "NAME=Color-toggleIcon" );
+
+		Ihandle* toggleIconInvert = IupFlatToggle( GLOBAL.languageItems["yes"].toCString );
+		IupSetAttributes( toggleIconInvert, "NAME=Color-toggleIconInvert" );
+		
+		Ihandle* toggleIconInvertAll = IupFlatToggle( GLOBAL.languageItems["all"].toCString );
+		IupSetAttributes( toggleIconInvertAll, "NAME=Color-toggleIconInvertAll" );
+
+		Ihandle* toggleDarkMode = IupFlatToggle( GLOBAL.languageItems["usedarkmode"].toCString );
+		IupSetStrAttribute( toggleDarkMode, "VALUE", toStringz(GLOBAL.editorSetting00.UseDarkMode) );
+		IupSetAttributes( toggleDarkMode, "NAME=Color-toggleDarkMode,ALIGNMENT=ALEFT:ACENTER" );
+
+		Ihandle* hBoxIcon = IupHbox( toggleIcon, toggleIconInvert, toggleIconInvertAll, null );
+		IupSetAttributes( hBoxIcon, "ALIGNMENT=ACENTER,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
+		Ihandle* radioIcon = IupRadio( hBoxIcon );
+
 		version(Windows)
-		{
-			// Bottom
-			Ihandle* toggleIcon = IupFlatToggle( GLOBAL.languageItems["no"].toCString );
-			IupSetAttributes( toggleIcon, "NAME=Color-toggleIcon" );
-
-			Ihandle* toggleIconInvert = IupFlatToggle( GLOBAL.languageItems["yes"].toCString );
-			IupSetAttributes( toggleIconInvert, "NAME=Color-toggleIconInvert" );
-			
-			Ihandle* toggleIconInvertAll = IupFlatToggle( GLOBAL.languageItems["all"].toCString );
-			IupSetAttributes( toggleIconInvertAll, "NAME=Color-toggleIconInvertAll" );
-
-			Ihandle* toggleDarkMode = IupFlatToggle( GLOBAL.languageItems["usedarkmode"].toCString );
-			IupSetStrAttribute( toggleDarkMode, "VALUE", toStringz(GLOBAL.editorSetting00.UseDarkMode) );
-			IupSetAttributes( toggleDarkMode, "NAME=Color-toggleDarkMode,ALIGNMENT=ALEFT:ACENTER" );
-
-
-			Ihandle* hBoxIcon = IupHbox( toggleIcon, toggleIconInvert, toggleIconInvertAll, null );
-			IupSetAttributes( hBoxIcon, "ALIGNMENT=ACENTER,HOMOGENEOUS=YES,EXPANDCHILDREN=YES" );
-			Ihandle* radioIcon = IupRadio( hBoxIcon );
-
 			Ihandle* hBoxIcon2 = IupHbox( radioIcon, toggleDarkMode, null );
-			IupSetAttributes( hBoxIcon2, "ALIGNMENT=ACENTER,HOMOGENEOUS=YES,NORMALIZESIZE=HORIZONTAL" );
-			
-			Ihandle* frameIcon = IupFrame( hBoxIcon2 );
-			IupSetAttributes( frameIcon, "SIZE=346x16" );
-			IupSetAttribute( frameIcon, "TITLE", GLOBAL.languageItems["iconinvert"].toCString );
-			
-			if( GLOBAL.editorSetting00.IconInvert == "OFF" )
-				IupSetAttribute( toggleIcon, "VALUE", "ON" );
-			else if( GLOBAL.editorSetting00.IconInvert == "ON" )
-				IupSetAttribute( toggleIconInvert, "VALUE", "ON" );
-			else
-				IupSetAttribute( toggleIconInvertAll, "VALUE", "ON" );
-			
-
-			// Combine
-			Ihandle* vColor = IupVbox( colorTemplateFrame, frameColor, frameColor_1, frameIcon, frameOPACITY, null );
-			IupSetAttributes( vColor, "ALIGNMENT=ACENTER,EXPANDCHILDREN=YES,HOMOGENEOUS=NO,GAP=0" );
-		}
 		else
-		{
-			Ihandle* vColor = IupVbox( colorTemplateFrame, frameColor, frameColor_1, frameOPACITY, null );
-			IupSetAttributes( vColor, "ALIGNMENT=ACENTER,EXPANDCHILDREN=YES,HOMOGENEOUS=NO,GAP=0" );
-		}
+			Ihandle* hBoxIcon2 = radioIcon;
+			
+		IupSetAttributes( hBoxIcon2, "ALIGNMENT=ACENTER,HOMOGENEOUS=YES,NORMALIZESIZE=HORIZONTAL" );
+		
+		Ihandle* frameIcon = IupFrame( hBoxIcon2 );
+		IupSetAttributes( frameIcon, "SIZE=346x16" );
+		IupSetAttribute( frameIcon, "TITLE", GLOBAL.languageItems["iconinvert"].toCString );
+		
+		if( GLOBAL.editorSetting00.IconInvert == "OFF" )
+			IupSetAttribute( toggleIcon, "VALUE", "ON" );
+		else if( GLOBAL.editorSetting00.IconInvert == "ON" )
+			IupSetAttribute( toggleIconInvert, "VALUE", "ON" );
+		else
+			IupSetAttribute( toggleIconInvertAll, "VALUE", "ON" );
+		
+
+		// Combine
+		Ihandle* vColor = IupVbox( colorTemplateFrame, frameColor, frameColor_1, frameIcon, frameOPACITY, null );
+		IupSetAttributes( vColor, "ALIGNMENT=ACENTER,EXPANDCHILDREN=YES,HOMOGENEOUS=NO,GAP=0" );
 
 
 		// Short Cut
@@ -1983,24 +1984,27 @@ private:
 		
 		IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih )
 		{
-			GLOBAL.preferenceDlg.changeColor();
-			/*
-			Ihandle* _findtHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "Color-CFindInFilesDialog-list_Find" );
-			Ihandle* _replaceHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "Color-CFindInFilesDialog-list_Replace" );
-			*/
-			if( GLOBAL.bDarkMode &&  GLOBAL.editorSetting00.UseDarkMode == "ON" )
+			version(Windows)
 			{
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textSelAlpha" ), "WID" ), "DarkMode_ItemsView", null );
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textIndicatorAlpha" ), "WID" ), "DarkMode_Explorer", null );
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textMessageIndicatorAlpha" ), "WID" ), "DarkMode_CFD", null );
-		
+				GLOBAL.preferenceDlg.changeColor();
+				GLOBAL.preferenceDlg.changeIcon();
+				/+
+				if( GLOBAL.bCanUseDarkMode )
+				{
+					if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+					{
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textSelAlpha" ), "WID" ), "DarkMode_ItemsView", null );
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textIndicatorAlpha" ), "WID" ), "DarkMode_Explorer", null );
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textMessageIndicatorAlpha" ), "WID" ), "DarkMode_CFD", null );
+					}
+					else
+					{
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
+					}
+				}
+				+/
 			}
-			else
-			{
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
-			}	
-			
 			return IUP_DEFAULT;
 		});	
 		
@@ -2009,12 +2013,36 @@ private:
 
 	~this()
 	{
+		//IupDestroy( getIhandle );
 	}
 	
 	override string show( int x, int y )
 	{
 		IupShowXY( _dlg, x, y );
 		return "OK";
+	}
+	
+	void changeIcon()
+	{
+		string tail;
+		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
+		
+		IupSetStrAttribute( btnOpen, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
+		IupSetStrAttribute( btnx64Open, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
+		version(FBIDE)
+		{
+			IupSetStrAttribute( btnOpenx64Debugger, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
+			IupSetStrAttribute( btnOpenDebugger, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
+		}
+		version(linux)
+		{
+			IupSetStrAttribute( btnOpenTerminal, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
+			IupSetStrAttribute( btnOpenHtmlApp, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
+		}
+		
+		IupSetStrAttribute( colorDefaultRefresh, "IMAGE", toStringz( "icon_refresh" ~ tail ) );
+		IupSetStrAttribute( colorTemplateRemove, "IMAGE", toStringz( "icon_debug_clear" ~ tail ) );
+		IupSetStrAttribute( colorTemplateSave, "IMAGE", toStringz( "icon_save" ~ tail ) );
 	}
 	
 	void changeColor()
@@ -2026,17 +2054,16 @@ private:
 		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
 	
-		if( GLOBAL.bDarkMode &&  GLOBAL.editorSetting00.UseDarkMode == "ON" )
-		{
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
-		}
-		else
-		{
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
-		}	
-	
 		version(Windows)
 		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
+				else
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
+			}
+
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "keyword-tabs" ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "preference-tabs" ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
 		}
@@ -2189,10 +2216,12 @@ extern(C) // Callback for CPreferenceDialog
 	private int CPreferenceDialog_btnCancel_cb( Ihandle* ih )
 	{
 		IupHide( GLOBAL.preferenceDlg.getIhandle );
+		/+
 		if( GLOBAL.preferenceDlg.getIhandle != null ) IupDestroy( GLOBAL.preferenceDlg.getIhandle );
 		destroy( GLOBAL.preferenceDlg );
 		GC.free( cast(void*) GLOBAL.preferenceDlg );
 		GLOBAL.preferenceDlg = null;
+		+/
 		return IUP_DEFAULT;
 	}
 
@@ -2201,10 +2230,12 @@ extern(C) // Callback for CPreferenceDialog
 	{
 		CPreferenceDialog_btnApply_cb( ih );
 		IupHide( GLOBAL.preferenceDlg.getIhandle );
+		/+
 		if( GLOBAL.preferenceDlg.getIhandle != null ) IupDestroy( GLOBAL.preferenceDlg.getIhandle );
 		destroy(  GLOBAL.preferenceDlg );
 		GC.free( cast(void*) GLOBAL.preferenceDlg );
 		GLOBAL.preferenceDlg = null;
+		+/
 		return IUP_DEFAULT;
 	}
 
@@ -2420,12 +2451,15 @@ extern(C) // Callback for CPreferenceDialog
 			}		
 			
 			// Add for color
-			IupSetStrGlobal( "DLGFGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-			IupSetStrGlobal( "DLGBGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-			IupSetStrGlobal( "TXTFGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrGlobal( "TXTBGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );				
-			IupSetStrAttribute( GLOBAL.mainDlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-			IupSetStrAttribute( GLOBAL.mainDlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			version(Windows)
+			{
+				IupSetStrGlobal( "DLGFGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+				IupSetStrGlobal( "DLGBGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+				IupSetStrGlobal( "TXTFGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+				IupSetStrGlobal( "TXTBGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+				IupSetStrAttribute( GLOBAL.mainDlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+				IupSetStrAttribute( GLOBAL.mainDlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			}
 
 			IupSetStrAttribute( GLOBAL.documentTabs, "FGCOLOR", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Fore ) );
 			IupSetStrAttribute( GLOBAL.documentTabs, "BGCOLOR", toStringz( GLOBAL.editColor.SCE_B_IDENTIFIER_Back ) );
@@ -2481,9 +2515,9 @@ extern(C) // Callback for CPreferenceDialog
 			}
 			else
 			{
-				GLOBAL.x64compilerFullPath	= GLOBAL.compilerFullPath;
-				GLOBAL.debuggerFullPath		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-debuggerPath" ), "VALUE" ) ).dup;
-				GLOBAL.x64debuggerFullPath	= GLOBAL.debuggerFullPath;
+				GLOBAL.compilerSettings.x64compilerFullPath	= GLOBAL.compilerSettings.compilerFullPath;
+				GLOBAL.compilerSettings.debuggerFullPath		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-debuggerPath" ), "VALUE" ) ).dup;
+				GLOBAL.compilerSettings.x64debuggerFullPath	= GLOBAL.compilerSettings.debuggerFullPath;
 				
 				GLOBAL.linuxTermName		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-textTerminalPath" ), "VALUE" ) ).dup;
 				GLOBAL.linuxHtmlAppName		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Compiler-htmlappPath" ), "VALUE" ) ).dup;
@@ -2706,7 +2740,11 @@ extern(C) // Callback for CPreferenceDialog
 			IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 			
 			if( GLOBAL.serachInFilesDlg !is null ) GLOBAL.serachInFilesDlg.changeColor();
-			if( GLOBAL.preferenceDlg !is null ) GLOBAL.preferenceDlg.changeColor();
+			if( GLOBAL.preferenceDlg !is null )
+			{
+				GLOBAL.preferenceDlg.changeColor();
+				GLOBAL.preferenceDlg.changeIcon();
+			}
 			
 			// Save Setup to Xml
 			//IDECONFIG.save();
@@ -3077,7 +3115,7 @@ extern(C) // Callback for CPreferenceDialog
 							strings[0] = strip( strings[0] ).dup;
 						}
 						
-						int spacePos = lastIndexOf( strings[1], " " );
+						auto spacePos = lastIndexOf( strings[1], " " );
 						if( spacePos > -1 )
 						{
 							size = strings[1][spacePos+1..$].dup;
@@ -3091,7 +3129,7 @@ extern(C) // Callback for CPreferenceDialog
 					{
 						version(linux)
 						{
-							int spaceTailPos = lastIndexOf( fontInformation, " " );
+							auto spaceTailPos = lastIndexOf( fontInformation, " " );
 							if( spaceTailPos > 0 )
 							{
 								size = fontInformation[spaceTailPos+1..$].dup;

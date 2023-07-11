@@ -316,22 +316,22 @@ public:
 		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		foreach( int LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+		foreach( size_t LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
-				int openPos = indexOf( lineText, "(" );
+				auto openPos = indexOf( lineText, "(" );
 				if( openPos > 0 )
 				{
-					int closePos = indexOf( lineText, ")", openPos );
+					auto closePos = indexOf( lineText, ")", openPos );
 					if( closePos > openPos + 1 )
 					{
-						int colonPos = indexOf( lineText, ": ", closePos );
+						auto colonPos = indexOf( lineText, ": ", closePos );
 						if( colonPos > closePos )
 						{
-							int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-							IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
-							IupScintillaSendMessage( outputPanel, 2504, lineHeadPos + colonPos + 2, lineText.length - colonPos - 2 ); // SCI_INDICATORFILLRANGE =  2504
+							int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, cast(int) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+							IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, cast(int) colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( outputPanel, 2504, cast(int) (lineHeadPos + colonPos + 2), cast(int) (lineText.length - colonPos - 2) ); // SCI_INDICATORFILLRANGE =  2504
 						}
 					}
 				}
@@ -344,14 +344,14 @@ public:
 		IupScintillaSendMessage( outputPanel, 2505, 0, IupGetInt( outputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		IupScintillaSendMessage( outputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		foreach( int LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
+		foreach( size_t LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( outputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
-				int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+				int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, cast(int) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
 				string triml_lineText = strip( lineText );
 				lineHeadPos += ( lineText.length - triml_lineText.length );
-				IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
+				IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, cast(int) triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
 			}
 		}
 	}
@@ -361,19 +361,22 @@ public:
 		IupScintillaSendMessage( searchOutputPanel, 2505, 0, IupGetInt( searchOutputPanel, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
 		IupScintillaSendMessage( searchOutputPanel, 2500, 4, 0 ); // SCI_SETINDICATORCURRENT = 2500
 		
-		foreach( int LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
+		foreach( size_t LineNum, string lineText; splitLines( fSTRz( IupGetAttribute( searchOutputPanel, "VALUE" ) ) ) )
 		{
 			if( lineText.length )
 			{
-				int openPos = indexOf( lineText, "(" );
+				auto openPos = indexOf( lineText, "(" );
 				if( openPos > 0 )
 				{
-					int closePos = indexOf( lineText, "): ", openPos );
+					auto closePos = indexOf( lineText, "): ", openPos );
 					if( closePos > openPos + 1 )
 					{
-						int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-						IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
-						IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos + closePos + 3, lineText.length - closePos - 3 ); // SCI_INDICATORFILLRANGE =  2504
+						int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, cast(int) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+						if( lineHeadPos > -1 )
+						{
+							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, cast(int) closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( searchOutputPanel, 2504, cast(int) (lineHeadPos + closePos + 3), cast(int) (lineText.length - closePos - 3) ); // SCI_INDICATORFILLRANGE =  2504
+						}
 					}
 				}
 			}
@@ -491,10 +494,10 @@ extern(C)
 
 					version(FBIDE)
 					{
-						int openPos = indexOf( lineText, "(" );
+						auto openPos = indexOf( lineText, "(" );
 						if( openPos > 0 )
 						{
-							int closePos = indexOf( lineText, ")", openPos );
+							auto closePos = indexOf( lineText, ")", openPos );
 							if( closePos > openPos + 1 )
 							{
 								if( closePos < lineText.length - 1 )
@@ -531,7 +534,7 @@ extern(C)
 														if( s.length )
 														{
 															bool bWarning;
-															int lineNumberTail = indexOf( s, ") error" );
+															auto lineNumberTail = indexOf( s, ") error" );
 															if( lineNumberTail == -1 )
 															{
 																lineNumberTail = indexOf( s, ") warning" );
@@ -540,7 +543,7 @@ extern(C)
 
 															if( lineNumberTail > 0 )
 															{
-																int lineNumberHead = indexOf( s, "(" );
+																auto lineNumberHead = indexOf( s, "(" );
 																if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > -1 )
 																{
 																	string filePath = tools.normalizeSlash( s[0..lineNumberHead++] );
@@ -608,10 +611,10 @@ extern(C)
 					}
 					version(DIDE)
 					{
-						int closePos = indexOf( lineText, "): " );
+						auto closePos = indexOf( lineText, "): " );
 						if( closePos > 0 )
 						{
-							int openPos = lastIndexOf( lineText, "(", closePos );
+							auto openPos = lastIndexOf( lineText, "(", closePos );
 							if( openPos < closePos && closePos > 0 )
 							{
 								string lineNumber_char = lineText[openPos+1..closePos];
@@ -639,10 +642,10 @@ extern(C)
 													bool bWarning;
 
 													if( indexOf( s, "warning - " ) == 0 ) bWarning = true;
-													int lineNumberTail = indexOf( s, "): " );
+													auto lineNumberTail = indexOf( s, "): " );
 													if( lineNumberTail > 0 )
 													{
-														int lineNumberHead = lastIndexOf( s, "(", lineNumberTail );
+														auto lineNumberHead = lastIndexOf( s, "(", lineNumberTail );
 														if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > 0 )
 														{
 															string filePath = bWarning ? Array.replace( s[10..lineNumberHead++], "\\", "/" ) : Array.replace( s[0..lineNumberHead++], '\\', '/' );
@@ -737,11 +740,11 @@ extern(C)
 						string	fileName;
 						string	lineText = fSTRz( IupGetAttribute( ih, "LINEVALUE" ) );
 						
-						int closePos = indexOf( lineText, "):" );
+						auto closePos = indexOf( lineText, "):" );
 						if( closePos > 0 )
 						{
 							lineText = lineText[0..closePos].dup;
-							int openPos = lastIndexOf( lineText, "(" );
+							auto openPos = lastIndexOf( lineText, "(" );
 							if( openPos > 0 )
 							{
 								string lineNumber_char = lineText[openPos+1..$];

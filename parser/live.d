@@ -214,7 +214,7 @@ struct LiveParser
 				}
 				
 				int	lineHeadPostion = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2167, currentLineNum - 1, 0 );
-				int currentLineTextLength = strip( currentLineText).length;
+				int currentLineTextLength = cast(int) strip( currentLineText).length;
 			
 				CASTnode 	oldHead = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), currentLineNum );
 				if( oldHead is null ) return;
@@ -392,7 +392,7 @@ struct LiveParser
 					{
 						char* blockText = cast(char*)calloc( 1, posTail-posHead );
 						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
-						newHead = GLOBAL.outlineTree.parserText( fromStringz( blockText ) );
+						newHead = GLOBAL.outlineTree.parserText( fSTRz( blockText ) );
 						free( blockText );
 					}
 				

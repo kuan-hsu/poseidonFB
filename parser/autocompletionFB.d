@@ -173,17 +173,17 @@ version(FBIDE)
 					{
 						if( listContainer[i].length )
 						{
-							int dollarPos = lastIndexOf( listContainer[i], "~" );
+							auto dollarPos = lastIndexOf( listContainer[i], "~" );
 							if( dollarPos > -1 )
 							{
 								_type = listContainer[i][dollarPos+1..$];
-								if( _type.length > maxRight ) maxRight = _type.length;
+								if( _type.length > maxRight ) maxRight = cast(int) _type.length;
 								_list = listContainer[i][0..dollarPos];
-								if( _list.length > maxLeft ) maxLeft = _list.length;
+								if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
 							}
 							else
 							{
-								if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
+								if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
 							}
 						}
 					}
@@ -193,13 +193,13 @@ version(FBIDE)
 					{
 						if( i < listContainer.length - 1 )
 						{
-							int questPos = lastIndexOf( listContainer[i], "?0" );
+							auto questPos = lastIndexOf( listContainer[i], "?0" );
 							if( questPos > -1 )
 							{
 								string	_keyWord = listContainer[i][0..questPos];
 								string	compareWord;
 								
-								int tildePos = lastIndexOf( listContainer[i+1], "~" );
+								auto tildePos = lastIndexOf( listContainer[i+1], "~" );
 								if( tildePos > -1 )
 									compareWord = listContainer[i+1][0..tildePos];
 								else
@@ -216,7 +216,7 @@ version(FBIDE)
 						{
 							string _string;
 							
-							int dollarPos = lastIndexOf( listContainer[i], "~" );
+							auto dollarPos = lastIndexOf( listContainer[i], "~" );
 							if( dollarPos > 0 )
 							{
 								_type = listContainer[i][dollarPos+1..$];
@@ -272,7 +272,7 @@ version(FBIDE)
 		{
 			if( node !is null )
 			{
-				int openParenPos = indexOf( node.type, "(" );
+				auto openParenPos = indexOf( node.type, "(" );
 				if( openParenPos > -1 )
 				{
 					_type = node.type[0..openParenPos];
@@ -306,7 +306,7 @@ version(FBIDE)
 			{
 				if( node.name[$-1] == ')' )
 				{
-					int posOpenParen = indexOf( node.name, "(" );
+					auto posOpenParen = indexOf( node.name, "(" );
 					if( posOpenParen > -1 ) name = node.name[0..posOpenParen];
 				}
 			}
@@ -320,7 +320,7 @@ version(FBIDE)
 			{
 				if( node.type.length )
 				{
-					int posOpenParen = indexOf( node.type, "(" );
+					auto posOpenParen = indexOf( node.type, "(" );
 					if( posOpenParen > -1 ) type = node.type[0..posOpenParen]; else type = node.type;
 				}
 			}
@@ -1311,8 +1311,8 @@ version(FBIDE)
 			int listHead;
 			foreach( lineText; splitLines( list ) )
 			{
-				int openParenPos = indexOf( lineText, "(" );
-				int closeParenPos = lastIndexOf( lineText, ")" );
+				auto openParenPos = indexOf( lineText, "(" );
+				auto closeParenPos = lastIndexOf( lineText, ")" );
 				if( closeParenPos > openParenPos + 1 && openParenPos > 0 )
 				{
 					openParenPos += listHead;
@@ -1321,7 +1321,7 @@ version(FBIDE)
 					int parenCount;
 					int	paramCount;
 					
-					for( int i = openParenPos + 1; i < closeParenPos; ++i )
+					for( int i = cast(int) openParenPos + 1; i < closeParenPos; ++i )
 					{
 						if( i == openParenPos + 1 )	highlightStart = i;
 						 
@@ -1356,7 +1356,7 @@ version(FBIDE)
 					{
 						if( ++paramCount == itemNO )
 						{
-							highlightEnd = closeParenPos;
+							highlightEnd = cast(int) closeParenPos;
 							return;
 						}
 					}					
@@ -1382,7 +1382,7 @@ version(FBIDE)
 			
 			if( lineHeadPos == -1 )	lineHeadPos = cast(int) IupScintillaSendMessage( ih, 2167, ScintillaAction.getCurrentLine( ih ) - 1, 0 );
 			
-			for( int i = lineHeadText.length - 1; i >= 0; --i ) //SCI_POSITIONFROMLINE 2167
+			for( int i = cast(int) lineHeadText.length - 1; i >= 0; --i ) //SCI_POSITIONFROMLINE 2167
 			{
 				if( !bGetName )
 				{
@@ -1601,7 +1601,7 @@ version(FBIDE)
 					listContainer.length = 0;
 					IupSetAttribute( iupSci, "AUTOCCANCEL", "YES" );
 
-					lineNum = IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+					lineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
 					
 					return getDivideWord( word );
@@ -1809,7 +1809,7 @@ version(FBIDE)
 					}
 					else
 					{
-						int dotPos = indexOf( _fatherNode.name, "." );
+						auto dotPos = indexOf( _fatherNode.name, "." );
 						if( dotPos > -1 )
 						{
 							memberFunctionMotherName = _fatherNode.name[0..dotPos];
@@ -2611,7 +2611,7 @@ version(FBIDE)
 
 			scope _t = new IupString( targetText );
 
-			int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+			int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 
 			while( posHead >= 0 )
 			{
@@ -2620,7 +2620,7 @@ version(FBIDE)
 				{
 					IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
 					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 				}
 				else
 				{
@@ -2633,7 +2633,7 @@ version(FBIDE)
 						bool	bFirstChar = true;
 						int		count;
 						
-						for( int i = posHead + targetText.length; i < documentLength; ++ i )
+						for( int i = posHead + cast(int) targetText.length; i < documentLength; ++ i )
 						{
 							string _s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
 
@@ -2685,7 +2685,7 @@ version(FBIDE)
 				if( !bReSearch )
 				{
 					// Check after "sub""function"...etc have word, like "end sub" or "exit function", Research 
-					for( int i = posHead + targetText.length; i < documentLength; ++ i )
+					for( int i = posHead + cast(int) targetText.length; i < documentLength; ++ i )
 					{
 						string s = Uni.toLower( fSTRz( IupGetAttributeId( iupSci, "CHAR", i ) ) );
 
@@ -2726,7 +2726,7 @@ version(FBIDE)
 				{
 					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
 					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 				}
 				else
 				{
@@ -2794,7 +2794,7 @@ version(FBIDE)
 
 			scope _t = new IupString( targetText );
 			
-			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 			
 			while( pos > -1 )
 			{
@@ -2805,13 +2805,13 @@ version(FBIDE)
 					{
 						IupSetInt( iupSci, "TARGETSTART", pos - 1 );
 						IupSetInt( iupSci, "TARGETEND", 0 );
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 					}
 					else
 					{
-						IupSetInt( iupSci, "TARGETSTART", pos + targetText.length );
+						IupSetInt( iupSci, "TARGETSTART", pos + cast(int) targetText.length );
 						IupSetInt( iupSci, "TARGETEND", -1 );
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, targetText.length, cast(int) _t.toCString );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
 					}
 				}
 				else
@@ -3153,8 +3153,11 @@ version(FBIDE)
 												break;
 											}
 										}
+										goto case;
+										
 									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
 										if( countParen == 0 && countBracket == 0 ) return word;
+										goto default;
 										
 									default: 
 										if( countParen == 0 && countBracket == 0 )
@@ -3362,17 +3365,17 @@ version(FBIDE)
 							{
 								if( listContainer[i].length )
 								{
-									int dollarPos = lastIndexOf( listContainer[i], "~" );
+									auto dollarPos = lastIndexOf( listContainer[i], "~" );
 									if( dollarPos > -1 )
 									{
 										_type = listContainer[i][dollarPos+1..$];
-										if( _type.length > maxRight ) maxRight = _type.length;
+										if( _type.length > maxRight ) maxRight = cast(int) _type.length;
 										_list = listContainer[i][0..dollarPos];
-										if( _list.length > maxLeft ) maxLeft = _list.length;
+										if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
 									}
 									else
 									{
-										if( listContainer[i].length > maxLeft ) maxLeft = listContainer[i].length;
+										if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
 									}
 								}
 							}
@@ -3390,13 +3393,13 @@ version(FBIDE)
 							
 							if( i < listContainer.length - 1 )
 							{
-								int questPos = lastIndexOf( listContainer[i], "?0" );
+								auto questPos = lastIndexOf( listContainer[i], "?0" );
 								if( questPos > -1 )
 								{
 									string	_keyWord = listContainer[i][0..questPos];
 									string 	compareWord;
 									
-									int tildePos = lastIndexOf( listContainer[i+1], "~" );
+									auto tildePos = lastIndexOf( listContainer[i+1], "~" );
 									if( tildePos > -1 )
 										compareWord = listContainer[i+1][0..tildePos];
 									else
@@ -3412,28 +3415,21 @@ version(FBIDE)
 
 							if( listContainer[i].length )
 							{
-								//if( GLOBAL.toggleShowListType == "ON" )
-								//{
-									string _string;
-									
-									int dollarPos = lastIndexOf( listContainer[i], "~" );
-									if( dollarPos > -1 )
-									{
-										_type = listContainer[i][dollarPos+1..$];
-										_list = listContainer[i][0..dollarPos];
-										_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
-									}
-									else
-									{
-										_string = listContainer[i];
-									}
-
-									result ~= ( _string ~ "^" );
-								/*}
+								string _string;
+								
+								auto dollarPos = lastIndexOf( listContainer[i], "~" );
+								if( dollarPos > -1 )
+								{
+									_type = listContainer[i][dollarPos+1..$];
+									_list = listContainer[i][0..dollarPos];
+									_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
+								}
 								else
 								{
-									result ~= ( listContainer[i] ~ "^" );
-								}*/
+									_string = listContainer[i];
+								}
+
+								result ~= ( _string ~ "^" );
 							}
 						}
 					}
@@ -3550,10 +3546,10 @@ version(FBIDE)
 									scope _result = new IupString( title0 );
 									IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
 									
-									int assignPos = indexOf( title0, " = " );
+									auto assignPos = indexOf( title0, " = " );
 									if( assignPos > -1 )
 									{
-										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, assignPos ); // SCI_CALLTIPSETHLT 2204
+										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, cast(int) assignPos ); // SCI_CALLTIPSETHLT 2204
 										IupScintillaSendMessage( cSci.getIupScintilla, 2207, 0xFF0000, 0 ); // SCI_CALLTIPSETFOREHLT 2207
 									}
 									else
@@ -3662,7 +3658,6 @@ version(FBIDE)
 													{
 														if( _splitWords[1].length )
 														{
-															scope htmlappPath = new FilePath( GLOBAL.linuxHtmlAppName );
 															switch( Path.stripExtension( Path.baseName( GLOBAL.linuxHtmlAppName ) ) )
 															{
 																case "xchm":
@@ -3712,12 +3707,12 @@ version(FBIDE)
 						string options = GLOBAL.compilerSettings.activeCompiler.Option;
 						if( options.length )
 						{	
-							int _versionPos = indexOf( options, "-d" );
+							auto _versionPos = indexOf( options, "-d" );
 							while( _versionPos > -1  )
 							{
 								string	versionName;
 								bool	bBeforeSymbol = true;
-								for( int i = _versionPos + 2; i < options.length; ++ i )
+								for( int i = cast(int) _versionPos + 2; i < options.length; ++ i )
 								{
 									if( options[i] == '\t' || options[i] == ' ' )
 									{
@@ -3779,7 +3774,7 @@ version(FBIDE)
 								}
 								else
 								{
-									int dotPos = indexOf( _fatherNode.name, "." );
+									auto dotPos = indexOf( _fatherNode.name, "." );
 									if( dotPos > -1 )
 									{
 										memberFunctionMotherName = _fatherNode.name[0..dotPos];
@@ -4115,7 +4110,7 @@ version(FBIDE)
 						else
 							_list = ( "@ \"" ~ _rNode.name ~ "\"" ~ " ...[" ~ std.conv.to!(string)( AST_Head.lineNumber ) ~ "]\n" );
 
-						int filePathPos = _list.length;
+						int filePathPos = cast(int) _list.length;
 						
 						
 						string nameSpaceTitle;
@@ -4464,13 +4459,13 @@ version(FBIDE)
 						}
 						else if( _checkType == 0 )
 						{
-							if( !_isTail( POS + target.length ) ) return -1;
+							if( !_isTail( POS + cast(int) target.length ) ) return -1;
 							if( !_isHead( POS ) ) return -1;
 						}
 						
 						if( _checkType & 1 )
 						{
-							if( _isTail( POS + target.length ) ) return -1;
+							if( _isTail( POS + cast(int) target.length ) ) return -1;
 						}
 						
 						if( _checkType & 2 )
@@ -4889,7 +4884,7 @@ version(FBIDE)
 					else
 					{
 						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", alreadyInput.length - 1, _result.toCString );
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
 					}
 					return true;
 				}
@@ -4985,17 +4980,17 @@ version(FBIDE)
 			
 			if( listInContainer.length )
 			{
-				int semicolonPos = indexOf( listInContainer, ";" );
+				auto semicolonPos = indexOf( listInContainer, ";" );
 				if( semicolonPos > -1 )
 				{
 					lineNumber = std.conv.to!(int)( listInContainer[0..semicolonPos] );
 					if( currentLn == lineNumber )
 					{
-						int openParenPos = indexOf( listInContainer, "(" );
+						auto openParenPos = indexOf( listInContainer, "(" );
 						if( openParenPos > semicolonPos )
 						{
 							//char[] procedureNameFromList;
-							for( int i = openParenPos - 1; i > semicolonPos; -- i )
+							for( int i = cast(int) openParenPos - 1; i > semicolonPos; -- i )
 							{
 								if( listInContainer[i] == ' ' ) break;
 								procedureNameFromList = listInContainer[i] ~ procedureNameFromList;
@@ -5073,7 +5068,7 @@ version(FBIDE)
 				{
 					calltipContainer.pop();
 					list = calltipContainer.top;
-					int semicolonPos = indexOf( list, ";" );
+					auto semicolonPos = indexOf( list, ";" );
 					if( semicolonPos > -1 )
 					{
 						list = list[semicolonPos+1..$].dup;
@@ -5138,7 +5133,7 @@ version(FBIDE)
 				string list = calltipContainer.top();
 				if( list.length )
 				{
-					int semicolonPos = indexOf( list, ";" );
+					auto semicolonPos = indexOf( list, ";" );
 					if( semicolonPos > -1 )
 					{
 						list = list[semicolonPos+1..$].dup;
@@ -5202,7 +5197,7 @@ version(FBIDE)
 							
 							scope _result = new IupString( AutoComplete.showListThread.getResult );
 							if( _alreadyInput.length )
-								IupScintillaSendMessage( sci, 2100, _alreadyInput.length, cast(int) _result.toCString );
+								IupScintillaSendMessage( sci, 2100, cast(int) _alreadyInput.length, cast(int) _result.toCString );
 							else
 								IupScintillaSendMessage( sci, 2100, 0, cast(int) _result.toCString );
 								

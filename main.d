@@ -6,9 +6,8 @@ import iup.iup_scintilla;
 import global, layout, images.imageData, tools, navcache;
 import menu, scintilla, actionManager;
 import parser.autocompletion, parser.ast;
-
 debug import std.stdio;
-import std.file, std.string, std.conv, std.process, Path = std.path, Array = std.array;
+import std.file, std.string, Conv = std.conv, std.process, Path = std.path, Array = std.array;
 
 version(Windows)
 {
@@ -23,10 +22,10 @@ version(Windows)
 		}
 	}
 	
-	pragma(lib, "winmm.lib"); // For PlaySound()
-	pragma(lib, "user32.lib");
-	pragma(lib, "iup.lib");
-	pragma(lib, "iup_scintilla.lib");
+	pragma(lib, "winmm"); // For PlaySound()
+	pragma(lib, "user32");
+	pragma(lib, "iup");
+	pragma(lib, "iup_scintilla");
 }
 else
 {
@@ -42,7 +41,7 @@ void main( string[] args )
 		debug writefln( "IUP open error!!!" );
 		return;
 	}
-	
+
 	version(Windows)
 	{
 		version(FBIDE)	IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
@@ -53,18 +52,15 @@ void main( string[] args )
 			IupClose();
 			return;
 		}
-	}
 	
-	// Dynamic Libraries Load...
-	version(Windows)
-	{
-		SharedLib sharedlib;
+		// Dynamic Libraries Load...
+		SharedLib HtmlLoader;
 		GLOBAL.htmlHelp = null;
 		
 		try
 		{
-			sharedlib = SharedLib.load( `hhctrl.ocx` );
-			void* ptr = sharedlib.getSymbol("HtmlHelpW");
+			HtmlLoader = SharedLib.load( `hhctrl.ocx` );
+			void* ptr = HtmlLoader.getSymbol("HtmlHelpW");
 			if( ptr )
 			{
 				GLOBAL.htmlHelp = cast(GLOBAL._htmlHelp) ptr;
@@ -80,82 +76,56 @@ void main( string[] args )
 			
 			debug writefln(e.toString);
 		}
-	}
 	
-
-	// Dark Mode
-	SharedLib DarkModeLoader;
-	version(Windows)
-	{
-		GLOBAL.AllowDarkModeForWindow = null;
+	
+		// Dark Mode
+		SharedLib DarkModeLoader;
 		GLOBAL.InitDarkMode = null;
 		GLOBAL.SetWindowTheme = null;
-	}
-	GLOBAL.SetDarkMode = null;
-	try
-	{
-		version(Windows) DarkModeLoader = SharedLib.load( `DarkMode.dll` );// else DarkModeLoader = SharedLib.load( `./DarkMode.so` );
-		if( DarkModeLoader !is null )
+		try
 		{
-			void* ptr = null;
-			version(Windows)
-			{
-				ptr = DarkModeLoader.getSymbol("AllowDarkModeForWindow_FB");
-				if( ptr )
-				{
-					void **point = cast(void **)&GLOBAL.AllowDarkModeForWindow; // binding function address from DLL to our function pointer
-					*point = ptr;
-				}
-				else
-					throw new Exception( "Symbol 'AllowDarkModeForWindow_FB' not found" );
-				
-				
-				ptr = null;
-				ptr = DarkModeLoader.getSymbol("InitDarkMode_FB");
-				if( ptr )
-				{
-					void **point = cast(void **)&GLOBAL.InitDarkMode; // binding function address from DLL to our function pointer
-					*point = ptr;
-				}
-				else
-					throw new Exception( "Symbol 'InitDarkMode_FB' not found" );
+			version(X86_64)
+				DarkModeLoader = SharedLib.load( `DarkMode64.dll` );
+			else
+				DarkModeLoader = SharedLib.load( `DarkMode32.dll` );
 
-				ptr = null;
-				ptr = DarkModeLoader.getSymbol("SetWindowTheme_FB");
-				if( ptr )
-				{
-					void **point = cast(void **)&GLOBAL.SetWindowTheme; // binding function address from DLL to our function pointer
-					*point = ptr;
-				}
-				else
-					throw new Exception( "Symbol 'SetWindowTheme_FB' not found" );
-			}
-			
-			ptr = null;
-			ptr = DarkModeLoader.getSymbol("SetDarkMode_FB");
-			if( ptr )
+			if( DarkModeLoader !is null )
 			{
-				void **point = cast(void **)&GLOBAL.SetDarkMode; // binding function address from DLL to our function pointer
-				*point = ptr;
+				void* ptr = null;
+				version(Windows)
+				{
+					ptr = DarkModeLoader.getSymbol("InitDarkMode_FB");
+					if( ptr )
+					{
+						void **point = cast(void **)&GLOBAL.InitDarkMode; // binding function address from DLL to our function pointer
+						*point = ptr;
+					}
+					else
+						throw new Exception( "Symbol 'InitDarkMode_FB' not found" );
+
+					ptr = null;
+					ptr = DarkModeLoader.getSymbol("SetWindowTheme_FB");
+					if( ptr )
+					{
+						void **point = cast(void **)&GLOBAL.SetWindowTheme; // binding function address from DLL to our function pointer
+						*point = ptr;
+					}
+					else
+						throw new Exception( "Symbol 'SetWindowTheme_FB' not found" );
+				}
+
+				debug writefln( "DarkMode.dll and Symbols loaded success!" );
 			}
 			else
-				throw new Exception( "Symbol 'SetDarkMode_FB' not found" );					
-				
-				
-			debug writefln( "DarkMode.dll and Symbols loaded success!" );
+			{
+				throw new Exception( "LOAD DLL ERROR!" );
+			}
 		}
-		else
+		catch( Exception e )
 		{
-			GLOBAL.SetDarkMode = null;
-			throw new Exception( "LOAD DLL ERROR!" );
+			debug writefln(e.toString);
 		}
 	}
-	catch( Exception e )
-	{
-		GLOBAL.SetDarkMode = null;
-		debug writefln(e.toString);
-	}	
-	
 	
 	//  Get poseidonFB exePath & set the new cwd
 	GLOBAL.poseidonPath = Path.dirName( args[0] ); // without tail /
@@ -193,12 +163,14 @@ void main( string[] args )
 	// Set Default Font
 	if(  GLOBAL.fonts[0].fontString.length ) IupSetStrGlobal( "DEFAULTFONT", toStringz( GLOBAL.fonts[0].fontString ) );
 	IupSetGlobal( "UTF8MODE", "YES" );
-	version(Windows) IupSetGlobal( "UTF8MODE_FILE", "YES" );
-	
-	IupSetStrGlobal( "DLGFGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-	IupSetStrGlobal( "DLGBGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
-	IupSetStrGlobal( "TXTFGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-	IupSetStrGlobal( "TXTBGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+	version(Windows)
+	{
+		IupSetGlobal( "UTF8MODE_FILE", "YES" );
+		IupSetStrGlobal( "DLGFGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+		IupSetStrGlobal( "DLGBGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
+		IupSetStrGlobal( "TXTFGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+		IupSetStrGlobal( "TXTBGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+	}
 	
 	version(Posix) createMenu();
 	
@@ -218,7 +190,7 @@ void main( string[] args )
 	version(FBIDE)	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonFB - FreeBasic IDE" );
 	version(DIDE)	IupSetAttribute( GLOBAL.mainDlg, "TITLE", "poseidonD - D Programming Language IDE" );
 	IupSetAttribute( GLOBAL.mainDlg, "ICON", "icon_poseidonFB" );
-	IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
+	version(Posix) IupSetAttribute( GLOBAL.mainDlg, "MENU", "mymenu" );
 	version(FBIDE)	IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonFB" );
 	version(DIDE)	IupSetAttribute( GLOBAL.mainDlg, "NAME", "poseidonD" );
 
@@ -238,18 +210,13 @@ void main( string[] args )
 	EditorLayoutSize	_editorSetting01 = GLOBAL.editorSetting01;
 	EditorOpacity		_editorSetting02 = GLOBAL.editorSetting02;
 	EditorColorUint		_editColor = GLOBAL.editColor;
-	
-	if( GLOBAL.SetDarkMode != null && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+
+	if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 	{
 		version(Windows)
 		{
-			GLOBAL.bDarkMode = cast(bool) GLOBAL.InitDarkMode();
-			if( GLOBAL.bDarkMode )
-				GLOBAL.SetDarkMode( true, true );
-			else
-			{
-				debug writefln( "Couldn't fit DarkMode API needs!" );
-			}
+			GLOBAL.bCanUseDarkMode = cast(bool) GLOBAL.InitDarkMode();
+			//IupMessage("",toStringz(Conv.to!(string)(GLOBAL.bCanUseDarkMode)));
 		}
 	}
 	
@@ -283,10 +250,13 @@ void main( string[] args )
 	
 	GLOBAL.messagePanel.setScintillaColor(); // Set MessagePanel Color
 	
-	if( GLOBAL.bDarkMode && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+	if( GLOBAL.bCanUseDarkMode )
 	{
-		GLOBAL.searchExpander.changeColor();
-		GLOBAL.outlineTree.changeColor();
+		if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+		{
+			GLOBAL.searchExpander.changeColor();
+			GLOBAL.outlineTree.changeColor();
+		}
 	}
 	
 	// Load Default Parser
@@ -375,7 +345,7 @@ void main( string[] args )
 			string[] information = Array.split( s, " " );
 			if( information.length == 4 )
 			{
-				Monitor m = { to!(int)( information[0] ), to!(int)( information[1] ), to!(int)( information[2] ), to!(int)( information[3] ), monitorID++ };
+				Monitor m = { Conv.to!(int)( information[0] ), Conv.to!(int)( information[1] ), Conv.to!(int)( information[2] ), Conv.to!(int)( information[3] ), monitorID++ };
 				GLOBAL.monitors ~= m;
 			}
 		}
@@ -387,7 +357,7 @@ void main( string[] args )
 	
 	// Init
 	AutoComplete.init();
-	
+
 	IupRefresh( GLOBAL.mainDlg );
 	
 	//IUP main Loop
@@ -402,6 +372,9 @@ void main( string[] args )
 	
 	IupClose();
 	
-	version(Windows) if( sharedlib !is null ) sharedlib.unload();
-	if( DarkModeLoader !is null ) DarkModeLoader.unload();
+	version(Windows)
+	{
+		if( HtmlLoader !is null ) HtmlLoader.unload();
+		if( DarkModeLoader !is null ) DarkModeLoader.unload();
+	}
 }

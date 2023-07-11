@@ -244,7 +244,7 @@ extern(C)
 			IupSetAttribute( listHandle, "APPENDITEM", toStringz( fileName ) );
 			CManualDialog.tempManuals ~= ( fileName ~ "," );
 			
-			IupSetInt( listHandle, "VALUE", CManualDialog.tempManuals.length ); // Set Focus
+			IupSetInt( listHandle, "VALUE", cast(int) CManualDialog.tempManuals.length ); // Set Focus
 			
 			Ihandle* dirHandle = IupGetHandle( "textManualDir" );
 			if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", "" );

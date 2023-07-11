@@ -139,22 +139,25 @@ public:
 		IupSetAttribute( _dlg, "DEFAULTESC", "FindFiles_btnHiddenCANCEL" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );	
 		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
-		IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih )
+		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* _findHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Find" );
 			Ihandle* _replaceHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Replace" );
 			if( _findHandle != null && _replaceHandle != null )
 			{
-				if( GLOBAL.bDarkMode && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				if( GLOBAL.bCanUseDarkMode )
 				{
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "DarkMode_CFD", null );
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "DarkMode_CFD", null );
+					if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+					{
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "DarkMode_CFD", null );
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "DarkMode_CFD", null );
+					}
+					else
+					{
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "CFD", null );
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "CFD", null );
+					}	
 				}
-				else
-				{
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "CFD", null );
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "CFD", null );
-				}	
 			}
 			
 			return IUP_DEFAULT;
@@ -189,19 +192,22 @@ public:
 	
 	void changeColor()
 	{
-		IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		version(Windows)
+		{
+			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
 
-		IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listReplace, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-	
-		IupSetStrAttribute( btnCANCEL, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
-		IupSetStrAttribute( btnFindAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
-		IupSetStrAttribute( btnReplaceAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
-		IupSetStrAttribute( btnCountAll, "HLCOLOR",IupGetAttribute( _dlg, "BGCOLOR" ) );
-		IupSetStrAttribute( btnMarkAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );	
+			IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listReplace, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		
+			IupSetStrAttribute( btnCANCEL, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
+			IupSetStrAttribute( btnFindAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
+			IupSetStrAttribute( btnReplaceAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
+			IupSetStrAttribute( btnCountAll, "HLCOLOR",IupGetAttribute( _dlg, "BGCOLOR" ) );
+			IupSetStrAttribute( btnMarkAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
+		}
 	}
 }
 
@@ -341,12 +347,15 @@ extern(C) // Callback for CFindInFilesDialog
 						string activePrjName = actionManager.ProjectAction.getActiveProjectName();
 						if( activePrjName.length )
 						{
-							foreach( string s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
+							if( activePrjName in GLOBAL.projectManager )
 							{
-								count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
+								foreach( string s; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
+								{
+									count = count + actionManager.SearchAction.findInOneFile( s, findText, replaceText, _findMethod, buttonIndex );
+								}
+								
+								GLOBAL.messagePanel.applySearchOutputPanelINDICATOR();
 							}
-							
-							GLOBAL.messagePanel.applySearchOutputPanelINDICATOR();
 						}
 						else
 						{

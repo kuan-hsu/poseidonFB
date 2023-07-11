@@ -358,14 +358,14 @@ private:
 
 	string getWhatIs( string varName )
 	{
-		int colonspacePos = indexOf( varName, ": " );
+		auto colonspacePos = indexOf( varName, ": " );
 		if( colonspacePos > 0 ) varName = varName[colonspacePos+2..$].dup;
 	
 		string type = GLOBAL.debugPanel.sendCommand( "whatis " ~ varName ~ "\n", false );
 		if( type.length > 5 )
 		{
 			type = strip( type[0..$-5] ).dup; // remove (gdb)
-			int posAssign = indexOf( type, " = " );
+			auto posAssign = indexOf( type, " = " );
 			if( posAssign > 0 ) return type[posAssign+3..$].dup;
 		}
 		return "?";
@@ -378,7 +378,7 @@ private:
 		if( value.length > 5 )
 		{
 			value = value[0..$-5].dup; // remove (gdb)
-			int posAssign = indexOf( value, " = " );
+			auto posAssign = indexOf( value, " = " );
 			if( posAssign > 0 ) return value[posAssign+3..$].dup;
 		}
 		return "?";
@@ -408,7 +408,7 @@ private:
 			{
 				if( _title[0] == '#' )
 				{
-					int doublespacePos = indexOf( _title, "  " );
+					auto doublespacePos = indexOf( _title, "  " );
 					if( doublespacePos > 0 ) return _title[1..doublespacePos].dup;
 				}
 			}				
@@ -436,13 +436,13 @@ private:
 				if( treeID > 0 ) title = fSTRz( IupGetAttributeId( backtraceHandle, "TITLE", treeID ) );
 			}
 			
-			int atPos = lastIndexOf( title, " at " );
+			auto atPos = lastIndexOf( title, " at " );
 			if( atPos > 0 )
 			{
-				int colonPos = lastIndexOf( title, ":" );
+				auto colonPos = lastIndexOf( title, ":" );
 				if( colonPos > 0 && colonPos > atPos )
 				{
-					int doubleSpacePos = indexOf( title, "  " );
+					auto doubleSpacePos = indexOf( title, "  " );
 					if( doubleSpacePos > 0 )
 					{
 						results ~= tools.normalizeSlash( title[atPos+4..colonPos].dup );
@@ -496,7 +496,7 @@ private:
 			string _title = fSTRz( IupGetAttributeId( backtraceHandle, "TITLE", treeID ) );
 			if( !bFull )
 			{
-				int colonPos = lastIndexOf( _title, ":" );
+				auto colonPos = lastIndexOf( _title, ":" );
 				if( colonPos > 0 ) return _title[0..colonPos].dup;
 			}
 			else
@@ -545,20 +545,20 @@ private:
 	{
 		VarObject _vo;
 		
-		int assignPos = indexOf( title, " = " );
+		auto assignPos = indexOf( title, " = " );
 		if( assignPos > 0 )
 		{
 			_vo.name = title[0..assignPos].dup;
 			if( _vo.name.length )
 			{
-				int colonspacePos = indexOf( _vo.name, ": " );
+				auto colonspacePos = indexOf( _vo.name, ": " );
 				if( colonspacePos < assignPos && colonspacePos > 0 ) _vo.name = _vo.name[colonspacePos+2..$].dup;
 			}
 			
-			int openPos = indexOf( title, " (" );
+			auto openPos = indexOf( title, " (" );
 			if( openPos > 0 )
 			{
-				int closePos = lastIndexOf( title, ") " );
+				auto closePos = lastIndexOf( title, ") " );
 				if( closePos > 0 && closePos > openPos + 2 )
 				{
 					_vo.type = title[openPos+2..closePos].dup;
@@ -587,7 +587,7 @@ private:
 			result.value = value;
 			if( value[0] == '(' )
 			{
-				int closePos = lastIndexOf( value, ") " );
+				auto closePos = lastIndexOf( value, ") " );
 				if( closePos > 0 )
 				{
 					result.value = value[closePos+2..$].dup;
@@ -614,8 +614,8 @@ private:
 		
 		foreach( s; splitLines( fixGDBMessage( gdbMessage ) ) )
 		{
-			int closePos = s.length;
-			int assignPos = indexOf( s, " = " );
+			auto closePos = s.length;
+			auto assignPos = indexOf( s, " = " );
 			if( assignPos > 0 )
 			{
 				VarObject _vo;
@@ -669,7 +669,7 @@ private:
 			{
 				if( data.length )
 				{
-					int assignPos = indexOf( data, " = " );
+					auto assignPos = indexOf( data, " = " );
 					if( assignPos > -1 )
 					{
 						if( indexOf( data, "[" ) > -1  )
@@ -698,7 +698,7 @@ private:
 			else if( gdbMessage[i] == ','  )
 			{
 				string type;
-				int assignPos = indexOf( data, " = " );
+				auto assignPos = indexOf( data, " = " );
 				if( assignPos > -1 )
 				{
 					if( indexOf( data, "[" ) > -1  )
@@ -740,7 +740,7 @@ private:
 
 						if( open == 0 )
 						{
-							int assignPos = indexOf( data, " = " );
+							auto assignPos = indexOf( data, " = " );
 							if( assignPos > -1 )
 							{
 								if( indexOf( data, "[" ) > 0 ) _type = ""; else _type = GLOBAL.debugPanel.getWhatIs( motherName ~ "." ~ data[0..assignPos] );
@@ -774,7 +774,7 @@ private:
 	{
 		//int head = Util.index( message, "Program received signal SIGSEGV, Segmentation fault." );
 		//int head = Util.index( message, "Segmentation fault." );
-		int head = indexOf( message, "signal SIGSEGV," );
+		auto head = indexOf( message, "signal SIGSEGV," );
 		if( head > -1 )
 		{
 			IupMessageError( GLOBAL.mainDlg, toStringz( message[head..$-5].dup ) );
@@ -808,10 +808,10 @@ private:
 	
 	string removeIDTitle( string s )
 	{
-		int assignPos = indexOf( s, " = " );
+		auto assignPos = indexOf( s, " = " );
 		if( assignPos > 0 )
 		{
-			int colonspacePos = indexOf( s, ": " );
+			auto colonspacePos = indexOf( s, ": " );
 			if( colonspacePos > 0 ) return s[colonspacePos+2..$].dup;
 		}
 		
@@ -825,7 +825,7 @@ private:
 		{
 			if( s[0] > 47 && s[0] < 58 )
 			{
-				int colonSpacePos = indexOf( s, ": " );
+				auto colonSpacePos = indexOf( s, ": " );
 				if( colonSpacePos > 0 ) return s[0..colonSpacePos].dup;
 			}
 		}
@@ -853,12 +853,12 @@ private:
 		{
 			bool	bNoSameDeepNode = false;
 			
-			for( int i = variables.length - 1; i >= 0; -- i )
+			for( int i = cast(int) variables.length - 1; i >= 0; -- i )
 			{
 				if( !bNoSameDeepNode )
 				{
 					string	numID;
-					int		colonspacePos = indexOf( variables[i].name, ": " );
+					auto		colonspacePos = indexOf( variables[i].name, ": " );
 					if( colonspacePos > 0 )
 					{
 						numID = variables[i].name[0..colonspacePos+2].dup;
@@ -956,14 +956,14 @@ private:
 				{
 					string startAddress, endAddress;
 					
-					int startPos = indexOf( results[0], "starts at address " );
-					int endPos = indexOf( results[0], "ends at " );
+					auto startPos = indexOf( results[0], "starts at address " );
+					auto endPos = indexOf( results[0], "ends at " );
 					if( endPos > startPos && startPos > -1 )
 					{
-						int startSpacePos = indexOf( results[0], " ", startPos + 18 );
+						auto startSpacePos = indexOf( results[0], " ", startPos + 18 );
 						if( startSpacePos > 0 ) startAddress = results[0][startPos+18..startSpacePos].dup;
 						
-						int endSpacePos = indexOf( results[0], " ", endPos + 8 );
+						auto endSpacePos = indexOf( results[0], " ", endPos + 8 );
 						if( endSpacePos > 0 ) endAddress = results[0][endPos+8..endSpacePos].dup;
 						
 						if( startAddress.length && endAddress.length )
@@ -1033,6 +1033,11 @@ public:
 	this()
 	{
 		createLayout();
+	}
+	
+	~this()
+	{
+		if( isExecuting || isRunning ) terminal();
 	}
 	
 	void changeColor()
@@ -1134,8 +1139,7 @@ public:
 	{
 		string nodeTitle, THIS;
 		
-		
-		int assignPos = indexOf( originTitle, "=" );
+		auto assignPos = indexOf( originTitle, "=" );
 		if( assignPos > 0 ) originTitle = strip( originTitle[0..assignPos].dup );
 		
 		/*
@@ -1155,7 +1159,7 @@ public:
 		if( value != "?" )
 		{
 			type = GLOBAL.debugPanel.getWhatIs( THIS ~ varName );
-			int dotPos = lastIndexOf( varName, "." );
+			auto dotPos = lastIndexOf( varName, "." );
 			if( value[0] == '{' )
 			{
 				//value = "{...}";
@@ -1191,7 +1195,7 @@ public:
 					}
 				}
 				
-				int closeParenPos = lastIndexOf( value, ")" );
+				auto closeParenPos = lastIndexOf( value, ")" );
 				if( closeParenPos > 0 ) value = strip( value[closeParenPos+1..$].dup );
 			}
 			
@@ -1220,11 +1224,11 @@ public:
 					while( _depth >= 0 )
 					{
 						title = fSTRz( IupGetAttributeId( _tree, "TITLE", parnetID ) ); // Get Tree Title
-						int assignPos = indexOf( title, " = " );
+						auto assignPos = indexOf( title, " = " );
 						if( assignPos > 0 )
 						{
 							// Remove ID
-							int colonspacePos = indexOf( title, ": " );
+							auto colonspacePos = indexOf( title, ": " );
 							if( colonspacePos > 0 )
 							{
 								title = title[colonspacePos+2..$].dup;
@@ -1273,10 +1277,10 @@ public:
 		string result = DebugControl.sendCommand( command, bShow );
 
 		// Check GDB reach end
-		int gdbEndStringPosTail = lastIndexOf( result, "exited normally]" );
+		auto gdbEndStringPosTail = lastIndexOf( result, "exited normally]" );
 		if( gdbEndStringPosTail > 0 )
 		{
-			int gdbEndStringPosHead = lastIndexOf( result, "[Inferior" );
+			auto gdbEndStringPosHead = lastIndexOf( result, "[Inferior" );
 			if( gdbEndStringPosHead > 0 )
 			{
 				int _result = tools.questMessage( "GDB", result[gdbEndStringPosHead..gdbEndStringPosTail+16] ~ "\n" ~ GLOBAL.languageItems["exitdebug1"].toDString );
@@ -1329,8 +1333,8 @@ public:
 						{
 							string _id, _fullPath, _lineNumber;
 							
-							int tail = indexOf( result, " at" );
-							int head = indexOf( result, "Breakpoint " );
+							auto tail = indexOf( result, " at" );
+							auto head = indexOf( result, "Breakpoint " );
 							if( tail > head + 11 ) _id = result[head+11..tail].dup;
 
 							head = lastIndexOf( result, ": file " );
@@ -1539,7 +1543,7 @@ public:
 							bool	bFirstInsert = true;
 							string	branchString;
 
-							for( int i = results.length - 1; i >= 0;  -- i )
+							for( int i = cast(int) results.length - 1; i >= 0;  -- i )
 							{
 								if( results[i].length )
 								{
@@ -1773,7 +1777,7 @@ public:
 											for( int i = 0; i < results.length; ++i )
 											{
 												string[] values;
-												int spacePos = indexOf( results[i], " " );
+												auto spacePos = indexOf( results[i], " " );
 												if( spacePos > 0 )
 												{
 													values ~= to!(string)( i );
@@ -1818,7 +1822,7 @@ public:
 											if( results.length == 1 )
 											{
 												result = results[0];
-												int spacePos = indexOf( result, " " );
+												auto spacePos = indexOf( result, " " );
 												if( spacePos > 0 )
 												{
 													string		name = result[0..spacePos].dup;
@@ -2029,7 +2033,7 @@ public:
 			}
 			else
 			{
-				version(linux) DebugControl = new DebugThread( "\"" ~ command ~ "\"", f.path );
+				version(linux) DebugControl = new DebugThread( "\"" ~ command ~ "\"", Path.dirName( GLOBAL.compilerSettings.debuggerFullPath ) );
 			}
 		}
 		else
@@ -2044,14 +2048,12 @@ public:
 
 	int compileWithDebug()
 	{
-		//return ExecuterAction.compile( null, null, null, "-g" );
-		return false;
+		return ExecuterAction.compile( null, null, null, "-g" );
 	}
 
 	bool buildAllWithDebug()
 	{
-		//return ExecuterAction.buildAll( null, null, "-g" );
-		return false;
+		return ExecuterAction.buildAll( null, null, "-g" );
 	}	
 
 	void updateBackTrace()
@@ -2258,8 +2260,7 @@ private :
 
 public:
 	bool		bExecuted;
-	HANDLE		dupWriteHandle;
-	
+
 	this( string _executeFullPath, string _cwd = null )
 	{
 		executeFullPath = _executeFullPath;
@@ -2579,7 +2580,7 @@ extern( C )
 						
 						if( title[0] > 47 && title[0] < 58 )
 						{
-							int	colonspacePos = indexOf( title, ": " );
+							auto	colonspacePos = indexOf( title, ": " );
 							if( colonspacePos > 0 )
 							{
 								numID = title[0..colonspacePos+2].dup;
@@ -2594,10 +2595,10 @@ extern( C )
 
 						if( value == "#_close_#" ) return IUP_DEFAULT;
 						
-						int assignPos = indexOf( title, " = " );
+						auto assignPos = indexOf( title, " = " );
 						GLOBAL.debugPanel.sendCommand( "set var " ~ fullVarName ~ " = " ~  value ~ "\n", false );
 
-						int posCloseParen = indexOf( title, ") " );
+						auto posCloseParen = indexOf( title, ") " );
 						if( posCloseParen > 0 ) IupSetAttributeId( ih, "TITLE", id, toStringz( numID ~ title[0..posCloseParen+2] ~ value ) );else IupSetStrAttributeId( ih, "TITLE", id, toStringz( numID ~ title[0..assignPos+3] ~ value ) );
 						return IUP_IGNORE;
 					}
@@ -2669,13 +2670,13 @@ extern( C )
 				if( title[0] > 47 && title[0] < 58 )
 				{
 					IupSetAttribute( itemADDLIST, "ACTIVE", "NO" );
-					int	colonspacePos = indexOf( title, ": " );
+					auto	colonspacePos = indexOf( title, ": " );
 					if( colonspacePos > 0 ) title = title[colonspacePos+2..$].dup;
 				}
 
 				if( title[0] == '&' ) IupSetAttribute( itemADDRESS, "ACTIVE", "NO" );
 				
-				int closeParenPos = lastIndexOf( title, ")" );
+				auto closeParenPos = lastIndexOf( title, ")" );
 				if( closeParenPos > 0 )
 				{
 					if( title[closeParenPos-1] != '*' ) IupSetAttribute( itemVALUE, "ACTIVE", "NO" ); else IupSetAttribute( itemADDRESS, "ACTIVE", "NO" );
@@ -2744,10 +2745,10 @@ extern( C )
 
 					if( value == "#_close_#" ) return IUP_DEFAULT;
 					
-					int assignPos = indexOf( title, " = " );
+					auto assignPos = indexOf( title, " = " );
 					GLOBAL.debugPanel.sendCommand( "set var " ~ fullVarName ~ " = " ~  value ~ "\n", false );
 
-					int posCloseParen = indexOf( title, ") " );
+					auto posCloseParen = indexOf( title, ") " );
 					if( posCloseParen > 0 ) IupSetStrAttributeId( ih, "TITLE", id, toStringz( title[0..posCloseParen+2] ~ value ) );else IupSetStrAttributeId( ih, "TITLE", id, toStringz( title[0..assignPos+3] ~ value ) );
 					return IUP_IGNORE;
 				}					
@@ -2772,7 +2773,7 @@ extern( C )
 				IupSetAttributes( itemADDRESS, "NAME=VARIABLES_ADDRESS,IMAGE=icon_debug_at" );
 				IupSetCallback( itemADDRESS, "ACTION", cast(Icallback) &itemRightClick_ACTION );
 				
-				int closeParenPos = lastIndexOf( title, ")" );
+				auto closeParenPos = lastIndexOf( title, ")" );
 				if( closeParenPos > 0 )
 				{
 					if( title[closeParenPos-1] != '*' ) IupSetAttribute( itemVALUE, "ACTIVE", "NO" ); else IupSetAttribute( itemADDRESS, "ACTIVE", "NO" );
@@ -2881,8 +2882,7 @@ extern( C )
 			int		_id = IupGetInt( _ih, "VALUE" );
 			string	title = fSTRz( IupGetAttributeId( _ih, "TITLE", _id ) );
 			
-			
-			int closeParenPos = lastIndexOf( title, ") " );
+			auto closeParenPos = lastIndexOf( title, ") " );
 			if( closeParenPos > 0 )
 				if( title[closeParenPos-1] == '*' ) bHasStar = true;
 			
@@ -2903,7 +2903,7 @@ extern( C )
 				if( gdbMessage == "?" ) return IUP_DEFAULT;
 				
 				
-				int	openPos = indexOf( gdbMessage, "{" );
+				auto	openPos = indexOf( gdbMessage, "{" );
 				if( openPos > -1 )
 				{
 					bHasMember = true;
@@ -2911,7 +2911,7 @@ extern( C )
 				}
 				
 				// Insert type if need....
-				int closePos = lastIndexOf( gdbMessage, ") " );
+				auto closePos = lastIndexOf( gdbMessage, ") " );
 				if( closePos == -1 )
 				{
 					string type = GLOBAL.debugPanel.getWhatIs( varFullName );

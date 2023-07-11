@@ -30,7 +30,7 @@ private:
 				{
 					if( s[0] != '\'' )
 					{
-						int assignIndex = indexOf( s, "=" );
+						auto assignIndex = indexOf( s, "=" );
 						if( assignIndex > -1 )
 						{
 							try
@@ -909,7 +909,7 @@ public:
 				
 				doc ~= ( f ~ "=" );
 				
-				foreach( int i, int value; GLOBAL.fileStatusManager[f] )
+				foreach( size_t i, int value; GLOBAL.fileStatusManager[f] )
 				{
 					if( i == 0 )
 						doc ~= ( "(" ~ Conv.to!string( value ) ~ ")" );
@@ -966,14 +966,14 @@ public:
 				}
 				
 				// Get Line Data
-				int assignPos = indexOf( lineData, "=" );
+				auto assignPos = indexOf( lineData, "=" );
 				if( assignPos > -1 )
 				{
 					int		pos;
 					string	fullPath = tools.normalizeSlash( lineData[0..assignPos] );
 					string	rightData = lineData[assignPos+1..$].dup;
 					
-					int closeParenPos = indexOf( rightData, ")" );
+					auto closeParenPos = indexOf( rightData, ")" );
 					if( closeParenPos > -1 )
 					{
 						pos = Conv.to!(int)( rightData[1..closeParenPos] );

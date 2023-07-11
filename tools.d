@@ -63,7 +63,7 @@ public:
 		{
 			_DString = fSTRz( Cstring );
 			
-			int _len = strlen( Cstring );
+			auto _len = strlen( Cstring );
 			_CstringPointer = cast(char*)calloc( _len + 1, 1 );
 			memcpy( _CstringPointer, Cstring, _len );
 		}
@@ -325,17 +325,15 @@ version(Posix) string modifyLinuxDropFileName( string _fn )
 			{
 				char _a = _fn[i+1];
 				char _b = _fn[i+2];
-				
 				char computeValue;
-				
 				
 				if( _a >= '0' && _a <= '9' )
 				{
-					computeValue = ( _a - 48 ) * 16;
+					computeValue = cast(char) ( ( _a - 48 ) * 16 );
 				}
 				else if( _a >= 'A' && _a <= 'F' )
 				{
-					computeValue = ( _a - 55 ) * 16;
+					computeValue = cast(char) ( ( _a - 55 ) * 16 );
 				}
 				else
 				{
@@ -416,7 +414,8 @@ string[] getCompilerImportPath( string compilerFullPath )
 		}
 		else
 		{
-			return [Path.asNormalizedPath( Path.dirName( compilerFullPath )  ~ "/include/freebasic" )];
+			if( compilerFullPath == "fbc" ) return ["/usr/local/include/freebasic"];
+			return [Path.buildNormalizedPath( Path.dirName( compilerFullPath )  ~ "/../include/freebasic" )];
 		}
 	}
 	else // version(DIDE)
@@ -424,7 +423,15 @@ string[] getCompilerImportPath( string compilerFullPath )
 		// Get and Set Default Import Path
 		string compilerPath = Path.dirName( compilerFullPath ); // Without last /
 		string scFullPath;
-		version(Windows) scFullPath = compilerPath ~ "/sc.ini"; else scFullPath = compilerPath ~ "/dmd.conf";
+		version(Windows)
+		{
+			scFullPath = compilerPath ~ "/sc.ini";
+		}
+		else
+		{
+			scFullPath = compilerPath ~ "/dmd.conf";
+			if( !exists( scFullPath ) ) scFullPath = "/etc/dmd.conf";
+		}
 		
 		string[] results;
 		if( exists( scFullPath ) )
@@ -439,8 +446,8 @@ string[] getCompilerImportPath( string compilerFullPath )
 						line = Array.replace( line[7..$], "\t", " " ); // Convert TAB -> SPACE
 						if( line.length )
 						{
-							int endPos;
-							int iPos = indexOf( line, "-I" );
+							ptrdiff_t endPos;
+							auto iPos = indexOf( line, "-I" );
 							while( iPos > -1 )
 							{
 								bool bWithQuote;
@@ -709,7 +716,7 @@ final class SharedLib
                     else {
                          wchar[1024] tmp = void;
                          auto i = MultiByteToWideChar (CP_UTF8, 0,
-                                                       path.ptr, path.length,
+                                                       path.ptr, cast(int) path.length,
                                                        tmp.ptr, tmp.length-1);
                          if (i > 0)
                             {
@@ -750,7 +757,7 @@ final class SharedLib
 
                 handle = dlopen((this.path_ ~ "\0").ptr, mode_);
                 if (handle is null && throwExceptions) {
-                    throw new SharedLibException("Couldn't load shared library: " ~ fromStringz(dlerror()).idup);
+                    throw new Exception("Couldn't load shared library: " ~ fromStringz(dlerror()).idup);
                 }
             }
 
@@ -1226,7 +1233,7 @@ int getINILineData( string lineData, out string left, out string right )
 		if( lineData[0] == '\'' ) return 0;
 
 		
-	int assignPos = indexOf( lineData, "=" );
+	auto assignPos = indexOf( lineData, "=" );
 	if( assignPos > 0 )
 	{
 		left	= strip( lineData[0..assignPos] );

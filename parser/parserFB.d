@@ -1113,7 +1113,7 @@ version(FBIDE)
 						parseToken();
 					}
 					
-					int indexOpenparen = indexOf( _rightExpress, "(" );
+					auto indexOpenparen = indexOf( _rightExpress, "(" );
 					if( indexOpenparen > -1 ) _rightExpress = _rightExpress[0..indexOpenparen];
 					
 					activeASTnode.addChild( _name, B_VARIABLE, null, _type, _rightExpress, _lineNum );

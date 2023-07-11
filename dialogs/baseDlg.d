@@ -61,8 +61,11 @@ class CBaseDialog
 	{
 		_dlg = IupDialog( null );
 		IupSetStrAttribute( _dlg, "TITLE", toStringz( title ) );
-		IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		version(Windows)
+		{
+			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		}
 		
 		string size	= to!(string)( w ) ~ "x" ~ to!(string)( h );
 		string onlyW = to!(string)( w ) ~ "x";

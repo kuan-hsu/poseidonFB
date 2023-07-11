@@ -178,12 +178,12 @@ private:
 		{
 			foreach( s; GLOBAL.compilerSettings.customCompilerOptions )
 			{
-				int bpos = lastIndexOf( s, "%::% " );
+				auto bpos = lastIndexOf( s, "%::% " );
 				if( bpos > 0 )
 				{
 					if( s[bpos+5..$] == name )
 					{
-						int fpos = indexOf( s, "%::% " );
+						auto fpos = indexOf( s, "%::% " );
 						if( fpos < bpos && fpos > -1 )
 						{
 							tipString = ( s[0..fpos] ~ "\n" ~ s[fpos+5..bpos] ).dup; // With Compiler Path
@@ -292,7 +292,7 @@ extern(C) // Callback for CBaseDialog
 					int		x, y;
 					string	mousePos = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
-					int crossSign = indexOf( mousePos, "x" );
+					auto crossSign = indexOf( mousePos, "x" );
 					if( crossSign > 0 )
 					{
 						x = to!(int)( mousePos[0..crossSign] );
@@ -327,9 +327,9 @@ extern(C) // Callback for CBaseDialog
 												null
 											);
 											
-				for( int i = GLOBAL.compilerSettings.customCompilerOptions.length - 1; i >= 0; -- i )
+				for( int i = cast(int) GLOBAL.compilerSettings.customCompilerOptions.length - 1; i >= 0; -- i )
 				{
-					int pos = lastIndexOf( GLOBAL.compilerSettings.customCompilerOptions[i], "%::% " );
+					auto pos = lastIndexOf( GLOBAL.compilerSettings.customCompilerOptions[i], "%::% " );
 					if( pos > 0 )
 					{
 						string Name = GLOBAL.compilerSettings.customCompilerOptions[i][pos+5..$].dup;
@@ -373,7 +373,7 @@ extern(C) // Callback for CBaseDialog
 							
 							
 							Ihandle*[100] _item;
-							foreach( int i, key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
+							foreach( size_t i, key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
 							{
 								_item[i] = IupItem( toStringz( key ), null );
 								IupSetCallback( _item[i], "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
@@ -424,7 +424,7 @@ extern(C) // Callback for CBaseDialog
 				{
 					string mousePos = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
-					int crossSign = indexOf( mousePos, "x" );
+					auto crossSign = indexOf( mousePos, "x" );
 					if( crossSign > 0 )
 					{
 						x = to!(int)( mousePos[0..crossSign] );
@@ -446,7 +446,7 @@ extern(C) // Callback for CBaseDialog
 					lineNum = strip( lineNum );
 					if( lineNum.length)
 					{
-						int pos = lastIndexOf( lineNum, "x" );
+						auto pos = lastIndexOf( lineNum, "x" );
 						if( pos == -1 )	pos = lastIndexOf( lineNum, ":" );
 						if( pos > 0 )
 						{

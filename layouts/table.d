@@ -306,7 +306,7 @@ public:
 	
 	int getColumnCount()
 	{
-		return columnFrame.length;
+		return cast(int) columnFrame.length;
 	}
 	
 	void setImageId( string imageName, int id, int location )

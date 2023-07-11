@@ -14,7 +14,7 @@ private:
 	import				parser.scanner, parser.token, parser.parser, std.conv;
 	import				core.thread;
 
-	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList;
+	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList, outlineToolBarBox;
 	Ihandle*			outlineToolbarTitleImage, outlineButtonCollapse, outlineButtonPR, outlineButtonShowLinenum, outlineToggleAnyWord, outlineButtonFresh, outlineButtonHide;
 	CASTnode[]			listItemASTs;
 	int[]				listItemTreeID;
@@ -1160,11 +1160,13 @@ private:
 				if( fromStringz( IupGetAttribute( _expandHandle, "STATE" ) ) == "OPEN" )
 				{
 					IupSetAttribute( _expandHandle, "STATE", "CLOSE" );
+					//IupSetAttribute( _expandHandle, "ACTIVE", "NO" );
 					Ihandle* _backgroundbox = IupGetChild( _expandHandle, 1 ); // Get outlineTreeNodeList Ihandle
 					if( _backgroundbox != null ) IupSetAttributes( _backgroundbox, "VISIBLE=NO,ACTIVE=NO" ); // Make outlineTreeNodeList to hide
 				}
 				else
 				{
+					//IupSetAttribute( _expandHandle, "ACTIVE", "YES" );
 					IupSetAttribute( _expandHandle, "STATE", "OPEN" );
 					Ihandle* _backgroundbox = IupGetChild( _expandHandle, 1 );
 					if( _backgroundbox != null ) IupSetAttributes( _backgroundbox, "VISIBLE=YES,ACTIVE=YES" ); // Make outlineTreeNodeList to show
@@ -1189,10 +1191,15 @@ private:
 		
 		Ihandle* expander = IupExpander( outlineTreeNodeList );
 		IupSetAttributes( expander, "BARSIZE=0,STATE=CLOSE,EXPAND=HORIZONTAL,NAME=Outline_Expander" );
+		IupSetStrAttribute( expander, "BACKCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
+
 		Ihandle* _backgroundbox = IupGetChild( expander, 0 );
-		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image 		
+		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image
 		
-		layoutHandle = IupVbox( outlineToolbarH, expander, zBoxHandle, null );
+		outlineToolBarBox = IupBackgroundBox( outlineToolbarH );
+		IupSetStrAttribute( outlineToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );		
+		
+		layoutHandle = IupVbox( outlineToolBarBox, expander, zBoxHandle, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,EXPANDCHILDREN=YES,GAP=2" );
 		layoutHandle = IupBackgroundBox( layoutHandle );
 
@@ -1233,14 +1240,17 @@ public:
 
 	void changeColor()
 	{
-		if( GLOBAL.bDarkMode && GLOBAL.editorSetting00.UseDarkMode == "ON" )
+		version(Windows)
 		{
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "DarkMode_CFD", null );
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "DarkMode_CFD", null );
+				else
+					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "CFD", null );
+			}
 		}
-		else
-		{
-			GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "CFD", null );
-		}
+		IupSetStrAttribute( outlineToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 		
 		IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
@@ -1406,14 +1416,16 @@ public:
 			
 			if( IupGetChildCount( zBoxHandle ) > 0 ) showTreeAndButtons( true );
 			
-			if( GLOBAL.bDarkMode &&  GLOBAL.editorSetting00.UseDarkMode == "ON" )
+			version(Windows)
 			{
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "DarkMode_CFD", null );
+				if( GLOBAL.bCanUseDarkMode )
+				{
+					if(  GLOBAL.editorSetting00.UseDarkMode == "ON" )
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "DarkMode_CFD", null );
+					else
+						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "CFD", null );
+				}
 			}
-			else
-			{
-				GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "CFD", null );
-			}				
 			
 			return tree;
 		}
@@ -1815,7 +1827,7 @@ public:
 				foreach_reverse( CASTnode _node; newASTNodes )
 					if( insertID <= 0 ) append( actTree, _node, -insertID ); else append( actTree, _node, insertID, true );
 
-				int markID = IupGetInt( actTree, "LASTADDNODE" ) + newASTNodes.length - 1;
+				int markID = IupGetInt( actTree, "LASTADDNODE" ) + cast(int) newASTNodes.length - 1;
 				IupSetAttributeId( actTree, "MARKED", markID, "YES" );
 				
 				if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
@@ -2235,14 +2247,14 @@ extern(C)
 		{
 			// Avoid mouuse cursor disappear
 			string screenXY = fromStringz( IupGetAttribute( ih, "SCREENPOSITION" ) ).dup;
-			int commaPos = indexOf( screenXY, "," );
+			auto commaPos = indexOf( screenXY, "," );
 			if( commaPos > 0 )
 			{
 				int screenX = to!(int)( screenXY[0..commaPos] );
 				int screenY = to!(int)( screenXY[commaPos+1..$] );
 				
 				string WH = fSTRz( IupGetAttribute( ih, "RASTERSIZE" ) );
-				int crossPos = indexOf( WH, "x" );
+				auto crossPos = indexOf( WH, "x" );
 				if( crossPos > 0 )
 				{
 					screenY = screenY + to!(int)( WH[crossPos+1..$] );

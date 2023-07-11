@@ -46,7 +46,7 @@ public:
 	{
 		_child.father = this;
 		children ~= _child;
-		return children.length - 1;
+		return cast(int) children.length - 1;
 	}
 
 	CASTnode addChild( string _name, int _kind, string _protection, string _type, string _base, int _lineNumber, int _endLineNum = -1  )
@@ -61,7 +61,7 @@ public:
 	{
 		int			mid;
 		int			low = 0; 
-		int			upper = children.length - 1;
+		int			upper = cast(int) children.length - 1;
 		CASTnode[]	tempChildren;
 
 		if( children.length )
@@ -130,7 +130,7 @@ public:
 	
 	CASTnode[] getChildren(){ return children; }
 
-	int getChildrenCount(){ return children.length; }
+	int getChildrenCount(){ return cast(int) children.length; }
 	
 	void killChild( int index )
 	{	

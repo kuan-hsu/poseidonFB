@@ -7,10 +7,6 @@ import layouts.tabDocument, layouts.toolbar, layouts.projectPanel, layouts.messa
 import layouts.statusBar;
 import dialogs.searchDlg, dialogs.findFilesDlg, dialogs.helpDlg, dialogs.argOptionDlg;
 import parser.live, parser.autocompletion;
-/*
-import tango.io.Stdout, tango.stdc.stringz, tango.io.FilePath, Integer = tango.text.convert.Integer, Util = tango.text.Util;
-import tango.sys.win32.UserGdi;
-*/
 import std.string, std.conv, std.file, Array = std.array, Path = std.path;
 import core.sys.windows.winuser;
 
@@ -49,10 +45,6 @@ void createExplorerWindow()
 	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSFORECOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
 	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSBACKCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 	IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
-	IupSetCallback( GLOBAL.projectViewTabs, "FLAT_BUTTON_CB", cast(Icallback) function( Ihandle* _ih ){
-		DocumentTabAction.setFocus( ScintillaAction.getActiveIupScintilla() );
-		return IUP_DEFAULT;
-	});
 	
 	createTabs();
 	createTabs2();
@@ -157,10 +149,11 @@ void createExplorerWindow()
 	version(linux) IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
 	IupSetAttribute( GLOBAL.messageSplit, "COLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
+	/+
 	IupSetCallback( GLOBAL.messageSplit, "VALUECHANGED_CB", cast(Icallback) function( Ihandle* _ih ){
 		return IUP_DEFAULT;
 	});
-
+	+/
 
 	GLOBAL.statusBar = new CStatusBar();
 	Ihandle* expander = IupExpander( GLOBAL.toolbar.getHandle );
@@ -201,7 +194,7 @@ void createExplorerWindow()
 					string cursorString = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
 					int		cursorX, cursorY, iconX, iconY;
-					int 	crossSign = indexOf( cursorString, "x" );
+					auto 	crossSign = indexOf( cursorString, "x" );
 					if( crossSign > 0 )
 					{
 						cursorX = to!(int)( cursorString[0..crossSign] );
@@ -294,7 +287,7 @@ extern(C)
 				}				
 				
 			}
-
+			
 			//IupShow( ih );
 			// BOOL IsIconic( [in] HWND hWnd );  Check the window is min
 			if( IsIconic( IupGetAttribute( GLOBAL.mainDlg, "HWND" ) ) )
@@ -406,7 +399,7 @@ extern(C)
 			case IUP_MINIMIZE:			GLOBAL.editorSetting01.PLACEMENT = "MINIMIZED";		break;
 			default:
 		}
-
+	
 		return IUP_DEFAULT;
 	}
 

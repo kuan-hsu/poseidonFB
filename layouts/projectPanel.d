@@ -12,9 +12,8 @@ private:
 	import				project, parser.autocompletion, parser.ast, dialogs.prjPropertyDlg, parser.parserFB;
 	import				core.thread;
 	
-	
 	Ihandle*			projectToolbarTitleImage, projectButtonCollapse, projectButtonHide;
-	Ihandle*			layoutHandle, tree;
+	Ihandle*			layoutHandle, tree, projectToolBarBox;
 	
 	// Inner Class
 	class ParseThread : Thread
@@ -162,7 +161,10 @@ private:
 		IupSetAttribute( tree, "IMAGE0", "icon_prj" );
 		IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_prj" );
 		
-		layoutHandle = IupVbox( projectToolbarH, tree, null );
+		projectToolBarBox = IupBackgroundBox( projectToolbarH );
+		IupSetStrAttribute( projectToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );	
+		
+		layoutHandle = IupVbox( projectToolBarBox, tree, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,GAP=2" );
 		layoutHandle = IupBackgroundBox( layoutHandle );
 		
@@ -171,7 +173,7 @@ private:
 
 	void toBoldTitle( Ihandle* _tree, int id )
 	{
-		int commaPos = indexOf( GLOBAL.fonts[4].fontString, "," );
+		auto commaPos = indexOf( GLOBAL.fonts[4].fontString, "," );
 		if( commaPos > 0 )
 		{
 			string fontString = Array.replace( GLOBAL.fonts[4].fontString.dup, ",", ",Bold " );
@@ -399,6 +401,8 @@ public:
 	
 	void changeColor()
 	{
+		IupSetStrAttribute( projectToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );	
+		
 		IupSetStrAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
@@ -914,7 +918,7 @@ public:
 			if( temps.length > 8 )
 			{
 				GLOBAL.recentProjects.length = 8;
-				for( count = temps.length - 8; count < temps.length; ++count )
+				for( count = cast(int) temps.length - 8; count < temps.length; ++count )
 					GLOBAL.recentProjects[index++] = temps[count];
 			}
 			else
@@ -2068,11 +2072,10 @@ extern(C)
 
 	private int _createTree( string _prjDirName, ref string _titleName, int startID = 2 )
 	{
-		int		pos;
 		int		folderLocateId = startID;
 		string	fullPath = tools.normalizeSlash( _titleName );
 
-		pos = indexOf( fullPathByOS( fullPath ), fullPathByOS( _prjDirName ) );
+		auto pos = indexOf( fullPathByOS( fullPath ), fullPathByOS( _prjDirName ) );
 		if( pos == 0 ) _titleName = fullPath[_prjDirName.length..$].dup;
 
 		// Check the child Folder

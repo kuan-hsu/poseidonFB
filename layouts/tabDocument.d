@@ -385,7 +385,7 @@ extern(C)
 				{
 					int		RASTER_W = -1;
 					string	documentTabs_RASTERSIZE = fSTRz( IupGetAttribute(ih, "RASTERSIZE" ) );
-					int		crossPos = indexOf( documentTabs_RASTERSIZE, "x" );
+					auto		crossPos = indexOf( documentTabs_RASTERSIZE, "x" );
 					
 					if( crossPos > 0 )
 					{
@@ -432,7 +432,7 @@ extern(C)
 
 						if( screenPos.length )
 						{
-							int crossPos = indexOf( screenPos, "x" );
+							auto crossPos = indexOf( screenPos, "x" );
 							if( crossPos > 0 )
 							{
 								screenX = to!(int)( screenPos[0..crossPos] );
@@ -452,7 +452,7 @@ extern(C)
 						
 						if( tabs1Pos.length )
 						{
-							int commaPos = indexOf( tabs1Pos, "," );
+							auto commaPos = indexOf( tabs1Pos, "," );
 							if( commaPos > 0 )
 							{
 								tabs1X = to!(int)( tabs1Pos[0..commaPos] );
@@ -472,7 +472,7 @@ extern(C)
 						
 						if( tabs2Pos.length )
 						{
-							int commaPos = indexOf( tabs2Pos, "," );
+							auto commaPos = indexOf( tabs2Pos, "," );
 							if( commaPos > 0 )
 							{
 								tabs2X = to!(int)( tabs2Pos[0..commaPos] );
@@ -501,7 +501,7 @@ extern(C)
 							
 							int titleH = -1, CLIENT_H = -1, RASTER_H = -1, RASTER_W = -1;
 							
-							int crossPos = indexOf( documentTabs_CLIENTSIZE, "x" );
+							auto crossPos = indexOf( documentTabs_CLIENTSIZE, "x" );
 							if( crossPos > 0 )	CLIENT_H = to!(int)( documentTabs_CLIENTSIZE[crossPos+1..$] );
 							
 							crossPos = indexOf( documentTabs_RASTERSIZE, "x" );
