@@ -84,23 +84,19 @@ private:
 
 		// Buttons
 		btnFindAll = IupFlatButton( GLOBAL.languageItems["findall"].toCString );
-		IupSetAttributes( btnFindAll, "EXPAND=YES,NAME=btn_Find" );
-		IupSetStrAttribute( btnFindAll, "HLCOLOR", "" );
+		IupSetAttributes( btnFindAll, "EXPAND=YES,CANFOCUS=NO,NAME=btn_Find" );
 		IupSetCallback( btnFindAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		btnReplaceAll = IupFlatButton( GLOBAL.languageItems["replaceall"].toCString );
-		IupSetAttributes( btnReplaceAll, "EXPAND=YES,NAME=btn_Replace" );
-		IupSetStrAttribute( btnReplaceAll, "HLCOLOR", "" );
+		IupSetAttributes( btnReplaceAll, "EXPAND=YES,CANFOCUS=NO,NAME=btn_Replace" );
 		IupSetCallback( btnReplaceAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		btnCountAll = IupFlatButton( GLOBAL.languageItems["countall"].toCString );
-		IupSetAttributes( btnCountAll, "EXPAND=YES,NAME=btn_Count" );
-		IupSetStrAttribute( btnCountAll, "HLCOLOR", "" );
+		IupSetAttributes( btnCountAll, "EXPAND=YES,CANFOCUS=NO,NAME=btn_Count" );
 		IupSetCallback( btnCountAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 		
 		btnMarkAll = IupFlatButton( GLOBAL.languageItems["bookmarkall"].toCString );
-		IupSetAttributes( btnMarkAll, "EXPAND=YES,NAME=btn_Mark" );
-		IupSetStrAttribute( btnMarkAll, "HLCOLOR", "" );
+		IupSetAttributes( btnMarkAll, "EXPAND=YES,CANFOCUS=NO,NAME=btn_Mark" );
 		IupSetCallback( btnMarkAll, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnExecute_ACTION_CB );
 
 		Ihandle* vBoxButton = IupVbox( btnFindAll, btnReplaceAll, btnCountAll, btnMarkAll, null );
@@ -201,13 +197,20 @@ public:
 			IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( listReplace, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		
+			/*
 			IupSetStrAttribute( btnCANCEL, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
 			IupSetStrAttribute( btnFindAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
 			IupSetStrAttribute( btnReplaceAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
 			IupSetStrAttribute( btnCountAll, "HLCOLOR",IupGetAttribute( _dlg, "BGCOLOR" ) );
 			IupSetStrAttribute( btnMarkAll, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
+			*/
 		}
+
+		IupSetStrAttribute( btnCANCEL, "HLCOLOR", null );
+		IupSetStrAttribute( btnFindAll, "HLCOLOR", null );
+		IupSetStrAttribute( btnReplaceAll, "HLCOLOR", null );
+		IupSetStrAttribute( btnCountAll, "HLCOLOR", null );
+		IupSetStrAttribute( btnMarkAll, "HLCOLOR", null );
 	}
 }
 

@@ -94,24 +94,8 @@ void main( string[] args )
 				void* ptr = null;
 				version(Windows)
 				{
-					ptr = DarkModeLoader.getSymbol("InitDarkMode_FB");
-					if( ptr )
-					{
-						void **point = cast(void **)&GLOBAL.InitDarkMode; // binding function address from DLL to our function pointer
-						*point = ptr;
-					}
-					else
-						throw new Exception( "Symbol 'InitDarkMode_FB' not found" );
-
-					ptr = null;
-					ptr = DarkModeLoader.getSymbol("SetWindowTheme_FB");
-					if( ptr )
-					{
-						void **point = cast(void **)&GLOBAL.SetWindowTheme; // binding function address from DLL to our function pointer
-						*point = ptr;
-					}
-					else
-						throw new Exception( "Symbol 'SetWindowTheme_FB' not found" );
+					GLOBAL.InitDarkMode = cast(typeof(GLOBAL.InitDarkMode)) DarkModeLoader.getSymbol("InitDarkMode_FB");
+					GLOBAL.SetWindowTheme = cast(typeof(GLOBAL.SetWindowTheme)) DarkModeLoader.getSymbol("SetWindowTheme_FB");
 				}
 
 				debug writefln( "DarkMode.dll and Symbols loaded success!" );
@@ -123,15 +107,23 @@ void main( string[] args )
 		}
 		catch( Exception e )
 		{
+			if( DarkModeLoader !is null )
+			{
+				destroy( DarkModeLoader );
+				DarkModeLoader = null;
+			}
 			debug writefln(e.toString);
 		}
 	}
 	
 	//  Get poseidonFB exePath & set the new cwd
 	GLOBAL.poseidonPath = Path.dirName( args[0] ); // without tail /
-	GLOBAL.EnvironmentVars = environment.toAA();
 	version(Posix)
 	{
+		//Prevent GDB python error
+		environment.remove("PYTHONHOME");
+		environment.remove("PYTHONPATH");	
+
 		/*
 		auto user = getpwuid( getuid() );
 		char[] home = fromStringz( user.pw_dir );
@@ -152,6 +144,8 @@ void main( string[] args )
 				std.file.copy( filename, GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ Path.baseName( filename ) );
 		}
 	}
+	
+	GLOBAL.EnvironmentVars = environment.toAA();
 	
 	// Init IDE
 	createEditorSetting();
@@ -215,7 +209,7 @@ void main( string[] args )
 	{
 		version(Windows)
 		{
-			GLOBAL.bCanUseDarkMode = cast(bool) GLOBAL.InitDarkMode();
+			if( DarkModeLoader !is null ) GLOBAL.bCanUseDarkMode = cast(bool) GLOBAL.InitDarkMode();
 			//IupMessage("",toStringz(Conv.to!(string)(GLOBAL.bCanUseDarkMode)));
 		}
 	}

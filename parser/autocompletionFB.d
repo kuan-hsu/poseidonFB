@@ -36,7 +36,6 @@ version(FBIDE)
 		static shared bool[string]			noIncludeNodeContainer;
 		
 		static CASTnode[]					extendedClasses;
-		//static SortedMap!(char[], char[])	map;
 		static Stack!(string)				calltipContainer;
 		public static string				noneListProcedureName;
 		static string[]						listContainer;
@@ -166,6 +165,9 @@ version(FBIDE)
 
 				if( listContainer.length )
 				{
+					//Algorithm.sort( listContainer );
+					Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
+					
 					string	_type, _list;
 					int		maxLeft, maxRight;
 
@@ -173,7 +175,7 @@ version(FBIDE)
 					{
 						if( listContainer[i].length )
 						{
-							auto dollarPos = lastIndexOf( listContainer[i], "~" );
+							auto dollarPos = lastIndexOf( listContainer[i], "#" );
 							if( dollarPos > -1 )
 							{
 								_type = listContainer[i][dollarPos+1..$];
@@ -191,32 +193,29 @@ version(FBIDE)
 					//string formatString = "{,-" ~ to!(string)( maxLeft ) ~ "} :: {,-" ~ to!(string)( maxRight ) ~ "}";
 					for( int i = 0; i < listContainer.length; ++ i )
 					{
+						if( i > 0 )
+						{
+							if( Uni.toLower( listContainer[i] ) == Uni.toLower( listContainer[i-1] ) ) continue;
+						}					
+						/*
 						if( i < listContainer.length - 1 )
 						{
-							auto questPos = lastIndexOf( listContainer[i], "?0" );
-							if( questPos > -1 )
-							{
-								string	_keyWord = listContainer[i][0..questPos];
-								string	compareWord;
+							string	_keyWord, compareWord;
+							
+							auto questPos = lastIndexOf( listContainer[i], "?" );
+							if( questPos > -1 ) _keyWord = listContainer[i][0..questPos]; else _keyWord = listContainer[i];
+							
+							questPos = lastIndexOf( listContainer[i+1], "?" );
+							if( questPos > -1 ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];								
 								
-								auto tildePos = lastIndexOf( listContainer[i+1], "~" );
-								if( tildePos > -1 )
-									compareWord = listContainer[i+1][0..tildePos];
-								else
-								{
-									questPos = lastIndexOf( listContainer[i+1], "?" );
-									if( questPos > -1 ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
-								}
-								
-								if( Uni.toLower( _keyWord ) == Uni.toLower( compareWord ) ) continue;
-							}
+							if( Uni.toLower( _keyWord ) == Uni.toLower( compareWord ) ) continue;
 						}
-
+						*/
 						if( listContainer[i].length )
 						{
 							string _string;
 							
-							auto dollarPos = lastIndexOf( listContainer[i], "~" );
+							auto dollarPos = lastIndexOf( listContainer[i], "#" );
 							if( dollarPos > 0 )
 							{
 								_type = listContainer[i][dollarPos+1..$];
@@ -330,13 +329,13 @@ version(FBIDE)
 				case B_DEFINE | B_VARIABLE:	return name ~ "?33";
 				case B_DEFINE | B_FUNCTION:	return name ~ "?34";
 				
-				case B_SUB:					return bShowType ? name ~ "~void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
-				case B_FUNCTION:			return bShowType ? name ~ "~" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
+				case B_SUB:					return bShowType ? name ~ "#void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
+				case B_FUNCTION:			return bShowType ? name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
 				case B_VARIABLE:
 					if( node.name.length )
 					{
 						if( !type.length ) type = node.base; // VAR
-						if( node.name[$-1] == ')' ) return bShowType ? name ~ "~" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return bShowType ? name ~ "~" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
+						if( node.name[$-1] == ')' ) return bShowType ? name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return bShowType ? name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
 					}
 					break;
 
@@ -350,9 +349,9 @@ version(FBIDE)
 				case B_CLASS:					return name ~ "?" ~ std.conv.to!(string)( 7 + protAdd );
 				case B_TYPE: 					return name ~ "?" ~ std.conv.to!(string)( 10 + protAdd );
 				case B_ENUM: 					return name ~ "?" ~ std.conv.to!(string)( 12 + protAdd );
-				case B_PARAM:					return bShowType ? name ~ "~" ~ type ~ "?18" : name ~ "?18";
+				case B_PARAM:					return bShowType ? name ~ "#" ~ type ~ "?18" : name ~ "?18";
 				case B_ENUMMEMBER:				return name ~ "?19";
-				case B_ALIAS:					return bShowType ? name ~ "~" ~ type ~ "?20" : name ~ "?20";//name ~ "?20";
+				case B_ALIAS:					return bShowType ? name ~ "#" ~ type ~ "?20" : name ~ "?20";//name ~ "?20";
 				case B_NAMESPACE:				return name ~ "?24";
 				case B_INCLUDE, B_CTOR, B_DTOR:	return null;
 				case B_OPERATOR:				return null;
@@ -1289,7 +1288,8 @@ version(FBIDE)
 				}
 			}
 
-			Algorithm.sort( results );
+			//Algorithm.sort( results );
+			Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( results );
 			
 			string result;
 			for( int i = 0; i < results.length; i ++ )
@@ -1759,16 +1759,9 @@ version(FBIDE)
 			auto		function_originalAST_Head = AST_Head;
 			auto		_rootNode = ParserAction.getRoot( function_originalAST_Head );
 			string		fullPath = _rootNode !is null ? _rootNode.name : "";
-			
-			
-			if( bPushContainer )
-			{
-				//if( map is null ) map = new SortedMap!(char[], char[]); else map.reset();
-			}
+			string		memberFunctionMotherName, result;
 			
 			extendedClasses.length = 0;
-			
-			string		memberFunctionMotherName, result;
 
 			if( !splitWord[0].length )
 			{
@@ -1876,7 +1869,6 @@ version(FBIDE)
 												if( indexOf( Uni.toLower( s ), Uni.toLower( splitWord[i] ) ) == 0 )
 												{
 													s = tools.convertKeyWordCase( GLOBAL.keywordCase, s );
-													//map.add( Uni.toUpper( s ~ "?0" ), s ~ "?0" );
 													listContainer ~= ( s ~ "?0" );
 												}
 											}
@@ -1904,7 +1896,6 @@ version(FBIDE)
 									foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
 									{
 										string _list = getListImage( _node );
-										//map.add( Uni.toUpper( _list ), _list );
 										listContainer ~= _list;
 									}
 								}
@@ -1942,7 +1933,6 @@ version(FBIDE)
 										foreach( CASTnode _child; getMembers( namespaceNode ) ) // Get members( include nested unnamed union & type )
 										{
 											string _list = getListImage( _child );
-											//map.add( upperCase( _list ), _list );
 											listContainer ~= _list;
 										}
 									}
@@ -1991,7 +1981,6 @@ version(FBIDE)
 									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 									{
 										string _list = getListImage( _child );
-										//map.add( Uni.toUpper( _list ), _list );
 										listContainer ~= _list;
 									}
 								}
@@ -2087,7 +2076,6 @@ version(FBIDE)
 										if( indexOf( Uni.toLower( _child.name ), splitWord[i] ) == 0 )
 										{
 											string _list = getListImage( _child );
-											//map.add( upperCase( _list ), _list );
 											listContainer ~= _list;
 										}
 									}
@@ -2110,7 +2098,6 @@ version(FBIDE)
 									foreach( CASTnode _child; getMembers( a ) ) // Get members( include nested unnamed union & type )
 									{
 										string _list = getListImage( _child );
-										//map.add( upperCase( _list ), _list );
 										listContainer ~= _list;
 									}
 								}
@@ -2138,7 +2125,6 @@ version(FBIDE)
 								if( indexOf( Uni.toLower( _child.name ), splitWord[i] ) == 0 )
 								{
 									string _list = getListImage( _child );
-									//map.add( upperCase( _list ), _list );
 									listContainer ~= _list;
 								}
 							}
@@ -2162,7 +2148,6 @@ version(FBIDE)
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
 								string _list = getListImage( _child );
-								//map.add( upperCase( _list ), _list );
 								listContainer ~= _list;
 							}
 						}
@@ -2197,13 +2182,7 @@ version(FBIDE)
 					}
 				}
 			}		
-		
-			if( bPushContainer )
-			{	/*
-				foreach( key, value; map )
-					listContainer ~= value;*/
-			}
-		
+
 			return result;
 		}
 		
@@ -2457,7 +2436,7 @@ version(FBIDE)
 				// Work on Project
 				// Step 4(Final): The include folder of the FreeBASIC installation (FreeBASIC\inc, where FreeBASIC is the folder where the fbc executable is located)
 				FocusUnit _focus = GLOBAL.compilerSettings.activeCompiler;
-				string[] _path3 = _focus.IncDir;
+				string[] _path3 = _focus.IncDir.dup;
 				
 				for( int i = 0; i < words.length; ++ i )
 				{
@@ -2555,7 +2534,8 @@ version(FBIDE)
 				}
 				
 				text = words[$-1];
-				Algorithm.sort( listContainer );
+				//Algorithm.sort( listContainer );
+				Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 				
 				string list;
 				for( int i = 0; i < listContainer.length; ++ i )
@@ -3320,77 +3300,43 @@ version(FBIDE)
 						}
 						
 						if( !listContainer.length ) listContainer = noUsingListContainer;
-						/+
-						char[][] keyWordListContainer;
-						
-						if( listContainer.length )
-						{
-							if( listContainer[$-1][$-1] == '0' )
-							{
-								keyWordListContainer = listContainer.dup;
-								listContainer.length = 0;
-							}
-						}
-
-						if( !listContainer.length )
-						{
-							foreach( char[] s; usingNames )
-							{
-								char[][] splitWithDot = Util.split( s, "." );
-								char[][] namespaceSplitWord = splitWithDot ~ splitWord;
-								char[] _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
-								if( listContainer.length )
-								{
-									listContainer = keyWordListContainer ~ listContainer;
-									result = _result;
-									break;
-								}
-							}
-						}
-						
-						if( !listContainer.length ) listContainer = keyWordListContainer;
-						+/
 					}
 
 					if( listContainer.length )
 					{
-						//listContainer.sort;
+						//Algorithm.sort( listContainer );
+						Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 
 						string	_type, _list;
 						int		maxLeft, maxRight;
 
-						//if( GLOBAL.toggleShowListType == "ON" )
-						//{
-							for( int i = 0; i < listContainer.length; ++ i )
+						for( int i = 0; i < listContainer.length; ++ i )
+						{
+							if( listContainer[i].length )
 							{
-								if( listContainer[i].length )
+								auto dollarPos = lastIndexOf( listContainer[i], "#" );
+								if( dollarPos > -1 )
 								{
-									auto dollarPos = lastIndexOf( listContainer[i], "~" );
-									if( dollarPos > -1 )
-									{
-										_type = listContainer[i][dollarPos+1..$];
-										if( _type.length > maxRight ) maxRight = cast(int) _type.length;
-										_list = listContainer[i][0..dollarPos];
-										if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
-									}
-									else
-									{
-										if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
-									}
+									_type = listContainer[i][dollarPos+1..$];
+									if( _type.length > maxRight ) maxRight = cast(int) _type.length;
+									_list = listContainer[i][0..dollarPos];
+									if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
+								}
+								else
+								{
+									if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
 								}
 							}
-						//}
+						}
 
 						//string formatString = "{,-" ~ to!(string)( maxLeft ) ~ "} :: {,-" ~ to!(string)( maxRight ) ~ "}";
 						for( int i = 0; i < listContainer.length; ++ i )
 						{
-							/*
 							if( i > 0 )
 							{
 								if( listContainer[i] == listContainer[i-1] ) continue;
 							}
-							*/
-							
+							/*
 							if( i < listContainer.length - 1 )
 							{
 								auto questPos = lastIndexOf( listContainer[i], "?0" );
@@ -3399,7 +3345,7 @@ version(FBIDE)
 									string	_keyWord = listContainer[i][0..questPos];
 									string 	compareWord;
 									
-									auto tildePos = lastIndexOf( listContainer[i+1], "~" );
+									auto tildePos = lastIndexOf( listContainer[i+1], "#" );
 									if( tildePos > -1 )
 										compareWord = listContainer[i+1][0..tildePos];
 									else
@@ -3411,13 +3357,13 @@ version(FBIDE)
 									if( Uni.toLower( _keyWord ) == Uni.toLower( compareWord ) ) continue;
 								}
 							}
-
+							*/
 
 							if( listContainer[i].length )
 							{
 								string _string;
 								
-								auto dollarPos = lastIndexOf( listContainer[i], "~" );
+								auto dollarPos = lastIndexOf( listContainer[i], "#" );
 								if( dollarPos > -1 )
 								{
 									_type = listContainer[i][dollarPos+1..$];
@@ -3506,6 +3452,7 @@ version(FBIDE)
 					if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
 					
 					word = getWholeWordDoubleSide( cSci.getIupScintilla, currentPos );
+					if( !word.length ) return;
 					word = Uni.toLower( Algorithm.reverse( word.dup ) );
 					
 					if( GLOBAL.debugPanel.isRunning && GLOBAL.debugPanel.isExecuting )
@@ -3925,7 +3872,7 @@ version(FBIDE)
 									if( !nameSpaceNodes.length ) return null;
 									
 									foreach( CASTnode a; nameSpaceNodes )
-										if( Uni.toLower( a.type ) == Uni.toLower( _AST_Head.type ) ) return a;
+										if( Uni.sicmp( a.type, _AST_Head.type ) == 0 ) return a;
 									
 									return nameSpaceNodes[0];
 								}
@@ -3980,7 +3927,7 @@ version(FBIDE)
 								if( nameSpaceNodes.length ) 
 								{
 									foreach( CASTnode a; nameSpaceNodes )
-										if( Uni.toLower( a.type ) == Uni.toLower( _AST_Head.type ) ) return a;
+										if( Uni.sicmp( a.type, _AST_Head.type ) == 0 ) return a;
 									
 									returnNode = nameSpaceNodes[0];
 								}

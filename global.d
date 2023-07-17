@@ -101,7 +101,7 @@ public:
 		extern(C)
 		{
 			// CHM viewer
-			alias static	HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) _htmlHelp;
+			alias _htmlHelp = HWND function( HWND, LPCWSTR, UINT, DWORD_PTR);
 
 			// DarkMode
 			static		BOOL function() InitDarkMode = null;

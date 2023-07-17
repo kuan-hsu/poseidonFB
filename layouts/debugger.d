@@ -58,14 +58,14 @@ private:
 			IupSetAttributes( labelSEPARATOR[i], "STYLE=EMPTY" );
 		}
 		
-		IupSetAttributes( btnClear, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_clear" );				IupSetAttribute( btnClear, "TIP", GLOBAL.languageItems["clear"].toCString );
-		IupSetAttributes( btnResume, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_resume" );			IupSetAttribute( btnResume, "TIP", GLOBAL.languageItems["runcontinue"].toCString );
-		IupSetAttributes( btnStop, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_stop" );				IupSetAttribute( btnStop, "TIP", GLOBAL.languageItems["stop"].toCString );
-		IupSetAttributes( btnStep, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_step" );				IupSetAttribute( btnStep, "TIP", GLOBAL.languageItems["step"].toCString );
-		IupSetAttributes( btnNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_next" );				IupSetAttribute( btnNext, "TIP", GLOBAL.languageItems["next"].toCString );
-		IupSetAttributes( btnReturn, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_return" );			IupSetAttribute( btnReturn, "TIP", GLOBAL.languageItems["return"].toCString );
-		IupSetAttributes( btnUntil, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_until" );				IupSetAttribute( btnUntil, "TIP", GLOBAL.languageItems["until"].toCString );
-		IupSetAttributes( btnTerminate, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear" );				IupSetAttribute( btnTerminate, "TIP", GLOBAL.languageItems["terminate"].toCString );
+		IupSetAttributes( btnClear, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_clear" );				IupSetStrAttribute( btnClear, "TIP", GLOBAL.languageItems["clear"].toCString );
+		IupSetAttributes( btnResume, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_resume" );			IupSetStrAttribute( btnResume, "TIP", GLOBAL.languageItems["runcontinue"].toCString );
+		IupSetAttributes( btnStop, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_stop" );				IupSetStrAttribute( btnStop, "TIP", GLOBAL.languageItems["stop"].toCString );
+		IupSetAttributes( btnStep, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_step" );				IupSetStrAttribute( btnStep, "TIP", GLOBAL.languageItems["step"].toCString );
+		IupSetAttributes( btnNext, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_next" );				IupSetStrAttribute( btnNext, "TIP", GLOBAL.languageItems["next"].toCString );
+		IupSetAttributes( btnReturn, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_return" );			IupSetStrAttribute( btnReturn, "TIP", GLOBAL.languageItems["return"].toCString );
+		IupSetAttributes( btnUntil, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_until" );				IupSetStrAttribute( btnUntil, "TIP", GLOBAL.languageItems["until"].toCString );
+		IupSetAttributes( btnTerminate, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_clear" );				IupSetStrAttribute( btnTerminate, "TIP", GLOBAL.languageItems["terminate"].toCString );
 		
 		IupSetCallback( btnClear, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
@@ -114,8 +114,8 @@ private:
 
 		btnLeft		= IupButton( null, "Left" );
 		btnRefresh	= IupButton( null, "Refresh" );
-		IupSetAttributes( btnLeft, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left" );	IupSetAttribute( btnLeft, "TIP", GLOBAL.languageItems["addtowatch"].toCString );
-		IupSetAttributes( btnRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );
+		IupSetAttributes( btnLeft, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_left" );	IupSetStrAttribute( btnLeft, "TIP", GLOBAL.languageItems["addtowatch"].toCString );
+		IupSetAttributes( btnRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetStrAttribute( btnRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );
 		IupSetCallback( btnLeft, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			if( GLOBAL.debugPanel.isRunning )
@@ -222,10 +222,10 @@ private:
 		btnDelAll			= IupButton( null, "RemoveAll" );
 		btnWatchRefresh		= IupButton( null, "WatchRefresh" );
 		
-		IupSetAttributes( btnAdd, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_add" );			IupSetAttribute( btnAdd, "TIP", GLOBAL.languageItems["add"].toCString );
-		IupSetAttributes( btnDel, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );				IupSetAttribute( btnDel, "TIP", GLOBAL.languageItems["remove"].toCString );
-		IupSetAttributes( btnDelAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_deleteall" );		IupSetAttribute( btnDelAll, "TIP", GLOBAL.languageItems["removeall"].toCString );
-		IupSetAttributes( btnWatchRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetAttribute( btnWatchRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );			
+		IupSetAttributes( btnAdd, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_debug_add" );			IupSetStrAttribute( btnAdd, "TIP", GLOBAL.languageItems["add"].toCString );
+		IupSetAttributes( btnDel, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_delete" );				IupSetStrAttribute( btnDel, "TIP", GLOBAL.languageItems["remove"].toCString );
+		IupSetAttributes( btnDelAll, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_deleteall" );		IupSetStrAttribute( btnDelAll, "TIP", GLOBAL.languageItems["removeall"].toCString );
+		IupSetAttributes( btnWatchRefresh, "ALIGNMENT=ACENTER:ACENTER,FLAT=YES,IMAGE=icon_refresh" );	IupSetStrAttribute( btnWatchRefresh, "TIP", GLOBAL.languageItems["refresh"].toCString );			
 
 		Ihandle* hBoxVar1_toolbar = IupHbox( IupFill(), btnAdd, btnDel, btnDelAll, btnWatchRefresh, null );
 		IupSetAttributes( hBoxVar1_toolbar, "ALIGNMENT=ACENTER,GAP=2" );
@@ -2156,13 +2156,13 @@ class DebugThread //: Thread
 private :
 	import					std.stdio, std.process, core.thread, std.file;
 	version(Windows) import	core.sys.windows.winbase, core.sys.windows.windef;
-
+	version(Posix) import core.sys.posix.fcntl : fcntl, F_SETFL, O_NONBLOCK;
 	
 	string			executeFullPath, cwd;
 	bool			b64Bit;
 	int				caretPos, splitValue;
 	ProcessPipes	proc;
-
+	bool			bStdoutNOBLOCK, bStderrNOBLOCK; 
 
 	string getGDBmessage( int deleyms = 100 )
 	{
@@ -2221,28 +2221,36 @@ private :
 				}
 			}
 			
+			// Check Stderr message.
 			// Prevent Windows hanging.......
-			version(Windows)
+			int ch;
+			if( bStderrNOBLOCK )
 			{
-				uint iTotalBytesAvail, iNumberOfBytesWritten;
-				char[4096] sBuf;
-
-				PeekNamedPipe( proc.stderr.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
-				if( iTotalBytesAvail > 0 )
-				{
-					while( iTotalBytesAvail > 0  )
-					{
-						if( iTotalBytesAvail > 4096 ) iTotalBytesAvail = 4096;
-						ReadFile( proc.stderr.windowsHandle, sBuf.ptr, iTotalBytesAvail, &iNumberOfBytesWritten, null );
-						stderrString ~= sBuf[0..iNumberOfBytesWritten];
-						PeekNamedPipe( proc.stderr.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
-					}
+				auto fp = proc.stderr.getFP();
+				while( ( ch = fgetc(fp)) != EOF )
+				{ 
+					stderrString ~= cast(char) ch;
 				}
 			}
 			else
 			{
-				foreach( line; proc.stderr.byLine )  
-					stderrString ~= ( strip( line ) ~ "\n" );
+				version(Windows)
+				{
+					uint iTotalBytesAvail, iNumberOfBytesWritten;
+					char[4096] sBuf;
+
+					PeekNamedPipe( proc.stderr.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
+					if( iTotalBytesAvail > 0 )
+					{
+						while( iTotalBytesAvail > 0  )
+						{
+							if( iTotalBytesAvail > 4096 ) iTotalBytesAvail = 4096;
+							ReadFile( proc.stderr.windowsHandle, sBuf.ptr, iTotalBytesAvail, &iNumberOfBytesWritten, null );
+							stderrString ~= sBuf[0..iNumberOfBytesWritten];
+							PeekNamedPipe( proc.stderr.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
+						}
+					}
+				}
 			}
 			
 			if( stderrString.length ) tools.questMessage( "Alarm", stderrString, "WARNING", "OK" );			
@@ -2309,9 +2317,16 @@ public:
 				b64Bit = true;
 			}
 			
-			
-
 			proc = pipeShell( "\"" ~ debuggerExe ~ "\" " ~ executeFullPath, Redirect.all, environment.toAA, Config.suppressConsole, cwd );
+			version(Windows)
+			{
+				auto x = PIPE_NOWAIT;
+				if( SetNamedPipeHandleState( proc.stderr.windowsHandle(), &x, null, null ) ) bStderrNOBLOCK = true;
+			}
+			else
+			{
+				if( fcntl( fileno( proc.stderr.getFP() ), F_SETFL, O_NONBLOCK ) != -1 ) bStderrNOBLOCK = true;
+			}
 			string result = getGDBmessage();
 			
 			IupSetStrAttribute( GLOBAL.debugPanel.getConsoleHandle, "APPEND", toStringz( result ) );

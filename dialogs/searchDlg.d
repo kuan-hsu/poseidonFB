@@ -129,24 +129,24 @@ class CSearchExpander
 		version(DIDE) IupSetAttribute( btnCase, "VALUE", "ON" );
 		version(FBIDE) IupSetAttribute( btnCase, "VALUE", "OFF" );
 		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnCase, "IMPRESS=icon_casesensitive_invert" );
-		IupSetAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
+		IupSetStrAttribute( btnCase, "TIP", GLOBAL.languageItems["casesensitive"].toCString );
 		IupSetCallback( btnCase, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnWhole = IupToggle( null, null );
 		IupSetAttributes( btnWhole, "IMAGE=icon_notwholeword,IMPRESS=icon_wholeword,FLAT=YES,VALUE=ON,NAME=toggle_Whole,SIZE=x12,CANFOCUS=NO" );
 		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnWhole, "IMPRESS=icon_notwholeword_invert" );
-		IupSetAttribute( btnWhole, "TIP", GLOBAL.languageItems["wholeword"].toCString );
+		IupSetStrAttribute( btnWhole, "TIP", GLOBAL.languageItems["wholeword"].toCString );
 		IupSetCallback( btnWhole, "ACTION", cast(Icallback) &CSearchExpander_Toggle_ACTION );
 
 		btnScope = IupToggle( null, null );
 		IupSetAttributes( btnScope, "IMAGE=icon_selectall,FLAT=YES,VALUE=ON,NAME=toggle_Scope,SIZE=x12,CANFOCUS=NO" );
 		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnScope, "IMPRESS=icon_selectall_invert" );
-		IupSetAttribute( btnScope, "TIP", GLOBAL.languageItems["scope"].toCString );
+		IupSetStrAttribute( btnScope, "TIP", GLOBAL.languageItems["scope"].toCString );
 
 		btnDirection = IupToggle( null, null );
 		IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow,IMAGE=icon_uparrow,FLAT=YES,VALUE=ON,NAME=toggle_Direction,SIZE=x12,CANFOCUS=NO" );
 		if( GLOBAL.editorSetting00.IconInvert == "ALL" ) IupSetAttributes( btnDirection, "IMPRESS=icon_downarrow_invert" );
-		IupSetAttribute( btnDirection, "TIP", GLOBAL.languageItems["direction"].toCString );
+		IupSetStrAttribute( btnDirection, "TIP", GLOBAL.languageItems["direction"].toCString );
 		
 		btnClose = IupButton( null, null );
 		IupSetAttributes( btnClose, "IMAGE=icon_close,FLAT=YES,NAME=btn_Close,SIZE=x12,CANFOCUS=NO" );
@@ -217,13 +217,13 @@ class CSearchExpander
 					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "CFD", null );
 				}
 			}
+
+			IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listReplace, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		}
 
-		IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listReplace, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-			
 		IupSetStrAttribute( btnFindPrev, "HLCOLOR", null );
 		IupSetStrAttribute( btnFindNext, "HLCOLOR", null );
 		IupSetStrAttribute( btnReplaceFind, "HLCOLOR", null );

@@ -41,7 +41,7 @@ private:
 		IupSetAttributes( _hBox01, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 		
 		Ihandle* hBox01 = IupFrame( _hBox01 );
-		IupSetAttribute( hBox01, "TITLE", GLOBAL.languageItems["compilerpath"].toCString );
+		IupSetStrAttribute( hBox01, "TITLE", GLOBAL.languageItems["compilerpath"].toCString );
 		IupSetAttributes( hBox01, "EXPANDCHILDREN=YES,SIZE=346x");
 
 		Ihandle* hBox02, hBox01x64, hBox02x64;
@@ -62,7 +62,7 @@ private:
 				IupSetAttributes( _hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 				
 				hBox01x64 = IupFrame( _hBox01x64 );
-				IupSetAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
+				IupSetStrAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
 				IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
 				
 				Ihandle* textx64DebuggerPath = IupText( null );
@@ -77,7 +77,7 @@ private:
 				IupSetAttributes( _hBox02x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 				
 				hBox02x64 = IupFrame( _hBox02x64 );
-				IupSetAttribute( hBox02x64, "TITLE", GLOBAL.languageItems["debugx64path"].toCString );
+				IupSetStrAttribute( hBox02x64, "TITLE", GLOBAL.languageItems["debugx64path"].toCString );
 				IupSetAttributes( hBox02x64, "EXPANDCHILDREN=YES,SIZE=346x");
 			}
 
@@ -95,7 +95,7 @@ private:
 			IupSetAttributes( _hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 			
 			hBox02 = IupFrame( _hBox02 );
-			IupSetAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
+			IupSetStrAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
 			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");			
 		}
 		else
@@ -114,7 +114,7 @@ private:
 				IupSetAttributes( _hBox01x64, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 				
 				hBox01x64 = IupFrame( _hBox01x64 );
-				IupSetAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
+				IupSetStrAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
 				IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
 			}
 		}
@@ -122,7 +122,7 @@ private:
 		version(linux)
 		{
 			Ihandle* textTerminalPath = IupText( null );
-			IupSetAttributes( textTerminalPath, "SIZE=320x,NAME=Compiler-textTerminalPath" );
+			IupSetAttributes( textTerminalPath, "SIZE=320x,NAME=Compiler-textTerminalPath,BORDER=NO" );
 			IupSetStrAttribute( textTerminalPath, "VALUE", toStringz( GLOBAL.linuxTermName ) );
 		
 			btnOpenTerminal = IupButton( null, null );
@@ -133,12 +133,12 @@ private:
 			IupSetAttributes( _hBox03, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 			
 			Ihandle* hBox03 = IupFrame( _hBox03 );
-			IupSetAttribute( hBox03, "TITLE", GLOBAL.languageItems["terminalpath"].toCString );
+			IupSetStrAttribute( hBox03, "TITLE", GLOBAL.languageItems["terminalpath"].toCString );
 			IupSetAttributes( hBox03, "EXPANDCHILDREN=YES,SIZE=346x");
 			
 			
 			Ihandle* textHtmlAppPath = IupText( null );
-			IupSetAttributes( textHtmlAppPath, "SIZE=320x,NAME=Compiler-htmlappPath" );
+			IupSetAttributes( textHtmlAppPath, "SIZE=320x,NAME=Compiler-htmlappPath,BORDER=NO" );
 			IupSetStrAttribute( textHtmlAppPath, "VALUE", toStringz( GLOBAL.linuxHtmlAppName ) );
 		
 			btnOpenHtmlApp = IupButton( null, null );
@@ -149,7 +149,7 @@ private:
 			IupSetAttributes( _hBox04, "ALIGNMENT=ACENTER,MARGIN=5x0" );
 			
 			Ihandle* hBox04 = IupFrame( _hBox04 );
-			IupSetAttribute( hBox04, "TITLE", GLOBAL.languageItems["htmlapppath"].toCString );
+			IupSetStrAttribute( hBox04, "TITLE", GLOBAL.languageItems["htmlapppath"].toCString );
 			IupSetAttributes( hBox04, "EXPANDCHILDREN=YES,SIZE=346x");			
 		}		
 
@@ -232,7 +232,7 @@ private:
 		version(DIDE)	IupSetAttributes( vBoxCompiler, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
 
 		Ihandle* frameCompiler = IupFrame( vBoxCompiler );
-		IupSetAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
+		IupSetStrAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=346x");
 		
 		
@@ -292,7 +292,7 @@ private:
 		
 		Ihandle* textTrigger = IupText( null );
 		IupSetAttribute( textTrigger, "SIZE", "30x12" );
-		IupSetAttribute( textTrigger, "TIP", GLOBAL.languageItems["triggertip"].toCString );
+		IupSetStrAttribute( textTrigger, "TIP", GLOBAL.languageItems["triggertip"].toCString );
 		IupSetInt( textTrigger, "VALUE", GLOBAL.autoCompletionTriggerWordCount );
 		IupSetHandle( "textTrigger", textTrigger );
 		
@@ -303,7 +303,7 @@ private:
 
 			Ihandle* textIncludeLevel = IupText( null );
 			IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
-			IupSetAttribute( textIncludeLevel, "TIP", GLOBAL.languageItems["includeleveltip"].toCString );
+			IupSetStrAttribute( textIncludeLevel, "TIP", GLOBAL.languageItems["includeleveltip"].toCString );
 			IupSetInt( textIncludeLevel, "VALUE", GLOBAL.compilerSettings.includeLevel );
 			IupSetHandle( "textIncludeLevel", textIncludeLevel );
 		}
@@ -408,7 +408,7 @@ private:
 		
 		Ihandle* frameLive = IupFrame( hBoxLive2 );
 		IupSetAttributes( frameLive, "SIZE=346x" );
-		IupSetAttribute( frameLive, "TITLE", GLOBAL.languageItems["parserlive"].toCString );
+		IupSetStrAttribute( frameLive, "TITLE", GLOBAL.languageItems["parserlive"].toCString );
 
 		switch( GLOBAL.liveLevel )
 		{
@@ -427,7 +427,7 @@ private:
 		
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
-		IupSetAttribute( frameParser, "TITLE",  GLOBAL.languageItems["parsersetting"].toCString );
+		IupSetStrAttribute( frameParser, "TITLE",  GLOBAL.languageItems["parsersetting"].toCString );
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 		IupSetAttribute( frameParser, "SIZE", "346x");
 
@@ -598,7 +598,7 @@ private:
 		Ihandle* labelColumnEdge = IupLabel( GLOBAL.languageItems["columnedge"].toCString );
 		Ihandle* textColumnEdge = IupText( null );
 		IupSetStrAttribute( textColumnEdge, "VALUE", toStringz( GLOBAL.editorSetting00.ColumnEdge ) );
-		IupSetAttribute( textColumnEdge, "TIP", GLOBAL.languageItems["triggertip"].toCString );
+		IupSetStrAttribute( textColumnEdge, "TIP", GLOBAL.languageItems["triggertip"].toCString );
 		IupSetHandle( "textColumnEdge", textColumnEdge );
 		Ihandle* hBoxColumn = IupHbox( labelColumnEdge, textColumnEdge, null );
 		IupSetAttribute( hBoxColumn, "ALIGNMENT", "ACENTER" );
@@ -606,7 +606,7 @@ private:
 		Ihandle* labelBarsize = IupLabel( GLOBAL.languageItems["barsize"].toCString );
 		Ihandle* textBarSize = IupText( null );
 		IupSetStrAttribute( textBarSize, "VALUE", toStringz( GLOBAL.editorSetting01.BarSize ) );
-		IupSetAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
+		IupSetStrAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
 		IupSetHandle( "textBarSize", textBarSize );
 		Ihandle* hBoxBarSize = IupHbox( labelBarsize, textBarSize, null );
 		IupSetAttribute( hBoxBarSize, "ALIGNMENT", "ACENTER" );
@@ -846,7 +846,7 @@ private:
 
 			Ihandle* frameKeywordCase = IupFrame( IupRadio( hBoxKeywordCase ) );
 			IupSetAttributes( frameKeywordCase, "SIZE=346x,GAP=1" );
-			IupSetAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].toCString );
+			IupSetStrAttribute( frameKeywordCase, "TITLE", GLOBAL.languageItems["autoconvertkeyword"].toCString );
 			
 			switch( GLOBAL.keywordCase )
 			{
@@ -913,12 +913,12 @@ private:
 
 		colorDefaultRefresh = IupButton( null, null );
 		IupSetAttributes( colorDefaultRefresh, "FLAT=NO,IMAGE=icon_refresh,FLAT=YES" );
-		IupSetAttribute( colorDefaultRefresh, "TIP", GLOBAL.languageItems["default"].toCString() );
+		IupSetStrAttribute( colorDefaultRefresh, "TIP", GLOBAL.languageItems["default"].toCString() );
 		IupSetCallback( colorDefaultRefresh, "ACTION", cast(Icallback) &colorTemplateList_reset_ACTION );
 
 		colorTemplateRemove = IupButton( null, null );
 		IupSetAttributes( colorTemplateRemove, "FLAT=NO,IMAGE=icon_debug_clear,FLAT=YES" );
-		IupSetAttribute( colorTemplateRemove, "TIP", GLOBAL.languageItems["remove"].toCString() );
+		IupSetStrAttribute( colorTemplateRemove, "TIP", GLOBAL.languageItems["remove"].toCString() );
 		IupSetCallback( colorTemplateRemove, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
 			Ihandle* _listHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-colorTemplateList" );
@@ -993,7 +993,7 @@ private:
 		
 
 		Ihandle* colorTemplateFrame = IupFrame( _hboxColorPath );
-		IupSetAttribute( colorTemplateFrame, "TITLE", GLOBAL.languageItems["colorfile"].toCString() );
+		IupSetStrAttribute( colorTemplateFrame, "TITLE", GLOBAL.languageItems["colorfile"].toCString() );
 		IupSetAttributes( colorTemplateFrame, "EXPANDCHILDREN=YES,SIZE=346x");
 		
 		
@@ -1042,7 +1042,7 @@ private:
 		Ihandle* textAlpha = IupText( null );
 		IupSetAttributes( textAlpha, "SIZE=24x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=50,NAME=Color-textSelAlpha" );
 		IupSetStrAttribute( textAlpha, "VALUE", toStringz( GLOBAL.editColor.selAlpha ) );
-		IupSetAttribute( textAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
+		IupSetStrAttribute( textAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
 		
 		
 		// 2017.1.14
@@ -1068,7 +1068,7 @@ private:
 		Ihandle* textIndicatorAlpha = IupText( null );
 		version(Windows) IupSetAttributes( textIndicatorAlpha, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=50,NAME=Color-textIndicatorAlpha" ); else IupSetAttributes( textIndicatorAlpha, "SIZE=16x10,MARGIN=0x0,NAME=Color-textIndicatorAlpha" );
 		IupSetStrAttribute( textIndicatorAlpha, "VALUE", toStringz( GLOBAL.editColor.currentWordAlpha ) );
-		IupSetAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
+		IupSetStrAttribute( textIndicatorAlpha, "TIP", GLOBAL.languageItems["alphatip"].toCString() );
 
 
 
@@ -1097,7 +1097,7 @@ private:
 		Ihandle* frameColor = IupFrame( gboxColor );
 		IupSetAttributes( frameColor, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetAttribute( frameColor, "SIZE", "346x" );
-		IupSetAttribute( frameColor, "TITLE", GLOBAL.languageItems["color"].toCString );
+		IupSetStrAttribute( frameColor, "TITLE", GLOBAL.languageItems["color"].toCString );
 
 		
 		// Color -1
@@ -1603,7 +1603,7 @@ private:
 		IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=8,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
-		IupSetAttribute( frameColor_1, "TITLE", GLOBAL.languageItems["colorfgbg"].toCString );
+		IupSetStrAttribute( frameColor_1, "TITLE", GLOBAL.languageItems["colorfgbg"].toCString );
 		
 		
 		// OPACITY
@@ -1694,7 +1694,7 @@ private:
 		IupSetAttributes( gboxOPACITY, "SIZELIN =-1,NUMDIV=5,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=8,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
 		Ihandle* frameOPACITY = IupFrame( gboxOPACITY );
 		IupSetAttributes( frameOPACITY, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
-		IupSetAttribute( frameOPACITY, "TITLE", GLOBAL.languageItems["dialogopacity"].toCString );
+		IupSetStrAttribute( frameOPACITY, "TITLE", GLOBAL.languageItems["dialogopacity"].toCString );
 		
 		
 		// Bottom
@@ -1718,13 +1718,16 @@ private:
 		version(Windows)
 			Ihandle* hBoxIcon2 = IupHbox( radioIcon, toggleDarkMode, null );
 		else
-			Ihandle* hBoxIcon2 = radioIcon;
+		{
+			//IupSetAttributes( hBoxIcon, "SIZE=346x" );
+			Ihandle* hBoxIcon2 = IupHbox( radioIcon, null );
+		}
 			
 		IupSetAttributes( hBoxIcon2, "ALIGNMENT=ACENTER,HOMOGENEOUS=YES,NORMALIZESIZE=HORIZONTAL" );
 		
 		Ihandle* frameIcon = IupFrame( hBoxIcon2 );
-		IupSetAttributes( frameIcon, "SIZE=346x16" );
-		IupSetAttribute( frameIcon, "TITLE", GLOBAL.languageItems["iconinvert"].toCString );
+		IupSetAttributes( frameIcon, "SIZE=346x" );
+		IupSetStrAttribute( frameIcon, "TITLE", GLOBAL.languageItems["iconinvert"].toCString );
 		
 		if( GLOBAL.editorSetting00.IconInvert == "OFF" )
 			IupSetAttribute( toggleIcon, "VALUE", "ON" );
@@ -2047,15 +2050,16 @@ private:
 	
 	void changeColor()
 	{
-		IupSetStrAttribute( getIhandle, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( getIhandle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		
-		//List
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
-	
 		version(Windows)
 		{
+
+			IupSetStrAttribute( getIhandle, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( getIhandle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			
+			//List
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
+	
 			if( GLOBAL.bCanUseDarkMode )
 			{
 				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
@@ -2071,12 +2075,12 @@ private:
 		IupSetStrAttribute( btnOK, "HLCOLOR", null );
 		IupSetStrAttribute( btnAPPLY, "HLCOLOR", null );
 		IupSetStrAttribute( btnCANCEL, "HLCOLOR", null );
-		
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-compilerPath" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-compilerPath" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		
+
 		version(Windows)
 		{
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-compilerPath" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-compilerPath" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		
 			version(FBIDE)
 			{
 				IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-x64compilerPath" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
@@ -2093,54 +2097,62 @@ private:
 		}
 		else
 		{
+			/*
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-textTerminalPath" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-textTerminalPath" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-htmlappPath" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-htmlappPath" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			*/
 		}
 		
 		version(FBIDE)
 		{
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-debuggerPath" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-debuggerPath" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			version(Windows)
+			{
+				IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-debuggerPath" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+				IupSetStrAttribute( IupGetDialogChild( getIhandle, "Compiler-debuggerPath" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			}
 		}
 		
-		IupSetStrAttribute( IupGetHandle( "textMaxHeight" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetHandle( "textMaxHeight" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetHandle( "textTrigger" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetHandle( "textTrigger" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetHandle( "textIncludeLevel" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetHandle( "textIncludeLevel" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetHandle( "textSetControlCharSymbol" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetHandle( "textSetControlCharSymbol" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetHandle( "textTabWidth" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetHandle( "textTabWidth" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetHandle( "textColumnEdge" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetHandle( "textColumnEdge" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetHandle( "textBarSize" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetHandle( "textBarSize" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textSelAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textSelAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textIndicatorAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textIndicatorAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textLeftViewHLTAplha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textLeftViewHLTAplha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageIndicatorAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageIndicatorAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		
+		version(Windows)
+		{
+			IupSetStrAttribute( IupGetHandle( "textMaxHeight" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textMaxHeight" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textTrigger" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textTrigger" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textIncludeLevel" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textIncludeLevel" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textSetControlCharSymbol" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textSetControlCharSymbol" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textTabWidth" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textTabWidth" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textColumnEdge" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textColumnEdge" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textBarSize" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textBarSize" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textMonitorID" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textMonitorID" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleX" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleX" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleY" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleY" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleW" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleW" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleH" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleH" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textSelAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textSelAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textIndicatorAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textIndicatorAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textLeftViewHLTAplha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textLeftViewHLTAplha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageIndicatorAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageIndicatorAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textMonitorID" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textMonitorID" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleX" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleX" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleY" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleY" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleW" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleW" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleH" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "textConsoleH" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 
 		IupSetStrAttribute( IupGetHandle( "keyWordText0" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( IupGetHandle( "keyWordText0" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
@@ -2158,18 +2170,18 @@ private:
 		IupSetStrAttribute( IupGetHandle( "shortCutList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( IupGetHandle( "shortCutList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textFindInFilesDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textFindInFilesDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textPreferenceDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textPreferenceDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textProjectDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textProjectDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGotoDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGotoDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textNewFileDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textNewFileDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		version(Windows)
-		{
+		{		
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textFindInFilesDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textFindInFilesDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textPreferenceDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textPreferenceDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textProjectDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textProjectDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGotoDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGotoDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textNewFileDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textNewFileDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textAutoCompleteDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textAutoCompleteDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		}
@@ -3180,7 +3192,7 @@ extern(C) // Callback for CPreferenceDialog
 	{
 		int value = IupGetInt( ih, "VALUE" );
 		//IupSetInt( ih, "VALUE", value );
-		IupSetAttribute( ih, "TIP", toStringz( to!(string)( value ) ) );
+		IupSetStrAttribute( ih, "TIP", toStringz( to!(string)( value ) ) );
 		
 		return IUP_DEFAULT;
 	}

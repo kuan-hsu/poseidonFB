@@ -40,14 +40,20 @@ class IupString
 {
 private:
 	char*	_CstringPointer = null;
-	string	_DString;
 
 	void copy( string Dstring )
 	{
-		_DString = Dstring;
 		_CstringPointer = cast(char*)calloc( Dstring.length + 1, 1 );
 		memcpy( _CstringPointer, Dstring.ptr, Dstring.length );
 	}
+	
+	char* convert( string Dstring )
+	{
+		if( _CstringPointer != null ) free( _CstringPointer );
+		copy( Dstring );
+
+		return _CstringPointer;
+	}	
 
 public:
 	this(){}
@@ -61,8 +67,6 @@ public:
 	{
 		if( Cstring != null )
 		{
-			_DString = fSTRz( Cstring );
-			
 			auto _len = strlen( Cstring );
 			_CstringPointer = cast(char*)calloc( _len + 1, 1 );
 			memcpy( _CstringPointer, Cstring, _len );
@@ -84,14 +88,6 @@ public:
 		convert( fromStringz( rhs ).dup );
 	}
 
-	char* convert( string Dstring )
-	{
-		if( _CstringPointer != null ) free( _CstringPointer );
-		copy( Dstring );
-
-		return _CstringPointer;
-	}
-
 	char* toCString()
 	{
 		return _CstringPointer;
@@ -99,7 +95,8 @@ public:
 
 	string toDString()
 	{
-		return _DString;
+		if( _CstringPointer != null ) return fSTRz( _CstringPointer );
+		return null;
 	}
 }
 
@@ -484,6 +481,40 @@ string[] getCompilerImportPath( string compilerFullPath )
 		return results;
 	}
 	return null;
+}
+
+
+void* DyLibLoad( string libName )
+{
+	import core.runtime;
+	return Runtime.loadLibrary( libName );
+}
+
+void* DyLibSymbol( void* lib, string symName )
+{
+	if( !lib ) return null;
+	
+	version(Windows)
+	{
+		import core.sys.windows.winbase:GetProcAddress;
+		return GetProcAddress( lib, toStringz( symName ) );
+	}
+	else
+	{
+		import core.sys.posix.dlfcn;
+		
+		auto ret = dlsym( lib, toStringz( symName ) );
+		char* error = dlerror();
+		if( error ) return null;
+		
+		return ret;
+	}
+}
+
+void DyLibFree( void* lib )
+{
+	import core.runtime;
+	Runtime.unloadLibrary( lib );
 }
 
 

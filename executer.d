@@ -983,11 +983,8 @@ private:
 			}
 			version(DIDE)
 			{
-				version(Windows)
-				{
-					int _COMPILERVER = DMDversion( compiler );
-					if( indexOf( _focus.Option, "-m32omf" ) > -1 ) _COMPILERVER = 1;
-				}
+				int _COMPILERVER = DMDversion( compiler );
+				version(Windows) if( indexOf( _focus.Option, "-m32omf" ) > -1 ) _COMPILERVER = 1;
 				
 				foreach( s; _focus.IncDir )
 				{

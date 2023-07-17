@@ -414,7 +414,7 @@ extern(C)
 		}
 
 		if( GLOBAL.editorSetting01.PLACEMENT != "MINIMIZED" ) GLOBAL.statusBar.setPrjNameSize( width );
-		
+
 		return IUP_DEFAULT;
 	}
 	
@@ -528,11 +528,6 @@ extern(C)
 					{
 						if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
 						{
-							/*
-							char[] s = ScintillaAction.getCurrentChar( -1, cSci.getIupScintilla );
-							if( s.length ) c = cast(int) s[$-1];
-							Stdout( "Keycode:" , Integer.toString( GLOBAL.KeyNumber ) ~ " " ~ Integer.toString( c ) ).newline;
-							*/
 							switch( c )
 							{
 								case 10, 13: // Eneter
@@ -589,14 +584,11 @@ extern(C)
 		
 			GLOBAL.bKeyUp = true; // Release
 			GLOBAL.KeyNumber = -1;
-			//Stdout( "KEYUP = " ~ Integer.toString( c ) ).newline;
 		}
 		else
 		{
 			GLOBAL.KeyNumber = c;
 		}
-			
-		//if( press == 0 ) IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "KeyUP\n" ) );else IupSetAttribute( GLOBAL.outputPanel, "APPEND", GLOBAL.cString.convert( "KeyDOWN\n" ) );
 
 		return IUP_DEFAULT;
 	}

@@ -671,11 +671,13 @@ Ihandle* createMenu()
 	IupSetAttribute( customTooledit, "IMAGE", "icon_toolitem" );
 	IupSetCallback( customTooledit, "ACTION", cast(Icallback)&coustomTooledit_cb );
 	
+	/*
 	Ihandle* markIupSeparator = IupSeparator();
 	IupSetAttribute( markIupSeparator, "TITLE", "" );
+	*/
 	
-	version(FBIDE) Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, markIupSeparator, null  );
-	version(DIDE) Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, IupSeparator(), customTooledit, markIupSeparator, null  );
+	version(FBIDE) Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, convertCase, IupSeparator(), customTooledit, /*markIupSeparator,*/ null  );
+	version(DIDE) Ihandle* toolsSubMenu = IupMenu( setEOL, convertEOL, convertEncoding, IupSeparator(), customTooledit, /*markIupSeparator,*/ null  );
 		
 	IupSetHandle( "toolsSubMenu", toolsSubMenu );
 	
@@ -725,8 +727,10 @@ Ihandle* createMenu()
 	IupSetAttribute(item_about, "IMAGE", "icon_information");
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE\nPoseidonFB(V0.506)  2023.07.11\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE\nPoseidonD(V0.081)  2023.07.11\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		bool _64bit;
+		version(X86_64) _64bit = true;
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "\nPoseidonFB(V0.507)  2023.07.17\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "\nPoseidonD(V0.082)  2023.07.17\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -1688,7 +1692,7 @@ extern(C)
 		if( GLOBAL.preferenceDlg is null )
 		{
 			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
-			GLOBAL.preferenceDlg.show( IUP_RIGHTPARENT, IUP_TOPPARENT );
+			version(Windows) GLOBAL.preferenceDlg.show( IUP_RIGHTPARENT, IUP_TOPPARENT ); else GLOBAL.preferenceDlg.show( IUP_CENTER, IUP_CENTER );
 		}
 		else
 		{

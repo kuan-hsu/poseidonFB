@@ -721,20 +721,19 @@ public:
 			if( GLOBAL.enableParser == "ON" && GLOBAL.preParseLevel > 0 )
 			{
 				GLOBAL.activeProjectPath = setupDir;
-
-				if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
-				{
-					IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
-					IupSetInt( GLOBAL.messageSplit, "BARSIZE", std.conv.to!(int)( GLOBAL.editorSetting01.BarSize ) );
-					IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
-					IupSetInt( GLOBAL.messageSplit, "ACTIVE", 1 );
-				}
-				IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
-				
 				GLOBAL.compilerSettings.activeCompiler = getActiveCompilerInformation( GLOBAL.projectManager[setupDir].dir );
 
 				if( GLOBAL.togglePreLoadPrj == "ON" )
 				{
+					if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
+					{
+						IupSetAttribute( GLOBAL.menuMessageWindow, "VALUE", "ON" );
+						IupSetInt( GLOBAL.messageSplit, "BARSIZE", std.conv.to!(int)( GLOBAL.editorSetting01.BarSize ) );
+						IupSetInt( GLOBAL.messageSplit, "VALUE", GLOBAL.messageSplit_value );
+						IupSetInt( GLOBAL.messageSplit, "ACTIVE", 1 );
+					}
+					IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );				
+				
 					GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 					GLOBAL.statusBar.setPrjName( "Pre-Parse Project..." );
 					

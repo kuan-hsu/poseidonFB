@@ -121,7 +121,7 @@ struct LiveParser
 					functionWord = fSTRz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
 				}
 				
-				int lineHead = IupScintillaSendMessage( iupSci, 2166, functionPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+				int lineHead = cast(int) IupScintillaSendMessage( iupSci, 2166, functionPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 
 				while( lineHead > oldLineHead  )
 				{
@@ -139,7 +139,7 @@ struct LiveParser
 								functionWord = fSTRz( IupGetAttributeId( iupSci, "CHAR", functionPos ) );
 							}
 							
-							lineHead = IupScintillaSendMessage( iupSci, 2166, functionPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+							lineHead = cast(int) IupScintillaSendMessage( iupSci, 2166, functionPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 						}
 						else
 						{
@@ -491,7 +491,7 @@ struct LiveParser
 				if( cSci !is null )
 				{
 					int			currentPos = ScintillaAction.getCurrentPos( cSci.getIupScintilla );
-					int			currentLineNum = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
+					int			currentLineNum = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 
 					if( ScintillaAction.isComment( cSci.getIupScintilla, currentPos ) ) return;
 
@@ -506,7 +506,7 @@ struct LiveParser
 							// Reparse All
 							GLOBAL.outlineTree.refresh( cSci );
 							
-							int _ln = IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
+							int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 						
 							int pos = IupGetInt( GLOBAL.outlineTree.getZBoxHandle, "VALUEPOS" ); // Get active zbox pos
 							Ihandle* actTree = IupGetChild( GLOBAL.outlineTree.getZBoxHandle, pos );
@@ -545,7 +545,7 @@ struct LiveParser
 						{
 							char* blockText = cast(char*)calloc( 1, posTail-posHead );
 							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
-							newHead = GLOBAL.outlineTree.parserText( fromStringz( blockText ) );
+							newHead = GLOBAL.outlineTree.parserText( fSTRz( blockText ) );
 							free( blockText );
 						}
 					}

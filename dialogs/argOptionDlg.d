@@ -65,7 +65,7 @@ class CArgOptionDialog : CBaseDialog
 			
 			Ihandle* btnToolsAdd = IupButton( null, null );
 			IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES,CANFOCUS=NO" );
-			IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
+			IupSetStrAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
 			IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsAdd );
 
 			Ihandle* btnToolsErase = IupButton( null, null );

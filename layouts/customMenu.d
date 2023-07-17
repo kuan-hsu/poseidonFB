@@ -40,17 +40,17 @@ public:
 		IupSetInt( timer, "RUN", 1 );
 		IupSetCallback( timer, "ACTION_CB", cast(Icallback) function( Ihandle* _ih )
 		{
-			bool bAlreadyPopup;
+			Ihandle* preFocusButton = null;
 			foreach( _item; this.items )
 			{
 				if( _item.bOpen )
 				{
-					bAlreadyPopup = true;
+					preFocusButton = _item.button;
 					break;
 				}
 			}		
 		
-			if( bAlreadyPopup )
+			if( preFocusButton != null )
 			{
 				int cursorX, cursorY;
 				string cursorXY = fromStringz( IupGetGlobal( "CURSORPOS" ) ).dup;
@@ -109,6 +109,7 @@ public:
 		IupSetStrAttribute( _unit.button, "PADDING", "2x4" );
 		IupSetStrAttribute( _unit.button, "TEXTHLCOLOR", "0 0 0" );
 		IupSetStrAttribute( _unit.button, "BORDERWIDTH", "0" );
+		//IupSetInt( _unit.button, "FOCUSFEEDBACK", 0 );
 		IupSetCallback( _unit.button, "FLAT_ACTION", cast(Icallback) function( Ihandle* _ih )
 		{
 			int itemW, itemH;
@@ -152,7 +153,7 @@ public:
 			}		
 
 			return IUP_DEFAULT;
-		});		
+		});
 
 		IupAppend( layout, _unit.button );
 		items ~= _unit;
@@ -180,7 +181,6 @@ public:
 				IupSetStrAttribute( this.items[i].button, "BGCOLOR", toStringz( bgcolor ) );
 			}
 		}
-		
 	}
 	
 	void setFont( string font )

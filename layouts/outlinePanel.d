@@ -1182,8 +1182,6 @@ private:
 
 		outlineTreeNodeList = IupList( null );
 		IupSetAttributes( outlineTreeNodeList, "ACTIVE=NO,VISIBLE=NO,DROPDOWN=YES,SHOWIMAGE=YES,EDITBOX=YES,EXPAND=YES,DROPEXPAND=NO,VISIBLEITEMS=8,VISIBLE=NO,NAME=list_Outline" );
-		//IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
-		//IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 		IupSetCallback( outlineTreeNodeList, "DROPDOWN_CB",cast(Icallback) &COutline_List_DROPDOWN_CB );
 		IupSetCallback( outlineTreeNodeList, "ACTION",cast(Icallback) &COutline_List_ACTION );
 		IupSetCallback( outlineTreeNodeList, "K_ANY",cast(Icallback) &COutline_List_K_ANY );
@@ -1249,12 +1247,11 @@ public:
 				else
 					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "CFD", null );
 			}
+
+			IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		}
 		IupSetStrAttribute( outlineToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
-		
-		IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		
 		IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
 		IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );	
 		IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSLINECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );	
@@ -1456,6 +1453,9 @@ public:
 			IupSetAttribute( outlineButtonShowLinenum, "VISIBLE", "YES" );
 			IupSetAttribute( outlineButtonFresh, "VISIBLE", "YES" );
 		}
+		
+		IupSetStrAttribute( getLayoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
+		IupSetStrAttribute( GLOBAL.projectTree.getLayoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 	}
 	
 	

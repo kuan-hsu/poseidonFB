@@ -32,12 +32,12 @@ private:
 		
 		Ihandle* btnToolsAdd = IupButton( null, null );
 		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES,CANFOCUS=NO" );
-		IupSetAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
+		IupSetStrAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
 		IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CCustomDialog_btnToolsAdd );
 
 		Ihandle* btnToolsErase = IupButton( null, null );
 		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES,CANFOCUS=NO" );
-		IupSetAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
+		IupSetStrAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
 		IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CCustomDialog_btnToolsErase );
 		
 		Ihandle* btnToolsUp = IupButton( null, null );
@@ -70,7 +70,7 @@ private:
 		
 		Ihandle* btnToolsDir = IupButton( null, null );
 		IupSetAttributes( btnToolsDir, "IMAGE=icon_openfile,FLAT=YES" );
-		IupSetAttribute( btnToolsDir, "TIP", GLOBAL.languageItems["open"].toCString );
+		IupSetStrAttribute( btnToolsDir, "TIP", GLOBAL.languageItems["open"].toCString );
 		IupSetCallback( btnToolsDir, "ACTION", cast(Icallback) &CCustomDialog_OPENDIR );			
 
 		Ihandle* hBox00 = IupHbox( labelToolsDir, textToolsDir, btnToolsDir, null );

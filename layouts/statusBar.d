@@ -218,27 +218,28 @@ private:
 		{
 			IupSetStrAttribute( layoutHandle, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
 			IupSetStrAttribute( layoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+
+			IupSetStrAttribute( image, "HLCOLOR", "" );
+			
+			IupSetStrAttribute( prjName, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( prjName, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetStrAttribute( LINExCOL, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( LINExCOL, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetStrAttribute( Ins, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( Ins, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetStrAttribute( EOLType, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( EOLType, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
+			IupSetStrAttribute( compileOptionSelection, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( compileOptionSelection, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetStrAttribute( findMessage, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( findMessage, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetStrAttribute( image, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( image, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetStrAttribute( codecomplete, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( codecomplete, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
+			IupSetStrAttribute( EncodingType, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( EncodingType, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
 		}
-		IupSetStrAttribute( image, "HLCOLOR", "" );
-		
-		IupSetStrAttribute( prjName, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( prjName, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		IupSetStrAttribute( LINExCOL, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( LINExCOL, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		IupSetStrAttribute( Ins, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( Ins, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		IupSetStrAttribute( EOLType, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( EOLType, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
-		IupSetStrAttribute( compileOptionSelection, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( compileOptionSelection, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		IupSetStrAttribute( findMessage, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( findMessage, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		IupSetStrAttribute( image, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( image, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		IupSetStrAttribute( codecomplete, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( codecomplete, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );	
-		IupSetStrAttribute( EncodingType, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		IupSetStrAttribute( EncodingType, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
 	}
 }
 
