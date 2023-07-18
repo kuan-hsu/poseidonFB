@@ -419,6 +419,8 @@ string[] getCompilerImportPath( string compilerFullPath )
 	{
 		// Get and Set Default Import Path
 		string compilerPath = Path.dirName( compilerFullPath ); // Without last /
+		if( Path.stripExtension( Path.baseName( compilerFullPath ) ) == "ldc2" ) return [Path.buildNormalizedPath( Path.dirName( compilerPath )  ~ "/import" )];
+		
 		string scFullPath;
 		version(Windows)
 		{
@@ -485,9 +487,17 @@ string[] getCompilerImportPath( string compilerFullPath )
 
 
 void* DyLibLoad( string libName )
-{
-	import core.runtime;
-	return Runtime.loadLibrary( libName );
+{	
+	version(Windows)
+	{
+		import core.runtime;
+		return Runtime.loadLibrary( libName );
+	}
+	else
+	{
+		import core.sys.posix.dlfcn;
+		return dlopen( toStringz( libName ), RTLD_NOW );
+	}
 }
 
 void* DyLibSymbol( void* lib, string symName )
@@ -513,8 +523,16 @@ void* DyLibSymbol( void* lib, string symName )
 
 void DyLibFree( void* lib )
 {
-	import core.runtime;
-	Runtime.unloadLibrary( lib );
+	version(Windows)
+	{
+		import core.runtime;
+		Runtime.unloadLibrary( lib );
+	}
+	else
+	{
+		import core.sys.posix.dlfcn;
+		dlclose( lib );
+	}
 }
 
 

@@ -2581,7 +2581,7 @@ version(DIDE)
 			
 			scope _t = new IupString( targetText );
 			
-			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 			
 			while( pos > -1 )
 			{
@@ -2592,13 +2592,13 @@ version(DIDE)
 					{
 						IupScintillaSendMessage( iupSci, 2190, pos - 1, 0 );
 						IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 					}
 					else
 					{
-						IupScintillaSendMessage( iupSci, 2190, pos + cast(int) targetText.length, 0 );
+						IupScintillaSendMessage( iupSci, 2190, pos + cast(ptrdiff_t) targetText.length, 0 );
 						IupScintillaSendMessage( iupSci, 2192, documentLength - 1, 0 );							// SCI_SETTARGETEND = 2192,
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 					}
 				}
 				else
@@ -3456,12 +3456,12 @@ version(DIDE)
 							cleanCalltipContainer(); // Clear Call Tip Container						
 							IupScintillaSendMessage( cSci.getIupScintilla, 2206, tools.convertIupColor( GLOBAL.editColor.showTypeFore ), 0 ); //SCI_CALLTIPSETFORE 2206
 							IupScintillaSendMessage( cSci.getIupScintilla, 2205, tools.convertIupColor( GLOBAL.editColor.showTypeBack ), 0 ); //SCI_CALLTIPSETBACK 2205
-							IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
+							IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(ptrdiff_t) _result.toCString ); // SCI_CALLTIPSHOW 2200
 
 							
 							if( topLayerStartPos > -1 )
 							{
-								IupScintillaSendMessage( cSci.getIupScintilla, 2204, topLayerStartPos, cast(int) _list.length ); // SCI_CALLTIPSETHLT 2204
+								IupScintillaSendMessage( cSci.getIupScintilla, 2204, topLayerStartPos, cast(ptrdiff_t) _list.length ); // SCI_CALLTIPSETHLT 2204
 								IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showTypeHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							}
 							else
@@ -3582,7 +3582,7 @@ version(DIDE)
 						
 						//SCI_CALLTIPSETHLT 2204
 						scope _result = new IupString( list );
-						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
+						IupScintillaSendMessage( ih, 2200, pos, cast(ptrdiff_t) _result.toCString );
 						IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 						
 						//if( calltipContainer !is null )	calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
@@ -3595,7 +3595,7 @@ version(DIDE)
 					else
 					{
 						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
 					}
 					return true;
 				}
@@ -3871,7 +3871,7 @@ version(DIDE)
 						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
 						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 						scope _result = new IupString( list );
-						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
+						IupScintillaSendMessage( ih, 2200, pos, cast(ptrdiff_t) _result.toCString );
 						IupScintillaSendMessage( ih, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 						
 						calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
@@ -3963,9 +3963,9 @@ version(DIDE)
 							
 							scope _result = new IupString( AutoComplete.showListThread.getResult );
 							if( _alreadyInput.length )
-								IupScintillaSendMessage( sci, 2100, cast(int) _alreadyInput.length, cast(int) _result.toCString );
+								IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
 							else
-								IupScintillaSendMessage( sci, 2100, 0, cast(int) _result.toCString );
+								IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
 								
 							bShowListTrigger = true;
 						}
@@ -3997,7 +3997,7 @@ version(DIDE)
 							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 							IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 							scope _result = new IupString( ScintillaAction.textWrap( AutoComplete.showCallTipThread.getResult ) );
-							if( !bShowListTrigger ) IupScintillaSendMessage( sci, 2200, _pos, cast(int) _result.toCString );
+							if( !bShowListTrigger ) IupScintillaSendMessage( sci, 2200, _pos, cast(ptrdiff_t) _result.toCString );
 							
 							AutoComplete.calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 							

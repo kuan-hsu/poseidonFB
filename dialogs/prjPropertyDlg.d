@@ -364,28 +364,31 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		createLayout();
 		
-		IupSetStrAttribute( textProjectName, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textProjectName, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
-		IupSetStrAttribute( textProjectDir, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textProjectDir, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( textMainFile, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textMainFile, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( textTargetName, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textTargetName, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( textArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( textCompilerOpts, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textCompilerOpts, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( textCompilerPath, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textCompilerPath, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listIncludePath, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listIncludePath, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listLibPath, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listLibPath, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listType, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listType, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listFocus, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listFocus, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		version(Windows)
+		{
+			IupSetStrAttribute( textProjectName, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textProjectName, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
+			IupSetStrAttribute( textProjectDir, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textProjectDir, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( textMainFile, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textMainFile, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( textTargetName, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textTargetName, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( textArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( textCompilerOpts, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textCompilerOpts, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( textCompilerPath, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textCompilerPath, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listIncludePath, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listIncludePath, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listLibPath, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listLibPath, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listType, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listType, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listFocus, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listFocus, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 
 		if( !bCreateNew )
 		{
@@ -453,7 +456,6 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.projectDlg ) );
 		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) &CProjectPropertiesDialog_SHOW_CB );
-		
 		
 		IupMap( _dlg );
 	}

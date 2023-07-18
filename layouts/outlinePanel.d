@@ -1455,7 +1455,7 @@ public:
 		}
 		
 		IupSetStrAttribute( getLayoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
-		IupSetStrAttribute( GLOBAL.projectTree.getLayoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
+		IupSetStrAttribute( GLOBAL.projectTree.getLayoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
 	}
 	
 	

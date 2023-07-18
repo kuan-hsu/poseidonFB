@@ -101,7 +101,7 @@ public:
 		extern(C)
 		{
 			// CHM viewer
-			alias _htmlHelp = HWND function( HWND, LPCWSTR, UINT, DWORD_PTR);
+			static		HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) htmlHelp = null;
 
 			// DarkMode
 			static		BOOL function() InitDarkMode = null;
@@ -161,10 +161,6 @@ public:
 	
 	// Setting
 	static string[string]		EnvironmentVars;
-	version(Windows) 
-	{
-		static _htmlHelp		htmlHelp;
-	}
 	static string				poseidonPath;			// Include Tail /
 	static string				linuxHome = "";
 	static string				linuxTermName;

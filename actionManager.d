@@ -669,7 +669,7 @@ public:
 		
 		scope _t = new IupString( target );
 		
-		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
+		int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) target.length, cast(ptrdiff_t) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		while( findPos != -1 )
 		{
 			if( getBeforeWord( iupSci, findPos - 1 ) == Uni.toLower( beforeWord ) )
@@ -684,7 +684,7 @@ public:
 			
 			IupSetInt( iupSci, "TARGETSTART", findPos + cast(int) target.length );
 			IupSetInt( iupSci, "TARGETEND", -1 );
-			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) target.length, cast(int) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) target.length, cast(ptrdiff_t) _t.toCString ); // SCI_SEARCHINTARGET = 2197,
 		}		
 		
 		return count;
@@ -2449,7 +2449,7 @@ private:
 			IupScintillaSendMessage( ih, 2190, currentPos, 0 ); 						// SCI_SETTARGETSTART = 2190,
 			if( bNext )	IupScintillaSendMessage( ih, 2192, documentLength, 0 ); else IupScintillaSendMessage( ih, 2192, 0, 0 );
 
-			findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+			findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 			
 			// reSearch form file's head
 			if( findPos < 0 )
@@ -2465,7 +2465,7 @@ private:
 					IupScintillaSendMessage( ih, 2192, currentPos, 0 );				// SCI_SETTARGETEND = 2192,
 				}
 
-				findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(int) targetText.length, cast(int) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
+				findPos = cast(int) IupScintillaSendMessage( ih, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString ); //SCI_SEARCHINTARGET = 2197,
 			}
 	
 			if( findPos < 0 )

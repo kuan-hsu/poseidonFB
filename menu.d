@@ -728,9 +728,12 @@ Ihandle* createMenu()
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		bool _64bit;
+		string	C = "DMD";
 		version(X86_64) _64bit = true;
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "\nPoseidonFB(V0.507)  2023.07.17\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "\nPoseidonD(V0.082)  2023.07.17\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(LDC) C = "LDC";
+		version(GDC) C = "GDC";
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.508)  2023.07.18\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.082)  2023.07.17\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -973,13 +976,13 @@ version(FBIDE)
 						
 						scope _t = new IupString( targetText );
 
-						int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+						int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 						while( posHead >= 0 )
 						{
 							IupSetAttribute( iupSci, "REPLACETARGET", toStringz( replaceText ) );
 							IupSetInt( iupSci, "TARGETSTART", posHead + replaceTextLength );
 							IupSetInt( iupSci, "TARGETEND", -1 );
-							posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+							posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 						}					
 					}
 				}

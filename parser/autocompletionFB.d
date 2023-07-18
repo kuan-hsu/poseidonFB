@@ -2591,7 +2591,7 @@ version(FBIDE)
 
 			scope _t = new IupString( targetText );
 
-			int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+			int posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 
 			while( posHead >= 0 )
 			{
@@ -2600,7 +2600,7 @@ version(FBIDE)
 				{
 					IupScintillaSendMessage( iupSci, 2190, posHead - 1, 0 );				// SCI_SETTARGETSTART = 2190,
 					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 				}
 				else
 				{
@@ -2706,7 +2706,7 @@ version(FBIDE)
 				{
 					IupScintillaSendMessage( iupSci, 2190, --posHead, 0 );
 					IupScintillaSendMessage( iupSci, 2192, 0, 0 );							// SCI_SETTARGETEND = 2192,
-					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+					posHead = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 				}
 				else
 				{
@@ -2774,7 +2774,7 @@ version(FBIDE)
 
 			scope _t = new IupString( targetText );
 			
-			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+			pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 			
 			while( pos > -1 )
 			{
@@ -2785,13 +2785,13 @@ version(FBIDE)
 					{
 						IupSetInt( iupSci, "TARGETSTART", pos - 1 );
 						IupSetInt( iupSci, "TARGETEND", 0 );
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 					}
 					else
 					{
 						IupSetInt( iupSci, "TARGETSTART", pos + cast(int) targetText.length );
 						IupSetInt( iupSci, "TARGETEND", -1 );
-						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) targetText.length, cast(int) _t.toCString );
+						pos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) targetText.length, cast(ptrdiff_t) _t.toCString );
 					}
 				}
 				else
@@ -3443,7 +3443,7 @@ version(FBIDE)
 								scope _result = new IupString( includeFullPath );
 								IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0xFF0000, 0 ); //SCI_CALLTIPSETFORE 2206
 								IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0x00FFFF, 0 ); //SCI_CALLTIPSETBACK 2205
-								IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
+								IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(ptrdiff_t) _result.toCString ); // SCI_CALLTIPSHOW 2200
 							}
 							return;
 						}
@@ -3491,12 +3491,12 @@ version(FBIDE)
 									IupScintillaSendMessage( cSci.getIupScintilla, 2206, 0x000000, 0 ); //SCI_CALLTIPSETFORE 2206
 									IupScintillaSendMessage( cSci.getIupScintilla, 2205, 0xFFEEFF, 0 ); //SCI_CALLTIPSETBACK 2205
 									scope _result = new IupString( title0 );
-									IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
+									IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(ptrdiff_t) _result.toCString ); // SCI_CALLTIPSHOW 2200
 									
 									auto assignPos = indexOf( title0, " = " );
 									if( assignPos > -1 )
 									{
-										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, cast(int) assignPos ); // SCI_CALLTIPSETHLT 2204
+										IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, cast(ptrdiff_t) assignPos ); // SCI_CALLTIPSETHLT 2204
 										IupScintillaSendMessage( cSci.getIupScintilla, 2207, 0xFF0000, 0 ); // SCI_CALLTIPSETFOREHLT 2207
 									}
 									else
@@ -4187,7 +4187,7 @@ version(FBIDE)
 						cleanCalltipContainer(); // Clear Call Tip Container
 						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 1, 0 ); // SCI_CALLTIPSETPOSITION 2213
 						scope _result = new IupString( showTypeContent );
-						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(int) _result.toCString ); // SCI_CALLTIPSHOW 2200
+						IupScintillaSendMessage( cSci.getIupScintilla, 2200, currentPos, cast(ptrdiff_t) _result.toCString ); // SCI_CALLTIPSHOW 2200
 						IupScintillaSendMessage( cSci.getIupScintilla, 2213, 0, 0 ); // SCI_CALLTIPSETPOSITION 2213
 						IupScintillaSendMessage( cSci.getIupScintilla, 2204, 0, filePathPos ); // SCI_CALLTIPSETHLT 2204
 						IupScintillaSendMessage( cSci.getIupScintilla, 2207, tools.convertIupColor( GLOBAL.editColor.showTypeHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
@@ -4820,7 +4820,7 @@ version(FBIDE)
 						
 						//SCI_CALLTIPSETHLT 2204
 						scope _result = new IupString( ScintillaAction.textWrap( list ) );
-						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
+						IupScintillaSendMessage( ih, 2200, pos, cast(ptrdiff_t) _result.toCString );
 						
 						calltipContainer.push( std.conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						
@@ -4831,7 +4831,7 @@ version(FBIDE)
 					else
 					{
 						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(int) alreadyInput.length - 1, cast(int) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
+						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
 					}
 					return true;
 				}
@@ -5041,7 +5041,7 @@ version(FBIDE)
 						IupScintillaSendMessage( ih, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
 						IupScintillaSendMessage( ih, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 						scope _result = new IupString( ScintillaAction.textWrap( list ) );
-						IupScintillaSendMessage( ih, 2200, pos, cast(int) _result.toCString );
+						IupScintillaSendMessage( ih, 2200, pos, cast(ptrdiff_t) _result.toCString );
 						
 						//if( calltipContainer !is null )	calltipContainer.push( to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						calltipContainer.push( std.conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
@@ -5144,9 +5144,9 @@ version(FBIDE)
 							
 							scope _result = new IupString( AutoComplete.showListThread.getResult );
 							if( _alreadyInput.length )
-								IupScintillaSendMessage( sci, 2100, cast(int) _alreadyInput.length, cast(int) _result.toCString );
+								IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
 							else
-								IupScintillaSendMessage( sci, 2100, 0, cast(int) _result.toCString );
+								IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
 								
 
 							auto cSci = ScintillaAction.getActiveCScintilla();
@@ -5178,7 +5178,7 @@ version(FBIDE)
 							IupScintillaSendMessage( sci, 2205, tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
 							IupScintillaSendMessage( sci, 2206, tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
 							scope _result = new IupString( ScintillaAction.textWrap( AutoComplete.showCallTipThread.getResult ) );
-							IupScintillaSendMessage( sci, 2200, _pos, cast(int) _result.toCString );
+							IupScintillaSendMessage( sci, 2200, _pos, cast(ptrdiff_t) _result.toCString );
 							
 							AutoComplete.calltipContainer.push( to!(string)( ScintillaAction.getLinefromPos( sci, _pos ) ) ~ ";" ~ AutoComplete.showCallTipThread.getResult );
 							

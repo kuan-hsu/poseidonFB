@@ -384,14 +384,14 @@ struct LiveParser
 					version(Windows)
 					{
 						auto blockText = new char[posTail-posHead];
-						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
+						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(ptrdiff_t) blockText.ptr );// SCI_GETTARGETTEXT 2687
 						newHead = GLOBAL.outlineTree.parserText( blockText.dup );
 						destroy( blockText );
 					}
 					else
 					{
 						char* blockText = cast(char*)calloc( 1, posTail-posHead );
-						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
+						IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(ptrdiff_t) blockText );// SCI_GETTARGETTEXT 2687
 						newHead = GLOBAL.outlineTree.parserText( fSTRz( blockText ) );
 						free( blockText );
 					}
@@ -537,14 +537,14 @@ struct LiveParser
 						version(Windows)
 						{
 							auto blockText = new char[posTail-posHead];
-							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText.ptr );// SCI_GETTARGETTEXT 2687
+							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(ptrdiff_t) blockText.ptr );// SCI_GETTARGETTEXT 2687
 							newHead = GLOBAL.outlineTree.parserText( blockText.dup );
 							destroy( blockText );
 						}
 						else
 						{
 							char* blockText = cast(char*)calloc( 1, posTail-posHead );
-							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(int) blockText );// SCI_GETTARGETTEXT 2687
+							IupScintillaSendMessage( cSci.getIupScintilla, 2687, 0, cast(ptrdiff_t) blockText );// SCI_GETTARGETTEXT 2687
 							newHead = GLOBAL.outlineTree.parserText( fSTRz( blockText ) );
 							free( blockText );
 						}

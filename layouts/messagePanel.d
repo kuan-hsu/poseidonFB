@@ -329,9 +329,9 @@ public:
 						auto colonPos = indexOf( lineText, ": ", closePos );
 						if( colonPos > closePos )
 						{
-							int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, cast(int) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
-							IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, cast(int) colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
-							IupScintillaSendMessage( outputPanel, 2504, cast(int) (lineHeadPos + colonPos + 2), cast(int) (lineText.length - colonPos - 2) ); // SCI_INDICATORFILLRANGE =  2504
+							int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, cast(size_t) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+							IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, cast(ptrdiff_t) colonPos + 1 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( outputPanel, 2504, cast(size_t) (lineHeadPos + colonPos + 2), cast(int) (lineText.length - colonPos - 2) ); // SCI_INDICATORFILLRANGE =  2504
 						}
 					}
 				}
@@ -348,10 +348,10 @@ public:
 		{
 			if( lineText.length )
 			{
-				int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, cast(int) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+				int lineHeadPos = cast(int) IupScintillaSendMessage( outputPanel, 2167, cast(size_t) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
 				string triml_lineText = strip( lineText );
 				lineHeadPos += ( lineText.length - triml_lineText.length );
-				IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, cast(int) triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
+				IupScintillaSendMessage( outputPanel, 2504, lineHeadPos, cast(ptrdiff_t) triml_lineText.length ); // SCI_INDICATORFILLRANGE =  2504
 			}
 		}
 	}
@@ -371,11 +371,11 @@ public:
 					auto closePos = indexOf( lineText, "): ", openPos );
 					if( closePos > openPos + 1 )
 					{
-						int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, cast(int) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
+						int lineHeadPos = cast(int) IupScintillaSendMessage( searchOutputPanel, 2167, cast(size_t) LineNum, 0 ); //SCI_POSITIONFROMLINE 2167
 						if( lineHeadPos > -1 )
 						{
-							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, cast(int) closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
-							IupScintillaSendMessage( searchOutputPanel, 2504, cast(int) (lineHeadPos + closePos + 3), cast(int) (lineText.length - closePos - 3) ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( searchOutputPanel, 2504, lineHeadPos, cast(ptrdiff_t) closePos + 2 ); // SCI_INDICATORFILLRANGE =  2504
+							IupScintillaSendMessage( searchOutputPanel, 2504, cast(size_t) (lineHeadPos + closePos + 3), cast(ptrdiff_t) (lineText.length - closePos - 3) ); // SCI_INDICATORFILLRANGE =  2504
 						}
 					}
 				}

@@ -162,7 +162,7 @@ private:
 		IupSetAttribute( tree, "IMAGEEXPANDED0", "icon_prj" );
 		
 		projectToolBarBox = IupBackgroundBox( projectToolbarH );
-		IupSetStrAttribute( projectToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );	
+		IupSetStrAttribute( projectToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );	
 		
 		layoutHandle = IupVbox( projectToolBarBox, tree, null );
 		IupSetAttributes( layoutHandle, "ALIGNMENT=ARIGHT,GAP=2" );
@@ -401,7 +401,7 @@ public:
 	
 	void changeColor()
 	{
-		IupSetStrAttribute( projectToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );	
+		IupSetStrAttribute( projectToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );	
 		
 		IupSetStrAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
@@ -749,7 +749,11 @@ public:
 				
 					GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
 				}
-				if( GLOBAL.editorSetting01.OutputSci == "ON" ) GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
+				if( GLOBAL.editorSetting01.OutputSci == "ON" )
+				{
+					GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
+					IupSetInt( GLOBAL.messagePanel.getOutputPanelHandle, "CARETPOS", 99999999 );
+				}
 			}
 		}
 		else

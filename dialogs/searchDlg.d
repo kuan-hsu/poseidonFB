@@ -390,7 +390,7 @@ extern(C)
 					actionManager.SearchAction.addListItem( listFind_handle, findText.toDString, 15 );
 					if( flag == 2 && ReplaceText.toDString.length ) actionManager.SearchAction.addListItem( listReplace_handle, ReplaceText.toDString, 15 );
 					
-					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
+					int findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) findText.toDString.length, cast(ptrdiff_t) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
 					while( findPos > -1 )
 					{
 						switch( flag )
@@ -413,7 +413,7 @@ extern(C)
 						if( !bScopeSelection ) IupSetInt( iupSci, "TARGETEND", -1 ); else IupSetAttribute( iupSci, "TARGETFROMSELECTION", "YES" );
 						if( flag < 2 ) IupSetInt( iupSci, "TARGETSTART", findPos + cast(int) findText.toDString.length ); else IupSetInt( iupSci, "TARGETSTART", findPos + cast(int) ReplaceText.toDString.length );
 						
-						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(int) findText.toDString.length, cast(int) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
+						findPos = cast(int) IupScintillaSendMessage( iupSci, 2197, cast(size_t) findText.toDString.length, cast(ptrdiff_t) findText.toCString ); //SCI_SEARCHINTARGET = 2197,
 					}
 				}
 			}

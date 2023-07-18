@@ -17,7 +17,7 @@ version(Windows)
 	{
 		version(D_Version2)
 		{
-			pragma(linkerDirective, "/entry:mainCRTStartup");
+			version(LDC) pragma(linkerDirective, "/entry:wmainCRTStartup"); else pragma(linkerDirective, "/entry:mainCRTStartup");
 			pragma(linkerDirective, "/SUBSYSTEM:WINDOWS");
 		}
 	}
@@ -55,23 +55,22 @@ void main( string[] args )
 	
 		// Dynamic Libraries Load...
 		SharedLib HtmlLoader;
-		GLOBAL.htmlHelp = null;
-		
 		try
 		{
 			HtmlLoader = SharedLib.load( `hhctrl.ocx` );
-			void* ptr = HtmlLoader.getSymbol("HtmlHelpW");
-			if( ptr )
+			if( HtmlLoader !is null )
 			{
-				GLOBAL.htmlHelp = cast(GLOBAL._htmlHelp) ptr;
-			}
-			else
-			{
-				debug writefln("HtmlHelpW Symbol not found");
+				GLOBAL.htmlHelp = cast(typeof(GLOBAL.htmlHelp)) HtmlLoader.getSymbol("HtmlHelpW");
+				debug writefln( "hhctrl.ocx and Symbols loaded success!" );
 			}
 		}
 		catch( Exception e )
 		{
+			if( HtmlLoader !is null )
+			{
+				destroy( HtmlLoader );
+				HtmlLoader = null;
+			}
 			GLOBAL.htmlHelp = null;
 			
 			debug writefln(e.toString);
@@ -80,8 +79,6 @@ void main( string[] args )
 	
 		// Dark Mode
 		SharedLib DarkModeLoader;
-		GLOBAL.InitDarkMode = null;
-		GLOBAL.SetWindowTheme = null;
 		try
 		{
 			version(X86_64)
@@ -91,13 +88,8 @@ void main( string[] args )
 
 			if( DarkModeLoader !is null )
 			{
-				void* ptr = null;
-				version(Windows)
-				{
-					GLOBAL.InitDarkMode = cast(typeof(GLOBAL.InitDarkMode)) DarkModeLoader.getSymbol("InitDarkMode_FB");
-					GLOBAL.SetWindowTheme = cast(typeof(GLOBAL.SetWindowTheme)) DarkModeLoader.getSymbol("SetWindowTheme_FB");
-				}
-
+				GLOBAL.InitDarkMode = cast(typeof(GLOBAL.InitDarkMode)) DarkModeLoader.getSymbol("InitDarkMode_FB");
+				GLOBAL.SetWindowTheme = cast(typeof(GLOBAL.SetWindowTheme)) DarkModeLoader.getSymbol("SetWindowTheme_FB");
 				debug writefln( "DarkMode.dll and Symbols loaded success!" );
 			}
 			else
