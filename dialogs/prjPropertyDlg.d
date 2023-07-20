@@ -3,6 +3,7 @@
 private import iup.iup, iup.iup_scintilla;
 private import global, project, scintilla, actionManager, tools;
 private import dialogs.baseDlg, dialogs.fileDlg, dialogs.singleTextDlg;
+private import darkmode.darkmode;
 private import std.string, std.file, Path = std.path, std.conv;
 
 
@@ -822,13 +823,13 @@ extern(C) // Callback for CProjectPropertiesDialog
 			{
 				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 				{
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "DarkMode_CFD", null );
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "DarkMode_CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "DarkMode_CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "DarkMode_CFD", null );
 				}
 				else
 				{
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "CFD", null );
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "CFD", null );
 				}
 			}
 		}

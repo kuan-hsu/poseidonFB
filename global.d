@@ -98,15 +98,8 @@ private:
 public:
 	version(Windows)
 	{
-		extern(C)
-		{
-			// CHM viewer
-			static		HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) htmlHelp = null;
-
-			// DarkMode
-			static		BOOL function() InitDarkMode = null;
-			static		HRESULT function( HWND, LPCWSTR, LPCWSTR ) SetWindowTheme = null;
-		}
+		// CHM viewer
+		extern(Windows)	static HWND function( HWND, LPCWSTR, UINT, DWORD_PTR) htmlHelp = null;
 	}
 	
 	static shared CASTnode[string]			parserManager;

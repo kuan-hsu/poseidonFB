@@ -16,6 +16,7 @@ name=K:/CodingPark/GameKYO/lib/iup/iup5947/dll10
 [Sources]
 name=IDE.d
 name=actionManager.d
+name=darkmode/darkmode.d
 name=dialogs/argOptionDlg.d
 name=dialogs/baseDlg.d
 name=dialogs/customDlg.d
@@ -65,19 +66,19 @@ name=tools.d
 [Focus]
 title=LDC_x64
 target=poseidonFB
-option=-odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
+option=--m64 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
 compiler=K:/CodingPark/ldc2-1.32.2-windows-multilib/bin/ldc2.exe
 incdir=K:/CodingPark/dmd2/import
 libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll10_64
 title=x64
 target=poseidonFB
-option=-odobjs -version=FBIDE -version=GUI -mscrtlib=msvcrt100 poseidonFB64.res
+option=-odobjs -version=FBIDE -version=GUI poseidonFB64.res
 compiler=K:/CodingPark/dmd2/windows/bin64/dmd.exe
 incdir=K:/CodingPark/dmd2/import
 libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll10_64
 title=LDC_x32
 target=poseidonFB
-option=-odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB.res
+option=--m32 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB.res
 compiler=K:/CodingPark/ldc2-1.32.2-windows-multilib/bin/ldc2.exe
 incdir=K:/CodingPark/dmd2/import
 libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll10

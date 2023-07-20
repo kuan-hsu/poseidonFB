@@ -3566,7 +3566,7 @@ version(FBIDE)
 																akLink.pszKeywords = toUTF16z( keyWord16 );
 																akLink.fIndexOnFail = 0;
 																//GLOBAL.htmlHelp( null, toString16z( _path ), 1, 0 ); // HH_DISPLAY_TOPIC = 1
-																if( GLOBAL.htmlHelp( null, toUTF16z( _path ), 0x000D, cast(uint) &akLink ) != null ) //#define HH_KEYWORD_LOOKUP       &h000D
+																if( GLOBAL.htmlHelp( null, toUTF16z( _path ), 0x000D, cast(DWORD_PTR) &akLink ) != null ) //#define HH_KEYWORD_LOOKUP       &h000D
 																{
 																	bExitFlag = true;
 																	break;

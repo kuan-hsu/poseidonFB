@@ -88,15 +88,6 @@ public:
 		});
 	}
 	
-	~this()
-	{
-		if( timer != null )
-		{
-			IupSetAttribute( timer, "RUN", "OFF" );
-			IupDestroy( timer );
-		}
-	}
-	
 	void addItem( string _title, Ihandle* _IupMenu )
 	{
 		ItemUnit _unit;

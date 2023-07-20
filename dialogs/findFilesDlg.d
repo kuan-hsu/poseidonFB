@@ -4,8 +4,8 @@ private import iup.iup, iup.iup_scintilla;
 private import tools;
 private import global, project, scintilla, actionManager, menu;
 private import dialogs.baseDlg;
+private import darkmode.darkmode;
 private import std.conv;
-
 
 class CFindInFilesDialog : CBaseDialog
 {
@@ -145,13 +145,13 @@ public:
 				{
 					if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 					{
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "DarkMode_CFD", null );
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "DarkMode_CFD", null );
+						SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "DarkMode_CFD", null );
+						SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "DarkMode_CFD", null );
 					}
 					else
 					{
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "CFD", null );
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "CFD", null );
+						SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "CFD", null );
+						SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "CFD", null );
 					}	
 				}
 			}

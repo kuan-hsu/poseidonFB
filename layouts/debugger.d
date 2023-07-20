@@ -24,7 +24,7 @@ private:
 	Ihandle*				txtConsoleCommand;
 	Ihandle* 				mainHandle, consoleHandle, backtraceHandle, tabResultsHandle, disasHandle;
 	Ihandle*				watchTreeHandle, localTreeHandle, argTreeHandle, shareTreeHandle, varTabHandle;
-	Ihandle*				bpScrollBox, regScrollBox;
+	Ihandle*				leftScrollBox, bpScrollBox, regScrollBox;
 	Ihandle*				varSplit, rightSplitHandle, mainSplit;
 	CTable					bpTable, regTable;
 	Ihandle*				btnClear, btnResume, btnStop, btnStep, btnNext, btnReturn, btnUntil, btnTerminate, btnLeft, btnRefresh, btnAdd, btnDel, btnDelAll, btnWatchRefresh;
@@ -91,10 +91,10 @@ private:
 		IupSetStrAttribute( consoleHandle, "FONT", toStringz( GLOBAL.fonts[9].fontString ) );
 		IupSetCallback( consoleHandle, "VALUECHANGED_CB", cast(Icallback) &consoleOutputChange_cb );
 
-		vBox_LEFT = IupVbox( hBox_toolbar, txtConsoleCommand, consoleHandle, null );
+		vBox_LEFT = IupVbox( IupBackgroundBox( hBox_toolbar ), IupBackgroundBox( txtConsoleCommand ), consoleHandle, null );
 		IupSetAttributes( vBox_LEFT, "GAP=2,EXPAND=YES,ALIGNMENT=ACENTER" );
 
-		Ihandle* leftScrollBox = IupScrollBox( vBox_LEFT );
+		leftScrollBox = IupScrollBox( vBox_LEFT );
 
 		//
 		backtraceHandle = IupTree();
@@ -201,9 +201,9 @@ private:
 		//IupSetAttribute( varTabHandle, "HIGHCOLOR", "0 128 0" );
 		//IupSetAttribute( varTabHandle, "TABSHIGHCOLOR", "240 255 240" );
 		IupSetCallback( varTabHandle, "TABCHANGEPOS_CB", cast(Icallback) &varTabChange_cb );
-		IupSetAttribute( varTabHandle, "TABTITLE0", GLOBAL.languageItems["locals"].toCString() );
-		IupSetAttribute( varTabHandle, "TABTITLE1", GLOBAL.languageItems["args"].toCString() );
-		IupSetAttribute( varTabHandle, "TABTITLE2", GLOBAL.languageItems["shared"].toCString() );
+		IupSetStrAttribute( varTabHandle, "TABTITLE0", GLOBAL.languageItems["locals"].toCString() );
+		IupSetStrAttribute( varTabHandle, "TABTITLE1", GLOBAL.languageItems["args"].toCString() );
+		IupSetStrAttribute( varTabHandle, "TABTITLE2", GLOBAL.languageItems["shared"].toCString() );
 		IupSetAttribute( varTabHandle, "HIGHCOLOR", "255 0 0" );
 		IupSetStrAttribute( varTabHandle, "TABSFORECOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( varTabHandle, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
@@ -213,7 +213,7 @@ private:
 
 		Ihandle* vbox_var0 = IupVbox( hBoxVar0_toolbar, varTabHandle, null );
 		Ihandle* var0Frame = IupFrame( vbox_var0 );
-		IupSetAttribute( var0Frame, "TITLE", GLOBAL.languageItems["variable"].toCString );
+		IupSetStrAttribute( var0Frame, "TITLE", GLOBAL.languageItems["variable"].toCString );
 		IupSetAttribute( var0Frame, "EXPANDCHILDREN", "YES");
 		Ihandle* var0ScrollBox = IupFlatScrollBox( var0Frame );
 		
@@ -272,7 +272,7 @@ private:
 
 		Ihandle* vbox_var1 = IupVbox( hBoxVar1_toolbar, watchTreeHandle, null );
 		Ihandle* var1Frame = IupFrame( vbox_var1 );
-		IupSetAttribute( var1Frame, "TITLE", GLOBAL.languageItems["watchlist"].toCString );
+		IupSetStrAttribute( var1Frame, "TITLE", GLOBAL.languageItems["watchlist"].toCString );
 		IupSetAttribute( var1Frame, "EXPANDCHILDREN", "YES");
 		Ihandle* var1ScrollBox = IupFlatScrollBox( var1Frame );
 	
@@ -327,10 +327,10 @@ private:
 		tabResultsHandle = IupFlatTabs( bpScrollBox, WatchVarBackground, regScrollBox, disasHandle, null );
 		IupSetAttributes( tabResultsHandle, "TABTYPE=BOTTOM,EXPAND=YES,TABSPADDING=6x2" );
 		IupSetCallback( tabResultsHandle, "TABCHANGEPOS_CB", cast(Icallback) &resultTabChange_cb );
-		IupSetAttribute( tabResultsHandle, "TABTITLE0", GLOBAL.languageItems["bp"].toCString );
-		IupSetAttribute( tabResultsHandle, "TABTITLE1", GLOBAL.languageItems["variable"].toCString );
-		IupSetAttribute( tabResultsHandle, "TABTITLE2", GLOBAL.languageItems["register"].toCString );
-		IupSetAttribute( tabResultsHandle, "TABTITLE3", GLOBAL.languageItems["disassemble"].toCString );
+		IupSetStrAttribute( tabResultsHandle, "TABTITLE0", GLOBAL.languageItems["bp"].toCString );
+		IupSetStrAttribute( tabResultsHandle, "TABTITLE1", GLOBAL.languageItems["variable"].toCString );
+		IupSetStrAttribute( tabResultsHandle, "TABTITLE2", GLOBAL.languageItems["register"].toCString );
+		IupSetStrAttribute( tabResultsHandle, "TABTITLE3", GLOBAL.languageItems["disassemble"].toCString );
 		IupSetAttribute( tabResultsHandle, "HIGHCOLOR", "255 0 0" );
 		IupSetStrAttribute( tabResultsHandle, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
 		IupSetStrAttribute( tabResultsHandle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
@@ -348,8 +348,8 @@ private:
 		IupSetInt( mainSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 		
 
-		mainHandle = IupFlatScrollBox( mainSplit );
-		IupSetAttribute( mainHandle, "TABTITLE", GLOBAL.languageItems["caption_debug"].toCString );
+		mainHandle = IupScrollBox( mainSplit );
+		IupSetStrAttribute( mainHandle, "TABTITLE", GLOBAL.languageItems["caption_debug"].toCString );
 		IupSetAttribute( mainHandle, "TABIMAGE", "icon_debug" );
 		
 		
@@ -1038,6 +1038,13 @@ public:
 	~this()
 	{
 		if( isExecuting || isRunning ) terminal();
+	}
+	
+	void adjustColor()
+	{
+		IupSetStrAttribute( mainHandle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		//IupSetStrAttribute( IupGetParent( txtConsoleCommand ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+		//IupRedraw( mainHandle, 1 );
 	}
 	
 	void changeColor()
@@ -1896,15 +1903,14 @@ public:
 	void terminal()
 	{
 		bRunning = false;
-		DebugControl.bExecuted = false;
-		
 		if( DebugControl !is null )
 		{
+			DebugControl.bExecuted = false;
 			destroy( DebugControl );
 			DebugControl = null;
 		}
 		IupSetAttribute( consoleHandle, "VALUE", "" );
-		IupSetAttribute( GLOBAL.debugPanel.getConsoleCommandInputHandle, "VALUE", "" ); // Clear Input Text
+		IupSetAttribute( getConsoleCommandInputHandle, "VALUE", "" ); // Clear Input Text
 		
 		localTreeFrame = argTreeFrame = shareTreeFrame = regFrame = disasFrame = "";
 		

@@ -480,6 +480,25 @@ string[] getCompilerImportPath( string compilerFullPath )
 				}
 			}
 		}
+		
+		if( !results.length )
+		{
+			version(Windows)
+			{
+				auto _path = Path.buildNormalizedPath( compilerPath ~ "/../../src/phobos" );
+				if( exists( _path ) ) results ~= _path;
+				_path = Path.buildNormalizedPath( compilerPath ~ "/../../src/druntime/import" );
+				if( exists( _path ) ) results ~= _path;
+			}
+			else
+			{
+				auto _path = "/usr/include/d/dmd/phobos";
+				if( exists( _path ) ) results ~= _path;
+				auto _path = "/usr/include/d/dmd/druntime/import";
+				if( exists( _path ) ) results ~= _path;
+			}
+		}
+		
 		return results;
 	}
 	return null;

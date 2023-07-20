@@ -352,6 +352,12 @@ private:
 		
 		void go()
 		{
+			if( buildTools.compilerSettings.useThread != "ON" )
+			{
+				processDlg = createProcessDlg( "Compiling......" );
+				IupFlush();
+			}
+			
 			quickRunFile = quickFileTemp;
 			options = _beCompiledFile ~ ( options.length ? " " ~ options : "" );
 			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options ), buildTools, cwd, true, true );
@@ -607,11 +613,7 @@ private:
 
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilefailure"].toCString() );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString() );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
 				}
 				else
 				{
@@ -630,11 +632,7 @@ private:
 				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\nCompile Success! But got warning..." );
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compilewarning"].toCString() );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+					tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
 				}
 				else
 				{
@@ -654,11 +652,7 @@ private:
 			if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!!" );
 			if( buildTools.compilerSettings.useResultDlg == "ON" )
 			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["compileok"].toCString() );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString() );
-				IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
+				tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
 			}
 			else
 			{
@@ -1040,7 +1034,8 @@ private:
 
 				string bits;
 				if( _COMPILERVER == 4 )
-					if( GLOBAL.compilerSettings.Bit64 == "ON" ) bits = "--m64 "; else bits = "--m32 ";
+					if( indexOf( options, "--m32" ) == -1 && indexOf( options, "--m64" ) == -1 )
+						if( GLOBAL.compilerSettings.Bit64 == "ON" ) bits = "--m64 "; else bits = "--m32 ";
 			}
 			
 
@@ -1200,7 +1195,8 @@ public:
 			{
 				string bits;
 				if( tools.DMDversion( compiler ) == 4 )
-					if( GLOBAL.compilerSettings.Bit64 == "ON" ) bits = "--m64 "; else bits = "--m32 ";
+					if( indexOf( options, "--m32" ) == -1 && indexOf( options, "--m64" ) == -1 )
+						if( GLOBAL.compilerSettings.Bit64 == "ON" ) bits = "--m64 "; else bits = "--m32 ";
 			}			
 
 			// Set The Using Opts
@@ -1223,11 +1219,10 @@ public:
 			// Pass compiler, files, options to Thread
 			
 			auto _thread = new CompileThread( compiler, cSci.getFullPath, options, Path.dirName( cSci.getFullPath ), bRun, args );
-			_thread.start;
-			if( GLOBAL.compilerSettings.useThread != "ON" )
-				_thread.join;
+			version(Posix)
+				_thread.go;
 			else
-				version(Posix) _thread.join;
+				if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;
 		}
 		else
 		{
@@ -1278,11 +1273,10 @@ public:
 				if( bLinkResult )
 				{
 					auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
-					_thread.start;
-					if( GLOBAL.compilerSettings.useThread != "ON" )
-						_thread.join;
+					version(Posix)
+						_thread.go;
 					else
-						version(Posix) _thread.join;					
+						if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;					
 				}
 				else
 				{
@@ -1318,11 +1312,10 @@ public:
 
 				// Start Thread
 				auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
-				_thread.start;
-				if( GLOBAL.compilerSettings.useThread != "ON" )
-					_thread.join;
+				version(Posix)
+					_thread.go;
 				else
-					version(Posix) _thread.join;				
+					if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;			
 				
 				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 				return true;
@@ -1386,7 +1379,8 @@ public:
 				{
 					if( GLOBAL.toolbar.checkGuiButtonStatus ) options ~= " -L/SUBSYSTEM:WINDOWS";
 					if( tools.DMDversion( compiler ) == 4 )
-						if( GLOBAL.compilerSettings.Bit64 == "ON" ) options = "--m64 " ~ options; else options = "--m32 " ~ options;
+						if( indexOf( options, "--m32" ) == -1 && indexOf( options, "--m64" ) == -1 )
+							if( GLOBAL.compilerSettings.Bit64 == "ON" ) options = "--m64 " ~ options; else options = "--m32 " ~ options;
 				}
 			}
 		
@@ -1406,11 +1400,10 @@ public:
 			GLOBAL.messagePanel.printOutputPanel( "Quick Run " ~ cSci.getFullPath ~ "......\n", true );
 			// Pass compiler, files, options to Thread
 			auto _thread = new CompileThread( compiler, fileName, options, Path.dirName( fileName ), true, args, true );
-			_thread.start;
-			if( GLOBAL.compilerSettings.useThread != "ON" )
-				_thread.join;
+			version(Posix)
+				_thread.go;
 			else
-				version(Posix) _thread.join;			
+				if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;			
 			
 			return true;
 		}

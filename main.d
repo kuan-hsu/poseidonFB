@@ -2,12 +2,12 @@
 
 import iup.iup;
 import iup.iup_scintilla;
-
 import global, layout, images.imageData, tools, navcache;
 import menu, scintilla, actionManager;
 import parser.autocompletion, parser.ast;
-debug import std.stdio;
+import darkmode.darkmode;
 import std.file, std.string, Conv = std.conv, std.process, Path = std.path, Array = std.array;
+debug import std.stdio;
 
 version(Windows)
 {
@@ -61,6 +61,9 @@ void main( string[] args )
 			if( HtmlLoader !is null )
 			{
 				GLOBAL.htmlHelp = cast(typeof(GLOBAL.htmlHelp)) HtmlLoader.getSymbol("HtmlHelpW");
+				// Init HtmlHelp, prevent darkmode -- FixDarkScrollBar crash
+				DWORD dwCookie;
+				GLOBAL.htmlHelp( null, null, 0x001C, cast(DWORD_PTR) &dwCookie ); // HH_INITIALIZE = 0x001C
 				debug writefln( "hhctrl.ocx and Symbols loaded success!" );
 			}
 		}
@@ -72,40 +75,8 @@ void main( string[] args )
 				HtmlLoader = null;
 			}
 			GLOBAL.htmlHelp = null;
-			
 			debug writefln(e.toString);
-		}
-	
-	
-		// Dark Mode
-		SharedLib DarkModeLoader;
-		try
-		{
-			version(X86_64)
-				DarkModeLoader = SharedLib.load( `DarkMode64.dll` );
-			else
-				DarkModeLoader = SharedLib.load( `DarkMode32.dll` );
-
-			if( DarkModeLoader !is null )
-			{
-				GLOBAL.InitDarkMode = cast(typeof(GLOBAL.InitDarkMode)) DarkModeLoader.getSymbol("InitDarkMode_FB");
-				GLOBAL.SetWindowTheme = cast(typeof(GLOBAL.SetWindowTheme)) DarkModeLoader.getSymbol("SetWindowTheme_FB");
-				debug writefln( "DarkMode.dll and Symbols loaded success!" );
-			}
-			else
-			{
-				throw new Exception( "LOAD DLL ERROR!" );
-			}
-		}
-		catch( Exception e )
-		{
-			if( DarkModeLoader !is null )
-			{
-				destroy( DarkModeLoader );
-				DarkModeLoader = null;
-			}
-			debug writefln(e.toString);
-		}
+		}		
 	}
 	
 	//  Get poseidonFB exePath & set the new cwd
@@ -197,11 +168,11 @@ void main( string[] args )
 	EditorOpacity		_editorSetting02 = GLOBAL.editorSetting02;
 	EditorColorUint		_editColor = GLOBAL.editColor;
 
-	if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+	version(Windows)
 	{
-		version(Windows)
+		if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 		{
-			if( DarkModeLoader !is null ) GLOBAL.bCanUseDarkMode = cast(bool) GLOBAL.InitDarkMode();
+			GLOBAL.bCanUseDarkMode = InitDarkMode();
 			//IupMessage("",toStringz(Conv.to!(string)(GLOBAL.bCanUseDarkMode)));
 		}
 	}
@@ -236,12 +207,15 @@ void main( string[] args )
 	
 	GLOBAL.messagePanel.setScintillaColor(); // Set MessagePanel Color
 	
-	if( GLOBAL.bCanUseDarkMode )
+	version(Windows)
 	{
-		if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+		if( GLOBAL.bCanUseDarkMode )
 		{
-			GLOBAL.searchExpander.changeColor();
-			GLOBAL.outlineTree.changeColor();
+			if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+			{
+				GLOBAL.searchExpander.changeColor();
+				GLOBAL.outlineTree.changeColor();
+			}
 		}
 	}
 	
@@ -356,11 +330,7 @@ void main( string[] args )
 	foreach( _plugin; GLOBAL.pluginMnager )
 		if( _plugin !is null ) destroy( _plugin );
 	
-	IupClose();
+	version(Windows) if( HtmlLoader !is null ) HtmlLoader.unload();
 	
-	version(Windows)
-	{
-		if( HtmlLoader !is null ) HtmlLoader.unload();
-		if( DarkModeLoader !is null ) DarkModeLoader.unload();
-	}
+	IupClose();
 }

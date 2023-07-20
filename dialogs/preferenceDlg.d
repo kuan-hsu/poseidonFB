@@ -6,6 +6,7 @@ private import layouts.table;
 
 private import global, menu, IDE, project, tools, scintilla, actionManager, parser.autocompletion;
 private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg, dialogs.shortcutDlg;
+private import darkmode.darkmode;
 private import std.string, std.file, std.conv, std.format, Path = std.path, Array = std.array;
 private import core.memory;
 
@@ -2063,9 +2064,9 @@ private:
 			if( GLOBAL.bCanUseDarkMode )
 			{
 				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
 				else
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
 			}
 
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "keyword-tabs" ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		

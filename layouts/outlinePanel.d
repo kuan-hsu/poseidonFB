@@ -4,6 +4,7 @@ private import iup.iup;
 
 private import global, scintilla, actionManager, menu, tools;
 private import dialogs.singleTextDlg, dialogs.fileDlg;
+private import darkmode.darkmode;
 private import parser.ast;
 private import std.string, std.conv, std.file, Array = std.array, Path = std.path, Uni = std.uni;
 
@@ -1243,9 +1244,9 @@ public:
 			if( GLOBAL.bCanUseDarkMode )
 			{
 				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "DarkMode_CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "DarkMode_CFD", null );
 				else
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "CFD", null );
 			}
 
 			IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
@@ -1394,7 +1395,7 @@ public:
 				IupSetStrAttribute( tree, "IMAGE0", toStringz( "icon_folder" ~ tail ) );
 				IupSetStrAttribute( tree, "IMAGEEXPANDED0", toStringz( "icon_folder_open" ~ tail ) );
 			}
-			version(DIDE)
+			else //version(DIDE)
 			{
 				IupSetAttributeId( tree, "IMAGE", 0, "IUP_module" );
 				IupSetAttributeId( tree, "IMAGEEXPANDED", 0, "IUP_module" );
@@ -1417,10 +1418,10 @@ public:
 			{
 				if( GLOBAL.bCanUseDarkMode )
 				{
-					if(  GLOBAL.editorSetting00.UseDarkMode == "ON" )
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "DarkMode_CFD", null );
+					if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+						SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "DarkMode_CFD", null );
 					else
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "CFD", null );
+						SetWindowTheme( cast(void*) IupGetAttribute( tree, "WID" ), "CFD", null );
 				}
 			}
 			
@@ -1454,8 +1455,10 @@ public:
 			IupSetAttribute( outlineButtonFresh, "VISIBLE", "YES" );
 		}
 		
+		// Prevent x64 stranger color error...
 		IupSetStrAttribute( getLayoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 		IupSetStrAttribute( GLOBAL.projectTree.getLayoutHandle, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
+		if( GLOBAL.debugPanel !is null ) GLOBAL.debugPanel.adjustColor();
 	}
 	
 	

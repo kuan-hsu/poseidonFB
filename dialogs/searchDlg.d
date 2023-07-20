@@ -3,6 +3,7 @@
 private import iup.iup, iup.iup_scintilla;
 private import global, tools, scintilla, actionManager;
 private import dialogs.baseDlg;
+private import darkmode.darkmode;
 private import std.string, std.file, Path = std.path, std.conv;
 
 class CSearchExpander
@@ -208,13 +209,13 @@ class CSearchExpander
 			{
 				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 				{
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "DarkMode_CFD", null );
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "DarkMode_CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "DarkMode_CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "DarkMode_CFD", null );
 				}
 				else
 				{
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "CFD", null );
-					GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "CFD", null );
+					SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "CFD", null );
 				}
 			}
 
