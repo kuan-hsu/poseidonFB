@@ -440,8 +440,7 @@ extern(C) // Callback for CBaseDialog
 					// Open Dialog Window
 					scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false, "POSEIDON_MAIN_DIALOG", null, false );
 					IupSetAttributes( gotoLineDlg.getIhandle, "BORDER=NO,RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO,OPACITY=198" );
-					IupSetAttribute( gotoLineDlg.getIhandle, "TITLE", "" );
-					
+					IupSetAttribute( gotoLineDlg.getIhandle, "TITLE", null );
 					string lineNum = gotoLineDlg.show( x, y - 60 );
 					
 					lineNum = strip( lineNum );

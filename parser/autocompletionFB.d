@@ -249,11 +249,15 @@ version(FBIDE)
 		
 		static void cleanIncludesMarkContainer( int level = -1)
 		{
+			( cast(CASTnode[string]) includesMarkContainer ).clear;
+			( cast(bool[string]) noIncludeNodeContainer ).clear;
+			/*
 			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
 				includesMarkContainer.remove( key );
 			
 			foreach( key; ( cast(bool[string]) noIncludeNodeContainer ).keys )
 				noIncludeNodeContainer.remove( key );
+			*/
 		}
 		
 		static bool checkExtendedClassesExist( CASTnode _node )
@@ -829,8 +833,11 @@ version(FBIDE)
 			+/
 			
 			// Parse Include
-			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
+			if( includesFromPath != originalFullPath )
+			{
+				auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
+				//IupMessage( "", toStringz( includesFromPath ~ "\n" ~ originalNode.name ~ "\n" ~ originalFullPath ~ "\n" ~ std.conv.to!(string)(includesMarkContainer.length )) );
+			}
 
 			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{
@@ -879,12 +886,11 @@ version(FBIDE)
 				}
 			}			
 			
-			auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
-
-			/*
-			foreach( CASTnode n; includesMarkContainer )
-				Stdout( n.name ).newline;
-			*/
+			if( includesFromPath != originalFullPath )
+			{
+				auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
+				//IupMessage( "", toStringz( includesFromPath ~ "\n" ~ originalNode.name ~ "\n" ~ originalFullPath ~ "\n" ~ std.conv.to!(string)(includesMarkContainer.length )) );
+			}
 			
 			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{

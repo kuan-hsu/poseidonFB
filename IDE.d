@@ -23,6 +23,7 @@ private:
 		{
 			int _encoding, _withBom;
 			auto lngDocument = FileAction.loadFile( lngFilePath, _encoding, _withBom );
+			
 			foreach( s; splitLines( lngDocument ) )
 			{
 				s = strip( s );
@@ -30,16 +31,13 @@ private:
 				{
 					if( s[0] != '\'' )
 					{
-						auto assignIndex = indexOf( s, "=" );
-						if( assignIndex > -1 )
+						string left, right;
+						int _result = tools.getINILineData( s, left, right );
+						if( _result == 2 )
 						{
-							try
+							if( left.length && right.length )
 							{
-								GLOBAL.languageItems[strip( s[0..assignIndex] )] = strip( s[assignIndex+1..$] );
-							}
-							catch( Exception e )
-							{
-								debug IupMessage( toStringz( "Language Error!" ), toStringz( strip( s[0..assignIndex] ) ~ "=Error" ) );
+								if( left in GLOBAL.languageItems ) GLOBAL.languageItems[left] = right;// else IupMessage( "Error",toStringz(left ) );
 							}
 						}
 					}
@@ -197,7 +195,6 @@ public:
 			doc ~= setINILineData( "MessageSplit", GLOBAL.editorSetting01.MessageSplit );
 			doc ~= setINILineData( "OutlineWindow", GLOBAL.editorSetting01.OutlineWindow );
 			doc ~= setINILineData( "MessageWindow", GLOBAL.editorSetting01.MessageWindow );
-			doc ~= setINILineData( "OutlineFlat", GLOBAL.editorSetting01.OutlineFlat );
 			doc ~= setINILineData( "OutputSci", GLOBAL.editorSetting01.OutputSci );
 			doc ~= setINILineData( "RotateTabs", GLOBAL.editorSetting01.RotateTabs );
 			doc ~= setINILineData( "BarSize", GLOBAL.editorSetting01.BarSize );
@@ -288,7 +285,6 @@ public:
 			doc ~= setINILineData( "searchIndicator", GLOBAL.editColor.searchIndicator );
 			doc ~= setINILineData( "searchIndicatorAlpha", GLOBAL.editColor.searchIndicatorAlpha );
 			doc ~= setINILineData( "prjViewHLT", GLOBAL.editColor.prjViewHLT );
-			doc ~= setINILineData( "prjViewHLTAlpha", GLOBAL.editColor.prjViewHLTAlpha );
 			
 			// shortkeys
 			doc ~= setINILineData( "[shortkeys]");
@@ -477,7 +473,7 @@ public:
 				lineData = strip( lineData );
 				
 				// Get Line Data
-				int _result = getINILineData( lineData, left, right );
+				int _result = tools.getINILineData( lineData, left, right );
 				if( _result == 1 )
 				{
 					blockText = left;
@@ -583,10 +579,6 @@ public:
 							case "MessageSplit":			GLOBAL.editorSetting01.MessageSplit = right;			break;
 							case "OutlineWindow":			GLOBAL.editorSetting01.OutlineWindow = right;			break;
 							case "MessageWindow":			GLOBAL.editorSetting01.MessageWindow = right;			break;
-							case "OutlineFlat":				
-								version(Windows) GLOBAL.editorSetting01.OutlineFlat = right; else GLOBAL.editorSetting01.OutlineFlat = "OFF";
-								version(IUP327) GLOBAL.editorSetting01.OutlineFlat = "OFF";
-								break;
 							case "OutputSci":				version(Windows) GLOBAL.editorSetting01.OutputSci = right; else GLOBAL.editorSetting01.OutputSci = "ON"; break;
 							case "RotateTabs":				GLOBAL.editorSetting01.RotateTabs = right;				break;
 							case "BarSize":
@@ -690,7 +682,6 @@ public:
 							case "searchIndicator":			if( right.length ) GLOBAL.editColor.searchIndicator = right;				break;
 							case "searchIndicatorAlpha":	if( right.length ) GLOBAL.editColor.searchIndicatorAlpha = right;			break;
 							case "prjViewHLT":				if( right.length ) GLOBAL.editColor.prjViewHLT = right;						break;
-							case "prjViewHLTAlpha":			if( right.length ) GLOBAL.editColor.prjViewHLTAlpha = right;				break;
 							
 							default:
 						}
@@ -1080,10 +1071,6 @@ public:
 						case	"warningFore":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_FG" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"warningBack":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_BG" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"prjViewHLT":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLeftViewHLT" ), "FGCOLOR", toStringz( right ) ); break;
-						case	"prjViewHLTAlpha":
-								version(Windows) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textLeftViewHLTAplha" ), "SPINVALUE", toStringz( right ) );
-								version(linux) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-ttextLeftViewHLTAplha" ), "VALUE", toStringz( right ) );
-								break;
 						case 	"showtypeFore":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_FG" ), "FGCOLOR", toStringz( right ) ); break;
 						case 	"showtypeBack":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_BG" ), "FGCOLOR", toStringz( right ) ); break;
 						case 	"showtypeHLT":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowTypeHLT" ), "FGCOLOR", toStringz( right ) ); break;
@@ -1199,7 +1186,6 @@ public:
 			doc ~= setINILineData( "warningFore", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_FG" ), "FGCOLOR" ) ) );
 			doc ~= setINILineData( "warningBack", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_BG" ), "FGCOLOR" ) ) );
 			doc ~= setINILineData( "prjViewHLT", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLeftViewHLT" ), "FGCOLOR" ) ) );
-			doc ~= setINILineData( "prjViewHLTAlpha", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textLeftViewHLTAplha" ), "VALUE" ) ) );
 
 			doc ~= setINILineData( "showTypeFore", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_FG" ), "FGCOLOR" ) ) );
 			doc ~= setINILineData( "showTypeBack", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_BG" ), "FGCOLOR" ) ) );

@@ -606,12 +606,28 @@ private:
 
 		Ihandle* labelBarsize = IupLabel( GLOBAL.languageItems["barsize"].toCString );
 		Ihandle* textBarSize = IupText( null );
+		IupSetAttributes( textBarSize, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2" );
 		IupSetStrAttribute( textBarSize, "VALUE", toStringz( GLOBAL.editorSetting01.BarSize ) );
 		IupSetStrAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
 		IupSetHandle( "textBarSize", textBarSize );
 		Ihandle* hBoxBarSize = IupHbox( labelBarsize, textBarSize, null );
 		IupSetAttribute( hBoxBarSize, "ALIGNMENT", "ACENTER" );
 
+		Ihandle* labelAscent = IupLabel( GLOBAL.languageItems["ascent"].toCString );
+		Ihandle* textAscent = IupText( null );
+		IupSetAttributes( textAscent, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
+		IupSetStrAttribute( textAscent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRAASCENT ) );
+		IupSetHandle( "textAscent", textAscent );
+		Ihandle* hBoxAscent = IupHbox( labelAscent, textAscent, null );
+		IupSetAttribute( hBoxAscent, "ALIGNMENT", "ACENTER" );
+
+		Ihandle* labelDescent = IupLabel( GLOBAL.languageItems["descent"].toCString );
+		Ihandle* textDescent = IupText( null );
+		IupSetAttributes( textDescent, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
+		IupSetStrAttribute( textDescent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRADESCENT ) );
+		IupSetHandle( "textDescent", textDescent );
+		Ihandle* hBoxDescent = IupHbox( labelDescent, textDescent, null );
+		IupSetAttribute( hBoxDescent, "ALIGNMENT", "ACENTER" );
 
 		version(FBIDE)
 		{
@@ -667,6 +683,9 @@ private:
 					hBoxBarSize,
 					hBoxControlChar,
 					
+					hBoxAscent,
+					hBoxDescent,
+					
 					null
 				);
 			}
@@ -718,6 +737,9 @@ private:
 
 					hBoxBarSize,
 					hBoxControlChar,
+					
+					hBoxAscent,
+					hBoxDescent,
 					
 					null
 				);
@@ -1282,20 +1304,6 @@ private:
 		IupSetStrAttribute( btnLeftViewHLT, "FGCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 		IupSetCallback( btnLeftViewHLT, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 		IupSetAttributes( btnLeftViewHLT, "SIZE=16x8,NAME=Color-btnLeftViewHLT" );
-		Ihandle* textLeftViewHLTAlpha = IupText( null );
-		IupSetStrAttribute( textLeftViewHLTAlpha, "VALUE", toStringz( GLOBAL.editColor.prjViewHLTAlpha ) );
-		version(Windows)
-		{
-			IupSetAttributes( textLeftViewHLTAlpha, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=50,NAME=Color-textLeftViewHLTAplha" );
-			if( GLOBAL.editorSetting01.OutlineFlat != "ON" ) IupSetAttribute( textLeftViewHLTAlpha, "ACTIVE", "NO" );
-		}
-		else
-		{
-			IupSetAttributes( textLeftViewHLTAlpha, "SIZE=16x10,MARGIN=0x0,NAME=Color-textLeftViewHLTAplha" );
-			IupSetAttribute( btnLeftViewHLT, "ACTIVE", "NO" );
-			IupSetAttribute( textLeftViewHLTAlpha, "ACTIVE", "NO" );
-		}
-		
 		
 		Ihandle* labelMessageIndicator = IupLabel( GLOBAL.languageItems["messageindicator"].toCString );
 		Ihandle* btnMessageIndicator = IupFlatButton( null );
@@ -1420,7 +1428,7 @@ private:
 				IupFill(),
 				labelLeftViewHLT,
 				btnLeftViewHLT,
-				textLeftViewHLTAlpha,
+				IupFill(),
 				
 				labelShowType,
 				btnShowType_FG,
@@ -2133,13 +2141,15 @@ private:
 			IupSetStrAttribute( IupGetHandle( "textColumnEdge" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( IupGetHandle( "textBarSize" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetHandle( "textBarSize" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textAscent" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textAscent" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetHandle( "textDescent" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetHandle( "textDescent" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textSelAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textSelAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textIndicatorAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textIndicatorAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textLeftViewHLTAplha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textLeftViewHLTAplha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageIndicatorAlpha" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageIndicatorAlpha" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 
@@ -2257,12 +2267,6 @@ extern(C) // Callback for CPreferenceDialog
 	{
 		try
 		{
-			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
-			{	
-				IupSetInt( GLOBAL.outlineTree.getZBoxHandle, "VISIBLE", 0 );
-				IupSetInt( GLOBAL.projectTree.getTreeHandle, "VISIBLE", 0 );
-			}
-		
 			GLOBAL.KEYWORDS[0] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText0" ), "VALUE" ))).dup;
 			GLOBAL.KEYWORDS[1] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText1" ), "VALUE" ))).dup;
 			GLOBAL.KEYWORDS[2] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText2" ), "VALUE" ))).dup;
@@ -2312,6 +2316,8 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.ControlCharSymbol	= fromStringz( IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) ).dup;
 			GLOBAL.editorSetting00.TabWidth				= fromStringz( IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" ) ).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz( IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" ) ).dup;
+			GLOBAL.editorSetting01.EXTRAASCENT			= fromStringz( IupGetAttribute( IupGetHandle( "textAscent" ), "VALUE" ) ).dup;
+			GLOBAL.editorSetting01.EXTRADESCENT			= fromStringz( IupGetAttribute( IupGetHandle( "textDescent" ), "VALUE" ) ).dup;
 			GLOBAL.editorSetting01.BarSize				= fromStringz( IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) ).dup;
 			
 			try
@@ -2410,11 +2416,6 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.braceBack = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ), "FGCOLOR" ) ).dup;
 
 			GLOBAL.editColor.prjViewHLT = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLeftViewHLT" ), "FGCOLOR" ) ).dup;
-			version(Windows)
-				GLOBAL.editColor.prjViewHLTAlpha		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textLeftViewHLTAplha" ), "SPINVALUE" ) ).dup;
-			else
-				GLOBAL.editColor.prjViewHLTAlpha		= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textLeftViewHLTAplha" ), "VALUE" ) ).dup;
-				
 			GLOBAL.editColor.searchIndicator = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnMessageIndicator" ), "FGCOLOR" ) ).dup;
 			version(Windows)
 				GLOBAL.editColor.searchIndicatorAlpha	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "SPINVALUE" ) ).dup;
@@ -2764,13 +2765,6 @@ extern(C) // Callback for CPreferenceDialog
 			IDECONFIG.saveINI();
 
 			IupRefreshChildren( IupGetHandle( "PreferenceHandle" ) );
-			
-			if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
-			{
-				//IupSetInt( GLOBAL.projectViewTabs, "VISIBLE", 1 );
-				IupSetInt( GLOBAL.outlineTree.getZBoxHandle, "VISIBLE", 1 );
-				IupSetInt( GLOBAL.projectTree.getTreeHandle, "VISIBLE", 1 );
-			}
 		}
 		catch( Exception e )
 		{
@@ -3041,10 +3035,6 @@ extern(C) // Callback for CPreferenceDialog
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_FG" ), "FGCOLOR", "0 0 255" );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnWarning_BG" ), "FGCOLOR", "255 255 157" );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLeftViewHLT" ), "FGCOLOR", "0 0 255" );
-		version(Windows)
-			IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textLeftViewHLTAplha" ), "SPINVALUE", "80" );
-		else
-			IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textLeftViewHLTAplha" ), "VALUE", "80" );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_FG" ), "FGCOLOR", "0 0 255" );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowType_BG" ), "FGCOLOR", "255 255 170" );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnShowTypeHLT" ), "FGCOLOR", "0 128 0" );

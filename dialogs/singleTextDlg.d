@@ -24,9 +24,11 @@ private:
 		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextDialog_text", textResult );
-		IupSetStrAttribute( textResult, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textResult, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-
+		version(Windows)
+		{
+			IupSetStrAttribute( textResult, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textResult, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 		Ihandle* hBox = IupHbox( label, textResult, null );
 		IupSetAttribute( hBox, "ALIGNMENT", "ACENTER" );
 
@@ -41,7 +43,7 @@ public:
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		IupSetAttribute( _dlg, "ICON", toStringz( iconName.dup ) );
+		if( iconName.length ) IupSetStrAttribute( _dlg, "ICON", toStringz( iconName ) );
 
 		labelName = _labelText ;
 
@@ -114,12 +116,15 @@ public:
 		IupSetStrAttribute( inputText, "SIZE", toStringz( to!(string)(w) ~ "x" ~ to!(string)(h) ) );
 		IupSetStrAttribute( inputText, "BGCOLOR", toStringz( color ) );
 		IupSetCallback( inputText, "K_ANY", cast(Icallback) &CSingleTextInput_K_ANY );
-		IupSetStrAttribute( inputText, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( inputText, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );			
+		version(Windows)
+		{
+			IupSetStrAttribute( inputText, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( inputText, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 		
 		inputDlg = IupDialog( inputText );
 		IupSetAttributes( inputDlg, "RESIZE=NO,MAXBOX=NO,MINBOX=NO,MENUBOX=NO" );
-		IupSetAttribute( inputDlg, "TITLE", "" );
+		IupSetAttribute( inputDlg, "TITLE", null );
 		IupSetInt( inputDlg, "BORDER", border );
 		IupSetInt( inputDlg, "OPACITY", opacity );
 
@@ -183,8 +188,11 @@ private:
 		IupSetAttribute( textResult, "EXPAND", "YES" );
 		IupSetStrAttribute( textResult, "FONT", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetHandle( "CSingleTextOpen_text", textResult );
-		IupSetStrAttribute( textResult, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textResult, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );			
+		version(Windows)
+		{
+			IupSetStrAttribute( textResult, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textResult, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 		
 		openButton = IupButton( null, null );
 		IupSetAttributes( openButton, "IMAGE=icon_openfile,FLAT=YES,CANFOCUS=NO" );

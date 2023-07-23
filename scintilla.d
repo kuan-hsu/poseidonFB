@@ -646,7 +646,7 @@ public:
 		{
 			IupSetAttribute( sci, "USETABS", "YES" );
 		}
-		IupScintillaSendMessage( sci, 2106, cast(int) '^', 0 ); //#define SCI_AUTOCSETSEPARATOR 2106
+		IupScintillaSendMessage( sci, 2106, cast(size_t) '^', 0 ); //#define SCI_AUTOCSETSEPARATOR 2106
 		IupSetAttribute( sci, "APPENDNEWLINE", "NO" );
 
 		/*
@@ -770,9 +770,9 @@ public:
 			IupScintillaSendMessage( sci, 2558, 8, 255 ); // SCI_INDICSETOUTLINEALPHA 2558
 		
 		// Scintilla White space
-		IupScintillaSendMessage( sci, 2525, to!(size_t)( GLOBAL.editorSetting01.EXTRAASCENT ), 0 ); // SCI_SETEXTRAASCENT 2525
-		IupScintillaSendMessage( sci, 2527, to!(size_t)( GLOBAL.editorSetting01.EXTRADESCENT ), 0 ); // SCI_SETEXTRADESCENT 2527
-
+		IupScintillaSendMessage( sci, 2525, cast(size_t) to!(int)( GLOBAL.editorSetting01.EXTRAASCENT ), 0 ); // SCI_SETEXTRAASCENT 2525
+		IupScintillaSendMessage( sci, 2527, cast(size_t) to!(int)( GLOBAL.editorSetting01.EXTRADESCENT ), 0 ); // SCI_SETEXTRADESCENT 2527
+		
 		version(FBIDE)
 		{
 			// Autocompletion XPM Image

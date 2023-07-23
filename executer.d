@@ -747,8 +747,11 @@ private:
 			}
 			
 
-			
-			if( !options.length ) options = _focus.Option; // Notice: Do not use custom options
+			if( !options.length )
+			{
+				options = _focus.Option; // Notice: Do not use custom options
+				if( !options.length && !GLOBAL.projectManager[activePrjName].focusOn.length ) options = customOpt;
+			}
 
 			string txtCommand, txtSources, txtIncludeDirs, txtLibDirs;
 

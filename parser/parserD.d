@@ -55,21 +55,21 @@ version(DIDE)
 					{
 						if( token().tok == _tokOpen )
 						{
-							if( _countDemlimit > 0 ) _params ~= token().identifier;
+							if( _countDemlimit > 0 ) _params = stripRight( _params ) ~ token().identifier;
 							_countDemlimit ++;
 						}
 						else if( token().tok == _tokClose )
 						{
 							_countDemlimit --;
-							if( _countDemlimit > 0 ) _params ~= token().identifier;
+							if( _countDemlimit > 0 ) _params = stripRight( _params ) ~ token().identifier;
 						}
 						else
 						{
 							switch( token().tok )
 							{
 								case TOK.Topenbracket, TOK.Topencurly, TOK.Topenparen, TOK.Tclosebracket, TOK.Tclosecurly, TOK.Tcloseparen, TOK.Tcomma, TOK.Tassign,
-									TOK.Tdot, TOK.Tdotdot, TOK.Tdotdotdot:
-										_params ~= token().identifier;
+									TOK.Tdot, TOK.Tdotdot, TOK.Tdotdotdot, TOK.Ttimes:
+										_params = stripRight( _params ) ~ token().identifier;
 										break;
 										
 								default:
@@ -79,7 +79,12 @@ version(DIDE)
 									{
 										if( _params.length )
 										{
-											if( _params[$-1] == ' ' ) _params ~= token().identifier; else _params ~= ( " " ~ token().identifier );
+											switch( _params[$-1] )
+											{
+												case ' ', '(', '[', '{':	_params ~= token().identifier; break;
+												default:					_params ~= ( " " ~ token().identifier );
+											
+											}
 										}
 										else
 											_params ~= ( " " ~ token().identifier );
@@ -1692,7 +1697,6 @@ version(DIDE)
 						_type ~= ( token().identifier ~ " " );
 						parseToken();
 					}
-
 					_type ~= getBasicType();
 					_type ~= getBasicType2();
 					_result ~= ( _type ~ " " );

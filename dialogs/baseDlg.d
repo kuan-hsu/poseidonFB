@@ -60,7 +60,7 @@ class CBaseDialog
 	this( int w, int h, string title, bool bResize = true, string parent = "" )
 	{
 		_dlg = IupDialog( null );
-		IupSetStrAttribute( _dlg, "TITLE", toStringz( title ) );
+		if( title.length ) IupSetStrAttribute( _dlg, "TITLE", toStringz( title ) );
 		version(Windows)
 		{
 			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );

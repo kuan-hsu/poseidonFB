@@ -681,7 +681,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		scope fileSelectDlg = new CFileDlg( GLOBAL.languageItems["compilerpath"].toDString() ~ "...", GLOBAL.languageItems["exefile"].toDString() ~ "|*.exe", "OPEN", "NO", relatedPath );
 		
 		string fileName = fileSelectDlg.getFileName();
-		if( fileName.length ) IupSetStrAttribute( _textElement, "VALUE", toStringz( fileName ) );
+		if( fileName.length ) IupSetStrAttribute( _textElement, "VALUE", toStringz( tools.normalizeSlash( fileName ) ) );
 
 		return IUP_DEFAULT;
 	}
@@ -691,7 +691,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		string label = fSTRz( IupGetAttribute( IupGetParent( IupGetParent( ih ) ), "TITLE" ) );
 		scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", label, null, fSTRz( IupGetAttributeId( ih, "", item ) ), false, "PRJPROPERTY_DIALOG" );
 		string fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-		if( fileName.length ) IupSetStrAttributeId( ih, "", item, toStringz( fileName ) );
+		if( fileName.length ) IupSetStrAttributeId( ih, "", item, toStringz( tools.normalizeSlash( fileName ) ) );
 		IupSetInt( ih, "VALUE", item ); // Set Focus
 		
 		return IUP_DEFAULT;
@@ -707,7 +707,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		string fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 		if( fileName.length )
 		{
-			IupSetStrAttribute( list, "APPENDITEM", toStringz(fileName) );
+			IupSetStrAttribute( list, "APPENDITEM", toStringz( tools.normalizeSlash( fileName ) ) );
 			IupSetInt( list, "VALUE", IupGetInt( list, "COUNT" ) ); // Set Focus
 		}
 		
@@ -753,7 +753,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 			string label = fSTRz( IupGetAttribute( IupGetParent( IupGetParent( list ) ), "TITLE" ) );
 			scope selectFileDlg = new CSingleTextOpen( 460, -1, GLOBAL.languageItems["add"].toDString() ~ "...", label, null, fSTRz( IupGetAttributeId( list, "", itemNumber ) ), false, "PRJPROPERTY_DIALOG" );
 			string fileName = selectFileDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
-			if( fileName.length ) IupSetStrAttributeId( list, "", itemNumber, toStringz(fileName) );
+			if( fileName.length ) IupSetStrAttributeId( list, "", itemNumber, toStringz( tools.normalizeSlash( fileName ) ) );
 			
 			IupSetInt( list, "VALUE", itemNumber ); // Set Focus
 		}

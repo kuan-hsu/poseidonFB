@@ -11,7 +11,7 @@ struct EditorToggleUint
 
 struct EditorLayoutSize
 {
-	string USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", OutlineWindow = "ON", MessageWindow = "ON", OutlineFlat = "OFF", RotateTabs = "OFF", BarSize = "2";
+	string USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", OutlineWindow = "ON", MessageWindow = "ON", RotateTabs = "OFF", BarSize = "2";
 	version(linux) 
 		string OutputSci = "ON";
 	else
@@ -29,7 +29,7 @@ struct EditorColorUint
 	string		SCE_B_IDENTIFIER_Fore, SCE_B_IDENTIFIER_Back, SCE_B_COMMENTBLOCK_Fore, SCE_B_COMMENTBLOCK_Back;
 	string		projectFore, projectBack, outlineFore, outlineBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType, dlgFore, dlgBack, txtFore, txtBack;
 	string		callTipFore, callTipBack, callTipHLT, showTypeFore, showTypeBack, showTypeHLT, autoCompleteFore, autoCompleteBack, autoCompleteHLTFore, autoCompleteHLTBack;
-	string		searchIndicator, searchIndicatorAlpha, prjViewHLT, prjViewHLTAlpha;
+	string		searchIndicator, searchIndicatorAlpha, prjViewHLT;
 }
 
 struct CompilerSettingUint
@@ -330,8 +330,7 @@ public:
 		GLOBAL.editColor.searchIndicator = "0 0 255";
 		GLOBAL.editColor.searchIndicatorAlpha = "128";
 		GLOBAL.editColor.prjViewHLT = "0 0 128";
-		GLOBAL.editColor.prjViewHLTAlpha = "128";
-		
+
 		/*
 		GLOBAL.debuggerFullPath = new IupString();
 		GLOBAL.x64debuggerFullPath = new IupString();
@@ -686,10 +685,8 @@ public:
 						GLOBAL.languageItems["columnedge"] = new IupString( "Column Edge" );
 						GLOBAL.languageItems["barsize"] = new IupString( "Bar Size" );
 							GLOBAL.languageItems["barsizetip"] = new IupString( "Need Restart Poseidon (2~5)" );
-						GLOBAL.languageItems["maker0"] = new IupString( "Maker0" );
-						GLOBAL.languageItems["maker1"] = new IupString( "Maker1" );
-						GLOBAL.languageItems["maker2"] = new IupString( "Maker2" );
-						GLOBAL.languageItems["maker3"] = new IupString( "Maker3" );
+						GLOBAL.languageItems["ascent"] = new IupString( "Extra Ascent" );
+						GLOBAL.languageItems["descent"] = new IupString( "Extra Descent" );
 						GLOBAL.languageItems["autoconvertkeyword"] = new IupString( "Auto Convert Keyword Case" );
 						GLOBAL.languageItems["qbcase"] = new IupString( "Use QB-IDE Convert Case" );
 						GLOBAL.languageItems["newdocbom"] = new IupString( "Create New Doc With BOM" );
@@ -787,7 +784,6 @@ public:
 						GLOBAL.languageItems["sc_backnav"] = new IupString( "Backward Navigation" );
 						GLOBAL.languageItems["sc_forwardnav"] = new IupString( "Forward Navigation" );
 						GLOBAL.languageItems["sc_backdefinition"] = new IupString( "Back Definition" );
-						
 					GLOBAL.languageItems["keywords"] = new IupString( "Keywords" );
 						GLOBAL.languageItems["keyword0"] = new IupString( "Keyword0" );
 						GLOBAL.languageItems["keyword1"] = new IupString( "Keyword1" );
@@ -898,7 +894,7 @@ public:
 		GLOBAL.languageItems["bookmarkall"] = new IupString( "Mark All" );
 		GLOBAL.languageItems["document"] = new IupString( "Document" );
 		GLOBAL.languageItems["alldocument"] = new IupString( "All Document" );
-		GLOBAL.languageItems["allproject"] = new IupString( "All Project" );
+		GLOBAL.languageItems["allproject"] = new IupString( "All Projects" );
 		GLOBAL.languageItems["status"] = new IupString( "Status Bar" );
 		
 		// shortcut
@@ -1003,6 +999,5 @@ public:
 		GLOBAL.languageItems["lngfile"] = new IupString( "Language Files" );
 		GLOBAL.languageItems["chmfile"] = new IupString( "Microsoft Compiled HTML Help" );
 		GLOBAL.languageItems["allfile"] = new IupString( "All Files" );
-		GLOBAL.languageItems["fbeditfile"] = new IupString( "FbEdit Projects" );
 	}	
 }

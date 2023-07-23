@@ -124,32 +124,13 @@ private:
 		Ihandle* projectToolbarH = IupHbox( projectToolbarTitleImage, IupFill, projectButtonCollapse, projectButtonHide, null );
 		IupSetAttributes( projectToolbarH, "ALIGNMENT=ACENTER,SIZE=NULL" );
 		
-		version(IUP327) GLOBAL.editorSetting01.OutlineFlat = "OFF";
-		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
+		tree = IupTree();
+		IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
+		IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
+		if( GLOBAL.editColor.prjViewHLT.length )
 		{
-			tree = IupFlatTree();
-			IupSetAttributes( tree, "FLATSCROLLBAR=YES,EXPAND=YES,BORDERWIDTH=1,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
-			IupSetAttribute( tree, "ADDBRANCH-1", "Projects" );
-			IupSetStrAttribute( tree, "SB_FORECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
-			IupSetStrAttribute( tree, "BORDERCOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
-			IupSetCallback( tree, "FLAT_BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-			if( GLOBAL.editColor.prjViewHLT.length )
-			{
-				IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
-				IupSetStrAttribute( tree, "HLCOLORALPHA", toStringz( GLOBAL.editColor.prjViewHLTAlpha ) );
-			}
+			IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 		}
-		else
-		{
-			tree = IupTree();
-			IupSetAttributes( tree, "ADDROOT=YES,EXPAND=YES,TITLE=Projects,SIZE=NULL,BORDER=NO,MARKMODE=MULTIPLE,NAME=POSEIDON_PROJECT_Tree" );
-			IupSetCallback( tree, "BUTTON_CB", cast(Icallback) &CProjectTree_BUTTON_CB );
-			if( GLOBAL.editColor.prjViewHLT.length )
-			{
-				IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
-			}
-		}
-		
 		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
 		
@@ -407,14 +388,6 @@ public:
 		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
 		IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
-		
-		if( GLOBAL.editorSetting01.OutlineFlat == "ON" )
-		{
-			IupSetStrAttribute( tree, "SB_FORECOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
-			IupSetStrAttribute( tree, "BORDERCOLOR", toStringz( GLOBAL.editColor.linenumBack ) );
-			IupSetStrAttribute( tree, "HLCOLORALPHA", toStringz( GLOBAL.editColor.prjViewHLTAlpha ) );
-		}
-		
 		for( int i = 1; i < IupGetInt( tree, "COUNT" ); ++ i )
 		{
 			if( IupGetIntId( tree, "DEPTH", i ) == 1 )
@@ -467,8 +440,6 @@ public:
 	{
 		string prjDirName = GLOBAL.projectManager[setupDir].dir ~ "/";
 		
-		if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( tree, "VISIBLE", 0 ); // For speed up
-
 		// Add Project's Name to Tree
 		IupSetStrAttribute( tree, "ADDBRANCH0", toStringz( GLOBAL.projectManager[setupDir].name ) );
 		IupSetAttribute( tree, "IMAGE1", "icon_packageexplorer" );
@@ -614,8 +585,6 @@ public:
 				IupSetAttributeId( tree, "USERDATA", folderLocateId + 1, tools.getCString( userData ) );
 			}
 		}
-		
-		if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetInt( tree, "VISIBLE", 1 ); // For speed up
 
 		// Switch to project tree tab
 		IupSetAttribute( GLOBAL.projectViewTabs, "VALUEPOS", "0" );
@@ -1064,10 +1033,6 @@ extern(C)
 				{
 					CProjectTree_Open_cb( ih );
 					return IUP_IGNORE;
-				}
-				else
-				{
-					if( GLOBAL.editorSetting01.OutlineFlat == "ON" ) IupSetAttribute( ih, "MARK", "CLEARALL" ); // For projectTree(IupFlatTree) MULTIPLE Selection
 				}
 			}
 		}

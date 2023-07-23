@@ -83,27 +83,27 @@ public:
 		
 		doc ~= setINILineData( "[IncludeDirs]");
 		foreach( s; includeDirs )
-			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			doc ~= setINILineData( "name",  tools.normalizeSlash( _replaceDir( s, PATH ) ) );
 
 		doc ~= setINILineData( "[LibDirs]");
 		foreach( s; libDirs ) 
-			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			doc ~= setINILineData( "name",  tools.normalizeSlash( _replaceDir( s, PATH ) ) );
 
 		doc ~= setINILineData( "[Sources]");
 		foreach( s; sources ) 
-			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			doc ~= setINILineData( "name",  tools.normalizeSlash( _replaceDir( s, PATH ) ) );
 
 		doc ~= setINILineData( "[Includes]");
 		foreach( s; includes ) 
-			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			doc ~= setINILineData( "name",  tools.normalizeSlash( _replaceDir( s, PATH ) ) );
 
 		doc ~= setINILineData( "[Others]");
 		foreach( s; others ) 
-			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			doc ~= setINILineData( "name",  tools.normalizeSlash( _replaceDir( s, PATH ) ) );
 
 		doc ~= setINILineData( "[Misc]");
 		foreach( s; misc ) 
-			doc ~= setINILineData( "name",  _replaceDir( s, PATH ) );
+			doc ~= setINILineData( "name",  tools.normalizeSlash( _replaceDir( s, PATH ) ) );
 			
 			
 		doc ~= setINILineData( "[Focus]");

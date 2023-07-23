@@ -494,7 +494,7 @@ string[] getCompilerImportPath( string compilerFullPath )
 			{
 				auto _path = "/usr/include/d/dmd/phobos";
 				if( exists( _path ) ) results ~= _path;
-				auto _path = "/usr/include/d/dmd/druntime/import";
+				_path = "/usr/include/d/dmd/druntime/import";
 				if( exists( _path ) ) results ~= _path;
 			}
 		}
@@ -1305,7 +1305,7 @@ int getINILineData( string lineData, out string left, out string right )
 	if( assignPos > 0 )
 	{
 		left	= strip( lineData[0..assignPos] );
-		right	= strip( lineData[assignPos+1..$] );
+		if( assignPos < lineData.length - 1) right = strip( lineData[assignPos+1..$] );
 		
 		// For previous reversion.....
 		if( left.length > 1 )

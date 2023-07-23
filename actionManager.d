@@ -824,7 +824,7 @@ public:
 				Ihandle* _tree = GLOBAL.outlineTree.getTree( fullPath );
 				if( _tree == null )	GLOBAL.outlineTree.createTree( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)] );
 				
-				GLOBAL.outlineTree.changeTree( fullPath );
+				//GLOBAL.outlineTree.changeTree( fullPath );
 				
 				// Load and parse to fill up includesMarkContainer, for speed-up
 				if( !( fullPathByOS(fullPath) in preParsedIncludes ) )
