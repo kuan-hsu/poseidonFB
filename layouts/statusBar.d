@@ -44,7 +44,7 @@ private:
 		}
 		else
 		{
-			IupSetAttribute( compileOptionSelection, "TITLE", toStringz( GLOBAL.compilerSettings.currentCustomCompilerOption ) );
+			IupSetStrAttribute( compileOptionSelection, "TITLE", toStringz( GLOBAL.compilerSettings.currentCustomCompilerOption ) );
 			setTip( GLOBAL.compilerSettings.currentCustomCompilerOption );
 		}
 		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );

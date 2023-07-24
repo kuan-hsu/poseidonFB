@@ -271,6 +271,7 @@ options=Options
 				manualpath=Manual Path
 				manualusing=Search Help Manual
 				name=Name
+				manualnote=Note: FB_manual need be the first item
 
 	language=Language
 		openlanguage=Choose Language...
@@ -308,6 +309,7 @@ dialogopacity=Set Dialog Opacity
 
 output=Output
 	clear=Clear
+	outputsci=Output Use Scintilla(Need Restart)
 
 'tab
 closeothers=Close Others

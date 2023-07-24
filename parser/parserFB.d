@@ -2509,7 +2509,7 @@ version(FBIDE)
 				{
 					if( tokenIndex == prevTokenIndex )
 					{
-						if( ++repeatCount > 10 ) 
+						if( ++repeatCount > 10 )
 						{
 							IupMessageError( GLOBAL.mainDlg, "Infinite Loop of parse() function" );
 							break;
@@ -2613,7 +2613,10 @@ version(FBIDE)
 							break;
 							
 						case TOK.Tusing:
-							if( next().tok != TOK.Tstrings && next().tok == TOK.Tidentifier ) parseUsing();
+							if( next().tok != TOK.Tstrings && next().tok == TOK.Tidentifier )
+								parseUsing();
+							else
+								parseToken( TOK.Tusing );
 							break;
 								
 						case TOK.Tdeclare:

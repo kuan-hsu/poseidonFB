@@ -3555,8 +3555,6 @@ version(FBIDE)
 											{
 												if( GLOBAL.htmlHelp != null )
 												{
-													wstring keyWord16 = toUTF16( keyWord );
-													
 													foreach( s; GLOBAL.manuals )
 													{
 														string[] _splitWords = Array.split( s, "," );
@@ -3564,15 +3562,13 @@ version(FBIDE)
 														{
 															if( _splitWords[1].length )
 															{
-																wstring	_path = toUTF16( _splitWords[1] );
-
 																HH_AKLINK	akLink;
 																akLink.cbStruct = HH_AKLINK.sizeof;
 																akLink.fReserved = 0;
-																akLink.pszKeywords = toUTF16z( keyWord16 );
+																akLink.pszKeywords = toUTF16z( keyWord );
 																akLink.fIndexOnFail = 0;
 																//GLOBAL.htmlHelp( null, toString16z( _path ), 1, 0 ); // HH_DISPLAY_TOPIC = 1
-																if( GLOBAL.htmlHelp( null, toUTF16z( _path ), 0x000D, cast(DWORD_PTR) &akLink ) != null ) //#define HH_KEYWORD_LOOKUP       &h000D
+																if( GLOBAL.htmlHelp( null, toUTF16z( _splitWords[1] ), 0x000D, cast(DWORD_PTR) &akLink ) != null ) //#define HH_KEYWORD_LOOKUP       &h000D
 																{
 																	bExitFlag = true;
 																	break;
@@ -3597,7 +3593,11 @@ version(FBIDE)
 														string[] _splitWords = Array.split( GLOBAL.manuals[0], "," );
 														if( _splitWords.length == 2 )
 														{
-															if( _splitWords[1].length )	IupExecute( "hh", toStringz( "\"" ~ _splitWords[1] ~ keyPg ~ "\"" ) );
+															if( _splitWords[1].length )
+															{
+																IupExecute( "hh", toStringz( "\"" ~ _splitWords[1] ~ keyPg ~ "\"" ) );
+																bExitFlag = true;
+															}
 														}
 													}
 												}
@@ -3623,8 +3623,9 @@ version(FBIDE)
 																	IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
 																	break;
 																default:
-																	IupExecute( "./CHMVIEW", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+																	IupExecute( "CHMVIEW", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
 															}
+															bExitFlag = true;
 														}
 													}
 												}

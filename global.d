@@ -795,6 +795,7 @@ public:
 					// GLOBAL.languageItems["manual"] = new IupString( "Manual" );
 						GLOBAL.languageItems["manualpath"] = new IupString( "Manual Path" );
 						GLOBAL.languageItems["manualusing"] = new IupString( "Search Help Manual" );
+						GLOBAL.languageItems["manualnote"] = new IupString( "Note: FB_manual need be the first item" );
 						GLOBAL.languageItems["name"] = new IupString( "Name" );
 					
 			GLOBAL.languageItems["language"] = new IupString( "Language" );
@@ -833,7 +834,8 @@ public:
 
 		GLOBAL.languageItems["output"] = new IupString( "Output" );
 			GLOBAL.languageItems["clear"] = new IupString( "Clear" );
-
+			GLOBAL.languageItems["outputsci"] = new IupString( "Output Use Scintilla(Need Restart)" );
+			
 		//'tab
 		GLOBAL.languageItems["closeothers"] = new IupString( "Close Others" );
 		GLOBAL.languageItems["closeright"] = new IupString( "Close Right" );

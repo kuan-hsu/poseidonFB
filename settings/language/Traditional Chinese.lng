@@ -271,6 +271,7 @@ options=選項
 				manualpath=手冊路徑
 				manualusing=搜尋使用手冊
 				name=名稱
+				manualnote=Note: FB_manual應為第一個項目
 				
 	language=語言
 		openlanguage=選定語言...
@@ -308,6 +309,7 @@ dialogopacity=視窗透明度
 	
 	output=輸出
 	clear=清除
+	outputsci=輸出使用Scintilla物件(須重啟動)
 
 'tab
 closeothers=關閉其它

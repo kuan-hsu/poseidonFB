@@ -21,6 +21,7 @@ private:
 		
 		listManuals = IupList( null );
 		IupSetAttributes( listManuals, "EXPAND=HORIZONTAL" );
+		version(FBIDE) IupSetStrAttribute( listManuals, "TIP", GLOBAL.languageItems["manualnote"].toCString );
 		IupSetHandle( "listManuals_Handle", listManuals );
 		IupSetCallback( listManuals, "ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
 
@@ -71,7 +72,6 @@ private:
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
 
-	
 		Ihandle* vBoxLayout = IupVbox( frameList, hBox00, labelSEPARATOR, bottom, null );
 		
 		IupAppend( _dlg, vBoxLayout );

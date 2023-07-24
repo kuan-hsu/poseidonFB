@@ -580,7 +580,11 @@ private:
 		IupSetStrAttribute( toggleSaveAllModified, "VALUE", toStringz(GLOBAL.editorSetting00.SaveAllModified) );
 		IupSetAttribute( toggleSaveAllModified, "ALIGNMENT", "ALEFT:ACENTER" );
 		IupSetHandle( "toggleSaveAllModified", toggleSaveAllModified );
-		
+
+		Ihandle* toggleUseSci = IupFlatToggle( GLOBAL.languageItems["outputsci"].toCString() );
+		IupSetStrAttribute( toggleUseSci, "VALUE", toStringz(GLOBAL.editorSetting01.OutputSci) );
+		IupSetAttribute( toggleUseSci, "ALIGNMENT", "ALEFT:ACENTER" );
+		IupSetHandle( "toggleUseSci", toggleUseSci );
 		
 		Ihandle* labelSetControlCharSymbol = IupLabel( GLOBAL.languageItems["controlcharsymbol"].toCString );
 		Ihandle* textSetControlCharSymbol = IupText( null );
@@ -606,7 +610,7 @@ private:
 
 		Ihandle* labelBarsize = IupLabel( GLOBAL.languageItems["barsize"].toCString );
 		Ihandle* textBarSize = IupText( null );
-		IupSetAttributes( textBarSize, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2" );
+		IupSetAttributes( textBarSize, "SIZE=40x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2" );
 		IupSetStrAttribute( textBarSize, "VALUE", toStringz( GLOBAL.editorSetting01.BarSize ) );
 		IupSetStrAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
 		IupSetHandle( "textBarSize", textBarSize );
@@ -617,6 +621,7 @@ private:
 		Ihandle* textAscent = IupText( null );
 		IupSetAttributes( textAscent, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
 		IupSetStrAttribute( textAscent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRAASCENT ) );
+		version(Posix) IupSetAttribute( textAscent, "SIZE", "48x" );
 		IupSetHandle( "textAscent", textAscent );
 		Ihandle* hBoxAscent = IupHbox( labelAscent, textAscent, null );
 		IupSetAttribute( hBoxAscent, "ALIGNMENT", "ACENTER" );
@@ -624,6 +629,7 @@ private:
 		Ihandle* labelDescent = IupLabel( GLOBAL.languageItems["descent"].toCString );
 		Ihandle* textDescent = IupText( null );
 		IupSetAttributes( textDescent, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
+		version(Posix) IupSetAttribute( textDescent, "SIZE", "48x" );
 		IupSetStrAttribute( textDescent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRADESCENT ) );
 		IupSetHandle( "textDescent", textDescent );
 		Ihandle* hBoxDescent = IupHbox( labelDescent, textDescent, null );
@@ -675,7 +681,7 @@ private:
 					toggleSaveAllModified,
 					
 					toggleColorBarLine,
-					IupFill(),
+					toggleUseSci,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -730,7 +736,7 @@ private:
 					toggleSaveAllModified,
 					
 					toggleColorBarLine,
-					IupFill(),
+					toggleUseSci,
 					
 					hBoxTab,
 					hBoxColumn,
@@ -787,11 +793,17 @@ private:
 					toggleSaveAllModified,
 					toggleColorBarLine,
 					
+					toggleUseSci,
+					IupFill(),
+					
 					hBoxTab,
 					hBoxColumn,
 
 					hBoxBarSize,
 					hBoxControlChar,
+					
+					hBoxAscent,
+					hBoxDescent,
 					
 					null
 				);
@@ -833,11 +845,17 @@ private:
 					toggleSaveAllModified,
 					toggleColorBarLine,
 					
+					toggleUseSci,
+					IupFill(),
+					
 					hBoxTab,
 					hBoxColumn,
 
 					hBoxBarSize,
 					hBoxControlChar,
+					
+					hBoxAscent,
+					hBoxDescent,
 					
 					null
 				);
@@ -1547,7 +1565,7 @@ private:
 				IupFill(),
 				labelLeftViewHLT,
 				btnLeftViewHLT,
-				textLeftViewHLTAlpha,
+				IupFill(),
 				
 				labelShowType,
 				btnShowType_FG,
@@ -2311,8 +2329,9 @@ extern(C) // Callback for CPreferenceDialog
 			version(FBIDE) GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
 			version(Windows) GLOBAL.editorSetting00.NewDocBOM				= fromStringz(IupGetAttribute( IupGetHandle( "toggleNewDocBOM" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.SaveAllModified			= fromStringz(IupGetAttribute( IupGetHandle( "toggleSaveAllModified" ), "VALUE" )).dup;
+			GLOBAL.editorSetting01.OutputSci				= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseSci" ), "VALUE" )).dup;
 			
-			
+
 			GLOBAL.editorSetting00.ControlCharSymbol	= fromStringz( IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) ).dup;
 			GLOBAL.editorSetting00.TabWidth				= fromStringz( IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" ) ).dup;
 			GLOBAL.editorSetting00.ColumnEdge			= fromStringz( IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" ) ).dup;
