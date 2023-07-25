@@ -3,11 +3,12 @@
 import		iup.iup, iup.iup_scintilla;
 import		global, tools, menu, actionManager;
 import		dialogs.singleTextDlg, dialogs.argOptionDlg;
-import		std.string, std.conv;
+import		std.string, std.conv, Array = std.array;
 
 class CStatusBar
 {
 private:
+	import		project;
 	Ihandle*	layoutHandle, prjName, LINExCOL, Ins, EOLType, EncodingType, image, compileOptionSelection, codecomplete, findMessage;
 	int			originalTrigger;
 	
@@ -120,6 +121,8 @@ private:
 	
 	void setPrjName( string name, bool bFull = false )
 	{
+		IupSetStrAttribute( prjName, "TIP", "" );
+		
 		if( !bFull )
 		{
 			if( strip( name ).length == 0 ) GLOBAL.activeProjectPath = "";
@@ -145,7 +148,32 @@ private:
 			
 			string _name = GLOBAL.languageItems["caption_prj"].toDString() ~ ": " ~ _prjName ~ ( focusName.length ? " [" ~ focusName ~ "]" : ""  );
 			IupSetStrAttribute( prjName, "TITLE", toStringz( _name ) );
-			if( strip( _name ).length == 0 ) GLOBAL.activeProjectPath = "";
+			if( strip( _name ).length == 0 )
+				GLOBAL.activeProjectPath = "";
+			else
+			{
+				if( _prjDir in GLOBAL.projectManager )
+				{
+					auto prj = GLOBAL.projectManager[_prjDir];
+					
+					string		tipString;
+					FocusUnit	_focus;
+					
+					_focus.Compiler = prj.compilerPath;
+					_focus.Option = prj.compilerOption;
+					_focus.IncDir = prj.includeDirs;
+					_focus.LibDir = prj.libDirs;		
+					
+					if( prj.focusOn.length )
+					{
+						if( prj.focusOn in prj.focusUnit ) _focus = prj.focusUnit[prj.focusOn];
+					}
+					
+					tipString = strip( _focus.Compiler ~ "\n" ~ _focus.Option ~ "\n" ~ Array.join( _focus.IncDir, "; " ) ~ "\n" ~ Array.join( _focus.LibDir, "; " ) );
+					if( tipString.length ) IupSetStrAttribute( prjName, "TIP", toStringz( tipString ) ); else IupSetStrAttribute( prjName, "TIP", "<null>" );
+					IupRefresh( prjName );
+				}
+			}
 		}
 	}
 	
@@ -383,7 +411,7 @@ extern(C) // Callback for CBaseDialog
 							}
 							
 							IupPopup( popupMenu, IUP_MOUSEPOS, IUP_MOUSEPOS );
-							IupDestroy( popupMenu );								
+							IupDestroy( popupMenu );						
 						}
 					}
 				}

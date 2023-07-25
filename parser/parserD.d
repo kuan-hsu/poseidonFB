@@ -2396,8 +2396,16 @@ version(DIDE)
 					
 					if( token().tok == TOK.Tassign )
 					{
+						parseToken();
 						while( token().tok != TOK.Tcomma && token().tok != TOK.Tclosecurly )
-							parseToken();
+						{
+							if( token().tok == TOK.Topenparen )
+							{
+								tokenIndex = getDelimitedTailIndex( TOK.Topenparen, TOK.Tcloseparen, -1, true );
+							}
+							else
+								parseToken();
+						}
 					}
 
 					activeASTnode.addChild( _name, D_ENUMMEMBER, null, _type.length ? _type : _EnumBaseType, null, _ln );

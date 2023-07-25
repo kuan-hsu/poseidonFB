@@ -589,6 +589,7 @@ private:
 		Ihandle* labelSetControlCharSymbol = IupLabel( GLOBAL.languageItems["controlcharsymbol"].toCString );
 		Ihandle* textSetControlCharSymbol = IupText( null );
 		IupSetStrAttribute( textSetControlCharSymbol, "VALUE", toStringz( GLOBAL.editorSetting00.ControlCharSymbol ) );
+		IupSetAttribute( textSetControlCharSymbol, "SIZE", "48x" );
 		IupSetHandle( "textSetControlCharSymbol", textSetControlCharSymbol );
 		Ihandle* hBoxControlChar = IupHbox( labelSetControlCharSymbol, textSetControlCharSymbol, null );
 		IupSetAttribute( hBoxControlChar, "ALIGNMENT", "ACENTER" );
@@ -596,6 +597,7 @@ private:
 		Ihandle* labelTabWidth = IupLabel( GLOBAL.languageItems["tabwidth"].toCString );
 		Ihandle* textTabWidth = IupText( null );
 		IupSetStrAttribute( textTabWidth, "VALUE", toStringz( GLOBAL.editorSetting00.TabWidth ) );
+		IupSetAttribute( textTabWidth, "SIZE", "48x" );
 		IupSetHandle( "textTabWidth", textTabWidth );
 		Ihandle* hBoxTab = IupHbox( labelTabWidth, textTabWidth, null );
 		IupSetAttribute( hBoxTab, "ALIGNMENT", "ACENTER" );
@@ -604,13 +606,14 @@ private:
 		Ihandle* textColumnEdge = IupText( null );
 		IupSetStrAttribute( textColumnEdge, "VALUE", toStringz( GLOBAL.editorSetting00.ColumnEdge ) );
 		IupSetStrAttribute( textColumnEdge, "TIP", GLOBAL.languageItems["triggertip"].toCString );
+		IupSetAttribute( textColumnEdge, "SIZE", "48x" );
 		IupSetHandle( "textColumnEdge", textColumnEdge );
 		Ihandle* hBoxColumn = IupHbox( labelColumnEdge, textColumnEdge, null );
 		IupSetAttribute( hBoxColumn, "ALIGNMENT", "ACENTER" );
 
 		Ihandle* labelBarsize = IupLabel( GLOBAL.languageItems["barsize"].toCString );
 		Ihandle* textBarSize = IupText( null );
-		IupSetAttributes( textBarSize, "SIZE=40x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2" );
+		IupSetAttributes( textBarSize, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2" );
 		IupSetStrAttribute( textBarSize, "VALUE", toStringz( GLOBAL.editorSetting01.BarSize ) );
 		IupSetStrAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
 		IupSetHandle( "textBarSize", textBarSize );
@@ -619,17 +622,15 @@ private:
 
 		Ihandle* labelAscent = IupLabel( GLOBAL.languageItems["ascent"].toCString );
 		Ihandle* textAscent = IupText( null );
-		IupSetAttributes( textAscent, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
+		IupSetAttributes( textAscent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
 		IupSetStrAttribute( textAscent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRAASCENT ) );
-		version(Posix) IupSetAttribute( textAscent, "SIZE", "48x" );
 		IupSetHandle( "textAscent", textAscent );
 		Ihandle* hBoxAscent = IupHbox( labelAscent, textAscent, null );
 		IupSetAttribute( hBoxAscent, "ALIGNMENT", "ACENTER" );
 
 		Ihandle* labelDescent = IupLabel( GLOBAL.languageItems["descent"].toCString );
 		Ihandle* textDescent = IupText( null );
-		IupSetAttributes( textDescent, "SIZE=32x10,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
-		version(Posix) IupSetAttribute( textDescent, "SIZE", "48x" );
+		IupSetAttributes( textDescent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
 		IupSetStrAttribute( textDescent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRADESCENT ) );
 		IupSetHandle( "textDescent", textDescent );
 		Ihandle* hBoxDescent = IupHbox( labelDescent, textDescent, null );
@@ -940,7 +941,7 @@ private:
 		
 		version(FBIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, frameKeywordCase, null );
 		version(DIDE)	Ihandle* vBoxPage02 = IupVbox( gbox, null );
-		IupSetAttributes( vBoxPage02, "MARGIN=0x1,EXPANDCHILDREN=YES" );
+		IupSetAttributes( vBoxPage02, "MARGIN=4x1,EXPANDCHILDREN=YES" );
 
 		// Color
 		Ihandle* colorTemplateList = IupList( null );
@@ -1999,7 +2000,7 @@ private:
 		//version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x310" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
 		
 		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
-		
+
 		// Bottom Button
 		IupSetStrAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
 		IupSetCallback( btnAPPLY, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_btnApply_cb );

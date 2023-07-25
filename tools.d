@@ -989,6 +989,20 @@ public:
         return [];
       }
     }
+	
+    final @property string getOutputMessage() { 
+      synchronized {
+        if (outbuffer.data.length) return outbuffer.data[0 .. $].dup;
+        return null;
+      }
+    }
+	
+    final @property string getErrorMessage() { 
+      synchronized {
+        if (errbuffer.data.length) return errbuffer.data[0 .. $].dup; 
+        return null;
+      }
+    }		
 
     // Runtime of the thread in mseconds
     final @property long time() const

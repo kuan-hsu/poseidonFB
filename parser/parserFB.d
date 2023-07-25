@@ -35,7 +35,7 @@ version(FBIDE)
 			return false;
 		}		
 		
-		string getDelimitedString( int _tokOpen, int _tokClose )
+		string getDelimitedString( int _tokOpen, int _tokClose, bool eolEscape = true )
 		{
 			try
 			{
@@ -65,6 +65,9 @@ version(FBIDE)
 						}
 						
 						parseToken();
+						
+						if( eolEscape )
+							if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) break;
 					}
 					while( _countDemlimit > 0 && tokenIndex < tokens.length );
 				}
@@ -1095,6 +1098,11 @@ version(FBIDE)
 								parseToken();
 							}
 						}
+					}
+					else if( token().tok == TOK.Ttype )
+					{
+						parseToken( TOK.Ttype );
+						if( token().tok == TOK.Tless ) _type = getDelimitedString( TOK.Tless, TOK.Tgreater );
 					}
 					else if( token().tok == TOK.Tstrings )
 					{

@@ -474,20 +474,16 @@ private:
 
 	static bool CompilerProcess( string command, string args, BuildDataToTLS buildTools, string workDir = "", bool bGUI = true, bool bShowMessage = true )
 	{
-		/+
-		ProcessPipes pipes;
-		if( bGUI )
-			pipes = pipeShell( command ~ " " ~ args, Redirect.stdout | Redirect.stderr, null, Config.suppressConsole, workDir );
-		else
-			pipes = pipeShell( command ~ " " ~ args, Redirect.stdout | Redirect.stderr, null, Config.none, workDir );
-		+/
 		scope DaNodeProcess = new tools.Process( command ~ " " ~ args, workDir );
 		DaNodeProcess.start();
 		while(!DaNodeProcess.finished){ Thread.sleep( msecs( 5 ) ); }
 		
-		string theMessage = DaNodeProcess.output( 0 ).dup;
-		int		_state = DaNodeProcess.getMessageState();
+		string outputMessage = DaNodeProcess.getOutputMessage;
+		string errorMessage = DaNodeProcess.getErrorMessage;
+		string theMessage = outputMessage ~ ( outputMessage.length ? "\n" : "" ) ~ errorMessage;
+
 		bool	bError, bWarning;
+		if( errorMessage.length ) bError = true;
 		version(FBIDE)
 		{
 			foreach( line; splitLines( theMessage ) )
@@ -512,85 +508,11 @@ private:
 				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
 			}
 		}
+
 		
-		bool bBuildSuccess;
+		int		_state = DaNodeProcess.getMessageState();
+		bool	bBuildSuccess;
 		if( _state == 0 ) bBuildSuccess = true; 
-		/+
-		bool	bError, bWarning;
-		string	stdoutMessage, stderrMessage;
-		version(FBIDE)
-		{
-			foreach( line; pipes.stdout.byLine )
-			{
-				if( !bWarning )
-				{
-					if( indexOf( line, "warning " ) > -1 ) bWarning = true;
-				}
-				if( !bError )
-				{
-					if( indexOf( line, "error " ) > -1 ) bError = true;
-				}
-				
-				line = strip( line );
-				stdoutMessage ~= ( line ~ "\n" );
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-			}
-			
-			foreach( line; pipes.stderr.byLine )  
-			{
-				if( !bWarning )
-				{
-					if( indexOf( line, "warning:" ) > -1 )
-					{
-						bWarning = true;
-						stderrMessage ~= ( line ~ "\n" );
-						if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-						continue;
-					}
-				}
-				
-				if( !bError )
-					if( line.length ) bError = true;
-
-				line = strip( line );
-				stderrMessage ~= ( line ~ "\n" );
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
-			}
-		}
-		else //version(DIDE)
-		{
-			foreach( line; pipes.stderr.byLine )  
-			{
-				if( strip( line ).length ) bError = true;
-				version(Windows) line = fromMBSz( line );
-
-				line = strip( line );
-				stderrMessage ~= ( line ~ "\n" );
-				if( bShowMessage && buildTools.MessageHanDle != null ) IupSetStrAttribute( buildTools.MessageHanDle, "APPEND", toStringz( line ) );
-			}
-
-			foreach( line; pipes.stdout.byLine )
-			{
-				if( !bError )
-				{
-					if( indexOf( line, "): " ) > -1 )
-						bError = true;
-					else if( indexOf( line, "Error " ) > -1 )
-						bError = true;
-				}				
-				version(Windows) line = fromMBSz( line );
-				
-				line = strip( line );
-				stdoutMessage ~= ( line ~ "\n" );
-				if( bShowMessage && buildTools.MessageHanDle != null ) IupSetStrAttribute( buildTools.MessageHanDle, "APPEND", toStringz( line ) );
-			}
-		}
-		
-		
-		bool bBuildSuccess;
-		if( wait( pipes.pid ) == 0 ) bBuildSuccess = true;
-		+/
-
 		version(FBIDE)
 		{
 			if( _state > 0 ) showAnnotation( theMessage, buildTools ); else showAnnotation( null, buildTools );

@@ -9,7 +9,7 @@ struct FocusUnit
 struct PROJECT
 {
 private:
-	import iup.iup, iup.iup_config;
+	import iup.iup;
 	import global, actionManager, tools;
 	import std.string, std.file, std.encoding, Path = std.path, Uni = std.uni, Array = std.array, Algorithm = std.algorithm;
 

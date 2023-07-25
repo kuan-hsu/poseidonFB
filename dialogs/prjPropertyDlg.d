@@ -537,7 +537,6 @@ extern(C) // Callback for CProjectPropertiesDialog
 			if( fromStringz( IupGetAttribute( dirHandle, "ACTIVE" ) ) == "YES" ) GLOBAL.projectTree.CreateNewProject( CProjectPropertiesDialog.tempProject.name, CProjectPropertiesDialog.tempProject.dir );
 			GLOBAL.statusBar.setPrjName( GLOBAL.languageItems["caption_prj"].toDString ~ ": " ~ GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].name 
 										~ ( GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].focusOn.length ? " [" ~ GLOBAL.projectManager[CProjectPropertiesDialog.tempProject.dir].focusOn ~ "]" : "" ) );
-										
 		}
 
 		return IUP_CLOSE;

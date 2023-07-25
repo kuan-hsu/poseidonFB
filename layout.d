@@ -746,9 +746,13 @@ extern(C)
 			bool bIsPrj;
 			
 			version(FBIDE)
+			{
 				if( Path.baseName( prjSettingFile ) == "FB.poseidon" ) bIsPrj = true;
+			}
 			else
+			{
 				if( Path.baseName( prjSettingFile ) == "D.poseidon" ) bIsPrj = true;
+			}
 				
 			if( bIsPrj )
 			{

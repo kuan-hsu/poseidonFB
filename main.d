@@ -43,7 +43,7 @@ void main( string[] args )
 	}
 
 	version(Windows)
-	{
+	{	
 		version(FBIDE)	IupSetGlobal("SINGLEINSTANCE", "poseidonFB - FreeBasic IDE");
 		version(DIDE)	IupSetGlobal("SINGLEINSTANCE", "poseidonD - D Programming Language IDE");
 			
@@ -52,7 +52,7 @@ void main( string[] args )
 			IupClose();
 			return;
 		}
-	
+		
 		// Dynamic Libraries Load...
 		SharedLib HtmlLoader;
 		try
