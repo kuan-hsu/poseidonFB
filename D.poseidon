@@ -4,7 +4,7 @@ Type=1
 MainFile=
 PassOneFile=
 TargetName=poseidonFB
-FocusOn=x64
+FocusOn=LDC_x32
 CompilerArgs=
 CompilerOption=-odobjs -version=FBIDE -version=GUI poseidonFB.res
 Comment=

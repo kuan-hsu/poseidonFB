@@ -375,8 +375,7 @@ version(Posix) string modifyLinuxDropFileName( string _fn )
 
 FocusUnit getActiveCompilerInformation( string fromProjectDir = null )
 {
-	static string	prevPrjDir;
-	FocusUnit		_focus;
+	FocusUnit			_focus;
 	
 	// Check custom compiler 
 	string customOpt, customCompiler;
@@ -386,34 +385,31 @@ FocusUnit getActiveCompilerInformation( string fromProjectDir = null )
 	string activePrjName = !fromProjectDir.length ? ProjectAction.getActiveProjectName( true ) : fromProjectDir;
 	if( activePrjName.length )
 	{
-		if( ( activePrjName != prevPrjDir ) || fromProjectDir.length )
+		_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
+		_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
+		_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+		_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
+		_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
+		if( GLOBAL.projectManager[activePrjName].focusOn.length )
 		{
-			_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
-			_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
-			_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
-			_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
-			_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
-			if( GLOBAL.projectManager[activePrjName].focusOn.length )
-			{
-				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
-			}
-			// If project has no options, just no options!
-			if( !_focus.Compiler.length ) _focus.Compiler = customCompiler;
-			if( fromProjectDir.length ) _focus.IncDir = [ fromProjectDir ] ~ _focus.IncDir;
-
-			string[] _compilerDefaultImportPath = getCompilerImportPath( _focus.Compiler );
-			if( _compilerDefaultImportPath.length ) _focus.IncDir ~= _compilerDefaultImportPath; // IncDir include compiler
-			prevPrjDir = activePrjName;
-			
-			return _focus;
+			if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
 		}
+		else
+		{
+			if( !_focus.Option.length ) _focus.Option = customOpt;
+		}
+		if( !_focus.Compiler.length ) _focus.Compiler = customCompiler;
+		//if( fromProjectDir.length ) _focus.IncDir = [ fromProjectDir ] ~ _focus.IncDir;
+		
+		string[] _compilerDefaultImportPath = getCompilerImportPath( _focus.Compiler );
+		if( _compilerDefaultImportPath.length ) _focus.IncDir ~= _compilerDefaultImportPath; // IncDir include compiler
+		return _focus;
 	}
 
 	_focus.Compiler = customCompiler;
 	_focus.Option = customOpt;
 	string[] _compilerDefaultImportPath = getCompilerImportPath( _focus.Compiler );
 	if( _compilerDefaultImportPath.length ) _focus.IncDir ~= _compilerDefaultImportPath; // IncDir include compiler 	
-	prevPrjDir = activePrjName;
 	
 	return _focus;
 }
@@ -437,7 +433,7 @@ string[] getCompilerImportPath( string compilerFullPath )
 	{
 		// Get and Set Default Import Path
 		string compilerPath = Path.dirName( compilerFullPath ); // Without last /
-		if( Path.stripExtension( Path.baseName( compilerFullPath ) ) == "ldc2" ) return [Path.buildNormalizedPath( Path.dirName( compilerPath )  ~ "/import" )];
+		if( Path.stripExtension( Path.baseName( compilerFullPath ) ) == "ldc2" ) return [tools.normalizeSlash( Path.buildNormalizedPath( Path.dirName( compilerPath )  ~ "/import" ) )];
 		
 		string scFullPath;
 		version(Windows)

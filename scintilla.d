@@ -148,18 +148,18 @@ public:
 			
 
 			// Set margin size
-			int textWidth = IupGetInt( sci, "STYLEFONTSIZE32" );//cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = IupGetInt( sci, "STYLEFONTSIZE32" ) + 1;
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
 				string lc = to!(string)( lineCount );
 				if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 				{
-					IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
+					IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length ) * textWidth );
 				}
 				else
 				{
-					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 )* textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length ) * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 5 * textWidth );
 				}
 			}
 			else
@@ -529,18 +529,18 @@ public:
 
 		if( !bFirstTime )
 		{
-			int textWidth = IupGetInt( sci, "STYLEFONTSIZE32" );//cast(int) IupScintillaSendMessage( sci, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+			int textWidth = IupGetInt( sci, "STYLEFONTSIZE32" ) + 1;
 			if( GLOBAL.editorSetting00.LineMargin == "ON" )
 			{
 				int lineCount = IupGetInt( sci, "LINECOUNT" );
 				string lc = to!(string)( lineCount );
 				if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 				{
-					IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
+					IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length ) * textWidth );
 				}
 				else
 				{
-					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 6 * textWidth );
+					if( lc.length > 5 ) IupSetInt( sci, "MARGINWIDTH0", ( cast(int) lc.length ) * textWidth ); else IupSetInt( sci, "MARGINWIDTH0", 5 * textWidth );
 				}
 			}
 			else
@@ -2803,10 +2803,10 @@ extern(C)
 						auto count =  indexOf( dText, "\n" );
 						if( count > -1 )
 						{
-							int textWidth = IupGetInt( ih, "STYLEFONTSIZE32" );//cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+							int textWidth = IupGetInt( ih, "STYLEFONTSIZE32" ) + 1;
 							int lineCount = IupGetInt( ih, "LINECOUNT" );
 							string lc = to!(string)( lineCount + 1 + count );
-							IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
+							IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length ) * textWidth );
 						}
 					}
 					else
@@ -2816,10 +2816,10 @@ extern(C)
 							if( GLOBAL.editorSetting00.LineMargin == "ON" )
 							{
 								// Set margin size
-								int textWidth = IupGetInt( ih, "STYLEFONTSIZE32" );//cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+								int textWidth = IupGetInt( ih, "STYLEFONTSIZE32" ) + 1;
 								int lineCount = IupGetInt( ih, "LINECOUNT" );
 								string lc = to!(string)( lineCount + 1 );
-								IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
+								IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length ) * textWidth );
 							}						
 						}
 					}
@@ -2829,7 +2829,7 @@ extern(C)
 					if( GLOBAL.editorSetting00.LineMargin == "ON" )
 					{
 						// Set margin size
-						int			textWidth = IupGetInt( ih, "STYLEFONTSIZE32" );//cast(int) IupScintillaSendMessage( ih, 2276, 33, cast(int) "9".ptr ); // SCI_TEXTWIDTH 2276
+						int			textWidth = IupGetInt( ih, "STYLEFONTSIZE32" ) + 1;
 						ptrdiff_t	count;
 						
 						string selText = fSTRz( IupGetAttribute( ih, "SELECTEDTEXT" ) );
@@ -2848,7 +2848,7 @@ extern(C)
 						{
 							int lineCount = IupGetInt( ih, "LINECOUNT" );
 							string lc = to!(string)( lineCount - count );
-							IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * textWidth );
+							IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length ) * textWidth );
 						}
 					}
 				}
@@ -3336,14 +3336,12 @@ extern(C)
 	{
 		try
 		{
-			int	fontWidth;
-			auto commaPos = lastIndexOf( GLOBAL.fonts[1].fontString, "," );
-			if( commaPos > -1 ) fontWidth = to!(int)( strip( GLOBAL.fonts[1].fontString[commaPos+1..$] ) ) - 2;
-			
+			int textWidth = IupGetInt( ih, "STYLEFONTSIZE32" ) + 1;
 			int lineCount = IupGetInt( ih, "LINECOUNT" );
 			string lc = to!(string)( lineCount );
-
-			IupSetInt( ih, "MARGINWIDTH0", ( cast(int) lc.length + 1 ) * ( fontWidth + zoomInPoints )  );
+			IupSetInt( ih, "MARGINWIDTH0", ( 5 ) * ( textWidth + zoomInPoints ) );
+			IupSetInt( ih, "MARGINWIDTH1", ( textWidth + zoomInPoints ) );
+			IupSetInt( ih, "MARGINWIDTH2", ( textWidth + zoomInPoints ) );
 		}
 		catch( Exception e )
 		{
