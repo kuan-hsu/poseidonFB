@@ -109,7 +109,7 @@ private:
 		
 		static string getAppPath( string appName )
 		{
-			if( exists( appName ) ) return appName;
+			if( std.file.exists( appName ) ) return appName;
 
 			try
 			{
@@ -254,7 +254,7 @@ private:
 			
 			if( bQuickRun )
 			{
-				if( exists( oriCommand ) )
+				if( std.file.exists( oriCommand ) )
 				{
 					string objFullPath = oriCommand;
 					if( oriCommand[0] == '"' && oriCommand[$-1] == '"' ) objFullPath = oriCommand[1..$-1].dup;
@@ -262,17 +262,17 @@ private:
 					version(Windows)
 					{
 						objFullPath = Path.stripExtension( oriCommand ) ~ ".obj";
-						if( exists( objFullPath ) ) std.file.remove( objFullPath );
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 					}
 					else
 					{
 						objFullPath = Path.stripExtension( oriCommand ) ~ ".o";
-						if( exists( objFullPath ) ) std.file.remove( objFullPath );
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 						objFullPath = Path.stripExtension( oriCommand );
-						if( exists( objFullPath ) ) std.file.remove( objFullPath );
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 					}
 					objFullPath = Path.stripExtension( oriCommand ) ~ ".bas";
-					if( exists( objFullPath ) ) std.file.remove( objFullPath );
+					if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 				}
 			}
 		}
@@ -342,7 +342,7 @@ private:
 			{
 				// Remove the execute file
 				string singleExistedExecute = _beRunFile ~ ".exe";
-				if( exists( singleExistedExecute ) ) std.file.remove( singleExistedExecute );
+				if( std.file.exists( singleExistedExecute ) ) std.file.remove( singleExistedExecute );
 			}	
 		
 			if( GLOBAL.compilerSettings.useThread == "ON" ) processDlg = createProcessDlg( "Compiling......" );
@@ -384,15 +384,15 @@ private:
 				{
 					if( bQuickRun )
 					{
-						if( exists( fileFullPath ) )
+						if( std.file.exists( fileFullPath ) )
 						{
 							string objFullPath = fileFullPath;
 							if( objFullPath[0] == '"' && objFullPath[$-1] == '"' ) objFullPath = fileFullPath[1..$-1].dup;
-							if( exists( objFullPath ) ) std.file.remove( objFullPath );
+							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 							objFullPath = Path.stripExtension( objFullPath ) ~ ".o";
-							if( exists( objFullPath ) ) std.file.remove( objFullPath );
+							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 							objFullPath = Path.stripExtension( objFullPath ) ~ ".bas";
-							if( exists( objFullPath ) ) std.file.remove( objFullPath );
+							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 						}
 					}
 				}
@@ -711,7 +711,7 @@ private:
 						version(FBIDE)
 						{
 							auto objFullPath = Path.stripExtension( s ) ~ ".o";
-							if( exists( objFullPath ) )
+							if( std.file.exists( objFullPath ) )
 							{
 								std.file.getTimes( objFullPath, _accessTimeO, _modifiedTimeO );
 								std.file.getTimes( s, _accessTimeF, _modifiedTimeF );
@@ -760,7 +760,7 @@ private:
 							}
 							
 							version(Windows) objFullPathWithoutExt ~= ".obj"; else objFullPathWithoutExt ~= ".o";
-							if( exists( objFullPathWithoutExt ) )
+							if( std.file.exists( objFullPathWithoutExt ) )
 							{
 								std.file.getTimes( objFullPathWithoutExt, _accessTimeO, _modifiedTimeO );
 								std.file.getTimes( s, _accessTimeF, _modifiedTimeF );
@@ -818,7 +818,7 @@ private:
 							}						
 						
 							version(Windows) objFullPathWithoutExt ~= ".obj"; else objFullPathWithoutExt ~= ".o";
-							if( exists( objFullPathWithoutExt ) ) txtSources = txtSources ~ " \"" ~ objFullPathWithoutExt ~ "\"" ;			
+							if( std.file.exists( objFullPathWithoutExt ) ) txtSources = txtSources ~ " \"" ~ objFullPathWithoutExt ~ "\"" ;			
 						}
 						break;
 						
@@ -1054,7 +1054,7 @@ private:
 
 			// Create Dir for Target
 			string _targetPath = Path.dirName( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName );
-			if( !exists( _targetPath ) ) std.file.mkdir( _targetPath );			
+			if( !std.file.exists( _targetPath ) ) std.file.mkdir( _targetPath );			
 		}
 		catch( Exception e )
 		{
@@ -1354,23 +1354,35 @@ public:
 		IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
 
 		
-		bool	bRunProject;
-		string	activePrjName	= actionManager.ProjectAction.getActiveProjectName();
-		
+		bool		bRunProject;
+		string		activePrjName	= actionManager.ProjectAction.getActiveProjectName();
+		CScintilla	cSci = ScintillaAction.getActiveCScintilla();
 		// Set Multiple Focus Project
 		FocusUnit	_beRunfocus;
 		string		_beRunFile;
 		string		_bePassArgs;
 		
+		
 		if( activePrjName.length )
 		{
 			if( activePrjName in GLOBAL.projectManager )
 			{
-				bRunProject = true;
-				if( GLOBAL.projectManager[activePrjName].focusOn.length )
+				if( cSci is null )
 				{
-					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _beRunfocus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+					bRunProject = true;
 				}
+				else
+				{
+					if( ProjectAction.fileInProject( cSci.getFullPath, activePrjName ) == activePrjName ) bRunProject = true;
+				}
+			}
+		}
+		
+		if( bRunProject )
+		{
+			if( GLOBAL.projectManager[activePrjName].focusOn.length )
+			{
+				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _beRunfocus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
 			}
 			
 			if( _beRunfocus.Target.length ) _beRunFile = Path.stripExtension( _beRunfocus.Target );
@@ -1389,16 +1401,15 @@ public:
 			}			
 		}
 		// Not in project! try single exe
-		if( !bRunProject )
+		else //if( !bRunProject )
 		{
-			auto cSci = ScintillaAction.getActiveCScintilla();
 			if( cSci !is null ) _beRunFile = Path.stripExtension( cSci.getFullPath() );
 		}
 		
 		if( args.length ) _bePassArgs = args;
 		version(Windows) if( _beRunFile.length ) _beRunFile = _beRunFile ~ ".exe";
 		GLOBAL.messagePanel.printOutputPanel( "Run " ~ _beRunFile ~ "......\n", true );
-		if( exists( _beRunFile ) )
+		if( std.file.exists( _beRunFile ) )
 		{
 			auto _thread = new ExecuterThread( _beRunFile, _bePassArgs, getBuildNeedDataToTLS, Path.dirName( _beRunFile ) );
 			_thread.start;

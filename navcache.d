@@ -88,7 +88,7 @@ public:
 		{}
 		else
 		{
-			if( !exists( fullPath ) ) return false;
+			if( !std.file.exists( fullPath ) ) return false;
 		}
 		
 		

@@ -732,8 +732,8 @@ Ihandle* createMenu()
 		version(X86_64) _64bit = true;
 		version(LDC) C = "LDC";
 		version(GDC) C = "GDC";
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.512)  2023.07.25\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.085)  2023.07.24\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.513)  2023.07.26\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.086)  2023.07.25\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -1119,7 +1119,7 @@ extern(C)
 		if( IupGetInt( dlg, "STATUS") == 0 )
 		{
 			string fileString = strip( fromStringz( IupGetAttribute( dlg, "VALUE" ) ).dup );
-			if( exists( fileString ) )
+			if( std.file.exists( fileString ) )
 			{
 				Ihandle* _ih = IupGetHandle( "_lng" );
 				if( _ih != null )
@@ -1819,25 +1819,25 @@ extern(C)
 					version(FBIDE)
 					{
 						auto oPath = Path.stripExtension( s ) ~ ".o";
-						if( exists( oPath ) ) std.file.remove( oPath );
+						if( std.file.exists( oPath ) ) std.file.remove( oPath );
 					}
 					else
 					{
 						version(Windows)
 						{
 							auto oPath = Path.stripExtension( s ) ~ ".obj";
-							if( exists( oPath ) ) std.file.remove( oPath );
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
 							
 							oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".obj";
-							if( exists( oPath ) ) std.file.remove( oPath );
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
 						}
 						else
 						{
 							auto oPath = Path.stripExtension( s ) ~ ".o";
-							if( exists( oPath ) ) std.file.remove( oPath );
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
 							
 							oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".o";
-							if( exists( oPath ) ) std.file.remove( oPath );
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
 						}
 					}
 				}
@@ -1847,12 +1847,12 @@ extern(C)
 					version(Windows)
 					{
 						auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".obj";
-						if( exists( oPath ) ) std.file.remove( oPath );
+						if( std.file.exists( oPath ) ) std.file.remove( oPath );
 					}
 					else
 					{
 						auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".o";
-						if( exists( oPath ) ) std.file.remove( oPath );
+						if( std.file.exists( oPath ) ) std.file.remove( oPath );
 					}
 
 					string activeCompilerOption;
@@ -1874,7 +1874,7 @@ extern(C)
 						if( odTail > odPos + 3 )
 						{
 							string pathName = GLOBAL.projectManager[activePrjName].compilerOption[odPos+3..odTail].dup;
-							if( exists( pathName ) )
+							if( std.file.exists( pathName ) )
 								if( std.file.isDir( pathName ) ) std.file.rmdirRecurse( pathName ); 
 						}
 					}
@@ -1911,7 +1911,7 @@ extern(C)
 					}
 				}				
 				
-				if( exists( executeName ) ) std.file.remove( executeName );
+				if( std.file.exists( executeName ) ) std.file.remove( executeName );
 
 				GLOBAL.messagePanel.printOutputPanel( "Done." );
 			}
@@ -2047,7 +2047,7 @@ extern(C)
 			{
 				if( title == splitWords[0] )
 				{
-					if( exists( splitWords[1] ) )
+					if( std.file.exists( splitWords[1] ) )
 					{
 						if( Uni.toLower( Path.extension( splitWords[1] ) ) == ".chm" )
 						{

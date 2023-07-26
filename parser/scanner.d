@@ -12,7 +12,7 @@ private:
 public:
 	static TokenUnit[] scanFile( string fullPath )
 	{
-		if( exists( fullPath ) )
+		if( std.file.exists( fullPath ) )
 		{
 			try
 			{
@@ -35,7 +35,8 @@ public:
 			}
 			catch( Exception e )
 			{
-				IupMessage( "scanFile BUG", toStringz( e.toString ) );
+				// https://superuser.com/questions/86999/why-cant-i-name-a-folder-or-file-con-in-windows
+				//IupMessage( "scanFile BUG", toStringz( e.toString ) );
 			}
 		}
 		

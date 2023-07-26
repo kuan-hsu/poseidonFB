@@ -2,7 +2,7 @@
 
 private import iup.iup;
 private import global, project, actionManager;
-private import std.string, std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
+private import std.string, Conv = std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
 private import core.stdc.stdlib, core.stdc.string, core.thread;
 
 
@@ -133,25 +133,33 @@ uint convertIupColor( string color )
 {
 	uint result = 0xffffff;
 	
-	if( color.length > 1 )
+	try
 	{
-		if( color[0] == '#' )
+		if( color.length > 1 )
 		{
-			color = "0x" ~ color[1..$];
-			result = to!(uint)( color );
-		}
-		else if( color[0..2] == "0x" )
-		{
-			result = to!(uint)( color );
-		}
-		else
-		{
-			string[] colors = split( color, " " );
-			if( colors.length == 3 )
+			if( color[0] == '#' )
 			{
-				result = ( to!(uint)( colors[2] ) << 16 ) | ( to!(uint)( colors[1] ) << 8 ) | ( to!(uint)( colors[0] ) );
+				color = color[1..$].dup;
+				result = Conv.parse!uint( color, 16 );
+			}
+			else if( color[0..2] == "0x" )
+			{
+				color = color[2..$].dup;
+				result = Conv.parse!uint( color, 16 );
+			}
+			else
+			{
+				string[] colors = split( color, " " );
+				if( colors.length == 3 )
+				{
+					result = ( Conv.to!(uint)( colors[2] ) << 16 ) | ( Conv.to!(uint)( colors[1] ) << 8 ) | ( Conv.to!(uint)( colors[0] ) );
+				}
 			}
 		}
+	}
+	catch( Exception e )
+	{
+		IupMessage( "convertIupColor", "ISSUE #22" );
 	}
 
 	return result;
@@ -180,9 +188,13 @@ version(DIDE)
 	{
 		if( Path.stripExtension( Path.baseName( dmdFullPath ) ) == "ldc2" ) return 4;
 		version(Windows)
-			if( exists( Path.dirName( dmdFullPath ) ~ "/dub.exe" ) ) return 2;
+		{
+			if( std.file.exists( Path.dirName( dmdFullPath ) ~ "/dub.exe" ) ) return 2;
+		}
 		else
-			if( exists( Path.dirName( dmdFullPath ) ~ "/dub" ) ) return 2;
+		{
+			if( std.file.exists( Path.dirName( dmdFullPath ) ~ "/dub" ) ) return 2;
+		}
 		
 		return 1;
 	}
@@ -363,39 +375,45 @@ version(Posix) string modifyLinuxDropFileName( string _fn )
 
 FocusUnit getActiveCompilerInformation( string fromProjectDir = null )
 {
-	import std.stdio;
-	FocusUnit _focus;
+	static string	prevPrjDir;
+	FocusUnit		_focus;
 	
 	// Check custom compiler 
 	string customOpt, customCompiler;
 	CustomToolAction.getCustomCompilers( customOpt, customCompiler );
 	if( !customCompiler.length ) customCompiler = ( GLOBAL.compilerSettings.Bit64 == "OFF" ? GLOBAL.compilerSettings.compilerFullPath : GLOBAL.compilerSettings.x64compilerFullPath );
 	
-	string activePrjName = !fromProjectDir.length ? ProjectAction.getActiveProjectName : fromProjectDir;
+	string activePrjName = !fromProjectDir.length ? ProjectAction.getActiveProjectName( true ) : fromProjectDir;
 	if( activePrjName.length )
 	{
-		_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
-		_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
-		_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
-		_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
-		_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
-		if( GLOBAL.projectManager[activePrjName].focusOn.length )
+		if( ( activePrjName != prevPrjDir ) || fromProjectDir.length )
 		{
-			if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
-		}
-		// If project has no options, just no options!
-		if( !_focus.Compiler.length ) _focus.Compiler = customCompiler;
-		if( fromProjectDir.length ) _focus.IncDir = [ fromProjectDir ] ~ _focus.IncDir;
+			_focus.Compiler = GLOBAL.projectManager[activePrjName].compilerPath;
+			_focus.Option = GLOBAL.projectManager[activePrjName].compilerOption;
+			_focus.Target = GLOBAL.projectManager[activePrjName].targetName;
+			_focus.IncDir = GLOBAL.projectManager[activePrjName].includeDirs;
+			_focus.LibDir = GLOBAL.projectManager[activePrjName].libDirs;
+			if( GLOBAL.projectManager[activePrjName].focusOn.length )
+			{
+				if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _focus = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn];
+			}
+			// If project has no options, just no options!
+			if( !_focus.Compiler.length ) _focus.Compiler = customCompiler;
+			if( fromProjectDir.length ) _focus.IncDir = [ fromProjectDir ] ~ _focus.IncDir;
 
-		string[] _compilerDefaultImportPath = getCompilerImportPath( _focus.Compiler );
-		if( _compilerDefaultImportPath.length ) _focus.IncDir ~= _compilerDefaultImportPath; // IncDir include compiler 
-		return _focus;
+			string[] _compilerDefaultImportPath = getCompilerImportPath( _focus.Compiler );
+			if( _compilerDefaultImportPath.length ) _focus.IncDir ~= _compilerDefaultImportPath; // IncDir include compiler
+			prevPrjDir = activePrjName;
+			
+			return _focus;
+		}
 	}
 
 	_focus.Compiler = customCompiler;
 	_focus.Option = customOpt;
 	string[] _compilerDefaultImportPath = getCompilerImportPath( _focus.Compiler );
 	if( _compilerDefaultImportPath.length ) _focus.IncDir ~= _compilerDefaultImportPath; // IncDir include compiler 	
+	prevPrjDir = activePrjName;
 	
 	return _focus;
 }
@@ -429,11 +447,11 @@ string[] getCompilerImportPath( string compilerFullPath )
 		else
 		{
 			scFullPath = compilerPath ~ "/dmd.conf";
-			if( !exists( scFullPath ) ) scFullPath = "/etc/dmd.conf";
+			if( !std.file.exists( scFullPath ) ) scFullPath = "/etc/dmd.conf";
 		}
 		
 		string[] results;
-		if( exists( scFullPath ) )
+		if( std.file.exists( scFullPath ) )
 		{
 			auto scfile = cast(string) std.file.read( scFullPath );
 			foreach( line; std.string.splitLines( scfile ) )
@@ -486,16 +504,16 @@ string[] getCompilerImportPath( string compilerFullPath )
 			version(Windows)
 			{
 				auto _path = Path.buildNormalizedPath( compilerPath ~ "/../../src/phobos" );
-				if( exists( _path ) ) results ~= _path;
+				if( std.file.exists( _path ) ) results ~= _path;
 				_path = Path.buildNormalizedPath( compilerPath ~ "/../../src/druntime/import" );
-				if( exists( _path ) ) results ~= _path;
+				if( std.file.exists( _path ) ) results ~= _path;
 			}
 			else
 			{
 				auto _path = "/usr/include/d/dmd/phobos";
-				if( exists( _path ) ) results ~= _path;
+				if( std.file.exists( _path ) ) results ~= _path;
 				_path = "/usr/include/d/dmd/druntime/import";
-				if( exists( _path ) ) results ~= _path;
+				if( std.file.exists( _path ) ) results ~= _path;
 			}
 		}
 		

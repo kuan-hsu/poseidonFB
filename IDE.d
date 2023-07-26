@@ -16,10 +16,10 @@ private:
 		if( GLOBAL.linuxHome.length )
 		{
 			lngFilePath = GLOBAL.linuxHome ~ "/settings/language/" ~GLOBAL.language ~ ".ini"; // In main.d, the .poseidonFB or .poseidonD path already added in linuxHome 
-			if( !exists( lngFilePath ) ) lngFilePath = "settings/language/" ~ GLOBAL.language ~ ".lng";
+			if( !std.file.exists( lngFilePath ) ) lngFilePath = "settings/language/" ~ GLOBAL.language ~ ".lng";
 		}
 
-		if( exists( lngFilePath ) )
+		if( std.file.exists( lngFilePath ) )
 		{
 			int _encoding, _withBom;
 			auto lngDocument = FileAction.loadFile( lngFilePath, _encoding, _withBom );
@@ -459,9 +459,9 @@ public:
 			if( GLOBAL.linuxHome.length )
 			{
 				fullpath = GLOBAL.linuxHome ~ "/settings/editorSettings.ini"; // In main.d, the .poseidonFB or .poseidonD path already added in linuxHome 
-				if( !exists( fullpath ) ) fullpath = "settings/editorSettings.ini";
+				if( !std.file.exists( fullpath ) ) fullpath = "settings/editorSettings.ini";
 			}
-			if( !exists( fullpath ) ) throw new Exception( "editorSettings.ini isn't existed!" );
+			if( !std.file.exists( fullpath ) ) throw new Exception( "editorSettings.ini isn't existed!" );
 			
 			// Load INI
 			int _enconding, _withBom;
@@ -928,7 +928,7 @@ public:
 		{
 			string iniPath = GLOBAL.poseidonPath ~ "/settings/docStatus.ini";
 			if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/settings/docStatus.ini"; // In main.d, the .poseidonFB or .poseidonD path already added in linuxHome 
-			if( !exists( iniPath ) ) return;
+			if( !std.file.exists( iniPath ) ) return;
 			
 			// Load INI
 			/*
@@ -991,7 +991,7 @@ public:
 		{
 			string iniPath = GLOBAL.poseidonPath ~ "/settings/colorTemplates/" ~ templateName ~ ".ini";
 			if( GLOBAL.linuxHome.length ) iniPath = GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ templateName ~ ".ini"; // In main.d, the .poseidonFB or .poseidonD path already added in linuxHome 
-			if( !exists( iniPath ) )
+			if( !std.file.exists( iniPath ) )
 			{
 				debug writefln( "loadColorTemplateINI() file isn't exist error!" );
 				IupMessageError( GLOBAL.mainDlg, "loadColorTemplateINI() file isn't existed!" );
@@ -1150,7 +1150,7 @@ public:
 		{
 			string templatePath = GLOBAL.poseidonPath ~ "/settings/colorTemplates";
 			if( GLOBAL.linuxHome.length ) templatePath = GLOBAL.linuxHome ~ "/settings/colorTemplates";
-			if( !exists( templatePath ) ) std.file.mkdir( templatePath );
+			if( !std.file.exists( templatePath ) ) std.file.mkdir( templatePath );
 			
 			string doc = "[color]\n";
 			doc ~= setINILineData( "caretLine", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCaretLine" ), "FGCOLOR" ) ) );

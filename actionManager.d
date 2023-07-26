@@ -182,7 +182,7 @@ public:
 	{
 		try
 		{
-			if( !exists( fullPath ) )
+			if( !std.file.exists( fullPath ) )
 			{
 				IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
 				return null;
@@ -773,7 +773,7 @@ public:
 			GLOBAL.statusBar.setPrjName( null, true );
 		}
 
-		if( GLOBAL.enableParser == "ON" ) GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
+		// if( GLOBAL.enableParser == "ON" ) GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
 
 		return true;
 	}
@@ -813,7 +813,7 @@ public:
 		{
 			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 			
-			if( !exists( fullPath ) ) return false;
+			if( !std.file.exists( fullPath ) ) return false;
 
 			int		_bom, _withBom;
 			string 	_text = FileAction.loadFile( fullPath, _bom, _withBom );
@@ -1746,10 +1746,16 @@ struct ProjectAction
 		return getTargetDepthID( 1 );
 	}
 
-	static string getActiveProjectName()
+	static string getActiveProjectName( bool bCheckScintilla = false )
 	{
+		if( bCheckScintilla )
+		{
+			auto cSci = ScintillaAction.getActiveCScintilla();
+			if( cSci !is null ) return fileInProject( cSci.getFullPath );
+		}
+	
+		// There is no any scintilla tabitem or force pass, search project node
 		int id = getActiveProjectID();
-
 		if( id < 1 ) return null;
 
 		return fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id ) );//fromStringz( IupGetAttributeId( GLOBAL.projectTree.getShadowTreeHandle, "TITLE", id ) ).dup;
@@ -2348,7 +2354,7 @@ public:
 		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
 		version(DIDE)	if( !tools.isParsableExt( _ext, 3 ) )	return null;		
 
-		if( exists( fullPath ) )
+		if( std.file.exists( fullPath ) )
 		{
 			scope _parser = new CParser( Scanner.scanFile( fullPath ) );
 			auto _ast = _parser.parse( fullPath );
@@ -2373,7 +2379,7 @@ public:
 		{
 			// Don't Create Tree
 			// Parser
-			if( exists( fullPath ) )
+			if( std.file.exists( fullPath ) )
 			{
 				scope _parser = new CParser( Scanner.scanFile( fullPath ) );
 				auto _ast = _parser.parse( fullPath );
@@ -2406,13 +2412,13 @@ public:
 			version(FBIDE)
 			{
 				string objectFilePath = GLOBAL.poseidonPath ~ "/settings/json/FB_BuiltinFunctions.json";
-				if( exists( objectFilePath ) ) return GLOBAL.Parser.json2Ast( FileAction.loadFile( objectFilePath, bom, withBom ) );
+				if( std.file.exists( objectFilePath ) ) return GLOBAL.Parser.json2Ast( FileAction.loadFile( objectFilePath, bom, withBom ) );
 			}
 			else //version(DIDE)
 			{
 				string objectFilePath = GLOBAL.poseidonPath ~ "/settings/json/ObjectD2.json";
 				if( tools.DMDversion( GLOBAL.compilerSettings.compilerFullPath ) == 1 ) objectFilePath = GLOBAL.poseidonPath ~ "/settings/json/ObjectD1.json";
-				if( exists( objectFilePath ) ) return GLOBAL.Parser.json2Ast( FileAction.loadFile( objectFilePath, bom, withBom ) );
+				if( std.file.exists( objectFilePath ) ) return GLOBAL.Parser.json2Ast( FileAction.loadFile( objectFilePath, bom, withBom ) );
 			}
 		}
 		catch( Exception e)
@@ -2587,7 +2593,7 @@ public:
 		try
 		{
 			if( fullPathByOS(fullPath) in GLOBAL.scintillaManager ) bInDocument = true;
-			if( exists( fullPath ) || bInDocument )
+			if( std.file.exists( fullPath ) || bInDocument )
 			{
 				if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 				IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 1 );
@@ -2766,7 +2772,7 @@ private:
 public:	
 	static void run( CustomTool tool )
 	{
-		if( !exists( tool.dir ) )
+		if( !std.file.exists( tool.dir ) )
 		{
 			IupMessageError( null, toStringz( tool.dir ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
 			return;

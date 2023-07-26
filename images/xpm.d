@@ -257,7 +257,7 @@ private:
 			string		prevLine, pixel;
 			ColorUnit[]	color;
 			
-			
+			if( !std.file.exists( filePath ) ) return null;
 			auto doc = cast(string) std.file.read( filePath );
 			foreach( size_t count, line; std.string.splitLines( doc ) )
 			{
@@ -378,6 +378,7 @@ private:
 			string		prevLine, pixel;
 			ColorUnit[]	color;
 
+			if( !std.file.exists( filePath ) ) return;
 			auto doc = cast(string) std.file.read( filePath );
 			foreach( size_t count, line; std.string.splitLines( doc ) )
 			{

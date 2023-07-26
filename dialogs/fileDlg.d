@@ -26,7 +26,7 @@ private:
 		}
 		else if( DIALOGTYPE == "OPEN" || DIALOGTYPE == "DIR" )
 		{
-			if( exists( _fileName ) )
+			if( std.file.exists( _fileName ) )
 			{
 				if( std.file.isFile( _fileName ) ) _fileName = Path.dirName( _fileName );
 				if( std.file.isDir( _fileName ) ) IupSetStrAttribute( dlg, "DIRECTORY", toStringz( _fileName ) );
@@ -80,7 +80,7 @@ private:
 					
 				if( filesName.length )
 				{
-					if( exists( filesName[0] ) )
+					if( std.file.exists( filesName[0] ) )
 					{
 						if( std.file.isDir( filesName[0] ) ) GLOBAL.recentOpenDir = filesName[0]; else GLOBAL.recentOpenDir = Path.dirName( filesName[0] );
 					}

@@ -183,7 +183,13 @@ public:
 			IupSetCallback( sci, "ZOOM_CB",cast(Icallback) &CScintilla_zoom_cb );
 			IupSetCallback( sci, "GETFOCUS_CB",cast(Icallback) function( Ihandle* _ih )
 			{
-				if( GLOBAL.enableParser == "ON" ) GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
+				static Ihandle* prevIHandle;
+				if( _ih != prevIHandle ) // prevent double trigger
+				{
+					if( GLOBAL.enableParser == "ON" ) GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
+				}
+				prevIHandle = _ih;
+				
 				return IUP_DEFAULT;
 			});
 
@@ -494,7 +500,7 @@ public:
 		IupSetStrAttribute(sci, "STYLEFONT40",  toStringz( font ) );
 		IupSetStrAttribute(sci, "STYLEFONTSIZE40",  toStringz( size ) );
 
-		IupScintillaSendMessage( sci, 2207, tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+		IupScintillaSendMessage( sci, 2207, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
 		/*
 		IupSetAttribute(sci, "STYLEFONTSIZE38",  "10" );
 		IupScintillaSendMessage( sci, 2205, tools.convertIupColor( "210 255 255" ), 0 ); // SCI_CALLTIPSETBACK 2205
@@ -661,7 +667,7 @@ public:
 		{
 			IupScintillaSendMessage( sci, 2021, 1, 0 );
 			IupScintillaSendMessage( sci, 2086, 2, 0 );
-			IupScintillaSendMessage( sci, 2084, 1, tools.convertIupColor( "177 177 177" ) );
+			IupScintillaSendMessage( sci, 2084, 1, cast(ptrdiff_t) tools.convertIupColor( "177 177 177" ) );
 		}
 		else
 		{
@@ -670,7 +676,7 @@ public:
 
 
 		// Color
-		IupScintillaSendMessage( sci, 2098, tools.convertIupColor( GLOBAL.editColor.caretLine ), 0 ); //SCI_SETCARETLINEBACK = 2098
+		IupScintillaSendMessage( sci, 2098, cast(size_t) tools.convertIupColor( GLOBAL.editColor.caretLine ), 0 ); //SCI_SETCARETLINEBACK = 2098
 
 		uint alpha = to!(int)( GLOBAL.editColor.selAlpha );
 		if( alpha > 255 )
@@ -680,20 +686,20 @@ public:
 
 		if( alpha == 255 )
 		{
-			IupScintillaSendMessage( sci, 2067, 1, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, 1, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 1, cast(ptrdiff_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, cast(ptrdiff_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else if( alpha == 0 )
 		{
-			IupScintillaSendMessage( sci, 2067, 0, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, 1, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 0, cast(ptrdiff_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, cast(ptrdiff_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 		}
 		else
 		{
-			IupScintillaSendMessage( sci, 2067, 0, tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-			IupScintillaSendMessage( sci, 2068, 1, tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+			IupScintillaSendMessage( sci, 2067, 0, cast(ptrdiff_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+			IupScintillaSendMessage( sci, 2068, 1, cast(ptrdiff_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
 			IupScintillaSendMessage( sci, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
 		}
 		
@@ -703,7 +709,7 @@ public:
 		/*
 		IupScintillaSendMessage( sci, 2290, 0, 0xffffff ); // SCI_SETFOLDMARGINCOLOUR = 2290,
 		*/
-		IupScintillaSendMessage( sci, 2069, tools.convertIupColor( GLOBAL.editColor.cursor ), 0 ); // SCI_SETCARETFORE = 2069,
+		IupScintillaSendMessage( sci, 2069, cast(size_t) tools.convertIupColor( GLOBAL.editColor.cursor ), 0 ); // SCI_SETCARETFORE = 2069,
 
 		//IupSetAttribute( sci, "FOLDFLAGS", "LEVELNUMBERS" );  
 
@@ -755,7 +761,7 @@ public:
 		IupScintillaSendMessage( sci, 2080, 8, GLOBAL.indicatorStyle ); //SCI_INDICSETSTYLE = 2080
 		//IupScintillaSendMessage( sci, 2284, 1, 0 ); //SCI_SETTWOPHASEDRAW = 2284		
 		//IupScintillaSendMessage( sci, 2510, 8, 1 ); //SCI_INDICSETUNDER = 2510
-		IupScintillaSendMessage( sci, 2082, 8, tools.convertIupColor( GLOBAL.editColor.currentWord ) ); // SCI_INDICSETFORE = 2082
+		IupScintillaSendMessage( sci, 2082, 8, cast(ptrdiff_t) tools.convertIupColor( GLOBAL.editColor.currentWord ) ); // SCI_INDICSETFORE = 2082
 		
 		alpha = to!(int)( GLOBAL.editColor.currentWordAlpha );
 		if( alpha <= 0 )
@@ -3241,7 +3247,7 @@ extern(C)
 			version(DIDE)	_fn = _fn ~ "/D.poseidon";
 		}
 
-		if( exists( _fn ) )
+		if( std.file.exists( _fn ) )
 		{
 			bool bIsPrj;
 			

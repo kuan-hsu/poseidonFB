@@ -668,7 +668,7 @@ public:
 		version(FBIDE)	string sFN = setupDir ~ "/FB.poseidon";
 		version(DIDE)	string sFN = setupDir ~ "/D.poseidon";
 
-		if( exists( sFN ) )
+		if( std.file.exists( sFN ) )
 		{
 			PROJECT		p;
 			GLOBAL.projectManager[setupDir] = p.loadFile( sFN );
@@ -710,7 +710,7 @@ public:
 					GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Files Pre-Loading...", true );
 					foreach( source; GLOBAL.projectManager[setupDir].sources ~ GLOBAL.projectManager[setupDir].includes ~ GLOBAL.projectManager[setupDir].misc ~ GLOBAL.projectManager[setupDir].others )
 					{
-						if( exists( source ) ) parsedFiles ~= source;
+						if( std.file.exists( source ) ) parsedFiles ~= source;
 					}
 
 					for( int i = 0; i <= GLOBAL.preParseLevel; ++i )
@@ -730,7 +730,7 @@ public:
 			IupMessageError( null, toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString ) );
 			if( bAskCreateNew )
 			{
-				if( exists( setupDir ) )
+				if( std.file.exists( setupDir ) )
 				{
 					int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["createnewone"].toDString );
 					if( result == 1 )
@@ -1317,7 +1317,7 @@ extern(C)
 			}
 
 			fullPath ~= fileName;
-			if( exists( fullPath ) )
+			if( std.file.exists( fullPath ) )
 			{
 				Ihandle* messageDlg = IupMessageDlg();
 				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
@@ -1407,7 +1407,7 @@ extern(C)
 
 			// Get the parent folder name
 			string dir = Path.dirName( fullPath );
-			if( !exists( dir ) ) mkdir( dir ); // Create Folder On Disk
+			if( !std.file.exists( dir ) ) mkdir( dir ); // Create Folder On Disk
 
 			version(Windows)
 			{
@@ -1504,7 +1504,7 @@ extern(C)
 			{
 				if( fullPath.length )
 				{
-					if( !exists( fullPath ) )
+					if( !std.file.exists( fullPath ) )
 					{
 						Ihandle* messageDlg = IupMessageDlg();
 						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
@@ -1667,7 +1667,7 @@ extern(C)
 				if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" )
 				{
 					string fullPath = fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) ).dup;
-					if( exists( fullPath ) )
+					if( std.file.exists( fullPath ) )
 					{
 						string ext = toLower( Path.extension( fullPath ) );
 						
@@ -1743,7 +1743,7 @@ extern(C)
 				if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" )
 				{
 					string fullPath = fSTRz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", _i ) );
-					if( exists( fullPath ) )
+					if( std.file.exists( fullPath ) )
 					{
 						if( selectedIDs.length == 1 )
 							actionManager.ScintillaAction.openFile( fullPath, -1 );

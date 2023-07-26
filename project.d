@@ -132,7 +132,7 @@ public:
 	{
 		string _replaceDir( string _fullPath, string _dir )
 		{
-			if( !Path.isAbsolute( _fullPath ) ) return _dir ~ "/" ~ _fullPath;
+			if( !Path.isAbsolute( _fullPath ) ) return tools.normalizeSlash( _dir ~ "/" ~ _fullPath );
 			return _fullPath;
 		}
 		
@@ -141,7 +141,7 @@ public:
 		{
 			int _encoding, _withBom;
 			auto doc = FileAction.loadFile( settingFileFullPath, _encoding, _withBom );
-			string _dir = Path.dirName( settingFileFullPath );
+			string _dir = tools.normalizeSlash( Path.dirName( settingFileFullPath ) );
 			s.dir = _dir;
 			
 			string	blockText, focusName, left, right;
@@ -226,7 +226,7 @@ public:
 								if( focusName.length )	s.focusUnit[focusName].Option = right;
 								break;
 							case "compiler":
-								if( focusName.length )	s.focusUnit[focusName].Compiler = right;
+								if( focusName.length )	s.focusUnit[focusName].Compiler = tools.normalizeSlash( right );
 								break;
 							case "incdir":
 								if( focusName.length )

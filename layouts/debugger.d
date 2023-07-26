@@ -2022,11 +2022,11 @@ public:
 		//IupSetAttribute( GLOBAL.outputPanel, "VALUE", toStringz("") ); // Clean outputPanel
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
-		if( exists( command ) )
+		if( std.file.exists( command ) )
 		{
 			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
 			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ "......", true );
-			if( exists( GLOBAL.compilerSettings.debuggerFullPath ) )
+			if( std.file.exists( GLOBAL.compilerSettings.debuggerFullPath ) )
 			{
 				if( Uni.toLower( Path.baseName( GLOBAL.compilerSettings.debuggerFullPath ) ) == "fbdebugger.exe" )
 				{

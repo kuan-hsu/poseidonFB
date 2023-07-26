@@ -276,7 +276,7 @@ extern(C)
 			if( args.length > 1 )
 			{
 				string argPath = args[1];
-				if( exists( argPath ) )
+				if( std.file.exists( argPath ) )
 				{
 					string PRJFILE;
 					version(FBIDE) PRJFILE = "FB.poseidon"; else PRJFILE = "D.poseidon";
@@ -741,7 +741,7 @@ extern(C)
 				prjSettingFile = _fn ~ "/" ~ "D.poseidon";
 		}
 		
-		if( exists( prjSettingFile ) )
+		if( std.file.exists( prjSettingFile ) )
 		{
 			bool bIsPrj;
 			

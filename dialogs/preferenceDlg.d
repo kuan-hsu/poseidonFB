@@ -99,7 +99,7 @@ private:
 			IupSetStrAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
 			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");			
 		}
-		else
+		else // DIDE
 		{
 			version(Windows)
 			{
@@ -117,6 +117,24 @@ private:
 				hBox01x64 = IupFrame( _hBox01x64 );
 				IupSetStrAttribute( hBox01x64, "TITLE", GLOBAL.languageItems["x64path"].toCString );
 				IupSetAttributes( hBox01x64, "EXPANDCHILDREN=YES,SIZE=346x");
+			}
+			else
+			{
+				Ihandle* textDebuggerPath = IupText( null );
+				IupSetAttributes( textDebuggerPath, "SIZE=320x,NAME=Compiler-debuggerPath,BORDER=NO" );
+				IupSetStrAttribute( textDebuggerPath, "VALUE", toStringz( GLOBAL.compilerSettings.debuggerFullPath ) );
+				IupSetHandle( "debuggerPath_Handle", textDebuggerPath );
+				
+				btnOpenDebugger = IupButton( null, null );
+				IupSetAttributes( btnOpenDebugger, "IMAGE=icon_openfile,NAME=x86,FLAT=YES" );
+				IupSetCallback( btnOpenDebugger, "ACTION", cast(Icallback) &CPreferenceDialog_OpenAppBinFile_cb );
+				
+				Ihandle* _hBox02 = IupHbox( textDebuggerPath, btnOpenDebugger, null );
+				IupSetAttributes( _hBox02, "ALIGNMENT=ACENTER,MARGIN=5x0" );
+				
+				hBox02 = IupFrame( _hBox02 );
+				IupSetStrAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
+				IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");			
 			}
 		}
 		
@@ -236,28 +254,18 @@ private:
 		IupSetStrAttribute( frameCompiler, "TITLE", GLOBAL.languageItems["compilersetting"].toCString );
 		IupSetAttributes( frameCompiler, "EXPANDCHILDREN=YES,SIZE=346x");
 		
-		
 		Ihandle* vBoxCompilerSettings;
-		version(FBIDE)
+		version(Posix)
 		{
-			version(Windows)
-				vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, frameCompiler, null );
-			else
-				vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, hBox04, frameCompiler, null );
-				
-			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
-			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
+			vBoxCompilerSettings = IupVbox( hBox01, hBox02, hBox03, hBox04, frameCompiler, null );
 		}
 		else
 		{
-			version(Windows)
-				vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, frameCompiler, null );
-			else
-				vBoxCompilerSettings = IupVbox( hBox01, hBox03, hBox04, frameCompiler, null );
-				
-			IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
-			IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
+			version(FBIDE) vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, hBox02, hBox02x64, frameCompiler, null );
+			version(DIDE) vBoxCompilerSettings = IupVbox( hBox01, hBox01x64, frameCompiler, null );
 		}
+		IupSetAttributes( vBoxCompilerSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
+		IupSetAttribute( vBoxCompilerSettings, "EXPANDCHILDREN", "YES");
 
 
 		// Parser Setting
@@ -977,7 +985,7 @@ private:
 						if( fromStringz( IupGetAttributeId( _listHandle, "", i ) ) == templateName )
 						{
 							string templateFullPath = templatePath ~ "/" ~templateName ~ ".ini";
-							if( exists( templateFullPath ) )
+							if( std.file.exists( templateFullPath ) )
 							{
 								int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["suredelete"].toDString, "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
 								if( result == 1 )
@@ -2983,7 +2991,7 @@ extern(C) // Callback for CPreferenceDialog
 		if( state == 1 )
 		{
 			string templateFP = GLOBAL.linuxHome.length ? ( GLOBAL.linuxHome ~ "/settings/colorTemplates" ) : "settings/colorTemplates";
-			if( exists( templateFP ) )
+			if( std.file.exists( templateFP ) )
 			{
 				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
 				version(linux) IupSetAttributeId( ih, "", 1, toStringz( " " ) );

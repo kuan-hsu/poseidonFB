@@ -1562,7 +1562,7 @@ public:
 		{
 			// Don't Create Tree
 			// Parser
-			if( exists( fullPath ) )
+			if( std.file.exists( fullPath ) )
 			{
 				if( GLOBAL.Parser.updateTokens( GLOBAL.scanner.scanFile( fullPath ) ) )
 				{

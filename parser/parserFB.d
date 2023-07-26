@@ -194,9 +194,9 @@ version(FBIDE)
 
 							if( token().tok != TOK.Teol && token().tok != TOK.Tcolon )
 							{
+								string type;
 								if( token().tok == TOK.Tnumbers  )
 								{
-									string type;
 									if( indexOf( token().identifier, "." ) > 0 )
 									{
 										type = "single";
@@ -210,7 +210,7 @@ version(FBIDE)
 								}
 								else if( token().tok == TOK.Tstrings  )
 								{
-									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, "string", null, lineNumber );	
+									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, "string", null, lineNumber );
 									parseToken();
 								}
 								else if( token().tok == TOK.Topenparen )
@@ -230,13 +230,24 @@ version(FBIDE)
 									activeASTnode.addChild( name, B_FUNCTION | B_DEFINE, null, param, null, lineNumber );
 									
 									// Continue until EOL
-									while( token().tok != TOK.Teol && tokenIndex < tokens.length )
-										parseToken();
+									skipToEOL();
+								}
+								else if( token().tok == TOK.Ttype && next().tok == TOK.Tless ) // #define LIGHTGRAY type<Color>( 200, 200, 200, 255 )
+								{
+									parseToken( TOK.Ttype );
+									type = getDelimitedString( TOK.Tless, TOK.Tgreater );
+									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, type, null, lineNumber );
+									skipToEOL();
 								}
 								else if( token().tok == TOK.Tidentifier )
 								{
 									activeASTnode.addChild( name, B_ALIAS | B_DEFINE, null, null, null, lineNumber );
 									parseToken();
+								}
+								else
+								{
+									activeASTnode.addChild( name, B_VARIABLE | B_DEFINE, null, null, null, lineNumber );
+									skipToEOL();
 								}
 							}
 							else

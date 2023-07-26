@@ -99,9 +99,9 @@ void main( string[] args )
 			version(FBIDE)	GLOBAL.linuxHome ~= "/.poseidonFB";
 			version(DIDE)	GLOBAL.linuxHome ~= "/.poseidonD";
 			
-			if( !exists( GLOBAL.linuxHome ) ) std.file.mkdir( GLOBAL.linuxHome );
-			if( !exists( GLOBAL.linuxHome ~ "/settings" ) ) std.file.mkdir( GLOBAL.linuxHome ~ "/settings" );
-			if( !exists( GLOBAL.linuxHome ~ "/settings/colorTemplates" ) ) std.file.mkdir( GLOBAL.linuxHome ~ "/settings/colorTemplates" );
+			if( !std.file.exists( GLOBAL.linuxHome ) ) std.file.mkdir( GLOBAL.linuxHome );
+			if( !std.file.exists( GLOBAL.linuxHome ~ "/settings" ) ) std.file.mkdir( GLOBAL.linuxHome ~ "/settings" );
+			if( !std.file.exists( GLOBAL.linuxHome ~ "/settings/colorTemplates" ) ) std.file.mkdir( GLOBAL.linuxHome ~ "/settings/colorTemplates" );
 
 			foreach( string filename; dirEntries( GLOBAL.poseidonPath ~ "/settings/colorTemplates", "*.ini", SpanMode.shallow) )
 				std.file.copy( filename, GLOBAL.linuxHome ~ "/settings/colorTemplates/" ~ Path.baseName( filename ) );
@@ -225,7 +225,7 @@ void main( string[] args )
 	if( args.length > 1 )
 	{
 		auto argPath = args[1];
-		if( exists( argPath ) )
+		if( std.file.exists( argPath ) )
 		{
 			version(FBIDE)
 			{
