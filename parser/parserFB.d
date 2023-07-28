@@ -7,10 +7,10 @@ version(FBIDE)
 	class CParser : _PARSER
 	{
 	private:
-		debug import std.stdio;
-		import global, parser.token, parser.ast;
-		import iup.iup;
-		import std.string, Uni = std.uni, Array = std.array, Path = std.path, Conv = std.conv;
+		debug import	std.stdio;
+		import			global, parser.token, parser.ast;
+		import 			iup.iup;
+		import 			std.string, Uni = std.uni, Array = std.array, Path = std.path, Conv = std.conv;
 		
 		bool skipToEOL()
 		{
@@ -252,14 +252,29 @@ version(FBIDE)
 							}
 							else
 							{
-								activeASTnode.addChild( name, B_VERSION | B_DEFINE, null, null, null, lineNumber );
+								activeASTnode.addChild( name, B_VARIABLE, null, null, null, lineNumber );
 							}
 						}
 						break;
 					
-
+					case TOK.Telseif:
+						version(VERSION_NONE)
+						{}
+						else
+						{
+							if( activeASTnode !is null )
+							{
+								if( activeASTnode.kind == ( B_VERSION | B_PARAM ) || activeASTnode.kind == B_VERSION )
+								{
+									if( activeASTnode !is null )
+										if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								}
+							}
+						}
+						goto case;
+						
 					case TOK.Tif:
-						parseToken( TOK.Tif );
+						parseToken();
 						version(VERSION_NONE)
 						{
 							skipToEOL();
@@ -346,7 +361,10 @@ version(FBIDE)
 						}						
 						else
 						{
-							if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( token().identifier, B_VERSION, null, null, null, token().lineNumber );
+							if( activeASTnode !is null )
+							{
+								if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( token().identifier, B_VERSION, null, null, null, token().lineNumber );
+							}
 							parseToken();
 						}
 						break;
@@ -359,7 +377,10 @@ version(FBIDE)
 						}						
 						else
 						{
-							if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( "!" ~ token().identifier, B_VERSION, null, "!", null, token().lineNumber );
+							if( activeASTnode !is null )
+							{
+								if( token().tok == TOK.Tidentifier ) activeASTnode = activeASTnode.addChild( "!" ~ token().identifier, B_VERSION, null, "!", null, token().lineNumber );
+							}
 							parseToken();
 						}
 						break;
@@ -371,35 +392,37 @@ version(FBIDE)
 						}					
 						else
 						{
-							if( activeASTnode.kind == ( B_VERSION | B_PARAM ) )
+							if( activeASTnode !is null )
 							{
-								
-								CASTnode[] _children = activeASTnode.getChildren();
-								activeASTnode.zeroChildCount(); // set children length = 0, make killChild() not release the memory
-								activeASTnode = activeASTnode.getFather( token().lineNumber );
-								activeASTnode.killChild( activeASTnode.getChildrenCount - 1 );
-								
-								foreach( CASTnode _child; _children ) // Paste _children Back
-									activeASTnode.addChild( _child );
-								
-								activeASTnode = activeASTnode.addChild( "#else", B_VERSION | B_PARAM, null, null, "#else", token().lineNumber );
-							}
-							else if( activeASTnode.kind == B_VERSION )
-							{
-								string _name = activeASTnode.name;
-								activeASTnode = activeASTnode.getFather( token().lineNumber );
-								if( activeASTnode.name.length )
+								if( activeASTnode.kind == ( B_VERSION | B_PARAM ) )
 								{
-									if( _name[0] == '!' )
-										activeASTnode = activeASTnode.addChild( _name[1..$], B_VERSION, null, null, null, token().lineNumber );
-									else
-										activeASTnode = activeASTnode.addChild( "!" ~ _name, B_VERSION, null, "!", null, token().lineNumber );
+									CASTnode[] _children = activeASTnode.getChildren();
+									activeASTnode.zeroChildCount(); // set children length = 0, make killChild() not release the memory
+									if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+									activeASTnode.killChild( activeASTnode.getChildrenCount - 1 );
+									
+									foreach( CASTnode _child; _children ) // Paste _children Back
+										activeASTnode.addChild( _child );
+									
+									activeASTnode = activeASTnode.addChild( "#else", B_VERSION | B_PARAM, null, null, "#else", token().lineNumber );
+								}
+								else if( activeASTnode.kind == B_VERSION )
+								{
+									string _name = activeASTnode.name;
+									if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+									if( activeASTnode.name.length )
+									{
+										if( _name[0] == '!' )
+											activeASTnode = activeASTnode.addChild( _name[1..$], B_VERSION, null, null, null, token().lineNumber );
+										else
+											activeASTnode = activeASTnode.addChild( "!" ~ _name, B_VERSION, null, "!", null, token().lineNumber );
+									}
 								}
 							}
 							parseToken( TOK.Telse );
 						}
 						break;
-					
+					/*
 					case TOK.Telseif:
 						parseToken();
 						
@@ -424,7 +447,7 @@ version(FBIDE)
 							}
 						}
 						break;
-						
+					*/	
 					case TOK.Tendif:
 						version(VERSION_NONE)
 						{
@@ -432,18 +455,23 @@ version(FBIDE)
 						}
 						else
 						{
-							if( activeASTnode.kind == ( B_VERSION | B_PARAM ) )
+							if( activeASTnode !is null )
 							{
-								CASTnode[] _children = activeASTnode.getChildren();
-								activeASTnode.zeroChildCount(); // set children length = 0, make killChild() not release the memory
-								activeASTnode = activeASTnode.getFather( token().lineNumber );
-								activeASTnode.killChild( activeASTnode.getChildrenCount - 1 );
+								if( activeASTnode.kind == ( B_VERSION | B_PARAM ) )
+								{
+									CASTnode[] _children = activeASTnode.getChildren();
+									activeASTnode.zeroChildCount(); // set children length = 0, make killChild() not release the memory
+									if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+									activeASTnode.killChild( activeASTnode.getChildrenCount - 1 );
 
-								foreach( CASTnode _child; _children ) // Paste _children Back
-									activeASTnode.addChild( _child );
+									foreach( CASTnode _child; _children ) // Paste _children Back
+										activeASTnode.addChild( _child );
+								}
+								else if( activeASTnode.kind & B_VERSION )
+								{
+									if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								}
 							}
-							else if( activeASTnode.kind & B_VERSION )
-								activeASTnode = activeASTnode.getFather( token().lineNumber );
 								
 							parseToken( TOK.Tendif );
 						}
@@ -1858,7 +1886,7 @@ version(FBIDE)
 							break;
 
 						case TOK.Tprotected:
-							parseToken( TOK.Tprivate );
+							parseToken( TOK.Tprotected );
 							if( token().tok == TOK.Tcolon )
 							{
 								parseToken( TOK.Tcolon );

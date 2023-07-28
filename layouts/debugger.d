@@ -21,6 +21,8 @@ struct VarObject
 class CDebugger
 {
 private:
+	import					std.process;
+	
 	Ihandle*				txtConsoleCommand;
 	Ihandle* 				mainHandle, consoleHandle, backtraceHandle, tabResultsHandle, disasHandle;
 	Ihandle*				watchTreeHandle, localTreeHandle, argTreeHandle, shareTreeHandle, varTabHandle;
@@ -364,7 +366,7 @@ private:
 		string type = GLOBAL.debugPanel.sendCommand( "whatis " ~ varName ~ "\n", false );
 		if( type.length > 5 )
 		{
-			type = strip( type[0..$-5] ).dup; // remove (gdb)
+			if( type[$-5..$] == "(gdb)" ) type = strip( type[0..$-5] ).dup; // remove (gdb)
 			auto posAssign = indexOf( type, " = " );
 			if( posAssign > 0 ) return type[posAssign+3..$].dup;
 		}
@@ -377,7 +379,7 @@ private:
 
 		if( value.length > 5 )
 		{
-			value = value[0..$-5].dup; // remove (gdb)
+			if( value[$-5..$] == "(gdb)" ) value = strip( value[0..$-5] ).dup; // remove (gdb)
 			auto posAssign = indexOf( value, " = " );
 			if( posAssign > 0 ) return value[posAssign+3..$].dup;
 		}
@@ -512,7 +514,8 @@ private:
 	string fixGDBMessage( string _result )
 	{
 		string[] results = splitLines( _result );
-		results.length = results.length - 1; // remove (gdb)
+		if( results.length > 1 )
+			if( results[$-1] == "(gdb)" ) results.length = results.length - 1; // remove (gdb)
 
 		_result = "";
 
@@ -1388,9 +1391,7 @@ public:
 						{
 							if( bRunning )
 							{
-								string[] results = splitLines( result );
-
-								results.length = results.length - 1; // remove (gdb)
+								string[] results = splitLines( fixGDBMessage( result ) ); // remove (gdb)
 								if( results.length == 0 ) // NO ERROR
 								{
 									string _id = strip( splitCommand[2] );
@@ -1445,9 +1446,7 @@ public:
 				case "undisplay":
 					if( bRunning )
 					{
-						string[] results = splitLines( result );
-
-						results.length = results.length - 1; // remove (gdb)
+						string[] results = splitLines( fixGDBMessage( result ) ); // remove (gdb)
 						if( results.length == 0 ) // NO ERROR
 						{
 							string _id = strip( splitCommand[2] );
@@ -1539,10 +1538,7 @@ public:
 				case "bt", "backtrace", "where":
 					if( bRunning )
 					{
-						string[] results = splitLines( result );
-
-						results.length = results.length - 1; // remove (gdb)
-
+						string[] results = splitLines( fixGDBMessage( result ) ); // remove (gdb)
 						if( results.length > 0 )
 						{
 							IupSetAttributeId( backtraceHandle, "DELNODE", 0, "CHILDREN" );
@@ -1672,8 +1668,7 @@ public:
 							case "variables":
 								if( bRunning )
 								{
-									string[] results = splitLines( result );
-									if( results.length ) results.length = results.length - 1; // remove (gdb)
+									string[] results = splitLines( fixGDBMessage( result ) ); // remove (gdb)
 
 									bool		bGlobal;
 									string		fileFullPath;
@@ -1763,9 +1758,7 @@ public:
 							case "r", "register", "registers", "reg":
 								if( bRunning )
 								{
-									string[] results = splitLines( result );
-									if( results.length ) results.length = results.length - 1; // remove (gdb)
-									
+									string[] results = splitLines( fixGDBMessage( result ) ); // remove (gdb)
 									if( results.length)
 									{
 										if( splitCommand.length == 2 )
@@ -2024,22 +2017,36 @@ public:
 		
 		if( std.file.exists( command ) )
 		{
-			//IupSetAttribute( GLOBAL.outputPanel, "VALUE", GLOBAL.cString.convert( "Running " ~ command ~ "......" ) );
-			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ "......", true );
-			if( std.file.exists( GLOBAL.compilerSettings.debuggerFullPath ) )
+			bool b64Bit = GLOBAL.compilerSettings.Bit64 == "OFF" ? false : true;
+			string debuggerExe = !b64Bit ? GLOBAL.compilerSettings.debuggerFullPath : GLOBAL.compilerSettings.x64debuggerFullPath;
+			version(Posix) debuggerExe = GLOBAL.compilerSettings.debuggerFullPath;
+			foreach( s; environment.toAA.keys )
 			{
-				if( Uni.toLower( Path.baseName( GLOBAL.compilerSettings.debuggerFullPath ) ) == "fbdebugger.exe" )
+				debuggerExe = Array.replace( debuggerExe, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
+			}
+
+			GLOBAL.messagePanel.printOutputPanel( "Running " ~ command ~ "......", true );
+			if( std.file.exists( debuggerExe ) )
+			{
+				if( Uni.toLower( Path.baseName( debuggerExe ) ) == "fbdebugger.exe" )
 				{
-					IupExecute( toStringz( "\"" ~ Array.replace( GLOBAL.compilerSettings.debuggerFullPath, "/", "\\" ) ~ "\"" ), toStringz( command ) );
+					IupExecute( toStringz( tools.normalizeSlash( debuggerExe, ) ), toStringz( command ) );
 				}
 				else
 				{
-					DebugControl = new DebugThread( "\"" ~ command ~ "\"", Path.dirName( GLOBAL.compilerSettings.debuggerFullPath ) );
+					DebugControl = new DebugThread( debuggerExe, "\"" ~ command ~ "\"", Path.dirName( GLOBAL.compilerSettings.debuggerFullPath ) );
 				}
 			}
 			else
 			{
-				version(linux) DebugControl = new DebugThread( "\"" ~ command ~ "\"", Path.dirName( GLOBAL.compilerSettings.debuggerFullPath ) );
+				version(linux)
+					DebugControl = new DebugThread( debuggerExe, "\"" ~ command ~ "\"", Path.dirName( GLOBAL.compilerSettings.debuggerFullPath ) );
+				else
+				{
+					GLOBAL.messagePanel.printOutputPanel( "\nDebugger: " ~ GLOBAL.compilerSettings.debuggerFullPath ~ " isn't existed!\nRun Error!", false );
+					IupMessageError( null, "Debugger isn't existed!" );
+					return false;
+				}
 			}
 		}
 		else
@@ -2160,57 +2167,20 @@ class CVarDlg : CSingleTextDialog
 class DebugThread //: Thread
 {
 private :
-	import					std.stdio, std.process, core.thread, std.file;
-	version(Windows) import	core.sys.windows.winbase, core.sys.windows.windef;
-	version(Posix) import core.sys.posix.fcntl : fcntl, F_SETFL, O_NONBLOCK;
+	import						std.stdio, std.process, core.thread, std.file, std.windows.charset;
+	version(Windows)	import	core.sys.windows.winbase, core.sys.windows.windef;
+	version(Posix)		import	core.sys.posix.fcntl : fcntl, F_SETFL, O_NONBLOCK;
 	
-	string			executeFullPath, cwd;
+	string			debuggerExe, executeFullPath, cwd, stderrMessage;
 	bool			b64Bit;
 	int				caretPos, splitValue;
 	ProcessPipes	proc;
-	bool			bStdoutNOBLOCK, bStderrNOBLOCK; 
+	bool			bStdoutNOBLOCK, bStderrNOBLOCK;
 
 	string getGDBmessage( int deleyms = 100 )
 	{
 		try
 		{
-			/+
-			string result;
-			
-			version(Windows)
-			{
-				uint iTotalBytesAvail, iNumberOfBytesWritten;
-				char[4096] sBuf;
-
-				//Thread.sleep( dur!("msecs")( 100 ) );
-				PeekNamedPipe( proc.stderr.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
-				if( iTotalBytesAvail > 0 )
-				{
-					while( iTotalBytesAvail > 0  )
-					{
-						if( iTotalBytesAvail > 4096 ) iTotalBytesAvail = 4096;
-						ReadFile( proc.stderr.windowsHandle, sBuf.ptr, iTotalBytesAvail, &iNumberOfBytesWritten, null );
-						result ~= sBuf[0..iNumberOfBytesWritten];
-						PeekNamedPipe( proc.stderr.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
-					}
-				}
-				iTotalBytesAvail = 0, iNumberOfBytesWritten = 0;
-				PeekNamedPipe( proc.stdout.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
-				if( iTotalBytesAvail > 0 )
-				{
-					while( iTotalBytesAvail > 0  )
-					{
-						if( iTotalBytesAvail > 4096 ) iTotalBytesAvail = 4096;
-						ReadFile( proc.stdout.windowsHandle, sBuf.ptr, iTotalBytesAvail, &iNumberOfBytesWritten, null );
-						result ~= sBuf[0..iNumberOfBytesWritten];
-						PeekNamedPipe( proc.stdout.windowsHandle, null, 0, null, &iTotalBytesAvail, null);
-					}
-				}
-			}
-			else
-			{
-			}
-			+/
 			char c;
 			string stdoutString, stderrString;
 			
@@ -2237,6 +2207,8 @@ private :
 				{ 
 					stderrString ~= cast(char) ch;
 				}
+				
+				version(Windows) stderrString = fromMBSz( toStringz( strip( stderrString ) ~ "\0" ) );
 			}
 			else
 			{
@@ -2259,7 +2231,13 @@ private :
 				}
 			}
 			
-			if( stderrString.length ) tools.questMessage( "Alarm", stderrString, "WARNING", "OK" );			
+			if( stderrString.length )
+			{
+				tools.questMessage( "Alarm", stderrString, "WARNING", "OK" );
+				stderrMessage = stderrString;
+			}
+			else
+				stderrMessage = "";
 			
 			return strip( stdoutString );
 		}
@@ -2275,8 +2253,9 @@ private :
 public:
 	bool		bExecuted;
 
-	this( string _executeFullPath, string _cwd = null )
+	this( string _debuggerExe, string _executeFullPath, string _cwd = null )
 	{
+		debuggerExe = _debuggerExe;
 		executeFullPath = _executeFullPath;
 		cwd = _cwd;
 		run();
@@ -2284,10 +2263,8 @@ public:
 
 	~this()
 	{
-		//proc.close();
-		kill( proc.pid );
-		//delete proc;
-
+		auto s = tryWait( proc.pid );
+		if( !s.terminated && s.status == 0 ) kill( proc.pid );
 		foreach( CScintilla cSci; GLOBAL.scintillaManager )
 		{
 			//#define SCI_MARKERDELETEALL 2045
@@ -2302,26 +2279,10 @@ public:
 		try
 		{
 			if( bExecuted ) return;
-			
+
 			// Show the Debug window
 			IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "YES" );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 2 );
-			
-			string debuggerExe = GLOBAL.compilerSettings.debuggerFullPath;
-			
-			version(Windows)
-			{
-				b64Bit = GLOBAL.compilerSettings.Bit64 == "OFF" ? false : true;
-				debuggerExe = !b64Bit ? GLOBAL.compilerSettings.debuggerFullPath : GLOBAL.compilerSettings.x64debuggerFullPath;
-				foreach( s; environment.toAA.keys )
-				{
-					debuggerExe = Array.replace( debuggerExe, "%"~s~"%", GLOBAL.EnvironmentVars[s] );
-				}
-			}
-			else
-			{
-				b64Bit = true;
-			}
 			
 			proc = pipeShell( "\"" ~ debuggerExe ~ "\" " ~ executeFullPath, Redirect.all, environment.toAA, Config.suppressConsole, cwd );
 			version(Windows)
@@ -2333,7 +2294,18 @@ public:
 			{
 				if( fcntl( fileno( proc.stderr.getFP() ), F_SETFL, O_NONBLOCK ) != -1 ) bStderrNOBLOCK = true;
 			}
+			
 			string result = getGDBmessage();
+			
+			if( stderrMessage.length )
+			{
+				IupMessageError( null, "Debugger running fail, exit!" );
+				auto s = tryWait( proc.pid );
+				if( !s.terminated && s.status == 0 ) kill( proc.pid );
+				IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "VALUE", "" );
+				IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window
+				return;
+			}
 			
 			IupSetStrAttribute( GLOBAL.debugPanel.getConsoleHandle, "APPEND", toStringz( result ) );
 
@@ -2738,9 +2710,7 @@ extern( C )
 					{
 						string title = fSTRz( IupGetAttributeId( ih, "TITLE",id ) );
 						string fullVarName = GLOBAL.debugPanel.getFullVarNameInTree( ih, id );
-						
 						VarObject[] variables = GLOBAL.debugPanel.getTypeVarValueByLinesFromPrint( GLOBAL.debugPanel.getPrint( title[0] == '*' ? "*" ~ fullVarName : fullVarName ), fullVarName );
-						
 						if( variables.length )
 						{
 							foreach( VarObject _vo; variables )

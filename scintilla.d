@@ -186,7 +186,91 @@ public:
 				static Ihandle* prevIHandle;
 				if( _ih != prevIHandle ) // prevent double trigger
 				{
-					if( GLOBAL.enableParser == "ON" ) GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
+					if( GLOBAL.enableParser == "ON" )
+					{
+						GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
+						
+						try
+						{
+							version(DIDE)
+							{
+								// Reset VersionCondition Container
+								( cast(float[string]) AutoComplete.VersionCondition ).clear;
+								string options = GLOBAL.compilerSettings.activeCompiler.Option;
+								if( options.length )
+								{	
+									version(LDC)
+									{
+										auto _versionPos = indexOf( options, "-d-version=" );
+										int shift = 11;
+									}
+									else
+									{
+										auto _versionPos = indexOf( options, "-version=" );
+										int shift = 9;
+									}
+										
+									while( _versionPos > -1 )
+									{
+										string versionName;
+										for( int i = cast(int) _versionPos + shift; i < options.length; ++ i )
+										{
+											if( options[i] == '\t' || options[i] == ' ' ) break;
+											versionName ~= options[i];
+										}								
+										
+										if( versionName.length ) AutoComplete.VersionCondition[versionName] = 1;
+										
+										version(LDC)
+											_versionPos = indexOf( options, "-version=", _versionPos + 11 );
+										else
+											_versionPos = indexOf( options, "-version=", _versionPos + 9 );
+									}
+								}
+							}
+							version(FBIDE)
+							{
+								version(VERSION_NONE)
+								{
+								}
+								else
+								{
+									// Reset VersionCondition Container
+									( cast(float[string]) AutoComplete.VersionCondition ).clear;
+									string options = GLOBAL.compilerSettings.activeCompiler.Option;
+									if( options.length )
+									{	
+										auto _versionPos = indexOf( options, "-d" );
+										while( _versionPos > -1 )
+										{
+											string	versionName;
+											bool	bBeforeSymbol = true;
+											for( int i = cast(int) _versionPos + 2; i < options.length; ++ i )
+											{
+												if( options[i] == '\t' || options[i] == ' ' )
+												{
+													if( !bBeforeSymbol ) break; else continue;
+												}
+												else if( options[i] == '=' )
+												{
+													break;
+												}
+
+												versionName ~= options[i];
+											}				
+
+											if( versionName.length ) AutoComplete.VersionCondition[Uni.toUpper(versionName)] = 1;
+											_versionPos = indexOf( options, "-d", _versionPos + 2 );
+										}								
+									}							
+								}
+							}
+						}
+						catch( Exception e )
+						{
+							IupMessage( "Scintilla GET_FOCUS Error", toStringz( e.toString ) );
+						}
+					}
 				}
 				prevIHandle = _ih;
 				
@@ -2979,7 +3063,6 @@ extern(C)
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 		
-		
 		if( insert == 1 )
 		{
 			//if( length > 1 ) return IUP_DEFAULT;
@@ -3042,74 +3125,9 @@ extern(C)
 						//if( AutoComplete.showListThread !is null ) AutoComplete.showListThread.stop();
 						//if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 					}
-
+					
 					try
 					{
-						version(DIDE)
-						{
-							// Reset VersionCondition Container
-							foreach( key; ( cast(float[string]) AutoComplete.VersionCondition ).keys )
-								AutoComplete.VersionCondition.remove( key );
-							
-							string options = GLOBAL.compilerSettings.activeCompiler.Option;
-							if( options.length )
-							{	
-								auto _versionPos = indexOf( options, "-version=" );
-								while( _versionPos > -1 )
-								{
-									string versionName;
-									for( int i = cast(int) _versionPos + 9; i < options.length; ++ i )
-									{
-										if( options[i] == '\t' || options[i] == ' ' ) break;
-										versionName ~= options[i];
-									}								
-									
-									if( versionName.length ) AutoComplete.VersionCondition[versionName] = 1;
-									
-									_versionPos = indexOf( options, "-version=", _versionPos + 9 );
-								}
-							}
-						}
-						version(FBIDE)
-						{
-							version(VERSION_NONE)
-							{
-							}
-							else
-							{
-								// Reset VersionCondition Container
-								foreach( key; ( cast(float[string]) AutoComplete.VersionCondition ).keys )
-									AutoComplete.VersionCondition.remove( key );
-
-								string options = GLOBAL.compilerSettings.activeCompiler.Option;
-								if( options.length )
-								{	
-									auto _versionPos = indexOf( options, "-d" );
-									while( _versionPos > -1 )
-									{
-										string	versionName;
-										bool	bBeforeSymbol = true;
-										for( int i = cast(int) _versionPos + 2; i < options.length; ++ i )
-										{
-											if( options[i] == '\t' || options[i] == ' ' )
-											{
-												if( !bBeforeSymbol ) break; else continue;
-											}
-											else if( options[i] == '=' )
-											{
-												break;
-											}
-
-											versionName ~= options[i];
-										}				
-
-										if( versionName.length ) AutoComplete.VersionCondition[Uni.toUpper(versionName)] = 1;
-										_versionPos = indexOf( options, "-d", _versionPos + 2 );
-									}								
-								}							
-							}
-						}
-						
 						if( GLOBAL.toggleCompleteAtBackThread == "ON" )
 						{
 							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, false );
@@ -3121,8 +3139,9 @@ extern(C)
 					}
 					catch( Exception e )
 					{
-						IupMessageError( null, toStringz( "callAutocomplete() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
+						IupMessage( "callAutocomplete() Error", toStringz( e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 					}
+						
 			}
 		}
 		

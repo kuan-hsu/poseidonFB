@@ -365,7 +365,7 @@ private:
 		
 		Ihandle* labelTriggerDelay = IupLabel( GLOBAL.languageItems["completedelay"].toCString );
 		Ihandle* valTriggerDelay = IupVal( null );
-		IupSetAttributes( valTriggerDelay, "MIN=50,MAX=1000,RASTERSIZE=100x16,STEP=0.05265,PAGESTEP=0.1" );
+		IupSetAttributes( valTriggerDelay, "MIN=5,MAX=1000,RASTERSIZE=100x16,STEP=0.05265,PAGESTEP=0.1" );
 		IupSetStrAttribute( valTriggerDelay, "VALUE", toStringz( GLOBAL.triggerDelay ) );
 		IupSetHandle( "valTriggerDelay", valTriggerDelay );
 		IupSetCallback( valTriggerDelay, "VALUECHANGED_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );

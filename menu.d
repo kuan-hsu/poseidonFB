@@ -732,8 +732,8 @@ Ihandle* createMenu()
 		version(X86_64) _64bit = true;
 		version(LDC) C = "LDC";
 		version(GDC) C = "GDC";
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.514)  2023.07.27\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.086)  2023.07.25\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.515)  2023.07.28\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.087)  2023.07.28\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	

@@ -13,7 +13,7 @@ version(FBIDE)
 		import tools;
 		import parser.ast;
 		import scintilla, project;
-		import std.string, std.file, std.process, std.utf, std.format, Array = std.array, Uni = std.uni, Path = std.path, Algorithm = std.algorithm, std.algorithm.mutation : SwapStrategy;
+		import std.string, std.file, std.process, std.utf, std.format, Conv = std.conv, Array = std.array, Uni = std.uni, Path = std.path, Algorithm = std.algorithm, std.algorithm.mutation : SwapStrategy;
 		import core.thread, core.sys.windows.winnt, core.sys.windows.windef;
 
 
@@ -32,6 +32,14 @@ version(FBIDE)
 			}
 		}
 		
+		struct PrevAnalysisUnit
+		{
+			string[]	word;
+			CASTnode	node;
+			int			linenum;
+		}
+		
+		
 		static shared CASTnode[string]		includesMarkContainer;
 		static shared bool[string]			noIncludeNodeContainer;
 		
@@ -41,7 +49,8 @@ version(FBIDE)
 		static string[]						listContainer;
 
 		static string						showTypeContent;
-		static string						includesFromPath;
+		static __gshared string				includesFromPath;
+		static __gshared PrevAnalysisUnit	prevAnalysis;
 
 
 		class CGetIncludes : Thread
@@ -288,10 +297,11 @@ version(FBIDE)
 			}
 		}
 		
-		static string getListImage( CASTnode node )
+		static string getListImage( CASTnode node, bool bFullShow = false )
 		{
-			if( GLOBAL.compilerSettings.toggleShowAllMember == "OFF" )
-				if( node.protection == "private" ) return null;
+			if( !bFullShow )
+				if( GLOBAL.compilerSettings.toggleShowAllMember == "OFF" )
+					if( node.protection == "private" ) return null;
 				
 			if( Algorithm.count( node.name, "." ) > 0 ) return null;
 			
@@ -489,10 +499,12 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 		
-			if( GLOBAL.compilerSettings.includeLevel > 0 )
+			if( GLOBAL.compilerSettings.includeLevel > -1 )
+			{
 				if( level > GLOBAL.compilerSettings.includeLevel - 1 ) return null;
 
-			if( level > 2 ) return null; // MAX 3 STEP (0,1,2)
+				if( level > 2 ) return null; // MAX 3 STEP (0,1,2)
+			}
 			
 			CASTnode[] results;
 			
@@ -620,23 +632,19 @@ version(FBIDE)
 				CASTnode includeAST;
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
 				{
+					auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
 					if( !bAlreadyExisted )
 					{
-						auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-						
-						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-						results ~= cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
+						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) _ast;
+						results ~= _ast;
 					}
-					
-					results ~= getIncludes( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)], includeFullPath, _LEVEL );
+					results ~= getIncludes( _ast, includeFullPath, _LEVEL );
 				}
 				else
 				{
-					//CASTnode _createFileNode = GLOBAL.outlineTree.loadParser( includeFullPath );
 					CASTnode _createFileNode = ParserAction.createParser( includeFullPath, true );
 					if( _createFileNode !is null )
 					{
-						debug writefln( "Loaded Done: " ~ includeFullPath );
 						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) _createFileNode;
 						results ~= _createFileNode;
 						results ~= getIncludes( _createFileNode, includeFullPath, _LEVEL );
@@ -1208,7 +1216,7 @@ version(FBIDE)
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
 				*/
-				
+				version(VERSION_NONE) initIncludesMarkContainer( originalNode, originalNode.lineNumber ); else checkVersionSpec( originalNode, originalNode.lineNumber );
 				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
 				if( usingNames.length )
 				{
@@ -1218,7 +1226,8 @@ version(FBIDE)
 						string[] splitWithDot = Array.split( s, "." );
 						string[] namespaceSplitWord = splitWithDot ~ splitWord;
 						analysisSplitWorld_ReturnCompleteList( originalNode, namespaceSplitWord, lineNum, true, false, false );
-						if( originalNode !is null ) return originalNode;
+						if( originalNode !is oriAST )
+							if( originalNode !is null ) return originalNode;
 					}
 				}
 				
@@ -1625,7 +1634,7 @@ version(FBIDE)
 			foreach( CASTnode _friends; getMembers( AST_Head ) )
 			{
 				if( _friends.kind == ( B_DEFINE | B_VERSION ) )
-					if( _friends.lineNumber < lineNum ) AutoComplete.VersionCondition[Uni.toUpper(_friends.name)] = 1;
+					if( _friends.lineNumber < lineNum ) VersionCondition[Uni.toUpper(_friends.name)] = 1;
 			}
 			
 			if( AST_Head.getFather !is null )
@@ -1655,7 +1664,7 @@ version(FBIDE)
 									if( _friends.getFather.type.length )
 										if( Uni.toUpper( _friends.name ) == Uni.toUpper( _friends.getFather.name[1..$] ) ) continue; // Skip the C-style include once
 								
-								AutoComplete.VersionCondition[Uni.toUpper(_friends.name)] = 1; // Much VersionCondition, performance loss
+								VersionCondition[Uni.toUpper(_friends.name)] = 1; // Much VersionCondition, performance loss
 							}
 						}
 					}
@@ -1824,7 +1833,22 @@ version(FBIDE)
 			}
 			
 			CASTnode[] nameSpaceNodes;
-			for( int i = 0; i < splitWord.length; i++ )
+			
+			int startNum;
+			if( lineNum == prevAnalysis.linenum )
+			{
+				if( prevAnalysis.word.length < splitWord.length )
+				{
+					if( indexOf( Array.join( splitWord, "." ), Array.join( prevAnalysis.word, "." ) ) == 0 )
+					{
+						AST_Head = prevAnalysis.node;
+						startNum = cast(int) prevAnalysis.word.length;
+						//IupMessage( "GO", toStringz( Array.join( prevAnalysis.word, "." ) ) );
+					}
+				}
+			}
+			
+			for( int i = startNum; i < splitWord.length; i++ )
 			{
 				listContainer.length = 0;
 				
@@ -1879,8 +1903,7 @@ version(FBIDE)
 												}
 											}
 										}
-									}							
-									//keyWordlist( splitWord[i] );
+									}
 								}
 							}
 
@@ -1899,11 +1922,16 @@ version(FBIDE)
 								
 								if( bPushContainer )
 								{
-									foreach( CASTnode _node; resultNodes ~ resultIncludeNodes )
+									foreach( CASTnode _node; resultNodes )
 									{
-										string _list = getListImage( _node );
+										string _list = getListImage( _node, true );
 										listContainer ~= _list;
 									}
+									foreach( CASTnode _node; resultIncludeNodes )
+									{
+										string _list = getListImage( _node, false );
+										listContainer ~= _list;
+									}								
 								}
 							}
 						}
@@ -1938,7 +1966,7 @@ version(FBIDE)
 									{
 										foreach( CASTnode _child; getMembers( namespaceNode ) ) // Get members( include nested unnamed union & type )
 										{
-											string _list = getListImage( _child );
+											string _list = getListImage( _child, true );
 											listContainer ~= _list;
 										}
 									}
@@ -1980,13 +2008,19 @@ version(FBIDE)
 								}
 							}
 							
+								
+							//********************************************************************
+							prevAnalysis = PrevAnalysisUnit( [splitWord[0]], AST_Head, lineNum );
+							//IupMessage( toStringz( Conv.to!(string)( i ) ), toStringz( splitWord[0] ) );
+							
+							
 							if( bPushContainer )
 							{
 								if( AST_Head.kind & ( B_TYPE | B_ENUM | B_UNION | B_CLASS | B_NAMESPACE ) )
 								{
 									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 									{
-										string _list = getListImage( _child );
+										string _list = getListImage( _child, false );
 										listContainer ~= _list;
 									}
 								}
@@ -2058,7 +2092,6 @@ version(FBIDE)
 				}
 				else if( i == splitWord.length -1 )
 				{
-
 					if( nameSpaceNodes.length )
 					{
 						if( !bDot )
@@ -2081,7 +2114,7 @@ version(FBIDE)
 									{
 										if( indexOf( Uni.toLower( _child.name ), splitWord[i] ) == 0 )
 										{
-											string _list = getListImage( _child );
+											string _list = getListImage( _child, false );
 											listContainer ~= _list;
 										}
 									}
@@ -2097,13 +2130,16 @@ version(FBIDE)
 							
 							if( !nameSpaceNodes.length ) return null; else AST_Head = nameSpaceNodes[0];
 							
+							//********************************************************************
+							prevAnalysis = PrevAnalysisUnit( splitWord[0..$].dup, AST_Head, lineNum );							
+							
 							if( bPushContainer )
 							{
 								foreach( CASTnode a; nameSpaceNodes )
 								{
 									foreach( CASTnode _child; getMembers( a ) ) // Get members( include nested unnamed union & type )
 									{
-										string _list = getListImage( _child );
+										string _list = getListImage( _child, false );
 										listContainer ~= _list;
 									}
 								}
@@ -2130,7 +2166,7 @@ version(FBIDE)
 							{
 								if( indexOf( Uni.toLower( _child.name ), splitWord[i] ) == 0 )
 								{
-									string _list = getListImage( _child );
+									string _list = getListImage( _child, false );
 									listContainer ~= _list;
 								}
 							}
@@ -2148,12 +2184,15 @@ version(FBIDE)
 							if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_UNION, lineNum ) ) return null; // for nested TYPE / UNION
 						}
 						
+						//********************************************************************
+						prevAnalysis = PrevAnalysisUnit( splitWord[0..$].dup, AST_Head, lineNum );
+						//IupMessage( toStringz( Conv.to!(string)( i ) ), toStringz( Array.join( prevAnalysis.word, "." ) ) );
 						
 						if( bPushContainer )
 						{
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
-								string _list = getListImage( _child );
+								string _list = getListImage( _child, false );
 								listContainer ~= _list;
 							}
 						}
@@ -3647,7 +3686,7 @@ version(FBIDE)
 					
 					// Get VersionCondition names
 					if( AST_Head is null ) return;
-					
+					/+
 					version(VERSION_NONE)
 					{
 						initIncludesMarkContainer( AST_Head, lineNum );
@@ -3687,6 +3726,8 @@ version(FBIDE)
 						
 						checkVersionSpec( AST_Head, lineNum );
 					}
+					+/
+					checkVersionSpec( AST_Head, lineNum );
 					
 					if( !splitWord[0].length )
 					{
@@ -5150,13 +5191,20 @@ version(FBIDE)
 							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							
 							scope _result = new IupString( AutoComplete.showListThread.getResult );
-							if( _alreadyInput.length )
-								IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+							version(Windows)
+							{
+								if( _alreadyInput.length )
+									ScintillaAction.directSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+								else
+									ScintillaAction.directSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
+							}
 							else
-								IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
-								
-
-							auto cSci = ScintillaAction.getActiveCScintilla();
+							{
+								if( _alreadyInput.length )
+									IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+								else
+									IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
+							}
 						}
 					}
 				}
@@ -5198,8 +5246,6 @@ version(FBIDE)
 							}
 							
 							AutoComplete.noneListProcedureName = "";
-							
-							auto cSci = ScintillaAction.getActiveCScintilla();
 						}
 					}
 				}

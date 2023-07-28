@@ -18,6 +18,13 @@ version(DIDE)
 		import Path = std.path, Array = std.array, Uni = std.uni;
 		import core.thread;
 
+		struct PrevAnalysisUnit
+		{
+			string[]	word;
+			CASTnode	node;
+			int			linenum;
+		}
+		
 		static Stack!(string)				calltipContainer;
 		public static string				noneListProcedureName;
 		
@@ -26,7 +33,7 @@ version(DIDE)
 		public static shared int[string]	VersionCondition;
 		
 		static string						showTypeContent;
-		
+		static __gshared PrevAnalysisUnit	prevAnalysis;
 		
 		class CGetIncludes : Thread
 		{
@@ -1846,8 +1853,21 @@ version(DIDE)
 			string		wordWithoutSymbol;
 			CASTnode	tempReturnNode;
 			bool		bBracket;
-			
-			for( int i = 0; i < splitWord.length; i++ )
+
+			int startNum;
+			if( lineNum == prevAnalysis.linenum )
+			{
+				if( prevAnalysis.word.length < splitWord.length )
+				{
+					if( indexOf( Array.join( splitWord, "." ), Array.join( prevAnalysis.word, "." ) ) == 0 )
+					{
+						AST_Head = prevAnalysis.node;
+						startNum = cast(int) prevAnalysis.word.length;
+						//IupMessage( "GO", toStringz( Array.join( prevAnalysis.word, "." ) ) );
+					}
+				}
+			}			
+			for( int i = startNum; i < splitWord.length; i++ )
 			{
 				listContainer.length = 0;
 				
@@ -1961,6 +1981,11 @@ version(DIDE)
 									if( defaultList.length ) return defaultList;
 								}
 							}
+							
+							//********************************************************************
+							prevAnalysis = PrevAnalysisUnit( [splitWord[0]], AST_Head, lineNum );
+							//IupMessage( toStringz( Conv.to!(string)( i ) ), toStringz( splitWord[0] ) );							
+							
 							
 							if( bPushContainer )
 							{
@@ -2103,7 +2128,7 @@ version(DIDE)
 									if( defaultList.length ) return defaultList;
 								}
 							}
-
+							
 							if( bPushContainer )
 							{
 								if( AST_Head.kind & ( D_STRUCT | D_ENUM | D_UNION | D_CLASS | D_INTERFACE ) )
@@ -2132,6 +2157,10 @@ version(DIDE)
 								
 							}
 						}
+						
+						//********************************************************************
+						prevAnalysis = PrevAnalysisUnit( splitWord[0..$].dup, AST_Head, lineNum );
+						//IupMessage( toStringz( Conv.to!(string)( i ) ), toStringz( Array.join( prevAnalysis.word, "." ) ) );
 					}
 				}
 				else
@@ -3148,7 +3177,7 @@ version(DIDE)
 					CASTnode		AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
 
 					if( AST_Head is null ) return;
-					
+					/+
 					// Reset VersionCondition Container
 					foreach( string key; ( cast(int[string]) VersionCondition ).keys )
 						VersionCondition.remove( key );
@@ -3170,7 +3199,7 @@ version(DIDE)
 							_versionPos = indexOf( options, "-version=", _versionPos + 9 );
 						}
 					}
-					
+					+/
 
 					// Goto Import Modules
 					if( runType > 0 )
@@ -3962,11 +3991,21 @@ version(DIDE)
 							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 							
 							scope _result = new IupString( AutoComplete.showListThread.getResult );
-							if( _alreadyInput.length )
-								IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+							version(Windows)
+							{
+								if( _alreadyInput.length )
+									ScintillaAction.directSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+								else
+									ScintillaAction.directSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
+							}
 							else
-								IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
-								
+							{
+								if( _alreadyInput.length )
+									IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+								else
+									IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
+							}
+
 							bShowListTrigger = true;
 						}
 					}
