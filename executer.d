@@ -361,8 +361,7 @@ private:
 			quickRunFile = quickFileTemp;
 			options = _beCompiledFile ~ ( options.length ? " " ~ options : "" );
 			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options ), buildTools, cwd, true, true );
-			if( processDlg != null )
-				if( IupGetInt( processDlg, "VISIBLE" ) == 1 ) IupDestroy( processDlg );
+			if( processDlg != null ) IupDestroy( processDlg );
 			
 			if( bCompileSuccess )
 			{
@@ -404,7 +403,62 @@ private:
 			return bCompileSuccess;
 		}
 	}
+
 	
+	class BuildThread : Thread
+	{
+	private:
+		string			cwd, prjName, command, options1, options2;
+		Ihandle*		processDlg;
+		BuildDataToTLS	buildTools;
+		bool			bCompileSuccess;
+		
+	public:
+		this( string _command, string _prjName, string _options1, string _options2, string _cwd = null )
+		{
+			cwd						= _cwd;
+			prjName					= _prjName;
+			command					= strip( _command );
+			options1				= _options1;
+			options2				= _options2;
+			buildTools				= getBuildNeedDataToTLS();
+			
+			if( GLOBAL.compilerSettings.useThread == "ON" ) processDlg = createProcessDlg( "Compiling......" );
+			
+			super( &go );
+		}		
+		
+		void go()
+		{
+			if( buildTools.compilerSettings.useThread != "ON" )
+			{
+				processDlg = createProcessDlg( "Compiling......" );
+				IupFlush();
+			}
+			
+			if( options1.length )
+			{
+				IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( "\n" ~ command ~ " " ~ options1 ~ "\n\n" ) );
+				IupFlush();
+				options1 = options1.length ? " " ~ options1 : "";
+				bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options1 ), buildTools, cwd, true, true, true );
+				if( !bCompileSuccess )
+				{
+					if( processDlg != null ) IupDestroy( processDlg );
+					return;
+				}
+			}
+			
+			if( options1.length ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\n************************************\n" );
+
+			IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( "Continue Link Project: [" ~ prjName ~ "]......\n\n" ~ command ~ options2 ~ "\n" ) );
+			IupFlush();
+			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options2 ), buildTools, cwd, true, true, false );
+
+			if( processDlg != null ) IupDestroy( processDlg );
+		}
+	}	
+
 	
 	static void showAnnotation( string message, BuildDataToTLS buildTools )
 	{
@@ -472,7 +526,7 @@ private:
 		}
 	}
 
-	static bool CompilerProcess( string command, string args, BuildDataToTLS buildTools, string workDir = "", bool bGUI = true, bool bShowMessage = true )
+	static bool CompilerProcess( string command, string args, BuildDataToTLS buildTools, string workDir = "", bool bGUI = true, bool bShowMessage = true, bool bNoSuccessSFX = false )
 	{
 		scope DaNodeProcess = new tools.Process( command ~ " " ~ args, workDir );
 		DaNodeProcess.start();
@@ -512,23 +566,36 @@ private:
 		
 		int		_state = DaNodeProcess.getMessageState();
 		bool	bBuildSuccess;
-		if( _state == 0 ) bBuildSuccess = true; 
-		version(FBIDE)
+		if( _state == 0 )
 		{
-			if( _state > 0 ) showAnnotation( theMessage, buildTools ); else showAnnotation( null, buildTools );
-		}
-		else //version(DIDE)
-		{
-			if( _state > 0 )
-			{
-				showAnnotation( theMessage, buildTools );
-			}
-			else
-				showAnnotation( null, buildTools );
-		}
+			bBuildSuccess = true;
+			showAnnotation( null, buildTools );
 
-		if( !bBuildSuccess )
+			if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!!" );
+			
+			if( !bNoSuccessSFX )
+			{
+				if( buildTools.compilerSettings.useResultDlg == "ON" )
+				{
+					tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+				}
+				else
+				{
+					version(Windows)
+					{
+						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
+					}
+					else
+					{
+						if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
+					}							
+				}
+			}			
+		}
+		else
 		{
+			showAnnotation( theMessage, buildTools );
+
 			if( !bWarning || _state > 1 || bError )
 			{
 				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\nCompile Error!!" );
@@ -567,25 +634,7 @@ private:
 						if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
 					}							
 				}
-			}
-		}
-		else
-		{
-			if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!!" );
-			if( buildTools.compilerSettings.useResultDlg == "ON" )
-			{
-				tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
-			}
-			else
-			{
-				version(Windows)
-				{
-					if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-				}
-				else
-				{
-					if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-				}							
+				bBuildSuccess = true;
 			}
 		}
 
@@ -818,7 +867,8 @@ private:
 							}						
 						
 							version(Windows) objFullPathWithoutExt ~= ".obj"; else objFullPathWithoutExt ~= ".o";
-							if( std.file.exists( objFullPathWithoutExt ) ) txtSources = txtSources ~ " \"" ~ objFullPathWithoutExt ~ "\"" ;			
+							//if( std.file.exists( objFullPathWithoutExt ) )
+							txtSources = txtSources ~ " \"" ~ objFullPathWithoutExt ~ "\"" ;			
 						}
 						break;
 						
@@ -1173,44 +1223,29 @@ public:
 	{
 		try
 		{
-			// Keep Message panel open
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
-			GLOBAL.messagePanel.printOutputPanel( "", true ); // Clean outputPanel
-		
-			string finalArgsString;
-			string activePrjName = ProjectAction.getActiveProjectName();
-			if( getBuildNeedData( compiler, finalArgsString, options, optionDebug, 1 ) )
+
+			string options1, options2, activePrjName = ProjectAction.getActiveProjectName();
+
+			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]......", true );
+			if( getBuildNeedData( compiler, options1, options, optionDebug, 1 ) )
 			{
-				// Start Thread
-				if( finalArgsString.length )
+				if( getBuildNeedData( compiler, options2, options, optionDebug, 2 ) )
 				{
-					GLOBAL.messagePanel.printOutputPanel( "Buinding Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]......\n\n" ~ compiler ~ " " ~ finalArgsString ~ "\n\n", true );
-					auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
-					_thread.go;
-					if( !_thread.getCompileResult ) return false;
-				}
-				
-				if( finalArgsString.length ) GLOBAL.messagePanel.printOutputPanel( "\n************************************\n", false );
-				
-				auto bLinkResult = getBuildNeedData( compiler, finalArgsString, options, optionDebug, 2 );
-				GLOBAL.messagePanel.printOutputPanel( "Continue Link Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]......\n\n" ~ compiler ~ finalArgsString ~ "\n", false );
-				if( bLinkResult )
-				{
-					auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
+					auto _thread = new BuildThread( compiler, GLOBAL.projectManager[activePrjName].name, options1, options2, GLOBAL.projectManager[activePrjName].dir );
 					version(Posix)
 						_thread.go;
 					else
-						if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;					
+						if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;
+
+					if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+					return true;
 				}
-				else
-				{
-					return false;
-				}
-				
-				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
-				return true;
 			}
+			
+			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
+
 		}
 		catch( Exception e )
 		{

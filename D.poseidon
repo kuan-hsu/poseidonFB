@@ -71,7 +71,7 @@ compiler=K:/CodingPark/dmd2/windows/bin/dmd.exe
 incdir=K:/CodingPark/dmd2/import
 libdir=K:/CodingPark/GameKYO/lib/iup/iup327/dll10
 title=LDC_x64
-target=poseidonFB
+target=poseidonFB_x64
 option=--m64 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
 compiler=K:/CodingPark/ldc2-1.32.2-windows-multilib/bin/ldc2.exe
 incdir=K:/CodingPark/dmd2/import

@@ -20,9 +20,10 @@ version(DIDE)
 
 		struct PrevAnalysisUnit
 		{
-			string[]	word;
-			CASTnode	node;
-			int			linenum;
+			string[]		word;
+			CASTnode		node;
+			int				linenum;
+			string[string]	completeList, completeCallTip;
 		}
 		
 		static Stack!(string)				calltipContainer;
@@ -33,7 +34,7 @@ version(DIDE)
 		public static shared int[string]	VersionCondition;
 		
 		static string						showTypeContent;
-		static __gshared PrevAnalysisUnit	prevAnalysis;
+		static __gshared PrevAnalysisUnit	prevAnalysis, prevComplete;
 		
 		class CGetIncludes : Thread
 		{
@@ -106,63 +107,134 @@ version(DIDE)
 					return;
 				}
 				
-				result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
-
-				if( listContainer.length )
+				
+				// For Quick show the dialog...
+				bool bCompleteJump;
+				if( lineNum == prevComplete.linenum )
 				{
-					Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
-
-					string	_type, _list;
-					int		maxLeft, maxRight;
-
-					for( int i = 0; i < listContainer.length; ++ i )
+					//if( prevComplete.word.length >= splitWord.length )
+					if( prevComplete.word.length && splitWord.length )
 					{
-						if( listContainer[i].length )
+						//string prevWords = fullPathByOS( Array.join( prevComplete.word, "." ) );
+						string nowWords = fullPathByOS( Array.join( splitWord, "." ) );
+					
+						//if( indexOf( prevWords, nowWords ) == 0 )
+						if( fullPathByOS( prevComplete.word[0] ) == fullPathByOS( splitWord[0] ) )
 						{
-							auto dollarPos = lastIndexOf( listContainer[i], "#" );
-							if( dollarPos > -1 )
+							if( bDot )
 							{
-								_type = listContainer[i][dollarPos+1..$];
-								if( _type.length > maxRight ) maxRight = cast(int) _type.length;
-								_list = listContainer[i][0..dollarPos];
-								if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
+								if( nowWords in prevComplete.completeList )
+								{
+									result = prevComplete.completeList[nowWords];
+									bCompleteJump = true;
+								}
+							}
+							else if( bCallTip )
+							{
+								if( nowWords in prevComplete.completeCallTip )
+								{
+									result = prevComplete.completeCallTip[nowWords];
+									bCompleteJump = true;
+								}
 							}
 							else
 							{
-								if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
+								if( splitWord.length > 1 )
+								{
+									nowWords = fullPathByOS( Array.join( splitWord[0..$-1], "." ) );
+									if( nowWords in prevComplete.completeList )
+									{
+										result = prevComplete.completeList[nowWords];
+										bCompleteJump = true;
+									}
+								}
 							}
-						}
-					}
-
-					//string formatString = "{,-" ~ Conv.to!(string)( maxLeft ) ~ "} :: {,-" ~ Conv.to!(string)( maxRight ) ~ "}";					
-					for( int i = 0; i < listContainer.length; ++ i )
-					{
-						if( i > 0 )
-							if( listContainer[i] == listContainer[i-1] ) continue;
-
-						if( listContainer[i].length )
-						{
-							string _string;
-							
-							auto dollarPos = lastIndexOf( listContainer[i], "#" );
-							if( dollarPos > -1 )
-							{
-								_type = listContainer[i][dollarPos+1..$];
-								_list = listContainer[i][0..dollarPos];
-								_string = stripRight( format( "%-" ~ Conv.to!(string)(maxLeft) ~ "s :: %-" ~ Conv.to!(string)(maxRight) ~ "s", _list, _type ) );
-							}
-							else
-							{
-								_string = listContainer[i];
-							}
-
-							result ~= ( _string ~ "^" );
 						}
 					}
 				}
+				else
+				{
+					if( prevComplete.completeList.length ) prevComplete.completeList.clear;
+					if( prevComplete.completeCallTip.length ) prevComplete.completeCallTip.clear;
+				}
+				
+				
+				if( !bCompleteJump )
+				{
+					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
 
-				if( result.length )
-					if( result[$-1] == '^' ) result = result[0..$-1];
+					if( listContainer.length )
+					{
+						Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
+
+						string	_type, _list;
+						int		maxLeft, maxRight;
+
+						for( int i = 0; i < listContainer.length; ++ i )
+						{
+							if( listContainer[i].length )
+							{
+								auto dollarPos = lastIndexOf( listContainer[i], "#" );
+								if( dollarPos > -1 )
+								{
+									_type = listContainer[i][dollarPos+1..$];
+									if( _type.length > maxRight ) maxRight = cast(int) _type.length;
+									_list = listContainer[i][0..dollarPos];
+									if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
+								}
+								else
+								{
+									if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
+								}
+							}
+						}
+
+						//string formatString = "{,-" ~ Conv.to!(string)( maxLeft ) ~ "} :: {,-" ~ Conv.to!(string)( maxRight ) ~ "}";					
+						for( int i = 0; i < listContainer.length; ++ i )
+						{
+							if( i > 0 )
+								if( listContainer[i] == listContainer[i-1] ) continue;
+
+							if( listContainer[i].length )
+							{
+								string _string;
+								
+								auto dollarPos = lastIndexOf( listContainer[i], "#" );
+								if( dollarPos > -1 )
+								{
+									_type = listContainer[i][dollarPos+1..$];
+									_list = listContainer[i][0..dollarPos];
+									_string = stripRight( format( "%-" ~ Conv.to!(string)(maxLeft) ~ "s :: %-" ~ Conv.to!(string)(maxRight) ~ "s", _list, _type ) );
+								}
+								else
+								{
+									_string = listContainer[i];
+								}
+
+								result ~= ( _string ~ "^" );
+							}
+						}
+					}
+
+					if( result.length )
+						if( result[$-1] == '^' ) result = result[0..$-1];
+				}
+					
+					
+					
+				// For Quick show the dialog...
+				if( bDot )
+				{
+					prevComplete.word = splitWord;
+					prevComplete.linenum = lineNum;
+					prevComplete.completeList[fullPathByOS( Array.join( splitWord, "." ) )] = result;
+				}
+				else if( bCallTip )
+				{
+					prevComplete.word = splitWord;
+					prevComplete.linenum = lineNum;
+					prevComplete.completeCallTip[fullPathByOS( Array.join( splitWord, "." ) )] = result;
+				}					
 			}
 			
 			string getResult()
@@ -1001,7 +1073,6 @@ version(DIDE)
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
 				{
 					includesMarkContainer[fullPathByOS(includeFullPath)] = GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-					
 					auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
 					results ~= _ast;
 					if( !bCheckOnlyOnce ) results ~= getIncludes( _ast, "" );
@@ -1013,7 +1084,6 @@ version(DIDE)
 					if( _createFileNode !is null )
 					{
 						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) _createFileNode;
-						
 						results ~= _createFileNode;
 						if( !bCheckOnlyOnce ) results ~= getIncludes( _createFileNode, "" );
 					}
@@ -1033,20 +1103,8 @@ version(DIDE)
 			
 			CASTnode[] results;
 
-			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
-				includesMarkContainer.remove( key );		
-			
-			// Parse Include
-			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			
-			auto _headNode = originalNode;
-			while( _headNode.getFather !is null )
-				_headNode = _headNode.getFather;
-				
-			//if( _headNode.kind & D_MODULE ) cleanIncludeContainer( _headNode );
-			
-			auto dummyASTs = getIncludes( originalNode, "", true );
-			
+			cleanIncludeContainer();
+			getIncludes( originalNode, "", true );
 
 			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{
@@ -1089,24 +1147,9 @@ version(DIDE)
 			
 			CASTnode[] results;
 			
-			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
-				includesMarkContainer.remove( key );
+			cleanIncludeContainer();
+			getIncludes( originalNode, "", true );
 
-			// Parse Include
-			//CASTnode[] includeASTnodes = getIncludes( originalNode, originalFullPath );
-			auto _headNode = originalNode;
-			while( _headNode.getFather !is null )
-				_headNode = _headNode.getFather;
-				
-			//if( _headNode.kind & D_MODULE ) cleanIncludeContainer( _headNode );
-			
-			auto dummyASTs = getIncludes( originalNode, "", true );
-			
-
-			/*
-			foreach( CASTnode n; includesMarkContainer )
-				Stdout( n.name ).newline;
-			*/
 			foreach( includeAST; includesMarkContainer )
 			{
 				if( D_KIND & D_MODULE )
@@ -2235,15 +2278,9 @@ version(DIDE)
 			return true;
 		}		
 		
-		static void cleanIncludeContainer( CASTnode afterCleanAddParserTree = null )
+		static void cleanIncludeContainer()
 		{
-			foreach( string key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
-				includesMarkContainer.remove( key );
-				
-			if( afterCleanAddParserTree !is null )
-			{
-				if( afterCleanAddParserTree.kind & D_MODULE ) includesMarkContainer[fullPathByOS(afterCleanAddParserTree.type)] = cast(shared CASTnode) afterCleanAddParserTree;
-			}
+			( cast(CASTnode[string]) includesMarkContainer ).clear;
 		}
 		
 		static void cleanCalltipContainer()
@@ -3961,6 +3998,15 @@ version(DIDE)
 			
 			return false;
 		}
+		
+		static resetPrevContainer()
+		{
+			if( prevAnalysis.completeList.length ) prevAnalysis.completeList.clear;
+			if( prevComplete.completeCallTip.length ) prevComplete.completeCallTip.clear;
+			prevAnalysis.word.length = prevComplete.word.length = 0;
+			prevAnalysis.linenum = prevComplete.linenum = 0;
+			prevAnalysis.node = prevComplete.node = null;
+		}		
 	}
 	
 	

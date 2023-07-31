@@ -732,7 +732,7 @@ Ihandle* createMenu()
 		version(X86_64) _64bit = true;
 		version(LDC) C = "LDC";
 		version(GDC) C = "GDC";
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.515)  2023.07.28\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.516)  2023.07.31\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.087)  2023.07.28\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
@@ -1855,17 +1855,10 @@ extern(C)
 						if( std.file.exists( oPath ) ) std.file.remove( oPath );
 					}
 
-					string activeCompilerOption;
+					string activeCompilerOption = GLOBAL.projectManager[activePrjName].compilerOption;
 					if( GLOBAL.projectManager[activePrjName].focusOn.length )
-					{
-						if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit )
-						{
-							activeCompilerOption = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Option;
-						}
-					}
+						if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) activeCompilerOption = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Option;
 					
-					if( !activeCompilerOption.length ) activeCompilerOption =  GLOBAL.projectManager[activePrjName].compilerOption;
-
 					auto odPos = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
 					if( odPos > -1 )
 					{
@@ -1873,15 +1866,25 @@ extern(C)
 						if( odTail == -1 ) odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "\t", odPos + 3 );
 						if( odTail > odPos + 3 )
 						{
-							string pathName = GLOBAL.projectManager[activePrjName].compilerOption[odPos+3..odTail].dup;
+							string pathName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].compilerOption[odPos+3..odTail];
 							if( std.file.exists( pathName ) )
-								if( std.file.isDir( pathName ) ) std.file.rmdirRecurse( pathName ); 
+								if( std.file.isDir( pathName ) )
+								{
+									foreach( string filename; dirEntries( pathName, "*.{obj,o}", SpanMode.depth) )
+										std.file.remove( filename );
+									//std.file.rmdirRecurse( pathName ); 
+								}
 						}
 					}
 				}
 				
-				string executeName, _targetName;
-				if( GLOBAL.projectManager[activePrjName].targetName.length ) _targetName = Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ); else _targetName = Path.stripExtension( GLOBAL.projectManager[activePrjName].name );
+				string executeName;
+				string _targetName = GLOBAL.projectManager[activePrjName].targetName;
+				if( GLOBAL.projectManager[activePrjName].focusOn.length )
+				{
+					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _targetName = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Target;
+				}
+				if( !_targetName.length ) _targetName = Path.stripExtension( GLOBAL.projectManager[activePrjName].name );
 				version(Windows)
 				{
 					switch( GLOBAL.projectManager[activePrjName].type )

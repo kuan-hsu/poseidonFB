@@ -36,7 +36,21 @@ public:
 			catch( Exception e )
 			{
 				// https://superuser.com/questions/86999/why-cant-i-name-a-folder-or-file-con-in-windows
-				//IupMessage( "scanFile BUG", toStringz( e.toString ) );
+				version(Windows)
+				{
+					import Path = std.path, Conv = std.conv;
+					switch( toUpper( Path.stripExtension( Path.baseName( fullPath ) ) ) )
+					{
+						case "CON", "PRN", "AUX", "CLOCK$", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+							"LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9":
+							// Windows reversed
+							return null;
+							break;
+						default:
+					}
+				}
+				
+				IupMessage( "scanFile BUG", toStringz( e.toString ) );
 			}
 		}
 		

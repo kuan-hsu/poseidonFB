@@ -34,9 +34,10 @@ version(FBIDE)
 		
 		struct PrevAnalysisUnit
 		{
-			string[]	word;
-			CASTnode	node;
-			int			linenum;
+			string[]		word;
+			CASTnode		node;
+			int				linenum;
+			string[string]	completeList, completeCallTip;
 		}
 		
 		
@@ -49,8 +50,7 @@ version(FBIDE)
 		static string[]						listContainer;
 
 		static string						showTypeContent;
-		static __gshared string				includesFromPath;
-		static __gshared PrevAnalysisUnit	prevAnalysis;
+		static __gshared PrevAnalysisUnit	prevAnalysis, prevComplete;
 
 
 		class CGetIncludes : Thread
@@ -124,125 +124,188 @@ version(FBIDE)
 				
 				auto oriAST = AST_Head;
 				
-				version(VERSION_NONE) initIncludesMarkContainer( AST_Head, lineNum ); else checkVersionSpec( AST_Head, lineNum );
-				result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
-				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
-				if( usingNames.length )
+				version(VERSION_NONE){} else checkVersionSpec( AST_Head, lineNum );
+				
+				
+				// For Quick show the dialog...
+				/*
+				writefln( Array.join( prevComplete.word, "." ) );
+				writefln( Array.join( splitWord, "." ) );
+				*/
+				bool bCompleteJump;
+				if( lineNum == prevComplete.linenum )
 				{
-					string[] noUsingListContainer;
-					if( splitWord.length == 1 )
+					//if( prevComplete.word.length >= splitWord.length )
+					if( prevComplete.word.length && splitWord.length )
 					{
-						if( !bDot && !bCallTip )
+						//string prevWords = fullPathByOS( Array.join( prevComplete.word, "." ) );
+						string nowWords = fullPathByOS( Array.join( splitWord, "." ) );
+					
+						//if( indexOf( prevWords, nowWords ) == 0 )
+						if( fullPathByOS( prevComplete.word[0] ) == fullPathByOS( splitWord[0] ) )
 						{
-							noUsingListContainer = listContainer.dup;
-							listContainer.length = 0;
-						}
-						else if( bCallTip )
-						{
-							if( !result.length ) listContainer.length = 0;
+							if( bDot )
+							{
+								if( nowWords in prevComplete.completeList )
+								{
+									result = prevComplete.completeList[nowWords];
+									bCompleteJump = true;
+								}
+							}
+							else if( bCallTip )
+							{
+								if( nowWords in prevComplete.completeCallTip )
+								{
+									result = prevComplete.completeCallTip[nowWords];
+									bCompleteJump = true;
+								}
+							}
+							else
+							{
+								if( splitWord.length > 1 )
+								{
+									nowWords = fullPathByOS( Array.join( splitWord[0..$-1], "." ) );
+									if( nowWords in prevComplete.completeList )
+									{
+										result = prevComplete.completeList[nowWords];
+										bCompleteJump = true;
+									}
+								}
+							}
 						}
 					}
+				}
+				else
+				{
+					if( prevComplete.completeList.length ) prevComplete.completeList.clear;
+					if( prevComplete.completeCallTip.length ) prevComplete.completeCallTip.clear;
+					cleanInsertBIContainer();
+				}
+				
+
+				if( !bCompleteJump )
+				{
+					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
 					
-					if( !listContainer.length )
+					string[] usingNames = checkUsingNamespace( oriAST, lineNum );
+					if( usingNames.length )
 					{
-						foreach( s; usingNames )
+						string[] noUsingListContainer;
+						if( splitWord.length == 1 )
 						{
-							string[] splitWithDot = Array.split( s, "." );
-							string[] namespaceSplitWord = splitWithDot ~ splitWord;
-							string _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
-							
-							if( bCallTip )
+							if( !bDot && !bCallTip )
 							{
-								if( _result.length )
+								noUsingListContainer = listContainer.dup;
+								listContainer.length = 0;
+							}
+							else if( bCallTip )
+							{
+								if( !result.length ) listContainer.length = 0;
+							}
+						}
+						
+						if( !listContainer.length )
+						{
+							foreach( s; usingNames )
+							{
+								string[] splitWithDot = Array.split( s, "." );
+								string[] namespaceSplitWord = splitWithDot ~ splitWord;
+								string _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
+								
+								if( bCallTip )
 								{
+									if( _result.length )
+									{
+										result = _result;
+										break;
+									}
+								}
+								
+								if( listContainer.length )
+								{
+									listContainer = noUsingListContainer ~ listContainer;
 									result = _result;
 									break;
 								}
 							}
-							
-							if( listContainer.length )
+						}
+						
+						if( !listContainer.length ) listContainer = noUsingListContainer;			
+					}				
+
+					if( listContainer.length )
+					{
+						//Algorithm.sort( listContainer );
+						Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
+						
+						string	_type, _list;
+						int		maxLeft, maxRight;
+
+						for( int i = 0; i < listContainer.length; ++ i )
+						{
+							if( listContainer[i].length )
 							{
-								listContainer = noUsingListContainer ~ listContainer;
-								result = _result;
-								break;
+								auto dollarPos = lastIndexOf( listContainer[i], "#" );
+								if( dollarPos > -1 )
+								{
+									_type = listContainer[i][dollarPos+1..$];
+									if( _type.length > maxRight ) maxRight = cast(int) _type.length;
+									_list = listContainer[i][0..dollarPos];
+									if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
+								}
+								else
+								{
+									if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
+								}
 							}
 						}
-					}
-					
-					if( !listContainer.length ) listContainer = noUsingListContainer;			
-				}				
 
-				if( listContainer.length )
-				{
-					//Algorithm.sort( listContainer );
-					Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
-					
-					string	_type, _list;
-					int		maxLeft, maxRight;
-
-					for( int i = 0; i < listContainer.length; ++ i )
-					{
-						if( listContainer[i].length )
+						for( int i = 0; i < listContainer.length; ++ i )
 						{
-							auto dollarPos = lastIndexOf( listContainer[i], "#" );
-							if( dollarPos > -1 )
+							if( i > 0 )
 							{
-								_type = listContainer[i][dollarPos+1..$];
-								if( _type.length > maxRight ) maxRight = cast(int) _type.length;
-								_list = listContainer[i][0..dollarPos];
-								if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
-							}
-							else
-							{
-								if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
-							}
-						}
-					}
+								if( Uni.toLower( listContainer[i] ) == Uni.toLower( listContainer[i-1] ) ) continue;
+							}					
 
-					//string formatString = "{,-" ~ to!(string)( maxLeft ) ~ "} :: {,-" ~ to!(string)( maxRight ) ~ "}";
-					for( int i = 0; i < listContainer.length; ++ i )
-					{
-						if( i > 0 )
-						{
-							if( Uni.toLower( listContainer[i] ) == Uni.toLower( listContainer[i-1] ) ) continue;
-						}					
-						/*
-						if( i < listContainer.length - 1 )
-						{
-							string	_keyWord, compareWord;
-							
-							auto questPos = lastIndexOf( listContainer[i], "?" );
-							if( questPos > -1 ) _keyWord = listContainer[i][0..questPos]; else _keyWord = listContainer[i];
-							
-							questPos = lastIndexOf( listContainer[i+1], "?" );
-							if( questPos > -1 ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];								
+							if( listContainer[i].length )
+							{
+								string _string;
 								
-							if( Uni.toLower( _keyWord ) == Uni.toLower( compareWord ) ) continue;
-						}
-						*/
-						if( listContainer[i].length )
-						{
-							string _string;
-							
-							auto dollarPos = lastIndexOf( listContainer[i], "#" );
-							if( dollarPos > 0 )
-							{
-								_type = listContainer[i][dollarPos+1..$];
-								_list = listContainer[i][0..dollarPos];
-								_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
-							}
-							else
-							{
-								_string = listContainer[i];
-							}
+								auto dollarPos = lastIndexOf( listContainer[i], "#" );
+								if( dollarPos > 0 )
+								{
+									_type = listContainer[i][dollarPos+1..$];
+									_list = listContainer[i][0..dollarPos];
+									_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
+								}
+								else
+								{
+									_string = listContainer[i];
+								}
 
-							result ~= ( _string ~ "^" );
+								result ~= ( _string ~ "^" );
+							}
 						}
 					}
+				
+					if( result.length )
+						if( result[$-1] == '^' ) result = result[0..$-1];
 				}
 
-				if( result.length )
-					if( result[$-1] == '^' ) result = result[0..$-1];
+				
+				// For Quick show the dialog...
+				if( bDot )
+				{
+					prevComplete.word = splitWord;
+					prevComplete.linenum = lineNum;
+					prevComplete.completeList[fullPathByOS( Array.join( splitWord, "." ) )] = result;
+				}
+				else if( bCallTip )
+				{
+					prevComplete.word = splitWord;
+					prevComplete.linenum = lineNum;
+					prevComplete.completeCallTip[fullPathByOS( Array.join( splitWord, "." ) )] = result;
+				}
 			}
 			
 			string getResult()
@@ -255,19 +318,6 @@ version(FBIDE)
 		public static CShowListThread	showListThread;
 		public static CShowListThread	showCallTipThread;
 		static Ihandle* timer = null;
-		
-		static void cleanIncludesMarkContainer( int level = -1)
-		{
-			( cast(CASTnode[string]) includesMarkContainer ).clear;
-			( cast(bool[string]) noIncludeNodeContainer ).clear;
-			/*
-			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
-				includesMarkContainer.remove( key );
-			
-			foreach( key; ( cast(bool[string]) noIncludeNodeContainer ).keys )
-				noIncludeNodeContainer.remove( key );
-			*/
-		}
 		
 		static bool checkExtendedClassesExist( CASTnode _node )
 		{
@@ -623,21 +673,14 @@ version(FBIDE)
 
 			if( includeFullPath.length )
 			{
-				bool bAlreadyExisted = ( fullPathByOS(includeFullPath) in includesMarkContainer ) ? true : false;
-				
-				if( GLOBAL.compilerSettings.includeLevel < 0 )
-					if( bAlreadyExisted ) return null;
-
+				if( fullPathByOS(includeFullPath) in includesMarkContainer ) return null;
 
 				CASTnode includeAST;
 				if( fullPathByOS(includeFullPath) in GLOBAL.parserManager )
 				{
 					auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(includeFullPath)];
-					if( !bAlreadyExisted )
-					{
-						includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) _ast;
-						results ~= _ast;
-					}
+					includesMarkContainer[fullPathByOS(includeFullPath)] = cast(shared CASTnode) _ast;
+					results ~= _ast;
 					results ~= getIncludes( _ast, includeFullPath, _LEVEL );
 				}
 				else
@@ -707,7 +750,6 @@ version(FBIDE)
 								CASTnode _createFileNode = ParserAction.loadParser( s, true );
 								if( _createFileNode !is null )
 								{
-									includesMarkContainer[fullPathByOS(s)] = cast(shared CASTnode) _createFileNode;
 									foreach( CASTnode _node; _createFileNode.getChildren )
 									{
 										if( _node.kind & B_INCLUDE ) 
@@ -716,10 +758,16 @@ version(FBIDE)
 											if( name == originalFullPath )
 											{
 												noIncludeNodeContainer[originalFullPath] = true;
+												/*
 												if( bWholeWord )
 													return searchMatchMemberNodes( _createFileNode, word, B_ALL, true ) ~ getMatchIncludesFromWholeWord( _createFileNode, s, word, _node.lineNumber );
 												else
 													return searchMatchMemberNodes( _createFileNode, word, B_ALL, false ) ~ getMatchIncludesFromWord( _createFileNode, s, word, _node.lineNumber );
+												*/
+												if( bWholeWord )
+													return searchMatchMemberNodes( _createFileNode, word, B_ALL, true ) ~ getMatchIncludesFromWholeWord( _createFileNode, s, word );
+												else
+													return searchMatchMemberNodes( _createFileNode, word, B_ALL, false ) ~ getMatchIncludesFromWord( _createFileNode, s, word );
 											}
 										}
 									}
@@ -814,38 +862,11 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 
-			string[] prevKeys = ( cast(CASTnode[string]) includesMarkContainer ).keys;
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, true, ln );
-			if( results.length )
-				return results;
-			else
-			{
-				foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
-				{
-					bool bRemove = true;
-					foreach( pKey; prevKeys )
-					{
-						if( pKey == key )
-						{
-							bRemove = false;
-							break;
-						}
-					}
-					if( bRemove ) includesMarkContainer.remove( key );
-				}
-			}
+			if( results.length ) return results;
 
-			/+
-			foreach( char[] key; includesMarkContainer.keys )
-				includesMarkContainer.remove( key );		
-			+/
-			
-			// Parse Include
-			if( includesFromPath != originalFullPath )
-			{
-				auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
-				//IupMessage( "", toStringz( includesFromPath ~ "\n" ~ originalNode.name ~ "\n" ~ originalFullPath ~ "\n" ~ std.conv.to!(string)(includesMarkContainer.length )) );
-			}
+			cleanIncludeContainer();
+			getIncludes( originalNode, originalFullPath, 0, ln );
 
 			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{
@@ -873,32 +894,11 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 			
-			string[] prevKeys = ( cast(CASTnode[string]) includesMarkContainer ).keys;
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, false, ln );
-			if( results.length )
-				return results;
-			else
-			{
-				foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
-				{
-					bool bRemove = true;
-					foreach( pKey; prevKeys )
-					{
-						if( pKey == key )
-						{
-							bRemove = false;
-							break;
-						}
-					}
-					if( bRemove ) includesMarkContainer.remove( key );
-				}
-			}			
+			if( results.length ) return results;
 			
-			if( includesFromPath != originalFullPath )
-			{
-				auto dummyASTs = getIncludes( originalNode, originalFullPath, 0 );
-				//IupMessage( "", toStringz( includesFromPath ~ "\n" ~ originalNode.name ~ "\n" ~ originalFullPath ~ "\n" ~ std.conv.to!(string)(includesMarkContainer.length )) );
-			}
+			cleanIncludeContainer();
+			getIncludes( originalNode, originalFullPath, 0, ln );
 			
 			foreach( includeAST; cast(CASTnode[string]) includesMarkContainer )
 			{
@@ -1216,7 +1216,7 @@ version(FBIDE)
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
 				*/
-				version(VERSION_NONE) initIncludesMarkContainer( originalNode, originalNode.lineNumber ); else checkVersionSpec( originalNode, originalNode.lineNumber );
+				version(VERSION_NONE){} else checkVersionSpec( originalNode, originalNode.lineNumber );
 				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
 				if( usingNames.length )
 				{
@@ -1641,19 +1641,13 @@ version(FBIDE)
 				checkVersionSpec( AST_Head.getFather, lineNum );
 			else
 			{
-				//initIncludesMarkContainer( AST_Head, lineNum );
-				
-				if( includesFromPath != AST_Head.name ) includesFromPath = AST_Head.name;
-				cleanIncludesMarkContainer();
-				
 				if( GLOBAL.compilerSettings.includeLevel != 0 )
 				{
 					int oriIncludeLevel = GLOBAL.compilerSettings.includeLevel;
 					
 					// Heavy slow down the spped, only check only 2-steps
 					// if( GLOBAL.includeLevel > 2 ) GLOBAL.includeLevel = 2; // Comment this line to get full-check
-					auto dummy = getIncludes( AST_Head, AST_Head.name, 0 );
-					
+					getIncludes( AST_Head, AST_Head.name, 0 );
 					foreach( _includeNode; cast(CASTnode[string]) includesMarkContainer )
 					{
 						foreach( CASTnode _friends; getMembers( _includeNode, true ) )
@@ -1672,23 +1666,6 @@ version(FBIDE)
 					GLOBAL.compilerSettings.includeLevel = oriIncludeLevel;
 				}
 			}
-		}
-		
-		
-		static void initIncludesMarkContainer( CASTnode AST_Head, int lineNum )
-		{
-			if( includesFromPath != AST_Head.name ) includesFromPath = AST_Head.name;
-			cleanIncludesMarkContainer();
-			
-			if( GLOBAL.compilerSettings.includeLevel != 0 )
-			{
-				//int oriIncludeLevel = GLOBAL.includeLevel;
-				
-				// Heavy slow down the spped, only check only 2-steps
-				// if( GLOBAL.includeLevel > 2 ) GLOBAL.includeLevel = 2; // Comment this line to get full-check
-				auto dummy = getIncludes( AST_Head, AST_Head.name, 0 );
-				//GLOBAL.includeLevel = oriIncludeLevel;
-			}			
 		}
 		
 		
@@ -1826,27 +1803,53 @@ version(FBIDE)
 				}
 			}
 			
-			if( includesFromPath != fullPath )
-			{
-				includesFromPath = fullPath;
-				cleanIncludesMarkContainer();
-			}
-			
 			CASTnode[] nameSpaceNodes;
 			
 			int startNum;
 			if( lineNum == prevAnalysis.linenum )
-			{
+			{	/*
+				writefln( Array.join( prevAnalysis.word, "." ) );
+				writefln( Array.join( splitWord, "." ) );
+				writefln("");
+				*/
 				if( prevAnalysis.word.length < splitWord.length )
 				{
 					if( indexOf( Array.join( splitWord, "." ), Array.join( prevAnalysis.word, "." ) ) == 0 )
 					{
 						AST_Head = prevAnalysis.node;
 						startNum = cast(int) prevAnalysis.word.length;
-						//IupMessage( "GO", toStringz( Array.join( prevAnalysis.word, "." ) ) );
+						//writefln( "BINGO" );
 					}
 				}
+				/+
+				else if( prevAnalysis.word.length == splitWord.length )
+				{
+					if( indexOf( Array.join( splitWord, "." ), Array.join( prevAnalysis.word, "." ) ) == 0 )
+					{
+						AST_Head = prevAnalysis.node;
+						//writefln( "EQUAL BINGO" );
+						
+						if( bDot )
+						{
+							if( bPushContainer )
+							{
+								if( AST_Head.kind & ( B_TYPE | B_ENUM | B_UNION | B_NAMESPACE | B_CLASS ) )
+								{
+									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
+									{
+										string _list = getListImage( _child, false );
+										listContainer ~= _list;
+									}
+								}
+							}
+							return result;
+						}
+					}
+				}
+				+/
 			}
+			
+			
 			
 			for( int i = startNum; i < splitWord.length; i++ )
 			{
@@ -1870,7 +1873,7 @@ version(FBIDE)
 
 								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
 								auto _parserManaper = cast(CASTnode[string]) GLOBAL.parserManager;
-								if( fullPathByOS(fullPath) in _parserManaper ) resultIncludeNodes	= getMatchIncludesFromWholeWord( _parserManaper[fullPathByOS(fullPath)], fullPath, splitWord[i], B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+								if( fullPathByOS(fullPath) in _parserManaper ) resultIncludeNodes = getMatchIncludesFromWholeWord( _parserManaper[fullPathByOS(fullPath)], fullPath, splitWord[i], lineNum );
 
 								// For Type Objects
 								if( memberFunctionMotherName.length )
@@ -1911,7 +1914,7 @@ version(FBIDE)
 							{
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
 								
-								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i] );
+								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i], lineNum );
 								// For Type Objects
 								if( memberFunctionMotherName.length )
 								{
@@ -1939,7 +1942,10 @@ version(FBIDE)
 						{
 							// Get Members
 							//AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
-
+							import core.time;
+							
+							
+							
 							CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], B_FIND );
 							if( !matchNodes.length )
 								AST_Head = null;
@@ -2025,6 +2031,7 @@ version(FBIDE)
 									}
 								}
 							}
+
 						}
 
 						break;
@@ -2064,12 +2071,10 @@ version(FBIDE)
 						{
 							if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 							{
-								//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
 								CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
 								if( memberFunctionMotherNode !is null )
 								{
 									if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
-									//AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
 								}
 							}
 						}					
@@ -2186,7 +2191,6 @@ version(FBIDE)
 						
 						//********************************************************************
 						prevAnalysis = PrevAnalysisUnit( splitWord[0..$].dup, AST_Head, lineNum );
-						//IupMessage( toStringz( Conv.to!(string)( i ) ), toStringz( Array.join( prevAnalysis.word, "." ) ) );
 						
 						if( bPushContainer )
 						{
@@ -2222,7 +2226,6 @@ version(FBIDE)
 					}
 					else
 					{
-						//if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY, lineNum ) ) return null;
 						if( !stepByStep( AST_Head, splitWord[i], B_VARIABLE | B_FUNCTION | B_PROPERTY | B_TYPE | B_UNION, lineNum ) ) return null; // for nested TYPE / UNION
 					}
 				}
@@ -2248,8 +2251,6 @@ version(FBIDE)
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
 				setTimer( std.conv.to!(int)( GLOBAL.triggerDelay ) );
 			}
-			
-			//if( calltipContainer is null ) calltipContainer = new CStack!(string);
 		}
 		
 		static void setTimer( uint milisecond )
@@ -2286,14 +2287,18 @@ version(FBIDE)
 		
 		static void cleanIncludeContainer()
 		{
-			foreach( key; ( cast(CASTnode[string]) includesMarkContainer ).keys )
-				includesMarkContainer.remove( key );
-		}		
+			( cast(CASTnode[string]) includesMarkContainer ).clear;
+		}
 		
 		static void cleanCalltipContainer()
 		{
 			calltipContainer.clear();
 		}
+		
+		static void cleanInsertBIContainer()
+		{
+			( cast(bool[string]) noIncludeNodeContainer ).clear;
+		}		
 		
 		static string getKeywordContainerList( string word, bool bCleanContainer = true )
 		{
@@ -2376,7 +2381,7 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode[] getIncludes( CASTnode originalNode, string originalFullPath, int _LEVEL )
+		static CASTnode[] getIncludes( CASTnode originalNode, string originalFullPath, int _LEVEL, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
 			if( GLOBAL.compilerSettings.includeLevel == 0 ) return null;
@@ -2394,7 +2399,7 @@ version(FBIDE)
 			{
 				if( _node.kind & B_INCLUDE )
 				{
-					if( _node.lineNumber < 2147483647 )
+					if( _node.lineNumber < ln )
 					{
 						CASTnode[] _results = check( _node.name, originalFullPath, _LEVEL );
 						if( _results.length ) results ~= _results;
@@ -3298,136 +3303,172 @@ version(FBIDE)
 					
 					auto oriAST = AST_Head;
 					
-					version(VERSION_NONE) initIncludesMarkContainer( AST_Head, lineNum ); else checkVersionSpec( AST_Head, lineNum );
-					
-					result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
-					string[] usingNames = checkUsingNamespace( oriAST, lineNum );
-					if( usingNames.length )
-					{
-						string[] noUsingListContainer;
-						if( splitWord.length == 1 )
+					version(VERSION_NONE){} else checkVersionSpec( AST_Head, lineNum );
+
+
+					// For Quick show the dialog...
+					bool bCompleteJump;
+					if( lineNum == prevComplete.linenum )
+					{	/*
+						writefln( Array.join( prevComplete.word, "." ) );
+						writefln( Array.join( splitWord, "." ) );
+						writefln("");				
+						*/
+						if( prevComplete.word.length == splitWord.length )
 						{
-							if( !bDot && !bCallTip )
+							string prevWords = fullPathByOS( Array.join( prevComplete.word, "." ) );
+							string nowWords = fullPathByOS( Array.join( splitWord, "." ) );
+						
+							if( indexOf( nowWords, prevWords ) == 0 )
 							{
-								noUsingListContainer = listContainer;
-								listContainer.length = 0;
-							}
-							else if( bCallTip )
-							{
-								if( !result.length ) listContainer.length = 0; 
+								if( bDot )
+								{
+									if( prevWords in prevComplete.completeList )
+									{
+										result = prevComplete.completeList[prevWords];
+										bCompleteJump = true;
+									}
+								}
+								else if( bCallTip )
+								{
+									if( prevWords in prevComplete.completeCallTip )
+									{
+										result = prevComplete.completeCallTip[prevWords];
+										bCompleteJump = true;
+									}
+								}
 							}
 						}
-						
-						if( !listContainer.length )
+					}
+					else
+					{
+						if( prevComplete.completeList.length ) prevComplete.completeList.clear;
+						if( prevComplete.completeCallTip.length ) prevComplete.completeCallTip.clear;
+					}
+					
+					
+					if( !bCompleteJump )
+					{
+						result = analysisSplitWorld_ReturnCompleteList( AST_Head, splitWord, lineNum, bDot, bCallTip, true );
+						string[] usingNames = checkUsingNamespace( oriAST, lineNum );
+						if( usingNames.length )
 						{
-							foreach( s; usingNames )
+							string[] noUsingListContainer;
+							if( splitWord.length == 1 )
 							{
-								string[] splitWithDot = Array.split( s, "." );
-								string[] namespaceSplitWord = splitWithDot ~ splitWord;
-								string _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
-								
-								if( bCallTip )
+								if( !bDot && !bCallTip )
 								{
-									if( _result.length )
+									noUsingListContainer = listContainer;
+									listContainer.length = 0;
+								}
+								else if( bCallTip )
+								{
+									if( !result.length ) listContainer.length = 0; 
+								}
+							}
+							
+							if( !listContainer.length )
+							{
+								foreach( s; usingNames )
+								{
+									string[] splitWithDot = Array.split( s, "." );
+									string[] namespaceSplitWord = splitWithDot ~ splitWord;
+									string _result = analysisSplitWorld_ReturnCompleteList( oriAST, namespaceSplitWord, lineNum, bDot, bCallTip, true );
+									
+									if( bCallTip )
 									{
+										if( _result.length )
+										{
+											result = _result;
+											break;
+										}
+									}
+									
+									if( listContainer.length )
+									{
+										listContainer = noUsingListContainer ~ listContainer;
 										result = _result;
 										break;
 									}
 								}
-								
-								if( listContainer.length )
-								{
-									listContainer = noUsingListContainer ~ listContainer;
-									result = _result;
-									break;
-								}
 							}
-						}
-						
-						if( !listContainer.length ) listContainer = noUsingListContainer;
-					}
-
-					if( listContainer.length )
-					{
-						//Algorithm.sort( listContainer );
-						Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
-
-						string	_type, _list;
-						int		maxLeft, maxRight;
-
-						for( int i = 0; i < listContainer.length; ++ i )
-						{
-							if( listContainer[i].length )
-							{
-								auto dollarPos = lastIndexOf( listContainer[i], "#" );
-								if( dollarPos > -1 )
-								{
-									_type = listContainer[i][dollarPos+1..$];
-									if( _type.length > maxRight ) maxRight = cast(int) _type.length;
-									_list = listContainer[i][0..dollarPos];
-									if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
-								}
-								else
-								{
-									if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
-								}
-							}
+							
+							if( !listContainer.length ) listContainer = noUsingListContainer;
 						}
 
-						//string formatString = "{,-" ~ to!(string)( maxLeft ) ~ "} :: {,-" ~ to!(string)( maxRight ) ~ "}";
-						for( int i = 0; i < listContainer.length; ++ i )
+						if( listContainer.length )
 						{
-							if( i > 0 )
+							//Algorithm.sort( listContainer );
+							Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
+
+							string	_type, _list;
+							int		maxLeft, maxRight;
+
+							for( int i = 0; i < listContainer.length; ++ i )
 							{
-								if( listContainer[i] == listContainer[i-1] ) continue;
-							}
-							/*
-							if( i < listContainer.length - 1 )
-							{
-								auto questPos = lastIndexOf( listContainer[i], "?0" );
-								if( questPos > -1 )
+								if( listContainer[i].length )
 								{
-									string	_keyWord = listContainer[i][0..questPos];
-									string 	compareWord;
-									
-									auto tildePos = lastIndexOf( listContainer[i+1], "#" );
-									if( tildePos > -1 )
-										compareWord = listContainer[i+1][0..tildePos];
+									auto dollarPos = lastIndexOf( listContainer[i], "#" );
+									if( dollarPos > -1 )
+									{
+										_type = listContainer[i][dollarPos+1..$];
+										if( _type.length > maxRight ) maxRight = cast(int) _type.length;
+										_list = listContainer[i][0..dollarPos];
+										if( _list.length > maxLeft ) maxLeft = cast(int) _list.length;
+									}
 									else
 									{
-										questPos = lastIndexOf( listContainer[i+1], "?" );
-										if( questPos > -1 ) compareWord = listContainer[i+1][0..questPos]; else compareWord = listContainer[i+1];
+										if( listContainer[i].length > maxLeft ) maxLeft = cast(int) listContainer[i].length;
 									}
-									
-									if( Uni.toLower( _keyWord ) == Uni.toLower( compareWord ) ) continue;
 								}
 							}
-							*/
 
-							if( listContainer[i].length )
+							for( int i = 0; i < listContainer.length; ++ i )
 							{
-								string _string;
-								
-								auto dollarPos = lastIndexOf( listContainer[i], "#" );
-								if( dollarPos > -1 )
+								if( i > 0 )
 								{
-									_type = listContainer[i][dollarPos+1..$];
-									_list = listContainer[i][0..dollarPos];
-									_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
-								}
-								else
-								{
-									_string = listContainer[i];
+									if( listContainer[i] == listContainer[i-1] ) continue;
 								}
 
-								result ~= ( _string ~ "^" );
+								if( listContainer[i].length )
+								{
+									string _string;
+									
+									auto dollarPos = lastIndexOf( listContainer[i], "#" );
+									if( dollarPos > -1 )
+									{
+										_type = listContainer[i][dollarPos+1..$];
+										_list = listContainer[i][0..dollarPos];
+										_string = stripRight( format( "%-" ~ std.conv.to!(string)(maxLeft) ~ "s :: %-" ~ std.conv.to!(string)(maxRight) ~ "s", _list, _type ) );
+									}
+									else
+									{
+										_string = listContainer[i];
+									}
+
+									result ~= ( _string ~ "^" );
+								}
 							}
 						}
-					}
-				}
 
-				if( result.length )
-					if( result[$-1] == '^' ) result = result[0..$-1];
+						if( result.length )
+							if( result[$-1] == '^' ) result = result[0..$-1];
+					}
+						
+					// For Quick show the dialog...
+					if( bDot )
+					{
+						prevComplete.word = splitWord;
+						prevComplete.linenum = lineNum;
+						prevComplete.completeList[fullPathByOS( Array.join( splitWord, "." ) )] = result;
+					}
+					else if( bCallTip )
+					{
+						prevComplete.word = splitWord;
+						prevComplete.linenum = lineNum;
+						prevComplete.completeCallTip[fullPathByOS( Array.join( splitWord, "." ) )] = result;
+					}							
+				}
 
 				return result.dup;
 			}
@@ -3686,47 +3727,7 @@ version(FBIDE)
 					
 					// Get VersionCondition names
 					if( AST_Head is null ) return;
-					/+
-					version(VERSION_NONE)
-					{
-						initIncludesMarkContainer( AST_Head, lineNum );
-					}
-					else
-					{
-						// Reset VersionCondition Container
-						foreach( key; ( cast(float[string]) AutoComplete.VersionCondition ).keys )
-							AutoComplete.VersionCondition.remove( key );						
-						
-						string options = GLOBAL.compilerSettings.activeCompiler.Option;
-						if( options.length )
-						{	
-							auto _versionPos = indexOf( options, "-d" );
-							while( _versionPos > -1  )
-							{
-								string	versionName;
-								bool	bBeforeSymbol = true;
-								for( int i = cast(int) _versionPos + 2; i < options.length; ++ i )
-								{
-									if( options[i] == '\t' || options[i] == ' ' )
-									{
-										if( !bBeforeSymbol ) break; else continue;
-									}
-									else if( options[i] == '=' )
-									{
-										break;
-									}
 
-									versionName ~= options[i];
-								}								
-
-								if( versionName.length ) AutoComplete.VersionCondition[Uni.toUpper(versionName)] = 1;
-								_versionPos = indexOf( options, "-d", _versionPos + 2 );
-							}								
-						}
-						
-						checkVersionSpec( AST_Head, lineNum );
-					}
-					+/
 					checkVersionSpec( AST_Head, lineNum );
 					
 					if( !splitWord[0].length )
@@ -5151,6 +5152,15 @@ version(FBIDE)
 			}
 			
 			return false;
+		}
+		
+		static resetPrevContainer()
+		{
+			if( prevAnalysis.completeList.length ) prevAnalysis.completeList.clear;
+			if( prevComplete.completeCallTip.length ) prevComplete.completeCallTip.clear;
+			prevAnalysis.word.length = prevComplete.word.length = 0;
+			prevAnalysis.linenum = prevComplete.linenum = 0;
+			prevAnalysis.node = prevComplete.node = null;
 		}
 	}
 

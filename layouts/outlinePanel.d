@@ -12,7 +12,7 @@ class COutline
 {
 private:
 	import 				iup.iup_scintilla;
-	import				parser.scanner, parser.token, parser.parser, std.conv;
+	import				parser.scanner, parser.token, parser.parser, parser.autocompletion, std.conv;
 	import				core.thread;
 
 	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList, outlineToolBarBox;
@@ -894,9 +894,17 @@ private:
 						default:
 							IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
 					}
-					break;					
-					
-				case D_STRUCT, D_UNION, D_VERSION, D_DEBUG, D_SCOPE:
+					break;
+				/*
+				case D_VERSION:
+					if( _node.getChildrenCount > 0 )
+						IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
+					else
+						bNoImage = true;
+					break;
+				*/
+				case D_VERSION:
+				case D_STRUCT, D_UNION, D_DEBUG, D_SCOPE:
 					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ lineNumString ) );
 					break;
 
@@ -1786,6 +1794,12 @@ public:
 						CASTnode temp = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)];
 						GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)] = cast(shared CASTnode) astHeadNode;
 						destroy( temp );
+						
+						// Flip
+						Ihandle* newTree = createTree( astHeadNode );
+						IupSetAttribute( zBoxHandle, "VALUE_HANDLE", cast(char*) newTree );
+						IupDestroy( actTree );						
+						/*
 						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
 						version(DIDE)
 						{
@@ -1797,8 +1811,9 @@ public:
 						{
 							append( actTree, t, 0 );
 						}
-						
+						*/
 						// Reparse Lexer
+						AutoComplete.resetPrevContainer();
 						version(FBIDE) IupScintillaSendMessage( cSci.getIupScintilla, 4003, 0, -1 ); // SCI_COLOURISE 4003
 						return true;
 					}
