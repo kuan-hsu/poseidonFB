@@ -242,10 +242,7 @@ private:
 		Ihandle* hBoxConsole = IupHbox( labelMonitorID, textMonitorID, labelConsoleX, textConsoleX, labelConsoleY, textConsoleY, labelConsoleW, textConsoleW, labelConsoleH, textConsoleH, null );
 		IupSetAttributes( hBoxConsole, "ALIGNMENT=ACENTER" );
 		
-		version(Windows )
-			Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, toggleCompileAtBackThread, hBoxConsole, null );
-		else
-			Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, hBoxConsole, null );
+		Ihandle* vBoxCompiler = IupVbox( toggleAnnotation, toggleShowResultWindow, toggleSFX, toggleDelPrevEXE, toggleConsoleExe, toggleCompileAtBackThread, hBoxConsole, null );
 			
 		version(FBIDE)	IupSetAttributes( vBoxCompiler, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		version(DIDE)	IupSetAttributes( vBoxCompiler, "GAP=16,MARGIN=0x1,EXPANDCHILDREN=NO" );
@@ -287,7 +284,7 @@ private:
 		IupSetAttributes( labelMaxHeight, "SIZE=120x12,ALIGNMENT=ARIGHT:ACENTER" );
 		
 		Ihandle* textMaxHeight = IupText( null );
-		IupSetAttribute( textMaxHeight, "SIZE", "56x12" );
+		IupSetAttributes( textMaxHeight, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=20,SPINMIN=5,READONLY=YES" );
 		IupSetInt( textMaxHeight, "VALUE", GLOBAL.autoCMaxHeight );
 		IupSetHandle( "textMaxHeight", textMaxHeight );
 
@@ -297,10 +294,10 @@ private:
 		
 		
 		Ihandle* labelTrigger = IupLabel( GLOBAL.languageItems["trigger"].toCString );
-		IupSetAttributes( labelTrigger, "SIZE=120x12" );
+		//IupSetAttributes( labelTrigger, "SIZE=120x12" );
 		
 		Ihandle* textTrigger = IupText( null );
-		IupSetAttribute( textTrigger, "SIZE", "30x12" );
+		IupSetAttributes( textTrigger, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=6,SPINMIN=0,READONLY=YES" );
 		IupSetStrAttribute( textTrigger, "TIP", GLOBAL.languageItems["triggertip"].toCString );
 		IupSetInt( textTrigger, "VALUE", GLOBAL.autoCompletionTriggerWordCount );
 		IupSetHandle( "textTrigger", textTrigger );
@@ -308,10 +305,10 @@ private:
 		version(FBIDE)
 		{
 			Ihandle* labelIncludeLevel = IupLabel( GLOBAL.languageItems["includelevel"].toCString );
-			IupSetAttributes( labelIncludeLevel, "SIZE=120x12,GAP=0" );
+			//IupSetAttributes( labelIncludeLevel, "SIZE=120x12,GAP=0" );
 
 			Ihandle* textIncludeLevel = IupText( null );
-			IupSetAttribute( textIncludeLevel, "SIZE", "30x12" );
+			IupSetAttributes( textIncludeLevel, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=6,SPINMIN=-1,READONLY=YES" );
 			IupSetStrAttribute( textIncludeLevel, "TIP", GLOBAL.languageItems["includeleveltip"].toCString );
 			IupSetInt( textIncludeLevel, "VALUE", GLOBAL.compilerSettings.includeLevel );
 			IupSetHandle( "textIncludeLevel", textIncludeLevel );
@@ -383,14 +380,13 @@ private:
 		IupSetHandle( "togglePreLoadPrj", togglePreLoadPrj );		
 
 		Ihandle* labelPreParseLevel = IupLabel( GLOBAL.languageItems["preparselevel"].toCString );
-		Ihandle* valPreParseLevel = IupVal( null );
-		IupSetAttributes( valPreParseLevel, "MIN=0,MAX=5,RASTERSIZE=50x16,STEP=0.205,PAGESTEP=0.1" );
-		IupSetInt( valPreParseLevel, "VALUE", GLOBAL.preParseLevel );
-		IupSetHandle( "valPreParseLevel", valPreParseLevel );
-		IupSetCallback( valPreParseLevel, "VALUECHANGED_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );
-		IupSetCallback( valPreParseLevel, "ENTERWINDOW_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );	
+		Ihandle* textPreParseLevel = IupText( null );
+		IupSetAttributes( textPreParseLevel, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=0,READONLY=YES" );
+		IupSetInt( textPreParseLevel, "VALUE", GLOBAL.preParseLevel );
+		IupSetHandle( "textPreParseLevel", textPreParseLevel );
 
-		Ihandle* hBoxPreParseLevel = IupHbox( togglePreLoadPrj, IupFill, labelPreParseLevel, valPreParseLevel, null );
+
+		Ihandle* hBoxPreParseLevel = IupHbox( togglePreLoadPrj, IupFill, labelPreParseLevel, textPreParseLevel, null );
 		IupSetAttributes( hBoxPreParseLevel, "ALIGNMENT=ACENTER" );
 
 
@@ -428,8 +424,9 @@ private:
 
 
 
-		version(FBIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, labelIncludeLevel, textIncludeLevel, null );
+		version(FBIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, IupFill, labelIncludeLevel, textIncludeLevel, null );
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
+		//IupSetAttributes( hBox00, "NORMALIZESIZE=HORIZONTAL" ); 
 		
 		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, /*toggleSHOWLISTTYPE, */toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
@@ -589,11 +586,6 @@ private:
 		IupSetAttribute( toggleSaveAllModified, "ALIGNMENT", "ALEFT:ACENTER" );
 		IupSetHandle( "toggleSaveAllModified", toggleSaveAllModified );
 
-		Ihandle* toggleUseSci = IupFlatToggle( GLOBAL.languageItems["outputsci"].toCString() );
-		IupSetStrAttribute( toggleUseSci, "VALUE", toStringz(GLOBAL.editorSetting01.OutputSci) );
-		IupSetAttribute( toggleUseSci, "ALIGNMENT", "ALEFT:ACENTER" );
-		IupSetHandle( "toggleUseSci", toggleUseSci );
-		
 		Ihandle* labelSetControlCharSymbol = IupLabel( GLOBAL.languageItems["controlcharsymbol"].toCString );
 		Ihandle* textSetControlCharSymbol = IupText( null );
 		IupSetStrAttribute( textSetControlCharSymbol, "VALUE", toStringz( GLOBAL.editorSetting00.ControlCharSymbol ) );
@@ -621,7 +613,7 @@ private:
 
 		Ihandle* labelBarsize = IupLabel( GLOBAL.languageItems["barsize"].toCString );
 		Ihandle* textBarSize = IupText( null );
-		IupSetAttributes( textBarSize, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2" );
+		IupSetAttributes( textBarSize, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2,READONLY=YES" );
 		IupSetStrAttribute( textBarSize, "VALUE", toStringz( GLOBAL.editorSetting01.BarSize ) );
 		IupSetStrAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
 		IupSetHandle( "textBarSize", textBarSize );
@@ -630,7 +622,7 @@ private:
 
 		Ihandle* labelAscent = IupLabel( GLOBAL.languageItems["ascent"].toCString );
 		Ihandle* textAscent = IupText( null );
-		IupSetAttributes( textAscent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
+		IupSetAttributes( textAscent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5,READONLY=YES" );
 		IupSetStrAttribute( textAscent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRAASCENT ) );
 		IupSetHandle( "textAscent", textAscent );
 		Ihandle* hBoxAscent = IupHbox( labelAscent, textAscent, null );
@@ -638,7 +630,7 @@ private:
 
 		Ihandle* labelDescent = IupLabel( GLOBAL.languageItems["descent"].toCString );
 		Ihandle* textDescent = IupText( null );
-		IupSetAttributes( textDescent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
+		IupSetAttributes( textDescent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5,READONLY=YES" );
 		IupSetStrAttribute( textDescent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRADESCENT ) );
 		IupSetHandle( "textDescent", textDescent );
 		Ihandle* hBoxDescent = IupHbox( labelDescent, textDescent, null );
@@ -690,7 +682,7 @@ private:
 					toggleSaveAllModified,
 					
 					toggleColorBarLine,
-					toggleUseSci,
+					IupFill(),
 					
 					hBoxTab,
 					hBoxColumn,
@@ -745,7 +737,7 @@ private:
 					toggleSaveAllModified,
 					
 					toggleColorBarLine,
-					toggleUseSci,
+					IupFill(),
 					
 					hBoxTab,
 					hBoxColumn,
@@ -802,9 +794,6 @@ private:
 					toggleSaveAllModified,
 					toggleColorBarLine,
 					
-					toggleUseSci,
-					IupFill(),
-					
 					hBoxTab,
 					hBoxColumn,
 
@@ -853,9 +842,6 @@ private:
 
 					toggleSaveAllModified,
 					toggleColorBarLine,
-					
-					toggleUseSci,
-					IupFill(),
 					
 					hBoxTab,
 					hBoxColumn,
@@ -2338,15 +2324,13 @@ extern(C) // Callback for CPreferenceDialog
 			version(FBIDE) GLOBAL.editorSetting00.QBCase					= fromStringz(IupGetAttribute( IupGetHandle( "toggleQBCase" ), "VALUE" )).dup;
 			version(Windows) GLOBAL.editorSetting00.NewDocBOM				= fromStringz(IupGetAttribute( IupGetHandle( "toggleNewDocBOM" ), "VALUE" )).dup;
 			GLOBAL.editorSetting00.SaveAllModified			= fromStringz(IupGetAttribute( IupGetHandle( "toggleSaveAllModified" ), "VALUE" )).dup;
-			GLOBAL.editorSetting01.OutputSci				= fromStringz(IupGetAttribute( IupGetHandle( "toggleUseSci" ), "VALUE" )).dup;
-			
 
-			GLOBAL.editorSetting00.ControlCharSymbol	= fromStringz( IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting00.TabWidth				= fromStringz( IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting00.ColumnEdge			= fromStringz( IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting01.EXTRAASCENT			= fromStringz( IupGetAttribute( IupGetHandle( "textAscent" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting01.EXTRADESCENT			= fromStringz( IupGetAttribute( IupGetHandle( "textDescent" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting01.BarSize				= fromStringz( IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) ).dup;
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) ) ) ) GLOBAL.editorSetting00.ControlCharSymbol	= fSTRz( IupGetAttribute( IupGetHandle( "textSetControlCharSymbol" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" ) ) ) ) GLOBAL.editorSetting00.TabWidth = fSTRz( IupGetAttribute( IupGetHandle( "textTabWidth" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" ) ) ) ) GLOBAL.editorSetting00.ColumnEdge = fSTRz( IupGetAttribute( IupGetHandle( "textColumnEdge" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textAscent" ), "VALUE" ) ) ) ) GLOBAL.editorSetting01.EXTRAASCENT = fSTRz( IupGetAttribute( IupGetHandle( "textAscent" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textDescent" ), "VALUE" ) ) ) ) GLOBAL.editorSetting01.EXTRADESCENT = fSTRz( IupGetAttribute( IupGetHandle( "textDescent" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) ) ) ) GLOBAL.editorSetting01.BarSize = fSTRz( IupGetAttribute( IupGetHandle( "textBarSize" ), "VALUE" ) );
 			
 			try
 			{
@@ -2391,17 +2375,13 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.linenumBack = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLinenumBack" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.fold = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ), "FGCOLOR" ) ).dup;			
 			
-			version(Windows)
-				GLOBAL.editColor.selAlpha	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textSelAlpha" ), "SPINVALUE" ) ).dup;			
-			else
-				GLOBAL.editColor.selAlpha	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textSelAlpha" ), "VALUE" ) ).dup;			
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textSelAlpha" ), "VALUE" ) ) ) )
+				GLOBAL.editColor.selAlpha = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textSelAlpha" ), "VALUE" ) );
 			
 			GLOBAL.editColor.currentWord = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ), "FGCOLOR" ) ).dup;
 			
-			version(Windows)
-				GLOBAL.editColor.currentWordAlpha	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textIndicatorAlpha" ), "SPINVALUE" ) ).dup;
-			else
-				GLOBAL.editColor.currentWordAlpha	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textIndicatorAlpha" ), "VALUE" ) ).dup;
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textIndicatorAlpha" ), "VALUE" ) ) ) )
+				GLOBAL.editColor.currentWordAlpha = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textIndicatorAlpha" ), "VALUE" ) );
 
 			GLOBAL.editColor.scintillaFore = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_FG" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.scintillaBack = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btn_Scintilla_BG" ), "FGCOLOR" ) ).dup;
@@ -2445,11 +2425,9 @@ extern(C) // Callback for CPreferenceDialog
 
 			GLOBAL.editColor.prjViewHLT = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnLeftViewHLT" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.searchIndicator = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnMessageIndicator" ), "FGCOLOR" ) ).dup;
-			version(Windows)
-				GLOBAL.editColor.searchIndicatorAlpha	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "SPINVALUE" ) ).dup;
-			else
-				GLOBAL.editColor.searchIndicatorAlpha	= fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "VALUE" ) ).dup;
-		
+			
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "VALUE" ) ) ) )
+				GLOBAL.editColor.searchIndicatorAlpha = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "VALUE" ) );
 			
 			GLOBAL.editColor.callTipFore = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCallTip_FG" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.callTipBack = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCallTip_BG" ), "FGCOLOR" ) ).dup;
@@ -2463,12 +2441,21 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.autoCompleteHLTBack = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnAutoCompleteHLT_BG" ), "FGCOLOR" ) ).dup;
 			
 			// OPACITY
-			GLOBAL.editorSetting02.findfilesDlg = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textFindInFilesDlg" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting02.preferenceDlg = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textPreferenceDlg" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting02.projectDlg = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textProjectDlg" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting02.gotoDlg = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textGotoDlg" ), "VALUE" ) ).dup;
-			GLOBAL.editorSetting02.newfileDlg = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textNewFileDlg" ), "VALUE" ) ).dup;
-			version(Windows) GLOBAL.editorSetting02.autocompleteDlg = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textAutoCompleteDlg" ), "VALUE" ) ).dup;
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textFindInFilesDlg" ), "VALUE" ) ) ) )
+				GLOBAL.editorSetting02.findfilesDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textFindInFilesDlg" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textPreferenceDlg" ), "VALUE" ) ) ) )
+				GLOBAL.editorSetting02.preferenceDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textPreferenceDlg" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textProjectDlg" ), "VALUE" ) ) ) )
+				GLOBAL.editorSetting02.projectDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textProjectDlg" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textGotoDlg" ), "VALUE" ) ) ) )	
+				GLOBAL.editorSetting02.gotoDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textGotoDlg" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textNewFileDlg" ), "VALUE" ) ) ) )
+				GLOBAL.editorSetting02.newfileDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textNewFileDlg" ), "VALUE" ) );
+			version(Windows)
+			{
+				if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textAutoCompleteDlg" ), "VALUE" ) ) ) )
+					GLOBAL.editorSetting02.autocompleteDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textAutoCompleteDlg" ), "VALUE" ) );
+			}
 			if( GLOBAL.serachInFilesDlg !is null ) IupSetStrAttribute( GLOBAL.serachInFilesDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
 			if( GLOBAL.preferenceDlg !is null ) IupSetStrAttribute( GLOBAL.preferenceDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
 
@@ -2534,10 +2521,10 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.keyWord[4] = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.keyWord[5] = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR" ) ).dup;
 			
-			GLOBAL.autoCompletionTriggerWordCount		= to!(int)( fromStringz( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ) );
-			GLOBAL.autoCMaxHeight						= to!(int)( fromStringz( IupGetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE" ) ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ) ) ) GLOBAL.autoCompletionTriggerWordCount = IupGetInt( IupGetHandle( "textTrigger" ), "VALUE" );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE" ) ) ) ) GLOBAL.autoCMaxHeight = IupGetInt( IupGetHandle( "textMaxHeight" ), "VALUE" );
 			GLOBAL.statusBar.setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
-			version(FBIDE) GLOBAL.compilerSettings.includeLevel	= to!(int)( fromStringz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) );
+			version(FBIDE) if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) ) ) GLOBAL.compilerSettings.includeLevel = IupGetInt( IupGetHandle( "textIncludeLevel" ), "VALUE" );
 			
 
 			// Compiler & Debugger
@@ -2581,32 +2568,35 @@ extern(C) // Callback for CPreferenceDialog
 				Ihandle* _mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textMonitorID" );
 				if( _mHandle != null )
 				{
-					GLOBAL.consoleWindow.id = to!(int)( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) ) - 1;
-					if( GLOBAL.consoleWindow.id < 0 || GLOBAL.consoleWindow.id >= GLOBAL.monitors.length )
+					if( std.string.isNumeric( fSTRz( IupGetAttribute( _mHandle, "VALUE" ) ) ) )
 					{
-						GLOBAL.consoleWindow.id = 0;
-						IupSetAttribute( _mHandle, "VALUE", "1" );
+						GLOBAL.consoleWindow.id = IupGetInt( _mHandle, "VALUE" ) - 1;
+						if( GLOBAL.consoleWindow.id < 0 || GLOBAL.consoleWindow.id >= GLOBAL.monitors.length )
+						{
+							GLOBAL.consoleWindow.id = 0;
+							IupSetAttribute( _mHandle, "VALUE", "1" );
+						}
 					}
 				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleX" );
 				if( _mHandle != null )
 				{
-					GLOBAL.consoleWindow.x = to!(int)( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
+					if( std.string.isNumeric( fSTRz( IupGetAttribute( _mHandle, "VALUE" ) ) ) )	GLOBAL.consoleWindow.x = IupGetInt( _mHandle, "VALUE" );
 				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleY" );
 				if( _mHandle != null )
 				{
-					GLOBAL.consoleWindow.y = to!(int)( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
+					if( std.string.isNumeric( fSTRz( IupGetAttribute( _mHandle, "VALUE" ) ) ) ) GLOBAL.consoleWindow.y = IupGetInt( _mHandle, "VALUE" );
 				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleW" );
 				if( _mHandle != null )
 				{
-					GLOBAL.consoleWindow.w = to!(int)( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
+					if( std.string.isNumeric( fSTRz( IupGetAttribute( _mHandle, "VALUE" ) ) ) ) GLOBAL.consoleWindow.w = IupGetInt( _mHandle, "VALUE" );
 				}
 				_mHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "textConsoleH" );
 				if( _mHandle != null )
 				{
-					GLOBAL.consoleWindow.h = to!(int)( fromStringz( IupGetAttribute( _mHandle, "VALUE" ) ) );
+					if( std.string.isNumeric( fSTRz( IupGetAttribute( _mHandle, "VALUE" ) ) ) ) GLOBAL.consoleWindow.h = IupGetInt( _mHandle, "VALUE" );
 				}
 			}
 			catch( Exception e )
@@ -2699,11 +2689,10 @@ extern(C) // Callback for CPreferenceDialog
 				AutoComplete.setTimer( v );
 			}
 			
-			_valHandle = IupGetHandle( "valPreParseLevel" );
+			_valHandle = IupGetHandle( "textPreParseLevel" );
 			if( _valHandle != null )
 			{
-				int v = IupGetInt( _valHandle, "VALUE" );
-				GLOBAL.preParseLevel = v;
+				if( std.string.isNumeric( fSTRz( IupGetAttribute( _valHandle, "VALUE" ) ) ) ) GLOBAL.preParseLevel = IupGetInt( _valHandle, "VALUE" );
 			}
 			
 			// Message

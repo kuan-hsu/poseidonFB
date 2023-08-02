@@ -3,7 +3,7 @@
 private import iup.iup;
 private import iup.iup_scintilla;
 private import global, scintilla, actionManager, tools;
-private import std.string, std.conv, std.file, Array = std.array, Path = std.path, Uni = std.uni;
+private import std.string, std.conv, std.file, std.math, Array = std.array, Path = std.path, Uni = std.uni;
 
 class CMessageAndSearch
 {
@@ -14,17 +14,10 @@ private:
 
 	void createMessagePanel()
 	{
-		if( GLOBAL.editorSetting01.OutputSci == "ON" )
-		{
-			outputPanel = IupScintilla();
-			IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO" );
-		}
-		else
-		{
-			outputPanel = IupText( null );
-			IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO,WORDWRAP=YES,READONLY=YES" );
-		}
+		outputPanel = IupScintilla();
+		IupSetAttributes( outputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO" );
 		IupSetCallback( outputPanel, "BUTTON_CB", cast(Icallback) &outputPanelButton_cb );
+		IupSetCallback( outputPanel, "POSTMESSAGE_CB", cast(Icallback) &outputPanelPOSTMESSAGE_CB );
 		
 		searchOutputPanel = IupScintilla();
 		IupSetAttributes( searchOutputPanel, "MULTILINE=YES,SCROLLBAR=VERTICAL,EXPAND=YES,BORDER=NO" );
@@ -44,14 +37,11 @@ public:
 	
 	void setScintillaColor()
 	{
-		if( GLOBAL.editorSetting01.OutputSci == "ON" )
-		{
-			// outputPanel		
-			IupSetAttribute( outputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
-			IupSetAttributeId( outputPanel, "INDICATORSTYLE", 4, "DOTBOX" );
-			IupSetStrAttributeId( outputPanel, "INDICATORFGCOLOR", 4, toStringz( GLOBAL.editColor.searchIndicator ) );
-			IupSetIntId( outputPanel, "INDICATORALPHA", 4, to!(int)( GLOBAL.editColor.searchIndicatorAlpha ) );
-		}
+		// outputPanel		
+		IupSetAttribute( outputPanel, "WORDWRAP", "CHAR" );	// SCE_B_KEYWORD4 12
+		IupSetAttributeId( outputPanel, "INDICATORSTYLE", 4, "DOTBOX" );
+		IupSetStrAttributeId( outputPanel, "INDICATORFGCOLOR", 4, toStringz( GLOBAL.editColor.searchIndicator ) );
+		IupSetIntId( outputPanel, "INDICATORALPHA", 4, to!(int)( GLOBAL.editColor.searchIndicatorAlpha ) );
 		
 		// scintilla
 		version(FBIDE) IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "freebasic"); else IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "d" );
@@ -99,17 +89,9 @@ public:
 			alpha = 0;
 			
 		// outputPanel
-		if( GLOBAL.editorSetting01.OutputSci == "ON" )
-		{
-			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.outputFore ) );		// 32
-			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.outputBack ) );		// 32
-			IupSetAttribute( outputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
-		}
-		else
-		{
-			IupSetStrAttribute( outputPanel, "FGCOLOR", toStringz( GLOBAL.editColor.outputFore ) );
-			IupSetStrAttribute( outputPanel, "BGCOLOR", toStringz( GLOBAL.editColor.outputBack ) );
-		}
+		IupSetStrAttribute( outputPanel, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.outputFore ) );		// 32
+		IupSetStrAttribute( outputPanel, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.outputBack ) );		// 32
+		IupSetAttribute( outputPanel, "STYLECLEARALL", "Yes");  /* sets all styles to have the same attributes as 32 */
 		/*
 		IupSetAttribute( outputPanel, "STYLEFGCOLOR3", GLOBAL.editColor.keyWord[0].toCString );	// SCE_B_KEYWORD 3
 		IupSetAttribute( outputPanel, "STYLEFGCOLOR10", GLOBAL.editColor.keyWord[1].toCString );	// SCE_B_KEYWORD2 10
@@ -119,40 +101,37 @@ public:
 		
 		version(FBIDE)
 		{
-			if( GLOBAL.editorSetting01.OutputSci == "ON" )
-			{
-				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore ) );		// SCE_B_COMMENT 1
-				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back ) );		// SCE_B_COMMENT 1
-				
-				/*
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_B_OPERATOR 6
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_B_OPERATOR 6
-				*/
-				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_B_NUMBER 2
-				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_B_NUMBER 2
+			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Fore ) );		// SCE_B_COMMENT 1
+			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR1", toStringz( GLOBAL.editColor.SCE_B_COMMENT_Back ) );		// SCE_B_COMMENT 1
+			
+			/*
+			IupSetAttribute( outputPanel, "STYLEFGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_B_OPERATOR 6
+			IupSetAttribute( outputPanel, "STYLEBGCOLOR6", GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_B_OPERATOR 6
+			*/
+			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_B_NUMBER 2
+			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR2", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_B_NUMBER 2
 
-				/*
-				IupSetAttribute( outputPanel, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_B_STRING 4
-				IupSetAttribute( outputPanel, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_B_STRING 4
-				*/
-				if( alpha == 255 )
-				{
-					IupScintillaSendMessage( outputPanel, 2067, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
-					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
-				}
-				else if( alpha == 0 )
-				{
-					IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
-					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
-				}
-				else
-				{
-					IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
-					IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   
-				}
+			/*
+			IupSetAttribute( outputPanel, "STYLEFGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_B_STRING 4
+			IupSetAttribute( outputPanel, "STYLEBGCOLOR4", GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_B_STRING 4
+			*/
+			if( alpha == 255 )
+			{
+				IupScintillaSendMessage( outputPanel, 2067, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+				IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+			}
+			else if( alpha == 0 )
+			{
+				IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+				IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+			}
+			else
+			{
+				IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+				IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+				IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   
 			}
 			// searchOutputPanel
 			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.searchFore ) );		// 32
@@ -179,42 +158,40 @@ public:
 		}
 		version(DIDE)
 		{
-			if( GLOBAL.editorSetting01.OutputSci == "ON" )
-			{
-				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore ) );	// SCE_D_CHARACTER 12
-				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Back ) );	// SCE_D_CHARACTER 12
-				
-				/*
-				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
-				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13
-				*/
-				
-				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_D_NUMBER 5
-				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_D_NUMBER 5
+			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Fore ) );	// SCE_D_CHARACTER 12
+			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR12", toStringz( GLOBAL.editColor.SCE_B_PREPROCESSOR_Back ) );	// SCE_D_CHARACTER 12
+			
+			/*
+			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Fore.toCString );		// SCE_D_OPERATOR 13
+			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back.toCString );		// SCE_D_OPERATOR 13
+			*/
+			
+			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Fore ) );		// SCE_D_NUMBER 5
+			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR5", toStringz( GLOBAL.editColor.SCE_B_NUMBER_Back ) );		// SCE_D_NUMBER 5
 
-				/*
-				IupSetStrAttribute( outputPanel, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_D_STRING 10
-				IupSetStrAttribute( outputPanel, "STYLEBGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_D_STRING 10
-				*/
-				if( alpha == 255 )
-				{
-					IupScintillaSendMessage( outputPanel, 2067, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
-					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
-				}
-				else if( alpha == 0 )
-				{
-					IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
-					IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
-				}
-				else
-				{
-					IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
-					IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
-					IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
-				}
+			/*
+			IupSetStrAttribute( outputPanel, "STYLEFGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Fore.toCString );		// SCE_D_STRING 10
+			IupSetStrAttribute( outputPanel, "STYLEBGCOLOR10", toStringz( GLOBAL.editColor.SCE_B_STRING_Back.toCString );		// SCE_D_STRING 10
+			*/
+			if( alpha == 255 )
+			{
+				IupScintillaSendMessage( outputPanel, 2067, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+				IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
 			}
+			else if( alpha == 0 )
+			{
+				IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+				IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+				IupScintillaSendMessage( outputPanel, 2478, 256, 0 );// SCI_SETSELALPHA   2478
+			}
+			else
+			{
+				IupScintillaSendMessage( outputPanel, 2067, false, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionFore ) );// SCI_SETSELFORE = 2067,
+				IupScintillaSendMessage( outputPanel, 2068, true, cast(size_t) tools.convertIupColor( GLOBAL.editColor.selectionBack ) );// SCI_SETSELBACK = 2068,
+				IupScintillaSendMessage( outputPanel, 2478, alpha, 0 );// SCI_SETSELALPHA   2478
+			}
+
 			// searchOutputPanel
 			IupSetStrAttribute( searchOutputPanel, "STYLEFGCOLOR32", toStringz( GLOBAL.editColor.searchFore ) );		// 32
 			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR32", toStringz( GLOBAL.editColor.searchBack ) );		// 32
@@ -248,12 +225,9 @@ public:
 			IupSetStrAttribute( searchOutputPanel, "STYLEBGCOLOR13", toStringz( GLOBAL.editColor.SCE_B_OPERATOR_Back ) );		// SCE_D_OPERATOR 13	
 		}
 		
-		if( GLOBAL.editorSetting01.OutputSci == "ON" )
-		{
-			// Caret Line ( Current Line )
-			IupSetStrAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
-			IupSetStrAttribute( outputPanel, "CARETLINEBACKCOLOR", toStringz( GLOBAL.editColor.caretLine ) );
-		}
+		// Caret Line ( Current Line )
+		IupSetStrAttribute( outputPanel, "CARETLINEVISIBLE", toStringz( GLOBAL.editorSetting00.CaretLine ) );
+		IupSetStrAttribute( outputPanel, "CARETLINEBACKCOLOR", toStringz( GLOBAL.editColor.caretLine ) );
 		
 		/*
 		IupSetAttribute(searchOutputPanel, "STYLEBOLD3", "YES");
@@ -586,18 +560,8 @@ extern(C)
 										}
 
 										// Make all line be selected
-										if( GLOBAL.editorSetting01.OutputSci == "ON" )
-										{
-											int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
-											IupSetAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",0:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length - 1 ) ) );										
-										}
-										else
-										{
-											int pos = IupConvertXYToPos( ih, x, y );
-											int _line, col;
-											IupTextConvertPosToLinCol( ih, pos, &_line, &col );
-											IupSetAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",1:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length + 1 ) ) );										
-										}
+										int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
+										IupSetAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",0:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length ) ) );										
 										
 										return IUP_IGNORE;
 									}
@@ -687,18 +651,8 @@ extern(C)
 								}
 
 								// Make all line be selected
-								if( GLOBAL.editorSetting01.OutputSci == "ON" )
-								{
-									int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
-									IupSetStrAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",0:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length - 1 ) ) );
-								}
-								else
-								{
-									int pos = IupConvertXYToPos( ih, x, y );
-									int _line, col;
-									IupTextConvertPosToLinCol( ih, pos, &_line, &col );
-									IupSetStrAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",1:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length + 1 ) ) );										
-								}
+								int	_line = ScintillaAction.getLinefromPos( ih, ScintillaAction.getCurrentPos( ih ) );
+								IupSetStrAttribute( ih, "SELECTION", toStringz( to!(string)( _line ) ~ ",0:" ~ to!(string)( _line ) ~ "," ~ to!(string)( lineText.length ) ) );
 								
 								return IUP_IGNORE;
 							}
@@ -721,6 +675,74 @@ extern(C)
 			return IUP_IGNORE;
 		}
 		
+		return IUP_DEFAULT;
+	}
+	
+	private int outputPanelPOSTMESSAGE_CB( Ihandle *ih, const char* s, int i, double d, void* p )
+	{
+		switch( cast(int) d )
+		{
+			case 0: // Compile message
+				switch( i )
+				{
+					case 0:
+						IupSetStrAttribute( ih, "APPEND", s );
+						break;
+					case 1:
+						IupSetStrAttribute( ih, "VALUE", s );
+						break;
+					case 2:
+						GLOBAL.messagePanel.applyOutputPanelINDICATOR();
+						IupSetInt( ih, "CARETPOS", 99999999 );
+						IupFlush();
+						break;
+					default:
+				}
+				break;
+			
+			case 1:
+				if( p != null )
+				{
+					Ihandle* iupSci = cast(Ihandle*) p;
+					IupSetAttribute( iupSci, "ANNOTATIONCLEARALL", "YES" );
+				}
+				break;
+			
+			case 2: // Send i = linenum, s = annotationText, p = iupSci
+				if( p != null )
+				{
+					Ihandle*	iupSci = cast(Ihandle*) p;
+					string		annotationText = fSTRz( s );
+					bool		bWarning = ( i < 0 ) ? true : false;
+					int			lineNumber = std.math.abs( i );
+					
+					string getText = fSTRz( IupGetAttributeId( iupSci, "ANNOTATIONTEXT", lineNumber ) );
+					if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
+					IupSetStrAttributeId( iupSci, "ANNOTATIONTEXT", lineNumber, toStringz( annotationText ) );
+					if( bWarning ) IupSetIntId( iupSci, "ANNOTATIONSTYLE", lineNumber, 41 ); else IupSetIntId( iupSci, "ANNOTATIONSTYLE", lineNumber, 40 );
+					IupSetAttribute( iupSci, "ANNOTATIONVISIBLE", "BOXED" );
+				}
+				break;
+				
+			case 3:
+				switch( fSTRz( s ) )
+				{
+					case "message":
+						tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+						break;
+					case "error":
+						tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						break;
+					case "alarm":
+						tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
+						break;
+					default:						
+				}
+				break;
+				
+			default:
+		}
+	
 		return IUP_DEFAULT;
 	}
 

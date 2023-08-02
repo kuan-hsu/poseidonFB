@@ -33,7 +33,6 @@ private:
 		CMessageAndSearch		messagePanel;
 		CScintilla[string]		scintillaManager;
 		CompilerSettingUint		compilerSettings;
-		string					OutputSci;
 		string					poseidonPath, linuxTermName;
 		Monitor					consoleWindow;
 		Monitor[]				monitors;
@@ -44,7 +43,6 @@ private:
 		BuildDataToTLS buildTools = { GLOBAL.messagePanel,
 									GLOBAL.scintillaManager,
 									GLOBAL.compilerSettings,
-									GLOBAL.editorSetting01.OutputSci,
 									GLOBAL.poseidonPath, GLOBAL.linuxTermName,
 									GLOBAL.consoleWindow,
 									GLOBAL.monitors
@@ -237,8 +235,14 @@ private:
 							geoString = Array.replace( geoString, "--geometry=", "-geometry " );
 							pid = spawnShell( buildTools.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
 							break;
-						case "mate-terminal" ,"xfce4-terminal" ,"lxterminal", "gnome-terminal", "tilix":
-							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
+						case "gnome-terminal",:
+							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e=\"" ~ command ~ " " ~ args ~ "\"", null, Config.none, cwd );
+							break;
+						case "mate-terinal":
+							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e \"" ~ command ~ " " ~ args ~ "\"", null, Config.none, cwd );
+							break;
+						case "xfce4-terminal" ,"lxterminal", "tilix":
+							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " --command=\"" ~ command ~ " " ~ args ~ "\"", null, Config.none, cwd );
 							break;
 						default:
 							pid = spawnShell( buildTools.linuxTermName ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
@@ -345,29 +349,22 @@ private:
 				if( std.file.exists( singleExistedExecute ) ) std.file.remove( singleExistedExecute );
 			}	
 		
-			if( GLOBAL.compilerSettings.useThread == "ON" ) processDlg = createProcessDlg( "Compiling......" );
+			processDlg = createProcessDlg( "Compiling......" );
+			IupFlush();
 			
 			super( &go );
 		}		
 		
 		void go()
 		{
-			if( buildTools.compilerSettings.useThread != "ON" )
-			{
-				processDlg = createProcessDlg( "Compiling......" );
-				IupFlush();
-			}
-			
 			quickRunFile = quickFileTemp;
 			options = _beCompiledFile ~ ( options.length ? " " ~ options : "" );
-			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options ), buildTools, cwd, true, true );
+			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options ), buildTools, cwd, false, processDlg );
 			if( processDlg != null ) IupDestroy( processDlg );
-			
 			if( bCompileSuccess )
 			{
 				version(FBIDE)
 				{
-					debug writefln( "COMPILE OK!!" );
 					if( bRun )
 					{
 						version(Windows) _beRunFile ~= ".exe";
@@ -423,38 +420,51 @@ private:
 			options2				= _options2;
 			buildTools				= getBuildNeedDataToTLS();
 			
-			if( GLOBAL.compilerSettings.useThread == "ON" ) processDlg = createProcessDlg( "Compiling......" );
+			processDlg = createProcessDlg( "Compiling......" );
+			IupFlush();
 			
 			super( &go );
 		}		
 		
 		void go()
 		{
-			if( buildTools.compilerSettings.useThread != "ON" )
-			{
-				processDlg = createProcessDlg( "Compiling......" );
-				IupFlush();
-			}
-			
 			if( options1.length )
 			{
 				IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( "\n" ~ command ~ " " ~ options1 ~ "\n\n" ) );
 				IupFlush();
 				options1 = options1.length ? " " ~ options1 : "";
-				bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options1 ), buildTools, cwd, true, true, true );
+				bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options1 ), buildTools, cwd, true, processDlg );
 				if( !bCompileSuccess )
 				{
 					if( processDlg != null ) IupDestroy( processDlg );
 					return;
 				}
+				
+				if( buildTools.compilerSettings.useThread == "ON" )
+				{
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\n************************************\n", 0, 0.0, null );
+				}
+				else
+				{
+					IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\n************************************\n" );
+					IupFlush();
+				}				
 			}
 			
-			if( options1.length ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\n************************************\n" );
+			if( options2.length )
+			{
+				if( buildTools.compilerSettings.useThread == "ON" )
+				{
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( "Continue Link Project: [" ~ prjName ~ "]......\n\n" ~ command ~ options2 ~ "\n" ), 0, 0.0, null );
+				}
+				else
+				{
+					IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( "Continue Link Project: [" ~ prjName ~ "]......\n\n" ~ command ~ options2 ~ "\n" ) );
+					IupFlush();
+				}
+			}
 
-			IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( "Continue Link Project: [" ~ prjName ~ "]......\n\n" ~ command ~ options2 ~ "\n" ) );
-			IupFlush();
-			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options2 ), buildTools, cwd, true, true, false );
-
+			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options2 ), buildTools, cwd, false, processDlg );
 			if( processDlg != null ) IupDestroy( processDlg );
 		}
 	}	
@@ -466,7 +476,8 @@ private:
 		
 		foreach( CScintilla cSci; buildTools.scintillaManager )
 		{
-			IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
+			IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 0, 1.0, cast(void*) cSci.getIupScintilla );
+			//IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			
 			int prevLineNumber, prevLineNumberCount;
 			
@@ -514,11 +525,14 @@ private:
 								prevLineNumberCount ++;
 							}
 							
+							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( annotationText ), lineNumber, 2.0, cast(void*) cSci.getIupScintilla );
+							/*
 							string getText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber ) );
 							if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
 							IupSetStrAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber, toStringz( annotationText ) );
 							if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 40 );
 							IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
+							*/
 						}
 					}
 				}
@@ -526,23 +540,22 @@ private:
 		}
 	}
 
-	static bool CompilerProcess( string command, string args, BuildDataToTLS buildTools, string workDir = "", bool bGUI = true, bool bShowMessage = true, bool bNoSuccessSFX = false )
+	static bool CompilerProcess( string command, string args, BuildDataToTLS buildTools, string workDir, bool bHalfTime, ref Ihandle* _processDlg )
 	{
 		scope DaNodeProcess = new tools.Process( command ~ " " ~ args, workDir );
 		DaNodeProcess.start();
 		while(!DaNodeProcess.finished){ Thread.sleep( msecs( 5 ) ); }
-		
-		string outputMessage = DaNodeProcess.getOutputMessage;
-		string errorMessage = DaNodeProcess.getErrorMessage;
-		string theMessage = outputMessage ~ ( outputMessage.length ? "\n" : "" ) ~ errorMessage;
 
-		bool	bError, bWarning;
-		if( errorMessage.length ) bError = true;
+		string	outputMessage = DaNodeProcess.getOutputMessage;
+		string	errorMessage = DaNodeProcess.getErrorMessage;
+		string	theMessage = outputMessage ~ ( outputMessage.length ? "\n" : "" ) ~ errorMessage;
+		bool	bWarning, bError = errorMessage.length ? true : false;
+
 		version(FBIDE)
 		{
 			foreach( line; splitLines( theMessage ) )
 			{
-				line = strip( line );
+				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
 				if( !bWarning )
 				{
 					if( indexOf( line, "warning " ) > -1 ) bWarning = true;
@@ -551,7 +564,10 @@ private:
 				{
 					if( indexOf( line, "error " ) > -1 ) bError = true;
 				}
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
+				if( buildTools.messagePanel !is null )
+				{
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0.0, null );
+				}
 			}
 		}
 		else //version(DIDE)
@@ -559,36 +575,42 @@ private:
 			foreach( line; splitLines( theMessage ) )  
 			{
 				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", toStringz( line ) );
+				if( buildTools.messagePanel !is null )
+				{
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0.0, null );
+				}
 			}
 		}
-
 		
 		int		_state = DaNodeProcess.getMessageState();
 		bool	bBuildSuccess;
+
+		if( !bHalfTime )
+		{
+			IupDestroy( _processDlg );
+			_processDlg = null;
+		}
+
 		if( _state == 0 )
 		{
 			bBuildSuccess = true;
 			showAnnotation( null, buildTools );
 
-			if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "Compile Success!!" );
+			if( buildTools.messagePanel !is null )
+			{
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "Compile Success!!", 0, 0, null );
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null ); // scroll to tail
+			}
 			
-			if( !bNoSuccessSFX )
+			if( !bHalfTime )
 			{
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
-					tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "message", 0, 3, null );
 				}
-				else
+				else if( buildTools.compilerSettings.useSFX == "ON" )
 				{
-					version(Windows)
-					{
-						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/success.wav", null, 0x0001 );
-					}
-					else
-					{
-						if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/success.wav" );
-					}							
+					version(Windows) PlaySound( "settings/sound/success.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/success.wav" );
 				}
 			}			
 		}
@@ -598,52 +620,44 @@ private:
 
 			if( !bWarning || _state > 1 || bError )
 			{
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\nCompile Error!!" );
+				if( buildTools.messagePanel !is null )
+				{
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Error!!", 0, 0.0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0.0, null );
+				}
 
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
-					tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "error", 0, 3, null );
 				}
-				else
+				else if( buildTools.compilerSettings.useSFX == "ON" )
 				{
-					version(Windows) 
-					{
-						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/error.wav", null, 0x0001 );
-					}
-					else
-					{
-						if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/error.wav" );
-					}
+					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 );	else IupExecute( "aplay", "settings/sound/error.wav" );
 				}
 			}
 			else
 			{
-				if( bShowMessage && buildTools.messagePanel !is null ) IupSetStrAttribute( buildTools.messagePanel.getOutputPanelHandle, "APPEND", "\nCompile Success! But got warning..." );
-				if( buildTools.compilerSettings.useResultDlg == "ON" )
+				if( buildTools.messagePanel !is null )
 				{
-					tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Success! But got warning...", 0, 0.0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0.0, null );
 				}
-				else
+				
+				if( !bHalfTime )
 				{
-					version(Windows)
+					if( buildTools.compilerSettings.useResultDlg == "ON" )
 					{
-						if( buildTools.compilerSettings.useSFX == "ON" ) PlaySound( "settings/sound/warning.wav", null, 0x0001 );
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "alarm", 0, 3, null );
 					}
-					else
+					else if( buildTools.compilerSettings.useSFX == "ON" )
 					{
-						if( buildTools.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
-					}							
+						version(Windows) PlaySound( "settings/sound/warning.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/warning.wav" );
+					}
 				}
 				bBuildSuccess = true;
 			}
 		}
-
-		if( buildTools.OutputSci == "ON" ) 
-		{
-			buildTools.messagePanel.applyOutputPanelINDICATOR();
-			IupSetInt( buildTools.messagePanel.getOutputPanelHandle, "CARETPOS", 99999999 );
-		}
-		
+	
 		return bBuildSuccess;
 	}
 
@@ -1194,10 +1208,7 @@ public:
 			// Pass compiler, files, options to Thread
 			
 			auto _thread = new CompileThread( compiler, cSci.getFullPath, options, Path.dirName( cSci.getFullPath ), bRun, args );
-			version(Posix)
-				_thread.go;
-			else
-				if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;
+			if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;
 		}
 		else
 		{
@@ -1233,15 +1244,26 @@ public:
 			{
 				if( getBuildNeedData( compiler, options2, options, optionDebug, 2 ) )
 				{
+					// Diet
+					options1 = Array.replace( options1, "\"" ~ activePrjName ~ "/", "\"" );
+					options2 = Array.replace( options2, "\"" ~ activePrjName ~ "/", "\"" );
+					
 					auto _thread = new BuildThread( compiler, GLOBAL.projectManager[activePrjName].name, options1, options2, GLOBAL.projectManager[activePrjName].dir );
-					version(Posix)
-						_thread.go;
-					else
-						if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;
+					if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;
 
 					if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 					return true;
 				}
+				else
+				{
+					GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n", true );
+					GLOBAL.messagePanel.printOutputPanel( "Project data got somethings error, build not continue, abort......", false );
+				}				
+			}
+			else
+			{
+				GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n", true );
+				GLOBAL.messagePanel.printOutputPanel( "Project data got somethings error, build not continue, abort......", false );
 			}
 			
 			if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
@@ -1268,17 +1290,22 @@ public:
 			string finalArgsString;
 			if( getBuildNeedData( compiler, finalArgsString, options, optionDebug, 0 ) )
 			{
+				// Diet
+				finalArgsString = Array.replace( finalArgsString, "\"" ~ activePrjName ~ "/", "\"" );
+				
 				GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n" ~ compiler ~ finalArgsString ~ "\n", true );
 
 				// Start Thread
 				auto _thread = new CompileThread( compiler, "", finalArgsString, GLOBAL.projectManager[activePrjName].dir );
-				version(Posix)
-					_thread.go;
-				else
-					if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;			
+				if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;			
 				
 				if( ScintillaAction.getActiveIupScintilla != null ) IupSetFocus( ScintillaAction.getActiveIupScintilla );
 				return true;
+			}
+			else
+			{
+				GLOBAL.messagePanel.printOutputPanel( "Building Project: " ~ GLOBAL.projectManager[activePrjName].name ~ "......\n\n", true );
+				GLOBAL.messagePanel.printOutputPanel( "Project Data got Somethings Error, Build Not Continue, Abort......", false );
 			}
 		}
 		catch( Exception e )
@@ -1360,10 +1387,7 @@ public:
 			GLOBAL.messagePanel.printOutputPanel( "Quick Run " ~ cSci.getFullPath ~ "......\n", true );
 			// Pass compiler, files, options to Thread
 			auto _thread = new CompileThread( compiler, fileName, options, Path.dirName( fileName ), true, args, true );
-			version(Posix)
-				_thread.go;
-			else
-				if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;			
+			if( GLOBAL.compilerSettings.useThread == "ON" ) _thread.start; else _thread.go;			
 			
 			return true;
 		}

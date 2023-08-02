@@ -718,11 +718,9 @@ public:
 				
 					GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );
 				}
-				if( GLOBAL.editorSetting01.OutputSci == "ON" )
-				{
-					GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
-					IupSetInt( GLOBAL.messagePanel.getOutputPanelHandle, "CARETPOS", 99999999 );
-				}
+
+				GLOBAL.messagePanel.applyOutputPanelINDICATOR2();
+				IupSetInt( GLOBAL.messagePanel.getOutputPanelHandle, "CARETPOS", 99999999 );
 			}
 		}
 		else
@@ -1130,7 +1128,7 @@ extern(C)
 					break;
 					
 				default:
-					if( toLower( Path.baseName( titleFP ) ) == ".bas" )
+					if( isParsableExt( Path.extension( titleFP ), 7 ) )
 					{
 						popupMenu = IupMenu( 
 												IupItem( GLOBAL.languageItems["open"].toCString, "CProjectTree_open" ),

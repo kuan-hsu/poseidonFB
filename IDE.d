@@ -195,7 +195,6 @@ public:
 			doc ~= setINILineData( "MessageSplit", GLOBAL.editorSetting01.MessageSplit );
 			doc ~= setINILineData( "OutlineWindow", GLOBAL.editorSetting01.OutlineWindow );
 			doc ~= setINILineData( "MessageWindow", GLOBAL.editorSetting01.MessageWindow );
-			doc ~= setINILineData( "OutputSci", GLOBAL.editorSetting01.OutputSci );
 			doc ~= setINILineData( "RotateTabs", GLOBAL.editorSetting01.RotateTabs );
 			doc ~= setINILineData( "BarSize", GLOBAL.editorSetting01.BarSize );
 			doc ~= setINILineData( "EXTRAASCENT", GLOBAL.editorSetting01.EXTRAASCENT );
@@ -579,7 +578,6 @@ public:
 							case "MessageSplit":			GLOBAL.editorSetting01.MessageSplit = right;			break;
 							case "OutlineWindow":			GLOBAL.editorSetting01.OutlineWindow = right;			break;
 							case "MessageWindow":			GLOBAL.editorSetting01.MessageWindow = right;			break;
-							case "OutputSci":				GLOBAL.editorSetting01.OutputSci = right;				break;
 							case "RotateTabs":				GLOBAL.editorSetting01.RotateTabs = right;				break;
 							case "BarSize":
 								GLOBAL.editorSetting01.BarSize = right;

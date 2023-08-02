@@ -12,11 +12,6 @@ struct EditorToggleUint
 struct EditorLayoutSize
 {
 	string USEFULLSCREEN = "OFF", PLACEMENT = "MAXIMIZED", RASTERSIZE = "700x500", ExplorerSplit = "170", MessageSplit = "800", OutlineWindow = "ON", MessageWindow = "ON", RotateTabs = "OFF", BarSize = "2";
-	version(linux) 
-		string OutputSci = "ON";
-	else
-		string OutputSci = "OFF";
-		
 	string EXTRAASCENT = "0", EXTRADESCENT = "0";
 }
 
@@ -41,7 +36,7 @@ struct CompilerSettingUint
 	string		useSFX = "ON";
 	string		useDelExistExe = "ON";
 	string		useConsoleLaunch = "OFF";
-	string		useThread = "OFF";
+	string		useThread = "ON";
 	string		Bit64 = "OFF";
 	string		currentCustomCompilerOption, noneCustomCompilerOption;
 	string		enableKeywordComplete = "ON";
