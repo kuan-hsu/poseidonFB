@@ -484,7 +484,7 @@ extern(C)
 										
 										if( ExecuterAction.quickRunFile.length )
 										{
-											string _baseName = Path.stripExtension( fileName );
+											string _baseName = Path.stripExtension( Path.baseName( fileName ) );
 											if( _baseName.length == 16 )
 												if( _baseName[0..12] == "poseidonTemp" && isNumeric( _baseName[12..14] ) )
 													fileName = ExecuterAction.quickRunFile;

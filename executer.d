@@ -442,7 +442,7 @@ private:
 				
 				if( buildTools.compilerSettings.useThread == "ON" )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\n************************************\n", 0, 0.0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\n************************************\n", 0, 0, null );
 				}
 				else
 				{
@@ -470,13 +470,13 @@ private:
 	}	
 
 	
-	static void showAnnotation( string message, BuildDataToTLS buildTools )
+	static void showAnnotation( string message, BuildDataToTLS buildTools, string workDir )
 	{
 		if( buildTools.compilerSettings.useAnootation != "ON" ) return;
 		
 		foreach( CScintilla cSci; buildTools.scintillaManager )
 		{
-			IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 0, 1.0, cast(void*) cSci.getIupScintilla );
+			IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 0, 1, cast(void*) cSci.getIupScintilla );
 			//IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			
 			int prevLineNumber, prevLineNumberCount;
@@ -506,8 +506,11 @@ private:
 					if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > -1 )
 					{
 						string filePath = tools.normalizeSlash( s[0..lineNumberHead++] );
-
 						if( quickRunFile.length ) filePath = quickRunFile;
+						
+						if( !Path.isAbsolute( filePath ) )
+							if( Path.isValidFilename( Path.baseName( filePath ) ) ) filePath = tools.normalizeSlash( workDir ~ "/" ~ filePath );
+						
 						if( filePath == cSci.getFullPath )
 						{
 							int	lineNumber = Conv.to!(int)( s[lineNumberHead..lineNumberTail] ) - 1;
@@ -525,7 +528,7 @@ private:
 								prevLineNumberCount ++;
 							}
 							
-							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( annotationText ), lineNumber, 2.0, cast(void*) cSci.getIupScintilla );
+							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( annotationText ), ( bWarning ? -lineNumber : lineNumber ), 2, cast(void*) cSci.getIupScintilla );
 							/*
 							string getText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber ) );
 							if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
@@ -555,6 +558,20 @@ private:
 		{
 			foreach( line; splitLines( theMessage ) )
 			{
+				auto openIndex = ( indexOf( line, "(" ) );
+				auto closeIndex = ( indexOf( line, ") error" ) );
+				if( closeIndex == -1 ) closeIndex = indexOf( line, ") warning" );
+				if( closeIndex > openIndex && openIndex > 0 )
+				{
+					string _fn = line[0..openIndex].dup;
+					if( !Path.isAbsolute( _fn ) ) 
+						if( Path.isValidFilename( Path.baseName( _fn ) ) )
+						{
+							_fn = tools.normalizeSlash( workDir ~ "/" ~ _fn );
+							line = ( _fn ~ line[openIndex..$] ).dup;
+						}
+				}
+				
 				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
 				if( !bWarning )
 				{
@@ -566,7 +583,7 @@ private:
 				}
 				if( buildTools.messagePanel !is null )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0.0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
 				}
 			}
 		}
@@ -574,10 +591,23 @@ private:
 		{
 			foreach( line; splitLines( theMessage ) )  
 			{
+				auto openIndex = ( indexOf( line, "(" ) );
+				auto closeIndex = ( indexOf( line, "):" ) );
+				if( closeIndex > openIndex && openIndex > 0 )
+				{
+					string _fn = line[0..openIndex].dup;
+					if( !Path.isAbsolute( _fn ) ) 
+						if( Path.isValidFilename( Path.baseName( _fn ) ) )
+						{
+							_fn = tools.normalizeSlash( workDir ~ "/" ~ _fn );
+							line = ( _fn ~ line[openIndex..$] ).dup;
+						}
+				}
+			
 				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
 				if( buildTools.messagePanel !is null )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0.0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
 				}
 			}
 		}
@@ -594,7 +624,7 @@ private:
 		if( _state == 0 )
 		{
 			bBuildSuccess = true;
-			showAnnotation( null, buildTools );
+			showAnnotation( null, buildTools, workDir );
 
 			if( buildTools.messagePanel !is null )
 			{
@@ -616,14 +646,14 @@ private:
 		}
 		else
 		{
-			showAnnotation( theMessage, buildTools );
+			showAnnotation( theMessage, buildTools, workDir );
 
 			if( !bWarning || _state > 1 || bError )
 			{
 				if( buildTools.messagePanel !is null )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Error!!", 0, 0.0, null );
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0.0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Error!!", 0, 0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
 				}
 
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
@@ -639,8 +669,8 @@ private:
 			{
 				if( buildTools.messagePanel !is null )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Success! But got warning...", 0, 0.0, null );
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0.0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Success! But got warning...", 0, 0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
 				}
 				
 				if( !bHalfTime )
@@ -1375,7 +1405,7 @@ public:
 			
 			if( GLOBAL.linuxHome.length )
 			{
-				version(FBIDE) fileName = GLOBAL.linuxHome ~ "/" ~ fileName ~ ".bas"; else fileName =GLOBAL.linuxHome ~ "/" ~ fileName ~ ".d";
+				version(FBIDE) fileName = GLOBAL.linuxHome ~ "/" ~ fileName ~ ".bas"; else fileName = GLOBAL.linuxHome ~ "/" ~ fileName ~ ".d";
 			}
 			else
 			{
