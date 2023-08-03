@@ -199,15 +199,18 @@ public:
 								string options = GLOBAL.compilerSettings.activeCompiler.Option;
 								if( options.length )
 								{	
-									version(LDC)
+									int ComplierVer = tools.DMDversion( GLOBAL.compilerSettings.activeCompiler.Compiler );
+									ptrdiff_t	_versionPos;
+									int			shift;
+									if( ComplierVer == 4 )
 									{
-										auto _versionPos = indexOf( options, "-d-version=" );
-										int shift = 11;
+										_versionPos = indexOf( options, "-d-version=" );
+										shift = 11;
 									}
 									else
 									{
-										auto _versionPos = indexOf( options, "-version=" );
-										int shift = 9;
+										_versionPos = indexOf( options, "-version=" );
+										shift = 9;
 									}
 										
 									while( _versionPos > -1 )
@@ -220,9 +223,9 @@ public:
 										}								
 										
 										if( versionName.length ) AutoComplete.VersionCondition[versionName] = 1;
-										
-										version(LDC)
-											_versionPos = indexOf( options, "-version=", _versionPos + 11 );
+
+										if( ComplierVer == 4 )
+											_versionPos = indexOf( options, "-d-version=", _versionPos + 11 );
 										else
 											_versionPos = indexOf( options, "-version=", _versionPos + 9 );
 									}
@@ -2564,7 +2567,14 @@ extern(C)
 									
 									if( alreadyInput.length )
 									{
-										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+										if( lastChar == "(" )
+										{
+											AutoComplete.updateCallTip( ih, pos, cast(char*) toStringz( alreadyInput ) );
+										}
+										else
+										{
+											if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+										}
 									}
 								}
 								catch( Exception e )
@@ -2624,8 +2634,14 @@ extern(C)
 								
 									if( alreadyInput.length )
 									{
-										if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
-										//AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+										if( lastChar == "(" )
+										{
+											AutoComplete.updateCallTip( ih, pos, cast(char*) toStringz( alreadyInput ) );
+										}
+										else
+										{
+											if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+										}									
 									}
 								}
 								catch( Exception e )

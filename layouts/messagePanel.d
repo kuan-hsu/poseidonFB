@@ -4,6 +4,7 @@ private import iup.iup;
 private import iup.iup_scintilla;
 private import global, scintilla, actionManager, tools;
 private import std.string, std.conv, std.file, std.math, Array = std.array, Path = std.path, Uni = std.uni;
+version(Windows) private import core.sys.windows.mmsystem;
 
 class CMessageAndSearch
 {
@@ -482,12 +483,12 @@ extern(C)
 										lineNumber = to!(int)( lineNumber_char );
 										fileName = tools.normalizeSlash( lineText[0..openPos] );
 										
-										if( ExecuterAction.quickRunFile.length )
+										if( ExecuterAction.quickRunFromFile.length )
 										{
 											string _baseName = Path.stripExtension( Path.baseName( fileName ) );
 											if( _baseName.length == 16 )
 												if( _baseName[0..12] == "poseidonTemp" && isNumeric( _baseName[12..14] ) )
-													fileName = ExecuterAction.quickRunFile;
+													fileName = ExecuterAction.quickRunFromFile;
 										}
 										
 										if( fullPathByOS(fileName) in GLOBAL.scintillaManager )
@@ -585,6 +586,14 @@ extern(C)
 								lineNumber = to!(int)( lineNumber_char );
 								
 								if( indexOf( lineText, "warning - " ) == 0 ) fileName = tools.normalizeSlash( lineText[10..openPos] ); else fileName =  tools.normalizeSlash( lineText[0..openPos] );
+								if( ExecuterAction.quickRunFromFile.length )
+								{
+									string _baseName = Path.stripExtension( Path.baseName( fileName ) );
+									if( _baseName.length == 16 )
+										if( _baseName[0..12] == "poseidonTemp" && isNumeric( _baseName[12..14] ) )
+											fileName = ExecuterAction.quickRunFromFile;
+								}								
+								
 								if( fullPathByOS(fileName) in GLOBAL.scintillaManager )
 								{
 									if( GLOBAL.navigation.addCache( fileName, lineNumber ) ) ScintillaAction.openFile( fileName, lineNumber );
@@ -736,8 +745,22 @@ extern(C)
 					case "alarm":
 						tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
 						break;
+					case "success":
+						version(Windows) PlaySound( "settings/sound/success.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/success.wav" );
+						break;
+					case "warning":
+						version(Windows) PlaySound( "settings/sound/warning.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/warning.wav" );
+						break;
+					case "fail":
+						version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 );	else IupExecute( "aplay", "settings/sound/error.wav" );
+						break;
 					default:						
 				}
+				break;
+				
+			case 4:
+				Ihandle* _ih_ = cast(Ihandle*) p;
+				if( p != null ) IupDestroy( _ih_ );
 				break;
 				
 			default:

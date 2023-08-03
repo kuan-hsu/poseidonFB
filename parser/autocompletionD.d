@@ -33,6 +33,9 @@ version(DIDE)
 		static shared CASTnode[string]		includesMarkContainer;
 		public static shared int[string]	VersionCondition;
 		
+		static shared CASTnode				nowLineAst;
+		static shared int					nowLineNum;
+		
 		static string						showTypeContent;
 		static __gshared PrevAnalysisUnit	prevAnalysis, prevComplete;
 		
@@ -269,15 +272,18 @@ version(DIDE)
 		static bool checkIsFriendAndMother( CASTnode node )
 		{
 			if( node is null ) return false;
-			
+			/*
 			int				lineNum = ScintillaAction.getCurrentLine( ScintillaAction.getActiveIupScintilla );
 			CASTnode		AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
+			*/
+			int lineNum = nowLineNum;
+			CASTnode AST_Head = cast(CASTnode) nowLineAst;
 			
 			if( AST_Head is null ) return false;
 			
 			
 			// check Different module
-			if( ParserAction.getRoot( node ) != ParserAction.getActiveParseAST() ) return false;
+			if( ParserAction.getRoot( node ) != ParserAction.getRoot( AST_Head ) ) return false;
 
 			auto father = node.getFather;
 			if( father !is null )
@@ -1875,6 +1881,9 @@ version(DIDE)
 					lineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
 					
+					nowLineAst = cast(shared CASTnode) AST_Head;
+					nowLineNum = lineNum;
+					
 					return getDivideWord( word );
 				}
 			}
@@ -3096,6 +3105,9 @@ version(DIDE)
 					int				lineNum = cast(int) IupScintillaSendMessage( iupSci, 2166, pos, 0 ) + 1; //SCI_LINEFROMPOSITION = 2166,
 					CASTnode		AST_Head = ParserAction.getActiveASTFromLine( ParserAction.getActiveParseAST(), lineNum );
 					string			memberFunctionMotherName;
+					
+					nowLineAst = cast(shared CASTnode) AST_Head;
+					nowLineNum = lineNum;					
 
 					if( AST_Head is null )
 					{
@@ -4027,32 +4039,34 @@ version(DIDE)
 						{
 							int		_pos = ScintillaAction.getCurrentPos( sci );
 							int		dummyHeadPos;
-							string	_alreadyInput;
+							
 							string	lastChar = fSTRz( IupGetAttributeId( sci, "CHAR", _pos - 1 ) );
 
-							if( !_alreadyInput.length ) _alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).dup );
-							string[] splitWord = AutoComplete.getDivideWord( _alreadyInput );
-							_alreadyInput = splitWord[$-1];
-
-							if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
-							
-							scope _result = new IupString( AutoComplete.showListThread.getResult );
-							version(Windows)
+							string	_alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( sci, _pos, dummyHeadPos ).dup );
+							if( _alreadyInput.length )
 							{
-								if( _alreadyInput.length )
-									ScintillaAction.directSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+								string[] splitWord = AutoComplete.getDivideWord( _alreadyInput );
+								_alreadyInput = splitWord[$-1];
+								if( cast(int) IupScintillaSendMessage( sci, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( sci, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+								
+								scope _result = new IupString( AutoComplete.showListThread.getResult );
+								version(Windows)
+								{
+									if( _alreadyInput.length )
+										ScintillaAction.directSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+									else
+										ScintillaAction.directSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
+								}
 								else
-									ScintillaAction.directSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
-							}
-							else
-							{
-								if( _alreadyInput.length )
-									IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
-								else
-									IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
-							}
+								{
+									if( _alreadyInput.length )
+										IupScintillaSendMessage( sci, 2100, cast(size_t) _alreadyInput.length, cast(ptrdiff_t) _result.toCString );
+									else
+										IupScintillaSendMessage( sci, 2100, 0, cast(ptrdiff_t) _result.toCString );
+								}
 
-							bShowListTrigger = true;
+								bShowListTrigger = true;
+							}
 						}
 					}
 				}

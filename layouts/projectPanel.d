@@ -1670,14 +1670,8 @@ extern(C)
 						string ext = toLower( Path.extension( fullPath ) );
 						
 						// Version Condition
-						string _source_ = ".bas", _include_ = ".bi";
-						version(DIDE)
-						{
-							_source_	= ".d";
-							_include_	= ".di";
-						}					
-
-						if( ext == _include_ || ext == _source_ )
+						version(FBIDE) int _options = 7; else int _options = 3;
+						if( tools.isParsableExt( Path.extension( fullPath ), _options ) )
 						{
 							if( selectedIDs.length == 1 )
 							{
@@ -1689,27 +1683,14 @@ extern(C)
 						}
 						else
 						{
-							if( tools.isParsableExt( ext, 3 ) )
+							version( Windows )
 							{
-								if( selectedIDs.length == 1 )
-								{
-									actionManager.ScintillaAction.openFile( fullPath );
-									break;
-								}
-								else
-									actionManager.ScintillaAction.openFile( fullPath );
+								fullPath = Array.replace( fullPath, "/", "\\" );
+								IupExecute( "cmd", toStringz( "/c \"" ~ fullPath ~ "\"" ) );
 							}
 							else
 							{
-								version( Windows )
-								{
-									fullPath = Array.replace( fullPath, "/", "\\" );
-									IupExecute( "cmd", toStringz( "/c \"" ~ fullPath ~ "\"" ) );
-								}
-								else
-								{
-									IupExecute( "xdg-open", toStringz( "\"" ~ fullPath ~ "\"" ) );
-								}							
+								IupExecute( "xdg-open", toStringz( "\"" ~ fullPath ~ "\"" ) );
 							}
 						}
 					}

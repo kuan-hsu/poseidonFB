@@ -235,10 +235,7 @@ private:
 							geoString = Array.replace( geoString, "--geometry=", "-geometry " );
 							pid = spawnShell( buildTools.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
 							break;
-						case "gnome-terminal",:
-							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e=\"" ~ command ~ " " ~ args ~ "\"", null, Config.none, cwd );
-							break;
-						case "mate-terinal":
+						case "gnome-terminal","mate-terinal":
 							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e \"" ~ command ~ " " ~ args ~ "\"", null, Config.none, cwd );
 							break;
 						case "xfce4-terminal" ,"lxterminal", "tilix":
@@ -275,7 +272,7 @@ private:
 						objFullPath = Path.stripExtension( oriCommand );
 						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 					}
-					objFullPath = Path.stripExtension( oriCommand ) ~ ".bas";
+					version(FBIDE) objFullPath = Path.stripExtension( oriCommand ) ~ ".bas"; else objFullPath = Path.stripExtension( oriCommand ) ~ ".d";
 					if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 				}
 			}
@@ -305,7 +302,7 @@ private:
 			bQuickRun				= _bQuickRun;
 			args					= _args;
 			buildTools				= getBuildNeedDataToTLS();
-			quickFileTemp			= quickRunFile;
+			quickFileTemp			= quickRunFromFile;
 			
 			if( fileFullPath.length )
 			{
@@ -337,7 +334,6 @@ private:
 					fileFullPath = strip( fileFullPath, "\"" );
 					_beRunFile = Path.stripExtension( strip( fileFullPath ) );
 					_beCompiledFile = "\"" ~ fileFullPath ~ "\"";
-					if( bRun ) _beCompiledFile = "-run " ~ _beCompiledFile;
 				}
 			}			
 
@@ -357,28 +353,25 @@ private:
 		
 		void go()
 		{
-			quickRunFile = quickFileTemp;
+			quickRunFromFile = bQuickRun ? quickFileTemp : "";
 			options = _beCompiledFile ~ ( options.length ? " " ~ options : "" );
 			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options ), buildTools, cwd, false, processDlg );
-			if( processDlg != null ) IupDestroy( processDlg );
+			if( processDlg != null ) IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) processDlg );//IupDestroy( processDlg );
 			if( bCompileSuccess )
 			{
-				version(FBIDE)
+				if( bRun )
 				{
-					if( bRun )
-					{
-						version(Windows) _beRunFile ~= ".exe";
-						auto _thread = new ExecuterThread( _beRunFile, args, buildTools, cwd, bQuickRun );						
-						_thread.start;
-						//_thread.join;
-					}
+					version(Windows) _beRunFile ~= ".exe";
+					auto _thread = new ExecuterThread( _beRunFile, args, buildTools, cwd, bQuickRun );						
+					_thread.start;
+					//_thread.join;
 				}
 			}
 			else
 			{
-				version(FBIDE)
+				if( bQuickRun )
 				{
-					if( bQuickRun )
+					version(FBIDE)
 					{
 						if( std.file.exists( fileFullPath ) )
 						{
@@ -388,6 +381,19 @@ private:
 							objFullPath = Path.stripExtension( objFullPath ) ~ ".o";
 							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 							objFullPath = Path.stripExtension( objFullPath ) ~ ".bas";
+							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+						}
+					}
+					else
+					{
+						if( std.file.exists( fileFullPath ) )
+						{
+							string objFullPath = fileFullPath;
+							if( objFullPath[0] == '"' && objFullPath[$-1] == '"' ) objFullPath = fileFullPath[1..$-1].dup;
+							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+							version(Windows) objFullPath = Path.stripExtension( objFullPath ) ~ ".obj"; else objFullPath = Path.stripExtension( objFullPath ) ~ ".o";
+							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+							objFullPath = Path.stripExtension( objFullPath ) ~ ".d";
 							if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 						}
 					}
@@ -436,7 +442,7 @@ private:
 				bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options1 ), buildTools, cwd, true, processDlg );
 				if( !bCompileSuccess )
 				{
-					if( processDlg != null ) IupDestroy( processDlg );
+					if( processDlg != null ) IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) processDlg );//IupDestroy( processDlg );
 					return;
 				}
 				
@@ -465,7 +471,7 @@ private:
 			}
 
 			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options2 ), buildTools, cwd, false, processDlg );
-			if( processDlg != null ) IupDestroy( processDlg );
+			if( processDlg != null ) IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) processDlg );//IupDestroy( processDlg );
 		}
 	}	
 
@@ -480,7 +486,6 @@ private:
 			//IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			
 			int prevLineNumber, prevLineNumberCount;
-			
 			foreach( s; splitLines( message ) )
 			{
 				bool bWarning;
@@ -506,10 +511,34 @@ private:
 					if( lineNumberHead < lineNumberTail - 1 && lineNumberHead > -1 )
 					{
 						string filePath = tools.normalizeSlash( s[0..lineNumberHead++] );
-						if( quickRunFile.length ) filePath = quickRunFile;
+						string _baseName = Path.stripExtension( Path.baseName( filePath ) );
+						if( quickRunFromFile.length ) 
+						{
+							if( _baseName.length == 16 )
+							{
+								if( _baseName[0..12] == "poseidonTemp" && isNumeric( _baseName[12..14] ) )
+								{
+									filePath = quickRunFromFile;
+									_baseName = "";
+								}
+							}
+						}
 						
-						if( !Path.isAbsolute( filePath ) )
-							if( Path.isValidFilename( Path.baseName( filePath ) ) ) filePath = tools.normalizeSlash( workDir ~ "/" ~ filePath );
+						if( _baseName.length )
+						{
+							if( !Path.isAbsolute( filePath ) )
+								if( Path.isValidFilename( Path.baseName( filePath ) ) ) 
+								{	
+									version(FBIDE)
+									{
+										if( tools.isParsableExt( Path.extension( filePath ), 7 ) ) filePath = tools.normalizeSlash( workDir ~ "/" ~ filePath );
+									}
+									else
+									{
+										if( tools.isParsableExt( Path.extension( filePath ), 3 ) ) filePath = tools.normalizeSlash( workDir ~ "/" ~ filePath );
+									}
+								}
+						}
 						
 						if( filePath == cSci.getFullPath )
 						{
@@ -529,13 +558,6 @@ private:
 							}
 							
 							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( annotationText ), ( bWarning ? -lineNumber : lineNumber ), 2, cast(void*) cSci.getIupScintilla );
-							/*
-							string getText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber ) );
-							if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
-							IupSetStrAttributeId( cSci.getIupScintilla, "ANNOTATIONTEXT", lineNumber, toStringz( annotationText ) );
-							if( bWarning ) IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 41 ); else IupSetIntId( cSci.getIupScintilla, "ANNOTATIONSTYLE", lineNumber, 40 );
-							IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONVISIBLE", "BOXED" );
-							*/
 						}
 					}
 				}
@@ -560,31 +582,29 @@ private:
 			{
 				auto openIndex = ( indexOf( line, "(" ) );
 				auto closeIndex = ( indexOf( line, ") error" ) );
-				if( closeIndex == -1 ) closeIndex = indexOf( line, ") warning" );
+				if( closeIndex == -1 )
+				{
+					closeIndex = indexOf( line, ") warning" );
+					if( closeIndex > -1 ) bWarning = true;
+				}
+				else
+				{
+					bError = true;
+				}
+
 				if( closeIndex > openIndex && openIndex > 0 )
 				{
 					string _fn = line[0..openIndex].dup;
 					if( !Path.isAbsolute( _fn ) ) 
-						if( Path.isValidFilename( Path.baseName( _fn ) ) )
+						if( Path.isValidFilename( Path.baseName( _fn ) ) && tools.isParsableExt( Path.extension( _fn ), 7 ) )
 						{
-							_fn = tools.normalizeSlash( workDir ~ "/" ~ _fn );
+							_fn = Path.buildNormalizedPath( workDir ~ "/" ~ _fn );
 							line = ( _fn ~ line[openIndex..$] ).dup;
 						}
 				}
 				
 				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
-				if( !bWarning )
-				{
-					if( indexOf( line, "warning " ) > -1 ) bWarning = true;
-				}
-				if( !bError )
-				{
-					if( indexOf( line, "error " ) > -1 ) bError = true;
-				}
-				if( buildTools.messagePanel !is null )
-				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
-				}
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
 			}
 		}
 		else //version(DIDE)
@@ -597,18 +617,15 @@ private:
 				{
 					string _fn = line[0..openIndex].dup;
 					if( !Path.isAbsolute( _fn ) ) 
-						if( Path.isValidFilename( Path.baseName( _fn ) ) )
+						if( Path.isValidFilename( Path.baseName( _fn ) ) && tools.isParsableExt( Path.extension( _fn ), 3 ) )
 						{
-							_fn = tools.normalizeSlash( workDir ~ "/" ~ _fn );
+							_fn = Path.buildNormalizedPath( workDir ~ "/" ~ _fn );
 							line = ( _fn ~ line[openIndex..$] ).dup;
 						}
 				}
 			
 				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
-				if( buildTools.messagePanel !is null )
-				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
-				}
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
 			}
 		}
 		
@@ -617,7 +634,8 @@ private:
 
 		if( !bHalfTime )
 		{
-			IupDestroy( _processDlg );
+			IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) _processDlg );
+			//IupDestroy( _processDlg );
 			_processDlg = null;
 		}
 
@@ -640,7 +658,8 @@ private:
 				}
 				else if( buildTools.compilerSettings.useSFX == "ON" )
 				{
-					version(Windows) PlaySound( "settings/sound/success.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/success.wav" );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "success", 0, 3, null );
+					//version(Windows) PlaySound( "settings/sound/success.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/success.wav" );
 				}
 			}			
 		}
@@ -650,11 +669,8 @@ private:
 
 			if( !bWarning || _state > 1 || bError )
 			{
-				if( buildTools.messagePanel !is null )
-				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Error!!", 0, 0, null );
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
-				}
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Error!!", 0, 0, null );
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
 
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
@@ -662,16 +678,14 @@ private:
 				}
 				else if( buildTools.compilerSettings.useSFX == "ON" )
 				{
-					version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 );	else IupExecute( "aplay", "settings/sound/error.wav" );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "fail", 0, 3, null );
+					//version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 );	else IupExecute( "aplay", "settings/sound/error.wav" );
 				}
 			}
 			else
 			{
-				if( buildTools.messagePanel !is null )
-				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Success! But got warning...", 0, 0, null );
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
-				}
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Success! But got warning...", 0, 0, null );
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
 				
 				if( !bHalfTime )
 				{
@@ -681,7 +695,8 @@ private:
 					}
 					else if( buildTools.compilerSettings.useSFX == "ON" )
 					{
-						version(Windows) PlaySound( "settings/sound/warning.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/warning.wav" );
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "warning", 0, 3, null );
+						//version(Windows) PlaySound( "settings/sound/warning.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/warning.wav" );
 					}
 				}
 				bBuildSuccess = true;
@@ -1159,11 +1174,12 @@ private:
 	}
 
 public:
-	static string		quickRunFile;
+	static string		quickRunFromFile;
 	
 	static int compile( string options = null, string args = null, string compiler = null, string optionDebug = null, bool bRun = false )
 	{
 		version(linux) if( bRun && !checkTerminalExists() ) return false;
+		quickRunFromFile = "";
 
 		GLOBAL.messagePanel.printOutputPanel( "", true );
 		
@@ -1242,7 +1258,7 @@ public:
 		}
 		else
 		{
-			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nCompile Error!", true );
+			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nAbort!", true );
 			return false;
 		}
 
@@ -1262,12 +1278,20 @@ public:
 	
 	static bool build( string options = null, string args = null, string compiler = null, string optionDebug = null )
 	{
+		quickRunFromFile = "";
 		try
 		{
 			if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 			IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
+			GLOBAL.messagePanel.printOutputPanel( "", true ); // Clean outputPanel
 
 			string options1, options2, activePrjName = ProjectAction.getActiveProjectName();
+			
+			if( activePrjName !in GLOBAL.projectManager )
+			{
+				GLOBAL.messagePanel.printOutputPanel( "Without any valid project has been selected......?\n\nAbort!", true );
+				return false;
+			}
 
 			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]......", true );
 			if( getBuildNeedData( compiler, options1, options, optionDebug, 1 ) )
@@ -1309,6 +1333,7 @@ public:
 	
 	static bool buildAll( string options = null, string compiler = null, string optionDebug = null )
 	{
+		quickRunFromFile = "";
 		try
 		{
 			// Keep Message panel open
@@ -1317,6 +1342,12 @@ public:
 			GLOBAL.messagePanel.printOutputPanel( "", true ); // Clean outputPanel
 		
 			string activePrjName = ProjectAction.getActiveProjectName();
+			if( activePrjName !in GLOBAL.projectManager )
+			{
+				GLOBAL.messagePanel.printOutputPanel( "Without any valid project has been selected......?\n\nAbort!", true );
+				return false;
+			}			
+			
 			string finalArgsString;
 			if( getBuildNeedData( compiler, finalArgsString, options, optionDebug, 0 ) )
 			{
@@ -1349,18 +1380,10 @@ public:
 	
 	static bool quickRun( string options = null, string args = null, string compiler = null )
 	{
-		version(linux)
-		{
-			if( !checkTerminalExists() ) 
-			{
-				int dummy = tools.questMessage( "Error", "The linux terminal path isn't set.", "ERROR", "OK" );
-				return false;
-			}
-		}
+		version(linux) if( !checkTerminalExists() ) return false;
+		quickRunFromFile = "";
 		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
-		
-		quickRunFile = "";
 		
 		string files;
 		auto cSci = ScintillaAction.getActiveCScintilla();
@@ -1402,17 +1425,12 @@ public:
 			}
 		
 			string fileName = "poseidonTemp" ~ Conv.to!(string)(MonoTime.currTime.ticks)[$-4..$];
+			string tempDir = GLOBAL.linuxHome.length ? GLOBAL.linuxHome : Path.dirName( cSci.getFullPath );
+			if( tempDir == "." ) tempDir = GLOBAL.poseidonPath;
+			version(FBIDE) fileName = tempDir ~ "/" ~ fileName ~ ".bas"; else fileName = tempDir ~ "/" ~ fileName ~ ".d";
 			
-			if( GLOBAL.linuxHome.length )
-			{
-				version(FBIDE) fileName = GLOBAL.linuxHome ~ "/" ~ fileName ~ ".bas"; else fileName = GLOBAL.linuxHome ~ "/" ~ fileName ~ ".d";
-			}
-			else
-			{
-				version(FBIDE) fileName = Path.dirName( cSci.getFullPath ) ~ "/" ~ fileName ~ ".bas"; else fileName = Path.dirName( cSci.getFullPath ) ~ "/" ~ fileName ~ ".d";
-			}
 			FileAction.saveFile( fileName, cSci.getText, BOM.utf8, true );
-			quickRunFile = cSci.getFullPath;
+			quickRunFromFile = cSci.getFullPath;
 		
 			GLOBAL.messagePanel.printOutputPanel( "Quick Run " ~ cSci.getFullPath ~ "......\n", true );
 			// Pass compiler, files, options to Thread
@@ -1423,21 +1441,15 @@ public:
 		}
 		else
 		{
-			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nQuick Run Error!", true );
+			GLOBAL.messagePanel.printOutputPanel( "Without any source file has been selected......?\n\nQuickRun abort!", true );
 		}
 		return false;
 	}
 
 	static bool run( string args = null, bool bForceCompileOne = false )
 	{
-		version(linux)
-		{
-			if( !checkTerminalExists() ) 
-			{
-				int dummy = tools.questMessage( "Error", "The linux terminal path isn't set.", "ERROR", "OK" );
-				return false;
-			}
-		}
+		version(linux) if( !checkTerminalExists() ) return false;
+		
 		// Keep Message panel open
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );
 		IupSetInt( GLOBAL.messageWindowTabs, "VALUEPOS", 0 );
@@ -1509,7 +1521,7 @@ public:
 		}
 		else
 		{
-			GLOBAL.messagePanel.printOutputPanel( "Execute file: " ~ _beRunFile ~ "\nisn't exist......?\n\nRun Error!", true );
+			GLOBAL.messagePanel.printOutputPanel( "Executable file isn't existed......?\n\nAbort!", true );
 			return false;
 		}
 	

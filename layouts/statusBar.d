@@ -16,7 +16,7 @@ private:
 	{
 		prjName = IupLabel( null );
 		IupSetAttribute( prjName, "SIZE", "150x" );
-		IupSetCallback( prjName, "BUTTON_CB", cast(Icallback) &CStatusBar_PROJECTFOCUS_CB );
+		IupSetCallback( prjName, "BUTTON_CB", cast(Icallback) &CStatusBar_PROJECTBUTTON_CB );
 
 		LINExCOL = IupLabel( "             " );
 		IupSetCallback( LINExCOL, "BUTTON_CB", cast(Icallback) &CStatusBar_LINExCOL_BUTTON_CB );
@@ -378,7 +378,7 @@ extern(C) // Callback for CBaseDialog
 		return IUP_DEFAULT;
 	}
 	
-	private int CStatusBar_PROJECTFOCUS_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
+	private int CStatusBar_PROJECTBUTTON_CB( Ihandle* ih, int button, int pressed, int x, int y, char* status )
 	{
 		if( CStatusBar_Empty_BUTTON_CB( ih, button, pressed, x, y, status ) == IUP_IGNORE ) return IUP_IGNORE;
 		
@@ -396,7 +396,7 @@ extern(C) // Callback for CBaseDialog
 							Ihandle* popupMenu = IupMenu( null );
 							
 							Ihandle* _emptyItem = IupItem( toStringz( "<null>" ), null );
-							IupSetCallback( _emptyItem, "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
+							IupSetCallback( _emptyItem, "ACTION", cast(Icallback ) &CStatusBar_PROJECT_popupMenu_Action );
 							IupAppend( popupMenu, _emptyItem );
 							if( !GLOBAL.projectManager[activePrjDir].focusOn.length ) IupSetAttribute( _emptyItem, "VALUE", "ON" );
 							
@@ -405,7 +405,7 @@ extern(C) // Callback for CBaseDialog
 							foreach( size_t i, key; GLOBAL.projectManager[activePrjDir].focusUnit.keys )
 							{
 								_item[i] = IupItem( toStringz( key ), null );
-								IupSetCallback( _item[i], "ACTION", cast(Icallback ) &CStatusBar_PROJECTFOCUS_popupMenu_Action );
+								IupSetCallback( _item[i], "ACTION", cast(Icallback ) &CStatusBar_PROJECT_popupMenu_Action );
 								IupAppend( popupMenu, _item[i] );
 								if( key == GLOBAL.projectManager[activePrjDir].focusOn ) IupSetAttribute( _item[i], "VALUE", "ON" );
 							}
@@ -420,7 +420,7 @@ extern(C) // Callback for CBaseDialog
 		return IUP_DEFAULT;
 	}
 	
-	private int CStatusBar_PROJECTFOCUS_popupMenu_Action( Ihandle* ih )
+	private int CStatusBar_PROJECT_popupMenu_Action( Ihandle* ih )
 	{
 		string focusTitle = fSTRz( IupGetAttribute( ih, "TITLE" ) );
 		string activePrjDir = ProjectAction.getActiveProjectName();
@@ -436,6 +436,7 @@ extern(C) // Callback for CBaseDialog
 		
 		IupSetAttribute( ih, "VALUE", "ON" );
 		GLOBAL.statusBar.setPrjName( "", true );
+		GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
 		
 		return IUP_DEFAULT;
 	}

@@ -214,11 +214,11 @@ private:
 		IupSetInt( textConsoleW, "VALUE", GLOBAL.consoleWindow.w );
 		IupSetInt( textConsoleH, "VALUE", GLOBAL.consoleWindow.h );
 		
-		IupSetAttribute( textMonitorID, "SIZE", "20x" );
-		IupSetAttribute( textConsoleX, "SIZE", "20x" );
-		IupSetAttribute( textConsoleY, "SIZE", "20x" );
-		IupSetAttribute( textConsoleW, "SIZE", "20x" );
-		IupSetAttribute( textConsoleH, "SIZE", "20x" );
+		IupSetAttribute( textMonitorID, "SIZE", "16x" );
+		IupSetAttribute( textConsoleX, "SIZE", "24x" );
+		IupSetAttribute( textConsoleY, "SIZE", "24x" );
+		IupSetAttribute( textConsoleW, "SIZE", "24x" );
+		IupSetAttribute( textConsoleH, "SIZE", "24x" );
 		
 		if( GLOBAL.monitors.length == 1 )
 		{
@@ -284,7 +284,7 @@ private:
 		IupSetAttributes( labelMaxHeight, "SIZE=120x12,ALIGNMENT=ARIGHT:ACENTER" );
 		
 		Ihandle* textMaxHeight = IupText( null );
-		IupSetAttributes( textMaxHeight, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=20,SPINMIN=5,READONLY=YES" );
+		IupSetAttributes( textMaxHeight, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=20,SPINMIN=5" );
 		IupSetInt( textMaxHeight, "VALUE", GLOBAL.autoCMaxHeight );
 		IupSetHandle( "textMaxHeight", textMaxHeight );
 
@@ -297,7 +297,7 @@ private:
 		//IupSetAttributes( labelTrigger, "SIZE=120x12" );
 		
 		Ihandle* textTrigger = IupText( null );
-		IupSetAttributes( textTrigger, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=6,SPINMIN=0,READONLY=YES" );
+		IupSetAttributes( textTrigger, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=6,SPINMIN=0" );
 		IupSetStrAttribute( textTrigger, "TIP", GLOBAL.languageItems["triggertip"].toCString );
 		IupSetInt( textTrigger, "VALUE", GLOBAL.autoCompletionTriggerWordCount );
 		IupSetHandle( "textTrigger", textTrigger );
@@ -308,7 +308,7 @@ private:
 			//IupSetAttributes( labelIncludeLevel, "SIZE=120x12,GAP=0" );
 
 			Ihandle* textIncludeLevel = IupText( null );
-			IupSetAttributes( textIncludeLevel, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=6,SPINMIN=-1,READONLY=YES" );
+			IupSetAttributes( textIncludeLevel, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=6,SPINMIN=-1" );
 			IupSetStrAttribute( textIncludeLevel, "TIP", GLOBAL.languageItems["includeleveltip"].toCString );
 			IupSetInt( textIncludeLevel, "VALUE", GLOBAL.compilerSettings.includeLevel );
 			IupSetHandle( "textIncludeLevel", textIncludeLevel );
@@ -381,7 +381,7 @@ private:
 
 		Ihandle* labelPreParseLevel = IupLabel( GLOBAL.languageItems["preparselevel"].toCString );
 		Ihandle* textPreParseLevel = IupText( null );
-		IupSetAttributes( textPreParseLevel, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=0,READONLY=YES" );
+		IupSetAttributes( textPreParseLevel, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=0" );
 		IupSetInt( textPreParseLevel, "VALUE", GLOBAL.preParseLevel );
 		IupSetHandle( "textPreParseLevel", textPreParseLevel );
 
@@ -426,7 +426,7 @@ private:
 
 		version(FBIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, IupFill, labelIncludeLevel, textIncludeLevel, null );
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
-		//IupSetAttributes( hBox00, "NORMALIZESIZE=HORIZONTAL" ); 
+		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" ); 
 		
 		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, /*toggleSHOWLISTTYPE, */toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
@@ -613,7 +613,7 @@ private:
 
 		Ihandle* labelBarsize = IupLabel( GLOBAL.languageItems["barsize"].toCString );
 		Ihandle* textBarSize = IupText( null );
-		IupSetAttributes( textBarSize, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2,READONLY=YES" );
+		IupSetAttributes( textBarSize, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=2" );
 		IupSetStrAttribute( textBarSize, "VALUE", toStringz( GLOBAL.editorSetting01.BarSize ) );
 		IupSetStrAttribute( textBarSize, "TIP", GLOBAL.languageItems["barsizetip"].toCString );
 		IupSetHandle( "textBarSize", textBarSize );
@@ -622,7 +622,7 @@ private:
 
 		Ihandle* labelAscent = IupLabel( GLOBAL.languageItems["ascent"].toCString );
 		Ihandle* textAscent = IupText( null );
-		IupSetAttributes( textAscent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5,READONLY=YES" );
+		IupSetAttributes( textAscent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5" );
 		IupSetStrAttribute( textAscent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRAASCENT ) );
 		IupSetHandle( "textAscent", textAscent );
 		Ihandle* hBoxAscent = IupHbox( labelAscent, textAscent, null );
@@ -630,7 +630,7 @@ private:
 
 		Ihandle* labelDescent = IupLabel( GLOBAL.languageItems["descent"].toCString );
 		Ihandle* textDescent = IupText( null );
-		IupSetAttributes( textDescent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5,READONLY=YES" );
+		IupSetAttributes( textDescent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5" );
 		IupSetStrAttribute( textDescent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRADESCENT ) );
 		IupSetHandle( "textDescent", textDescent );
 		Ihandle* hBoxDescent = IupHbox( labelDescent, textDescent, null );
@@ -1658,7 +1658,7 @@ private:
 		{
 			Ihandle* labelAutoCompleteDlg = IupLabel( GLOBAL.languageItems["autocomplete"].toCString );
 			Ihandle* textAutoCompleteDlg = IupText( null );
-			IupSetAttributes( textAutoCompleteDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textAutoCompleteDlg,READONLY=YES" );
+			IupSetAttributes( textAutoCompleteDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textAutoCompleteDlg" );
 			IupSetStrAttribute( textAutoCompleteDlg, "SPINVALUE", toStringz( GLOBAL.editorSetting02.autocompleteDlg ) );
 		}
 		
