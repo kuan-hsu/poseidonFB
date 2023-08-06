@@ -356,7 +356,18 @@ private:
 			quickRunFromFile = bQuickRun ? quickFileTemp : "";
 			options = _beCompiledFile ~ ( options.length ? " " ~ options : "" );
 			bCompileSuccess = CompilerProcess( "\"" ~ strip( command, "\"" ) ~ "\"", strip( options ), buildTools, cwd, false, processDlg );
-			if( processDlg != null ) IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) processDlg );//IupDestroy( processDlg );
+
+			// If is back-thread, pause this back-thread, let main-thread run to IUP main-loop to regain control, the callbacks will run.......
+			if( buildTools.compilerSettings.useThread == "ON" )
+			{
+				Thread.sleep(100.msecs);
+				if( processDlg != null ) IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) processDlg );
+			}
+			else
+			{
+				if( processDlg != null ) IupDestroy( processDlg );
+			}
+			
 			if( bCompileSuccess )
 			{
 				if( bRun )
@@ -482,8 +493,10 @@ private:
 		
 		foreach( CScintilla cSci; buildTools.scintillaManager )
 		{
-			IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 0, 1, cast(void*) cSci.getIupScintilla );
-			//IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
+			if( buildTools.compilerSettings.useThread == "ON" )
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 0, 1, cast(void*) cSci.getIupScintilla );
+			else
+				IupSetAttribute( cSci.getIupScintilla, "ANNOTATIONCLEARALL", "YES" );
 			
 			int prevLineNumber, prevLineNumberCount;
 			foreach( s; splitLines( message ) )
@@ -557,7 +570,18 @@ private:
 								prevLineNumberCount ++;
 							}
 							
-							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( annotationText ), ( bWarning ? -lineNumber : lineNumber ), 2, cast(void*) cSci.getIupScintilla );
+							if( buildTools.compilerSettings.useThread == "ON" )
+								IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( annotationText ), ( bWarning ? -lineNumber : lineNumber ), 2, cast(void*) cSci.getIupScintilla );
+							else
+							{
+								Ihandle*	iupSci = cSci.getIupScintilla;
+							
+								string getText = fSTRz( IupGetAttributeId( iupSci, "ANNOTATIONTEXT", lineNumber ) );
+								if( getText.length ) annotationText = getText ~ "\n" ~ annotationText;
+								IupSetStrAttributeId( iupSci, "ANNOTATIONTEXT", lineNumber, toStringz( annotationText ) );
+								if( bWarning ) IupSetIntId( iupSci, "ANNOTATIONSTYLE", lineNumber, 41 ); else IupSetIntId( iupSci, "ANNOTATIONSTYLE", lineNumber, 40 );
+								IupSetAttribute( iupSci, "ANNOTATIONVISIBLE", "BOXED" );
+							}
 						}
 					}
 				}
@@ -604,7 +628,10 @@ private:
 				}
 				
 				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
-				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
+				if( buildTools.compilerSettings.useThread == "ON" )
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
+				else
+					GLOBAL.messagePanel.printOutputPanel( line, false, true );
 			}
 		}
 		else //version(DIDE)
@@ -625,7 +652,10 @@ private:
 				}
 			
 				version(Windows) line = fromMBSz( toStringz( strip( line ) ~ "\0" ) ); else	line = strip( line );
-				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
+				if( buildTools.compilerSettings.useThread == "ON" )
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, toStringz( line ), 0, 0, null );
+				else
+					GLOBAL.messagePanel.printOutputPanel( line, false, true );
 			}
 		}
 		
@@ -634,8 +664,10 @@ private:
 
 		if( !bHalfTime )
 		{
-			IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) _processDlg );
-			//IupDestroy( _processDlg );
+			if( buildTools.compilerSettings.useThread == "ON" )
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, null, 0, 4, cast(void*) _processDlg );
+			else
+				IupDestroy( _processDlg );
 			_processDlg = null;
 		}
 
@@ -646,15 +678,25 @@ private:
 
 			if( buildTools.messagePanel !is null )
 			{
-				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "Compile Success!!", 0, 0, null );
-				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null ); // scroll to tail
+				if( buildTools.compilerSettings.useThread == "ON" )
+				{
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "Compile Success!!", 0, 0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null ); // scroll to tail
+				}
+				else
+				{
+					GLOBAL.messagePanel.printOutputPanel( "Compile Success!!", false, true );
+				}
 			}
 			
 			if( !bHalfTime )
 			{
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "message", 0, 3, null );
+					if( buildTools.compilerSettings.useThread == "ON" )
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "message", 0, 3, null );
+					else
+						tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
 				}
 				else if( buildTools.compilerSettings.useSFX == "ON" )
 				{
@@ -674,7 +716,10 @@ private:
 
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "error", 0, 3, null );
+					if( buildTools.compilerSettings.useThread == "ON" )
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "error", 0, 3, null );
+					else
+						tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
 				}
 				else if( buildTools.compilerSettings.useSFX == "ON" )
 				{
@@ -691,7 +736,10 @@ private:
 				{
 					if( buildTools.compilerSettings.useResultDlg == "ON" )
 					{
-						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "alarm", 0, 3, null );
+						if( buildTools.compilerSettings.useThread == "ON" )
+							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "alarm", 0, 3, null );
+						else
+							tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
 					}
 					else if( buildTools.compilerSettings.useSFX == "ON" )
 					{

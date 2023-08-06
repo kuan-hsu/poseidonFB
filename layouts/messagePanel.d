@@ -4,6 +4,7 @@ private import iup.iup;
 private import iup.iup_scintilla;
 private import global, scintilla, actionManager, tools;
 private import std.string, std.conv, std.file, std.math, Array = std.array, Path = std.path, Uni = std.uni;
+private import core.thread;
 version(Windows) private import core.sys.windows.mmsystem;
 
 class CMessageAndSearch
@@ -737,13 +738,22 @@ extern(C)
 				switch( fSTRz( s ) )
 				{
 					case "message":
+						thread_suspendAll();
 						tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+						thread_resumeAll();
+						IupSetFocus( ScintillaAction.getActiveIupScintilla );
 						break;
 					case "error":
+						thread_suspendAll();
 						tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						thread_resumeAll();
+						IupSetFocus( ScintillaAction.getActiveIupScintilla );
 						break;
 					case "alarm":
+						thread_suspendAll();
 						tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
+						thread_resumeAll();
+						IupSetFocus( ScintillaAction.getActiveIupScintilla );
 						break;
 					case "success":
 						version(Windows) PlaySound( "settings/sound/success.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/success.wav" );

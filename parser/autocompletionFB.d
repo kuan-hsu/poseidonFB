@@ -1821,35 +1821,8 @@ version(FBIDE)
 						//writefln( "BINGO" );
 					}
 				}
-				/+
-				else if( prevAnalysis.word.length == splitWord.length )
-				{
-					if( indexOf( Array.join( splitWord, "." ), Array.join( prevAnalysis.word, "." ) ) == 0 )
-					{
-						AST_Head = prevAnalysis.node;
-						//writefln( "EQUAL BINGO" );
-						
-						if( bDot )
-						{
-							if( bPushContainer )
-							{
-								if( AST_Head.kind & ( B_TYPE | B_ENUM | B_UNION | B_NAMESPACE | B_CLASS ) )
-								{
-									foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
-									{
-										string _list = getListImage( _child, false );
-										listContainer ~= _list;
-									}
-								}
-							}
-							return result;
-						}
-					}
-				}
-				+/
 			}
-			
-			
+
 			
 			for( int i = startNum; i < splitWord.length; i++ )
 			{
@@ -2001,7 +1974,7 @@ version(FBIDE)
 
 							if( AST_Head is null ) return null;
 
-							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION ) )
+							if( AST_Head.kind & ( B_VARIABLE | B_PARAM | B_FUNCTION | B_ALIAS ) )
 							{
 								if( !isDefaultType( ParserAction.getSeparateType( AST_Head.type, true ) ) )
 								{

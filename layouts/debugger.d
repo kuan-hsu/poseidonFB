@@ -1576,7 +1576,7 @@ public:
 											IupSetAttributeId( backtraceHandle, "IMAGE", lastID, "icon_debug_bt1" );
 											IupSetAttributeId( backtraceHandle, "IMAGEEXPANDED", lastID, "icon_debug_bt1" );
 										}
-										if( i == 0 )
+										if( i == results.length - 1 )
 										{
 											IupSetAttributeId( backtraceHandle, "COLOR", lastID, "0 128 0" );
 											version(Windows) IupSetAttributeId( backtraceHandle, "MARKED", lastID, "YES" ); else IupSetInt( backtraceHandle, "VALUE", lastID );
