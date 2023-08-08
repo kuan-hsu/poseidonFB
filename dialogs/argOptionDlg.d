@@ -206,13 +206,16 @@ class CArgOptionDialog : CBaseDialog
 		createLayout();
 		
 		IupSetStrAttribute( listTools, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listTools, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
-		IupSetStrAttribute( listCompiler, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listCompiler, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listOptions, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listOptions, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		IupSetStrAttribute( listArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( listArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		IupSetStrAttribute( listTools, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		version(Windows)
+		{
+			IupSetStrAttribute( listCompiler, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listCompiler, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listOptions, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listOptions, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 	}
 
 	~this()

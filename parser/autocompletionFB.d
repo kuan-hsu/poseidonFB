@@ -1135,7 +1135,7 @@ version(FBIDE)
 									continue;
 								}
 							}
-							
+							/*
 							version(Posix)
 							{
 								if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
@@ -1144,6 +1144,7 @@ version(FBIDE)
 									continue;
 								}
 							}
+							*/
 						}
 						else
 						{
@@ -1647,6 +1648,7 @@ version(FBIDE)
 					
 					// Heavy slow down the spped, only check only 2-steps
 					// if( GLOBAL.includeLevel > 2 ) GLOBAL.includeLevel = 2; // Comment this line to get full-check
+					cleanIncludeContainer();
 					getIncludes( AST_Head, AST_Head.name, 0 );
 					foreach( _includeNode; cast(CASTnode[string]) includesMarkContainer )
 					{

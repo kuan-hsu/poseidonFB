@@ -22,25 +22,29 @@ private:
 		listManuals = IupList( null );
 		IupSetAttributes( listManuals, "EXPAND=HORIZONTAL" );
 		version(FBIDE) IupSetStrAttribute( listManuals, "TIP", GLOBAL.languageItems["manualnote"].toCString );
-		IupSetHandle( "listManuals_Handle", listManuals );
+		IupSetHandle( "MANUAL_list", listManuals );
 		IupSetCallback( listManuals, "ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
 
 		Ihandle* btnToolsAdd = IupButton( null, null );
 		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
 		IupSetStrAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
+		IupSetHandle( "MANUAL_Add", btnToolsAdd );
 		IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CManualDialog_btnToolsAdd_ACTION );
 
 		Ihandle* btnToolsErase = IupButton( null, null );
-		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES" );
+		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES,ACTIVE=NO" );
 		IupSetStrAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
+		IupSetHandle( "MANUAL_Erase", btnToolsErase );
 		IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CManualDialog_btnToolsErase_ACTION );
 		
 		Ihandle* btnToolsUp = IupButton( null, null );
-		IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES" );
+		IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES,ACTIVE=NO" );
+		IupSetHandle( "MANUAL_Up", btnToolsUp );
 		IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CManualDialog_btnToolsUp_ACTION );
 		
 		Ihandle* btnToolsDown = IupButton( null, null );
-		IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES" );
+		IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES,ACTIVE=NO" );
+		IupSetHandle( "MANUAL_Down", btnToolsDown );
 		IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CManualDialog_btnToolsDown_ACTION );
 		
 		Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, null );
@@ -56,12 +60,13 @@ private:
 		IupSetAttributes( labelManualDir, "ALIGNMENT=ARIGHT" );
 
 		Ihandle* textManualDir = IupText( null );
-		IupSetAttribute( textManualDir, "EXPAND", "HORIZONTAL" );
-		IupSetHandle( "textManualDir", textManualDir );
+		IupSetAttributes( textManualDir, "EXPAND=HORIZONTAL,ACTIVE=NO" );
+		IupSetHandle( "MANUAL_Text", textManualDir );
 		IupSetCallback( textManualDir, "ACTION", cast(Icallback) &CManualDialog_textManualDir_ACTION );
 		
 		Ihandle* btnManualDir = IupButton( null, null );
-		IupSetAttributes( btnManualDir, "IMAGE=icon_openfile,FLAT=YES" );
+		IupSetAttributes( btnManualDir, "IMAGE=icon_openfile,FLAT=YES,ACTIVE=NO" );
+		IupSetHandle( "MANUAL_Dir", btnManualDir );
 		IupSetStrAttribute( btnManualDir, "TIP", GLOBAL.languageItems["open"].toCString );
 		IupSetCallback( btnManualDir, "ACTION", cast(Icallback) &CManualDialog_btnManualDir_ACTION );			
 		
@@ -101,8 +106,13 @@ public:
 
 	~this()
 	{
-		IupSetHandle( "listManuals_Handle", null );
-		IupSetHandle( "textManualDir", null );
+		IupSetHandle( "MANUAL_list", null );
+		IupSetHandle( "MANUAL_Text", null );
+		IupSetHandle( "MANUAL_Dir", null );
+		IupSetHandle( "MANUAL_Add", null );
+		IupSetHandle( "MANUAL_Erase", null );
+		IupSetHandle( "MANUAL_Up", null );
+		IupSetHandle( "MANUAL_Down", null );
 		
 		CManualDialog.tempManuals.length = 0;
 		destroy( manualpathString );
@@ -160,7 +170,7 @@ extern(C)
 
 	private int CManualDialog_btnManualDir_ACTION( Ihandle* ih ) 
 	{
-		Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
+		Ihandle* listHandle = IupGetHandle( "MANUAL_list" );
 		
 		if( listHandle != null )
 		{
@@ -171,7 +181,7 @@ extern(C)
 
 				if( fileName.length )
 				{
-					Ihandle* dirHandle = IupGetHandle( "textManualDir" );
+					Ihandle* dirHandle = IupGetHandle( "MANUAL_Text" );
 					if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", toStringz( fileName ) );
 					
 					int id = IupGetInt( listHandle, "VALUE" );
@@ -194,7 +204,13 @@ extern(C)
 	
 	private int CManualDialog_listManuals_ACTION( Ihandle *ih, char *text, int item, int state )
 	{
-		Ihandle* dirHandle = IupGetHandle( "textManualDir" );
+		IupSetAttribute( IupGetHandle( "MANUAL_Text" ), "ACTIVE", "YES" );
+		IupSetAttribute( IupGetHandle( "MANUAL_Dir" ), "ACTIVE", "YES" );
+		IupSetAttribute( IupGetHandle( "MANUAL_Erase" ), "ACTIVE", "YES" );
+		IupSetAttribute( IupGetHandle( "MANUAL_Up" ), "ACTIVE", "YES" );
+		IupSetAttribute( IupGetHandle( "MANUAL_Down" ), "ACTIVE", "YES" );
+		
+		Ihandle* dirHandle = IupGetHandle( "MANUAL_Text" );
 		
 		if( dirHandle != null )
 		{
@@ -215,7 +231,7 @@ extern(C)
 	
 	private int CManualDialog_textManualDir_ACTION( Ihandle *ih, int c, char *new_value )
 	{
-		Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
+		Ihandle* listHandle = IupGetHandle( "MANUAL_list" );
 		if( listHandle != null )
 		{
 			int id = IupGetInt( listHandle, "VALUE" );
@@ -239,15 +255,23 @@ extern(C)
 		
 		if( fileName.length )
 		{
-			Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
+			Ihandle* listHandle = IupGetHandle( "MANUAL_list" );
 			
 			IupSetAttribute( listHandle, "APPENDITEM", toStringz( fileName ) );
 			CManualDialog.tempManuals ~= ( fileName ~ "," );
 			
 			IupSetInt( listHandle, "VALUE", cast(int) CManualDialog.tempManuals.length ); // Set Focus
 			
-			Ihandle* dirHandle = IupGetHandle( "textManualDir" );
-			if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", "" );
+			Ihandle* dirHandle = IupGetHandle( "MANUAL_Text" );
+			if( dirHandle != null )
+			{
+				IupSetAttribute( dirHandle, "VALUE", "" );
+				IupSetAttribute( IupGetHandle( "MANUAL_Text" ), "ACTIVE", "YES" );
+				IupSetAttribute( IupGetHandle( "MANUAL_Dir" ), "ACTIVE", "YES" );
+				IupSetAttribute( IupGetHandle( "MANUAL_Erase" ), "ACTIVE", "YES" );
+				IupSetAttribute( IupGetHandle( "MANUAL_Up" ), "ACTIVE", "YES" );
+				IupSetAttribute( IupGetHandle( "MANUAL_Down" ), "ACTIVE", "YES" );
+			}
 		}
 		
 		return IUP_DEFAULT;
@@ -256,7 +280,7 @@ extern(C)
 
 	private int CManualDialog_btnToolsErase_ACTION( Ihandle* ih ) 
 	{
-		Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
+		Ihandle* listHandle = IupGetHandle( "MANUAL_list" );
 		
 		if( listHandle != null )
 		{		
@@ -283,8 +307,19 @@ extern(C)
 					
 					CManualDialog.tempManuals = _tempManuals;
 					
-					Ihandle* dirHandle = IupGetHandle( "textManualDir" );
-					if( dirHandle != null ) IupSetAttribute( dirHandle, "VALUE", "" );
+					Ihandle* dirHandle = IupGetHandle( "MANUAL_Text" );
+					if( dirHandle != null )
+					{
+						IupSetAttribute( dirHandle, "VALUE", "" );
+						if( !_tempManuals.length )
+						{
+							IupSetAttribute( IupGetHandle( "MANUAL_Text" ), "ACTIVE", "NO" );
+							IupSetAttribute( IupGetHandle( "MANUAL_Dir" ), "ACTIVE", "NO" );
+							IupSetAttribute( IupGetHandle( "MANUAL_Erase" ), "ACTIVE", "NO" );
+							IupSetAttribute( IupGetHandle( "MANUAL_Up" ), "ACTIVE", "NO" );
+							IupSetAttribute( IupGetHandle( "MANUAL_Down" ), "ACTIVE", "NO" );						
+						}
+					}
 				}
 			}
 		}
@@ -295,7 +330,7 @@ extern(C)
 
 	private int CManualDialog_btnToolsUp_ACTION( Ihandle* ih ) 
 	{
-		Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
+		Ihandle* listHandle = IupGetHandle( "MANUAL_list" );
 		if( listHandle != null )
 		{
 			int itemNumber = IupGetInt( listHandle, "VALUE" );
@@ -322,7 +357,7 @@ extern(C)
 	
 	private int CManualDialog_btnToolsDown_ACTION( Ihandle* ih ) 
 	{
-		Ihandle* listHandle = IupGetHandle( "listManuals_Handle" );
+		Ihandle* listHandle = IupGetHandle( "MANUAL_list" );
 		if( listHandle != null )
 		{
 			int itemNumber = IupGetInt( listHandle, "VALUE" );

@@ -63,8 +63,11 @@ private:
 		
 		Ihandle* textToolsDir = IupText( null );
 		IupSetAttribute( textToolsDir, "EXPAND", "HORIZONTAL" );
-		IupSetStrAttribute( textToolsDir, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textToolsDir, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		version(Windows)
+		{
+			IupSetStrAttribute( textToolsDir, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textToolsDir, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 		IupSetHandle( "textToolsDir", textToolsDir );
 		IupSetCallback( textToolsDir, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 		
@@ -83,9 +86,11 @@ private:
 		
 		Ihandle* textToolsArgs = IupText( null );
 		IupSetAttribute( textToolsArgs, "EXPAND", "HORIZONTAL" );
-		IupSetStrAttribute( textToolsArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-		IupSetStrAttribute( textToolsArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-
+		version(Windows)
+		{
+			IupSetStrAttribute( textToolsArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( textToolsArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		}
 		IupSetHandle( "textToolsArgs", textToolsArgs );
 		IupSetCallback( textToolsArgs, "ACTION", cast(Icallback) &CCustomCompilerOptionDialog_listOptions_EDIT_CB );
 

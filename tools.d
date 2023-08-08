@@ -941,6 +941,7 @@ private:
 	Appender!(char[])  errbuffer;           /// Error appender buffer
 	
 	string				cwd;
+	int					pidStatus;
 
 
 	/* Set a filestream to nonblocking mode, if not Posix, use winbase.h */
@@ -1113,10 +1114,13 @@ public:
           Thread.sleep(msecs(1));
         }
 		
+		pidStatus = process.status;
+		
         if (!process.terminated) {
           /+writeln("command: %s < %s did not finish in time [%s msecs]", command, inputfile, time());+/
           killProcess(cpid, 9);
           process = WaitResult(true, wait(cpid));
+		  pidStatus = process.status;
         }
         /+writeln("command finished %d after %s msecs", status(), time());+/
 
@@ -1140,12 +1144,9 @@ public:
 	/+
 	If length of outbuffer and errbuffer are empty, compiler success~
 	+/
-	int getMessageState()
+	int getPidStatus()
 	{
-		int ret;
-		if( outbuffer.data.length ) ret = 1;
-		if( errbuffer.data.length ) ret = ret | 2;
-		return ret;
+		return pidStatus;
 	}	
 }
 

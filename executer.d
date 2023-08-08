@@ -272,8 +272,29 @@ private:
 						objFullPath = Path.stripExtension( oriCommand );
 						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
 					}
-					version(FBIDE) objFullPath = Path.stripExtension( oriCommand ) ~ ".bas"; else objFullPath = Path.stripExtension( oriCommand ) ~ ".d";
-					if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+					
+					version(FBIDE)
+					{
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".bas";
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+
+						// -r or -R
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".c";
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".asm";
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".ll";
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );			
+						
+						// -pp
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".pp.bas";
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+					}
+					else // version(DIDE)
+					{
+						objFullPath = Path.stripExtension( oriCommand ) ~ ".d";
+						if( std.file.exists( objFullPath ) ) std.file.remove( objFullPath );
+					}
 				}
 			}
 		}
@@ -659,7 +680,7 @@ private:
 			}
 		}
 		
-		int		_state = DaNodeProcess.getMessageState();
+		int		_status = DaNodeProcess.getPidStatus();
 		bool	bBuildSuccess;
 
 		if( !bHalfTime )
@@ -671,21 +692,37 @@ private:
 			_processDlg = null;
 		}
 
-		if( _state == 0 )
+		if( _status == 0 ) // compile success or success but got warning
 		{
 			bBuildSuccess = true;
-			showAnnotation( null, buildTools, workDir );
-
-			if( buildTools.messagePanel !is null )
+			
+			if( !bWarning )
 			{
+				showAnnotation( null, buildTools, workDir );
+				if( buildTools.messagePanel !is null )
+				{
+					if( buildTools.compilerSettings.useThread == "ON" )
+					{
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "Compile Success!!", 0, 0, null );
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null ); // scroll to tail
+					}
+					else
+					{
+						GLOBAL.messagePanel.printOutputPanel( "Compile Success!!", false, true );
+					}
+				}
+			}
+			else
+			{
+				showAnnotation( theMessage, buildTools, workDir );
 				if( buildTools.compilerSettings.useThread == "ON" )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "Compile Success!!", 0, 0, null );
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null ); // scroll to tail
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Success! But got warning...", 0, 0, null );
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
 				}
 				else
 				{
-					GLOBAL.messagePanel.printOutputPanel( "Compile Success!!", false, true );
+					GLOBAL.messagePanel.printOutputPanel( "\nCompile Success! But got warning...", false, true );
 				}
 			}
 			
@@ -694,60 +731,53 @@ private:
 				if( buildTools.compilerSettings.useResultDlg == "ON" )
 				{
 					if( buildTools.compilerSettings.useThread == "ON" )
-						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "message", 0, 3, null );
+					{
+						if( !bWarning )
+							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "message", 0, 3, null );
+						else
+							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "alarm", 0, 3, null );
+					}
 					else
-						tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+					{
+						if( !bWarning )
+							tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+						else
+							tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
+					}
 				}
 				else if( buildTools.compilerSettings.useSFX == "ON" )
 				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "success", 0, 3, null );
-					//version(Windows) PlaySound( "settings/sound/success.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/success.wav" );
+					if( !bWarning )
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "success", 0, 3, null );
+					else
+						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "warning", 0, 3, null );
 				}
 			}			
 		}
 		else
 		{
 			showAnnotation( theMessage, buildTools, workDir );
-
-			if( !bWarning || _state > 1 || bError )
+			if( buildTools.compilerSettings.useThread == "ON" )
 			{
 				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Error!!", 0, 0, null );
 				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
-
-				if( buildTools.compilerSettings.useResultDlg == "ON" )
-				{
-					if( buildTools.compilerSettings.useThread == "ON" )
-						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "error", 0, 3, null );
-					else
-						tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
-				}
-				else if( buildTools.compilerSettings.useSFX == "ON" )
-				{
-					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "fail", 0, 3, null );
-					//version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 );	else IupExecute( "aplay", "settings/sound/error.wav" );
-				}
 			}
 			else
 			{
-				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "\nCompile Success! But got warning...", 0, 0, null );
-				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "", 2, 0, null );
-				
-				if( !bHalfTime )
-				{
-					if( buildTools.compilerSettings.useResultDlg == "ON" )
-					{
-						if( buildTools.compilerSettings.useThread == "ON" )
-							IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "alarm", 0, 3, null );
-						else
-							tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
-					}
-					else if( buildTools.compilerSettings.useSFX == "ON" )
-					{
-						IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "warning", 0, 3, null );
-						//version(Windows) PlaySound( "settings/sound/warning.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/warning.wav" );
-					}
-				}
-				bBuildSuccess = true;
+				GLOBAL.messagePanel.printOutputPanel( "\nCompile Error...", false, true );
+			}
+
+			if( buildTools.compilerSettings.useResultDlg == "ON" )
+			{
+				if( buildTools.compilerSettings.useThread == "ON" )
+					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "error", 0, 3, null );
+				else
+					tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+			}
+			else if( buildTools.compilerSettings.useSFX == "ON" )
+			{
+				IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "fail", 0, 3, null );
+				//version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 );	else IupExecute( "aplay", "settings/sound/error.wav" );
 			}
 		}
 	
@@ -849,14 +879,61 @@ private:
 					}
 				}
 			}
+			
+			
+			bool		bGotOneFileToBuild;
+			string		MainFile;
+			version(FBIDE)
+			{
+				if( GLOBAL.projectManager[activePrjName].mainFile.length )
+				{
+					string mainFilePath = Path.stripExtension( GLOBAL.projectManager[activePrjName].mainFile );
+					foreach( s; GLOBAL.projectManager[activePrjName].sources )
+					{
+						string noext = Path.stripExtension( s );
+						auto pos = lastIndexOf( noext, mainFilePath );
+						if( pos > -1 )
+						{
+							if( pos == noext.length - mainFilePath.length )
+							{
+								MainFile = s;
+								if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" ) bGotOneFileToBuild = true;
+								break;
+							}
+						}
+					}
+					
+					if( !MainFile.length ) // The mainfile not in GLOBAL.projectManager[activePrjName].sources
+					{
+						tools.questMessage( GLOBAL.languageItems["error"].toDString, "The main file not in project!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						return false;
+					}
+				}
+				else
+				{
+					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
+					{
+						tools.questMessage( GLOBAL.languageItems["error"].toDString, "Please Set Main File Without Extension,The Project had set in One File Mode\n", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						return false;
+					}
+				}
+			}
+			
+			
 
-			bool bGotOneFileToBuild, bNoSourceNeedBeCompiled;
+			bool bNoSourceNeedBeCompiled;
 			foreach( s; GLOBAL.projectManager[activePrjName].sources )
 			{
 				switch( SourceType )
 				{
 					case 0:
-						version(FBIDE)	txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+						version(FBIDE)
+						{
+							if( bGotOneFileToBuild )
+								txtSources = " -b \"" ~ MainFile ~ "\"" ;
+							else
+								txtSources = txtSources ~ " -b \"" ~ s ~ "\"" ;
+						}
 						version(DIDE)	txtSources = txtSources ~ " \"" ~ s ~ "\"" ;
 						break;
 						
@@ -866,6 +943,11 @@ private:
 						
 						version(FBIDE)
 						{
+							if( bGotOneFileToBuild )
+							{
+								s = MainFile;
+								txtSources = "";
+							}
 							auto objFullPath = Path.stripExtension( s ) ~ ".o";
 							if( std.file.exists( objFullPath ) )
 							{
@@ -930,7 +1012,10 @@ private:
 					case 2:
 						version(FBIDE)
 						{
-							txtSources = txtSources ~ " -a \"" ~ Path.stripExtension( s ) ~ ".o\"" ;
+							if( bGotOneFileToBuild )
+								txtSources = " -a \"" ~ Path.stripExtension( MainFile ) ~ ".o\"" ;
+							else
+								txtSources = txtSources ~ " -a \"" ~ Path.stripExtension( s ) ~ ".o\"" ;
 						}
 						else //version(DIDE)
 						{
@@ -981,59 +1066,12 @@ private:
 						
 					default:
 				}
+				
+				if( bGotOneFileToBuild ) break;
 			}
 			
 			if( SourceType == 1 && !txtSources.length ) bNoSourceNeedBeCompiled = true;
-			
-			version(FBIDE)
-			{
-				if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
-				{
-					if( GLOBAL.projectManager[activePrjName].mainFile.length )
-					{
-						string mainFilePath = GLOBAL.projectManager[activePrjName].mainFile;
-						foreach( s; GLOBAL.projectManager[activePrjName].sources )
-						{
-							if( s.length > 4 )
-							{
-								if( Uni.toLower( s[$-3..$] ) == "bas" )
-								{
-									string name = Path.stripExtension( Path.baseName( mainFilePath ) );
-									if( Path.isAbsolute( mainFilePath ) )
-									{
-										if( Uni.toLower( s[0..$-4] ) == Uni.toLower( name ) )
-										{
-											txtSources = " -b \"" ~ s ~ "\"";
-											bGotOneFileToBuild = true;
-											break;
-										}
-									}
-									else
-									{
-										string relativePath = Array.replace( s[0..$-4], GLOBAL.projectManager[activePrjName].dir ~ "/", "" );
-										if( Uni.toLower( relativePath ) == Uni.toLower( name ) ) 
-										{
-											txtSources = " -b \"" ~ s ~ "\"";
-											bGotOneFileToBuild = true;
-											break;
-										}
-									}
-								}
-							}
-						}
-					}
-					else
-					{
-						GLOBAL.messagePanel.printOutputPanel( "Please Set Main File Without Extension, The Project is set One File Mode.", true );
-						if( GLOBAL.compilerSettings.useSFX == "ON" )
-						{
-							version(Windows) PlaySound( "settings/sound/error.wav", null, 0x0001 ); else IupExecute( "aplay", "settings/sound/error.wav" );
-						}
-						return false;
-					}
-				}
-			}
-			
+
 			if( !txtSources.length && SourceType != 1 )
 			{
 				GLOBAL.messagePanel.printOutputPanel( "Without source files......?\n\nBuild Error!", true );
@@ -1127,9 +1165,7 @@ private:
 				
 				version(FBIDE)
 				{
-					string _m = Path.stripExtension( Path.baseName ( GLOBAL.projectManager[activePrjName].mainFile ) );
-					filesANDargs = "-c" ~ ( _m.length ? ( " -m \"" ~ _m ) ~ "\"" : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-					
+					filesANDargs = "-c" ~ ( MainFile.length ? ( " -m \"" ~ Path.stripExtension( MainFile ) ~ "\"" ) : "" ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 				}
 				version(DIDE)
 				{
@@ -1181,23 +1217,10 @@ private:
 	
 			version(FBIDE)
 			{
-				bool 	bWithExt;
-				string	mainFile;
-				if( GLOBAL.projectManager[activePrjName].mainFile.length )
-				{
-					string mainFilePath = GLOBAL.projectManager[activePrjName].mainFile;
-					if( Path.extension( mainFilePath ).length )
-					{
-						mainFile = Path.dirName( mainFilePath ) ~ "/ " ~ Path.stripExtension( Path.baseName( mainFilePath ) );
-						bWithExt = true;
-					}
-					else
-						mainFile = mainFilePath;
-				}
-			
-				filesANDargs = executeName ~ ( bGotOneFileToBuild ? "" : ( mainFile.length ? ( " -m \"" ~ mainFile ) ~ "\"" : "" ) ) ~
-							txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
-				
+				if( SourceType == 2 )
+					filesANDargs = executeName ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
+				else
+					filesANDargs = executeName ~ ( bGotOneFileToBuild ? "" : ( MainFile.length ? ( " -m \"" ~ Path.stripExtension( MainFile ) ~ "\"" ) : "" ) ) ~ txtSources ~ txtIncludeDirs ~ txtLibDirs ~ ( options.length ? " " ~ options : "" ) ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			}
 			version(DIDE)
 			{
@@ -1206,8 +1229,6 @@ private:
 			
 			version(FBIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) filesANDargs ~= " -s gui";
 			version(DIDE)	if( GLOBAL.toolbar.checkGuiButtonStatus ) filesANDargs ~= " -L/SUBSYSTEM:WINDOWS";
-			
-			version(FBIDE) if( bWithExt ) GLOBAL.messagePanel.printOutputPanel( "****** Warnning! Main File Should Withould Extension! ******\n", false );
 
 			// Create Dir for Target
 			string _targetPath = Path.dirName( GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName );
@@ -1260,7 +1281,7 @@ public:
 
 			if( !ScintillaAction.saveFile( cSci ) )
 			{
-				GLOBAL.messagePanel.printOutputPanel( "Compile Cancel By User.\n\nCompile Cancel!", true );
+				GLOBAL.messagePanel.printOutputPanel( "Save files error!\n\nCompile Cancel!", true );
 				return false;
 			}
 			else
@@ -1340,6 +1361,15 @@ public:
 				GLOBAL.messagePanel.printOutputPanel( "Without any valid project has been selected......?\n\nAbort!", true );
 				return false;
 			}
+			else
+			{
+				if( !GLOBAL.projectManager[activePrjName].mainFile.length )
+				{
+					auto questMessageResult = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, "Compile all sources to objects,\nPlease set the main file.\nContinue?", "WARNING", "YESNO", IUP_CENTER, IUP_CENTER );
+					if( questMessageResult == 2 ) return false;
+				}
+			}
+
 
 			GLOBAL.messagePanel.printOutputPanel( "Buinding Project: [" ~ GLOBAL.projectManager[activePrjName].name ~ "]......", true );
 			if( getBuildNeedData( compiler, options1, options, optionDebug, 1 ) )
@@ -1472,12 +1502,24 @@ public:
 				}
 			}
 		
-			string fileName = "poseidonTemp" ~ Conv.to!(string)(MonoTime.currTime.ticks)[$-4..$];
-			string tempDir = GLOBAL.linuxHome.length ? GLOBAL.linuxHome : Path.dirName( cSci.getFullPath );
+			string poseidonTempFile = "poseidonTemp" ~ Conv.to!(string)(MonoTime.currTime.ticks)[$-4..$];
+			string tempDir = Path.dirName( cSci.getFullPath );
+			string fileName;
 			if( tempDir == "." ) tempDir = GLOBAL.poseidonPath;
-			version(FBIDE) fileName = tempDir ~ "/" ~ fileName ~ ".bas"; else fileName = tempDir ~ "/" ~ fileName ~ ".d";
-			
-			FileAction.saveFile( fileName, cSci.getText, BOM.utf8, true );
+			version(FBIDE) fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".bas"; else fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".d";
+			if( !FileAction.saveFile( fileName, cSci.getText, BOM.utf8, true ) ) // If AppImage, the poseidon Path files can't be written
+			{
+				if( Path.dirName( cSci.getFullPath ) == "." ) // Should be NONAME#?.bas
+				{
+					tempDir = GLOBAL.linuxHome.length ? GLOBAL.linuxHome : GLOBAL.poseidonPath;
+					version(FBIDE) fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".bas"; else fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".d";
+					if( !FileAction.saveFile( fileName, cSci.getText, BOM.utf8, true ) )
+					{
+						tools.questMessage( GLOBAL.languageItems["error"].toDString, "Can't create quickrun temp file!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						return false;
+					}
+				}
+			}
 			quickRunFromFile = cSci.getFullPath;
 		
 			GLOBAL.messagePanel.printOutputPanel( "Quick Run " ~ cSci.getFullPath ~ "......\n", true );
