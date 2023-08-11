@@ -732,8 +732,8 @@ Ihandle* createMenu()
 		version(X86_64) _64bit = true;
 		version(LDC) C = "LDC";
 		version(GDC) C = "GDC";
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.521)  2023.08.08\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.090)  2023.08.03\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.522)  2023.08.11\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.091)  2023.08.11\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
 		return IUP_DEFAULT;
 	});
 	
@@ -1902,13 +1902,19 @@ extern(C)
 					switch( GLOBAL.projectManager[activePrjName].type )
 					{
 						case "2":
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a";
+							version(FBIDE)
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a";
+							else
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib";
 							break;
 						case "3":
 							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll";
 							if( std.file.exists( executeName ) ) std.file.remove( executeName );
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/lib" ~ _targetName ~ ".dll.a";
-							if( std.file.exists( executeName ) ) std.file.remove( executeName );
+							version(FBIDE)
+							{
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/lib" ~ _targetName ~ ".dll.a";
+								if( std.file.exists( executeName ) ) std.file.remove( executeName );
+							}
 							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".def";
 							break;
 						default:

@@ -196,11 +196,11 @@ private:
 				{
 					if( buildTools.consoleWindow.id < buildTools.monitors.length )
 					{
-						consoleArgs = "0 " ~ x ~ " " ~ y ~ " " ~ w ~ " " ~ h ~ " 0 " ~ command ~ " " ~ args;
+						consoleArgs = "0 " ~ x ~ " " ~ y ~ " " ~ w ~ " " ~ h ~ " 0 \"" ~ command ~ "\" " ~ args;
 					}
 					else
 					{
-						consoleArgs = "0 0 0 0 0 0 " ~ command ~ " " ~ args;
+						consoleArgs = "0 0 0 0 0 0 \"" ~ command ~ "\" " ~ args;
 					}
 				}
 				else
@@ -209,7 +209,7 @@ private:
 				}
 				
 				args = consoleArgs;
-				command = buildTools.poseidonPath ~ "/consoleLauncher";
+				command = Array.replace( buildTools.poseidonPath ~ "/consoleLauncher", " ", "\\ " );
 			}
 			
 			version(Windows)
@@ -227,27 +227,23 @@ private:
 					geoString = " --geometry=" ~ w ~ "x" ~ h ~ "+" ~ x ~ "+" ~ y;
 				}
 
-				if( buildTools.linuxTermName )
+				if( args.length ) args = " " ~ args;
+				buildTools.linuxTermName = strip( buildTools.linuxTermName );
+				if( buildTools.linuxTermName.length )
 				{
-					switch( strip( buildTools.linuxTermName ) )
+					switch( buildTools.linuxTermName )
 					{
 						case "xterm", "uxterm":
 							geoString = Array.replace( geoString, "--geometry=", "-geometry " );
-							pid = spawnShell( buildTools.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
-							break;
-						case "gnome-terminal","mate-terinal":
-							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e \"" ~ command ~ " " ~ args ~ "\"", null, Config.none, cwd );
-							break;
-						case "xfce4-terminal" ,"lxterminal", "tilix":
-							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " --command=\"" ~ command ~ " " ~ args ~ "\"", null, Config.none, cwd );
+							pid = spawnShell( buildTools.linuxTermName ~ " -T poseidon_terminal" ~ geoString ~ " -e \"" ~ command ~ args ~ "\"", null, Config.none, cwd );
 							break;
 						default:
-							pid = spawnShell( buildTools.linuxTermName ~ " -e " ~ command ~ " " ~ args, null, Config.none, cwd );
+							pid = spawnShell( buildTools.linuxTermName ~ " --title poseidon_terminal" ~ geoString ~ " -e \"" ~ command ~ args ~ "\"", null, Config.none, cwd );
 					}
 				}
 				else
 				{
-					pid = spawnShell( command ~ " " ~ args, null, Config.none, cwd );
+					pid = spawnShell( command ~ args, null, Config.none, cwd );
 				}
 			}
 			
@@ -1293,6 +1289,8 @@ public:
 						if( ScintillaAction.getModifyByTitle( _cSci ) ) ScintillaAction.saveFile( _cSci );
 					}
 				}
+				
+				cSci = ScintillaAction.getActiveCScintilla();
 			}
 			
 			version(DIDE)
@@ -1363,10 +1361,13 @@ public:
 			}
 			else
 			{
-				if( !GLOBAL.projectManager[activePrjName].mainFile.length )
+				version(FBIDE)
 				{
-					auto questMessageResult = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, "Compile all sources to objects,\nPlease set the main file.\nContinue?", "WARNING", "YESNO", IUP_CENTER, IUP_CENTER );
-					if( questMessageResult == 2 ) return false;
+					if( !GLOBAL.projectManager[activePrjName].mainFile.length )
+					{
+						auto questMessageResult = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, "Compile all sources to objects,\nPlease set the main file.\nContinue?", "WARNING", "YESNO", IUP_CENTER, IUP_CENTER );
+						if( questMessageResult == 2 ) return false;
+					}
 				}
 			}
 
