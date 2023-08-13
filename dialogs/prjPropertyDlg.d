@@ -97,52 +97,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		
 		listFocus = IupList( null );
 		IupSetAttributes( listFocus, "SHOWIMAGE=NO,EDITBOX=YES,DROPDOWN=YES,VISIBLE_ITEMS=5,SIZE=106x12,NAME=PRJPROPERTY_FocusList" );
-		IupSetCallback( listFocus, "VALUECHANGED_CB",cast(Icallback) cast(Icallback) function( Ihandle* ih )
-		{
-			Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
-			
-			if( _dlg != null )
-			{
-				Ihandle* _focusList = IupGetDialogChild( _dlg, "PRJPROPERTY_FocusList" );
-				if( _focusList != null )
-				{
-					string focusTitle = strip( fSTRz( IupGetAttribute( _focusList, "VALUE" ) ) );
-					if( !focusTitle.length )
-					{
-						IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.targetName ) );
-						IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerOption ) );
-						IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerPath ) );
-
-						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "REMOVEITEM", "ALL" );
-						for( int i = 0; i < CProjectPropertiesDialog.tempProject.includeDirs.length; ++ i )
-							IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.includeDirs[i] ) );
-						
-						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "REMOVEITEM", "ALL" );
-						for( int i = 0; i < CProjectPropertiesDialog.tempProject.libDirs.length; ++ i )
-							IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.libDirs[i] ) );
-					}
-					else
-					{
-						if( focusTitle in CProjectPropertiesDialog.tempProject.focusUnit )
-						{
-							IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Target ) );
-							IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Option ) );
-							IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Compiler ) );
-							
-							IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "REMOVEITEM", "ALL" );
-							for( int i = 0; i < CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].IncDir.length; ++ i )
-								IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].IncDir[i] ) );
-							
-							IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "REMOVEITEM", "ALL" );
-							for( int i = 0; i < CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].LibDir.length; ++ i )
-								IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].LibDir[i] ) );
-						}
-					}
-				}
-			}
-			
-			return IUP_DEFAULT;
-		});
+		IupSetCallback( listFocus, "ACTION",cast(Icallback) &CProjectPropertiesDialog_listFocus_ACTION );
 		
 		Ihandle* focusRemove = IupButton( null, null );
 		IupSetAttributes( focusRemove, "FLAT=YES,IMAGE=icon_debug_clear" );
@@ -340,7 +295,6 @@ class CProjectPropertiesDialog : CBaseDialog
 		}
 		IupSetAttributes( projectTabs, "TABTYPE=TOP,EXPAND=YES" );
 
-		
 		Ihandle* vBox = IupVbox( projectTabs, bottom, null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=2x2,GAP=2,EXPAND=YES" );
 
@@ -491,6 +445,51 @@ class CProjectPropertiesDialog : CBaseDialog
 private:
 extern(C) // Callback for CProjectPropertiesDialog
 {
+	int CProjectPropertiesDialog_listFocus_ACTION( Ihandle* ih, char* text, int item, int state )
+	{
+		if( state == 1 )
+		{
+			Ihandle* _dlg = IupGetHandle( "PRJPROPERTY_DIALOG" );
+			if( _dlg != null )
+			{
+				string focusTitle = strip( fSTRz( text ) );
+				if( !focusTitle.length )
+				{
+					IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.targetName ) );
+					IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerOption ) );
+					IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.compilerPath ) );
+
+					IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "REMOVEITEM", "ALL" );
+					for( int i = 0; i < CProjectPropertiesDialog.tempProject.includeDirs.length; ++ i )
+						IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.includeDirs[i] ) );
+					
+					IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "REMOVEITEM", "ALL" );
+					for( int i = 0; i < CProjectPropertiesDialog.tempProject.libDirs.length; ++ i )
+						IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.libDirs[i] ) );
+				}
+				else
+				{
+					if( focusTitle in CProjectPropertiesDialog.tempProject.focusUnit )
+					{
+						IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_TargetName" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Target ) );
+						IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_Options" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Option ) );
+						IupSetStrAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_CompilerPath" ), "VALUE", toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].Compiler ) );
+						
+						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "REMOVEITEM", "ALL" );
+						for( int i = 0; i < CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].IncDir.length; ++ i )
+							IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_IncludePaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].IncDir[i] ) );
+						
+						IupSetAttribute( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "REMOVEITEM", "ALL" );
+						for( int i = 0; i < CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].LibDir.length; ++ i )
+							IupSetStrAttributeId( IupGetDialogChild( _dlg, "PRJPROPERTY_LibPaths" ), "", i + 1, toStringz( CProjectPropertiesDialog.tempProject.focusUnit[focusTitle].LibDir[i] ) );
+					}
+				}
+			}
+		}
+		
+		return IUP_DEFAULT;
+	}
+
 	int CProjectPropertiesDialog_btnOK_cb( Ihandle* ih )
 	{
 		// Apply First!!!

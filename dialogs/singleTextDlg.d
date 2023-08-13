@@ -62,7 +62,7 @@ public:
 
 	~this()
 	{
-		IupSetHandle( "textResult", null );
+		IupSetHandle( "CSingleTextDialog_text", null );
 	}
 
 	override string show( int x, int y ) // Overload form CBaseDialog
@@ -258,13 +258,13 @@ public:
 
 	~this()
 	{
-		IupSetHandle( "textResult", null );
+		IupSetHandle( "CSingleTextOpen_text", null );
 		if( labelName !is null ) destroy( labelName );
 	}
 
 	override string show( int x, int y ) // Overload form CBaseDialog
 	{
-		IupMap( _dlg );
+		//IupMap( _dlg );
 		IupPopup( _dlg, x, y );
 
 		Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );

@@ -4,7 +4,7 @@ Type=1
 MainFile=
 PassOneFile=
 TargetName=poseidonFB
-FocusOn=
+FocusOn=LDC_x64
 CompilerArgs=
 CompilerOption=-odobjs -version=FBIDE -version=GUI poseidonFB.res
 Comment=
@@ -64,18 +64,12 @@ name=tools.d
 [Others]
 [Misc]
 [Focus]
-title=IUP327_x32
-target=poseidonFB
-option=-odobjs -version=FBIDE -version=GUI -version=IUP327 -mscrtlib=msvcrt100 poseidonFB.res
-compiler=K:/CodingPark/dmd2/windows/bin/dmd.exe
-incdir=K:/CodingPark/dmd2/import
-libdir=K:/CodingPark/GameKYO/lib/iup/iup327/dll10
 title=LDC_x64
-target=poseidonFB_x64
-option=--m64 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
+target=poseidonFB
+option=-odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB.res
 compiler=K:/CodingPark/ldc2-1.32.2-windows-multilib/bin/ldc2.exe
 incdir=K:/CodingPark/dmd2/import
-libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14_64
+libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14
 title=x64
 target=poseidonFB
 option=-odobjs -version=FBIDE -version=GUI poseidonFB64.res

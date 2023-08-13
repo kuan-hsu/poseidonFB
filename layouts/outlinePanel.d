@@ -1946,11 +1946,11 @@ extern(C)
 						{
 							if( bAnyWord )
 							{
-								if( indexOf( tools.fullPathByOS( _node.name ), tools.fullPathByOS( editText ) ) > -1 ) bGo = true; else bGo = false;
+								if( indexOf( Uni.toLower( _node.name ), Uni.toLower( editText ) ) > -1 ) bGo = true; else bGo = false;
 							}
 							else
 							{
-								if( indexOf( tools.fullPathByOS( _node.name ), tools.fullPathByOS( editText ) ) == 0 ) bGo = true; else bGo = false;
+								if( indexOf( Uni.toLower( _node.name ), Uni.toLower( editText ) ) == 0 ) bGo = true; else bGo = false;
 							}
 							
 							if( bGo )

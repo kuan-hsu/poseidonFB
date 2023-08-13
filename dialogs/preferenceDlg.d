@@ -16,8 +16,6 @@ private struct PreferenceDialogParameters
 	static		CTable			fontTable;
 }
 
-version(IUP327) Ihandle* IupFlatToggle( char* title ) { return IupToggle( title, null ); }
-
 class CPreferenceDialog : CBaseDialog
 {
 private:
