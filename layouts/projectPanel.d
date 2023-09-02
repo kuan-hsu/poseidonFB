@@ -610,29 +610,31 @@ public:
 		IupSetStrAttribute( tree, "ADDBRANCH0", toStringz( prjName ) );
 		version(Windows) IupSetAttributeId( tree, "MARKED", 1, "YES" ); else IupSetInt( tree, "VALUE", 1 );
 		IupSetAttribute( tree, "USERDATA1", tools.getCString( prjDir ) );
-		IupSetAttributeId( tree, "COLOR", 1, "128 0 0" );
+		IupSetAttribute( tree, "IMAGE1", "icon_packageexplorer" );
+		IupSetAttribute( tree, "IMAGEEXPANDED1", "icon_prj_open" );		
+		IupSetStrAttributeId( tree, "COLOR", 1, toStringz( GLOBAL.editColor.prjTitle ) );
 		toBoldTitle( tree, 1 );
 
 		IupSetAttribute( tree, "ADDBRANCH1", "Miscellaneous" );
-		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Others" );
-		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Includes" );
-		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );
 		
 		IupSetAttribute( tree, "ADDBRANCH1", "Sources" );
-		IupSetAttributeId( tree, "COLOR", 2, "0 0 255" );
+		IupSetStrAttributeId( tree, "COLOR", 2, toStringz( GLOBAL.editColor.prjSourceType ) );
 		IupSetAttribute( tree, "IMAGE2", "icon_door" );
 		IupSetAttribute( tree, "IMAGEEXPANDED2", "icon_dooropen" );
 		toBoldTitle( tree, 2 );

@@ -357,7 +357,7 @@ struct LiveParser
 
 					if( posHead == 0 )
 					{
-						GLOBAL.outlineTree.refresh( cSci );
+						GLOBAL.outlineTree.refresh( cSci, ( GLOBAL.toggleUpdateOutlineLive == "ON" ? true : false ) );
 						
 						int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 					
@@ -503,7 +503,7 @@ struct LiveParser
 						{
 							//IupMessage("FALSE","");
 							// Reparse All
-							GLOBAL.outlineTree.refresh( cSci );
+							GLOBAL.outlineTree.refresh( cSci, ( GLOBAL.toggleUpdateOutlineLive == "ON" ? true : false ) );
 							
 							int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 						

@@ -295,7 +295,7 @@ class CToolBar
 		}
 		
 		listHandle = IupFlatList();
-		IupSetAttributes( listHandle, "SIZE=x13,ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDON_TOOLBAR_FunctionList" );
+		IupSetAttributes( listHandle, "CPADDING=0x0,SIZE=x5,ACTIVE=YES,SHOWIMAGE=YES,SCROLLBAR=NO,NAME=POSEIDON_TOOLBAR_FunctionList" );
 		version(Windows) IupSetStrAttribute( listHandle, "FONT", toStringz( GLOBAL.fonts[0].fontString ) ); else IupSetStrAttribute( listHandle, "FONTFACE", toStringz( GLOBAL.fonts[0].fontString ) );
 		IupSetAttribute( listHandle, "EXPAND", "HORIZONTAL" );
 		IupSetStrAttribute( listHandle, "FGCOLOR", toStringz ( GLOBAL.editColor.txtFore ) );
@@ -320,6 +320,7 @@ class CToolBar
 					btnMarkNext, btnMarkClean, labelSEPARATOR[4], btnCompile, btnBuildRun, btnRun, btnBuildAll, btnReBuild, btnQuickRun, listHandle, commandText, null );
 		}
 
+		IupSetAttribute( handle, "NORMALIZESIZE", "VERTICAL" );
 		handle = IupBackgroundBox( handle );
 		version(Windows) IupSetStrAttribute( handle, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) ); // linux get IupFlatSeparator wrong color
 

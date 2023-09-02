@@ -16,7 +16,7 @@ private:
 	}
 
 	Ihandle*			layout;
-	Ihandle*			timer;
+	static Ihandle*		timer;
 	static ItemUnit[]	items;
 	
 	static void splitCross( ref string _source, ref int w, ref int h )
@@ -37,7 +37,6 @@ public:
 
 		timer = IupTimer();
 		IupSetInt( timer, "TIME", interval );
-		IupSetInt( timer, "RUN", 1 );
 		IupSetCallback( timer, "ACTION_CB", cast(Icallback) function( Ihandle* _ih )
 		{
 			Ihandle* preFocusButton = null;
@@ -83,6 +82,10 @@ public:
 					}
 				}
 			}
+			else
+			{
+				IupSetInt( _ih, "RUN", 0 );
+			}
 
 			return IUP_DEFAULT;
 		});
@@ -117,6 +120,7 @@ public:
 					this.items[i].bOpen = true;
 					IupSetStrAttribute( _ih, "FGCOLOR", "0 0 0" );
 					IupSetAttribute( _ih, "BGCOLOR", "200 225 245" );
+					IupSetInt( timer, "RUN", 1 );
 					IupPopup( this.items[i].menu, itemX, itemY + itemH );
 					break;
 				}

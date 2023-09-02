@@ -620,7 +620,7 @@ private:
 
 		Ihandle* labelAscent = IupLabel( GLOBAL.languageItems["ascent"].toCString );
 		Ihandle* textAscent = IupText( null );
-		IupSetAttributes( textAscent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5" );
+		IupSetAttributes( textAscent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
 		IupSetStrAttribute( textAscent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRAASCENT ) );
 		IupSetHandle( "textAscent", textAscent );
 		Ihandle* hBoxAscent = IupHbox( labelAscent, textAscent, null );
@@ -628,7 +628,7 @@ private:
 
 		Ihandle* labelDescent = IupLabel( GLOBAL.languageItems["descent"].toCString );
 		Ihandle* textDescent = IupText( null );
-		IupSetAttributes( textDescent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=-5" );
+		IupSetAttributes( textDescent, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=10,SPINMIN=-10" );
 		IupSetStrAttribute( textDescent, "VALUE", toStringz( GLOBAL.editorSetting01.EXTRADESCENT ) );
 		IupSetHandle( "textDescent", textDescent );
 		Ihandle* hBoxDescent = IupHbox( labelDescent, textDescent, null );
@@ -1620,7 +1620,7 @@ private:
 			);
 		}
 		
-		IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=8,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
+		IupSetAttributes( gboxColor_1, "SIZELIN =-1,NUMDIV=7,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=4,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
 		Ihandle* frameColor_1 = IupFrame( gboxColor_1 );
 		IupSetAttributes( frameColor_1, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetStrAttribute( frameColor_1, "TITLE", GLOBAL.languageItems["colorfgbg"].toCString );
@@ -1767,11 +1767,11 @@ private:
 		IupSetAttributes( shortCutList, "SIZE=150x200,MULTIPLE=NO,MARGIN=2x10,VISIBLECOLUMNS=YES,EXPAND=YES,AUTOHIDE=YES,SHOWIMAGE=YES" );
 		version( Windows )
 		{
-			IupSetAttribute( shortCutList, "FONT", "Courier New,9" );
+			IupSetAttribute( shortCutList, "FONT", "Consolas,10" );
 		}
 		else
 		{
-			IupSetAttribute( shortCutList, "FONT", "Monospace, 9" );
+			IupSetAttribute( shortCutList, "FONT", "Monospace, 10" );
 		}
 		IupSetHandle( "shortCutList", shortCutList );
 		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );

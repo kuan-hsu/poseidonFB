@@ -2785,6 +2785,14 @@ version(DIDE)
 									if( countParen == 0 && countBracket == 0 ) return word;
 									goto default;
 									
+								case '.':
+									if( pos > 0 )
+									{
+										if( countBracket == 0 )
+											if( fSTRz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "." ) return word;
+									}
+									goto default;
+									
 								default: 
 									if( countParen == 0 && countBracket == 0 )
 									{
@@ -2957,6 +2965,14 @@ version(DIDE)
 									if( countParen == 0 && countBracket == 0 ) return word;
 									goto default;
 									
+								case '.':
+									if( pos > 0 )
+									{
+										if( countBracket == 0 )
+											if( fSTRz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "." ) return word;
+									}
+									goto default;
+									
 								default: 
 									if( countParen == 0 && countBracket == 0 )
 									{
@@ -3038,6 +3054,14 @@ version(DIDE)
 									
 								case ' ', '\t', ':', ';', '+', '-', '*', '/', '<', '>', ',', '=', '&':
 									if( countParen == 0 && countBracket == 0 ) return word;
+									goto default;
+									
+								case '.':
+									if( pos > 0 )
+									{
+										if( countBracket == 0 )
+											if( fSTRz( IupGetAttributeId( iupSci, "CHAR", pos - 1 ) ) == "." ) return word;
+									}
 									goto default;
 									
 								default: 

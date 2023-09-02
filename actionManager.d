@@ -813,9 +813,9 @@ public:
 
 		try
 		{
-			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
-			
 			if( !std.file.exists( fullPath ) ) return false;
+			
+			if( IupGetInt( GLOBAL.dndDocumentZBox, "VALUEPOS" ) == 0 ) IupSetInt( GLOBAL.dndDocumentZBox, "VALUEPOS", 1 );
 
 			int		_bom, _withBom;
 			string 	_text = FileAction.loadFile( fullPath, _bom, _withBom );

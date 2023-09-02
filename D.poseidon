@@ -65,11 +65,11 @@ name=tools.d
 [Misc]
 [Focus]
 title=LDC_x64
-target=poseidonFB
-option=-odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB.res
+target=poseidonFB_x64
+option=--m64 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
 compiler=K:/CodingPark/ldc2-1.32.2-windows-multilib/bin/ldc2.exe
 incdir=K:/CodingPark/dmd2/import
-libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14
+libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14_64
 title=x64
 target=poseidonFB
 option=-odobjs -version=FBIDE -version=GUI poseidonFB64.res

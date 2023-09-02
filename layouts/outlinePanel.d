@@ -1767,7 +1767,7 @@ public:
 	}	
 	
 	
-	bool refresh( CScintilla cSci )
+	bool refresh( CScintilla cSci, bool bUpdateTree = true )
 	{
 		if( GLOBAL.enableParser != "ON" ) return false;
 		if( cSci is null ) return false;
@@ -1795,23 +1795,13 @@ public:
 						GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)] = cast(shared CASTnode) astHeadNode;
 						destroy( temp );
 						
-						// Flip
-						Ihandle* newTree = createTree( astHeadNode );
-						IupSetAttribute( zBoxHandle, "VALUE_HANDLE", cast(char*) newTree );
-						IupDestroy( actTree );						
-						/*
-						IupSetAttributeId( actTree, "DELNODE", 0, "CHILDREN" );
-						version(DIDE)
+						if( bUpdateTree )
 						{
-							IupSetAttributeId( actTree, "USERDATA", 0, cast(char*) astHeadNode );
-							IupSetAttribute( actTree, "TITLE", toStringz( astHeadNode.name ) );						
+							Ihandle* newTree = createTree( astHeadNode );
+							IupSetAttribute( zBoxHandle, "VALUE_HANDLE", cast(char*) newTree );
+							IupDestroy( actTree );						
 						}
-						IupSetAttributeId( actTree, "COLOR", 0, toStringz( GLOBAL.editColor.outlineFore ) );
-						foreach_reverse( CASTnode t; astHeadNode.getChildren() )
-						{
-							append( actTree, t, 0 );
-						}
-						*/
+
 						// Reparse Lexer
 						AutoComplete.resetPrevContainer();
 						version(FBIDE) IupScintillaSendMessage( cSci.getIupScintilla, 4003, 0, -1 ); // SCI_COLOURISE 4003

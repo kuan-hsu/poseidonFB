@@ -6,7 +6,7 @@ private import global, actionManager, scintilla, project, tools, layout;
 private import parser.autocompletion;
 private import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg, dialogs.manualDlg, layouts.customMenu;
 private import parser.scanner,  parser.token, parser.parser, parser.ast;
-private import std.string, std.conv, std.file, std.encoding, Path = std.path, Array = std.array, Uni = std.uni, std.algorithm;
+private import std.string, std.conv, std.file, std.encoding, std.process, Path = std.path, Array = std.array, Uni = std.uni, std.algorithm;
 private import core.memory;
 
 Ihandle* createMenu()
@@ -726,12 +726,28 @@ Ihandle* createMenu()
 	IupSetCallback( item_about, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
 		bool _64bit;
+		string	aboutHead;
 		string	C = "DMD";
 		version(X86_64) _64bit = true;
 		version(LDC) C = "LDC";
 		version(GDC) C = "GDC";
-		version(FBIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.523)  2023.08.13\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
-		version(DIDE)	IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.091)  2023.08.13\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\nlibreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		version(FBIDE)
+		{
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.524)  2023.09.02\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+		}
+		else
+		{
+			aboutHead = "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.092)  2023.09.02\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidond\n\n";
+		}
+		
+		version(Windows)
+		{
+			IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( aboutHead ~ "libreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr" ) );
+		}
+		else
+		{
+			IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( aboutHead ~ "libreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n\nCHMVIEW\nBy VANYA\nhttps://sourceforge.net/projects/chm-view/files/" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+		}
 		return IUP_DEFAULT;
 	});
 	
@@ -2089,7 +2105,8 @@ extern(C)
 										IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( splitWords[1] ) );
 										break;
 									default:
-										IupExecute( "./CHMVIEW", toStringz( splitWords[1] ) );
+										auto which = executeShell( "CHMVIEW_gtk3 " ~ splitWords[1] );
+										if( which.status != 0 )	IupExecute( "CHMVIEW_gtk2", toStringz( splitWords[1] ) );
 								}							
 							}
 						}
