@@ -984,7 +984,7 @@ version(FBIDE)
 								if( token().tok == TOK.Tassign )
 								{
 									parseToken( TOK.Tassign );
-									if( token().tok == TOK.Tnumbers || token().tok == TOK.Tidentifier )
+									if( token().tok == TOK.Tnumbers )// || token().tok == TOK.Tidentifier )
 									{
 										bool bSingle;
 										if( token().tok == TOK.Tnumbers )
@@ -1014,13 +1014,53 @@ version(FBIDE)
 											return true;
 										}
 										else
+										
+										
 										{
 											return false;
 										}
-									
 									}
 									else
 									{
+										if( token().tok == TOK.Tidentifier )
+										{
+											switch( Uni.toLower( token().identifier ) )
+											{
+												case "cbyte", "cshort", "cubyte", "cushort":
+													activeASTnode.addChild( _name, B_VARIABLE, null, token().identifier[1..$].dup, null, _lineNum );
+													parseToken( );
+													return true;
+												case "cint", "cuint":
+													activeASTnode.addChild( _name, B_VARIABLE, null, ( token().identifier[1..$] ~ "eger" ).dup, null, _lineNum );
+													parseToken( );
+													return true;
+												case "clng":
+													activeASTnode.addChild( _name, B_VARIABLE, null, "long", null, _lineNum );
+													parseToken( );
+													return true;
+												case "culng":
+													activeASTnode.addChild( _name, B_VARIABLE, null, "ulong", null, _lineNum );
+													parseToken( );
+													return true;
+												case "clngint":
+													activeASTnode.addChild( _name, B_VARIABLE, null, "longint", null, _lineNum );
+													parseToken( );
+													return true;
+												case "culngint":
+													activeASTnode.addChild( _name, B_VARIABLE, null, "ulongint", null, _lineNum );
+													parseToken( );
+													return true;
+												case "csng":
+													activeASTnode.addChild( _name, B_VARIABLE, null, "single", null, _lineNum );
+													parseToken( );
+													return true;
+												case "cdbl":
+													activeASTnode.addChild( _name, B_VARIABLE, null, "double", null, _lineNum );
+													parseToken( );
+													return true;
+												default:	
+											}
+										}
 										return false;
 									}
 								}
@@ -1161,7 +1201,36 @@ version(FBIDE)
 					}
 					
 					auto indexOpenparen = indexOf( _rightExpress, "(" );
-					if( indexOpenparen > -1 ) _rightExpress = _rightExpress[0..indexOpenparen];
+					if( indexOpenparen > -1 )
+					{
+						_rightExpress = _rightExpress[0..indexOpenparen];
+						switch( Uni.toLower( _rightExpress ) )
+						{
+							case "asc":			_type = "ulong";		_rightExpress = ""; break;
+							case "val":			_type = "double";		_rightExpress = ""; break;
+							case "valint":		_type = "integer";		_rightExpress = ""; break;
+							case "valuint":		_type = "uinteger";		_rightExpress = ""; break;
+							case "vallng":		_type = "long";			_rightExpress = ""; break;
+							case "valulng":		_type = "ulong";		_rightExpress = ""; break;
+							case "cdbl":		_type = "double";		_rightExpress = ""; break;
+							case "csng":		_type = "single";		_rightExpress = ""; break;
+							case "cint":		_type = "integer";		_rightExpress = ""; break;
+							case "cuint":		_type = "uinteger";		_rightExpress = ""; break;
+							case "clng":		_type = "long";			_rightExpress = ""; break;
+							case "culng":		_type = "ulong";		_rightExpress = ""; break;
+							case "clngint":		_type = "longint";		_rightExpress = ""; break;
+							case "culngint":	_type = "ulongint";		_rightExpress = ""; break;
+							case "str", "chr", "bin", "oct", "hex":
+								_type = "string";
+								_rightExpress = "";
+								break;
+							case "cbyte", "cubyte", "cshort", "cushort":
+								_type = _rightExpress[1..$].dup;
+								_rightExpress = "";
+								break;
+							default:
+						}
+					}
 					
 					activeASTnode.addChild( _name, B_VARIABLE, null, _type, _rightExpress, _lineNum );
 				}

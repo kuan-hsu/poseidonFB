@@ -254,6 +254,8 @@ public:
 			}
 			return IUP_DEFAULT;
 		});
+		
+		IupMap( _dlg );
 	}
 
 	~this()
@@ -264,9 +266,7 @@ public:
 
 	override string show( int x, int y ) // Overload form CBaseDialog
 	{
-		//IupMap( _dlg );
 		IupPopup( _dlg, x, y );
-
 		Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
 		return fromStringz( IupGetAttribute( textHandle, "VALUE" ) ).dup;
 	}

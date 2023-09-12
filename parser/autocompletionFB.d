@@ -376,16 +376,11 @@ version(FBIDE)
 			else
 				return null;
 
-			bool bShowType = true;//GLOBAL.toggleShowListType == "ON" ? true : false;
 			string type = node.type;
-
-			if( bShowType )
+			if( node.type.length )
 			{
-				if( node.type.length )
-				{
-					auto posOpenParen = indexOf( node.type, "(" );
-					if( posOpenParen > -1 ) type = node.type[0..posOpenParen]; else type = node.type;
-				}
+				auto posOpenParen = indexOf( node.type, "(" );
+				if( posOpenParen > -1 ) type = node.type[0..posOpenParen]; else type = node.type;
 			}
 			
 			switch( node.kind )
@@ -393,13 +388,13 @@ version(FBIDE)
 				case B_DEFINE | B_VARIABLE:	return name ~ "?33";
 				case B_DEFINE | B_FUNCTION:	return name ~ "?34";
 				
-				case B_SUB:					return bShowType ? name ~ "#void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
-				case B_FUNCTION:			return bShowType ? name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
+				case B_SUB:					return name ~ "#void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
+				case B_FUNCTION:			return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
 				case B_VARIABLE:
 					if( node.name.length )
 					{
 						if( !type.length ) type = node.base; // VAR
-						if( node.name[$-1] == ')' ) return bShowType ? name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return bShowType ? name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd ) : name ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
+						if( node.name[$-1] == ')' ) return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
 					}
 					break;
 
@@ -413,9 +408,16 @@ version(FBIDE)
 				case B_CLASS:					return name ~ "?" ~ std.conv.to!(string)( 7 + protAdd );
 				case B_TYPE: 					return name ~ "?" ~ std.conv.to!(string)( 10 + protAdd );
 				case B_ENUM: 					return name ~ "?" ~ std.conv.to!(string)( 12 + protAdd );
-				case B_PARAM:					return bShowType ? name ~ "#" ~ type ~ "?18" : name ~ "?18";
-				case B_ENUMMEMBER:				return name ~ "?19";
-				case B_ALIAS:					return bShowType ? name ~ "#" ~ type ~ "?20" : name ~ "?20";//name ~ "?20";
+				case B_PARAM:					return name ~ "#" ~ type ~ "?18";
+				/*case B_ENUMMEMBER:				return name ~ "?19";*/
+				case B_ENUMMEMBER:
+					if( node.getFather !is null )
+					{
+						if( node.getFather.name.length ) return name ~ "#<" ~ node.getFather.name ~ ">?19";
+					}
+					return name ~ "?19";
+				
+				case B_ALIAS:					return name ~ "#" ~ type ~ "?20";
 				case B_NAMESPACE:				return name ~ "?24";
 				case B_INCLUDE, B_CTOR, B_DTOR:	return null;
 				case B_OPERATOR:				return null;
@@ -424,7 +426,7 @@ version(FBIDE)
 
 			return name;
 		}
-
+		/+
 		static CASTnode[] anonymousEnumMembers( CASTnode originalNode )
 		{
 			if( originalNode is null ) return null;
@@ -441,7 +443,7 @@ version(FBIDE)
 
 			return results;
 		}
-
+		
 		static CASTnode[] getAnonymousEnumMemberFromWord( CASTnode originalNode, string word )
 		{
 			if( originalNode is null ) return null;
@@ -462,7 +464,6 @@ version(FBIDE)
 			return results;
 		}
 
-		/*
 		static CASTnode getAnonymousEnumMemberFromWholeWord( CASTnode originalNode, char[] word )
 		{
 			if( originalNode.kind & B_ENUM )
@@ -478,7 +479,7 @@ version(FBIDE)
 
 			return null;
 		}
-		*/
+		+/
 
 		static CASTnode getBaseNode( CASTnode originalNode )
 		{
@@ -630,30 +631,26 @@ version(FBIDE)
 			
 			CASTnode[] results;
 			
+			word = Uni.toLower( word );
+			
 			foreach( child; getMembers( node ) )
 			{
+				if( child.kind & B_ENUM )
+				{
+					foreach( _son; child.getChildren )
+					{
+						if( indexOf( Uni.toLower( _son.name ), word ) == 0 )
+							if( line >= child.lineNumber ) results ~= _son;
+					}				
+				}
+			
 				if( child.name.length )
 				{
-					if( indexOf( Uni.toLower( child.name ), Uni.toLower( word ) ) == 0 )
+					if( indexOf( Uni.toLower( child.name ), word ) == 0 )
 					{
 						if( line >= child.lineNumber ) results ~= child;
 					}
 				}
-				else
-				{
-					if( line >= child.lineNumber )
-					{
-						CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, word );
-						if( enumResult.length ) results ~= enumResult;
-					}
-				}
-
-				/*
-				if( Util.index( lowerCase( child.name ), word ) == 0 )
-				{
-					if( line >= child.lineNumber ) results ~= child;
-				}
-				*/
 			}
 
 			if( node.getFather() !is null )
@@ -864,6 +861,8 @@ version(FBIDE)
 
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, true, ln );
 			if( results.length ) return results;
+			
+			word = Uni.toLower( word );
 
 			cleanIncludeContainer();
 			getIncludes( originalNode, originalFullPath, 0, ln );
@@ -874,14 +873,17 @@ version(FBIDE)
 				{
 					foreach( child; getMembers( includeAST ) )
 					{
+						if( child.kind & B_ENUM )
+						{
+							foreach( _son; child.getChildren )
+							{
+								if( Uni.toLower( ParserAction.removeArrayAndPointer( _son.name ) ) == word ) results ~= _son;
+							}								
+						}
+						
 						if( child.name.length )
 						{
-							if( Uni.toLower( ParserAction.removeArrayAndPointer( child.name ) ) == Uni.toLower( word ) ) results ~= child;
-						}
-						else
-						{
-							CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, Uni.toLower( word ) );
-							if( enumResult.length ) results ~= enumResult;
+							if( Uni.toLower( ParserAction.removeArrayAndPointer( child.name ) ) == word ) results ~= child;
 						}
 					}
 				}
@@ -893,6 +895,8 @@ version(FBIDE)
 		static CASTnode[] getMatchIncludesFromWord( CASTnode originalNode, string originalFullPath, string word, int ln = 2147483647 )
 		{
 			if( originalNode is null ) return null;
+			
+			word = Uni.toLower( word );
 			
 			CASTnode[] results = getInsertCodeBI( originalNode, originalFullPath, word, false, ln );
 			if( results.length ) return results;
@@ -910,7 +914,7 @@ version(FBIDE)
 						{
 							if( child.name.length )
 							{
-								if( indexOf( Uni.toLower( child.name ), Uni.toLower( word ) ) == 0 )
+								if( indexOf( Uni.toLower( child.name ), word ) == 0 )
 								{
 									results ~= child;
 								}
@@ -918,17 +922,20 @@ version(FBIDE)
 						}
 						else
 						{
+							if( child.kind & B_ENUM )
+							{
+								foreach( _son; child.getChildren )
+								{
+									if( indexOf( Uni.toLower( _son.name ), word ) == 0 ) results ~= _son;
+								}								
+							}
+							
 							if( child.name.length )
 							{
-								if( indexOf( Uni.toLower( child.name ), Uni.toLower( word ) ) == 0 )
+								if( indexOf( Uni.toLower( child.name ), word ) == 0 )
 								{
 									results ~= child;
 								}
-							}
-							else
-							{
-								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( child, Uni.toLower( word ) );
-								if( enumResult.length ) results ~= enumResult;
 							}
 						}
 					}
@@ -954,23 +961,26 @@ version(FBIDE)
 		{
 			if( originalNode is null ) return null;
 			
+			word = Uni.toLower( word );
+			
 			foreach( CASTnode _node; getMembers( originalNode, bSkipExtend ) )
 			{
 				if( _node.kind & B_KIND )
 				{
 					string name = Uni.toLower( ParserAction.removeArrayAndPointer( _node.name ) );
 					
-					if( name.length )
+					if( _node.kind & B_ENUM )
 					{
-						if( name == Uni.toLower( word ) ) return _node;
-					}
-					else
-					{
-						foreach( CASTnode _enumMember; anonymousEnumMembers( _node ) )
+						foreach( _son; _node.getChildren )
 						{
-							if( Uni.toLower( _enumMember.name ) == Uni.toLower( word ) ) return _enumMember;
+							if( Uni.toLower( _son.name ) == word ) return _son;
 						}
 					}
+					
+					if( name.length )
+					{
+						if( name == word ) return _node;
+					}					
 				}
 			}
 
@@ -993,23 +1003,33 @@ version(FBIDE)
 
 					if( bWholeWord )
 					{
-						if( name == word ) results ~= _node;
+						if( _node.kind & B_ENUM )
+						{
+							foreach( _son; _node.getChildren )
+							{
+								if( Uni.toLower( _son.name ) == word ) results ~= _son;
+							}
+						}
+						
+						if( name.length )
+						{
+							if( name == word ) results ~= _node;
+						}
 					}
 					else
 					{
-						//if( Util.index( name, lowerCase( word ) ) == 0 ) results ~= _node;
+						if( _node.kind & B_ENUM )
+						{
+							foreach( _son; _node.getChildren )
+							{
+								if( indexOf( Uni.toLower( _son.name ), word ) == 0 ) results ~= _son;
+							}							
+						}					
+					
 						if( name.length )
 						{
 							if( indexOf( name, word ) == 0 ) results ~= _node;
 						}
-						else
-						{
-							if( _node.kind & B_ENUM )
-							{
-								CASTnode[] enumResult = getAnonymousEnumMemberFromWord( _node, word );
-								if( enumResult.length ) results ~= enumResult;
-							}
-						}					
 					}
 				}
 			}
@@ -4137,7 +4157,17 @@ version(FBIDE)
 							else 
 								_list ~= "OPERATOR:\n";
 							break;
-
+							
+						case B_ENUMMEMBER:
+							if( AST_Head.getFather.name.length )
+							{
+								nameSpaceTitle = getNameSpaceWithDotTail( AST_Head.getFather );
+								_list ~= ( "ENUM: < " ~ nameSpaceTitle ~ AST_Head.getFather.name ~ " >\n" );
+							}
+							else 
+								_list ~= "ENUM: <Anonymous>\n";
+							break;
+						
 						case B_PARAM:	 	_list ~= "PARAMETER:\n";	break;
 						case B_CTOR:	 	_list ~= "CTOR:\n";			break;
 						case B_DTOR:	 	_list ~= "DTOR:\n";			break;
