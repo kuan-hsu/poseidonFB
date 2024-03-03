@@ -18,12 +18,12 @@ class CCompilerHelpDialog : CBaseDialog
 		{
 			version(FBIDE)
 			{
-				auto d = cast(string) std.file.read( "settings/compilerOptionsFB.txt" );
+				auto d = cast(string) std.file.read( GLOBAL.poseidonPath ~ "/settings/compilerOptionsFB.txt" );
 				IupSetStrAttribute( text, "VALUE", toStringz( d ) );
 			}
 			else
 			{
-				auto d = cast(string) std.file.read( "settings/compilerOptionsD.txt" );
+				auto d = cast(string) std.file.read( GLOBAL.poseidonPath ~ "/settings/compilerOptionsD.txt" );
 				IupSetStrAttribute( text, "VALUE", toStringz( d ) );
 			}
 		}

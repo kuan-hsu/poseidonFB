@@ -67,18 +67,18 @@ name=tools.d
 title=LDC_x64
 target=poseidonFB_x64
 option=--m64 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
-compiler=K:/CodingPark/ldc2-1.32.2-windows-multilib/bin/ldc2.exe
-incdir=K:/CodingPark/dmd2/import
-libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14_64
+compiler=C:/Users/nagah/OneDrive/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
+incdir=C:/Users/nagah/OneDrive/codingPark/import
+libdir=C:/Users/nagah/OneDrive/codingPark/Libraries/iup/iup5947/dll14_64
 title=x64
-target=poseidonFB
+target=poseidonFB_x64
 option=-odobjs -version=FBIDE -version=GUI poseidonFB64.res
-compiler=K:/CodingPark/dmd2/windows/bin64/dmd.exe
-incdir=K:/CodingPark/dmd2/import
-libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14_64
+compiler=C:/Users/nagah/OneDrive/codingPark/dmd2/windows/bin64/dmd.exe
+incdir=C:/Users/nagah/OneDrive/codingPark/import
+libdir=C:/Users/nagah/OneDrive/codingPark/Libraries/iup/iup5947/dll14_64
 title=LDC_x32
 target=poseidonFB
 option=--m32 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB.res
-compiler=K:/CodingPark/ldc2-1.32.2-windows-multilib/bin/ldc2.exe
-incdir=K:/CodingPark/dmd2/import
-libdir=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14
+compiler=C:/Users/nagah/OneDrive/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
+incdir=C:/Users/nagah/OneDrive/codingPark/import
+libdir=C:/Users/nagah/OneDrive/codingPark/Libraries/iup/iup5947/dll14

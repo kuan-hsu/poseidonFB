@@ -363,7 +363,7 @@ version(Windows)
 	fnSetWindowTheme SetWindowTheme = null;
 	bool InitDarkMode()
 	{
-		import std.string, std.conv, iup.iup;
+		import std.string, std.conv;
 		
 		auto RtlGetNtVersionNumbers = cast(fnRtlGetNtVersionNumbers)(GetProcAddress(GetModuleHandleW("ntdll.dll"), "RtlGetNtVersionNumbers"));
 		if (RtlGetNtVersionNumbers)

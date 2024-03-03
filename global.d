@@ -149,7 +149,7 @@ public:
 	
 	// Setting
 	static string[string]		EnvironmentVars;
-	static string				poseidonPath;			// Include Tail /
+	static string				poseidonPath;			// Without Tail /
 	static string				linuxHome = "";
 	static string				linuxTermName;
 	static string				linuxHtmlAppName;

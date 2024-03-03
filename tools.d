@@ -2,7 +2,7 @@
 
 private import iup.iup;
 private import global, project, actionManager;
-private import std.string, Conv = std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
+private import std.string, std.process, Conv = std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
 private import core.stdc.stdlib, core.stdc.string, core.thread;
 
 
@@ -180,6 +180,28 @@ version(FBIDE)
 
 		return replaceText;
 	}
+}
+
+bool isAppExists( string path )
+{
+	if( exists( path ) ) return true;
+	
+	version(linux)
+	{
+		try
+		{
+			auto which = executeShell( "which " ~ path );
+			if( which.status != 0 ) 
+				return false;
+			else
+			{
+				auto ret = which.output;
+				if( ret.length > 0 ) return true;
+			}
+		}
+		catch( Exception e ){}
+	}
+	return false;
 }
 
 version(DIDE)
