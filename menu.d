@@ -7,7 +7,7 @@ private import parser.autocompletion;
 private import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg, dialogs.manualDlg, layouts.customMenu;
 private import parser.scanner,  parser.token, parser.parser, parser.ast;
 private import std.string, std.conv, std.file, std.encoding, std.process, Path = std.path, Array = std.array, Uni = std.uni, std.algorithm;
-private import core.memory;
+private import core.memory, core.thread;
 
 Ihandle* createMenu()
 {
@@ -733,7 +733,7 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.525)  2023.09.12\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.526)  2024.03.03\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
@@ -2095,18 +2095,19 @@ extern(C)
 							else
 							{
 								string htmlappPath = Path.baseName( GLOBAL.linuxHtmlAppName );
-								switch( htmlappPath )
+								switch( strip( htmlappPath ) )
 								{
 									case "xchm":
 										IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "\"" ~ splitWords[1] ~ "\"" ) );	// xchm "file:/home/username/freebasic/FB-manual-1.05.0.chm#xchm:/KeyPg%s.html"
 										break;
-									case "kchmviewer":
-									case "CHMVIEW":
-										IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( splitWords[1] ) );
+									case "":
+										auto chmPid = spawnShell( "CHMVIEW_gtk3 " ~ splitWords[1] );
+										Thread.sleep( 20.msecs );
+										auto chm = tryWait( chmPid );
+										if( chm.status != 0 || chm.terminated ) IupExecute( "CHMVIEW_gtk2", toStringz( splitWords[1] ) );
 										break;
 									default:
-										auto which = executeShell( "CHMVIEW_gtk3 " ~ splitWords[1] );
-										if( which.status != 0 )	IupExecute( "CHMVIEW_gtk2", toStringz( splitWords[1] ) );
+										IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( splitWords[1] ) );
 								}							
 							}
 						}

@@ -67,29 +67,6 @@ private:
 		return processDlg;
 	}
 	
-	
-	static bool isAppExists( string path )
-	{
-		if( exists( path ) ) return true;
-		
-		version(linux)
-		{
-			try
-			{
-				auto which = executeShell( "which " ~ path );
-				if( which.status != 0 ) 
-					return false;
-				else
-				{
-					auto ret = which.output;
-					if( ret.length > 0 ) return true;
-				}
-			}
-			catch( Exception e ){}
-		}
-		return false;
-	}
-	
 	version(linux)
 	{
 		static bool checkTerminalExists()

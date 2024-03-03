@@ -3607,7 +3607,7 @@ version(FBIDE)
 												{
 													if( _splitWords[1].length )
 													{
-														switch( Path.stripExtension( Path.baseName( GLOBAL.linuxHtmlAppName ) ) )
+														switch( strip( Path.stripExtension( Path.baseName( GLOBAL.linuxHtmlAppName ) ) ) )
 														{
 															case "xchm":
 																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( "\"file:" ~ _splitWords[1] ~ "#xchm:/KeyPg" ~ keyWord ~ ".html\"" ) );	// xchm "file:/home/username/freebasic/FB-manual-1.05.0.chm#xchm:/KeyPg%s.html"
@@ -3618,9 +3618,14 @@ version(FBIDE)
 															case "CHMVIEW":
 																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
 																break;
+															case "":
+																auto chmPid = spawnShell( "CHMVIEW_gtk3 " ~ _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" );
+																Thread.sleep( 20.msecs );
+																auto chm = tryWait( chmPid );
+																if( chm.status != 0 || chm.terminated ) IupExecute( "CHMVIEW_gtk2", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+																break;
 															default:
-																auto which = executeShell( "CHMVIEW_gtk3 " ~ _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" );
-																if( which.status != 0 )	IupExecute( "CHMVIEW_gtk2", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
+																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), null );
 														}
 														bExitFlag = true;
 													}
