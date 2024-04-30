@@ -733,7 +733,7 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.526)  2024.03.03\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.527)  2024.05.01\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
@@ -1828,129 +1828,136 @@ extern(C)
 		{
 			if( activePrjName in GLOBAL.projectManager )
 			{
-				foreach( s; GLOBAL.projectManager[activePrjName].sources )
+				try
 				{
-					version(FBIDE)
+					foreach( s; GLOBAL.projectManager[activePrjName].sources )
 					{
-						auto oPath = Path.stripExtension( s ) ~ ".o";
-						if( std.file.exists( oPath ) ) std.file.remove( oPath );
-						
-						// -r or -R
-						oPath = Path.stripExtension( s ) ~ ".c";
-						if( std.file.exists( oPath ) ) std.file.remove( oPath );
-						oPath = Path.stripExtension( s ) ~ ".asm";
-						if( std.file.exists( oPath ) ) std.file.remove( oPath );
-						oPath = Path.stripExtension( s ) ~ ".ll";
-						if( std.file.exists( oPath ) ) std.file.remove( oPath );
-						
-						// -pp
-						oPath = Path.stripExtension( s ) ~ ".pp" ~ Path.extension( s );
-						if( std.file.exists( oPath ) ) std.file.remove( oPath );						
-					}
-					version(DIDE)
-					{
-						version(Windows)
-						{
-							auto oPath = Path.stripExtension( s ) ~ ".obj";
-							if( std.file.exists( oPath ) ) std.file.remove( oPath );
-							
-							oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".obj";
-							if( std.file.exists( oPath ) ) std.file.remove( oPath );
-						}
-						else
+						version(FBIDE)
 						{
 							auto oPath = Path.stripExtension( s ) ~ ".o";
 							if( std.file.exists( oPath ) ) std.file.remove( oPath );
 							
-							oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".o";
+							// -r or -R
+							oPath = Path.stripExtension( s ) ~ ".c";
 							if( std.file.exists( oPath ) ) std.file.remove( oPath );
+							oPath = Path.stripExtension( s ) ~ ".asm";
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
+							oPath = Path.stripExtension( s ) ~ ".ll";
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
+							
+							// -pp
+							oPath = Path.stripExtension( s ) ~ ".pp" ~ Path.extension( s );
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );						
+						}
+						version(DIDE)
+						{
+							version(Windows)
+							{
+								auto oPath = Path.stripExtension( s ) ~ ".obj";
+								if( std.file.exists( oPath ) ) std.file.remove( oPath );
+								
+								oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".obj";
+								if( std.file.exists( oPath ) ) std.file.remove( oPath );
+							}
+							else
+							{
+								auto oPath = Path.stripExtension( s ) ~ ".o";
+								if( std.file.exists( oPath ) ) std.file.remove( oPath );
+								
+								oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( Path.baseName( s ) ) ~ ".o";
+								if( std.file.exists( oPath ) ) std.file.remove( oPath );
+							}
 						}
 					}
-				}
-				
-				version(DIDE)
-				{
+					
+					version(DIDE)
+					{
+						version(Windows)
+						{
+							auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".obj";
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
+						}
+						else
+						{
+							auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".o";
+							if( std.file.exists( oPath ) ) std.file.remove( oPath );
+						}
+
+						string activeCompilerOption = GLOBAL.projectManager[activePrjName].compilerOption;
+						if( GLOBAL.projectManager[activePrjName].focusOn.length )
+							if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) activeCompilerOption = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Option;
+						
+						auto odPos = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
+						if( odPos > -1 )
+						{
+							auto odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, " ", odPos + 3 );
+							if( odTail == -1 ) odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "\t", odPos + 3 );
+							if( odTail > odPos + 3 )
+							{
+								string pathName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].compilerOption[odPos+3..odTail];
+								if( std.file.exists( pathName ) )
+									if( std.file.isDir( pathName ) )
+									{
+										foreach( string filename; dirEntries( pathName, "*.{obj,o}", SpanMode.depth) )
+											std.file.remove( filename );
+										//std.file.rmdirRecurse( pathName ); 
+									}
+							}
+						}
+					}
+					
+					string executeName;
+					string _targetName = GLOBAL.projectManager[activePrjName].targetName;
+					if( GLOBAL.projectManager[activePrjName].focusOn.length )
+					{
+						if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _targetName = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Target;
+					}
+					if( !_targetName.length ) _targetName = Path.stripExtension( GLOBAL.projectManager[activePrjName].name );
 					version(Windows)
 					{
-						auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".obj";
-						if( std.file.exists( oPath ) ) std.file.remove( oPath );
+						switch( GLOBAL.projectManager[activePrjName].type )
+						{
+							case "2":
+								version(FBIDE)
+									executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a";
+								else
+									executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib";
+								break;
+							case "3":
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll";
+								if( std.file.exists( executeName ) ) std.file.remove( executeName );
+								version(FBIDE)
+								{
+									executeName = GLOBAL.projectManager[activePrjName].dir ~ "/lib" ~ _targetName ~ ".dll.a";
+									if( std.file.exists( executeName ) ) std.file.remove( executeName );
+								}
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".def";
+								break;
+							default:
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe";
+						}
 					}
 					else
 					{
-						auto oPath = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ Path.stripExtension( GLOBAL.projectManager[activePrjName].targetName ) ~ ".o";
-						if( std.file.exists( oPath ) ) std.file.remove( oPath );
-					}
-
-					string activeCompilerOption = GLOBAL.projectManager[activePrjName].compilerOption;
-					if( GLOBAL.projectManager[activePrjName].focusOn.length )
-						if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) activeCompilerOption = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Option;
-					
-					auto odPos = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "-od" );
-					if( odPos > -1 )
-					{
-						auto odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, " ", odPos + 3 );
-						if( odTail == -1 ) odTail = indexOf( GLOBAL.projectManager[activePrjName].compilerOption, "\t", odPos + 3 );
-						if( odTail > odPos + 3 )
+						switch( GLOBAL.projectManager[activePrjName].type )
 						{
-							string pathName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ GLOBAL.projectManager[activePrjName].compilerOption[odPos+3..odTail];
-							if( std.file.exists( pathName ) )
-								if( std.file.isDir( pathName ) )
-								{
-									foreach( string filename; dirEntries( pathName, "*.{obj,o}", SpanMode.depth) )
-										std.file.remove( filename );
-									//std.file.rmdirRecurse( pathName ); 
-								}
-						}
-					}
-				}
-				
-				string executeName;
-				string _targetName = GLOBAL.projectManager[activePrjName].targetName;
-				if( GLOBAL.projectManager[activePrjName].focusOn.length )
-				{
-					if( GLOBAL.projectManager[activePrjName].focusOn in GLOBAL.projectManager[activePrjName].focusUnit ) _targetName = GLOBAL.projectManager[activePrjName].focusUnit[GLOBAL.projectManager[activePrjName].focusOn].Target;
-				}
-				if( !_targetName.length ) _targetName = Path.stripExtension( GLOBAL.projectManager[activePrjName].name );
-				version(Windows)
-				{
-					switch( GLOBAL.projectManager[activePrjName].type )
-					{
-						case "2":
-							version(FBIDE)
+							case "2":
 								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a";
-							else
-								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".lib";
-							break;
-						case "3":
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".dll";
-							if( std.file.exists( executeName ) ) std.file.remove( executeName );
-							version(FBIDE)
-							{
-								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/lib" ~ _targetName ~ ".dll.a";
-								if( std.file.exists( executeName ) ) std.file.remove( executeName );
-							}
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".def";
-							break;
-						default:
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".exe";
-					}
+								break;
+							case "3":
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so";
+								break;
+							default:
+								executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName;
+						}
+					}				
+					
+					if( std.file.exists( executeName ) ) std.file.remove( executeName );
 				}
-				else
+				catch( Exception e )
 				{
-					switch( GLOBAL.projectManager[activePrjName].type )
-					{
-						case "2":
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ "lib" ~ _targetName ~ ".a";
-							break;
-						case "3":
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName ~ ".so";
-							break;
-						default:
-							executeName = GLOBAL.projectManager[activePrjName].dir ~ "/" ~ _targetName;
-					}
+					tools.questMessage( "Error", e.toString, "ERROR", "OK" );
 				}				
-				
-				if( std.file.exists( executeName ) ) std.file.remove( executeName );
 
 				GLOBAL.messagePanel.printOutputPanel( "Done." );
 			}

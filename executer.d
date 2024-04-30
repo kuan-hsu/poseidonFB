@@ -334,9 +334,16 @@ private:
 			
 			if( GLOBAL.compilerSettings.useDelExistExe == "ON" )
 			{
-				// Remove the execute file
-				string singleExistedExecute = _beRunFile ~ ".exe";
-				if( std.file.exists( singleExistedExecute ) ) std.file.remove( singleExistedExecute );
+				try
+				{
+					// Remove the execute file
+					string singleExistedExecute = _beRunFile ~ ".exe";
+					if( std.file.exists( singleExistedExecute ) ) std.file.remove( singleExistedExecute );
+				}
+				catch( Exception e )
+				{
+					tools.questMessage( "Error", e.toString, "ERROR", "OK" );
+				}
 			}	
 		
 			processDlg = createProcessDlg( "Compiling......" );

@@ -307,8 +307,17 @@ extern(C)
 	// While Leave poseidon.......
 	int mainDialog_CLOSE_cb(Ihandle *ih)
 	{
-		int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["sureexit"].toDString );
-		if( result != 1 ) return IUP_IGNORE;
+		if( GLOBAL.scintillaManager.length > 0 )
+		{
+			foreach( sc; GLOBAL.scintillaManager )
+			{
+				if( ScintillaAction.getModifyByTitle( sc ) )
+				{
+					int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["sureexit"].toDString );
+					if( result != 1 ) return IUP_IGNORE; else break;
+				}
+			}
+		}
 	
 		try
 		{
