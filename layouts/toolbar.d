@@ -437,7 +437,7 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					auto dlg = new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 3 ) ExecuterAction.compile( result[0], null, result[2] );
 					destroy( dlg );
@@ -459,7 +459,7 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					auto dlg = new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 3 ) ExecuterAction.build( result[0], null, result[2] );
 					destroy( dlg );
@@ -481,7 +481,7 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
+					auto dlg = new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 1 );
 					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 1  );
 					if( result.length == 3 ) ExecuterAction.buildAll( result[0], result[2], null );
 					destroy( dlg );
@@ -503,7 +503,7 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					auto dlg = new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
 					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  ).dup;
 					if( result.length == 3 ) ExecuterAction.compile( result[0], result[1], result[2], null, true ); // 3rd parameter = " " is compile & run
 					destroy( dlg );
@@ -525,7 +525,7 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 2 );
+					auto dlg = new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 2 );
 					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 2  );
 					if( result.length == 3 ) ExecuterAction.run( result[1] );
 					destroy( dlg );
@@ -547,7 +547,7 @@ extern( C )
 			{
 				if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) > 0 ) // No document, exit
 				{
-					auto dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
+					auto dlg = new CArgOptionDialog( -1, -1, GLOBAL.languageItems["caption_argtitle"].toDString(), 3 );
 					string[] result = dlg.show( IUP_MOUSEPOS, IUP_MOUSEPOS, 3  );
 					if( result.length == 3 ) ExecuterAction.quickRun( result[0], result[1], result[2] );
 					destroy( dlg );

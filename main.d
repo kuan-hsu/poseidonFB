@@ -168,12 +168,17 @@ void main( string[] args )
 	EditorOpacity		_editorSetting02 = GLOBAL.editorSetting02;
 	EditorColorUint		_editColor = GLOBAL.editColor;
 
+	IupMap( GLOBAL.mainDlg );
 	version(Windows)
 	{
 		if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 		{
 			GLOBAL.bCanUseDarkMode = InitDarkMode();
-			//IupMessage("",toStringz(Conv.to!(string)(GLOBAL.bCanUseDarkMode)));
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				AllowDarkModeForWindow( IupGetAttribute( GLOBAL.mainDlg, "HWND" ), 1 );
+				RefreshCaptionColor( IupGetAttribute( GLOBAL.mainDlg, "HWND" ) );
+			}
 		}
 	}
 	

@@ -9,6 +9,8 @@ private import std.string, std.conv;
 class CCustomDialog : CBaseDialog
 {
 private:
+	import					darkmode.darkmode;
+	
 	Ihandle*				listTools, treePluginStatus;
 	Ihandle*				labelStatus;
 	string					paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n%p% = Active Prj Files\n%pdir% = Active Prj Dir";
@@ -213,6 +215,18 @@ private:
 		{
 			if( !CCustomDialog.editCustomTools[i].name.length ) break;
 			IupSetStrAttribute( listTools, "APPENDITEM", toStringz( CCustomDialog.editCustomTools[i].name ) );
+		}
+		
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
+				}
+			}
 		}		
 	}	
 

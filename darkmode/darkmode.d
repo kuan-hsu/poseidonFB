@@ -263,13 +263,6 @@ version(Windows)
 	bool g_darkModeEnabled = false;
 	DWORD g_buildNumber = 0;
 
-	bool AllowDarkModeForWindow(HWND hWnd, bool allow)
-	{
-		if (g_darkModeSupported)
-			return _AllowDarkModeForWindow(hWnd, allow);
-		return false;
-	}
-
 	bool IsHighContrast()
 	{
 		HIGHCONTRASTW highContrast;// = { sizeof(highContrast) };
@@ -291,7 +284,7 @@ version(Windows)
 			SetPropW(hWnd, "UseImmersiveDarkModeColors", cast(HANDLE)(cast(INT_PTR)(dark)));
 		else if (_SetWindowCompositionAttribute)
 		{
-			WINDOWCOMPOSITIONATTRIBDATA data;// = { WCA_USEDARKMODECOLORS, &dark, sizeof(dark) };
+			WINDOWCOMPOSITIONATTRIBDATA data = { WINDOWCOMPOSITIONATTRIB.WCA_USEDARKMODECOLORS, &dark, dark.sizeof };
 			_SetWindowCompositionAttribute(hWnd, &data);
 		}
 	}
@@ -361,6 +354,15 @@ version(Windows)
 
 	public:
 	fnSetWindowTheme SetWindowTheme = null;
+	
+	void RefreshCaptionColor(HWND hWnd){ RefreshTitleBarThemeColor( hWnd );	}
+
+	bool AllowDarkModeForWindow(HWND hWnd, bool allow)
+	{
+		if (g_darkModeSupported) return _AllowDarkModeForWindow(hWnd, allow);
+		return false;
+	}
+	
 	bool InitDarkMode()
 	{
 		import std.string, std.conv;

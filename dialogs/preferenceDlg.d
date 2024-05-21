@@ -7,7 +7,7 @@ private import layouts.table;
 private import global, menu, IDE, project, tools, scintilla, actionManager, parser.autocompletion;
 private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg, dialogs.shortcutDlg;
 private import darkmode.darkmode;
-private import std.string, std.file, std.conv, std.format, Path = std.path, Array = std.array;
+private import std.string, std.file, std.conv, std.format, Path = std.path, Array = std.array, Conv = std.conv;
 private import core.memory;
 
 private struct PreferenceDialogParameters
@@ -19,6 +19,7 @@ private struct PreferenceDialogParameters
 class CPreferenceDialog : CBaseDialog
 {
 private:
+	import darkmode.darkmode;
 	import Array = std.array;
 	
 	Ihandle* btnOpen, btnx64Open, btnOpenx64Debugger, btnOpenDebugger, colorDefaultRefresh, colorTemplateRemove, colorTemplateSave;
@@ -2032,6 +2033,19 @@ private:
 		});	
 		
 		IupMap( _dlg );
+		
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
+				}
+			}
+		}		
+
 	}
 
 	~this()
@@ -2042,6 +2056,7 @@ private:
 	override string show( int x, int y )
 	{
 		IupShowXY( _dlg, x, y );
+		
 		return "OK";
 	}
 	
@@ -2797,6 +2812,29 @@ extern(C) // Callback for CPreferenceDialog
 		IupSetAttribute(dlg, "SHOWHEX", "YES");
 		IupSetAttribute(dlg, "SHOWCOLORTABLE", "YES");
 		IupSetAttribute(dlg, "TITLE", GLOBAL.languageItems["color"].toCString() );
+		
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					IupMap( dlg );
+					AllowDarkModeForWindow( IupGetAttribute( dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( dlg, "HWND" ) );
+					
+					Ihandle* _c = IupGetChild( dlg, 0 ); 
+					_c = IupGetChild( _c, 2 ); // hBox, label, hbox
+
+					auto child = IupGetNextChild( _c, null );
+					while( child )
+					{
+						if( fSTRz( IupGetClassName(child) ) == "button" ) SetWindowTheme( IupGetAttribute( child, "WID" ), "DarkMode_Explorer", null );
+						child = IupGetNextChild(null, child);
+					}
+				}
+			}
+		}
 
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 

@@ -6,7 +6,7 @@ class CCompilerHelpDialog : CBaseDialog
 {
 	private:
 	import iup.iup;	
-	import global;
+	import global, darkmode.darkmode;
 	import std.string, std.file;
 
 	void createLayout()
@@ -37,12 +37,26 @@ class CCompilerHelpDialog : CBaseDialog
 		IupSetAttributes( vBox, "ALIGNMENT=ARIGHT,MARGIN=5x5,GAP=2,EXPAND=YES" );
 
 		IupAppend( _dlg, vBox );
+		
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					IupMap( _dlg );
+					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
+				}
+			}
+		}		
 	}	
 
 	public:
 	this( int w, int h, string title, bool bResize = true, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
+		IupSetAttribute( _dlg, "ICON", "icon_selectall" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		IupSetAttribute( _dlg, "TOPMOST", "YES" );
 		createLayout();

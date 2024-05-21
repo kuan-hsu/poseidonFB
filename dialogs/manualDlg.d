@@ -9,6 +9,7 @@ private import std.string, std.conv, Array = std.array;
 class CManualDialog : CBaseDialog
 {
 private:
+	import				darkmode.darkmode;
 	Ihandle*			listManuals;
 	Ihandle*			labelStatus;
 	IupString			manualpathString;
@@ -120,6 +121,18 @@ public:
 	
 	override string show( int x, int y )
 	{
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
+				}
+			}
+		}
+		
 		IupPopup( _dlg, x, y );
 		return null;
 	}	

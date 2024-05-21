@@ -8,11 +8,14 @@ import std.string, std.conv, Array = std.array;
 class CShortCutDialog : CBaseDialog
 {
 private:
+	import			darkmode.darkmode;
 	Ihandle*		textResult;
 	IupString[3]	labelTitle;
 
 	void createLayout( int item, string listText )
 	{
+		IupSetAttribute( _dlg, "ICON", "icon_cut" );
+		
 		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
 		IupSetAttribute( btnAPPLY, "TITLE", GLOBAL.languageItems["clear"].toCString );
 
@@ -94,6 +97,24 @@ private:
 		Ihandle* VBox0 = IupVbox( label0, label1, label2, labelSEPARATOR, HBox0, IupFill(), bottom, null );
 		IupSetAttributes( VBox0, "MARGIN=5x5" );
 		IupAppend( _dlg, VBox0 );
+		
+		IupMap( _dlg );
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
+					SetWindowTheme( cast(void*) IupGetAttribute( keyList, "WID" ), "DarkMode_CFD", null );
+				}
+				else
+				{
+					SetWindowTheme( cast(void*) IupGetAttribute( keyList, "WID" ), "CFD", null );
+				}
+			}
+		}		
 	}	
 
 public:
@@ -103,7 +124,7 @@ public:
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Courier New,9" );
+			IupSetAttribute( _dlg, "FONT", "Consolas,9" );
 		}
 		else
 		{

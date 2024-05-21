@@ -9,6 +9,7 @@ private import std.string, std.conv;
 class CArgOptionDialog : CBaseDialog
 {
 	private:
+	version(Windows)	import darkmode.darkmode;
 	import				tools;
 	Ihandle*			listTools, listCompiler, listOptions, listArgs, btnCompilerPath;
 	
@@ -176,18 +177,18 @@ class CArgOptionDialog : CBaseDialog
 			IupSetAttributes( hBoxArgs, "ALIGNMENT=ACENTER,MARGIN=2x0" );	
 		}
 
-		
+		/*
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
-		
+		*/
 		Ihandle* vBoxLayout;
 
 		switch( QuickMode )
 		{
-			case 1:			vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, labelSEPARATOR, bottom, null ); break;
-			case 2:			vBoxLayout = IupVbox( frameList, hBoxArgs, labelSEPARATOR, bottom, null ); break;
-			case 3:			vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, hBoxArgs, labelSEPARATOR, bottom, null ); break;
-			default:		vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, labelSEPARATOR, bottom, null ); break;
+			case 1:			vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, /*labelSEPARATOR,*/ bottom, null ); break;
+			case 2:			vBoxLayout = IupVbox( frameList, hBoxArgs, /*labelSEPARATOR,*/ bottom, null ); break;
+			case 3:			vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, hBoxArgs, /*labelSEPARATOR,*/ bottom, null ); break;
+			default:		vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, /*labelSEPARATOR,*/ bottom, null ); break;
 		}
 
 		IupAppend( _dlg, vBoxLayout );
@@ -302,9 +303,33 @@ class CArgOptionDialog : CBaseDialog
 					else
 						IupSetAttribute( listCompiler, "VALUE", "" );
 				}
-			}			
-		}
+			}
 			
+			
+		}
+
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					IupMap( _dlg );
+					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
+					
+					if( listArgs ) SetWindowTheme( cast(void*) IupGetAttribute( listArgs, "WID" ), "DarkMode_CFD", null );
+					if( listCompiler ) SetWindowTheme( cast(void*) IupGetAttribute( listCompiler, "WID" ), "DarkMode_CFD", null );
+					if( listOptions ) SetWindowTheme( cast(void*) IupGetAttribute( listOptions, "WID" ), "DarkMode_CFD", null );					
+				}
+				else
+				{
+					if( listArgs ) SetWindowTheme( cast(void*) IupGetAttribute( listArgs, "WID" ), "CFD", null );
+					if( listCompiler ) SetWindowTheme( cast(void*) IupGetAttribute( listCompiler, "WID" ), "CFD", null );
+					if( listOptions ) SetWindowTheme( cast(void*) IupGetAttribute( listOptions, "WID" ), "CFD", null );
+				}
+			}
+		}		
 
 		IupPopup( _dlg, x, y );
 		

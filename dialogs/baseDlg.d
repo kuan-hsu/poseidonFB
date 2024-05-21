@@ -4,6 +4,9 @@ import iup.iup;
 
 class CBaseDialog
 {
+	private:
+	import darkmode.darkmode;
+	
 	protected:
 	import global, project, scintilla, actionManager, tools;
 	import std.string, std.algorithm, std.conv;
@@ -89,7 +92,7 @@ class CBaseDialog
 		}
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
 		
-		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
+		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );	
 	}
 
 
@@ -106,7 +109,19 @@ class CBaseDialog
 	}
 
 	string show( int x, int y )
-	{
+	{	
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
+				{
+					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
+					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
+				}
+			}
+		}
+		
 		IupPopup( _dlg, x, y );
 		return null;
 	}
