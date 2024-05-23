@@ -223,6 +223,9 @@ public:
 	
 	static bool					bKeyUp = true;
 	static int					KeyNumber;
+	static int					scintillaActionInsert;
+	static int					scintillaActionLength;
+	static string				scintillaActionText;
 	
 	static CustomTool[13]		customTools;
 	/*

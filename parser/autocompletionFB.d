@@ -245,7 +245,7 @@ version(FBIDE)
 						{
 							if( listContainer[i].length )
 							{
-								auto dollarPos = lastIndexOf( listContainer[i], "#" );
+								auto dollarPos = lastIndexOf( listContainer[i], "|" );
 								if( dollarPos > -1 )
 								{
 									_type = listContainer[i][dollarPos+1..$];
@@ -271,7 +271,7 @@ version(FBIDE)
 							{
 								string _string;
 								
-								auto dollarPos = lastIndexOf( listContainer[i], "#" );
+								auto dollarPos = lastIndexOf( listContainer[i], "|" );
 								if( dollarPos > 0 )
 								{
 									_type = listContainer[i][dollarPos+1..$];
@@ -388,13 +388,13 @@ version(FBIDE)
 				case B_DEFINE | B_VARIABLE:	return name ~ "?33";
 				case B_DEFINE | B_FUNCTION:	return name ~ "?34";
 				
-				case B_SUB:					return name ~ "#void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
-				case B_FUNCTION:			return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
+				case B_SUB:					return name ~ "|void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
+				case B_FUNCTION:			return name ~ "|" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
 				case B_VARIABLE:
 					if( node.name.length )
 					{
 						if( !type.length ) type = node.base; // VAR
-						if( node.name[$-1] == ')' ) return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
+						if( node.name[$-1] == ')' ) return name ~ "|" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
 					}
 					break;
 
@@ -1349,54 +1349,61 @@ version(FBIDE)
 			{
 				auto openParenPos = indexOf( lineText, "(" );
 				auto closeParenPos = lastIndexOf( lineText, ")" );
-				if( closeParenPos > openParenPos + 1 && openParenPos > 0 )
+				if( openParenPos > 0 )
 				{
-					openParenPos += listHead;
-					closeParenPos += listHead;
-					
-					int parenCount;
-					int	paramCount;
-					
-					for( int i = cast(int) openParenPos + 1; i < closeParenPos; ++i )
+					if( closeParenPos > openParenPos + 1 ) // with Params
 					{
-						if( i == openParenPos + 1 )	highlightStart = i;
-						 
-						switch( list[i] )
-						{
-							case ',':
-								if( parenCount == 0 )
-								{
-									if( ++paramCount == itemNO )
-									{
-										highlightEnd = i;
-										return;
-									}
-									else
-									{
-										highlightStart = i + 1;
-									}
-								}
-								break;
-							case '(':
-								parenCount ++;
-								break;
-							case ')':
-								parenCount --;
-								break;
-							default:
+						openParenPos += listHead;
+						closeParenPos += listHead;
 						
+						int parenCount;
+						int	paramCount;
+						
+						for( int i = cast(int) openParenPos + 1; i < closeParenPos; ++i )
+						{
+							if( i == openParenPos + 1 )	highlightStart = i;
+							 
+							switch( list[i] )
+							{
+								case ',':
+									if( parenCount == 0 )
+									{
+										if( ++paramCount == itemNO )
+										{
+											highlightEnd = i;
+											return;
+										}
+										else
+										{
+											highlightStart = i + 1;
+										}
+									}
+									break;
+								case '(':
+									parenCount ++;
+									break;
+								case ')':
+									parenCount --;
+									break;
+								default:
+							
+							}
+						}
+
+						if( parenCount == 0 )
+						{
+							if( ++paramCount == itemNO )
+							{
+								highlightEnd = cast(int) closeParenPos;
+								return;
+							}
 						}
 					}
-
-					if( parenCount == 0 )
+					else
 					{
-						if( ++paramCount == itemNO )
-						{
-							highlightEnd = cast(int) closeParenPos;
-							return;
-						}
-					}					
-					
+						highlightStart = -1;
+						return;
+					}
 				}
 				
 				listHead += lineText.length;
@@ -3403,7 +3410,7 @@ version(FBIDE)
 							{
 								if( listContainer[i].length )
 								{
-									auto dollarPos = lastIndexOf( listContainer[i], "#" );
+									auto dollarPos = lastIndexOf( listContainer[i], "|" );
 									if( dollarPos > -1 )
 									{
 										_type = listContainer[i][dollarPos+1..$];
@@ -3429,7 +3436,7 @@ version(FBIDE)
 								{
 									string _string;
 									
-									auto dollarPos = lastIndexOf( listContainer[i], "#" );
+									auto dollarPos = lastIndexOf( listContainer[i], "|" );
 									if( dollarPos > -1 )
 									{
 										_type = listContainer[i][dollarPos+1..$];
@@ -4865,51 +4872,37 @@ version(FBIDE)
 			else
 			{
 				//if( timer != null )	IupSetAttribute( timer, "RUN", "NO" );
-				string list = charAdd( ih, pos, text, bForce );
-
-				if( list.length )
+				if( text != "(" )
 				{
-					string[] splitWord = getDivideWord( alreadyInput );
+					string list = charAdd( ih, pos, text, bForce );
 
-					alreadyInput = splitWord[$-1];
-					if( text == "(" )
+					if( list.length )
 					{
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+						string[] splitWord = getDivideWord( alreadyInput );
 
-						IupScintillaSendMessage( ih, 2205, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
-						
-						//SCI_CALLTIPSETHLT 2204
-						scope _result = new IupString( ScintillaAction.textWrap( list ) );
-						IupScintillaSendMessage( ih, 2200, pos, cast(ptrdiff_t) _result.toCString );
-						
-						calltipContainer.push( std.conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
-						
-						int highlightStart, highlightEnd;
-						callTipSetHLT( list, 1, highlightStart, highlightEnd );
-						if( highlightEnd > -1 ) IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+						alreadyInput = splitWord[$-1];
+						if( text != "(" )
+						{
+							scope _result = new IupString( list );
+							IupScintillaSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString );  // autocomplete list
+						}
+						return true;
 					}
-					else
-					{
-						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
-					}
-					return true;
 				}
 			}
 
 			return false;
 		}
 		
-		static bool updateCallTip( Ihandle* ih, int pos, char* singleWord )
+		static bool updateCallTip( Ihandle* ih, int pos, string singleWord )
 		{
 			if( !bSkipAutoComplete ) bSkipAutoComplete = true; else return false;
 			
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" )
 			{
-				if( singleWord != null )
+				if( singleWord.length )
 				{
-					string s = fSTRz( singleWord );
+					string s = singleWord;
 					if( s == "(" || s == ")" || s == "," ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
 				}
 				else
@@ -4934,29 +4927,14 @@ version(FBIDE)
 			}
 			
 			
-			if( singleWord == null )
+			if( !singleWord.length )
 			{
 				int currentPos = ScintillaAction.getCurrentPos( ih );
 				LineHeadText = _getLineHeadText( pos - 1 );
-				/+
-				if( currentPos > pos ) // BS
-				{
-					/*
-					01234567
-					KUAN,
-					Before pos at 5, after press BS, the current pos = 4
-					*/
-					LineHeadText = _getLineHeadText( pos - 2 );
-				}
-				else // DEL
-				{
-					LineHeadText = _getLineHeadText( pos - 1 );
-				}
-				+/
 			}
 			else
 			{
-				string s = fSTRz( singleWord );
+				string s = singleWord;
 				
 				// Press Enter, leave...
 				if( s == "\n" )
@@ -4985,7 +4963,6 @@ version(FBIDE)
 
 			string	list;
 			string	listInContainer = calltipContainer.size > 0 ? calltipContainer.top() : "";
-			
 			if( listInContainer.length )
 			{
 				auto semicolonPos = indexOf( listInContainer, ";" );
@@ -4997,7 +4974,7 @@ version(FBIDE)
 						auto openParenPos = indexOf( listInContainer, "(" );
 						if( openParenPos > semicolonPos )
 						{
-							//char[] procedureNameFromList;
+							//strung procedureNameFromList;
 							for( int i = cast(int) openParenPos - 1; i > semicolonPos; -- i )
 							{
 								if( listInContainer[i] == ' ' ) break;
@@ -5060,7 +5037,6 @@ version(FBIDE)
 				else
 				{
 					// commaCount != 0 and calltipContainer is empty, Re-get the list
-					//IupMessage("updateCallTip", "NULL" );
 					list = charAdd( ih, firstOpenParenPosFromDocument, "(", true );
 					if( list.length )
 					{
@@ -5104,7 +5080,6 @@ version(FBIDE)
 						scope _result = new IupString( ScintillaAction.textWrap( list ) );
 						IupScintillaSendMessage( ih, 2200, pos, cast(ptrdiff_t) _result.toCString );
 						
-						//if( calltipContainer !is null )	calltipContainer.push( to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 						calltipContainer.push( std.conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
 					}
 				
@@ -5115,9 +5090,12 @@ version(FBIDE)
 
 						if( highlightEnd > -1 )
 						{
-							IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
-							IupScintillaSendMessage( ih, 2207, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
-							return true;
+							if( highlightStart > -1 )
+							{
+								IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+								IupScintillaSendMessage( ih, 2207, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
+								return true;
+							}
 						}
 						else
 						{

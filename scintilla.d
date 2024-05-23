@@ -177,6 +177,7 @@ public:
 			IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
 			IupSetCallback( sci, "K_ANY",cast(Icallback) &CScintilla_keyany_cb );
 			IupSetCallback( sci, "ACTION",cast(Icallback) &CScintilla_action_cb );
+			IupSetCallback( sci, "VALUECHANGED_CB",cast(Icallback) &CScintilla_VALUECHANGED_cb );
 			IupSetCallback( sci, "CARET_CB",cast(Icallback) &CScintilla_caret_cb );
 			IupSetCallback( sci, "AUTOCSELECTION_CB",cast(Icallback) &CScintilla_AUTOCSELECTION_cb );
 			IupSetCallback( sci, "DROPFILES_CB",cast(Icallback) &CScintilla_dropfiles_cb );
@@ -2569,7 +2570,7 @@ extern(C)
 									{
 										if( lastChar == "(" )
 										{
-											AutoComplete.updateCallTip( ih, pos, cast(char*) toStringz( alreadyInput ) );
+											AutoComplete.updateCallTip( ih, pos, alreadyInput );
 										}
 										else
 										{
@@ -2636,7 +2637,7 @@ extern(C)
 									{
 										if( lastChar == "(" )
 										{
-											AutoComplete.updateCallTip( ih, pos, cast(char*) toStringz( alreadyInput ) );
+											AutoComplete.updateCallTip( ih, pos, alreadyInput );
 										}
 										else
 										{
@@ -2856,10 +2857,15 @@ extern(C)
 
 	private int CScintilla_action_cb( Ihandle *ih, int insert, int pos, int length, char* _text )
 	{
+		GLOBAL.scintillaActionInsert = insert;
+		GLOBAL.scintillaActionLength = length;
+		if( _text == null ) GLOBAL.scintillaActionText = ""; else GLOBAL.scintillaActionText = fSTRz( _text );
+		
+		/*
 		if( AutoComplete.showListThread !is null ) return IUP_DEFAULT;
 
 		AutoComplete.clearShowTypeContent(); // Clear ShowType Clipboard
-		
+		*/
 		// Modified LineNumber Margin Width
 		if( GLOBAL.editorSetting00.FixedLineMargin == "OFF" )
 		{
@@ -2959,15 +2965,21 @@ extern(C)
 			}
 		}
 
+		return IUP_DEFAULT;
+	}
+	
+	
+	private int CScintilla_VALUECHANGED_cb( Ihandle *ih )
+	{
+		if( AutoComplete.showListThread !is null ) return IUP_DEFAULT;
+
+		AutoComplete.clearShowTypeContent(); // Clear ShowType Clipboard
 		
 		// If un-release the key, cancel
 		//if( !GLOBAL.bKeyUp ) return IUP_DEFAULT;else GLOBAL.bKeyUp = false;
 		if( GLOBAL.bKeyUp ) GLOBAL.bKeyUp = false;
 		
 		if( AutoComplete.bAutocompletionPressEnter ) return IUP_IGNORE;
-		
-		if( AutoComplete.showListThread !is null ) return IUP_DEFAULT;
-		
 		if( AutoComplete.bSkipAutoComplete )
 		{
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
@@ -2980,6 +2992,8 @@ extern(C)
 		bool bCheckString = true;
 		version(FBIDE) if( GLOBAL.compilerSettings.enableIncludeComplete == "ON" ) bCheckString = false;
 
+		int pos = ScintillaAction.getCurrentPos( ih );
+				
 		if( ScintillaAction.isComment( ih, pos, bCheckString ) )
 			if( ScintillaAction.isComment( ih, pos - 1, bCheckString ) ) return IUP_DEFAULT;
 
@@ -3003,7 +3017,10 @@ extern(C)
 			}
 		}		
 		+/
-		if( length > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
+		
+		
+		if( GLOBAL.scintillaActionLength > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
+
 		
 		// Include Autocomplete
 		if( AutoComplete.showListThread is null )
@@ -3011,18 +3028,19 @@ extern(C)
 			if( GLOBAL.compilerSettings.enableIncludeComplete == "ON" )
 			{
 				bool bCheckDeclare;
-				version(FBIDE)	bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos );
-				version(DIDE)	bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos );
+				version(FBIDE)	bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos - 1 );
+				version(DIDE)	bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos - 1 );
 
 				if( bCheckDeclare )
 				{
-					string alreadyInput = fSTRz( _text );
-					string list = AutoComplete.includeComplete( ih, pos, alreadyInput );
+					
+					string alreadyInput = GLOBAL.scintillaActionText.dup;
+					string list = AutoComplete.includeComplete( ih, pos, alreadyInput ); // After calling, alreadyInput be modified
 					if( list.length )
 					{
-						//IupScintillaSendMessage( ih, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
 						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
+						ScintillaAction.directSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString );
+						
 						return IUP_DEFAULT;
 					}
 				}
@@ -3035,7 +3053,7 @@ extern(C)
 				if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" )
 				{
 					int dummyHeadPos;
-					string sKeyin = fSTRz( _text );
+					string sKeyin = GLOBAL.scintillaActionText;
 					
 					switch( sKeyin )
 					{
@@ -3063,30 +3081,26 @@ extern(C)
 								if( list.length )
 								{
 									scope _result = new IupString( list );
-									if( !word.length ) IupScintillaSendMessage( ih, 2100, cast(size_t) word.length - 1, cast(ptrdiff_t) _result.toCString ); else IupSetStrAttributeId( ih, "AUTOCSHOW", cast(int) word.length - 1, _result.toCString );
+									ScintillaAction.directSendMessage( ih, 2100, cast(size_t) word.length - 1, cast(ptrdiff_t) _result.toCString );
 								}
 							}
 					}
 				}
-				
+
 				return IUP_DEFAULT;
 			}
 		}
 
 		// Check CallTip
-		AutoComplete.updateCallTip( ih, pos, _text );		
+		AutoComplete.updateCallTip( ih, pos, GLOBAL.scintillaActionText );
 
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 		
-		if( insert == 1 )
+		if( GLOBAL.scintillaActionInsert == 1 )
 		{
-			//if( length > 1 ) return IUP_DEFAULT;
-			
 			int dummyHeadPos;
-			// Below code are fixed because of IUP DLL10 and D 1.076
-			string text = fSTRz( _text );
-			//text ~= _text[0];
+			string text = GLOBAL.scintillaActionText;
 			
 			switch( text )
 			{
@@ -3107,11 +3121,9 @@ extern(C)
 							{
 								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
 								{
-									//IupMessage("POINTER","");
 									alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( ih, pos - 1, dummyHeadPos ).dup );
 									alreadyInput ~= "->";
 									bDot = true;
-									//bWithoutList = false;
 								}
 							}
 						}
@@ -3136,11 +3148,6 @@ extern(C)
 						if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) break;
 					}
-					else
-					{
-						//if( AutoComplete.showListThread !is null ) AutoComplete.showListThread.stop();
-						//if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-					}
 					
 					try
 					{
@@ -3162,6 +3169,7 @@ extern(C)
 		}
 		
 		return IUP_DEFAULT;
+	
 	}
 
 

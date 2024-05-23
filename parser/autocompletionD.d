@@ -2411,7 +2411,7 @@ version(DIDE)
 				
 				// Step 1: Relative from the directory of the source file
 				string		_path1;
-				string[] 	_path2, _path3;
+				string[] 	_path2;
 				/+
 				this is includeComplete, so base on document fullpath
 				+/
@@ -2422,6 +2422,8 @@ version(DIDE)
 				// Step 3: Relative from addition directories specified with the -i command line option
 				// Work on Project
 				_path2 = GLOBAL.compilerSettings.activeCompiler.IncDir.dup;
+				auto _prjDir = ProjectAction.getActiveProjectDir();
+				if( _prjDir.length ) _path2 = _prjDir ~ _path2;
 				
 				int index;
 				for( int i = 0; i < words.length; ++ i )
@@ -3668,53 +3670,37 @@ version(DIDE)
 			}
 			else
 			{
-				string list = charAdd( ih, pos, text, bForce );
-
-				if( list.length )
+				if( text != "(" )
 				{
-					string[] splitWord = getDivideWord( alreadyInput );
+					string list = charAdd( ih, pos, text, bForce );
 
-					alreadyInput = splitWord[$-1];
-					if( text == "(" )
+					if( list.length )
 					{
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-						
-						IupScintillaSendMessage( ih, 2205, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipBack ), 0 ); // SCI_CALLTIPSETBACK 2205
-						IupScintillaSendMessage( ih, 2206, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipFore ), 0 ); // SCI_CALLTIPSETFORE 2206
-						
-						//SCI_CALLTIPSETHLT 2204
-						scope _result = new IupString( list );
-						IupScintillaSendMessage( ih, 2200, pos, cast(ptrdiff_t) _result.toCString );
-						IupScintillaSendMessage( ih, 2207, cast(size_t) tools.convertIupColor( GLOBAL.editColor.callTipHLT ), 0 ); // SCI_CALLTIPSETFOREHLT 2207
-						
-						//if( calltipContainer !is null )	calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
-						calltipContainer.push( Conv.to!(string)( ScintillaAction.getLinefromPos( ih, pos ) ) ~ ";" ~ list );
-						
-						int highlightStart, highlightEnd;
-						callTipSetHLT( list, 1, highlightStart, highlightEnd );
-						if( highlightEnd > -1 ) IupScintillaSendMessage( ih, 2204, highlightStart, highlightEnd ); // SCI_CALLTIPSETHLT 2204
+						string[] splitWord = getDivideWord( alreadyInput );
+
+						alreadyInput = splitWord[$-1];
+						if( text != "(" )
+						{
+							scope _result = new IupString( list );
+							IupScintillaSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString );  // autocomplete list
+						}
+						return true;
 					}
-					else
-					{
-						scope _result = new IupString( list );
-						if( !alreadyInput.length ) IupScintillaSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString ); else IupSetAttributeId( ih, "AUTOCSHOW", cast(int) alreadyInput.length - 1, _result.toCString );
-					}
-					return true;
 				}
 			}
 
 			return false;
 		}
 		
-		static bool updateCallTip( Ihandle* ih, int pos, char* singleWord )
+		static bool updateCallTip( Ihandle* ih, int pos, string singleWord )
 		{
 			if( !bSkipAutoComplete ) bSkipAutoComplete = true; else return false;
 			
 			if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) // Complete List already showed
 			{
-				if( singleWord != null )
+				if( singleWord.length )
 				{
-					string s = fSTRz( singleWord );
+					string s = singleWord;
 					if( s == "(" || s == ")" || s == "," ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" ); else return false;
 				}
 				else
@@ -3726,9 +3712,9 @@ version(DIDE)
 			{
 				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) // Calltip already showed
 				{
-					if( singleWord != null )
+					if( singleWord.length )
 					{
-						string s = fSTRz( singleWord );
+						string s = singleWord;
 						if( s == ")" ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 					}
 				}
@@ -3751,29 +3737,14 @@ version(DIDE)
 			}
 			
 			
-			if( singleWord == null )
+			if( !singleWord.length )
 			{
 				int currentPos = ScintillaAction.getCurrentPos( ih );
 				LineHeadText = _getLineHeadText( pos - 1 );
-				/+
-				if( currentPos > pos ) // BS
-				{
-					/*
-					01234567
-					KUAN,
-					Before pos at 5, after press BS, the current pos = 4
-					*/
-					LineHeadText = _getLineHeadText( pos - 2 );
-				}
-				else // DEL
-				{
-					LineHeadText = _getLineHeadText( pos - 1 );
-				}
-				+/
 			}
 			else
 			{
-				string s = fSTRz( singleWord );
+				string s = singleWord;
 				
 				// Press Enter, leave...
 				if( s == "\n" )
@@ -3783,18 +3754,7 @@ version(DIDE)
 					cleanCalltipContainer();
 					return false;
 				}
-				/*
-				string	listInContainer = calltipContainer.top();
-				if( listInContainer.length )
-				{
-					int semicolonPos = Util.index( listInContainer, ";" );
-					if( semicolonPos < listInContainer.length )
-					{
-						lineNumber = Integer.toInt( listInContainer[0..semicolonPos] );
-						if( ScintillaAction.getCurrentLine( ih ) != lineNumber + 1 ) cleanCalltipContainer();
-					}
-				}
-				*/
+
 				LineHeadText = _getLineHeadText( pos - 1, s );
 			}
 
@@ -3803,21 +3763,16 @@ version(DIDE)
 
 			if( commaCount == 0 )
 			{
-				calltipContainer.pop();
+				if( calltipContainer.size > 0 ) calltipContainer.pop();
 				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 				return false;
 			}
 
-
-
 			// Last time we get null "List" at same line and same procedureNameFromDocument, leave!!!!!
 			if( noneListProcedureName == Conv.to!(string)( firstOpenParenPosFromDocument ) ~ ";" ~ procedureNameFromDocument ) return false;
 	
-	
-	
 			string	list;
 			string	listInContainer = calltipContainer.top();
-			
 			if( listInContainer.length )
 			{
 				auto semicolonPos = indexOf( listInContainer, ";" );
@@ -3836,51 +3791,32 @@ version(DIDE)
 								procedureNameFromList = listInContainer[i] ~ procedureNameFromList;
 							}
 							
-							version(FBIDE)
+							auto doubleColonPos = lastIndexOf( procedureNameFromList, "::this" );
+							if( doubleColonPos > -1 )
 							{
-								if( procedureNameFromList != "Constructor" )
+								if( procedureNameFromDocument != "this" )
 								{
-									if( lowerCase(procedureNameFromList) == lowerCase(procedureNameFromDocument) )
+									if( doubleColonPos > 0 )
 									{
-										bContinue = true;
-										list = listInContainer[semicolonPos+1..$].dup;
+										if( procedureNameFromList[0..doubleColonPos] == procedureNameFromDocument )
+										{
+											bContinue = true;
+											list = listInContainer[semicolonPos+1..$].dup;
+										}
 									}
 								}
 								else
 								{
 									bContinue = true;
 									list = listInContainer[semicolonPos+1..$].dup;
-								}
+								}									
 							}
-							version(DIDE)
+							else
 							{
-								auto doubleColonPos = lastIndexOf( procedureNameFromList, "::this" );
-								if( doubleColonPos > -1 )
+								if( procedureNameFromList == procedureNameFromDocument )
 								{
-									if( procedureNameFromDocument != "this" )
-									{
-										if( doubleColonPos > 0 )
-										{
-											if( procedureNameFromList[0..doubleColonPos] == procedureNameFromDocument )
-											{
-												bContinue = true;
-												list = listInContainer[semicolonPos+1..$].dup;
-											}
-										}
-									}
-									else
-									{
-										bContinue = true;
-										list = listInContainer[semicolonPos+1..$].dup;
-									}									
-								}
-								else
-								{
-									if( procedureNameFromList == procedureNameFromDocument )
-									{
-										bContinue = true;
-										list = listInContainer[semicolonPos+1..$].dup;
-									}
+									bContinue = true;
+									list = listInContainer[semicolonPos+1..$].dup;
 								}
 							}
 						}	
@@ -3953,14 +3889,10 @@ version(DIDE)
 				}
 			}
 			
-			
 			if( !bContinue )
 			{
-				if( calltipContainer.size > 0 )
-				{
-					calltipContainer.clear();
-					//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
-				}
+				if( calltipContainer.size > 0 ) calltipContainer.clear();
+				//if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 					
 				return false;
 			}
