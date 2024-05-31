@@ -114,7 +114,7 @@ private:
 					else if( quoteLineCount <= num_colors + 1 )
 					{
 						rPos = lastIndexOf( line, "\"" );
-						string[] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						string[] splitData = tools.splitSigns( line[2..rPos], ' ', '\t' );
 						if( splitData.length == 2 )
 						{
 							ColorUnit _color;
@@ -307,7 +307,7 @@ private:
 					else if( quoteLineCount <= num_colors + 1 )
 					{
 						rPos = lastIndexOf( line, "\"" );
-						string[] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						string[] splitData = tools.splitSigns( line[2..rPos], ' ', '\t' );
 						if( splitData.length == 2 )
 						{
 							ColorUnit _color;
@@ -427,7 +427,7 @@ private:
 					else if( quoteLineCount <= num_colors + 1 )
 					{
 						rPos = lastIndexOf( line, "\"" );
-						string[] splitData = tools.splitSign( line[2..rPos], ' ', '\t' );
+						string[] splitData = tools.splitSigns( line[2..rPos], ' ', '\t' );
 						if( splitData.length == 2 )
 						{
 							ColorUnit _color;

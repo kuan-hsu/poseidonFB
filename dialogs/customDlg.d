@@ -9,14 +9,11 @@ private import std.string, std.conv;
 class CCustomDialog : CBaseDialog
 {
 private:
-	import					darkmode.darkmode;
-	
 	Ihandle*				listTools, treePluginStatus;
 	Ihandle*				labelStatus;
 	string					paramTip = "Special Parameters:\n%s% = Selected Text\n%f% = Active File Fullpath\n%fn% = Active File Name\n%fdir% = Active File Dir\n%pn% = Active Prj Name\n%p% = Active Prj Files\n%pdir% = Active Prj Dir";
 	IupString				_tools, _args;
 	IupString[13]			IupItemTitle;
-	
 	
 	static	CustomTool[13]	editCustomTools;
 
@@ -197,6 +194,7 @@ private:
 		IupSetAttribute( frameListPlugin, "TITLE", GLOBAL.languageItems["pluginstatus"].toCString );
 
 		Ihandle* vBoxLayout = IupVbox( frameList, vBoxDescription, labelSEPARATOR, bottom, frameListPlugin, null );
+		IupSetAttributes( vBoxLayout, "ALIGNMENT=ACENTER,MARGIN=5x,GAP=0" );
 		
 		IupAppend( _dlg, vBoxLayout );
 
@@ -217,17 +215,7 @@ private:
 			IupSetStrAttribute( listTools, "APPENDITEM", toStringz( CCustomDialog.editCustomTools[i].name ) );
 		}
 		
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-				}
-			}
-		}		
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}	
 
 	public:

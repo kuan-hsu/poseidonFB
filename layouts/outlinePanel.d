@@ -1210,14 +1210,7 @@ public:
 	{
 		version(Windows)
 		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-					SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "DarkMode_CFD", null );
-				else
-					SetWindowTheme( cast(void*) IupGetAttribute( outlineTreeNodeList, "WID" ), "CFD", null );
-			}
-
+			tools.setWinTheme( outlineTreeNodeList, "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 			IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		}
@@ -2142,19 +2135,14 @@ extern(C)
 		private int COutline_List_EDIT_CB( Ihandle *ih, int c, char *new_value )
 		{
 			// Avoid mouuse cursor disappear
-			string screenXY = fromStringz( IupGetAttribute( ih, "SCREENPOSITION" ) ).dup;
-			auto commaPos = indexOf( screenXY, "," );
-			if( commaPos > 0 )
+			int screenX, screenY, sizeW, sizeH;
+			string screenXY = fSTRz( IupGetAttribute( ih, "SCREENPOSITION" ) );
+			if( tools.splitBySign( screenXY, ",", screenX, screenY ) )
 			{
-				int screenX = to!(int)( screenXY[0..commaPos] );
-				int screenY = to!(int)( screenXY[commaPos+1..$] );
-				
 				string WH = fSTRz( IupGetAttribute( ih, "RASTERSIZE" ) );
-				auto crossPos = indexOf( WH, "x" );
-				if( crossPos > 0 )
+				if( tools.splitBySign( WH, "x", sizeW, sizeH ) )
 				{
-					screenY = screenY + to!(int)( WH[crossPos+1..$] );
-					
+					screenY = screenY + sizeH;
 					screenXY = to!(string)( screenX + 8 ) ~ "x" ~ to!(string)( screenY + 8 );
 					IupSetStrGlobal( "CURSORPOS", toStringz( screenXY ) );
 				}

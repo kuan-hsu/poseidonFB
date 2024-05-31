@@ -394,7 +394,7 @@ version(FBIDE)
 					if( node.name.length )
 					{
 						if( !type.length ) type = node.base; // VAR
-						if( node.name[$-1] == ')' ) return name ~ "|" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return name ~ "#" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
+						if( node.name[$-1] == ')' ) return name ~ "|" ~ type ~ "?" ~ std.conv.to!(string)( 1 + protAdd ); else return name ~ "|" ~ type ~ "?" ~ std.conv.to!(string)( 4 + protAdd );
 					}
 					break;
 
@@ -408,16 +408,16 @@ version(FBIDE)
 				case B_CLASS:					return name ~ "?" ~ std.conv.to!(string)( 7 + protAdd );
 				case B_TYPE: 					return name ~ "?" ~ std.conv.to!(string)( 10 + protAdd );
 				case B_ENUM: 					return name ~ "?" ~ std.conv.to!(string)( 12 + protAdd );
-				case B_PARAM:					return name ~ "#" ~ type ~ "?18";
+				case B_PARAM:					return name ~ "|" ~ type ~ "?18";
 				/*case B_ENUMMEMBER:				return name ~ "?19";*/
 				case B_ENUMMEMBER:
 					if( node.getFather !is null )
 					{
-						if( node.getFather.name.length ) return name ~ "#<" ~ node.getFather.name ~ ">?19";
+						if( node.getFather.name.length ) return name ~ "|<" ~ node.getFather.name ~ ">?19";
 					}
 					return name ~ "?19";
 				
-				case B_ALIAS:					return name ~ "#" ~ type ~ "?20";
+				case B_ALIAS:					return name ~ "|" ~ type ~ "?20";
 				case B_NAMESPACE:				return name ~ "?24";
 				case B_INCLUDE, B_CTOR, B_DTOR:	return null;
 				case B_OPERATOR:				return null;
@@ -4804,9 +4804,7 @@ version(FBIDE)
 			if( preLoadContainerThread !is null )
 			{
 				if( preLoadContainerThread.isRunning )
-				{
 					preLoadContainerThread.join();
-				}
 				else
 				{
 					destroy( preLoadContainerThread );
@@ -4871,7 +4869,6 @@ version(FBIDE)
 			}
 			else
 			{
-				//if( timer != null )	IupSetAttribute( timer, "RUN", "NO" );
 				if( text != "(" )
 				{
 					string list = charAdd( ih, pos, text, bForce );

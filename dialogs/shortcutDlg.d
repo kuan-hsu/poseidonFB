@@ -8,7 +8,6 @@ import std.string, std.conv, Array = std.array;
 class CShortCutDialog : CBaseDialog
 {
 private:
-	import			darkmode.darkmode;
 	Ihandle*		textResult;
 	IupString[3]	labelTitle;
 
@@ -101,19 +100,9 @@ private:
 		IupMap( _dlg );
 		version(Windows)
 		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-					SetWindowTheme( cast(void*) IupGetAttribute( keyList, "WID" ), "DarkMode_CFD", null );
-				}
-				else
-				{
-					SetWindowTheme( cast(void*) IupGetAttribute( keyList, "WID" ), "CFD", null );
-				}
-			}
+			bool _UseDarkMode = GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false;
+			tools.setCaptionTheme( _dlg, _UseDarkMode );
+			tools.setWinTheme( keyList, "CFD", _UseDarkMode );
 		}		
 	}	
 

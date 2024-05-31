@@ -355,7 +355,7 @@ version(Windows)
 	public:
 	fnSetWindowTheme SetWindowTheme = null;
 	
-	void RefreshCaptionColor(HWND hWnd){ RefreshTitleBarThemeColor( hWnd );	}
+	void RefreshCaptionColor(HWND hWnd){ if (g_darkModeSupported) RefreshTitleBarThemeColor( hWnd ); }
 
 	bool AllowDarkModeForWindow(HWND hWnd, bool allow)
 	{

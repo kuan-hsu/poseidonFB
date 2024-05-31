@@ -4,7 +4,6 @@ private import iup.iup, iup.iup_scintilla;
 private import tools;
 private import global, project, scintilla, actionManager, menu;
 private import dialogs.baseDlg;
-private import darkmode.darkmode;
 private import std.conv;
 
 class CFindInFilesDialog : CBaseDialog
@@ -135,24 +134,16 @@ public:
 		IupSetAttribute( _dlg, "DEFAULTESC", "FindFiles_btnHiddenCANCEL" );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );	
 		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
-		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih )
+		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih, int state )
 		{
-			Ihandle* _findHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Find" );
-			Ihandle* _replaceHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Replace" );
-			if( _findHandle != null && _replaceHandle != null )
+			if( state == IUP_SHOW )
 			{
-				if( GLOBAL.bCanUseDarkMode )
+				Ihandle* _findHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Find" );
+				Ihandle* _replaceHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Replace" );
+				if( _findHandle != null && _replaceHandle != null )
 				{
-					if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-					{
-						SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "DarkMode_CFD", null );
-						SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "DarkMode_CFD", null );
-					}
-					else
-					{
-						SetWindowTheme( cast(void*) IupGetAttribute( _findHandle, "WID" ), "CFD", null );
-						SetWindowTheme( cast(void*) IupGetAttribute( _replaceHandle, "WID" ), "CFD", null );
-					}	
+					tools.setWinTheme( _findHandle, "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+					tools.setWinTheme( _replaceHandle, "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 				}
 			}
 			
@@ -160,17 +151,7 @@ public:
 		});
 		
 		IupMap( _dlg );
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-				}
-			}
-		}		
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}
 
 	~this()

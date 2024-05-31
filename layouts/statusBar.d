@@ -318,6 +318,7 @@ extern(C) // Callback for CBaseDialog
 				IupSetAttribute( itemConfig, "IMAGE", "icon_tools" );
 				IupSetCallback( itemConfig, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
+					/*
 					int		x, y;
 					string	mousePos = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
@@ -332,16 +333,16 @@ extern(C) // Callback for CBaseDialog
 						x = IUP_MOUSEPOS;
 						y = IUP_CURRENT;
 					}
-					
+					*/
 					version(Windows)
 					{
 						scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
-						dlg.show( x, y - 220, -1 );
+						dlg.show( -1, -1, -1 );
 					}
 					else
 					{
 						scope dlg = new CArgOptionDialog( 492, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
-						dlg.show( x, y - 220,-1 );
+						dlg.show( -1, -1, -1 );
 					}
 					
 					return IUP_DEFAULT;

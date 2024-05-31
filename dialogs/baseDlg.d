@@ -4,9 +4,6 @@ import iup.iup;
 
 class CBaseDialog
 {
-	private:
-	import darkmode.darkmode;
-	
 	protected:
 	import global, project, scintilla, actionManager, tools;
 	import std.string, std.algorithm, std.conv;
@@ -110,18 +107,7 @@ class CBaseDialog
 
 	string show( int x, int y )
 	{	
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-				}
-			}
-		}
-		
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		IupPopup( _dlg, x, y );
 		return null;
 	}

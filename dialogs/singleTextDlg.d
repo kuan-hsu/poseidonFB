@@ -7,7 +7,7 @@ import std.conv, std.string;
 class CSingleTextDialog : CBaseDialog
 {
 private:
-	import		global, darkmode.darkmode;
+	import		global, tools;
 	
 	Ihandle*	label, textResult;
 	string		labelName;
@@ -68,19 +68,7 @@ public:
 	override string show( int x, int y ) // Overload form CBaseDialog
 	{
 		IupMap( _dlg );
-		
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-				}
-			}
-		}		
-		
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		IupPopup( _dlg, x, y );
 
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );

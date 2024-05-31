@@ -1,8 +1,8 @@
 ﻿module tools;
 
 private import iup.iup;
-private import global, project, actionManager;
-private import std.string, std.process, Conv = std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
+private import global, project, actionManager, darkmode.darkmode;
+private import std.string, std.process, std.utf, Conv = std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
 private import core.stdc.stdlib, core.stdc.string, core.thread;
 
 
@@ -590,338 +590,6 @@ void DyLibFree( void* lib )
 	}
 }
 
-
-// DLL loader, code form Tango Library, 
-version (Posix) {
-    version (FreeBSD) { } else { pragma (lib, "dl"); }
-}
-
-final class SharedLib
-{
-	import std.string;
-	version(Windows)
-		import core.sys.windows.winbase, core.sys.windows.windef, core.sys.windows.winnls;
-	else
-		import core.sys.posix.dlfcn;
-		
-    // Mapped from RTLD_NOW, RTLD_LAZY, RTLD_GLOBAL and RTLD_LOCAL
-    enum LoadMode
-	{
-        Now = 0b1,
-        Lazy = 0b10,
-        Global = 0b100,
-        Local = 0b1000
-    }
-
-
-    /**
-        Loads an OS-specific shared library.
-        Note:
-        Please use this function instead of the constructor, which is private.
-        Params:
-            path = The path to a shared library to be loaded
-            mode = Library loading mode. See LoadMode
-        Returns:
-            A SharedLib instance being a handle to the library, or throws
-            SharedLibException if it could not be loaded
-      */
-    static SharedLib load(const(char)[] path, LoadMode mode = LoadMode.Now | LoadMode.Global) {
-    	return loadImpl(path, mode, true);
-    }
-
-    /**
-        Loads an OS-specific shared library.
-        Note:
-        Please use this function instead of the constructor, which is private.
-        Params:
-            path = The path to a shared library to be loaded
-            mode = Library loading mode. See LoadMode
-        Returns:
-            A SharedLib instance being a handle to the library, or null if it
-            could not be loaded
-      */
-    static SharedLib loadNoThrow(const(char)[] path, LoadMode mode = LoadMode.Now | LoadMode.Global) {
-    	return loadImpl(path, mode, false);
-    }
-
-
-    private static SharedLib loadImpl(const(char)[] path, LoadMode mode, bool throwExceptions) {
-        SharedLib res;
-
-        synchronized (mutex) {
-            auto lib = path in loadedLibs;
-            if (lib) {
-                version (SharedLibVerbose) Trace.formatln("SharedLib found in the hashmap");
-                res = *lib;
-            }
-            else {
-                version (SharedLibVerbose) Trace.formatln("Creating a new instance of SharedLib");
-                res = new SharedLib(path);
-                loadedLibs[path] = res;
-            }
-
-            ++res.refCnt;
-        }
-
-        bool delRes = false;
-        Exception exc;
-
-        synchronized (res) {
-            if (!res.loaded) {
-                version (SharedLibVerbose) Trace.formatln("Loading the SharedLib");
-                try {
-                    res.load_(mode, throwExceptions);
-                } catch (Exception e) {
-                    exc = e;
-                }
-            }
-
-            if (res.loaded) {
-                version (SharedLibVerbose) Trace.formatln("SharedLib successfully loaded, returning");
-                return res;
-            } else {
-                synchronized (mutex) {
-                    if (path in loadedLibs) {
-                        version (SharedLibVerbose) Trace.formatln("Removing the SharedLib from the hashmap");
-                        loadedLibs.remove(path);
-                    }
-                }
-            }
-
-            // make sure that only one thread will delete the object
-            if (0 == --res.refCnt) {
-                delRes = true;
-            }
-        }
-
-        if (delRes) {
-            version (SharedLibVerbose) Trace.formatln("Deleting the SharedLib");
-            res.destroy;
-        }
-
-        if (exc !is null) {
-            throw exc;
-        }
-
-        version (SharedLibVerbose) Trace.formatln("SharedLib not loaded, returning null");
-        return null;
-    }
-
-
-    /**
-        Unloads the OS-specific shared library associated with this SharedLib instance.
-        Note:
-        It's invalid to use the object after unload() has been called, as unload()
-        will delete it if it's not referenced any more.
-        Throws SharedLibException on failure. In this case, the SharedLib object is not deleted.
-      */
-    void unload() {
-    	return unloadImpl(true);
-    }
-
-
-    /**
-        Unloads the OS-specific shared library associated with this SharedLib instance.
-        Note:
-        It's invalid to use the object after unload() has been called, as unload()
-        will delete it if it's not referenced any more.
-      */
-    void unloadNoThrow() {
-    	return unloadImpl(false);
-    }
-
-
-    private void unloadImpl(bool throwExceptions) {
-        bool deleteThis = false;
-
-        synchronized (this) {
-            assert (loaded);
-            assert (refCnt > 0);
-
-            synchronized (mutex) {
-                if (--refCnt <= 0) {
-                    version (SharedLibVerbose) Trace.formatln("Unloading the SharedLib");
-                    try {
-                        unload_(throwExceptions);
-                    } catch (Exception e) {
-                        ++refCnt;
-                        throw e;
-                    }
-
-                    assert ((path in loadedLibs) !is null);
-                    loadedLibs.remove(path);
-
-                    deleteThis = true;
-                }
-            }
-        }
-        if (deleteThis) {
-            version (SharedLibVerbose) Trace.formatln("Deleting the SharedLib");
-            ((SharedLib l) { l.destroy; })(this);
-        }
-    }
-
-
-    /**
-        Returns the path to the OS-specific shared library associated with this object.
-      */
-    @property const(char)[] path() {
-        return this.path_;
-    }
-
-
-    /**
-        Obtains the address of a symbol within the shared library
-        Params:
-            name = The name of the symbol; must be a null-terminated C string
-        Returns:
-            A pointer to the symbol or throws SharedLibException if it's
-            not present in the library.
-      */
-    void* getSymbol(const(char)* name) {
-       return getSymbolImpl(name, true);
-    }
-
-
-    /**
-        Obtains the address of a symbol within the shared library
-        Params:
-            name = The name of the symbol; must be a null-terminated C string
-        Returns:
-            A pointer to the symbol or null if it's not present in the library.
-      */
-    void* getSymbolNoThrow(const(char)* name) {
-       return getSymbolImpl(name, false);
-    }
-
-
-    private void* getSymbolImpl(const(char)* name, bool throwExceptions) {
-        assert (loaded);
-        return getSymbol_(name, throwExceptions);
-    }
-
-
-
-    /**
-        Returns the total number of libraries currently loaded by SharedLib
-      */
-    static uint numLoadedLibs() {
-        return cast(uint) loadedLibs.keys.length;
-    }
-
-
-    private {
-        version (Windows) {
-            HMODULE handle;
-
-            void load_(LoadMode mode, bool throwExceptions) {
-                version (Win32SansUnicode)
-                         handle = LoadLibraryA((this.path_ ~ "\0").ptr);
-                    else {
-                         wchar[1024] tmp = void;
-                         auto i = MultiByteToWideChar (CP_UTF8, 0,
-                                                       path.ptr, cast(int) path.length,
-                                                       tmp.ptr, tmp.length-1);
-                         if (i > 0)
-                            {
-                            tmp[i] = 0;
-                            handle = LoadLibraryW (tmp.ptr);
-                            }
-                    }
-                if (handle is null && throwExceptions) {
-                    throw new Exception("Couldn't load shared library '" ~ this.path_.idup ~ "' : " /*~ SysError.lastMsg.idup*/);
-                }
-            }
-
-            void* getSymbol_(const(char)* name, bool throwExceptions) {
-                // MSDN: "Multiple threads do not overwrite each other's last-error code."
-                auto res = GetProcAddress(handle, name);
-                if (res is null && throwExceptions) {
-                    throw new Exception("Couldn't load symbol '" ~ fromStringz(name).idup ~ "' from shared library '" ~ this.path_.idup ~ "' : "/* ~ SysError.lastMsg.idup*/);
-                } else {
-                    return res;
-                }
-            }
-
-            void unload_(bool throwExceptions) {
-                if (0 == FreeLibrary(handle) && throwExceptions) {
-                    throw new Exception("Couldn't unload shared library '" ~ this.path_.idup ~ "' : "/* ~ SysError.lastMsg.idup*/);
-                }
-            }
-        }
-        else version (Posix) {
-            void* handle;
-
-            void load_(LoadMode mode, bool throwExceptions) {
-                int mode_;
-                if (mode & LoadMode.Now) mode_ |= RTLD_NOW;
-                if (mode & LoadMode.Lazy) mode_ |= RTLD_LAZY;
-                if (mode & LoadMode.Global) mode_ |= RTLD_GLOBAL;
-                if (mode & LoadMode.Local) mode_ |= RTLD_LOCAL;
-
-                handle = dlopen((this.path_ ~ "\0").ptr, mode_);
-                if (handle is null && throwExceptions) {
-                    throw new Exception("Couldn't load shared library: " ~ fromStringz(dlerror()).idup);
-                }
-            }
-
-            void* getSymbol_(const(char)* name, bool throwExceptions) {
-                if (throwExceptions) {
-                    synchronized (typeof(this).classinfo) { // dlerror need not be reentrant
-                        auto err = dlerror();               // clear previous error condition
-                        auto res = dlsym(handle, name);     // result of null does NOT indicate error
-                        
-                        err = dlerror();                    // check for error condition
-                        if (err !is null) {
-                            throw new Exception("Couldn't load symbol: " ~ fromStringz(err).idup);
-                        } else {
-                            return res;
-                        }
-                    }
-                } else {
-                    return dlsym(handle, name);
-                }
-            }
-
-            void unload_(bool throwExceptions) {
-                if (0 != dlclose(handle) && throwExceptions) {
-                    throw new Exception("Couldn't unload shared library: " ~ fromStringz(dlerror()).idup);
-                }
-            }
-        }
-        else {
-            static assert (false, "No support for this platform");
-        }
-
-
-        const(char)[] path_;
-        int refCnt = 0;
-
-
-        @property bool loaded() {
-            return handle !is null;
-        }
-
-
-        this(const(char)[] path) {
-            this.path_ = path;
-        }
-    }
-
-
-    private __gshared {
-        SharedLib[char[]] loadedLibs;
-        Object mutex;
-    }
-
-
-    shared static this() {
-        mutex = new Object;
-    }
-}
-
-
-
 /+
 Process Class
 The issue: https://forum.dlang.org/thread/jpdoormeobwxrszcyrmg@forum.dlang.org
@@ -1176,14 +844,10 @@ class CPLUGIN
 {
 	private:
 	import											iup.iup;
-	/*
-	import											tango.sys.SharedLib;
-	import											tango.stdc.stringz;
-	*/
+
+	void*											sharedLib;
 	extern(C) void function( char* _fullPath )		poseidon_Dll_Go;
 	extern(C) void function()						poseidon_Dll_Release;
-	
-	SharedLib										sharedLib;
 	string											pluginName, pluginPath;
 	bool											bSuccess, bReleaseSuccess;
 	
@@ -1195,47 +859,39 @@ class CPLUGIN
 		{
 			pluginName = name;
 			pluginPath = fullPath;
-			
-			sharedLib = SharedLib.load( fullPath );
-			
-			void* iupPtr = sharedLib.getSymbol( "poseidon_Dll_Go" );
-			if( iupPtr )
+			sharedLib = DyLibLoad( fullPath );
+			if( sharedLib )
 			{
-				void **point = cast(void **) &poseidon_Dll_Go; // binding function address from DLL to our function pointer
-				*point = iupPtr;
-				bSuccess = true;
+				poseidon_Dll_Go = cast(typeof(poseidon_Dll_Go)) DyLibSymbol( sharedLib, "poseidon_Dll_Go" );
+				if( poseidon_Dll_Go ) bSuccess = true; else IupMessage( "Error", toStringz( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" ) );
+
+				poseidon_Dll_Release = cast(typeof(poseidon_Dll_Release)) DyLibSymbol( sharedLib, "poseidon_Dll_Release" );
+				if( poseidon_Dll_Release ) bReleaseSuccess = true; else IupMessage( "Error", toStringz( "Load poseidon_Dll_Release Symbol in " ~ name ~ " Error!" ) );
 				
-				// Release
-				void* iupPtrRelease = sharedLib.getSymbol( "poseidon_Dll_Release" );
-				if( iupPtrRelease )
+				if( !bSuccess || !bReleaseSuccess )
 				{
-					void **pointRelease = cast(void **) &poseidon_Dll_Release; // binding function address from DLL to our function pointer
-					*pointRelease = iupPtrRelease;
-					bReleaseSuccess = true;
-				}				
+					DyLibFree( sharedLib );
+					sharedLib = null;
+					throw new Exception( "Load Symbol in " ~ name ~ " Error!" );
+				}
 			}
 			else
 			{
-				unload();
-				IupMessage( "Error", toStringz( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" ) );
-				throw new Exception( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" );
+				IupMessage( "Error", toStringz( "Load " ~ name ~ " Error!\n" ) );
+				throw new Exception( "Load " ~ name ~ " Error!\n" );
 			}
 		}
 		catch( Exception e )
 		{
-			if( !bSuccess )
-			{
-				unload();
-				IupMessage( "Error", toStringz( "Load " ~ name ~ " Error!\n" ~ e.toString ) );
-				throw new Exception( "Load " ~ name ~ " Error!\n" ~ e.toString );
-			}
+			IupMessage( "Error", toStringz( e.toString ) );
+			throw e;
 		}
 	}
 	
 	~this()
 	{
 		if( bReleaseSuccess) poseidon_Dll_Release();
-		if( sharedLib !is null ) sharedLib.unload();
+		if( sharedLib ) DyLibFree( sharedLib );
 	}
 	
 	void go()
@@ -1260,10 +916,10 @@ class CPLUGIN
 	
 	void unload()
 	{
-		if( sharedLib !is null )
+		if( sharedLib )
 		{
 			if( bReleaseSuccess ) poseidon_Dll_Release();
-			sharedLib.unload();
+			DyLibFree( sharedLib );
 		}
 	}
 }
@@ -1295,8 +951,19 @@ int questMessage( string title, string message, string DIALOGTYPE = "QUESTION", 
 	return result;
 }
 
+bool splitBySign( string _string, string _sign, ref int _left, ref int _right )
+{
+	auto _signPosition = indexOf( _string, _sign );
+	if( _signPosition > 0 )
+	{
+		_left = Conv.to!(int)( _string[0.._signPosition] );
+		_right = Conv.to!(int)( _string[_signPosition+1..$] );
+		return true;
+	}
+	return false;
+}
 
-string[] splitSign( string s, string sign ... )
+string[] splitSigns( string s, string sign ... )
 {
 	string[]	result;
 	string		word;
@@ -1374,4 +1041,30 @@ int getINILineData( string lineData, out string left, out string right )
 		}
 	}
 	return 0;
+}
+
+
+version(Windows) bool setCaptionTheme( Ihandle* ih, bool bDarkMode )
+{
+	if( GLOBAL.bCanUseDarkMode )
+	{
+		AllowDarkModeForWindow( IupGetAttribute( ih, "WID" ), bDarkMode ? 1 : 0 );
+		RefreshCaptionColor( IupGetAttribute( ih, "WID" ) );
+		return true;
+	}
+	
+	return false;
+}
+
+
+version(Windows) bool setWinTheme( Ihandle* ih, string pszSubAppName = "CFD", bool bDarkMode = true )
+{
+	if( GLOBAL.bCanUseDarkMode )
+	{
+		if( bDarkMode ) pszSubAppName = "DarkMode_" ~ pszSubAppName;
+		SetWindowTheme( IupGetAttribute( ih, "WID" ), std.utf.toUTF16z( pszSubAppName ), null );
+		return true;
+	}
+	
+	return false;
 }

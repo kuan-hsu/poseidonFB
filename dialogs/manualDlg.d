@@ -9,7 +9,6 @@ private import std.string, std.conv, Array = std.array;
 class CManualDialog : CBaseDialog
 {
 private:
-	import				darkmode.darkmode;
 	Ihandle*			listManuals;
 	Ihandle*			labelStatus;
 	IupString			manualpathString;
@@ -20,11 +19,14 @@ private:
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
 		
-		listManuals = IupList( null );
-		IupSetAttributes( listManuals, "EXPAND=HORIZONTAL" );
+		version(Windows) listManuals = IupFlatList(); else listManuals = IupList( null );
+		IupSetAttributes( listManuals, "EXPAND=HORIZONTAL,SIZE=x10" );
 		version(FBIDE) IupSetStrAttribute( listManuals, "TIP", GLOBAL.languageItems["manualnote"].toCString );
 		IupSetHandle( "MANUAL_list", listManuals );
-		IupSetCallback( listManuals, "ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
+		version(Windows)
+			IupSetCallback( listManuals, "FLAT_ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
+		else
+			IupSetCallback( listManuals, "ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
 
 		Ihandle* btnToolsAdd = IupButton( null, null );
 		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
@@ -53,7 +55,7 @@ private:
 		Ihandle* listHbox = IupHbox( listManuals, vBoxButtonTools, null );
 		IupSetAttributes( listHbox, "NORMALIZESIZE=VERTICAL" );
 		
-		Ihandle* frameList = IupFrame( listHbox );
+		version(Windows) Ihandle* frameList = IupFlatFrame( listHbox ); else Ihandle* frameList = IupFrame( listHbox );
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		
 		manualpathString = new IupString( " " ~ GLOBAL.languageItems["manualpath"].toDString ~ ":" );
@@ -74,13 +76,15 @@ private:
 		
 		Ihandle* hBox00 = IupHbox( labelManualDir, textManualDir, btnManualDir, null );
 		IupSetAttribute( hBox00, "ALIGNMENT", "ACENTER" );
-		
+		/*
 		Ihandle* labelSEPARATOR = IupLabel( null ); 
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
-
-		Ihandle* vBoxLayout = IupVbox( frameList, hBox00, labelSEPARATOR, bottom, null );
+		*/
+		Ihandle* vBoxLayout = IupVbox( frameList, hBox00, /*labelSEPARATOR,*/ bottom, null );
+		IupSetAttributes( vBoxLayout, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=0" );
 		
 		IupAppend( _dlg, vBoxLayout );
+		changeColor();
 		IupMap( _dlg );
 		foreach( s; GLOBAL.manuals )
 		{
@@ -103,6 +107,11 @@ public:
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
 		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["ok"].toCString );
 		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CManualDialog_btnApply_ACTION );
+		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih, int state )
+		{
+			if( state == IUP_SHOW )	tools.setWinTheme( IupGetHandle("MANUAL_Text"), "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			return IUP_DEFAULT;
+		});		
 	}
 
 	~this()
@@ -121,20 +130,25 @@ public:
 	
 	override string show( int x, int y )
 	{
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-				}
-			}
-		}
-		
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		IupPopup( _dlg, x, y );
 		return null;
+	}
+	
+	void changeColor()
+	{
+		version(Windows)
+		{
+			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			
+			/*
+			IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( listReplace, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			*/
+		}
 	}	
 }
 

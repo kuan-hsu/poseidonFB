@@ -1988,46 +1988,38 @@ extern(C)
 		{
 			if( fromStringz( IupGetAttribute( GLOBAL.scrollICONHandle, "VISIBLE" ) ) == "YES" )
 			{
-				//IupMessage("","");
 				string cursorString = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 				
-				int		cursorX, cursorY, iconX, iconY;
-				auto 	crossSign = indexOf( cursorString, "x" );
-				if( crossSign > 0 )
+				int	cursorX, cursorY, iconX, iconY;
+				if( tools.splitBySign( cursorString, "x", cursorX, cursorY ) )
 				{
-					cursorX = to!(int)( cursorString[0..crossSign] );
-					cursorY = to!(int)( cursorString[crossSign+1..$] );
-				}
-				
-				string iconString = fSTRz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
-				crossSign = indexOf( iconString, "," );
-				if( crossSign > 0 )
-				{
-					iconX = to!(int)( iconString[0..crossSign] );
-					iconY = to!(int)( iconString[crossSign+1..$] );
-				}
-				if( cursorY > iconY + 16 )
-				{
-					int add = ( cursorY - iconY - 16 ) / 50 + 1;
-					IupScintillaSendMessage( ih, 2168, 0, add ); // SCI_LINESCROLL 2168
-					
-				}
-				else if( cursorY < iconY + 16 )
-				{
-					int minus = ( cursorY - iconY - 16 ) / 50 - 1;
-					IupScintillaSendMessage( ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
-				}
-				
-				if( cursorX > iconX + 16 )
-				{
-					int add = ( cursorX - iconX - 16 ) / 20 + 1;
-					IupScintillaSendMessage( ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
-					
-				}
-				else if( cursorX < iconX + 16 )
-				{
-					int minus = ( cursorX - iconX - 16 ) / 40 - 1;
-					IupScintillaSendMessage( ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
+					string iconString = fSTRz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
+					if( tools.splitBySign( iconString, ",", iconX, iconY ) )
+					{
+						if( cursorY > iconY + 16 )
+						{
+							int add = ( cursorY - iconY - 16 ) / 50 + 1;
+							IupScintillaSendMessage( ih, 2168, 0, add ); // SCI_LINESCROLL 2168
+							
+						}
+						else if( cursorY < iconY + 16 )
+						{
+							int minus = ( cursorY - iconY - 16 ) / 50 - 1;
+							IupScintillaSendMessage( ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
+						}
+						
+						if( cursorX > iconX + 16 )
+						{
+							int add = ( cursorX - iconX - 16 ) / 20 + 1;
+							IupScintillaSendMessage( ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
+							
+						}
+						else if( cursorX < iconX + 16 )
+						{
+							int minus = ( cursorX - iconX - 16 ) / 40 - 1;
+							IupScintillaSendMessage( ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
+						}
+					}
 				}
 			}
 		}
@@ -3304,66 +3296,34 @@ extern(C)
 			else
 			{
 				bool bSkip;
-				//char[]	documentTabs1_CLIENTSIZE	= fromStringz( IupGetAttribute( GLOBAL.documentTabs, "CLIENTSIZE" ) );
 				string	documentTabs1_RASTERSIZE	= fSTRz( IupGetAttribute( GLOBAL.documentTabs, "RASTERSIZE" ) );				
-				//char[]	documentTabs2_CLIENTSIZE	= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "CLIENTSIZE" ) );
-				string	documentTabs2_RASTERSIZE	= fSTRz( IupGetAttribute( GLOBAL.documentTabs_Sub, "RASTERSIZE" ) );				
 				string	tabs1Pos					= fSTRz( IupGetAttribute( GLOBAL.documentTabs, "SCREENPOSITION" ) );
-				//char[]	tabs2Pos					= fromStringz( IupGetAttribute( GLOBAL.documentTabs_Sub, "SCREENPOSITION" ) );
 				string	screenPos					= fSTRz( IupGetGlobal( "CURSORPOS" ) );
 				if( screenPos.length )
 				{
-					auto crossPos = indexOf( screenPos, "x" );
-					if( crossPos > -1 )
-					{
-						int		screenX = to!(int)( screenPos[0..crossPos] );
-						int		screenY = to!(int)( screenPos[crossPos+1..$] );
-						int		tabs1X, tabs1Y;
-						
-						if( tabs1Pos.length )
-						{
-							auto commaPos = indexOf( tabs1Pos, "," );
-							if( commaPos > -1 )
+					int	screenX, screenY, tabs1X, tabs1Y, RASTER1_W, RASTER1_H;
+					
+					if( tools.splitBySign( screenPos, "x", screenX, screenY ) )
+						if( tools.splitBySign( tabs1Pos, ",", tabs1X, tabs1Y ) )
+							if( tools.splitBySign( documentTabs1_RASTERSIZE, "x", RASTER1_W, RASTER1_H ) )
 							{
-								tabs1X = to!(int)( tabs1Pos[0..commaPos] );
-								tabs1Y = to!(int)( tabs1Pos[commaPos+1..$] );
-							}
-						}						
-						
-						int		title1_H, RASTER1_W, RASTER1_H, CLIENT1_H; 
-						
-						//if( documentTabs1_CLIENTSIZE.length && documentTabs1_RASTERSIZE.length )
-						if( documentTabs1_RASTERSIZE.length )
-						{
-							//crossPos = Util.index( documentTabs1_CLIENTSIZE, "x" );
-							//if( crossPos < documentTabs1_CLIENTSIZE.length ) CLIENT1_H = Integer.atoi( documentTabs1_CLIENTSIZE[crossPos+1..$] );
-							
-							crossPos = indexOf( documentTabs1_RASTERSIZE, "x" );
-							if( crossPos > -1 )
-							{
-								RASTER1_W = to!(int)( documentTabs1_RASTERSIZE[0..crossPos] );
-								RASTER1_H = to!(int)( documentTabs1_RASTERSIZE[crossPos+1..$] );
-								//title1_H = RASTER1_H - CLIENT1_H; 
-							}
-						}
-						
-						if( screenX > tabs1X && screenX < tabs1X + RASTER1_W )
-						{
-							if( screenY > tabs1Y && screenY < tabs1Y + RASTER1_H )
-							{
-								DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
-								bSkip = true;
-							}
-						}
+								if( screenX > tabs1X && screenX < tabs1X + RASTER1_W )
+								{
+									if( screenY > tabs1Y && screenY < tabs1Y + RASTER1_H )
+									{
+										DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs );
+										bSkip = true;
+									}
+								}
 
-						if( !bSkip )
-						{
-							if( IupGetInt( GLOBAL.documentSplit, "VALUE" ) != 1000 || IupGetInt( GLOBAL.documentSplit2, "VALUE" ) != 1000 )
-							{
-								DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs_Sub );
+								if( !bSkip )
+								{
+									if( IupGetInt( GLOBAL.documentSplit, "VALUE" ) != 1000 || IupGetInt( GLOBAL.documentSplit2, "VALUE" ) != 1000 )
+									{
+										DocumentTabAction.setActiveDocumentTabs( GLOBAL.documentTabs_Sub );
+									}
+								}
 							}
-						}
-					}
 				}
 				
 				actionManager.ScintillaAction.openFile( _fn, true );

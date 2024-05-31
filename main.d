@@ -3,9 +3,8 @@
 import iup.iup;
 import iup.iup_scintilla;
 import global, layout, images.imageData, tools, navcache;
-import menu, scintilla, actionManager;
+import menu, scintilla, actionManager, darkmode.darkmode;
 import parser.autocompletion, parser.ast;
-import darkmode.darkmode;
 import std.file, std.string, Conv = std.conv, std.process, Path = std.path, Array = std.array;
 debug import std.stdio;
 
@@ -54,29 +53,17 @@ void main( string[] args )
 		}
 		
 		// Dynamic Libraries Load...
-		SharedLib HtmlLoader;
-		try
+		auto ocxHH = tools.DyLibLoad( `hhctrl.ocx` );
+		if( ocxHH != null )
 		{
-			HtmlLoader = SharedLib.load( `hhctrl.ocx` );
-			if( HtmlLoader !is null )
+			GLOBAL.htmlHelp = cast(typeof(GLOBAL.htmlHelp)) tools.DyLibSymbol( ocxHH, "HtmlHelpW" );
+			if( GLOBAL.htmlHelp != null )
 			{
-				GLOBAL.htmlHelp = cast(typeof(GLOBAL.htmlHelp)) HtmlLoader.getSymbol("HtmlHelpW");
 				// Init HtmlHelp, prevent darkmode -- FixDarkScrollBar crash
 				DWORD dwCookie;
 				GLOBAL.htmlHelp( null, null, 0x001C, cast(DWORD_PTR) &dwCookie ); // HH_INITIALIZE = 0x001C
-				debug writefln( "hhctrl.ocx and Symbols loaded success!" );
 			}
 		}
-		catch( Exception e )
-		{
-			if( HtmlLoader !is null )
-			{
-				destroy( HtmlLoader );
-				HtmlLoader = null;
-			}
-			GLOBAL.htmlHelp = null;
-			debug writefln(e.toString);
-		}		
 	}
 	
 	//  Get poseidonFB exePath & set the new cwd
@@ -174,11 +161,7 @@ void main( string[] args )
 		if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 		{
 			GLOBAL.bCanUseDarkMode = InitDarkMode();
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				AllowDarkModeForWindow( IupGetAttribute( GLOBAL.mainDlg, "HWND" ), 1 );
-				RefreshCaptionColor( IupGetAttribute( GLOBAL.mainDlg, "HWND" ) );
-			}
+			tools.setCaptionTheme( GLOBAL.mainDlg, true );
 		}
 	}
 	
@@ -335,7 +318,7 @@ void main( string[] args )
 	foreach( _plugin; GLOBAL.pluginMnager )
 		if( _plugin !is null ) destroy( _plugin );
 	
-	version(Windows) if( HtmlLoader !is null ) HtmlLoader.unload();
+	version(Windows) if( ocxHH != null ) tools.DyLibFree( ocxHH );
 	
 	IupClose();
 }

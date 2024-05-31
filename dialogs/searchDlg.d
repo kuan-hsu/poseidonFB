@@ -3,14 +3,11 @@
 private import iup.iup, iup.iup_scintilla;
 private import global, tools, scintilla, actionManager;
 private import dialogs.baseDlg;
-private import darkmode.darkmode;
 private import std.string, std.file, Path = std.path, std.conv;
 
 class CSearchExpander
 {
 	private:
-	import				tools;
-	
 	Ihandle*			listFind, listReplace, btnFindPrev, btnFindNext, btnReplaceFind, btnReplace, btnReplaceAll, btnMarkAll;
 	Ihandle*			btnCase, btnScope, btnClose, btnWhole, btnDirection;
 	Ihandle*			expander;
@@ -205,20 +202,9 @@ class CSearchExpander
 	{
 		version(Windows)
 		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "DarkMode_CFD", null );
-					SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "DarkMode_CFD", null );
-				}
-				else
-				{
-					SetWindowTheme( cast(void*) IupGetAttribute( listFind, "WID" ), "CFD", null );
-					SetWindowTheme( cast(void*) IupGetAttribute( listReplace, "WID" ), "CFD", null );
-				}
-			}
-
+			bool _UseDarkMode = GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false;
+			tools.setWinTheme( listFind, "CFD", _UseDarkMode );
+			tools.setWinTheme( listReplace, "CFD", _UseDarkMode );
 			IupSetStrAttribute( listFind, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( listFind, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( listReplace, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );

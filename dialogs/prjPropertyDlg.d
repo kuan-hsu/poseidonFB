@@ -3,7 +3,6 @@
 private import iup.iup, iup.iup_scintilla;
 private import global, project, scintilla, actionManager, tools;
 private import dialogs.baseDlg, dialogs.fileDlg, dialogs.singleTextDlg;
-private import darkmode.darkmode;
 private import std.string, std.file, Path = std.path, std.conv;
 
 
@@ -808,27 +807,17 @@ extern(C) // Callback for CProjectPropertiesDialog
 		return IUP_DEFAULT;
 	}
 	
-	version(Windows) int CProjectPropertiesDialog_SHOW_CB( Ihandle *ih ) 
+	version(Windows) int CProjectPropertiesDialog_SHOW_CB( Ihandle* ih, int state )
 	{
-		//IupSetStrAttribute( ih, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-		//IupSetStrAttribute( ih, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-	
-		Ihandle* _typeHandle = IupGetDialogChild( ih, "PRJPROPERTY_TypeList" );
-		Ihandle* _focusHandle = IupGetDialogChild( ih, "PRJPROPERTY_FocusList" );
-		if( _typeHandle != null && _focusHandle != null )
+		if( state == IUP_SHOW )
 		{
-			if( GLOBAL.bCanUseDarkMode )
+			Ihandle* _typeHandle = IupGetDialogChild( ih, "PRJPROPERTY_TypeList" );
+			Ihandle* _focusHandle = IupGetDialogChild( ih, "PRJPROPERTY_FocusList" );
+			if( _typeHandle != null && _focusHandle != null )
 			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "DarkMode_CFD", null );
-					SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "DarkMode_CFD", null );
-				}
-				else
-				{
-					SetWindowTheme( cast(void*) IupGetAttribute( _typeHandle, "WID" ), "CFD", null );
-					SetWindowTheme( cast(void*) IupGetAttribute( _focusHandle, "WID" ), "CFD", null );
-				}
+				bool _UseDarkMode = GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false;
+				tools.setWinTheme( _typeHandle, "CFD", _UseDarkMode );
+				tools.setWinTheme( _focusHandle, "CFD", _UseDarkMode );
 			}
 		}
 		

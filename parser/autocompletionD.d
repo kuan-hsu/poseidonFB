@@ -3635,6 +3635,7 @@ version(DIDE)
 						{
 							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
 
+							// wait showCallTipThread thread done
 							try
 							{
 								if( showCallTipThread !is null )
@@ -3709,7 +3710,7 @@ version(DIDE)
 				}
 			}
 			else
-			{
+			{	/*
 				if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 ) // Calltip already showed
 				{
 					if( singleWord.length )
@@ -3717,7 +3718,7 @@ version(DIDE)
 						string s = singleWord;
 						if( s == ")" ) IupScintillaSendMessage( ih, 2201, 0, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 					}
-				}
+				}*/
 			}
 
 			

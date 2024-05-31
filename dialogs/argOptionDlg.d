@@ -1,7 +1,6 @@
 ﻿module dialogs.argOptionDlg;
 
 private import iup.iup;
-
 private import global, project, actionManager, tools;
 private import dialogs.baseDlg, dialogs.singleTextDlg, dialogs.fileDlg;
 private import std.string, std.conv;
@@ -9,16 +8,10 @@ private import std.string, std.conv;
 class CArgOptionDialog : CBaseDialog
 {
 	private:
-	version(Windows)	import darkmode.darkmode;
-	import				tools;
 	Ihandle*			listTools, listCompiler, listOptions, listArgs, btnCompilerPath;
-	
 	Ihandle*			hBoxCompiler, hBoxOptions, hBoxArgs;
-	
-	
 	Ihandle*			labelStatus;
 	int					QuickMode;
-	
 	string[]			_recentOptions, _recentArgs, _recentCompilers;
 	
 	static string[]		tempCustomCompilerOptions;
@@ -41,12 +34,10 @@ class CArgOptionDialog : CBaseDialog
 			IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
 		}
 		
-		
-		listTools = IupList( null );
+		version(Windows) listTools = IupFlatList(); else listTools = IupList( null );
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
 		IupSetHandle( "CArgOptionDialog_listTools_Handle", listTools );
-		IupSetCallback( listTools, "ACTION", cast(Icallback) &CArgOptionDialog_ACTION );
-		
+		version(Windows) IupSetCallback( listTools, "FLAT_ACTION", cast(Icallback) &CArgOptionDialog_ACTION ); else IupSetCallback( listTools, "ACTION", cast(Icallback) &CArgOptionDialog_ACTION );
 		
 		for( int i = 0; i < GLOBAL.compilerSettings.customCompilerOptions.length; ++ i )
 		{
@@ -83,12 +74,12 @@ class CArgOptionDialog : CBaseDialog
 			IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsDown );
 			
 			Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, null );
-			frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
+			version(Windows) frameList = IupFlatFrame( IupHbox( listTools, vBoxButtonTools, null ) ); else frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
 		}
 		else
 		{
 			IupSetAttributes( listTools, "VISIBLELINES=5" );
-			frameList = IupFrame( listTools );
+			version(Windows) frameList = IupFlatFrame( listTools ); else frameList = IupFrame( listTools );
 		}
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 
@@ -98,7 +89,6 @@ class CArgOptionDialog : CBaseDialog
 		
 		Ihandle* labelCompiler = IupLabel( GLOBAL.languageItems["compiler"].toCString );
 		IupSetAttributes( labelCompiler, "SIZE=60x16" );
-		
 
 		if( QuickMode )
 		{
@@ -182,7 +172,6 @@ class CArgOptionDialog : CBaseDialog
 		IupSetAttribute( labelSEPARATOR, "SEPARATOR", "HORIZONTAL");
 		*/
 		Ihandle* vBoxLayout;
-
 		switch( QuickMode )
 		{
 			case 1:			vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, /*labelSEPARATOR,*/ bottom, null ); break;
@@ -190,6 +179,7 @@ class CArgOptionDialog : CBaseDialog
 			case 3:			vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, hBoxArgs, /*labelSEPARATOR,*/ bottom, null ); break;
 			default:		vBoxLayout = IupVbox( frameList, hBoxCompiler, hBoxOptions, /*labelSEPARATOR,*/ bottom, null ); break;
 		}
+		IupSetAttributes( vBoxLayout, "ALIGNMENT=ACENTER,MARGIN=5x5,GAP=0" );
 
 		IupAppend( _dlg, vBoxLayout );
 	}	
@@ -315,21 +305,29 @@ class CArgOptionDialog : CBaseDialog
 				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 				{
 					IupMap( _dlg );
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-					
-					if( listArgs ) SetWindowTheme( cast(void*) IupGetAttribute( listArgs, "WID" ), "DarkMode_CFD", null );
-					if( listCompiler ) SetWindowTheme( cast(void*) IupGetAttribute( listCompiler, "WID" ), "DarkMode_CFD", null );
-					if( listOptions ) SetWindowTheme( cast(void*) IupGetAttribute( listOptions, "WID" ), "DarkMode_CFD", null );					
+					tools.setCaptionTheme( _dlg, true );
+					if( listArgs ) tools.setWinTheme( listArgs, "CFD", true );
+					if( listCompiler ) tools.setWinTheme( listCompiler, "CFD", true );
+					if( listOptions ) tools.setWinTheme( listOptions, "CFD", true );
 				}
 				else
 				{
-					if( listArgs ) SetWindowTheme( cast(void*) IupGetAttribute( listArgs, "WID" ), "CFD", null );
-					if( listCompiler ) SetWindowTheme( cast(void*) IupGetAttribute( listCompiler, "WID" ), "CFD", null );
-					if( listOptions ) SetWindowTheme( cast(void*) IupGetAttribute( listOptions, "WID" ), "CFD", null );
+					if( listArgs ) tools.setWinTheme( listArgs, "CFD", false );
+					if( listCompiler ) tools.setWinTheme( listCompiler, "CFD", false );
+					if( listOptions ) tools.setWinTheme( listOptions, "CFD", false );
 				}
 			}
-		}		
+		}
+		
+		if( !QuickMode )
+		{
+			IupMap( _dlg );
+			int screenX, screenY, width, height;
+			tools.splitBySign( fSTRz( IupGetAttribute( _dlg, "NATURALSIZE" ) ), "x", width, height );
+			tools.splitBySign( fSTRz( IupGetAttribute( GLOBAL.statusBar.getLayoutHandle, "SCREENPOSITION" ) ), ",", screenX, screenY );
+			x = screenX;
+			y = screenY - height;
+		}
 
 		IupPopup( _dlg, x, y );
 		

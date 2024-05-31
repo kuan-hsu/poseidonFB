@@ -6,7 +6,6 @@ private import layouts.table;
 
 private import global, menu, IDE, project, tools, scintilla, actionManager, parser.autocompletion;
 private import dialogs.baseDlg, dialogs.helpDlg, dialogs.fileDlg, dialogs.shortcutDlg;
-private import darkmode.darkmode;
 private import std.string, std.file, std.conv, std.format, Path = std.path, Array = std.array, Conv = std.conv;
 private import core.memory;
 
@@ -2006,46 +2005,21 @@ private:
 			return IUP_DEFAULT;//CONTINUE;
 		});
 		
-		IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih )
+		IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih, int state )
 		{
-			version(Windows)
+			if( state == IUP_SHOW )
 			{
-				GLOBAL.preferenceDlg.changeColor();
-				GLOBAL.preferenceDlg.changeIcon();
-				/+
-				if( GLOBAL.bCanUseDarkMode )
+				version(Windows)
 				{
-					if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-					{
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textSelAlpha" ), "WID" ), "DarkMode_ItemsView", null );
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textIndicatorAlpha" ), "WID" ), "DarkMode_Explorer", null );
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( ih, "Color-textMessageIndicatorAlpha" ), "WID" ), "DarkMode_CFD", null );
-					}
-					else
-					{
-						GLOBAL.SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
-					}
+					GLOBAL.preferenceDlg.changeColor();
+					GLOBAL.preferenceDlg.changeIcon();
 				}
-				+/
 			}
 			return IUP_DEFAULT;
 		});	
 		
 		IupMap( _dlg );
-		
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-				}
-			}
-		}		
-
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}
 
 	~this()
@@ -2094,14 +2068,8 @@ private:
 			//List
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
-	
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-					SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "DarkMode_CFD", null );
-				else
-					SetWindowTheme( cast(void*) IupGetAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "WID" ), "CFD", null );
-			}
+			
+			tools.setWinTheme( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "keyword-tabs" ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "preference-tabs" ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
@@ -2776,7 +2744,8 @@ extern(C) // Callback for CPreferenceDialog
 			if( GLOBAL.toolbar !is null ) GLOBAL.toolbar.changeColor();
 			if( GLOBAL.statusBar !is null ) GLOBAL.statusBar.changeColor();
 			if( GLOBAL.debugPanel !is null ) GLOBAL.debugPanel.changeColor();
-			if( GLOBAL.searchExpander !is null ) GLOBAL.searchExpander.changeColor();			
+			if( GLOBAL.searchExpander !is null ) GLOBAL.searchExpander.changeColor();
+			if( GLOBAL.menubar !is null )  GLOBAL.menubar.changeColor( GLOBAL.editColor.dlgFore, GLOBAL.editColor.dlgBack );
 			
 			GLOBAL.messagePanel.applyColor(); // Set GLOBAL.messagePanel Color
 			IupSetStrAttribute( GLOBAL.projectViewTabs, "TABSFORECOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
@@ -2789,6 +2758,8 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.preferenceDlg.changeColor();
 				GLOBAL.preferenceDlg.changeIcon();
 			}
+			
+			version(Windows) tools.setCaptionTheme( GLOBAL.mainDlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 			
 			// Save Setup to Xml
 			//IDECONFIG.save();
@@ -2817,19 +2788,17 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			if( GLOBAL.bCanUseDarkMode )
 			{
+				IupMap( dlg );
+				tools.setCaptionTheme( dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 				{
-					IupMap( dlg );
-					AllowDarkModeForWindow( IupGetAttribute( dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( dlg, "HWND" ) );
-					
 					Ihandle* _c = IupGetChild( dlg, 0 ); 
 					_c = IupGetChild( _c, 2 ); // hBox, label, hbox
 
 					auto child = IupGetNextChild( _c, null );
 					while( child )
 					{
-						if( fSTRz( IupGetClassName(child) ) == "button" ) SetWindowTheme( IupGetAttribute( child, "WID" ), "DarkMode_Explorer", null );
+						if( fSTRz( IupGetClassName(child) ) == "button" ) tools.setWinTheme( child, "Explorer", true );
 						child = IupGetNextChild(null, child);
 					}
 				}

@@ -6,7 +6,7 @@ class CCompilerHelpDialog : CBaseDialog
 {
 	private:
 	import iup.iup;	
-	import global, darkmode.darkmode;
+	import global;
 	import std.string, std.file;
 
 	void createLayout()
@@ -37,19 +37,7 @@ class CCompilerHelpDialog : CBaseDialog
 		IupSetAttributes( vBox, "ALIGNMENT=ARIGHT,MARGIN=5x5,GAP=2,EXPAND=YES" );
 
 		IupAppend( _dlg, vBox );
-		
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					IupMap( _dlg );
-					AllowDarkModeForWindow( IupGetAttribute( _dlg, "HWND" ), 1 );
-					RefreshCaptionColor( IupGetAttribute( _dlg, "HWND" ) );
-				}
-			}
-		}		
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}	
 
 	public:

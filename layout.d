@@ -194,43 +194,35 @@ void createExplorerWindow()
 					string cursorString = fSTRz( IupGetGlobal( "CURSORPOS" ) );
 					
 					int		cursorX, cursorY, iconX, iconY;
-					auto 	crossSign = indexOf( cursorString, "x" );
-					if( crossSign > 0 )
+					if( tools.splitBySign( cursorString, "x", cursorX, cursorY ) )
 					{
-						cursorX = to!(int)( cursorString[0..crossSign] );
-						cursorY = to!(int)( cursorString[crossSign+1..$] );
-					}
-					
-					string iconString = fSTRz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
-					crossSign = indexOf( iconString, "," );
-					if( crossSign > 0 )
-					{
-						iconX = to!(int)( iconString[0..crossSign] );
-						iconY = to!(int)( iconString[crossSign+1..$] );
-					}
-					
-					if( cursorY > iconY + 16 )
-					{
-						int add = ( cursorY - iconY - 16 ) / 5 + 1;
-						IupScintillaSendMessage( _ih, 2168, 0, add ); // SCI_LINESCROLL 2168
-						
-					}
-					else if( cursorY < iconY + 16 )
-					{
-						int minus = ( cursorY - iconY - 16 ) / 5 - 1;
-						IupScintillaSendMessage( _ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
-					}
-					
-					if( cursorX > iconX + 16 )
-					{
-						int add = ( cursorX - iconX - 16 ) / 100;
-						IupScintillaSendMessage( _ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
-						
-					}
-					else if( cursorX < iconX + 16 )
-					{
-						int minus = ( cursorX - iconX - 16 ) / 100;
-						IupScintillaSendMessage( _ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
+						string iconString = fSTRz( IupGetAttribute( GLOBAL.scrollICONHandle, "SCREENPOSITION" ) );
+						if( tools.splitBySign( iconString, ",", iconX, iconY ) )
+						{
+							if( cursorY > iconY + 16 )
+							{
+								int add = ( cursorY - iconY - 16 ) / 5 + 1;
+								IupScintillaSendMessage( _ih, 2168, 0, add ); // SCI_LINESCROLL 2168
+								
+							}
+							else if( cursorY < iconY + 16 )
+							{
+								int minus = ( cursorY - iconY - 16 ) / 5 - 1;
+								IupScintillaSendMessage( _ih, 2168, 0, minus ); // SCI_LINESCROLL 2168
+							}
+							
+							if( cursorX > iconX + 16 )
+							{
+								int add = ( cursorX - iconX - 16 ) / 100;
+								IupScintillaSendMessage( _ih, 2168, add, 0 ); // SCI_LINESCROLL 2168
+								
+							}
+							else if( cursorX < iconX + 16 )
+							{
+								int minus = ( cursorX - iconX - 16 ) / 100;
+								IupScintillaSendMessage( _ih, 2168, minus, 0 ); // SCI_LINESCROLL 2168
+							}
+						}
 					}
 				}
 			}
