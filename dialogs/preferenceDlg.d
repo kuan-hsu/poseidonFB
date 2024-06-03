@@ -95,7 +95,7 @@ private:
 			
 			hBox02 = IupFrame( _hBox02 );
 			IupSetStrAttribute( hBox02, "TITLE", GLOBAL.languageItems["debugpath"].toCString );
-			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");			
+			IupSetAttributes( hBox02, "EXPANDCHILDREN=YES,SIZE=346x");
 		}
 		else // DIDE
 		{
@@ -971,7 +971,7 @@ private:
 							string templateFullPath = templatePath ~ "/" ~templateName ~ ".ini";
 							if( std.file.exists( templateFullPath ) )
 							{
-								int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["suredelete"].toDString, "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
+								int result = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["suredelete"].toDString, "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
 								if( result == 1 )
 								{
 									std.file.remove( templateFullPath );
@@ -2019,7 +2019,6 @@ private:
 		});	
 		
 		IupMap( _dlg );
-		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}
 
 	~this()
@@ -2029,6 +2028,7 @@ private:
 	
 	override string show( int x, int y )
 	{
+		tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		IupShowXY( _dlg, x, y );
 		
 		return "OK";
@@ -2174,6 +2174,16 @@ private:
 		
 		IupSetStrAttribute( IupGetHandle( "shortCutList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( IupGetHandle( "shortCutList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+		version(Windows)
+		{
+			tools.setWinTheme( IupGetHandle( "shortCutList" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( IupGetHandle( "keyWordText0" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( IupGetHandle( "keyWordText1" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( IupGetHandle( "keyWordText2" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( IupGetHandle( "keyWordText3" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( IupGetHandle( "keyWordText4" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( IupGetHandle( "keyWordText5" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		
 		version(Windows)
 		{		
@@ -2759,8 +2769,13 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.preferenceDlg.changeIcon();
 			}
 			
-			version(Windows) tools.setCaptionTheme( GLOBAL.mainDlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			
+			version(Windows)
+			{
+				tools.setMenuTheme( GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+				tools.setCaptionTheme( GLOBAL.preferenceDlg.getIhandle, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+				tools.setCaptionTheme( GLOBAL.mainDlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			}
+
 			// Save Setup to Xml
 			//IDECONFIG.save();
 			IDECONFIG.saveINI();
@@ -2833,13 +2848,7 @@ extern(C) // Callback for CPreferenceDialog
 			
 			IupSetStrAttribute( ih, "FGCOLOR", _color ); IupSetFocus( ih );
 			
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=2,BUTTONS=YESNO" );
-			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["applyfgcolor"].toCString );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString() );
-			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
-			int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
-			
+			int button = tools.MessageDlg( GLOBAL.languageItems["quest"].toDString(), GLOBAL.languageItems["applycolor"].toDString, "QUESTION", "YESNO", IUP_CENTER, IUP_CENTER );
 			if( button == 1 )
 			{
 				Ihandle* _ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENT_FG" );
@@ -2915,13 +2924,7 @@ extern(C) // Callback for CPreferenceDialog
 			
 			IupSetStrAttribute( ih, "FGCOLOR", _color ); IupSetFocus( ih );
 			
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=2,BUTTONS=YESNO" );
-			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["applycolor"].toCString );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString() );
-			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
-			int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
-			
+			int button = tools.MessageDlg( GLOBAL.languageItems["quest"].toDString(), GLOBAL.languageItems["applycolor"].toDString, "QUESTION", "YESNO", IUP_CENTER, IUP_CENTER );
 			if( button == 1 )
 			{
 				Ihandle* _ih = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSCE_B_COMMENT_BG" );

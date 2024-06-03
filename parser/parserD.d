@@ -3055,7 +3055,7 @@ version(DIDE)
 					{
 						if( ++repeatCount > 10 )
 						{
-							tools.questMessage( "Error", "Infinite Loop of parse() function", "ERROR", "OK" );
+							tools.MessageDlg( "Error", "Infinite Loop of parse() function", "ERROR", "OK" );
 							//Stdout( "Infinite Loop of parse() function" ).newline;
 							break;
 						}

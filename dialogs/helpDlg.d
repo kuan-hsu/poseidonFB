@@ -8,10 +8,12 @@ class CCompilerHelpDialog : CBaseDialog
 	import iup.iup;	
 	import global;
 	import std.string, std.file;
+	
+	Ihandle* text;
 
 	void createLayout()
 	{
-		Ihandle* text = IupText( null );
+		text = IupText( null );
 		IupSetAttributes( text, "EXPAND=YES,MULTILINE=YES,READONLY=YES" );
 
 		try
@@ -37,7 +39,7 @@ class CCompilerHelpDialog : CBaseDialog
 		IupSetAttributes( vBox, "ALIGNMENT=ARIGHT,MARGIN=5x5,GAP=2,EXPAND=YES" );
 
 		IupAppend( _dlg, vBox );
-		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		IupMap( _dlg );
 	}	
 
 	public:
@@ -57,7 +59,14 @@ class CCompilerHelpDialog : CBaseDialog
 
 	override string show( int x, int y )
 	{
+		version(Windows)
+		{
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
+			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
+		}
 		IupShowXY( _dlg, x, y );
+		version(Windows) tools.setWinTheme( text, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		return null;
 	}	
 }

@@ -305,7 +305,7 @@ extern(C)
 			{
 				if( ScintillaAction.getModifyByTitle( sc ) )
 				{
-					int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["sureexit"].toDString );
+					int result = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["sureexit"].toDString );
 					if( result != 1 ) return IUP_IGNORE; else break;
 				}
 			}

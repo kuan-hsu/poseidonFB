@@ -444,7 +444,8 @@ extern(C) // Callback for CFindInFilesDialog
 				if( selectionHandle != null )
 				{
 					string itemTitle = fromStringz( IupGetAttributeId( toolHabdle, "", itemID ) ).dup;
-					int result = tools.questMessage( "Quest", GLOBAL.languageItems["applythisone"].toDString ~ "\n" ~ itemTitle, "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
+					auto dialogHandle = IupGetParent( IupGetParent( IupGetParent( ih ) ) );
+					int result = tools.MessageDlg( "Quest",  GLOBAL.languageItems["applythisone"].toDString ~ "\n" ~ itemTitle, "QUESTION", "YESNO", IUP_MOUSEPOS, IupGetInt( dialogHandle, "Y" ) );
 					if( result == 1 )
 					{
 						GLOBAL.compilerSettings.currentCustomCompilerOption = itemTitle;

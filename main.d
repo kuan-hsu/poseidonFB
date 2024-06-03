@@ -158,11 +158,9 @@ void main( string[] args )
 	IupMap( GLOBAL.mainDlg );
 	version(Windows)
 	{
-		if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-		{
-			GLOBAL.bCanUseDarkMode = InitDarkMode();
-			tools.setCaptionTheme( GLOBAL.mainDlg, true );
-		}
+		GLOBAL.bCanUseDarkMode = InitDarkMode();
+		tools.setMenuTheme( GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		tools.setCaptionTheme( GLOBAL.mainDlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}
 	
 	// Shows dialog
@@ -199,6 +197,7 @@ void main( string[] args )
 	{
 		if( GLOBAL.bCanUseDarkMode )
 		{
+			tools.setWinTheme( GLOBAL.projectTree.getTreeHandle, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 			if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
 			{
 				GLOBAL.searchExpander.changeColor();

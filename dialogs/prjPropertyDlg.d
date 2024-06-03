@@ -494,12 +494,7 @@ extern(C) // Callback for CProjectPropertiesDialog
 		// Apply First!!!
 		if( CProjectPropertiesDialog_btnApply_cb( null ) == IUP_IGNORE )
 		{
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-			IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["nodirmessage"].toCString() );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString() );
-			IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-		
+			tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString(), GLOBAL.languageItems["nodirmessage"].toDString, "WARNING", "", IUP_CENTER, IUP_CENTER );
 			return IUP_IGNORE;
 		}
 		

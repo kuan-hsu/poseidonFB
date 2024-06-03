@@ -342,7 +342,7 @@ private:
 				}
 				catch( Exception e )
 				{
-					tools.questMessage( "Error", e.toString, "ERROR", "OK" );
+					tools.MessageDlg( "Error", e.toString, "ERROR", "OK" );
 				}
 			}	
 		
@@ -720,9 +720,9 @@ private:
 					else
 					{
 						if( !bWarning )
-							tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+							tools.MessageDlg( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
 						else
-							tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
+							tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
 					}
 				}
 				else if( buildTools.compilerSettings.useSFX == "ON" )
@@ -752,7 +752,7 @@ private:
 				if( buildTools.compilerSettings.useThread == "ON" )
 					IupPostMessage( buildTools.messagePanel.getOutputPanelHandle, "error", 0, 3, null );
 				else
-					tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+					tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
 			}
 			else if( buildTools.compilerSettings.useSFX == "ON" )
 			{
@@ -776,7 +776,7 @@ private:
 		{
 			if( !checkTerminalExists() ) 
 			{
-				int dummy = tools.questMessage( "Error", "The linux terminal path isn't set.", "ERROR", "OK" );
+				int dummy = tools.MessageDlg( "Error", "The linux terminal path isn't set.", "ERROR", "OK" );
 				return false;
 			}
 		}
@@ -830,7 +830,7 @@ private:
 			
 			if( !checkCompilerExists( fbcFullPath ) )
 			{
-				int dummy = tools.questMessage( "Error", "The Compiler Path isn't set!", "ERROR", "OK" );
+				int dummy = tools.MessageDlg( "Error", "The Compiler Path isn't set!", "ERROR", "OK" );
 				return false;
 			}
 			
@@ -885,7 +885,7 @@ private:
 					
 					if( !MainFile.length ) // The mainfile not in GLOBAL.projectManager[activePrjName].sources
 					{
-						tools.questMessage( GLOBAL.languageItems["error"].toDString, "The main file not in project!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "The main file not in project!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
 						return false;
 					}
 				}
@@ -893,7 +893,7 @@ private:
 				{
 					if( GLOBAL.projectManager[activePrjName].passOneFile == "ON" )
 					{
-						tools.questMessage( GLOBAL.languageItems["error"].toDString, "Please Set Main File Without Extension,The Project had set in One File Mode\n", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Please Set Main File Without Extension,The Project had set in One File Mode\n", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
 						return false;
 					}
 				}
@@ -1109,10 +1109,7 @@ private:
 									}
 									else
 									{
-										Ihandle* messageDlg = IupMessageDlg();
-										IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION,TITLE=Message,BUTTONDEFAULT=1" );
-										IupSetAttribute( messageDlg, "VALUE", toStringz( "Libraries Path Error!" ) );
-										IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );	
+										tools.MessageDlg( "Message", "Libraries Path Error!", "INFORMATION", "", IUP_CENTER, IUP_CENTER );
 										return false;
 									}
 								}
@@ -1349,7 +1346,7 @@ public:
 				{
 					if( !GLOBAL.projectManager[activePrjName].mainFile.length )
 					{
-						auto questMessageResult = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, "Compile all sources to objects,\nPlease set the main file.\nContinue?", "WARNING", "YESNO", IUP_CENTER, IUP_CENTER );
+						auto questMessageResult = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "Compile all sources to objects,\nPlease set the main file.\nContinue?", "WARNING", "YESNO", IUP_CENTER, IUP_CENTER );
 						if( questMessageResult == 2 ) return false;
 					}
 				}
@@ -1492,15 +1489,15 @@ public:
 			string fileName;
 			if( tempDir == "." ) tempDir = GLOBAL.poseidonPath;
 			version(FBIDE) fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".bas"; else fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".d";
-			if( !FileAction.saveFile( fileName, cSci.getText, BOM.utf8, true ) ) // If AppImage, the poseidon Path files can't be written
+			if( !FileAction.saveFile( fileName, cSci.getText, cSci.getBOM, cSci.withBOM ) ) // If AppImage, the poseidon Path files can't be written
 			{
 				if( Path.dirName( cSci.getFullPath ) == "." ) // Should be NONAME#?.bas
 				{
 					tempDir = GLOBAL.linuxHome.length ? GLOBAL.linuxHome : GLOBAL.poseidonPath;
 					version(FBIDE) fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".bas"; else fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".d";
-					if( !FileAction.saveFile( fileName, cSci.getText, BOM.utf8, true ) )
+					if( !FileAction.saveFile( fileName, cSci.getText, cSci.getBOM, cSci.withBOM ) )
 					{
-						tools.questMessage( GLOBAL.languageItems["error"].toDString, "Can't create quickrun temp file!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Can't create quickrun temp file!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
 						return false;
 					}
 				}

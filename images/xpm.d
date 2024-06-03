@@ -503,13 +503,44 @@ private:
 					IupSetHandle( __handleName.toCString, imageInvert );
 				}
 			}
-
 		}
 		catch( Exception e )
 		{
 		}
 	}
+	
+	static Ihandle* InvertIupImage( Ihandle* oriImage )
+	{
+		if( oriImage )
+		{
+			Ihandle* modImage = IupImage( IupGetInt( oriImage, "WIDTH" ), IupGetInt( oriImage, "HEIGHT" ), null );
+			
+			IupCopyAttributes( oriImage, modImage );
+			
+			string[] colors;
+			for( int i = 0; i < 8; ++i )
+				colors ~= fSTRz( IupGetAttributeId( modImage, "", i ) );
 
+			foreach( size_t counter, string color; colors )
+			{
+				if( color != "BGCOLOR" )
+				{
+					string[] _colorValues = Array.split( color, " " );
+					if( _colorValues.length == 3 )
+					{
+						string invert = to!(string)( 255 - to!(int)( _colorValues[0] ) ) ~ " " ~ to!(string)( 255 - to!(int)( _colorValues[1] ) ) ~ " " ~ to!(string)( 255 - to!(int)( _colorValues[2] ) );
+						//if( handleName == "icon_cut" ) IupMessage( "before", IupGetAttributeId( oriImage, "", cast(int)counter ) );
+						IupSetStrAttribute( modImage, toStringz( to!(string)( counter ) ) , toStringz( invert ) );
+						//if( handleName == "icon_cut" ) IupMessage( "after", IupGetAttributeId( oriImage, "", cast(int)counter ) );
+					}
+				}
+			}
+			return modImage;
+		}
+		
+		return null;
+	}	
+	
 	static void init()
 	{
 		version(FBIDE)

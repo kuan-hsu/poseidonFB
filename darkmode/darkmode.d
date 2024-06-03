@@ -355,13 +355,24 @@ version(Windows)
 	public:
 	fnSetWindowTheme SetWindowTheme = null;
 	
-	void RefreshCaptionColor(HWND hWnd){ if (g_darkModeSupported) RefreshTitleBarThemeColor( hWnd ); }
-
-	bool AllowDarkModeForWindow(HWND hWnd, bool allow)
+	void RefreshCaptionColor(HWND hWnd, bool bDarkMode)
 	{
-		if (g_darkModeSupported) return _AllowDarkModeForWindow(hWnd, allow);
-		return false;
+		if (g_darkModeSupported)
+		{
+			AllowDarkModeForApp( bDarkMode );
+			_AllowDarkModeForWindow(hWnd, bDarkMode);
+			RefreshTitleBarThemeColor( hWnd );
+		}
 	}
+	
+	void RefreshPopupMenu(bool bDarkMode)
+	{
+		if (g_darkModeSupported)
+		{
+			AllowDarkModeForApp( bDarkMode );
+			_FlushMenuThemes();
+		}
+	}	
 	
 	bool InitDarkMode()
 	{
@@ -390,7 +401,7 @@ version(Windows)
 					else
 						_SetPreferredAppMode = cast(fnSetPreferredAppMode)(ord135);
 
-					//_FlushMenuThemes = reinterpret_cast<fnFlushMenuThemes>(GetProcAddress(hUxtheme, MAKEINTRESOURCEA(136)));
+					_FlushMenuThemes = cast(fnFlushMenuThemes)(GetProcAddress(hUxtheme, MAKEINTRESOURCEA(136)));
 					_IsDarkModeAllowedForWindow = cast(fnIsDarkModeAllowedForWindow)(GetProcAddress(hUxtheme, MAKEINTRESOURCEA(137)));
 
 					_SetWindowCompositionAttribute = cast(fnSetWindowCompositionAttribute)(GetProcAddress(GetModuleHandleW("user32.dll"), "SetWindowCompositionAttribute"));
@@ -400,17 +411,17 @@ version(Windows)
 						_ShouldAppsUseDarkMode &&
 						_AllowDarkModeForWindow &&
 						(_AllowDarkModeForApp || _SetPreferredAppMode) &&
-						//_FlushMenuThemes &&
+						_FlushMenuThemes &&
 						_IsDarkModeAllowedForWindow)
 					{
 						g_darkModeSupported = true;
 
-						AllowDarkModeForApp(true);
+						//AllowDarkModeForApp(true);
 						_RefreshImmersiveColorPolicyState();
 
 						g_darkModeEnabled = _ShouldAppsUseDarkMode() && !IsHighContrast();
 
-						FixDarkScrollBar();
+						//FixDarkScrollBar();
 						
 						return true;
 					}

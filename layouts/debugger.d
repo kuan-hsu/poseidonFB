@@ -1293,7 +1293,7 @@ public:
 			auto gdbEndStringPosHead = lastIndexOf( result, "[Inferior" );
 			if( gdbEndStringPosHead > 0 )
 			{
-				int _result = tools.questMessage( "GDB", result[gdbEndStringPosHead..gdbEndStringPosTail+16] ~ "\n" ~ GLOBAL.languageItems["exitdebug1"].toDString );
+				int _result = tools.MessageDlg( "GDB", result[gdbEndStringPosHead..gdbEndStringPosTail+16] ~ "\n" ~ GLOBAL.languageItems["exitdebug1"].toDString );
 				if( _result == 1 )
 				{
 					terminal();
@@ -2233,7 +2233,7 @@ private :
 			
 			if( stderrString.length )
 			{
-				tools.questMessage( "Alarm", stderrString, "WARNING", "OK" );
+				tools.MessageDlg( "Alarm", stderrString, "WARNING", "OK" );
 				stderrMessage = stderrString;
 			}
 			else
@@ -2394,7 +2394,7 @@ public:
 		switch( command )
 		{
 			case "kill\n", "k\n":
-				int result = tools.questMessage( "GDB", "Kill the program being debugged?" );
+				int result = tools.MessageDlg( "GDB", "Kill the program being debugged?" );
 				if( result == 2 ) return "#_NO_#";
 				break;
 				
@@ -2929,7 +2929,7 @@ extern( C )
 				
 				if( _ih == GLOBAL.debugPanel.watchTreeHandle )
 				{
-					int _result = tools.questMessage( "GDB", GLOBAL.languageItems["addtowatch"].toDString ~ "?", "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
+					int _result = tools.MessageDlg( "GDB", GLOBAL.languageItems["addtowatch"].toDString ~ "?", "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
 					if( _result == 1 )
 					{
 						IupSetAttributeId( _ih, "DELNODE", IupGetIntId( _ih, "NEXT", _id ), "SELECTED" );

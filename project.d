@@ -55,7 +55,7 @@ public:
 			if( prjPropertyDialog == null ) prjPropertyDialog = GLOBAL.mainDlg;
 			try
 			{
-				int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, dir ~ "\n" ~ GLOBAL.languageItems["nodirandcreate"].toDString, "WARNING" );
+				int result = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, dir ~ "\n" ~ GLOBAL.languageItems["nodirandcreate"].toDString, "WARNING" );
 				if( result == 1 ) std.file.mkdir( dir ); else return false;
 			}
 			catch( Exception e )

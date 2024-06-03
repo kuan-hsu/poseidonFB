@@ -99,6 +99,210 @@ Ihandle* load_image_scroll()
   return image;
 }
 
+Ihandle* create_image_warningbox( bool bInvert = false)
+{
+  ubyte[] imgdata = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 6, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 3, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 2, 6, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 2, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 6, 6, 6, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 6, 6, 6, 6, 0, 2, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 6, 6, 6, 6, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 1, 0, 0, 6, 6, 6, 6, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 2, 6, 6, 0, 0, 0, 0, 0, 1, 6, 6, 1, 0, 0, 0, 0, 7, 6, 6, 2, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 6, 6, 2, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 6, 6, 6, 1, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 0, 0, 0,
+    0, 0, 0, 2, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0,
+    0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0,
+    0, 0, 6, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0,
+    0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0,
+    0, 0, 2, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 0, 0,
+    0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0,
+    0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+
+  IupSetAttribute(image, "0", "BGCOLOR");
+  if( !bInvert ) IupSetAttribute(image, "1", "20 22 20"); else IupSetAttribute(image, "1", "235 233 235");
+  if( !bInvert ) IupSetAttribute(image, "2", "12 14 12"); else IupSetAttribute(image, "2", "243 241 243");
+  if( !bInvert ) IupSetAttribute(image, "3", "28 30 28"); else IupSetAttribute(image, "3", "227 225 227");
+  if( !bInvert ) IupSetAttribute(image, "4", "12 10 12"); else IupSetAttribute(image, "4", "243 245 243");
+  if( !bInvert ) IupSetAttribute(image, "5", "28 26 28"); else IupSetAttribute(image, "5", "227 229 227");
+  if( !bInvert ) IupSetAttribute(image, "6", "20 18 20"); else IupSetAttribute(image, "6", "235 237 235");
+  if( !bInvert ) IupSetAttribute(image, "7", "36 34 36"); else IupSetAttribute(image, "7", "219 221 219");
+
+  return image;
+}
+
+Ihandle* create_image_querybox( bool bInvert = false)
+{
+  ubyte[] imgdata = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 1, 2, 2, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 3, 3, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+    0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+
+  IupSetAttribute(image, "0", "BGCOLOR");
+  if( !bInvert ) IupSetAttribute(image, "1", "12 14 12"); else IupSetAttribute(image, "1", "243 241 243");
+  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");
+  if( !bInvert ) IupSetAttribute(image, "3", "20 18 20"); else IupSetAttribute(image, "3", "235 237 235");
+  /*
+  IupSetAttribute(image, "4", "0 0 0");
+  IupSetAttribute(image, "5", "0 0 0");
+  IupSetAttribute(image, "6", "0 0 0");
+  IupSetAttribute(image, "7", "0 0 0");
+  */
+  return image;
+}
+
+Ihandle* create_image_errorbox( bool bInvert = false)
+{
+  ubyte[] imgdata = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 1, 2, 2, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 3, 3, 1, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 1, 3, 3, 0, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 1, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+    0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 1, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 1, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+    0, 0, 0, 0, 3, 3, 1, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+
+  IupSetAttribute(image, "0", "BGCOLOR");
+  if( !bInvert ) IupSetAttribute(image, "1", "12 14 12"); else IupSetAttribute(image, "1", "243 241 243");
+  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");;
+  if( !bInvert ) IupSetAttribute(image, "3", "20 18 20"); else IupSetAttribute(image, "3", "235 237 235");
+  /*
+  if( !bInvert ) IupSetAttribute(image, "4", "0 0 0"); else IupSetAttribute(image, "4", "0 0 0");
+  if( !bInvert ) IupSetAttribute(image, "5", "0 0 0"); else IupSetAttribute(image, "5", "0 0 0");
+  if( !bInvert ) IupSetAttribute(image, "6", "0 0 0"); else IupSetAttribute(image, "6", "0 0 0");
+  if( !bInvert ) IupSetAttribute(image, "7", "0 0 0"); else IupSetAttribute(image, "7", "0 0 0"); 
+  */
+  return image;
+}
+
+Ihandle* create_image_infobox( bool bInvert = false)
+{
+  ubyte[] imgdata = [
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2, 2, 2, 2, 7, 4, 7, 7, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 4, 1, 1, 1, 2, 2, 0, 1, 1, 0, 2, 2, 1, 1, 1, 7, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 6, 1, 1, 1, 0, 2, 2, 0, 0, 2, 2, 0, 1, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 0, 2, 2, 2, 2, 0, 1, 1, 1, 1, 7, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 0, 2, 2, 0, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+
+  if( !bInvert ) IupSetAttribute(image, "0", "4 2 4"); else IupSetAttribute(image, "0", "251 253 251");
+  IupSetAttribute(image, "1", "BGCOLOR");
+  if( !bInvert ) IupSetAttribute(image, "2", "44 53 52"); else IupSetAttribute(image, "2", "211 202 203");
+  if( !bInvert ) IupSetAttribute(image, "3", "84 86 84"); else IupSetAttribute(image, "3", "171 169 171");
+  if( !bInvert ) IupSetAttribute(image, "4", "68 66 68"); else IupSetAttribute(image, "4", "187 189 187");
+  if( !bInvert ) IupSetAttribute(image, "5", "43 41 43"); else IupSetAttribute(image, "5", "212 214 212");
+  if( !bInvert ) IupSetAttribute(image, "6", "36 66 68"); else IupSetAttribute(image, "6", "219 189 187");
+  if( !bInvert ) IupSetAttribute(image, "7", "52 51 57"); else IupSetAttribute(image, "7", "203 204 198");
+
+  return image;
+}
+
+
+
 void load_all_images_icons()
 {
 	XPM.init();
@@ -309,4 +513,101 @@ void load_all_images_icons()
 
 	IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
 	IupSetHandle( "icon_scroll", load_image_scroll() );
+	
+	IupSetHandle( "warningbox", create_image_warningbox() );
+	IupSetHandle( "querybox", create_image_querybox() );
+	IupSetHandle( "errorbox", create_image_errorbox() );
+	IupSetHandle( "infobox", create_image_infobox() );
+	IupSetHandle( "warningbox_invert", create_image_warningbox(true) );
+	IupSetHandle( "querybox_invert", create_image_querybox(true) );
+	IupSetHandle( "infobox_invert",create_image_infobox(true) );
 }
+
+/+
+void IupImagesInvert()
+{
+	XPM._InvertIupImage( "icon_packageexplorer" );
+	XPM._InvertIupImage( "icon_downarrow" );
+	XPM._InvertIupImage( "icon_outline" );
+	XPM._InvertIupImage( "icon_openprj" );
+	XPM._InvertIupImage( "icon_uparrow" );
+	XPM._InvertIupImage( "icon_saveas" );
+	XPM._InvertIupImage( "icon_savetabs" );
+	XPM._InvertIupImage( "icon_fbmanual" );
+	XPM._InvertIupImage( "icon_goto" );
+	XPM._InvertIupImage( "icon_gotomember" );
+	XPM._InvertIupImage( "icon_delete" );
+	XPM._InvertIupImage( "icon_Write" );
+	XPM._InvertIupImage( "icon_search" );
+	XPM._InvertIupImage( "icon_message" );
+	XPM._InvertIupImage( "icon_help" );
+	XPM._InvertIupImage( "icon_deleteothers" );
+	XPM._InvertIupImage( "icon_deleteright" );
+	XPM._InvertIupImage( "icon_deleteall" );
+	XPM._InvertIupImage( "icon_annotation" );
+	XPM._InvertIupImage( "icon_annotation_hide" );
+	XPM._InvertIupImage( "icon_annotation_remove" );
+	XPM._InvertIupImage( "icon_tools" );
+	XPM._InvertIupImage( "icon_toolitem" );
+	XPM._InvertIupImage( "icon_properties" );
+	XPM._InvertIupImage( "icon_preference" );
+	XPM._InvertIupImage( "icon_information" );
+	XPM._InvertIupImage( "icon_findnext" );
+	XPM._InvertIupImage( "icon_findprev" );
+	XPM._InvertIupImage( "icon_findfiles" );
+	XPM._InvertIupImage( "icon_door" );
+	XPM._InvertIupImage( "icon_dooropen" );
+	XPM._InvertIupImage( "icon_type" );
+	XPM._InvertIupImage( "icon_comment" );
+	XPM._InvertIupImage( "icon_uncomment" );
+	XPM._InvertIupImage( "icon_customoption" );
+	XPM._InvertIupImage( "icon_fullscreen" );
+	XPM._InvertIupImage( "icon_folder" );
+	XPM._InvertIupImage( "icon_folder_open" );
+	XPM._InvertIupImage( "icon_prj_open" );
+	XPM._InvertIupImage( "icon_prj" );
+	XPM._InvertIupImage( "icon_collapse" );
+	XPM._InvertIupImage( "icon_collapse1" );
+	XPM._InvertIupImage( "icon_importall" );
+	XPM._InvertIupImage( "icon_manual" );
+	XPM._InvertIupImage( "icon_casesensitive" );
+	XPM._InvertIupImage( "icon_close" );
+	XPM._InvertIupImage( "icon_selectall" );
+	XPM._InvertIupImage( "icon_newfile" );
+	XPM._InvertIupImage( "icon_openfile" );
+	XPM._InvertIupImage( "icon_save" );
+	XPM._InvertIupImage( "icon_saveall" );
+	XPM._InvertIupImage( "icon_undo" );
+	XPM._InvertIupImage( "icon_redo" );
+	XPM._InvertIupImage( "icon_clear" );
+	XPM._InvertIupImage( "icon_cut" );
+	XPM._InvertIupImage( "icon_copy" );
+	XPM._InvertIupImage( "icon_paste" );
+	XPM._InvertIupImage( "icon_debug_left" );
+	XPM._InvertIupImage( "icon_debug_right" );
+	XPM._InvertIupImage( "icon_mark" );
+	XPM._InvertIupImage( "icon_marknext" );
+	XPM._InvertIupImage( "icon_markprev" );
+	XPM._InvertIupImage( "icon_markclear" );
+	XPM._InvertIupImage( "icon_compile" );
+	XPM._InvertIupImage( "icon_buildrun" );
+	XPM._InvertIupImage( "icon_run" );
+	XPM._InvertIupImage( "icon_build" );
+	XPM._InvertIupImage( "icon_rebuild" );
+	XPM._InvertIupImage( "icon_quickrun" );
+	XPM._InvertIupImage( "icon_32" );
+	XPM._InvertIupImage( "icon_64" );
+	XPM._InvertIupImage( "icon_console" );
+	XPM._InvertIupImage( "icon_gui" );
+	XPM._InvertIupImage( "icon_collapse2" );
+	XPM._InvertIupImage( "icon_shift_l" );
+	XPM._InvertIupImage( "icon_show_pr" );
+	XPM._InvertIupImage( "icon_show_p" );
+	XPM._InvertIupImage( "icon_show_r" );
+	XPM._InvertIupImage( "icon_show_nopr" );
+	XPM._InvertIupImage( "icon_wholeword" );
+	XPM._InvertIupImage( "icon_notwholeword" );
+	XPM._InvertIupImage( "icon_show_linenum" );
+	XPM._InvertIupImage( "icon_refresh" );
+}
++/

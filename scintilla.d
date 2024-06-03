@@ -99,7 +99,6 @@ private:
 		//IupSetAttribute( sci, "CLEARALL", "" );
 		setGlobalSetting( true );
 		
-
 		switch( GLOBAL.editorSetting00.EolType )
 		{
 			case "0":	IupScintillaSendMessage( sci, 2031, 0, 0 ); break;
@@ -357,6 +356,11 @@ public:
 	{
 		encoding = cast(BOM) _encoding;
 	}
+	
+	int getBOM()
+	{
+		return encoding;
+	}	
 
 	Ihandle* getIupScintilla()
 	{
@@ -549,7 +553,7 @@ public:
 		
 		IupSetAttribute(sci, "STYLEBOLD34", "YES");
 		//IupScintillaSendMessage( sci, 2053, 34, 1 );
-		
+		version(Windows) tools.setWinTheme( sci, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		
 		// Character representations
 		// Set Control Character to <space>

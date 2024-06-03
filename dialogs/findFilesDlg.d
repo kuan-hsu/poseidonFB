@@ -151,7 +151,6 @@ public:
 		});
 		
 		IupMap( _dlg );
-		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}
 
 	~this()
@@ -163,6 +162,7 @@ public:
 	string show( string selectedWord ) // Overload form CBaseDialog
 	{
 		if( selectedWord.length ) IupSetStrAttribute( listFind, "VALUE", toStringz( selectedWord ) );
+		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		IupShow( _dlg );
 		return null;
 	}	
@@ -299,14 +299,8 @@ extern(C) // Callback for CFindInFilesDialog
 				if( buttonIndex == 1 )
 				{
 					IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "NO" );
-					
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONS=OKCANCEL");
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["findreplacefiles"].toCString );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["cantundo"].toCString );
-
-					IupPopup( messageDlg, IUP_CURRENT, IUP_CURRENT );
-					if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 2 )
+					int _result = tools.MessageDlg( GLOBAL.languageItems["findreplacefiles"].toDString, GLOBAL.languageItems["cantundo"].toDString, "WARNING", "OKCANCEL", IUP_CURRENT, IUP_CURRENT );
+					if( _result == 2 )
 					{
 						IupSetAttribute( GLOBAL.serachInFilesDlg.getIhandle, "VISIBLE", "YES" );
 						return IUP_DEFAULT;

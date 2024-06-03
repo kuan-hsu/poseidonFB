@@ -268,7 +268,7 @@ public:
 					case BOM.utf16le:	_fp.rawWrite( cast(ubyte[])[0xFF, 0xFE] );					_fp.rawWrite( toUTF16( data ) );									break;
 					case BOM.utf16be:	_fp.rawWrite( cast(ubyte[])[0xFE, 0xFF]);					_fp.rawWrite( swapBytes( cast(ubyte[]) toUTF16( data ), 2 ) );		break;
 					case BOM.utf8:		_fp.rawWrite( cast(ubyte[])[0xEF, 0xBB, 0xBF]);				_fp.rawWrite( data );												break;
-					default:			_fp.write( data );											_fp.close;														return false;	
+					default:			version( Windows ) _fp.rawWrite( fromStringz( toMBSz( data, 0 ) ) ); else _fp.rawWrite( data );																									break;
 				}
 				
 				_fp.close;
@@ -1085,13 +1085,7 @@ public:
 					if( pos > -1 ) IupSetInt( GLOBAL.activeDocumentTabs, "VALUEPOS" , pos ); 
 					scope cStringDocument = new IupString( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 					
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-					IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );
-					//int button = IupAlarm( toStringz( GLOBAL.languageItems["alarm"] ), GLOBAL.cString.convert( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["bechange"] ), toStringz( GLOBAL.languageItems["yes"] ), toStringz( GLOBAL.languageItems["no"] ), toStringz( GLOBAL.languageItems["cancel"] ) );
-					int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
+					int button = tools.MessageDlg( GLOBAL.languageItems["quest"].toDString(), cStringDocument.toDString, "QUESTION", "YESNOCANCEL", IUP_CENTER, IUP_CENTER );
 					if( button == 3 )
 					{
 						IupSetFocus( cSci.getIupScintilla );
@@ -1142,13 +1136,7 @@ public:
 						
 						scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
 						
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-						IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
-						int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );
-						//int button = IupAlarm( "Quest", GLOBAL.cString.convert( "\"" ~ cSci.getFullPath() ~ "\"\nhas been changed, save it now?" ), "Yes", "No", "Cancel" );
+						int button = tools.MessageDlg( GLOBAL.languageItems["quest"].toDString(), cStringDocument.toDString, "QUESTION", "YESNOCANCEL", IUP_CENTER, IUP_CENTER );
 						if( button == 3 )
 						{
 							IupSetFocus( iupSci );
@@ -1232,13 +1220,7 @@ public:
 						IupSetAttribute( _activeTabs, "VALUE_HANDLE", cast(char*) iupSci );
 						
 						scope cStringDocument = new IupString( "\"" ~ cSci.getFullPath() ~ "\"\n" ~ GLOBAL.languageItems["bechange"].toDString() );
-						
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=QUESTION,BUTTONDEFAULT=3,BUTTONS=YESNOCANCEL" );
-						IupSetAttribute( messageDlg, "VALUE", cStringDocument.toCString );
-						IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["quest"].toCString );
-						IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
-						int button = IupGetInt( messageDlg, "BUTTONRESPONSE" );				
+						int button = tools.MessageDlg( GLOBAL.languageItems["quest"].toDString, cStringDocument.toDString, "QUESTION", "YESNOCANCEL", IUP_CENTER, IUP_CENTER );
 						if( button == 3 ) // Cancel the Close All action...
 						{
 							return IUP_IGNORE;

@@ -388,6 +388,7 @@ public:
 		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
 		IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
+		version(Windows) tools.setWinTheme( tree, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		for( int i = 1; i < IupGetInt( tree, "COUNT" ); ++ i )
 		{
 			if( IupGetIntId( tree, "DEPTH", i ) == 1 )
@@ -658,11 +659,7 @@ public:
 		
 		if( setupDir in GLOBAL.projectManager )
 		{
-			Ihandle* messageDlg = IupMessageDlg();
-			IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-			IupSetStrAttribute( messageDlg, "VALUE", toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString ) );
-			IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
-			IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
+			tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems["opened"].toDString, "WARNING", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 			return true;
 		}
 
@@ -678,11 +675,7 @@ public:
 			if( !GLOBAL.projectManager[setupDir].dir.length )
 			{
 				GLOBAL.projectManager.remove( setupDir );
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-				IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems[".poseidonbroken"].toCString );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems[".poseidonbroken"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );			
 				return false;
 			}
 
@@ -732,7 +725,7 @@ public:
 			{
 				if( std.file.exists( setupDir ) )
 				{
-					int result = tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["createnewone"].toDString );
+					int result = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["createnewone"].toDString );
 					if( result == 1 )
 					{
 						scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), true, true, setupDir );
@@ -1319,11 +1312,7 @@ extern(C)
 			fullPath ~= fileName;
 			if( std.file.exists( fullPath ) )
 			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-				IupSetStrAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fileName ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString() ) );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
-				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );					
+				tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "\"" ~ fileName ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString, "WARNING", "", IUP_MOUSEPOS, IUP_MOUSEPOS );									
 				return IUP_DEFAULT;
 			}
 			
@@ -1335,33 +1324,21 @@ extern(C)
 					case ".bas":
 						if( prjFilesFolderName != "Sources" )
 						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );						
 							return IUP_DEFAULT;
 						}
 						break;
 					case ".bi":
 						if( prjFilesFolderName != "Includes" )
 						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );						
 							return IUP_DEFAULT;
 						}
 						break;
 					default:
 						if( prjFilesFolderName != "Others" && prjFilesFolderName != "Miscellaneous" )
 						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );												
 							return IUP_DEFAULT;
 						}
 				}
@@ -1373,33 +1350,21 @@ extern(C)
 					case ".d":
 						if( prjFilesFolderName != "Sources" )
 						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );												
 							return IUP_DEFAULT;
 						}
 						break;
 					case ".di":
 						if( prjFilesFolderName != "Includes" )
 						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );						
 							return IUP_DEFAULT;
 						}
 						break;
 					default:
 						if( prjFilesFolderName != "Others" && prjFilesFolderName != "Miscellaneous" )
 						{
-							Ihandle* messageDlg = IupMessageDlg();
-							IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-							IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-							IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-							IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+							tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );						
 							return IUP_DEFAULT;
 						}
 				}
@@ -1506,11 +1471,7 @@ extern(C)
 				{
 					if( !std.file.exists( fullPath ) )
 					{
-						Ihandle* messageDlg = IupMessageDlg();
-						IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING" );
-						IupSetAttribute( messageDlg, "VALUE", toStringz( "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString() ) );
-						IupSetAttribute( messageDlg, "TITLE", toStringz( GLOBAL.languageItems["alarm"].toDString() ) );
-						IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );							
+						tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "\"" ~ fullPath ~ "\"\n" ~ GLOBAL.languageItems["existed"].toDString, "WARNING", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 						return IUP_DEFAULT;
 					}
 					else
@@ -1538,11 +1499,7 @@ extern(C)
 							case ".bas":
 								if( prjFilesFolderName != "Sources" )
 								{
-									Ihandle* messageDlg = IupMessageDlg();
-									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 									return IUP_DEFAULT;
 								}
 								else
@@ -1553,11 +1510,7 @@ extern(C)
 							case ".bi":
 								if( prjFilesFolderName != "Includes" )
 								{
-									Ihandle* messageDlg = IupMessageDlg();
-									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 									return IUP_DEFAULT;
 								}
 								else
@@ -1572,11 +1525,7 @@ extern(C)
 									GLOBAL.projectManager[prjDirName].misc ~= tools.normalizeSlash( fullPath );
 								else
 								{
-									Ihandle* messageDlg = IupMessageDlg();
-									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 									return IUP_DEFAULT;
 								}
 						}
@@ -1588,11 +1537,7 @@ extern(C)
 							case ".d":
 								if( prjFilesFolderName != "Sources" )
 								{
-									Ihandle* messageDlg = IupMessageDlg();
-									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 									return IUP_DEFAULT;
 								}
 								else
@@ -1603,11 +1548,7 @@ extern(C)
 							case ".di":
 								if( prjFilesFolderName != "Includes" )
 								{
-									Ihandle* messageDlg = IupMessageDlg();
-									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 									return IUP_DEFAULT;
 								}
 								else
@@ -1622,11 +1563,7 @@ extern(C)
 									GLOBAL.projectManager[prjDirName].misc ~= tools.normalizeSlash( fullPath );
 								else
 								{
-									Ihandle* messageDlg = IupMessageDlg();
-									IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-									IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["wrongext"].toCString );
-									IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-									IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );								
+									tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["wrongext"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 									return IUP_DEFAULT;
 								}
 						}
@@ -1838,14 +1775,8 @@ extern(C)
 		IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" );
 		IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 
-
-		Ihandle* messageDlg = IupMessageDlg();
-		IupSetAttributes( messageDlg, "DIALOGTYPE=WARNING,BUTTONS=OKCANCEL" );
-		IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["suredelete"].toCString );
-		IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["alarm"].toCString );
-		IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );
-
-		if( IupGetInt( messageDlg, "BUTTONRESPONSE" ) == 1 )
+		int _result = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["suredelete"].toDString, "WARNING", "OKCANCEL", IUP_MOUSEPOS, IUP_MOUSEPOS );
+		if( _result == 1 )
 		{
 			if( fullPath.length )
 			{

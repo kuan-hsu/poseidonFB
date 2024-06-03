@@ -1226,7 +1226,7 @@ public:
 			{
 				IupSetAttribute( ih, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
 				IupSetAttribute( ih, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );					
-
+				version(Windows) tools.setWinTheme( ih, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 				if( GLOBAL.editColor.prjViewHLT.length ) IupSetStrAttribute( ih, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 				try
 				{
@@ -1339,6 +1339,8 @@ public:
 			IupSetAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );			
 			
 			if( IupGetChildCount( zBoxHandle ) > 0 ) showTreeAndButtons( true );
+			version(Windows) tools.setWinTheme( tree, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			
 			return tree;
 		}
 		

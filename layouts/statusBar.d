@@ -318,22 +318,6 @@ extern(C) // Callback for CBaseDialog
 				IupSetAttribute( itemConfig, "IMAGE", "icon_tools" );
 				IupSetCallback( itemConfig, "ACTION", cast(Icallback) function( Ihandle* ih )
 				{
-					/*
-					int		x, y;
-					string	mousePos = fSTRz( IupGetGlobal( "CURSORPOS" ) );
-					
-					auto crossSign = indexOf( mousePos, "x" );
-					if( crossSign > 0 )
-					{
-						x = to!(int)( mousePos[0..crossSign] );
-						y = to!(int)( mousePos[crossSign+1..$] );
-					}
-					else
-					{
-						x = IUP_MOUSEPOS;
-						y = IUP_CURRENT;
-					}
-					*/
 					version(Windows)
 					{
 						scope dlg = new CArgOptionDialog( 480, -1, GLOBAL.languageItems["setcustomoption"].toDString() );
@@ -351,12 +335,13 @@ extern(C) // Callback for CBaseDialog
 				
 
 				Ihandle* popupMenu = IupMenu( 	
-												IupSeparator(),
 												itemNULL,
 												itemConfig,
 												null
 											);
-											
+				
+				if( GLOBAL.compilerSettings.customCompilerOptions.length ) IupInsert( popupMenu, null, IupSeparator() );
+
 				for( int i = cast(int) GLOBAL.compilerSettings.customCompilerOptions.length - 1; i >= 0; -- i )
 				{
 					auto pos = lastIndexOf( GLOBAL.compilerSettings.customCompilerOptions[i], "%::% " );

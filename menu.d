@@ -733,7 +733,7 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.530)  2024.06.01\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.531)  2024.06.03\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
@@ -742,7 +742,8 @@ Ihandle* createMenu()
 		
 		version(Windows)
 		{
-			IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( aboutHead ~ "libreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr" ) );
+			tools.MessageDlg( GLOBAL.languageItems["about"].toDString, aboutHead ~ "libreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr", "", "OK" );
+			//IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( aboutHead ~ "libreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr" ) );
 		}
 		else
 		{
@@ -1140,12 +1141,7 @@ extern(C)
 				{
 					IupSetStrAttribute( _ih, "TITLE", toStringz( Path.stripExtension( Path.baseName( fileString ) ) ) );
 					GLOBAL.language = Path.stripExtension( Path.baseName( fileString ) );
-					
-					Ihandle* messageDlg = IupMessageDlg();
-					IupSetAttributes( messageDlg, "DIALOGTYPE=INFORMATION" );
-					IupSetAttribute( messageDlg, "VALUE", GLOBAL.languageItems["needrestart"].toCString );
-					IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["message"].toCString );
-					IupPopup( messageDlg, IUP_CENTER, IUP_CENTER );		
+					tools.MessageDlg( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["needrestart"].toDString, "INFORMATION", "", IUP_CENTER, IUP_CENTER );
 				}
 			}
 		}
@@ -1160,12 +1156,7 @@ extern(C)
 		{
 			if( !ScintillaAction.openFile( title, -1 ) )
 			{
-				Ihandle* messageDlg = IupMessageDlg();
-				IupSetAttributes( messageDlg, "DIALOGTYPE=ERROR" );
-				IupSetStrAttribute( messageDlg, "VALUE", toStringz( "\"" ~ title ~ "\"\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
-				IupSetAttribute( messageDlg, "TITLE", GLOBAL.languageItems["error"].toCString );
-				IupPopup( messageDlg, IUP_MOUSEPOS, IUP_MOUSEPOS );			
-				
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "\"" ~ title ~ "\"\n" ~ GLOBAL.languageItems["filelost"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 				IupDestroy( ih );
 				
 				IupString[] _recentFiles;
@@ -1956,7 +1947,7 @@ extern(C)
 				}
 				catch( Exception e )
 				{
-					tools.questMessage( "Error", e.toString, "ERROR", "OK" );
+					tools.MessageDlg( "Error", e.toString, "ERROR", "OK" );
 				}				
 
 				GLOBAL.messagePanel.printOutputPanel( "Done." );

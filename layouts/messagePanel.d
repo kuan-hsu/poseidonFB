@@ -739,19 +739,19 @@ extern(C)
 				{
 					case "message":
 						thread_suspendAll();
-						tools.questMessage( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
+						tools.MessageDlg( GLOBAL.languageItems["message"].toDString, GLOBAL.languageItems["compileok"].toDString, "INFORMATION", "OK", IUP_CENTER, IUP_CENTER );
 						thread_resumeAll();
 						IupSetFocus( ScintillaAction.getActiveIupScintilla );
 						break;
 					case "error":
 						thread_suspendAll();
-						tools.questMessage( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["compilefailure"].toDString, "ERROR", "OK", IUP_CENTER, IUP_CENTER );
 						thread_resumeAll();
 						IupSetFocus( ScintillaAction.getActiveIupScintilla );
 						break;
 					case "alarm":
 						thread_suspendAll();
-						tools.questMessage( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
+						tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["compilewarning"].toDString, "WARNING", "OK", IUP_CENTER, IUP_CENTER );
 						thread_resumeAll();
 						IupSetFocus( ScintillaAction.getActiveIupScintilla );
 						break;
