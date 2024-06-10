@@ -67,7 +67,7 @@ struct CustomTool
 
 struct EditorOpacity
 {
-	string	findfilesDlg = "255", preferenceDlg = "255", projectDlg = "255", gotoDlg = "255", newfileDlg = "255", autocompleteDlg = "220";
+	string	generalDlg = "225", messageDlg = "240", autocompleteDlg = "220";
 }
 
 struct Monitor

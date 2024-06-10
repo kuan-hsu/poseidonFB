@@ -434,13 +434,17 @@ public:
 				
 			// opacity
 			doc ~= setINILineData( "[opacity]");
+			doc ~= setINILineData( "generaldialog", GLOBAL.editorSetting02.generalDlg );
+			doc ~= setINILineData( "messagedlg", GLOBAL.editorSetting02.messageDlg );
+			doc ~= setINILineData( "autocompletedlg", GLOBAL.editorSetting02.autocompleteDlg );
+			/*
 			doc ~= setINILineData( "findfilesdlg", GLOBAL.editorSetting02.findfilesDlg );
 			doc ~= setINILineData( "preferencedlg", GLOBAL.editorSetting02.preferenceDlg );
 			doc ~= setINILineData( "projectdlg", GLOBAL.editorSetting02.preferenceDlg );
 			doc ~= setINILineData( "gotodlg", GLOBAL.editorSetting02.gotoDlg );
 			doc ~= setINILineData( "newfiledlg", GLOBAL.editorSetting02.newfileDlg );
 			doc ~= setINILineData( "autocompletedlg", GLOBAL.editorSetting02.autocompleteDlg );
-			
+			*/
 			actionManager.FileAction.saveFile( fullpath, doc, BOM.utf8, true );
 		}
 		catch( Exception e )
@@ -860,12 +864,17 @@ public:
 					case "[opacity]":
 						switch( left )
 						{
+							case "generaldialog":				GLOBAL.editorSetting02.generalDlg = right;				break;
+							case "messagedlg":					GLOBAL.editorSetting02.messageDlg = right;				break;
+							case "autocompletedlg":				GLOBAL.editorSetting02.autocompleteDlg = right; 		break;
+							/*
 							case "findfilesdlg":				GLOBAL.editorSetting02.findfilesDlg = right;				break;
 							case "preferencedlg":				GLOBAL.editorSetting02.preferenceDlg = right;				break;
 							case "projectdlg":					GLOBAL.editorSetting02.projectDlg = right;					break;
 							case "gotodlg":						GLOBAL.editorSetting02.gotoDlg = right;						break;
 							case "newfiledlg":					GLOBAL.editorSetting02.newfileDlg = right;					break;
 							case "autocompletedlg":				GLOBAL.editorSetting02.autocompleteDlg = right; 			break;
+							*/
 							default:
 						}
 						break;
@@ -877,7 +886,7 @@ public:
 		catch( Exception e )
 		{
 			debug writefln( e.toString );
-			IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );
+			IupMessage( "loadINI", toStringz( e.toString ) );
 		}
 		
 		version(linux) GLOBAL.compilerSettings.x64compilerFullPath = GLOBAL.compilerSettings.compilerFullPath;
@@ -992,7 +1001,7 @@ public:
 			if( !std.file.exists( iniPath ) )
 			{
 				debug writefln( "loadColorTemplateINI() file isn't exist error!" );
-				IupMessageError( GLOBAL.mainDlg, "loadColorTemplateINI() file isn't existed!" );
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "loadColorTemplateINI() file isn't existed!", "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				return false;
 			}
 			
@@ -1236,7 +1245,7 @@ public:
 		catch( Exception e )
 		{
 			debug writefln( e.toString );
-			IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );		
+			IupMessage( "saveColorTemplateINI", toStringz( e.toString ) );		
 		}
 	}	
 }

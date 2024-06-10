@@ -99,219 +99,221 @@ Ihandle* load_image_scroll()
   return image;
 }
 
-Ihandle* create_image_warningbox( bool bInvert = false)
+version(Windows)
 {
-  ubyte[] imgdata = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 6, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 3, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 2, 6, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 2, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 6, 6, 6, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 6, 6, 6, 6, 0, 2, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 6, 6, 6, 6, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 1, 0, 0, 6, 6, 6, 6, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 2, 6, 6, 0, 0, 0, 0, 0, 1, 6, 6, 1, 0, 0, 0, 0, 7, 6, 6, 2, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 1, 6, 6, 2, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 6, 6, 6, 1, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 0, 0, 0,
-    0, 0, 0, 2, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0,
-    0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0,
-    0, 0, 6, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0,
-    0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0,
-    0, 0, 2, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 0, 0,
-    0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0,
-    0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Ihandle* create_image_warningbox( bool bInvert = false)
+	{
+	  ubyte[] imgdata = [
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 6, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 3, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 2, 6, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 2, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 6, 6, 6, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 6, 6, 6, 6, 0, 2, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 6, 6, 6, 6, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 1, 0, 0, 6, 6, 6, 6, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 2, 6, 6, 0, 0, 0, 0, 0, 1, 6, 6, 1, 0, 0, 0, 0, 7, 6, 6, 2, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 6, 6, 2, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 6, 6, 6, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 2, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 0, 0, 0, 0,
+		0, 0, 0, 2, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0,
+		0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0,
+		0, 0, 6, 6, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0,
+		0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0,
+		0, 0, 2, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 0, 0,
+		0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0,
+		0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+	  Ihandle* image = IupImage(32, 32, imgdata.ptr);
 
-  IupSetAttribute(image, "0", "BGCOLOR");
-  if( !bInvert ) IupSetAttribute(image, "1", "20 22 20"); else IupSetAttribute(image, "1", "235 233 235");
-  if( !bInvert ) IupSetAttribute(image, "2", "12 14 12"); else IupSetAttribute(image, "2", "243 241 243");
-  if( !bInvert ) IupSetAttribute(image, "3", "28 30 28"); else IupSetAttribute(image, "3", "227 225 227");
-  if( !bInvert ) IupSetAttribute(image, "4", "12 10 12"); else IupSetAttribute(image, "4", "243 245 243");
-  if( !bInvert ) IupSetAttribute(image, "5", "28 26 28"); else IupSetAttribute(image, "5", "227 229 227");
-  if( !bInvert ) IupSetAttribute(image, "6", "20 18 20"); else IupSetAttribute(image, "6", "235 237 235");
-  if( !bInvert ) IupSetAttribute(image, "7", "36 34 36"); else IupSetAttribute(image, "7", "219 221 219");
+	  IupSetAttribute(image, "0", "BGCOLOR");
+	  if( !bInvert ) IupSetAttribute(image, "1", "20 22 20"); else IupSetAttribute(image, "1", "235 233 235");
+	  if( !bInvert ) IupSetAttribute(image, "2", "12 14 12"); else IupSetAttribute(image, "2", "243 241 243");
+	  if( !bInvert ) IupSetAttribute(image, "3", "28 30 28"); else IupSetAttribute(image, "3", "227 225 227");
+	  if( !bInvert ) IupSetAttribute(image, "4", "12 10 12"); else IupSetAttribute(image, "4", "243 245 243");
+	  if( !bInvert ) IupSetAttribute(image, "5", "28 26 28"); else IupSetAttribute(image, "5", "227 229 227");
+	  if( !bInvert ) IupSetAttribute(image, "6", "20 18 20"); else IupSetAttribute(image, "6", "235 237 235");
+	  if( !bInvert ) IupSetAttribute(image, "7", "36 34 36"); else IupSetAttribute(image, "7", "219 221 219");
 
-  return image;
+	  return image;
+	}
+
+	Ihandle* create_image_querybox( bool bInvert = false)
+	{
+	  ubyte[] imgdata = [
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 1, 2, 2, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 3, 3, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+		0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+	  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+
+	  IupSetAttribute(image, "0", "BGCOLOR");
+	  if( !bInvert ) IupSetAttribute(image, "1", "12 14 12"); else IupSetAttribute(image, "1", "243 241 243");
+	  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");
+	  if( !bInvert ) IupSetAttribute(image, "3", "20 18 20"); else IupSetAttribute(image, "3", "235 237 235");
+	  /*
+	  IupSetAttribute(image, "4", "0 0 0");
+	  IupSetAttribute(image, "5", "0 0 0");
+	  IupSetAttribute(image, "6", "0 0 0");
+	  IupSetAttribute(image, "7", "0 0 0");
+	  */
+	  return image;
+	}
+
+	Ihandle* create_image_errorbox( bool bInvert = false)
+	{
+	  ubyte[] imgdata = [
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 1, 2, 2, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 3, 3, 1, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 1, 3, 3, 0, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 1, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+		0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
+		0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 1, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 1, 0, 0, 3, 3, 3, 1, 0, 0, 0,
+		0, 0, 0, 0, 3, 3, 1, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+	  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+
+	  IupSetAttribute(image, "0", "BGCOLOR");
+	  if( !bInvert ) IupSetAttribute(image, "1", "12 14 12"); else IupSetAttribute(image, "1", "243 241 243");
+	  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");;
+	  if( !bInvert ) IupSetAttribute(image, "3", "20 18 20"); else IupSetAttribute(image, "3", "235 237 235");
+	  /*
+	  if( !bInvert ) IupSetAttribute(image, "4", "0 0 0"); else IupSetAttribute(image, "4", "0 0 0");
+	  if( !bInvert ) IupSetAttribute(image, "5", "0 0 0"); else IupSetAttribute(image, "5", "0 0 0");
+	  if( !bInvert ) IupSetAttribute(image, "6", "0 0 0"); else IupSetAttribute(image, "6", "0 0 0");
+	  if( !bInvert ) IupSetAttribute(image, "7", "0 0 0"); else IupSetAttribute(image, "7", "0 0 0"); 
+	  */
+	  return image;
+	}
+
+	Ihandle* create_image_infobox( bool bInvert = false)
+	{
+	  ubyte[] imgdata = [
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2, 2, 2, 2, 7, 4, 7, 7, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 4, 1, 1, 1, 2, 2, 0, 1, 1, 0, 2, 2, 1, 1, 1, 7, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 6, 1, 1, 1, 0, 2, 2, 0, 0, 2, 2, 0, 1, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 0, 2, 2, 2, 2, 0, 1, 1, 1, 1, 7, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 0, 2, 2, 0, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+	  Ihandle* image = IupImage(32, 32, imgdata.ptr);
+
+	  if( !bInvert ) IupSetAttribute(image, "0", "4 2 4"); else IupSetAttribute(image, "0", "251 253 251");
+	  IupSetAttribute(image, "1", "BGCOLOR");
+	  if( !bInvert ) IupSetAttribute(image, "2", "44 53 52"); else IupSetAttribute(image, "2", "211 202 203");
+	  if( !bInvert ) IupSetAttribute(image, "3", "84 86 84"); else IupSetAttribute(image, "3", "171 169 171");
+	  if( !bInvert ) IupSetAttribute(image, "4", "68 66 68"); else IupSetAttribute(image, "4", "187 189 187");
+	  if( !bInvert ) IupSetAttribute(image, "5", "43 41 43"); else IupSetAttribute(image, "5", "212 214 212");
+	  if( !bInvert ) IupSetAttribute(image, "6", "36 66 68"); else IupSetAttribute(image, "6", "219 189 187");
+	  if( !bInvert ) IupSetAttribute(image, "7", "52 51 57"); else IupSetAttribute(image, "7", "203 204 198");
+
+	  return image;
+	}
 }
-
-Ihandle* create_image_querybox( bool bInvert = false)
-{
-  ubyte[] imgdata = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 1, 2, 2, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 3, 3, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
-    0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-  Ihandle* image = IupImage(32, 32, imgdata.ptr);
-
-  IupSetAttribute(image, "0", "BGCOLOR");
-  if( !bInvert ) IupSetAttribute(image, "1", "12 14 12"); else IupSetAttribute(image, "1", "243 241 243");
-  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");
-  if( !bInvert ) IupSetAttribute(image, "3", "20 18 20"); else IupSetAttribute(image, "3", "235 237 235");
-  /*
-  IupSetAttribute(image, "4", "0 0 0");
-  IupSetAttribute(image, "5", "0 0 0");
-  IupSetAttribute(image, "6", "0 0 0");
-  IupSetAttribute(image, "7", "0 0 0");
-  */
-  return image;
-}
-
-Ihandle* create_image_errorbox( bool bInvert = false)
-{
-  ubyte[] imgdata = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 1, 2, 2, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 3, 3, 1, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 1, 3, 3, 0, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 1, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
-    0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0,
-    0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 1, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 1, 0, 0, 3, 3, 3, 1, 0, 0, 0,
-    0, 0, 0, 0, 3, 3, 1, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 1, 3, 3, 1, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-  Ihandle* image = IupImage(32, 32, imgdata.ptr);
-
-  IupSetAttribute(image, "0", "BGCOLOR");
-  if( !bInvert ) IupSetAttribute(image, "1", "12 14 12"); else IupSetAttribute(image, "1", "243 241 243");
-  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");;
-  if( !bInvert ) IupSetAttribute(image, "3", "20 18 20"); else IupSetAttribute(image, "3", "235 237 235");
-  /*
-  if( !bInvert ) IupSetAttribute(image, "4", "0 0 0"); else IupSetAttribute(image, "4", "0 0 0");
-  if( !bInvert ) IupSetAttribute(image, "5", "0 0 0"); else IupSetAttribute(image, "5", "0 0 0");
-  if( !bInvert ) IupSetAttribute(image, "6", "0 0 0"); else IupSetAttribute(image, "6", "0 0 0");
-  if( !bInvert ) IupSetAttribute(image, "7", "0 0 0"); else IupSetAttribute(image, "7", "0 0 0"); 
-  */
-  return image;
-}
-
-Ihandle* create_image_infobox( bool bInvert = false)
-{
-  ubyte[] imgdata = [
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2, 2, 2, 2, 7, 4, 7, 7, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 4, 1, 1, 1, 2, 2, 0, 1, 1, 0, 2, 2, 1, 1, 1, 7, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 6, 1, 1, 1, 0, 2, 2, 0, 0, 2, 2, 0, 1, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 0, 2, 2, 2, 2, 0, 1, 1, 1, 1, 7, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 0, 2, 2, 0, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 5, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 5, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-
-  Ihandle* image = IupImage(32, 32, imgdata.ptr);
-
-  if( !bInvert ) IupSetAttribute(image, "0", "4 2 4"); else IupSetAttribute(image, "0", "251 253 251");
-  IupSetAttribute(image, "1", "BGCOLOR");
-  if( !bInvert ) IupSetAttribute(image, "2", "44 53 52"); else IupSetAttribute(image, "2", "211 202 203");
-  if( !bInvert ) IupSetAttribute(image, "3", "84 86 84"); else IupSetAttribute(image, "3", "171 169 171");
-  if( !bInvert ) IupSetAttribute(image, "4", "68 66 68"); else IupSetAttribute(image, "4", "187 189 187");
-  if( !bInvert ) IupSetAttribute(image, "5", "43 41 43"); else IupSetAttribute(image, "5", "212 214 212");
-  if( !bInvert ) IupSetAttribute(image, "6", "36 66 68"); else IupSetAttribute(image, "6", "219 189 187");
-  if( !bInvert ) IupSetAttribute(image, "7", "52 51 57"); else IupSetAttribute(image, "7", "203 204 198");
-
-  return image;
-}
-
 
 
 void load_all_images_icons()
 {
 	XPM.init();
 
-	version(FBIDE) IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/bas.xpm" ) ); else IupSetHandle( "icon_bas", XPM.getIUPimage( "icons/xpm/d.xpm" ) );
-	IupSetHandle( "icon_txt", XPM.getIUPimage( "icons/xpm/txt.xpm" ) );
-	IupSetHandle( "icon_bi", XPM.getIUPimage( "icons/xpm/bi.xpm" ) );
-	IupSetHandle( "icon_importprj", XPM.getIUPimage( "icons/xpm/fbedit.xpm" ) );
-	IupSetHandle( "icon_colormark", XPM.getIUPimage( "icons/xpm/colormark.xpm" ) );
+	version(FBIDE) IupSetHandle( "icon_bas", XPM.getIUPimageFormXPM( "icons/xpm/bas.xpm" ) ); else IupSetHandle( "icon_bas", XPM.getIUPimageFormXPM( "icons/xpm/d.xpm" ) );
+	IupSetHandle( "icon_txt", XPM.getIUPimageFormXPM( "icons/xpm/txt.xpm" ) );
+	IupSetHandle( "icon_bi", XPM.getIUPimageFormXPM( "icons/xpm/bi.xpm" ) );
+	IupSetHandle( "icon_importprj", XPM.getIUPimageFormXPM( "icons/xpm/fbedit.xpm" ) );
+	IupSetHandle( "icon_colormark", XPM.getIUPimageFormXPM( "icons/xpm/colormark.xpm" ) );
 
 	XPM.createIUPimageHandle( "icons/xpm/prjexplorer.xpm", "icon_packageexplorer", true );
 	XPM.createIUPimageHandle( "icons/xpm/down.xpm", "icon_downarrow", true );
@@ -357,7 +359,6 @@ void load_all_images_icons()
 	XPM.createIUPimageHandle( "icons/xpm/collapse1.xpm", "icon_collapse1" );
 	XPM.createIUPimageHandle( "icons/xpm/importall.xpm", "icon_importall" );
 	XPM.createIUPimageHandle( "icons/xpm/manual.xpm", "icon_manual" );
-	//XPM.createIUPimageHandle( "icons/xpm/wholeword.xpm", "icon_wholeword" );
 	XPM.createIUPimageHandle( "icons/xpm/casesensitive.xpm", "icon_casesensitive", true );
 	XPM.createIUPimageHandle( "icons/xpm/close.xpm", "icon_close" );
 	XPM.createIUPimageHandle( "icons/xpm/selectall.xpm", "icon_selectall", true );
@@ -412,84 +413,84 @@ void load_all_images_icons()
 
 	
 	// Color icon 
-	IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) );
-	IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) );
-	IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) );
-	IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );
-	IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
-	IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
-	IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array.xpm" ) );
-	IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable.xpm" ) );
+	IupSetHandle( "IUP_function", XPM.getIUPimageFormXPM( "icons/xpm/outline/fun_public.xpm" ) );
+	IupSetHandle( "IUP_sub", XPM.getIUPimageFormXPM( "icons/xpm/outline/sub_public.xpm" ) );
+	IupSetHandle( "IUP_function_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/fun_protected.xpm" ) );
+	IupSetHandle( "IUP_function_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/fun_private.xpm" ) );
+	IupSetHandle( "IUP_sub_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/sub_protected.xpm" ) );
+	IupSetHandle( "IUP_sub_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/sub_private.xpm" ) );
+	IupSetHandle( "IUP_variable_array", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_array.xpm" ) );
+	IupSetHandle( "IUP_variable", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable.xpm" ) );
 
 	version(FBIDE)
 	{
-		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );
-		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );
+		IupSetHandle( "IUP_ctor", XPM.getIUPimageFormXPM( "icons/xpm/outline/ctor.xpm" ) );
+		IupSetHandle( "IUP_dtor", XPM.getIUPimageFormXPM( "icons/xpm/outline/dtor.xpm" ) );
 
-		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class.xpm" ) );
-		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/type.xpm" ) );
+		IupSetHandle( "IUP_class", XPM.getIUPimageFormXPM( "icons/xpm/outline/class.xpm" ) );
+		IupSetHandle( "IUP_struct", XPM.getIUPimageFormXPM( "icons/xpm/outline/type.xpm" ) );
 		
-		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property.xpm" ) );
-		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );
-		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );
-		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected.xpm" ) );
-		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected.xpm" ) );
-		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private.xpm" ) );
-		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private.xpm" ) );
-		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member.xpm" ) );
-		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum.xpm" ) );
-		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias.xpm" ) );
-		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union.xpm" ) );
-		IupSetHandle( "IUP_namespace", XPM.getIUPimage( "icons/xpm/outline/namespace.xpm" ) );
-		IupSetHandle( "IUP_macro", XPM.getIUPimage( "icons/xpm/outline/macro.xpm" ) );
-		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );
-		IupSetHandle( "IUP_define_fun", XPM.getIUPimage( "icons/xpm/outline/define_fun.xpm" ) );
-		IupSetHandle( "IUP_define_var", XPM.getIUPimage( "icons/xpm/outline/define_var.xpm" ) );
-		IupSetHandle( "IUP_with", XPM.getIUPimage( "icons/xpm/outline/with.xpm" ) );
-		IupSetHandle( "IUP_import", XPM.getIUPimage( "icons/xpm/outline/import.xpm" ) );
-		IupSetHandle( "IUP_version", XPM.getIUPimage( "icons/xpm/outline/version.xpm" ) );
-		IupSetHandle( "IUP_versionspec", XPM.getIUPimage( "icons/xpm/outline/version_spec.xpm" ) );
+		IupSetHandle( "IUP_property", XPM.getIUPimageFormXPM( "icons/xpm/outline/property.xpm" ) );
+		IupSetHandle( "IUP_property_var", XPM.getIUPimageFormXPM( "icons/xpm/outline/property_var.xpm" ) );
+		IupSetHandle( "IUP_operator", XPM.getIUPimageFormXPM( "icons/xpm/outline/operator.xpm" ) );
+		IupSetHandle( "IUP_variable_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_protected.xpm" ) );
+		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_array_protected.xpm" ) );
+		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_array_private.xpm" ) );
+		IupSetHandle( "IUP_variable_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_private.xpm" ) );
+		IupSetHandle( "IUP_enummember", XPM.getIUPimageFormXPM( "icons/xpm/outline/enum_member.xpm" ) );
+		IupSetHandle( "IUP_enum", XPM.getIUPimageFormXPM( "icons/xpm/outline/enum.xpm" ) );
+		IupSetHandle( "IUP_alias", XPM.getIUPimageFormXPM( "icons/xpm/outline/alias.xpm" ) );
+		IupSetHandle( "IUP_union", XPM.getIUPimageFormXPM( "icons/xpm/outline/union.xpm" ) );
+		IupSetHandle( "IUP_namespace", XPM.getIUPimageFormXPM( "icons/xpm/outline/namespace.xpm" ) );
+		IupSetHandle( "IUP_macro", XPM.getIUPimageFormXPM( "icons/xpm/outline/macro.xpm" ) );
+		IupSetHandle( "IUP_scope", XPM.getIUPimageFormXPM( "icons/xpm/outline/scope.xpm" ) );
+		IupSetHandle( "IUP_define_fun", XPM.getIUPimageFormXPM( "icons/xpm/outline/define_fun.xpm" ) );
+		IupSetHandle( "IUP_define_var", XPM.getIUPimageFormXPM( "icons/xpm/outline/define_var.xpm" ) );
+		IupSetHandle( "IUP_with", XPM.getIUPimageFormXPM( "icons/xpm/outline/with.xpm" ) );
+		IupSetHandle( "IUP_import", XPM.getIUPimageFormXPM( "icons/xpm/outline/import.xpm" ) );
+		IupSetHandle( "IUP_version", XPM.getIUPimageFormXPM( "icons/xpm/outline/version.xpm" ) );
+		IupSetHandle( "IUP_versionspec", XPM.getIUPimageFormXPM( "icons/xpm/outline/version_spec.xpm" ) );
 	}
 	version(DIDE)
 	{
-		IupSetHandle( "IUP_function", XPM.getIUPimage( "icons/xpm/outline/fun_public.xpm" ) );
-		//IupSetHandle( "IUP_sub", XPM.getIUPimage( "icons/xpm/outline/sub_public.xpm" ) );
-		IupSetHandle( "IUP_function_protected", XPM.getIUPimage( "icons/xpm/outline/fun_protected.xpm" ) );
-		IupSetHandle( "IUP_function_private", XPM.getIUPimage( "icons/xpm/outline/fun_private.xpm" ) );
-		//IupSetHandle( "IUP_sub_protected", XPM.getIUPimage( "icons/xpm/outline/sub_protected.xpm" ) );
-		//IupSetHandle( "IUP_sub_private", XPM.getIUPimage( "icons/xpm/outline/sub_private.xpm" ) );
-		IupSetHandle( "IUP_variable_array", XPM.getIUPimage( "icons/xpm/outline/variable_array_D.xpm" ) );
-		IupSetHandle( "IUP_variable", XPM.getIUPimage( "icons/xpm/outline/variable.xpm" ) );
+		IupSetHandle( "IUP_function", XPM.getIUPimageFormXPM( "icons/xpm/outline/fun_public.xpm" ) );
+		//IupSetHandle( "IUP_sub", XPM.getIUPimageFormXPM( "icons/xpm/outline/sub_public.xpm" ) );
+		IupSetHandle( "IUP_function_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/fun_protected.xpm" ) );
+		IupSetHandle( "IUP_function_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/fun_private.xpm" ) );
+		//IupSetHandle( "IUP_sub_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/sub_protected.xpm" ) );
+		//IupSetHandle( "IUP_sub_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/sub_private.xpm" ) );
+		IupSetHandle( "IUP_variable_array", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_array_D.xpm" ) );
+		IupSetHandle( "IUP_variable", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable.xpm" ) );
 
-		IupSetHandle( "IUP_debugspec", XPM.getIUPimage( "icons/xpm/outline/debug_spec.xpm" ) );
-		IupSetHandle( "IUP_debug", XPM.getIUPimage( "icons/xpm/outline/debug.xpm" ) );
-		IupSetHandle( "IUP_versionspec", XPM.getIUPimage( "icons/xpm/outline/version_spec.xpm" ) );
-		IupSetHandle( "IUP_version", XPM.getIUPimage( "icons/xpm/outline/version.xpm" ) );
-		IupSetHandle( "IUP_module", XPM.getIUPimage( "icons/xpm/outline/module.xpm" ) );
-		IupSetHandle( "IUP_template", XPM.getIUPimage( "icons/xpm/outline/template.xpm" ) );
-		IupSetHandle( "IUP_ctor", XPM.getIUPimage( "icons/xpm/outline/ctor.xpm" ) );
-		IupSetHandle( "IUP_dtor", XPM.getIUPimage( "icons/xpm/outline/dtor.xpm" ) );
-		IupSetHandle( "IUP_class", XPM.getIUPimage( "icons/xpm/outline/class.xpm" ) );
-		IupSetHandle( "IUP_struct", XPM.getIUPimage( "icons/xpm/outline/struct.xpm" ) );
-		IupSetHandle( "IUP_property", XPM.getIUPimage( "icons/xpm/outline/property.xpm" ) );
-		IupSetHandle( "IUP_property_var", XPM.getIUPimage( "icons/xpm/outline/property_var.xpm" ) );
-		IupSetHandle( "IUP_operator", XPM.getIUPimage( "icons/xpm/outline/operator.xpm" ) );
-		IupSetHandle( "IUP_variable_protected", XPM.getIUPimage( "icons/xpm/outline/variable_protected.xpm" ) );
-		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimage( "icons/xpm/outline/variable_array_protected_D.xpm" ) );
-		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimage( "icons/xpm/outline/variable_array_private_D.xpm" ) );
-		IupSetHandle( "IUP_variable_private", XPM.getIUPimage( "icons/xpm/outline/variable_private.xpm" ) );
-		IupSetHandle( "IUP_enummember", XPM.getIUPimage( "icons/xpm/outline/enum_member.xpm" ) );
-		IupSetHandle( "IUP_enum", XPM.getIUPimage( "icons/xpm/outline/enum.xpm" ) );
-		IupSetHandle( "IUP_alias", XPM.getIUPimage( "icons/xpm/outline/alias.xpm" ) );
-		IupSetHandle( "IUP_union", XPM.getIUPimage( "icons/xpm/outline/union.xpm" ) );
-		IupSetHandle( "IUP_scope", XPM.getIUPimage( "icons/xpm/outline/scope.xpm" ) );
-		IupSetHandle( "IUP_import", XPM.getIUPimage( "icons/xpm/outline/import.xpm" ) );
-		IupSetHandle( "IUP_import_private", XPM.getIUPimage( "icons/xpm/outline/import_private.xpm" ) );
-		IupSetHandle( "IUP_interface", XPM.getIUPimage( "icons/xpm/outline/interface.xpm" ) );
-		IupSetHandle( "IUP_anonymous", XPM.getIUPimage( "icons/xpm/outline/anonymous.xpm" ) );
-		IupSetHandle( "IUP_funptr_private", XPM.getIUPimage( "icons/xpm/outline/funptr_private.xpm" ) );
-		IupSetHandle( "IUP_funptr_protected", XPM.getIUPimage( "icons/xpm/outline/funptr_protected.xpm" ) );
-		IupSetHandle( "IUP_funptr", XPM.getIUPimage( "icons/xpm/outline/funptr_public.xpm" ) );
+		IupSetHandle( "IUP_debugspec", XPM.getIUPimageFormXPM( "icons/xpm/outline/debug_spec.xpm" ) );
+		IupSetHandle( "IUP_debug", XPM.getIUPimageFormXPM( "icons/xpm/outline/debug.xpm" ) );
+		IupSetHandle( "IUP_versionspec", XPM.getIUPimageFormXPM( "icons/xpm/outline/version_spec.xpm" ) );
+		IupSetHandle( "IUP_version", XPM.getIUPimageFormXPM( "icons/xpm/outline/version.xpm" ) );
+		IupSetHandle( "IUP_module", XPM.getIUPimageFormXPM( "icons/xpm/outline/module.xpm" ) );
+		IupSetHandle( "IUP_template", XPM.getIUPimageFormXPM( "icons/xpm/outline/template.xpm" ) );
+		IupSetHandle( "IUP_ctor", XPM.getIUPimageFormXPM( "icons/xpm/outline/ctor.xpm" ) );
+		IupSetHandle( "IUP_dtor", XPM.getIUPimageFormXPM( "icons/xpm/outline/dtor.xpm" ) );
+		IupSetHandle( "IUP_class", XPM.getIUPimageFormXPM( "icons/xpm/outline/class.xpm" ) );
+		IupSetHandle( "IUP_struct", XPM.getIUPimageFormXPM( "icons/xpm/outline/struct.xpm" ) );
+		IupSetHandle( "IUP_property", XPM.getIUPimageFormXPM( "icons/xpm/outline/property.xpm" ) );
+		IupSetHandle( "IUP_property_var", XPM.getIUPimageFormXPM( "icons/xpm/outline/property_var.xpm" ) );
+		IupSetHandle( "IUP_operator", XPM.getIUPimageFormXPM( "icons/xpm/outline/operator.xpm" ) );
+		IupSetHandle( "IUP_variable_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_protected.xpm" ) );
+		IupSetHandle( "IUP_variable_array_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_array_protected_D.xpm" ) );
+		IupSetHandle( "IUP_variable_array_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_array_private_D.xpm" ) );
+		IupSetHandle( "IUP_variable_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/variable_private.xpm" ) );
+		IupSetHandle( "IUP_enummember", XPM.getIUPimageFormXPM( "icons/xpm/outline/enum_member.xpm" ) );
+		IupSetHandle( "IUP_enum", XPM.getIUPimageFormXPM( "icons/xpm/outline/enum.xpm" ) );
+		IupSetHandle( "IUP_alias", XPM.getIUPimageFormXPM( "icons/xpm/outline/alias.xpm" ) );
+		IupSetHandle( "IUP_union", XPM.getIUPimageFormXPM( "icons/xpm/outline/union.xpm" ) );
+		IupSetHandle( "IUP_scope", XPM.getIUPimageFormXPM( "icons/xpm/outline/scope.xpm" ) );
+		IupSetHandle( "IUP_import", XPM.getIUPimageFormXPM( "icons/xpm/outline/import.xpm" ) );
+		IupSetHandle( "IUP_import_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/import_private.xpm" ) );
+		IupSetHandle( "IUP_interface", XPM.getIUPimageFormXPM( "icons/xpm/outline/interface.xpm" ) );
+		IupSetHandle( "IUP_anonymous", XPM.getIUPimageFormXPM( "icons/xpm/outline/anonymous.xpm" ) );
+		IupSetHandle( "IUP_funptr_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/funptr_private.xpm" ) );
+		IupSetHandle( "IUP_funptr_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/funptr_protected.xpm" ) );
+		IupSetHandle( "IUP_funptr", XPM.getIUPimageFormXPM( "icons/xpm/outline/funptr_public.xpm" ) );
 	}
 
 	XPM.createIUPimageHandle( "icons/xpm/debug/until.xpm", "icon_debug_until", true );
@@ -509,105 +510,19 @@ void load_all_images_icons()
 	XPM.createIUPimageHandle( "icons/xpm/debug/debug_build.xpm", "icon_debugbuild" );
 	XPM.createIUPimageHandle( "icons/xpm/debug/at.xpm", "icon_debug_at" );
 	XPM.createIUPimageHandle( "icons/xpm/debug/star.xpm", "icon_debug_star" );
-	IupSetHandle( "icon_debug_change", XPM.getIUPimage( "icons/xpm/debug/change.xpm" ) );
+	IupSetHandle( "icon_debug_change", XPM.getIUPimageFormXPM( "icons/xpm/debug/change.xpm" ) );
 
 	IupSetHandle( "icon_poseidonFB", load_image_poseidonFBico() );
 	IupSetHandle( "icon_scroll", load_image_scroll() );
-	
-	IupSetHandle( "warningbox", create_image_warningbox() );
-	IupSetHandle( "querybox", create_image_querybox() );
-	IupSetHandle( "errorbox", create_image_errorbox() );
-	IupSetHandle( "infobox", create_image_infobox() );
-	IupSetHandle( "warningbox_invert", create_image_warningbox(true) );
-	IupSetHandle( "querybox_invert", create_image_querybox(true) );
-	IupSetHandle( "infobox_invert",create_image_infobox(true) );
-}
 
-/+
-void IupImagesInvert()
-{
-	XPM._InvertIupImage( "icon_packageexplorer" );
-	XPM._InvertIupImage( "icon_downarrow" );
-	XPM._InvertIupImage( "icon_outline" );
-	XPM._InvertIupImage( "icon_openprj" );
-	XPM._InvertIupImage( "icon_uparrow" );
-	XPM._InvertIupImage( "icon_saveas" );
-	XPM._InvertIupImage( "icon_savetabs" );
-	XPM._InvertIupImage( "icon_fbmanual" );
-	XPM._InvertIupImage( "icon_goto" );
-	XPM._InvertIupImage( "icon_gotomember" );
-	XPM._InvertIupImage( "icon_delete" );
-	XPM._InvertIupImage( "icon_Write" );
-	XPM._InvertIupImage( "icon_search" );
-	XPM._InvertIupImage( "icon_message" );
-	XPM._InvertIupImage( "icon_help" );
-	XPM._InvertIupImage( "icon_deleteothers" );
-	XPM._InvertIupImage( "icon_deleteright" );
-	XPM._InvertIupImage( "icon_deleteall" );
-	XPM._InvertIupImage( "icon_annotation" );
-	XPM._InvertIupImage( "icon_annotation_hide" );
-	XPM._InvertIupImage( "icon_annotation_remove" );
-	XPM._InvertIupImage( "icon_tools" );
-	XPM._InvertIupImage( "icon_toolitem" );
-	XPM._InvertIupImage( "icon_properties" );
-	XPM._InvertIupImage( "icon_preference" );
-	XPM._InvertIupImage( "icon_information" );
-	XPM._InvertIupImage( "icon_findnext" );
-	XPM._InvertIupImage( "icon_findprev" );
-	XPM._InvertIupImage( "icon_findfiles" );
-	XPM._InvertIupImage( "icon_door" );
-	XPM._InvertIupImage( "icon_dooropen" );
-	XPM._InvertIupImage( "icon_type" );
-	XPM._InvertIupImage( "icon_comment" );
-	XPM._InvertIupImage( "icon_uncomment" );
-	XPM._InvertIupImage( "icon_customoption" );
-	XPM._InvertIupImage( "icon_fullscreen" );
-	XPM._InvertIupImage( "icon_folder" );
-	XPM._InvertIupImage( "icon_folder_open" );
-	XPM._InvertIupImage( "icon_prj_open" );
-	XPM._InvertIupImage( "icon_prj" );
-	XPM._InvertIupImage( "icon_collapse" );
-	XPM._InvertIupImage( "icon_collapse1" );
-	XPM._InvertIupImage( "icon_importall" );
-	XPM._InvertIupImage( "icon_manual" );
-	XPM._InvertIupImage( "icon_casesensitive" );
-	XPM._InvertIupImage( "icon_close" );
-	XPM._InvertIupImage( "icon_selectall" );
-	XPM._InvertIupImage( "icon_newfile" );
-	XPM._InvertIupImage( "icon_openfile" );
-	XPM._InvertIupImage( "icon_save" );
-	XPM._InvertIupImage( "icon_saveall" );
-	XPM._InvertIupImage( "icon_undo" );
-	XPM._InvertIupImage( "icon_redo" );
-	XPM._InvertIupImage( "icon_clear" );
-	XPM._InvertIupImage( "icon_cut" );
-	XPM._InvertIupImage( "icon_copy" );
-	XPM._InvertIupImage( "icon_paste" );
-	XPM._InvertIupImage( "icon_debug_left" );
-	XPM._InvertIupImage( "icon_debug_right" );
-	XPM._InvertIupImage( "icon_mark" );
-	XPM._InvertIupImage( "icon_marknext" );
-	XPM._InvertIupImage( "icon_markprev" );
-	XPM._InvertIupImage( "icon_markclear" );
-	XPM._InvertIupImage( "icon_compile" );
-	XPM._InvertIupImage( "icon_buildrun" );
-	XPM._InvertIupImage( "icon_run" );
-	XPM._InvertIupImage( "icon_build" );
-	XPM._InvertIupImage( "icon_rebuild" );
-	XPM._InvertIupImage( "icon_quickrun" );
-	XPM._InvertIupImage( "icon_32" );
-	XPM._InvertIupImage( "icon_64" );
-	XPM._InvertIupImage( "icon_console" );
-	XPM._InvertIupImage( "icon_gui" );
-	XPM._InvertIupImage( "icon_collapse2" );
-	XPM._InvertIupImage( "icon_shift_l" );
-	XPM._InvertIupImage( "icon_show_pr" );
-	XPM._InvertIupImage( "icon_show_p" );
-	XPM._InvertIupImage( "icon_show_r" );
-	XPM._InvertIupImage( "icon_show_nopr" );
-	XPM._InvertIupImage( "icon_wholeword" );
-	XPM._InvertIupImage( "icon_notwholeword" );
-	XPM._InvertIupImage( "icon_show_linenum" );
-	XPM._InvertIupImage( "icon_refresh" );
+	version(Windows)
+	{
+		IupSetHandle( "warningbox", create_image_warningbox() );
+		IupSetHandle( "querybox", create_image_querybox() );
+		IupSetHandle( "errorbox", create_image_errorbox() );
+		IupSetHandle( "infobox", create_image_infobox() );
+		IupSetHandle( "warningbox_invert", create_image_warningbox(true) );
+		IupSetHandle( "querybox_invert", create_image_querybox(true) );
+		IupSetHandle( "infobox_invert",create_image_infobox(true) );
+	}
 }
-+/

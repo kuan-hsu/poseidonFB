@@ -26,7 +26,7 @@ private:
 	
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton( "40x12", "aoc" );
+		Ihandle* bottom = createDlgButton( "40x12", "aoc", "CPreferenceDialog" );
 
 		Ihandle* textCompilerPath = IupText( null );
 		IupSetAttributes( textCompilerPath, "SIZE=320x,NAME=Compiler-compilerPath,BORDER=NO" );
@@ -988,7 +988,7 @@ private:
 				}
 				else
 				{
-					IupMessage( GLOBAL.languageItems["alarm"].toCString, "No Items be Selected!" );
+					tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "No Items be Selected!", "WARNING", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				}
 			}
 			
@@ -1006,16 +1006,16 @@ private:
 				try
 				{
 					IDECONFIG.saveColorTemplateINI( templateName );
-					IupMessage( GLOBAL.languageItems["colorfile"].toCString(), toStringz( GLOBAL.languageItems["save"].toDString() ~ " " ~ GLOBAL.languageItems["ok"].toDString() ) );
+					tools.MessageDlg( GLOBAL.languageItems["colorfile"].toDString, GLOBAL.languageItems["save"].toDString() ~ " " ~ GLOBAL.languageItems["ok"].toDString(), "INFORMATION", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				}
 				catch( Exception e )
 				{
-					IupMessageError( null, toStringz( e.toString ) );
+					IupMessage( "ColorTemplate Save", toStringz( e.toString ) );
 				}
 			}
 			else
 			{
-				IupMessage( GLOBAL.languageItems["alarm"].toCString, "Color Template Name Is Empty!" );
+				tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "Color Template Name Is Empty!", "WARNING", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			}
 			
 			return IUP_DEFAULT;
@@ -1627,30 +1627,15 @@ private:
 		
 		
 		// OPACITY
-		Ihandle* labelFindInFilesDlg = IupLabel( GLOBAL.languageItems["findreplacefiles"].toCString );
-		Ihandle* textFindInFilesDlg = IupText( null );
-		IupSetAttributes( textFindInFilesDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textFindInFilesDlg" );
-		IupSetStrAttribute( textFindInFilesDlg, "VALUE", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
+		Ihandle* labelGeneralDlg = IupLabel( GLOBAL.languageItems["general"].toCString );
+		Ihandle* textGeneralDlg = IupText( null );
+		IupSetAttributes( textGeneralDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textGeneralDlg" );
+		IupSetStrAttribute( textGeneralDlg, "VALUE", toStringz( GLOBAL.editorSetting02.generalDlg ) );
 		
-		Ihandle* labelPreferenceDlg = IupLabel( GLOBAL.languageItems["preference"].toCString );
-		Ihandle* textPreferenceDlg = IupText( null );
-		IupSetAttributes( textPreferenceDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textPreferenceDlg" );
-		IupSetStrAttribute( textPreferenceDlg, "VALUE", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
-
-		Ihandle* labelProjectDlg = IupLabel( GLOBAL.languageItems["prjproperties"].toCString );
-		Ihandle* textProjectDlg = IupText( null );
-		IupSetAttributes( textProjectDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textProjectDlg" );
-		IupSetStrAttribute( textProjectDlg, "VALUE", toStringz( GLOBAL.editorSetting02.projectDlg ) );
-
-		Ihandle* labelGotoDlg = IupLabel( GLOBAL.languageItems["goto"].toCString );
-		Ihandle* textGotoDlg = IupText( null );
-		IupSetAttributes( textGotoDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textGotoDlg" );
-		IupSetStrAttribute( textGotoDlg, "VALUE", toStringz( GLOBAL.editorSetting02.gotoDlg ) );
-
-		Ihandle* labelNewFileDlg = IupLabel( GLOBAL.languageItems["newfile"].toCString );
-		Ihandle* textNewFileDlg = IupText( null );
-		IupSetAttributes( textNewFileDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textNewFileDlg" );
-		IupSetStrAttribute( textNewFileDlg, "VALUE", toStringz( GLOBAL.editorSetting02.newfileDlg ) );
+		Ihandle* labelMessageDlg = IupLabel( GLOBAL.languageItems["message"].toCString );
+		Ihandle* textMessageDlg = IupText( null );
+		IupSetAttributes( textMessageDlg, "SIZE=16x10,MARGIN=0x0,SPIN=YES,SPINMAX=255,SPINMIN=100,NAME=Color-textMessageDlg" );
+		IupSetStrAttribute( textMessageDlg, "VALUE", toStringz( GLOBAL.editorSetting02.messageDlg ) );
 		
 		version(Windows)
 		{
@@ -1664,23 +1649,17 @@ private:
 		{
 			Ihandle* gboxOPACITY = IupGridBox
 			(
-				labelFindInFilesDlg,
-				textFindInFilesDlg,
+				labelGeneralDlg,
+				textGeneralDlg,
 				IupFill,
-				labelPreferenceDlg,
-				textPreferenceDlg,
+				labelMessageDlg,
+				textMessageDlg,
 				
-				labelProjectDlg,
-				textProjectDlg,
-				IupFill,
-				labelGotoDlg,
-				textGotoDlg,
-				
-				labelNewFileDlg,
-				textNewFileDlg,
-				IupFill,
 				labelAutoCompleteDlg,
 				textAutoCompleteDlg,
+				IupFill,
+				IupFill,
+				IupFill,				
 				
 				null
 			);
@@ -1689,20 +1668,8 @@ private:
 		{
 			Ihandle* gboxOPACITY = IupGridBox
 			(
-				labelFindInFilesDlg,
-				textFindInFilesDlg,
-				IupFill,
-				labelPreferenceDlg,
-				textPreferenceDlg,
-				
-				labelProjectDlg,
-				textProjectDlg,
-				IupFill,
-				labelGotoDlg,
-				textGotoDlg,
-				
-				labelNewFileDlg,
-				textNewFileDlg,
+				labelGeneralDlg,
+				textGeneralDlg,
 				IupFill,
 				IupFill,
 				IupFill,
@@ -1968,7 +1935,7 @@ private:
 	}
 	
 
-	public:
+public:
 	this( int w, int h, string title, bool bResize = true, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, "POSEIDON_MAIN_TOOLBAR" );
@@ -1988,10 +1955,6 @@ private:
 		IupSetHandle( "PreferenceHandle", getIhandle );
 		
 		createLayout();
-		
-		//version(Windows) IupSetAttribute( _dlg, "SIZE", "-1x310" ); else IupSetAttribute( _dlg, "SIZE", "-1x360" );
-		
-		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
 
 		// Bottom Button
 		IupSetStrAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
@@ -2005,30 +1968,23 @@ private:
 			return IUP_DEFAULT;//CONTINUE;
 		});
 		
-		IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih, int state )
-		{
-			if( state == IUP_SHOW )
-			{
-				version(Windows)
-				{
-					GLOBAL.preferenceDlg.changeColor();
-					GLOBAL.preferenceDlg.changeIcon();
-				}
-			}
-			return IUP_DEFAULT;
-		});	
-		
 		IupMap( _dlg );
 	}
 
-	~this()
+	void show()
 	{
-		//IupDestroy( getIhandle );
+		version(Windows) tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		IupShow( _dlg );
 	}
 	
 	override string show( int x, int y )
 	{
-		tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		// First time call this dialog to show
+		version(Windows)
+		{
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupShowXY( _dlg, x, y );
 		
 		return "OK";
@@ -2068,9 +2024,6 @@ private:
 			//List
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );		
-			
-			tools.setWinTheme( IupGetDialogChild( getIhandle, "Color-colorTemplateList" ), "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "keyword-tabs" ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "preference-tabs" ), "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
 		}
@@ -2174,29 +2127,13 @@ private:
 		
 		IupSetStrAttribute( IupGetHandle( "shortCutList" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( IupGetHandle( "shortCutList" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		version(Windows)
-		{
-			tools.setWinTheme( IupGetHandle( "shortCutList" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setWinTheme( IupGetHandle( "keyWordText0" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setWinTheme( IupGetHandle( "keyWordText1" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setWinTheme( IupGetHandle( "keyWordText2" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setWinTheme( IupGetHandle( "keyWordText3" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setWinTheme( IupGetHandle( "keyWordText4" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setWinTheme( IupGetHandle( "keyWordText5" ), "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-		}
-		
+
 		version(Windows)
 		{		
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textFindInFilesDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textFindInFilesDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textPreferenceDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textPreferenceDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textProjectDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textProjectDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGotoDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGotoDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textNewFileDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textNewFileDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGeneralDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textGeneralDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
+			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textMessageDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textAutoCompleteDlg" ), "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( IupGetDialogChild( getIhandle, "Color-textAutoCompleteDlg" ), "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 		}
@@ -2243,12 +2180,6 @@ extern(C) // Callback for CPreferenceDialog
 	private int CPreferenceDialog_btnCancel_cb( Ihandle* ih )
 	{
 		IupHide( GLOBAL.preferenceDlg.getIhandle );
-		/+
-		if( GLOBAL.preferenceDlg.getIhandle != null ) IupDestroy( GLOBAL.preferenceDlg.getIhandle );
-		destroy( GLOBAL.preferenceDlg );
-		GC.free( cast(void*) GLOBAL.preferenceDlg );
-		GLOBAL.preferenceDlg = null;
-		+/
 		return IUP_DEFAULT;
 	}
 
@@ -2257,12 +2188,7 @@ extern(C) // Callback for CPreferenceDialog
 	{
 		CPreferenceDialog_btnApply_cb( ih );
 		IupHide( GLOBAL.preferenceDlg.getIhandle );
-		/+
-		if( GLOBAL.preferenceDlg.getIhandle != null ) IupDestroy( GLOBAL.preferenceDlg.getIhandle );
-		destroy(  GLOBAL.preferenceDlg );
-		GC.free( cast(void*) GLOBAL.preferenceDlg );
-		GLOBAL.preferenceDlg = null;
-		+/
+
 		return IUP_DEFAULT;
 	}
 
@@ -2271,6 +2197,8 @@ extern(C) // Callback for CPreferenceDialog
 	{
 		try
 		{
+			version(Windows) string oldUseDarkMode = GLOBAL.editorSetting00.UseDarkMode;
+			
 			GLOBAL.KEYWORDS[0] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText0" ), "VALUE" ))).dup;
 			GLOBAL.KEYWORDS[1] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText1" ), "VALUE" ))).dup;
 			GLOBAL.KEYWORDS[2] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText2" ), "VALUE" ))).dup;
@@ -2432,23 +2360,17 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.autoCompleteHLTBack = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnAutoCompleteHLT_BG" ), "FGCOLOR" ) ).dup;
 			
 			// OPACITY
-			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textFindInFilesDlg" ), "VALUE" ) ) ) )
-				GLOBAL.editorSetting02.findfilesDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textFindInFilesDlg" ), "VALUE" ) );
-			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textPreferenceDlg" ), "VALUE" ) ) ) )
-				GLOBAL.editorSetting02.preferenceDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textPreferenceDlg" ), "VALUE" ) );
-			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textProjectDlg" ), "VALUE" ) ) ) )
-				GLOBAL.editorSetting02.projectDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textProjectDlg" ), "VALUE" ) );
-			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textGotoDlg" ), "VALUE" ) ) ) )	
-				GLOBAL.editorSetting02.gotoDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textGotoDlg" ), "VALUE" ) );
-			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textNewFileDlg" ), "VALUE" ) ) ) )
-				GLOBAL.editorSetting02.newfileDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textNewFileDlg" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textGeneralDlg" ), "VALUE" ) ) ) )
+				GLOBAL.editorSetting02.generalDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textGeneralDlg" ), "VALUE" ) );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageDlg" ), "VALUE" ) ) ) )
+				GLOBAL.editorSetting02.messageDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageDlg" ), "VALUE" ) );
 			version(Windows)
 			{
 				if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textAutoCompleteDlg" ), "VALUE" ) ) ) )
 					GLOBAL.editorSetting02.autocompleteDlg = fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textAutoCompleteDlg" ), "VALUE" ) );
 			}
-			if( GLOBAL.serachInFilesDlg !is null ) IupSetStrAttribute( GLOBAL.serachInFilesDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
-			if( GLOBAL.preferenceDlg !is null ) IupSetStrAttribute( GLOBAL.preferenceDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.preferenceDlg ) );
+			if( GLOBAL.serachInFilesDlg !is null ) IupSetStrAttribute( GLOBAL.serachInFilesDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.generalDlg ) );
+			if( GLOBAL.preferenceDlg !is null ) IupSetStrAttribute( GLOBAL.preferenceDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.generalDlg ) );
 
 			
 			if( GLOBAL.editorSetting00.ColorBarLine == "ON" )
@@ -2781,12 +2703,26 @@ extern(C) // Callback for CPreferenceDialog
 			IDECONFIG.saveINI();
 
 			IupRefreshChildren( IupGetHandle( "PreferenceHandle" ) );
+			
+			// refresh GLOBAL.preferenceDlg CaptionTheme
+			version(Windows)
+			{
+				if( oldUseDarkMode != GLOBAL.editorSetting00.UseDarkMode ) // If darkmode setting has be changed, do it...
+				{
+					if( ih == IupGetHandle( "CPreferenceDialogbtnAPPLY" ) )
+					{
+						tools.setDarkMode4Dialog( GLOBAL.preferenceDlg.getIhandle, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+						IupHide( GLOBAL.preferenceDlg.getIhandle );
+						IupShow( GLOBAL.preferenceDlg.getIhandle );
+					}
+				}
+			}			
 		}
 		catch( Exception e )
 		{
 			IupMessage( "CPreferenceDialog_btnOK_cb", toStringz( "CPreferenceDialog_btnOK_cb Error\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 		}
-
+		
 		return IUP_DEFAULT;
 	}
 
@@ -2809,7 +2745,6 @@ extern(C) // Callback for CPreferenceDialog
 				{
 					Ihandle* _c = IupGetChild( dlg, 0 ); 
 					_c = IupGetChild( _c, 2 ); // hBox, label, hbox
-
 					auto child = IupGetNextChild( _c, null );
 					while( child )
 					{
@@ -2819,7 +2754,6 @@ extern(C) // Callback for CPreferenceDialog
 				}
 			}
 		}
-
 		IupPopup( dlg, IUP_CURRENT, IUP_CURRENT );
 
 		if( IupGetInt( dlg, "STATUS" ) )

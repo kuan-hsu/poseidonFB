@@ -4,15 +4,15 @@ Type=1
 MainFile=
 PassOneFile=
 TargetName=poseidonFB
-FocusOn=LDC_x32
+FocusOn=x64
 CompilerArgs=
 CompilerOption=-odobjs -version=FBIDE -version=GUI poseidonFB.res
 Comment=
 CompilerPath=K:/CodingPark/dmd2/windows/bin/dmd.exe
 [IncludeDirs]
-name=K:/CodingPark/dmd2/import
+name=K:/codingPark/import
 [LibDirs]
-name=K:/CodingPark/GameKYO/lib/iup/iup5947/dll14
+name=K:/codingPark/Libraries/iup/iup5947/dll14
 [Sources]
 name=IDE.d
 name=actionManager.d
@@ -20,6 +20,7 @@ name=darkmode/darkmode.d
 name=dialogs/argOptionDlg.d
 name=dialogs/baseDlg.d
 name=dialogs/customDlg.d
+name=dialogs/customMessageDlg.d
 name=dialogs/fileDlg.d
 name=dialogs/findFilesDlg.d
 name=dialogs/helpDlg.d
@@ -67,18 +68,18 @@ name=tools.d
 title=LDC_x64
 target=poseidonFB_x64
 option=--m64 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
-compiler=C:/Users/nagah/OneDrive/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
-incdir=C:/Users/nagah/OneDrive/codingPark/import
-libdir=C:/Users/nagah/OneDrive/codingPark/Libraries/iup/iup5947/dll14_64
+compiler=K:/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
+incdir=K:/codingPark/import
+libdir=K:/codingPark/Libraries/iup/iup5947/dll14_64
 title=x64
 target=poseidonFB_x64
 option=-odobjs -version=FBIDE -version=GUI poseidonFB64.res
-compiler=C:/Users/nagah/OneDrive/codingPark/dmd2/windows/bin64/dmd.exe
-incdir=C:/Users/nagah/OneDrive/codingPark/import
-libdir=C:/Users/nagah/OneDrive/codingPark/Libraries/iup/iup5947/dll14_64
+compiler=K:/codingPark/dmd2/windows/bin64/dmd.exe
+incdir=K:/codingPark/import
+libdir=K:/codingPark/Libraries/iup/iup5947/dll14_64
 title=LDC_x32
 target=poseidonFB
 option=--m32 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB.res
-compiler=C:/Users/nagah/OneDrive/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
-incdir=C:/Users/nagah/OneDrive/codingPark/import
-libdir=C:/Users/nagah/OneDrive/codingPark/Libraries/iup/iup5947/dll14
+compiler=K:/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
+incdir=K:/codingPark/import
+libdir=K:/codingPark/Libraries/iup/iup5947/dll14

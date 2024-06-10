@@ -7,7 +7,7 @@ private import std.string, std.conv;
 
 class CArgOptionDialog : CBaseDialog
 {
-	private:
+private:
 	Ihandle*			listTools, listCompiler, listOptions, listArgs, btnCompilerPath;
 	Ihandle*			hBoxCompiler, hBoxOptions, hBoxArgs;
 	Ihandle*			labelStatus;
@@ -34,10 +34,10 @@ class CArgOptionDialog : CBaseDialog
 			IupSetCallback( btnHiddenOK, "ACTION", cast(Icallback) &CArgOptionDialog_btnOKtoApply_cb );
 		}
 		
-		version(Windows) listTools = IupFlatList(); else listTools = IupList( null );
+		listTools = IupList(null);
 		IupSetAttributes( listTools, "MULTIPLE=NO,EXPAND=YES" );
 		IupSetHandle( "CArgOptionDialog_listTools_Handle", listTools );
-		version(Windows) IupSetCallback( listTools, "FLAT_ACTION", cast(Icallback) &CArgOptionDialog_ACTION ); else IupSetCallback( listTools, "ACTION", cast(Icallback) &CArgOptionDialog_ACTION );
+		IupSetCallback( listTools, "ACTION", cast(Icallback) &CArgOptionDialog_ACTION );
 		
 		for( int i = 0; i < GLOBAL.compilerSettings.customCompilerOptions.length; ++ i )
 		{
@@ -74,7 +74,11 @@ class CArgOptionDialog : CBaseDialog
 			IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CArgOptionDialog_btnToolsDown );
 			
 			Ihandle* vBoxButtonTools = IupVbox( btnToolsAdd, btnToolsErase, btnToolsUp, btnToolsDown, null );
-			version(Windows) frameList = IupFlatFrame( IupHbox( listTools, vBoxButtonTools, null ) ); else frameList = IupFrame( IupHbox( listTools, vBoxButtonTools, null ) );
+			
+			Ihandle* listToolsHbox = IupHbox( listTools, vBoxButtonTools, null );
+			IupSetAttribute( listToolsHbox, "NORMALIZESIZE", "VERTICAL" );
+			
+			version(Windows) frameList = IupFlatFrame( listToolsHbox ); else frameList = IupFrame( listToolsHbox );
 		}
 		else
 		{
@@ -184,8 +188,7 @@ class CArgOptionDialog : CBaseDialog
 		IupAppend( _dlg, vBoxLayout );
 	}	
 
-	public:
-	
+public:
 	this( int w, int h, string title, int _QuickMode = 0, bool bResize = false, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		QuickMode = _QuickMode;
@@ -206,7 +209,7 @@ class CArgOptionDialog : CBaseDialog
 			IupSetStrAttribute( listOptions, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
 			IupSetStrAttribute( listArgs, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 			IupSetStrAttribute( listArgs, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		}
+		}		
 	}
 
 	~this()
@@ -294,39 +297,25 @@ class CArgOptionDialog : CBaseDialog
 						IupSetAttribute( listCompiler, "VALUE", "" );
 				}
 			}
-			
-			
 		}
-
-		version(Windows)
-		{
-			if( GLOBAL.bCanUseDarkMode )
-			{
-				if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-				{
-					IupMap( _dlg );
-					tools.setCaptionTheme( _dlg, true );
-					if( listArgs ) tools.setWinTheme( listArgs, "CFD", true );
-					if( listCompiler ) tools.setWinTheme( listCompiler, "CFD", true );
-					if( listOptions ) tools.setWinTheme( listOptions, "CFD", true );
-				}
-				else
-				{
-					if( listArgs ) tools.setWinTheme( listArgs, "CFD", false );
-					if( listCompiler ) tools.setWinTheme( listCompiler, "CFD", false );
-					if( listOptions ) tools.setWinTheme( listOptions, "CFD", false );
-				}
-			}
-		}
-		
-		if( !QuickMode )
+		else
 		{
 			IupMap( _dlg );
 			int screenX, screenY, width, height;
 			tools.splitBySign( fSTRz( IupGetAttribute( _dlg, "NATURALSIZE" ) ), "x", width, height );
 			tools.splitBySign( fSTRz( IupGetAttribute( GLOBAL.statusBar.getLayoutHandle, "SCREENPOSITION" ) ), ",", screenX, screenY );
 			x = screenX;
-			y = screenY - height;
+			y = screenY - height;		
+		}
+
+		version(Windows)
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				IupMap( _dlg );
+				tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+				tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			}
 		}
 
 		IupPopup( _dlg, x, y );
@@ -582,7 +571,7 @@ extern(C) // Callback for CFindInFilesDialog
 			IupSetInt( toolsHandle, "VALUE", IupGetInt( toolsHandle, "COUNT" ) );
 			
 			CArgOptionDialog.tempCustomCompilerOptions.length = CArgOptionDialog.tempCustomCompilerOptions.length + 1;
-			CArgOptionDialog.tempCustomCompilerOptions[$-1] = "%::% " ~ newFileName;
+			CArgOptionDialog.tempCustomCompilerOptions[$-1] = "%::% %::% " ~ newFileName;
 			
 			Ihandle* textHandle = IupGetHandle( "CArgOptionDialog_textOptions" );
 			if( textHandle != null ) IupSetAttribute( textHandle, "VALUE", "" );

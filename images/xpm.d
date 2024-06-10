@@ -5,7 +5,7 @@ struct XPM
 private:
 	import iup.iup;
 	import global, tools, actionManager;
-	import std.string, std.conv, std.file, Array = std.array;
+	import std.string, std.conv, std.file, Array = std.array, std.uni;
 
 	struct ColorUnit
 	{
@@ -246,7 +246,7 @@ private:
 			bookmark_rgba;
 	}
 
-	static Ihandle* getIUPimage( string filePath )
+	static Ihandle* getIUPimageFormXPM( string filePath )
 	{
 		try
 		{
@@ -337,7 +337,7 @@ private:
 							pixel ~= c;
 					}
 				}
-			}			
+			}
 			
 			ubyte[] data; 
 			foreach( char c; pixel )
@@ -507,6 +507,101 @@ private:
 		catch( Exception e )
 		{
 		}
+	}
+	
+	static Ihandle* loadIupImage( string filePath, bool bInvert = false )
+	{
+		Ihandle*	img;
+		
+		int			MODE;
+		string		_width, _height;
+		ubyte[]		imgData;
+		
+		if( !std.file.exists( filePath ) ) filePath = GLOBAL.poseidonPath ~ "/" ~ filePath;
+		if( !std.file.exists( filePath ) ) return null;
+		auto doc = cast(string) std.file.read( filePath );
+		foreach( line; std.string.splitLines( doc ) )
+		{
+			line = strip( line );
+			
+			if( line.length )
+			{
+				if( MODE == 0 )
+				{
+					if( line.length > 25 )
+					{
+						if( line == "unsigned char imgdata[] = {" )
+						{
+							MODE = 1;
+							continue;
+						}
+						
+						if( line[0..26] == "Ihandle* image = IupImage(" )
+						{
+							auto _data = Array.split( line[26..$], "," );
+							if( _data.length == 3 )
+							{
+								_width = _data[0];
+								_height = strip( _data[1] );
+								if( imgData.length ) img = IupImage( std.conv.to!(int)(_width), std.conv.to!(int)(_height), imgData.ptr );
+								
+							}
+						}
+						
+						else if( line[0..23] == "IupSetAttribute(image, " )
+						{
+							if( img )
+							{
+								string[] _data = Array.split( line[23..$-3], "," );
+								if( _data.length == 2 )
+								{
+									string _num = strip( _data[0], "\"" );
+									string _colorvalue = strip( strip( _data[1] ), "\"" );
+									if( bInvert )
+									{
+										auto temp = Array.split( _colorvalue, " " );
+										if( temp.length == 3 )
+										{
+											int r = 255 - std.conv.to!(int)(temp[0]);
+											int g = 255 - std.conv.to!(int)(temp[1]);
+											int b = 255 - std.conv.to!(int)(temp[2]);
+											_colorvalue = std.conv.to!(string)(r) ~ " " ~ std.conv.to!(string)(g) ~ " " ~ std.conv.to!(string)(b); 
+										}
+									}
+										
+									IupSetStrAttribute( img, toStringz( _num), toStringz( _colorvalue ) ); 
+								}
+							}
+						}
+						
+					}
+				}
+				else if( MODE == 1 )
+				{
+					string pixel;
+					foreach( c; line )
+					{						
+						if( c == ',' )
+						{
+							imgData ~= std.conv.to!(ubyte)(pixel);
+							pixel = "";
+						}
+						else if( c == '}' )
+						{
+							imgData ~= std.conv.to!(ubyte)(pixel);
+							MODE = 0;
+							break;
+						}
+						else if( isNumber( c ) )
+						{
+							pixel ~= c;
+						}
+					}
+					
+				}
+			}
+		}
+		return img;
 	}
 	
 	static Ihandle* InvertIupImage( Ihandle* oriImage )

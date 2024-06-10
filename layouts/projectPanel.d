@@ -383,12 +383,15 @@ public:
 	void changeColor()
 	{
 		IupSetStrAttribute( projectToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );	
-		
 		IupSetStrAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "FGCOLOR", toStringz( GLOBAL.editColor.projectFore ) );
 		IupSetStrAttribute( tree, "BGCOLOR", toStringz( GLOBAL.editColor.projectBack ) );
 		IupSetStrAttribute( tree, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
-		version(Windows) tools.setWinTheme( tree, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		version(Windows)
+		{
+			tools.setWinTheme( tree, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( projectToolBarBox, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		for( int i = 1; i < IupGetInt( tree, "COUNT" ); ++ i )
 		{
 			if( IupGetIntId( tree, "DEPTH", i ) == 1 )
@@ -675,7 +678,7 @@ public:
 			if( !GLOBAL.projectManager[setupDir].dir.length )
 			{
 				GLOBAL.projectManager.remove( setupDir );
-				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems[".poseidonbroken"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );			
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems[".poseidonbroken"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 				return false;
 			}
 
@@ -720,7 +723,7 @@ public:
 		}
 		else
 		{
-			IupMessageError( null, toStringz( "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString ) );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "\"" ~ setupDir ~ "\"\n" ~ GLOBAL.languageItems[".poseidonlost"].toDString, "ERROR", "", IUP_MOUSEPOS, IUP_MOUSEPOS );
 			if( bAskCreateNew )
 			{
 				if( std.file.exists( setupDir ) )
@@ -916,8 +919,11 @@ public:
 			IupSetCallback( _clearRecentPrjs, "ACTION", cast(Icallback) &menu.submenuRecentPrjsClear_click_cb );
 			IupInsert( recentPrj_ih, null, _clearRecentPrjs );
 			IupMap( IupGetChild( recentPrj_ih, 0 ) );
-			IupInsert( recentPrj_ih, null, IupSeparator() );
-			IupMap( IupGetChild( recentPrj_ih, 0 ) );
+			if( GLOBAL.recentProjects.length )
+			{
+				IupInsert( recentPrj_ih, null, IupSeparator() );
+				IupMap( IupGetChild( recentPrj_ih, 0 ) );
+			}
 	
 			// Create New iupItem
 			for( int i = 0; i < GLOBAL.recentProjects.length; ++ i )
@@ -1277,7 +1283,6 @@ extern(C)
 	{
 		// Open Dialog Window
 		scope test = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["newfile"].toDString(), GLOBAL.languageItems["filename"].toDString() ~ ":", "120x", null, false, "POSEIDON_MAIN_DIALOG", "icon_newfile", false );
-		IupSetStrAttribute( test.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.newfileDlg ) );
 		string fileName = test.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		if( fileName.length )
@@ -1635,7 +1640,7 @@ extern(C)
 					}
 					else
 					{
-						IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 						break;
 					}
 				}
@@ -1670,7 +1675,7 @@ extern(C)
 					}
 					else
 					{
-						IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 					}
 				}
 			}
@@ -1787,7 +1792,7 @@ extern(C)
 				}
 				catch( Exception e )
 				{
-					IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );
+					IupMessage( "ProjectTree Delete", toStringz( e.toString ) );
 				}
 			}
 		}

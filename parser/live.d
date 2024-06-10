@@ -66,7 +66,7 @@ struct LiveParser
 		}
 		catch( Exception e )
 		{
-			IupMessageError( null, toStringz( "delChildrenByLineNum() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
+			IupMessage( "", toStringz( "delChildrenByLineNum() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 		}
 
 		return null;
@@ -313,7 +313,7 @@ struct LiveParser
 		}
 		catch( Exception e )
 		{
-			IupMessageError( null, toStringz( "parseCurrentLine() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
+			IupMessage( "", toStringz( "parseCurrentLine() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 		}
 	}
 
@@ -475,7 +475,7 @@ struct LiveParser
 			}
 			catch( Exception e )
 			{
-				IupMessageError( null, toStringz( "parseCurrentBlock() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
+				IupMessage( "", toStringz( "parseCurrentBlock() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 			}
 		}
 	}

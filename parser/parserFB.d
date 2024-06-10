@@ -2627,7 +2627,7 @@ version(FBIDE)
 					{
 						if( ++repeatCount > 10 )
 						{
-							IupMessageError( GLOBAL.mainDlg, "Infinite Loop of parse() function" );
+							IupMessage( "", "Infinite Loop of parse() function" );
 							break;
 						}
 					}
@@ -2778,7 +2778,7 @@ version(FBIDE)
 			}
 			catch( Exception e )
 			{
-				debug IupMessageError( null, toStringz( "parserFB Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
+				debug IupMessage( "", toStringz( "parserFB Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ Conv.to!(string)( e.line ) ) );
 			}
 
 			if( head !is null )

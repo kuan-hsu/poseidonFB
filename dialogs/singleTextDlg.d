@@ -68,7 +68,11 @@ public:
 	override string show( int x, int y ) // Overload form CBaseDialog
 	{
 		IupMap( _dlg );
-		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		version(Windows)
+		{
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupPopup( _dlg, x, y );
 
 		Ihandle* textHandle = IupGetHandle( "CSingleTextDialog_text" );
@@ -267,6 +271,12 @@ public:
 
 	override string show( int x, int y ) // Overload form CBaseDialog
 	{
+		IupMap( _dlg );
+		version(Windows)
+		{
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}	
 		IupPopup( _dlg, x, y );
 		Ihandle* textHandle = IupGetHandle( "CSingleTextOpen_text" );
 		return fromStringz( IupGetAttribute( textHandle, "VALUE" ) ).dup;

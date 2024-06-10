@@ -96,14 +96,6 @@ private:
 		Ihandle* VBox0 = IupVbox( label0, label1, label2, labelSEPARATOR, HBox0, IupFill(), bottom, null );
 		IupSetAttributes( VBox0, "MARGIN=5x5" );
 		IupAppend( _dlg, VBox0 );
-		
-		IupMap( _dlg );
-		version(Windows)
-		{
-			bool _UseDarkMode = GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false;
-			tools.setCaptionTheme( _dlg, _UseDarkMode );
-			tools.setWinTheme( keyList, "CFD", _UseDarkMode );
-		}		
 	}	
 
 public:
@@ -141,6 +133,12 @@ public:
 
 	override string show( int x, int y ) // Overload form CBaseDialog
 	{
+		version(Windows)
+		{
+			IupMap( _dlg );
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupPopup( _dlg, x, y );
 
 		return null;

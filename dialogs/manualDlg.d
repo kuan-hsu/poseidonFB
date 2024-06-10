@@ -19,34 +19,31 @@ private:
 	{
 		Ihandle* bottom = createDlgButton( "40x12" );
 		
-		version(Windows) listManuals = IupFlatList(); else listManuals = IupList( null );
+		listManuals = IupList( null );
 		IupSetAttributes( listManuals, "EXPAND=HORIZONTAL,SIZE=x10" );
 		version(FBIDE) IupSetStrAttribute( listManuals, "TIP", GLOBAL.languageItems["manualnote"].toCString );
 		IupSetHandle( "MANUAL_list", listManuals );
-		version(Windows)
-			IupSetCallback( listManuals, "FLAT_ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
-		else
-			IupSetCallback( listManuals, "ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
+		IupSetCallback( listManuals, "ACTION", cast(Icallback) &CManualDialog_listManuals_ACTION );
 
 		Ihandle* btnToolsAdd = IupButton( null, null );
-		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES" );
+		IupSetAttributes( btnToolsAdd, "IMAGE=icon_debug_add,FLAT=YES,CANFOCUS=NO" );
 		IupSetStrAttribute( btnToolsAdd, "TIP", GLOBAL.languageItems["add"].toCString );
 		IupSetHandle( "MANUAL_Add", btnToolsAdd );
 		IupSetCallback( btnToolsAdd, "ACTION", cast(Icallback) &CManualDialog_btnToolsAdd_ACTION );
 
 		Ihandle* btnToolsErase = IupButton( null, null );
-		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES,ACTIVE=NO" );
+		IupSetAttributes( btnToolsErase, "IMAGE=icon_delete,FLAT=YES,ACTIVE=NO, CANFOCUS=NO" );
 		IupSetStrAttribute( btnToolsErase, "TIP", GLOBAL.languageItems["remove"].toCString );
 		IupSetHandle( "MANUAL_Erase", btnToolsErase );
 		IupSetCallback( btnToolsErase, "ACTION", cast(Icallback) &CManualDialog_btnToolsErase_ACTION );
 		
 		Ihandle* btnToolsUp = IupButton( null, null );
-		IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES,ACTIVE=NO" );
+		IupSetAttributes( btnToolsUp, "IMAGE=icon_uparrow,FLAT=YES,ACTIVE=NO, CANFOCUS=NO" );
 		IupSetHandle( "MANUAL_Up", btnToolsUp );
 		IupSetCallback( btnToolsUp, "ACTION", cast(Icallback) &CManualDialog_btnToolsUp_ACTION );
 		
 		Ihandle* btnToolsDown = IupButton( null, null );
-		IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES,ACTIVE=NO" );
+		IupSetAttributes( btnToolsDown, "IMAGE=icon_downarrow,FLAT=YES,ACTIVE=NO, CANFOCUS=NO" );
 		IupSetHandle( "MANUAL_Down", btnToolsDown );
 		IupSetCallback( btnToolsDown, "ACTION", cast(Icallback) &CManualDialog_btnToolsDown_ACTION );
 		
@@ -95,7 +92,6 @@ private:
 	}	
 
 public:
-	
 	this( int w, int h, string title, bool bResize = false, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
@@ -106,12 +102,7 @@ public:
 		
 		IupSetAttribute( btnCANCEL, "TITLE", GLOBAL.languageItems["close"].toCString );
 		IupSetAttribute( btnOK, "TITLE", GLOBAL.languageItems["ok"].toCString );
-		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CManualDialog_btnApply_ACTION );
-		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih, int state )
-		{
-			if( state == IUP_SHOW )	tools.setWinTheme( IupGetHandle("MANUAL_Text"), "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			return IUP_DEFAULT;
-		});		
+		IupSetCallback( btnOK, "FLAT_ACTION", cast(Icallback) &CManualDialog_btnApply_ACTION );		
 	}
 
 	~this()
@@ -130,7 +121,12 @@ public:
 	
 	override string show( int x, int y )
 	{
-		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		version(Windows)
+		{
+			IupMap( _dlg );
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupPopup( _dlg, x, y );
 		return null;
 	}

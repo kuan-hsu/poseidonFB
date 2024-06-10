@@ -1,7 +1,7 @@
 ﻿module tools;
 
 private import iup.iup;
-private import global, project, actionManager, darkmode.darkmode;
+private import global, project, actionManager, darkmode.darkmode, dialogs.customMessageDlg;
 private import std.string, std.process, std.utf, Conv = std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
 private import core.stdc.stdlib, core.stdc.string, core.thread;
 
@@ -866,8 +866,7 @@ class CPLUGIN
 				if( poseidon_Dll_Go ) bSuccess = true; else IupMessage( "Error", toStringz( "Load poseidon_Dll_Go Symbol in " ~ name ~ " Error!" ) );
 
 				poseidon_Dll_Release = cast(typeof(poseidon_Dll_Release)) DyLibSymbol( sharedLib, "poseidon_Dll_Release" );
-				if( poseidon_Dll_Release ) bReleaseSuccess = true; else IupMessage( "Error", toStringz( "Load poseidon_Dll_Release Symbol in " ~ name ~ " Error!" ) );
-				
+				if( poseidon_Dll_Release ) bReleaseSuccess = true; else tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Load poseidon_Dll_Release Symbol in " ~ name ~ " Error!", "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				if( !bSuccess || !bReleaseSuccess )
 				{
 					DyLibFree( sharedLib );
@@ -924,236 +923,6 @@ class CPLUGIN
 	}
 }
 
-
-class CCustomMessageDialog
-{
-private:
-	import global, tools;
-	import std.string, std.algorithm, Conv = std.conv;
-	
-	const int			labelminW = 80, labelminH = 24;
-	
-	Ihandle*			_dlg, labelMessage, vBox;
-	Ihandle*			btnYES, btnNO, btnAPPLY, btnOK, btnCANCEL;
-	
-	/*
-	bottons = "OK", "OKCANCEL", "RETRYCANCEL", "YESNO", or "YESNOCANCEL"
-	*/
-	Ihandle* createDlgButton( string buttonSize = "40x12", string buttons = "OK" )
-	{
-		if( !buttonSize.length ) buttonSize = "40x12";
-		
-		bool		yesEqualno;
-		Ihandle*	hBox_DlgButton;
-		if( buttons == "OKCANCEL" )
-		{
-			btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
-			IupSetStrAttribute( btnOK, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnOK, "NAME=btnOK" );
-			IupSetHandle( "CCustomMessageDialog_OK", btnOK );
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomMessageDialog_btnYES_cb );
-			
-			btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
-			IupSetStrAttribute( btnCANCEL, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnCANCEL, "NAME=btnCANCEL" );
-			IupSetHandle( "CCustomMessageDialog_CANCEL", btnCANCEL );
-			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CCustomMessageDialog_btnCANCEL_cb );
-			
-			hBox_DlgButton = IupHbox( btnOK, btnCANCEL, null );
-		}
-		else if( buttons == "YESNO" )
-		{
-			btnOK = IupButton( GLOBAL.languageItems["yes"].toCString, null );
-			IupSetStrAttribute( btnOK, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnOK, "NAME=btnOK" );
-			IupSetHandle( "CCustomMessageDialog_OK", btnOK );
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomMessageDialog_btnYES_cb );
-			
-			btnCANCEL = IupButton( GLOBAL.languageItems["no"].toCString, null );
-			IupSetStrAttribute( btnCANCEL, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnCANCEL, "NAME=btnCANCEL" );
-			IupSetHandle( "CCustomMessageDialog_CANCEL", btnCANCEL );
-			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CCustomMessageDialog_btnNO_cb );
-			
-			hBox_DlgButton = IupHbox( btnOK, btnCANCEL, null );
-		}
-		else if( buttons == "YESNOCANCEL" )
-		{
-			btnOK = IupButton( GLOBAL.languageItems["yes"].toCString, null );
-			IupSetStrAttribute( btnOK, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnOK, "NAME=btnOK" );
-			IupSetHandle( "CCustomMessageDialog_OK", btnOK );
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomMessageDialog_btnYES_cb );
-			
-			btnNO = IupButton( GLOBAL.languageItems["no"].toCString, null );
-			IupSetStrAttribute( btnNO, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnNO, "NAME=btnNO" );
-			IupSetCallback( btnNO, "ACTION", cast(Icallback) &CCustomMessageDialog_btnNO_cb );
-			
-			btnCANCEL = IupButton( GLOBAL.languageItems["cancel"].toCString, null );
-			IupSetStrAttribute( btnCANCEL, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnCANCEL, "NAME=btnCANCEL" );
-			IupSetHandle( "CCustomMessageDialog_CANCEL", btnCANCEL );
-			IupSetCallback( btnCANCEL, "ACTION", cast(Icallback) &CCustomMessageDialog_btnCANCEL_cb );
-			
-			hBox_DlgButton = IupHbox( btnOK, btnNO, btnCANCEL, null );
-		}
-		else
-		{
-			btnOK = IupButton( GLOBAL.languageItems["ok"].toCString, null );
-			IupSetStrAttribute( btnOK, "SIZE", toStringz( buttonSize ) );
-			IupSetAttributes( btnOK, "NAME=btnYES" );
-			IupSetHandle( "CCustomMessageDialog_OK", btnOK );
-			IupSetCallback( btnOK, "ACTION", cast(Icallback) &CCustomMessageDialog_btnCANCEL_cb );
-			
-			hBox_DlgButton = IupHbox( btnOK, null );
-			yesEqualno = true;
-		}
-
-		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ACENTER,NORMALIZESIZE=HORIZONTAL,HOMOGENEOUS=YES,GAP=5,MARGIN=2x2" );
-		IupSetAttribute( _dlg, "DEFAULTENTER", "CCustomMessageDialog_OK" );
-		if( !yesEqualno ) IupSetAttribute( _dlg, "DEFAULTESC", "CCustomMessageDialog_CANCEL" ); else IupSetAttribute( _dlg, "DEFAULTESC", "CCustomMessageDialog_OK" );
-		//IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CBaseDialog_btnCancel_cb );		
-		
-		return hBox_DlgButton;
-	}
-	
-	
-	Ihandle* createMessage( string message, string iconName = "" )
-	{
-		labelMessage = IupLabel( null );
-		IupSetStrAttribute( labelMessage, "TITLE", toStringz( message ) );
-		IupSetAttributes( labelMessage, "ALIGNMENT=ALEFT,EXPAND=YES" );
-		
-		if( iconName.length )
-		{
-			Ihandle* labelICON = IupLabel( null );
-			if( iconName == "ERROR" )
-				GLOBAL.editorSetting00.IconInvert != "ALL" ? IupSetStrAttribute( labelICON, "IMAGE", "errorbox" ) : IupSetStrAttribute( labelICON, "IMAGE", "errorbox_invert" );
-			else if( iconName == "WARNING" )
-				GLOBAL.editorSetting00.IconInvert != "ALL" ? IupSetStrAttribute( labelICON, "IMAGE", "warningbox" ) : IupSetStrAttribute( labelICON, "IMAGE", "warningbox_invert" );
-			else if( iconName == "QUESTION" )
-				GLOBAL.editorSetting00.IconInvert != "ALL" ? IupSetStrAttribute( labelICON, "IMAGE", "querybox" ) : IupSetStrAttribute( labelICON, "IMAGE", "querybox_invert" );
-			else if( iconName == "INFORMATION" )
-				GLOBAL.editorSetting00.IconInvert != "ALL" ? IupSetStrAttribute( labelICON, "IMAGE", "infobox" ) : IupSetStrAttribute( labelICON, "IMAGE", "infobox_invert" );
-			else
-			{
-				IupDestroy( labelICON );
-				return labelMessage;
-			}
-				
-			Ihandle* labelhBox = IupHbox( labelICON, labelMessage, null );
-			IupSetAttributes( labelhBox, "ALIGNMENT=ACENTER" );
-
-			return labelhBox;
-		}
-		
-		return labelMessage;
-	}
-	
-
-public:
-	static int _result;
-	
-	this( string title, string message, string buttonType, string iconName = "" )
-	{	
-		_dlg = IupDialog( null );
-		if( title.length ) IupSetStrAttribute( _dlg, "TITLE", toStringz( title ) );
-		version(Windows)
-		{
-			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-		}
-		
-		vBox = IupVbox( IupFill, createMessage( message, iconName ), IupFill, createDlgButton( "", buttonType ), null );
-		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,EXPANDCHILDREN=YES,GAP=10,MARGIN=10x2" );
-		
-		IupAppend( _dlg, vBox );
-		
-		IupSetAttributes( _dlg, "RESIZE=NO,MINBOX=NO,SHRINK=YES,MENUBOX=NO" );
-		IupSetAttribute( _dlg, "PARENTDIALOG", "POSEIDON_MAIN_DIALOG" );
-		IupSetStrAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
-	}
-
-
-	~this()
-	{
-		IupDestroy( _dlg );
-	}
-
-	int show( int x, int y )
-	{
-		IupMap(_dlg);
-		
-		/*
-		Width in 1/4's of the average width of a character for the current FONT of each control.
-		Height in 1/8's of the average height of a character for the current FONT of each control.		
-		*/
-		int w, h, dialogW, dialogH;
-		tools.splitBySign( fSTRz( IupGetAttribute( labelMessage, "SIZE" ) ), "x", w, h );
-		tools.splitBySign( fSTRz( IupGetAttribute( _dlg, "SIZE" ) ), "x", dialogW, dialogH );
-		
-		if( h < labelminH && w < labelminW )
-		{
-			IupSetStrAttribute( labelMessage, "SIZE", toStringz( Conv.to!(string)(labelminW) ~ "x" ~ Conv.to!(string)(labelminH) ) );
-			IupSetStrAttribute( _dlg, "SIZE", toStringz( Conv.to!(string)(dialogW + labelminW - w) ~ "x" ~ Conv.to!(string)(dialogH + labelminH - h) ) );
-		}
-		else if( h < labelminH )
-		{
-			IupSetStrAttribute( labelMessage, "SIZE", toStringz( "x" ~ Conv.to!(string)(labelminH) ) );
-			IupSetStrAttribute( _dlg, "SIZE", toStringz( Conv.to!(string)(dialogW) ~ "x" ~ Conv.to!(string)(dialogH + labelminH - h) ) );
-		}
-		else if( w < labelminW )
-		{
-			IupSetStrAttribute( labelMessage, "SIZE", toStringz( Conv.to!(string)(labelminW) ~ "x" ) );
-			IupSetStrAttribute( _dlg, "SIZE", toStringz( Conv.to!(string)(dialogW + labelminW - w) ~ "x" ~ Conv.to!(string)(dialogH) ) );
-		}
-		else
-		{
-			IupSetStrAttribute( _dlg, "SIZE", toStringz( Conv.to!(string)(dialogW + 4) ~ "x" ~ Conv.to!(string)(dialogH) ) );
-		}
-		
-		version(Windows)
-		{
-			bool bUseDark = GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false;
-			tools.setCaptionTheme( _dlg, bUseDark );
-			tools.setWinTheme( btnYES, "Explorer", bUseDark );
-			tools.setWinTheme( btnNO, "Explorer", bUseDark );
-			tools.setWinTheme( btnOK, "Explorer", bUseDark );
-			tools.setWinTheme( btnCANCEL, "Explorer", bUseDark );
-		}
-		
-		IupPopup( _dlg, x, y );
-		
-		return _result;
-	}
-	
-	Ihandle* getIhandle()
-	{
-		return _dlg;
-	}
-}
-
-extern(C) // Callback for CBaseDialog
-{
-	private int CCustomMessageDialog_btnYES_cb( Ihandle* ih )
-	{
-		CCustomMessageDialog._result = 1;
-		return IUP_CLOSE;
-	}
-	
-	private int CCustomMessageDialog_btnNO_cb( Ihandle* ih )
-	{
-		CCustomMessageDialog._result = 2;
-		return IUP_CLOSE;
-	}	
-
-	private int CCustomMessageDialog_btnCANCEL_cb( Ihandle* ih )
-	{
-		CCustomMessageDialog._result = 3;
-		return IUP_CLOSE;
-	}
-}
 
 /+
 BUTTONDEFAULT: Number of the default button. Can be "1", "2" or "3". "2" is valid only for "RETRYCANCEL", "OKCANCEL" and "YESNO" button configurations. "3" is valid only for "YESNOCANCEL". Default: "1".
@@ -1315,4 +1084,44 @@ version(Windows) bool setWinTheme( Ihandle* ih, string pszSubAppName = "CFD", bo
 	}
 	
 	return false;
+}
+
+version(Windows)
+{
+	private void _searchNode( Ihandle* node, bool bDarkMode = true )
+	{
+		if( IupGetChildCount( node ) > 0 )
+		{
+			for( int i = 0; i < IupGetChildCount( node ); ++ i )
+				_searchNode( IupGetChild( node, i ), bDarkMode );
+		}
+		else
+		{
+			switch( fSTRz( IupGetClassName( node ) ) )
+			{
+				case "text":
+					auto _caret = fSTRz( IupGetAttribute( node, "CARET" ) );
+					if( indexOf( _caret, "," ) != -1 ) tools.setWinTheme( node, "Explorer", bDarkMode ); else tools.setWinTheme( node, "CFD", bDarkMode );
+					break;
+				case "list":
+					string readonly = fSTRz( IupGetAttribute( node, "READONLY" ) );
+					if( readonly.length ) 
+						tools.setWinTheme( node, "CFD", bDarkMode ); //EDITBOX is ON
+					else
+					{	// VALUESTRING.length = EDITBOX=NO and DROPDOWN=YES, DROPDOWN=NO and MULTIPLE=NO
+						if( fSTRz( IupGetAttribute( node, "VALUESTRING" ) ).length ) tools.setWinTheme( node, "CFD", bDarkMode ); else tools.setWinTheme( node, "Explorer", bDarkMode );
+					}
+					break;
+				case "tree", "button":
+					tools.setWinTheme( node, "Explorer", bDarkMode );
+					break;
+				default:
+			}
+		}
+	}
+
+	void setDarkMode4Dialog( Ihandle* _dlg, bool bDarkMode = true )
+	{
+		version(Windows) if( GLOBAL.bCanUseDarkMode ) _searchNode( _dlg, bDarkMode );
+	}
 }

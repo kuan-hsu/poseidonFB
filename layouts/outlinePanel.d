@@ -1188,22 +1188,23 @@ public:
 	void changeIcons()
 	{
 		string tail;
-		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
+		if( GLOBAL.editorSetting00.IconInvert != "OFF" ) tail = "_invert";
 
-		IupSetStrAttribute( outlineToolbarTitleImage, "IMAGE", toStringz( "icon_outline" ~ tail ) );
-		IupSetStrAttribute( outlineButtonCollapse, "IMAGE", toStringz( "icon_collapse2" ~ tail ) );
+		IupSetStrAttribute( outlineToolbarTitleImage, "IMAGE", toStringz( tail.length ? "icon_outline" : "icon_outline" ~ tail ) );
+		IupSetStrAttribute( outlineButtonCollapse, "IMAGE", toStringz( tail.length ? "icon_collapse2" : "icon_collapse2" ~ tail ) );
 		switch( showIndex )
 		{
-			case 0:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_pr" ~ tail ) ); break;
-			case 1:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_p" ~ tail ) ); break;
-			case 2:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_r" ~ tail ) ); break;
-			default:	IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( "icon_show_nopr" ~ tail ) ); break;
+			case 0:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( tail.length ? "icon_show_pr" : "icon_show_pr" ~ tail ) ); break;
+			case 1:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( tail.length ? "icon_show_p" : "icon_show_p" ~ tail ) ); break;
+			case 2:		IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( tail.length ? "icon_show_r" : "icon_show_r" ~ tail ) ); break;
+			default:	IupSetStrAttribute( outlineButtonPR, "IMAGE", toStringz( tail.length ? "icon_show_nopr" : "icon_show_nopr" ~ tail ) ); break;
 		}
 		IupSetStrAttribute( outlineToggleAnyWord, "IMPRESS", toStringz( "icon_wholeword" ~ tail )); 
-		IupSetStrAttribute( outlineToggleAnyWord, "IMAGE", toStringz( "icon_notwholeword" ~ tail ));
-		IupSetStrAttribute( outlineButtonShowLinenum, "IMAGE", toStringz( "icon_show_linenum" ~ tail ) );
-		IupSetStrAttribute( outlineButtonFresh, "IMAGE", toStringz( "icon_refresh" ~ tail ) );
-		IupSetStrAttribute( outlineButtonHide, "IMAGE", toStringz( "icon_shift_l" ~ tail ) );
+		IupSetStrAttribute( outlineToggleAnyWord, "IMAGE", toStringz( tail.length ? "icon_notwholeword" : "icon_notwholeword" ~ tail ));
+		IupSetStrAttribute( outlineButtonShowLinenum, "IMPRESS", toStringz( "icon_show_linenum" ~ tail ) );
+		IupSetStrAttribute( outlineButtonShowLinenum, "IMAGE", toStringz( tail.length ? "icon_show_linenum" : "icon_show_linenum" ~ tail ) );
+		IupSetStrAttribute( outlineButtonFresh, "IMAGE", toStringz( tail.length ? "icon_refresh" : "icon_refresh" ~ tail ) );
+		IupSetStrAttribute( outlineButtonHide, "IMAGE", toStringz( tail.length ? "icon_shift_l" : "icon_shift_l" ~ tail ) );
 	}
 
 	void changeColor()
@@ -1211,8 +1212,10 @@ public:
 		version(Windows)
 		{
 			tools.setWinTheme( outlineTreeNodeList, "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
-			IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
+			tools.setDarkMode4Dialog( outlineToolBarBox, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
+			IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
+			
 		}
 		IupSetStrAttribute( outlineToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 		IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );

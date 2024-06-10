@@ -7,7 +7,7 @@ private import std.string, Array = std.array;
 
 class CToolBar
 {
-	private:
+private:
 	import 				iup.iup_scintilla;
 	import 				menu, parser.ast, tools;
 	
@@ -334,44 +334,43 @@ class CToolBar
 	void changeIcons()
 	{
 		string tail;
-		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
+		if( GLOBAL.editorSetting00.IconInvert != "OFF" ) tail = "_invert";
 
-		IupSetStrAttribute( btnNew, "IMAGE", toStringz( "icon_newfile" ~ tail ) );
-		IupSetStrAttribute( btnOpen, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
-		IupSetStrAttribute( btnSave, "IMAGE", toStringz( "icon_save" ~ tail ) );
-		IupSetStrAttribute( btnSaveAll, "IMAGE", toStringz( "icon_saveall" ~ tail ) );
-		IupSetStrAttribute( btnUndo, "IMAGE", toStringz( "icon_undo" ~ tail ) );
-		IupSetStrAttribute( btnRedo, "IMAGE", toStringz( "icon_redo" ~ tail ) );
-		IupSetStrAttribute( btnClearUndoBuffer, "IMAGE", toStringz( "icon_clear" ~ tail ) );
+		IupSetStrAttribute( btnNew, "IMAGE", toStringz( tail.length ? "icon_newfile" : "icon_newfile" ~ tail ) );
+		IupSetStrAttribute( btnOpen, "IMAGE", toStringz( tail.length ? "icon_openfile" : "icon_openfile" ~ tail ) );
+		IupSetStrAttribute( btnSave, "IMAGE", toStringz( tail.length ? "icon_save" : "icon_save" ~ tail ) );
+		IupSetStrAttribute( btnSaveAll, "IMAGE", toStringz( tail.length ? "icon_saveall" : "icon_saveall" ~ tail ) );
+		IupSetStrAttribute( btnUndo, "IMAGE", toStringz( tail.length ? "icon_undo" : "icon_undo" ~ tail ) );
+		IupSetStrAttribute( btnRedo, "IMAGE", toStringz( tail.length ? "icon_redo" : "icon_redo" ~ tail ) );
+		IupSetStrAttribute( btnClearUndoBuffer, "IMAGE", toStringz( tail.length ? "icon_clear" : "icon_clear" ~ tail ) );
 
-		IupSetStrAttribute( btnCut, "IMAGE", toStringz( "icon_cut" ~ tail ) );
-		IupSetStrAttribute( btnCopy, "IMAGE", toStringz( "icon_copy" ~ tail ) );
-		IupSetStrAttribute( btnPaste, "IMAGE", toStringz( "icon_paste" ~ tail ) );
+		IupSetStrAttribute( btnCut, "IMAGE", toStringz( tail.length ? "icon_cut" : "icon_cut" ~ tail ) );
+		IupSetStrAttribute( btnCopy, "IMAGE", toStringz( tail.length ? "icon_copy" : "icon_copy" ~ tail ) );
+		IupSetStrAttribute( btnPaste, "IMAGE", toStringz( tail.length ? "icon_paste" : "icon_paste" ~ tail ) );
 
-		IupSetStrAttribute( btnBackNav, "IMAGE", toStringz( "icon_debug_left" ~ tail ) );
-		IupSetStrAttribute( btnForwardNav, "IMAGE", toStringz( "icon_debug_right" ~ tail ) );
-		IupSetStrAttribute( btnClearNav, "IMAGE", toStringz( "icon_clear" ~ tail ) );
+		IupSetStrAttribute( btnBackNav, "IMAGE", toStringz( tail.length ? "icon_debug_left" : "icon_debug_left" ~ tail ) );
+		IupSetStrAttribute( btnForwardNav, "IMAGE", toStringz( tail.length ? "icon_debug_right" : "icon_debug_right" ~ tail ) );
+		IupSetStrAttribute( btnClearNav, "IMAGE", toStringz( tail.length ? "icon_clear" : "icon_clear" ~ tail ) );
 
-		IupSetStrAttribute( btnMark, "IMAGE", toStringz( "icon_mark" ~ tail ) );
-		IupSetStrAttribute( btnMarkPrev, "IMAGE", toStringz( "icon_markprev" ~ tail ) );
-		IupSetStrAttribute( btnMarkNext, "IMAGE", toStringz( "icon_marknext" ~ tail ) );
-		IupSetStrAttribute( btnMarkClean, "IMAGE", toStringz( "icon_markclear" ~ tail ) );
+		IupSetStrAttribute( btnMark, "IMAGE", toStringz( tail.length ? "icon_mark" : "icon_mark" ~ tail ) );
+		IupSetStrAttribute( btnMarkPrev, "IMAGE", toStringz( tail.length ? "icon_markprev" : "icon_markprev" ~ tail ) );
+		IupSetStrAttribute( btnMarkNext, "IMAGE", toStringz( tail.length ? "icon_marknext" : "icon_marknext" ~ tail ) );
+		IupSetStrAttribute( btnMarkClean, "IMAGE", toStringz( tail.length ? "icon_markclear" : "icon_markclear" ~ tail ) );
 
-		IupSetStrAttribute( btnCompile, "IMAGE", toStringz( "icon_compile" ~ tail ) );
-		IupSetStrAttribute( btnBuildRun, "IMAGE", toStringz( "icon_buildrun" ~ tail ) );
-		IupSetStrAttribute( btnRun, "IMAGE", toStringz( "icon_run" ~ tail ) );
-		IupSetStrAttribute( btnBuildAll, "IMAGE", toStringz( "icon_build" ~ tail ) );
-		IupSetStrAttribute( btnReBuild, "IMAGE", toStringz( "icon_rebuild" ~ tail ) );
-		IupSetStrAttribute( btnQuickRun, "IMAGE", toStringz( "icon_quickrun" ~ tail ) );
+		IupSetStrAttribute( btnCompile, "IMAGE", toStringz( tail.length ? "icon_compile" : "icon_compile" ~ tail ) );
+		IupSetStrAttribute( btnBuildRun, "IMAGE", toStringz( tail.length ? "icon_buildrun" : "icon_buildrun" ~ tail ) );
+		IupSetStrAttribute( btnRun, "IMAGE", toStringz( tail.length ? "icon_run" : "icon_run" ~ tail ) );
+		IupSetStrAttribute( btnBuildAll, "IMAGE", toStringz( tail.length ? "icon_build" : "icon_build" ~ tail ) );
+		IupSetStrAttribute( btnReBuild, "IMAGE", toStringz( tail.length ? "icon_rebuild" : "icon_rebuild" ~ tail ) );
+		IupSetStrAttribute( btnQuickRun, "IMAGE", toStringz( tail.length ? "icon_quickrun" : "icon_quickrun" ~ tail ) );
 
-		IupSetStrAttribute( guiButton, "IMAGE", toStringz( "icon_console" ~ tail ) );
+		IupSetStrAttribute( guiButton, "IMAGE", toStringz( tail.length ? "icon_console" : "icon_console" ~ tail ) );
 		IupSetStrAttribute( guiButton, "IMPRESS", toStringz( "icon_gui" ~ tail ) );
-		IupSetStrAttribute( bitButton, "IMAGE", toStringz( "icon_32" ~ tail ) );
+		IupSetStrAttribute( bitButton, "IMAGE", toStringz( tail.length ? "icon_32" : "icon_32" ~ tail ) );
 		IupSetStrAttribute( bitButton, "IMPRESS", toStringz( "icon_64" ~ tail ) );
 	}
 
-
-	public:
+public:
 	this()
 	{
 		createToolBar();

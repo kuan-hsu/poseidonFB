@@ -18,7 +18,7 @@ private:
 
 	void createLayout()
 	{
-		Ihandle* bottom = createDlgButton( "40x16", "c" );
+		Ihandle* bottom = createDlgButton( "40x16", "c", "CFindInFilesDialog" );
 
 		labelTitle[0] = new IupString( GLOBAL.languageItems["findwhat"].toDString ~ ":" );
 		labelTitle[1] = new IupString( GLOBAL.languageItems["replacewith"].toDString ~ ":" );
@@ -132,23 +132,7 @@ public:
 		IupSetStrAttribute( listFind, "VALUE", toStringz( findWhat ) );
 		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 		IupSetAttribute( _dlg, "DEFAULTESC", "FindFiles_btnHiddenCANCEL" );
-		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );	
-		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.findfilesDlg ) );
-		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) function( Ihandle* ih, int state )
-		{
-			if( state == IUP_SHOW )
-			{
-				Ihandle* _findHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Find" );
-				Ihandle* _replaceHandle = IupGetDialogChild( GLOBAL.serachInFilesDlg.getIhandle, "CFindInFilesDialog-list_Replace" );
-				if( _findHandle != null && _replaceHandle != null )
-				{
-					tools.setWinTheme( _findHandle, "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-					tools.setWinTheme( _replaceHandle, "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-				}
-			}
-			
-			return IUP_DEFAULT;
-		});
+		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &dialogs.findFilesDlg.btnCancel_ACTION_CB );
 		
 		IupMap( _dlg );
 	}
@@ -162,17 +146,26 @@ public:
 	string show( string selectedWord ) // Overload form CBaseDialog
 	{
 		if( selectedWord.length ) IupSetStrAttribute( listFind, "VALUE", toStringz( selectedWord ) );
-		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		version(Windows)
+		{
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupShow( _dlg );
 		return null;
 	}	
-
+	
 	override string show( int x, int y ) // Overload form CBaseDialog
 	{
+		version(Windows)
+		{
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupShowXY( _dlg, x, y );
 		return null;
 	}
-
+	
 	void setStatusBar( string text )
 	{
 		IupSetStrAttribute( labelStatus, "TITLE", toStringz( text ) );

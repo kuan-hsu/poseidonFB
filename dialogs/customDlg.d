@@ -52,7 +52,7 @@ private:
 		Ihandle* listHbox = IupHbox( listTools, vBoxButtonTools, null );
 		IupSetAttributes( listHbox, "NORMALIZESIZE=VERTICAL" );
 		
-		Ihandle* frameList = IupFrame( listHbox );
+		version(Windows) Ihandle* frameList = IupFlatFrame( listHbox ); else Ihandle* frameList = IupFrame( listHbox );
 		IupSetAttributes( frameList, "ALIGNMENT=ACENTER,MARGIN=2x2" );
 		
 		
@@ -218,14 +218,13 @@ private:
 		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}	
 
-	public:
-	
+public:
 	this( int w, int h, string title, bool bResize = false, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
 		IupSetAttribute( _dlg, "ICON", "icon_tools" );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
-		
+
 		for( int i = 1; i < 13; ++ i )
 		{	
 			editCustomTools[i].args = GLOBAL.customTools[i].args;
@@ -257,6 +256,11 @@ private:
 	
 	override string show( int x, int y )
 	{
+		version(Windows)
+		{
+			IupMap( _dlg );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupPopup( _dlg, x, y );
 		return null;
 	}	
@@ -404,7 +408,7 @@ extern(C)
 		int index = IupGetInt( toolsHandle, "COUNT" );
 		if( index >= 12 )
 		{
-			IupMessageError( toolsHandle, GLOBAL.languageItems["onlytools"].toCString );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["onlytools"].toDString, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			return IUP_DEFAULT;
 		}
 		

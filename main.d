@@ -202,6 +202,7 @@ void main( string[] args )
 			{
 				GLOBAL.searchExpander.changeColor();
 				GLOBAL.outlineTree.changeColor();
+				GLOBAL.projectTree.changeColor();
 			}
 		}
 	}

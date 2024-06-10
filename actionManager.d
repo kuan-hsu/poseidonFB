@@ -184,14 +184,14 @@ public:
 		{
 			if( !std.file.exists( fullPath ) )
 			{
-				IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				return null;
 			}
 			else
 			{
 				if( std.file.isDir( fullPath ) ) 
 				{
-					IupMessageError( null, toStringz( fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString() ) );
+					tools.MessageDlg( GLOBAL.languageItems["error"].toDString, fullPath ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 					return null;
 				}
 			}
@@ -1607,8 +1607,11 @@ public:
 			IupSetCallback( _clearRecentFiles, "ACTION", cast(Icallback) &menu.submenuRecentFilesClear_click_cb );
 			IupInsert( recentFile_ih, null, _clearRecentFiles );
 			IupMap( IupGetChild( recentFile_ih, 0 ) );
-			IupInsert( recentFile_ih, null, IupSeparator() );
-			IupMap( IupGetChild( recentFile_ih, 0 ) );
+			if( GLOBAL.recentFiles.length )
+			{
+				IupInsert( recentFile_ih, null, IupSeparator() );
+				IupMap( IupGetChild( recentFile_ih, 0 ) );
+			}
 			
 			// Create New iupItem
 			for( int i = 0; i < GLOBAL.recentFiles.length; ++ i )
@@ -2765,7 +2768,7 @@ public:
 	{
 		if( !std.file.exists( tool.dir ) )
 		{
-			IupMessageError( null, toStringz( tool.dir ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString ) );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, tool.dir ~ "\n" ~ GLOBAL.languageItems["filelost"].toDString, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			return;
 		}
 		
@@ -2799,7 +2802,7 @@ public:
 					}
 					else
 					{
-						IupMessageError( GLOBAL.mainDlg, toStringz( tool.name ~ " Is Null" ) );
+						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, tool.name ~ " Is Null", "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 						GLOBAL.pluginMnager.remove( tool.name );
 					}
 				}
@@ -2811,7 +2814,7 @@ public:
 			}
 			catch( Exception e )
 			{
-				IupMessageError( GLOBAL.mainDlg, toStringz( e.toString ) );
+				IupMessage( "CustomTool Run()", toStringz( e.toString ) );
 				if( tool.name in GLOBAL.pluginMnager ) GLOBAL.pluginMnager.remove( tool.name );
 			}
 		}

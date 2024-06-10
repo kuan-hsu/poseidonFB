@@ -8,8 +8,7 @@ private import std.string, std.file, Path = std.path, std.conv;
 
 class CProjectPropertiesDialog : CBaseDialog
 {
-	private:
-	
+private:	
 	Ihandle*	textProjectName, listType, textProjectDir, textMainFile, toggleOneFile, textTargetName, textArgs, textCompilerOpts, textCompilerPath;
 	Ihandle*	listFocus;
 	Ihandle*	btnProjectDir;
@@ -199,7 +198,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		// PAGE 2 Include...
 		// Include Paths
 		listIncludePath = IupList( null );
-		IupSetAttributes( listIncludePath, "MULTIPLE=NO,SIZE=326x64,NAME=PRJPROPERTY_IncludePaths" );
+		IupSetAttributes( listIncludePath, "MULTIPLE=NO,EXPAND=HORIZONTAL,NAME=PRJPROPERTY_IncludePaths" );
 
 		IupSetHandle( "listIncludePath_Handle", listIncludePath );
 		IupSetCallback( listIncludePath, "DBLCLICK_CB", cast(Icallback) &CProjectPropertiesDialog_DBLCLICK_CB );
@@ -241,32 +240,32 @@ class CProjectPropertiesDialog : CBaseDialog
 
 		// Library Paths
 		listLibPath = IupList( null );
-		IupSetAttributes( listLibPath, "MULTIPLE=NO,SIZE=328x64,NAME=PRJPROPERTY_LibPaths" );
+		IupSetAttributes( listLibPath, "MULTIPLE=NO,EXPAND=HORIZONTAL,NAME=PRJPROPERTY_LibPaths" );
 		IupSetHandle( "listLibPath_Handle", listLibPath );
 		IupSetCallback( listLibPath, "DBLCLICK_CB", cast(Icallback) &CProjectPropertiesDialog_DBLCLICK_CB );
 
 		Ihandle* btnLibPathAdd = IupButton( null, null );
-		IupSetAttributes( btnLibPathAdd, "IMAGE=icon_debug_add,FLAT=YES" );
+		IupSetAttributes( btnLibPathAdd, "IMAGE=icon_debug_add,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnLibPathAdd_Handle", btnLibPathAdd );
 		IupSetCallback( btnLibPathAdd, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Add_cb );
 
 		Ihandle* btnLibPathErase = IupButton( null, null );
-		IupSetAttributes( btnLibPathErase, "IMAGE=icon_delete,FLAT=YES" );
+		IupSetAttributes( btnLibPathErase, "IMAGE=icon_delete,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnLibPathErase_Handle", btnLibPathErase );
 		IupSetCallback( btnLibPathErase, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Erase_cb );
 		
 		Ihandle* btnLibPathEdit = IupButton( null, null );
-		IupSetAttributes( btnLibPathEdit, "IMAGE=icon_Write,FLAT=YES" );
+		IupSetAttributes( btnLibPathEdit, "IMAGE=icon_Write,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnLibPathEdit_Handle", btnLibPathEdit );
 		IupSetCallback( btnLibPathEdit, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Edit_cb );
 
 		Ihandle* btnLibPathUp = IupButton( null, null );
-		IupSetAttributes( btnLibPathUp, "IMAGE=icon_uparrow,FLAT=YES" );
+		IupSetAttributes( btnLibPathUp, "IMAGE=icon_uparrow,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnLibPathUp_Handle", btnLibPathUp );
 		IupSetCallback( btnLibPathUp, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Up_cb );
 		
 		Ihandle* btnLibPathDown = IupButton( null, null );
-		IupSetAttributes( btnLibPathDown, "IMAGE=icon_downarrow,FLAT=YES" );
+		IupSetAttributes( btnLibPathDown, "IMAGE=icon_downarrow,FLAT=YES,CANFOCUS=NO" );
 		IupSetHandle( "btnLibPathDown_Handle", btnLibPathDown );
 		IupSetCallback( btnLibPathDown, "ACTION", cast(Icallback) &CProjectPropertiesDialog_Down_cb );
 
@@ -304,7 +303,7 @@ class CProjectPropertiesDialog : CBaseDialog
 		IupSetCallback( btnAPPLY, "FLAT_ACTION", cast(Icallback) &CProjectPropertiesDialog_btnApply_cb );
 	}
 
-	public:
+public:
 	this( int w, int h, string title, bool bResize = true, bool bNew = true, string existedDir = "" )
 	{
 		super( w, h, title, bResize, "POSEIDON_MAIN_DIALOG" );
@@ -407,9 +406,6 @@ class CProjectPropertiesDialog : CBaseDialog
 				IupSetStrAttribute( textProjectDir, "BGCOLOR",  IupGetGlobal("TXTBGCOLOR") );
 			}
 		}
-		
-		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.projectDlg ) );
-		version(Windows) IupSetCallback( _dlg, "SHOW_CB", cast(Icallback) &CProjectPropertiesDialog_SHOW_CB );
 		
 		IupMap( _dlg );
 	}
@@ -801,22 +797,4 @@ extern(C) // Callback for CProjectPropertiesDialog
 
 		return IUP_DEFAULT;
 	}
-	
-	version(Windows) int CProjectPropertiesDialog_SHOW_CB( Ihandle* ih, int state )
-	{
-		if( state == IUP_SHOW )
-		{
-			Ihandle* _typeHandle = IupGetDialogChild( ih, "PRJPROPERTY_TypeList" );
-			Ihandle* _focusHandle = IupGetDialogChild( ih, "PRJPROPERTY_FocusList" );
-			if( _typeHandle != null && _focusHandle != null )
-			{
-				bool _UseDarkMode = GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false;
-				tools.setWinTheme( _typeHandle, "CFD", _UseDarkMode );
-				tools.setWinTheme( _focusHandle, "CFD", _UseDarkMode );
-			}
-		}
-		
-		return IUP_DEFAULT;
-	}	
-	
 }

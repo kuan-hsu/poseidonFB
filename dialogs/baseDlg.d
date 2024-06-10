@@ -4,39 +4,39 @@ import iup.iup;
 
 class CBaseDialog
 {
-	protected:
+protected:
 	import global, project, scintilla, actionManager, tools;
 	import std.string, std.algorithm, std.conv;
 	
 	Ihandle*			_dlg;
 	Ihandle*			btnAPPLY, btnOK, btnCANCEL, btnHiddenOK, btnHiddenCANCEL;
 	
-	Ihandle* createDlgButton( string buttonSize = "40x20", string buttons = "oc" )
+	Ihandle* createDlgButton( string buttonSize = "40x20", string buttons = "oc", string HandleHeadName = "" )
 	{
 		btnAPPLY = IupFlatButton( GLOBAL.languageItems["apply"].toCString );
 		IupSetStrAttribute( btnAPPLY, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
-		IupSetHandle( "btnAPPLY", btnAPPLY );
+		IupSetHandle( toStringz( HandleHeadName ~ "btnAPPLY" ), btnAPPLY );
 		IupSetStrAttribute( btnAPPLY, "SIZE", toStringz( buttonSize ) );
 		
 		btnOK = IupFlatButton( GLOBAL.languageItems["ok"].toCString );
 		IupSetStrAttribute( btnOK, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
-		IupSetHandle( "btnOK", btnOK );
+		IupSetHandle( toStringz( HandleHeadName ~ "btnOK" ), btnOK );
 		IupSetStrAttribute( btnOK, "SIZE", toStringz( buttonSize ) );
 		
 		btnCANCEL = IupFlatButton( GLOBAL.languageItems["cancel"].toCString );
 		IupSetStrAttribute( btnCANCEL, "HLCOLOR", IupGetAttribute( _dlg, "BGCOLOR" ) );
-		IupSetHandle( "btnCANCEL", btnCANCEL );
+		IupSetHandle( toStringz( HandleHeadName ~ "btnCANCEL" ), btnCANCEL );
 		IupSetStrAttribute( btnCANCEL, "SIZE", toStringz( buttonSize ) );
 		IupSetCallback( btnCANCEL, "FLAT_ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
 		
 		// IupFlatButton won't support DEFAULTENTER / DEFAULTESC, so we create non-visible IupButton
 		btnHiddenOK = IupButton( null, null );
 		IupSetAttribute( btnHiddenOK, "VISIBLE", "NO" );
-		IupSetHandle( "btnHiddenOK", btnHiddenOK );
+		IupSetHandle( toStringz( HandleHeadName ~ "btnHiddenOK" ), btnHiddenOK );
 		
 		btnHiddenCANCEL = IupButton( null, null );
 		IupSetAttribute( btnHiddenCANCEL, "VISIBLE", "NO" );
-		IupSetHandle( "btnHiddenCANCEL", btnHiddenCANCEL );
+		IupSetHandle( toStringz( HandleHeadName ~ "btnHiddenCANCEL" ), btnHiddenCANCEL );
 		IupSetCallback( btnHiddenCANCEL, "ACTION", cast(Icallback) &CBaseDialog_btnCancel_cb );
 		
 		
@@ -44,8 +44,8 @@ class CBaseDialog
 		Ihandle* hBox_DlgButton = IupHbox( btnHiddenOK, btnHiddenCANCEL, IupFill(), btnAPPLY, btnOK, btnCANCEL, null );
 		IupSetAttributes( hBox_DlgButton, "ALIGNMENT=ABOTTOM,GAP=5,MARGIN=1x0" );
 
-		IupSetAttribute( _dlg, "DEFAULTENTER", "btnHiddenOK" );
-		IupSetAttribute( _dlg, "DEFAULTESC", "btnHiddenCANCEL" );
+		IupSetAttribute( _dlg, "DEFAULTENTER", toStringz( HandleHeadName ~ "btnHiddenOK" ) );
+		IupSetAttribute( _dlg, "DEFAULTESC", toStringz( HandleHeadName ~ "btnHiddenCANCEL" ) );
 		IupSetCallback( _dlg, "CLOSE_CB", cast(Icallback) &CBaseDialog_btnCancel_cb );
 
 		if( std.algorithm.count( buttons, "a" ) == 0 ) IupDestroy( btnAPPLY );
@@ -56,7 +56,7 @@ class CBaseDialog
 	}
 	
 
-	public:
+public:
 	this( int w, int h, string title, bool bResize = true, string parent = "" )
 	{
 		_dlg = IupDialog( null );
@@ -66,6 +66,7 @@ class CBaseDialog
 			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
 			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
 		}
+		IupSetStrAttribute( _dlg, "OPACITY", toStringz( GLOBAL.editorSetting02.generalDlg ) );
 		
 		string size	= to!(string)( w ) ~ "x" ~ to!(string)( h );
 		string onlyW = to!(string)( w ) ~ "x";
@@ -89,7 +90,7 @@ class CBaseDialog
 		}
 		if( !bResize ) IupSetAttribute( _dlg, "RESIZE", "NO" );
 		
-		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );	
+		IupSetAttribute( _dlg, "FONT", IupGetGlobal( "DEFAULTFONT" ) );
 	}
 
 
@@ -107,7 +108,12 @@ class CBaseDialog
 
 	string show( int x, int y )
 	{	
-		version(Windows) tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		version(Windows)
+		{
+			IupMap( _dlg );
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
 		IupPopup( _dlg, x, y );
 		return null;
 	}

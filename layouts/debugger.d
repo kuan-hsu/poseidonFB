@@ -780,7 +780,7 @@ private:
 		auto head = indexOf( message, "signal SIGSEGV," );
 		if( head > -1 )
 		{
-			IupMessageError( GLOBAL.mainDlg, toStringz( message[head..$-5].dup ) );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, message[head..$-5].dup, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			return;
 		}
 
@@ -788,14 +788,14 @@ private:
 		head = indexOf( message, "signal SIGFPE," );
 		if( head > -1 )
 		{
-			IupMessageError( GLOBAL.mainDlg, toStringz( message[head..$-5].dup ) );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, message[head..$-5].dup, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			return;
 		}
 		
 		head = indexOf( message, "signal SIGABRT," );
 		if( head > -1 )
 		{
-			IupMessageError( GLOBAL.mainDlg, toStringz( message[head..$-5].dup ) );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, message[head..$-5].dup, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			return;
 		}
 		
@@ -803,7 +803,7 @@ private:
 		head = indexOf( message, "The program is not being run." );
 		if( head > -1 )
 		{
-			IupMessageError( GLOBAL.mainDlg, toStringz( message[head..$-5].dup ) );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, message[head..$-5].dup, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			return;
 		}
 	}
@@ -2044,7 +2044,7 @@ public:
 				else
 				{
 					GLOBAL.messagePanel.printOutputPanel( "\nDebugger: " ~ GLOBAL.compilerSettings.debuggerFullPath ~ " isn't existed!\nRun Error!", false );
-					IupMessageError( null, "Debugger isn't existed!" );
+					tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Debugger isn't existed!", "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 					return false;
 				}
 			}
@@ -2299,7 +2299,7 @@ public:
 			
 			if( stderrMessage.length )
 			{
-				IupMessageError( null, "Debugger running fail, exit!" );
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Debugger running fail, exit!", "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				auto s = tryWait( proc.pid );
 				if( !s.terminated && s.status == 0 ) kill( proc.pid );
 				IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "VALUE", "" );
@@ -2311,7 +2311,7 @@ public:
 
 			if( indexOf( result, "(no debugging symbols found)" ) > -1 )
 			{
-				IupMessageError( null, GLOBAL.languageItems["exitdebug2"].toCString() );
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, GLOBAL.languageItems["exitdebug2"].toDString, "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				kill( proc.pid );
 				IupSetAttribute( GLOBAL.debugPanel.getConsoleHandle, "VALUE", "" );
 				IupSetAttributeId( GLOBAL.messageWindowTabs, "TABVISIBLE", 2, "NO" ); // Hide the Debug window

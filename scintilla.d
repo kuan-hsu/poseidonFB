@@ -2957,7 +2957,7 @@ extern(C)
 			}
 			catch( Exception e )
 			{
-				IupMessageError( null, toStringz( "LiveParser lineNumberAdd() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
+				IupMessage( "", toStringz( "LiveParser lineNumberAdd() Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 			}
 		}
 
@@ -3270,7 +3270,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			IupMessageError( null, toStringz( "CScintilla_caret_cb Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
+			IupMessage( "", toStringz( "CScintilla_caret_cb Error:\n" ~ e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
 		}
 		return IUP_DEFAULT;
 	}
@@ -3352,7 +3352,7 @@ extern(C)
 		}
 		catch( Exception e )
 		{
-			IupMessageError( null, toStringz( "CScintilla_zoom_cb Error: " ~ e.toString ) );
+			IupMessage( "", toStringz( "CScintilla_zoom_cb Error: " ~ e.toString ) );
 		}
 		
 		return IUP_DEFAULT;

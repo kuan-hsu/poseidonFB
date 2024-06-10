@@ -60,7 +60,7 @@ public:
 			}
 			catch( Exception e )
 			{
-				IupMessageError( prjPropertyDialog, toStringz( e.toString ) );
+				IupMessage( "Project Save()", toStringz( e.toString ) );
 				return false;
 			}
 		}
@@ -256,7 +256,7 @@ public:
 		}
 		catch( Exception e )
 		{
-			IupMessageError( null, "loadFile() in project.d Error!" );
+			IupMessage( "", "Load Project File Error!" );
 		}
 
 		return s;			

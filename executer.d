@@ -75,7 +75,7 @@ private:
 			{
 				if( GLOBAL.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
 				GLOBAL.messagePanel.printOutputPanel( "Terminal path isn't existed!\nPlease set in 'Preference Dialog'.", true );
-				IupMessageError( null, "Terminal Path isn't Existed!" );
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Terminal Path isn't Existed!", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				return false;
 			}
 			return true;
@@ -107,7 +107,7 @@ private:
 		if( !isAppExists( fbcFullPath ) )
 		{
 			GLOBAL.messagePanel.printOutputPanel( "Compiler isn't existed......?\n\nCompiler Path = " ~ fbcFullPath ~ " ?", true );
-			IupMessageError( null, "Compiler isn't Existed!" );
+			tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Compiler isn't Existed!", "ERROR", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
 			return false;
 		}
 		

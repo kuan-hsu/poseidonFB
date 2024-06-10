@@ -4,7 +4,7 @@ import dialogs.baseDlg;
 
 class CCompilerHelpDialog : CBaseDialog
 {
-	private:
+private:
 	import iup.iup;	
 	import global;
 	import std.string, std.file;
@@ -42,7 +42,7 @@ class CCompilerHelpDialog : CBaseDialog
 		IupMap( _dlg );
 	}	
 
-	public:
+public:
 	this( int w, int h, string title, bool bResize = true, string parent = "POSEIDON_MAIN_DIALOG" )
 	{
 		super( w, h, title, bResize, parent );
@@ -61,12 +61,13 @@ class CCompilerHelpDialog : CBaseDialog
 	{
 		version(Windows)
 		{
-			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 			IupSetStrAttribute( _dlg, "FGCOLOR", toStringz( GLOBAL.editColor.dlgFore ) );
-			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );		
+			IupSetStrAttribute( _dlg, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupMap( _dlg );
+			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( text, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		}
 		IupShowXY( _dlg, x, y );
-		version(Windows) tools.setWinTheme( text, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		return null;
 	}	
 }

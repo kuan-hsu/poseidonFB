@@ -105,7 +105,7 @@ Ihandle* createMenu()
 	IupSetAttribute( _clearRecentFiles, "IMAGE", "icon_deleteall" );
 	IupSetCallback( _clearRecentFiles, "ACTION", cast(Icallback) &submenuRecentFilesClear_click_cb );
 	IupInsert( recentFilesSubMenu, null, _clearRecentFiles );
-	IupInsert( recentFilesSubMenu, null, IupSeparator() );
+	if( GLOBAL.recentFiles.length ) IupInsert( recentFilesSubMenu, null, IupSeparator() );
 	IupMap( _clearRecentFiles );
 
 	//Ihandle*[] submenuItem;
@@ -131,7 +131,7 @@ Ihandle* createMenu()
 	IupSetAttribute(_clearRecentPrjs, "IMAGE", "icon_deleteall");
 	IupSetCallback( _clearRecentPrjs, "ACTION", cast(Icallback) &submenuRecentPrjsClear_click_cb );
 	IupInsert( recentPrjsSubMenu, null, _clearRecentPrjs );
-	IupInsert( recentPrjsSubMenu, null, IupSeparator() );
+	if( GLOBAL.recentProjects.length ) IupInsert( recentPrjsSubMenu, null, IupSeparator() );
 	IupMap( _clearRecentPrjs );
 
 	//Ihandle*[] submenuItem;
@@ -733,11 +733,11 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.531)  2024.06.03\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.532)  2024.06.10\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
-			aboutHead = "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.093)  2024.05.23\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidond\n\n";
+			aboutHead = "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.094)  2024.06.10\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidond\n\n";
 		}
 		
 		version(Windows)
@@ -747,7 +747,7 @@ Ihandle* createMenu()
 		}
 		else
 		{
-			IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( aboutHead ~ "libreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n\nCHMVIEW\nBy VANYA\nhttps://sourceforge.net/projects/chm-view/files/" ~ ( GLOBAL.linuxHome.length ? "\nAppImage" : "" ) ) );
+			IupMessage( GLOBAL.languageItems["about"].toCString, toStringz( aboutHead ~ "libreoffice-style-sifr ICONs\nBy Rizal Muttaqin\nhttps://github.com/rizmut/libreoffice-style-sifr\n\nCHMVIEW\nBy VANYA\nhttps://sourceforge.net/projects/chm-view/files/" ~ ( GLOBAL.linuxHome.length ? "\n\nAppImage" : "" ) ) );
 		}
 		return IUP_DEFAULT;
 	});
@@ -1511,7 +1511,6 @@ extern(C)
 		{
 			// Open Dialog Window
 			scope gotoLineDlg = new CSingleTextDialog( -1, -1, GLOBAL.languageItems["sc_goto"].toDString() ~ "...", GLOBAL.languageItems["line"].toDString() ~ ":", null, null, false, "POSEIDON_MAIN_DIALOG", "icon_shift_l", false );
-			IupSetStrAttribute( gotoLineDlg.getIhandle, "OPACITY", toStringz( GLOBAL.editorSetting02.gotoDlg ) );
 			string lineNum = gotoLineDlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
 			
 			lineNum = strip( lineNum );
@@ -1706,13 +1705,7 @@ extern(C)
 		}
 		else
 		{
-			IupShow( GLOBAL.preferenceDlg.getIhandle );
-			/+
-			destroy( GLOBAL.preferenceDlg );
-			GC.free( cast(void*) GLOBAL.preferenceDlg );
-			GLOBAL.preferenceDlg = null;
-			GLOBAL.preferenceDlg = new CPreferenceDialog( -1, -1, GLOBAL.languageItems["caption_preference"].toDString(), false, "POSEIDON_MAIN_DIALOG" );
-			+/
+			GLOBAL.preferenceDlg.show();
 		}
 		
 

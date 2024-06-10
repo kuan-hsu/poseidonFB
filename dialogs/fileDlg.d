@@ -95,7 +95,7 @@ private:
 		IupDestroy( dlg );
 	}
 
-	public:
+public:
 	this( string title, string filefilter = "All Files|*.*", string DIALOGTYPE = "OPEN", string MULTIPLEFILES = "NO", string _fn = "" )
 	{
 		callIupFileDlg( title, filefilter, DIALOGTYPE, MULTIPLEFILES, _fn );

@@ -7,7 +7,7 @@ private import std.string, std.file, Path = std.path, std.conv;
 
 class CSearchExpander
 {
-	private:
+private:
 	Ihandle*			listFind, listReplace, btnFindPrev, btnFindNext, btnReplaceFind, btnReplace, btnReplaceAll, btnMarkAll;
 	Ihandle*			btnCase, btnScope, btnClose, btnWhole, btnDirection;
 	Ihandle*			expander;
@@ -169,25 +169,24 @@ class CSearchExpander
 		Ihandle* _backgroundbox = IupGetChild( expander, 0 );
 		if( _backgroundbox != null ) IupSetAttribute( _backgroundbox, "VISIBLE", "NO" ); // Hide Title Image
 		
-		//changeIcons();
+		changeIcons();
 	}
 	
 	void changeIcons()
 	{
 		string tail;
-		if( GLOBAL.editorSetting00.IconInvert == "ON" ) tail = "_invert";
+		if( GLOBAL.editorSetting00.IconInvert != "OFF" ) tail = "_invert";
 
-		IupSetStrAttribute( btnCase, "IMAGE", toStringz( "icon_casesensitive" ~ tail ) );
-		IupSetStrAttribute( btnScope, "IMAGE", toStringz( "icon_selectall" ~ tail ) );
-		IupSetStrAttribute( btnClose, "IMAGE", toStringz( "icon_close" ~ tail ) );
-		IupSetStrAttribute( btnWhole, "IMAGE", toStringz( "icon_notwholeword" ~ tail ) );
+		IupSetStrAttribute( btnCase, "IMAGE", toStringz( tail.length ? "icon_casesensitive" :  "icon_casesensitive" ~ tail ) );
+		IupSetStrAttribute( btnScope, "IMAGE", toStringz( tail.length ? "icon_selectall" : "icon_selectall" ~ tail ) );
+		IupSetStrAttribute( btnClose, "IMAGE", toStringz( tail.length ? "icon_close" : "icon_close" ~ tail ) );
+		IupSetStrAttribute( btnWhole, "IMAGE", toStringz( tail.length ? "icon_notwholeword" : "icon_notwholeword" ~ tail ) );
 		IupSetStrAttribute( btnWhole, "IMPRESS", toStringz( "icon_wholeword" ~ tail ) );
-		IupSetStrAttribute( btnDirection, "IMAGE", toStringz( "icon_uparrow" ~ tail ) );
+		IupSetStrAttribute( btnDirection, "IMAGE", toStringz( tail.length ? "icon_uparrow" : "icon_uparrow" ~ tail ) );
 		IupSetStrAttribute( btnDirection, "IMPRESS", toStringz( "icon_downarrow" ~ tail ) );
 	}	
 	
-	public:
-	
+public:
 	// SCFIND_WHOLEWORD = 2, SCFIND_MATCHCASE = 4
 	version(FBIDE)	int searchRule = 2;
 	version(DIDE)	int	searchRule = 6;
