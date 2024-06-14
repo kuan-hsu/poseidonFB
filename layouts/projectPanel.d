@@ -956,6 +956,8 @@ extern(C)
 				// Swith the doument tabs by select Tree Node, if the doument isn't exist, do nothing
 				if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "LEAF" )
 				{
+					version(Windows) if( GLOBAL.bCanUseDarkMode ) IupSetStrAttributeId( ih, "COLOR", id, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
+					
 					char*	_fullpath = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
 					
 					if( _fullpath != null )
@@ -1016,7 +1018,11 @@ extern(C)
 		}
 		else
 		{
-			//IupMessage("UnSelect", toStringz( Integer.toString( id ) ) );
+			version(Windows)
+			{
+				if( GLOBAL.bCanUseDarkMode )
+					if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "LEAF" ) IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.projectFore ) );
+			}
 		}
 
 		return IUP_DEFAULT;
@@ -1053,7 +1059,12 @@ extern(C)
 		{
 			if( status[i] == '+' )
 			{
-				if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" )	IupSetAttributeId( ih, "MARKED", i, "NO" );
+				if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "BRANCH" )
+					IupSetAttributeId( ih, "MARKED", i, "NO" );
+				else
+				{
+					version(Windows) if( GLOBAL.bCanUseDarkMode ) IupSetStrAttributeId( ih, "COLOR", i, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
+				}
 			}
 		}
 		
@@ -1068,8 +1079,12 @@ extern(C)
 		{
 			for( int i = 0; i < n; ++ i )
 			{
-				
 				status[ids[i]] = '-';
+				version(Windows)
+				{
+					if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "LEAF" )
+						if( GLOBAL.bCanUseDarkMode ) IupSetStrAttributeId( ih, "COLOR", i, toStringz( GLOBAL.editColor.projectFore ) );				
+				}
 			}
 			
 			for( int i = 0; i < status.length; ++ i )
@@ -1095,6 +1110,8 @@ extern(C)
 
 	private int CProjectTree_RightClick_cb( Ihandle *ih, int id )
 	{
+		version(Windows) ProjectAction.clearDarkModeNodesForeColor();
+	
 		if( fromStringz( IupGetAttributeId( ih, "MARKED", id ) ) == "NO" )
 		{
 			IupSetAttribute( ih, "MARK", "CLEARALL" );

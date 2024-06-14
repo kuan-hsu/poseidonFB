@@ -971,7 +971,9 @@ private:
 							string templateFullPath = templatePath ~ "/" ~templateName ~ ".ini";
 							if( std.file.exists( templateFullPath ) )
 							{
-								int result = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["suredelete"].toDString, "QUESTION", "YESNO", IUP_MOUSEPOS, IUP_MOUSEPOS );
+								int w, h;
+								tools.splitBySign( fSTRz( IupGetAttribute( _listHandle, "RASTERSIZE" ) ), "x", w, h );
+								int result = tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, GLOBAL.languageItems["suredelete"].toDString, "QUESTION", "YESNO", IupGetInt( _listHandle, "X" ), IupGetInt( _listHandle, "Y" ) + h );
 								if( result == 1 )
 								{
 									std.file.remove( templateFullPath );
@@ -1000,13 +1002,16 @@ private:
 		IupSetStrAttribute( colorTemplateSave, "TIP", GLOBAL.languageItems["save"].toCString );
 		IupSetCallback( colorTemplateSave, "ACTION", cast(Icallback) function( Ihandle* ih )
 		{
-			string templateName = strip( fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-colorTemplateList" ), "VALUE" ) ) );
+			Ihandle* _listHandle = IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-colorTemplateList" );
+			int w, h;
+			tools.splitBySign( fSTRz( IupGetAttribute( _listHandle, "RASTERSIZE" ) ), "x", w, h );			
+			string templateName = strip( fSTRz( IupGetAttribute( _listHandle, "VALUE" ) ) );
 			if( templateName.length )
 			{
 				try
 				{
 					IDECONFIG.saveColorTemplateINI( templateName );
-					tools.MessageDlg( GLOBAL.languageItems["colorfile"].toDString, GLOBAL.languageItems["save"].toDString() ~ " " ~ GLOBAL.languageItems["ok"].toDString(), "INFORMATION", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
+					tools.MessageDlg( GLOBAL.languageItems["colorfile"].toDString, GLOBAL.languageItems["save"].toDString() ~ " " ~ GLOBAL.languageItems["ok"].toDString(), "INFORMATION", "", IupGetInt( _listHandle, "X" ), IupGetInt( _listHandle, "Y" ) + h );
 				}
 				catch( Exception e )
 				{
@@ -1015,7 +1020,7 @@ private:
 			}
 			else
 			{
-				tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "Color Template Name Is Empty!", "WARNING", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
+				tools.MessageDlg( GLOBAL.languageItems["alarm"].toDString, "Color Template Name Is Empty!", "WARNING", "", IupGetInt( _listHandle, "X" ), IupGetInt( _listHandle, "Y" ) + h );
 			}
 			
 			return IUP_DEFAULT;
@@ -1884,6 +1889,8 @@ private:
 		{
 			Ihandle* keywordTabs = IupFlatTabs( vBoxKeyWord0, vBoxKeyWord1, vBoxKeyWord2, vBoxKeyWord3, vBoxKeyWord4, vBoxKeyWord5, null );
 			IupSetStrAttribute( keywordTabs, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
+			IupSetAttribute( keywordTabs, "HIGHCOLOR", "255 0 0" );
+			IupSetAttribute( keywordTabs, "TABSPADDING", "3x2" );
 		}
 		else
 			Ihandle* keywordTabs = IupTabs( vBoxKeyWord0, vBoxKeyWord1, vBoxKeyWord2, vBoxKeyWord3, vBoxKeyWord4, vBoxKeyWord5, null );
@@ -1903,7 +1910,7 @@ private:
 		{
 			Ihandle* preferenceTabs = IupFlatTabs( vBoxCompilerSettings, vBoxParserSettings, vBoxPage02, sb, vColor, shortCutList, keywordTabs, /*manuFrame,*/ null );
 			IupSetStrAttribute( preferenceTabs, "BGCOLOR", toStringz( GLOBAL.editColor.dlgBack ) );
-
+			IupSetAttribute( preferenceTabs, "HIGHCOLOR", "255 0 0" );
 			IupSetCallback( preferenceTabs, "TABCHANGEPOS_CB", cast(Icallback) function( Ihandle* ih )
 			{
 				IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-colorTemplateList" ), "SHOWDROPDOWN", "NO" );
@@ -1915,8 +1922,6 @@ private:
 		
 		IupSetAttribute( preferenceTabs, "NAME", "preference-tabs" );
 		
-		
-		
 		Ihandle* Preference_btnHiddenOK = IupButton( null, null );
 		IupSetAttribute( Preference_btnHiddenOK, "VISIBLE", "NO" );
 		IupSetHandle( "Preference_btnHiddenOK", Preference_btnHiddenOK );
@@ -1927,7 +1932,6 @@ private:
 		IupSetHandle( "Preference_btnHiddenCANCEL", Preference_btnHiddenCANCEL );
 		IupSetCallback( Preference_btnHiddenCANCEL, "ACTION", cast(Icallback) &CPreferenceDialog_btnCancel_cb );		
 
-		
 		Ihandle* vBox = IupVbox( preferenceTabs, IupHbox( Preference_btnHiddenOK, Preference_btnHiddenCANCEL, bottom, null ), null );
 		IupSetAttributes( vBox, "ALIGNMENT=ACENTER,MARGIN=2x2,GAP=5,EXPAND=YES" );
 
@@ -2171,7 +2175,7 @@ extern(C) // Callback for CPreferenceDialog
 		}
 
 		scope skDialog = new CShortCutDialog( -1, -1, item, fSTRz( text ) );
-		skDialog.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+		skDialog.show( IUP_MOUSEPOS, IUP_MOUSEPOS );
 
 		return IUP_DEFAULT;
 	}
@@ -2608,6 +2612,22 @@ extern(C) // Callback for CPreferenceDialog
 				if( std.string.isNumeric( fSTRz( IupGetAttribute( _valHandle, "VALUE" ) ) ) ) GLOBAL.preParseLevel = IupGetInt( _valHandle, "VALUE" );
 			}
 			
+			//
+			//
+			// Change Theme
+			version(Windows)
+			{
+				if( oldUseDarkMode != GLOBAL.editorSetting00.UseDarkMode ) // If darkmode setting has be changed, do it...
+				{
+					tools.setMenuTheme( GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+					tools.setCaptionTheme( GLOBAL.preferenceDlg.getIhandle, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+					tools.setCaptionTheme( GLOBAL.mainDlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+				}
+			}			
+			//
+			//
+			//		
+			
 			// Message
 			GLOBAL.messagePanel.setScintillaColor();
 
@@ -2690,13 +2710,6 @@ extern(C) // Callback for CPreferenceDialog
 				GLOBAL.preferenceDlg.changeColor();
 				GLOBAL.preferenceDlg.changeIcon();
 			}
-			
-			version(Windows)
-			{
-				tools.setMenuTheme( GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-				tools.setCaptionTheme( GLOBAL.preferenceDlg.getIhandle, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-				tools.setCaptionTheme( GLOBAL.mainDlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			}
 
 			// Save Setup to Xml
 			//IDECONFIG.save();
@@ -2712,8 +2725,7 @@ extern(C) // Callback for CPreferenceDialog
 					if( ih == IupGetHandle( "CPreferenceDialogbtnAPPLY" ) )
 					{
 						tools.setDarkMode4Dialog( GLOBAL.preferenceDlg.getIhandle, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-						IupHide( GLOBAL.preferenceDlg.getIhandle );
-						IupShow( GLOBAL.preferenceDlg.getIhandle );
+						IupSetFocus( GLOBAL.mainDlg );
 					}
 				}
 			}			

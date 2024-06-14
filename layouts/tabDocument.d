@@ -350,8 +350,8 @@ extern(C)
 			CScintilla cSci = ScintillaAction.getCScintilla( cast(Ihandle*) IupGetAttribute( ih, "VALUE_HANDLE" ) );
 			IupSetFocus( cSci.getIupScintilla );
 			StatusBarAction.update( cSci.getIupScintilla );
+			version(Windows) ProjectAction.clearDarkModeNodesForeColor();			
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
-			
 			if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
 			{
 				GLOBAL.statusBar.setPrjName( "                                            " );

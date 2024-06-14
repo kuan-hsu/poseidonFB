@@ -1204,6 +1204,7 @@ extern(C)
 				auto cSci = ScintillaAction.getCScintilla( ih );
 				if( cSci !is null )
 				{
+					version(Windows) ProjectAction.clearDarkModeNodesForeColor();
 					IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 					ScintillaAction.toTreeMarked( cSci.getFullPath, 2 );
 				}

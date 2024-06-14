@@ -324,9 +324,9 @@ public:
 					IupSetFocus( _child );
 					IupScintillaSendMessage( _child, 2380, 1, 0 ); // SCI_SETFOCUS 2380
 
-					// Marked the trees( FileList & ProjectTree )
+					// Marked the trees( ProjectTree )
+					version(Windows) ProjectAction.clearDarkModeNodesForeColor();
 					IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
-					
 					if( !( actionManager.ScintillaAction.toTreeMarked( cSci.getFullPath() ) & 2 ) )
 					{
 						GLOBAL.statusBar.setPrjName( "                                            " );
@@ -781,7 +781,7 @@ public:
 	}
 	
 	static bool openFile( string fullPath, int lineNumber = -1 )
-	{	import std.stdio;
+	{	//import std.stdio;
 		fullPath = tools.normalizeSlash( fullPath );
 		
 		// FullPath had already opened
@@ -791,7 +791,7 @@ public:
 			
 			Ihandle* _documentTabs = DocumentTabAction.getDocumentTabs( ih );
 			if( _documentTabs != null )	DocumentTabAction.setActiveDocumentTabs( _documentTabs ); else return false;
-
+			version(Windows) ProjectAction.clearDarkModeNodesForeColor();
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 			
 			DocumentTabAction.setFocus( ih );
@@ -858,6 +858,14 @@ public:
 
 			// Set documentTabs to visible
 			if( IupGetInt( GLOBAL.documentTabs, "COUNT" ) == 1 ) IupSetAttribute( GLOBAL.documentTabs, "VISIBLE", "YES" );
+			version(Windows)
+			{
+				if( GLOBAL.bCanUseDarkMode )
+				{
+					int id = IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" );
+					if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) ) == "LEAF" ) IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id, toStringz( GLOBAL.editColor.projectFore ) );
+				}
+			}			
 			IupSetAttribute( GLOBAL.projectTree.getTreeHandle, "MARK", "CLEARALL" ); // For projectTree MULTIPLE Selection
 			
 			// Set new tabitem to focus
@@ -953,6 +961,7 @@ public:
 						{
 							IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "MARKED", id, "YES" );
 							IupSetInt( GLOBAL.projectTree.getTreeHandle, "VALUE", id );
+							version(Windows) if( GLOBAL.bCanUseDarkMode ) IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
 							GLOBAL.statusBar.setPrjName( null, true );
 							result = result | 2;
 							break;
@@ -1710,10 +1719,10 @@ public:
 
 struct ProjectAction
 {
-	private:
+private:
 		import project;
 		
-	public:
+public:
 	static int getTargetDepthID( int targetDepth )
 	{
 		int 	id		= IupGetInt( GLOBAL.projectTree.getTreeHandle, "VALUE" ); // Get Focus TreeNode
@@ -1917,7 +1926,26 @@ struct ProjectAction
 		}
 		
 		return result;
-	}	
+	}
+	
+	version(Windows)
+	{
+		static void clearDarkModeNodesForeColor( int id = -1 )
+		{
+			if( GLOBAL.bCanUseDarkMode )
+			{
+				if( id == -1 )
+				{
+					foreach( int _i; ProjectAction.getSelectIDs() )
+						if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", _i ) ) == "LEAF" ) IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", _i, toStringz( GLOBAL.editColor.projectFore ) );
+				}
+				else
+				{
+					if( fromStringz( IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "KIND", id ) ) == "LEAF" ) IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id, toStringz( GLOBAL.editColor.projectFore ) );
+				}
+			}
+		}
+	}
 }
 
 

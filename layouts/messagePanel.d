@@ -58,6 +58,12 @@ public:
 		IupSetStrAttributeId( searchOutputPanel, "INDICATORFGCOLOR", 4, toStringz( GLOBAL.editColor.searchIndicator ) );
 		IupSetIntId( searchOutputPanel, "INDICATORALPHA", 4, to!(int)( GLOBAL.editColor.searchIndicatorAlpha ) );
 		
+		version(Windows)
+		{
+			tools.setWinTheme( outputPanel, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( searchOutputPanel, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+		}
+		
 		applyColor();
 		changeIcon();
 	}

@@ -59,6 +59,7 @@ version(Windows)
 	}
 	alias _IMAGE_DELAYLOAD_DESCRIPTOR* PIMAGE_DELAYLOAD_DESCRIPTOR;
 
+	HMODULE hUxtheme, hComctl;
 
 	// This file contains code from
 	// https://github.com/stevemk14ebr/PolyHook_2_0/blob/master/sources/IatHook.cpp
@@ -318,7 +319,7 @@ version(Windows)
 
 	void FixDarkScrollBar()
 	{
-		HMODULE hComctl = LoadLibraryExW("comctl32.dll", null, 0x00000800); // LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800
+		hComctl = LoadLibraryExW("comctl32.dll", null, 0x00000800); // LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800
 		if (hComctl)
 		{
 			auto addr = FindDelayLoadThunkInModule(hComctl, "uxtheme.dll", 49); // OpenNcThemeData
@@ -355,6 +356,8 @@ version(Windows)
 	public:
 	fnSetWindowTheme SetWindowTheme = null;
 	
+	void AllowDarkModeForWindow(HWND hWnd, bool bDarkMode){ if (g_darkModeSupported) _AllowDarkModeForWindow(hWnd, bDarkMode); }
+	
 	void RefreshCaptionColor(HWND hWnd, bool bDarkMode)
 	{
 		if (g_darkModeSupported)
@@ -386,7 +389,7 @@ version(Windows)
 			g_buildNumber = g_buildNumber & 0xffff;
 			if (major == 10 && minor == 0 && CheckBuildNumber(g_buildNumber))
 			{
-				HMODULE hUxtheme = LoadLibraryExW("uxtheme.dll", null, 0x00000800); // LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800
+				hUxtheme = LoadLibraryExW("uxtheme.dll", null, 0x00000800); // LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800
 				if (hUxtheme)
 				{
 					_OpenNcThemeData = cast(fnOpenNcThemeData)(GetProcAddress(hUxtheme, MAKEINTRESOURCEA(49)));
@@ -421,7 +424,7 @@ version(Windows)
 
 						g_darkModeEnabled = _ShouldAppsUseDarkMode() && !IsHighContrast();
 
-						//FixDarkScrollBar();
+						FixDarkScrollBar();
 						
 						return true;
 					}
@@ -429,5 +432,11 @@ version(Windows)
 			}
 		}
 		return false;
+	}
+	
+	void releaseDarkModeDLL()
+	{
+		if( hUxtheme ) FreeLibrary( hUxtheme );
+		if( hComctl ) FreeLibrary( hComctl );
 	}
 }

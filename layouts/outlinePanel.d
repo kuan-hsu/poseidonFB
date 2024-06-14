@@ -1209,14 +1209,6 @@ public:
 
 	void changeColor()
 	{
-		version(Windows)
-		{
-			tools.setWinTheme( outlineTreeNodeList, "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setDarkMode4Dialog( outlineToolBarBox, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			IupSetStrAttribute( outlineTreeNodeList, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
-			IupSetStrAttribute( outlineTreeNodeList, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
-			
-		}
 		IupSetStrAttribute( outlineToolBarBox, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );
 		IupSetStrAttribute( GLOBAL.projectViewTabs, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
 		IupSetStrAttribute( GLOBAL.projectViewTabs, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );	
@@ -1229,7 +1221,6 @@ public:
 			{
 				IupSetAttribute( ih, "FGCOLOR", toStringz( GLOBAL.editColor.outlineFore ) );
 				IupSetAttribute( ih, "BGCOLOR", toStringz( GLOBAL.editColor.outlineBack ) );					
-				version(Windows) tools.setWinTheme( ih, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 				if( GLOBAL.editColor.prjViewHLT.length ) IupSetStrAttribute( ih, "HLCOLOR", toStringz( GLOBAL.editColor.prjViewHLT ) );
 				try
 				{
@@ -1281,7 +1272,8 @@ public:
 					IupMessage( "changeColor() Error", toStringz( e.toString ) );
 				}
 			}
-		}			
+		}
+		version(Windows) tools.setDarkMode4Dialog( GLOBAL.outlineTree.getLayoutHandle, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 	}
 
 

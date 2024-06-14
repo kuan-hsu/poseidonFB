@@ -165,6 +165,18 @@ uint convertIupColor( string color )
 	return result;
 }
 
+string invertColor( string _IUPColor )
+{
+	string ret = "0 0 0";
+	
+	string[] _colorValues = Array.split( _IUPColor, " " );
+	if( _colorValues.length == 3 )
+	{
+		ret = Conv.to!(string)( 255 - Conv.to!(int)( _colorValues[0] ) ) ~ " " ~ Conv.to!(string)( 255 - Conv.to!(int)( _colorValues[1] ) ) ~ " " ~ Conv.to!(string)( 255 - Conv.to!(int)( _colorValues[2] ) );
+	}	
+	return ret;
+}
+
 
 version(FBIDE)
 {
@@ -1079,7 +1091,9 @@ version(Windows) bool setWinTheme( Ihandle* ih, string pszSubAppName = "CFD", bo
 	if( GLOBAL.bCanUseDarkMode )
 	{
 		if( bDarkMode ) pszSubAppName = "DarkMode_" ~ pszSubAppName;
-		SetWindowTheme( IupGetAttribute( ih, "WID" ), std.utf.toUTF16z( pszSubAppName ), null );
+		auto _hwnd = IupGetAttribute( ih, "WID" );
+		//AllowDarkModeForWindow( _hwnd, bDarkMode );
+		SetWindowTheme( _hwnd, std.utf.toUTF16z( pszSubAppName ), null );
 		return true;
 	}
 	

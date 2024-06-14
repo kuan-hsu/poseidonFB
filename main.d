@@ -197,13 +197,9 @@ void main( string[] args )
 	{
 		if( GLOBAL.bCanUseDarkMode )
 		{
-			tools.setWinTheme( GLOBAL.projectTree.getTreeHandle, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			if( GLOBAL.editorSetting00.UseDarkMode == "ON" )
-			{
-				GLOBAL.searchExpander.changeColor();
-				GLOBAL.outlineTree.changeColor();
-				GLOBAL.projectTree.changeColor();
-			}
+			GLOBAL.searchExpander.changeColor();
+			GLOBAL.outlineTree.changeColor();
+			GLOBAL.projectTree.changeColor();
 		}
 	}
 	
@@ -319,6 +315,7 @@ void main( string[] args )
 		if( _plugin !is null ) destroy( _plugin );
 	
 	version(Windows) if( ocxHH != null ) tools.DyLibFree( ocxHH );
+	version(Windows) releaseDarkModeDLL();
 	
 	IupClose();
 }
