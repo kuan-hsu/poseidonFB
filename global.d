@@ -222,7 +222,7 @@ public:
 	static fontUint[]			fonts;
 	
 	static bool					bKeyUp = true;
-	static int					KeyNumber;
+	static int					KeyNumber = -1;
 	static int					scintillaActionInsert;
 	static int					scintillaActionLength;
 	static string				scintillaActionText;

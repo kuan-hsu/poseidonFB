@@ -75,7 +75,7 @@ private:
 			{
 				if( GLOBAL.compilerSettings.useSFX == "ON" ) IupExecute( "aplay", "settings/sound/warning.wav" );
 				GLOBAL.messagePanel.printOutputPanel( "Terminal path isn't existed!\nPlease set in 'Preference Dialog'.", true );
-				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Terminal Path isn't Existed!", "", IUP_CENTERPARENT, IUP_CENTERPARENT );
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Terminal Path isn't Existed!", "ERROR", "YES", IUP_CENTERPARENT, IUP_CENTERPARENT );
 				return false;
 			}
 			return true;

@@ -940,8 +940,13 @@ private:
 		IupSetAttributes( colorTemplateList, "NAME=Color-colorTemplateList,ACTIVE=YES,EDITBOX=YES,EXPAND=HORIZONTAL,DROPDOWN=YES,VISIBLEITEMS=5" );
 		IupSetStrAttribute( colorTemplateList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( colorTemplateList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-
-		version(linux)IupSetStrAttributeId( colorTemplateList, "", 1, toStringz( " " ) );
+		version(linux)
+		{
+			for( int i = 0; i < 6; ++i )
+				IupSetStrAttributeId( colorTemplateList, "", i, "" ); // Add Dummy for linux
+			
+			IupSetStrAttributeId( colorTemplateList, "", 1, toStringz( " " ) );
+		}		
 		IupSetCallback( colorTemplateList, "DROPDOWN_CB",cast(Icallback) &colorTemplateList_DROPDOWN_CB );
 		IupSetCallback( colorTemplateList, "ACTION",cast(Icallback) &colorTemplateList_ACTION_CB );
 

@@ -70,6 +70,7 @@ extern(C)
 		DocumentTabAction.setActiveDocumentTabs( ih );
 		
 		GLOBAL.outlineTree.cleanListItems();
+		version(linux) for( int i = 0; i < 6; ++i ) IupSetStrAttributeId( IupGetDialogChild( GLOBAL.mainDlg, "list_Outline" ), "", i + 1, " " ); // Add Dummy for linux
 		
 		return actionManager.DocumentTabAction.tabChangePOS( ih, new_pos );
 	}
