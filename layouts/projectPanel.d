@@ -669,6 +669,8 @@ public:
 		
 		version(FBIDE)	string sFN = setupDir ~ "/FB.poseidon";
 		version(DIDE)	string sFN = setupDir ~ "/D.poseidon";
+		
+		version(Windows) ProjectAction.clearDarkModeNodesForeColor();
 
 		if( std.file.exists( sFN ) )
 		{

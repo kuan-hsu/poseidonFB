@@ -30,7 +30,7 @@ private:
 		
 		if( item < 8 )
 			item --;
-		else if( item < 23 )
+		else if( item < 22 )
 			item -= 2;
 		else if( item < 29 )
 			item -= 3;
@@ -84,9 +84,11 @@ private:
 			listOptions ~= ( to!(string)( i ) ~ "=\"F" ~ to!(string)( i - 26 ) ~ "\"," );
 		}
 
-		listOptions ~= ( "39=\"TAB\"," );
+		listOptions ~= ( "39=\"TAB\",40=\"UP\",41=\"DOWN\",42=\"LEFT\",43=\"RIGHT\"," );
+		listOptions ~= ( "44=\"PgU\",45=\"PgD\",46=\"HOME\",47=\"END\",48=\"DEL\",49=\"INS\"," );
+		listOptions ~= ( "50=\"PLUS\",51=\"MINUS\",52=\"MCL\",53=\"DIV\",54=\"\\\"," );
 
-		listOptions ~= "DROPDOWN=YES,VALUESTRING=" ~ strip( listText[25..30].dup );
+		listOptions ~= "VISIBLEITEMS=10,DROPDOWN=YES,VALUESTRING=" ~ strip( listText[25..30].dup );
 		IupSetAttributes( keyList, toStringz( listOptions ) );
 
 		Ihandle* HBox0 = IupHbox( toggleCtrl, toggleShift, toggleAlt, keyList, null );
@@ -103,15 +105,16 @@ public:
 	{
 		super( w, h, GLOBAL.languageItems["shortcut"].toDString(), bResize, parent );
 		IupSetAttribute( _dlg, "MINBOX", "NO" );
+		/*
 		version( Windows )
 		{
-			IupSetAttribute( _dlg, "FONT", "Consolas,9" );
+			IupSetAttribute( _dlg, "FONT", "Consolas,12" );
 		}
 		else
 		{
 			IupSetAttribute( _dlg, "FONT", "Monospace, 10" );
 		}		
-
+		*/
 		createLayout( item, listText );
 
 		IupSetCallback( btnAPPLY, "FLAT_ACTION", cast(Icallback) &CShortCutDialog_btnClear_cb );
@@ -137,7 +140,7 @@ public:
 		{
 			IupMap( _dlg );
 			tools.setCaptionTheme( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
-			tools.setDarkMode4Dialog( _dlg, GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			tools.setWinTheme( IupGetHandle( "keyList" ), "CFD", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
 		}
 		IupPopup( _dlg, x, y );
 
@@ -150,7 +153,6 @@ extern(C) // Callback for CSingleTextDialog
 {
 	private int CShortCutDialog_btnClear_cb( Ihandle* ih )
 	{
-	
 		Ihandle* label1_handle = IupGetHandle( "labelKeyValue" );
 		if( label1_handle != null ) IupSetStrAttribute( label1_handle, "TITLE", toStringz( GLOBAL.languageItems["shortcutkey"].toDString() ~ ":" ) );
 		
@@ -179,19 +181,19 @@ extern(C) // Callback for CSingleTextDialog
 			
 			case "dupdown":						pos = 6;	break;
 			case "dupup":						pos = 7;	break;
-			case "delline":						pos = 8;	break;
-			case "find":						pos = 9;	break;
-			case "findinfile":					pos = 10;	break;
-			case "findnext":					pos = 11;	break;
-			case "findprev":					pos = 12;	break;
-			case "gotoline":					pos = 13;	break;
-			case "undo":						pos = 14;	break;
-			case "redo":						pos = 15;	break;
-			case "comment":						pos = 16;	break;
-			case "uncomment":					pos = 17;	break;
-			case "backnav":						pos = 18;	break;
-			case "forwardnav":					pos = 19;	break;
-			
+			case "find":						pos = 8;	break;
+			case "findinfile":					pos = 9;	break;
+			case "findnext":					pos = 10;	break;
+			case "findprev":					pos = 11;	break;
+			case "gotoline":					pos = 12;	break;
+			case "undo":						pos = 13;	break;
+			case "redo":						pos = 14;	break;
+			case "comment":						pos = 15;	break;
+			case "uncomment":					pos = 16;	break;
+			case "backnav":						pos = 17;	break;
+			case "forwardnav":					pos = 18;	break;
+
+			case "outlinesearch":				pos = 19;	break;
 			case "showtype":					pos = 20;	break;
 			case "defintion":					pos = 21;	break;
 			case "procedure":					pos = 22;	break;
@@ -277,19 +279,19 @@ extern(C) // Callback for CSingleTextDialog
 			
 			case "dupdown":						pos = 6;	break;
 			case "dupup":						pos = 7;	break;
-			case "delline":						pos = 8;	break;
-			case "find":						pos = 9;	break;
-			case "findinfile":					pos = 10;	break;
-			case "findnext":					pos = 11;	break;
-			case "findprev":					pos = 12;	break;
-			case "gotoline":					pos = 13;	break;
-			case "undo":						pos = 14;	break;
-			case "redo":						pos = 15;	break;
-			case "comment":						pos = 16;	break;
-			case "uncomment":					pos = 17;	break;
-			case "backnav":						pos = 18;	break;
-			case "forwardnav":					pos = 19;	break;
-			
+			case "find":						pos = 8;	break;
+			case "findinfile":					pos = 9;	break;
+			case "findnext":					pos = 10;	break;
+			case "findprev":					pos = 11;	break;
+			case "gotoline":					pos = 12;	break;
+			case "undo":						pos = 13;	break;
+			case "redo":						pos = 14;	break;
+			case "comment":						pos = 15;	break;
+			case "uncomment":					pos = 16;	break;
+			case "backnav":						pos = 17;	break;
+			case "forwardnav":					pos = 18;	break;
+
+			case "outlinesearch":				pos = 19;	break;
 			case "showtype":					pos = 20;	break;
 			case "defintion":					pos = 21;	break;
 			case "procedure":					pos = 22;	break;
@@ -347,7 +349,7 @@ extern(C) // Callback for CSingleTextDialog
 			//char[] string = Stdout.layout.convert( " {,-5} + {,-5} + {,-5} + {,-5} {,-40}", splitWord[0], splitWord[1], splitWord[2], splitWord[3], GLOBAL.shortKeys[pos].title );
 			if( pos < 6 )
 				pos ++;
-			else if( pos < 20 )
+			else if( pos < 19 )
 				pos += 2;
 			else if( pos < 25 )
 				pos += 3;

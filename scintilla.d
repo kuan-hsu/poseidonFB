@@ -2279,21 +2279,6 @@ extern(C)
 							}
 						}
 						break;
-					case "delline":
-						if( sk.keyValue > 0 )
-						{
-							if( sk.keyValue == c )
-							{
-								auto iupSci = ScintillaAction.getActiveIupScintilla();
-								if( iupSci != null )
-								{
-									int line = ScintillaAction.getCurrentLine( iupSci ) - 1;
-									IupScintillaSendMessage( iupSci, 2338, line, 0 ); // SCI_LINEDELETE 2338
-								}
-								return IUP_IGNORE;
-							}
-						}
-						break;
 					case "find":				
 						if( sk.keyValue == c )
 						{
@@ -2343,6 +2328,29 @@ extern(C)
 							return IUP_IGNORE;
 						}
 						break;
+					case "outlinesearch":
+						if( sk.keyValue == c )
+						{
+							Ihandle* _expandHandle = IupGetDialogChild( GLOBAL.outlineTree.getLayoutHandle, "Outline_Expander" );
+							if( _expandHandle != null )
+							{
+								Ihandle* _listHandle = IupGetChild( _expandHandle, 1 );
+								if( _listHandle != null )
+								{
+									if( fromStringz( IupGetAttribute( _expandHandle, "STATE" ) ) == "CLOSE" )
+									{
+										IupSetAttribute( _expandHandle, "STATE", "OPEN" );
+										IupSetAttributes( _listHandle, "VISIBLE=YES,ACTIVE=YES" ); // Make outlineTreeNodeList to show
+									}
+									
+									if( IupGetInt( GLOBAL.menuOutlineWindow, "VALUE" ) == 0 ) menu.outlineMenuItem_cb( GLOBAL.menuOutlineWindow );
+									IupSetInt( GLOBAL.projectViewTabs, "VALUEPOS", 1 );
+									IupSetFocus( _listHandle );
+								}
+							}
+							return IUP_IGNORE;
+						}
+						break;						
 					case "defintion":
 						if( sk.keyValue == c )
 						{

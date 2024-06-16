@@ -58,7 +58,7 @@ public:
 		if( keyValue & 0x10000000 ) result ~= "S+";else result ~= "+";
 		if( keyValue & 0x40000000 ) result ~= "A+";else result ~= "+";
 
-		keyValue = keyValue & 0xFFFF;
+		keyValue = keyValue & 0xFFFFFF;
 
 		if( keyValue == 0x9 ) // TAB
 		{
@@ -72,6 +72,66 @@ public:
 		else if( keyValue >= 0xFFBE && keyValue <= 0xFFC9 ) // 'F1' ~ 'F12'
 		{
 			result ~= ( "F" ~ Conv.to!(string)( keyValue - 0xFFBD ) );
+		}
+		else if( keyValue == 65361 ) // 'LEFT'
+		{
+			result ~= "LEFT";
+		}
+		else if( keyValue == 65362 ) // 'UP'
+		{
+			result ~= "UP";
+		}
+		else if( keyValue == 65363 ) // 'RIGHT'
+		{
+			result ~= "RIGHT";
+		}
+		else if( keyValue == 65364 ) // 'DOWN'
+		{
+			result ~= "DOWN";
+		}
+		else if( keyValue == 65365 ) // 'PAGEUP'
+		{
+			result ~= "PgU";
+		}
+		else if( keyValue == 65366 ) // 'PAGEDOWN'
+		{
+			result ~= "PgD";
+		}
+		else if( keyValue == 65360 ) // 'HOME'
+		{
+			result ~= "HOME";
+		}
+		else if( keyValue == 65367 ) // 'END'
+		{
+			result ~= "END";
+		}
+		else if( keyValue == 65536 ) // 'DEL'
+		{
+			result ~= "DEL";
+		}
+		else if( keyValue == 65379 ) // 'INS'
+		{
+			result ~= "INS";
+		}
+		else if( keyValue == 43 ) // '+'
+		{
+			result ~= "PLUS";
+		}
+		else if( keyValue == 45 ) // '-'
+		{
+			result ~= "MINUS";
+		}
+		else if( keyValue == 42 ) // '*'
+		{
+			result ~= "MCL";
+		}
+		else if( keyValue == 47 ) // '/'
+		{
+			result ~= "DIV";
+		}
+		else if( keyValue == 92 ) // '\'
+		{
+			result ~= "\\";
 		}
 		
 		return result;
@@ -98,6 +158,51 @@ public:
 					case "TAB":
 						result += 9;
 						break;
+						
+					case "UP":
+						result += 65362; break;
+
+					case "DOWN":
+						result += 65364; break;
+
+					case "LEFT":
+						result += 65361; break;
+
+					case "RIGHT":
+						result += 65363; break;
+
+					case "PgU":
+						result += 65365; break;
+
+					case "PgD":
+						result += 65366; break;
+
+					case "HOME":
+						result += 65360; break;
+
+					case "END":
+						result += 65367; break;
+
+					case "PLUS":
+						result += 43; break;
+
+					case "MINUS":
+						result += 45; break;
+
+					case "MCL":
+						result += 42; break;
+
+					case "DIV":
+						result += 47; break;
+
+					case "DEL":
+						result += 65536; break;
+
+					case "INS":
+						result += 65379; break;
+
+					case "\\":
+						result += 92; break;
 
 					default:
 						if( splitWord[3][0] == 'F' )
@@ -296,19 +401,19 @@ public:
 
 			doc ~= setINILineData( "dupdown", convertShortKeyValue2String( GLOBAL.shortKeys[6].keyValue ) );
 			doc ~= setINILineData( "dupup", convertShortKeyValue2String( GLOBAL.shortKeys[7].keyValue ) );
-			doc ~= setINILineData( "delline", convertShortKeyValue2String( GLOBAL.shortKeys[8].keyValue ) );
-			doc ~= setINILineData( "find", convertShortKeyValue2String( GLOBAL.shortKeys[9].keyValue ) );
-			doc ~= setINILineData( "findinfile", convertShortKeyValue2String( GLOBAL.shortKeys[10].keyValue ) );
-			doc ~= setINILineData( "findnext", convertShortKeyValue2String( GLOBAL.shortKeys[11].keyValue ) );
-			doc ~= setINILineData( "findprev", convertShortKeyValue2String( GLOBAL.shortKeys[12].keyValue ) );
-			doc ~= setINILineData( "gotoline", convertShortKeyValue2String( GLOBAL.shortKeys[13].keyValue ) );
-			doc ~= setINILineData( "undo", convertShortKeyValue2String( GLOBAL.shortKeys[14].keyValue ) );
-			doc ~= setINILineData( "redo", convertShortKeyValue2String( GLOBAL.shortKeys[15].keyValue ) );
-			doc ~= setINILineData( "comment", convertShortKeyValue2String( GLOBAL.shortKeys[16].keyValue ) );
-			doc ~= setINILineData( "uncomment", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) );
-			doc ~= setINILineData( "backnav", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) );
-			doc ~= setINILineData( "forwardnav", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) );
+			doc ~= setINILineData( "find", convertShortKeyValue2String( GLOBAL.shortKeys[8].keyValue ) );
+			doc ~= setINILineData( "findinfile", convertShortKeyValue2String( GLOBAL.shortKeys[9].keyValue ) );
+			doc ~= setINILineData( "findnext", convertShortKeyValue2String( GLOBAL.shortKeys[10].keyValue ) );
+			doc ~= setINILineData( "findprev", convertShortKeyValue2String( GLOBAL.shortKeys[11].keyValue ) );
+			doc ~= setINILineData( "gotoline", convertShortKeyValue2String( GLOBAL.shortKeys[12].keyValue ) );
+			doc ~= setINILineData( "undo", convertShortKeyValue2String( GLOBAL.shortKeys[13].keyValue ) );
+			doc ~= setINILineData( "redo", convertShortKeyValue2String( GLOBAL.shortKeys[14].keyValue ) );
+			doc ~= setINILineData( "comment", convertShortKeyValue2String( GLOBAL.shortKeys[15].keyValue ) );
+			doc ~= setINILineData( "uncomment", convertShortKeyValue2String( GLOBAL.shortKeys[16].keyValue ) );
+			doc ~= setINILineData( "backnav", convertShortKeyValue2String( GLOBAL.shortKeys[17].keyValue ) );
+			doc ~= setINILineData( "forwardnav", convertShortKeyValue2String( GLOBAL.shortKeys[18].keyValue ) );
 
+			doc ~= setINILineData( "outlinesearch", convertShortKeyValue2String( GLOBAL.shortKeys[19].keyValue ) );
 			doc ~= setINILineData( "showtype", convertShortKeyValue2String( GLOBAL.shortKeys[20].keyValue ) );
 			doc ~= setINILineData( "defintion", convertShortKeyValue2String( GLOBAL.shortKeys[21].keyValue ) );
 			doc ~= setINILineData( "procedure", convertShortKeyValue2String( GLOBAL.shortKeys[22].keyValue ) );
@@ -704,19 +809,19 @@ public:
 
 							case "dupdown":					index = 6; title = GLOBAL.languageItems["sc_dupdown"].toDString();					break;
 							case "dupup":					index = 7; title = GLOBAL.languageItems["sc_dupup"].toDString();					break;
-							case "delline":					index = 8; title = GLOBAL.languageItems["sc_delline"].toDString();					break;
-							case "find":					index = 9; title = GLOBAL.languageItems["sc_findreplace"].toDString();				break;
-							case "findinfile":				index =10; title = GLOBAL.languageItems["sc_findreplacefiles"].toDString();			break;
-							case "findnext":				index =11; title = GLOBAL.languageItems["sc_findnext"].toDString();					break;
-							case "findprev":				index =12; title = GLOBAL.languageItems["sc_findprev"].toDString();					break;
-							case "gotoline":				index =13; title = GLOBAL.languageItems["sc_goto"].toDString();						break;
-							case "undo":					index =14; title = GLOBAL.languageItems["sc_undo"].toDString();						break;
-							case "redo":					index =15; title = GLOBAL.languageItems["sc_redo"].toDString();						break;
-							case "comment":					index =16; title = GLOBAL.languageItems["sc_comment"].toDString();					break;
-							case "uncomment":				index =17; title = GLOBAL.languageItems["sc_uncomment"].toDString();				break;
-							case "backnav":					index =18; title = GLOBAL.languageItems["sc_backnav"].toDString();					break;
-							case "forwardnav":				index =19; title = GLOBAL.languageItems["sc_forwardnav"].toDString();				break;
-							
+							case "find":					index = 8; title = GLOBAL.languageItems["sc_findreplace"].toDString();				break;
+							case "findinfile":				index = 9; title = GLOBAL.languageItems["sc_findreplacefiles"].toDString();			break;
+							case "findnext":				index =10; title = GLOBAL.languageItems["sc_findnext"].toDString();					break;
+							case "findprev":				index =11; title = GLOBAL.languageItems["sc_findprev"].toDString();					break;
+							case "gotoline":				index =12; title = GLOBAL.languageItems["sc_goto"].toDString();						break;
+							case "undo":					index =13; title = GLOBAL.languageItems["sc_undo"].toDString();						break;
+							case "redo":					index =14; title = GLOBAL.languageItems["sc_redo"].toDString();						break;
+							case "comment":					index =15; title = GLOBAL.languageItems["sc_comment"].toDString();					break;
+							case "uncomment":				index =16; title = GLOBAL.languageItems["sc_uncomment"].toDString();				break;
+							case "backnav":					index =17; title = GLOBAL.languageItems["sc_backnav"].toDString();					break;
+							case "forwardnav":				index =18; title = GLOBAL.languageItems["sc_forwardnav"].toDString();				break;
+
+							case "outlinesearch":			index =19; title = GLOBAL.languageItems["sc_outlinesearch"].toDString();			break;
 							case "showtype":				index =20; title = GLOBAL.languageItems["sc_showtype"].toDString();					break;
 							case "defintion":				index =21; title = GLOBAL.languageItems["sc_gotodef"].toDString();					break;
 							case "procedure":				index =22; title = GLOBAL.languageItems["sc_procedure"].toDString();				break;

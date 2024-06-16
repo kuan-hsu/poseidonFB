@@ -14,12 +14,6 @@ private:
 	import 				iup.iup_scintilla;
 	import				parser.scanner, parser.token, parser.parser, parser.autocompletion, std.conv;
 	import				core.thread;
-	
-	version(linux)
-	{
-		static bool 		bCheckTreenodeToList;
-		static int			nowSelectedListItem;
-	}
 
 	Ihandle*			layoutHandle, zBoxHandle, outlineTreeNodeList, outlineToolBarBox;
 	Ihandle*			outlineToolbarTitleImage, outlineButtonCollapse, outlineButtonPR, outlineButtonShowLinenum, outlineToggleAnyWord, outlineButtonFresh, outlineButtonHide;
@@ -1167,9 +1161,15 @@ private:
 			IupSetCallback( outlineTreeNodeList, "EDIT_CB",cast(Icallback) &COutline_List_EDIT_CB );
 		else
 		{
-			for( int i = 0; i < 6; ++i )
-				IupSetStrAttributeId( outlineTreeNodeList, "", i + 1, "" ); // Add Dummy for linux
-		}		
+			IupSetCallback( outlineTreeNodeList, "GETFOCUS_CB",cast(Icallback) function( Ihandle* ih )
+			{
+				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
+				for( int i = 0; i < 10; ++i )
+					IupSetStrAttributeId( ih, "", i + 1, "" ); // Add Dummy for linux, fixed the popup dialog size = 10 items
+				
+				return IUP_DEFAULT;
+			});	
+		}
 		
 		Ihandle* expander = IupExpander( outlineTreeNodeList );
 		IupSetAttributes( expander, "BARSIZE=0,STATE=CLOSE,EXPAND=HORIZONTAL,NAME=Outline_Expander" );
@@ -1187,7 +1187,6 @@ private:
 
 		changeIcons();
 	}
-	
 	
 public:
 	this()
@@ -1911,9 +1910,8 @@ extern(C)
 		// ListBox open
 		if( state == 1 )
 		{
-			version(linux) if( COutline.bCheckTreenodeToList ) return IUP_DEFAULT;
 			setTreeNodeToList( strip( fSTRz( IupGetAttribute( ih, "VALUE" ) ) ) );
-			IupSetFocus( ih );
+			version(Windows) IupSetFocus( ih );
 		}
 		else	// ListBox close
 		{
@@ -1922,9 +1920,9 @@ extern(C)
 			KeyDown = 13
 			Trigger Order: keydown -> DROPDOWN_CB -> keyup
 			*/
-			if( GLOBAL.KeyNumber == 13 ) 
+			version(Windows)
 			{
-				version(Windows)
+				if( GLOBAL.KeyNumber == 13 ) 
 				{
 					if( IupGetInt( ih, "COUNT" ) > 0 )
 					{
@@ -1942,32 +1940,48 @@ extern(C)
 										IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1], "YES" );
 										IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[GLOBAL.outlineTree.listItemIndex-1] );
 									}
-									//IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 									IupSetFocus( ih );
 								}
 							}
 						}
 					}
 				}
-			}
-			else if( GLOBAL.KeyNumber == 65307 ) // ESC
-			{
-				version(Windows)
+				else if( GLOBAL.KeyNumber == 65307 ) // ESC
 				{
 					GLOBAL.outlineTree.cleanListItems();
 					IupSetAttribute( ih, "VALUE", "" );
 				}
+				/*
+				else
+				{
+					IupMessage( "",toStringz( to!(string)( GLOBAL.KeyNumber ) ) );
+				}
+				*/
 			}
-			//else IupMessage( "",toStringz( to!(string)( GLOBAL.KeyNumber ) ) );
-
-			version(linux)
+			else
 			{
-				for( int i = IupGetInt( ih, "COUNT" ); i < 6; ++i )
-					IupSetStrAttribute( ih, "APPENDITEM", "" ); // Dummy
-					
-				COutline.bCheckTreenodeToList = false;
-				COutline.nowSelectedListItem = 0;
-			}			
+				/*
+				When click button
+				(1)Just trigger COutline_List_DROPDOWN_CB OPEN
+				Re-click button
+				(2)Trigger COutline_List_DROPDOWN_CB CLOSE
+				Use IupSetFocus to set focus
+				(3)Trigger GETFOCUS_CB
+				
+				COutline_List_DROPDOWN_CB OPEN
+				COutline_List_DROPDOWN_CB CLOSE
+				GETFOCUS_CB
+				
+				Select an item
+				(4)The COutline_List_ACTION before GETFOCUS_CB
+				
+				COutline_List_DROPDOWN_CB OPEN
+				COutline_List_DROPDOWN_CB CLOSE
+				COutline_List_ACTION
+				GETFOCUS_CB
+				*/
+				IupSetFocus( ih );
+			}
 		}
 		
 		return IUP_DEFAULT;
@@ -1975,8 +1989,6 @@ extern(C)
 
 	private int COutline_List_ACTION( Ihandle *ih, char *text, int item, int state )
 	{
-		version(linux) COutline.nowSelectedListItem = item;
-		
 		if( state == 1 )
 		{
 			GLOBAL.outlineTree.listItemIndex = item;
@@ -2009,7 +2021,6 @@ extern(C)
 									IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
 								}
 							}
-							//IupSetFocus( ScintillaAction.getActiveIupScintilla ); // Set Focus To Ducument
 							IupSetFocus( ih ); // Set Focus To List
 						}
 					}
@@ -2017,15 +2028,18 @@ extern(C)
 			}
 			else
 			{
-				if( IupGetInt( ih, "COUNT" ) > 0 && item > 0 )
+				version(Windows)
 				{
-					Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
-					if( tree != null )
+					if( IupGetInt( ih, "COUNT" ) > 0 && item > 0 )
 					{
-						if( GLOBAL.outlineTree.listItemTreeID.length > item - 1 )
+						Ihandle* tree = GLOBAL.outlineTree.getActiveTree();
+						if( tree != null )
 						{
-							IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[--item], "YES" );
-							IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+							if( GLOBAL.outlineTree.listItemTreeID.length > item - 1 )
+							{
+								IupSetAttributeId( tree, "MARKED", GLOBAL.outlineTree.listItemTreeID[--item], "YES" );
+								IupSetInt( tree, "VALUE", GLOBAL.outlineTree.listItemTreeID[item] );
+							}
 						}
 					}
 				}
@@ -2043,27 +2057,11 @@ extern(C)
 			{
 				if( c == 13 )
 				{
-					setTreeNodeToList( strip( fSTRz( IupGetAttribute( ih, "VALUE" ) ) ) );
 					IupSetAttribute( ih, "SHOWDROPDOWN", "YES" );
 				}
 				else if( GLOBAL.KeyNumber == 65307 ) // ESC
 				{
-					//GLOBAL.outlineTree.cleanListItems();
 					IupSetAttribute( ih, "VALUE", "" );
-				}
-				else if( GLOBAL.KeyNumber == ScintillaAction.iup_XkeyAlt( 65364 ) ) // DOWN = 65364 UP=65362
-				{
-					setTreeNodeToList( strip( fSTRz( IupGetAttribute( ih, "VALUE" ) ) ) );
-				}
-				else if( GLOBAL.KeyNumber == 65364 )
-				{
-					if( COutline.nowSelectedListItem > 0 )
-					{
-						if( COutline.nowSelectedListItem + 1 <= IupGetInt( ih, "COUNT" ) )
-						{
-							if( strip( fSTRz( IupGetAttributeId( ih, "", COutline.nowSelectedListItem + 1 ) ) ) == "" ) return IUP_IGNORE;
-						}
-					}
 				}
 			}
 			return IUP_DEFAULT;
@@ -2078,7 +2076,7 @@ extern(C)
 				if( GLOBAL.KeyNumber == 65307 ) // ESC
 				{
 					GLOBAL.outlineTree.cleanListItems();
-					IupSetAttribute( ih, "VALUE", "" );
+					//IupSetAttribute( ih, "VALUE", "" );
 				}
 			}
 			return IUP_DEFAULT;
@@ -2156,8 +2154,6 @@ extern(C)
 						GLOBAL.outlineTree.listItemIndex = 1;
 						version(Windows) IupSetStrAttribute( _listHandle, "VALUE", toStringz( GLOBAL.outlineTree.listItemASTs[0].name ) );
 					}
-					
-					version(linux) COutline.bCheckTreenodeToList = true;
 					return true;
 				}
 			}
