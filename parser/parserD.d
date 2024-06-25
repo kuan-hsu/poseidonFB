@@ -2953,13 +2953,17 @@ version(DIDE)
 				switch( token().tok )
 				{
 					case TOK.Tversion, TOK.Tdebug:
+					
+						string baseString;
+						if( prev().tok == TOK.Telse ) baseString = "-else-";
+					
 						parseToken();
 
 						if( token().tok == TOK.Topenparen )
 						{
 							_name = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
 							if( _name.length > 2 ) _name = _name[1..$-1];
-							activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, null, _ln );
+							activeASTnode = activeASTnode.addChild( _name, D_KIND, getProt(), null, baseString, _ln );
 
 							if( token().tok != TOK.Topencurly )
 							{
@@ -3466,7 +3470,19 @@ version(DIDE)
 
 											if( token().tok != TOK.Tversion && token().tok != TOK.Tdebug )
 											{
-												activeASTnode = activeASTnode.addChild( "-else-", D_KIND, getProt(), null, _name, _ln );
+												int		_i = activeASTnode.getChildrenCount;
+												string	_elseString;
+												do
+												{
+													if( --_i < 0 ) break;
+													if( activeASTnode[_i].kind & D_VERSION )
+													{
+														_elseString = "!" ~ activeASTnode[_i].name ~ ( _elseString.length ? " " ~ _elseString : "" );
+													}
+												}
+												while( activeASTnode[_i].base == "-else-" );									
+												// Save to type
+												activeASTnode = activeASTnode( "-else-", D_KIND, getProt(), _elseString, _name, _ln );
 												
 												if( token().tok != TOK.Topencurly )
 												{

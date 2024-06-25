@@ -299,6 +299,7 @@ extern(C)
 	// While Leave poseidon.......
 	int mainDialog_CLOSE_cb(Ihandle *ih)
 	{
+		if( fSTRz( IupGetAttribute( ih, "MINIMIZED" ) ) == "YES" ) version(Windows) ShowWindow( IupGetAttribute( ih, "HWND" ), SW_RESTORE );
 		if( GLOBAL.scintillaManager.length > 0 )
 		{
 			foreach( sc; GLOBAL.scintillaManager )

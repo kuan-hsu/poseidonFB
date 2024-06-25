@@ -1,7 +1,7 @@
 ﻿module tools;
 
 private import iup.iup;
-private import global, project, actionManager, darkmode.darkmode, dialogs.customMessageDlg;
+private import global, project, actionManager, darkmode.darkmode, dialogs.customMessageDlg, parser.ast;
 private import std.string, std.process, std.utf, Conv = std.conv, Array = std.array, std.file, Uni = std.uni, Path = std.path;
 private import core.stdc.stdlib, core.stdc.string, core.thread;
 
@@ -99,6 +99,35 @@ public:
 		return null;
 	}
 }
+
+/*
+int BinarySearchForNodeLinenum( CASTnode _node, int _ln, int low = -1, int upper = -1 )
+{
+	if( low == -1 ) low = 0;
+	if( upper == -1 ) upper = _node.getChildrenCount - 1;
+
+	int mid;
+	auto children = _node.getChildren;
+	while( low <= upper ) 
+	{ 
+		mid = ( low + upper ) / 2; 
+		if( children[mid].lineNumber < _ln ) 
+		{
+			low = mid + 1 ;
+		}
+		else if( children[mid].lineNumber > _ln )
+		{
+			upper = mid - 1;
+		}
+		else
+		{
+			return mid;
+		}
+	}
+	
+	return -1;
+}
+*/
 
 char* getCString( string Dstring )
 {
@@ -352,58 +381,61 @@ version(Windows)
 }
 
 
-version(Posix) string modifyLinuxDropFileName( string _fn )
+version(Posix)
 {
-	string result;
-	
-	for( int i = 0; i < _fn.length; ++ i )
+	string modifyLinuxDropFileName( string _fn )
 	{
-		if( _fn[i] != '%' )
-		{
-			result ~= _fn[i];
-		}
-		else
-		{
-			if( i + 2 < _fn.length )
-			{
-				char _a = _fn[i+1];
-				char _b = _fn[i+2];
-				char computeValue;
-				
-				if( _a >= '0' && _a <= '9' )
-				{
-					computeValue = cast(char) ( ( _a - 48 ) * 16 );
-				}
-				else if( _a >= 'A' && _a <= 'F' )
-				{
-					computeValue = cast(char) ( ( _a - 55 ) * 16 );
-				}
-				else
-				{
-					break;
-				}
-				
-				if( _b >= '0' && _b <= '9' )
-				{
-					computeValue += ( _b - 48 );
-				}
-				else if( _b >= 'A' && _b <= 'F' )
-				{
-					computeValue += ( _b - 55 );
-				}
-				else
-				{
-					break;
-				}
+		string result;
 		
-				result ~= cast(char)computeValue;
-				
-				i += 2;
+		for( int i = 0; i < _fn.length; ++ i )
+		{
+			if( _fn[i] != '%' )
+			{
+				result ~= _fn[i];
+			}
+			else
+			{
+				if( i + 2 < _fn.length )
+				{
+					char _a = _fn[i+1];
+					char _b = _fn[i+2];
+					char computeValue;
+					
+					if( _a >= '0' && _a <= '9' )
+					{
+						computeValue = cast(char) ( ( _a - 48 ) * 16 );
+					}
+					else if( _a >= 'A' && _a <= 'F' )
+					{
+						computeValue = cast(char) ( ( _a - 55 ) * 16 );
+					}
+					else
+					{
+						break;
+					}
+					
+					if( _b >= '0' && _b <= '9' )
+					{
+						computeValue += ( _b - 48 );
+					}
+					else if( _b >= 'A' && _b <= 'F' )
+					{
+						computeValue += ( _b - 55 );
+					}
+					else
+					{
+						break;
+					}
+			
+					result ~= cast(char)computeValue;
+					
+					i += 2;
+				}
 			}
 		}
+		
+		return result;
 	}
-	
-	return result;
 }
 
 

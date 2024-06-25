@@ -355,7 +355,7 @@ private:
 				
 				if( _node.kind & B_VERSION )
 				{
-					if( _node.type == "!" ) IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); else IupSetAttributeId( rootTree, "COLOR", lastAddNode, "0 180 0" );
+					if( _node.name == "-else-" ) IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); else IupSetAttributeId( rootTree, "COLOR", lastAddNode, "0 180 0" );
 				}
 			}
 			version(DIDE)
@@ -418,7 +418,6 @@ private:
 								case B_FUNCTION, B_PROPERTY, B_OPERATOR:
 									string _type;
 									string _paramString;
-									
 									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 									switch( showIndex )
 									{
@@ -503,7 +502,6 @@ private:
 								case D_FUNCTION, D_FUNCTIONLITERALS:
 									string _type = _node.type;
 									string _paramString;
-									
 									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
 									switch( showIndex )
 									{
@@ -1859,6 +1857,8 @@ public:
 		listItemTreeID.length = 0;
 		listItemIndex = 0;
 	}
+	
+	int getShowIndex(){ return showIndex; }
 }
 
 extern(C) 

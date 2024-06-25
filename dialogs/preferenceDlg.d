@@ -1742,8 +1742,11 @@ private:
 		// Short Cut
 		Ihandle* shortCutList = IupList( null );
 		IupSetAttributes( shortCutList, "SIZE=150x200,MULTIPLE=NO,MARGIN=2x10,VISIBLECOLUMNS=YES,EXPAND=YES,AUTOHIDE=YES,SHOWIMAGE=YES" );
+		/*
 		IupSetStrAttribute( shortCutList, "FONT", toStringz( GLOBAL.fonts[11].fontString ) );
 		IupSetAttribute( shortCutList, "FONTSIZE", "10" );
+		*/
+		version( Windows ) IupSetAttribute( shortCutList, "FONT", "Consolas,10" ); else IupSetAttribute( shortCutList, "FONT", "Monospace, 10" );
 		IupSetHandle( "shortCutList", shortCutList );
 		IupSetCallback( shortCutList, "DBLCLICK_CB", cast(Icallback) &CPreferenceDialog_shortCutList_DBLCLICK_CB );
 

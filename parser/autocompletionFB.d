@@ -236,7 +236,7 @@ version(FBIDE)
 					if( listContainer.length )
 					{
 						//Algorithm.sort( listContainer );
-						Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
+						//Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 						
 						string	_type, _list;
 						int		maxLeft, maxRight;
@@ -426,61 +426,142 @@ version(FBIDE)
 
 			return name;
 		}
-		/+
-		static CASTnode[] anonymousEnumMembers( CASTnode originalNode )
+
+		static CASTnode[] getBottomToTopMatchNodes( CASTnode node, string word, int line, int B_KIND, bool bCompleteMatch, bool bJustOneResult, bool bSkipExtend = false, uint added = 0  )
 		{
-			if( originalNode is null ) return null;
+			if( node is null ) return null;
+
+			word = Uni.toLower( word );
 			
-			CASTnode[] results;
-			
-			if( originalNode.kind & B_ENUM )
+			CASTnode[] results, childrenNodes = node.getChildren;
+
+			if( node.kind & ( B_TYPE | B_CLASS ) )
+				childrenNodes ~= getBaseNodeMembers( node );
+			else if( node.kind & B_VERSION )
 			{
-				foreach( CASTnode _node; originalNode.getChildren() )
-				{
-					results ~= _node;
-				}
+				if( !ParserAction.checkConditionalCompileMatch( node ) ) return null;
 			}
 
-			return results;
-		}
-		
-		static CASTnode[] getAnonymousEnumMemberFromWord( CASTnode originalNode, string word )
-		{
-			if( originalNode is null ) return null;
-			
-			CASTnode[] results;
-			
-			if( originalNode.kind & B_ENUM )
+			for( ptrdiff_t i = 0; i < childrenNodes.length; ++ i )
 			{
-				if( !originalNode.name.length )
+				if( !( childrenNodes[i].kind & B_KIND ) ) continue;
+
+				if( line >= childrenNodes[i].lineNumber )
 				{
-					foreach( CASTnode _node; anonymousEnumMembers( originalNode ) )
+					if( ( line == childrenNodes[i].lineNumber ) && ( childrenNodes[i].kind & B_VERSION ) ) continue;
+					
+					if( childrenNodes[i].kind & B_BLOCK )
 					{
-						if( indexOf( Uni.toLower( _node.name ), word ) == 0 ) results ~= _node;
+						if( childrenNodes[i].kind & B_ENUM )
+						{
+							if( line > childrenNodes[i].endLineNum )//&& line > childrenNodes[i].lineNumber )
+							{
+								foreach( _son; childrenNodes[i].getChildren )
+								{
+									string _name = Uni.toLower( _son.name );//ParserAction.removeArrayAndPointer( _son.name ) );
+									if( bCompleteMatch )
+									{
+										if( word == _name )
+											if( bJustOneResult ) return [ _son ]; else results ~= _son;
+									}
+									else
+									{
+										if( indexOf( _name, word ) == 0 )
+											if( bJustOneResult ) return [ _son ]; else results ~= _son;
+									}
+								}
+							}
+						}
+						else if( childrenNodes[i].kind & B_VERSION )
+						{
+							if( ParserAction.checkConditionalCompileMatch( childrenNodes[i] ) )
+							{
+								foreach( grandson; getMembers( childrenNodes[i], bSkipExtend ) )
+								{
+									if( grandson.name.length )
+									{
+										string _name = Uni.toLower( grandson.name );//ParserAction.removeArrayAndPointer( grandson.name ) );
+										if( bCompleteMatch )
+										{
+											if( word == _name ) 
+												if( bJustOneResult ) return [ grandson ]; else results ~= grandson;
+										}
+										else
+										{
+											if( indexOf( _name, word ) == 0 )
+												if( bJustOneResult ) return [ grandson ]; else results ~= grandson;
+										}
+									}
+								}
+								
+								// Since symbol is matched, move to tail of the Blocks
+								do
+								{
+									if( i + 1 >= childrenNodes.length ) break;
+									if( childrenNodes[i+1].kind & B_VERSION )
+									{
+										if( childrenNodes[i+1].base == "-else-" ) break; else i = i + 1;
+									}
+									else
+										break;
+								}
+								while( childrenNodes[i].kind & B_VERSION );
+							}
+						}
+						else
+						{
+							if( childrenNodes[i].name.length )
+							{
+								string _name = Uni.toLower( childrenNodes[i].name );//ParserAction.removeArrayAndPointer( childrenNodes[i].name ) );
+								if( bCompleteMatch )
+								{
+									if( word == _name )
+										if( bJustOneResult ) return [ childrenNodes[i] ]; else results ~= childrenNodes[i];
+								}
+								else
+								{
+									if( indexOf( _name, word ) == 0 )
+										if( bJustOneResult ) return [ childrenNodes[i] ]; else results ~= childrenNodes[i];
+								}
+							}
+						}
+					}
+					else
+					{
+						if( childrenNodes[i].name.length )
+						{
+							string _name = Uni.toLower( childrenNodes[i].name );//ParserAction.removeArrayAndPointer( childrenNodes[i].name ) );
+							if( bCompleteMatch )
+							{
+								if( word == _name )
+									if( bJustOneResult ) return [ childrenNodes[i] ]; else results ~= childrenNodes[i];
+							}
+							else
+							{
+								if( indexOf( _name, word ) == 0 )
+									if( bJustOneResult ) return [ childrenNodes[i] ]; else results ~= childrenNodes[i];
+							}
+						}
 					}
 				}
+				else
+					break;
 			}
 
+			if( node.getFather !is null )
+			{	
+				// When 1st call, if in B_VERSION Blocks, move to head of the Blocks
+				if( added == 0 && ( node.kind & B_VERSION ) )
+				{
+					if( ParserAction.moveToConditionalCompileBlockHead( node ) > -1 ) results ~= getBottomToTopMatchNodes( node.getFather, word, node.lineNumber, B_KIND, bCompleteMatch, bJustOneResult, bSkipExtend, ++added );
+				}
+				else
+					results ~= getBottomToTopMatchNodes( node.getFather, word, node.lineNumber, B_KIND, bCompleteMatch, bJustOneResult, bSkipExtend, ++added );
+			}
+			
 			return results;
 		}
-
-		static CASTnode getAnonymousEnumMemberFromWholeWord( CASTnode originalNode, char[] word )
-		{
-			if( originalNode.kind & B_ENUM )
-			{
-				if( !originalNode.name.length )
-				{			
-					foreach( CASTnode _node; anonymousEnumMembers( originalNode ) )
-					{
-						if( lowerCase( _node.name )== lowerCase( word ) ) return _node;
-					}
-				}
-			}
-
-			return null;
-		}
-		+/
-
+	
 		static CASTnode getBaseNode( CASTnode originalNode )
 		{
 			if( originalNode is null ) return null;
@@ -585,82 +666,13 @@ version(FBIDE)
 
 		static CASTnode[] getMatchASTfromWholeWord( CASTnode node, string word, int line, int B_KIND )
 		{
-			if( node is null ) return null;
-			
-			CASTnode[] results;
-			
-			foreach( child; getMembers( node ) )
-			{
-				if( child.kind & B_KIND )
-				{
-					if( Uni.toLower( ParserAction.removeArrayAndPointer( child.name ) ) == Uni.toLower( word ) )
-					{
-						if( line < 0 )
-						{
-							results ~= child;
-						}
-						else
-						{
-							if( line >= child.lineNumber ) results ~= child;
-						}
-					}
-					/*
-					else
-					{
-						if( line >= child.lineNumber )
-						{
-							CASTnode enumResult = getAnonymousEnumMemberFromWholeWord( child, word );
-							if( enumResult !is null ) results ~= enumResult;
-						}
-					}
-					*/
-				}
-			}
-
-			if( node.getFather() !is null )
-			{
-				results ~= getMatchASTfromWholeWord( node.getFather, word, line, B_KIND );
-			}
-
-			return results;
+			return getBottomToTopMatchNodes( node, word, line, B_ALL, true, false );
 		}	
 
 		static CASTnode[] getMatchASTfromWord( CASTnode node, string word, int line )
 		{
-			if( node is null ) return null;
-			
-			CASTnode[] results;
-			
-			word = Uni.toLower( word );
-			
-			foreach( child; getMembers( node ) )
-			{
-				if( child.kind & B_ENUM )
-				{
-					foreach( _son; child.getChildren )
-					{
-						if( indexOf( Uni.toLower( _son.name ), word ) == 0 )
-							if( line >= child.lineNumber ) results ~= _son;
-					}				
-				}
-			
-				if( child.name.length )
-				{
-					if( indexOf( Uni.toLower( child.name ), word ) == 0 )
-					{
-						if( line >= child.lineNumber ) results ~= child;
-					}
-				}
-			}
-
-			if( node.getFather() !is null )
-			{
-				results ~= getMatchASTfromWord( node.getFather, word, line );
-			}
-
-			return results;
+			return getBottomToTopMatchNodes( node, word, line, B_ALL, false, false );
 		}
-
 
 		static CASTnode[] check( string name, string originalFullPath, int _LEVEL )
 		{
@@ -1038,58 +1050,42 @@ version(FBIDE)
 		}
 		
 
-		static CASTnode searchMatchNode( CASTnode originalNode, string word, int B_KIND = B_ALL, bool bSkipExtend = true )
+		static CASTnode searchMatchNode( CASTnode originalNode, string word, int ln, int B_KIND = B_ALL, bool bSkipExtend = true )
 		{
 			if( originalNode is null ) return null;
 			
-			CASTnode resultNode = searchMatchMemberNode( originalNode, word, B_KIND, bSkipExtend );
-
-			if( resultNode is null )
-			{
-				if( originalNode.getFather() !is null )
-				{
-					resultNode = searchMatchNode( originalNode.getFather(), word, B_KIND, bSkipExtend );
-				}
-				else
-				{
-					//auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
-					string rootFilePath = originalNode.name;
-					//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );					
-					if( fullPathByOS(rootFilePath) in GLOBAL.parserManager ) 
-					{
-						auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(rootFilePath)];
-						CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _ast, rootFilePath, word, B_KIND );
-						if( resultIncludeNodes.length )	resultNode = resultIncludeNodes[0];
-					}
-				}
-			}
-
-			return resultNode;
-		}
-		
-		
-		static CASTnode[] searchMatchNodes( CASTnode originalNode, string word, int B_KIND = B_ALL, bool bSkipExtend = false )
-		{
-			if( originalNode is null ) return null;
-			
-			CASTnode[] resultNodes = searchMatchMemberNodes( originalNode, word, B_KIND, true, bSkipExtend );
-
-			if( originalNode.getFather() !is null )
-			{
-				resultNodes ~= searchMatchNodes( originalNode.getFather(), word, B_KIND, bSkipExtend );
-			}
+			CASTnode[] resultNodes = getBottomToTopMatchNodes( originalNode, word, ln, B_KIND, true, true, bSkipExtend );
+			if( resultNodes.length )
+				return resultNodes[0];
 			else
 			{
-				//auto cSci = actionManager.ScintillaAction.getActiveCScintilla();
+				originalNode = ParserAction.getRoot( originalNode );
 				string rootFilePath = originalNode.name;
-
-				//CASTnode[] resultIncludeNodes = getMatchIncludesFromWord( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], cSci.getFullPath, word );
 				if( fullPathByOS(rootFilePath) in GLOBAL.parserManager ) 
 				{
 					auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(rootFilePath)];
-					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _ast, rootFilePath, word );
-					if( resultIncludeNodes.length )	resultNodes ~= resultIncludeNodes;
+					CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _ast, rootFilePath, word, B_KIND );
+					if( resultIncludeNodes.length )	return resultIncludeNodes[0];
 				}
+			}
+			
+			return null;
+		}
+		
+		
+		static CASTnode[] searchMatchNodes( CASTnode originalNode, string word, int ln, int B_KIND = B_ALL, bool bSkipExtend = false )
+		{
+			if( originalNode is null ) return null;
+			
+			CASTnode[] resultNodes = getBottomToTopMatchNodes( originalNode, word, ln, B_KIND, true, false, bSkipExtend );
+			originalNode = ParserAction.getRoot( originalNode );
+			
+			string rootFilePath = originalNode.name;
+			if( fullPathByOS(rootFilePath) in GLOBAL.parserManager ) 
+			{
+				auto _ast = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(rootFilePath)];
+				CASTnode[] resultIncludeNodes = getMatchIncludesFromWholeWord( _ast, rootFilePath, word );
+				if( resultIncludeNodes.length )	resultNodes ~= resultIncludeNodes;
 			}
 			
 			return resultNodes;
@@ -1116,73 +1112,21 @@ version(FBIDE)
 					}
 					else
 					{
-						string symbol = Uni.toUpper( childrenNodes[i].name );
-						string noSignSymbolName = childrenNodes[i].type.length ? symbol[1..$] : symbol;
-						if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
+						if( ParserAction.checkConditionalCompileMatch( childrenNodes[i] ) )
 						{
-							version(Windows)
+							result ~= getMembers( childrenNodes[i], bSkipExtend );
+							// Since symbol is matched, move to tail of the Blocks
+							do
 							{
-								if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
+								if( i + 1 >= childrenNodes.length ) break;
+								if( childrenNodes[i+1].kind & B_VERSION )
 								{
-									result ~= getMembers( childrenNodes[i], bSkipExtend );
-									continue;
-								}
-							}
-							
-							version(linux)
-							{
-								if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
-								{
-									result ~= getMembers( childrenNodes[i], bSkipExtend );
-									continue;
-								}
-							}
-							
-							version(FreeBSD)
-							{
-								if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
-								{
-									result ~= getMembers( childrenNodes[i], bSkipExtend );
-									continue;
-								}
-							}
-							
-							version(OpenBSD)
-							{
-								if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
-								{
-									result ~= getMembers( childrenNodes[i], bSkipExtend );
-									continue;
-								}
-							}
-							/*
-							version(Posix)
-							{
-								if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
-								{
-									result ~= getMembers( childrenNodes[i], bSkipExtend );
-									continue;
-								}
-							}
-							*/
-						}
-						else
-						{
-							if( !childrenNodes[i].type.length )
-							{
-								if( symbol in AutoComplete.VersionCondition ) result ~= getMembers( childrenNodes[i], bSkipExtend );
-							}
-							else
-							{
-								if( AutoComplete.VersionCondition.length )
-								{
-									if( !( symbol[1..$] in AutoComplete.VersionCondition ) ) result ~= getMembers( childrenNodes[i], bSkipExtend );
+									if( childrenNodes[i+1].base == "-else-" ) break; else i = i + 1;
 								}
 								else
-								{
-									result ~= getMembers( childrenNodes[i], bSkipExtend );
-								}
+									break;
 							}
+							while( childrenNodes[i].kind & B_VERSION );							
 						}
 					}
 				}
@@ -1199,24 +1143,6 @@ version(FBIDE)
 			return result;
 		}
 		
-		
-		static int skipPreprocessorCondition( CASTnode[] nodeGroup, int oriIndex )
-		{
-			int ret = oriIndex;
-			
-			if( oriIndex + 1 < nodeGroup.length )
-			{
-				while( nodeGroup[++oriIndex].kind == ( B_VERSION | B_PARAM ) )
-				{
-					if( nodeGroup[oriIndex].base != "#if" ) ret = oriIndex; else break;
-					if( oriIndex + 1 >= nodeGroup.length ) break;
-				}
-			}
-			
-			return ret;
-		}
-		
-
 		static CASTnode getType( CASTnode originalNode, int lineNum )
 		{
 			if( originalNode is null ) return null;
@@ -1530,8 +1456,7 @@ version(FBIDE)
 				}
 			}
 		}
-		
-		
+
 		static string[] getDivideWord( string word )
 		{
 			string[]	splitWord;
@@ -1745,7 +1670,7 @@ version(FBIDE)
 				if( i == 0 )
 				{
 					//matchNodes = _searchMatchNodes( _AST_Head, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION );
-					matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], B_NAMESPACE | B_CLASS | B_TYPE | B_UNION, true );
+					matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], -1, B_NAMESPACE | B_CLASS | B_TYPE | B_UNION, true );
 					if( !matchNodes.length ) return null; 
 					if( _splitWord.length == 1 ) break;
 				}
@@ -1882,7 +1807,7 @@ version(FBIDE)
 								{
 									// "_searchMatchNode" also search includes
 									//CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
-									CASTnode classNode = searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS, true );
+									CASTnode classNode = searchMatchNode( AST_Head, memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode, splitWord[i], B_ALL );
 								}
 
@@ -1921,7 +1846,7 @@ version(FBIDE)
 								if( memberFunctionMotherName.length )
 								{
 									//CASTnode classNode = _searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS );
-									CASTnode classNode = searchMatchNode( AST_Head, memberFunctionMotherName, B_TYPE | B_CLASS, true );
+									CASTnode classNode = searchMatchNode( AST_Head, memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode,  splitWord[i] , B_ALL, false );
 								}
 								
@@ -1948,7 +1873,7 @@ version(FBIDE)
 							
 							
 							
-							CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], B_FIND );
+							CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], lineNum, B_FIND );
 							if( !matchNodes.length )
 								AST_Head = null;
 							else if( matchNodes.length == 1 )
@@ -1992,10 +1917,10 @@ version(FBIDE)
 									if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 									{
 										//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-										CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
+										CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 										if( memberFunctionMotherNode !is null )
 										{
-											if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+											if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], lineNum, B_FIND );
 										}
 									}
 								}					
@@ -2040,7 +1965,7 @@ version(FBIDE)
 					}
 					
 					//AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
-					CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], B_FIND );
+					CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], lineNum, B_FIND );
 					if( !matchNodes.length )
 						AST_Head = null;
 					else if( matchNodes.length == 1 )
@@ -2073,10 +1998,10 @@ version(FBIDE)
 						{
 							if( fullPathByOS(fullPath) in GLOBAL.parserManager )
 							{
-								CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
+								CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 								if( memberFunctionMotherNode !is null )
 								{
-									if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], B_FIND );
+									if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], lineNum, B_FIND );
 								}
 							}
 						}					
@@ -2587,7 +2512,7 @@ version(FBIDE)
 				
 				text = words[$-1];
 				//Algorithm.sort( listContainer );
-				Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
+				//Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 				
 				string list;
 				for( int i = 0; i < listContainer.length; ++ i )
@@ -3401,7 +3326,7 @@ version(FBIDE)
 						if( listContainer.length )
 						{
 							//Algorithm.sort( listContainer );
-							Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
+							//Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 
 							string	_type, _list;
 							int		maxLeft, maxRight;
@@ -3853,14 +3778,13 @@ version(FBIDE)
 					{
 						if( i == 0 )
 						{
-							CASTnode[] matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], B_FIND | B_SUB | B_ENUMMEMBER );
+							CASTnode[] matchNodes = searchMatchNodes( _AST_Head, _splitWord[i], lineNum, B_FIND | B_SUB | B_ENUMMEMBER );
 							if( !matchNodes.length )
 							{
 								// For Type Objects
 								if( memberFunctionMotherName.length )
 								{
-									//CASTnode memberFunctionMotherNode = _searchMatchNode( GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS );
-									CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, B_TYPE | B_CLASS, true );
+									CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(cSci.getFullPath)], memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 									if( memberFunctionMotherNode !is null )
 									{
 										if( Uni.toLower( _splitWord[i] ) == "this" )
@@ -3869,7 +3793,7 @@ version(FBIDE)
 										}
 										else
 										{
-											auto matchNode = searchMatchNode( memberFunctionMotherNode, _splitWord[i], B_FIND | B_CTOR | B_SUB );
+											auto matchNode = searchMatchNode( memberFunctionMotherNode, _splitWord[i], lineNum, B_FIND | B_CTOR | B_SUB );
 											if( matchNode !is null ) matchNodes ~= matchNode;
 										}
 									}

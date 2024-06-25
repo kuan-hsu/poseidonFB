@@ -2060,7 +2060,121 @@ public:
 										while( AST_Head.kind & ( B_WITH | B_SCOPE ) );
 									}
 									
-									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+									string		_tip;
+									ptrdiff_t	i;
+									
+									string _getConditionalCompilation( ref CASTnode _node )
+									{
+										string _ret;
+										if( _node.kind & B_VERSION )
+										{
+											do
+											{
+												if( _node.getFather !is null )
+												{
+													string _elseString, _elseNotString;
+													if( _node.name == "-else-" )
+													{
+														foreach( string symName; Array.split( _node.type, " " ) )
+														{
+															if( symName.length )
+															{
+																if( symName[0] == '!' ) _elseNotString = symName ~ ( _elseNotString.length ? " " ~ _elseNotString : "" ); else _elseString = symName ~ ( _elseString.length ? " " ~ _elseString : "" );
+															}
+														}
+													}
+													
+													// classify the with ! and without !
+													if( _elseString.length )
+													{
+														if( _elseNotString.length )
+															_ret = "defined(" ~ _elseString ~ " " ~ _elseNotString ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+														else
+															_ret = "defined(" ~ _elseString ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+													}
+													else
+													{
+														if( _elseNotString.length ) _ret = "defined(" ~ _elseNotString ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+													}
+													if( !_elseString.length && !_elseNotString.length )	_ret = "defined(" ~ _node.name ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+
+													_node = _node.getFather;
+												}
+												else break;
+											}
+											while( _node.kind & B_VERSION );
+										}
+										return _ret;
+									}
+									
+									_tip = _getConditionalCompilation( AST_Head );
+									
+									string[] _tips = Array.split( _tip, "\n" );
+									if( _tips.length > 1 )
+									{
+										for( i = _tips.length - 1; i >= 0; --i )
+										{
+											string _tab;
+											for( ptrdiff_t j = 0; j < i; ++j )
+												_tab ~= "\t";
+												
+											_tips[i] = _tab ~ _tips[i];
+										}
+										
+										_tip = "";
+										for( i = 0; i < _tips.length; ++i )
+											_tip = _tip ~ _tips[i] ~ "\n";
+											
+										_tip = strip( _tip );
+									}									
+									
+									string _type, _paramString, _name, _blockCondition;
+									ParserAction.getSplitDataFromNodeTypeString( AST_Head.type, _type, _paramString );
+									if( AST_Head.kind & B_FUNCTION ) _type = _type.length ? " as " ~ _type : ""; else _type = "";
+									_name = AST_Head.name;
+
+									while( AST_Head.kind & B_NAMESPACE )
+									{
+										if( AST_Head.getFather !is null )
+										{
+											if( AST_Head.getFather.kind & B_NAMESPACE )
+											{
+												AST_Head = AST_Head.getFather;
+												_name = AST_Head.name ~ "." ~ _name;
+											}
+											else
+												break;
+										}
+										else
+											break;
+									}
+									
+									if( AST_Head.getFather !is null )
+									{
+										auto _node = AST_Head.getFather;
+										if( _node.kind & B_VERSION )
+										{
+											auto nowAST = AST_Head;
+											_blockCondition = _getConditionalCompilation( _node );
+											_blockCondition = Array.replace( _blockCondition, "\n", " " );
+											AST_Head = nowAST;
+										}
+									}
+									else
+									{
+										_name = Path.baseName( AST_Head.name );
+									}
+									
+									switch( GLOBAL.outlineTree.getShowIndex )
+									{
+										case 0:									break;
+										case 1:		_type = "";					break;
+										case 2:		_paramString = ""; 			break;	
+										default:	_type = _paramString = "";	break;
+									}
+										
+									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( ( _blockCondition.length ? _blockCondition ~ "  " : "" ) ~ Array.replace( _name ~ _paramString ~ _type, "*", " ptr" ) ) );
+									if( _tip.length ) IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, toStringz( _tip ) ); else IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, "" );
 									switch( AST_Head.kind )
 									{
 										case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
@@ -2072,6 +2186,9 @@ public:
 										case B_DTOR:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_dtor" );			break;
 										case B_PROPERTY:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_property" );		break;
 										case B_OPERATOR:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_operator" );		break;
+										case B_NAMESPACE:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_namespace" );	break;
+										case B_BAS:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","icon_bas" );			break;
+										case B_BI:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","icon_bi" );			break;
 										default:
 											IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1", null );
 											IupSetAttribute( GLOBAL.toolbar.getListHandle(), "1", "" );
@@ -2079,7 +2196,86 @@ public:
 								}
 								version(DIDE)
 								{
-									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( AST_Head.name ) );
+									string		_tip;
+									ptrdiff_t	i;
+									string _getConditionalCompilation( ref CASTnode _node )
+									{
+										string _ret;
+										if( _node.kind & D_VERSION )
+										{
+											do
+											{
+												if( _node.getFather !is null )
+												{
+													string _elseString;
+													if( _node.name == "-else-" ) _elseString = _node.type;
+													
+													if( _elseString.length )
+														_ret = "version(" ~ _elseString ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+													else
+														_ret = "version(" ~ _node.name ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+													
+													_node = _node.getFather;
+												}
+												else break;
+											}
+											while( _node.kind & D_VERSION );
+										}
+										return _ret;
+									}
+									
+									_tip = _getConditionalCompilation( AST_Head );
+									
+									string[] _tips = Array.split( _tip, "\n" );
+									if( _tips.length > 1 )
+									{
+										for( i = _tips.length - 1; i >= 0; --i )
+										{
+											string _tab;
+											for( ptrdiff_t j = 0; j < i; ++j )
+												_tab ~= "\t";
+												
+											_tips[i] = _tab ~ "version(" ~ _tips[i] ~ ")";
+										}
+										
+										_tip = "";
+										for( i = 0; i < _tips.length; ++i )
+											_tip = _tip ~ _tips[i] ~ "\n";
+											
+										_tip = strip( _tip );
+									}
+									else
+									{
+										_tip = strip( _tip );
+										if( _tip.length ) _tip = "version(" ~ _tip ~ ")";
+									}
+									
+									string _type, _paramString, _blockCondition;
+									ParserAction.getSplitDataFromNodeTypeString( AST_Head.type, _type, _paramString );
+									if( AST_Head.kind & D_FUNCTION ) _type = _type.length ? _type ~ " " : "void "; else _type = "";
+									
+									if( AST_Head.getFather !is null )
+									{
+										auto _node = AST_Head.getFather;
+										if( _node.kind & D_VERSION )
+										{
+											auto nowAST = AST_Head;
+											_blockCondition = _getConditionalCompilation( _node );
+											if( _blockCondition.length ) _blockCondition = "version(" ~ Array.replace( _blockCondition, "\n", " " ) ~ ")";
+											AST_Head = nowAST;
+										}
+									}
+									
+									switch( GLOBAL.outlineTree.getShowIndex )
+									{
+										case 0:									break;
+										case 1:		_type = "";					break;
+										case 2:		_paramString = "";			break;	
+										default:	_type = _paramString = "";	break;
+									}									
+								
+									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( ( _blockCondition.length ? _blockCondition ~ "  " : "" ) ~ _type ~ AST_Head.name ~ _paramString ) );
+									if( _tip.length ) IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, toStringz( _tip ) ); else IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, "" );
 									
 									if( AST_Head.kind & D_MODULE )
 										IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_module" );
@@ -2138,6 +2334,7 @@ struct ParserAction
 private:
 	import scintilla;
 	import parser.ast, parser.scanner, parser.parser;
+	import parser.autocompletion;
 
 public:
 	static CASTnode getActiveParseAST()
@@ -2200,6 +2397,120 @@ public:
 		return node;
 	}
 	
+	static bool checkConditionalCompileMatch( CASTnode node )
+	{
+		if( node.kind & B_VERSION )
+		{
+			string[] symbols;
+			if( node.name == "-else-" )
+				symbols = Array.split( node.type, " " );
+			else
+				symbols = Array.split( node.name, " " );
+			
+			int bWIN32 = -1, bLINUX = -1;
+			foreach( string symName; symbols )
+			{
+				symName = Uni.toUpper( symName );
+				version(Windows)
+				{
+					if( symName == "__FB_WIN32__" )
+						return true;
+					else if( symName == "!__FB_WIN32__" )
+						return false;
+					else if( symName == "__FB_LINUX__" || symName == "__FB_FREEBSD__" || symName == "__FB_OPENBSD__" || symName == "__FB_UNIX__" || symName == "__FB_DOS__" || symName == "__FB_XBOS__" )
+						bWIN32 = 0;
+				}
+				version(linux)
+				{
+					if( symName == "__FB_LINUX__" )
+						return true;
+					else if( symName == "!__FB_LINUX__" )
+						return false;
+					else if( symName == "__FB_WIN32__" || symName == "__FB_FREEBSD__" || symName == "__FB_OPENBSD__" || symName == "__FB_UNIX__" || symName == "__FB_DOS__" || symName == "__FB_XBOS__" )
+						bLINUX = 0;
+				}
+			}
+			
+			version(Windows)	if( bWIN32 == 1 ) return true;
+			version(linux)		if( bLINUX == 1 ) return true;
+			
+			bool bGotMatch;
+			if( !bGotMatch )
+			{
+				foreach( string symName; symbols )
+				{
+					symName = Uni.toUpper( symName );
+					if( symName in AutoComplete.VersionCondition )
+						return true;
+					else
+					{
+						if( symName.length )
+						{
+							if( symName[0] == '!' )
+							{
+								if( symName[1..$] in AutoComplete.VersionCondition ) bGotMatch = false; else bGotMatch = true;
+							}
+						}
+					}
+				}
+			}
+			
+			if( bGotMatch ) return true;
+		}
+		
+		return false;
+	}
+	
+	static int moveToConditionalCompileBlockHead( ref CASTnode node )
+	{
+		if( node.kind & B_VERSION )
+		{
+			auto	_father = node.getFather;
+			int		_i;
+			if( _father !is null )
+			{
+				int		low, mid, upper = _father.getChildrenCount, _ln = node.lineNumber;
+				auto	children = _father.getChildren;
+				// Binary Search
+				while( low <= upper ) 
+				{ 
+					mid = ( low + upper ) / 2; 
+					if( children[mid].lineNumber < _ln ) 
+					{
+						low = mid + 1 ;
+					}
+					else if( children[mid].lineNumber > _ln )
+					{
+						upper = mid - 1;
+					}
+					else
+					{
+						break;
+					}
+				}			
+			
+				for( _i = mid; _i < _father.getChildrenCount; ++_i )
+				{
+					if( node == _father[_i] ) 
+						if( _i == 0 ) return 0; else break;
+				}
+			}
+			
+			while( --_i >= 0 )
+			{
+				if( _father[_i].kind & B_VERSION )
+				{
+					node = _father[_i];
+					if( node.base == "-if-" ) return _i; // In #IF
+				}
+				else
+					return ++_i;
+			}
+		}
+	
+		return -1;
+	}
+
 	static string removeArrayAndPointer( string word )
 	{
 		string result;
