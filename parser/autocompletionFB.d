@@ -439,7 +439,9 @@ version(FBIDE)
 			CASTnode[] results, childrenNodes = node.getChildren;
 
 			if( node.kind & ( B_TYPE | B_CLASS ) )
-				childrenNodes ~= getBaseNodeMembers( node );
+			{
+				if( !bSkipExtend ) childrenNodes ~= getBaseNodeMembers( node );
+			}
 			else if( node.kind & B_VERSION )
 			{
 				if( GLOBAL.parserSettings.conditionalCompilation == 0 )
