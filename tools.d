@@ -227,7 +227,7 @@ bool isAppExists( string path )
 {
 	if( exists( path ) ) return true;
 	
-	version(linux)
+	version(Posix)
 	{
 		try
 		{
@@ -279,9 +279,9 @@ bool isParsableExt( string _ext, int flag = 7 )
 		{
 			if( flag & 2 ) return true;
 		}
-		else if( _ext == GLOBAL.extraParsableExt )
+		else if( _ext == GLOBAL.parserSettings.extraParsableExt )
 		{
-			if( !GLOBAL.extraParsableExt.length ) return false;
+			if( !GLOBAL.parserSettings.extraParsableExt.length ) return false;
 			if( flag & 4 ) return true;
 		}
 	}

@@ -75,6 +75,7 @@ version(DIDE)
 			bool				bDot, bCallTip;
 			string[]			splitWord;
 			CompilerSettingUint compilerSettings;
+			ParserSettingUint	parserSettings;
 			
 		public:
 			this( CASTnode _AST_Head, int _pos, int _lineNum, bool _bDot, bool _bCallTip, string[] _splitWord, string _text, int _ext = -1, string _extString = ""  )
@@ -88,7 +89,8 @@ version(DIDE)
 				text				= _text;
 				ext					= _ext;
 				_extString			= _extString;
-				compilerSettings	= GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
+				compilerSettings	= GLOBAL.compilerSettings;	// copy MainThread GLOBAL.compilerSettings Data
+				parserSettings		= GLOBAL.parserSettings;	// copy MainThread GLOBAL.parserSettings Data
 				
 				super( &run );
 			}
@@ -97,6 +99,7 @@ version(DIDE)
 			void run()
 			{
 				GLOBAL.compilerSettings = compilerSettings; // To TLS GLOBAL.compilerSettings
+				GLOBAL.parserSettings = parserSettings;		// To TLS GLOBAL.parserSettings
 
 				if( AST_Head is null )
 				{
@@ -104,7 +107,7 @@ version(DIDE)
 					return;
 				}
 
-				if( GLOBAL.autoCompletionTriggerWordCount < 1 ) 
+				if( GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 ) 
 				{
 					if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
 					return;
@@ -352,7 +355,7 @@ version(DIDE)
 						foreach( CASTnode funNode; searchMatchNodes( _node.getFather, _node.name, D_FUNCTION, _node.lineNumber ) )
 						{
 							result ~= "\n";
-							if( GLOBAL.showTypeWithParams != "ON" )
+							if( GLOBAL.parserSettings.showTypeWithParams != "ON" )
 								result ~= ( ParserAction.getSeparateType( funNode.type ) ~ " " ~ funNode.name );
 							else
 								result ~= ( ParserAction.getSeparateType( funNode.type ) ~ " " ~ funNode.name ~ ParserAction.getSeparateParam( funNode.type ) ).dup;
@@ -369,7 +372,7 @@ version(DIDE)
 						{
 							result ~= "\n";
 							//_space[] = ' ';
-							if( GLOBAL.showTypeWithParams != "ON" )
+							if( GLOBAL.parserSettings.showTypeWithParams != "ON" )
 								result ~= ( _space ~ "this" );
 							else
 								result ~= ( _space ~ "this" ~ ParserAction.getSeparateParam( _child.type ) );
@@ -1326,23 +1329,29 @@ version(DIDE)
 			childrenNodes ~= getBaseNodeMembers( AST_Head );
 
 			//foreach( CASTnode _child; AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ) )
-
 			foreach( CASTnode _child; childrenNodes )
 			{
 				if( _child.kind & D_VERSION )
 				{
 					version(Windows)
 					{
-						if( _child.name == "Windows" || _child.name == "Win32" || ( _child.name == "-else-" && _child.base == "linux" ) )
+						if( _child.name == "Windows" || _child.name == "Win32" || _child.name == "Win64" || ( _child.name == "-else-" && ( _child.base != "Windows" || _child.base != "Win32" || _child.base != "Win64" ) ) )
 						{
 							result ~= getMembers( _child );
 							continue;
 						}
 					}
-
 					version(linux)
 					{
 						if( _child.name == "linux" || ( _child.name == "-else-" && _child.base != "linux" ) )
+						{
+							result ~= getMembers( _child );
+							continue;
+						}
+					}
+					version(BSD)
+					{
+						if( _child.name == "BSD" || ( _child.name == "-else-" && _child.base != "BSD" ) )
 						{
 							result ~= getMembers( _child );
 							continue;
@@ -2249,7 +2258,7 @@ version(DIDE)
 				timer = IupTimer();
 				IupSetAttributes( timer, "TIME=50,RUN=NO" );
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
-				setTimer( Conv.to!(int)( GLOBAL.triggerDelay ) );
+				setTimer( Conv.to!(int)( GLOBAL.parserSettings.triggerDelay ) );
 			}
 			
 			calltipContainer.clear();
@@ -3141,7 +3150,7 @@ version(DIDE)
 						return null;
 					}
 
-					if( GLOBAL.autoCompletionTriggerWordCount < 1 && !bForce ) 
+					if( GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 && !bForce ) 
 					{
 						if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
@@ -3215,7 +3224,7 @@ version(DIDE)
 
 		static void toDefintionAndType( int runType )
 		{
-			if( GLOBAL.enableParser != "ON" ) return;
+			if( GLOBAL.parserSettings.enableParser != "ON" ) return;
 			
 			try
 			{
@@ -3473,7 +3482,7 @@ version(DIDE)
 						if( firstASTNode !is null )
 						{
 							ParserAction.getSplitDataFromNodeTypeString( firstASTNode.type, _type, _param );
-							if( GLOBAL.showTypeWithParams != "ON" ) _param = "";
+							if( GLOBAL.parserSettings.showTypeWithParams != "ON" ) _param = "";
 							switch( firstASTNode.kind )
 							{
 								case D_MODULE: _type = "\"MODULE\""; break;
@@ -3516,7 +3525,7 @@ version(DIDE)
 						if( finalASTNode !is null )
 						{
 							ParserAction.getSplitDataFromNodeTypeString( finalASTNode.type, _type, _param );
-							if( GLOBAL.showTypeWithParams != "ON" ) _param = "";
+							if( GLOBAL.parserSettings.showTypeWithParams != "ON" ) _param = "";
 							switch( finalASTNode.kind )
 							{
 								case D_MODULE: _type = "\"MODULE\""; break;
@@ -3827,7 +3836,7 @@ version(DIDE)
 
 			if( !list.length )
 			{
-				if( GLOBAL.toggleCompleteAtBackThread == "ON" )
+				if( GLOBAL.parserSettings.toggleCompleteAtBackThread == "ON" )
 				{
 					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" )
 					{

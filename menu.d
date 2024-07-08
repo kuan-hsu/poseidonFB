@@ -350,17 +350,17 @@ Ihandle* createMenu()
 	});
 	
 	Ihandle* FunctionTitle = IupItem( GLOBAL.languageItems["showtitle"].toCString, null );
-	if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( FunctionTitle, "VALUE", "ON" ); else IupSetAttribute( FunctionTitle, "VALUE", "OFF" );
+	if( GLOBAL.parserSettings.showFunctionTitle == "ON" ) IupSetAttribute( FunctionTitle, "VALUE", "ON" ); else IupSetAttribute( FunctionTitle, "VALUE", "OFF" );
 	IupSetAttribute( FunctionTitle, "AUTOTOGGLE", "YES" );
 	IupSetAttribute( FunctionTitle, "NAME", "function_title" );
 	IupSetHandle( "menuFunctionTitle", FunctionTitle );	
 	IupSetCallback( FunctionTitle, "ACTION", cast(Icallback) function( Ihandle* ih )
 	{
-		if( GLOBAL.showFunctionTitle == "ON" ) GLOBAL.showFunctionTitle = "OFF"; else GLOBAL.showFunctionTitle = "ON";
+		if( GLOBAL.parserSettings.showFunctionTitle == "ON" ) GLOBAL.parserSettings.showFunctionTitle = "OFF"; else GLOBAL.parserSettings.showFunctionTitle = "ON";
 		if( GLOBAL.preferenceDlg !is null )
-			if( IupGetHandle( "toggleFunctionTitle" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE", toStringz( GLOBAL.showFunctionTitle ) );
+			if( IupGetHandle( "toggleFunctionTitle" ) != null ) IupSetStrAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE", toStringz( GLOBAL.parserSettings.showFunctionTitle ) );
 
-		if( GLOBAL.showFunctionTitle == "ON" )
+		if( GLOBAL.parserSettings.showFunctionTitle == "ON" )
 		{
 			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" );
 			IupRefresh( GLOBAL.toolbar.getListHandle() );
@@ -733,11 +733,11 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.536)  2024.06.25\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.537)  2024.07.08\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
-			aboutHead = "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.094)  2024.06.15\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidond\n\n";
+			aboutHead = "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.094)  2024.07.08\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidond\n\n";
 		}
 		
 		version(Windows)

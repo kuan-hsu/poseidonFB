@@ -182,78 +182,16 @@ private:
 			{
 				if( _child.kind & B_VERSION )
 				{
-					version(VERSION_NONE)
+					if( GLOBAL.parserSettings.conditionalCompilation == 0 )
 					{
+					}
+					else if( GLOBAL.parserSettings.conditionalCompilation == 2 )
+					{
+						result ~= getVersionIncludes( _child );
 					}
 					else
 					{
-						string symbol = toUpper( _child.name );
-						string noSignSymbolName = _child.type.length ? symbol[1..$] : symbol;
-						if( noSignSymbolName == "__FB_WIN32__" || noSignSymbolName == "__FB_LINUX__" || noSignSymbolName == "__FB_FREEBSD__" || noSignSymbolName == "__FB_OPENBSD__" || noSignSymbolName == "__FB_UNIX__" )
-						{
-							version(Windows)
-							{
-								if( symbol == "__FB_WIN32__" || ( symbol != "!__FB_WIN32__" ) )
-								{
-									result ~= getVersionIncludes( _child );
-									continue;
-								}
-							}
-							
-							version(linux)
-							{
-								if( symbol == "__FB_LINUX__" || ( symbol != "!__FB_LINUX__" ) )
-								{
-									result ~= getVersionIncludes( _child );
-									continue;
-								}
-							}
-							
-							version(FreeBSD)
-							{
-								if( symbol == "__FB_FREEBSD__" || ( symbol != "!__FB_FREEBSD__" ) )
-								{
-									result ~= getVersionIncludes( _child );
-									continue;
-								}
-							}
-							
-							version(OpenBSD)
-							{
-								if( symbol == "__FB_OPENBSD__" || ( symbol != "!__FB_OPENBSD__" ) )
-								{
-									result ~= getVersionIncludes( _child );
-									continue;
-								}
-							}
-							
-							version(Posix)
-							{
-								if( symbol == "__FB_UNIX__" || ( symbol != "!__FB_UNIX__" ) )
-								{
-									result ~= getVersionIncludes( _child );
-									continue;
-								}
-							}
-						}
-						else
-						{
-							if( !_child.type.length )
-							{
-								if( symbol in AutoComplete.VersionCondition ) result ~= getVersionIncludes( _child );
-							}
-							else
-							{
-								if( AutoComplete.VersionCondition.length )
-								{
-									if( !( symbol[1..$] in AutoComplete.VersionCondition ) ) result ~= getVersionIncludes( _child );
-								}
-								else
-								{
-									result ~= getVersionIncludes( _child );
-								}
-							}
-						}
+						if( ParserAction.checkConditionalCompileMatch( _child ) ) result ~= getVersionIncludes( _child );
 					}
 				}
 				else if( _child.kind & B_INCLUDE )
@@ -267,16 +205,23 @@ private:
 				{
 					version(Windows)
 					{
-						if( _child.name == "Windows" || _child.name == "Win32" || ( _child.name == "-else-" && _child.base == "linux" ) )
+						if( _child.name == "Windows" || _child.name == "Win32" || _child.name == "Win64" || ( _child.name == "-else-" && ( _child.base != "Windows" || _child.base != "Win32" || _child.base != "Win64" ) ) )
 						{
 							result ~= getVersionIncludes( _child );
 							continue;
 						}
 					}
-
 					version(linux)
 					{
 						if( _child.name == "linux" || ( _child.name == "-else-" && _child.base != "linux" ) )
+						{
+							result ~= getVersionIncludes( _child );
+							continue;
+						}
+					}				
+					version(BSD)
+					{
+						if( _child.name == "BSD" || ( _child.name == "-else-" && _child.base != "BSD" ) )
 						{
 							result ~= getVersionIncludes( _child );
 							continue;
@@ -687,12 +632,12 @@ public:
 			createProjectTree( setupDir );
 			
 			// PreLoad, Load all files in project parser
-			if( GLOBAL.enableParser == "ON" && GLOBAL.preParseLevel > 0 )
+			if( GLOBAL.parserSettings.enableParser == "ON" && GLOBAL.parserSettings.preParseLevel > 0 )
 			{
 				GLOBAL.activeProjectPath = setupDir;
 				GLOBAL.compilerSettings.activeCompiler = getActiveCompilerInformation( GLOBAL.projectManager[setupDir].dir );
 
-				if( GLOBAL.togglePreLoadPrj == "ON" )
+				if( GLOBAL.parserSettings.togglePreLoadPrj == "ON" )
 				{
 					if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" )
 					{
@@ -713,7 +658,7 @@ public:
 						if( std.file.exists( source ) ) parsedFiles ~= source;
 					}
 
-					for( int i = 0; i <= GLOBAL.preParseLevel; ++i )
+					for( int i = 0; i <= GLOBAL.parserSettings.preParseLevel; ++i )
 						parsedFiles = preParseFiles( parsedFiles, i );
 				
 					GLOBAL.messagePanel.printOutputPanel( "Project { " ~ GLOBAL.projectManager[setupDir].name ~ " } Pre-Loading Finished." );

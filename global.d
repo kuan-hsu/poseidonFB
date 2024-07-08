@@ -45,7 +45,29 @@ struct CompilerSettingUint
 	string[]	customCompilerOptions;
 	int			includeLevel = 3;
 	FocusUnit	activeCompiler;
+}
+
+struct ParserSettingUint
+{
+	string		extraParsableExt = "inc";
+	string		enableParser = "ON";
+	string		showFunctionTitle = "OFF";
+	string		togglePreLoadPrj = "OFF";
+	string		showTypeWithParams = "OFF";
+	string		toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
+	string		toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
+	string		toggleEnableDwell = "OFF";
+	string		toggleOverWrite = "OFF";
+	string		toggleCompleteAtBackThread = "ON";
 	
+	string		dwellDelay = "1000";
+	string		triggerDelay = "100";
+
+	int			autoCompletionTriggerWordCount = 3;
+	int			conditionalCompilation = 1;
+	int 		preParseLevel = 3;
+	int			liveLevel = 1;
+	string		toggleUpdateOutlineLive = "ON";	
 }
 
 struct ShortKey
@@ -164,6 +186,9 @@ public:
 	static string				consoleExe = "OFF";
 	static string				toggleCompileAtBackThread = "OFF";
 	+/
+	
+	static string				toggleUseManual = "OFF";	
+	
 	static string[]				manuals;
 	static string				recentOpenDir;
 	static string[]				recentOptions, recentArgs, recentCompilers, prevPrj, prevDoc;
@@ -174,36 +199,15 @@ public:
 	static EditorOpacity		editorSetting02;
 	static EditorColorUint		editColor;
 	static CompilerSettingUint	compilerSettings;
+	static ParserSettingUint	parserSettings;
 
-	static string				extraParsableExt = "inc";
-	static string				enableParser = "ON";
-	static string				showFunctionTitle = "OFF";
-	static string				togglePreLoadPrj = "OFF";
-	static string				showTypeWithParams = "OFF";
-	static string				toggleIgnoreCase = "ON";		// SCI_AUTOCSETIGNORECASE
-	static string				toggleCaseInsensitive = "ON";	// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR
-	//static string				toggleShowListType = "OFF";
-	static string				toggleEnableDwell = "OFF";
-	static string				toggleOverWrite = "OFF";
-	static string				toggleCompleteAtBackThread = "ON";
-	
-	static string				toggleUseManual = "OFF";
-	
-	static string				dwellDelay = "1000";
-	static string				triggerDelay = "100";
 	static int					autoCMaxHeight = 12;
 	static int					indicatorStyle = 16;
 	
 
 	static CScintilla[string]	scintillaManager;
 	static int[][string]		fileStatusManager;
-	
-	
 
-	static int					autoCompletionTriggerWordCount = 3;
-	static int 					preParseLevel = 3;
-	static int					liveLevel = 1;
-	static string				toggleUpdateOutlineLive = "ON";
 
 	//Parser
 	static Scanner				scanner;
@@ -648,6 +652,8 @@ public:
 							GLOBAL.languageItems["light"] = new IupString( "Light" );
 							GLOBAL.languageItems["full"] = new IupString( "Full" );
 							GLOBAL.languageItems["update"] = new IupString( "Update Outline" );
+						GLOBAL.languageItems["conditionalCompilation"] = new IupString( "Conditional Compilation" );
+							GLOBAL.languageItems["custom"] = new IupString( "Custom(By OS)" );
 						GLOBAL.languageItems["trigger"] = new IupString( "Autocompletion Trigger:" );
 							GLOBAL.languageItems["triggertip"] = new IupString( "Set 0 To Disable" );
 							GLOBAL.languageItems["codecompletiononoff"] = new IupString( "Code Completion On/Off" );

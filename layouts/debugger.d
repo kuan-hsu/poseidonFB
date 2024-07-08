@@ -2039,7 +2039,7 @@ public:
 			}
 			else
 			{
-				version(linux)
+				version(Posix)
 					DebugControl = new DebugThread( debuggerExe, "\"" ~ command ~ "\"", Path.dirName( GLOBAL.compilerSettings.debuggerFullPath ) );
 				else
 				{

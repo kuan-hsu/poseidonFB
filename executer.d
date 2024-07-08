@@ -67,7 +67,7 @@ private:
 		return processDlg;
 	}
 	
-	version(linux)
+	version(Posix)
 	{
 		static bool checkTerminalExists()
 		{
@@ -772,7 +772,7 @@ private:
 	*/
 	static bool getBuildNeedData( ref string compiler, ref string filesANDargs, string options, string optionDebug, int SourceType = 0 )
 	{
-		version(linux)
+		version(Posix)
 		{
 			if( !checkTerminalExists() ) 
 			{
@@ -1224,7 +1224,7 @@ public:
 	
 	static int compile( string options = null, string args = null, string compiler = null, string optionDebug = null, bool bRun = false )
 	{
-		version(linux) if( bRun && !checkTerminalExists() ) return false;
+		version(Posix) if( bRun && !checkTerminalExists() ) return false;
 		quickRunFromFile = "";
 
 		GLOBAL.messagePanel.printOutputPanel( "", true );
@@ -1440,7 +1440,7 @@ public:
 	
 	static bool quickRun( string options = null, string args = null, string compiler = null )
 	{
-		version(linux) if( !checkTerminalExists() ) return false;
+		version(Posix) if( !checkTerminalExists() ) return false;
 		quickRunFromFile = "";
 		
 		GLOBAL.messagePanel.printOutputPanel( "", true );
@@ -1520,7 +1520,7 @@ public:
 
 	static bool run( string args = null, bool bForceCompileOne = false )
 	{
-		version(linux) if( !checkTerminalExists() ) return false;
+		version(Posix) if( !checkTerminalExists() ) return false;
 		
 		// Keep Message panel open
 		if( fromStringz( IupGetAttribute( GLOBAL.menuMessageWindow, "VALUE" ) ) == "OFF" ) menu.messageMenuItem_cb( GLOBAL.menuMessageWindow );

@@ -940,7 +940,7 @@ private:
 	
 	int updateNodeByLineNumber( CASTnode[] newASTNodes, int _ln )
 	{
-		if( GLOBAL.toggleUpdateOutlineLive != "ON" ) return -1;
+		if( GLOBAL.parserSettings.toggleUpdateOutlineLive != "ON" ) return -1;
 
 		int insertID = -1;
 		if( IupGetChildCount( GLOBAL.outlineTree.getZBoxHandle ) > 0 )
@@ -1503,7 +1503,7 @@ public:
 
 	CASTnode createParserByText( string fullPath, string document )
 	{
-		if( GLOBAL.enableParser != "ON" ) return null;
+		if( GLOBAL.parserSettings.enableParser != "ON" ) return null;
 		
 		string _ext = Path.extension( Uni.toLower( fullPath ) );
 		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
@@ -1523,7 +1523,7 @@ public:
 
 	CASTnode loadFile( string fullPath )
 	{
-		if( GLOBAL.enableParser != "ON" ) return null;
+		if( GLOBAL.parserSettings.enableParser != "ON" ) return null;
 
 		string _ext = Path.extension( Uni.toLower( fullPath ) );
 		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
@@ -1557,7 +1557,7 @@ public:
 	
 	CASTnode loadParser( string fullPath )
 	{
-		if( GLOBAL.enableParser != "ON" ) return null;
+		if( GLOBAL.parserSettings.enableParser != "ON" ) return null;
 		
 		string _ext = Path.extension( Uni.toLower( fullPath ) );
 		version(FBIDE)	if( !tools.isParsableExt( _ext, 7 ) )	return null;
@@ -1768,7 +1768,7 @@ public:
 	
 	bool refresh( CScintilla cSci, bool bUpdateTree = true )
 	{
-		if( GLOBAL.enableParser != "ON" ) return false;
+		if( GLOBAL.parserSettings.enableParser != "ON" ) return false;
 		if( cSci is null ) return false;
 
 		string _ext = Uni.toLower( Path.extension( cSci.getFullPath ) );
@@ -2049,7 +2049,7 @@ extern(C)
 		return IUP_DEFAULT;
 	}	
 
-	version(linux)
+	version(Posix)
 	{
 		private int COutline_List_K_ANY( Ihandle *ih, int c )
 		{
@@ -2149,7 +2149,7 @@ extern(C)
 						}
 					}
 
-					if( IupGetInt( actTree, "COUNT" ) > 0 )
+					if( GLOBAL.outlineTree.listItemASTs.length > 0 )
 					{
 						GLOBAL.outlineTree.listItemIndex = 1;
 						version(Windows) IupSetStrAttribute( _listHandle, "VALUE", toStringz( GLOBAL.outlineTree.listItemASTs[0].name ) );

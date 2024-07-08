@@ -2039,9 +2039,9 @@ public:
 						GLOBAL.statusBar.setEncodingType( "UNKNOWN?   " );
 				}
 
-				if( GLOBAL.showFunctionTitle == "ON" )
+				if( GLOBAL.parserSettings.showFunctionTitle == "ON" )
 				{
-					if( GLOBAL.enableParser == "ON" )
+					if( GLOBAL.parserSettings.enableParser == "ON" )
 					{
 						if( fullPathByOS(cSci.getFullPath) in GLOBAL.parserManager )
 						{
@@ -2173,7 +2173,7 @@ public:
 										default:	_type = _paramString = "";	break;
 									}
 										
-									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( ( _blockCondition.length ? _blockCondition ~ "  " : "" ) ~ Array.replace( _name ~ _paramString ~ _type, "*", " ptr" ) ) );
+									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( ( _blockCondition.length ? _blockCondition ~ " " : "" ) ~ Array.replace( _name ~ _paramString ~ _type, "*", " ptr" ) ) );
 									if( _tip.length ) IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, toStringz( _tip ) ); else IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, "" );
 									switch( AST_Head.kind )
 									{
@@ -2211,9 +2211,9 @@ public:
 													if( _node.name == "-else-" ) _elseString = _node.type;
 													
 													if( _elseString.length )
-														_ret = "version(" ~ _elseString ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+														_ret = _elseString ~ ( _ret.length ? "\n" ~ _ret : "" );
 													else
-														_ret = "version(" ~ _node.name ~ ")" ~ ( _ret.length ? "\n" ~ _ret : "" );
+														_ret = _node.name ~ ( _ret.length ? "\n" ~ _ret : "" );
 													
 													_node = _node.getFather;
 												}
@@ -2274,7 +2274,7 @@ public:
 										default:	_type = _paramString = "";	break;
 									}									
 								
-									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( ( _blockCondition.length ? _blockCondition ~ "  " : "" ) ~ _type ~ AST_Head.name ~ _paramString ) );
+									IupSetStrAttribute( GLOBAL.toolbar.getListHandle(), "1", toStringz( ( _blockCondition.length ? _blockCondition ~ " " : "" ) ~ _type ~ AST_Head.name ~ _paramString ) );
 									if( _tip.length ) IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, toStringz( _tip ) ); else IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, "" );
 									
 									if( AST_Head.kind & D_MODULE )
@@ -2397,118 +2397,133 @@ public:
 		return node;
 	}
 	
-	static bool checkConditionalCompileMatch( CASTnode node )
+	version(FBIDE)
 	{
-		if( node.kind & B_VERSION )
+		static bool checkConditionalCompileMatch( CASTnode node )
 		{
-			string[] symbols;
-			if( node.name == "-else-" )
-				symbols = Array.split( node.type, " " );
-			else
-				symbols = Array.split( node.name, " " );
-			
-			int bWIN32 = -1, bLINUX = -1;
-			foreach( string symName; symbols )
+			if( node.kind & B_VERSION )
 			{
-				symName = Uni.toUpper( symName );
-				version(Windows)
-				{
-					if( symName == "__FB_WIN32__" )
-						return true;
-					else if( symName == "!__FB_WIN32__" )
-						return false;
-					else if( symName == "__FB_LINUX__" || symName == "__FB_FREEBSD__" || symName == "__FB_OPENBSD__" || symName == "__FB_UNIX__" || symName == "__FB_DOS__" || symName == "__FB_XBOS__" )
-						bWIN32 = 0;
-				}
-				version(linux)
-				{
-					if( symName == "__FB_LINUX__" )
-						return true;
-					else if( symName == "!__FB_LINUX__" )
-						return false;
-					else if( symName == "__FB_WIN32__" || symName == "__FB_FREEBSD__" || symName == "__FB_OPENBSD__" || symName == "__FB_UNIX__" || symName == "__FB_DOS__" || symName == "__FB_XBOS__" )
-						bLINUX = 0;
-				}
-			}
-			
-			version(Windows)	if( bWIN32 == 1 ) return true;
-			version(linux)		if( bLINUX == 1 ) return true;
-			
-			bool bGotMatch;
-			if( !bGotMatch )
-			{
+				if( GLOBAL.parserSettings.conditionalCompilation > 1 ) return true;
+				
+				string[] symbols;
+				if( node.name == "-else-" )
+					symbols = Array.split( node.type, " " );
+				else
+					symbols = Array.split( node.name, " " );
+				
+				int bWIN32 = -1, bLINUX = -1, bBSD = -1;
 				foreach( string symName; symbols )
 				{
 					symName = Uni.toUpper( symName );
-					if( symName in AutoComplete.VersionCondition )
-						return true;
-					else
+					version(Windows)
 					{
-						if( symName.length )
+						if( symName == "__FB_WIN32__" )
+							return true;
+						else if( symName == "!__FB_WIN32__" )
+							return false;
+						else if( symName == "__FB_LINUX__" || symName == "__FB_FREEBSD__" || symName == "__FB_OPENBSD__" || symName == "__FB_UNIX__" || symName == "__FB_DOS__" || symName == "__FB_XBOX__" )
+							bWIN32 = 0;
+					}
+					version(linux)
+					{
+						if( symName == "__FB_LINUX__" )
+							return true;
+						else if( symName == "!__FB_LINUX__" )
+							return false;
+						else if( symName == "__FB_WIN32__" || symName == "__FB_FREEBSD__" || symName == "__FB_OPENBSD__" || symName == "__FB_UNIX__" || symName == "__FB_DOS__" || symName == "__FB_XBOX__" )
+							bLINUX = 0;
+					}
+					version(BSD)
+					{
+						if( symName == "__FB_FREEBSD__" || sysName == "__FB_OPENBSD__" )
+							return true;
+						else if( symName == "!__FB_FREEBSD__" || sysName == "!__FB_OPENBSD__" )
+							return false;
+						else if( symName == "__FB_WIN32__" || symName == "__FB_LINUX__" || symName == "__FB_UNIX__" || symName == "__FB_DOS__" || symName == "__FB_XBOX__" )
+							bBSD = 0;
+					}
+				}
+				/*
+				version(Windows)	if( bWIN32 == 1 ) return true;
+				version(linux)		if( bLINUX == 1 ) return true;
+				version(BSD)		if( bBSD == 1 ) return true;
+				*/
+				bool bGotMatch;
+				if( !bGotMatch )
+				{
+					foreach( string symName; symbols )
+					{
+						symName = Uni.toUpper( symName );
+						if( symName in AutoComplete.VersionCondition )
+							return true;
+						else
 						{
-							if( symName[0] == '!' )
+							if( symName.length )
 							{
-								if( symName[1..$] in AutoComplete.VersionCondition ) bGotMatch = false; else bGotMatch = true;
+								if( symName[0] == '!' )
+								{
+									if( symName[1..$] in AutoComplete.VersionCondition ) bGotMatch = false; else bGotMatch = true;
+								}
 							}
 						}
 					}
 				}
+				
+				if( bGotMatch ) return true;
 			}
 			
-			if( bGotMatch ) return true;
+			return false;
 		}
 		
-		return false;
-	}
-	
-	static int moveToConditionalCompileBlockHead( ref CASTnode node )
-	{
-		if( node.kind & B_VERSION )
+		static int moveToConditionalCompileBlockHead( ref CASTnode node )
 		{
-			auto	_father = node.getFather;
-			int		_i;
-			if( _father !is null )
+			if( node.kind & B_VERSION )
 			{
-				int		low, mid, upper = _father.getChildrenCount, _ln = node.lineNumber;
-				auto	children = _father.getChildren;
-				// Binary Search
-				while( low <= upper ) 
-				{ 
-					mid = ( low + upper ) / 2; 
-					if( children[mid].lineNumber < _ln ) 
+				auto	_father = node.getFather;
+				int		_i;
+				if( _father !is null )
+				{
+					int		low, mid, upper = _father.getChildrenCount, _ln = node.lineNumber;
+					auto	children = _father.getChildren;
+					// Binary Search
+					while( low <= upper ) 
+					{ 
+						mid = ( low + upper ) / 2; 
+						if( children[mid].lineNumber < _ln ) 
+						{
+							low = mid + 1 ;
+						}
+						else if( children[mid].lineNumber > _ln )
+						{
+							upper = mid - 1;
+						}
+						else
+						{
+							break;
+						}
+					}			
+				
+					for( _i = mid; _i < _father.getChildrenCount; ++_i )
 					{
-						low = mid + 1 ;
+						if( node == _father[_i] ) 
+							if( _i == 0 ) return 0; else break;
 					}
-					else if( children[mid].lineNumber > _ln )
+				}
+				
+				while( --_i >= 0 )
+				{
+					if( _father[_i].kind & B_VERSION )
 					{
-						upper = mid - 1;
+						node = _father[_i];
+						if( node.base == "-if-" ) return _i; // In #IF
 					}
 					else
-					{
-						break;
-					}
-				}			
-			
-				for( _i = mid; _i < _father.getChildrenCount; ++_i )
-				{
-					if( node == _father[_i] ) 
-						if( _i == 0 ) return 0; else break;
+						return ++_i;
 				}
 			}
-			
-			while( --_i >= 0 )
-			{
-				if( _father[_i].kind & B_VERSION )
-				{
-					node = _father[_i];
-					if( node.base == "-if-" ) return _i; // In #IF
-				}
-				else
-					return ++_i;
-			}
+		
+			return -1;
 		}
-	
-		return -1;
 	}
 
 	static string removeArrayAndPointer( string word )

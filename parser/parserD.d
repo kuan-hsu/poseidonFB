@@ -3482,7 +3482,7 @@ version(DIDE)
 												}
 												while( activeASTnode[_i].base == "-else-" );									
 												// Save to type
-												activeASTnode = activeASTnode( "-else-", D_KIND, getProt(), _elseString, _name, _ln );
+												activeASTnode = activeASTnode.addChild( "-else-", D_KIND, getProt(), _elseString, _name, _ln );
 												
 												if( token().tok != TOK.Topencurly )
 												{

@@ -87,6 +87,7 @@ version(FBIDE)
 			bool				bDot, bCallTip;
 			string[]			splitWord;
 			CompilerSettingUint compilerSettings;
+			ParserSettingUint	parserSettings;
 			
 		public:
 			this( CASTnode _AST_Head, int _pos, int _lineNum, bool _bDot, bool _bCallTip, string[] _splitWord, string _text, int _ext = -1, string _extString = ""  )
@@ -100,7 +101,8 @@ version(FBIDE)
 				text				= _text;
 				ext					= _ext;
 				_extString			= _extString;
-				compilerSettings	= GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
+				compilerSettings	= GLOBAL.compilerSettings;	// copy MainThread GLOBAL.compilerSettings Data
+				parserSettings		= GLOBAL.parserSettings;	// copy MainThread GLOBAL.parserSettings Data
 			
 				super( &run );
 			}
@@ -109,6 +111,7 @@ version(FBIDE)
 			void run()
 			{
 				GLOBAL.compilerSettings = compilerSettings; // To TLS GLOBAL.compilerSettings
+				GLOBAL.parserSettings = parserSettings; // To TLS GLOBAL.parserSettings
 
 				if( AST_Head is null )
 				{
@@ -116,7 +119,7 @@ version(FBIDE)
 					return;
 				}
 			
-				if( GLOBAL.autoCompletionTriggerWordCount < 1 ) 
+				if( GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 ) 
 				{
 					if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) result = getKeywordContainerList( splitWord[0] );
 					return;
@@ -124,7 +127,7 @@ version(FBIDE)
 				
 				auto oriAST = AST_Head;
 				
-				version(VERSION_NONE){} else checkVersionSpec( AST_Head, lineNum );
+				if( GLOBAL.parserSettings.conditionalCompilation == 1 ) checkVersionSpec( AST_Head, lineNum );
 				
 				
 				// For Quick show the dialog...
@@ -439,7 +442,12 @@ version(FBIDE)
 				childrenNodes ~= getBaseNodeMembers( node );
 			else if( node.kind & B_VERSION )
 			{
-				if( !ParserAction.checkConditionalCompileMatch( node ) ) return null;
+				if( GLOBAL.parserSettings.conditionalCompilation == 0 )
+					return null;
+				else if( GLOBAL.parserSettings.conditionalCompilation == 1 )
+				{
+					if( !ParserAction.checkConditionalCompileMatch( node ) ) return null;
+				}
 			}
 
 			for( ptrdiff_t i = 0; i < childrenNodes.length; ++ i )
@@ -448,7 +456,8 @@ version(FBIDE)
 
 				if( line >= childrenNodes[i].lineNumber )
 				{
-					if( ( line == childrenNodes[i].lineNumber ) && ( childrenNodes[i].kind & B_VERSION ) ) continue;
+					if( GLOBAL.parserSettings.conditionalCompilation > 0 )
+						if( ( line == childrenNodes[i].lineNumber ) && ( childrenNodes[i].kind & B_VERSION ) ) continue;
 					
 					if( childrenNodes[i].kind & B_BLOCK )
 					{
@@ -474,7 +483,46 @@ version(FBIDE)
 						}
 						else if( childrenNodes[i].kind & B_VERSION )
 						{
-							if( ParserAction.checkConditionalCompileMatch( childrenNodes[i] ) )
+							if( GLOBAL.parserSettings.conditionalCompilation == 0 )
+							{
+							}
+							else if( GLOBAL.parserSettings.conditionalCompilation == 1 )
+							{
+								if( ParserAction.checkConditionalCompileMatch( childrenNodes[i] ) )
+								{
+									foreach( grandson; getMembers( childrenNodes[i], bSkipExtend ) )
+									{
+										if( grandson.name.length )
+										{
+											string _name = Uni.toLower( grandson.name );//ParserAction.removeArrayAndPointer( grandson.name ) );
+											if( bCompleteMatch )
+											{
+												if( word == _name ) 
+													if( bJustOneResult ) return [ grandson ]; else results ~= grandson;
+											}
+											else
+											{
+												if( indexOf( _name, word ) == 0 )
+													if( bJustOneResult ) return [ grandson ]; else results ~= grandson;
+											}
+										}
+									}
+									
+									// Since symbol is matched, move to tail of the Blocks
+									do
+									{
+										if( i + 1 >= childrenNodes.length ) break;
+										if( childrenNodes[i+1].kind & B_VERSION )
+										{
+											if( childrenNodes[i+1].base == "-else-" ) break; else i = i + 1;
+										}
+										else
+											break;
+									}
+									while( childrenNodes[i].kind & B_VERSION );
+								}
+							}
+							else
 							{
 								foreach( grandson; getMembers( childrenNodes[i], bSkipExtend ) )
 								{
@@ -493,7 +541,7 @@ version(FBIDE)
 										}
 									}
 								}
-								
+								/*
 								// Since symbol is matched, move to tail of the Blocks
 								do
 								{
@@ -505,7 +553,8 @@ version(FBIDE)
 									else
 										break;
 								}
-								while( childrenNodes[i].kind & B_VERSION );
+								while( childrenNodes[i].kind & B_VERSION );	
+								*/
 							}
 						}
 						else
@@ -551,7 +600,7 @@ version(FBIDE)
 			if( node.getFather !is null )
 			{	
 				// When 1st call, if in B_VERSION Blocks, move to head of the Blocks
-				if( added == 0 && ( node.kind & B_VERSION ) )
+				if( added == 0 && ( node.kind & B_VERSION ) && ( GLOBAL.parserSettings.conditionalCompilation >= 1 ) )
 				{
 					if( ParserAction.moveToConditionalCompileBlockHead( node ) > -1 ) results ~= getBottomToTopMatchNodes( node.getFather, word, node.lineNumber, B_KIND, bCompleteMatch, bJustOneResult, bSkipExtend, ++added );
 				}
@@ -1107,8 +1156,12 @@ version(FBIDE)
 			{
 				if( childrenNodes[i].kind == B_VERSION )
 				{
-					version(VERSION_NONE)
+					if( GLOBAL.parserSettings.conditionalCompilation == 0 )
 					{
+					}
+					else if( GLOBAL.parserSettings.conditionalCompilation == 2 )
+					{
+						result ~= getMembers( childrenNodes[i], bSkipExtend );
 					}
 					else
 					{
@@ -1163,7 +1216,7 @@ version(FBIDE)
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
 				*/
-				version(VERSION_NONE){} else checkVersionSpec( originalNode, originalNode.lineNumber );
+				if( GLOBAL.parserSettings.conditionalCompilation == 1 ) checkVersionSpec( originalNode, originalNode.lineNumber );
 				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
 				if( usingNames.length )
 				{
@@ -2176,7 +2229,7 @@ version(FBIDE)
 				timer = IupTimer();
 				IupSetAttributes( timer, "TIME=50,RUN=NO" );
 				IupSetCallback( timer, "ACTION_CB", cast(Icallback) &CompleteTimer_ACTION );
-				setTimer( std.conv.to!(int)( GLOBAL.triggerDelay ) );
+				setTimer( std.conv.to!(int)( GLOBAL.parserSettings.triggerDelay ) );
 			}
 		}
 		
@@ -3222,7 +3275,7 @@ version(FBIDE)
 						return null;
 					}
 
-					if( GLOBAL.autoCompletionTriggerWordCount < 1 && !bForce ) 
+					if( GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 && !bForce ) 
 					{
 						if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" ) return getKeywordContainerList( splitWord[0] );
 						return null;
@@ -3230,7 +3283,7 @@ version(FBIDE)
 					
 					auto oriAST = AST_Head;
 					
-					version(VERSION_NONE){} else checkVersionSpec( AST_Head, lineNum );
+					if( GLOBAL.parserSettings.conditionalCompilation == 1 ) checkVersionSpec( AST_Head, lineNum );
 
 
 					// For Quick show the dialog...
@@ -3577,7 +3630,7 @@ version(FBIDE)
 				return;
 		
 		
-			if( GLOBAL.enableParser != "ON" ) return;
+			if( GLOBAL.parserSettings.enableParser != "ON" ) return;
 			clearShowTypeContent();
 			
 			try
@@ -3663,7 +3716,7 @@ version(FBIDE)
 				// Get VersionCondition names
 				if( AST_Head is null ) return;
 
-				checkVersionSpec( AST_Head, lineNum );
+				if( GLOBAL.parserSettings.conditionalCompilation == 1 ) checkVersionSpec( AST_Head, lineNum );
 				
 				if( !splitWord[0].length )
 				{
@@ -4013,7 +4066,7 @@ version(FBIDE)
 					
 					string	_param, _type;
 					getTypeAndParameter( AST_Head, _type, _param );
-					if( GLOBAL.showTypeWithParams != "ON" ) _param = "";
+					if( GLOBAL.parserSettings.showTypeWithParams != "ON" ) _param = "";
 					
 					switch( AST_Head.kind )
 					{
@@ -4279,7 +4332,7 @@ version(FBIDE)
 							}
 							else
 							{
-								exceptFiles ~= ( Path.stripExtension( fullPath ) ~ "." ~ GLOBAL.extraParsableExt );
+								exceptFiles ~= ( Path.stripExtension( fullPath ) ~ "." ~ GLOBAL.parserSettings.extraParsableExt );
 								_resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, exceptFiles[$-1], AST_Head.kind );
 								if( _resultNode !is null )
 								{
@@ -4922,7 +4975,7 @@ version(FBIDE)
 
 			if( !list.length )
 			{
-				if( GLOBAL.toggleCompleteAtBackThread == "ON" )
+				if( GLOBAL.parserSettings.toggleCompleteAtBackThread == "ON" )
 				{
 					if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "NO" )
 					{

@@ -467,27 +467,27 @@ public:
 			doc ~= setINILineData( "[parser]");
 			doc ~= setINILineData( "enablekeywordcomplete", GLOBAL.compilerSettings.enableKeywordComplete );
 			doc ~= setINILineData( "enableincludecomplete", GLOBAL.compilerSettings.enableIncludeComplete );
-			doc ~= setINILineData( "enableparser", GLOBAL.enableParser );
-			doc ~= setINILineData( "parsertrigger", Conv.to!(string)( GLOBAL.autoCompletionTriggerWordCount ) );
-			doc ~= setINILineData( "togglepreloadprj", GLOBAL.togglePreLoadPrj );
-			doc ~= setINILineData( "showfunctiontitle", GLOBAL.showFunctionTitle );
-			doc ~= setINILineData( "showtypewithparams", GLOBAL.showTypeWithParams );
+			doc ~= setINILineData( "enableparser", GLOBAL.parserSettings.enableParser );
+			doc ~= setINILineData( "parsertrigger", Conv.to!(string)( GLOBAL.parserSettings.autoCompletionTriggerWordCount ) );
+			doc ~= setINILineData( "togglepreloadprj", GLOBAL.parserSettings.togglePreLoadPrj );
+			doc ~= setINILineData( "showfunctiontitle", GLOBAL.parserSettings.showFunctionTitle );
+			doc ~= setINILineData( "showtypewithparams", GLOBAL.parserSettings.showTypeWithParams );
 			doc ~= setINILineData( "includelevel", Conv.to!(string)( GLOBAL.compilerSettings.includeLevel ) );
-			doc ~= setINILineData( "preparselevel", Conv.to!(string)( GLOBAL.preParseLevel ) );
-			doc ~= setINILineData( "ignorecase", GLOBAL.toggleIgnoreCase );
-			doc ~= setINILineData( "caseinsensitive", GLOBAL.toggleCaseInsensitive );
-			//doc ~= setINILineData( "showlisttype", GLOBAL.toggleShowListType );
+			doc ~= setINILineData( "preparselevel", Conv.to!(string)( GLOBAL.parserSettings.preParseLevel ) );
+			doc ~= setINILineData( "ignorecase", GLOBAL.parserSettings.toggleIgnoreCase );
+			doc ~= setINILineData( "caseinsensitive", GLOBAL.parserSettings.toggleCaseInsensitive );
+			doc ~= setINILineData( "conditionalcompilation", Conv.to!(string)( GLOBAL.parserSettings.conditionalCompilation ) );
 			doc ~= setINILineData( "showallmember", GLOBAL.compilerSettings.toggleShowAllMember );
-			doc ~= setINILineData( "enabledwell", GLOBAL.toggleEnableDwell );
-			doc ~= setINILineData( "enableoverwrite", GLOBAL.toggleOverWrite );
-			doc ~= setINILineData( "completeatbackthread", GLOBAL.toggleCompleteAtBackThread );
-			doc ~= setINILineData( "livelevel", Conv.to!(string)( GLOBAL.liveLevel ) );
-			doc ~= setINILineData( "updateoutlinelive", GLOBAL.toggleUpdateOutlineLive );
+			doc ~= setINILineData( "enabledwell", GLOBAL.parserSettings.toggleEnableDwell );
+			doc ~= setINILineData( "enableoverwrite", GLOBAL.parserSettings.toggleOverWrite );
+			doc ~= setINILineData( "completeatbackthread", GLOBAL.parserSettings.toggleCompleteAtBackThread );
+			doc ~= setINILineData( "livelevel", Conv.to!(string)( GLOBAL.parserSettings.liveLevel ) );
+			doc ~= setINILineData( "updateoutlinelive", GLOBAL.parserSettings.toggleUpdateOutlineLive );
 			doc ~= setINILineData( "keywordcase", Conv.to!(string)( GLOBAL.keywordCase ) );
-			doc ~= setINILineData( "dwelldelay", GLOBAL.dwellDelay );
-			doc ~= setINILineData( "triggerdelay", GLOBAL.triggerDelay );
+			doc ~= setINILineData( "dwelldelay", GLOBAL.parserSettings.dwellDelay );
+			doc ~= setINILineData( "triggerdelay", GLOBAL.parserSettings.triggerDelay );
 			doc ~= setINILineData( "autocmaxheight", Conv.to!(string)( GLOBAL.autoCMaxHeight ) );
-			doc ~= setINILineData( "extraext", GLOBAL.extraParsableExt );
+			doc ~= setINILineData( "extraext", GLOBAL.parserSettings.extraParsableExt );
 			
 			// manual
 			doc ~= setINILineData( "[manual]");
@@ -858,7 +858,7 @@ public:
 						{
 							case "compilerpath":			
 								GLOBAL.compilerSettings.compilerFullPath = right;
-								version(linux) GLOBAL.compilerSettings.x64compilerFullPath = right;
+								version(Posix) GLOBAL.compilerSettings.x64compilerFullPath = right;
 								break;
 							case "x64compilerpath":
 								version(Windows) GLOBAL.compilerSettings.x64compilerFullPath = right;
@@ -885,29 +885,29 @@ public:
 					case "[parser]":
 						switch( left )
 						{
-							case "enablekeywordcomplete":	GLOBAL.compilerSettings.enableKeywordComplete = right;							break;
-							case "enableincludecomplete":	GLOBAL.compilerSettings.enableIncludeComplete = right;							break;
-							case "enableparser":			GLOBAL.enableParser = right;									break;
-							case "parsertrigger":			GLOBAL.autoCompletionTriggerWordCount = Conv.to!(int)( right );	break;
-							case "togglepreloadprj":		GLOBAL.togglePreLoadPrj = right;								break;
-							case "showfunctiontitle":		GLOBAL.showFunctionTitle = right;								break;
-							case "showtypewithparams":		GLOBAL.showTypeWithParams = right;								break;
-							case "includelevel":			GLOBAL.compilerSettings.includeLevel = Conv.to!(int)( right );					break;
-							case "preparselevel":			GLOBAL.preParseLevel = Conv.to!(int)( right );					break;
-							case "ignorecase":				GLOBAL.toggleIgnoreCase = right;								break;
-							case "caseinsensitive":			GLOBAL.toggleCaseInsensitive = right;							break;
-							//case "showlisttype":			GLOBAL.toggleShowListType = right;								break;
-							case "showallmember":			GLOBAL.compilerSettings.toggleShowAllMember = right;								break;
-							case "enabledwell":				GLOBAL.toggleEnableDwell = right;								break;
-							case "enableoverwrite":			GLOBAL.toggleOverWrite = right;									break;
-							case "completeatbackthread":	GLOBAL.toggleCompleteAtBackThread = right;						break;
-							case "livelevel":				GLOBAL.liveLevel = Conv.to!(int)( right );						break;
-							case "updateoutlinelive":		GLOBAL.toggleUpdateOutlineLive = right;							break;
-							case "keywordcase":				GLOBAL.keywordCase = Conv.to!(int)( right );						break;
-							case "dwelldelay":				GLOBAL.dwellDelay = right;										break;
-							case "triggerdelay":			GLOBAL.triggerDelay = right;									break;
+							case "enablekeywordcomplete":	GLOBAL.compilerSettings.enableKeywordComplete = right;			break;
+							case "enableincludecomplete":	GLOBAL.compilerSettings.enableIncludeComplete = right;			break;
+							case "enableparser":			GLOBAL.parserSettings.enableParser = right;						break;
+							case "parsertrigger":			GLOBAL.parserSettings.autoCompletionTriggerWordCount = Conv.to!(int)( right );	break;
+							case "togglepreloadprj":		GLOBAL.parserSettings.togglePreLoadPrj = right;					break;
+							case "showfunctiontitle":		GLOBAL.parserSettings.showFunctionTitle = right;				break;
+							case "showtypewithparams":		GLOBAL.parserSettings.showTypeWithParams = right;				break;
+							case "includelevel":			GLOBAL.compilerSettings.includeLevel = Conv.to!(int)( right );	break;
+							case "preparselevel":			GLOBAL.parserSettings.preParseLevel = Conv.to!(int)( right );	break;
+							case "ignorecase":				GLOBAL.parserSettings.toggleIgnoreCase = right;					break;
+							case "caseinsensitive":			GLOBAL.parserSettings.toggleCaseInsensitive = right;			break;
+							case "conditionalcompilation":	GLOBAL.parserSettings.conditionalCompilation = Conv.to!(int)( right );			break;
+							case "showallmember":			GLOBAL.compilerSettings.toggleShowAllMember = right;			break;
+							case "enabledwell":				GLOBAL.parserSettings.toggleEnableDwell = right;				break;
+							case "enableoverwrite":			GLOBAL.parserSettings.toggleOverWrite = right;					break;
+							case "completeatbackthread":	GLOBAL.parserSettings.toggleCompleteAtBackThread = right;		break;
+							case "livelevel":				GLOBAL.parserSettings.liveLevel = Conv.to!(int)( right );		break;
+							case "updateoutlinelive":		GLOBAL.parserSettings.toggleUpdateOutlineLive = right;			break;
+							case "keywordcase":				GLOBAL.keywordCase = Conv.to!(int)( right );					break;
+							case "dwelldelay":				GLOBAL.parserSettings.dwellDelay = right;						break;
+							case "triggerdelay":			GLOBAL.parserSettings.triggerDelay = right;						break;
 							case "autocmaxheight":			GLOBAL.autoCMaxHeight = Conv.to!(int)( right );					break;
-							case "extraext":				GLOBAL.extraParsableExt = right;								break;
+							case "extraext":				GLOBAL.parserSettings.extraParsableExt = right;					break;
 							default:
 						}
 						break;
@@ -994,7 +994,7 @@ public:
 			IupMessage( "loadINI", toStringz( e.toString ) );
 		}
 		
-		version(linux) GLOBAL.compilerSettings.x64compilerFullPath = GLOBAL.compilerSettings.compilerFullPath;
+		version(Posix) GLOBAL.compilerSettings.x64compilerFullPath = GLOBAL.compilerSettings.compilerFullPath;
 	}
 	
 	static void saveFileStatus()
@@ -1144,7 +1144,7 @@ public:
 						case	"fold":						IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnFoldingColor" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"selAlpha":
 								version(Windows) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textSelAlpha" ), "SPINVALUE", toStringz( right ) );
-								version(linux) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textSelAlpha" ), "VALUE", toStringz( right ) );
+								version(Posix) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textSelAlpha" ), "VALUE", toStringz( right ) );
 								break;
 						case	"prjTitle":					IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrjTitle" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"prjSourceType":			IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSourceTypeFolder" ), "FGCOLOR", toStringz( right ) ); break;
@@ -1169,12 +1169,12 @@ public:
 						case	"currentword":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnIndicator" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"currentwordAlpha":
 								version(Windows) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textIndicatorAlpha" ), "SPINVALUE", toStringz( right ) );
-								version(linux) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textIndicatorAlpha" ), "VALUE", toStringz( right ) );
+								version(Posix) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textIndicatorAlpha" ), "VALUE", toStringz( right ) );
 								break;
 						case	"messageIndicator":			IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnMessageIndicator" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"messageIndicatorAlpha":
 								version(Windows) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "SPINVALUE", toStringz( right ) );
-								version(linux) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "VALUE", toStringz( right ) );
+								version(Posix) IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-textMessageIndicatorAlpha" ), "VALUE", toStringz( right ) );
 								break;
 						case	"braceFore":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_FG" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"braceBack":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnBrace_BG" ), "FGCOLOR", toStringz( right ) ); break;

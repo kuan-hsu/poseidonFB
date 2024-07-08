@@ -22,7 +22,7 @@ private:
 	import Array = std.array;
 	
 	Ihandle* btnOpen, btnx64Open, btnOpenx64Debugger, btnOpenDebugger, colorDefaultRefresh, colorTemplateRemove, colorTemplateSave;
-	version(linux) Ihandle* btnOpenTerminal, btnOpenHtmlApp;
+	version(Posix) Ihandle* btnOpenTerminal, btnOpenHtmlApp;
 	
 	void createLayout()
 	{
@@ -136,7 +136,7 @@ private:
 			}
 		}
 		
-		version(linux)
+		version(Posix)
 		{
 			Ihandle* textTerminalPath = IupText( null );
 			IupSetAttributes( textTerminalPath, "SIZE=320x,NAME=Compiler-textTerminalPath,BORDER=NO" );
@@ -275,7 +275,7 @@ private:
 		
 		//*******************
 		Ihandle* toggleUseParser = IupFlatToggle( GLOBAL.languageItems["enableparser"].toCString );
-		IupSetStrAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.enableParser) );
+		IupSetStrAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.parserSettings.enableParser) );
 		IupSetHandle( "toggleUseParser", toggleUseParser );
 		
 		Ihandle* labelMaxHeight = IupLabel( GLOBAL.languageItems["autocmaxheight"].toCString );
@@ -297,7 +297,7 @@ private:
 		Ihandle* textTrigger = IupText( null );
 		IupSetAttributes( textTrigger, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=6,SPINMIN=0" );
 		IupSetStrAttribute( textTrigger, "TIP", GLOBAL.languageItems["triggertip"].toCString );
-		IupSetInt( textTrigger, "VALUE", GLOBAL.autoCompletionTriggerWordCount );
+		IupSetInt( textTrigger, "VALUE", GLOBAL.parserSettings.autoCompletionTriggerWordCount );
 		IupSetHandle( "textTrigger", textTrigger );
 		
 		version(FBIDE)
@@ -314,15 +314,15 @@ private:
 
 		
 		Ihandle* toggleWithParams = IupFlatToggle( GLOBAL.languageItems["showtypeparam"].toCString );
-		IupSetStrAttribute( toggleWithParams, "VALUE", toStringz(GLOBAL.showTypeWithParams) );
+		IupSetStrAttribute( toggleWithParams, "VALUE", toStringz(GLOBAL.parserSettings.showTypeWithParams) );
 		IupSetHandle( "toggleWithParams", toggleWithParams );
 
 		Ihandle* toggleIGNORECASE = IupFlatToggle( GLOBAL.languageItems["sortignorecase"].toCString );
-		IupSetStrAttribute( toggleIGNORECASE, "VALUE", toStringz(GLOBAL.toggleIgnoreCase) );
+		IupSetStrAttribute( toggleIGNORECASE, "VALUE", toStringz(GLOBAL.parserSettings.toggleIgnoreCase) );
 		IupSetHandle( "toggleIGNORECASE", toggleIGNORECASE );
 
 		Ihandle* toggleCASEINSENSITIVE = IupFlatToggle( GLOBAL.languageItems["selectcase"].toCString );
-		IupSetStrAttribute( toggleCASEINSENSITIVE, "VALUE", toStringz(GLOBAL.toggleCaseInsensitive) );
+		IupSetStrAttribute( toggleCASEINSENSITIVE, "VALUE", toStringz(GLOBAL.parserSettings.toggleCaseInsensitive) );
 		IupSetHandle( "toggleCASEINSENSITIVE", toggleCASEINSENSITIVE );
 		/*
 		Ihandle* toggleSHOWLISTTYPE = IupFlatToggle( GLOBAL.languageItems["showlisttype"].toCString );
@@ -334,13 +334,13 @@ private:
 		IupSetHandle( "toggleSHOWALLMEMBER", toggleSHOWALLMEMBER );
 		
 		Ihandle* toggleDWELL = IupFlatToggle( GLOBAL.languageItems["enabledwell"].toCString );
-		IupSetStrAttribute( toggleDWELL, "VALUE", toStringz(GLOBAL.toggleEnableDwell) );
+		IupSetStrAttribute( toggleDWELL, "VALUE", toStringz(GLOBAL.parserSettings.toggleEnableDwell) );
 		IupSetHandle( "toggleDWELL", toggleDWELL );
 		
 		Ihandle* labelDWELL = IupLabel( GLOBAL.languageItems["dwelldelay"].toCString );
 		Ihandle* valDWELL = IupVal( null );
 		IupSetAttributes( valDWELL, "MIN=200,MAX=2200,RASTERSIZE=100x16,STEP=0.05,PAGESTEP=0.05" );
-		IupSetStrAttribute( valDWELL, "VALUE", toStringz( GLOBAL.dwellDelay ) );
+		IupSetStrAttribute( valDWELL, "VALUE", toStringz( GLOBAL.parserSettings.dwellDelay ) );
 		IupSetHandle( "valDWELL", valDWELL );
 		IupSetCallback( valDWELL, "VALUECHANGED_CB", cast(Icallback) &valDWELL_VALUECHANGED_CB );
 		IupSetCallback( valDWELL, "ENTERWINDOW_CB", cast(Icallback) &valDWELL_VALUECHANGED_CB );
@@ -351,17 +351,17 @@ private:
 		
 
 		Ihandle* toggleOverWrite = IupFlatToggle( GLOBAL.languageItems["enableoverwrite"].toCString );
-		IupSetStrAttribute( toggleOverWrite, "VALUE", toStringz(GLOBAL.toggleOverWrite) );
+		IupSetStrAttribute( toggleOverWrite, "VALUE", toStringz(GLOBAL.parserSettings.toggleOverWrite) );
 		IupSetHandle( "toggleOverWrite", toggleOverWrite );
 
 		Ihandle* toggleBackThread = IupFlatToggle( GLOBAL.languageItems["completeatbackthread"].toCString );
-		IupSetStrAttribute( toggleBackThread, "VALUE", toStringz(GLOBAL.toggleCompleteAtBackThread) );
+		IupSetStrAttribute( toggleBackThread, "VALUE", toStringz(GLOBAL.parserSettings.toggleCompleteAtBackThread) );
 		IupSetHandle( "toggleBackThread", toggleBackThread );
 		
 		Ihandle* labelTriggerDelay = IupLabel( GLOBAL.languageItems["completedelay"].toCString );
 		Ihandle* valTriggerDelay = IupVal( null );
 		IupSetAttributes( valTriggerDelay, "MIN=5,MAX=1000,RASTERSIZE=100x16,STEP=0.05265,PAGESTEP=0.1" );
-		IupSetStrAttribute( valTriggerDelay, "VALUE", toStringz( GLOBAL.triggerDelay ) );
+		IupSetStrAttribute( valTriggerDelay, "VALUE", toStringz( GLOBAL.parserSettings.triggerDelay ) );
 		IupSetHandle( "valTriggerDelay", valTriggerDelay );
 		IupSetCallback( valTriggerDelay, "VALUECHANGED_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );
 		IupSetCallback( valTriggerDelay, "ENTERWINDOW_CB", cast(Icallback) &valTriggerDelay_VALUECHANGED_CB );	
@@ -370,17 +370,17 @@ private:
 		IupSetAttributes( hBoxTriggerDelay, "ALIGNMENT=ACENTER" );
 		
 		Ihandle* toggleFunctionTitle = IupFlatToggle( GLOBAL.languageItems["showtitle"].toCString );
-		IupSetStrAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.showFunctionTitle) );
+		IupSetStrAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.parserSettings.showFunctionTitle) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
 		
 		Ihandle* togglePreLoadPrj = IupFlatToggle( GLOBAL.languageItems["preloadprj"].toCString );
-		IupSetStrAttribute( togglePreLoadPrj, "VALUE", toStringz(GLOBAL.togglePreLoadPrj) );
+		IupSetStrAttribute( togglePreLoadPrj, "VALUE", toStringz(GLOBAL.parserSettings.togglePreLoadPrj) );
 		IupSetHandle( "togglePreLoadPrj", togglePreLoadPrj );		
 
 		Ihandle* labelPreParseLevel = IupLabel( GLOBAL.languageItems["preparselevel"].toCString );
 		Ihandle* textPreParseLevel = IupText( null );
 		IupSetAttributes( textPreParseLevel, "SIZE=48x,MARGIN=0x0,SPIN=YES,SPINMAX=5,SPINMIN=0" );
-		IupSetInt( textPreParseLevel, "VALUE", GLOBAL.preParseLevel );
+		IupSetInt( textPreParseLevel, "VALUE", GLOBAL.parserSettings.preParseLevel );
 		IupSetHandle( "textPreParseLevel", textPreParseLevel );
 
 
@@ -399,7 +399,7 @@ private:
 		IupSetHandle( "toggleLiveFull", toggleLiveFull );
 
 		Ihandle* toggleUpdateOutline = IupFlatToggle( GLOBAL.languageItems["update"].toCString );
-		IupSetStrAttribute( toggleUpdateOutline, "VALUE", toStringz(GLOBAL.toggleUpdateOutlineLive) );
+		IupSetStrAttribute( toggleUpdateOutline, "VALUE", toStringz(GLOBAL.parserSettings.toggleUpdateOutlineLive) );
 		IupSetHandle( "toggleUpdateOutline", toggleUpdateOutline );
 
 		Ihandle* hBoxLive = IupHbox( toggleLiveNone, toggleLiveLight, toggleLiveFull, null );
@@ -413,14 +413,39 @@ private:
 		IupSetAttributes( frameLive, "SIZE=346x" );
 		IupSetStrAttribute( frameLive, "TITLE", GLOBAL.languageItems["parserlive"].toCString );
 
-		switch( GLOBAL.liveLevel )
+		switch( GLOBAL.parserSettings.liveLevel )
 		{
 			case 1:		IupSetAttribute( toggleLiveLight, "VALUE", "ON" ); break;
 			case 2:		IupSetAttribute( toggleLiveFull, "VALUE", "ON" ); break;
 			default:	IupSetAttribute( toggleLiveNone, "VALUE", "ON" ); break;
 		}
+		
+		version(FBIDE)
+		{
+			Ihandle* toggleConditionNone = IupFlatToggle( GLOBAL.languageItems["none"].toCString );
+			IupSetHandle( "toggleConditionNone", toggleConditionNone );
 
+			Ihandle* toggleConditionCustom = IupFlatToggle( GLOBAL.languageItems["custom"].toCString );
+			IupSetHandle( "toggleConditionCustom", toggleConditionCustom );
+			
+			Ihandle* toggleConditionFull = IupFlatToggle( GLOBAL.languageItems["full"].toCString );
+			IupSetHandle( "toggleConditionFull", toggleConditionFull );
 
+			Ihandle* hBoxCondition = IupHbox( toggleConditionNone, toggleConditionCustom, toggleConditionFull, null );
+			IupSetAttributes( hBoxCondition, "ALIGNMENT=ACENTER,HOMOGENEOUS=YES,GAP=30,MARGIN=10x" );
+			Ihandle* radioCondition = IupRadio( hBoxCondition );
+			
+			Ihandle* frameCondition = IupFrame( radioCondition );
+			IupSetAttributes( frameCondition, "SIZE=346x" );
+			IupSetStrAttribute( frameCondition, "TITLE", GLOBAL.languageItems["conditionalCompilation"].toCString );
+
+			switch( GLOBAL.parserSettings.conditionalCompilation )
+			{
+				case 0:		IupSetAttribute( toggleConditionNone, "VALUE", "ON" ); break;
+				case 2:		IupSetAttribute( toggleConditionFull, "VALUE", "ON" ); break;
+				default:	IupSetAttribute( toggleConditionCustom, "VALUE", "ON" ); break;
+			}
+		}
 
 		version(FBIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, IupFill, labelIncludeLevel, textIncludeLevel, null );
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
@@ -435,7 +460,7 @@ private:
 		IupSetAttribute( frameParser, "EXPANDCHILDREN", "YES");
 		IupSetAttribute( frameParser, "SIZE", "346x");
 
-		Ihandle* vBoxParserSettings = IupVbox( frameParser, frameLive, null );
+		version(FBIDE) Ihandle* vBoxParserSettings = IupVbox( frameParser, frameLive, frameCondition, null ); else Ihandle* vBoxParserSettings = IupVbox( frameParser, frameLive, null );
 		IupSetAttributes( vBoxParserSettings, "ALIGNMENT=ALEFT,MARGIN=2x5");
 		IupSetAttribute( vBoxParserSettings, "EXPANDCHILDREN", "YES");
 		
@@ -940,7 +965,7 @@ private:
 		IupSetAttributes( colorTemplateList, "NAME=Color-colorTemplateList,ACTIVE=YES,EDITBOX=YES,EXPAND=HORIZONTAL,DROPDOWN=YES,VISIBLEITEMS=5" );
 		IupSetStrAttribute( colorTemplateList, "FGCOLOR", toStringz( GLOBAL.editColor.txtFore ) );
 		IupSetStrAttribute( colorTemplateList, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		version(linux)
+		version(Posix)
 		{
 			for( int i = 0; i < 6; ++i )
 				IupSetStrAttributeId( colorTemplateList, "", i, "" ); // Add Dummy for linux
@@ -2008,7 +2033,7 @@ public:
 			IupSetStrAttribute( btnOpenx64Debugger, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
 			IupSetStrAttribute( btnOpenDebugger, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
 		}
-		version(linux)
+		version(Posix)
 		{
 			IupSetStrAttribute( btnOpenTerminal, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
 			IupSetStrAttribute( btnOpenHtmlApp, "IMAGE", toStringz( "icon_openfile" ~ tail ) );
@@ -2442,9 +2467,9 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editColor.keyWord[4] = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.keyWord[5] = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR" ) ).dup;
 			
-			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ) ) ) GLOBAL.autoCompletionTriggerWordCount = IupGetInt( IupGetHandle( "textTrigger" ), "VALUE" );
+			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textTrigger" ), "VALUE" ) ) ) ) GLOBAL.parserSettings.autoCompletionTriggerWordCount = IupGetInt( IupGetHandle( "textTrigger" ), "VALUE" );
 			if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textMaxHeight" ), "VALUE" ) ) ) ) GLOBAL.autoCMaxHeight = IupGetInt( IupGetHandle( "textMaxHeight" ), "VALUE" );
-			GLOBAL.statusBar.setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
+			GLOBAL.statusBar.setOriginalTrigger( GLOBAL.parserSettings.autoCompletionTriggerWordCount );
 			version(FBIDE) if( std.string.isNumeric( fSTRz( IupGetAttribute( IupGetHandle( "textIncludeLevel" ), "VALUE" ) ) ) ) GLOBAL.compilerSettings.includeLevel = IupGetInt( IupGetHandle( "textIncludeLevel" ), "VALUE" );
 			
 
@@ -2530,43 +2555,40 @@ extern(C) // Callback for CPreferenceDialog
 			
 			GLOBAL.compilerSettings.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
 			GLOBAL.compilerSettings.enableIncludeComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleIncludeComplete" ), "VALUE" ) ).dup;
-			GLOBAL.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
-			GLOBAL.togglePreLoadPrj						= fromStringz( IupGetAttribute( IupGetHandle( "togglePreLoadPrj" ), "VALUE" ) ).dup;
-			GLOBAL.showFunctionTitle					= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.togglePreLoadPrj						= fromStringz( IupGetAttribute( IupGetHandle( "togglePreLoadPrj" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.showFunctionTitle						= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
 				if( IupGetHandle( "menuFunctionTitle" ) != null ) IupSetStrAttribute( IupGetHandle( "menuFunctionTitle" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) );
 			
 			
-			GLOBAL.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
-			GLOBAL.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
-			GLOBAL.toggleCaseInsensitive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
-			/*GLOBAL.toggleShowListType					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWLISTTYPE" ), "VALUE" ) ).dup;*/
-			GLOBAL.compilerSettings.toggleShowAllMember	= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWALLMEMBER" ), "VALUE" ) ).dup;
-			GLOBAL.toggleEnableDwell					= fromStringz( IupGetAttribute( IupGetHandle( "toggleDWELL" ), "VALUE" ) ).dup;
-			GLOBAL.toggleOverWrite						= fromStringz( IupGetAttribute( IupGetHandle( "toggleOverWrite" ), "VALUE" ) ).dup;
-			GLOBAL.toggleCompleteAtBackThread			= fromStringz( IupGetAttribute( IupGetHandle( "toggleBackThread" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.toggleCaseInsensitive					= fromStringz( IupGetAttribute( IupGetHandle( "toggleCASEINSENSITIVE" ), "VALUE" ) ).dup;
+			GLOBAL.compilerSettings.toggleShowAllMember					= fromStringz( IupGetAttribute( IupGetHandle( "toggleSHOWALLMEMBER" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.toggleEnableDwell						= fromStringz( IupGetAttribute( IupGetHandle( "toggleDWELL" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.toggleOverWrite						= fromStringz( IupGetAttribute( IupGetHandle( "toggleOverWrite" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.toggleCompleteAtBackThread			= fromStringz( IupGetAttribute( IupGetHandle( "toggleBackThread" ), "VALUE" ) ).dup;
 			
 			if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveNone" ), "VALUE" ) ) == "ON" )
-				GLOBAL.liveLevel = 0;
+				GLOBAL.parserSettings.liveLevel = 0;
 			else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveLight" ), "VALUE" ) ) == "ON" )
-				GLOBAL.liveLevel = 1;
+				GLOBAL.parserSettings.liveLevel = 1;
 			else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveFull" ), "VALUE" ) ) == "ON" )
-				GLOBAL.liveLevel = 2;
+				GLOBAL.parserSettings.liveLevel = 2;
 			else
-				GLOBAL.liveLevel = 0;
+				GLOBAL.parserSettings.liveLevel = 0;
 
-			GLOBAL.toggleUpdateOutlineLive				= fromStringz( IupGetAttribute( IupGetHandle( "toggleUpdateOutline" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.toggleUpdateOutlineLive	= fromStringz( IupGetAttribute( IupGetHandle( "toggleUpdateOutline" ), "VALUE" ) ).dup;
 
-
-
-			if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveNone" ), "VALUE" ) ) == "ON" )
-				GLOBAL.liveLevel = 0;
-			else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveLight" ), "VALUE" ) ) == "ON" )
-				GLOBAL.liveLevel = 1;
-			else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleLiveFull" ), "VALUE" ) ) == "ON" )
-				GLOBAL.liveLevel = 2;
-			else
-				GLOBAL.liveLevel = 0;
-
+			version(FBIDE)
+			{
+				if( fromStringz( IupGetAttribute( IupGetHandle( "toggleConditionNone" ), "VALUE" ) ) == "ON" )
+					GLOBAL.parserSettings.conditionalCompilation = 0;
+				else if( fromStringz( IupGetAttribute( IupGetHandle( "toggleConditionFull" ), "VALUE" ) ) == "ON" )
+					GLOBAL.parserSettings.conditionalCompilation = 2;
+				else 
+					GLOBAL.parserSettings.conditionalCompilation = 1;
+			}
 
 			// Icon Invert
 			if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-toggleIcon" ), "VALUE" ) ) == "ON" )
@@ -2582,7 +2604,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.editorSetting00.UseDarkMode = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-toggleDarkMode" ), "VALUE" ) ).dup;
 				
 
-			if( GLOBAL.showFunctionTitle == "ON" )
+			if( GLOBAL.parserSettings.showFunctionTitle == "ON" )
 			{
 				IupSetAttribute( GLOBAL.toolbar.getListHandle(), "VISIBLE", "YES" );
 				IupRefresh( GLOBAL.toolbar.getListHandle() );
@@ -2598,7 +2620,7 @@ extern(C) // Callback for CPreferenceDialog
 				int value = ( cast(int) valuef / 100 ) * 100;
 			
 				IupSetInt( _valHandle, "VALUE", value );
-				GLOBAL.dwellDelay = to!(string)( value );
+				GLOBAL.parserSettings.dwellDelay = to!(string)( value );
 			}
 			
 			_valHandle = IupGetHandle( "valTriggerDelay" );
@@ -2606,14 +2628,14 @@ extern(C) // Callback for CPreferenceDialog
 			{
 				int v = IupGetInt( _valHandle, "VALUE" );
 				if( v < 50 ) v = 50;
-				GLOBAL.triggerDelay = to!(string)( v );
+				GLOBAL.parserSettings.triggerDelay = to!(string)( v );
 				AutoComplete.setTimer( v );
 			}
 			
 			_valHandle = IupGetHandle( "textPreParseLevel" );
 			if( _valHandle != null )
 			{
-				if( std.string.isNumeric( fSTRz( IupGetAttribute( _valHandle, "VALUE" ) ) ) ) GLOBAL.preParseLevel = IupGetInt( _valHandle, "VALUE" );
+				if( std.string.isNumeric( fSTRz( IupGetAttribute( _valHandle, "VALUE" ) ) ) ) GLOBAL.parserSettings.preParseLevel = IupGetInt( _valHandle, "VALUE" );
 			}
 			
 			//
@@ -2683,7 +2705,7 @@ extern(C) // Callback for CPreferenceDialog
 			version(Windows) GLOBAL.menubar.setFont( GLOBAL.fonts[0].fontString );
 			version(DIDE)
 			{
-				version(linux) GLOBAL.debugPanel.setFont();
+				version(Posix) GLOBAL.debugPanel.setFont();
 			}
 			else
 			{
@@ -2941,7 +2963,7 @@ extern(C) // Callback for CPreferenceDialog
 			if( std.file.exists( templateFP ) )
 			{
 				IupSetAttribute( ih, "REMOVEITEM", "ALL" );
-				version(linux) IupSetAttributeId( ih, "", 1, toStringz( " " ) );
+				version(Posix) IupSetAttributeId( ih, "", 1, toStringz( " " ) );
 				foreach( string filename; dirEntries( GLOBAL.poseidonPath ~ "/settings/colorTemplates", "*.ini", SpanMode.shallow ) )
 					IupSetStrAttribute( ih, "APPENDITEM", toStringz( Path.stripExtension( Path.baseName( filename ) ) ) );
 			}
@@ -3105,7 +3127,7 @@ extern(C) // Callback for CPreferenceDialog
 					}
 					else
 					{
-						version(linux)
+						version(Posix)
 						{
 							auto spaceTailPos = lastIndexOf( fontInformation, " " );
 							if( spaceTailPos > 0 )

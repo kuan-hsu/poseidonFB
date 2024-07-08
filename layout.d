@@ -69,7 +69,7 @@ void createExplorerWindow()
 		IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
 		IupSetStrAttribute( GLOBAL.documentSplit, "COLOR", toStringz( GLOBAL.editColor.fold ) );
 	}		
-	version(linux) IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
+	version(Posix) IupSetAttributes( GLOBAL.documentSplit, "SHOWGRIP=NO" );
 
 	// BOTTOM
 	if( GLOBAL.editorSetting01.RotateTabs == "ON" )
@@ -83,7 +83,7 @@ void createExplorerWindow()
 		IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
 		IupSetStrAttribute( GLOBAL.documentSplit2, "COLOR", toStringz( GLOBAL.editColor.fold ) );
 	}	
-	version(linux) IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
+	version(Posix) IupSetAttributes( GLOBAL.documentSplit2, "SHOWGRIP=NO" );
 	
 	GLOBAL.searchExpander = new CSearchExpander;
 	GLOBAL.activeDocumentTabs = GLOBAL.documentTabs;
@@ -97,7 +97,7 @@ void createExplorerWindow()
 		IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
 		IupSetStrAttribute( GLOBAL.explorerSplit, "COLOR", toStringz( GLOBAL.editColor.fold ) );
 	}
-	version(linux) IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
+	version(Posix) IupSetAttributes( GLOBAL.explorerSplit, "SHOWGRIP=NO" );
 	
 	//createMessagePanel();
 	GLOBAL.messagePanel = new CMessageAndSearch();
@@ -146,7 +146,7 @@ void createExplorerWindow()
 		IupSetStrAttribute( GLOBAL.messageSplit, "COLOR", toStringz( GLOBAL.editColor.fold ) );
 		IupSetInt( GLOBAL.messageSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 	}	
-	version(linux) IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
+	version(Posix) IupSetAttributes( GLOBAL.messageSplit, "SHOWGRIP=NO" );
 	IupSetAttribute( GLOBAL.messageSplit, "COLOR", toStringz( GLOBAL.editColor.linenumBack ) );
 	IupSetInt( GLOBAL.messageSplit, "BARSIZE", to!(int)( GLOBAL.editorSetting01.BarSize ) );
 	/+
@@ -299,7 +299,15 @@ extern(C)
 	// While Leave poseidon.......
 	int mainDialog_CLOSE_cb(Ihandle *ih)
 	{
-		if( fSTRz( IupGetAttribute( ih, "MINIMIZED" ) ) == "YES" ) version(Windows) ShowWindow( IupGetAttribute( ih, "HWND" ), SW_RESTORE );
+		version(Windows)
+		{
+			if( fSTRz( IupGetAttribute( ih, "MINIMIZED" ) ) == "YES" ) ShowWindow( IupGetAttribute( ih, "HWND" ), SW_RESTORE );
+		}
+		else
+		{
+			IupShow( ih );
+		}
+
 		if( GLOBAL.scintillaManager.length > 0 )
 		{
 			foreach( sc; GLOBAL.scintillaManager )
@@ -366,7 +374,7 @@ extern(C)
 				}
 			}
 
-			GLOBAL.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger();
+			GLOBAL.parserSettings.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger();
 			IDECONFIG.saveINI();
 
 			foreach( parser; GLOBAL.parserManager )
@@ -526,14 +534,14 @@ extern(C)
 					}
 
 					
-					if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel > 0 && !GLOBAL.bKeyUp )
+					if( GLOBAL.parserSettings.enableParser == "ON" && GLOBAL.parserSettings.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
 						if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
 						{
 							switch( c )
 							{
 								case 10, 13: // Eneter
-									switch( GLOBAL.liveLevel )
+									switch( GLOBAL.parserSettings.liveLevel )
 									{
 										case 1:
 											int prevLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 1;
@@ -556,7 +564,7 @@ extern(C)
 									break;
 
 								case 8, 9, 65535: // BACKSPACE, TAB, DEL
-									switch( GLOBAL.liveLevel )
+									switch( GLOBAL.parserSettings.liveLevel )
 									{
 										case 1: LiveParser.parseCurrentLine(); break;
 										case 2: LiveParser.parseCurrentBlock(); break;
@@ -567,7 +575,7 @@ extern(C)
 								default:
 									if( c > 31 && c < 127 )
 									{
-										switch( GLOBAL.liveLevel )
+										switch( GLOBAL.parserSettings.liveLevel )
 										{
 											case 1: LiveParser.parseCurrentLine(); break;
 											case 2: LiveParser.parseCurrentBlock(); break;
@@ -732,7 +740,7 @@ extern(C)
 	private int label_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
 	{
 		string _fn = fSTRz( filename );
-		version(linux) _fn = tools.modifyLinuxDropFileName( _fn );
+		version(Posix) _fn = tools.modifyLinuxDropFileName( _fn );
 
 		string prjSettingFile = _fn;
 		if( isDir( _fn ) )

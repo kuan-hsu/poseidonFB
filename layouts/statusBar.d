@@ -51,7 +51,7 @@ private:
 		IupSetCallback( compileOptionSelection, "BUTTON_CB", cast(Icallback) &CStatusBar_Empty_BUTTON_CB );
 		
 		codecomplete = IupFlatButton( "" );
-		if( GLOBAL.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "icon_run" ); else IupSetAttribute( codecomplete, "IMAGE", "icon_debug_stop" );
+		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 ) IupSetAttribute( codecomplete, "IMAGE", "icon_run" ); else IupSetAttribute( codecomplete, "IMAGE", "icon_debug_stop" );
 		IupSetAttributes( codecomplete, "NAME=label_Codecomplete,SHOWBORDER=NO,BORDERWIDTH=0,SIZE=10x8" );
 		IupSetStrAttribute( codecomplete, "TIP", GLOBAL.languageItems["codecompletiononoff"].toCString );
 		IupSetCallback( codecomplete, "FLAT_BUTTON_CB", cast(Icallback) &CStatusBar_Codecomplete_BUTTON_CB );
@@ -94,7 +94,7 @@ private:
 	this()
 	{
 		createLayout();
-		setOriginalTrigger( GLOBAL.autoCompletionTriggerWordCount );
+		setOriginalTrigger( GLOBAL.parserSettings.autoCompletionTriggerWordCount );
 	}
 	
 	~this(){}
@@ -654,14 +654,14 @@ extern(C) // Callback for CBaseDialog
 				if( fromStringz( IupGetAttribute( codecompleteHandle, "IMAGE" ) ) == "icon_run" )
 				{
 					GLOBAL.statusBar.setCompleteIcon( false );
-					GLOBAL.autoCompletionTriggerWordCount = 0;
+					GLOBAL.parserSettings.autoCompletionTriggerWordCount = 0;
 				}
 				else
 				{
 					GLOBAL.statusBar.setCompleteIcon( true );
-					GLOBAL.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger;
+					GLOBAL.parserSettings.autoCompletionTriggerWordCount = GLOBAL.statusBar.getOriginalTrigger;
 				}
-				if( preferenceTriggerHandle != null ) IupSetStrAttribute( preferenceTriggerHandle, "VALUE", toStringz( to!(string)( GLOBAL.autoCompletionTriggerWordCount ) ) );
+				if( preferenceTriggerHandle != null ) IupSetStrAttribute( preferenceTriggerHandle, "VALUE", toStringz( to!(string)( GLOBAL.parserSettings.autoCompletionTriggerWordCount ) ) );
 			}
 		}
 

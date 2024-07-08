@@ -255,7 +255,7 @@ struct LiveParser
 					if( newHead.getChildrenCount == 0 )
 					{
 						destroy( newHead );
-						if( GLOBAL.toggleUpdateOutlineLive == "ON" )
+						if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" )
 						{
 							Ihandle* actTree = GLOBAL.outlineTree.getActiveTree();
 							GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
@@ -287,7 +287,7 @@ struct LiveParser
 					if( newChildren.length )
 					{
 						int insertID;
-						if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
+						if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( currentLineNum );
 
 						oldHead = delChildrenByLineNum( oldHead, currentLineNum );
 
@@ -296,7 +296,7 @@ struct LiveParser
 							foreach( CASTnode node; newChildren )
 								oldHead.insertChildByLineNumber( node, node.lineNumber );
 
-							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertNodeByLineNumber( newChildren, insertID );
+							if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertNodeByLineNumber( newChildren, insertID );
 
 							newHead.zeroChildCount();
 						}
@@ -357,7 +357,7 @@ struct LiveParser
 
 					if( posHead == 0 )
 					{
-						GLOBAL.outlineTree.refresh( cSci, ( GLOBAL.toggleUpdateOutlineLive == "ON" ? true : false ) );
+						GLOBAL.outlineTree.refresh( cSci, ( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" ? true : false ) );
 						
 						int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 					
@@ -426,7 +426,7 @@ struct LiveParser
 							if( oldHead !is null )
 							{
 								int insertID;
-								if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( headLine );
+								if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( headLine );
 
 								CASTnode father = oldHead.getFather;
 
@@ -452,7 +452,7 @@ struct LiveParser
 								//if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.updateOneLineNodeByNumber( currentLineNum, newChildren );
 								father.insertChildByLineNumber( newHead[0], headLine );
 
-								if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], insertID );
+								if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], insertID );
 								
 								newHead.zeroChildCount();
 								destroy( newHead );
@@ -503,7 +503,7 @@ struct LiveParser
 						{
 							//IupMessage("FALSE","");
 							// Reparse All
-							GLOBAL.outlineTree.refresh( cSci, ( GLOBAL.toggleUpdateOutlineLive == "ON" ? true : false ) );
+							GLOBAL.outlineTree.refresh( cSci, ( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" ? true : false ) );
 							
 							int _ln = cast(int) IupScintillaSendMessage( cSci.getIupScintilla, 2166, currentPos, 0 ) + 1;
 						
@@ -578,7 +578,7 @@ struct LiveParser
 						if( oldHead !is null )
 						{
 							int insertID;
-							if( GLOBAL.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( headLine );
+							if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" ) insertID = GLOBAL.outlineTree.removeNodeAndGetInsertIndexByLineNumber( headLine );
 
 							CASTnode father = oldHead.getFather;
 
@@ -604,7 +604,7 @@ struct LiveParser
 							//if( GLOBAL.toggleUpdateOutlineLive == "ON" ) GLOBAL.outlineTree.updateOneLineNodeByNumber( currentLineNum, newChildren );
 							father.insertChildByLineNumber( newHead[0], headLine );
 							
-							if( GLOBAL.toggleUpdateOutlineLive == "ON" )
+							if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" )
 							{
 								GLOBAL.outlineTree.insertBlockNodeByLineNumber( newHead[0], insertID );
 							}						

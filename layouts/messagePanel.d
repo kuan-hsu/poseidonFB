@@ -272,7 +272,7 @@ public:
 		if( txt.length )
 		{
 			if( bClear ) IupSetStrAttribute( outputPanel, "VALUE", toStringz( txt ) ); else IupSetStrAttribute( outputPanel, "APPEND", toStringz( txt ) );
-			version(linux) if( bScrolltoBottom ) scrollOutputPanel( -1 );
+			version(Posix) if( bScrolltoBottom ) scrollOutputPanel( -1 );
 		}
 		else
 		{

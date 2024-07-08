@@ -186,7 +186,7 @@ public:
 				static Ihandle* prevIHandle;
 				if( _ih != prevIHandle ) // prevent double trigger
 				{
-					if( GLOBAL.enableParser == "ON" )
+					if( GLOBAL.parserSettings.enableParser == "ON" )
 					{
 						GLOBAL.compilerSettings.activeCompiler = tools.getActiveCompilerInformation();
 						
@@ -233,10 +233,7 @@ public:
 							}
 							version(FBIDE)
 							{
-								version(VERSION_NONE)
-								{
-								}
-								else
+								if( GLOBAL.parserSettings.conditionalCompilation == 1 )
 								{
 									// Reset VersionCondition Container
 									( cast(float[string]) AutoComplete.VersionCondition ).clear;
@@ -283,7 +280,7 @@ public:
 			//IupSetCallback( sci, "MAP_CB",cast(Icallback) &scintilla_MAP_CB );
 			IupSetCallback( sci, "MOTION_CB",cast(Icallback) &CScintilla_MOTION_CB );
 			IupSetCallback( sci, "DWELL_CB",cast(Icallback) &CScintilla_DWELL_CB );
-			IupSetInt( sci, "MOUSEDWELLTIME", to!(int)( GLOBAL.dwellDelay ) );
+			IupSetInt( sci, "MOUSEDWELLTIME", to!(int)( GLOBAL.parserSettings.dwellDelay ) );
 		}
 		catch( Exception e )
 		{
@@ -808,10 +805,10 @@ public:
 		IupScintillaSendMessage( sci, 2655, 1, 0 ); // SCI_SETCARETLINEVISIBLEALWAYS = 2655,
 
 		// SCI_AUTOCSETIGNORECASE 2115
-		if( GLOBAL.toggleIgnoreCase == "ON" ) IupScintillaSendMessage( sci, 2115, 1, 0 ); else IupScintillaSendMessage( sci, 2115, 0, 0 );
+		if( GLOBAL.parserSettings.toggleIgnoreCase == "ON" ) IupScintillaSendMessage( sci, 2115, 1, 0 ); else IupScintillaSendMessage( sci, 2115, 0, 0 );
 
 		// SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR 2634
-		if(GLOBAL.toggleCaseInsensitive == "ON" ) IupScintillaSendMessage( sci, 2634, 1, 0 ); else IupScintillaSendMessage( sci, 2634, 0, 0 );
+		if(GLOBAL.parserSettings.toggleCaseInsensitive == "ON" ) IupScintillaSendMessage( sci, 2634, 1, 0 ); else IupScintillaSendMessage( sci, 2634, 0, 0 );
 		
 		//IupScintillaSendMessage( sci, 2118, 0, 0 ); // SCI_AUTOCSETAUTOHIDE 2118
 		version(FBIDE) IupScintillaSendMessage( sci, 2660, 1, 0 ); //SCI_AUTOCSETORDER 2660
@@ -832,7 +829,7 @@ public:
 		}
 		
 		IupSetAttribute( sci, "USEPOPUP", "NO" );
-		IupSetInt( sci, "MOUSEDWELLTIME", to!(int)( GLOBAL.dwellDelay ) );
+		IupSetInt( sci, "MOUSEDWELLTIME", to!(int)( GLOBAL.parserSettings.dwellDelay ) );
 		
 		if( GLOBAL.editorSetting00.BraceMatchHighlight == "OFF" ) IupScintillaSendMessage( sci, 2351, -1, -1 ); // SCI_BRACEHIGHLIGHT 2351
 		if( GLOBAL.editorSetting00.HighlightCurrentWord != "ON" ) IupScintillaSendMessage( sci, 2505, 0, IupGetInt( sci, "COUNT" ) ); // SCI_INDICATORCLEARRANGE = 2505
@@ -1213,7 +1210,7 @@ extern(C)
 		
 		
 		// Using IupFlatTabs at Linux, Double Click will trigget BUTTON_CB on IupScintilla, then BUTTON_CB on IupFlatTabs
-		version(linux)
+		version(Posix)
 		{
 			if( pressed == 1 ) // in
 			{
@@ -1290,7 +1287,7 @@ extern(C)
 				}
 				else if( statusString[6] == 'A' )
 				{
-					version(linux)
+					version(Posix)
 					{
 						if( pressed == 0 )
 						{
@@ -1342,7 +1339,7 @@ extern(C)
 			}
 			else if( statusString[5] == 'D' )
 			{
-				version(linux) return IUP_IGNORE;
+				version(Posix) return IUP_IGNORE;
 			}
 		}			
 
@@ -1848,7 +1845,7 @@ extern(C)
 					IupDestroy( popupMenu );
 				}
 				
-				version(linux) return IUP_IGNORE; // For Linux MOD
+				version(Posix) return IUP_IGNORE; // For Linux MOD
 			}
 			else if( button == IUP_BUTTON2 ) // Middle Click
 			{
@@ -1874,7 +1871,7 @@ extern(C)
 
 							IupSetFocus( ih );							
 						}
-						version(linux) return IUP_IGNORE; else return IUP_DEFAULT;
+						version(Posix) return IUP_IGNORE; else return IUP_DEFAULT;
 					}
 				}
 	
@@ -1939,7 +1936,7 @@ extern(C)
 	
 	private int CScintilla_DWELL_CB( Ihandle *ih, int state, int pos, int x, int y )
 	{
-		if( GLOBAL.toggleEnableDwell == "ON" )
+		if( GLOBAL.parserSettings.toggleEnableDwell == "ON" )
 		{
 			if( state == 1 )
 			{
@@ -2553,7 +2550,7 @@ extern(C)
 							
 								try
 								{
-									if( GLOBAL.enableParser != "ON" )
+									if( GLOBAL.parserSettings.enableParser != "ON" )
 									{
 										// Check Keyword Autocomplete
 										if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" )
@@ -2579,7 +2576,7 @@ extern(C)
 										}
 										else
 										{
-											if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+											if( GLOBAL.parserSettings.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 										}
 									}
 								}
@@ -2618,7 +2615,7 @@ extern(C)
 							
 								try
 								{
-									if( GLOBAL.enableParser != "ON" )
+									if( GLOBAL.parserSettings.enableParser != "ON" )
 									{
 										// Check Keyword Autocomplete
 										if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" )
@@ -2646,7 +2643,7 @@ extern(C)
 										}
 										else
 										{
-											if( GLOBAL.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
+											if( GLOBAL.parserSettings.toggleCompleteAtBackThread == "ON" ) AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", false ); else AutoComplete.callAutocomplete( ih, pos - 1, lastChar, alreadyInput ~ " ", true );
 										}									
 									}
 								}
@@ -2776,7 +2773,7 @@ extern(C)
 					
 					return IUP_IGNORE;
 				}
-				else if( c == 536936291 || c == 526870979 ) // Ctrl + Ins / Ctrl + C
+				else if( c == 536936291 || c == 536870979 ) // Ctrl + Ins / Ctrl + C
 				{
 					string showtype = AutoComplete.getShowTypeContent();
 					if( showtype.length )
@@ -2830,7 +2827,7 @@ extern(C)
 			}
 			
 			scope textCovert = new IupString( _text.dup );
-			if( GLOBAL.toggleOverWrite == "ON" )
+			if( GLOBAL.parserSettings.toggleOverWrite == "ON" )
 			{
 				int tail = AutoComplete.getWholeWordTailPos( ih, pos );
 				if( tail > pos )
@@ -2992,7 +2989,7 @@ extern(C)
 			return IUP_DEFAULT;
 		}
 		
-		if( GLOBAL.compilerSettings.enableIncludeComplete != "ON" && GLOBAL.compilerSettings.enableKeywordComplete != "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) return IUP_DEFAULT;
+		if( GLOBAL.compilerSettings.enableIncludeComplete != "ON" && GLOBAL.compilerSettings.enableKeywordComplete != "ON" && GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 ) return IUP_DEFAULT;
 		
 		bool bCheckString = true;
 		version(FBIDE) if( GLOBAL.compilerSettings.enableIncludeComplete == "ON" ) bCheckString = false;
@@ -3052,7 +3049,7 @@ extern(C)
 			}
 			
 			// Check Keyword Autocomplete
-			if( GLOBAL.enableParser != "ON" || ( GLOBAL.enableParser == "ON" && GLOBAL.autoCompletionTriggerWordCount < 1 ) )
+			if( GLOBAL.parserSettings.enableParser != "ON" || ( GLOBAL.parserSettings.enableParser == "ON" && GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 ) )
 			{
 				// Check Keyword Autocomplete
 				if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" )
@@ -3072,9 +3069,9 @@ extern(C)
 							
 							if( word.length )
 							{
-								if( GLOBAL.autoCompletionTriggerWordCount > 0 )
+								if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 )
 								{
-									if( word.length < GLOBAL.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
+									if( word.length < GLOBAL.parserSettings.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
 								}
 								else
 								{
@@ -3100,7 +3097,7 @@ extern(C)
 		AutoComplete.updateCallTip( ih, pos, GLOBAL.scintillaActionText );
 
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
-		if( GLOBAL.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
+		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 		
 		if( GLOBAL.scintillaActionInsert == 1 )
 		{
@@ -3150,13 +3147,13 @@ extern(C)
 
 					if( !bDot && !bOpenParen )
 					{
-						if( alreadyInput.length < GLOBAL.autoCompletionTriggerWordCount ) break;
+						if( alreadyInput.length < GLOBAL.parserSettings.autoCompletionTriggerWordCount ) break;
 						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) break;
 					}
 					
 					try
 					{
-						if( GLOBAL.toggleCompleteAtBackThread == "ON" )
+						if( GLOBAL.parserSettings.toggleCompleteAtBackThread == "ON" )
 						{
 							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, false );
 						}
@@ -3287,7 +3284,7 @@ extern(C)
 	private int CScintilla_dropfiles_cb( Ihandle *ih, char* filename, int num, int x, int y )
 	{
 		string _fn = fSTRz( filename );
-		version(linux) _fn = tools.modifyLinuxDropFileName( _fn );
+		version(Posix) _fn = tools.modifyLinuxDropFileName( _fn );
 	
 		if( std.file.isDir( _fn ) )
 		{

@@ -301,7 +301,7 @@ private:
 		IupSetStrAttribute( listHandle, "FGCOLOR", toStringz ( GLOBAL.editColor.txtFore ) );
 		IupSetAttribute( listHandle, "HLCOLORALPHA", "0" );
 		IupSetStrAttribute( listHandle, "BGCOLOR", toStringz( GLOBAL.editColor.txtBack ) );
-		if( GLOBAL.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
+		if( GLOBAL.parserSettings.showFunctionTitle == "ON" ) IupSetAttribute( listHandle, "VISIBLE", "YES" ); else IupSetAttribute( listHandle, "VISIBLE", "NO" );
 		
 		Ihandle* commandText = IupScintilla();
 		IupSetAttributes( commandText, "ACTIVE=YES,NAME=POSEIDON_COMMANDLINE,VISIBLE=NO,SIZE=1x8" );
@@ -326,7 +326,7 @@ private:
 
 		IupSetAttributes( handle, "ALIGNMENT=ACENTER,NAME=POSEIDON_TOOLBAR" );
 		IupSetHandle( "POSEIDON_MAIN_TOOLBAR", handle );
-		version(linux) IupSetAttributes( handle, "MARGIN=0x2" );
+		version(Posix) IupSetAttributes( handle, "MARGIN=0x2" );
 		
 		changeIcons();
 	}
