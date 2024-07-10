@@ -468,6 +468,7 @@ public:
 			doc ~= setINILineData( "enablekeywordcomplete", GLOBAL.compilerSettings.enableKeywordComplete );
 			doc ~= setINILineData( "enableincludecomplete", GLOBAL.compilerSettings.enableIncludeComplete );
 			doc ~= setINILineData( "enableparser", GLOBAL.parserSettings.enableParser );
+			doc ~= setINILineData( "manualcomplete", GLOBAL.parserSettings.autoCompleteManually );
 			doc ~= setINILineData( "parsertrigger", Conv.to!(string)( GLOBAL.parserSettings.autoCompletionTriggerWordCount ) );
 			doc ~= setINILineData( "togglepreloadprj", GLOBAL.parserSettings.togglePreLoadPrj );
 			doc ~= setINILineData( "showfunctiontitle", GLOBAL.parserSettings.showFunctionTitle );
@@ -888,6 +889,7 @@ public:
 							case "enablekeywordcomplete":	GLOBAL.compilerSettings.enableKeywordComplete = right;			break;
 							case "enableincludecomplete":	GLOBAL.compilerSettings.enableIncludeComplete = right;			break;
 							case "enableparser":			GLOBAL.parserSettings.enableParser = right;						break;
+							case "manualcomplete":			GLOBAL.parserSettings.autoCompleteManually = right;				break;
 							case "parsertrigger":			GLOBAL.parserSettings.autoCompletionTriggerWordCount = Conv.to!(int)( right );	break;
 							case "togglepreloadprj":		GLOBAL.parserSettings.togglePreLoadPrj = right;					break;
 							case "showfunctiontitle":		GLOBAL.parserSettings.showFunctionTitle = right;				break;

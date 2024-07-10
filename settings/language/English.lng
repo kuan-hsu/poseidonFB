@@ -120,6 +120,7 @@ options=Options
 				enablekeyword=Enable Keyword Autocomplete
 				enableinclude=Enable Include Autocomplete
 				enableparser=Enable Parser
+				manualcomplete=Use Autocomplete Manually
 				showtitle=Show Function Title
 				preloadprj=Project Pre-Parse While Loading
 				width=Width

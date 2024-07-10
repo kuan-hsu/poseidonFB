@@ -868,7 +868,7 @@ version(FBIDE)
 		Dim array_symbol (arraybounds) As DataType = { expression [, ...] } | Any
 		Dim udt_symbol As DataType = ( expression [, ...] ) | Any
 		*/
-		bool parseVariable()
+		bool parseVariable( string _protection = "" )
 		{
 			bool bConst;
 			
@@ -882,7 +882,7 @@ version(FBIDE)
 
 					parseToken();
 
-					string	_type, _name, _protection;
+					string	_type, _name;
 					int		_lineNum;
 
 					if( token().tok == TOK.Tshared )
@@ -1974,7 +1974,7 @@ version(FBIDE)
 							break;
 
 						case TOK.Tdim:
-							parseVariable();
+							parseVariable( _protection );
 							break;
 							
 						case TOK.Tas:

@@ -3945,12 +3945,11 @@ version(DIDE)
 		
 		static bool updateCallTipByDirectKey( Ihandle* ih, int pos )
 		{
-			int		commaCount, parenCount, firstOpenParenPosFromDocument;
-			string	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
-
 			if( cast(int) IupScintillaSendMessage( ih, 2202, 0, 0 ) == 1 )
 			{
-				string list = calltipContainer.top();
+				int		commaCount, parenCount, firstOpenParenPosFromDocument;
+				string	procedureNameFromDocument = AutoComplete.parseProcedureForCalltip( ih, pos, commaCount, parenCount, firstOpenParenPosFromDocument ); // from document
+				string	list = calltipContainer.top();
 				if( list.length )
 				{
 					auto semicolonPos = indexOf( list, ";" );
@@ -3969,6 +3968,7 @@ version(DIDE)
 						else
 						{
 							IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
+							if( GLOBAL.parserSettings.autoCompleteManually == "ON" ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 						}
 					}
 				}
@@ -4001,7 +4001,7 @@ version(DIDE)
 					auto sci = ScintillaAction.getActiveIupScintilla();
 					if( sci != null )
 					{
-						if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
+						if( IupGetInt( sci, "AUTOCACTIVE" ) == 0 )
 						{
 							int		_pos = ScintillaAction.getCurrentPos( sci );
 							int		dummyHeadPos;
@@ -4052,7 +4052,7 @@ version(DIDE)
 					auto sci = ScintillaAction.getActiveIupScintilla();
 					if( sci != null )
 					{
-						if( fromStringz( IupGetAttribute( sci, "AUTOCACTIVE" ) ) == "NO" )
+						if( IupGetInt( sci, "AUTOCACTIVE" ) == 0 )
 						{
 							int		_pos = ScintillaAction.getCurrentPos( sci );
 							

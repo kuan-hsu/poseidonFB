@@ -2999,27 +2999,6 @@ extern(C)
 		if( ScintillaAction.isComment( ih, pos, bCheckString ) )
 			if( ScintillaAction.isComment( ih, pos - 1, bCheckString ) ) return IUP_DEFAULT;
 
-		/+
-		// Avoid keypress release reaction slow issue
-		if( GLOBAL.enableParser == "ON" && GLOBAL.liveLevel == 1 )
-		{
-			if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
-			{
-				if( insert == 1 )
-				{
-					int currentLineNum = cast(int) IupScintillaSendMessage( ih, 2166, pos, 0 );
-					int lineHeadPostion = cast(int) IupScintillaSendMessage( ih, 2167, currentLineNum, 0 );
-					int insertPos = pos - lineHeadPostion;
-					
-					char[] t = fromStringz( IupGetAttribute( ih, "LINEVALUE" ) );
-					t = t[0..insertPos] ~ fromStringz( _text ) ~ t[insertPos..$];
-					//Stdout( t ).newline;
-					LiveParser.parseCurrentLine( currentLineNum + 1, t );
-				}
-			}
-		}		
-		+/
-		
 		
 		if( GLOBAL.scintillaActionLength > 2 ) return IUP_DEFAULT; // Prevent insert(paste) too big text to crash
 
@@ -3027,146 +3006,154 @@ extern(C)
 		// Include Autocomplete
 		if( AutoComplete.showListThread is null )
 		{
-			if( GLOBAL.compilerSettings.enableIncludeComplete == "ON" )
+			if( GLOBAL.parserSettings.autoCompleteManually != "ON" )
 			{
-				bool bCheckDeclare;
-				version(FBIDE)	bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos - 1 );
-				version(DIDE)	bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos - 1 );
-
-				if( bCheckDeclare )
+				if( GLOBAL.compilerSettings.enableIncludeComplete == "ON" )
 				{
-					
-					string alreadyInput = GLOBAL.scintillaActionText.dup;
-					string list = AutoComplete.includeComplete( ih, pos, alreadyInput ); // After calling, alreadyInput be modified
-					if( list.length )
+					bool bCheckDeclare;
+					version(FBIDE)	bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos - 1 );
+					version(DIDE)	bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos - 1 );
+
+					if( bCheckDeclare )
 					{
-						scope _result = new IupString( list );
-						ScintillaAction.directSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString );
 						
-						return IUP_DEFAULT;
+						string alreadyInput = GLOBAL.scintillaActionText.dup;
+						string list = AutoComplete.includeComplete( ih, pos, alreadyInput ); // After calling, alreadyInput be modified
+						if( list.length )
+						{
+							scope _result = new IupString( list );
+							ScintillaAction.directSendMessage( ih, 2100, cast(size_t) alreadyInput.length - 1, cast(ptrdiff_t) _result.toCString );
+							
+							return IUP_DEFAULT;
+						}
 					}
 				}
-			}
-			
-			// Check Keyword Autocomplete
-			if( GLOBAL.parserSettings.enableParser != "ON" || ( GLOBAL.parserSettings.enableParser == "ON" && GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 ) )
-			{
+				
 				// Check Keyword Autocomplete
-				if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" )
+				if( GLOBAL.parserSettings.enableParser != "ON" || ( GLOBAL.parserSettings.enableParser == "ON" && GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 ) )
 				{
-					int dummyHeadPos;
-					string sKeyin = GLOBAL.scintillaActionText;
-					
-					switch( sKeyin )
+					// Check Keyword Autocomplete
+					if( GLOBAL.compilerSettings.enableKeywordComplete == "ON" )
 					{
-						case " ", "\n", "\t", "\r", ")":
-							IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-							break;
-							
-						default:
-							string word = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos );
-							word = ( Algorithm.reverse( word.dup ) ~ sKeyin ).dup;
-							
-							if( word.length )
-							{
-								if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 )
-								{
-									if( word.length < GLOBAL.parserSettings.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
-								}
-								else
-								{
-									if( word.length < 2 ) return IUP_DEFAULT;
-								}
+						int dummyHeadPos;
+						string sKeyin = GLOBAL.scintillaActionText;
+						
+						switch( sKeyin )
+						{
+							case " ", "\n", "\t", "\r", ")":
+								IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+								break;
 								
-								string list;
-								if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" ) list = AutoComplete.getKeywordContainerList( word );
-								if( list.length )
+							default:
+								string word = AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos );
+								word = ( Algorithm.reverse( word.dup ) ~ sKeyin ).dup;
+								
+								if( word.length )
 								{
-									scope _result = new IupString( list );
-									ScintillaAction.directSendMessage( ih, 2100, cast(size_t) word.length - 1, cast(ptrdiff_t) _result.toCString );
+									if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 )
+									{
+										if( word.length < GLOBAL.parserSettings.autoCompletionTriggerWordCount ) return IUP_DEFAULT;
+									}
+									else
+									{
+										if( word.length < 2 ) return IUP_DEFAULT;
+									}
+									
+									string list;
+									if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) != "YES" ) list = AutoComplete.getKeywordContainerList( word );
+									if( list.length )
+									{
+										scope _result = new IupString( list );
+										ScintillaAction.directSendMessage( ih, 2100, cast(size_t) word.length - 1, cast(ptrdiff_t) _result.toCString );
+									}
 								}
-							}
+						}
 					}
-				}
 
-				return IUP_DEFAULT;
+					return IUP_DEFAULT;
+				}
 			}
 		}
+		
+		if( GLOBAL.parserSettings.enableParser == "OFF" ) return IUP_DEFAULT;
 
 		// Check CallTip
-		AutoComplete.updateCallTip( ih, pos, GLOBAL.scintillaActionText );
+		if( GLOBAL.parserSettings.autoCompleteManually != "ON" ) AutoComplete.updateCallTip( ih, pos, GLOBAL.scintillaActionText ); else AutoComplete.updateCallTipByDirectKey( ih, pos );
 
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 		
-		if( GLOBAL.scintillaActionInsert == 1 )
+		if( GLOBAL.parserSettings.autoCompleteManually != "ON" )
 		{
-			int dummyHeadPos;
-			string text = GLOBAL.scintillaActionText;
-			
-			switch( text )
+			if( GLOBAL.scintillaActionInsert == 1 )
 			{
-				case " ", "\n", "\t", "\r", ")":
-					IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
-					//bWithoutList = false;
-					break;
+				int dummyHeadPos;
+				string text = GLOBAL.scintillaActionText;
+				
+				switch( text )
+				{
+					case " ", "\n", "\t", "\r", ")":
+						IupSetAttribute( ih, "AUTOCCANCEL", "YES" );
+						//bWithoutList = false;
+						break;
 
-				default:
-					string	alreadyInput;
-					bool	bDot, bOpenParen;
+					default:
+						string	alreadyInput;
+						bool	bDot, bOpenParen;
 
-					if( text == ">" )
-					{
-						version(FBIDE)
+						if( text == ">" )
 						{
-							if( pos > 0 )
+							version(FBIDE)
 							{
-								if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
+								if( pos > 0 )
 								{
-									alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( ih, pos - 1, dummyHeadPos ).dup );
-									alreadyInput ~= "->";
-									bDot = true;
+									if( fromStringz( IupGetAttributeId( ih, "CHAR", pos - 1 ) ) == "-" )
+									{
+										alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( ih, pos - 1, dummyHeadPos ).dup );
+										alreadyInput ~= "->";
+										bDot = true;
+									}
 								}
 							}
 						}
-					}
-					else if( text == "." )
-					{
-						bDot = true;
-					}
-					else if( text == "(" )
-					{
-						bOpenParen = true;
-					}
-					
-					if( !alreadyInput.length )
-					{
-						alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos ).dup );
-						alreadyInput ~= text;
-					}
-
-					if( !bDot && !bOpenParen )
-					{
-						if( alreadyInput.length < GLOBAL.parserSettings.autoCompletionTriggerWordCount ) break;
-						if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) break;
-					}
-					
-					try
-					{
-						if( GLOBAL.parserSettings.toggleCompleteAtBackThread == "ON" )
+						else if( text == "." )
 						{
-							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, false );
+							bDot = true;
 						}
-						else
-							AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );
-							
-						return IUP_DEFAULT;
-					}
-					catch( Exception e )
-					{
-						IupMessage( "callAutocomplete() Error", toStringz( e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
-					}
+						else if( text == "(" )
+						{
+							bOpenParen = true;
+						}
 						
+						if( !alreadyInput.length )
+						{
+							alreadyInput = Algorithm.reverse( AutoComplete.getWholeWordReverse( ih, pos, dummyHeadPos ).dup );
+							alreadyInput ~= text;
+						}
+
+						if( !bDot && !bOpenParen )
+						{
+							if( alreadyInput.length < GLOBAL.parserSettings.autoCompletionTriggerWordCount ) break;
+							if( fromStringz( IupGetAttribute( ih, "AUTOCACTIVE" ) ) == "YES" ) break;
+						}
+						
+						try
+						{
+							if( GLOBAL.parserSettings.toggleCompleteAtBackThread == "ON" )
+							{
+								AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, false );
+							}
+							else
+								AutoComplete.callAutocomplete( ih, pos, text, alreadyInput, true );
+								
+							return IUP_DEFAULT;
+						}
+						catch( Exception e )
+						{
+							IupMessage( "callAutocomplete() Error", toStringz( e.toString ~"\n" ~ e.file ~ " : " ~ to!(string)( e.line ) ) );
+						}
+							
+				}
 			}
 		}
 		

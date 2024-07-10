@@ -51,6 +51,7 @@ struct ParserSettingUint
 {
 	string		extraParsableExt = "inc";
 	string		enableParser = "ON";
+	string		autoCompleteManually = "OFF";
 	string		showFunctionTitle = "OFF";
 	string		togglePreLoadPrj = "OFF";
 	string		showTypeWithParams = "OFF";
@@ -633,6 +634,7 @@ public:
 						GLOBAL.languageItems["enablekeyword"] = new IupString( "Enable Keyword Autocomplete" );
 						GLOBAL.languageItems["enableinclude"] = new IupString( "Enable Include Autocomplete" );
 						GLOBAL.languageItems["enableparser"] = new IupString( "Enable Parser" );
+						GLOBAL.languageItems["manualcomplete"] = new IupString( "Use Autocomplete Manually" );
 						GLOBAL.languageItems["showtitle"] = new IupString( "Show Function Title" );
 						GLOBAL.languageItems["preloadprj"] = new IupString( "Project Pre-Parse While Loading" );
 						GLOBAL.languageItems["width"] = new IupString( "Width" );

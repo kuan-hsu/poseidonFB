@@ -278,6 +278,11 @@ private:
 		IupSetStrAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.parserSettings.enableParser) );
 		IupSetHandle( "toggleUseParser", toggleUseParser );
 		
+		Ihandle* toggleManualComplete = IupFlatToggle( GLOBAL.languageItems["manualcomplete"].toCString );
+		IupSetStrAttribute( toggleManualComplete, "VALUE", toStringz(GLOBAL.parserSettings.autoCompleteManually) );
+		IupSetHandle( "toggleManualComplete", toggleManualComplete );
+		
+		
 		Ihandle* labelMaxHeight = IupLabel( GLOBAL.languageItems["autocmaxheight"].toCString );
 		IupSetAttributes( labelMaxHeight, "SIZE=120x12,ALIGNMENT=ARIGHT:ACENTER" );
 		
@@ -451,7 +456,7 @@ private:
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" ); 
 		
-		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, /*toggleSHOWLISTTYPE, */toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleManualComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, /*toggleSHOWLISTTYPE, */toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
 	
@@ -2555,7 +2560,9 @@ extern(C) // Callback for CPreferenceDialog
 			
 			GLOBAL.compilerSettings.enableKeywordComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleKeywordComplete" ), "VALUE" ) ).dup;
 			GLOBAL.compilerSettings.enableIncludeComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleIncludeComplete" ), "VALUE" ) ).dup;
+
 			GLOBAL.parserSettings.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
+			GLOBAL.parserSettings.autoCompleteManually					= fromStringz( IupGetAttribute( IupGetHandle( "toggleManualComplete" ), "VALUE" ) ).dup;
 			GLOBAL.parserSettings.togglePreLoadPrj						= fromStringz( IupGetAttribute( IupGetHandle( "togglePreLoadPrj" ), "VALUE" ) ).dup;
 			GLOBAL.parserSettings.showFunctionTitle						= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
 				if( IupGetHandle( "menuFunctionTitle" ) != null ) IupSetStrAttribute( IupGetHandle( "menuFunctionTitle" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) );

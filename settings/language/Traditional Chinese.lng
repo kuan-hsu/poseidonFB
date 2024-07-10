@@ -120,6 +120,7 @@ options=選項
 				enablekeyword=啟用關鍵字自動完成
 				enableinclude=啟用引含自動完成
 				enableparser=啟動分析器
+				manualcomplete=手動啟動自動完成
 				showtitle=顯示函式名稱
 				preloadprj=預先進行專案分析
 				width=寬度

@@ -979,8 +979,8 @@ DIALOGTYPE: Type of dialog defines which icon will be displayed besides the mess
 +/
 int MessageDlg( string title, string message, string DIALOGTYPE = "QUESTION", string BUTTONS = "YESNO", int _x = IUP_CENTERPARENT, int _y = IUP_CENTERPARENT )
 {
-	int result;
-	version(Windows)
+	int	result;
+	if( GLOBAL.bCanUseDarkMode )
 	{
 		scope customDlg = new CCustomMessageDialog( title, message, BUTTONS, DIALOGTYPE );
 		result = customDlg.show( _x, _y );

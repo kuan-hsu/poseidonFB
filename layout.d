@@ -536,52 +536,65 @@ extern(C)
 					
 					if( GLOBAL.parserSettings.enableParser == "ON" && GLOBAL.parserSettings.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
-						if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
+						if( IupGetInt( cSci.getIupScintilla, "AUTOCACTIVE" ) == 0 ) 
 						{
-							switch( c )
+							if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
 							{
-								case 10, 13: // Eneter
-									switch( GLOBAL.parserSettings.liveLevel )
-									{
-										case 1:
-											int prevLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla ) - 1;
-											string prevLineText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
-											//GLOBAL.messagePanel.printOutputPanel( "prevLine(" ~ Integer.toString(prevLine) ~ "): " ~ prevLineText );
-											
-											if( strip( prevLineText ).length )
-											{
-												if( strip( fromStringz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ) ).length )
+								switch( c )
+								{
+									case 10, 13: // Eneter
+										switch( GLOBAL.parserSettings.liveLevel )
+										{
+											case 1:
+												if( AutoComplete.bAutocompletionPressEnter ) break;
+												int currentLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla );
+												int prevLine = currentLine - 1;
+												string prevLineText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
+												if( strip( prevLineText ).length )
 												{
-													LiveParser.parseCurrentLine( prevLine );
-													LiveParser.parseCurrentLine();
+													LiveParser.parseCurrentLine( prevLine, prevLineText );
+													string currentLineText = strip( fSTRz( IupGetAttribute( cSci.getIupScintilla, "LINEVALUE" ) ) );
+													if( currentLineText.length ) LiveParser.parseCurrentLine( currentLine, currentLineText );
 												}
-											}
-											break;
-											
-										case 2: LiveParser.parseCurrentBlock(); break;
-										default:
-									}
-									break;
+												break;
+												
+											case 2: LiveParser.parseCurrentBlock(); break;
+											default:
+										}
+										break;
 
-								case 8, 9, 65535: // BACKSPACE, TAB, DEL
-									switch( GLOBAL.parserSettings.liveLevel )
-									{
-										case 1: LiveParser.parseCurrentLine(); break;
-										case 2: LiveParser.parseCurrentBlock(); break;
-										default:
-									}
-									break;
-										
-								default:
-									if( c > 31 && c < 127 )
-									{
+									case 8, 9, 65535: // BACKSPACE, TAB, DEL
 										switch( GLOBAL.parserSettings.liveLevel )
 										{
 											case 1: LiveParser.parseCurrentLine(); break;
 											case 2: LiveParser.parseCurrentBlock(); break;
 											default:
 										}
-									}
+										break;
+									
+									case 65505: // For Quick-Type " ( shift + ' )
+										if( GLOBAL.KeyNumber == 34 || GLOBAL.KeyNumber == 39 )
+										{
+											switch( GLOBAL.parserSettings.liveLevel )
+											{
+												case 1: LiveParser.parseCurrentLine(); break;
+												case 2: LiveParser.parseCurrentBlock(); break;
+												default:
+											}
+										}
+										break;
+											
+									default:
+										if( c > 31 && c < 127 )
+										{
+											switch( GLOBAL.parserSettings.liveLevel )
+											{
+												case 1: LiveParser.parseCurrentLine(); break;
+												case 2: LiveParser.parseCurrentBlock(); break;
+												default:
+											}
+										}
+								}
 							}
 						}
 					}
