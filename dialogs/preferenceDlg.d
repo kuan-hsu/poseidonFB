@@ -278,11 +278,6 @@ private:
 		IupSetStrAttribute( toggleUseParser, "VALUE", toStringz(GLOBAL.parserSettings.enableParser) );
 		IupSetHandle( "toggleUseParser", toggleUseParser );
 		
-		Ihandle* toggleManualComplete = IupFlatToggle( GLOBAL.languageItems["manualcomplete"].toCString );
-		IupSetStrAttribute( toggleManualComplete, "VALUE", toStringz(GLOBAL.parserSettings.autoCompleteManually) );
-		IupSetHandle( "toggleManualComplete", toggleManualComplete );
-		
-		
 		Ihandle* labelMaxHeight = IupLabel( GLOBAL.languageItems["autocmaxheight"].toCString );
 		IupSetAttributes( labelMaxHeight, "SIZE=120x12,ALIGNMENT=ARIGHT:ACENTER" );
 		
@@ -456,7 +451,7 @@ private:
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" ); 
 		
-		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleManualComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, /*toggleSHOWLISTTYPE, */toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
+		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, /*toggleSHOWLISTTYPE, */toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
 		
 	
@@ -1837,27 +1832,27 @@ private:
 
 		Ihandle* keyWordText0 = IupText( null );
 		IupSetAttributes( keyWordText0, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetStrAttribute( keyWordText0, "VALUE", toStringz( GLOBAL.KEYWORDS[0] ) );
+		IupSetStrAttribute( keyWordText0, "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[0] ) );
 		IupSetHandle( "keyWordText0", keyWordText0 );
 		Ihandle* keyWordText1 = IupText( null );
 		IupSetAttributes( keyWordText1, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetStrAttribute( keyWordText1, "VALUE", toStringz( GLOBAL.KEYWORDS[1] ) );
+		IupSetStrAttribute( keyWordText1, "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[1] ) );
 		IupSetHandle( "keyWordText1", keyWordText1 );
 		Ihandle* keyWordText2 = IupText( null );
 		IupSetAttributes( keyWordText2, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetStrAttribute( keyWordText2, "VALUE", toStringz( GLOBAL.KEYWORDS[2] ) );
+		IupSetStrAttribute( keyWordText2, "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[2] ) );
 		IupSetHandle( "keyWordText2", keyWordText2 );
 		Ihandle* keyWordText3 = IupText( null );
 		IupSetAttributes( keyWordText3, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetStrAttribute( keyWordText3, "VALUE", toStringz( GLOBAL.KEYWORDS[3] ) );
+		IupSetStrAttribute( keyWordText3, "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[3] ) );
 		IupSetHandle( "keyWordText3", keyWordText3 );
 		Ihandle* keyWordText4 = IupText( null );
 		IupSetAttributes( keyWordText4, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetStrAttribute( keyWordText4, "VALUE", toStringz( GLOBAL.KEYWORDS[4] ) );
+		IupSetStrAttribute( keyWordText4, "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[4] ) );
 		IupSetHandle( "keyWordText4", keyWordText4 );
 		Ihandle* keyWordText5 = IupText( null );
 		IupSetAttributes( keyWordText5, "MULTILINE=YES,EXPAND=YES,WORDWRAP=YES,AUTOHIDE=YES,SCROLLBAR=YES,PADDING=2x2" );
-		IupSetStrAttribute( keyWordText5, "VALUE", toStringz( GLOBAL.KEYWORDS[5] ) );
+		IupSetStrAttribute( keyWordText5, "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[5] ) );
 		IupSetHandle( "keyWordText5", keyWordText5 );
 		
 		
@@ -2237,12 +2232,12 @@ extern(C) // Callback for CPreferenceDialog
 		{
 			version(Windows) string oldUseDarkMode = GLOBAL.editorSetting00.UseDarkMode;
 			
-			GLOBAL.KEYWORDS[0] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText0" ), "VALUE" ))).dup;
-			GLOBAL.KEYWORDS[1] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText1" ), "VALUE" ))).dup;
-			GLOBAL.KEYWORDS[2] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText2" ), "VALUE" ))).dup;
-			GLOBAL.KEYWORDS[3] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText3" ), "VALUE" ))).dup;
-			GLOBAL.KEYWORDS[4] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText4" ), "VALUE" ))).dup;
-			GLOBAL.KEYWORDS[5] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText5" ), "VALUE" ))).dup;
+			GLOBAL.parserSettings.KEYWORDS[0] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText0" ), "VALUE" ))).dup;
+			GLOBAL.parserSettings.KEYWORDS[1] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText1" ), "VALUE" ))).dup;
+			GLOBAL.parserSettings.KEYWORDS[2] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText2" ), "VALUE" ))).dup;
+			GLOBAL.parserSettings.KEYWORDS[3] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText3" ), "VALUE" ))).dup;
+			GLOBAL.parserSettings.KEYWORDS[4] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText4" ), "VALUE" ))).dup;
+			GLOBAL.parserSettings.KEYWORDS[5] = strip( fromStringz(IupGetAttribute( IupGetHandle( "keyWordText5" ), "VALUE" ))).dup;
 			
 			GLOBAL.editorSetting00.LineMargin				= fromStringz(IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" )).dup;
 				if( IupGetHandle( "menuLineMargin" ) != null ) IupSetStrAttribute( IupGetHandle( "menuLineMargin" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleLineMargin" ), "VALUE" ) );
@@ -2562,7 +2557,6 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.compilerSettings.enableIncludeComplete				= fromStringz( IupGetAttribute( IupGetHandle( "toggleIncludeComplete" ), "VALUE" ) ).dup;
 
 			GLOBAL.parserSettings.enableParser							= fromStringz( IupGetAttribute( IupGetHandle( "toggleUseParser" ), "VALUE" ) ).dup;
-			GLOBAL.parserSettings.autoCompleteManually					= fromStringz( IupGetAttribute( IupGetHandle( "toggleManualComplete" ), "VALUE" ) ).dup;
 			GLOBAL.parserSettings.togglePreLoadPrj						= fromStringz( IupGetAttribute( IupGetHandle( "togglePreLoadPrj" ), "VALUE" ) ).dup;
 			GLOBAL.parserSettings.showFunctionTitle						= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
 				if( IupGetHandle( "menuFunctionTitle" ) != null ) IupSetStrAttribute( IupGetHandle( "menuFunctionTitle" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) );

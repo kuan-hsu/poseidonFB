@@ -572,18 +572,35 @@ extern(C)
 										}
 										break;
 									
-									case 65505: // For Quick-Type " ( shift + ' )
-										if( GLOBAL.KeyNumber == 34 || GLOBAL.KeyNumber == 39 )
-										{
-											switch( GLOBAL.parserSettings.liveLevel )
+									version(Windows)
+									{
+										case 65505: // For Quick-Type " ( shift + ' )
+											if( GLOBAL.KeyNumber == 34 || GLOBAL.KeyNumber == 39 )
 											{
-												case 1: LiveParser.parseCurrentLine(); break;
-												case 2: LiveParser.parseCurrentBlock(); break;
-												default:
+												switch( GLOBAL.parserSettings.liveLevel )
+												{
+													case 1: LiveParser.parseCurrentLine(); break;
+													case 2: LiveParser.parseCurrentBlock(); break;
+													default:
+												}
 											}
-										}
-										break;
-											
+											break;
+									}
+									else
+									{
+										case 268500962: // For Quick-Type " ( shift + ' )
+											if( GLOBAL.KeyNumber == 34 || GLOBAL.KeyNumber == 39 )
+											{
+												switch( GLOBAL.parserSettings.liveLevel )
+												{
+													case 1: LiveParser.parseCurrentLine(); break;
+													case 2: LiveParser.parseCurrentBlock(); break;
+													default:
+												}
+											}
+											break;
+									}
+									
 									default:
 										if( c > 31 && c < 127 )
 										{

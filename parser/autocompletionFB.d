@@ -58,12 +58,14 @@ version(FBIDE)
 		private:
 			CASTnode			AST_Head;
 			CompilerSettingUint	compilerSettings; // For TLS
+			ParserSettingUint	parserSettings;
 		
 		public:
 			this( CASTnode _AST_Head )
 			{
-				AST_Head = _AST_Head;
-				compilerSettings = GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
+				AST_Head			= _AST_Head;
+				compilerSettings	= GLOBAL.compilerSettings; // copy MainThread GLOBAL.compilerSettings Data
+				parserSettings		= GLOBAL.parserSettings;	// copy MainThread GLOBAL.parserSettings Data
 				
 				super( &run );
 			}
@@ -71,6 +73,7 @@ version(FBIDE)
 			void run()
 			{
 				GLOBAL.compilerSettings = compilerSettings; // To TLS GLOBAL.compilerSettings
+				GLOBAL.parserSettings = parserSettings; // To TLS GLOBAL.parserSettings
 				AutoComplete.getIncludes( AST_Head, AST_Head.name, 0 );
 			}
 		}
@@ -1494,7 +1497,7 @@ version(FBIDE)
 
 		static void keyWordlist( string word )
 		{
-			foreach( _s; GLOBAL.KEYWORDS )
+			foreach( _s; GLOBAL.parserSettings.KEYWORDS )
 			{
 				foreach( s; Array.split( _s, " " ) )
 				{
@@ -1849,7 +1852,8 @@ version(FBIDE)
 								if( !bPushContainer ) return null;
 								
 								if( GLOBAL.objectDefaultParser !is null )
-									resultNodes	= getMatchASTfromWholeWord( cast(CASTnode) GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
+									resultNodes = searchMatchMemberNodes( cast(CASTnode) GLOBAL.objectDefaultParser, splitWord[i], B_FUNCTION | B_SUB | B_DEFINE, true, true );
+									//resultNodes	= getMatchASTfromWholeWord( cast(CASTnode) GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
 
 								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
 								auto _parserManaper = cast(CASTnode[string]) GLOBAL.parserManager;
@@ -1873,7 +1877,7 @@ version(FBIDE)
 							{
 								if( bPushContainer )
 								{
-									foreach( _s; GLOBAL.KEYWORDS )
+									foreach( _s; GLOBAL.parserSettings.KEYWORDS )
 									{
 										foreach( s; Array.split( _s, " " ) )
 										{
@@ -3512,7 +3516,7 @@ version(FBIDE)
 
 								if( splitWord[0].length )
 								{
-									foreach( _s; GLOBAL.KEYWORDS )
+									foreach( _s; GLOBAL.parserSettings.KEYWORDS )
 									{
 										foreach( targetText; Array.split( _s, " " ) )
 										{
@@ -5108,7 +5112,7 @@ version(FBIDE)
 						else
 						{
 							IupScintillaSendMessage( ih, 2204, 0, -1 ); // SCI_CALLTIPSETHLT 2204
-							if( GLOBAL.parserSettings.autoCompleteManually == "ON" ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
+							if( GLOBAL.parserSettings.autoCompletionTriggerWordCount < 1 ) IupScintillaSendMessage( ih, 2201, 1, 0 ); //  SCI_CALLTIPCANCEL 2201 , SCI_CALLTIPACTIVE 2202
 						}
 					}
 				}

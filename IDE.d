@@ -233,7 +233,7 @@ public:
 			doc ~= setINILineData( "language", GLOBAL.language );
 			
 			for( int i = 0; i < 6; ++ i )
-				doc ~= setINILineData( "keyword" ~ Conv.to!(string)( i ), strip( GLOBAL.KEYWORDS[i] ) );
+				doc ~= setINILineData( "keyword" ~ Conv.to!(string)( i ), strip( GLOBAL.parserSettings.KEYWORDS[i] ) );
 
 			for( int i = 1; i < 13; ++ i )
 				doc ~= setINILineData( "customtools" ~ Conv.to!(string)( i ), strip( GLOBAL.customTools[i].name ) ~ "," ~ strip( GLOBAL.customTools[i].dir ) ~ "," ~ strip( GLOBAL.customTools[i].args ) ~ "," ~ strip( GLOBAL.customTools[i].toggleShowConsole ));
@@ -468,7 +468,6 @@ public:
 			doc ~= setINILineData( "enablekeywordcomplete", GLOBAL.compilerSettings.enableKeywordComplete );
 			doc ~= setINILineData( "enableincludecomplete", GLOBAL.compilerSettings.enableIncludeComplete );
 			doc ~= setINILineData( "enableparser", GLOBAL.parserSettings.enableParser );
-			doc ~= setINILineData( "manualcomplete", GLOBAL.parserSettings.autoCompleteManually );
 			doc ~= setINILineData( "parsertrigger", Conv.to!(string)( GLOBAL.parserSettings.autoCompletionTriggerWordCount ) );
 			doc ~= setINILineData( "togglepreloadprj", GLOBAL.parserSettings.togglePreLoadPrj );
 			doc ~= setINILineData( "showfunctiontitle", GLOBAL.parserSettings.showFunctionTitle );
@@ -607,12 +606,12 @@ public:
 					case "[editor]":
 						switch( left )
 						{
-							case "keyword0":		GLOBAL.KEYWORDS[0] = right;						break;
-							case "keyword1":		GLOBAL.KEYWORDS[1] = right;						break;
-							case "keyword2":		GLOBAL.KEYWORDS[2] = right;						break;
-							case "keyword3":		GLOBAL.KEYWORDS[3] = right;						break;
-							case "keyword4":		GLOBAL.KEYWORDS[4] = right;						break;
-							case "keyword5":		GLOBAL.KEYWORDS[5] = right;						break;
+							case "keyword0":		GLOBAL.parserSettings.KEYWORDS[0] = right;						break;
+							case "keyword1":		GLOBAL.parserSettings.KEYWORDS[1] = right;						break;
+							case "keyword2":		GLOBAL.parserSettings.KEYWORDS[2] = right;						break;
+							case "keyword3":		GLOBAL.parserSettings.KEYWORDS[3] = right;						break;
+							case "keyword4":		GLOBAL.parserSettings.KEYWORDS[4] = right;						break;
+							case "keyword5":		GLOBAL.parserSettings.KEYWORDS[5] = right;						break;
 							case "indicatorStyle":	GLOBAL.indicatorStyle = Conv.to!(int)( right );	break;
 							case "language":
 								GLOBAL.language = right;
@@ -889,7 +888,6 @@ public:
 							case "enablekeywordcomplete":	GLOBAL.compilerSettings.enableKeywordComplete = right;			break;
 							case "enableincludecomplete":	GLOBAL.compilerSettings.enableIncludeComplete = right;			break;
 							case "enableparser":			GLOBAL.parserSettings.enableParser = right;						break;
-							case "manualcomplete":			GLOBAL.parserSettings.autoCompleteManually = right;				break;
 							case "parsertrigger":			GLOBAL.parserSettings.autoCompletionTriggerWordCount = Conv.to!(int)( right );	break;
 							case "togglepreloadprj":		GLOBAL.parserSettings.togglePreLoadPrj = right;					break;
 							case "showfunctiontitle":		GLOBAL.parserSettings.showFunctionTitle = right;				break;

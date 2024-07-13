@@ -49,7 +49,7 @@ public:
 		version(FBIDE) IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "freebasic"); else IupSetAttribute( searchOutputPanel, "LEXERLANGUAGE", "d" );
 		for( int i = 0; i < 6; ++i )
 		{
-			string _key = strip( GLOBAL.KEYWORDS[i] );
+			string _key = strip( GLOBAL.parserSettings.KEYWORDS[i] );
 			if( _key.length ) IupSetStrAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ to!(string)( i ) ), toStringz( Uni.toLower( _key ) ) ); else IupSetStrAttribute( searchOutputPanel, toStringz( "KEYWORDS" ~ to!(string)( i ) ), "" );
 		}			
 		

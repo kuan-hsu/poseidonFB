@@ -439,19 +439,19 @@ public:
 			if( tools.isParsableExt( _ext, 7 ) ) IupSetAttribute(sci, "LEXERLANGUAGE", "freebasic" );
 			for( int i = 0; i < 6; ++ i )
 			{
-				string _key = strip( GLOBAL.KEYWORDS[i] );
+				string _key = strip( GLOBAL.parserSettings.KEYWORDS[i] );
 				if( _key.length ) IupSetStrAttribute( sci, toStringz( "KEYWORDS" ~ to!(string)( i ) ), toStringz( Uni.toLower( _key ) ) ); else IupSetStrAttribute( sci, toStringz( "KEYWORDS" ~ to!(string)( i ) ), "" );
 			}
 		}
 		else // version(DIDE)
 		{
 			if( tools.isParsableExt( _ext, 3 ) ) IupSetAttribute(sci, "LEXERLANGUAGE", "d" );
-			if( GLOBAL.KEYWORDS[0].length ) IupSetStrAttribute(sci, "KEYWORDS0", toStringz( GLOBAL.KEYWORDS[0] ) ); else IupSetAttribute( sci, "KEYWORDS0", "" );
-			if( GLOBAL.KEYWORDS[1].length ) IupSetStrAttribute(sci, "KEYWORDS1", toStringz( GLOBAL.KEYWORDS[1] ) ); else IupSetAttribute( sci, "KEYWORDS1", "" );
-			if( GLOBAL.KEYWORDS[2].length ) IupSetStrAttribute(sci, "KEYWORDS3", toStringz( GLOBAL.KEYWORDS[2] ) ); else IupSetAttribute( sci, "KEYWORDS3", "" );
-			if( GLOBAL.KEYWORDS[3].length ) IupSetStrAttribute(sci, "KEYWORDS4", toStringz( GLOBAL.KEYWORDS[3] ) ); else IupSetAttribute( sci, "KEYWORDS4", "" );
-			if( GLOBAL.KEYWORDS[4].length ) IupSetStrAttribute(sci, "KEYWORDS5", toStringz( GLOBAL.KEYWORDS[4] ) ); else IupSetAttribute( sci, "KEYWORDS5", "" );
-			if( GLOBAL.KEYWORDS[5].length ) IupSetStrAttribute(sci, "KEYWORDS6", toStringz( GLOBAL.KEYWORDS[5] ) ); else IupSetAttribute( sci, "KEYWORDS6", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[0].length ) IupSetStrAttribute(sci, "KEYWORDS0", toStringz( GLOBAL.KEYWORDS[0] ) ); else IupSetStrAttribute( sci, "KEYWORDS0", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[1].length ) IupSetStrAttribute(sci, "KEYWORDS1", toStringz( GLOBAL.KEYWORDS[1] ) ); else IupSetStrAttribute( sci, "KEYWORDS1", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[2].length ) IupSetStrAttribute(sci, "KEYWORDS3", toStringz( GLOBAL.KEYWORDS[2] ) ); else IupSetStrAttribute( sci, "KEYWORDS3", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[3].length ) IupSetStrAttribute(sci, "KEYWORDS4", toStringz( GLOBAL.KEYWORDS[3] ) ); else IupSetStrAttribute( sci, "KEYWORDS4", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[4].length ) IupSetStrAttribute(sci, "KEYWORDS5", toStringz( GLOBAL.KEYWORDS[4] ) ); else IupSetStrAttribute( sci, "KEYWORDS5", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[5].length ) IupSetStrAttribute(sci, "KEYWORDS6", toStringz( GLOBAL.KEYWORDS[5] ) ); else IupSetStrAttribute( sci, "KEYWORDS6", "" );
 		}
 
 		string font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
@@ -1547,15 +1547,15 @@ extern(C)
 							string targetText = Uni.toLower( fSTRz( IupGetAttribute( iupSci, "SELECTEDTEXT" ) ) );
 							if( targetText.length )
 							{
-								foreach( s; Array.split( GLOBAL.KEYWORDS[4], " " ) )
+								foreach( s; Array.split( GLOBAL.parserSettings.KEYWORDS[4], " " ) )
 								{
 									if( s == targetText ) return IUP_DEFAULT;
 								}
 								
-								string k4 = strip( GLOBAL.KEYWORDS[4] );
+								string k4 = strip( GLOBAL.parserSettings.KEYWORDS[4] );
 								if( k4.length ) k4 = k4 ~ " " ~ targetText; else k4 = targetText;
-								GLOBAL.KEYWORDS[4] = k4;
-								IupSetStrAttribute( IupGetHandle( "keyWordText4" ), "VALUE", toStringz( GLOBAL.KEYWORDS[4] ) );
+								GLOBAL.parserSettings.KEYWORDS[4] = k4;
+								IupSetStrAttribute( IupGetHandle( "keyWordText4" ), "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[4] ) );
 	
 								foreach( CScintilla cSci; GLOBAL.scintillaManager )
 									if( cSci !is null ) cSci.setGlobalSetting();
@@ -1574,15 +1574,15 @@ extern(C)
 							string targetText = Uni.toLower( fSTRz( IupGetAttribute( iupSci, "SELECTEDTEXT" ) ) );
 							if( targetText.length )
 							{
-								foreach( s; Array.split( GLOBAL.KEYWORDS[5], " " ) )
+								foreach( s; Array.split( GLOBAL.parserSettings.KEYWORDS[5], " " ) )
 								{
 									if( s == targetText ) return IUP_DEFAULT;
 								}
 								
-								string k5 = strip( GLOBAL.KEYWORDS[5] );
+								string k5 = strip( GLOBAL.parserSettings.KEYWORDS[5] );
 								if( k5.length ) k5 = k5 ~ " " ~ targetText; else k5 = targetText;
-								GLOBAL.KEYWORDS[5] = k5;
-								IupSetStrAttribute( IupGetHandle( "keyWordText4" ), "VALUE", toStringz( GLOBAL.KEYWORDS[5] ) );
+								GLOBAL.parserSettings.KEYWORDS[5] = k5;
+								IupSetStrAttribute( IupGetHandle( "keyWordText5" ), "VALUE", toStringz( GLOBAL.parserSettings.KEYWORDS[5] ) );
 								
 								foreach( CScintilla cSci; GLOBAL.scintillaManager )
 									if( cSci !is null ) cSci.setGlobalSetting();
@@ -2152,7 +2152,7 @@ extern(C)
 									word = Uni.toLower( Algorithm.reverse( word.dup ) );
 
 									bool bExitFlag;
-									foreach( keyword; GLOBAL.KEYWORDS )
+									foreach( keyword; GLOBAL.parserSettings.KEYWORDS )
 									{
 										foreach( k; Array.split( keyword, " " ) )
 										{	
@@ -2196,7 +2196,7 @@ extern(C)
 								if( lineTail > lineHead )
 								{
 									IupScintillaSendMessage( ih, 2198, 2, 0 );		// SCFIND_WHOLEWORD = 2,				// SCI_SETSEARCHFLAGS = 2198
-									foreach( _s; GLOBAL.KEYWORDS )
+									foreach( _s; GLOBAL.parserSettings.KEYWORDS )
 									{
 										foreach( targetText; Array.split( _s, " " ) )
 										{
@@ -3006,17 +3006,16 @@ extern(C)
 		// Include Autocomplete
 		if( AutoComplete.showListThread is null )
 		{
-			if( GLOBAL.parserSettings.autoCompleteManually != "ON" )
+			if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 )
 			{
 				if( GLOBAL.compilerSettings.enableIncludeComplete == "ON" )
 				{
 					bool bCheckDeclare;
-					version(FBIDE)	bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos - 1 );
-					version(DIDE)	bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos - 1 );
+					version(FBIDE)	bCheckDeclare = AutoComplete.checkIscludeDeclare( ih, pos );
+					version(DIDE)	bCheckDeclare = AutoComplete.checkIsclmportDeclare( ih, pos );
 
 					if( bCheckDeclare )
 					{
-						
 						string alreadyInput = GLOBAL.scintillaActionText.dup;
 						string list = AutoComplete.includeComplete( ih, pos, alreadyInput ); // After calling, alreadyInput be modified
 						if( list.length )
@@ -3078,12 +3077,12 @@ extern(C)
 		if( GLOBAL.parserSettings.enableParser == "OFF" ) return IUP_DEFAULT;
 
 		// Check CallTip
-		if( GLOBAL.parserSettings.autoCompleteManually != "ON" ) AutoComplete.updateCallTip( ih, pos, GLOBAL.scintillaActionText ); else AutoComplete.updateCallTipByDirectKey( ih, pos );
+		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 ) AutoComplete.updateCallTip( ih, pos, GLOBAL.scintillaActionText ); else AutoComplete.updateCallTipByDirectKey( ih, pos );
 
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
 		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
 		
-		if( GLOBAL.parserSettings.autoCompleteManually != "ON" )
+		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 )
 		{
 			if( GLOBAL.scintillaActionInsert == 1 )
 			{

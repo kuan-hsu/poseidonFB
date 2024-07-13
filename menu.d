@@ -733,7 +733,7 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.539)  2024.07.10\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.540)  2024.07.13\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
@@ -977,7 +977,7 @@ version(FBIDE)
 			Ihandle* iupSci = cSci.getIupScintilla;
 			IupScintillaSendMessage( iupSci, 2198, 2, 0 );						// SCI_SETSEARCHFLAGS = 2198,
 			
-			foreach(  _s; GLOBAL.KEYWORDS )
+			foreach(  _s; GLOBAL.parserSettings.KEYWORDS )
 			{
 				foreach( targetText; Array.split( _s, " " ) )
 				{
