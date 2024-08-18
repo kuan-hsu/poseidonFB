@@ -1711,9 +1711,12 @@ public:
 	
 	static ptrdiff_t directSendMessage( Ihandle* ih, uint msg, size_t wParam, ptrdiff_t lParam )
 	{
+		return IupScintillaSendMessage( ih, msg, wParam, lParam );
+		/*
 		auto directFunction = cast(SciFnDirect) IupScintillaSendMessage( ih, 2184, 0, 0 ); // #define SCI_GETDIRECTFUNCTION 2184
 		auto directPointer = IupScintillaSendMessage( ih, 2185, 0, 0 ); // #define SCI_GETDIRECTPOINTER 2185
 		return directFunction( directPointer, msg, wParam, lParam ); // #define SCI_APPENDTEXT 2282
+		*/
 	}
 }
 

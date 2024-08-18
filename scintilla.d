@@ -446,12 +446,12 @@ public:
 		else // version(DIDE)
 		{
 			if( tools.isParsableExt( _ext, 3 ) ) IupSetAttribute(sci, "LEXERLANGUAGE", "d" );
-			if( GLOBAL.parserSettings.KEYWORDS[0].length ) IupSetStrAttribute(sci, "KEYWORDS0", toStringz( GLOBAL.KEYWORDS[0] ) ); else IupSetStrAttribute( sci, "KEYWORDS0", "" );
-			if( GLOBAL.parserSettings.KEYWORDS[1].length ) IupSetStrAttribute(sci, "KEYWORDS1", toStringz( GLOBAL.KEYWORDS[1] ) ); else IupSetStrAttribute( sci, "KEYWORDS1", "" );
-			if( GLOBAL.parserSettings.KEYWORDS[2].length ) IupSetStrAttribute(sci, "KEYWORDS3", toStringz( GLOBAL.KEYWORDS[2] ) ); else IupSetStrAttribute( sci, "KEYWORDS3", "" );
-			if( GLOBAL.parserSettings.KEYWORDS[3].length ) IupSetStrAttribute(sci, "KEYWORDS4", toStringz( GLOBAL.KEYWORDS[3] ) ); else IupSetStrAttribute( sci, "KEYWORDS4", "" );
-			if( GLOBAL.parserSettings.KEYWORDS[4].length ) IupSetStrAttribute(sci, "KEYWORDS5", toStringz( GLOBAL.KEYWORDS[4] ) ); else IupSetStrAttribute( sci, "KEYWORDS5", "" );
-			if( GLOBAL.parserSettings.KEYWORDS[5].length ) IupSetStrAttribute(sci, "KEYWORDS6", toStringz( GLOBAL.KEYWORDS[5] ) ); else IupSetStrAttribute( sci, "KEYWORDS6", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[0].length ) IupSetStrAttribute(sci, "KEYWORDS0", toStringz( GLOBAL.parserSettings.KEYWORDS[0] ) ); else IupSetStrAttribute( sci, "KEYWORDS0", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[1].length ) IupSetStrAttribute(sci, "KEYWORDS1", toStringz( GLOBAL.parserSettings.KEYWORDS[1] ) ); else IupSetStrAttribute( sci, "KEYWORDS1", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[2].length ) IupSetStrAttribute(sci, "KEYWORDS3", toStringz( GLOBAL.parserSettings.KEYWORDS[2] ) ); else IupSetStrAttribute( sci, "KEYWORDS3", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[3].length ) IupSetStrAttribute(sci, "KEYWORDS4", toStringz( GLOBAL.parserSettings.KEYWORDS[3] ) ); else IupSetStrAttribute( sci, "KEYWORDS4", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[4].length ) IupSetStrAttribute(sci, "KEYWORDS5", toStringz( GLOBAL.parserSettings.KEYWORDS[4] ) ); else IupSetStrAttribute( sci, "KEYWORDS5", "" );
+			if( GLOBAL.parserSettings.KEYWORDS[5].length ) IupSetStrAttribute(sci, "KEYWORDS6", toStringz( GLOBAL.parserSettings.KEYWORDS[5] ) ); else IupSetStrAttribute( sci, "KEYWORDS6", "" );
 		}
 
 		string font, size = "10", Bold = "NO", Italic ="NO", Underline = "NO", Strikeout = "NO";
@@ -3080,8 +3080,6 @@ extern(C)
 		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 ) AutoComplete.updateCallTip( ih, pos, GLOBAL.scintillaActionText ); else AutoComplete.updateCallTipByDirectKey( ih, pos );
 
 		// If GLOBAL.autoCompletionTriggerWordCount = 0, cancel
-		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount <= 0 ) return IUP_DEFAULT;
-		
 		if( GLOBAL.parserSettings.autoCompletionTriggerWordCount > 0 )
 		{
 			if( GLOBAL.scintillaActionInsert == 1 )

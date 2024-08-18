@@ -2589,6 +2589,18 @@ extern(C) // Callback for CPreferenceDialog
 					GLOBAL.parserSettings.conditionalCompilation = 2;
 				else 
 					GLOBAL.parserSettings.conditionalCompilation = 1;
+					
+				// Icon Invert
+				if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase0" ), "VALUE" ) ) == "ON" )
+					GLOBAL.keywordCase= 0;
+				else if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase1" ), "VALUE" ) ) == "ON" )
+					GLOBAL.keywordCase= 1;
+				else if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase2" ), "VALUE" ) ) == "ON" )
+					GLOBAL.keywordCase= 2;
+				else if( fromStringz( IupGetAttribute( IupGetHandle( "radioKeywordCase3" ), "VALUE" ) ) == "ON" )
+					GLOBAL.keywordCase= 3;
+				else
+					GLOBAL.keywordCase= 4;
 			}
 
 			// Icon Invert
