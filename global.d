@@ -51,7 +51,7 @@ struct ParserSettingUint
 {
 	string[6] 	KEYWORDS;
 	
-	string		extraParsableExt = "inc";
+	string		extraParsableExt = ".inc";
 	string		enableParser = "ON";
 	string		showFunctionTitle = "OFF";
 	string		togglePreLoadPrj = "OFF";

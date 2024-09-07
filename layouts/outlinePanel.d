@@ -661,7 +661,7 @@ private:
 					}
 					break;
 
-				case B_SUB, B_CTOR, B_DTOR:
+				case B_SUB, B_CTOR, B_DTOR, B_MACRO:
 					switch( showIndex )
 					{
 						case 0, 1:

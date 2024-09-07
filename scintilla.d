@@ -927,7 +927,8 @@ public:
 			IupScintillaSendMessage( sci, 2627, 20, cast(ptrdiff_t) XPM.alias_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 
 			IupScintillaSendMessage( sci, 2627, 21, cast(ptrdiff_t) XPM.normal_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
-			//IupScintillaSendMessage( sci, 2627, 22, cast(ptrdiff_t) XPM.import_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
+			
+			IupScintillaSendMessage( sci, 2627, 22, cast(ptrdiff_t) XPM.macro_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627
 			//IupScintillaSendMessage( sci, 2627, 23, cast(ptrdiff_t) XPM.autoWord_rgba.toStringz ); // SCI_REGISTERRGBAIMAGE = 2627
 
 			IupScintillaSendMessage( sci, 2627, 24, cast(ptrdiff_t) XPM.namespace_obj_rgba.toCString ); // SCI_REGISTERRGBAIMAGE = 2627

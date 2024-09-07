@@ -393,6 +393,8 @@ version(FBIDE)
 				case B_DEFINE | B_VARIABLE:	return name ~ "?33";
 				case B_DEFINE | B_FUNCTION:	return name ~ "?34";
 				
+				case B_MACRO:				return name ~ "?22";
+				
 				case B_SUB:					return name ~ "|void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
 				case B_FUNCTION:			return name ~ "|" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
 				case B_VARIABLE:
@@ -1279,7 +1281,16 @@ version(FBIDE)
 					if( groupAST[i].name == groupAST[i-1].name && groupAST[i].type == groupAST[i-1].type ) continue;
 				}
 				
-				if( groupAST[i].kind & ( B_FUNCTION | B_SUB | B_PROPERTY ) )
+				if( groupAST[i].kind & ( B_MACRO | B_DEFINE ) )
+				{
+					if( ( !word.length ) || Uni.toLower( groupAST[i].name ) == Uni.toLower( word ) )
+					{
+						string _type, _paramString	= "()";
+						getTypeAndParameter( groupAST[i], _type, _paramString );
+						if( groupAST[i].kind & B_MACRO ) results ~= ( "#MACRO " ~ groupAST[i].name ~ _paramString ~ "\n" ); else results ~= ( "#DEFINE " ~ groupAST[i].name ~ _paramString ~ "\n" );
+					}
+				}
+				else if( groupAST[i].kind & ( B_FUNCTION | B_SUB | B_PROPERTY ) )
 				{
 					if( ( !word.length ) || Uni.toLower( groupAST[i].name ) == Uni.toLower( word ) )
 					{
@@ -1852,10 +1863,10 @@ version(FBIDE)
 								if( !bPushContainer ) return null;
 								
 								if( GLOBAL.objectDefaultParser !is null )
-									resultNodes = searchMatchMemberNodes( cast(CASTnode) GLOBAL.objectDefaultParser, splitWord[i], B_FUNCTION | B_SUB | B_DEFINE, true, true );
+									resultNodes = searchMatchMemberNodes( cast(CASTnode) GLOBAL.objectDefaultParser, splitWord[i], B_FUNCTION | B_SUB | B_DEFINE | B_MACRO, true, true );
 									//resultNodes	= getMatchASTfromWholeWord( cast(CASTnode) GLOBAL.objectDefaultParser, splitWord[i], -1, B_FUNCTION | B_SUB | B_DEFINE );
 
-								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE );
+								resultNodes			~= getMatchASTfromWholeWord( AST_Head, splitWord[i], lineNum, B_FUNCTION | B_SUB | B_PROPERTY | B_TYPE | B_CLASS | B_UNION | B_NAMESPACE | B_DEFINE | B_MACRO );
 								auto _parserManaper = cast(CASTnode[string]) GLOBAL.parserManager;
 								if( fullPathByOS(fullPath) in _parserManaper ) resultIncludeNodes = getMatchIncludesFromWholeWord( _parserManaper[fullPathByOS(fullPath)], fullPath, splitWord[i], lineNum );
 
@@ -4110,6 +4121,7 @@ version(FBIDE)
 							else
 								 _list ~= "SUBROUTINE:\n";
 							break;
+							
 						case B_FUNCTION:
 							if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) )
 							{
@@ -4119,6 +4131,11 @@ version(FBIDE)
 							else
 								_list ~= "FUNCTION:\n";
 							break;
+							
+						case B_MACRO:
+							_list ~= "MACRO:\n";
+							break;
+						
 						case B_VARIABLE:
 							if( AST_Head.getFather.kind & ( B_TYPE | B_CLASS ) )
 							{
