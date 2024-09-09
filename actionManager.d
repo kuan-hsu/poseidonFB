@@ -2181,6 +2181,7 @@ public:
 									if( _tip.length ) IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, toStringz( _tip ) ); else IupSetStrAttributeId( GLOBAL.toolbar.getListHandle(), "ITEMTIP", 1, "" );
 									switch( AST_Head.kind )
 									{
+										case B_MACRO:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_macro" );		break;
 										case B_FUNCTION:	IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_function" );		break;
 										case B_SUB:			IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_sub" );			break;
 										case B_TYPE:		IupSetAttribute( GLOBAL.toolbar.getListHandle(), "IMAGE1","IUP_struct" );		break;
@@ -2358,7 +2359,7 @@ public:
 	{
 		version(FBIDE)
 		{
-			if( _kind == -1 ) _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_OPERATOR | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE | B_NAMESPACE | B_VERSION;
+			if( _kind == -1 ) _kind = B_BAS | B_BI | B_FUNCTION | B_SUB | B_OPERATOR | B_PROPERTY | B_CTOR | B_DTOR | B_TYPE | B_ENUM | B_UNION | B_CLASS | B_WITH | B_SCOPE | B_NAMESPACE | B_VERSION | B_MACRO;
 		}
 		version(DIDE)
 		{
