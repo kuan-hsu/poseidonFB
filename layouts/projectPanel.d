@@ -903,7 +903,7 @@ extern(C)
 				// Swith the doument tabs by select Tree Node, if the doument isn't exist, do nothing
 				if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "LEAF" )
 				{
-					version(Windows) if( GLOBAL.bCanUseDarkMode ) IupSetStrAttributeId( ih, "COLOR", id, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
+					version(Windows) /*if( GLOBAL.bCanUseDarkMode )*/ IupSetStrAttributeId( ih, "COLOR", id, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
 					
 					char*	_fullpath = IupGetAttributeId( GLOBAL.projectTree.getTreeHandle, "USERDATA", id );
 					
@@ -967,7 +967,7 @@ extern(C)
 		{
 			version(Windows)
 			{
-				if( GLOBAL.bCanUseDarkMode )
+				/*if( GLOBAL.bCanUseDarkMode )*/
 					if( fromStringz( IupGetAttributeId( ih, "KIND", id ) ) == "LEAF" ) IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.projectFore ) );
 			}
 		}
@@ -1010,7 +1010,7 @@ extern(C)
 					IupSetAttributeId( ih, "MARKED", i, "NO" );
 				else
 				{
-					version(Windows) if( GLOBAL.bCanUseDarkMode ) IupSetStrAttributeId( ih, "COLOR", i, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
+					version(Windows) /*if( GLOBAL.bCanUseDarkMode )*/ IupSetStrAttributeId( ih, "COLOR", i, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
 				}
 			}
 		}
@@ -1030,7 +1030,7 @@ extern(C)
 				version(Windows)
 				{
 					if( fromStringz( IupGetAttributeId( ih, "KIND", i ) ) == "LEAF" )
-						if( GLOBAL.bCanUseDarkMode ) IupSetStrAttributeId( ih, "COLOR", i, toStringz( GLOBAL.editColor.projectFore ) );				
+						/*if( GLOBAL.bCanUseDarkMode )*/ IupSetStrAttributeId( ih, "COLOR", i, toStringz( GLOBAL.editColor.projectFore ) );				
 				}
 			}
 			

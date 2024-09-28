@@ -2626,77 +2626,63 @@ public:
 		return node;
 	}
 	
+	// For getType use, the TYPE should be without Array sign
 	static string[] getDivideWordWithoutSymbol( string word )
 	{
-		int _getDelimitedString( int _index, char _delimitedOpen, char _delimitedClose )
-		{
-			int		_countDemlimit, _i;
-			
-			for( _i = _index; _i < word.length; ++ _i )
-			{
-				if( word[_i] == _delimitedOpen ) _countDemlimit ++;
-				if( word[_i] == _delimitedClose ) _countDemlimit --;
-			
-				if( _countDemlimit <= 0 ) break;
-			}
-
-			return _i;
-		}
-
 		string[]	splitWord;
 		string		tempWord;
-		int			returnIndex;
-		for( int i = 0; i < word.length ; ++ i )
+		int			countParen;
+		
+		version(FBIDE)
 		{
-			if( word[i] == '.' )
+			
+			if( GLOBAL.parserSettings.toggleExtendMacro == "ON" )
 			{
-				splitWord ~= ParserAction.removeArrayAndPointer( tempWord );
-				tempWord = "";
-			}
-			else
-			{
-				if( word[i] == '(' )
+				for( int i = 0; i < word.length ; ++i )
 				{
-					returnIndex = _getDelimitedString( i, '(', ')' );
-					if( returnIndex < word.length )
+					if( word[i] == '(' )
+						countParen ++;
+					else if( word[i] == ')' )
+						countParen --;
+						
+					if( word[i] == '.' )
 					{
-						i = returnIndex;
-					}
-				}
-				else if( word[i] == '[' )
-				{
-					returnIndex = _getDelimitedString( i, '[', ']' );
-					if( returnIndex < word.length )
-					{
-						i = returnIndex;
-					}				
-				}
-				else
-				{
-					version(FBIDE)
-					{
-						if( i > 0 )
+						if( countParen == 0 )
 						{
-							if( word[i] == '>' )
-							{
-								if( word[i-1] == '-' )
-								{
-									splitWord ~= ParserAction.removeArrayAndPointer( tempWord );
-									tempWord = "";
-									continue;
-								}
-							}
+							splitWord ~= tempWord;
+							tempWord = "";
+							continue;
 						}
 					}
-				
 					tempWord ~= word[i];
 				}
-			}			
+				
+				if( tempWord.length ) splitWord ~= tempWord;
+				return splitWord;				
+			}
 		}
 
-		splitWord ~= ParserAction.removeArrayAndPointer( tempWord );
+		for( int i = 0; i < word.length ; ++i )
+		{
+			if( word[i] == '(' )
+				countParen ++;
+			else if( word[i] == ')' )
+				countParen --;
+			
+			if( countParen == 0 )
+			{
+				if( word[i] == '.' )
+				{
+					splitWord ~= tempWord;
+					tempWord = "";
+				}
+				else
+					tempWord ~= word[i];
+			}
+		}
 
-		return splitWord;
+		if( tempWord.length ) splitWord ~= tempWord;
+		return splitWord;			
 	}
 	
 	

@@ -2821,10 +2821,13 @@ extern(C)
 		
 		if( _text.length )
 		{
-			if( _text[$-1] == ')' )
+			if( GLOBAL.parserSettings.toggleExtendMacro != "ON" )
 			{
-				auto _pos = indexOf( _text, "(" );
-				if( _pos > -1 ) _text = _text[0.._pos].dup;
+				if( _text[$-1] == ')' )
+				{
+					auto _pos = indexOf( _text, "(" );
+					if( _pos > -1 ) _text = _text[0.._pos].dup;
+				}
 			}
 			
 			scope textCovert = new IupString( _text.dup );

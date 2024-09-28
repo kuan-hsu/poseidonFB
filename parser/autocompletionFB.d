@@ -339,6 +339,41 @@ version(FBIDE)
 		{
 			if( node !is null )
 			{
+				if( ( node.kind & ( B_VARIABLE | B_PARAM ) ) && GLOBAL.parserSettings.toggleExtendMacro == "ON" )
+				{
+					_type = node.type;
+					return;
+				}
+				
+				if( node.type.length )
+				{
+					if( node.type[$-1] == ')' )
+					{
+						int countParen;
+						string tempWord;
+						for( auto i = node.type.length - 1; i >= 0; -- i )
+						{
+							if( node.type[i] == ')' )
+							{
+								countParen --;
+							}
+							else if( node.type[i] == '(' )
+							{
+								countParen ++;
+							}
+							
+							if( countParen == 0 )
+							{
+								_type = node.type[0..i].dup;
+								_param = node.type[i..$].dup;
+								return;
+							}
+						}
+					}
+				}
+				
+				_type = node.type;
+				/*
 				auto openParenPos = indexOf( node.type, "(" );
 				if( openParenPos > -1 )
 				{
@@ -349,6 +384,7 @@ version(FBIDE)
 				{
 					_type = node.type;
 				}
+				*/
 			}
 		}
 		
@@ -372,20 +408,30 @@ version(FBIDE)
 			string name = node.name;
 			if( node.name.length )
 			{
-				if( node.name[$-1] == ')' )
+				if( ( node.kind & ( B_CLASS | B_TYPE ) ) && GLOBAL.parserSettings.toggleExtendMacro == "ON" )
+				{}
+				else
 				{
-					auto posOpenParen = indexOf( node.name, "(" );
-					if( posOpenParen > -1 ) name = node.name[0..posOpenParen];
+					if( node.name[$-1] == ')' )
+					{
+						auto posOpenParen = indexOf( node.name, "(" );
+						if( posOpenParen > -1 ) name = node.name[0..posOpenParen];
+					}
 				}
-			}
+			}			
 			else
 				return null;
 
 			string type = node.type;
 			if( node.type.length )
 			{
-				auto posOpenParen = indexOf( node.type, "(" );
-				if( posOpenParen > -1 ) type = node.type[0..posOpenParen]; else type = node.type;
+				if( ( node.kind & ( B_VARIABLE | B_PARAM ) ) && GLOBAL.parserSettings.toggleExtendMacro == "ON" )
+				{}
+				else
+				{
+					auto posOpenParen = indexOf( node.type, "(" );
+					if( posOpenParen > -1 ) type = node.type[0..posOpenParen]; else type = node.type;
+				}
 			}
 			
 			switch( node.kind )
@@ -950,7 +996,14 @@ version(FBIDE)
 						
 						if( child.name.length )
 						{
-							if( Uni.toLower( ParserAction.removeArrayAndPointer( child.name ) ) == word ) results ~= child;
+							if( GLOBAL.parserSettings.toggleExtendMacro == "ON" )
+							{
+								if( Uni.toLower( stripRight( child.name, "*" ) ) == word ) results ~= child;
+							}
+							else
+							{
+								if( Uni.toLower( ParserAction.removeArrayAndPointer( child.name ) ) == word ) results ~= child;
+							}
 						}
 					}
 				}
@@ -1211,13 +1264,15 @@ version(FBIDE)
 			if( originalNode.kind & ( B_ALIAS | B_VARIABLE | B_PARAM | B_FUNCTION ) )
 			{
 				string[]	splitWord;
-				string		_type;
+				string		_type, _param;
 				
 				auto oriAST = originalNode;
 				
-				if( originalNode.type.length ) _type = originalNode.type; else _type = stripLeft( originalNode.base, "*" ); // remove leftside *
+				if( originalNode.kind & B_FUNCTION ) getTypeAndParameter( originalNode, _type, _param ); else _type = originalNode.type;
+				if( !originalNode.type.length ) _type = stripLeft( originalNode.base, "*" ); // remove leftside *
+				//if( originalNode.type.length ) _type = originalNode.type; else _type = stripLeft( originalNode.base, "*" ); // remove leftside *
 				
-				splitWord = ParserAction.getDivideWordWithoutSymbol( _type );
+				splitWord = ParserAction.getDivideWordWithoutSymbol( _type ); // Split to words
 				/*
 				foreach( char[] s; splitWord )
 					if( s == originalNode.name ) return null;
@@ -1937,11 +1992,7 @@ version(FBIDE)
 						{
 							// Get Members
 							//AST_Head = searchMatchNode( AST_Head, splitWord[i], B_FIND ); // NOTE!!!! Using "searchMatchNode()"
-							import core.time;
-							
-							
-							
-							CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], lineNum, B_FIND );
+							CASTnode[] matchNodes = searchMatchNodes( AST_Head, splitWord[i], lineNum, B_FIND_FOR_DOT );
 							if( !matchNodes.length )
 								AST_Head = null;
 							else if( matchNodes.length == 1 )

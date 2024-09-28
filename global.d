@@ -70,6 +70,7 @@ struct ParserSettingUint
 	int 		preParseLevel = 3;
 	int			liveLevel = 1;
 	string		toggleUpdateOutlineLive = "ON";	
+	string		toggleExtendMacro = "OFF";
 }
 
 struct ShortKey
@@ -628,6 +629,7 @@ public:
 						GLOBAL.languageItems["enableinclude"] = new IupString( "Enable Include Autocomplete" );
 						GLOBAL.languageItems["enableparser"] = new IupString( "Enable Parser" );
 						GLOBAL.languageItems["showtitle"] = new IupString( "Show Function Title" );
+						GLOBAL.languageItems["enablemacro"] = new IupString( "Enable Extend Macro Parser" );
 						GLOBAL.languageItems["preloadprj"] = new IupString( "Project Pre-Parse While Loading" );
 						GLOBAL.languageItems["width"] = new IupString( "Width" );
 						GLOBAL.languageItems["showtypeparam"] = new IupString( "Show Type With Function Parameters" );

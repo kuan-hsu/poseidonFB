@@ -471,6 +471,7 @@ public:
 			doc ~= setINILineData( "parsertrigger", Conv.to!(string)( GLOBAL.parserSettings.autoCompletionTriggerWordCount ) );
 			doc ~= setINILineData( "togglepreloadprj", GLOBAL.parserSettings.togglePreLoadPrj );
 			doc ~= setINILineData( "showfunctiontitle", GLOBAL.parserSettings.showFunctionTitle );
+			doc ~= setINILineData( "enableextmacro", GLOBAL.parserSettings.toggleExtendMacro );
 			doc ~= setINILineData( "showtypewithparams", GLOBAL.parserSettings.showTypeWithParams );
 			doc ~= setINILineData( "includelevel", Conv.to!(string)( GLOBAL.compilerSettings.includeLevel ) );
 			doc ~= setINILineData( "preparselevel", Conv.to!(string)( GLOBAL.parserSettings.preParseLevel ) );
@@ -891,6 +892,7 @@ public:
 							case "parsertrigger":			GLOBAL.parserSettings.autoCompletionTriggerWordCount = Conv.to!(int)( right );	break;
 							case "togglepreloadprj":		GLOBAL.parserSettings.togglePreLoadPrj = right;					break;
 							case "showfunctiontitle":		GLOBAL.parserSettings.showFunctionTitle = right;				break;
+							case "enableextmacro":			GLOBAL.parserSettings.toggleExtendMacro = right;				break;
 							case "showtypewithparams":		GLOBAL.parserSettings.showTypeWithParams = right;				break;
 							case "includelevel":			GLOBAL.compilerSettings.includeLevel = Conv.to!(int)( right );	break;
 							case "preparselevel":			GLOBAL.parserSettings.preParseLevel = Conv.to!(int)( right );	break;

@@ -1320,6 +1320,70 @@ public:
 			IupSetStrAttributeId( tree, "COLOR", 0, toStringz( GLOBAL.editColor.prjTitle ) );
 			IupSetAttributeId( tree, "TITLEFONTSTYLE", 0, "Bold" ); // Bold
 			//toBoldTitle( tree, 0 );
+			version(Windows)
+			{
+				IupSetCallback( tree, "SELECTION_CB", cast(Icallback) function( Ihandle *ih, int id, int status )
+				{
+					if( status == 1 )
+					{
+						/*if( GLOBAL.bCanUseDarkMode )*/ IupSetStrAttributeId( ih, "COLOR", id, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
+					}
+					else
+					{
+						/*
+						if( GLOBAL.bCanUseDarkMode ) 
+						{
+						*/
+							CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
+							IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.outlineFore ) );
+							if( GLOBAL.editorSetting00.ColorOutline == "ON" )
+							{
+								if( id == 0 )
+								{
+									IupSetStrAttributeId( ih, "COLOR", 0, toStringz( GLOBAL.editColor.prjTitle ) );
+									return IUP_DEFAULT;
+								}
+									
+								version(FBIDE)
+								{
+									switch( Uni.toLower( _node.protection ) )
+									{
+										case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
+										case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 127 39" ); break;
+										default:
+									}
+									
+									if( _node.kind & B_VERSION )
+									{
+										if( _node.name == "-else-" ) IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); else IupSetAttributeId( ih, "COLOR", id, "0 180 0" );
+									}
+								}
+								version(DIDE)
+								{
+									if( _node.kind & D_IMPORT )
+									{
+										if( _node.protection == "protected" )
+											IupSetAttributeId( ih, "COLOR", id, "255 95 17" );
+										else if( _node.protection == "" || _node.protection == "private" )
+											IupSetAttributeId( ih, "COLOR", id, "255 0 0" );
+									}
+									else
+									{
+										switch( _node.protection )
+										{
+											case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
+											case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 95 17" ); break;
+											default:			IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.outlineFore ) );
+										}
+									}
+								}
+							}
+						/*}*/
+					}
+				
+					return IUP_DEFAULT;
+				});
+			}
 			
 			version(FBIDE)
 			{

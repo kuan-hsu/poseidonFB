@@ -373,6 +373,10 @@ private:
 		IupSetStrAttribute( toggleFunctionTitle, "VALUE", toStringz(GLOBAL.parserSettings.showFunctionTitle) );
 		IupSetHandle( "toggleFunctionTitle", toggleFunctionTitle );
 		
+		Ihandle* toggleExtMacro = IupFlatToggle( GLOBAL.languageItems["enablemacro"].toCString );
+		IupSetStrAttribute( toggleExtMacro, "VALUE", toStringz(GLOBAL.parserSettings.toggleExtendMacro) );
+		IupSetHandle( "toggleExtMacro", toggleExtMacro );
+		
 		Ihandle* togglePreLoadPrj = IupFlatToggle( GLOBAL.languageItems["preloadprj"].toCString );
 		IupSetStrAttribute( togglePreLoadPrj, "VALUE", toStringz(GLOBAL.parserSettings.togglePreLoadPrj) );
 		IupSetHandle( "togglePreLoadPrj", togglePreLoadPrj );		
@@ -451,9 +455,15 @@ private:
 		version(DIDE)	Ihandle* hBox00 = IupHbox( labelTrigger, textTrigger, null );
 		IupSetAttributes( hBox00, "ALIGNMENT=ACENTER" ); 
 		
-		Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, /*toggleSHOWLISTTYPE, */toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
+		version(DIDE)
+		{
+			Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, hBox00, null );
+		}
+		else
+		{
+			Ihandle* vBox00 = IupVbox( hBoxUseParser, toggleKeywordComplete, toggleIncludeComplete, toggleWithParams, toggleIGNORECASE, toggleCASEINSENSITIVE, toggleSHOWALLMEMBER, hBoxDWELL, toggleOverWrite, hBoxTriggerDelay, hBoxPreParseLevel, toggleFunctionTitle, toggleExtMacro, hBox00, null );
+		}
 		IupSetAttributes( vBox00, "GAP=10,MARGIN=0x1,EXPANDCHILDREN=NO" );
-		
 	
 		Ihandle* frameParser = IupFrame( vBox00 );
 		IupSetStrAttribute( frameParser, "TITLE",  GLOBAL.languageItems["parsersetting"].toCString );
@@ -2561,6 +2571,7 @@ extern(C) // Callback for CPreferenceDialog
 			GLOBAL.parserSettings.showFunctionTitle						= fromStringz( IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) ).dup;
 				if( IupGetHandle( "menuFunctionTitle" ) != null ) IupSetStrAttribute( IupGetHandle( "menuFunctionTitle" ), "VALUE", IupGetAttribute( IupGetHandle( "toggleFunctionTitle" ), "VALUE" ) );
 			
+			GLOBAL.parserSettings.toggleExtendMacro						= fromStringz( IupGetAttribute( IupGetHandle( "toggleExtMacro" ), "VALUE" ) ).dup;
 			
 			GLOBAL.parserSettings.showTypeWithParams					= fromStringz( IupGetAttribute( IupGetHandle( "toggleWithParams" ), "VALUE" ) ).dup;
 			GLOBAL.parserSettings.toggleIgnoreCase						= fromStringz( IupGetAttribute( IupGetHandle( "toggleIGNORECASE" ), "VALUE" ) ).dup;
