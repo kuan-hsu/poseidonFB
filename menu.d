@@ -733,7 +733,7 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.544)  2024.09.28\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.545)  2024.09.29\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{

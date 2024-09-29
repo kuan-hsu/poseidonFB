@@ -170,7 +170,7 @@ public:
 			IupSetAttribute( sci, "DROPFILESTARGET", "YES" );
 			IupSetAttribute( sci, "SCROLLBAR", "YES" );
 			
-			IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
+			//IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
 			IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 			IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
 			IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
@@ -951,6 +951,9 @@ public:
 			IupScintillaSendMessage( sci, 2627, 36, cast(ptrdiff_t) XPM.bi_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 			IupScintillaSendMessage( sci, 2627, 37, cast(ptrdiff_t) XPM.folder_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 			
+			IupScintillaSendMessage( sci, 2627, 38, cast(ptrdiff_t) XPM.private_funptr_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 39, cast(ptrdiff_t) XPM.protected_funptr_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
+			IupScintillaSendMessage( sci, 2627, 40, cast(ptrdiff_t) XPM.public_funptr_rgba.toCString ); // SCI_REGISTERIMAGE = 2627
 
 			// BOOKMARK
 			IupScintillaSendMessage( sci, 2626, 1, cast(ptrdiff_t) XPM.bookmark_rgba.toCString ); // SCI_MARKERDEFINERGBAIMAGE 2626
@@ -1031,10 +1034,10 @@ public:
 
 extern(C)
 {
+	/*
 	private int CScintilla_linesChanged_cb( Ihandle* ih, int lin, int num )
 	{
 		//IupMessage( "", toStringz( "Num=" ~ Integer.toString( num ) ~ "\nLin=" ~ Integer.toString( lin + 1 ) ) );
-		
 		CScintilla cSci = ScintillaAction.getActiveCScintilla;
 		
 		if( cSci !is null )
@@ -1051,10 +1054,9 @@ extern(C)
 					LiveParser.lineNumberAdd( cast(CASTnode) GLOBAL.parserManager[fullPathByOS( cSci.getFullPath )], lin + 1, num );
 				}
 			}
-		
 		return IUP_DEFAULT;
 	}
-	
+	*/
 	private int marginclick_cb( Ihandle* ih, int margin, int line, char* status )
 	{
 		string statusString = fSTRz( status );
@@ -2855,6 +2857,16 @@ extern(C)
 				}
 				else
 					IupSetStrAttribute( ih, "SELECTEDTEXT", textCovert.toCString );			
+			}
+		}
+		
+		if( GLOBAL.parserSettings.enableParser == "ON" )
+		{
+			switch( GLOBAL.parserSettings.liveLevel )
+			{
+				case 1: LiveParser.parseCurrentLine(); break;
+				case 2: LiveParser.parseCurrentBlock(); break;
+				default:
 			}
 		}
 

@@ -229,7 +229,7 @@ private:
 			union_protected_obj_rgba, union_obj_rgba, enum_private_obj_rgba, enum_protected_obj_rgba, enum_obj_rgba,
 			normal_rgba, with_rgba, parameter_rgba, enum_member_obj_rgba, template_obj_rgba,
 			functionpointer_obj_rgba, namespace_obj_rgba, property_rgba, property_var_rgba, define_var_rgba, define_fun_rgba, macro_obj_rgba,
-			bas_rgba, bi_rgba, folder_rgba,
+			bas_rgba, bi_rgba, folder_rgba, private_funptr_rgba, protected_funptr_rgba, public_funptr_rgba,
 			bookmark_rgba;
 	}
 	version(DIDE)
@@ -646,6 +646,10 @@ private:
 			private_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_private.xpm");
 			protected_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_protected.xpm" );
 			public_sub_rgba 				= getRGBA( "icons/xpm/outline/sub_public.xpm" );
+			private_funptr_rgba 			= getRGBA( "icons/xpm/outline/funptr_private.xpm");
+			protected_funptr_rgba 			= getRGBA( "icons/xpm/outline/funptr_protected.xpm" );
+			public_funptr_rgba 				= getRGBA( "icons/xpm/outline/funptr_public.xpm" );
+			
 			
 			private_variable_array_rgba		= getRGBA( "icons/xpm/outline/variable_array_private.xpm" );
 			protected_variable_array_rgba 	= getRGBA( "icons/xpm/outline/variable_array_protected.xpm" );

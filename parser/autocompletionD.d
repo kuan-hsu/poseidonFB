@@ -3484,7 +3484,7 @@ version(DIDE)
 
 						if( firstASTNode !is null )
 						{
-							ParserAction.getSplitDataFromNodeTypeString( firstASTNode.type, _type, _param );
+							ParserAction.returnTypeAndParameter( firstASTNode.type, _type, _param );
 							if( GLOBAL.parserSettings.showTypeWithParams != "ON" ) _param = "";
 							switch( firstASTNode.kind )
 							{
@@ -3527,7 +3527,7 @@ version(DIDE)
 						
 						if( finalASTNode !is null )
 						{
-							ParserAction.getSplitDataFromNodeTypeString( finalASTNode.type, _type, _param );
+							ParserAction.returnTypeAndParameter( finalASTNode.type, _type, _param );
 							if( GLOBAL.parserSettings.showTypeWithParams != "ON" ) _param = "";
 							switch( finalASTNode.kind )
 							{

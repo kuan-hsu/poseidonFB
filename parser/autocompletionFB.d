@@ -334,7 +334,6 @@ version(FBIDE)
 			return false;
 		}
 		
-		
 		static void getTypeAndParameter( CASTnode node, ref string _type, ref string _param )
 		{
 			if( node !is null )
@@ -345,46 +344,7 @@ version(FBIDE)
 					return;
 				}
 				
-				if( node.type.length )
-				{
-					if( node.type[$-1] == ')' )
-					{
-						int countParen;
-						string tempWord;
-						for( auto i = node.type.length - 1; i >= 0; -- i )
-						{
-							if( node.type[i] == ')' )
-							{
-								countParen --;
-							}
-							else if( node.type[i] == '(' )
-							{
-								countParen ++;
-							}
-							
-							if( countParen == 0 )
-							{
-								_type = node.type[0..i].dup;
-								_param = node.type[i..$].dup;
-								return;
-							}
-						}
-					}
-				}
-				
-				_type = node.type;
-				/*
-				auto openParenPos = indexOf( node.type, "(" );
-				if( openParenPos > -1 )
-				{
-					_type = node.type[0..openParenPos];
-					_param = node.type[openParenPos..$];
-				}
-				else
-				{
-					_type = node.type;
-				}
-				*/
+				ParserAction.returnTypeAndParameter( node.type, _type, _param );
 			}
 		}
 		
@@ -442,7 +402,10 @@ version(FBIDE)
 				case B_MACRO:				return name ~ "?22";
 				
 				case B_SUB:					return name ~ "|void" ~ "?" ~ std.conv.to!(string)( 25 + protAdd );
-				case B_FUNCTION:			return name ~ "|" ~ type ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
+				case B_FUNCTION:			
+					if( node.base.length ) return name ~ "|" ~ ( type.length ? type : "void" ) ~ "?" ~ std.conv.to!(string)( 38 + protAdd ); // FUNCTION / SUB pointer
+					return name ~ "|" ~ ( type.length ? type : "void" ) ~ "?" ~ std.conv.to!(string)( 28 + protAdd );
+					
 				case B_VARIABLE:
 					if( node.name.length )
 					{
@@ -519,7 +482,7 @@ version(FBIDE)
 							{
 								foreach( _son; childrenNodes[i].getChildren )
 								{
-									string _name = Uni.toLower( _son.name );//ParserAction.removeArrayAndPointer( _son.name ) );
+									string _name = Uni.toLower( /*_son.name );*/ParserAction.removeArrayAndPointer( _son.name ) );
 									if( bCompleteMatch )
 									{
 										if( word == _name )
@@ -546,7 +509,7 @@ version(FBIDE)
 									{
 										if( grandson.name.length )
 										{
-											string _name = Uni.toLower( grandson.name );//ParserAction.removeArrayAndPointer( grandson.name ) );
+											string _name = Uni.toLower( /*grandson.name );*/ParserAction.removeArrayAndPointer( grandson.name ) );
 											if( bCompleteMatch )
 											{
 												if( word == _name ) 
@@ -580,7 +543,7 @@ version(FBIDE)
 								{
 									if( grandson.name.length )
 									{
-										string _name = Uni.toLower( grandson.name );//ParserAction.removeArrayAndPointer( grandson.name ) );
+										string _name = Uni.toLower( /*grandson.name );*/ParserAction.removeArrayAndPointer( grandson.name ) );
 										if( bCompleteMatch )
 										{
 											if( word == _name ) 
@@ -613,7 +576,7 @@ version(FBIDE)
 						{
 							if( childrenNodes[i].name.length )
 							{
-								string _name = Uni.toLower( childrenNodes[i].name );//ParserAction.removeArrayAndPointer( childrenNodes[i].name ) );
+								string _name = Uni.toLower( /*childrenNodes[i].name );*/ParserAction.removeArrayAndPointer( childrenNodes[i].name ) );
 								if( bCompleteMatch )
 								{
 									if( word == _name )
@@ -631,7 +594,7 @@ version(FBIDE)
 					{
 						if( childrenNodes[i].name.length )
 						{
-							string _name = Uni.toLower( childrenNodes[i].name );//ParserAction.removeArrayAndPointer( childrenNodes[i].name ) );
+							string _name = Uni.toLower( /*childrenNodes[i].name );*/ ParserAction.removeArrayAndPointer( childrenNodes[i].name ) );
 							if( bCompleteMatch )
 							{
 								if( word == _name )
@@ -767,12 +730,12 @@ version(FBIDE)
 
 		static CASTnode[] getMatchASTfromWholeWord( CASTnode node, string word, int line, int B_KIND )
 		{
-			return getBottomToTopMatchNodes( node, word, line, B_ALL, true, false );
+			return getBottomToTopMatchNodes( node, word, line, B_KIND, true, false );
 		}	
 
-		static CASTnode[] getMatchASTfromWord( CASTnode node, string word, int line )
+		static CASTnode[] getMatchASTfromWord( CASTnode node, string word, int line, int B_KIND )
 		{
-			return getBottomToTopMatchNodes( node, word, line, B_ALL, false, false );
+			return getBottomToTopMatchNodes( node, word, line, B_KIND, false, false );
 		}
 
 		static CASTnode[] check( string name, string originalFullPath, int _LEVEL )
@@ -1268,15 +1231,21 @@ version(FBIDE)
 				
 				auto oriAST = originalNode;
 				
+				if( !originalNode.type.length ) return null;
 				if( originalNode.kind & B_FUNCTION ) getTypeAndParameter( originalNode, _type, _param ); else _type = originalNode.type;
-				if( !originalNode.type.length ) _type = stripLeft( originalNode.base, "*" ); // remove leftside *
 				//if( originalNode.type.length ) _type = originalNode.type; else _type = stripLeft( originalNode.base, "*" ); // remove leftside *
+
+				// Check Function Ptr
+				if( originalNode.kind == B_ALIAS )
+				{
+					if( originalNode.base.length )
+					{
+						getTypeAndParameter( originalNode, _type, _param );
+						splitWord ~= _type;
+					}
+				}
 				
-				splitWord = ParserAction.getDivideWordWithoutSymbol( _type ); // Split to words
-				/*
-				foreach( char[] s; splitWord )
-					if( s == originalNode.name ) return null;
-				*/
+				if( !splitWord.length ) splitWord = ParserAction.getDivideWordWithoutSymbol( _type ); // Split to words
 				if( GLOBAL.parserSettings.conditionalCompilation == 1 ) checkVersionSpec( originalNode, originalNode.lineNumber );
 				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
 				if( usingNames.length )
@@ -1320,7 +1289,7 @@ version(FBIDE)
 				{
 					return false;
 				}
-			}	
+			}
 
 			return true;
 		}
@@ -1819,6 +1788,24 @@ version(FBIDE)
 			return null;
 		}		
 
+		static string checkFunctionPoint( CASTnode AST_Head, string word, int lineNum )
+		{
+			auto varNode = searchMatchNode( AST_Head, word, lineNum, B_VARIABLE, true );
+			if( varNode !is null )
+			{
+				varNode = searchMatchNode( AST_Head, varNode.type, lineNum, B_ALIAS, true );
+				if( varNode !is null )
+				{
+					if( varNode.base.length ) // = "FUNCTIONPTR" or "SUBPTR"
+					{
+						scope aliasNode = new CASTnode( varNode.name, B_FUNCTION, null, varNode.type, "pointer", varNode.lineNumber );
+						return callTipList( [aliasNode], "" );
+					}
+				}
+			}
+			
+			return null;
+		}
 		
 		static string analysisSplitWorld_ReturnCompleteList( ref CASTnode AST_Head, string[] splitWord, int lineNum, bool bDot, bool bCallTip, bool bPushContainer  )
 		{
@@ -1933,8 +1920,10 @@ version(FBIDE)
 									CASTnode classNode = searchMatchNode( AST_Head, memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 									if( classNode !is null ) resultNodes ~= searchMatchMemberNodes( classNode, splitWord[i], B_ALL );
 								}
-
+								
 								result = callTipList( resultNodes ~ resultIncludeNodes, splitWord[i] );
+								if( !result.length ) result = checkFunctionPoint( AST_Head, splitWord[i], lineNum );
+
 								return strip( result );
 							}
 
@@ -1962,7 +1951,7 @@ version(FBIDE)
 
 							if( AST_Head !is null )
 							{
-								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum );
+								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum, B_ALL );
 								
 								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i], lineNum );
 								// For Type Objects
@@ -2154,6 +2143,18 @@ version(FBIDE)
 								foreach( CASTnode a; nameSpaceNodes )
 									result ~= callTipList( a.getChildren() ~ getBaseNodeMembers( a ), splitWord[i] );
 
+								if( !result.length )
+								{
+									foreach( CASTnode a; nameSpaceNodes )
+									{
+										AST_Head = searchMatchMemberNode( a, splitWord[i], B_ALL, true );
+										if( AST_Head !is null )
+										{
+											result = checkFunctionPoint( AST_Head, splitWord[i], AST_Head.lineNumber );
+											if( result.length ) break;
+										}
+									}
+								}
 								return strip( result );
 							}
 							
@@ -2208,6 +2209,11 @@ version(FBIDE)
 							if( !bPushContainer ) return null;
 							
 							result = callTipList( AST_Head.getChildren() ~ getBaseNodeMembers( AST_Head ), splitWord[i] );
+							if( !result.length )
+							{
+								AST_Head = searchMatchMemberNode( AST_Head, splitWord[i], B_ALL, true );
+								if( AST_Head !is null )	result = checkFunctionPoint( AST_Head, splitWord[i], AST_Head.lineNumber );
+							}							
 							return strip( result );
 						}
 						
@@ -2242,6 +2248,7 @@ version(FBIDE)
 						{
 							foreach( CASTnode _child; getMembers( AST_Head ) ) // Get members( include nested unnamed union & type )
 							{
+							
 								string _list = getListImage( _child, false );
 								listContainer ~= _list;
 							}
@@ -4180,7 +4187,9 @@ version(FBIDE)
 								_list ~= ( "MEMBER_FUNCTION: < " ~ nameSpaceTitle ~ AST_Head.getFather.name ~ " >\n" );
 							}
 							else
-								_list ~= "FUNCTION:\n";
+							{
+								if( AST_Head.base.length ) _list ~= "PROCEDURE LITERALS:\n"; else _list ~= "FUNCTION:\n";
+							}
 							break;
 							
 						case B_MACRO:
@@ -4226,7 +4235,8 @@ version(FBIDE)
 							else 
 								_list ~= "ENUM: <Anonymous>\n";
 							break;
-						
+							
+						case B_ALIAS:		_list ~= "ALIAS:\n";	break;
 						case B_PARAM:	 	_list ~= "PARAMETER:\n";	break;
 						case B_CTOR:	 	_list ~= "CTOR:\n";			break;
 						case B_DTOR:	 	_list ~= "DTOR:\n";			break;
@@ -4241,6 +4251,10 @@ version(FBIDE)
 						
 						_name= getNameSpaceWithDotTail( AST_Head ) ~ _name;
 						_list ~= ScintillaAction.textWrap( ( _type ~ " " ~ _name ) ).dup;
+					}
+					else if( AST_Head.kind & B_ALIAS )
+					{
+						_list ~= ScintillaAction.textWrap( ( AST_Head.type ~ " = " ~ AST_Head.name ) ).dup;
 					}
 					else if( AST_Head.kind & ( B_FUNCTION | B_SUB | B_PROPERTY | B_OPERATOR ) )
 					{

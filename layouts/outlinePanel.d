@@ -120,8 +120,13 @@ private:
 					break;
 
 				case B_FUNCTION:
-					IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, toStringz( "IUP_function" ~ prot ) );
-					IupSetStrAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode,toStringz( "IUP_function" ~ prot ) );
+					if( _node.base == "pointer" )
+						IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, toStringz( "IUP_funptr" ~ prot ) );
+					else
+					{
+						IupSetStrAttributeId( rootTree, "IMAGE", lastAddNode, toStringz( "IUP_function" ~ prot ) );
+						IupSetStrAttributeId( rootTree, "IMAGEEXPANDED", lastAddNode,toStringz( "IUP_function" ~ prot ) );
+					}
 					break;
 
 				case B_SUB:
@@ -342,42 +347,7 @@ private:
 		}
 		
 
-		if( GLOBAL.editorSetting00.ColorOutline == "ON" )
-		{
-			version(FBIDE)
-			{
-				switch( Uni.toLower( _node.protection ) )
-				{
-					case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); break;
-					case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 127 39" ); break;
-					default:
-				}
-				
-				if( _node.kind & B_VERSION )
-				{
-					if( _node.name == "-else-" ) IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); else IupSetAttributeId( rootTree, "COLOR", lastAddNode, "0 180 0" );
-				}
-			}
-			version(DIDE)
-			{
-				if( _node.kind & D_IMPORT )
-				{
-					if( _node.protection == "protected" )
-						IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 95 17" );
-					else if( _node.protection == "" || _node.protection == "private" )
-						IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" );
-				}
-				else
-				{
-					switch( _node.protection )
-					{
-						case "private":		IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 0 0" ); break;
-						case "protected":	IupSetAttributeId( rootTree, "COLOR", lastAddNode, "255 95 17" ); break;
-						default:
-					}
-				}
-			}
-		}
+		if( GLOBAL.editorSetting00.ColorOutline == "ON" ) restoreSingleNodeColor( rootTree, lastAddNode, _node );
 	}
 	
 
@@ -418,7 +388,7 @@ private:
 								case B_FUNCTION, B_PROPERTY, B_OPERATOR:
 									string _type;
 									string _paramString;
-									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+									ParserAction.returnTypeAndParameter( _node.type, _type, _paramString );
 									switch( showIndex )
 									{
 										case 0:
@@ -502,7 +472,7 @@ private:
 								case D_FUNCTION, D_FUNCTIONLITERALS:
 									string _type = _node.type;
 									string _paramString;
-									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+									ParserAction.returnTypeAndParameter( _node.type, _type, _paramString );
 									switch( showIndex )
 									{
 										case 0:
@@ -567,7 +537,7 @@ private:
 								case D_FUNCTIONPTR:
 									string _type;
 									string _paramString;
-									ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+									ParserAction.returnTypeAndParameter( _node.type, _type, _paramString );
 									switch( showIndex )
 									{
 										case 0:
@@ -643,7 +613,26 @@ private:
 				case B_FUNCTION, B_PROPERTY, B_OPERATOR:
 					string _type = _node.type;
 					string _paramString;
-					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+					ParserAction.returnTypeAndParameter( _node.type, _type, _paramString );
+					if( _node.kind & B_FUNCTION && _node.base == "pointer" )
+					{
+						switch( showIndex )
+						{
+							case 0:
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+								break;
+							case 1:
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ _paramString ~ lineNumString ) );
+								break;
+							case 2:
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _type.length ? " : " ~ _type : "" ) ~ lineNumString ) );
+								break;
+							default:
+								IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
+
+						}
+						break;
+					}
 					switch( showIndex )
 					{
 						case 0:
@@ -719,7 +708,7 @@ private:
 					}
 					goto case;
 				
-				case  B_ALIAS:
+				case B_ALIAS:
 					if( showIndex == 0 || showIndex == 2 )
 					{
 						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ ( _node.type.length ? " : " ~ _node.type : "" ) ~ lineNumString ) );
@@ -729,6 +718,7 @@ private:
 						IupSetStrAttributeId( rootTree, toStringz( LEAF ), bracchID, toStringz( _node.name ~ lineNumString ) );
 					}
 					break;
+				
 				/*
 				case B_VERSION | B_PARAM:
 					IupSetStrAttributeId( rootTree, toStringz( BRANCH ), bracchID, toStringz( _node.name ~ _node.protection ~ _node.type ~ lineNumString ) );
@@ -772,7 +762,7 @@ private:
 				case D_FUNCTION, D_FUNCTIONLITERALS:
 					string _type = _node.type;
 					string _paramString;
-					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+					ParserAction.returnTypeAndParameter( _node.type, _type, _paramString );
 					switch( showIndex )
 					{
 						case 0:
@@ -814,7 +804,7 @@ private:
 				case D_FUNCTIONPTR:
 					string _type;
 					string _paramString;
-					ParserAction.getSplitDataFromNodeTypeString( _node.type, _type, _paramString );
+					ParserAction.returnTypeAndParameter( _node.type, _type, _paramString );
 					switch( showIndex )
 					{
 						case 0:
@@ -1301,7 +1291,7 @@ public:
 
 		return null;
 	}
-
+	
 	Ihandle* createTree( CASTnode head )
 	{
 		if( head !is null )
@@ -1330,55 +1320,7 @@ public:
 					}
 					else
 					{
-						/*
-						if( GLOBAL.bCanUseDarkMode ) 
-						{
-						*/
-							CASTnode _node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
-							IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.outlineFore ) );
-							if( GLOBAL.editorSetting00.ColorOutline == "ON" )
-							{
-								if( id == 0 )
-								{
-									IupSetStrAttributeId( ih, "COLOR", 0, toStringz( GLOBAL.editColor.prjTitle ) );
-									return IUP_DEFAULT;
-								}
-									
-								version(FBIDE)
-								{
-									switch( Uni.toLower( _node.protection ) )
-									{
-										case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
-										case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 127 39" ); break;
-										default:
-									}
-									
-									if( _node.kind & B_VERSION )
-									{
-										if( _node.name == "-else-" ) IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); else IupSetAttributeId( ih, "COLOR", id, "0 180 0" );
-									}
-								}
-								version(DIDE)
-								{
-									if( _node.kind & D_IMPORT )
-									{
-										if( _node.protection == "protected" )
-											IupSetAttributeId( ih, "COLOR", id, "255 95 17" );
-										else if( _node.protection == "" || _node.protection == "private" )
-											IupSetAttributeId( ih, "COLOR", id, "255 0 0" );
-									}
-									else
-									{
-										switch( _node.protection )
-										{
-											case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
-											case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 95 17" ); break;
-											default:			IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.outlineFore ) );
-										}
-									}
-								}
-							}
-						/*}*/
+						restoreSingleNodeColor( ih, id );
 					}
 				
 					return IUP_DEFAULT;
@@ -1410,6 +1352,7 @@ public:
 			
 			if( IupGetChildCount( zBoxHandle ) > 0 ) showTreeAndButtons( true );
 			version(Windows) tools.setWinTheme( tree, "Explorer", GLOBAL.editorSetting00.UseDarkMode == "ON" ? true : false );
+			version(Windows) IupSetStrAttributeId( tree, "COLOR", 0, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) ); // Selected on first Node, color it
 			
 			return tree;
 		}
@@ -1670,7 +1613,10 @@ public:
 					}
 					break;
 
-				case B_FUNCTION:			return ( "IUP_function" ~ prot );
+				case B_FUNCTION:
+					if( _node.base == "pointer" ) return ( "IUP_funptr" ~ prot );
+					return ( "IUP_function" ~ prot );
+					
 				case B_SUB:					return ( "IUP_sub" ~ prot );
 				case B_OPERATOR:			return "IUP_operator";
 				case B_PROPERTY:	
@@ -1804,11 +1750,18 @@ public:
 			Ihandle* actTree = getActiveTree();
 			if( actTree != null )
 			{
+				restoreSingleNodeColor( actTree, insertID );
+				
 				foreach_reverse( CASTnode _node; newASTNodes )
 					if( insertID <= 0 ) append( actTree, _node, -insertID ); else append( actTree, _node, insertID, true );
 
 				int markID = IupGetInt( actTree, "LASTADDNODE" ) + cast(int) newASTNodes.length - 1;
 				IupSetAttributeId( actTree, "MARKED", markID, "YES" );
+				version(Windows)
+				{
+					IupSetInt( actTree, "VALUE", markID );
+					IupSetStrAttributeId( actTree, "COLOR", markID, toStringz( tools.invertColor( GLOBAL.editColor.prjViewHLT ) ) );
+				}
 			}
 		}
 		catch( Exception e ){}		
@@ -1923,6 +1876,58 @@ public:
 	}
 	
 	int getShowIndex(){ return showIndex; }
+}
+
+private void restoreSingleNodeColor( Ihandle* ih, int id, CASTnode _node = null )
+{
+	if( GLOBAL.editorSetting00.ColorOutline != "ON" ) return;
+	
+	if( id < 0 ) return;
+	if( id == 0 )
+	{
+		IupSetStrAttributeId( ih, "COLOR", 0, toStringz( GLOBAL.editColor.prjTitle ) );
+		return;
+	}
+	
+	if( _node is null )
+	{
+		_node = cast(CASTnode) IupGetAttributeId( ih, "USERDATA", id );
+		IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.outlineFore ) );
+	}
+	
+	version(FBIDE)
+	{
+		switch( Uni.toLower( _node.protection ) )
+		{
+			case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
+			case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 127 39" ); break;
+			default:
+		}
+		
+		if( _node.kind & B_VERSION )
+		{
+			if( _node.name == "-else-" ) IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); else IupSetAttributeId( ih, "COLOR", id, "0 180 0" );
+		}
+	}
+	version(DIDE)
+	{
+		if( _node.kind & D_IMPORT )
+		{
+			if( _node.protection == "protected" )
+				IupSetAttributeId( ih, "COLOR", id, "255 95 17" );
+			else if( _node.protection == "" || _node.protection == "private" )
+				IupSetAttributeId( ih, "COLOR", id, "255 0 0" );
+		}
+		else
+		{
+			switch( _node.protection )
+			{
+				case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
+				case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 95 17" ); break;
+				default:			IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.outlineFore ) );
+			}
+		}
+	}
 }
 
 extern(C) 

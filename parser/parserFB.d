@@ -897,8 +897,8 @@ version(FBIDE)
 
 					parseToken();
 
-					string	_type, _name;
-					int		_lineNum;
+					string	_type, _name, fpType;
+					int		fpKind, _lineNum = token().lineNumber;
 
 					if( token().tok == TOK.Tshared )
 					{
@@ -909,6 +909,29 @@ version(FBIDE)
 					if( token().tok == TOK.Tas )
 					{
 						parseToken( TOK.Tas );
+						if( parseFunctionPointer( fpKind, fpType ) )
+						{
+							if( token().tok == TOK.Tidentifier )
+							{
+								if( next().tok == TOK.Tcolon || next().tok == TOK.Teol )
+								{
+									_name = token().identifier;
+									parseToken( TOK.Tidentifier );
+								}
+							}
+							
+							if( _name.length )
+							{
+								if( token().tok == TOK.Tcolon || token().tok == TOK.Teol )
+								{
+									activeASTnode.addChild( _name, B_FUNCTION, _protection, fpType, "pointer", _lineNum );
+								}
+								return true;
+							}
+							else
+								return false;
+							
+						}
 
 						if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
 						
@@ -1102,18 +1125,14 @@ version(FBIDE)
 							if( token().tok == TOK.Tas )
 							{
 								parseToken( TOK.Tas );
-
-								if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
-								
-								int fpKind;
-								string fpType;
 								if( parseFunctionPointer( fpKind, fpType ) )
-								//if( parseFunctionPointer( _name, _lineNum ) )
 								{
-									activeASTnode.addChild( _name, fpKind, null, fpType, null, _lineNum );
+									activeASTnode.addChild( _name, B_FUNCTION, _protection, fpType, "pointer", _lineNum );
 									if( token.tok != TOK.Tcomma ) break; else parseToken( TOK.Tcomma );
 									continue;
 								}
+								
+								if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
 
 								_type = getVariableType();
 								if( _type.length )
@@ -1969,8 +1988,8 @@ version(FBIDE)
 				
 				while( token().tok != TOK.Tend && next().tok != B_KIND )
 				{
-					string	_type, _name;
-					int		_lineNum;
+					string	_type, _name, fpType;
+					int		_lineNum, fpKind;
 					
 					switch( token().tok )
 					{
@@ -2007,6 +2026,27 @@ version(FBIDE)
 							
 						case TOK.Tas:
 							parseToken( TOK.Tas );
+							if( parseFunctionPointer( fpKind, fpType ) )
+							{
+								if( token().tok == TOK.Tidentifier )
+								{
+									if( next().tok == TOK.Tcolon || next().tok == TOK.Teol )
+									{
+										_name = token().identifier;
+										parseToken( TOK.Tidentifier );
+									}
+								}
+								
+								if( _name.length )
+								{
+									if( token().tok == TOK.Tcolon || token().tok == TOK.Teol )
+									{
+										activeASTnode.addChild( _name, B_FUNCTION, _protection, fpType, "pointer", _lineNum );
+									}
+								}
+								continue;
+							}
+							
 							_type = getVariableType();
 
 							if( _type.length )
@@ -2221,13 +2261,9 @@ version(FBIDE)
 							if( token().tok == TOK.Tas )
 							{
 								parseToken( TOK.Tas );
-
-								int fpKind;
-								string fpType;
-								//if( parseFunctionPointer( _name, _lineNum ) ) break;
 								if( parseFunctionPointer( fpKind, fpType ) )
 								{
-									activeASTnode.addChild( _name, fpKind, null, fpType, null, _lineNum );
+									activeASTnode.addChild( _name, B_FUNCTION, _protection, fpType, "pointer", _lineNum );
 									break;
 								}
 
@@ -2321,36 +2357,31 @@ version(FBIDE)
 
 					if( token().tok == TOK.Topenparen ) _typeparam = parseParam( true );
 
-					if( token().tok == TOK.Tas )
+					if( _kind & B_FUNCTION )
 					{
-						parseToken( TOK.Tas );
-
-						if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
-
-						_returnType = getVariableType();
-						if( _returnType.length )
+						if( token().tok == TOK.Tas )
 						{
-							parseToken();
-							while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
-							{
-								_returnType ~= "*";
-								parseToken();
-							}
+							parseToken( TOK.Tas );
 
-							_typeparam = _returnType ~ _typeparam;
-							//activeASTnode.addChild( _name, _kind, null, _type, null, _lineNumber );
-							
-							return true;
+							if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+							_returnType = getVariableType();
+							if( _returnType.length )
+							{
+								parseToken();
+								while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+								{
+									_returnType ~= "*";
+									parseToken();
+								}
+
+								_typeparam = _returnType ~ _typeparam;
+							}
 						}
 					}
 
 					if( token().tok == TOK.Tstatic || token().tok == TOK.Texport || token().tok == TOK.Toverride ) parseToken();
-					
-					if( token().tok == TOK.Teol || token().tok == TOK.Tcolon ) // SUB
-					{
-						//activeASTnode.addChild( _name, _kind, null, _param, null, _lineNumber );
-						return true;
-					}		
+					return true;
 				}
 			}
 			catch( Exception e )
@@ -2404,6 +2435,7 @@ version(FBIDE)
 						parseToken( TOK.Tidentifier );
 					}
 
+					// B_ALIAS
 					if( token().tok == TOK.Tas )
 					{
 						parseToken( TOK.Tas );
@@ -2421,7 +2453,15 @@ version(FBIDE)
 							}
 							if( _name.length )
 							{
-								if( token().tok == TOK.Tcolon || token().tok == TOK.Teol ) activeASTnode.addChild( _name, fpKind, null, fpType, null, _lineNum );
+								if( token().tok == TOK.Tcolon || token().tok == TOK.Teol )
+								{
+									if( fpKind & B_FUNCTION )
+										activeASTnode.addChild( _name, B_ALIAS, null, fpType, "FUNCTIONPTR", _lineNum );
+									else if( fpKind & B_SUB )
+										activeASTnode.addChild( _name, B_ALIAS, null, fpType, "SUBPTR", _lineNum );
+									else
+										activeASTnode.addChild( _name, B_ALIAS, null, fpType, null, _lineNum );
+								}
 								return true;
 							}
 							else

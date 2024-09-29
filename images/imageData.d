@@ -450,6 +450,10 @@ void load_all_images_icons()
 		IupSetHandle( "IUP_import", XPM.getIUPimageFormXPM( "icons/xpm/outline/import.xpm" ) );
 		IupSetHandle( "IUP_version", XPM.getIUPimageFormXPM( "icons/xpm/outline/version.xpm" ) );
 		IupSetHandle( "IUP_versionspec", XPM.getIUPimageFormXPM( "icons/xpm/outline/version_spec.xpm" ) );
+		
+		IupSetHandle( "IUP_funptr_private", XPM.getIUPimageFormXPM( "icons/xpm/outline/funptr_private.xpm" ) );
+		IupSetHandle( "IUP_funptr_protected", XPM.getIUPimageFormXPM( "icons/xpm/outline/funptr_protected.xpm" ) );
+		IupSetHandle( "IUP_funptr", XPM.getIUPimageFormXPM( "icons/xpm/outline/funptr_public.xpm" ) );		
 	}
 	version(DIDE)
 	{

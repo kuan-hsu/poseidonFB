@@ -2133,7 +2133,7 @@ public:
 									}									
 									
 									string _type, _paramString, _name, _blockCondition;
-									ParserAction.getSplitDataFromNodeTypeString( AST_Head.type, _type, _paramString );
+									ParserAction.returnTypeAndParameter( AST_Head.type, _type, _paramString );
 									if( AST_Head.kind & B_FUNCTION ) _type = _type.length ? " as " ~ _type : ""; else _type = "";
 									_name = AST_Head.name;
 
@@ -2256,7 +2256,7 @@ public:
 									}
 									
 									string _type, _paramString, _blockCondition;
-									ParserAction.getSplitDataFromNodeTypeString( AST_Head.type, _type, _paramString );
+									ParserAction.returnTypeAndParameter( AST_Head.type, _type, _paramString );
 									if( AST_Head.kind & D_FUNCTION ) _type = _type.length ? _type ~ " " : "void "; else _type = "";
 									
 									if( AST_Head.getFather !is null )
@@ -2564,46 +2564,52 @@ public:
 
 		return result;
 	}
+	
+	static void returnTypeAndParameter( string s, ref string _type, ref string _param )
+	{
+		if( s.length )
+		{
+			if( s[$-1] == ')' )
+			{
+				int countParen;
+				string tempWord;
+				for( auto i = s.length - 1; i >= 0; -- i )
+				{
+					if( s[i] == ')' )
+					{
+						countParen --;
+					}
+					else if( s[i] == '(' )
+					{
+						countParen ++;
+					}
+					
+					if( countParen == 0 )
+					{
+						_type = s[0..i].dup;
+						_param = s[i..$].dup;
+						return;
+					}
+				}
+			}
+			
+			_type = s;
+		}
+	}	
 
 	static string getSeparateType( string _string, bool bemoveArrayAndPoint = false )
 	{
-		auto openParenPos = indexOf( _string, "(" );
-
-		if( openParenPos > 0 ) // should be >= 1
-		{
-			version(DIDE) if( _string[openParenPos-1] == '!' ) openParenPos = indexOf( _string, "(", openParenPos + 1 );
-		}
-		
-		if( openParenPos > -1 )
-		{
-			if( bemoveArrayAndPoint ) return removeArrayAndPointer( _string[0..openParenPos] ); else return _string[0..openParenPos].dup;
-		}
-
-		return !bemoveArrayAndPoint ? _string : removeArrayAndPointer( _string );
+		string _type, _param;
+		returnTypeAndParameter( _string, _type, _param );
+		return _type;
 	}
 
 	static string getSeparateParam( string _string )
 	{
-		auto openParenPos = indexOf( _string, "(" );
-
-		if( openParenPos > 0 ) // should be >= 1
-		{
-			version(DIDE) if( _string[openParenPos-1] == '!' ) openParenPos = indexOf( _string, "(", openParenPos + 1 );
-		}
-		
-		if( openParenPos > -1 )
-		{
-			return _string[openParenPos..$].dup;
-		}
-
-		return null;
+		string _type, _param;
+		returnTypeAndParameter( _string, _type, _param );
+		return _param;
 	}	
-	
-	static void getSplitDataFromNodeTypeString( string s, ref string _type, ref string _paramString, bool bemoveArrayAndPoint = false  )
-	{
-		_type			= getSeparateType( s, bemoveArrayAndPoint );
-		_paramString	= getSeparateParam( s );
-	}
 	
 	version(DIDE) static CASTnode getFatherOfMemberMethod( CASTnode node )
 	{
@@ -2627,7 +2633,7 @@ public:
 	}
 	
 	// For getType use, the TYPE should be without Array sign
-	static string[] getDivideWordWithoutSymbol( string word )
+	static string[] getDivideWordWithoutSymbol( string word, bool bRemovePtr = true )
 	{
 		string[]	splitWord;
 		string		tempWord;
@@ -2635,7 +2641,6 @@ public:
 		
 		version(FBIDE)
 		{
-			
 			if( GLOBAL.parserSettings.toggleExtendMacro == "ON" )
 			{
 				for( int i = 0; i < word.length ; ++i )
@@ -2649,7 +2654,7 @@ public:
 					{
 						if( countParen == 0 )
 						{
-							splitWord ~= tempWord;
+							splitWord ~= ( bRemovePtr ? stripRight( tempWord , "*" ) : tempWord );
 							tempWord = "";
 							continue;
 						}
@@ -2657,7 +2662,7 @@ public:
 					tempWord ~= word[i];
 				}
 				
-				if( tempWord.length ) splitWord ~= tempWord;
+				if( tempWord.length ) splitWord ~= ( bRemovePtr ? stripRight( tempWord , "*" ) : tempWord );
 				return splitWord;				
 			}
 		}
@@ -2673,7 +2678,7 @@ public:
 			{
 				if( word[i] == '.' )
 				{
-					splitWord ~= tempWord;
+					splitWord ~= splitWord ~= ( bRemovePtr ? stripRight( tempWord , "*" ) : tempWord );
 					tempWord = "";
 				}
 				else
@@ -2681,7 +2686,7 @@ public:
 			}
 		}
 
-		if( tempWord.length ) splitWord ~= tempWord;
+		if( tempWord.length ) splitWord ~= ( bRemovePtr ? stripRight( tempWord , "*" ) : tempWord );
 		return splitWord;			
 	}
 	

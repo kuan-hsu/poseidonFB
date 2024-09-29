@@ -549,8 +549,6 @@ struct LiveParser
 						}
 					}
 
-					//IupMessage("TRUE","");
-
 					if( newHead !is null )
 					{
 						CASTnode[]	beAliveNodes;
