@@ -311,7 +311,9 @@ private:
 			IupSetInt( textIncludeLevel, "VALUE", GLOBAL.compilerSettings.includeLevel );
 			IupSetHandle( "textIncludeLevel", textIncludeLevel );
 		}
-
+		
+		
+		
 		
 		Ihandle* toggleWithParams = IupFlatToggle( GLOBAL.languageItems["showtypeparam"].toCString );
 		IupSetStrAttribute( toggleWithParams, "VALUE", toStringz(GLOBAL.parserSettings.showTypeWithParams) );
@@ -1425,6 +1427,17 @@ private:
 		IupSetAttributes( btnAutoCompleteHLT_FG, "SIZE=16x8,NAME=Color-btnAutoCompleteHLT_FG" );
 		IupSetAttributes( btnAutoCompleteHLT_BG, "SIZE=16x8,NAME=Color-btnAutoCompleteHLT_BG" );
 
+		Ihandle* labelProtected = IupLabel( GLOBAL.languageItems["protected"].toCString );
+		Ihandle* btnProtected = IupFlatButton( null );
+		IupSetStrAttribute( btnProtected, "FGCOLOR", toStringz( GLOBAL.editColor.protectedColor ) );
+		IupSetAttributes( btnProtected, "SIZE=16x8,NAME=Color-btnProtected" );
+		IupSetCallback( btnProtected, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
+		
+		Ihandle* labelPrivate = IupLabel( GLOBAL.languageItems["private"].toCString );
+		Ihandle* btnPrivate = IupFlatButton( null );
+		IupSetStrAttribute( btnPrivate, "FGCOLOR", toStringz( GLOBAL.editColor.privateColor ) );
+		IupSetAttributes( btnPrivate, "SIZE=16x8,NAME=Color-btnPrivate" );
+		IupSetCallback( btnPrivate, "FLAT_ACTION", cast(Icallback) &CPreferenceDialog_colorChoose_cb );
 
 		version(Windows)
 		{
@@ -1509,6 +1522,14 @@ private:
 				labelAutoCompleteHLT,
 				btnAutoCompleteHLT_FG,
 				btnAutoCompleteHLT_BG,
+				
+				labelProtected,
+				btnProtected,
+				IupFill(),
+				IupFill(),
+				labelPrivate,
+				btnPrivate,
+				IupFill(),				
 				
 				label_Scintilla,
 				btn_Scintilla_FG,
@@ -1620,15 +1641,15 @@ private:
 				labelCallTipHLT,
 				btnCallTipHLT,
 				IupFill(),			
-				/*
-				labelAutoComplete,
-				btnAutoComplete_FG,
-				btnAutoComplete_BG,
+				
+				labelProtected,
+				btnProtected,
 				IupFill(),
-				labelAutoCompleteHLT,
-				btnAutoCompleteHLT_FG,
-				btnAutoCompleteHLT_BG,
-				*/
+				IupFill(),
+				labelPrivate,
+				btnPrivate,
+				IupFill(),
+
 				label_Scintilla,
 				btn_Scintilla_FG,
 				btn_Scintilla_BG,
@@ -1660,7 +1681,7 @@ private:
 				labelSCE_B_COMMENTBLOCK,
 				btnSCE_B_COMMENTBLOCK_FG,
 				btnSCE_B_COMMENTBLOCK_BG,
-
+				
 				null
 			);
 		}
@@ -1699,12 +1720,9 @@ private:
 				IupFill,
 				labelMessageDlg,
 				textMessageDlg,
-				
+				IupFill,
 				labelAutoCompleteDlg,
-				textAutoCompleteDlg,
-				IupFill,
-				IupFill,
-				IupFill,				
+				textAutoCompleteDlg,		
 				
 				null
 			);
@@ -1723,7 +1741,11 @@ private:
 			);
 		}
 		
-		IupSetAttributes( gboxOPACITY, "SIZELIN =-1,NUMDIV=5,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=8,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
+		version(Windows)
+			IupSetAttributes( gboxOPACITY, "SIZELIN =-1,NUMDIV=8,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=8,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
+		else
+			IupSetAttributes( gboxOPACITY, "SIZELIN =-1,NUMDIV=5,ALIGNMENTLIN=ACENTER,ALIGNMENTCOL=ALEFT,GAPLIN=8,GAPCOL=5,MARGIN=2x8,EXPANDCHILDREN=HORIZONTAL" );
+		
 		Ihandle* frameOPACITY = IupFrame( gboxOPACITY );
 		IupSetAttributes( frameOPACITY, "MARGIN=0x0,EXPAND=YES,EXPAND=HORIZONTAL" );
 		IupSetStrAttribute( frameOPACITY, "TITLE", GLOBAL.languageItems["dialogopacity"].toCString );
@@ -2329,6 +2351,7 @@ extern(C) // Callback for CPreferenceDialog
 				}			
 			}
 			
+
 			GLOBAL.editColor.caretLine = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCaretLine" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.cursor = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnCursor" ), "FGCOLOR" ) ).dup;
 			GLOBAL.editColor.selectionFore = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnSelectFore" ), "FGCOLOR" ) ).dup;
@@ -2613,6 +2636,11 @@ extern(C) // Callback for CPreferenceDialog
 				else
 					GLOBAL.keywordCase= 4;
 			}
+			
+			// Prot Color
+			GLOBAL.editColor.protectedColor = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnProtected" ), "FGCOLOR" ) ).dup;
+			GLOBAL.editColor.privateColor = fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrivate" ), "FGCOLOR" ) ).dup;
+
 
 			// Icon Invert
 			if( fromStringz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-toggleIcon" ), "VALUE" ) ) == "ON" )
@@ -3091,6 +3119,9 @@ extern(C) // Callback for CPreferenceDialog
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord3Color" ), "FGCOLOR", "16 108 232" );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR", "255 0 0" );
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR", "0 255 0" );
+
+		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnProtected" ), "FGCOLOR", "255 95 17" );
+		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrivate" ), "FGCOLOR", "255 0 0" );
 
 		// bottom
 		IupSetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-toggleIcon" ), "VALUE", "ON" );

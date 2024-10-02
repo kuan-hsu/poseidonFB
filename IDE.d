@@ -368,6 +368,8 @@ public:
 			doc ~= setINILineData( "dlgBack", GLOBAL.editColor.dlgBack );
 			doc ~= setINILineData( "txtFore", GLOBAL.editColor.txtFore );
 			doc ~= setINILineData( "txtBack", GLOBAL.editColor.txtBack );
+			doc ~= setINILineData( "protectedColor", GLOBAL.editColor.protectedColor );
+			doc ~= setINILineData( "privateColor", GLOBAL.editColor.privateColor );
 			
 			doc ~= setINILineData( "outputFore", GLOBAL.editColor.outputFore );
 			doc ~= setINILineData( "outputBack", GLOBAL.editColor.outputBack );
@@ -790,6 +792,9 @@ public:
 							case "searchIndicator":			if( right.length ) GLOBAL.editColor.searchIndicator = right;				break;
 							case "searchIndicatorAlpha":	if( right.length ) GLOBAL.editColor.searchIndicatorAlpha = right;			break;
 							case "prjViewHLT":				if( right.length ) GLOBAL.editColor.prjViewHLT = right;						break;
+
+							case "protectedColor":			if( right.length ) GLOBAL.editColor.protectedColor = right;					break;
+							case "privateColor":			if( right.length ) GLOBAL.editColor.privateColor = right;					break;
 							
 							default:
 						}
@@ -1219,7 +1224,10 @@ public:
 						case	"keyword3":					IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord3Color" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"keyword4":					IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR", toStringz( right ) ); break;
 						case	"keyword5":					IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR", toStringz( right ) ); break;
-						
+
+						case	"protectedColor":			IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnProtected" ), "FGCOLOR", toStringz( right ) ); break;
+						case	"privateColor":				IupSetStrAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrivate" ), "FGCOLOR", toStringz( right ) ); break;
+
 						default:
 					}
 				}
@@ -1335,6 +1343,9 @@ public:
 			doc ~= setINILineData( "keyword3", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord3Color" ), "FGCOLOR" ) ) );
 			doc ~= setINILineData( "keyword4", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord4Color" ), "FGCOLOR" ) ) );
 			doc ~= setINILineData( "keyword5", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnKeyWord5Color" ), "FGCOLOR" ) ) );
+			
+			doc ~= setINILineData( "protectedColor", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnProtected" ), "FGCOLOR" ) ) );
+			doc ~= setINILineData( "privateColor", fSTRz( IupGetAttribute( IupGetDialogChild( GLOBAL.preferenceDlg.getIhandle, "Color-btnPrivate" ), "FGCOLOR" ) ) );
 
 			doc ~= "[toggle]\n";
 			

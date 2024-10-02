@@ -25,6 +25,7 @@ struct EditorColorUint
 	string		projectFore, projectBack, outlineFore, outlineBack, outputFore, outputBack, searchFore, searchBack, prjTitle, prjSourceType, dlgFore, dlgBack, txtFore, txtBack;
 	string		callTipFore, callTipBack, callTipHLT, showTypeFore, showTypeBack, showTypeHLT, autoCompleteFore, autoCompleteBack, autoCompleteHLTFore, autoCompleteHLTBack;
 	string		searchIndicator, searchIndicatorAlpha, prjViewHLT;
+	string		privateColor, protectedColor;
 }
 
 struct CompilerSettingUint
@@ -328,13 +329,8 @@ public:
 		GLOBAL.editColor.searchIndicatorAlpha = "128";
 		GLOBAL.editColor.prjViewHLT = "0 0 128";
 
-		/*
-		GLOBAL.debuggerFullPath = new IupString();
-		GLOBAL.x64debuggerFullPath = new IupString();
-		GLOBAL.linuxTermName = new IupString();
-		*/
-		//GLOBAL.colorTemplate = new IupString();
-		//GLOBAL.defaultOption = new IupString();
+		GLOBAL.editColor.protectedColor = "255 95 17";
+		GLOBAL.editColor.privateColor = "255 0 0";
 		
 		GLOBAL.compilerSettings.currentCustomCompilerOption = "";
 		GLOBAL.compilerSettings.noneCustomCompilerOption = "None Custom Compile Option";
@@ -637,6 +633,8 @@ public:
 						GLOBAL.languageItems["selectcase"] = new IupString( "Selection Of Autocomplete List Is Case Insensitive" );
 						GLOBAL.languageItems["showlisttype"] = new IupString( "Show Autocomplete List Type" );
 						GLOBAL.languageItems["showallmembers"] = new IupString( "Show All Members( public, protected, private )" );
+						GLOBAL.languageItems["protected"] = new IupString( "Protected Color" );
+						GLOBAL.languageItems["private"] = new IupString( "Private Color" );
 						GLOBAL.languageItems["enabledwell"] = new IupString( "Enable Mouse Dwell to Show Type" );
 							GLOBAL.languageItems["dwelldelay"] = new IupString( "Dwell Delay(ms):" );
 						GLOBAL.languageItems["enableoverwrite"] = new IupString( "Overwrite To Non Identifier Character" );

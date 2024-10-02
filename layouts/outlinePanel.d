@@ -1240,8 +1240,9 @@ public:
 							{
 								switch( Uni.toLower( _node.protection ) )
 								{
-									case "private", "protected":	break;
-									default:						IupSetStrAttributeId( ih, "COLOR", j, toStringz( GLOBAL.editColor.outlineFore ) );
+									case "private":		IupSetStrAttributeId( ih, "COLOR", j, toStringz( GLOBAL.editColor.privateColor ) ); break;
+									case "protected":	IupSetStrAttributeId( ih, "COLOR", j, toStringz( GLOBAL.editColor.protectedColor ) ); break;
+									default:			IupSetStrAttributeId( ih, "COLOR", j, toStringz( GLOBAL.editColor.outlineFore ) );
 								}
 								
 								version(FBIDE)
@@ -1750,7 +1751,11 @@ public:
 			Ihandle* actTree = getActiveTree();
 			if( actTree != null )
 			{
-				restoreSingleNodeColor( actTree, insertID );
+				version(Windows)
+				{
+					int activeID = IupGetInt( actTree, "VALUE" );
+					if( activeID > -1 ) restoreSingleNodeColor( actTree, activeID );
+				}
 				
 				foreach_reverse( CASTnode _node; newASTNodes )
 					if( insertID <= 0 ) append( actTree, _node, -insertID ); else append( actTree, _node, insertID, true );
@@ -1899,8 +1904,8 @@ private void restoreSingleNodeColor( Ihandle* ih, int id, CASTnode _node = null 
 	{
 		switch( Uni.toLower( _node.protection ) )
 		{
-			case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
-			case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 127 39" ); break;
+			case "private":		IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.privateColor ) ); break;
+			case "protected":	IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.protectedColor ) ); break;
 			default:
 		}
 		
@@ -1914,16 +1919,16 @@ private void restoreSingleNodeColor( Ihandle* ih, int id, CASTnode _node = null 
 		if( _node.kind & D_IMPORT )
 		{
 			if( _node.protection == "protected" )
-				IupSetAttributeId( ih, "COLOR", id, "255 95 17" );
+				IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.protectedColor ) );
 			else if( _node.protection == "" || _node.protection == "private" )
-				IupSetAttributeId( ih, "COLOR", id, "255 0 0" );
+				IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.privateColor ) );
 		}
 		else
 		{
 			switch( _node.protection )
 			{
-				case "private":		IupSetAttributeId( ih, "COLOR", id, "255 0 0" ); break;
-				case "protected":	IupSetAttributeId( ih, "COLOR", id, "255 95 17" ); break;
+				case "private":		IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.privateColor ) ); break;
+				case "protected":	IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.protectedColor ) ); break;
 				default:			IupSetStrAttributeId( ih, "COLOR", id, toStringz( GLOBAL.editColor.outlineFore ) );
 			}
 		}

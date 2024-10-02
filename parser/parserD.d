@@ -11,8 +11,8 @@ version(DIDE)
 		import			parser.ast, parser.token;
 		import			std.string, Algorithm = std.algorithm;
 		debug import	iup.iup, Conv = std.conv;
+		
 		string			activeProt;
-
 		Stack!(string)	curlyStack;
 		Stack!(string)	protStack;
 		Stack!(string)	conditionStack;
@@ -29,6 +29,7 @@ version(DIDE)
 					else
 					{
 						parseToken();
+						activeProt = "";
 						break;
 					}
 				}
@@ -156,19 +157,23 @@ version(DIDE)
 			return _tempTokenIndex;
 		}
 		
-
 		string getProt()
 		{
 			string result;
 			
 			if( !activeProt.length )
 			{
-				string _stackValue = protStack.top();
-				
-				if( _stackValue.length > 1 )
+				if( !protStack.empty )
 				{
-					if( _stackValue[$-1] == ':' ) return _stackValue[0..$-1]; else return _stackValue;
+					string _stackValue = protStack.top();
+					if( _stackValue.length )
+					{
+						if( _stackValue[$-1] == ':' || _stackValue[$-1] == '{' ) return _stackValue[0..$-1];
+					}
+					return _stackValue;
 				}
+				else
+					return null;
 			}
 
 			return activeProt;
@@ -3405,24 +3410,45 @@ version(DIDE)
 							curlyStack.push( "{" );
 							
 							// Protection
+							if( activeProt.length )
+								protStack.push( activeProt ~ "{" );
+							else
+							{
+								auto _content = protStack.top;
+								if( _content.length )
+								{
+									if( _content[$-1] == ':' || _content[$-1] == '{' ) protStack.push( _content[0..$-1] ); else protStack.push( _content );
+								}
+								else
+									protStack.push( "" );
+							}
 							activeProt = "";
-							protStack.push( "{" );
-							if( prev().tok == TOK.Tprivate || prev().tok == TOK.Tprotected || prev().tok == TOK.Tpublic ) protStack.push( prev().identifier );
 							
 							parseToken( TOK.Topencurly );
 							break;
 							
 						case TOK.Tclosecurly:
 							// Protection
-							if( protStack.size() > 0 )
+							while( !protStack.empty )
 							{
-								while( protStack.top() != "{" && protStack.top() != "" )
-									protStack.pop();
-								
-								if( protStack.top() == "{" ) protStack.pop();
+								auto _p = protStack.top;
+								if( _p.length )
+								{
+									if( _p[$-1] == '{' )
+									{
+										protStack.pop;
+										break;
+									}
+									else if( _p[$-1] == ':' )
+									{
+										protStack.pop;
+										continue;
+									}
+								}
+								protStack.pop;
+								break;
 							}
 							
-
 							bool	bSkipParseToken;
 							if( curlyStack.top() == "{" )
 							{
@@ -3482,7 +3508,7 @@ version(DIDE)
 												}
 												while( activeASTnode[_i].base == "-else-" );									
 												// Save to type
-												activeASTnode = activeASTnode.addChild( "-else-", D_KIND, getProt(), _elseString, _name, _ln );
+												activeASTnode = activeASTnode.addChild( "-else-", D_KIND, getProt(), "", _name, _ln );
 												
 												if( token().tok != TOK.Topencurly )
 												{
