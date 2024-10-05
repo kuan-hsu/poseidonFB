@@ -1846,7 +1846,14 @@ version(FBIDE)
 				}
 				while( _fatherNode.kind & ( B_WITH | B_SCOPE ) );
 			}
-			
+			else
+			{
+				if( AST_Head.getFather !is null )
+				{
+					if( AST_Head.getFather.kind & (  B_CTOR | B_DTOR | B_FUNCTION | B_SUB | B_OPERATOR | B_PROPERTY ) ) _fatherNode = AST_Head.getFather;
+				}
+			}
+
 			if( _fatherNode.getFather !is null )
 			{
 				if( _fatherNode.name.length )
