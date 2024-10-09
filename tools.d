@@ -968,6 +968,44 @@ class CPLUGIN
 }
 
 
+class CSymmetricalCounter
+{
+private:
+	int		counter;
+	string	LSign, RSign;
+	
+public:
+	this()
+	{
+		LSign = "(";
+		RSign = ")";
+	}
+	
+	this( string L, string R )
+	{
+		LSign = L;
+		RSign = R;
+	}
+	
+	bool count( char c )
+	{
+		return count( [c] );
+	}
+
+	bool count( string s )
+	{
+		if( s == LSign )
+			counter ++;
+		else if( s == RSign )
+			counter --;
+		else
+		{
+			if( counter == 0 ) return true;
+		}
+		return false;
+	}
+}
+
 /+
 BUTTONDEFAULT: Number of the default button. Can be "1", "2" or "3". "2" is valid only for "RETRYCANCEL", "OKCANCEL" and "YESNO" button configurations. "3" is valid only for "YESNOCANCEL". Default: "1".
 

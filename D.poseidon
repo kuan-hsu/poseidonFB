@@ -68,7 +68,7 @@ name=tools.d
 title=LDC_x64
 target=poseidonFB_x64
 option=--m64 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB64.res
-compiler=K:/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
+compiler=K:/codingPark/ldc2-1.39.0-windows-multilib/bin/ldc2.exe
 incdir=K:/codingPark/import
 libdir=K:/codingPark/Libraries/iup/iup5947/dll14_64
 title=x64
@@ -80,6 +80,6 @@ libdir=K:/codingPark/Libraries/iup/iup5947/dll14_64
 title=LDC_x32
 target=poseidonFB
 option=--m32 -odobjs -O -d-version=FBIDE -d-version=GUI poseidonFB.res
-compiler=K:/codingPark/ldc2-1.36.0-windows-multilib/bin/ldc2.exe
+compiler=K:/codingPark/ldc2-1.39.0-windows-multilib/bin/ldc2.exe
 incdir=K:/codingPark/import
 libdir=K:/codingPark/Libraries/iup/iup5947/dll14

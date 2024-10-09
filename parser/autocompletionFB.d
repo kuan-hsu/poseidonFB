@@ -353,8 +353,25 @@ version(FBIDE)
 			if( !bFullShow )
 				if( GLOBAL.compilerSettings.toggleShowAllMember == "OFF" )
 					if( node.protection == "private" ) return null;
-				
-			if( Algorithm.count( node.name, "." ) > 0 ) return null;
+			
+			/*
+			scope _counter = new CSymmetricalCounter;
+			for( int i = 0; i < node.name.length; ++ i )
+				if( _counter.count( node.name[i] ) && node.name[i] == '.' ) return null;
+			*/
+			//if( Algorithm.count( node.name, "." ) > 0 ) return null;
+			int countOpen;
+			for( int i = 0; i < node.name.length; ++ i )
+			{
+				if( node.name[i] == '(' )
+					countOpen ++;
+				else if( node.name[i] == ')' )
+					countOpen --;
+				else if( node.name[i] == '.' )
+				{
+					if( countOpen == 0 ) return null;
+				}
+			}
 			
 			int protAdd;
 			switch( node.protection )
@@ -1862,13 +1879,10 @@ version(FBIDE)
 					{
 						memberFunctionMotherName = _fatherNode.name;
 					}
-					else
+					else if( _fatherNode.kind & ( B_FUNCTION | B_SUB | B_PROPERTY | B_OPERATOR ) )
 					{
 						auto dotPos = indexOf( _fatherNode.name, "." );
-						if( dotPos > -1 )
-						{
-							memberFunctionMotherName = _fatherNode.name[0..dotPos];
-						}
+						if( dotPos > 0 ) memberFunctionMotherName = _fatherNode.name[0..dotPos];
 					}
 				}
 			}
@@ -2035,7 +2049,7 @@ version(FBIDE)
 										CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 										if( memberFunctionMotherNode !is null )
 										{
-											if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], lineNum, B_FIND );
+											if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchMemberNode( memberFunctionMotherNode, splitWord[i], B_FIND_FOR_DOT | B_SUB, false );
 										}
 									}
 								}					
@@ -2116,7 +2130,7 @@ version(FBIDE)
 								CASTnode memberFunctionMotherNode = searchMatchNode( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], memberFunctionMotherName, lineNum, B_TYPE | B_CLASS, true );
 								if( memberFunctionMotherNode !is null )
 								{
-									if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchNode( memberFunctionMotherNode, splitWord[i], lineNum, B_FIND );
+									if( Uni.toLower( splitWord[i] ) == "this" ) AST_Head = memberFunctionMotherNode; else AST_Head = searchMatchMemberNode( memberFunctionMotherNode, splitWord[i], B_FIND_FOR_DOT | B_SUB, false );
 								}
 							}
 						}					
@@ -3829,19 +3843,10 @@ version(FBIDE)
 						{
 							memberFunctionMotherName = _fatherNode.name;
 						}
-						else
+						else if( _fatherNode.kind & ( B_FUNCTION | B_SUB | B_PROPERTY | B_OPERATOR ) )
 						{
-							if( _fatherNode.kind & ( B_BI | B_BAS ) )
-							{
-							}
-							else
-							{
-								auto dotPos = indexOf( _fatherNode.name, "." );
-								if( dotPos > -1 )
-								{
-									memberFunctionMotherName = _fatherNode.name[0..dotPos];
-								}
-							}
+							auto dotPos = indexOf( _fatherNode.name, "." );
+							if( dotPos > 0 ) memberFunctionMotherName = _fatherNode.name[0..dotPos];
 						}
 					}
 				}
@@ -3924,7 +3929,7 @@ version(FBIDE)
 										}
 										else
 										{
-											auto matchNode = searchMatchNode( memberFunctionMotherNode, _splitWord[i], lineNum, B_FIND | B_CTOR | B_SUB );
+											auto matchNode = searchMatchMemberNode( memberFunctionMotherNode, _splitWord[i], B_FIND_FOR_DOT | B_SUB, false );
 											if( matchNode !is null ) matchNodes ~= matchNode;
 										}
 									}

@@ -1527,7 +1527,6 @@ public:
 	static bool isComment( Ihandle* ih, int pos, bool bString = true )
 	{
 		int style = cast(int) IupScintillaSendMessage( ih, 2010, pos, 0 ); // SCI_GETSTYLEAT 2010
-		
 		if( bString )
 		{
 			version(FBIDE)
@@ -1550,7 +1549,7 @@ public:
 				if( style == 1 || style == 2 || style == 3 || style == 4 ) return true;
 			}
 		}
-		
+		/*
 		int lineStartPos = cast(int) IupScintillaSendMessage( ih, 2167, IupScintillaSendMessage( ih, 2166, pos, 0 ), 0 ); // SCI_LINEFROMPOSITION = 2166, SCI_POSITIONFROMLINE=2167
 		//IupMessage("", toStringz( to!(string)(pos) ~ " / " ~ to!(string)(lineStartPos) ) );
 
@@ -1559,7 +1558,7 @@ public:
 		for( int i = pos - 1; i >= lineStartPos; --i )
 		{
 			if( IupScintillaSendMessage( ih, 2010, i, 0 ) == 1 ) return true;
-		}
+		}*/
 		return false;
 	}
 	
