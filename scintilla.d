@@ -170,7 +170,7 @@ public:
 			IupSetAttribute( sci, "DROPFILESTARGET", "YES" );
 			IupSetAttribute( sci, "SCROLLBAR", "YES" );
 			
-			//IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
+			IupSetCallback( sci, "LINESCHANGED_CB",cast(Icallback) &CScintilla_linesChanged_cb );
 			IupSetCallback( sci, "MARGINCLICK_CB",cast(Icallback) &marginclick_cb );
 			IupSetCallback( sci, "BUTTON_CB",cast(Icallback) &button_cb );
 			IupSetCallback( sci, "SAVEPOINT_CB",cast(Icallback) &savePoint_cb );
@@ -1034,7 +1034,6 @@ public:
 
 extern(C)
 {
-	/*
 	private int CScintilla_linesChanged_cb( Ihandle* ih, int lin, int num )
 	{
 		//IupMessage( "", toStringz( "Num=" ~ Integer.toString( num ) ~ "\nLin=" ~ Integer.toString( lin + 1 ) ) );
@@ -1056,7 +1055,7 @@ extern(C)
 			}
 		return IUP_DEFAULT;
 	}
-	*/
+	
 	private int marginclick_cb( Ihandle* ih, int margin, int line, char* status )
 	{
 		string statusString = fSTRz( status );
@@ -2859,7 +2858,7 @@ extern(C)
 					IupSetStrAttribute( ih, "SELECTEDTEXT", textCovert.toCString );			
 			}
 		}
-		
+		/*
 		if( GLOBAL.parserSettings.enableParser == "ON" )
 		{
 			switch( GLOBAL.parserSettings.liveLevel )
@@ -2869,7 +2868,7 @@ extern(C)
 				default:
 			}
 		}
-
+		*/
 		return IUP_DEFAULT;
 	}
 

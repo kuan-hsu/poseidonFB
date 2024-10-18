@@ -1238,22 +1238,23 @@ version(FBIDE)
 		static CASTnode getType( CASTnode originalNode, int lineNum )
 		{
 			if( originalNode is null ) return null;
-			
-			CASTnode resultNode;
 
+			CASTnode resultNode;
+			
 			if( originalNode.kind & ( B_ALIAS | B_VARIABLE | B_PARAM | B_FUNCTION ) )
 			{
 				string[]	splitWord;
-				string		_type, _param;
+				string		_param, _type = originalNode.type;
 				
 				auto oriAST = originalNode;
 				
-				if( !originalNode.type.length ) return null;
-				if( originalNode.kind & B_FUNCTION ) getTypeAndParameter( originalNode, _type, _param ); else _type = originalNode.type;
-				//if( originalNode.type.length ) _type = originalNode.type; else _type = stripLeft( originalNode.base, "*" ); // remove leftside *
-
-				// Check Function Ptr
-				if( originalNode.kind == B_ALIAS )
+				if( originalNode.kind & B_FUNCTION )
+					getTypeAndParameter( originalNode, _type, _param ); 
+				else if( originalNode.kind & B_VARIABLE )
+				{
+					if( !originalNode.type.length ) _type = stripLeft( originalNode.base, "*" ); // For 'var', remove leftside * at first
+				}
+				else if( originalNode.kind == B_ALIAS ) // Check Function Ptr
 				{
 					if( originalNode.base.length )
 					{
@@ -1262,6 +1263,7 @@ version(FBIDE)
 					}
 				}
 				
+				if( !_type.length ) return null;
 				if( !splitWord.length ) splitWord = ParserAction.getDivideWordWithoutSymbol( _type ); // Split to words
 				if( GLOBAL.parserSettings.conditionalCompilation == 1 ) checkVersionSpec( originalNode, originalNode.lineNumber );
 				string[] usingNames = checkUsingNamespace( oriAST, lineNum );
@@ -3864,42 +3866,35 @@ version(FBIDE)
 					case "destructor":
 						if( keyword_Btype == 0 ) keyword_Btype = B_DTOR;
 						goto default;
-					/*
+					
 					case "operator":
 						if( keyword_Btype == 0 ) keyword_Btype = B_OPERATOR;
+						goto default;
+						
 					case "property":
 						if( keyword_Btype == 0 ) keyword_Btype = B_PROPERTY;
-					*/
+						goto default;
+					
 					default:
 						if( keyword_Btype > 0 )
 						{
 							if( AST_Head.kind & ( B_CTOR | B_DTOR ) )
 							{
-								if( TYPE < 2 )
+								if( TYPE < 2 ) 
 									if( AST_Head.lineNumber == AST_Head.endLineNum ) return; // Declare
 							}
-						}
-					
-						/+
-						if( keyword_Btype > 0 )
-						{
-							CASTnode _motherNode = AST_Head;
-
-							foreach( CASTnode _node; getMembers( AST_Head ) )
+							else if( AST_Head.kind & ( B_TYPE | B_CLASS ) )
 							{
-								if( _node.kind & keyword_Btype )
+								foreach( CASTnode _tor; AST_Head.getChildren )
 								{
-									if( _node.lineNumber == lineNum )
+									if( _tor.lineNumber == lineNum )
 									{
-										AST_Head = _node;
+										AST_Head = _tor;
 										break;
 									}
 								}
 							}
-
-							if( AST_Head is null ) return;
 						}
-						+/
 				}
 				
 				// Comment at 2022/05/28

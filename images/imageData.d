@@ -242,7 +242,7 @@ version(Windows)
 
 	  IupSetAttribute(image, "0", "BGCOLOR");
 	  if( !bInvert ) IupSetAttribute(image, "1", "12 14 12"); else IupSetAttribute(image, "1", "243 241 243");
-	  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");;
+	  if( !bInvert ) IupSetAttribute(image, "2", "20 22 20"); else IupSetAttribute(image, "2", "235 233 235");
 	  if( !bInvert ) IupSetAttribute(image, "3", "20 18 20"); else IupSetAttribute(image, "3", "235 237 235");
 	  /*
 	  if( !bInvert ) IupSetAttribute(image, "4", "0 0 0"); else IupSetAttribute(image, "4", "0 0 0");

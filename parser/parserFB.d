@@ -58,10 +58,21 @@ version(FBIDE)
 						}
 						else
 						{
+							if( token().tok == TOK.Tcomma || token().tok == TOK.Topenparen )
+								_params ~= token().identifier;
+							else
+							{
+								if( prev().tok == TOK.Tcomma || prev().tok == TOK.Topenparen )
+									_params ~= token().identifier;
+								else
+									_params ~= ( " " ~ token().identifier );
+							}
+							/*
 							if( token().tok == TOK.Tidentifier )
 								_params ~= ( " " ~ token().identifier );
 							else
 								_params ~= token().identifier;
+							*/
 						}
 						
 						parseToken();
@@ -1982,11 +1993,10 @@ version(FBIDE)
 					case B_TYPE:	B_KIND = TOK.Ttype; break;
 					case B_UNION:	B_KIND = TOK.Tunion; break;
 					case B_ENUM:	B_KIND = TOK.Tenum; break;
-					default:
-						B_KIND = TOK.Ttype;
+					default:		B_KIND = TOK.Ttype;
 				}
 				
-				while( token().tok != TOK.Tend && next().tok != B_KIND )
+				while( !( token().tok == TOK.Tend && next().tok == B_KIND ) )
 				{
 					string	_type, _name, fpType;
 					int		_lineNum, fpKind;
@@ -2184,7 +2194,11 @@ version(FBIDE)
 							if( token().tok == TOK.Tend || next().tok == TOK.Tenum )
 							{
 								tokenIndex += 2;
-								if( activeASTnode.getFather !is null ) activeASTnode = activeASTnode.getFather( token().lineNumber );
+								if( activeASTnode.getFather !is null )
+								{
+									activeASTnode.protection = _protection;
+									activeASTnode = activeASTnode.getFather( token().lineNumber );
+								}
 							}
 							else
 							{
@@ -2203,7 +2217,7 @@ version(FBIDE)
 								{
 									if( next2().tok == TOK.Topenparen || next2().tok == TOK.Teol || next2().tok == TOK.Textends )
 									{
-										parseType();
+										parseType( false, _protection );
 										break;
 									}
 								}
@@ -2244,69 +2258,76 @@ version(FBIDE)
 
 						//case TOK.Tidentifier:
 						default:
-							_name = token().identifier;
-							_lineNum = token().lineNumber;
-							parseToken(); 
-
-							// Array
-							if( token().tok == TOK.Topenparen ) _name ~= parseArray();
-
-							// fieldname : bits As DataType [= initializer]
-							if( token().tok == TOK.Tcolon )
+							if( token().tok == TOK.Tidentifier )
 							{
-								parseToken( TOK.Tcolon );
-								if( token().tok == TOK.Tnumbers ) parseToken( TOK.Tnumbers );else return false;
-							}
-						
-							if( token().tok == TOK.Tas )
-							{
-								parseToken( TOK.Tas );
-								if( parseFunctionPointer( fpKind, fpType ) )
+								_name = token().identifier;
+								_lineNum = token().lineNumber;
+								parseToken(); 
+
+								// Array
+								if( token().tok == TOK.Topenparen ) _name ~= parseArray();
+
+								// fieldname : bits As DataType [= initializer]
+								if( token().tok == TOK.Tcolon )
 								{
-									activeASTnode.addChild( _name, B_FUNCTION, _protection, fpType, "pointer", _lineNum );
-									break;
+									parseToken( TOK.Tcolon );
+									if( token().tok == TOK.Tnumbers ) parseToken( TOK.Tnumbers );else return false;
 								}
-
-								if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
-
-								_type = getVariableType();
-								if( _type.length )
+							
+								if( token().tok == TOK.Tas )
 								{
-									parseToken();
-									
-									if( _type == "string" || _type == "zstring" || _type == "wstring" )
+									parseToken( TOK.Tas );
+									if( parseFunctionPointer( fpKind, fpType ) )
 									{
-										if( token().tok == TOK.Ttimes )
-										{
-											parseToken( TOK.Ttimes );
-											parseToken(); // TOK.Tnumber or	TOK.Tidentifier
-										}
-									}
-									
-									// For Macro, Ex: dim a as GEN_TYPE(qwer)
-									string _typeParams;
-									if( GLOBAL.parserSettings.toggleExtendMacro == "ON" )
-										if( token().tok == TOK.Topenparen )	_typeParams = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
-									
-									while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
-									{
-										_type ~= "*";
-										parseToken();
+										activeASTnode.addChild( _name, B_FUNCTION, _protection, fpType, "pointer", _lineNum );
+										break;
 									}
 
-									// [= initializer]
-									if( token().tok == TOK.Tassign )
+									if( token().tok == TOK.Tconst ) parseToken( TOK.Tconst );
+
+									_type = getVariableType();
+									if( _type.length )
 									{
-										parseToken( TOK.Tassign );
-										if( token().tok == TOK.Tstrings || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
+										parseToken();
+										
+										if( _type == "string" || _type == "zstring" || _type == "wstring" )
+										{
+											if( token().tok == TOK.Ttimes )
+											{
+												parseToken( TOK.Ttimes );
+												parseToken(); // TOK.Tnumber or	TOK.Tidentifier
+											}
+										}
+										
+										// For Macro, Ex: dim a as GEN_TYPE(qwer)
+										string _typeParams;
+										if( GLOBAL.parserSettings.toggleExtendMacro == "ON" )
+											if( token().tok == TOK.Topenparen )	_typeParams = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen );
+										
+										while( token().tok == TOK.Tptr || token().tok == TOK.Tpointer )
+										{
+											_type ~= "*";
+											parseToken();
+										}
+
+										// [= initializer]
+										if( token().tok == TOK.Tassign )
+										{
+											parseToken( TOK.Tassign );
+											if( token().tok == TOK.Tstrings || token().tok == TOK.Tidentifier || token().tok == TOK.Tnumbers ) parseToken();else return false;
+										}
+									
+										activeASTnode.addChild( _name, B_VARIABLE, _protection, _type ~ _typeParams, null, _lineNum );
 									}
-								
-									activeASTnode.addChild( _name, B_VARIABLE, _protection, _type ~ _typeParams, null, _lineNum );
+								}
+								else
+								{
+									return false;
 								}
 							}
 							else
 							{
-								return false;
+								tokenIndex ++;
 							}
 					}
 				}
@@ -2355,8 +2376,7 @@ version(FBIDE)
 
 					string  _returnType;
 
-					if( token().tok == TOK.Topenparen ) _typeparam = parseParam( true );
-
+					if( token().tok == TOK.Topenparen ) _typeparam = getDelimitedString( TOK.Topenparen, TOK.Tcloseparen, true );//parseParam( true );
 					if( _kind & B_FUNCTION )
 					{
 						if( token().tok == TOK.Tas )
@@ -2393,7 +2413,7 @@ version(FBIDE)
 			return false;
 		}
 		
-		bool parseType( bool bClass = false )
+		bool parseType( bool bClass = false, string _prot = "" )
 		{
 			try
 			{
@@ -2546,7 +2566,7 @@ version(FBIDE)
 
 						if( token().tok == TOK.Teol || token().tok == TOK.Tcolon )
 						{
-							if( bClass ) activeASTnode = activeASTnode.addChild( _name, B_CLASS, null, /*_typeParams*/null, _base, _lineNum ); else activeASTnode = activeASTnode.addChild( _name, _kind, null, /*_typeParams*/null, _base, _lineNum );
+							if( bClass ) activeASTnode = activeASTnode.addChild( _name, B_CLASS, _prot, /*_typeParams*/null, _base, _lineNum ); else activeASTnode = activeASTnode.addChild( _name, _kind, _prot, /*_typeParams*/null, _base, _lineNum );
 							parseToken( TOK.Teol );
 							parseTypeBody( _kind );
 						}

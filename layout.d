@@ -536,8 +536,8 @@ extern(C)
 					
 					if( GLOBAL.parserSettings.enableParser == "ON" && GLOBAL.parserSettings.liveLevel > 0 && !GLOBAL.bKeyUp )
 					{
-						if( IupGetInt( cSci.getIupScintilla, "AUTOCACTIVE" ) == 0 ) 
-						{
+						//if( IupGetInt( cSci.getIupScintilla, "AUTOCACTIVE" ) == 0 ) 
+						//{
 							if( !AutoComplete.showCallTipThreadIsRunning && !AutoComplete.showListThreadIsRunning )
 							{
 								switch( c )
@@ -546,7 +546,16 @@ extern(C)
 										switch( GLOBAL.parserSettings.liveLevel )
 										{
 											case 1:
-												if( AutoComplete.bAutocompletionPressEnter ) break;
+												if( AutoComplete.bAutocompletionPressEnter )
+												{
+													switch( GLOBAL.parserSettings.liveLevel )
+													{
+														case 1: LiveParser.parseCurrentLine(); break;
+														case 2: LiveParser.parseCurrentBlock(); break;
+														default:
+													}												
+													break;
+												}
 												int currentLine = ScintillaAction.getCurrentLine( cSci.getIupScintilla );
 												int prevLine = currentLine - 1;
 												string prevLineText = fSTRz( IupGetAttributeId( cSci.getIupScintilla, "LINE", prevLine - 1 ) ); // 0 BASE
@@ -613,7 +622,7 @@ extern(C)
 										}
 								}
 							}
-						}
+						//}
 					}
 				}
 			}

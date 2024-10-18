@@ -1487,23 +1487,15 @@ public:
 			string poseidonTempFile = "poseidonTemp" ~ Conv.to!(string)(MonoTime.currTime.ticks)[$-4..$];
 			string tempDir = Path.dirName( cSci.getFullPath );
 			string fileName;
-			if( tempDir == "." ) tempDir = GLOBAL.poseidonPath;
+			if( tempDir == "." ) tempDir = GLOBAL.linuxHome.length ? GLOBAL.linuxHome : GLOBAL.poseidonPath;
 			version(FBIDE) fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".bas"; else fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".d";
 			if( !FileAction.saveFile( fileName, cSci.getText, cSci.getBOM, cSci.withBOM ) ) // If AppImage, the poseidon Path files can't be written
 			{
-				if( Path.dirName( cSci.getFullPath ) == "." ) // Should be NONAME#?.bas
-				{
-					tempDir = GLOBAL.linuxHome.length ? GLOBAL.linuxHome : GLOBAL.poseidonPath;
-					version(FBIDE) fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".bas"; else fileName = tempDir ~ "/" ~ poseidonTempFile ~ ".d";
-					if( !FileAction.saveFile( fileName, cSci.getText, cSci.getBOM, cSci.withBOM ) )
-					{
-						tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Can't create quickrun temp file!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
-						return false;
-					}
-				}
+				tools.MessageDlg( GLOBAL.languageItems["error"].toDString, "Can't create quickrun temp file!", "ERROR", "OK", IUP_CENTER, IUP_CENTER );
+				return false;
 			}
+
 			quickRunFromFile = cSci.getFullPath;
-		
 			GLOBAL.messagePanel.printOutputPanel( "Quick Run " ~ cSci.getFullPath ~ "......\n", true );
 			// Pass compiler, files, options to Thread
 			auto _thread = new CompileThread( compiler, fileName, options, Path.dirName( fileName ), true, args, true );

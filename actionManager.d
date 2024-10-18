@@ -294,7 +294,7 @@ public:
 		catch( Exception e )
 		{
 			if( _fp.isOpen ) _fp.close;
-			throw e;
+			//throw e;
 		}
 		
 		return false;
