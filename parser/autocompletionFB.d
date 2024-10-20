@@ -1051,7 +1051,7 @@ version(FBIDE)
 			_type = Uni.toLower( _type );
 			
 			if( _type == "byte" || _type == "ubyte" || _type == "short" || _type == "ushort" || _type == "integer" || _type == "uinteger" || _type == "longint" || _type == "ulongint" ||
-				_type == "single" || _type == "double" || _type == "string" || _type == "zstring" || _type == "wstring" || _type == "boolean" ) return true;
+				_type == "single" || _type == "double" || _type == "string" || _type == "zstring" || _type == "wstring" || _type == "boolean" || _type == "any" ) return true;
 
 			return false;
 		}
@@ -2009,7 +2009,7 @@ version(FBIDE)
 								AST_Head = null;
 							else if( matchNodes.length == 1 )
 							{
-								AST_Head = matchNodes[0];
+								if( AST_Head != matchNodes[0] ) AST_Head = matchNodes[0]; else AST_Head = null;
 							}
 							else
 							{
@@ -2019,7 +2019,20 @@ version(FBIDE)
 							
 							if( !nameSpaceNodes.length )
 							{
-								if( matchNodes.length ) AST_Head = matchNodes[0]; else AST_Head = null;
+								if( AST_Head !is null )
+								{
+									if( matchNodes.length > 1 )
+									{
+										foreach( CASTnode a; matchNodes )
+										{
+											if( a != AST_Head )
+											{
+												AST_Head = a;
+												break;
+											}
+										}
+									}
+								}
 							}
 							else
 							{
@@ -3096,7 +3109,7 @@ version(FBIDE)
 									switch( _dcharString )
 									{
 										case ")", "(", "[", "]", "<", ">", "{", "}":
-										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "=", ",", "@":
+										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "=", ",", ";", "@":
 											return toUTF8( word32 );
 											
 										default: 
@@ -3118,7 +3131,7 @@ version(FBIDE)
 									switch( s )
 									{
 										case ")", "(", "[", "]", "<", ">", "{", "}":
-										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "=", ",", "@":
+										case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "=", ",", ";", "@":
 											return word;
 											
 										default: 
@@ -3207,7 +3220,7 @@ version(FBIDE)
 											}
 										}
 										goto case;
-									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", ";", "@":
 										if( countParen == 0 && countBracket == 0 ) return toUTF8( word32 );
 										goto default;
 									default: 
@@ -3261,7 +3274,7 @@ version(FBIDE)
 										}
 										goto case;
 										
-									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", "@":
+									case " ", "\t", ":", "\n", "\r", "+", "-", "*", "/", "\\", "<", "=", ",", ";", "@":
 										if( countParen == 0 && countBracket == 0 ) return word;
 										goto default;
 										

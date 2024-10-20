@@ -2012,6 +2012,19 @@ version(DIDE)
 							
 							// Get Members
 							AST_Head = searchMatchNode( AST_Head, wordWithoutSymbol, D_FIND ); // NOTE!!!! Using "searchMatchNode()"
+							if( _sub_ori_AST_Head == AST_Head )
+							{
+								foreach( CASTnode a; searchMatchNodes( AST_Head, wordWithoutSymbol, D_FIND ) )
+								{
+									if( a != _sub_ori_AST_Head )
+									{
+										AST_Head = a;
+										break;
+									}
+								}
+								if( _sub_ori_AST_Head == AST_Head ) return null;
+							}
+							
 							if( AST_Head is null ) AST_Head = searchObjectModule( wordWithoutSymbol, D_FIND );
 							if( AST_Head is null )
 							{
