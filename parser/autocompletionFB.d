@@ -484,7 +484,14 @@ version(FBIDE)
 
 			for( ptrdiff_t i = 0; i < childrenNodes.length; ++ i )
 			{
-				if( !( childrenNodes[i].kind & B_KIND ) ) continue;
+				if( node.getFather is null )
+				{
+					if( !( childrenNodes[i].kind & ( B_KIND | B_VERSION ) ) ) continue;
+				}
+				else
+				{
+					if( !( childrenNodes[i].kind & B_KIND ) ) continue;
+				}
 
 				if( line >= childrenNodes[i].lineNumber )
 				{
@@ -1283,7 +1290,6 @@ version(FBIDE)
 				// No Using or No results found...
 				originalNode = oriAST;
 				analysisSplitWorld_ReturnCompleteList( originalNode, splitWord, lineNum, true, false, false );
-				
 				if( originalNode is oriAST ) return oriAST; // Prevent infinite loop
 				
 				if( originalNode !is null ) resultNode = originalNode;// else resultNode = oriAST;
@@ -3918,6 +3924,8 @@ version(FBIDE)
 				{
 					CASTnode[] nameSpaceNodes;
 					CASTnode returnNode;
+					extendedClasses.length = 0;
+					
 					for( int i = 0; i < _splitWord.length; i++ )
 					{
 						if( i == 0 )

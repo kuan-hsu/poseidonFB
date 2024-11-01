@@ -5,7 +5,7 @@ private import iup.iup, iup.iup_scintilla;
 private import global, actionManager, scintilla, project, tools, layout;
 private import parser.autocompletion;
 private import dialogs.singleTextDlg, dialogs.prjPropertyDlg, dialogs.preferenceDlg, dialogs.fileDlg, dialogs.customDlg, dialogs.manualDlg, layouts.customMenu;
-private import parser.scanner,  parser.token, parser.parser, parser.ast;
+private import parser.scanner,  parser.token, parser.parser, parser.ast, parser.live;
 private import std.string, std.conv, std.file, std.encoding, std.process, Path = std.path, Array = std.array, Uni = std.uni, std.algorithm;
 private import core.memory, core.thread;
 
@@ -17,7 +17,7 @@ Ihandle* createMenu()
 	Ihandle* item_redo, item_undo, item_cut, item_copy, item_paste, item_selectAll, edit_menu;
 	Ihandle* item_findReplace, item_findNext, item_findPrevious, item_findReplaceInFiles, item_goto, search_menu;
 	Ihandle* view_menu;
-	Ihandle* item_newProject, item_openProject, item_closeProject, item_saveProject, item_projectProperties, project_menu;
+	Ihandle* item_newProject, item_openProject, item_closeProject, item_saveProject, item_projectProperties, item_projectReparse, project_menu;
 	Ihandle* item_compile, item_buildrun, item_run, item_build, item_buildAll, item_reBuild, item_clearBuild, item_quickRun, build_menu;
 	Ihandle* item_runDebug, item_withDebug, item_BuildwithDebug, debug_menu;
 	Ihandle* misc_menu;
@@ -435,6 +435,10 @@ Ihandle* createMenu()
 	item_projectProperties = IupItem( GLOBAL.languageItems["properties"].toCString, null);
 	IupSetAttribute(item_projectProperties, "IMAGE", "icon_properties");
 	IupSetCallback(item_projectProperties, "ACTION", cast(Icallback)&projectProperties_cb);
+	
+	item_projectReparse = IupItem( GLOBAL.languageItems["sc_reparse"].toCString, null);
+	IupSetAttribute(item_projectReparse, "IMAGE", "icon_refresh");
+	IupSetCallback(item_projectReparse, "ACTION", cast(Icallback)&projectReparse_cb);
 
 	// Build
 	item_compile = IupItem( GLOBAL.languageItems["compile"].toCString, null );
@@ -733,7 +737,7 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.550)  2024.10.20\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.551)  2024.11.01\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
@@ -835,6 +839,8 @@ Ihandle* createMenu()
 							IupSeparator(),
 							item_closeProject,
 							item_closeAllProject,
+							IupSeparator(),
+							item_projectReparse,
 							IupSeparator(),
 							item_projectProperties,
 							null );
@@ -1220,7 +1226,18 @@ extern(C)
 			if( fromStringz(IupGetAttribute( ih, "UNDO" )) == "YES" )
 			{
 				AutoComplete.bSkipAutoComplete = true;
+				auto line = ScintillaAction.getCurrentLine( ih );
 				IupSetAttribute( ih, "UNDO", "YES" );
+				
+				if( line == ScintillaAction.getCurrentLine( ih ) && GLOBAL.parserSettings.enableParser == "ON" )
+				{
+					switch( GLOBAL.parserSettings.liveLevel )
+					{
+						case 1: LiveParser.parseCurrentLine(); break;
+						case 2: LiveParser.parseCurrentBlock(); break;
+						default:
+					}
+				}
 			}
 			IupSetFocus( ih );
 		}
@@ -1234,7 +1251,18 @@ extern(C)
 			if( fromStringz(IupGetAttribute( ih, "REDO" )) == "YES" )
 			{
 				AutoComplete.bSkipAutoComplete = true;
+				auto line = ScintillaAction.getCurrentLine( ih );
 				IupSetAttribute( ih, "REDO", "YES" );
+				
+				if( line == ScintillaAction.getCurrentLine( ih ) && GLOBAL.parserSettings.enableParser == "ON" )
+				{
+					switch( GLOBAL.parserSettings.liveLevel )
+					{
+						case 1: LiveParser.parseCurrentLine(); break;
+						case 2: LiveParser.parseCurrentBlock(); break;
+						default:
+					}
+				}				
 			}
 			IupSetFocus( ih );
 		}
@@ -1776,6 +1804,69 @@ extern(C)
 
 		scope dlg = new CProjectPropertiesDialog( -1, -1, GLOBAL.languageItems["caption_prjproperties"].toDString(), false, false );
 		dlg.show( IUP_CENTERPARENT, IUP_CENTERPARENT );
+
+		return IUP_DEFAULT;
+	}
+	
+	int projectReparse_cb( Ihandle *ih )
+	{
+		string activePrjName = actionManager.ProjectAction.getActiveProjectName();
+
+		if( activePrjName in GLOBAL.projectManager )
+		{
+			GLOBAL.messagePanel.printOutputPanel( "Project[ " ~ activePrjName ~ " ] Reparse......", true, false );
+			
+			string activeFileFullPath = ScintillaAction.getFullPath();
+			
+			foreach( prjFileFullPath; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
+			{
+				if( fullPathByOS( prjFileFullPath ) in GLOBAL.parserManager )
+				{
+					string document;
+					if( fullPathByOS(prjFileFullPath) in GLOBAL.scintillaManager )
+						document = GLOBAL.scintillaManager[fullPathByOS(prjFileFullPath) ].getText();
+					else
+					{
+						if( !std.file.exists( prjFileFullPath ) ) continue;
+						int		_bom, _withBom;
+						document = FileAction.loadFile( prjFileFullPath, _bom, _withBom );					
+					}
+					
+					try
+					{
+						CASTnode astHeadNode;
+						GLOBAL.Parser.updateTokens( GLOBAL.scanner.scan( document ) );
+						astHeadNode = GLOBAL.Parser.parse( prjFileFullPath );
+						
+						CASTnode temp = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(prjFileFullPath)];
+						GLOBAL.parserManager[fullPathByOS(prjFileFullPath)] = cast(shared CASTnode) astHeadNode;
+						destroy( temp );
+						
+						GLOBAL.messagePanel.printOutputPanel( "  " ~ prjFileFullPath ~ " be reparsed.", false, true );
+					
+						Ihandle* actTree = GLOBAL.outlineTree.getTree( prjFileFullPath );
+						if( actTree != null )
+						{
+							if( GLOBAL.parserSettings.toggleUpdateOutlineLive == "ON" )
+							{
+								Ihandle* newTree = GLOBAL.outlineTree.createTree( astHeadNode );
+								IupDestroy( actTree );						
+							}
+
+							// Reparse Lexer
+							AutoComplete.resetPrevContainer();
+							version(FBIDE)
+							{
+								if( fullPathByOS(prjFileFullPath) in GLOBAL.scintillaManager ) IupScintillaSendMessage( GLOBAL.scintillaManager[fullPathByOS(prjFileFullPath)].getIupScintilla, 4003, 0, -1 ); // SCI_COLOURISE 4003
+							}
+						}
+					}
+					catch( Exception e ){}
+				}
+			}
+			
+			if( activeFileFullPath.length ) GLOBAL.outlineTree.changeTree( activeFileFullPath );
+		}
 
 		return IUP_DEFAULT;
 	}

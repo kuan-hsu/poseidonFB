@@ -257,6 +257,7 @@ public:
 												}
 
 												versionName ~= options[i];
+												bBeforeSymbol = false;
 											}				
 
 											if( versionName.length ) AutoComplete.VersionCondition[Uni.toUpper(versionName)] = 1;

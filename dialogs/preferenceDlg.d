@@ -2806,7 +2806,7 @@ extern(C) // Callback for CPreferenceDialog
 						IupSetFocus( GLOBAL.mainDlg );
 					}
 				}
-			}			
+			}		
 		}
 		catch( Exception e )
 		{
