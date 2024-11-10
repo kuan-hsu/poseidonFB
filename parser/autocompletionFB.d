@@ -2679,7 +2679,7 @@ version(FBIDE)
 				}
 				
 				text = words[$-1];
-				//Algorithm.sort( listContainer );
+				Algorithm.sort( listContainer );
 				//Algorithm.sort!("toUpper(a) < toUpper(b)", SwapStrategy.stable)( listContainer );
 				
 				string list;

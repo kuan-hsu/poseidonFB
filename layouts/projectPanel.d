@@ -705,6 +705,19 @@ public:
 			DocumentTabAction.updateTabsLayout();			
 
 			GLOBAL.projectManager[activePrjName].saveFile();
+			//GLOBAL.messagePanel.printOutputPanel( "Project[ " ~ activePrjName ~ " ] Close......", true, false );
+			foreach( prjFileFullPath; GLOBAL.projectManager[activePrjName].sources ~ GLOBAL.projectManager[activePrjName].includes )
+			{
+				if( fullPathByOS( prjFileFullPath ) in GLOBAL.parserManager )
+				{
+					CASTnode temp = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(prjFileFullPath)];
+					destroy( temp );
+					GLOBAL.parserManager.remove( fullPathByOS(prjFileFullPath) );
+					
+					//GLOBAL.messagePanel.printOutputPanel( "  Parser: " ~ prjFileFullPath ~ " be removed.", false, true );
+				}
+			}			
+			
 			GLOBAL.projectManager.remove( activePrjName );
 
 			int countChild = IupGetInt( tree, "COUNT" );
@@ -765,6 +778,18 @@ public:
 			}
 			
 			DocumentTabAction.updateTabsLayout();
+			//GLOBAL.messagePanel.printOutputPanel( "Project[ " ~ p.name ~ " ] Close......", true, false );
+			foreach( prjFileFullPath; p.sources ~ p.includes )
+			{
+				if( fullPathByOS( prjFileFullPath ) in GLOBAL.parserManager )
+				{
+					CASTnode temp = cast(CASTnode) GLOBAL.parserManager[fullPathByOS(prjFileFullPath)];
+					destroy( temp );
+					GLOBAL.parserManager.remove( fullPathByOS(prjFileFullPath) );
+					
+					//GLOBAL.messagePanel.printOutputPanel( "  Parser: " ~ prjFileFullPath ~ " be removed.", false, true );
+				}
+			}				
 
 			prjsDir ~= p.dir.dup;
 			p.saveFile();
@@ -1397,6 +1422,8 @@ extern(C)
 			if( kind == "BRANCH" )
 			{
 				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "ADDBRANCH", id, toStringz( folderName ) );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGE", id+1, "icon_folder" );
+				IupSetAttributeId( GLOBAL.projectTree.getTreeHandle, "IMAGEEXPANDED", id+1, "icon_folder_open" );
 				IupSetStrAttributeId( GLOBAL.projectTree.getTreeHandle, "COLOR", id + 1, toStringz( GLOBAL.editColor.projectFore ) );
 			}
 		}

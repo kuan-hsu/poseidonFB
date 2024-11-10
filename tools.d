@@ -465,7 +465,7 @@ FocusUnit getActiveCompilerInformation( string fromProjectDir = null )
 			if( !_focus.Option.length ) _focus.Option = customOpt;
 		}
 		if( !_focus.Compiler.length ) _focus.Compiler = customCompiler;
-		//if( fromProjectDir.length ) _focus.IncDir = [ fromProjectDir ] ~ _focus.IncDir;
+		version(FBIDE) if( fromProjectDir.length ) _focus.IncDir = [ fromProjectDir ] ~ _focus.IncDir; else  _focus.IncDir =  [ GLOBAL.projectManager[activePrjName].dir ] ~ _focus.IncDir;
 		
 		string[] _compilerDefaultImportPath = getCompilerImportPath( _focus.Compiler );
 		if( _compilerDefaultImportPath.length ) _focus.IncDir ~= _compilerDefaultImportPath; // IncDir include compiler

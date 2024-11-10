@@ -737,7 +737,7 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.551)  2024.11.01\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.552)  2024.11.10\nBy Kuan Hsu (Taiwan)\nhttps://bitbucket.org/KuanHsu/poseidonfb\n\n";
 		}
 		else
 		{
@@ -856,6 +856,8 @@ Ihandle* createMenu()
 							item_closeProject,
 							item_closeAllProject,
 							IupSeparator(),
+							item_projectReparse,
+							IupSeparator(),							
 							item_projectProperties,
 							null );
 	}
@@ -1814,7 +1816,7 @@ extern(C)
 
 		if( activePrjName in GLOBAL.projectManager )
 		{
-			GLOBAL.messagePanel.printOutputPanel( "Project[ " ~ activePrjName ~ " ] Reparse......", true, false );
+			//GLOBAL.messagePanel.printOutputPanel( "Project[ " ~ activePrjName ~ " ] Reparse......", true, false );
 			
 			string activeFileFullPath = ScintillaAction.getFullPath();
 			
@@ -1842,8 +1844,7 @@ extern(C)
 						GLOBAL.parserManager[fullPathByOS(prjFileFullPath)] = cast(shared CASTnode) astHeadNode;
 						destroy( temp );
 						
-						GLOBAL.messagePanel.printOutputPanel( "  " ~ prjFileFullPath ~ " be reparsed.", false, true );
-					
+						//GLOBAL.messagePanel.printOutputPanel( "  " ~ prjFileFullPath ~ " be reparsed.", false, true );
 						Ihandle* actTree = GLOBAL.outlineTree.getTree( prjFileFullPath );
 						if( actTree != null )
 						{
