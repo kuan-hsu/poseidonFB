@@ -26,7 +26,7 @@ Linux mint18 x64:
 ![linux64.png](https://bitbucket.org/repo/j5rjj4/images/559348986-linux64.png)
 
 ## Install ##
-Go to **Downloads** https://bitbucket.org/KuanHsu/poseidonfb/downloads/ to select file to download.
+Go to **Release** to select files to download.
 
 **Win:**
 
@@ -34,15 +34,4 @@ Download poseidonFB.7z, extract to folder, then run the poseidonFB.exe
 
 **Linux:**
 
-First install IUP framework(3.27), https://sourceforge.net/projects/iup/files/3.27/Linux%20Libraries/
-
-Open the terminal to install the *.so to system.
-
-```
-#!d
-
-sudo ./install
-
-```
-
-Then choose x64 or x86 version to download, extract to folder, then run the poseidonFB
+Download poseidonFB.AppImage, change permissions -- enable ‘Allow executing file as program'
