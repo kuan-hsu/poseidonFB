@@ -35,3 +35,7 @@ Download poseidonFB.7z, extract to folder, then run the poseidonFB.exe
 **Linux:**
 
 Download poseidonFB.AppImage, change permissions -- enable ‘Allow executing file as program'
+
+**Forum:**
+
+freeBASIC forum: https://www.freebasic.net/forum/viewtopic.php?t=23935
