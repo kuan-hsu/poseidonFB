@@ -279,10 +279,14 @@ bool isParsableExt( string _ext, int flag = 7 )
 		{
 			if( flag & 2 ) return true;
 		}
-		else if( _ext == GLOBAL.parserSettings.extraParsableExt )
-		{
-			if( !GLOBAL.parserSettings.extraParsableExt.length ) return false;
-			if( flag & 4 ) return true;
+		else
+		{		
+			foreach( string e; Array.split( GLOBAL.parserSettings.extraParsableExt, ";" ) )
+			{
+				if( e.length )
+					if( _ext == toLower( e ) )
+						if( flag & 4 ) return true;
+			}
 		}
 	}
 	else

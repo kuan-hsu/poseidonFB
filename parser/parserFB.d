@@ -2952,7 +2952,8 @@ version(FBIDE)
 							break;
 
 						default:
-							tokenIndex ++;
+							skipToEOL();
+							//tokenIndex ++;
 					}
 				}
 			}

@@ -4444,12 +4444,18 @@ version(FBIDE)
 							}
 							else
 							{
-								exceptFiles ~= ( Path.stripExtension( fullPath ) ~ "." ~ GLOBAL.parserSettings.extraParsableExt );
-								_resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, exceptFiles[$-1], AST_Head.kind );
-								if( _resultNode !is null )
+								foreach( string e; Array.split( GLOBAL.parserSettings.extraParsableExt, ";" ) )
 								{
-									if( GLOBAL.navigation.addCache( exceptFiles[$-1], _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( exceptFiles[$-1], _resultNode.lineNumber );
-									return;
+									if( e.length )
+									{
+										exceptFiles ~= ( Path.stripExtension( fullPath ) ~ e );
+										_resultNode = getMatchNodeInFile( oriAST, nameSpaces, procedureName, exceptFiles[$-1], AST_Head.kind );
+										if( _resultNode !is null )
+										{
+											if( GLOBAL.navigation.addCache( exceptFiles[$-1], _resultNode.lineNumber ) ) actionManager.ScintillaAction.openFile( exceptFiles[$-1], _resultNode.lineNumber );
+											return;
+										}
+									}
 								}
 							}
 						}
