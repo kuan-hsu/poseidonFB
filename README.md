@@ -17,13 +17,13 @@ It supports:
 11. Self-define short cuts
 12. etc...
 
-Win7:
+Win10:
 
-![poseidonFB_windows.png](https://bitbucket.org/repo/j5rjj4/images/501719893-poseidonFB_windows.png)
+![poseidonFB_windows.png](https://i.imgur.com/x972maO.png)
 
 Linux mint18 x64:
 
-![linux64.png](https://bitbucket.org/repo/j5rjj4/images/559348986-linux64.png)
+![linux64.png](https://i.imgur.com/UTFCnaf.png)
 
 ## Install ##
 Go to **Release** to select files to download.
