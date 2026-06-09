@@ -502,20 +502,37 @@ version(FBIDE)
 					{
 						if( childrenNodes[i].kind & B_ENUM )
 						{
-							if( line > childrenNodes[i].endLineNum )//&& line > childrenNodes[i].lineNumber )
+							if( ( line > childrenNodes[i].endLineNum ) || ( line == childrenNodes[i].lineNumber ) )
 							{
-								foreach( _son; childrenNodes[i].getChildren )
+								if( childrenNodes[i].name.length )
 								{
-									string _name = Uni.toLower( /*_son.name );*/ParserAction.removeArrayAndPointer( _son.name ) );
+									string _name = Uni.toLower( /*childrenNodes[i].name );*/ ParserAction.removeArrayAndPointer( childrenNodes[i].name ) );
 									if( bCompleteMatch )
 									{
 										if( word == _name )
-											if( bJustOneResult ) return [ _son ]; else results ~= _son;
+											if( bJustOneResult ) return [ childrenNodes[i] ]; else results ~= childrenNodes[i];
 									}
 									else
 									{
 										if( indexOf( _name, word ) == 0 )
-											if( bJustOneResult ) return [ _son ]; else results ~= _son;
+											if( bJustOneResult ) return [ childrenNodes[i] ]; else results ~= childrenNodes[i];
+									}
+								}							
+								else
+								{
+									foreach( _son; childrenNodes[i].getChildren )
+									{
+										string _name = Uni.toLower( /*_son.name );*/ParserAction.removeArrayAndPointer( _son.name ) );
+										if( bCompleteMatch )
+										{
+											if( word == _name )
+												if( bJustOneResult ) return [ _son ]; else results ~= _son;
+										}
+										else
+										{
+											if( indexOf( _name, word ) == 0 )
+												if( bJustOneResult ) return [ _son ]; else results ~= _son;
+										}
 									}
 								}
 							}
@@ -1981,7 +1998,7 @@ version(FBIDE)
 							if( AST_Head !is null )
 							{
 								resultNodes			= getMatchASTfromWord( AST_Head, splitWord[i], lineNum, B_ALL );
-								
+
 								if( fullPathByOS(fullPath) in GLOBAL.parserManager ) resultIncludeNodes = getMatchIncludesFromWord( cast(CASTnode) GLOBAL.parserManager[fullPathByOS(fullPath)], fullPath, splitWord[i], lineNum );
 								// For Type Objects
 								if( memberFunctionMotherName.length )
@@ -3723,7 +3740,7 @@ version(FBIDE)
 																if( chm.status != 0 || chm.terminated ) IupExecute( "CHMVIEW_gtk2", toStringz( _splitWords[1] ~ " -p KeyPg" ~ keyWord ~ ".html" ) );
 																break;
 															default:
-																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), null );
+																IupExecute( toStringz( GLOBAL.linuxHtmlAppName ), toStringz( _splitWords[1] ) );
 														}
 														bExitFlag = true;
 													}

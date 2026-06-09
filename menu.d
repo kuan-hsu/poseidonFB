@@ -737,11 +737,11 @@ Ihandle* createMenu()
 		version(GDC) C = "GDC";
 		version(FBIDE)
 		{
-			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.553)  2025.06.21\nBy Kuan Hsu (Taiwan)\nhttps://github.com/kuan-hsu/poseidonFB\n\n";
+			aboutHead = "FreeBasic IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonFB(V0.554)  2026.06.09\nBy Kuan Hsu (Taiwan)\nhttps://github.com/kuan-hsu/poseidonFB\n\n";
 		}
 		else
 		{
-			aboutHead = "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.095)  2024.10.01\nBy Kuan Hsu (Taiwan)\nhttps://github.com/kuan-hsu/poseidonD\n\n";
+			aboutHead = "D Programming IDE" ~ (  _64bit ? " (x64)" : " (x86)" ) ~ "_" ~ C ~ "\nPoseidonD(V0.097)  2026.06.09\nBy Kuan Hsu (Taiwan)\nhttps://github.com/kuan-hsu/poseidonD\n\n";
 		}
 		
 		version(Windows)

@@ -1274,17 +1274,17 @@ public:
 				cSci = ScintillaAction.getActiveCScintilla();
 			}
 			
+			// Set The Using Opts
+			options = strip( options );
+			if( !options.length ) options = strip( customOpt );
 			version(DIDE)
 			{
 				string bits;
 				if( tools.DMDversion( compiler ) == 4 )
 					if( indexOf( options, "--m32" ) == -1 && indexOf( options, "--m64" ) == -1 )
 						if( GLOBAL.compilerSettings.Bit64 == "ON" ) bits = "--m64 "; else bits = "--m32 ";
-			}			
-
-			// Set The Using Opts
-			options = strip( options );
-			if( !options.length ) options = strip( customOpt );
+			}
+			
 			options = options ~ ( optionDebug.length ? " " ~ optionDebug : "" );
 			version(Windows)
 			{
